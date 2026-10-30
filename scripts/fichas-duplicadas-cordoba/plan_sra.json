@@ -1,0 +1,34 @@
+{
+ "plan": [
+  {
+   "club_id": "chile-xv",
+   "por": [
+    "parecido"
+   ],
+   "fichas": [
+    {
+     "id": "5e5df323-d010-4b6b-b80a-005497854418",
+     "full_name": "Alvaro Marco",
+     "usos": 1,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "76ad3ffc-0491-4589-af44-9e0d833f1e54",
+     "full_name": "Marco Alvano",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "keep": "5e5df323-d010-4b6b-b80a-005497854418",
+   "nombre": "Alvaro Marco",
+   "borrar": [
+    "76ad3ffc-0491-4589-af44-9e0d833f1e54"
+   ],
+   "first": "Alvaro",
+   "last": "Marco"
+  }
+ ],
+ "conflictos": []
+}

@@ -1,0 +1,314 @@
+{
+  "descripcion": "URBA Top 14 Copa Macro - Fecha 20 - sabado 29/08/2026",
+  "torneo": "d29703d0-125c-44a1-ab38-137450935a6e",
+  "partidos": [
+    {
+      "id": "3dbd98b8-bc53-4537-8622-5907eab6ec38",
+      "rotulo": "Newman vs Hindu",
+      "local": {
+        "nombre": "Club Newman",
+        "titulares": [
+          { "numero": 1, "nombre": "Isidro Bosch" },
+          { "numero": 2, "nombre": "Beltrán Salese" },
+          { "numero": 3, "nombre": "Bautista Bosch" },
+          { "numero": 4, "nombre": "Pablo Cardinal" },
+          { "numero": 5, "nombre": "Alejandro Urtubey" },
+          { "numero": 6, "nombre": "Faustino Santarelli" },
+          { "numero": 7, "nombre": "Joaquín de la Vega" },
+          { "numero": 8, "nombre": "Rodrigo Díaz de Vivar" },
+          { "numero": 9, "nombre": "Lucas Marguery" },
+          { "numero": 10, "nombre": "Gonzalo Gutiérrez Taboada" },
+          { "numero": 11, "nombre": "Justo Ortiz Basualdo" },
+          { "numero": 12, "nombre": "Benjamín Lanfranco" },
+          { "numero": 13, "nombre": "Simón Prince" },
+          { "numero": 14, "nombre": "Santiago Marolda" },
+          { "numero": 15, "nombre": "Juan Bautista Daireaux" }
+        ]
+      },
+      "visitante": {
+        "nombre": "Hindú Club",
+        "titulares": [
+          { "numero": 1, "nombre": "Franco Diviesti" },
+          { "numero": 2, "nombre": "Agustín Capurro" },
+          { "numero": 3, "nombre": "Nicolás Leiva" },
+          { "numero": 4, "nombre": "Carlos Repetto" },
+          { "numero": 5, "nombre": "Juan Comolli" },
+          { "numero": 6, "nombre": "Santino Amaya" },
+          { "numero": 7, "nombre": "Gastón Caire" },
+          { "numero": 8, "nombre": "Roque Guassardi" },
+          { "numero": 9, "nombre": "Felipe Ezcurra" },
+          { "numero": 10, "nombre": "Fermín Ormaechea" },
+          { "numero": 11, "nombre": "Tomás Amher" },
+          { "numero": 12, "nombre": "Federico Graglia" },
+          { "numero": 13, "nombre": "Ramón Fernández Miranda" },
+          { "numero": 14, "nombre": "Sebastián Cancelliere" },
+          { "numero": 15, "nombre": "Pascal Senillosa" }
+        ]
+      }
+    },
+    {
+      "id": "e6f5cf17-67d1-4f77-8585-480220377e22",
+      "rotulo": "Belgrano Athletic vs Regatas Bella Vista",
+      "local": {
+        "nombre": "Belgrano Athletic",
+        "titulares": [
+          { "numero": 1, "nombre": "Francisco Ferronato" },
+          { "numero": 2, "nombre": "Francisco Lusarreta" },
+          { "numero": 3, "nombre": "Lisandro García Dragui" },
+          { "numero": 4, "nombre": "Luciano Tecca" },
+          { "numero": 5, "nombre": "Mateo Gasparotti" },
+          { "numero": 6, "nombre": "Jerónimo Sorondo" },
+          { "numero": 7, "nombre": "Julián Rebussone" },
+          { "numero": 8, "nombre": "Franco Vega" },
+          { "numero": 9, "nombre": "Theo Blacksley" },
+          { "numero": 10, "nombre": "Juan Landó" },
+          { "numero": 11, "nombre": "Félix Ceñal" },
+          { "numero": 12, "nombre": "Juan Brescia" },
+          { "numero": 13, "nombre": "Tomás Etchepare" },
+          { "numero": 14, "nombre": "Pedro Arana" },
+          { "numero": 15, "nombre": "Nicolás Spinelli" }
+        ]
+      },
+      "visitante": {
+        "nombre": "Regatas de Bella Vista",
+        "titulares": [
+          { "numero": 1, "nombre": "Diego Torres Agüero" },
+          { "numero": 2, "nombre": "Beltrán Landivar" },
+          { "numero": 3, "nombre": "Felipe Galli" },
+          { "numero": 4, "nombre": "Tomás Sanguinetti" },
+          { "numero": 5, "nombre": "Marcelo Toledo" },
+          { "numero": 6, "nombre": "Santiago Ruiz" },
+          { "numero": 7, "nombre": "Lucas Gobet" },
+          { "numero": 8, "nombre": "Felipe Camerlinckx" },
+          { "numero": 9, "nombre": "Marcos Joseph" },
+          { "numero": 10, "nombre": "José de la Torre" },
+          { "numero": 11, "nombre": "Enrique Camerlinckx" },
+          { "numero": 12, "nombre": "Mateo Camerlinckx" },
+          { "numero": 13, "nombre": "Francisco Pisani" },
+          { "numero": 14, "nombre": "Felipe Rugolo" },
+          { "numero": 15, "nombre": "Justo Camerlinckx" }
+        ]
+      }
+    },
+    {
+      "id": "c1c4e3f1-c03d-4cc8-a6d0-b34fa516b9af",
+      "rotulo": "CASI vs Los Matreros",
+      "local": {
+        "nombre": "CASI",
+        "titulares": [
+          { "numero": 1, "nombre": "Joaquín Britto" },
+          { "numero": 2, "nombre": "Juan Bautista Torres" },
+          { "numero": 3, "nombre": "Félix Paolucci" },
+          { "numero": 4, "nombre": "Leo Mazzini" },
+          { "numero": 5, "nombre": "Ignacio Larrague" },
+          { "numero": 6, "nombre": "Benito Paolucci" },
+          { "numero": 7, "nombre": "Eugenio Sartori" },
+          { "numero": 8, "nombre": "Luis Briatore" },
+          { "numero": 9, "nombre": "Eliseo Roger" },
+          { "numero": 10, "nombre": "Felipe Hileman" },
+          { "numero": 11, "nombre": "Tomas Phelan" },
+          { "numero": 12, "nombre": "Benjamín Belaga" },
+          { "numero": 13, "nombre": "Jerónimo Solveyra" },
+          { "numero": 14, "nombre": "Santiago David" },
+          { "numero": 15, "nombre": "Pedro Repetto" }
+        ]
+      },
+      "visitante": {
+        "nombre": "Los Matreros",
+        "titulares": [
+          { "numero": 1, "nombre": "Augusto Genoud" },
+          { "numero": 2, "nombre": "Tomás Sánchez" },
+          { "numero": 3, "nombre": "Valentín Hardt" },
+          { "numero": 4, "nombre": "Alejo Villafañe" },
+          { "numero": 5, "nombre": "Juan Pablo Guevara" },
+          { "numero": 6, "nombre": "Colin Mc Comark" },
+          { "numero": 7, "nombre": "Thiago Córvalán" },
+          { "numero": 8, "nombre": "Santiago Villarino", "capitan": true },
+          { "numero": 9, "nombre": "Marcos Amorisa" },
+          { "numero": 10, "nombre": "Juan F. Morales" },
+          { "numero": 11, "nombre": "Santiago Marelli" },
+          { "numero": 12, "nombre": "Pedro Del Busto" },
+          { "numero": 13, "nombre": "Nicolás Santecchia" },
+          { "numero": 14, "nombre": "Germán Gallastegui" },
+          { "numero": 15, "nombre": "Juan P. Garcia Michero" }
+        ]
+      }
+    },
+    {
+      "id": "3d8d4f73-d083-4f75-ad54-b07c6edd3c69",
+      "rotulo": "Buenos Aires vs Atletico del Rosario",
+      "local": {
+        "nombre": "Buenos Aires CRC",
+        "titulares": [
+          { "numero": 1, "nombre": "Tomás Gallo" },
+          { "numero": 2, "nombre": "Tomás Rosasco" },
+          { "numero": 3, "nombre": "Renzo Zanella" },
+          { "numero": 4, "nombre": "Pedro del Carril" },
+          { "numero": 5, "nombre": "Francisco Syriani" },
+          { "numero": 6, "nombre": "Lucas Etcheverry" },
+          { "numero": 7, "nombre": "Bautista Saint Bonnet" },
+          { "numero": 8, "nombre": "Pablo Bourdal" },
+          { "numero": 9, "nombre": "Mateo Freire" },
+          { "numero": 10, "nombre": "Tomás Bunge" },
+          { "numero": 11, "nombre": "Julián Quetglas" },
+          { "numero": 12, "nombre": "Agustín Lamensa", "capitan": true },
+          { "numero": 13, "nombre": "Tomás Acosta Pimentel" },
+          { "numero": 14, "nombre": "Alfonso Latorre" },
+          { "numero": 15, "nombre": "Nicolás Pizzo" }
+        ]
+      },
+      "visitante": {
+        "nombre": "Atlético del Rosario",
+        "titulares": [
+          { "numero": 1, "nombre": "José Carro" },
+          { "numero": 2, "nombre": "Ramiro Rubio" },
+          { "numero": 3, "nombre": "Bruno Montenegro" },
+          { "numero": 4, "nombre": "José Cáceres" },
+          { "numero": 5, "nombre": "Octavio Capella" },
+          { "numero": 6, "nombre": "Federico Etcheverry" },
+          { "numero": 7, "nombre": "Jerónimo Gómez Vara" },
+          { "numero": 8, "nombre": "Lucas Malanos" },
+          { "numero": 9, "nombre": "Tomás Cornejo" },
+          { "numero": 10, "nombre": "Manuel Nogués" },
+          { "numero": 11, "nombre": "Tomás Malanos", "capitan": true },
+          { "numero": 12, "nombre": "Ramiro Musio" },
+          { "numero": 13, "nombre": "Santiago Vítola" },
+          { "numero": 14, "nombre": "Juan Cruz Bertero" },
+          { "numero": 15, "nombre": "Martín Elías" }
+        ]
+      }
+    },
+    {
+      "id": "60606298-b24f-4897-9a3f-d9e4e7a186e2",
+      "rotulo": "SIC vs La Plata",
+      "local": {
+        "nombre": "San Isidro Club",
+        "titulares": [
+          { "numero": 1, "nombre": "Marcos Piccinini" },
+          { "numero": 2, "nombre": "Ignacio Bottazzini" },
+          { "numero": 3, "nombre": "Francisco Calandra" },
+          { "numero": 4, "nombre": "Bautista Viero" },
+          { "numero": 5, "nombre": "Ciro Plorutti" },
+          { "numero": 6, "nombre": "Andrea Panzarini" },
+          { "numero": 7, "nombre": "Santos Fernández De Oliveira" },
+          { "numero": 8, "nombre": "Tomás Meyrelles" },
+          { "numero": 9, "nombre": "Mateo Albanese" },
+          { "numero": 10, "nombre": "Santiago Pavlovsky" },
+          { "numero": 11, "nombre": "Bernabé López Fleming" },
+          { "numero": 12, "nombre": "Ignacio Pietranera" },
+          { "numero": 13, "nombre": "Nicanor Acosta" },
+          { "numero": 14, "nombre": "Jacinto Campbell" },
+          { "numero": 15, "nombre": "Francisco González Capdevila" }
+        ]
+      },
+      "visitante": {
+        "nombre": "La Plata",
+        "titulares": [
+          { "numero": 1, "nombre": "Ariel Del Cerro" },
+          { "numero": 2, "nombre": "Joaquín Nuñez" },
+          { "numero": 3, "nombre": "Martín Patat" },
+          { "numero": 4, "nombre": "Bautista Ozog" },
+          { "numero": 5, "nombre": "Iván Kucic" },
+          { "numero": 6, "nombre": "Segundo Pineda" },
+          { "numero": 7, "nombre": "Francisco Ringuelet" },
+          { "numero": 8, "nombre": "Tomás Bernasconi", "capitan": true },
+          { "numero": 9, "nombre": "Manuel de la Fuente" },
+          { "numero": 10, "nombre": "Santino Di Lucca" },
+          { "numero": 11, "nombre": "Pedro Addiechi" },
+          { "numero": 12, "nombre": "Juan Francisco Soto" },
+          { "numero": 13, "nombre": "Luca Juliano" },
+          { "numero": 14, "nombre": "Gino Festa" },
+          { "numero": 15, "nombre": "Tomás Suarez Folch" }
+        ]
+      }
+    },
+    {
+      "id": "23338894-9045-4ec9-b6c0-5daeeaf269b5",
+      "rotulo": "CUBA vs Los Tilos",
+      "local": {
+        "nombre": "CUBA",
+        "titulares": [
+          { "numero": 1, "nombre": "Joaquín Yakiche" },
+          { "numero": 2, "nombre": "Tomás Anderlic" },
+          { "numero": 3, "nombre": "Francisco Garoby" },
+          { "numero": 4, "nombre": "Santos Cayol" },
+          { "numero": 5, "nombre": "Santiago Uriarte" },
+          { "numero": 6, "nombre": "Lucas Campion" },
+          { "numero": 7, "nombre": "Segundo Pisani" },
+          { "numero": 8, "nombre": "Benito Ortiz de Rosas" },
+          { "numero": 9, "nombre": "Félix Corleto" },
+          { "numero": 10, "nombre": "Francisco Figueroa Bunge" },
+          { "numero": 11, "nombre": "Bautista Casaurang" },
+          { "numero": 12, "nombre": "Marcos Eliçagaray" },
+          { "numero": 13, "nombre": "Felipe de la Vega" },
+          { "numero": 14, "nombre": "Marcos Moroni" },
+          { "numero": 15, "nombre": "Tomás Passaro" }
+        ]
+      },
+      "visitante": {
+        "nombre": "Los Tilos",
+        "titulares": [
+          { "numero": 1, "nombre": "Manuel Puertas" },
+          { "numero": 2, "nombre": "Hipólito San Sebastián" },
+          { "numero": 3, "nombre": "Facundo Maffei" },
+          { "numero": 4, "nombre": "Juan Blaiotta Lago" },
+          { "numero": 5, "nombre": "Bautista Gatti" },
+          { "numero": 6, "nombre": "Eliseo Chiavassa" },
+          { "numero": 7, "nombre": "Felipe Puertas" },
+          { "numero": 8, "nombre": "Felipe Bares" },
+          { "numero": 9, "nombre": "Marcos Albina" },
+          { "numero": 10, "nombre": "Joaquín Tuculet" },
+          { "numero": 11, "nombre": "Gastón Martínez Salgado" },
+          { "numero": 12, "nombre": "Tomás Fernández Armendariz" },
+          { "numero": 13, "nombre": "Thiago Bassagaisteguy" },
+          { "numero": 14, "nombre": "Ignacio Guichon" },
+          { "numero": 15, "nombre": "Bautista Santamarina" }
+        ]
+      }
+    },
+    {
+      "id": "59897c49-0cde-45be-8c0b-d84fb5845bcf",
+      "rotulo": "Alumni vs Champagnat",
+      "local": {
+        "nombre": "Asoc. Alumni",
+        "titulares": [
+          { "numero": 1, "nombre": "Juan Cruz Bottoni" },
+          { "numero": 2, "nombre": "Tomás Bivort" },
+          { "numero": 3, "nombre": "Franco Cozzi" },
+          { "numero": 4, "nombre": "Sebastián Fauve" },
+          { "numero": 5, "nombre": "Santiago Alduncin" },
+          { "numero": 6, "nombre": "Santiago Neyra" },
+          { "numero": 7, "nombre": "Patricio Anderson" },
+          { "numero": 8, "nombre": "Santiago Montagner" },
+          { "numero": 9, "nombre": "Ezequiel Zalazar" },
+          { "numero": 10, "nombre": "Bautista Canzani" },
+          { "numero": 11, "nombre": "Mateo Castanier" },
+          { "numero": 12, "nombre": "Filippo Testoni" },
+          { "numero": 13, "nombre": "Tomás Cubilla" },
+          { "numero": 14, "nombre": "Ramón Fuentes" },
+          { "numero": 15, "nombre": "Jacinto Maciel" }
+        ]
+      },
+      "visitante": {
+        "nombre": "Club Champagnat",
+        "titulares": [
+          { "numero": 1, "nombre": "Alberto Adissi" },
+          { "numero": 2, "nombre": "Simón Panelo" },
+          { "numero": 3, "nombre": "Tomás Yanzon" },
+          { "numero": 4, "nombre": "Nicolás Rojo" },
+          { "numero": 5, "nombre": "Iñaki Ustariz" },
+          { "numero": 6, "nombre": "Matías Alonso Boto" },
+          { "numero": 7, "nombre": "Tomás Alonso Boto" },
+          { "numero": 8, "nombre": "Lucas Moresco" },
+          { "numero": 9, "nombre": "Juan Segundo Panelo" },
+          { "numero": 10, "nombre": "Gonzalo Costaguta" },
+          { "numero": 11, "nombre": "Tomás Baca Castex" },
+          { "numero": 12, "nombre": "Santos Panelo" },
+          { "numero": 13, "nombre": "Tomás Cotter Daireaux" },
+          { "numero": 14, "nombre": "Bautista Rodríguez Navarro" },
+          { "numero": 15, "nombre": "Joaquín Núñez" }
+        ]
+      }
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { guardRejection } from '@/lib/auth/apiAdmin';
 import { createClient } from '@/lib/supabase/server';
 import { getServiceWriter } from '@/lib/supabase/serviceWriter';
 import { requireTournamentAdminContext } from '@/lib/auth/permissions';
@@ -22,8 +23,8 @@ export async function GET(
     let context;
     try {
         context = await requireTournamentAdminContext(supabase);
-    } catch {
-        return err('Unauthorized', 401);
+    } catch (authError) {
+        return err(...guardRejection(authError));
     }
 
     const { id } = await params;
@@ -59,8 +60,8 @@ export async function POST(
     let context;
     try {
         context = await requireTournamentAdminContext(supabase);
-    } catch {
-        return err('Unauthorized', 401);
+    } catch (authError) {
+        return err(...guardRejection(authError));
     }
 
     const { id: tournamentId } = await params;
@@ -115,9 +116,13 @@ export async function POST(
         .eq('id', tournamentId)
         .maybeSingle();
     const ownerId = (tournamentRow?.created_by_user_id as string | null | undefined) ?? context.userId;
+    // El plan de OTRO usuario (el dueño del torneo) se lee con service-role:
+    // `user_active_plan` respeta el RLS de `subscriptions` (security_invoker),
+    // y con el cliente de la request un colaborador no vería la fila del dueño
+    // y caería al plan free.
     const planCtx = ownerId === context.userId
         ? await getUserPlanContext(supabase, context.userId, context.rawRole)
-        : await getUserPlanContext(supabase, ownerId);
+        : await getUserPlanContext(writer, ownerId);
 
     const { count: currentParticipantsCount } = await writer
         .from('tournament_participants')
@@ -163,8 +168,8 @@ export async function DELETE(
     let context;
     try {
         context = await requireTournamentAdminContext(supabase);
-    } catch {
-        return err('Unauthorized', 401);
+    } catch (authError) {
+        return err(...guardRejection(authError));
     }
 
     const { id: tournamentId } = await params;

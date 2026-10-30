@@ -1,0 +1,2774 @@
+Torneo Cordobés M15 "B" 2026 (Unión Cordobesa) · tarjetas de partido (texto del SIGER) · validado contra el marcador de la base
+
+Club La Tablada M15 "B" vs Jockey Club Córdoba M15 "C" · torneo-cordobes-m15-b · tarjeta 290963  ·  9b5aef1c-82b8-45f1-bacf-90255b4c193f
+  local     · Club La Tablada M15 "B" · 22 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M15 "C" · 27 jugadores · 0 con ficha fijada
+  eventos   · 48
+    min  1 (1T 1) local     conversion   Joaquin Jofre
+    min  1 (1T 1) local     try          Octavio Gambino
+    min  4 (1T 4) local     conversion   Joaquin Jofre
+    min  4 (1T 4) local     try          Joaquin Jofre
+    min  8 (1T 8) local     conversion   Joaquin Jofre
+    min  8 (1T 8) local     try          Guillermo Jose Nores
+    min 15 (1T 15) local     try          Calixto De La Torre Cornet
+    min 17 (1T 17) local     try          Octavio Gambino
+    min 17 (1T 17) local     conversion   Joaquin Jofre
+    min 23 (1T 23) local     try          Estanislao Verrier Araoz
+    min 23 (1T 23) local     conversion   Joaquin Jofre
+    min 25 (1T 25) visitante substitution Felipe Tay Tosco
+    min 25 (1T 25) local     try          Franco Becher
+    min 25 (1T 25) local     conversion   Joaquin Jofre
+    min 28 (1T 28) local     try          Octavio Gambino
+    min 28 (1T 28) local     conversion   Joaquin Jofre
+    min 30 (1T 30) local     try          Pedro Jaime
+    min 30 (1T 30) local     conversion   Pedro Jaime
+    min 35 (1T 35) visitante substitution Geronimo Manuel Ponce
+    min 35 (1T 35) visitante substitution Santiago Agustín Ludueña
+    min 35 (1T 35) visitante substitution Matias Rubi Arcurio
+    min 35 (1T 35) visitante substitution Branko Emanuel Lupiañez Heyd
+    min 35 (1T 35) local     try          Joaquin Jofre
+    min 35 (1T 35) local     conversion   Joaquin Jofre
+    min 40 (2T 0) local     substitution Calixto De La Torre Cornet
+    min 40 (2T 0) local     substitution Estanislao Verrier Araoz
+    min 40 (2T 0) local     substitution Juan Bautista Araya Balbi
+    min 40 (2T 0) local     substitution Segundo Manzi
+    min 40 (2T 0) local     substitution Santiago Montironi
+    min 40 (2T 0) local     substitution Bruno Stenfer
+    min 44 (2T 4) local     try          Alejandro Damonte
+    min 44 (2T 4) local     conversion   Joaquin Jofre
+    min 48 (2T 8) local     substitution Octavio Gambino
+    min 50 (2T 10) local     try          Valentin Auad
+    min 50 (2T 10) local     conversion   Joaquin Jofre
+    min 56 (2T 16) local     try          Simon Tagle
+    min 56 (2T 16) local     conversion   Joaquin Jofre
+    min 60 (2T 20) local     conversion   Joaquin Jofre
+    min 60 (2T 20) local     try          Simon Tagle
+    min 61 (2T 21) local     try          Guillermo Jose Nores
+    min 61 (2T 21) local     conversion   Joaquin Jofre
+    min 63 (2T 23) local     try          Valentin Auad
+    min 65 (2T 25) local     try          Franco Becher
+    min 65 (2T 25) local     conversion   Joaquin Jofre
+    min 70 (2T 30) local     try          Pedro Jaime
+    min 70 (2T 30) local     conversion   Joaquin Jofre
+    min 72 (2T 32) local     try          Simon Tagle
+    min 72 (2T 32) local     conversion   Joaquin Jofre
+  marcador  · eventos 129-0 · guardado 129-0
+  tries     · 19-0 (guardado 19-0)
+  arbitro   · Sergio Maldonado . (No Oficial) (guardado: Sergio Maldonado . (No Oficial))
+  guardado  · 22 local · 27 visitante · 48 eventos
+
+Urú Curé Rugby Club M15 "B" vs San Francisco R.C. M15 "B" · torneo-cordobes-m15-b · tarjeta 290964  ·  f98c2f75-54d7-4fe2-ae66-ffd96ee97740
+  local     · Urú Curé Rugby Club M15 "B" · 24 jugadores · 0 con ficha fijada
+  visitante · San Francisco R.C. M15 "B" · 16 jugadores · 0 con ficha fijada
+  eventos   · 32
+    min  5 (1T 5) local     conversion   Augusto Sosa Cocco
+    min  5 (1T 5) local     try          Benicio Cocorda Farina
+    min  6 (1T 6) local     try          Benicio Cocorda Farina
+    min  6 (1T 6) local     conversion   Augusto Sosa Cocco
+    min 12 (1T 12) local     try          Augusto Sosa Cocco
+    min 12 (1T 12) local     conversion   Augusto Sosa Cocco
+    min 14 (1T 14) local     try          Lorenzo Pielmann
+    min 14 (1T 14) local     conversion   Augusto Sosa Cocco
+    min 17 (1T 17) local     try          Pedro Lovell
+    min 19 (1T 19) local     try          Jeronimo Pauls
+    min 19 (1T 19) local     conversion   Augusto Sosa Cocco
+    min 27 (1T 27) local     try          Jeronimo Pauls
+    min 40 (2T 0) local     substitution Juan Francisco Casasnovas Martinez
+    min 40 (2T 0) local     substitution Facundo Rios Centeno
+    min 40 (2T 0) local     substitution Lautaro Trebucq
+    min 40 (2T 0) local     substitution Francisco Marrero Las Heras
+    min 40 (2T 0) local     substitution Santiago Zampa Hipp
+    min 40 (2T 0) local     substitution Benjamin Rodríguez Merenda
+    min 40 (2T 0) local     substitution Benicio Beron
+    min 40 (2T 0) local     substitution Juan Cruz Oliva
+    min 40 (2T 0) local     substitution Gonzalo Regidor
+    min 47 (2T 7) local     conversion   Augusto Sosa Cocco
+    min 47 (2T 7) local     try          Benicio Cocorda Farina
+    min 54 (2T 14) local     conversion   Augusto Sosa Cocco
+    min 54 (2T 14) local     try          Aquiles Rivoira
+    min 55 (2T 15) visitante substitution Samuel Velásquez Reyes
+    min 68 (2T 28) local     conversion   Pedro Lovell
+    min 68 (2T 28) local     try          Lorenzo Cargnelutti
+    min 70 (2T 30) local     conversion   Pedro Lovell
+    min 70 (2T 30) local     try          Lorenzo Pielmann
+    min 75 (2T 35) local     conversion   Pedro Lovell
+    min 75 (2T 35) local     try          Benicio Cocorda Farina
+  marcador  · eventos 80-0 · guardado 80-0
+  tries     · 12-0 (guardado 12-0)
+  arbitro   · Carlos Altobelli (guardado: Carlos Altobelli)
+  guardado  · 24 local · 16 visitante · 32 eventos
+
+Córdoba Rugby Club M15 "B" vs Alta Gracia R.C. M15 "B" · torneo-cordobes-m15-b · tarjeta 290965  ·  8aa77270-abc2-47bb-a220-81e17978abb9
+  local     · Córdoba Rugby Club M15 "B" · 20 jugadores · 0 con ficha fijada
+  visitante · Alta Gracia R.C. M15 "B" · 22 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min  2 (1T 2) local     try          Leandro Martin Barboza Bilbao
+    min  2 (1T 2) local     conversion   Thiago Benjamin Berardi
+    min  4 (1T 4) local     try          Thiago Benjamin Berardi
+    min  4 (1T 4) local     conversion   Thiago Benjamin Berardi
+    min  6 (1T 6) local     try          Thiago Benjamin Berardi
+    min  8 (1T 8) visitante penalty_goal Joaquin Arrese
+    min 20 (1T 20) local     try          Valentino Ropellatto
+    min 25 (1T 25) local     try          Lorenzo Curtino Severini
+    min 25 (1T 25) local     conversion   Thiago Benjamin Berardi
+    min 42 (2T 2) visitante try          Luca Oreste Pelliza Bussadori
+    min 42 (2T 2) visitante conversion   Joaquin Arrese
+    min 46 (2T 6) local     try          Mathías Lautaro Parma Caminos
+    min 46 (2T 6) local     conversion   Thiago Benjamin Berardi
+    min 53 (2T 13) local     try          Benjamín Gomez Lardone
+    min 53 (2T 13) local     conversion   Thiago Benjamin Berardi
+    min 56 (2T 16) visitante substitution Gabriel Nahir Martín Nifury
+    min 56 (2T 16) local     try          Leandro Martin Barboza Bilbao
+    min 57 (2T 17) local     conversion   Thiago Benjamin Berardi
+    min 62 (2T 22) visitante injury       Joel Genaro Aime
+    min 62 (2T 22) visitante substitution Joel Genaro Aime
+  marcador  · eventos 52-10 · guardado 52-10
+  tries     · 8-1 (guardado 8-1)
+  arbitro   · Eduardo Cavaglia (guardado: Eduardo Cavaglia)
+  guardado  · 20 local · 22 visitante · 20 eventos
+
+Club Palermo Bajo M15 "B" vs Jockey Club Córdoba M15 "B" · torneo-cordobes-m15-b · tarjeta 290967  ·  753ea018-d9a1-46e1-bd94-80d0f873a3da
+  local     · Club Palermo Bajo M15 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M15 "B" · 24 jugadores · 0 con ficha fijada
+  eventos   · 14
+    min  5 (1T 5) visitante conversion   Facundo Ramos Martínez
+    min  5 (1T 5) visitante try          Lucio Sparaino
+    min  8 (1T 8) visitante try          Octavio Ferrer Mendieta
+    min 13 (1T 13) visitante try          Augusto Cesar Borrini
+    min 15 (1T 15) visitante try          Matias Rubi Arcurio
+    min 15 (1T 15) visitante conversion   Facundo Ramos Martínez
+    min 19 (1T 19) visitante try          Matias Rubi Arcurio
+    min 25 (1T 25) visitante conversion   Facundo Ramos Martínez
+    min 25 (1T 25) visitante try          Lucio Sparaino
+    min 35 (1T 35) visitante try          Felipe Panero Castillo
+    min 35 (1T 35) visitante conversion   Facundo Ramos Martínez
+    min 35 (1T 35) visitante substitution Felipe Santacroce
+    min 35 (1T 35) visitante substitution Augusto Cesar Borrini
+    min 35 (1T 35) visitante substitution Matias Rubi Arcurio
+  marcador  · eventos 0-43 · guardado 0-43
+  tries     · 0-7 (guardado 0-7)
+  arbitro   · Emanuel Maldonado (guardado: Emanuel Maldonado)
+  guardado  · 23 local · 24 visitante · 14 eventos
+
+Tala Rugby Club M15 "B" vs Club Universitario de Córdoba M15 "B" · torneo-cordobes-m15-b · tarjeta 290968  ·  1f68a56e-ab6f-40cf-84b6-2b3d28d1faee
+  local     · Tala Rugby Club M15 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba M15 "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min  6 (1T 6) local     try          Pedro Giordano
+    min 11 (1T 11) local     try          Pedro Giordano
+    min 12 (1T 12) local     conversion   Agustin Linzoain
+    min 13 (1T 13) local     try          Tomas Francisco Lopez Gilardoni
+    min 14 (1T 14) local     conversion   Agustin Linzoain
+    min 27 (1T 27) local     try          Agustin Linzoain
+    min 28 (1T 28) local     conversion   Agustin Linzoain
+    min 34 (1T 34) visitante try          Geronimo Allende Peralta
+    min 43 (2T 3) local     try          Joaquin Gabriel Leguizamón
+    min 43 (2T 3) local     conversion   Tomas Salvador Alvarez
+    min 50 (2T 10) local     try          Benjamin Sufe Bosco
+    min 51 (2T 11) local     conversion   Tomas Salvador Alvarez
+    min 53 (2T 13) local     try          Tomas Salvador Alvarez
+    min 54 (2T 14) local     conversion   Tomas Salvador Alvarez
+    min 55 (2T 15) local     try          Joaquin Gabriel Leguizamón
+    min 56 (2T 16) local     conversion   Tomas Salvador Alvarez
+    min 57 (2T 17) local     try          Santino Iván Peralta
+    min 64 (2T 24) local     try          Martin Salord
+    min 64 (2T 24) local     conversion   Tomas Salvador Alvarez
+    min 70 (2T 30) local     penalty_goal Agustin Linzoain
+  marcador  · eventos 69-5 · guardado 69-5
+  tries     · 10-1 (guardado 10-1)
+  arbitro   · Daniel Borsarelli (guardado: Daniel Borsarelli)
+  guardado  · 23 local · 23 visitante · 20 eventos
+
+Baguales R.C. M15 "B" vs Club La Tablada M15 "B" · torneo-cordobes-m15-b · tarjeta 290969  ·  bbadd3fa-3bae-4fcc-b404-59e72c1f0dba
+  local     · Baguales R.C. M15 "B" · 26 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M15 "B" · 25 jugadores · 0 con ficha fijada
+  eventos   · 14
+    min  8 (1T 8) visitante try          Franco Becher
+    min  8 (1T 8) visitante conversion   Valentin Auad
+    min 15 (1T 15) local     card_yellow  Francisco Alvarenga
+    min 26 (1T 26) local     try          Facundo Massa
+    min 30 (1T 30) local     card_yellow  Facundo Massa
+    min 30 (1T 30) visitante try          Nicolas Miranda Del Valle
+    min 30 (1T 30) visitante conversion   Juan Bautista Araya Balbi
+    min 34 (1T 34) visitante try          Alejandro Damonte
+    min 34 (1T 34) visitante conversion   Juan Bautista Araya Balbi
+    min 44 (2T 4) visitante try          Constancio Rosso
+    min 44 (2T 4) visitante conversion   Juan Bautista Araya Balbi
+    min 63 (2T 23) local     try          Albano Bustamante
+    min 63 (2T 23) local     conversion   Ivan Cesar Caceres
+    min 70 (2T 30) visitante try          Juan Bautista Araya Balbi
+  marcador  · eventos 12-33 · guardado 12-33
+  tries     · 2-5 (guardado 2-5)
+  arbitro   · Patricio Verdun Sheridan (guardado: Patricio Verdun Sheridan)
+  guardado  · 26 local · 25 visitante · 14 eventos
+
+Jockey Club Córdoba M15 "C" vs San Francisco R.C. M15 "B" · torneo-cordobes-m15-b · tarjeta 290970  ·  021a0c24-a0eb-418e-9bc1-48d530bf08a0
+  local     · Jockey Club Córdoba M15 "C" · 30 jugadores · 0 con ficha fijada
+  visitante · San Francisco R.C. M15 "B" · 17 jugadores · 0 con ficha fijada
+  eventos   · 15
+    min 14 (1T 14) local     try          Tomás Bazan Soaje
+    min 14 (1T 14) local     conversion   Pedro Francisco Sanchez Suarez
+    min 21 (1T 21) visitante try          Valentino Pellini
+    min 21 (1T 21) visitante conversion   Emiliano Fraga
+    min 29 (1T 29) visitante try          Emiliano Fraga
+    min 29 (1T 29) visitante conversion   Emiliano Fraga
+    min 32 (1T 32) visitante try          Jano Pagliero
+    min 40 (2T 0) visitante substitution Álvaro Santino Cejas
+    min 46 (2T 6) visitante card_yellow  Felipe Codini
+    min 50 (2T 10) local     try          Felipe Poderti
+    min 50 (2T 10) local     conversion   Francisco Diego Criado Urgorri
+    min 53 (2T 13) visitante try          Valentino Pellini
+    min 53 (2T 13) visitante conversion   Emiliano Fraga
+    min 61 (2T 21) visitante try          Benjamín Richiardone
+    min 68 (2T 28) visitante penalty_goal Emiliano Fraga
+  marcador  · eventos 14-34 · guardado 14-34
+  tries     · 2-5 (guardado 2-5)
+  arbitro   · Isaias Sergio Ignacio Ponce (guardado: Isaias Sergio Ignacio Ponce)
+  guardado  · 30 local · 17 visitante · 15 eventos
+
+Tala Rugby Club M15 "C" vs Córdoba Rugby Club M15 "B" · torneo-cordobes-m15-b · tarjeta 290971  ·  e9fb043e-425e-4cc1-ae1a-33891ca8a4a8
+  local     · Tala Rugby Club M15 "C" · 29 jugadores · 0 con ficha fijada
+  visitante · Córdoba Rugby Club M15 "B" · 20 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min  6 (1T 6) local     conversion   Bautista Narbona
+    min  6 (1T 6) local     try          Rocco Bonelli
+    min  8 (1T 8) local     injury       Rocco Bonelli
+    min 20 (1T 20) visitante try          Thiago Benjamin Berardi
+    min 20 (1T 20) visitante conversion   Thiago Benjamin Berardi
+    min 29 (1T 29) visitante substitution Jeremias Koriakos
+    min 31 (1T 31) visitante penalty_goal Thiago Benjamin Berardi
+    min 35 (1T 35) local     substitution Valentino Gabriel Cavallini Mariño
+    min 35 (1T 35) local     substitution Francisco Ezequiel Viqueira
+    min 35 (1T 35) local     substitution Martin Salord
+    min 35 (1T 35) local     substitution Lautaro Casado
+    min 35 (1T 35) local     substitution Agostino Alfredo Arias
+    min 35 (1T 35) local     substitution Santiago Ciceri
+    min 35 (1T 35) local     substitution Felipe Caruana
+    min 36 (1T 36) visitante substitution Benjamín Gomez Lardone
+    min 50 (2T 10) local     conversion   Bautista Narbona
+    min 50 (2T 10) local     try          Francisco Durá
+    min 55 (2T 15) visitante try          Thiago Benjamin Berardi
+    min 55 (2T 15) visitante conversion   Thiago Benjamin Berardi
+    min 62 (2T 22) visitante substitution Valentino Espinosa
+    min 67 (2T 27) visitante penalty_goal Thiago Benjamin Berardi
+    min 70 (2T 30) visitante try          Benjamín Gomez Lardone
+    min 72 (2T 32) visitante conversion   Mathías Lautaro Parma Caminos
+    min 74 (2T 34) local     try          Jano Bautista Plutman
+    min 74 (2T 34) local     conversion   Bautista Narbona
+    min 75 (2T 35) visitante try          Thiago Benjamin Berardi
+    min 75 (2T 35) visitante conversion   Thiago Benjamin Berardi
+  marcador  · eventos 21-34 · guardado 21-34
+  tries     · 3-4 (guardado 3-4)
+  arbitro   · Pablo Daniel Dionicio Benitez (guardado: Pablo Daniel Dionicio Benitez)
+  guardado  · 29 local · 20 visitante · 27 eventos
+
+Club La Tablada M15 "C" vs Córdoba Rugby Club M15 "B" · torneo-cordobes-m15-b · tarjeta 290972  ·  492e4170-e58e-4b0f-b6d2-cb2d99f4b3ce
+  local     · Club La Tablada M15 "C" · 23 jugadores · 0 con ficha fijada
+  visitante · Córdoba Rugby Club M15 "B" · 19 jugadores · 0 con ficha fijada
+  eventos   · 23
+    min  3 (1T 3) visitante conversion   Thiago Benjamin Berardi
+    min  3 (1T 3) visitante try          Valentino Ropellatto
+    min  7 (1T 7) local     try          Julio Francisco Aliaga Moyano
+    min  7 (1T 7) local     conversion   Leon Bautista Moudjoukian
+    min 14 (1T 14) visitante try          Thiago Benjamin Berardi
+    min 14 (1T 14) visitante conversion   Thiago Benjamin Berardi
+    min 20 (1T 20) visitante penalty_goal Thiago Benjamin Berardi
+    min 23 (1T 23) visitante try          Benjamín Gomez Lardone
+    min 23 (1T 23) visitante conversion   Thiago Benjamin Berardi
+    min 33 (1T 33) local     penalty_goal Leon Bautista Moudjoukian
+    min 41 (2T 1) visitante try          Valentino Ropellatto
+    min 41 (2T 1) visitante conversion   Thiago Benjamin Berardi
+    min 49 (2T 9) visitante conversion   Thiago Benjamin Berardi
+    min 55 (2T 15) visitante try          Leandro Martin Barboza Bilbao
+    min 58 (2T 18) visitante try          Leandro Martin Barboza Bilbao
+    min 59 (2T 19) visitante conversion   Thiago Benjamin Berardi
+    min 63 (2T 23) visitante try          Thiago Benjamin Berardi
+    min 67 (2T 27) local     try          Joaquin Martinez Piñero
+    min 67 (2T 27) local     conversion   Leon Bautista Moudjoukian
+    min 73 (2T 33) visitante try          Mathías Lautaro Parma Caminos
+    min 74 (2T 34) visitante conversion   Thiago Benjamin Berardi
+    min 75 (2T 35) visitante try          Mathías Lautaro Parma Caminos
+    min 75 (2T 35) visitante conversion   Thiago Benjamin Berardi
+  marcador  · eventos 17-64 · guardado 17-64
+  tries     · 2-9 (guardado 2-9)
+  arbitro   · Eduardo Cavaglia (guardado: Eduardo Cavaglia)
+  guardado  · 23 local · 19 visitante · 23 eventos
+
+Córdoba Athletic Club M15 "B" vs Tala Rugby Club M15 "B" · torneo-cordobes-m15-b · tarjeta 290973  ·  7d30cefa-d905-478d-9923-c0b1850031be
+  local     · Córdoba Athletic Club M15 "B" · 26 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M15 "B" · 25 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min  2 (1T 2) local     try          Salvador Collino
+    min 10 (1T 10) local     try          Agustín Castellano
+    min 16 (1T 16) local     try          Franco Ribba
+    min 18 (1T 18) local     try          Agustín Castellano
+    min 18 (1T 18) local     conversion   Agustin Villalba
+    min 20 (1T 20) local     try          Salvador Collino
+    min 25 (1T 25) visitante try          Agustin Linzoain
+    min 29 (1T 29) local     try          Benjamin Castellano
+    min 29 (1T 29) local     conversion   Agustin Villalba
+    min 42 (2T 2) visitante try          Tomas Salvador Alvarez
+    min 42 (2T 2) visitante conversion   Agustin Linzoain
+    min 52 (2T 12) local     try          Salvador Collino
+    min 52 (2T 12) local     conversion   Agustin Villalba
+    min 57 (2T 17) visitante try          Lucio Marucco
+    min 57 (2T 17) visitante conversion   Agustin Linzoain
+    min 65 (2T 25) local     try          Agustín Castellano
+    min 65 (2T 25) local     conversion   Facundo Duarte Febre
+    min 71 (2T 31) visitante try          Tomas Francisco Lopez Gilardoni
+    min 71 (2T 31) visitante conversion   Agustin Linzoain
+    min 73 (2T 33) visitante try          Tomas Salvador Alvarez
+    min 73 (2T 33) visitante conversion   Agustin Linzoain
+    min 78 (2T 38) local     penalty_goal Facundo Duarte Febre
+  marcador  · eventos 51-33 · guardado 51-33
+  tries     · 8-5 (guardado 8-5)
+  arbitro   · Juan Francisco Gomez (guardado: Juan Francisco Gomez)
+  guardado  · 26 local · 25 visitante · 22 eventos
+
+Club La Tablada M15 "B" vs Urú Curé Rugby Club M15 "B" · torneo-cordobes-m15-b · tarjeta 290974  ·  b84df6ca-e2e3-4a90-a3e6-01c68c2b72c0
+  local     · Club La Tablada M15 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Urú Curé Rugby Club M15 "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min  2 (1T 2) local     try          Baltazar Ignacio Campana
+    min  6 (1T 6) local     try          Constancio Rosso
+    min 12 (1T 12) visitante try          Lorenzo Pielmann
+    min 13 (1T 13) visitante conversion   Agustin Fuentes
+    min 20 (1T 20) local     substitution Constancio Rosso
+    min 23 (1T 23) local     penalty_goal Joaquin Jofre
+    min 41 (2T 1) visitante substitution Juan Cruz Oliva
+    min 41 (2T 1) visitante substitution Valentino Di Marco
+    min 44 (2T 4) local     card_yellow  Francisco Aznarez Bedoya
+    min 46 (2T 6) local     substitution Juan Pedro Cmet
+    min 46 (2T 6) local     substitution Manuel Garcia Cortes
+    min 46 (2T 6) local     substitution Valentino Cura Tey
+    min 46 (2T 6) local     substitution Ignacio Vasena Alonso
+    min 50 (2T 10) local     try          Simon Tagle
+    min 52 (2T 12) visitante substitution Francisco Marrero Las Heras
+    min 53 (2T 13) visitante substitution Vicente Jose Crespo
+    min 53 (2T 13) visitante substitution Lautaro Trebucq
+    min 54 (2T 14) local     conversion   Joaquin Jofre
+    min 55 (2T 15) local     substitution Matias Hernandez Gallardo
+    min 55 (2T 15) local     substitution Baltazar Ignacio Campana
+    min 58 (2T 18) local     substitution Joaquin Jofre
+    min 60 (2T 20) local     conversion   Juan Bautista Araya Balbi
+    min 60 (2T 20) local     try          Franco Becher
+    min 63 (2T 23) local     try          Estanislao Verrier Araoz
+    min 69 (2T 29) visitante try          Vicente Di Santo
+    min 70 (2T 30) visitante conversion   Pedro Lovell
+    min 71 (2T 31) local     try          Franco Becher
+  marcador  · eventos 37-14 · guardado 37-14
+  tries     · 6-2 (guardado 6-2)
+  arbitro   · Pablo Daniel Dionicio Benitez (guardado: Pablo Daniel Dionicio Benitez)
+  guardado  · 23 local · 23 visitante · 27 eventos
+
+Jockey Club Córdoba M15 "B" vs Baguales R.C. M15 "B" · torneo-cordobes-m15-b · tarjeta 290975  ·  8885f449-27a0-4d16-af8d-8c39887c6d7c
+  local     · Jockey Club Córdoba M15 "B" · 26 jugadores · 0 con ficha fijada
+  visitante · Baguales R.C. M15 "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 31
+    min 14 (1T 14) local     conversion   Juan Ignacio Gimenez
+    min 14 (1T 14) local     try          Leandro Emiliano Rosales
+    min 30 (1T 30) visitante try          Francisco Alvarenga
+    min 30 (1T 30) local     try          Matias Rubi Arcurio
+    min 30 (1T 30) local     conversion   Juan Ignacio Gimenez
+    min 31 (1T 31) local     try          Octavio Ferrer Mendieta
+    min 31 (1T 31) local     conversion   Juan Ignacio Gimenez
+    min 35 (1T 35) local     try          Leandro Emiliano Rosales
+    min 41 (2T 1) local     try          Felipe Poderti
+    min 41 (2T 1) local     conversion   Juan Ignacio Gimenez
+    min 43 (2T 3) local     try          Matias Rubi Arcurio
+    min 43 (2T 3) local     conversion   Juan Ignacio Gimenez
+    min 44 (2T 4) local     try          Antonio Jose Nores Navarro
+    min 44 (2T 4) local     conversion   Juan Ignacio Gimenez
+    min 46 (2T 6) local     conversion   Juan Ignacio Gimenez
+    min 46 (2T 6) local     try          Antonio Jose Nores Navarro
+    min 50 (2T 10) visitante injury       Luciano Valentín Aguirre
+    min 50 (2T 10) local     try          Felipe Poderti
+    min 50 (2T 10) local     conversion   Juan Ignacio Gimenez
+    min 54 (2T 14) local     try          Felipe Poderti
+    min 57 (2T 17) local     try          Felipe Poderti
+    min 57 (2T 17) local     conversion   Juan Ignacio Gimenez
+    min 60 (2T 20) local     try          Francisco Diego Criado Urgorri
+    min 60 (2T 20) local     conversion   Juan Ignacio Gimenez
+    min 63 (2T 23) local     try          Leandro Emiliano Rosales
+    min 63 (2T 23) local     conversion   Isidro García Faure
+    min 66 (2T 26) local     try          Felipe Poderti
+    min 66 (2T 26) local     conversion   Isidro García Faure
+    min 72 (2T 32) local     try          Leandro Emiliano Rosales
+    min 75 (2T 35) local     try          Vargas Alessio Lautaro
+    min 75 (2T 35) local     conversion   Isidro García Faure
+  marcador  · eventos 106-5 · guardado 106-5
+  tries     · 16-1 (guardado 16-1)
+  arbitro   · Patricio Verdun Sheridan (guardado: Patricio Verdun Sheridan)
+  guardado  · 26 local · 23 visitante · 31 eventos
+
+Tala Rugby Club M15 "C" vs Jockey Club Córdoba M15 "C" · torneo-cordobes-m15-b · tarjeta 290976  ·  2b715f67-797f-4049-ae71-dbab8f5a8c95
+  local     · Tala Rugby Club M15 "C" · 30 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M15 "C" · 28 jugadores · 0 con ficha fijada
+  eventos   · 13
+    min 17 (1T 17) local     try          Juan Sebastian Romero Ramacciotti
+    min 17 (1T 17) local     conversion   Bautista Narbona
+    min 28 (1T 28) visitante try          Jose Ignacio Campora Arrambide
+    min 28 (1T 28) visitante conversion   Santiago Aguirre Miranda
+    min 45 (2T 5) visitante try          Agustin Yapur
+    min 48 (2T 8) visitante try          Lorenzo Miguel Rossi Comito
+    min 48 (2T 8) visitante conversion   Santiago Aguirre Miranda
+    min 67 (2T 27) visitante try          Lorenzo Miguel Rossi Comito
+    min 67 (2T 27) visitante conversion   Santiago Aguirre Miranda
+    min 68 (2T 28) local     try          Lautaro Emidi Rosenbaun
+    min 68 (2T 28) local     conversion   Bautista Narbona
+    min 72 (2T 32) local     try          Juan Cruz Marchetti
+    min 72 (2T 32) local     conversion   Bautista Narbona
+  marcador  · eventos 21-26 · guardado 21-26
+  tries     · 3-4 (guardado 3-4)
+  arbitro   · Nazarena Yael Gigena Ramallo (guardado: Nazarena Yael Gigena Ramallo)
+  guardado  · 30 local · 28 visitante · 13 eventos
+
+San Francisco R.C. M15 "B" vs Alta Gracia R.C. M15 "B" · torneo-cordobes-m15-b · tarjeta 290977  ·  7c9cde6a-577b-4707-9745-e436a0662261
+  local     · San Francisco R.C. M15 "B" · 17 jugadores · 0 con ficha fijada
+  visitante · Alta Gracia R.C. M15 "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min  3 (1T 3) local     penalty_goal Emiliano Fraga
+    min 10 (1T 10) local     try          Joaquin Jesús Ortiz Esposito
+    min 10 (1T 10) local     conversion   Emiliano Fraga
+    min 15 (1T 15) local     try          Emiliano Fraga
+    min 15 (1T 15) local     conversion   Emiliano Fraga
+    min 21 (1T 21) local     try          Emiliano Fraga
+    min 21 (1T 21) local     conversion   Emiliano Fraga
+    min 25 (1T 25) local     try          Pedro Morano
+    min 27 (1T 27) local     conversion   Emiliano Fraga
+    min 27 (1T 27) local     try          Joaquin Jesús Ortiz Esposito
+    min 33 (1T 33) visitante penalty_goal Joaquin Arrese
+    min 51 (2T 11) local     try          Jano Pagliero
+    min 51 (2T 11) local     substitution Álvaro Santino Cejas
+    min 51 (2T 11) local     substitution Iker Gonzalez Heer
+    min 64 (2T 24) local     try          Valentino Roldan
+    min 64 (2T 24) local     conversion   Emiliano Fraga
+    min 67 (2T 27) local     try          Valentino Roldan
+    min 67 (2T 27) local     conversion   Emiliano Fraga
+  marcador  · eventos 55-3 · guardado 55-3
+  tries     · 8-0 (guardado 8-0)
+  arbitro   · Francisco Pecchio (guardado: Francisco Pecchio)
+  guardado  · 17 local · 23 visitante · 18 eventos
+
+Club La Tablada M15 "B" vs Córdoba Athletic Club M15 "B" · torneo-cordobes-m15-b · tarjeta 290978  ·  65e4d02f-6eb7-47d7-80f9-a0181c7fa23e
+  local     · Club La Tablada M15 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club M15 "B" · 21 jugadores · 0 con ficha fijada
+  eventos   · 30
+    min  3 (1T 3) visitante try          Franco Ribba
+    min 17 (1T 17) local     conversion   Joaquin Jofre
+    min 17 (1T 17) local     try          Baltazar Ignacio Campana
+    min 24 (1T 24) local     conversion   Joaquin Jofre
+    min 24 (1T 24) local     try          Baltazar Ignacio Campana
+    min 29 (1T 29) local     conversion   Joaquin Jofre
+    min 29 (1T 29) local     try          Estanislao Verrier Araoz
+    min 33 (1T 33) local     penalty_goal Joaquin Jofre
+    min 40 (2T 0) local     substitution Manuel Garcia Cortes
+    min 41 (2T 1) visitante substitution Franco Ribba
+    min 41 (2T 1) visitante substitution Bautista Emanuel Gambra Macias
+    min 43 (2T 3) local     try          Felipe Rolon Soto
+    min 45 (2T 5) local     substitution Valentino Cura Tey
+    min 45 (2T 5) local     card_yellow  Simon Giunta
+    min 45 (2T 5) local     substitution Joaquin Jofre
+    min 45 (2T 5) local     substitution Baltazar Ignacio Campana
+    min 45 (2T 5) local     substitution Santiago Montironi
+    min 48 (2T 8) local     substitution Estanislao Verrier Araoz
+    min 49 (2T 9) visitante try          Lisandro Gastón Esperon
+    min 50 (2T 10) visitante conversion   Santino Estevez Olmos
+    min 53 (2T 13) visitante substitution Gaston Valentino Gallo Orellana
+    min 54 (2T 14) visitante substitution Lisandro Gastón Esperon
+    min 54 (2T 14) visitante substitution Lautaro Bourse
+    min 54 (2T 14) visitante substitution Felipe Bisbal
+    min 55 (2T 15) local     substitution Octavio Gambino
+    min 58 (2T 18) local     try          Santiago Girardi
+    min 58 (2T 18) local     conversion   Juan Bautista Araya Balbi
+    min 60 (2T 20) local     substitution Simon Giunta
+    min 69 (2T 29) local     try          Juan Bautista Araya Balbi
+    min 69 (2T 29) local     conversion   Juan Bautista Araya Balbi
+  marcador  · eventos 43-12 · guardado 43-12
+  tries     · 6-2 (guardado 6-2)
+  arbitro   · Francisco Pecchio (guardado: Francisco Pecchio)
+  guardado  · 23 local · 21 visitante · 30 eventos
+
+Jockey Club Córdoba M15 "C" vs Jockey Club Córdoba M15 "B" · torneo-cordobes-m15-b · tarjeta 290980  ·  a06d08fe-f518-4cc1-8ec9-b1eefd04a1ec
+  local     · Jockey Club Córdoba M15 "C" · 15 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M15 "B" · 15 jugadores · 0 con ficha fijada
+  eventos   · 16
+    min  9 (1T 9) visitante try          Ignacio Esteban Rosales
+    min 21 (1T 21) visitante try          Vicente Ribero De Olmos
+    min 22 (1T 22) visitante conversion   Pedro Francisco Sanchez Suarez
+    min 24 (1T 24) visitante try          Tomás Bazan Soaje
+    min 25 (1T 25) visitante conversion   Pedro Francisco Sanchez Suarez
+    min 29 (1T 29) visitante try          Tomás Bazan Soaje
+    min 29 (1T 29) visitante conversion   Pedro Francisco Sanchez Suarez
+    min 33 (1T 33) visitante try          Ignacio Esteban Rosales
+    min 45 (2T 5) local     try          Bautista Zaror Tagle
+    min 46 (2T 6) local     conversion   Antonio Jose Nores Navarro
+    min 60 (2T 20) visitante try          Pedro Francisco Sanchez Suarez
+    min 63 (2T 23) visitante try          Tomás Bazan Soaje
+    min 64 (2T 24) visitante conversion   Pedro Francisco Sanchez Suarez
+    min 66 (2T 26) local     try          Felipe Tay Tosco
+    min 67 (2T 27) local     conversion   Antonio Jose Nores Navarro
+    min 70 (2T 30) local     try          Bautista Zaror Tagle
+  marcador  · eventos 19-43 · guardado 19-43
+  tries     · 3-7 (guardado 3-7)
+  arbitro   · Alejandro Martin Ceballos (guardado: Alejandro Martin Ceballos)
+  guardado  · 15 local · 15 visitante · 16 eventos
+
+Club La Tablada M15 "C" vs Club Universitario de Córdoba M15 "B" · torneo-cordobes-m15-b · tarjeta 290981  ·  defc22a5-9fbd-4d9b-b6a4-73bc085e6888
+  local     · Club La Tablada M15 "C" · 30 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba M15 "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min  5 (1T 5) visitante try          Raffael Yammal
+    min 11 (1T 11) visitante try          Raffael Yammal
+    min 11 (1T 11) visitante conversion   Geronimo Allende Peralta
+    min 14 (1T 14) visitante card_yellow  Tomas Meynet Jofre
+    min 20 (1T 20) visitante try          Raffael Yammal
+    min 20 (1T 20) visitante conversion   Geronimo Allende Peralta
+    min 22 (1T 22) visitante try          Jerónimo Sandin
+    min 30 (1T 30) visitante substitution Geronimo Villarreal
+    min 41 (2T 1) local     substitution Juan Ignacio Santillan
+    min 41 (2T 1) local     substitution Felipe Ceballos
+    min 44 (2T 4) local     substitution Juan Cruz Cattaneo
+    min 45 (2T 5) local     substitution Mateo Juarez Arriola
+    min 48 (2T 8) local     substitution Daniel Antonio Zilberberg Mirman
+    min 50 (2T 10) local     substitution Ignacio Alzuarte
+    min 50 (2T 10) local     substitution Máximo Martin Moreno Del Villar
+    min 69 (2T 29) visitante try          Ignacio Galvan
+    min 69 (2T 29) visitante conversion   Geronimo Allende Peralta
+    min 70 (2T 30) visitante substitution Santiago Gabriel Barbosa
+    min 76 (2T 36) local     substitution Juan Cruz Barreras
+    min 76 (2T 36) local     substitution Felipe Rolon Soto
+    min 76 (2T 36) local     substitution Juan Cruz Santillan
+    min 78 (2T 38) visitante card_yellow  Matteo Nota
+  marcador  · eventos 0-31 · guardado 0-31
+  tries     · 0-5 (guardado 0-5)
+  arbitro   · Isaias Sergio Ignacio Ponce (guardado: Isaias Sergio Ignacio Ponce)
+  guardado  · 30 local · 23 visitante · 22 eventos
+
+Urú Curé Rugby Club M15 "B" vs Baguales R.C. M15 "B" · torneo-cordobes-m15-b · tarjeta 290983  ·  29ed02b7-a8b0-435a-99dc-f02bd4949bc2
+  local     · Urú Curé Rugby Club M15 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Baguales R.C. M15 "B" · 20 jugadores · 0 con ficha fijada
+  eventos   · 34
+    min  2 (1T 2) local     try          Pedro Lovell
+    min  7 (1T 7) local     try          Benicio Beron
+    min  7 (1T 7) local     conversion   Pedro Lovell
+    min  9 (1T 9) local     try          Benicio Cocorda Farina
+    min  9 (1T 9) local     conversion   Pedro Lovell
+    min 12 (1T 12) local     try          Nicolás Balmaceda Pecorari
+    min 12 (1T 12) local     conversion   Pedro Lovell
+    min 16 (1T 16) local     try          Pedro Lovell
+    min 21 (1T 21) visitante try          Thiago Luberchi
+    min 24 (1T 24) local     try          Juan Cruz Oliva
+    min 24 (1T 24) local     conversion   Pedro Lovell
+    min 28 (1T 28) local     try          Benicio Cocorda Farina
+    min 28 (1T 28) local     conversion   Pedro Lovell
+    min 40 (2T 0) visitante substitution Matteo Baldovin
+    min 40 (2T 0) visitante substitution José María Bustillo
+    min 40 (2T 0) visitante substitution Elías Ignacio Castro
+    min 41 (2T 1) local     try          Juan Sosa Cocco
+    min 41 (2T 1) local     substitution Facundo Rios Centeno
+    min 43 (2T 3) local     conversion   Juan Sosa Cocco
+    min 48 (2T 8) local     substitution Benjamin Rodríguez Merenda
+    min 53 (2T 13) local     try          Benicio Beron
+    min 54 (2T 14) local     conversion   Juan Sosa Cocco
+    min 54 (2T 14) local     try          Juan Sosa Cocco
+    min 60 (2T 20) local     substitution Francisco Marrero Las Heras
+    min 60 (2T 20) local     substitution Aquiles Rivoira
+    min 60 (2T 20) local     substitution Matias Costa
+    min 60 (2T 20) local     substitution Benicio Beron
+    min 60 (2T 20) local     substitution Vicente Jose Crespo
+    min 63 (2T 23) local     try          Simon Alemano Borga
+    min 66 (2T 26) local     conversion   Pedro Lovell
+    min 66 (2T 26) local     try          Juan Nazareno Godoy Bessone
+    min 69 (2T 29) local     conversion   Pedro Lovell
+    min 69 (2T 29) local     try          Nicolás Balmaceda Pecorari
+    min 75 (2T 35) local     try          Benicio Cocorda Farina
+  marcador  · eventos 88-5 · guardado 88-5
+  tries     · 14-1 (guardado 14-1)
+  guardado  · 23 local · 20 visitante · 34 eventos
+
+Club La Tablada M15 "C" vs Club La Tablada M15 "B" · torneo-cordobes-m15-b · tarjeta 290984  ·  59472cbf-aa86-4877-a73d-06decf825c97
+  local     · Club La Tablada M15 "C" · 30 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M15 "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 30
+    min  2 (1T 2) visitante conversion   Joaquin Jofre
+    min  2 (1T 2) visitante try          Octavio Gambino
+    min  7 (1T 7) visitante try          Santiago Girardi
+    min 27 (1T 27) local     try          Juan Cruz Barreras
+    min 35 (1T 35) visitante substitution Santiago Girardi
+    min 35 (1T 35) visitante substitution Salvador Andreone
+    min 35 (1T 35) visitante conversion   Joaquin Jofre
+    min 35 (1T 35) visitante try          Francisco Aznarez Bedoya
+    min 35 (1T 35) visitante substitution Joaquin Jofre
+    min 35 (1T 35) visitante substitution Manuel Garcia Cortes
+    min 40 (2T 0) local     substitution Matías Pascualini
+    min 40 (2T 0) local     substitution Jeronimo Rinaldini
+    min 44 (2T 4) local     try          Santiago Pupich
+    min 47 (2T 7) visitante conversion   Juan Bautista Araya Balbi
+    min 47 (2T 7) visitante try          Valentino Cura Tey
+    min 47 (2T 7) visitante substitution Manuel Gonzalez
+    min 47 (2T 7) visitante substitution Simon Tagle
+    min 50 (2T 10) local     substitution Pedro Fada
+    min 53 (2T 13) local     substitution Joaquin Martinez Piñero
+    min 53 (2T 13) local     substitution Pedro Aguilar
+    min 53 (2T 13) local     substitution Felipe Danilo Lista Carrica
+    min 53 (2T 13) local     substitution Juan Cruz Cattaneo
+    min 54 (2T 14) visitante try          Simon Tagle
+    min 54 (2T 14) visitante conversion   Valentin Auad
+    min 55 (2T 15) local     substitution Juan Martin Ortiz Valdez
+    min 65 (2T 25) visitante substitution Franco Becher
+    min 68 (2T 28) visitante substitution Simon Giunta
+    min 71 (2T 31) visitante try          Joaquin Jofre
+    min 74 (2T 34) visitante try          Daniel Antonio Zilberberg Mirman
+    min 74 (2T 34) visitante conversion   Valentin Auad
+  marcador  · eventos 10-45 · guardado 10-45
+  tries     · 2-7 (guardado 2-7)
+  arbitro   · Tomas Elias Gigena Ramallo (guardado: Tomas Elias Gigena Ramallo)
+  guardado  · 30 local · 23 visitante · 30 eventos
+
+Córdoba Athletic Club M15 "B" vs Club Palermo Bajo M15 "B" · torneo-cordobes-m15-b · tarjeta 290985  ·  7b294b5e-30a1-46a3-9af1-d8ef6e7adc74
+  local     · Córdoba Athletic Club M15 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo M15 "B" · 24 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min  6 (1T 6) local     try          Cruz Juan Peña
+    min  6 (1T 6) local     conversion   Bautista Emanuel Gambra Macias
+    min  8 (1T 8) local     try          Benjamin Castellano
+    min  8 (1T 8) local     conversion   Bautista Emanuel Gambra Macias
+    min 14 (1T 14) local     try          Bautista Emanuel Gambra Macias
+    min 18 (1T 18) local     try          Juan Sebastian Bossi
+    min 20 (1T 20) local     try          Benjamin Castellano
+    min 42 (2T 2) local     try          Benjamin Castellano
+    min 42 (2T 2) local     conversion   Bautista Emanuel Gambra Macias
+    min 47 (2T 7) visitante try          Lucio Stritzke
+    min 49 (2T 9) local     try          Benjamin Castellano
+    min 49 (2T 9) local     conversion   Bautista Emanuel Gambra Macias
+    min 51 (2T 11) local     try          Bautista Emanuel Gambra Macias
+    min 51 (2T 11) local     conversion   Bautista Emanuel Gambra Macias
+    min 53 (2T 13) local     try          Juan Sebastian Bossi
+    min 56 (2T 16) local     try          Benjamin Castellano
+    min 56 (2T 16) local     conversion   Juan Sebastian Bossi
+  marcador  · eventos 62-5 · guardado 62-5
+  tries     · 10-1 (guardado 10-1)
+  arbitro   · Eduardo Cavaglia (guardado: Eduardo Cavaglia)
+  guardado  · 23 local · 24 visitante · 17 eventos
+
+Jockey Club Córdoba M15 "B" vs Urú Curé Rugby Club M15 "B" · torneo-cordobes-m15-b · tarjeta 290986  ·  9d9d63f7-20d2-40bf-bad2-9c45c295ca2d
+  local     · Jockey Club Córdoba M15 "B" · 27 jugadores · 0 con ficha fijada
+  visitante · Urú Curé Rugby Club M15 "B" · 21 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min  8 (1T 8) local     try          Octavio Ferrer Mendieta
+    min  9 (1T 9) local     conversion   Facundo Ramos Martínez
+    min 11 (1T 11) local     try          Felipe Poderti
+    min 11 (1T 11) local     conversion   Facundo Ramos Martínez
+    min 22 (1T 22) local     try          Felipe Poderti
+    min 22 (1T 22) local     conversion   Facundo Ramos Martínez
+    min 30 (1T 30) local     substitution Ciro San Millán
+    min 45 (2T 5) local     try          Felipe Poderti
+    min 46 (2T 6) local     conversion   Facundo Ramos Martínez
+    min 49 (2T 9) local     try          Felipe Poderti
+    min 50 (2T 10) local     conversion   Facundo Ramos Martínez
+    min 50 (2T 10) local     substitution Santiago Ferreyra
+    min 50 (2T 10) local     substitution Felipe Poderti
+    min 52 (2T 12) local     try          Felipe Poderti
+    min 60 (2T 20) local     substitution Salvador Ceballos
+    min 60 (2T 20) local     substitution Antonio Jose Nores Navarro
+    min 60 (2T 20) local     substitution Facundo Ramos Martínez
+    min 62 (2T 22) visitante try          Matias Costa
+    min 75 (2T 35) visitante substitution Benjamin Rodríguez Merenda
+    min 75 (2T 35) visitante substitution Juan Sosa Cocco
+    min 75 (2T 35) visitante substitution Felipe Arqué Latour
+    min 75 (2T 35) visitante try          Francisco Estevez
+  marcador  · eventos 40-10 · guardado 40-10
+  tries     · 6-2 (guardado 6-2)
+  arbitro   · Paula Alejandra Mingot (guardado: Paula Alejandra Mingot)
+  guardado  · 27 local · 21 visitante · 22 eventos
+
+Tala Rugby Club M15 "B" vs San Francisco R.C. M15 "B" · torneo-cordobes-m15-b · tarjeta 290987  ·  956736a1-24ad-4e26-91e8-b2e8bbe89b8e
+  local     · Tala Rugby Club M15 "B" · 24 jugadores · 0 con ficha fijada
+  visitante · San Francisco R.C. M15 "B" · 17 jugadores · 0 con ficha fijada
+  eventos   · 32
+    min  5 (1T 5) local     try          Gonzalo Exequiel Gomez Oliva
+    min 15 (1T 15) local     try          Tomas Gross
+    min 24 (1T 24) visitante substitution Álvaro Santino Cejas
+    min 28 (1T 28) local     try          Augusto Máximo Pastore
+    min 30 (1T 30) local     try          Fermin Cañas
+    min 30 (1T 30) local     conversion   Agustin Linzoain
+    min 34 (1T 34) local     try          Bautista Narbona
+    min 37 (1T 37) local     try          Ignacio Gomez Castaños
+    min 37 (1T 37) local     conversion   Agustin Linzoain
+    min 41 (2T 1) local     substitution Agustin Linzoain
+    min 41 (2T 1) local     substitution Santiago León Pérez Godino
+    min 41 (2T 1) local     substitution Gonzalo Exequiel Gomez Oliva
+    min 41 (2T 1) local     substitution Lucas Faccendini Maldonado
+    min 41 (2T 1) local     substitution Martin Salord
+    min 41 (2T 1) local     substitution Juan Sebastian Romero Ramacciotti
+    min 44 (2T 4) visitante try          Valentino Pellini
+    min 50 (2T 10) visitante try          Pedro Gabriel Tamayo Cajaleón
+    min 52 (2T 12) local     substitution Francisco Lo Celso Carballo
+    min 52 (2T 12) local     substitution Santiago Ciceri
+    min 52 (2T 12) local     substitution Santiago Meyer
+    min 53 (2T 13) visitante substitution Julián Rosa
+    min 60 (2T 20) local     conversion   Bautista Narbona
+    min 60 (2T 20) local     try          Ignacio Gomez Castaños
+    min 63 (2T 23) local     conversion   Bautista Narbona
+    min 63 (2T 23) local     try          Tomas Gross
+    min 65 (2T 25) local     conversion   Bautista Narbona
+    min 65 (2T 25) local     try          Tomas Iaria
+    min 70 (2T 30) local     try          Ignacio Gomez Castaños
+    min 73 (2T 33) visitante try          Emiliano Fraga
+    min 74 (2T 34) visitante conversion   Emiliano Fraga
+    min 75 (2T 35) local     conversion   Bautista Narbona
+    min 75 (2T 35) local     try          Ignacio Gomez Castaños
+  marcador  · eventos 67-17 · guardado 67-17
+  tries     · 11-3 (guardado 11-3)
+  arbitro   · Javier Sorbera Ferrer (guardado: Javier Sorbera Ferrer)
+  guardado  · 24 local · 17 visitante · 32 eventos
+
+Alta Gracia R.C. M15 "B" vs Baguales R.C. M15 "B" · torneo-cordobes-m15-b · tarjeta 290989  ·  966d1127-bd96-466a-b96b-65da38dcb74d
+  local     · Alta Gracia R.C. M15 "B" · 16 jugadores · 0 con ficha fijada
+  visitante · Baguales R.C. M15 "B" · 20 jugadores · 0 con ficha fijada
+  eventos   · 15
+    min  7 (1T 7) local     try          Stefano Antonio Canteros
+    min  8 (1T 8) local     conversion   Joaquin Arrese
+    min 26 (1T 26) local     try          Francisco Mariano Pedernera
+    min 41 (2T 1) local     try          Francisco Mariano Pedernera
+    min 46 (2T 6) visitante card_red     Pedro Ricardo Rivarola
+    min 49 (2T 9) local     try          Emilio Agustin Gelos Lopez
+    min 50 (2T 10) local     conversion   Emilio Agustin Gelos Lopez
+    min 51 (2T 11) local     try          Joel Genaro Aime
+    min 52 (2T 12) visitante try          Thiago Luberchi
+    min 52 (2T 12) visitante conversion   Thiago Luberchi
+    min 54 (2T 14) local     try          Joel Genaro Aime
+    min 54 (2T 14) local     try          Emilio Agustin Gelos Lopez
+    min 56 (2T 16) visitante injury       Thiago Luberchi
+    min 59 (2T 19) local     try          Francisco Mariano Pedernera
+    min 70 (2T 30) local     substitution Joaquin Asua Pellegrini
+  marcador  · eventos 44-7 · guardado 44-7
+  tries     · 8-1 (guardado 8-1)
+  arbitro   · Nazarena Yael Gigena Ramallo (guardado: Nazarena Yael Gigena Ramallo)
+  guardado  · 16 local · 20 visitante · 15 eventos
+
+Club La Tablada M15 "B" vs Jockey Club Córdoba M15 "B" · torneo-cordobes-m15-b · tarjeta 290990  ·  c2e89a48-b9f5-4738-9b37-86c3a33a1076
+  local     · Club La Tablada M15 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M15 "B" · 22 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min  7 (1T 7) visitante try          Isidro García Faure
+    min 24 (1T 24) local     try          Valentino Cura Tey
+    min 24 (1T 24) local     conversion   Joaquin Jofre
+    min 30 (1T 30) local     try          Franco Becher
+    min 33 (1T 33) local     try          Simon Tagle
+    min 35 (1T 35) visitante substitution Lorenzo Miguel Rossi Comito
+    min 35 (1T 35) visitante substitution Felipe Santacroce
+    min 41 (2T 1) visitante try          Benjamin Krumm
+    min 49 (2T 9) local     penalty_goal Joaquin Jofre
+    min 50 (2T 10) local     substitution Juan Bautista Araya Balbi
+    min 55 (2T 15) visitante substitution Juan Ignacio Tapia
+    min 55 (2T 15) local     substitution Guillermo Jose Nores
+    min 55 (2T 15) local     substitution Franco Becher
+    min 55 (2T 15) local     substitution Octavio Gambino
+    min 56 (2T 16) local     conversion   Joaquin Jofre
+    min 56 (2T 16) local     try          Simon Tagle
+    min 60 (2T 20) visitante substitution Pedro Heredia
+    min 65 (2T 25) visitante substitution Salvador Ceballos
+    min 65 (2T 25) visitante substitution Octavio Ferrer Mendieta
+    min 65 (2T 25) local     substitution Mateo Altamira
+    min 65 (2T 25) local     substitution Valentino Cura Tey
+    min 70 (2T 30) visitante substitution Antonio Jose Nores Navarro
+  marcador  · eventos 27-10 · guardado 27-10
+  tries     · 4-2 (guardado 4-2)
+  arbitro   · Franco Coppetti (guardado: Franco Coppetti)
+  guardado  · 23 local · 22 visitante · 22 eventos
+
+Urú Curé Rugby Club M15 "B" vs Club Universitario de Córdoba M15 "B" · torneo-cordobes-m15-b · tarjeta 290991  ·  b75b1ae1-92f3-4e22-b394-3df29e76b588
+  local     · Urú Curé Rugby Club M15 "B" · 29 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba M15 "B" · 30 jugadores · 0 con ficha fijada
+  eventos   · 19
+    min  2 (1T 2) local     try          Matias Costa
+    min  5 (1T 5) visitante try          Tomas Meynet Jofre
+    min  7 (1T 7) local     try          Juan Sosa Cocco
+    min 18 (1T 18) visitante try          Geronimo Allende Peralta
+    min 21 (1T 21) local     try          Augusto Sosa Cocco
+    min 30 (1T 30) local     try          Matias Costa
+    min 49 (1T 49) local     try          Vicente Jose Crespo
+    min 52 (1T 52) local     try          Benicio Beron
+    min 52 (1T 52) local     conversion   Pedro Lovell
+    min 55 (1T 55) local     try          Francisco Marrero Las Heras
+    min 63 (1T 63) local     try          Valentino Di Marco
+    min 63 (1T 63) local     conversion   Facundo Rios Centeno
+    min 63 (1T 63) local     conversion   Facundo Rios Centeno
+    min 54 (2T 14) visitante try          Mateo Saieva Carunchio
+    min 54 (2T 14) local     try          Benicio Beron
+    min 54 (2T 14) local     conversion   Pedro Lovell
+    min 57 (2T 17) visitante try          Mateo Saieva Carunchio
+    min 57 (2T 17) visitante conversion   Geronimo Allende Peralta
+    min 75 (2T 35) visitante try          Benjamin Livio
+  marcador  · eventos 53-27 · guardado 53-27
+  tries     · 9-5 (guardado 9-5)
+  arbitro   · Emanuel Maldonado (guardado: Emanuel Maldonado)
+  guardado  · 29 local · 30 visitante · 19 eventos
+
+Baguales R.C. M15 "B" vs Tala Rugby Club M15 "C" · torneo-cordobes-m15-b · tarjeta 290996  ·  1a3f22f6-7974-4ed9-bf4e-2507a56b6e63
+  local     · Baguales R.C. M15 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M15 "C" · 23 jugadores · 0 con ficha fijada
+  eventos   · 34
+    min  1 (1T 1) local     conversion   Valentino Monticelli Cubero
+    min  1 (1T 1) local     try          Luciano Valentín Aguirre
+    min  5 (1T 5) local     card_yellow  Ciro Nicolas Bega
+    min  7 (1T 7) local     try          Nicolas Brandan
+    min  7 (1T 7) local     conversion   Valentino Monticelli Cubero
+    min 10 (1T 10) visitante try          Santiago Ortiz
+    min 17 (1T 17) local     try          Thiago Benjamin Fernandez Altamirano
+    min 17 (1T 17) local     conversion   Valentino Monticelli Cubero
+    min 22 (1T 22) visitante try          Santiago Ortiz
+    min 22 (1T 22) visitante conversion   Maximiliano Nicolas Navarro
+    min 24 (1T 24) local     try          Nicolas Brandan
+    min 25 (1T 25) local     substitution Ciro Nicolas Bega
+    min 30 (1T 30) local     substitution José María Bustillo
+    min 30 (1T 30) local     card_yellow  Ignacio Luna
+    min 32 (1T 32) visitante try          Santiago Ortiz
+    min 32 (1T 32) visitante conversion   Maximiliano Nicolas Navarro
+    min 35 (1T 35) visitante substitution Valentin Cardaci Brandan
+    min 35 (1T 35) visitante substitution Agostino Alfredo Arias
+    min 35 (1T 35) local     conversion   Valentino Monticelli Cubero
+    min 35 (1T 35) local     card_yellow  Valentino Monticelli Cubero
+    min 35 (1T 35) local     try          Nicolas Brandan
+    min 40 (2T 0) local     substitution Luciano Valentín Aguirre
+    min 41 (2T 1) visitante try          Bautista Diaz Cardeilhac
+    min 45 (2T 5) local     substitution Ignacio Luna
+    min 45 (2T 5) local     try          Joaquin Micolini Soratti
+    min 47 (2T 7) visitante card_yellow  Dante Vagheggini Bruno
+    min 54 (2T 14) local     conversion   Valentino Monticelli Cubero
+    min 54 (2T 14) local     try          Nicolas Brandan
+    min 58 (2T 18) visitante try          Juan Ignacio Rujinsky
+    min 58 (2T 18) visitante conversion   Maximiliano Nicolas Navarro
+    min 60 (2T 20) local     conversion   Nicolas Brandan
+    min 60 (2T 20) local     try          Matteo Baldovin
+    min 65 (2T 25) local     card_red     Valentino Monticelli Cubero
+    min 65 (2T 25) local     card_yellow  Valentino Monticelli Cubero
+  marcador  · eventos 52-31 · guardado 52-31
+  tries     · 8-5 (guardado 8-5)
+  arbitro   · Daniel Alejandro Funes (guardado: Daniel Alejandro Funes)
+  guardado  · 23 local · 23 visitante · 34 eventos
+
+Club Universitario de Córdoba M15 "B" vs Club La Tablada M15 "B" · torneo-cordobes-m15-b · tarjeta 290998  ·  54a5598f-4347-4383-b252-c7b024d6db0a
+  local     · Club Universitario de Córdoba M15 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M15 "B" · 24 jugadores · 0 con ficha fijada
+  eventos   · 36
+    min  1 (1T 1) visitante try          Ignacio Alzuarte
+    min  6 (1T 6) visitante try          Ignacio Alzuarte
+    min  6 (1T 6) visitante conversion   Joaquin Jofre
+    min  8 (1T 8) visitante try          Joaquin Jofre
+    min  9 (1T 9) visitante conversion   Valentin Auad
+    min 10 (1T 10) visitante try          Mateo Altamira
+    min 10 (1T 10) visitante conversion   Joaquin Jofre
+    min 18 (1T 18) visitante try          Valentin Auad
+    min 18 (1T 18) visitante conversion   Joaquin Jofre
+    min 23 (1T 23) visitante try          Franco Becher
+    min 23 (1T 23) visitante conversion   Valentin Auad
+    min 26 (1T 26) visitante conversion   Joaquin Jofre
+    min 26 (1T 26) visitante try          Franco Becher
+    min 29 (1T 29) visitante try          Ignacio Alzuarte
+    min 29 (1T 29) visitante conversion   Valentin Auad
+    min 34 (1T 34) visitante try          Guillermo Jose Nores
+    min 34 (1T 34) visitante conversion   Joaquin Jofre
+    min 41 (2T 1) visitante substitution Simon Tagle
+    min 41 (2T 1) visitante substitution Juan Bautista Araya Balbi
+    min 43 (2T 3) visitante substitution Mateo Altamira
+    min 43 (2T 3) visitante substitution Calixto De La Torre Cornet
+    min 43 (2T 3) visitante substitution Bruno Stenfer
+    min 43 (2T 3) visitante conversion   Joaquin Jofre
+    min 43 (2T 3) visitante try          Ignacio Alzuarte
+    min 48 (2T 8) visitante try          Genaro Ceballos
+    min 48 (2T 8) visitante conversion   Joaquin Jofre
+    min 49 (2T 9) visitante substitution Benjamin Tagle
+    min 49 (2T 9) visitante substitution Guillermo Jose Nores
+    min 58 (2T 18) local     try          Tomás Guerrero Cordoba
+    min 61 (2T 21) local     substitution Geronimo Villarreal
+    min 61 (2T 21) local     substitution Bautista Ariza Kurtzer
+    min 63 (2T 23) visitante substitution Pedro Jaime
+    min 67 (2T 27) visitante try          Genaro Ceballos
+    min 67 (2T 27) visitante conversion   Joaquin Jofre
+    min 70 (2T 30) local     card_yellow  Lorenzo Masera
+    min 70 (2T 30) visitante penalty_try  
+  marcador  · eventos 5-89 · guardado 5-89
+  tries     · 1-13 (guardado 1-13)
+  arbitro   · Francisco Pecchio (guardado: Francisco Pecchio)
+  guardado  · 23 local · 24 visitante · 36 eventos
+
+Córdoba Athletic Club M15 "B" vs Jockey Club Córdoba M15 "C" · torneo-cordobes-m15-b · tarjeta 290999  ·  6636ce6c-fb50-462f-b06c-bffaa70496bb
+  local     · Córdoba Athletic Club M15 "B" · 26 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M15 "C" · 23 jugadores · 0 con ficha fijada
+  eventos   · 28
+    min  4 (1T 4) local     conversion   Bautista Emanuel Gambra Macias
+    min  4 (1T 4) local     try          Benjamin Castellano
+    min  9 (1T 9) local     try          Benjamin Castellano
+    min  9 (1T 9) local     conversion   Bautista Emanuel Gambra Macias
+    min 16 (1T 16) local     try          Lisandro Gastón Esperon
+    min 22 (1T 22) local     try          Justino Castex
+    min 22 (1T 22) local     conversion   Bautista Emanuel Gambra Macias
+    min 24 (1T 24) local     try          Justino Castex
+    min 24 (1T 24) local     conversion   Bautista Emanuel Gambra Macias
+    min 27 (1T 27) local     substitution Salvador Dyntino
+    min 28 (1T 28) local     substitution Alejo Nicolas Tiano Lasso
+    min 28 (1T 28) local     try          Genaro Arana Montoro
+    min 34 (1T 34) local     try          Bautista Emanuel Gambra Macias
+    min 35 (1T 35) visitante substitution Geronimo Manuel Ponce
+    min 35 (1T 35) visitante substitution Francisco Diego Criado Urgorri
+    min 35 (1T 35) visitante substitution Vargas Alessio Lautaro
+    min 35 (1T 35) visitante substitution Matias Inaudi
+    min 35 (1T 35) local     substitution Genaro Arana Montoro
+    min 35 (1T 35) local     conversion   Bautista Emanuel Gambra Macias
+    min 35 (1T 35) local     substitution Benjamin Castellano
+    min 35 (1T 35) local     substitution Juan Sebastian Bossi
+    min 46 (2T 6) visitante try          Juan Ignacio Espinedo
+    min 50 (2T 10) local     substitution Franco Medina Paoletti
+    min 55 (2T 15) local     substitution Lisandro Gastón Esperon
+    min 60 (2T 20) visitante try          Tomás Bazan Soaje
+    min 60 (2T 20) visitante conversion   Pedro Francisco Sanchez Suarez
+    min 69 (2T 29) visitante try          Felipe Meyer
+    min 75 (2T 35) local     try          Lautaro Bourse
+  marcador  · eventos 50-17 · guardado 50-17
+  tries     · 8-3 (guardado 8-3)
+  arbitro   · Paula Alejandra Mingot (guardado: Paula Alejandra Mingot)
+  guardado  · 26 local · 23 visitante · 28 eventos
+
+Club Palermo Bajo M15 "B" vs Córdoba Rugby Club M15 "B" · torneo-cordobes-m15-b · tarjeta 291000  ·  f01b67c7-ade7-4ac5-ad7a-4ac606c59956
+  local     · Club Palermo Bajo M15 "B" · 30 jugadores · 0 con ficha fijada
+  visitante · Córdoba Rugby Club M15 "B" · 19 jugadores · 0 con ficha fijada
+  eventos   · 31
+    min  1 (1T 1) visitante try          Thiago Benjamin Berardi
+    min  3 (1T 3) visitante conversion   Thiago Benjamin Berardi
+    min  4 (1T 4) visitante try          Lautaro Nahuel Martinez
+    min  5 (1T 5) visitante conversion   Thiago Benjamin Berardi
+    min  6 (1T 6) local     try          Justino Vitto Feliciani
+    min 13 (1T 13) visitante try          Valentino Ropellatto
+    min 14 (1T 14) local     substitution Manuel Gomez
+    min 14 (1T 14) visitante conversion   Thiago Benjamin Berardi
+    min 15 (1T 15) visitante try          Leandro Martin Barboza Bilbao
+    min 16 (1T 16) visitante conversion   Thiago Benjamin Berardi
+    min 18 (1T 18) visitante try          Thiago Benjamin Berardi
+    min 21 (1T 21) local     substitution Khamil Omar Salum
+    min 21 (1T 21) visitante try          Thiago Benjamin Berardi
+    min 22 (1T 22) visitante conversion   Thiago Benjamin Berardi
+    min 23 (1T 23) local     substitution Joaquín Rebollo Monna
+    min 27 (1T 27) visitante try          Lautaro Nahuel Martinez
+    min 28 (1T 28) visitante conversion   Thiago Benjamin Berardi
+    min 35 (1T 35) local     substitution Ciro Benjamin Tomas
+    min 36 (1T 36) visitante try          Facundo Bortagaray Galla
+    min 45 (2T 5) visitante substitution Valentino Espinosa
+    min 45 (2T 5) visitante substitution Jeremias Koriakos
+    min 45 (2T 5) visitante substitution Mathías Lautaro Parma Caminos
+    min 45 (2T 5) visitante substitution Thiago Luciano Coronel
+    min 50 (2T 10) local     substitution Lautaro Moiso
+    min 60 (2T 20) visitante try          Valentino Ropellatto
+    min 62 (2T 22) visitante try          Valentino Ropellatto
+    min 63 (2T 23) visitante conversion   Thiago Benjamin Berardi
+    min 66 (2T 26) local     try          Enzo Gabriel Lujan
+    min 70 (2T 30) local     conversion   Benjamin Velez Delgado
+    min 70 (2T 30) local     try          Benjamin Velez Delgado
+    min 74 (2T 34) local     card_yellow  Enzo Gabriel Lujan
+  marcador  · eventos 17-64 · guardado 17-64
+  tries     · 3-10 (guardado 3-10)
+  arbitro   · Raúl Fernando Rodriguez Almada (guardado: Raúl Fernando Rodriguez Almada)
+  guardado  · 30 local · 19 visitante · 31 eventos
+
+Jockey Club Córdoba M15 "B" vs Alta Gracia R.C. M15 "B" · torneo-cordobes-m15-b · tarjeta 291001  ·  3596314c-e8a1-4edc-98c6-4f94a3e022a0
+  local     · Jockey Club Córdoba M15 "B" · 24 jugadores · 0 con ficha fijada
+  visitante · Alta Gracia R.C. M15 "B" · 18 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min  1 (1T 1) local     try          Juan Ignacio Gimenez
+    min  1 (1T 1) local     substitution Matias Inaudi
+    min  2 (1T 2) local     conversion   Juan Ignacio Gimenez
+    min  7 (1T 7) local     try          Pedro Albiero
+    min 10 (1T 10) visitante try          Fabrizio Martinez
+    min 13 (1T 13) local     try          Joaquin Antonio Pedernera Griffa
+    min 28 (1T 28) local     try          Isidro García Faure
+    min 35 (1T 35) local     substitution Bautista Brizuela
+    min 35 (1T 35) local     substitution Francisco Diego Criado Urgorri
+    min 37 (1T 37) local     substitution Lucio Melo Biagi
+    min 41 (2T 1) local     conversion   Juan Ignacio Gimenez
+    min 41 (2T 1) local     try          Isidro García Faure
+    min 49 (2T 9) local     try          Felipe Garcia Racigh
+    min 54 (2T 14) local     try          Juan Ignacio Gimenez
+    min 58 (2T 18) local     try          Mateo Buitrago Herrera
+    min 60 (2T 20) local     substitution Pedro Albiero
+    min 60 (2T 20) local     substitution Isidro García Faure
+    min 65 (2T 25) local     card_yellow  Augusto Cesar Borrini
+    min 72 (2T 32) visitante try          Joaquin Arrese
+    min 73 (2T 33) visitante conversion   Joaquin Arrese
+    min 75 (2T 35) visitante try          Francisco Mariano Pedernera
+    min 77 (2T 37) local     substitution Tomás Bazan Soaje
+  marcador  · eventos 44-17 · guardado 44-17
+  tries     · 8-3 (guardado 8-3)
+  arbitro   · Emanuel Maldonado (guardado: Emanuel Maldonado)
+  guardado  · 24 local · 18 visitante · 22 eventos
+
+Urú Curé Rugby Club M15 "B" vs Club Palermo Bajo M15 "B" · torneo-cordobes-m15-b · tarjeta 291004  ·  c399097b-81a6-47fb-ac01-b2d715ce2807
+  local     · Urú Curé Rugby Club M15 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo M15 "B" · 30 jugadores · 0 con ficha fijada
+  eventos   · 29
+    min 10 (1T 10) local     try          Benjamin Rodríguez Merenda
+    min 10 (1T 10) local     conversion   Juan Sosa Cocco
+    min 14 (1T 14) local     try          Vicente Jose Crespo
+    min 14 (1T 14) local     conversion   Juan Sosa Cocco
+    min 16 (1T 16) local     try          Aquiles Rivoira
+    min 16 (1T 16) local     conversion   Juan Sosa Cocco
+    min 18 (1T 18) local     try          Luciano Gentile Tallón
+    min 23 (1T 23) local     try          Juan Sosa Cocco
+    min 31 (1T 31) local     try          Juan Sosa Cocco
+    min 31 (1T 31) local     conversion   Juan Sosa Cocco
+    min 35 (1T 35) visitante try          Roko Sprljan
+    min 35 (1T 35) visitante conversion   Pedro Fiorenza
+    min 37 (1T 37) visitante try          Roko Sprljan
+    min 37 (1T 37) visitante conversion   Pedro Fiorenza
+    min 46 (2T 6) local     try          Aquiles Rivoira
+    min 46 (2T 6) local     conversion   Juan Sosa Cocco
+    min 50 (2T 10) local     try          Francisco Marrero Las Heras
+    min 60 (2T 20) visitante try          Pedro Fiorenza
+    min 60 (2T 20) visitante conversion   Pedro Fiorenza
+    min 65 (2T 25) visitante card_yellow  Roko Sprljan
+    min 66 (2T 26) visitante try          Gregorio Caffaratti Etchegoncelay
+    min 66 (2T 26) visitante conversion   Pedro Fiorenza
+    min 69 (2T 29) visitante try          Roko Sprljan
+    min 69 (2T 29) visitante conversion   Pedro Fiorenza
+    min 71 (2T 31) local     try          Benicio Beron
+    min 71 (2T 31) local     conversion   Juan Sosa Cocco
+    min 73 (2T 33) visitante try          Lucio Stritzke
+    min 73 (2T 33) visitante conversion   Pedro Fiorenza
+    min 73 (2T 33) local     card_yellow  Nicolás Balmaceda Pecorari
+  marcador  · eventos 57-42 · guardado 57-42
+  tries     · 9-6 (guardado 9-6)
+  arbitro   · Franco Coppetti (guardado: Franco Coppetti)
+  guardado  · 23 local · 30 visitante · 29 eventos
+
+Jockey Club Córdoba M15 "C" vs Club La Tablada M15 "C" · torneo-cordobes-m15-b · tarjeta 291007  ·  090a26cb-917d-4dc6-9a69-79b8b5ddd5b3
+  local     · Jockey Club Córdoba M15 "C" · 27 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M15 "C" · 30 jugadores · 0 con ficha fijada
+  eventos   · 21
+    min  5 (1T 5) visitante try          Ignacio Vasena Alonso
+    min  5 (1T 5) visitante conversion   Juan Ignacio Santillan
+    min  8 (1T 8) local     try          Francisco Diego Criado Urgorri
+    min 26 (1T 26) visitante try          Pedro Fada
+    min 29 (1T 29) visitante try          Felipe Ceballos
+    min 29 (1T 29) visitante conversion   Juan Ignacio Santillan
+    min 35 (1T 35) local     substitution Ignacio Juarez Bricca
+    min 35 (1T 35) local     substitution Felipe Massanet
+    min 35 (1T 35) local     substitution Geronimo Manuel Ponce
+    min 35 (1T 35) visitante try          Juan Ignacio Santillan
+    min 35 (1T 35) visitante conversion   Juan Ignacio Santillan
+    min 49 (2T 9) visitante try          Jeronimo Rinaldini
+    min 52 (2T 12) local     substitution Joaquin Antonio Pedernera Griffa
+    min 52 (2T 12) local     substitution Juan José Clariá Lauría
+    min 52 (2T 12) local     substitution Bautista Zaror Tagle
+    min 52 (2T 12) local     substitution Felipe Meyer
+    min 54 (2T 14) visitante try          Felipe Ceballos
+    min 54 (2T 14) visitante conversion   Matías Pascualini
+    min 70 (2T 30) local     substitution Bautista Brizuela
+    min 70 (2T 30) local     conversion   Antonio Jose Nores Navarro
+    min 70 (2T 30) local     try          Leandro Emiliano Rosales
+  marcador  · eventos 12-38 · guardado 12-38
+  tries     · 2-6 (guardado 2-6)
+  arbitro   · Francisco Pecchio (guardado: Francisco Pecchio)
+  guardado  · 27 local · 30 visitante · 21 eventos
+
+Club Palermo Bajo M15 "B" vs Club La Tablada M15 "B" · torneo-cordobes-m15-b · tarjeta 291008  ·  b8f25ca5-9779-404b-a344-8173eb44c12e
+  local     · Club Palermo Bajo M15 "B" · 30 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M15 "B" · 22 jugadores · 0 con ficha fijada
+  eventos   · 49
+    min  3 (1T 3) visitante try          Benjamin Tagle
+    min  4 (1T 4) visitante conversion   Joaquin Jofre
+    min  6 (1T 6) visitante try          Clemente Pignata
+    min  6 (1T 6) visitante conversion   Joaquin Jofre
+    min 15 (1T 15) visitante try          Francisco Jose Segovia
+    min 15 (1T 15) visitante conversion   Joaquin Jofre
+    min 18 (1T 18) visitante try          Ignacio Alzuarte
+    min 21 (1T 21) visitante try          Guillermo Jose Nores
+    min 21 (1T 21) visitante conversion   Joaquin Jofre
+    min 28 (1T 28) visitante try          Guillermo Jose Nores
+    min 28 (1T 28) visitante conversion   Joaquin Jofre
+    min 30 (1T 30) visitante try          Francisco Jose Segovia
+    min 31 (1T 31) visitante conversion   Joaquin Jofre
+    min 32 (1T 32) visitante try          Ignacio Vasena Alonso
+    min 33 (1T 33) visitante conversion   Joaquin Jofre
+    min 35 (1T 35) visitante try          Guillermo Jose Nores
+    min 35 (1T 35) visitante conversion   Joaquin Jofre
+    min 41 (2T 1) local     substitution Nicolas David Cazon
+    min 41 (2T 1) local     substitution Lautaro Moiso
+    min 41 (2T 1) visitante try          Ignacio Vasena Alonso
+    min 42 (2T 2) visitante try          Clemente Pignata
+    min 42 (2T 2) visitante conversion   Joaquin Jofre
+    min 44 (2T 4) visitante try          Ignacio Vasena Alonso
+    min 46 (2T 6) visitante substitution Guillermo Jose Nores
+    min 50 (2T 10) visitante try          Ignacio Vasena Alonso
+    min 51 (2T 11) visitante conversion   Joaquin Jofre
+    min 51 (2T 11) visitante substitution Ignacio Vasena Alonso
+    min 51 (2T 11) visitante substitution Juan Bautista Araya Balbi
+    min 51 (2T 11) visitante substitution Lisandro Imanol Parellada Ivanoff
+    min 51 (2T 11) visitante substitution Ignacio Alzuarte
+    min 53 (2T 13) visitante try          Pedro Jaime
+    min 53 (2T 13) visitante conversion   Simon Tagle
+    min 55 (2T 15) visitante substitution Clemente Pignata
+    min 55 (2T 15) visitante try          Jeronimo Fernandez De Maussion
+    min 55 (2T 15) visitante conversion   Simon Tagle
+    min 58 (2T 18) visitante try          Genaro Ceballos
+    min 58 (2T 18) visitante conversion   Simon Tagle
+    min 59 (2T 19) visitante try          Manuel Gonzalez
+    min 60 (2T 20) visitante conversion   Simon Tagle
+    min 61 (2T 21) visitante try          Manuel Gonzalez
+    min 62 (2T 22) local     substitution Maximo Lamas
+    min 62 (2T 22) local     substitution Benjamin Velez Delgado
+    min 62 (2T 22) local     substitution Juan Cruz Rico Taborda
+    min 62 (2T 22) local     substitution Santino Esteban Russo Ferrari
+    min 62 (2T 22) visitante conversion   Simon Tagle
+    min 68 (2T 28) visitante try          Simon Tagle
+    min 68 (2T 28) visitante conversion   Simon Tagle
+    min 71 (2T 31) visitante try          Felipe Ceballos
+    min 71 (2T 31) visitante conversion   Simon Tagle
+  marcador  · eventos 0-134 · guardado 0-134
+  tries     · 0-20 (guardado 0-20)
+  arbitro   · Francisco Pecchio (guardado: Francisco Pecchio)
+  guardado  · 30 local · 22 visitante · 49 eventos
+
+Club Universitario de Córdoba M15 "B" vs Jockey Club Córdoba M15 "B" · torneo-cordobes-m15-b · tarjeta 291009  ·  374a830f-b672-40db-982e-934ba8414f95
+  local     · Club Universitario de Córdoba M15 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M15 "B" · 21 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min 23 (1T 23) visitante try          Santiago Aguirre Miranda
+    min 34 (1T 34) local     card_yellow  Leon Zurita
+    min 35 (1T 35) visitante try          Felipe Panero Castillo
+    min 35 (1T 35) visitante substitution Felipe Massanet
+    min 35 (1T 35) visitante substitution Ciro San Millán
+    min 35 (1T 35) visitante conversion   Facundo Ramos Martínez
+    min 42 (2T 2) visitante try          Felipe Meyer
+    min 47 (2T 7) visitante try          Felipe Meyer
+    min 49 (2T 9) visitante substitution Lucas Nahuel Davalos
+    min 52 (2T 12) local     substitution Enzo Dauria Alarcon
+    min 58 (2T 18) local     substitution Karim Antoun
+    min 62 (2T 22) visitante try          Santino Nicolás Genesio Molinar
+    min 62 (2T 22) visitante substitution Facundo Ramos Martínez
+    min 65 (2T 25) visitante substitution Santiago Aguirre Miranda
+    min 67 (2T 27) visitante try          Santino Nicolás Genesio Molinar
+    min 70 (2T 30) local     try          Benjamin Livio
+    min 70 (2T 30) local     conversion   Benjamin Livio
+  marcador  · eventos 7-32 · guardado 7-32
+  tries     · 1-6 (guardado 1-6)
+  arbitro   · Paula Alejandra Mingot (guardado: Paula Alejandra Mingot)
+  guardado  · 23 local · 21 visitante · 17 eventos
+
+Córdoba Athletic Club M15 "B" vs San Francisco R.C. M15 "B" · torneo-cordobes-m15-b · tarjeta 291010  ·  2294606d-c3fc-4004-bf86-57be2ff298f9
+  local     · Córdoba Athletic Club M15 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · San Francisco R.C. M15 "B" · 19 jugadores · 0 con ficha fijada
+  eventos   · 36
+    min 11 (1T 11) local     try          Benjamin Castellano
+    min 19 (1T 19) visitante try          Emiliano Fraga
+    min 19 (1T 19) visitante conversion   Emiliano Fraga
+    min 22 (1T 22) local     try          Pedro Bas
+    min 22 (1T 22) local     conversion   Bautista Emanuel Gambra Macias
+    min 25 (1T 25) visitante substitution Samuel Velásquez Reyes
+    min 25 (1T 25) local     try          Lisandro Herrera Avila
+    min 25 (1T 25) local     conversion   Bautista Emanuel Gambra Macias
+    min 27 (1T 27) local     conversion   Bautista Emanuel Gambra Macias
+    min 27 (1T 27) local     try          Pedro Bas
+    min 34 (1T 34) local     try          Maximo Gabazzi
+    min 34 (1T 34) local     conversion   Bautista Emanuel Gambra Macias
+    min 40 (2T 0) visitante substitution Pedro Morano
+    min 40 (2T 0) visitante substitution Felipe Codini
+    min 45 (2T 5) local     substitution Agustin Ceballos Alaniz
+    min 46 (2T 6) local     try          Salvador Collino
+    min 48 (2T 8) local     try          Pedro Bas
+    min 48 (2T 8) local     conversion   Juan Sebastian Bossi
+    min 51 (2T 11) local     try          Benjamin Castellano
+    min 52 (2T 12) local     substitution Santos Bastián Celli
+    min 53 (2T 13) local     substitution Benjamin Castellano
+    min 53 (2T 13) local     substitution Nicholas Echavarria
+    min 53 (2T 13) local     try          Facundo Duarte Febre
+    min 53 (2T 13) local     conversion   Bautista Emanuel Gambra Macias
+    min 56 (2T 16) local     substitution Felipe Bisbal
+    min 56 (2T 16) local     try          Maximo Gabazzi
+    min 56 (2T 16) local     substitution Juan Sebastian Bossi
+    min 56 (2T 16) local     substitution Maximo Gabazzi
+    min 56 (2T 16) local     substitution Lautaro Bourse
+    min 60 (2T 20) visitante try          Pedro Gabriel Tamayo Cajaleón
+    min 60 (2T 20) visitante conversion   Emiliano Fraga
+    min 60 (2T 20) visitante substitution Thiago Nicolas Merlo
+    min 62 (2T 22) local     try          Facundo Duarte Febre
+    min 65 (2T 25) local     try          Facundo Duarte Febre
+    min 68 (2T 28) visitante try          Emiliano Fraga
+    min 68 (2T 28) visitante conversion   Emiliano Fraga
+  marcador  · eventos 72-21 · guardado 72-21
+  tries     · 12-3 (guardado 12-3)
+  arbitro   · Raúl Fernando Rodriguez Almada (guardado: Raúl Fernando Rodriguez Almada)
+  guardado  · 23 local · 19 visitante · 36 eventos
+
+Jockey Club Córdoba M15 "C" vs Urú Curé Rugby Club M15 "B" · torneo-cordobes-m15-b · tarjeta 291011  ·  e72c2d7b-ff39-4ce1-94f7-aabdd2c9eb01
+  local     · Jockey Club Córdoba M15 "C" · 23 jugadores · 0 con ficha fijada
+  visitante · Urú Curé Rugby Club M15 "B" · 20 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min  1 (1T 1) visitante substitution Pedro Lovell
+    min  4 (1T 4) visitante try          Juan Sosa Cocco
+    min 12 (1T 12) local     try          Felipe Poderti
+    min 20 (1T 20) local     try          Felipe Meyer
+    min 20 (1T 20) local     conversion   Antonio Jose Nores Navarro
+    min 30 (1T 30) local     try          Felipe Meyer
+    min 30 (1T 30) local     conversion   Antonio Jose Nores Navarro
+    min 34 (1T 34) local     penalty_goal Antonio Jose Nores Navarro
+    min 48 (2T 8) visitante substitution José Octavio Perna
+    min 55 (2T 15) visitante substitution Luciano Gentile Tallón
+    min 55 (2T 15) visitante substitution Benicio Beron
+    min 55 (2T 15) visitante substitution Juan Nazareno Godoy Bessone
+    min 67 (2T 27) visitante try          Matias Costa
+    min 69 (2T 29) visitante try          Juan Cruz Lino
+    min 71 (2T 31) visitante try          Nicolás Balmaceda Pecorari
+    min 71 (2T 31) visitante conversion   Juan Sosa Cocco
+    min 76 (2T 36) local     substitution Felipe Poderti
+    min 76 (2T 36) local     substitution Ignacio Juarez Bricca
+    min 76 (2T 36) local     substitution Juan José Clariá Lauría
+    min 76 (2T 36) local     substitution Felipe Meyer
+  marcador  · eventos 22-22 · guardado 22-22
+  tries     · 3-4 (guardado 3-4)
+  arbitro   · Javier Menne . (No Oficial) (guardado: Javier Menne . (No Oficial))
+  guardado  · 23 local · 20 visitante · 20 eventos
+
+Baguales R.C. M15 "B" vs Club La Tablada M15 "C" · torneo-cordobes-m15-b · tarjeta 291013  ·  f9c09190-ad56-4d0e-a989-3df82f786d4c
+  local     · Baguales R.C. M15 "B" · 25 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M15 "C" · 24 jugadores · 0 con ficha fijada
+  eventos   · 13
+    min  1 (1T 1) visitante try          Joaquin Martinez Piñero
+    min  1 (1T 1) visitante conversion   Juan Martin Fernandez
+    min  5 (1T 5) visitante try          Daniel Antonio Zilberberg Mirman
+    min 12 (1T 12) local     try          Nicolas Brandan
+    min 17 (1T 17) visitante try          Juan Martin Fernandez
+    min 25 (1T 25) visitante try          Juan Martin Fernandez
+    min 25 (1T 25) visitante conversion   Benjamin Castellari
+    min 33 (1T 33) local     try          Joaquin Micolini Soratti
+    min 55 (2T 15) visitante try          Julio Francisco Aliaga Moyano
+    min 55 (2T 15) visitante conversion   Joaquin Martinez Piñero
+    min 67 (2T 27) local     card_yellow  Valentino Monticelli Cubero
+    min 78 (2T 38) local     try          Luciano Valentín Aguirre
+    min 78 (2T 38) local     conversion   Valentino Monticelli Cubero
+  marcador  · eventos 17-31 · guardado 17-31
+  tries     · 3-5 (guardado 3-5)
+  arbitro   · Franco Coppetti (guardado: Franco Coppetti)
+  guardado  · 25 local · 24 visitante · 13 eventos
+
+Tala Rugby Club M15 "B" vs Jockey Club Córdoba M15 "B" · torneo-cordobes-m15-b · tarjeta 291015  ·  6b02e7a8-b7f5-47cf-b333-21762c5b5af7
+  local     · Tala Rugby Club M15 "B" · 25 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M15 "B" · 24 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min  5 (1T 5) visitante conversion   Facundo Ramos Martínez
+    min  5 (1T 5) visitante try          Pedro Heredia
+    min 11 (1T 11) visitante substitution Benjamin Krumm
+    min 21 (1T 21) visitante try          Felipe Poderti
+    min 21 (1T 21) visitante conversion   Facundo Ramos Martínez
+    min 24 (1T 24) local     try          Juan Cruz Rivero Villarroel
+    min 41 (2T 1) visitante substitution Felipe Poderti
+    min 41 (2T 1) visitante substitution Juan Ignacio Tapia
+    min 42 (2T 2) local     try          Juan Sebastian Romero Ramacciotti
+    min 45 (2T 5) visitante substitution Octavio Ferrer Mendieta
+    min 50 (2T 10) visitante substitution Matias Rubi Arcurio
+    min 56 (2T 16) visitante conversion   Facundo Ramos Martínez
+    min 56 (2T 16) visitante try          Pedro Heredia
+    min 63 (2T 23) local     card_yellow  Francisco Lo Celso Carballo
+    min 64 (2T 24) visitante conversion   Facundo Ramos Martínez
+    min 64 (2T 24) visitante try          Salvador Ceballos
+    min 65 (2T 25) visitante substitution Felipe Poderti
+    min 65 (2T 25) visitante substitution Felipe Panero Castillo
+    min 72 (2T 32) visitante conversion   Facundo Ramos Martínez
+    min 72 (2T 32) visitante try          Lucas Nahuel Davalos
+  marcador  · eventos 10-35 · guardado 10-35
+  tries     · 2-5 (guardado 2-5)
+  arbitro   · Isaias Sergio Ignacio Ponce (guardado: Isaias Sergio Ignacio Ponce)
+  guardado  · 25 local · 24 visitante · 20 eventos
+
+Club Palermo Bajo M15 "B" vs San Francisco R.C. M15 "B" · torneo-cordobes-m15-b · tarjeta 291016  ·  f51223e1-f287-4023-aa4b-4b9ed3f37c2e
+  local     · Club Palermo Bajo M15 "B" · 28 jugadores · 0 con ficha fijada
+  visitante · San Francisco R.C. M15 "B" · 20 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min  1 (1T 1) visitante try          Emiliano Fraga
+    min 14 (1T 14) visitante try          Valentino Pellini
+    min 14 (1T 14) visitante conversion   Emiliano Fraga
+    min 18 (1T 18) visitante try          Pedro Gabriel Tamayo Cajaleón
+    min 18 (1T 18) visitante conversion   Emiliano Fraga
+    min 23 (1T 23) visitante try          Francisco Ortega
+    min 26 (1T 26) visitante try          Francisco Ortega
+    min 26 (1T 26) visitante conversion   Emiliano Fraga
+    min 31 (1T 31) visitante try          Emiliano Fraga
+    min 31 (1T 31) visitante conversion   Emiliano Fraga
+    min 33 (1T 33) visitante try          Joaquin Jesús Ortiz Esposito
+    min 33 (1T 33) visitante conversion   Emiliano Fraga
+    min 41 (2T 1) visitante try          Valentino Pellini
+    min 41 (2T 1) visitante conversion   Emiliano Fraga
+    min 47 (2T 7) local     try          Roko Sprljan
+    min 49 (2T 9) visitante try          Pedro Gabriel Tamayo Cajaleón
+    min 49 (2T 9) visitante substitution Valentino Roldan
+    min 49 (2T 9) visitante substitution Álvaro Santino Cejas
+    min 53 (2T 13) visitante substitution Felipe Codini
+    min 55 (2T 15) visitante card_yellow  Pedro Gabriel Tamayo Cajaleón
+    min 58 (2T 18) local     try          Santino Abel Martinez
+    min 58 (2T 18) local     conversion   Matías Vera
+    min 68 (2T 28) visitante card_yellow  Valentino Pellini
+    min 72 (2T 32) visitante try          Pedro Gabriel Tamayo Cajaleón
+    min 72 (2T 32) visitante conversion   Emiliano Fraga
+  marcador  · eventos 12-64 · guardado 12-64
+  tries     · 2-10 (guardado 2-10)
+  arbitro   · Carlos Altobelli (guardado: Carlos Altobelli)
+  guardado  · 28 local · 20 visitante · 25 eventos
+
+Tala Rugby Club M15 "C" vs Club La Tablada M15 "B" · torneo-cordobes-m15-b · tarjeta 291017  ·  bbb622e5-a178-4eb2-9b55-7c96fb40985d
+  local     · Tala Rugby Club M15 "C" · 30 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M15 "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 39
+    min  8 (1T 8) visitante try          Constancio Rosso
+    min  9 (1T 9) visitante conversion   Joaquin Jofre
+    min 14 (1T 14) visitante conversion   Joaquin Jofre
+    min 14 (1T 14) visitante try          Manuel Gonzalez
+    min 16 (1T 16) visitante try          Manuel Garcia Cortes
+    min 17 (1T 17) visitante conversion   Joaquin Jofre
+    min 24 (1T 24) visitante conversion   Joaquin Jofre
+    min 24 (1T 24) visitante try          Constancio Rosso
+    min 28 (1T 28) local     injury       Jano Bautista Plutman
+    min 28 (1T 28) visitante try          Octavio Gambino
+    min 29 (1T 29) visitante conversion   Joaquin Jofre
+    min 36 (1T 36) visitante try          Octavio Gambino
+    min 41 (2T 1) local     substitution Nahuel Marcos Madrid
+    min 41 (2T 1) local     substitution Bautista Altamirano
+    min 44 (2T 4) visitante conversion   Joaquin Jofre
+    min 44 (2T 4) visitante try          Guillermo Jose Nores
+    min 45 (2T 5) visitante substitution Pedro Jaime
+    min 50 (2T 10) visitante try          Constancio Rosso
+    min 50 (2T 10) visitante substitution Jeronimo Fernandez De Maussion
+    min 50 (2T 10) visitante substitution Simon Tagle
+    min 50 (2T 10) visitante substitution Salvador Andreone
+    min 50 (2T 10) visitante substitution Valentino Cura Tey
+    min 53 (2T 13) visitante try          Genaro Ceballos
+    min 54 (2T 14) visitante conversion   Joaquin Jofre
+    min 55 (2T 15) visitante substitution Manuel Garcia Cortes
+    min 58 (2T 18) visitante try          Constancio Rosso
+    min 59 (2T 19) visitante conversion   Joaquin Jofre
+    min 60 (2T 20) local     substitution Juan Ignacio Capitán Maccio
+    min 60 (2T 20) local     substitution Lisandro Salvador Ledesma Palavecino
+    min 60 (2T 20) local     substitution Rafael Silva Nourikhan
+    min 63 (2T 23) visitante try          Constancio Rosso
+    min 66 (2T 26) visitante try          Juan Pedro Cmet
+    min 67 (2T 27) visitante conversion   Joaquin Jofre
+    min 69 (2T 29) visitante try          Joaquin Jofre
+    min 70 (2T 30) local     card_yellow  Juan Ignacio Rujinsky
+    min 70 (2T 30) visitante conversion   Joaquin Jofre
+    min 75 (2T 35) visitante card_yellow  Constancio Rosso
+    min 75 (2T 35) visitante try          Juan Martin Fernandez
+    min 75 (2T 35) visitante conversion   Joaquin Jofre
+  marcador  · eventos 0-92 · guardado 0-92
+  tries     · 0-14 (guardado 0-14)
+  arbitro   · Pablo Daniel Dionicio Benitez (guardado: Pablo Daniel Dionicio Benitez)
+  guardado  · 30 local · 23 visitante · 39 eventos
+
+Baguales R.C. M15 "B" vs Jockey Club Córdoba M15 "C" · torneo-cordobes-m15-b · tarjeta 291019  ·  981824f7-68d8-46b6-b1b8-8ff2d9674bf0
+  local     · Baguales R.C. M15 "B" · 25 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M15 "C" · 25 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min  7 (1T 7) local     try          Facundo Massa
+    min  7 (1T 7) local     conversion   Valentino Monticelli Cubero
+    min  9 (1T 9) local     try          Juan Segundo Tanco Gariglio
+    min 15 (1T 15) visitante try          Lucas Nahuel Davalos
+    min 21 (1T 21) local     try          Luciano Valentín Aguirre
+    min 21 (1T 21) local     conversion   Valentino Monticelli Cubero
+    min 31 (1T 31) local     try          Joaquin Micolini Soratti
+    min 31 (1T 31) local     conversion   Valentino Monticelli Cubero
+    min 40 (2T 0) local     substitution Benjamin Ignacio Carreon
+    min 40 (2T 0) local     substitution Thiago Luberchi
+    min 40 (2T 0) local     substitution Emilio Prosdocimo
+    min 42 (2T 2) local     try          Valentino Monticelli Cubero
+    min 59 (2T 19) visitante try          Felipe Meyer
+    min 59 (2T 19) visitante conversion   Antonio Jose Nores Navarro
+    min 68 (2T 28) visitante try          Lucas Nahuel Davalos
+    min 68 (2T 28) visitante conversion   Antonio Jose Nores Navarro
+    min 68 (2T 28) visitante substitution Agustín Orthusteguy
+  marcador  · eventos 31-19 · guardado 31-19
+  tries     · 5-3 (guardado —-—)
+  arbitro   · Carlos Rafael Hernandez (guardado: —)
+  guardado  · 25 local · 25 visitante · 17 eventos
+
+Club La Tablada M15 "B" vs San Francisco R.C. M15 "B" · torneo-cordobes-m15-b · tarjeta 291023  ·  d0a10e98-005c-40f9-bee0-578866c5e610
+  local     · Club La Tablada M15 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · San Francisco R.C. M15 "B" · 18 jugadores · 0 con ficha fijada
+  eventos   · 31
+    min  2 (1T 2) local     try          Lisandro Imanol Parellada Ivanoff
+    min  3 (1T 3) local     conversion   Joaquin Jofre
+    min 10 (1T 10) local     try          Mateo Altamira
+    min 11 (1T 11) local     conversion   Joaquin Jofre
+    min 14 (1T 14) local     try          Lisandro Imanol Parellada Ivanoff
+    min 15 (1T 15) local     conversion   Joaquin Jofre
+    min 18 (1T 18) local     try          Juan Pedro Cmet
+    min 19 (1T 19) local     conversion   Joaquin Jofre
+    min 22 (1T 22) local     try          Clemente Pignata
+    min 23 (1T 23) local     conversion   Joaquin Jofre
+    min 26 (1T 26) local     try          Baltazar Ignacio Campana
+    min 27 (1T 27) local     conversion   Joaquin Jofre
+    min 30 (1T 30) local     substitution Mateo Altamira
+    min 30 (1T 30) local     try          Constancio Rosso
+    min 31 (1T 31) local     conversion   Joaquin Jofre
+    min 32 (1T 32) local     try          Jeronimo Fernandez De Maussion
+    min 32 (1T 32) local     conversion   Joaquin Jofre
+    min 40 (2T 0) local     substitution Clemente Pignata
+    min 40 (2T 0) local     substitution Valentino Cura Tey
+    min 40 (2T 0) local     substitution Juan Pedro Cmet
+    min 40 (2T 0) local     substitution Juan Bautista Araya Balbi
+    min 42 (2T 2) local     conversion   Joaquin Jofre
+    min 42 (2T 2) local     try          Constancio Rosso
+    min 45 (2T 5) local     substitution Constancio Rosso
+    min 50 (2T 10) local     substitution Ignacio Alzuarte
+    min 52 (2T 12) local     try          Ignacio Alzuarte
+    min 55 (2T 15) local     try          Juan Bautista Araya Balbi
+    min 55 (2T 15) local     conversion   Joaquin Jofre
+    min 56 (2T 16) local     try          Francisco Aznarez Bedoya
+    min 60 (2T 20) local     substitution Lisandro Imanol Parellada Ivanoff
+    min 67 (2T 27) local     try          Simon Tagle
+  marcador  · eventos 85-0 · guardado 85-0
+  tries     · 13-0 (guardado —-—)
+  arbitro   · Emanuel Maldonado (guardado: —)
+  guardado  · 23 local · 18 visitante · 31 eventos
+
+Jockey Club Córdoba M15 "C" vs Baguales R.C. M15 "B" · torneo-cordobes-m15-b · tarjeta 291024  ·  946a5081-2581-48d9-bc74-c91860d1a48a
+  local     · Jockey Club Córdoba M15 "C" · 21 jugadores · 0 con ficha fijada
+  visitante · Baguales R.C. M15 "B" · 25 jugadores · 0 con ficha fijada
+  eventos   · 21
+    min  5 (1T 5) local     try          Mateo Buitrago Herrera
+    min 13 (1T 13) visitante try          Thiago Benjamin Fernandez Altamirano
+    min 16 (1T 16) local     try          Santiago Agustín Ludueña
+    min 16 (1T 16) local     conversion   Antonio Jose Nores Navarro
+    min 16 (1T 16) local     try          Mateo Buitrago Herrera
+    min 16 (1T 16) local     conversion   Antonio Jose Nores Navarro
+    min 29 (1T 29) local     try          Pedro Heredia
+    min 40 (2T 0) visitante substitution Ciro Nicolas Bega
+    min 40 (2T 0) visitante substitution Francisco Alvarenga
+    min 43 (2T 3) local     substitution Ignacio Juarez Bricca
+    min 43 (2T 3) local     substitution Ignacio Luna Vallania
+    min 49 (2T 9) local     conversion   Antonio Jose Nores Navarro
+    min 49 (2T 9) local     try          Isidro García Faure
+    min 50 (2T 10) visitante try          Joaquin Micolini Soratti
+    min 50 (2T 10) visitante conversion   Thiago Luberchi
+    min 50 (2T 10) local     substitution Tomas Drenkard
+    min 50 (2T 10) local     substitution Branko Emanuel Lupiañez Heyd
+    min 55 (2T 15) visitante try          José María Bustillo
+    min 55 (2T 15) visitante conversion   Jose Octavio Pereira Tottis
+    min 68 (2T 28) local     substitution Agustín Orthusteguy
+    min 70 (2T 30) local     penalty_goal Antonio Jose Nores Navarro
+  marcador  · eventos 34-19 · guardado 34-19
+  tries     · 5-3 (guardado —-—)
+  arbitro   · Héctor Marcelo Villarroel (guardado: —)
+  guardado  · 21 local · 25 visitante · 21 eventos
+
+Tala Rugby Club M15 "C" vs Club La Tablada M15 "C" · torneo-cordobes-m15-b · tarjeta 291026  ·  2cc3aba7-2635-4aa0-880d-3a77d900b20d
+  local     · Tala Rugby Club M15 "C" · 26 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M15 "C" · 26 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min 13 (1T 13) visitante conversion   Juan Ignacio Santillan
+    min 13 (1T 13) visitante try          Genaro Ceballos
+    min 20 (1T 20) local     conversion   Gregorio Ramos
+    min 20 (1T 20) local     try          Benjamin Sufe Bosco
+    min 27 (1T 27) visitante try          Francisco Aznarez Bedoya
+    min 40 (2T 0) local     substitution Tomas Iaria
+    min 40 (2T 0) local     substitution Santiago Ciceri
+    min 41 (2T 1) visitante substitution Santiago Girardi
+    min 41 (2T 1) visitante substitution Nicolas Miranda Del Valle
+    min 41 (2T 1) visitante substitution Jeronimo Rinaldini
+    min 41 (2T 1) visitante substitution Genaro Ceballos
+    min 41 (2T 1) visitante substitution Salvador Tey
+    min 45 (2T 5) local     substitution Gregorio Ramos
+    min 51 (2T 11) visitante try          Felipe Galindez
+    min 51 (2T 11) visitante conversion   Leon Bautista Moudjoukian
+    min 51 (2T 11) visitante injury       Felipe Galindez
+    min 52 (2T 12) visitante injury       Juan Martin Fernandez
+    min 69 (2T 29) local     try          Tomas Salvador Alvarez
+    min 69 (2T 29) local     conversion   Tomas Salvador Alvarez
+    min 74 (2T 34) local     try          Baltazar Panella
+    min 74 (2T 34) local     conversion   Tomas Salvador Alvarez
+    min 75 (2T 35) local     substitution Juan Cruz Marchetti
+    min 75 (2T 35) local     substitution Tomas Adriel Aguero Bruno
+    min 75 (2T 35) local     substitution Lautaro Casado
+    min 75 (2T 35) local     substitution Juan Ignacio Capitán Maccio
+  marcador  · eventos 21-19 · guardado 21-19
+  tries     · 3-3 (guardado —-—)
+  arbitro   · Designacion Local . (No Oficial) (guardado: —)
+  guardado  · 26 local · 26 visitante · 25 eventos
+
+Club Universitario de Córdoba M15 "B" vs Club Palermo Bajo M15 "B" · torneo-cordobes-m15-b · tarjeta 297230  ·  ca6626e2-83e3-4d66-a713-ad94b8f2b3ef
+  local     · Club Universitario de Córdoba M15 "B" · 29 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo M15 "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min  4 (1T 4) visitante try          Ivan Moreno Gómez
+    min  9 (1T 9) local     conversion   Geronimo Allende Peralta
+    min  9 (1T 9) local     try          Francisco Garbero
+    min 13 (1T 13) visitante try          Lucio Stritzke
+    min 18 (1T 18) visitante substitution Nicolas David Cazon
+    min 18 (1T 18) visitante substitution Manuel Gomez
+    min 28 (1T 28) local     try          Jerónimo Sandin
+    min 28 (1T 28) local     conversion   Geronimo Allende Peralta
+    min 28 (1T 28) visitante substitution Elias Misael Robledo Arrascaeta
+    min 32 (1T 32) local     try          Francisco Garbero
+    min 32 (1T 32) local     conversion   Geronimo Allende Peralta
+    min 35 (1T 35) visitante substitution Santino Abel Martinez
+    min 45 (2T 5) local     substitution Enzo Dauria Alarcon
+    min 45 (2T 5) local     substitution Santiago Gabriel Barbosa
+    min 46 (2T 6) local     substitution Francisco Garbero
+    min 47 (2T 7) visitante substitution Juan Cruz Dura
+    min 50 (2T 10) local     substitution Benjamin Livio
+    min 52 (2T 12) local     conversion   Geronimo Allende Peralta
+    min 52 (2T 12) local     try          Francisco Garbero
+    min 55 (2T 15) local     substitution Jerónimo Sandin
+    min 55 (2T 15) local     substitution Bautista Ale Vergara
+    min 57 (2T 17) local     conversion   Geronimo Allende Peralta
+    min 57 (2T 17) local     try          Karim Antoun
+    min 68 (2T 28) visitante card_yellow  Gregorio Martín Ieugeniuk
+    min 68 (2T 28) local     try          Geronimo Allende Peralta
+    min 70 (2T 30) local     try          Karim Antoun
+    min 70 (2T 30) local     conversion   Geronimo Allende Peralta
+  marcador  · eventos 47-10 · guardado 47-10
+  tries     · 7-2 (guardado —-—)
+  arbitro   · Emanuel Maldonado (guardado: —)
+  guardado  · 29 local · 23 visitante · 27 eventos
+
+Jockey Club Córdoba M15 "C" vs Córdoba Rugby Club M15 "B" · torneo-cordobes-m15-b · tarjeta 306981  ·  ecb68260-5898-4111-86f1-c5a33ea8d579
+  local     · Jockey Club Córdoba M15 "C" · 29 jugadores · 0 con ficha fijada
+  visitante · Córdoba Rugby Club M15 "B" · 18 jugadores · 0 con ficha fijada
+  eventos   · 26
+    min 31 (1T 31) visitante try          Valentino Ropellatto
+    min 32 (1T 32) visitante conversion   Thiago Benjamin Berardi
+    min 35 (1T 35) local     try          Felipe Santacroce
+    min 35 (1T 35) local     substitution Lorenzo Sastre
+    min 46 (1T 46) local     substitution Luca Valentin Regueiro Lascano
+    min 46 (1T 46) local     substitution Antonio Jose Nores Navarro
+    min 50 (1T 50) local     substitution Felipe Santacroce
+    min 53 (1T 53) local     substitution Vicente Ribero De Olmos
+    min 54 (1T 54) local     substitution Felipe Garcia Racigh
+    min 54 (1T 54) local     substitution Santino Nicolás Genesio Molinar
+    min 60 (1T 60) local     substitution Santiago Agustín Ludueña
+    min 48 (2T 8) visitante try          Mathías Lautaro Parma Caminos
+    min 49 (2T 9) visitante conversion   Thiago Benjamin Berardi
+    min 54 (2T 14) visitante substitution Angel Matias Gomez Mendez
+    min 54 (2T 14) visitante substitution Valentino Espinosa
+    min 54 (2T 14) visitante try          Valentino Ropellatto
+    min 55 (2T 15) visitante conversion   Thiago Benjamin Berardi
+    min 59 (2T 19) visitante try          Thiago Benjamin Berardi
+    min 60 (2T 20) visitante conversion   Thiago Benjamin Berardi
+    min 64 (2T 24) visitante try          Salvador Bortagaray
+    min 69 (2T 29) visitante try          Leandro Martin Barboza Bilbao
+    min 70 (2T 30) visitante conversion   Thiago Benjamin Berardi
+    min 71 (2T 31) visitante try          Mathías Lautaro Parma Caminos
+    min 72 (2T 32) visitante conversion   Thiago Benjamin Berardi
+    min 74 (2T 34) visitante try          Lautaro Nahuel Martinez
+    min 75 (2T 35) visitante conversion   Thiago Benjamin Berardi
+  marcador  · eventos 5-54 · guardado 5-54
+  tries     · 1-8 (guardado —-—)
+  arbitro   · Alejandro Martin Ceballos (guardado: —)
+  guardado  · 29 local · 18 visitante · 26 eventos
+
+Alta Gracia R.C. M15 "B" vs Córdoba Rugby Club M15 "B" · torneo-cordobes-m15-b · tarjeta 310319  ·  080cbaaa-38a8-4e0c-8b16-5861a3b7aaa4
+  local     · Alta Gracia R.C. M15 "B" · 18 jugadores · 0 con ficha fijada
+  visitante · Córdoba Rugby Club M15 "B" · 19 jugadores · 0 con ficha fijada
+  eventos   · 12
+    min  7 (1T 7) visitante try          Benjamín Gomez Lardone
+    min 11 (1T 11) local     try          Francisco Mariano Pedernera
+    min 25 (1T 25) local     try          Francisco Mariano Pedernera
+    min 27 (1T 27) visitante try          Jarek Mateo Skrzypek
+    min 35 (1T 35) visitante try          Valentino Ropellatto
+    min 41 (2T 1) visitante try          Thiago Benjamin Berardi
+    min 49 (2T 9) visitante try          Lorenzo Curtino Severini
+    min 62 (2T 22) visitante try          Jarek Mateo Skrzypek
+    min 65 (2T 25) local     injury       Francisco Mariano Pedernera
+    min 65 (2T 25) local     injury       Tiziano Mazzochi
+    min 75 (2T 35) visitante try          Lautaro Nahuel Martinez
+    min 75 (2T 35) visitante conversion   Lautaro Nahuel Martinez
+  marcador  · eventos 10-37 · guardado 10-37
+  tries     · 2-7 (guardado —-—)
+  arbitro   · Santiago Herrera Albano 47173507 (No Oficial) (guardado: —)
+  guardado  · 18 local · 19 visitante · 12 eventos
+
+San Francisco R.C. M15 "B" vs Jockey Club Córdoba M15 "B" · torneo-cordobes-m15-b · tarjeta 313099  ·  68c55fa8-4e57-4d84-a3d1-fd2a8438834d
+  local     · San Francisco R.C. M15 "B" · 21 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M15 "B" · 19 jugadores · 0 con ficha fijada
+  eventos   · 35
+    min  5 (1T 5) local     conversion   Emiliano Fraga
+    min  5 (1T 5) local     try          Emiliano Fraga
+    min  8 (1T 8) visitante conversion   Santiago Aguirre Miranda
+    min  8 (1T 8) visitante try          Felipe Meyer
+    min 11 (1T 11) visitante try          Matias Rubi Arcurio
+    min 14 (1T 14) visitante try          Felipe Meyer
+    min 14 (1T 14) visitante conversion   Santiago Aguirre Miranda
+    min 18 (1T 18) local     try          Pedro Gabriel Tamayo Cajaleón
+    min 18 (1T 18) local     conversion   Emiliano Fraga
+    min 22 (1T 22) local     substitution Bautista Lamberti
+    min 22 (1T 22) visitante try          Felipe Meyer
+    min 22 (1T 22) visitante conversion   Santiago Aguirre Miranda
+    min 26 (1T 26) local     try          Salvador Luciano Gómez
+    min 35 (1T 35) visitante substitution Ciro San Millán
+    min 35 (1T 35) visitante substitution Santiago Aguirre Miranda
+    min 35 (1T 35) visitante substitution Matias Inaudi
+    min 40 (2T 0) local     substitution Nicolás Francisco Barrera
+    min 40 (2T 0) local     substitution Benjamín Richiardone
+    min 40 (2T 0) local     substitution Álvaro Santino Cejas
+    min 44 (2T 4) visitante conversion   Cristóbal Caminos
+    min 44 (2T 4) visitante try          Ignacio Esteban Rosales
+    min 54 (2T 14) local     substitution Donato Virano
+    min 54 (2T 14) local     substitution Julián Rosa
+    min 56 (2T 16) visitante conversion   Cristóbal Caminos
+    min 56 (2T 16) visitante try          Cristóbal Caminos
+    min 64 (2T 24) visitante conversion   Cristóbal Caminos
+    min 64 (2T 24) visitante try          Matias Rubi Arcurio
+    min 66 (2T 26) local     try          Emiliano Fraga
+    min 66 (2T 26) local     conversion   Emiliano Fraga
+    min 71 (2T 31) local     try          Gianfranco Acosta
+    min 71 (2T 31) local     conversion   Emiliano Fraga
+    min 74 (2T 34) visitante try          Cristóbal Caminos
+    min 74 (2T 34) visitante conversion   Cristóbal Caminos
+    min 75 (2T 35) local     try          Joaquin Jesús Ortiz Esposito
+    min 75 (2T 35) local     conversion   Emiliano Fraga
+  marcador  · eventos 40-54 · guardado 40-54
+  tries     · 6-8 (guardado —-—)
+  arbitro   · Carlos Rafael Hernandez (guardado: —)
+  guardado  · 21 local · 19 visitante · 35 eventos
+
+Club Palermo Bajo M15 "B" vs Club Universitario de Córdoba M15 "B" · torneo-cordobes-m15-b · tarjeta 313101  ·  867dcc11-c69b-4bb9-8407-9757fb9fcd22
+  local     · Club Palermo Bajo M15 "B" · 26 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba M15 "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 28
+    min 11 (1T 11) local     conversion   Matías Vera
+    min 11 (1T 11) local     try          Juan Cruz Rico Taborda
+    min 15 (1T 15) visitante substitution Teo Asef
+    min 19 (1T 19) visitante conversion   Tomas Meynet Jofre
+    min 19 (1T 19) visitante try          Tomás Guerrero Cordoba
+    min 26 (1T 26) visitante try          Miqueas Salvador Moreno
+    min 26 (1T 26) visitante conversion   Tomas Meynet Jofre
+    min 32 (1T 32) local     substitution Lorenzo Gramaglia
+    min 41 (2T 1) local     substitution Elias Misael Robledo Arrascaeta
+    min 41 (2T 1) visitante substitution Mateo Saieva Carunchio
+    min 41 (2T 1) visitante substitution Geronimo Allende Peralta
+    min 42 (2T 2) local     substitution Valentin Jaime
+    min 42 (2T 2) local     conversion   Matías Vera
+    min 42 (2T 2) local     try          Enzo Gabriel Lujan
+    min 45 (2T 5) visitante substitution Maximo Facundo Rodriguez Ochoa
+    min 49 (2T 9) visitante try          Jerónimo Sandin
+    min 49 (2T 9) visitante conversion   Tomas Meynet Jofre
+    min 50 (2T 10) local     substitution Matías Vera
+    min 53 (2T 13) local     try          Ivan Moreno Gómez
+    min 57 (2T 17) local     conversion   Matías Vera
+    min 57 (2T 17) local     try          Gregorio Caffaratti Etchegoncelay
+    min 58 (2T 18) visitante substitution Gonzalo Chiotta Cerruti
+    min 58 (2T 18) visitante conversion   Tomas Meynet Jofre
+    min 58 (2T 18) visitante try          Francisco Garbero
+    min 65 (2T 25) local     conversion   Matías Vera
+    min 65 (2T 25) local     try          Benjamin Velez Delgado
+    min 73 (2T 33) visitante try          Jerónimo Sandin
+    min 75 (2T 35) visitante penalty_goal Tomas Meynet Jofre
+  marcador  · eventos 33-36 · guardado 33-36
+  tries     · 5-5 (guardado —-—)
+  arbitro   · Pablo Daniel Dionicio Benitez (guardado: —)
+  guardado  · 26 local · 23 visitante · 28 eventos
+
+Córdoba Rugby Club M15 "B" vs Tala Rugby Club M15 "C" · torneo-cordobes-m15-b · tarjeta 313105  ·  62527b4a-b8df-42f2-a0c3-343f4539f80e
+  local     · Córdoba Rugby Club M15 "B" · 19 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M15 "C" · 23 jugadores · 0 con ficha fijada
+  eventos   · 28
+    min  2 (1T 2) local     conversion   Thiago Benjamin Berardi
+    min  2 (1T 2) local     try          Thiago Benjamin Berardi
+    min  6 (1T 6) visitante try          Bautista Diaz Cardeilhac
+    min 15 (1T 15) local     try          Valentino Ropellatto
+    min 18 (1T 18) local     try          Mathías Lautaro Parma Caminos
+    min 25 (1T 25) local     try          Lautaro Nahuel Martinez
+    min 25 (1T 25) local     card_yellow  Thiago Luciano Coronel
+    min 27 (1T 27) visitante try          Faustino Spalla
+    min 35 (1T 35) visitante substitution Santiago León Pérez Godino
+    min 35 (1T 35) visitante substitution Dante Vagheggini Bruno
+    min 35 (1T 35) local     try          Josué Chavarria
+    min 35 (1T 35) local     conversion   Thiago Benjamin Berardi
+    min 40 (2T 0) local     substitution Camilo Caetano Kukuchka Rossi
+    min 40 (2T 0) local     substitution Thiago Luciano Coronel
+    min 43 (2T 3) local     conversion   Thiago Benjamin Berardi
+    min 43 (2T 3) local     try          Leandro Martin Barboza Bilbao
+    min 46 (2T 6) visitante substitution Tomás Linzoain
+    min 46 (2T 6) local     try          Valentino Ropellatto
+    min 48 (2T 8) local     conversion   Thiago Benjamin Berardi
+    min 49 (2T 9) local     try          Lorenzo Curtino Severini
+    min 62 (2T 22) local     try          Valentino Ropellatto
+    min 65 (2T 25) local     card_yellow  Thiago Benjamin Berardi
+    min 65 (2T 25) local     conversion   Lautaro Nahuel Martinez
+    min 67 (2T 27) local     try          Lautaro Nahuel Martinez
+    min 68 (2T 28) local     try          Thiago Benjamin Berardi
+    min 68 (2T 28) local     conversion   Mathías Lautaro Parma Caminos
+    min 76 (2T 36) local     try          Benjamín Gomez Lardone
+    min 76 (2T 36) local     conversion   Thiago Benjamin Berardi
+  marcador  · eventos 74-10 · guardado 74-10
+  tries     · 12-2 (guardado —-—)
+  arbitro   · Sergio Maldonado (guardado: —)
+  guardado  · 19 local · 23 visitante · 28 eventos
+
+Tala Rugby Club M15 "C" vs Urú Curé Rugby Club M15 "B" · torneo-cordobes-m15-b · tarjeta 314691  ·  04a6d8d0-35c0-4755-9132-4707ba40d11a
+  local     · Tala Rugby Club M15 "C" · 27 jugadores · 0 con ficha fijada
+  visitante · Urú Curé Rugby Club M15 "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 34
+    min 11 (1T 11) visitante conversion   Juan Sosa Cocco
+    min 11 (1T 11) visitante try          Benicio Cocorda Farina
+    min 17 (1T 17) visitante try          Lautaro Trebucq
+    min 21 (1T 21) visitante try          Nicolás Balmaceda Pecorari
+    min 35 (1T 35) local     try          Agostino Alfredo Arias
+    min 41 (2T 1) local     substitution Juan Cruz Marchetti
+    min 41 (2T 1) local     substitution Tomás Linzoain
+    min 41 (2T 1) local     substitution Santiago Viramonte
+    min 41 (2T 1) local     substitution Santino Daghero
+    min 43 (2T 3) visitante try          Lautaro Trebucq
+    min 43 (2T 3) visitante conversion   Juan Sosa Cocco
+    min 44 (2T 4) local     try          Felipe Zapata
+    min 49 (2T 9) local     substitution Fabrizzio Palaver
+    min 49 (2T 9) local     substitution Nahuel Marcos Madrid
+    min 51 (2T 11) visitante substitution Vicente Jose Crespo
+    min 51 (2T 11) visitante substitution Benicio Cocorda Farina
+    min 51 (2T 11) visitante substitution Juan Francisco Casasnovas Martinez
+    min 51 (2T 11) visitante substitution Luciano Gentile Tallón
+    min 54 (2T 14) local     substitution Felipe Zapata
+    min 54 (2T 14) visitante try          Juan Sosa Cocco
+    min 56 (2T 16) local     substitution Jano Bautista Plutman
+    min 56 (2T 16) visitante substitution Benjamin Rodríguez Merenda
+    min 56 (2T 16) local     card_yellow  Ignacio Álvarez
+    min 56 (2T 16) visitante substitution Juan Cruz Martinez Turiello
+    min 56 (2T 16) visitante substitution Felipe Tosco Gonella
+    min 57 (2T 17) visitante try          Valentino Di Marco
+    min 57 (2T 17) visitante conversion   Juan Sosa Cocco
+    min 61 (2T 21) visitante try          Valentino Di Marco
+    min 61 (2T 21) visitante conversion   Juan Sosa Cocco
+    min 65 (2T 25) visitante try          Luciano Gentile Tallón
+    min 66 (2T 26) local     try          Santiago Ciceri
+    min 66 (2T 26) local     conversion   Tomas Salvador Alvarez
+    min 70 (2T 30) visitante try          Lautaro Trebucq
+    min 70 (2T 30) visitante conversion   Juan Sosa Cocco
+  marcador  · eventos 17-55 · guardado 17-55
+  tries     · 3-9 (guardado —-—)
+  arbitro   · Francisco Romero Brondino (guardado: —)
+  guardado  · 27 local · 23 visitante · 34 eventos
+
+Club Universitario de Córdoba M15 "B" vs Baguales R.C. M15 "B" · torneo-cordobes-m15-b · tarjeta 314694  ·  30795155-a1ce-4794-93ef-887f9eb76eb4
+  local     · Club Universitario de Córdoba M15 "B" · 22 jugadores · 0 con ficha fijada
+  visitante · Baguales R.C. M15 "B" · 25 jugadores · 0 con ficha fijada
+  eventos   · 23
+    min  1 (1T 1) local     conversion   Tomas Meynet Jofre
+    min  1 (1T 1) local     try          Maximo Facundo Rodriguez Ochoa
+    min 10 (1T 10) local     try          Tomás Guerrero Cordoba
+    min 10 (1T 10) local     conversion   Tomas Meynet Jofre
+    min 13 (1T 13) local     try          Leon Zurita
+    min 13 (1T 13) local     conversion   Tomas Meynet Jofre
+    min 20 (1T 20) local     try          Federico Axel Antoun
+    min 20 (1T 20) local     conversion   Tomas Meynet Jofre
+    min 23 (1T 23) visitante penalty_goal Francisco Alvarenga
+    min 25 (1T 25) local     conversion   Tomas Meynet Jofre
+    min 25 (1T 25) local     try          Tomás Guerrero Cordoba
+    min 41 (2T 1) visitante substitution Juan Segundo Tanco Gariglio
+    min 41 (2T 1) visitante substitution Ivan Cesar Caceres
+    min 41 (2T 1) visitante substitution Elías Ignacio Castro
+    min 44 (2T 4) local     try          Tomás Guerrero Cordoba
+    min 44 (2T 4) local     conversion   Tomas Meynet Jofre
+    min 64 (2T 24) local     try          Francisco Garbero
+    min 67 (2T 27) local     try          Miqueas Salvador Moreno
+    min 67 (2T 27) local     conversion   Tomas Meynet Jofre
+    min 69 (2T 29) local     try          Federico Axel Antoun
+    min 69 (2T 29) local     conversion   Tomas Meynet Jofre
+    min 71 (2T 31) local     try          Jerónimo Sandin
+    min 71 (2T 31) local     conversion   Tomas Meynet Jofre
+  marcador  · eventos 68-3 · guardado 68-3
+  tries     · 10-0 (guardado —-—)
+  arbitro   · Sergio Maldonado (guardado: —)
+  guardado  · 22 local · 25 visitante · 23 eventos
+
+Alta Gracia R.C. M15 "B" vs San Francisco R.C. M15 "B" · torneo-cordobes-m15-b · tarjeta 314696  ·  4b35f927-9cae-43ec-b7e8-28d308855ada
+  local     · Alta Gracia R.C. M15 "B" · 19 jugadores · 0 con ficha fijada
+  visitante · San Francisco R.C. M15 "B" · 21 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min  1 (1T 1) local     substitution Ignacio Quimey Altero
+    min 10 (1T 10) visitante conversion   Emiliano Fraga
+    min 10 (1T 10) visitante try          Samuel Velásquez Reyes
+    min 25 (1T 25) local     try          Lázaro Salgado
+    min 27 (1T 27) local     try          Luca Oreste Pelliza Bussadori
+    min 28 (1T 28) local     conversion   Joaquin Arrese
+    min 34 (1T 34) visitante try          Emiliano Fraga
+    min 40 (2T 0) visitante substitution Álvaro Santino Cejas
+    min 42 (2T 2) local     try          Francisco Mariano Pedernera
+    min 47 (2T 7) visitante try          Pedro Gabriel Tamayo Cajaleón
+    min 47 (2T 7) visitante conversion   Emiliano Fraga
+    min 50 (2T 10) visitante conversion   Emiliano Fraga
+    min 50 (2T 10) visitante try          Emiliano Fraga
+    min 50 (2T 10) visitante substitution Benjamín Richiardone
+    min 59 (2T 19) visitante substitution Bautista Lamberti
+    min 60 (2T 20) visitante substitution Samuel Velásquez Reyes
+    min 60 (2T 20) visitante try          Pedro Gabriel Tamayo Cajaleón
+    min 60 (2T 20) visitante conversion   Emiliano Fraga
+    min 63 (2T 23) visitante substitution Julián Rosa
+    min 69 (2T 29) visitante try          Valentino Pellini
+  marcador  · eventos 17-38 · guardado 17-38
+  tries     · 3-6 (guardado —-—)
+  arbitro   · Alejandro Martin Ceballos (guardado: —)
+  guardado  · 19 local · 21 visitante · 20 eventos
+
+Urú Curé Rugby Club M15 "B" vs Jockey Club Córdoba M15 "B" · torneo-cordobes-m15-b · tarjeta 315171  ·  3d2ff406-b2a6-4856-9b5d-e999333acef7
+  local     · Urú Curé Rugby Club M15 "B" · 25 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M15 "B" · 24 jugadores · 0 con ficha fijada
+  eventos   · 30
+    min  2 (1T 2) local     try          Lautaro Trebucq
+    min 10 (1T 10) local     try          Aquiles Rivoira
+    min 10 (1T 10) local     conversion   Juan Sosa Cocco
+    min 15 (1T 15) visitante try          Felipe Meyer
+    min 15 (1T 15) visitante conversion   Facundo Ramos Martínez
+    min 25 (1T 25) local     try          Aquiles Rivoira
+    min 30 (1T 30) visitante try          Salvador Ceballos
+    min 35 (1T 35) visitante try          Felipe Garcia Racigh
+    min 41 (2T 1) local     card_yellow  Lautaro Trebucq
+    min 41 (2T 1) visitante substitution Lorenzo Miguel Rossi Comito
+    min 41 (2T 1) visitante substitution Augusto Cesar Borrini
+    min 41 (2T 1) visitante substitution Juan Ignacio Tapia
+    min 41 (2T 1) visitante substitution Lucio Melo Biagi
+    min 42 (2T 2) local     try          Matias Costa
+    min 42 (2T 2) local     conversion   Juan Sosa Cocco
+    min 51 (2T 11) local     substitution Lautaro Trebucq
+    min 51 (2T 11) local     substitution Nicolás Balmaceda Pecorari
+    min 51 (2T 11) local     try          Benicio Cocorda Farina
+    min 51 (2T 11) local     conversion   Juan Sosa Cocco
+    min 59 (2T 19) local     substitution Pedro Lovell
+    min 59 (2T 19) local     substitution Matias Costa
+    min 59 (2T 19) local     substitution Aquiles Rivoira
+    min 59 (2T 19) local     substitution Jeronimo Pauls
+    min 59 (2T 19) local     substitution Felipe Tosco Gonella
+    min 59 (2T 19) local     substitution Juan Cruz Oliva
+    min 68 (2T 28) local     try          Juan Cruz Lino
+    min 68 (2T 28) local     conversion   Augusto Sosa Cocco
+    min 74 (2T 34) visitante conversion   Facundo Ramos Martínez
+    min 74 (2T 34) visitante try          Ignacio Esteban Rosales
+    min 74 (2T 34) visitante substitution Facundo Ramos Martínez
+  marcador  · eventos 38-24 · guardado 38-24
+  tries     · 6-4 (guardado —-—)
+  arbitro   · Emanuel Maldonado (guardado: —)
+  guardado  · 25 local · 24 visitante · 30 eventos
+
+Baguales R.C. M15 "B" vs Tala Rugby Club M15 "B" · torneo-cordobes-m15-b · tarjeta 315173  ·  8321f5e3-4096-486a-af03-1665c779bcff
+  local     · Baguales R.C. M15 "B" · 25 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M15 "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 30
+    min  2 (1T 2) visitante try          Tomas Francisco Lopez Gilardoni
+    min 12 (1T 12) visitante try          Pedro Marin
+    min 17 (1T 17) visitante try          Santiago Martinez Gavier
+    min 21 (1T 21) visitante try          Bautista Kember
+    min 23 (1T 23) visitante try          Tomas Francisco Lopez Gilardoni
+    min 33 (1T 33) visitante penalty_try  
+    min 35 (1T 35) visitante try          Tomas Iaria
+    min 35 (1T 35) visitante conversion   Bautista Kember
+    min 40 (2T 0) local     substitution Emiliano Fernandez
+    min 40 (2T 0) local     substitution Matteo Baldovin
+    min 40 (2T 0) local     substitution Santino Nicolas Rojas
+    min 41 (2T 1) visitante substitution Bruno A Mole
+    min 41 (2T 1) visitante substitution Tomas Iaria
+    min 41 (2T 1) visitante substitution Bautista Bonelli
+    min 41 (2T 1) visitante substitution Pedro Hernandez
+    min 41 (2T 1) visitante substitution Santiago Martinez Gavier
+    min 41 (2T 1) visitante substitution Lisandro Salvador Ledesma Palavecino
+    min 41 (2T 1) visitante substitution Martin Salord
+    min 41 (2T 1) visitante substitution Bruno A Mole
+    min 55 (2T 15) visitante try          Luca Galli
+    min 56 (2T 16) local     try          Francisco Alvarenga
+    min 57 (2T 17) visitante conversion   Bautista Kember
+    min 57 (2T 17) visitante try          Gonzalo Exequiel Gomez Oliva
+    min 62 (2T 22) visitante conversion   Bautista Kember
+    min 62 (2T 22) visitante try          Tomas Gross
+    min 69 (2T 29) visitante conversion   Bautista Kember
+    min 69 (2T 29) visitante try          Lucas Faccendini Maldonado
+    min 72 (2T 32) visitante try          Pedro Marin
+    min 75 (2T 35) visitante conversion   Bautista Kember
+    min 75 (2T 35) visitante try          Luca Galli
+  marcador  · eventos 5-77 · guardado 5-77
+  tries     · 1-13 (guardado —-—)
+  arbitro   · XXXXXXXXX XXXXXXXXX (No Oficial) (guardado: —)
+  guardado  · 25 local · 23 visitante · 30 eventos
+
+Club La Tablada M15 "C" vs Tala Rugby Club M15 "C" · torneo-cordobes-m15-b · tarjeta 315179  ·  7c27b265-eb1e-45ce-a726-707baf8ac76d
+  local     · Club La Tablada M15 "C" · 29 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M15 "C" · 30 jugadores · 0 con ficha fijada
+  eventos   · 39
+    min  1 (1T 1) local     try          Manuel Garcia Cortes
+    min  6 (1T 6) visitante try          Juan Ignacio Rujinsky
+    min  7 (1T 7) visitante conversion   Maximiliano Nicolas Navarro
+    min 12 (1T 12) local     try          Gregorio Caceres Gonzalez
+    min 12 (1T 12) local     conversion   Juan Ignacio Santillan
+    min 20 (1T 20) visitante try          Tomas Salvador Alvarez
+    min 20 (1T 20) local     substitution Matías Pascualini
+    min 20 (1T 20) local     substitution Jeronimo Marquez
+    min 28 (1T 28) local     try          Gregorio Caceres Gonzalez
+    min 28 (1T 28) local     conversion   Juan Ignacio Santillan
+    min 41 (2T 1) visitante substitution Juan Cruz Marchetti
+    min 41 (2T 1) visitante substitution Nahuel Marcos Madrid
+    min 41 (2T 1) visitante substitution Tomás Linzoain
+    min 41 (2T 1) local     substitution Juan Ignacio Santillan
+    min 41 (2T 1) local     substitution Juan Cruz Barreras
+    min 41 (2T 1) local     substitution Matias Hernandez Gallardo
+    min 46 (2T 6) visitante substitution Santiago Viramonte
+    min 46 (2T 6) local     substitution Facundo Ferla
+    min 46 (2T 6) local     substitution Daniel Antonio Zilberberg Mirman
+    min 47 (2T 7) local     substitution Manuel Garcia Cortes
+    min 52 (2T 12) visitante substitution Juan Ignacio Rujinsky
+    min 52 (2T 12) local     try          Felipe Danilo Lista Carrica
+    min 52 (2T 12) local     substitution Pedro Fada
+    min 52 (2T 12) local     conversion   Benjamin Castellari
+    min 56 (2T 16) visitante substitution Agustin Cervilla
+    min 58 (2T 18) local     substitution Máximo Martin Moreno Del Villar
+    min 58 (2T 18) local     substitution Felipe Galindez
+    min 58 (2T 18) local     conversion   Juan Martin Fernandez
+    min 58 (2T 18) local     try          Jeronimo Rinaldini
+    min 58 (2T 18) local     substitution Mateo Juarez Arriola
+    min 58 (2T 18) local     substitution Felipe Ceballos
+    min 60 (2T 20) visitante substitution Maximiliano Nicolas Navarro
+    min 61 (2T 21) visitante substitution Fabrizzio Palaver
+    min 62 (2T 22) local     substitution Gregorio Caceres Gonzalez
+    min 65 (2T 25) local     try          Felipe Ceballos
+    min 67 (2T 27) visitante substitution Faustino Spalla
+    min 67 (2T 27) visitante substitution Bautista Diaz Cardeilhac
+    min 67 (2T 27) local     try          Jeronimo Rinaldini
+    min 67 (2T 27) local     conversion   Juan Martin Fernandez
+  marcador  · eventos 45-12 · guardado 45-12
+  tries     · 7-2 (guardado —-—)
+  arbitro   · Leandro Marcos Lubary (guardado: —)
+  guardado  · 29 local · 30 visitante · 39 eventos
+
+Club Universitario de Córdoba M15 "B" vs Urú Curé Rugby Club M15 "B" · torneo-cordobes-m15-b · tarjeta 319650  ·  0ec38dbc-5f28-48a0-a53a-67b7cabd9e9b
+  local     · Club Universitario de Córdoba M15 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Urú Curé Rugby Club M15 "B" · 21 jugadores · 0 con ficha fijada
+  eventos   · 28
+    min  2 (1T 2) local     conversion   Tomas Meynet Jofre
+    min  2 (1T 2) local     try          Pedro Beyrne
+    min 15 (1T 15) visitante try          Pedro Lovell
+    min 15 (1T 15) local     substitution Benjamin Mancini
+    min 19 (1T 19) visitante try          Aquiles Rivoira
+    min 29 (1T 29) local     substitution Jerónimo Sandin
+    min 30 (1T 30) visitante try          Aquiles Rivoira
+    min 31 (1T 31) visitante conversion   Pedro Lovell
+    min 33 (1T 33) visitante try          Aquiles Rivoira
+    min 34 (1T 34) visitante conversion   Pedro Lovell
+    min 34 (1T 34) local     substitution Geronimo Allende Peralta
+    min 41 (2T 1) visitante substitution Lorenzo Cargnelutti
+    min 41 (2T 1) visitante substitution Jose Ignacio Barella Pueyrredon
+    min 44 (2T 4) local     substitution Santiago Gabriel Barbosa
+    min 45 (2T 5) local     substitution Genaro Gonzalez Perez
+    min 46 (2T 6) visitante try          Aquiles Rivoira
+    min 48 (2T 8) local     substitution Máximo Gerardo Bazan
+    min 50 (2T 10) local     substitution Cristian Emanuel Acuña
+    min 53 (2T 13) visitante substitution Luciano Gentile Tallón
+    min 57 (2T 17) visitante try          Benicio Beron
+    min 58 (2T 18) visitante conversion   Felipe Arqué Latour
+    min 62 (2T 22) visitante try          Rafael Bazzara Salido
+    min 69 (2T 29) local     conversion   Tomas Meynet Jofre
+    min 69 (2T 29) local     try          Pedro Beyrne
+    min 74 (2T 34) visitante try          Lautaro Trebucq
+    min 75 (2T 35) visitante conversion   Pedro Lovell
+    min 76 (2T 36) visitante try          Gonzalo Regidor
+    min 77 (2T 37) visitante conversion   Pedro Lovell
+  marcador  · eventos 14-55 · guardado 14-55
+  tries     · 2-9 (guardado —-—)
+  arbitro   · Pablo Daniel Dionicio Benitez (guardado: —)
+  guardado  · 23 local · 21 visitante · 28 eventos
+
+Tala Rugby Club M15 "B" vs Jockey Club Córdoba M15 "C" · torneo-cordobes-m15-b · tarjeta 319652  ·  a22c134f-4df9-4f83-ac09-bbc3983ca927
+  local     · Tala Rugby Club M15 "B" · 25 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M15 "C" · 25 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min  1 (1T 1) local     conversion   Bautista Kember
+    min  1 (1T 1) local     try          Lisandro Salvador Ledesma Palavecino
+    min 12 (1T 12) local     try          Bautista Kember
+    min 12 (1T 12) local     conversion   Bautista Kember
+    min 22 (1T 22) local     card_yellow  Lisandro Salvador Ledesma Palavecino
+    min 30 (1T 30) local     try          Nicolás Liprandi
+    min 34 (1T 34) local     try          Santino Sufé Cafferata
+    min 34 (1T 34) local     conversion   Bautista Kember
+    min 41 (2T 1) local     conversion   Bautista Kember
+    min 41 (2T 1) local     try          Luca Galli
+    min 44 (2T 4) local     try          Gonzalo Exequiel Gomez Oliva
+    min 53 (2T 13) local     try          Lucio Marucco
+    min 53 (2T 13) local     conversion   Bautista Kember
+    min 60 (2T 20) local     try          Tomas Iaria
+    min 60 (2T 20) local     conversion   Bautista Kember
+    min 61 (2T 21) visitante card_yellow  Dino Vitali
+    min 66 (2T 26) local     try          Bautista Kember
+    min 66 (2T 26) local     conversion   Bautista Kember
+    min 74 (2T 34) local     try          Lucio Marucco
+    min 74 (2T 34) local     conversion   Bautista Kember
+  marcador  · eventos 66-0 · guardado 66-0
+  tries     · 10-0 (guardado —-—)
+  arbitro   · Cristian Mauro Quiles Buteler (guardado: —)
+  guardado  · 25 local · 25 visitante · 20 eventos
+
+Urú Curé Rugby Club M15 "B" vs Tala Rugby Club M15 "B" · torneo-cordobes-m15-b · tarjeta 320310  ·  d0d83a01-cac7-4940-b56b-1a9072f22ae8
+  local     · Urú Curé Rugby Club M15 "B" · 25 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M15 "B" · 24 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min 17 (1T 17) visitante try          Santino Sufé Cafferata
+    min 34 (1T 34) visitante conversion   Bautista Narbona
+    min 34 (1T 34) visitante try          Luca Galli
+    min 35 (1T 35) visitante substitution Perea Manuel
+    min 35 (1T 35) visitante substitution Santiago Martinez Gavier
+    min 41 (2T 1) local     substitution Lorenzo Cargnelutti
+    min 41 (2T 1) local     substitution Jeronimo Pauls
+    min 41 (2T 1) local     substitution Juan Francisco Casasnovas Martinez
+    min 44 (2T 4) visitante conversion   Bautista Narbona
+    min 44 (2T 4) visitante try          Tomas Gross
+    min 47 (2T 7) visitante card_yellow  Bautista Bonelli
+    min 52 (2T 12) visitante substitution Tomas Salvador Alvarez
+    min 52 (2T 12) visitante substitution Bautista Narbona
+    min 52 (2T 12) visitante substitution Juan Sebastian Romero Ramacciotti
+    min 52 (2T 12) visitante substitution Pedro Hernandez
+    min 55 (2T 15) local     try          Juan Nazareno Godoy Bessone
+    min 56 (2T 16) local     substitution Felipe Tosco Gonella
+    min 58 (2T 18) visitante substitution Francisco Lo Celso Carballo
+    min 58 (2T 18) visitante substitution Jerónimo Iaria
+    min 59 (2T 19) visitante try          Lucio Marucco
+    min 64 (2T 24) local     injury       Benjamin Rodríguez Merenda
+    min 68 (2T 28) visitante injury       Tomas Gross
+  marcador  · eventos 5-24 · guardado 5-24
+  tries     · 1-4 (guardado —-—)
+  arbitro   · Pablo Daniel Dionicio Benitez (guardado: —)
+  guardado  · 25 local · 24 visitante · 22 eventos
+
+Alta Gracia R.C. M15 "B" vs Córdoba Athletic Club M15 "B" · torneo-cordobes-m15-b · tarjeta 320739  ·  30008a9b-179d-4681-a4c5-6436b20cfbab
+  local     · Alta Gracia R.C. M15 "B" · 19 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club M15 "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min  2 (1T 2) visitante try          Agustin Villalba
+    min  8 (1T 8) visitante try          Justino Castex
+    min  8 (1T 8) visitante conversion   Facundo Duarte Febre
+    min 13 (1T 13) visitante try          Facundo Duarte Febre
+    min 13 (1T 13) visitante conversion   Facundo Duarte Febre
+    min 24 (1T 24) visitante try          Justino Castex
+    min 28 (1T 28) local     try          Joaquin Arrese
+    min 30 (1T 30) visitante substitution Franco Medina Paoletti
+    min 30 (1T 30) visitante try          Maximo Gabazzi
+    min 30 (1T 30) visitante conversion   Agustin Villalba
+    min 34 (1T 34) visitante try          Ignacio Lauret Luna
+    min 43 (2T 3) local     try          Francisco Mariano Pedernera
+    min 44 (2T 4) local     conversion   Emilio Agustin Gelos Lopez
+    min 45 (2T 5) visitante substitution Ignacio Lauret Luna
+    min 45 (2T 5) visitante substitution Augusto Felipe Bonoris
+    min 45 (2T 5) visitante substitution Santos Bastián Celli
+    min 45 (2T 5) visitante try          Maximo Gabazzi
+    min 50 (2T 10) visitante substitution Dilan Valentin Zapata Oviedo
+    min 51 (2T 11) local     try          Emilio Agustin Gelos Lopez
+    min 52 (2T 12) local     conversion   Emilio Agustin Gelos Lopez
+    min 58 (2T 18) visitante conversion   Facundo Duarte Febre
+    min 58 (2T 18) visitante try          Facundo Duarte Febre
+    min 65 (2T 25) visitante substitution Agustin Villalba
+    min 68 (2T 28) visitante substitution Maximo Gabazzi
+  marcador  · eventos 19-48 · guardado 19-48
+  tries     · 3-8 (guardado —-—)
+  arbitro   · Francisco Pecchio (guardado: —)
+  guardado  · 19 local · 23 visitante · 24 eventos
+
+Tala Rugby Club M15 "C" vs Club Palermo Bajo M15 "B" · torneo-cordobes-m15-b · tarjeta 320740  ·  ebc39b6b-1938-4a06-bda5-03cb96f982c2
+  local     · Tala Rugby Club M15 "C" · 28 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo M15 "B" · 21 jugadores · 0 con ficha fijada
+  eventos   · 15
+    min  2 (1T 2) local     try          Lautaro Emidi Rosenbaun
+    min  2 (1T 2) local     conversion   Lautaro Emidi Rosenbaun
+    min  2 (1T 2) local     try          Lautaro Emidi Rosenbaun
+    min  2 (1T 2) local     conversion   Lautaro Emidi Rosenbaun
+    min  2 (1T 2) local     try          Lautaro Emidi Rosenbaun
+    min  2 (1T 2) local     conversion   Lautaro Emidi Rosenbaun
+    min  2 (1T 2) local     try          Lautaro Emidi Rosenbaun
+    min  2 (1T 2) local     penalty_goal Lautaro Emidi Rosenbaun
+    min  4 (1T 4) visitante try          Nicolas Molina
+    min  4 (1T 4) visitante conversion   Nicolas Molina
+    min  4 (1T 4) visitante try          Nicolas Molina
+    min  4 (1T 4) visitante conversion   Nicolas Molina
+    min  4 (1T 4) visitante try          Nicolas Molina
+    min  4 (1T 4) visitante conversion   Nicolas Molina
+    min  4 (1T 4) visitante penalty_goal Nicolas Molina
+  marcador  · eventos 29-24 · guardado 29-24
+  tries     · 4-3 (guardado —-—)
+  arbitro   · Emanuel Maldonado (guardado: —)
+  guardado  · 28 local · 21 visitante · 15 eventos
+
+Córdoba Rugby Club M15 "B" vs Jockey Club Córdoba M15 "B" · torneo-cordobes-m15-b · tarjeta 320741  ·  3821a081-e66b-4a30-8b26-0a61a67cbaee
+  local     · Córdoba Rugby Club M15 "B" · 19 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M15 "B" · 19 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min  6 (1T 6) local     try          Leandro Martin Barboza Bilbao
+    min  6 (1T 6) local     conversion   Thiago Benjamin Berardi
+    min 10 (1T 10) visitante try          Pedro Heredia
+    min 10 (1T 10) visitante conversion   Salvador Ceballos
+    min 10 (1T 10) visitante substitution Juan Ignacio Espinedo
+    min 16 (1T 16) visitante try          Mateo Buitrago Herrera
+    min 23 (1T 23) visitante try          Benjamín Genaro Ganigian
+    min 23 (1T 23) visitante conversion   Santiago Aguirre Miranda
+    min 29 (1T 29) local     try          Benjamín Gomez Lardone
+    min 42 (2T 2) local     penalty_goal Thiago Benjamin Berardi
+    min 43 (2T 3) visitante substitution Antonio Jose Nores Navarro
+    min 55 (2T 15) visitante substitution Ciro San Millán
+    min 60 (2T 20) visitante substitution Felipe Santacroce
+    min 65 (2T 25) local     substitution Facundo Bortagaray Galla
+    min 66 (2T 26) local     substitution Valentino Espinosa
+    min 66 (2T 26) local     substitution Thiago Luciano Coronel
+    min 75 (2T 35) local     try          Valentino Ropellatto
+    min 75 (2T 35) local     conversion   Thiago Benjamin Berardi
+    min 75 (2T 35) visitante try          Santiago Aguirre Miranda
+    min 75 (2T 35) visitante card_yellow  Benjamín Genaro Ganigian
+  marcador  · eventos 22-24 · guardado 22-24
+  tries     · 3-4 (guardado —-—)
+  arbitro   · Leandro Marcos Lubary (guardado: —)
+  guardado  · 19 local · 19 visitante · 20 eventos
+
+Club La Tablada M15 "C" vs Jockey Club Córdoba M15 "C" · torneo-cordobes-m15-b · tarjeta 320743  ·  06881915-724a-4dd7-ba84-935571df6944
+  local     · Club La Tablada M15 "C" · 30 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M15 "C" · 25 jugadores · 0 con ficha fijada
+  eventos   · 31
+    min  5 (1T 5) local     try          Felipe Danilo Lista Carrica
+    min 10 (1T 10) local     try          Felipe Ceballos
+    min 11 (1T 11) local     conversion   Juan Ignacio Santillan
+    min 14 (1T 14) local     try          Franco Villanueva Roque
+    min 15 (1T 15) visitante substitution Branko Emanuel Lupiañez Heyd
+    min 15 (1T 15) local     conversion   Juan Ignacio Santillan
+    min 22 (1T 22) local     substitution Jeronimo Marquez
+    min 33 (1T 33) local     try          Pedro Fada
+    min 34 (1T 34) local     conversion   Juan Ignacio Santillan
+    min 35 (1T 35) visitante substitution Agustín Orthusteguy
+    min 41 (2T 1) local     substitution Matías Pascualini
+    min 41 (2T 1) local     substitution Pedro Fada
+    min 41 (2T 1) local     substitution Juan Ignacio Santillan
+    min 41 (2T 1) local     substitution Daniel Antonio Zilberberg Mirman
+    min 43 (2T 3) local     substitution Juan Cruz Barreras
+    min 47 (2T 7) visitante substitution Matias Inaudi
+    min 47 (2T 7) local     substitution Felipe Danilo Lista Carrica
+    min 47 (2T 7) local     substitution Felipe Ceballos
+    min 47 (2T 7) local     try          Felipe Danilo Lista Carrica
+    min 51 (2T 11) visitante substitution Joaquin Cardona Allende
+    min 51 (2T 11) local     substitution Santiago Cardo
+    min 52 (2T 12) local     substitution Manuel Garcia Cortes
+    min 55 (2T 15) local     substitution Ignacio Ivan Mavec
+    min 57 (2T 17) local     substitution Gregorio Caceres Gonzalez
+    min 60 (2T 20) local     substitution Calixto De La Torre Cornet
+    min 60 (2T 20) local     try          Juan Martin Fernandez
+    min 61 (2T 21) local     substitution Mateo Juarez Arriola
+    min 63 (2T 23) local     try          Alejandro Damonte
+    min 63 (2T 23) local     conversion   Juan Martin Fernandez
+    min 75 (2T 35) local     try          Victorio Rotundo
+    min 75 (2T 35) local     conversion   Juan Martin Fernandez
+  marcador  · eventos 50-0 · guardado 50-0
+  tries     · 8-0 (guardado —-—)
+  arbitro   · Paloma Vedia (guardado: —)
+  guardado  · 30 local · 25 visitante · 31 eventos
+
+Córdoba Athletic Club M15 "B" vs Jockey Club Córdoba M15 "B" · torneo-cordobes-m15-b · tarjeta 322688  ·  78b53a0d-e94d-4130-8f18-210d444c3196
+  local     · Córdoba Athletic Club M15 "B" · 28 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M15 "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 19
+    min  1 (1T 1) visitante substitution Benjamín Genaro Ganigian
+    min  3 (1T 3) visitante try          Bautista Cassani
+    min 15 (1T 15) local     try          Maximo Gabazzi
+    min 20 (1T 20) visitante try          Pedro Heredia
+    min 23 (1T 23) visitante try          Felipe Meyer
+    min 23 (1T 23) visitante conversion   Juan Ignacio Gimenez
+    min 29 (1T 29) visitante try          Isidro García Faure
+    min 29 (1T 29) visitante conversion   Juan Ignacio Gimenez
+    min 33 (1T 33) visitante try          Isidro García Faure
+    min 33 (1T 33) visitante conversion   Juan Ignacio Gimenez
+    min 35 (1T 35) visitante substitution Pedro Heredia
+    min 45 (2T 5) visitante substitution Lorenzo Miguel Rossi Comito
+    min 45 (2T 5) visitante substitution Juan Ignacio Gimenez
+    min 50 (2T 10) local     try          Fabrizio Dalessandro Serra
+    min 50 (2T 10) visitante substitution Felipe Poderti
+    min 50 (2T 10) visitante substitution Luca Valentin Regueiro Lascano
+    min 50 (2T 10) visitante substitution Isidro García Faure
+    min 65 (2T 25) visitante try          Juan Ignacio Espinedo
+    min 70 (2T 30) visitante substitution Bautista Cassani
+  marcador  · eventos 10-36 · guardado 10-36
+  tries     · 2-6 (guardado —-—)
+  arbitro   · Carlos Altobelli (guardado: —)
+  guardado  · 28 local · 23 visitante · 19 eventos
+
+Tala Rugby Club M15 "B" vs Club La Tablada M15 "B" · torneo-cordobes-m15-b · tarjeta 322690  ·  3c8234c2-e5e4-46a9-b1a6-84ee83c30172
+  local     · Tala Rugby Club M15 "B" · 24 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M15 "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 12
+    min  3 (1T 3) visitante try          Julio Francisco Aliaga Moyano
+    min 18 (1T 18) visitante try          Juan Bautista Araya Balbi
+    min 27 (1T 27) visitante try          Santiago Cardo
+    min 44 (2T 4) visitante substitution Juan Bautista Araya Balbi
+    min 45 (2T 5) visitante substitution Benjamin Tagle
+    min 45 (2T 5) visitante substitution Francisco Picone
+    min 45 (2T 5) visitante substitution Mateo Altamira
+    min 45 (2T 5) visitante substitution Clemente Pignata
+    min 46 (2T 6) visitante try          Baltazar Ignacio Campana
+    min 55 (2T 15) visitante substitution Valentin Auad
+    min 65 (2T 25) visitante substitution Ignacio Alzuarte
+    min 75 (2T 35) visitante try          Juan Pedro Cmet
+  marcador  · eventos 0-25 · guardado 0-25
+  tries     · 0-5 (guardado —-—)
+  arbitro   · Emanuel Maldonado (guardado: —)
+  guardado  · 24 local · 23 visitante · 12 eventos
+
+Club Palermo Bajo M15 "B" vs Urú Curé Rugby Club M15 "B" · torneo-cordobes-m15-b · tarjeta 322691  ·  88137d67-c6ea-4e85-a0aa-1b84792e0166
+  local     · Club Palermo Bajo M15 "B" · 24 jugadores · 0 con ficha fijada
+  visitante · Urú Curé Rugby Club M15 "B" · 19 jugadores · 0 con ficha fijada
+  eventos   · 31
+    min  3 (1T 3) visitante try          Agustin Fuentes
+    min  5 (1T 5) visitante conversion   Agustin Fuentes
+    min  5 (1T 5) visitante try          Agustin Fuentes
+    min 13 (1T 13) visitante try          Agustin Fuentes
+    min 15 (1T 15) visitante try          Agustin Fuentes
+    min 15 (1T 15) visitante conversion   Agustin Fuentes
+    min 18 (1T 18) local     substitution Francesco Vignaroli
+    min 19 (1T 19) local     substitution Giuliano Masuero Carletti
+    min 19 (1T 19) visitante try          Agustin Fuentes
+    min 21 (1T 21) visitante try          Felipe Bonet
+    min 21 (1T 21) visitante conversion   Agustin Fuentes
+    min 26 (1T 26) local     substitution Lautaro Moiso
+    min 26 (1T 26) visitante try          Benicio Cocorda Farina
+    min 26 (1T 26) visitante conversion   Agustin Fuentes
+    min 28 (1T 28) local     substitution Maximo Lamas
+    min 32 (1T 32) visitante try          Gonzalo Regidor
+    min 32 (1T 32) visitante conversion   Agustin Fuentes
+    min 38 (1T 38) local     substitution Cristian Dario Arietti Serniotti
+    min 45 (2T 5) visitante conversion   Agustin Fuentes
+    min 45 (2T 5) visitante try          Felipe Bonet
+    min 52 (2T 12) visitante try          Benicio Cocorda Farina
+    min 52 (2T 12) visitante conversion   Agustin Fuentes
+    min 55 (2T 15) local     card_yellow  Santino Esteban Russo Ferrari
+    min 56 (2T 16) visitante try          Agustin Fuentes
+    min 56 (2T 16) visitante substitution Dimas Benjamin Rodríguez
+    min 56 (2T 16) visitante substitution Juan Cruz Oliva
+    min 56 (2T 16) visitante substitution Benicio Beron
+    min 60 (2T 20) visitante try          Agustin Fuentes
+    min 60 (2T 20) visitante conversion   Agustin Fuentes
+    min 64 (2T 24) visitante try          Vicente Jose Crespo
+    min 68 (2T 28) visitante try          Santiago Zampa Hipp
+  marcador  · eventos 0-86 · guardado 0-86
+  tries     · 0-14 (guardado —-—)
+  arbitro   · Santiago Herrera Albano (guardado: —)
+  guardado  · 24 local · 19 visitante · 31 eventos
+
+Baguales R.C. M15 "B" vs Alta Gracia R.C. M15 "B" · torneo-cordobes-m15-b · tarjeta 322694  ·  25cc0834-58c4-45f5-920f-a7b96a3732c0
+  local     · Baguales R.C. M15 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Alta Gracia R.C. M15 "B" · 20 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min  1 (1T 1) local     conversion   Valentino Monticelli Cubero
+    min  1 (1T 1) visitante substitution Joel Genaro Aime
+    min  1 (1T 1) local     try          Luciano Valentín Aguirre
+    min  7 (1T 7) local     try          José María Bustillo
+    min  7 (1T 7) local     conversion   Valentino Monticelli Cubero
+    min 12 (1T 12) local     try          Ivan Cesar Caceres
+    min 12 (1T 12) local     conversion   Valentino Monticelli Cubero
+    min 24 (1T 24) local     try          Thiago Benjamin Fernandez Altamirano
+    min 24 (1T 24) local     conversion   Valentino Monticelli Cubero
+    min 24 (1T 24) local     try          Matteo Baldovin
+    min 25 (1T 25) visitante conversion   Lautaro Benjamín Ortiz
+    min 26 (1T 26) visitante card_yellow  Natanael Joaquin Ledesma
+    min 32 (1T 32) visitante try          Lautaro Benjamín Ortiz
+    min 40 (2T 0) local     substitution Nicolas Brandan
+    min 40 (2T 0) local     substitution Ignacio Luna
+    min 40 (2T 0) local     substitution Joaquin Micolini Soratti
+    min 43 (2T 3) local     conversion   Valentino Monticelli Cubero
+    min 43 (2T 3) local     try          Thiago Benjamin Fernandez Altamirano
+    min 44 (2T 4) visitante try          Lázaro Salgado
+    min 53 (2T 13) local     try          Valentino Monticelli Cubero
+    min 60 (2T 20) local     conversion   Valentino Monticelli Cubero
+    min 60 (2T 20) local     try          Thiago Benjamin Fernandez Altamirano
+    min 70 (2T 30) local     conversion   Valentino Monticelli Cubero
+    min 70 (2T 30) local     try          Thiago Benjamin Fernandez Altamirano
+  marcador  · eventos 59-12 · guardado 59-12
+  tries     · 9-2 (guardado —-—)
+  arbitro   · Santiago Herrera Albano (guardado: —)
+  guardado  · 23 local · 20 visitante · 24 eventos
+
+Club La Tablada M15 "C" vs San Francisco R.C. M15 "B" · torneo-cordobes-m15-b · tarjeta 322696  ·  80105b26-0a1a-4659-8fd6-28b0534ad784
+  local     · Club La Tablada M15 "C" · 23 jugadores · 0 con ficha fijada
+  visitante · San Francisco R.C. M15 "B" · 18 jugadores · 0 con ficha fijada
+  eventos   · 21
+    min  3 (1T 3) local     penalty_goal Juan Ignacio Santillan
+    min  6 (1T 6) visitante try          Emiliano Fraga
+    min 14 (1T 14) visitante try          Emiliano Fraga
+    min 21 (1T 21) local     substitution Justo Rojas Hadad
+    min 22 (1T 22) local     substitution Juan Cruz Barreras
+    min 23 (1T 23) visitante try          Emiliano Fraga
+    min 23 (1T 23) visitante conversion   Emiliano Fraga
+    min 26 (1T 26) local     substitution Juan Ignacio Santillan
+    min 29 (1T 29) visitante conversion   Emiliano Fraga
+    min 29 (1T 29) visitante try          Jano Pagliero
+    min 41 (2T 1) local     try          Ignacio Vasena Alonso
+    min 41 (2T 1) local     substitution Facundo Ferla
+    min 41 (2T 1) local     substitution Agustín Garbagnoli
+    min 41 (2T 1) local     substitution Máximo Martin Moreno Del Villar
+    min 41 (2T 1) local     conversion   Matías Pascualini
+    min 50 (2T 10) local     substitution Mateo Juarez Arriola
+    min 50 (2T 10) local     try          Simon Tagle
+    min 54 (2T 14) local     substitution Felipe Rolon Soto
+    min 65 (2T 25) visitante substitution Jano Pagliero
+    min 69 (2T 29) visitante try          Emiliano Fraga
+    min 69 (2T 29) visitante conversion   Emiliano Fraga
+  marcador  · eventos 15-31 · guardado 15-31
+  tries     · 2-5 (guardado —-—)
+  arbitro   · Raúl Fernando Rodriguez Almada (guardado: —)
+  guardado  · 23 local · 18 visitante · 21 eventos
+
+Jockey Club Córdoba M15 "C" vs Tala Rugby Club M15 "C" · torneo-cordobes-m15-b · tarjeta 322697  ·  c222e15a-e0fe-4e9f-9282-d7b9a9ce29cf
+  local     · Jockey Club Córdoba M15 "C" · 30 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M15 "C" · 30 jugadores · 0 con ficha fijada
+  eventos   · 19
+    min 20 (1T 20) local     substitution Marco Rossi Landi
+    min 28 (1T 28) local     conversion   Antonio Jose Nores Navarro
+    min 28 (1T 28) local     try          Francisco Diego Criado Urgorri
+    min 35 (1T 35) local     substitution Bautista Brizuela
+    min 41 (2T 1) visitante substitution Francisco Ezequiel Viqueira
+    min 41 (2T 1) visitante substitution Dante Vagheggini Bruno
+    min 46 (2T 6) local     conversion   Facundo Ramos Martínez
+    min 46 (2T 6) local     try          Felipe Santacroce
+    min 50 (2T 10) visitante substitution Tomás Linzoain
+    min 50 (2T 10) local     substitution Francisco Diego Criado Urgorri
+    min 55 (2T 15) local     try          Francisco Carranza Garello
+    min 55 (2T 15) local     conversion   Facundo Ramos Martínez
+    min 55 (2T 15) local     substitution Lucio Melo Biagi
+    min 62 (2T 22) visitante substitution Santiago Viramonte
+    min 63 (2T 23) visitante card_yellow  Nahuel Marcos Madrid
+    min 65 (2T 25) visitante substitution Ignacio Álvarez
+    min 65 (2T 25) visitante substitution Bautista Altamirano
+    min 70 (2T 30) local     card_yellow  Felipe Massanet
+    min 70 (2T 30) local     substitution Lorenzo Sastre
+  marcador  · eventos 21-0 · guardado 21-0
+  tries     · 3-0 (guardado —-—)
+  arbitro   · Alejo Sebastian Rodriguez Rufino Saravia (guardado: —)
+  guardado  · 30 local · 30 visitante · 19 eventos
+
+Club La Tablada M15 "B" vs Club Palermo Bajo M15 "B" · torneo-cordobes-m15-b · tarjeta 324099  ·  15c8171b-d93d-4f90-815d-64df5f33e6cb
+  local     · Club La Tablada M15 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo M15 "B" · 24 jugadores · 0 con ficha fijada
+  eventos   · 23
+    min  3 (1T 3) local     try          Ignacio Alzuarte
+    min  6 (1T 6) local     try          Ignacio Alzuarte
+    min  7 (1T 7) local     conversion   Joaquin Jofre
+    min 11 (1T 11) local     try          Ignacio Alzuarte
+    min 20 (1T 20) local     try          Clemente Pignata
+    min 24 (1T 24) local     try          Santiago Girardi
+    min 25 (1T 25) local     conversion   Joaquin Jofre
+    min 31 (1T 31) local     try          Julio Francisco Aliaga Moyano
+    min 32 (1T 32) local     conversion   Joaquin Jofre
+    min 44 (2T 4) local     try          Constancio Rosso
+    min 45 (2T 5) local     substitution Baltazar Ignacio Campana
+    min 45 (2T 5) local     substitution Francisco Picone
+    min 45 (2T 5) local     substitution Clemente Pignata
+    min 45 (2T 5) local     conversion   Joaquin Jofre
+    min 55 (2T 15) local     substitution Valentino Milani
+    min 55 (2T 15) local     substitution Julio Francisco Aliaga Moyano
+    min 55 (2T 15) local     substitution Ignacio Alzuarte
+    min 55 (2T 15) local     substitution Jeronimo Fernandez De Maussion
+    min 55 (2T 15) local     substitution Manuel Gonzalez
+    min 61 (2T 21) local     try          Santiago Cardo
+    min 62 (2T 22) local     conversion   Joaquin Jofre
+    min 74 (2T 34) local     try          Joaquin Jofre
+    min 75 (2T 35) local     conversion   Joaquin Jofre
+  marcador  · eventos 57-0 · guardado 57-0
+  tries     · 9-0 (guardado —-—)
+  arbitro   · Emanuel Maldonado (guardado: —)
+  guardado  · 23 local · 24 visitante · 23 eventos
+
+Alta Gracia R.C. M15 "B" vs Tala Rugby Club M15 "B" · torneo-cordobes-m15-b · tarjeta 324103  ·  3379bb97-86e3-4b74-92ad-e148a27d0d24
+  local     · Alta Gracia R.C. M15 "B" · 20 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M15 "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 29
+    min  3 (1T 3) visitante try          Santiago Ciceri
+    min 17 (1T 17) visitante try          Juan Ignacio Rujinsky
+    min 17 (1T 17) visitante conversion   Pedro Giordano
+    min 25 (1T 25) local     card_yellow  Joaquin Asua Pellegrini
+    min 29 (1T 29) visitante try          Pedro Giordano
+    min 29 (1T 29) visitante conversion   Pedro Giordano
+    min 37 (1T 37) visitante conversion   Pedro Giordano
+    min 37 (1T 37) visitante try          Martin Salord
+    min 41 (2T 1) visitante substitution Lisandro Salvador Ledesma Palavecino
+    min 41 (2T 1) visitante substitution Juan Ignacio Rujinsky
+    min 41 (2T 1) visitante substitution Tomas Salvador Alvarez
+    min 41 (2T 1) visitante substitution Santiago Martinez Gavier
+    min 41 (2T 1) visitante substitution Pedro Hernandez
+    min 45 (2T 5) visitante try          Pedro Marin
+    min 45 (2T 5) visitante conversion   Pedro Giordano
+    min 48 (2T 8) visitante try          Santiago Ciceri
+    min 48 (2T 8) visitante conversion   Pedro Giordano
+    min 50 (2T 10) visitante try          Pedro Marin
+    min 52 (2T 12) visitante substitution Facundo Chevallier Boutell
+    min 54 (2T 14) visitante try          Gerónimo Albar Díaz
+    min 54 (2T 14) visitante conversion   Pedro Giordano
+    min 57 (2T 17) visitante substitution Gregorio Ramos
+    min 57 (2T 17) visitante substitution Nahuel Marcos Madrid
+    min 61 (2T 21) local     try          Fabrizio Martinez
+    min 64 (2T 24) local     try          Joaquin Asua Pellegrini
+    min 65 (2T 25) local     conversion   Emilio Agustin Gelos Lopez
+    min 69 (2T 29) visitante try          Bautista Narbona
+    min 74 (2T 34) visitante try          Bautista Narbona
+    min 74 (2T 34) visitante conversion   Bautista Narbona
+  marcador  · eventos 12-64 · guardado 12-64
+  tries     · 2-10 (guardado —-—)
+  arbitro   · Javier Antonio Gutierrez (guardado: —)
+  guardado  · 20 local · 23 visitante · 29 eventos
+
+Tala Rugby Club M15 "C" vs Club Universitario de Córdoba M15 "B" · torneo-cordobes-m15-b · tarjeta 325123  ·  dc0bf99d-fd2f-45b9-8d68-0057d9007dc4
+  local     · Tala Rugby Club M15 "C" · 27 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba M15 "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 15
+    min  7 (1T 7) local     try          Bautista Diaz Cardeilhac
+    min  8 (1T 8) local     conversion   Martin Salord
+    min 15 (1T 15) visitante try          Leon Zurita
+    min 15 (1T 15) visitante conversion   Tomas Meynet Jofre
+    min 25 (1T 25) visitante try          Geronimo Allende Peralta
+    min 25 (1T 25) visitante conversion   Geronimo Allende Peralta
+    min 32 (1T 32) local     try          Augusto Jose Rodriguez Cepparo
+    min 32 (1T 32) local     conversion   Martin Salord
+    min 48 (2T 8) local     card_yellow  Agustin Cervilla
+    min 55 (2T 15) visitante try          Maximo Facundo Rodriguez Ochoa
+    min 55 (2T 15) visitante conversion   Tomas Meynet Jofre
+    min 57 (2T 17) local     try          Agostino Alfredo Arias
+    min 57 (2T 17) local     conversion   Martin Salord
+    min 69 (2T 29) visitante try          Tomas Meynet Jofre
+    min 75 (2T 35) local     try          Agostino Alfredo Arias
+  marcador  · eventos 26-26 · guardado 26-26
+  tries     · 4-4 (guardado —-—)
+  arbitro   · Isaias Sergio Ignacio Ponce (guardado: —)
+  guardado  · 27 local · 23 visitante · 15 eventos
+
+Club Palermo Bajo M15 "B" vs Club La Tablada M15 "C" · torneo-cordobes-m15-b · tarjeta 325140  ·  d88b4932-7b91-43c7-9e08-f590df3574f7
+  local     · Club Palermo Bajo M15 "B" · 30 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M15 "C" · 30 jugadores · 0 con ficha fijada
+  eventos   · 12
+    min  1 (1T 1) local     try          Benjamin Velez Delgado
+    min  1 (1T 1) local     conversion   Benjamin Velez Delgado
+    min  4 (1T 4) local     try          Renzo Fontti
+    min 18 (1T 18) local     try          Justino Vitto Feliciani
+    min 34 (1T 34) local     try          Enzo Gabriel Lujan
+    min 41 (2T 1) local     try          Renzo Fontti
+    min 50 (2T 10) visitante try          Daniel Antonio Zilberberg Mirman
+    min 50 (2T 10) visitante conversion   Franco Villanueva Roque
+    min 58 (2T 18) local     try          Facundo Figuerola Casas
+    min 62 (2T 22) visitante try          Francisco Bianchi
+    min 74 (2T 34) visitante try          Francisco Bianchi
+    min 74 (2T 34) visitante conversion   Franco Villanueva Roque
+  marcador  · eventos 32-19 · guardado 32-19
+  tries     · 6-3 (guardado —-—)
+  arbitro   · Guillermo Callizo (guardado: —)
+  guardado  · 30 local · 30 visitante · 12 eventos
+
+San Francisco R.C. M15 "B" vs Club La Tablada M15 "B" · torneo-cordobes-m15-b · tarjeta 325601  ·  b7301c4b-4cbf-44d3-9982-055c122a430a
+  local     · San Francisco R.C. M15 "B" · 22 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M15 "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min  8 (1T 8) visitante try          Clemente Pignata
+    min 20 (1T 20) visitante try          Alejandro Damonte
+    min 33 (1T 33) visitante try          Valentino Cura Tey
+    min 34 (1T 34) visitante conversion   Juan Bautista Araya Balbi
+    min 45 (2T 5) visitante substitution Guillermo Jose Nores
+    min 45 (2T 5) visitante substitution Manuel Gonzalez
+    min 46 (2T 6) local     substitution Donato Virano
+    min 46 (2T 6) local     substitution Nicolás Francisco Barrera
+    min 48 (2T 8) visitante try          Santiago Cardo
+    min 49 (2T 9) visitante conversion   Ignacio Alzuarte
+    min 50 (2T 10) visitante substitution Valentino Cura Tey
+    min 50 (2T 10) visitante substitution Constancio Rosso
+    min 50 (2T 10) visitante substitution Juan Bautista Araya Balbi
+    min 52 (2T 12) local     substitution Francisco Ortega
+    min 55 (2T 15) visitante substitution Salvador Andreone
+    min 58 (2T 18) local     substitution Bautista Lamberti
+    min 60 (2T 20) visitante substitution Clemente Pignata
+    min 61 (2T 21) local     substitution Julián Rosa
+    min 62 (2T 22) visitante try          Mateo Altamira
+    min 63 (2T 23) visitante conversion   Joaquin Jofre
+    min 65 (2T 25) local     try          Emiliano Fraga
+    min 68 (2T 28) visitante try          Ignacio Alzuarte
+    min 69 (2T 29) local     substitution Facundo Castellari
+    min 72 (2T 32) visitante try          Simon Tagle
+    min 73 (2T 33) visitante conversion   Joaquin Jofre
+  marcador  · eventos 5-43 · guardado 5-43
+  tries     · 1-7 (guardado —-—)
+  arbitro   · Alejandro Martin Ceballos (guardado: —)
+  guardado  · 22 local · 23 visitante · 25 eventos
+
+Tala Rugby Club M15 "C" vs Jockey Club Córdoba M15 "B" · torneo-cordobes-m15-b · tarjeta 325602  ·  a056ac70-d914-4d55-91dc-2681c5630233
+  local     · Tala Rugby Club M15 "C" · 29 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M15 "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min  4 (1T 4) visitante try          Santino Nicolás Genesio Molinar
+    min 12 (1T 12) visitante try          Matias Rubi Arcurio
+    min 12 (1T 12) visitante conversion   Antonio Jose Nores Navarro
+    min 15 (1T 15) visitante try          Pedro Heredia
+    min 15 (1T 15) visitante conversion   Antonio Jose Nores Navarro
+    min 20 (1T 20) visitante try          Benjamín Genaro Ganigian
+    min 30 (1T 30) visitante try          Santino Nicolás Genesio Molinar
+    min 30 (1T 30) visitante conversion   Antonio Jose Nores Navarro
+    min 35 (1T 35) local     substitution Nicolás Bedacarratx
+    min 35 (1T 35) local     substitution Augusto Jose Rodriguez Cepparo
+    min 37 (1T 37) visitante conversion   Antonio Jose Nores Navarro
+    min 37 (1T 37) visitante try          Pedro Heredia
+    min 40 (1T 40) local     substitution Dante Vagheggini Bruno
+    min 41 (1T 41) local     substitution Bautista Altamirano
+    min 42 (1T 42) local     substitution Ignacio Álvarez
+    min 42 (1T 42) local     substitution Santiago León Pérez Godino
+    min 45 (1T 45) local     substitution Juan Cruz Marchetti
+    min 45 (1T 45) local     substitution Bautista Diaz Cardeilhac
+    min 49 (1T 49) local     substitution Juan Ignacio Capitán Maccio
+    min 58 (1T 58) local     substitution Martin Salord
+    min 51 (2T 11) visitante try          Benjamín Genaro Ganigian
+    min 55 (2T 15) visitante substitution Lucio Melo Biagi
+    min 55 (2T 15) visitante substitution Felipe Santacroce
+    min 60 (2T 20) visitante substitution Felipe Garcia Racigh
+    min 70 (2T 30) visitante substitution Juan Ignacio Espinedo
+    min 70 (2T 30) visitante substitution Octavio Ferrer Mendieta
+    min 70 (2T 30) visitante try          Antonio Jose Nores Navarro
+  marcador  · eventos 0-48 · guardado 0-48
+  tries     · 0-8 (guardado —-—)
+  arbitro   · Santiago Herrera Albano (guardado: —)
+  guardado  · 29 local · 23 visitante · 27 eventos
+
+Jockey Club Córdoba M15 "C" vs Tala Rugby Club M15 "B" · torneo-cordobes-m15-b · tarjeta 325604  ·  ddc7c3f0-f8dc-4039-93ea-edebc0e2bfab
+  local     · Jockey Club Córdoba M15 "C" · 28 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M15 "B" · 26 jugadores · 0 con ficha fijada
+  eventos   · 21
+    min  2 (1T 2) visitante try          Santiago Ciceri
+    min  5 (1T 5) visitante conversion   Santiago Ciceri
+    min 10 (1T 10) visitante conversion   Gregorio Ramos
+    min 10 (1T 10) visitante try          Santiago Ortiz
+    min 15 (1T 15) visitante conversion   Santiago Ortiz
+    min 15 (1T 15) visitante try          Santiago Ortiz
+    min 30 (1T 30) visitante try          Santiago Ortiz
+    min 35 (1T 35) local     substitution Vargas Alessio Lautaro
+    min 35 (1T 35) local     substitution Joaquin Antonio Pedernera Griffa
+    min 40 (1T 40) local     try          Felipe Massanet
+    min 40 (2T 0) local     try          Fabrizio Joaquin Gervan Cisneros
+    min 42 (2T 2) visitante try          Tomas Francisco Lopez Gilardoni
+    min 42 (2T 2) visitante conversion   Juan Ignacio Rujinsky
+    min 47 (2T 7) local     try          Felipe Massanet
+    min 50 (2T 10) local     substitution Matias Inaudi
+    min 50 (2T 10) visitante try          Gonzalo Exequiel Gomez Oliva
+    min 53 (2T 13) local     injury       Mateo Buitrago Herrera
+    min 57 (2T 17) local     substitution Benjamin Krumm
+    min 65 (2T 25) visitante try          Juan Ignacio Rujinsky
+    min 70 (2T 30) local     substitution Ramiro Zarate Ravera
+    min 70 (2T 30) local     substitution Dino Vitali
+  marcador  · eventos 15-43 · guardado 15-43
+  tries     · 3-7 (guardado —-—)
+  arbitro   · Rodrigo Tiranti (guardado: —)
+  guardado  · 28 local · 26 visitante · 21 eventos
+
+Córdoba Athletic Club M15 "B" vs Córdoba Rugby Club M15 "B" · torneo-cordobes-m15-b · tarjeta 326195  ·  9be6cd50-81c0-4291-84ca-85a5637a35f1
+  local     · Córdoba Athletic Club M15 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Córdoba Rugby Club M15 "B" · 18 jugadores · 0 con ficha fijada
+  eventos   · 35
+    min  2 (1T 2) visitante try          Leandro Martin Barboza Bilbao
+    min  5 (1T 5) visitante try          Leandro Martin Barboza Bilbao
+    min  5 (1T 5) visitante conversion   Thiago Benjamin Berardi
+    min  8 (1T 8) local     try          Franco Medina Paoletti
+    min 10 (1T 10) local     try          Ignacio Lauret Luna
+    min 11 (1T 11) local     conversion   Agustin Villalba
+    min 12 (1T 12) local     try          Augusto Felipe Bonoris
+    min 13 (1T 13) local     conversion   Agustin Villalba
+    min 17 (1T 17) local     try          Augusto Felipe Bonoris
+    min 18 (1T 18) local     conversion   Facundo Duarte Febre
+    min 20 (1T 20) visitante try          Valentino Ropellatto
+    min 20 (1T 20) visitante conversion   Thiago Benjamin Berardi
+    min 20 (1T 20) visitante card_yellow  Bruno Mariano Pino
+    min 30 (1T 30) local     try          Ignacio Lauret Luna
+    min 35 (1T 35) local     try          Franco Medina Paoletti
+    min 36 (1T 36) local     conversion   Agustin Villalba
+    min 39 (1T 39) visitante try          Thiago Benjamin Berardi
+    min 39 (1T 39) visitante conversion   Thiago Benjamin Berardi
+    min 40 (2T 0) local     substitution Lisandro Fabián Monje
+    min 40 (2T 0) local     substitution Luca Bollati Barros
+    min 40 (2T 0) local     substitution Franco Medina Paoletti
+    min 40 (2T 0) local     substitution Ignacio Lauret Luna
+    min 40 (2T 0) local     substitution Cruz Juan Peña
+    min 40 (2T 0) local     substitution Facundo Duarte Febre
+    min 50 (2T 10) local     try          Fabrizio Dalessandro Serra
+    min 51 (2T 11) local     conversion   Agustin Villalba
+    min 55 (2T 15) local     try          Pedro Bas
+    min 59 (2T 19) visitante try          Leandro Martin Barboza Bilbao
+    min 60 (2T 20) local     card_yellow  Maximo Gabazzi
+    min 64 (2T 24) local     try          Ignacio Lauret Luna
+    min 68 (2T 28) visitante try          Thiago Benjamin Berardi
+    min 68 (2T 28) visitante conversion   Thiago Benjamin Berardi
+    min 70 (2T 30) local     try          Pedro Bas
+    min 75 (2T 35) visitante card_yellow  Jeremias Koriakos
+    min 75 (2T 35) local     card_yellow  Lisandro Gastón Esperon
+  marcador  · eventos 60-38 · guardado 60-38
+  tries     · 10-6 (guardado —-—)
+  arbitro   · Javier Sorbera Ferrer (guardado: —)
+  guardado  · 23 local · 18 visitante · 35 eventos
+
+Jockey Club Córdoba M15 "B" vs San Francisco R.C. M15 "B" · torneo-cordobes-m15-b · tarjeta 326197  ·  8c0b5e0b-e27b-4b9f-9403-6817319a2338
+  local     · Jockey Club Córdoba M15 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · San Francisco R.C. M15 "B" · 15 jugadores · 0 con ficha fijada
+  eventos   · 9
+    min  4 (1T 4) local     try          Felipe Garcia Racigh
+    min  9 (1T 9) visitante try          Valentino Pellini
+    min 32 (1T 32) local     try          Facundo Ramos Martínez
+    min 32 (1T 32) local     conversion   Pedro Francisco Sanchez Suarez
+    min 45 (2T 5) local     try          Felipe Meyer
+    min 45 (2T 5) local     conversion   Facundo Ramos Martínez
+    min 52 (2T 12) local     try          Felipe Meyer
+    min 52 (2T 12) local     conversion   Facundo Ramos Martínez
+    min 57 (2T 17) visitante injury       Valentino Roldan
+  marcador  · eventos 26-5 · guardado 26-5
+  tries     · 4-1 (guardado —-—)
+  arbitro   · Leandro Luchetti (guardado: —)
+  guardado  · 23 local · 15 visitante · 9 eventos
+
+Urú Curé Rugby Club M15 "B" vs Jockey Club Córdoba M15 "C" · torneo-cordobes-m15-b · tarjeta 326199  ·  459ff288-0f79-4ce0-8679-0e666c0fc9db
+  local     · Urú Curé Rugby Club M15 "B" · 27 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M15 "C" · 26 jugadores · 0 con ficha fijada
+  eventos   · 37
+    min  1 (1T 1) local     try          Agustin Fuentes
+    min  1 (1T 1) local     conversion   Agustin Fuentes
+    min 16 (1T 16) local     try          Matias Costa
+    min 16 (1T 16) local     conversion   Agustin Fuentes
+    min 17 (1T 17) local     substitution Felipe Arqué Latour
+    min 17 (1T 17) local     substitution Santiago Zampa Hipp
+    min 17 (1T 17) local     substitution Felipe Tosco Gonella
+    min 21 (1T 21) local     try          Vicente Jose Crespo
+    min 21 (1T 21) local     conversion   Agustin Fuentes
+    min 25 (1T 25) local     try          Jose Ignacio Barella Pueyrredon
+    min 28 (1T 28) local     try          Agustin Fuentes
+    min 32 (1T 32) visitante try          Francisco Carranza Garello
+    min 32 (1T 32) visitante conversion   Antonio Jose Nores Navarro
+    min 35 (1T 35) local     substitution Jose Ignacio Barella Pueyrredon
+    min 35 (1T 35) local     substitution Lorenzo Cargnelutti
+    min 35 (1T 35) local     try          Dimas Benjamin Rodríguez
+    min 35 (1T 35) local     substitution Matias Costa
+    min 35 (1T 35) local     substitution Aquiles Rivoira
+    min 35 (1T 35) local     conversion   Agustin Fuentes
+    min 41 (2T 1) visitante substitution Agustín Orthusteguy
+    min 41 (2T 1) local     conversion   Agustin Fuentes
+    min 41 (2T 1) local     try          Agustin Fuentes
+    min 48 (2T 8) visitante substitution Isidro García Faure
+    min 48 (2T 8) local     try          Francisco Marrero Las Heras
+    min 48 (2T 8) local     conversion   Agustin Fuentes
+    min 54 (2T 14) local     try          Francisco Marrero Las Heras
+    min 56 (2T 16) visitante substitution Matias Inaudi
+    min 59 (2T 19) local     conversion   Agustin Fuentes
+    min 59 (2T 19) local     try          Agustin Fuentes
+    min 62 (2T 22) local     try          Agustin Fuentes
+    min 62 (2T 22) local     conversion   Agustin Fuentes
+    min 64 (2T 24) local     conversion   Agustin Fuentes
+    min 64 (2T 24) local     try          Nicolas Caggiano
+    min 66 (2T 26) local     try          Juan Sosa Cocco
+    min 67 (2T 27) local     conversion   Agustin Fuentes
+    min 70 (2T 30) visitante try          Lorenzo Miguel Rossi Comito
+    min 70 (2T 30) visitante conversion   Antonio Jose Nores Navarro
+  marcador  · eventos 85-14 · guardado 85-14
+  tries     · 13-2 (guardado —-—)
+  arbitro   · Santiago Herrera Albano (guardado: —)
+  guardado  · 27 local · 26 visitante · 37 eventos
+
+Tala Rugby Club M15 "C" vs Tala Rugby Club M15 "B" · torneo-cordobes-m15-b · tarjeta 326201  ·  49a7659f-8648-4aac-9f02-3388388856ee
+  local     · Tala Rugby Club M15 "C" · 29 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M15 "B" · 25 jugadores · 0 con ficha fijada
+  eventos   · 8
+    min  4 (1T 4) visitante try          Santiago Ciceri
+    min  8 (1T 8) visitante try          Gregorio Ramos
+    min  8 (1T 8) visitante conversion   Tomas Francisco Lopez Gilardoni
+    min 17 (1T 17) visitante conversion   Tomas Salvador Alvarez
+    min 21 (1T 21) visitante try          Juan Ignacio Rujinsky
+    min 21 (1T 21) visitante conversion   Tomas Salvador Alvarez
+    min 21 (1T 21) visitante try          Juan Ignacio Rujinsky
+    min 63 (2T 23) local     try          Santiago León Pérez Godino
+  marcador  · eventos 5-26 · guardado 5-26
+  tries     · 1-4 (guardado —-—)
+  arbitro   · Agustin Goycoolea (guardado: —)
+  guardado  · 29 local · 25 visitante · 8 eventos
+
+Alta Gracia R.C. M15 "B" vs Jockey Club Córdoba M15 "B" · torneo-cordobes-m15-b · tarjeta 326771  ·  b16515c9-2420-40dc-a298-52fe510f0146
+  local     · Alta Gracia R.C. M15 "B" · 20 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M15 "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 0-28
+  tries     · 0-0 (guardado —-—)
+  guardado  · 20 local · 23 visitante · 0 eventos
+
+Jockey Club Córdoba M15 "C" vs Club La Tablada M15 "B" · torneo-cordobes-m15-b · tarjeta 326774  ·  fb1690a4-01e0-4189-b6b4-9dccd562f391
+  local     · Jockey Club Córdoba M15 "C" · 23 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M15 "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 30
+    min 12 (1T 12) visitante try          Santiago Girardi
+    min 13 (1T 13) visitante conversion   Juan Bautista Araya Balbi
+    min 21 (1T 21) visitante try          Julio Francisco Aliaga Moyano
+    min 25 (1T 25) visitante try          Manuel Gonzalez
+    min 29 (1T 29) visitante try          Alejandro Damonte
+    min 35 (1T 35) local     substitution Geronimo Manuel Ponce
+    min 35 (1T 35) visitante try          Alejandro Damonte
+    min 41 (2T 1) visitante substitution Manuel Gonzalez
+    min 41 (2T 1) visitante substitution Juan Bautista Araya Balbi
+    min 41 (2T 1) visitante substitution Simon Tagle
+    min 41 (2T 1) visitante try          Lisandro Imanol Parellada Ivanoff
+    min 42 (2T 2) visitante conversion   Juan Bautista Araya Balbi
+    min 45 (2T 5) local     substitution Luca Valentin Regueiro Lascano
+    min 45 (2T 5) visitante substitution Francisco Picone
+    min 45 (2T 5) visitante substitution Lisandro Imanol Parellada Ivanoff
+    min 49 (2T 9) local     substitution Tomás Bazan Soaje
+    min 52 (2T 12) visitante substitution Clemente Pignata
+    min 52 (2T 12) visitante try          Alejandro Damonte
+    min 52 (2T 12) visitante substitution Santiago Girardi
+    min 53 (2T 13) visitante conversion   Joaquin Jofre
+    min 55 (2T 15) local     substitution Ignacio Juarez Bricca
+    min 55 (2T 15) local     substitution Joaquin Antonio Pedernera Griffa
+    min 57 (2T 17) visitante try          Luca Lomonaco Manzi
+    min 58 (2T 18) visitante conversion   Joaquin Jofre
+    min 60 (2T 20) local     substitution Marco Rossi Landi
+    min 62 (2T 22) local     conversion   Antonio Jose Nores Navarro
+    min 62 (2T 22) local     try          Antonio Jose Nores Navarro
+    min 68 (2T 28) local     substitution Francisco Diego Criado Urgorri
+    min 68 (2T 28) visitante try          Juan Pedro Cmet
+    min 70 (2T 30) local     substitution Vargas Alessio Lautaro
+  marcador  · eventos 7-53 · guardado 7-53
+  tries     · 1-9 (guardado 1-8)
+  arbitro   · Leandro Marcos Lubary (guardado: —)
+  guardado  · 23 local · 23 visitante · 30 eventos
+
+Tala Rugby Club M15 "B" vs Córdoba Rugby Club M15 "B" · torneo-cordobes-m15-b · tarjeta 326785  ·  9cc0aa73-00c3-4685-aceb-0d73cfc31029
+  local     · Tala Rugby Club M15 "B" · 25 jugadores · 0 con ficha fijada
+  visitante · Córdoba Rugby Club M15 "B" · 19 jugadores · 0 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 0-28
+  tries     · 0-0 (guardado —-—)
+  guardado  · 25 local · 19 visitante · 0 eventos
+
+Jockey Club Córdoba M15 "B" vs Córdoba Rugby Club M15 "B" · torneo-cordobes-m15-b · tarjeta 328014  ·  440f2084-d841-4fa8-8afd-a8cff10a389f
+  local     · Jockey Club Córdoba M15 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Córdoba Rugby Club M15 "B" · 19 jugadores · 0 con ficha fijada
+  eventos   · 33
+    min  9 (1T 9) local     conversion   Santiago Aguirre Miranda
+    min  9 (1T 9) local     try          Felipe Poderti
+    min 13 (1T 13) local     try          Benjamín Genaro Ganigian
+    min 13 (1T 13) local     conversion   Santiago Aguirre Miranda
+    min 20 (1T 20) local     try          Benjamín Genaro Ganigian
+    min 20 (1T 20) local     conversion   Santiago Aguirre Miranda
+    min 26 (1T 26) local     try          Santiago Aguirre Miranda
+    min 26 (1T 26) local     conversion   Santiago Aguirre Miranda
+    min 28 (1T 28) local     conversion   Santiago Aguirre Miranda
+    min 28 (1T 28) local     try          Felipe Poderti
+    min 33 (1T 33) local     try          Matias Rubi Arcurio
+    min 33 (1T 33) local     conversion   Santiago Aguirre Miranda
+    min 37 (1T 37) visitante try          Lautaro Nahuel Martinez
+    min 41 (2T 1) local     substitution Felipe Poderti
+    min 41 (2T 1) local     substitution Luca Valentin Regueiro Lascano
+    min 41 (2T 1) local     substitution Felipe Santacroce
+    min 41 (2T 1) local     substitution Bautista Cassani
+    min 41 (2T 1) local     substitution Pedro Francisco Sanchez Suarez
+    min 41 (2T 1) local     substitution Matias Rubi Arcurio
+    min 47 (2T 7) local     conversion   Facundo Ramos Martínez
+    min 47 (2T 7) local     try          Isidro García Faure
+    min 49 (2T 9) local     substitution Juan Ignacio Tapia
+    min 52 (2T 12) visitante try          Lautaro Nahuel Martinez
+    min 52 (2T 12) local     substitution Salvador Ceballos
+    min 55 (2T 15) visitante try          Lautaro Nahuel Martinez
+    min 56 (2T 16) visitante conversion   Thiago Benjamin Berardi
+    min 62 (2T 22) local     conversion   Facundo Ramos Martínez
+    min 62 (2T 22) local     try          Benjamín Genaro Ganigian
+    min 68 (2T 28) local     try          Juan Ignacio Espinedo
+    min 71 (2T 31) visitante card_yellow  Benjamín Gomez Lardone
+    min 73 (2T 33) visitante try          Leandro Martin Barboza Bilbao
+    min 75 (2T 35) visitante try          Josué Chavarria
+    min 75 (2T 35) visitante conversion   Salvador Bortagaray
+  marcador  · eventos 61-29 · guardado 61-29
+  tries     · 9-5 (guardado —-—)
+  guardado  · 23 local · 19 visitante · 33 eventos
+
+listo · 84 partidos

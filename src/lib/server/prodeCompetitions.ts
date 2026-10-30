@@ -135,15 +135,22 @@ function getSportLabel(value: string | null) {
     }
 }
 
-function resolveUserIdentity(source: unknown, fallback?: UserIdentity | null): UserIdentity {
+/**
+ * El nombre público del ranking. Sin nombre cargado ya NO se usa la parte
+ * local del email: el leaderboard es público y "juan.perez1987" es un dato
+ * personal (y medio email). Va "Jugador" + un sufijo corto del id, estable y
+ * sin nada que identifique a la persona.
+ */
+function anonymousPlayerName(userId?: string | null) {
+    const suffix = String(userId ?? '').replace(/[^0-9a-f]/gi, '').slice(-4).toUpperCase();
+    return suffix ? `Jugador ${suffix}` : 'Jugador';
+}
+
+function resolveUserIdentity(source: unknown, fallback?: UserIdentity | null, userId?: string | null): UserIdentity {
     const userRow = toRelatedRecord(source);
     const name = toNullableString(userRow.name)
-        || (() => {
-            const email = toNullableString(userRow.email);
-            return email ? email.split('@')[0] || null : null;
-        })()
         || fallback?.name
-        || 'Usuario';
+        || anonymousPlayerName(userId ?? toNullableString(userRow.id));
 
     return {
         name,
@@ -161,7 +168,7 @@ async function loadUserIdentityMap(client: SupabaseClientLike, userIds: string[]
 
     const { data, error } = await client
         .from('users')
-        .select('id, name, avatar_url, email')
+        .select('id, name, avatar_url')
         .in('id', uniqueUserIds);
 
     if (error) {
@@ -172,7 +179,7 @@ async function loadUserIdentityMap(client: SupabaseClientLike, userIds: string[]
         const userId = toSafeString(row.id);
         if (!userId) return;
 
-        identityMap.set(userId, resolveUserIdentity(row));
+        identityMap.set(userId, resolveUserIdentity(row, null, userId));
     });
 
     return identityMap;
@@ -782,7 +789,11 @@ export async function listPublicProdeUserTotals(): Promise<SchemaStatus<PublicPr
     return {
         schemaReady: true,
         data: totalsRows.map((row, index) => {
-            const userIdentity = resolveUserIdentity(row.users, userIdentityMap.get(toSafeString(row.user_id)));
+            const userIdentity = resolveUserIdentity(
+                row.users,
+                userIdentityMap.get(toSafeString(row.user_id)),
+                toSafeString(row.user_id),
+            );
             return {
                 userId: toSafeString(row.user_id),
                 userName: userIdentity.name,

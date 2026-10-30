@@ -1,0 +1,1893 @@
+tarjetas oficiales f769a402
+
+cordoba-athletic-club-m19-c vs cordoba-athletic-club-m19-d · f769a402 · tarjeta 295609  ·  7cbf9981-c100-424a-8fe5-ad7e697c9d3d
+  local     · cordoba-athletic-club-m19-c · 22 jugadores · 0 con ficha fijada
+  visitante · cordoba-athletic-club-m19-d · 23 jugadores · 0 con ficha fijada
+  eventos   · 23
+    min  5 (1T 5) visitante try          Agustin Carlos Corbella
+    min 11 (1T 11) visitante try          Manuel Soria Urrutia
+    min 12 (1T 12) visitante conversion   Salvador Acuña
+    min 20 (1T 20) visitante try          Manuel Sallo
+    min 21 (1T 21) visitante conversion   Salvador Acuña
+    min 30 (1T 30) local     try          Santino Nieto
+    min 40 (2T 0) visitante substitution Juan Pablo Marquez
+    min 40 (2T 0) visitante substitution Agustin Gabriel Campos Campos Varela
+    min 40 (2T 0) visitante substitution Emiliano D'amario
+    min 49 (2T 9) local     try          Lautaro Ignacio Castro Diaz
+    min 50 (2T 10) local     conversion   Mateo Nicolas Torres Pereyra
+    min 56 (2T 16) visitante try          Eliseo Deleite Garcia
+    min 62 (2T 22) visitante try          Francisco Cebreros Lozano
+    min 70 (2T 30) local     try          Mateo Nicolas Torres Pereyra
+    min 77 (2T 37) visitante try          Francisco Cebreros Lozano
+    min 77 (2T 37) visitante conversion   Salvador Acuña
+    min 80 (2T 40) local     substitution Valentino Luka Suarez Carmganola
+    min 80 (2T 40) local     substitution Bautista Vazquez Panebianco
+    min 80 (2T 40) local     substitution Santino Bertolino
+    min 80 (2T 40) local     substitution Juan Ignacio Bru
+    min 80 (2T 40) local     substitution Valentin Lauret Luna
+    min 80 (2T 40) local     substitution Justo Somare
+    min 80 (2T 40) local     substitution Joaquin Galleguillo
+  marcador  · eventos 17-36 · guardado 17-36
+  tries     · 3-6 (guardado —-—)
+  arbitro   · LEONEL SORBERA (guardado: —)
+  guardado  · 22 local · 23 visitante · 23 eventos
+
+uru-cure-rugby-club-m19-b vs club-la-tablada-m19-c · f769a402 · tarjeta 295551  ·  45b4fc8a-8093-495e-890d-dfc11948a7e5
+  local     · uru-cure-rugby-club-m19-b · 27 jugadores · 0 con ficha fijada
+  visitante · club-la-tablada-m19-c · 24 jugadores · 0 con ficha fijada
+  eventos   · 26
+    min 16 (1T 16) local     try          Benjamin Anino
+    min 25 (1T 25) visitante try          Alejo Llanos
+    min 44 (2T 4) local     try          Francesco Medina
+    min 45 (2T 5) local     substitution Pedro Joaquín Nicolás Remedi
+    min 45 (2T 5) local     substitution Francisco Oscar Rivarola Fernández
+    min 45 (2T 5) local     substitution Máximo Nicolas Ferreyra Ruiz
+    min 47 (2T 7) visitante try          Pablo Gonzalez Palau
+    min 47 (2T 7) visitante conversion   Joaquin Campos
+    min 47 (2T 7) visitante conversion   Joaquin Campos
+    min 49 (2T 9) local     substitution Manuel Lopez Giordana
+    min 53 (2T 13) local     try          Francesco Medina
+    min 53 (2T 13) local     conversion   Cristobal Aguilera
+    min 56 (2T 16) local     substitution Pedro Picco Wevar
+    min 57 (2T 17) local     substitution Gustavo Jose Echenique
+    min 57 (2T 17) local     substitution Lisandro Torres
+    min 61 (2T 21) visitante substitution Genaro Alfonso Casas
+    min 63 (2T 23) local     penalty_goal Cristobal Aguilera
+    min 67 (2T 27) visitante substitution Joaquín Squinobal
+    min 67 (2T 27) visitante substitution Alex David Fioramonti Atencio
+    min 67 (2T 27) visitante substitution Baltazar Del Valle Cabanillas
+    min 68 (2T 28) visitante try          Lucas Mateo Sanchez
+    min 68 (2T 28) visitante card_yellow  Luca Benjamín Leiva
+    min 69 (2T 29) visitante substitution Alejo Llanos
+    min 69 (2T 29) visitante substitution Pablo Gonzalez Palau
+    min 70 (2T 30) visitante injury       Lautaro Benjamin Galliano
+    min 74 (2T 34) visitante substitution Lucas Mateo Sanchez
+  marcador  · eventos 20-19 · guardado 20-19
+  tries     · 3-3 (guardado —-—)
+  arbitro   · NAHUEL SABENA (guardado: —)
+  guardado  · 27 local · 24 visitante · 26 eventos
+
+club-la-tablada-m19-b vs cordoba-athletic-club-m19-b · f769a402 · tarjeta 295549  ·  2e771b99-cb12-4056-8f16-0d0f441f6b7a
+  local     · club-la-tablada-m19-b · 26 jugadores · 0 con ficha fijada
+  visitante · cordoba-athletic-club-m19-b · 26 jugadores · 6 con ficha fijada
+  eventos   · 29
+    min  1 (1T 1) visitante try          Bautista Vazquez Panebianco
+    min  5 (1T 5) local     try          Gaston Novillo Saravia
+    min 24 (1T 24) local     try          Santino Nicolás Pereyra
+    min 25 (1T 25) local     conversion   Alejo Shekendemian
+    min 27 (1T 27) local     card_yellow  Manuel Franco Iglesias
+    min 29 (1T 29) visitante penalty_goal Facundo Isao Mishima
+    min 32 (1T 32) visitante card_yellow  Bautista Vazquez Panebianco
+    min 35 (1T 35) visitante penalty_goal Facundo Isao Mishima
+    min 44 (2T 4) visitante try          Emiliano D'amario
+    min 45 (2T 5) visitante substitution Santino Prieto Martínez
+    min 46 (2T 6) visitante substitution Valentino Luka Suarez Carmganola
+    min 46 (2T 6) visitante injury       Lautaro Jonas Sosa
+    min 46 (2T 6) visitante substitution Tomas Zuain Fornillo
+    min 46 (2T 6) visitante substitution Lautaro Jonas Sosa
+    min 48 (2T 8) visitante substitution Juan Martin Castro
+    min 51 (2T 11) visitante substitution Emilio José
+    min 60 (2T 20) visitante substitution Emiliano D'amario
+    min 60 (2T 20) visitante substitution Joaquin Galleguillo
+    min 60 (2T 20) visitante card_yellow  Alex Mateo Pugni Albanesi
+    min 61 (2T 21) local     penalty_goal Alejo Shekendemian
+    min 62 (2T 22) visitante substitution Benjamin Osvaldo Campi
+    min 65 (2T 25) local     try          Tomas Maldonado
+    min 66 (2T 26) local     conversion   Alejo Shekendemian
+    min 71 (2T 31) visitante substitution Alex Mateo Pugni Albanesi
+    min 71 (2T 31) visitante substitution Bautista Vazquez Panebianco
+    min 72 (2T 32) visitante try          Faustino Castillo
+    min 73 (2T 33) visitante conversion   Facundo Isao Mishima
+    min 74 (2T 34) local     penalty_goal Alejo Shekendemian
+    min 78 (2T 38) visitante penalty_goal Facundo Isao Mishima
+  marcador  · eventos 25-26 · guardado 25-26
+  tries     · 3-3 (guardado —-—)
+  arbitro   · SERGIO ZBURA (guardado: —)
+  guardado  · 26 local · 26 visitante · 29 eventos
+
+jockey-club-cordoba-m19-c vs cordoba-athletic-club-m19-d · f769a402 · tarjeta 296524  ·  b292e6d2-b47b-44df-9ad0-d3270f610a89
+  local     · jockey-club-cordoba-m19-c · 29 jugadores · 0 con ficha fijada
+  visitante · cordoba-athletic-club-m19-d · 30 jugadores · 0 con ficha fijada
+  eventos   · 32
+    min  6 (1T 6) local     penalty_goal Valentin Roldan
+    min 13 (1T 13) visitante substitution Valentin Lauret Luna
+    min 26 (1T 26) visitante try          Joaquin Peralta Galvan
+    min 27 (1T 27) visitante conversion   Mateo Nicolas Torres Pereyra
+    min 29 (1T 29) local     injury       Felipe Belaustegui
+    min 29 (1T 29) visitante try          Santino Nieto
+    min 30 (1T 30) visitante conversion   Mateo Nicolas Torres Pereyra
+    min 34 (1T 34) local     try          Ignacio Ruggieri
+    min 34 (1T 34) local     conversion   Valentin Roldan
+    min 36 (1T 36) local     substitution Mateo Piumetto
+    min 40 (2T 0) visitante substitution Joaquin Peralta Galvan
+    min 40 (2T 0) visitante substitution Juan Cruz Navarro Lescano
+    min 40 (2T 0) visitante substitution Santino Bertolino
+    min 40 (2T 0) visitante substitution Carlos Alexis Tello
+    min 40 (2T 0) visitante substitution Justo Somare
+    min 40 (2T 0) visitante substitution Mateo Nicolas Torres Pereyra
+    min 40 (2T 0) visitante substitution Lautaro Ignacio Castro Diaz
+    min 52 (2T 12) visitante try          Alejo Iturria
+    min 68 (2T 28) visitante injury       Valentin Beletti
+    min 68 (2T 28) visitante substitution Valentin Beletti
+    min 70 (2T 30) visitante substitution Jair Cardozo
+    min 70 (2T 30) visitante try          Salvador Colombo
+    min 70 (2T 30) visitante injury       Jair Cardozo
+    min 70 (2T 30) visitante substitution Oscar Iván Nieva Sandoval
+    min 76 (2T 36) local     substitution Ignacio Stempels Rivero
+    min 80 (2T 40) local     substitution Felipe Belaustegui
+    min 86 (2T 46) local     substitution Valentin Roldan
+    min 86 (2T 46) local     substitution Benjamin Cesano
+    min 86 (2T 46) local     substitution Felipe Carrara
+    min 86 (2T 46) local     substitution Sebastián Nicolas Gonzalez
+    min 86 (2T 46) local     substitution Manuel Ojeda
+    min 87 (2T 47) local     substitution Martin Robinson
+  marcador  · eventos 10-24 · guardado 10-24
+  tries     · 1-4 (guardado —-—)
+  arbitro   · PALOMA VEDIA (guardado: —)
+  guardado  · 29 local · 30 visitante · 32 eventos
+
+cordoba-athletic-club-m19-d vs san-francisco-r-c-m19-b · f769a402 · tarjeta 295559  ·  a28bda3c-52ab-43b4-a7a5-63f8ad707962
+  local     · cordoba-athletic-club-m19-d · 23 jugadores · 0 con ficha fijada
+  visitante · san-francisco-r-c-m19-b · 23 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min  2 (1T 2) local     try          Federico Lopez Romera
+    min  3 (1T 3) local     conversion   Salvador Acuña
+    min  5 (1T 5) local     try          Salvador Acuña
+    min  8 (1T 8) visitante try          Bruno Diaz
+    min 26 (1T 26) visitante penalty_goal Santino Vanzetti
+    min 27 (1T 27) local     try          Joaquin Martinez
+    min 28 (1T 28) local     conversion   Salvador Acuña
+    min 34 (1T 34) local     try          Juan Pablo Marquez
+    min 35 (1T 35) local     conversion   Salvador Acuña
+    min 43 (2T 3) local     try          Santino Nieto
+    min 46 (2T 6) local     substitution Juan Ignacio Giordana
+    min 46 (2T 6) local     substitution Justo Somare
+    min 46 (2T 6) local     substitution Santino Joaquin Inzulza Contrera
+    min 46 (2T 6) local     substitution Santino Nieto
+    min 46 (2T 6) local     substitution Carlos Alexis Tello
+    min 48 (2T 8) local     substitution Juan Pablo Lagoria
+    min 48 (2T 8) local     substitution Juan Pablo Marquez
+    min 55 (2T 15) local     try          Francisco Cebreros Lozano
+    min 59 (2T 19) local     substitution Joaquin Martinez
+    min 59 (2T 19) local     try          Salvador Acuña
+    min 60 (2T 20) local     conversion   Salvador Acuña
+    min 68 (2T 28) local     try          Fabrizio Ceretti
+    min 69 (2T 29) local     conversion   Salvador Acuña
+    min 74 (2T 34) local     try          Fabrizio Ceretti
+    min 75 (2T 35) local     conversion   Salvador Acuña
+  marcador  · eventos 57-8 · guardado 57-8
+  tries     · 9-1 (guardado —-—)
+  arbitro   · CRISTIAN MAURO QUILES BUTELER (guardado: —)
+  guardado  · 23 local · 23 visitante · 25 eventos
+
+jockey-club-cordoba-m19-c vs cordoba-rugby-club-m19-b · f769a402 · tarjeta 295558  ·  c4f4868e-94eb-424c-ac62-9cb92b05c126
+  local     · jockey-club-cordoba-m19-c · 24 jugadores · 0 con ficha fijada
+  visitante · cordoba-rugby-club-m19-b · 30 jugadores · 19 con ficha fijada
+  eventos   · 26
+    min 10 (1T 10) local     penalty_goal Santiago Bosch
+    min 20 (1T 20) local     substitution Joaquin Prado Ercoli
+    min 29 (1T 29) visitante try          Francisco Ezequiel Pérez Palau
+    min 31 (1T 31) visitante try          Alvaro Quiroga
+    min 31 (1T 31) visitante substitution Francisco Ezequiel Pérez Palau
+    min 45 (2T 5) local     substitution Valentin Roldan
+    min 45 (2T 5) local     substitution Octavio Triay
+    min 45 (2T 5) visitante substitution Lorenzo Defazy
+    min 45 (2T 5) visitante try          Johann Rolando Sebastian Benega Tisera
+    min 48 (2T 8) local     try          Ignacio Ruggieri
+    min 48 (2T 8) local     conversion   Mauro Gastón Pérez
+    min 50 (2T 10) local     substitution Lautaro Tejeda
+    min 50 (2T 10) local     substitution Nicolás Blando Molina
+    min 50 (2T 10) local     substitution Santiago Paolini
+    min 55 (2T 15) local     try          Homero Spongia
+    min 56 (2T 16) visitante substitution Santiago Lescano
+    min 59 (2T 19) visitante card_yellow  Ian Carrizo
+    min 60 (2T 20) local     substitution Santiago Bosch
+    min 60 (2T 20) visitante substitution Johann Rolando Sebastian Benega Tisera
+    min 65 (2T 25) visitante substitution Santino Ropellatto
+    min 65 (2T 25) visitante substitution Juan Ignacio Fraticelli
+    min 65 (2T 25) visitante card_yellow  Santino Fulgenzi
+    min 66 (2T 26) visitante substitution Tomas Valentin Damiano Arri
+    min 71 (2T 31) visitante substitution Emiliano Barreras
+    min 72 (2T 32) visitante try          Álvaro Bautista Asvisio
+    min 72 (2T 32) visitante conversion   Nicolas Plans
+  marcador  · eventos 15-22 · guardado 15-22
+  tries     · 2-4 (guardado —-—)
+  arbitro   · ÁNGELES MURUA (guardado: —)
+  guardado  · 24 local · 30 visitante · 26 eventos
+
+club-palermo-bajo-m19-b vs club-la-tablada-m19-b · f769a402 · tarjeta 295555  ·  abc98679-bd02-45eb-bb22-24b9909b43b9
+  local     · club-palermo-bajo-m19-b · 27 jugadores · 0 con ficha fijada
+  visitante · club-la-tablada-m19-b · 24 jugadores · 0 con ficha fijada
+  eventos   · 28
+    min 12 (1T 12) local     try          Benjamin Strada
+    min 13 (1T 13) local     conversion   Juan Cruz Alvarez
+    min 21 (1T 21) local     try          Felipe Canepa
+    min 22 (1T 22) local     conversion   Juan Cruz Alvarez
+    min 25 (1T 25) visitante substitution Pedro Mañá
+    min 41 (2T 1) local     substitution Juan Ignacio Vera
+    min 44 (2T 4) local     substitution Mateo Georgetti
+    min 49 (2T 9) local     try          Joaquín Dragonetti
+    min 49 (2T 9) local     substitution Santino Rossi
+    min 49 (2T 9) local     substitution Juan Ignacio Gallardo
+    min 49 (2T 9) visitante substitution Augusto Aita Tagle
+    min 50 (2T 10) visitante substitution Manuel Franco Iglesias
+    min 52 (2T 12) visitante substitution Cristobal Pastor
+    min 52 (2T 12) visitante substitution Joaquín Squinobal
+    min 57 (2T 17) visitante substitution Juan Cruz Moreno
+    min 58 (2T 18) local     substitution Benjamin Roy Peralta
+    min 60 (2T 20) visitante conversion   Alejo Shekendemian
+    min 64 (2T 24) local     try          Angel Valentin Alarcon
+    min 65 (2T 25) local     conversion   Juan Cruz Alvarez
+    min 65 (2T 25) visitante substitution Benicio Romarovsky
+    min 70 (2T 30) local     substitution Francisco Javier Pretini
+    min 70 (2T 30) local     substitution Felipe Canepa
+    min 71 (2T 31) visitante try          Felipe Bernardi
+    min 71 (2T 31) visitante try          Máximo Moreno
+    min 74 (2T 34) visitante try          Gaston Novillo Saravia
+    min 74 (2T 34) visitante conversion   Alejo Shekendemian
+    min 80 (2T 40) visitante substitution Gonzalo Legnazzi
+    min 80 (2T 40) visitante substitution Juan Ignacio Farah
+  marcador  · eventos 26-19 · guardado 26-19
+  tries     · 4-3 (guardado —-—)
+  arbitro   · LAUTARO JOAQUIN QUIROGA CAFURE (guardado: —)
+  guardado  · 27 local · 24 visitante · 28 eventos
+
+club-universitario-de-cordoba-m19-b vs jockey-club-cordoba-m19-b · f769a402 · tarjeta 295554  ·  1e739f77-00d9-4c30-bc69-f8fb44c7340e
+  local     · club-universitario-de-cordoba-m19-b · 24 jugadores · 0 con ficha fijada
+  visitante · jockey-club-cordoba-m19-b · 23 jugadores · 0 con ficha fijada
+  eventos   · 33
+    min  1 (1T 1) visitante try          Julian Lopez Olivero
+    min  1 (1T 1) visitante conversion   Joaquin Delia
+    min  8 (1T 8) local     try          Bautista Sartor Musso
+    min  8 (1T 8) local     conversion   Mauro Llamas Bruno
+    min 15 (1T 15) visitante try          Francisco Sangoy Cafferata
+    min 20 (1T 20) visitante penalty_goal Joaquin Delia
+    min 22 (1T 22) visitante try          Tomás Ernesto Guevara Ortiz
+    min 50 (2T 10) local     substitution Lautaro Gabriel Roteda
+    min 50 (2T 10) local     substitution Joaquin Suarez
+    min 50 (2T 10) local     substitution Lucas Jose Maldonado Gomez
+    min 71 (2T 31) local     card_yellow  Francisco Octavio Ariza
+    min 77 (2T 37) visitante try          Francisco Sangoy Cafferata
+    min 77 (2T 37) visitante conversion   Joaquin Delia
+    min 80 (2T 40) local     substitution Thiago Nicolas Sanchez
+    min 80 (2T 40) local     substitution Jeremías Molinari Maidana
+    min 83 (2T 43) visitante substitution Francisco Sanmillan Seguro
+    min 83 (2T 43) visitante substitution Tomás Ernesto Guevara Ortiz
+    min 83 (2T 43) visitante substitution León Mendoza Finzi
+    min 83 (2T 43) visitante substitution Emanuel Valentin Guzman Ladino
+    min 83 (2T 43) visitante substitution Sebastián Nicolas Gonzalez
+    min 85 (2T 45) visitante substitution Felipe Luti Bitar
+    min 85 (2T 45) visitante substitution Martin Oglietti Aguirre
+    min 85 (2T 45) visitante substitution Tobias Marco Aime
+    min 87 (2T 47) visitante try          Julian Lopez Olivero
+    min 87 (2T 47) visitante conversion   Joaquin Delia
+    min 92 (2T 52) visitante try          Julian Lopez Olivero
+    min 92 (2T 52) visitante conversion   Joaquin Delia
+    min 97 (2T 57) visitante try          Santiago Mazzuferi
+    min 97 (2T 57) visitante conversion   Joaquin Delia
+    min 98 (2T 58) visitante try          Santiago Mazzuferi
+    min 103 (2T 63) visitante try          Felipe Joaquin Vazquez
+    min 103 (2T 63) visitante conversion   Joaquin Delia
+    min 110 (2T 70) visitante card_yellow  Valentino Chicco
+  marcador  · eventos 7-60 · guardado 7-60
+  tries     · 1-9 (guardado —-—)
+  arbitro   · NAHUEL SABENA (guardado: —)
+  guardado  · 24 local · 23 visitante · 33 eventos
+
+jockey-club-cordoba-m19-c vs club-la-tablada-m19-c · f769a402 · tarjeta 303621  ·  fc6c745c-0ec9-4e89-9417-6dede71c2485
+  local     · jockey-club-cordoba-m19-c · 27 jugadores · 0 con ficha fijada
+  visitante · club-la-tablada-m19-c · 24 jugadores · 0 con ficha fijada
+  eventos   · 33
+    min  4 (1T 4) visitante try          Genaro Alfonso Casas
+    min  5 (1T 5) visitante conversion   Joaquin Campos
+    min 16 (1T 16) visitante penalty_goal Joaquin Campos
+    min 20 (1T 20) local     try          Sebastián Nicolas Gonzalez
+    min 24 (1T 24) visitante try          Tomas Citati Hernandez
+    min 24 (1T 24) visitante conversion   Joaquin Campos
+    min 32 (1T 32) visitante card_yellow  Juan Antonio Manso
+    min 35 (1T 35) local     substitution Francisco Fierro
+    min 35 (1T 35) local     substitution Sebastián Nicolas Gonzalez
+    min 35 (1T 35) local     substitution Lautaro Tejeda
+    min 35 (1T 35) local     try          Santiago Paolini
+    min 35 (1T 35) local     conversion   Lautaro Tejeda
+    min 35 (1T 35) visitante card_yellow  Benicio Romarovsky
+    min 40 (1T 40) local     substitution Ignacio Scalvenzi
+    min 45 (2T 5) visitante substitution Justino Legora
+    min 53 (2T 13) visitante substitution Nicanor Linera
+    min 57 (2T 17) visitante try          Manuel Somoza
+    min 57 (2T 17) visitante conversion   Joaquin Campos
+    min 57 (2T 17) visitante substitution Juan Antonio Manso
+    min 62 (2T 22) visitante substitution Mateo Marcantonelli
+    min 62 (2T 22) visitante substitution Manuel Franco Iglesias
+    min 63 (2T 23) visitante substitution Facundo Riaño
+    min 71 (2T 31) visitante penalty_goal Joaquin Campos
+    min 80 (2T 40) local     substitution Valentin Roldan
+    min 80 (2T 40) local     try          Joaquin Prado Ercoli
+    min 80 (2T 40) visitante substitution Alex David Fioramonti Atencio
+    min 80 (2T 40) visitante substitution Joaquín Squinobal
+    min 86 (2T 46) local     substitution Benjamin Cesano
+    min 96 (2T 56) local     substitution Felipe Mariano Rossi Comito
+    min 97 (2T 57) local     try          Nicolas Magnano
+    min 101 (2T 61) local     substitution Maximo Cardozo
+    min 101 (2T 61) local     substitution Agustin Gonzalez
+    min 110 (2T 70) local     card_yellow  Homero Spongia
+  marcador  · eventos 22-27 · guardado 22-27
+  tries     · 4-3 (guardado —-—)
+  arbitro   · DAIANA DEL MILAGRO CESARETTI (guardado: —)
+  guardado  · 27 local · 24 visitante · 33 eventos
+
+san-francisco-r-c-m19-b vs cordoba-rugby-club-m19-b · f769a402 · tarjeta 295565  ·  9cfdf6a8-beb8-4f1a-9d1d-38d1c7622cfd
+  local     · san-francisco-r-c-m19-b · 23 jugadores · 0 con ficha fijada
+  visitante · cordoba-rugby-club-m19-b · 23 jugadores · 15 con ficha fijada
+  eventos   · 26
+    min  2 (1T 2) visitante try          Alvaro Quiroga
+    min  4 (1T 4) local     penalty_goal Santino Vanzetti
+    min 10 (1T 10) visitante try          Álvaro Bautista Asvisio
+    min 10 (1T 10) visitante conversion   Nicolas Plans
+    min 16 (1T 16) local     penalty_goal Santino Vanzetti
+    min 20 (1T 20) visitante try          Álvaro Bautista Asvisio
+    min 22 (1T 22) visitante try          Álvaro Bautista Asvisio
+    min 23 (1T 23) visitante conversion   Francisco Agustin Molina
+    min 42 (2T 2) visitante substitution Santiago Lescano
+    min 45 (2T 5) visitante substitution Lautaro Rasmussen
+    min 47 (2T 7) visitante substitution Francisco Agustin Molina
+    min 51 (2T 11) visitante card_yellow  Alvaro Quiroga
+    min 52 (2T 12) visitante card_yellow  Ian Carrizo
+    min 55 (2T 15) local     card_yellow  Augusto Levrino
+    min 58 (2T 18) local     try          Máximo Gallo
+    min 58 (2T 18) local     conversion   Santino Vanzetti
+    min 58 (2T 18) visitante substitution Emiliano Barreras
+    min 60 (2T 20) local     card_yellow  Kevin Juarez
+    min 60 (2T 20) visitante substitution Luis Mondino
+    min 60 (2T 20) visitante substitution Álvaro Bautista Asvisio
+    min 63 (2T 23) visitante try          Nicolas Plans
+    min 63 (2T 23) visitante conversion   Juan Ignacio Fraticelli
+    min 69 (2T 29) visitante substitution Lorenzo Defazy
+    min 69 (2T 29) visitante try          Tomas Valentin Damiano Arri
+    min 73 (2T 33) local     try          Santino Vanzetti
+    min 74 (2T 34) visitante try          Nicolas Plans
+  marcador  · eventos 18-41 · guardado 18-41
+  tries     · 2-7 (guardado —-—)
+  arbitro   · SERGIO MALDONADO (guardado: —)
+  guardado  · 23 local · 23 visitante · 26 eventos
+
+tala-rugby-club-m19-b vs uru-cure-rugby-club-m19-b · f769a402 · tarjeta 295560  ·  d017de92-cb0c-404d-b07d-40d9c087b2fa
+  local     · tala-rugby-club-m19-b · 23 jugadores · 0 con ficha fijada
+  visitante · uru-cure-rugby-club-m19-b · 23 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min  4 (1T 4) local     substitution Tomas Eizikovits
+    min  6 (1T 6) local     card_yellow  Tomas Silbestein
+    min 11 (1T 11) visitante try          Manuel Coll
+    min 14 (1T 14) visitante card_yellow  Mirco Rene Dalmasso
+    min 23 (1T 23) local     try          Ignacio Geremia
+    min 23 (1T 23) local     conversion   Francisco Martin Ambort
+    min 34 (1T 34) local     penalty_goal Francisco Martin Ambort
+    min 46 (2T 6) local     card_yellow  Tomas Silbestein
+    min 46 (2T 6) local     card_red     Tomas Silbestein
+    min 51 (2T 11) local     substitution Lorenzo Garzon Fanin
+    min 51 (2T 11) visitante substitution Pedro Picco Wevar
+    min 54 (2T 14) visitante substitution Máximo Nicolas Ferreyra Ruiz
+    min 55 (2T 15) local     try          Gonzalo Meyer
+    min 55 (2T 15) local     conversion   Francisco Martin Ambort
+    min 56 (2T 16) local     substitution Pedro Zartarian Boetto
+    min 57 (2T 17) visitante substitution Francisco Fia
+    min 57 (2T 17) visitante substitution Tadeo Ulises Fraschetti
+    min 57 (2T 17) visitante substitution Gustavo Jose Echenique
+    min 58 (2T 18) local     try          Francisco Martin Ambort
+    min 59 (2T 19) visitante substitution Manuel Coll
+    min 60 (2T 20) local     substitution Juan De La Cruz Mendez Casariego
+    min 60 (2T 20) visitante substitution Cristobal Aguilera
+    min 62 (2T 22) local     substitution Ignacio Geremia
+    min 62 (2T 22) local     substitution Facundo Centeno
+    min 65 (2T 25) local     penalty_goal Francisco Martin Ambort
+    min 72 (2T 32) local     try          Lucas Fernández
+    min 72 (2T 32) local     conversion   Francisco Martin Ambort
+  marcador  · eventos 32-5 · guardado 32-5
+  tries     · 4-1 (guardado —-—)
+  arbitro   · FLORENCIA LEDESMA (guardado: —)
+  guardado  · 23 local · 23 visitante · 27 eventos
+
+cordoba-athletic-club-m19-d vs jockey-club-cordoba-m19-b · f769a402 · tarjeta 295568  ·  416479ff-e185-4900-850b-5239863f0717
+  local     · cordoba-athletic-club-m19-d · 23 jugadores · 0 con ficha fijada
+  visitante · jockey-club-cordoba-m19-b · 27 jugadores · 0 con ficha fijada
+  eventos   · 40
+    min  2 (1T 2) visitante try          Octavio Triay
+    min 13 (1T 13) local     try          Mateo Jose Graglia Dichiara
+    min 14 (1T 14) local     conversion   Mateo Nicolas Torres Pereyra
+    min 17 (1T 17) local     substitution Felipe Paz Albert
+    min 23 (1T 23) visitante try          Valentino Chicco
+    min 27 (1T 27) local     try          Mateo Romanazzi Pereyra
+    min 28 (1T 28) local     conversion   Mateo Nicolas Torres Pereyra
+    min 30 (1T 30) visitante card_yellow  Joaquin Delia
+    min 32 (1T 32) local     try          Agustin Gabriel Campos Campos Varela
+    min 33 (1T 33) local     conversion   Mateo Nicolas Torres Pereyra
+    min 37 (1T 37) local     try          Joaquin Peralta Galvan
+    min 38 (1T 38) local     conversion   Mateo Nicolas Torres Pereyra
+    min 42 (2T 2) visitante substitution Felipe Luti Bitar
+    min 42 (2T 2) visitante substitution Maximo Cardozo
+    min 42 (2T 2) visitante substitution Valentino Chicco
+    min 42 (2T 2) visitante substitution León Mendoza Finzi
+    min 42 (2T 2) visitante substitution Francisco Sanmillan Seguro
+    min 42 (2T 2) visitante substitution Santino Dei Rossi
+    min 42 (2T 2) visitante substitution Augusto Toledo Toselli
+    min 42 (2T 2) visitante substitution Manuel Ojeda
+    min 42 (2T 2) visitante substitution Martin Oglietti Aguirre
+    min 42 (2T 2) visitante substitution Octavio Triay
+    min 45 (2T 5) visitante try          Felipe Bessone
+    min 46 (2T 6) local     substitution Francisco Arguello
+    min 46 (2T 6) local     substitution Valentino Luka Suarez Carmganola
+    min 46 (2T 6) visitante conversion   Joaquin Delia
+    min 47 (2T 7) local     substitution Eliseo Deleite Garcia
+    min 47 (2T 7) local     substitution Juan Pablo Lagoria
+    min 48 (2T 8) visitante try          Francisco Sangoy Cafferata
+    min 49 (2T 9) visitante conversion   Joaquin Delia
+    min 58 (2T 18) local     substitution Agustin Gabriel Campos Campos Varela
+    min 59 (2T 19) visitante try          Felipe Mariano Rossi Comito
+    min 64 (2T 24) local     substitution Lautaro Bisbal
+    min 68 (2T 28) local     substitution Mateo Romanazzi Pereyra
+    min 73 (2T 33) visitante try          Dylan Farias
+    min 74 (2T 34) visitante conversion   Joaquin Delia
+    min 75 (2T 35) local     try          Emiliano D'amario
+    min 75 (2T 35) visitante conversion   Felipe Bessone
+    min 75 (2T 35) visitante try          Dylan Farias
+    min 80 (2T 40) visitante card_yellow  Felipe Bessone
+  marcador  · eventos 33-43 · guardado 33-43
+  tries     · 5-7 (guardado —-—)
+  arbitro   · GABRIEL HERNÁN TIRANTE (guardado: —)
+  guardado  · 23 local · 27 visitante · 40 eventos
+
+club-palermo-bajo-m19-b vs cordoba-athletic-club-m19-b · f769a402 · tarjeta 295566  ·  7ee44282-f1e2-423a-ac3d-5497644c06dc
+  local     · club-palermo-bajo-m19-b · 29 jugadores · 0 con ficha fijada
+  visitante · cordoba-athletic-club-m19-b · 23 jugadores · 7 con ficha fijada
+  eventos   · 12
+    min  5 (1T 5) visitante try          Santiago Ojeda
+    min  5 (1T 5) visitante conversion   Juan Pablo Soria
+    min 18 (1T 18) visitante card_yellow  Salvador Vazquez Panebianco
+    min 22 (1T 22) local     try          Benjamin Mauro Laurenti
+    min 31 (1T 31) local     try          Mateo Grosso
+    min 32 (1T 32) local     conversion   Juan Cruz Alvarez
+    min 45 (2T 5) local     try          Rodolfo Garcia Araoz
+    min 45 (2T 5) local     conversion   Juan Cruz Alvarez
+    min 55 (2T 15) local     try          Mateo Bautista Gomez Gauna
+    min 56 (2T 16) local     conversion   Juan Cruz Alvarez
+    min 64 (2T 24) local     try          Joaquín Dragonetti
+    min 74 (2T 34) local     try          Bautista Colubriale
+  marcador  · eventos 36-7 · guardado 36-7
+  tries     · 6-1 (guardado —-—)
+  arbitro   · PALOMA VEDIA (guardado: —)
+  guardado  · 29 local · 23 visitante · 12 eventos
+
+club-la-tablada-m19-b vs tala-rugby-club-m19-b · f769a402 · tarjeta 295567  ·  bb4e21f7-7ef6-44c0-869f-7ea4c39b867f
+  local     · club-la-tablada-m19-b · 24 jugadores · 0 con ficha fijada
+  visitante · tala-rugby-club-m19-b · 24 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min 24 (1T 24) local     penalty_goal Facundo Altamira
+    min 35 (1T 35) local     card_yellow  Tomas Lautaro Milan
+    min 36 (1T 36) visitante try          Francisco Martin Ambort
+    min 43 (2T 3) local     substitution Augusto Aita Tagle
+    min 43 (2T 3) visitante try          Gonzalo Meyer
+    min 43 (2T 3) visitante conversion   Francisco Martin Ambort
+    min 48 (2T 8) local     substitution Tomas Lautaro Milan
+    min 48 (2T 8) visitante substitution Lorenzo Ferez
+    min 50 (2T 10) visitante substitution Gonzalo Meyer
+    min 51 (2T 11) local     substitution Joaquín Squinobal
+    min 51 (2T 11) local     substitution Joaquin Campos
+    min 56 (2T 16) local     substitution Ignacio Stenfer
+    min 56 (2T 16) local     substitution Felipe Maldonado
+    min 61 (2T 21) visitante substitution Juan De La Cruz Mendez Casariego
+    min 61 (2T 21) visitante substitution Guido Bobatto
+    min 64 (2T 24) local     substitution Facundo Altamira
+    min 64 (2T 24) local     substitution Juan Cruz Moreno
+    min 69 (2T 29) local     try          Juan Ignacio Farah
+    min 69 (2T 29) local     conversion   Francisco Perez
+    min 70 (2T 30) visitante substitution Agustín Varela
+    min 71 (2T 31) visitante substitution Valentin Napolitano
+    min 71 (2T 31) visitante substitution Santiago Debarberis
+    min 75 (2T 35) visitante card_yellow  Facundo Centeno
+    min 76 (2T 36) local     penalty_goal Francisco Perez
+  marcador  · eventos 13-12 · guardado 13-12
+  tries     · 1-2 (guardado —-—)
+  arbitro   · LAUTARO JOAQUIN QUIROGA CAFURE (guardado: —)
+  guardado  · 24 local · 24 visitante · 24 eventos
+
+cordoba-athletic-club-m19-c vs san-francisco-r-c-m19-b · f769a402 · tarjeta 295576  ·  d77f5a0c-3324-4183-bf29-5bf63ffd12cb
+  local     · cordoba-athletic-club-m19-c · 23 jugadores · 0 con ficha fijada
+  visitante · san-francisco-r-c-m19-b · 22 jugadores · 0 con ficha fijada
+  eventos   · 26
+    min  2 (1T 2) local     try          Juan Ignacio Giordana
+    min  3 (1T 3) local     conversion   Mateo Jose Graglia Dichiara
+    min  6 (1T 6) local     try          Juan Ignacio Giordana
+    min  7 (1T 7) local     conversion   Mateo Jose Graglia Dichiara
+    min  9 (1T 9) local     injury       Santino Nieto
+    min  9 (1T 9) local     substitution Santiago Bocco
+    min 11 (1T 11) local     try          Santino Joaquin Inzulza Contrera
+    min 12 (1T 12) local     conversion   Mateo Jose Graglia Dichiara
+    min 22 (1T 22) local     try          Juan Pablo Marquez
+    min 29 (1T 29) local     try          Juan Pablo Marquez
+    min 30 (1T 30) visitante try          Fausto Norryh González
+    min 30 (1T 30) visitante conversion   Santino Vanzetti
+    min 36 (1T 36) local     try          Francisco Cebreros Lozano
+    min 40 (2T 0) local     substitution Francisco Cebreros Lozano
+    min 40 (2T 0) local     substitution Raul Calamera
+    min 47 (2T 7) local     try          Santino Joaquin Inzulza Contrera
+    min 49 (2T 9) local     substitution Santino Nieto
+    min 50 (2T 10) visitante try          Mateo Schiro Breda
+    min 52 (2T 12) local     substitution Justo Somare
+    min 52 (2T 12) local     substitution Juan Pablo Marquez
+    min 57 (2T 17) local     try          Fabrizio Ceretti
+    min 61 (2T 21) local     try          Salvador Cabanillas
+    min 68 (2T 28) local     try          Eliseo Branca Mondelli
+    min 69 (2T 29) local     conversion   Lorenzo Joaquin Cremonezzi
+    min 70 (2T 30) visitante try          Santino Astegiano
+    min 75 (2T 35) local     try          Bautista Alvarez
+  marcador  · eventos 63-17 · guardado 63-17
+  tries     · 11-3 (guardado —-—)
+  arbitro   · LEONEL SORBERA (guardado: —)
+  guardado  · 23 local · 22 visitante · 26 eventos
+
+tala-rugby-club-m19-c vs cordoba-rugby-club-m19-b · f769a402 · tarjeta 295575  ·  f851be34-b472-4786-be82-d41974b710e6
+  local     · tala-rugby-club-m19-c · 21 jugadores · 0 con ficha fijada
+  visitante · cordoba-rugby-club-m19-b · 25 jugadores · 17 con ficha fijada
+  eventos   · 29
+    min  4 (1T 4) visitante try          Johann Rolando Sebastian Benega Tisera
+    min  7 (1T 7) visitante try          Lautaro David Balán Tolaba
+    min 12 (1T 12) local     try          Augusto Ibrahín Abregu
+    min 12 (1T 12) local     conversion   Antonio Rafael Cabanillas
+    min 12 (1T 12) visitante try          Álvaro Bautista Asvisio
+    min 12 (1T 12) visitante conversion   Francisco Agustin Molina
+    min 15 (1T 15) visitante conversion   Francisco Agustin Molina
+    min 15 (1T 15) visitante try          Francisco Ezequiel Pérez Palau
+    min 29 (1T 29) visitante try          Ian Carrizo
+    min 41 (2T 1) visitante substitution Lorenzo Defazy
+    min 50 (2T 10) visitante substitution Gaston Maximiliano Squire
+    min 50 (2T 10) visitante substitution Santiago Alejandro Alincastro Sosa
+    min 56 (2T 16) visitante try          Francisco Agustin Molina
+    min 56 (2T 16) visitante conversion   Nicolas Plans
+    min 56 (2T 16) visitante substitution Francisco Agustin Molina
+    min 57 (2T 17) local     substitution Máximo Valentino Broggi
+    min 57 (2T 17) visitante substitution Santino Ropellatto
+    min 57 (2T 17) visitante substitution Francisco Ezequiel Pérez Palau
+    min 60 (2T 20) visitante substitution Ian Carrizo
+    min 61 (2T 21) visitante substitution Octavio Altamirano Nesha
+    min 64 (2T 24) visitante try          Luis Mondino
+    min 65 (2T 25) local     substitution Facundo Moyano Mahieu
+    min 65 (2T 25) visitante substitution Santiago Di Fulvio Gonzalez
+    min 73 (2T 33) local     try          José Francisco Vivanco Cabrera
+    min 73 (2T 33) local     conversion   Antonio Rafael Cabanillas
+    min 80 (2T 40) local     substitution Leopoldo Garzón González
+    min 80 (2T 40) local     substitution Felipe Esteban
+    min 80 (2T 40) local     substitution Francisco Ferreyra
+    min 80 (2T 40) local     substitution John Walker De Martini
+  marcador  · eventos 14-41 · guardado 14-41
+  tries     · 2-7 (guardado —-—)
+  arbitro   · FLORENCIA LEDESMA (guardado: —)
+  guardado  · 21 local · 25 visitante · 29 eventos
+
+tala-rugby-club-m19-b vs cordoba-athletic-club-m19-b · f769a402 · tarjeta 295572  ·  8e839e7c-a362-461a-9dd2-35003b478884
+  local     · tala-rugby-club-m19-b · 23 jugadores · 0 con ficha fijada
+  visitante · cordoba-athletic-club-m19-b · 23 jugadores · 10 con ficha fijada
+  eventos   · 30
+    min 11 (1T 11) local     penalty_goal Francisco Martin Ambort
+    min 24 (1T 24) visitante try          Joaquin Martinez
+    min 25 (1T 25) visitante conversion   Salvador Acuña
+    min 31 (1T 31) visitante try          Santino Prieto Martínez
+    min 43 (2T 3) visitante try          Salvador Vazquez Panebianco
+    min 44 (2T 4) visitante conversion   Salvador Acuña
+    min 47 (2T 7) visitante substitution Juan Martin Castro
+    min 55 (2T 15) visitante substitution Santiago Ojeda
+    min 57 (2T 17) local     substitution Lucas Fernández
+    min 57 (2T 17) local     substitution Valentino Margaria Smith
+    min 57 (2T 17) local     substitution Agustín Varela
+    min 57 (2T 17) local     substitution Constantino Corvalán
+    min 60 (2T 20) visitante try          Lautaro Castex
+    min 61 (2T 21) visitante card_yellow  Santiago Vedia
+    min 61 (2T 21) visitante conversion   Salvador Acuña
+    min 67 (2T 27) local     try          Felipe Quaglia
+    min 67 (2T 27) local     conversion   Francisco Martin Ambort
+    min 67 (2T 27) visitante card_yellow  Salvador Vazquez Panebianco
+    min 73 (2T 33) local     try          Enzo Daniel Aguero Bruno
+    min 73 (2T 33) local     conversion   Francisco Martin Ambort
+    min 80 (2T 40) local     substitution Martin Leandro Basso
+    min 80 (2T 40) local     substitution Thiago Diaz Montenegro
+    min 80 (2T 40) local     substitution Gianluca Melano
+    min 80 (2T 40) local     substitution Nicolas Farras Noguerol
+    min 80 (2T 40) visitante substitution Santino Prieto Martínez
+    min 80 (2T 40) visitante substitution Juan Pablo Soria
+    min 80 (2T 40) visitante substitution Faustino Castillo
+    min 80 (2T 40) visitante substitution Joaquin Martinez
+    min 80 (2T 40) visitante substitution Joaquin Maiquez Grosso
+    min 80 (2T 40) visitante substitution José Ignacio Ferrayoli
+  marcador  · eventos 17-26 · guardado 17-26
+  tries     · 2-4 (guardado —-—)
+  arbitro   · ABEL ESTEBAN TUREK (guardado: —)
+  guardado  · 23 local · 23 visitante · 30 eventos
+
+san-francisco-r-c-m19-b vs club-palermo-bajo-m19-b · f769a402 · tarjeta 295581  ·  8602b9cf-92a6-44e9-bdc5-7b5fc684081f
+  local     · san-francisco-r-c-m19-b · 21 jugadores · 0 con ficha fijada
+  visitante · club-palermo-bajo-m19-b · 23 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min  6 (1T 6) local     try          Santino Vanzetti
+    min  6 (1T 6) visitante try          Benjamin Strada
+    min  7 (1T 7) visitante conversion   Juan Cruz Alvarez
+    min 15 (1T 15) visitante try          Mateo Bautista Gomez Gauna
+    min 16 (1T 16) visitante conversion   Juan Cruz Alvarez
+    min 21 (1T 21) visitante try          Benjamin Roy Peralta
+    min 31 (1T 31) visitante try          Benjamin Roy Peralta
+    min 32 (1T 32) visitante conversion   Juan Cruz Alvarez
+    min 35 (1T 35) visitante try          Mateo Bautista Gomez Gauna
+    min 35 (1T 35) visitante conversion   Juan Cruz Alvarez
+    min 42 (2T 2) visitante try          Joaquin Feliú
+    min 42 (2T 2) visitante conversion   Juan Cruz Alvarez
+    min 43 (2T 3) visitante conversion   Juan Cruz Alvarez
+    min 43 (2T 3) visitante substitution Benjamin Strada
+    min 43 (2T 3) visitante substitution Facundo Zahir Umar
+    min 43 (2T 3) visitante substitution Álvaro Teniente
+    min 43 (2T 3) visitante try          Mateo Georgetti
+    min 45 (2T 5) visitante substitution Benjamin Roy Peralta
+    min 45 (2T 5) visitante substitution Ignacio Leonel Lujan
+    min 45 (2T 5) visitante substitution Bautista Colubriale
+    min 61 (2T 21) visitante try          Mateo Georgetti
+    min 62 (2T 22) visitante conversion   Juan Cruz Alvarez
+    min 65 (2T 25) local     try          José Ignacio Martinez Diaz
+    min 65 (2T 25) local     conversion   Santino Vanzetti
+    min 68 (2T 28) visitante try          Mateo Bautista Gomez Gauna
+    min 69 (2T 29) visitante try          Facundo Valentin Farias
+    min 70 (2T 30) visitante conversion   Juan Cruz Alvarez
+  marcador  · eventos 12-66 · guardado 12-66
+  tries     · 2-10 (guardado —-—)
+  arbitro   · LEANDRO LUCHETTI (guardado: —)
+  guardado  · 21 local · 23 visitante · 27 eventos
+
+jockey-club-cordoba-m19-b vs uru-cure-rugby-club-m19-b · f769a402 · tarjeta 295578  ·  6e9bb081-10cb-4bad-9b65-250735e60a97
+  local     · jockey-club-cordoba-m19-b · 23 jugadores · 0 con ficha fijada
+  visitante · uru-cure-rugby-club-m19-b · 23 jugadores · 0 con ficha fijada
+  eventos   · 13
+    min  3 (1T 3) local     try          Elias Gerez
+    min  6 (1T 6) visitante penalty_goal Cristobal Aguilera
+    min 11 (1T 11) local     try          Francisco Sangoy Cafferata
+    min 15 (1T 15) local     try          Felipe Bessone
+    min 34 (1T 34) local     penalty_goal Lautaro Tejeda
+    min 45 (2T 5) local     try          Francisco Sangoy Cafferata
+    min 46 (2T 6) local     conversion   Francisco Sangoy Cafferata
+    min 49 (2T 9) local     try          Felipe Mariano Rossi Comito
+    min 50 (2T 10) local     conversion   Salvador Franco Curvino
+    min 58 (2T 18) local     try          Francisco Sangoy Cafferata
+    min 59 (2T 19) local     conversion   Tobias Marco Aime
+    min 61 (2T 21) local     try          Felipe Bessone
+    min 62 (2T 22) local     conversion   Tobias Marco Aime
+  marcador  · eventos 46-3 · guardado 46-3
+  tries     · 7-0 (guardado —-—)
+  arbitro   · PALOMA VEDIA (guardado: —)
+  guardado  · 23 local · 23 visitante · 13 eventos
+
+cordoba-athletic-club-m19-b vs cordoba-athletic-club-m19-c · f769a402 · tarjeta 295582  ·  695afedd-8bdd-48b7-a8b8-4404e724806f
+  local     · cordoba-athletic-club-m19-b · 19 jugadores · 9 con ficha fijada
+  visitante · cordoba-athletic-club-m19-c · 20 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min  4 (1T 4) local     try          Santiago Ojeda
+    min  5 (1T 5) local     conversion   Juan Pablo Soria
+    min  6 (1T 6) visitante try          Juan Cruz Valdivia
+    min 12 (1T 12) local     try          Salvador Vazquez Panebianco
+    min 17 (1T 17) visitante try          Juan Cruz Valdivia
+    min 19 (1T 19) visitante try          Eliseo Deleite Garcia
+    min 22 (1T 22) local     try          Valentin Nuñez Pereyra
+    min 29 (1T 29) visitante try          Juan Cruz Valdivia
+    min 30 (1T 30) visitante conversion   Salvador Acuña
+    min 40 (2T 0) local     substitution Santino Prieto Martínez
+    min 40 (2T 0) local     substitution Mauricio Bazan Gonzalez
+    min 40 (2T 0) visitante substitution Joaquin Maiquez Grosso
+    min 40 (2T 0) visitante substitution Facundo Isao Mishima
+    min 40 (2T 0) visitante substitution Faustino Castillo
+    min 48 (2T 8) visitante substitution Juan Cruz Valdivia
+    min 50 (2T 10) local     try          Juan Cruz Navarro Lescano
+    min 54 (2T 14) local     try          Agustin Gabriel Campos Campos Varela
+    min 55 (2T 15) local     conversion   Juan Pablo Soria
+    min 64 (2T 24) local     try          Juan Cruz Polanco Garcia
+    min 65 (2T 25) local     conversion   Juan Pablo Soria
+    min 72 (2T 32) visitante try          Raul Calamera
+    min 73 (2T 33) visitante conversion   Salvador Acuña
+  marcador  · eventos 36-29 · guardado 36-29
+  tries     · 6-5 (guardado —-—)
+  arbitro   · PALOMA VEDIA (guardado: —)
+  guardado  · 19 local · 20 visitante · 22 eventos
+
+club-la-tablada-m19-c vs club-la-tablada-m19-b · f769a402 · tarjeta 295580  ·  8cc8c28e-5253-4d2d-ab42-5ecb996b0d18
+  local     · club-la-tablada-m19-c · 29 jugadores · 0 con ficha fijada
+  visitante · club-la-tablada-m19-b · 26 jugadores · 0 con ficha fijada
+  eventos   · 36
+    min  4 (1T 4) visitante try          Gonzalo Legnazzi
+    min  5 (1T 5) visitante conversion   Facundo Altamira
+    min 16 (1T 16) visitante try          Juan Juarez
+    min 17 (1T 17) visitante conversion   Facundo Altamira
+    min 30 (1T 30) local     try          Bautista Soria
+    min 30 (1T 30) local     conversion   Facundo Volodarsky
+    min 31 (1T 31) visitante try          Serafin Andreone Aguilar
+    min 32 (1T 32) visitante conversion   Facundo Altamira
+    min 36 (1T 36) visitante try          Pedro Mañá
+    min 36 (1T 36) visitante conversion   Facundo Altamira
+    min 43 (2T 3) local     substitution Joaquin Gallo
+    min 45 (2T 5) local     substitution Santino Ferrera
+    min 45 (2T 5) visitante substitution Joaquín Squinobal
+    min 45 (2T 5) visitante substitution Ignacio Stenfer
+    min 45 (2T 5) visitante substitution Tobias Benjamin Corzo Poroli
+    min 46 (2T 6) local     substitution Benjamin Cabello Molina
+    min 47 (2T 7) visitante substitution Genaro Acuña
+    min 48 (2T 8) visitante substitution Francisco Morelli
+    min 50 (2T 10) visitante substitution Felipe Bernardi
+    min 50 (2T 10) visitante substitution Juan Juarez
+    min 55 (2T 15) local     substitution Genaro Alfonso Casas
+    min 55 (2T 15) visitante substitution Facundo Altamira
+    min 55 (2T 15) visitante substitution Serafin Andreone Aguilar
+    min 56 (2T 16) local     substitution Bautista Soria
+    min 56 (2T 16) local     substitution Lautaro Benjamin Galliano
+    min 56 (2T 16) local     substitution Justiniano Carranza
+    min 56 (2T 16) local     substitution Alex David Fioramonti Atencio
+    min 56 (2T 16) local     substitution Luca Benjamín Leiva
+    min 64 (2T 24) visitante try          Pedro Mañá
+    min 64 (2T 24) visitante conversion   Francisco Perez
+    min 66 (2T 26) local     substitution Juan Antonio Manso
+    min 66 (2T 26) local     substitution Tomas Citati Hernandez
+    min 68 (2T 28) local     try          Nahuel Arnaldo Luna
+    min 68 (2T 28) local     conversion   Facundo Volodarsky
+    min 76 (2T 36) visitante try          Francisco Perez
+    min 76 (2T 36) visitante conversion   Francisco Perez
+  marcador  · eventos 14-42 · guardado 14-42
+  tries     · 2-6 (guardado —-—)
+  arbitro   · FRANCISCO ROMERO BRONDINO (guardado: —)
+  guardado  · 29 local · 26 visitante · 36 eventos
+
+cordoba-rugby-club-m19-b vs club-la-tablada-m19-c · f769a402 · tarjeta 295588  ·  8963a561-766f-49e0-84db-55e2f357ed60
+  local     · cordoba-rugby-club-m19-b · 28 jugadores · 21 con ficha fijada
+  visitante · club-la-tablada-m19-c · 26 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min  3 (1T 3) local     try          Valentín Zacarías
+    min 26 (1T 26) local     try          Alvaro Quiroga
+    min 30 (1T 30) visitante try          Ignacio Sarena
+    min 30 (1T 30) visitante substitution Santino Ferrera
+    min 31 (1T 31) visitante conversion   Manuel Franco Iglesias
+    min 42 (2T 2) local     substitution Francisco Agustin Molina
+    min 44 (2T 4) local     substitution Santiago Alejandro Alincastro Sosa
+    min 44 (2T 4) local     substitution Santiago Di Fulvio Gonzalez
+    min 47 (2T 7) visitante substitution Luca Benjamín Leiva
+    min 49 (2T 9) local     substitution Santiago Sartori
+    min 53 (2T 13) visitante substitution Agustín Ferla Cecenarro
+    min 53 (2T 13) visitante substitution Bautista Soria
+    min 58 (2T 18) local     substitution Valentín Zacarías
+    min 59 (2T 19) visitante substitution Justiniano Carranza
+    min 59 (2T 19) visitante penalty_goal Manuel Franco Iglesias
+    min 59 (2T 19) visitante substitution Tomas Citati Hernandez
+    min 59 (2T 19) visitante substitution Genaro Alfonso Casas
+    min 62 (2T 22) visitante substitution Ignacio Sarena
+    min 63 (2T 23) visitante try          Joaquin Gallo
+    min 63 (2T 23) visitante conversion   Manuel Franco Iglesias
+    min 66 (2T 26) local     try          Álvaro Bautista Asvisio
+    min 67 (2T 27) visitante substitution Tiziano Lomonaco Manzi
+    min 74 (2T 34) visitante substitution Lucas Mateo Sanchez
+    min 75 (2T 35) local     try          Alvaro Quiroga
+    min 75 (2T 35) local     conversion   Álvaro Bautista Asvisio
+  marcador  · eventos 22-17 · guardado 22-17
+  tries     · 4-2 (guardado —-—)
+  arbitro   · SERGIO MALDONADO (guardado: —)
+  guardado  · 28 local · 26 visitante · 25 eventos
+
+club-palermo-bajo-m19-b vs tala-rugby-club-m19-b · f769a402 · tarjeta 295585  ·  75b9711a-cd17-4fbc-8670-bfb18c875e98
+  local     · club-palermo-bajo-m19-b · 28 jugadores · 0 con ficha fijada
+  visitante · tala-rugby-club-m19-b · 24 jugadores · 0 con ficha fijada
+  eventos   · 33
+    min  8 (1T 8) local     try          Rodolfo Garcia Araoz
+    min  8 (1T 8) local     conversion   Juan Cruz Alvarez
+    min 15 (1T 15) visitante try          Dante Baistrocchi
+    min 15 (1T 15) visitante conversion   Francisco Martin Ambort
+    min 16 (1T 16) local     try          Juan Cruz Alvarez
+    min 27 (1T 27) visitante try          Lorenzo Ferez
+    min 27 (1T 27) visitante conversion   Francisco Martin Ambort
+    min 36 (1T 36) local     try          Mateo Georgetti
+    min 36 (1T 36) local     conversion   Juan Cruz Alvarez
+    min 40 (2T 0) visitante substitution Enzo Daniel Aguero Bruno
+    min 40 (2T 0) visitante substitution Agustín Varela
+    min 40 (2T 0) visitante substitution Santiago Debarberis
+    min 40 (2T 0) visitante substitution Francisco Martin Ambort
+    min 44 (2T 4) visitante try          Santino Contato Tribulo
+    min 49 (2T 9) local     conversion   Juan Cruz Alvarez
+    min 49 (2T 9) local     conversion   Mateo Grosso
+    min 49 (2T 9) local     try          Rodolfo Garcia Araoz
+    min 50 (2T 10) visitante substitution Nicolás Martínez Bernáldez
+    min 54 (2T 14) local     substitution Mateo Bautista Gomez Gauna
+    min 54 (2T 14) visitante substitution Severo Ríos Del Barco
+    min 56 (2T 16) local     substitution Rodolfo Garcia Araoz
+    min 56 (2T 16) visitante substitution Lorenzo Garzon Fanin
+    min 58 (2T 18) local     substitution Felipe Canepa
+    min 58 (2T 18) visitante try          Juan Ignacio Vespasiani
+    min 58 (2T 18) visitante conversion   Dante Baistrocchi
+    min 59 (2T 19) visitante substitution Lorenzo Ferez
+    min 60 (2T 20) local     substitution Joaquin Feliú
+    min 62 (2T 22) visitante try          Juan Ignacio Vespasiani
+    min 62 (2T 22) visitante conversion   Dante Baistrocchi
+    min 69 (2T 29) visitante substitution Valentin Napolitano
+    min 75 (2T 35) visitante try          Tomas Silbestein
+    min 75 (2T 35) visitante conversion   Dante Baistrocchi
+    min 80 (2T 40) local     substitution Mateo Georgetti
+  marcador  · eventos 28-40 · guardado 28-40
+  tries     · 4-6 (guardado —-—)
+  arbitro   · REARTES GUSTAVO 39446797 (NO OFICIAL) (guardado: —)
+  guardado  · 28 local · 24 visitante · 33 eventos
+
+san-francisco-r-c-m19-b vs tala-rugby-club-m19-c · f769a402 · tarjeta 310019  ·  448813eb-8690-465e-a28c-a0b3660b0350
+  local     · san-francisco-r-c-m19-b · 23 jugadores · 0 con ficha fijada
+  visitante · tala-rugby-club-m19-c · 20 jugadores · 0 con ficha fijada
+  eventos   · 15
+    min 11 (1T 11) local     penalty_goal Santino Vanzetti
+    min 13 (1T 13) visitante try          Felipe Recalde
+    min 17 (1T 17) local     try          Santino Astegiano
+    min 18 (1T 18) local     conversion   Santino Vanzetti
+    min 22 (1T 22) visitante try          Juan Ignacio Villagra Rodríguez
+    min 41 (2T 1) visitante try          Augusto Ibrahín Abregu
+    min 48 (2T 8) local     try          Fausto Norryh González
+    min 48 (2T 8) local     conversion   Santino Vanzetti
+    min 56 (2T 16) local     card_yellow  Santino Vanzetti
+    min 60 (2T 20) local     injury       José Ignacio Gallo
+    min 65 (2T 25) visitante try          Constantino Corvalán
+    min 68 (2T 28) visitante try          Mateo Cremonini
+    min 68 (2T 28) visitante conversion   Antonio Rafael Cabanillas
+    min 71 (2T 31) visitante try          Mateo Cremonini
+    min 71 (2T 31) visitante conversion   Antonio Rafael Cabanillas
+  marcador  · eventos 17-34 · guardado 17-34
+  tries     · 2-6 (guardado —-—)
+  arbitro   · IGNACIO SANTIAGO OLMEDO RAMIREZ (guardado: —)
+  guardado  · 23 local · 20 visitante · 15 eventos
+
+uru-cure-rugby-club-m19-b vs cordoba-athletic-club-m19-c · f769a402 · tarjeta 295601  ·  c06bf14a-c3f3-4e27-af9d-8eeb2989d795
+  local     · uru-cure-rugby-club-m19-b · 23 jugadores · 0 con ficha fijada
+  visitante · cordoba-athletic-club-m19-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min  4 (1T 4) local     conversion   Cristobal Aguilera
+    min  4 (1T 4) local     try          Tadeo Ulises Fraschetti
+    min 13 (1T 13) local     penalty_goal Cristobal Aguilera
+    min 31 (1T 31) local     try          Garcia Agustin
+    min 43 (2T 3) local     substitution Manuel Capriglioni
+    min 45 (2T 5) local     penalty_goal Cristobal Aguilera
+    min 50 (2T 10) local     substitution Benjamín Sereno
+    min 50 (2T 10) visitante substitution Juan Ignacio Bru
+    min 51 (2T 11) local     card_yellow  Pedro Picco Wevar
+    min 53 (2T 13) local     conversion   Cristobal Aguilera
+    min 53 (2T 13) local     try          Jeronimo Suino Borghi
+    min 54 (2T 14) local     substitution Faustino Tereszczuk
+    min 56 (2T 16) visitante substitution Valentin Lauret Luna
+    min 56 (2T 16) visitante substitution Justo Somare
+    min 56 (2T 16) visitante substitution Joaquin Galleguillo
+    min 57 (2T 17) visitante substitution Juan Manuel Arias
+    min 57 (2T 17) visitante substitution Tiziano Barco Prozco
+    min 58 (2T 18) visitante substitution Simon Rodriguez Barretta
+    min 59 (2T 19) local     substitution Benicio Razzini
+    min 63 (2T 23) local     substitution Pedro Picco Wevar
+    min 63 (2T 23) local     substitution Cristobal Aguilera
+    min 66 (2T 26) visitante try          Vicente Gsponer
+    min 67 (2T 27) visitante conversion   Juan Pablo Soria
+    min 74 (2T 34) local     card_yellow  Jeronimo Suino Borghi
+    min 80 (2T 40) visitante substitution Salvador Vazquez Panebianco
+  marcador  · eventos 25-7 · guardado 25-7
+  tries     · 3-1 (guardado —-—)
+  arbitro   · RAÚL FERNANDO RODRIGUEZ ALMADA (guardado: —)
+  guardado  · 23 local · 23 visitante · 25 eventos
+
+jockey-club-cordoba-m19-b vs tala-rugby-club-m19-c · f769a402 · tarjeta 295599  ·  d803e2fc-1d43-49e5-9f62-757039bb9648
+  local     · jockey-club-cordoba-m19-b · 23 jugadores · 0 con ficha fijada
+  visitante · tala-rugby-club-m19-c · 25 jugadores · 0 con ficha fijada
+  eventos   · 30
+    min  1 (1T 1) local     try          Santino Dei Rossi
+    min  1 (1T 1) local     conversion   Salvador Franco Curvino
+    min  6 (1T 6) local     try          Valentino Chicco
+    min  6 (1T 6) local     conversion   Salvador Franco Curvino
+    min 12 (1T 12) local     try          Felipe Bessone
+    min 12 (1T 12) local     conversion   Salvador Franco Curvino
+    min 20 (1T 20) local     card_yellow  Santino Dei Rossi
+    min 24 (1T 24) visitante substitution Ignacio Amaya Torletti
+    min 28 (1T 28) local     penalty_goal Salvador Franco Curvino
+    min 30 (1T 30) local     try          Tobias Marco Aime
+    min 30 (1T 30) local     conversion   Salvador Franco Curvino
+    min 32 (1T 32) visitante try          Miguel Patricio Moran Hernández
+    min 40 (2T 0) visitante substitution Augusto Ibrahín Abregu
+    min 50 (2T 10) visitante substitution Felipe Quaglia
+    min 50 (2T 10) visitante substitution Felipe Recalde
+    min 50 (2T 10) visitante substitution Antonio Rafael Cabanillas
+    min 55 (2T 15) visitante card_yellow  Joaquín Molina
+    min 56 (2T 16) visitante substitution Valentin Picchio
+    min 59 (2T 19) visitante substitution Juan Ignacio Villagra Rodríguez
+    min 60 (2T 20) visitante substitution Miguel Patricio Moran Hernández
+    min 60 (2T 20) visitante substitution Santiago Debarberis
+    min 64 (2T 24) visitante try          Genaro Luciano Mattiuz Ponzo
+    min 73 (2T 33) visitante try          Joaquin Villella Navarta
+    min 90 (2T 50) local     substitution Santino Dei Rossi
+    min 90 (2T 50) local     substitution Valentino Chicco
+    min 94 (2T 54) local     substitution Emanuel Valentin Guzman Ladino
+    min 94 (2T 54) local     substitution Juan Cruz Labiuk
+    min 94 (2T 54) local     substitution Santiago Paolini
+    min 100 (2T 60) local     substitution León Mendoza Finzi
+    min 100 (2T 60) local     substitution Joaquin Alvarez Quiñones
+  marcador  · eventos 31-15 · guardado 31-15
+  tries     · 4-3 (guardado —-—)
+  arbitro   · LUCAS HUMERES (guardado: —)
+  guardado  · 23 local · 25 visitante · 30 eventos
+
+cordoba-athletic-club-m19-d vs club-la-tablada-m19-b · f769a402 · tarjeta 295598  ·  05d702cc-0021-47ef-a6ed-7a79e12b87d3
+  local     · cordoba-athletic-club-m19-d · 29 jugadores · 0 con ficha fijada
+  visitante · club-la-tablada-m19-b · 26 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min  2 (1T 2) visitante try          Mateo Marcantonelli
+    min  2 (1T 2) visitante conversion   Facundo Altamira
+    min  5 (1T 5) local     penalty_goal Felipe Paz Albert
+    min 14 (1T 14) visitante try          Juan Ignacio Farah
+    min 28 (1T 28) visitante penalty_goal Facundo Altamira
+    min 48 (2T 8) local     try          Lorenzo Joaquin Cremonezzi
+    min 52 (2T 12) visitante card_yellow  Serafin Andreone Aguilar
+    min 57 (2T 17) local     substitution Salvador Colombo
+    min 60 (2T 20) visitante try          Facundo Altamira
+    min 60 (2T 20) visitante conversion   Facundo Altamira
+    min 66 (2T 26) local     substitution Jair Cardozo
+    min 67 (2T 27) local     substitution Joaquín Ferrero Rey Nores
+    min 67 (2T 27) visitante card_yellow  Francisco Perez
+    min 71 (2T 31) visitante try          Juan Bautista Vaca Narvaja
+    min 71 (2T 31) visitante conversion   Facundo Altamira
+    min 80 (2T 40) local     substitution Santino Prieto Martínez
+    min 80 (2T 40) local     substitution Mateo Romanazzi Pereyra
+    min 80 (2T 40) local     substitution Lautaro Bisbal
+    min 80 (2T 40) local     substitution Federico Lopez Romera
+    min 80 (2T 40) local     substitution Tomas Vinuesa
+    min 80 (2T 40) local     substitution Salvador Rotondo
+    min 80 (2T 40) local     substitution Juan Cruz Polanco Garcia
+    min 80 (2T 40) local     substitution Sebastian Villalba
+    min 80 (2T 40) local     substitution Felipe Paz Albert
+    min 80 (2T 40) local     substitution Joaquin Maiquez Grosso
+  marcador  · eventos 8-29 · guardado 8-29
+  tries     · 1-4 (guardado —-—)
+  arbitro   · EMMANUEL BOSCATTO (guardado: —)
+  guardado  · 29 local · 26 visitante · 25 eventos
+
+cordoba-athletic-club-m19-d vs cordoba-rugby-club-m19-b · f769a402 · tarjeta 311170  ·  42c104a6-cb9e-4b53-9234-8623317e4895
+  local     · cordoba-athletic-club-m19-d · 26 jugadores · 0 con ficha fijada
+  visitante · cordoba-rugby-club-m19-b · 25 jugadores · 16 con ficha fijada
+  eventos   · 30
+    min  5 (1T 5) visitante substitution Marcos Nicolas Reartes
+    min  9 (1T 9) local     try          Valentin Lauret Luna
+    min 23 (1T 23) visitante try          Luis Mondino
+    min 26 (1T 26) local     substitution Fausto Castillo Di Benedetto
+    min 30 (1T 30) visitante try          Joaquin Sanchez
+    min 30 (1T 30) visitante conversion   Álvaro Bautista Asvisio
+    min 41 (2T 1) visitante substitution Lautaro David Balán Tolaba
+    min 42 (2T 2) visitante try          Juan Ignacio Rincón
+    min 45 (2T 5) local     try          Juan Pablo Soria
+    min 46 (2T 6) local     substitution Benicio José Gambra Macias
+    min 46 (2T 6) local     conversion   Juan Pablo Soria
+    min 49 (2T 9) local     substitution Justo Somare
+    min 49 (2T 9) local     substitution Joaquin Galleguillo
+    min 50 (2T 10) visitante substitution Lorenzo Defazy
+    min 53 (2T 13) local     substitution Tiziano Barco Prozco
+    min 55 (2T 15) local     substitution Salvador Colombo
+    min 55 (2T 15) visitante substitution Lautaro Rasmussen
+    min 55 (2T 15) visitante try          Alvaro Quiroga
+    min 62 (2T 22) visitante substitution Luis Mondino
+    min 63 (2T 23) local     substitution Valentin Lauret Luna
+    min 66 (2T 26) local     try          Bautista Vazquez Panebianco
+    min 67 (2T 27) local     conversion   Juan Pablo Soria
+    min 68 (2T 28) local     try          Juan Pablo Soria
+    min 69 (2T 29) local     conversion   Juan Pablo Soria
+    min 70 (2T 30) visitante try          Gaston Maximiliano Squire
+    min 75 (2T 35) local     try          Salvador Cabanillas
+    min 76 (2T 36) local     conversion   Juan Pablo Soria
+    min 80 (2T 40) local     substitution Santiago Ojeda
+    min 80 (2T 40) local     substitution Eliseo Deleite Garcia
+    min 80 (2T 40) local     substitution Joaquín Ferrero Rey Nores
+  marcador  · eventos 33-27 · guardado 33-27
+  tries     · 5-5 (guardado —-—)
+  arbitro   · EMMANUEL BOSCATTO (guardado: —)
+  guardado  · 26 local · 25 visitante · 30 eventos
+
+san-francisco-r-c-m19-b vs tala-rugby-club-m19-b · f769a402 · tarjeta 295607  ·  b3db7297-d88c-4777-bedd-d66798a2f8dd
+  local     · san-francisco-r-c-m19-b · 23 jugadores · 0 con ficha fijada
+  visitante · tala-rugby-club-m19-b · 24 jugadores · 0 con ficha fijada
+  eventos   · 28
+    min  2 (1T 2) visitante try          Valentin Napolitano
+    min  2 (1T 2) visitante conversion   Francisco Martin Ambort
+    min 11 (1T 11) visitante try          Juan Ignacio Vespasiani
+    min 11 (1T 11) visitante conversion   Francisco Martin Ambort
+    min 14 (1T 14) visitante try          Lorenzo Ferez
+    min 18 (1T 18) visitante try          Luca Antonio Simondi
+    min 20 (1T 20) visitante try          Francisco Martin Ambort
+    min 20 (1T 20) visitante conversion   Francisco Martin Ambort
+    min 25 (1T 25) local     try          Santino Astegiano
+    min 25 (1T 25) local     conversion   Santino Vanzetti
+    min 40 (2T 0) visitante substitution Agustín Varela
+    min 46 (2T 6) local     try          Fausto Norryh González
+    min 48 (2T 8) visitante try          Francisco Ortega
+    min 51 (2T 11) visitante substitution Nicolás Martínez Bernáldez
+    min 51 (2T 11) visitante substitution Juan De La Cruz Mendez Casariego
+    min 51 (2T 11) visitante substitution Francisco Ortega
+    min 51 (2T 11) visitante substitution Severo Ríos Del Barco
+    min 56 (2T 16) visitante substitution Valentin Napolitano
+    min 60 (2T 20) visitante substitution Juan Ignacio Vespasiani
+    min 60 (2T 20) visitante substitution Augusto Ibrahín Abregu
+    min 65 (2T 25) visitante card_yellow  Ramon Agustin Ortega
+    min 67 (2T 27) local     card_yellow  Emilio Pereyra
+    min 68 (2T 28) visitante try          Miguel Patricio Moran Hernández
+    min 68 (2T 28) visitante conversion   Francisco Martin Ambort
+    min 72 (2T 32) visitante try          Francisco Martin Ambort
+    min 72 (2T 32) visitante conversion   Francisco Martin Ambort
+    min 78 (2T 38) visitante try          Bautista Savid
+    min 78 (2T 38) visitante conversion   Francisco Martin Ambort
+  marcador  · eventos 12-57 · guardado 12-57
+  tries     · 2-9 (guardado —-—)
+  arbitro   · LEANDRO LUCHETTI (guardado: —)
+  guardado  · 23 local · 24 visitante · 28 eventos
+
+club-palermo-bajo-m19-b vs cordoba-athletic-club-m19-c · f769a402 · tarjeta 295605  ·  3eef60eb-189d-46d0-a954-95221d9e51e8
+  local     · club-palermo-bajo-m19-b · 30 jugadores · 0 con ficha fijada
+  visitante · cordoba-athletic-club-m19-c · 26 jugadores · 0 con ficha fijada
+  eventos   · 15
+    min  8 (1T 8) local     try          Mateo Georgetti
+    min  9 (1T 9) local     conversion   Mateo Grosso
+    min 16 (1T 16) visitante try          Faustino Castillo
+    min 17 (1T 17) visitante conversion   Salvador Acuña
+    min 21 (1T 21) local     conversion   Mateo Grosso
+    min 23 (1T 23) local     try          Juan Cruz Alvarez
+    min 27 (1T 27) local     try          Juan Cruz Alvarez
+    min 47 (2T 7) local     try          Facundo Ismael Ferreyra
+    min 47 (2T 7) local     conversion   Juan Cruz Alvarez
+    min 57 (2T 17) local     try          Facundo Ismael Ferreyra
+    min 63 (2T 23) local     card_yellow  Álvaro Teniente
+    min 65 (2T 25) visitante try          Salvador Acuña
+    min 65 (2T 25) visitante conversion   Salvador Acuña
+    min 74 (2T 34) visitante try          Salvador Acuña
+    min 74 (2T 34) visitante conversion   Lautaro Castex
+  marcador  · eventos 31-21 · guardado 31-21
+  tries     · 5-3 (guardado —-—)
+  arbitro   · PALOMA VEDIA (guardado: —)
+  guardado  · 30 local · 26 visitante · 15 eventos
+
+club-la-tablada-m19-c vs jockey-club-cordoba-m19-b · f769a402 · tarjeta 295604  ·  7307be7b-1bc0-403c-89fb-8b0cf40c5fe4
+  local     · club-la-tablada-m19-c · 25 jugadores · 0 con ficha fijada
+  visitante · jockey-club-cordoba-m19-b · 24 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min 10 (1T 10) visitante drop_goal    Salvador Franco Curvino
+    min 27 (1T 27) local     card_yellow  Alex David Fioramonti Atencio
+    min 42 (2T 2) local     substitution Alex David Fioramonti Atencio
+    min 46 (2T 6) local     substitution Pascual Taboas
+    min 48 (2T 8) local     substitution Lautaro Benjamin Galliano
+    min 50 (2T 10) local     substitution Agustín Ferla Cecenarro
+    min 50 (2T 10) local     try          Juan Ignacio Farah
+    min 51 (2T 11) local     conversion   Santino Dottori
+    min 52 (2T 12) local     substitution Fabrizio Roldan
+    min 55 (2T 15) local     substitution Bautista Rinaldi
+    min 55 (2T 15) local     substitution Valentín Cortes
+    min 63 (2T 23) local     substitution Benjamin Cabello Molina
+    min 67 (2T 27) local     substitution Juan Ignacio Farah
+    min 75 (2T 35) local     substitution Miqueas Lacaze
+    min 82 (2T 42) visitante try          Augusto Toledo Toselli
+    min 82 (2T 42) visitante conversion   Salvador Franco Curvino
+    min 82 (2T 42) visitante substitution Tomás Ernesto Guevara Ortiz
+    min 85 (2T 45) visitante substitution Felipe Mariano Rossi Comito
+    min 85 (2T 45) visitante substitution Santiago Ramos Martinez
+    min 90 (2T 50) visitante substitution Mauro Gastón Pérez
+    min 100 (2T 60) visitante substitution Mateo Patocchi Arrieta
+    min 100 (2T 60) visitante substitution Tobias Marco Aime
+    min 100 (2T 60) visitante substitution Felipe Bessone
+    min 102 (2T 62) visitante conversion   Salvador Franco Curvino
+    min 102 (2T 62) visitante try          Ari Hued
+    min 108 (2T 68) visitante try          Agustín Peral Aden
+    min 108 (2T 68) visitante conversion   Salvador Franco Curvino
+  marcador  · eventos 7-24 · guardado 7-24
+  tries     · 1-3 (guardado —-—)
+  arbitro   · FRANCISCO ROMERO BRONDINO (guardado: —)
+  guardado  · 25 local · 24 visitante · 27 eventos
+
+tala-rugby-club-m19-b vs tala-rugby-club-m19-c · f769a402 · tarjeta 312605  ·  6b599bcb-c506-4634-88c3-30ff6d8b6c10
+  local     · tala-rugby-club-m19-b · 23 jugadores · 0 con ficha fijada
+  visitante · tala-rugby-club-m19-c · 24 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min  5 (1T 5) local     try          Francisco Martin Ambort
+    min  5 (1T 5) local     conversion   Francisco Martin Ambort
+    min  8 (1T 8) local     try          Francisco Martin Ambort
+    min  8 (1T 8) local     conversion   Francisco Martin Ambort
+    min 15 (1T 15) local     try          Francisco Ortega
+    min 15 (1T 15) local     conversion   Francisco Martin Ambort
+    min 22 (1T 22) visitante try          Benjamin Debarre
+    min 22 (1T 22) visitante conversion   José Francisco Vivanco Cabrera
+    min 27 (1T 27) local     try          Francisco Martin Ambort
+    min 34 (1T 34) visitante try          Felipe Quaglia
+    min 45 (2T 5) local     try          Augusto Ibrahín Abregu
+    min 45 (2T 5) local     conversion   Francisco Martin Ambort
+    min 50 (2T 10) visitante try          Tomás Reznichenco Acosta
+    min 55 (2T 15) local     try          Lorenzo Ferez
+    min 55 (2T 15) local     conversion   Francisco Martin Ambort
+    min 62 (2T 22) local     try          Francisco Martin Ambort
+    min 62 (2T 22) local     conversion   Francisco Martin Ambort
+    min 64 (2T 24) visitante try          José Francisco Vivanco Cabrera
+    min 70 (2T 30) local     try          Agustín Varela
+    min 70 (2T 30) local     conversion   Francisco Martin Ambort
+  marcador  · eventos 54-22 · guardado 54-22
+  tries     · 8-4 (guardado —-—)
+  arbitro   · FRANCISCO ROMERO BRONDINO (guardado: —)
+  guardado  · 23 local · 24 visitante · 20 eventos
+
+jockey-club-cordoba-m19-b vs san-francisco-r-c-m19-b · f769a402 · tarjeta 314456  ·  696b3d95-ccd1-4e5a-9a5a-5a87a65a3d68
+  local     · jockey-club-cordoba-m19-b · 23 jugadores · 0 con ficha fijada
+  visitante · san-francisco-r-c-m19-b · 23 jugadores · 0 con ficha fijada
+  eventos   · 13
+    min 15 (1T 15) local     try          Valentin Roldan
+    min 16 (1T 16) visitante card_yellow  Correa Elias
+    min 34 (1T 34) local     try          Lautaro Tejeda
+    min 44 (2T 4) local     try          Tomás Ernesto Guevara Ortiz
+    min 45 (2T 5) local     conversion   Lucca Infante
+    min 48 (2T 8) local     try          Mateo Tay Tosco
+    min 53 (2T 13) local     try          Francisco Antonio Gimenez
+    min 54 (2T 14) local     conversion   Lucca Infante
+    min 60 (2T 20) local     try          Lucca Infante
+    min 66 (2T 26) visitante try          Santino Vanzetti
+    min 66 (2T 26) visitante conversion   Santino Vanzetti
+    min 71 (2T 31) local     try          Valentino Tinto
+    min 75 (2T 35) visitante try          Fausto Norryh González
+  marcador  · eventos 39-12 · guardado 39-12
+  tries     · 7-2 (guardado —-—)
+  arbitro   · PALOMA VEDIA (guardado: —)
+  guardado  · 23 local · 23 visitante · 13 eventos
+
+tala-rugby-club-m19-b vs club-la-tablada-m19-c · f769a402 · tarjeta 314606  ·  73ecd003-2136-4a5e-be9b-3af4845b66be
+  local     · tala-rugby-club-m19-b · 23 jugadores · 0 con ficha fijada
+  visitante · club-la-tablada-m19-c · 21 jugadores · 0 con ficha fijada
+  eventos   · 31
+    min  8 (1T 8) visitante penalty_goal Jeronimo Villalba Zamboni
+    min 11 (1T 11) local     try          Thiago Diaz Montenegro
+    min 11 (1T 11) local     conversion   Benjamin Insausti
+    min 17 (1T 17) visitante try          Ramiro Raffo
+    min 18 (1T 18) visitante conversion   Jeronimo Villalba Zamboni
+    min 22 (1T 22) local     try          Joaquin Ortiz
+    min 22 (1T 22) local     conversion   Francisco Martin Ambort
+    min 25 (1T 25) visitante substitution Alex David Fioramonti Atencio
+    min 25 (1T 25) visitante substitution Francisco Ignacio Vignolo
+    min 27 (1T 27) local     try          Francisco Martin Ambort
+    min 27 (1T 27) visitante card_yellow  Serafin Andreone Aguilar
+    min 36 (1T 36) local     try          Joaquin Ortiz
+    min 36 (1T 36) local     conversion   Francisco Martin Ambort
+    min 40 (2T 0) local     substitution Thiago Diaz Montenegro
+    min 40 (2T 0) local     substitution Ramon Agustin Ortega
+    min 40 (2T 0) local     substitution Benjamin Insausti
+    min 41 (2T 1) visitante card_yellow  Ramiro Raffo
+    min 44 (2T 4) visitante penalty_goal Jeronimo Villalba Zamboni
+    min 45 (2T 5) local     substitution Ignacio Geremia
+    min 45 (2T 5) local     substitution Lucas Fernández
+    min 46 (2T 6) local     try          Francisco Ortega
+    min 51 (2T 11) visitante substitution Santino Ferrera
+    min 53 (2T 13) local     card_yellow  Santiago Debarberis
+    min 54 (2T 14) local     card_yellow  Juan Ignacio Vespasiani
+    min 54 (2T 14) visitante penalty_try  
+    min 55 (2T 15) visitante substitution Bautista Rinaldi
+    min 63 (2T 23) visitante card_yellow  Pascual Taboas
+    min 65 (2T 25) local     try          Nicolás Martínez Bernáldez
+    min 67 (2T 27) visitante substitution Bautista Soria
+    min 70 (2T 30) local     try          Francisco Ortega
+    min 70 (2T 30) visitante substitution Nicanor Linera
+  marcador  · eventos 41-20 · guardado 41-20
+  tries     · 7-2 (guardado —-—)
+  arbitro   · EUGENIO MORRA (guardado: —)
+  guardado  · 23 local · 21 visitante · 31 eventos
+
+uru-cure-rugby-club-m19-b vs cordoba-athletic-club-m19-d · f769a402 · tarjeta 314605  ·  66383e20-4a87-48dd-82ab-6331bebd966e
+  local     · uru-cure-rugby-club-m19-b · 25 jugadores · 0 con ficha fijada
+  visitante · cordoba-athletic-club-m19-d · 22 jugadores · 0 con ficha fijada
+  eventos   · 30
+    min  2 (1T 2) local     try          Augusto Gomez Rossi
+    min  2 (1T 2) local     conversion   Cristobal Aguilera
+    min  5 (1T 5) local     try          Tadeo Ulises Fraschetti
+    min  5 (1T 5) local     conversion   Cristobal Aguilera
+    min 20 (1T 20) visitante try          Lautaro Castex
+    min 21 (1T 21) visitante conversion   Juan Pablo Soria
+    min 23 (1T 23) local     try          Garcia Agustin
+    min 23 (1T 23) local     conversion   Cristobal Aguilera
+    min 24 (1T 24) local     substitution Máximo Nicolas Ferreyra Ruiz
+    min 24 (1T 24) visitante substitution Oscar Iván Nieva Sandoval
+    min 24 (1T 24) visitante substitution Salvador Angilello Marangone
+    min 29 (1T 29) local     try          Benjamin Anino
+    min 44 (2T 4) local     try          Benicio Razzini
+    min 50 (2T 10) local     substitution Tadeo Ulises Fraschetti
+    min 50 (2T 10) local     substitution Lisandro Torres
+    min 50 (2T 10) local     substitution Benjamín Sereno
+    min 50 (2T 10) visitante try          Sebastian Villalba
+    min 50 (2T 10) visitante substitution José Ignacio Ferrayoli
+    min 57 (2T 17) visitante substitution Juan Manuel Arias
+    min 58 (2T 18) local     try          Garcia Agustin
+    min 62 (2T 22) local     try          Tadeo Ulises Fraschetti
+    min 62 (2T 22) local     conversion   Cristobal Aguilera
+    min 63 (2T 23) visitante substitution Sebastian Villalba
+    min 64 (2T 24) local     substitution Augusto Gomez Rossi
+    min 64 (2T 24) visitante substitution Santiago Bocco
+    min 73 (2T 33) visitante card_yellow  Eliseo Deleite Garcia
+    min 73 (2T 33) visitante try          Felipe Paz Albert
+    min 74 (2T 34) local     card_red     Manuel Capriglioni
+    min 74 (2T 34) visitante conversion   Juan Pablo Soria
+    min 75 (2T 35) visitante card_yellow  Emiliano D'amario
+  marcador  · eventos 43-19 · guardado 43-19
+  tries     · 7-3 (guardado —-—)
+  arbitro   · ABEL ESTEBAN TUREK (guardado: —)
+  guardado  · 25 local · 22 visitante · 30 eventos
+
+club-la-tablada-m19-c vs tala-rugby-club-m19-b · f769a402 · tarjeta 315127  ·  33c84dce-325a-4571-852a-7ba7924a78c1
+  local     · club-la-tablada-m19-c · 24 jugadores · 0 con ficha fijada
+  visitante · tala-rugby-club-m19-b · 23 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min  8 (1T 8) visitante try          Valentin Napolitano
+    min  8 (1T 8) visitante conversion   Benjamin Insausti
+    min 13 (1T 13) local     try          Genaro Alfonso Casas
+    min 25 (1T 25) visitante try          Agustín Varela
+    min 25 (1T 25) visitante conversion   Dante Baistrocchi
+    min 32 (1T 32) visitante card_yellow  Santiago Debarberis
+    min 49 (2T 9) local     try          Gregorio Salomon
+    min 55 (2T 15) local     substitution Ramiro Lozada
+    min 55 (2T 15) visitante try          Lucas Fernández
+    min 55 (2T 15) visitante conversion   Francisco Sosa
+    min 59 (2T 19) local     try          Bautista Rinaldi
+    min 60 (2T 20) local     substitution Bautista Rinaldi
+    min 65 (2T 25) local     substitution Lautaro Benjamin Galliano
+    min 65 (2T 25) local     substitution Genaro Acuña
+    min 65 (2T 25) local     substitution Nicanor Linera
+    min 66 (2T 26) visitante try          Ramon Agustin Ortega
+    min 68 (2T 28) local     substitution Bautista Soria
+    min 70 (2T 30) local     substitution Agustín Ferla Cecenarro
+    min 70 (2T 30) visitante try          Enzo Daniel Aguero Bruno
+    min 74 (2T 34) local     substitution Nahuel Arnaldo Luna
+    min 74 (2T 34) local     substitution Tomas Lautaro Milan
+    min 75 (2T 35) visitante card_yellow  Agustín Varela
+  marcador  · eventos 15-31 · guardado 15-31
+  tries     · 3-5 (guardado —-—)
+  arbitro   · ALEJANDRO AUGUSTO AGUERO (guardado: —)
+  guardado  · 24 local · 23 visitante · 22 eventos
+
+club-la-tablada-m19-b vs club-palermo-bajo-m19-b · f769a402 · tarjeta 315130  ·  cbada137-e665-4ef3-86a2-d40e06a3974a
+  local     · club-la-tablada-m19-b · 23 jugadores · 0 con ficha fijada
+  visitante · club-palermo-bajo-m19-b · 23 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min  6 (1T 6) local     try          Tomas Citati Hernandez
+    min 15 (1T 15) visitante try          Benjamin Strada
+    min 15 (1T 15) visitante conversion   Benjamin Strada
+    min 15 (1T 15) visitante try          Benjamin Strada
+    min 15 (1T 15) visitante try          Benjamin Strada
+    min 19 (1T 19) local     penalty_goal Facundo Volodarsky
+    min 27 (1T 27) local     try          Juan Ignacio Farah
+    min 27 (1T 27) local     conversion   Facundo Volodarsky
+    min 48 (2T 8) local     substitution Fausto Frattesi Winchel
+    min 48 (2T 8) local     substitution Francisco Perez
+    min 48 (2T 8) local     substitution Juan Cruz Moreno
+    min 58 (2T 18) local     substitution Gonzalo Legnazzi
+    min 58 (2T 18) local     substitution Mateo Marcantonelli
+    min 58 (2T 18) local     substitution Felipe Maldonado
+    min 58 (2T 18) local     substitution Cristobal Pastor
+    min 58 (2T 18) local     substitution Juan Ignacio Farah
+    min 65 (2T 25) visitante card_yellow  Mateo Lujan
+  marcador  · eventos 15-17 · guardado 15-17
+  tries     · 2-3 (guardado —-—)
+  arbitro   · LUCAS GASTON DOPASO (guardado: —)
+  guardado  · 23 local · 23 visitante · 17 eventos
+
+cordoba-athletic-club-m19-d vs tala-rugby-club-m19-b · f769a402 · tarjeta 319673  ·  7cdf1c3b-eedf-4d6b-9a31-605cc97e4ca5
+  local     · cordoba-athletic-club-m19-d · 22 jugadores · 0 con ficha fijada
+  visitante · tala-rugby-club-m19-b · 23 jugadores · 0 con ficha fijada
+  eventos   · 37
+    min  1 (1T 1) visitante try          Dante Baistrocchi
+    min  1 (1T 1) visitante conversion   Francisco Sosa
+    min  4 (1T 4) local     try          Mateo Meyer
+    min  7 (1T 7) visitante try          Santiago Debarberis
+    min  7 (1T 7) visitante conversion   Francisco Sosa
+    min 22 (1T 22) local     try          Patricio Escurra
+    min 23 (1T 23) local     conversion   Alex Mateo Pugni Albanesi
+    min 26 (1T 26) visitante try          Thiago Diaz Montenegro
+    min 29 (1T 29) local     try          Joaquin Galleguillo
+    min 34 (1T 34) visitante try          Francisco Ortega
+    min 42 (2T 2) visitante try          Dante Baistrocchi
+    min 45 (2T 5) visitante try          Dante Baistrocchi
+    min 45 (2T 5) visitante conversion   Francisco Sosa
+    min 47 (2T 7) local     substitution Federico Lopez Romera
+    min 50 (2T 10) visitante try          Valentin Napolitano
+    min 50 (2T 10) visitante conversion   Francisco Sosa
+    min 50 (2T 10) visitante substitution Benjamin Insausti
+    min 51 (2T 11) local     substitution Salvador Angilello Marangone
+    min 51 (2T 11) local     substitution Eliseo Deleite Garcia
+    min 51 (2T 11) local     substitution Jeremias Gordillo Molina
+    min 54 (2T 14) local     card_yellow  Benicio José Gambra Macias
+    min 55 (2T 15) visitante try          Valentin Picchio
+    min 55 (2T 15) visitante conversion   Francisco Sosa
+    min 56 (2T 16) visitante substitution Tomas Eizikovits
+    min 56 (2T 16) visitante substitution Valentin Picchio
+    min 63 (2T 23) visitante substitution Fausto Pelizza
+    min 63 (2T 23) visitante substitution Tomas Silbestein
+    min 63 (2T 23) visitante substitution Thiago Diaz Montenegro
+    min 63 (2T 23) visitante substitution Francisco Martin Ambort
+    min 66 (2T 26) local     try          Tomas Zuain Fornillo
+    min 67 (2T 27) visitante substitution Constantino Corvalán
+    min 68 (2T 28) local     substitution Emiliano D'amario
+    min 68 (2T 28) local     substitution Mateo Meyer
+    min 68 (2T 28) local     substitution Joaquin Galleguillo
+    min 69 (2T 29) visitante try          Dante Baistrocchi
+    min 75 (2T 35) visitante try          Mateo Aguirre Pigini
+    min 75 (2T 35) visitante conversion   Francisco Sosa
+  marcador  · eventos 22-62 · guardado 22-62
+  tries     · 4-10 (guardado —-—)
+  arbitro   · MARTIN LEIVA (guardado: —)
+  guardado  · 22 local · 23 visitante · 37 eventos
+
+cordoba-athletic-club-m19-b vs cordoba-rugby-club-m19-b · f769a402 · tarjeta 319672  ·  8137a5cb-3390-49c3-b26b-03dfe023ad06
+  local     · cordoba-athletic-club-m19-b · 22 jugadores · 11 con ficha fijada
+  visitante · cordoba-rugby-club-m19-b · 28 jugadores · 22 con ficha fijada
+  eventos   · 34
+    min  1 (1T 1) local     card_yellow  Samuel Carranza
+    min  1 (1T 1) local     try          Mauricio Bazan Gonzalez
+    min  1 (1T 1) local     conversion   Juan Pablo Soria
+    min  1 (1T 1) visitante try          Alvaro Quiroga
+    min  1 (1T 1) visitante conversion   Santino Fulgenzi
+    min  2 (1T 2) local     card_yellow  Lautaro Castex
+    min  2 (1T 2) local     try          Lautaro Castex
+    min  2 (1T 2) visitante try          Santiago Lescano
+    min  2 (1T 2) visitante conversion   Santino Fulgenzi
+    min  3 (1T 3) local     card_yellow  Mateo Nicolas Torres Pereyra
+    min  3 (1T 3) local     try          Fabrizio Barco Orozco
+    min  3 (1T 3) local     conversion   Salvador Acuña
+    min  3 (1T 3) visitante try          Joaquin Sanchez
+    min  3 (1T 3) visitante conversion   Santino Fulgenzi
+    min  4 (1T 4) visitante penalty_try  
+    min  5 (1T 5) visitante try          Santino Fulgenzi
+    min  6 (1T 6) visitante try          Santino Fulgenzi
+    min 35 (1T 35) local     injury       Fabrizio Barco Orozco
+    min 40 (1T 40) local     substitution Lautaro Bisbal
+    min 40 (1T 40) local     substitution Faustino Castillo
+    min 40 (1T 40) local     substitution Juan Cruz Polanco Garcia
+    min 40 (1T 40) local     substitution Mateo Nicolas Torres Pereyra
+    min 40 (1T 40) local     substitution Mauricio Bazan Gonzalez
+    min 40 (1T 40) local     substitution Juan Ignacio Reinoso Santander
+    min 40 (1T 40) local     substitution Fabrizio Barco Orozco
+    min 40 (1T 40) visitante substitution Santiago Lescano
+    min 40 (1T 40) visitante substitution Álvaro Bautista Asvisio
+    min 40 (1T 40) visitante substitution Santiago Di Fulvio Gonzalez
+    min 40 (1T 40) visitante substitution Santiago Sartori
+    min 40 (1T 40) visitante substitution Álvaro Bautista Asvisio
+    min 40 (1T 40) visitante substitution Lautaro David Balán Tolaba
+    min 40 (1T 40) visitante substitution Mateo Llorca Maza
+    min 40 (1T 40) visitante substitution Nicolas Plans
+    min 40 (1T 40) visitante injury       Álvaro Bautista Asvisio
+  marcador  · eventos 19-38 · guardado 19-38
+  tries     · 3-6 (guardado —-—)
+  arbitro   · ABEL ESTEBAN TUREK (guardado: —)
+  guardado  · 22 local · 28 visitante · 34 eventos
+
+jockey-club-cordoba-m19-b vs club-la-tablada-m19-b · f769a402 · tarjeta 319671  ·  254d0a42-3998-4299-b65c-9d011de7cf01
+  local     · jockey-club-cordoba-m19-b · 23 jugadores · 0 con ficha fijada
+  visitante · club-la-tablada-m19-b · 24 jugadores · 0 con ficha fijada
+  eventos   · 29
+    min 11 (1T 11) visitante try          Tomas Citati Hernandez
+    min 11 (1T 11) visitante conversion   Alejo Shekendemian
+    min 14 (1T 14) local     try          Santiago Ramos Martinez
+    min 32 (1T 32) visitante card_yellow  Cristobal Pastor
+    min 47 (2T 7) visitante try          Tomas Maldonado
+    min 47 (2T 7) visitante conversion   Alejo Shekendemian
+    min 52 (2T 12) visitante substitution Cristobal Pastor
+    min 52 (2T 12) visitante substitution Juan Ignacio Farah
+    min 58 (2T 18) visitante substitution Tomas Citati Hernandez
+    min 66 (2T 26) visitante card_yellow  Cristóbal Manrique
+    min 67 (2T 27) visitante substitution Santino Nicolás Pereyra
+    min 67 (2T 27) visitante substitution Felipe Maldonado
+    min 67 (2T 27) visitante substitution Genaro Acuña
+    min 69 (2T 29) visitante card_yellow  Justino Legora
+    min 73 (2T 33) local     card_yellow  Benjamin Granero Torres
+    min 73 (2T 33) visitante try          Nahuel Arnaldo Luna
+    min 73 (2T 33) visitante conversion   Alejo Shekendemian
+    min 78 (2T 38) local     substitution Elias Gerez
+    min 80 (2T 40) visitante substitution Juan Cruz Moreno
+    min 84 (2T 44) local     try          Santino Dei Rossi
+    min 90 (2T 50) local     substitution Santiago Ramos Martinez
+    min 90 (2T 50) local     substitution Felipe Mariano Rossi Comito
+    min 95 (2T 55) local     substitution Francisco Sanmillan Seguro
+    min 95 (2T 55) local     substitution Octavio Triay
+    min 95 (2T 55) local     substitution Facundo Patricio Barreiro Riga
+    min 105 (2T 65) local     try          Felipe Luti Bitar
+    min 105 (2T 65) local     conversion   Felipe Bessone
+    min 105 (2T 65) local     substitution Mator Aguirre
+    min 105 (2T 65) local     substitution Joaquin Delia
+  marcador  · eventos 17-21 · guardado 17-21
+  tries     · 3-3 (guardado —-—)
+  arbitro   · EMMANUEL BOSCATTO (guardado: —)
+  guardado  · 23 local · 24 visitante · 29 eventos
+
+tala-rugby-club-m19-c vs uru-cure-rugby-club-m19-b · f769a402 · tarjeta 319674  ·  c3e22961-a8eb-421e-bbe6-672757363635
+  local     · tala-rugby-club-m19-c · 24 jugadores · 0 con ficha fijada
+  visitante · uru-cure-rugby-club-m19-b · 22 jugadores · 0 con ficha fijada
+  eventos   · 32
+    min  5 (1T 5) visitante try          Manuel Coll
+    min  9 (1T 9) visitante try          Augusto Gomez Rossi
+    min  9 (1T 9) visitante conversion   Cristobal Aguilera
+    min 11 (1T 11) local     try          Egidio Jeremias Heyd
+    min 11 (1T 11) local     conversion   Juan De La Cruz Mendez Casariego
+    min 19 (1T 19) visitante try          Iñaki Rins
+    min 30 (1T 30) local     try          Tomas Feliciosi
+    min 30 (1T 30) local     conversion   Juan De La Cruz Mendez Casariego
+    min 42 (2T 2) visitante try          Cristobal Aguilera
+    min 42 (2T 2) visitante conversion   Cristobal Aguilera
+    min 46 (2T 6) local     substitution Enzo Daniel Aguero Bruno
+    min 46 (2T 6) local     substitution Ramiro Quiroga Perez
+    min 46 (2T 6) local     substitution Mateo Aguirre Pigini
+    min 48 (2T 8) visitante try          Manuel Capriglioni
+    min 48 (2T 8) visitante conversion   Cristobal Aguilera
+    min 50 (2T 10) visitante try          Francesco Medina
+    min 50 (2T 10) visitante conversion   Cristobal Aguilera
+    min 53 (2T 13) visitante substitution Augusto Gomez Rossi
+    min 53 (2T 13) visitante substitution Juan Martin Garcia Soler
+    min 53 (2T 13) visitante try          Juan Ignacio Altamirano Rojas
+    min 53 (2T 13) visitante conversion   Cristobal Aguilera
+    min 55 (2T 15) visitante substitution Juan Ignacio Altamirano Rojas
+    min 56 (2T 16) visitante try          Benjamin Anino
+    min 56 (2T 16) visitante conversion   Cristobal Aguilera
+    min 56 (2T 16) visitante substitution Benjamin Anino
+    min 56 (2T 16) visitante substitution Iñaki Rins
+    min 57 (2T 17) visitante substitution Manuel Capriglioni
+    min 61 (2T 21) local     substitution Miguel Patricio Moran Hernández
+    min 65 (2T 25) visitante substitution Pedro Picco Wevar
+    min 68 (2T 28) local     try          Augusto Ibrahín Abregu
+    min 75 (2T 35) visitante try          Cristobal Aguilera
+    min 75 (2T 35) visitante conversion   Cristobal Aguilera
+  marcador  · eventos 19-59 · guardado 19-59
+  tries     · 3-9 (guardado —-—)
+  arbitro   · LUCAS GASTON DOPASO (guardado: —)
+  guardado  · 24 local · 22 visitante · 32 eventos
+
+tala-rugby-club-m19-c vs san-francisco-r-c-m19-b · f769a402 · tarjeta 320851  ·  9481f27c-715c-4d53-a817-0b37f52a3cd2
+  local     · tala-rugby-club-m19-c · 25 jugadores · 0 con ficha fijada
+  visitante · san-francisco-r-c-m19-b · 23 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min  2 (1T 2) local     try          Augusto Ibrahín Abregu
+    min  2 (1T 2) local     conversion   Antonio Rafael Cabanillas
+    min 12 (1T 12) visitante try          Agustin Suarez
+    min 17 (1T 17) local     try          Enzo Daniel Aguero Bruno
+    min 17 (1T 17) local     conversion   Antonio Rafael Cabanillas
+    min 27 (1T 27) local     try          Felipe Quaglia
+    min 32 (1T 32) visitante try          Juan Pedro Lamberti
+    min 32 (1T 32) visitante conversion   Santino Vanzetti
+    min 35 (1T 35) local     substitution Tomas Silbestein
+    min 40 (2T 0) local     substitution Ignacio Amaya Torletti
+    min 46 (2T 6) local     try          Ramiro Quiroga Perez
+    min 46 (2T 6) local     conversion   Antonio Rafael Cabanillas
+    min 51 (2T 11) local     substitution Antonio Rafael Cabanillas
+    min 58 (2T 18) local     try          Tomas Feliciosi
+    min 58 (2T 18) local     conversion   Juan De La Cruz Mendez Casariego
+    min 62 (2T 22) visitante conversion   Santino Vanzetti
+    min 62 (2T 22) visitante try          Bruno Verrua
+    min 62 (2T 22) visitante conversion   Santino Vanzetti
+    min 62 (2T 22) visitante try          Fausto Norryh González
+    min 65 (2T 25) local     substitution Augusto Ibrahín Abregu
+    min 65 (2T 25) local     substitution Enzo Daniel Aguero Bruno
+    min 72 (2T 32) visitante card_yellow  Benjamin Sargenti
+    min 72 (2T 32) visitante try          Correa Elias
+    min 72 (2T 32) visitante conversion   Santino Vanzetti
+    min 75 (2T 35) local     substitution Joaquin Ortiz
+  marcador  · eventos 33-33 · guardado 33-33
+  tries     · 5-5 (guardado —-—)
+  arbitro   · ARTURO MARTINEZ (guardado: —)
+  guardado  · 25 local · 23 visitante · 25 eventos
+
+jockey-club-cordoba-m19-b vs cordoba-athletic-club-m19-b · f769a402 · tarjeta 323998  ·  780cf7f4-abd6-468a-8651-9fe4d567f58b
+  local     · jockey-club-cordoba-m19-b · 23 jugadores · 0 con ficha fijada
+  visitante · cordoba-athletic-club-m19-b · 23 jugadores · 10 con ficha fijada
+  eventos   · 28
+    min 16 (1T 16) local     penalty_goal Joaquin Delia
+    min 17 (1T 17) visitante try          Francisco Arguello
+    min 18 (1T 18) visitante conversion   Facundo Isao Mishima
+    min 22 (1T 22) visitante penalty_goal Facundo Isao Mishima
+    min 28 (1T 28) local     try          Joaquin Delia
+    min 28 (1T 28) visitante card_yellow  Eliseo Deleite Garcia
+    min 32 (1T 32) visitante penalty_goal Facundo Isao Mishima
+    min 33 (1T 33) visitante try          José Ignacio Ferrayoli
+    min 34 (1T 34) visitante conversion   Facundo Isao Mishima
+    min 35 (1T 35) local     penalty_goal Joaquin Delia
+    min 43 (2T 3) visitante substitution José Ignacio Ferrayoli
+    min 44 (2T 4) local     substitution Santiago Mazzuferi
+    min 45 (2T 5) local     try          Santiago Ramos Martinez
+    min 46 (2T 6) visitante substitution Santiago Bocco
+    min 49 (2T 9) local     substitution Francisco Sanmillan Seguro
+    min 50 (2T 10) local     substitution Octavio Triay
+    min 50 (2T 10) local     substitution Francisco Sangoy Cafferata
+    min 55 (2T 15) local     substitution Tomás Ernesto Guevara Ortiz
+    min 55 (2T 15) local     substitution Mator Aguirre
+    min 58 (2T 18) visitante substitution Jeremias Gordillo Molina
+    min 62 (2T 22) local     substitution Tobias Ciotta
+    min 64 (2T 24) visitante substitution Valentin Nuñez Pereyra
+    min 64 (2T 24) visitante substitution Lautaro Bisbal
+    min 68 (2T 28) local     try          Santiago Ramos Martinez
+    min 71 (2T 31) visitante substitution Facundo Isao Mishima
+    min 71 (2T 31) visitante substitution Eliseo Deleite Garcia
+    min 75 (2T 35) local     card_yellow  Mateo Patocchi Arrieta
+    min 76 (2T 36) visitante card_yellow  Mateo Meyer
+  marcador  · eventos 21-20 · guardado 21-20
+  tries     · 3-2 (guardado —-—)
+  arbitro   · ARTURO MARTINEZ (guardado: —)
+  guardado  · 23 local · 23 visitante · 28 eventos
+
+tala-rugby-club-m19-b vs club-palermo-bajo-m19-b · f769a402 · tarjeta 323996  ·  f66745cb-63b0-483e-8207-3ea13cac3225
+  local     · tala-rugby-club-m19-b · 24 jugadores · 0 con ficha fijada
+  visitante · club-palermo-bajo-m19-b · 23 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min  5 (1T 5) visitante try          Ignacio Alejo Barrionuevo
+    min  5 (1T 5) visitante conversion   Mateo Lujan
+    min 10 (1T 10) visitante try          Conrado Bergese
+    min 17 (1T 17) local     try          Fausto Pelizza
+    min 17 (1T 17) local     conversion   Benjamin Insausti
+    min 35 (1T 35) local     try          Ignacio Geremia
+    min 40 (2T 0) local     substitution Martin Leandro Basso
+    min 47 (2T 7) local     substitution Enzo Daniel Aguero Bruno
+    min 47 (2T 7) local     card_yellow  Santino Contato Tribulo
+    min 51 (2T 11) visitante substitution Mateo Lujan
+    min 51 (2T 11) visitante substitution Mateo Bautista Gomez Gauna
+    min 58 (2T 18) local     substitution Dante Baistrocchi
+    min 58 (2T 18) local     substitution Felipe Recalde
+    min 60 (2T 20) local     card_yellow  Thiago Diaz Montenegro
+    min 64 (2T 24) local     try          Santino Contato Tribulo
+    min 65 (2T 25) local     substitution Ignacio Geremia
+    min 67 (2T 27) visitante try          Angel Valentin Alarcon
+    min 68 (2T 28) visitante conversion   Tomas De Celis
+    min 75 (2T 35) visitante penalty_goal Tomas De Celis
+    min 80 (2T 40) visitante substitution Mateo Georgetti
+    min 80 (2T 40) visitante substitution Facundo Ismael Ferreyra
+    min 80 (2T 40) visitante substitution Juan Ignacio Gallardo
+  marcador  · eventos 17-22 · guardado 17-22
+  tries     · 3-3 (guardado —-—)
+  arbitro   · LUCAS GASTON DOPASO (guardado: —)
+  guardado  · 24 local · 23 visitante · 22 eventos
+
+san-francisco-r-c-m19-b vs jockey-club-cordoba-m19-c · f769a402 · tarjeta 324000  ·  136d9018-55ce-4021-bb6d-85bb588949da
+  local     · san-francisco-r-c-m19-b · 20 jugadores · 0 con ficha fijada
+  visitante · jockey-club-cordoba-m19-c · 22 jugadores · 0 con ficha fijada
+  eventos   · 16
+    min  9 (1T 9) local     try          Benjamin Lencinas
+    min  9 (1T 9) local     conversion   Benjamin Lencinas
+    min 14 (1T 14) visitante try          Emanuel Valentin Guzman Ladino
+    min 14 (1T 14) visitante conversion   Emanuel Valentin Guzman Ladino
+    min 19 (1T 19) visitante try          Emanuel Valentin Guzman Ladino
+    min 19 (1T 19) visitante conversion   Emanuel Valentin Guzman Ladino
+    min 25 (1T 25) local     try          Benjamin Lencinas
+    min 25 (1T 25) local     conversion   Benjamin Lencinas
+    min 28 (1T 28) local     try          Benjamin Lencinas
+    min 28 (1T 28) local     conversion   Benjamin Lencinas
+    min 45 (2T 5) local     try          Benjamin Lencinas
+    min 45 (2T 5) local     conversion   Benjamin Lencinas
+    min 51 (2T 11) visitante try          Emanuel Valentin Guzman Ladino
+    min 51 (2T 11) visitante conversion   Emanuel Valentin Guzman Ladino
+    min 73 (2T 33) visitante conversion   Emanuel Valentin Guzman Ladino
+    min 73 (2T 33) visitante try          Emanuel Valentin Guzman Ladino
+  marcador  · eventos 28-28 · guardado 28-28
+  tries     · 4-4 (guardado —-—)
+  arbitro   · LEANDRO LUCHETTI (guardado: —)
+  guardado  · 20 local · 22 visitante · 16 eventos
+
+tala-rugby-club-m19-b vs jockey-club-cordoba-m19-b · f769a402 · tarjeta 324507  ·  1cb95f78-d383-4e64-a62d-11f140a03b57
+  local     · tala-rugby-club-m19-b · 25 jugadores · 0 con ficha fijada
+  visitante · jockey-club-cordoba-m19-b · 23 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min  7 (1T 7) local     penalty_goal Dante Baistrocchi
+    min 24 (1T 24) local     try          Santino Contato Tribulo
+    min 28 (1T 28) visitante try          Martin Robinson
+    min 29 (1T 29) local     try          Santino Contato Tribulo
+    min 29 (1T 29) local     conversion   Dante Baistrocchi
+    min 29 (1T 29) local     substitution Tomas Silbestein
+    min 29 (1T 29) local     substitution Bautista Kassabian
+    min 42 (2T 2) local     substitution Tomas Eizikovits
+    min 48 (2T 8) local     substitution Francisco Martin Ambort
+    min 70 (2T 30) local     substitution Valentin Picchio
+    min 70 (2T 30) local     substitution Juan Ignacio Vespasiani
+    min 70 (2T 30) local     substitution Juan De La Cruz Mendez Casariego
+    min 70 (2T 30) local     substitution Valentin Napolitano
+    min 80 (2T 40) visitante try          Santiago Ramos Martinez
+    min 80 (2T 40) visitante conversion   Joaquin Delia
+    min 85 (2T 45) visitante substitution Maximo Cardozo
+    min 85 (2T 45) visitante substitution Tomás Ernesto Guevara Ortiz
+    min 85 (2T 45) visitante substitution Francisco Sanmillan Seguro
+    min 87 (2T 47) visitante penalty_goal Joaquin Delia
+    min 88 (2T 48) visitante substitution Mator Aguirre
+    min 88 (2T 48) visitante substitution Facundo Patricio Barreiro Riga
+    min 90 (2T 50) visitante substitution Francisco Sangoy Cafferata
+    min 90 (2T 50) visitante substitution Lautaro Tejeda
+    min 100 (2T 60) visitante try          Emanuel Valentin Guzman Ladino
+    min 100 (2T 60) visitante conversion   Joaquin Delia
+  marcador  · eventos 15-22 · guardado 15-22
+  tries     · 2-3 (guardado —-—)
+  arbitro   · LUCAS HUMERES (guardado: —)
+  guardado  · 25 local · 23 visitante · 25 eventos
+
+club-la-tablada-m19-c vs cordoba-athletic-club-m19-b · f769a402 · tarjeta 324506  ·  144ff79a-1e02-4554-bfb8-9f5c4d42f5d9
+  local     · club-la-tablada-m19-c · 23 jugadores · 0 con ficha fijada
+  visitante · cordoba-athletic-club-m19-b · 23 jugadores · 11 con ficha fijada
+  eventos   · 29
+    min  3 (1T 3) visitante try          Francisco Racedo
+    min  9 (1T 9) local     penalty_goal Alejo Shekendemian
+    min 11 (1T 11) local     try          Juan Cruz Moreno
+    min 18 (1T 18) visitante try          Juan Martin Castro
+    min 19 (1T 19) visitante conversion   Facundo Isao Mishima
+    min 21 (1T 21) local     try          Tomas Citati Hernandez
+    min 22 (1T 22) local     conversion   Alejo Shekendemian
+    min 25 (1T 25) local     substitution Francisco Morelli
+    min 34 (1T 34) local     substitution Genaro Alfonso Casas
+    min 40 (2T 0) visitante substitution Lautaro Jonas Sosa
+    min 40 (2T 0) visitante substitution Tiziano Barco Prozco
+    min 44 (2T 4) visitante substitution Samuel Carranza
+    min 45 (2T 5) local     try          Bautista Rinaldi
+    min 45 (2T 5) local     conversion   Alejo Shekendemian
+    min 47 (2T 7) local     substitution Bautista Soria
+    min 48 (2T 8) visitante substitution Santiago Agustin Manzur
+    min 48 (2T 8) visitante substitution Mauricio Bazan Gonzalez
+    min 51 (2T 11) local     substitution Martiniano Griguol
+    min 51 (2T 11) local     substitution Valentín Cortes
+    min 55 (2T 15) visitante try          José Ignacio Ferrayoli
+    min 56 (2T 16) visitante conversion   Facundo Isao Mishima
+    min 58 (2T 18) local     substitution Juan Cruz Moreno
+    min 63 (2T 23) visitante try          Mateo Nicolas Ragazzini
+    min 63 (2T 23) visitante substitution Lautaro Bisbal
+    min 64 (2T 24) local     card_yellow  Nahuel Arnaldo Luna
+    min 64 (2T 24) visitante conversion   Facundo Isao Mishima
+    min 70 (2T 30) visitante substitution Juan Martin Castro
+    min 77 (2T 37) visitante penalty_goal Facundo Isao Mishima
+    min 80 (2T 40) local     substitution Tomas Arguello Avalos
+  marcador  · eventos 22-29 · guardado 22-29
+  tries     · 3-4 (guardado —-—)
+  arbitro   · FRANCO ZARATE (guardado: —)
+  guardado  · 23 local · 23 visitante · 29 eventos
+
+san-francisco-r-c-m19-b vs uru-cure-rugby-club-m19-b · f769a402 · tarjeta 325096  ·  560478ae-5e6d-41f0-90cb-d59c79549f04
+  local     · san-francisco-r-c-m19-b · 20 jugadores · 0 con ficha fijada
+  visitante · uru-cure-rugby-club-m19-b · 17 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min  4 (1T 4) visitante try          Augusto Gomez Rossi
+    min  4 (1T 4) visitante conversion   Garcia Agustin
+    min 15 (1T 15) local     try          Benjamin Sargenti
+    min 15 (1T 15) local     conversion   Benjamin Sargenti
+    min 18 (1T 18) visitante try          Juan Ignacio Altamirano Rojas
+    min 25 (1T 25) visitante try          Juan Ignacio Altamirano Rojas
+    min 28 (1T 28) visitante try          Lisandro Torres
+    min 28 (1T 28) visitante conversion   Garcia Agustin
+    min 36 (1T 36) local     try          Santino Astegiano
+    min 36 (1T 36) local     conversion   Santino Vanzetti
+    min 45 (2T 5) visitante try          Faustino Tereszczuk
+    min 45 (2T 5) visitante conversion   Faustino Tereszczuk
+    min 45 (2T 5) visitante substitution Tadeo Medina
+    min 48 (2T 8) visitante try          Tomas Knuttsen
+    min 48 (2T 8) visitante conversion   Garcia Agustin
+    min 50 (2T 10) visitante substitution Salvador Cosio
+    min 54 (2T 14) visitante try          Manuel Coll
+    min 54 (2T 14) visitante conversion   Garcia Agustin
+    min 58 (2T 18) visitante try          Tomas Knuttsen
+    min 58 (2T 18) visitante conversion   Garcia Agustin
+    min 61 (2T 21) local     try          Juan Cruz Butus Acebal
+    min 61 (2T 21) local     conversion   Santino Vanzetti
+    min 68 (2T 28) visitante try          Augusto Gomez Rossi
+    min 68 (2T 28) visitante conversion   Garcia Agustin
+    min 72 (2T 32) local     card_yellow  Bruno Verrua
+  marcador  · eventos 21-59 · guardado 21-59
+  tries     · 3-9 (guardado —-—)
+  arbitro   · SANTIAGO HERRERA ALBANO (guardado: —)
+  guardado  · 20 local · 17 visitante · 25 eventos
+
+jockey-club-cordoba-m19-c vs tala-rugby-club-m19-c · f769a402 · tarjeta 325095  ·  d48aa0c1-89ad-464f-a688-6e2dbec435ad
+  local     · jockey-club-cordoba-m19-c · 22 jugadores · 0 con ficha fijada
+  visitante · tala-rugby-club-m19-c · 19 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min 12 (1T 12) visitante try          Tomas Feliciosi
+    min 12 (1T 12) visitante conversion   Juan De La Cruz Mendez Casariego
+    min 17 (1T 17) visitante try          Constantino Corvalán
+    min 17 (1T 17) visitante conversion   Juan De La Cruz Mendez Casariego
+    min 22 (1T 22) visitante try          Tomas Feliciosi
+    min 22 (1T 22) visitante conversion   Juan De La Cruz Mendez Casariego
+    min 46 (2T 6) visitante try          Augusto Ibrahín Abregu
+    min 46 (2T 6) visitante conversion   Juan De La Cruz Mendez Casariego
+    min 80 (2T 40) local     substitution Gonzalo Perez
+    min 80 (2T 40) local     substitution Mauro Gastón Pérez
+    min 80 (2T 40) local     substitution Lautaro Juarez Bricca
+    min 80 (2T 40) local     substitution Joaquin Prado Ercoli
+    min 80 (2T 40) local     substitution Lucca Infante
+    min 80 (2T 40) local     substitution Sebastián Nicolas Gonzalez
+    min 80 (2T 40) local     substitution Emanuel Valentin Guzman Ladino
+    min 95 (2T 55) local     try          Octavio Triay
+    min 95 (2T 55) local     conversion   Martin Oglietti Aguirre
+    min 98 (2T 58) local     try          Octavio Triay
+    min 98 (2T 58) local     conversion   Martin Oglietti Aguirre
+    min 100 (2T 60) local     try          Joaquin Alvarez Quiñones
+    min 655 (2T 615) visitante try          Constantino Corvalán
+    min 655 (2T 615) visitante conversion   Juan De La Cruz Mendez Casariego
+  marcador  · eventos 19-35 · guardado 19-35
+  tries     · 3-5 (guardado —-—)
+  arbitro   · TOMAS ELIAS GIGENA RAMALLO (guardado: —)
+  guardado  · 22 local · 19 visitante · 22 eventos
+
+jockey-club-cordoba-m19-b vs cordoba-athletic-club-m19-d · f769a402 · tarjeta 325093  ·  5104511e-5c52-47ee-ab1e-5f69162ca048
+  local     · jockey-club-cordoba-m19-b · 23 jugadores · 0 con ficha fijada
+  visitante · cordoba-athletic-club-m19-d · 23 jugadores · 0 con ficha fijada
+  eventos   · 30
+    min  9 (1T 9) local     penalty_goal Joaquin Delia
+    min 16 (1T 16) local     substitution Agustin Gonzalez
+    min 18 (1T 18) local     try          Tobias Ciotta
+    min 19 (1T 19) local     conversion   Joaquin Delia
+    min 31 (1T 31) visitante substitution Joaquin Galleguillo
+    min 35 (1T 35) local     substitution Joaquin Delia
+    min 36 (1T 36) local     try          Francisco Sangoy Cafferata
+    min 36 (1T 36) local     conversion   Joaquin Delia
+    min 42 (2T 2) local     try          Martin Robinson
+    min 42 (2T 2) local     conversion   Salvador Franco Curvino
+    min 53 (2T 13) local     card_yellow  Mateo Patocchi Arrieta
+    min 54 (2T 14) local     substitution Mator Aguirre
+    min 57 (2T 17) visitante substitution Valentino Luka Suarez Carmganola
+    min 57 (2T 17) visitante substitution Santino Bertolino
+    min 59 (2T 19) local     substitution Augusto Toledo Toselli
+    min 59 (2T 19) local     substitution Facundo Patricio Barreiro Riga
+    min 59 (2T 19) local     substitution Santiago Ramos Martinez
+    min 59 (2T 19) local     substitution Maximo Cardozo
+    min 59 (2T 19) visitante substitution Oscar Iván Nieva Sandoval
+    min 60 (2T 20) visitante try          Emiliano D'amario
+    min 61 (2T 21) visitante conversion   Salvador Acuña
+    min 65 (2T 25) local     substitution Francisco Sanmillan Seguro
+    min 67 (2T 27) local     try          Francisco Vaccarini
+    min 67 (2T 27) local     conversion   Salvador Franco Curvino
+    min 71 (2T 31) visitante substitution Agustin Gabriel Campos Campos Varela
+    min 73 (2T 33) visitante try          Olivier Courtis
+    min 75 (2T 35) local     card_yellow  Santiago Paolini
+    min 80 (2T 40) visitante substitution Francisco Cebreros Lozano
+    min 80 (2T 40) visitante substitution Salvador Angilello Marangone
+    min 80 (2T 40) visitante substitution Francisco Moreyra Aguero
+  marcador  · eventos 31-12 · guardado 31-12
+  tries     · 4-2 (guardado —-—)
+  arbitro   · GABRIEL HERNÁN TIRANTE (guardado: —)
+  guardado  · 23 local · 23 visitante · 30 eventos
+
+club-palermo-bajo-m19-b vs cordoba-rugby-club-m19-b · f769a402 · tarjeta 325092  ·  a2976f47-2600-466a-a6f7-03691d56ec44
+  local     · club-palermo-bajo-m19-b · 23 jugadores · 0 con ficha fijada
+  visitante · cordoba-rugby-club-m19-b · 23 jugadores · 20 con ficha fijada
+  eventos   · 17
+    min 12 (1T 12) local     card_yellow  Mateo Grosso
+    min 14 (1T 14) local     substitution Rodolfo Garcia Araoz
+    min 14 (1T 14) visitante card_yellow  Santiago Lescano
+    min 16 (1T 16) visitante card_yellow  Ian Carrizo
+    min 30 (1T 30) local     try          Tomas De Celis
+    min 41 (2T 1) visitante substitution Emiliano Barreras
+    min 44 (2T 4) local     substitution Facundo Zahir Umar
+    min 49 (2T 9) visitante try          Santiago Alejandro Alincastro Sosa
+    min 54 (2T 14) visitante try          Joaquin Sanchez
+    min 60 (2T 20) local     try          Ignacio Alejo Barrionuevo
+    min 61 (2T 21) local     conversion   Juan Cruz Alvarez
+    min 67 (2T 27) visitante substitution Santiago Lescano
+    min 70 (2T 30) local     substitution Juan Ignacio Gallardo
+    min 72 (2T 32) local     try          Ramiro Bersano
+    min 73 (2T 33) local     conversion   Juan Cruz Alvarez
+    min 75 (2T 35) local     card_yellow  Mateo Grosso
+    min 75 (2T 35) local     card_red     Mateo Grosso
+  marcador  · eventos 19-10 · guardado 19-10
+  tries     · 3-2 (guardado —-—)
+  arbitro   · ÁNGELES MURUA (guardado: —)
+  guardado  · 23 local · 23 visitante · 17 eventos
+
+cordoba-athletic-club-m19-b vs cordoba-rugby-club-m19-b · f769a402 · tarjeta 327335  ·  aff23241-b492-4aea-bd69-0433157716de
+  local     · cordoba-athletic-club-m19-b · 23 jugadores · 23 con ficha fijada
+  visitante · cordoba-rugby-club-m19-b · 23 jugadores · 23 con ficha fijada
+  eventos   · 27
+    min  3 (1T 3) visitante try          Valentín Zacarías
+    min 12 (1T 12) local     try          Olivier Courtis
+    min 13 (1T 13) local     conversion   Salvador Acuña
+    min 17 (1T 17) local     try          Francisco Racedo
+    min 18 (1T 18) local     conversion   Salvador Acuña
+    min 26 (1T 26) local     card_yellow  Samuel Carranza
+    min 27 (1T 27) visitante try          Valentín Zacarías
+    min 47 (2T 7) local     try          Mateo Godoy Brupbacher
+    min 47 (2T 7) local     substitution Santiago Vedia
+    min 47 (2T 7) local     substitution Lautaro Bisbal
+    min 47 (2T 7) local     substitution Mateo Nicolas Ragazzini
+    min 52 (2T 12) visitante substitution Joel Manuel Gonzalez
+    min 52 (2T 12) visitante substitution Emiliano Barreras
+    min 54 (2T 14) local     substitution Lautaro Castex
+    min 54 (2T 14) local     substitution Mauricio Bazan Gonzalez
+    min 55 (2T 15) local     substitution Jeremias Gordillo Molina
+    min 55 (2T 15) local     substitution Santiago Ojeda
+    min 59 (2T 19) visitante substitution Tomas Agustin Lastra Flores
+    min 66 (2T 26) visitante try          Alvaro Quiroga
+    min 66 (2T 26) visitante conversion   Nicolas Plans
+    min 70 (2T 30) local     try          Alejo Iturria
+    min 71 (2T 31) local     conversion   Salvador Acuña
+    min 72 (2T 32) local     try          Facundo Isao Mishima
+    min 73 (2T 33) local     conversion   Salvador Acuña
+    min 75 (2T 35) local     try          Tiziano Barco Prozco
+    min 76 (2T 36) local     conversion   Salvador Acuña
+    min 80 (2T 40) local     substitution Santiago Agustin Manzur
+  marcador  · eventos 40-17 · guardado 40-17
+  tries     · 6-3 (guardado 6-3)
+  arbitro   · GUSTAVO REARTES (guardado: Reartes G.)
+  guardado  · 23 local · 23 visitante · 27 eventos
+
+cordoba-athletic-club-m19-c vs jockey-club-cordoba-m19-c · f769a402 · tarjeta 326173  ·  01f90350-6304-4e50-8e44-5c380505f07d
+  local     · cordoba-athletic-club-m19-c · 22 jugadores · 0 con ficha fijada
+  visitante · jockey-club-cordoba-m19-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 30
+    min  0 (1T 0) visitante card_yellow  Emanuel Valentin Guzman Ladino
+    min  0 (1T 0) visitante substitution Felipe Belaustegui
+    min  3 (1T 3) visitante try          Ignacio Ruggieri
+    min 17 (1T 17) local     try          Valentino Luka Suarez Carmganola
+    min 18 (1T 18) local     conversion   Juan Manuel Arias
+    min 19 (1T 19) visitante try          Lucca Infante
+    min 19 (1T 19) visitante conversion   Lucca Infante
+    min 26 (1T 26) visitante try          Felipe Carrara
+    min 26 (1T 26) visitante conversion   Lucca Infante
+    min 28 (1T 28) local     substitution Oscar Iván Nieva Sandoval
+    min 34 (1T 34) local     try          Sebastian Villalba
+    min 35 (1T 35) local     conversion   Juan Manuel Arias
+    min 40 (2T 0) visitante card_yellow  Felipe Luti Bitar
+    min 40 (2T 0) visitante card_yellow  Matheo Cervatto
+    min 40 (2T 0) visitante substitution Sebastián Nicolas Gonzalez
+    min 40 (2T 0) visitante substitution Ignacio Ruggieri
+    min 40 (2T 0) visitante substitution Felipe Mariano Rossi Comito
+    min 40 (2T 0) visitante substitution Mauro Gastón Pérez
+    min 40 (2T 0) visitante substitution Valentin Roldan
+    min 40 (2T 0) visitante substitution Lautaro Tejeda
+    min 43 (2T 3) local     card_yellow  Emiliano D'amario
+    min 51 (2T 11) local     try          Alex Mateo Pugni Albanesi
+    min 52 (2T 12) local     conversion   Juan Manuel Arias
+    min 57 (2T 17) local     substitution Felipe Paz Albert
+    min 60 (2T 20) local     try          Emiliano D'amario
+    min 61 (2T 21) local     substitution Emiliano D'amario
+    min 61 (2T 21) local     substitution Santino Bertolino
+    min 61 (2T 21) local     substitution Benicio José Gambra Macias
+    min 61 (2T 21) local     conversion   Juan Manuel Arias
+    min 66 (2T 26) local     substitution Joaquin Galleguillo
+  marcador  · eventos 28-19 · guardado 28-19
+  tries     · 4-3 (guardado —-—)
+  arbitro   · GABRIEL HERNÁN TIRANTE (guardado: —)
+  guardado  · 22 local · 23 visitante · 30 eventos
+
+uru-cure-rugby-club-m19-b vs tala-rugby-club-m19-c · f769a402 · tarjeta 326172  ·  3921c476-e112-43b6-b470-fc0890e2134d
+  local     · uru-cure-rugby-club-m19-b · 23 jugadores · 0 con ficha fijada
+  visitante · tala-rugby-club-m19-c · 20 jugadores · 0 con ficha fijada
+  eventos   · 23
+    min  1 (1T 1) local     try          Karim Safadi
+    min  1 (1T 1) local     conversion   Cristobal Aguilera
+    min  5 (1T 5) local     try          Benjamin Anino
+    min  5 (1T 5) local     conversion   Cristobal Aguilera
+    min  7 (1T 7) visitante card_yellow  Lorenzo Garzon Fanin
+    min 11 (1T 11) local     try          Manuel Coll
+    min 16 (1T 16) visitante substitution Juan Manuel Álvarez
+    min 17 (1T 17) local     try          Augusto Gomez Rossi
+    min 17 (1T 17) local     conversion   Cristobal Aguilera
+    min 21 (1T 21) local     try          Manuel Coll
+    min 24 (1T 24) local     try          Garcia Agustin
+    min 24 (1T 24) local     conversion   Cristobal Aguilera
+    min 33 (1T 33) local     card_yellow  Gino Albelo
+    min 51 (2T 11) local     try          Karim Safadi
+    min 56 (2T 16) visitante try          Jerónimo Viramonte Martín
+    min 56 (2T 16) visitante conversion   Tomas Feliciosi
+    min 60 (2T 20) local     card_yellow  Juan Martin Garcia Soler
+    min 61 (2T 21) visitante substitution Martin Leandro Basso
+    min 62 (2T 22) local     try          Pedro Picco Wevar
+    min 62 (2T 22) local     conversion   Pedro Picco Wevar
+    min 64 (2T 24) local     try          Manuel Coll
+    min 64 (2T 24) local     conversion   Tadeo Ulises Fraschetti
+    min 65 (2T 25) visitante substitution Genaro Luciano Mattiuz Ponzo
+  marcador  · eventos 57-7 · guardado 57-7
+  tries     · 9-1 (guardado —-—)
+  arbitro   · TOMAS ELIAS GIGENA RAMALLO (guardado: —)
+  guardado  · 23 local · 20 visitante · 23 eventos
+
+listo · 54 partidos

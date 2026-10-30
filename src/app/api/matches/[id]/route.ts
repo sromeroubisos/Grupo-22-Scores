@@ -37,6 +37,7 @@ import {
   getEspnMotorsportMatchBundle,
   parseEspnMotorsportMatchId,
 } from '@/lib/services/espnMotorsport';
+import { getEspnMotorsportEventDetails } from '@/lib/services/espnMotorsportEvent';
 import {
   getEspnFootballMatchBundle,
   parseEspnFootballMatchId,
@@ -439,7 +440,12 @@ export async function GET(
     }
 
     if (espnMotorsportMatchId) {
-      const bundle = await getEspnMotorsportMatchBundle(matchId);
+      // La ficha del fin de semana (sesiones, tiempos, circuito) va aparte del
+      // bundle genérico: si ESPN falla en la parte fina, la cabecera se sirve igual.
+      const [bundle, details] = await Promise.all([
+        getEspnMotorsportMatchBundle(matchId),
+        getEspnMotorsportEventDetails(espnMotorsportMatchId.leagueSlug, espnMotorsportMatchId.eventId).catch(() => null),
+      ]);
       if (!bundle) {
         return jsonNoStore(
           { error: 'Match not found' },
@@ -447,7 +453,11 @@ export async function GET(
         );
       }
 
-      return jsonNoStore({ ...bundle, videos: await videosPromise });
+      return jsonNoStore({
+        ...bundle,
+        match: { ...bundle.match, motorsport: details },
+        videos: await videosPromise,
+      });
     }
 
     if (isFlashScoreMatchId(matchId)) {
@@ -479,7 +489,8 @@ export async function GET(
       );
     }
 
-    if (!isMatchVisibleToPublic(match) && !(await canReadHiddenMatch(matchId))) {
+    const visibleToPublic = isMatchVisibleToPublic(match);
+    if (!visibleToPublic && !(await canReadHiddenMatch(matchId))) {
       return jsonNoStore(
         { error: 'Match not found' },
         { status: 404 }
@@ -488,7 +499,10 @@ export async function GET(
 
     const isLiveMatch = (match as { status?: unknown }).status === 'live';
     const body = { ...match, videos: await videosPromise };
-    return isLiveMatch ? jsonLiveCached(body) : jsonNoStore(body);
+    // El caché público del vivo es SOLO para partidos que ve cualquiera. Uno
+    // oculto llega acá porque lo pidió un admin; con `public, s-maxage` el CDN
+    // lo guardaba por URL y el próximo anónimo recibía el partido oculto.
+    return isLiveMatch && visibleToPublic ? jsonLiveCached(body) : jsonNoStore(body);
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Internal server error';
     console.error('Error in GET /api/matches/[id]:', error);

@@ -1,0 +1,242 @@
+{
+  "descripcion": "Formacion de Cordoba Athletic (Instagram del club) + el plantel ya cargado de Jockey Club Cordoba",
+  "torneo": "Top 10 del Centro",
+  "partidos": [
+    {
+      "id": "acdf66fc-5072-44f2-90e9-44e143ea47b7",
+      "rotulo": "Jockey Club Cordoba vs Cordoba Athletic Club",
+      "local": {
+        "nombre": "Jockey Club Cordoba",
+        "titulares": [
+          {
+            "numero": 1,
+            "nombre": "Agustin Peralta",
+            "id": "514d1000-f225-40a4-acc4-c57f5dbd34f5"
+          },
+          {
+            "numero": 2,
+            "nombre": "Juan Manuel Freytes Echenique",
+            "id": "db876971-ffce-4a60-8c17-ac0189186cee"
+          },
+          {
+            "numero": 3,
+            "nombre": "Octavio Filippa",
+            "id": "f3828245-eb79-4b03-a4c6-c77bf33ce5ad"
+          },
+          {
+            "numero": 4,
+            "nombre": "Juan Cruz Conde",
+            "id": "f8701dcb-650e-4762-9998-5606334ae3cb"
+          },
+          {
+            "numero": 5,
+            "nombre": "Lautaro Esteban de Jesús Ramirez Juncos",
+            "id": "cad6d344-517e-42f4-8eef-04be3a2c6ca4"
+          },
+          {
+            "numero": 6,
+            "nombre": "Augusto Nicolás Cugnini",
+            "id": "26002f40-0522-4b30-af18-8e9cde4e6767"
+          },
+          {
+            "numero": 7,
+            "nombre": "Lucas Mateo Moyano Aguirre",
+            "id": "a20757d4-9ef1-4882-85a9-e6a0398d7113"
+          },
+          {
+            "numero": 8,
+            "nombre": "Patricio Molina",
+            "id": "a527e521-c4ed-498d-ab27-96f123cc44d4"
+          },
+          {
+            "numero": 9,
+            "nombre": "Nicolas Viola",
+            "id": "a0296d84-3c16-41be-81a9-ec81f2d61a1d"
+          },
+          {
+            "numero": 10,
+            "nombre": "Facundo Rodriguez",
+            "id": "cbfaa6fe-5991-4029-987a-08ff7d8cf664"
+          },
+          {
+            "numero": 11,
+            "nombre": "Matias Fischer",
+            "id": "3137ea8f-b9d3-48bf-8a54-c581cfdedd3e"
+          },
+          {
+            "numero": 12,
+            "nombre": "Julio Deheza",
+            "id": "ed436c2f-2d15-480e-acfa-10126c5a94c6"
+          },
+          {
+            "numero": 13,
+            "nombre": "Tiziano Marchetto",
+            "id": "f970eedd-9bef-4ef5-b871-bae8302853ef"
+          },
+          {
+            "numero": 14,
+            "nombre": "Manuel Carrara",
+            "id": "717cdc32-9e0f-475b-b170-7f192272dde5"
+          },
+          {
+            "numero": 15,
+            "nombre": "Julián Viola",
+            "id": "eee08568-846a-4df9-a786-9fca461bee45"
+          }
+        ],
+        "suplentes": [
+          {
+            "numero": 16,
+            "nombre": "Leandro Martin Nassif",
+            "id": "97078f67-1c1e-43e7-a255-adc5b4152ac5"
+          },
+          {
+            "numero": 17,
+            "nombre": "Genaro Merola Moreschi",
+            "id": "88348a94-9cfc-43cb-8ed7-506e44e21c85"
+          },
+          {
+            "numero": 18,
+            "nombre": "Francisco Etchegorry",
+            "id": "992e159d-b02b-4282-b09a-563b9cb23147"
+          },
+          {
+            "numero": 19,
+            "nombre": "Santiago Toya",
+            "id": "106f02e1-2830-4330-ab1c-5d259a4ef386"
+          },
+          {
+            "numero": 20,
+            "nombre": "Abraham Elias",
+            "id": "8c3c13ed-b933-4a39-8f60-e526af4a896e"
+          },
+          {
+            "numero": 21,
+            "nombre": "Marcelo Nicolás Blanco",
+            "id": "020d73cb-bfc2-4f16-ace9-c262b53cfc66"
+          },
+          {
+            "numero": 22,
+            "nombre": "Juan Ignacio Ludueña Fassi",
+            "id": "7305bc17-ba48-4295-ac8b-ac2425096bdc"
+          },
+          {
+            "numero": 23,
+            "nombre": "Tomas Bergero",
+            "id": "5ac822aa-7fe2-4a36-82d3-16dc52659991"
+          }
+        ]
+      },
+      "visitante": {
+        "nombre": "Cordoba Athletic Club",
+        "titulares": [
+          {
+            "numero": 1,
+            "nombre": "Luciano Gabellieri"
+          },
+          {
+            "numero": 2,
+            "nombre": "Conradot Cortés"
+          },
+          {
+            "numero": 3,
+            "nombre": "Alejo Yammal"
+          },
+          {
+            "numero": 4,
+            "nombre": "Rogelio Quiroga",
+            "id": "109f6edc-87da-47c6-9397-3ecb2f5e33f3",
+            "capitan": true
+          },
+          {
+            "numero": 5,
+            "nombre": "Genaro Fissore"
+          },
+          {
+            "numero": 6,
+            "nombre": "Lucio Willington"
+          },
+          {
+            "numero": 7,
+            "nombre": "Valentín Cabral"
+          },
+          {
+            "numero": 8,
+            "nombre": "Federico Rodriguez"
+          },
+          {
+            "numero": 9,
+            "nombre": "Constantino Keller",
+            "id": "6a3a7a2c-d647-4cc6-8f60-cc1b11642736"
+          },
+          {
+            "numero": 10,
+            "nombre": "Genaro Keller",
+            "id": "799d852a-50e6-4cee-b8e2-adb329a5a4dd"
+          },
+          {
+            "numero": 11,
+            "nombre": "Luciano Keller",
+            "id": "a21048f0-83bf-4054-9ca2-9b4ed369d626"
+          },
+          {
+            "numero": 12,
+            "nombre": "Estanislao Arrias",
+            "id": "148f4664-16a8-402c-bb38-0798659c556c"
+          },
+          {
+            "numero": 13,
+            "nombre": "Santino Colombo"
+          },
+          {
+            "numero": 14,
+            "nombre": "Facundo López",
+            "id": "b6bcfe02-053e-45bb-835b-ab96231ed2c9"
+          },
+          {
+            "numero": 15,
+            "nombre": "Mateo Sanchez"
+          }
+        ],
+        "suplentes": [
+          {
+            "numero": 16,
+            "nombre": "Maximiliano Maero"
+          },
+          {
+            "numero": 17,
+            "nombre": "Santos Juárez",
+            "id": "3011caf2-298c-44d8-9a40-406fc8781219"
+          },
+          {
+            "numero": 18,
+            "nombre": "Agustín Fitte"
+          },
+          {
+            "numero": 19,
+            "nombre": "Agustín Brasca",
+            "id": "86e0d81e-0a6e-4ed8-9f15-76d5de2a7009"
+          },
+          {
+            "numero": 20,
+            "nombre": "Juan Segundo Villa",
+            "id": "f8e605df-0bc5-4836-9b2c-bd41e3eb92b6"
+          },
+          {
+            "numero": 21,
+            "nombre": "Máximo León"
+          },
+          {
+            "numero": 22,
+            "nombre": "Tomás Caffaratti"
+          },
+          {
+            "numero": 23,
+            "nombre": "Felipe Acuña",
+            "id": "900af005-0206-4c1b-a9f1-33394d959ccc"
+          }
+        ]
+      }
+    }
+  ]
+}

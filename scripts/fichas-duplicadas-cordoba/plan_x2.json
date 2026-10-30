@@ -1,0 +1,1251 @@
+{
+ "plan": [
+  {
+   "club_id": "club-universitario-de-cordoba",
+   "por": [
+    "cross"
+   ],
+   "nombre": "Galo Fernández",
+   "keep": "9ad1cea7-6611-4592-95a4-bd09980d6b90",
+   "first": "Galo",
+   "last": "Fernández",
+   "fichas": [
+    {
+     "id": "9ad1cea7-6611-4592-95a4-bd09980d6b90",
+     "full_name": "Galo Fernández",
+     "club": "club-universitario-de-cordoba",
+     "usos": 8,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "01015be1-69a9-4e4f-8397-1afda5b5e05c",
+     "full_name": "Galo Fernández",
+     "club": "dogos-xv",
+     "usos": 14,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "borrar": [
+    "01015be1-69a9-4e4f-8397-1afda5b5e05c"
+   ]
+  },
+  {
+   "club_id": "la-plata",
+   "por": [
+    "cross"
+   ],
+   "nombre": "Juan Pedro Bernasconi",
+   "keep": "02c8036b-d85d-4958-baac-ccf44ad6fb13",
+   "first": "Juan Pedro",
+   "last": "Bernasconi",
+   "fichas": [
+    {
+     "id": "02c8036b-d85d-4958-baac-ccf44ad6fb13",
+     "full_name": "Juan Pedro Bernasconi",
+     "club": "la-plata",
+     "usos": 1,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "216894cf-35d9-4743-aacd-08534c716781",
+     "full_name": "Juan Pedro Bernasconi",
+     "club": "pampas",
+     "usos": 12,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "a5fdd09c-28b4-48e5-9465-dbe57aea70b7",
+     "full_name": "Juan Pedro Bernasconi",
+     "club": "argentina-xv",
+     "usos": 1,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "borrar": [
+    "216894cf-35d9-4743-aacd-08534c716781",
+    "a5fdd09c-28b4-48e5-9465-dbe57aea70b7"
+   ]
+  },
+  {
+   "club_id": "los-caranchos",
+   "por": [
+    "cross"
+   ],
+   "nombre": "Benjamín Ordiz",
+   "keep": "082561d0-0082-48e0-896f-f4656cbb7a86",
+   "first": null,
+   "last": null,
+   "fichas": [
+    {
+     "id": "082561d0-0082-48e0-896f-f4656cbb7a86",
+     "full_name": "Benjamin Ordiz",
+     "club": "los-caranchos",
+     "usos": 5,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "6cb7483c-d912-4f30-ad6b-6335eee5b36c",
+     "full_name": "Benjamín Ordiz",
+     "club": "capibaras-xv",
+     "usos": 2,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "073e067f-5675-42a4-b1be-e2a2869620c5",
+     "full_name": "Benjamín Ordiz",
+     "club": "argentina",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "a52fcddd-d277-4dcd-9344-33a232c59d8b",
+     "full_name": "BENJAMÍN ORDIZ",
+     "club": "argentina-m20",
+     "usos": 1,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "borrar": [
+    "6cb7483c-d912-4f30-ad6b-6335eee5b36c",
+    "073e067f-5675-42a4-b1be-e2a2869620c5",
+    "a52fcddd-d277-4dcd-9344-33a232c59d8b"
+   ]
+  },
+  {
+   "club_id": "atletico-del-rosario",
+   "por": [
+    "cross"
+   ],
+   "nombre": "Santiago Vítola",
+   "keep": "0cacfda6-0948-4b36-98b2-4bdb3be54e8c",
+   "first": null,
+   "last": null,
+   "fichas": [
+    {
+     "id": "0cacfda6-0948-4b36-98b2-4bdb3be54e8c",
+     "full_name": "Santiago Vitola",
+     "club": "atletico-del-rosario",
+     "usos": 3,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "d08e8c0c-d932-4cca-a96f-125a70aa7b1f",
+     "full_name": "Santiago Vítola",
+     "club": "atletico-del-rosario",
+     "usos": 1,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "f1c2af1a-1032-4bf5-aade-bb83feb0a5e0",
+     "full_name": "Santiago Vitola",
+     "club": "capibaras-xv",
+     "usos": 2,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "borrar": [
+    "d08e8c0c-d932-4cca-a96f-125a70aa7b1f",
+    "f1c2af1a-1032-4bf5-aade-bb83feb0a5e0"
+   ]
+  },
+  {
+   "club_id": "san-martin-de-villa-maria",
+   "por": [
+    "cross"
+   ],
+   "nombre": "Benjamín Vázquez Calcaterra",
+   "keep": "12561908-a9d0-44c0-bb72-8fdc80298e76",
+   "first": "Benjamín",
+   "last": "Vázquez Calcaterra",
+   "fichas": [
+    {
+     "id": "12561908-a9d0-44c0-bb72-8fdc80298e76",
+     "full_name": "Benjamín Vázquez Calcaterra",
+     "club": "san-martin-de-villa-maria",
+     "usos": 14,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "8f44a4a9-1b3f-4172-aeff-0e8310b8eb5d",
+     "full_name": "Benjamín Vázquez Calcaterra",
+     "club": "dogos-xv",
+     "usos": 1,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "borrar": [
+    "8f44a4a9-1b3f-4172-aeff-0e8310b8eb5d"
+   ]
+  },
+  {
+   "club_id": "jockey-club-de-villa-maria",
+   "por": [
+    "cross"
+   ],
+   "nombre": "Benjamín Farías",
+   "keep": "f7fe55de-7142-4f01-8c8e-74f28a5343a7",
+   "first": "Benjamín",
+   "last": "Farías",
+   "fichas": [
+    {
+     "id": "f7fe55de-7142-4f01-8c8e-74f28a5343a7",
+     "full_name": "Benjamín Farías",
+     "club": "jockey-club-de-villa-maria",
+     "usos": 20,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "a89e3e11-688b-4d51-8576-171602ab7478",
+     "full_name": "Benjamín Farías",
+     "club": "tarucas",
+     "usos": 4,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "borrar": [
+    "a89e3e11-688b-4d51-8576-171602ab7478"
+   ]
+  },
+  {
+   "club_id": "jockey-club-de-villa-maria",
+   "por": [
+    "cross"
+   ],
+   "nombre": "Martín Vaca",
+   "keep": "88462fae-9cda-44e3-881e-a87e76590218",
+   "first": "Martín",
+   "last": "Vaca",
+   "fichas": [
+    {
+     "id": "88462fae-9cda-44e3-881e-a87e76590218",
+     "full_name": "Martín Vaca",
+     "club": "jockey-club-de-villa-maria",
+     "usos": 8,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "1920a929-49d2-4821-9a01-31131df67a7d",
+     "full_name": "Martín Vaca",
+     "club": "capibaras-xv",
+     "usos": 9,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "d94b62a3-0261-4f3c-9d06-adf27b48de5c",
+     "full_name": "Martín Vaca",
+     "club": "argentina-xv",
+     "usos": 1,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "borrar": [
+    "1920a929-49d2-4821-9a01-31131df67a7d",
+    "d94b62a3-0261-4f3c-9d06-adf27b48de5c"
+   ]
+  },
+  {
+   "club_id": "argentina-m20",
+   "por": [
+    "cross"
+   ],
+   "nombre": "Luciano Avaca",
+   "keep": "73b7d000-ad85-47b6-b861-fcdd02081d6a",
+   "first": null,
+   "last": null,
+   "fichas": [
+    {
+     "id": "73b7d000-ad85-47b6-b861-fcdd02081d6a",
+     "full_name": "LUCIANO AVACA",
+     "club": "argentina-m20",
+     "usos": 1,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "1c06db99-080e-4143-82e1-3a1c302c925b",
+     "full_name": "Luciano Avaca",
+     "club": "dogos-xv",
+     "usos": 4,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "bb421072-8087-4ecb-8ca0-888f87782367",
+     "full_name": "Luciano Avaca",
+     "club": "argentina-xv",
+     "usos": 1,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "borrar": [
+    "1c06db99-080e-4143-82e1-3a1c302c925b",
+    "bb421072-8087-4ecb-8ca0-888f87782367"
+   ]
+  },
+  {
+   "club_id": "belgrano-athletic",
+   "por": [
+    "cross"
+   ],
+   "nombre": "Rodrigo Fernández Criado",
+   "keep": "5c6e5802-9ee2-4cdb-82e7-a1ea117b34d6",
+   "first": "Rodrigo Fernández",
+   "last": "Criado",
+   "fichas": [
+    {
+     "id": "5c6e5802-9ee2-4cdb-82e7-a1ea117b34d6",
+     "full_name": "Rodrigo Fernández Criado",
+     "club": "belgrano-athletic",
+     "usos": 5,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "c9a24765-74b6-47f5-8342-bc3df62a1daa",
+     "full_name": "Rodrigo Fernández Criado",
+     "club": "pampas",
+     "usos": 15,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "2363c000-6114-4eee-bb8e-d41169883369",
+     "full_name": "Rodrigo Fernández Criado",
+     "club": "argentina-xv",
+     "usos": 1,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "borrar": [
+    "c9a24765-74b6-47f5-8342-bc3df62a1daa",
+    "2363c000-6114-4eee-bb8e-d41169883369"
+   ]
+  },
+  {
+   "club_id": "san-jose",
+   "por": [
+    "cross"
+   ],
+   "nombre": "Gonzalo Bareiro",
+   "keep": "f8c926f7-c780-4864-82ab-4dc5e820256b",
+   "first": "Gonzalo",
+   "last": "Bareiro",
+   "fichas": [
+    {
+     "id": "f8c926f7-c780-4864-82ab-4dc5e820256b",
+     "full_name": "Gonzalo Bareiro",
+     "club": "san-jose",
+     "usos": 6,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "25cbf9e8-368d-4f11-a749-eb243c3ab0fc",
+     "full_name": "Gonzalo Bareiro",
+     "club": "yacare-xv",
+     "usos": 14,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "borrar": [
+    "25cbf9e8-368d-4f11-a749-eb243c3ab0fc"
+   ]
+  },
+  {
+   "club_id": "logaritmo-rugby-club",
+   "por": [
+    "cross"
+   ],
+   "nombre": "Juan Segundo Huber",
+   "keep": "dfa34aed-ba82-46fa-91ad-1ffddaffbedd",
+   "first": "Juan Segundo",
+   "last": "Huber",
+   "fichas": [
+    {
+     "id": "dfa34aed-ba82-46fa-91ad-1ffddaffbedd",
+     "full_name": "Juan Segundo Huber",
+     "club": "logaritmo-rugby-club",
+     "usos": 13,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "2a786425-99a8-4551-9e2d-bf1e8d0a1291",
+     "full_name": "Juan Segundo Huber",
+     "club": "capibaras-xv",
+     "usos": 4,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "borrar": [
+    "2a786425-99a8-4551-9e2d-bf1e8d0a1291"
+   ]
+  },
+  {
+   "club_id": "jockey-club-de-rosario",
+   "por": [
+    "cross"
+   ],
+   "nombre": "Juan Bautista Baronio",
+   "keep": "49f8c92f-5506-4dd6-9d86-4b90727be297",
+   "first": "Juan Bautista",
+   "last": "Baronio",
+   "fichas": [
+    {
+     "id": "49f8c92f-5506-4dd6-9d86-4b90727be297",
+     "full_name": "Juan Bautista Baronio",
+     "club": "jockey-club-de-rosario",
+     "usos": 5,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "304f68ef-1863-416e-b346-9c4e613908ee",
+     "full_name": "Juan Bautista Baronio",
+     "club": "capibaras-xv",
+     "usos": 15,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "borrar": [
+    "304f68ef-1863-416e-b346-9c4e613908ee"
+   ]
+  },
+  {
+   "club_id": "uruguay-xv",
+   "por": [
+    "cross"
+   ],
+   "nombre": "Felipe Aliaga",
+   "keep": "33e5c688-d4ac-43fe-b276-c328931e34d7",
+   "first": "Felipe",
+   "last": "Aliaga",
+   "fichas": [
+    {
+     "id": "33e5c688-d4ac-43fe-b276-c328931e34d7",
+     "full_name": "Felipe Aliaga",
+     "club": "uruguay-xv",
+     "usos": 1,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "e5c16c51-bc08-4916-9f9e-cc9ec9560919",
+     "full_name": "Felipe Aliaga",
+     "club": "penarol",
+     "usos": 10,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "borrar": [
+    "e5c16c51-bc08-4916-9f9e-cc9ec9560919"
+   ]
+  },
+  {
+   "club_id": "club-tilcara",
+   "por": [
+    "cross"
+   ],
+   "nombre": "Franco Benítez",
+   "keep": "38c9f3d1-b86a-4438-96a3-7c885e265560",
+   "first": "Franco",
+   "last": "Benítez",
+   "fichas": [
+    {
+     "id": "38c9f3d1-b86a-4438-96a3-7c885e265560",
+     "full_name": "Franco Benítez",
+     "club": "club-tilcara",
+     "usos": 13,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "36cd7988-937a-487c-9ef0-cd60e7a884a5",
+     "full_name": "Franco Benítez",
+     "club": "capibaras-xv",
+     "usos": 4,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "borrar": [
+    "36cd7988-937a-487c-9ef0-cd60e7a884a5"
+   ]
+  },
+  {
+   "club_id": "paraguay",
+   "por": [
+    "cross"
+   ],
+   "nombre": "Facundo Paiva",
+   "keep": "3923514d-c9e4-4dbc-a0ac-14fd43ecdfcb",
+   "first": "Facundo",
+   "last": "Paiva",
+   "fichas": [
+    {
+     "id": "3923514d-c9e4-4dbc-a0ac-14fd43ecdfcb",
+     "full_name": "Facundo Paiva",
+     "club": "paraguay",
+     "usos": 1,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "c4625463-adb5-4b4a-8203-df9cf4fdbaec",
+     "full_name": "Facundo Paiva",
+     "club": "yacare-xv",
+     "usos": 4,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "borrar": [
+    "c4625463-adb5-4b4a-8203-df9cf4fdbaec"
+   ]
+  },
+  {
+   "club_id": "tucuman-rugby-club",
+   "por": [
+    "cross"
+   ],
+   "nombre": "Mariano Muntaner",
+   "keep": "3b2707d0-9588-4bbe-a869-246852aceb02",
+   "first": "Mariano",
+   "last": "Muntaner",
+   "fichas": [
+    {
+     "id": "3b2707d0-9588-4bbe-a869-246852aceb02",
+     "full_name": "Mariano Muntaner",
+     "club": "tucuman-rugby-club",
+     "usos": 10,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "ddfab376-e34a-445c-a060-b02d21363c80",
+     "full_name": "Mariano Muntaner",
+     "club": "tarucas",
+     "usos": 12,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "borrar": [
+    "ddfab376-e34a-445c-a060-b02d21363c80"
+   ]
+  },
+  {
+   "club_id": "tucuman-rugby-club",
+   "por": [
+    "cross"
+   ],
+   "nombre": "Matías Sauze",
+   "keep": "3e9b3bb0-31c7-4cca-9488-2bfc38519602",
+   "first": null,
+   "last": null,
+   "fichas": [
+    {
+     "id": "3e9b3bb0-31c7-4cca-9488-2bfc38519602",
+     "full_name": "Matias Sauze",
+     "club": "tucuman-rugby-club",
+     "usos": 10,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "ec13e71c-ac1b-49be-99cd-fe2d7b69b72c",
+     "full_name": "Matías Sauze",
+     "club": "tarucas",
+     "usos": 11,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "borrar": [
+    "ec13e71c-ac1b-49be-99cd-fe2d7b69b72c"
+   ]
+  },
+  {
+   "club_id": "uruguay-xv",
+   "por": [
+    "cross"
+   ],
+   "nombre": "Pedro Suárez",
+   "keep": "432a02f8-77b4-407d-bf0d-cfa8e6aae059",
+   "first": "Pedro",
+   "last": "Suárez",
+   "fichas": [
+    {
+     "id": "432a02f8-77b4-407d-bf0d-cfa8e6aae059",
+     "full_name": "Pedro Suárez",
+     "club": "uruguay-xv",
+     "usos": 1,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "47317741-3c59-4ef2-bde4-5b0752ff6860",
+     "full_name": "Pedro Suárez",
+     "club": "penarol",
+     "usos": 7,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "d19dbbbd-3172-4f6b-9582-d7449a8a2d24",
+     "full_name": "Pedro Suárez",
+     "club": "uruguay-u20",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "borrar": [
+    "47317741-3c59-4ef2-bde4-5b0752ff6860",
+    "d19dbbbd-3172-4f6b-9582-d7449a8a2d24"
+   ]
+  },
+  {
+   "club_id": "estudiantes-de-parana",
+   "por": [
+    "cross"
+   ],
+   "nombre": "Franco Rossetto",
+   "keep": "e177b3b2-b1d6-40c9-a1fc-c8617a7b8bcd",
+   "first": "Franco",
+   "last": "Rossetto",
+   "fichas": [
+    {
+     "id": "e177b3b2-b1d6-40c9-a1fc-c8617a7b8bcd",
+     "full_name": "Franco Rossetto",
+     "club": "estudiantes-de-parana",
+     "usos": 6,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "60df1d00-3f08-4083-b0e8-4e6b38a09369",
+     "full_name": "Franco Rossetto",
+     "club": "capibaras-xv",
+     "usos": 14,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "49d51c3c-e99f-4ee4-983b-b12aa7f13f6e",
+     "full_name": "Franco Rossetto",
+     "club": "argentina-xv",
+     "usos": 1,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "borrar": [
+    "60df1d00-3f08-4083-b0e8-4e6b38a09369",
+    "49d51c3c-e99f-4ee4-983b-b12aa7f13f6e"
+   ]
+  },
+  {
+   "club_id": "tala-rugby-club",
+   "por": [
+    "cross"
+   ],
+   "nombre": "Gastón Garayzabal",
+   "keep": "ac9a7ae8-2589-45a3-bf01-101913f2ff8b",
+   "first": null,
+   "last": null,
+   "fichas": [
+    {
+     "id": "ac9a7ae8-2589-45a3-bf01-101913f2ff8b",
+     "full_name": "Gaston Garayzabal",
+     "club": "tala-rugby-club",
+     "usos": 8,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "7aaf8e33-ab93-46b5-b2de-4def22be25df",
+     "full_name": "Gastón Garayzabal",
+     "club": "dogos-xv",
+     "usos": 9,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "borrar": [
+    "7aaf8e33-ab93-46b5-b2de-4def22be25df"
+   ]
+  },
+  {
+   "club_id": "jockey-club-de-rosario",
+   "por": [
+    "cross"
+   ],
+   "nombre": "Ignacio Dogliani",
+   "keep": "b46268ae-7032-4ccb-ba2b-12d90390e0e0",
+   "first": "Ignacio",
+   "last": "Dogliani",
+   "fichas": [
+    {
+     "id": "b46268ae-7032-4ccb-ba2b-12d90390e0e0",
+     "full_name": "Ignacio Dogliani",
+     "club": "jockey-club-de-rosario",
+     "usos": 11,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "6e4ea0fb-b514-4b71-90af-0b03abe578e2",
+     "full_name": "Ignacio Dogliani",
+     "club": "capibaras-xv",
+     "usos": 14,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "506ec158-f29a-495c-a4aa-fb85d9f7ea3f",
+     "full_name": "Ignacio Dogliani",
+     "club": "argentina-xv",
+     "usos": 1,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "borrar": [
+    "6e4ea0fb-b514-4b71-90af-0b03abe578e2",
+    "506ec158-f29a-495c-a4aa-fb85d9f7ea3f"
+   ]
+  },
+  {
+   "club_id": "uruguay-xv",
+   "por": [
+    "cross"
+   ],
+   "nombre": "Lucas Bianchi",
+   "keep": "734c9fce-c8f7-46eb-9a3e-915869e31a02",
+   "first": "Lucas",
+   "last": "Bianchi",
+   "fichas": [
+    {
+     "id": "734c9fce-c8f7-46eb-9a3e-915869e31a02",
+     "full_name": "Lucas Bianchi",
+     "club": "uruguay-xv",
+     "usos": 1,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "537237ae-70c2-4c72-8b3b-c505f9491e08",
+     "full_name": "Lucas Bianchi",
+     "club": "penarol",
+     "usos": 13,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "borrar": [
+    "537237ae-70c2-4c72-8b3b-c505f9491e08"
+   ]
+  },
+  {
+   "club_id": "marista-rugby-club",
+   "por": [
+    "cross"
+   ],
+   "nombre": "Genaro Podestá",
+   "keep": "5bbbca20-8722-4d3c-a275-c32516045334",
+   "first": "Genaro",
+   "last": "Podestá",
+   "fichas": [
+    {
+     "id": "5bbbca20-8722-4d3c-a275-c32516045334",
+     "full_name": "Genaro Podestá",
+     "club": "marista-rugby-club",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "a3e8c0c6-7842-43e5-b5cd-71a9a2e10de1",
+     "full_name": "Genaro Podestá",
+     "club": "dogos-xv",
+     "usos": 16,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "borrar": [
+    "a3e8c0c6-7842-43e5-b5cd-71a9a2e10de1"
+   ]
+  },
+  {
+   "club_id": "tucuman-rugby-club",
+   "por": [
+    "cross"
+   ],
+   "nombre": "Bautista Estofan",
+   "keep": "5e8a5c0a-92f0-44ec-a37b-5c93e8a07922",
+   "first": "Bautista",
+   "last": "Estofan",
+   "fichas": [
+    {
+     "id": "5e8a5c0a-92f0-44ec-a37b-5c93e8a07922",
+     "full_name": "Bautista Estofan",
+     "club": "tucuman-rugby-club",
+     "usos": 7,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "75bf08c1-7dea-4616-8713-86e6807609a4",
+     "full_name": "Bautista Estofan",
+     "club": "tarucas",
+     "usos": 12,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "borrar": [
+    "75bf08c1-7dea-4616-8713-86e6807609a4"
+   ]
+  },
+  {
+   "club_id": "club-la-tablada",
+   "por": [
+    "cross"
+   ],
+   "nombre": "Federico Rolotti",
+   "keep": "649fe0e8-2ebf-46e6-aa77-e1e70f3303f6",
+   "first": "Federico",
+   "last": "Rolotti",
+   "fichas": [
+    {
+     "id": "649fe0e8-2ebf-46e6-aa77-e1e70f3303f6",
+     "full_name": "Federico Rolotti",
+     "club": "club-la-tablada",
+     "usos": 20,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "e5db726f-45e0-4abc-ad7d-39b7796a37f8",
+     "full_name": "Federico Rolotti",
+     "club": "dogos-xv",
+     "usos": 6,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "borrar": [
+    "e5db726f-45e0-4abc-ad7d-39b7796a37f8"
+   ]
+  },
+  {
+   "club_id": "argentina-m20",
+   "por": [
+    "cross"
+   ],
+   "nombre": "Valentino REGGIARDO",
+   "keep": "8a2e817b-7fb6-4272-ad0e-72b9d65b65c1",
+   "first": "Valentino",
+   "last": "REGGIARDO",
+   "fichas": [
+    {
+     "id": "8a2e817b-7fb6-4272-ad0e-72b9d65b65c1",
+     "full_name": "Valentino REGGIARDO",
+     "club": "argentina-m20",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "699464d2-5531-4d63-bcc9-87fb73d20fb1",
+     "full_name": "Valentino Reggiardo",
+     "club": "pampas",
+     "usos": 2,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "borrar": [
+    "699464d2-5531-4d63-bcc9-87fb73d20fb1"
+   ]
+  },
+  {
+   "club_id": "paraguay",
+   "por": [
+    "cross"
+   ],
+   "nombre": "Enrique Quinteros",
+   "keep": "6f19d7f8-b30d-4214-bec4-97baada8ca20",
+   "first": "Enrique",
+   "last": "Quinteros",
+   "fichas": [
+    {
+     "id": "6f19d7f8-b30d-4214-bec4-97baada8ca20",
+     "full_name": "Enrique Quinteros",
+     "club": "paraguay",
+     "usos": 1,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "afdb35da-5fbf-4695-b2eb-dccfbe8598c9",
+     "full_name": "Enrique Quinteros",
+     "club": "yacare-xv",
+     "usos": 11,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "borrar": [
+    "afdb35da-5fbf-4695-b2eb-dccfbe8598c9"
+   ]
+  },
+  {
+   "club_id": "argentina",
+   "por": [
+    "cross"
+   ],
+   "nombre": "Nicolás Roger",
+   "keep": "e655783d-7daa-4338-bada-49e795c65799",
+   "first": "Nicolás",
+   "last": "Roger",
+   "fichas": [
+    {
+     "id": "e655783d-7daa-4338-bada-49e795c65799",
+     "full_name": "Nicolás Roger",
+     "club": "argentina",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "76dcc275-2575-49a9-8d35-f45eff98c8da",
+     "full_name": "Nicolás Roger",
+     "club": "dogos-xv",
+     "usos": 5,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "borrar": [
+    "76dcc275-2575-49a9-8d35-f45eff98c8da"
+   ]
+  },
+  {
+   "club_id": "tala-rugby-club",
+   "por": [
+    "cross"
+   ],
+   "nombre": "Mateo Soler",
+   "keep": "c87a2b59-9b81-4a76-9b9e-6d020408346f",
+   "first": "Mateo",
+   "last": "Soler",
+   "fichas": [
+    {
+     "id": "c87a2b59-9b81-4a76-9b9e-6d020408346f",
+     "full_name": "Mateo Soler",
+     "club": "tala-rugby-club",
+     "usos": 8,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "7ae1d9bf-e78d-4ec0-90b7-8b015019e69c",
+     "full_name": "Mateo Soler",
+     "club": "dogos-xv",
+     "usos": 14,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "e7ff9dff-8d89-4ebe-9b15-cd704dcf8f0f",
+     "full_name": "Mateo Soler",
+     "club": "argentina",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "borrar": [
+    "7ae1d9bf-e78d-4ec0-90b7-8b015019e69c",
+    "e7ff9dff-8d89-4ebe-9b15-cd704dcf8f0f"
+   ]
+  },
+  {
+   "club_id": "tucuman-rugby-club",
+   "por": [
+    "cross"
+   ],
+   "nombre": "Simón José Pfister",
+   "keep": "90b78676-0839-49a3-a76a-0ded40fc1c23",
+   "first": "Simón José",
+   "last": "Pfister",
+   "fichas": [
+    {
+     "id": "90b78676-0839-49a3-a76a-0ded40fc1c23",
+     "full_name": "Simón José Pfister",
+     "club": "tucuman-rugby-club",
+     "usos": 5,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "8146f6e7-6f47-4b58-9315-c3f05787f5c1",
+     "full_name": "Simón José Pfister",
+     "club": "tarucas",
+     "usos": 3,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "borrar": [
+    "8146f6e7-6f47-4b58-9315-c3f05787f5c1"
+   ]
+  },
+  {
+   "club_id": "buenos-aires-crc",
+   "por": [
+    "cross"
+   ],
+   "nombre": "Alfonso Latorre",
+   "keep": "c2d64a9b-65d2-4c57-97fe-8b67be5ec7ee",
+   "first": "Alfonso",
+   "last": "Latorre",
+   "fichas": [
+    {
+     "id": "c2d64a9b-65d2-4c57-97fe-8b67be5ec7ee",
+     "full_name": "Alfonso Latorre",
+     "club": "buenos-aires-crc",
+     "usos": 5,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "85be5f8f-810e-4655-ac1d-5900b37b32d4",
+     "full_name": "Alfonso Latorre",
+     "club": "pampas",
+     "usos": 6,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "borrar": [
+    "85be5f8f-810e-4655-ac1d-5900b37b32d4"
+   ]
+  },
+  {
+   "club_id": "uruguay-xv",
+   "por": [
+    "cross"
+   ],
+   "nombre": "Juan Manuel Alonso",
+   "keep": "8805af02-56c9-4c85-ad4b-7f691a49f858",
+   "first": "Juan Manuel",
+   "last": "Alonso",
+   "fichas": [
+    {
+     "id": "8805af02-56c9-4c85-ad4b-7f691a49f858",
+     "full_name": "Juan Manuel Alonso",
+     "club": "uruguay-xv",
+     "usos": 1,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "da1bb8e8-674c-42ee-8b75-bcdd2dec8502",
+     "full_name": "Juan Manuel Alonso",
+     "club": "penarol",
+     "usos": 13,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "borrar": [
+    "da1bb8e8-674c-42ee-8b75-bcdd2dec8502"
+   ]
+  },
+  {
+   "club_id": "jockey-club-de-rosario",
+   "por": [
+    "cross"
+   ],
+   "nombre": "Francisco Lluch",
+   "keep": "b7c6930d-e8d4-4d9d-9156-afe74bb79d45",
+   "first": "Francisco",
+   "last": "Lluch",
+   "fichas": [
+    {
+     "id": "b7c6930d-e8d4-4d9d-9156-afe74bb79d45",
+     "full_name": "Francisco Lluch",
+     "club": "jockey-club-de-rosario",
+     "usos": 5,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "89e2d0bf-b5f7-438d-af97-ce71ba9ba596",
+     "full_name": "Francisco Lluch",
+     "club": "capibaras-xv",
+     "usos": 7,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "borrar": [
+    "89e2d0bf-b5f7-438d-af97-ce71ba9ba596"
+   ]
+  },
+  {
+   "club_id": "paraguay",
+   "por": [
+    "cross"
+   ],
+   "nombre": "Nahuel Kacerosky",
+   "keep": "d10ddfde-a9fe-425b-ad95-32d6a4a7a5f7",
+   "first": "Nahuel",
+   "last": "Kacerosky",
+   "fichas": [
+    {
+     "id": "d10ddfde-a9fe-425b-ad95-32d6a4a7a5f7",
+     "full_name": "Nahuel Kacerosky",
+     "club": "paraguay",
+     "usos": 1,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "939de4ff-a1ab-4e37-9332-ab6b45cfceb4",
+     "full_name": "Nahuel Kacerosky",
+     "club": "yacare-xv",
+     "usos": 5,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "borrar": [
+    "939de4ff-a1ab-4e37-9332-ab6b45cfceb4"
+   ]
+  },
+  {
+   "club_id": "tucuman-lawn-tennis",
+   "por": [
+    "cross"
+   ],
+   "nombre": "Santiago Saleme",
+   "keep": "a6cd0548-6f24-4fa3-abe4-99e71bb432b9",
+   "first": "Santiago",
+   "last": "Saleme",
+   "fichas": [
+    {
+     "id": "a6cd0548-6f24-4fa3-abe4-99e71bb432b9",
+     "full_name": "Santiago Saleme",
+     "club": "tucuman-lawn-tennis",
+     "usos": 10,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "cca50b99-02d2-4102-be81-2c98b5d96937",
+     "full_name": "Santiago Saleme",
+     "club": "tarucas",
+     "usos": 5,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "borrar": [
+    "cca50b99-02d2-4102-be81-2c98b5d96937"
+   ]
+  },
+  {
+   "club_id": "selknam",
+   "por": [
+    "cross"
+   ],
+   "nombre": "Gonzalo Lara",
+   "keep": "b75d7481-c4b4-485c-a7a3-f306b874c822",
+   "first": "Gonzalo",
+   "last": "Lara",
+   "fichas": [
+    {
+     "id": "b75d7481-c4b4-485c-a7a3-f306b874c822",
+     "full_name": "Gonzalo Lara",
+     "club": "selknam",
+     "usos": 1,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "b7329202-8c2a-4b50-a024-3df3949840b0",
+     "full_name": "Gonzalo Lara",
+     "club": "academia-selknam",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "borrar": [
+    "b7329202-8c2a-4b50-a024-3df3949840b0"
+   ]
+  },
+  {
+   "club_id": "belgrano-athletic",
+   "por": [
+    "cross"
+   ],
+   "nombre": "Francisco Lusarreta",
+   "keep": "e2ce7c1d-1abe-4273-98db-ee0ae9c97333",
+   "first": "Francisco",
+   "last": "Lusarreta",
+   "fichas": [
+    {
+     "id": "e2ce7c1d-1abe-4273-98db-ee0ae9c97333",
+     "full_name": "Francisco Lusarreta",
+     "club": "belgrano-athletic",
+     "usos": 4,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "e1fe71d7-0330-4d1d-b9fc-93bcc9b36522",
+     "full_name": "Francisco Lusarreta",
+     "club": "pampas",
+     "usos": 14,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "borrar": [
+    "e1fe71d7-0330-4d1d-b9fc-93bcc9b36522"
+   ]
+  }
+ ],
+ "conflictos": []
+}

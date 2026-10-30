@@ -10,7 +10,8 @@ import {
 } from '@/lib/services/espnFootball';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
-import { getLocalPlayerProfile } from '@/lib/services/localPlayerProfile';
+import { ageFromBirthDate, getLocalPlayerProfile, toPublicLocalPlayerProfile } from '@/lib/services/localPlayerProfile';
+import { requireAdminApiContext } from '@/lib/auth/apiAdmin';
 import {
     getRugbyPassPlayerBundle,
     parseRugbyPassPlayerSlug,
@@ -101,21 +102,29 @@ export async function GET(request: Request) {
             // `people`: de 1528 jugadores solo 144 tienen posicion cargada y 38
             // fecha de nacimiento, pero 350 tienen eventos. Ver
             // `localPlayerProfile.ts`.
-            const profile = await getLocalPlayerProfile(supabase, playerId);
+            const fullProfile = await getLocalPlayerProfile(supabase, playerId);
 
-            if (profile) {
+            if (fullProfile) {
+                // Fecha de nacimiento, talla y peso sólo para el panel. Al resto
+                // le llega la EDAD (lo que muestra la ficha): la lectura es con
+                // service_role y hay jugadores menores de edad. Mismo criterio
+                // que el padrón de `/api/teams`.
+                const isPanelUser = await requireAdminApiContext().then(() => true, () => false);
+                const profile = isPanelUser ? fullProfile : toPublicLocalPlayerProfile(fullProfile);
+                const privateFields = isPanelUser
+                    ? { birth_date: fullProfile.birthDate, height: fullProfile.height, weight: fullProfile.weight }
+                    : {};
                 return Response.json({
                     ok: true,
                     source: 'local',
                     details: {
-                        id: profile.id,
-                        name: profile.name,
-                        image_path: profile.photo || '',
-                        birth_date: profile.birthDate,
-                        position: profile.position || '',
-                        height: profile.height,
-                        weight: profile.weight,
-                        jersey_number: profile.number,
+                        id: fullProfile.id,
+                        name: fullProfile.name,
+                        image_path: fullProfile.photo || '',
+                        age: ageFromBirthDate(fullProfile.birthDate),
+                        ...privateFields,
+                        position: fullProfile.position || '',
+                        jersey_number: fullProfile.number,
                         // El escudo va por el proxy (`/api/assets/team-logo`),
                         // no crudo: `clubs.logo_url` guarda PNG en base64 de
                         // hasta 200 KB y los metia enteros en esta respuesta.
@@ -161,7 +170,7 @@ export async function GET(request: Request) {
     } catch (e: any) {
         console.error('Players API error', e);
         return Response.json(
-            { ok: false, error: 'Failed to load player data', details: e.message || String(e) },
+            { ok: false, error: 'Failed to load player data' },
             { status: 500 }
         );
     }

@@ -1,0 +1,2174 @@
+{
+ "nea": [
+  {
+   "id": "072897e2-c759-43d4-97fd-e528daa8c62f",
+   "date_time": "2026-04-07T19:00:00+00:00",
+   "home_club_id": "curda",
+   "away_club_id": "taraguy-r-c",
+   "score": {
+    "away": 35,
+    "home": 26
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "1854017f-994c-41fd-ae2c-81c02d5f1a11",
+   "date_time": "2026-05-23T19:00:00+00:00",
+   "home_club_id": "taraguy-r-c",
+   "away_club_id": "aguara",
+   "score": {
+    "away": 24,
+    "home": 69
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "885e8afc-c26b-4865-bb18-cf9ea9f1e3ff",
+   "date_time": "2026-05-23T19:00:00+00:00",
+   "home_club_id": "curne",
+   "away_club_id": "sixty-r-c",
+   "score": {
+    "away": 16,
+    "home": 34
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "baf4a203-ea61-4b5c-83c4-5ca577eadc13",
+   "date_time": "2026-05-23T19:00:00+00:00",
+   "home_club_id": "curda",
+   "away_club_id": "aranduroga-r-c",
+   "score": {
+    "away": 29,
+    "home": 24
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "e0f335b5-4613-4d65-ae21-1c5eb4451fda",
+   "date_time": "2026-05-23T19:00:00+00:00",
+   "home_club_id": "san-jose",
+   "away_club_id": "regatas-de-resistencia",
+   "score": {
+    "away": 29,
+    "home": 32,
+    "awayTries": 0,
+    "homeTries": 0
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "159c8d66-5045-4fe2-a153-4905637e5caf",
+   "date_time": "2026-05-24T19:00:00+00:00",
+   "home_club_id": "san-patricio",
+   "away_club_id": "capri",
+   "score": {
+    "away": 10,
+    "home": 106,
+    "penalties": null,
+    "manualOverride": {
+     "away": 10,
+     "home": 106,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "9e2a27f2-9143-4906-8c68-43add5780a2b",
+   "date_time": "2026-06-06T19:00:00+00:00",
+   "home_club_id": "regatas-de-resistencia",
+   "away_club_id": "aguara",
+   "score": {
+    "away": 30,
+    "home": 28
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "c6e28f3e-c741-4d72-b5d1-cfbf3c862172",
+   "date_time": "2026-06-06T19:00:00+00:00",
+   "home_club_id": "sixty-r-c",
+   "away_club_id": "capri",
+   "score": {
+    "away": 17,
+    "home": 56,
+    "penalties": null,
+    "manualOverride": {
+     "away": 17,
+     "home": 56,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "dc9b2105-244b-4b2c-b7e1-9536d8dcd3a1",
+   "date_time": "2026-06-06T19:00:00+00:00",
+   "home_club_id": "san-jose",
+   "away_club_id": "taraguy-r-c",
+   "score": {
+    "away": 47,
+    "home": 17
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "fe42751d-2fcd-4c9f-9e23-5f8e22e14ab8",
+   "date_time": "2026-06-06T19:00:00+00:00",
+   "home_club_id": "aranduroga-r-c",
+   "away_club_id": "san-patricio",
+   "score": {
+    "away": 35,
+    "home": 32
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "021f207a-35d7-46b9-b990-80183d22259f",
+   "date_time": "2026-06-07T19:00:00+00:00",
+   "home_club_id": "curda",
+   "away_club_id": "curne",
+   "score": {
+    "away": 14,
+    "home": 19,
+    "awayTries": 0,
+    "homeTries": 0
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "851d2ca7-6584-456e-852c-0e15fb8174e2",
+   "date_time": "2026-06-13T19:00:00+00:00",
+   "home_club_id": "capri",
+   "away_club_id": "curda",
+   "score": {
+    "away": 64,
+    "home": 28
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "8aec4209-302a-47ec-bdd5-4fad73bed79c",
+   "date_time": "2026-06-13T19:00:00+00:00",
+   "home_club_id": "san-patricio",
+   "away_club_id": "curne",
+   "score": {
+    "away": 39,
+    "home": 9
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "9273d7d6-c94a-44bd-bb87-d3ec72deef85",
+   "date_time": "2026-06-13T19:00:00+00:00",
+   "home_club_id": "sixty-r-c",
+   "away_club_id": "aranduroga-r-c",
+   "score": {
+    "away": 30,
+    "home": 16
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "ee95223b-368b-4d45-964b-352c1fc3ddab",
+   "date_time": "2026-06-13T19:00:00+00:00",
+   "home_club_id": "aguara",
+   "away_club_id": "san-jose",
+   "score": {
+    "away": 29,
+    "home": 23
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "efe1d339-b46f-40a6-a1f1-5b323417264c",
+   "date_time": "2026-06-13T19:00:00+00:00",
+   "home_club_id": "taraguy-r-c",
+   "away_club_id": "regatas-de-resistencia",
+   "score": {
+    "away": 0,
+    "home": 38
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "068ea307-46be-4135-9eea-1f630a05b53f",
+   "date_time": "2026-06-20T19:00:00+00:00",
+   "home_club_id": "san-jose",
+   "away_club_id": "curda",
+   "score": {
+    "away": 15,
+    "home": 13
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "932a9b2e-0fc5-46a9-bf5e-8ee91fe0dac1",
+   "date_time": "2026-06-20T19:00:00+00:00",
+   "home_club_id": "curne",
+   "away_club_id": "aranduroga-r-c",
+   "score": {
+    "away": 48,
+    "home": 24
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "9b568096-f5a2-4336-a37f-e8019f5e85b8",
+   "date_time": "2026-06-20T19:00:00+00:00",
+   "home_club_id": "aguara",
+   "away_club_id": "sixty-r-c",
+   "score": {
+    "away": 33,
+    "home": 14
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "aedcf2f4-3f69-44d0-9193-8f3dde0583e8",
+   "date_time": "2026-06-20T19:00:00+00:00",
+   "home_club_id": "taraguy-r-c",
+   "away_club_id": "capri",
+   "score": {
+    "away": 22,
+    "home": 71
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "dc5559c0-5672-4d77-adfc-2e4252f7a59c",
+   "date_time": "2026-06-20T19:00:00+00:00",
+   "home_club_id": "san-patricio",
+   "away_club_id": "regatas-de-resistencia",
+   "score": {
+    "away": 17,
+    "home": 35
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "17fe1f5a-83c6-47f8-99fb-84fa19fe0ea5",
+   "date_time": "2026-07-04T19:00:00+00:00",
+   "home_club_id": "sixty-r-c",
+   "away_club_id": "san-patricio",
+   "score": {
+    "away": 34,
+    "home": 22,
+    "penalties": null,
+    "manualOverride": {
+     "away": 34,
+     "home": 22,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "59d5dbba-e889-4ef4-a12a-28fb7b578361",
+   "date_time": "2026-07-04T19:00:00+00:00",
+   "home_club_id": "capri",
+   "away_club_id": "aguara",
+   "score": {
+    "away": 32,
+    "home": 12
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "be26d702-36d2-4b2a-9753-f5dead631266",
+   "date_time": "2026-07-04T19:00:00+00:00",
+   "home_club_id": "regatas-de-resistencia",
+   "away_club_id": "curne",
+   "score": {
+    "away": 17,
+    "home": 23
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "ccf2ecc9-d66f-4277-a9c2-e9d2c81cb415",
+   "date_time": "2026-07-04T19:00:00+00:00",
+   "home_club_id": "aranduroga-r-c",
+   "away_club_id": "san-jose",
+   "score": {
+    "away": 21,
+    "home": 44
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "907fc760-103e-4a16-9576-2ad6530d99d0",
+   "date_time": "2026-07-11T19:00:00+00:00",
+   "home_club_id": "aranduroga-r-c",
+   "away_club_id": "regatas-de-resistencia",
+   "score": {
+    "away": 27,
+    "home": 31
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "c015c50d-c54d-40ee-9db0-6ed81a64e08b",
+   "date_time": "2026-07-11T19:00:00+00:00",
+   "home_club_id": "curda",
+   "away_club_id": "sixty-r-c",
+   "score": {
+    "away": 13,
+    "home": 36
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "e9900d79-a7ac-4e67-90e0-b03022cc6c7b",
+   "date_time": "2026-07-11T19:00:00+00:00",
+   "home_club_id": "taraguy-r-c",
+   "away_club_id": "san-patricio",
+   "score": {
+    "away": 30,
+    "home": 34
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "f72abdf9-8871-4592-8579-7021813751e6",
+   "date_time": "2026-07-11T19:00:00+00:00",
+   "home_club_id": "curne",
+   "away_club_id": "aguara",
+   "score": {
+    "away": 7,
+    "home": 48
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "fcb6a123-efa5-46f3-93da-613d10724acc",
+   "date_time": "2026-07-11T19:00:00+00:00",
+   "home_club_id": "san-jose",
+   "away_club_id": "capri",
+   "score": {
+    "away": 17,
+    "home": 70
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "57f24eef-756a-4eb2-9134-9d87c2a6266c",
+   "date_time": "2026-07-18T19:00:00+00:00",
+   "home_club_id": "capri",
+   "away_club_id": "regatas-de-resistencia",
+   "score": {
+    "away": 46,
+    "home": 24
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "690152fb-3170-425a-ad63-0b01ef86d18a",
+   "date_time": "2026-07-18T19:00:00+00:00",
+   "home_club_id": "curne",
+   "away_club_id": "san-jose",
+   "score": {
+    "away": 24,
+    "home": 30
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "a54ce361-1ef7-4eb0-b3d4-cc7780bf23f7",
+   "date_time": "2026-07-18T19:00:00+00:00",
+   "home_club_id": "aranduroga-r-c",
+   "away_club_id": "aguara",
+   "score": {
+    "away": 7,
+    "home": 26
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "dacd02a3-71ce-431d-b0af-3b1a2bbf42da",
+   "date_time": "2026-07-18T19:00:00+00:00",
+   "home_club_id": "san-patricio",
+   "away_club_id": "curda",
+   "score": {
+    "away": 26,
+    "home": 31
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "e55009dc-a8dd-48da-86cd-c9583e4eecef",
+   "date_time": "2026-07-18T19:00:00+00:00",
+   "home_club_id": "sixty-r-c",
+   "away_club_id": "taraguy-r-c",
+   "score": {
+    "away": 43,
+    "home": 31
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "32b2c0db-ce5e-480d-83de-234376339471",
+   "date_time": "2026-08-08T19:00:00+00:00",
+   "home_club_id": "capri",
+   "away_club_id": "curne",
+   "score": {
+    "away": 64,
+    "home": 19,
+    "awayTries": 0,
+    "homeTries": 0
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "7fd238f2-3a0d-4888-b915-67916225394d",
+   "date_time": "2026-08-08T19:00:00+00:00",
+   "home_club_id": "taraguy-r-c",
+   "away_club_id": "aranduroga-r-c",
+   "score": {
+    "away": 25,
+    "home": 26,
+    "penalties": null,
+    "manualOverride": {
+     "away": 25,
+     "home": 26,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "8d6af5fc-ae42-4b43-b8b6-e168e8a3ee9a",
+   "date_time": "2026-08-08T19:00:00+00:00",
+   "home_club_id": "aguara",
+   "away_club_id": "san-patricio",
+   "score": {
+    "away": 21,
+    "home": 41,
+    "awayTries": 0,
+    "homeTries": 0
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "a63631da-1b61-4aa0-808b-4e9f2bd99427",
+   "date_time": "2026-08-08T19:00:00+00:00",
+   "home_club_id": "regatas-de-resistencia",
+   "away_club_id": "curda",
+   "score": {
+    "away": 26,
+    "home": 22,
+    "awayTries": 0,
+    "homeTries": 0
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "a789b587-f2fe-4c14-8ba0-e13189e8de7c",
+   "date_time": "2026-08-09T19:00:00+00:00",
+   "home_club_id": "san-jose",
+   "away_club_id": "sixty-r-c",
+   "score": {
+    "away": 19,
+    "home": 59,
+    "awayTries": 0,
+    "homeTries": 0,
+    "penalties": null,
+    "manualOverride": {
+     "away": 19,
+     "home": 59,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "69f04d2e-e474-41bc-9715-b9a2331c3f3c",
+   "date_time": "2026-08-15T19:00:00+00:00",
+   "home_club_id": "san-patricio",
+   "away_club_id": "san-jose",
+   "score": {
+    "away": 32,
+    "home": 27,
+    "awayTries": 0,
+    "homeTries": 0
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "f36e6646-ebb8-4d72-a2c6-68ef730e13f3",
+   "date_time": "2026-08-15T19:00:00+00:00",
+   "home_club_id": "curne",
+   "away_club_id": "taraguy-r-c",
+   "score": {
+    "away": 16,
+    "home": 32,
+    "awayTries": 1,
+    "homeTries": 4
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "3d4d5542-cfa9-4e50-bbcb-efb3d5130938",
+   "date_time": "2026-08-16T18:30:00+00:00",
+   "home_club_id": "curda",
+   "away_club_id": "aguara",
+   "score": {
+    "away": 28,
+    "home": 75,
+    "awayTries": 0,
+    "homeTries": 0
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "5be2fb0f-b968-4428-b4f8-95adb1c43d57",
+   "date_time": "2026-08-16T18:30:00+00:00",
+   "home_club_id": "regatas-de-resistencia",
+   "away_club_id": "sixty-r-c",
+   "score": {
+    "away": 17,
+    "home": 20,
+    "awayTries": 0,
+    "homeTries": 0
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "beccfcf6-7b6d-4a31-8bad-4dbc069a9850",
+   "date_time": "2026-08-16T18:30:00+00:00",
+   "home_club_id": "aranduroga-r-c",
+   "away_club_id": "capri",
+   "score": {
+    "away": 17,
+    "home": 66,
+    "awayTries": 0,
+    "homeTries": 0
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "c56764e6-b400-489d-81eb-07b768d61eb2"
+  },
+  {
+   "id": "ca73afc9-2f92-488e-a877-0b9ef8f88b54",
+   "date_time": "2026-08-22T19:00:00+00:00",
+   "home_club_id": "aguara",
+   "away_club_id": "curne",
+   "score": {
+    "away": 39,
+    "home": 19
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "36496ee9-0fa1-417c-9597-e77c75b6a9ac"
+  },
+  {
+   "id": "d45063c9-9f33-466d-8277-e75c2fcf9144",
+   "date_time": "2026-08-22T19:00:00+00:00",
+   "home_club_id": "san-jose",
+   "away_club_id": "san-patricio",
+   "score": {
+    "away": 14,
+    "home": 75
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "36496ee9-0fa1-417c-9597-e77c75b6a9ac"
+  },
+  {
+   "id": "f1f160c0-4084-401d-b252-389464f37982",
+   "date_time": "2026-08-22T19:00:00+00:00",
+   "home_club_id": "regatas-de-resistencia",
+   "away_club_id": "taraguy-r-c",
+   "score": {
+    "away": 29,
+    "home": 15
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "36496ee9-0fa1-417c-9597-e77c75b6a9ac"
+  },
+  {
+   "id": "84cdc073-98ce-4d76-a0ca-23362dcfba54",
+   "date_time": "2026-08-23T19:00:00+00:00",
+   "home_club_id": "aranduroga-r-c",
+   "away_club_id": "curda",
+   "score": {
+    "away": 27,
+    "home": 36,
+    "penalties": null,
+    "manualOverride": {
+     "away": 27,
+     "home": 36,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "36496ee9-0fa1-417c-9597-e77c75b6a9ac"
+  },
+  {
+   "id": "3401fee9-eca6-4f65-a640-fc719134f31f",
+   "date_time": "2026-08-29T17:30:00+00:00",
+   "home_club_id": "taraguy-r-c",
+   "away_club_id": "san-jose",
+   "score": {
+    "away": 13,
+    "home": 35,
+    "awayTries": 0,
+    "homeTries": 0
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "36496ee9-0fa1-417c-9597-e77c75b6a9ac"
+  },
+  {
+   "id": "66b7eb48-7584-45da-81e7-e16a926dbfdb",
+   "date_time": "2026-08-29T17:30:00+00:00",
+   "home_club_id": "san-patricio",
+   "away_club_id": "aranduroga-r-c",
+   "score": {
+    "away": 35,
+    "home": 32,
+    "awayTries": 0,
+    "homeTries": 0
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "36496ee9-0fa1-417c-9597-e77c75b6a9ac"
+  },
+  {
+   "id": "c99fba8d-3d22-4d65-86d7-532bbcf9d3c4",
+   "date_time": "2026-08-29T17:30:00+00:00",
+   "home_club_id": "curne",
+   "away_club_id": "curda",
+   "score": {
+    "away": 33,
+    "home": 53,
+    "awayTries": 0,
+    "homeTries": 0
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "36496ee9-0fa1-417c-9597-e77c75b6a9ac"
+  },
+  {
+   "id": "d1bc140e-8891-40f3-b1d7-3756ae9c9ce7",
+   "date_time": "2026-08-30T19:00:00+00:00",
+   "home_club_id": "aguara",
+   "away_club_id": "regatas-de-resistencia",
+   "score": {
+    "away": 16,
+    "home": 33
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "36496ee9-0fa1-417c-9597-e77c75b6a9ac"
+  },
+  {
+   "id": "0a112ed2-d2bf-4862-8faa-8826f152c93e",
+   "date_time": "2026-09-05T19:00:00+00:00",
+   "home_club_id": "san-jose",
+   "away_club_id": "aguara",
+   "score": {
+    "away": 27,
+    "home": 34,
+    "penalties": null,
+    "manualOverride": {
+     "away": 27,
+     "home": 34,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "36496ee9-0fa1-417c-9597-e77c75b6a9ac"
+  },
+  {
+   "id": "5768d779-62dc-4c8d-a76c-816e5683b197",
+   "date_time": "2026-09-05T19:00:00+00:00",
+   "home_club_id": "curne",
+   "away_club_id": "san-patricio",
+   "score": {
+    "away": 21,
+    "home": 36,
+    "awayTries": 0,
+    "homeTries": 0
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "36496ee9-0fa1-417c-9597-e77c75b6a9ac"
+  },
+  {
+   "id": "fb3a7a55-55e5-4140-8772-9b70767510be",
+   "date_time": "2026-09-05T19:00:00+00:00",
+   "home_club_id": "aranduroga-r-c",
+   "away_club_id": "taraguy-r-c",
+   "score": {
+    "away": 24,
+    "home": 24,
+    "awayTries": 0,
+    "homeTries": 0
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "36496ee9-0fa1-417c-9597-e77c75b6a9ac"
+  },
+  {
+   "id": "f0c9aa5f-ff4f-45b8-9bd9-8828609bfbcb",
+   "date_time": "2026-09-06T17:00:00+00:00",
+   "home_club_id": "curda",
+   "away_club_id": "regatas-de-resistencia",
+   "score": {
+    "away": 18,
+    "home": 28
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "36496ee9-0fa1-417c-9597-e77c75b6a9ac"
+  },
+  {
+   "id": "ddaa7f58-1a9b-4a68-8a02-0ede762d53bb",
+   "date_time": "2026-09-19T18:45:00+00:00",
+   "home_club_id": "aranduroga-r-c",
+   "away_club_id": "curne",
+   "score": {
+    "away": 32,
+    "home": 34,
+    "penalties": null,
+    "manualOverride": {
+     "away": 32,
+     "home": 34,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "36496ee9-0fa1-417c-9597-e77c75b6a9ac"
+  },
+  {
+   "id": "0c43b6d9-3153-4629-be4c-8b279590e17d",
+   "date_time": "2026-09-19T19:00:00+00:00",
+   "home_club_id": "curda",
+   "away_club_id": "san-jose",
+   "score": {
+    "away": 20,
+    "home": 20,
+    "penalties": null,
+    "manualOverride": {
+     "away": 20,
+     "home": 20,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "36496ee9-0fa1-417c-9597-e77c75b6a9ac"
+  },
+  {
+   "id": "40b1a7b8-9437-492a-ad1e-4828fbb14201",
+   "date_time": "2026-09-19T19:00:00+00:00",
+   "home_club_id": "aguara",
+   "away_club_id": "taraguy-r-c",
+   "score": {
+    "away": 30,
+    "home": 13,
+    "penalties": null,
+    "manualOverride": {
+     "away": 30,
+     "home": 13,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "36496ee9-0fa1-417c-9597-e77c75b6a9ac"
+  },
+  {
+   "id": "c532bbf5-7a19-4d17-b366-4aedbaf9a0a3",
+   "date_time": "2026-09-19T19:00:00+00:00",
+   "home_club_id": "regatas-de-resistencia",
+   "away_club_id": "san-patricio",
+   "score": {
+    "away": 17,
+    "home": 33,
+    "penalties": null,
+    "manualOverride": {
+     "away": 17,
+     "home": 33,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "36496ee9-0fa1-417c-9597-e77c75b6a9ac"
+  },
+  {
+   "id": "af2e47ff-ef48-48f9-9be5-456df64f89ed",
+   "date_time": "2026-10-03T17:30:00+00:00",
+   "home_club_id": "taraguy-r-c",
+   "away_club_id": "curda",
+   "score": {
+    "away": 25,
+    "home": 28,
+    "awayTries": 3,
+    "homeTries": 3,
+    "penalties": null,
+    "manualOverride": {
+     "away": 25,
+     "home": 28,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "36496ee9-0fa1-417c-9597-e77c75b6a9ac"
+  },
+  {
+   "id": "84b316d3-feac-4ff8-bbb3-c776cdcb39ee",
+   "date_time": "2026-10-03T18:30:00+00:00",
+   "home_club_id": "san-jose",
+   "away_club_id": "aranduroga-r-c",
+   "score": {
+    "away": 28,
+    "home": 40
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "36496ee9-0fa1-417c-9597-e77c75b6a9ac"
+  },
+  {
+   "id": "ea78e382-e544-490b-8099-e3d8125b0aec",
+   "date_time": "2026-10-03T19:00:00+00:00",
+   "home_club_id": "san-patricio",
+   "away_club_id": "aguara",
+   "score": {
+    "away": 0,
+    "home": 32
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "36496ee9-0fa1-417c-9597-e77c75b6a9ac"
+  },
+  {
+   "id": "7863ec93-57ac-4477-bee6-5d8ecf8c251f",
+   "date_time": "2026-10-04T19:00:00+00:00",
+   "home_club_id": "curne",
+   "away_club_id": "regatas-de-resistencia",
+   "score": {
+    "away": 22,
+    "home": 35,
+    "penalties": null,
+    "manualOverride": {
+     "away": 22,
+     "home": 35,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "36496ee9-0fa1-417c-9597-e77c75b6a9ac"
+  },
+  {
+   "id": "f10e0cf0-1e29-4ab2-ab53-85cd21f58bd0",
+   "date_time": "2026-10-10T18:00:00+00:00",
+   "home_club_id": "san-jose",
+   "away_club_id": "curne",
+   "score": {
+    "away": 24,
+    "home": 33
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "36496ee9-0fa1-417c-9597-e77c75b6a9ac"
+  },
+  {
+   "id": "1fe1e2a2-5532-4456-8e25-187c0a040c83",
+   "date_time": "2026-10-10T18:45:00+00:00",
+   "home_club_id": "aguara",
+   "away_club_id": "curda",
+   "score": {
+    "away": 60,
+    "home": 22
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "36496ee9-0fa1-417c-9597-e77c75b6a9ac"
+  },
+  {
+   "id": "610d1fff-48e8-4ff2-8696-65374953ae26",
+   "date_time": "2026-10-10T19:00:00+00:00",
+   "home_club_id": "san-patricio",
+   "away_club_id": "taraguy-r-c",
+   "score": {
+    "away": 36,
+    "home": 39
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "36496ee9-0fa1-417c-9597-e77c75b6a9ac"
+  },
+  {
+   "id": "61716abc-defd-4137-b670-45f4fdfe0f20",
+   "date_time": "2026-10-11T19:00:00+00:00",
+   "home_club_id": "regatas-de-resistencia",
+   "away_club_id": "aranduroga-r-c",
+   "score": {
+    "away": 59,
+    "home": 33
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "36496ee9-0fa1-417c-9597-e77c75b6a9ac"
+  },
+  {
+   "id": "00afae7f-8af9-4e7d-93b5-89e7727c5095",
+   "date_time": "2026-10-17T19:00:00+00:00",
+   "home_club_id": "regatas-de-resistencia",
+   "away_club_id": "san-jose",
+   "score": {
+    "away": 33,
+    "home": 15
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "36496ee9-0fa1-417c-9597-e77c75b6a9ac"
+  },
+  {
+   "id": "280a4334-073d-47de-a087-d89db95c3e07",
+   "date_time": "2026-10-17T19:00:00+00:00",
+   "home_club_id": "curda",
+   "away_club_id": "san-patricio",
+   "score": {
+    "away": 27,
+    "home": 45
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "36496ee9-0fa1-417c-9597-e77c75b6a9ac"
+  },
+  {
+   "id": "358ce61b-ddc8-48bd-84ff-d42941ab37ca",
+   "date_time": "2026-10-17T19:00:00+00:00",
+   "home_club_id": "aranduroga-r-c",
+   "away_club_id": "aguara",
+   "score": {
+    "away": 43,
+    "home": 38
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "36496ee9-0fa1-417c-9597-e77c75b6a9ac"
+  },
+  {
+   "id": "dfcdd641-ad57-4217-9ab1-90c0bb71938d",
+   "date_time": "2026-10-17T19:00:00+00:00",
+   "home_club_id": "taraguy-r-c",
+   "away_club_id": "curne",
+   "score": {
+    "away": 21,
+    "home": 31
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "2c9d7e30-5481-44fd-8226-3b3fec34f20a",
+   "phase_id": "36496ee9-0fa1-417c-9597-e77c75b6a9ac"
+  }
+ ],
+ "noa": [
+  {
+   "id": "151522da-375d-4f05-acc1-e0f76807d639",
+   "date_time": "2026-08-08T18:30:00+00:00",
+   "home_club_id": "tucuman-rugby-club",
+   "away_club_id": "los-tarcos",
+   "score": {
+    "away": 26,
+    "home": 24
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  },
+  {
+   "id": "43e1217c-89f1-4e5e-a976-c22847a53198",
+   "date_time": "2026-08-08T18:30:00+00:00",
+   "home_club_id": "tucuman-lawn-tennis",
+   "away_club_id": "universitario-de-tucuman",
+   "score": {
+    "away": 29,
+    "home": 44
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  },
+  {
+   "id": "67a3e53e-60c6-4a49-ba23-dd716e3012d2",
+   "date_time": "2026-08-08T18:30:00+00:00",
+   "home_club_id": "cardenales-r-c",
+   "away_club_id": "jockey-club-salta",
+   "score": {
+    "away": 28,
+    "home": 31
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  },
+  {
+   "id": "a893c9af-5a19-41c9-b8bf-2216c0bd824b",
+   "date_time": "2026-08-09T18:30:00+00:00",
+   "home_club_id": "huirapuca",
+   "away_club_id": "lince-rugby-club",
+   "score": {
+    "away": 21,
+    "home": 45,
+    "awayTries": 0,
+    "homeTries": 0
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  },
+  {
+   "id": "f109857a-7f2e-4bb9-9a85-f28ea6018756",
+   "date_time": "2026-08-09T18:30:00+00:00",
+   "home_club_id": "natacion-y-gimnasia",
+   "away_club_id": "universitario-de-salta",
+   "score": {
+    "away": 24,
+    "home": 32
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  },
+  {
+   "id": "8b194757-6aaf-4476-9d34-fc7f9bfeb526",
+   "date_time": "2026-08-15T18:30:00+00:00",
+   "home_club_id": "lince-rugby-club",
+   "away_club_id": "tucuman-rugby-club",
+   "score": {
+    "away": 35,
+    "home": 31
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  },
+  {
+   "id": "090646df-fcab-4bd4-82fe-12987680ec84",
+   "date_time": "2026-08-22T18:30:00+00:00",
+   "home_club_id": "universitario-de-tucuman",
+   "away_club_id": "cardenales-r-c",
+   "score": {
+    "away": 23,
+    "home": 22
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  },
+  {
+   "id": "0a156445-f191-4eaf-bc5a-e4ca14dcba11",
+   "date_time": "2026-08-22T18:30:00+00:00",
+   "home_club_id": "universitario-de-salta",
+   "away_club_id": "jockey-club-salta",
+   "score": {
+    "away": 27,
+    "home": 35
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  },
+  {
+   "id": "1a4aedad-d680-41c9-86a9-8c83d5247db7",
+   "date_time": "2026-08-22T18:30:00+00:00",
+   "home_club_id": "los-tarcos",
+   "away_club_id": "tucuman-lawn-tennis",
+   "score": {
+    "away": 23,
+    "home": 27
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  },
+  {
+   "id": "124d0098-3c39-4d9b-8da0-8dba8012270d",
+   "date_time": "2026-08-23T18:30:00+00:00",
+   "home_club_id": "natacion-y-gimnasia",
+   "away_club_id": "huirapuca",
+   "score": {
+    "away": 20,
+    "home": 23,
+    "penalties": null,
+    "manualOverride": {
+     "away": 20,
+     "home": 23,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  },
+  {
+   "id": "617d023b-3627-473d-ace3-9e3486c24c5d",
+   "date_time": "2026-08-29T17:00:00+00:00",
+   "home_club_id": "jockey-club-salta",
+   "away_club_id": "universitario-de-tucuman",
+   "score": {
+    "away": 44,
+    "home": 42,
+    "awayTries": 0,
+    "homeTries": 0
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  },
+  {
+   "id": "62287a89-176a-487b-b781-2cd67834b146",
+   "date_time": "2026-08-29T17:30:00+00:00",
+   "home_club_id": "cardenales-r-c",
+   "away_club_id": "los-tarcos",
+   "score": {
+    "away": 17,
+    "home": 21,
+    "awayTries": 0,
+    "homeTries": 0
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  },
+  {
+   "id": "0ee2a394-364d-47dc-87df-4bcadc505204",
+   "date_time": "2026-08-30T18:30:00+00:00",
+   "home_club_id": "tucuman-lawn-tennis",
+   "away_club_id": "lince-rugby-club",
+   "score": {
+    "away": 31,
+    "home": 59
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  },
+  {
+   "id": "e19f53b2-6358-4ce1-a345-360ebcb42e2a",
+   "date_time": "2026-08-30T18:45:00+00:00",
+   "home_club_id": "huirapuca",
+   "away_club_id": "universitario-de-salta",
+   "score": {
+    "away": 24,
+    "home": 48
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  },
+  {
+   "id": "c89c7049-d8d1-4144-b114-aa99a074b16e",
+   "date_time": "2026-08-30T19:00:00+00:00",
+   "home_club_id": "tucuman-rugby-club",
+   "away_club_id": "natacion-y-gimnasia",
+   "score": {
+    "away": 27,
+    "home": 29
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  },
+  {
+   "id": "363e1610-626f-4b7b-a260-01b83982f7e6",
+   "date_time": "2026-09-05T18:30:00+00:00",
+   "home_club_id": "los-tarcos",
+   "away_club_id": "jockey-club-salta",
+   "score": {
+    "away": 31,
+    "home": 36
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  },
+  {
+   "id": "e62e5618-8abe-44fd-815c-47b7ae43a978",
+   "date_time": "2026-09-05T18:30:00+00:00",
+   "home_club_id": "natacion-y-gimnasia",
+   "away_club_id": "tucuman-lawn-tennis",
+   "score": {
+    "away": 27,
+    "home": 31
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  },
+  {
+   "id": "f1ec8ad6-ef21-4ed3-b03d-3a8116f0415c",
+   "date_time": "2026-09-05T18:30:00+00:00",
+   "home_club_id": "huirapuca",
+   "away_club_id": "tucuman-rugby-club",
+   "score": {
+    "away": 33,
+    "home": 37
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  },
+  {
+   "id": "9a728af6-7e33-4016-8a25-a94b83298b54",
+   "date_time": "2026-09-06T18:30:00+00:00",
+   "home_club_id": "lince-rugby-club",
+   "away_club_id": "cardenales-r-c",
+   "score": {
+    "away": 43,
+    "home": 40
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  },
+  {
+   "id": "287a9261-3515-482b-9698-8077a458d6ba",
+   "date_time": "2026-09-12T18:30:00+00:00",
+   "home_club_id": "universitario-de-salta",
+   "away_club_id": "universitario-de-tucuman",
+   "score": {
+    "away": 30,
+    "home": 23
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  },
+  {
+   "id": "ad07e4c1-b7ec-428f-9840-e907136a3e3f",
+   "date_time": "2026-09-19T16:30:00+00:00",
+   "home_club_id": "cardenales-r-c",
+   "away_club_id": "natacion-y-gimnasia",
+   "score": {
+    "away": 33,
+    "home": 40,
+    "penalties": null,
+    "manualOverride": {
+     "away": 33,
+     "home": 40,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "Patricio Padrón",
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  },
+  {
+   "id": "37c04bbf-0848-4789-a017-e83de6c35313",
+   "date_time": "2026-09-19T18:30:00+00:00",
+   "home_club_id": "tucuman-rugby-club",
+   "away_club_id": "universitario-de-salta",
+   "score": {
+    "away": 40,
+    "home": 35,
+    "awayTries": 6,
+    "homeTries": 4,
+    "penalties": null,
+    "manualOverride": {
+     "away": 40,
+     "home": 35,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "Julián Montenegro",
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  },
+  {
+   "id": "d95096a6-67bb-4813-88d0-7b7f74e7748e",
+   "date_time": "2026-09-19T18:30:00+00:00",
+   "home_club_id": "universitario-de-tucuman",
+   "away_club_id": "los-tarcos",
+   "score": {
+    "away": 31,
+    "home": 36,
+    "penalties": null,
+    "manualOverride": {
+     "away": 31,
+     "home": 36,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "Facundo Stratti",
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  },
+  {
+   "id": "5852c7fa-122f-4b23-bc7c-d5b9f5d50a4b",
+   "date_time": "2026-09-20T00:30:00+00:00",
+   "home_club_id": "jockey-club-salta",
+   "away_club_id": "lince-rugby-club",
+   "score": {
+    "away": 45,
+    "home": 45,
+    "penalties": null,
+    "manualOverride": {
+     "away": 45,
+     "home": 45,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "Ezequiel Orcajada",
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  },
+  {
+   "id": "4fbfaee3-883c-46e6-b7be-2d2e9b5b72fc",
+   "date_time": "2026-09-20T19:00:00+00:00",
+   "home_club_id": "tucuman-lawn-tennis",
+   "away_club_id": "huirapuca",
+   "score": {
+    "away": 37,
+    "home": 60,
+    "penalties": null,
+    "manualOverride": {
+     "away": 37,
+     "home": 60,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "Pedro López Vildoza",
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  },
+  {
+   "id": "0c434e81-0887-4223-b088-53c7cff69250",
+   "date_time": "2026-09-26T18:30:00+00:00",
+   "home_club_id": "huirapuca",
+   "away_club_id": "cardenales-r-c",
+   "score": {
+    "away": 21,
+    "home": 74
+   },
+   "status": "final",
+   "referee": "Álvaro Del Barco",
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  },
+  {
+   "id": "f47e8611-9ce0-4bef-a7d8-b854967be1db",
+   "date_time": "2026-09-26T18:30:00+00:00",
+   "home_club_id": "universitario-de-salta",
+   "away_club_id": "los-tarcos",
+   "score": {
+    "away": 38,
+    "home": 45
+   },
+   "status": "final",
+   "referee": "Néstor Pirez",
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  },
+  {
+   "id": "500a3c75-dbc5-4d14-9ada-2aa3ad8b4a07",
+   "date_time": "2026-09-27T19:00:00+00:00",
+   "home_club_id": "lince-rugby-club",
+   "away_club_id": "universitario-de-tucuman",
+   "score": {
+    "away": 42,
+    "home": 40
+   },
+   "status": "final",
+   "referee": "Patricio Padrón",
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  },
+  {
+   "id": "6ee759b3-566f-4662-b086-1670c6a7956a",
+   "date_time": "2026-10-03T18:00:00+00:00",
+   "home_club_id": "tucuman-rugby-club",
+   "away_club_id": "tucuman-lawn-tennis",
+   "score": {
+    "away": 38,
+    "home": 34
+   },
+   "status": "final",
+   "referee": "Gonzalo Daneri",
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  },
+  {
+   "id": "14e563f6-2e11-42aa-a118-9c86cb862274",
+   "date_time": "2026-10-03T19:00:00+00:00",
+   "home_club_id": "natacion-y-gimnasia",
+   "away_club_id": "jockey-club-salta",
+   "score": {
+    "away": 38,
+    "home": 37
+   },
+   "status": "final",
+   "referee": "Leandro Santillán",
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  },
+  {
+   "id": "2fa56865-8635-4ef6-b2f2-61437064ab8b",
+   "date_time": "2026-10-17T18:30:00+00:00",
+   "home_club_id": "tucuman-lawn-tennis",
+   "away_club_id": "universitario-de-salta",
+   "score": {
+    "away": 28,
+    "home": 56
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  },
+  {
+   "id": "3874f8aa-3030-4413-a9f9-ee521485c8fd",
+   "date_time": "2026-10-17T18:30:00+00:00",
+   "home_club_id": "los-tarcos",
+   "away_club_id": "lince-rugby-club",
+   "score": {
+    "away": 21,
+    "home": 49
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  },
+  {
+   "id": "4e7b615e-93b0-4315-82aa-7603698267eb",
+   "date_time": "2026-10-17T18:30:00+00:00",
+   "home_club_id": "universitario-de-tucuman",
+   "away_club_id": "natacion-y-gimnasia",
+   "score": {
+    "away": 28,
+    "home": 25
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  },
+  {
+   "id": "d63021ae-eed3-4d20-9b93-853560d37c58",
+   "date_time": "2026-10-17T18:30:00+00:00",
+   "home_club_id": "jockey-club-salta",
+   "away_club_id": "huirapuca",
+   "score": {
+    "away": 51,
+    "home": 35
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  },
+  {
+   "id": "e50f8281-eb83-4d29-bee2-314fe7c72fb3",
+   "date_time": "2026-10-18T18:30:00+00:00",
+   "home_club_id": "cardenales-r-c",
+   "away_club_id": "tucuman-rugby-club",
+   "score": {
+    "away": 28,
+    "home": 23,
+    "penalties": null,
+    "manualOverride": {
+     "away": 28,
+     "home": 23,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  },
+  {
+   "id": "07db795a-fe60-4160-a80c-cd9e7980e8bb",
+   "date_time": "2026-10-24T18:30:00+00:00",
+   "home_club_id": "tucuman-lawn-tennis",
+   "away_club_id": "cardenales-r-c",
+   "score": {
+    "away": 10,
+    "home": 54
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  },
+  {
+   "id": "29ca843c-1951-498a-a27f-2072971ae15d",
+   "date_time": "2026-10-24T18:30:00+00:00",
+   "home_club_id": "huirapuca",
+   "away_club_id": "universitario-de-tucuman",
+   "score": {
+    "away": 23,
+    "home": 27
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  },
+  {
+   "id": "88981fab-503a-4de0-a56d-a68384118b09",
+   "date_time": "2026-10-24T18:30:00+00:00",
+   "home_club_id": "natacion-y-gimnasia",
+   "away_club_id": "los-tarcos",
+   "score": {
+    "away": 14,
+    "home": 21
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  },
+  {
+   "id": "a88bd4e5-a980-44c1-92c3-09ee2ec71ef7",
+   "date_time": "2026-10-25T18:30:00+00:00",
+   "home_club_id": "tucuman-rugby-club",
+   "away_club_id": "jockey-club-salta",
+   "score": {
+    "away": 17,
+    "home": 61
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  },
+  {
+   "id": "df8768dc-1ea6-422a-b014-f71d84c0fee5",
+   "date_time": "2026-10-25T18:30:00+00:00",
+   "home_club_id": "universitario-de-salta",
+   "away_club_id": "lince-rugby-club",
+   "score": {
+    "away": 48,
+    "home": 40
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  },
+  {
+   "id": "37f7c899-d515-4b71-a921-29beee98e69d",
+   "date_time": "2026-10-31T18:30:00+00:00",
+   "home_club_id": "los-tarcos",
+   "away_club_id": "huirapuca",
+   "score": {
+    "away": 0,
+    "home": 0
+   },
+   "status": "scheduled",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  },
+  {
+   "id": "54df5545-e5bc-4b88-a85f-398fd0a0179d",
+   "date_time": "2026-10-31T18:30:00+00:00",
+   "home_club_id": "jockey-club-salta",
+   "away_club_id": "tucuman-lawn-tennis",
+   "score": {
+    "away": 0,
+    "home": 0
+   },
+   "status": "scheduled",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  },
+  {
+   "id": "5ca821d5-4590-47ca-878c-4add5718dc97",
+   "date_time": "2026-10-31T18:30:00+00:00",
+   "home_club_id": "lince-rugby-club",
+   "away_club_id": "natacion-y-gimnasia",
+   "score": {
+    "away": 0,
+    "home": 0
+   },
+   "status": "scheduled",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  },
+  {
+   "id": "909981a2-b810-47d4-a394-240118a23caf",
+   "date_time": "2026-10-31T18:30:00+00:00",
+   "home_club_id": "cardenales-r-c",
+   "away_club_id": "universitario-de-salta",
+   "score": {
+    "away": 0,
+    "home": 0
+   },
+   "status": "scheduled",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  },
+  {
+   "id": "c7af8857-76eb-4380-9f6a-1ca27b7229c9",
+   "date_time": "2026-10-31T18:30:00+00:00",
+   "home_club_id": "universitario-de-tucuman",
+   "away_club_id": "tucuman-rugby-club",
+   "score": {
+    "away": 0,
+    "home": 0
+   },
+   "status": "scheduled",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "745a4a32-4585-4684-848b-6984ae887a1f",
+   "phase_id": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3"
+  }
+ ]
+}

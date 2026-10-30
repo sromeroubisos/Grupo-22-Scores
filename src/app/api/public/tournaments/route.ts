@@ -218,6 +218,13 @@ type PublicTournamentsRequestParams = {
     countryFlag: string | null;
     /** `?season=2025`; null = la temporada más reciente de cada unión. */
     season: string | null;
+    /**
+     * Si el pedido puede escribir (y leer) un snapshot durable en
+     * `tournaments_feed_cache`. Solo los pedidos canónicos —sin búsqueda libre,
+     * sin ids de país, con parámetros de forma conocida— lo hacen. Ver
+     * `normalizePublicTournamentsRequest`.
+     */
+    persistable: boolean;
 };
 
 type TournamentsResponseCacheEntry = {
@@ -1441,17 +1448,58 @@ async function queryPublicDbTournamentsForRequest(
     };
 }
 
+// Topes de los parámetros libres. La ruta es anónima y cada combinación
+// distinta era una fila nueva en `tournaments_feed_cache`: con `?search=` al azar
+// un script llenaba la tabla sin límite (y la memoria de la lambda con ella).
+const MAX_SEARCH_LENGTH = 80;
+const MAX_COUNTRY_NAME_LENGTH = 80;
+const MAX_EXTERNAL_COUNTRY_IDS = 8;
+// Los ids de país de FlashScore son cortos y alfanuméricos; lo que no tiene esa
+// forma no matchea ningún torneo, así que descartarlo no cambia el resultado.
+const EXTERNAL_COUNTRY_ID_PATTERN = /^[A-Za-z0-9_-]{1,40}$/;
+const SPORT_PARAM_PATTERN = /^[a-z0-9_-]{1,32}$/i;
+const KNOWN_SCOPES = new Set(['summary', 'country', 'catalog', 'db', 'full']);
+
 function normalizePublicTournamentsRequest(request: Request): PublicTournamentsRequestParams {
     const { searchParams } = new URL(request.url);
     const sport = searchParams.get('sport');
     const flashScoreSportKey = resolveFlashScoreSportKey(sport);
     const scope = searchParams.get('scope');
-    const search = searchParams.get('search')?.trim().toLowerCase() || '';
-    const explicitExternalCountryId = searchParams.get('external_country_id')?.trim() || null;
-    const externalCountryIds = uniqueNormalizedIdentifiers([
-        explicitExternalCountryId,
+    const rawSearch = searchParams.get('search')?.trim().toLowerCase() || '';
+    const search = rawSearch.slice(0, MAX_SEARCH_LENGTH);
+    const rawExplicitExternalCountryId = searchParams.get('external_country_id')?.trim() || null;
+    const explicitExternalCountryId = rawExplicitExternalCountryId
+        && EXTERNAL_COUNTRY_ID_PATTERN.test(rawExplicitExternalCountryId)
+        ? rawExplicitExternalCountryId
+        : null;
+    const rawExternalCountryIds = uniqueNormalizedIdentifiers([
+        rawExplicitExternalCountryId,
         ...parseRequestIdentifierList(searchParams.getAll('external_country_ids')),
     ]);
+    const externalCountryIds = rawExternalCountryIds
+        .filter((id) => EXTERNAL_COUNTRY_ID_PATTERN.test(id))
+        .slice(0, MAX_EXTERNAL_COUNTRY_IDS);
+    const rawCountryName = searchParams.get('country_name')?.trim() || null;
+    const countryName = rawCountryName ? rawCountryName.slice(0, MAX_COUNTRY_NAME_LENGTH) : null;
+
+    // Algo se recortó o se descartó: el pedido no es uno que arme la app.
+    const altered = rawSearch.length > MAX_SEARCH_LENGTH
+        || externalCountryIds.length !== rawExternalCountryIds.length
+        || (rawCountryName !== null && rawCountryName.length > MAX_COUNTRY_NAME_LENGTH);
+
+    // El snapshot durable es para los feeds que arma la app y se repiten miles
+    // de veces (portada, resumen por país, catálogo). Un `?search=` o un país
+    // puntual tienen clave libre: persistirlos le daba a cualquiera una fila
+    // nueva por pedido. Esos viven solo en memoria (con tope LRU) y por TTL.
+    // `country` queda afuera aunque venga bien formado: los ids son texto libre
+    // y su payload sale del catálogo, que sí tiene snapshot propio.
+    const persistable = !altered
+        && !search
+        && externalCountryIds.length === 0
+        && !countryName
+        && (scope === null || KNOWN_SCOPES.has(scope))
+        && scope !== 'country'
+        && (sport === null || SPORT_PARAM_PATTERN.test(sport));
 
     return {
         sport,
@@ -1464,9 +1512,10 @@ function normalizePublicTournamentsRequest(request: Request): PublicTournamentsR
         audience: resolveAudienceFilter(searchParams.get('audience')),
         externalCountryId: explicitExternalCountryId || externalCountryIds[0] || null,
         externalCountryIds,
-        countryName: searchParams.get('country_name')?.trim() || null,
-        countryFlag: searchParams.get('country_flag')?.trim() || null,
+        countryName,
+        countryFlag: searchParams.get('country_flag')?.trim().slice(0, 16) || null,
         season: normalizeSeasonParam(searchParams.get('season')),
+        persistable,
     };
 }
 
@@ -1616,6 +1665,12 @@ async function persistTournamentsFeedSnapshot(
     trace?: TournamentsTraceContext,
 ) {
     if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        return false;
+    }
+
+    // Clave libre (búsqueda, país puntual, parámetros recortados): no se
+    // persiste. Ver `persistable` en normalizePublicTournamentsRequest.
+    if (!params.persistable) {
         return false;
     }
 
@@ -2171,11 +2226,15 @@ export async function GET(request: NextRequest) {
     try {
         const readClient = await getReadClient();
         const persistedLookupStartedAt = Date.now();
-        const persistedSnapshot = await readUsableTournamentsFeedSnapshot<PublicTournamentsPayload>(
-            readClient,
-            cacheKey,
-            new Date().toISOString(),
-        );
+        // Sin snapshot posible, ni se consulta la tabla: un pedido con clave
+        // libre no tiene por qué costar dos idas a la base antes de computar.
+        const persistedSnapshot = params.persistable
+            ? await readUsableTournamentsFeedSnapshot<PublicTournamentsPayload>(
+                readClient,
+                cacheKey,
+                new Date().toISOString(),
+            )
+            : null;
         const persistedLookupMs = trackDuration(trace.metrics, 'persisted_cache_lookup_ms', persistedLookupStartedAt);
         if (persistedLookupMs > 300) {
             logTournamentsEvent('warn', 'tournaments_slow_persisted_lookup', trace, { threshold_ms: 300 });
@@ -2220,7 +2279,9 @@ export async function GET(request: NextRequest) {
         }
 
         const persistedMetaStartedAt = Date.now();
-        const persistedSnapshotMeta = await readTournamentsFeedSnapshotMetadata(readClient, cacheKey);
+        const persistedSnapshotMeta = params.persistable
+            ? await readTournamentsFeedSnapshotMetadata(readClient, cacheKey)
+            : null;
         if (persistedSnapshotMeta) {
             trackDuration(trace.metrics, 'persisted_metadata_recheck_ms', persistedMetaStartedAt);
             trace.metrics.persisted_payload_bytes = persistedSnapshotMeta.payloadSizeBytes || 0;

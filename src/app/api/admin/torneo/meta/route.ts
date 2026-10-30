@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { guardRejection } from '@/lib/auth/apiAdmin';
 import { createClient } from '@/lib/supabase/server';
 import { requireTournamentAdminContext } from '@/lib/auth/permissions';
 
@@ -11,8 +12,8 @@ export async function GET() {
 
     try {
         await requireTournamentAdminContext(supabase);
-    } catch {
-        return err('Unauthorized', 401);
+    } catch (authError) {
+        return err(...guardRejection(authError));
     }
 
     const [unionsResult, sportsResult, countriesResult] = await Promise.all([

@@ -87,9 +87,15 @@ export async function commitInterpretedTournament(
     selection: ImportSelection;
     userId: string;
     fileName?: string | null;
+    /**
+     * Qué clubes existentes puede ADOPTAR esta importación. Sin scope (o con
+     * `isUnlimited: false` y el club fuera de `clubIds`) no se adopta ninguno.
+     */
+    clubScope?: { isUnlimited: boolean; clubIds: ReadonlySet<string> };
   },
 ): Promise<CommitResult> {
   const { interpreted, selection, userId } = params;
+  const clubScope = params.clubScope ?? { isUnlimited: false, clubIds: new Set<string>() };
   const warnings: string[] = [...(interpreted.warnings ?? [])];
   const created = { clubs: 0, participants: 0, phases: 0, zones: 0, matches: 0, rosters: 0, players: 0 };
 
@@ -233,10 +239,19 @@ export async function commitInterpretedTournament(
       const { data: existing } = await writer.from('clubs').select('id, name').eq('id', id).maybeSingle();
       if (existing) {
         if (clubNamesLookAlike(name, existing.name)) {
-          teamToClubId.set(key, id);
-          return id;
+          // Adoptar un club por parecido de nombre lo mete en un torneo nuevo
+          // con service_role: un admin de torneo podía "llevarse" cualquier
+          // club del catálogo escribiendo su nombre en la planilla. Fuera del
+          // alcance, NO se adopta: se crea uno propio sin publicar (lo menos
+          // disruptivo — la importación sigue andando) y se avisa, para que un
+          // super admin lo vincule al club real si corresponde.
+          if (clubScope.isUnlimited || clubScope.clubIds.has(id)) {
+            teamToClubId.set(key, id);
+            return id;
+          }
+          warnings.push(`El club "${name}" ya existe pero no está en tu alcance: se creó uno nuevo sin publicar. Pedile a un super admin que lo vincule al existente.`);
         }
-        continue; // slug collision with a different club → try next suffix
+        continue; // slug ocupado por otro club (o uno fuera de alcance) → probar el siguiente sufijo
       }
       const { error } = await writer.from('clubs').insert([{
         id, slug: id, name, sport: 'rugby', status: 'active', is_visible: false,

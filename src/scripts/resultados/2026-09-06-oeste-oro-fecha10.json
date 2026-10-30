@@ -1,0 +1,30 @@
+{
+  "fecha": "2026-09-06",
+  "descripcion": "Copa Oro del Oeste 2026 · 10a fecha · Universitario de San Juan 35-32 Mendoza · Liceo 57-26 Teque",
+  "fuente": "Cuadro de la 10a fecha (6 de septiembre) pasado por Santiago.",
+  "motivo": "Carga manual de la 10a fecha. Los Tordos vs CPBM quedo postergado al 3/10 y ya figura con esa fecha. El bonus ofensivo de Liceo-Teque se declara porque la fuente no publica tries: sin el, la tabla daba Liceo 37 y Teque 1 contra los 38 y 2 del cuadro oficial, y esa diferencia de un punto por lado es exactamente un bonus ofensivo para cada uno.",
+  "partidos": [
+    {
+      "partido": "2bea7517-8e2b-4665-82f9-741afb0dcbc0",
+      "local": "Universitario de San Juan",
+      "visitante": "Mendoza Rugby Club",
+      "marcador": {
+        "local": 35,
+        "visitante": 32
+      }
+    },
+    {
+      "partido": "768cc86c-03b0-4a1d-a45f-8b6618a00e64",
+      "local": "Liceo Rugby Club",
+      "visitante": "Teqüe R.C.",
+      "marcador": {
+        "local": 57,
+        "visitante": 26
+      },
+      "bonusOfensivo": [
+        "local",
+        "visitante"
+      ]
+    }
+  ]
+}

@@ -55,11 +55,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         { url: base, changeFrequency: 'hourly', priority: 1 },
         { url: `${base}/noticias`, changeFrequency: 'daily', priority: 0.9 },
         { url: `${base}/noticias/videos`, changeFrequency: 'daily', priority: 0.7 },
+        { url: `${base}/tournaments`, changeFrequency: 'daily', priority: 0.8 },
+        { url: `${base}/resultados`, changeFrequency: 'hourly', priority: 0.8 },
+        { url: `${base}/fixtures`, changeFrequency: 'daily', priority: 0.7 },
+        { url: `${base}/tablas`, changeFrequency: 'daily', priority: 0.7 },
+        { url: `${base}/clubs`, changeFrequency: 'weekly', priority: 0.6 },
+        { url: `${base}/players`, changeFrequency: 'weekly', priority: 0.5 },
         { url: `${base}/rankings`, changeFrequency: 'weekly', priority: 0.6 },
         { url: `${base}/juegos`, changeFrequency: 'monthly', priority: 0.5 },
+        { url: `${base}/prode`, changeFrequency: 'weekly', priority: 0.5 },
         { url: `${base}/para-clubes`, changeFrequency: 'monthly', priority: 0.5 },
         { url: `${base}/para-torneos`, changeFrequency: 'monthly', priority: 0.5 },
+        { url: `${base}/contacto`, changeFrequency: 'yearly', priority: 0.3 },
+        { url: `${base}/privacidad`, changeFrequency: 'yearly', priority: 0.2 },
     ];
+    // Torneos, clubes y partidos tienen su propio sitemap (tournaments/,
+    // clubs/ y matches/sitemap.ts), declarados en robots.ts.
 
     const newsPages: MetadataRoute.Sitemap = (await publishedNews()).map((news) => ({
         url: `${base}${newsPath(news)}`,

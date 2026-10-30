@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/server';
 import { isGlobalAdminRole } from '@/lib/auth/roles';
+import { assertMfaSatisfied, isMfaError } from '@/lib/auth/mfa';
+import { getApiErrorMessageForClient } from '@/lib/auth/apiAdmin';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 import { invalidateExternalTournamentApiCaches } from '@/lib/server/externalTournamentCacheInvalidation';
@@ -37,10 +39,18 @@ async function requireExactSuperAdmin() {
         throw new Error('Forbidden: Super admin access required');
     }
 
+    // El segundo factor, como en requireSuperAdmin: solo exige algo si el
+    // usuario tiene un factor verificado. Se contesta con 403, no 401.
+    await assertMfaSatisfied(user.role);
+
     return user;
 }
 
 function buildErrorResponse(err: unknown, fallback = 'Internal Server Error') {
+    if (isMfaError(err)) {
+        return NextResponse.json({ ok: false, error: getApiErrorMessageForClient(err) }, { status: 403 });
+    }
+
     const message = err instanceof Error ? err.message : fallback;
     const status =
         message === 'Unauthorized'

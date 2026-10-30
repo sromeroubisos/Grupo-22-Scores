@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import {
-    canManageClubContext,
     getClubManagementTarget,
     requireUserAccessContext,
 } from '@/lib/auth/permissions';
-import { EDIT_MEMBERSHIP_ROLES } from '@/lib/auth/roles';
+import { canAdministerClubAccess, explainGrantDenial } from '@/lib/club-admin/grantAuthority';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 import { randomBytes } from 'crypto';
@@ -18,6 +17,12 @@ function generateToken(): string {
 
 function err(message: string, status: number) {
     return NextResponse.json({ ok: false, error: message }, { status });
+}
+
+/** El detalle de Supabase va al log; a la pantalla, un mensaje fijo. */
+function failure(scope: string, error: unknown, fallback: string) {
+    console.error(`[api/club-admin/invites][${scope}]`, error);
+    return err(fallback, 500);
 }
 
 const createInviteSchema = z.object({
@@ -34,23 +39,28 @@ const deleteInviteSchema = z.object({
     inviteId: z.string().min(1),
 });
 
+/**
+ * Las invitaciones son accesos en potencia (y el GET devuelve los tokens): las
+ * ve, crea y revoca SOLO el admin del club o un admin global. Antes alcanzaba
+ * con ser editor, y un editor se mandaba un link de admin a sí mismo.
+ */
 async function resolveClubAccess(clubId: string) {
     const supabase = await createClient();
     const context = await requireUserAccessContext(supabase).catch(() => null);
     if (!context) {
-        return { error: err('No autenticado', 401), target: null };
+        return { error: err('No autenticado', 401), target: null, context: null };
     }
 
     const target = await getClubManagementTarget(supabase, clubId);
     if (!target) {
-        return { error: err('Club no encontrado', 404), target: null };
+        return { error: err('Club no encontrado', 404), target: null, context: null };
     }
 
-    if (!canManageClubContext(context, target, EDIT_MEMBERSHIP_ROLES)) {
-        return { error: err('Sin permisos para administrar este club', 403), target: null };
+    if (!canAdministerClubAccess(context, target)) {
+        return { error: err('Solo un admin del club puede gestionar invitaciones', 403), target: null, context: null };
     }
 
-    return { error: null, target, userId: context.userId };
+    return { error: null, target, context, userId: context.userId };
 }
 
 export async function GET(request: NextRequest) {
@@ -104,8 +114,7 @@ export async function GET(request: NextRequest) {
 
         return NextResponse.json({ ok: true, data: payload });
     } catch (error) {
-        const message = error instanceof Error ? error.message : 'No se pudieron cargar las invitaciones';
-        return err(message, 500);
+        return failure('GET', error, 'No se pudieron cargar las invitaciones');
     }
 }
 
@@ -118,16 +127,15 @@ export async function POST(request: NextRequest) {
 
         const { clubId, scopeType, scopeId, role, expiresInDays, maxUses } = parsed.data;
         const access = await resolveClubAccess(clubId);
-        if (access.error || !access.target) {
+        if (access.error || !access.target || !access.context) {
             return access.error!;
         }
 
-        const validScope =
-            (scopeType === 'club' && scopeId === access.target.clubId) ||
-            (scopeType === 'club_family' && scopeId === access.target.familyRootId);
-
-        if (!validScope) {
-            return err('El alcance elegido no corresponde al club activo', 400);
+        // Alcance del club activo, club_family solo si es admin de la familia,
+        // y nunca un rol mayor que el propio.
+        const denial = explainGrantDenial(access.context, access.target, scopeType, scopeId, role);
+        if (denial) {
+            return err(denial, 403);
         }
 
         const token = generateToken();
@@ -164,8 +172,7 @@ export async function POST(request: NextRequest) {
             },
         });
     } catch (error) {
-        const message = error instanceof Error ? error.message : 'No se pudo crear la invitacion';
-        return err(message, 500);
+        return failure('POST', error, 'No se pudo crear la invitacion');
     }
 }
 
@@ -196,7 +203,6 @@ export async function DELETE(request: NextRequest) {
 
         return NextResponse.json({ ok: true });
     } catch (error) {
-        const message = error instanceof Error ? error.message : 'No se pudo revocar la invitacion';
-        return err(message, 500);
+        return failure('DELETE', error, 'No se pudo revocar la invitacion');
     }
 }

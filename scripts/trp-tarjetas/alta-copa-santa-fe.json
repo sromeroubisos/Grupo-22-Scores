@@ -1,0 +1,484 @@
+{
+ "nombre": "Copa Santa Fe",
+ "slug": "copa-santa-fe-2026",
+ "origen": "copa-santa-fe-2026-tarjetas",
+ "fechaInicio": "2026-03-28",
+ "fases": [
+  {
+   "nombre": "Primera",
+   "orden": 1
+  }
+ ],
+ "clubes": [
+  {
+   "id": "alma-juniors",
+   "corto": "Alma Juniors"
+  },
+  {
+   "id": "atletico-brown-san-vicente",
+   "corto": "Atl. Brown"
+  },
+  {
+   "id": "cha-roga-r-c",
+   "corto": "Cha Roga"
+  },
+  {
+   "id": "crai",
+   "corto": "CRAI"
+  },
+  {
+   "id": "crar",
+   "corto": "CRAR"
+  },
+  {
+   "id": "la-salle-jobson",
+   "corto": "La Salle"
+  },
+  {
+   "id": "querandi-r-c",
+   "corto": "Querandí"
+  },
+  {
+   "id": "santa-fe-r-c",
+   "corto": "Santa Fe RC"
+  },
+  {
+   "id": "universitario-de-santa-fe",
+   "corto": "Universitario"
+  }
+ ],
+ "partidos": [
+  {
+   "fase": "Primera",
+   "fecha": "2026-03-28",
+   "hora": "16:00",
+   "home": "universitario-de-santa-fe",
+   "away": "atletico-brown-san-vicente",
+   "homeScore": 35,
+   "awayScore": 30,
+   "cerrado": true,
+   "tarjeta": "296353",
+   "estado": "Cerrado"
+  },
+  {
+   "fase": "Primera",
+   "fecha": "2026-03-28",
+   "hora": "16:00",
+   "home": "crar",
+   "away": "la-salle-jobson",
+   "homeScore": 41,
+   "awayScore": 15,
+   "cerrado": true,
+   "tarjeta": "296354",
+   "estado": "Cerrado"
+  },
+  {
+   "fase": "Primera",
+   "fecha": "2026-04-25",
+   "hora": "16:00",
+   "home": "querandi-r-c",
+   "away": "alma-juniors",
+   "homeScore": 23,
+   "awayScore": 37,
+   "cerrado": true,
+   "tarjeta": "307656",
+   "estado": "Cerrado"
+  },
+  {
+   "fase": "Primera",
+   "fecha": "2026-04-25",
+   "hora": "16:00",
+   "home": "cha-roga-r-c",
+   "away": "universitario-de-santa-fe",
+   "homeScore": 0,
+   "awayScore": 38,
+   "cerrado": true,
+   "tarjeta": "307655",
+   "estado": "Cerrado"
+  },
+  {
+   "fase": "Primera",
+   "fecha": "2026-04-25",
+   "hora": "16:00",
+   "home": "atletico-brown-san-vicente",
+   "away": "crar",
+   "homeScore": 27,
+   "awayScore": 19,
+   "cerrado": true,
+   "tarjeta": "307654",
+   "estado": "Cerrado"
+  },
+  {
+   "fase": "Primera",
+   "fecha": "2026-04-24",
+   "hora": "20:30",
+   "home": "santa-fe-r-c",
+   "away": "crai",
+   "homeScore": 17,
+   "awayScore": 36,
+   "cerrado": true,
+   "tarjeta": "307657",
+   "estado": "Cerrado"
+  },
+  {
+   "fase": "Primera",
+   "fecha": "2026-05-30",
+   "hora": "16:00",
+   "home": "la-salle-jobson",
+   "away": "atletico-brown-san-vicente",
+   "homeScore": 27,
+   "awayScore": 19,
+   "cerrado": true,
+   "tarjeta": "309562",
+   "estado": "Cerrado"
+  },
+  {
+   "fase": "Primera",
+   "fecha": "2026-05-30",
+   "hora": "16:00",
+   "home": "crar",
+   "away": "cha-roga-r-c",
+   "homeScore": 27,
+   "awayScore": 13,
+   "cerrado": true,
+   "tarjeta": "309561",
+   "estado": "Cerrado"
+  },
+  {
+   "fase": "Primera",
+   "fecha": "2026-05-30",
+   "hora": "16:00",
+   "home": "universitario-de-santa-fe",
+   "away": "querandi-r-c",
+   "homeScore": 60,
+   "awayScore": 17,
+   "cerrado": true,
+   "tarjeta": "309560",
+   "estado": "Cerrado"
+  },
+  {
+   "fase": "Primera",
+   "fecha": "2026-05-30",
+   "hora": "14:00",
+   "home": "santa-fe-r-c",
+   "away": "alma-juniors",
+   "homeScore": 29,
+   "awayScore": 32,
+   "cerrado": true,
+   "tarjeta": "309559",
+   "estado": "Cerrado"
+  },
+  {
+   "fase": "Primera",
+   "fecha": "2026-06-27",
+   "hora": "16:00",
+   "home": "alma-juniors",
+   "away": "crai",
+   "homeScore": 14,
+   "awayScore": 18,
+   "cerrado": true,
+   "tarjeta": "311952",
+   "estado": "Cerrado"
+  },
+  {
+   "fase": "Primera",
+   "fecha": "2026-06-27",
+   "hora": "16:00",
+   "home": "universitario-de-santa-fe",
+   "away": "santa-fe-r-c",
+   "homeScore": 26,
+   "awayScore": 22,
+   "cerrado": true,
+   "tarjeta": "311951",
+   "estado": "Cerrado"
+  },
+  {
+   "fase": "Primera",
+   "fecha": "2026-06-27",
+   "hora": "16:00",
+   "home": "crar",
+   "away": "querandi-r-c",
+   "homeScore": 84,
+   "awayScore": 3,
+   "cerrado": true,
+   "tarjeta": "311950",
+   "estado": "Cerrado"
+  },
+  {
+   "fase": "Primera",
+   "fecha": "2026-06-27",
+   "hora": "16:00",
+   "home": "cha-roga-r-c",
+   "away": "la-salle-jobson",
+   "homeScore": 15,
+   "awayScore": 20,
+   "cerrado": true,
+   "tarjeta": "311949",
+   "estado": "Cerrado"
+  },
+  {
+   "fase": "Primera",
+   "fecha": "2026-07-25",
+   "hora": "16:00",
+   "home": "atletico-brown-san-vicente",
+   "away": "cha-roga-r-c",
+   "homeScore": 43,
+   "awayScore": 17,
+   "cerrado": true,
+   "tarjeta": "314037",
+   "estado": "Cerrado"
+  },
+  {
+   "fase": "Primera",
+   "fecha": "2026-07-25",
+   "hora": "16:00",
+   "home": "la-salle-jobson",
+   "away": "querandi-r-c",
+   "homeScore": 45,
+   "awayScore": 27,
+   "cerrado": true,
+   "tarjeta": "314036",
+   "estado": "Cerrado"
+  },
+  {
+   "fase": "Primera",
+   "fecha": "2026-07-25",
+   "hora": "13:30",
+   "home": "santa-fe-r-c",
+   "away": "crar",
+   "homeScore": 43,
+   "awayScore": 27,
+   "cerrado": true,
+   "tarjeta": "314035",
+   "estado": "Cerrado"
+  },
+  {
+   "fase": "Primera",
+   "fecha": "2026-07-25",
+   "hora": "16:00",
+   "home": "crai",
+   "away": "universitario-de-santa-fe",
+   "homeScore": 26,
+   "awayScore": 29,
+   "cerrado": true,
+   "tarjeta": "314034",
+   "estado": "Cerrado"
+  },
+  {
+   "fase": "Primera",
+   "fecha": "2026-08-01",
+   "hora": "16:00",
+   "home": "alma-juniors",
+   "away": "universitario-de-santa-fe",
+   "homeScore": 26,
+   "awayScore": 18,
+   "cerrado": true,
+   "tarjeta": "314989",
+   "estado": "Cerrado"
+  },
+  {
+   "fase": "Primera",
+   "fecha": "2026-08-01",
+   "hora": "16:00",
+   "home": "crai",
+   "away": "crar",
+   "homeScore": 45,
+   "awayScore": 26,
+   "cerrado": true,
+   "tarjeta": "314988",
+   "estado": "Cerrado"
+  },
+  {
+   "fase": "Primera",
+   "fecha": "2026-08-01",
+   "hora": "16:00",
+   "home": "santa-fe-r-c",
+   "away": "la-salle-jobson",
+   "homeScore": 28,
+   "awayScore": 13,
+   "cerrado": true,
+   "tarjeta": "314987",
+   "estado": "Cerrado"
+  },
+  {
+   "fase": "Primera",
+   "fecha": "2026-08-01",
+   "hora": "16:00",
+   "home": "querandi-r-c",
+   "away": "atletico-brown-san-vicente",
+   "homeScore": 21,
+   "awayScore": 40,
+   "cerrado": true,
+   "tarjeta": "314986",
+   "estado": "Cerrado"
+  },
+  {
+   "fase": "Primera",
+   "fecha": "2026-09-05",
+   "hora": "16:00",
+   "home": "cha-roga-r-c",
+   "away": "querandi-r-c",
+   "homeScore": 46,
+   "awayScore": 19,
+   "cerrado": true,
+   "tarjeta": "322597",
+   "estado": "Cerrado"
+  },
+  {
+   "fase": "Primera",
+   "fecha": "2026-09-05",
+   "hora": "16:00",
+   "home": "atletico-brown-san-vicente",
+   "away": "santa-fe-r-c",
+   "homeScore": 22,
+   "awayScore": 14,
+   "cerrado": true,
+   "tarjeta": "322596",
+   "estado": "Cerrado"
+  },
+  {
+   "fase": "Primera",
+   "fecha": "2026-09-05",
+   "hora": "16:00",
+   "home": "la-salle-jobson",
+   "away": "crai",
+   "homeScore": 22,
+   "awayScore": 52,
+   "cerrado": true,
+   "tarjeta": "322595",
+   "estado": "Cerrado"
+  },
+  {
+   "fase": "Primera",
+   "fecha": "2026-09-05",
+   "hora": "16:00",
+   "home": "crar",
+   "away": "alma-juniors",
+   "homeScore": 32,
+   "awayScore": 27,
+   "cerrado": true,
+   "tarjeta": "322594",
+   "estado": "Cerrado"
+  },
+  {
+   "fase": "Primera",
+   "fecha": "2026-09-11",
+   "hora": "21:00",
+   "home": "universitario-de-santa-fe",
+   "away": "crar",
+   "homeScore": 37,
+   "awayScore": 17,
+   "cerrado": true,
+   "tarjeta": "322605",
+   "estado": "Cerrado"
+  },
+  {
+   "fase": "Primera",
+   "fecha": "2026-09-11",
+   "hora": "21:00",
+   "home": "crai",
+   "away": "atletico-brown-san-vicente",
+   "homeScore": 87,
+   "awayScore": 7,
+   "cerrado": true,
+   "tarjeta": "322603",
+   "estado": "Cerrado"
+  },
+  {
+   "fase": "Primera",
+   "fecha": "2026-09-10",
+   "hora": "21:00",
+   "home": "alma-juniors",
+   "away": "la-salle-jobson",
+   "homeScore": 43,
+   "awayScore": 12,
+   "cerrado": true,
+   "tarjeta": "322604",
+   "estado": "Cerrado"
+  },
+  {
+   "fase": "Primera",
+   "fecha": "2026-09-10",
+   "hora": "20:30",
+   "home": "santa-fe-r-c",
+   "away": "cha-roga-r-c",
+   "homeScore": 64,
+   "awayScore": 27,
+   "cerrado": true,
+   "tarjeta": "322602",
+   "estado": "Cerrado"
+  },
+  {
+   "fase": "Primera",
+   "fecha": "2026-10-03",
+   "hora": "16:00",
+   "home": "querandi-r-c",
+   "away": "santa-fe-r-c",
+   "homeScore": 27,
+   "awayScore": 81,
+   "cerrado": true,
+   "tarjeta": "322613",
+   "estado": "Cerrado"
+  },
+  {
+   "fase": "Primera",
+   "fecha": "2026-10-03",
+   "hora": "16:00",
+   "home": "cha-roga-r-c",
+   "away": "crai",
+   "homeScore": 24,
+   "awayScore": 76,
+   "cerrado": true,
+   "tarjeta": "322612",
+   "estado": "Cerrado"
+  },
+  {
+   "fase": "Primera",
+   "fecha": "2026-10-03",
+   "hora": "16:00",
+   "home": "atletico-brown-san-vicente",
+   "away": "alma-juniors",
+   "homeScore": 14,
+   "awayScore": 17,
+   "cerrado": true,
+   "tarjeta": "322611",
+   "estado": "Cerrado"
+  },
+  {
+   "fase": "Primera",
+   "fecha": "2026-10-03",
+   "hora": "16:00",
+   "home": "la-salle-jobson",
+   "away": "universitario-de-santa-fe",
+   "homeScore": 7,
+   "awayScore": 111,
+   "cerrado": true,
+   "tarjeta": "322610",
+   "estado": "Cerrado"
+  },
+  {
+   "fase": "Primera",
+   "fecha": "2026-03-28",
+   "hora": "16:00",
+   "home": "crai",
+   "away": "querandi-r-c",
+   "homeScore": 62,
+   "awayScore": 3,
+   "cerrado": true,
+   "tarjeta": "296351",
+   "estado": "Cerrado"
+  },
+  {
+   "fase": "Primera",
+   "fecha": "2026-03-28",
+   "hora": "16:00",
+   "home": "alma-juniors",
+   "away": "cha-roga-r-c",
+   "homeScore": 43,
+   "awayScore": 17,
+   "cerrado": true,
+   "tarjeta": "296352",
+   "estado": "Cerrado"
+  }
+ ]
+}

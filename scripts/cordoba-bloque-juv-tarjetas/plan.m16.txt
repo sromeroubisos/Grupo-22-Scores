@@ -1,0 +1,2275 @@
+Torneo Cordobés M16 "A" 2026 (Unión Cordobesa) · tarjetas de partido (JSON de tablas) · validado contra el marcador de la base
+
+Córdoba Athletic Club M16 "A" vs Club Universitario de Córdoba M16 "A" · torneo-cordobes-m16-a · tarjeta 291027  ·  d9f1194c-98ef-4e59-858d-0c97524b1718
+  local     · Córdoba Athletic Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min  6 (1T 6) visitante try          
+    min  6 (1T 6) visitante conversion   
+    min 16 (1T 16) local     injury       Maximiliano Rojas
+    min 16 (1T 16) local     substitution Maximiliano Rojas
+    min 21 (1T 21) visitante try          
+    min 28 (1T 28) visitante try          
+    min 28 (1T 28) visitante conversion   
+    min 33 (1T 33) visitante card_yellow  
+    min 42 (2T 2) local     card_yellow  Fausto López Grimaut
+    min 47 (2T 7) local     try          Manuel Gonzalez D'amato
+    min 49 (2T 9) visitante try          
+    min 50 (2T 10) local     substitution Tomas Cardona
+    min 54 (2T 14) local     try          Salvador Pascualini
+    min 54 (2T 14) local     conversion   Bautista Martinat Bonetto
+    min 56 (2T 16) local     card_yellow  Nazareno Gabriel Avaca
+    min 60 (2T 20) visitante try          
+    min 60 (2T 20) visitante conversion   
+    min 69 (2T 29) visitante card_yellow  
+    min 77 (2T 37) local     try          Manuel Gonzalez D'amato
+    min 78 (2T 38) visitante card_yellow  
+  marcador  · eventos 17-31 · guardado 17-31
+  tries     · 3-5 (guardado —-—)
+  arbitro   · Florencia Ledesma (guardado: —)
+
+Jockey Club Córdoba M16 "A" vs Tala Rugby Club M16 "A" · torneo-cordobes-m16-a · tarjeta 291028  ·  87e62cc7-15db-4c52-9fd1-196a149854f0
+  local     · Jockey Club Córdoba M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 14-36
+  tries     · 0-0 (guardado —-—)
+  arbitro   · Martin LEIVA . (No Oficial) (guardado: —)
+
+Jockey Club de Villa María M16 "A" vs Club Palermo Bajo M16 "A" · torneo-cordobes-m16-a · tarjeta 291029  ·  27e290c3-92bd-4573-a1c5-0eb896b0ce57
+  local     · Jockey Club de Villa María M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 23
+    min  3 (1T 3) visitante injury       
+    min  3 (1T 3) visitante try          
+    min  8 (1T 8) visitante try          
+    min 11 (1T 11) visitante try          
+    min 12 (1T 12) visitante conversion   
+    min 14 (1T 14) local     try          Vito Milidoni
+    min 17 (1T 17) local     substitution Agustín Alassia
+    min 21 (1T 21) local     try          Felipe Kamienski
+    min 35 (1T 35) visitante try          
+    min 35 (1T 35) visitante conversion   
+    min 43 (2T 3) local     try          Leon Gallego Cance
+    min 50 (2T 10) local     try          Vito Milidoni
+    min 50 (2T 10) local     substitution Bautista Conforti Mariscotti
+    min 59 (2T 19) visitante try          
+    min 67 (2T 27) visitante try          
+    min 68 (2T 28) visitante conversion   
+    min 69 (2T 29) local     substitution Pedro Salomon
+    min 71 (2T 31) local     substitution Benjamín Bascur Stevenazzi
+    min 71 (2T 31) local     substitution Benjamín Ferrere
+    min 71 (2T 31) local     substitution Benjamin Giusiano Bonavia
+    min 72 (2T 32) local     card_yellow  Pedro Salomon
+    min 74 (2T 34) visitante try          
+    min 75 (2T 35) visitante conversion   
+  marcador  · eventos 20-43 · guardado 20-43
+  tries     · 4-7 (guardado —-—)
+  arbitro   · Pablo Daniel Dionicio Benitez (guardado: —)
+
+Club La Tablada M16 "A" vs Carlos Paz Rugby Club M16 "A" · torneo-cordobes-m16-a · tarjeta 291030  ·  88942474-6bd4-4d40-9a81-0ea94b23001c
+  local     · Club La Tablada M16 "A" · 22 jugadores · 0 con ficha fijada
+  visitante · Carlos Paz Rugby Club M16 "A" · 19 jugadores · 0 con ficha fijada
+  eventos   · 37
+    min  1 (1T 1) local     try          
+    min  1 (1T 1) local     conversion   
+    min  4 (1T 4) local     try          
+    min  5 (1T 5) local     conversion   
+    min  7 (1T 7) local     try          
+    min  7 (1T 7) local     conversion   
+    min 10 (1T 10) local     try          
+    min 10 (1T 10) local     conversion   
+    min 14 (1T 14) local     try          
+    min 14 (1T 14) local     conversion   
+    min 17 (1T 17) local     try          
+    min 17 (1T 17) local     conversion   
+    min 21 (1T 21) local     try          
+    min 25 (1T 25) local     try          
+    min 25 (1T 25) local     conversion   
+    min 31 (1T 31) local     try          
+    min 35 (1T 35) local     try          
+    min 41 (2T 1) local     try          
+    min 43 (2T 3) local     try          
+    min 43 (2T 3) local     conversion   
+    min 44 (2T 4) local     try          
+    min 44 (2T 4) local     conversion   
+    min 50 (2T 10) local     try          
+    min 52 (2T 12) local     try          
+    min 52 (2T 12) local     conversion   
+    min 55 (2T 15) local     try          
+    min 55 (2T 15) local     conversion   
+    min 56 (2T 16) local     try          
+    min 56 (2T 16) local     conversion   
+    min 60 (2T 20) local     try          
+    min 60 (2T 20) local     conversion   
+    min 63 (2T 23) local     try          
+    min 63 (2T 23) local     conversion   
+    min 65 (2T 25) local     try          
+    min 67 (2T 27) local     try          
+    min 67 (2T 27) local     conversion   
+    min 69 (2T 29) local     try          
+  marcador  · eventos 140-0 · guardado 140-0
+  tries     · 22-0 (guardado —-—)
+  arbitro   · Sergio Maldonado (guardado: —)
+
+Urú Curé Rugby Club M16 "A" vs San Martín de Villa María M16 "A" · torneo-cordobes-m16-a · tarjeta 291031  ·  0321bb97-6683-433a-96a1-aa637197dc33
+  local     · Urú Curé Rugby Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · San Martín de Villa María M16 "A" · 20 jugadores · 0 con ficha fijada
+  eventos   · 12
+    min  3 (1T 3) visitante try          
+    min  3 (1T 3) visitante conversion   
+    min  3 (1T 3) visitante try          
+    min  3 (1T 3) visitante conversion   
+    min  3 (1T 3) visitante try          
+    min 13 (1T 13) local     try          Augusto Kauer Garcia
+    min 13 (1T 13) local     conversion   Augusto Kauer Garcia
+    min 53 (2T 13) local     try          Augusto Kauer Garcia
+    min 53 (2T 13) local     try          Augusto Kauer Garcia
+    min 53 (2T 13) local     penalty_goal Augusto Kauer Garcia
+    min 53 (2T 13) local     conversion   Augusto Kauer Garcia
+    min 53 (2T 13) local     conversion   Augusto Kauer Garcia
+  marcador  · eventos 24-19 · guardado 24-19
+  tries     · 3-3 (guardado —-—)
+  arbitro   · Santiago Geronimo Lozada Chaves (guardado: —)
+
+Urú Curé Rugby Club M16 "A" vs Córdoba Athletic Club M16 "A" · torneo-cordobes-m16-a · tarjeta 296625  ·  f4336720-0225-4610-88b3-b0ae6fc2ddc2
+  local     · Urú Curé Rugby Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 10
+    min  1 (1T 1) local     try          Branco Benicio Bailatti Cufré
+    min  3 (1T 3) local     try          Santino Ponsone
+    min 45 (2T 5) visitante try          Cristobal Zurro Vanni
+    min 47 (2T 7) local     try          Augusto Kauer Garcia
+    min 50 (2T 10) visitante try          Manuel Gonzalez D'amato
+    min 51 (2T 11) visitante conversion   Manuel Gonzalez D'amato
+    min 57 (2T 17) visitante try          Manuel Gonzalez D'amato
+    min 70 (2T 30) local     try          Octavio Airaldo
+    min 71 (2T 31) local     conversion   Valentino Dominici
+    min 75 (2T 35) local     try          Bruno Simionati
+  marcador  · eventos 27-17 · guardado 27-17
+  tries     · 5-3 (guardado —-—)
+  arbitro   · Leonel Sorbera (guardado: —)
+
+San Martín de Villa María M16 "A" vs Club La Tablada M16 "A" · torneo-cordobes-m16-a · tarjeta 296626  ·  dabf002d-fa9e-4df5-8bbf-69d683b70d36
+  local     · San Martín de Villa María M16 "A" · 20 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M16 "A" · 22 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min 11 (1T 11) visitante try          
+    min 11 (1T 11) visitante conversion   
+    min 20 (1T 20) visitante try          
+    min 20 (1T 20) visitante conversion   
+    min 26 (1T 26) local     card_yellow  
+    min 29 (1T 29) visitante try          
+    min 29 (1T 29) visitante conversion   
+    min 31 (1T 31) visitante try          
+    min 31 (1T 31) visitante conversion   
+    min 43 (2T 3) visitante try          
+    min 53 (2T 13) visitante try          
+    min 53 (2T 13) visitante conversion   
+    min 55 (2T 15) local     try          
+    min 59 (2T 19) local     card_yellow  
+    min 59 (2T 19) visitante try          
+    min 59 (2T 19) visitante conversion   
+    min 63 (2T 23) local     card_yellow  
+    min 67 (2T 27) visitante try          
+    min 67 (2T 27) visitante conversion   
+    min 70 (2T 30) local     try          
+  marcador  · eventos 10-54 · guardado 10-54
+  tries     · 2-8 (guardado —-—)
+  arbitro   · Lautaro Joaquin Quiroga Cafure (guardado: —)
+
+Carlos Paz Rugby Club M16 "A" vs Jockey Club de Villa María M16 "A" · torneo-cordobes-m16-a · tarjeta 296627  ·  8d4f8e33-cd6c-4e3f-b0da-2d166bad28b0
+  local     · Carlos Paz Rugby Club M16 "A" · 19 jugadores · 0 con ficha fijada
+  visitante · Jockey Club de Villa María M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 0-42
+  tries     · 0-0 (guardado —-—)
+  arbitro   · Tomas Elias Gigena Ramallo (guardado: —)
+
+Club Palermo Bajo M16 "A" vs Jockey Club Córdoba M16 "A" · torneo-cordobes-m16-a · tarjeta 296628  ·  195b2247-e37b-44b4-8dde-735c97ef07e6
+  local     · Club Palermo Bajo M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M16 "A" · 22 jugadores · 0 con ficha fijada
+  eventos   · 12
+    min  2 (1T 2) visitante try          Alfonso Heredia Carrara
+    min  3 (1T 3) visitante conversion   Ciro Patocchi Arrieta
+    min 35 (1T 35) visitante substitution Francisco Alfredo Caparros
+    min 45 (2T 5) local     try          
+    min 45 (2T 5) visitante card_yellow  Matias Velazquez Cano
+    min 51 (2T 11) visitante substitution Federico Robledo Saracho
+    min 54 (2T 14) visitante substitution Santino Piasentini
+    min 55 (2T 15) visitante substitution Bautista Gil
+    min 60 (2T 20) local     penalty_goal 
+    min 60 (2T 20) visitante substitution Alfonso Heredia Carrara
+    min 70 (2T 30) local     try          
+    min 75 (2T 35) local     try          
+  marcador  · eventos 18-7 · guardado 18-7
+  tries     · 3-1 (guardado —-—)
+  arbitro   · Cristian Schwartz (guardado: —)
+
+Tala Rugby Club M16 "A" vs Club Universitario de Córdoba M16 "A" · torneo-cordobes-m16-a · tarjeta 296629  ·  61dde5b0-d23c-4bc5-87f3-465f581b01fb
+  local     · Tala Rugby Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 14
+    min  8 (1T 8) local     try          
+    min 16 (1T 16) local     try          
+    min 16 (1T 16) local     conversion   
+    min 21 (1T 21) local     try          
+    min 21 (1T 21) local     conversion   
+    min 25 (1T 25) local     try          
+    min 25 (1T 25) local     conversion   
+    min 27 (1T 27) local     try          
+    min 27 (1T 27) local     conversion   
+    min 32 (1T 32) visitante try          
+    min 32 (1T 32) visitante conversion   
+    min 54 (2T 14) visitante try          
+    min 67 (2T 27) visitante try          
+    min 67 (2T 27) visitante conversion   
+  marcador  · eventos 33-19 · guardado 33-19
+  tries     · 5-3 (guardado —-—)
+  arbitro   · José Octaviano Borquez (guardado: —)
+
+Córdoba Athletic Club M16 "A" vs Tala Rugby Club M16 "A" · torneo-cordobes-m16-a · tarjeta 297302  ·  8f911cb9-2e2a-4e90-87dd-f10f0321a341
+  local     · Córdoba Athletic Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min  5 (1T 5) visitante try          
+    min 12 (1T 12) local     penalty_goal Manuel Gonzalez D'amato
+    min 15 (1T 15) local     card_yellow  Valentin Nicolas Frias Lopez
+    min 24 (1T 24) visitante try          
+    min 27 (1T 27) visitante card_yellow  
+    min 31 (1T 31) local     try          Bautista Martinat Bonetto
+    min 31 (1T 31) local     conversion   Manuel Gonzalez D'amato
+    min 49 (2T 9) visitante try          
+    min 49 (2T 9) visitante conversion   
+    min 51 (2T 11) visitante try          
+    min 53 (2T 13) visitante card_yellow  
+    min 55 (2T 15) visitante try          
+    min 55 (2T 15) visitante conversion   
+    min 64 (2T 24) local     card_yellow  Facundo Zapata
+    min 65 (2T 25) visitante try          
+    min 65 (2T 25) visitante conversion   
+    min 71 (2T 31) local     try          Cristobal Zurro Vanni
+    min 71 (2T 31) local     conversion   Manuel Gonzalez D'amato
+  marcador  · eventos 17-36 · guardado 17-36
+  tries     · 2-6 (guardado —-—)
+  arbitro   · Alejandro Augusto Aguero (guardado: —)
+
+Club Universitario de Córdoba M16 "A" vs Club Palermo Bajo M16 "A" · torneo-cordobes-m16-a · tarjeta 297303  ·  4d84dac7-1e2c-4294-8a02-c30176d1db16
+  local     · Club Universitario de Córdoba M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min  5 (1T 5) local     penalty_goal 
+    min 12 (1T 12) visitante penalty_goal 
+    min 15 (1T 15) visitante try          
+    min 16 (1T 16) visitante conversion   
+    min 17 (1T 17) local     try          
+    min 17 (1T 17) local     conversion   
+    min 23 (1T 23) visitante penalty_goal 
+    min 26 (1T 26) local     conversion   
+    min 26 (1T 26) local     try          
+    min 42 (2T 2) local     try          
+    min 46 (2T 6) visitante penalty_goal 
+    min 52 (2T 12) visitante try          
+    min 53 (2T 13) visitante conversion   
+    min 69 (2T 29) visitante try          
+    min 70 (2T 30) visitante conversion   
+    min 71 (2T 31) local     try          
+    min 71 (2T 31) local     conversion   
+  marcador  · eventos 29-30 · guardado 29-30
+  tries     · 4-3 (guardado —-—)
+  arbitro   · Pablo Daniel Dionicio Benitez (guardado: —)
+
+Jockey Club Córdoba M16 "A" vs Carlos Paz Rugby Club M16 "A" · torneo-cordobes-m16-a · tarjeta 297304  ·  4003c634-a684-42fc-98cc-bc4b94f4887e
+  local     · Jockey Club Córdoba M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Carlos Paz Rugby Club M16 "A" · 19 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min  4 (1T 4) local     try          Ciro Patocchi Arrieta
+    min  7 (1T 7) local     try          Ciro Patocchi Arrieta
+    min  8 (1T 8) local     conversion   Ciro Patocchi Arrieta
+    min 15 (1T 15) local     try          Francisco Alfredo Caparros
+    min 16 (1T 16) local     conversion   Ciro Patocchi Arrieta
+    min 21 (1T 21) local     try          Santino Piasentini
+    min 22 (1T 22) local     conversion   Ciro Patocchi Arrieta
+    min 30 (1T 30) local     try          Genaro Fiori
+    min 31 (1T 31) local     conversion   Ciro Patocchi Arrieta
+    min 44 (2T 4) local     try          Genaro Fiori
+    min 45 (2T 5) local     conversion   Ciro Patocchi Arrieta
+    min 54 (2T 14) local     try          Tomas Castaño
+    min 55 (2T 15) local     conversion   Ciro Patocchi Arrieta
+    min 62 (2T 22) local     try          Ignacio Cugat
+    min 63 (2T 23) local     conversion   Ciro Patocchi Arrieta
+    min 65 (2T 25) visitante try          
+    min 66 (2T 26) visitante conversion   
+    min 75 (2T 35) local     try          Tomas Castaño
+  marcador  · eventos 59-7 · guardado 59-7
+  tries     · 9-1 (guardado —-—)
+  arbitro   · Leonel Sorbera (guardado: —)
+
+Jockey Club de Villa María M16 "A" vs San Martín de Villa María M16 "A" · torneo-cordobes-m16-a · tarjeta 297305  ·  b00a91e3-68eb-499e-9c5b-4ba8a70f92bb
+  local     · Jockey Club de Villa María M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · San Martín de Villa María M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 9
+    min  4 (1T 4) local     try          Vito Milidoni
+    min 23 (1T 23) local     try          Benjamin Giusiano Bonavia
+    min 23 (1T 23) local     conversion   Felipe Acosta Salomón
+    min 60 (2T 20) visitante try          Alejo Bertello
+    min 61 (2T 21) visitante conversion   Tomas Espinosa Marcelloni
+    min 64 (2T 24) local     penalty_goal Felipe Acosta Salomón
+    min 72 (2T 32) local     substitution Benjamin Giusiano Bonavia
+    min 74 (2T 34) local     try          Robertino Jose Gili
+    min 74 (2T 34) local     conversion   Felipe Acosta Salomón
+  marcador  · eventos 22-7 · guardado 22-7
+  tries     · 3-1 (guardado —-—)
+  arbitro   · Emanuel Ordoñez (guardado: —)
+
+Club La Tablada M16 "A" vs Urú Curé Rugby Club M16 "A" · torneo-cordobes-m16-a · tarjeta 297306  ·  1125f857-63f1-4569-bec8-136b45d7aa6a
+  local     · Club La Tablada M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Urú Curé Rugby Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 19
+    min  2 (1T 2) local     try          
+    min  2 (1T 2) local     conversion   
+    min  4 (1T 4) local     try          
+    min  4 (1T 4) local     conversion   
+    min  6 (1T 6) local     conversion   
+    min  6 (1T 6) local     try          
+    min  9 (1T 9) visitante try          Branco Benicio Bailatti Cufré
+    min  9 (1T 9) visitante conversion   Benjamin Compagnucci
+    min 12 (1T 12) local     try          
+    min 12 (1T 12) local     conversion   
+    min 22 (1T 22) visitante try          Bruno Simionati
+    min 22 (1T 22) visitante conversion   Benjamin Compagnucci
+    min 35 (1T 35) local     try          
+    min 41 (2T 1) local     try          
+    min 41 (2T 1) local     conversion   
+    min 51 (2T 11) local     try          
+    min 51 (2T 11) local     conversion   
+    min 54 (2T 14) local     conversion   
+    min 67 (2T 27) local     try          
+  marcador  · eventos 54-14 · guardado 54-14
+  tries     · 8-2 (guardado —-—)
+  arbitro   · Santiago Herrera Albano (guardado: —)
+
+Club La Tablada M16 "A" vs Córdoba Athletic Club M16 "A" · torneo-cordobes-m16-a · tarjeta 298458  ·  3b653534-40c5-422c-bc8e-ba5918f7c4ec
+  local     · Club La Tablada M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 13
+    min 13 (1T 13) visitante try          Bautista Martinat Bonetto
+    min 14 (1T 14) visitante conversion   Bautista Martinat Bonetto
+    min 26 (1T 26) local     try          
+    min 27 (1T 27) local     conversion   
+    min 35 (1T 35) local     try          
+    min 35 (1T 35) local     conversion   
+    min 50 (2T 10) local     try          
+    min 59 (2T 19) visitante try          Nazareno Gabriel Avaca
+    min 63 (2T 23) local     penalty_goal 
+    min 71 (2T 31) local     card_yellow  
+    min 72 (2T 32) visitante card_yellow  Nazareno Gabriel Avaca
+    min 75 (2T 35) local     try          
+    min 75 (2T 35) local     conversion   
+  marcador  · eventos 29-12 · guardado 29-12
+  tries     · 4-2 (guardado —-—)
+  arbitro   · Tomas Elias Gigena Ramallo (guardado: —)
+
+Urú Curé Rugby Club M16 "A" vs Jockey Club de Villa María M16 "A" · torneo-cordobes-m16-a · tarjeta 299673  ·  d198c41d-b4b7-44dc-93e3-138b63088c4b
+  local     · Urú Curé Rugby Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club de Villa María M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min  7 (1T 7) local     try          Augusto Kauer Garcia
+    min  8 (1T 8) local     conversion   Faustino Calleri Mantaras
+    min 17 (1T 17) visitante try          Vito Milidoni
+    min 17 (1T 17) visitante conversion   Felipe Acosta Salomón
+    min 23 (1T 23) visitante try          Vito Milidoni
+    min 25 (1T 25) local     substitution Manuel Maria Yenaropulos Caceres
+    min 27 (1T 27) local     substitution Benjamin Gentile
+    min 28 (1T 28) local     try          Benjamín Madoz Castillo
+    min 30 (1T 30) local     try          Branco Benicio Bailatti Cufré
+    min 31 (1T 31) local     conversion   Gennaro Doratto
+    min 32 (1T 32) visitante try          Vito Milidoni
+    min 32 (1T 32) visitante conversion   Felipe Acosta Salomón
+    min 42 (2T 2) local     substitution Faustino Calleri Mantaras
+    min 47 (2T 7) local     penalty_goal Gennaro Doratto
+    min 52 (2T 12) local     try          Octavio Airaldo
+    min 53 (2T 13) visitante penalty_goal Felipe Acosta Salomón
+    min 58 (2T 18) visitante substitution Vito Milidoni
+    min 58 (2T 18) visitante substitution Benjamín Ferrere
+    min 61 (2T 21) local     try          Augusto Kauer Garcia
+    min 62 (2T 22) visitante substitution Benjamín Bascur Stevenazzi
+    min 69 (2T 29) local     try          Valentino Dominici
+    min 70 (2T 30) local     conversion   Gennaro Doratto
+  marcador  · eventos 39-22 · guardado 39-22
+  tries     · 6-3 (guardado —-—)
+  arbitro   · Carlos Altobelli (guardado: —)
+
+San Martín de Villa María M16 "A" vs Jockey Club Córdoba M16 "A" · torneo-cordobes-m16-a · tarjeta 300951  ·  e6c2d25f-9a8d-4274-ac4c-3cfc1d34b3ed
+  local     · San Martín de Villa María M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M16 "A" · 21 jugadores · 0 con ficha fijada
+  eventos   · 11
+    min 15 (1T 15) local     try          Joaquin Echeverría
+    min 17 (1T 17) visitante try          Facundo Romero Flynn
+    min 20 (1T 20) visitante try          Ciro Patocchi Arrieta
+    min 23 (1T 23) visitante try          Mateo Basile
+    min 27 (1T 27) visitante try          Julian Carrara Gomila
+    min 27 (1T 27) visitante conversion   Bautista Martinez Turrado
+    min 31 (1T 31) visitante conversion   Bautista Martinez Turrado
+    min 31 (1T 31) visitante try          Santiago Oglietti Aguirre
+    min 34 (1T 34) visitante try          Ignacio Blasco
+    min 34 (1T 34) visitante conversion   Bautista Martinez Turrado
+    min 1503 (1T 1503) local     conversion   Tomas Espinosa Marcelloni
+  marcador  · eventos 7-36 · guardado 7-36
+  tries     · 1-6 (guardado —-—)
+  arbitro   · Paloma Vedia (guardado: —)
+
+Carlos Paz Rugby Club M16 "A" vs Club Universitario de Córdoba M16 "A" · torneo-cordobes-m16-a · tarjeta 300952  ·  aeaa5cd1-6e83-4bf5-86a7-26025e36a85c
+  local     · Carlos Paz Rugby Club M16 "A" · 17 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min  5 (1T 5) visitante try          
+    min  8 (1T 8) visitante try          
+    min  8 (1T 8) visitante conversion   
+    min 10 (1T 10) visitante try          
+    min 10 (1T 10) visitante conversion   
+    min 14 (1T 14) visitante try          
+    min 14 (1T 14) visitante conversion   
+    min 23 (1T 23) local     try          
+    min 33 (1T 33) visitante try          
+    min 33 (1T 33) visitante conversion   
+    min 35 (1T 35) visitante try          
+    min 35 (1T 35) visitante conversion   
+    min 42 (2T 2) visitante try          
+    min 42 (2T 2) visitante conversion   
+    min 49 (2T 9) visitante try          
+    min 49 (2T 9) visitante conversion   
+    min 60 (2T 20) visitante try          
+    min 60 (2T 20) visitante conversion   
+    min 68 (2T 28) visitante card_yellow  
+    min 71 (2T 31) visitante try          
+    min 71 (2T 31) visitante conversion   
+    min 73 (2T 33) visitante try          
+    min 73 (2T 33) visitante conversion   
+    min 76 (2T 36) visitante try          
+    min 76 (2T 36) visitante conversion   
+  marcador  · eventos 5-82 · guardado 5-82
+  tries     · 1-12 (guardado —-—)
+  arbitro   · Paula Alejandra Mingot (guardado: —)
+
+Club Palermo Bajo M16 "A" vs Tala Rugby Club M16 "A" · torneo-cordobes-m16-a · tarjeta 300953  ·  92c5d1d7-99a1-4d86-b617-b969d7f4da3a
+  local     · Club Palermo Bajo M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 13
+    min  8 (1T 8) visitante try          
+    min 10 (1T 10) visitante try          
+    min 25 (1T 25) visitante penalty_goal 
+    min 32 (1T 32) visitante try          
+    min 34 (1T 34) local     conversion   
+    min 35 (1T 35) local     try          
+    min 47 (2T 7) local     try          
+    min 48 (2T 8) local     conversion   
+    min 50 (2T 10) visitante try          
+    min 52 (2T 12) visitante try          
+    min 61 (2T 21) visitante penalty_goal 
+    min 73 (2T 33) visitante try          
+    min 74 (2T 34) visitante conversion   
+  marcador  · eventos 14-38 · guardado 14-38
+  tries     · 2-6 (guardado —-—)
+  arbitro   · Daniel Borsarelli (guardado: —)
+
+Córdoba Athletic Club M16 "A" vs Club Palermo Bajo M16 "A" · torneo-cordobes-m16-a · tarjeta 307123  ·  2b8c8c0a-d19c-40de-8dba-98ba4f1ec473
+  local     · Córdoba Athletic Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 13
+    min  8 (1T 8) visitante try          
+    min 13 (1T 13) local     try          Valentin Nicolas Frias Lopez
+    min 14 (1T 14) local     conversion   Bautista Martinat Bonetto
+    min 30 (1T 30) visitante try          
+    min 30 (1T 30) local     try          Gaspar Florensa
+    min 31 (1T 31) visitante conversion   
+    min 31 (1T 31) local     conversion   Bautista Martinat Bonetto
+    min 44 (2T 4) visitante try          
+    min 45 (2T 5) visitante conversion   
+    min 48 (2T 8) local     penalty_goal Bautista Martinat Bonetto
+    min 48 (2T 8) visitante try          
+    min 65 (2T 25) local     try          Juan Pablo Arinci Caffaratti
+    min 72 (2T 32) local     try          Franco Emmanuel Olivetto
+  marcador  · eventos 27-24 · guardado 27-24
+  tries     · 4-4 (guardado —-—)
+  arbitro   · Leonel Sorbera (guardado: —)
+
+Tala Rugby Club M16 "A" vs Carlos Paz Rugby Club M16 "A" · torneo-cordobes-m16-a · tarjeta 307124  ·  419763ce-a671-40fa-90e5-0bd0a16b3785
+  local     · Tala Rugby Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Carlos Paz Rugby Club M16 "A" · 17 jugadores · 0 con ficha fijada
+  eventos   · 8
+    min 10 (1T 10) local     try          
+    min 10 (1T 10) local     conversion   
+    min 24 (1T 24) local     try          
+    min 24 (1T 24) local     conversion   
+    min 40 (2T 0) local     card_yellow  
+    min 49 (2T 9) local     try          
+    min 52 (2T 12) local     try          
+    min 58 (2T 18) local     try          
+  marcador  · eventos 29-0 · guardado 29-0
+  tries     · 5-0 (guardado —-—)
+  arbitro   · Emanuel Maldonado (guardado: —)
+
+Club Universitario de Córdoba M16 "A" vs San Martín de Villa María M16 "A" · torneo-cordobes-m16-a · tarjeta 307125  ·  8d2a0da0-a341-4b91-b1be-001a749629fa
+  local     · Club Universitario de Córdoba M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · San Martín de Villa María M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 29
+    min  7 (1T 7) local     try          
+    min  7 (1T 7) local     conversion   
+    min  9 (1T 9) local     try          
+    min  9 (1T 9) local     conversion   
+    min 10 (1T 10) visitante substitution Agustín Piazza
+    min 19 (1T 19) local     try          
+    min 19 (1T 19) local     conversion   
+    min 26 (1T 26) local     try          
+    min 29 (1T 29) local     try          
+    min 29 (1T 29) local     conversion   
+    min 35 (1T 35) local     try          
+    min 35 (1T 35) local     conversion   
+    min 46 (2T 6) visitante try          Juan Ignacio Celayes
+    min 46 (2T 6) visitante conversion   Tomas Espinosa Marcelloni
+    min 50 (2T 10) visitante substitution Benjamín Cora
+    min 50 (2T 10) visitante substitution Francesco Giménez Calabrese
+    min 51 (2T 11) local     try          
+    min 51 (2T 11) local     conversion   
+    min 60 (2T 20) local     card_yellow  
+    min 62 (2T 22) visitante try          Tomas Espinosa Marcelloni
+    min 62 (2T 22) visitante conversion   Tomas Espinosa Marcelloni
+    min 62 (2T 22) local     try          
+    min 62 (2T 22) local     conversion   
+    min 64 (2T 24) visitante substitution Benjamin Lazos Acevedo
+    min 70 (2T 30) visitante try          Rocco Scotto
+    min 70 (2T 30) visitante conversion   Tomas Espinosa Marcelloni
+    min 70 (2T 30) visitante try          Alejo Bertello
+    min 70 (2T 30) visitante conversion   Tomas Espinosa Marcelloni
+    min 75 (2T 35) visitante card_yellow  Gaston Benjamin Diaz Gontero
+  marcador  · eventos 54-28 · guardado 54-28
+  tries     · 8-4 (guardado —-—)
+  arbitro   · Isaias Sergio Ignacio Ponce (guardado: —)
+
+Jockey Club Córdoba M16 "A" vs Urú Curé Rugby Club M16 "A" · torneo-cordobes-m16-a · tarjeta 307126  ·  c944cea1-d2fb-4f85-94ba-0c73fab9a3fe
+  local     · Jockey Club Córdoba M16 "A" · 21 jugadores · 0 con ficha fijada
+  visitante · Urú Curé Rugby Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min  8 (1T 8) visitante try          Benjamin Gentile
+    min 11 (1T 11) visitante try          Augusto Kauer Garcia
+    min 25 (1T 25) local     try          Ignacio Blasco
+    min 25 (1T 25) local     conversion   Ciro Patocchi Arrieta
+    min 30 (1T 30) local     try          Francisco Alfredo Caparros
+    min 30 (1T 30) local     conversion   Ciro Patocchi Arrieta
+    min 33 (1T 33) visitante card_yellow  Benjamín Madoz Castillo
+    min 42 (2T 2) visitante conversion   Gennaro Doratto
+    min 42 (2T 2) visitante try          Lucas Agustín Bustos Bernal
+    min 52 (2T 12) local     try          Julian Carrara Gomila
+    min 52 (2T 12) local     conversion   Ciro Patocchi Arrieta
+    min 55 (2T 15) local     substitution Octavio Enrique Borrini
+    min 56 (2T 16) local     substitution Facundo Romero Flynn
+    min 58 (2T 18) visitante try          Valentino Dominici
+    min 58 (2T 18) visitante conversion   Gennaro Doratto
+    min 58 (2T 18) local     substitution Santiago Oglietti Aguirre
+    min 63 (2T 23) visitante penalty_goal Gennaro Doratto
+    min 64 (2T 24) local     substitution Ignacio Blasco
+    min 74 (2T 34) visitante card_yellow  Gennaro Doratto
+    min 74 (2T 34) local     substitution Alfonso Heredia Carrara
+    min 74 (2T 34) local     try          Francisco Alfredo Caparros
+    min 74 (2T 34) local     conversion   Ciro Patocchi Arrieta
+  marcador  · eventos 28-27 · guardado 28-27
+  tries     · 4-4 (guardado —-—)
+  arbitro   · Tomas Elias Gigena Ramallo (guardado: —)
+
+Jockey Club de Villa María M16 "A" vs Club La Tablada M16 "A" · torneo-cordobes-m16-a · tarjeta 307127  ·  1c407bc2-2446-444b-ad49-de2685a47737
+  local     · Jockey Club de Villa María M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 11
+    min  8 (1T 8) visitante penalty_goal 
+    min 18 (1T 18) visitante try          
+    min 19 (1T 19) visitante conversion   
+    min 24 (1T 24) local     try          Vito Milidoni
+    min 24 (1T 24) local     conversion   Felipe Acosta Salomón
+    min 50 (2T 10) local     try          Mauricio Trillini
+    min 50 (2T 10) local     conversion   Felipe Acosta Salomón
+    min 66 (2T 26) visitante try          
+    min 67 (2T 27) visitante conversion   
+    min 71 (2T 31) local     try          Vito Milidoni
+    min 71 (2T 31) local     conversion   Felipe Acosta Salomón
+  marcador  · eventos 21-17 · guardado 21-17
+  tries     · 3-2 (guardado —-—)
+  arbitro   · Carlos Prieto (guardado: —)
+
+Jockey Club de Villa María M16 "A" vs Córdoba Athletic Club M16 "A" · torneo-cordobes-m16-a · tarjeta 308289  ·  a2b83ea7-c9ac-47ea-b4ba-db63001b0244
+  local     · Jockey Club de Villa María M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 12
+    min  7 (1T 7) local     try          Pedro Belloccio
+    min 10 (1T 10) visitante try          Felipe Hak
+    min 26 (1T 26) local     try          Leon Gallego Cance
+    min 43 (2T 3) local     try          Juan Simon Ghella
+    min 43 (2T 3) local     conversion   Felipe Acosta Salomón
+    min 49 (2T 9) visitante try          Stefano Faccio Vera
+    min 50 (2T 10) visitante conversion   Manuel Gonzalez D'amato
+    min 53 (2T 13) visitante try          Manuel Gonzalez D'amato
+    min 53 (2T 13) visitante conversion   Manuel Gonzalez D'amato
+    min 57 (2T 17) local     try          Benjamin Giusiano Bonavia
+    min 57 (2T 17) visitante card_yellow  Facundo Zapata
+    min 61 (2T 21) local     substitution Pedro Salomon
+  marcador  · eventos 22-19 · guardado 22-19
+  tries     · 4-3 (guardado —-—)
+  arbitro   · Emanuel Ordoñez (guardado: —)
+
+Club La Tablada M16 "A" vs Jockey Club Córdoba M16 "A" · torneo-cordobes-m16-a · tarjeta 308290  ·  ecf0f712-b73c-43ed-92fa-58a7d1c23e2f
+  local     · Club La Tablada M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M16 "A" · 22 jugadores · 0 con ficha fijada
+  eventos   · 19
+    min  8 (1T 8) local     penalty_goal 
+    min 22 (1T 22) visitante try          Alfonso Heredia Carrara
+    min 22 (1T 22) visitante conversion   Ciro Patocchi Arrieta
+    min 26 (1T 26) local     try          
+    min 26 (1T 26) local     conversion   
+    min 33 (1T 33) visitante try          Tomas Castaño
+    min 44 (2T 4) visitante substitution Constantino Marchiaro
+    min 55 (2T 15) visitante try          Santino Piasentini
+    min 55 (2T 15) visitante conversion   Ciro Patocchi Arrieta
+    min 60 (2T 20) visitante try          Francisco Alfredo Caparros
+    min 60 (2T 20) visitante conversion   Ciro Patocchi Arrieta
+    min 65 (2T 25) local     try          
+    min 65 (2T 25) local     conversion   
+    min 67 (2T 27) visitante substitution Bautista Martinez Turrado
+    min 68 (2T 28) visitante substitution Mateo Basile
+    min 72 (2T 32) local     penalty_goal 
+    min 72 (2T 32) visitante card_yellow  Lorenzo Staricco Tosas
+    min 75 (2T 35) local     try          
+    min 75 (2T 35) local     conversion   
+  marcador  · eventos 27-26 · guardado 27-26
+  tries     · 3-4 (guardado —-—)
+  arbitro   · Francisco Romero Brondino (guardado: —)
+
+Urú Curé Rugby Club M16 "A" vs Club Universitario de Córdoba M16 "A" · torneo-cordobes-m16-a · tarjeta 308291  ·  f50c5eba-7655-458c-8fb0-9864ff7dbc10
+  local     · Urú Curé Rugby Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 15
+    min  6 (1T 6) visitante try          
+    min  6 (1T 6) visitante conversion   
+    min  7 (1T 7) local     try          Valentino Dominici
+    min 13 (1T 13) local     penalty_goal Lucas Agustín Bustos Bernal
+    min 15 (1T 15) visitante try          
+    min 15 (1T 15) visitante conversion   
+    min 20 (1T 20) local     penalty_goal Lucas Agustín Bustos Bernal
+    min 31 (1T 31) local     penalty_goal Lucas Agustín Bustos Bernal
+    min 40 (2T 0) local     substitution Gerónimo Varea
+    min 46 (2T 6) local     penalty_goal Gennaro Doratto
+    min 48 (2T 8) local     penalty_goal Gennaro Doratto
+    min 52 (2T 12) visitante card_yellow  
+    min 61 (2T 21) local     try          Branco Benicio Bailatti Cufré
+    min 62 (2T 22) local     conversion   Gennaro Doratto
+    min 65 (2T 25) local     card_yellow  Tomás Lautaro Urbano
+  marcador  · eventos 27-14 · guardado 27-14
+  tries     · 2-2 (guardado —-—)
+  arbitro   · Cristian Mauro Quiles Buteler (guardado: —)
+
+San Martín de Villa María M16 "A" vs Tala Rugby Club M16 "A" · torneo-cordobes-m16-a · tarjeta 308292  ·  bff092f9-bd85-45fd-9efd-0ba853711396
+  local     · San Martín de Villa María M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 21-38
+  tries     · 0-0 (guardado —-—)
+  arbitro   · Sergio Zbura (guardado: —)
+
+Carlos Paz Rugby Club M16 "A" vs Club Palermo Bajo M16 "A" · torneo-cordobes-m16-a · tarjeta 308293  ·  a4b9e668-5246-4600-b132-a547943bdc42
+  local     · Carlos Paz Rugby Club M16 "A" · 17 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo M16 "A" · 21 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min  2 (1T 2) visitante try          
+    min  5 (1T 5) visitante try          
+    min  6 (1T 6) visitante conversion   
+    min 11 (1T 11) visitante try          
+    min 21 (1T 21) visitante try          
+    min 24 (1T 24) visitante try          
+    min 25 (1T 25) visitante conversion   
+    min 27 (1T 27) local     card_yellow  
+    min 30 (1T 30) visitante try          
+    min 31 (1T 31) visitante conversion   
+    min 38 (1T 38) visitante try          
+    min 38 (1T 38) visitante conversion   
+    min 41 (2T 1) visitante try          
+    min 42 (2T 2) visitante conversion   
+    min 46 (2T 6) local     injury       
+    min 47 (2T 7) visitante try          
+    min 48 (2T 8) visitante conversion   
+    min 68 (2T 28) visitante try          
+    min 69 (2T 29) visitante conversion   
+    min 71 (2T 31) visitante try          
+    min 72 (2T 32) visitante conversion   
+    min 75 (2T 35) visitante try          
+    min 75 (2T 35) visitante injury       
+    min 76 (2T 36) visitante conversion   
+  marcador  · eventos 0-78 · guardado 0-78
+  tries     · 0-12 (guardado —-—)
+  arbitro   · Patricio Verdun Sheridan (guardado: —)
+
+Tala Rugby Club M16 "A" vs Urú Curé Rugby Club M16 "A" · torneo-cordobes-m16-a · tarjeta 308664  ·  7473aa1c-1f92-4bcf-a0c4-7d4d0e064d57
+  local     · Tala Rugby Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Urú Curé Rugby Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 30
+    min  2 (1T 2) local     try          
+    min  2 (1T 2) local     conversion   
+    min  4 (1T 4) local     try          
+    min  7 (1T 7) local     try          
+    min  7 (1T 7) local     conversion   
+    min 12 (1T 12) local     try          
+    min 14 (1T 14) local     try          
+    min 14 (1T 14) local     conversion   
+    min 20 (1T 20) local     try          
+    min 20 (1T 20) local     conversion   
+    min 23 (1T 23) visitante card_yellow  
+    min 27 (1T 27) local     try          
+    min 27 (1T 27) local     conversion   
+    min 35 (1T 35) local     try          
+    min 35 (1T 35) local     conversion   
+    min 46 (2T 6) local     try          
+    min 46 (2T 6) local     conversion   
+    min 48 (2T 8) local     try          
+    min 48 (2T 8) local     conversion   
+    min 49 (2T 9) visitante substitution Sacha Lautaro Palacio Romero
+    min 55 (2T 15) visitante substitution David Nicolas Junker
+    min 57 (2T 17) local     try          
+    min 57 (2T 17) local     conversion   
+    min 60 (2T 20) visitante substitution Pedro Palacios Pastre
+    min 60 (2T 20) local     try          
+    min 62 (2T 22) local     try          
+    min 70 (2T 30) visitante card_yellow  Santiago Sánchez Busso
+    min 74 (2T 34) local     try          
+    min 74 (2T 34) local     conversion   
+    min 74 (2T 34) local     conversion   
+  marcador  · eventos 92-0 · guardado 92-0
+  tries     · 14-0 (guardado —-—)
+  arbitro   · Francisco Romero Brondino (guardado: —)
+
+Club Universitario de Córdoba M16 "A" vs Club La Tablada M16 "A" · torneo-cordobes-m16-a · tarjeta 308665  ·  0c2b6c5a-f330-49df-841e-2bc287cac74d
+  local     · Club Universitario de Córdoba M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 15
+    min 10 (1T 10) local     penalty_goal 
+    min 15 (1T 15) visitante try          
+    min 15 (1T 15) visitante conversion   
+    min 25 (1T 25) local     penalty_goal 
+    min 25 (1T 25) visitante try          
+    min 25 (1T 25) visitante conversion   
+    min 35 (1T 35) local     try          
+    min 43 (2T 3) local     penalty_goal 
+    min 52 (2T 12) local     try          
+    min 52 (2T 12) local     conversion   
+    min 59 (2T 19) visitante penalty_goal 
+    min 60 (2T 20) visitante try          
+    min 60 (2T 20) visitante conversion   
+    min 65 (2T 25) visitante try          
+    min 65 (2T 25) visitante conversion   
+  marcador  · eventos 21-31 · guardado 21-31
+  tries     · 2-4 (guardado —-—)
+  arbitro   · Pablo Daniel Dionicio Benitez (guardado: —)
+
+Jockey Club Córdoba M16 "A" vs Jockey Club de Villa María M16 "A" · torneo-cordobes-m16-a · tarjeta 308666  ·  4176b71f-2ba2-41f2-a690-45434bed9765
+  local     · Jockey Club Córdoba M16 "A" · 21 jugadores · 0 con ficha fijada
+  visitante · Jockey Club de Villa María M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min  7 (1T 7) local     try          Julian Carrara Gomila
+    min 12 (1T 12) local     conversion   Ciro Patocchi Arrieta
+    min 12 (1T 12) local     try          Alfonso Heredia Carrara
+    min 20 (1T 20) visitante card_yellow  Robertino Jose Gili
+    min 20 (1T 20) local     card_yellow  Tomas Castaño
+    min 20 (1T 20) local     try          Ciro Patocchi Arrieta
+    min 26 (1T 26) visitante try          Leon Gallego Cance
+    min 28 (1T 28) local     try          Ciro Patocchi Arrieta
+    min 28 (1T 28) local     conversion   Ciro Patocchi Arrieta
+    min 30 (1T 30) visitante card_yellow  Benjamín Bascur Stevenazzi
+    min 32 (1T 32) local     try          Francisco Alfredo Caparros
+    min 44 (2T 4) local     try          Tomas Castaño
+    min 44 (2T 4) local     conversion   Ciro Patocchi Arrieta
+    min 45 (2T 5) visitante substitution Benjamín Ferrere
+    min 45 (2T 5) visitante substitution Pedro Salomon
+    min 50 (2T 10) local     card_yellow  Genaro Fiori
+    min 57 (2T 17) visitante try          Juan Simon Ghella
+    min 60 (2T 20) local     substitution Santiago Oglietti Aguirre
+    min 63 (2T 23) local     substitution Facundo Romero Flynn
+    min 63 (2T 23) local     substitution Lucas Vicente Inaudi
+    min 65 (2T 25) visitante try          Vito Milidoni
+    min 65 (2T 25) visitante conversion   Felipe Acosta Salomón
+    min 73 (2T 33) visitante substitution Benjamín Bascur Stevenazzi
+    min 73 (2T 33) visitante substitution Agustín Alassia
+  marcador  · eventos 36-17 · guardado 36-17
+  tries     · 6-3 (guardado —-—)
+  arbitro   · Ángeles Murua (guardado: —)
+
+Jockey Club Córdoba M16 "A" vs Córdoba Athletic Club M16 "A" · torneo-cordobes-m16-a · tarjeta 309576  ·  5ff1ad75-bd81-47e6-ad5a-a3e9178a70e9
+  local     · Jockey Club Córdoba M16 "A" · 22 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min 20 (1T 20) local     try          Santino Piasentini
+    min 26 (1T 26) visitante try          Valentin Nicolas Frias Lopez
+    min 27 (1T 27) visitante conversion   Bautista Martinat Bonetto
+    min 36 (1T 36) visitante penalty_goal Bautista Martinat Bonetto
+    min 45 (2T 5) visitante substitution Camilo Vitanza Frank
+    min 45 (2T 5) visitante substitution Tiziano Bustos Rodriguez
+    min 45 (2T 5) visitante substitution Valentin Nicolas Frias Lopez
+    min 45 (2T 5) visitante substitution Tomas Cardona Allende
+    min 45 (2T 5) visitante substitution Franco Emmanuel Olivetto
+    min 53 (2T 13) local     card_yellow  Matias Velazquez Cano
+    min 53 (2T 13) visitante card_yellow  Valentino Chiappara
+    min 56 (2T 16) visitante try          Gaspar Florensa
+    min 62 (2T 22) visitante substitution Lucas Nahuel Velez
+    min 62 (2T 22) visitante substitution Gaspar Florensa
+    min 70 (2T 30) visitante try          Stefano Faccio Vera
+    min 70 (2T 30) visitante substitution Stefano Faccio Vera
+    min 71 (2T 31) visitante conversion   Bautista Martinat Bonetto
+  marcador  · eventos 5-22 · guardado 5-22
+  tries     · 1-3 (guardado —-—)
+  arbitro   · Leonel Sorbera (guardado: —)
+
+San Martín de Villa María M16 "A" vs Carlos Paz Rugby Club M16 "A" · torneo-cordobes-m16-a · tarjeta 309577  ·  4e64e104-9a74-4fd3-b573-5d4c4e1ce576
+  local     · San Martín de Villa María M16 "A" · 15 jugadores · 0 con ficha fijada
+  visitante · Carlos Paz Rugby Club M16 "A" · 17 jugadores · 0 con ficha fijada
+  eventos   · 14
+    min  5 (1T 5) visitante try          
+    min  5 (1T 5) visitante conversion   
+    min  8 (1T 8) local     try          Tomas Espinosa Marcelloni
+    min 14 (1T 14) local     try          Tomas Espinosa Marcelloni
+    min 15 (1T 15) local     try          Tomas Espinosa Marcelloni
+    min 15 (1T 15) local     conversion   Tomas Espinosa Marcelloni
+    min 23 (1T 23) local     try          Emanuel Arguello
+    min 28 (1T 28) local     try          Valentino Rossi
+    min 45 (2T 5) local     substitution Albano Rivarola
+    min 64 (2T 24) local     conversion   Tomas Espinosa Marcelloni
+    min 67 (2T 27) visitante try          
+    min 67 (2T 27) visitante conversion   
+    min 69 (2T 29) local     conversion   Rocco Scotto
+    min 73 (2T 33) local     card_yellow  Tomas Espinosa Marcelloni
+  marcador  · eventos 31-14 · guardado 31-14
+  tries     · 5-2 (guardado —-—)
+  arbitro   · Emanuel Maldonado (guardado: —)
+
+Jockey Club de Villa María M16 "A" vs Club Universitario de Córdoba M16 "A" · torneo-cordobes-m16-a · tarjeta 309578  ·  b991525b-d0e2-4421-969c-716ae562d75f
+  local     · Jockey Club de Villa María M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 11
+    min 18 (1T 18) visitante conversion   
+    min 18 (1T 18) visitante try          
+    min 31 (1T 31) local     try          Leon Gallego Cance
+    min 31 (1T 31) local     conversion   Felipe Acosta Salomón
+    min 35 (1T 35) visitante try          
+    min 35 (1T 35) visitante conversion   
+    min 49 (2T 9) local     card_yellow  Mauricio Trillini
+    min 51 (2T 11) visitante try          
+    min 51 (2T 11) visitante conversion   
+    min 54 (2T 14) visitante try          
+    min 67 (2T 27) local     try          Vito Milidoni
+  marcador  · eventos 12-26 · guardado 12-26
+  tries     · 2-4 (guardado —-—)
+  arbitro   · Herrera Santiago . (No Oficial) (guardado: —)
+
+Club La Tablada M16 "A" vs Tala Rugby Club M16 "A" · torneo-cordobes-m16-a · tarjeta 309579  ·  1de62ff5-5118-4737-afce-845020421f9f
+  local     · Club La Tablada M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 12
+    min  6 (1T 6) visitante try          
+    min  6 (1T 6) visitante conversion   
+    min 22 (1T 22) visitante try          
+    min 22 (1T 22) visitante conversion   
+    min 56 (2T 16) local     try          
+    min 56 (2T 16) local     conversion   
+    min 60 (2T 20) visitante try          
+    min 60 (2T 20) visitante conversion   
+    min 65 (2T 25) visitante try          
+    min 65 (2T 25) visitante conversion   
+    min 75 (2T 35) local     try          
+    min 75 (2T 35) local     conversion   
+  marcador  · eventos 14-28 · guardado 14-28
+  tries     · 2-4 (guardado —-—)
+  arbitro   · Francisco Romero Brondino (guardado: —)
+
+Urú Curé Rugby Club M16 "A" vs Club Palermo Bajo M16 "A" · torneo-cordobes-m16-a · tarjeta 309580  ·  288cefc0-8eeb-4bc5-8e02-7d97dc132b10
+  local     · Urú Curé Rugby Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo M16 "A" · 18 jugadores · 0 con ficha fijada
+  eventos   · 9
+    min 16 (1T 16) visitante try          
+    min 25 (1T 25) local     try          Manuel Maria Yenaropulos Caceres
+    min 46 (2T 6) local     try          Augusto Kauer Garcia
+    min 50 (2T 10) local     penalty_goal Gennaro Doratto
+    min 60 (2T 20) visitante try          
+    min 61 (2T 21) visitante conversion   
+    min 74 (2T 34) local     penalty_goal Gennaro Doratto
+    min 75 (2T 35) local     card_yellow  Dante Baez Simonassi
+    min 78 (2T 38) visitante try          
+  marcador  · eventos 16-17 · guardado 16-17
+  tries     · 2-3 (guardado —-—)
+  arbitro   · Nazarena Yael Gigena Ramallo (guardado: —)
+
+Córdoba Athletic Club M16 "A" vs San Martín de Villa María M16 "A" · torneo-cordobes-m16-a · tarjeta 310333  ·  f37062fc-f3d1-4dec-bef4-8fbb24502d5d
+  local     · Córdoba Athletic Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · San Martín de Villa María M16 "A" · 19 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min  1 (1T 1) local     try          Gaspar Florensa
+    min  2 (1T 2) local     conversion   Manuel Gonzalez D'amato
+    min  8 (1T 8) local     try          Bautista Martinat Bonetto
+    min  9 (1T 9) local     conversion   Manuel Gonzalez D'amato
+    min 25 (1T 25) local     try          Gaspar Florensa
+    min 26 (1T 26) local     conversion   Manuel Gonzalez D'amato
+    min 29 (1T 29) local     try          Manuel Gonzalez D'amato
+    min 30 (1T 30) local     conversion   Manuel Gonzalez D'amato
+    min 32 (1T 32) local     try          Gaspar Florensa
+    min 35 (1T 35) local     try          Stefano Faccio Vera
+    min 36 (1T 36) local     conversion   Manuel Gonzalez D'amato
+    min 49 (2T 9) local     substitution Nazareno Gabriel Avaca
+    min 49 (2T 9) local     try          Franco Emmanuel Olivetto
+    min 50 (2T 10) local     conversion   Manuel Gonzalez D'amato
+    min 52 (2T 12) local     try          Franco Emmanuel Olivetto
+    min 53 (2T 13) local     substitution Fausto López Grimaut
+    min 53 (2T 13) local     conversion   Manuel Gonzalez D'amato
+    min 61 (2T 21) local     try          Gaspar Florensa
+    min 64 (2T 24) local     try          Stefano Faccio Vera
+    min 65 (2T 25) local     conversion   Manuel Gonzalez D'amato
+    min 68 (2T 28) local     try          Manuel Gonzalez D'amato
+    min 69 (2T 29) local     conversion   Manuel Gonzalez D'amato
+    min 70 (2T 30) visitante try          Rocco Scotto
+    min 71 (2T 31) visitante conversion   Tomas Espinosa Marcelloni
+  marcador  · eventos 73-7 · guardado 73-7
+  tries     · 11-1 (guardado —-—)
+  arbitro   · Daiana Del Milagro Cesaretti (guardado: —)
+
+Carlos Paz Rugby Club M16 "A" vs Urú Curé Rugby Club M16 "A" · torneo-cordobes-m16-a · tarjeta 310334  ·  70cc227c-964f-43ad-b959-99259c848d96
+  local     · Carlos Paz Rugby Club M16 "A" · 17 jugadores · 0 con ficha fijada
+  visitante · Urú Curé Rugby Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 15
+    min  1 (1T 1) visitante try          Faustino Calleri Mantaras
+    min  2 (1T 2) visitante conversion   Gennaro Doratto
+    min  9 (1T 9) visitante try          Branco Benicio Bailatti Cufré
+    min 15 (1T 15) local     try          
+    min 15 (1T 15) visitante try          Augusto Pavetto
+    min 16 (1T 16) visitante try          Branco Benicio Bailatti Cufré
+    min 20 (1T 20) local     try          
+    min 25 (1T 25) visitante try          Valentino Dominici
+    min 30 (1T 30) visitante try          Victorino Domanski
+    min 45 (2T 5) visitante try          Branco Benicio Bailatti Cufré
+    min 50 (2T 10) visitante try          Valentino Dominici
+    min 60 (2T 20) local     try          
+    min 60 (2T 20) visitante try          Branco Benicio Bailatti Cufré
+    min 65 (2T 25) visitante try          Bruno Simionati
+    min 75 (2T 35) visitante injury       
+  marcador  · eventos 15-52 · guardado 15-52
+  tries     · 3-10 (guardado —-—)
+  arbitro   · Emanuel Maldonado (guardado: —)
+
+Club Palermo Bajo M16 "A" vs Club La Tablada M16 "A" · torneo-cordobes-m16-a · tarjeta 310335  ·  d9b385aa-e178-4d46-a067-a0916f8eb957
+  local     · Club Palermo Bajo M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 12
+    min  4 (1T 4) local     try          
+    min 21 (1T 21) visitante try          
+    min 21 (1T 21) visitante penalty_goal 
+    min 21 (1T 21) visitante try          
+    min 21 (1T 21) visitante conversion   
+    min 21 (1T 21) visitante try          
+    min 21 (1T 21) visitante conversion   
+    min 44 (2T 4) local     try          
+    min 54 (2T 14) local     try          
+    min 70 (2T 30) local     try          
+    min 71 (2T 31) local     conversion   
+    min 75 (2T 35) local     penalty_goal 
+  marcador  · eventos 25-22 · guardado 25-22
+  tries     · 4-3 (guardado —-—)
+  arbitro   · Lucas Gaston Dopaso (guardado: —)
+
+Tala Rugby Club M16 "A" vs Jockey Club de Villa María M16 "A" · torneo-cordobes-m16-a · tarjeta 310336  ·  e6ec0a89-3184-4b74-a304-e51196155d62
+  local     · Tala Rugby Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club de Villa María M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min  4 (1T 4) local     try          
+    min  4 (1T 4) local     conversion   
+    min 11 (1T 11) visitante try          Leon Gallego Cance
+    min 11 (1T 11) visitante conversion   Felipe Acosta Salomón
+    min 13 (1T 13) local     try          
+    min 13 (1T 13) local     conversion   
+    min 20 (1T 20) local     try          
+    min 22 (1T 22) local     try          
+    min 22 (1T 22) local     conversion   
+    min 31 (1T 31) local     try          
+    min 34 (1T 34) local     try          
+    min 34 (1T 34) local     conversion   
+    min 42 (2T 2) local     try          
+    min 42 (2T 2) local     conversion   
+    min 45 (2T 5) local     try          
+    min 45 (2T 5) local     conversion   
+    min 62 (2T 22) local     try          
+    min 62 (2T 22) local     conversion   
+    min 74 (2T 34) local     try          
+    min 74 (2T 34) local     conversion   
+  marcador  · eventos 66-7 · guardado 66-7
+  tries     · 10-1 (guardado —-—)
+  arbitro   · Leonel Sorbera (guardado: —)
+
+Club Universitario de Córdoba M16 "A" vs Jockey Club Córdoba M16 "A" · torneo-cordobes-m16-a · tarjeta 310337  ·  6efd086e-cb03-42d6-bf9c-ddbb358f4729
+  local     · Club Universitario de Córdoba M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 19
+    min  5 (1T 5) local     try          
+    min  5 (1T 5) local     conversion   
+    min 30 (1T 30) local     try          
+    min 30 (1T 30) local     conversion   
+    min 33 (1T 33) visitante try          Tomas Castaño
+    min 35 (1T 35) local     penalty_goal 
+    min 40 (2T 0) visitante substitution Matias Velazquez Cano
+    min 42 (2T 2) visitante try          Lucas Vicente Inaudi
+    min 42 (2T 2) visitante conversion   Bautista Martinez Turrado
+    min 45 (2T 5) local     penalty_goal 
+    min 50 (2T 10) local     try          
+    min 54 (2T 14) visitante try          Octavio Enrique Borrini
+    min 60 (2T 20) local     card_yellow  
+    min 64 (2T 24) visitante try          Francisco Alfredo Caparros
+    min 64 (2T 24) visitante conversion   Bautista Martinez Turrado
+    min 69 (2T 29) visitante substitution Valentino Plaate
+    min 69 (2T 29) local     penalty_goal 
+    min 75 (2T 35) visitante try          Lucas Vicente Inaudi
+    min 75 (2T 35) visitante conversion   Bautista Martinez Turrado
+  marcador  · eventos 28-31 · guardado 28-31
+  tries     · 3-5 (guardado —-—)
+  arbitro   · Javier Sorbera Ferrer (guardado: —)
+
+Club Universitario de Córdoba M16 "A" vs Córdoba Athletic Club M16 "A" · torneo-cordobes-m16-a · tarjeta 311558  ·  ad82d7b5-320a-4884-8c2b-1e708f70f277
+  local     · Club Universitario de Córdoba M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 13
+    min  7 (1T 7) local     try          
+    min 32 (1T 32) visitante try          Lautaro Gabriel Flores
+    min 33 (1T 33) visitante conversion   Bautista Martinat Bonetto
+    min 46 (2T 6) visitante substitution Tiziano Bustos Rodriguez
+    min 46 (2T 6) visitante substitution Valentin Nicolas Frias Lopez
+    min 49 (2T 9) visitante try          Manuel Gonzalez D'amato
+    min 49 (2T 9) visitante conversion   Bautista Martinat Bonetto
+    min 54 (2T 14) visitante substitution Felipe Hak
+    min 57 (2T 17) visitante penalty_goal Bautista Martinat Bonetto
+    min 61 (2T 21) visitante substitution Fausto López Grimaut
+    min 61 (2T 21) visitante try          Bautista Guzman Rodriguez
+    min 74 (2T 34) visitante try          Nazareno Gabriel Avaca
+    min 74 (2T 34) visitante conversion   Bautista Martinat Bonetto
+  marcador  · eventos 5-29 · guardado 5-29
+  tries     · 1-4 (guardado —-—)
+  arbitro   · Leonel Sorbera (guardado: —)
+
+Tala Rugby Club M16 "A" vs Jockey Club Córdoba M16 "A" · torneo-cordobes-m16-a · tarjeta 311559  ·  e8169a4f-4bc7-40a7-865c-2b0fb1df2fe0
+  local     · Tala Rugby Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M16 "A" · 21 jugadores · 0 con ficha fijada
+  eventos   · 30
+    min 10 (1T 10) local     try          
+    min 10 (1T 10) local     conversion   
+    min 14 (1T 14) visitante substitution Santiago Oglietti Aguirre
+    min 14 (1T 14) local     try          
+    min 14 (1T 14) local     conversion   
+    min 20 (1T 20) visitante substitution Federico Robledo Saracho
+    min 20 (1T 20) visitante try          Alfonso Heredia Carrara
+    min 20 (1T 20) visitante conversion   Ciro Patocchi Arrieta
+    min 22 (1T 22) local     try          
+    min 22 (1T 22) local     conversion   
+    min 25 (1T 25) visitante try          Bautista Diaz Senn
+    min 25 (1T 25) visitante conversion   Ciro Patocchi Arrieta
+    min 28 (1T 28) local     try          
+    min 28 (1T 28) local     conversion   
+    min 34 (1T 34) local     try          
+    min 40 (2T 0) visitante substitution Octavio Enrique Borrini
+    min 42 (2T 2) local     card_yellow  
+    min 45 (2T 5) visitante try          Francisco Alfredo Caparros
+    min 45 (2T 5) visitante conversion   Ciro Patocchi Arrieta
+    min 52 (2T 12) local     try          
+    min 52 (2T 12) local     conversion   
+    min 62 (2T 22) visitante conversion   Ciro Patocchi Arrieta
+    min 62 (2T 22) visitante try          Tomas Castaño
+    min 64 (2T 24) local     try          
+    min 69 (2T 29) visitante conversion   Ciro Patocchi Arrieta
+    min 69 (2T 29) visitante try          Tomas Agustín Aguirre Martin
+    min 72 (2T 32) local     try          
+    min 72 (2T 32) local     conversion   
+    min 74 (2T 34) visitante try          Alfonso Heredia Carrara
+    min 74 (2T 34) visitante conversion   Ciro Patocchi Arrieta
+  marcador  · eventos 52-42 · guardado 52-42
+  tries     · 8-6 (guardado —-—)
+  arbitro   · Arturo Martinez (guardado: —)
+
+Club Palermo Bajo M16 "A" vs Jockey Club de Villa María M16 "A" · torneo-cordobes-m16-a · tarjeta 311560  ·  f2f050c8-a9a8-4b6e-93d8-0057ada5b03a
+  local     · Club Palermo Bajo M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club de Villa María M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 11
+    min 14 (1T 14) local     try          
+    min 15 (1T 15) local     conversion   
+    min 20 (1T 20) local     try          
+    min 34 (1T 34) visitante try          Leon Gallego Cance
+    min 43 (2T 3) visitante try          Vito Milidoni
+    min 43 (2T 3) visitante conversion   Felipe Acosta Salomón
+    min 46 (2T 6) visitante card_yellow  Vito Milidoni
+    min 62 (2T 22) visitante try          Vito Milidoni
+    min 62 (2T 22) visitante conversion   Felipe Acosta Salomón
+    min 66 (2T 26) local     try          
+    min 67 (2T 27) local     conversion   
+  marcador  · eventos 19-19 · guardado 19-19
+  tries     · 3-3 (guardado —-—)
+  arbitro   · Martin Leiva (guardado: —)
+
+San Martín de Villa María M16 "A" vs Urú Curé Rugby Club M16 "A" · torneo-cordobes-m16-a · tarjeta 311562  ·  2c3c515b-cc7b-40f2-9d1b-489019fa49df
+  local     · San Martín de Villa María M16 "A" · 20 jugadores · 0 con ficha fijada
+  visitante · Urú Curé Rugby Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min  1 (1T 1) visitante try          Branco Benicio Bailatti Cufré
+    min  2 (1T 2) visitante conversion   Gennaro Doratto
+    min 13 (1T 13) visitante try          Branco Benicio Bailatti Cufré
+    min 14 (1T 14) visitante conversion   Gennaro Doratto
+    min 21 (1T 21) local     try          Alejo Bertello
+    min 42 (2T 2) visitante try          Gennaro Doratto
+    min 43 (2T 3) visitante conversion   Gennaro Doratto
+    min 45 (2T 5) local     substitution Alejo Verea Guzman
+    min 46 (2T 6) visitante substitution Gerónimo Varea
+    min 52 (2T 12) local     try          Bautista Españon Soria
+    min 52 (2T 12) local     conversion   Tomas Espinosa Marcelloni
+    min 54 (2T 14) visitante try          Valentino Dominici
+    min 55 (2T 15) visitante substitution Facundo Larrieu
+    min 55 (2T 15) visitante conversion   Gennaro Doratto
+    min 57 (2T 17) visitante substitution Benjamín Madoz Castillo
+    min 58 (2T 18) local     try          Alejo Bertello
+    min 63 (2T 23) visitante try          David Nicolas Junker
+    min 64 (2T 24) visitante conversion   Gennaro Doratto
+    min 67 (2T 27) visitante try          Valentino Dominici
+    min 67 (2T 27) visitante conversion   Gennaro Doratto
+    min 68 (2T 28) visitante substitution Augusto Kauer Garcia
+    min 69 (2T 29) local     substitution Bautista Españon Soria
+    min 71 (2T 31) visitante substitution Faustino Calleri Mantaras
+    min 71 (2T 31) visitante substitution Lucas Agustín Bustos Bernal
+    min 75 (2T 35) local     try          Alejo Bertello
+  marcador  · eventos 22-42 · guardado 22-42
+  tries     · 4-6 (guardado —-—)
+  arbitro   · Franco Zarate (guardado: —)
+
+Córdoba Athletic Club M16 "A" vs Urú Curé Rugby Club M16 "A" · torneo-cordobes-m16-a · tarjeta 312566  ·  4fe9e93b-3ea7-46d8-98c3-d0ed33ee4895
+  local     · Córdoba Athletic Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Urú Curé Rugby Club M16 "A" · 21 jugadores · 0 con ficha fijada
+  eventos   · 31
+    min  5 (1T 5) visitante try          Bruno Simionati
+    min  6 (1T 6) visitante conversion   Gennaro Doratto
+    min  8 (1T 8) local     try          Bautista Martinat Bonetto
+    min  9 (1T 9) local     conversion   Bautista Martinat Bonetto
+    min 12 (1T 12) visitante penalty_goal Gennaro Doratto
+    min 17 (1T 17) local     try          Manuel Gonzalez D'amato
+    min 26 (1T 26) visitante try          Bruno Simionati
+    min 31 (1T 31) local     try          Lautaro Gabriel Flores
+    min 31 (1T 31) visitante substitution Benjamín Madoz Castillo
+    min 32 (1T 32) local     conversion   Bautista Martinat Bonetto
+    min 34 (1T 34) visitante try          Branco Benicio Bailatti Cufré
+    min 35 (1T 35) visitante conversion   Gennaro Doratto
+    min 40 (2T 0) local     substitution Camilo Vitanza Frank
+    min 40 (2T 0) local     substitution Valentin Nicolas Frias Lopez
+    min 40 (2T 0) local     substitution Juan Pablo Arinci Caffaratti
+    min 45 (2T 5) local     substitution Tomas Cardona Allende
+    min 46 (2T 6) visitante try          Branco Benicio Bailatti Cufré
+    min 46 (2T 6) visitante substitution Dante Baez Simonassi
+    min 50 (2T 10) local     substitution Felipe Hak
+    min 53 (2T 13) visitante substitution Gennaro Doratto
+    min 58 (2T 18) local     try          Valentino Chiappara
+    min 59 (2T 19) local     conversion   Bautista Martinat Bonetto
+    min 60 (2T 20) local     substitution Tiziano Bustos Rodriguez
+    min 68 (2T 28) visitante try          Valentino Dominici
+    min 69 (2T 29) visitante conversion   Lucas Agustín Bustos Bernal
+    min 72 (2T 32) visitante penalty_goal Lucas Agustín Bustos Bernal
+    min 73 (2T 33) local     try          Manuel Gonzalez D'amato
+    min 73 (2T 33) local     conversion   Bautista Martinat Bonetto
+    min 74 (2T 34) local     try          Cristobal Zurro Vanni
+    min 74 (2T 34) visitante substitution Facundo Larrieu
+    min 75 (2T 35) local     conversion   Bautista Martinat Bonetto
+  marcador  · eventos 40-37 · guardado 40-37
+  tries     · 6-5 (guardado —-—)
+  arbitro   · Martin Leiva (guardado: —)
+
+Club La Tablada M16 "A" vs San Martín de Villa María M16 "A" · torneo-cordobes-m16-a · tarjeta 312567  ·  b331aeb0-560f-4c5a-970e-0e1c3540ee3b
+  local     · Club La Tablada M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · San Martín de Villa María M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 21
+    min  7 (1T 7) local     try          
+    min 12 (1T 12) local     try          
+    min 20 (1T 20) local     card_yellow  
+    min 22 (1T 22) local     try          
+    min 23 (1T 23) local     conversion   
+    min 24 (1T 24) local     try          
+    min 25 (1T 25) local     conversion   
+    min 32 (1T 32) local     try          
+    min 41 (2T 1) local     try          
+    min 50 (2T 10) visitante try          Benjamin Lazos Acevedo
+    min 50 (2T 10) local     card_yellow  
+    min 55 (2T 15) local     try          
+    min 57 (2T 17) visitante card_yellow  Salvador Boonstra
+    min 60 (2T 20) visitante injury       Joaquin Echeverría
+    min 61 (2T 21) visitante try          Valentino Rossi
+    min 62 (2T 22) visitante conversion   Tomas Espinosa Marcelloni
+    min 68 (2T 28) local     try          
+    min 69 (2T 29) local     conversion   
+    min 71 (2T 31) visitante substitution Alejo Bertello
+    min 75 (2T 35) local     try          
+    min 76 (2T 36) local     conversion   
+  marcador  · eventos 53-12 · guardado 53-12
+  tries     · 9-2 (guardado —-—)
+  arbitro   · Ángeles Murua (guardado: —)
+
+Jockey Club de Villa María M16 "A" vs Carlos Paz Rugby Club M16 "A" · torneo-cordobes-m16-a · tarjeta 312568  ·  4935462e-5bc5-4b46-8b3a-a72133761aee
+  local     · Jockey Club de Villa María M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Carlos Paz Rugby Club M16 "A" · 17 jugadores · 0 con ficha fijada
+  eventos   · 35
+    min  1 (1T 1) local     try          Leon Gallego Cance
+    min  1 (1T 1) local     conversion   Felipe Acosta Salomón
+    min  3 (1T 3) local     try          Felipe Kamienski
+    min  3 (1T 3) local     conversion   Felipe Acosta Salomón
+    min  4 (1T 4) local     try          Juan Simon Ghella
+    min  4 (1T 4) local     conversion   Felipe Acosta Salomón
+    min  8 (1T 8) local     try          Pedro Salomon
+    min  8 (1T 8) local     conversion   Felipe Acosta Salomón
+    min 10 (1T 10) local     try          Robertino Jose Gili
+    min 10 (1T 10) local     conversion   Felipe Acosta Salomón
+    min 14 (1T 14) local     try          Benjamin Giusiano Bonavia
+    min 14 (1T 14) local     conversion   Felipe Acosta Salomón
+    min 15 (1T 15) visitante card_yellow  
+    min 15 (1T 15) local     try          Pedro Salomon
+    min 15 (1T 15) local     conversion   Felipe Acosta Salomón
+    min 25 (1T 25) local     try          Mateo Emiliano Lopez
+    min 25 (1T 25) local     conversion   Felipe Acosta Salomón
+    min 31 (1T 31) local     try          Vito Milidoni
+    min 31 (1T 31) local     conversion   Felipe Acosta Salomón
+    min 33 (1T 33) local     try          Mauricio Trillini
+    min 33 (1T 33) local     conversion   Felipe Acosta Salomón
+    min 40 (2T 0) visitante try          
+    min 42 (2T 2) local     try          Vito Milidoni
+    min 42 (2T 2) local     conversion   Felipe Acosta Salomón
+    min 55 (2T 15) visitante card_yellow  
+    min 57 (2T 17) local     try          Vito Milidoni
+    min 57 (2T 17) local     conversion   Felipe Acosta Salomón
+    min 60 (2T 20) local     try          Agustín Alassia
+    min 60 (2T 20) local     conversion   Felipe Acosta Salomón
+    min 65 (2T 25) local     try          Vito Milidoni
+    min 65 (2T 25) local     conversion   Felipe Acosta Salomón
+    min 71 (2T 31) local     try          Agustín Alassia
+    min 71 (2T 31) local     conversion   Felipe Acosta Salomón
+    min 72 (2T 32) local     try          Agustín Alassia
+    min 74 (2T 34) local     try          Felipe Acosta Salomón
+  marcador  · eventos 115-5 · guardado 115-5
+  tries     · 17-1 (guardado —-—)
+  arbitro   · Florencia Ledesma (guardado: —)
+
+Jockey Club Córdoba M16 "A" vs Club Palermo Bajo M16 "A" · torneo-cordobes-m16-a · tarjeta 312569  ·  41deef11-e0ca-4d1a-8daf-a9fd2bebae13
+  local     · Jockey Club Córdoba M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 13
+    min 10 (1T 10) local     try          
+    min 10 (1T 10) visitante try          
+    min 10 (1T 10) local     conversion   
+    min 10 (1T 10) local     try          
+    min 10 (1T 10) local     conversion   
+    min 11 (1T 11) visitante conversion   
+    min 16 (1T 16) visitante penalty_goal 
+    min 20 (1T 20) visitante injury       
+    min 23 (1T 23) visitante try          
+    min 24 (1T 24) visitante conversion   
+    min 34 (1T 34) visitante try          
+    min 50 (2T 10) visitante try          
+    min 70 (2T 30) visitante try          
+  marcador  · eventos 14-32 · guardado 14-32
+  tries     · 2-5 (guardado —-—)
+  arbitro   · Lucas Gaston Dopaso (guardado: —)
+
+Club Universitario de Córdoba M16 "A" vs Tala Rugby Club M16 "A" · torneo-cordobes-m16-a · tarjeta 312570  ·  3f960b77-2357-400d-ad1c-6ca691dab8a3
+  local     · Club Universitario de Córdoba M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 14
+    min 15 (1T 15) visitante try          
+    min 20 (1T 20) visitante try          
+    min 20 (1T 20) visitante conversion   
+    min 23 (1T 23) local     try          
+    min 23 (1T 23) local     conversion   
+    min 27 (1T 27) visitante try          
+    min 27 (1T 27) visitante conversion   
+    min 34 (1T 34) local     try          
+    min 34 (1T 34) local     conversion   
+    min 45 (2T 5) local     try          
+    min 45 (2T 5) local     card_yellow  
+    min 47 (2T 7) visitante try          
+    min 54 (2T 14) visitante try          
+    min 62 (2T 22) visitante card_yellow  
+  marcador  · eventos 19-29 · guardado 19-29
+  tries     · 3-5 (guardado —-—)
+  arbitro   · Leandro Luchetti (guardado: —)
+
+San Martín de Villa María M16 "A" vs Jockey Club de Villa María M16 "A" · torneo-cordobes-m16-a · tarjeta 313081  ·  c835ac34-2a00-4c79-b32b-0f453b889a4f
+  local     · San Martín de Villa María M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club de Villa María M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 19
+    min  2 (1T 2) local     card_yellow  Benjamin Felipe Pasculi
+    min  3 (1T 3) visitante try          Vito Milidoni
+    min  3 (1T 3) visitante conversion   Felipe Acosta Salomón
+    min 14 (1T 14) visitante try          Leon Gallego Cance
+    min 14 (1T 14) visitante conversion   Felipe Acosta Salomón
+    min 19 (1T 19) visitante try          Juan Ignacio Forgione
+    min 21 (1T 21) visitante try          Benjamín Bascur Stevenazzi
+    min 25 (1T 25) visitante try          Robertino Jose Gili
+    min 25 (1T 25) visitante conversion   Felipe Acosta Salomón
+    min 28 (1T 28) visitante penalty_try  
+    min 44 (2T 4) local     card_yellow  Juan Ignacio Celayes
+    min 48 (2T 8) local     try          Alejo Bertello
+    min 49 (2T 9) local     conversion   Tomas Espinosa Marcelloni
+    min 55 (2T 15) visitante card_yellow  Dante Battistutti
+    min 58 (2T 18) local     card_yellow  Tomas Espinosa Marcelloni
+    min 62 (2T 22) local     substitution Nazareno Altamirano Pozzetti
+    min 63 (2T 23) local     substitution Valentino Rossi
+    min 69 (2T 29) local     card_yellow  Albano Rivarola
+    min 77 (2T 37) local     card_red     Juan Ignacio Celayes
+  marcador  · eventos 7-38 · guardado 7-38
+  tries     · 1-6 (guardado —-—)
+  arbitro   · Javier Alberto Flores (guardado: —)
+
+Tala Rugby Club M16 "A" vs Córdoba Athletic Club M16 "A" · torneo-cordobes-m16-a · tarjeta 313082  ·  bc362b8a-b7af-4b71-ad9e-2aaffb538702
+  local     · Tala Rugby Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 14
+    min  9 (1T 9) local     try          
+    min 10 (1T 10) local     conversion   
+    min 18 (1T 18) local     try          
+    min 19 (1T 19) local     conversion   
+    min 21 (1T 21) visitante try          Stefano Faccio Vera
+    min 22 (1T 22) visitante conversion   Manuel Gonzalez D'amato
+    min 27 (1T 27) visitante try          Manuel Gonzalez D'amato
+    min 30 (1T 30) visitante try          Bautista Martinat Bonetto
+    min 56 (2T 16) visitante substitution Valentin Nicolas Frias Lopez
+    min 60 (2T 20) visitante try          Fausto López Grimaut
+    min 61 (2T 21) visitante conversion   Bautista Martinat Bonetto
+    min 63 (2T 23) local     try          
+    min 66 (2T 26) local     try          
+    min 75 (2T 35) visitante penalty_goal Manuel Gonzalez D'amato
+  marcador  · eventos 24-27 · guardado 24-27
+  tries     · 4-4 (guardado —-—)
+  arbitro   · Leonel Sorbera (guardado: —)
+
+Club Palermo Bajo M16 "A" vs Club Universitario de Córdoba M16 "A" · torneo-cordobes-m16-a · tarjeta 313083  ·  ba56858e-18a8-49e7-a627-6e3d7f4211b9
+  local     · Club Palermo Bajo M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 12
+    min  4 (1T 4) local     try          
+    min  7 (1T 7) visitante penalty_goal 
+    min 15 (1T 15) local     try          
+    min 27 (1T 27) local     try          
+    min 28 (1T 28) local     conversion   
+    min 35 (1T 35) local     try          
+    min 35 (1T 35) local     conversion   
+    min 48 (2T 8) visitante try          
+    min 61 (2T 21) local     try          
+    min 63 (2T 23) visitante card_yellow  
+    min 73 (2T 33) visitante try          
+    min 73 (2T 33) visitante conversion   
+  marcador  · eventos 29-15 · guardado 29-15
+  tries     · 5-2 (guardado —-—)
+  arbitro   · Tomas Elias Gigena Ramallo (guardado: —)
+
+Carlos Paz Rugby Club M16 "A" vs Jockey Club Córdoba M16 "A" · torneo-cordobes-m16-a · tarjeta 313084  ·  8a4e5d10-4b11-4662-9caf-970c2395999d
+  local     · Carlos Paz Rugby Club M16 "A" · 18 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M16 "A" · 22 jugadores · 0 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 0-28
+  tries     · 0-0 (guardado —-—)
+  arbitro   · (No Oficial) (guardado: —)
+
+Urú Curé Rugby Club M16 "A" vs Club La Tablada M16 "A" · torneo-cordobes-m16-a · tarjeta 313085  ·  3a1165f6-7061-4367-a162-2d8492d9d13d
+  local     · Urú Curé Rugby Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M16 "A" · 22 jugadores · 0 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 27-32
+  tries     · 0-0 (guardado —-—)
+  arbitro   · Sebastian Velez (guardado: —)
+
+Jockey Club de Villa María M16 "A" vs Urú Curé Rugby Club M16 "A" · torneo-cordobes-m16-a · tarjeta 314666  ·  e732a756-4d18-4702-a5e0-5d797d1728a9
+  local     · Jockey Club de Villa María M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Urú Curé Rugby Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min  2 (1T 2) local     try          Robertino Jose Gili
+    min  2 (1T 2) local     conversion   Felipe Acosta Salomón
+    min  5 (1T 5) visitante try          Segundo Picco
+    min  6 (1T 6) visitante conversion   Gennaro Doratto
+    min  9 (1T 9) visitante penalty_goal Gennaro Doratto
+    min 11 (1T 11) local     try          Robertino Jose Gili
+    min 19 (1T 19) visitante penalty_goal Gennaro Doratto
+    min 22 (1T 22) local     try          Leon Gallego Cance
+    min 28 (1T 28) visitante penalty_goal Gennaro Doratto
+    min 32 (1T 32) local     try          Leon Gallego Cance
+    min 35 (1T 35) visitante try          Branco Benicio Bailatti Cufré
+    min 36 (1T 36) visitante conversion   Gennaro Doratto
+    min 41 (2T 1) local     substitution Agustín Alassia
+    min 43 (2T 3) visitante penalty_goal Gennaro Doratto
+    min 48 (2T 8) visitante card_yellow  Branco Benicio Bailatti Cufré
+    min 50 (2T 10) local     penalty_goal Felipe Acosta Salomón
+    min 51 (2T 11) visitante try          Bruno Simionati
+    min 52 (2T 12) visitante conversion   Gennaro Doratto
+    min 59 (2T 19) local     try          Felipe Kamienski
+    min 60 (2T 20) visitante card_yellow  Victorino Domanski
+    min 64 (2T 24) local     try          Vito Milidoni
+    min 65 (2T 25) local     conversion   Felipe Acosta Salomón
+    min 65 (2T 25) local     substitution Benjamín Ferrere
+    min 68 (2T 28) local     penalty_goal Felipe Acosta Salomón
+    min 70 (2T 30) local     penalty_goal Felipe Acosta Salomón
+    min 72 (2T 32) local     penalty_goal Felipe Acosta Salomón
+    min 75 (2T 35) local     penalty_goal Felipe Acosta Salomón
+  marcador  · eventos 49-33 · guardado 49-33
+  tries     · 6-3 (guardado —-—)
+  arbitro   · Santiago Herrera Albano (guardado: —)
+
+Córdoba Athletic Club M16 "A" vs Club La Tablada M16 "A" · torneo-cordobes-m16-a · tarjeta 314667  ·  6ae7d4ee-b23f-4698-8fd1-b1a634c3b03b
+  local     · Córdoba Athletic Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 12
+    min 20 (1T 20) visitante try          
+    min 20 (1T 20) visitante conversion   
+    min 30 (1T 30) local     substitution Felipe Hak
+    min 50 (2T 10) local     try          Fausto López Grimaut
+    min 51 (2T 11) local     conversion   Bautista Martinat Bonetto
+    min 55 (2T 15) local     try          Stefano Faccio Vera
+    min 56 (2T 16) local     conversion   Bautista Martinat Bonetto
+    min 68 (2T 28) visitante try          
+    min 70 (2T 30) local     substitution Maximiliano Rojas
+    min 76 (2T 36) visitante card_yellow  
+    min 76 (2T 36) visitante card_yellow  
+    min 76 (2T 36) local     penalty_goal Bautista Martinat Bonetto
+  marcador  · eventos 17-12 · guardado 17-12
+  tries     · 2-2 (guardado —-—)
+  arbitro   · Tomas Elias Gigena Ramallo (guardado: —)
+
+Jockey Club Córdoba M16 "A" vs San Martín de Villa María M16 "A" · torneo-cordobes-m16-a · tarjeta 314668  ·  eb758261-8641-4e55-9a7d-e029fd07f138
+  local     · Jockey Club Córdoba M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · San Martín de Villa María M16 "A" · 18 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min  8 (1T 8) local     try          Ramiro Inaudi
+    min  8 (1T 8) local     conversion   Ciro Patocchi Arrieta
+    min 15 (1T 15) local     try          Ignacio Cugat
+    min 15 (1T 15) local     conversion   Ciro Patocchi Arrieta
+    min 18 (1T 18) local     try          Alfonso Heredia Carrara
+    min 31 (1T 31) visitante card_yellow  Tomas Espinosa Marcelloni
+    min 46 (2T 6) local     try          Tomas Castaño
+    min 55 (2T 15) visitante try          Rocco Scotto
+    min 56 (2T 16) visitante conversion   Tomas Espinosa Marcelloni
+    min 61 (2T 21) visitante try          Alejo Bertello
+    min 63 (2T 23) local     try          Santos Oliver
+    min 63 (2T 23) local     conversion   Ciro Patocchi Arrieta
+    min 72 (2T 32) local     try          Jeronimo Dalmases
+    min 72 (2T 32) local     conversion   Ciro Patocchi Arrieta
+    min 74 (2T 34) visitante card_yellow  Emanuel Arguello
+    min 76 (2T 36) local     try          Tomas Castaño
+    min 76 (2T 36) local     conversion   Ciro Patocchi Arrieta
+  marcador  · eventos 45-12 · guardado 45-12
+  tries     · 7-2 (guardado —-—)
+  arbitro   · Francisco Romero Brondino (guardado: —)
+
+Club Universitario de Córdoba M16 "A" vs Carlos Paz Rugby Club M16 "A" · torneo-cordobes-m16-a · tarjeta 314669  ·  0fc282f5-5614-434e-a286-082e3f7ef0da
+  local     · Club Universitario de Córdoba M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Carlos Paz Rugby Club M16 "A" · 17 jugadores · 0 con ficha fijada
+  eventos   · 21
+    min  2 (1T 2) local     try          
+    min  4 (1T 4) local     try          
+    min  4 (1T 4) local     conversion   
+    min  7 (1T 7) local     try          
+    min  7 (1T 7) local     conversion   
+    min 16 (1T 16) local     try          
+    min 16 (1T 16) local     conversion   
+    min 21 (1T 21) local     try          
+    min 21 (1T 21) local     conversion   
+    min 22 (1T 22) visitante card_yellow  
+    min 26 (1T 26) local     conversion   
+    min 26 (1T 26) local     try          
+    min 28 (1T 28) local     try          
+    min 28 (1T 28) local     conversion   
+    min 45 (2T 5) local     try          
+    min 46 (2T 6) local     try          
+    min 46 (2T 6) local     conversion   
+    min 63 (2T 23) visitante try          
+    min 63 (2T 23) visitante conversion   
+    min 75 (2T 35) local     try          
+    min 75 (2T 35) local     conversion   
+  marcador  · eventos 66-7 · guardado 66-7
+  tries     · 10-1 (guardado —-—)
+  arbitro   · Pablo Daniel Dionicio Benitez (guardado: —)
+
+Tala Rugby Club M16 "A" vs Club Palermo Bajo M16 "A" · torneo-cordobes-m16-a · tarjeta 314670  ·  acebd517-6ea4-4933-acae-22903f370ef5
+  local     · Tala Rugby Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 14
+    min  4 (1T 4) visitante card_yellow  
+    min  5 (1T 5) local     try          
+    min 17 (1T 17) local     try          
+    min 17 (1T 17) local     conversion   
+    min 19 (1T 19) local     try          
+    min 19 (1T 19) local     conversion   
+    min 29 (1T 29) visitante try          
+    min 30 (1T 30) visitante conversion   
+    min 30 (1T 30) local     card_yellow  
+    min 43 (2T 3) visitante try          
+    min 50 (2T 10) local     conversion   
+    min 50 (2T 10) local     try          
+    min 65 (2T 25) visitante try          
+    min 74 (2T 34) visitante try          
+  marcador  · eventos 26-22 · guardado 26-22
+  tries     · 4-4 (guardado —-—)
+  arbitro   · Raúl Fernando Rodriguez Almada (guardado: —)
+
+Club Palermo Bajo M16 "A" vs Córdoba Athletic Club M16 "A" · torneo-cordobes-m16-a · tarjeta 315197  ·  068f0175-f72a-4e30-8199-eccdecf0afce
+  local     · Club Palermo Bajo M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 16
+    min 10 (1T 10) local     try          
+    min 19 (1T 19) visitante penalty_goal Bautista Martinat Bonetto
+    min 28 (1T 28) local     try          
+    min 33 (1T 33) visitante penalty_goal Bautista Martinat Bonetto
+    min 37 (1T 37) visitante penalty_goal Bautista Martinat Bonetto
+    min 43 (2T 3) visitante try          Valentino Chiappara
+    min 47 (2T 7) local     card_yellow  
+    min 47 (2T 7) local     try          
+    min 48 (2T 8) local     conversion   
+    min 51 (2T 11) visitante card_yellow  Bautista Martinat Bonetto
+    min 57 (2T 17) local     card_yellow  
+    min 58 (2T 18) visitante penalty_goal Manuel Gonzalez D'amato
+    min 67 (2T 27) visitante try          Bautista Martinat Bonetto
+    min 67 (2T 27) visitante conversion   Manuel Gonzalez D'amato
+    min 74 (2T 34) local     try          
+    min 75 (2T 35) local     conversion   
+  marcador  · eventos 24-24 · guardado 24-24
+  tries     · 4-2 (guardado —-—)
+  arbitro   · Cristian Mauro Quiles Buteler (guardado: —)
+
+Carlos Paz Rugby Club M16 "A" vs Tala Rugby Club M16 "A" · torneo-cordobes-m16-a · tarjeta 315198  ·  f521fd17-aa78-4adb-9f99-eaeaf750c6af
+  local     · Carlos Paz Rugby Club M16 "A" · 17 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 28
+    min  2 (1T 2) visitante try          
+    min  2 (1T 2) visitante conversion   
+    min  5 (1T 5) visitante try          
+    min  5 (1T 5) visitante conversion   
+    min 10 (1T 10) local     try          
+    min 10 (1T 10) visitante try          
+    min 10 (1T 10) visitante conversion   
+    min 12 (1T 12) visitante try          
+    min 12 (1T 12) visitante conversion   
+    min 16 (1T 16) visitante try          
+    min 16 (1T 16) visitante conversion   
+    min 23 (1T 23) visitante try          
+    min 23 (1T 23) visitante conversion   
+    min 27 (1T 27) visitante try          
+    min 32 (1T 32) visitante try          
+    min 32 (1T 32) visitante conversion   
+    min 34 (1T 34) visitante try          
+    min 34 (1T 34) visitante conversion   
+    min 43 (2T 3) visitante try          
+    min 43 (2T 3) visitante conversion   
+    min 49 (2T 9) visitante try          
+    min 49 (2T 9) visitante conversion   
+    min 59 (2T 19) visitante try          
+    min 59 (2T 19) visitante conversion   
+    min 67 (2T 27) visitante try          
+    min 67 (2T 27) visitante conversion   
+    min 70 (2T 30) local     try          
+    min 75 (2T 35) visitante try          
+  marcador  · eventos 10-94 · guardado 10-94
+  tries     · 2-14 (guardado —-—)
+  arbitro   · Arturo Martinez (guardado: —)
+
+San Martín de Villa María M16 "A" vs Club Universitario de Córdoba M16 "A" · torneo-cordobes-m16-a · tarjeta 315199  ·  ac1bd9c2-d074-45e6-b420-cf18c3a12728
+  local     · San Martín de Villa María M16 "A" · 17 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min  3 (1T 3) visitante try          
+    min  6 (1T 6) visitante try          
+    min  6 (1T 6) visitante conversion   
+    min 11 (1T 11) visitante try          
+    min 11 (1T 11) visitante conversion   
+    min 19 (1T 19) visitante card_yellow  
+    min 20 (1T 20) local     penalty_try  
+    min 22 (1T 22) visitante try          
+    min 22 (1T 22) visitante conversion   
+    min 27 (1T 27) local     substitution Kevin Horacio Albornoz
+    min 27 (1T 27) visitante try          
+    min 27 (1T 27) visitante conversion   
+    min 45 (2T 5) visitante try          
+    min 45 (2T 5) visitante conversion   
+    min 60 (2T 20) local     substitution Benjamín Cora
+    min 60 (2T 20) visitante try          
+    min 63 (2T 23) visitante try          
+    min 65 (2T 25) local     card_yellow  Jeremías Sanchez
+    min 66 (2T 26) visitante try          
+    min 70 (2T 30) visitante try          
+    min 70 (2T 30) visitante conversion   
+    min 71 (2T 31) visitante try          
+    min 72 (2T 32) visitante conversion   
+    min 74 (2T 34) visitante try          
+  marcador  · eventos 7-74 · guardado 7-74
+  tries     · 1-12 (guardado —-—)
+  arbitro   · Ricardo Ezequiel Oyola (guardado: —)
+
+Urú Curé Rugby Club M16 "A" vs Jockey Club Córdoba M16 "A" · torneo-cordobes-m16-a · tarjeta 315200  ·  f761ae64-2080-434e-ae8c-36b99ff2130f
+  local     · Urú Curé Rugby Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 31
+    min  5 (1T 5) visitante try          Julian Carrara Gomila
+    min  5 (1T 5) visitante conversion   Ciro Patocchi Arrieta
+    min 12 (1T 12) local     substitution Lucas Agustín Bustos Bernal
+    min 17 (1T 17) visitante try          Santino Piasentini
+    min 17 (1T 17) visitante conversion   Ciro Patocchi Arrieta
+    min 20 (1T 20) local     try          Valentino Dominici
+    min 20 (1T 20) local     conversion   Gennaro Doratto
+    min 25 (1T 25) local     substitution Francisco Marzochini Herrero
+    min 25 (1T 25) local     try          Segundo Picco
+    min 26 (1T 26) local     conversion   Gennaro Doratto
+    min 30 (1T 30) visitante try          Alfonso Heredia Carrara
+    min 41 (2T 1) local     try          Tomás Lautaro Urbano
+    min 45 (2T 5) local     try          Valentino Dominici
+    min 46 (2T 6) local     substitution Pedro Palacios Pastre
+    min 46 (2T 6) local     conversion   Gennaro Doratto
+    min 51 (2T 11) visitante substitution Martin Clerico
+    min 51 (2T 11) visitante substitution Tomas Agustín Aguirre Martin
+    min 51 (2T 11) local     try          Valentino Dominici
+    min 52 (2T 12) local     conversion   Gennaro Doratto
+    min 53 (2T 13) local     card_yellow  Benjamin Gentile
+    min 54 (2T 14) visitante try          Mateo Basile
+    min 54 (2T 14) visitante conversion   Ciro Patocchi Arrieta
+    min 62 (2T 22) visitante substitution Matias Velazquez Cano
+    min 64 (2T 24) local     substitution Valentino Dominici
+    min 64 (2T 24) local     try          Valentino Dominici
+    min 66 (2T 26) local     card_yellow  Segundo Picco
+    min 70 (2T 30) visitante substitution Santiago Oglietti Aguirre
+    min 70 (2T 30) visitante substitution Julian Carrara Gomila
+    min 70 (2T 30) local     try          Pedro Palacios Pastre
+    min 71 (2T 31) local     conversion   Gennaro Doratto
+    min 74 (2T 34) visitante try          Agustin Siebenhaar
+  marcador  · eventos 45-31 · guardado 45-31
+  tries     · 7-5 (guardado —-—)
+  arbitro   · Gabriel Hernán Tirante (guardado: —)
+
+Club La Tablada M16 "A" vs Jockey Club de Villa María M16 "A" · torneo-cordobes-m16-a · tarjeta 315201  ·  9be71d95-c8ba-4e69-9819-a4f468e79691
+  local     · Club La Tablada M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club de Villa María M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 23
+    min  1 (1T 1) local     try          
+    min  1 (1T 1) local     conversion   
+    min 14 (1T 14) local     try          
+    min 17 (1T 17) local     try          
+    min 17 (1T 17) local     conversion   
+    min 28 (1T 28) visitante try          Pedro Salomon
+    min 28 (1T 28) visitante conversion   Felipe Acosta Salomón
+    min 32 (1T 32) local     try          
+    min 32 (1T 32) local     conversion   
+    min 35 (1T 35) visitante try          Vito Milidoni
+    min 35 (1T 35) visitante conversion   Felipe Acosta Salomón
+    min 41 (2T 1) local     try          
+    min 48 (2T 8) visitante try          Benjamín Ferrere
+    min 48 (2T 8) visitante conversion   Felipe Acosta Salomón
+    min 52 (2T 12) local     try          
+    min 57 (2T 17) visitante try          Felipe Acosta Salomón
+    min 57 (2T 17) visitante conversion   Felipe Acosta Salomón
+    min 64 (2T 24) local     try          
+    min 64 (2T 24) local     conversion   
+    min 68 (2T 28) visitante try          Benjamin Giusiano Bonavia
+    min 68 (2T 28) visitante conversion   Felipe Acosta Salomón
+    min 73 (2T 33) local     try          
+    min 73 (2T 33) local     conversion   
+  marcador  · eventos 50-35 · guardado 50-35
+  tries     · 8-5 (guardado —-—)
+  arbitro   · Francisco Romero Brondino (guardado: —)
+
+Córdoba Athletic Club M16 "A" vs Jockey Club de Villa María M16 "A" · torneo-cordobes-m16-a · tarjeta 319632  ·  59248378-7abb-43c9-a14b-464b407560c0
+  local     · Córdoba Athletic Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club de Villa María M16 "A" · 22 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min 11 (1T 11) local     try          Nazareno Gabriel Avaca
+    min 11 (1T 11) local     conversion   Bautista Martinat Bonetto
+    min 13 (1T 13) local     try          Cristobal Zurro Vanni
+    min 14 (1T 14) local     conversion   Bautista Martinat Bonetto
+    min 17 (1T 17) local     substitution Camilo Vitanza Frank
+    min 24 (1T 24) visitante try          Juan Simon Ghella
+    min 26 (1T 26) local     try          Cristobal Zurro Vanni
+    min 26 (1T 26) local     conversion   Bautista Martinat Bonetto
+    min 29 (1T 29) local     try          Cristobal Zurro Vanni
+    min 30 (1T 30) local     conversion   Bautista Martinat Bonetto
+    min 33 (1T 33) local     try          Nazareno Gabriel Avaca
+    min 33 (1T 33) local     conversion   Bautista Martinat Bonetto
+    min 41 (2T 1) local     try          Bruno Barroni
+    min 42 (2T 2) local     conversion   Bautista Martinat Bonetto
+    min 52 (2T 12) local     try          Bautista Martinat Bonetto
+    min 52 (2T 12) local     conversion   Bautista Martinat Bonetto
+    min 53 (2T 13) local     substitution Maximiliano Rojas
+    min 53 (2T 13) local     substitution Franco Emmanuel Olivetto
+    min 62 (2T 22) local     substitution Fausto López Grimaut
+    min 64 (2T 24) local     try          Cristobal Zurro Vanni
+    min 64 (2T 24) local     conversion   Bautista Martinat Bonetto
+    min 66 (2T 26) local     substitution Tiziano Bustos Rodriguez
+    min 69 (2T 29) local     substitution Lucas Nahuel Velez
+    min 70 (2T 30) visitante try          Felipe Acosta Salomón
+    min 70 (2T 30) visitante conversion   Felipe Acosta Salomón
+    min 74 (2T 34) local     try          Manuel Gonzalez D'amato
+    min 75 (2T 35) local     conversion   Bautista Martinat Bonetto
+  marcador  · eventos 63-12 · guardado 63-12
+  tries     · 9-2 (guardado —-—)
+  arbitro   · Ricardo Ezequiel Oyola (guardado: —)
+
+Jockey Club Córdoba M16 "A" vs Club La Tablada M16 "A" · torneo-cordobes-m16-a · tarjeta 319633  ·  5d2d37c3-db0b-4d52-91f0-a896d0981c6a
+  local     · Jockey Club Córdoba M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 8
+    min 17 (1T 17) local     try          Francisco Alfredo Caparros
+    min 18 (1T 18) local     conversion   Ciro Patocchi Arrieta
+    min 22 (1T 22) visitante try          
+    min 46 (2T 6) visitante try          
+    min 47 (2T 7) visitante conversion   
+    min 63 (2T 23) visitante penalty_goal 
+    min 77 (2T 37) local     try          Facundo Romero Flynn
+    min 78 (2T 38) local     conversion   Ciro Patocchi Arrieta
+  marcador  · eventos 14-15 · guardado 14-15
+  tries     · 2-2 (guardado —-—)
+  arbitro   · Daniel Borsarelli (guardado: —)
+
+Club Universitario de Córdoba M16 "A" vs Urú Curé Rugby Club M16 "A" · torneo-cordobes-m16-a · tarjeta 319634  ·  83f3ca1e-4db7-4e4c-b356-03f4a8fdbb78
+  local     · Club Universitario de Córdoba M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Urú Curé Rugby Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min  2 (1T 2) visitante try          Bruno Simionati
+    min  3 (1T 3) visitante conversion   Gennaro Doratto
+    min 10 (1T 10) local     try          
+    min 16 (1T 16) visitante substitution Santiago Sánchez Busso
+    min 18 (1T 18) local     try          
+    min 21 (1T 21) visitante penalty_goal Gennaro Doratto
+    min 26 (1T 26) local     try          
+    min 35 (1T 35) visitante substitution Dante Baez Simonassi
+    min 38 (1T 38) visitante penalty_goal Gennaro Doratto
+    min 44 (2T 4) local     card_yellow  
+    min 45 (2T 5) visitante penalty_goal Gennaro Doratto
+    min 54 (2T 14) local     conversion   
+    min 54 (2T 14) local     try          
+    min 58 (2T 18) local     penalty_goal 
+    min 61 (2T 21) visitante try          Santino Ponsone
+    min 64 (2T 24) visitante try          Segundo Picco
+    min 71 (2T 31) local     try          
+    min 74 (2T 34) local     try          
+    min 74 (2T 34) local     conversion   
+    min 75 (2T 35) visitante try          Bruno Simionati
+  marcador  · eventos 37-31 · guardado 37-31
+  tries     · 6-4 (guardado —-—)
+  arbitro   · Leandro Luchetti (guardado: —)
+
+Tala Rugby Club M16 "A" vs San Martín de Villa María M16 "A" · torneo-cordobes-m16-a · tarjeta 319635  ·  894502f1-0df2-4273-b788-1a964a81f63e
+  local     · Tala Rugby Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · San Martín de Villa María M16 "A" · 19 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min  1 (1T 1) local     try          
+    min  1 (1T 1) local     conversion   
+    min  3 (1T 3) local     try          
+    min  3 (1T 3) local     conversion   
+    min 10 (1T 10) local     try          
+    min 10 (1T 10) local     conversion   
+    min 17 (1T 17) local     try          
+    min 17 (1T 17) local     conversion   
+    min 23 (1T 23) local     try          
+    min 23 (1T 23) local     conversion   
+    min 27 (1T 27) local     try          
+    min 27 (1T 27) local     conversion   
+    min 32 (1T 32) visitante card_yellow  Gaston Benjamin Diaz Gontero
+    min 35 (1T 35) visitante try          Rocco Scotto
+    min 35 (1T 35) visitante conversion   Tomas Espinosa Marcelloni
+    min 41 (2T 1) local     try          
+    min 41 (2T 1) local     conversion   
+    min 50 (2T 10) local     try          
+    min 53 (2T 13) local     try          
+    min 53 (2T 13) local     conversion   
+    min 60 (2T 20) visitante substitution Bautista Españon Soria
+    min 67 (2T 27) local     try          
+    min 67 (2T 27) local     conversion   
+    min 72 (2T 32) local     try          
+    min 72 (2T 32) local     conversion   
+  marcador  · eventos 75-7 · guardado 75-7
+  tries     · 11-1 (guardado —-—)
+  arbitro   · Lucas Humeres (guardado: —)
+
+Club Palermo Bajo M16 "A" vs Carlos Paz Rugby Club M16 "A" · torneo-cordobes-m16-a · tarjeta 319636  ·  2b8bc6e8-de10-45bb-a565-7490f061410a
+  local     · Club Palermo Bajo M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Carlos Paz Rugby Club M16 "A" · 17 jugadores · 0 con ficha fijada
+  eventos   · 19
+    min  2 (1T 2) local     try          
+    min  3 (1T 3) local     conversion   
+    min  9 (1T 9) local     try          
+    min 16 (1T 16) visitante try          
+    min 16 (1T 16) visitante conversion   
+    min 19 (1T 19) local     try          
+    min 20 (1T 20) local     conversion   
+    min 30 (1T 30) local     try          
+    min 33 (1T 33) local     try          
+    min 34 (1T 34) local     conversion   
+    min 44 (2T 4) local     try          
+    min 49 (2T 9) local     try          
+    min 50 (2T 10) local     conversion   
+    min 54 (2T 14) visitante try          
+    min 67 (2T 27) visitante try          
+    min 72 (2T 32) visitante try          
+    min 72 (2T 32) visitante conversion   
+    min 78 (2T 38) local     try          
+    min 78 (2T 38) local     conversion   
+  marcador  · eventos 50-24 · guardado 50-24
+  tries     · 8-4 (guardado —-—)
+  arbitro   · Nazarena Yael Gigena Ramallo (guardado: —)
+
+Carlos Paz Rugby Club M16 "A" vs Córdoba Athletic Club M16 "A" · torneo-cordobes-m16-a · tarjeta 320651  ·  612757f9-5366-4819-a397-913433a4bf2d
+  local     · Carlos Paz Rugby Club M16 "A" · 17 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min  4 (1T 4) visitante try          Cristobal Zurro Vanni
+    min  4 (1T 4) visitante conversion   Manuel Gonzalez D'amato
+    min  6 (1T 6) visitante try          Cristobal Zurro Vanni
+    min  7 (1T 7) visitante conversion   Bautista Martinat Bonetto
+    min  8 (1T 8) visitante try          Bruno Barroni
+    min  9 (1T 9) visitante conversion   Bautista Martinat Bonetto
+    min 30 (1T 30) visitante try          Lucas Nahuel Velez
+    min 32 (1T 32) visitante try          Bruno Barroni
+    min 33 (1T 33) visitante conversion   Bautista Martinat Bonetto
+    min 41 (2T 1) visitante substitution Lucas Nahuel Velez
+    min 43 (2T 3) visitante try          Bautista Martinat Bonetto
+    min 45 (2T 5) visitante try          Bruno Barroni
+    min 45 (2T 5) visitante conversion   Manuel Gonzalez D'amato
+    min 46 (2T 6) visitante substitution Felipe Hak
+    min 57 (2T 17) visitante substitution Tiziano Bustos Rodriguez
+    min 60 (2T 20) visitante substitution Cristobal Zurro Vanni
+    min 60 (2T 20) visitante substitution Bautista Martinat Bonetto
+    min 60 (2T 20) visitante substitution Fausto López Grimaut
+    min 62 (2T 22) visitante try          Gaspar Florensa
+    min 63 (2T 23) visitante conversion   Manuel Gonzalez D'amato
+    min 67 (2T 27) local     try          
+    min 67 (2T 27) local     conversion   
+    min 67 (2T 27) visitante card_yellow  Feix Fernandez Valle
+    min 70 (2T 30) visitante try          Salvador Pascualini
+    min 71 (2T 31) visitante conversion   Manuel Gonzalez D'amato
+    min 73 (2T 33) visitante try          Salvador Pascualini
+    min 74 (2T 34) visitante conversion   Manuel Gonzalez D'amato
+  marcador  · eventos 7-66 · guardado 7-66
+  tries     · 1-10 (guardado —-—)
+  arbitro   · Martin Leiva (guardado: —)
+
+San Martín de Villa María M16 "A" vs Club Palermo Bajo M16 "A" · torneo-cordobes-m16-a · tarjeta 320652  ·  b74e5ddd-7bdc-4b21-b25d-b9949d8082ae
+  local     · San Martín de Villa María M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 16
+    min  4 (1T 4) visitante try          
+    min  4 (1T 4) visitante conversion   
+    min 15 (1T 15) local     try          Tomas Espinosa Marcelloni
+    min 15 (1T 15) local     conversion   Tomas Espinosa Marcelloni
+    min 32 (1T 32) local     try          Bautista Españon Soria
+    min 50 (2T 10) local     card_yellow  Isaias Cagliero
+    min 51 (2T 11) visitante try          
+    min 57 (2T 17) local     substitution Valentino Rossi
+    min 59 (2T 19) local     substitution Bautista Españon Soria
+    min 61 (2T 21) local     substitution Salvador Boonstra
+    min 62 (2T 22) visitante card_yellow  
+    min 66 (2T 26) visitante try          
+    min 73 (2T 33) local     substitution Juan Ignacio Celayes
+    min 73 (2T 33) visitante penalty_goal 
+    min 75 (2T 35) visitante try          
+    min 75 (2T 35) visitante conversion   
+  marcador  · eventos 12-27 · guardado 12-27
+  tries     · 2-4 (guardado —-—)
+  arbitro   · Nazarena Yael Gigena Ramallo (guardado: —)
+
+Urú Curé Rugby Club M16 "A" vs Tala Rugby Club M16 "A" · torneo-cordobes-m16-a · tarjeta 320653  ·  11563a81-7167-4958-b283-4d8565e226bb
+  local     · Urú Curé Rugby Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min  1 (1T 1) visitante try          
+    min  1 (1T 1) visitante conversion   
+    min  4 (1T 4) visitante try          
+    min 10 (1T 10) visitante try          
+    min 10 (1T 10) visitante conversion   
+    min 18 (1T 18) local     try          Branco Benicio Bailatti Cufré
+    min 19 (1T 19) local     conversion   Gennaro Doratto
+    min 24 (1T 24) visitante try          
+    min 24 (1T 24) visitante conversion   
+    min 35 (1T 35) local     try          Branco Benicio Bailatti Cufré
+    min 36 (1T 36) local     conversion   Faustino Calleri Mantaras
+    min 42 (2T 2) local     substitution Tomás Lautaro Urbano
+    min 51 (2T 11) visitante try          
+    min 51 (2T 11) visitante conversion   
+    min 53 (2T 13) visitante try          
+    min 53 (2T 13) visitante conversion   
+    min 56 (2T 16) local     try          Santino Ponsone
+    min 60 (2T 20) local     substitution Pedro Palacios Pastre
+    min 62 (2T 22) local     try          Gennaro Doratto
+    min 63 (2T 23) local     conversion   Gennaro Doratto
+    min 68 (2T 28) local     try          Augusto Kauer Garcia
+    min 69 (2T 29) local     conversion   Gennaro Doratto
+  marcador  · eventos 33-40 · guardado 33-40
+  tries     · 5-6 (guardado —-—)
+  arbitro   · Evaristo Gonzalo Cappellini (guardado: —)
+
+Club La Tablada M16 "A" vs Club Universitario de Córdoba M16 "A" · torneo-cordobes-m16-a · tarjeta 320654  ·  ccb86195-a905-482e-aa08-55e26f8a4f6f
+  local     · Club La Tablada M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 16
+    min  7 (1T 7) local     try          
+    min 16 (1T 16) local     penalty_goal 
+    min 18 (1T 18) visitante injury       
+    min 28 (1T 28) visitante try          
+    min 28 (1T 28) visitante conversion   
+    min 30 (1T 30) local     penalty_goal 
+    min 33 (1T 33) visitante penalty_goal 
+    min 45 (2T 5) visitante try          
+    min 45 (2T 5) visitante conversion   
+    min 52 (2T 12) local     try          
+    min 53 (2T 13) local     conversion   
+    min 56 (2T 16) local     try          
+    min 57 (2T 17) local     conversion   
+    min 60 (2T 20) local     card_yellow  
+    min 64 (2T 24) local     card_yellow  
+    min 66 (2T 26) visitante try          
+  marcador  · eventos 25-22 · guardado 25-22
+  tries     · 3-3 (guardado —-—)
+  arbitro   · Francisco Romero Brondino (guardado: —)
+
+Jockey Club de Villa María M16 "A" vs Jockey Club Córdoba M16 "A" · torneo-cordobes-m16-a · tarjeta 320655  ·  cab3757c-e321-4d23-9796-f8dedb000622
+  local     · Jockey Club de Villa María M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M16 "A" · 19 jugadores · 0 con ficha fijada
+  eventos   · 11
+    min  6 (1T 6) local     try          Vito Milidoni
+    min  9 (1T 9) local     try          Robertino Jose Gili
+    min 10 (1T 10) local     conversion   Felipe Acosta Salomón
+    min 21 (1T 21) visitante try          Alfonso Heredia Carrara
+    min 26 (1T 26) local     penalty_goal Felipe Acosta Salomón
+    min 57 (2T 17) local     try          Mauricio Trillini
+    min 65 (2T 25) visitante try          Alfonso Heredia Carrara
+    min 65 (2T 25) visitante conversion   Ciro Patocchi Arrieta
+    min 75 (2T 35) local     card_yellow  Joaquin Abregu
+    min 79 (2T 39) visitante try          Federico Robledo Saracho
+    min 79 (2T 39) visitante conversion   Ciro Patocchi Arrieta
+  marcador  · eventos 20-19 · guardado 20-19
+  tries     · 3-3 (guardado —-—)
+  arbitro   · Santiago Herrera Albano (guardado: —)
+
+Córdoba Athletic Club M16 "A" vs Jockey Club Córdoba M16 "A" · torneo-cordobes-m16-a · tarjeta 322625  ·  2820101a-5429-4b33-a2a1-611cf6688035
+  local     · Córdoba Athletic Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M16 "A" · 22 jugadores · 0 con ficha fijada
+  eventos   · 21
+    min  3 (1T 3) local     try          Bruno Barroni
+    min  3 (1T 3) local     conversion   Manuel Gonzalez D'amato
+    min 19 (1T 19) local     penalty_goal Manuel Gonzalez D'amato
+    min 21 (1T 21) visitante try          Alfonso Heredia Carrara
+    min 26 (1T 26) visitante try          Santino Piasentini
+    min 26 (1T 26) visitante conversion   Bautista Martinez Turrado
+    min 29 (1T 29) local     try          Bautista Martinat Bonetto
+    min 29 (1T 29) local     conversion   Manuel Gonzalez D'amato
+    min 42 (2T 2) local     substitution Feix Fernandez Valle
+    min 48 (2T 8) local     substitution Felipe Hak
+    min 48 (2T 8) local     substitution Franco Emmanuel Olivetto
+    min 55 (2T 15) visitante try          Julian Carrara Gomila
+    min 55 (2T 15) visitante conversion   Bautista Martinez Turrado
+    min 55 (2T 15) visitante card_yellow  Francisco Alfredo Caparros
+    min 55 (2T 15) visitante card_yellow  Bautista Gil
+    min 55 (2T 15) visitante card_yellow  Santiago Oglietti Aguirre
+    min 62 (2T 22) local     penalty_goal Bautista Martinat Bonetto
+    min 68 (2T 28) local     try          Lucas Nahuel Velez
+    min 68 (2T 28) local     conversion   Bautista Martinat Bonetto
+    min 77 (2T 37) local     try          Nazareno Gabriel Avaca
+    min 77 (2T 37) local     conversion   Manuel Gonzalez D'amato
+  marcador  · eventos 34-19 · guardado 34-19
+  tries     · 4-3 (guardado —-—)
+  arbitro   · Tomas Elias Gigena Ramallo (guardado: —)
+
+Club Universitario de Córdoba M16 "A" vs Jockey Club de Villa María M16 "A" · torneo-cordobes-m16-a · tarjeta 322626  ·  61c6a1f8-cf2f-4f9e-bb1b-9350ebb9a288
+  local     · Club Universitario de Córdoba M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club de Villa María M16 "A" · 22 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min  5 (1T 5) local     try          
+    min 25 (1T 25) visitante try          Vito Milidoni
+    min 32 (1T 32) visitante try          Vito Milidoni
+    min 32 (1T 32) visitante conversion   Felipe Acosta Salomón
+    min 36 (1T 36) visitante try          Benjamín Bascur Stevenazzi
+    min 36 (1T 36) visitante conversion   Felipe Acosta Salomón
+    min 41 (2T 1) visitante try          Vito Milidoni
+    min 41 (2T 1) visitante conversion   Felipe Acosta Salomón
+    min 45 (2T 5) local     try          
+    min 49 (2T 9) local     try          
+    min 56 (2T 16) visitante card_yellow  Dante Battistutti
+    min 59 (2T 19) local     try          
+    min 61 (2T 21) visitante try          Felipe Acosta Salomón
+    min 62 (2T 22) visitante conversion   Felipe Acosta Salomón
+    min 65 (2T 25) visitante penalty_goal Felipe Acosta Salomón
+    min 66 (2T 26) visitante try          Vito Milidoni
+    min 71 (2T 31) visitante try          Vito Milidoni
+    min 71 (2T 31) visitante conversion   Felipe Acosta Salomón
+  marcador  · eventos 20-48 · guardado 20-48
+  tries     · 4-7 (guardado —-—)
+  arbitro   · Francisco Romero Brondino (guardado: —)
+
+Tala Rugby Club M16 "A" vs Club La Tablada M16 "A" · torneo-cordobes-m16-a · tarjeta 322627  ·  1f9d646d-68ad-4ac8-b2c3-940025d41a41
+  local     · Tala Rugby Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 9
+    min  9 (1T 9) visitante card_yellow  
+    min 17 (1T 17) local     penalty_goal 
+    min 22 (1T 22) visitante penalty_goal 
+    min 31 (1T 31) local     try          
+    min 31 (1T 31) local     conversion   
+    min 45 (2T 5) visitante conversion   
+    min 45 (2T 5) visitante try          
+    min 67 (2T 27) visitante try          
+    min 75 (2T 35) local     try          
+  marcador  · eventos 15-15 · guardado 15-15
+  tries     · 2-2 (guardado —-—)
+  arbitro   · Emmanuel Boscatto (guardado: —)
+
+Club Palermo Bajo M16 "A" vs Urú Curé Rugby Club M16 "A" · torneo-cordobes-m16-a · tarjeta 322628  ·  cfa1d736-7ad8-49ca-b5b7-a1f72a708ed8
+  local     · Club Palermo Bajo M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Urú Curé Rugby Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min  1 (1T 1) visitante substitution Gerónimo Varea
+    min  2 (1T 2) visitante try          Benjamin Gentile
+    min  3 (1T 3) visitante conversion   Gennaro Doratto
+    min  7 (1T 7) local     try          
+    min 13 (1T 13) visitante substitution David Nicolas Junker
+    min 14 (1T 14) local     try          
+    min 14 (1T 14) visitante substitution Gonzalo Carpanzano
+    min 15 (1T 15) local     conversion   
+    min 22 (1T 22) local     try          
+    min 23 (1T 23) local     conversion   
+    min 30 (1T 30) visitante try          Benjamin Gentile
+    min 33 (1T 33) local     try          
+    min 34 (1T 34) local     conversion   
+    min 42 (2T 2) local     try          
+    min 43 (2T 3) local     conversion   
+    min 47 (2T 7) visitante try          Benjamin Gentile
+    min 56 (2T 16) visitante substitution Augusto Pavetto
+    min 62 (2T 22) visitante substitution Facundo Larrieu
+    min 62 (2T 22) local     try          
+    min 63 (2T 23) local     conversion   
+    min 65 (2T 25) local     try          
+    min 66 (2T 26) visitante substitution Octavio Airaldo
+    min 69 (2T 29) visitante try          Branco Benicio Bailatti Cufré
+    min 75 (2T 35) local     try          
+  marcador  · eventos 50-22 · guardado 50-22
+  tries     · 8-4 (guardado —-—)
+  arbitro   · Javier Sorbera Ferrer (guardado: —)
+
+Carlos Paz Rugby Club M16 "A" vs San Martín de Villa María M16 "A" · torneo-cordobes-m16-a · tarjeta 322629  ·  40d334c2-68bc-4837-a3fc-2998cfd8376b
+  local     · Carlos Paz Rugby Club M16 "A" · 17 jugadores · 0 con ficha fijada
+  visitante · San Martín de Villa María M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 21
+    min  5 (1T 5) visitante try          Rocco Scotto
+    min 11 (1T 11) local     try          
+    min 11 (1T 11) local     conversion   
+    min 20 (1T 20) visitante try          Albano Rivarola
+    min 20 (1T 20) visitante conversion   Tomas Espinosa Marcelloni
+    min 25 (1T 25) local     try          
+    min 25 (1T 25) local     conversion   
+    min 34 (1T 34) local     penalty_goal 
+    min 37 (1T 37) visitante try          Gaston Benjamin Diaz Gontero
+    min 45 (2T 5) visitante try          Benjamin Felipe Pasculi
+    min 52 (2T 12) visitante try          Benjamín Cora
+    min 52 (2T 12) visitante conversion   Tomas Espinosa Marcelloni
+    min 58 (2T 18) local     card_yellow  
+    min 62 (2T 22) visitante penalty_goal Tomas Espinosa Marcelloni
+    min 63 (2T 23) local     card_yellow  
+    min 65 (2T 25) visitante try          Tomas Espinosa Marcelloni
+    min 65 (2T 25) visitante conversion   Tomas Espinosa Marcelloni
+    min 70 (2T 30) visitante try          Albano Rivarola
+    min 70 (2T 30) visitante conversion   Tomas Espinosa Marcelloni
+    min 74 (2T 34) visitante try          Benjamín Cora
+    min 74 (2T 34) visitante conversion   Tomas Espinosa Marcelloni
+  marcador  · eventos 17-53 · guardado 17-53
+  tries     · 2-8 (guardado —-—)
+  arbitro   · Javier Nicolas Olalla (guardado: —)
+
+San Martín de Villa María M16 "A" vs Córdoba Athletic Club M16 "A" · torneo-cordobes-m16-a · tarjeta 324067  ·  96f9fb7c-479c-401d-ad39-5d9cc95c9fc6
+  local     · San Martín de Villa María M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 26
+    min  4 (1T 4) visitante try          Feix Fernandez Valle
+    min  4 (1T 4) visitante conversion   Manuel Gonzalez D'amato
+    min 11 (1T 11) local     try          Albano Rivarola
+    min 12 (1T 12) local     conversion   Albano Rivarola
+    min 19 (1T 19) visitante try          Cristobal Zurro Vanni
+    min 27 (1T 27) local     try          Benjamín Cora
+    min 28 (1T 28) local     conversion   Albano Rivarola
+    min 29 (1T 29) visitante try          Cristobal Zurro Vanni
+    min 30 (1T 30) visitante conversion   Manuel Gonzalez D'amato
+    min 33 (1T 33) local     try          Juan Ignacio Celayes
+    min 40 (2T 0) visitante substitution Gaspar Florensa
+    min 42 (2T 2) visitante try          Salvador Pascualini
+    min 54 (2T 14) visitante try          Lucas Nahuel Velez
+    min 55 (2T 15) visitante substitution Luca Bautista De La Iglesia
+    min 55 (2T 15) visitante conversion   Manuel Gonzalez D'amato
+    min 58 (2T 18) visitante substitution Tomas Cardona Allende
+    min 58 (2T 18) visitante substitution Cristobal Zurro Vanni
+    min 61 (2T 21) local     card_yellow  Alejo Bertello
+    min 62 (2T 22) visitante try          Bautista Martinat Bonetto
+    min 63 (2T 23) visitante substitution Salvador Pascualini
+    min 63 (2T 23) visitante substitution Tiziano Bustos Rodriguez
+    min 63 (2T 23) visitante substitution Fausto López Grimaut
+    min 63 (2T 23) visitante conversion   Manuel Gonzalez D'amato
+    min 68 (2T 28) visitante substitution Lucas Nahuel Velez
+    min 68 (2T 28) visitante try          Bautista Martinat Bonetto
+    min 69 (2T 29) visitante conversion   Manuel Gonzalez D'amato
+  marcador  · eventos 19-45 · guardado 19-45
+  tries     · 3-7 (guardado —-—)
+  arbitro   · Javier Alberto Flores (guardado: —)
+
+Urú Curé Rugby Club M16 "A" vs Carlos Paz Rugby Club M16 "A" · torneo-cordobes-m16-a · tarjeta 324068  ·  5ec6a26a-2df3-4d85-ad6b-0ee095359fad
+  local     · Urú Curé Rugby Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Carlos Paz Rugby Club M16 "A" · 17 jugadores · 0 con ficha fijada
+  eventos   · 12
+    min  1 (1T 1) local     try          Bruno Simionati
+    min  2 (1T 2) local     conversion   Gennaro Doratto
+    min  6 (1T 6) local     try          Augusto Pavetto
+    min  7 (1T 7) local     conversion   Gennaro Doratto
+    min  8 (1T 8) visitante try          
+    min 15 (1T 15) visitante try          
+    min 20 (1T 20) local     try          Augusto Pavetto
+    min 21 (1T 21) local     conversion   Gennaro Doratto
+    min 46 (2T 6) local     try          Valentino Dominici
+    min 50 (2T 10) visitante try          
+    min 55 (2T 15) local     try          Valentino Dominici
+    min 56 (2T 16) local     try          Branco Benicio Bailatti Cufré
+  marcador  · eventos 36-15 · guardado 36-15
+  tries     · 6-3 (guardado —-—)
+  arbitro   · Franco Zarate (guardado: —)
+
+Club La Tablada M16 "A" vs Club Palermo Bajo M16 "A" · torneo-cordobes-m16-a · tarjeta 324069  ·  0fad5ca0-8835-4ea7-9d92-30c37ae781e5
+  local     · Club La Tablada M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 10
+    min  5 (1T 5) visitante try          
+    min  6 (1T 6) visitante conversion   
+    min 15 (1T 15) local     penalty_goal 
+    min 22 (1T 22) visitante try          
+    min 23 (1T 23) visitante conversion   
+    min 48 (2T 8) visitante try          
+    min 49 (2T 9) visitante conversion   
+    min 61 (2T 21) visitante try          
+    min 62 (2T 22) visitante conversion   
+    min 67 (2T 27) visitante try          
+  marcador  · eventos 3-33 · guardado 3-33
+  tries     · 0-5 (guardado —-—)
+  arbitro   · Florencia Ledesma (guardado: —)
+
+Jockey Club de Villa María M16 "A" vs Tala Rugby Club M16 "A" · torneo-cordobes-m16-a · tarjeta 324071  ·  6be0e983-c03e-42a5-95e2-dd61e06a349e
+  local     · Jockey Club de Villa María M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M16 "A" · 22 jugadores · 0 con ficha fijada
+  eventos   · 12
+    min  4 (1T 4) local     try          Vito Milidoni
+    min  4 (1T 4) local     conversion   Felipe Acosta Salomón
+    min 13 (1T 13) local     card_yellow  Pedro Salomon
+    min 27 (1T 27) visitante try          
+    min 28 (1T 28) local     try          Vito Milidoni
+    min 35 (1T 35) visitante try          
+    min 35 (1T 35) visitante conversion   
+    min 43 (2T 3) local     try          Vito Milidoni
+    min 43 (2T 3) local     conversion   Felipe Acosta Salomón
+    min 54 (2T 14) visitante try          
+    min 63 (2T 23) visitante try          
+    min 73 (2T 33) visitante penalty_goal 
+  marcador  · eventos 19-25 · guardado 19-25
+  tries     · 3-4 (guardado —-—)
+  arbitro   · Santiago Herrera Albano (guardado: —)
+
+Jockey Club Córdoba M16 "A" vs Club Universitario de Córdoba M16 "A" · torneo-cordobes-m16-a · tarjeta 324072  ·  e2435868-0bcd-4895-92db-c901770034fd
+  local     · Jockey Club Córdoba M16 "A" · 22 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 15
+    min  6 (1T 6) visitante try          
+    min  9 (1T 9) local     conversion   Ciro Patocchi Arrieta
+    min  9 (1T 9) local     try          Ciro Patocchi Arrieta
+    min 25 (1T 25) visitante try          
+    min 25 (1T 25) visitante conversion   
+    min 32 (1T 32) visitante try          
+    min 42 (2T 2) local     try          Alfonso Heredia Carrara
+    min 58 (2T 18) local     card_yellow  Francisco Alfredo Caparros
+    min 58 (2T 18) visitante card_yellow  
+    min 65 (2T 25) visitante try          
+    min 66 (2T 26) local     try          Facundo Romero Flynn
+    min 73 (2T 33) visitante card_yellow  
+    min 74 (2T 34) local     try          Bautista Diaz Senn
+    min 74 (2T 34) local     conversion   Ciro Patocchi Arrieta
+    min 75 (2T 35) visitante penalty_goal 
+  marcador  · eventos 24-25 · guardado 24-25
+  tries     · 4-4 (guardado —-—)
+  arbitro   · Francisco Pecchio (guardado: —)
+
+Club La Tablada M16 "A" vs Jockey Club de Villa María M16 "A" · torneo-cordobes-m16-a · tarjeta 325111  ·  e60074de-149b-4076-b3ad-d416db02ec0d
+  local     · Club La Tablada M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club de Villa María M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 40-24
+  tries     · 0-0 (guardado —-—)
+  arbitro   · Lautaro Joaquin Quiroga Cafure (guardado: —)
+
+Córdoba Athletic Club M16 "A" vs Urú Curé Rugby Club M16 "A" · torneo-cordobes-m16-a · tarjeta 325112  ·  6ba8338b-c421-4361-800f-d39eecac58b2
+  local     · Córdoba Athletic Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Urú Curé Rugby Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 13
+    min 10 (1T 10) visitante try          
+    min 19 (1T 19) visitante try          
+    min 23 (1T 23) local     try          Bautista Martinat Bonetto
+    min 23 (1T 23) local     conversion   Manuel Gonzalez D'amato
+    min 32 (1T 32) local     try          Stefano Faccio Vera
+    min 32 (1T 32) local     conversion   Manuel Gonzalez D'amato
+    min 47 (2T 7) local     try          Manuel Gonzalez D'amato
+    min 47 (2T 7) local     conversion   Manuel Gonzalez D'amato
+    min 59 (2T 19) visitante try          
+    min 64 (2T 24) visitante try          
+    min 64 (2T 24) visitante conversion   
+    min 68 (2T 28) local     try          Bautista Martinat Bonetto
+    min 68 (2T 28) local     conversion   Manuel Gonzalez D'amato
+  marcador  · eventos 28-22 · guardado 28-22
+  tries     · 4-4 (guardado —-—)
+  arbitro   · Enzo Riva (guardado: —)
+
+Tala Rugby Club M16 "A" vs Córdoba Athletic Club M16 "A" · torneo-cordobes-m16-a · tarjeta 326176  ·  b7a4a6b4-da46-4ffd-8972-04f9d26d4da1
+  local     · Tala Rugby Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 15
+    min  3 (1T 3) visitante penalty_goal Bautista Martinat Bonetto
+    min 33 (1T 33) local     try          
+    min 33 (1T 33) local     conversion   
+    min 41 (1T 41) local     try          
+    min 41 (1T 41) local     conversion   
+    min 41 (2T 1) local     try          
+    min 41 (2T 1) local     conversion   
+    min 45 (2T 5) local     try          
+    min 53 (2T 13) local     try          
+    min 56 (2T 16) local     try          
+    min 56 (2T 16) local     conversion   
+    min 63 (2T 23) local     try          
+    min 63 (2T 23) local     conversion   
+    min 71 (2T 31) visitante try          Manuel Gonzalez D'amato
+    min 71 (2T 31) visitante conversion   Manuel Gonzalez D'amato
+  marcador  · eventos 45-10 · guardado 45-10
+  tries     · 7-1 (guardado —-—)
+  arbitro   · Ignacio Santiago Olmedo Ramirez (guardado: —)
+
+Club Palermo Bajo M16 "A" vs Club La Tablada M16 "A" · torneo-cordobes-m16-a · tarjeta 326177  ·  1ce9a805-58dc-4f2a-80b4-a55988f12758
+  local     · Club Palermo Bajo M16 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M16 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min  2 (1T 2) visitante try          
+    min  2 (1T 2) visitante try          
+    min  2 (1T 2) visitante conversion   
+    min 15 (1T 15) local     try          
+    min 25 (1T 25) visitante penalty_goal 
+    min 35 (1T 35) local     try          
+    min 42 (2T 2) local     try          
+    min 42 (2T 2) local     conversion   
+    min 46 (2T 6) visitante try          
+    min 46 (2T 6) visitante conversion   
+    min 52 (2T 12) visitante penalty_goal 
+    min 52 (2T 12) visitante penalty_try  
+    min 57 (2T 17) local     card_yellow  
+    min 59 (2T 19) local     try          
+    min 69 (2T 29) visitante try          
+    min 69 (2T 29) visitante conversion   
+    min 69 (2T 29) visitante card_yellow  
+    min 73 (2T 33) local     try          
+  marcador  · eventos 27-39 · guardado 27-39
+  tries     · 5-5 (guardado —-—)
+  arbitro   · Lucas Gaston Dopaso (guardado: —)
+
+(plan: no se escribió nada)

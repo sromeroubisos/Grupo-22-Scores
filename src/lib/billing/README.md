@@ -23,7 +23,7 @@ supabase db push
 Esto crea:
 
 - Tabla `public.subscriptions`
-- Vista `public.user_active_plan`
+- Vista `public.user_active_plan` (con `security_invoker`: respeta el RLS de `subscriptions`, así que leer el plan de otro usuario pide el cliente service-role)
 - Trigger `subscriptions_set_updated_at`
 - Políticas RLS (cada usuario ve solo lo suyo, admins globales ven todo)
 

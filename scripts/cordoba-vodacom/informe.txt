@@ -1,0 +1,12 @@
+  aviso JOCKEY CLUB CORDOBA 47-19 UNIVERSITARIO (297558): ingreso sin salida, dorsal 22 (1T 13)
+308023: sin plantel utilizable (308023)
+308025: EVENTOS NO CIERRAN UNIVERSITARIO 39-31 SAN MARTIN R.C. VM (308025): eventos 0-0 (308025)
+  aviso JOCKEY CLUB CORDOBA 39-36 TALA R.C. (309918): ingreso sin salida, dorsal 21 (2T 10)
+  aviso JOCKEY VILLA MARIA 23-28 URU-CURE (313001): ingreso sin salida, dorsal 20 (2T 29)
+  aviso LA TABLADA 76-7 CARLOS PAZ RC (313002): ingreso sin salida, dorsal 21 (2T 22)
+  aviso PALERMO BAJO 23-17 UNIVERSITARIO (313004): ingreso sin salida, dorsal 19 (2T 17)
+  aviso JOCKEY CLUB CORDOBA 42-19 JOCKEY VILLA MARIA (315218): ingreso sin salida, dorsal 16 (2T 21)
+  aviso CORDOBA ATHLETIC 13-24 JOCKEY CLUB CORDOBA (323946): salida sin reemplazo, dorsal 2 (2T 38)
+
+Partidos de la base SIN tarjeta: 1
+  2026-04-25 M Urú Curé Rugby Club Intermedia 0-28 Carlos Paz Rugby Club Intermedia

@@ -7,10 +7,12 @@ const { competencias } = JSON.parse(fs.readFileSync('deduced.json', 'utf8'));
 const fechaBoletin = new Map(JSON.parse(fs.readFileSync('parsed.json', 'utf8')).bulletins.map((b) => [b.n, b.date]));
 /** El sábado siguiente a una fecha ISO. */
 const sabadoTras = (iso) => { const d = new Date(iso + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() + ((6 - d.getUTCDay() + 7) % 7 || 7)); return d.toISOString().slice(0, 10); };
-const HOY = '2026-09-30';
-// La última tabla publicada es la del boletín Nº 34 (22/9): lo programado después
+const HOY = '2026-10-02';
+// La última tabla publicada es la del boletín Nº 35 (29/9): lo programado después
 // de esa fecha puede estar jugado, pero el resultado sale en el boletín siguiente.
-const ULTIMA_TABLA = '2026-09-23';
+const ULTIMA_TABLA = '2026-10-01';
+// La ventana del último boletín arranca en el anterior (Nº 34, 23/9).
+const VENTANA_DESDE = [...fechaBoletin.values()].sort().at(-2);
 
 const sinTilde = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '');
 function claveEquipo(nombre) {
@@ -83,7 +85,16 @@ for (const c of competencias) {
         note: `Jugado según la tabla; marcador no deducible${p.motivo ? ` (${p.motivo})` : ''}` });
       out.issues.push(`${division} ${torneo} ${phase} ${p.etapa}: ${base.home} - ${base.away} sin marcador`);
     } else {
-      const futuro = base.date && base.date > ULTIMA_TABLA;
+      // "Futuro" se mide contra la última tabla de ESTA competencia, no la del
+      // boletín: cuando una división pasa a finales deja de tener tabla (en el
+      // Nº 35 sólo M19 la trae) y sus últimos partidos no son postergados, son
+      // partidos cuyo marcador no publicó nadie. El mismo día que sube el
+      // boletín cuenta como futuro: la tabla corta en la reunión, días antes.
+      // Y sólo dentro de la última ventana: una fase cerrada hace meses (las
+      // finales de Iniciación) tampoco tiene tabla posterior, y lo suyo sí es
+      // un partido que no figura jugado.
+      const ultimaTabla = fechaBoletin.get(ult.boletin) || ULTIMA_TABLA;
+      const futuro = base.date && base.date >= ultimaTabla && base.date > VENTANA_DESDE;
       out.matches.push({ ...base, status: futuro ? 'scheduled' : 'postponed', hs: null, as: null, hp: null, ap: null,
         note: futuro ? (base.date <= HOY ? 'Resultado pendiente del próximo boletín de la URT' : '') : 'Programado; no figura jugado en las tablas siguientes' });
     }

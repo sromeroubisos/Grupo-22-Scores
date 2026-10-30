@@ -43,11 +43,35 @@ Copiar `.env.example` a `.env` y completar:
 ```env
 G22_BASE_URL=https://g22scores.com
 G22_API_KEY=...
+MCP_INBOUND_TOKEN=...   # obligatorio, minimo 32 caracteres
 
 PORT=3001
 MCP_PATH=/mcp
 G22_TIMEOUT_MS=20000
+MCP_MAX_SSE_SESSIONS=20
+# HOST=0.0.0.0
+# MCP_ALLOW_NO_AUTH=true   # SOLO desarrollo local
 ```
+
+### Autenticacion de entrada (obligatoria)
+
+`update_result` cambia marcadores reales con la `G22_API_KEY` del servidor, asi
+que el MCP no puede quedar abierto a quien conozca la URL. Todo pedido a
+`/mcp`, `/mcp/messages`, `/sse` y `/messages` tiene que traer:
+
+```http
+Authorization: Bearer <MCP_INBOUND_TOKEN>
+```
+
+El token se compara en tiempo constante (SHA-256 + `timingSafeEqual`). Generar
+uno con `node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"`.
+
+- Sin `MCP_INBOUND_TOKEN` el servidor **no arranca** (falla cerrado).
+- Para probar en local sin token: `MCP_ALLOW_NO_AUTH=true`. En ese modo escucha
+  solo en `127.0.0.1`, nunca en la red.
+- `/health` queda abierto y no expone datos.
+- Hay un tope de `MCP_MAX_SSE_SESSIONS` (20 por defecto) sesiones SSE abiertas;
+  pasado el tope contesta 503 con `Retry-After`.
 
 `G22_API_KEY` se envia a la API REST como:
 
@@ -105,7 +129,7 @@ npm start
 En otra terminal, listar tools con el cliente MCP oficial:
 
 ```bash
-node --input-type=module -e "import { Client } from '@modelcontextprotocol/sdk/client/index.js'; import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'; const client = new Client({ name: 'g22-test-client', version: '1.0.0' }); const transport = new StreamableHTTPClientTransport(new URL('http://localhost:3001/mcp')); await client.connect(transport); console.log(JSON.stringify(await client.listTools(), null, 2)); await client.close();"
+node --input-type=module -e "import { Client } from '@modelcontextprotocol/sdk/client/index.js'; import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'; const client = new Client({ name: 'g22-test-client', version: '1.0.0' }); const transport = new StreamableHTTPClientTransport(new URL('http://localhost:3001/mcp'), { requestInit: { headers: { Authorization: 'Bearer ' + process.env.MCP_INBOUND_TOKEN } } }); await client.connect(transport); console.log(JSON.stringify(await client.listTools(), null, 2)); await client.close();"
 ```
 
 La respuesta debe incluir exactamente estas tools:

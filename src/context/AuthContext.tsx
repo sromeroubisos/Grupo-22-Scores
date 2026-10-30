@@ -18,7 +18,7 @@ import {
     getOnboardingStatus,
 } from '@/lib/services/preferencesService';
 import { isAuthRateLimitError } from '@/lib/auth/errors';
-import { clearSupabaseBrowserSession, createClient, getSupabaseBrowserSessionHint } from '@/lib/supabase/client';
+import { clearSupabaseBrowserSession, createClient, getSupabaseBrowserSessionHint, hasSupabaseBrowserSessionMaterial } from '@/lib/supabase/client';
 import { hasRecentTerminalRefreshFailure, resetTerminalRefreshFailure } from '@/lib/supabase/auth-fetch';
 import type { LooseSupabaseClient } from '@/lib/supabase/loose';
 import { logPerf, measureAsync, nowMs, warnIfDuplicateWindow } from '@/lib/perf/measure';
@@ -139,6 +139,12 @@ function writeCachedAuthUser(user: User | null) {
 const isAbortError = (err: unknown) => {
     if (!(err instanceof Error)) {
         return false;
+    }
+
+    // No pudo tomarse el lock de auth (browserAuthLock en lib/supabase/client):
+    // es contención, no una sesión rota. Se trata como una cancelación más.
+    if ((err as { isAcquireTimeout?: unknown }).isAcquireTimeout === true) {
+        return true;
     }
 
     return (
@@ -522,10 +528,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         const sessionHint = getSupabaseBrowserSessionHint();
+        // El atajo es para el visitante anonimo: sin material de sesion no hay
+        // nada que verificar y se ahorra el getSession().
+        //
+        // Lo que NO puede decidir es que alguien es invitado. Antes se pedia
+        // `isAccessTokenFresh`, y eso da falso con una sesion perfectamente
+        // valida en los dos casos que solo pasan en el telefono: el movil
+        // congela la pestaña y el access token vence —el refresh token sigue
+        // vivo, pero aca no se lo miraba—, y la cookie de Google viene partida
+        // en trozos, que el parser casero lee mal. Resultado: sesion buena,
+        // home como invitado, y ni siquiera se intentaba renovar. En la compu
+        // la pestaña sigue viva y el token nunca vence: por eso no se veia.
+        //
+        // Ahora alcanza con que EXISTA la cookie —comprobacion por nombre, sin
+        // parsear— para correr el bootstrap real y que supabase-ssr, que es la
+        // fuente de verdad, renueve si hace falta.
         const skipPublicAnonymousAuth =
             !initialCachedUser &&
             !isRscUserDependentPath(pathname) &&
-            !sessionHint.isAccessTokenFresh;
+            !hasSupabaseBrowserSessionMaterial();
 
         if (skipPublicAnonymousAuth) {
             activeProfileFetchRef.current = null;
@@ -536,7 +557,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setIsLoading(false);
             logRefreshLoop('initAuth_skipped', {
                 pathname,
-                reason: sessionHint.hasSession ? 'public_stale_or_expired_session_hint' : 'public_no_session_hint',
+                reason: sessionHint.hasSession ? 'public_hint_parsed_but_no_session_material' : 'public_no_session_material',
             });
 
             return () => {

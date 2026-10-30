@@ -1,3 +1,8 @@
+import { sanitizeNext } from '@/lib/auth/redirect';
+
+// La validación del destino vive en UN lugar (`sanitizeNext`): con dos copias,
+// la que no se arregló era la puerta del open redirect. Acá solo se suma el
+// destino por defecto según el rol que se eligió al entrar.
 export function sanitizeReturnTo(raw: string | null, roleIntent?: string | null): string {
     if (!raw) {
         if (roleIntent === 'super_admin') return '/admin/super';
@@ -6,28 +11,5 @@ export function sanitizeReturnTo(raw: string | null, roleIntent?: string | null)
         return '/';
     }
 
-    // Prevent open redirects
-    if (
-        !raw.startsWith('/') ||
-        raw.startsWith('//') ||
-        raw.includes('@') ||
-        raw.includes('\\') ||
-        /^(https?|javascript|data|file|ftp):/i.test(raw)
-    ) {
-        return '/';
-    }
-
-    // Prevent auth loops
-    const lower = raw.toLowerCase();
-    if (
-        lower === '/login' ||
-        lower.startsWith('/login?') ||
-        lower === '/register' ||
-        lower.startsWith('/register?') ||
-        lower.startsWith('/auth/')
-    ) {
-        return '/';
-    }
-
-    return raw;
+    return sanitizeNext(raw);
 }

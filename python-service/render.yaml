@@ -7,6 +7,9 @@ services:
     healthCheckPath: /health
     autoDeploy: true
     envVars:
+      # Sin ENV=dev el servicio exige SERVICE_TOKEN para arrancar y apaga /docs.
+      - key: ENV
+        value: production
       - key: SERVICE_TOKEN
         sync: false
       - key: SOFASCORE_BASE_URL

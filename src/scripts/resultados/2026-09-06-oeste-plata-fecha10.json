@@ -1,0 +1,35 @@
+{
+  "fecha": "2026-09-06",
+  "descripcion": "Copa Plata del Oeste 2026 · 10a fecha · Jockey 102-14 Rivadavia · Peumayen 27-28 Alfiles · Banco 27-30 Tacuru",
+  "fuente": "Cuadro de la 10a fecha (6 de septiembre) pasado por Santiago.",
+  "motivo": "Carga manual de la 10a fecha. Universitario 32-31 Huazihul ya estaba cargado (5/9).",
+  "partidos": [
+    {
+      "partido": "80e75f3e-0cab-4bf2-99ed-9ef305d51f11",
+      "local": "Jockey Club San Juan",
+      "visitante": "Rivadavia Rugby Club",
+      "marcador": {
+        "local": 102,
+        "visitante": 14
+      }
+    },
+    {
+      "partido": "1ab5b7a6-0200-4075-8e0a-45c3ce2babd0",
+      "local": "Peumayen Rugby Club",
+      "visitante": "Alfiles S.C.",
+      "marcador": {
+        "local": 27,
+        "visitante": 28
+      }
+    },
+    {
+      "partido": "f96e6586-b9b6-40ce-8e5a-05e8a097b430",
+      "local": "Banco Rugby Club",
+      "visitante": "Tacurú Rugby Hockey Club",
+      "marcador": {
+        "local": 27,
+        "visitante": 30
+      }
+    }
+  ]
+}

@@ -26,9 +26,11 @@ type CreateResult = {
     userId: string;
     email: string;
     role: string;
-    password: string;
+    // null cuando la cuenta ya existía: la ruta no toca ni devuelve su contraseña.
+    password: string | null;
     created: boolean;
     updated: boolean;
+    message?: string;
 };
 
 const inputStyle: React.CSSProperties = {
@@ -291,8 +293,15 @@ export default function CrearTrabajadorPage() {
                             }}
                         >
                             <Check size={20} />
-                            {result.created ? 'Cuenta creada y lista para usar' : 'Cuenta actualizada y lista para usar'}
+                            {result.created ? 'Cuenta creada y lista para usar' : 'Rol asignado a la cuenta existente'}
                         </div>
+                        {!result.password ? (
+                            <p style={{ margin: 0, color: 'var(--basalt-400)', fontSize: 13, lineHeight: 1.6 }}>
+                                {result.message ||
+                                    'La cuenta ya existía: se le asignó el rol y su contraseña no se tocó. Si no la recuerda, que use "Olvidé mi contraseña" en el login.'}
+                            </p>
+                        ) : (
+                        <>
                         <p style={{ margin: 0, color: 'var(--basalt-400)', fontSize: 13, lineHeight: 1.6 }}>
                             La cuenta ya está <strong>confirmada</strong>, con contraseña y el rol{' '}
                             <strong>{ROLE_LABELS[result.role as AppUserRole] || result.role}</strong> asignado. El
@@ -321,15 +330,19 @@ export default function CrearTrabajadorPage() {
                                 </strong>
                             </div>
                         </div>
+                        </>
+                        )}
                         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                            <button
-                                className={`${styles.btn} ${styles.btnPrimary}`}
-                                type="button"
-                                onClick={() => void copyCredentials()}
-                            >
-                                {copied ? <Check size={16} /> : <Copy size={16} />}
-                                {copied ? 'Copiado' : 'Copiar credenciales'}
-                            </button>
+                            {result.password ? (
+                                <button
+                                    className={`${styles.btn} ${styles.btnPrimary}`}
+                                    type="button"
+                                    onClick={() => void copyCredentials()}
+                                >
+                                    {copied ? <Check size={16} /> : <Copy size={16} />}
+                                    {copied ? 'Copiado' : 'Copiar credenciales'}
+                                </button>
+                            ) : null}
                             <button className={styles.btn} type="button" onClick={resetForm}>
                                 <UserPlus size={16} /> Crear otro
                             </button>

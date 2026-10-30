@@ -5,7 +5,15 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
 import { getServerAuthRole } from '@/lib/auth/newsAccess';
-import { hasNewsManagementAccess } from '@/lib/auth/roles';
+import {
+    canManageTournamentContext,
+    getTournamentManagementTarget,
+    getUserAccessContext,
+    type UserAccessContext,
+} from '@/lib/auth/permissions';
+import { EDIT_MEMBERSHIP_ROLES, hasEditorialAccess } from '@/lib/auth/roles';
+import { createAdminClient } from '@/lib/supabase/admin';
+import { createClient } from '@/lib/supabase/server';
 import { VideoPollsUnavailableError, VIDEO_POLLS_MIGRATION } from '@/lib/server/videoPolls';
 import {
     MAX_POLL_NAME_LENGTH,
@@ -47,24 +55,59 @@ export function pollErrorResponse(error: unknown, fallback: string) {
         return jsonError(error.message, 503, { migration: VIDEO_POLLS_MIGRATION, reason: error.reason });
     }
     console.error('[video-polls]', error);
-    return jsonError(error instanceof Error ? error.message : fallback, 500);
+    // El mensaje crudo (de Supabase o de Postgres) va al log, no a la pantalla.
+    return jsonError(fallback, 500);
+}
+
+export interface PollEditor {
+    ok: true;
+    userId: string;
+    isGlobalEditor: boolean;
+    access: UserAccessContext;
 }
 
 /**
- * Quien administra noticias arma y cierra votaciones. Sin sesión verificada
- * es 401 (pasa un instante durante el refresh del token: conviene reintentar);
- * con sesión pero sin rol editorial, 403.
+ * Quién arma, edita y borra votaciones: la editorial global (super_admin,
+ * admin_general, redactor) sobre cualquier torneo, o quien administra ESE
+ * torneo (membresía admin/editor sobre el torneo, su deporte o su unión). Antes
+ * alcanzaba con cualquier rol de admin —un editor de club borraba la votación
+ * de otro torneo con service_role—. Sin sesión verificada es 401 (pasa un
+ * instante durante el refresh del token: conviene reintentar); con sesión pero
+ * sin ningún permiso, 403. El alcance por torneo lo cierra
+ * `requirePollTournamentAccess`.
  */
-export async function requireEditor(): Promise<{ ok: true; userId: string | null } | { ok: false; response: NextResponse }> {
+export async function requireEditor(): Promise<PollEditor | { ok: false; response: NextResponse }> {
     const context = await getServerAuthRole();
     const userId = context.session?.user?.id ?? null;
     if (!userId) {
         return { ok: false, response: jsonError('No se pudo verificar tu sesión. Probá de nuevo en unos segundos.', 401) };
     }
-    if (!hasNewsManagementAccess(context.role)) {
+    const access = await getUserAccessContext(await createClient()).catch(() => null);
+    if (!access || access.userId !== userId) {
+        return { ok: false, response: jsonError('No se pudo verificar tu sesión. Probá de nuevo en unos segundos.', 401) };
+    }
+    const isGlobalEditor = hasEditorialAccess(context.role);
+    const hasTournamentMembership = access.memberships.some((membership) =>
+        (membership.scopeType === 'tournament' || membership.scopeType === 'sport' || membership.scopeType === 'union') &&
+        EDIT_MEMBERSHIP_ROLES.has(membership.role as never)
+    );
+    if (!isGlobalEditor && !hasTournamentMembership) {
         return { ok: false, response: jsonError('No tenés permiso para administrar votaciones.', 403) };
     }
-    return { ok: true, userId };
+    return { ok: true, userId, isGlobalEditor, access };
+}
+
+/**
+ * null si el editor puede tocar votaciones de ese torneo; si no, el 403 listo
+ * para devolver. El torneo se lee con service_role: uno oculto sigue siendo de
+ * quien lo administra.
+ */
+export async function requirePollTournamentAccess(editor: PollEditor, tournamentId: string): Promise<NextResponse | null> {
+    if (editor.isGlobalEditor) return null;
+    const admin = createAdminClient() as unknown as Awaited<ReturnType<typeof createClient>>;
+    const target = await getTournamentManagementTarget(admin, tournamentId).catch(() => null);
+    if (target && canManageTournamentContext(editor.access, target, EDIT_MEMBERSHIP_ROLES)) return null;
+    return jsonError('No administrás ese torneo.', 403);
 }
 
 /** El usuario verificado, o null si no hay sesión válida. */

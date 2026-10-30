@@ -171,7 +171,13 @@ const Partido = memo(function Partido({ match }: { match: SerializedMatch }) {
                 {match.isLive ? (
                     <span className={styles.live}>{etiquetaDeEstado(match.statusLabel, match.status)}</span>
                 ) : (
-                    <span>{match.status === 'final' ? 'Final' : horaLocal(match.startsAt)}</span>
+                    <span>
+                        {match.status === 'final'
+                            ? 'Final'
+                            /* Sin hora confirmada el proveedor manda un relleno:
+                               mostrarlo diría "00:00" de un partido nocturno. */
+                            : match.timeValid === false ? 'Hora a conf.' : horaLocal(match.startsAt)}
+                    </span>
                 )}
                 {match.round ? <span className={styles.round}>{etiquetaDeRonda(match.round)}</span> : null}
             </div>

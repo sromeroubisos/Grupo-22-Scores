@@ -1,0 +1,730 @@
+Torneo Cordobés Preintermedia "B" 2026 (Unión Cordobesa) · tarjetas de partido (JSON de tablas) · validado contra el marcador de la base
+
+Córdoba Athletic Club Preintermedia "B" vs Universidad Nacional de Córdoba Preintermedia "A" · torneo-cordobes-preintermedia-b · tarjeta 295700  ·  88aa48a6-9143-40f8-aff0-6f065c19516b
+  local     · Córdoba Athletic Club Preintermedia "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Universidad Nacional de Córdoba Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 34
+    min 15 (1T 15) visitante try          Eliseo David Funes
+    min 16 (1T 16) visitante conversion   Ignacio Chiappello
+    min 21 (1T 21) visitante try          Benjamin Meroi
+    min 22 (1T 22) visitante conversion   Ignacio Chiappello
+    min 24 (1T 24) local     penalty_try  
+    min 30 (1T 30) visitante penalty_goal Ignacio Chiappello
+    min 32 (1T 32) local     try          Benjamín Virasoro
+    min 33 (1T 33) local     conversion   Joaquin Oliva
+    min 38 (1T 38) local     try          Facundo Aguado
+    min 45 (2T 5) local     substitution Matias Navarret Pochat
+    min 45 (2T 5) local     substitution Dario Elias
+    min 45 (2T 5) local     substitution Agustin Barrionuevo Juarez
+    min 47 (2T 7) visitante card_yellow  Gonzalo Re
+    min 47 (2T 7) local     penalty_try  
+    min 49 (2T 9) visitante substitution Cristian Gaston Lucero
+    min 50 (2T 10) visitante substitution Benjamin Meroi
+    min 50 (2T 10) local     card_yellow  Ivo Valentin Reinoso
+    min 52 (2T 12) visitante substitution Matías Andres Gareis
+    min 52 (2T 12) visitante substitution Lucca Mattalia
+    min 53 (2T 13) local     try          Joaquin San Sebastian
+    min 53 (2T 13) local     conversion   Joaquin Oliva
+    min 55 (2T 15) local     substitution Mateo Cenci
+    min 55 (2T 15) local     substitution Augusto Javier Ruiz
+    min 60 (2T 20) visitante substitution Gonzalo Re
+    min 60 (2T 20) visitante substitution Octavio Mattalía
+    min 60 (2T 20) local     substitution Benjamin Ahumada
+    min 61 (2T 21) visitante try          Luciano Cuneo
+    min 61 (2T 21) local     try          Ian Luca Bienaime
+    min 61 (2T 21) local     conversion   Joaquin Oliva
+    min 62 (2T 22) visitante conversion   Ignacio Chiappello
+    min 64 (2T 24) visitante substitution Eliseo David Funes
+    min 73 (2T 33) visitante try          Juan Pablo Ferreiro
+    min 74 (2T 34) visitante conversion   Ignacio Chiappello
+    min 75 (2T 35) visitante card_yellow  Agustin Ramirez
+  marcador  · eventos 40-31 · guardado 40-31
+  tries     · 6-4 (guardado —-—)
+  arbitro   · Carlos Rafael Hernandez (guardado: —)
+  guardado  · 23 local · 23 visitante · 34 eventos
+
+Club Palermo Bajo Preintermedia "B" vs Club Universitario de Córdoba Preintermedia "B" · torneo-cordobes-preintermedia-b · tarjeta 295701  ·  18c5f3c9-0c7e-4865-8b97-10315e411ae0
+  local     · Club Palermo Bajo Preintermedia "B" · 25 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba Preintermedia "B" · 24 jugadores · 0 con ficha fijada
+  eventos   · 30
+    min  9 (1T 9) local     try          Matias Mateo
+    min  9 (1T 9) local     conversion   Benjamin Biglia
+    min 14 (1T 14) visitante substitution Facundo Agustin Vergara
+    min 22 (1T 22) local     try          Federico Bianchi
+    min 22 (1T 22) local     conversion   Benjamin Biglia
+    min 32 (1T 32) local     try          Mateo Yojala
+    min 40 (2T 0) local     substitution Diego Raul Mansilla
+    min 40 (2T 0) local     substitution Lorenzo Ferratto Guzman
+    min 40 (2T 0) local     substitution Federico Bianchi
+    min 40 (2T 0) visitante substitution Natanael Mozo
+    min 40 (2T 0) visitante substitution Santiago Frias
+    min 40 (2T 0) visitante substitution Gaspar Lorea
+    min 40 (2T 0) visitante substitution Facundo Ameijeiras
+    min 47 (2T 7) visitante try          Leandro Lizarraga
+    min 47 (2T 7) local     card_yellow  Facundo Jose Parola
+    min 47 (2T 7) local     substitution Mauricio Ismael Ferreyra
+    min 48 (2T 8) local     substitution Mateo Yojala
+    min 49 (2T 9) local     substitution Benjamin Biglia
+    min 49 (2T 9) local     substitution Agustin Kinen
+    min 49 (2T 9) local     substitution Javier Lopez
+    min 53 (2T 13) visitante substitution Nestor Jose Oviedo
+    min 53 (2T 13) visitante substitution Julian Lucero Farias
+    min 53 (2T 13) local     try          Ezequiel Broglia Ossola
+    min 53 (2T 13) local     conversion   Lautaro Muñoz Scavuzzo
+    min 54 (2T 14) local     substitution Facundo Jose Parola
+    min 54 (2T 14) local     substitution Marco Pinosa
+    min 57 (2T 17) visitante substitution Santiago Diaz
+    min 67 (2T 27) local     try          Lorenzo Iturriza
+    min 67 (2T 27) local     conversion   Lautaro Muñoz Scavuzzo
+    min 74 (2T 34) local     try          Juan Marques Moll
+  marcador  · eventos 38-5 · guardado 38-5
+  tries     · 6-1 (guardado —-—)
+  arbitro   · Héctor Marcelo Villarroel (guardado: —)
+  guardado  · 25 local · 24 visitante · 30 eventos
+
+Jockey Club Córdoba Preintermedia "B" vs Tala Rugby Club Preintermedia "B" · torneo-cordobes-preintermedia-b · tarjeta 295702  ·  d6a6ba4e-02ff-4fb0-81b4-7a4cc547a554
+  local     · Jockey Club Córdoba Preintermedia "B" · 27 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club Preintermedia "B" · 28 jugadores · 0 con ficha fijada
+  eventos   · 11
+    min  2 (1T 2) visitante card_red     Geronimo Sesin
+    min  3 (1T 3) local     try          
+    min 15 (1T 15) visitante try          Agustin Barros
+    min 15 (1T 15) visitante conversion   Fernando Pereyra
+    min 24 (1T 24) local     try          
+    min 25 (1T 25) local     conversion   
+    min 55 (2T 15) local     try          
+    min 60 (2T 20) visitante card_yellow  Facundo Freites
+    min 62 (2T 22) local     penalty_goal 
+    min 70 (2T 30) local     penalty_goal 
+    min 78 (2T 38) local     try          
+  marcador  · eventos 28-7 · guardado 28-7
+  tries     · 4-1 (guardado —-—)
+  arbitro   · Paloma Vedia (guardado: —)
+  guardado  · 27 local · 28 visitante · 11 eventos
+
+Taborín RC Preintermedia "B" vs Baguales R.C. Preintermedia "B" · torneo-cordobes-preintermedia-b · tarjeta 295703  ·  0afdae26-43d8-4eec-a3a8-57c76113ee65
+  local     · Taborín RC Preintermedia "B" · 22 jugadores · 0 con ficha fijada
+  visitante · Baguales R.C. Preintermedia "B" · 21 jugadores · 0 con ficha fijada
+  eventos   · 15
+    min  2 (1T 2) local     try          
+    min  2 (1T 2) local     conversion   
+    min 30 (1T 30) local     try          
+    min 30 (1T 30) local     conversion   
+    min 41 (2T 1) visitante substitution Gonzalo Britez
+    min 43 (2T 3) visitante try          Lucas Martín Arguello
+    min 43 (2T 3) visitante conversion   Valentín Ismael Acosta
+    min 48 (2T 8) visitante try          Pablo Vozzi
+    min 48 (2T 8) visitante conversion   Valentín Ismael Acosta
+    min 50 (2T 10) visitante substitution Mateo Canale
+    min 50 (2T 10) visitante substitution Felipe Martinez
+    min 60 (2T 20) visitante substitution Nicanor San
+    min 63 (2T 23) local     try          
+    min 64 (2T 24) local     conversion   
+    min 66 (2T 26) local     card_yellow  
+  marcador  · eventos 21-14 · guardado 21-14
+  tries     · 3-2 (guardado —-—)
+  arbitro   · Ángeles Murua (guardado: —)
+  guardado  · 22 local · 21 visitante · 15 eventos
+
+Universidad Nacional de Córdoba Preintermedia "B" vs La Tablada "B" - Pre Intermedia · torneo-cordobes-preintermedia-b · tarjeta 295705  ·  924cba9b-c878-41cc-bba4-4ed874f60558
+  local     · Universidad Nacional de Córdoba Preintermedia "B" · 25 jugadores · 0 con ficha fijada
+  visitante · La Tablada "B" - Pre Intermedia · 25 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min  2 (1T 2) visitante try          
+    min  6 (1T 6) visitante try          
+    min  7 (1T 7) visitante conversion   
+    min 10 (1T 10) local     injury       
+    min 31 (1T 31) visitante penalty_goal 
+    min 44 (2T 4) local     try          
+    min 45 (2T 5) local     conversion   
+    min 50 (2T 10) visitante try          
+    min 51 (2T 11) visitante conversion   
+    min 55 (2T 15) visitante try          
+    min 56 (2T 16) visitante conversion   
+    min 58 (2T 18) visitante card_yellow  
+    min 60 (2T 20) local     injury       
+    min 61 (2T 21) local     try          
+    min 61 (2T 21) local     conversion   
+    min 62 (2T 22) visitante try          
+    min 63 (2T 23) visitante conversion   
+  marcador  · eventos 14-36 · guardado 14-36
+  tries     · 2-5 (guardado —-—)
+  arbitro   · Cristian Schwartz (guardado: —)
+  guardado  · 25 local · 25 visitante · 17 eventos
+
+Club Palermo Bajo Preintermedia "B" vs Jockey Club Córdoba Preintermedia "B" · torneo-cordobes-preintermedia-b · tarjeta 295706  ·  74e6ea0f-e2f9-420e-8844-3119c0bc03b2
+  local     · Club Palermo Bajo Preintermedia "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba Preintermedia "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min  5 (1T 5) visitante try          
+    min  5 (1T 5) visitante conversion   
+    min 10 (1T 10) local     try          Federico Bianchi
+    min 19 (1T 19) local     try          Lucas Eladio Lopez
+    min 19 (1T 19) local     conversion   Lucas Eladio Lopez
+    min 25 (1T 25) local     card_yellow  Diego Raul Mansilla
+    min 27 (1T 27) visitante card_yellow  
+    min 37 (1T 37) visitante try          
+    min 40 (2T 0) local     penalty_try  
+    min 44 (2T 4) local     substitution Diego Raul Mansilla
+    min 44 (2T 4) local     substitution Lorenzo Ferratto Guzman
+    min 44 (2T 4) local     substitution Juan Marques Moll
+    min 44 (2T 4) local     substitution Simon Alday
+    min 56 (2T 16) local     substitution Federico Bianchi
+    min 56 (2T 16) local     substitution Elias Sales
+    min 57 (2T 17) visitante try          
+    min 57 (2T 17) visitante conversion   
+    min 60 (2T 20) visitante card_yellow  
+    min 62 (2T 22) local     substitution Ezequiel Broglia Ossola
+    min 63 (2T 23) local     try          Mateo Yojala
+    min 73 (2T 33) local     substitution Mauricio Ismael Ferreyra
+    min 80 (2T 40) visitante card_yellow  
+  marcador  · eventos 24-19 · guardado 24-19
+  tries     · 4-3 (guardado —-—)
+  arbitro   · Sebastian Velez (guardado: —)
+  guardado  · 23 local · 23 visitante · 22 eventos
+
+Club Universitario de Córdoba Preintermedia "B" vs Taborín RC Preintermedia "B" · torneo-cordobes-preintermedia-b · tarjeta 295707  ·  afdca8ca-05e3-42fe-a81d-41bf71ec3aea
+  local     · Club Universitario de Córdoba Preintermedia "B" · 28 jugadores · 0 con ficha fijada
+  visitante · Taborín RC Preintermedia "B" · 24 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min  9 (1T 9) local     try          Juan Francisco Farias
+    min 14 (1T 14) local     try          Julian Lucero Farias
+    min 23 (1T 23) local     try          Julian Lucero Farias
+    min 23 (1T 23) local     conversion   Galo Guajardo
+    min 25 (1T 25) local     card_yellow  Jeremías Flores
+    min 27 (1T 27) visitante try          
+    min 27 (1T 27) visitante conversion   
+    min 30 (1T 30) local     try          Tobias Buzzoni
+    min 30 (1T 30) local     conversion   Galo Guajardo
+    min 33 (1T 33) visitante penalty_goal 
+    min 33 (1T 33) local     card_yellow  Juan Pablo Benavides Pelaytay
+    min 48 (2T 8) local     try          Renzo Francisco Flores Velarde
+    min 48 (2T 8) local     conversion   Galo Guajardo
+    min 55 (2T 15) local     try          Natanael Mozo
+    min 58 (2T 18) local     try          Mateo Valentin Morero
+    min 59 (2T 19) visitante card_yellow  
+    min 65 (2T 25) local     card_yellow  Santiago Frias
+    min 67 (2T 27) visitante card_yellow  
+    min 73 (2T 33) visitante card_yellow  
+    min 78 (2T 38) local     card_yellow  Tobias Buzzoni
+  marcador  · eventos 41-10 · guardado 41-10
+  tries     · 7-1 (guardado —-—)
+  arbitro   · Carlos Rafael Hernandez (guardado: —)
+  guardado  · 28 local · 24 visitante · 20 eventos
+
+La Tablada "B" - Pre Intermedia vs Córdoba Athletic Club Preintermedia "B" · torneo-cordobes-preintermedia-b · tarjeta 295708  ·  b2b101d0-f928-4ead-b40b-b62116c23a78
+  local     · La Tablada "B" - Pre Intermedia · 26 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club Preintermedia "B" · 26 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min 16 (1T 16) local     try          
+    min 17 (1T 17) local     conversion   
+    min 21 (1T 21) visitante try          Maximo Emiliano Romero
+    min 36 (1T 36) visitante try          Francisco Lucio Speranza
+    min 38 (1T 38) visitante try          Mateo Ferreyra
+    min 38 (1T 38) visitante conversion   Joaquin Oliva
+    min 40 (1T 40) local     penalty_goal 
+    min 41 (2T 1) visitante substitution Dario Elias
+    min 41 (2T 1) visitante substitution Maximo Emiliano Romero
+    min 41 (2T 1) visitante substitution Giuliano Filomeni
+    min 45 (2T 5) visitante substitution Facundo Quiroga Cafure
+    min 47 (2T 7) local     card_yellow  
+    min 50 (2T 10) visitante substitution Santiago Javier Galetto
+    min 51 (2T 11) visitante try          Ezequiel Canziani
+    min 51 (2T 11) visitante conversion   Joaquin Oliva
+    min 54 (2T 14) local     penalty_goal 
+    min 55 (2T 15) visitante substitution Ivo Valentin Reinoso
+    min 55 (2T 15) visitante substitution Santiago Segura
+    min 61 (2T 21) local     try          
+    min 62 (2T 22) local     conversion   
+    min 64 (2T 24) local     card_yellow  
+    min 65 (2T 25) visitante substitution Joaquin San Sebastian
+    min 70 (2T 30) visitante try          Francisco Lucio Speranza
+    min 70 (2T 30) visitante substitution Simon Courtis
+    min 79 (2T 39) local     penalty_goal 
+  marcador  · eventos 23-29 · guardado 23-29
+  tries     · 2-5 (guardado —-—)
+  arbitro   · Javier Antonio Gutierrez (guardado: —)
+  guardado  · 26 local · 26 visitante · 25 eventos
+
+Los Hurones Preintermedia "B" vs Tala Rugby Club Preintermedia "B" · torneo-cordobes-preintermedia-b · tarjeta 295709  ·  e4ed85b3-c9d0-4cd5-8ab6-ecd33493afc3
+  local     · Los Hurones Preintermedia "B" · 24 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club Preintermedia "B" · 22 jugadores · 0 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 14-59
+  tries     · 0-0 (guardado —-—)
+  arbitro   · Daniel Borsarelli (guardado: —)
+  guardado  · 24 local · 22 visitante · 0 eventos
+
+Jockey Club Córdoba Preintermedia "C" vs Universidad Nacional de Córdoba Preintermedia "A" · torneo-cordobes-preintermedia-b · tarjeta 295710  ·  85a1b3e9-f3ee-471d-968d-9ff118df137d
+  local     · Jockey Club Córdoba Preintermedia "C" · 25 jugadores · 0 con ficha fijada
+  visitante · Universidad Nacional de Córdoba Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 19
+    min  2 (1T 2) visitante try          Juan Ignacio Palavecino
+    min  2 (1T 2) visitante conversion   Yago Emanuel Torres
+    min 21 (1T 21) local     penalty_goal 
+    min 26 (1T 26) visitante try          Octavio Mattalía
+    min 27 (1T 27) visitante conversion   Yago Emanuel Torres
+    min 36 (1T 36) local     card_yellow  
+    min 36 (1T 36) visitante card_yellow  Cristian Gaston Lucero
+    min 43 (2T 3) visitante substitution Emilio Guevara
+    min 43 (2T 3) visitante substitution Eliseo David Funes
+    min 47 (2T 7) visitante substitution Francisco Sosa López
+    min 47 (2T 7) visitante substitution Francisco Torres Navarro
+    min 60 (2T 20) local     injury       
+    min 63 (2T 23) visitante try          Luciano Cuneo
+    min 64 (2T 24) visitante conversion   Yago Emanuel Torres
+    min 68 (2T 28) visitante try          Lucca Mattalia
+    min 69 (2T 29) visitante conversion   Yago Emanuel Torres
+    min 70 (2T 30) visitante substitution Alan Mariano Villarreal
+    min 78 (2T 38) visitante try          Luciano Cuneo
+    min 79 (2T 39) visitante conversion   Yago Emanuel Torres
+  marcador  · eventos 3-35 · guardado 3-35
+  tries     · 0-5 (guardado —-—)
+  arbitro   · Alejandro Augusto Aguero (guardado: —)
+  guardado  · 25 local · 23 visitante · 19 eventos
+
+Club Universitario de Córdoba Preintermedia "B" vs Jockey Club Córdoba Preintermedia "B" · torneo-cordobes-preintermedia-b · tarjeta 295712  ·  26750265-adf0-4762-8d65-be14832e4bc3
+  local     · Club Universitario de Córdoba Preintermedia "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba Preintermedia "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min 11 (1T 11) local     card_yellow  Renzo Francisco Flores Velarde
+    min 20 (1T 20) visitante try          
+    min 20 (1T 20) visitante conversion   
+    min 26 (1T 26) visitante penalty_goal 
+    min 28 (1T 28) visitante try          
+    min 31 (1T 31) local     try          Nestor Jose Oviedo
+    min 31 (1T 31) local     conversion   Facundo Matias Garay
+    min 38 (1T 38) visitante try          
+    min 38 (1T 38) visitante conversion   
+    min 46 (2T 6) visitante try          
+    min 46 (2T 6) visitante conversion   
+    min 47 (2T 7) visitante try          
+    min 47 (2T 7) visitante conversion   
+    min 65 (2T 25) local     card_yellow  Santiago Diaz
+    min 65 (2T 25) visitante try          
+    min 65 (2T 25) visitante conversion   
+    min 69 (2T 29) visitante try          
+    min 70 (2T 30) visitante try          
+    min 70 (2T 30) visitante conversion   
+    min 78 (2T 38) visitante card_yellow  
+    min 80 (2T 40) local     card_yellow  Santiago Gamarra
+    min 80 (2T 40) visitante try          
+    min 80 (2T 40) visitante conversion   
+    min 80 (2T 40) visitante card_yellow  
+  marcador  · eventos 7-62 · guardado 7-62
+  tries     · 1-9 (guardado —-—)
+  arbitro   · Sebastian Velez (guardado: —)
+  guardado  · 23 local · 23 visitante · 24 eventos
+
+Club Palermo Bajo Preintermedia "B" vs La Tablada "B" - Pre Intermedia · torneo-cordobes-preintermedia-b · tarjeta 295713  ·  8a8b4dd0-6c41-4181-b507-d505e484c277
+  local     · Club Palermo Bajo Preintermedia "B" · 24 jugadores · 0 con ficha fijada
+  visitante · La Tablada "B" - Pre Intermedia · 28 jugadores · 0 con ficha fijada
+  eventos   · 21
+    min 18 (1T 18) visitante try          
+    min 19 (1T 19) visitante conversion   
+    min 22 (1T 22) local     try          Mateo Yojala
+    min 32 (1T 32) visitante try          
+    min 40 (2T 0) local     substitution Lorenzo Ferratto Guzman
+    min 40 (2T 0) local     substitution Lucas Eladio Lopez
+    min 40 (2T 0) local     substitution Nicolas Flores
+    min 48 (2T 8) local     substitution Diego Raul Mansilla
+    min 51 (2T 11) local     substitution Tiziano Cragnolini
+    min 51 (2T 11) local     substitution Ezequiel Broglia Ossola
+    min 51 (2T 11) visitante card_yellow  
+    min 52 (2T 12) local     substitution Matias Alauie
+    min 54 (2T 14) local     substitution Facundo Bisio
+    min 54 (2T 14) local     try          Mateo Yojala
+    min 54 (2T 14) local     conversion   Francisco Jose Rodrigues Da Cruz
+    min 58 (2T 18) local     substitution Marco Pinosa
+    min 58 (2T 18) visitante try          
+    min 63 (2T 23) local     penalty_goal Francisco Jose Rodrigues Da Cruz
+    min 67 (2T 27) visitante penalty_goal 
+    min 78 (2T 38) visitante try          
+    min 79 (2T 39) visitante conversion   
+  marcador  · eventos 15-27 · guardado 15-27
+  tries     · 2-4 (guardado —-—)
+  arbitro   · Sergio Maldonado (guardado: —)
+  guardado  · 24 local · 28 visitante · 21 eventos
+
+Universidad Nacional de Córdoba Preintermedia "A" vs Taborín RC Preintermedia "B" · torneo-cordobes-preintermedia-b · tarjeta 295714  ·  28e338ba-824e-487b-b834-4f9344661095
+  local     · Universidad Nacional de Córdoba Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Taborín RC Preintermedia "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 69-5
+  tries     · 0-0 (guardado —-—)
+  arbitro   · Héctor Marcelo Villarroel (guardado: —)
+  guardado  · 23 local · 23 visitante · 0 eventos
+
+Córdoba Athletic Club Preintermedia "B" vs Baguales R.C. Preintermedia "B" · torneo-cordobes-preintermedia-b · tarjeta 295715  ·  f8f414c1-f2cf-46c3-a6d4-dd0f6c6fce99
+  local     · Córdoba Athletic Club Preintermedia "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Baguales R.C. Preintermedia "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 66-17
+  tries     · 0-0 (guardado —-—)
+  arbitro   · Emmanuel Boscatto (guardado: —)
+  guardado  · 23 local · 23 visitante · 0 eventos
+
+Universidad Nacional de Córdoba Preintermedia "B" vs Tala Rugby Club Preintermedia "B" · torneo-cordobes-preintermedia-b · tarjeta 295716  ·  70563a1a-48ef-4037-8de0-b8f5c99f9acf
+  local     · Universidad Nacional de Córdoba Preintermedia "B" · 24 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club Preintermedia "B" · 22 jugadores · 0 con ficha fijada
+  eventos   · 15
+    min 15 (1T 15) visitante try          Lorenzo Perez Jaime
+    min 16 (1T 16) visitante conversion   Constantino Martinez
+    min 17 (1T 17) visitante try          Eliseo Barraco Marmol
+    min 18 (1T 18) visitante conversion   Carlos Quinto Luque Colombres
+    min 30 (1T 30) visitante try          Luciano Ibarra
+    min 31 (1T 31) visitante conversion   Carlos Quinto Luque Colombres
+    min 38 (1T 38) visitante try          Constantino Martinez
+    min 39 (1T 39) visitante conversion   Carlos Quinto Luque Colombres
+    min 40 (2T 0) visitante conversion   Carlos Quinto Luque Colombres
+    min 53 (2T 13) visitante try          Agustin Barros
+    min 54 (2T 14) visitante conversion   Carlos Quinto Luque Colombres
+    min 67 (2T 27) visitante card_yellow  Ismael Lopez
+    min 77 (2T 37) visitante try          Tomas Villalba
+    min 78 (2T 38) visitante conversion   Carlos Quinto Luque Colombres
+    min 79 (2T 39) visitante try          Tomas Villalba
+  marcador  · eventos 0-49 · guardado 0-49
+  tries     · 0-7 (guardado —-—)
+  arbitro   · Carlos Altobelli (guardado: —)
+  guardado  · 24 local · 22 visitante · 15 eventos
+
+Jockey Club Córdoba Preintermedia "C" vs Córdoba Athletic Club Preintermedia "C" · torneo-cordobes-preintermedia-b · tarjeta 295717  ·  f61d7c6b-2acf-4f6d-8462-d7712b077178
+  local     · Jockey Club Córdoba Preintermedia "C" · 22 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club Preintermedia "C" · 25 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min  6 (1T 6) local     try          
+    min  7 (1T 7) local     conversion   
+    min 10 (1T 10) visitante substitution Federico Bustos Fierro
+    min 20 (1T 20) visitante try          Augusto Ibañez
+    min 20 (1T 20) visitante conversion   Adolfo Sadashi Mishima
+    min 30 (1T 30) visitante penalty_goal Adolfo Sadashi Mishima
+    min 35 (1T 35) local     injury       
+    min 40 (1T 40) visitante try          Juan Ignacio Brondo
+    min 40 (1T 40) visitante conversion   Adolfo Sadashi Mishima
+    min 41 (2T 1) visitante substitution Agustin Mansilla
+    min 50 (2T 10) visitante substitution Mateo Busso Garlot
+    min 60 (2T 20) visitante substitution Lisandro Bahamonde
+    min 65 (2T 25) visitante substitution Ivo Valentin Reinoso
+    min 70 (2T 30) visitante try          Augusto Ibañez
+    min 70 (2T 30) visitante substitution Francisco Martin Lopez Restagno
+    min 71 (2T 31) visitante conversion   Adolfo Sadashi Mishima
+    min 73 (2T 33) visitante penalty_goal Adolfo Sadashi Mishima
+    min 75 (2T 35) local     card_yellow  
+  marcador  · eventos 7-27 · guardado 7-27
+  tries     · 1-3 (guardado —-—)
+  arbitro   · Arturo Martinez (guardado: —)
+  guardado  · 22 local · 25 visitante · 18 eventos
+
+Jockey Club Córdoba Preintermedia "B" vs Universidad Nacional de Córdoba Preintermedia "B" · torneo-cordobes-preintermedia-b · tarjeta 295718  ·  75acfd52-3500-4102-a5e5-462616ff1b06
+  local     · Jockey Club Córdoba Preintermedia "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Universidad Nacional de Córdoba Preintermedia "B" · 26 jugadores · 0 con ficha fijada
+  eventos   · 30
+    min  9 (1T 9) local     try          
+    min 15 (1T 15) local     try          
+    min 15 (1T 15) local     conversion   
+    min 27 (1T 27) local     penalty_try  
+    min 28 (1T 28) visitante substitution Giuliano Alessandro Paciaroni
+    min 34 (1T 34) local     try          
+    min 34 (1T 34) local     conversion   
+    min 39 (1T 39) visitante card_yellow  Agustin Kurincic
+    min 39 (1T 39) visitante card_yellow  Gonzalo Re
+    min 39 (1T 39) local     card_yellow  
+    min 42 (1T 42) local     try          
+    min 42 (1T 42) local     conversion   
+    min 40 (2T 0) local     try          
+    min 40 (2T 0) local     conversion   
+    min 44 (2T 4) visitante substitution Santino Terenzio
+    min 44 (2T 4) local     try          
+    min 46 (2T 6) visitante substitution Lucas Guerra
+    min 46 (2T 6) visitante substitution Lucca Mattalia
+    min 50 (2T 10) visitante try          Jose Alejandro Villagra
+    min 50 (2T 10) visitante conversion   Benjamin Meroi
+    min 50 (2T 10) visitante substitution Juan Cruz Mendez
+    min 56 (2T 16) visitante try          Juan Cruz Fernandez Pillado
+    min 56 (2T 16) visitante conversion   Ignacio Chiappello
+    min 57 (2T 17) visitante substitution Juan Cruz Fernandez Pillado
+    min 61 (2T 21) local     try          
+    min 61 (2T 21) local     conversion   
+    min 65 (2T 25) local     try          
+    min 65 (2T 25) local     conversion   
+    min 68 (2T 28) local     card_yellow  
+    min 73 (2T 33) visitante try          Eliseo David Funes
+  marcador  · eventos 59-19 · guardado 59-19
+  tries     · 9-3 (guardado —-—)
+  arbitro   · Javier Nicolas Olalla (guardado: —)
+  guardado  · 23 local · 26 visitante · 30 eventos
+
+Córdoba Athletic Club Preintermedia "C" vs La Tablada "B" - Pre Intermedia · torneo-cordobes-preintermedia-b · tarjeta 295720  ·  da1884fb-aefc-4fb5-889f-68aae094cf18
+  local     · Córdoba Athletic Club Preintermedia "C" · 29 jugadores · 0 con ficha fijada
+  visitante · La Tablada "B" - Pre Intermedia · 28 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min  4 (1T 4) local     card_yellow  Juan Ignacio Cibin
+    min 29 (1T 29) local     try          Augusto Ibañez
+    min 30 (1T 30) visitante card_red     
+    min 30 (1T 30) local     conversion   Eros Parada
+    min 41 (2T 1) local     substitution Pedro Salomone Konicoff
+    min 41 (2T 1) local     substitution Benjamin Ahumada
+    min 41 (2T 1) local     substitution Joaquin San Sebastian
+    min 41 (2T 1) local     substitution Tomas Bunge Biscayart
+    min 44 (2T 4) local     penalty_goal Eros Parada
+    min 46 (2T 6) local     substitution Ezequiel Herrera Albano
+    min 47 (2T 7) visitante try          
+    min 48 (2T 8) visitante conversion   
+    min 52 (2T 12) local     substitution Matias Lazarte
+    min 53 (2T 13) local     substitution Antonio Martinez
+    min 56 (2T 16) local     substitution Giuliano Filomeni
+    min 59 (2T 19) visitante penalty_goal 
+    min 60 (2T 20) local     substitution Facundo Aguado
+    min 60 (2T 20) local     substitution Eros Parada
+    min 66 (2T 26) local     penalty_goal Adolfo Sadashi Mishima
+    min 73 (2T 33) local     substitution Santiago Javier Galetto
+  marcador  · eventos 13-10 · guardado 13-10
+  tries     · 1-1 (guardado —-—)
+  arbitro   · Javier Alberto Flores (guardado: —)
+  guardado  · 29 local · 28 visitante · 20 eventos
+
+Los Hurones Preintermedia "B" vs Club Palermo Bajo Preintermedia "B" · torneo-cordobes-preintermedia-b · tarjeta 295722  ·  75496da0-910c-4bb1-812c-16c11dd59dae
+  local     · Los Hurones Preintermedia "B" · 21 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo Preintermedia "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min 21 (1T 21) visitante try          Lucas Eladio Lopez
+    min 21 (1T 21) visitante conversion   Francisco Jose Rodrigues Da Cruz
+    min 27 (1T 27) local     try          Matias Ibarra
+    min 27 (1T 27) local     conversion   Ignacio Raúl Ferreyra Lopez
+    min 33 (1T 33) local     card_yellow  Thomas Gutierrez
+    min 33 (1T 33) local     card_yellow  Martin Iñiguez
+    min 35 (1T 35) visitante try          Francisco Jose Rodrigues Da Cruz
+    min 40 (1T 40) visitante penalty_goal Francisco Jose Rodrigues Da Cruz
+    min 40 (2T 0) local     substitution Thomas Gutierrez
+    min 40 (2T 0) local     substitution Genaro Bortoli Boccardi
+    min 40 (2T 0) local     substitution Marcos Luduena
+    min 40 (2T 0) visitante substitution Diego Raul Mansilla
+    min 40 (2T 0) visitante substitution Martin Juarez
+    min 40 (2T 0) visitante substitution Augusto Marbian
+    min 40 (2T 0) visitante substitution Santiago Aleksandrowicz
+    min 40 (2T 0) visitante substitution Simon Alday
+    min 40 (2T 0) visitante substitution Lucas Eladio Lopez
+    min 40 (2T 0) visitante substitution Facundo Bisio
+    min 40 (2T 0) visitante substitution Facundo Jose Parola
+    min 51 (2T 11) visitante try          Agustin Kinen
+    min 51 (2T 11) visitante conversion   Francisco Jose Rodrigues Da Cruz
+    min 68 (2T 28) visitante try          Juan Cruz Torres
+    min 70 (2T 30) visitante try          Marco Pinosa
+    min 70 (2T 30) visitante conversion   Francisco Jose Rodrigues Da Cruz
+  marcador  · eventos 7-34 · guardado 7-34
+  tries     · 1-5 (guardado —-—)
+  arbitro   · Cristian Schwartz (guardado: —)
+  guardado  · 21 local · 23 visitante · 24 eventos
+
+Baguales R.C. Preintermedia "B" vs Jockey Club Córdoba Preintermedia "C" · torneo-cordobes-preintermedia-b · tarjeta 295723  ·  32673d6b-fefd-4f2d-8135-8f1bdf13c535
+  local     · Baguales R.C. Preintermedia "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba Preintermedia "C" · 22 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min  5 (1T 5) visitante try          
+    min  5 (1T 5) visitante conversion   
+    min 10 (1T 10) local     card_yellow  Renzo Farrando
+    min 20 (1T 20) visitante try          
+    min 20 (1T 20) visitante conversion   
+    min 34 (1T 34) visitante conversion   
+    min 34 (1T 34) visitante try          
+    min 37 (1T 37) visitante try          
+    min 41 (2T 1) local     substitution Matias Agustín Gonzalez
+    min 46 (2T 6) local     substitution Luciano Michel Vega
+    min 47 (2T 7) local     substitution Diego José Zanon
+    min 50 (2T 10) visitante card_yellow  
+    min 55 (2T 15) visitante try          
+    min 62 (2T 22) visitante try          
+    min 66 (2T 26) local     try          Bautista Cordero Goranescu
+    min 70 (2T 30) visitante try          
+    min 75 (2T 35) visitante try          
+    min 75 (2T 35) visitante conversion   
+  marcador  · eventos 5-48 · guardado 5-48
+  tries     · 1-8 (guardado —-—)
+  arbitro   · Daniel Alejandro Funes (guardado: —)
+  guardado  · 23 local · 22 visitante · 18 eventos
+
+Club Palermo Bajo Preintermedia "B" vs Córdoba Athletic Club Preintermedia "B" · torneo-cordobes-preintermedia-b · tarjeta 295725  ·  3b52bc52-54ea-4226-8097-8b3d0c7227b9
+  local     · Club Palermo Bajo Preintermedia "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club Preintermedia "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 34
+    min  3 (1T 3) local     penalty_goal Francisco Jose Rodrigues Da Cruz
+    min  9 (1T 9) visitante penalty_goal Joaquin Oliva
+    min 11 (1T 11) local     penalty_goal Francisco Jose Rodrigues Da Cruz
+    min 15 (1T 15) visitante try          Emiliano Mendez
+    min 16 (1T 16) visitante conversion   Joaquin Oliva
+    min 19 (1T 19) local     penalty_goal Francisco Jose Rodrigues Da Cruz
+    min 21 (1T 21) local     try          Santiago Aleksandrowicz
+    min 27 (1T 27) local     penalty_goal Francisco Jose Rodrigues Da Cruz
+    min 32 (1T 32) visitante try          Matias Lazarte
+    min 32 (1T 32) visitante conversion   Joaquin Oliva
+    min 37 (1T 37) visitante try          Matias Cejas
+    min 37 (1T 37) visitante conversion   Joaquin Oliva
+    min 40 (2T 0) local     substitution Juan Marques Moll
+    min 41 (2T 1) visitante substitution Tomas Bunge Biscayart
+    min 49 (2T 9) local     substitution Simon Alday
+    min 55 (2T 15) local     penalty_goal Francisco Jose Rodrigues Da Cruz
+    min 56 (2T 16) local     substitution Francisco Jose Rodrigues Da Cruz
+    min 56 (2T 16) local     substitution Facundo Bisio
+    min 56 (2T 16) visitante substitution Diego Stocker
+    min 56 (2T 16) local     substitution Santiago Aleksandrowicz
+    min 56 (2T 16) visitante substitution Matias Cejas
+    min 56 (2T 16) visitante substitution Santiago Javier Galetto
+    min 58 (2T 18) local     substitution Marco Pinosa
+    min 58 (2T 18) local     try          Augusto Marbian
+    min 61 (2T 21) visitante substitution Ezequiel Herrera Albano
+    min 61 (2T 21) visitante substitution German Ezequiel Koth
+    min 61 (2T 21) visitante substitution Matias Lazarte
+    min 64 (2T 24) local     penalty_goal Lautaro Muñoz Scavuzzo
+    min 68 (2T 28) local     penalty_goal Lautaro Muñoz Scavuzzo
+    min 72 (2T 32) local     try          Federico Pregot
+    min 76 (2T 36) visitante try          Agustin Barrionuevo Juarez
+    min 77 (2T 37) visitante conversion   Joaquin Oliva
+    min 78 (2T 38) visitante try          Lisandro Bahamonde
+    min 78 (2T 38) visitante conversion   Joaquin Oliva
+  marcador  · eventos 36-38 · guardado 36-38
+  tries     · 3-5 (guardado —-—)
+  arbitro   · Pablo Gerardo Ronco (guardado: —)
+  guardado  · 23 local · 23 visitante · 34 eventos
+
+Club Universitario de Córdoba Preintermedia "B" vs Universidad Nacional de Córdoba Preintermedia "A" · torneo-cordobes-preintermedia-b · tarjeta 295726  ·  7fec31e1-f260-4284-a5a3-43e69777828d
+  local     · Club Universitario de Córdoba Preintermedia "B" · 25 jugadores · 0 con ficha fijada
+  visitante · Universidad Nacional de Córdoba Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 14
+    min 10 (1T 10) visitante try          Francisco Sosa López
+    min 22 (1T 22) local     try          Joaquin Martinez
+    min 25 (1T 25) visitante penalty_goal Ignacio Chiappello
+    min 40 (1T 40) local     penalty_goal Galo Guajardo
+    min 48 (2T 8) visitante try          Francisco Sosa López
+    min 49 (2T 9) visitante card_yellow  Gonzalo Fernando Ochoa
+    min 50 (2T 10) local     try          Julian Lucero Farias
+    min 51 (2T 11) visitante card_yellow  Juan Pablo Ferreiro
+    min 53 (2T 13) visitante penalty_goal Ignacio Chiappello
+    min 61 (2T 21) local     card_yellow  Santiago Diaz
+    min 68 (2T 28) visitante card_yellow  Lautaro Neira
+    min 70 (2T 30) local     try          Natanael Mozo
+    min 75 (2T 35) visitante try          Juan Martín Acuña
+    min 76 (2T 36) visitante conversion   Ignacio Chiappello
+  marcador  · eventos 18-23 · guardado 18-23
+  tries     · 3-3 (guardado —-—)
+  arbitro   · Cristian Mauro Quiles Buteler (guardado: —)
+  guardado  · 25 local · 23 visitante · 14 eventos
+
+La Tablada "B" - Pre Intermedia vs Tala Rugby Club Preintermedia "B" · torneo-cordobes-preintermedia-b · tarjeta 295727  ·  bf2c7cef-7b8b-44a1-a060-6485a7f6adaf
+  local     · La Tablada "B" - Pre Intermedia · 26 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club Preintermedia "B" · 26 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min 20 (1T 20) visitante penalty_goal Fernando Pereyra
+    min 41 (2T 1) visitante substitution Agustin Sugasti
+    min 41 (2T 1) visitante substitution Augusto Altamirano
+    min 41 (2T 1) visitante substitution Valentino Bordoni
+    min 41 (2T 1) visitante substitution Constantino Martinez
+    min 44 (2T 4) visitante try          Francisco Arguello
+    min 47 (2T 7) visitante penalty_goal Fernando Pereyra
+    min 52 (2T 12) visitante substitution Geronimo Sesin
+    min 57 (2T 17) visitante substitution José León Justiniano
+    min 58 (2T 18) local     try          
+    min 62 (2T 22) visitante penalty_goal Fernando Pereyra
+    min 62 (2T 22) visitante substitution Fernando Pereyra
+    min 63 (2T 23) local     penalty_goal 
+    min 65 (2T 25) local     penalty_goal 
+    min 68 (2T 28) visitante try          Francisco Martinez
+    min 75 (2T 35) visitante card_yellow  Nicolás Pereyra
+    min 76 (2T 36) local     penalty_try  
+    min 77 (2T 37) visitante card_yellow  Francisco Ponssa
+  marcador  · eventos 18-19 · guardado 18-19
+  tries     · 2-2 (guardado —-—)
+  arbitro   · Emmanuel Boscatto (guardado: —)
+  guardado  · 26 local · 26 visitante · 18 eventos
+
+Córdoba Athletic Club Preintermedia "C" vs Universidad Nacional de Córdoba Preintermedia "B" · torneo-cordobes-preintermedia-b · tarjeta 295728  ·  aec8fe5e-d4ff-408c-bba3-790a67403610
+  local     · Córdoba Athletic Club Preintermedia "C" · 24 jugadores · 0 con ficha fijada
+  visitante · Universidad Nacional de Córdoba Preintermedia "B" · 27 jugadores · 0 con ficha fijada
+  eventos   · 26
+    min  6 (1T 6) local     try          Mateo Cenci
+    min 11 (1T 11) local     try          German Sehringer
+    min 11 (1T 11) local     conversion   Santiago Gabriel Molina Freiria
+    min 29 (1T 29) visitante try          Fernando Rivera
+    min 32 (1T 32) visitante substitution Fernando Rivera
+    min 37 (1T 37) local     try          Lautaro José Chavez Eve
+    min 40 (1T 40) visitante substitution Juan Andrés Nieto
+    min 45 (2T 5) local     substitution Joaquin Martinat Bonetto
+    min 50 (2T 10) visitante substitution Marcos Hernández
+    min 50 (2T 10) visitante substitution Juan Cruz Fernandez Pillado
+    min 53 (2T 13) visitante substitution Joaquin Fiol
+    min 55 (2T 15) local     substitution German Sehringer
+    min 55 (2T 15) local     substitution Augusto Ibañez
+    min 58 (2T 18) visitante substitution Milton Abel Breard
+    min 60 (2T 20) local     try          Mateo Agustin Maiquez Grosso
+    min 60 (2T 20) local     substitution Giuliano Filomeni
+    min 60 (2T 20) local     substitution Antonio Martinez
+    min 60 (2T 20) visitante substitution Gerardo Hugo Lobos
+    min 62 (2T 22) local     try          Ivo Valentin Reinoso
+    min 62 (2T 22) local     conversion   Adolfo Sadashi Mishima
+    min 63 (2T 23) local     substitution Francisco Martin Lopez Restagno
+    min 65 (2T 25) visitante substitution Mauricio Ezequiel Ponce
+    min 65 (2T 25) local     substitution Lautaro José Chavez Eve
+    min 65 (2T 25) local     try          Mateo Cenci
+    min 70 (2T 30) local     substitution Pedro Salomone Konicoff
+    min 71 (2T 31) local     try          Mateo Agustin Maiquez Grosso
+  marcador  · eventos 39-5 · guardado 39-5
+  tries     · 7-1 (guardado —-—)
+  arbitro   · Héctor Marcelo Villarroel (guardado: —)
+  guardado  · 24 local · 27 visitante · 26 eventos
+
+Jockey Club Córdoba Preintermedia "C" vs Los Hurones Preintermedia "B" · torneo-cordobes-preintermedia-b · tarjeta 295729  ·  4b01acd3-8d7d-4378-aa9c-683c745e124c
+  local     · Jockey Club Córdoba Preintermedia "C" · 25 jugadores · 0 con ficha fijada
+  visitante · Los Hurones Preintermedia "B" · 22 jugadores · 0 con ficha fijada
+  eventos   · 19
+    min  1 (1T 1) local     try          
+    min  7 (1T 7) local     try          
+    min 14 (1T 14) visitante conversion   Ignacio Raúl Ferreyra Lopez
+    min 14 (1T 14) visitante try          Matias Ibarra
+    min 25 (1T 25) local     card_yellow  
+    min 32 (1T 32) visitante try          Martin Iñiguez
+    min 38 (1T 38) visitante penalty_goal Ignacio Raúl Ferreyra Lopez
+    min 40 (2T 0) visitante substitution Carlos Rafael Liendo Oro
+    min 40 (2T 0) visitante substitution Santiago Colombo
+    min 40 (2T 0) visitante substitution Jonathan Lopez
+    min 40 (2T 0) visitante substitution Genaro Bortoli Boccardi
+    min 40 (2T 0) visitante substitution Leonel Scalise
+    min 40 (2T 0) visitante substitution Fernando Andres Zárate
+    min 40 (2T 0) visitante substitution Richard Bendette
+    min 43 (2T 3) local     try          
+    min 44 (2T 4) local     conversion   
+    min 49 (2T 9) visitante try          Martin Iñiguez
+    min 53 (2T 13) local     try          
+    min 72 (2T 32) local     try          
+  marcador  · eventos 27-20 · guardado 27-20
+  tries     · 5-3 (guardado —-—)
+  arbitro   · Cristian Schwartz (guardado: —)
+  guardado  · 25 local · 22 visitante · 19 eventos
+
+Jockey Club Córdoba Preintermedia "B" vs Baguales R.C. Preintermedia "B" · torneo-cordobes-preintermedia-b · tarjeta 295730  ·  bd74dead-c51c-47fd-931a-07a09933f64d
+  local     · Jockey Club Córdoba Preintermedia "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Baguales R.C. Preintermedia "B" · 22 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min  1 (1T 1) visitante try          Juan Martin Rivarola
+    min  1 (1T 1) visitante conversion   Joaquin Bravo
+    min  7 (1T 7) local     try          
+    min  7 (1T 7) local     conversion   
+    min 14 (1T 14) local     try          
+    min 14 (1T 14) local     conversion   
+    min 21 (1T 21) local     try          
+    min 21 (1T 21) local     conversion   
+    min 26 (1T 26) local     try          
+    min 26 (1T 26) local     conversion   
+    min 31 (1T 31) local     conversion   
+    min 31 (1T 31) local     try          
+    min 39 (1T 39) local     try          
+    min 43 (2T 3) local     try          
+    min 43 (2T 3) local     conversion   
+    min 45 (2T 5) visitante try          Jeremías Machado
+    min 50 (2T 10) local     try          
+    min 52 (2T 12) visitante try          Ian Uriel Galeano
+    min 54 (2T 14) local     try          
+    min 66 (2T 26) visitante try          Mateo Valentín Goi Baldoncini
+    min 67 (2T 27) local     try          
+    min 67 (2T 27) local     conversion   
+  marcador  · eventos 64-22 · guardado 64-22
+  tries     · 10-4 (guardado —-—)
+  arbitro   · Juan Francisco Gomez (guardado: —)

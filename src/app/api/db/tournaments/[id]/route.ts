@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getReadClient } from '@/lib/supabase/read';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 import { resolveSerializableLogoUrl } from '@/lib/utils/logoUrl';
+import { getTournamentReadAccess } from '@/lib/server/tournamentReadGate';
 
 type TournamentLookupRow = {
     id: string;
@@ -71,6 +72,12 @@ export async function GET(
 ) {
     const { id } = await params;
 
+    // Borrador u oculto: 404 salvo para quien lo puede leer en el gestor.
+    const access = await getTournamentReadAccess(id);
+    if (access === 'denied') {
+        return NextResponse.json({ ok: false }, { status: 404 });
+    }
+
     const supabase = await getReadClient();
 
     // Try to find a tournament by ID (UUID) or by slug.
@@ -103,5 +110,5 @@ export async function GET(
             banner_url: sanitizeInlineAssetUrl(data.banner_url, data),
             sport_id: data.sport_id || data.legacy_sport || 'rugby',
         }
-    });
+    }, access === 'restricted' ? { headers: { 'Cache-Control': 'private, no-store' } } : undefined);
 }

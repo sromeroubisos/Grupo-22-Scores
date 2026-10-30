@@ -71,6 +71,7 @@ export const CLUB_MAP: Record<number, string> = {
   1865: 'fusion-r-c',
   1866: 'aero-club-rio-iv',
   5967: 'santa-rosa-r-c-c',
+  8638: 'baguales-r-c', // Liguilla Clasificatoria 2024 (Jesús María)
   5976: 'catamarca-r-c',
   5977: 'los-chelcos',
 };

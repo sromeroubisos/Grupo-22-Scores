@@ -216,6 +216,38 @@ test('si URBA informa una hora real, el defecto no la pisa', () => {
   assert.equal(playdateToUtcIso('2026-08-15T11:00:00', 'Superior'), '2026-08-15T14:00:00.000Z');
 });
 
+/* ── jornadas con horario corrido ───────────────────────────────────────── */
+
+/**
+ * Cuando la URBA corre el día entero, la jornada alcanza a TODAS las categorías
+ * —también a las que no tienen horario por subcategoría y se quedarían en la
+ * medianoche—. 14:00 de Buenos Aires son las 17:00Z del MISMO día.
+ */
+test('la jornada corrida alcanza a las categorías sin horario propio', () => {
+  for (const sub of ['Superior', 'Intermedia', 'Preintermedia B', 'M22', null, undefined, '']) {
+    assert.equal(
+      playdateToUtcIso('2026-08-29T00:00:00', sub),
+      '2026-08-29T17:00:00.000Z',
+      `${JSON.stringify(sub)} debería correrse con la jornada`,
+    );
+  }
+});
+
+/**
+ * Lo que la acota: sólo el día que nombra. El domingo de esa misma fecha juegan
+ * el juvenil y el femenino, y tienen que seguir como estaban — si la excepción
+ * se derramara al día siguiente, correría partidos que nadie movió.
+ */
+test('la jornada corrida no se derrama a los días vecinos', () => {
+  assert.equal(playdateToUtcIso('2026-08-30T00:00:00', 'M19'), '2026-08-30T03:00:00.000Z');
+  assert.equal(playdateToUtcIso('2026-08-28T00:00:00', 'Superior'), '2026-08-28T18:30:00.000Z');
+});
+
+/** Sigue valiendo lo de siempre: una hora informada por URBA no se pisa. */
+test('en una jornada corrida, la hora real de URBA manda igual', () => {
+  assert.equal(playdateToUtcIso('2026-08-29T11:00:00', 'Superior'), '2026-08-29T14:00:00.000Z');
+});
+
 /**
  * El motivo por el que la regla vive en el conector y no en la base.
  *

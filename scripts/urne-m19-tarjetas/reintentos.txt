@@ -1,0 +1,8 @@
+apertura intento 1 fallo: Error: Error: server:SUPABASE:select timed out after 8000ms
+apertura intento 2 fallo: Error: no se pudo leer aranduroga-r-c-m19-b vs aranduroga-r-c-m19-a · APERTURA 2026 · tarjeta 309499: Error: server:SUPABASE:select timed out after 8000ms
+apertura intento 3 fallo: Error: Error: server:SUPABASE:select timed out after 8000ms
+apertura intento 4 fallo: Error: Error: server:SUPABASE:select timed out after 8000ms
+oficial intento 1 fallo: Error: Error: server:SUPABASE:select timed out after 8000ms
+oficial intento 2 fallo: Error: Error: server:SUPABASE:select timed out after 8000ms
+oficial intento 3 fallo: Error: Error: server:SUPABASE:update timed out after 8000ms
+oficial intento 4 fallo: Error: Error: server:SUPABASE:update timed out after 8000ms

@@ -1,0 +1,131 @@
+{
+  "fecha": "2026-09-06",
+  "descripcion": "Americas Rugby Championship 2026 · fecha 3 · Uruguay XV 41-12 Paraguay (Valparaiso, 06/09/2026)",
+  "fuente": "Minuto a minuto publicado por la organizacion. No publico las formaciones: se carga SOLO el minuto a minuto, con --sin-formacion.",
+  "marcador": {
+    "local": 41,
+    "visitante": 12
+  },
+  "local": {
+    "nombre": "Uruguay XV"
+  },
+  "visitante": {
+    "nombre": "Paraguay"
+  },
+  "eventos": [
+    {
+      "minuto": 0,
+      "tipo": "match_start",
+      "periodo": "1T"
+    },
+    {
+      "minuto": 6,
+      "tipo": "try",
+      "equipo": "visitante",
+      "jugador": "Mussi, Joaquin",
+      "periodo": "1T"
+    },
+    {
+      "minuto": 7,
+      "tipo": "conversion",
+      "equipo": "visitante",
+      "jugador": "Mussi, Joaquin",
+      "periodo": "1T"
+    },
+    {
+      "minuto": 13,
+      "tipo": "try",
+      "equipo": "local",
+      "jugador": "Álvarez, Ignacio",
+      "periodo": "1T"
+    },
+    {
+      "minuto": 25,
+      "tipo": "card_yellow",
+      "equipo": "local",
+      "jugador": "Ferrario, Justo",
+      "periodo": "1T"
+    },
+    {
+      "minuto": 26,
+      "tipo": "try",
+      "equipo": "visitante",
+      "jugador": "Chavez, Jordi",
+      "periodo": "1T"
+    },
+    {
+      "minuto": 37,
+      "tipo": "try",
+      "equipo": "local",
+      "jugador": "Alonso, Juan Manuel",
+      "periodo": "1T"
+    },
+    {
+      "minuto": 40,
+      "tipo": "match_half",
+      "periodo": "1T"
+    },
+    {
+      "minuto": 44,
+      "tipo": "try",
+      "equipo": "local",
+      "jugador": "Kigel, Germán",
+      "periodo": "2T"
+    },
+    {
+      "minuto": 45,
+      "tipo": "conversion",
+      "equipo": "local",
+      "jugador": "Álvarez, Santiago",
+      "periodo": "2T"
+    },
+    {
+      "minuto": 56,
+      "tipo": "try",
+      "equipo": "local",
+      "jugador": "Ferrario, Justo",
+      "periodo": "2T"
+    },
+    {
+      "minuto": 57,
+      "tipo": "conversion",
+      "equipo": "local",
+      "jugador": "Ferrario, Justo",
+      "periodo": "2T"
+    },
+    {
+      "minuto": 59,
+      "tipo": "try",
+      "equipo": "local",
+      "jugador": "Alonso, Juan Manuel",
+      "periodo": "2T"
+    },
+    {
+      "minuto": 60,
+      "tipo": "conversion",
+      "equipo": "local",
+      "jugador": "Ferrario, Justo",
+      "periodo": "2T"
+    },
+    {
+      "minuto": 62,
+      "tipo": "try",
+      "equipo": "local",
+      "jugador": "Ferrario, Justo",
+      "periodo": "2T"
+    },
+    {
+      "minuto": 64,
+      "tipo": "try",
+      "equipo": "local",
+      "jugador": "Diana, Manuel",
+      "periodo": "2T"
+    },
+    {
+      "minuto": 80,
+      "tipo": "match_end",
+      "periodo": "2T"
+    }
+  ],
+  "nota": "Los minutos del segundo tiempo vienen contados desde cero en la fuente (4', 5', 16'...) y aca van absolutos (44', 45', 56'...), que es como los guarda el resto del proyecto. El `periodo` va declarado porque el camino de escritura no lo deduce: ver el comentario de `periodo` en carga-partido-local.ts."
+}

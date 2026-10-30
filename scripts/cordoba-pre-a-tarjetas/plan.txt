@@ -1,0 +1,3051 @@
+Torneo Cordobés Preintermedia "A" 2026 (Unión Cordobesa) · tarjetas de partido (JSON de tablas) · validado contra el marcador de la base
+
+Jockey Club Córdoba Preintermedia "A" vs Tala Rugby Club Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276870  ·  9cf59ab7-8320-4cc6-893b-aa95e711c33b
+  local     · Jockey Club Córdoba Preintermedia "A" · 23 jugadores · 1 con ficha fijada
+  visitante · Tala Rugby Club Preintermedia "A" · 23 jugadores · 1 con ficha fijada
+  eventos   · 22
+    min 25 (1T 25) local     card_yellow  Francisco Galliano
+    min 36 (1T 36) visitante try          Jesus Mendez Casariego
+    min 36 (1T 36) visitante conversion   Tobias Cordoba Oyhamburu
+    min 40 (2T 0) visitante try          Federico Simondi
+    min 40 (2T 0) visitante substitution Maximo Barella
+    min 40 (2T 0) visitante substitution Mateo Copello
+    min 40 (2T 0) visitante substitution Ezequiel Romero Cassano
+    min 42 (2T 2) visitante substitution Ignacio Ceppolino
+    min 42 (2T 2) visitante substitution Valentín Adanto Risso
+    min 46 (2T 6) local     try          Facundo Ludueña Gómez
+    min 46 (2T 6) local     conversion   Lucas Gadow
+    min 46 (2T 6) visitante card_yellow  Ramiro Bugia
+    min 53 (2T 13) visitante try          Martin Mocatti
+    min 60 (2T 20) visitante substitution Tomas De Vértiz Cañon
+    min 61 (2T 21) local     try          Horacio Urtubey
+    min 65 (2T 25) local     card_yellow  Lucio Gil
+    min 68 (2T 28) visitante try          Carlos Fabian Nielsen
+    min 68 (2T 28) visitante conversion   Tobias Cordoba Oyhamburu
+    min 70 (2T 30) visitante substitution Facundo Almada
+    min 74 (2T 34) visitante card_yellow  Diogenes Sesin
+    min 76 (2T 36) local     try          Juan Manuel Freytes Echenique
+    min 76 (2T 36) local     conversion   Joaquín José Cima
+  marcador  · eventos 19-24 · guardado 19-24
+  tries     · 3-4 (guardado —-—)
+  arbitro   · Abel Esteban Turek (guardado: —)
+
+San Martín de Villa María Preintermedia "A" vs Jockey Club de Villa María Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276871  ·  759a0b37-6117-41b7-8aea-bd62c241d2f9
+  local     · San Martín de Villa María Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club de Villa María Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min  4 (1T 4) local     penalty_goal Pablo Pereyra
+    min  8 (1T 8) visitante card_yellow  Tomás Sayago
+    min 13 (1T 13) local     try          Roman Villarreal
+    min 13 (1T 13) local     conversion   Pablo Pereyra
+    min 28 (1T 28) visitante card_yellow  Benjamin Farias
+    min 30 (1T 30) local     penalty_goal Pablo Pereyra
+    min 30 (1T 30) local     injury       Tomas Martin
+    min 31 (1T 31) visitante try          Alejandro Figueroa
+    min 31 (1T 31) visitante conversion   Bautista Portesio
+    min 40 (2T 0) visitante substitution Francisco Requena
+    min 40 (2T 0) visitante substitution Valentin Vivas
+    min 40 (2T 0) visitante substitution Genaro Daglio
+    min 41 (2T 1) local     substitution Roman Villarreal
+    min 45 (2T 5) visitante substitution Santiago Daglio
+    min 48 (2T 8) visitante try          Matias Garcia
+    min 48 (2T 8) visitante conversion   Bautista Portesio
+    min 54 (2T 14) visitante penalty_goal Bautista Portesio
+    min 60 (2T 20) local     substitution Franco David Oviedo
+    min 62 (2T 22) local     try          Federico Boschitari
+    min 62 (2T 22) local     conversion   Pablo Pereyra
+    min 70 (2T 30) local     substitution Marcos Debiaggi
+    min 70 (2T 30) local     substitution Pedro Ambrosio
+    min 72 (2T 32) local     penalty_goal Pablo Pereyra
+    min 75 (2T 35) local     card_yellow  Marcos Debiaggi
+    min 78 (2T 38) visitante try          Federico Quaglia
+  marcador  · eventos 23-22 · guardado 23-22
+  tries     · 2-3 (guardado —-—)
+  arbitro   · Daniel Edgardo Luna (guardado: —)
+
+Córdoba Athletic Club Preintermedia "A" vs Urú Curé Rugby Club Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276872  ·  cffbee57-29b4-4dd2-ba6a-e838d16ed416
+  local     · Córdoba Athletic Club Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Urú Curé Rugby Club Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 31
+    min  8 (1T 8) local     try          Thiago Armando
+    min  8 (1T 8) local     conversion   Eros Parada
+    min 19 (1T 19) local     penalty_try  
+    min 20 (1T 20) visitante card_yellow  Ignacio Saenz
+    min 27 (1T 27) visitante try          José Ignacio Benevento
+    min 43 (2T 3) visitante substitution Jeronimo Marzari
+    min 47 (2T 7) visitante substitution Salvador Maccio
+    min 50 (2T 10) local     card_yellow  Maximo Emiliano Romero
+    min 50 (2T 10) local     substitution Fernando Bustos Fierro
+    min 50 (2T 10) local     substitution Benjamin Testa
+    min 51 (2T 11) local     try          Martín Vaccarello
+    min 51 (2T 11) local     conversion   Eros Parada
+    min 55 (2T 15) local     substitution Maximo Emiliano Romero
+    min 55 (2T 15) local     substitution Mateo Malik Alabí
+    min 55 (2T 15) local     substitution Felipe Marangone
+    min 55 (2T 15) local     substitution Ignacio Arana
+    min 59 (2T 19) visitante substitution Theo Menichetti
+    min 59 (2T 19) visitante substitution Ignacio Saenz
+    min 59 (2T 19) visitante substitution Manuel Velich
+    min 59 (2T 19) local     try          Santiago Antonucci
+    min 59 (2T 19) local     conversion   Eros Parada
+    min 65 (2T 25) local     substitution Thiago Armando
+    min 67 (2T 27) visitante try          Santino Pariani
+    min 67 (2T 27) visitante conversion   Juan Cruz Pispieiro
+    min 68 (2T 28) visitante substitution Funes Gonzalo
+    min 70 (2T 30) local     card_yellow  Eros Parada
+    min 71 (2T 31) local     penalty_goal Martín Vaccarello
+    min 72 (2T 32) visitante try          Santino Pariani
+    min 73 (2T 33) visitante conversion   Juan Cruz Pispieiro
+    min 73 (2T 33) visitante substitution Salvador Hipermayen
+    min 79 (2T 39) visitante injury       Alexis Rodrigo Funes
+  marcador  · eventos 31-19 · guardado 31-19
+  tries     · 4-3 (guardado —-—)
+  arbitro   · Pablo RONCO . (No Oficial) (guardado: —)
+
+Club Palermo Bajo Preintermedia "A" vs Club Universitario de Córdoba Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276874  ·  b5590e58-9fed-43f0-ae39-57569c0d8d93
+  local     · Club Palermo Bajo Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 31
+    min  8 (1T 8) local     penalty_try  
+    min 18 (1T 18) visitante try          Farid Hammoud
+    min 18 (1T 18) visitante conversion   Javier Perez Soria
+    min 22 (1T 22) visitante card_yellow  Joaquin Martinez
+    min 24 (1T 24) local     try          Luca Samir Alegre Chedid
+    min 27 (1T 27) local     try          Tomas Interdonato
+    min 27 (1T 27) local     conversion   Lucas Eladio Lopez
+    min 33 (1T 33) visitante try          Tobias Buzzoni
+    min 33 (1T 33) local     card_yellow  Lucas Eladio Lopez
+    min 33 (1T 33) visitante conversion   Javier Perez Soria
+    min 35 (1T 35) visitante try          Miguel Nicolás Diaz Llanos
+    min 40 (2T 0) local     substitution Nicolas Godoy
+    min 40 (2T 0) local     substitution Juan Cruz Moreno
+    min 40 (2T 0) local     substitution Tomas Interdonato
+    min 40 (2T 0) visitante substitution Luis Fabian Farias
+    min 40 (2T 0) visitante substitution Joaquin Martinez
+    min 41 (2T 1) visitante try          Maximiliano Riveros
+    min 42 (2T 2) local     substitution Luca Samir Alegre Chedid
+    min 42 (2T 2) local     substitution Juan Gregorio Ferreyra Lammertyn
+    min 43 (2T 3) local     substitution Lucas Eladio Lopez
+    min 50 (2T 10) visitante substitution Valentino Combina Dalmasso
+    min 53 (2T 13) visitante penalty_goal Javier Perez Soria
+    min 53 (2T 13) local     substitution Federico Pregot
+    min 56 (2T 16) local     substitution Elias Sales
+    min 61 (2T 21) visitante card_yellow  Maximiliano Riveros
+    min 62 (2T 22) local     try          Juan Cruz Broglia
+    min 62 (2T 22) local     conversion   Tomás Aldao
+    min 68 (2T 28) visitante substitution Santiago Repezza
+    min 70 (2T 30) local     try          Facundo Nicolas Marengo
+    min 72 (2T 32) visitante substitution Miguel Nicolás Diaz Llanos
+    min 75 (2T 35) visitante substitution Benjamin Castro
+  marcador  · eventos 31-27 · guardado 31-27
+  tries     · 5-4 (guardado —-—)
+  arbitro   · Sebastian Velez (guardado: —)
+
+Club Palermo Bajo Preintermedia "A" vs Jockey Club Córdoba Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276875  ·  dd428f86-b9b0-4ae6-b9de-8ef4d91aafbd
+  local     · Club Palermo Bajo Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba Preintermedia "A" · 23 jugadores · 1 con ficha fijada
+  eventos   · 22
+    min  2 (1T 2) local     penalty_goal Javier Lopez
+    min  6 (1T 6) local     try          Juan Cruz Broglia
+    min 13 (1T 13) visitante card_yellow  Augusto Ocaña
+    min 13 (1T 13) local     card_yellow  Matias Facundo Bianchi Altamira
+    min 14 (1T 14) local     penalty_goal Javier Lopez
+    min 23 (1T 23) local     try          Luca Samir Alegre Chedid
+    min 36 (1T 36) visitante try          Maximo Goldaracena
+    min 37 (1T 37) local     card_yellow  Juan Segundo Raffaini Cabanillas
+    min 42 (2T 2) visitante try          Lucio Gil
+    min 42 (2T 2) visitante conversion   Lucas Gadow
+    min 42 (2T 2) local     substitution Matias Facundo Bianchi Altamira
+    min 42 (2T 2) local     substitution Juan Gregorio Ferreyra Lammertyn
+    min 47 (2T 7) local     substitution Octavio Herrera Manna
+    min 47 (2T 7) local     substitution Javier Lopez
+    min 51 (2T 11) local     substitution Mateo Broglia
+    min 54 (2T 14) local     substitution Benjamin Mangiafave
+    min 54 (2T 14) local     try          Pedro Benjamin Valera Morillo
+    min 55 (2T 15) local     substitution Pedro Benjamin Valera Morillo
+    min 65 (2T 25) local     penalty_goal Benjamin Biglia
+    min 72 (2T 32) visitante try          Lautaro Picossi
+    min 75 (2T 35) local     try          Juan Segundo Raffaini Cabanillas
+    min 75 (2T 35) local     conversion   Benjamin Biglia
+  marcador  · eventos 31-17 · guardado 31-17
+  tries     · 4-3 (guardado —-—)
+  arbitro   · Luciano Francisco Romero (guardado: —)
+
+La Tablada "A" - Pre Intermedia vs Córdoba Athletic Club Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276877  ·  f3508cb1-6da5-4273-9bec-e12ebbc75eab
+  local     · La Tablada "A" - Pre Intermedia · 23 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 32
+    min  1 (1T 1) visitante try          Santiago Antonucci
+    min  8 (1T 8) local     penalty_goal Bautista Demarchi
+    min 13 (1T 13) visitante try          Francisco Debiase
+    min 13 (1T 13) visitante conversion   Eros Parada
+    min 19 (1T 19) local     try          Bautista Paoletti
+    min 22 (1T 22) visitante try          Felipe Saliba
+    min 22 (1T 22) visitante conversion   Eros Parada
+    min 35 (1T 35) local     try          Jacinto Villegas
+    min 40 (2T 0) local     substitution Bautista Paoletti
+    min 45 (2T 5) visitante card_yellow  Fernando Bustos Fierro
+    min 46 (2T 6) local     try          Juan Ignacio Bosio
+    min 47 (2T 7) visitante penalty_goal Eros Parada
+    min 47 (2T 7) local     conversion   Bautista Demarchi
+    min 49 (2T 9) local     substitution Nicolas Gauna
+    min 49 (2T 9) local     substitution Matias Francisca
+    min 50 (2T 10) local     substitution Juan Ignacio Bosio
+    min 50 (2T 10) visitante card_yellow  Felipe Saliba
+    min 50 (2T 10) local     substitution Matías Mariani
+    min 50 (2T 10) local     substitution Matias Petrini
+    min 50 (2T 10) local     substitution Valentín Tomas Aguero
+    min 51 (2T 11) visitante substitution Francisco Debiase
+    min 52 (2T 12) visitante card_yellow  Ian Luca Bienaime
+    min 56 (2T 16) visitante substitution Alejo Yammal
+    min 56 (2T 16) visitante substitution Agustin Benavides
+    min 58 (2T 18) visitante try          Benjamin Testa
+    min 60 (2T 20) visitante substitution Felipe Saliba
+    min 61 (2T 21) visitante substitution Fernando Bustos Fierro
+    min 62 (2T 22) visitante substitution German Maurino
+    min 62 (2T 22) visitante substitution Facundo Miguel Morandini
+    min 69 (2T 29) local     try          Felipe Lima
+    min 82 (2T 42) local     try          Jacinto Villegas
+    min 84 (2T 44) local     conversion   Bautista Demarchi
+  marcador  · eventos 32-27 · guardado 32-27
+  tries     · 5-4 (guardado —-—)
+  arbitro   · Daiana Del Milagro Cesaretti (guardado: —)
+
+Urú Curé Rugby Club Preintermedia "A" vs San Martín de Villa María Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276878  ·  5fc1c283-deaa-41d6-9aa3-b26107a2a0ac
+  local     · Urú Curé Rugby Club Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · San Martín de Villa María Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min  1 (1T 1) local     try          Benjamin Quiros
+    min  1 (1T 1) local     conversion   Benjamin Quiros
+    min  3 (1T 3) visitante try          Ignacio Tenchini
+    min 22 (1T 22) visitante try          Agustín Picca
+    min 22 (1T 22) local     card_yellow  Maximiliano Walter Baez
+    min 40 (1T 40) local     try          Benjamin Quiros
+    min 55 (1T 55) local     card_yellow  Jeronimo Marzari
+    min 40 (2T 0) local     try          Juan Cruz Pispieiro
+    min 40 (2T 0) local     conversion   Juan Cruz Pispieiro
+    min 46 (2T 6) local     try          Bautista Formini Lopez
+    min 46 (2T 6) local     conversion   Bautista Formini Lopez
+    min 46 (2T 6) local     try          Marco Gomez
+    min 46 (2T 6) local     conversion   Marco Gomez
+    min 46 (2T 6) local     try          Marco Gomez
+    min 46 (2T 6) local     conversion   Marco Gomez
+    min 66 (2T 26) local     try          Marco Gomez
+    min 66 (2T 26) local     conversion   Marco Gomez
+    min 66 (2T 26) local     try          Marco Gomez
+    min 66 (2T 26) local     conversion   Marco Gomez
+    min 70 (2T 30) visitante try          Agustín Picca
+    min 70 (2T 30) visitante conversion   Pablo Pereyra
+    min 70 (2T 30) local     try          Marco Gomez
+    min 70 (2T 30) local     try          Santiago Gagna
+    min 72 (2T 32) local     card_yellow  José Manuel Bosch
+    min 78 (2T 38) visitante try          Eduardo Gómez
+  marcador  · eventos 64-22 · guardado 64-22
+  tries     · 10-4 (guardado —-—)
+  arbitro   · Gustavo Reartes (guardado: —)
+
+Jockey Club de Villa María Preintermedia "A" vs Tala Rugby Club Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276879  ·  ab5646ca-cc3f-42e9-a1d6-551dfe56613d
+  local     · Jockey Club de Villa María Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club Preintermedia "A" · 23 jugadores · 2 con ficha fijada
+  eventos   · 22
+    min  4 (1T 4) visitante try          Tobias Cordoba Oyhamburu
+    min  7 (1T 7) local     penalty_goal Luciano Cittadini
+    min 10 (1T 10) visitante try          Mateo Taborda
+    min 12 (1T 12) visitante try          Carlos Quinto Luque Colombres
+    min 19 (1T 19) local     penalty_goal Luciano Cittadini
+    min 29 (1T 29) visitante try          Tobias Rojas
+    min 40 (2T 0) local     conversion   Juan Santiago Benzo
+    min 42 (2T 2) visitante try          Tobias Cordoba Oyhamburu
+    min 42 (2T 2) visitante conversion   Tobias Cordoba Oyhamburu
+    min 48 (2T 8) visitante try          Diogenes Sesin
+    min 48 (2T 8) visitante conversion   Tobias Cordoba Oyhamburu
+    min 51 (2T 11) local     card_yellow  Matias Garcia
+    min 51 (2T 11) visitante card_yellow  Matías Bartolome Torales
+    min 52 (2T 12) local     try          Pedro Valle
+    min 55 (2T 15) visitante try          Mateo Taborda
+    min 60 (2T 20) local     card_yellow  Nicolás Montero
+    min 64 (2T 24) visitante try          Santino Cuaranta
+    min 71 (2T 31) visitante try          Ignacio Ceppolino
+    min 71 (2T 31) visitante conversion   Fernando Pereyra
+    min 73 (2T 33) local     card_yellow  Ignacio Nicolas Fregapani
+    min 74 (2T 34) visitante card_yellow  Ezequiel Romero Cassano
+    min 79 (2T 39) local     try          Joaquin Mabel Bono
+  marcador  · eventos 18-51 · guardado 18-51
+  tries     · 2-9 (guardado —-—)
+  arbitro   · Cristian Mauro Quiles Buteler (guardado: —)
+
+Jockey Club Córdoba Preintermedia "A" vs Jockey Club de Villa María Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276880  ·  be6ff86c-4596-4ece-8ad2-55f392c6ee22
+  local     · Jockey Club Córdoba Preintermedia "A" · 23 jugadores · 1 con ficha fijada
+  visitante · Jockey Club de Villa María Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min  6 (1T 6) local     try          Facundo Ludueña Gómez
+    min  7 (1T 7) local     conversion   Alvaro Areco Penalba
+    min 10 (1T 10) local     try          Lucio Carrara
+    min 11 (1T 11) local     conversion   Alvaro Areco Penalba
+    min 20 (1T 20) local     card_yellow  Facundo Ludueña Gómez
+    min 22 (1T 22) visitante try          Tomas Bertolino
+    min 23 (1T 23) visitante conversion   Joaquin Mabel Bono
+    min 32 (1T 32) visitante substitution Genaro Daglio
+    min 40 (2T 0) local     substitution Octavio Pasquali
+    min 43 (2T 3) local     substitution Santiago Morales
+    min 43 (2T 3) local     substitution Facundo Ludueña Gómez
+    min 44 (2T 4) visitante penalty_goal Joaquin Mabel Bono
+    min 49 (2T 9) visitante substitution Alejandro Figueroa
+    min 49 (2T 9) local     substitution Valentin Toledo
+    min 49 (2T 9) local     substitution Alvaro Areco Penalba
+    min 49 (2T 9) local     substitution Ignacio Quintana
+    min 49 (2T 9) local     try          Valentin Castro
+    min 49 (2T 9) local     substitution Tomas Molina Becerra
+    min 50 (2T 10) local     conversion   Alvaro Areco Penalba
+    min 55 (2T 15) local     substitution Agustin Brizuela Del Moral
+    min 60 (2T 20) visitante substitution Valentin Vivas
+    min 60 (2T 20) visitante substitution Tobias Requena
+    min 63 (2T 23) visitante card_yellow  Francisco Requena
+    min 69 (2T 29) local     card_yellow  Maximo Staricco Tosas
+    min 80 (2T 40) local     card_yellow  Matias Erazarret
+  marcador  · eventos 21-10 · guardado 21-10
+  tries     · 3-1 (guardado —-—)
+  arbitro   · Gabriel Hernán Tirante (guardado: —)
+
+Tala Rugby Club Preintermedia "A" vs Urú Curé Rugby Club Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276881  ·  4d329b37-cd48-4eba-b25f-eaae7dc1454b
+  local     · Tala Rugby Club Preintermedia "A" · 23 jugadores · 2 con ficha fijada
+  visitante · Urú Curé Rugby Club Preintermedia "A" · 22 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min  4 (1T 4) local     try          Matías Bartolome Torales
+    min  9 (1T 9) visitante card_yellow  Santino Pariani
+    min 15 (1T 15) local     try          Mateo Taborda
+    min 19 (1T 19) visitante try          Tomas Tarditi
+    min 22 (1T 22) visitante card_yellow  Santino Pariani
+    min 22 (1T 22) visitante card_red     Santino Pariani
+    min 23 (1T 23) local     try          Ezequiel Romero Cassano
+    min 26 (1T 26) local     try          Santiago Benjamin Luna
+    min 26 (1T 26) local     conversion   Fernando Pereyra
+    min 30 (1T 30) visitante try          Juan Cruz Pispieiro
+    min 31 (1T 31) visitante conversion   Juan Cruz Pispieiro
+    min 34 (1T 34) local     try          Matías Bartolome Torales
+    min 34 (1T 34) local     conversion   Fernando Pereyra
+    min 37 (1T 37) visitante card_yellow  Marco Gomez
+    min 39 (1T 39) visitante card_yellow  Nicolas Alejandro Ruano
+    min 40 (1T 40) local     penalty_try  
+    min 40 (2T 0) local     try          Gaston Ohanian
+    min 40 (2T 0) local     conversion   Fernando Pereyra
+    min 47 (2T 7) local     penalty_try  
+    min 52 (2T 12) local     card_yellow  Tomas Wortley
+    min 58 (2T 18) visitante try          Tomas Orellano Santarelli
+    min 69 (2T 29) local     try          Santiago Benjamin Luna
+    min 69 (2T 29) local     conversion   Fernando Pereyra
+    min 70 (2T 30) visitante injury       Tomas Orellano Santarelli
+  marcador  · eventos 57-17 · guardado 57-17
+  tries     · 9-3 (guardado —-—)
+  arbitro   · Luciano Francisco Romero (guardado: —)
+
+San Martín de Villa María Preintermedia "A" vs La Tablada "A" - Pre Intermedia · torneo-cordobes-preintermedia-a · tarjeta 276882  ·  d83eb5ae-178e-4ae5-a875-9df95d2c2bf1
+  local     · San Martín de Villa María Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · La Tablada "A" - Pre Intermedia · 23 jugadores · 0 con ficha fijada
+  eventos   · 36
+    min  9 (1T 9) visitante try          Facundo Romero
+    min 10 (1T 10) visitante conversion   Gabriel Alejandro Roldán
+    min 13 (1T 13) visitante try          Alvaro Solana Allende
+    min 14 (1T 14) visitante conversion   Gabriel Alejandro Roldán
+    min 19 (1T 19) visitante try          Salvador Solana
+    min 20 (1T 20) visitante conversion   Gabriel Alejandro Roldán
+    min 30 (1T 30) local     card_yellow  Eduardo Gómez
+    min 32 (1T 32) visitante card_yellow  Alvaro Solana Allende
+    min 37 (1T 37) visitante try          Franco Nicolas Galliano
+    min 38 (1T 38) visitante conversion   Gabriel Alejandro Roldán
+    min 40 (1T 40) local     try          Federico Perez
+    min 40 (1T 40) local     conversion   Pablo Pereyra
+    min 40 (1T 40) visitante card_yellow  German Rojas
+    min 41 (2T 1) local     substitution Máximo Cotaimich
+    min 48 (2T 8) local     substitution Martin Brondolo
+    min 48 (2T 8) local     substitution Lionel Carrizo
+    min 50 (2T 10) visitante substitution Facundo Romero
+    min 56 (2T 16) local     substitution Roman Villarreal
+    min 56 (2T 16) visitante substitution Facundo Perrone
+    min 56 (2T 16) visitante substitution Valentino Pizoni Morales
+    min 57 (2T 17) local     try          Ignacio Barrozo Peralta
+    min 57 (2T 17) local     conversion   Pablo Pereyra
+    min 61 (2T 21) visitante substitution Franco Nicolas Galliano
+    min 62 (2T 22) local     substitution Nahuel Peralta
+    min 62 (2T 22) visitante substitution German Rojas
+    min 62 (2T 22) visitante substitution Salvador Solana
+    min 63 (2T 23) local     substitution Gaston Rosetto Olthoff
+    min 66 (2T 26) visitante try          Tomás Hugo Cristiani
+    min 67 (2T 27) visitante conversion   Gabriel Alejandro Roldán
+    min 69 (2T 29) visitante substitution Matías Mariani
+    min 69 (2T 29) visitante try          Tomás Hugo Cristiani
+    min 73 (2T 33) visitante try          Gonzalo Berrotaran
+    min 74 (2T 34) visitante conversion   Gabriel Alejandro Roldán
+    min 78 (2T 38) local     substitution Tobias Genta
+    min 80 (2T 40) visitante try          Felipe Lima
+    min 81 (2T 41) visitante conversion   Gabriel Alejandro Roldán
+  marcador  · eventos 14-54 · guardado 14-54
+  tries     · 2-8 (guardado —-—)
+  arbitro   · Leandro Luchetti (guardado: —)
+
+Córdoba Athletic Club Preintermedia "A" vs Club Universitario de Córdoba Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276883  ·  24e67b2a-33b8-449c-a074-3f0fc4c3d5f9
+  local     · Córdoba Athletic Club Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 29
+    min  5 (1T 5) local     try          Fernando Bustos Fierro
+    min 15 (1T 15) local     try          Martín Vaccarello
+    min 24 (1T 24) visitante try          Ignacio Salas Mendoza
+    min 28 (1T 28) local     try          Martín Vaccarello
+    min 34 (1T 34) local     try          Salvador Florensa
+    min 34 (1T 34) local     conversion   Santiago Segura
+    min 40 (2T 0) visitante substitution Valentino Combina Dalmasso
+    min 40 (2T 0) visitante substitution Javier Perez Soria
+    min 41 (2T 1) local     substitution Facundo Coraglio
+    min 41 (2T 1) local     substitution Fernando Bustos Fierro
+    min 41 (2T 1) local     substitution Maximo Emiliano Romero
+    min 41 (2T 1) local     substitution Thiago Armando
+    min 41 (2T 1) visitante try          Farid Hammoud
+    min 41 (2T 1) visitante conversion   Cesar Rolando Sebastian Nequi
+    min 45 (2T 5) visitante substitution Benjamin Castro
+    min 45 (2T 5) visitante substitution Franco Nahuel González Kogan
+    min 45 (2T 5) local     substitution Francisco Debiase
+    min 48 (2T 8) visitante substitution Joaquin Gelos
+    min 48 (2T 8) local     try          Francisco Lucio Speranza
+    min 49 (2T 9) local     conversion   Benjamin Testa
+    min 50 (2T 10) visitante substitution Juan Pablo Benavides Pelaytay
+    min 50 (2T 10) local     substitution Martín Vaccarello
+    min 56 (2T 16) visitante substitution Juan Pablo Benavides Pelaytay
+    min 65 (2T 25) visitante substitution Benjamin Castro
+    min 65 (2T 25) local     substitution Felipe Saliba
+    min 68 (2T 28) local     try          Salvador Florensa
+    min 69 (2T 29) local     conversion   Benjamin Testa
+    min 75 (2T 35) local     substitution German Maurino
+    min 78 (2T 38) local     card_yellow  Matias Cejas
+  marcador  · eventos 36-12 · guardado 36-12
+  tries     · 6-2 (guardado —-—)
+  arbitro   · Pablo Gerardo Ronco (guardado: —)
+
+Club Palermo Bajo Preintermedia "A" vs Córdoba Athletic Club Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276886  ·  fca6b8ec-13e4-4282-a154-102896b1546a
+  local     · Club Palermo Bajo Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 32
+    min  9 (1T 9) visitante card_yellow  Santiago Segura
+    min 10 (1T 10) local     try          Mateo Lozano Carabajal
+    min 27 (1T 27) local     card_yellow  Pedro Benjamin Valera Morillo
+    min 33 (1T 33) visitante try          Salvador Florensa
+    min 33 (1T 33) visitante conversion   Eros Parada
+    min 37 (1T 37) local     penalty_goal Benjamin Biglia
+    min 38 (1T 38) local     card_red     Alejo Lujan
+    min 40 (1T 40) local     try          Francisco Galmes
+    min 40 (2T 0) local     substitution Tomas Agustin Rubio
+    min 41 (2T 1) visitante substitution Facundo Coraglio
+    min 43 (2T 3) visitante substitution Fernando Bustos Fierro
+    min 43 (2T 3) visitante substitution Maximo Emiliano Romero
+    min 43 (2T 3) visitante try          Salvador Florensa
+    min 43 (2T 3) visitante conversion   Eros Parada
+    min 44 (2T 4) local     substitution Pedro Benjamin Valera Morillo
+    min 44 (2T 4) local     substitution Benjamin Biglia
+    min 44 (2T 4) local     substitution Franco Roson
+    min 45 (2T 5) visitante substitution Máximo Manuel Jaurena
+    min 48 (2T 8) local     try          Tomas Agustin Rubio
+    min 48 (2T 8) local     conversion   Elias Sales
+    min 51 (2T 11) visitante try          Benjamin Testa
+    min 53 (2T 13) visitante card_yellow  Einel Iñaki Knorr
+    min 54 (2T 14) local     try          Mateo Lozano Carabajal
+    min 55 (2T 15) visitante substitution Thiago Armando
+    min 56 (2T 16) local     substitution Juan Gregorio Ferreyra Lammertyn
+    min 59 (2T 19) visitante penalty_goal Eros Parada
+    min 63 (2T 23) visitante substitution Ezequiel Canziani
+    min 63 (2T 23) visitante substitution Santiago Segura
+    min 70 (2T 30) visitante substitution Ezequiel Manzur
+    min 76 (2T 36) local     substitution Ignacio Barrionuevo
+    min 80 (2T 40) local     try          Ariel Francisco Olmedo Ramirez
+    min 80 (2T 40) local     conversion   Elias Sales
+  marcador  · eventos 32-22 · guardado 32-22
+  tries     · 5-3 (guardado —-—)
+  arbitro   · Martin Leandro Barrabino (guardado: —)
+
+Club Universitario de Córdoba Preintermedia "A" vs San Martín de Villa María Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276887  ·  dda54bae-75db-458b-a11b-08443dc13c3e
+  local     · Club Universitario de Córdoba Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · San Martín de Villa María Preintermedia "A" · 21 jugadores · 0 con ficha fijada
+  eventos   · 14
+    min  3 (1T 3) local     try          Ignacio Salas Mendoza
+    min 12 (1T 12) visitante try          Agustín Picca
+    min 17 (1T 17) local     card_yellow  Pedro Vara Paredes
+    min 17 (1T 17) visitante card_yellow  Ignacio Tenchini
+    min 40 (1T 40) local     try          Santiago Fabian Escobar
+    min 40 (2T 0) local     conversion   Javier Perez Soria
+    min 54 (2T 14) visitante try          Lionel Carrizo
+    min 55 (2T 15) visitante conversion   Pablo Pereyra
+    min 59 (2T 19) local     try          Ignacio Salas Mendoza
+    min 60 (2T 20) local     conversion   Javier Perez Soria
+    min 66 (2T 26) local     try          Santiago Fabian Escobar
+    min 67 (2T 27) local     conversion   Javier Perez Soria
+    min 70 (2T 30) local     card_yellow  Federico Blacizza
+    min 79 (2T 39) local     try          Facundo Matias Garay
+  marcador  · eventos 31-12 · guardado 31-12
+  tries     · 5-2 (guardado —-—)
+  arbitro   · Ignacio Santiago Olmedo Ramirez (guardado: —)
+
+La Tablada "A" - Pre Intermedia vs Tala Rugby Club Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276888  ·  d1f1539c-6a6f-4571-924a-b89cd42f926b
+  local     · La Tablada "A" - Pre Intermedia · 23 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club Preintermedia "A" · 23 jugadores · 2 con ficha fijada
+  eventos   · 28
+    min  3 (1T 3) visitante try          Mateo Taborda
+    min 13 (1T 13) local     try          Valentín Tomas Aguero
+    min 14 (1T 14) local     conversion   Facundo Cevey
+    min 22 (1T 22) visitante try          Matías Bartolome Torales
+    min 22 (1T 22) visitante conversion   Carlos Quinto Luque Colombres
+    min 22 (1T 22) visitante substitution Ignacio Ceppolino
+    min 38 (1T 38) local     penalty_goal Facundo Cevey
+    min 40 (2T 0) local     substitution Valentino Pizoni Morales
+    min 41 (2T 1) visitante substitution Facundo Almada
+    min 41 (2T 1) visitante substitution Tobias Cordoba Oyhamburu
+    min 42 (2T 2) visitante try          Carlos Fabian Nielsen
+    min 42 (2T 2) visitante conversion   Fernando Pereyra
+    min 46 (2T 6) visitante substitution Valentín Adanto Risso
+    min 47 (2T 7) visitante penalty_goal Fernando Pereyra
+    min 48 (2T 8) local     substitution Alvaro Solana Allende
+    min 48 (2T 8) local     substitution Facundo Perrone
+    min 48 (2T 8) local     substitution Facundo Cevey
+    min 50 (2T 10) visitante substitution Ezequiel Romero Cassano
+    min 52 (2T 12) visitante substitution Carlos Quinto Luque Colombres
+    min 53 (2T 13) visitante penalty_goal Fernando Pereyra
+    min 55 (2T 15) local     substitution Valentín Tomas Aguero
+    min 61 (2T 21) visitante substitution Mateo Taborda
+    min 61 (2T 21) visitante substitution Maximo Barella
+    min 67 (2T 27) local     card_red     Tomas Ignacio Lopez
+    min 73 (2T 33) visitante try          Matías Bartolome Torales
+    min 73 (2T 33) visitante conversion   Fernando Pereyra
+    min 79 (2T 39) visitante try          Carlos Fabian Nielsen
+    min 79 (2T 39) visitante conversion   Fernando Pereyra
+  marcador  · eventos 10-39 · guardado 10-39
+  tries     · 1-5 (guardado —-—)
+  arbitro   · Luciano Francisco Romero (guardado: —)
+
+Urú Curé Rugby Club Preintermedia "A" vs Jockey Club de Villa María Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276889  ·  347dafd6-d620-458e-8162-372e83432ef0
+  local     · Urú Curé Rugby Club Preintermedia "A" · 21 jugadores · 0 con ficha fijada
+  visitante · Jockey Club de Villa María Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min  1 (1T 1) local     try          Santiago Oviedo
+    min  1 (1T 1) visitante try          Joaquin Perazzio
+    min  1 (1T 1) local     conversion   Santiago Oviedo
+    min  1 (1T 1) visitante conversion   Joaquin Perazzio
+    min  1 (1T 1) local     try          Felipe Joaquin Ambroggio
+    min  1 (1T 1) visitante try          Sebastián Cordoba
+    min  1 (1T 1) local     conversion   Felipe Joaquin Ambroggio
+    min  1 (1T 1) visitante conversion   Sebastián Cordoba
+    min  1 (1T 1) local     try          Emiliano Bustos
+    min  1 (1T 1) visitante try          Francisco Requena
+    min  1 (1T 1) local     conversion   Emiliano Bustos
+    min 40 (1T 40) visitante substitution Sebastián Cordoba
+    min 40 (1T 40) local     substitution Valentino Bonelli
+    min 40 (1T 40) local     card_yellow  Maximiliano Walter Baez
+    min 40 (1T 40) visitante substitution Valentin Vivas
+    min 40 (1T 40) visitante substitution Matias Garcia
+    min 40 (1T 40) local     substitution Nicolas Alejandro Ruano
+    min 40 (1T 40) visitante substitution Dante Fissore
+    min 40 (1T 40) local     substitution Tomas Orellano Santarelli
+    min 40 (1T 40) visitante substitution Juan Santiago Benzo
+    min 40 (1T 40) local     substitution Leonel Bazan
+    min 40 (1T 40) local     substitution Tomas Tarditi
+  marcador  · eventos 21-19 · guardado 21-19
+  tries     · 3-3 (guardado —-—)
+  arbitro   · Abel Esteban Turek (guardado: —)
+
+Jockey Club Córdoba Preintermedia "A" vs Urú Curé Rugby Club Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276890  ·  8e3dea93-e2aa-4af7-b97c-d59748575cd9
+  local     · Jockey Club Córdoba Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Urú Curé Rugby Club Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 8
+    min  6 (1T 6) local     try          Ignacio Quintana
+    min 15 (1T 15) visitante try          Santino Pariani
+    min 15 (1T 15) visitante conversion   Juan Cruz Pispieiro
+    min 23 (1T 23) local     penalty_try  
+    min 26 (1T 26) visitante penalty_goal Juan Cruz Pispieiro
+    min 35 (1T 35) visitante penalty_goal Juan Cruz Pispieiro
+    min 43 (2T 3) local     try          Maximo Staricco Tosas
+    min 43 (2T 3) local     conversion   Joaquín José Cima
+  marcador  · eventos 19-13 · guardado 19-13
+  tries     · 3-1 (guardado —-—)
+  arbitro   · Cristian Mauro Quiles Buteler (guardado: —)
+
+Jockey Club de Villa María Preintermedia "A" vs La Tablada "A" - Pre Intermedia · torneo-cordobes-preintermedia-a · tarjeta 276891  ·  abab4139-a595-43b7-9a4b-ceeb93be6090
+  local     · Jockey Club de Villa María Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · La Tablada "A" - Pre Intermedia · 23 jugadores · 0 con ficha fijada
+  eventos   · 7
+    min 12 (1T 12) local     try          Tomas Bertolino
+    min 12 (1T 12) local     conversion   Luciano Cittadini
+    min 17 (1T 17) visitante try          Alvaro Solana Allende
+    min 20 (1T 20) local     card_yellow  Pedro Valle
+    min 26 (1T 26) local     card_yellow  Tomas Bertolino
+    min 40 (1T 40) local     penalty_goal Luciano Cittadini
+    min 59 (2T 19) visitante card_yellow  Matías Roitman
+  marcador  · eventos 10-5 · guardado 10-5
+  tries     · 1-1 (guardado —-—)
+  arbitro   · Emanuel Ordoñez (guardado: —)
+
+Tala Rugby Club Preintermedia "A" vs Club Universitario de Córdoba Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276892  ·  2ff92d01-f560-4530-bad8-188ec385944d
+  local     · Tala Rugby Club Preintermedia "A" · 23 jugadores · 1 con ficha fijada
+  visitante · Club Universitario de Córdoba Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min 10 (1T 10) visitante card_yellow  Benjamin Castro
+    min 17 (1T 17) local     try          Gaston Ohanian
+    min 17 (1T 17) local     conversion   Fernando Pereyra
+    min 25 (1T 25) visitante try          Franco Nahuel González Kogan
+    min 40 (2T 0) visitante substitution Javier Perez Soria
+    min 40 (2T 0) visitante substitution Farid Hammoud
+    min 40 (2T 0) visitante substitution Benjamin Castro
+    min 41 (2T 1) local     substitution Ramiro Bugia
+    min 41 (2T 1) local     substitution Rocco Moriconi Brasini
+    min 41 (2T 1) local     substitution Santiago Pando
+    min 46 (2T 6) local     substitution Facundo Almada
+    min 46 (2T 6) local     substitution Matías Bartolome Torales
+    min 47 (2T 7) visitante try          Franco Nahuel González Kogan
+    min 47 (2T 7) visitante conversion   Javier Perez Soria
+    min 49 (2T 9) visitante card_yellow  Joaquin Gelos
+    min 49 (2T 9) local     substitution Carlos Fabian Nielsen
+    min 59 (2T 19) local     substitution Mateo Taborda
+    min 59 (2T 19) local     substitution Marcos Bossin Russo
+    min 66 (2T 26) visitante substitution Pedro Vara Paredes
+    min 71 (2T 31) visitante card_yellow  Ignacio Salas Mendoza
+    min 72 (2T 32) visitante substitution Luciano Vieyra
+    min 72 (2T 32) local     try          Tomas Wortley
+    min 72 (2T 32) local     conversion   Fernando Pereyra
+    min 74 (2T 34) visitante substitution Santiago Fabian Escobar
+    min 78 (2T 38) visitante substitution Ignacio Agustín Brizuela
+  marcador  · eventos 14-12 · guardado 14-12
+  tries     · 2-2 (guardado —-—)
+  arbitro   · Arturo Martinez (guardado: —)
+
+San Martín de Villa María Preintermedia "A" vs Club Palermo Bajo Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276893  ·  81c7edbe-526c-4270-9cf3-e1931175350d
+  local     · San Martín de Villa María Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min  6 (1T 6) visitante penalty_goal Tomás Aldao
+    min 12 (1T 12) local     try          Manuel Patricelli
+    min 15 (1T 15) local     try          Manuel Patricelli
+    min 19 (1T 19) local     try          Manuel Patricelli
+    min 19 (1T 19) local     conversion   Manuel Patricelli
+    min 25 (1T 25) visitante try          Santiago Aleksandrowicz
+    min 40 (1T 40) visitante try          Santiago Aleksandrowicz
+    min 40 (1T 40) visitante conversion   Tomás Aldao
+    min 41 (2T 1) visitante substitution Tomas Ignacio Berbel
+    min 41 (2T 1) visitante substitution Juan Cruz Moreno
+    min 43 (2T 3) visitante card_yellow  Octavio Herrera Manna
+    min 45 (2T 5) visitante try          Matias Mateo
+    min 45 (2T 5) visitante conversion   Tomás Aldao
+    min 52 (2T 12) visitante substitution Gerónimo Ferreyra Andrada
+    min 55 (2T 15) visitante substitution Octavio Herrera Manna
+    min 55 (2T 15) visitante substitution Benjamin Mangiafave
+    min 55 (2T 15) visitante substitution Ignacio Barrionuevo
+    min 55 (2T 15) visitante substitution Santiago Aleksandrowicz
+    min 59 (2T 19) visitante try          Juan Segundo Raffaini Cabanillas
+    min 59 (2T 19) visitante conversion   Tomás Aldao
+    min 61 (2T 21) visitante try          Franco Roson
+    min 61 (2T 21) visitante conversion   Tomás Aldao
+    min 68 (2T 28) visitante try          Tomás Aldao
+    min 70 (2T 30) visitante try          Matias Mateo
+    min 70 (2T 30) visitante conversion   Tomás Aldao
+  marcador  · eventos 17-48 · guardado 17-48
+  tries     · 3-7 (guardado —-—)
+  arbitro   · Santiago Geronimo Lozada Chaves (guardado: —)
+
+Córdoba Athletic Club Preintermedia "A" vs Jockey Club Córdoba Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276895  ·  1b1d3a82-5fe0-46f2-8478-25e902467a4e
+  local     · Córdoba Athletic Club Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 39
+    min  8 (1T 8) local     card_yellow  Lautaro Jose Bocco
+    min 21 (1T 21) local     try          Eros Parada
+    min 40 (1T 40) visitante penalty_try  
+    min 40 (1T 40) visitante try          Francesco Pizzicari
+    min 40 (1T 40) visitante conversion   Francesco Pizzicari
+    min 40 (1T 40) visitante try          Agustin Brizuela Del Moral
+    min 40 (1T 40) visitante conversion   Agustin Brizuela Del Moral
+    min 40 (1T 40) visitante try          Valentin Castro
+    min 40 (1T 40) visitante conversion   Valentin Castro
+    min 40 (1T 40) visitante try          Francesco Pizzicari
+    min 40 (1T 40) visitante conversion   Francesco Pizzicari
+    min 40 (1T 40) visitante penalty_goal Joaquín Chaves Bertin
+    min 40 (1T 40) visitante try          Jeremias Ignacio Alvarez Avoledo
+    min 40 (1T 40) visitante conversion   Jeremias Ignacio Alvarez Avoledo
+    min 40 (1T 40) visitante try          Agustin Cavallero
+    min 40 (1T 40) visitante substitution Ignacio Quintana
+    min 40 (1T 40) visitante substitution Maximo Staricco Tosas
+    min 40 (1T 40) visitante substitution Francisco Galliano
+    min 40 (1T 40) visitante substitution Mateo Ferreyra
+    min 40 (1T 40) visitante substitution Josemaria Palacios Sesto
+    min 40 (1T 40) visitante substitution Lautaro Gualdieri
+    min 40 (1T 40) visitante substitution Jeremias Ignacio Alvarez Avoledo
+    min 40 (1T 40) visitante substitution Valentin Castro
+    min 40 (1T 40) visitante card_yellow  Maximo Staricco Tosas
+    min 40 (1T 40) visitante card_yellow  Augusto Ocaña
+    min 40 (2T 0) local     card_red     German Maurino
+    min 45 (2T 5) local     substitution Facundo Coraglio
+    min 45 (2T 5) local     substitution Nazareno Fonzo
+    min 45 (2T 5) local     substitution Thiago Armando
+    min 50 (2T 10) local     substitution Matias Lazarte
+    min 50 (2T 10) local     substitution Fernando Bustos Fierro
+    min 51 (2T 11) local     card_yellow  Santiago Segura
+    min 55 (2T 15) local     substitution Ian Luca Bienaime
+    min 55 (2T 15) local     substitution Lautaro Jose Bocco
+    min 55 (2T 15) local     substitution Facundo Miguel Morandini
+    min 60 (2T 20) local     substitution Mateo Malik Alabí
+    min 74 (2T 34) local     try          Ignacio Vanni
+    min 74 (2T 34) local     conversion   Santiago Segura
+    min 77 (2T 37) local     try          German Maurino
+  marcador  · eventos 17-50 · guardado 17-50
+  tries     · 3-7 (guardado —-—)
+  arbitro   · Abel Esteban Turek (guardado: —)
+
+Club Palermo Bajo Preintermedia "A" vs Tala Rugby Club Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276897  ·  7fdc2d21-5ee1-4568-ada7-b45a0c340b01
+  local     · Club Palermo Bajo Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club Preintermedia "A" · 23 jugadores · 1 con ficha fijada
+  eventos   · 33
+    min  3 (1T 3) visitante conversion   Fernando Pereyra
+    min  3 (1T 3) visitante try          Tomas Villalba
+    min 16 (1T 16) visitante penalty_goal Fernando Pereyra
+    min 23 (1T 23) visitante card_yellow  Tobias Cordoba Oyhamburu
+    min 26 (1T 26) visitante penalty_goal Fernando Pereyra
+    min 28 (1T 28) local     try          Franco Roson
+    min 28 (1T 28) local     conversion   Tomás Aldao
+    min 29 (1T 29) visitante card_yellow  Franco Garcia
+    min 36 (1T 36) local     substitution Iñaki Castroviejo
+    min 38 (1T 38) local     penalty_try  
+    min 41 (2T 1) local     substitution Tomas Ignacio Berbel
+    min 41 (2T 1) visitante substitution Facundo Freites
+    min 41 (2T 1) local     substitution Matias Facundo Bianchi Altamira
+    min 41 (2T 1) visitante substitution Tomas Wortley
+    min 41 (2T 1) visitante substitution Felipe Spagnuolo Garzon
+    min 45 (2T 5) local     substitution Franco Roson
+    min 46 (2T 6) local     substitution Mariano Vassia
+    min 46 (2T 6) visitante substitution Santino Cuaranta
+    min 47 (2T 7) local     substitution Santiago Aleksandrowicz
+    min 47 (2T 7) visitante try          Tobias Cordoba Oyhamburu
+    min 52 (2T 12) visitante try          Carlos Fabian Nielsen
+    min 53 (2T 13) local     substitution Gerónimo Ferreyra Andrada
+    min 54 (2T 14) local     substitution Octavio Herrera Manna
+    min 63 (2T 23) local     try          Lucas Eladio Lopez
+    min 63 (2T 23) local     conversion   Tomás Aldao
+    min 70 (2T 30) local     penalty_goal Tomás Aldao
+    min 72 (2T 32) visitante substitution Mateo Taborda
+    min 72 (2T 32) visitante substitution Facundo Almada
+    min 72 (2T 32) visitante substitution Tomas Villalba
+    min 73 (2T 33) visitante try          Carlos Fabian Nielsen
+    min 73 (2T 33) visitante conversion   Fernando Pereyra
+    min 77 (2T 37) visitante try          Francisco Ponssa
+    min 77 (2T 37) visitante conversion   Fernando Pereyra
+  marcador  · eventos 24-37 · guardado 24-37
+  tries     · 3-5 (guardado —-—)
+  arbitro   · Pablo Gerardo Ronco (guardado: —)
+
+Club Universitario de Córdoba Preintermedia "A" vs Jockey Club de Villa María Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276898  ·  949d362e-a8a7-43d6-8cc0-602a1aeb602a
+  local     · Club Universitario de Córdoba Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club de Villa María Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min  2 (1T 2) local     card_yellow  Ignacio Salas Mendoza
+    min  2 (1T 2) local     try          Tobias Buzzoni
+    min 11 (1T 11) visitante card_yellow  Federico Quaglia
+    min 14 (1T 14) local     card_yellow  Luis Fabian Farias
+    min 15 (1T 15) visitante card_yellow  Sebastián Cordoba
+    min 17 (1T 17) local     try          Farid Hammoud
+    min 17 (1T 17) local     conversion   Facundo Ameijeiras
+    min 40 (2T 0) local     try          Luciano Ruben Zalazar Castellanos
+    min 40 (2T 0) local     conversion   Tobias Buzzoni
+    min 47 (2T 7) local     try          Luciano Ruben Zalazar Castellanos
+    min 47 (2T 7) local     conversion   Tobias Buzzoni
+    min 50 (2T 10) visitante try          Sebastián Cordoba
+    min 50 (2T 10) local     card_yellow  Franco Nahuel González Kogan
+    min 54 (2T 14) local     conversion   Tobias Buzzoni
+    min 54 (2T 14) local     try          Ignacio Salas Mendoza
+    min 58 (2T 18) local     penalty_goal Tobias Buzzoni
+    min 75 (2T 35) visitante try          Bautista Arbarello
+  marcador  · eventos 36-10 · guardado 36-10
+  tries     · 5-2 (guardado —-—)
+  arbitro   · Emmanuel Boscatto (guardado: —)
+
+La Tablada "A" - Pre Intermedia vs Urú Curé Rugby Club Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276899  ·  b2ff0cb8-7e9c-480b-a6d4-4903e3f81b19
+  local     · La Tablada "A" - Pre Intermedia · 23 jugadores · 0 con ficha fijada
+  visitante · Urú Curé Rugby Club Preintermedia "A" · 22 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min  1 (1T 1) local     try          Maximiliano Bianconi
+    min  2 (1T 2) local     conversion   Bautista Demarchi
+    min 23 (1T 23) local     penalty_goal Bautista Demarchi
+    min 26 (1T 26) visitante try          Santiago Gagna
+    min 33 (1T 33) local     penalty_goal Bautista Demarchi
+    min 36 (1T 36) visitante penalty_goal Santiago Gagna
+    min 40 (2T 0) local     substitution Facundo Romero
+    min 40 (2T 0) local     substitution Tomas Sanchez
+    min 45 (2T 5) local     substitution Benjamín De Alzáa
+    min 47 (2T 7) local     try          Tomas Ignacio Lopez
+    min 48 (2T 8) local     conversion   Bautista Demarchi
+    min 48 (2T 8) local     substitution Matias Francisca
+    min 51 (2T 11) local     try          Augusto Arguello
+    min 53 (2T 13) local     substitution Santiago Milani
+    min 54 (2T 14) local     substitution Matías Mariani
+    min 54 (2T 14) local     substitution Bautista Paoletti
+    min 62 (2T 22) visitante card_yellow  Santiago Gagna
+    min 62 (2T 22) local     substitution Matias Petrini
+    min 66 (2T 26) local     penalty_goal Bautista Demarchi
+    min 74 (2T 34) visitante try          José Ignacio Benevento
+    min 75 (2T 35) visitante conversion   Santiago Gagna
+    min 77 (2T 37) local     try          Tomas Retta
+  marcador  · eventos 33-15 · guardado 33-15
+  tries     · 4-2 (guardado —-—)
+  arbitro   · Paloma Vedia (guardado: —)
+
+Jockey Club Córdoba Preintermedia "A" vs La Tablada "A" - Pre Intermedia · torneo-cordobes-preintermedia-a · tarjeta 276900  ·  284f3c66-f54b-432b-91a8-5df69e8d5c5b
+  local     · Jockey Club Córdoba Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · La Tablada "A" - Pre Intermedia · 23 jugadores · 0 con ficha fijada
+  eventos   · 12
+    min 23 (1T 23) local     try          Facundo Ludueña Gómez
+    min 34 (1T 34) visitante try          Agustin Bosio
+    min 35 (1T 35) visitante conversion   Bautista Demarchi
+    min 44 (2T 4) visitante card_yellow  Augusto Arguello
+    min 64 (2T 24) local     penalty_goal Joaquín Chaves Bertin
+    min 67 (2T 27) local     penalty_goal Joaquín Chaves Bertin
+    min 69 (2T 29) visitante try          Lorenzo Dutto
+    min 70 (2T 30) visitante conversion   Nicolas Gauna
+    min 75 (2T 35) local     penalty_goal Joaquín Chaves Bertin
+    min 80 (2T 40) local     card_red     Augusto Ocaña
+    min 80 (2T 40) visitante try          Facundo Funes
+    min 81 (2T 41) visitante conversion   Nicolas Gauna
+  marcador  · eventos 14-21 · guardado 14-21
+  tries     · 1-3 (guardado —-—)
+  arbitro   · Daiana Del Milagro Cesaretti (guardado: —)
+
+Urú Curé Rugby Club Preintermedia "A" vs Club Universitario de Córdoba Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276901  ·  463a70fb-cec0-4cd2-8ba5-a73be83e9142
+  local     · Urú Curé Rugby Club Preintermedia "A" · 22 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 29
+    min  8 (1T 8) visitante substitution Galo Guajardo
+    min  8 (1T 8) visitante injury       Galo Guajardo
+    min 10 (1T 10) local     substitution Alexis Rodrigo Funes
+    min 10 (1T 10) local     injury       Alexis Rodrigo Funes
+    min 12 (1T 12) visitante penalty_goal Tobias Buzzoni
+    min 15 (1T 15) visitante try          Julian Lucero Farias
+    min 15 (1T 15) visitante conversion   Tobias Buzzoni
+    min 19 (1T 19) local     penalty_goal Santiago Gagna
+    min 38 (1T 38) local     card_yellow  Funes Gonzalo
+    min 44 (1T 44) visitante try          Renzo Francisco Flores Velarde
+    min 44 (1T 44) visitante conversion   Tobias Buzzoni
+    min 40 (2T 0) visitante injury       Luis Fabian Farias
+    min 42 (2T 2) local     card_yellow  Maximiliano Walter Baez
+    min 42 (2T 2) local     substitution Benjamin Quiros
+    min 45 (2T 5) visitante try          Renzo Francisco Flores Velarde
+    min 48 (2T 8) local     card_yellow  Mauro Agustin Palacios
+    min 48 (2T 8) visitante substitution Mateo Valentin Morero
+    min 48 (2T 8) visitante substitution Luciano Vieyra
+    min 48 (2T 8) visitante substitution Javier Perez Soria
+    min 54 (2T 14) visitante substitution Ignacio Agustín Brizuela
+    min 59 (2T 19) visitante substitution Juan Benjamin Spat
+    min 62 (2T 22) local     substitution Jeronimo De La Mota Boehler
+    min 66 (2T 26) local     try          Santiago Gagna
+    min 66 (2T 26) local     conversion   Santiago Gagna
+    min 66 (2T 26) visitante card_yellow  Pedro Vara Paredes
+    min 69 (2T 29) visitante penalty_goal Tobias Buzzoni
+    min 72 (2T 32) local     penalty_goal Santiago Gagna
+    min 77 (2T 37) local     card_yellow  Jeronimo Marzari
+    min 80 (2T 40) visitante penalty_goal Tobias Buzzoni
+  marcador  · eventos 13-28 · guardado 13-28
+  tries     · 1-3 (guardado —-—)
+  arbitro   · Nahuel Sabena (guardado: —)
+
+Jockey Club de Villa María Preintermedia "A" vs Club Palermo Bajo Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276902  ·  2b20f1eb-d5ad-48e1-8471-ed06a01aaf49
+  local     · Jockey Club de Villa María Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 26
+    min 23 (1T 23) visitante try          Franco Roson
+    min 29 (1T 29) visitante card_yellow  Diego Ezequiel Deodato
+    min 30 (1T 30) local     card_yellow  Santiago Daglio
+    min 35 (1T 35) visitante try          Iñaki Castroviejo
+    min 35 (1T 35) visitante conversion   Lucas Eladio Lopez
+    min 40 (1T 40) visitante try          Manuel Valentín Quintana
+    min 41 (2T 1) visitante substitution Iñaki Castroviejo
+    min 41 (2T 1) visitante substitution Franco Roson
+    min 42 (2T 2) visitante try          Juan Segundo Raffaini Cabanillas
+    min 47 (2T 7) visitante substitution Tomas Agustin Rubio
+    min 47 (2T 7) visitante substitution Mariano Vassia
+    min 47 (2T 7) visitante substitution Juan Segundo Raffaini Cabanillas
+    min 51 (2T 11) visitante try          Diego Ezequiel Deodato
+    min 51 (2T 11) visitante conversion   Lucas Eladio Lopez
+    min 51 (2T 11) visitante substitution Benjamin Mangiafave
+    min 53 (2T 13) visitante substitution Ezequiel Broglia Ossola
+    min 58 (2T 18) visitante substitution Manuel Valentín Quintana
+    min 61 (2T 21) visitante try          Javier Lopez
+    min 61 (2T 21) visitante conversion   Lucas Eladio Lopez
+    min 65 (2T 25) local     try          Pedro Valle
+    min 70 (2T 30) local     try          Bruno Rampone
+    min 70 (2T 30) local     conversion   Juan Cruz Bustos
+    min 70 (2T 30) local     card_yellow  Santiago Daglio
+    min 71 (2T 31) visitante try          Agustin Carabajal
+    min 71 (2T 31) visitante conversion   Lucas Eladio Lopez
+    min 79 (2T 39) visitante card_yellow  Juan Gregorio Ferreyra Lammertyn
+  marcador  · eventos 12-43 · guardado 12-43
+  tries     · 2-7 (guardado —-—)
+  arbitro   · Carlos Prieto (guardado: —)
+
+San Martín de Villa María Preintermedia "A" vs Córdoba Athletic Club Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276904  ·  4921d0df-b30d-4c50-98e7-4701c8dc3d17
+  local     · San Martín de Villa María Preintermedia "A" · 19 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 23
+    min  5 (1T 5) visitante try          Maximo Emiliano Romero
+    min  6 (1T 6) visitante conversion   Eros Parada
+    min 19 (1T 19) visitante try          Matias Cejas
+    min 20 (1T 20) visitante conversion   Eros Parada
+    min 40 (1T 40) local     try          Tomás Cánova
+    min 40 (1T 40) local     conversion   Lionel Carrizo
+    min 40 (2T 0) local     try          Federico Boschitari
+    min 40 (2T 0) local     substitution Lionel Carrizo
+    min 40 (2T 0) visitante try          Augusto Ibañez
+    min 45 (2T 5) visitante substitution Facundo Miguel Morandini
+    min 45 (2T 5) visitante conversion   Mateo Agustin Maiquez Grosso
+    min 52 (2T 12) visitante try          Eros Parada
+    min 55 (2T 15) visitante substitution Matias Cejas
+    min 55 (2T 15) visitante substitution Einel Iñaki Knorr
+    min 57 (2T 17) visitante try          Santiago Antonucci
+    min 58 (2T 18) local     substitution Roman Villarreal
+    min 58 (2T 18) visitante conversion   Eros Parada
+    min 65 (2T 25) visitante substitution Facundo Coraglio
+    min 65 (2T 25) visitante penalty_try  
+    min 65 (2T 25) visitante substitution Máximo Manuel Jaurena
+    min 71 (2T 31) local     substitution Cipriano Sabas Unzueta Pivetta
+    min 72 (2T 32) visitante try          Santiago Antonucci
+    min 73 (2T 33) visitante conversion   Eros Parada
+  marcador  · eventos 12-47 · guardado 12-47
+  tries     · 2-7 (guardado —-—)
+  arbitro   · Pablo Gerardo Ronco (guardado: —)
+
+San Martín de Villa María Preintermedia "A" vs Jockey Club Córdoba Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276905  ·  9ef3b79a-2cc1-4052-9a51-827e3751e313
+  local     · San Martín de Villa María Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 26-33
+  tries     · 0-0 (guardado —-—)
+  arbitro   · Martin Leandro Barrabino (guardado: —)
+
+Córdoba Athletic Club Preintermedia "A" vs Tala Rugby Club Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276906  ·  1ab2de0b-e6ca-4e18-a3bf-2a0701e099bf
+  local     · Córdoba Athletic Club Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club Preintermedia "A" · 23 jugadores · 2 con ficha fijada
+  eventos   · 28
+    min  4 (1T 4) visitante try          Franco Garcia
+    min  4 (1T 4) visitante conversion   Fernando Pereyra
+    min 26 (1T 26) local     card_yellow  Facundo Miguel Morandini
+    min 26 (1T 26) visitante penalty_goal Fernando Pereyra
+    min 29 (1T 29) visitante try          Santino Cuaranta
+    min 29 (1T 29) visitante conversion   Fernando Pereyra
+    min 36 (1T 36) local     penalty_goal Santiago Segura
+    min 40 (2T 0) local     substitution Einel Iñaki Knorr
+    min 40 (2T 0) local     substitution Thiago Armando
+    min 40 (2T 0) visitante try          Martin Mocatti
+    min 40 (2T 0) visitante conversion   Fernando Pereyra
+    min 41 (2T 1) visitante substitution Francisco Ponssa
+    min 42 (2T 2) local     try          Ivo Valentin Reinoso
+    min 42 (2T 2) visitante card_yellow  Valentín Adanto Risso
+    min 43 (2T 3) local     conversion   Santiago Segura
+    min 50 (2T 10) local     substitution Facundo Miguel Morandini
+    min 50 (2T 10) local     substitution Ivo Valentin Reinoso
+    min 52 (2T 12) visitante substitution Nicolas Pereyra
+    min 52 (2T 12) visitante try          Mateo Taborda
+    min 52 (2T 12) visitante conversion   Fernando Pereyra
+    min 60 (2T 20) local     substitution Mateo Malik Alabí
+    min 66 (2T 26) local     card_yellow  Facundo Coraglio
+    min 66 (2T 26) local     substitution Máximo Manuel Jaurena
+    min 70 (2T 30) visitante try          Martin Mocatti
+    min 70 (2T 30) visitante conversion   Fernando Pereyra
+    min 74 (2T 34) visitante try          Mateo Raimundi
+    min 74 (2T 34) visitante conversion   Fernando Pereyra
+    min 75 (2T 35) local     substitution Maximo Emiliano Romero
+  marcador  · eventos 10-45 · guardado 10-45
+  tries     · 1-6 (guardado —-—)
+  arbitro   · Juan Francisco Gomez (guardado: —)
+
+Club Palermo Bajo Preintermedia "A" vs Urú Curé Rugby Club Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276908  ·  59d92f49-f5cc-4ac6-b9c8-77d152bfbd9f
+  local     · Club Palermo Bajo Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Urú Curé Rugby Club Preintermedia "A" · 22 jugadores · 0 con ficha fijada
+  eventos   · 30
+    min  4 (1T 4) visitante penalty_goal Santiago Gagna
+    min  5 (1T 5) local     try          Tomas Interdonato
+    min  5 (1T 5) local     conversion   Lucas Eladio Lopez
+    min  8 (1T 8) visitante try          Santiago Mondino
+    min 10 (1T 10) visitante try          Tomas Tarditi
+    min 10 (1T 10) visitante conversion   Santiago Gagna
+    min 15 (1T 15) local     try          Mariano Vassia
+    min 15 (1T 15) local     conversion   Lucas Eladio Lopez
+    min 29 (1T 29) visitante card_yellow  Salvador Maccio
+    min 32 (1T 32) local     substitution Fernando Bernardi
+    min 33 (1T 33) local     penalty_try  
+    min 34 (1T 34) local     try          Federico Bianchi
+    min 34 (1T 34) local     conversion   Lucas Eladio Lopez
+    min 39 (1T 39) visitante penalty_goal Santiago Gagna
+    min 41 (2T 1) local     substitution Mariano Vassia
+    min 44 (2T 4) local     try          Javier Lopez
+    min 44 (2T 4) local     conversion   Lucas Eladio Lopez
+    min 47 (2T 7) visitante try          Jeronimo Marzari
+    min 48 (2T 8) local     substitution Javier Lopez
+    min 52 (2T 12) visitante try          Tomas Tarditi
+    min 55 (2T 15) local     substitution Tomas Interdonato
+    min 61 (2T 21) local     substitution Mateo Yojala
+    min 61 (2T 21) local     substitution Germán Tello
+    min 66 (2T 26) visitante try          Funes Gonzalo
+    min 66 (2T 26) visitante conversion   Tadeo Ulises Fraschetti
+    min 69 (2T 29) local     try          Tomas Lopresti
+    min 69 (2T 29) local     conversion   Benjamin Biglia
+    min 73 (2T 33) visitante card_yellow  Juan Valentino Santangelo
+    min 73 (2T 33) local     try          Matias Facundo Bianchi Altamira
+    min 79 (2T 39) local     card_yellow  Tomas Lopresti
+  marcador  · eventos 47-35 · guardado 47-35
+  tries     · 7-5 (guardado —-—)
+  arbitro   · Cristian Mauro Quiles Buteler (guardado: —)
+
+Club Universitario de Córdoba Preintermedia "A" vs La Tablada "A" - Pre Intermedia · torneo-cordobes-preintermedia-a · tarjeta 276909  ·  44a566e5-5497-4357-905d-100aedb9de2f
+  local     · Club Universitario de Córdoba Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · La Tablada "A" - Pre Intermedia · 23 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min 23 (1T 23) visitante try          Pedro Allende
+    min 23 (1T 23) visitante conversion   Nicolas Gauna
+    min 26 (1T 26) local     penalty_goal Tobias Buzzoni
+    min 29 (1T 29) local     try          Joaquin Nicolas Mimessi
+    min 38 (1T 38) local     penalty_goal Tobias Buzzoni
+    min 44 (1T 44) visitante penalty_goal Nicolas Gauna
+    min 61 (1T 61) visitante try          Pedro Allende
+    min 61 (1T 61) visitante conversion   Nicolas Gauna
+    min 40 (2T 0) local     card_yellow  Tobias Buzzoni
+    min 40 (2T 0) local     substitution Javier Perez Soria
+    min 52 (2T 12) local     penalty_goal Tobias Buzzoni
+    min 55 (2T 15) local     substitution Jeremias Peralta
+    min 57 (2T 17) local     substitution Renzo Francisco Flores Velarde
+    min 62 (2T 22) local     substitution Ignacio Agustín Brizuela
+    min 63 (2T 23) local     substitution Santiago Fabian Escobar
+    min 64 (2T 24) local     substitution Luis Fabian Farias
+    min 73 (2T 33) visitante try          Pedro Allende
+    min 73 (2T 33) visitante conversion   Nicolas Gauna
+    min 74 (2T 34) local     substitution Mateo Valentin Morero
+    min 74 (2T 34) local     substitution Ignacio Salas Mendoza
+    min 77 (2T 37) visitante card_yellow  Agustin Bosio
+    min 77 (2T 37) local     card_yellow  Joaquin Gelos
+  marcador  · eventos 14-24 · guardado 14-24
+  tries     · 1-3 (guardado —-—)
+  arbitro   · Sebastian Velez (guardado: —)
+
+Jockey Club Córdoba Preintermedia "A" vs Club Universitario de Córdoba Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276910  ·  4704965e-08b3-452e-87a0-c819e8cf9384
+  local     · Jockey Club Córdoba Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min  2 (1T 2) local     try          Conrado Alonso
+    min  2 (1T 2) local     conversion   Joaquín Chaves Bertin
+    min  8 (1T 8) local     try          Facundo Ludueña Gómez
+    min  8 (1T 8) local     conversion   Joaquín Chaves Bertin
+    min 13 (1T 13) visitante penalty_goal Joaquin Mercado
+    min 14 (1T 14) local     conversion   Conrado Alonso
+    min 14 (1T 14) local     try          Conrado Alonso
+    min 20 (1T 20) local     try          Conrado Alonso
+    min 20 (1T 20) local     conversion   Conrado Alonso
+    min 24 (1T 24) local     try          Conrado Alonso
+    min 24 (1T 24) local     conversion   Joaquín Chaves Bertin
+    min 36 (1T 36) visitante try          Joaquin Gelos
+    min 46 (2T 6) local     try          Valentin Castro
+    min 46 (2T 6) local     conversion   Valentin Castro
+    min 57 (2T 17) local     try          Juan Manuel Sanso
+    min 57 (2T 17) local     conversion   Joaquín Chaves Bertin
+    min 60 (2T 20) local     card_yellow  Lucio Carrara
+    min 68 (2T 28) visitante try          Facundo Matias Garay
+    min 68 (2T 28) visitante conversion   Facundo Matias Garay
+    min 70 (2T 30) local     card_yellow  Tomas De Goycoechea
+    min 77 (2T 37) visitante try          Jeremias Peralta
+    min 77 (2T 37) visitante conversion   Facundo Matias Garay
+  marcador  · eventos 49-22 · guardado 49-22
+  tries     · 7-3 (guardado —-—)
+  arbitro   · Sebastian Velez (guardado: —)
+
+La Tablada "A" - Pre Intermedia vs Club Palermo Bajo Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276911  ·  e91fe0c9-e919-4f7a-9170-0a6414b635a4
+  local     · La Tablada "A" - Pre Intermedia · 23 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 32
+    min  1 (1T 1) local     try          Joaquin Paiva
+    min  2 (1T 2) local     conversion   Nicolas Gauna
+    min 19 (1T 19) visitante penalty_goal Lucas Eladio Lopez
+    min 24 (1T 24) local     penalty_goal Nicolas Gauna
+    min 36 (1T 36) visitante try          Mateo Yojala
+    min 36 (1T 36) visitante conversion   Lucas Eladio Lopez
+    min 40 (2T 0) local     substitution Zair Leonel Acosta
+    min 41 (2T 1) visitante substitution Germán Tello
+    min 45 (2T 5) local     substitution Valentino Pizoni Morales
+    min 46 (2T 6) local     try          Justo Bonadeo
+    min 47 (2T 7) visitante substitution Octavio Herrera Manna
+    min 47 (2T 7) visitante substitution Lucas Eladio Lopez
+    min 47 (2T 7) local     conversion   Nicolas Gauna
+    min 47 (2T 7) visitante substitution Federico Bianchi
+    min 47 (2T 7) visitante substitution Mateo Yojala
+    min 51 (2T 11) local     try          Lorenzo Dutto
+    min 51 (2T 11) visitante substitution Maximo Ricardo Contigiani
+    min 52 (2T 12) local     conversion   Nicolas Gauna
+    min 52 (2T 12) visitante substitution Ignacio Barrionuevo
+    min 53 (2T 13) local     try          Justo Bonadeo
+    min 57 (2T 17) local     substitution Justo Bonadeo
+    min 60 (2T 20) local     substitution Augusto Arguello
+    min 60 (2T 20) local     substitution Alejo Manuel Garcia
+    min 61 (2T 21) local     substitution Facundo Perrone
+    min 62 (2T 22) visitante substitution Ariel Francisco Olmedo Ramirez
+    min 63 (2T 23) visitante try          Alejo Lujan
+    min 63 (2T 23) local     substitution Bautista Demarchi
+    min 63 (2T 23) local     substitution Franco Nicolas Galliano
+    min 69 (2T 29) local     penalty_goal Nicolas Gauna
+    min 72 (2T 32) visitante try          Matias Facundo Bianchi Altamira
+    min 72 (2T 32) local     card_yellow  Gonzalo Berrotaran
+    min 77 (2T 37) local     penalty_goal Nicolas Gauna
+  marcador  · eventos 35-20 · guardado 35-20
+  tries     · 4-3 (guardado —-—)
+  arbitro   · Daniel Edgardo Luna (guardado: —)
+
+Jockey Club de Villa María Preintermedia "A" vs Córdoba Athletic Club Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276913  ·  daa53bfe-73e8-403d-bc6a-bcd17ce0dae2
+  local     · Jockey Club de Villa María Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min  7 (1T 7) local     try          Alejandro Figueroa
+    min  7 (1T 7) local     conversion   Joaquin Barrios
+    min 27 (1T 27) visitante card_yellow  Agustin Benavides
+    min 27 (1T 27) local     try          Joaquin Perazzio
+    min 27 (1T 27) local     conversion   Joaquin Perazzio
+    min 27 (1T 27) local     card_yellow  Bruno Rampone
+    min 34 (1T 34) visitante try          Benjamin Testa
+    min 34 (1T 34) visitante conversion   Benjamin Testa
+    min 45 (2T 5) visitante substitution Einel Iñaki Knorr
+    min 45 (2T 5) local     substitution Alejandro Figueroa
+    min 45 (2T 5) visitante substitution Agustin Benavides
+    min 45 (2T 5) local     substitution Luciano Astutti
+    min 47 (2T 7) visitante try          Thiago Armando
+    min 47 (2T 7) visitante conversion   Eros Parada
+    min 50 (2T 10) visitante substitution Thiago Armando
+    min 50 (2T 10) visitante substitution Facundo Quiroga Cafure
+    min 50 (2T 10) visitante substitution Máximo Manuel Jaurena
+    min 52 (2T 12) visitante try          Ivo Valentin Reinoso
+    min 52 (2T 12) visitante conversion   Benjamin Testa
+    min 55 (2T 15) local     substitution Joaquin Perazzio
+    min 60 (2T 20) local     substitution Valentin Vivas
+    min 60 (2T 20) visitante substitution Jeremias Pineira
+    min 65 (2T 25) visitante substitution Ivo Valentin Reinoso
+    min 78 (2T 38) visitante try          Eros Parada
+    min 78 (2T 38) visitante conversion   Benjamin Testa
+  marcador  · eventos 14-28 · guardado 14-28
+  tries     · 2-4 (guardado —-—)
+  arbitro   · Gustavo Reartes (guardado: —)
+
+Tala Rugby Club Preintermedia "A" vs San Martín de Villa María Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276914  ·  82042721-b6fc-44f8-b97b-5b579ebe7b8b
+  local     · Tala Rugby Club Preintermedia "A" · 23 jugadores · 2 con ficha fijada
+  visitante · San Martín de Villa María Preintermedia "A" · 19 jugadores · 0 con ficha fijada
+  eventos   · 34
+    min 10 (1T 10) visitante try          Federico Perez
+    min 10 (1T 10) visitante conversion   Pablo Pereyra
+    min 11 (1T 11) local     try          Facundo Freites
+    min 11 (1T 11) local     conversion   Fernando Pereyra
+    min 14 (1T 14) local     try          Matías Bartolome Torales
+    min 14 (1T 14) local     conversion   Fernando Pereyra
+    min 24 (1T 24) local     card_yellow  Martin Mocatti
+    min 28 (1T 28) local     try          Santino Cuaranta
+    min 28 (1T 28) local     conversion   Fernando Pereyra
+    min 39 (1T 39) local     try          Santino Cuaranta
+    min 41 (2T 1) local     try          Santiago Lastra
+    min 41 (2T 1) local     conversion   Fernando Pereyra
+    min 45 (2T 5) local     substitution Mateo Taborda
+    min 45 (2T 5) local     substitution Maximo Barella
+    min 45 (2T 5) local     substitution Facundo Almada
+    min 45 (2T 5) local     substitution Franco Garcia
+    min 45 (2T 5) local     substitution Nicolas Pereyra
+    min 45 (2T 5) local     substitution Lucca Moriconi
+    min 45 (2T 5) local     substitution Matías Bartolome Torales
+    min 48 (2T 8) local     substitution Facundo Freites
+    min 55 (2T 15) local     try          Tobias Cordoba Oyhamburu
+    min 55 (2T 15) local     conversion   Fernando Pereyra
+    min 60 (2T 20) local     try          Carlos Fabian Nielsen
+    min 60 (2T 20) local     conversion   Fernando Pereyra
+    min 65 (2T 25) local     try          Luciano Andres Coria
+    min 65 (2T 25) local     conversion   Fernando Pereyra
+    min 66 (2T 26) local     try          Alvaro Revol
+    min 66 (2T 26) local     conversion   Fernando Pereyra
+    min 69 (2T 29) local     try          Alvaro Revol
+    min 69 (2T 29) local     conversion   Fernando Pereyra
+    min 70 (2T 30) visitante card_yellow  Francisco Maestre
+    min 74 (2T 34) local     try          Carlos Fabian Nielsen
+    min 74 (2T 34) local     conversion   Fernando Pereyra
+    min 76 (2T 36) local     try          Ramiro Bugia
+  marcador  · eventos 80-7 · guardado 80-7
+  tries     · 12-1 (guardado —-—)
+  arbitro   · Juan Francisco Gomez (guardado: —)
+
+Tala Rugby Club Preintermedia "A" vs Jockey Club Córdoba Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276915  ·  d06748b2-1c29-49f0-9ffb-7ba1e7d04123
+  local     · Tala Rugby Club Preintermedia "A" · 23 jugadores · 2 con ficha fijada
+  visitante · Jockey Club Córdoba Preintermedia "A" · 23 jugadores · 2 con ficha fijada
+  eventos   · 41
+    min  2 (1T 2) local     penalty_goal Fernando Pereyra
+    min  3 (1T 3) local     try          Alvaro Revol
+    min  8 (1T 8) visitante penalty_goal Joaquín Chaves Bertin
+    min  8 (1T 8) local     card_yellow  Mateo Taborda
+    min 11 (1T 11) visitante try          Agustin Brizuela Del Moral
+    min 11 (1T 11) visitante conversion   Joaquín Chaves Bertin
+    min 22 (1T 22) local     penalty_goal Fernando Pereyra
+    min 24 (1T 24) local     try          Franco Garcia
+    min 24 (1T 24) local     conversion   Fernando Pereyra
+    min 27 (1T 27) local     try          Nicolas Pereyra
+    min 27 (1T 27) local     conversion   Fernando Pereyra
+    min 31 (1T 31) visitante try          Francisco Nicolás Burgos
+    min 31 (1T 31) visitante conversion   Joaquín Chaves Bertin
+    min 34 (1T 34) local     substitution Valentín Adanto Risso
+    min 34 (1T 34) local     substitution Ramiro Bugia
+    min 39 (1T 39) local     penalty_goal Fernando Pereyra
+    min 40 (1T 40) visitante penalty_try  
+    min 40 (2T 0) visitante try          Nicolas Corso
+    min 41 (2T 1) visitante conversion   Joaquín Chaves Bertin
+    min 43 (2T 3) local     substitution Franco Garcia
+    min 43 (2T 3) local     substitution Ignacio Ceppolino
+    min 46 (2T 6) local     penalty_goal Fernando Pereyra
+    min 49 (2T 9) local     try          Facundo Freites
+    min 49 (2T 9) local     conversion   Fernando Pereyra
+    min 49 (2T 9) local     substitution Nicolas Pereyra
+    min 49 (2T 9) local     substitution Facundo Almada
+    min 52 (2T 12) local     substitution Rocco Moriconi Brasini
+    min 53 (2T 13) local     penalty_goal Fernando Pereyra
+    min 54 (2T 14) visitante penalty_goal Joaquín Chaves Bertin
+    min 62 (2T 22) local     penalty_goal Fernando Pereyra
+    min 64 (2T 24) local     card_yellow  Santiago Lastra
+    min 64 (2T 24) local     substitution Maximo Barella
+    min 65 (2T 25) visitante try          Jeremias Ignacio Alvarez Avoledo
+    min 68 (2T 28) visitante try          Jeremias Ignacio Alvarez Avoledo
+    min 68 (2T 28) visitante conversion   Joaquín Chaves Bertin
+    min 73 (2T 33) visitante card_yellow  Valentin Toledo
+    min 73 (2T 33) visitante penalty_goal Joaquín Chaves Bertin
+    min 73 (2T 33) visitante card_yellow  Alvaro Areco Penalba
+    min 74 (2T 34) local     card_yellow  Tomas Wortley
+    min 78 (2T 38) local     try          Facundo Freites
+    min 78 (2T 38) local     conversion   Fernando Pereyra
+  marcador  · eventos 51-49 · guardado 51-49
+  tries     · 5-6 (guardado —-—)
+  arbitro   · Eugenio Morra (guardado: —)
+
+Jockey Club de Villa María Preintermedia "A" vs San Martín de Villa María Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276916  ·  503cf12e-a2b5-4ef2-8101-a777374839d1
+  local     · Jockey Club de Villa María Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · San Martín de Villa María Preintermedia "A" · 22 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min  9 (1T 9) local     try          Alejandro Figueroa
+    min  9 (1T 9) local     conversion   Juan Santiago Benzo
+    min 20 (1T 20) local     try          Joaquin Perazzio
+    min 20 (1T 20) local     conversion   Juan Santiago Benzo
+    min 35 (1T 35) local     try          Tomás Sayago
+    min 35 (1T 35) local     conversion   Juan Santiago Benzo
+    min 36 (1T 36) visitante try          Marcos Debiaggi
+    min 36 (1T 36) visitante try          Lucas Ortiz Loudet
+    min 40 (2T 0) local     penalty_goal Juan Santiago Benzo
+    min 40 (2T 0) local     substitution Valentin Vivas
+    min 40 (2T 0) local     substitution Federico Quaglia
+    min 42 (2T 2) local     card_yellow  Santiago Daglio
+    min 55 (2T 15) local     card_yellow  Tomas Bertolino
+    min 60 (2T 20) local     substitution Joaquin Barrios
+    min 60 (2T 20) local     substitution Bruno Rampone
+    min 70 (2T 30) visitante try          Lucas Ortiz Loudet
+    min 70 (2T 30) visitante conversion   Pablo Pereyra
+    min 70 (2T 30) local     substitution Valentino Brugiafreddo
+    min 73 (2T 33) local     try          Sebastián Cordoba
+    min 74 (2T 34) local     conversion   Juan Santiago Benzo
+    min 76 (2T 36) visitante try          Pablo Pereyra
+    min 76 (2T 36) visitante conversion   Pablo Pereyra
+  marcador  · eventos 31-24 · guardado 31-24
+  tries     · 4-4 (guardado —-—)
+  arbitro   · Gustavo Reartes (guardado: —)
+
+Urú Curé Rugby Club Preintermedia "A" vs Córdoba Athletic Club Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276917  ·  bd24ba83-b6cc-4b8d-a673-ea99824370a8
+  local     · Urú Curé Rugby Club Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 35
+    min 10 (1T 10) visitante try          Santiago Antonucci
+    min 23 (1T 23) local     card_yellow  Imanol Rins
+    min 23 (1T 23) visitante try          Tomás Kouchoumpos
+    min 23 (1T 23) visitante card_yellow  Juan Ignacio Cibin
+    min 29 (1T 29) visitante substitution Facundo Coraglio
+    min 32 (1T 32) visitante try          Ignacio Vanni
+    min 33 (1T 33) local     card_yellow  Theo Menichetti
+    min 33 (1T 33) visitante conversion   Eros Parada
+    min 37 (1T 37) local     try          Mateo Varela
+    min 41 (2T 1) local     substitution Leonel Bazan
+    min 41 (2T 1) local     try          Mateo Varela
+    min 41 (2T 1) visitante card_yellow  German Ezequiel Koth
+    min 42 (2T 2) local     conversion   Santiago Gagna
+    min 43 (2T 3) visitante try          Salvador Florensa
+    min 43 (2T 3) visitante substitution Matias Lazarte
+    min 44 (2T 4) visitante conversion   Eros Parada
+    min 44 (2T 4) local     try          Máximo Flores Macías
+    min 45 (2T 5) local     try          Tomas Tarditi
+    min 45 (2T 5) local     conversion   Santiago Gagna
+    min 46 (2T 6) local     substitution Juan Valentino Santangelo
+    min 56 (2T 16) local     substitution Tomas Tarditi
+    min 56 (2T 16) local     substitution Santiago Gagna
+    min 62 (2T 22) local     substitution Imanol Rins
+    min 65 (2T 25) local     substitution Mateo Varela
+    min 68 (2T 28) visitante penalty_goal Eros Parada
+    min 68 (2T 28) local     substitution Maximiliano Walter Baez
+    min 73 (2T 33) visitante try          German Ezequiel Koth
+    min 74 (2T 34) visitante substitution Einel Iñaki Knorr
+    min 74 (2T 34) visitante substitution Thiago Armando
+    min 74 (2T 34) visitante substitution Mateo Malik Alabí
+    min 74 (2T 34) visitante substitution Tomás Kouchoumpos
+    min 76 (2T 36) visitante try          Ignacio Vanni
+    min 77 (2T 37) visitante substitution Ignacio Vanni
+    min 77 (2T 37) visitante conversion   Eros Parada
+    min 78 (2T 38) local     try          José Ignacio Benevento
+  marcador  · eventos 29-39 · guardado 29-39
+  tries     · 5-6 (guardado —-—)
+  arbitro   · Ignacio Santiago Olmedo Ramirez (guardado: —)
+
+Club Universitario de Córdoba Preintermedia "A" vs Club Palermo Bajo Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276919  ·  33c7bcd7-35af-4d45-92ad-6be42c69cf97
+  local     · Club Universitario de Córdoba Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 36
+    min 11 (1T 11) visitante try          Octavio Herrera Manna
+    min 11 (1T 11) visitante conversion   Lucas Eladio Lopez
+    min 17 (1T 17) local     penalty_goal Tobias Buzzoni
+    min 20 (1T 20) visitante try          Alejo Lujan
+    min 20 (1T 20) visitante conversion   Lucas Eladio Lopez
+    min 25 (1T 25) local     try          Juan Pablo Benavides Pelaytay
+    min 29 (1T 29) local     card_yellow  Santiago Fabian Escobar
+    min 29 (1T 29) visitante try          Mateo Broglia
+    min 33 (1T 33) visitante try          Agustin Carabajal
+    min 33 (1T 33) visitante conversion   Lucas Eladio Lopez
+    min 40 (1T 40) visitante try          Pedro Benjamin Valera Morillo
+    min 40 (2T 0) local     substitution Galo Guajardo
+    min 44 (2T 4) visitante substitution Diego Ezequiel Deodato
+    min 45 (2T 5) local     substitution Leandro Lizarraga
+    min 46 (2T 6) local     substitution Mateo Valentin Morero
+    min 46 (2T 6) visitante substitution Gerónimo Ferreyra Andrada
+    min 46 (2T 6) visitante substitution Mateo Broglia
+    min 48 (2T 8) local     try          Ignacio Salas Mendoza
+    min 48 (2T 8) local     substitution Franco Nahuel González Kogan
+    min 49 (2T 9) local     conversion   Tobias Buzzoni
+    min 50 (2T 10) local     substitution Jeremias Peralta
+    min 54 (2T 14) visitante substitution Mateo Yojala
+    min 55 (2T 15) local     try          Miguel Nicolás Diaz Llanos
+    min 56 (2T 16) local     conversion   Tobias Buzzoni
+    min 56 (2T 16) local     substitution Ignacio Salas Mendoza
+    min 58 (2T 18) visitante card_yellow  Federico Pregot
+    min 59 (2T 19) visitante card_yellow  Alejo Lujan
+    min 60 (2T 20) visitante substitution Matias Mateo
+    min 60 (2T 20) local     try          Pedro Eguiguren
+    min 66 (2T 26) local     try          Ignacio Salas Mendoza
+    min 66 (2T 26) local     substitution Santiago Fabian Escobar
+    min 67 (2T 27) local     conversion   Tobias Buzzoni
+    min 68 (2T 28) visitante substitution Tomas Agustin Rubio
+    min 68 (2T 28) visitante substitution Maximo Ricardo Contigiani
+    min 68 (2T 28) visitante substitution Octavio Herrera Manna
+    min 73 (2T 33) visitante try          Agustin Carabajal
+  marcador  · eventos 34-36 · guardado 34-36
+  tries     · 5-6 (guardado —-—)
+  arbitro   · Martin Leandro Barrabino (guardado: —)
+
+Jockey Club Córdoba Preintermedia "A" vs Club Palermo Bajo Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276920  ·  15487bdc-96cc-44b5-9faa-60fea575c6e1
+  local     · Jockey Club Córdoba Preintermedia "A" · 23 jugadores · 1 con ficha fijada
+  visitante · Club Palermo Bajo Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min  3 (1T 3) local     try          Agustin Peralta
+    min  3 (1T 3) local     conversion   Agustin Peralta
+    min 26 (1T 26) visitante try          Mateo Yojala
+    min 26 (1T 26) visitante conversion   Benjamin Biglia
+    min 37 (1T 37) visitante card_yellow  Juan Cruz Moreno
+    min 41 (2T 1) visitante substitution Iñaki Castroviejo
+    min 43 (2T 3) local     try          Mateo Ferreyra
+    min 43 (2T 3) local     try          Mateo Ferreyra
+    min 50 (2T 10) visitante substitution Alejo Lujan
+    min 50 (2T 10) visitante substitution Benjamin Biglia
+    min 52 (2T 12) visitante substitution Elias Sales
+    min 53 (2T 13) visitante try          Mateo Yojala
+    min 58 (2T 18) visitante substitution Ariel Francisco Olmedo Ramirez
+    min 62 (2T 22) visitante try          Ignacio Barrionuevo
+    min 62 (2T 22) visitante conversion   Lucas Eladio Lopez
+    min 63 (2T 23) visitante substitution Ignacio Barrionuevo
+    min 66 (2T 26) visitante substitution Facundo Gutierrez
+    min 79 (2T 39) visitante penalty_try  
+  marcador  · eventos 17-26 · guardado 17-26
+  tries     · 3-4 (guardado —-—)
+  arbitro   · Gustavo Reartes (guardado: —)
+
+Córdoba Athletic Club Preintermedia "A" vs La Tablada "A" - Pre Intermedia · torneo-cordobes-preintermedia-a · tarjeta 276922  ·  e40f6859-78ac-41c7-9a8d-ed87e9c170af
+  local     · Córdoba Athletic Club Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · La Tablada "A" - Pre Intermedia · 23 jugadores · 0 con ficha fijada
+  eventos   · 26
+    min  7 (1T 7) visitante card_yellow  Gonzalo Berrotaran
+    min 31 (1T 31) local     try          German Ezequiel Koth
+    min 39 (1T 39) local     try          Thiago Armando
+    min 39 (1T 39) local     conversion   Benjamin Testa
+    min 40 (2T 0) visitante substitution Facundo Perrone
+    min 40 (2T 0) visitante substitution Matias Petrini
+    min 40 (2T 0) visitante substitution Facundo Romero
+    min 40 (2T 0) visitante substitution Justo Bonadeo
+    min 40 (2T 0) visitante substitution Joaquin Paiva
+    min 40 (2T 0) visitante substitution Valentín Tomas Aguero
+    min 40 (2T 0) visitante substitution Jose Ignacio Vazquez
+    min 40 (2T 0) visitante substitution Agustin Bosio
+    min 41 (2T 1) local     substitution German Ezequiel Koth
+    min 41 (2T 1) local     substitution Thiago Armando
+    min 46 (2T 6) local     card_yellow  Matias Lazarte
+    min 47 (2T 7) visitante penalty_goal Bautista Demarchi
+    min 49 (2T 9) visitante penalty_goal Bautista Demarchi
+    min 51 (2T 11) local     penalty_goal Benjamin Testa
+    min 54 (2T 14) visitante try          Gonzalo Berrotaran
+    min 54 (2T 14) visitante conversion   Bautista Demarchi
+    min 55 (2T 15) local     substitution Bruno Romero
+    min 59 (2T 19) visitante penalty_goal Bautista Demarchi
+    min 61 (2T 21) visitante try          Jacinto Villegas
+    min 66 (2T 26) local     substitution Matias Lazarte
+    min 70 (2T 30) local     try          Agustin Benavides
+    min 71 (2T 31) local     conversion   Benjamin Testa
+  marcador  · eventos 22-21 · guardado 22-21
+  tries     · 3-2 (guardado —-—)
+  arbitro   · Daniel Edgardo Luna (guardado: —)
+
+San Martín de Villa María Preintermedia "A" vs Urú Curé Rugby Club Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276923  ·  078cc52e-60dc-47a8-9804-546ad020f896
+  local     · San Martín de Villa María Preintermedia "A" · 21 jugadores · 0 con ficha fijada
+  visitante · Urú Curé Rugby Club Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 28
+    min  4 (1T 4) local     try          Federico Perez
+    min  4 (1T 4) local     conversion   Pablo Pereyra
+    min  8 (1T 8) visitante try          Santiago Gagna
+    min  8 (1T 8) visitante conversion   Santiago Gagna
+    min 15 (1T 15) local     try          Federico Perez
+    min 15 (1T 15) visitante card_yellow  Leonel Bazan
+    min 16 (1T 16) local     card_yellow  Roman Villarreal
+    min 23 (1T 23) visitante try          Tomas Tarditi
+    min 23 (1T 23) visitante conversion   Santiago Gagna
+    min 35 (1T 35) local     try          Jose Julián Bruno
+    min 36 (1T 36) visitante try          Juan Cruz Pispieiro
+    min 36 (1T 36) visitante conversion   Santiago Gagna
+    min 42 (2T 2) visitante try          Salvador Hipermayen
+    min 43 (2T 3) visitante conversion   Santiago Gagna
+    min 49 (2T 9) visitante substitution Santiago Gagna
+    min 57 (2T 17) local     substitution Tomás Cánova
+    min 63 (2T 23) visitante substitution Alexis Rodrigo Funes
+    min 63 (2T 23) visitante substitution Leonel Bazan
+    min 64 (2T 24) visitante try          Salvador Maccio
+    min 66 (2T 26) local     try          Gaston Rosetto Olthoff
+    min 66 (2T 26) local     conversion   Pablo Pereyra
+    min 66 (2T 26) visitante substitution Santiago Mondino
+    min 66 (2T 26) visitante substitution Santiago Colina Bosch
+    min 70 (2T 30) visitante substitution Maximiliano Walter Baez
+    min 72 (2T 32) local     substitution Fernando Cuellar
+    min 75 (2T 35) visitante try          Mateo Varela
+    min 77 (2T 37) local     try          Federico Perez
+    min 78 (2T 38) visitante card_yellow  Martin Palacios
+  marcador  · eventos 29-38 · guardado 29-38
+  tries     · 5-6 (guardado —-—)
+  arbitro   · Juan Francisco Gomez (guardado: —)
+
+Tala Rugby Club Preintermedia "A" vs Jockey Club de Villa María Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276924  ·  5804cab0-4540-4c21-8d4c-907d4ac80a0d
+  local     · Tala Rugby Club Preintermedia "A" · 23 jugadores · 2 con ficha fijada
+  visitante · Jockey Club de Villa María Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 39
+    min  3 (1T 3) visitante try          Bruno Rampone
+    min  3 (1T 3) visitante conversion   Joaquin Barrios
+    min  8 (1T 8) local     try          Ignacio Ceppolino
+    min  8 (1T 8) visitante try          Tomás Sayago
+    min 15 (1T 15) visitante card_yellow  Santiago Daglio
+    min 15 (1T 15) visitante card_red     Santiago Daglio
+    min 19 (1T 19) local     try          Mateo Taborda
+    min 19 (1T 19) local     conversion   Fernando Pereyra
+    min 23 (1T 23) local     try          Ignacio Ceppolino
+    min 23 (1T 23) local     conversion   Fernando Pereyra
+    min 24 (1T 24) visitante card_yellow  Santiago Daglio
+    min 30 (1T 30) visitante penalty_goal Joaquin Barrios
+    min 33 (1T 33) local     try          Gaston Ohanian
+    min 33 (1T 33) local     conversion   Fernando Pereyra
+    min 40 (1T 40) local     card_yellow  Martin Mocatti
+    min 40 (2T 0) local     substitution Rocco Moriconi Brasini
+    min 40 (2T 0) local     substitution Valentín Adanto Risso
+    min 46 (2T 6) local     try          Mateo Taborda
+    min 46 (2T 6) local     conversion   Fernando Pereyra
+    min 46 (2T 6) local     substitution Ignacio Ceppolino
+    min 49 (2T 9) local     substitution Mateo Taborda
+    min 49 (2T 9) local     substitution Maximo Barella
+    min 49 (2T 9) local     substitution Facundo Almada
+    min 49 (2T 9) local     substitution Nicolas Pereyra
+    min 49 (2T 9) local     substitution Carlos Fabian Nielsen
+    min 50 (2T 10) visitante try          Genaro Alvarez
+    min 50 (2T 10) visitante conversion   Joaquin Barrios
+    min 50 (2T 10) visitante substitution Tobias Requena
+    min 50 (2T 10) visitante substitution Valentin Vivas
+    min 55 (2T 15) visitante substitution Luciano Astutti
+    min 55 (2T 15) visitante card_yellow  Genaro Alvarez
+    min 55 (2T 15) visitante substitution Joaquin Perazzio
+    min 60 (2T 20) local     try          Federico Bianchini
+    min 61 (2T 21) local     try          Federico Bianchini
+    min 61 (2T 21) local     conversion   Fernando Pereyra
+    min 65 (2T 25) visitante card_yellow  Juan Cruz Bustos
+    min 73 (2T 33) local     try          Juan Cruz Maldonado
+    min 73 (2T 33) local     conversion   Fernando Pereyra
+    min 75 (2T 35) local     card_red     Juan Cruz Maldonado
+  marcador  · eventos 52-22 · guardado 52-22
+  tries     · 8-3 (guardado —-—)
+  arbitro   · Sebastian Velez (guardado: —)
+
+Jockey Club de Villa María Preintermedia "A" vs Jockey Club Córdoba Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276925  ·  ef76563c-e827-4681-8cd1-97ae29611d58
+  local     · Jockey Club de Villa María Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 10
+    min 26 (1T 26) visitante penalty_goal Tomas Albiero Vallania
+    min 29 (1T 29) visitante try          Juan Manuel Sanso
+    min 29 (1T 29) visitante conversion   Tomas Albiero Vallania
+    min 35 (1T 35) visitante try          Facundo Ludueña Gómez
+    min 45 (2T 5) local     try          Tobias Requena
+    min 45 (2T 5) local     card_red     Luciano Astutti
+    min 45 (2T 5) local     substitution Juan Martin Pacheco
+    min 45 (2T 5) local     substitution Sebastián Cordoba
+    min 45 (2T 5) local     substitution Valentino Silvio Venier
+    min 78 (2T 38) visitante try          Valentin Toledo
+  marcador  · eventos 5-20 · guardado 5-20
+  tries     · 1-3 (guardado —-—)
+  arbitro   · Sergio Zbura (guardado: —)
+
+Urú Curé Rugby Club Preintermedia "A" vs Tala Rugby Club Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276926  ·  58e9f8e6-7a63-4dbb-8284-9b8ea1282063
+  local     · Urú Curé Rugby Club Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club Preintermedia "A" · 22 jugadores · 1 con ficha fijada
+  eventos   · 32
+    min  7 (1T 7) local     try          Marco Gomez
+    min 16 (1T 16) visitante card_yellow  Franco Garcia
+    min 16 (1T 16) local     card_yellow  Benjamin Carra
+    min 19 (1T 19) visitante try          Ramiro Bugia
+    min 19 (1T 19) visitante conversion   Fernando Pereyra
+    min 20 (1T 20) local     card_yellow  Augusto Kohler
+    min 23 (1T 23) local     try          Santiago Gagna
+    min 24 (1T 24) local     conversion   Santiago Gagna
+    min 26 (1T 26) visitante conversion   Fernando Pereyra
+    min 26 (1T 26) visitante try          Tobias Cordoba Oyhamburu
+    min 33 (1T 33) local     penalty_goal Santiago Gagna
+    min 39 (1T 39) visitante try          Ignacio Ceppolino
+    min 39 (1T 39) visitante conversion   Fernando Pereyra
+    min 40 (2T 0) visitante substitution Facundo Almada
+    min 40 (2T 0) visitante substitution Federico Bianchini
+    min 40 (2T 0) visitante substitution Nicolas Pereyra
+    min 42 (2T 2) visitante try          Santino Cuaranta
+    min 42 (2T 2) visitante conversion   Fernando Pereyra
+    min 44 (2T 4) visitante substitution Ignacio Ceppolino
+    min 50 (2T 10) visitante conversion   Fernando Pereyra
+    min 50 (2T 10) visitante try          Bautista Kosciuk
+    min 50 (2T 10) visitante substitution Franco Garcia
+    min 53 (2T 13) local     try          Salvador Hipermayen
+    min 55 (2T 15) visitante try          Santino Cuaranta
+    min 55 (2T 15) visitante conversion   Fernando Pereyra
+    min 55 (2T 15) visitante substitution Ramiro Bugia
+    min 62 (2T 22) local     try          José Ignacio Benevento
+    min 71 (2T 31) local     try          Santiago Colina Bosch
+    min 75 (2T 35) visitante conversion   Fernando Pereyra
+    min 75 (2T 35) visitante try          Tobias Cordoba Oyhamburu
+    min 75 (2T 35) visitante substitution Tomas Wortley
+    min 79 (2T 39) local     try          Benjamin Carra
+  marcador  · eventos 35-49 · guardado 35-49
+  tries     · 6-7 (guardado —-—)
+  arbitro   · Eugenio Morra (guardado: —)
+
+La Tablada "A" - Pre Intermedia vs San Martín de Villa María Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276927  ·  f885b20e-5805-436d-ab8c-d043363ea248
+  local     · La Tablada "A" - Pre Intermedia · 23 jugadores · 0 con ficha fijada
+  visitante · San Martín de Villa María Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 33
+    min  9 (1T 9) local     try          Facundo Funes
+    min 10 (1T 10) local     conversion   Bautista Demarchi
+    min 12 (1T 12) local     try          Lautaro Arceguet
+    min 13 (1T 13) local     conversion   Bautista Demarchi
+    min 18 (1T 18) visitante card_yellow  Eduardo Gómez
+    min 18 (1T 18) local     try          Maximiliano Bianconi
+    min 21 (1T 21) local     try          Facundo Funes
+    min 21 (1T 21) local     conversion   Bautista Demarchi
+    min 27 (1T 27) visitante try          Tomás Cánova
+    min 27 (1T 27) visitante conversion   Lionel Carrizo
+    min 31 (1T 31) visitante try          Agustín Picca
+    min 35 (1T 35) local     penalty_goal Bautista Demarchi
+    min 40 (1T 40) local     substitution Augusto Arguello
+    min 40 (1T 40) local     substitution Facundo Funes
+    min 41 (1T 41) visitante try          Roman Villarreal
+    min 41 (1T 41) visitante conversion   Lionel Carrizo
+    min 47 (2T 7) local     substitution Tomas Retta
+    min 50 (2T 10) visitante substitution Agustín Picca
+    min 50 (2T 10) local     substitution Justo Bonadeo
+    min 50 (2T 10) local     penalty_goal Bautista Demarchi
+    min 51 (2T 11) visitante substitution Jose Julián Bruno
+    min 53 (2T 13) local     try          Jacinto Villegas
+    min 54 (2T 14) local     conversion   Bautista Demarchi
+    min 57 (2T 17) local     substitution Facundo Perrone
+    min 61 (2T 21) local     substitution Asael Gaston Acosta
+    min 61 (2T 21) local     substitution Gonzalo Berrotaran
+    min 62 (2T 22) local     substitution Bautista Demarchi
+    min 63 (2T 23) visitante substitution Manuel Patricelli
+    min 68 (2T 28) visitante substitution Eduardo Gómez
+    min 73 (2T 33) local     try          Franco Nicolas Galliano
+    min 73 (2T 33) local     conversion   Felipe Lima
+    min 77 (2T 37) visitante card_yellow  Lautaro Joaquin Figueroa
+    min 80 (2T 40) local     penalty_try  
+  marcador  · eventos 53-19 · guardado 53-19
+  tries     · 7-3 (guardado —-—)
+  arbitro   · Gustavo Reartes (guardado: —)
+
+Club Universitario de Córdoba Preintermedia "A" vs Córdoba Athletic Club Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276928  ·  ae4bb68a-fb2f-448b-96e7-431c73fe746c
+  local     · Club Universitario de Córdoba Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min 10 (1T 10) visitante try          Facundo Coraglio
+    min 10 (1T 10) visitante conversion   Santiago Antonucci
+    min 13 (1T 13) local     try          Miguel Nicolás Diaz Llanos
+    min 13 (1T 13) local     conversion   Agustin Altamirano Decicco
+    min 30 (1T 30) visitante try          Santiago Antonucci
+    min 30 (1T 30) visitante conversion   Santiago Antonucci
+    min 40 (2T 0) local     substitution Nestor Jose Oviedo
+    min 40 (2T 0) local     substitution Ignacio Salas Mendoza
+    min 40 (2T 0) local     substitution Ignacio Agustín Brizuela
+    min 40 (2T 0) local     substitution Juan Pablo Benavides Pelaytay
+    min 40 (2T 0) local     substitution Luis Fabian Farias
+    min 40 (2T 0) local     substitution Nicolás Villella Navarta
+    min 40 (2T 0) local     substitution Juan Benjamin Spat
+    min 40 (2T 0) local     substitution Tomas Cuello
+    min 54 (2T 14) visitante substitution Mateo Malik Alabí
+    min 57 (2T 17) visitante substitution Fernando Bustos Fierro
+    min 58 (2T 18) visitante substitution Thiago Armando
+    min 60 (2T 20) local     try          Miguel Nicolás Diaz Llanos
+    min 62 (2T 22) visitante substitution Juan Francisco Lanzani
+    min 62 (2T 22) visitante substitution Bruno Romero
+    min 63 (2T 23) visitante substitution Tomas Agustin Castrillon
+    min 63 (2T 23) local     try          Álvaro Garmendia
+    min 63 (2T 23) local     conversion   Agustin Altamirano Decicco
+    min 64 (2T 24) visitante card_yellow  Agustin Benavides
+    min 72 (2T 32) visitante try          Tomas Adamo Araoz
+    min 72 (2T 32) visitante conversion   Santiago Antonucci
+    min 74 (2T 34) visitante substitution Agustin Benavides
+  marcador  · eventos 19-21 · guardado 19-21
+  tries     · 3-3 (guardado —-—)
+  arbitro   · Daniel Edgardo Luna (guardado: —)
+
+Córdoba Athletic Club Preintermedia "A" vs Club Palermo Bajo Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276931  ·  a538ce26-7b58-4f55-a74c-20f5cb464c17
+  local     · Córdoba Athletic Club Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min 10 (1T 10) local     penalty_goal Benjamin Testa
+    min 19 (1T 19) visitante try          Javier Lopez
+    min 20 (1T 20) visitante conversion   Benjamin Biglia
+    min 24 (1T 24) visitante card_yellow  Diego Ezequiel Deodato
+    min 25 (1T 25) local     try          Benjamin Testa
+    min 25 (1T 25) local     conversion   Benjamin Testa
+    min 31 (1T 31) visitante try          Tomas Lopresti
+    min 38 (1T 38) visitante try          Ezequiel Broglia Ossola
+    min 39 (1T 39) visitante conversion   Benjamin Biglia
+    min 47 (2T 7) visitante substitution Tomas Lopresti
+    min 50 (2T 10) local     substitution Fernando Bustos Fierro
+    min 50 (2T 10) local     substitution German Ezequiel Koth
+    min 50 (2T 10) local     substitution Thiago Armando
+    min 55 (2T 15) local     substitution Tomás Kouchoumpos
+    min 57 (2T 17) visitante penalty_goal Benjamin Biglia
+    min 59 (2T 19) local     substitution Ignacio Vanni
+    min 60 (2T 20) visitante substitution Benjamin Biglia
+    min 64 (2T 24) local     penalty_goal Benjamin Testa
+    min 64 (2T 24) local     substitution Mateo Malik Alabí
+    min 65 (2T 25) visitante substitution Mateo Yojala
+    min 67 (2T 27) visitante penalty_goal Lucas Eladio Lopez
+    min 67 (2T 27) visitante substitution Gerónimo Ferreyra Andrada
+    min 68 (2T 28) visitante substitution Franco Roson
+    min 71 (2T 31) visitante substitution Germán Tello
+    min 77 (2T 37) visitante try          Facundo Gutierrez
+    min 78 (2T 38) local     substitution Juan Ignacio Cibin
+    min 78 (2T 38) visitante conversion   Lucas Eladio Lopez
+  marcador  · eventos 13-32 · guardado 13-32
+  tries     · 1-4 (guardado —-—)
+  arbitro   · Daniel Edgardo Luna (guardado: —)
+
+San Martín de Villa María Preintermedia "A" vs Club Universitario de Córdoba Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276932  ·  787aa052-e89b-48f2-b902-2f38e60c3e72
+  local     · San Martín de Villa María Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 19
+    min 12 (1T 12) visitante try          Juan Manuel Dorrego
+    min 24 (1T 24) visitante try          Tomas Cuello
+    min 25 (1T 25) visitante conversion   Tobias Buzzoni
+    min 34 (1T 34) visitante try          Agustin Altamirano Decicco
+    min 35 (1T 35) visitante conversion   Tobias Buzzoni
+    min 39 (1T 39) local     card_red     Pablo Pereyra
+    min 39 (1T 39) local     card_red     Roman Villarreal
+    min 39 (1T 39) visitante card_red     Juan Pablo Benavides Pelaytay
+    min 40 (2T 0) visitante try          Felipe Ramirez Presta
+    min 40 (2T 0) visitante conversion   Tobias Buzzoni
+    min 43 (2T 3) visitante penalty_goal Tobias Buzzoni
+    min 53 (2T 13) visitante conversion   Tobias Buzzoni
+    min 57 (2T 17) visitante penalty_goal Tobias Buzzoni
+    min 65 (2T 25) visitante try          Tobias Buzzoni
+    min 66 (2T 26) visitante conversion   Tobias Buzzoni
+    min 67 (2T 27) local     try          Federico Perez
+    min 72 (2T 32) visitante try          Felipe Ramirez Presta
+    min 78 (2T 38) visitante try          Tobias Buzzoni
+    min 79 (2T 39) visitante conversion   Tobias Buzzoni
+  marcador  · eventos 5-53 · guardado 5-53
+  tries     · 1-7 (guardado —-—)
+  arbitro   · Florencia Ledesma (guardado: —)
+
+Tala Rugby Club Preintermedia "A" vs La Tablada "A" - Pre Intermedia · torneo-cordobes-preintermedia-a · tarjeta 276933  ·  03902148-cfbc-42de-bf91-e06dbac90b6c
+  local     · Tala Rugby Club Preintermedia "A" · 23 jugadores · 2 con ficha fijada
+  visitante · La Tablada "A" - Pre Intermedia · 23 jugadores · 0 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 38-22
+  tries     · 0-0 (guardado —-—)
+  arbitro   · Juan Francisco Gomez (guardado: —)
+
+Jockey Club de Villa María Preintermedia "A" vs Urú Curé Rugby Club Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276934  ·  bb4dc180-6640-492a-9f18-39b7fcfc1024
+  local     · Jockey Club de Villa María Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Urú Curé Rugby Club Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min  3 (1T 3) local     penalty_goal Joaquin Barrios
+    min 15 (1T 15) local     try          Juan Martin Pacheco
+    min 27 (1T 27) local     try          Santiago Daglio
+    min 32 (1T 32) local     try          Genaro Alvarez
+    min 37 (1T 37) visitante substitution Juan Valentino Santangelo
+    min 40 (1T 40) visitante try          Santiago Colina Bosch
+    min 41 (2T 1) visitante substitution Martin Palacios
+    min 45 (2T 5) local     substitution Alejandro Figueroa
+    min 45 (2T 5) visitante substitution Manuel Velich
+    min 46 (2T 6) local     try          Juan Martin Pacheco
+    min 47 (2T 7) visitante substitution Theo Menichetti
+    min 47 (2T 7) visitante substitution Jeronimo Marzari
+    min 47 (2T 7) visitante substitution Benjamin Quiros
+    min 48 (2T 8) local     try          Valentino Brugiafreddo
+    min 48 (2T 8) local     conversion   Joaquin Barrios
+    min 50 (2T 10) local     substitution Juan Martin Pacheco
+    min 52 (2T 12) visitante try          Ignacio Saenz
+    min 52 (2T 12) visitante conversion   Santiago Gagna
+    min 60 (2T 20) local     substitution Genaro Alvarez
+    min 60 (2T 20) local     substitution Fausto Paez
+    min 65 (2T 25) visitante substitution Salvador Maccio
+    min 67 (2T 27) local     try          Valentino Brugiafreddo
+    min 67 (2T 27) local     conversion   Joaquin Barrios
+    min 72 (2T 32) visitante substitution Santino Pariani
+  marcador  · eventos 37-12 · guardado 37-12
+  tries     · 6-2 (guardado —-—)
+  arbitro   · Carlos Prieto (guardado: —)
+
+Urú Curé Rugby Club Preintermedia "A" vs Jockey Club Córdoba Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276935  ·  ed213512-377f-4211-8f9a-bdd164023b59
+  local     · Urú Curé Rugby Club Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba Preintermedia "A" · 23 jugadores · 1 con ficha fijada
+  eventos   · 34
+    min  9 (1T 9) local     card_yellow  José Ignacio Benevento
+    min  9 (1T 9) visitante try          Juan Manuel Sanso
+    min  9 (1T 9) visitante conversion   Joaquín Chaves Bertin
+    min 13 (1T 13) visitante card_yellow  Augusto Ocaña
+    min 21 (1T 21) visitante try          Juan Manuel Sanso
+    min 21 (1T 21) visitante conversion   Joaquín Chaves Bertin
+    min 25 (1T 25) local     try          Funes Gonzalo
+    min 25 (1T 25) local     conversion   Santiago Gagna
+    min 45 (2T 5) local     penalty_goal Santiago Gagna
+    min 46 (2T 6) visitante penalty_goal Joaquín Chaves Bertin
+    min 47 (2T 7) local     substitution Salvador Maccio
+    min 47 (2T 7) local     substitution Santiago Mondino
+    min 47 (2T 7) visitante substitution Juan Ignacio Wergez
+    min 48 (2T 8) visitante substitution Lautaro Gualdieri
+    min 50 (2T 10) visitante substitution Gregorio Amuchastegui
+    min 51 (2T 11) local     substitution Felipe Joaquin Ambroggio
+    min 56 (2T 16) local     substitution Leonel Bazan
+    min 56 (2T 16) local     substitution Ignacio Saenz
+    min 56 (2T 16) local     substitution Santino Pariani
+    min 60 (2T 20) visitante substitution Juan Manuel Olivero
+    min 60 (2T 20) visitante substitution Maximo Goldaracena
+    min 62 (2T 22) local     try          Salvador Hipermayen
+    min 62 (2T 22) visitante try          Tomas Albiero Vallania
+    min 62 (2T 22) local     conversion   Juan Cruz Pispieiro
+    min 62 (2T 22) visitante conversion   Joaquín Chaves Bertin
+    min 65 (2T 25) visitante try          Felipe Boffi
+    min 67 (2T 27) visitante try          Valentino Audicio
+    min 67 (2T 27) visitante conversion   Joaquín Chaves Bertin
+    min 68 (2T 28) visitante substitution Felipe Boffi
+    min 69 (2T 29) local     substitution José Ignacio Benevento
+    min 76 (2T 36) visitante try          Juan Manuel Sanso
+    min 76 (2T 36) visitante conversion   Joaquín Chaves Bertin
+    min 78 (2T 38) local     try          Funes Gonzalo
+    min 78 (2T 38) local     conversion   Juan Cruz Pispieiro
+  marcador  · eventos 24-43 · guardado 24-43
+  tries     · 3-6 (guardado —-—)
+  arbitro   · Martin Leandro Barrabino (guardado: —)
+
+La Tablada "A" - Pre Intermedia vs Jockey Club de Villa María Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276936  ·  82e06a05-dacc-40fd-967c-2c100e15e70a
+  local     · La Tablada "A" - Pre Intermedia · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club de Villa María Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 33
+    min  3 (1T 3) visitante penalty_goal Joaquin Barrios
+    min  5 (1T 5) local     try          Lorenzo Dutto
+    min  6 (1T 6) local     conversion   Lorenzo Dutto
+    min 11 (1T 11) local     try          Augusto Arguello
+    min 12 (1T 12) visitante try          Sebastián Cordoba
+    min 12 (1T 12) visitante conversion   Joaquin Barrios
+    min 12 (1T 12) local     conversion   Bautista Demarchi
+    min 29 (1T 29) local     try          Lorenzo Dutto
+    min 36 (1T 36) local     penalty_goal Bautista Demarchi
+    min 40 (2T 0) local     substitution Ignacio Jose Perez
+    min 41 (2T 1) local     penalty_goal Bautista Demarchi
+    min 43 (2T 3) local     try          Augusto Arguello
+    min 44 (2T 4) local     conversion   Bautista Demarchi
+    min 45 (2T 5) local     substitution Asael Gaston Acosta
+    min 47 (2T 7) local     substitution Facundo Funes
+    min 48 (2T 8) local     substitution Facundo Perrone
+    min 50 (2T 10) visitante substitution Tomás Sayago
+    min 52 (2T 12) visitante try          Santiago Daglio
+    min 52 (2T 12) local     substitution Nicolas Gauna
+    min 52 (2T 12) local     substitution Agustin Bosio
+    min 53 (2T 13) local     card_yellow  Nicolas Páez De La Torre
+    min 55 (2T 15) visitante substitution Bruno Rampone
+    min 55 (2T 15) visitante substitution Luciano Astutti
+    min 55 (2T 15) local     substitution Augusto Arguello
+    min 55 (2T 15) local     substitution Juan Cruz Pilotto
+    min 58 (2T 18) local     try          Franco Nicolas Galliano
+    min 59 (2T 19) local     conversion   Bautista Demarchi
+    min 60 (2T 20) visitante substitution Valentino Brugiafreddo
+    min 60 (2T 20) visitante card_yellow  Santiago Daglio
+    min 68 (2T 28) local     try          Felipe Lima
+    min 69 (2T 29) local     conversion   Bautista Demarchi
+    min 70 (2T 30) visitante card_yellow  Joaquin Barrios
+    min 76 (2T 36) local     penalty_goal Bautista Demarchi
+  marcador  · eventos 49-15 · guardado 49-15
+  tries     · 6-2 (guardado —-—)
+  arbitro   · Santiago Corvalán Rt (guardado: —)
+
+Club Universitario de Córdoba Preintermedia "A" vs Tala Rugby Club Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276937  ·  1f9c2165-be6e-485e-8b93-ec18ec659823
+  local     · Club Universitario de Córdoba Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club Preintermedia "A" · 23 jugadores · 1 con ficha fijada
+  eventos   · 30
+    min  8 (1T 8) local     try          Alejo Ferreyra
+    min 15 (1T 15) visitante penalty_goal Fernando Pereyra
+    min 23 (1T 23) local     card_yellow  Tobias Buzzoni
+    min 23 (1T 23) visitante penalty_try  
+    min 27 (1T 27) local     try          Valentino Combina Dalmasso
+    min 30 (1T 30) visitante try          Carlos Fabian Nielsen
+    min 30 (1T 30) visitante conversion   Fernando Pereyra
+    min 41 (2T 1) visitante substitution Martin Iván Altamirano
+    min 43 (2T 3) visitante try          Maximo Barella
+    min 43 (2T 3) visitante conversion   Fernando Pereyra
+    min 45 (2T 5) visitante substitution Federico Bianchini
+    min 47 (2T 7) local     substitution Juan Manuel Dorrego
+    min 47 (2T 7) local     substitution Javier Perez Soria
+    min 49 (2T 9) visitante substitution Tomas De Vértiz Cañon
+    min 50 (2T 10) visitante substitution Rocco Moriconi Brasini
+    min 52 (2T 12) visitante penalty_goal Fernando Pereyra
+    min 54 (2T 14) local     substitution Nestor Jose Oviedo
+    min 54 (2T 14) local     substitution Ignacio Salas Mendoza
+    min 54 (2T 14) visitante substitution Ignacio Ceppolino
+    min 58 (2T 18) visitante try          Santino Cuaranta
+    min 58 (2T 18) visitante conversion   Fernando Pereyra
+    min 60 (2T 20) visitante substitution Facundo Almada
+    min 62 (2T 22) visitante substitution Maximo Barella
+    min 63 (2T 23) local     substitution Juan Pablo Benavides Pelaytay
+    min 64 (2T 24) local     substitution Ignacio Agustín Brizuela
+    min 70 (2T 30) local     substitution Pedro Vara Paredes
+    min 70 (2T 30) visitante try          Gaston Ohanian
+    min 70 (2T 30) visitante conversion   Fernando Pereyra
+    min 71 (2T 31) visitante try          Santiago Lastra
+    min 77 (2T 37) local     substitution Valentino Combina Dalmasso
+  marcador  · eventos 10-46 · guardado 10-46
+  tries     · 2-6 (guardado —-—)
+  arbitro   · Daiana Del Milagro Cesaretti (guardado: —)
+
+Club Palermo Bajo Preintermedia "A" vs San Martín de Villa María Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276938  ·  fe01bb50-47c1-4015-a6a9-ac894cabf8b7
+  local     · Club Palermo Bajo Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · San Martín de Villa María Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 31
+    min  8 (1T 8) visitante penalty_goal Lionel Carrizo
+    min 12 (1T 12) local     try          Juan Cruz Broglia
+    min 12 (1T 12) local     conversion   Lucas Eladio Lopez
+    min 23 (1T 23) visitante penalty_goal Lionel Carrizo
+    min 27 (1T 27) local     card_yellow  Matias Facundo Bianchi Altamira
+    min 27 (1T 27) local     substitution Mateo Broglia
+    min 28 (1T 28) visitante penalty_goal Lionel Carrizo
+    min 33 (1T 33) local     substitution Alejo Lujan
+    min 40 (1T 40) visitante card_yellow  Eduardo Gómez
+    min 40 (1T 40) local     penalty_try  
+    min 46 (2T 6) local     substitution Octavio Herrera Manna
+    min 46 (2T 6) local     substitution Franco Roson
+    min 48 (2T 8) visitante substitution Roman Villarreal
+    min 48 (2T 8) visitante card_yellow  Agustín Picca
+    min 49 (2T 9) local     try          Mateo Yojala
+    min 49 (2T 9) local     substitution Diego Ezequiel Deodato
+    min 49 (2T 9) local     substitution Luca Samir Alegre Chedid
+    min 50 (2T 10) visitante substitution Ignacio Tenchini
+    min 50 (2T 10) visitante injury       Ignacio Tenchini
+    min 52 (2T 12) local     substitution Ignacio Barrionuevo
+    min 55 (2T 15) local     substitution Tomas Agustin Rubio
+    min 59 (2T 19) visitante substitution Federico Perez
+    min 67 (2T 27) visitante card_yellow  Lautaro Dario Alanis
+    min 70 (2T 30) visitante substitution Eduardo Gómez
+    min 70 (2T 30) local     try          Lucas Eladio Lopez
+    min 70 (2T 30) local     conversion   Benjamin Biglia
+    min 72 (2T 32) visitante try          Francisco Maestre
+    min 74 (2T 34) visitante substitution Federico Boschitari
+    min 74 (2T 34) local     try          Mateo Yojala
+    min 76 (2T 36) local     try          Mateo Yojala
+    min 76 (2T 36) local     conversion   Benjamin Biglia
+  marcador  · eventos 38-14 · guardado 38-14
+  tries     · 6-1 (guardado —-—)
+  arbitro   · Gustavo Reartes (guardado: —)
+
+Jockey Club Córdoba Preintermedia "A" vs Córdoba Athletic Club Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276940  ·  94e12c69-350a-4659-a8c9-ba95e8cbde9a
+  local     · Jockey Club Córdoba Preintermedia "A" · 23 jugadores · 1 con ficha fijada
+  visitante · Córdoba Athletic Club Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 33
+    min  2 (1T 2) visitante try          Thiago Armando
+    min 15 (1T 15) local     try          Valentino Audicio
+    min 15 (1T 15) local     conversion   Joaquín Chaves Bertin
+    min 30 (1T 30) local     penalty_goal Joaquín Chaves Bertin
+    min 42 (1T 42) local     try          Francisco Manfredi De Olmos
+    min 42 (1T 42) local     conversion   Joaquín Chaves Bertin
+    min 45 (2T 5) local     substitution Valentin Toledo
+    min 47 (2T 7) visitante try          Matias Lazarte
+    min 47 (2T 7) visitante conversion   Eros Parada
+    min 50 (2T 10) local     substitution Agustin Rey
+    min 50 (2T 10) local     substitution Facundo Ludueña Gómez
+    min 50 (2T 10) local     substitution Gregorio Amuchastegui
+    min 54 (2T 14) visitante try          German Ezequiel Koth
+    min 54 (2T 14) visitante conversion   Eros Parada
+    min 54 (2T 14) local     card_yellow  Lucio Carrara
+    min 57 (2T 17) visitante substitution Matias Lazarte
+    min 58 (2T 18) visitante substitution German Ezequiel Koth
+    min 58 (2T 18) visitante substitution Mateo Malik Alabí
+    min 60 (2T 20) visitante substitution Tomás Kouchoumpos
+    min 60 (2T 20) local     substitution Tomas Molina Becerra
+    min 60 (2T 20) local     substitution Francesco Pizzicari
+    min 61 (2T 21) visitante try          Bautista Acuña
+    min 61 (2T 21) visitante conversion   Eros Parada
+    min 61 (2T 21) visitante substitution Facundo Coraglio
+    min 65 (2T 25) visitante substitution Thiago Armando
+    min 65 (2T 25) local     substitution Francisco Manfredi De Olmos
+    min 65 (2T 25) local     substitution Jose Ignacio Caparros
+    min 67 (2T 27) local     try          Jose Ignacio Caparros
+    min 67 (2T 27) local     conversion   Joaquín Chaves Bertin
+    min 70 (2T 30) visitante card_yellow  Maximo Leon
+    min 75 (2T 35) local     card_yellow  Hernán Darío Quintana
+    min 76 (2T 36) local     try          Juan Ignacio Wergez
+    min 76 (2T 36) local     conversion   Joaquín Chaves Bertin
+  marcador  · eventos 31-26 · guardado 31-26
+  tries     · 4-4 (guardado —-—)
+  arbitro   · Fernando Martin Pettina (guardado: —)
+
+Tala Rugby Club Preintermedia "A" vs Club Palermo Bajo Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276942  ·  9720ded5-46fa-4170-815a-e1924a7fe86e
+  local     · Tala Rugby Club Preintermedia "A" · 23 jugadores · 2 con ficha fijada
+  visitante · Club Palermo Bajo Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 30-28
+  tries     · 0-0 (guardado —-—)
+  arbitro   · Gustavo Reartes (guardado: —)
+
+Jockey Club de Villa María Preintermedia "A" vs Club Universitario de Córdoba Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276943  ·  cad0b1da-27d2-4ab4-a983-3c20b5677402
+  local     · Jockey Club de Villa María Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 28
+    min  4 (1T 4) visitante card_yellow  Pedro Vara Paredes
+    min  8 (1T 8) visitante card_yellow  Agustin Quevedo
+    min 11 (1T 11) local     try          Valentin Vivas
+    min 11 (1T 11) local     conversion   Joaquin Barrios
+    min 11 (1T 11) visitante substitution Mateo Valentin Morero
+    min 21 (1T 21) visitante try          Ulises Agustín Bernie
+    min 21 (1T 21) visitante conversion   Tobias Buzzoni
+    min 25 (1T 25) local     card_yellow  Tomás Sayago
+    min 25 (1T 25) visitante card_yellow  Javier Perez Soria
+    min 32 (1T 32) local     try          Carando Mateo
+    min 38 (1T 38) local     penalty_try  
+    min 43 (2T 3) visitante substitution Ignacio Agustín Brizuela
+    min 45 (2T 5) local     substitution Alejandro Figueroa
+    min 45 (2T 5) local     substitution Valentin Vivas
+    min 45 (2T 5) local     substitution Joaquin Mabel Bono
+    min 50 (2T 10) local     substitution Renzo Tymoschuk
+    min 51 (2T 11) visitante substitution Javier Perez Soria
+    min 51 (2T 11) visitante substitution Agustin Quevedo
+    min 54 (2T 14) visitante substitution Hermes Puig
+    min 54 (2T 14) visitante substitution Álvaro Garmendia
+    min 55 (2T 15) local     substitution Joaquin Perazzio
+    min 56 (2T 16) visitante substitution Juan Pablo Benavides Pelaytay
+    min 57 (2T 17) visitante try          Tobias Buzzoni
+    min 57 (2T 17) visitante conversion   Tobias Buzzoni
+    min 61 (2T 21) visitante substitution Jeremías Flores
+    min 62 (2T 22) local     try          Carando Mateo
+    min 78 (2T 38) local     try          Emiliano Gaston Moreno
+    min 78 (2T 38) local     conversion   Joaquin Barrios
+  marcador  · eventos 31-14 · guardado 31-14
+  tries     · 5-2 (guardado —-—)
+  arbitro   · Horacio Coronado (guardado: —)
+
+Urú Curé Rugby Club Preintermedia "A" vs La Tablada "A" - Pre Intermedia · torneo-cordobes-preintermedia-a · tarjeta 276944  ·  81070862-5c5c-4890-91c2-13865b1330ee
+  local     · Urú Curé Rugby Club Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · La Tablada "A" - Pre Intermedia · 23 jugadores · 0 con ficha fijada
+  eventos   · 40
+    min  2 (1T 2) visitante try          Franco Nicolas Galliano
+    min  3 (1T 3) visitante conversion   Bautista Demarchi
+    min 10 (1T 10) visitante penalty_goal Bautista Demarchi
+    min 15 (1T 15) local     penalty_goal Santiago Gagna
+    min 16 (1T 16) visitante penalty_goal Bautista Demarchi
+    min 23 (1T 23) visitante try          Augusto Arguello
+    min 26 (1T 26) local     substitution Alexis Rodrigo Funes
+    min 30 (1T 30) visitante penalty_goal Bautista Demarchi
+    min 32 (1T 32) local     try          José Ignacio Benevento
+    min 35 (1T 35) local     card_yellow  José Ignacio Benevento
+    min 37 (1T 37) visitante try          Maximiliano Bianconi
+    min 38 (1T 38) visitante conversion   Bautista Demarchi
+    min 40 (1T 40) local     try          Santino Pariani
+    min 40 (1T 40) local     conversion   Santiago Gagna
+    min 41 (2T 1) visitante card_yellow  Facundo Romero
+    min 42 (2T 2) local     try          Tomas Tarditi
+    min 43 (2T 3) local     conversion   Santiago Gagna
+    min 43 (2T 3) local     substitution Benjamin Quiros
+    min 43 (2T 3) local     substitution Salvador Maccio
+    min 43 (2T 3) local     substitution Santiago Mondino
+    min 43 (2T 3) local     substitution Augusto Kohler
+    min 45 (2T 5) visitante try          Augusto Arguello
+    min 46 (2T 6) visitante conversion   Bautista Demarchi
+    min 48 (2T 8) visitante substitution Facundo Romero
+    min 52 (2T 12) visitante try          Ignacio Jose Perez
+    min 53 (2T 13) visitante conversion   Bautista Demarchi
+    min 53 (2T 13) visitante substitution Ignacio Jose Perez
+    min 53 (2T 13) visitante substitution Augusto Arguello
+    min 53 (2T 13) visitante substitution Franco Nicolas Galliano
+    min 55 (2T 15) visitante substitution Agustin Bosio
+    min 59 (2T 19) visitante card_yellow  Tomas Sala
+    min 60 (2T 20) local     substitution Manuel Velich
+    min 60 (2T 20) visitante substitution Facundo Perrone
+    min 60 (2T 20) visitante substitution Matias Petrini
+    min 60 (2T 20) visitante substitution Tomas Sanchez
+    min 61 (2T 21) local     try          Mateo Varela
+    min 70 (2T 30) local     substitution Emiliano Bustos
+    min 71 (2T 31) local     try          Juan Cruz Pispieiro
+    min 73 (2T 33) local     conversion   Santiago Gagna
+    min 78 (2T 38) visitante penalty_goal Bautista Demarchi
+  marcador  · eventos 34-45 · guardado 34-45
+  tries     · 5-5 (guardado —-—)
+  arbitro   · Luciano Francisco Romero (guardado: —)
+
+La Tablada "A" - Pre Intermedia vs Jockey Club Córdoba Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276945  ·  612fc022-5a08-4cb1-9b49-82c61a946a73
+  local     · La Tablada "A" - Pre Intermedia · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba Preintermedia "A" · 23 jugadores · 1 con ficha fijada
+  eventos   · 26
+    min 10 (1T 10) visitante try          Agustin Rodriguez
+    min 24 (1T 24) local     substitution Asael Gaston Acosta
+    min 26 (1T 26) visitante substitution Agustin Rodriguez
+    min 27 (1T 27) local     penalty_goal Nicolas Gauna
+    min 36 (1T 36) visitante try          Joaquín Chaves Bertin
+    min 37 (1T 37) local     substitution Manuel Ussher
+    min 37 (1T 37) visitante conversion   Joaquín Chaves Bertin
+    min 37 (1T 37) local     injury       Santiago Milani
+    min 40 (1T 40) visitante substitution Lautaro Gualdieri
+    min 40 (1T 40) local     substitution Matías Mariani
+    min 40 (1T 40) visitante penalty_goal Joaquín Chaves Bertin
+    min 40 (1T 40) local     substitution Benjamín De Alzáa
+    min 40 (2T 0) visitante penalty_goal Joaquín Chaves Bertin
+    min 43 (2T 3) local     try          Augusto Arguello
+    min 44 (2T 4) local     conversion   Nicolas Gauna
+    min 48 (2T 8) visitante substitution Tomas Molina Becerra
+    min 50 (2T 10) local     substitution Juan Ignacio Bosio
+    min 50 (2T 10) local     penalty_goal Nicolas Gauna
+    min 56 (2T 16) visitante substitution Facundo Ludueña Gómez
+    min 56 (2T 16) visitante substitution Gregorio Amuchastegui
+    min 56 (2T 16) visitante substitution Lucio Carrara
+    min 62 (2T 22) local     substitution Zair Leonel Acosta
+    min 65 (2T 25) visitante substitution Mateo Ferreyra
+    min 71 (2T 31) visitante penalty_goal Joaquín Chaves Bertin
+    min 77 (2T 37) local     try          Valentino Pizoni Morales
+    min 78 (2T 38) local     conversion   Nicolas Gauna
+  marcador  · eventos 20-21 · guardado 20-21
+  tries     · 2-2 (guardado —-—)
+  arbitro   · Horacio Coronado (guardado: —)
+
+Club Universitario de Córdoba Preintermedia "A" vs Urú Curé Rugby Club Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276946  ·  baee92b8-2d6e-4f10-a32e-3955291ae7a8
+  local     · Club Universitario de Córdoba Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Urú Curé Rugby Club Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 15
+    min  3 (1T 3) local     try          Benjamin Castro
+    min  3 (1T 3) local     conversion   Benjamin Castro
+    min 10 (1T 10) local     penalty_try  
+    min 14 (1T 14) visitante try          Marco Gomez
+    min 14 (1T 14) visitante conversion   Marco Gomez
+    min 16 (1T 16) visitante try          Marco Gomez
+    min 16 (1T 16) local     penalty_goal Javier Perez Soria
+    min 25 (1T 25) local     try          Javier Perez Soria
+    min 42 (2T 2) local     try          Javier Perez Soria
+    min 42 (2T 2) local     conversion   Javier Perez Soria
+    min 47 (2T 7) local     try          Julian Lucero Farias
+    min 47 (2T 7) local     conversion   Julian Lucero Farias
+    min 56 (2T 16) visitante conversion   Marco Gomez
+    min 59 (2T 19) visitante try          Marco Gomez
+    min 65 (2T 25) local     try          Juan Benjamin Spat
+  marcador  · eventos 41-19 · guardado 41-19
+  tries     · 6-3 (guardado —-—)
+  arbitro   · Santiago Geronimo Lozada Chaves (guardado: —)
+
+Club Palermo Bajo Preintermedia "A" vs Jockey Club de Villa María Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276947  ·  c782df26-2226-4547-a404-aa063becad14
+  local     · Club Palermo Bajo Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club de Villa María Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 19
+    min  1 (1T 1) visitante try          Alejandro Figueroa
+    min  1 (1T 1) visitante conversion   Alejandro Figueroa
+    min  1 (1T 1) visitante try          Alejandro Figueroa
+    min  1 (1T 1) visitante try          Alejandro Figueroa
+    min  1 (1T 1) visitante card_yellow  Santiago Daglio
+    min  1 (1T 1) visitante card_yellow  Lisandro Massetti
+    min  1 (1T 1) visitante card_yellow  Luciano Cittadini
+    min  6 (1T 6) local     try          Mariano Vassia
+    min  6 (1T 6) local     conversion   Tomás Aldao
+    min 15 (1T 15) local     try          Maximo Ricardo Contigiani
+    min 15 (1T 15) local     conversion   Tomás Aldao
+    min 22 (1T 22) local     try          Juan Segundo Raffaini Cabanillas
+    min 22 (1T 22) local     conversion   Tomás Aldao
+    min 34 (1T 34) local     try          Germán Tello
+    min 54 (2T 14) local     substitution Mariano Vassia
+    min 55 (2T 15) local     try          Juan Segundo Raffaini Cabanillas
+    min 55 (2T 15) local     conversion   Tomás Aldao
+    min 73 (2T 33) local     penalty_goal Tomás Aldao
+    min 77 (2T 37) local     substitution Maximo Ricardo Contigiani
+  marcador  · eventos 36-17 · guardado 36-17
+  tries     · 5-3 (guardado —-—)
+  arbitro   · Fernando Martin Pettina (guardado: —)
+
+Córdoba Athletic Club Preintermedia "A" vs San Martín de Villa María Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276949  ·  dc95a062-466f-4a5c-ad5a-38e89f605b40
+  local     · Córdoba Athletic Club Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · San Martín de Villa María Preintermedia "A" · 21 jugadores · 0 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 78-12
+  tries     · 0-0 (guardado —-—)
+  arbitro   · Pablo Gerardo Ronco (guardado: —)
+
+Jockey Club Córdoba Preintermedia "A" vs San Martín de Villa María Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276950  ·  402f9458-f40e-47c9-b763-e7805d7659e2
+  local     · Jockey Club Córdoba Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · San Martín de Villa María Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 29
+    min  7 (1T 7) local     try          Maximo Staricco Tosas
+    min 14 (1T 14) local     try          Enzo Roncaglia
+    min 25 (1T 25) visitante card_yellow  Gaston Rosetto Olthoff
+    min 29 (1T 29) visitante card_yellow  Federico Boschitari
+    min 35 (1T 35) local     try          Valentin Castro
+    min 36 (1T 36) local     conversion   Mateo Andersson
+    min 42 (1T 42) local     try          Felipe Boffi
+    min 43 (1T 43) local     conversion   Mateo Andersson
+    min 40 (2T 0) local     conversion   Joaquín José Cima
+    min 40 (2T 0) local     substitution Augusto Ocaña
+    min 45 (2T 5) visitante substitution Martin Brondolo
+    min 45 (2T 5) visitante substitution Bautista Cruz
+    min 46 (2T 6) visitante substitution Manuel Patricelli
+    min 46 (2T 6) local     substitution Agustin Rodriguez
+    min 50 (2T 10) local     conversion   Mateo Andersson
+    min 50 (2T 10) local     substitution Gregorio Amuchastegui
+    min 50 (2T 10) local     substitution Genaro Simondi
+    min 50 (2T 10) local     try          Josemaria Palacios Sesto
+    min 52 (2T 12) local     try          Maximo Staricco Tosas
+    min 55 (2T 15) visitante card_yellow  Gaston Rosetto Olthoff
+    min 55 (2T 15) visitante card_red     Gaston Rosetto Olthoff
+    min 56 (2T 16) local     substitution Francesco Pizzicari
+    min 59 (2T 19) local     try          Valentin Castro
+    min 66 (2T 26) local     try          Mateo Ferreyra
+    min 66 (2T 26) local     conversion   Joaquín José Cima
+    min 71 (2T 31) local     try          Josemaria Palacios Sesto
+    min 73 (2T 33) local     try          Jeremias Ignacio Alvarez Avoledo
+    min 73 (2T 33) local     conversion   Joaquín José Cima
+    min 79 (2T 39) local     try          Valentin Castro
+  marcador  · eventos 67-0 · guardado 67-0
+  tries     · 11-0 (guardado —-—)
+  arbitro   · Martin Leandro Barrabino (guardado: —)
+
+Tala Rugby Club Preintermedia "A" vs Córdoba Athletic Club Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276951  ·  93c628a6-0c44-4cfe-b6e7-9b81d27f703c
+  local     · Tala Rugby Club Preintermedia "A" · 23 jugadores · 2 con ficha fijada
+  visitante · Córdoba Athletic Club Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min  7 (1T 7) local     substitution Maximo Barella
+    min 27 (1T 27) visitante penalty_goal Eros Parada
+    min 38 (1T 38) visitante try          Salvador Florensa
+    min 38 (1T 38) visitante conversion   Eros Parada
+    min 41 (2T 1) local     substitution Nicolas Cantarutti
+    min 41 (2T 1) local     substitution Ezequiel Romero Cassano
+    min 41 (2T 1) local     substitution Ramiro Bugia
+    min 41 (2T 1) local     substitution Valentín Adanto Risso
+    min 41 (2T 1) local     substitution Facundo Nicolas Luna
+    min 41 (2T 1) local     substitution Carlos Quinto Luque Colombres
+    min 45 (2T 5) visitante substitution Einel Iñaki Knorr
+    min 45 (2T 5) visitante substitution Matias Lazarte
+    min 45 (2T 5) visitante substitution Juan Cruz Rodriguez
+    min 45 (2T 5) visitante card_yellow  Francisco Lucio Speranza
+    min 45 (2T 5) local     try          Carlos Fabian Nielsen
+    min 55 (2T 15) visitante substitution Francisco Lucio Speranza
+    min 55 (2T 15) visitante substitution Máximo Manuel Jaurena
+    min 57 (2T 17) local     substitution Facundo Almada
+    min 61 (2T 21) local     try          Mateo Taborda
+    min 61 (2T 21) local     conversion   Tobias Cordoba Oyhamburu
+    min 68 (2T 28) local     try          Martin Mocatti
+    min 72 (2T 32) visitante card_yellow  Nazareno Fonzo
+  marcador  · eventos 17-10 · guardado 17-10
+  tries     · 3-1 (guardado —-—)
+  arbitro   · Ignacio Santiago Olmedo Ramirez (guardado: —)
+
+Urú Curé Rugby Club Preintermedia "A" vs Club Palermo Bajo Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276953  ·  3617f7f4-e357-4d64-a52d-d858e26a0eff
+  local     · Urú Curé Rugby Club Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min  8 (1T 8) visitante try          Tomas Ignacio Berbel
+    min  8 (1T 8) visitante conversion   Tomás Aldao
+    min 16 (1T 16) local     penalty_goal Juan Cruz Pispieiro
+    min 19 (1T 19) visitante card_yellow  Franco Roson
+    min 20 (1T 20) local     try          Bautista Formini Lopez
+    min 21 (1T 21) local     conversion   Juan Cruz Pispieiro
+    min 24 (1T 24) visitante penalty_goal Tomás Aldao
+    min 38 (1T 38) visitante try          Tomas Ignacio Berbel
+    min 38 (1T 38) visitante conversion   Tomás Aldao
+    min 40 (2T 0) visitante substitution Juan Gregorio Ferreyra Lammertyn
+    min 46 (2T 6) local     card_yellow  Marco Gomez
+    min 46 (2T 6) visitante substitution Franco Roson
+    min 48 (2T 8) visitante substitution Luca Samir Alegre Chedid
+    min 48 (2T 8) visitante substitution Maximo Ricardo Contigiani
+    min 54 (2T 14) visitante substitution Tomás Aldao
+    min 57 (2T 17) local     card_yellow  Augusto Kohler
+    min 57 (2T 17) visitante card_yellow  Tomas Ignacio Berbel
+    min 59 (2T 19) visitante card_yellow  Federico Pregot
+    min 60 (2T 20) visitante substitution Pedro Benjamin Valera Morillo
+    min 65 (2T 25) visitante substitution Matias Mateo
+    min 66 (2T 26) visitante try          Juan Segundo Raffaini Cabanillas
+    min 72 (2T 32) visitante card_yellow  Diego Ezequiel Deodato
+    min 73 (2T 33) local     try          Salvador Maccio
+    min 74 (2T 34) local     conversion   Felipe Joaquin Ambroggio
+  marcador  · eventos 17-22 · guardado 17-22
+  tries     · 2-3 (guardado —-—)
+  arbitro   · Cristian Mauro Quiles Buteler (guardado: —)
+
+La Tablada "A" - Pre Intermedia vs Club Universitario de Córdoba Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276954  ·  80577141-2998-47f2-8cc5-70adc1ba0327
+  local     · La Tablada "A" - Pre Intermedia · 23 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 33
+    min  2 (1T 2) local     try          Alvaro Solana Allende
+    min  3 (1T 3) local     conversion   Bautista Demarchi
+    min 16 (1T 16) visitante try          Luis Fabian Farias
+    min 17 (1T 17) visitante conversion   Javier Perez Soria
+    min 22 (1T 22) local     penalty_goal Bautista Demarchi
+    min 23 (1T 23) local     try          Valentín Tomas Aguero
+    min 34 (1T 34) visitante penalty_goal Javier Perez Soria
+    min 40 (1T 40) local     penalty_goal Bautista Demarchi
+    min 41 (2T 1) visitante card_yellow  Santiago Fabian Escobar
+    min 45 (2T 5) visitante try          Juan Cruz Alias
+    min 46 (2T 6) visitante conversion   Javier Perez Soria
+    min 48 (2T 8) visitante substitution Juan Benjamin Spat
+    min 49 (2T 9) local     substitution Facundo Perrone
+    min 49 (2T 9) local     substitution Zair Leonel Acosta
+    min 49 (2T 9) local     substitution Salvador Laje
+    min 49 (2T 9) local     substitution Valentín Tomas Aguero
+    min 50 (2T 10) visitante substitution Juan Cruz Alias
+    min 50 (2T 10) local     try          Gonzalo Berrotaran
+    min 55 (2T 15) local     substitution Juan Ignacio Bosio
+    min 55 (2T 15) local     penalty_goal Bautista Demarchi
+    min 55 (2T 15) local     substitution Tomas Retta
+    min 58 (2T 18) visitante substitution Pedro Vara Paredes
+    min 59 (2T 19) local     substitution Alvaro Solana Allende
+    min 65 (2T 25) visitante substitution Luis Fabian Farias
+    min 66 (2T 26) local     substitution Matías Mariani
+    min 70 (2T 30) local     try          Nicolas Gauna
+    min 71 (2T 31) visitante substitution Ignacio Agustín Brizuela
+    min 71 (2T 31) local     conversion   Bautista Demarchi
+    min 72 (2T 32) visitante substitution Facundo Matias Garay
+    min 72 (2T 32) visitante substitution Farid Hammoud
+    min 72 (2T 32) local     try          Gonzalo Berrotaran
+    min 72 (2T 32) local     conversion   Bautista Demarchi
+    min 77 (2T 37) visitante try          Joaquin Albarracin
+  marcador  · eventos 40-22 · guardado 40-22
+  tries     · 5-3 (guardado —-—)
+  arbitro   · Horacio Coronado (guardado: —)
+
+Club Universitario de Córdoba Preintermedia "A" vs Jockey Club Córdoba Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276955  ·  ae1d6b92-0537-4415-b8e9-a47a91fbf3b8
+  local     · Club Universitario de Córdoba Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba Preintermedia "A" · 23 jugadores · 1 con ficha fijada
+  eventos   · 29
+    min  1 (1T 1) local     try          Mateo Valentin Morero
+    min  1 (1T 1) visitante try          Agustin Rodriguez
+    min  1 (1T 1) local     conversion   Mateo Valentin Morero
+    min  1 (1T 1) visitante conversion   Agustin Rodriguez
+    min  1 (1T 1) local     try          Juan Benjamin Spat
+    min  1 (1T 1) visitante try          Agustin Rodriguez
+    min  1 (1T 1) local     conversion   Juan Benjamin Spat
+    min  1 (1T 1) visitante try          Juan Manuel Sanso
+    min  1 (1T 1) local     penalty_goal Facundo Ameijeiras
+    min  1 (1T 1) visitante penalty_try  
+    min  1 (1T 1) local     card_yellow  Pedro Vara Paredes
+    min  1 (1T 1) visitante try          Josemaria Palacios Sesto
+    min  1 (1T 1) local     card_yellow  Nestor Jose Oviedo
+    min  1 (1T 1) visitante conversion   Josemaria Palacios Sesto
+    min  1 (1T 1) visitante try          Juan Manuel Sanso
+    min 36 (1T 36) visitante card_yellow  Agustin Goycoolea
+    min 40 (1T 40) local     substitution Ignacio Salas Mendoza
+    min 40 (1T 40) local     substitution Ignacio Agustín Brizuela
+    min 40 (1T 40) local     substitution Luis Fabian Farias
+    min 40 (1T 40) visitante substitution Ignacio Quintana
+    min 40 (1T 40) visitante substitution Juan Manuel Sanso
+    min 40 (1T 40) visitante substitution Gregorio Amuchastegui
+    min 40 (1T 40) visitante substitution Mateo Ferreyra
+    min 40 (1T 40) local     substitution Joaquin Martinez
+    min 40 (1T 40) visitante substitution Augusto Ocaña
+    min 40 (1T 40) local     substitution Galo Guajardo
+    min 40 (1T 40) visitante substitution Genaro Simondi
+    min 40 (1T 40) visitante substitution Alvaro Areco Penalba
+    min 40 (1T 40) visitante substitution Enzo Roncaglia
+  marcador  · eventos 17-36 · guardado 17-36
+  tries     · 2-6 (guardado —-—)
+  arbitro   · Abel Esteban Turek (guardado: —)
+
+Club Palermo Bajo Preintermedia "A" vs La Tablada "A" - Pre Intermedia · torneo-cordobes-preintermedia-a · tarjeta 276956  ·  bee5d71c-a7f0-4dbc-8999-16866500d0e1
+  local     · Club Palermo Bajo Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · La Tablada "A" - Pre Intermedia · 23 jugadores · 0 con ficha fijada
+  eventos   · 37
+    min  5 (1T 5) visitante penalty_goal Bautista Demarchi
+    min  9 (1T 9) local     card_yellow  Juan Cruz Moreno
+    min 10 (1T 10) visitante try          Juan Ignacio Bosio
+    min 11 (1T 11) visitante conversion   Bautista Demarchi
+    min 15 (1T 15) local     try          Ignacio Barrionuevo
+    min 15 (1T 15) local     conversion   Tomás Aldao
+    min 24 (1T 24) visitante injury       Facundo Romero
+    min 25 (1T 25) visitante substitution Facundo Romero
+    min 28 (1T 28) local     penalty_goal Tomás Aldao
+    min 33 (1T 33) visitante penalty_goal Bautista Demarchi
+    min 39 (1T 39) local     try          Juan Cruz Broglia
+    min 39 (1T 39) local     conversion   Tomás Aldao
+    min 40 (2T 0) visitante substitution Matias Petrini
+    min 45 (2T 5) local     substitution Luca Samir Alegre Chedid
+    min 45 (2T 5) local     substitution Juan Gregorio Ferreyra Lammertyn
+    min 46 (2T 6) visitante substitution Matías Mariani
+    min 46 (2T 6) visitante substitution Bautista Paoletti
+    min 47 (2T 7) local     card_yellow  Pedro Benjamin Valera Morillo
+    min 48 (2T 8) local     substitution Mateo Broglia
+    min 51 (2T 11) visitante substitution Maximo Antonio Corzo Poroli
+    min 54 (2T 14) visitante substitution German Rojas
+    min 55 (2T 15) local     substitution Octavio Herrera Manna
+    min 55 (2T 15) local     substitution Matias Mateo
+    min 57 (2T 17) local     try          Diego Ezequiel Deodato
+    min 57 (2T 17) local     conversion   Benjamin Biglia
+    min 57 (2T 17) local     substitution Pedro Benjamin Valera Morillo
+    min 62 (2T 22) visitante substitution Felipe Lima
+    min 66 (2T 26) visitante substitution Asael Gaston Acosta
+    min 68 (2T 28) visitante try          Valentin Rojas
+    min 69 (2T 29) visitante conversion   Bautista Demarchi
+    min 70 (2T 30) local     substitution Juan Cruz Moreno
+    min 70 (2T 30) local     card_yellow  Tomás Aldao
+    min 71 (2T 31) local     card_yellow  Tomás Aldao
+    min 71 (2T 31) local     card_red     Tomás Aldao
+    min 72 (2T 32) local     try          Ignacio Barrionuevo
+    min 72 (2T 32) local     conversion   Benjamin Biglia
+    min 77 (2T 37) visitante try          Santiago Sanchez Pulgar
+  marcador  · eventos 31-25 · guardado 31-25
+  tries     · 4-3 (guardado —-—)
+  arbitro   · Martin Leandro Barrabino (guardado: —)
+
+Córdoba Athletic Club Preintermedia "A" vs Jockey Club de Villa María Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276958  ·  9c359a8f-aa26-4057-a13b-6afdbc288de9
+  local     · Córdoba Athletic Club Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club de Villa María Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 32
+    min 12 (1T 12) local     card_yellow  German Maurino
+    min 12 (1T 12) visitante try          Valentin Vivas
+    min 12 (1T 12) visitante conversion   Luciano Cittadini
+    min 24 (1T 24) local     try          Maximo Emiliano Romero
+    min 27 (1T 27) local     try          Santiago Villalba Kohn
+    min 27 (1T 27) local     conversion   Salvador Florensa
+    min 28 (1T 28) visitante try          Alejandro Figueroa
+    min 28 (1T 28) visitante conversion   Luciano Cittadini
+    min 35 (1T 35) visitante try          Genaro Daglio
+    min 40 (2T 0) visitante card_red     Santiago Daglio
+    min 43 (2T 3) visitante try          Genaro Daglio
+    min 45 (2T 5) local     substitution Fernando Bustos Fierro
+    min 45 (2T 5) local     substitution Maximo Emiliano Romero
+    min 50 (2T 10) local     substitution Santiago Segura
+    min 50 (2T 10) local     substitution Stefano Lucero
+    min 53 (2T 13) visitante substitution Tomás Sayago
+    min 55 (2T 15) visitante card_yellow  Luciano Astutti
+    min 55 (2T 15) local     substitution Thiago Armando
+    min 55 (2T 15) local     substitution Ignacio Vanni
+    min 56 (2T 16) local     try          Salvador Florensa
+    min 57 (2T 17) visitante substitution Alejandro Figueroa
+    min 59 (2T 19) visitante substitution Valentino Brugiafreddo
+    min 60 (2T 20) local     substitution Martín Vaccarello
+    min 60 (2T 20) local     substitution Santiago Javier Galetto
+    min 62 (2T 22) visitante substitution Valentin Vivas
+    min 64 (2T 24) visitante substitution Juan Santiago Benzo
+    min 65 (2T 25) local     try          Salvador Florensa
+    min 65 (2T 25) local     conversion   Nazareno Fonzo
+    min 70 (2T 30) local     try          Nazareno Fonzo
+    min 71 (2T 31) visitante try          Genaro Daglio
+    min 71 (2T 31) visitante conversion   Luciano Cittadini
+    min 79 (2T 39) local     penalty_goal Benjamin Testa
+  marcador  · eventos 32-31 · guardado 32-31
+  tries     · 5-5 (guardado —-—)
+  arbitro   · Cristian Mauro Quiles Buteler (guardado: —)
+
+San Martín de Villa María Preintermedia "A" vs Tala Rugby Club Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 276959  ·  c4b38f97-1628-4e23-b48b-8354ede4c174
+  local     · San Martín de Villa María Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club Preintermedia "A" · 23 jugadores · 2 con ficha fijada
+  eventos   · 23
+    min  3 (1T 3) local     penalty_goal Lionel Carrizo
+    min 10 (1T 10) visitante try          Tomas De Vértiz Cañon
+    min 11 (1T 11) visitante conversion   Tobias Cordoba Oyhamburu
+    min 15 (1T 15) visitante try          Tomas De Vértiz Cañon
+    min 15 (1T 15) visitante conversion   Tobias Cordoba Oyhamburu
+    min 23 (1T 23) visitante try          Diogenes Sesin
+    min 24 (1T 24) visitante conversion   Tobias Cordoba Oyhamburu
+    min 28 (1T 28) visitante try          Tobias Cordoba Oyhamburu
+    min 31 (1T 31) local     try          Ignacio Tenchini
+    min 34 (1T 34) visitante try          Fernando Pereyra
+    min 35 (1T 35) visitante conversion   Tobias Cordoba Oyhamburu
+    min 38 (1T 38) visitante card_yellow  Mateo Taborda
+    min 42 (2T 2) visitante try          Tomas Wortley
+    min 42 (2T 2) visitante conversion   Tobias Cordoba Oyhamburu
+    min 53 (2T 13) visitante try          Carlos Fabian Nielsen
+    min 61 (2T 21) visitante try          Pablo Montero
+    min 63 (2T 23) visitante try          Valentino Bordoni
+    min 64 (2T 24) visitante conversion   Tobias Cordoba Oyhamburu
+    min 74 (2T 34) visitante try          Carlos Fabian Nielsen
+    min 74 (2T 34) visitante conversion   Tobias Cordoba Oyhamburu
+    min 77 (2T 37) local     try          Lucas Miguel Demaría
+    min 79 (2T 39) visitante try          Carlos Fabian Nielsen
+    min 79 (2T 39) visitante conversion   Tobias Cordoba Oyhamburu
+  marcador  · eventos 13-71 · guardado 13-71
+  tries     · 2-11 (guardado —-—)
+  arbitro   · Sergio Zbura (guardado: —)
+
+La Tablada "A" - Pre Intermedia vs Urú Curé Rugby Club Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 322713  ·  9ad75e03-d5ac-4e14-8bb7-d148f028ce29
+  local     · La Tablada "A" - Pre Intermedia · 23 jugadores · 0 con ficha fijada
+  visitante · Urú Curé Rugby Club Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min  1 (1T 1) local     try          Valentino Pizoni Morales
+    min  8 (1T 8) local     try          Agustin Bosio
+    min  9 (1T 9) local     conversion   Valentin Rojas
+    min 32 (1T 32) local     card_yellow  Asael Gaston Acosta
+    min 39 (1T 39) visitante card_yellow  Nicolas Alejandro Ruano
+    min 40 (1T 40) local     substitution Matias Petrini
+    min 41 (2T 1) visitante substitution Joel Wittouck
+    min 41 (2T 1) visitante substitution Leonel Bazan
+    min 41 (2T 1) visitante substitution Tomas Tarditi
+    min 43 (2T 3) local     try          Facundo Funes
+    min 44 (2T 4) local     conversion   Valentin Rojas
+    min 47 (2T 7) visitante substitution Nicolas Alejandro Ruano
+    min 48 (2T 8) visitante substitution Santino Pariani
+    min 48 (2T 8) local     substitution Nicolas Gauna
+    min 49 (2T 9) local     substitution Justo Bonadeo
+    min 51 (2T 11) local     substitution Benjamín De Alzáa
+    min 54 (2T 14) local     try          Valentín Tomas Aguero
+    min 56 (2T 16) local     substitution Facundo Perrone
+    min 57 (2T 17) local     conversion   Valentin Rojas
+    min 58 (2T 18) local     substitution Agustin Bosio
+    min 62 (2T 22) visitante try          Juan Valentino Santangelo
+    min 67 (2T 27) visitante substitution Máximo Martín D'andrea Van Der Kolk
+    min 72 (2T 32) visitante substitution Santiago Mondino
+    min 74 (2T 34) visitante substitution Manuel Velich
+    min 74 (2T 34) local     try          Tomas Sala
+    min 77 (2T 37) visitante try          Salvador Hipermayen
+    min 78 (2T 38) visitante conversion   Juan Cruz Pispieiro
+  marcador  · eventos 31-12 · guardado 31-12
+  tries     · 5-2 (guardado —-—)
+  arbitro   · Martin Leandro Barrabino (guardado: —)
+
+Jockey Club Córdoba Preintermedia "A" vs Jockey Club de Villa María Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 322714  ·  bf2a195c-08d7-43d6-bddd-ab1e734a531a
+  local     · Jockey Club Córdoba Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club de Villa María Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 26
+    min 20 (1T 20) visitante try          Juan Martin Pacheco
+    min 25 (1T 25) local     card_yellow  Esteban Martellotto
+    min 26 (1T 26) visitante try          Juan Martin Pacheco
+    min 30 (1T 30) visitante penalty_goal Valentino Silvio Venier
+    min 40 (2T 0) local     substitution Felipe Boffi
+    min 45 (2T 5) local     try          Joaquín José Cima
+    min 45 (2T 5) visitante substitution Juan Martin Pacheco
+    min 45 (2T 5) local     conversion   Joaquín José Cima
+    min 45 (2T 5) visitante substitution Sebastián Cordoba
+    min 47 (2T 7) local     substitution Lautaro Gualdieri
+    min 47 (2T 7) local     substitution Ivo Pelcer
+    min 47 (2T 7) local     substitution Facundo Ludueña Gómez
+    min 50 (2T 10) visitante substitution Tomás Sayago
+    min 50 (2T 10) visitante substitution Joaquin Perazzio
+    min 50 (2T 10) local     substitution Esteban Martellotto
+    min 50 (2T 10) visitante substitution Fausto Paez
+    min 55 (2T 15) local     try          Juan Manuel Sanso
+    min 55 (2T 15) local     conversion   Juan Manuel Sanso
+    min 55 (2T 15) local     conversion   Joaquín José Cima
+    min 56 (2T 16) local     substitution Octavio Bordon
+    min 60 (2T 20) local     substitution Ignacio Quintana
+    min 60 (2T 20) local     substitution Enzo Roncaglia
+    min 68 (2T 28) local     try          Gonzalo Masin
+    min 70 (2T 30) visitante substitution Santiago Daglio
+    min 73 (2T 33) local     try          Martiniano Cola
+    min 78 (2T 38) local     try          Tomas De Goycoechea
+  marcador  · eventos 31-13 · guardado 31-13
+  tries     · 5-2 (guardado —-—)
+  arbitro   · Sebastian Velez (guardado: —)
+
+Tala Rugby Club Preintermedia "A" vs Urú Curé Rugby Club Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 323973  ·  7bce32be-c4f7-44c8-9e79-f34bd36c4cb5
+  local     · Tala Rugby Club Preintermedia "A" · 23 jugadores · 2 con ficha fijada
+  visitante · Urú Curé Rugby Club Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 32
+    min  4 (1T 4) local     try          Martin Mocatti
+    min  4 (1T 4) local     conversion   Fernando Pereyra
+    min 12 (1T 12) local     try          Ignacio Ceppolino
+    min 23 (1T 23) local     try          Carlos Fabian Nielsen
+    min 23 (1T 23) local     conversion   Fernando Pereyra
+    min 25 (1T 25) visitante try          Facundo Dalvit
+    min 30 (1T 30) local     try          Ramiro Bugia
+    min 30 (1T 30) local     conversion   Fernando Pereyra
+    min 35 (1T 35) visitante try          Facundo Dalvit
+    min 35 (1T 35) visitante conversion   Juan Cruz Pispieiro
+    min 39 (1T 39) local     card_yellow  Martin Mocatti
+    min 40 (2T 0) visitante try          Facundo Dalvit
+    min 40 (2T 0) visitante conversion   Juan Cruz Pispieiro
+    min 40 (2T 0) local     substitution Gaston Ohanian
+    min 40 (2T 0) local     substitution Tomas De Vértiz Cañon
+    min 40 (2T 0) local     substitution Federico Bianchini
+    min 45 (2T 5) local     substitution Ramiro Bugia
+    min 45 (2T 5) local     substitution Martin Iván Altamirano
+    min 45 (2T 5) local     substitution Martin Mocatti
+    min 47 (2T 7) local     try          Facundo Almada
+    min 47 (2T 7) local     conversion   Fernando Pereyra
+    min 50 (2T 10) local     substitution Santiago Lastra
+    min 55 (2T 15) visitante try          Facundo Dalvit
+    min 55 (2T 15) visitante conversion   Juan Cruz Pispieiro
+    min 55 (2T 15) local     substitution Facundo Almada
+    min 64 (2T 24) local     try          Salvador Otero Rímini
+    min 64 (2T 24) local     conversion   Fernando Pereyra
+    min 75 (2T 35) local     try          Rocco Moriconi Brasini
+    min 75 (2T 35) local     conversion   Fernando Pereyra
+    min 75 (2T 35) local     card_yellow  Franco Garcia
+    min 78 (2T 38) local     try          Conrado Bengoechea
+    min 78 (2T 38) local     conversion   Fernando Pereyra
+  marcador  · eventos 54-26 · guardado 54-26
+  tries     · 8-4 (guardado —-—)
+  arbitro   · Lucas Humeres (guardado: —)
+
+La Tablada "A" - Pre Intermedia vs Córdoba Athletic Club Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 323974  ·  04e15161-6113-4c82-bd18-805be0a7dd7b
+  local     · La Tablada "A" - Pre Intermedia · 23 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 30
+    min  4 (1T 4) local     penalty_goal Valentin Rojas
+    min 11 (1T 11) local     try          Justo Bonadeo
+    min 12 (1T 12) local     conversion   Valentin Rojas
+    min 16 (1T 16) local     penalty_goal Valentin Rojas
+    min 23 (1T 23) visitante try          Ignacio Vanni
+    min 23 (1T 23) visitante conversion   Benjamin Testa
+    min 28 (1T 28) local     try          Alvaro Solana Allende
+    min 29 (1T 29) local     conversion   Valentin Rojas
+    min 32 (1T 32) local     try          Facundo Funes
+    min 33 (1T 33) local     conversion   Valentin Rojas
+    min 40 (2T 0) visitante substitution Benjamin Testa
+    min 45 (2T 5) visitante substitution Felipe Marangone
+    min 45 (2T 5) local     substitution Lorenzo Dutto
+    min 50 (2T 10) local     substitution Facundo Perrone
+    min 50 (2T 10) local     card_yellow  Nicolas Páez De La Torre
+    min 52 (2T 12) local     substitution Luca D'ugo Vivanco
+    min 53 (2T 13) local     substitution Tomás Facundo Altamira Pasqualini
+    min 56 (2T 16) local     substitution Facundo Funes
+    min 59 (2T 19) visitante substitution Maximo Emiliano Romero
+    min 59 (2T 19) local     substitution Pablo Lozada
+    min 60 (2T 20) visitante substitution Bruno Romero
+    min 63 (2T 23) visitante substitution Mateo Malik Alabí
+    min 64 (2T 24) visitante substitution Einel Iñaki Knorr
+    min 64 (2T 24) visitante substitution Thiago Armando
+    min 64 (2T 24) local     substitution Valentin Rojas
+    min 66 (2T 26) local     substitution Maximiliano Miguel Bareiro
+    min 70 (2T 30) visitante try          Antonio Martinez
+    min 70 (2T 30) visitante conversion   Eros Parada
+    min 77 (2T 37) visitante substitution Facundo Miguel Morandini
+    min 83 (2T 43) local     try          Alvaro Solana Allende
+  marcador  · eventos 32-14 · guardado 32-14
+  tries     · 4-2 (guardado —-—)
+  arbitro   · Juan Francisco Gomez (guardado: —)
+
+Club Palermo Bajo Preintermedia "A" vs Jockey Club de Villa María Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 323975  ·  7d4297f0-c4b8-407a-a03b-973ed669df1d
+  local     · Club Palermo Bajo Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club de Villa María Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min 27 (1T 27) local     try          Alejo Lujan
+    min 27 (1T 27) visitante card_yellow  Santiago Daglio
+    min 27 (1T 27) local     conversion   Benjamin Biglia
+    min 31 (1T 31) local     try          Tomas Lopresti
+    min 43 (1T 43) visitante card_yellow  Carando Mateo
+    min 41 (2T 1) local     substitution Ariel Francisco Olmedo Ramirez
+    min 49 (2T 9) local     substitution Benjamin Biglia
+    min 52 (2T 12) visitante penalty_goal Luciano Cittadini
+    min 52 (2T 12) local     substitution Saul Ivan Aratano
+    min 53 (2T 13) local     substitution Tomas Lopresti
+    min 53 (2T 13) local     substitution Mateo Broglia
+    min 56 (2T 16) local     substitution Alejo Lujan
+    min 57 (2T 17) local     try          Diego Ezequiel Deodato
+    min 59 (2T 19) local     substitution Ezequiel Broglia Ossola
+    min 62 (2T 22) local     substitution Facundo Gutierrez
+    min 62 (2T 22) local     penalty_try  
+    min 65 (2T 25) local     try          Lucas Cuello
+    min 65 (2T 25) local     conversion   Lucas Eladio Lopez
+    min 70 (2T 30) visitante card_yellow  Valentino Silvio Venier
+    min 75 (2T 35) local     try          Federico Bianchi
+  marcador  · eventos 36-3 · guardado 36-3
+  tries     · 6-0 (guardado —-—)
+  arbitro   · Abel Esteban Turek (guardado: —)
+
+Jockey Club Córdoba Preintermedia "A" vs Club Universitario de Córdoba Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 323976  ·  7e0f4c2f-5bac-4971-833e-f60d6ee13012
+  local     · Jockey Club Córdoba Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 36
+    min 16 (1T 16) local     try          Valentin Bentue
+    min 22 (1T 22) local     try          Martiniano Cola
+    min 24 (1T 24) visitante try          Tobias Buzzoni
+    min 28 (1T 28) visitante penalty_goal Tobias Buzzoni
+    min 32 (1T 32) visitante penalty_goal Tobias Buzzoni
+    min 37 (1T 37) local     try          Lucio Carrara
+    min 37 (1T 37) local     conversion   Joaquín José Cima
+    min 40 (2T 0) local     substitution Ignacio Quintana
+    min 40 (2T 0) local     substitution Facundo Ludueña Gómez
+    min 40 (2T 0) local     substitution Gregorio Amuchastegui
+    min 40 (2T 0) visitante substitution Galo Guajardo
+    min 46 (2T 6) visitante substitution Nestor Jose Oviedo
+    min 47 (2T 7) local     card_yellow  Juan Cruz Moyano
+    min 48 (2T 8) local     try          Lautaro Gualdieri
+    min 48 (2T 8) local     conversion   Joaquín José Cima
+    min 50 (2T 10) visitante substitution Ignacio Salas Mendoza
+    min 50 (2T 10) local     substitution Lucio Carrara
+    min 50 (2T 10) local     substitution Santiago Merlini
+    min 50 (2T 10) local     substitution Lautaro Gualdieri
+    min 50 (2T 10) local     substitution Felipe Boffi
+    min 50 (2T 10) local     substitution Enzo Roncaglia
+    min 51 (2T 11) local     try          Valentin Bentue
+    min 51 (2T 11) local     conversion   Joaquín José Cima
+    min 57 (2T 17) visitante substitution Tomas Cuello
+    min 60 (2T 20) visitante substitution Pedro Eguiguren
+    min 60 (2T 20) visitante substitution Ignacio Agustín Brizuela
+    min 60 (2T 20) visitante card_red     Francisco Javier Contreras
+    min 61 (2T 21) local     card_yellow  Hernán Darío Quintana
+    min 62 (2T 22) local     try          Santiago Merlini
+    min 62 (2T 22) local     conversion   Joaquín José Cima
+    min 67 (2T 27) visitante try          Juan Manuel Lizarraga
+    min 70 (2T 30) visitante substitution Juan Benjamin Spat
+    min 76 (2T 36) visitante try          Juan Manuel Lizarraga
+    min 76 (2T 36) visitante conversion   Tobias Buzzoni
+    min 79 (2T 39) local     try          Manuel Nefa
+    min 79 (2T 39) local     conversion   Joaquín José Cima
+  marcador  · eventos 45-23 · guardado 45-23
+  tries     · 7-3 (guardado —-—)
+  arbitro   · Luciano Francisco Romero (guardado: —)
+
+Córdoba Athletic Club Preintermedia "A" vs Tala Rugby Club Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 324493  ·  36e56d6f-469b-4fd6-bb18-1ddbf2589d72
+  local     · Córdoba Athletic Club Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club Preintermedia "A" · 23 jugadores · 1 con ficha fijada
+  eventos   · 38
+    min  1 (1T 1) local     penalty_goal Benjamin Testa
+    min  6 (1T 6) visitante conversion   Fernando Pereyra
+    min  6 (1T 6) visitante try          Matías Bartolome Torales
+    min 15 (1T 15) local     injury       Facundo Miguel Morandini
+    min 15 (1T 15) local     substitution Facundo Miguel Morandini
+    min 15 (1T 15) visitante penalty_goal Fernando Pereyra
+    min 16 (1T 16) local     card_yellow  Santiago Antonucci
+    min 20 (1T 20) visitante card_yellow  Ramiro Bugia
+    min 20 (1T 20) local     try          Santiago Carol Bortayro
+    min 21 (1T 21) local     conversion   Benjamin Testa
+    min 25 (1T 25) local     penalty_goal Benjamin Testa
+    min 29 (1T 29) visitante try          Alvaro Revol
+    min 29 (1T 29) visitante conversion   Fernando Pereyra
+    min 30 (1T 30) local     injury       Benjamin Testa
+    min 30 (1T 30) local     substitution Benjamin Testa
+    min 32 (1T 32) visitante try          Nicolas Pereyra
+    min 32 (1T 32) visitante conversion   Nicolas Pereyra
+    min 40 (2T 0) local     substitution Ivo Valentin Reinoso
+    min 40 (2T 0) visitante substitution Ramiro Bugia
+    min 40 (2T 0) visitante substitution Martin Iván Altamirano
+    min 40 (2T 0) visitante substitution Rocco Moriconi Brasini
+    min 40 (2T 0) visitante substitution Bautista Kosciuk
+    min 40 (2T 0) visitante substitution Nicolas Pereyra
+    min 50 (2T 10) visitante substitution Federico Bianchini
+    min 50 (2T 10) visitante substitution Tobias Cordoba Oyhamburu
+    min 55 (2T 15) local     substitution Einel Iñaki Knorr
+    min 56 (2T 16) visitante substitution Facundo Almada
+    min 56 (2T 16) local     try          Santiago Carol Bortayro
+    min 57 (2T 17) local     conversion   Eros Parada
+    min 60 (2T 20) visitante try          Mateo Taborda
+    min 64 (2T 24) local     try          Eros Parada
+    min 64 (2T 24) local     conversion   Eros Parada
+    min 73 (2T 33) local     substitution Maximo Emiliano Romero
+    min 73 (2T 33) local     substitution Thiago Armando
+    min 73 (2T 33) local     substitution Mateo Malik Alabí
+    min 75 (2T 35) visitante try          Matías Bartolome Torales
+    min 75 (2T 35) visitante conversion   Fernando Pereyra
+    min 78 (2T 38) local     substitution Bruno Romero
+  marcador  · eventos 27-36 · guardado 27-36
+  tries     · 3-5 (guardado —-—)
+  arbitro   · Abel Esteban Turek (guardado: —)
+
+Club Universitario de Córdoba Preintermedia "A" vs Club Palermo Bajo Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 324495  ·  91429d00-4c7c-4a3b-976e-a72e71dd6afe
+  local     · Club Universitario de Córdoba Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 36
+    min  7 (1T 7) visitante try          Franco Roson
+    min  7 (1T 7) visitante conversion   Benjamin Biglia
+    min 19 (1T 19) visitante try          Juan Cruz Mercado
+    min 22 (1T 22) visitante try          Tomas Lopresti
+    min 22 (1T 22) visitante conversion   Benjamin Biglia
+    min 26 (1T 26) visitante try          Franco Roson
+    min 26 (1T 26) visitante conversion   Benjamin Biglia
+    min 27 (1T 27) local     card_red     Joaquin Gelos
+    min 30 (1T 30) visitante try          Matias Facundo Bianchi Altamira
+    min 30 (1T 30) visitante conversion   Benjamin Biglia
+    min 32 (1T 32) visitante card_yellow  Agustin Kinen
+    min 40 (1T 40) local     try          Ignacio Salas Mendoza
+    min 40 (2T 0) local     substitution Nestor Jose Oviedo
+    min 40 (2T 0) local     substitution Natanael Mozo
+    min 40 (2T 0) local     substitution Joaquin Martinez
+    min 40 (2T 0) local     substitution Galo Guajardo
+    min 40 (2T 0) local     substitution Farid Hammoud
+    min 40 (2T 0) local     substitution Santiago Diaz
+    min 43 (2T 3) visitante try          Mateo Yojala
+    min 44 (2T 4) visitante substitution Facundo Gutierrez
+    min 46 (2T 6) visitante try          Tomas Lopresti
+    min 46 (2T 6) visitante conversion   Lucas Eladio Lopez
+    min 46 (2T 6) visitante substitution Benjamin Biglia
+    min 46 (2T 6) visitante substitution Tomas Lopresti
+    min 46 (2T 6) visitante substitution Ariel Francisco Olmedo Ramirez
+    min 49 (2T 9) visitante substitution Saul Ivan Aratano
+    min 49 (2T 9) visitante substitution Agustin Kinen
+    min 49 (2T 9) visitante substitution Mateo Broglia
+    min 51 (2T 11) visitante substitution Juan Cruz Mercado
+    min 55 (2T 15) visitante try          Matias Facundo Bianchi Altamira
+    min 55 (2T 15) visitante conversion   Lucas Eladio Lopez
+    min 57 (2T 17) local     try          Jeremias Peralta
+    min 58 (2T 18) local     card_yellow  Santiago Diaz
+    min 60 (2T 20) visitante try          Mateo Yojala
+    min 60 (2T 20) visitante conversion   Lucas Eladio Lopez
+    min 73 (2T 33) local     try          Tomas Cuello
+  marcador  · eventos 15-59 · guardado 15-59
+  tries     · 3-9 (guardado —-—)
+  arbitro   · Daniel Edgardo Luna (guardado: —)
+
+San Martín de Villa María Preintermedia "A" vs Córdoba Athletic Club Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 325078  ·  292a9129-6491-4ebd-a539-d367ab6f1a40
+  local     · San Martín de Villa María Preintermedia "A" · 22 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 19
+    min  2 (1T 2) local     try          Fernando Cuellar
+    min 15 (1T 15) local     try          Martin Brondolo
+    min 15 (1T 15) local     conversion   Lionel Carrizo
+    min 24 (1T 24) visitante try          Tomás Kouchoumpos
+    min 34 (1T 34) visitante substitution Antonio Martinez
+    min 40 (1T 40) visitante card_yellow  Gustavo Merino
+    min 41 (2T 1) visitante substitution Tomas Bunge Biscayart
+    min 45 (2T 5) local     try          Lautaro Dario Alanis
+    min 46 (2T 6) local     card_yellow  Ignacio Barrozo Peralta
+    min 47 (2T 7) local     card_yellow  Gaston Rosetto Olthoff
+    min 47 (2T 7) visitante penalty_goal Tomas Amusategui
+    min 48 (2T 8) local     substitution Fernando Cuellar
+    min 50 (2T 10) visitante substitution Gustavo Merino
+    min 52 (2T 12) visitante substitution Fernando Bustos Fierro
+    min 55 (2T 15) visitante substitution Federico Bustos Fierro
+    min 63 (2T 23) local     substitution Ignacio Barrozo Peralta
+    min 63 (2T 23) visitante substitution Tomás Kouchoumpos
+    min 68 (2T 28) local     substitution Manuel Patricelli
+    min 78 (2T 38) local     substitution Agustín Picca
+  marcador  · eventos 17-8 · guardado 17-8
+  tries     · 3-1 (guardado —-—)
+  arbitro   · Nahuel Sabena (guardado: —)
+
+Tala Rugby Club Preintermedia "A" vs La Tablada "A" - Pre Intermedia · torneo-cordobes-preintermedia-a · tarjeta 325079  ·  a2531b2c-9ce7-4180-9735-6cdc0fa49f83
+  local     · Tala Rugby Club Preintermedia "A" · 23 jugadores · 2 con ficha fijada
+  visitante · La Tablada "A" - Pre Intermedia · 23 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min  4 (1T 4) visitante substitution Justo Bonadeo
+    min 13 (1T 13) local     try          Nicolas Pereyra
+    min 20 (1T 20) local     penalty_goal Fernando Pereyra
+    min 24 (1T 24) local     penalty_goal Fernando Pereyra
+    min 31 (1T 31) visitante card_yellow  Tomas Sala
+    min 32 (1T 32) local     try          Martin Iván Altamirano
+    min 33 (1T 33) local     conversion   Fernando Pereyra
+    min 40 (1T 40) visitante substitution Vicente Vacca
+    min 40 (1T 40) visitante substitution Conrado Volpi
+    min 40 (2T 0) local     try          Mateo Taborda
+    min 40 (2T 0) local     conversion   Fernando Pereyra
+    min 46 (2T 6) visitante card_yellow  Tomas Sala
+    min 46 (2T 6) visitante card_red     Tomas Sala
+    min 54 (2T 14) visitante try          Francesco Bianco
+    min 62 (2T 22) local     try          Santiago Wortley
+    min 63 (2T 23) local     conversion   Fernando Pereyra
+    min 69 (2T 29) visitante card_yellow  Franco Nicolas Galliano
+    min 72 (2T 32) local     card_yellow  Martin Mocatti
+    min 77 (2T 37) visitante try          Francesco Bianco
+    min 78 (2T 38) visitante conversion   Lucas Sudria
+  marcador  · eventos 32-12 · guardado 32-12
+  tries     · 4-2 (guardado —-—)
+  arbitro   · Ignacio Santiago Olmedo Ramirez (guardado: —)
+
+Club Palermo Bajo Preintermedia "A" vs Jockey Club Córdoba Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 325080  ·  6bf5733a-f7a3-4f1c-a637-7ddad1635825
+  local     · Club Palermo Bajo Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba Preintermedia "A" · 23 jugadores · 1 con ficha fijada
+  eventos   · 27
+    min  5 (1T 5) visitante try          Pedro Benjamín Yapur
+    min  5 (1T 5) visitante conversion   Pedro Benjamín Yapur
+    min 13 (1T 13) visitante try          Lucio Carrara
+    min 13 (1T 13) visitante conversion   Pedro Benjamín Yapur
+    min 19 (1T 19) local     try          Mateo Broglia
+    min 19 (1T 19) visitante try          Martiniano Cola
+    min 26 (1T 26) local     try          Franco Roson
+    min 26 (1T 26) local     conversion   Lucas Eladio Lopez
+    min 33 (1T 33) visitante try          Enzo Roncaglia
+    min 41 (2T 1) local     substitution Gerónimo Ferreyra Andrada
+    min 41 (2T 1) local     substitution Tomas Lopresti
+    min 45 (2T 5) local     try          Agustin Carabajal
+    min 45 (2T 5) local     conversion   Lucas Eladio Lopez
+    min 46 (2T 6) local     substitution Benjamin Biglia
+    min 47 (2T 7) local     substitution Ezequiel Broglia Ossola
+    min 51 (2T 11) local     substitution Mateo Broglia
+    min 55 (2T 15) local     substitution Diego Ezequiel Deodato
+    min 55 (2T 15) local     substitution Maximo Ricardo Contigiani
+    min 58 (2T 18) visitante penalty_goal Pedro Benjamín Yapur
+    min 63 (2T 23) visitante try          Manuel Nefa
+    min 63 (2T 23) local     substitution Tomas Ignacio Berbel
+    min 66 (2T 26) local     try          Agustin Carabajal
+    min 66 (2T 26) local     conversion   Lucas Eladio Lopez
+    min 69 (2T 29) visitante card_yellow  Augusto Ocaña
+    min 70 (2T 30) local     card_yellow  Agustin Carabajal
+    min 71 (2T 31) visitante try          Francisco Manfredi De Olmos
+    min 75 (2T 35) visitante try          Martín Federico Chercuetella Pilar
+  marcador  · eventos 26-42 · guardado 26-42
+  tries     · 4-7 (guardado —-—)
+  arbitro   · Juan Francisco Gomez (guardado: —)
+
+La Tablada "A" - Pre Intermedia vs San Martín de Villa María Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 326139  ·  58f38c77-6ed2-4a5f-a3a5-9ec1d6905a4e
+  local     · La Tablada "A" - Pre Intermedia · 23 jugadores · 0 con ficha fijada
+  visitante · San Martín de Villa María Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 32
+    min  3 (1T 3) local     try          Facundo Funes
+    min  4 (1T 4) local     conversion   Bautista Demarchi
+    min 12 (1T 12) local     penalty_goal Bautista Demarchi
+    min 26 (1T 26) visitante try          Gaston Rosetto Olthoff
+    min 26 (1T 26) visitante conversion   Lionel Carrizo
+    min 33 (1T 33) local     substitution Matias Francisca
+    min 37 (1T 37) local     try          Bautista Demarchi
+    min 38 (1T 38) local     conversion   Bautista Demarchi
+    min 40 (2T 0) visitante substitution Manuel Patricelli
+    min 40 (2T 0) visitante substitution Lautaro Dario Alanis
+    min 40 (2T 0) visitante substitution Fernando Cuellar
+    min 40 (2T 0) visitante substitution Marcos Debiaggi
+    min 40 (2T 0) visitante substitution Agustín Pomba
+    min 40 (2T 0) visitante substitution Jose Julián Bruno
+    min 41 (2T 1) visitante try          Lionel Carrizo
+    min 41 (2T 1) visitante conversion   Lionel Carrizo
+    min 46 (2T 6) local     substitution Facundo Perrone
+    min 46 (2T 6) local     substitution Alejo Manuel Garcia
+    min 48 (2T 8) local     substitution Juan Zelada
+    min 49 (2T 9) local     try          Lorenzo Dutto
+    min 55 (2T 15) local     substitution Augusto Arguello
+    min 57 (2T 17) visitante card_yellow  Juan Ignacio Fernández
+    min 60 (2T 20) local     substitution Bautista Demarchi
+    min 61 (2T 21) local     substitution Valentín Moras
+    min 61 (2T 21) local     substitution Joaquin Paiva
+    min 62 (2T 22) local     try          Lorenzo Dutto
+    min 63 (2T 23) local     conversion   Lucas Sudria
+    min 76 (2T 36) local     try          Lorenzo Dutto
+    min 76 (2T 36) local     conversion   Lucas Sudria
+    min 78 (2T 38) visitante try          Francisco Ivan Acosta Brizuela
+    min 78 (2T 38) visitante conversion   Lionel Carrizo
+    min 79 (2T 39) visitante card_yellow  Agustín Picca
+  marcador  · eventos 36-21 · guardado 36-21
+  tries     · 5-3 (guardado —-—)
+  arbitro   · Daniel Edgardo Luna (guardado: —)
+
+Córdoba Athletic Club Preintermedia "A" vs Urú Curé Rugby Club Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 326140  ·  3c1b6447-6517-4ccc-8368-0ce76e38b74c
+  local     · Córdoba Athletic Club Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Urú Curé Rugby Club Preintermedia "A" · 21 jugadores · 0 con ficha fijada
+  eventos   · 38
+    min 12 (1T 12) local     try          Joaquin Oliva
+    min 15 (1T 15) local     try          Ignacio Vanni
+    min 15 (1T 15) local     conversion   Joaquin Oliva
+    min 21 (1T 21) visitante card_yellow  Tomas Orellano Santarelli
+    min 24 (1T 24) visitante card_yellow  Maximiliano Walter Baez
+    min 24 (1T 24) visitante card_yellow  Maximiliano Walter Baez
+    min 24 (1T 24) visitante card_red     Maximiliano Walter Baez
+    min 25 (1T 25) local     card_yellow  Bautista Acuña
+    min 25 (1T 25) local     card_yellow  Bautista Acuña
+    min 25 (1T 25) local     card_red     Bautista Acuña
+    min 28 (1T 28) local     try          Mateo Malik Alabí
+    min 32 (1T 32) visitante try          Jeronimo Marzari
+    min 32 (1T 32) visitante substitution Salvador Hipermayen
+    min 32 (1T 32) visitante conversion   Juan Cruz Pispieiro
+    min 39 (1T 39) local     try          Joaquin Oliva
+    min 39 (1T 39) local     conversion   Joaquin Oliva
+    min 45 (1T 45) local     try          Ivo Valentin Reinoso
+    min 40 (2T 0) visitante substitution Maximiliano Walter Baez
+    min 40 (2T 0) visitante substitution Benjamin Quiros
+    min 45 (2T 5) visitante substitution Santiago Mondino
+    min 47 (2T 7) visitante try          Nicolas Alejandro Ruano
+    min 50 (2T 10) local     try          Santiago Antonucci
+    min 52 (2T 12) visitante substitution Manuel Velich
+    min 54 (2T 14) visitante substitution Emiliano Bustos
+    min 58 (2T 18) visitante card_yellow  Marco Gomez
+    min 60 (2T 20) visitante try          Valentino Yacono
+    min 60 (2T 20) visitante conversion   Juan Cruz Pispieiro
+    min 61 (2T 21) local     card_yellow  Felipe Marangone
+    min 65 (2T 25) local     substitution Facundo Coraglio
+    min 65 (2T 25) local     substitution Fernando Bustos Fierro
+    min 65 (2T 25) local     substitution Maximo Emiliano Romero
+    min 65 (2T 25) local     substitution Thiago Armando
+    min 70 (2T 30) local     substitution Joaquin Oliva
+    min 70 (2T 30) local     substitution Santiago Antonucci
+    min 71 (2T 31) local     try          Mateo Malik Alabí
+    min 71 (2T 31) local     conversion   Thiago Javier Bejarano
+    min 75 (2T 35) local     substitution Tomás Kouchoumpos
+    min 76 (2T 36) local     try          Bruno Romero
+  marcador  · eventos 46-19 · guardado 46-19
+  tries     · 8-3 (guardado —-—)
+  arbitro   · Nahuel Sabena (guardado: —)
+
+Club Universitario de Córdoba Preintermedia "A" vs Jockey Club de Villa María Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 326141  ·  7321f91f-e6d2-49c7-b9e6-064fcd21a3c4
+  local     · Club Universitario de Córdoba Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club de Villa María Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 28
+    min  7 (1T 7) visitante try          Tomas Bertolino
+    min  7 (1T 7) visitante conversion   Joaquin Barrios
+    min 22 (1T 22) visitante try          Valentino Silvio Venier
+    min 24 (1T 24) visitante try          Luciano Astutti
+    min 24 (1T 24) visitante conversion   Joaquin Barrios
+    min 29 (1T 29) visitante penalty_goal Joaquin Barrios
+    min 33 (1T 33) local     try          Ignacio Salas Mendoza
+    min 40 (2T 0) local     substitution Galo Guajardo
+    min 40 (2T 0) local     substitution Jeremias Peralta
+    min 45 (2T 5) local     try          Juan Benjamin Spat
+    min 45 (2T 5) local     substitution Joaquin Martinez
+    min 46 (2T 6) local     conversion   Tobias Buzzoni
+    min 50 (2T 10) visitante substitution Tomas Bertolino
+    min 50 (2T 10) visitante substitution Francisco Requena
+    min 50 (2T 10) visitante substitution Pedro Valle
+    min 50 (2T 10) visitante substitution Sebastián Cordoba
+    min 50 (2T 10) visitante try          Federico Quaglia
+    min 50 (2T 10) visitante conversion   Joaquin Barrios
+    min 50 (2T 10) visitante substitution Juan Martin Pacheco
+    min 53 (2T 13) local     penalty_try  
+    min 60 (2T 20) local     substitution Natanael Mozo
+    min 60 (2T 20) local     substitution Luis Fabian Farias
+    min 60 (2T 20) local     substitution Pedro Eguiguren
+    min 60 (2T 20) local     substitution Facundo Ameijeiras
+    min 60 (2T 20) visitante try          Federico Domenico Benzo
+    min 60 (2T 20) visitante card_yellow  Joaquin Perazzio
+    min 70 (2T 30) local     substitution Nestor Jose Oviedo
+    min 70 (2T 30) visitante substitution Valentino Silvio Venier
+  marcador  · eventos 19-34 · guardado 19-34
+  tries     · 3-5 (guardado —-—)
+  arbitro   · Martin Leandro Barrabino (guardado: —)
+
+Córdoba Athletic Club Preintermedia "A" vs Jockey Club de Villa María Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 326733  ·  ae4db719-7d4c-4d39-8d56-e48078ec279d
+  local     · Córdoba Athletic Club Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club de Villa María Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min  2 (1T 2) local     try          Ignacio Vanni
+    min  3 (1T 3) local     conversion   Ignacio Vanni
+    min 10 (1T 10) local     try          Augusto Ibañez
+    min 11 (1T 11) local     conversion   Ignacio Vanni
+    min 15 (1T 15) visitante try          Federico Quaglia
+    min 20 (1T 20) local     substitution Thiago Armando
+    min 23 (1T 23) visitante penalty_goal Amadeo Milidoni
+    min 53 (2T 13) visitante substitution Pedro Valle
+    min 53 (2T 13) local     substitution Tomas Agustín Macías
+    min 57 (2T 17) local     try          Stefano Lucero
+    min 58 (2T 18) local     conversion   Ignacio Vanni
+    min 60 (2T 20) visitante substitution Tomás Sayago
+    min 60 (2T 20) visitante substitution Federico Domenico Benzo
+    min 60 (2T 20) visitante substitution Federico Quaglia
+    min 63 (2T 23) local     substitution Maximo Emiliano Romero
+    min 63 (2T 23) visitante try          Santiago Daglio
+    min 63 (2T 23) visitante conversion   Amadeo Milidoni
+    min 65 (2T 25) local     substitution Juan Cruz Rodriguez
+    min 74 (2T 34) local     penalty_goal Tomas Amusategui
+    min 74 (2T 34) local     substitution Augusto Ibañez
+    min 75 (2T 35) local     substitution Diego Stocker
+    min 78 (2T 38) local     try          German Ezequiel Koth
+  marcador  · eventos 29-15 · guardado 29-15
+  tries     · 4-2 (guardado —-—)
+  arbitro   · Pablo Gerardo Ronco (guardado: —)
+
+Club Universitario de Córdoba Preintermedia "A" vs Urú Curé Rugby Club Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 326734  ·  5440a25d-163f-412d-9646-81742b42f735
+  local     · Club Universitario de Córdoba Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Urú Curé Rugby Club Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 32
+    min  1 (1T 1) local     try          Nestor Jose Oviedo
+    min  1 (1T 1) visitante try          Benjamin Quiros
+    min  1 (1T 1) visitante conversion   Juan Cruz Pispieiro
+    min  2 (1T 2) local     try          Joaquin Tomas Moyano Pinchasowicz
+    min  2 (1T 2) local     penalty_try  
+    min  2 (1T 2) visitante try          Tomas Orellano Santarelli
+    min  2 (1T 2) visitante conversion   Juan Cruz Pispieiro
+    min  3 (1T 3) local     try          Natanael Mozo
+    min  3 (1T 3) visitante penalty_goal Juan Cruz Pispieiro
+    min  3 (1T 3) visitante penalty_goal Juan Cruz Pispieiro
+    min  3 (1T 3) visitante penalty_goal Juan Cruz Pispieiro
+    min  3 (1T 3) visitante penalty_goal Juan Cruz Pispieiro
+    min 20 (1T 20) local     card_yellow  Nestor Jose Oviedo
+    min 20 (1T 20) local     card_yellow  Juan Pablo Benavides Pelaytay
+    min 20 (1T 20) visitante card_yellow  Santiago Mondino
+    min 20 (1T 20) visitante card_yellow  José Ignacio Benevento
+    min 40 (1T 40) local     substitution Nestor Jose Oviedo
+    min 40 (1T 40) local     substitution Natanael Mozo
+    min 40 (1T 40) local     substitution Juan Pablo Benavides Pelaytay
+    min 40 (1T 40) local     substitution Gonzalo Nicolas Martinez Jarchum
+    min 40 (1T 40) local     substitution Facundo Matias Garay
+    min 40 (1T 40) visitante substitution Benjamin Quiros
+    min 40 (1T 40) local     substitution Nicolás Villella Navarta
+    min 40 (1T 40) visitante substitution Theo Menichetti
+    min 40 (1T 40) local     substitution Facundo Ameijeiras
+    min 40 (1T 40) visitante substitution Benjamin Carra
+    min 40 (1T 40) visitante substitution Santiago Mondino
+    min 40 (1T 40) visitante substitution Augusto Kohler
+    min 40 (1T 40) visitante substitution Santiago Gagna
+    min 40 (1T 40) visitante substitution Emiliano Bustos
+    min 40 (1T 40) visitante substitution Manuel Velich
+    min 60 (1T 60) visitante card_yellow  Valentino Yacono
+  marcador  · eventos 22-26 · guardado 22-26
+  tries     · 4-2 (guardado —-—)
+  arbitro   · Abel Esteban Turek (guardado: —)
+
+Tala Rugby Club Preintermedia "A" vs Jockey Club Córdoba Preintermedia "A" · torneo-cordobes-preintermedia-a · tarjeta 326735  ·  04209f34-12e8-45d1-a8a0-58e43ffa275a
+  local     · Tala Rugby Club Preintermedia "A" · 23 jugadores · 2 con ficha fijada
+  visitante · Jockey Club Córdoba Preintermedia "A" · 23 jugadores · 3 con ficha fijada
+  eventos   · 22
+    min  5 (1T 5) local     try          Fernando Pereyra
+    min  5 (1T 5) local     conversion   Fernando Pereyra
+    min 20 (1T 20) visitante try          Santiago Merlini
+    min 20 (1T 20) visitante conversion   Alvaro Areco Penalba
+    min 41 (2T 1) local     substitution Tomas Wortley
+    min 45 (2T 5) visitante substitution Lucio Carrara
+    min 50 (2T 10) local     card_yellow  Facundo Almada
+    min 50 (2T 10) visitante substitution Santiago Merlini
+    min 50 (2T 10) local     substitution Ramiro Bugia
+    min 50 (2T 10) visitante penalty_goal Pedro Benjamín Yapur
+    min 60 (2T 20) local     card_yellow  Juan Cruz Maldonado
+    min 60 (2T 20) visitante substitution Gregorio Amuchastegui
+    min 60 (2T 20) visitante substitution Facundo Ludueña Gómez
+    min 60 (2T 20) visitante substitution Alvaro Areco Penalba
+    min 60 (2T 20) visitante substitution Marino Muñoz Boetto
+    min 60 (2T 20) visitante try          Pedro Benjamín Yapur
+    min 60 (2T 20) visitante conversion   Pedro Benjamín Yapur
+    min 65 (2T 25) visitante substitution Felipe Boffi
+    min 73 (2T 33) visitante card_yellow  Augusto Ocaña
+    min 75 (2T 35) visitante substitution Mateo Ferreyra
+    min 79 (2T 39) local     try          Mateo Taborda
+    min 79 (2T 39) local     conversion   Fernando Pereyra
+  marcador  · eventos 14-17 · guardado 14-17
+  tries     · 2-2 (guardado 2-2)
+  arbitro   · Daiana Del Milagro Cesaretti (guardado: —)
+
+Club Palermo Bajo Preintermedia "A" vs La Tablada "A" - Pre Intermedia · torneo-cordobes-preintermedia-a · tarjeta 326736  ·  3d329a6d-fc2b-4781-b79a-5233dbf04532
+  local     · Club Palermo Bajo Preintermedia "A" · 23 jugadores · 0 con ficha fijada
+  visitante · La Tablada "A" - Pre Intermedia · 23 jugadores · 0 con ficha fijada
+  eventos   · 29
+    min  3 (1T 3) visitante penalty_goal Bautista Demarchi
+    min  5 (1T 5) local     try          Matias Facundo Bianchi Altamira
+    min 34 (1T 34) local     conversion   Lucas Eladio Lopez
+    min 34 (1T 34) local     try          Matias Mateo
+    min 42 (2T 2) visitante penalty_try  
+    min 42 (2T 2) local     card_yellow  Tomas Ignacio Berbel
+    min 44 (2T 4) local     try          Agustin Carabajal
+    min 46 (2T 6) visitante try          Valentín Moras
+    min 47 (2T 7) visitante conversion   Bautista Demarchi
+    min 47 (2T 7) local     substitution Ariel Francisco Olmedo Ramirez
+    min 47 (2T 7) local     substitution Alejo Lujan
+    min 47 (2T 7) local     substitution Benjamin Biglia
+    min 47 (2T 7) local     substitution Ignacio Barrionuevo
+    min 50 (2T 10) visitante substitution Facundo Perrone
+    min 51 (2T 11) local     substitution Matias Facundo Bianchi Altamira
+    min 55 (2T 15) visitante try          Facundo Funes
+    min 57 (2T 17) local     substitution Saul Ivan Aratano
+    min 62 (2T 22) visitante substitution Valentín Moras
+    min 62 (2T 22) visitante substitution Luciano Barrera
+    min 62 (2T 22) visitante substitution Augusto Arguello
+    min 62 (2T 22) local     substitution Franco Roson
+    min 69 (2T 29) visitante substitution Alejo Manuel Garcia
+    min 69 (2T 29) visitante substitution Bautista Demarchi
+    min 69 (2T 29) local     try          Mateo Broglia
+    min 75 (2T 35) local     penalty_goal Lucas Eladio Lopez
+    min 80 (2T 40) visitante penalty_goal Lucas Sudria
+    min 80 (2T 40) visitante substitution Ignacio Leskiw
+    min 82 (2T 42) visitante substitution Tomas Sala
+    min 93 (2T 53) visitante try          Lorenzo Dutto
+  marcador  · eventos 25-30 · guardado 25-30
+  tries     · 4-4 (guardado —-—)
+  arbitro   · Fernando Martin Pettina (guardado: —)
+
+(plan: no se escribió nada)

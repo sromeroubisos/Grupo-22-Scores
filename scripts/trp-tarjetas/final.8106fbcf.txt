@@ -1,0 +1,1341 @@
+tarjetas oficiales 8106fbcf
+
+universitario-de-santa-fe vs atletico-brown-san-vicente · 8106fbcf · tarjeta 296353  ·  26113d37-fb45-4ab1-b2bb-1fd766df66ae
+  local     · universitario-de-santa-fe · 23 jugadores · 23 con ficha fijada
+  visitante · atletico-brown-san-vicente · 23 jugadores · 0 con ficha fijada
+  eventos   · 28
+    min  2 (1T 2) visitante penalty_goal Rodrigo Gigena
+    min  6 (1T 6) visitante try          Facundo Mancilla
+    min 14 (1T 14) local     try          Renzo Nahuel Carrara
+    min 14 (1T 14) local     conversion   Mateo Carughi
+    min 19 (1T 19) visitante penalty_goal Rodrigo Gigena
+    min 25 (1T 25) local     try          Maximo Frenguelli
+    min 25 (1T 25) local     conversion   Mateo Carughi
+    min 30 (1T 30) local     substitution Mateo Carughi
+    min 35 (1T 35) local     try          Maximo Frenguelli
+    min 35 (1T 35) local     conversion   Maximo Frenguelli
+    min 41 (2T 1) local     substitution Maximo Frenguelli
+    min 49 (2T 9) local     substitution Mateo Schmidt
+    min 49 (2T 9) local     try          Victor Andrés Redondo
+    min 50 (2T 10) local     conversion   Ignacio Haas
+    min 52 (2T 12) visitante try          Lautaro Rossi
+    min 52 (2T 12) visitante conversion   Rodrigo Gigena
+    min 57 (2T 17) visitante substitution Facundo Mancilla
+    min 61 (2T 21) local     substitution Jorge Onorato
+    min 61 (2T 21) local     substitution Nicolas Sanchez
+    min 63 (2T 23) local     try          Ignacio Haas
+    min 63 (2T 23) local     conversion   Ignacio Haas
+    min 68 (2T 28) visitante substitution Thiago Favaro
+    min 68 (2T 28) visitante substitution Ezequiel Belo
+    min 70 (2T 30) local     substitution Gabriel Sala
+    min 72 (2T 32) visitante try          Emiliano Gastón Turino
+    min 72 (2T 32) visitante conversion   Rodrigo Gigena
+    min 74 (2T 34) local     card_yellow  Ivan Dal Molin
+    min 78 (2T 38) visitante try          Gaston Quintero
+  marcador  · eventos 35-30 · guardado 35-30
+  tries     · 5-4 (guardado —-—)
+  arbitro   · FABIAN PRATS (guardado: —)
+  guardado  · 23 local · 23 visitante · 28 eventos
+
+crar vs la-salle-jobson · 8106fbcf · tarjeta 296354  ·  f9faa2cd-772f-4f3c-9d4e-bd2d9c2c8870
+  local     · crar · 23 jugadores · 22 con ficha fijada
+  visitante · la-salle-jobson · 23 jugadores · 23 con ficha fijada
+  eventos   · 29
+    min 10 (1T 10) visitante try          Tomás Buttaro
+    min 11 (1T 11) visitante conversion   Gerónimo Rosa
+    min 12 (1T 12) visitante drop_goal    Guido Micocci
+    min 18 (1T 18) local     try          Tomás Ferrero
+    min 18 (1T 18) local     conversion   Valentino Appo
+    min 25 (1T 25) local     penalty_try  
+    min 25 (1T 25) visitante card_yellow  Maximo Yuale
+    min 34 (1T 34) local     try          Gonzalo Clemenz
+    min 34 (1T 34) local     conversion   Valentino Appo
+    min 41 (2T 1) visitante substitution Maximo Yuale
+    min 41 (2T 1) visitante substitution Diego Ojeda
+    min 46 (2T 6) local     substitution Bruno Rivas
+    min 46 (2T 6) local     substitution Francisco Ambort
+    min 47 (2T 7) visitante substitution Leandro Tacca
+    min 47 (2T 7) visitante substitution Lionel Pellegri
+    min 49 (2T 9) visitante try          Walter Chiarinoti
+    min 51 (2T 11) local     substitution Jerónimo Ribero
+    min 51 (2T 11) local     substitution Santiago Clemenz
+    min 55 (2T 15) visitante substitution Tomás Gilabert
+    min 55 (2T 15) visitante substitution Lautaro Salcedo
+    min 56 (2T 16) local     try          Martin Barberis
+    min 59 (2T 19) local     penalty_goal Valentino Appo
+    min 61 (2T 21) local     substitution Leonardo Sabellotti
+    min 61 (2T 21) local     try          Leonardo Sabellotti
+    min 61 (2T 21) local     conversion   Valentino Appo
+    min 61 (2T 21) local     substitution Gonzalo Clemenz
+    min 64 (2T 24) visitante substitution Tomás Buttaro
+    min 64 (2T 24) visitante substitution Bautista Bressan
+    min 72 (2T 32) local     try          Valentino Appo
+  marcador  · eventos 41-15 · guardado 41-15
+  tries     · 6-2 (guardado —-—)
+  arbitro   · MATEO CIACCIO (guardado: —)
+  guardado  · 23 local · 23 visitante · 29 eventos
+
+querandi-r-c vs alma-juniors · 8106fbcf · tarjeta 307656  ·  19c341ac-3045-485c-8724-098024dec980
+  local     · querandi-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · alma-juniors · 23 jugadores · 16 con ficha fijada
+  eventos   · 29
+    min 12 (1T 12) local     penalty_goal Mateo Villar
+    min 20 (1T 20) visitante try          Sebastián Massi
+    min 20 (1T 20) visitante conversion   Marcelo Gabriel Heidegger
+    min 29 (1T 29) visitante penalty_goal Marcelo Gabriel Heidegger
+    min 31 (1T 31) visitante card_yellow  Ignacio Bengochea
+    min 32 (1T 32) local     penalty_goal Mateo Villar
+    min 33 (1T 33) visitante card_yellow  Juan Cazzullo
+    min 36 (1T 36) local     try          Felipe Cortes
+    min 36 (1T 36) local     conversion   Mateo Villar
+    min 41 (1T 41) visitante try          Osmar Sosa
+    min 41 (2T 1) visitante substitution Gianfranco Lissi
+    min 41 (2T 1) visitante substitution Ignacio Bengochea
+    min 42 (2T 2) local     penalty_goal Mateo Villar
+    min 43 (2T 3) local     substitution Agustin Serfaty
+    min 45 (2T 5) visitante try          Agustin Piris
+    min 48 (2T 8) local     substitution Tomas Jorge Maidana
+    min 53 (2T 13) visitante penalty_goal Marcelo Gabriel Heidegger
+    min 57 (2T 17) local     substitution Cristian Maidana
+    min 61 (2T 21) visitante substitution Sebastián Massi
+    min 64 (2T 24) visitante try          Renzo Borgogno
+    min 64 (2T 24) visitante conversion   Marcelo Gabriel Heidegger
+    min 66 (2T 26) visitante substitution Federico Korell
+    min 74 (2T 34) visitante try          Renzo Borgogno
+    min 74 (2T 34) visitante conversion   Marcelo Gabriel Heidegger
+    min 75 (2T 35) visitante substitution Jose Francisco Lucena
+    min 77 (2T 37) visitante substitution Osmar Sosa
+    min 77 (2T 37) visitante substitution Javier Longoni
+    min 78 (2T 38) local     try          Laureano Gandini
+    min 79 (2T 39) local     conversion   Mateo Villar
+  marcador  · eventos 23-37 · guardado 23-37
+  tries     · 2-5 (guardado —-—)
+  arbitro   · FABIAN PRATS (guardado: —)
+  guardado  · 23 local · 23 visitante · 29 eventos
+
+cha-roga-r-c vs universitario-de-santa-fe · 8106fbcf · tarjeta 307655  ·  f96256da-fdb8-49f3-b4b7-b8adb13ca537
+  local     · cha-roga-r-c · 23 jugadores · 22 con ficha fijada
+  visitante · universitario-de-santa-fe · 23 jugadores · 21 con ficha fijada
+  eventos   · 28
+    min 15 (1T 15) visitante penalty_goal Mateo Bianchi
+    min 18 (1T 18) local     card_yellow  Gonzalo Tomas Casal
+    min 18 (1T 18) visitante try          Victor Andrés Redondo
+    min 18 (1T 18) visitante conversion   Mateo Bianchi
+    min 23 (1T 23) visitante penalty_try  
+    min 24 (1T 24) local     card_yellow  Franco Porfiri
+    min 44 (2T 4) visitante substitution Mateo Schmidt
+    min 47 (2T 7) visitante substitution Nahuel Ivan Gonzalez
+    min 48 (2T 8) visitante substitution Cristian Onorato
+    min 52 (2T 12) local     substitution Gonzalo Tomas Casal
+    min 54 (2T 14) visitante substitution Ivan Dal Molin
+    min 55 (2T 15) visitante try          Ian Nahuel Dallaverde
+    min 55 (2T 15) visitante conversion   Mateo Bianchi
+    min 55 (2T 15) visitante substitution Matias Gonzalez
+    min 57 (2T 17) local     substitution Facundo Nicolas Eberhardt
+    min 57 (2T 17) local     substitution Franco Porfiri
+    min 57 (2T 17) local     substitution Dante Joaquin Perlender
+    min 59 (2T 19) visitante try          Ian Nahuel Dallaverde
+    min 59 (2T 19) visitante conversion   Mateo Bianchi
+    min 60 (2T 20) visitante substitution Ivan Dal Molin
+    min 60 (2T 20) visitante substitution Mateo Bianchi
+    min 65 (2T 25) visitante substitution Federico Bruzzone
+    min 71 (2T 31) visitante card_red     Gabriel Sala
+    min 73 (2T 33) visitante substitution Jorge Onorato
+    min 75 (2T 35) local     substitution Diego García
+    min 75 (2T 35) local     substitution Lautaro Fleita
+    min 75 (2T 35) visitante try          Ian Nahuel Dallaverde
+    min 75 (2T 35) visitante conversion   Ignacio Haas
+  marcador  · eventos 0-38 · guardado 0-38
+  tries     · 0-5 (guardado —-—)
+  arbitro   · MATEO CIACCIO (guardado: —)
+  guardado  · 23 local · 23 visitante · 28 eventos
+
+atletico-brown-san-vicente vs crar · 8106fbcf · tarjeta 307654  ·  b258fcf8-f69e-4339-a847-41ddb76aee55
+  local     · atletico-brown-san-vicente · 23 jugadores · 0 con ficha fijada
+  visitante · crar · 23 jugadores · 17 con ficha fijada
+  eventos   · 25
+    min 19 (1T 19) visitante card_yellow  Manuel Alejandro Mandrille
+    min 20 (1T 20) local     try          Facundo Mancilla
+    min 20 (1T 20) local     conversion   Rodrigo Gigena
+    min 30 (1T 30) visitante substitution Ian Trossero
+    min 30 (1T 30) visitante substitution Ticiano Hang
+    min 45 (2T 5) local     try          Lautaro Rossi
+    min 45 (2T 5) local     conversion   Rodrigo Gigena
+    min 49 (2T 9) local     penalty_goal Rodrigo Gigena
+    min 49 (2T 9) visitante card_yellow  Fabricio Machado
+    min 51 (2T 11) visitante try          Leonardo Sabellotti
+    min 51 (2T 11) visitante conversion   Bernardo Mateo Villar
+    min 60 (2T 20) local     card_yellow  Rodrigo Gigena
+    min 64 (2T 24) visitante try          Francisco Fuglini
+    min 64 (2T 24) visitante injury       Gian Marco Allasino
+    min 70 (2T 30) local     substitution Ezequiel Belo
+    min 70 (2T 30) visitante substitution Joaquín Astesano
+    min 72 (2T 32) local     penalty_goal Rodrigo Gigena
+    min 73 (2T 33) local     try          Nahuel Magnoli
+    min 73 (2T 33) local     conversion   Rodrigo Gigena
+    min 76 (2T 36) local     card_yellow  Fabricio Fontana
+    min 76 (2T 36) visitante substitution Maximo Astesano
+    min 76 (2T 36) visitante substitution Facundo Ledesma
+    min 78 (2T 38) visitante try          Pedro Mandrille
+    min 78 (2T 38) visitante conversion   Mateo Ferrero
+    min 80 (2T 40) visitante substitution Santino Lozano
+  marcador  · eventos 27-19 · guardado 27-19
+  tries     · 3-3 (guardado —-—)
+  arbitro   · ALFREDO FUN (guardado: —)
+  guardado  · 23 local · 23 visitante · 25 eventos
+
+santa-fe-r-c vs crai · 8106fbcf · tarjeta 307657  ·  5b7f3771-6b7d-4d39-9bd1-85ca2867eea2
+  local     · santa-fe-r-c · 23 jugadores · 7 con ficha fijada
+  visitante · crai · 23 jugadores · 16 con ficha fijada
+  eventos   · 26
+    min  7 (1T 7) visitante card_yellow  Francisco Oscar Alberto
+    min  8 (1T 8) local     try          Santiago Caputto
+    min 14 (1T 14) visitante try          Elio Gariboldi
+    min 14 (1T 14) visitante conversion   Franco Pierangeli
+    min 22 (1T 22) visitante try          Elio Gariboldi
+    min 22 (1T 22) visitante conversion   Franco Pierangeli
+    min 26 (1T 26) visitante try          Ramiro Germano
+    min 32 (1T 32) local     try          Santiago Caputto
+    min 33 (1T 33) local     conversion   Manuel Maria Borzone Mas
+    min 36 (1T 36) visitante try          Franco Pierangeli
+    min 36 (1T 36) visitante conversion   Franco Pierangeli
+    min 41 (2T 1) visitante substitution Elio Gariboldi
+    min 41 (2T 1) visitante substitution Tomás Funes Iturraspe
+    min 44 (2T 4) visitante substitution Juan Bautista Raffa
+    min 50 (2T 10) visitante substitution Franco Pierangeli
+    min 67 (2T 27) visitante try          Bautista Lattanzi
+    min 67 (2T 27) visitante substitution Esteban Russi
+    min 67 (2T 27) visitante substitution Blas Michelini
+    min 67 (2T 27) visitante substitution Lautaro Labath
+    min 67 (2T 27) visitante substitution Luciano Simino
+    min 71 (2T 31) visitante try          Juan Nicolas Miguel
+    min 75 (2T 35) visitante card_yellow  Tomas Mufarrege
+    min 97 (2T 57) local     try          Santiago Caputto
+    min 100 (2T 60) local     substitution Juan Martin Benet
+    min 102 (2T 62) local     substitution Santiago Caputto
+    min 105 (2T 65) local     substitution Valentino Cobelli
+  marcador  · eventos 17-36 · guardado 17-36
+  tries     · 3-6 (guardado —-—)
+  arbitro   · EXEQUIEL ADROVER (guardado: —)
+  guardado  · 23 local · 23 visitante · 26 eventos
+
+la-salle-jobson vs atletico-brown-san-vicente · 8106fbcf · tarjeta 309562  ·  56b9efb1-6611-4f22-8ba9-9c3f5cb79f2c
+  local     · la-salle-jobson · 23 jugadores · 23 con ficha fijada
+  visitante · atletico-brown-san-vicente · 23 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min  9 (1T 9) visitante try          Emiliano Gastón Turino
+    min 19 (1T 19) local     try          Walter Chiarinoti
+    min 19 (1T 19) visitante card_yellow  Emiliano Gastón Turino
+    min 30 (1T 30) visitante substitution Mateo Luna
+    min 40 (1T 40) visitante try          Stefano Saccone
+    min 40 (1T 40) visitante conversion   Rodrigo Gigena
+    min 41 (2T 1) local     substitution Francisco De Marco
+    min 41 (2T 1) local     substitution Bautista Bressan
+    min 43 (2T 3) local     try          Juan Cruz Hadad
+    min 43 (2T 3) local     conversion   Gerónimo Rosa
+    min 51 (2T 11) local     try          Agustín Kohlbrener
+    min 54 (2T 14) local     try          Emanuel Piris
+    min 54 (2T 14) local     conversion   Gerónimo Rosa
+    min 60 (2T 20) visitante substitution Leandro Omar Sanchez
+    min 67 (2T 27) local     substitution Pablo Yuale
+    min 68 (2T 28) local     penalty_goal Gerónimo Rosa
+    min 76 (2T 36) visitante try          César Grosso
+    min 76 (2T 36) visitante conversion   Rodrigo Gigena
+    min 79 (2T 39) local     card_yellow  Guido Micocci
+    min 79 (2T 39) visitante card_yellow  Guillermo Pievaroli
+  marcador  · eventos 27-19 · guardado 27-19
+  tries     · 4-3 (guardado —-—)
+  arbitro   · FACUNDO PUNTILLO FERNANDEZ (guardado: —)
+  guardado  · 23 local · 23 visitante · 20 eventos
+
+crar vs cha-roga-r-c · 8106fbcf · tarjeta 309561  ·  02029499-39a9-46d3-a9a9-23ebed95d826
+  local     · crar · 23 jugadores · 20 con ficha fijada
+  visitante · cha-roga-r-c · 23 jugadores · 20 con ficha fijada
+  eventos   · 27
+    min 16 (1T 16) visitante penalty_goal Bladimir Villamayor
+    min 20 (1T 20) local     try          Bruno Rivas
+    min 25 (1T 25) local     card_yellow  Lucas Cesar Canello
+    min 28 (1T 28) visitante penalty_goal Bladimir Villamayor
+    min 29 (1T 29) visitante try          Pietro Croce
+    min 30 (1T 30) visitante conversion   Bladimir Villamayor
+    min 33 (1T 33) local     card_yellow  Gonzalo Clemenz
+    min 39 (1T 39) local     penalty_goal Santiago Kerstens
+    min 42 (2T 2) local     try          Maximo Astesano
+    min 42 (2T 2) local     conversion   Santiago Kerstens
+    min 45 (2T 5) visitante substitution Joaquin Strada
+    min 45 (2T 5) visitante card_yellow  Luigi Croce
+    min 46 (2T 6) local     try          Bernardo Mateo Villar
+    min 47 (2T 7) local     substitution Santiago Franco
+    min 50 (2T 10) local     substitution Bernardo Mateo Villar
+    min 51 (2T 11) visitante substitution Nazareno Loyola
+    min 55 (2T 15) local     substitution Gonzalo Clemenz
+    min 55 (2T 15) local     substitution Maximo Astesano
+    min 60 (2T 20) local     substitution Pedro Mandrille
+    min 60 (2T 20) local     substitution Fabricio Machado
+    min 60 (2T 20) local     substitution Francisco Ambort
+    min 60 (2T 20) local     substitution Gabriel Natanael Morales
+    min 63 (2T 23) local     try          Pedro Ambort
+    min 63 (2T 23) local     conversion   Santiago Kerstens
+    min 71 (2T 31) visitante substitution Dario Alberto Medina
+    min 71 (2T 31) visitante card_yellow  Luigi Croce
+    min 71 (2T 31) visitante card_red     Luigi Croce
+  marcador  · eventos 27-13 · guardado 27-13
+  tries     · 4-1 (guardado —-—)
+  arbitro   · XXX XXX (NO OFICIAL) (guardado: —)
+  guardado  · 23 local · 23 visitante · 27 eventos
+
+universitario-de-santa-fe vs querandi-r-c · 8106fbcf · tarjeta 309560  ·  42ad1d56-46df-4518-bff6-a47447ffb636
+  local     · universitario-de-santa-fe · 23 jugadores · 20 con ficha fijada
+  visitante · querandi-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 36
+    min  1 (1T 1) local     try          Ivan Dal Molin
+    min  6 (1T 6) local     try          Ivan Dal Molin
+    min  8 (1T 8) visitante try          Agustin Andress Nieto Pino
+    min  8 (1T 8) visitante conversion   Mateo Villar
+    min 13 (1T 13) visitante penalty_goal Mateo Villar
+    min 21 (1T 21) local     try          Federico Bruzzone
+    min 26 (1T 26) local     try          Maximo Frenguelli
+    min 26 (1T 26) local     conversion   Mateo Bianchi
+    min 39 (1T 39) local     try          Matias Gonzalez
+    min 41 (2T 1) local     try          Lucas Ivan Demarchi
+    min 41 (2T 1) local     conversion   Mateo Bianchi
+    min 49 (2T 9) local     try          Bruno Lautaro Sosa
+    min 49 (2T 9) local     conversion   Mateo Bianchi
+    min 53 (2T 13) local     substitution Álvaro Oteo
+    min 55 (2T 15) local     try          Ignacio Haas
+    min 55 (2T 15) local     conversion   Ignacio Haas
+    min 57 (2T 17) local     substitution Juan Galiano
+    min 58 (2T 18) local     substitution Tomas Albini
+    min 60 (2T 20) local     substitution Mateo Bianchi
+    min 64 (2T 24) local     try          Lucas Ivan Demarchi
+    min 67 (2T 27) local     substitution Maximo Frenguelli
+    min 70 (2T 30) local     try          Joaquin Juarez
+    min 70 (2T 30) local     conversion   Ignacio Haas
+    min 80 (2T 40) local     substitution Matias Gonzalez
+    min 80 (2T 40) local     substitution Juan Manuel Royo
+    min 80 (2T 40) local     injury       Cristian Onorato
+    min 80 (2T 40) local     substitution Cristian Onorato
+    min 95 (2T 55) visitante substitution Tomas Amor
+    min 104 (2T 64) visitante substitution Nicolas Graziano
+    min 104 (2T 64) visitante substitution Ignacio Aguirre
+    min 108 (2T 68) visitante substitution Brian Franco
+    min 114 (2T 74) visitante try          Tomas Oliva
+    min 114 (2T 74) visitante conversion   Mateo Villar
+    min 114 (2T 74) visitante substitution Cristian Maidana
+    min 119 (2T 79) visitante substitution Eleazar Bertinetti
+    min 119 (2T 79) visitante substitution Ignacio Alico
+  marcador  · eventos 60-17 · guardado 60-17
+  tries     · 10-2 (guardado —-—)
+  arbitro   · MATEO CIACCIO (guardado: —)
+  guardado  · 23 local · 23 visitante · 36 eventos
+
+santa-fe-r-c vs alma-juniors · 8106fbcf · tarjeta 309559  ·  f1814d5f-e6a3-4479-851d-9cdd46d76293
+  local     · santa-fe-r-c · 23 jugadores · 9 con ficha fijada
+  visitante · alma-juniors · 23 jugadores · 22 con ficha fijada
+  eventos   · 35
+    min 17 (1T 17) local     try          Francisco Eleuteri
+    min 18 (1T 18) local     conversion   Augusto Basso
+    min 25 (1T 25) local     card_yellow  Juan Martin Benet
+    min 27 (1T 27) visitante card_yellow  Chelini Genaro
+    min 28 (1T 28) local     penalty_goal Augusto Basso
+    min 37 (1T 37) visitante try          Gaston Juarez
+    min 37 (1T 37) visitante conversion   Facundo Alvez
+    min 39 (1T 39) local     try          Gabriel Savino
+    min 40 (1T 40) local     conversion   Augusto Basso
+    min 40 (1T 40) visitante card_yellow  Brian Rosillo
+    min 45 (2T 5) visitante substitution Facundo Alvez
+    min 45 (2T 5) visitante try          Gaston Juarez
+    min 50 (2T 10) visitante substitution Brian Rosillo
+    min 50 (2T 10) visitante substitution Chelini Genaro
+    min 50 (2T 10) visitante substitution Tomas Tadeo Widmer
+    min 52 (2T 12) visitante try          Ignacio Roffinott
+    min 52 (2T 12) visitante conversion   Tomas Burna
+    min 54 (2T 14) visitante substitution Joaquin Fernandez
+    min 62 (2T 22) visitante substitution Gaston Juarez
+    min 62 (2T 22) visitante substitution Javier Longoni
+    min 67 (2T 27) visitante penalty_goal Tomas Burna
+    min 76 (2T 36) visitante try          Lautaro Rivas
+    min 76 (2T 36) visitante conversion   Tomas Burna
+    min 80 (2T 40) visitante penalty_goal Tomas Burna
+    min 80 (2T 40) visitante substitution Agustin Piris
+    min 84 (2T 44) local     substitution Manuel Maria Borzone Mas
+    min 90 (2T 50) local     substitution Agustin Fruttero
+    min 92 (2T 52) local     substitution Gabriel Savino
+    min 92 (2T 52) local     substitution Joaquín Sabater
+    min 102 (2T 62) local     try          Tomas Burlando
+    min 104 (2T 64) local     substitution Lisandro Parreño
+    min 104 (2T 64) local     substitution Juan Martin Benet
+    min 106 (2T 66) local     substitution Augusto Basso
+    min 108 (2T 68) local     try          Ramiro Agustin Gimenez Melo
+    min 109 (2T 69) local     conversion   Guillermo Mariano
+  marcador  · eventos 29-32 · guardado 29-32
+  tries     · 4-4 (guardado —-—)
+  arbitro   · XXX XXX (NO OFICIAL) (guardado: —)
+  guardado  · 23 local · 23 visitante · 35 eventos
+
+alma-juniors vs crai · 8106fbcf · tarjeta 311952  ·  c2430664-b23d-455d-accc-f1601c4c8233
+  local     · alma-juniors · 23 jugadores · 22 con ficha fijada
+  visitante · crai · 23 jugadores · 14 con ficha fijada
+  eventos   · 26
+    min 25 (1T 25) visitante conversion   Francisco Oscar Alberto
+    min 25 (1T 25) visitante try          José Manuel Canuto
+    min 34 (1T 34) local     card_yellow  Chelini Genaro
+    min 40 (1T 40) visitante penalty_goal Francisco Oscar Alberto
+    min 46 (2T 6) visitante substitution Enzo Abraham
+    min 47 (2T 7) local     substitution Sebastián Massi
+    min 47 (2T 7) visitante substitution Ramiro Germano
+    min 54 (2T 14) local     substitution Brian Rosillo
+    min 54 (2T 14) local     substitution Joaquin Fernandez
+    min 54 (2T 14) local     substitution Chelini Genaro
+    min 55 (2T 15) visitante try          Bautista Lattanzi
+    min 57 (2T 17) local     substitution Facundo Alvez
+    min 60 (2T 20) visitante substitution Juan Bautista Baialardo
+    min 62 (2T 22) visitante penalty_goal Francisco Oscar Alberto
+    min 62 (2T 22) visitante substitution Daniel Bugnon
+    min 65 (2T 25) local     try          Gaston Juarez
+    min 65 (2T 25) local     conversion   Tomas Burna
+    min 65 (2T 25) visitante substitution José Ignacio Galvez
+    min 65 (2T 25) visitante substitution Julio Tejerina
+    min 70 (2T 30) visitante card_yellow  Angel Cassanello
+    min 72 (2T 32) local     card_yellow  Matías Joaquin Torres
+    min 80 (2T 40) local     try          Agustín Ascona
+    min 80 (2T 40) local     conversion   Tomas Burna
+    min 80 (2T 40) local     substitution Javier Longoni
+    min 80 (2T 40) local     substitution Ignacio Bengochea
+    min 80 (2T 40) local     substitution Agustin Piris
+  marcador  · eventos 14-18 · guardado 14-18
+  tries     · 2-2 (guardado —-—)
+  arbitro   · MATEO CIACCIO (guardado: —)
+  guardado  · 23 local · 23 visitante · 26 eventos
+
+universitario-de-santa-fe vs santa-fe-r-c · 8106fbcf · tarjeta 311951  ·  b34415fe-a972-46f2-9fbc-1731af58b037
+  local     · universitario-de-santa-fe · 23 jugadores · 23 con ficha fijada
+  visitante · santa-fe-r-c · 23 jugadores · 12 con ficha fijada
+  eventos   · 27
+    min  5 (1T 5) local     penalty_goal Ignacio Haas
+    min 16 (1T 16) local     card_yellow  Gabriel Sala
+    min 17 (1T 17) visitante penalty_goal Augusto Basso
+    min 18 (1T 18) local     penalty_goal Ignacio Haas
+    min 26 (1T 26) local     try          Ignacio Haas
+    min 26 (1T 26) local     conversion   Ignacio Haas
+    min 28 (1T 28) local     try          Gabriel Sala
+    min 33 (1T 33) local     try          Tomas Nuñez
+    min 49 (2T 9) local     substitution Renzo Nahuel Carrara
+    min 49 (2T 9) local     substitution Yonathan Antonio Benítez
+    min 55 (2T 15) local     penalty_goal Ignacio Haas
+    min 63 (2T 23) local     substitution Laureano Olmos
+    min 68 (2T 28) local     substitution Ignacio Haas
+    min 68 (2T 28) local     substitution Jorge Onorato
+    min 73 (2T 33) local     substitution Ian Nahuel Dallaverde
+    min 75 (2T 35) local     substitution Federico Bruzzone
+    min 80 (2T 40) visitante substitution Lucio Ruata
+    min 80 (2T 40) visitante substitution Conrado El Halli Obeid
+    min 80 (2T 40) visitante substitution Joaquín Sabater
+    min 80 (2T 40) visitante substitution Franco Peloso
+    min 80 (2T 40) visitante substitution Gabriel Savino
+    min 80 (2T 40) visitante substitution Manuel Maria Borzone Mas
+    min 81 (2T 41) visitante try          Juan Cruz Strada
+    min 82 (2T 42) visitante conversion   Augusto Basso
+    min 99 (2T 59) visitante try          Tomas Fertonani
+    min 108 (2T 68) visitante try          Juan Cruz Strada
+    min 109 (2T 69) visitante conversion   Augusto Basso
+  marcador  · eventos 26-22 · guardado 26-22
+  tries     · 3-3 (guardado —-—)
+  arbitro   · FABIAN PRATS (guardado: —)
+  guardado  · 23 local · 23 visitante · 27 eventos
+
+crar vs querandi-r-c · 8106fbcf · tarjeta 311950  ·  9f573984-700a-46fe-812a-d6d32f1c3372
+  local     · crar · 23 jugadores · 22 con ficha fijada
+  visitante · querandi-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 35
+    min  4 (1T 4) visitante penalty_goal Mateo Villar
+    min  6 (1T 6) local     try          Lucas Cesar Canello
+    min  6 (1T 6) local     conversion   Santiago Kerstens
+    min  9 (1T 9) local     try          Manuel Alejandro Mandrille
+    min 21 (1T 21) visitante card_yellow  Felipe Cortes
+    min 22 (1T 22) local     try          Maximo Astesano
+    min 22 (1T 22) local     conversion   Santiago Kerstens
+    min 25 (1T 25) local     try          Lucas Cesar Canello
+    min 25 (1T 25) local     conversion   Santiago Kerstens
+    min 29 (1T 29) local     card_yellow  Facundo Gabriel Aimo
+    min 31 (1T 31) local     try          Leonardo Sabellotti
+    min 31 (1T 31) local     conversion   Santiago Kerstens
+    min 36 (1T 36) local     try          Francisco Fuglini
+    min 36 (1T 36) local     conversion   Santiago Kerstens
+    min 39 (1T 39) local     try          Mateo Ferrero
+    min 39 (1T 39) local     conversion   Santiago Kerstens
+    min 44 (1T 44) visitante substitution Eloy Francisco Natera Trejo
+    min 44 (1T 44) visitante substitution Felipe Cortes
+    min 56 (1T 56) visitante substitution Ramiro Lagraba
+    min 46 (2T 6) local     try          Esteban Appo
+    min 49 (2T 9) local     try          Tomás Ferrero
+    min 49 (2T 9) local     conversion   Santiago Kerstens
+    min 50 (2T 10) local     substitution Maximo Astesano
+    min 50 (2T 10) local     substitution Gabriel Natanael Morales
+    min 50 (2T 10) local     substitution Santiago Clemenz
+    min 50 (2T 10) local     substitution Manuel Alejandro Mandrille
+    min 50 (2T 10) local     substitution Agustin Cesano
+    min 54 (2T 14) local     substitution Leonardo Sabellotti
+    min 54 (2T 14) local     substitution Tomás Ferrero
+    min 55 (2T 15) local     try          Pedro Ambort
+    min 61 (2T 21) local     try          Lucas Cesar Canello
+    min 67 (2T 27) local     try          Esteban Appo
+    min 73 (2T 33) local     try          Ignacio Martinez
+    min 77 (2T 37) local     try          Julian Clemenz
+    min 80 (2T 40) local     substitution Franco Madera
+  marcador  · eventos 84-3 · guardado 84-3
+  tries     · 14-0 (guardado —-—)
+  arbitro   · FACUNDO PUNTILLO FERNANDEZ (guardado: —)
+  guardado  · 23 local · 23 visitante · 35 eventos
+
+cha-roga-r-c vs la-salle-jobson · 8106fbcf · tarjeta 311949  ·  abe4cc00-e3d4-4339-b2e0-cded2a27c480
+  local     · cha-roga-r-c · 23 jugadores · 23 con ficha fijada
+  visitante · la-salle-jobson · 23 jugadores · 23 con ficha fijada
+  eventos   · 20
+    min  3 (1T 3) visitante try          Tomas Marconi
+    min  3 (1T 3) visitante conversion   Gerónimo Rosa
+    min  9 (1T 9) visitante try          Andrés Uriel Rios
+    min 19 (1T 19) visitante card_yellow  Francisco De Marco
+    min 21 (1T 21) local     try          Pietro Croce
+    min 22 (1T 22) local     conversion   Bladimir Villamayor
+    min 34 (1T 34) visitante card_yellow  Pablo Yuale
+    min 43 (2T 3) local     try          Julián Marcelo Cabral
+    min 47 (2T 7) visitante penalty_goal Gerónimo Rosa
+    min 53 (2T 13) local     penalty_goal Bladimir Villamayor
+    min 56 (2T 16) visitante try          Francisco De Marco
+    min 59 (2T 19) local     substitution Joaquin Strada
+    min 59 (2T 19) local     substitution Diego García
+    min 59 (2T 19) local     substitution Federico Exequiel Andreu
+    min 70 (2T 30) local     card_yellow  Alexis Zilonka
+    min 73 (2T 33) local     substitution Facundo Godoy
+    min 76 (2T 36) local     substitution Leandro Lara
+    min 76 (2T 36) local     substitution Nazareno Loyola
+    min 76 (2T 36) local     substitution Lautaro Fleita
+    min 78 (2T 38) local     substitution Gaspar Maurer
+  marcador  · eventos 15-20 · guardado 15-20
+  tries     · 2-3 (guardado —-—)
+  arbitro   · EXEQUIEL ADROVER (guardado: —)
+  guardado  · 23 local · 23 visitante · 20 eventos
+
+atletico-brown-san-vicente vs cha-roga-r-c · 8106fbcf · tarjeta 314037  ·  404a7ea0-3dd6-4903-8921-c46624d9d814
+  local     · atletico-brown-san-vicente · 23 jugadores · 0 con ficha fijada
+  visitante · cha-roga-r-c · 23 jugadores · 23 con ficha fijada
+  eventos   · 33
+    min  6 (1T 6) local     try          Stefano Saccone
+    min  7 (1T 7) local     conversion   Thiago Favaro
+    min  8 (1T 8) local     try          Guillermo Pievaroli
+    min 15 (1T 15) visitante injury       Ulises Acevedo
+    min 23 (1T 23) local     try          Lisandro Rossi
+    min 23 (1T 23) local     conversion   Thiago Favaro
+    min 23 (1T 23) visitante card_yellow  Lautaro Fleita
+    min 25 (1T 25) visitante injury       Gabriel Alexis Porfiri
+    min 25 (1T 25) visitante substitution Gabriel Alexis Porfiri
+    min 26 (1T 26) visitante substitution Nazareno Loyola
+    min 29 (1T 29) local     card_yellow  Leandro Omar Sanchez
+    min 34 (1T 34) visitante try          Gonzalo Fernandez
+    min 37 (1T 37) local     card_yellow  Martin Lautaro Flamenco
+    min 42 (2T 2) visitante try          Gaspar Maurer
+    min 43 (2T 3) visitante conversion   Bladimir Villamayor
+    min 49 (2T 9) local     try          Guillermo Pievaroli
+    min 49 (2T 9) local     conversion   Thiago Favaro
+    min 49 (2T 9) visitante substitution Valentin Andreu
+    min 51 (2T 11) local     try          Guillermo Pievaroli
+    min 52 (2T 12) local     substitution Uriel Veron
+    min 65 (2T 25) local     substitution Facundo Mancilla
+    min 66 (2T 26) local     substitution Thiago Favaro
+    min 66 (2T 26) local     substitution Martin Lautaro Flamenco
+    min 66 (2T 26) visitante substitution Ulises Acevedo
+    min 68 (2T 28) visitante try          Emiliano Lizasoain
+    min 69 (2T 29) local     try          Stefano Saccone
+    min 69 (2T 29) local     conversion   Rodrigo Gigena
+    min 73 (2T 33) visitante substitution Gonzalo Fernandez
+    min 73 (2T 33) visitante substitution Gaspar Maurer
+    min 74 (2T 34) local     substitution Guillermo Pievaroli
+    min 79 (2T 39) local     try          Leandro Omar Sanchez
+    min 79 (2T 39) visitante card_yellow  Gabriel Troncoso
+    min 80 (2T 40) visitante substitution Tomas Medina
+  marcador  · eventos 43-17 · guardado 43-17
+  tries     · 7-3 (guardado —-—)
+  arbitro   · LEONARDO DEL RIO (guardado: —)
+  guardado  · 23 local · 23 visitante · 33 eventos
+
+la-salle-jobson vs querandi-r-c · 8106fbcf · tarjeta 314036  ·  008738a9-872c-4cab-8e03-e132548229d6
+  local     · la-salle-jobson · 23 jugadores · 22 con ficha fijada
+  visitante · querandi-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 26
+    min  5 (1T 5) local     try          Lionel Pellegri
+    min  5 (1T 5) local     conversion   Gerónimo Rosa
+    min 14 (1T 14) local     conversion   Gerónimo Rosa
+    min 14 (1T 14) local     try          Juan Ignacio Grosso
+    min 26 (1T 26) local     try          Emanuel Piris
+    min 26 (1T 26) local     conversion   Gerónimo Rosa
+    min 34 (1T 34) visitante try          Mateo Villar
+    min 39 (1T 39) local     try          Guido Micocci
+    min 39 (1T 39) local     conversion   Gerónimo Rosa
+    min 41 (2T 1) local     substitution Emanuel Piris
+    min 45 (2T 5) visitante try          Agustin Andress Nieto Pino
+    min 46 (2T 6) visitante conversion   Mateo Villar
+    min 47 (2T 7) local     try          Guido Micocci
+    min 47 (2T 7) local     conversion   Gerónimo Rosa
+    min 55 (2T 15) visitante try          Mateo Villar
+    min 56 (2T 16) visitante conversion   Mateo Villar
+    min 58 (2T 18) local     substitution Tomás Rudi
+    min 58 (2T 18) local     substitution Lionel Pellegri
+    min 58 (2T 18) local     substitution Santiago Bortolozzi
+    min 60 (2T 20) visitante penalty_goal Mateo Villar
+    min 66 (2T 26) visitante substitution Eloy Francisco Natera Trejo
+    min 67 (2T 27) local     try          Bautista Bressan
+    min 68 (2T 28) visitante substitution Juan José Zalazar
+    min 76 (2T 36) local     try          Enzo Baccega
+    min 79 (2T 39) visitante try          Joaquin Gutierrez
+    min 110 (2T 70) local     substitution Gerónimo Rosa
+  marcador  · eventos 45-27 · guardado 45-27
+  tries     · 7-4 (guardado —-—)
+  arbitro   · EXEQUIEL ADROVER (guardado: —)
+  guardado  · 23 local · 23 visitante · 26 eventos
+
+santa-fe-r-c vs crar · 8106fbcf · tarjeta 314035  ·  baebffb4-08fd-47f6-aefb-7bb9183539f6
+  local     · santa-fe-r-c · 23 jugadores · 5 con ficha fijada
+  visitante · crar · 23 jugadores · 22 con ficha fijada
+  eventos   · 29
+    min  2 (1T 2) local     penalty_goal Lautaro Valentinuzzi
+    min  7 (1T 7) visitante penalty_try  
+    min 12 (1T 12) local     try          Agustin Kilgelmann
+    min 13 (1T 13) local     conversion   Lautaro Valentinuzzi
+    min 20 (1T 20) local     try          Luciano Fonti
+    min 21 (1T 21) local     conversion   Lautaro Valentinuzzi
+    min 33 (1T 33) visitante penalty_goal Valentino Appo
+    min 38 (1T 38) visitante try          Lucas Cesar Canello
+    min 54 (2T 14) visitante try          Esteban Appo
+    min 54 (2T 14) visitante substitution Franco Madera
+    min 54 (2T 14) visitante substitution Franco Appo
+    min 66 (2T 26) visitante penalty_try  
+    min 71 (2T 31) visitante card_yellow  Pedro Ambort
+    min 73 (2T 33) visitante substitution Esteban Appo
+    min 73 (2T 33) visitante substitution Santiago Albrecht
+    min 84 (2T 44) local     try          Gabriel Savino
+    min 85 (2T 45) local     try          German Zmutt
+    min 86 (2T 46) local     conversion   Lautaro Valentinuzzi
+    min 92 (2T 52) local     card_yellow  Agustín Maidana
+    min 95 (2T 55) local     substitution Gabriel Savino
+    min 95 (2T 55) local     substitution Agustin Kilgelmann
+    min 95 (2T 55) local     substitution Franco Peloso
+    min 95 (2T 55) local     substitution Felipe José Stratta
+    min 105 (2T 65) local     card_yellow  Juan Martin Benet
+    min 108 (2T 68) local     try          Conrado El Halli Obeid
+    min 109 (2T 69) local     conversion   Lautaro Valentinuzzi
+    min 113 (2T 73) local     try          Felipe José Stratta
+    min 114 (2T 74) local     conversion   Lautaro Valentinuzzi
+    min 115 (2T 75) local     substitution Franco Foradini
+  marcador  · eventos 43-27 · guardado 43-27
+  tries     · 6-4 (guardado —-—)
+  arbitro   · JAVIER IGNACIO VILLALBA (guardado: —)
+  guardado  · 23 local · 23 visitante · 29 eventos
+
+crai vs universitario-de-santa-fe · 8106fbcf · tarjeta 314034  ·  8d41fe43-f8cb-4fba-a330-5824ceaf9df2
+  local     · crai · 23 jugadores · 8 con ficha fijada
+  visitante · universitario-de-santa-fe · 23 jugadores · 21 con ficha fijada
+  eventos   · 36
+    min  5 (1T 5) local     try          Julio Tejerina
+    min  5 (1T 5) local     conversion   Juan Bautista Baialardo
+    min  7 (1T 7) visitante try          Ignacio Haas
+    min  7 (1T 7) visitante conversion   Ignacio Haas
+    min 13 (1T 13) visitante try          Gonzalo Meza
+    min 13 (1T 13) visitante conversion   Ignacio Haas
+    min 19 (1T 19) visitante card_yellow  Tomas Alejandro Galiano
+    min 20 (1T 20) local     try          Gonzalo Liendo
+    min 20 (1T 20) local     conversion   Juan Bautista Baialardo
+    min 25 (1T 25) local     card_yellow  Santiago Nieto
+    min 27 (1T 27) visitante try          Jorge Onorato
+    min 27 (1T 27) visitante conversion   Ignacio Haas
+    min 32 (1T 32) visitante try          Tomas Alejandro Galiano
+    min 36 (1T 36) visitante card_yellow  Mateo Carughi
+    min 42 (2T 2) local     injury       Santiago Nieto
+    min 44 (2T 4) local     substitution Ignacio Perona
+    min 44 (2T 4) local     substitution Gerónimo Ferreyra
+    min 44 (2T 4) local     substitution Santiago Nieto
+    min 45 (2T 5) local     try          Gonzalo Liendo
+    min 45 (2T 5) local     conversion   Juan Bautista Baialardo
+    min 48 (2T 8) local     card_yellow  Juan Nicolas Miguel
+    min 48 (2T 8) visitante injury       Juan Manuel Royo
+    min 55 (2T 15) visitante card_yellow  Yonathan Antonio Benítez
+    min 60 (2T 20) local     try          José Ignacio Galvez
+    min 60 (2T 20) local     substitution Antonio Fendrich
+    min 65 (2T 25) visitante substitution Mateo Schmidt
+    min 68 (2T 28) local     substitution Juan Bautista Baialardo
+    min 68 (2T 28) visitante substitution Yonathan Antonio Benítez
+    min 69 (2T 29) visitante substitution Julián Fleitas
+    min 72 (2T 32) visitante penalty_goal Ignacio Haas
+    min 75 (2T 35) local     substitution Gonzalo Liendo
+    min 75 (2T 35) local     substitution Santino Zampedri
+    min 78 (2T 38) visitante substitution Ian Nahuel Dallaverde
+    min 78 (2T 38) visitante substitution Mateo Carughi
+    min 80 (2T 40) visitante substitution Jorge Onorato
+    min 80 (2T 40) visitante substitution Juan Manuel Royo
+  marcador  · eventos 26-29 · guardado 26-29
+  tries     · 4-4 (guardado —-—)
+  arbitro   · FERNANDO DIEGO DE FEO (guardado: —)
+  guardado  · 23 local · 23 visitante · 36 eventos
+
+alma-juniors vs universitario-de-santa-fe · 8106fbcf · tarjeta 314989  ·  71428f8b-75f9-4cbc-928a-4e5f0e1fe9ac
+  local     · alma-juniors · 23 jugadores · 23 con ficha fijada
+  visitante · universitario-de-santa-fe · 23 jugadores · 23 con ficha fijada
+  eventos   · 27
+    min 13 (1T 13) local     penalty_goal Tomas Burna
+    min 26 (1T 26) local     penalty_goal Tomas Burna
+    min 26 (1T 26) visitante card_yellow  Mateo Bianchi
+    min 29 (1T 29) visitante try          Ian Nahuel Dallaverde
+    min 35 (1T 35) local     try          Bautista Grenon
+    min 35 (1T 35) local     conversion   Tomas Burna
+    min 35 (1T 35) visitante penalty_goal Ignacio Haas
+    min 41 (2T 1) local     substitution Martin Roldan
+    min 53 (2T 13) local     card_yellow  Lautaro Rivas
+    min 56 (2T 16) local     card_yellow  Joaquin Fernandez
+    min 56 (2T 16) local     substitution Mario Mosqueda
+    min 58 (2T 18) visitante try          Nicolas Rivadeneira
+    min 58 (2T 18) visitante conversion   Ignacio Haas
+    min 62 (2T 22) visitante substitution Marcos Leguizamón
+    min 64 (2T 24) local     try          Maximiliano Henain
+    min 64 (2T 24) local     conversion   Alan Ramón Sanchez
+    min 66 (2T 26) local     substitution Joaquin Fernandez
+    min 66 (2T 26) local     substitution Chelini Genaro
+    min 71 (2T 31) local     penalty_goal Tomas Burna
+    min 75 (2T 35) visitante substitution Mateo Bianchi
+    min 75 (2T 35) visitante substitution Gustavo Exequiel Benitez
+    min 78 (2T 38) local     substitution Bautista Grenon
+    min 78 (2T 38) local     card_yellow  Luciano Waisprot
+    min 78 (2T 38) visitante penalty_goal Ignacio Haas
+    min 79 (2T 39) local     substitution Tomas Burna
+    min 80 (2T 40) local     penalty_goal Alan Ramón Sanchez
+    min 80 (2T 40) visitante substitution Lucas Ponce De Leon
+  marcador  · eventos 26-18 · guardado 26-18
+  tries     · 2-2 (guardado —-—)
+  arbitro   · FABIAN PRATS (guardado: —)
+  guardado  · 23 local · 23 visitante · 27 eventos
+
+crai vs crar · 8106fbcf · tarjeta 314988  ·  85c6984d-5cd1-4459-920e-5bfd7a9a6a28
+  local     · crai · 23 jugadores · 17 con ficha fijada
+  visitante · crar · 23 jugadores · 21 con ficha fijada
+  eventos   · 36
+    min 11 (1T 11) local     try          Ignacio Perona
+    min 11 (1T 11) local     conversion   Francisco Oscar Alberto
+    min 24 (1T 24) visitante try          Manuel Alejandro Mandrille
+    min 30 (1T 30) visitante try          Manuel Alejandro Mandrille
+    min 30 (1T 30) visitante conversion   Santiago Kerstens
+    min 35 (1T 35) visitante try          Esteban Appo
+    min 35 (1T 35) visitante conversion   Santiago Kerstens
+    min 41 (2T 1) local     substitution Antonio Fendrich
+    min 46 (2T 6) local     substitution Máximo Torres Jozami
+    min 47 (2T 7) visitante substitution Ticiano Hang
+    min 47 (2T 7) visitante substitution Gabriel Natanael Morales
+    min 47 (2T 7) visitante substitution Esteban Appo
+    min 47 (2T 7) visitante substitution Agustin Narvaez
+    min 54 (2T 14) local     substitution Juan Martin Mufarrege
+    min 54 (2T 14) local     substitution Pablo Ferreyra
+    min 54 (2T 14) local     try          Galo Ayala Kraft
+    min 54 (2T 14) local     substitution Esteban Russi
+    min 54 (2T 14) local     conversion   Francisco Oscar Alberto
+    min 56 (2T 16) visitante card_yellow  Jonatan Viotti
+    min 58 (2T 18) local     try          Emiliano Salazar Torroija
+    min 58 (2T 18) local     conversion   Francisco Oscar Alberto
+    min 62 (2T 22) local     try          Bautista Lattanzi
+    min 62 (2T 22) local     conversion   Francisco Oscar Alberto
+    min 66 (2T 26) local     try          José Ignacio Galvez
+    min 66 (2T 26) local     conversion   Francisco Oscar Alberto
+    min 72 (2T 32) local     substitution Franco Pierangeli
+    min 72 (2T 32) local     try          Lautaro Montini
+    min 74 (2T 34) visitante substitution Maximo Astesano
+    min 78 (2T 38) local     try          Galo Ayala Kraft
+    min 78 (2T 38) local     substitution Juan Ignacio Funes Iturraspe
+    min 78 (2T 38) local     substitution Galo Ayala Kraft
+    min 80 (2T 40) visitante try          Tomás Lopez
+    min 80 (2T 40) visitante conversion   Santiago Kerstens
+    min 80 (2T 40) visitante substitution Bruno Rivas
+    min 80 (2T 40) visitante substitution Santiago Albrecht
+    min 80 (2T 40) visitante substitution Pedro Taverna
+  marcador  · eventos 45-26 · guardado 45-26
+  tries     · 7-4 (guardado —-—)
+  arbitro   · EXEQUIEL ADROVER (guardado: —)
+  guardado  · 23 local · 23 visitante · 36 eventos
+
+santa-fe-r-c vs la-salle-jobson · 8106fbcf · tarjeta 314987  ·  383adc72-6d7c-4162-855e-dbcf43159dd2
+  local     · santa-fe-r-c · 23 jugadores · 3 con ficha fijada
+  visitante · la-salle-jobson · 23 jugadores · 22 con ficha fijada
+  eventos   · 20
+    min 10 (1T 10) local     try          Benicio Deicas
+    min 11 (1T 11) local     conversion   Lautaro Valentinuzzi
+    min 23 (1T 23) local     try          Franco Peloso
+    min 24 (1T 24) local     conversion   Lautaro Valentinuzzi
+    min 34 (1T 34) visitante card_yellow  Andrés Uriel Rios
+    min 41 (2T 1) visitante substitution Agustín Kohlbrener
+    min 45 (2T 5) visitante try          Juan Ignacio Grosso
+    min 51 (2T 11) visitante try          Santiago Novelli
+    min 57 (2T 17) visitante drop_goal    Guido Micocci
+    min 90 (2T 50) local     substitution Felipe José Stratta
+    min 93 (2T 53) local     substitution Iñaki Cardin Echarren
+    min 93 (2T 53) local     substitution Nicolas Monasterolo
+    min 102 (2T 62) local     try          Bautista Sarsotti
+    min 102 (2T 62) local     substitution Franco Peloso
+    min 103 (2T 63) local     conversion   Lautaro Valentinuzzi
+    min 110 (2T 70) local     substitution Agustin Kilgelmann
+    min 112 (2T 72) local     try          Lisandro Parreño
+    min 113 (2T 73) local     conversion   Lautaro Valentinuzzi
+    min 115 (2T 75) local     substitution Julian Ricardo Clerico
+    min 115 (2T 75) local     substitution Conrado El Halli Obeid
+  marcador  · eventos 28-13 · guardado 28-13
+  tries     · 4-2 (guardado —-—)
+  arbitro   · FERNANDO DIEGO DE FEO (guardado: —)
+  guardado  · 23 local · 23 visitante · 20 eventos
+
+querandi-r-c vs atletico-brown-san-vicente · 8106fbcf · tarjeta 314986  ·  7f0daa94-8161-4ddd-9252-26f68a674d4d
+  local     · querandi-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · atletico-brown-san-vicente · 23 jugadores · 0 con ficha fijada
+  eventos   · 26
+    min  1 (1T 1) local     drop_goal    Mateo Villar
+    min  2 (1T 2) visitante penalty_goal Rodrigo Gigena
+    min  6 (1T 6) visitante try          Ezequiel Belo
+    min  7 (1T 7) visitante conversion   Rodrigo Gigena
+    min 10 (1T 10) visitante try          Lisandro Rossi
+    min 11 (1T 11) visitante conversion   Rodrigo Gigena
+    min 17 (1T 17) local     try          Mateo Villar
+    min 18 (1T 18) local     conversion   Mateo Villar
+    min 23 (1T 23) local     penalty_goal Mateo Villar
+    min 28 (1T 28) visitante penalty_goal Rodrigo Gigena
+    min 38 (1T 38) visitante penalty_goal Rodrigo Gigena
+    min 53 (2T 13) visitante try          César Grosso
+    min 53 (2T 13) visitante conversion   Rodrigo Gigena
+    min 58 (2T 18) visitante substitution Martin Lautaro Flamenco
+    min 60 (2T 20) visitante try          Leandro Omar Sanchez
+    min 68 (2T 28) visitante substitution Facundo Mancilla
+    min 78 (2T 38) visitante try          Leandro Omar Sanchez
+    min 83 (2T 43) local     card_yellow  Nicolas Graziano
+    min 92 (2T 52) local     card_yellow  Jerónimo Ardana
+    min 98 (2T 58) local     penalty_goal Mateo Villar
+    min 98 (2T 58) local     substitution Ignacio Aguirre
+    min 104 (2T 64) local     try          Adolfo Potolicchio
+    min 110 (2T 70) local     substitution Cristian Maidana
+    min 110 (2T 70) local     substitution Jerónimo Ardana
+    min 110 (2T 70) local     substitution Adolfo Potolicchio
+    min 118 (2T 78) local     substitution Juan José Zalazar
+  marcador  · eventos 21-40 · guardado 21-40
+  tries     · 2-5 (guardado —-—)
+  arbitro   · FERNANDO MARTIN LAURIA (guardado: —)
+  guardado  · 23 local · 23 visitante · 26 eventos
+
+cha-roga-r-c vs querandi-r-c · 8106fbcf · tarjeta 322597  ·  52bac0a1-cd3b-4478-a04b-0094e91b7570
+  local     · cha-roga-r-c · 23 jugadores · 23 con ficha fijada
+  visitante · querandi-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 36
+    min  1 (1T 1) local     substitution Dante Joaquin Perlender
+    min  3 (1T 3) visitante card_yellow  Ramiro Lagraba
+    min  4 (1T 4) local     try          Valentin Andreu
+    min 16 (1T 16) local     penalty_goal Julián Marcelo Cabral
+    min 32 (1T 32) visitante try          Agustin Serfaty
+    min 38 (1T 38) local     card_yellow  Juan Pablo Camargo
+    min 38 (1T 38) visitante try          Ignacio Aguirre
+    min 38 (1T 38) visitante conversion   Mateo Villar
+    min 41 (2T 1) local     substitution Valentin Andreu
+    min 41 (2T 1) local     injury       Valentin Andreu
+    min 42 (2T 2) local     penalty_goal Bladimir Villamayor
+    min 42 (2T 2) visitante try          Ramiro Lagraba
+    min 43 (2T 3) visitante conversion   Mateo Villar
+    min 46 (2T 6) local     try          Thomas Fernandez
+    min 47 (2T 7) local     conversion   Bladimir Villamayor
+    min 50 (2T 10) local     substitution Julián Marcelo Cabral
+    min 51 (2T 11) local     try          Thomas Fernandez
+    min 52 (2T 12) local     conversion   Bladimir Villamayor
+    min 54 (2T 14) local     try          Dario Alberto Medina
+    min 55 (2T 15) local     conversion   Bladimir Villamayor
+    min 57 (2T 17) local     card_yellow  Matias Alejandro Rabaglino
+    min 67 (2T 27) local     try          Gonzalo Fernandez
+    min 67 (2T 27) local     conversion   Bladimir Villamayor
+    min 72 (2T 32) local     card_red     Nazareno Loyola
+    min 73 (2T 33) local     substitution Dario Alberto Medina
+    min 80 (2T 40) local     try          Gonzalo Fernandez
+    min 80 (2T 40) local     substitution Gabriel Alexis Porfiri
+    min 80 (2T 40) local     substitution Facundo Godoy
+    min 80 (2T 40) local     substitution Ulises Acevedo
+    min 81 (2T 41) local     conversion   Bladimir Villamayor
+    min 95 (2T 55) visitante substitution Brian Franco
+    min 98 (2T 58) visitante substitution Nicolas Graziano
+    min 104 (2T 64) visitante substitution Rodrigo Scalzo
+    min 104 (2T 64) visitante substitution Cristian Maidana
+    min 112 (2T 72) visitante card_yellow  Ignacio Alico
+    min 113 (2T 73) visitante card_red     Tomas Oliva
+  marcador  · eventos 46-19 · guardado 46-19
+  tries     · 6-3 (guardado —-—)
+  arbitro   · JOAQUIN ZAPATA (guardado: —)
+  guardado  · 23 local · 23 visitante · 36 eventos
+
+atletico-brown-san-vicente vs santa-fe-r-c · 8106fbcf · tarjeta 322596  ·  b20338b0-66d0-4bd0-bb17-8b04b98b8be9
+  local     · atletico-brown-san-vicente · 23 jugadores · 0 con ficha fijada
+  visitante · santa-fe-r-c · 23 jugadores · 1 con ficha fijada
+  eventos   · 20
+    min 18 (1T 18) local     try          Stefano Saccone
+    min 18 (1T 18) local     conversion   Rodrigo Gigena
+    min 21 (1T 21) visitante try          Franco Foradini
+    min 22 (1T 22) visitante conversion   Matías Vazquez
+    min 27 (1T 27) local     try          César Grosso
+    min 27 (1T 27) local     conversion   Rodrigo Gigena
+    min 60 (2T 20) local     penalty_goal Rodrigo Gigena
+    min 60 (2T 20) local     card_yellow  Nahuel Magnoli
+    min 65 (2T 25) local     try          Stefano Saccone
+    min 65 (2T 25) local     substitution Brandon Miño
+    min 74 (2T 34) local     substitution Mateo Luna
+    min 79 (2T 39) local     card_yellow  Guillermo Pievaroli
+    min 80 (2T 40) visitante substitution Agustin Kilgelmann
+    min 80 (2T 40) visitante substitution Bautista Galassi
+    min 90 (2T 50) visitante substitution Marcos Ribot
+    min 90 (2T 50) visitante substitution Benicio Deicas
+    min 100 (2T 60) visitante substitution Ian Milocco
+    min 100 (2T 60) visitante substitution Alfredo Antonio Milesi
+    min 102 (2T 62) visitante try          Valentin Fernandez
+    min 103 (2T 63) visitante conversion   Matías Vazquez
+  marcador  · eventos 22-14 · guardado 22-14
+  tries     · 3-2 (guardado —-—)
+  arbitro   · NICOLÁS BARRAZA (guardado: —)
+  guardado  · 23 local · 23 visitante · 20 eventos
+
+la-salle-jobson vs crai · 8106fbcf · tarjeta 322595  ·  0983898b-a7e8-46bf-b6cf-88bffa02958f
+  local     · la-salle-jobson · 23 jugadores · 23 con ficha fijada
+  visitante · crai · 23 jugadores · 17 con ficha fijada
+  eventos   · 40
+    min  7 (1T 7) visitante try          Emanuel Piermarini
+    min 16 (1T 16) visitante try          Bautista Lattanzi
+    min 16 (1T 16) visitante conversion   Francisco Oscar Alberto
+    min 22 (1T 22) local     penalty_goal Guido Micocci
+    min 22 (1T 22) visitante card_yellow  Augusto Chemes
+    min 28 (1T 28) local     card_yellow  Lautaro Gabriel Alesso
+    min 30 (1T 30) visitante try          Elio Gariboldi
+    min 38 (1T 38) local     try          Tomas Marconi
+    min 38 (1T 38) local     conversion   Guido Micocci
+    min 39 (1T 39) local     try          Santiago Miretti
+    min 41 (2T 1) local     substitution Agustín Kohlbrener
+    min 41 (2T 1) visitante substitution Augusto Chemes
+    min 46 (2T 6) local     substitution Tomás Rudi
+    min 46 (2T 6) local     substitution Santiago Miretti
+    min 46 (2T 6) local     substitution Tomas Marconi
+    min 50 (2T 10) visitante substitution Enzo Abraham
+    min 50 (2T 10) visitante substitution Máximo Torres Jozami
+    min 51 (2T 11) visitante penalty_try  Francisco Oscar Alberto
+    min 52 (2T 12) local     substitution Andrés Uriel Rios
+    min 52 (2T 12) local     substitution Enzo Baccega
+    min 52 (2T 12) local     substitution Lautaro Salcedo
+    min 52 (2T 12) local     substitution Emanuel Piris
+    min 52 (2T 12) local     card_yellow  Eliezer Pizarro
+    min 55 (2T 15) visitante try          Angel Cassanello
+    min 55 (2T 15) visitante conversion   Francisco Oscar Alberto
+    min 57 (2T 17) visitante try          Santino Zampedri
+    min 57 (2T 17) visitante conversion   Francisco Oscar Alberto
+    min 60 (2T 20) local     try          Diego Ojeda
+    min 60 (2T 20) local     conversion   Guido Micocci
+    min 60 (2T 20) visitante substitution Elio Gariboldi
+    min 60 (2T 20) visitante substitution Ramiro Martín Ibañez
+    min 60 (2T 20) visitante substitution Emanuel Piermarini
+    min 60 (2T 20) visitante substitution Francisco Oscar Alberto
+    min 60 (2T 20) visitante substitution Santino Zampedri
+    min 70 (2T 30) visitante injury       Lucas Castro
+    min 70 (2T 30) visitante substitution Lucas Castro
+    min 74 (2T 34) visitante try          Juan Bautista Baialardo
+    min 74 (2T 34) visitante conversion   Juan Bautista Baialardo
+    min 79 (2T 39) visitante try          Bautista Lattanzi
+    min 79 (2T 39) visitante conversion   Juan Bautista Baialardo
+  marcador  · eventos 22-52 · guardado 22-52
+  tries     · 3-8 (guardado —-—)
+  arbitro   · FERNANDO DIEGO DE FEO (guardado: —)
+  guardado  · 23 local · 23 visitante · 40 eventos
+
+crar vs alma-juniors · 8106fbcf · tarjeta 322594  ·  47aed9db-9037-41a7-b66d-91aaecc95fd9
+  local     · crar · 23 jugadores · 20 con ficha fijada
+  visitante · alma-juniors · 23 jugadores · 21 con ficha fijada
+  eventos   · 33
+    min  2 (1T 2) local     try          Francisco Ambort
+    min  2 (1T 2) local     conversion   Valentino Appo
+    min 12 (1T 12) visitante penalty_goal Facundo Alvez
+    min 15 (1T 15) local     try          Juan Cruz Karlen
+    min 15 (1T 15) local     conversion   Valentino Appo
+    min 37 (1T 37) visitante try          Vicente Morales
+    min 40 (1T 40) visitante card_yellow  Gonzalo Lencina
+    min 40 (1T 40) visitante substitution Javier Longoni
+    min 43 (1T 43) local     try          Pedro Taverna
+    min 43 (2T 3) visitante try          Joaquin Fernandez
+    min 44 (2T 4) visitante conversion   Facundo Alvez
+    min 50 (2T 10) visitante substitution Bruno Perroud
+    min 50 (2T 10) visitante substitution Fernando Alexander Pedraza
+    min 50 (2T 10) visitante substitution Joaquin Fernandez
+    min 53 (2T 13) local     try          Valentino Appo
+    min 53 (2T 13) visitante substitution Mateo Torrilla
+    min 55 (2T 15) visitante substitution Vicente Morales
+    min 55 (2T 15) visitante substitution Facundo Alvez
+    min 60 (2T 20) local     substitution Julian Clemenz
+    min 60 (2T 20) local     substitution Fabricio Machado
+    min 60 (2T 20) local     substitution Francisco Ambort
+    min 60 (2T 20) local     substitution Pedro Taverna
+    min 60 (2T 20) visitante card_yellow  Tomas Burna
+    min 60 (2T 20) visitante substitution Franco Juarez
+    min 62 (2T 22) local     try          Maximo Astesano
+    min 66 (2T 26) local     substitution Pedro Ambort
+    min 75 (2T 35) visitante try          Sebastián Massi
+    min 76 (2T 36) local     card_yellow  Maximo Astesano
+    min 76 (2T 36) visitante conversion   Tomas Burna
+    min 80 (2T 40) local     penalty_goal Santiago Kerstens
+    min 80 (2T 40) local     substitution Gabriel Natanael Morales
+    min 80 (2T 40) local     substitution Facundo Ledesma
+    min 80 (2T 40) visitante try          Agustín Ascona
+  marcador  · eventos 32-27 · guardado 32-27
+  tries     · 5-4 (guardado —-—)
+  arbitro   · MATEO CIACCIO (guardado: —)
+  guardado  · 23 local · 23 visitante · 33 eventos
+
+universitario-de-santa-fe vs crar · 8106fbcf · tarjeta 322605  ·  7b5d9b90-ab84-47cf-8b8a-ff42975f75f7
+  local     · universitario-de-santa-fe · 23 jugadores · 19 con ficha fijada
+  visitante · crar · 23 jugadores · 18 con ficha fijada
+  eventos   · 33
+    min 13 (1T 13) local     try          Santiago Hotham
+    min 13 (1T 13) local     conversion   Tomas Nuñez
+    min 14 (1T 14) local     card_yellow  Eugenio Klipka
+    min 25 (1T 25) local     try          Ignacio Haas
+    min 25 (1T 25) local     conversion   Tomas Nuñez
+    min 42 (2T 2) local     penalty_goal Tomas Nuñez
+    min 46 (2T 6) local     substitution Matias Gonzalez
+    min 49 (2T 9) local     card_red     Federico Bruzzone
+    min 49 (2T 9) visitante try          Ticiano Hang
+    min 49 (2T 9) visitante conversion   Jerónimo Ribero
+    min 51 (2T 11) local     injury       Juan Manuel Royo
+    min 51 (2T 11) local     substitution Juan Manuel Royo
+    min 51 (2T 11) local     substitution Renzo Nahuel Carrara
+    min 51 (2T 11) local     penalty_goal Tomas Nuñez
+    min 51 (2T 11) local     substitution Diego Duran
+    min 53 (2T 13) local     substitution Tobias Pantaleone
+    min 53 (2T 13) visitante substitution Maximo Astesano
+    min 53 (2T 13) visitante substitution Santiago Franco
+    min 55 (2T 15) local     try          Facundo Kieffer
+    min 55 (2T 15) local     conversion   Ignacio Haas
+    min 55 (2T 15) local     substitution Mateo Bianchi
+    min 56 (2T 16) visitante substitution Franco Madera
+    min 60 (2T 20) local     substitution Mateo Schmidt
+    min 61 (2T 21) local     try          Santiago Hotham
+    min 61 (2T 21) local     substitution Eugenio Klipka
+    min 61 (2T 21) visitante substitution Julian Clemenz
+    min 61 (2T 21) visitante substitution Ian Trossero
+    min 63 (2T 23) visitante try          Valentino Manera
+    min 67 (2T 27) local     try          Agustín Juarez
+    min 69 (2T 29) visitante try          Valentino Manera
+    min 80 (2T 40) visitante substitution Francisco Ambort
+    min 80 (2T 40) visitante substitution Santiago Clemenz
+    min 80 (2T 40) visitante substitution Santino Lozano
+  marcador  · eventos 37-17 · guardado 37-17
+  tries     · 5-3 (guardado —-—)
+  arbitro   · ALFREDO FUN (guardado: —)
+  guardado  · 23 local · 23 visitante · 33 eventos
+
+crai vs atletico-brown-san-vicente · 8106fbcf · tarjeta 322603  ·  f945dce2-347e-456c-8472-0b6a673afd89
+  local     · crai · 23 jugadores · 23 con ficha fijada
+  visitante · atletico-brown-san-vicente · 23 jugadores · 0 con ficha fijada
+  eventos   · 38
+    min  9 (1T 9) local     try          Angel Cassanello
+    min  9 (1T 9) local     conversion   Agustin Raul Gimenez
+    min 11 (1T 11) local     try          Franco Pierangeli
+    min 11 (1T 11) local     conversion   Agustin Raul Gimenez
+    min 14 (1T 14) local     try          Juan Cruz Moretti
+    min 16 (1T 16) local     try          Agustin Raul Gimenez
+    min 30 (1T 30) local     try          Gonzalo Liendo
+    min 30 (1T 30) local     conversion   Agustin Raul Gimenez
+    min 32 (1T 32) local     try          Angel Cassanello
+    min 32 (1T 32) local     conversion   Agustin Raul Gimenez
+    min 38 (1T 38) local     try          Antonio Carletti
+    min 38 (1T 38) local     conversion   Agustin Raul Gimenez
+    min 42 (2T 2) local     try          Joaquin Valentin Guzman Beron
+    min 42 (2T 2) local     conversion   Agustin Raul Gimenez
+    min 46 (2T 6) local     substitution Joaquin Valentin Guzman Beron
+    min 46 (2T 6) local     substitution Gonzalo Liendo
+    min 46 (2T 6) local     substitution Ramiro Martín Ibañez
+    min 51 (2T 11) local     substitution Juan Ignacio Sánchez
+    min 51 (2T 11) local     substitution Mariano Torres Jozami
+    min 52 (2T 12) local     substitution Mateo Fauda
+    min 52 (2T 12) local     substitution Agustin Raul Gimenez
+    min 53 (2T 13) local     substitution Angel Cassanello
+    min 55 (2T 15) visitante substitution Guillermo Pievaroli
+    min 56 (2T 16) local     try          Elio Gariboldi
+    min 56 (2T 16) local     conversion   Genaro Giombi
+    min 58 (2T 18) visitante substitution Facundo Mancilla
+    min 58 (2T 18) visitante substitution Brandon Miño
+    min 62 (2T 22) local     try          José Ignacio Galvez
+    min 62 (2T 22) local     conversion   Genaro Giombi
+    min 65 (2T 25) visitante try          Leandro Omar Sanchez
+    min 66 (2T 26) visitante conversion   Rodrigo Gigena
+    min 68 (2T 28) visitante substitution Leandro Omar Sanchez
+    min 71 (2T 31) local     try          José Ignacio Galvez
+    min 71 (2T 31) local     conversion   Genaro Giombi
+    min 76 (2T 36) local     try          Tomás Funes Iturraspe
+    min 76 (2T 36) local     conversion   Genaro Giombi
+    min 78 (2T 38) local     try          Ramiro Germano
+    min 78 (2T 38) local     conversion   Genaro Giombi
+  marcador  · eventos 87-7 · guardado 87-7
+  tries     · 13-1 (guardado —-—)
+  arbitro   · EXEQUIEL ADROVER (guardado: —)
+  guardado  · 23 local · 23 visitante · 38 eventos
+
+alma-juniors vs la-salle-jobson · 8106fbcf · tarjeta 322604  ·  fd88c763-7d06-42d6-9fd9-3719cd96617d
+  local     · alma-juniors · 23 jugadores · 14 con ficha fijada
+  visitante · la-salle-jobson · 23 jugadores · 14 con ficha fijada
+  eventos   · 23
+    min 12 (1T 12) local     try          Bruno Perroud
+    min 21 (1T 21) local     try          Alan Franco Blanche
+    min 25 (1T 25) local     try          Alan Franco Blanche
+    min 26 (1T 26) local     conversion   Facundo Alvez
+    min 32 (1T 32) local     try          Conrado Oteo
+    min 39 (1T 39) local     try          Mateo Torrilla
+    min 40 (1T 40) local     conversion   Facundo Alvez
+    min 44 (2T 4) local     substitution Martin Roldan
+    min 44 (2T 4) local     try          Mateo Torrilla
+    min 45 (2T 5) local     conversion   Facundo Alvez
+    min 46 (2T 6) visitante substitution Dante Canonico
+    min 47 (2T 7) local     try          Alan Franco Blanche
+    min 47 (2T 7) local     conversion   Facundo Alvez
+    min 53 (2T 13) local     substitution Ignacio Roffinott
+    min 60 (2T 20) local     substitution Fernando Alexander Pedraza
+    min 60 (2T 20) local     substitution Jose Francisco Lucena
+    min 62 (2T 22) visitante try          Eliezer Pizarro
+    min 68 (2T 28) local     substitution Mateo Torrilla
+    min 68 (2T 28) local     substitution Agustin Piris
+    min 70 (2T 30) local     card_yellow  Ignacio Burna
+    min 71 (2T 31) local     substitution Facundo Alvez
+    min 72 (2T 32) visitante try          Eliezer Pizarro
+    min 72 (2T 32) visitante conversion   Francisco Walburg
+  marcador  · eventos 43-12 · guardado 43-12
+  tries     · 7-2 (guardado —-—)
+  arbitro   · NICOLÁS BARRAZA (guardado: —)
+  guardado  · 23 local · 23 visitante · 23 eventos
+
+santa-fe-r-c vs cha-roga-r-c · 8106fbcf · tarjeta 322602  ·  e079bf32-8e71-4b97-8d4b-e28b299643b7
+  local     · santa-fe-r-c · 23 jugadores · 11 con ficha fijada
+  visitante · cha-roga-r-c · 23 jugadores · 22 con ficha fijada
+  eventos   · 39
+    min  4 (1T 4) local     substitution Pedro Berardi
+    min  6 (1T 6) local     try          Valentino Cobelli
+    min  9 (1T 9) local     try          Joaquin Alonso
+    min 10 (1T 10) local     conversion   Lautaro Valentinuzzi
+    min 14 (1T 14) local     try          Manuel Iturraspe
+    min 15 (1T 15) local     conversion   Lautaro Valentinuzzi
+    min 17 (1T 17) visitante try          Emiliano Lizasoain
+    min 21 (1T 21) local     try          Valentino Cobelli
+    min 22 (1T 22) local     conversion   Lautaro Valentinuzzi
+    min 25 (1T 25) visitante try          Gonzalo Fernandez
+    min 28 (1T 28) visitante try          Emiliano Lizasoain
+    min 33 (1T 33) local     try          Gabriel Savino
+    min 34 (1T 34) local     conversion   Lautaro Valentinuzzi
+    min 37 (1T 37) local     try          Agustín Maidana
+    min 38 (1T 38) local     conversion   Lautaro Valentinuzzi
+    min 46 (2T 6) visitante substitution Juan Pablo Camargo
+    min 53 (2T 13) visitante substitution Franco Porfiri
+    min 53 (2T 13) visitante substitution Emiliano Lizasoain
+    min 55 (2T 15) visitante try          Gabriel Alexis Porfiri
+    min 56 (2T 16) visitante conversion   Bladimir Villamayor
+    min 59 (2T 19) visitante try          Juan Ignacio Machunske
+    min 59 (2T 19) visitante substitution Lautaro Fleita
+    min 59 (2T 19) visitante substitution Diego García
+    min 65 (2T 25) visitante substitution Gonzalo Fernandez
+    min 69 (2T 29) visitante substitution Dario Alberto Medina
+    min 69 (2T 29) visitante card_yellow  Leandro Lara
+    min 80 (2T 40) local     substitution German Zmutt
+    min 80 (2T 40) local     substitution Juan Martin Benet
+    min 80 (2T 40) local     substitution Luciano Fonti
+    min 80 (2T 40) local     substitution Ignacio Etchepare
+    min 80 (2T 40) local     substitution Manuel Maria Borzone Mas
+    min 84 (2T 44) local     try          Manuel Iturraspe
+    min 91 (2T 51) local     try          Valentino Cobelli
+    min 93 (2T 53) local     substitution Gabriel Savino
+    min 93 (2T 53) local     substitution Tomas Fertonani
+    min 109 (2T 69) local     try          Manuel Iturraspe
+    min 110 (2T 70) local     conversion   Lautaro Valentinuzzi
+    min 119 (2T 79) local     try          Franco Peloso
+    min 120 (2T 80) local     conversion   Lautaro Valentinuzzi
+  marcador  · eventos 64-27 · guardado 64-27
+  tries     · 10-5 (guardado —-—)
+  arbitro   · MATEO CIACCIO (guardado: —)
+  guardado  · 23 local · 23 visitante · 39 eventos
+
+querandi-r-c vs santa-fe-r-c · 8106fbcf · tarjeta 322613  ·  ab0a757b-616c-40a1-9287-b257ad4efd2f
+  local     · querandi-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · santa-fe-r-c · 23 jugadores · 1 con ficha fijada
+  eventos   · 41
+    min  5 (1T 5) visitante try          Martin Augusto Mantaras
+    min  6 (1T 6) visitante conversion   Matías Vazquez
+    min  8 (1T 8) local     penalty_goal Mateo Villar
+    min 12 (1T 12) visitante try          Tomas Fertonani
+    min 15 (1T 15) local     try          Tomas Oliva
+    min 16 (1T 16) local     conversion   Mateo Villar
+    min 23 (1T 23) local     try          Mateo Villar
+    min 23 (1T 23) local     substitution Nicolas Graziano
+    min 24 (1T 24) local     conversion   Mateo Villar
+    min 25 (1T 25) visitante try          Guillermo Beckmann
+    min 26 (1T 26) visitante conversion   Matías Vazquez
+    min 28 (1T 28) visitante try          Iñaki Cardin Echarren
+    min 35 (1T 35) visitante try          Ramiro Agustin Gimenez Melo
+    min 40 (1T 40) local     penalty_goal Mateo Villar
+    min 84 (2T 44) visitante try          Tomas Fertonani
+    min 86 (2T 46) visitante substitution Ignacio Poletti
+    min 90 (2T 50) visitante substitution Augusto Ruata
+    min 92 (2T 52) visitante try          Matias Francomano
+    min 93 (2T 53) visitante conversion   Matías Vazquez
+    min 95 (2T 55) visitante try          Ignacio Etchepare
+    min 95 (2T 55) visitante substitution Marcos Ribot
+    min 95 (2T 55) visitante substitution Tomas Fertonani
+    min 96 (2T 56) local     substitution Agustin Andress Nieto Pino
+    min 96 (2T 56) visitante conversion   Matías Vazquez
+    min 101 (2T 61) visitante substitution Felipe Franco
+    min 103 (2T 63) visitante substitution Guillermo Beckmann
+    min 103 (2T 63) visitante substitution Matias Francomano
+    min 105 (2T 65) local     substitution Joaquin Gutierrez
+    min 105 (2T 65) visitante try          Ignacio Dechiara
+    min 107 (2T 67) local     substitution Cristian Maidana
+    min 107 (2T 67) visitante try          Agustin Fruttero
+    min 108 (2T 68) local     substitution Brian Franco
+    min 108 (2T 68) visitante conversion   Matías Vazquez
+    min 111 (2T 71) local     try          Agustin Serfaty
+    min 112 (2T 72) local     conversion   Mateo Villar
+    min 114 (2T 74) visitante try          Franco Foradini
+    min 115 (2T 75) visitante conversion   Matías Vazquez
+    min 117 (2T 77) visitante try          Marcos Ribot
+    min 118 (2T 78) visitante conversion   Matías Vazquez
+    min 119 (2T 79) visitante try          Matías Vazquez
+    min 120 (2T 80) visitante conversion   Matías Vazquez
+  marcador  · eventos 27-81 · guardado 27-81
+  tries     · 3-13 (guardado —-—)
+  arbitro   · LEONARDO DEL RIO (guardado: —)
+  guardado  · 23 local · 23 visitante · 41 eventos
+
+cha-roga-r-c vs crai · 8106fbcf · tarjeta 322612  ·  c70f22e6-c8b0-4a82-935c-686c1c3fbf26
+  local     · cha-roga-r-c · 23 jugadores · 23 con ficha fijada
+  visitante · crai · 23 jugadores · 19 con ficha fijada
+  eventos   · 41
+    min  3 (1T 3) visitante try          Alejandro Molinas
+    min  3 (1T 3) visitante conversion   Francisco Oscar Alberto
+    min  7 (1T 7) visitante try          Tomás Schinner
+    min  7 (1T 7) visitante conversion   Francisco Oscar Alberto
+    min 20 (1T 20) visitante try          Justo Barcojo
+    min 24 (1T 24) visitante try          Tomás Schinner
+    min 32 (1T 32) visitante try          Carreras Iturraspe Ignacio Maria
+    min 32 (1T 32) visitante conversion   Francisco Oscar Alberto
+    min 37 (1T 37) local     try          Emiliano Lizasoain
+    min 39 (1T 39) visitante substitution Ignacio Perona
+    min 41 (2T 1) visitante substitution Tomás Schinner
+    min 44 (2T 4) visitante substitution Justo Barcojo
+    min 45 (2T 5) visitante conversion   Francisco Oscar Alberto
+    min 45 (2T 5) visitante try          Augusto Chemes
+    min 48 (2T 8) visitante try          José Ignacio Galvez
+    min 48 (2T 8) visitante conversion   Francisco Oscar Alberto
+    min 51 (2T 11) visitante conversion   Francisco Oscar Alberto
+    min 51 (2T 11) visitante try          Ramiro Germano
+    min 54 (2T 14) visitante try          Carreras Iturraspe Ignacio Maria
+    min 54 (2T 14) visitante conversion   Facundo Beltramino
+    min 55 (2T 15) local     substitution Emiliano Lizasoain
+    min 55 (2T 15) visitante substitution Esteban Russi
+    min 57 (2T 17) visitante try          Carreras Iturraspe Ignacio Maria
+    min 62 (2T 22) visitante try          Bautista Lattanzi
+    min 62 (2T 22) visitante conversion   Facundo Beltramino
+    min 62 (2T 22) visitante substitution Carreras Iturraspe Ignacio Maria
+    min 62 (2T 22) visitante substitution Ramiro Del Sastre
+    min 65 (2T 25) local     substitution Dario Alberto Medina
+    min 65 (2T 25) local     substitution Leandro Lara
+    min 65 (2T 25) local     substitution Diego García
+    min 67 (2T 27) local     try          Julián Marcelo Cabral
+    min 68 (2T 28) local     conversion   Bladimir Villamayor
+    min 69 (2T 29) visitante substitution Elio Gariboldi
+    min 69 (2T 29) visitante substitution Luciano Simino
+    min 72 (2T 32) local     substitution Bladimir Villamayor
+    min 74 (2T 34) local     try          Gonzalo Fernandez
+    min 75 (2T 35) local     substitution Gaspar Maurer
+    min 75 (2T 35) local     substitution Gabriel Alexis Porfiri
+    min 75 (2T 35) local     conversion   Alejo Lagger
+    min 77 (2T 37) visitante try          Bautista Lattanzi
+    min 79 (2T 39) local     try          Gonzalo Fernandez
+  marcador  · eventos 24-76 · guardado 24-76
+  tries     · 4-12 (guardado —-—)
+  arbitro   · EXEQUIEL ADROVER (guardado: —)
+  guardado  · 23 local · 23 visitante · 41 eventos
+
+atletico-brown-san-vicente vs alma-juniors · 8106fbcf · tarjeta 322611  ·  29b3edc6-3a36-464e-be0c-124c1074b323
+  local     · atletico-brown-san-vicente · 23 jugadores · 0 con ficha fijada
+  visitante · alma-juniors · 23 jugadores · 22 con ficha fijada
+  eventos   · 19
+    min  7 (1T 7) local     penalty_goal Rodrigo Gigena
+    min 11 (1T 11) local     penalty_goal Rodrigo Gigena
+    min 11 (1T 11) visitante card_yellow  Franco Juarez
+    min 25 (1T 25) local     try          Emiliano Gastón Turino
+    min 25 (1T 25) visitante substitution Brian Rosillo
+    min 35 (1T 35) visitante substitution Joaquin Fernandez
+    min 40 (1T 40) visitante substitution Vicente Morales
+    min 45 (2T 5) visitante substitution Nicolás Sandobal
+    min 45 (2T 5) visitante substitution Facundo Alvez
+    min 45 (2T 5) visitante substitution Lautaro Rivas
+    min 48 (2T 8) local     card_yellow  Lisandro Rossi
+    min 48 (2T 8) visitante substitution Mateo Torrilla
+    min 48 (2T 8) visitante substitution Agustin Piris
+    min 50 (2T 10) visitante try          Gaston Juarez
+    min 51 (2T 11) visitante conversion   Alan Ramón Sanchez
+    min 53 (2T 13) local     penalty_goal Rodrigo Gigena
+    min 63 (2T 23) local     substitution Guillermo Pievaroli
+    min 69 (2T 29) visitante try          Alan Franco Blanche
+    min 73 (2T 33) visitante try          Lucas Widmer
+  marcador  · eventos 14-17 · guardado 14-17
+  tries     · 1-3 (guardado —-—)
+  arbitro   · FABIAN PRATS (guardado: —)
+  guardado  · 23 local · 23 visitante · 19 eventos
+
+la-salle-jobson vs universitario-de-santa-fe · 8106fbcf · tarjeta 322610  ·  88eebd62-b3cd-4756-a044-72113ba15245
+  local     · la-salle-jobson · 23 jugadores · 18 con ficha fijada
+  visitante · universitario-de-santa-fe · 23 jugadores · 21 con ficha fijada
+  eventos   · 45
+    min  5 (1T 5) visitante try          Ignacio Haas
+    min 14 (1T 14) visitante try          Julián Fleitas
+    min 14 (1T 14) visitante conversion   Ignacio Haas
+    min 17 (1T 17) visitante try          Tomas Nuñez
+    min 17 (1T 17) visitante conversion   Ignacio Haas
+    min 27 (1T 27) visitante card_yellow  Matias Gonzalez
+    min 30 (1T 30) local     substitution Walter Chiarinoti
+    min 30 (1T 30) visitante try          Tomas Nuñez
+    min 30 (1T 30) visitante conversion   Ignacio Haas
+    min 33 (1T 33) visitante try          Ignacio Haas
+    min 33 (1T 33) visitante conversion   Ignacio Haas
+    min 40 (1T 40) visitante try          Gabriel Sala
+    min 40 (1T 40) visitante conversion   Ignacio Haas
+    min 41 (2T 1) visitante try          Gustavo Exequiel Benitez
+    min 41 (2T 1) visitante substitution Mateo Carughi
+    min 47 (2T 7) local     substitution Angel Diaz
+    min 47 (2T 7) local     substitution Tomás Gilabert
+    min 47 (2T 7) local     substitution Ignacio Nicolas Volpato
+    min 47 (2T 7) visitante try          Jorge Onorato
+    min 47 (2T 7) visitante conversion   Ignacio Haas
+    min 48 (2T 8) visitante try          Facundo Kieffer
+    min 48 (2T 8) visitante conversion   Ignacio Haas
+    min 49 (2T 9) visitante substitution Gabriel Sala
+    min 49 (2T 9) visitante substitution Tomas Alejandro Galiano
+    min 52 (2T 12) visitante try          Lihuel Fausto Bravo Márquez
+    min 52 (2T 12) visitante conversion   Ignacio Haas
+    min 54 (2T 14) visitante try          Victor Andrés Redondo
+    min 54 (2T 14) visitante conversion   Ignacio Haas
+    min 56 (2T 16) visitante substitution Ian Nahuel Dallaverde
+    min 56 (2T 16) visitante try          Lihuel Fausto Bravo Márquez
+    min 56 (2T 16) visitante conversion   Ignacio Haas
+    min 58 (2T 18) visitante try          Ignacio Mazzaro
+    min 58 (2T 18) visitante conversion   Ignacio Haas
+    min 62 (2T 22) visitante try          Ignacio Haas
+    min 65 (2T 25) visitante try          Gustavo Exequiel Benitez
+    min 65 (2T 25) visitante conversion   Ignacio Haas
+    min 68 (2T 28) visitante try          Bruno Lautaro Sosa
+    min 68 (2T 28) visitante conversion   Ignacio Haas
+    min 70 (2T 30) visitante try          Gonzalo Meza
+    min 72 (2T 32) local     try          Juan Cruz Candioti
+    min 72 (2T 32) local     conversion   Pelayo Biagioni
+    min 80 (2T 40) visitante substitution Matias Gonzalez
+    min 80 (2T 40) visitante substitution Julián Fleitas
+    min 80 (2T 40) visitante substitution Renzo Nahuel Carrara
+    min 80 (2T 40) visitante substitution Jorge Onorato
+  marcador  · eventos 7-111 · guardado 7-111
+  tries     · 1-17 (guardado —-—)
+  arbitro   · MATEO CIACCIO (guardado: —)
+  guardado  · 23 local · 23 visitante · 45 eventos
+
+listo · 34 partidos

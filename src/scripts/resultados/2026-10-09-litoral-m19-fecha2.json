@@ -1,0 +1,10 @@
+{
+  "fecha": "2026-10-09",
+  "descripcion": "Torneo Regional del Litoral M19 · 2ª fecha (viernes) · zona A",
+  "fuente": "Tercer Tiempo Rugby (10/10/2026)",
+  "motivo": "Resultado de la fecha 2 del Regional del Litoral M19 (Tercer Tiempo Rugby, 10/10/2026); el ofensivo va declarado desde el récord publicado, la fuente da el marcador y no los tries.",
+  "puntosBonusOfensivo": 1,
+  "partidos": [
+    { "partido": "7369b425-01c8-477e-bfa2-f9f4b55d36d2", "local": "Estudiantes de Paraná M19", "visitante": "Santa Fe RC M19", "marcador": { "local": 52, "visitante": 12 }, "bonusOfensivo": ["local"] }
+  ]
+}

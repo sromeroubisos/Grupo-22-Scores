@@ -1,0 +1,72 @@
+{
+  "descripcion": "Torneo del Interior A 2026 · semifinal · Tala RC vs Jockey Club Córdoba (26/09/2026). Árbitro: Federico Longobardi (Rosario). Números de Tala confirmados con el carrusel de @talarugbycluboficial (post colaborativo DdwDewnFfRy), banco 16-23 incluido: 8 fichas reusadas (la de más formaciones ante duplicados). Las 30 fichas se reusan; ante duplicados de Tala se tomó la de más formaciones. Banco de Jockey (16-25) desde el post de @jccrugby: 9 fichas reusadas, Jerónimo Carballo nueva.",
+  "torneo": "Torneo del Interior \"A\"",
+  "partidos": [
+    {
+      "id": "86bae874-ad7f-42a5-a8d3-37dc5a8348e1",
+      "rotulo": "Tala RC vs Jockey Club Córdoba",
+      "local": {
+        "nombre": "Tala Rugby Club",
+        "titulares": [
+          { "numero": 1, "nombre": "Julián Escanilla", "id": "950f40e4-ba1c-432b-9921-6f49192b06b3" },
+          { "numero": 2, "nombre": "Lucas Bredanini", "id": "b257bc32-78d5-4b1e-a48a-fd6b7c995676", "capitan": true },
+          { "numero": 3, "nombre": "Enzo Avaca", "id": "a0d2398b-6030-4139-bd74-8f92b0fcc748" },
+          { "numero": 4, "nombre": "Pedro Cajal", "id": "4e899128-0865-465e-ab96-6db572e9d9b2" },
+          { "numero": 5, "nombre": "Gregorio Hernández", "id": "2afa0b22-0d77-40da-8c9a-c21aa799bff7" },
+          { "numero": 6, "nombre": "Mateo Cajal", "id": "870a5f99-0f79-4906-9af7-d8432f89257a" },
+          { "numero": 7, "nombre": "Lautaro Simes", "id": "1f0acfb3-d043-4b3b-872a-c080cd5ce1a7" },
+          { "numero": 8, "nombre": "Federico Simondi", "id": "a6afc3fd-1aee-43dc-a3f3-dd3020dba2b2" },
+          { "numero": 9, "nombre": "Ignacio Díaz", "id": "d45ee4e9-026a-4f9b-ba7f-b181247cc4f0" },
+          { "numero": 10, "nombre": "Facundo Ortiz", "id": "6db093d7-f8cf-4df9-8248-23e9e734c8a6" },
+          { "numero": 11, "nombre": "Valentín Soler", "id": "4396d1f9-afa6-4e87-a92e-97daa1b04236" },
+          { "numero": 12, "nombre": "Ignacio de Vértiz", "id": "d97cad7e-057d-4b96-9180-2f5a866cc1ca" },
+          { "numero": 13, "nombre": "Agustín De Vértiz", "id": "5e6e2ff5-db1f-4934-bf92-1477be89f25a" },
+          { "numero": 14, "nombre": "Gerónimo Vittar", "id": "0f27bba7-ff69-4213-8fa4-f02f75db41d4" },
+          { "numero": 15, "nombre": "Mateo Soler", "id": "c87a2b59-9b81-4a76-9b9e-6d020408346f" }
+        ],
+        "suplentes": [
+          { "numero": 16, "nombre": "Manuel Arroyo", "id": "072f3cd5-6548-4399-a061-ac533b10a425" },
+          { "numero": 17, "nombre": "Salvador Ortiz", "id": "d286fad2-5f3a-45aa-88d8-72fe956b00e0" },
+          { "numero": 18, "nombre": "Francisco Caturelli", "id": "c99b9f99-6471-47c5-9f51-b8b21657639c" },
+          { "numero": 19, "nombre": "Farid Salazar", "id": "a26b67f6-e779-463e-8ece-ac661aad4e4f" },
+          { "numero": 20, "nombre": "Gastón Garayzabal", "id": "ac9a7ae8-2589-45a3-bf01-101913f2ff8b" },
+          { "numero": 21, "nombre": "Hilario Fernández", "id": "38bacd16-3265-4d6d-b5a1-6a707e85a522" },
+          { "numero": 22, "nombre": "Manuel Giannantonio", "id": "3791551d-5cd4-488f-a189-ad03e896935a" },
+          { "numero": 23, "nombre": "Luciano Avaca", "id": "605ef257-607a-4133-a870-8643dd56f267" }
+        ]
+      },
+      "visitante": {
+        "nombre": "Jockey Club Córdoba",
+        "titulares": [
+          { "numero": 1, "nombre": "Agustín Peralta", "id": "514d1000-f225-40a4-acc4-c57f5dbd34f5" },
+          { "numero": 2, "nombre": "Leandro Nassif", "id": "97078f67-1c1e-43e7-a255-adc5b4152ac5" },
+          { "numero": 3, "nombre": "Francisco Etchegorry", "id": "992e159d-b02b-4282-b09a-563b9cb23147" },
+          { "numero": 4, "nombre": "Santiago Toya", "id": "106f02e1-2830-4330-ab1c-5d259a4ef386" },
+          { "numero": 5, "nombre": "Lautaro Ramírez", "id": "cad6d344-517e-42f4-8eef-04be3a2c6ca4" },
+          { "numero": 6, "nombre": "Augusto Cugnini", "id": "26002f40-0522-4b30-af18-8e9cde4e6767" },
+          { "numero": 7, "nombre": "Gonzalo Maldonado", "id": "2902718a-0072-4f0c-addb-d45164c41004" },
+          { "numero": 8, "nombre": "Patricio Molina", "id": "a527e521-c4ed-498d-ab27-96f123cc44d4" },
+          { "numero": 9, "nombre": "Nicolás Viola", "id": "a0296d84-3c16-41be-81a9-ec81f2d61a1d" },
+          { "numero": 10, "nombre": "Facundo Rodríguez", "id": "cbfaa6fe-5991-4029-987a-08ff7d8cf664" },
+          { "numero": 11, "nombre": "Matías Fischer", "id": "3137ea8f-b9d3-48bf-8a54-c581cfdedd3e" },
+          { "numero": 12, "nombre": "Julio Deheza", "id": "ed436c2f-2d15-480e-acfa-10126c5a94c6", "capitan": true },
+          { "numero": 13, "nombre": "Tiziano Marchetto", "id": "f970eedd-9bef-4ef5-b871-bae8302853ef" },
+          { "numero": 14, "nombre": "Manuel Carrara", "id": "717cdc32-9e0f-475b-b170-7f192272dde5" },
+          { "numero": 15, "nombre": "Julián Viola", "id": "eee08568-846a-4df9-a786-9fca461bee45" }
+        ],
+        "suplentes": [
+          { "numero": 16, "nombre": "Juan Manuel Freytes Echenique", "id": "db876971-ffce-4a60-8c17-ac0189186cee" },
+          { "numero": 17, "nombre": "Uriel Spósito", "id": "40fa7490-78c3-46da-a1e6-c305af65055f" },
+          { "numero": 18, "nombre": "Octavio Filippa", "id": "f3828245-eb79-4b03-a4c6-c77bf33ce5ad" },
+          { "numero": 19, "nombre": "Juan Cruz Conde", "id": "f8701dcb-650e-4762-9998-5606334ae3cb" },
+          { "numero": 20, "nombre": "Abraham Elías", "id": "8c3c13ed-b933-4a39-8f60-e526af4a896e" },
+          { "numero": 21, "nombre": "Lucas Moyano", "id": "a20757d4-9ef1-4882-85a9-e6a0398d7113" },
+          { "numero": 22, "nombre": "Marcelo Blanco", "id": "020d73cb-bfc2-4f16-ace9-c262b53cfc66" },
+          { "numero": 23, "nombre": "Juan Ludueña", "id": "7305bc17-ba48-4295-ac8b-ac2425096bdc" },
+          { "numero": 24, "nombre": "Tomás Bergero", "id": "5ac822aa-7fe2-4a36-82d3-16dc52659991" },
+          { "numero": 25, "nombre": "Jerónimo Carballo" }
+        ]
+      }
+    }
+  ]
+}

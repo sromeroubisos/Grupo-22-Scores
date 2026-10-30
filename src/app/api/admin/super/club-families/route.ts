@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { guardRejection } from '@/lib/auth/apiAdmin';
 import { requireGlobalAdminContext } from '@/lib/auth/permissions';
 import { createClient } from '@/lib/supabase/server';
 import { getReadClient } from '@/lib/supabase/read';
@@ -40,8 +41,8 @@ export async function GET() {
     try {
         const authClient = await createClient();
         await requireGlobalAdminContext(authClient);
-    } catch {
-        return jsonError('Unauthorized', 401);
+    } catch (authError) {
+        return jsonError(...guardRejection(authError));
     }
 
     try {
@@ -109,8 +110,8 @@ export async function POST(request: NextRequest) {
     try {
         authClient = await createClient();
         await requireGlobalAdminContext(authClient);
-    } catch {
-        return jsonError('Unauthorized', 401);
+    } catch (authError) {
+        return jsonError(...guardRejection(authError));
     }
 
     try {
@@ -297,8 +298,8 @@ export async function DELETE(request: NextRequest) {
     try {
         authClient = await createClient();
         await requireGlobalAdminContext(authClient);
-    } catch {
-        return jsonError('Unauthorized', 401);
+    } catch (authError) {
+        return jsonError(...guardRejection(authError));
     }
 
     try {

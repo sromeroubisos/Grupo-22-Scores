@@ -2,7 +2,12 @@ import { NextResponse } from 'next/server';
 import { getReadClient } from '@/lib/supabase/read';
 import { escapePostgrestLike } from '@/lib/utils/postgrest';
 import { searchExternalTournamentCatalog } from '@/lib/server/externalTournamentCatalog';
-import { getPreferredExternalProviderForSport } from '@/lib/externalProviderPolicy';
+import {
+    FLASHSCORE_PROVIDER,
+    getPreferredExternalProviderForSport,
+    isRugbySport,
+} from '@/lib/externalProviderPolicy';
+import { RUGBYPASS_PROVIDER } from '@/lib/services/rugbyPassParser';
 
 type SearchResult = {
     id: string;
@@ -52,6 +57,21 @@ type PersonSearchRow = {
     role: string | null;
 };
 
+/**
+ * Un jugador de proveedor, del indice que llena `rugbypass-catalog`.
+ *
+ * Es el espejo de `external_teams` para las personas: la ficha ya sabia abrir
+ * `/players/rp-player-<slug>`, lo que faltaba era como encontrarla.
+ */
+type ExternalPlayerSearchRow = {
+    id: string;
+    name: string | null;
+    position: string | null;
+    team_name: string | null;
+    sport: string | null;
+    current_squad: boolean | null;
+};
+
 type ExternalTeamSearchRow = {
     id: string;
     name: string | null;
@@ -95,11 +115,20 @@ export async function GET(request: Request) {
     };
 
     try {
-        // Four sources: local tournaments and clubs, plus their external counterparts.
-        // The provider offers no search endpoint (/search 404s), so external results come
-        // from our own indexes: the tournament catalog fed by the matches feed, and the
-        // external_teams cache filled by team lookups.
-        const [tournamentsRes, clubsRes, externalTournaments, externalTeamsRes, peopleRes] = await Promise.all([
+        // Seis fuentes: torneos, clubes y jugadores locales, y los tres espejos
+        // externos. Ningun proveedor tiene endpoint de busqueda (/search da 404),
+        // asi que lo externo sale SIEMPRE de indices propios: el catalogo de
+        // torneos que llena el feed de partidos, `external_teams` y
+        // `external_players` — estos dos ultimos con el catalogo de RugbyPass,
+        // que escribe el cron `rugbypass-catalog`.
+        const [
+            tournamentsRes,
+            clubsRes,
+            externalTournaments,
+            externalTeamsRes,
+            peopleRes,
+            externalPlayersRes,
+        ] = await Promise.all([
             supabase.from('tournaments')
                 .select('id, name, display_name, slug, sport_id, country_id, logo_url, is_visible, status, review_status, sport:sports(name), country:countries(name)')
                 .or(`name.ilike.%${escapedSearch}%,display_name.ilike.%${escapedSearch}%,slug.ilike.%${escapedSearch}%`)
@@ -130,6 +159,20 @@ export async function GET(request: Request) {
                 .select('id, full_name, name, first_name, last_name, position, club_id, status, role, club:clubs(name)')
                 .or(`full_name.ilike.%${escapedSearch}%,name.ilike.%${escapedSearch}%,first_name.ilike.%${escapedSearch}%,last_name.ilike.%${escapedSearch}%`)
                 .limit(limit),
+            // Jugadores de proveedor. Una sola columna de nombre: el proveedor
+            // publica el nombre entero y no lo parte, asi que no hay apellido
+            // suelto contra el que buscar.
+            //
+            // El plantel VIGENTE va primero, y no filtra: el que se retiro sigue
+            // teniendo ficha y quien lo escribe por nombre lo esta buscando a el.
+            // Se piden mas filas de las que entran porque el cupo de jugadores
+            // recorta despues, y con .limit(limit) un apellido comun gastaria el
+            // pedido entero en gente que no se va a mostrar.
+            supabase.from('external_players')
+                .select('id, name, position, team_name, sport, current_squad')
+                .ilike('name', `%${escapedSearch}%`)
+                .order('current_squad', { ascending: false })
+                .limit(Math.min(limit * 4, 100)),
         ]);
 
         debugInfo = {
@@ -224,6 +267,7 @@ export async function GET(request: Request) {
         // the better record (curated name, logo, slug), so the local one wins on a name clash.
         const dbTournamentNames = new Set(rawResults.filter(r => r.type === 'tournament').map(r => r.title.toLowerCase()));
         const dbClubNames = new Set(rawResults.filter(r => r.type === 'club').map(r => r.title.toLowerCase()));
+        const dbPlayerNames = new Set(rawResults.filter(r => r.type === 'player').map(r => r.title.toLowerCase()));
 
         for (const hit of externalTournaments) {
             if (dbTournamentNames.has(hit.name.toLowerCase())) continue;
@@ -268,6 +312,40 @@ export async function GET(request: Request) {
                     url: `/clubs/${team.id}?${params.toString()}`,
                     logo_url: sanitizeSearchLogoUrl(team.logo_url, team.id),
                     searchWeight: calculateWeight(name, team.short_name, null, lSearch, 3),
+                });
+            }
+        }
+
+        // La tabla puede no existir todavia (migracion sin correr) y eso no
+        // rompe la busqueda: se pierden los jugadores de proveedor, no la lista.
+        if (externalPlayersRes.error) {
+            console.warn('[Universal Search] External players query skipped:', externalPlayersRes.error.message);
+        }
+
+        if (externalPlayersRes.data) {
+            for (const player of externalPlayersRes.data as ExternalPlayerSearchRow[]) {
+                const name = player.name?.trim();
+                if (!name || !player.id) continue;
+                // Misma regla que con los clubes: si la ficha local existe, es la
+                // mejor: tiene club, plantel y partidos de la base.
+                if (dbPlayerNames.has(name.toLowerCase())) continue;
+
+                const detalle = [player.position?.trim(), player.team_name?.trim()]
+                    .filter(Boolean)
+                    .join(' · ');
+
+                rawResults.push({
+                    id: player.id,
+                    type: 'player' as const,
+                    title: name,
+                    subtitle: detalle ? `Jugador · ${detalle}` : 'Jugador',
+                    // El id ya lleva el prefijo del proveedor: la ficha resuelve
+                    // sola contra su catalogo, sin parametros en el enlace.
+                    url: `/players/${player.id}`,
+                    // La foto del proveedor no viaja: la lista dibuja iniciales y
+                    // traer 5045 URLs de CDN para mostrar doce es pura latencia.
+                    logo_url: null,
+                    searchWeight: calculateWeight(name, null, null, lSearch, 5),
                 });
             }
         }
@@ -356,11 +434,9 @@ function dedupeExternalTeams(rows: ExternalTeamSearchRow[]): ExternalTeamSearchR
  * el proveedor nunca llego a completar.
  */
 function rangoExternalTeam(team: ExternalTeamSearchRow): number[] {
-    const preferido = getPreferredExternalProviderForSport(team.sport);
     return [
-        // 1. El proveedor habilitado para ESE deporte. En rugby es FlashScore;
-        //    rugbyarchive es el archivo historico, no la fuente viva.
-        (team.source || '').toLowerCase() === preferido ? 0 : 1,
+        // 1. El proveedor que manda para ESE deporte.
+        rangoDeFuente(team),
         // 2. Sin team_url no hay contra que resolver y la ficha abre en blanco.
         team.team_url ? 0 : 1,
         // 3. El escudo se escribe recien cuando una lectura del equipo trajo datos: su
@@ -372,6 +448,32 @@ function rangoExternalTeam(team: ExternalTeamSearchRow): number[] {
         //    cascara suele ser la mas nueva: nace cada vez que aparece un partido.
         -(Date.parse(team.last_fetched_at || '') || 0),
     ];
+}
+
+/**
+ * CUAL PROVEEDOR GANA CUANDO DOS FILAS SON EL MISMO CLUB.
+ *
+ * En todos los deportes menos rugby alcanza con el proveedor habilitado. En
+ * RUGBY no: el habilitado sigue siendo FlashScore porque es quien escribe los
+ * partidos de respaldo, pero la fuente que se PUBLICA es RugbyPass —es la que
+ * reemplaza a FlashScore en el feed (`rugbyPassSupersedes`)— y es la unica con
+ * plantel y con ficha de jugador. Sin esta excepcion, un "Leinster" de RugbyPass
+ * quedaba tapado por la cascara homonima de FlashScore y el club se abria vacio:
+ * el dato estaba cargado y la pantalla no lo mostraba.
+ *
+ * `rugbyarchive` va ultimo a proposito en los dos casos: es el archivo
+ * historico, de donde sale el palmares, no la fuente viva.
+ */
+function rangoDeFuente(team: ExternalTeamSearchRow): number {
+    const source = (team.source || '').toLowerCase();
+
+    if (isRugbySport(team.sport)) {
+        if (source === RUGBYPASS_PROVIDER) return 0;
+        if (source === FLASHSCORE_PROVIDER) return 1;
+        return 2;
+    }
+
+    return source === getPreferredExternalProviderForSport(team.sport) ? 0 : 1;
 }
 
 function comparaExternalTeams(a: ExternalTeamSearchRow, b: ExternalTeamSearchRow): number {

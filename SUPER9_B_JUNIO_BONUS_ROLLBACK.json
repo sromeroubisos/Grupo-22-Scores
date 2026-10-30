@@ -1,0 +1,116 @@
+{
+  "partidos": [
+    {
+      "id": "09f5d18f-3f81-44cc-b9ca-240da690fb29",
+      "antes": {
+        "home_base_points": 4,
+        "away_base_points": 0,
+        "home_bonus_points": 0,
+        "away_bonus_points": 0,
+        "points_autocalculated": true,
+        "points_override_reason": null
+      }
+    },
+    {
+      "id": "12fd7e7f-d244-4755-9922-2c496f1a47ee",
+      "antes": {
+        "home_base_points": 0,
+        "away_base_points": 4,
+        "home_bonus_points": 0,
+        "away_bonus_points": 0,
+        "points_autocalculated": true,
+        "points_override_reason": null
+      }
+    },
+    {
+      "id": "4740d45c-d5db-4656-83e5-478827eab2cf",
+      "antes": {
+        "home_base_points": 4,
+        "away_base_points": 0,
+        "home_bonus_points": 0,
+        "away_bonus_points": 0,
+        "points_autocalculated": true,
+        "points_override_reason": null
+      }
+    },
+    {
+      "id": "8578f0ad-f0fe-414f-b025-86ec2f80180c",
+      "antes": {
+        "home_base_points": 0,
+        "away_base_points": 4,
+        "home_bonus_points": 0,
+        "away_bonus_points": 2,
+        "points_autocalculated": false,
+        "points_override_reason": null
+      }
+    },
+    {
+      "id": "859458c4-5836-49d8-b6eb-993d956e1a6d",
+      "antes": {
+        "home_base_points": 0,
+        "away_base_points": 4,
+        "home_bonus_points": 0,
+        "away_bonus_points": 2,
+        "points_autocalculated": false,
+        "points_override_reason": null
+      }
+    },
+    {
+      "id": "c15573a0-4120-4163-bb83-c94ef514e818",
+      "antes": {
+        "home_base_points": 4,
+        "away_base_points": 0,
+        "home_bonus_points": 0,
+        "away_bonus_points": 0,
+        "points_autocalculated": true,
+        "points_override_reason": null
+      }
+    },
+    {
+      "id": "f7c3394f-bfc8-481e-8066-642c9f0a8918",
+      "antes": {
+        "home_base_points": 0,
+        "away_base_points": 4,
+        "home_bonus_points": 2,
+        "away_bonus_points": 2,
+        "points_autocalculated": false,
+        "points_override_reason": null
+      }
+    }
+  ],
+  "fase": {
+    "id": "4fce0ada-db34-4b22-8354-54af7956d8e4",
+    "tiebreakers_antes": [
+      {
+        "order": "desc",
+        "metric": "points",
+        "enabled": true,
+        "priority": 1
+      },
+      {
+        "order": "desc",
+        "metric": "pointsDiff",
+        "enabled": true,
+        "priority": 2
+      },
+      {
+        "order": "desc",
+        "metric": "headToHead",
+        "enabled": true,
+        "priority": 3
+      },
+      {
+        "order": "desc",
+        "metric": "won",
+        "enabled": true,
+        "priority": 4
+      },
+      {
+        "order": "desc",
+        "metric": "pointsFor",
+        "enabled": true,
+        "priority": 5
+      }
+    ]
+  }
+}

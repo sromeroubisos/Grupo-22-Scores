@@ -7,8 +7,10 @@
  */
 
 import { NextResponse } from 'next/server';
-import { getRugbyPassCompetitionStats } from '@/lib/services/rugbyPass';
+import { getRugbyPassCompetitionStats, isRugbyPassSeasonLabel } from '@/lib/services/rugbyPass';
 import { parseRugbyPassTournamentId } from '@/lib/services/rugbyPassTournamentBundle';
+import { normalizeRugbyPassSeasonLabel } from '@/lib/services/rugbyPassSeasonStats';
+import { limitAnonymousRequest, PUBLIC_SHORT_CACHE_CONTROL } from '@/lib/server/publicRouteGuards';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,20 +21,41 @@ export async function GET(request: Request) {
     // (`rp-comp-203`) y el oid pelado (`203`).
     const competitionId = parseRugbyPassTournamentId(crudo) ?? Number(crudo);
 
-    if (!Number.isFinite(competitionId)) {
+    // Entero positivo y corto: los oid de RugbyPass son de tres o cuatro cifras.
+    if (!Number.isInteger(competitionId) || competitionId <= 0 || competitionId > 9_999_999) {
         return NextResponse.json({ error: 'Falta el id de la competicion' }, { status: 400 });
     }
 
+    // `season` vacio = la temporada que la pagina abre. Lo demas tiene que tener
+    // forma de temporada (`2026`, `2026-27`): cada rotulo distinto era una clave
+    // de memoria nueva. Un rotulo raro NO es 400: el servicio ya caia a la
+    // temporada por defecto, y la pestana tiene que seguir dibujandose si el
+    // torneo trae su temporada escrita de otra manera.
+    const seasonCruda = (searchParams.get('season') || '').slice(0, 20);
+    const seasonNormalizada = seasonCruda ? normalizeRugbyPassSeasonLabel(seasonCruda) : '';
+    const season = isRugbyPassSeasonLabel(seasonNormalizada) ? seasonNormalizada : '';
+
+    // Anonima y cara (ocho llamadas al sitio por temporada nueva): tope por IP.
+    const limited = await limitAnonymousRequest(request, 'rugbypass-stats');
+    if (limited) return limited;
+
     try {
-        const stats = await getRugbyPassCompetitionStats(competitionId, searchParams.get('season'));
+        const stats = await getRugbyPassCompetitionStats(competitionId, season || null);
         if (!stats) {
             // La competicion no esta habilitada o no publica estadisticas
             // ("Internationals" es un cajon de test matches y su /stats/ da 404).
             return NextResponse.json({ error: 'Esta competicion no publica estadisticas' }, { status: 404 });
         }
-        return NextResponse.json(stats);
+        // Igual para cualquiera (no lee sesion): el CDN puede servirla.
+        return NextResponse.json(stats, { headers: { 'Cache-Control': PUBLIC_SHORT_CACHE_CONTROL } });
     } catch (error) {
-        const detalle = error instanceof Error ? error.message : 'Error desconocido';
-        return NextResponse.json({ error: detalle }, { status: 502 });
+        // El mensaje del servicio lleva la URL del sitio (`… en https://…`): va
+        // al log, no a la respuesta. Hacia afuera, solo si se puede reintentar.
+        console.error('[rugbypass/stats] fallo al pedir estadisticas:', error);
+        const lento = error instanceof Error && /tardo demasiado/.test(error.message);
+        return NextResponse.json(
+            { error: lento ? 'RugbyPass tardo demasiado en responder' : 'No se pudieron traer las estadisticas de RugbyPass' },
+            { status: 502 },
+        );
     }
 }

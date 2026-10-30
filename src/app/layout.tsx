@@ -7,6 +7,7 @@ import ConditionalLayout from "@/components/ConditionalLayout";
 import { AuthProvider } from "@/context/AuthContext";
 import { appIconHref } from "@/lib/appBranding";
 import { publicSiteUrl } from "@/lib/seo/siteUrl";
+import { serializeJsonLd } from "@/lib/utils/jsonLd";
 import "./globals.css";
 
 export const viewport: Viewport = {
@@ -151,7 +152,7 @@ export default function RootLayout({
       <body suppressHydrationWarning>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(siteJsonLd) }}
+          dangerouslySetInnerHTML={{ __html: serializeJsonLd(siteJsonLd) }}
         />
         <ChunkLoadRecovery />
         {/*

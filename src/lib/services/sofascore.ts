@@ -57,7 +57,9 @@ async function fetchJson<T>(path: string, ttlSeconds: number, cacheKey: string):
     if (SERVICE_TOKEN) headers['x-service-token'] = SERVICE_TOKEN;
 
     try {
-        const res = await fetch(url, { headers, cache: 'no-store' });
+        // Sin timeout, un servicio colgado retenía la lambda hasta el límite de
+        // Vercel (y la memoria con ella). 8 s: lo que tarda de sobra una respuesta sana.
+        const res = await fetch(url, { headers, cache: 'no-store', signal: AbortSignal.timeout(8000) });
         if (res.status === 404) return null;
         if (!res.ok) {
             throw new SofaScoreServiceError(`sofascore service ${res.status}`, res.status);

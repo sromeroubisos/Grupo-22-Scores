@@ -1,0 +1,172 @@
+{
+ "rondas": [
+  {
+   "id": "6542938a-24e5-4868-bddb-0743da3924a9",
+   "phase_id": "ecf96450-d341-4aac-a0f3-3457bef8c569",
+   "name": "REC - Fecha 1",
+   "order_index": 19,
+   "start_date": "2026-08-28T00:00:00+00:00",
+   "end_date": "2026-08-29T00:00:00+00:00",
+   "is_completed": true,
+   "notes": null,
+   "created_at": "2026-10-16T14:27:40.836+00:00",
+   "updated_at": "2026-10-16T14:27:40.836+00:00",
+   "season_id": "667bae64-081b-4c1c-b315-aa11ab535f9a",
+   "group_id": null
+  },
+  {
+   "id": "411195db-de74-41f1-9ca2-0806ec9c9342",
+   "phase_id": "ecf96450-d341-4aac-a0f3-3457bef8c569",
+   "name": "REC - Fecha 2",
+   "order_index": 20,
+   "start_date": "2026-09-12T00:00:00+00:00",
+   "end_date": "2026-09-12T00:00:00+00:00",
+   "is_completed": true,
+   "notes": null,
+   "created_at": "2026-10-16T14:27:40.836+00:00",
+   "updated_at": "2026-10-16T14:27:40.836+00:00",
+   "season_id": "667bae64-081b-4c1c-b315-aa11ab535f9a",
+   "group_id": null
+  },
+  {
+   "id": "696296d2-9cb4-480e-85b3-55abb1a9e585",
+   "phase_id": "ecf96450-d341-4aac-a0f3-3457bef8c569",
+   "name": "REC - Fecha 3",
+   "order_index": 21,
+   "start_date": "2026-09-19T00:00:00+00:00",
+   "end_date": "2026-09-19T00:00:00+00:00",
+   "is_completed": true,
+   "notes": null,
+   "created_at": "2026-10-16T14:27:40.836+00:00",
+   "updated_at": "2026-10-16T14:27:40.836+00:00",
+   "season_id": "667bae64-081b-4c1c-b315-aa11ab535f9a",
+   "group_id": null
+  },
+  {
+   "id": "5e43965e-6729-42b6-8ced-dcb409b5d64b",
+   "phase_id": "ecf96450-d341-4aac-a0f3-3457bef8c569",
+   "name": "REC - Fecha 4",
+   "order_index": 22,
+   "start_date": "2026-09-26T00:00:00+00:00",
+   "end_date": "2026-09-26T00:00:00+00:00",
+   "is_completed": true,
+   "notes": null,
+   "created_at": "2026-10-16T14:27:40.836+00:00",
+   "updated_at": "2026-10-16T14:27:40.836+00:00",
+   "season_id": "667bae64-081b-4c1c-b315-aa11ab535f9a",
+   "group_id": null
+  },
+  {
+   "id": "615a7a84-bf18-495c-b66e-b8e6c717377e",
+   "phase_id": "ecf96450-d341-4aac-a0f3-3457bef8c569",
+   "name": "REC - Fecha 5",
+   "order_index": 23,
+   "start_date": "2026-10-09T00:00:00+00:00",
+   "end_date": "2026-10-10T00:00:00+00:00",
+   "is_completed": true,
+   "notes": null,
+   "created_at": "2026-10-16T14:27:40.836+00:00",
+   "updated_at": "2026-10-16T14:27:40.836+00:00",
+   "season_id": "667bae64-081b-4c1c-b315-aa11ab535f9a",
+   "group_id": null
+  }
+ ],
+ "partidos": [
+  {
+   "id": "a9d42a79-a9f2-449e-95b2-7476e8eea950",
+   "phase_id": "ecf96450-d341-4aac-a0f3-3457bef8c569",
+   "round_uuid": "411195db-de74-41f1-9ca2-0806ec9c9342",
+   "round_label": "REC - Fecha 2"
+  },
+  {
+   "id": "50517d83-bd06-4ade-9ab6-0fa5cf7de854",
+   "phase_id": "ecf96450-d341-4aac-a0f3-3457bef8c569",
+   "round_uuid": "411195db-de74-41f1-9ca2-0806ec9c9342",
+   "round_label": "REC - Fecha 2"
+  },
+  {
+   "id": "eac476b4-9d64-42c9-8db1-3b8927136fb2",
+   "phase_id": "ecf96450-d341-4aac-a0f3-3457bef8c569",
+   "round_uuid": "411195db-de74-41f1-9ca2-0806ec9c9342",
+   "round_label": "REC - Fecha 2"
+  },
+  {
+   "id": "90077c20-cfdc-4f68-8082-cfb0f689092a",
+   "phase_id": "ecf96450-d341-4aac-a0f3-3457bef8c569",
+   "round_uuid": "411195db-de74-41f1-9ca2-0806ec9c9342",
+   "round_label": "REC - Fecha 2"
+  },
+  {
+   "id": "977c9414-c320-4d28-b73b-52ac1c7a377b",
+   "phase_id": "ecf96450-d341-4aac-a0f3-3457bef8c569",
+   "round_uuid": "5e43965e-6729-42b6-8ced-dcb409b5d64b",
+   "round_label": "REC - Fecha 4"
+  },
+  {
+   "id": "712a1c2f-567a-461d-8b56-9b873aaa85af",
+   "phase_id": "ecf96450-d341-4aac-a0f3-3457bef8c569",
+   "round_uuid": "5e43965e-6729-42b6-8ced-dcb409b5d64b",
+   "round_label": "REC - Fecha 4"
+  },
+  {
+   "id": "a88ff118-727e-452f-a090-88353f2a5272",
+   "phase_id": "ecf96450-d341-4aac-a0f3-3457bef8c569",
+   "round_uuid": "5e43965e-6729-42b6-8ced-dcb409b5d64b",
+   "round_label": "REC - Fecha 4"
+  },
+  {
+   "id": "ebbb9859-b1a9-4605-a374-4fa477dbd465",
+   "phase_id": "ecf96450-d341-4aac-a0f3-3457bef8c569",
+   "round_uuid": "615a7a84-bf18-495c-b66e-b8e6c717377e",
+   "round_label": "REC - Fecha 5"
+  },
+  {
+   "id": "b8a8907c-2057-4283-9208-c63350ce55ac",
+   "phase_id": "ecf96450-d341-4aac-a0f3-3457bef8c569",
+   "round_uuid": "615a7a84-bf18-495c-b66e-b8e6c717377e",
+   "round_label": "REC - Fecha 5"
+  },
+  {
+   "id": "99e5f3b3-c7b8-48b6-a9bd-ce77a7eed2d9",
+   "phase_id": "ecf96450-d341-4aac-a0f3-3457bef8c569",
+   "round_uuid": "615a7a84-bf18-495c-b66e-b8e6c717377e",
+   "round_label": "REC - Fecha 5"
+  },
+  {
+   "id": "1f77c5f2-a70e-4452-bef5-dd44845b0ec7",
+   "phase_id": "ecf96450-d341-4aac-a0f3-3457bef8c569",
+   "round_uuid": "6542938a-24e5-4868-bddb-0743da3924a9",
+   "round_label": "REC - Fecha 1"
+  },
+  {
+   "id": "1a753fd0-6006-403b-b28a-4f7863173384",
+   "phase_id": "ecf96450-d341-4aac-a0f3-3457bef8c569",
+   "round_uuid": "6542938a-24e5-4868-bddb-0743da3924a9",
+   "round_label": "REC - Fecha 1"
+  },
+  {
+   "id": "474c267c-5a71-471b-a695-c3f01086b7a4",
+   "phase_id": "ecf96450-d341-4aac-a0f3-3457bef8c569",
+   "round_uuid": "6542938a-24e5-4868-bddb-0743da3924a9",
+   "round_label": "REC - Fecha 1"
+  },
+  {
+   "id": "75a7e80d-cb66-4c24-a052-ced603bbe849",
+   "phase_id": "ecf96450-d341-4aac-a0f3-3457bef8c569",
+   "round_uuid": "696296d2-9cb4-480e-85b3-55abb1a9e585",
+   "round_label": "REC - Fecha 3"
+  },
+  {
+   "id": "ae6177fc-8969-40ad-84c5-c55fc5d835a7",
+   "phase_id": "ecf96450-d341-4aac-a0f3-3457bef8c569",
+   "round_uuid": "696296d2-9cb4-480e-85b3-55abb1a9e585",
+   "round_label": "REC - Fecha 3"
+  },
+  {
+   "id": "b07bad9f-fc41-4acd-a8ab-70d5a5fdc83d",
+   "phase_id": "ecf96450-d341-4aac-a0f3-3457bef8c569",
+   "round_uuid": "696296d2-9cb4-480e-85b3-55abb1a9e585",
+   "round_label": "REC - Fecha 3"
+  }
+ ]
+}

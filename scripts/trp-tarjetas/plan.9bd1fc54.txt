@@ -1,0 +1,725 @@
+tarjetas oficiales 9bd1fc54
+
+sociedad-sportiva-de-bahia-blanca vs santa-rosa-r-c · 9bd1fc54 · tarjeta 280989  ·  fc038764-e859-4942-91ab-d577c8d05300
+  local     · sociedad-sportiva-de-bahia-blanca · 23 jugadores · 23 con ficha fijada
+  visitante · santa-rosa-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 48
+    min  6 (1T 6) local     try          Rafael Larrañaga
+    min  6 (1T 6) local     conversion   Tomas Bermudez Caneparis
+    min  8 (1T 8) local     try          Francisco Cantalejos
+    min 12 (1T 12) local     try          Luca Nahuel Loiacono
+    min 16 (1T 16) local     try          Pedro Zorzano
+    min 16 (1T 16) local     conversion   Tomas Bermudez Caneparis
+    min 22 (1T 22) local     try          Francisco Cantalejos
+    min 22 (1T 22) local     conversion   Mateo Kohler
+    min 26 (1T 26) local     try          Alan Martinez
+    min 29 (1T 29) local     try          Alan Martinez
+    min 29 (1T 29) local     conversion   Mateo Kohler
+    min 32 (1T 32) local     try          Tomas Bermudez Caneparis
+    min 34 (1T 34) local     try          Felipe Inchausti
+    min 34 (1T 34) local     conversion   Mateo Kohler
+    min 38 (1T 38) local     try          Rafael Larrañaga
+    min 38 (1T 38) local     conversion   Mateo Kohler
+    min 43 (2T 3) local     try          Luca Nahuel Loiacono
+    min 43 (2T 3) local     conversion   Mateo Kohler
+    min 44 (2T 4) local     substitution Rafael Larrañaga
+    min 45 (2T 5) local     substitution Facundo Ferrandez
+    min 48 (2T 8) local     try          Renato Cantalejos
+    min 48 (2T 8) local     conversion   Mateo Kohler
+    min 49 (2T 9) local     substitution Renato Cantalejos
+    min 57 (2T 17) local     try          Tomas Bermudez Caneparis
+    min 57 (2T 17) local     conversion   Mateo Kohler
+    min 60 (2T 20) local     try          Tomas Bermudez Caneparis
+    min 60 (2T 20) local     conversion   Mateo Kohler
+    min 61 (2T 21) local     substitution Iñaki Azcoitia
+    min 61 (2T 21) local     substitution Ignacio Lance
+    min 61 (2T 21) local     substitution Luca Nahuel Loiacono
+    min 62 (2T 22) local     substitution Francisco Cantalejos
+    min 62 (2T 22) local     substitution Felipe Inchausti
+    min 68 (2T 28) local     try          Tomas Inchausti
+    min 68 (2T 28) local     conversion   Mateo Kohler
+    min 69 (2T 29) visitante substitution Juan Bautista Fasce
+    min 70 (2T 30) visitante substitution Jose Ignacio Costabel
+    min 72 (2T 32) local     try          Pedro Zorzano
+    min 72 (2T 32) local     conversion   Mateo Kohler
+    min 72 (2T 32) visitante substitution Nestor Tomas Lezcano Gimenez
+    min 72 (2T 32) visitante substitution Benjamin Lang
+    min 72 (2T 32) visitante substitution Nicolas Vlasich
+    min 72 (2T 32) visitante substitution Gaspar Giretti
+    min 74 (2T 34) local     try          Felipe Serrat
+    min 75 (2T 35) local     conversion   Mateo Kohler
+    min 76 (2T 36) local     try          Tomas Bermudez Caneparis
+    min 76 (2T 36) local     conversion   Tomas Bermudez Caneparis
+    min 80 (2T 40) local     try          Pedro Zorzano
+    min 80 (2T 40) local     conversion   Mateo Kohler
+  marcador  · eventos 125-0 · guardado 125-0
+  tries     · 19-0 (guardado —-—)
+  arbitro   · FEDERICO RONCORONI (guardado: —)
+
+argentino-de-bahia-blanca vs universitario-de-bahia-blanca · 9bd1fc54 · tarjeta 280990  ·  9b146542-89b3-44c6-b44a-ce4de13b832e
+  local     · argentino-de-bahia-blanca · 23 jugadores · 0 con ficha fijada
+  visitante · universitario-de-bahia-blanca · 23 jugadores · 0 con ficha fijada
+  eventos   · 34
+    min  4 (1T 4) local     try          Manuel Saldaño Rocha
+    min  7 (1T 7) visitante penalty_goal Sebastián Barrera
+    min 20 (1T 20) local     try          Pablo Cerljenko
+    min 21 (1T 21) local     conversion   Ramiro Valentin Correa
+    min 25 (1T 25) local     try          Francisco Muñiz Bullrich
+    min 26 (1T 26) local     conversion   Ramiro Valentin Correa
+    min 30 (1T 30) local     try          Francisco Muñiz Bullrich
+    min 31 (1T 31) local     conversion   Ramiro Valentin Correa
+    min 39 (1T 39) local     try          Francisco Ramirez Vita
+    min 42 (2T 2) local     try          Guido Marconi
+    min 43 (2T 3) local     conversion   Ramiro Valentin Correa
+    min 46 (2T 6) local     substitution Pedro Selvarolo
+    min 46 (2T 6) visitante substitution Michael Aquino
+    min 46 (2T 6) visitante substitution Ernesto Theaux
+    min 51 (2T 11) local     try          Manuel Molina
+    min 52 (2T 12) local     conversion   Ramiro Valentin Correa
+    min 53 (2T 13) visitante card_yellow  Matias Araque
+    min 55 (2T 15) visitante substitution Marcos Torresi
+    min 55 (2T 15) visitante substitution Sebastián Barrera
+    min 58 (2T 18) local     substitution Emiliano Bruno Barrera
+    min 60 (2T 20) local     try          Agustin Grunewald
+    min 60 (2T 20) visitante substitution Emiliano D'amico
+    min 61 (2T 21) local     conversion   Ramiro Valentin Correa
+    min 61 (2T 21) local     substitution Santiago Ramos Apphatie
+    min 63 (2T 23) local     try          Agustin Grunewald
+    min 64 (2T 24) local     conversion   Ramiro Valentin Correa
+    min 68 (2T 28) local     substitution Facundo Esteban Aristimuño Maidana
+    min 68 (2T 28) local     substitution Pablo Cerljenko
+    min 69 (2T 29) local     try          Francisco Ramirez Vita
+    min 70 (2T 30) local     substitution Francisco Muñiz Bullrich
+    min 70 (2T 30) local     substitution Alejo Marconi
+    min 71 (2T 31) local     substitution Francisco Ramirez Vita
+    min 79 (2T 39) local     try          Nicolás Alejandro Marengo
+    min 80 (2T 40) local     conversion   Ramiro Valentin Correa
+  marcador  · eventos 71-3 · guardado 71-3
+  tries     · 11-0 (guardado —-—)
+  arbitro   · JUAN IGNACIO ROSSELLO (guardado: —)
+
+santa-rosa-r-c vs club-el-nacional · 9bd1fc54 · tarjeta 280991  ·  038d971b-76fc-4624-a66b-5696c8610c23
+  local     · santa-rosa-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · club-el-nacional · 23 jugadores · 0 con ficha fijada
+  eventos   · 26
+    min  1 (1T 1) local     card_yellow  Benjamin Lang
+    min  8 (1T 8) visitante try          Nicolas Coronel
+    min 23 (1T 23) local     try          Tomás Kolman
+    min 23 (1T 23) local     conversion   Leandro Baumgaertner
+    min 36 (1T 36) visitante try          Elias Gerardi
+    min 39 (1T 39) local     try          Juan Bautista Fasce
+    min 60 (2T 20) local     try          Nicolas Vlasich
+    min 60 (2T 20) local     conversion   Leandro Baumgaertner
+    min 62 (2T 22) local     injury       Tomás Kolman
+    min 62 (2T 22) local     substitution Tomás Kolman
+    min 67 (2T 27) local     substitution Leandro Baumgaertner
+    min 67 (2T 27) local     injury       Leandro Baumgaertner
+    min 70 (2T 30) local     try          Gaspar Giretti
+    min 70 (2T 30) local     conversion   Brian Fraifer
+    min 72 (2T 32) local     substitution Nestor Tomas Lezcano Gimenez
+    min 72 (2T 32) local     substitution Juan Bautista Fasce
+    min 72 (2T 32) local     substitution Gaspar Giretti
+    min 80 (2T 40) local     penalty_goal Brian Fraifer
+    min 83 (2T 43) visitante try          Nicolas Coronel
+    min 90 (2T 50) visitante substitution Danilo Valero
+    min 90 (2T 50) visitante injury       Danilo Valero
+    min 100 (2T 60) visitante injury       Gonzalo Ezequiel Rivero
+    min 100 (2T 60) visitante substitution Gonzalo Ezequiel Rivero
+    min 115 (2T 75) visitante try          Joaquin Marcilese
+    min 115 (2T 75) visitante conversion   Lucas Pavez
+    min 120 (2T 80) visitante injury       Nicolas Coronel
+  marcador  · eventos 29-22 · guardado 29-22
+  tries     · 4-4 (guardado —-—)
+  arbitro   · ESTEBAN SZELAGOWSKI (guardado: —)
+
+universitario-de-bahia-blanca vs sociedad-sportiva-de-bahia-blanca · 9bd1fc54 · tarjeta 280992  ·  6ecc2104-4973-4d21-99da-692667854845
+  local     · universitario-de-bahia-blanca · 23 jugadores · 0 con ficha fijada
+  visitante · sociedad-sportiva-de-bahia-blanca · 23 jugadores · 23 con ficha fijada
+  eventos   · 37
+    min  5 (1T 5) local     penalty_goal Sebastián Barrera
+    min 27 (1T 27) visitante substitution Luca Nahuel Loiacono
+    min 28 (1T 28) visitante try          Patricio Cantalejos
+    min 28 (1T 28) visitante conversion   Mateo Kohler
+    min 44 (2T 4) local     penalty_goal Sebastián Barrera
+    min 50 (2T 10) local     penalty_goal Sebastián Barrera
+    min 50 (2T 10) local     substitution Santiago Muñoz
+    min 50 (2T 10) local     substitution Michael Aquino
+    min 55 (2T 15) local     substitution Valentin Gorla
+    min 55 (2T 15) local     substitution Mateo Pandolfi
+    min 60 (2T 20) local     try          Lautaro Carrio Biagetti
+    min 60 (2T 20) local     conversion   Sebastián Barrera
+    min 60 (2T 20) local     substitution Tomas Fara
+    min 70 (2T 30) local     substitution Juan Cruz Fernández Márquez
+    min 70 (2T 30) local     substitution Santiago Lagos
+    min 77 (2T 37) local     card_yellow  Martin Rivero
+    min 83 (2T 43) visitante try          Felipe Serrat
+    min 83 (2T 43) visitante conversion   Mateo Kohler
+    min 87 (2T 47) visitante substitution Felipe Inchausti
+    min 92 (2T 52) visitante substitution Ignacio Ficcadenti
+    min 92 (2T 52) visitante try          Tomas Inchausti
+    min 92 (2T 52) visitante conversion   Mateo Kohler
+    min 94 (2T 54) visitante conversion   Mateo Kohler
+    min 94 (2T 54) visitante try          Patricio Cantalejos
+    min 96 (2T 56) visitante substitution Iñaki Azcoitia
+    min 96 (2T 56) visitante substitution Ignacio Lance
+    min 96 (2T 56) visitante substitution Federico Stein
+    min 96 (2T 56) visitante substitution Mateo Kohler
+    min 97 (2T 57) visitante substitution Patricio Cantalejos
+    min 98 (2T 58) visitante try          Pedro Zorzano
+    min 98 (2T 58) visitante conversion   Patricio Cantalejos
+    min 102 (2T 62) visitante try          Tomas Inchausti
+    min 105 (2T 65) visitante try          Tomas Inchausti
+    min 105 (2T 65) visitante conversion   Tomas Bermudez Caneparis
+    min 107 (2T 67) visitante try          Facundo Ferrandez
+    min 120 (2T 80) visitante try          Tomas Inchausti
+    min 120 (2T 80) visitante conversion   Tomas Bermudez Caneparis
+  marcador  · eventos 16-59 · guardado 16-59
+  tries     · 1-9 (guardado —-—)
+  arbitro   · JUAN IGNACIO ROSSELLO (guardado: —)
+
+club-el-nacional vs sociedad-sportiva-de-bahia-blanca · 9bd1fc54 · tarjeta 280994  ·  b3573d64-40f3-4014-939e-31ad111e1d07
+  local     · club-el-nacional · 23 jugadores · 0 con ficha fijada
+  visitante · sociedad-sportiva-de-bahia-blanca · 23 jugadores · 23 con ficha fijada
+  eventos   · 29
+    min  1 (1T 1) visitante try          Patricio Cantalejos
+    min  1 (1T 1) visitante conversion   Mateo Kohler
+    min 13 (1T 13) visitante try          Pedro Zorzano
+    min 13 (1T 13) visitante conversion   Mateo Kohler
+    min 13 (1T 13) visitante substitution Tomas Inchausti
+    min 16 (1T 16) visitante try          Pedro Zorzano
+    min 16 (1T 16) visitante conversion   Mateo Kohler
+    min 20 (1T 20) visitante try          Mateo Kohler
+    min 20 (1T 20) visitante conversion   Mateo Kohler
+    min 33 (1T 33) visitante substitution Renato Cantalejos
+    min 40 (1T 40) visitante try          Rafael Larrañaga
+    min 40 (1T 40) visitante conversion   Mateo Kohler
+    min 43 (2T 3) visitante substitution Ignacio Lance
+    min 52 (2T 12) visitante substitution Rocco Portada
+    min 53 (2T 13) visitante substitution Mateo Kohler
+    min 53 (2T 13) visitante substitution Iñaki Azcoitia
+    min 53 (2T 13) visitante substitution Luca Nahuel Loiacono
+    min 53 (2T 13) visitante substitution Rafael Larrañaga
+    min 57 (2T 17) visitante try          Juan Cruz Harguindeguy Puccinelli
+    min 57 (2T 17) visitante conversion   Tomas Bermudez Caneparis
+    min 63 (2T 23) visitante try          Mateo Cardoso Lopes
+    min 63 (2T 23) visitante conversion   Tomas Bermudez Caneparis
+    min 74 (2T 34) visitante try          Tomas Bermudez Caneparis
+    min 74 (2T 34) visitante conversion   Tomas Bermudez Caneparis
+    min 76 (2T 36) visitante try          Alan Martinez
+    min 76 (2T 36) visitante conversion   Tomas Bermudez Caneparis
+    min 80 (2T 40) local     substitution Bruno Reñones
+    min 88 (2T 48) local     injury       Federico Moreno
+    min 98 (2T 58) local     card_yellow  Elias Gerardi
+  marcador  · eventos 0-63 · guardado 0-63
+  tries     · 0-9 (guardado —-—)
+  arbitro   · SANTIAGO BEVACQUA (guardado: —)
+
+argentino-de-bahia-blanca vs santa-rosa-r-c · 9bd1fc54 · tarjeta 280993  ·  173e5b0a-6af9-436a-a79f-edaebe08b598
+  local     · argentino-de-bahia-blanca · 23 jugadores · 0 con ficha fijada
+  visitante · santa-rosa-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 30-0
+  tries     · 0-0 (guardado —-—)
+  arbitro   · JUAN IGNACIO ROSSELLO (guardado: —)
+
+club-el-nacional vs argentino-de-bahia-blanca · 9bd1fc54 · tarjeta 280996  ·  44550d2e-422b-4f8d-82e4-48be73a09fb6
+  local     · club-el-nacional · 23 jugadores · 0 con ficha fijada
+  visitante · argentino-de-bahia-blanca · 23 jugadores · 0 con ficha fijada
+  eventos   · 37
+    min  4 (1T 4) visitante penalty_goal Ramiro Valentin Correa
+    min  8 (1T 8) visitante try          Alejo Marconi
+    min  9 (1T 9) visitante conversion   Ramiro Valentin Correa
+    min 18 (1T 18) local     card_yellow  Elias Gerardi
+    min 22 (1T 22) visitante try          Agustin Grunewald
+    min 23 (1T 23) visitante conversion   Ramiro Valentin Correa
+    min 29 (1T 29) visitante try          Agustin Grunewald
+    min 30 (1T 30) visitante conversion   Ramiro Valentin Correa
+    min 32 (1T 32) visitante try          Francisco Arnaldo
+    min 33 (1T 33) visitante conversion   Ramiro Valentin Correa
+    min 35 (1T 35) visitante try          Santiago Ramos Apphatie
+    min 36 (1T 36) visitante conversion   Ramiro Valentin Correa
+    min 40 (1T 40) visitante try          Guido Marconi
+    min 41 (1T 41) visitante conversion   Ramiro Valentin Correa
+    min 41 (2T 1) visitante try          Agustin Grunewald
+    min 48 (2T 8) visitante substitution Matias Dempaire
+    min 48 (2T 8) visitante try          Francisco Arnaldo
+    min 49 (2T 9) visitante conversion   Ramiro Valentin Correa
+    min 50 (2T 10) visitante try          Ramiro Valentin Correa
+    min 51 (2T 11) visitante conversion   Ramiro Valentin Correa
+    min 53 (2T 13) visitante try          Agustin Grunewald
+    min 54 (2T 14) visitante conversion   Ramiro Valentin Correa
+    min 54 (2T 14) visitante substitution Agustin Grunewald
+    min 54 (2T 14) visitante substitution Tomas Agustin Gutierrez Rivas
+    min 54 (2T 14) visitante substitution Pablo Cerljenko
+    min 58 (2T 18) visitante substitution Santiago Ramos Apphatie
+    min 59 (2T 19) visitante try          Francisco Muñiz Bullrich
+    min 60 (2T 20) visitante conversion   Ramiro Valentin Correa
+    min 62 (2T 22) visitante try          Alejo Marconi
+    min 62 (2T 22) visitante substitution Pascual Gonzalez
+    min 63 (2T 23) visitante conversion   Ramiro Valentin Correa
+    min 66 (2T 26) visitante card_yellow  Cristian Villarreal
+    min 70 (2T 30) visitante substitution Thomas Arroyuelo
+    min 70 (2T 30) visitante substitution Thomas Arroyuelo
+    min 70 (2T 30) visitante injury       Thomas Arroyuelo
+    min 72 (2T 32) visitante try          Francisco Arnaldo
+    min 73 (2T 33) visitante conversion   Ramiro Valentin Correa
+  marcador  · eventos 0-92 · guardado 0-92
+  tries     · 0-13 (guardado —-—)
+  arbitro   · ESTEBAN BEVACQUA (guardado: —)
+
+santa-rosa-r-c vs universitario-de-bahia-blanca · 9bd1fc54 · tarjeta 280995  ·  041ae512-720a-4104-9d31-49d3e79bc0a8
+  local     · santa-rosa-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · universitario-de-bahia-blanca · 23 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min  2 (1T 2) visitante try          Mateo Pandolfi
+    min 41 (2T 1) local     substitution Pablo Matias Mañak
+    min 47 (2T 7) visitante try          Tobias Andrade
+    min 49 (2T 9) visitante substitution Santiago Muñoz
+    min 49 (2T 9) visitante substitution Julio Andrés Nahuel Nill
+    min 51 (2T 11) local     try          Facundo Epinal
+    min 54 (2T 14) visitante substitution Juan Cruz Fernández Márquez
+    min 58 (2T 18) visitante injury       Santiago Rodríguez
+    min 58 (2T 18) visitante substitution Santiago Rodríguez
+    min 65 (2T 25) local     substitution Lautaro Gerassi
+    min 65 (2T 25) local     substitution Nestor Tomas Lezcano Gimenez
+    min 65 (2T 25) visitante substitution Valentin Gorla
+    min 65 (2T 25) visitante substitution Marcos Torresi
+    min 70 (2T 30) local     substitution Federico Corrales
+    min 70 (2T 30) local     substitution Juan Ignacio Echandia Anocibar
+    min 70 (2T 30) local     substitution Eduardo Ruiz
+    min 77 (2T 37) visitante penalty_goal Sebastián Barrera
+  marcador  · eventos 5-13 · guardado 5-13
+  tries     · 1-2 (guardado —-—)
+  arbitro   · ESTEBAN SZELAGOWSKI (guardado: —)
+
+universitario-de-bahia-blanca vs club-el-nacional · 9bd1fc54 · tarjeta 281008  ·  1296e240-8181-4171-b342-c7a542c275c4
+  local     · universitario-de-bahia-blanca · 23 jugadores · 0 con ficha fijada
+  visitante · club-el-nacional · 23 jugadores · 0 con ficha fijada
+  eventos   · 23
+    min  4 (1T 4) local     penalty_goal Sebastián Barrera
+    min 30 (1T 30) visitante try          Tomas Gabriel Rost
+    min 30 (1T 30) visitante conversion   Lucas Pavez
+    min 34 (1T 34) local     try          Sebastián Barrera
+    min 34 (1T 34) local     conversion   Sebastián Barrera
+    min 45 (2T 5) local     penalty_goal Sebastián Barrera
+    min 45 (2T 5) local     card_yellow  Michael Aquino
+    min 50 (2T 10) local     substitution Julio Andrés Nahuel Nill
+    min 54 (2T 14) local     try          Dylan Williman
+    min 54 (2T 14) local     conversion   Tobias Andrade
+    min 55 (2T 15) local     substitution Michael Aquino
+    min 59 (2T 19) local     substitution Marcos Torresi
+    min 59 (2T 19) local     substitution Sebastián Barrera
+    min 59 (2T 19) local     substitution Mauro Rudel
+    min 60 (2T 20) local     penalty_goal Tobias Andrade
+    min 61 (2T 21) local     substitution Dylan Williman
+    min 66 (2T 26) local     penalty_goal Tobias Andrade
+    min 80 (2T 40) local     penalty_goal Tobias Andrade
+    min 85 (2T 45) visitante card_yellow  Joaquin Falcón De Pizzo
+    min 110 (2T 70) visitante substitution Bruno Reñones
+    min 110 (2T 70) visitante substitution Dylan Gertje
+    min 114 (2T 74) visitante try          Tomas Gabriel Rost
+    min 114 (2T 74) visitante conversion   Lucas Pavez
+  marcador  · eventos 29-14 · guardado 29-14
+  tries     · 2-2 (guardado —-—)
+  arbitro   · JUAN IGNACIO ROSSELLO (guardado: —)
+
+argentino-de-bahia-blanca vs sociedad-sportiva-de-bahia-blanca · 9bd1fc54 · tarjeta 281007  ·  46555d32-9090-4774-9f35-d99efed281f9
+  local     · argentino-de-bahia-blanca · 23 jugadores · 0 con ficha fijada
+  visitante · sociedad-sportiva-de-bahia-blanca · 23 jugadores · 21 con ficha fijada
+  eventos   · 22
+    min  8 (1T 8) visitante try          Francisco Cantalejos
+    min  8 (1T 8) visitante conversion   Mateo Kohler
+    min 12 (1T 12) local     penalty_goal Ramiro Valentin Correa
+    min 20 (1T 20) visitante penalty_goal Mateo Kohler
+    min 43 (2T 3) local     substitution Cristian Villarreal
+    min 43 (2T 3) visitante penalty_goal Mateo Kohler
+    min 46 (2T 6) visitante card_yellow  Pedro Zorzano
+    min 47 (2T 7) local     substitution Julian Angel Gargiulo
+    min 48 (2T 8) visitante try          Francisco Cantalejos
+    min 56 (2T 16) local     card_yellow  Nicolas Hernandez
+    min 58 (2T 18) local     substitution Pedro Selvarolo
+    min 58 (2T 18) local     card_yellow  Pablo Cerljenko
+    min 62 (2T 22) visitante substitution Darían Troncoso
+    min 66 (2T 26) visitante card_yellow  Iñaki Azcoitia
+    min 73 (2T 33) visitante substitution Rafael Larrañaga
+    min 75 (2T 35) local     substitution Manuel Saldaño Rocha
+    min 75 (2T 35) visitante substitution Pedro Zorzano
+    min 76 (2T 36) local     substitution Ramiro Valentin Correa
+    min 79 (2T 39) visitante substitution Juan Cruz Harguindeguy Puccinelli
+    min 79 (2T 39) visitante substitution Felipe Inchausti
+    min 80 (2T 40) visitante try          Thiago Loiacono
+    min 80 (2T 40) visitante conversion   Mateo Kohler
+  marcador  · eventos 3-25 · guardado 3-25
+  tries     · 0-3 (guardado —-—)
+  arbitro   · SANTIAGO BEVACQUA (guardado: —)
+
+club-el-nacional vs universitario-de-bahia-blanca · 9bd1fc54 · tarjeta 281006  ·  a829d7c0-f3b6-4f42-ac4b-6b3142972aa4
+  local     · club-el-nacional · 23 jugadores · 0 con ficha fijada
+  visitante · universitario-de-bahia-blanca · 23 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min  4 (1T 4) local     penalty_goal Lucas Pavez
+    min 12 (1T 12) local     penalty_goal Lucas Pavez
+    min 25 (1T 25) visitante penalty_goal Tobias Andrade
+    min 28 (1T 28) visitante try          Santiago Gonzalez Lamponi
+    min 28 (1T 28) visitante conversion   Tobias Andrade
+    min 30 (1T 30) local     try          Tomas Gabriel Rost
+    min 37 (1T 37) local     card_yellow  Tomas Gabriel Rost
+    min 42 (2T 2) visitante try          Joaquin Cariac
+    min 42 (2T 2) visitante conversion   Tobias Andrade
+    min 45 (2T 5) visitante substitution Santino Veron
+    min 45 (2T 5) visitante substitution Juan Ignacio Gil
+    min 47 (2T 7) visitante try          Tobias Andrade
+    min 47 (2T 7) visitante conversion   Tobias Andrade
+    min 52 (2T 12) visitante substitution Martin Rivero
+    min 52 (2T 12) visitante substitution Ernesto Theaux
+    min 63 (2T 23) visitante try          Mateo Pandolfi
+    min 63 (2T 23) visitante conversion   Tobias Andrade
+    min 72 (2T 32) visitante try          Sebastián Barrera
+    min 72 (2T 32) visitante conversion   Tobias Andrade
+    min 78 (2T 38) visitante card_yellow  Michael Aquino
+    min 86 (2T 46) local     penalty_goal Lucas Pavez
+    min 91 (2T 51) local     try          Dylan Gertje
+    min 91 (2T 51) local     conversion   Lucas Pavez
+    min 93 (2T 53) local     try          Lucas Pavez
+    min 97 (2T 57) local     card_yellow  Juampablo Sandoval
+    min 119 (2T 79) local     try          Elias Gerardi
+    min 119 (2T 79) local     conversion   Lucas Pavez
+  marcador  · eventos 33-38 · guardado 33-38
+  tries     · 4-5 (guardado —-—)
+  arbitro   · OMAR ALEJANDRO VILLAFAÑE (guardado: —)
+
+sociedad-sportiva-de-bahia-blanca vs argentino-de-bahia-blanca · 9bd1fc54 · tarjeta 281005  ·  32db1587-47ec-4a64-9901-e4b9014cdcc2
+  local     · sociedad-sportiva-de-bahia-blanca · 23 jugadores · 22 con ficha fijada
+  visitante · argentino-de-bahia-blanca · 23 jugadores · 0 con ficha fijada
+  eventos   · 37
+    min  5 (1T 5) local     try          Rafael Larrañaga
+    min  5 (1T 5) local     conversion   Tomas Bermudez Caneparis
+    min  5 (1T 5) visitante injury       Manuel Molina
+    min 16 (1T 16) local     try          Alan Martinez
+    min 21 (1T 21) local     try          Francisco Cantalejos
+    min 21 (1T 21) local     conversion   Tomas Bermudez Caneparis
+    min 34 (1T 34) visitante substitution Manuel Saldaño Rocha
+    min 34 (1T 34) visitante substitution Baltazar Montero
+    min 34 (1T 34) visitante injury       Manuel Saldaño Rocha
+    min 40 (1T 40) local     try          Joaquin Rey Saravia
+    min 40 (1T 40) local     conversion   Tomas Bermudez Caneparis
+    min 41 (2T 1) local     conversion   Tomas Bermudez Caneparis
+    min 41 (2T 1) local     substitution Renato Cantalejos
+    min 41 (2T 1) local     substitution Federico Stein
+    min 41 (2T 1) local     try          Alan Martinez
+    min 47 (2T 7) local     try          Rafael Larrañaga
+    min 47 (2T 7) local     conversion   Tomas Bermudez Caneparis
+    min 51 (2T 11) local     substitution Joaquin Rey Saravia
+    min 52 (2T 12) local     try          Patricio Cantalejos
+    min 52 (2T 12) local     conversion   Tomas Bermudez Caneparis
+    min 52 (2T 12) local     substitution Tomas Inchausti
+    min 54 (2T 14) visitante substitution Martiniano Barsellini
+    min 55 (2T 15) local     try          Tomas Bermudez Caneparis
+    min 55 (2T 15) local     conversion   Tomas Bermudez Caneparis
+    min 57 (2T 17) local     substitution Santiago Bancora
+    min 57 (2T 17) local     substitution Iñaki Azcoitia
+    min 57 (2T 17) local     substitution Darían Troncoso
+    min 59 (2T 19) visitante injury       Baltazar Montero
+    min 59 (2T 19) visitante substitution Manuel Molina
+    min 60 (2T 20) local     substitution Rafael Larrañaga
+    min 68 (2T 28) visitante substitution Facundo Esteban Aristimuño Maidana
+    min 68 (2T 28) visitante substitution Santiago Ramos Apphatie
+    min 73 (2T 33) local     try          Tomas Inchausti
+    min 75 (2T 35) visitante substitution Pablo Cerljenko
+    min 75 (2T 35) visitante substitution Franco De Rosa
+    min 80 (2T 40) local     try          Felipe Serrat
+    min 80 (2T 40) local     conversion   Tomas Bermudez Caneparis
+  marcador  · eventos 66-0 · guardado 66-0
+  tries     · 10-0 (guardado —-—)
+  arbitro   · ESTEBAN SZELAGOWSKI (guardado: —)
+
+sociedad-sportiva-de-bahia-blanca vs club-el-nacional · 9bd1fc54 · tarjeta 281004  ·  67b2db7d-b410-439a-8f3b-5a7bfa926232
+  local     · sociedad-sportiva-de-bahia-blanca · 23 jugadores · 16 con ficha fijada
+  visitante · club-el-nacional · 23 jugadores · 0 con ficha fijada
+  eventos   · 32
+    min  9 (1T 9) local     try          Juan Ignacio Naretto
+    min 16 (1T 16) local     try          Gino Zanoni
+    min 16 (1T 16) local     conversion   Ignacio Ficcadenti
+    min 22 (1T 22) local     try          Geronimo Rivas Pompei
+    min 22 (1T 22) local     conversion   Ignacio Ficcadenti
+    min 28 (1T 28) local     try          Juan Ignacio Naretto
+    min 32 (1T 32) local     try          Felipe Serrat
+    min 32 (1T 32) local     conversion   Ignacio Ficcadenti
+    min 35 (1T 35) local     try          Juan Cruz Montoli
+    min 35 (1T 35) local     conversion   Ignacio Ficcadenti
+    min 48 (2T 8) local     substitution Juan Cruz Montoli
+    min 49 (2T 9) local     substitution Joaquin Rey Saravia
+    min 55 (2T 15) local     try          Felipe Serrat
+    min 55 (2T 15) local     conversion   Felipe Serrat
+    min 55 (2T 15) local     substitution Marcelo Mauricio Torrisi
+    min 55 (2T 15) local     substitution Darían Troncoso
+    min 55 (2T 15) local     substitution Rocco Portada
+    min 57 (2T 17) local     try          Juan Ignacio Naretto
+    min 57 (2T 17) local     conversion   Felipe Serrat
+    min 60 (2T 20) local     substitution Juan Ignacio Naretto
+    min 61 (2T 21) local     try          Juan Mitilli
+    min 61 (2T 21) local     conversion   Felipe Serrat
+    min 68 (2T 28) local     try          Alan Martinez
+    min 68 (2T 28) local     conversion   Felipe Serrat
+    min 68 (2T 28) local     substitution Juan Francisco Malanga
+    min 70 (2T 30) local     try          Alan Martinez
+    min 73 (2T 33) local     try          Felipe Serrat
+    min 73 (2T 33) local     conversion   Felipe Serrat
+    min 78 (2T 38) local     try          Geronimo Rivas Pompei
+    min 78 (2T 38) local     conversion   Felipe Serrat
+    min 100 (2T 60) visitante card_yellow  Elias Gerardi
+    min 110 (2T 70) visitante substitution Dylan Gertje
+  marcador  · eventos 85-0 · guardado 85-0
+  tries     · 13-0 (guardado —-—)
+  arbitro   · JUAN IGNACIO ROSSELLO (guardado: —)
+
+santa-rosa-r-c vs argentino-de-bahia-blanca · 9bd1fc54 · tarjeta 281003  ·  7567f938-c49f-4728-be43-8a408e58d446
+  local     · santa-rosa-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · argentino-de-bahia-blanca · 23 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min  9 (1T 9) local     card_yellow  Brian Fraifer
+    min 10 (1T 10) visitante try          Francisco Ramirez Vita
+    min 35 (1T 35) local     penalty_goal Brian Fraifer
+    min 45 (2T 5) visitante substitution Francisco Muñiz Bullrich
+    min 45 (2T 5) visitante substitution Santiago Ramos Apphatie
+    min 45 (2T 5) visitante try          Agustin Grunewald
+    min 50 (2T 10) visitante substitution Franco De Rosa
+    min 54 (2T 14) local     substitution Jose Ignacio Costabel
+    min 58 (2T 18) local     penalty_goal Brian Fraifer
+    min 65 (2T 25) visitante substitution Pedro Selvarolo
+    min 68 (2T 28) local     penalty_goal Brian Fraifer
+    min 71 (2T 31) visitante conversion   Manuel Molina
+    min 71 (2T 31) visitante substitution Pablo Cerljenko
+    min 71 (2T 31) visitante try          Manuel Molina
+    min 74 (2T 34) local     substitution Matías Cubells
+    min 80 (2T 40) visitante substitution Jonatan Humoffe
+    min 80 (2T 40) visitante injury       Jonatan Humoffe
+  marcador  · eventos 9-17 · guardado 9-17
+  tries     · 0-3 (guardado —-—)
+  arbitro   · ESTEBAN SZELAGOWSKI (guardado: —)
+
+argentino-de-bahia-blanca vs club-el-nacional · 9bd1fc54 · tarjeta 281002  ·  5c881d85-097c-482d-92ed-e73ae34b7dce
+  local     · argentino-de-bahia-blanca · 23 jugadores · 0 con ficha fijada
+  visitante · club-el-nacional · 23 jugadores · 0 con ficha fijada
+  eventos   · 26
+    min  3 (1T 3) local     try          Nicolás Alejandro Marengo
+    min  4 (1T 4) local     conversion   Pedro Selvarolo
+    min  9 (1T 9) visitante try          Nicolas Coronel
+    min  9 (1T 9) visitante conversion   Lucas Pavez
+    min 15 (1T 15) local     try          Pablo Cerljenko
+    min 16 (1T 16) local     conversion   Pedro Selvarolo
+    min 17 (1T 17) visitante try          Nicolas Coronel
+    min 24 (1T 24) local     try          Manuel Molina
+    min 40 (1T 40) local     try          Francisco Ramirez Vita
+    min 40 (1T 40) local     conversion   Manuel Molina
+    min 43 (2T 3) local     card_yellow  Facundo Esteban Aristimuño Maidana
+    min 60 (2T 20) local     try          Francisco Muñiz Bullrich
+    min 61 (2T 21) local     try          Pedro Selvarolo
+    min 70 (2T 30) local     substitution Francisco Ramirez Vita
+    min 70 (2T 30) local     substitution Facundo Esteban Aristimuño Maidana
+    min 70 (2T 30) local     substitution Pablo Cerljenko
+    min 70 (2T 30) local     substitution Francisco Muñiz Bullrich
+    min 78 (2T 38) local     try          Agustin Grunewald
+    min 78 (2T 38) local     substitution Pedro Selvarolo
+    min 79 (2T 39) local     conversion   Manuel Molina
+    min 80 (2T 40) local     try          Guido Marconi
+    min 80 (2T 40) local     conversion   Manuel Molina
+    min 90 (2T 50) visitante try          Tomas Gabriel Rost
+    min 90 (2T 50) visitante conversion   Lucas Pavez
+    min 110 (2T 70) visitante substitution Joaquin Fernández Palacios
+    min 115 (2T 75) visitante card_yellow  Federico Moreno
+  marcador  · eventos 50-19 · guardado 50-19
+  tries     · 8-3 (guardado —-—)
+  arbitro   · RODRIGO OSCAR LOFVALL (guardado: —)
+
+universitario-de-bahia-blanca vs santa-rosa-r-c · 9bd1fc54 · tarjeta 281001  ·  5dbb9d4f-4fda-404c-a428-d00e2e0f7bed
+  local     · universitario-de-bahia-blanca · 23 jugadores · 0 con ficha fijada
+  visitante · santa-rosa-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 21
+    min  6 (1T 6) visitante penalty_goal Brian Fraifer
+    min  9 (1T 9) local     penalty_goal Tobias Andrade
+    min 18 (1T 18) local     penalty_goal Tobias Andrade
+    min 29 (1T 29) local     penalty_goal Tobias Andrade
+    min 31 (1T 31) visitante try          Santiago Lopez Laco
+    min 31 (1T 31) visitante conversion   Brian Fraifer
+    min 38 (1T 38) visitante try          Joaquin Iturrioz
+    min 38 (1T 38) visitante conversion   Brian Fraifer
+    min 50 (2T 10) local     substitution Santino Veron
+    min 50 (2T 10) local     substitution Juan Ignacio Gil
+    min 50 (2T 10) local     substitution Juan Manuel Garechana
+    min 60 (2T 20) visitante try          Facundo Epinal
+    min 60 (2T 20) visitante conversion   Gastón Javier Erize Dufau
+    min 63 (2T 23) local     try          Tobias Andrade
+    min 63 (2T 23) local     conversion   Tobias Andrade
+    min 67 (2T 27) visitante substitution Jose Ignacio Costabel
+    min 68 (2T 28) local     try          Tobias Andrade
+    min 68 (2T 28) local     conversion   Tobias Andrade
+    min 71 (2T 31) visitante substitution Julian Bustos
+    min 71 (2T 31) visitante substitution Brian Fraifer
+    min 73 (2T 33) local     substitution Valentin Gorla
+  marcador  · eventos 23-24 · guardado 23-24
+  tries     · 2-3 (guardado —-—)
+  arbitro   · OMAR ALEJANDRO VILLAFAÑE (guardado: —)
+
+sociedad-sportiva-de-bahia-blanca vs universitario-de-bahia-blanca · 9bd1fc54 · tarjeta 281000  ·  366f9ba3-2e83-4e4f-8485-b1cc92174f31
+  local     · sociedad-sportiva-de-bahia-blanca · 23 jugadores · 19 con ficha fijada
+  visitante · universitario-de-bahia-blanca · 23 jugadores · 0 con ficha fijada
+  eventos   · 40
+    min  7 (1T 7) local     try          Felipe Serrat
+    min 16 (1T 16) visitante injury       Santiago Farias
+    min 16 (1T 16) visitante substitution Santiago Farias
+    min 20 (1T 20) visitante penalty_goal Tobias Andrade
+    min 21 (1T 21) local     try          Pedro Zorzano
+    min 21 (1T 21) local     conversion   Felipe Serrat
+    min 29 (1T 29) local     try          Alan Martinez
+    min 30 (1T 30) visitante substitution Santiago Muñoz
+    min 34 (1T 34) local     try          Pedro Zorzano
+    min 37 (1T 37) local     try          Rafael Larrañaga
+    min 37 (1T 37) local     conversion   Felipe Serrat
+    min 40 (1T 40) local     try          Alan Martinez
+    min 40 (1T 40) local     conversion   Felipe Serrat
+    min 41 (2T 1) local     substitution Tomas Inchausti
+    min 41 (2T 1) local     substitution Pedro Zorzano
+    min 41 (2T 1) local     substitution Renato Cantalejos
+    min 41 (2T 1) visitante try          Tobias Andrade
+    min 41 (2T 1) visitante conversion   Tobias Andrade
+    min 43 (2T 3) local     try          Marcos Kohler
+    min 43 (2T 3) local     conversion   Felipe Serrat
+    min 45 (2T 5) local     substitution Rafael Larrañaga
+    min 53 (2T 13) local     substitution Santiago Bancora
+    min 53 (2T 13) local     substitution Juan Francisco Malanga
+    min 53 (2T 13) local     substitution Darían Troncoso
+    min 54 (2T 14) local     substitution Francisco Cantalejos
+    min 55 (2T 15) visitante card_yellow  Marcos Torresi
+    min 56 (2T 16) local     penalty_try  
+    min 58 (2T 18) local     try          Felipe Serrat
+    min 58 (2T 18) local     conversion   Felipe Serrat
+    min 60 (2T 20) local     try          Matias Stalldecker
+    min 60 (2T 20) local     conversion   Felipe Serrat
+    min 60 (2T 20) visitante substitution Tomas Fara
+    min 63 (2T 23) local     try          Marcelo Mauricio Torrisi
+    min 63 (2T 23) local     conversion   Felipe Serrat
+    min 63 (2T 23) visitante substitution Mauro Rudel
+    min 63 (2T 23) visitante substitution Alvaro Nuñez
+    min 65 (2T 25) visitante substitution Marcos Torresi
+    min 75 (2T 35) local     card_yellow  Martin Dosio
+    min 78 (2T 38) local     try          Joaquin Marne
+    min 78 (2T 38) local     conversion   Felipe Serrat
+  marcador  · eventos 78-10 · guardado 78-10
+  tries     · 12-1 (guardado —-—)
+  arbitro   · ESTEBAN SZELAGOWSKI (guardado: —)
+
+club-el-nacional vs santa-rosa-r-c · 9bd1fc54 · tarjeta 280999  ·  4f496701-188c-4c45-bd14-ddb5d2df968e
+  local     · club-el-nacional · 23 jugadores · 0 con ficha fijada
+  visitante · santa-rosa-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 19
+    min 18 (1T 18) local     try          Nicolas Coronel
+    min 18 (1T 18) local     conversion   Lucas Pavez
+    min 27 (1T 27) local     try          Nicolas Coronel
+    min 42 (2T 2) visitante substitution Nestor Tomas Lezcano Gimenez
+    min 42 (2T 2) visitante substitution Valentino Scoles
+    min 60 (2T 20) visitante try          Matías Cubells
+    min 60 (2T 20) visitante conversion   Brian Fraifer
+    min 65 (2T 25) visitante substitution Matías Cubells
+    min 69 (2T 29) visitante substitution Julian Bustos
+    min 71 (2T 31) visitante substitution Gastón Javier Erize Dufau
+    min 73 (2T 33) visitante substitution Brian Fraifer
+    min 75 (2T 35) visitante try          Facundo Epinal
+    min 75 (2T 35) visitante conversion   Facundo Epinal
+    min 80 (2T 40) visitante try          Facundo Epinal
+    min 95 (2T 55) local     try          Bernardino Barbero
+    min 95 (2T 55) local     conversion   Lucas Pavez
+    min 95 (2T 55) local     substitution Bruno Reñones
+    min 95 (2T 55) local     substitution Juan Ignacio Samuel
+    min 110 (2T 70) local     card_yellow  Elias Gerardi
+  marcador  · eventos 19-19 · guardado 19-19
+  tries     · 3-3 (guardado —-—)
+  arbitro   · SANTIAGO BEVACQUA (guardado: —)
+
+universitario-de-bahia-blanca vs argentino-de-bahia-blanca · 9bd1fc54 · tarjeta 280998  ·  93aacb60-4996-460b-a298-1a17f9c8748b
+  local     · universitario-de-bahia-blanca · 23 jugadores · 0 con ficha fijada
+  visitante · argentino-de-bahia-blanca · 23 jugadores · 0 con ficha fijada
+  eventos   · 35
+    min  8 (1T 8) visitante try          Ramiro Valentin Correa
+    min  9 (1T 9) visitante conversion   Ramiro Valentin Correa
+    min 11 (1T 11) visitante try          Francisco Muñiz Bullrich
+    min 14 (1T 14) visitante try          Ramiro Valentin Correa
+    min 15 (1T 15) visitante conversion   Ramiro Valentin Correa
+    min 18 (1T 18) local     try          Marcos Torresi
+    min 22 (1T 22) visitante try          Guido Marconi
+    min 23 (1T 23) visitante conversion   Ramiro Valentin Correa
+    min 27 (1T 27) visitante injury       Ramiro Valentin Correa
+    min 27 (1T 27) visitante substitution Ramiro Valentin Correa
+    min 37 (1T 37) visitante try          Pedro Selvarolo
+    min 41 (1T 41) visitante card_yellow  Cristian Villarreal
+    min 42 (2T 2) visitante try          Francisco Ramirez Vita
+    min 47 (2T 7) local     substitution Julio Andrés Nahuel Nill
+    min 47 (2T 7) local     try          Mauro Rudel
+    min 47 (2T 7) local     conversion   Tobias Andrade
+    min 48 (2T 8) visitante substitution Cristian Villarreal
+    min 50 (2T 10) local     card_yellow  Marcos Torresi
+    min 52 (2T 12) local     substitution Martin Rivero
+    min 55 (2T 15) visitante card_yellow  Francisco Ramirez Vita
+    min 56 (2T 16) local     penalty_goal Tobias Andrade
+    min 62 (2T 22) local     injury       Tomas Fara
+    min 62 (2T 22) local     substitution Tomas Fara
+    min 64 (2T 24) local     penalty_goal Tobias Andrade
+    min 64 (2T 24) visitante substitution Francisco Maenza
+    min 64 (2T 24) visitante card_yellow  Thiago Zaballa
+    min 65 (2T 25) local     substitution Juan Ignacio Gil
+    min 65 (2T 25) local     substitution Santiago Muñoz
+    min 67 (2T 27) visitante substitution Ramiro Valentin Correa
+    min 68 (2T 28) visitante try          Baltazar Montero
+    min 70 (2T 30) visitante substitution Francisco Ramirez Vita
+    min 70 (2T 30) visitante substitution Facundo Esteban Aristimuño Maidana
+    min 73 (2T 33) visitante substitution Manuel Saldaño Rocha
+    min 74 (2T 34) visitante substitution Santiago Ramos Apphatie
+    min 81 (2T 41) visitante penalty_try  
+  marcador  · eventos 18-48 · guardado 18-48
+  tries     · 2-8 (guardado —-—)
+  arbitro   · RODRIGO OSCAR LOFVALL (guardado: —)
+
+santa-rosa-r-c vs sociedad-sportiva-de-bahia-blanca · 9bd1fc54 · tarjeta 280997  ·  2fabbd18-14ca-42ed-a34d-dae736e9fd7e
+  local     · santa-rosa-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · sociedad-sportiva-de-bahia-blanca · 23 jugadores · 19 con ficha fijada
+  eventos   · 35
+    min  6 (1T 6) visitante try          Facundo Ferrandez
+    min  6 (1T 6) visitante conversion   Mateo Kohler
+    min 11 (1T 11) local     card_yellow  Eduardo Ruiz
+    min 14 (1T 14) visitante penalty_try  
+    min 18 (1T 18) visitante card_yellow  Federico Stein
+    min 18 (1T 18) visitante card_yellow  Renato Cantalejos
+    min 22 (1T 22) visitante try          Facundo Ferrandez
+    min 26 (1T 26) visitante try          Francisco Cantalejos
+    min 26 (1T 26) visitante conversion   Mateo Kohler
+    min 29 (1T 29) visitante try          Renato Cantalejos
+    min 29 (1T 29) visitante conversion   Mateo Kohler
+    min 32 (1T 32) visitante try          Francisco Larrañaga
+    min 32 (1T 32) visitante conversion   Mateo Kohler
+    min 34 (1T 34) visitante try          Patricio Cantalejos
+    min 34 (1T 34) visitante conversion   Mateo Kohler
+    min 46 (2T 6) visitante substitution Francisco Larrañaga
+    min 46 (2T 6) visitante substitution Mateo Kohler
+    min 47 (2T 7) visitante try          Facundo Ferrandez
+    min 47 (2T 7) visitante conversion   Mateo Kohler
+    min 50 (2T 10) local     substitution Nestor Tomas Lezcano Gimenez
+    min 50 (2T 10) local     substitution Jose Ignacio Costabel
+    min 51 (2T 11) local     substitution Julian Bustos
+    min 51 (2T 11) visitante substitution Santiago Bancora
+    min 59 (2T 19) visitante substitution Facundo Ferrandez
+    min 65 (2T 25) visitante try          Mateo Cardoso Lopes
+    min 65 (2T 25) visitante substitution Iñaki Azcoitia
+    min 67 (2T 27) visitante substitution Francisco Cantalejos
+    min 67 (2T 27) visitante substitution Juan Cruz Harguindeguy Puccinelli
+    min 67 (2T 27) visitante substitution Darían Troncoso
+    min 69 (2T 29) local     substitution Brian Fraifer
+    min 71 (2T 31) local     substitution Alvaro Pacheco
+    min 71 (2T 31) local     substitution Jose Ignacio Costabel
+    min 71 (2T 31) visitante try          Juan Cruz Samuel
+    min 71 (2T 31) visitante conversion   Felipe Serrat
+    min 77 (2T 37) local     try          Valentino Prieto
+  marcador  · eventos 5-66 · guardado 5-66
+  tries     · 1-10 (guardado —-—)
+  arbitro   · ESTEBAN SZELAGOWSKI (guardado: —)
+
+(plan: no se escribió nada)

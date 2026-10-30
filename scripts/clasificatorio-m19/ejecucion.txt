@@ -1,0 +1,3052 @@
+Clasificatorio M19 Mar del Plata 2026 · tarjetas oficiales
+
+pueyrredon-mar-del-plata vs mar-del-plata-club · Clasificatorio M19 · tarjeta 279714  ·  d53f8ec7-41aa-4188-8b70-3deeb5ef57ae
+  local     · pueyrredon-mar-del-plata · 23 jugadores · 0 con ficha fijada
+  visitante · mar-del-plata-club · 23 jugadores · 0 con ficha fijada
+  eventos   · 30
+    min -1 (1T -1) local     substitution Braian Juarez
+    min -1 (1T -1) local     substitution Eloy Ojeda
+    min  5 (1T 5) visitante try          Marcos Ariel Balicchia
+    min  5 (1T 5) visitante conversion   Francisco Guevara
+    min 15 (1T 15) visitante try          Santiago Saforcada
+    min 15 (1T 15) visitante conversion   Francisco Guevara
+    min 18 (1T 18) visitante card_yellow  Franco Zucconi
+    min 25 (1T 25) visitante try          Clemente Baez
+    min 31 (1T 31) visitante try          Stefano Sabarese Capria
+    min 31 (1T 31) visitante conversion   Francisco Guevara
+    min 34 (1T 34) visitante conversion   Francisco Guevara
+    min 34 (1T 34) visitante try          Francisco Guevara
+    min 41 (2T 1) visitante substitution Santiago Saforcada
+    min 41 (2T 1) visitante substitution Francisco Escalante
+    min 41 (2T 1) visitante substitution Juan Manuel Cabrera Olguin
+    min 53 (2T 13) visitante substitution Mateo Buono
+    min 53 (2T 13) visitante substitution Bautista Fernandez Rua
+    min 53 (2T 13) visitante conversion   Francisco Guevara
+    min 53 (2T 13) visitante try          Clemente Baez
+    min 56 (2T 16) visitante substitution Francisco Blanco
+    min 56 (2T 16) visitante substitution Mirko Rackiewicz
+    min 56 (2T 16) visitante substitution Clemente Baez
+    min 60 (2T 20) visitante conversion   Francisco Guevara
+    min 60 (2T 20) visitante try          Juan Martin Eichhorn
+    min 62 (2T 22) visitante conversion   Francisco Guevara
+    min 62 (2T 22) visitante try          Tomas Huici
+    min 64 (2T 24) visitante conversion   Francisco Guevara
+    min 64 (2T 24) visitante try          Marcos Ariel Balicchia
+    min 70 (2T 30) visitante try          Bautista Arosteguy
+    min 76 (2T 36) local     try          Ezequiel Martín Perez Castiglione
+  marcador  · eventos 5-66 · guardado 5-66
+  tries     · 1-10 (guardado 1-10)
+  arbitro   · TOMAS IGNACIO CORDEIRO (guardado: TOMAS IGNACIO CORDEIRO)
+  guardado  · 23 local · 23 visitante · 30 eventos
+
+comercial-r-c vs universitario-de-mar-del-plata · Clasificatorio M19 · tarjeta 279715  ·  f7ae2a69-187b-469e-9420-a3347f8d174d
+  local     · comercial-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · universitario-de-mar-del-plata · 22 jugadores · 1 con ficha fijada
+  eventos   · 23
+    min 15 (1T 15) local     injury       Joaquín Rojas
+    min 15 (1T 15) local     substitution Joaquín Rojas
+    min 16 (1T 16) local     penalty_goal Teo Vazquez
+    min 22 (1T 22) visitante try          Luca Laino
+    min 29 (1T 29) visitante try          Juan Ignacio Galante
+    min 29 (1T 29) visitante conversion   Santiago Schwerdtfeger
+    min 34 (1T 34) visitante try          Simon Merlos
+    min 34 (1T 34) visitante conversion   Santiago Schwerdtfeger
+    min 40 (2T 0) visitante substitution Franco Monsalve
+    min 50 (2T 10) visitante substitution Facundo Nally
+    min 50 (2T 10) visitante card_yellow  Nahuel Akeem Imaz
+    min 55 (2T 15) visitante conversion   Santiago Schwerdtfeger
+    min 55 (2T 15) visitante try          Simon Macadam
+    min 60 (2T 20) visitante substitution Nahuel Akeem Imaz
+    min 64 (2T 24) visitante card_yellow  Dante Tempone
+    min 65 (2T 25) visitante substitution Simon Merlos
+    min 71 (2T 31) visitante card_yellow  Francisco Odriozola
+    min 72 (2T 32) local     card_yellow  Benjamín Mateo Miracco Martinez
+    min 72 (2T 32) visitante conversion   Santiago Schwerdtfeger
+    min 72 (2T 32) visitante try          Simon Macadam
+    min 75 (2T 35) local     try          Juan Etcheverry
+    min 80 (2T 40) local     substitution Benjamin Rivero
+    min 80 (2T 40) local     substitution Bruno Manuel Aguerrido
+  marcador  · eventos 8-33 · guardado 8-33
+  tries     · 1-5 (guardado 1-5)
+  arbitro   · MARIO FEDERICO CHARLES (guardado: MARIO FEDERICO CHARLES)
+  guardado  · 23 local · 22 visitante · 23 eventos
+
+union-del-sur vs uncas-r-c · Clasificatorio M19 · tarjeta 279717  ·  206fc986-860e-4407-8727-a7a1143dedf2
+  local     · union-del-sur · 23 jugadores · 0 con ficha fijada
+  visitante · uncas-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 36
+    min  1 (1T 1) local     conversion   Ramon Rossi
+    min  1 (1T 1) local     try          Tobias Leonel Uzquiza
+    min  4 (1T 4) local     try          Dante Saglia
+    min  6 (1T 6) local     try          Nicolas Pérez
+    min  6 (1T 6) local     conversion   Ramon Rossi
+    min  8 (1T 8) local     substitution Nicolas Pérez
+    min 13 (1T 13) local     try          Pedro Villar
+    min 13 (1T 13) local     conversion   Pedro Martin
+    min 14 (1T 14) local     try          Pedro Martin
+    min 14 (1T 14) local     conversion   Pedro Martin
+    min 16 (1T 16) local     try          Francisco Mariño
+    min 16 (1T 16) local     conversion   Pedro Martin
+    min 17 (1T 17) local     try          Dante Saglia
+    min 17 (1T 17) local     conversion   Pedro Martin
+    min 20 (1T 20) local     try          Pedro Villar
+    min 20 (1T 20) local     conversion   Ramon Rossi
+    min 30 (1T 30) local     try          Pedro Martin
+    min 30 (1T 30) local     conversion   Pedro Martin
+    min 41 (2T 1) local     substitution Thiago Jesús Gimenez Vicente
+    min 45 (2T 5) local     substitution Juan Martin París Santanera
+    min 45 (2T 5) local     substitution Tobias Leonel Uzquiza
+    min 45 (2T 5) local     substitution Francisco Mariño
+    min 48 (2T 8) local     substitution Santino Curto
+    min 49 (2T 9) local     conversion   Pedro Martin
+    min 49 (2T 9) local     try          Santiago Attanasio
+    min 50 (2T 10) local     substitution Dante Saglia
+    min 50 (2T 10) local     substitution Juan Cruz Gigli
+    min 53 (2T 13) local     try          Santiago Attanasio
+    min 55 (2T 15) local     try          Mateo Palenzona
+    min 55 (2T 15) local     conversion   Pedro Martin
+    min 58 (2T 18) local     try          Ramon Rossi
+    min 58 (2T 18) local     conversion   Pedro Martin
+    min 61 (2T 21) local     card_yellow  Agustin Ruseckaite
+    min 66 (2T 26) local     try          Tobias Ezequiel Arias
+    min 68 (2T 28) local     try          Santiago Attanasio
+    min 68 (2T 28) local     conversion   Pedro Martin
+  marcador  · eventos 99-0 · guardado 99-0
+  tries     · 15-0 (guardado 15-0)
+  arbitro   · CAMILA ISABEL GOLDAR (guardado: CAMILA ISABEL GOLDAR)
+  guardado  · 23 local · 23 visitante · 36 eventos
+
+san-ignacio-r-c vs bigua-rugby-club · Clasificatorio M19 · tarjeta 279718  ·  59b53b29-b1f8-4b02-b720-47034cfed0ff
+  local     · san-ignacio-r-c · 23 jugadores · 4 con ficha fijada
+  visitante · bigua-rugby-club · 23 jugadores · 0 con ficha fijada
+  eventos   · 21
+    min 15 (1T 15) local     injury       Luciano Zabala
+    min 15 (1T 15) local     substitution Luciano Zabala
+    min 18 (1T 18) visitante substitution Alejandro Figueroa
+    min 28 (1T 28) local     try          Matias Romano
+    min 29 (1T 29) local     conversion   Rafael Giardelli
+    min 33 (1T 33) local     card_yellow  Ramiro Allamanda
+    min 35 (1T 35) local     substitution Lautaro Ceschi
+    min 35 (1T 35) local     conversion   Rafael Giardelli
+    min 35 (1T 35) local     try          Pablo Justo Buenaventura
+    min 43 (2T 3) visitante card_yellow  Joaquin Estevez
+    min 45 (2T 5) local     substitution Pablo Justo Buenaventura
+    min 46 (2T 6) local     try          Rafael Giardelli
+    min 47 (2T 7) local     conversion   Rafael Giardelli
+    min 52 (2T 12) visitante substitution Felipe Zalazar
+    min 58 (2T 18) visitante substitution Quimey Aquino
+    min 58 (2T 18) visitante penalty_goal Franco Giardini
+    min 59 (2T 19) local     try          Lucas Belatinez
+    min 60 (2T 20) local     conversion   Rafael Giardelli
+    min 64 (2T 24) local     try          Daniel Havrylenko
+    min 72 (2T 32) local     card_yellow  Leonel Cotado
+    min 75 (2T 35) visitante try          Franco Vitale
+  marcador  · eventos 33-8 · guardado 33-8
+  tries     · 5-1 (guardado 5-1)
+  arbitro   · LAUTARO CORDEIRO (guardado: LAUTARO CORDEIRO)
+  guardado  · 23 local · 23 visitante · 21 eventos
+
+club-los-50 vs los-cardos-r-c · Clasificatorio M19 · tarjeta 279719  ·  d050a58f-e768-4b97-94a3-dc1f0345bb15
+  local     · club-los-50 · 23 jugadores · 0 con ficha fijada
+  visitante · los-cardos-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 13
+    min  5 (1T 5) visitante penalty_goal Agustin Bollier
+    min 11 (1T 11) local     try          Fermin Etchechoury
+    min 27 (1T 27) local     card_yellow  Agustin Andreoli
+    min 30 (1T 30) visitante injury       Quinto Llambi
+    min 30 (1T 30) visitante substitution Quinto Llambi
+    min 45 (2T 5) visitante try          Marcos Casabal
+    min 50 (2T 10) local     substitution Donato Gonzalez
+    min 55 (2T 15) local     substitution Felipe Schettino
+    min 55 (2T 15) local     substitution Pedro Cantarella
+    min 60 (2T 20) visitante substitution Francisco Sansot
+    min 60 (2T 20) visitante substitution Silvestre Cardozo
+    min 65 (2T 25) visitante penalty_goal Agustin Bollier
+    min 66 (2T 26) visitante substitution Matias Bollier
+  marcador  · eventos 5-11 · guardado 5-11
+  tries     · 1-1 (guardado 1-1)
+  arbitro   · BRUNO GUILLERMO SIMI (guardado: BRUNO GUILLERMO SIMI)
+  guardado  · 23 local · 23 visitante · 13 eventos
+
+ipr-sporting vs mar-del-plata-club · Clasificatorio M19 · tarjeta 281795  ·  2f5ade65-a746-4cad-9dcd-7e08cee89c71
+  local     · ipr-sporting · 23 jugadores · 1 con ficha fijada
+  visitante · mar-del-plata-club · 23 jugadores · 1 con ficha fijada
+  eventos   · 26
+    min  8 (1T 8) visitante conversion   Francisco Guevara
+    min  8 (1T 8) visitante try          Clemente Baez
+    min 20 (1T 20) visitante injury       Francisco Blanco
+    min 20 (1T 20) visitante substitution Clemente Baez
+    min 25 (1T 25) visitante try          Bautista Fernandez Rua
+    min 25 (1T 25) visitante conversion   Francisco Guevara
+    min 29 (1T 29) visitante card_yellow  Francisco Guevara
+    min 33 (1T 33) local     try          Santiago Lahitte
+    min 46 (2T 6) visitante card_yellow  Felipe Antonio Delgiorgio Salerno
+    min 49 (2T 9) visitante substitution Juan Manuel Cabrera Olguin
+    min 58 (2T 18) visitante substitution Mirko Rackiewicz
+    min 60 (2T 20) visitante substitution Francisco Blanco
+    min 64 (2T 24) visitante penalty_goal Francisco Guevara
+    min 68 (2T 28) visitante substitution Santiago Saforcada
+    min 68 (2T 28) visitante substitution Bautista Arosteguy
+    min 74 (2T 34) visitante try          Lionel Igor Blanco
+    min 77 (2T 37) local     substitution Lucas Guido Rabago Pezzati
+    min 90 (2T 50) local     try          Francisco Iriarte
+    min 90 (2T 50) local     conversion   Máximo Rodríguez Silva
+    min 97 (2T 57) local     substitution Santino Mariano Guazzelli
+    min 97 (2T 57) local     substitution Dylan Martín Racca
+    min 98 (2T 58) local     card_yellow  Mateo Jeremias Rossi
+    min 98 (2T 58) local     substitution Juan Martin Olza
+    min 103 (2T 63) local     injury       Agustín Figueroa
+    min 103 (2T 63) local     substitution Agustín Figueroa
+    min 110 (2T 70) local     injury       Santiago Nicolás Piccinini
+  marcador  · eventos 12-22 · guardado 12-22
+  tries     · 2-3 (guardado 2-3)
+  arbitro   · FRANCISCO CERSÓSIMO (guardado: FRANCISCO CERSÓSIMO)
+  guardado  · 23 local · 23 visitante · 26 eventos
+
+pueyrredon-mar-del-plata vs universitario-de-mar-del-plata · Clasificatorio M19 · tarjeta 281794  ·  3e0215de-2c58-4e5d-98da-f5e53ca3df73
+  local     · pueyrredon-mar-del-plata · 23 jugadores · 0 con ficha fijada
+  visitante · universitario-de-mar-del-plata · 23 jugadores · 1 con ficha fijada
+  eventos   · 17
+    min -1 (1T -1) local     substitution Juan Bautista Perez
+    min -1 (1T -1) local     substitution Braian Juarez
+    min  2 (1T 2) local     try          Francisco Tomas Vinaccia
+    min  4 (1T 4) visitante conversion   Robertino Moraza
+    min  4 (1T 4) visitante try          Francisco Domijan
+    min 18 (1T 18) visitante try          Luca Laino
+    min 18 (1T 18) visitante conversion   Robertino Moraza
+    min 42 (2T 2) visitante substitution Alberto Aitor Jaimerena
+    min 44 (2T 4) visitante try          Franco Monsalve
+    min 44 (2T 4) visitante conversion   Robertino Moraza
+    min 55 (2T 15) visitante substitution Nahuel Akeem Imaz
+    min 56 (2T 16) local     try          Oscar Santana Tejeda
+    min 69 (2T 29) visitante try          Simon Merlos
+    min 70 (2T 30) visitante substitution Simon Merlos
+    min 70 (2T 30) visitante substitution Manuel Barilari
+    min 70 (2T 30) visitante substitution Mateo Pampaloni
+    min 70 (2T 30) visitante substitution Lorenzo Diaz Gutierrez
+  marcador  · eventos 10-26 · guardado 10-26
+  tries     · 2-4 (guardado 2-4)
+  arbitro   · MARIO FEDERICO CHARLES (guardado: MARIO FEDERICO CHARLES)
+  guardado  · 23 local · 23 visitante · 17 eventos
+
+comercial-r-c vs union-del-sur · Clasificatorio M19 · tarjeta 281792  ·  3a752165-eacc-4afe-bb7c-3b3716d883c8
+  local     · comercial-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · union-del-sur · 23 jugadores · 0 con ficha fijada
+  eventos   · 30
+    min  1 (1T 1) local     penalty_goal Teo Vazquez
+    min 15 (1T 15) visitante conversion   Ramon Rossi
+    min 15 (1T 15) visitante try          Santiago Sanchez
+    min 20 (1T 20) local     penalty_goal Teo Vazquez
+    min 25 (1T 25) local     substitution Ramiro Cordonnier Falaschini
+    min 26 (1T 26) local     penalty_goal Teo Vazquez
+    min 28 (1T 28) visitante try          Ignacio Berasategui
+    min 28 (1T 28) visitante conversion   Ramon Rossi
+    min 30 (1T 30) local     substitution Bruno Manuel Aguerrido
+    min 31 (1T 31) visitante try          Tobias Leonel Uzquiza
+    min 31 (1T 31) visitante conversion   Ramon Rossi
+    min 35 (1T 35) visitante substitution Thiago Jesús Gimenez Vicente
+    min 42 (2T 2) visitante try          Juan Martin París Santanera
+    min 42 (2T 2) visitante conversion   Ramon Rossi
+    min 45 (2T 5) visitante substitution Tobias Leonel Uzquiza
+    min 54 (2T 14) local     injury       Francisco Gustavo Ruiz Vasquez
+    min 54 (2T 14) local     substitution Francisco Gustavo Ruiz Vasquez
+    min 54 (2T 14) local     conversion   Teo Vazquez
+    min 54 (2T 14) local     try          Ramiro Cordonnier Falaschini
+    min 55 (2T 15) visitante substitution Pedro Martin
+    min 55 (2T 15) visitante substitution Dante Saglia
+    min 61 (2T 21) visitante card_yellow  Mateo Palenzona
+    min 65 (2T 25) local     substitution Francisco Gustavo Ruiz Vasquez
+    min 65 (2T 25) visitante substitution Pedro Villar
+    min 65 (2T 25) visitante substitution Juan Martin París Santanera
+    min 66 (2T 26) local     conversion   Teo Vazquez
+    min 66 (2T 26) local     try          Bautista Porto
+    min 70 (2T 30) local     substitution Mijael Nicolás Suárez
+    min 73 (2T 33) local     try          Juan Etcheverry
+    min 73 (2T 33) local     conversion   Teo Vazquez
+  marcador  · eventos 30-28 · guardado 30-28
+  tries     · 3-4 (guardado 3-4)
+  arbitro   · CAMILA ISABEL GOLDAR (guardado: CAMILA ISABEL GOLDAR)
+  guardado  · 23 local · 23 visitante · 30 eventos
+
+bigua-rugby-club vs club-los-50 · Clasificatorio M19 · tarjeta 279720  ·  02d845af-eb13-4871-a3b1-680547a3979f
+  local     · bigua-rugby-club · 23 jugadores · 0 con ficha fijada
+  visitante · club-los-50 · 20 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min 10 (1T 10) visitante try          Fermin Etchechoury
+    min 11 (1T 11) visitante conversion   Bautista Joaquin Ramirez Pizarro
+    min 18 (1T 18) visitante card_yellow  Santiago Pellegrini
+    min 25 (1T 25) local     penalty_goal Franco Giardini
+    min 35 (1T 35) visitante card_yellow  Donato Gonzalez
+    min 41 (2T 1) local     substitution Mateo Diaz
+    min 41 (2T 1) local     substitution Kevin Sosa
+    min 42 (2T 2) local     card_yellow  Joaquin Estevez
+    min 47 (2T 7) visitante card_yellow  Bautista Arancibia
+    min 48 (2T 8) visitante substitution Julian Suarez Amasino
+    min 52 (2T 12) local     substitution Diego Joaquin Montenegro
+    min 55 (2T 15) local     substitution Franco Giardini
+    min 55 (2T 15) local     substitution Agustin Nicolas Muñoz
+    min 60 (2T 20) visitante substitution Bautista Arancibia
+    min 62 (2T 22) visitante card_yellow  Lautaro Aguilera
+    min 64 (2T 24) local     try          Agustin Castilla
+    min 64 (2T 24) local     conversion   Felipe Zalazar
+    min 76 (2T 36) visitante penalty_goal Bautista Joaquin Ramirez Pizarro
+  marcador  · eventos 10-10 · guardado 10-10
+  tries     · 1-1 (guardado 1-1)
+  arbitro   · AGUSTIN CERSOSIMO (guardado: AGUSTIN CERSOSIMO)
+  guardado  · 23 local · 20 visitante · 18 eventos
+
+bigua-rugby-club vs los-cardos-r-c · Clasificatorio M19 · tarjeta 281800  ·  40a3a67c-b063-44e0-b7b0-e71d480a93d7
+  local     · bigua-rugby-club · 23 jugadores · 0 con ficha fijada
+  visitante · los-cardos-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 28
+    min  5 (1T 5) visitante try          Alfonso Heer
+    min  6 (1T 6) visitante conversion   Agustin Bollier
+    min  8 (1T 8) visitante try          Justo Di Lazaro
+    min  9 (1T 9) visitante conversion   Agustin Bollier
+    min 16 (1T 16) local     conversion   Franco Giardini
+    min 16 (1T 16) local     try          Agustin Castilla
+    min 19 (1T 19) visitante try          Benjamin Zubiaurre
+    min 24 (1T 24) local     substitution Tomas Arriola Sauan
+    min 24 (1T 24) visitante try          Justo Di Lazaro
+    min 32 (1T 32) local     try          Diego Joaquin Montenegro
+    min 41 (2T 1) local     substitution Alexis Daniel Quintero
+    min 41 (2T 1) local     substitution Valentin Saldaña Torraco
+    min 42 (2T 2) local     substitution Nicolas Arenas
+    min 42 (2T 2) visitante try          Marcos Casabal
+    min 47 (2T 7) local     conversion   Franco Giardini
+    min 47 (2T 7) local     try          Joaquin Estevez
+    min 55 (2T 15) local     substitution Felipe Zalazar
+    min 57 (2T 17) visitante try          Benjamin Zubiaurre
+    min 60 (2T 20) local     conversion   Franco Giardini
+    min 60 (2T 20) local     try          Joaquin Estevez
+    min 60 (2T 20) local     substitution Franco Vitale
+    min 60 (2T 20) local     substitution Mateo Olivera
+    min 63 (2T 23) visitante penalty_goal Agustin Bollier
+    min 68 (2T 28) visitante card_yellow  Benjamin Zubiaurre
+    min 70 (2T 30) local     substitution Ivan Mbogja
+    min 70 (2T 30) local     conversion   Franco Giardini
+    min 70 (2T 30) local     try          Joaquin Estevez
+    min 70 (2T 30) local     injury       Ivan Mbogja
+  marcador  · eventos 33-37 · guardado 33-37
+  tries     · 5-6 (guardado 5-6)
+  arbitro   · MARIO FEDERICO CHARLES (guardado: MARIO FEDERICO CHARLES)
+  guardado  · 23 local · 23 visitante · 28 eventos
+
+club-los-50 vs uncas-r-c · Clasificatorio M19 · tarjeta 281799  ·  bec3ce3e-9f5a-408b-b10c-9fcc27afdb0c
+  local     · club-los-50 · 22 jugadores · 0 con ficha fijada
+  visitante · uncas-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 23
+    min  8 (1T 8) local     conversion   Bautista Joaquin Ramirez Pizarro
+    min  8 (1T 8) local     try          Bautista Joaquin Ramirez Pizarro
+    min 10 (1T 10) visitante card_yellow  Simon Barrionuevo
+    min 16 (1T 16) local     try          Lautaro Aguilera
+    min 19 (1T 19) local     try          Fermin Etchechoury
+    min 20 (1T 20) local     conversion   Bautista Joaquin Ramirez Pizarro
+    min 35 (1T 35) local     conversion   Bautista Joaquin Ramirez Pizarro
+    min 35 (1T 35) local     conversion   Bautista Joaquin Ramirez Pizarro
+    min 35 (1T 35) local     conversion   Bautista Joaquin Ramirez Pizarro
+    min 35 (1T 35) local     conversion   Bautista Joaquin Ramirez Pizarro
+    min 35 (1T 35) local     try          Valentino Iannone
+    min 42 (2T 2) visitante substitution Benjamin Uriel Durand
+    min 50 (2T 10) local     try          Agustin Torrissi
+    min 51 (2T 11) local     card_yellow  Donato Gonzalez
+    min 55 (2T 15) local     try          Bautista Joaquin Ramirez Pizarro
+    min 59 (2T 19) local     substitution Bernabe Fleitas
+    min 59 (2T 19) local     substitution Julian Suarez Amasino
+    min 60 (2T 20) visitante injury       Benjamin Cerviño
+    min 64 (2T 24) local     substitution Iñaki Elissondo
+    min 64 (2T 24) local     substitution Pedro Cantarella
+    min 65 (2T 25) local     try          Mirko Ciccimarra
+    min 70 (2T 30) local     try          Bautista Joaquin Ramirez Pizarro
+    min 70 (2T 30) local     conversion   Bautista Joaquin Ramirez Pizarro
+  marcador  · eventos 54-0 · guardado 54-0
+  tries     · 8-0 (guardado 8-0)
+  arbitro   · MAXIMILIANO DI LUCA (guardado: MAXIMILIANO DI LUCA)
+  guardado  · 22 local · 23 visitante · 23 eventos
+
+comercial-r-c vs san-ignacio-r-c · Clasificatorio M19 · tarjeta 281798  ·  57577fa3-31dd-4196-a25b-14ecb276a3a7
+  local     · comercial-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · san-ignacio-r-c · 23 jugadores · 3 con ficha fijada
+  eventos   · 11
+    min 10 (1T 10) visitante substitution Ramiro Allamanda
+    min 13 (1T 13) visitante try          Alberto Emilio Asseff
+    min 31 (1T 31) visitante try          Daniel Havrylenko
+    min 31 (1T 31) visitante conversion   Rocco Calimano
+    min 50 (2T 10) visitante substitution Lautaro Ceschi
+    min 56 (2T 16) visitante try          Luciano Zabala
+    min 57 (2T 17) visitante conversion   Rocco Calimano
+    min 65 (2T 25) visitante substitution Gabriel Orquera
+    min 66 (2T 26) visitante try          Agustin Bettiga
+    min 67 (2T 27) visitante conversion   Rocco Calimano
+    min 75 (2T 35) visitante injury       Daniel Havrylenko
+  marcador  · eventos 0-26 · guardado 0-26
+  tries     · 0-4 (guardado 0-4)
+  arbitro   · ALEJANDRO VILLANUEVA 11991906 (NO OFICIAL) (guardado: ALEJANDRO VILLANUEVA 11991906 (NO OFICIAL))
+  guardado  · 23 local · 23 visitante · 11 eventos
+
+union-del-sur vs pueyrredon-mar-del-plata · Clasificatorio M19 · tarjeta 281797  ·  ce8d5919-c9e0-4aa7-a79e-488c1a9a2244
+  local     · union-del-sur · 23 jugadores · 0 con ficha fijada
+  visitante · pueyrredon-mar-del-plata · 23 jugadores · 0 con ficha fijada
+  eventos   · 30
+    min -1 (1T -1) visitante substitution Luciano Tolosa
+    min -1 (1T -1) visitante substitution Braian Juarez
+    min  7 (1T 7) local     conversion   Ramon Rossi
+    min  7 (1T 7) local     try          Santiago Attanasio
+    min 13 (1T 13) local     injury       Pedro Villar
+    min 13 (1T 13) local     substitution Pedro Villar
+    min 19 (1T 19) local     try          Juan Bautista Mannarino
+    min 22 (1T 22) visitante card_yellow  Nehuen Otto Lechner
+    min 23 (1T 23) local     conversion   Pedro Martin
+    min 23 (1T 23) local     try          Ignacio Berasategui
+    min 30 (1T 30) local     try          Franco Naiderman
+    min 33 (1T 33) visitante try          Francisco Tomas Vinaccia
+    min 33 (1T 33) visitante conversion   Oscar Santana Tejeda
+    min 36 (1T 36) local     try          Pedro Martin
+    min 41 (2T 1) local     try          Benjamin Torres Martinez
+    min 41 (2T 1) local     substitution Santino Curto
+    min 52 (2T 12) local     try          Santiago Attanasio
+    min 53 (2T 13) local     substitution Pedro Villar
+    min 58 (2T 18) local     try          Mateo Rossi Verbel
+    min 60 (2T 20) local     substitution Juan Cruz Gigli
+    min 60 (2T 20) local     substitution Dante Saglia
+    min 60 (2T 20) local     try          Simón Rossi
+    min 60 (2T 20) local     conversion   Pedro Martin
+    min 60 (2T 20) local     substitution Juan Bautista Mannarino
+    min 65 (2T 25) visitante try          Diego Valentín Barros
+    min 65 (2T 25) visitante conversion   Milo Savino
+    min 67 (2T 27) visitante card_yellow  Ezequiel Martín Perez Castiglione
+    min 70 (2T 30) local     substitution Mateo Rossi Verbel
+    min 70 (2T 30) local     injury       Mateo Rossi Verbel
+    min 73 (2T 33) local     card_yellow  Nahuel Jeremias Villanueva
+  marcador  · eventos 51-14 · guardado 51-14
+  tries     · 9-2 (guardado 9-2)
+  arbitro   · AGUSTIN CERSOSIMO (guardado: AGUSTIN CERSOSIMO)
+  guardado  · 23 local · 23 visitante · 30 eventos
+
+universitario-de-mar-del-plata vs ipr-sporting · Clasificatorio M19 · tarjeta 281796  ·  4d38453a-a871-4458-8363-e04f4578cd53
+  local     · universitario-de-mar-del-plata · 23 jugadores · 1 con ficha fijada
+  visitante · ipr-sporting · 23 jugadores · 1 con ficha fijada
+  eventos   · 21
+    min  5 (1T 5) visitante try          Bautista Bianca
+    min  5 (1T 5) visitante conversion   Máximo Rodríguez Silva
+    min 10 (1T 10) local     card_yellow  Juan Ignacio Galante
+    min 20 (1T 20) local     substitution Nahuel Akeem Imaz
+    min 25 (1T 25) local     substitution Francisco Domijan
+    min 25 (1T 25) local     substitution Simon Merlos
+    min 25 (1T 25) local     injury       Franco Monsalve
+    min 25 (1T 25) local     substitution Mateo Pampaloni
+    min 30 (1T 30) local     substitution Franco Monsalve
+    min 33 (1T 33) visitante try          Dylan Martín Racca
+    min 33 (1T 33) visitante conversion   Máximo Rodríguez Silva
+    min 50 (2T 10) local     substitution Lorenzo Diaz Gutierrez
+    min 70 (2T 30) local     substitution Alberto Aitor Jaimerena
+    min 75 (2T 35) visitante substitution Juan Martin Olza
+    min 76 (2T 36) visitante try          Francisco Iriarte
+    min 88 (2T 48) visitante substitution Juan Pedro Camilión
+    min 89 (2T 49) visitante substitution Francisco Gorosito
+    min 90 (2T 50) visitante try          Dante Arabia Erratchu
+    min 92 (2T 52) visitante substitution Lucas Guido Rabago Pezzati
+    min 102 (2T 62) visitante try          Dylan Martín Racca
+    min 102 (2T 62) visitante conversion   Máximo Rodríguez Silva
+  marcador  · eventos 0-31 · guardado 0-31
+  tries     · 0-5 (guardado 0-5)
+  arbitro   · CESAR HORACIO BRUNI (guardado: CESAR HORACIO BRUNI)
+  guardado  · 23 local · 23 visitante · 21 eventos
+
+mar-del-plata-club vs universitario-de-mar-del-plata · Clasificatorio M19 · tarjeta 281805  ·  fffd544f-4c23-4fd0-8c76-0cc59127d2f8
+  local     · mar-del-plata-club · 23 jugadores · 1 con ficha fijada
+  visitante · universitario-de-mar-del-plata · 23 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min 13 (1T 13) local     penalty_try  
+    min 15 (1T 15) visitante try          Benjamin Elizalde
+    min 15 (1T 15) visitante conversion   Robertino Moraza
+    min 25 (1T 25) local     try          José Ignacio Borawski Chanes
+    min 33 (1T 33) local     try          Clemente Baez
+    min 34 (1T 34) local     conversion   Francisco Guevara
+    min 46 (2T 6) local     try          Bautista Fernandez Rua
+    min 50 (2T 10) local     try          Franco Zucconi
+    min 51 (2T 11) local     conversion   Francisco Guevara
+    min 51 (2T 11) visitante substitution Facundo Nally
+    min 51 (2T 11) visitante substitution Francesco Salvatierra
+    min 52 (2T 12) local     substitution Santiago Saforcada
+    min 52 (2T 12) local     substitution Mirko Rackiewicz
+    min 52 (2T 12) local     substitution Felipe Antonio Delgiorgio Salerno
+    min 55 (2T 15) local     substitution Clemente Baez
+    min 55 (2T 15) local     substitution Juan Martin Eichhorn
+    min 55 (2T 15) local     try          Beltran Scaminaci
+    min 56 (2T 16) local     conversion   Francisco Guevara
+    min 56 (2T 16) visitante substitution Franco Monsalve
+    min 60 (2T 20) local     substitution Francisco Blanco
+    min 65 (2T 25) local     substitution Bautista Fernandez Rua
+    min 65 (2T 25) local     substitution José Ignacio Borawski Chanes
+    min 65 (2T 25) local     try          José Ignacio Borawski Chanes
+    min 65 (2T 25) visitante substitution Simon Merlos
+    min 67 (2T 27) visitante card_yellow  Francisco Ignacio Zaldivar
+    min 75 (2T 35) visitante try          Juan Ignacio Galante
+    min 75 (2T 35) visitante conversion   Robertino Moraza
+  marcador  · eventos 43-14 · guardado 43-14
+  tries     · 7-2 (guardado 7-2)
+  arbitro   · GASTON BARTHE (guardado: GASTON BARTHE)
+  guardado  · 23 local · 23 visitante · 27 eventos
+
+ipr-sporting vs union-del-sur · Clasificatorio M19 · tarjeta 281804  ·  1f3c174e-a19c-4d36-b734-d94b204e9c3c
+  local     · ipr-sporting · 23 jugadores · 1 con ficha fijada
+  visitante · union-del-sur · 23 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min  3 (1T 3) visitante penalty_goal Ramon Rossi
+    min  5 (1T 5) visitante try          Marcos Gabotto
+    min  5 (1T 5) visitante conversion   Ramon Rossi
+    min 14 (1T 14) local     try          Dante Arabia Erratchu
+    min 14 (1T 14) local     conversion   Máximo Rodríguez Silva
+    min 28 (1T 28) local     try          Francisco Iriarte
+    min 28 (1T 28) local     conversion   Máximo Rodríguez Silva
+    min 31 (1T 31) visitante try          Tobias Leonel Uzquiza
+    min 35 (1T 35) local     penalty_goal Máximo Rodríguez Silva
+    min 42 (2T 2) visitante card_yellow  Ramon Rossi
+    min 58 (2T 18) visitante substitution Benjamin Torres Martinez
+    min 58 (2T 18) visitante substitution Alejo Blanco
+    min 59 (2T 19) visitante try          Agustin Ruseckaite
+    min 74 (2T 34) visitante substitution Juan Bautista Mannarino
+    min 74 (2T 34) visitante substitution Dante Saglia
+    min 85 (2T 45) local     substitution Facundo Altuna
+    min 85 (2T 45) local     substitution Lorenzo Pavan
+    min 89 (2T 49) local     try          Juan Pedro Camilión
+    min 95 (2T 55) local     substitution Lucas Guido Rabago Pezzati
+    min 107 (2T 67) local     card_yellow  Bautista Kah
+  marcador  · eventos 22-20 · guardado 22-20
+  tries     · 3-3 (guardado 3-3)
+  arbitro   · MAXIMILIANO DI LUCA (guardado: MAXIMILIANO DI LUCA)
+  guardado  · 23 local · 23 visitante · 20 eventos
+
+pueyrredon-mar-del-plata vs san-ignacio-r-c · Clasificatorio M19 · tarjeta 281803  ·  8db9b976-66d8-4d90-a63a-74a74e44f3d3
+  local     · pueyrredon-mar-del-plata · 23 jugadores · 0 con ficha fijada
+  visitante · san-ignacio-r-c · 23 jugadores · 5 con ficha fijada
+  eventos   · 25
+    min  1 (1T 1) local     substitution Juan Bautista Perez
+    min  1 (1T 1) local     substitution Eloy Ojeda
+    min  7 (1T 7) visitante try          Lautaro Ceschi
+    min  8 (1T 8) visitante conversion   Rafael Giardelli
+    min 11 (1T 11) local     card_yellow  Juan Bautista Aranciaga Bottaro
+    min 12 (1T 12) visitante try          Rafael Giardelli
+    min 18 (1T 18) local     try          Francisco Tomas Vinaccia
+    min 18 (1T 18) local     conversion   Oscar Santana Tejeda
+    min 25 (1T 25) local     try          Ezequiel Martín Perez Castiglione
+    min 25 (1T 25) local     conversion   Oscar Santana Tejeda
+    min 32 (1T 32) visitante try          Augusto Sanchez
+    min 33 (1T 33) visitante conversion   Rafael Giardelli
+    min 41 (2T 1) visitante try          Lautaro Ceschi
+    min 42 (2T 2) visitante try          Daniel Havrylenko
+    min 43 (2T 3) visitante conversion   Rafael Giardelli
+    min 45 (2T 5) visitante injury       Felipe Magrini
+    min 55 (2T 15) visitante substitution Ramiro Allamanda
+    min 55 (2T 15) visitante injury       Ramiro Allamanda
+    min 55 (2T 15) visitante substitution Ramiro Allamanda
+    min 60 (2T 20) local     try          Ezequiel Martín Perez Castiglione
+    min 60 (2T 20) local     conversion   Oscar Santana Tejeda
+    min 65 (2T 25) visitante try          Daniel Havrylenko
+    min 65 (2T 25) visitante substitution Felipe Magrini
+    min 65 (2T 25) visitante substitution Pablo Justo Buenaventura
+    min 66 (2T 26) visitante conversion   Rafael Giardelli
+  marcador  · eventos 21-38 · guardado 21-38
+  tries     · 3-6 (guardado 3-6)
+  arbitro   · MATIAS DRAMIS (guardado: MATIAS DRAMIS)
+  guardado  · 23 local · 23 visitante · 25 eventos
+
+comercial-r-c vs club-los-50 · Clasificatorio M19 · tarjeta 281802  ·  933759cc-a8db-4817-8f35-f5fb07ba4046
+  local     · comercial-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · club-los-50 · 20 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min  3 (1T 3) local     conversion   Teo Vazquez
+    min  3 (1T 3) local     try          Thiago Ruiz Alonso
+    min 16 (1T 16) local     try          Teo Vazquez
+    min 16 (1T 16) local     conversion   Teo Vazquez
+    min 20 (1T 20) visitante penalty_goal Bautista Joaquin Ramirez Pizarro
+    min 22 (1T 22) visitante try          Bautista Joaquin Ramirez Pizarro
+    min 25 (1T 25) visitante try          Mirko Ciccimarra
+    min 29 (1T 29) local     try          Federico Laval Cisterna
+    min 41 (2T 1) visitante try          Mirko Ciccimarra
+    min 44 (2T 4) visitante try          Fermin Etchechoury
+    min 45 (2T 5) local     substitution Tiago Valentin Aguerrido
+    min 45 (2T 5) visitante conversion   Bautista Joaquin Ramirez Pizarro
+    min 47 (2T 7) local     substitution Benicio Basavilbaso
+    min 52 (2T 12) visitante substitution Marcos Rios
+    min 54 (2T 14) local     substitution Santino Bibbo
+    min 54 (2T 14) local     conversion   Teo Vazquez
+    min 54 (2T 14) local     try          Bernardino Barcos
+    min 61 (2T 21) visitante substitution Valentino Iannone
+    min 65 (2T 25) local     try          Julián Daniel Valle Torres
+    min 66 (2T 26) local     substitution Thiago Ruiz Alonso
+    min 66 (2T 26) local     substitution Santino Cattelan
+    min 66 (2T 26) visitante substitution Facundo Camio
+    min 70 (2T 30) local     substitution Bautista Porto
+    min 70 (2T 30) local     substitution Lautaro Franchini
+  marcador  · eventos 31-25 · guardado 31-25
+  tries     · 5-4 (guardado 5-4)
+  arbitro   · JUAN GABRIEL ACIERNO (guardado: JUAN GABRIEL ACIERNO)
+  guardado  · 23 local · 20 visitante · 24 eventos
+
+uncas-r-c vs los-cardos-r-c · Clasificatorio M19 · tarjeta 281801  ·  03c4a126-95a0-4b32-b6ec-e414950fcec8
+  local     · uncas-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · los-cardos-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 26
+    min  1 (1T 1) visitante try          Alfonso Heer
+    min 12 (1T 12) visitante try          Marcos Casabal
+    min 12 (1T 12) visitante conversion   Agustin Bollier
+    min 15 (1T 15) visitante try          Benjamin Zubiaurre
+    min 15 (1T 15) visitante conversion   Agustin Bollier
+    min 20 (1T 20) visitante try          Juan Martín Franco
+    min 20 (1T 20) visitante conversion   Agustin Bollier
+    min 25 (1T 25) local     substitution Thiago Cordoba
+    min 25 (1T 25) visitante try          Juan Martín Franco
+    min 31 (1T 31) visitante try          Santiago Bardi
+    min 41 (2T 1) visitante try          Benjamin Zubiaurre
+    min 41 (2T 1) visitante substitution Francisco Sansot
+    min 41 (2T 1) visitante conversion   Agustin Bollier
+    min 48 (2T 8) visitante conversion   Agustin Bollier
+    min 48 (2T 8) visitante try          Ivan Schreiterer
+    min 50 (2T 10) visitante substitution Juan Martín Franco
+    min 50 (2T 10) visitante substitution Silvestre Cardozo
+    min 54 (2T 14) visitante conversion   Agustin Bollier
+    min 54 (2T 14) visitante try          Laureano Ferrero
+    min 59 (2T 19) visitante conversion   Agustin Bollier
+    min 59 (2T 19) visitante conversion   Marcos Casabal
+    min 59 (2T 19) visitante try          Marcos Casabal
+    min 60 (2T 20) local     substitution Bautista Simi
+    min 62 (2T 22) visitante conversion   Agustin Bollier
+    min 62 (2T 22) visitante try          Alfonso Heer
+    min 73 (2T 33) visitante try          Santiago Bardi
+  marcador  · eventos 0-78 · guardado 0-78
+  tries     · 0-12 (guardado 0-12)
+  arbitro   · JUAN MARIANO DI SAVINO (guardado: JUAN MARIANO DI SAVINO)
+  guardado  · 23 local · 23 visitante · 26 eventos
+
+bigua-rugby-club vs uncas-r-c · Clasificatorio M19 · tarjeta 281811  ·  150571a2-ad60-4fb9-b4c7-2d1201533606
+  local     · bigua-rugby-club · 23 jugadores · 0 con ficha fijada
+  visitante · uncas-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 29
+    min  2 (1T 2) local     try          Franco Vitale
+    min  6 (1T 6) local     try          Mateo Olivera
+    min 10 (1T 10) local     try          Valentino Villella
+    min 11 (1T 11) visitante card_yellow  Simon Piñero
+    min 12 (1T 12) local     try          Mateo Olivera
+    min 18 (1T 18) local     try          Agustin Castilla
+    min 19 (1T 19) visitante card_yellow  Simon Barrionuevo
+    min 20 (1T 20) visitante substitution Thiago Cordoba
+    min 20 (1T 20) visitante penalty_goal Benjamin Uriel Durand
+    min 22 (1T 22) visitante try          Carlos Valentino Llamas Dubois
+    min 30 (1T 30) visitante substitution Alex Verea
+    min 34 (1T 34) local     try          Santiago Molinari
+    min 35 (1T 35) local     conversion   Franco Giardini
+    min 41 (2T 1) visitante try          Carlos Valentino Llamas Dubois
+    min 41 (2T 1) visitante conversion   Benjamin Uriel Durand
+    min 42 (2T 2) local     substitution Nicolas Arenas
+    min 42 (2T 2) local     substitution Kevin Sosa
+    min 42 (2T 2) local     substitution Franco Giardini
+    min 44 (2T 4) local     card_yellow  Mateo Olivera
+    min 50 (2T 10) local     try          Joaquin Estevez
+    min 52 (2T 12) local     substitution Felipe Zalazar
+    min 52 (2T 12) local     substitution Guillermo Martin Del Moral
+    min 52 (2T 12) local     substitution Franco Vitale
+    min 52 (2T 12) local     substitution Guillermo Martin Del Moral
+    min 55 (2T 15) local     conversion   Thiago Sanchez Salerno
+    min 55 (2T 15) local     try          Joaquin Estevez
+    min 58 (2T 18) local     card_yellow  Agustin Castilla
+    min 70 (2T 30) visitante substitution Francisco Mancinelli
+    min 73 (2T 33) local     try          Benjamin Luna
+  marcador  · eventos 49-15 · guardado 49-15
+  tries     · 9-2 (guardado 9-2)
+  arbitro   · VALERIA ANTL (guardado: VALERIA ANTL)
+  guardado  · 23 local · 23 visitante · 29 eventos
+
+los-cardos-r-c vs comercial-r-c · Clasificatorio M19 · tarjeta 281810  ·  8af4cce5-2aa0-4df0-a274-3301005b84dd
+  local     · los-cardos-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · comercial-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min 12 (1T 12) local     try          Marcos Casabal
+    min 18 (1T 18) local     try          Juan Martín Franco
+    min 24 (1T 24) visitante try          Benjamín Mateo Miracco Martinez
+    min 32 (1T 32) local     try          Juan Martín Franco
+    min 32 (1T 32) local     conversion   Agustin Bollier
+    min 41 (2T 1) local     try          Alfonso Heer
+    min 41 (2T 1) local     conversion   Agustin Bollier
+    min 46 (2T 6) local     substitution Quinto Llambi
+    min 46 (2T 6) local     substitution Thiago Aladro
+    min 46 (2T 6) local     substitution Lorenzo Barrera
+    min 48 (2T 8) visitante substitution Santino Bibbo
+    min 59 (2T 19) visitante try          Bernardino Barcos
+    min 59 (2T 19) visitante conversion   Teo Vazquez
+    min 60 (2T 20) visitante substitution Julián Daniel Valle Torres
+    min 60 (2T 20) visitante substitution Tiago Valentin Aguerrido
+    min 60 (2T 20) visitante substitution Mateo Agustín Cativiela
+    min 63 (2T 23) local     try          Laureano Ferrero
+    min 65 (2T 25) local     substitution Marcos Casabal
+    min 65 (2T 25) visitante substitution Ramiro Cordonnier Falaschini
+    min 65 (2T 25) visitante substitution Santino Cattelan
+    min 68 (2T 28) visitante try          Teo Vazquez
+    min 68 (2T 28) visitante conversion   Teo Vazquez
+    min 70 (2T 30) visitante try          Juan Etcheverry
+    min 70 (2T 30) visitante conversion   Teo Vazquez
+  marcador  · eventos 29-26 · guardado 29-26
+  tries     · 5-4 (guardado 5-4)
+  arbitro   · MARCELO PUERTA (guardado: MARCELO PUERTA)
+  guardado  · 23 local · 23 visitante · 24 eventos
+
+pueyrredon-mar-del-plata vs club-los-50 · Clasificatorio M19 · tarjeta 281809  ·  658b65eb-a635-4dda-b5fd-983ca7e7b1ed
+  local     · pueyrredon-mar-del-plata · 23 jugadores · 0 con ficha fijada
+  visitante · club-los-50 · 21 jugadores · 0 con ficha fijada
+  eventos   · 33
+    min -1 (1T -1) local     substitution Valentino Blanco
+    min -1 (1T -1) local     substitution Braian Juarez
+    min -1 (1T -1) local     substitution Luciano Tolosa
+    min  6 (1T 6) local     try          Nehuen Otto Lechner
+    min 11 (1T 11) local     try          Ezequiel Martín Perez Castiglione
+    min 15 (1T 15) visitante conversion   Bautista Joaquin Ramirez Pizarro
+    min 15 (1T 15) visitante try          Santiago Pellegrini
+    min 19 (1T 19) local     card_yellow  Ivan Suarez Amaya
+    min 19 (1T 19) visitante card_yellow  Federico Beltran
+    min 23 (1T 23) local     try          Nehuen Otto Lechner
+    min 28 (1T 28) visitante conversion   Bautista Joaquin Ramirez Pizarro
+    min 28 (1T 28) visitante try          Bautista Joaquin Ramirez Pizarro
+    min 32 (1T 32) visitante penalty_goal Bautista Joaquin Ramirez Pizarro
+    min 36 (1T 36) local     card_yellow  Lautaro Javier Villanueva
+    min 36 (1T 36) visitante conversion   Bautista Joaquin Ramirez Pizarro
+    min 36 (1T 36) visitante try          Federico Beltran
+    min 37 (1T 37) visitante conversion   Bautista Joaquin Ramirez Pizarro
+    min 41 (2T 1) visitante substitution Felipe De Galvagni
+    min 41 (2T 1) visitante substitution Marcos Rios
+    min 41 (2T 1) visitante substitution Bernabe Fleitas
+    min 46 (2T 6) local     try          Santiago Suárez
+    min 46 (2T 6) local     conversion   Oscar Santana Tejeda
+    min 51 (2T 11) local     conversion   Oscar Santana Tejeda
+    min 51 (2T 11) local     try          Oscar Santana Tejeda
+    min 52 (2T 12) visitante substitution Facundo Camio
+    min 55 (2T 15) local     try          Nehuen Otto Lechner
+    min 55 (2T 15) local     conversion   Oscar Santana Tejeda
+    min 60 (2T 20) local     try          Juan Cruz Fioriti
+    min 60 (2T 20) local     conversion   Oscar Santana Tejeda
+    min 64 (2T 24) local     card_yellow  Juan Cruz Fioriti
+    min 64 (2T 24) visitante try          Donato Gonzalez
+    min 64 (2T 24) visitante conversion   Bautista Joaquin Ramirez Pizarro
+    min 69 (2T 29) visitante try          Luciano Christiansen
+  marcador  · eventos 43-38 · guardado 43-38
+  tries     · 7-5 (guardado 7-5)
+  arbitro   · JUAN IGNACIO PORFILIO (guardado: JUAN IGNACIO PORFILIO)
+  guardado  · 23 local · 21 visitante · 33 eventos
+
+san-ignacio-r-c vs ipr-sporting · Clasificatorio M19 · tarjeta 281807  ·  aa7f5eb1-c56a-4159-abff-4eb489ced8cd
+  local     · san-ignacio-r-c · 23 jugadores · 5 con ficha fijada
+  visitante · ipr-sporting · 23 jugadores · 1 con ficha fijada
+  eventos   · 22
+    min 12 (1T 12) visitante try          Juan Pedro Camilión
+    min 23 (1T 23) local     try          Leonel Cotado
+    min 28 (1T 28) visitante conversion   Máximo Rodríguez Silva
+    min 28 (1T 28) visitante try          Francisco Iriarte
+    min 51 (2T 11) local     penalty_goal Rafael Giardelli
+    min 54 (2T 14) local     substitution Alberto Emilio Asseff
+    min 56 (2T 16) local     substitution Felipe Magrini
+    min 56 (2T 16) local     substitution Rocco Calimano
+    min 65 (2T 25) local     substitution Juan Ignacio Madeira
+    min 70 (2T 30) local     card_yellow  Leonel Cotado
+    min 70 (2T 30) local     substitution Agustin Bettiga
+    min 74 (2T 34) local     try          Augusto Sanchez
+    min 95 (2T 55) visitante substitution Juan Pedro Camilión
+    min 96 (2T 56) visitante substitution Dylan Martín Racca
+    min 98 (2T 58) visitante try          Santino Mariano Guazzelli
+    min 98 (2T 58) visitante conversion   Máximo Rodríguez Silva
+    min 103 (2T 63) visitante substitution Santiago Nicolás Piccinini
+    min 103 (2T 63) visitante substitution Facundo Altuna
+    min 104 (2T 64) visitante substitution Benicio Murillo
+    min 105 (2T 65) visitante substitution Agustín Figueroa
+    min 105 (2T 65) visitante substitution Bautista Celis
+    min 107 (2T 67) visitante card_yellow  Benjamin Marcó Del Pont
+  marcador  · eventos 13-19 · guardado 13-19
+  tries     · 2-3 (guardado 2-3)
+  arbitro   · CESAR HORACIO BRUNI (guardado: CESAR HORACIO BRUNI)
+  guardado  · 23 local · 23 visitante · 22 eventos
+
+mar-del-plata-club vs union-del-sur · Clasificatorio M19 · tarjeta 281806  ·  28fc3c0e-c90b-4a51-8e14-563d661f0047
+  local     · mar-del-plata-club · 23 jugadores · 1 con ficha fijada
+  visitante · union-del-sur · 23 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min  9 (1T 9) local     try          Clemente Baez
+    min 10 (1T 10) local     conversion   Francisco Guevara
+    min 17 (1T 17) visitante substitution Pedro Martin
+    min 28 (1T 28) visitante try          Santiago Attanasio
+    min 28 (1T 28) visitante conversion   Ramon Rossi
+    min 31 (1T 31) local     try          Clemente Baez
+    min 43 (2T 3) local     card_yellow  Joaquín López Dupuy
+    min 45 (2T 5) local     substitution Francisco Escalante
+    min 46 (2T 6) visitante substitution Benjamin Torres Martinez
+    min 48 (2T 8) visitante card_yellow  Santiago Sanchez
+    min 54 (2T 14) local     substitution Santiago Saforcada
+    min 54 (2T 14) local     substitution Joaquín López Dupuy
+    min 54 (2T 14) local     substitution Bautista Webb
+    min 54 (2T 14) local     try          Marcos Ariel Balicchia
+    min 56 (2T 16) local     try          Bautista Fernandez Rua
+    min 56 (2T 16) local     substitution Mirko Rackiewicz
+    min 56 (2T 16) local     substitution Clemente Baez
+    min 57 (2T 17) local     conversion   Francisco Guevara
+    min 58 (2T 18) local     substitution Santino Muñoz
+    min 58 (2T 18) local     try          Marcos Ariel Balicchia
+    min 58 (2T 18) local     substitution Bautista Fernandez Rua
+    min 64 (2T 24) local     try          Beltran Scaminaci
+    min 65 (2T 25) local     conversion   Francisco Guevara
+    min 65 (2T 25) visitante substitution Santiago Attanasio
+    min 65 (2T 25) visitante substitution Franco Naiderman
+    min 71 (2T 31) visitante substitution Juan Bautista Mannarino
+    min 71 (2T 31) visitante substitution Alejo Blanco
+  marcador  · eventos 36-7 · guardado 36-7
+  tries     · 6-1 (guardado 6-1)
+  arbitro   · LAUTARO LAMAS (guardado: LAUTARO LAMAS)
+  guardado  · 23 local · 23 visitante · 27 eventos
+
+universitario-de-mar-del-plata vs union-del-sur · Clasificatorio M19 · tarjeta 281818  ·  8b753efd-af29-4214-aa6e-cda0638bd004
+  local     · universitario-de-mar-del-plata · 23 jugadores · 0 con ficha fijada
+  visitante · union-del-sur · 23 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min  6 (1T 6) visitante card_yellow  Franco Naiderman
+    min  8 (1T 8) local     try          Alejo Bitthoff
+    min 23 (1T 23) visitante try          Santiago Attanasio
+    min 23 (1T 23) visitante conversion   Ramon Rossi
+    min 28 (1T 28) visitante substitution Marcos Gabotto
+    min 40 (2T 0) local     substitution Benjamin Elizalde
+    min 41 (2T 1) visitante substitution Juan Cruz Gigli
+    min 41 (2T 1) visitante substitution Santino Curto
+    min 45 (2T 5) local     substitution Nahuel Akeem Imaz
+    min 45 (2T 5) local     substitution Franco Monsalve
+    min 50 (2T 10) visitante substitution Santiago Attanasio
+    min 51 (2T 11) local     penalty_goal Robertino Moraza
+    min 55 (2T 15) visitante substitution Faustino Domato Hidalgo
+    min 62 (2T 22) local     try          Luca Laino
+    min 62 (2T 22) local     conversion   Robertino Moraza
+    min 64 (2T 24) local     substitution Luca Laino
+    min 64 (2T 24) local     substitution Ciro Damelio
+    min 66 (2T 26) visitante conversion   Ramon Rossi
+    min 66 (2T 26) visitante try          Alejo Blanco
+    min 67 (2T 27) local     card_yellow  Francisco Ignacio Zaldivar
+    min 74 (2T 34) local     penalty_goal Robertino Moraza
+    min 75 (2T 35) visitante try          Agustin Ruseckaite
+  marcador  · eventos 18-19 · guardado 18-19
+  tries     · 2-3 (guardado 2-3)
+  arbitro   · JULIAN CARRARA (guardado: JULIAN CARRARA)
+  guardado  · 23 local · 23 visitante · 22 eventos
+
+club-los-50 vs ipr-sporting · Clasificatorio M19 · tarjeta 281815  ·  c9f9ad1a-38ae-4f55-853f-5b0ee72df019
+  local     · club-los-50 · 22 jugadores · 0 con ficha fijada
+  visitante · ipr-sporting · 23 jugadores · 1 con ficha fijada
+  eventos   · 30
+    min 10 (1T 10) local     card_yellow  Mirko Ciccimarra
+    min 10 (1T 10) visitante penalty_try  
+    min 13 (1T 13) local     penalty_goal Bautista Joaquin Ramirez Pizarro
+    min 15 (1T 15) visitante conversion   Santiago Lahitte
+    min 15 (1T 15) visitante conversion   Santiago Lahitte
+    min 15 (1T 15) visitante try          Dante Arabia Erratchu
+    min 20 (1T 20) visitante conversion   Santiago Lahitte
+    min 20 (1T 20) visitante try          Benicio Murillo
+    min 24 (1T 24) visitante substitution Lorenzo Pavan
+    min 27 (1T 27) local     try          Santiago Pellegrini
+    min 35 (1T 35) visitante substitution Mateo Jeremias Rossi
+    min 41 (2T 1) local     substitution Donato Gonzalez
+    min 43 (2T 3) local     substitution Facundo Camio
+    min 54 (2T 14) local     substitution Facundo Garra
+    min 55 (2T 15) local     substitution Bernabe Fleitas
+    min 57 (2T 17) local     substitution Santiago Pellegrini
+    min 60 (2T 20) local     substitution Benjamin Schettino
+    min 62 (2T 22) local     substitution Valentino Iannone
+    min 72 (2T 32) local     try          Bautista Joaquin Ramirez Pizarro
+    min 76 (2T 36) visitante try          Bautista Kah
+    min 76 (2T 36) visitante substitution Dylan Martín Racca
+    min 77 (2T 37) visitante substitution Bautista Bianca
+    min 78 (2T 38) visitante substitution Santiago Nicolás Piccinini
+    min 85 (2T 45) visitante substitution Benjamin Pasman
+    min 93 (2T 53) visitante substitution Dante Arabia Erratchu
+    min 93 (2T 53) visitante substitution Juan Pedro Camilión
+    min 100 (2T 60) visitante try          Santino Mariano Guazzelli
+    min 100 (2T 60) visitante conversion   Máximo Rodríguez Silva
+    min 104 (2T 64) visitante try          Santiago Lahitte
+    min 104 (2T 64) visitante conversion   Máximo Rodríguez Silva
+  marcador  · eventos 13-42 · guardado 13-42
+  tries     · 2-6 (guardado 2-6)
+  arbitro   · LAUTARO BAZTERRICA BARO (guardado: LAUTARO BAZTERRICA BARO)
+  guardado  · 22 local · 23 visitante · 30 eventos
+
+los-cardos-r-c vs pueyrredon-mar-del-plata · Clasificatorio M19 · tarjeta 281814  ·  054ccf16-814c-471d-adb7-993c2616e463
+  local     · los-cardos-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · pueyrredon-mar-del-plata · 23 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min  3 (1T 3) local     conversion   Agustin Bollier
+    min  3 (1T 3) local     try          Francisco Sansot
+    min  9 (1T 9) visitante try          Oscar Santana Tejeda
+    min  9 (1T 9) visitante conversion   Milo Savino
+    min 12 (1T 12) local     try          Francisco Sansot
+    min 12 (1T 12) local     conversion   Agustin Bollier
+    min 26 (1T 26) visitante substitution Ezequiel Martín Perez Castiglione
+    min 27 (1T 27) local     try          Juan Martín Franco
+    min 27 (1T 27) local     conversion   Agustin Bollier
+    min 34 (1T 34) local     try          Lorenzo Barrera
+    min 34 (1T 34) local     substitution Francisco Sansot
+    min 34 (1T 34) visitante try          Diego Valentín Barros
+    min 41 (2T 1) local     substitution Quinto Llambi
+    min 49 (2T 9) local     conversion   Agustin Bollier
+    min 49 (2T 9) local     try          Benjamin Zubiaurre
+    min 50 (2T 10) local     conversion   Agustin Bollier
+    min 50 (2T 10) local     try          Ignacio Dobal
+    min 55 (2T 15) local     substitution Valentino Lacamera
+    min 56 (2T 16) local     try          Juan Martín Franco
+    min 60 (2T 20) local     conversion   Agustin Bollier
+    min 60 (2T 20) local     try          Ramiro Pedersen
+    min 65 (2T 25) local     try          Silvestre Cardozo
+    min 71 (2T 31) local     conversion   Benjamin Zubiaurre
+    min 71 (2T 31) local     try          Agustin Bollier
+    min 74 (2T 34) local     try          Benjamin Zubiaurre
+    min 74 (2T 34) local     conversion   Benjamin Zubiaurre
+    min 75 (2T 35) local     try          Benjamin Zubiaurre
+  marcador  · eventos 76-12 · guardado 76-12
+  tries     · 12-2 (guardado 12-2)
+  arbitro   · JUAN MARIANO DI SAVINO (guardado: JUAN MARIANO DI SAVINO)
+  guardado  · 23 local · 23 visitante · 27 eventos
+
+bigua-rugby-club vs comercial-r-c · Clasificatorio M19 · tarjeta 281813  ·  a7e93baf-5bbb-444e-8e1f-cceababcf19e
+  local     · bigua-rugby-club · 23 jugadores · 0 con ficha fijada
+  visitante · comercial-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min  6 (1T 6) visitante conversion   Teo Vazquez
+    min  6 (1T 6) visitante try          Teo Vazquez
+    min 12 (1T 12) visitante try          Teo Vazquez
+    min 28 (1T 28) local     try          Joaquin Estevez
+    min 30 (1T 30) local     substitution Diego Joaquin Montenegro
+    min 43 (2T 3) local     try          Franco Vitale
+    min 48 (2T 8) local     substitution Emiliano Trelles
+    min 48 (2T 8) local     substitution Mateo Diaz
+    min 49 (2T 9) local     try          Mateo Olivera
+    min 52 (2T 12) visitante substitution Thiago Ruiz Alonso
+    min 52 (2T 12) visitante substitution Santino Cattelan
+    min 52 (2T 12) visitante injury       Mijael Nicolás Suárez
+    min 61 (2T 21) visitante substitution Tomas Ibarra Sánchez
+    min 61 (2T 21) visitante injury       Tomas Ibarra Sánchez
+    min 61 (2T 21) visitante substitution Mijael Nicolás Suárez
+    min 61 (2T 21) visitante substitution Mijael Nicolás Suárez
+    min 62 (2T 22) local     card_yellow  Julian Ruiz
+    min 62 (2T 22) local     card_yellow  Santiago Molinari
+    min 67 (2T 27) visitante try          Bernardino Barcos
+    min 70 (2T 30) visitante substitution Lautaro Franchini
+    min 70 (2T 30) visitante conversion   Teo Vazquez
+    min 70 (2T 30) visitante try          Juan Etcheverry
+  marcador  · eventos 15-24 · guardado 15-24
+  tries     · 3-4 (guardado 3-4)
+  arbitro   · JUAN IGNACIO PORFILIO (guardado: JUAN IGNACIO PORFILIO)
+  guardado  · 23 local · 23 visitante · 22 eventos
+
+mar-del-plata-club vs san-ignacio-r-c · Clasificatorio M19 · tarjeta 281817  ·  d3125a4c-7dbe-4d23-a287-1f8fa0fc94e1
+  local     · mar-del-plata-club · 23 jugadores · 1 con ficha fijada
+  visitante · san-ignacio-r-c · 23 jugadores · 5 con ficha fijada
+  eventos   · 16
+    min 21 (1T 21) local     try          Clemente Baez
+    min 34 (1T 34) local     penalty_goal Francisco Guevara
+    min 35 (1T 35) visitante substitution Rocco Calimano
+    min 41 (2T 1) local     substitution Francisco Escalante
+    min 42 (2T 2) local     substitution Matias Miguez
+    min 43 (2T 3) visitante penalty_goal Rafael Giardelli
+    min 45 (2T 5) local     substitution Joaquín López Dupuy
+    min 48 (2T 8) visitante penalty_goal Rafael Giardelli
+    min 50 (2T 10) local     try          Bautista Webb
+    min 55 (2T 15) local     substitution Clemente Baez
+    min 55 (2T 15) visitante substitution Santino Castillo
+    min 55 (2T 15) visitante substitution Pablo Justo Buenaventura
+    min 60 (2T 20) local     substitution Bautista Fernandez Rua
+    min 60 (2T 20) local     substitution Juan Martin Eichhorn
+    min 60 (2T 20) local     substitution Mateo Buono
+    min 60 (2T 20) local     substitution Mirko Rackiewicz
+  marcador  · eventos 13-6 · guardado 13-6
+  tries     · 2-0 (guardado 2-0)
+  arbitro   · LAUTARO LAMAS (guardado: LAUTARO LAMAS)
+  guardado  · 23 local · 23 visitante · 16 eventos
+
+bigua-rugby-club vs pueyrredon-mar-del-plata · Clasificatorio M19 · tarjeta 281823  ·  5bc4d894-da7a-4eac-8773-c8dfce6f5d4c
+  local     · bigua-rugby-club · 23 jugadores · 0 con ficha fijada
+  visitante · pueyrredon-mar-del-plata · 22 jugadores · 0 con ficha fijada
+  eventos   · 13
+    min  4 (1T 4) visitante try          Lautaro Javier Villanueva
+    min  4 (1T 4) visitante conversion   Valentino Blanco
+    min 16 (1T 16) local     card_yellow  Juan Pablo Rodriguez
+    min 46 (2T 6) visitante try          Francisco Tomas Vinaccia
+    min 48 (2T 8) local     try          Valentino Villella
+    min 48 (2T 8) local     substitution Valentin Saldaña Torraco
+    min 48 (2T 8) local     substitution Juan Colasurdo Juárez
+    min 48 (2T 8) local     substitution Santiago Molinari
+    min 48 (2T 8) local     substitution Juan Pablo Rodriguez
+    min 49 (2T 9) local     conversion   Franco Giardini
+    min 52 (2T 12) visitante try          Ezequiel Martín Perez Castiglione
+    min 64 (2T 24) local     try          Valentino Villella
+    min 65 (2T 25) local     conversion   Franco Giardini
+  marcador  · eventos 14-17 · guardado 14-17
+  tries     · 2-3 (guardado 2-3)
+  arbitro   · IGNACIO BOCARDO (guardado: IGNACIO BOCARDO)
+  guardado  · 23 local · 22 visitante · 13 eventos
+
+club-los-50 vs mar-del-plata-club · Clasificatorio M19 · tarjeta 281820  ·  163e62e4-d5cc-4579-818d-9f0fb3349ac6
+  local     · club-los-50 · 21 jugadores · 0 con ficha fijada
+  visitante · mar-del-plata-club · 23 jugadores · 0 con ficha fijada
+  eventos   · 16
+    min  7 (1T 7) visitante try          Clemente Baez
+    min 21 (1T 21) visitante try          Franco Zucconi
+    min 21 (1T 21) visitante conversion   Bautista Fernandez Rua
+    min 25 (1T 25) local     substitution Bernabe Fleitas
+    min 31 (1T 31) local     try          Valentino Iannone
+    min 31 (1T 31) local     conversion   Bautista Joaquin Ramirez Pizarro
+    min 35 (1T 35) local     substitution Julian Suarez Amasino
+    min 45 (2T 5) local     substitution Facundo Camio
+    min 56 (2T 16) local     card_yellow  Emmanuel Christiansen
+    min 62 (2T 22) local     substitution Mirko Bronzovich
+    min 75 (2T 35) local     substitution Donato Gonzalez
+    min 83 (2T 43) visitante try          Francisco Blanco
+    min 96 (2T 56) visitante try          Juan Ignacio Tettamanti
+    min 98 (2T 58) visitante try          Francisco Blanco
+    min 104 (2T 64) visitante try          Francisco Blanco
+    min 104 (2T 64) visitante conversion   Mateo Moreno
+  marcador  · eventos 7-34 · guardado 7-34
+  tries     · 1-6 (guardado 1-6)
+  arbitro   · BRUNO GUILLERMO SIMI (guardado: BRUNO GUILLERMO SIMI)
+  guardado  · 21 local · 23 visitante · 16 eventos
+
+ipr-sporting vs los-cardos-r-c · Clasificatorio M19 · tarjeta 281822  ·  797a26ca-cd93-4838-aefa-6ee5a6c6b3b6
+  local     · ipr-sporting · 23 jugadores · 1 con ficha fijada
+  visitante · los-cardos-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 23
+    min  3 (1T 3) local     conversion   Máximo Rodríguez Silva
+    min  3 (1T 3) local     try          Santiago Lahitte
+    min 19 (1T 19) local     conversion   Máximo Rodríguez Silva
+    min 19 (1T 19) local     try          Bautista Kah
+    min 25 (1T 25) local     try          Máximo Rodríguez Silva
+    min 25 (1T 25) local     conversion   Máximo Rodríguez Silva
+    min 51 (2T 11) visitante substitution Matias Bollier
+    min 54 (2T 14) visitante substitution Francisco Paez
+    min 55 (2T 15) visitante card_red     Lorenzo Barrera
+    min 77 (2T 37) local     try          Máximo Rodríguez Silva
+    min 77 (2T 37) local     conversion   Máximo Rodríguez Silva
+    min 90 (2T 50) local     substitution Salvador Patron Costas
+    min 91 (2T 51) local     substitution Máximo Rodríguez Silva
+    min 96 (2T 56) local     substitution Santiago Nicolás Piccinini
+    min 96 (2T 56) local     substitution Facundo Altuna
+    min 97 (2T 57) local     substitution Dante Arabia Erratchu
+    min 97 (2T 57) local     substitution Juan Pedro Camilión
+    min 99 (2T 59) local     try          Francisco Iriarte
+    min 99 (2T 59) local     conversion   Santiago Lahitte
+    min 101 (2T 61) local     substitution Santiago Lahitte
+    min 101 (2T 61) local     substitution Dylan Martín Racca
+    min 104 (2T 64) local     try          Bautista Kah
+    min 110 (2T 70) local     try          Juan Martin Olza
+  marcador  · eventos 45-0 · guardado 45-0
+  tries     · 7-0 (guardado 7-0)
+  arbitro   · ALEJANDRO VILLANUEVA 11991906 (NO OFICIAL) (guardado: ALEJANDRO VILLANUEVA 11991906 (NO OFICIAL))
+  guardado  · 23 local · 23 visitante · 23 eventos
+
+universitario-de-mar-del-plata vs san-ignacio-r-c · Clasificatorio M19 · tarjeta 281819  ·  515eeff0-0f12-4310-9ad4-ab850ae11df6
+  local     · universitario-de-mar-del-plata · 23 jugadores · 2 con ficha fijada
+  visitante · san-ignacio-r-c · 23 jugadores · 3 con ficha fijada
+  eventos   · 22
+    min  8 (1T 8) local     try          Santiago Schwerdtfeger
+    min 12 (1T 12) local     try          Simon Macadam
+    min 12 (1T 12) local     conversion   Benito Soler Villen B
+    min 16 (1T 16) visitante injury       Felipe Magrini
+    min 16 (1T 16) visitante substitution Felipe Magrini
+    min 40 (2T 0) local     substitution Juan Ignacio Galante
+    min 41 (2T 1) local     try          Francisco Odriozola
+    min 41 (2T 1) local     conversion   Benito Soler Villen B
+    min 55 (2T 15) local     substitution Francisco Ignacio Zaldivar
+    min 56 (2T 16) visitante try          Santino Castillo
+    min 57 (2T 17) local     try          Benito Soler Villen B
+    min 57 (2T 17) local     conversion   Benito Soler Villen B
+    min 57 (2T 17) visitante conversion   Daniel Havrylenko
+    min 60 (2T 20) local     substitution Lorenzo Diaz Gutierrez
+    min 60 (2T 20) local     injury       Lorenzo Diaz Gutierrez
+    min 60 (2T 20) local     substitution Nahuel Akeem Imaz
+    min 62 (2T 22) local     substitution Ciro Damelio
+    min 63 (2T 23) visitante try          Santino Castillo
+    min 64 (2T 24) visitante conversion   Juan Ignacio Madeira
+    min 67 (2T 27) local     try          Simon Macadam
+    min 71 (2T 31) visitante try          Juan Ignacio Madeira
+    min 72 (2T 32) visitante conversion   Juan Ignacio Madeira
+  marcador  · eventos 31-21 · guardado 31-21
+  tries     · 5-3 (guardado 5-3)
+  arbitro   · JULIAN FERNANDEZ (guardado: JULIAN FERNANDEZ)
+  guardado  · 23 local · 23 visitante · 22 eventos
+
+pueyrredon-mar-del-plata vs comercial-r-c · Clasificatorio M19 · tarjeta 281838  ·  1de00681-8a1d-415d-96f4-80d5f394fa1a
+  local     · pueyrredon-mar-del-plata · 23 jugadores · 0 con ficha fijada
+  visitante · comercial-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min -1 (1T -1) local     substitution Juan Bautista Perez
+    min  1 (1T 1) local     substitution Joaquin Lautaro Giles
+    min  3 (1T 3) local     substitution Santino Tomas Lucero
+    min  6 (1T 6) visitante try          Teo Vazquez
+    min  8 (1T 8) local     conversion   Milo Savino
+    min  8 (1T 8) local     try          Ezequiel Martín Perez Castiglione
+    min 16 (1T 16) visitante try          Teo Vazquez
+    min 21 (1T 21) visitante conversion   Bernardino Barcos
+    min 21 (1T 21) visitante try          Mateo Agustín Cativiela
+    min 33 (1T 33) visitante penalty_goal Bernardino Barcos
+    min 35 (1T 35) local     conversion   Oscar Santana Tejeda
+    min 35 (1T 35) local     try          Oscar Santana Tejeda
+    min 41 (2T 1) local     substitution Josué Thiago Barrionuevo Nicuez
+    min 43 (2T 3) local     substitution Rocco Vidal
+    min 43 (2T 3) visitante substitution Joaquín Rojas
+    min 51 (2T 11) visitante substitution Benicio Basavilbaso
+    min 51 (2T 11) visitante substitution Ramiro Cordonnier Falaschini
+    min 57 (2T 17) visitante substitution Santino Cattelan
+    min 60 (2T 20) local     substitution Valentino Blanco
+    min 63 (2T 23) local     try          Milo Savino
+    min 70 (2T 30) visitante substitution Lautaro Franchini
+    min 70 (2T 30) visitante substitution Julián Daniel Valle Torres
+  marcador  · eventos 19-20 · guardado 19-20
+  tries     · 3-3 (guardado 3-3)
+  arbitro   · JULIAN CARRARA (guardado: JULIAN CARRARA)
+  guardado  · 23 local · 23 visitante · 22 eventos
+
+bigua-rugby-club vs mar-del-plata-club · Clasificatorio M19 · tarjeta 281836  ·  9a03b70f-513c-4aa1-b678-1c978d0fb9d4
+  local     · bigua-rugby-club · 23 jugadores · 0 con ficha fijada
+  visitante · mar-del-plata-club · 23 jugadores · 1 con ficha fijada
+  eventos   · 26
+    min  3 (1T 3) visitante try          Valentino Lancellotti
+    min  6 (1T 6) visitante try          Gabino Felipe
+    min  6 (1T 6) visitante conversion   Mateo Moreno
+    min 14 (1T 14) visitante try          Valentino Lancellotti
+    min 20 (1T 20) local     try          Benjamin Luna
+    min 20 (1T 20) local     conversion   Franco Giardini
+    min 20 (1T 20) visitante substitution Tomas Zabludovich
+    min 23 (1T 23) visitante try          Valentino Lancellotti
+    min 23 (1T 23) visitante conversion   Mateo Moreno
+    min 26 (1T 26) visitante substitution Valentino Lancellotti
+    min 30 (1T 30) visitante conversion   Mateo Moreno
+    min 30 (1T 30) visitante try          Clemente Baez
+    min 32 (1T 32) local     substitution Bautista Benjamin Orellana
+    min 44 (2T 4) local     substitution Diego Joaquin Montenegro
+    min 45 (2T 5) visitante substitution Mirko Rackiewicz
+    min 45 (2T 5) visitante substitution Francisco Escalante
+    min 45 (2T 5) visitante substitution Franco Zucconi
+    min 50 (2T 10) local     substitution Agustin Nicolas Muñoz
+    min 50 (2T 10) local     substitution Franco Giardini
+    min 50 (2T 10) visitante substitution Pedro Serantes
+    min 57 (2T 17) visitante substitution Matias Miguez
+    min 57 (2T 17) visitante substitution Mateo Moreno
+    min 69 (2T 29) visitante try          Felipe Antonio Delgiorgio Salerno
+    min 72 (2T 32) local     substitution Emiliano Trelles
+    min 75 (2T 35) local     try          Thiago Sanchez Salerno
+    min 75 (2T 35) local     conversion   Valentino Villella
+  marcador  · eventos 14-36 · guardado 14-36
+  tries     · 2-6 (guardado 2-6)
+  arbitro   · NICOLÁS MIGUEL COSENTINO (guardado: NICOLÁS MIGUEL COSENTINO)
+  guardado  · 23 local · 23 visitante · 26 eventos
+
+los-cardos-r-c vs universitario-de-mar-del-plata · Clasificatorio M19 · tarjeta 281835  ·  3d17cae5-8538-4470-9d59-868f62c596a1
+  local     · los-cardos-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · universitario-de-mar-del-plata · 23 jugadores · 3 con ficha fijada
+  eventos   · 16
+    min 15 (1T 15) visitante try          Leandro Iñiguez
+    min 20 (1T 20) local     card_yellow  Francisco Sansot
+    min 25 (1T 25) local     try          Ignacio Dobal
+    min 25 (1T 25) local     conversion   Agustin Bollier
+    min 37 (1T 37) local     substitution Francisco Sansot
+    min 52 (1T 52) local     substitution Matias Bollier
+    min 59 (1T 59) local     substitution Alfonso Heer
+    min 40 (2T 0) visitante substitution Ciro Damelio
+    min 40 (2T 0) visitante substitution Juan Ignacio Galante
+    min 44 (2T 4) visitante try          Constantino Sapia Pucheta
+    min 44 (2T 4) visitante conversion   Benito Soler Villen B
+    min 44 (2T 4) visitante substitution Nahuel Akeem Imaz
+    min 44 (2T 4) visitante substitution Francisco Ignacio Zaldivar
+    min 51 (2T 11) visitante card_yellow  Ismael Sepúlveda
+    min 68 (2T 28) visitante try          Luca Laino
+    min 75 (2T 35) visitante penalty_goal Benito Soler Villen B
+  marcador  · eventos 7-20 · guardado 7-20
+  tries     · 1-3 (guardado 1-3)
+  arbitro   · JUAN MARIANO DI SAVINO (guardado: JUAN MARIANO DI SAVINO)
+  guardado  · 23 local · 23 visitante · 16 eventos
+
+union-del-sur vs club-los-50 · Clasificatorio M19 · tarjeta 281834  ·  20f3a7ab-0a9d-4e6d-8f93-2cc85de52e5c
+  local     · union-del-sur · 23 jugadores · 0 con ficha fijada
+  visitante · club-los-50 · 21 jugadores · 0 con ficha fijada
+  eventos   · 37
+    min  4 (1T 4) local     conversion   Ramon Rossi
+    min  4 (1T 4) local     try          Dante Saglia
+    min  8 (1T 8) visitante penalty_goal Bautista Joaquin Ramirez Pizarro
+    min 10 (1T 10) local     try          Ramon Rossi
+    min 10 (1T 10) local     conversion   Ramon Rossi
+    min 17 (1T 17) local     try          Benjamin Torres Martinez
+    min 17 (1T 17) local     conversion   Ramon Rossi
+    min 28 (1T 28) local     try          Alejo Blanco
+    min 28 (1T 28) local     conversion   Ramon Rossi
+    min 31 (1T 31) local     try          Santiago Attanasio
+    min 34 (1T 34) local     try          Ramon Rossi
+    min 34 (1T 34) local     conversion   Ramon Rossi
+    min 41 (2T 1) local     try          Máximo Mosquera Humen
+    min 43 (2T 3) visitante substitution Luciano Christiansen
+    min 43 (2T 3) visitante substitution Julian Suarez Amasino
+    min 43 (2T 3) visitante substitution Marcos Rios
+    min 45 (2T 5) local     substitution Máximo Mosquera Humen
+    min 45 (2T 5) local     substitution Juan Bautista Mannarino
+    min 46 (2T 6) visitante substitution Iñaki Elissondo
+    min 46 (2T 6) visitante try          Luciano Christiansen
+    min 46 (2T 6) visitante conversion   Bautista Joaquin Ramirez Pizarro
+    min 51 (2T 11) local     try          Felipe Mayorano
+    min 52 (2T 12) local     substitution Tobias Ezequiel Arias
+    min 56 (2T 16) visitante try          Bautista Joaquin Ramirez Pizarro
+    min 56 (2T 16) visitante conversion   Bautista Joaquin Ramirez Pizarro
+    min 57 (2T 17) local     substitution Tobias Leonel Uzquiza
+    min 58 (2T 18) local     try          Felipe Mayorano
+    min 60 (2T 20) local     substitution Alejo Blanco
+    min 61 (2T 21) local     conversion   Ramon Rossi
+    min 61 (2T 21) local     try          Santiago Attanasio
+    min 63 (2T 23) local     substitution Santiago Attanasio
+    min 63 (2T 23) local     substitution Franco Naiderman
+    min 66 (2T 26) local     substitution Dante Saglia
+    min 67 (2T 27) local     conversion   Pedro Martin
+    min 67 (2T 27) local     try          Santiago Attanasio
+    min 76 (2T 36) local     conversion   Pedro Martin
+    min 76 (2T 36) local     try          Benjamin Torres Martinez
+  marcador  · eventos 76-17 · guardado 76-17
+  tries     · 12-2 (guardado 12-2)
+  arbitro   · AGUSTIN CERSOSIMO (guardado: AGUSTIN CERSOSIMO)
+  guardado  · 23 local · 21 visitante · 37 eventos
+
+san-ignacio-r-c vs club-los-50 · Clasificatorio M19 · tarjeta 281845  ·  e321fbf5-6c30-4405-b762-ad9cf38c28fa
+  local     · san-ignacio-r-c · 23 jugadores · 4 con ficha fijada
+  visitante · club-los-50 · 23 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min  3 (1T 3) local     try          Rocco Calimano
+    min  4 (1T 4) local     conversion   Rafael Giardelli
+    min 16 (1T 16) local     try          Lucas Belatinez
+    min 24 (1T 24) local     card_yellow  Luciano Zabala
+    min 31 (1T 31) local     try          Rafael Giardelli
+    min 32 (1T 32) local     conversion   Rafael Giardelli
+    min 41 (2T 1) visitante substitution Felipe De Galvagni
+    min 43 (2T 3) local     try          Rafael Giardelli
+    min 47 (2T 7) local     try          Daniel Havrylenko
+    min 53 (2T 13) local     try          Rafael Giardelli
+    min 53 (2T 13) local     conversion   Lucas Belatinez
+    min 54 (2T 14) visitante card_yellow  Tomas Garcia Rife
+    min 54 (2T 14) visitante substitution Iñaki Elissondo
+    min 54 (2T 14) visitante substitution Julian Suarez Amasino
+    min 58 (2T 18) local     try          Augusto Sanchez
+    min 58 (2T 18) visitante substitution Mirko Bronzovich
+    min 58 (2T 18) visitante substitution Bernabe Fleitas
+    min 60 (2T 20) local     substitution Alberto Emilio Asseff
+    min 67 (2T 27) local     try          Pablo Sanchez
+    min 68 (2T 28) local     conversion   Augusto Sanchez
+    min 70 (2T 30) local     try          Pablo Sanchez
+    min 70 (2T 30) local     conversion   Rafael Giardelli
+    min 71 (2T 31) visitante try          Ignacio Rodriguez Libonatti
+    min 75 (2T 35) local     try          Leonel Cotado
+    min 75 (2T 35) local     conversion   Rafael Giardelli
+  marcador  · eventos 62-5 · guardado 62-5
+  tries     · 10-1 (guardado 10-1)
+  arbitro   · ALEJANDRO VILLANUEVA 11991906 (NO OFICIAL) (guardado: ALEJANDRO VILLANUEVA 11991906 (NO OFICIAL))
+  guardado  · 23 local · 23 visitante · 25 eventos
+
+union-del-sur vs los-cardos-r-c · Clasificatorio M19 · tarjeta 281843  ·  0f1368e7-6d57-4cd3-9047-9bbc8abff00e
+  local     · union-del-sur · 23 jugadores · 0 con ficha fijada
+  visitante · los-cardos-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 26
+    min  7 (1T 7) local     conversion   Ramon Rossi
+    min  7 (1T 7) local     try          Santiago Attanasio
+    min 10 (1T 10) visitante penalty_goal Agustin Bollier
+    min 13 (1T 13) local     try          Ramon Rossi
+    min 13 (1T 13) local     conversion   Ramon Rossi
+    min 15 (1T 15) local     try          Santiago Attanasio
+    min 15 (1T 15) local     conversion   Ramon Rossi
+    min 15 (1T 15) visitante substitution Tiziano Manuel Arias Ruderman
+    min 38 (1T 38) local     try          Santiago Sanchez
+    min 38 (1T 38) local     conversion   Ramon Rossi
+    min 41 (2T 1) visitante try          Justo Di Lazaro
+    min 41 (2T 1) visitante conversion   Agustin Bollier
+    min 43 (2T 3) local     substitution Tobias Leonel Uzquiza
+    min 43 (2T 3) local     substitution Tobias Ezequiel Arias
+    min 47 (2T 7) visitante try          Justo Di Lazaro
+    min 51 (2T 11) local     substitution Simón Rossi
+    min 51 (2T 11) local     substitution Felipe Mayorano
+    min 51 (2T 11) local     substitution Marcos Gabotto
+    min 55 (2T 15) visitante penalty_goal Agustin Bollier
+    min 59 (2T 19) visitante substitution Benjamin Zubiaurre
+    min 65 (2T 25) visitante try          Justo Di Lazaro
+    min 70 (2T 30) local     substitution Santiago Attanasio
+    min 70 (2T 30) local     substitution Ignacio Boggio
+    min 73 (2T 33) local     try          Facundo Muñoz
+    min 73 (2T 33) local     conversion   Ramon Rossi
+    min 76 (2T 36) local     penalty_goal Ramon Rossi
+  marcador  · eventos 38-23 · guardado 38-23
+  tries     · 5-3 (guardado 5-3)
+  arbitro   · MARIO FEDERICO CHARLES (guardado: MARIO FEDERICO CHARLES)
+  guardado  · 23 local · 23 visitante · 26 eventos
+
+universitario-de-mar-del-plata vs bigua-rugby-club · Clasificatorio M19 · tarjeta 281842  ·  be13a92f-6249-4ace-9b32-eef5592e5cd4
+  local     · universitario-de-mar-del-plata · 23 jugadores · 2 con ficha fijada
+  visitante · bigua-rugby-club · 23 jugadores · 0 con ficha fijada
+  eventos   · 29
+    min  1 (1T 1) local     try          Simon Merlos
+    min  7 (1T 7) local     conversion   Robertino Moraza
+    min  7 (1T 7) local     try          Robertino Moraza
+    min 10 (1T 10) visitante penalty_goal Franco Giardini
+    min 20 (1T 20) local     injury       Santiago Schwerdtfeger
+    min 20 (1T 20) local     substitution Santiago Schwerdtfeger
+    min 22 (1T 22) local     try          Tobias Ganly
+    min 22 (1T 22) local     conversion   Robertino Moraza
+    min 26 (1T 26) local     try          Matias Quiroga
+    min 26 (1T 26) local     conversion   Robertino Moraza
+    min 29 (1T 29) local     try          Francisco Figueredo
+    min 36 (1T 36) local     try          Tomas Di Tulio Vargas
+    min 41 (2T 1) visitante substitution Mateo Olivera
+    min 48 (2T 8) visitante substitution Mateo Diaz
+    min 50 (2T 10) local     substitution Leandro Iñiguez
+    min 57 (2T 17) local     try          Benjamin De La Vega
+    min 57 (2T 17) local     conversion   Robertino Moraza
+    min 58 (2T 18) local     substitution Simon Merlos
+    min 58 (2T 18) local     substitution Franco Cervellini
+    min 59 (2T 19) local     conversion   Robertino Moraza
+    min 59 (2T 19) local     try          Mateo Pampaloni
+    min 60 (2T 20) local     substitution Mateo Pampaloni
+    min 60 (2T 20) visitante substitution Thiago Sanchez Salerno
+    min 60 (2T 20) visitante substitution Nicolas Arenas
+    min 65 (2T 25) local     substitution Francisco Figueredo
+    min 65 (2T 25) local     substitution Matias Quiroga
+    min 73 (2T 33) local     card_yellow  Simon Merlos
+    min 73 (2T 33) visitante card_yellow  Joaquin Estevez
+    min 75 (2T 35) visitante try          Guillermo Martin Del Moral
+  marcador  · eventos 50-8 · guardado 50-8
+  tries     · 8-1 (guardado 8-1)
+  arbitro   · JULIAN FERNANDEZ (guardado: JULIAN FERNANDEZ)
+  guardado  · 23 local · 23 visitante · 29 eventos
+
+ipr-sporting vs comercial-r-c · Clasificatorio M19 · tarjeta 281840  ·  ba62e94e-6013-4fae-bd22-2630ef2a7483
+  local     · ipr-sporting · 23 jugadores · 1 con ficha fijada
+  visitante · comercial-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 28
+    min  9 (1T 9) visitante try          Teo Vazquez
+    min 12 (1T 12) local     try          Mateo Jeremias Rossi
+    min 12 (1T 12) local     conversion   Máximo Rodríguez Silva
+    min 16 (1T 16) visitante try          Benjamín Mateo Miracco Martinez
+    min 16 (1T 16) visitante conversion   Teo Vazquez
+    min 25 (1T 25) local     substitution Ignacio Stella
+    min 27 (1T 27) visitante card_yellow  Ramiro Cordonnier Falaschini
+    min 28 (1T 28) local     try          Bautista Kah
+    min 28 (1T 28) local     conversion   Máximo Rodríguez Silva
+    min 30 (1T 30) local     card_yellow  Mateo Jeremias Rossi
+    min 33 (1T 33) local     try          Santiago Nicolás Piccinini
+    min 33 (1T 33) local     conversion   Máximo Rodríguez Silva
+    min 49 (2T 9) visitante substitution Julián Daniel Valle Torres
+    min 49 (2T 9) visitante substitution Santino Cattelan
+    min 66 (2T 26) visitante try          Benjamín Mateo Miracco Martinez
+    min 66 (2T 26) visitante conversion   Teo Vazquez
+    min 72 (2T 32) visitante substitution Mateo Dambrosio
+    min 72 (2T 32) visitante injury       Mateo Dambrosio
+    min 72 (2T 32) visitante substitution Joaquín Rojas
+    min 81 (2T 41) local     try          Santiago Nicolás Piccinini
+    min 81 (2T 41) local     substitution Antonino José Fagioli
+    min 82 (2T 42) local     substitution Francisco Gorosito
+    min 84 (2T 44) local     substitution Máximo Rodríguez Silva
+    min 84 (2T 44) local     substitution Lucas Guido Rabago Pezzati
+    min 85 (2T 45) local     substitution Salvador Patron Costas
+    min 87 (2T 47) local     substitution Santiago Nicolás Piccinini
+    min 87 (2T 47) local     substitution Mateo Jeremias Rossi
+    min 100 (2T 60) local     card_yellow  Agustín Figueroa
+  marcador  · eventos 26-19 · guardado 26-19
+  tries     · 4-3 (guardado 4-3)
+  arbitro   · LAUTARO CORDEIRO (guardado: LAUTARO CORDEIRO)
+  guardado  · 23 local · 23 visitante · 28 eventos
+
+san-ignacio-r-c vs los-cardos-r-c · Clasificatorio M19 · tarjeta 281846  ·  eb310e82-39bc-48cb-bf43-6c95d6fa1b09
+  local     · san-ignacio-r-c · 23 jugadores · 4 con ficha fijada
+  visitante · los-cardos-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 13
+    min  1 (1T 1) visitante try          Benjamin Zubiaurre
+    min  1 (1T 1) visitante conversion   Agustin Bollier
+    min  8 (1T 8) local     try          Leonel Cotado
+    min 21 (1T 21) local     try          Leonel Cotado
+    min 22 (1T 22) local     conversion   Juan Ignacio Madeira
+    min 27 (1T 27) visitante penalty_goal Agustin Bollier
+    min 33 (1T 33) local     try          Daniel Havrylenko
+    min 34 (1T 34) local     card_yellow  Ramiro Allamanda
+    min 42 (2T 2) visitante substitution Quinto Llambi
+    min 50 (2T 10) visitante penalty_goal Agustin Bollier
+    min 55 (2T 15) visitante penalty_goal Agustin Bollier
+    min 72 (2T 32) visitante try          Justo Di Lazaro
+    min 74 (2T 34) visitante card_yellow  Jose Salvador Rodriguez
+  marcador  · eventos 17-21 · guardado 17-21
+  tries     · 3-2 (guardado 3-2)
+  arbitro   · JULIAN CARRARA (guardado: JULIAN CARRARA)
+  guardado  · 23 local · 23 visitante · 13 eventos
+
+pueyrredon-mar-del-plata vs ipr-sporting · Clasificatorio M19 · tarjeta 281851  ·  e9d07aa5-3638-461f-a3cb-42e94a538e80
+  local     · pueyrredon-mar-del-plata · 23 jugadores · 0 con ficha fijada
+  visitante · ipr-sporting · 23 jugadores · 1 con ficha fijada
+  eventos   · 26
+    min  7 (1T 7) visitante try          Mateo Jeremias Rossi
+    min  9 (1T 9) visitante conversion   Máximo Rodríguez Silva
+    min  9 (1T 9) visitante try          Benicio Murillo
+    min 16 (1T 16) visitante conversion   Máximo Rodríguez Silva
+    min 16 (1T 16) visitante try          Bautista Kah
+    min 22 (1T 22) local     card_yellow  Nehuen Otto Lechner
+    min 22 (1T 22) visitante try          Juan Pedro Camilión
+    min 29 (1T 29) visitante conversion   Máximo Rodríguez Silva
+    min 29 (1T 29) visitante try          Dante Arabia Erratchu
+    min 32 (1T 32) visitante conversion   Máximo Rodríguez Silva
+    min 32 (1T 32) visitante try          Santiago De La Vega
+    min 70 (2T 30) local     substitution Nehuen Otto Lechner
+    min 75 (2T 35) visitante substitution Santiago Nicolás Piccinini
+    min 77 (2T 37) visitante substitution Mateo Jeremias Rossi
+    min 77 (2T 37) visitante substitution Santiago De La Vega
+    min 78 (2T 38) visitante substitution Máximo Rodríguez Silva
+    min 79 (2T 39) visitante substitution Lucas Guido Rabago Pezzati
+    min 80 (2T 40) local     try          Francisco Tomas Vinaccia
+    min 80 (2T 40) local     conversion   Milo Savino
+    min 80 (2T 40) visitante substitution Francisco Iriarte
+    min 81 (2T 41) visitante substitution Juan Pedro Camilión
+    min 87 (2T 47) visitante try          Santiago Lahitte
+    min 87 (2T 47) visitante substitution Bautista Celis
+    min 89 (2T 49) visitante try          Santino Mariano Guazzelli
+    min 89 (2T 49) visitante conversion   Juan Manuel Montenegro
+    min 103 (2T 63) visitante try          Dante Arabia Erratchu
+  marcador  · eventos 7-55 · guardado 7-55
+  tries     · 1-9 (guardado 1-9)
+  arbitro   · GASTON BARTHE (guardado: GASTON BARTHE)
+  guardado  · 23 local · 23 visitante · 26 eventos
+
+comercial-r-c vs mar-del-plata-club · Clasificatorio M19 · tarjeta 281850  ·  b36c7342-3912-4ee3-bc63-2f16a5315936
+  local     · comercial-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · mar-del-plata-club · 23 jugadores · 0 con ficha fijada
+  eventos   · 32
+    min  1 (1T 1) local     try          Tomas Ibarra Sánchez
+    min  1 (1T 1) local     conversion   Teo Vazquez
+    min  5 (1T 5) visitante try          Mateo Bilancieri
+    min 10 (1T 10) visitante try          Tobias Igancio Andrade
+    min 10 (1T 10) visitante conversion   Francisco Guevara
+    min 17 (1T 17) visitante try          Bautista Arosteguy
+    min 17 (1T 17) visitante conversion   Francisco Guevara
+    min 28 (1T 28) local     injury       Teo Vazquez
+    min 28 (1T 28) local     substitution Teo Vazquez
+    min 31 (1T 31) visitante try          Santino Muñoz
+    min 44 (2T 4) local     substitution Santino Cattelan
+    min 47 (2T 7) local     substitution Julián Daniel Valle Torres
+    min 47 (2T 7) local     substitution Ramiro Cordonnier Falaschini
+    min 50 (2T 10) local     try          Benjamin Rivero
+    min 50 (2T 10) local     conversion   Bernardino Barcos
+    min 55 (2T 15) local     card_red     Benjamín Mateo Miracco Martinez
+    min 80 (2T 40) visitante try          Mateo Bilancieri
+    min 80 (2T 40) visitante conversion   Francisco Guevara
+    min 82 (2T 42) visitante try          Bautista Fernandez Rua
+    min 82 (2T 42) visitante conversion   Bautista Fernandez Rua
+    min 85 (2T 45) visitante substitution Santino Muñoz
+    min 85 (2T 45) visitante substitution Matias Miguez
+    min 85 (2T 45) visitante substitution Francisco Escalante
+    min 85 (2T 45) visitante substitution Mateo Bilancieri
+    min 85 (2T 45) visitante substitution Mirko Rackiewicz
+    min 90 (2T 50) visitante substitution Francisco Guevara
+    min 90 (2T 50) visitante substitution Juan Martin Moreno
+    min 90 (2T 50) visitante try          Bautista Fernandez Rua
+    min 90 (2T 50) visitante substitution Tobias Igancio Andrade
+    min 90 (2T 50) visitante injury       Francisco Guevara
+    min 95 (2T 55) visitante substitution Juan Martin Eichhorn
+    min 105 (2T 65) visitante try          Stefano Sabarese Capria
+  marcador  · eventos 14-48 · guardado 14-48
+  tries     · 2-8 (guardado 2-8)
+  arbitro   · JUAN IGNACIO PORFILIO (guardado: JUAN IGNACIO PORFILIO)
+  guardado  · 23 local · 23 visitante · 32 eventos
+
+union-del-sur vs bigua-rugby-club · Clasificatorio M19 · tarjeta 281848  ·  91596fad-eb30-4ce0-8aa6-57e935a90052
+  local     · union-del-sur · 23 jugadores · 0 con ficha fijada
+  visitante · bigua-rugby-club · 23 jugadores · 0 con ficha fijada
+  eventos   · 34
+    min  6 (1T 6) local     try          Simón Rossi
+    min 12 (1T 12) local     try          Simón Rossi
+    min 12 (1T 12) local     conversion   Ramon Rossi
+    min 16 (1T 16) visitante card_yellow  Julian Ruiz
+    min 19 (1T 19) local     try          Agustin Ruseckaite
+    min 19 (1T 19) local     conversion   Ramon Rossi
+    min 20 (1T 20) local     try          Santiago Sanchez
+    min 20 (1T 20) local     conversion   Ramon Rossi
+    min 27 (1T 27) local     try          Felipe Moritan
+    min 27 (1T 27) local     conversion   Ramon Rossi
+    min 30 (1T 30) local     substitution Benjamin Torres Martinez
+    min 30 (1T 30) local     substitution Marcos Gabotto
+    min 37 (1T 37) local     try          Felipe Moritan
+    min 43 (2T 3) local     try          Faustino Domato Hidalgo
+    min 43 (2T 3) local     conversion   Ramon Rossi
+    min 45 (2T 5) local     substitution Alejo Blanco
+    min 45 (2T 5) local     substitution Felipe Mayorano
+    min 45 (2T 5) local     substitution Franco Naiderman
+    min 45 (2T 5) local     substitution Faustino Domato Hidalgo
+    min 45 (2T 5) visitante substitution Franco Vitale
+    min 48 (2T 8) visitante try          Alejandro Figueroa
+    min 55 (2T 15) local     substitution Ignacio Berasategui
+    min 55 (2T 15) local     substitution Felipe Moritan
+    min 55 (2T 15) local     try          Santiago Attanasio
+    min 55 (2T 15) visitante substitution Guillermo Martin Del Moral
+    min 57 (2T 17) local     conversion   Ramon Rossi
+    min 57 (2T 17) local     try          Nahuel Jeremias Villanueva
+    min 63 (2T 23) local     conversion   Ramon Rossi
+    min 63 (2T 23) local     try          Santiago Attanasio
+    min 65 (2T 25) visitante substitution Benjamin Luna
+    min 69 (2T 29) local     conversion   Ramon Rossi
+    min 69 (2T 29) local     try          Ramon Rossi
+    min 72 (2T 32) local     try          Ramon Rossi
+    min 75 (2T 35) visitante try          Franco Giardini
+  marcador  · eventos 76-10 · guardado 76-10
+  tries     · 12-2 (guardado 12-2)
+  arbitro   · ALEJANDRO VILLANUEVA 11991906 (NO OFICIAL) (guardado: ALEJANDRO VILLANUEVA 11991906 (NO OFICIAL))
+  guardado  · 23 local · 23 visitante · 34 eventos
+
+club-los-50 vs universitario-de-mar-del-plata · Clasificatorio M19 · tarjeta 281831  ·  1aa45b9c-3445-4ee5-86c5-58828c064f64
+  local     · club-los-50 · 23 jugadores · 0 con ficha fijada
+  visitante · universitario-de-mar-del-plata · 23 jugadores · 2 con ficha fijada
+  eventos   · 38
+    min  3 (1T 3) visitante conversion   Robertino Moraza
+    min  3 (1T 3) visitante try          Francisco Odriozola
+    min  7 (1T 7) local     penalty_goal Bautista Joaquin Ramirez Pizarro
+    min  8 (1T 8) visitante card_yellow  Francesco Salvatierra
+    min 11 (1T 11) local     conversion   Bautista Joaquin Ramirez Pizarro
+    min 11 (1T 11) local     try          Donato Gonzalez
+    min 14 (1T 14) visitante try          Mateo Pampaloni
+    min 14 (1T 14) visitante conversion   Robertino Moraza
+    min 16 (1T 16) visitante try          Francisco Odriozola
+    min 23 (1T 23) local     try          Pedro Cantarella
+    min 27 (1T 27) local     try          Lautaro Aguilera
+    min 27 (1T 27) visitante try          Tobias Ganly
+    min 31 (1T 31) visitante try          Francisco Odriozola
+    min 31 (1T 31) visitante conversion   Robertino Moraza
+    min 35 (1T 35) visitante try          Mateo Pampaloni
+    min 35 (1T 35) visitante conversion   Robertino Moraza
+    min 42 (2T 2) local     substitution Julian Suarez Amasino
+    min 43 (2T 3) local     try          Facundo Garra
+    min 43 (2T 3) local     conversion   Bautista Joaquin Ramirez Pizarro
+    min 45 (2T 5) visitante substitution Santino Mendez
+    min 46 (2T 6) local     card_yellow  Agustin Torrissi
+    min 49 (2T 9) visitante try          Francisco Ignacio Zaldivar
+    min 50 (2T 10) local     substitution Bernabe Fleitas
+    min 52 (2T 12) local     try          Santiago Pellegrini
+    min 55 (2T 15) local     substitution Donato Gonzalez
+    min 55 (2T 15) visitante try          Ciro Damelio
+    min 55 (2T 15) visitante substitution Francisco Figueredo
+    min 55 (2T 15) visitante substitution Leandro Iñiguez
+    min 55 (2T 15) visitante conversion   Robertino Moraza
+    min 62 (2T 22) local     substitution Felipe Schettino
+    min 62 (2T 22) local     substitution Tadeo Stutz
+    min 62 (2T 22) local     substitution Mirko Bronzovich
+    min 65 (2T 25) visitante substitution Tobias Ganly
+    min 65 (2T 25) visitante substitution Simon Merlos
+    min 65 (2T 25) visitante substitution Francesco Salvatierra
+    min 67 (2T 27) local     conversion   Bautista Joaquin Ramirez Pizarro
+    min 70 (2T 30) visitante substitution Francisco Domijan
+    min 70 (2T 30) visitante substitution Ciro Damelio
+  marcador  · eventos 34-50 · guardado 34-50
+  tries     · 5-8 (guardado 5-8)
+  arbitro   · MARCELO PUERTA (guardado: MARCELO PUERTA)
+  guardado  · 23 local · 23 visitante · 38 eventos
+
+los-cardos-r-c vs mar-del-plata-club · Clasificatorio M19 · tarjeta 281829  ·  6a683973-fad6-477a-b66b-50adac15cb54
+  local     · los-cardos-r-c · 21 jugadores · 0 con ficha fijada
+  visitante · mar-del-plata-club · 23 jugadores · 1 con ficha fijada
+  eventos   · 25
+    min  4 (1T 4) visitante conversion   Mateo Moreno
+    min  4 (1T 4) visitante try          Benjamin Graef
+    min  6 (1T 6) visitante try          Matias Miguez
+    min  6 (1T 6) visitante conversion   Mateo Moreno
+    min 10 (1T 10) local     penalty_goal Agustin Bollier
+    min 15 (1T 15) local     penalty_goal Agustin Bollier
+    min 22 (1T 22) local     try          Silvestre Cardozo
+    min 22 (1T 22) local     conversion   Agustin Bollier
+    min 28 (1T 28) local     penalty_goal Agustin Bollier
+    min 29 (1T 29) visitante substitution Tobias Igancio Andrade
+    min 31 (1T 31) visitante try          Tomas Huici
+    min 46 (2T 6) local     substitution Matias Bollier
+    min 56 (2T 16) local     substitution Marcos Casabal
+    min 61 (2T 21) local     drop_goal    Agustin Bollier
+    min 75 (2T 35) visitante substitution Pedro Serantes
+    min 75 (2T 35) visitante substitution Mateo Bilancieri
+    min 75 (2T 35) visitante substitution Lionel Igor Blanco
+    min 76 (2T 36) local     try          Benjamin Zubiaurre
+    min 81 (2T 41) visitante substitution Matias Miguez
+    min 93 (2T 53) visitante substitution Mateo Moreno
+    min 93 (2T 53) visitante substitution Felipe Antonio Delgiorgio Salerno
+    min 96 (2T 56) visitante conversion   Mateo Moreno
+    min 96 (2T 56) visitante try          Clemente Baez
+    min 105 (2T 65) visitante conversion   Simon Amigo
+    min 105 (2T 65) visitante try          Tomas Huici
+  marcador  · eventos 24-33 · guardado 24-33
+  tries     · 2-5 (guardado 2-5)
+  arbitro   · LAUTARO BAZTERRICA BARO (guardado: LAUTARO BAZTERRICA BARO)
+  guardado  · 21 local · 23 visitante · 25 eventos
+
+bigua-rugby-club vs ipr-sporting · Clasificatorio M19 · tarjeta 281828  ·  4ad57b7b-0195-424e-9009-8902d09c7df5
+  local     · bigua-rugby-club · 23 jugadores · 0 con ficha fijada
+  visitante · ipr-sporting · 23 jugadores · 1 con ficha fijada
+  eventos   · 24
+    min 11 (1T 11) visitante try          Facundo Altuna
+    min 17 (1T 17) visitante conversion   Máximo Rodríguez Silva
+    min 17 (1T 17) visitante try          Bautista Kah
+    min 23 (1T 23) visitante conversion   Máximo Rodríguez Silva
+    min 23 (1T 23) visitante try          Juan Pedro Camilión
+    min 28 (1T 28) visitante conversion   Máximo Rodríguez Silva
+    min 28 (1T 28) visitante try          Santiago De La Vega
+    min 32 (1T 32) visitante conversion   Máximo Rodríguez Silva
+    min 32 (1T 32) visitante try          Dylan Martín Racca
+    min 35 (1T 35) visitante substitution Ramiro Catuogno
+    min 75 (2T 35) visitante substitution Dante Arabia Erratchu
+    min 76 (2T 36) visitante substitution Máximo Rodríguez Silva
+    min 77 (2T 37) visitante try          Francisco Iriarte
+    min 77 (2T 37) visitante conversion   Juan Manuel Montenegro
+    min 77 (2T 37) visitante substitution Juan Pedro Camilión
+    min 80 (2T 40) visitante substitution Pedro Bozzo Nigro
+    min 81 (2T 41) visitante substitution Santiago De La Vega
+    min 88 (2T 48) visitante substitution Bautista Kah
+    min 89 (2T 49) visitante try          Santiago Nicolás Piccinini
+    min 89 (2T 49) visitante conversion   Juan Manuel Montenegro
+    min 89 (2T 49) visitante substitution Dylan Martín Racca
+    min 93 (2T 53) visitante conversion   Juan Manuel Montenegro
+    min 93 (2T 53) visitante try          Ignacio Stella
+    min 99 (2T 59) visitante card_yellow  Mateo Jeremias Rossi
+  marcador  · eventos 0-54 · guardado 0-54
+  tries     · 0-8 (guardado 0-8)
+  arbitro   · MARIANO SCIANNA (guardado: MARIANO SCIANNA)
+  guardado  · 23 local · 23 visitante · 24 eventos
+
+san-ignacio-r-c vs union-del-sur · Clasificatorio M19 · tarjeta 281832  ·  605ae759-6020-4249-8670-349a72415998
+  local     · san-ignacio-r-c · 23 jugadores · 3 con ficha fijada
+  visitante · union-del-sur · 23 jugadores · 0 con ficha fijada
+  eventos   · 14
+    min 14 (1T 14) local     try          Augusto Sanchez
+    min 15 (1T 15) visitante substitution Santiago Attanasio
+    min 22 (1T 22) visitante try          Facundo Muñoz
+    min 22 (1T 22) visitante conversion   Ramon Rossi
+    min 34 (1T 34) local     penalty_goal Lucas Belatinez
+    min 45 (2T 5) visitante substitution Juan Cruz Gigli
+    min 45 (2T 5) visitante substitution Faustino Domato Hidalgo
+    min 52 (2T 12) visitante substitution Benjamin Torres Martinez
+    min 53 (2T 13) visitante substitution Franco Naiderman
+    min 59 (2T 19) local     try          Rocco Calimano
+    min 60 (2T 20) local     conversion   Rocco Calimano
+    min 60 (2T 20) visitante substitution Juan Bautista Mannarino
+    min 60 (2T 20) visitante substitution Simón Rossi
+    min 65 (2T 25) visitante penalty_goal Ramon Rossi
+  marcador  · eventos 15-10 · guardado 15-10
+  tries     · 2-1 (guardado 2-1)
+  arbitro   · FRANCO DE LEONARDIS (guardado: FRANCO DE LEONARDIS)
+  guardado  · 23 local · 23 visitante · 14 eventos
+
+club-los-50 vs san-ignacio-r-c · Clasificatorio M19 · tarjeta 322944  ·  12d1e71b-b967-4180-af16-4b56ead2290a
+  local     · club-los-50 · 19 jugadores · 0 con ficha fijada
+  visitante · san-ignacio-r-c · 21 jugadores · 4 con ficha fijada
+  eventos   · 21
+    min  4 (1T 4) visitante try          Matias Romano
+    min  4 (1T 4) visitante conversion   Rafael Giardelli
+    min 12 (1T 12) visitante try          Daniel Havrylenko
+    min 12 (1T 12) visitante conversion   Rafael Giardelli
+    min 20 (1T 20) local     try          Lautaro Aguilera
+    min 43 (2T 3) visitante try          Rafael Giardelli
+    min 43 (2T 3) visitante conversion   Rafael Giardelli
+    min 44 (2T 4) local     substitution Facundo Garra
+    min 44 (2T 4) local     substitution Bernabe Fleitas
+    min 48 (2T 8) local     try          Valentino Iannone
+    min 48 (2T 8) local     conversion   Bautista Joaquin Ramirez Pizarro
+    min 49 (2T 9) visitante try          Pablo Sanchez
+    min 50 (2T 10) visitante conversion   Rafael Giardelli
+    min 55 (2T 15) local     card_yellow  Lautaro Aguilera
+    min 60 (2T 20) visitante try          Rafael Giardelli
+    min 60 (2T 20) visitante conversion   Rafael Giardelli
+    min 63 (2T 23) visitante try          Pablo Sanchez
+    min 68 (2T 28) local     try          Bautista Joaquin Ramirez Pizarro
+    min 68 (2T 28) local     conversion   Bautista Joaquin Ramirez Pizarro
+    min 70 (2T 30) visitante try          Juan Ignacio Madeira
+    min 70 (2T 30) visitante conversion   Rafael Giardelli
+  marcador  · eventos 19-47 · guardado 19-47
+  tries     · 3-7 (guardado 3-7)
+  arbitro   · JULIAN FERNANDEZ (guardado: JULIAN FERNANDEZ)
+  guardado  · 19 local · 21 visitante · 21 eventos
+
+los-cardos-r-c vs union-del-sur · Clasificatorio M19 · tarjeta 322943  ·  f351aeac-08dd-4fba-8dd5-39a9bdbcb4da
+  local     · los-cardos-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · union-del-sur · 22 jugadores · 0 con ficha fijada
+  eventos   · 21
+    min  9 (1T 9) local     penalty_goal Benjamin Zubiaurre
+    min 15 (1T 15) visitante conversion   Ramon Rossi
+    min 15 (1T 15) visitante try          Santiago Attanasio
+    min 22 (1T 22) visitante try          Ignacio Berasategui
+    min 41 (2T 1) visitante substitution Faustino Domato Hidalgo
+    min 41 (2T 1) visitante substitution Juan Bautista Mannarino
+    min 42 (2T 2) local     try          Justo Di Lazaro
+    min 42 (2T 2) local     conversion   Benjamin Zubiaurre
+    min 42 (2T 2) local     injury       Agustin Bollier
+    min 42 (2T 2) local     substitution Agustin Bollier
+    min 57 (2T 17) visitante conversion   Pedro Martin
+    min 57 (2T 17) visitante try          Máximo Mosquera Humen
+    min 58 (2T 18) visitante substitution Juan Cruz Gigli
+    min 62 (2T 22) local     card_yellow  Justo Di Lazaro
+    min 68 (2T 28) visitante conversion   Pedro Martin
+    min 68 (2T 28) visitante try          Marcos Gabotto
+    min 69 (2T 29) visitante substitution Agustin Ruseckaite
+    min 69 (2T 29) visitante substitution Nicolas Pérez
+    min 69 (2T 29) visitante substitution Alejo Blanco
+    min 72 (2T 32) local     injury       Valentino Lacamera
+    min 72 (2T 32) local     substitution Valentino Lacamera
+  marcador  · eventos 10-26 · guardado 10-26
+  tries     · 1-4 (guardado 1-4)
+  arbitro   · IGNACIO FALCO (guardado: IGNACIO FALCO)
+  guardado  · 23 local · 22 visitante · 21 eventos
+
+bigua-rugby-club vs universitario-de-mar-del-plata · Clasificatorio M19 · tarjeta 322942  ·  cea8210e-8971-4a26-bac0-d6bdf4ea062c
+  local     · bigua-rugby-club · 23 jugadores · 0 con ficha fijada
+  visitante · universitario-de-mar-del-plata · 23 jugadores · 1 con ficha fijada
+  eventos   · 28
+    min  2 (1T 2) visitante conversion   Robertino Moraza
+    min  2 (1T 2) visitante try          Benjamin De La Vega
+    min  6 (1T 6) local     penalty_goal Franco Giardini
+    min 12 (1T 12) visitante try          Francisco Odriozola
+    min 18 (1T 18) visitante try          Francisco Ignacio Zaldivar
+    min 27 (1T 27) visitante try          Francisco Figueredo
+    min 30 (1T 30) local     substitution Diego Joaquin Montenegro
+    min 41 (2T 1) visitante try          Simon Macadam
+    min 43 (2T 3) visitante try          Benjamin Elizalde
+    min 43 (2T 3) visitante conversion   Robertino Moraza
+    min 47 (2T 7) visitante try          Francisco Odriozola
+    min 47 (2T 7) visitante conversion   Robertino Moraza
+    min 50 (2T 10) visitante substitution Benjamin Elizalde
+    min 50 (2T 10) visitante substitution Tomas Di Tulio Vargas
+    min 50 (2T 10) visitante try          Alejo Bitthoff
+    min 51 (2T 11) local     substitution Franco Giardini
+    min 51 (2T 11) local     substitution Alejandro Figueroa
+    min 55 (2T 15) visitante substitution Simon Macadam
+    min 59 (2T 19) visitante conversion   Robertino Moraza
+    min 59 (2T 19) visitante try          Francisco Odriozola
+    min 60 (2T 20) visitante substitution Benjamin De La Vega
+    min 65 (2T 25) visitante substitution Francisco Figueredo
+    min 65 (2T 25) visitante substitution Lorenzo Diaz Gutierrez
+    min 65 (2T 25) visitante substitution Alejo Bitthoff
+    min 65 (2T 25) visitante substitution Dante Tempone
+    min 71 (2T 31) visitante try          Tobias Ganly
+    min 74 (2T 34) visitante conversion   Robertino Moraza
+    min 74 (2T 34) visitante try          Simon Merlos
+  marcador  · eventos 3-65 · guardado 3-65
+  tries     · 0-11 (guardado 0-11)
+  arbitro   · JULIO CESAR APUT (guardado: JULIO CESAR APUT)
+  guardado  · 23 local · 23 visitante · 28 eventos
+
+comercial-r-c vs ipr-sporting · Clasificatorio M19 · tarjeta 322941  ·  203a4fa0-2d1a-423b-91a0-c6e85540c6ed
+  local     · comercial-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · ipr-sporting · 23 jugadores · 1 con ficha fijada
+  eventos   · 30
+    min  1 (1T 1) local     substitution Benicio Basavilbaso
+    min  6 (1T 6) visitante try          Bautista Kah
+    min  6 (1T 6) visitante conversion   Máximo Rodríguez Silva
+    min 12 (1T 12) local     conversion   Teo Vazquez
+    min 12 (1T 12) local     try          Juan Etcheverry
+    min 12 (1T 12) visitante substitution Salvador Patron Costas
+    min 26 (1T 26) visitante try          Salvador Patron Costas
+    min 26 (1T 26) visitante conversion   Máximo Rodríguez Silva
+    min 31 (1T 31) visitante try          Dylan Martín Racca
+    min 41 (2T 1) local     substitution Lucas Vázquez
+    min 41 (2T 1) local     substitution Mateo Banklian
+    min 41 (2T 1) visitante substitution Francisco Iriarte
+    min 42 (2T 2) visitante substitution Máximo Rodríguez Silva
+    min 43 (2T 3) visitante substitution Facundo Altuna
+    min 46 (2T 6) local     substitution Tiago Valentin Aguerrido
+    min 46 (2T 6) local     substitution Juan Pablo Sasso
+    min 47 (2T 7) local     substitution Thiago Ruiz Alonso
+    min 47 (2T 7) local     substitution Tomas Ibarra Sánchez
+    min 49 (2T 9) visitante try          Dante Arabia Erratchu
+    min 49 (2T 9) visitante conversion   Ramiro Manzo
+    min 52 (2T 12) visitante substitution Mateo Jeremias Rossi
+    min 54 (2T 14) local     substitution Santino Cattelan
+    min 54 (2T 14) local     substitution Julián Daniel Valle Torres
+    min 59 (2T 19) visitante substitution Felipe Rullo
+    min 60 (2T 20) visitante substitution Lucas Guido Rabago Pezzati
+    min 63 (2T 23) visitante try          Bautista Kah
+    min 63 (2T 23) visitante conversion   Juan Manuel Montenegro
+    min 70 (2T 30) visitante card_yellow  Dante Arabia Erratchu
+    min 75 (2T 35) visitante try          Santiago Nicolás Piccinini
+    min 75 (2T 35) visitante conversion   Juan Manuel Montenegro
+  marcador  · eventos 7-40 · guardado 7-40
+  tries     · 1-6 (guardado 1-6)
+  arbitro   · GUSTAVO CARLOS MORAZA (guardado: GUSTAVO CARLOS MORAZA)
+  guardado  · 23 local · 23 visitante · 30 eventos
+
+pueyrredon-mar-del-plata vs mar-del-plata-club-marron · Clasificatorio M19 · tarjeta 322940  ·  f826e828-9a3c-41b8-aa51-0adc0e1fdc9b
+  local     · pueyrredon-mar-del-plata · 23 jugadores · 0 con ficha fijada
+  visitante · mar-del-plata-club-marron · 23 jugadores · 0 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 0-0
+  tries     · 0-0 (guardado —-—)
+  arbitro   · LUCIANO PAMPIN (guardado: LUCIANO PAMPIN)
+  guardado  · 23 local · 23 visitante · 0 eventos
+
+comercial-r-c vs pueyrredon-mar-del-plata · Clasificatorio M19 · tarjeta 322939  ·  83172116-6399-4c98-959e-b2bd98dc9721
+  local     · comercial-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · pueyrredon-mar-del-plata · 23 jugadores · 0 con ficha fijada
+  eventos   · 29
+    min  5 (1T 5) local     try          Mateo Dambrosio
+    min 11 (1T 11) visitante try          Ezequiel Martín Perez Castiglione
+    min 11 (1T 11) visitante conversion   Milo Savino
+    min 15 (1T 15) visitante try          Oscar Santana Tejeda
+    min 15 (1T 15) visitante conversion   Milo Savino
+    min 20 (1T 20) local     conversion   Bernardino Barcos
+    min 20 (1T 20) local     try          Juan Etcheverry
+    min 29 (1T 29) local     conversion   Bernardino Barcos
+    min 29 (1T 29) local     try          Juan Etcheverry
+    min 36 (1T 36) visitante try          Ezequiel Martín Perez Castiglione
+    min 36 (1T 36) visitante conversion   Milo Savino
+    min 41 (2T 1) local     substitution Juan Pablo Sasso
+    min 44 (2T 4) visitante injury       Santiago Suárez
+    min 44 (2T 4) visitante substitution Santiago Suárez
+    min 45 (2T 5) local     substitution Ramiro Cordonnier Falaschini
+    min 45 (2T 5) local     substitution Teo Jauregui
+    min 50 (2T 10) local     substitution Benjamin Rivero
+    min 54 (2T 14) visitante try          Eloy Ojeda
+    min 56 (2T 16) local     try          Lautaro Franchini
+    min 60 (2T 20) local     substitution Tomas Ibarra Sánchez
+    min 61 (2T 21) local     substitution Santino Cattelan
+    min 61 (2T 21) local     substitution Nahuel Tobares
+    min 61 (2T 21) local     substitution Lautaro Franchini
+    min 63 (2T 23) local     try          Julián Daniel Valle Torres
+    min 63 (2T 23) local     conversion   Teo Vazquez
+    min 65 (2T 25) visitante substitution Juan Cruz Fioriti
+    min 65 (2T 25) visitante substitution Juan Bautista Perez
+    min 66 (2T 26) local     penalty_goal Teo Vazquez
+    min 70 (2T 30) visitante try          Oscar Santana Tejeda
+  marcador  · eventos 34-31 · guardado 34-31
+  tries     · 5-5 (guardado 5-5)
+  arbitro   · ALEJANDRO VILLANUEVA 11991906 (NO OFICIAL) (guardado: ALEJANDRO VILLANUEVA 11991906 (NO OFICIAL))
+  guardado  · 23 local · 23 visitante · 29 eventos
+
+mar-del-plata-club vs bigua-rugby-club · Clasificatorio M19 · tarjeta 322938  ·  a85e19b6-ca5f-44fc-9e1c-fb9cdaaf4973
+  local     · mar-del-plata-club · 17 jugadores · 0 con ficha fijada
+  visitante · bigua-rugby-club · 21 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min  4 (1T 4) local     try          Mirko Rackiewicz
+    min  4 (1T 4) local     conversion   Francisco Guevara
+    min  6 (1T 6) local     try          Bautista Fernandez Rua
+    min 10 (1T 10) local     conversion   Francisco Guevara
+    min 10 (1T 10) local     try          Benjamin Graef
+    min 14 (1T 14) local     conversion   Francisco Guevara
+    min 14 (1T 14) local     try          Ramon Fernandez Bayon
+    min 20 (1T 20) local     try          Juan Martin Eichhorn
+    min 23 (1T 23) visitante penalty_goal Franco Giardini
+    min 25 (1T 25) local     try          Francisco Guevara
+    min 25 (1T 25) local     conversion   Francisco Guevara
+    min 30 (1T 30) local     try          Valentino Lancellotti
+    min 45 (2T 5) local     try          Bautista Webb
+    min 45 (2T 5) local     conversion   Francisco Guevara
+    min 47 (2T 7) local     card_yellow  Mirko Rackiewicz
+    min 52 (2T 12) local     conversion   Francisco Guevara
+    min 52 (2T 12) local     try          Francisco Guevara
+    min 55 (2T 15) local     conversion   Francisco Guevara
+    min 55 (2T 15) local     try          Valentino Lancellotti
+    min 58 (2T 18) visitante card_yellow  Mateo Diaz
+    min 65 (2T 25) local     conversion   Francisco Guevara
+    min 65 (2T 25) local     try          Bautista Fernandez Rua
+    min 67 (2T 27) local     conversion   Francisco Guevara
+    min 67 (2T 27) local     try          Stefano Sabarese Capria
+    min 70 (2T 30) local     try          Juan Antonio Cejas
+    min 72 (2T 32) visitante try          Nicolas Arenas
+    min 72 (2T 32) visitante conversion   Franco Giardini
+  marcador  · eventos 83-10 · guardado 83-10
+  tries     · 13-1 (guardado 13-1)
+  arbitro   · MARTINA GERALDINE GARABATOS BONARD (guardado: MARTINA GERALDINE GARABATOS BONARD)
+  guardado  · 17 local · 21 visitante · 27 eventos
+
+universitario-de-mar-del-plata vs los-cardos-r-c · Clasificatorio M19 · tarjeta 322937  ·  29887cff-0518-44e3-89de-1ba62df91bfe
+  local     · universitario-de-mar-del-plata · 23 jugadores · 3 con ficha fijada
+  visitante · los-cardos-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min  9 (1T 9) visitante try          Silvestre Cardozo
+    min 14 (1T 14) local     penalty_goal Robertino Moraza
+    min 15 (1T 15) local     try          Simon Macadam
+    min 22 (1T 22) visitante card_yellow  Justo Di Lazaro
+    min 23 (1T 23) local     try          Luca Laino
+    min 23 (1T 23) local     conversion   Robertino Moraza
+    min 34 (1T 34) visitante try          Lorenzo Barrera
+    min 34 (1T 34) visitante conversion   Benjamin Zubiaurre
+    min 40 (2T 0) local     substitution Santino Mendez
+    min 40 (2T 0) local     substitution Juan Ignacio Galante
+    min 52 (2T 12) local     try          Francisco Odriozola
+    min 52 (2T 12) local     conversion   Robertino Moraza
+    min 60 (2T 20) local     card_yellow  Benjamin De La Vega
+    min 63 (2T 23) local     penalty_goal Robertino Moraza
+    min 63 (2T 23) visitante try          Benjamin Zubiaurre
+    min 63 (2T 23) visitante conversion   Benjamin Zubiaurre
+    min 70 (2T 30) local     substitution Ismael Sepúlveda
+    min 70 (2T 30) local     substitution Francisco Domijan
+    min 70 (2T 30) local     substitution Tobias Ganly
+    min 70 (2T 30) local     substitution Matias Quiroga
+    min 70 (2T 30) visitante try          Benjamin Zubiaurre
+    min 70 (2T 30) visitante conversion   Benjamin Zubiaurre
+    min 72 (2T 32) visitante substitution Santino Pedroza
+    min 72 (2T 32) visitante substitution Ramiro Pedersen
+    min 74 (2T 34) local     penalty_goal Robertino Moraza
+  marcador  · eventos 28-26 · guardado 28-26
+  tries     · 3-4 (guardado 3-4)
+  arbitro   · NICOLÁS MIGUEL COSENTINO (guardado: NICOLÁS MIGUEL COSENTINO)
+  guardado  · 23 local · 23 visitante · 25 eventos
+
+club-los-50 vs union-del-sur · Clasificatorio M19 · tarjeta 322936  ·  db078713-36e4-4d3a-884c-4706102f8f13
+  local     · club-los-50 · 18 jugadores · 0 con ficha fijada
+  visitante · union-del-sur · 21 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min 21 (1T 21) visitante try          Santiago Attanasio
+    min 21 (1T 21) visitante conversion   Pedro Martin
+    min 25 (1T 25) visitante substitution Nicolas Pérez
+    min 26 (1T 26) visitante card_yellow  Tobias Leonel Uzquiza
+    min 31 (1T 31) local     try          Santiago Pellegrini
+    min 31 (1T 31) local     conversion   Bautista Joaquin Ramirez Pizarro
+    min 35 (1T 35) local     penalty_goal Bautista Joaquin Ramirez Pizarro
+    min 35 (1T 35) visitante substitution Joaquin Cajal
+    min 45 (2T 5) visitante card_yellow  Santiago Sanchez
+    min 46 (2T 6) local     try          Valentino Iannone
+    min 51 (2T 11) local     try          Felipe Schettino
+    min 51 (2T 11) local     conversion   Bautista Joaquin Ramirez Pizarro
+    min 54 (2T 14) local     card_yellow  Valentino Iannone
+    min 56 (2T 16) local     substitution Julian Suarez Amasino
+    min 59 (2T 19) visitante try          Franco Naiderman
+    min 59 (2T 19) visitante conversion   Ramon Rossi
+    min 60 (2T 20) visitante substitution Franco Naiderman
+    min 62 (2T 22) local     penalty_goal Bautista Joaquin Ramirez Pizarro
+    min 64 (2T 24) local     try          Felipe Schettino
+    min 65 (2T 25) visitante substitution Bautista Ayala
+    min 67 (2T 27) visitante try          Ramon Rossi
+    min 70 (2T 30) local     card_yellow  Bautista Joaquin Ramirez Pizarro
+  marcador  · eventos 30-19 · guardado 30-19
+  tries     · 4-3 (guardado 4-3)
+  arbitro   · RAFAEL RUBIO (guardado: RAFAEL RUBIO)
+  guardado  · 18 local · 21 visitante · 22 eventos
+
+mar-del-plata-club-marron vs san-ignacio-r-c · Clasificatorio M19 · tarjeta 322935  ·  d7c2f97f-a1f6-4368-9336-be9c45279914
+  local     · mar-del-plata-club-marron · 18 jugadores · 0 con ficha fijada
+  visitante · san-ignacio-r-c · 23 jugadores · 4 con ficha fijada
+  eventos   · 34
+    min  3 (1T 3) visitante conversion   Rafael Giardelli
+    min  3 (1T 3) visitante try          Ramiro Allamanda
+    min  5 (1T 5) visitante try          Rafael Giardelli
+    min  5 (1T 5) visitante conversion   Rafael Giardelli
+    min  8 (1T 8) visitante penalty_try  
+    min  9 (1T 9) local     card_yellow  Tobias Igancio Andrade
+    min  9 (1T 9) visitante try          Tomas Peirano
+    min  9 (1T 9) visitante conversion   Rafael Giardelli
+    min 12 (1T 12) visitante try          Daniel Havrylenko
+    min 12 (1T 12) visitante conversion   Rafael Giardelli
+    min 19 (1T 19) visitante try          Rafael Giardelli
+    min 19 (1T 19) visitante conversion   Rafael Giardelli
+    min 26 (1T 26) visitante try          Lucas Belatinez
+    min 26 (1T 26) visitante conversion   Rafael Giardelli
+    min 33 (1T 33) local     try          Mateo Buono
+    min 33 (1T 33) visitante card_yellow  Pablo Sanchez
+    min 35 (1T 35) local     substitution Mateo Buono
+    min 45 (2T 5) local     try          José Ignacio Borawski Chanes
+    min 45 (2T 5) local     conversion   Simon Amigo
+    min 51 (2T 11) visitante substitution Matias Romano
+    min 52 (2T 12) visitante conversion   Rafael Giardelli
+    min 52 (2T 12) visitante try          Tomas Peirano
+    min 58 (2T 18) visitante conversion   Rafael Giardelli
+    min 58 (2T 18) visitante try          Tomas Muti Barillari
+    min 60 (2T 20) visitante try          Lucas Belatinez
+    min 60 (2T 20) visitante conversion   Rafael Giardelli
+    min 62 (2T 22) visitante try          Rafael Giardelli
+    min 62 (2T 22) visitante conversion   Rafael Giardelli
+    min 67 (2T 27) visitante substitution Pablo Sanchez
+    min 70 (2T 30) local     try          Pedro Serantes
+    min 70 (2T 30) local     conversion   Simon Amigo
+    min 73 (2T 33) visitante try          Juan Ignacio Madeira
+    min 73 (2T 33) visitante conversion   Rafael Giardelli
+    min 75 (2T 35) local     try          Juan Pedro Ovejero
+  marcador  · eventos 24-84 · guardado 24-84
+  tries     · 4-12 (guardado 4-12)
+  arbitro   · JULIAN FERNANDEZ (guardado: JULIAN FERNANDEZ)
+  guardado  · 18 local · 23 visitante · 34 eventos
+
+union-del-sur vs san-ignacio-r-c · Clasificatorio M19 · tarjeta 322934  ·  8a3b5d91-6908-4c3b-9e86-8fa97e51d693
+  local     · union-del-sur · 23 jugadores · 0 con ficha fijada
+  visitante · san-ignacio-r-c · 23 jugadores · 5 con ficha fijada
+  eventos   · 27
+    min  1 (1T 1) visitante try          Agustin Bettiga
+    min  2 (1T 2) visitante conversion   Rafael Giardelli
+    min  5 (1T 5) visitante try          Daniel Havrylenko
+    min  6 (1T 6) visitante conversion   Rafael Giardelli
+    min 14 (1T 14) local     try          Santiago Attanasio
+    min 22 (1T 22) visitante try          Ramiro Allamanda
+    min 27 (1T 27) local     try          Ramon Rossi
+    min 27 (1T 27) visitante card_yellow  Ramiro Allamanda
+    min 44 (2T 4) local     substitution Juan Cruz Gigli
+    min 46 (2T 6) visitante try          Rocco Calimano
+    min 47 (2T 7) visitante conversion   Rafael Giardelli
+    min 52 (2T 12) local     substitution Benjamin Torres Martinez
+    min 53 (2T 13) visitante penalty_goal Rafael Giardelli
+    min 61 (2T 21) local     substitution Nicolas Pérez
+    min 61 (2T 21) local     substitution Franco Naiderman
+    min 63 (2T 23) local     try          Facundo Muñoz
+    min 63 (2T 23) local     conversion   Ramon Rossi
+    min 65 (2T 25) visitante substitution Juan Ignacio Madeira
+    min 65 (2T 25) visitante substitution Leonel Cotado
+    min 65 (2T 25) visitante substitution Matias Romano
+    min 65 (2T 25) visitante substitution Felipe Magrini
+    min 65 (2T 25) visitante substitution Santino Castillo
+    min 66 (2T 26) visitante try          Tomás Alonso
+    min 72 (2T 32) local     substitution Santiago Sanchez
+    min 72 (2T 32) local     substitution Juan Bautista Mannarino
+    min 75 (2T 35) visitante try          Daniel Havrylenko
+    min 75 (2T 35) visitante conversion   Rafael Giardelli
+  marcador  · eventos 17-41 · guardado 17-41
+  tries     · 3-6 (guardado 3-6)
+  arbitro   · JUAN SILQUITI (guardado: JUAN SILQUITI)
+  guardado  · 23 local · 23 visitante · 27 eventos
+
+universitario-de-mar-del-plata vs club-los-50 · Clasificatorio M19 · tarjeta 322933  ·  b578641a-a19f-49a8-801a-59b259522838
+  local     · universitario-de-mar-del-plata · 23 jugadores · 1 con ficha fijada
+  visitante · club-los-50 · 18 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min  2 (1T 2) local     conversion   Robertino Moraza
+    min  2 (1T 2) local     try          Luca Laino
+    min 11 (1T 11) visitante penalty_goal Bautista Joaquin Ramirez Pizarro
+    min 18 (1T 18) visitante try          Bautista Joaquin Ramirez Pizarro
+    min 18 (1T 18) visitante conversion   Bautista Joaquin Ramirez Pizarro
+    min 23 (1T 23) local     try          Tobias Ganly
+    min 25 (1T 25) local     substitution Francisco Figueredo
+    min 32 (1T 32) local     try          Francisco Odriozola
+    min 32 (1T 32) local     conversion   Robertino Moraza
+    min 40 (2T 0) local     substitution Juan Ignacio Galante
+    min 40 (2T 0) local     substitution Simon Merlos
+    min 43 (2T 3) local     try          Francisco Ignacio Zaldivar
+    min 43 (2T 3) local     conversion   Robertino Moraza
+    min 45 (2T 5) local     try          Simon Macadam
+    min 45 (2T 5) local     conversion   Robertino Moraza
+    min 49 (2T 9) visitante substitution Bernabe Fleitas
+    min 49 (2T 9) visitante substitution Tadeo Stutz
+    min 50 (2T 10) local     substitution Franco Monsalve
+    min 50 (2T 10) local     substitution Ismael Sepúlveda
+    min 50 (2T 10) visitante substitution Iñaki Elissondo
+    min 63 (2T 23) local     card_yellow  Nahuel Akeem Imaz
+    min 70 (2T 30) local     substitution Francisco Ignacio Zaldivar
+    min 70 (2T 30) local     substitution Tomas Di Tulio Vargas
+    min 70 (2T 30) local     substitution Benjamin De La Vega
+    min 72 (2T 32) local     try          Dante Tempone
+  marcador  · eventos 38-10 · guardado 38-10
+  tries     · 6-1 (guardado 6-1)
+  arbitro   · HECTOR OLIVERA (guardado: HECTOR OLIVERA)
+  guardado  · 23 local · 18 visitante · 25 eventos
+
+mar-del-plata-club vs los-cardos-r-c · Clasificatorio M19 · tarjeta 322932  ·  5dc0ce56-a452-4fe7-964f-f98dce84aa1c
+  local     · mar-del-plata-club · 23 jugadores · 0 con ficha fijada
+  visitante · los-cardos-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 31
+    min 15 (1T 15) local     try          Juan Martin Eichhorn
+    min 16 (1T 16) local     conversion   Francisco Guevara
+    min 18 (1T 18) visitante try          Franco Cervellini
+    min 18 (1T 18) visitante conversion   Benjamin Zubiaurre
+    min 19 (1T 19) visitante injury       Thiago Aladro
+    min 19 (1T 19) visitante substitution Thiago Aladro
+    min 25 (1T 25) local     try          Clemente Baez
+    min 26 (1T 26) local     conversion   Francisco Guevara
+    min 29 (1T 29) visitante try          Benjamin Zubiaurre
+    min 29 (1T 29) visitante conversion   Benjamin Zubiaurre
+    min 33 (1T 33) local     try          Clemente Baez
+    min 34 (1T 34) local     conversion   Francisco Guevara
+    min 41 (2T 1) local     substitution Bautista De La Garma
+    min 41 (2T 1) local     substitution Juan Manuel Cabrera Olguin
+    min 41 (2T 1) visitante substitution Agustin Bollier
+    min 45 (2T 5) local     substitution Matias Miguez
+    min 49 (2T 9) local     try          Marcos Ariel Balicchia
+    min 50 (2T 10) local     substitution Mirko Rackiewicz
+    min 51 (2T 11) local     try          Salvador Francisco Gerardo
+    min 52 (2T 12) local     substitution Bautista Fernandez Rua
+    min 52 (2T 12) local     conversion   Francisco Guevara
+    min 52 (2T 12) local     substitution Ramon Fernandez Bayon
+    min 60 (2T 20) local     substitution Bautista Webb
+    min 60 (2T 20) local     substitution Tomas Huici
+    min 61 (2T 21) local     card_yellow  Francisco Guevara
+    min 61 (2T 21) visitante try          Ivan Schreiterer
+    min 61 (2T 21) visitante conversion   Benjamin Zubiaurre
+    min 68 (2T 28) visitante try          Alfonso Heer
+    min 68 (2T 28) visitante conversion   Benjamin Zubiaurre
+    min 73 (2T 33) local     try          Clemente Baez
+    min 74 (2T 34) local     conversion   Bautista Arosteguy
+  marcador  · eventos 40-28 · guardado 40-28
+  tries     · 6-4 (guardado 6-4)
+  arbitro   · TOMAS IGNACIO CORDEIRO (guardado: TOMAS IGNACIO CORDEIRO)
+  guardado  · 23 local · 23 visitante · 31 eventos
+
+ipr-sporting vs bigua-rugby-club · Clasificatorio M19 · tarjeta 322931  ·  1d0727c9-31d0-44d2-9fcf-2a315f61f25c
+  local     · ipr-sporting · 23 jugadores · 0 con ficha fijada
+  visitante · bigua-rugby-club · 22 jugadores · 0 con ficha fijada
+  eventos   · 33
+    min  1 (1T 1) local     conversion   Máximo Rodríguez Silva
+    min  1 (1T 1) local     try          Santiago Lahitte
+    min  2 (1T 2) local     conversion   Máximo Rodríguez Silva
+    min  2 (1T 2) local     try          Dante Arabia Erratchu
+    min  7 (1T 7) local     try          Mateo Jeremias Rossi
+    min  7 (1T 7) local     conversion   Máximo Rodríguez Silva
+    min 10 (1T 10) local     try          Francisco Iriarte
+    min 18 (1T 18) local     try          Mateo Jeremias Rossi
+    min 18 (1T 18) local     conversion   Máximo Rodríguez Silva
+    min 26 (1T 26) local     try          Santiago Lahitte
+    min 26 (1T 26) local     conversion   Máximo Rodríguez Silva
+    min 32 (1T 32) local     try          Bautista Celis
+    min 32 (1T 32) local     conversion   Máximo Rodríguez Silva
+    min 41 (2T 1) local     substitution Máximo Rodríguez Silva
+    min 42 (2T 2) local     substitution Felipe Rullo
+    min 43 (2T 3) local     try          Dante Arabia Erratchu
+    min 44 (2T 4) local     substitution Alejandro Bustillo
+    min 49 (2T 9) local     try          Ignacio Stella
+    min 49 (2T 9) local     conversion   Juan Manuel Montenegro
+    min 50 (2T 10) local     substitution Pedro Bozzo Nigro
+    min 50 (2T 10) local     substitution Facundo Altuna
+    min 51 (2T 11) local     substitution Dylan Martín Racca
+    min 51 (2T 11) local     substitution Lucas Guido Rabago Pezzati
+    min 52 (2T 12) local     card_yellow  Agustín Figueroa
+    min 52 (2T 12) local     substitution Dante Arabia Erratchu
+    min 55 (2T 15) local     conversion   Juan Manuel Montenegro
+    min 55 (2T 15) local     try          Ramiro Cappella
+    min 64 (2T 24) local     try          Nicolás Landini
+    min 68 (2T 28) local     try          Nicolás Landini
+    min 72 (2T 32) local     try          Benicio Murillo
+    min 72 (2T 32) local     conversion   Juan Manuel Montenegro
+    min 74 (2T 34) local     try          Juan Manuel Montenegro
+    min 74 (2T 34) local     conversion   Juan Manuel Montenegro
+  marcador  · eventos 90-0 · guardado 90-0
+  tries     · 14-0 (guardado 14-0)
+  arbitro   · JESICA PAOLA PARED (guardado: JESICA PAOLA PARED)
+  guardado  · 23 local · 22 visitante · 33 eventos
+
+mar-del-plata-club-marron vs comercial-r-c · Clasificatorio M19 · tarjeta 322930  ·  6df7c2d2-529a-4254-9066-0746351b0e4b
+  local     · mar-del-plata-club-marron · 23 jugadores · 0 con ficha fijada
+  visitante · comercial-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 35
+    min  1 (1T 1) visitante substitution Julián Daniel Valle Torres
+    min 10 (1T 10) local     try          Ramon Fernandez Bayon
+    min 11 (1T 11) local     conversion   Simon Amigo
+    min 12 (1T 12) local     try          Salvador Francisco Gerardo
+    min 13 (1T 13) local     conversion   Simon Amigo
+    min 16 (1T 16) visitante conversion   Bernardino Barcos
+    min 16 (1T 16) visitante try          Julián Daniel Valle Torres
+    min 28 (1T 28) visitante try          Mijael Nicolás Suárez
+    min 28 (1T 28) visitante conversion   Bernardino Barcos
+    min 32 (1T 32) local     try          Juan Antonio Cejas
+    min 33 (1T 33) local     conversion   Simon Amigo
+    min 41 (2T 1) local     substitution Joaquín Fígoli
+    min 41 (2T 1) local     substitution Federico Joaquín Jano
+    min 41 (2T 1) local     substitution Tomas Zabludovich
+    min 41 (2T 1) local     substitution Bautista Webb
+    min 41 (2T 1) visitante substitution Federico Laval Cisterna
+    min 41 (2T 1) visitante substitution Benicio Basavilbaso
+    min 41 (2T 1) visitante substitution Santino Cattelan
+    min 45 (2T 5) local     substitution Juan Antonio Cejas
+    min 49 (2T 9) visitante substitution Juan Pablo Sasso
+    min 50 (2T 10) local     substitution Iñaki Espino
+    min 50 (2T 10) local     substitution Salvador Francisco Gerardo
+    min 50 (2T 10) local     substitution Federico Peña
+    min 50 (2T 10) visitante conversion   Bernardino Barcos
+    min 50 (2T 10) visitante try          Bernardino Barcos
+    min 55 (2T 15) visitante substitution Federico Laval Cisterna
+    min 55 (2T 15) visitante conversion   Bernardino Barcos
+    min 55 (2T 15) visitante try          Juan Etcheverry
+    min 55 (2T 15) visitante injury       Federico Laval Cisterna
+    min 55 (2T 15) visitante substitution Teo Jauregui
+    min 60 (2T 20) local     try          Joaquin Morcella Vescovi
+    min 61 (2T 21) local     conversion   Simon Amigo
+    min 65 (2T 25) visitante try          Juan Etcheverry
+    min 70 (2T 30) visitante substitution Tomas Ibarra Sánchez
+    min 70 (2T 30) visitante substitution Ramiro Cordonnier Falaschini
+  marcador  · eventos 28-33 · guardado 28-33
+  tries     · 4-5 (guardado 4-5)
+  arbitro   · GUSTAVO CARLOS MORAZA (guardado: GUSTAVO CARLOS MORAZA)
+  guardado  · 23 local · 23 visitante · 35 eventos
+
+pueyrredon-mar-del-plata vs bigua-rugby-club · Clasificatorio M19 · tarjeta 314111  ·  e904a32f-c873-4cfd-9539-4468b772b8f9
+  local     · pueyrredon-mar-del-plata · 23 jugadores · 0 con ficha fijada
+  visitante · bigua-rugby-club · 22 jugadores · 0 con ficha fijada
+  eventos   · 11
+    min -1 (1T -1) local     substitution Tomas Grossi
+    min  9 (1T 9) visitante card_yellow  Mateo Andres Nicolau Stefani
+    min 15 (1T 15) local     try          Nahuel Matias Ferrin D'orso
+    min 22 (1T 22) local     try          Ezequiel Martín Perez Castiglione
+    min 31 (1T 31) local     try          Oscar Santana Tejeda
+    min 31 (1T 31) local     conversion   Juan Bautista Perez
+    min 50 (2T 10) local     card_yellow  Rocco Vidal
+    min 56 (2T 16) visitante try          Bautista Benjamin Orellana
+    min 58 (2T 18) local     try          Diego Valentín Barros
+    min 72 (2T 32) visitante try          Agustin Nicolas Muñoz
+    min 72 (2T 32) visitante conversion   Franco Giardini
+  marcador  · eventos 22-12 · guardado 22-12
+  tries     · 4-2 (guardado 4-2)
+  arbitro   · ALAN GONZALEZ (guardado: ALAN GONZALEZ)
+  guardado  · 23 local · 22 visitante · 11 eventos
+
+los-cardos-r-c vs ipr-sporting · Clasificatorio M19 · tarjeta 314110  ·  ea64d17e-f886-473d-b2ae-6cb00869eb24
+  local     · los-cardos-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · ipr-sporting · 23 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min  0 (1T 0) visitante substitution Octavio Pereyra
+    min  1 (1T 1) local     penalty_goal Benjamin Zubiaurre
+    min  4 (1T 4) visitante try          Bautista Kah
+    min  4 (1T 4) visitante conversion   Máximo Rodríguez Silva
+    min 13 (1T 13) local     try          Marcos Casabal
+    min 13 (1T 13) local     conversion   Benjamin Zubiaurre
+    min 50 (2T 10) local     injury       Laureano Ferrero
+    min 50 (2T 10) local     substitution Laureano Ferrero
+    min 51 (2T 11) local     penalty_goal Benjamin Zubiaurre
+    min 60 (2T 20) local     penalty_goal Benjamin Zubiaurre
+    min 65 (2T 25) local     card_yellow  Francisco Sansot
+    min 75 (2T 35) local     penalty_goal Benjamin Zubiaurre
+    min 75 (2T 35) visitante substitution Francisco Gorosito
+    min 77 (2T 37) visitante penalty_goal Máximo Rodríguez Silva
+    min 83 (2T 43) visitante penalty_goal Máximo Rodríguez Silva
+    min 93 (2T 53) visitante card_yellow  Bautista Kah
+    min 96 (2T 56) visitante substitution Máximo Rodríguez Silva
+    min 106 (2T 66) visitante card_yellow  Mateo Jeremias Rossi
+  marcador  · eventos 19-13 · guardado 19-13
+  tries     · 1-1 (guardado 1-1)
+  arbitro   · BRUNO GUILLERMO SIMI (guardado: BRUNO GUILLERMO SIMI)
+  guardado  · 23 local · 23 visitante · 18 eventos
+
+mar-del-plata-club vs club-los-50 · Clasificatorio M19 · tarjeta 314109  ·  f192910f-e07f-49ff-a660-aab0723b9a92
+  local     · mar-del-plata-club · 20 jugadores · 0 con ficha fijada
+  visitante · club-los-50 · 19 jugadores · 0 con ficha fijada
+  eventos   · 30
+    min  6 (1T 6) local     conversion   Francisco Guevara
+    min  6 (1T 6) local     try          Valentino Lancellotti
+    min 14 (1T 14) local     try          Clemente Baez
+    min 19 (1T 19) local     try          Valentino Lancellotti
+    min 19 (1T 19) local     conversion   Francisco Guevara
+    min 21 (1T 21) visitante try          Valentino Iannone
+    min 28 (1T 28) local     try          Mirko Rackiewicz
+    min 28 (1T 28) local     conversion   Francisco Guevara
+    min 36 (1T 36) visitante try          Santiago Pellegrini
+    min 36 (1T 36) visitante conversion   Bautista Joaquin Ramirez Pizarro
+    min 36 (1T 36) visitante substitution Mirko Bronzovich
+    min 50 (2T 10) visitante substitution Tomas Garcia Rife
+    min 56 (2T 16) visitante substitution Luciano Christiansen
+    min 56 (2T 16) visitante substitution Bernabe Fleitas
+    min 78 (2T 38) local     conversion   Francisco Guevara
+    min 78 (2T 38) local     try          Tomas Barrio
+    min 82 (2T 42) local     substitution Benjamin Graef
+    min 82 (2T 42) local     substitution Francisco Blanco
+    min 84 (2T 44) local     substitution Bautista Fernandez Rua
+    min 84 (2T 44) local     substitution Bautista De La Garma
+    min 87 (2T 47) local     try          Salvador Francisco Gerardo
+    min 89 (2T 49) local     substitution Mirko Rackiewicz
+    min 91 (2T 51) local     conversion   Francisco Guevara
+    min 91 (2T 51) local     try          Bautista Webb
+    min 101 (2T 61) local     conversion   Francisco Guevara
+    min 101 (2T 61) local     try          Clemente Baez
+    min 103 (2T 63) local     conversion   Francisco Guevara
+    min 103 (2T 63) local     try          Bautista Arosteguy
+    min 110 (2T 70) local     conversion   Francisco Guevara
+    min 110 (2T 70) local     try          Tomas Barrio
+  marcador  · eventos 66-12 · guardado 66-12
+  tries     · 10-2 (guardado 10-2)
+  arbitro   · ALEJO MARTIN FERNANDEZ (guardado: ALEJO MARTIN FERNANDEZ)
+  guardado  · 20 local · 19 visitante · 30 eventos
+
+san-ignacio-r-c vs universitario-de-mar-del-plata · Clasificatorio M19 · tarjeta 314108  ·  41e51d33-7f7c-4a7a-8643-6eb2f7e188ab
+  local     · san-ignacio-r-c · 23 jugadores · 3 con ficha fijada
+  visitante · universitario-de-mar-del-plata · 23 jugadores · 2 con ficha fijada
+  eventos   · 19
+    min  1 (1T 1) local     try          Rafael Giardelli
+    min 17 (1T 17) visitante conversion   Robertino Moraza
+    min 17 (1T 17) visitante try          Robertino Moraza
+    min 20 (1T 20) local     try          Rafael Giardelli
+    min 20 (1T 20) visitante injury       Dante Regini
+    min 20 (1T 20) visitante substitution Dante Regini
+    min 21 (1T 21) visitante try          Tobias Ganly
+    min 21 (1T 21) visitante conversion   Robertino Moraza
+    min 26 (1T 26) visitante penalty_goal Robertino Moraza
+    min 40 (2T 0) visitante substitution Francesco Salvatierra
+    min 42 (2T 2) local     try          Pablo Sanchez
+    min 45 (2T 5) local     substitution Rafael Giardelli
+    min 45 (2T 5) local     substitution Pablo Sanchez
+    min 50 (2T 10) local     substitution Luciano Zabala
+    min 50 (2T 10) visitante substitution Alejo Bitthoff
+    min 50 (2T 10) visitante substitution Matias Quiroga
+    min 60 (2T 20) visitante substitution Simon Merlos
+    min 60 (2T 20) visitante substitution Ciro Damelio
+    min 60 (2T 20) visitante substitution Juan Ignacio Galante
+  marcador  · eventos 15-17 · guardado 15-17
+  tries     · 3-2 (guardado 3-2)
+  arbitro   · FRANCO DE LEONARDIS (guardado: FRANCO DE LEONARDIS)
+  guardado  · 23 local · 23 visitante · 19 eventos
+
+mar-del-plata-club-marron vs union-del-sur · Clasificatorio M19 · tarjeta 314107  ·  e4d5d2f3-58f3-465b-810b-c35bc6d83c96
+  local     · mar-del-plata-club-marron · 17 jugadores · 0 con ficha fijada
+  visitante · union-del-sur · 23 jugadores · 0 con ficha fijada
+  eventos   · 36
+    min  9 (1T 9) visitante try          Santiago Sanchez
+    min 12 (1T 12) visitante try          Santiago Sanchez
+    min 12 (1T 12) visitante conversion   Pedro Martin
+    min 18 (1T 18) visitante try          Ignacio Berasategui
+    min 21 (1T 21) local     try          Matias Miguez
+    min 22 (1T 22) local     conversion   Simon Amigo
+    min 26 (1T 26) visitante try          Tobias Leonel Uzquiza
+    min 26 (1T 26) visitante conversion   Pedro Martin
+    min 38 (1T 38) visitante try          Ramon Rossi
+    min 41 (2T 1) local     substitution Juan Antonio Cejas
+    min 41 (2T 1) local     substitution Nicolas Jose Castillo Pereson
+    min 44 (2T 4) visitante try          Thiago Jesús Gimenez Vicente
+    min 44 (2T 4) visitante conversion   Pedro Martin
+    min 49 (2T 9) visitante try          Juan Cruz Gigli
+    min 49 (2T 9) visitante conversion   Pedro Martin
+    min 50 (2T 10) visitante substitution Nicolas Pérez
+    min 50 (2T 10) visitante substitution Juan Cruz Gigli
+    min 50 (2T 10) visitante substitution Tobias Leonel Uzquiza
+    min 50 (2T 10) visitante substitution Juan Bautista Mannarino
+    min 53 (2T 13) visitante conversion   Ramon Rossi
+    min 53 (2T 13) visitante try          Franco Naiderman
+    min 60 (2T 20) visitante substitution Agustin Ruseckaite
+    min 60 (2T 20) visitante substitution Joaquin Cajal
+    min 61 (2T 21) visitante conversion   Pedro Martin
+    min 61 (2T 21) visitante try          Ignacio Berasategui
+    min 63 (2T 23) local     penalty_try  
+    min 65 (2T 25) local     try          Ramon Fernandez Bayon
+    min 66 (2T 26) local     conversion   Simon Amigo
+    min 67 (2T 27) visitante conversion   Ramon Rossi
+    min 67 (2T 27) visitante try          Facundo Muñoz
+    min 69 (2T 29) visitante card_yellow  Pedro Martin
+    min 69 (2T 29) visitante conversion   Ramon Rossi
+    min 69 (2T 29) visitante try          Franco Naiderman
+    min 70 (2T 30) visitante conversion   Ramon Rossi
+    min 70 (2T 30) visitante try          Thiago Jesús Gimenez Vicente
+    min 75 (2T 35) local     try          José Ignacio Borawski Chanes
+  marcador  · eventos 26-78 · guardado 26-78
+  tries     · 4-12 (guardado 4-12)
+  arbitro   · JUAN IGNACIO PORFILIO (guardado: JUAN IGNACIO PORFILIO)
+  guardado  · 17 local · 23 visitante · 36 eventos
+
+union-del-sur vs universitario-de-mar-del-plata · Clasificatorio M19 · tarjeta 314075  ·  5c4f84c1-3ea6-436a-bcaf-12d804651bb4
+  local     · union-del-sur · 23 jugadores · 0 con ficha fijada
+  visitante · universitario-de-mar-del-plata · 23 jugadores · 2 con ficha fijada
+  eventos   · 22
+    min  1 (1T 1) local     substitution Tobias Leonel Uzquiza
+    min  4 (1T 4) visitante card_yellow  Alejo Bitthoff
+    min  5 (1T 5) local     try          Ignacio Berasategui
+    min  5 (1T 5) local     conversion   Pedro Martin
+    min 22 (1T 22) visitante try          Simon Macadam
+    min 40 (2T 0) visitante substitution Franco Monsalve
+    min 40 (2T 0) visitante substitution Juan Ignacio Galante
+    min 46 (2T 6) local     substitution Juan Bautista Mannarino
+    min 50 (2T 10) visitante substitution Ciro Damelio
+    min 55 (2T 15) visitante substitution Alejo Bitthoff
+    min 55 (2T 15) visitante substitution Francisco Figueredo
+    min 55 (2T 15) visitante substitution Mateo Pampaloni
+    min 60 (2T 20) local     substitution Felipe Mayorano
+    min 60 (2T 20) local     substitution Máximo Mosquera Humen
+    min 60 (2T 20) visitante substitution Ismael Sepúlveda
+    min 60 (2T 20) visitante substitution Lorenzo Diaz Gutierrez
+    min 67 (2T 27) visitante try          Luca Laino
+    min 70 (2T 30) local     conversion   Pedro Martin
+    min 70 (2T 30) local     try          Santiago Sanchez
+    min 71 (2T 31) local     substitution Thiago Jesús Gimenez Vicente
+    min 71 (2T 31) local     substitution Agustin Ruseckaite
+    min 74 (2T 34) local     card_yellow  Facundo Muñoz
+  marcador  · eventos 14-10 · guardado 14-10
+  tries     · 2-2 (guardado 2-2)
+  arbitro   · FRANCO DE LEONARDIS (guardado: FRANCO DE LEONARDIS)
+  guardado  · 23 local · 23 visitante · 22 eventos
+
+san-ignacio-r-c vs mar-del-plata-club · Clasificatorio M19 · tarjeta 314074  ·  7c618274-4969-4e77-8249-cbae8055c58f
+  local     · san-ignacio-r-c · 23 jugadores · 5 con ficha fijada
+  visitante · mar-del-plata-club · 23 jugadores · 0 con ficha fijada
+  eventos   · 23
+    min  5 (1T 5) local     try          Rafael Giardelli
+    min 15 (1T 15) visitante try          Franco Zucconi
+    min 21 (1T 21) visitante try          Mirko Rackiewicz
+    min 22 (1T 22) visitante conversion   Francisco Guevara
+    min 24 (1T 24) local     penalty_goal Rafael Giardelli
+    min 25 (1T 25) local     card_yellow  Ramiro Allamanda
+    min 35 (1T 35) local     substitution Matias Romano
+    min 35 (1T 35) visitante try          Clemente Baez
+    min 36 (1T 36) visitante conversion   Francisco Guevara
+    min 41 (2T 1) visitante substitution Juan Manuel Cabrera Olguin
+    min 41 (2T 1) visitante substitution Mateo Rivera
+    min 46 (2T 6) local     try          Rafael Giardelli
+    min 51 (2T 11) visitante substitution Bautista Fernandez Rua
+    min 51 (2T 11) visitante substitution Matias Miguez
+    min 51 (2T 11) visitante substitution Juan Martin Eichhorn
+    min 52 (2T 12) visitante card_yellow  Benjamin Graef
+    min 61 (2T 21) visitante substitution Bautista Arosteguy
+    min 64 (2T 24) local     try          Rafael Giardelli
+    min 66 (2T 26) visitante try          Clemente Baez
+    min 67 (2T 27) visitante conversion   Francisco Guevara
+    min 71 (2T 31) local     substitution Leonel Cotado
+    min 75 (2T 35) visitante substitution Clemente Baez
+    min 75 (2T 35) visitante substitution Mirko Rackiewicz
+  marcador  · eventos 18-26 · guardado 18-26
+  tries     · 3-4 (guardado 3-4)
+  arbitro   · SANTIAGO GIAQUINTO (guardado: SANTIAGO GIAQUINTO)
+  guardado  · 23 local · 23 visitante · 23 eventos
+
+ipr-sporting vs club-los-50 · Clasificatorio M19 · tarjeta 314073  ·  0b9ad842-74b3-4ac3-bc46-ca6a255a5d8a
+  local     · ipr-sporting · 23 jugadores · 0 con ficha fijada
+  visitante · club-los-50 · 21 jugadores · 0 con ficha fijada
+  eventos   · 28
+    min  6 (1T 6) local     card_yellow  Bautista Kah
+    min  7 (1T 7) visitante penalty_goal Bautista Joaquin Ramirez Pizarro
+    min 11 (1T 11) visitante try          Valentino Iannone
+    min 11 (1T 11) visitante conversion   Bautista Joaquin Ramirez Pizarro
+    min 13 (1T 13) local     try          Agustín Figueroa
+    min 16 (1T 16) local     try          Juan Pedro Camilión
+    min 18 (1T 18) local     substitution Benjamin Marcó Del Pont
+    min 20 (1T 20) visitante try          Bautista Joaquin Ramirez Pizarro
+    min 20 (1T 20) visitante conversion   Bautista Joaquin Ramirez Pizarro
+    min 20 (1T 20) visitante substitution Tadeo Stutz
+    min 35 (1T 35) local     card_yellow  Bautista Celis
+    min 41 (2T 1) local     substitution Felipe Rullo
+    min 42 (2T 2) local     substitution Juan Ignacio Garcias
+    min 42 (2T 2) visitante penalty_goal Bautista Joaquin Ramirez Pizarro
+    min 42 (2T 2) visitante substitution Bernabe Fleitas
+    min 48 (2T 8) local     substitution Máximo Rodríguez Silva
+    min 49 (2T 9) local     substitution Octavio Pereyra
+    min 54 (2T 14) local     try          Dante Arabia Erratchu
+    min 56 (2T 16) visitante penalty_goal Bautista Joaquin Ramirez Pizarro
+    min 58 (2T 18) local     substitution Tomas Echevarria
+    min 60 (2T 20) local     try          Dante Arabia Erratchu
+    min 63 (2T 23) local     substitution Lucas Guido Rabago Pezzati
+    min 63 (2T 23) visitante card_yellow  Emmanuel Christiansen
+    min 64 (2T 24) local     try          Mateo Jeremias Rossi
+    min 64 (2T 24) local     conversion   Juan Manuel Montenegro
+    min 67 (2T 27) local     try          Benicio Murillo
+    min 75 (2T 35) local     try          Juan Martin Olza
+    min 75 (2T 35) local     conversion   Juan Manuel Montenegro
+  marcador  · eventos 39-23 · guardado 39-23
+  tries     · 7-2 (guardado 7-2)
+  arbitro   · AGUSTIN CERSOSIMO (guardado: AGUSTIN CERSOSIMO)
+  guardado  · 23 local · 21 visitante · 28 eventos
+
+pueyrredon-mar-del-plata vs los-cardos-r-c · Clasificatorio M19 · tarjeta 314072  ·  4ae9b215-9336-4ca7-b97f-3f92185e382a
+  local     · pueyrredon-mar-del-plata · 23 jugadores · 0 con ficha fijada
+  visitante · los-cardos-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 16
+    min -1 (1T -1) local     substitution Tomas Grossi
+    min -1 (1T -1) local     substitution Cristian Lautaro Gomez
+    min  6 (1T 6) visitante try          Benjamin Zubiaurre
+    min  6 (1T 6) visitante conversion   Benjamin Zubiaurre
+    min 12 (1T 12) visitante try          Silvestre Cardozo
+    min 12 (1T 12) visitante conversion   Benjamin Zubiaurre
+    min 15 (1T 15) visitante try          Franco Cervellini
+    min 15 (1T 15) visitante conversion   Benjamin Zubiaurre
+    min 20 (1T 20) local     try          Oscar Santana Tejeda
+    min 34 (1T 34) visitante try          Jose Salvador Rodriguez
+    min 41 (2T 1) visitante try          Alfonso Heer
+    min 41 (2T 1) visitante conversion   Benjamin Zubiaurre
+    min 50 (2T 10) visitante try          Francisco Sansot
+    min 65 (2T 25) visitante substitution Valentino Lacamera
+    min 65 (2T 25) visitante substitution Benjamin Zubiaurre
+    min 73 (2T 33) visitante try          Marcos Casabal
+  marcador  · eventos 5-43 · guardado 5-43
+  tries     · 1-7 (guardado 1-7)
+  arbitro   · . . (NO OFICIAL) (guardado: . . (NO OFICIAL))
+  guardado  · 23 local · 23 visitante · 16 eventos
+
+comercial-r-c vs bigua-rugby-club · Clasificatorio M19 · tarjeta 314071  ·  91ad26dd-5767-4856-bb46-412db22034b7
+  local     · comercial-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · bigua-rugby-club · 23 jugadores · 0 con ficha fijada
+  eventos   · 21
+    min 19 (1T 19) visitante try          Joaquin Estevez
+    min 24 (1T 24) visitante try          Nicolas Arenas
+    min 25 (1T 25) visitante conversion   Franco Giardini
+    min 41 (2T 1) local     substitution Santino Cattelan
+    min 41 (2T 1) local     substitution Ramiro Cordonnier Falaschini
+    min 42 (2T 2) local     try          Juan Etcheverry
+    min 42 (2T 2) local     conversion   Bernardino Barcos
+    min 50 (2T 10) visitante substitution Bautista Benjamin Orellana
+    min 51 (2T 11) visitante substitution Tomas Arriola Sauan
+    min 52 (2T 12) local     substitution Benicio Basavilbaso
+    min 54 (2T 14) local     try          Juan Etcheverry
+    min 54 (2T 14) local     conversion   Bernardino Barcos
+    min 58 (2T 18) local     penalty_goal Bernardino Barcos
+    min 60 (2T 20) local     substitution Mateo Agustín Cativiela
+    min 61 (2T 21) local     card_yellow  Tiago Valentin Aguerrido
+    min 63 (2T 23) visitante try          Julian Ruiz
+    min 69 (2T 29) visitante substitution Emiliano Trelles
+    min 70 (2T 30) local     penalty_goal Bernardino Barcos
+    min 73 (2T 33) local     card_yellow  Juan Etcheverry
+    min 74 (2T 34) visitante try          Benjamin Luna
+    min 74 (2T 34) visitante conversion   Franco Giardini
+  marcador  · eventos 20-24 · guardado 20-24
+  tries     · 2-4 (guardado 2-4)
+  arbitro   · JULIO CESAR APUT (guardado: JULIO CESAR APUT)
+  guardado  · 23 local · 23 visitante · 21 eventos
+
+universitario-de-mar-del-plata vs mar-del-plata-club · Clasificatorio M19 · tarjeta 314065  ·  468019f0-85d1-45d5-a7be-6281943f1516
+  local     · universitario-de-mar-del-plata · 23 jugadores · 1 con ficha fijada
+  visitante · mar-del-plata-club · 20 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min  1 (1T 1) local     penalty_goal Robertino Moraza
+    min 22 (1T 22) visitante try          Francisco Guevara
+    min 28 (1T 28) visitante try          Clemente Baez
+    min 40 (2T 0) local     substitution Juan Ignacio Galante
+    min 42 (2T 2) visitante try          Benjamin Graef
+    min 42 (2T 2) visitante conversion   Francisco Guevara
+    min 45 (2T 5) local     injury       Ciro Damelio
+    min 45 (2T 5) local     substitution Ciro Damelio
+    min 45 (2T 5) visitante substitution Bautista De La Garma
+    min 45 (2T 5) visitante substitution Juan Manuel Cabrera Olguin
+    min 50 (2T 10) local     substitution Mateo Pampaloni
+    min 51 (2T 11) local     try          Simon Macadam
+    min 51 (2T 11) local     conversion   Robertino Moraza
+    min 55 (2T 15) local     substitution Francisco Domijan
+    min 55 (2T 15) local     substitution Leandro Iñiguez
+    min 55 (2T 15) local     substitution Franco Monsalve
+    min 55 (2T 15) local     substitution Francisco Zarate
+    min 55 (2T 15) visitante substitution Bautista Fernandez Rua
+    min 61 (2T 21) visitante substitution Clemente Baez
+    min 61 (2T 21) visitante substitution Juan Martin Eichhorn
+    min 70 (2T 30) local     card_yellow  Dante Regini
+    min 71 (2T 31) visitante penalty_goal Francisco Guevara
+    min 73 (2T 33) local     card_yellow  Lorenzo Diaz Gutierrez
+    min 73 (2T 33) visitante card_yellow  Benjamin Graef
+    min 75 (2T 35) visitante try          Franco Zucconi
+  marcador  · eventos 10-25 · guardado 10-25
+  tries     · 1-4 (guardado 1-4)
+  arbitro   · SANTIAGO GIAQUINTO (guardado: SANTIAGO GIAQUINTO)
+  guardado  · 23 local · 20 visitante · 25 eventos
+
+union-del-sur vs ipr-sporting · Clasificatorio M19 · tarjeta 314064  ·  9e789be8-5d83-4e3e-8c83-a2f54de293da
+  local     · union-del-sur · 23 jugadores · 0 con ficha fijada
+  visitante · ipr-sporting · 23 jugadores · 1 con ficha fijada
+  eventos   · 17
+    min  5 (1T 5) visitante try          Francisco Iriarte
+    min 11 (1T 11) local     try          Agustin Ruseckaite
+    min 17 (1T 17) visitante penalty_goal Máximo Rodríguez Silva
+    min 25 (1T 25) visitante substitution Santino Mariano Guazzelli
+    min 30 (1T 30) visitante substitution Francisco Gorosito
+    min 35 (1T 35) visitante substitution Facundo Altuna
+    min 46 (2T 6) visitante try          Dante Arabia Erratchu
+    min 46 (2T 6) visitante conversion   Máximo Rodríguez Silva
+    min 47 (2T 7) local     substitution Juan Cruz Gigli
+    min 47 (2T 7) local     substitution Máximo Mosquera Humen
+    min 52 (2T 12) visitante card_yellow  Santiago Nicolás Piccinini
+    min 60 (2T 20) local     substitution Simón Rossi
+    min 60 (2T 20) local     substitution Pedro Martin
+    min 60 (2T 20) local     substitution Mateo Palenzona
+    min 69 (2T 29) visitante substitution Dylan Martín Racca
+    min 70 (2T 30) visitante substitution Mateo Jeremias Rossi
+    min 72 (2T 32) local     try          Marcos Gabotto
+  marcador  · eventos 10-15 · guardado 10-15
+  tries     · 2-2 (guardado 2-2)
+  arbitro   · LAUTARO CORDEIRO (guardado: LAUTARO CORDEIRO)
+  guardado  · 23 local · 23 visitante · 17 eventos
+
+san-ignacio-r-c vs pueyrredon-mar-del-plata · Clasificatorio M19 · tarjeta 314063  ·  dfdd1087-5e05-495b-b203-3065cdbd6299
+  local     · san-ignacio-r-c · 23 jugadores · 3 con ficha fijada
+  visitante · pueyrredon-mar-del-plata · 23 jugadores · 0 con ficha fijada
+  eventos   · 26
+    min -1 (1T -1) visitante substitution Cristian Lautaro Gomez
+    min  2 (1T 2) local     substitution Juan Ignacio Madeira
+    min  4 (1T 4) local     try          Joaquin Melis
+    min 15 (1T 15) local     try          Lautaro Ceschi
+    min 16 (1T 16) local     conversion   Rafael Giardelli
+    min 25 (1T 25) local     try          Joaquin Melis
+    min 26 (1T 26) local     conversion   Rafael Giardelli
+    min 35 (1T 35) local     try          Daniel Havrylenko
+    min 35 (1T 35) local     conversion   Rafael Giardelli
+    min 46 (2T 6) local     try          Joaquin De Siena
+    min 46 (2T 6) local     conversion   Rafael Giardelli
+    min 48 (2T 8) local     try          Rafael Giardelli
+    min 48 (2T 8) local     conversion   Rafael Giardelli
+    min 54 (2T 14) local     try          Pablo Sanchez
+    min 55 (2T 15) local     conversion   Rafael Giardelli
+    min 56 (2T 16) local     try          Rafael Giardelli
+    min 56 (2T 16) local     conversion   Rafael Giardelli
+    min 60 (2T 20) local     try          Rafael Giardelli
+    min 62 (2T 22) local     try          Joaquin De Siena
+    min 65 (2T 25) local     try          Augusto Sanchez
+    min 65 (2T 25) local     conversion   Rafael Giardelli
+    min 67 (2T 27) local     try          Daniel Havrylenko
+    min 68 (2T 28) local     conversion   Rafael Giardelli
+    min 72 (2T 32) local     try          Joaquin De Siena
+    min 75 (2T 35) local     try          Joaquin De Siena
+    min 75 (2T 35) local     conversion   Rafael Giardelli
+  marcador  · eventos 90-0 · guardado 90-0
+  tries     · 14-0 (guardado 14-0)
+  arbitro   · ALEJANDRO VILLANUEVA 11991906 (NO OFICIAL) (guardado: ALEJANDRO VILLANUEVA 11991906 (NO OFICIAL))
+  guardado  · 23 local · 23 visitante · 26 eventos
+
+club-los-50 vs comercial-r-c · Clasificatorio M19 · tarjeta 314062  ·  4224bfe9-a214-4ab5-9d05-f68bb071c108
+  local     · club-los-50 · 20 jugadores · 0 con ficha fijada
+  visitante · comercial-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min  8 (1T 8) visitante try          Bernardino Barcos
+    min  8 (1T 8) visitante conversion   Bernardino Barcos
+    min 14 (1T 14) visitante substitution Mateo Agustín Cativiela
+    min 35 (1T 35) visitante try          Bernardino Barcos
+    min 35 (1T 35) visitante conversion   Bernardino Barcos
+    min 41 (2T 1) local     substitution Emmanuel Christiansen
+    min 41 (2T 1) local     substitution Julian Suarez Amasino
+    min 41 (2T 1) local     try          Agustin Torrissi
+    min 42 (2T 2) local     card_yellow  Valentino Iannone
+    min 54 (2T 14) local     substitution Iñaki Elissondo
+    min 54 (2T 14) local     substitution Bernabe Fleitas
+    min 56 (2T 16) visitante penalty_goal Bernardino Barcos
+    min 58 (2T 18) local     try          Valentino Iannone
+    min 58 (2T 18) local     conversion   Bautista Joaquin Ramirez Pizarro
+    min 58 (2T 18) visitante substitution Mijael Nicolás Suárez
+    min 60 (2T 20) visitante card_yellow  Lucas Vázquez
+    min 61 (2T 21) local     substitution Tadeo Stutz
+    min 62 (2T 22) visitante substitution Luciano Nicolas Giachero
+    min 62 (2T 22) visitante injury       Luciano Nicolas Giachero
+    min 62 (2T 22) visitante substitution Bruno Manuel Aguerrido
+    min 63 (2T 23) visitante penalty_goal Bernardino Barcos
+    min 67 (2T 27) local     try          Valentino Iannone
+    min 71 (2T 31) local     try          Agustin Torrissi
+    min 74 (2T 34) local     try          Agustin Torrissi
+  marcador  · eventos 27-20 · guardado 27-20
+  tries     · 5-2 (guardado 5-2)
+  arbitro   · MARCELO PUERTA (guardado: MARCELO PUERTA)
+  guardado  · 20 local · 23 visitante · 24 eventos
+
+bigua-rugby-club vs mar-del-plata-club-marron · Clasificatorio M19 · tarjeta 314061  ·  216e6cf1-42c4-4939-bf56-17ee5280bfd5
+  local     · bigua-rugby-club · 23 jugadores · 0 con ficha fijada
+  visitante · mar-del-plata-club-marron · 18 jugadores · 0 con ficha fijada
+  eventos   · 13
+    min  2 (1T 2) visitante try          Joaquin Morcella Vescovi
+    min  5 (1T 5) local     try          Agustin Nicolas Muñoz
+    min 20 (1T 20) visitante substitution Juan Martin Moreno
+    min 35 (1T 35) visitante try          Valentino Lancellotti
+    min 50 (2T 10) local     substitution Diego Joaquin Montenegro
+    min 60 (2T 20) visitante substitution Alexis Alan Joaquín Bontempo
+    min 62 (2T 22) visitante try          Gabino Felipe
+    min 63 (2T 23) local     try          Benjamin Luna
+    min 63 (2T 23) visitante conversion   Iñaki Espino
+    min 64 (2T 24) local     conversion   Franco Giardini
+    min 65 (2T 25) visitante substitution Joaquin Morcella Vescovi
+    min 66 (2T 26) visitante try          Valentino Lancellotti
+    min 71 (2T 31) local     card_yellow  Joaquin Estevez
+  marcador  · eventos 12-22 · guardado 12-22
+  tries     · 2-4 (guardado 2-4)
+  arbitro   · WALTER ADRIÁN LOTTER (guardado: WALTER ADRIÁN LOTTER)
+  guardado  · 23 local · 18 visitante · 13 eventos
+
+comercial-r-c vs los-cardos-r-c · Clasificatorio M19 · tarjeta 314070  ·  d671617f-000b-4881-86b9-7a15c4883ee2
+  local     · comercial-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · los-cardos-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 30
+    min  0 (1T 0) local     substitution Mateo Dambrosio
+    min  1 (1T 1) local     substitution Mateo Agustín Cativiela
+    min  1 (1T 1) visitante conversion   Agustin Bollier
+    min  1 (1T 1) visitante try          Ivan Schreiterer
+    min  8 (1T 8) visitante try          Francisco Brut
+    min  8 (1T 8) visitante conversion   Agustin Bollier
+    min 21 (1T 21) local     try          Tomas Ibarra Sánchez
+    min 21 (1T 21) local     conversion   Bernardino Barcos
+    min 23 (1T 23) visitante try          Francisco Brut
+    min 23 (1T 23) visitante conversion   Agustin Bollier
+    min 29 (1T 29) visitante try          Alfonso Heer
+    min 29 (1T 29) visitante conversion   Agustin Bollier
+    min 32 (1T 32) local     try          Mateo Dambrosio
+    min 33 (1T 33) visitante try          Marcos Casabal
+    min 41 (2T 1) local     substitution Ramiro Cordonnier Falaschini
+    min 41 (2T 1) local     substitution Tiago Valentin Aguerrido
+    min 41 (2T 1) local     substitution Santino Cattelan
+    min 41 (2T 1) visitante try          Juan Martín Franco
+    min 41 (2T 1) visitante conversion   Agustin Bollier
+    min 45 (2T 5) visitante try          Ivan Schreiterer
+    min 45 (2T 5) visitante conversion   Agustin Bollier
+    min 50 (2T 10) visitante substitution Laureano Ferrero
+    min 50 (2T 10) visitante substitution Valentino Lacamera
+    min 54 (2T 14) visitante try          Marcos Casabal
+    min 56 (2T 16) visitante substitution Francisco Brut
+    min 60 (2T 20) visitante substitution Matias Bollier
+    min 64 (2T 24) visitante conversion   Agustin Bollier
+    min 64 (2T 24) visitante try          Juan Martín Franco
+    min 75 (2T 35) visitante conversion   Agustin Bollier
+    min 75 (2T 35) visitante try          Nicanor Molinero
+  marcador  · eventos 12-66 · guardado 12-66
+  tries     · 2-10 (guardado 2-10)
+  arbitro   · LAUTARO CORDEIRO (guardado: LAUTARO CORDEIRO)
+  guardado  · 23 local · 23 visitante · 30 eventos
+
+club-los-50 vs pueyrredon-mar-del-plata · Clasificatorio M19 · tarjeta 314069  ·  17d9e376-0770-4d90-b399-71a9c35cadca
+  local     · club-los-50 · 21 jugadores · 0 con ficha fijada
+  visitante · pueyrredon-mar-del-plata · 23 jugadores · 0 con ficha fijada
+  eventos   · 21
+    min -1 (1T -1) visitante substitution Cristian Lautaro Gomez
+    min 12 (1T 12) local     conversion   Bautista Joaquin Ramirez Pizarro
+    min 12 (1T 12) local     try          Emmanuel Christiansen
+    min 15 (1T 15) visitante substitution Juan Bautista Perez
+    min 26 (1T 26) local     try          Santiago Pellegrini
+    min 26 (1T 26) local     conversion   Bautista Joaquin Ramirez Pizarro
+    min 31 (1T 31) local     substitution Emmanuel Christiansen
+    min 35 (1T 35) local     try          Pedro Cantarella
+    min 35 (1T 35) local     conversion   Bautista Joaquin Ramirez Pizarro
+    min 47 (2T 7) local     substitution Marcos Rios
+    min 47 (2T 7) local     substitution Iñaki Elissondo
+    min 48 (2T 8) local     try          Ignacio Butti
+    min 55 (2T 15) visitante substitution Eloy Ojeda
+    min 55 (2T 15) visitante substitution Josué Thiago Barrionuevo Nicuez
+    min 55 (2T 15) visitante substitution Milo Savino
+    min 57 (2T 17) local     try          Valentino Iannone
+    min 58 (2T 18) local     conversion   Bautista Joaquin Ramirez Pizarro
+    min 58 (2T 18) local     try          Fermin Etchechoury
+    min 61 (2T 21) local     substitution Tadeo Stutz
+    min 69 (2T 29) local     conversion   Bautista Joaquin Ramirez Pizarro
+    min 69 (2T 29) local     try          Tomas Garcia Rife
+  marcador  · eventos 45-0 · guardado 45-0
+  tries     · 7-0 (guardado 7-0)
+  arbitro   · RAFAEL RUBIO (guardado: RAFAEL RUBIO)
+  guardado  · 21 local · 23 visitante · 21 eventos
+
+ipr-sporting vs san-ignacio-r-c · Clasificatorio M19 · tarjeta 314068  ·  0c094773-2e6c-45f3-8ab6-3a86f5f6ba6e
+  local     · ipr-sporting · 23 jugadores · 1 con ficha fijada
+  visitante · san-ignacio-r-c · 23 jugadores · 4 con ficha fijada
+  eventos   · 16
+    min  7 (1T 7) visitante try          Pablo Sanchez
+    min  7 (1T 7) visitante conversion   Rafael Giardelli
+    min 18 (1T 18) visitante try          Rafael Giardelli
+    min 18 (1T 18) visitante conversion   Rafael Giardelli
+    min 35 (1T 35) local     try          Benicio Murillo
+    min 46 (2T 6) visitante substitution Lautaro Ceschi
+    min 57 (2T 17) visitante substitution Augusto Sanchez
+    min 57 (2T 17) visitante substitution Matias Romano
+    min 75 (2T 35) visitante penalty_goal Rafael Giardelli
+    min 76 (2T 36) local     substitution Juan Martin Olza
+    min 80 (2T 40) local     try          Dante Arabia Erratchu
+    min 80 (2T 40) local     conversion   Máximo Rodríguez Silva
+    min 90 (2T 50) local     substitution Salvador Patron Costas
+    min 90 (2T 50) local     substitution Santiago Nicolás Piccinini
+    min 94 (2T 54) local     substitution Felipe Rullo
+    min 98 (2T 58) local     penalty_goal Máximo Rodríguez Silva
+  marcador  · eventos 15-17 · guardado 15-17
+  tries     · 2-2 (guardado 2-2)
+  arbitro   · FRANCO DE LEONARDIS (guardado: FRANCO DE LEONARDIS)
+  guardado  · 23 local · 23 visitante · 16 eventos
+
+union-del-sur vs mar-del-plata-club · Clasificatorio M19 · tarjeta 314067  ·  7aa8f008-cab1-47ba-a5b3-2bef62aef222
+  local     · union-del-sur · 23 jugadores · 0 con ficha fijada
+  visitante · mar-del-plata-club · 19 jugadores · 1 con ficha fijada
+  eventos   · 27
+    min  2 (1T 2) local     conversion   Pedro Martin
+    min  2 (1T 2) local     try          Santiago Sanchez
+    min  8 (1T 8) visitante conversion   Francisco Guevara
+    min  8 (1T 8) visitante try          Felipe Antonio Delgiorgio Salerno
+    min 15 (1T 15) visitante substitution Juan Manuel Cabrera Olguin
+    min 16 (1T 16) visitante try          Bautista Fernandez Rua
+    min 16 (1T 16) visitante conversion   Francisco Guevara
+    min 25 (1T 25) local     try          Pedro Martin
+    min 36 (1T 36) visitante try          Franco Zucconi
+    min 41 (2T 1) local     substitution Franco Naiderman
+    min 44 (2T 4) visitante substitution Mateo Bilancieri
+    min 47 (2T 7) visitante try          Francisco Guevara
+    min 47 (2T 7) visitante conversion   Francisco Guevara
+    min 50 (2T 10) local     substitution Juan Bautista Mannarino
+    min 50 (2T 10) local     substitution Simón Rossi
+    min 52 (2T 12) visitante try          Juan Martin Eichhorn
+    min 52 (2T 12) visitante conversion   Francisco Guevara
+    min 54 (2T 14) local     substitution Alejo Blanco
+    min 54 (2T 14) local     substitution Nicolas Pérez
+    min 54 (2T 14) local     substitution Máximo Mosquera Humen
+    min 54 (2T 14) local     substitution Agustin Ruseckaite
+    min 55 (2T 15) local     conversion   Pedro Martin
+    min 55 (2T 15) local     try          Ramon Rossi
+    min 58 (2T 18) visitante try          Bautista Fernandez Rua
+    min 61 (2T 21) visitante substitution Felipe Antonio Delgiorgio Salerno
+    min 64 (2T 24) visitante try          Francisco Guevara
+    min 65 (2T 25) local     substitution Marcos Gabotto
+  marcador  · eventos 19-43 · guardado 19-43
+  tries     · 3-7 (guardado 3-7)
+  arbitro   · MARIO FEDERICO CHARLES (guardado: MARIO FEDERICO CHARLES)
+  guardado  · 23 local · 19 visitante · 27 eventos
+
+mar-del-plata-club-marron vs universitario-de-mar-del-plata · Clasificatorio M19 · tarjeta 314066  ·  1146004a-02c2-48a7-bca9-8b6e19fb5b5a
+  local     · mar-del-plata-club-marron · 16 jugadores · 0 con ficha fijada
+  visitante · universitario-de-mar-del-plata · 23 jugadores · 2 con ficha fijada
+  eventos   · 34
+    min  1 (1T 1) local     card_yellow  Ramon Fernandez Bayon
+    min  1 (1T 1) local     card_yellow  Joaquín López Dupuy
+    min  1 (1T 1) visitante penalty_try  
+    min  7 (1T 7) visitante try          Luca Laino
+    min 18 (1T 18) visitante try          Francisco Figueredo
+    min 18 (1T 18) visitante conversion   Francisco Domijan
+    min 24 (1T 24) visitante try          Tobias Ganly
+    min 27 (1T 27) visitante try          Luca Laino
+    min 27 (1T 27) visitante conversion   Francisco Domijan
+    min 30 (1T 30) visitante try          Luca Laino
+    min 31 (1T 31) visitante try          Benjamin Elizalde
+    min 31 (1T 31) visitante conversion   Francisco Domijan
+    min 34 (1T 34) visitante try          Mateo Pampaloni
+    min 34 (1T 34) visitante conversion   Francisco Domijan
+    min 36 (1T 36) visitante try          Simon Macadam
+    min 41 (2T 1) local     substitution Pio Bautista Nicolosi
+    min 45 (2T 5) visitante substitution Benjamin Elizalde
+    min 45 (2T 5) visitante substitution Matias Quiroga
+    min 45 (2T 5) visitante substitution Tomas Di Tulio Vargas
+    min 52 (2T 12) visitante card_yellow  Francisco Figueredo
+    min 53 (2T 13) local     try          Joaquín Fígoli
+    min 54 (2T 14) local     conversion   Simon Amigo
+    min 55 (2T 15) visitante substitution Francisco Zarate
+    min 57 (2T 17) visitante try          Francisco Domijan
+    min 58 (2T 18) visitante conversion   Francisco Domijan
+    min 58 (2T 18) visitante try          Lorenzo Diaz Gutierrez
+    min 60 (2T 20) visitante substitution Mateo Pampaloni
+    min 60 (2T 20) visitante substitution Simon Merlos
+    min 60 (2T 20) visitante substitution Constantino Sapia Pucheta
+    min 60 (2T 20) visitante substitution Lorenzo Diaz Gutierrez
+    min 65 (2T 25) visitante try          Dante Tempone
+    min 74 (2T 34) visitante conversion   Francisco Domijan
+    min 74 (2T 34) visitante try          Simon Macadam
+    min 75 (2T 35) visitante try          Camilo Baldino
+  marcador  · eventos 7-84 · guardado 7-84
+  tries     · 1-14 (guardado 1-14)
+  arbitro   · JUAN IGNACIO PORFILIO (guardado: JUAN IGNACIO PORFILIO)
+  guardado  · 16 local · 23 visitante · 34 eventos
+
+mar-del-plata-club-marron vs mar-del-plata-club · Clasificatorio M19 · tarjeta 314056  ·  71ebcac3-c718-4982-baf1-34e224a2d96c
+  local     · mar-del-plata-club-marron · 21 jugadores · 0 con ficha fijada
+  visitante · mar-del-plata-club · 20 jugadores · 1 con ficha fijada
+  eventos   · 22
+    min 10 (1T 10) local     try          Iñaki Espino
+    min 10 (1T 10) local     conversion   Simon Amigo
+    min 10 (1T 10) visitante try          Juan Martin Eichhorn
+    min 10 (1T 10) visitante conversion   Francisco Guevara
+    min 12 (1T 12) visitante try          Stefano Sabarese Capria
+    min 12 (1T 12) visitante conversion   Francisco Guevara
+    min 22 (1T 22) visitante try          Beltran Scaminaci
+    min 24 (1T 24) visitante try          Francisco Guevara
+    min 24 (1T 24) visitante conversion   Francisco Guevara
+    min 33 (1T 33) local     try          Francisco Robert
+    min 33 (1T 33) local     conversion   Simon Amigo
+    min 35 (1T 35) visitante try          Bautista Fernandez Rua
+    min 42 (2T 2) visitante try          Stefano Sabarese Capria
+    min 42 (2T 2) visitante conversion   Santino Muñoz
+    min 47 (2T 7) visitante try          Mirko Rackiewicz
+    min 47 (2T 7) visitante conversion   Franco Zucconi
+    min 55 (2T 15) local     try          Pedro Serantes
+    min 65 (2T 25) visitante try          Francisco Blanco
+    min 65 (2T 25) visitante conversion   Franco Zucconi
+    min 70 (2T 30) visitante try          Beltran Scaminaci
+    min 70 (2T 30) visitante conversion   Franco Zucconi
+    min 75 (2T 35) local     try          Federico Joaquín Jano
+  marcador  · eventos 24-59 · guardado 24-59
+  tries     · 4-9 (guardado 4-9)
+  arbitro   · FRANCO DE LEONARDIS (guardado: FRANCO DE LEONARDIS)
+  guardado  · 21 local · 20 visitante · 22 eventos
+
+los-cardos-r-c vs bigua-rugby-club · Clasificatorio M19 · tarjeta 314060  ·  cb94eea5-284b-46e8-8e2c-8ab769f87449
+  local     · los-cardos-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · bigua-rugby-club · 23 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min  2 (1T 2) local     penalty_goal Agustin Bollier
+    min  9 (1T 9) local     try          Valentino Lacamera
+    min  9 (1T 9) local     conversion   Agustin Bollier
+    min 12 (1T 12) local     try          Jose Salvador Rodriguez
+    min 12 (1T 12) local     conversion   Agustin Bollier
+    min 20 (1T 20) local     try          Ivan Schreiterer
+    min 20 (1T 20) local     conversion   Agustin Bollier
+    min 25 (1T 25) visitante try          Santiago Molinari
+    min 26 (1T 26) visitante conversion   Franco Giardini
+    min 32 (1T 32) visitante penalty_goal Franco Giardini
+    min 35 (1T 35) local     try          Marcos Casabal
+    min 35 (1T 35) local     conversion   Agustin Bollier
+    min 47 (2T 7) local     try          Justo Di Lazaro
+    min 47 (2T 7) local     conversion   Agustin Bollier
+    min 71 (2T 31) local     try          Quinto Llambi
+    min 71 (2T 31) local     conversion   Agustin Bollier
+    min 73 (2T 33) local     try          Ivan Schreiterer
+    min 73 (2T 33) local     conversion   Agustin Bollier
+  marcador  · eventos 52-10 · guardado 52-10
+  tries     · 7-1 (guardado 7-1)
+  arbitro   · RAFAEL RUBIO (guardado: RAFAEL RUBIO)
+  guardado  · 23 local · 23 visitante · 18 eventos
+
+san-ignacio-r-c vs comercial-r-c · Clasificatorio M19 · tarjeta 314059  ·  44ab6319-4e67-4e29-b3c7-ef2aa5ea7603
+  local     · san-ignacio-r-c · 23 jugadores · 3 con ficha fijada
+  visitante · comercial-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min  6 (1T 6) local     try          Daniel Havrylenko
+    min  7 (1T 7) local     conversion   Rocco Calimano
+    min 12 (1T 12) visitante try          Luciano Nicolas Giachero
+    min 12 (1T 12) visitante conversion   Bernardino Barcos
+    min 18 (1T 18) local     try          Felipe Magrini
+    min 19 (1T 19) local     conversion   Rocco Calimano
+    min 22 (1T 22) local     try          Felipe Magrini
+    min 23 (1T 23) local     conversion   Rocco Calimano
+    min 26 (1T 26) local     try          Pablo Sanchez
+    min 34 (1T 34) local     try          Juan Ignacio Madeira
+    min 41 (2T 1) visitante substitution Santino Cattelan
+    min 43 (2T 3) local     try          Daniel Havrylenko
+    min 51 (2T 11) visitante substitution Santino Bibbo
+    min 51 (2T 11) visitante substitution Bruno Manuel Aguerrido
+    min 54 (2T 14) local     try          Lucas Belatinez
+    min 55 (2T 15) local     conversion   Lucas Belatinez
+    min 59 (2T 19) local     try          Daniel Havrylenko
+    min 60 (2T 20) visitante try          Thiago Ruiz Alonso
+    min 60 (2T 20) visitante conversion   Bernardino Barcos
+    min 69 (2T 29) local     try          Lucas Belatinez
+    min 70 (2T 30) local     conversion   Lucas Belatinez
+    min 70 (2T 30) visitante substitution Mateo Agustín Cativiela
+    min 75 (2T 35) local     try          Rocco Calimano
+    min 75 (2T 35) local     conversion   Lucas Belatinez
+  marcador  · eventos 62-14 · guardado 62-14
+  tries     · 10-2 (guardado 10-2)
+  arbitro   · LUCIANO PAMPIN (guardado: LUCIANO PAMPIN)
+  guardado  · 23 local · 23 visitante · 24 eventos
+
+pueyrredon-mar-del-plata vs union-del-sur · Clasificatorio M19 · tarjeta 314058  ·  4ff23391-db25-45e0-a3aa-f4efd39555e2
+  local     · pueyrredon-mar-del-plata · 23 jugadores · 0 con ficha fijada
+  visitante · union-del-sur · 21 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min -1 (1T -1) local     substitution Milo Savino
+    min -1 (1T -1) local     substitution Cristian Lautaro Gomez
+    min -1 (1T -1) local     substitution Eloy Ojeda
+    min 11 (1T 11) visitante card_yellow  Mateo Palenzona
+    min 13 (1T 13) local     try          Felipe Lucio Martinez
+    min 18 (1T 18) visitante try          Santiago Sanchez
+    min 18 (1T 18) visitante conversion   Pedro Martin
+    min 23 (1T 23) visitante try          Juan Bautista Mannarino
+    min 23 (1T 23) visitante conversion   Pedro Martin
+    min 43 (2T 3) visitante try          Santiago Sanchez
+    min 48 (2T 8) local     try          Francisco Tomas Vinaccia
+    min 48 (2T 8) local     conversion   Oscar Santana Tejeda
+    min 60 (2T 20) local     try          Diego Valentín Barros
+    min 63 (2T 23) visitante try          Santiago Sanchez
+    min 66 (2T 26) visitante substitution Tobias Leonel Uzquiza
+    min 66 (2T 26) visitante substitution Bautista Ayala
+    min 66 (2T 26) visitante substitution Pedro Martin
+    min 69 (2T 29) visitante try          Santiago Attanasio
+    min 73 (2T 33) visitante substitution Mateo Palenzona
+    min 73 (2T 33) visitante substitution Benjamin Torres Martinez
+    min 75 (2T 35) visitante conversion   Franco Naiderman
+    min 75 (2T 35) visitante try          Santiago Attanasio
+  marcador  · eventos 17-36 · guardado 17-36
+  tries     · 3-6 (guardado 3-6)
+  arbitro   · JULIO CESAR APUT (guardado: JULIO CESAR APUT)
+  guardado  · 23 local · 21 visitante · 22 eventos
+
+ipr-sporting vs universitario-de-mar-del-plata · Clasificatorio M19 · tarjeta 314057  ·  a92f84df-0f07-4c07-bed4-ac35a9f7df9c
+  local     · ipr-sporting · 23 jugadores · 1 con ficha fijada
+  visitante · universitario-de-mar-del-plata · 23 jugadores · 2 con ficha fijada
+  eventos   · 23
+    min  2 (1T 2) visitante conversion   Robertino Moraza
+    min  2 (1T 2) visitante try          Robertino Moraza
+    min 36 (1T 36) visitante try          Ciro Damelio
+    min 40 (2T 0) visitante substitution Juan Ignacio Galante
+    min 40 (2T 0) visitante substitution Leandro Iñiguez
+    min 40 (2T 0) visitante substitution Francisco Domijan
+    min 50 (2T 10) visitante substitution Lorenzo Diaz Gutierrez
+    min 60 (2T 20) visitante substitution Franco Monsalve
+    min 60 (2T 20) visitante substitution Francisco Figueredo
+    min 60 (2T 20) visitante substitution Ismael Sepúlveda
+    min 70 (2T 30) visitante card_yellow  Ciro Damelio
+    min 75 (2T 35) local     substitution Santiago De La Vega
+    min 79 (2T 39) visitante card_yellow  Francisco Odriozola
+    min 80 (2T 40) local     substitution Pedro Bozzo Nigro
+    min 82 (2T 42) local     substitution Lucas Guido Rabago Pezzati
+    min 84 (2T 44) local     card_yellow  Facundo Altuna
+    min 94 (2T 54) local     substitution Facundo Altuna
+    min 94 (2T 54) local     substitution Benjamin Marcó Del Pont
+    min 96 (2T 56) local     substitution Máximo Rodríguez Silva
+    min 97 (2T 57) local     substitution Dylan Martín Racca
+    min 97 (2T 57) local     substitution Tomas Echevarria
+    min 109 (2T 69) local     try          Santiago Nicolás Piccinini
+    min 109 (2T 69) local     card_yellow  Francisco Iriarte
+  marcador  · eventos 5-12 · guardado 5-12
+  tries     · 1-2 (guardado 1-2)
+  arbitro   · LAUTARO LAMAS (guardado: LAUTARO LAMAS)
+  guardado  · 23 local · 23 visitante · 23 eventos
+
+universitario-de-mar-del-plata vs pueyrredon-mar-del-plata · Clasificatorio M19 · tarjeta 314054  ·  51a3d2fa-9352-42e1-9511-fb87e0881c9d
+  local     · universitario-de-mar-del-plata · 23 jugadores · 0 con ficha fijada
+  visitante · pueyrredon-mar-del-plata · 23 jugadores · 0 con ficha fijada
+  eventos   · 31
+    min -1 (1T -1) visitante substitution Rocco Vidal
+    min  5 (1T 5) local     conversion   Robertino Moraza
+    min  5 (1T 5) local     try          Franco Monsalve
+    min 11 (1T 11) visitante card_yellow  Santiago Suárez
+    min 17 (1T 17) local     try          Ciro Damelio
+    min 17 (1T 17) local     conversion   Robertino Moraza
+    min 22 (1T 22) local     try          Alejo Bitthoff
+    min 22 (1T 22) local     conversion   Robertino Moraza
+    min 27 (1T 27) local     try          Francisco Domijan
+    min 27 (1T 27) local     conversion   Robertino Moraza
+    min 32 (1T 32) local     card_yellow  Simon Merlos
+    min 41 (2T 1) local     try          Alejo Bitthoff
+    min 41 (2T 1) local     conversion   Robertino Moraza
+    min 45 (2T 5) local     substitution Nahuel Akeem Imaz
+    min 45 (2T 5) local     substitution Francisco Domijan
+    min 45 (2T 5) local     substitution Nicolas Mellino
+    min 52 (2T 12) local     try          Tobias Ganly
+    min 52 (2T 12) local     conversion   Robertino Moraza
+    min 55 (2T 15) local     substitution Tomas Di Tulio Vargas
+    min 55 (2T 15) local     substitution Franco Monsalve
+    min 55 (2T 15) local     try          Juan Ignacio Galante
+    min 55 (2T 15) local     conversion   Robertino Moraza
+    min 60 (2T 20) local     try          Alejo Bitthoff
+    min 60 (2T 20) local     substitution Juan Ignacio Galante
+    min 60 (2T 20) local     substitution Simon Merlos
+    min 60 (2T 20) visitante card_yellow  Leandro Mercado
+    min 62 (2T 22) local     try          Luca Laino
+    min 65 (2T 25) local     substitution Dante Regini
+    min 70 (2T 30) local     conversion   Robertino Moraza
+    min 70 (2T 30) local     try          Tobias Ganly
+    min 75 (2T 35) local     try          Lorenzo Diaz Gutierrez
+  marcador  · eventos 71-0 · guardado 71-0
+  tries     · 11-0 (guardado —-—)
+  arbitro   · HECTOR OLIVERA (guardado: —)
+  guardado  · 23 local · 23 visitante · 31 eventos
+
+mar-del-plata-club vs ipr-sporting · Clasificatorio M19 · tarjeta 314055  ·  a187722c-6d16-473a-9014-63159cde8f2f
+  local     · mar-del-plata-club · 21 jugadores · 1 con ficha fijada
+  visitante · ipr-sporting · 23 jugadores · 0 con ficha fijada
+  eventos   · 23
+    min  6 (1T 6) local     penalty_goal Francisco Guevara
+    min 18 (1T 18) local     penalty_goal Francisco Guevara
+    min 22 (1T 22) visitante penalty_goal Máximo Rodríguez Silva
+    min 34 (1T 34) visitante card_yellow  Agustín Figueroa
+    min 75 (2T 35) local     substitution Benjamin Graef
+    min 75 (2T 35) visitante substitution Santiago De La Vega
+    min 76 (2T 36) visitante substitution Bautista Celis
+    min 79 (2T 39) visitante substitution Lucas Guido Rabago Pezzati
+    min 83 (2T 43) visitante try          Máximo Rodríguez Silva
+    min 83 (2T 43) visitante conversion   Máximo Rodríguez Silva
+    min 85 (2T 45) visitante substitution Facundo Altuna
+    min 87 (2T 47) local     substitution Santino Muñoz
+    min 95 (2T 55) local     try          Felipe Antonio Delgiorgio Salerno
+    min 95 (2T 55) local     conversion   Francisco Guevara
+    min 95 (2T 55) visitante card_yellow  Santiago Lahitte
+    min 97 (2T 57) local     substitution Juan Martin Eichhorn
+    min 97 (2T 57) local     substitution Francisco Blanco
+    min 100 (2T 60) local     substitution Clemente Baez
+    min 100 (2T 60) local     substitution Felipe Antonio Delgiorgio Salerno
+    min 101 (2T 61) visitante penalty_goal Máximo Rodríguez Silva
+    min 103 (2T 63) visitante penalty_goal Máximo Rodríguez Silva
+    min 110 (2T 70) visitante try          Bautista Kah
+    min 110 (2T 70) visitante conversion   Máximo Rodríguez Silva
+  marcador  · eventos 13-23 · guardado 13-23
+  tries     · 1-2 (guardado —-—)
+  arbitro   · AGUSTIN CERSOSIMO (guardado: —)
+  guardado  · 21 local · 23 visitante · 23 eventos
+
+union-del-sur vs comercial-r-c · Clasificatorio M19 · tarjeta 314053  ·  f932a1a5-16db-42ce-9273-d70fb01ce588
+  local     · union-del-sur · 22 jugadores · 0 con ficha fijada
+  visitante · comercial-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 26
+    min  4 (1T 4) local     conversion   Pedro Martin
+    min  4 (1T 4) local     try          Santiago Attanasio
+    min  6 (1T 6) local     conversion   Pedro Martin
+    min  6 (1T 6) local     try          Alejo Blanco
+    min 15 (1T 15) local     conversion   Pedro Martin
+    min 15 (1T 15) local     try          Juan Bautista Mannarino
+    min 18 (1T 18) local     conversion   Pedro Martin
+    min 18 (1T 18) local     try          Juan Bautista Mannarino
+    min 35 (1T 35) local     conversion   Pedro Martin
+    min 35 (1T 35) local     try          Ignacio Berasategui
+    min 35 (1T 35) local     substitution Juan Bautista Mannarino
+    min 41 (2T 1) local     try          Franco Naiderman
+    min 47 (2T 7) local     conversion   Pedro Martin
+    min 47 (2T 7) local     try          Santiago Sanchez
+    min 50 (2T 10) local     conversion   Pedro Martin
+    min 50 (2T 10) local     try          Santiago Sanchez
+    min 54 (2T 14) local     conversion   Pedro Martin
+    min 54 (2T 14) local     try          Santiago Attanasio
+    min 54 (2T 14) local     substitution Nicolas Pérez
+    min 54 (2T 14) local     substitution Agustin Ruseckaite
+    min 54 (2T 14) local     substitution Alejo Blanco
+    min 56 (2T 16) local     try          Santiago Attanasio
+    min 64 (2T 24) local     try          Ignacio Berasategui
+    min 64 (2T 24) local     conversion   Pedro Martin
+    min 67 (2T 27) local     try          Franco Naiderman
+    min 75 (2T 35) local     substitution Máximo Mosquera Humen
+  marcador  · eventos 78-0 · guardado 78-0
+  tries     · 12-0 (guardado —-—)
+  arbitro   · MARIO FEDERICO CHARLES (guardado: —)

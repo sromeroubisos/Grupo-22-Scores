@@ -143,7 +143,7 @@ function Leaders({ boards, kind }: { boards: LeaderBoard[]; kind: 'teams' | 'pla
 }
 
 export default function TournamentRugbyPassStats({ competitionId, season, tournamentName }: Props) {
-    const [subTab, setSubTab] = useState<'teams' | 'players'>('teams');
+    const [subTab, setSubTab] = useState<'teams' | 'players'>('players');
     const [data, setData] = useState<Payload | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);

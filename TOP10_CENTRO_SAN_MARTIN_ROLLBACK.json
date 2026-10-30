@@ -1,0 +1,13 @@
+[
+  {
+    "id": "7c0298a2-9b5b-47db-aafd-90c01f865cfb",
+    "antes": {
+      "home_base_points": 4,
+      "away_base_points": 0,
+      "home_bonus_points": 0,
+      "away_bonus_points": 0,
+      "points_autocalculated": true,
+      "points_override_reason": null
+    }
+  }
+]

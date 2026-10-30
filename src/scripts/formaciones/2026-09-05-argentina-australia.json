@@ -1,0 +1,65 @@
+{
+  "partido": "8xgaTvZI",
+  "proveedor": "flashscore",
+  "descripcion": "Argentina vs Australia · Rugby Championship · 05/09/2026",
+  "local": {
+    "nombre": "Argentina",
+    "titulares": [
+      { "numero": 1, "nombre": "Boris Wenger" },
+      { "numero": 2, "nombre": "Ignacio Ruiz" },
+      { "numero": 3, "nombre": "Pedro Delgado" },
+      { "numero": 4, "nombre": "Efraín Elías" },
+      { "numero": 5, "nombre": "Franco Molina" },
+      { "numero": 6, "nombre": "Pablo Matera" },
+      { "numero": 7, "nombre": "Guido Petti" },
+      { "numero": 8, "nombre": "Joaquín Moro" },
+      { "numero": 9, "nombre": "Simón Benítez Cruz" },
+      { "numero": 10, "nombre": "Nicolás Roger" },
+      { "numero": 11, "nombre": "Ignacio Mendy" },
+      { "numero": 12, "nombre": "Faustino Sánchez Valarolo" },
+      { "numero": 13, "nombre": "Lucio Cinti" },
+      { "numero": 14, "nombre": "Rodrigo Isgró" },
+      { "numero": 15, "nombre": "Santiago Carreras" }
+    ],
+    "suplentes": [
+      { "numero": 16, "nombre": "Leonel Oviedo" },
+      { "numero": 17, "nombre": "Rodrigo Martínez" },
+      { "numero": 18, "nombre": "Francisco Moreno" },
+      { "numero": 19, "nombre": "Tomás Lavanini" },
+      { "numero": 20, "nombre": "Juan Martín Scelzo" },
+      { "numero": 21, "nombre": "Facundo Cardozo" },
+      { "numero": 22, "nombre": "Gonzalo Bertranou" },
+      { "numero": 23, "nombre": "Mateo Soler" }
+    ]
+  },
+  "visitante": {
+    "nombre": "Australia",
+    "titulares": [
+      { "numero": 1, "nombre": "Angus Bell" },
+      { "numero": 2, "nombre": "Billy Pollard" },
+      { "numero": 3, "nombre": "Taniela Tupou" },
+      { "numero": 4, "nombre": "Josh Canham" },
+      { "numero": 5, "nombre": "Jeremy Williams" },
+      { "numero": 6, "nombre": "Rob Valetini" },
+      { "numero": 7, "nombre": "Fraser McReight" },
+      { "numero": 8, "nombre": "Harry Wilson", "capitan": true },
+      { "numero": 9, "nombre": "Ryan Lonergan" },
+      { "numero": 10, "nombre": "Ben Donaldson" },
+      { "numero": 11, "nombre": "Filipo Daugunu" },
+      { "numero": 12, "nombre": "Len Ikitau" },
+      { "numero": 13, "nombre": "Joseph-Aukuso Suaalii" },
+      { "numero": 14, "nombre": "Max Jorgensen" },
+      { "numero": 15, "nombre": "Tom Wright" }
+    ],
+    "suplentes": [
+      { "numero": 16, "nombre": "Josh Nasser" },
+      { "numero": 17, "nombre": "Aidan Ross" },
+      { "numero": 18, "nombre": "Massimo De Lutiis" },
+      { "numero": 19, "nombre": "Lukhan Salakaia-Loto" },
+      { "numero": 20, "nombre": "Charlie Cale" },
+      { "numero": 21, "nombre": "Kalani Thomas" },
+      { "numero": 22, "nombre": "Carter Gordon" },
+      { "numero": 23, "nombre": "Isaac Henry" }
+    ]
+  }
+}

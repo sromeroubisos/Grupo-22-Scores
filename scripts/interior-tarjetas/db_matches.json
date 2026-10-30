@@ -1,0 +1,2300 @@
+[
+ {
+  "id": "644ae4c6-a448-41de-9d48-55808db6bf89",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-03-28T19:00:00+00:00",
+  "home_club_id": "tucuman-rugby-club",
+  "away_club_id": "mendoza-rugby-club",
+  "score": {
+   "away": 15,
+   "home": 54
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tucumán Rugby Club",
+  "a": "Mendoza Rugby Club",
+  "torneo": "torneo-del-interior-a",
+  "sh": 54,
+  "sa": 15,
+  "fecha": "2026-03-28"
+ },
+ {
+  "id": "a39081a8-21d3-4f46-89f7-b74e35f6f828",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-03-28T19:00:00+00:00",
+  "home_club_id": "estudiantes-de-parana",
+  "away_club_id": "tala-rugby-club",
+  "score": {
+   "away": 34,
+   "home": 26
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Estudiantes de Paraná",
+  "a": "Tala Rugby Club",
+  "torneo": "torneo-del-interior-a",
+  "sh": 26,
+  "sa": 34,
+  "fecha": "2026-03-28"
+ },
+ {
+  "id": "82ca49cc-f613-4b82-9e34-f9999490f7c9",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-03-28T19:00:00+00:00",
+  "home_club_id": "old-resian-club",
+  "away_club_id": "club-la-tablada",
+  "score": {
+   "away": 24,
+   "home": 22
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Old Resian Club",
+  "a": "Club La Tablada",
+  "torneo": "torneo-del-interior-a",
+  "sh": 22,
+  "sa": 24,
+  "fecha": "2026-03-28"
+ },
+ {
+  "id": "8e189d7d-4c96-4a05-806e-108ba78e2b20",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-03-28T19:00:00+00:00",
+  "home_club_id": "jockey-club-cordoba",
+  "away_club_id": "duendes-r-c",
+  "score": {
+   "away": 7,
+   "home": 22
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba",
+  "a": "Duendes R.C.",
+  "torneo": "torneo-del-interior-a",
+  "sh": 22,
+  "sa": 7,
+  "fecha": "2026-03-28"
+ },
+ {
+  "id": "67fb5c42-5a0e-4d88-8926-8ec2d142d72a",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-03-28T19:00:00+00:00",
+  "home_club_id": "club-universitario-de-cordoba",
+  "away_club_id": "jockey-club-de-rosario",
+  "score": {
+   "away": 44,
+   "home": 17
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Universitario de Córdoba",
+  "a": "Jockey Club de Rosario",
+  "torneo": "torneo-del-interior-a",
+  "sh": 17,
+  "sa": 44,
+  "fecha": "2026-03-28"
+ },
+ {
+  "id": "9f4ce3a6-663b-4e5d-bc76-794fa981a8d5",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-03-28T19:00:00+00:00",
+  "home_club_id": "santa-fe-r-c",
+  "away_club_id": "cordoba-athletic-club",
+  "score": {
+   "away": 13,
+   "home": 37
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Santa Fé R.C.",
+  "a": "Córdoba Athletic Club",
+  "torneo": "torneo-del-interior-a",
+  "sh": 37,
+  "sa": 13,
+  "fecha": "2026-03-28"
+ },
+ {
+  "id": "a698f3ba-2a16-44d3-810a-f71d50cfd5d7",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-03-28T19:00:00+00:00",
+  "home_club_id": "gimnasia-y-esgrima-de-rosario",
+  "away_club_id": "marista-rugby-club",
+  "score": {
+   "away": 13,
+   "home": 29
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Gimnasia y Esgrima de Rosario",
+  "a": "Marista Rugby Club",
+  "torneo": "torneo-del-interior-a",
+  "sh": 29,
+  "sa": 13,
+  "fecha": "2026-03-28"
+ },
+ {
+  "id": "921f49a1-7ed4-403f-a596-2775b5b3fa9b",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-03-28T19:00:00+00:00",
+  "home_club_id": "uru-cure-rugby-club",
+  "away_club_id": "curne",
+  "score": {
+   "away": 10,
+   "home": 35
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Urú Curé Rugby Club",
+  "a": "CURNE",
+  "torneo": "torneo-del-interior-a",
+  "sh": 35,
+  "sa": 10,
+  "fecha": "2026-03-28"
+ },
+ {
+  "id": "aaafd628-0ee8-4d16-92e5-a5234863b74f",
+  "tournament_id": "e2712855-36f4-4363-978e-5036af5c5449",
+  "date_time": "2026-03-28T19:00:00+00:00",
+  "home_club_id": "sociedad-sportiva-de-bahia-blanca",
+  "away_club_id": "neuquen-r-c",
+  "score": {
+   "away": 24,
+   "home": 25
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Sociedad Sportiva de Bahía Blanca",
+  "a": "Neuquén R.C.",
+  "torneo": "torneo-del-interior-b",
+  "sh": 25,
+  "sa": 24,
+  "fecha": "2026-03-28"
+ },
+ {
+  "id": "8b21f345-8130-4b66-8467-9fbc961b00a2",
+  "tournament_id": "e2712855-36f4-4363-978e-5036af5c5449",
+  "date_time": "2026-03-28T19:00:00+00:00",
+  "home_club_id": "tigres-r-c",
+  "away_club_id": "jockey-club-de-venado-tuerto",
+  "score": {
+   "away": 24,
+   "home": 25
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tigres R.C.",
+  "a": "Jockey Club de Venado Tuerto",
+  "torneo": "torneo-del-interior-b",
+  "sh": 25,
+  "sa": 24,
+  "fecha": "2026-03-28"
+ },
+ {
+  "id": "c629508a-6e67-4127-8085-c329bc7ca47b",
+  "tournament_id": "e2712855-36f4-4363-978e-5036af5c5449",
+  "date_time": "2026-03-28T19:00:00+00:00",
+  "home_club_id": "jockey-club-de-tucuman",
+  "away_club_id": "universitario-de-san-juan",
+  "score": {
+   "away": 27,
+   "home": 22
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club de Tucumán",
+  "a": "Universitario de San Juan",
+  "torneo": "torneo-del-interior-b",
+  "sh": 22,
+  "sa": 27,
+  "fecha": "2026-03-28"
+ },
+ {
+  "id": "a8f29687-4fe7-4b36-8f2a-8169eef5b844",
+  "tournament_id": "e2712855-36f4-4363-978e-5036af5c5449",
+  "date_time": "2026-03-28T19:00:00+00:00",
+  "home_club_id": "cardenales-r-c",
+  "away_club_id": "taraguy-r-c",
+  "score": {
+   "away": 18,
+   "home": 38
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Cardenales R.C.",
+  "a": "Taraguy R.C.",
+  "torneo": "torneo-del-interior-b",
+  "sh": 38,
+  "sa": 18,
+  "fecha": "2026-03-28"
+ },
+ {
+  "id": "edfa695f-ef59-4eaf-908b-6b40df27536e",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-04-25T16:00:00+00:00",
+  "home_club_id": "club-la-tablada",
+  "away_club_id": "jockey-club-cordoba",
+  "score": {
+   "away": 36,
+   "home": 17,
+   "awayTries": 5,
+   "homeTries": 2,
+   "penalties": null,
+   "manualOverride": null
+  },
+  "referee": null,
+  "lineup_home_count": 23,
+  "events_count": 17,
+  "h": "Club La Tablada",
+  "a": "Jockey Club Córdoba",
+  "torneo": "torneo-del-interior-a",
+  "sh": 17,
+  "sa": 36,
+  "fecha": "2026-04-25"
+ },
+ {
+  "id": "85aca9ce-f153-42a2-b43d-0235e02ab657",
+  "tournament_id": "e2712855-36f4-4363-978e-5036af5c5449",
+  "date_time": "2026-04-25T19:00:00+00:00",
+  "home_club_id": "parana-rowing",
+  "away_club_id": "crai",
+  "score": {
+   "away": 17,
+   "home": 21
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Paraná Rowing",
+  "a": "CRAI",
+  "torneo": "torneo-del-interior-b",
+  "sh": 21,
+  "sa": 17,
+  "fecha": "2026-04-25"
+ },
+ {
+  "id": "d9bbdd69-4e98-460a-a786-de05d20ba3da",
+  "tournament_id": "e2712855-36f4-4363-978e-5036af5c5449",
+  "date_time": "2026-04-25T19:00:00+00:00",
+  "home_club_id": "universitario-de-san-juan",
+  "away_club_id": "tucuman-lawn-tennis",
+  "score": {
+   "away": 18,
+   "home": 10
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Universitario de San Juan",
+  "a": "Tucumán Lawn Tennis",
+  "torneo": "torneo-del-interior-b",
+  "sh": 10,
+  "sa": 18,
+  "fecha": "2026-04-25"
+ },
+ {
+  "id": "5bb8758a-2d3d-4e71-aefe-5f3df445254f",
+  "tournament_id": "e2712855-36f4-4363-978e-5036af5c5449",
+  "date_time": "2026-04-25T19:00:00+00:00",
+  "home_club_id": "sociedad-sportiva-de-bahia-blanca",
+  "away_club_id": "liceo-rugby-club",
+  "score": {
+   "away": 24,
+   "home": 27
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Sociedad Sportiva de Bahía Blanca",
+  "a": "Liceo Rugby Club",
+  "torneo": "torneo-del-interior-b",
+  "sh": 27,
+  "sa": 24,
+  "fecha": "2026-04-25"
+ },
+ {
+  "id": "2907d9e2-81c9-46a1-8efb-07e01eac4cdf",
+  "tournament_id": "e2712855-36f4-4363-978e-5036af5c5449",
+  "date_time": "2026-04-25T19:00:00+00:00",
+  "home_club_id": "cardenales-r-c",
+  "away_club_id": "natacion-y-gimnasia",
+  "score": {
+   "away": 28,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Cardenales R.C.",
+  "a": "Natación y Gimnasia",
+  "torneo": "torneo-del-interior-b",
+  "sh": 28,
+  "sa": 28,
+  "fecha": "2026-04-25"
+ },
+ {
+  "id": "3087d314-b143-4211-a09a-b9eca31b2123",
+  "tournament_id": "e2712855-36f4-4363-978e-5036af5c5449",
+  "date_time": "2026-04-25T19:00:00+00:00",
+  "home_club_id": "tigres-r-c",
+  "away_club_id": "club-palermo-bajo",
+  "score": {
+   "away": 34,
+   "home": 33
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tigres R.C.",
+  "a": "Club Palermo Bajo",
+  "torneo": "torneo-del-interior-b",
+  "sh": 33,
+  "sa": 34,
+  "fecha": "2026-04-25"
+ },
+ {
+  "id": "3ea86483-cf28-4967-903e-88546ac24044",
+  "tournament_id": "e2712855-36f4-4363-978e-5036af5c5449",
+  "date_time": "2026-04-25T19:00:00+00:00",
+  "home_club_id": "universitario-de-tucuman",
+  "away_club_id": "jockey-club-de-villa-maria",
+  "score": {
+   "away": 22,
+   "home": 33
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Universitario de Tucumán",
+  "a": "Jockey Club de Villa María",
+  "torneo": "torneo-del-interior-b",
+  "sh": 33,
+  "sa": 22,
+  "fecha": "2026-04-25"
+ },
+ {
+  "id": "e1871349-d35a-4d67-979a-0d54402dedc8",
+  "tournament_id": "e2712855-36f4-4363-978e-5036af5c5449",
+  "date_time": "2026-04-25T19:00:00+00:00",
+  "home_club_id": "mar-del-plata-club",
+  "away_club_id": "ipr-sporting",
+  "score": {
+   "away": 30,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Mar del Plata Club",
+  "a": "IPR Sporting",
+  "torneo": "torneo-del-interior-b",
+  "sh": 28,
+  "sa": 30,
+  "fecha": "2026-04-25"
+ },
+ {
+  "id": "c40ddc3a-4c27-4c36-93af-ab2d88395f0a",
+  "tournament_id": "e2712855-36f4-4363-978e-5036af5c5449",
+  "date_time": "2026-04-25T19:00:00+00:00",
+  "home_club_id": "los-tordos-rugby-club",
+  "away_club_id": "huirapuca",
+  "score": {
+   "away": 29,
+   "home": 46
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Los Tordos Rugby Club",
+  "a": "Huirapuca",
+  "torneo": "torneo-del-interior-b",
+  "sh": 46,
+  "sa": 29,
+  "fecha": "2026-04-25"
+ },
+ {
+  "id": "155d8d44-20c1-4a71-86f6-cd7ea4dc6a87",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-04-25T19:30:00+00:00",
+  "home_club_id": "duendes-r-c",
+  "away_club_id": "old-resian-club",
+  "score": {
+   "away": 3,
+   "home": 38
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Duendes R.C.",
+  "a": "Old Resian Club",
+  "torneo": "torneo-del-interior-a",
+  "sh": 38,
+  "sa": 3,
+  "fecha": "2026-04-25"
+ },
+ {
+  "id": "2ddc202d-7947-4399-84ae-5ba729d4b292",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-04-25T19:30:00+00:00",
+  "home_club_id": "tala-rugby-club",
+  "away_club_id": "uru-cure-rugby-club",
+  "score": {
+   "away": 3,
+   "home": 79
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club",
+  "a": "Urú Curé Rugby Club",
+  "torneo": "torneo-del-interior-a",
+  "sh": 79,
+  "sa": 3,
+  "fecha": "2026-04-25"
+ },
+ {
+  "id": "69fe7d7e-3be3-4294-b1e7-3a6b765c88b6",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-04-25T19:30:00+00:00",
+  "home_club_id": "cordoba-athletic-club",
+  "away_club_id": "club-universitario-de-cordoba",
+  "score": {
+   "away": 17,
+   "home": 36
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club",
+  "a": "Club Universitario de Córdoba",
+  "torneo": "torneo-del-interior-a",
+  "sh": 36,
+  "sa": 17,
+  "fecha": "2026-04-25"
+ },
+ {
+  "id": "137b2f2a-c92d-4f53-85c5-fd8ba54557be",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-04-25T19:30:00+00:00",
+  "home_club_id": "mendoza-rugby-club",
+  "away_club_id": "gimnasia-y-esgrima-de-rosario",
+  "score": {
+   "away": 51,
+   "home": 17
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Mendoza Rugby Club",
+  "a": "Gimnasia y Esgrima de Rosario",
+  "torneo": "torneo-del-interior-a",
+  "sh": 17,
+  "sa": 51,
+  "fecha": "2026-04-25"
+ },
+ {
+  "id": "1f391f01-a4bd-4963-b813-2246371f6a28",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-04-25T19:30:00+00:00",
+  "home_club_id": "jockey-club-de-rosario",
+  "away_club_id": "santa-fe-r-c",
+  "score": {
+   "away": 31,
+   "home": 29,
+   "penalties": null,
+   "manualOverride": {
+    "away": 31,
+    "home": 29,
+    "cutoffMinute": null
+   }
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club de Rosario",
+  "a": "Santa Fé R.C.",
+  "torneo": "torneo-del-interior-a",
+  "sh": 29,
+  "sa": 31,
+  "fecha": "2026-04-25"
+ },
+ {
+  "id": "e96b4324-80ce-47d8-abc7-fb436aa2b058",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-04-25T19:30:00+00:00",
+  "home_club_id": "curne",
+  "away_club_id": "estudiantes-de-parana",
+  "score": {
+   "away": 27,
+   "home": 3
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "CURNE",
+  "a": "Estudiantes de Paraná",
+  "torneo": "torneo-del-interior-a",
+  "sh": 3,
+  "sa": 27,
+  "fecha": "2026-04-25"
+ },
+ {
+  "id": "c0536a9b-390b-4b42-b450-1dd4f1b10d29",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-04-25T19:30:00+00:00",
+  "home_club_id": "marista-rugby-club",
+  "away_club_id": "tucuman-rugby-club",
+  "score": {
+   "away": 39,
+   "home": 27
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Marista Rugby Club",
+  "a": "Tucumán Rugby Club",
+  "torneo": "torneo-del-interior-a",
+  "sh": 27,
+  "sa": 39,
+  "fecha": "2026-04-25"
+ },
+ {
+  "id": "1d7e5148-c8e0-4f4e-8803-6ee02243dc13",
+  "tournament_id": "e2712855-36f4-4363-978e-5036af5c5449",
+  "date_time": "2026-05-30T19:00:00+00:00",
+  "home_club_id": "natacion-y-gimnasia",
+  "away_club_id": "parana-rowing",
+  "score": {
+   "away": 16,
+   "home": 49,
+   "penalties": null,
+   "manualOverride": {
+    "away": 16,
+    "home": 49,
+    "cutoffMinute": null
+   }
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Natación y Gimnasia",
+  "a": "Paraná Rowing",
+  "torneo": "torneo-del-interior-b",
+  "sh": 49,
+  "sa": 16,
+  "fecha": "2026-05-30"
+ },
+ {
+  "id": "09d434b9-da3b-4308-9233-4155f24b902b",
+  "tournament_id": "e2712855-36f4-4363-978e-5036af5c5449",
+  "date_time": "2026-05-30T19:00:00+00:00",
+  "home_club_id": "crai",
+  "away_club_id": "cardenales-r-c",
+  "score": {
+   "away": 15,
+   "home": 5,
+   "penalties": null,
+   "manualOverride": {
+    "away": 15,
+    "home": 5,
+    "cutoffMinute": null
+   }
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "CRAI",
+  "a": "Cardenales R.C.",
+  "torneo": "torneo-del-interior-b",
+  "sh": 5,
+  "sa": 15,
+  "fecha": "2026-05-30"
+ },
+ {
+  "id": "3c81b263-7589-4476-b9bb-190e2b7991c9",
+  "tournament_id": "e2712855-36f4-4363-978e-5036af5c5449",
+  "date_time": "2026-05-30T19:00:00+00:00",
+  "home_club_id": "tucuman-lawn-tennis",
+  "away_club_id": "mar-del-plata-club",
+  "score": {
+   "away": 29,
+   "home": 44,
+   "penalties": null,
+   "manualOverride": {
+    "away": 29,
+    "home": 44,
+    "cutoffMinute": null
+   }
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tucumán Lawn Tennis",
+  "a": "Mar del Plata Club",
+  "torneo": "torneo-del-interior-b",
+  "sh": 44,
+  "sa": 29,
+  "fecha": "2026-05-30"
+ },
+ {
+  "id": "09ae9ae2-febe-4973-9f35-c0e97f0cc4a7",
+  "tournament_id": "e2712855-36f4-4363-978e-5036af5c5449",
+  "date_time": "2026-05-30T19:00:00+00:00",
+  "home_club_id": "ipr-sporting",
+  "away_club_id": "universitario-de-san-juan",
+  "score": {
+   "away": 41,
+   "home": 41
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "IPR Sporting",
+  "a": "Universitario de San Juan",
+  "torneo": "torneo-del-interior-b",
+  "sh": 41,
+  "sa": 41,
+  "fecha": "2026-05-30"
+ },
+ {
+  "id": "666d6b68-26e0-4ba7-8862-36f047d8fa17",
+  "tournament_id": "e2712855-36f4-4363-978e-5036af5c5449",
+  "date_time": "2026-05-30T19:00:00+00:00",
+  "home_club_id": "club-palermo-bajo",
+  "away_club_id": "universitario-de-tucuman",
+  "score": {
+   "away": 16,
+   "home": 41,
+   "penalties": null,
+   "manualOverride": {
+    "away": 16,
+    "home": 41,
+    "cutoffMinute": null
+   }
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Palermo Bajo",
+  "a": "Universitario de Tucumán",
+  "torneo": "torneo-del-interior-b",
+  "sh": 41,
+  "sa": 16,
+  "fecha": "2026-05-30"
+ },
+ {
+  "id": "8c9a735f-9d06-4686-9a74-29ef677dc40f",
+  "tournament_id": "e2712855-36f4-4363-978e-5036af5c5449",
+  "date_time": "2026-05-30T19:00:00+00:00",
+  "home_club_id": "liceo-rugby-club",
+  "away_club_id": "los-tordos-rugby-club",
+  "score": {
+   "away": 16,
+   "home": 20,
+   "penalties": null,
+   "manualOverride": {
+    "away": 16,
+    "home": 20,
+    "cutoffMinute": null
+   }
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Liceo Rugby Club",
+  "a": "Los Tordos Rugby Club",
+  "torneo": "torneo-del-interior-b",
+  "sh": 20,
+  "sa": 16,
+  "fecha": "2026-05-30"
+ },
+ {
+  "id": "18ae39a8-c244-4908-9148-af7284e99f6e",
+  "tournament_id": "e2712855-36f4-4363-978e-5036af5c5449",
+  "date_time": "2026-05-30T19:00:00+00:00",
+  "home_club_id": "jockey-club-de-villa-maria",
+  "away_club_id": "tigres-r-c",
+  "score": {
+   "away": 22,
+   "home": 32,
+   "penalties": null,
+   "manualOverride": {
+    "away": 22,
+    "home": 32,
+    "cutoffMinute": null
+   }
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club de Villa María",
+  "a": "Tigres R.C.",
+  "torneo": "torneo-del-interior-b",
+  "sh": 32,
+  "sa": 22,
+  "fecha": "2026-05-30"
+ },
+ {
+  "id": "cbeb5694-a6cd-42e7-afa9-15206f21a2a5",
+  "tournament_id": "e2712855-36f4-4363-978e-5036af5c5449",
+  "date_time": "2026-05-30T19:00:00+00:00",
+  "home_club_id": "huirapuca",
+  "away_club_id": "sociedad-sportiva-de-bahia-blanca",
+  "score": {
+   "away": 24,
+   "home": 17
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Huirapuca",
+  "a": "Sociedad Sportiva de Bahía Blanca",
+  "torneo": "torneo-del-interior-b",
+  "sh": 17,
+  "sa": 24,
+  "fecha": "2026-05-30"
+ },
+ {
+  "id": "35899e45-12bc-450a-8724-89892c6cfc44",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-05-30T19:30:00+00:00",
+  "home_club_id": "mendoza-rugby-club",
+  "away_club_id": "marista-rugby-club",
+  "score": {
+   "away": 27,
+   "home": 30,
+   "penalties": null,
+   "manualOverride": {
+    "away": 27,
+    "home": 30,
+    "cutoffMinute": null
+   }
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Mendoza Rugby Club",
+  "a": "Marista Rugby Club",
+  "torneo": "torneo-del-interior-a",
+  "sh": 30,
+  "sa": 27,
+  "fecha": "2026-05-30"
+ },
+ {
+  "id": "6e9bb983-dbd3-495f-a0d6-800393e769ff",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-05-30T19:30:00+00:00",
+  "home_club_id": "uru-cure-rugby-club",
+  "away_club_id": "estudiantes-de-parana",
+  "score": {
+   "away": 34,
+   "home": 29,
+   "penalties": null,
+   "manualOverride": {
+    "away": 34,
+    "home": 29,
+    "cutoffMinute": null
+   }
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Urú Curé Rugby Club",
+  "a": "Estudiantes de Paraná",
+  "torneo": "torneo-del-interior-a",
+  "sh": 29,
+  "sa": 34,
+  "fecha": "2026-05-30"
+ },
+ {
+  "id": "e675dd79-c1e3-4743-ac3d-cd1151f88b22",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-05-30T19:30:00+00:00",
+  "home_club_id": "cordoba-athletic-club",
+  "away_club_id": "jockey-club-de-rosario",
+  "score": {
+   "away": 27,
+   "home": 20,
+   "penalties": null,
+   "manualOverride": {
+    "away": 27,
+    "home": 20,
+    "cutoffMinute": null
+   }
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club",
+  "a": "Jockey Club de Rosario",
+  "torneo": "torneo-del-interior-a",
+  "sh": 20,
+  "sa": 27,
+  "fecha": "2026-05-30"
+ },
+ {
+  "id": "b30eedb2-0c54-4e08-a8b5-45d2e3c5e40e",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-05-30T19:30:00+00:00",
+  "home_club_id": "club-la-tablada",
+  "away_club_id": "duendes-r-c",
+  "score": {
+   "away": 41,
+   "home": 24,
+   "penalties": null,
+   "manualOverride": {
+    "away": 41,
+    "home": 24,
+    "cutoffMinute": null
+   }
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club La Tablada",
+  "a": "Duendes R.C.",
+  "torneo": "torneo-del-interior-a",
+  "sh": 24,
+  "sa": 41,
+  "fecha": "2026-05-30"
+ },
+ {
+  "id": "5abd44e2-810e-4308-8388-c4fc6aaee279",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-05-30T19:30:00+00:00",
+  "home_club_id": "old-resian-club",
+  "away_club_id": "jockey-club-cordoba",
+  "score": {
+   "away": 69,
+   "home": 22,
+   "penalties": null,
+   "manualOverride": {
+    "away": 69,
+    "home": 22,
+    "cutoffMinute": null
+   }
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Old Resian Club",
+  "a": "Jockey Club Córdoba",
+  "torneo": "torneo-del-interior-a",
+  "sh": 22,
+  "sa": 69,
+  "fecha": "2026-05-30"
+ },
+ {
+  "id": "69d162fa-754c-45f7-88a7-e20a7de0461a",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-05-30T19:30:00+00:00",
+  "home_club_id": "santa-fe-r-c",
+  "away_club_id": "club-universitario-de-cordoba",
+  "score": {
+   "away": 24,
+   "home": 25,
+   "penalties": null,
+   "manualOverride": {
+    "away": 24,
+    "home": 25,
+    "cutoffMinute": null
+   }
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Santa Fé R.C.",
+  "a": "Club Universitario de Córdoba",
+  "torneo": "torneo-del-interior-a",
+  "sh": 25,
+  "sa": 24,
+  "fecha": "2026-05-30"
+ },
+ {
+  "id": "fdc62748-c21c-4aab-a8dc-cb25ab0845d7",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-05-30T19:30:00+00:00",
+  "home_club_id": "tucuman-rugby-club",
+  "away_club_id": "gimnasia-y-esgrima-de-rosario",
+  "score": {
+   "away": 26,
+   "home": 37,
+   "penalties": null,
+   "manualOverride": {
+    "away": 26,
+    "home": 37,
+    "cutoffMinute": null
+   }
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tucumán Rugby Club",
+  "a": "Gimnasia y Esgrima de Rosario",
+  "torneo": "torneo-del-interior-a",
+  "sh": 37,
+  "sa": 26,
+  "fecha": "2026-05-30"
+ },
+ {
+  "id": "68c8092b-e9f5-460d-b52f-0f8cd171ce64",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-05-30T19:30:00+00:00",
+  "home_club_id": "curne",
+  "away_club_id": "tala-rugby-club",
+  "score": {
+   "away": 56,
+   "home": 10,
+   "penalties": null,
+   "manualOverride": {
+    "away": 56,
+    "home": 10,
+    "cutoffMinute": null
+   }
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "CURNE",
+  "a": "Tala Rugby Club",
+  "torneo": "torneo-del-interior-a",
+  "sh": 10,
+  "sa": 56,
+  "fecha": "2026-05-30"
+ },
+ {
+  "id": "242d8120-16b8-4dee-bb61-8aeaa34acccf",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-06-27T18:30:00+00:00",
+  "home_club_id": "marista-rugby-club",
+  "away_club_id": "mendoza-rugby-club",
+  "score": {
+   "away": 15,
+   "home": 31
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Marista Rugby Club",
+  "a": "Mendoza Rugby Club",
+  "torneo": "torneo-del-interior-a",
+  "sh": 31,
+  "sa": 15,
+  "fecha": "2026-06-27"
+ },
+ {
+  "id": "9f940803-c3cf-4ecd-b857-ec3c799786e9",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-06-27T18:30:00+00:00",
+  "home_club_id": "jockey-club-de-rosario",
+  "away_club_id": "cordoba-athletic-club",
+  "score": {
+   "away": 17,
+   "home": 56
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club de Rosario",
+  "a": "Córdoba Athletic Club",
+  "torneo": "torneo-del-interior-a",
+  "sh": 56,
+  "sa": 17,
+  "fecha": "2026-06-27"
+ },
+ {
+  "id": "6b11d7b3-2fca-4f60-88c5-391f3caeb7f2",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-06-27T18:30:00+00:00",
+  "home_club_id": "jockey-club-cordoba",
+  "away_club_id": "old-resian-club",
+  "score": {
+   "away": 45,
+   "home": 48,
+   "penalties": null,
+   "manualOverride": {
+    "away": 45,
+    "home": 48,
+    "cutoffMinute": null
+   }
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba",
+  "a": "Old Resian Club",
+  "torneo": "torneo-del-interior-a",
+  "sh": 48,
+  "sa": 45,
+  "fecha": "2026-06-27"
+ },
+ {
+  "id": "f5bcdff5-f8d4-48d1-a832-7917f78c49bd",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-06-27T18:30:00+00:00",
+  "home_club_id": "duendes-r-c",
+  "away_club_id": "club-la-tablada",
+  "score": {
+   "away": 19,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Duendes R.C.",
+  "a": "Club La Tablada",
+  "torneo": "torneo-del-interior-a",
+  "sh": 28,
+  "sa": 19,
+  "fecha": "2026-06-27"
+ },
+ {
+  "id": "648e1ff4-4481-4a1e-abe7-e30d46cf4995",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-06-27T18:30:00+00:00",
+  "home_club_id": "gimnasia-y-esgrima-de-rosario",
+  "away_club_id": "tucuman-rugby-club",
+  "score": {
+   "away": 39,
+   "home": 27
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Gimnasia y Esgrima de Rosario",
+  "a": "Tucumán Rugby Club",
+  "torneo": "torneo-del-interior-a",
+  "sh": 27,
+  "sa": 39,
+  "fecha": "2026-06-27"
+ },
+ {
+  "id": "d25cd44f-50f6-4c0d-975e-35516c52e26d",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-06-27T18:30:00+00:00",
+  "home_club_id": "estudiantes-de-parana",
+  "away_club_id": "uru-cure-rugby-club",
+  "score": {
+   "away": 17,
+   "home": 30
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Estudiantes de Paraná",
+  "a": "Urú Curé Rugby Club",
+  "torneo": "torneo-del-interior-a",
+  "sh": 30,
+  "sa": 17,
+  "fecha": "2026-06-27"
+ },
+ {
+  "id": "455076d8-024c-4359-8b63-f923ab9e7249",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-06-27T18:30:00+00:00",
+  "home_club_id": "club-universitario-de-cordoba",
+  "away_club_id": "santa-fe-r-c",
+  "score": {
+   "away": 40,
+   "home": 50,
+   "penalties": null,
+   "manualOverride": {
+    "away": 40,
+    "home": 50,
+    "cutoffMinute": null
+   }
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Universitario de Córdoba",
+  "a": "Santa Fé R.C.",
+  "torneo": "torneo-del-interior-a",
+  "sh": 50,
+  "sa": 40,
+  "fecha": "2026-06-27"
+ },
+ {
+  "id": "8be3644a-47ca-407d-8cbf-1b9221700dd4",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-06-27T18:30:00+00:00",
+  "home_club_id": "tala-rugby-club",
+  "away_club_id": "curne",
+  "score": {
+   "away": 8,
+   "home": 90
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club",
+  "a": "CURNE",
+  "torneo": "torneo-del-interior-a",
+  "sh": 90,
+  "sa": 8,
+  "fecha": "2026-06-27"
+ },
+ {
+  "id": "e6b7a84a-0634-4661-8bc9-8f4132c6c2fd",
+  "tournament_id": "e2712855-36f4-4363-978e-5036af5c5449",
+  "date_time": "2026-06-27T19:00:00+00:00",
+  "home_club_id": "mar-del-plata-club",
+  "away_club_id": "universitario-de-san-juan",
+  "score": {
+   "away": 20,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Mar del Plata Club",
+  "a": "Universitario de San Juan",
+  "torneo": "torneo-del-interior-b",
+  "sh": 28,
+  "sa": 20,
+  "fecha": "2026-06-27"
+ },
+ {
+  "id": "fa477181-5c32-4302-aad7-e15106398184",
+  "tournament_id": "e2712855-36f4-4363-978e-5036af5c5449",
+  "date_time": "2026-06-27T19:00:00+00:00",
+  "home_club_id": "tucuman-lawn-tennis",
+  "away_club_id": "ipr-sporting",
+  "score": {
+   "away": 33,
+   "home": 37
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tucumán Lawn Tennis",
+  "a": "IPR Sporting",
+  "torneo": "torneo-del-interior-b",
+  "sh": 37,
+  "sa": 33,
+  "fecha": "2026-06-27"
+ },
+ {
+  "id": "c47f4dbc-bac0-49a6-9845-f00a5d357a50",
+  "tournament_id": "e2712855-36f4-4363-978e-5036af5c5449",
+  "date_time": "2026-06-27T19:00:00+00:00",
+  "home_club_id": "parana-rowing",
+  "away_club_id": "cardenales-r-c",
+  "score": {
+   "away": 14,
+   "home": 52
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Paraná Rowing",
+  "a": "Cardenales R.C.",
+  "torneo": "torneo-del-interior-b",
+  "sh": 52,
+  "sa": 14,
+  "fecha": "2026-06-27"
+ },
+ {
+  "id": "ce277154-62d8-4932-ac71-59e91579402f",
+  "tournament_id": "e2712855-36f4-4363-978e-5036af5c5449",
+  "date_time": "2026-06-27T19:00:00+00:00",
+  "home_club_id": "club-palermo-bajo",
+  "away_club_id": "jockey-club-de-villa-maria",
+  "score": {
+   "away": 23,
+   "home": 20
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Palermo Bajo",
+  "a": "Jockey Club de Villa María",
+  "torneo": "torneo-del-interior-b",
+  "sh": 20,
+  "sa": 23,
+  "fecha": "2026-06-27"
+ },
+ {
+  "id": "6a398955-6e98-40c9-9066-442d023e042b",
+  "tournament_id": "e2712855-36f4-4363-978e-5036af5c5449",
+  "date_time": "2026-06-27T19:00:00+00:00",
+  "home_club_id": "universitario-de-tucuman",
+  "away_club_id": "tigres-r-c",
+  "score": {
+   "away": 34,
+   "home": 35
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Universitario de Tucumán",
+  "a": "Tigres R.C.",
+  "torneo": "torneo-del-interior-b",
+  "sh": 35,
+  "sa": 34,
+  "fecha": "2026-06-27"
+ },
+ {
+  "id": "790c65b0-c120-4556-9075-538455e71249",
+  "tournament_id": "e2712855-36f4-4363-978e-5036af5c5449",
+  "date_time": "2026-06-27T19:00:00+00:00",
+  "home_club_id": "los-tordos-rugby-club",
+  "away_club_id": "sociedad-sportiva-de-bahia-blanca",
+  "score": {
+   "away": 32,
+   "home": 16
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Los Tordos Rugby Club",
+  "a": "Sociedad Sportiva de Bahía Blanca",
+  "torneo": "torneo-del-interior-b",
+  "sh": 16,
+  "sa": 32,
+  "fecha": "2026-06-27"
+ },
+ {
+  "id": "d66ba2a4-a4af-4484-a324-ca108ef3b914",
+  "tournament_id": "e2712855-36f4-4363-978e-5036af5c5449",
+  "date_time": "2026-06-27T19:00:00+00:00",
+  "home_club_id": "liceo-rugby-club",
+  "away_club_id": "huirapuca",
+  "score": {
+   "away": 31,
+   "home": 25
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Liceo Rugby Club",
+  "a": "Huirapuca",
+  "torneo": "torneo-del-interior-b",
+  "sh": 25,
+  "sa": 31,
+  "fecha": "2026-06-27"
+ },
+ {
+  "id": "f7fb649d-c9b2-43d4-b5e3-f7ebde51f2c4",
+  "tournament_id": "e2712855-36f4-4363-978e-5036af5c5449",
+  "date_time": "2026-06-27T19:00:00+00:00",
+  "home_club_id": "natacion-y-gimnasia",
+  "away_club_id": "crai",
+  "score": {
+   "away": 33,
+   "home": 36
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Natación y Gimnasia",
+  "a": "CRAI",
+  "torneo": "torneo-del-interior-b",
+  "sh": 36,
+  "sa": 33,
+  "fecha": "2026-06-27"
+ },
+ {
+  "id": "310d038e-116a-486f-9e7b-33f92ee0e48b",
+  "tournament_id": "e2712855-36f4-4363-978e-5036af5c5449",
+  "date_time": "2026-07-25T18:30:00+00:00",
+  "home_club_id": "tucuman-lawn-tennis",
+  "away_club_id": "huirapuca",
+  "score": {
+   "away": 24,
+   "home": 27,
+   "penalties": null,
+   "manualOverride": {
+    "away": 24,
+    "home": 27,
+    "cutoffMinute": null
+   }
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tucumán Lawn Tennis",
+  "a": "Huirapuca",
+  "torneo": "torneo-del-interior-b",
+  "sh": 27,
+  "sa": 24,
+  "fecha": "2026-07-25"
+ },
+ {
+  "id": "dd9bb508-93a0-4717-bcc1-7c39133e86b5",
+  "tournament_id": "e2712855-36f4-4363-978e-5036af5c5449",
+  "date_time": "2026-07-25T18:30:00+00:00",
+  "home_club_id": "cardenales-r-c",
+  "away_club_id": "tigres-r-c",
+  "score": {
+   "away": 31,
+   "home": 37,
+   "awayTries": 2,
+   "homeTries": 5,
+   "penalties": null,
+   "manualOverride": {
+    "away": 31,
+    "home": 37,
+    "cutoffMinute": 59
+   }
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Cardenales R.C.",
+  "a": "Tigres R.C.",
+  "torneo": "torneo-del-interior-b",
+  "sh": 37,
+  "sa": 31,
+  "fecha": "2026-07-25"
+ },
+ {
+  "id": "5eee8319-d60b-4298-aaff-8ee7974ad990",
+  "tournament_id": "e2712855-36f4-4363-978e-5036af5c5449",
+  "date_time": "2026-07-25T18:30:00+00:00",
+  "home_club_id": "club-palermo-bajo",
+  "away_club_id": "parana-rowing",
+  "score": {
+   "away": 37,
+   "home": 34,
+   "penalties": null,
+   "manualOverride": {
+    "away": 37,
+    "home": 34,
+    "cutoffMinute": null
+   }
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Palermo Bajo",
+  "a": "Paraná Rowing",
+  "torneo": "torneo-del-interior-b",
+  "sh": 34,
+  "sa": 37,
+  "fecha": "2026-07-25"
+ },
+ {
+  "id": "5b600f46-421d-450f-9f2d-b828a7736c57",
+  "tournament_id": "e2712855-36f4-4363-978e-5036af5c5449",
+  "date_time": "2026-07-25T18:30:00+00:00",
+  "home_club_id": "natacion-y-gimnasia",
+  "away_club_id": "universitario-de-tucuman",
+  "score": {
+   "away": 25,
+   "home": 33
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Natación y Gimnasia",
+  "a": "Universitario de Tucumán",
+  "torneo": "torneo-del-interior-b",
+  "sh": 33,
+  "sa": 25,
+  "fecha": "2026-07-25"
+ },
+ {
+  "id": "c374f242-60cd-4bdc-a0cc-5f1b132260a3",
+  "tournament_id": "e2712855-36f4-4363-978e-5036af5c5449",
+  "date_time": "2026-07-25T18:30:00+00:00",
+  "home_club_id": "sociedad-sportiva-de-bahia-blanca",
+  "away_club_id": "ipr-sporting",
+  "score": {
+   "away": 10,
+   "home": 19
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Sociedad Sportiva de Bahía Blanca",
+  "a": "IPR Sporting",
+  "torneo": "torneo-del-interior-b",
+  "sh": 19,
+  "sa": 10,
+  "fecha": "2026-07-25"
+ },
+ {
+  "id": "418cc02b-51cc-47fa-ad2d-7936cf0e881e",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-07-25T18:30:00+00:00",
+  "home_club_id": "tucuman-rugby-club",
+  "away_club_id": "marista-rugby-club",
+  "score": {
+   "away": 33,
+   "home": 31,
+   "penalties": null,
+   "manualOverride": {
+    "away": 33,
+    "home": 31,
+    "cutoffMinute": null
+   }
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tucumán Rugby Club",
+  "a": "Marista Rugby Club",
+  "torneo": "torneo-del-interior-a",
+  "sh": 31,
+  "sa": 33,
+  "fecha": "2026-07-25"
+ },
+ {
+  "id": "e386077c-430f-451e-a089-4041a88daaa5",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-07-25T18:30:00+00:00",
+  "home_club_id": "uru-cure-rugby-club",
+  "away_club_id": "tala-rugby-club",
+  "score": {
+   "away": 40,
+   "home": 21,
+   "penalties": null,
+   "manualOverride": {
+    "away": 40,
+    "home": 21,
+    "cutoffMinute": null
+   }
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Urú Curé Rugby Club",
+  "a": "Tala Rugby Club",
+  "torneo": "torneo-del-interior-a",
+  "sh": 21,
+  "sa": 40,
+  "fecha": "2026-07-25"
+ },
+ {
+  "id": "712b969d-fcae-4a00-8c46-2ab479e6fb1b",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-07-25T18:30:00+00:00",
+  "home_club_id": "estudiantes-de-parana",
+  "away_club_id": "curne",
+  "score": {
+   "away": 0,
+   "home": 81,
+   "penalties": null,
+   "manualOverride": {
+    "away": 0,
+    "home": 81,
+    "cutoffMinute": null
+   }
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Estudiantes de Paraná",
+  "a": "CURNE",
+  "torneo": "torneo-del-interior-a",
+  "sh": 81,
+  "sa": 0,
+  "fecha": "2026-07-25"
+ },
+ {
+  "id": "04af575a-1caa-497f-9443-d9ae1b61b979",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-07-25T18:30:00+00:00",
+  "home_club_id": "santa-fe-r-c",
+  "away_club_id": "jockey-club-de-rosario",
+  "score": {
+   "away": 40,
+   "home": 30,
+   "penalties": null,
+   "manualOverride": {
+    "away": 40,
+    "home": 30,
+    "cutoffMinute": null
+   }
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Santa Fé R.C.",
+  "a": "Jockey Club de Rosario",
+  "torneo": "torneo-del-interior-a",
+  "sh": 30,
+  "sa": 40,
+  "fecha": "2026-07-25"
+ },
+ {
+  "id": "f876c009-8041-44ac-a34b-9d7c2a38242b",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-07-25T18:30:00+00:00",
+  "home_club_id": "club-universitario-de-cordoba",
+  "away_club_id": "cordoba-athletic-club",
+  "score": {
+   "away": 26,
+   "home": 28,
+   "penalties": null,
+   "manualOverride": {
+    "away": 26,
+    "home": 28,
+    "cutoffMinute": null
+   }
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Universitario de Córdoba",
+  "a": "Córdoba Athletic Club",
+  "torneo": "torneo-del-interior-a",
+  "sh": 28,
+  "sa": 26,
+  "fecha": "2026-07-25"
+ },
+ {
+  "id": "2f8a428f-550c-4d13-9744-76a3d890f962",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-07-25T18:30:00+00:00",
+  "home_club_id": "old-resian-club",
+  "away_club_id": "duendes-r-c",
+  "score": {
+   "away": 54,
+   "home": 26,
+   "awayTries": 7,
+   "homeTries": 4,
+   "penalties": null,
+   "manualOverride": null
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Old Resian Club",
+  "a": "Duendes R.C.",
+  "torneo": "torneo-del-interior-a",
+  "sh": 26,
+  "sa": 54,
+  "fecha": "2026-07-25"
+ },
+ {
+  "id": "246dc817-e46e-4899-b933-5a884d6d546d",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-07-25T18:30:00+00:00",
+  "home_club_id": "jockey-club-cordoba",
+  "away_club_id": "club-la-tablada",
+  "score": {
+   "away": 15,
+   "home": 18,
+   "awayTries": 2,
+   "homeTries": 2,
+   "penalties": null,
+   "manualOverride": null
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba",
+  "a": "Club La Tablada",
+  "torneo": "torneo-del-interior-a",
+  "sh": 18,
+  "sa": 15,
+  "fecha": "2026-07-25"
+ },
+ {
+  "id": "7af140f4-34f3-4998-9221-55a964000666",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-07-25T18:30:00+00:00",
+  "home_club_id": "gimnasia-y-esgrima-de-rosario",
+  "away_club_id": "mendoza-rugby-club",
+  "score": {
+   "away": 17,
+   "home": 28,
+   "penalties": null,
+   "manualOverride": {
+    "away": 17,
+    "home": 28,
+    "cutoffMinute": null
+   }
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Gimnasia y Esgrima de Rosario",
+  "a": "Mendoza Rugby Club",
+  "torneo": "torneo-del-interior-a",
+  "sh": 28,
+  "sa": 17,
+  "fecha": "2026-07-25"
+ },
+ {
+  "id": "3e8ab0b1-3a9d-4fab-a5ce-12580c477041",
+  "tournament_id": "e2712855-36f4-4363-978e-5036af5c5449",
+  "date_time": "2026-07-25T19:00:00+00:00",
+  "home_club_id": "mar-del-plata-club",
+  "away_club_id": "los-tordos-rugby-club",
+  "score": {
+   "away": 37,
+   "home": 51,
+   "awayTries": 4,
+   "homeTries": 8,
+   "penalties": null,
+   "manualOverride": null
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Mar del Plata Club",
+  "a": "Los Tordos Rugby Club",
+  "torneo": "torneo-del-interior-b",
+  "sh": 51,
+  "sa": 37,
+  "fecha": "2026-07-25"
+ },
+ {
+  "id": "4ad68de0-26f8-4e9b-b7fd-4247fa8a44b0",
+  "tournament_id": "e2712855-36f4-4363-978e-5036af5c5449",
+  "date_time": "2026-07-25T19:00:00+00:00",
+  "home_club_id": "liceo-rugby-club",
+  "away_club_id": "universitario-de-san-juan",
+  "score": {
+   "away": 43,
+   "home": 42,
+   "penalties": null,
+   "manualOverride": {
+    "away": 43,
+    "home": 42,
+    "cutoffMinute": null
+   }
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Liceo Rugby Club",
+  "a": "Universitario de San Juan",
+  "torneo": "torneo-del-interior-b",
+  "sh": 42,
+  "sa": 43,
+  "fecha": "2026-07-25"
+ },
+ {
+  "id": "9a75c1a4-1b72-4d45-953f-a635e456959e",
+  "tournament_id": "e2712855-36f4-4363-978e-5036af5c5449",
+  "date_time": "2026-07-25T19:00:00+00:00",
+  "home_club_id": "jockey-club-de-villa-maria",
+  "away_club_id": "crai",
+  "score": {
+   "away": 31,
+   "home": 35,
+   "awayTries": 358,
+   "homeTries": 278,
+   "penalties": null,
+   "manualOverride": {
+    "away": 0,
+    "home": 0,
+    "cutoffMinute": 0
+   }
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club de Villa María",
+  "a": "CRAI",
+  "torneo": "torneo-del-interior-b",
+  "sh": 35,
+  "sa": 31,
+  "fecha": "2026-07-25"
+ },
+ {
+  "id": "6a6778a7-39ef-429e-9425-e44a305c0e59",
+  "tournament_id": "e2712855-36f4-4363-978e-5036af5c5449",
+  "date_time": "2026-08-01T18:00:00+00:00",
+  "home_club_id": "natacion-y-gimnasia",
+  "away_club_id": "sociedad-sportiva-de-bahia-blanca",
+  "score": {
+   "away": 22,
+   "home": 41,
+   "penalties": null,
+   "manualOverride": {
+    "away": 22,
+    "home": 41,
+    "cutoffMinute": null
+   }
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Natación y Gimnasia",
+  "a": "Sociedad Sportiva de Bahía Blanca",
+  "torneo": "torneo-del-interior-b",
+  "sh": 41,
+  "sa": 22,
+  "fecha": "2026-08-01"
+ },
+ {
+  "id": "36e46f40-37b6-4d0c-a068-3b7c019c1627",
+  "tournament_id": "e2712855-36f4-4363-978e-5036af5c5449",
+  "date_time": "2026-08-01T18:30:00+00:00",
+  "home_club_id": "tucuman-lawn-tennis",
+  "away_club_id": "parana-rowing",
+  "score": {
+   "away": 24,
+   "home": 29,
+   "penalties": null,
+   "manualOverride": {
+    "away": 24,
+    "home": 29,
+    "cutoffMinute": null
+   }
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tucumán Lawn Tennis",
+  "a": "Paraná Rowing",
+  "torneo": "torneo-del-interior-b",
+  "sh": 29,
+  "sa": 24,
+  "fecha": "2026-08-01"
+ },
+ {
+  "id": "336dfe18-44a0-465e-a583-6a10d7e7d7f0",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-08-01T19:30:00+00:00",
+  "home_club_id": "club-la-tablada",
+  "away_club_id": "old-resian-club",
+  "score": {
+   "away": 35,
+   "home": 30,
+   "penalties": null,
+   "manualOverride": {
+    "away": 35,
+    "home": 30,
+    "cutoffMinute": null
+   }
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club La Tablada",
+  "a": "Old Resian Club",
+  "torneo": "torneo-del-interior-a",
+  "sh": 30,
+  "sa": 35,
+  "fecha": "2026-08-01"
+ },
+ {
+  "id": "9b9e990c-3d6e-4760-83bd-fc2cd658be16",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-08-01T19:30:00+00:00",
+  "home_club_id": "duendes-r-c",
+  "away_club_id": "jockey-club-cordoba",
+  "score": {
+   "away": 18,
+   "home": 17
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Duendes R.C.",
+  "a": "Jockey Club Córdoba",
+  "torneo": "torneo-del-interior-a",
+  "sh": 17,
+  "sa": 18,
+  "fecha": "2026-08-01"
+ },
+ {
+  "id": "1a73d001-4933-49a3-9e62-c1aa389aab4d",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-08-01T19:30:00+00:00",
+  "home_club_id": "jockey-club-de-rosario",
+  "away_club_id": "club-universitario-de-cordoba",
+  "score": {
+   "away": 33,
+   "home": 36
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club de Rosario",
+  "a": "Club Universitario de Córdoba",
+  "torneo": "torneo-del-interior-a",
+  "sh": 36,
+  "sa": 33,
+  "fecha": "2026-08-01"
+ },
+ {
+  "id": "e012dbad-456e-4ab8-98f9-e8713c50b14a",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-08-01T19:30:00+00:00",
+  "home_club_id": "cordoba-athletic-club",
+  "away_club_id": "santa-fe-r-c",
+  "score": {
+   "away": 29,
+   "home": 44
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club",
+  "a": "Santa Fé R.C.",
+  "torneo": "torneo-del-interior-a",
+  "sh": 44,
+  "sa": 29,
+  "fecha": "2026-08-01"
+ },
+ {
+  "id": "e90c9c01-03bd-4038-ba80-1abb0263cc1e",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-08-01T19:30:00+00:00",
+  "home_club_id": "curne",
+  "away_club_id": "uru-cure-rugby-club",
+  "score": {
+   "away": 8,
+   "home": 13
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "CURNE",
+  "a": "Urú Curé Rugby Club",
+  "torneo": "torneo-del-interior-a",
+  "sh": 13,
+  "sa": 8,
+  "fecha": "2026-08-01"
+ },
+ {
+  "id": "be8ffc19-f586-4a06-9a0f-754ee9204daa",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-08-01T19:30:00+00:00",
+  "home_club_id": "marista-rugby-club",
+  "away_club_id": "gimnasia-y-esgrima-de-rosario",
+  "score": {
+   "away": 14,
+   "home": 53
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Marista Rugby Club",
+  "a": "Gimnasia y Esgrima de Rosario",
+  "torneo": "torneo-del-interior-a",
+  "sh": 53,
+  "sa": 14,
+  "fecha": "2026-08-01"
+ },
+ {
+  "id": "766f2ce0-a96a-4d43-b89f-61cfa090f2ec",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-08-01T19:30:00+00:00",
+  "home_club_id": "mendoza-rugby-club",
+  "away_club_id": "tucuman-rugby-club",
+  "score": {
+   "away": 20,
+   "home": 17
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Mendoza Rugby Club",
+  "a": "Tucumán Rugby Club",
+  "torneo": "torneo-del-interior-a",
+  "sh": 17,
+  "sa": 20,
+  "fecha": "2026-08-01"
+ },
+ {
+  "id": "935d997a-ed8c-40fd-9ac3-27e34a5e189b",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-08-01T19:30:00+00:00",
+  "home_club_id": "tala-rugby-club",
+  "away_club_id": "estudiantes-de-parana",
+  "score": {
+   "away": 0,
+   "home": 30,
+   "awayTries": 0,
+   "homeTries": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club",
+  "a": "Estudiantes de Paraná",
+  "torneo": "torneo-del-interior-a",
+  "sh": 30,
+  "sa": 0,
+  "fecha": "2026-08-01"
+ },
+ {
+  "id": "22a53b0b-bb0e-4114-ba1a-4f328b9b2c2f",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-09-12T18:30:00+00:00",
+  "home_club_id": "cordoba-athletic-club",
+  "away_club_id": "curne",
+  "score": {
+   "away": 8,
+   "home": 61,
+   "awayTries": 0,
+   "homeTries": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club",
+  "a": "CURNE",
+  "torneo": "torneo-del-interior-a",
+  "sh": 61,
+  "sa": 8,
+  "fecha": "2026-09-12"
+ },
+ {
+  "id": "d345fb3d-3851-4c90-a8a5-6d6029d9621c",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-09-12T18:30:00+00:00",
+  "home_club_id": "tucuman-rugby-club",
+  "away_club_id": "duendes-r-c",
+  "score": {
+   "away": 21,
+   "home": 18,
+   "awayTries": 0,
+   "homeTries": 0,
+   "penalties": null,
+   "manualOverride": {
+    "away": 21,
+    "home": 18,
+    "cutoffMinute": null
+   }
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tucumán Rugby Club",
+  "a": "Duendes R.C.",
+  "torneo": "torneo-del-interior-a",
+  "sh": 18,
+  "sa": 21,
+  "fecha": "2026-09-12"
+ },
+ {
+  "id": "38a2b8db-82e2-4e07-980d-af98c53716f4",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-09-12T18:30:00+00:00",
+  "home_club_id": "gimnasia-y-esgrima-de-rosario",
+  "away_club_id": "club-la-tablada",
+  "score": {
+   "away": 38,
+   "home": 40,
+   "awayTries": 0,
+   "homeTries": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Gimnasia y Esgrima de Rosario",
+  "a": "Club La Tablada",
+  "torneo": "torneo-del-interior-a",
+  "sh": 40,
+  "sa": 38,
+  "fecha": "2026-09-12"
+ },
+ {
+  "id": "84aea9af-01c4-4d27-b04e-6ad440b3ccde",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-09-12T18:30:00+00:00",
+  "home_club_id": "jockey-club-cordoba",
+  "away_club_id": "marista-rugby-club",
+  "score": {
+   "away": 7,
+   "home": 47,
+   "penalties": null,
+   "manualOverride": {
+    "away": 7,
+    "home": 47,
+    "cutoffMinute": null
+   }
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba",
+  "a": "Marista Rugby Club",
+  "torneo": "torneo-del-interior-a",
+  "sh": 47,
+  "sa": 7,
+  "fecha": "2026-09-12"
+ },
+ {
+  "id": "868923ab-b802-446a-804a-765255532708",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-09-12T18:30:00+00:00",
+  "home_club_id": "tala-rugby-club",
+  "away_club_id": "santa-fe-r-c",
+  "score": {
+   "away": 29,
+   "home": 70,
+   "penalties": null,
+   "manualOverride": {
+    "away": 29,
+    "home": 70,
+    "cutoffMinute": null
+   }
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club",
+  "a": "Santa Fé R.C.",
+  "torneo": "torneo-del-interior-a",
+  "sh": 70,
+  "sa": 29,
+  "fecha": "2026-09-12"
+ },
+ {
+  "id": "eab1230c-ef3a-4876-91f1-6db2c2503b2f",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-09-12T18:30:00+00:00",
+  "home_club_id": "jockey-club-de-rosario",
+  "away_club_id": "estudiantes-de-parana",
+  "score": {
+   "away": 10,
+   "home": 23,
+   "awayTries": 0,
+   "homeTries": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club de Rosario",
+  "a": "Estudiantes de Paraná",
+  "torneo": "torneo-del-interior-a",
+  "sh": 23,
+  "sa": 10,
+  "fecha": "2026-09-12"
+ },
+ {
+  "id": "84d045c5-5115-4c66-b008-45f5004516ba",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-09-12T18:30:00+00:00",
+  "home_club_id": "old-resian-club",
+  "away_club_id": "mendoza-rugby-club",
+  "score": {
+   "away": 17,
+   "home": 31,
+   "awayTries": 0,
+   "homeTries": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Old Resian Club",
+  "a": "Mendoza Rugby Club",
+  "torneo": "torneo-del-interior-a",
+  "sh": 31,
+  "sa": 17,
+  "fecha": "2026-09-12"
+ },
+ {
+  "id": "ad7963b3-aed1-465f-a20e-39ee6359c96b",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-09-12T18:30:00+00:00",
+  "home_club_id": "uru-cure-rugby-club",
+  "away_club_id": "club-universitario-de-cordoba",
+  "score": {
+   "away": 8,
+   "home": 13,
+   "awayTries": 0,
+   "homeTries": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Urú Curé Rugby Club",
+  "a": "Club Universitario de Córdoba",
+  "torneo": "torneo-del-interior-a",
+  "sh": 13,
+  "sa": 8,
+  "fecha": "2026-09-12"
+ },
+ {
+  "id": "084bb7d4-77b1-4ea3-b732-674d29101095",
+  "tournament_id": "e2712855-36f4-4363-978e-5036af5c5449",
+  "date_time": "2026-09-12T18:30:00+00:00",
+  "home_club_id": "natacion-y-gimnasia",
+  "away_club_id": "tucuman-lawn-tennis",
+  "score": {
+   "away": 15,
+   "home": 23,
+   "penalties": null,
+   "manualOverride": {
+    "away": 15,
+    "home": 23,
+    "cutoffMinute": null
+   }
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Natación y Gimnasia",
+  "a": "Tucumán Lawn Tennis",
+  "torneo": "torneo-del-interior-b",
+  "sh": 23,
+  "sa": 15,
+  "fecha": "2026-09-12"
+ },
+ {
+  "id": "d959d0a7-4009-40f7-a52f-3d705173901a",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-09-26T19:00:00+00:00",
+  "home_club_id": "club-la-tablada",
+  "away_club_id": "sociedad-sportiva-de-bahia-blanca",
+  "score": {
+   "away": 12,
+   "home": 67,
+   "awayTries": 2,
+   "homeTries": 10
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 21,
+  "h": "Club La Tablada",
+  "a": "Sociedad Sportiva de Bahía Blanca",
+  "torneo": "torneo-del-interior-a",
+  "sh": 67,
+  "sa": 12,
+  "fecha": "2026-09-26"
+ },
+ {
+  "id": "ad9a5c4d-db76-4d20-ae9f-e4f2791d72de",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-09-26T19:00:00+00:00",
+  "home_club_id": "tucuman-lawn-tennis",
+  "away_club_id": "mendoza-rugby-club",
+  "score": {
+   "away": 28,
+   "home": 48
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tucumán Lawn Tennis",
+  "a": "Mendoza Rugby Club",
+  "torneo": "torneo-del-interior-a",
+  "sh": 48,
+  "sa": 28,
+  "fecha": "2026-09-26"
+ },
+ {
+  "id": "352621b7-7c46-4535-807a-aa350f2c621f",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-09-26T19:00:00+00:00",
+  "home_club_id": "natacion-y-gimnasia",
+  "away_club_id": "curne",
+  "score": {
+   "away": 37,
+   "home": 31
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Natación y Gimnasia",
+  "a": "CURNE",
+  "torneo": "torneo-del-interior-a",
+  "sh": 31,
+  "sa": 37,
+  "fecha": "2026-09-26"
+ },
+ {
+  "id": "86bae874-ad7f-42a5-a8d3-37dc5a8348e1",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-09-26T19:00:00+00:00",
+  "home_club_id": "tala-rugby-club",
+  "away_club_id": "jockey-club-cordoba",
+  "score": {
+   "away": 26,
+   "home": 27,
+   "awayTries": 2,
+   "homeTries": 4,
+   "penalties": null,
+   "manualOverride": null
+  },
+  "referee": "Federico Longobardi",
+  "lineup_home_count": 23,
+  "events_count": 0,
+  "h": "Tala Rugby Club",
+  "a": "Jockey Club Córdoba",
+  "torneo": "torneo-del-interior-a",
+  "sh": 27,
+  "sa": 26,
+  "fecha": "2026-09-26"
+ },
+ {
+  "id": "07ba8b7a-173d-47ec-b4b3-dd65b0ffc5d3",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-09-26T19:00:00+00:00",
+  "home_club_id": "jockey-club-de-rosario",
+  "away_club_id": "duendes-r-c",
+  "score": {
+   "away": 19,
+   "home": 23,
+   "awayTries": 2,
+   "homeTries": 2
+  },
+  "referee": "Tomás Ninci",
+  "lineup_home_count": 15,
+  "events_count": 0,
+  "h": "Jockey Club de Rosario",
+  "a": "Duendes R.C.",
+  "torneo": "torneo-del-interior-a",
+  "sh": 23,
+  "sa": 19,
+  "fecha": "2026-09-26"
+ },
+ {
+  "id": "301364c7-4c50-4a4b-9458-a4b4bffe6047",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-09-26T19:00:00+00:00",
+  "home_club_id": "club-universitario-de-cordoba",
+  "away_club_id": "parana-rowing",
+  "score": {
+   "away": 28,
+   "home": 50,
+   "awayTries": 4,
+   "homeTries": 8
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 21,
+  "h": "Club Universitario de Córdoba",
+  "a": "Paraná Rowing",
+  "torneo": "torneo-del-interior-a",
+  "sh": 50,
+  "sa": 28,
+  "fecha": "2026-09-26"
+ },
+ {
+  "id": "287970fb-65e8-421d-946c-22f0a16e8a63",
+  "tournament_id": "ed986d61-7389-48e5-b478-c1703b0e8379",
+  "date_time": "2026-10-03T19:00:00+00:00",
+  "home_club_id": "tala-rugby-club",
+  "away_club_id": "jockey-club-de-rosario",
+  "score": {
+   "away": 20,
+   "home": 34,
+   "awayTries": 2,
+   "homeTries": 5,
+   "penalties": null,
+   "manualOverride": null
+  },
+  "referee": "Bertazza T. (URBA)",
+  "lineup_home_count": 23,
+  "events_count": 0,
+  "h": "Tala Rugby Club",
+  "a": "Jockey Club de Rosario",
+  "torneo": "torneo-del-interior-a",
+  "sh": 34,
+  "sa": 20,
+  "fecha": "2026-10-03"
+ }
+]

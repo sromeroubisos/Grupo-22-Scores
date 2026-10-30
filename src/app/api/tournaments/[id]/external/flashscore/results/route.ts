@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { applyPublicShortCache, clampPageParam, limitAnonymousRequest } from '@/lib/server/publicRouteGuards';
 import { createClient } from '@/lib/supabase/server';
 import { getTournamentResults } from '@/lib/services/flashscore';
 import {
@@ -102,9 +103,14 @@ export async function GET(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
+    // Ruta anónima que termina en el proveedor externo: tope por IP.
+    const limited = await limitAnonymousRequest(request, 'ext-fs-results');
+    if (limited) return limited;
+
     try {
         const tournamentId = (await params).id;
-        const page = parseInt(request.nextUrl.searchParams.get('page') ?? '1', 10) || 1;
+        // `page` sin tope era una llamada paga nueva por número: se acota a 1..20.
+        const page = clampPageParam(request.nextUrl.searchParams.get('page'));
 
         const supabase = await createClient();
 
@@ -176,7 +182,10 @@ export async function GET(
             };
         });
 
-        return NextResponse.json({ matches, page, has_more: rawMatches.length >= 20 });
+        return applyPublicShortCache(
+            NextResponse.json({ matches, page, has_more: rawMatches.length >= 20 }),
+            request,
+        );
     } catch (err: any) {
         return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 });
     }

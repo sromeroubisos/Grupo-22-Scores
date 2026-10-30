@@ -85,7 +85,9 @@ async function leer(ruta: string): Promise<Documento> {
         await pausaCortesia();
         let res: Response;
         try {
-            res = await fetch(`${BASE}/${ruta}`, { headers: { Accept: 'application/json' } });
+            // Con timeout: un Leverade colgado ya no se come el presupuesto del
+            // cron entero. El AbortError cae en el catch y se reintenta como red caída.
+            res = await fetch(`${BASE}/${ruta}`, { headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(8000) });
         } catch (e) {
             // Red caída o DNS: pasajero, se reintenta igual que un 5xx.
             ultimoError = new Error(`Leverade ${ruta}: ${e instanceof Error ? e.message : String(e)}`);

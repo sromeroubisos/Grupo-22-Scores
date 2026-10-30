@@ -1,0 +1,33 @@
+{
+  "fecha": "2026-09-05",
+  "descripcion": "Torneo Regional del NOA \"B\" (Zona Ascenso) · 6ª fecha",
+  "fuente": "Tercer Tiempo TV Salta",
+  "motivo": "Resultados y tabla de la 6ª fecha publicados por Tercer Tiempo TV Salta. El bonus ofensivo va declarado: sale de la diferencia de puntos contra la tabla de la 5ª fecha, porque la placa da el marcador y no los tries.",
+  "puntosBonusOfensivo": 1,
+  "partidos": [
+    {
+      "partido": "07861687-4ba3-4c66-b766-a7162d7faddb",
+      "local": "Gimnasia", "visitante": "Old Lions",
+      "marcador": { "local": 25, "visitante": 33 },
+      "bonusOfensivo": []
+    },
+    {
+      "partido": "0ec0d342-f901-4999-8ac7-b439a8d61e1f",
+      "local": "Santiago LT", "visitante": "Jockey de Tucuman",
+      "marcador": { "local": 28, "visitante": 34 },
+      "bonusOfensivo": []
+    },
+    {
+      "partido": "e99eb09c-791e-4ace-91e8-8f11e385163a",
+      "local": "Tigres", "visitante": "Tiro",
+      "marcador": { "local": 86, "visitante": 0 },
+      "bonusOfensivo": ["local"]
+    },
+    {
+      "partido": "79ebf599-40a9-4ab4-87be-8a0dbad9f5ce",
+      "local": "Aguara Guazu", "visitante": "Santiago R",
+      "marcador": { "local": 31, "visitante": 25 },
+      "bonusOfensivo": []
+    }
+  ]
+}

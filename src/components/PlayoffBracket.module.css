@@ -671,3 +671,68 @@
         min-width: 170px;
     }
 }
+/* ================================================================
+   ESTILO FOTMOB — cuadro de eliminatorias
+   Tarjetas redondeadas sin borde, el ganador en negrita y el que
+   perdió apagado; sin el degradé verde ni las mayúsculas espaciadas.
+   Va al final: borrar este bloque devuelve el cuadro anterior.
+   ================================================================ */
+.title {
+    font-size: 1.1rem;
+    font-weight: 800;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--color-text-primary);
+}
+.title::after { display: none; }
+
+.roundTitle {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--color-text-secondary, var(--color-text-tertiary));
+    border-bottom: 0;
+    background: transparent;
+    padding: 6px 0 2px;
+    margin-bottom: 8px;
+}
+
+.roundColumn:not(:last-child) .matchesList::after { display: none; }
+
+.matchCard {
+    background: var(--color-bg-tertiary);
+    border: 0;
+    border-radius: 16px;
+}
+.matchCard:hover {
+    border-color: transparent;
+    background: var(--color-bg-tertiary);
+    transform: none;
+    box-shadow: none;
+}
+
+.matchDate {
+    background: transparent;
+    border-bottom: 0;
+    padding: 10px 14px 0;
+    font-size: 11px;
+}
+.matchStatus {
+    color: var(--color-text-tertiary);
+    font-weight: 700;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.participant { padding: 9px 14px; }
+.participant:not(:last-child) { border-bottom: 0; }
+
+.winner { background: transparent; }
+.winner .name { color: var(--color-text-primary); font-weight: 800; }
+.winner .score { color: var(--color-text-primary); }
+.participant:not(.winner) .name { color: var(--color-text-secondary, var(--color-text-tertiary)); }
+
+.logo { width: 24px; height: 24px; border-radius: 50%; }
+.name { font-size: 13px; }
+.score { font-family: inherit; font-size: 15px; }

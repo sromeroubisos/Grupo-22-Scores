@@ -1,0 +1,2352 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestor de Torneos · Mockups de rediseño</title>
+<style>
+:root {
+    --surface-0: #0a0d12;
+    --surface-1: #11151c;
+    --surface-2: #181d26;
+    --surface-3: #232934;
+    --surface-4: #2c333f;
+    --text-primary: #f4f6fa;
+    --text-secondary: #b6bdcc;
+    --text-dim: #6b7280;
+    --accent: #00a365;
+    --accent-2: #00c47a;
+    --accent-soft: rgba(0, 163, 101, 0.14);
+    --success: #34d399;
+    --warning: #facc15;
+    --danger: #f87171;
+    --info: #60a5fa;
+    --border: rgba(255, 255, 255, 0.06);
+    --border-strong: rgba(255, 255, 255, 0.12);
+    --r-sm: 6px;
+    --r-md: 10px;
+    --r-lg: 14px;
+    --r-xl: 22px;
+    --shadow-md: 0 6px 18px rgba(0,0,0,0.35);
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+    background: #06080c;
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+}
+
+.page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
+}
+
+.page-title {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+}
+
+.page-sub {
+    color: var(--text-secondary);
+    font-size: 15px;
+    margin-bottom: 40px;
+}
+
+.section {
+    margin: 56px 0;
+    border-top: 1px solid var(--border);
+    padding-top: 32px;
+}
+
+.section h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.section .lede {
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin-bottom: 24px;
+}
+
+.compare {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+@media (min-width: 1100px) {
+    .compare-2 { grid-template-columns: 360px 1fr; }
+}
+
+.frame-label {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent-2);
+    background: var(--accent-soft);
+    padding: 4px 10px;
+    border-radius: 999px;
+    margin-bottom: 12px;
+}
+
+.frame-label.desktop { color: var(--info); background: rgba(96, 165, 250, 0.12); }
+.frame-label.mobile { color: var(--accent-2); background: var(--accent-soft); }
+
+/* ============= MOBILE FRAME ============= */
+.mobile-frame {
+    width: 360px;
+    height: 720px;
+    margin: 0 auto;
+    background: var(--surface-0);
+    border-radius: 36px;
+    border: 8px solid #1a1f29;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.mobile-status {
+    height: 28px;
+    background: #06080c;
+    color: var(--text-dim);
+    font-size: 11px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 18px;
+    flex-shrink: 0;
+}
+
+.mobile-status .battery::before { content: "●●●●○"; }
+
+.mobile-screen {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: var(--surface-0);
+    position: relative;
+}
+
+/* ============= DESKTOP FRAME ============= */
+.desktop-frame {
+    border-radius: var(--r-lg);
+    background: var(--surface-0);
+    border: 1px solid var(--border-strong);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+}
+
+.desktop-chrome {
+    background: #1a1f29;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    gap: 6px;
+    flex-shrink: 0;
+}
+.desktop-chrome .dot { width: 11px; height: 11px; border-radius: 50%; }
+.desktop-chrome .dot:nth-child(1) { background: #ff5f57; }
+.desktop-chrome .dot:nth-child(2) { background: #febc2e; }
+.desktop-chrome .dot:nth-child(3) { background: #28c840; }
+.desktop-chrome .url {
+    margin-left: 16px;
+    background: #11151c;
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 4px;
+    flex: 1;
+    max-width: 480px;
+}
+
+.desktop-screen {
+    background: var(--surface-0);
+    min-height: 540px;
+}
+
+/* ============= COMMON UI ============= */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 0 14px;
+    height: 36px;
+    border-radius: var(--r-md);
+    border: 1px solid var(--border-strong);
+    background: var(--surface-2);
+    color: var(--text-primary);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 120ms ease;
+    white-space: nowrap;
+}
+.btn:hover { background: var(--surface-3); }
+.btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    font-weight: 600;
+}
+.btn-primary:hover { background: var(--accent-2); }
+.btn-ghost { background: transparent; border-color: transparent; color: var(--text-secondary); }
+.btn-ghost:hover { background: var(--surface-2); color: var(--text-primary); }
+.btn-sm { height: 30px; padding: 0 10px; font-size: 12px; }
+
+.icon { width: 16px; height: 16px; flex-shrink: 0; }
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+}
+.chip.active { background: var(--accent-soft); color: var(--accent-2); border-color: var(--accent); }
+.chip.success { background: rgba(52, 211, 153, 0.12); color: var(--success); border-color: rgba(52, 211, 153, 0.3); }
+.chip.warning { background: rgba(250, 204, 21, 0.12); color: var(--warning); border-color: rgba(250, 204, 21, 0.3); }
+.chip.danger { background: rgba(248, 113, 113, 0.12); color: var(--danger); border-color: rgba(248, 113, 113, 0.3); }
+.chip.draft { background: rgba(107, 114, 128, 0.18); color: var(--text-dim); }
+
+.dot-status {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.note {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 16px;
+    padding: 12px 14px;
+    background: rgba(96, 165, 250, 0.08);
+    border-left: 3px solid var(--info);
+    border-radius: 4px;
+    line-height: 1.55;
+}
+
+/* ============= MOCKUP 1: LISTA TORNEOS - DESKTOP ============= */
+.list-d-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.list-d-search {
+    flex: 1;
+    max-width: 480px;
+    position: relative;
+}
+.list-d-search input {
+    width: 100%;
+    height: 40px;
+    padding: 0 14px 0 38px;
+    background: var(--surface-1);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--r-md);
+    color: var(--text-primary);
+    font-size: 14px;
+    outline: none;
+}
+.list-d-search input:focus { border-color: var(--accent); }
+.list-d-search .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-dim);
+    font-size: 16px;
+}
+.list-d-search .kbd {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    background: var(--surface-3);
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+}
+
+.list-d-counts {
+    color: var(--text-secondary);
+    font-size: 13px;
+    margin-right: auto;
+    margin-left: 8px;
+}
+.list-d-counts strong { color: var(--text-primary); font-weight: 700; }
+
+.list-d-filters {
+    padding: 14px 24px;
+    display: flex;
+    gap: 8px;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    background: var(--surface-1);
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 120ms ease;
+}
+.filter-chip:hover { border-color: var(--accent); color: var(--text-primary); }
+.filter-chip.active {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: var(--text-primary);
+}
+.filter-chip .caret { color: var(--text-dim); font-size: 10px; }
+
+.list-d-grid {
+    padding: 20px 24px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 12px;
+}
+
+.t-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px;
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    cursor: pointer;
+    transition: all 120ms ease;
+    position: relative;
+}
+.t-card:hover {
+    border-color: var(--accent);
+    background: var(--surface-2);
+    transform: translateY(-1px);
+}
+
+.t-card-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: var(--surface-3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 18px;
+    overflow: hidden;
+    position: relative;
+}
+.t-card-logo.argentina { background: linear-gradient(135deg, #74acdf, #fff, #74acdf); }
+.t-card-logo.uruguay { background: linear-gradient(135deg, #003da5, #fff); }
+.t-card-logo.chile { background: linear-gradient(135deg, #d52b1e, #fff, #0033a0); }
+.t-card-logo.global { background: linear-gradient(135deg, #00a365, #003a25); }
+.t-card-logo.brasil { background: linear-gradient(135deg, #009b3a, #fedd00); }
+
+.t-card-body {
+    flex: 1;
+    min-width: 0;
+}
+.t-card-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 4px;
+}
+.t-card-meta {
+    font-size: 12px;
+    color: var(--text-dim);
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+.t-card-meta .sep { opacity: 0.5; }
+
+.t-card-actions {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+.t-card-iconbtn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-dim);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all 120ms ease;
+}
+.t-card-iconbtn:hover { background: var(--surface-3); color: var(--text-primary); }
+.t-card-iconbtn.starred { color: var(--warning); }
+.t-card-iconbtn.visible { color: var(--success); }
+
+.group-header {
+    grid-column: 1/-1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 0 8px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+    font-weight: 700;
+}
+.group-header strong { color: var(--text-primary); font-size: 13px; letter-spacing: 0; text-transform: none; font-weight: 700; }
+.group-header .count { color: var(--text-dim); font-weight: 500; font-size: 12px; }
+
+/* ============= MOCKUP 1B: LISTA TORNEOS - MOBILE ============= */
+.list-m-header {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: rgba(10, 13, 18, 0.96);
+    backdrop-filter: blur(12px);
+    padding: 14px 16px 8px;
+    border-bottom: 1px solid var(--border);
+}
+.list-m-titlebar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+.list-m-title {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+.list-m-search {
+    position: relative;
+    margin-bottom: 10px;
+}
+.list-m-search input {
+    width: 100%;
+    height: 40px;
+    padding: 0 14px 0 38px;
+    background: var(--surface-1);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--r-md);
+    color: var(--text-primary);
+    font-size: 14px;
+    outline: none;
+}
+.list-m-search .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-dim);
+}
+.list-m-filters {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+}
+.list-m-filters::-webkit-scrollbar { display: none; }
+
+.list-m-list {
+    padding: 8px 16px 80px;
+}
+.t-mcard {
+    display: flex;
+    gap: 12px;
+    padding: 14px 12px;
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    margin-bottom: 8px;
+    align-items: center;
+}
+.t-mcard-logo {
+    width: 36px;
+    height: 36px;
+    border-radius: 7px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+
+.fab {
+    position: absolute;
+    bottom: 80px;
+    right: 16px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 24px rgba(0, 163, 101, 0.4);
+    cursor: pointer;
+    z-index: 4;
+    border: none;
+}
+.fab svg { width: 24px; height: 24px; }
+
+/* ============= MOBILE BOTTOM TAB BAR ============= */
+.mtabs {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
+    background: var(--surface-1);
+    border-top: 1px solid var(--border);
+    display: flex;
+    z-index: 10;
+    padding-bottom: env(safe-area-inset-bottom);
+}
+.mtabs-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    color: var(--text-dim);
+    font-size: 10px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+}
+.mtabs-item.active { color: var(--accent-2); }
+.mtabs-item svg { width: 22px; height: 22px; }
+.mtabs-item .label { font-size: 10px; }
+
+/* ============= EMPTY STATE ============= */
+.empty-state {
+    padding: 48px 24px;
+    text-align: center;
+}
+.empty-illustration {
+    width: 110px;
+    height: 110px;
+    margin: 0 auto 20px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, var(--accent-soft), transparent 70%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.empty-state h3 {
+    font-size: 18px;
+    margin-bottom: 6px;
+    font-weight: 700;
+}
+.empty-state p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+}
+.template-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    max-width: 460px;
+    margin: 0 auto;
+    text-align: left;
+}
+.template-card {
+    display: flex;
+    gap: 12px;
+    padding: 14px;
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    align-items: center;
+    cursor: pointer;
+    transition: all 120ms ease;
+}
+.template-card:hover { border-color: var(--accent); background: var(--surface-2); }
+.template-card .ic {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--accent-soft);
+    color: var(--accent-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+}
+.template-card .copy { flex: 1; }
+.template-card .copy strong { font-size: 14px; font-weight: 700; display: block; margin-bottom: 2px; }
+.template-card .copy span { font-size: 12px; color: var(--text-dim); }
+
+/* ============= WIZARD ============= */
+.wiz-stepper {
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-bottom: 1px solid var(--border);
+}
+.wiz-stepper-bar {
+    height: 4px;
+    background: var(--surface-3);
+    border-radius: 2px;
+    overflow: hidden;
+}
+.wiz-stepper-bar .fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 240ms ease;
+}
+.wiz-stepper-text {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text-dim);
+}
+.wiz-stepper-text strong { color: var(--text-primary); font-weight: 600; }
+
+.wiz-body { padding: 20px; }
+.wiz-section { margin-bottom: 24px; }
+.wiz-section h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+.wiz-section .help {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 14px;
+}
+
+.field {
+    margin-bottom: 14px;
+}
+.field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+}
+.field input, .field select, .field textarea {
+    width: 100%;
+    height: 44px;
+    padding: 0 12px;
+    background: var(--surface-1);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--r-md);
+    color: var(--text-primary);
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+}
+.field input:focus, .field select:focus { border-color: var(--accent); }
+
+.choice-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+.choice {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 14px 8px;
+    background: var(--surface-1);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--r-md);
+    cursor: pointer;
+    text-align: center;
+    transition: all 120ms ease;
+}
+.choice:hover { border-color: var(--accent); background: var(--surface-2); }
+.choice.selected {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    box-shadow: 0 0 0 2px var(--accent-soft);
+}
+.choice .icon-big {
+    width: 36px;
+    height: 36px;
+    background: var(--surface-3);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+    font-size: 18px;
+}
+.choice.selected .icon-big { background: var(--accent); color: #fff; }
+.choice strong { font-size: 13px; font-weight: 600; }
+.choice span { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+
+.wiz-footer {
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 14px 20px;
+    background: var(--surface-1);
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 10px;
+    z-index: 5;
+}
+.wiz-footer .btn { flex: 1; height: 44px; }
+
+/* ============= MANAGE SHELL: HEADER + CONTENT ============= */
+.mng-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, var(--surface-1), var(--surface-0));
+}
+.mng-back {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.mng-headline {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 12px;
+}
+.mng-logo {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--r-md);
+    flex-shrink: 0;
+    background: linear-gradient(135deg, #003da5, #fff);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+}
+.mng-title {
+    flex: 1;
+    min-width: 0;
+}
+.mng-title h1 {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin-bottom: 4px;
+}
+.mng-meta {
+    font-size: 12px;
+    color: var(--text-dim);
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+.mng-meta .sep { opacity: 0.5; }
+.mng-action-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* completion */
+.completion {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+.completion-bar {
+    width: 60px;
+    height: 4px;
+    background: var(--surface-3);
+    border-radius: 2px;
+    overflow: hidden;
+}
+.completion-bar .fill {
+    height: 100%;
+    background: var(--accent);
+    width: 60%;
+}
+
+/* QUICK ACTIONS */
+.qa-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    padding: 16px;
+}
+.qa-card {
+    padding: 16px 14px;
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    cursor: pointer;
+    transition: all 120ms ease;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    text-align: left;
+}
+.qa-card:hover { border-color: var(--accent); background: var(--surface-2); }
+.qa-card .ic {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--accent-soft);
+    color: var(--accent-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 4px;
+}
+.qa-card strong { font-size: 14px; font-weight: 700; }
+.qa-card span { font-size: 11px; color: var(--text-dim); }
+
+/* RESUMEN cards */
+.resumen-grid {
+    padding: 16px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+.r-card {
+    padding: 16px;
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+}
+.r-card-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.r-card-title a { color: var(--accent-2); font-size: 11px; text-decoration: none; }
+.r-state-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background: var(--accent-soft);
+    border-radius: var(--r-md);
+    margin-bottom: 6px;
+}
+.r-state-pill strong { font-size: 16px; font-weight: 700; color: var(--accent-2); }
+.r-state-pill span { font-size: 12px; color: var(--text-secondary); }
+
+.health-list { display: flex; flex-direction: column; gap: 8px; }
+.health-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    background: var(--surface-2);
+    border-radius: var(--r-sm);
+    font-size: 13px;
+}
+.health-item.ok { border-left: 3px solid var(--success); }
+.health-item.warn { border-left: 3px solid var(--warning); }
+.health-item.err { border-left: 3px solid var(--danger); }
+.health-item .left { display: flex; align-items: center; gap: 8px; }
+.health-item .left .ic-status {
+    width: 18px; height: 18px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 11px; flex-shrink: 0;
+}
+.health-item.ok .ic-status { background: rgba(52,211,153,0.18); color: var(--success); }
+.health-item.warn .ic-status { background: rgba(250,204,21,0.18); color: var(--warning); }
+.health-item.err .ic-status { background: rgba(248,113,113,0.18); color: var(--danger); }
+.health-item .cta {
+    color: var(--accent-2);
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+/* DESKTOP MANAGE: 3-column shell */
+.mng-shell-d {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    min-height: 540px;
+}
+.mng-sidebar {
+    background: var(--surface-1);
+    border-right: 1px solid var(--border);
+    padding: 20px 12px;
+}
+.mng-sidebar-section {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    padding: 8px 12px 6px;
+}
+.mng-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: var(--r-sm);
+    color: var(--text-secondary);
+    font-size: 13px;
+    cursor: pointer;
+    margin-bottom: 2px;
+    text-decoration: none;
+    transition: all 120ms ease;
+    position: relative;
+}
+.mng-nav-item:hover { background: var(--surface-2); color: var(--text-primary); }
+.mng-nav-item.active {
+    background: var(--accent-soft);
+    color: var(--text-primary);
+    font-weight: 600;
+}
+.mng-nav-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 8px; bottom: 8px;
+    width: 3px;
+    background: var(--accent);
+    border-radius: 0 3px 3px 0;
+}
+.mng-nav-item .badge {
+    margin-left: auto;
+    font-size: 10px;
+    background: var(--accent);
+    color: #fff;
+    padding: 1px 6px;
+    border-radius: 10px;
+    font-weight: 700;
+}
+.mng-nav-item .dot-pending {
+    margin-left: auto;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent-2);
+    box-shadow: 0 0 6px var(--accent);
+}
+
+.mng-main {
+    padding: 24px 28px;
+    overflow: hidden;
+}
+
+/* desktop: 4 cards 12-grid */
+.mng-resumen-grid-d {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+.span-2 { grid-column: span 2; }
+
+.qa-grid-d {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+/* Comparison grid: ANTES vs DESPUÉS */
+.before-after-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: start;
+    margin-top: 24px;
+}
+@media (max-width: 900px) {
+    .before-after-row { grid-template-columns: 1fr; }
+}
+.ba-card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 18px;
+}
+.ba-card h4 {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 12px;
+    font-weight: 700;
+}
+.ba-card.before h4 { color: var(--danger); }
+.ba-card.after h4 { color: var(--accent-2); }
+.ba-card ul { list-style: none; padding: 0; }
+.ba-card li {
+    font-size: 13px;
+    padding: 6px 0;
+    color: var(--text-secondary);
+    line-height: 1.55;
+    padding-left: 22px;
+    position: relative;
+}
+.ba-card.before li::before { content: '✕'; position: absolute; left: 0; color: var(--danger); font-weight: 700; }
+.ba-card.after li::before { content: '✓'; position: absolute; left: 0; color: var(--accent-2); font-weight: 700; }
+
+/* mockup separators */
+.mockup-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 32px;
+}
+@media (min-width: 1100px) {
+    .mockup-row.cols-2 { grid-template-columns: 360px 1fr; align-items: start; }
+}
+
+/* utility */
+.mb-2 { margin-bottom: 8px; }
+.mb-3 { margin-bottom: 12px; }
+.mb-4 { margin-bottom: 16px; }
+.mt-3 { margin-top: 12px; }
+.mt-4 { margin-top: 16px; }
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.gap-2 { gap: 8px; }
+.gap-3 { gap: 12px; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.flex-1 { flex: 1; }
+
+.legend {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 16px 20px;
+    margin-bottom: 32px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+.legend strong { color: var(--text-primary); }
+.legend code {
+    font-family: var(--font-mono);
+    background: var(--surface-3);
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 12px;
+}
+
+/* hero */
+.hero {
+    padding: 44px 32px;
+    background: linear-gradient(135deg, #0a1f17, #0a0d12);
+    border-radius: var(--r-lg);
+    border: 1px solid var(--border);
+    margin-bottom: 32px;
+    position: relative;
+    overflow: hidden;
+}
+.hero::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 240px;
+    height: 240px;
+    background: radial-gradient(circle, var(--accent-soft), transparent 70%);
+    pointer-events: none;
+}
+.hero-eyebrow {
+    color: var(--accent-2);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+}
+.hero h1 {
+    font-size: 40px;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+    margin-bottom: 12px;
+}
+.hero p {
+    font-size: 16px;
+    color: var(--text-secondary);
+    max-width: 720px;
+    line-height: 1.6;
+}
+
+/* TOC */
+.toc {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 8px;
+    margin-bottom: 24px;
+}
+.toc a {
+    display: block;
+    padding: 12px 14px;
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 13px;
+    transition: all 120ms ease;
+}
+.toc a:hover {
+    border-color: var(--accent);
+    background: var(--surface-2);
+    color: var(--text-primary);
+}
+.toc a strong {
+    display: block;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+    font-weight: 700;
+}
+.toc a span { font-size: 11px; color: var(--text-dim); }
+
+</style>
+</head>
+<body>
+
+<div class="page">
+
+<!-- ============= HERO ============= -->
+<section class="hero">
+    <div class="hero-eyebrow">Mockups · Rediseño Gestor de Torneos</div>
+    <h1>De 8 pestañas, 4 capas CSS y 5 pasos a un flujo claro y mobile-first.</h1>
+    <p>
+        Un rediseño completo del gestor de torneos de Grupo-22-Scores enfocado en tres dolores reales:
+        mobile que sufre, curva de aprendizaje alta y demasiados clics. Cada vista propuesta convive con
+        el sistema actual y se puede adoptar incrementalmente.
+    </p>
+</section>
+
+<div class="toc">
+    <a href="#section-list">
+        <strong>1. Lista de torneos</strong>
+        <span>Filtros como chips · cards limpias · empty state con plantillas</span>
+    </a>
+    <a href="#section-empty">
+        <strong>2. Empty state + Plantillas</strong>
+        <span>Primer torneo en &lt;90 segundos</span>
+    </a>
+    <a href="#section-wizard">
+        <strong>3. Wizard simplificado</strong>
+        <span>5 pasos → 3 pasos · validación inline</span>
+    </a>
+    <a href="#section-manage">
+        <strong>4. Pantalla de gestión</strong>
+        <span>8 pestañas → 5 + bottom-tabs en mobile</span>
+    </a>
+    <a href="#section-resumen">
+        <strong>5. Pestaña Resumen rediseñada</strong>
+        <span>Acciones rápidas · salud · próximo evento</span>
+    </a>
+    <a href="#section-design">
+        <strong>6. Sistema visual unificado</strong>
+        <span>Tokens · tipografía · spacing</span>
+    </a>
+</div>
+
+<div class="legend">
+    <strong>Cómo leer este documento</strong> · Cada sección compara el rediseño en <strong>desktop</strong>
+    (frame de navegador) y <strong>mobile</strong> (frame de teléfono 360×720). Los mockups son visuales
+    estáticos pero usan los mismos tokens (<code>--accent</code>, <code>--surface-*</code>, <code>--text-*</code>)
+    que se proponen para implementación. Lee el informe completo en <code>GESTOR_TORNEOS_REDISEÑO.md</code>.
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 1: LISTA DE TORNEOS -->
+<!-- ============================================================ -->
+<section class="section" id="section-list">
+    <h2>1. Lista de torneos</h2>
+    <p class="lede">
+        Hoy: tarjetas con 11 elementos, filtros que rompen en mobile, acciones escondidas tras menú ⋮.
+        Propuesta: chips de filtro, card simplificada, acciones binarias visibles.
+    </p>
+
+    <div class="before-after-row">
+        <div class="ba-card before">
+            <h4>✕ Antes</h4>
+            <ul>
+                <li>5 selects + 4 labels en 1 fila — rompe en mobile</li>
+                <li>Card con 11 elementos visibles + menú ⋮ con más</li>
+                <li>Activar/desactivar = 2 clics + dropdown</li>
+                <li>Empty state genérico: "No se encontraron torneos…"</li>
+                <li>Bulk actions invisibles hasta hacer scroll</li>
+                <li>4880 líneas en <code>tournament-mobile.css</code> tapando agujeros</li>
+            </ul>
+        </div>
+        <div class="ba-card after">
+            <h4>✓ Después</h4>
+            <ul>
+                <li>Filtros como chips · en mobile: bottom-sheet "Filtros"</li>
+                <li>Card con 5 elementos: logo, nombre, estado, sport, acciones</li>
+                <li>Activar = 1 toggle directo (👁) en la propia card</li>
+                <li>Empty state con 3 plantillas y CTA grande</li>
+                <li>Bulk actions: barra flotante al seleccionar</li>
+                <li>1 sistema CSS, mobile-first nativo, sin parches</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="mockup-row cols-2 mt-4">
+
+        <!-- MOBILE: lista -->
+        <div>
+            <span class="frame-label mobile">Mobile · 360px</span>
+            <div class="mobile-frame">
+                <div class="mobile-status">
+                    <span>9:41</span>
+                    <span class="battery"></span>
+                </div>
+                <div class="mobile-screen">
+                    <div class="list-m-header">
+                        <div class="list-m-titlebar">
+                            <div class="list-m-title">Torneos</div>
+                            <button class="btn btn-ghost btn-sm" style="padding:0;width:32px;">
+                                <svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+                            </button>
+                        </div>
+                        <div class="list-m-search">
+                            <span class="search-icon">
+                                <svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            </span>
+                            <input placeholder="Buscar torneo o país…">
+                        </div>
+                        <div class="list-m-filters">
+                            <span class="filter-chip active">Todos <span class="caret">▾</span></span>
+                            <span class="filter-chip">Rugby <span class="caret">▾</span></span>
+                            <span class="filter-chip">2026 <span class="caret">▾</span></span>
+                            <span class="filter-chip">Argentina</span>
+                        </div>
+                    </div>
+
+                    <div class="list-m-list">
+                        <div class="group-header" style="padding:12px 0 6px;">
+                            <strong>🇦🇷 Argentina</strong>
+                            <span class="count">12 torneos</span>
+                        </div>
+
+                        <div class="t-mcard">
+                            <div class="t-mcard-logo" style="background:linear-gradient(135deg,#74acdf,#fff);"></div>
+                            <div style="flex:1; min-width:0;">
+                                <div style="font-size:14px; font-weight:600;">Torneo del Interior A</div>
+                                <div style="font-size:12px; color:var(--text-dim); display:flex; gap:6px;">
+                                    <span class="chip success" style="padding:1px 8px; font-size:10px;"><span class="dot-status"></span>Activo</span>
+                                    <span>·</span>
+                                    <span>Rugby · 2026</span>
+                                </div>
+                            </div>
+                            <button class="t-card-iconbtn starred">
+                                <svg class="icon" fill="currentColor" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                            </button>
+                        </div>
+
+                        <div class="t-mcard">
+                            <div class="t-mcard-logo" style="background:linear-gradient(135deg,#003da5,#fff);"></div>
+                            <div style="flex:1; min-width:0;">
+                                <div style="font-size:14px; font-weight:600;">URBA 2026 — Top 12</div>
+                                <div style="font-size:12px; color:var(--text-dim); display:flex; gap:6px;">
+                                    <span class="chip success" style="padding:1px 8px; font-size:10px;"><span class="dot-status"></span>Activo</span>
+                                    <span>·</span>
+                                    <span>Rugby · 2026</span>
+                                </div>
+                            </div>
+                            <button class="t-card-iconbtn">
+                                <svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                            </button>
+                        </div>
+
+                        <div class="t-mcard">
+                            <div class="t-mcard-logo" style="background:linear-gradient(135deg,#d52b1e,#0033a0);"></div>
+                            <div style="flex:1; min-width:0;">
+                                <div style="font-size:14px; font-weight:600;">Top 14 — La Nacional</div>
+                                <div style="font-size:12px; color:var(--text-dim); display:flex; gap:6px;">
+                                    <span class="chip draft" style="padding:1px 8px; font-size:10px;">Borrador</span>
+                                    <span>·</span>
+                                    <span>Rugby · 2026</span>
+                                </div>
+                            </div>
+                            <button class="t-card-iconbtn">
+                                <svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                            </button>
+                        </div>
+
+                        <div class="t-mcard">
+                            <div class="t-mcard-logo" style="background:linear-gradient(135deg,#009b3a,#fedd00);"></div>
+                            <div style="flex:1; min-width:0;">
+                                <div style="font-size:14px; font-weight:600;">Súper Liga Sudamericana</div>
+                                <div style="font-size:12px; color:var(--text-dim); display:flex; gap:6px;">
+                                    <span class="chip warning" style="padding:1px 8px; font-size:10px;"><span class="dot-status"></span>Pendiente</span>
+                                    <span>·</span>
+                                    <span>Rugby · 2026</span>
+                                </div>
+                            </div>
+                            <button class="t-card-iconbtn">
+                                <svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                            </button>
+                        </div>
+
+                        <div class="group-header" style="padding:12px 0 6px;">
+                            <strong>🇺🇾 Uruguay</strong>
+                            <span class="count">3 torneos</span>
+                        </div>
+
+                        <div class="t-mcard">
+                            <div class="t-mcard-logo" style="background:linear-gradient(135deg,#003da5,#fff);"></div>
+                            <div style="flex:1; min-width:0;">
+                                <div style="font-size:14px; font-weight:600;">Campeonato Uruguayo</div>
+                                <div style="font-size:12px; color:var(--text-dim); display:flex; gap:6px;">
+                                    <span class="chip success" style="padding:1px 8px; font-size:10px;"><span class="dot-status"></span>Activo</span>
+                                    <span>·</span>
+                                    <span>Fútbol · 2026</span>
+                                </div>
+                            </div>
+                            <button class="t-card-iconbtn"><svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
+                        </div>
+                    </div>
+
+                    <button class="fab" title="Crear torneo">
+                        <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- DESKTOP: lista -->
+        <div>
+            <span class="frame-label desktop">Desktop · 1280px+</span>
+            <div class="desktop-frame">
+                <div class="desktop-chrome">
+                    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                    <div class="url">localhost:3000/admin/super/torneos</div>
+                </div>
+                <div class="desktop-screen">
+                    <div class="list-d-header">
+                        <div class="list-d-search">
+                            <span class="search-icon">
+                                <svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            </span>
+                            <input placeholder="Buscar torneo, país u organización…">
+                            <span class="kbd">⌘K</span>
+                        </div>
+                        <div class="list-d-counts"><strong>87</strong> torneos · <strong>23</strong> activos</div>
+                        <button class="btn"><svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Refrescar</button>
+                        <button class="btn btn-primary">
+                            <svg class="icon" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            Crear torneo
+                        </button>
+                    </div>
+
+                    <div class="list-d-filters">
+                        <span class="filter-chip active">Estado: Activos <span class="caret">▾</span></span>
+                        <span class="filter-chip">Deporte: Todos <span class="caret">▾</span></span>
+                        <span class="filter-chip active">Temporada: 2026 <span class="caret">▾</span></span>
+                        <span class="filter-chip">País: Todos <span class="caret">▾</span></span>
+                        <span class="filter-chip">Origen: Todos <span class="caret">▾</span></span>
+                        <div style="flex:1"></div>
+                        <span class="filter-chip">⊞ Tarjetas</span>
+                        <span class="filter-chip">≡ Tabla</span>
+                    </div>
+
+                    <div class="list-d-grid">
+                        <div class="group-header">
+                            <span style="font-size:18px;">🇦🇷</span>
+                            <strong>Argentina</strong>
+                            <span class="count">12 torneos</span>
+                        </div>
+
+                        <div class="t-card">
+                            <div class="t-card-logo argentina">🏉</div>
+                            <div class="t-card-body">
+                                <div class="t-card-name">Torneo del Interior A</div>
+                                <div class="t-card-meta">
+                                    <span class="chip success" style="padding:1px 8px; font-size:10px;"><span class="dot-status"></span>Activo</span>
+                                    <span class="sep">·</span><span>Rugby</span>
+                                    <span class="sep">·</span><span>2026</span>
+                                </div>
+                            </div>
+                            <div class="t-card-actions">
+                                <button class="t-card-iconbtn visible" title="Visible al público">
+                                    <svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                </button>
+                                <button class="t-card-iconbtn starred" title="Destacado">
+                                    <svg class="icon" fill="currentColor" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                </button>
+                                <button class="t-card-iconbtn" title="Más">
+                                    <svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="t-card">
+                            <div class="t-card-logo argentina">🏉</div>
+                            <div class="t-card-body">
+                                <div class="t-card-name">URBA 2026 — Top 12</div>
+                                <div class="t-card-meta">
+                                    <span class="chip success" style="padding:1px 8px; font-size:10px;"><span class="dot-status"></span>Activo</span>
+                                    <span class="sep">·</span><span>Rugby</span>
+                                    <span class="sep">·</span><span>2026</span>
+                                </div>
+                            </div>
+                            <div class="t-card-actions">
+                                <button class="t-card-iconbtn visible"><svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                                <button class="t-card-iconbtn"><svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
+                                <button class="t-card-iconbtn"><svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
+                            </div>
+                        </div>
+
+                        <div class="t-card">
+                            <div class="t-card-logo argentina">🏉</div>
+                            <div class="t-card-body">
+                                <div class="t-card-name">Nacional de Clubes — Cuyo</div>
+                                <div class="t-card-meta">
+                                    <span class="chip draft" style="padding:1px 8px; font-size:10px;">Borrador</span>
+                                    <span class="sep">·</span><span>Rugby</span>
+                                    <span class="sep">·</span><span>2026</span>
+                                </div>
+                            </div>
+                            <div class="t-card-actions">
+                                <button class="t-card-iconbtn"><svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg></button>
+                                <button class="t-card-iconbtn"><svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
+                                <button class="t-card-iconbtn"><svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
+                            </div>
+                        </div>
+
+                        <div class="t-card">
+                            <div class="t-card-logo argentina">🏉</div>
+                            <div class="t-card-body">
+                                <div class="t-card-name">Argentine XV — Sudamérica</div>
+                                <div class="t-card-meta">
+                                    <span class="chip success" style="padding:1px 8px; font-size:10px;"><span class="dot-status"></span>Activo</span>
+                                    <span class="sep">·</span><span>Rugby</span>
+                                    <span class="sep">·</span><span>2026</span>
+                                </div>
+                            </div>
+                            <div class="t-card-actions">
+                                <button class="t-card-iconbtn visible"><svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                                <button class="t-card-iconbtn starred"><svg class="icon" fill="currentColor" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
+                                <button class="t-card-iconbtn"><svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
+                            </div>
+                        </div>
+
+                        <div class="group-header">
+                            <span style="font-size:18px;">🇺🇾</span>
+                            <strong>Uruguay</strong>
+                            <span class="count">3 torneos</span>
+                        </div>
+
+                        <div class="t-card">
+                            <div class="t-card-logo" style="background:linear-gradient(135deg,#003da5,#fff);">🏆</div>
+                            <div class="t-card-body">
+                                <div class="t-card-name">Campeonato Uruguayo</div>
+                                <div class="t-card-meta">
+                                    <span class="chip success" style="padding:1px 8px; font-size:10px;"><span class="dot-status"></span>Activo</span>
+                                    <span class="sep">·</span><span>Fútbol</span>
+                                    <span class="sep">·</span><span>2026</span>
+                                </div>
+                            </div>
+                            <div class="t-card-actions">
+                                <button class="t-card-iconbtn visible"><svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                                <button class="t-card-iconbtn"><svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
+                                <button class="t-card-iconbtn"><svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <div class="note">
+                <strong>Notas de implementación:</strong> En <code>page.tsx:486-547</code> reemplazar
+                la <code>filterBar</code> por chips. La card actual (<code>cardItem</code>, líneas 641-… )
+                pasa de 11 a 5 elementos. Los toggles de visibilidad y popular son ahora botones directos
+                (no abren menú). El botón ⋮ queda solo para acciones destructivas (eliminar, duplicar, vincular).
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- SECTION 2: EMPTY STATE + TEMPLATES -->
+<!-- ============================================================ -->
+<section class="section" id="section-empty">
+    <h2>2. Empty state productivo · Plantillas</h2>
+    <p class="lede">
+        Hoy: "No se encontraron torneos con los filtros actuales".
+        Propuesta: ilustración + plantillas pre-armadas + CTA grande.
+        Quita la barrera del wizard de 5 pasos para usuarios nuevos.
+    </p>
+
+    <div class="mockup-row cols-2">
+
+        <div>
+            <span class="frame-label mobile">Mobile · primer torneo</span>
+            <div class="mobile-frame">
+                <div class="mobile-status"><span>9:41</span><span class="battery"></span></div>
+                <div class="mobile-screen">
+                    <div class="list-m-header">
+                        <div class="list-m-titlebar">
+                            <div class="list-m-title">Torneos</div>
+                        </div>
+                    </div>
+                    <div class="empty-state">
+                        <div class="empty-illustration">
+                            <svg width="56" height="56" fill="none" stroke="var(--accent-2)" stroke-width="1.5" viewBox="0 0 24 24">
+                                <path d="M6 9h12l-1 7H7L6 9z"/>
+                                <path d="M9 9V6a3 3 0 0 1 6 0v3"/>
+                                <path d="M3 6h3M18 6h3"/>
+                            </svg>
+                        </div>
+                        <h3>Tu primer torneo</h3>
+                        <p>Empezá con una plantilla y editá lo que quieras después. Tarda menos de 1 minuto.</p>
+
+                        <div class="template-grid">
+                            <div class="template-card">
+                                <div class="ic">🏆</div>
+                                <div class="copy">
+                                    <strong>Liga clásica</strong>
+                                    <span>Round-robin · todos contra todos</span>
+                                </div>
+                            </div>
+                            <div class="template-card">
+                                <div class="ic">🥊</div>
+                                <div class="copy">
+                                    <strong>Eliminación directa</strong>
+                                    <span>Llaves · cuartos / semis / final</span>
+                                </div>
+                            </div>
+                            <div class="template-card">
+                                <div class="ic">🎯</div>
+                                <div class="copy">
+                                    <strong>Grupos + Playoff</strong>
+                                    <span>Más popular para rugby/fútbol</span>
+                                </div>
+                            </div>
+                            <div class="template-card">
+                                <div class="ic">⚙️</div>
+                                <div class="copy">
+                                    <strong>Personalizado</strong>
+                                    <span>Wizard completo, paso a paso</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <span class="frame-label desktop">Desktop · primer torneo</span>
+            <div class="desktop-frame">
+                <div class="desktop-chrome">
+                    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                    <div class="url">localhost:3000/admin/super/torneos</div>
+                </div>
+                <div class="desktop-screen" style="display:flex;align-items:center;justify-content:center;padding:40px 24px;">
+                    <div class="empty-state" style="max-width:560px;">
+                        <div class="empty-illustration" style="width:140px;height:140px;">
+                            <svg width="72" height="72" fill="none" stroke="var(--accent-2)" stroke-width="1.5" viewBox="0 0 24 24">
+                                <path d="M6 9h12l-1 7H7L6 9z"/>
+                                <path d="M9 9V6a3 3 0 0 1 6 0v3"/>
+                                <path d="M3 6h3M18 6h3"/>
+                            </svg>
+                        </div>
+                        <h3 style="font-size:24px;">Aún no creaste ningún torneo</h3>
+                        <p>Empezá con una plantilla pre-armada o usá el wizard si necesitás opciones avanzadas. Podés editar todo después.</p>
+
+                        <div class="template-grid" style="grid-template-columns:1fr 1fr;">
+                            <div class="template-card">
+                                <div class="ic">🏆</div>
+                                <div class="copy">
+                                    <strong>Liga clásica</strong>
+                                    <span>Round-robin</span>
+                                </div>
+                            </div>
+                            <div class="template-card">
+                                <div class="ic">🥊</div>
+                                <div class="copy">
+                                    <strong>Eliminación directa</strong>
+                                    <span>Llaves</span>
+                                </div>
+                            </div>
+                            <div class="template-card">
+                                <div class="ic">🎯</div>
+                                <div class="copy">
+                                    <strong>Grupos + Playoff</strong>
+                                    <span>Recomendado</span>
+                                </div>
+                            </div>
+                            <div class="template-card">
+                                <div class="ic">⚙️</div>
+                                <div class="copy">
+                                    <strong>Personalizado</strong>
+                                    <span>Wizard completo</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- SECTION 3: WIZARD SIMPLIFICADO -->
+<!-- ============================================================ -->
+<section class="section" id="section-wizard">
+    <h2>3. Wizard simplificado · 5 → 3 pasos</h2>
+    <p class="lede">
+        El paso 1 hoy pide nombre, deporte, audiencia, temporada, categoría, edad, país, unión y logo.
+        Demasiado para el primer impacto. Propuesta: paso 1 mínimo (nombre + deporte + temporada).
+        Logo, audiencia, jurisdicción quedan en pestaña Detalles post-creación. "Más opciones" expande inline.
+    </p>
+
+    <div class="before-after-row">
+        <div class="ba-card before">
+            <h4>✕ Antes — Paso 1</h4>
+            <ul>
+                <li>9 campos visibles · 32 deportes en grilla</li>
+                <li>Hero con 5 pills de metadata ocupando 25% del viewport mobile</li>
+                <li>Botones de navegación al final (scroll obligado en mobile)</li>
+                <li>Validación al hacer "Siguiente" — error tardío</li>
+                <li>Sin manera de "saltar" pasos opcionales</li>
+            </ul>
+        </div>
+        <div class="ba-card after">
+            <h4>✓ Después — Paso 1</h4>
+            <ul>
+                <li>3 campos esenciales · "Más opciones" colapsable</li>
+                <li>Hero solo en desktop · stepper compacto en mobile</li>
+                <li>Botones <strong>fijos al fondo</strong> con safe-area</li>
+                <li>Validación inline en vivo (botón se desactiva)</li>
+                <li>"Saltar y completar después" en pasos opcionales</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="mockup-row cols-2 mt-4">
+
+        <!-- MOBILE WIZARD -->
+        <div>
+            <span class="frame-label mobile">Mobile · paso 1 de 3</span>
+            <div class="mobile-frame">
+                <div class="mobile-status"><span>9:41</span><span class="battery"></span></div>
+                <div class="mobile-screen" style="padding-bottom:0;">
+                    <!-- topbar -->
+                    <div style="padding:12px 16px; display:flex; align-items:center; gap:8px; border-bottom:1px solid var(--border);">
+                        <button class="btn btn-ghost btn-sm" style="padding:0;width:32px;height:32px;">
+                            <svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+                        </button>
+                        <div style="flex:1; font-size:14px; font-weight:600;">Nuevo torneo</div>
+                        <button class="btn btn-ghost btn-sm" style="padding:0 8px; font-size:12px;">Cancelar</button>
+                    </div>
+
+                    <!-- stepper -->
+                    <div class="wiz-stepper">
+                        <div class="wiz-stepper-bar"><div class="fill" style="width:33%;"></div></div>
+                        <div class="wiz-stepper-text">
+                            <span><strong>Paso 1 de 3</strong> · Lo básico</span>
+                            <span>Estructura · Participantes</span>
+                        </div>
+                    </div>
+
+                    <div class="wiz-body">
+                        <div class="wiz-section">
+                            <h3>Lo básico</h3>
+                            <p class="help">Empezá con lo mínimo. El resto lo configurás después.</p>
+
+                            <div class="field">
+                                <label>NOMBRE DEL TORNEO</label>
+                                <input value="Torneo del Interior 2026" />
+                            </div>
+
+                            <div class="field">
+                                <label>DEPORTE</label>
+                                <div class="choice-grid">
+                                    <div class="choice selected">
+                                        <div class="icon-big">🏉</div>
+                                        <strong>Rugby</strong>
+                                        <span>Activo</span>
+                                    </div>
+                                    <div class="choice">
+                                        <div class="icon-big">⚽</div>
+                                        <strong>Fútbol</strong>
+                                        <span>Activo</span>
+                                    </div>
+                                    <div class="choice">
+                                        <div class="icon-big">🏑</div>
+                                        <strong>Hockey</strong>
+                                        <span>Activo</span>
+                                    </div>
+                                    <div class="choice">
+                                        <div class="icon-big">🏀</div>
+                                        <strong>Básquet</strong>
+                                        <span>Activo</span>
+                                    </div>
+                                </div>
+                                <div style="text-align:center; margin-top:10px;">
+                                    <button class="btn btn-ghost btn-sm">Ver 28 deportes más ▾</button>
+                                </div>
+                            </div>
+
+                            <div class="field">
+                                <label>TEMPORADA</label>
+                                <select>
+                                    <option>2026</option>
+                                    <option>2025</option>
+                                </select>
+                            </div>
+
+                            <div style="padding:12px 14px; background: var(--surface-2); border-radius: var(--r-md); border-left: 3px solid var(--info);">
+                                <div style="font-size:12px; font-weight:600; color:var(--info); margin-bottom:4px;">+ Más opciones</div>
+                                <div style="font-size:12px; color:var(--text-dim);">
+                                    Logo, categoría, edad, país, unión, sección pública…
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- footer fijo -->
+                    <div class="wiz-footer">
+                        <button class="btn">Atrás</button>
+                        <button class="btn btn-primary">Siguiente →</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DESKTOP WIZARD -->
+        <div>
+            <span class="frame-label desktop">Desktop · paso 1 de 3</span>
+            <div class="desktop-frame">
+                <div class="desktop-chrome">
+                    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                    <div class="url">localhost:3000/admin/super/torneos/crear</div>
+                </div>
+                <div class="desktop-screen" style="padding:32px 48px;">
+                    <div style="max-width:760px; margin:0 auto;">
+                        <a href="#" style="font-size:13px; color:var(--text-dim); text-decoration:none; display:inline-flex; align-items:center; gap:4px; margin-bottom:16px;">
+                            <svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+                            Volver a torneos
+                        </a>
+
+                        <h1 style="font-size:32px; font-weight:800; letter-spacing:-0.02em; margin-bottom:6px;">Crear torneo</h1>
+                        <p style="color:var(--text-secondary); margin-bottom:24px;">Tarda menos de 1 minuto · Podés editar todo después.</p>
+
+                        <!-- stepper desktop -->
+                        <div style="display:flex; gap:8px; margin-bottom:32px;">
+                            <div style="flex:1; padding:12px 16px; background:var(--accent-soft); border:1px solid var(--accent); border-radius:var(--r-md); display:flex; gap:10px; align-items:center;">
+                                <div style="width:24px; height:24px; border-radius:50%; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700;">1</div>
+                                <div>
+                                    <div style="font-size:13px; font-weight:700;">Lo básico</div>
+                                    <div style="font-size:11px; color:var(--text-dim);">Nombre, deporte y temporada</div>
+                                </div>
+                            </div>
+                            <div style="flex:1; padding:12px 16px; background:var(--surface-1); border:1px solid var(--border); border-radius:var(--r-md); display:flex; gap:10px; align-items:center;">
+                                <div style="width:24px; height:24px; border-radius:50%; background:var(--surface-3); color:var(--text-dim); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700;">2</div>
+                                <div>
+                                    <div style="font-size:13px; font-weight:700; color:var(--text-secondary);">Estructura</div>
+                                    <div style="font-size:11px; color:var(--text-dim);">Fases y formato</div>
+                                </div>
+                            </div>
+                            <div style="flex:1; padding:12px 16px; background:var(--surface-1); border:1px solid var(--border); border-radius:var(--r-md); display:flex; gap:10px; align-items:center;">
+                                <div style="width:24px; height:24px; border-radius:50%; background:var(--surface-3); color:var(--text-dim); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700;">3</div>
+                                <div>
+                                    <div style="font-size:13px; font-weight:700; color:var(--text-secondary);">Participantes</div>
+                                    <div style="font-size:11px; color:var(--text-dim);">Opcional</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="wiz-section">
+                            <h3 style="font-size:18px; margin-bottom:16px;">Lo básico</h3>
+
+                            <div style="display:grid; grid-template-columns:2fr 1fr; gap:16px;">
+                                <div class="field">
+                                    <label>NOMBRE DEL TORNEO</label>
+                                    <input value="Torneo del Interior 2026" />
+                                </div>
+                                <div class="field">
+                                    <label>TEMPORADA</label>
+                                    <select><option>2026</option></select>
+                                </div>
+                            </div>
+
+                            <div class="field">
+                                <label>DEPORTE</label>
+                                <div class="choice-grid" style="grid-template-columns:repeat(4, 1fr);">
+                                    <div class="choice selected">
+                                        <div class="icon-big">🏉</div>
+                                        <strong>Rugby</strong>
+                                        <span>Activo</span>
+                                    </div>
+                                    <div class="choice">
+                                        <div class="icon-big">⚽</div>
+                                        <strong>Fútbol</strong>
+                                        <span>Activo</span>
+                                    </div>
+                                    <div class="choice">
+                                        <div class="icon-big">🏑</div>
+                                        <strong>Hockey</strong>
+                                        <span>Activo</span>
+                                    </div>
+                                    <div class="choice">
+                                        <div class="icon-big">🏀</div>
+                                        <strong>Básquet</strong>
+                                        <span>Activo</span>
+                                    </div>
+                                </div>
+                                <div style="margin-top:8px;">
+                                    <button class="btn btn-ghost btn-sm">Ver 28 deportes más ▾</button>
+                                </div>
+                            </div>
+
+                            <div style="padding:14px 16px; background: var(--surface-1); border:1px dashed var(--border-strong); border-radius: var(--r-md); margin-top:16px;">
+                                <div style="font-size:13px; font-weight:600; color:var(--text-secondary); margin-bottom:4px; display:flex; align-items:center; gap:6px;">
+                                    <svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                    Más opciones (logo, audiencia, jurisdicción, edad)
+                                </div>
+                                <div style="font-size:12px; color:var(--text-dim);">
+                                    No hace falta llenarlas ahora. Las podés completar desde la pestaña Detalles del torneo creado.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="display:flex; justify-content:space-between; padding-top:24px; border-top:1px solid var(--border); margin-top:24px;">
+                            <button class="btn">Cancelar</button>
+                            <div style="display:flex; gap:8px;">
+                                <button class="btn">Guardar borrador</button>
+                                <button class="btn btn-primary">Siguiente →</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- SECTION 4: PANTALLA DE GESTIÓN -->
+<!-- ============================================================ -->
+<section class="section" id="section-manage">
+    <h2>4. Pantalla de gestión · 8 pestañas → 5 + bottom-tabs en mobile</h2>
+    <p class="lede">
+        Es la pantalla con la que el usuario pasa más tiempo y la más densa del producto.
+        URL real: <code>/admin/entities/[id]/manage?type=tournament</code>.
+        Hoy son 8 tabs en una sola fila horizontal con scroll. Propuesta: 5 principales en bottom-tabs (mobile) /
+        sidebar (desktop), 3 secundarias en menú "Más".
+    </p>
+
+    <div class="before-after-row">
+        <div class="ba-card before">
+            <h4>✕ Antes — 8 tabs en fila</h4>
+            <ul>
+                <li>Resumen · Detalles · Formato · Estructura · Participantes · Operación · Relacionados · Auditoría</li>
+                <li>En mobile colapsa a un dropdown bottom-sheet (descubrir lleva 2 taps)</li>
+                <li>"Detalles" y "Formato" son conceptualmente lo mismo (identidad y reglas)</li>
+                <li>"Relacionados" y "Auditoría" se usan &lt; 5% del tiempo</li>
+                <li>Header del shell ocupa ~180px verticales en mobile antes del contenido</li>
+            </ul>
+        </div>
+        <div class="ba-card after">
+            <h4>✓ Después — 5 tabs principales</h4>
+            <ul>
+                <li><strong>Resumen · Detalles · Estructura · Participantes · Operación</strong></li>
+                <li>Mobile: <strong>bottom-tab-bar nativa</strong> (siempre visible)</li>
+                <li>Desktop: sidebar izquierdo collapsible</li>
+                <li>"Más" abre Relacionados, Auditoría, Configuración avanzada</li>
+                <li>Header reducido a 80px en mobile, sticky</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="mockup-row cols-2 mt-4">
+
+        <!-- MOBILE MANAGE -->
+        <div>
+            <span class="frame-label mobile">Mobile · gestión torneo</span>
+            <div class="mobile-frame">
+                <div class="mobile-status"><span>9:41</span><span class="battery"></span></div>
+                <div class="mobile-screen" style="padding-bottom:0;">
+
+                    <!-- header compacto -->
+                    <div class="mng-header" style="padding:12px 14px;">
+                        <a href="#" class="mng-back">
+                            <svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+                            Torneos
+                        </a>
+                        <div class="mng-headline">
+                            <div class="mng-logo" style="width:44px;height:44px;">🏉</div>
+                            <div class="mng-title">
+                                <h1 style="font-size:16px;">Torneo del Interior A</h1>
+                                <div class="mng-meta">
+                                    <span class="chip success" style="padding:1px 8px; font-size:10px;"><span class="dot-status"></span>Activo</span>
+                                    <span>Rugby · 2026</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- contenido -->
+                    <div class="resumen-grid">
+                        <div class="r-card" style="background:linear-gradient(135deg,var(--accent-soft),transparent); border-color:var(--accent);">
+                            <div class="r-card-title" style="color:var(--accent-2);">Estado actual</div>
+                            <div style="font-size:18px; font-weight:700; margin-bottom:4px;">12 equipos · 6 fechas jugadas</div>
+                            <div style="font-size:12px; color:var(--text-secondary);">Próxima fecha: <strong>Sáb 16/05</strong></div>
+                        </div>
+
+                        <div class="r-card">
+                            <div class="r-card-title">Acciones rápidas</div>
+                            <div class="qa-grid" style="padding:0; gap:8px;">
+                                <div class="qa-card" style="padding:12px;">
+                                    <div class="ic" style="width:32px;height:32px;">
+                                        <svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                                    </div>
+                                    <strong>Cargar resultados</strong>
+                                    <span>3 partidos sin resultado</span>
+                                </div>
+                                <div class="qa-card" style="padding:12px;">
+                                    <div class="ic" style="width:32px;height:32px;">
+                                        <svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                                    </div>
+                                    <strong>Editar fixture</strong>
+                                    <span>54 partidos en total</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="r-card">
+                            <div class="r-card-title">
+                                <span>Salud del torneo</span>
+                                <a href="#">Ver todo</a>
+                            </div>
+                            <div class="health-list">
+                                <div class="health-item ok">
+                                    <div class="left">
+                                        <span class="ic-status">✓</span>
+                                        <span>Identidad</span>
+                                    </div>
+                                </div>
+                                <div class="health-item warn">
+                                    <div class="left">
+                                        <span class="ic-status">!</span>
+                                        <span>2 equipos sin plantel</span>
+                                    </div>
+                                    <a href="#" class="cta">Resolver</a>
+                                </div>
+                                <div class="health-item err">
+                                    <div class="left">
+                                        <span class="ic-status">×</span>
+                                        <span>Falta organizador</span>
+                                    </div>
+                                    <a href="#" class="cta">Asignar</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- bottom tab bar nativa -->
+                    <div class="mtabs">
+                        <a href="#" class="mtabs-item active">
+                            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+                            <span class="label">Resumen</span>
+                        </a>
+                        <a href="#" class="mtabs-item">
+                            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                            <span class="label">Detalles</span>
+                        </a>
+                        <a href="#" class="mtabs-item">
+                            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                            <span class="label">Estructura</span>
+                        </a>
+                        <a href="#" class="mtabs-item">
+                            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                            <span class="label">Equipos</span>
+                        </a>
+                        <a href="#" class="mtabs-item">
+                            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                            <span class="label">Operación</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DESKTOP MANAGE -->
+        <div>
+            <span class="frame-label desktop">Desktop · gestión torneo</span>
+            <div class="desktop-frame">
+                <div class="desktop-chrome">
+                    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                    <div class="url">localhost:3000/admin/entities/f76e47e2…/manage?type=tournament</div>
+                </div>
+                <div class="desktop-screen">
+
+                    <!-- header del shell -->
+                    <div class="mng-header" style="padding:14px 24px;">
+                        <a href="#" class="mng-back">
+                            <svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+                            Torneos / Argentina
+                        </a>
+                        <div class="mng-headline">
+                            <div class="mng-logo">🏉</div>
+                            <div class="mng-title">
+                                <h1>Torneo del Interior A</h1>
+                                <div class="mng-meta">
+                                    <span class="chip success" style="padding:1px 8px; font-size:10px;"><span class="dot-status"></span>Activo · Visible</span>
+                                    <span class="sep">·</span>
+                                    <span>Rugby · 2026 · 12 equipos · 54 partidos</span>
+                                </div>
+                            </div>
+                            <div class="mng-action-row" style="margin-left:auto;">
+                                <span class="completion">
+                                    Configuración <strong>83%</strong>
+                                    <span class="completion-bar"><span class="fill" style="width:83%;"></span></span>
+                                </span>
+                                <button class="btn btn-sm">Duplicar</button>
+                                <button class="btn btn-primary btn-sm">Vista pública ↗</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mng-shell-d">
+                        <!-- sidebar -->
+                        <aside class="mng-sidebar">
+                            <div class="mng-sidebar-section">Principal</div>
+                            <a href="#" class="mng-nav-item active">
+                                <svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+                                Resumen
+                            </a>
+                            <a href="#" class="mng-nav-item">
+                                <svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                Detalles
+                                <span class="dot-pending" title="Cambios sin guardar"></span>
+                            </a>
+                            <a href="#" class="mng-nav-item">
+                                <svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/></svg>
+                                Estructura
+                            </a>
+                            <a href="#" class="mng-nav-item">
+                                <svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                                Participantes
+                                <span class="badge">12</span>
+                            </a>
+                            <a href="#" class="mng-nav-item">
+                                <svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                                Operación
+                                <span class="badge" style="background:var(--warning); color:#000;">3</span>
+                            </a>
+
+                            <div class="mng-sidebar-section" style="margin-top:18px;">Más</div>
+                            <a href="#" class="mng-nav-item">
+                                <svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                                Relacionados
+                            </a>
+                            <a href="#" class="mng-nav-item">
+                                <svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                Auditoría
+                            </a>
+                            <a href="#" class="mng-nav-item">
+                                <svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                                Configuración
+                            </a>
+                        </aside>
+
+                        <!-- main -->
+                        <div class="mng-main">
+                            <div style="display:flex; align-items:baseline; justify-content:space-between; margin-bottom:18px;">
+                                <div>
+                                    <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim); font-weight:700;">Sección</div>
+                                    <h2 style="font-size:22px; font-weight:800; letter-spacing:-0.01em;">Resumen</h2>
+                                </div>
+                                <div style="font-size:12px; color:var(--text-dim);">Actualizado hace 2 min</div>
+                            </div>
+
+                            <!-- Estado actual + acciones rápidas -->
+                            <div class="mng-resumen-grid-d">
+                                <div class="r-card span-2" style="background:linear-gradient(135deg,var(--accent-soft),transparent);border-color:var(--accent);">
+                                    <div class="r-card-title" style="color:var(--accent-2);">Estado actual</div>
+                                    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:24px;">
+                                        <div>
+                                            <div style="font-size:12px; color:var(--text-dim); margin-bottom:4px;">Equipos</div>
+                                            <div style="font-size:24px; font-weight:800;">12</div>
+                                        </div>
+                                        <div>
+                                            <div style="font-size:12px; color:var(--text-dim); margin-bottom:4px;">Fechas jugadas</div>
+                                            <div style="font-size:24px; font-weight:800;">6 / 11</div>
+                                        </div>
+                                        <div>
+                                            <div style="font-size:12px; color:var(--text-dim); margin-bottom:4px;">Próxima fecha</div>
+                                            <div style="font-size:18px; font-weight:700;">Sáb 16/05</div>
+                                            <div style="font-size:11px; color:var(--text-secondary);">5 partidos programados</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="r-card span-2">
+                                    <div class="r-card-title">Acciones rápidas</div>
+                                    <div class="qa-grid-d">
+                                        <div class="qa-card">
+                                            <div class="ic"><svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+                                            <strong>Cargar resultados</strong>
+                                            <span>3 partidos pendientes</span>
+                                        </div>
+                                        <div class="qa-card">
+                                            <div class="ic"><svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div>
+                                            <strong>Editar fixture</strong>
+                                            <span>54 partidos totales</span>
+                                        </div>
+                                        <div class="qa-card">
+                                            <div class="ic"><svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+                                            <strong>Agregar equipo</strong>
+                                            <span>Cupo 12 / 16</span>
+                                        </div>
+                                        <div class="qa-card">
+                                            <div class="ic"><svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+                                            <strong>Publicar fecha</strong>
+                                            <span>Lista para difundir</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="r-card">
+                                    <div class="r-card-title">
+                                        <span>Salud del torneo</span>
+                                        <a href="#">Ver todo</a>
+                                    </div>
+                                    <div class="health-list">
+                                        <div class="health-item ok">
+                                            <div class="left"><span class="ic-status">✓</span><span>Identidad y formato OK</span></div>
+                                        </div>
+                                        <div class="health-item warn">
+                                            <div class="left"><span class="ic-status">!</span><span>2 equipos sin plantel</span></div>
+                                            <a href="#" class="cta">Resolver →</a>
+                                        </div>
+                                        <div class="health-item err">
+                                            <div class="left"><span class="ic-status">×</span><span>Falta organizador asignado</span></div>
+                                            <a href="#" class="cta">Asignar →</a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="r-card">
+                                    <div class="r-card-title">Próxima fecha · Sáb 16/05</div>
+                                    <div style="display:flex; flex-direction:column; gap:8px;">
+                                        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; background:var(--surface-2); border-radius:6px;">
+                                            <span style="font-size:13px;">SIC vs Hindú</span>
+                                            <span style="font-size:11px; color:var(--text-dim); font-family:var(--font-mono);">15:00</span>
+                                        </div>
+                                        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; background:var(--surface-2); border-radius:6px;">
+                                            <span style="font-size:13px;">CASI vs Belgrano</span>
+                                            <span style="font-size:11px; color:var(--text-dim); font-family:var(--font-mono);">15:30</span>
+                                        </div>
+                                        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; background:var(--surface-2); border-radius:6px;">
+                                            <span style="font-size:13px;">Pucará vs Newman</span>
+                                            <span style="font-size:11px; color:var(--text-dim); font-family:var(--font-mono);">16:00</span>
+                                        </div>
+                                        <a href="#" style="font-size:12px; color:var(--accent-2); text-decoration:none; margin-top:4px;">Ver fixture completo →</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="note">
+        <strong>Notas de implementación:</strong> En <code>TournamentTabs.tsx:24-33</code>
+        reagrupar los 8 tabs en 5 + secundarios. <code>TournamentSummaryTab.tsx</code> se reescribe
+        completamente: en lugar de 6 cards de 8/4 columnas, 4 cards en grilla 2×2 con foco en acción.
+        El <code>basalt-tabs-mobile</code> (línea 142) se reemplaza por una bottom-tab-bar nativa
+        montada al nivel de <code>TournamentManageShell</code>.
+    </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- SECTION 6: SISTEMA VISUAL -->
+<!-- ============================================================ -->
+<section class="section" id="section-design">
+    <h2>5. Sistema visual unificado</h2>
+    <p class="lede">
+        Hoy conviven 4 capas CSS (basalt 6004 líneas, mobile 4880, phase-wizard, participants-flash…)
+        con tipografías y colores hardcodeados. Propuesta: 1 set de tokens, 1 escala tipográfica, 1 sistema de spacing.
+    </p>
+
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:16px;">
+        <!-- Tokens superficies -->
+        <div class="r-card">
+            <div class="r-card-title">Superficies</div>
+            <div style="display:flex; flex-direction:column; gap:6px;">
+                <div style="display:flex; align-items:center; gap:10px;"><div style="width:36px;height:36px;background:#0a0d12;border-radius:6px;border:1px solid var(--border);"></div><div><div style="font-size:13px; font-weight:600;">--surface-0</div><div style="font-size:11px; color:var(--text-dim); font-family:var(--font-mono);">#0a0d12</div></div></div>
+                <div style="display:flex; align-items:center; gap:10px;"><div style="width:36px;height:36px;background:#11151c;border-radius:6px;border:1px solid var(--border);"></div><div><div style="font-size:13px; font-weight:600;">--surface-1</div><div style="font-size:11px; color:var(--text-dim); font-family:var(--font-mono);">#11151c</div></div></div>
+                <div style="display:flex; align-items:center; gap:10px;"><div style="width:36px;height:36px;background:#181d26;border-radius:6px;border:1px solid var(--border);"></div><div><div style="font-size:13px; font-weight:600;">--surface-2</div><div style="font-size:11px; color:var(--text-dim); font-family:var(--font-mono);">#181d26</div></div></div>
+                <div style="display:flex; align-items:center; gap:10px;"><div style="width:36px;height:36px;background:#232934;border-radius:6px;border:1px solid var(--border);"></div><div><div style="font-size:13px; font-weight:600;">--surface-3</div><div style="font-size:11px; color:var(--text-dim); font-family:var(--font-mono);">#232934</div></div></div>
+            </div>
+        </div>
+
+        <!-- Tokens semánticos -->
+        <div class="r-card">
+            <div class="r-card-title">Acción y estado</div>
+            <div style="display:flex; flex-direction:column; gap:6px;">
+                <div style="display:flex; align-items:center; gap:10px;"><div style="width:36px;height:36px;background:#00a365;border-radius:6px;"></div><div><div style="font-size:13px; font-weight:600;">--accent</div><div style="font-size:11px; color:var(--text-dim); font-family:var(--font-mono);">#00a365 · Marca</div></div></div>
+                <div style="display:flex; align-items:center; gap:10px;"><div style="width:36px;height:36px;background:#34d399;border-radius:6px;"></div><div><div style="font-size:13px; font-weight:600;">--success</div><div style="font-size:11px; color:var(--text-dim); font-family:var(--font-mono);">#34d399</div></div></div>
+                <div style="display:flex; align-items:center; gap:10px;"><div style="width:36px;height:36px;background:#facc15;border-radius:6px;"></div><div><div style="font-size:13px; font-weight:600;">--warning</div><div style="font-size:11px; color:var(--text-dim); font-family:var(--font-mono);">#facc15</div></div></div>
+                <div style="display:flex; align-items:center; gap:10px;"><div style="width:36px;height:36px;background:#f87171;border-radius:6px;"></div><div><div style="font-size:13px; font-weight:600;">--danger</div><div style="font-size:11px; color:var(--text-dim); font-family:var(--font-mono);">#f87171</div></div></div>
+            </div>
+        </div>
+
+        <!-- Tipografía -->
+        <div class="r-card">
+            <div class="r-card-title">Tipografía</div>
+            <div style="line-height:1.3;">
+                <div style="font-size:28px; font-weight:800; letter-spacing:-0.025em;">Aa <span style="font-size:11px; color:var(--text-dim); font-weight:400; font-family:var(--font-mono);">--t-2xl 28</span></div>
+                <div style="font-size:22px; font-weight:700;">Aa <span style="font-size:11px; color:var(--text-dim); font-weight:400; font-family:var(--font-mono);">--t-xl 22</span></div>
+                <div style="font-size:18px; font-weight:600;">Aa <span style="font-size:11px; color:var(--text-dim); font-weight:400; font-family:var(--font-mono);">--t-lg 18</span></div>
+                <div style="font-size:15px;">Aa <span style="font-size:11px; color:var(--text-dim); font-weight:400; font-family:var(--font-mono);">--t-base 15</span></div>
+                <div style="font-size:13px; color:var(--text-secondary);">Aa <span style="font-size:11px; color:var(--text-dim); font-weight:400; font-family:var(--font-mono);">--t-sm 13</span></div>
+                <div style="font-size:11px; color:var(--text-dim);">Aa <span style="font-size:11px; color:var(--text-dim); font-weight:400; font-family:var(--font-mono);">--t-xs 11</span></div>
+            </div>
+        </div>
+
+        <!-- Spacing -->
+        <div class="r-card">
+            <div class="r-card-title">Espaciado</div>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                <div style="display:flex; align-items:center; gap:10px;"><div style="height:8px; width:4px; background:var(--accent);"></div><span style="font-size:12px;">--sp-1 · 4px</span></div>
+                <div style="display:flex; align-items:center; gap:10px;"><div style="height:8px; width:8px; background:var(--accent);"></div><span style="font-size:12px;">--sp-2 · 8px</span></div>
+                <div style="display:flex; align-items:center; gap:10px;"><div style="height:8px; width:12px; background:var(--accent);"></div><span style="font-size:12px;">--sp-3 · 12px</span></div>
+                <div style="display:flex; align-items:center; gap:10px;"><div style="height:8px; width:16px; background:var(--accent);"></div><span style="font-size:12px;">--sp-4 · 16px</span></div>
+                <div style="display:flex; align-items:center; gap:10px;"><div style="height:8px; width:24px; background:var(--accent);"></div><span style="font-size:12px;">--sp-5 · 24px</span></div>
+                <div style="display:flex; align-items:center; gap:10px;"><div style="height:8px; width:32px; background:var(--accent);"></div><span style="font-size:12px;">--sp-6 · 32px</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="note mt-4">
+        <strong>Plan de migración:</strong> 1) Definir tokens en un único <code>tokens.css</code>
+        global. 2) Reemplazar usos de colores hex hardcodeados (<code>#34d399</code>, <code>#facc15</code>,
+        etc.) en CSS y JSX por <code>var(--success)</code>, <code>var(--warning)</code>, etc.
+        Búsqueda recomendada: <code>grep -rE "#[0-9a-fA-F]{6}" src/</code>. 3) Borrar progresivamente
+        <code>tournament-mobile.css</code> reemplazando los componentes por versiones mobile-first
+        nativas. 4) Eliminar capas CSS redundantes (basalt + mobile + flash + premium → 1 sola).
+    </div>
+</section>
+
+
+<section class="section">
+    <h2>Próximos pasos sugeridos</h2>
+    <p class="lede">Roadmap incremental para no romper nada en producción mientras se migra el diseño.</p>
+
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:14px;">
+        <div class="r-card">
+            <div class="r-card-title" style="color:var(--accent-2);">Sprint 1 · Quick wins</div>
+            <ul style="list-style:none; padding:0; font-size:13px; color:var(--text-secondary); line-height:1.6;">
+                <li>· Microcopy (Crear torneo, Lo básico…)</li>
+                <li>· Toggles directos (visibilidad, popular)</li>
+                <li>· Empty state con plantillas</li>
+                <li>· Footer wizard sticky en mobile</li>
+            </ul>
+        </div>
+        <div class="r-card">
+            <div class="r-card-title" style="color:var(--info);">Sprint 2 · Mobile-first</div>
+            <ul style="list-style:none; padding:0; font-size:13px; color:var(--text-secondary); line-height:1.6;">
+                <li>· Bottom-tab-bar (5 secciones)</li>
+                <li>· Wizard 5→3 pasos</li>
+                <li>· Drawer participantes full-height</li>
+                <li>· Eliminar tournament-mobile.css</li>
+            </ul>
+        </div>
+        <div class="r-card">
+            <div class="r-card-title" style="color:var(--warning);">Sprint 3 · Refresh visual</div>
+            <ul style="list-style:none; padding:0; font-size:13px; color:var(--text-secondary); line-height:1.6;">
+                <li>· Tokens unificados</li>
+                <li>· Tipografía sentence case</li>
+                <li>· Eliminar emojis decorativos</li>
+                <li>· Rediseño Resumen (4 cards)</li>
+            </ul>
+        </div>
+        <div class="r-card">
+            <div class="r-card-title" style="color:var(--success);">Sprint 4 · Onboarding</div>
+            <ul style="list-style:none; padding:0; font-size:13px; color:var(--text-secondary); line-height:1.6;">
+                <li>· Tour guiado primer login</li>
+                <li>· Tooltips de jerga (slug, fase…)</li>
+                <li>· Plantillas pre-cargadas</li>
+                <li>· Métricas time-to-first-tournament</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+</div>
+
+</body>
+</html>

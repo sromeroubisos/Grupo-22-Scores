@@ -1,0 +1,104 @@
+291032: sin plantel utilizable (291032)
+  aviso LA TABLADA "B" 166-0 LOS CUERVOS (BV) (291035): minuto ilegible "-1", se toma el de la fila vecina (1T -1 Try 5 Furst, Tomás)
+291039: sin plantel utilizable (291039)
+291044: sin plantel utilizable (291044)
+  aviso TALA R.C. "C" 68-12 LOS CUERVOS (BV) (291049): salida sin reemplazo, dorsal 14 (1T 26)
+  aviso SAN FRANCISCO R.C. 21-45 CORDOBA R.C. (291055): ingreso sin salida, dorsal 19 (2T 25)
+  aviso TALA R.C. "B" 33-24 SAN FRANCISCO R.C. (291058): ingreso sin salida, dorsal 21 (2T 10)
+  aviso LA TABLADA "B" 71-0 JOCKEY CLUB CORDOBA "B" (291062): salida sin reemplazo, dorsal 1 (2T 25)
+291064: sin plantel utilizable (291064)
+291070: sin plantel utilizable (291070)
+  aviso PALERMO BAJO "B" 35-10 CORDOBA R.C. (291071): ingreso sin salida, dorsal 19 (2T 19)
+  aviso JOCKEY CLUB CORDOBA "B" 41-34 ALTA GRACIA R.C. (291072): ingreso sin salida, dorsal 17 (1T 27)
+  aviso JOCKEY CLUB CORDOBA "B" 41-34 ALTA GRACIA R.C. (291072): ingreso sin salida, dorsal 16 (2T 11)
+291077: sin plantel utilizable (291077)
+291081: sin plantel utilizable (291081)
+  aviso LA TABLADA "C" 31-24 BAGUALES R.C. (313091): salida sin reemplazo, dorsal 15 (2T 0)
+314688: sin plantel utilizable (314688)
+315193: sin plantel utilizable (315193)
+  aviso CORDOBA R.C. 14-21 SAN FRANCISCO R.C. (315195): ingreso sin salida, dorsal 22 (2T 21)
+319638: sin plantel utilizable (319638)
+  aviso TALA R.C. "B" 89-0 LOS CUERVOS (BV) (319640): ingreso sin salida, dorsal 19 (1T 24)
+  aviso LA TABLADA "B" 63-14 UNIVERSITARIO "B" (320732): salida sin reemplazo, dorsal 2 (2T 5)
+322675: sin plantel utilizable (322675)
+  aviso BAGUALES R.C. 43-22 ALTA GRACIA R.C. (322676): ingreso sin salida, dorsal 18 (2T 0)
+  aviso BAGUALES R.C. 43-22 ALTA GRACIA R.C. (322676): ingreso sin salida, dorsal 19 (2T 0)
+  aviso BAGUALES R.C. 43-22 ALTA GRACIA R.C. (322676): ingreso sin salida, dorsal 23 (2T 0)
+  aviso LA TABLADA "C" 27-38 SAN FRANCISCO R.C. (322679): ingreso sin salida, dorsal 16 (2T 35)
+324094: sin plantel utilizable (324094)
+  aviso SAN FRANCISCO R.C. 113-0 LOS CUERVOS (BV) (324098): ingreso sin salida, dorsal 20 (2T 7)
+324522: sin plantel utilizable (324522)
+325120: sin plantel utilizable (325120)
+325157: sin plantel utilizable (325157)
+  aviso CORDOBA ATHLETIC "B" 45-35 ALTA GRACIA R.C. (325593): salida sin reemplazo, dorsal 21 (2T 12)
+  aviso CORDOBA ATHLETIC "B" 45-35 ALTA GRACIA R.C. (325593): salida sin reemplazo, dorsal 15 (2T 12)
+325598: sin plantel utilizable (325598)
+326778: EVENTOS NO CIERRAN PALERMO BAJO "B" 28-0 TALA R.C. "C" (326778): eventos 0-0 (326778)
+326784: SIN CRUCE TALA R.C. "B" 0-28 CORDOBA R.C. (326784) 2026-10-17 claves talab/crc (326784)
+
+Partidos de la base SIN tarjeta: 65
+  2026-03-14 B Baguales R.C. M16 "B" 5-52 Club Palermo Bajo M16 "B"
+  2026-03-21 B Baguales R.C. M16 "B" 0-28 Club La Tablada M16 "B"
+  2026-03-21 B Tala Rugby Club M16 "B" 85-0 Club Universitario de Córdoba M16 "B"
+  2026-03-28 B Córdoba Athletic Club M16 "B" 0-28 Tala Rugby Club M16 "B"
+  2026-03-28 B San Francisco R.C. M16 "B" 40-0 Alta Gracia R.C. M16 "B"
+  2026-04-10 B Alta Gracia R.C. M16 "B" 34-27 Tala Rugby Club M16 "C"
+  2026-04-11 B Club La Tablada M16 "B" 28-0 Córdoba Athletic Club M16 "B"
+  2026-04-11 B Los Cuervos R.C. M16 "B" 0-39 Jockey Club Córdoba M16 "B"
+  2026-04-11 B Club Palermo Bajo M16 "B" 31-26 Tala Rugby Club M16 "B"
+  2026-04-16 B Club La Tablada M16 "C" 29-24 Club La Tablada M16 "B"
+  2026-04-18 B Club Universitario de Córdoba M16 "B" 0-28 Tala Rugby Club M16 "C"
+  2026-04-18 B Jockey Club Córdoba M16 "B" 43-12 Aero Club Río IV M16 "B"
+  2026-04-18 B Los Cuervos R.C. M16 "B" 0-113 Córdoba Rugby Club M16 "B"
+  2026-04-23 B Tala Rugby Club M16 "C" 28-0 Córdoba Athletic Club M16 "B"
+  2026-04-25 B Club La Tablada M16 "C" 17-24 Club Palermo Bajo M16 "B"
+  2026-04-25 B Baguales R.C. M16 "B" 12-17 San Francisco R.C. M16 "B"
+  2026-05-09 B Córdoba Athletic Club M16 "B" 28-0 Los Cuervos R.C. M16 "B"
+  2026-05-16 B San Francisco R.C. M16 "B" 76-0 Tala Rugby Club M16 "C"
+  2026-05-16 B Alta Gracia R.C. M16 "B" 28-0 Club Universitario de Córdoba M16 "B"
+  2026-05-30 B Club Universitario de Córdoba M16 "B" 0-28 Jockey Club Córdoba M16 "B"
+  2026-05-30 B Tala Rugby Club M16 "B" 28-21 Tala Rugby Club M16 "C"
+  2026-05-30 B Córdoba Athletic Club M16 "B" 26-36 San Francisco R.C. M16 "B"
+  2026-05-30 B Baguales R.C. M16 "B" 34-39 Club La Tablada M16 "C"
+  2026-06-06 B Club Universitario de Córdoba M16 "B" 7-66 Córdoba Athletic Club M16 "B"
+  2026-06-06 B Baguales R.C. M16 "B" 19-5 Los Cuervos R.C. M16 "B"
+  2026-06-06 B Club Palermo Bajo M16 "B" 33-29 San Francisco R.C. M16 "B"
+  2026-06-07 B Córdoba Rugby Club M16 "B" 69-10 Aero Club Río IV M16 "B"
+  2026-06-18 B Club Universitario de Córdoba M16 "B" 24-43 Tala Rugby Club M16 "B"
+  2026-06-20 B Club La Tablada M16 "B" 7-50 San Francisco R.C. M16 "B"
+  2026-06-20 B Los Cuervos R.C. M16 "B" 19-51 Baguales R.C. M16 "B"
+  2026-06-20 B Córdoba Athletic Club M16 "B" 28-0 Aero Club Río IV M16 "B"
+  2026-06-20 B Jockey Club Córdoba M16 "B" 14-50 Club Palermo Bajo M16 "B"
+  2026-06-27 B Alta Gracia R.C. M16 "B" 42-22 Los Cuervos R.C. M16 "B"
+  2026-06-27 B Córdoba Rugby Club M16 "B" 5-35 Tala Rugby Club M16 "C"
+  2026-06-27 B Aero Club Río IV M16 "B" 7-76 Club La Tablada M16 "B"
+  2026-06-27 B San Francisco R.C. M16 "B" 28-0 Jockey Club Córdoba M16 "B"
+  2026-07-25 B Córdoba Rugby Club M16 "B" 28-0 Los Cuervos R.C. M16 "B"
+  2026-07-25 B Tala Rugby Club M16 "C" 24-22 Aero Club Río IV M16 "B"
+  2026-07-25 B Jockey Club Córdoba M16 "B" 43-5 Club La Tablada M16 "C"
+  2026-08-01 B Los Cuervos R.C. M16 "B" 28-0 Club Universitario de Córdoba M16 "B"
+  2026-08-01 B Club Palermo Bajo M16 "B" 42-15 Córdoba Athletic Club M16 "B"
+  2026-08-08 B Club Palermo Bajo M16 "B" 47-15 Alta Gracia R.C. M16 "B"
+  2026-08-08 B Tala Rugby Club M16 "C" 14-52 San Francisco R.C. M16 "B"
+  2026-08-21 B Aero Club Río IV M16 "B" 26-59 Tala Rugby Club M16 "B"
+  2026-08-22 B San Francisco R.C. M16 "B" 50-10 Baguales R.C. M16 "B"
+  2026-08-28 B Club Universitario de Córdoba M16 "B" 0-28 Córdoba Rugby Club M16 "B"
+  2026-08-28 B Córdoba Athletic Club M16 "B" 19-40 Jockey Club Córdoba M16 "B"
+  2026-08-29 B Tala Rugby Club M16 "B" 13-20 Club La Tablada M16 "B"
+  2026-09-12 B Córdoba Rugby Club M16 "B" 28-0 Córdoba Athletic Club M16 "B"
+  2026-09-12 B Aero Club Río IV M16 "B" 5-7 Club La Tablada M16 "C"
+  2026-09-19 B San Francisco R.C. M16 "B" 28-0 Club Universitario de Córdoba M16 "B"
+  2026-09-19 B Córdoba Rugby Club M16 "B" 14-36 Club La Tablada M16 "B"
+  2026-09-26 B Club Palermo Bajo M16 "B" 28-0 Club La Tablada M16 "C"
+  2026-09-26 B Alta Gracia R.C. M16 "B" 12-49 Club La Tablada M16 "B"
+  2026-09-26 B Baguales R.C. M16 "B" 15-64 Jockey Club Córdoba M16 "B"
+  2026-09-26 B Los Cuervos R.C. M16 "B" 28-0 Córdoba Athletic Club M16 "B"
+  2026-09-26 B Aero Club Río IV M16 "B" 28-0 Córdoba Rugby Club M16 "B"
+  2026-10-03 B Los Cuervos R.C. M16 "B" 24-56 Tala Rugby Club M16 "B"
+  2026-10-03 B Córdoba Rugby Club M16 "B" 0-28 Club Palermo Bajo M16 "B"
+  2026-10-03 B Baguales R.C. M16 "B" 26-33 Club Universitario de Córdoba M16 "B"
+  2026-10-10 B Club Universitario de Córdoba M16 "B" 74-0 Alta Gracia R.C. M16 "B"
+  2026-10-17 B Baguales R.C. M16 "B" 31-0 Aero Club Río IV M16 "B"
+  2026-10-17 B Alta Gracia R.C. M16 "B" 0-28 Jockey Club Córdoba M16 "B"
+  2026-10-17 B Los Cuervos R.C. M16 "B" 20-61 Club La Tablada M16 "B"
+  2026-10-31 B San Francisco R.C. M16 "B" 28-0 Córdoba Athletic Club M16 "B"

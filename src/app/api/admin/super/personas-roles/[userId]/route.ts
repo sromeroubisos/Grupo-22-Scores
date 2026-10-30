@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { guardRejection } from '@/lib/auth/apiAdmin';
 import type { PostgrestError } from '@supabase/supabase-js';
 import { requireGlobalAdminContext } from '@/lib/auth/permissions';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { APP_ROLES } from '@/lib/auth/roles';
+import { APP_ROLES, isGlobalAdminRole } from '@/lib/auth/roles';
 import { getReservedAdminRole } from '@/lib/types/user';
 
 type UserLookupRow = {
     id: string;
     email: string;
+    role: string | null;
 };
 
 function jsonError(message: string, status = 400) {
@@ -28,16 +30,23 @@ export async function PATCH(
     request: NextRequest,
     { params }: { params: Promise<{ userId: string }> }
 ) {
+    let actor: Awaited<ReturnType<typeof requireGlobalAdminContext>>;
     try {
         const supabase = await createClient();
-        await requireGlobalAdminContext(supabase);
-    } catch {
-        return jsonError('Unauthorized', 401);
+        actor = await requireGlobalAdminContext(supabase);
+    } catch (authError) {
+        return jsonError(...guardRejection(authError));
     }
 
     const { userId } = await params;
     if (!userId) {
         return jsonError('userId requerido', 400);
+    }
+
+    // Nadie se cambia el rol a si mismo: ni para subir (escalada) ni para
+    // bajar (el ultimo super admin se deja afuera solo).
+    if (userId === actor.userId) {
+        return jsonError('No podés cambiar tu propio rol.', 403);
     }
 
     let body: unknown;
@@ -58,7 +67,7 @@ export async function PATCH(
         const membershipsTable = admin.from('memberships') as any;
 
         const targetUserResult = await usersTable
-            .select('id, email')
+            .select('id, email, role')
             .eq('id', userId)
             .maybeSingle();
         const targetUser = targetUserResult.data as UserLookupRow | null;
@@ -75,6 +84,13 @@ export async function PATCH(
         const reservedRole = getReservedAdminRole(targetUser.email);
         if (reservedRole && role !== reservedRole) {
             return jsonError(`Esta cuenta esta reservada como ${reservedRole} y no puede recibir otro rol.`, 400);
+        }
+
+        // Jerarquia: los roles globales (dar uno, o sacarselo a quien lo
+        // tiene) son cosa de un super_admin exacto. Un admin_general es global
+        // pero no puede fabricar pares ni degradar a un super admin.
+        if ((isGlobalAdminRole(role) || isGlobalAdminRole(targetUser.role)) && actor.role !== 'super_admin') {
+            return jsonError('Solo un super admin puede asignar o quitar roles globales.', 403);
         }
 
         const updateResult = await usersTable

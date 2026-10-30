@@ -3,12 +3,17 @@
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import {
+    canManageClubContext,
     canManageSportContext,
     canManageTournamentContext,
+    getClubManagementTarget,
     getTournamentManagementTarget,
     hasScopedMembershipAccess,
     requireUserAccessContext,
+    type UserAccessContext,
 } from '@/lib/auth/permissions';
+import { isGlobalAdminRole } from '@/lib/auth/roles';
+import { ensureMatchManagementAccess } from '@/lib/server/matchCenterAdmin';
 import { revalidatePath } from 'next/cache';
 import { EntityType } from '@/lib/services/entityResolver';
 import { resolveTournamentCountryLabel } from '@/lib/data/countries';
@@ -42,6 +47,12 @@ const SCHEMAS: Record<EntityType, z.ZodObject<any>> = {
         is_popular: z.boolean().optional().nullable(),
         sync_locked: z.boolean().optional().nullable(),
         logo_url: z.string().optional().nullable(),
+        /** Color del banner de la pantalla pública (#RRGGBB). Vacío = el color sale del escudo. */
+        primary_color: z
+            .string()
+            .optional()
+            .nullable()
+            .refine((v) => v == null || v === '' || /^#[0-9a-fA-F]{6}$/.test(v), 'El color del banner debe ser #RRGGBB'),
         priority: z.number().int().optional().nullable(),
         format: z.string().optional().nullable(),
         ruleset: z.record(z.string(), z.any()).optional().nullable(),
@@ -303,6 +314,88 @@ async function getTournamentCreateContext(
     };
 }
 
+// ── ALCANCE (defensa en profundidad) ───────────────────────────────────────
+/*
+ * Club, unión, jugador y partido se escriben con el cliente del usuario, así
+ * que RLS es la primera barrera. Pero una server action se puede invocar con
+ * cualquier payload, sin pasar por el editor, y el RLS de estas tablas ya tuvo
+ * agujeros: el alcance se chequea también acá, con la misma regla que usa el
+ * resto del panel.
+ */
+async function canManageClubId(
+    supabase: Awaited<ReturnType<typeof createClient>>,
+    context: UserAccessContext,
+    clubId: unknown,
+): Promise<boolean> {
+    if (typeof clubId !== 'string' || !clubId) return false;
+    const target = await getClubManagementTarget(supabase, clubId).catch(() => null);
+    return Boolean(target && canManageClubContext(context, target));
+}
+
+async function canManageTournamentId(
+    supabase: Awaited<ReturnType<typeof createClient>>,
+    context: UserAccessContext,
+    tournamentId: unknown,
+): Promise<boolean> {
+    if (typeof tournamentId !== 'string' || !UUID_REGEX.test(tournamentId)) return false;
+    const target = await getTournamentManagementTarget(supabase, tournamentId);
+    return Boolean(target && canManageTournamentContext(context, target));
+}
+
+async function assertEntityScope(
+    supabase: Awaited<ReturnType<typeof createClient>>,
+    type: EntityType,
+    mode: 'create' | 'update' | 'delete',
+    id: string | null,
+    payload: Record<string, any>,
+): Promise<void> {
+    if (type === 'tournament') return; // tiene su propio contexto (getTournament*Context)
+
+    const context = await requireUserAccessContext(supabase);
+    if (isGlobalAdminRole(context.role)) return;
+
+    let allowed = false;
+
+    if (type === 'union') {
+        // Crear una unión es de admin global; editarla, de quien la gestiona.
+        allowed = mode !== 'create' && hasScopedMembershipAccess(context, 'union', id);
+    } else if (type === 'club') {
+        if (mode === 'create') {
+            allowed = hasScopedMembershipAccess(context, 'union', readOptionalScopedId(payload.union_id));
+        } else {
+            allowed = await canManageClubId(supabase, context, id);
+        }
+    } else if (type === 'player') {
+        let clubId: unknown = payload.club_id;
+        if (mode !== 'create' && id) {
+            const { data: current } = await supabase.from('players').select('club_id').eq('id', id).maybeSingle();
+            clubId = (current as { club_id?: string | null } | null)?.club_id ?? null;
+        }
+        allowed = await canManageClubId(supabase, context, clubId);
+        // Mover el jugador a otro club exige poder gestionar también el destino.
+        if (allowed && mode === 'update' && payload.club_id && payload.club_id !== clubId) {
+            allowed = await canManageClubId(supabase, context, payload.club_id);
+        }
+    } else if (type === 'match') {
+        if (mode === 'create') {
+            allowed = payload.tournament_id
+                ? await canManageTournamentId(supabase, context, payload.tournament_id)
+                : (await canManageClubId(supabase, context, payload.home_club_id)) ||
+                  (await canManageClubId(supabase, context, payload.away_club_id));
+        } else if (id) {
+            allowed = await ensureMatchManagementAccess(id).then(() => true, () => false);
+            // Pasar el partido a otro torneo exige poder gestionar el destino.
+            if (allowed && mode === 'update' && payload.tournament_id) {
+                allowed = await canManageTournamentId(supabase, context, payload.tournament_id);
+            }
+        }
+    }
+
+    if (!allowed) {
+        throw new Error('Forbidden');
+    }
+}
+
 // ── CREATE (INSERT) ─────────────────────────────────────────────────────────
 export async function createEntity(
     type: EntityType,
@@ -328,6 +421,7 @@ export async function createEntity(
     }
 
     const table = TABLE[type];
+    await assertEntityScope(supabase, type, 'create', null, cleanPayload);
     const tournamentContext = type === 'tournament'
         ? await getTournamentCreateContext(supabase, cleanPayload)
         : null;
@@ -425,6 +519,7 @@ export async function updateEntity(
 
     const cleanUpdates = sanitizeFields(type, updates, 'update');
     const table = TABLE[type];
+    await assertEntityScope(supabase, type, 'update', id, cleanUpdates);
     const tournamentContext = type === 'tournament'
         ? await getTournamentMutationContext(supabase, id)
         : null;
@@ -508,6 +603,19 @@ export async function updateEntitySafe(
     }
 }
 
+/**
+ * Lo único que acepta la carga en vivo. Antes era `.update({ ...payload })`:
+ * una server action recibe lo que el cliente quiera mandar, así que cualquier
+ * columna de `matches` (torneo, clubes, visibilidad) se podía pisar desde acá.
+ */
+const MATCH_LIVE_SCHEMA = z.object({
+    score: z.object({
+        home: z.number().int().min(0).max(999),
+        away: z.number().int().min(0).max(999),
+    }).strict().optional(),
+    status: z.enum(['scheduled', 'live', 'final', 'finished', 'postponed', 'suspended', 'cancelled', 'abandoned']).optional(),
+}).strict();
+
 export async function updateMatchLive(
     id: string,
     payload: {
@@ -515,21 +623,31 @@ export async function updateMatchLive(
         status?: string;
     }
 ): Promise<{ success: true }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('Unauthorized');
+    if (typeof id !== 'string' || !UUID_REGEX.test(id)) {
+        throw new Error('Invalid ID format: match requires a UUID.');
+    }
 
+    const parsed = MATCH_LIVE_SCHEMA.safeParse(payload ?? {});
+    if (!parsed.success) {
+        throw new Error('Validation Error: marcador o estado invalido');
+    }
+
+    // Mismo guard que el resto de la carga de partidos: global, o alcance
+    // sobre el torneo / el club autor de ESTE partido.
+    const context = await ensureMatchManagementAccess(id);
+
+    const supabase = await createClient();
     const { error } = await supabase
         .from('matches')
         .update({
-            ...payload,
+            ...parsed.data,
             updated_at: new Date().toISOString()
         })
         .eq('id', id);
 
     if (error) throw new Error(error.message);
 
-    await writeAuditLog(user.id, 'match', id, 'update', { live_update: payload });
+    await writeAuditLog(context.userId, 'match', id, 'update', { live_update: parsed.data });
 
     revalidatePath(`/admin/super/partidos/${id}`);
     revalidatePath(`/admin/entities/${id}/manage`);
@@ -546,6 +664,7 @@ export async function deleteEntity(
     if (!user) throw new Error('Unauthorized');
 
     const table = TABLE[type];
+    await assertEntityScope(supabase, type, 'delete', id, {});
     const tournamentContext = type === 'tournament'
         ? await getTournamentMutationContext(supabase, id)
         : null;

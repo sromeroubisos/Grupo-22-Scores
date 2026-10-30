@@ -33,8 +33,8 @@ const RAIZ='C:/Users/srome/OneDrive/Documentos/________S22/Recursos';
 // proveedor pero SIN url, y el proveedor rechaza todas las rutas candidatas. Se
 // guarda el id igual: el dia que aparezca la url es un campo, no una migracion.
 const COPAS = [
-  { slug:'rugby-champions-cup', name:'Champions Cup', stage:'z50otgjb', logo:`${RAIZ}/Heineken_Champions_Cup_CoreLogo_3C_CMYK_OnLight.png`, prioridad:98 },
-  { slug:'rugby-challenge-cup-epcr', name:'Challenge Cup', stage:'kfassg54', logo:`${RAIZ}/CHALLENGE CUP.png`, prioridad:92 },
+  { slug:'rugby-champions-cup', name:'Champions Cup', rpId:242, logo:`${RAIZ}/Heineken_Champions_Cup_CoreLogo_3C_CMYK_OnLight.png`, prioridad:98 },
+  { slug:'rugby-challenge-cup-epcr', name:'Challenge Cup', rpId:243, logo:`${RAIZ}/CHALLENGE CUP.png`, prioridad:92 },
 ];
 
 async function subirLogo(archivo){
@@ -62,9 +62,9 @@ for(const c of COPAS){
   filas.push({
     id: randomUUID(), name:c.name, display_name:c.name, slug:c.slug,
     sport:'rugby', sport_id:'rugby', country_id:'international', country:'Internacional', country_name:'Internacional',
-    external_id:`flashscore:${c.stage}`,
-    ruleset:{ external:{ flashscore:{ tournament_stage_id:c.stage } } },
-    is_api_managed:true, data_source:'flashscore',
+    external_id:`rp-comp-${c.rpId}`,
+    ruleset:{ external:{ rugbypass:{ competition_id:c.rpId } } },
+    is_api_managed:true, data_source:'rugbypass',
     status:'published', is_visible:true, is_active:true,
     logo_url: EJECUTAR ? logo.url : null,
     priority:c.prioridad,

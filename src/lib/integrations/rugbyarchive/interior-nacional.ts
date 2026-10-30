@@ -127,6 +127,15 @@ for (let y = 2008; y <= 2026; y++) YEARS_PATAGONICO.push(String(y));
 const YEARS_URUGUAYO: string[] = [];
 for (let y = 1951; y <= 2026; y++) YEARS_URUGUAYO.push(String(y));
 
+// ── Chile, máxima división (comp 463): 1948-2025. El 2026 lo mantiene el sync de ARUSA.
+const YEARS_CHILE: string[] = [];
+for (let y = 1948; y <= 2025; y++) YEARS_CHILE.push(String(y));
+
+// ── Nacional de Clubes Femenino (comp 3213): 2011-2025. El 2026 vive en G22
+// cargado a mano (fixture en curso) y no entra: importarlo lo marcaría 'completed'.
+const YEARS_FEMENINO: string[] = [];
+for (let y = 2011; y <= 2025; y++) YEARS_FEMENINO.push(String(y));
+
 /**
  * ¿Esta fase del Oeste (comp 124) pertenece a la línea PLATA?
  * Decidido fase por fase contra la membresía real de clubes (2026-08):
@@ -375,6 +384,34 @@ export const COMPETENCIAS: CompetenciaInterior[] = [
     // La fuente usa el mismo nombre en las 76 temporadas: no hay eras que
     // distinguir, así que la temporada se nombra igual que el torneo.
     nombreTemporada: (y) => `Uruguayo de Clubes ${y}`,
+  },
+  // ── Nacional de Clubes Femenino (3213) ─────────────────────────────────────
+  // Destino existente (4baab70e…, creado a mano con el 2026 y el palmarés
+  // 2011-2025 solo-campeón): SIN `crear`. Las temporadas solo-campeón se borran
+  // antes de importar para que la guarda de season_code no las saltee.
+  // La fuente publica los equipos como "<Club> Women 7s", con id propio.
+  {
+    comp: 3213,
+    nombreEsperado: "Argentina - Women's Nacional de Clubes",
+    slug: 'nacional-de-clubes-femenino',
+    years: YEARS_FEMENINO,
+    nombreTemporada: (y) => `Nacional de Clubes Femenino ${y}`,
+  },
+  // ── Chile: máxima división (463), 1948-2025 ────────────────────────────────
+  // Destino existente: `top-10-de-arusa` (ARUSA, sincronizado desde Leverade).
+  // Los 10 clubes del 2026 de la comp 463 son los mismos que los de ese torneo,
+  // así que es LA MISMA competición bajo otros nombres de era (Campeonato
+  // Central → Torneo Nacional Super 12/14 → Top 8 → Primera Nacional Top 10 →
+  // Primera División). Sin `crear`: un slug que no matchee es error ruidoso.
+  // El 2026 queda afuera: vive en G22 por el sync (93 partidos, temporada
+  // activa) y la fuente aún no declara campeón.
+  {
+    comp: 463,
+    nombreEsperado: 'Chile - Top 8',
+    slug: 'top-10-de-arusa',
+    years: YEARS_CHILE,
+    // El nombre de la fuente viene "Chile - <era>": se conserva la era.
+    nombreTemporada: (y, nomeFuente) => `${nomeFuente.replace(/^Chile - /, '')} ${y}`,
   },
 ];
 
@@ -783,6 +820,96 @@ export const CLUB_MAP_INTERIOR: Record<number, string> = {
   1876: 'coihues-r-c',
   6972: 'chenque-r-c',
   10635: 'club-las-aguilas',
+  // ── Nacional de Clubes Femenino (3213): cada club tiene un id propio "Women 7s" ──
+  3891: 'cardenales-r-c',
+  3892: 'cha-roga-r-c',
+  3893: 'bigua-rugby-club',
+  3894: 'sixty-r-c',
+  3895: 'las-teras',
+  3896: 'sitas',
+  3897: 'cuyo',
+  3898: 'centro-naval',
+  3899: 'capri',
+  3900: 'patagonia-r-c',
+  3902: 'argentino-de-bahia-blanca',
+  3903: 'cordoba-rugby-club',
+  3904: 'universidad-catolica-de-salta',
+  3905: 'alma-juniors',
+  3906: 'los-tordos-rugby-club',
+  3907: 'g-e-i',
+  3908: 'san-isidro-de-lules',
+  3909: 'comercial-r-c',
+  3910: 'nevado',
+  3911: 'la-plata',
+  3912: 'alto-valle',
+  3913: 'jockey-club-san-juan',
+  3914: 'pumai',
+  3915: 'coipu-r-c',
+  3916: 'marabunta-r-c',
+  3917: 'sirenas-smata',
+  3918: 'echague',
+  3919: 'san-patricio',
+  3920: 'aguara-guazu',
+  3921: 'villa-gesell-r-c',
+  3922: 'universidad-nacional-de-cordoba',
+  3923: 'roca-r-c',
+  3924: 'calafate-r-c',
+  5215: 'chaco-r-c',
+  6093: 'club-universitario-de-cordoba',
+  6094: 'old-resian-club',
+  6095: 'encarnacion-rugby-club',
+  6096: 'neuquen-r-c',
+  6097: 'alberdi',
+  6098: 'unsl',
+  6826: 'deportivo-portugues',
+  6827: 'palihue-rc',
+  6828: 'caraya',
+  6829: 'catriel-r-c',
+  6830: 'universitario-de-villa-mercedes',
+  9145: 'salto-del-guaira',
+  9146: 'catamarca-r-c',
+  9147: 'universitario-de-mendoza',
+  9148: 'aguilas-rc-saenz-pena',
+  9149: 'universitario-de-tierra-del-fuego',
+  9393: 'casa-de-padua',
+  9396: 'cordoba-athletic-club',
+  10891: 'peumayen-rugby-club',
+  11493: 'taborin-rc',
+  3901: 'granaderas-red-star',
+  9392: 'argentino-de-trenque-lauquen',
+  9394: 'san-jorge-r-c-ua',
+  9395: 'san-andres',
+  11492: 'c-u-q',
+  11494: 'regatas-de-resistencia',
+  // ── Chile, máxima división (463). Verificado contra la ficha (/api/squadra/{id}):
+  // 5372 "Old Boys" = Old Grangonian Club (`old-boys-r-c`, NO el uruguayo
+  // `old-boys-girls-club`); 5376 "Alumni SC"/"CDA" = Club Deportivo Alumni
+  // (`cd-alumni`, NO `asoc-alumni` de URBA); 5378 apunta al sitio de los
+  // Chunchos = U. de Chile; 5383 "Ingeniería U. de Chile" es OTRO equipo (se crea).
+  // 5386 "PUC" juega el 13° puesto en 2006, el año en que Católica (1354) es
+  // campeón: dos equipos distintos, se crea aparte. REVISABLE.
+  // 5377 Los Troncos: la ficha dice Concepción, G22 lo tiene en Santiago. REVISABLE.
+  2003: 'pwcc',
+  5372: 'old-boys-r-c',
+  5373: 'stade-francais',
+  5374: 'old-mackayans',
+  5375: 'cobs',
+  5376: 'cd-alumni',
+  5377: 'los-troncos',
+  5378: 'u-de-chile',
+  5379: 'old-johns',
+  5381: 'old-reds',
+  5384: 'old-navy',
+  5385: 'old-georgians',
+  5387: 'santo-tomas',
+  5388: 'old-locks',
+  5413: 'dobs',
+  5371: 'universidad-federico-santa-maria',
+  5380: 'udp',
+  5382: 'vina-rc',
+  5383: 'ingenieria-universidad-de-chile',
+  5386: 'puc',
+  5410: 'seminario-la-serena',
 };
 
 const U_TUCUMAN = 'e558d0d9-c01b-40ce-a1c7-e533cb81f97c';
@@ -895,6 +1022,34 @@ export const CLUBES_NUEVOS_INTERIOR: Array<Record<string, unknown>> = [
   { id: 'pucaru', name: 'Pucarú', short_name: 'Pucarú', city: 'Montevideo', union_id: U_URUGUAY, region: 'Montevideo', country: 'Uruguay' },
   { id: 'remeros-de-mercedes', name: 'Remeros de Mercedes', short_name: 'Remeros', city: 'Mercedes', union_id: U_URUGUAY, region: 'Soriano', country: 'Uruguay' },
   { id: 'salto-rugby', name: 'Salto Rugby', short_name: 'Salto', city: 'Salto', union_id: U_URUGUAY, region: 'Salto', country: 'Uruguay' },
+  // ── Chile, máxima división (463): los que G22 no tenía. Ciudad = `localita` de la ficha.
+  // Ninguno tiene badge en rugbyarchive. 5371 figura "Santiago" en la ficha pero
+  // la Santa María es de Valparaíso: la ciudad queda sin declarar.
+  { id: 'universidad-federico-santa-maria', name: 'Universidad Federico Santa María', short_name: 'UTFSM', city: null, union_id: 'arusa', region: 'Chile', country: 'Chile' },
+  { id: 'udp', name: 'Universidad Diego Portales', short_name: 'UDP', city: 'Santiago de Chile', union_id: 'arusa', region: 'Chile', country: 'Chile' },
+  { id: 'vina-rc', name: 'Viña Rugby Club', short_name: 'Viña RC', city: 'Viña del Mar', union_id: 'arusa', region: 'Chile', country: 'Chile' },
+  { id: 'ingenieria-universidad-de-chile', name: 'Ingeniería Universidad de Chile', short_name: 'Ingeniería U. de Chile', city: 'Santiago de Chile', union_id: 'arusa', region: 'Chile', country: 'Chile' },
+  { id: 'puc', name: 'PUC', short_name: 'PUC', city: 'Santiago de Chile', union_id: 'arusa', region: 'Chile', country: 'Chile' },
+  { id: 'seminario-la-serena', name: 'Seminario La Serena', short_name: 'Seminario', city: 'La Serena', union_id: 'arusa', region: 'Chile', country: 'Chile' },
+  // ── Nacional de Clubes Femenino (3213): los que G22 no tenía. Ciudad = `localita` de la ficha.
+  // Unión null donde no se pudo verificar. `salto-del-guaira` y `echague` REVISABLES.
+  { id: 'las-teras', name: 'Las Teras', short_name: 'Las Teras', city: 'Catamarca', union_id: 'union-andina-de-rugby', region: 'Catamarca', country: 'ARG' },
+  { id: 'g-e-i', name: 'G.E.I.', short_name: 'G.E.I.', city: 'Ituzaingó', union_id: 'urba', region: 'Buenos Aires', country: 'ARG' },
+  { id: 'san-isidro-de-lules', name: 'San Isidro de Lules', short_name: 'San Isidro Lules', city: 'San Isidro de Lules', union_id: U_TUCUMAN, region: 'Tucumán', country: 'ARG' },
+  { id: 'nevado', name: 'Nevado', short_name: 'Nevado', city: 'Chilecito', union_id: null, region: 'La Rioja', country: 'ARG' },
+  { id: 'alto-valle', name: 'Alto Valle', short_name: 'Alto Valle', city: 'Neuquén', union_id: 'union-de-rugby-de-alto-valle', region: 'Neuquén', country: 'ARG' },
+  { id: 'pumai', name: 'Pumai', short_name: 'Pumai', city: 'Maipú', union_id: U_CUYO, region: 'Mendoza', country: 'ARG' },
+  { id: 'sirenas-smata', name: 'Sirenas SMATA', short_name: 'Sirenas', city: 'Villa Mercedes', union_id: U_CUYO, region: 'San Luis', country: 'ARG' },
+  { id: 'echague', name: 'Atlético Echagüe Club', short_name: 'Echagüe', city: 'Paraná', union_id: null, region: 'Entre Ríos', country: 'ARG' },
+  { id: 'villa-gesell-r-c', name: 'Villa Gesell Rugby Club', short_name: 'Villa Gesell', city: 'Villa Gesell', union_id: null, region: 'Buenos Aires', country: 'ARG' },
+  { id: 'alberdi', name: 'Alberdi', short_name: 'Alberdi', city: 'San Miguel de Tucumán', union_id: U_TUCUMAN, region: 'Tucumán', country: 'ARG' },
+  { id: 'unsl', name: 'U.N.S.L.', short_name: 'U.N.S.L.', city: 'San Luis', union_id: U_CUYO, region: 'San Luis', country: 'ARG' },
+  { id: 'universitario-de-villa-mercedes', name: 'Universitario de Villa Mercedes', short_name: 'Univ. V. Mercedes', city: 'Villa Mercedes', union_id: U_CUYO, region: 'San Luis', country: 'ARG' },
+  { id: 'universitario-de-tierra-del-fuego', name: 'Universitario de Tierra del Fuego', short_name: 'Univ. TDF', city: 'Cono de Sombra', union_id: null, region: 'Tierra del Fuego', country: 'ARG' },
+  { id: 'universidad-catolica-de-salta', name: 'Universidad Católica de Salta', short_name: 'UCASAL', city: 'Salta', union_id: null, region: 'Salta', country: 'ARG' },
+  { id: 'granaderas-red-star', name: 'Granaderas / Red Star', short_name: 'Red Star', city: 'San Lorenzo', union_id: null, region: 'Santa Fe', country: 'ARG' },
+  { id: 'argentino-de-trenque-lauquen', name: 'Argentino de Trenque Lauquen', short_name: 'Argentino TL', city: 'Trenque Lauquen', union_id: null, region: 'Buenos Aires', country: 'ARG' },
+  { id: 'salto-del-guaira', name: 'Salto', short_name: 'Salto', city: 'Salto del Guairá', union_id: null, region: 'Salto del Guairá', country: 'ARG' },
 ].map((c) => ({
   ...c,
   slug: c.id,

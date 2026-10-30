@@ -21,7 +21,88 @@ import type { LooseSupabaseClient } from './loose'
 
 let client: LooseSupabaseClient | undefined
 const SUPABASE_AUTH_TIMEOUT_MS = 15000
+// El lock de auth se retiene MIENTRAS corre el request, así que su ventana
+// tiene que ser mayor que la del request o el que espera se cae solo. El
+// default de auth-js (10 s) es MENOR que nuestros 15 s: cualquier pedido de
+// auth que tarde entre 10 y 15 s tumbaba a todo otro llamador del lock.
+//
+// No se puede subir por opción: `lockAcquireTimeout` existe en auth-js pero
+// `_initSupabaseAuthClient` de supabase-js destructura las claves conocidas y
+// la tira por el camino. El único lugar que queda es el `lock` mismo.
+const SUPABASE_AUTH_LOCK_TIMEOUT_MS = SUPABASE_AUTH_TIMEOUT_MS + 10000
 const APP_AUTH_LOCAL_USER_KEY = 'g22_user'
+
+/**
+ * Falla de `browserAuthLock` cuando el lock no se consigue a tiempo.
+ *
+ * `isAcquireTimeout` es la marca que auth-js usa para distinguir "no pude
+ * tomar el lock" de "la operación falló", y sin ella el ticker de refresh
+ * trata el timeout como un error real.
+ */
+class SupabaseAuthLockTimeoutError extends Error {
+    readonly isAcquireTimeout = true
+
+    constructor(name: string, acquireTimeout: number) {
+        super(`No se pudo tomar el lock de auth "${name}" en ${acquireTimeout} ms`)
+        this.name = 'SupabaseAuthLockTimeoutError'
+    }
+}
+
+/**
+ * `navigator.locks` con un error propio en vez de un DOMException pelado.
+ *
+ * auth-js aborta el pedido del lock con `abortController.abort()` SIN reason,
+ * así que el navegador lo rechaza con `AbortError: signal is aborted without
+ * reason`: un error sin stack de la app, que en dev sube entero al overlay de
+ * Next sin decir de dónde salió. Acá el mismo caso viaja como
+ * {@link SupabaseAuthLockTimeoutError}, que se lee y se puede filtrar.
+ *
+ * La semántica no cambia: exclusivo siempre, `ifAvailable` cuando el timeout
+ * es 0, y nunca se corre `fn` sin el lock tomado (dos refresh en paralelo
+ * queman el refresh token).
+ */
+async function browserAuthLock<R>(name: string, acquireTimeout: number, fn: () => Promise<R>): Promise<R> {
+    const locks = typeof navigator !== 'undefined' ? navigator.locks : undefined
+    if (!locks) return await fn()
+
+    if (acquireTimeout === 0) {
+        return await locks.request(name, { mode: 'exclusive', ifAvailable: true }, async (lock) => {
+            if (!lock) throw new SupabaseAuthLockTimeoutError(name, 0)
+            return await fn()
+        }) as R
+    }
+
+    // Piso el timeout que manda auth-js: su default de 10 s no alcanza para el
+    // request de 15 s que este mismo archivo permite (ver
+    // SUPABASE_AUTH_LOCK_TIMEOUT_MS). Un valor mayor pedido por el llamador se
+    // respeta; el negativo sigue queriendo decir "sin timeout".
+    const effectiveTimeout = acquireTimeout > 0
+        ? Math.max(acquireTimeout, SUPABASE_AUTH_LOCK_TIMEOUT_MS)
+        : acquireTimeout
+
+    const controller = new AbortController()
+    const timeoutId = effectiveTimeout > 0
+        ? setTimeout(
+            () => controller.abort(new SupabaseAuthLockTimeoutError(name, effectiveTimeout)),
+            effectiveTimeout,
+        )
+        : undefined
+
+    try {
+        return await locks.request(
+            name,
+            { mode: 'exclusive', signal: controller.signal },
+            async () => await fn(),
+        ) as R
+    } catch (error) {
+        // El navegador rechaza con `signal.reason`, pero no todos coinciden:
+        // si abortamos nosotros, el error que sale es SIEMPRE el nuestro.
+        if (controller.signal.aborted) throw controller.signal.reason
+        throw error
+    } finally {
+        if (timeoutId !== undefined) clearTimeout(timeoutId)
+    }
+}
 
 function getSupabaseBrowserStorageKey() {
     return getSupabaseAuthStorageKey()
@@ -279,6 +360,38 @@ function readAccessTokenExpirySeconds(accessToken: unknown): number | null {
     } catch {
         return null
     }
+}
+
+/**
+ * Si el navegador guarda material de sesion, sin intentar leerlo.
+ *
+ * Mira SOLO el nombre de la cookie y sus trozos (`.0`, `.1`, ...). Es a
+ * proposito: `getSupabaseBrowserSessionHint()` tiene que parsear el contenido
+ * para responder, y ese parseo falla justo con las sesiones de Google, que
+ * vienen partidas porque arrastran `provider_token`. Una comprobacion que
+ * puede fallar no sirve para concluir "aca no hay nadie": el precio de
+ * equivocarse es tratar como invitado a alguien que inicio sesion.
+ *
+ * Devuelve `true` de mas antes que de menos. Un `true` equivocado solo cuesta
+ * un `getSession()`; un `false` equivocado cuesta la sesion.
+ */
+export function hasSupabaseBrowserSessionMaterial(): boolean {
+    if (typeof window === 'undefined') return false
+
+    const storageKey = getSupabaseBrowserStorageKey()
+    if (!storageKey) return false
+
+    for (const storage of getBrowserStorageStores()) {
+        try {
+            if (storage.getItem(storageKey)) return true
+        } catch {
+            // Modo privado o cuota: se sigue con las cookies.
+        }
+    }
+
+    return readBrowserCookies().some(({ name, value }) => (
+        Boolean(value) && (name === storageKey || name.startsWith(`${storageKey}.`))
+    ))
 }
 
 export function getSupabaseBrowserSessionHint() {
@@ -616,6 +729,7 @@ export function createClient() {
                 storageKey,
                 flowType: 'pkce',
                 autoRefreshToken: shouldAutoRefreshToken,
+                lock: browserAuthLock,
             },
             global: {
                 fetch: browserFetch,

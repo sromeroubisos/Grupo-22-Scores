@@ -1,0 +1,354 @@
+{
+ "descripcion": "Encuentro Femenino de Selecciones de XV 2026 · tarjeta oficial",
+ "partidos": [
+  {
+   "id": "e58750f3-33a4-4da9-a7ed-d40760ae629c",
+   "rotulo": "Alto Valle vs Buenos Aires · Zona A · tarjeta 327932",
+   "arbitro": "Martina Geraldine Garabatos Bonard",
+   "local": {
+    "nombre": "alto-valle-femenino",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Daira Benavidez"
+     },
+     {
+      "numero": 2,
+      "nombre": "Amy Fabiana Morro Seguiel"
+     },
+     {
+      "numero": 3,
+      "nombre": "Bianca Lujan Zuñiga"
+     },
+     {
+      "numero": 4,
+      "nombre": "Yesica Banegas"
+     },
+     {
+      "numero": 5,
+      "nombre": "Florencia Farroni Reina"
+     },
+     {
+      "numero": 6,
+      "nombre": "Aldana Micaela Guerci"
+     },
+     {
+      "numero": 7,
+      "nombre": "Ailin Sepúlveda"
+     },
+     {
+      "numero": 8,
+      "nombre": "Yesica Cecilia Oyola"
+     },
+     {
+      "numero": 9,
+      "nombre": "Maria Pia Perea"
+     },
+     {
+      "numero": 10,
+      "nombre": "María Florencia Nieva"
+     },
+     {
+      "numero": 11,
+      "nombre": "Florencia Toledo"
+     },
+     {
+      "numero": 12,
+      "nombre": "Daniza Gutierrez"
+     },
+     {
+      "numero": 13,
+      "nombre": "Pamela Florencia Esquivel"
+     },
+     {
+      "numero": 14,
+      "nombre": "Agustina Belén Sandoval"
+     },
+     {
+      "numero": 15,
+      "nombre": "Guadalupe Santana"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Génesis Guzman"
+     },
+     {
+      "numero": 17,
+      "nombre": "Maria Candela Kristensen"
+     },
+     {
+      "numero": 18,
+      "nombre": "Morena Agustina Roldán"
+     },
+     {
+      "numero": 19,
+      "nombre": "Pia Saez"
+     },
+     {
+      "numero": 20,
+      "nombre": "Morena Paloma Sanchez Jara"
+     },
+     {
+      "numero": 21,
+      "nombre": "Gianella Sanhueza"
+     },
+     {
+      "numero": 22,
+      "nombre": "Lucía Macarena Velázquez Loncomán"
+     }
+    ]
+   },
+   "visitante": {
+    "nombre": "buenos-aires-femenino",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Milagros Torres"
+     },
+     {
+      "numero": 2,
+      "nombre": "Renata Sosa Quintana"
+     },
+     {
+      "numero": 3,
+      "nombre": "Natalia Torres"
+     },
+     {
+      "numero": 4,
+      "nombre": "Barbara Rodriguez"
+     },
+     {
+      "numero": 5,
+      "nombre": "Ludmila Elena Toledo Pacher"
+     },
+     {
+      "numero": 6,
+      "nombre": "Melina Mercado"
+     },
+     {
+      "numero": 7,
+      "nombre": "Morena Abril Luis"
+     },
+     {
+      "numero": 8,
+      "nombre": "Camila Luna Contreras"
+     },
+     {
+      "numero": 9,
+      "nombre": "Isabella Cappellani"
+     },
+     {
+      "numero": 10,
+      "nombre": "Avril Rahmer Morgantini"
+     },
+     {
+      "numero": 11,
+      "nombre": "Carolina Charamone"
+     },
+     {
+      "numero": 12,
+      "nombre": "Cecilia Altini"
+     },
+     {
+      "numero": 13,
+      "nombre": "Melina Rosa Alcaraz"
+     },
+     {
+      "numero": 14,
+      "nombre": "Magali Gervasio"
+     },
+     {
+      "numero": 15,
+      "nombre": "Milagros Lecuona"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Jimena Sofia Tevez"
+     },
+     {
+      "numero": 17,
+      "nombre": "Iara Lugo"
+     },
+     {
+      "numero": 18,
+      "nombre": "Sol Josefina Rodriguez"
+     },
+     {
+      "numero": 19,
+      "nombre": "Aisha Tachini"
+     },
+     {
+      "numero": 20,
+      "nombre": "Rocio Sabrina Osorio"
+     },
+     {
+      "numero": 21,
+      "nombre": "Yael Cardoso"
+     },
+     {
+      "numero": 22,
+      "nombre": "Antonella Lezcano"
+     }
+    ]
+   },
+   "eventos": [
+    {
+     "minuto": 3,
+     "periodo": "1T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Yesica Banegas",
+     "detalle": "Entra: Lucía Macarena Velázquez Loncomán"
+    },
+    {
+     "minuto": 3,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Daira Benavidez",
+     "detalle": "Entra: Maria Candela Kristensen"
+    },
+    {
+     "minuto": 3,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Florencia Toledo",
+     "detalle": "Entra: Gianella Sanhueza"
+    },
+    {
+     "minuto": 3,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Agustina Belén Sandoval",
+     "detalle": "Entra: Génesis Guzman"
+    },
+    {
+     "minuto": 3,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "María Florencia Nieva",
+     "detalle": "Entra: Morena Agustina Roldán"
+    },
+    {
+     "minuto": 3,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Yesica Cecilia Oyola",
+     "detalle": "Entra: Pia Saez"
+    },
+    {
+     "minuto": 3,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Pamela Florencia Esquivel",
+     "detalle": "Entra: Morena Paloma Sanchez Jara"
+    },
+    {
+     "minuto": 20,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Milagros Lecuona",
+     "detalle": ""
+    },
+    {
+     "minuto": 20,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Avril Rahmer Morgantini",
+     "detalle": ""
+    },
+    {
+     "minuto": 29,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Carolina Charamone",
+     "detalle": ""
+    },
+    {
+     "minuto": 29,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Avril Rahmer Morgantini",
+     "detalle": ""
+    },
+    {
+     "minuto": 1,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Avril Rahmer Morgantini",
+     "detalle": ""
+    },
+    {
+     "minuto": 1,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Avril Rahmer Morgantini",
+     "detalle": ""
+    },
+    {
+     "minuto": 4,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Carolina Charamone",
+     "detalle": ""
+    },
+    {
+     "minuto": 4,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Avril Rahmer Morgantini",
+     "detalle": ""
+    },
+    {
+     "minuto": 15,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Carolina Charamone",
+     "detalle": ""
+    },
+    {
+     "minuto": 15,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Cecilia Altini",
+     "detalle": ""
+    },
+    {
+     "minuto": 15,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Cecilia Altini",
+     "detalle": ""
+    },
+    {
+     "minuto": 15,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Avril Rahmer Morgantini",
+     "detalle": ""
+    }
+   ]
+  }
+ ]
+}

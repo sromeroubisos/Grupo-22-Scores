@@ -1,0 +1,753 @@
+{
+ "descripcion": "Torneo Regional del Litoral Top 10 - fecha 16 - sabado 10/10/2026 (fuente: Tercer Tiempo Rugby)",
+ "partidos": [
+  {
+   "id": "a11d6e33-49fa-421d-8e5d-6e622166bfa6",
+   "rotulo": "Jockey Club de Rosario 29-34 Estudiantes de Paraná",
+   "arbitro": "Mateo Ciaccio",
+   "local": {
+    "nombre": "jockey-club-de-rosario",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Agustín Orsi"
+     },
+     {
+      "numero": 2,
+      "nombre": "Santiago Bellotti",
+      "id": "260bd6a3-48ae-46c0-94bb-66564a7dcf1d"
+     },
+     {
+      "numero": 3,
+      "nombre": "Ignacio Orsetti",
+      "id": "7e91506e-cd7d-48d9-8f86-e2b4eb9e43a5"
+     },
+     {
+      "numero": 4,
+      "nombre": "Ciro Baraldi"
+     },
+     {
+      "numero": 5,
+      "nombre": "Lucas Bur",
+      "id": "ab4b8469-aff4-4b93-9119-2dc1340d8b10"
+     },
+     {
+      "numero": 6,
+      "nombre": "Manuel Santi",
+      "id": "c2d1ec58-bf1b-448f-b7ac-55ffe74e25ad"
+     },
+     {
+      "numero": 7,
+      "nombre": "Felipe Baraldi",
+      "id": "09c0a936-966a-410c-9dd9-c130e0874beb"
+     },
+     {
+      "numero": 8,
+      "nombre": "Augusto Rossi",
+      "id": "1029a3fb-a186-4060-b411-9c99ba528f66"
+     },
+     {
+      "numero": 9,
+      "nombre": "Agustín Maderna",
+      "id": "84b38508-c099-468b-ad59-ebe8aedd8bf2"
+     },
+     {
+      "numero": 10,
+      "nombre": "Ignacio Dogliani",
+      "id": "b46268ae-7032-4ccb-ba2b-12d90390e0e0"
+     },
+     {
+      "numero": 11,
+      "nombre": "Santiago Casiello",
+      "id": "5817f3c6-8248-4c2c-93cc-ef0dd43682b4"
+     },
+     {
+      "numero": 12,
+      "nombre": "Fermín Vergara Oroño",
+      "id": "ef31bd8f-d481-47a0-8050-2ca6ce985578"
+     },
+     {
+      "numero": 13,
+      "nombre": "Manuel Llunch"
+     },
+     {
+      "numero": 14,
+      "nombre": "Pedro Quijano",
+      "id": "a51ecbb5-f8a5-4dfa-882e-75c0f9788939"
+     },
+     {
+      "numero": 15,
+      "nombre": "Joaquín Fanjul",
+      "id": "85c88766-17e5-44dc-bdf7-42d56bedf767"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Guido Cella",
+      "id": "aeaa54a5-a7b1-4b83-aab5-ffc0d1b925cb"
+     },
+     {
+      "numero": 17,
+      "nombre": "Jeremías Lamas",
+      "id": "0a3a0f6e-c1e8-47c4-b2f9-7fd77fae134b"
+     },
+     {
+      "numero": 18,
+      "nombre": "Damián Torino",
+      "id": "9fe26bc3-6461-471b-84f8-26430266a279"
+     },
+     {
+      "numero": 19,
+      "nombre": "Marcos Lorenzini",
+      "id": "7aee768d-2dab-4355-8fbd-4b2b4257c9e4"
+     },
+     {
+      "numero": 20,
+      "nombre": "Juan Lovell"
+     },
+     {
+      "numero": 21,
+      "nombre": "Ignacio Vergara"
+     },
+     {
+      "numero": 22,
+      "nombre": "Juan Baronio",
+      "id": "48a0465c-aac3-4d5c-8155-4c0ced46a61f"
+     },
+     {
+      "numero": 23,
+      "nombre": "Mauricio Carignano"
+     }
+    ]
+   },
+   "visitante": {
+    "nombre": "estudiantes-de-parana",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Diego Correa",
+      "id": "8809dbbe-80d9-4c9c-8d96-db4dc681260f"
+     },
+     {
+      "numero": 2,
+      "nombre": "Ramiro Gurovich"
+     },
+     {
+      "numero": 3,
+      "nombre": "Tomás Bertot",
+      "id": "b67ae249-8470-4fd8-aa9b-6af7c7dd3fde"
+     },
+     {
+      "numero": 4,
+      "nombre": "Patricio Ferraras"
+     },
+     {
+      "numero": 5,
+      "nombre": "Lisandro Uranga"
+     },
+     {
+      "numero": 6,
+      "nombre": "Álvaro Ferreyra",
+      "id": "ac288cac-88d3-49d1-b2ef-815a5f24a7af"
+     },
+     {
+      "numero": 7,
+      "nombre": "Mateo Martínez"
+     },
+     {
+      "numero": 8,
+      "nombre": "Basilio Cañas",
+      "id": "e258ec33-18c3-4374-9987-25c40bfc4d2b"
+     },
+     {
+      "numero": 9,
+      "nombre": "Juan M. Lescano"
+     },
+     {
+      "numero": 10,
+      "nombre": "Sebastián Dorigón",
+      "id": "7021f718-40ef-4b6b-830e-0e7d41961888"
+     },
+     {
+      "numero": 11,
+      "nombre": "Bautista Lescano",
+      "id": "ebfa42e9-8e00-472f-a542-853c7fc02367"
+     },
+     {
+      "numero": 12,
+      "nombre": "Máximo Cañas",
+      "id": "d63d95d3-ae04-4873-aa72-201aea07608b"
+     },
+     {
+      "numero": 13,
+      "nombre": "Santo Lescano",
+      "id": "2431348d-dec4-4b65-a4d6-a09a5964ee06"
+     },
+     {
+      "numero": 14,
+      "nombre": "Franco Rossetto",
+      "id": "e177b3b2-b1d6-40c9-a1fc-c8617a7b8bcd"
+     },
+     {
+      "numero": 15,
+      "nombre": "Bruno Heit"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Sebastián Bonvín"
+     },
+     {
+      "numero": 17,
+      "nombre": "Valentín Haiek"
+     },
+     {
+      "numero": 18,
+      "nombre": "Juan Floreán"
+     },
+     {
+      "numero": 19,
+      "nombre": "Franco Vartorelli"
+     },
+     {
+      "numero": 20,
+      "nombre": "Octavio Uranga"
+     },
+     {
+      "numero": 21,
+      "nombre": "Juan Bunge"
+     },
+     {
+      "numero": 22,
+      "nombre": "Mateo Santan"
+     },
+     {
+      "numero": 23,
+      "nombre": "Joaquín Maiztegui",
+      "id": "3e435d8a-32a3-4645-9cf1-2a28e7dd8b81"
+     }
+    ]
+   },
+   "eventos": [
+    {
+     "minuto": 2,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "detalle": "Anotador no identificado en la crónica"
+    },
+    {
+     "minuto": 2,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Joaquín Fanjul"
+    },
+    {
+     "minuto": 2,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "visitante",
+     "jugador": "Sebastián Dorigón"
+    },
+    {
+     "minuto": 5,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "visitante",
+     "jugador": "Juan M. Lescano",
+     "detalle": "J. Lescano"
+    },
+    {
+     "minuto": 9,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Sebastián Dorigón"
+    },
+    {
+     "minuto": 13,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Ignacio Orsetti"
+    },
+    {
+     "minuto": 13,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Joaquín Fanjul"
+    },
+    {
+     "minuto": 21,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "local",
+     "jugador": "Ignacio Orsetti"
+    },
+    {
+     "minuto": 34,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Joaquín Fanjul"
+    },
+    {
+     "minuto": 36,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Pedro Quijano"
+    },
+    {
+     "minuto": 36,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Joaquín Fanjul"
+    },
+    {
+     "minuto": 1,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Bautista Lescano"
+    },
+    {
+     "minuto": 1,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Sebastián Dorigón"
+    },
+    {
+     "minuto": 16,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "equipo": "local",
+     "detalle": "Baraldi"
+    },
+    {
+     "minuto": 17,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Mateo Martínez"
+    },
+    {
+     "minuto": 17,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Sebastián Dorigón"
+    },
+    {
+     "minuto": 19,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Ignacio Dogliani"
+    },
+    {
+     "minuto": 25,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Valentín Haiek"
+    },
+    {
+     "minuto": 25,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Sebastián Dorigón"
+    },
+    {
+     "minuto": 30,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Bruno Heit"
+    },
+    {
+     "minuto": 30,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Sebastián Dorigón"
+    },
+    {
+     "minuto": 37,
+     "periodo": "2T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Sebastián Dorigón"
+    },
+    {
+     "minuto": 41,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "equipo": "visitante",
+     "jugador": "Juan Floreán"
+    }
+   ]
+  },
+  {
+   "id": "b6f5cd74-5f3f-4c3e-89b3-7b7693c05343",
+   "rotulo": "Paraná Rowing 44-17 Old Resian",
+   "arbitro": "Facundo Gorla",
+   "local": {
+    "nombre": "parana-rowing",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Gabriel Gutiérrez"
+     },
+     {
+      "numero": 2,
+      "nombre": "Lucas Lerena",
+      "id": "8f626b28-382d-4973-b255-ab5bb7b0f63f"
+     },
+     {
+      "numero": 3,
+      "nombre": "Esteban Acosta",
+      "id": "9695691f-d138-4287-ab6f-0c62f525bafc"
+     },
+     {
+      "numero": 4,
+      "nombre": "Agustín Reding",
+      "id": "7231910e-6658-40a6-b6fe-5d215d98c7b1"
+     },
+     {
+      "numero": 5,
+      "nombre": "Joaquín Moine"
+     },
+     {
+      "numero": 6,
+      "nombre": "Franco Marizza",
+      "id": "12cd10b8-1044-4b1f-bd8e-57953dc7c0b8"
+     },
+     {
+      "numero": 7,
+      "nombre": "Facundo Taboada"
+     },
+     {
+      "numero": 8,
+      "nombre": "Andrés Agasse",
+      "capitan": true,
+      "id": "ab19cb14-28dc-4ef8-a60c-93b0eb73eb63"
+     },
+     {
+      "numero": 9,
+      "nombre": "Franco Osuna",
+      "id": "204828c9-2293-4730-8f3e-e960dcc12b65"
+     },
+     {
+      "numero": 10,
+      "nombre": "Aquiles Bourdín",
+      "id": "af9ddab8-ee29-4797-8392-4eb1135e41fb"
+     },
+     {
+      "numero": 11,
+      "nombre": "Mateo Baroli",
+      "id": "aa78a2ee-29f4-4a87-a441-bff76d40aa65"
+     },
+     {
+      "numero": 12,
+      "nombre": "Julián Pistrilli",
+      "id": "edb59c87-c91a-42b5-afae-310ec7e6a122"
+     },
+     {
+      "numero": 13,
+      "nombre": "Tomás Osuna"
+     },
+     {
+      "numero": 14,
+      "nombre": "Emanuel Schiavo",
+      "id": "b16dca1d-1ece-4317-9ce9-5b5ec978db0a"
+     },
+     {
+      "numero": 15,
+      "nombre": "Iván Quindt",
+      "id": "3d726484-59f2-4dbe-ae00-c8dd547365ad"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Joaquín Zapata"
+     },
+     {
+      "numero": 17,
+      "nombre": "Ignacio Lagisquet"
+     },
+     {
+      "numero": 18,
+      "nombre": "Tomás León"
+     },
+     {
+      "numero": 19,
+      "nombre": "Franco Dall´Ava"
+     },
+     {
+      "numero": 20,
+      "nombre": "Ramiro Bornisen"
+     },
+     {
+      "numero": 21,
+      "nombre": "Estanislao Cavenaghi"
+     },
+     {
+      "numero": 22,
+      "nombre": "Lautaro Wolf"
+     }
+    ]
+   },
+   "visitante": {
+    "nombre": "old-resian-club",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Santiago Cali"
+     },
+     {
+      "numero": 2,
+      "nombre": "Adrián Bacchella",
+      "id": "1c58bd73-8367-4e93-86e4-f5c2a2075d21"
+     },
+     {
+      "numero": 3,
+      "nombre": "Walter Mascaro"
+     },
+     {
+      "numero": 4,
+      "nombre": "Luciano Cuminetti"
+     },
+     {
+      "numero": 5,
+      "nombre": "Facundo Gómez Paris",
+      "id": "274d0d9b-1115-4c35-ab48-134b4297bc39"
+     },
+     {
+      "numero": 6,
+      "nombre": "Joaquín Demetrio",
+      "id": "9b0d20e0-b203-4b27-8dbc-c396d25756f7"
+     },
+     {
+      "numero": 7,
+      "nombre": "Franco Lo Nostro",
+      "id": "7ab9a080-98c3-495a-8776-424e0193ab80"
+     },
+     {
+      "numero": 8,
+      "nombre": "Gianfranco Speciale",
+      "id": "b616684d-8687-4539-bba2-5dd952d0f794"
+     },
+     {
+      "numero": 9,
+      "nombre": "Guido Richiardone"
+     },
+     {
+      "numero": 10,
+      "nombre": "Fausto Carugatti",
+      "id": "d06b4f34-482f-4dca-a207-18110dd031a8"
+     },
+     {
+      "numero": 11,
+      "nombre": "Nahuel Pacheco",
+      "id": "db2f4af5-0b4c-4edf-9b2b-c6e76745e435"
+     },
+     {
+      "numero": 12,
+      "nombre": "Luca Candini",
+      "id": "d40cd4a0-626e-4260-b84a-7e630cb11cb8"
+     },
+     {
+      "numero": 13,
+      "nombre": "Manuel Scarampi",
+      "id": "7ac0aa3a-22e0-4b3c-99a1-84609988dfd6"
+     },
+     {
+      "numero": 14,
+      "nombre": "Nahuel Romero",
+      "id": "945be1ea-9979-4a99-aa4a-9f6c80d7a6da"
+     },
+     {
+      "numero": 15,
+      "nombre": "Guido Candini",
+      "capitan": true,
+      "id": "b0257c78-8ac7-4360-ad21-f713d1f34b94"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Sánchez"
+     },
+     {
+      "numero": 17,
+      "nombre": "Diego Piancatelli",
+      "id": "4aa60462-dde1-4f7b-a448-0887b625c179"
+     },
+     {
+      "numero": 18,
+      "nombre": "Galarza"
+     },
+     {
+      "numero": 19,
+      "nombre": "Santiago Torroba",
+      "id": "821391b9-e81a-4faa-bed7-e8b216cd4d28"
+     },
+     {
+      "numero": 20,
+      "nombre": "Santiago Casa"
+     },
+     {
+      "numero": 21,
+      "nombre": "Marco Gómez Paris"
+     },
+     {
+      "numero": 22,
+      "nombre": "Alejo Ortenzi"
+     },
+     {
+      "numero": 23,
+      "nombre": "Juan Taletti",
+      "id": "855b4ece-2902-4c29-bb8c-0497a875f330"
+     }
+    ]
+   },
+   "eventos": [
+    {
+     "minuto": 3,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Guido Candini"
+    },
+    {
+     "minuto": 12,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "detalle": "Osuna"
+    },
+    {
+     "minuto": 12,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Aquiles Bourdín"
+    },
+    {
+     "minuto": 27,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Nahuel Romero"
+    },
+    {
+     "minuto": 27,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Guido Candini"
+    },
+    {
+     "minuto": 33,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Nahuel Romero"
+    },
+    {
+     "minuto": 33,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Guido Candini"
+    },
+    {
+     "minuto": 40,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Franco Marizza"
+    },
+    {
+     "minuto": 40,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Aquiles Bourdín"
+    },
+    {
+     "minuto": 8,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Tomás León"
+    },
+    {
+     "minuto": 8,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Aquiles Bourdín"
+    },
+    {
+     "minuto": 15,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Joaquín Moine"
+    },
+    {
+     "minuto": 15,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Aquiles Bourdín"
+    },
+    {
+     "minuto": 20,
+     "periodo": "2T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Aquiles Bourdín"
+    },
+    {
+     "minuto": 29,
+     "periodo": "2T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Aquiles Bourdín"
+    },
+    {
+     "minuto": 32,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Aquiles Bourdín"
+    },
+    {
+     "minuto": 32,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Aquiles Bourdín"
+    },
+    {
+     "minuto": 38,
+     "periodo": "2T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Aquiles Bourdín"
+    }
+   ]
+  }
+ ]
+}

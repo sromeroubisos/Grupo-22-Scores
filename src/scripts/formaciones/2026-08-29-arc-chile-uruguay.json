@@ -1,0 +1,89 @@
+{
+  "descripcion": "Americas Rugby Championship 2026 · fecha 1 · Chile XV 33-12 Uruguay XV (Talcahuano, 29/08/2026)",
+  "torneo": "Americas Rugby Championship",
+  "partidos": [
+    {
+      "id": "deb9ef3b-7900-4994-80ce-a001a6a6d4f7",
+      "rotulo": "Chile XV 33-12 Uruguay XV",
+      "arbitro": "Federico Longobardi",
+      "local": {
+        "nombre": "Chile XV",
+        "titulares": [
+          { "numero": 1, "nombre": "Emilio Shea" },
+          { "numero": 2, "nombre": "Augusto Bohme" },
+          { "numero": 3, "nombre": "Iñaki Gurruchaga" },
+          { "numero": 4, "nombre": "Bruno Sáez" },
+          { "numero": 5, "nombre": "Santiago Pedrero" },
+          { "numero": 6, "nombre": "Clemente Saavedra" },
+          { "numero": 7, "nombre": "Ernesto Tchimino" },
+          { "numero": 8, "nombre": "Alfonso Escobar" },
+          { "numero": 9, "nombre": "Benjamín Videla" },
+          { "numero": 10, "nombre": "Rodrigo Fernandez" },
+          { "numero": 11, "nombre": "Alvaro Marco" },
+          { "numero": 12, "nombre": "Domingo Saavedra" },
+          { "numero": 13, "nombre": "Santiago Videla" },
+          { "numero": 14, "nombre": "Tomas Salas" },
+          { "numero": 15, "nombre": "Matías Garafulic" }
+        ],
+        "suplentes": [
+          { "numero": 16, "nombre": "Salvador Lues" },
+          { "numero": 17, "nombre": "Norman Aguayo" },
+          { "numero": 18, "nombre": "Matías Dittus" },
+          { "numero": 19, "nombre": "Max Schlesinger" },
+          { "numero": 20, "nombre": "Joaquín Milesi" },
+          { "numero": 21, "nombre": "Marcelo Torrealba" },
+          { "numero": 22, "nombre": "Felipe Mendez" },
+          { "numero": 23, "nombre": "Clemente Armstrong" }
+        ]
+      },
+      "visitante": {
+        "nombre": "Uruguay XV",
+        "titulares": [
+          { "numero": 1, "nombre": "Mateo Perillo" },
+          { "numero": 2, "nombre": "Joaquín Myszka" },
+          { "numero": 3, "nombre": "Reinaldo Piussi" },
+          { "numero": 4, "nombre": "Ignacio Dotti" },
+          { "numero": 5, "nombre": "Felipe Aliaga" },
+          { "numero": 6, "nombre": "Mateo Sosa" },
+          { "numero": 7, "nombre": "Lucas Bianchi" },
+          { "numero": 8, "nombre": "Pedro Marsico" },
+          { "numero": 9, "nombre": "Ignacio Rodríguez Bosch" },
+          { "numero": 10, "nombre": "Justo Ferrario" },
+          { "numero": 11, "nombre": "Ignacio Facciolo" },
+          { "numero": 12, "nombre": "Joaquín Suarez" },
+          { "numero": 13, "nombre": "Alfonso Perillo" },
+          { "numero": 14, "nombre": "Juan Manuel Alonso" },
+          { "numero": 15, "nombre": "Ignacio Alvarez Akiki" }
+        ],
+        "suplentes": [
+          { "numero": 16, "nombre": "Germán Kiegel" },
+          { "numero": 17, "nombre": "Ignacio Péculo" },
+          { "numero": 18, "nombre": "Faustino Etchegorry" },
+          { "numero": 19, "nombre": "Manuel Ponte" },
+          { "numero": 20, "nombre": "Pedro Suárez" },
+          { "numero": 21, "nombre": "Pedro Hoblog" },
+          { "numero": 22, "nombre": "Francisco Landauer" },
+          { "numero": 23, "nombre": "Manuel Parodi" }
+        ]
+      },
+      "eventos": [
+        { "minuto": 2, "periodo": "1T", "tipo": "try", "equipo": "local", "jugador": "Benjamín Videla" },
+        { "minuto": 2, "periodo": "1T", "tipo": "conversion", "equipo": "local", "jugador": "Santiago Videla" },
+        { "minuto": 6, "periodo": "1T", "tipo": "try", "equipo": "local", "jugador": "Alfonso Escobar" },
+        { "minuto": 6, "periodo": "1T", "tipo": "conversion", "equipo": "local", "jugador": "Santiago Videla" },
+        { "minuto": 21, "periodo": "1T", "tipo": "try", "equipo": "visitante", "jugador": "Joaquín Myszka" },
+        { "minuto": 21, "periodo": "1T", "tipo": "conversion", "equipo": "visitante", "jugador": "Justo Ferrario" },
+        { "minuto": 33, "periodo": "1T", "tipo": "card_yellow", "equipo": "local", "jugador": "Iñaki Gurruchaga" },
+        { "minuto": 34, "periodo": "1T", "tipo": "try", "equipo": "visitante", "jugador": "Joaquín Myszka" },
+        { "minuto": 39, "periodo": "1T", "tipo": "try", "equipo": "local", "jugador": "Matías Dittus" },
+        { "minuto": 39, "periodo": "1T", "tipo": "conversion", "equipo": "local", "jugador": "Santiago Videla" },
+        { "minuto": 12, "periodo": "2T", "tipo": "card_red", "equipo": "visitante", "jugador": "Joaquín Myszka" },
+        { "minuto": 13, "periodo": "2T", "tipo": "card_red", "equipo": "visitante", "jugador": "Lucas Bianchi" },
+        { "minuto": 13, "periodo": "2T", "tipo": "card_red", "equipo": "local", "jugador": "Clemente Saavedra" },
+        { "minuto": 29, "periodo": "2T", "tipo": "try", "equipo": "local", "jugador": "Augusto Bohme" },
+        { "minuto": 29, "periodo": "2T", "tipo": "conversion", "equipo": "local", "jugador": "Santiago Videla" },
+        { "minuto": 31, "periodo": "2T", "tipo": "try", "equipo": "local", "jugador": "Matías Garafulic" }
+      ]
+    }
+  ]
+}

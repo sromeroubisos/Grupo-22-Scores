@@ -13,7 +13,8 @@ import path from 'node:path';
 
 import { TORNEOS } from './datos.mjs';
 import {
-  COPAS, DEFINICIONES_PUBLICADAS, JORNADA_1, RESULTADOS_J2, SEMIS_PUBLICADAS, TABLA_J1, TEMPORADA, TORNEO_SLUG, ZONAS,
+  COPAS, DEFINICIONES_PUBLICADAS, JORNADA_1, POSICIONES_FINALES, RESULTADOS_J2, SEMIS_PUBLICADAS, TABLA_J1,
+  TEMPORADA, TORNEO_SLUG, ZONAS,
 } from './norte-2026-datos.mjs';
 
 const REPO = process.cwd();
@@ -81,8 +82,34 @@ async function main() {
   const reglas = await leer(`tournament_match_advancement_rules?select=id&phase_id=in.(${fases.map((f) => f.id).join(',')})`);
   chequear(reglas.length === definiciones.length * 2, `${reglas.length} reglas de avance`);
 
+  // ── Posiciones finales, recalculadas de los resultados de la base ────────
+  // Cada copa reparte cuatro puestos desde su primero: la final da el 1º y el
+  // 2º, el partido de abajo el 3º y el 4º.
+  const ganaYPierde = (codigo) => {
+    const p = porCodigo.get(codigo);
+    if (p?.status !== 'final' || p.score?.home === p.score?.away) return null;
+    return p.score.home > p.score.away ? [p.home_club_id, p.away_club_id] : [p.away_club_id, p.home_club_id];
+  };
+  const posiciones = COPAS.flatMap((c) => {
+    const final = c.partidos.find((p) => p.ronda === 'Final');
+    const abajo = c.partidos.find((p) => p.local.de && p.ronda !== 'Final');
+    return [...(ganaYPierde(`P${final.n}`) ?? [null, null]), ...(ganaYPierde(`P${abajo.n}`) ?? [null, null])];
+  });
+  if (posiciones.every(Boolean)) {
+    chequear(posiciones.join() === POSICIONES_FINALES.join(), `posiciones finales: ${posiciones.map((c, i) => `${i + 1} ${c}`).join(' · ')}`);
+  } else {
+    console.log('· posiciones finales: faltan definiciones');
+  }
+
   // ── Cuadro de honor ───────────────────────────────────────────────────────
-  const esperado = new Map(TORNEOS.map((t) => [t.slug, [...t.palmares, ...(t.conFixture ? [{ anio: t.seasonActual, campeon: 'chubut-m16' }] : [])]]));
+  // El Norte suma la temporada del canon cuando la final de la Copa de Oro ya
+  // tiene resultado: el campeón es su ganador.
+  const campeonNorte = ganaYPierde('P24')?.[0];
+  const esperado = new Map(TORNEOS.map((t) => [t.slug, [
+    ...t.palmares,
+    ...(t.conFixture ? [{ anio: t.seasonActual, campeon: 'chubut-m16' }] : []),
+    ...(t.slug === TORNEO_SLUG && campeonNorte ? [{ anio: TEMPORADA, campeon: campeonNorte }] : []),
+  ]]));
   for (const [slug, palmares] of esperado) {
     const [t] = await leer(`tournaments?select=id&slug=eq.${slug}`);
     const temporadas = await leer(`tournament_seasons?select=season_code,champion_club_id&tournament_id=eq.${t.id}&champion_club_id=not.is.null&order=season_code`);

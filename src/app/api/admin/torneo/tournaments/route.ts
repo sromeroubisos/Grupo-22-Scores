@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { guardRejection } from '@/lib/auth/apiAdmin';
 import { normalizeAmericanFootballRuleset } from '@/lib/americanFootballRules';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -735,8 +736,8 @@ export async function GET(request: NextRequest) {
     let context;
     try {
         context = await requireTournamentAdminContext(supabase);
-    } catch {
-        return err('Unauthorized', 401);
+    } catch (authError) {
+        return err(...guardRejection(authError));
     }
 
     const scope = await resolveTournamentAdminScope(supabase, context);
@@ -808,8 +809,8 @@ export async function POST(request: NextRequest) {
     let context;
     try {
         context = await requireTournamentAdminContext(supabase);
-    } catch {
-        return err('Unauthorized', 401);
+    } catch (authError) {
+        return err(...guardRejection(authError));
     }
 
     let body: JsonObject;
@@ -860,6 +861,13 @@ export async function POST(request: NextRequest) {
 
     if (name.length < 3) {
         return err('El nombre del torneo debe tener al menos 3 caracteres', 400);
+    }
+
+    // Topes: estos números arman fases, zonas y jornadas en loops con
+    // service_role. Sin techo, `league_rounds: 100000` creaba cien mil filas
+    // (y un fixture de N² partidos) en un solo POST.
+    if (teamCount > 256 || groupCount > 64 || leagueRounds > 100 || qualifiersPerGroup > 64) {
+        return err('Valores fuera de rango: hasta 256 equipos, 64 zonas, 64 clasificados por zona y 100 vueltas.', 400);
     }
 
     const scope = await resolveTournamentAdminScope(supabase, context);

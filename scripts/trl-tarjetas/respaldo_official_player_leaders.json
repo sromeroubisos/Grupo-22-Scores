@@ -1,0 +1,127 @@
+{
+ "source": "BD UAR y RL360, vía @despuesdeltry",
+ "categories": [
+  {
+   "id": "points",
+   "rows": [
+    {
+     "name": "Aquiles Bourdin",
+     "rank": 1,
+     "tries": 6,
+     "value": 150,
+     "detail": "6T 36C 16P",
+     "club_id": "parana-rowing",
+     "club_name": "Rowing",
+     "penalties": 16,
+     "conversions": 36
+    },
+    {
+     "name": "Santiago Mendicino",
+     "rank": 2,
+     "tries": 6,
+     "value": 146,
+     "detail": "6T 25C 22P",
+     "club_id": "santa-fe-r-c",
+     "club_name": "Santa Fe R.",
+     "penalties": 22,
+     "person_id": "e8dab331-7e8d-4dd7-8f57-33637789af68",
+     "conversions": 25
+    },
+    {
+     "name": "Giuliano Francescangeli",
+     "rank": 3,
+     "tries": 3,
+     "value": 137,
+     "detail": "3T 34C 18P",
+     "club_id": "duendes-r-c",
+     "club_name": "Duendes",
+     "penalties": 18,
+     "person_id": "ab835ce4-08fb-444b-9427-e979668fa8b0",
+     "conversions": 34
+    },
+    {
+     "name": "Pedro González Fresneda",
+     "rank": 4,
+     "tries": 2,
+     "value": 126,
+     "detail": "2T 34C 16P",
+     "club_id": "universitario-de-rosario",
+     "club_name": "Universitario",
+     "penalties": 16,
+     "conversions": 34
+    },
+    {
+     "name": "Ramiro Picotto",
+     "rank": 5,
+     "tries": 0,
+     "value": 115,
+     "detail": "0T 26C 21P",
+     "club_id": "gimnasia-y-esgrima-de-rosario",
+     "club_name": "GER",
+     "penalties": 21,
+     "person_id": "804371bb-affe-430a-ae46-9bff2b7d8845",
+     "conversions": 26
+    }
+   ],
+   "unit": "Tantos",
+   "label": "Máximos anotadores"
+  },
+  {
+   "id": "tries",
+   "rows": [
+    {
+     "name": "Ignacio María Carreras Iturraspe",
+     "rank": 1,
+     "value": 13,
+     "detail": "15 partidos",
+     "club_id": "crai",
+     "matches": 15,
+     "club_name": "CRAI"
+    },
+    {
+     "name": "Alejo Pereira Tauzy",
+     "rank": 2,
+     "value": 13,
+     "detail": "16 partidos",
+     "club_id": "jockey-club-de-rosario",
+     "matches": 16,
+     "club_name": "Jockey R.",
+     "person_id": "969b167b-0af2-4ef1-8efc-42a1477368ce"
+    },
+    {
+     "name": "Agustín Omar Foradini",
+     "rank": 3,
+     "value": 11,
+     "detail": "17 partidos",
+     "club_id": "santa-fe-r-c",
+     "matches": 17,
+     "club_name": "Santa Fe R.",
+     "person_id": "4a40eee5-4ada-4272-9676-7989b34c027a"
+    },
+    {
+     "name": "Mateo Negroni",
+     "rank": 4,
+     "value": 10,
+     "detail": "16 partidos",
+     "club_id": "duendes-r-c",
+     "matches": 16,
+     "club_name": "Duendes",
+     "person_id": "889ed799-a804-429d-aa36-6fea2e338033"
+    },
+    {
+     "name": "Mateo Fauda",
+     "rank": 5,
+     "value": 10,
+     "detail": "17 partidos",
+     "club_id": "crai",
+     "matches": 17,
+     "club_name": "CRAI",
+     "person_id": "8a841994-541c-4b95-9f0d-f6f14a79d41a"
+    }
+   ],
+   "unit": "Tries",
+   "label": "Máximos tryman"
+  }
+ ],
+ "captured_at": "2026-10-22"
+}

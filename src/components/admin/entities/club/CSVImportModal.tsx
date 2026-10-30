@@ -553,8 +553,6 @@ export function CSVImportModal({ clubId, divisions, isOpen, onClose, onSuccess, 
                                 <div className="csv-help-group">
                                     <h3>Campos Avanzados</h3>
                                     <div className="csv-tag-list">
-                                        <span className="csv-tag">jersey_number</span>
-                                        <span className="csv-tag">squad_role</span>
                                         <span className="csv-tag">division_id</span>
                                         <span className="csv-tag">photo_url</span>
                                     </div>

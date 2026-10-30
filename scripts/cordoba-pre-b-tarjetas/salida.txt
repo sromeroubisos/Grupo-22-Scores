@@ -1,0 +1,1308 @@
+172 partidos en la base
+127 partidos armados -> C:\Users\srome\OneDrive\Escritorio\Grupo-22-Scores\src\scripts\formaciones\2026-10-22-pre-b-tarjetas.json · fichas nuevas a crear: 6123
+  aviso JOCKEY CLUB CORDOBA "B" 28-7 TALA R.C. "B" (295702): try sin jugador, dorsal None (1T 3 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 28-7 TALA R.C. "B" (295702): try sin jugador, dorsal None (1T 24 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 28-7 TALA R.C. "B" (295702): conversion sin jugador, dorsal None (1T 25 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 28-7 TALA R.C. "B" (295702): try sin jugador, dorsal None (2T 15 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 28-7 TALA R.C. "B" (295702): penalty_goal sin jugador, dorsal None (2T 22 Penal 3 )
+  aviso JOCKEY CLUB CORDOBA "B" 28-7 TALA R.C. "B" (295702): penalty_goal sin jugador, dorsal None (2T 30 Penal 3 )
+  aviso JOCKEY CLUB CORDOBA "B" 28-7 TALA R.C. "B" (295702): try sin jugador, dorsal None (2T 38 Try 5 )
+  aviso CLUB TABORIN 21-14 BAGUALES R.C. (295703): try sin jugador, dorsal None (1T 2 Try 5 )
+  aviso CLUB TABORIN 21-14 BAGUALES R.C. (295703): conversion sin jugador, dorsal None (1T 2 Conversión 2 )
+  aviso CLUB TABORIN 21-14 BAGUALES R.C. (295703): try sin jugador, dorsal None (1T 30 Try 5 )
+  aviso CLUB TABORIN 21-14 BAGUALES R.C. (295703): conversion sin jugador, dorsal None (1T 30 Conversión 2 )
+  aviso CLUB TABORIN 21-14 BAGUALES R.C. (295703): try sin jugador, dorsal None (2T 23 Try 5 )
+  aviso CLUB TABORIN 21-14 BAGUALES R.C. (295703): conversion sin jugador, dorsal None (2T 24 Conversión 2 )
+  aviso CLUB TABORIN 21-14 BAGUALES R.C. (295703): card_yellow sin jugador, dorsal None (2T 26 Amarilla  )
+295704: sin plantel utilizable (JCC VS CPRC (2))
+  aviso UNIV. NAC. DE CORDOBA "B" 14-36 LA TABLADA "B" (295705): injury sin jugador, dorsal None (1T 10 Lesionado  )
+  aviso UNIV. NAC. DE CORDOBA "B" 14-36 LA TABLADA "B" (295705): try sin jugador, dorsal None (2T 44 Try 5 )
+  aviso UNIV. NAC. DE CORDOBA "B" 14-36 LA TABLADA "B" (295705): conversion sin jugador, dorsal None (2T 45 Conversión 2 )
+  aviso UNIV. NAC. DE CORDOBA "B" 14-36 LA TABLADA "B" (295705): injury sin jugador, dorsal None (2T 60 Lesionado  )
+  aviso UNIV. NAC. DE CORDOBA "B" 14-36 LA TABLADA "B" (295705): try sin jugador, dorsal None (2T 61 Try 5 )
+  aviso UNIV. NAC. DE CORDOBA "B" 14-36 LA TABLADA "B" (295705): conversion sin jugador, dorsal None (2T 61 Conversión 2 )
+  aviso UNIV. NAC. DE CORDOBA "B" 14-36 LA TABLADA "B" (295705): cambio con dorsal sin jugador None->None
+  aviso UNIV. NAC. DE CORDOBA "B" 14-36 LA TABLADA "B" (295705): cambio con dorsal sin jugador None->None
+  aviso UNIV. NAC. DE CORDOBA "B" 14-36 LA TABLADA "B" (295705): cambio con dorsal sin jugador None->None
+  aviso UNIV. NAC. DE CORDOBA "B" 14-36 LA TABLADA "B" (295705): cambio con dorsal sin jugador None->None
+  aviso UNIV. NAC. DE CORDOBA "B" 14-36 LA TABLADA "B" (295705): cambio con dorsal sin jugador None->None
+  aviso UNIV. NAC. DE CORDOBA "B" 14-36 LA TABLADA "B" (295705): cambio con dorsal sin jugador None->None
+  aviso UNIV. NAC. DE CORDOBA "B" 14-36 LA TABLADA "B" (295705): cambio con dorsal sin jugador None->None
+  aviso UNIV. NAC. DE CORDOBA "B" 14-36 LA TABLADA "B" (295705): try sin jugador, dorsal None (1T 2 Try 5 )
+  aviso UNIV. NAC. DE CORDOBA "B" 14-36 LA TABLADA "B" (295705): try sin jugador, dorsal None (1T 6 Try 5 )
+  aviso UNIV. NAC. DE CORDOBA "B" 14-36 LA TABLADA "B" (295705): conversion sin jugador, dorsal None (1T 7 Conversión 2 )
+  aviso UNIV. NAC. DE CORDOBA "B" 14-36 LA TABLADA "B" (295705): penalty_goal sin jugador, dorsal None (1T 31 Penal 3 )
+  aviso UNIV. NAC. DE CORDOBA "B" 14-36 LA TABLADA "B" (295705): try sin jugador, dorsal None (2T 10 Try 5 )
+  aviso UNIV. NAC. DE CORDOBA "B" 14-36 LA TABLADA "B" (295705): conversion sin jugador, dorsal None (2T 11 Conversión 2 )
+  aviso UNIV. NAC. DE CORDOBA "B" 14-36 LA TABLADA "B" (295705): try sin jugador, dorsal None (2T 15 Try 5 )
+  aviso UNIV. NAC. DE CORDOBA "B" 14-36 LA TABLADA "B" (295705): conversion sin jugador, dorsal None (2T 16 Conversión 2 )
+  aviso UNIV. NAC. DE CORDOBA "B" 14-36 LA TABLADA "B" (295705): card_yellow sin jugador, dorsal None (2T 18 Amarilla  )
+  aviso UNIV. NAC. DE CORDOBA "B" 14-36 LA TABLADA "B" (295705): try sin jugador, dorsal None (2T 22 Try 5 )
+  aviso UNIV. NAC. DE CORDOBA "B" 14-36 LA TABLADA "B" (295705): conversion sin jugador, dorsal None (2T 23 Conversión 2 )
+  aviso PALERMO BAJO "B" 24-19 JOCKEY CLUB CORDOBA "B" (295706): try sin jugador, dorsal None (1T 5 Try 5 )
+  aviso PALERMO BAJO "B" 24-19 JOCKEY CLUB CORDOBA "B" (295706): conversion sin jugador, dorsal None (1T 5 Conversión 2 )
+  aviso PALERMO BAJO "B" 24-19 JOCKEY CLUB CORDOBA "B" (295706): card_yellow sin jugador, dorsal None (1T 27 Amarilla  )
+  aviso PALERMO BAJO "B" 24-19 JOCKEY CLUB CORDOBA "B" (295706): try sin jugador, dorsal None (1T 37 Try 5 )
+  aviso PALERMO BAJO "B" 24-19 JOCKEY CLUB CORDOBA "B" (295706): try sin jugador, dorsal None (2T 57 Try 5 )
+  aviso PALERMO BAJO "B" 24-19 JOCKEY CLUB CORDOBA "B" (295706): conversion sin jugador, dorsal None (2T 57 Conversión 2 )
+  aviso PALERMO BAJO "B" 24-19 JOCKEY CLUB CORDOBA "B" (295706): card_yellow sin jugador, dorsal None (2T 60 Amarilla  )
+  aviso PALERMO BAJO "B" 24-19 JOCKEY CLUB CORDOBA "B" (295706): card_yellow sin jugador, dorsal None (2T 80 Amarilla  )
+  aviso PALERMO BAJO "B" 24-19 JOCKEY CLUB CORDOBA "B" (295706): salida sin reemplazo, dorsal None (2T 10)
+  aviso UNIVERSITARIO "B" 41-10 CLUB TABORIN (295707): try sin jugador, dorsal None (1T 27 Try 5 )
+  aviso UNIVERSITARIO "B" 41-10 CLUB TABORIN (295707): conversion sin jugador, dorsal None (1T 27 Conversión 2 )
+  aviso UNIVERSITARIO "B" 41-10 CLUB TABORIN (295707): penalty_goal sin jugador, dorsal None (1T 33 Penal 3 )
+  aviso UNIVERSITARIO "B" 41-10 CLUB TABORIN (295707): card_yellow sin jugador, dorsal None (2T 19 Amarilla  )
+  aviso UNIVERSITARIO "B" 41-10 CLUB TABORIN (295707): card_yellow sin jugador, dorsal None (2T 27 Amarilla  )
+  aviso UNIVERSITARIO "B" 41-10 CLUB TABORIN (295707): card_yellow sin jugador, dorsal None (2T 33 Amarilla  )
+  aviso LA TABLADA "B" 23-29 CORDOBA ATHLETIC "B" (295708): try sin jugador, dorsal None (1T 16 Try 5 )
+  aviso LA TABLADA "B" 23-29 CORDOBA ATHLETIC "B" (295708): conversion sin jugador, dorsal None (1T 17 Conversión 2 )
+  aviso LA TABLADA "B" 23-29 CORDOBA ATHLETIC "B" (295708): penalty_goal sin jugador, dorsal None (1T 40 Penal 3 )
+  aviso LA TABLADA "B" 23-29 CORDOBA ATHLETIC "B" (295708): card_yellow sin jugador, dorsal None (2T 7 Amarilla  )
+  aviso LA TABLADA "B" 23-29 CORDOBA ATHLETIC "B" (295708): card_yellow sin jugador, dorsal None (2T 24 Amarilla  )
+  aviso LA TABLADA "B" 23-29 CORDOBA ATHLETIC "B" (295708): penalty_goal sin jugador, dorsal None (2T 54 Penal 3 )
+  aviso LA TABLADA "B" 23-29 CORDOBA ATHLETIC "B" (295708): try sin jugador, dorsal None (2T 61 Try 5 )
+  aviso LA TABLADA "B" 23-29 CORDOBA ATHLETIC "B" (295708): conversion sin jugador, dorsal None (2T 62 Conversión 2 )
+  aviso LA TABLADA "B" 23-29 CORDOBA ATHLETIC "B" (295708): penalty_goal sin jugador, dorsal None (2T 79 Penal 3 )
+  aviso LA TABLADA "B" 23-29 CORDOBA ATHLETIC "B" (295708): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 23-29 CORDOBA ATHLETIC "B" (295708): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 23-29 CORDOBA ATHLETIC "B" (295708): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 23-29 CORDOBA ATHLETIC "B" (295708): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 23-29 CORDOBA ATHLETIC "B" (295708): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 23-29 CORDOBA ATHLETIC "B" (295708): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 23-29 CORDOBA ATHLETIC "B" (295708): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 23-29 CORDOBA ATHLETIC "B" (295708): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 23-29 CORDOBA ATHLETIC "B" (295708): cambio con dorsal sin jugador None->None
+295709: EVENTOS NO CIERRAN HURONES (ARROYITO) 14-59 TALA R.C. "B" (295709): eventos 0-0 (HR VS TRC)
+  aviso JOCKEY CLUB CORDOBA "C" 3-35 UNIV. NAC. DE CORDOBA "A" (295710): penalty_goal sin jugador, dorsal None (1T 21 Penal 3 )
+  aviso JOCKEY CLUB CORDOBA "C" 3-35 UNIV. NAC. DE CORDOBA "A" (295710): card_yellow sin jugador, dorsal None (1T 36 Amarilla  )
+  aviso JOCKEY CLUB CORDOBA "C" 3-35 UNIV. NAC. DE CORDOBA "A" (295710): concussion sin jugador, dorsal None (2T 20 Conmoción cerebral  )
+295711: sin plantel utilizable (CCCC)
+  aviso UNIVERSITARIO "B" 7-62 JOCKEY CLUB CORDOBA "B" (295712): try sin jugador, dorsal None (1T 20 Try 5 )
+  aviso UNIVERSITARIO "B" 7-62 JOCKEY CLUB CORDOBA "B" (295712): conversion sin jugador, dorsal None (1T 20 Conversión 2 )
+  aviso UNIVERSITARIO "B" 7-62 JOCKEY CLUB CORDOBA "B" (295712): penalty_goal sin jugador, dorsal None (1T 26 Penal 3 )
+  aviso UNIVERSITARIO "B" 7-62 JOCKEY CLUB CORDOBA "B" (295712): try sin jugador, dorsal None (1T 28 Try 5 )
+  aviso UNIVERSITARIO "B" 7-62 JOCKEY CLUB CORDOBA "B" (295712): try sin jugador, dorsal None (1T 38 Try 5 )
+  aviso UNIVERSITARIO "B" 7-62 JOCKEY CLUB CORDOBA "B" (295712): conversion sin jugador, dorsal None (1T 38 Conversión 2 )
+  aviso UNIVERSITARIO "B" 7-62 JOCKEY CLUB CORDOBA "B" (295712): try sin jugador, dorsal None (2T 46 Try 5 )
+  aviso UNIVERSITARIO "B" 7-62 JOCKEY CLUB CORDOBA "B" (295712): conversion sin jugador, dorsal None (2T 46 Conversión 2 )
+  aviso UNIVERSITARIO "B" 7-62 JOCKEY CLUB CORDOBA "B" (295712): try sin jugador, dorsal None (2T 47 Try 5 )
+  aviso UNIVERSITARIO "B" 7-62 JOCKEY CLUB CORDOBA "B" (295712): conversion sin jugador, dorsal None (2T 47 Conversión 2 )
+  aviso UNIVERSITARIO "B" 7-62 JOCKEY CLUB CORDOBA "B" (295712): try sin jugador, dorsal None (2T 65 Try 5 )
+  aviso UNIVERSITARIO "B" 7-62 JOCKEY CLUB CORDOBA "B" (295712): conversion sin jugador, dorsal None (2T 65 Conversión 2 )
+  aviso UNIVERSITARIO "B" 7-62 JOCKEY CLUB CORDOBA "B" (295712): try sin jugador, dorsal None (2T 69 Try 5 )
+  aviso UNIVERSITARIO "B" 7-62 JOCKEY CLUB CORDOBA "B" (295712): try sin jugador, dorsal None (2T 70 Try 5 )
+  aviso UNIVERSITARIO "B" 7-62 JOCKEY CLUB CORDOBA "B" (295712): conversion sin jugador, dorsal None (2T 70 Conversión 2 )
+  aviso UNIVERSITARIO "B" 7-62 JOCKEY CLUB CORDOBA "B" (295712): card_yellow sin jugador, dorsal None (2T 78 Amarilla  )
+  aviso UNIVERSITARIO "B" 7-62 JOCKEY CLUB CORDOBA "B" (295712): try sin jugador, dorsal None (2T 80 Try 5 )
+  aviso UNIVERSITARIO "B" 7-62 JOCKEY CLUB CORDOBA "B" (295712): conversion sin jugador, dorsal None (2T 80 Conversión 2 )
+  aviso UNIVERSITARIO "B" 7-62 JOCKEY CLUB CORDOBA "B" (295712): card_yellow sin jugador, dorsal None (2T 80 Amarilla  )
+  aviso PALERMO BAJO "B" 15-27 LA TABLADA "B" (295713): try sin jugador, dorsal None (1T 18 Try 5 )
+  aviso PALERMO BAJO "B" 15-27 LA TABLADA "B" (295713): conversion sin jugador, dorsal None (1T 19 Conversión 2 )
+  aviso PALERMO BAJO "B" 15-27 LA TABLADA "B" (295713): try sin jugador, dorsal None (1T 32 Try 5 )
+  aviso PALERMO BAJO "B" 15-27 LA TABLADA "B" (295713): card_yellow sin jugador, dorsal None (2T 51 Amarilla  )
+  aviso PALERMO BAJO "B" 15-27 LA TABLADA "B" (295713): try sin jugador, dorsal None (2T 58 Try 5 )
+  aviso PALERMO BAJO "B" 15-27 LA TABLADA "B" (295713): penalty_goal sin jugador, dorsal None (2T 67 Penal 3 )
+  aviso PALERMO BAJO "B" 15-27 LA TABLADA "B" (295713): try sin jugador, dorsal None (2T 78 Try 5 )
+  aviso PALERMO BAJO "B" 15-27 LA TABLADA "B" (295713): conversion sin jugador, dorsal None (2T 79 Conversión 2 )
+  aviso PALERMO BAJO "B" 15-27 LA TABLADA "B" (295713): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "B" 15-27 LA TABLADA "B" (295713): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "B" 15-27 LA TABLADA "B" (295713): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "B" 15-27 LA TABLADA "B" (295713): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "B" 15-27 LA TABLADA "B" (295713): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "B" 15-27 LA TABLADA "B" (295713): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "B" 15-27 LA TABLADA "B" (295713): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "B" 15-27 LA TABLADA "B" (295713): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "B" 15-27 LA TABLADA "B" (295713): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "B" 15-27 LA TABLADA "B" (295713): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "B" 15-27 LA TABLADA "B" (295713): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "B" 15-27 LA TABLADA "B" (295713): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "B" 15-27 LA TABLADA "B" (295713): cambio con dorsal sin jugador None->None
+295714: EVENTOS NO CIERRAN UNIV. NAC. DE CORDOBA "A" 69-5 CLUB TABORIN (295714): eventos 69-0 (UN A VS TABI)
+295715: EVENTOS NO CIERRAN CORDOBA ATHLETIC "B" 66-17 BAGUALES R.C. (295715): eventos 66-0 (CAC VS BAG)
+  aviso JOCKEY CLUB CORDOBA "C" 7-27 CORDOBA ATHLETIC "C" (295717): try sin jugador, dorsal None (1T 6 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 7-27 CORDOBA ATHLETIC "C" (295717): conversion sin jugador, dorsal None (1T 7 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "C" 7-27 CORDOBA ATHLETIC "C" (295717): injury sin jugador, dorsal None (1T 35 Lesionado  )
+  aviso JOCKEY CLUB CORDOBA "C" 7-27 CORDOBA ATHLETIC "C" (295717): card_yellow sin jugador, dorsal None (2T 35 Amarilla  )
+  aviso JOCKEY CLUB CORDOBA "B" 59-19 UNIV. NAC. DE CORDOBA "B" (295718): try sin jugador, dorsal None (1T 9 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 59-19 UNIV. NAC. DE CORDOBA "B" (295718): try sin jugador, dorsal None (1T 15 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 59-19 UNIV. NAC. DE CORDOBA "B" (295718): conversion sin jugador, dorsal None (1T 15 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 59-19 UNIV. NAC. DE CORDOBA "B" (295718): try sin jugador, dorsal None (1T 34 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 59-19 UNIV. NAC. DE CORDOBA "B" (295718): conversion sin jugador, dorsal None (1T 34 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 59-19 UNIV. NAC. DE CORDOBA "B" (295718): card_yellow sin jugador, dorsal None (1T 39 Amarilla  )
+  aviso JOCKEY CLUB CORDOBA "B" 59-19 UNIV. NAC. DE CORDOBA "B" (295718): try sin jugador, dorsal None (1T 42 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 59-19 UNIV. NAC. DE CORDOBA "B" (295718): conversion sin jugador, dorsal None (1T 42 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 59-19 UNIV. NAC. DE CORDOBA "B" (295718): try sin jugador, dorsal None (2T 4 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 59-19 UNIV. NAC. DE CORDOBA "B" (295718): try sin jugador, dorsal None (2T 21 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 59-19 UNIV. NAC. DE CORDOBA "B" (295718): conversion sin jugador, dorsal None (2T 21 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 59-19 UNIV. NAC. DE CORDOBA "B" (295718): try sin jugador, dorsal None (2T 25 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 59-19 UNIV. NAC. DE CORDOBA "B" (295718): conversion sin jugador, dorsal None (2T 25 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 59-19 UNIV. NAC. DE CORDOBA "B" (295718): card_yellow sin jugador, dorsal None (2T 28 Amarilla  )
+  aviso JOCKEY CLUB CORDOBA "B" 59-19 UNIV. NAC. DE CORDOBA "B" (295718): try sin jugador, dorsal None (2T 40 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 59-19 UNIV. NAC. DE CORDOBA "B" (295718): conversion sin jugador, dorsal None (2T 40 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 59-19 UNIV. NAC. DE CORDOBA "B" (295718): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 59-19 UNIV. NAC. DE CORDOBA "B" (295718): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 59-19 UNIV. NAC. DE CORDOBA "B" (295718): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 59-19 UNIV. NAC. DE CORDOBA "B" (295718): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 59-19 UNIV. NAC. DE CORDOBA "B" (295718): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 59-19 UNIV. NAC. DE CORDOBA "B" (295718): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 59-19 UNIV. NAC. DE CORDOBA "B" (295718): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 59-19 UNIV. NAC. DE CORDOBA "B" (295718): cambio con dorsal sin jugador 12->None
+  aviso JOCKEY CLUB CORDOBA "B" 59-19 UNIV. NAC. DE CORDOBA "B" (295718): cambio con dorsal sin jugador 7->None
+295719: sin plantel utilizable (trc vs tbai)
+  aviso CORDOBA ATHLETIC "C" 13-10 LA TABLADA "B" (295720): card_red sin jugador, dorsal None (1T 30 Roja  )
+  aviso CORDOBA ATHLETIC "C" 13-10 LA TABLADA "B" (295720): try sin jugador, dorsal None (2T 47 Try 5 )
+  aviso CORDOBA ATHLETIC "C" 13-10 LA TABLADA "B" (295720): conversion sin jugador, dorsal None (2T 48 Conversión 2 )
+  aviso CORDOBA ATHLETIC "C" 13-10 LA TABLADA "B" (295720): penalty_goal sin jugador, dorsal None (2T 59 Penal 3 )
+  aviso CORDOBA ATHLETIC "C" 13-10 LA TABLADA "B" (295720): salida sin reemplazo, dorsal None (2T 26)
+  aviso CORDOBA ATHLETIC "C" 13-10 LA TABLADA "B" (295720): salida sin reemplazo, dorsal None (2T 26)
+  aviso CORDOBA ATHLETIC "C" 13-10 LA TABLADA "B" (295720): cambio con dorsal sin jugador None->None
+  aviso CORDOBA ATHLETIC "C" 13-10 LA TABLADA "B" (295720): cambio con dorsal sin jugador None->None
+  aviso CORDOBA ATHLETIC "C" 13-10 LA TABLADA "B" (295720): cambio con dorsal sin jugador None->None
+  aviso CORDOBA ATHLETIC "C" 13-10 LA TABLADA "B" (295720): cambio con dorsal sin jugador None->None
+  aviso CORDOBA ATHLETIC "C" 13-10 LA TABLADA "B" (295720): cambio con dorsal sin jugador None->None
+  aviso CORDOBA ATHLETIC "C" 13-10 LA TABLADA "B" (295720): cambio con dorsal sin jugador None->None
+  aviso CORDOBA ATHLETIC "C" 13-10 LA TABLADA "B" (295720): cambio con dorsal sin jugador None->None
+  aviso CORDOBA ATHLETIC "C" 13-10 LA TABLADA "B" (295720): cambio con dorsal sin jugador None->None
+  aviso CORDOBA ATHLETIC "C" 13-10 LA TABLADA "B" (295720): cambio con dorsal sin jugador None->None
+  aviso CORDOBA ATHLETIC "C" 13-10 LA TABLADA "B" (295720): cambio con dorsal sin jugador None->None
+  aviso CORDOBA ATHLETIC "C" 13-10 LA TABLADA "B" (295720): cambio con dorsal sin jugador None->None
+295721: sin plantel utilizable (cac vs cuc (3))
+  aviso BAGUALES R.C. 5-48 JOCKEY CLUB CORDOBA "C" (295723): try sin jugador, dorsal None (1T 5 Try 5 )
+  aviso BAGUALES R.C. 5-48 JOCKEY CLUB CORDOBA "C" (295723): conversion sin jugador, dorsal None (1T 5 Conversión 2 )
+  aviso BAGUALES R.C. 5-48 JOCKEY CLUB CORDOBA "C" (295723): try sin jugador, dorsal None (1T 20 Try 5 )
+  aviso BAGUALES R.C. 5-48 JOCKEY CLUB CORDOBA "C" (295723): conversion sin jugador, dorsal None (1T 20 Conversión 2 )
+  aviso BAGUALES R.C. 5-48 JOCKEY CLUB CORDOBA "C" (295723): conversion sin jugador, dorsal None (1T 34 Conversión 2 )
+  aviso BAGUALES R.C. 5-48 JOCKEY CLUB CORDOBA "C" (295723): try sin jugador, dorsal None (1T 34 Try 5 )
+  aviso BAGUALES R.C. 5-48 JOCKEY CLUB CORDOBA "C" (295723): try sin jugador, dorsal None (1T 37 Try 5 )
+  aviso BAGUALES R.C. 5-48 JOCKEY CLUB CORDOBA "C" (295723): card_yellow sin jugador, dorsal None (2T 50 Amarilla  )
+  aviso BAGUALES R.C. 5-48 JOCKEY CLUB CORDOBA "C" (295723): try sin jugador, dorsal None (2T 55 Try 5 )
+  aviso BAGUALES R.C. 5-48 JOCKEY CLUB CORDOBA "C" (295723): try sin jugador, dorsal None (2T 62 Try 5 )
+  aviso BAGUALES R.C. 5-48 JOCKEY CLUB CORDOBA "C" (295723): try sin jugador, dorsal None (2T 70 Try 5 )
+  aviso BAGUALES R.C. 5-48 JOCKEY CLUB CORDOBA "C" (295723): try sin jugador, dorsal None (2T 75 Try 5 )
+  aviso BAGUALES R.C. 5-48 JOCKEY CLUB CORDOBA "C" (295723): conversion sin jugador, dorsal None (2T 75 Conversión 2 )
+  aviso BAGUALES R.C. 5-48 JOCKEY CLUB CORDOBA "C" (295723): cambio con dorsal sin jugador None->None
+  aviso BAGUALES R.C. 5-48 JOCKEY CLUB CORDOBA "C" (295723): cambio con dorsal sin jugador None->None
+  aviso BAGUALES R.C. 5-48 JOCKEY CLUB CORDOBA "C" (295723): cambio con dorsal sin jugador None->None
+295724: sin plantel utilizable (tab vs jcc)
+  aviso PALERMO BAJO "B" 36-38 CORDOBA ATHLETIC "B" (295725): cambio con dorsal sin jugador None->23
+  aviso LA TABLADA "B" 18-19 TALA R.C. "B" (295727): penalty_goal sin jugador, dorsal None (2T 23 Penal 3 )
+  aviso LA TABLADA "B" 18-19 TALA R.C. "B" (295727): try sin jugador, dorsal None (2T 58 Try 5 )
+  aviso LA TABLADA "B" 18-19 TALA R.C. "B" (295727): penalty_goal sin jugador, dorsal None (2T 65 Penal 3 )
+  aviso LA TABLADA "B" 18-19 TALA R.C. "B" (295727): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 18-19 TALA R.C. "B" (295727): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 18-19 TALA R.C. "B" (295727): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 18-19 TALA R.C. "B" (295727): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 18-19 TALA R.C. "B" (295727): cambio con dorsal sin jugador None->23
+  aviso JOCKEY CLUB CORDOBA "C" 27-20 HURONES (ARROYITO) (295729): try sin jugador, dorsal None (1T 1 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 27-20 HURONES (ARROYITO) (295729): try sin jugador, dorsal None (1T 7 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 27-20 HURONES (ARROYITO) (295729): card_yellow sin jugador, dorsal None (1T 25 Amarilla  )
+  aviso JOCKEY CLUB CORDOBA "C" 27-20 HURONES (ARROYITO) (295729): try sin jugador, dorsal None (2T 3 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 27-20 HURONES (ARROYITO) (295729): conversion sin jugador, dorsal None (2T 4 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "C" 27-20 HURONES (ARROYITO) (295729): try sin jugador, dorsal None (2T 13 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 27-20 HURONES (ARROYITO) (295729): try sin jugador, dorsal None (2T 32 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 27-20 HURONES (ARROYITO) (295729): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 64-22 BAGUALES R.C. (295730): try sin jugador, dorsal None (1T 7 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 64-22 BAGUALES R.C. (295730): conversion sin jugador, dorsal None (1T 7 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 64-22 BAGUALES R.C. (295730): try sin jugador, dorsal None (1T 14 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 64-22 BAGUALES R.C. (295730): conversion sin jugador, dorsal None (1T 14 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 64-22 BAGUALES R.C. (295730): try sin jugador, dorsal None (1T 21 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 64-22 BAGUALES R.C. (295730): conversion sin jugador, dorsal None (1T 21 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 64-22 BAGUALES R.C. (295730): try sin jugador, dorsal None (1T 26 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 64-22 BAGUALES R.C. (295730): conversion sin jugador, dorsal None (1T 26 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 64-22 BAGUALES R.C. (295730): conversion sin jugador, dorsal None (1T 31 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 64-22 BAGUALES R.C. (295730): try sin jugador, dorsal None (1T 31 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 64-22 BAGUALES R.C. (295730): try sin jugador, dorsal None (1T 39 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 64-22 BAGUALES R.C. (295730): try sin jugador, dorsal None (2T 3 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 64-22 BAGUALES R.C. (295730): conversion sin jugador, dorsal None (2T 3 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 64-22 BAGUALES R.C. (295730): try sin jugador, dorsal None (2T 10 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 64-22 BAGUALES R.C. (295730): try sin jugador, dorsal None (2T 14 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 64-22 BAGUALES R.C. (295730): try sin jugador, dorsal None (2T 27 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 64-22 BAGUALES R.C. (295730): conversion sin jugador, dorsal None (2T 27 Conversión 2 )
+  aviso TALA R.C. "B" 28-15 CORDOBA ATHLETIC "B" (295731): salida sin reemplazo, dorsal 6 (2T 25)
+295732: sin plantel utilizable (cprc vs tbao)
+  aviso CORDOBA ATHLETIC "C" 18-22 PALERMO BAJO "B" (295733): salida sin reemplazo, dorsal 4 (2T 35)
+  aviso CORDOBA ATHLETIC "C" 18-22 PALERMO BAJO "B" (295733): salida sin reemplazo, dorsal 25 (2T 35)
+  aviso LA TABLADA "B" 52-5 UNIVERSITARIO "B" (295734): try sin jugador, dorsal None (1T 5 Try 5 )
+  aviso LA TABLADA "B" 52-5 UNIVERSITARIO "B" (295734): conversion sin jugador, dorsal None (1T 5 Conversión 2 )
+  aviso LA TABLADA "B" 52-5 UNIVERSITARIO "B" (295734): try sin jugador, dorsal None (1T 14 Try 5 )
+  aviso LA TABLADA "B" 52-5 UNIVERSITARIO "B" (295734): conversion sin jugador, dorsal None (1T 14 Conversión 2 )
+  aviso LA TABLADA "B" 52-5 UNIVERSITARIO "B" (295734): try sin jugador, dorsal None (1T 28 Try 5 )
+  aviso LA TABLADA "B" 52-5 UNIVERSITARIO "B" (295734): conversion sin jugador, dorsal None (1T 28 Conversión 2 )
+  aviso LA TABLADA "B" 52-5 UNIVERSITARIO "B" (295734): try sin jugador, dorsal None (1T 33 Try 5 )
+  aviso LA TABLADA "B" 52-5 UNIVERSITARIO "B" (295734): conversion sin jugador, dorsal None (1T 33 Conversión 2 )
+  aviso LA TABLADA "B" 52-5 UNIVERSITARIO "B" (295734): try sin jugador, dorsal None (2T 41 Try 5 )
+  aviso LA TABLADA "B" 52-5 UNIVERSITARIO "B" (295734): conversion sin jugador, dorsal None (2T 41 Conversión 2 )
+  aviso LA TABLADA "B" 52-5 UNIVERSITARIO "B" (295734): try sin jugador, dorsal None (2T 52 Try 5 )
+  aviso LA TABLADA "B" 52-5 UNIVERSITARIO "B" (295734): card_yellow sin jugador, dorsal None (2T 57 Amarilla  )
+  aviso LA TABLADA "B" 52-5 UNIVERSITARIO "B" (295734): try sin jugador, dorsal None (2T 64 Try 5 )
+  aviso LA TABLADA "B" 52-5 UNIVERSITARIO "B" (295734): card_yellow sin jugador, dorsal None (2T 74 Amarilla  )
+  aviso UNIV. NAC. DE CORDOBA "A" 22-35 HURONES (ARROYITO) (295735): salida sin reemplazo, dorsal 17 (2T 10)
+  aviso UNIV. NAC. DE CORDOBA "A" 22-35 HURONES (ARROYITO) (295735): salida sin reemplazo, dorsal 3 (2T 10)
+  aviso JOCKEY CLUB CORDOBA "B" 31-26 JOCKEY CLUB CORDOBA "C" (295736): try sin jugador, dorsal None (2T 5 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 31-26 JOCKEY CLUB CORDOBA "C" (295736): try sin jugador, dorsal None (2T 11 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 31-26 JOCKEY CLUB CORDOBA "C" (295736): try sin jugador, dorsal None (2T 11 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 31-26 JOCKEY CLUB CORDOBA "C" (295736): conversion sin jugador, dorsal None (2T 11 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 31-26 JOCKEY CLUB CORDOBA "C" (295736): try sin jugador, dorsal None (2T 15 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 31-26 JOCKEY CLUB CORDOBA "C" (295736): conversion sin jugador, dorsal None (2T 15 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 31-26 JOCKEY CLUB CORDOBA "C" (295736): try sin jugador, dorsal None (2T 19 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 31-26 JOCKEY CLUB CORDOBA "C" (295736): conversion sin jugador, dorsal None (2T 19 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 31-26 JOCKEY CLUB CORDOBA "C" (295736): try sin jugador, dorsal None (1T 7 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 31-26 JOCKEY CLUB CORDOBA "C" (295736): conversion sin jugador, dorsal None (1T 7 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 31-26 JOCKEY CLUB CORDOBA "C" (295736): try sin jugador, dorsal None (1T 13 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 31-26 JOCKEY CLUB CORDOBA "C" (295736): conversion sin jugador, dorsal None (1T 13 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 31-26 JOCKEY CLUB CORDOBA "C" (295736): try sin jugador, dorsal None (1T 30 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 31-26 JOCKEY CLUB CORDOBA "C" (295736): try sin jugador, dorsal None (2T 7 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 31-26 JOCKEY CLUB CORDOBA "C" (295736): conversion sin jugador, dorsal None (2T 7 Conversión 2 )
+  aviso HURONES (ARROYITO) 7-31 LA TABLADA "B" (295737): penalty_goal sin jugador, dorsal None (1T 6 Penal 3 )
+  aviso HURONES (ARROYITO) 7-31 LA TABLADA "B" (295737): try sin jugador, dorsal None (1T 13 Try 5 )
+  aviso HURONES (ARROYITO) 7-31 LA TABLADA "B" (295737): conversion sin jugador, dorsal None (1T 14 Conversión 2 )
+  aviso HURONES (ARROYITO) 7-31 LA TABLADA "B" (295737): try sin jugador, dorsal None (1T 16 Try 5 )
+  aviso HURONES (ARROYITO) 7-31 LA TABLADA "B" (295737): conversion sin jugador, dorsal None (1T 17 Conversión 2 )
+  aviso HURONES (ARROYITO) 7-31 LA TABLADA "B" (295737): try sin jugador, dorsal None (1T 36 Try 5 )
+  aviso HURONES (ARROYITO) 7-31 LA TABLADA "B" (295737): conversion sin jugador, dorsal None (1T 37 Conversión 2 )
+  aviso HURONES (ARROYITO) 7-31 LA TABLADA "B" (295737): try sin jugador, dorsal None (2T 64 Try 5 )
+  aviso HURONES (ARROYITO) 7-31 LA TABLADA "B" (295737): conversion sin jugador, dorsal None (2T 65 Conversión 2 )
+  aviso HURONES (ARROYITO) 7-31 LA TABLADA "B" (295737): cambio con dorsal sin jugador None->None
+295739: EVENTOS NO CIERRAN CLUB TABORIN 6-39 PALERMO BAJO "B" (295739): eventos 0-7 (tabo vs cpb)
+  aviso CLUB TABORIN 6-39 PALERMO BAJO "B" (295739): ingreso sin salida, dorsal 25 (2T 14)
+295741: EVENTOS NO CIERRAN BAGUALES R.C. 10-57 CORDOBA ATHLETIC "C" (295741): eventos 0-24 (bag vs cac)
+  aviso BAGUALES R.C. 10-57 CORDOBA ATHLETIC "C" (295741): ingreso sin salida, dorsal 17 (2T 5)
+295742: EVENTOS NO CIERRAN CORDOBA ATHLETIC "B" 14-25 JOCKEY CLUB CORDOBA "B" (295742): eventos 14-0 (cac b vs jcc b)
+  aviso JOCKEY CLUB CORDOBA "C" 55-15 CLUB TABORIN (295743): try sin jugador, dorsal None (1T 1 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 55-15 CLUB TABORIN (295743): try sin jugador, dorsal None (1T 13 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 55-15 CLUB TABORIN (295743): conversion sin jugador, dorsal None (1T 13 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "C" 55-15 CLUB TABORIN (295743): try sin jugador, dorsal None (1T 17 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 55-15 CLUB TABORIN (295743): conversion sin jugador, dorsal None (1T 17 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "C" 55-15 CLUB TABORIN (295743): try sin jugador, dorsal None (1T 25 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 55-15 CLUB TABORIN (295743): try sin jugador, dorsal None (1T 27 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 55-15 CLUB TABORIN (295743): try sin jugador, dorsal None (2T 9 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 55-15 CLUB TABORIN (295743): conversion sin jugador, dorsal None (2T 9 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "C" 55-15 CLUB TABORIN (295743): card_yellow sin jugador, dorsal None (2T 11 Amarilla  )
+  aviso JOCKEY CLUB CORDOBA "C" 55-15 CLUB TABORIN (295743): try sin jugador, dorsal None (2T 14 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 55-15 CLUB TABORIN (295743): conversion sin jugador, dorsal None (2T 14 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "C" 55-15 CLUB TABORIN (295743): try sin jugador, dorsal None (2T 23 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 55-15 CLUB TABORIN (295743): conversion sin jugador, dorsal None (2T 28 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "C" 55-15 CLUB TABORIN (295743): try sin jugador, dorsal None (2T 31 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 55-15 CLUB TABORIN (295743): card_yellow sin jugador, dorsal None (2T 37 Amarilla  )
+  aviso JOCKEY CLUB CORDOBA "C" 55-15 CLUB TABORIN (295743): try sin jugador, dorsal None (1T 23 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 55-15 CLUB TABORIN (295743): penalty_goal sin jugador, dorsal None (1T 30 Penal 3 )
+  aviso JOCKEY CLUB CORDOBA "C" 55-15 CLUB TABORIN (295743): try sin jugador, dorsal None (2T 4 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 55-15 CLUB TABORIN (295743): conversion sin jugador, dorsal None (2T 5 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "C" 55-15 CLUB TABORIN (295743): card_yellow sin jugador, dorsal None (2T 13 Amarilla  )
+  aviso JOCKEY CLUB CORDOBA "C" 55-15 CLUB TABORIN (295743): blue sin jugador, dorsal None (2T 29 Tarjeta azul  )
+  aviso JOCKEY CLUB CORDOBA "C" 55-15 CLUB TABORIN (295743): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 55-15 CLUB TABORIN (295743): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 55-15 CLUB TABORIN (295743): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 55-15 CLUB TABORIN (295743): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 55-15 CLUB TABORIN (295743): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 55-15 CLUB TABORIN (295743): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 55-15 CLUB TABORIN (295743): cambio con dorsal sin jugador None->None
+295745: sin plantel utilizable (cuc vs bag)
+  aviso LA TABLADA "B" 73-0 CARLOS PAZ RC (295746): try sin jugador, dorsal None (1T 4 Try 5 )
+  aviso LA TABLADA "B" 73-0 CARLOS PAZ RC (295746): try sin jugador, dorsal None (1T 8 Try 5 )
+  aviso LA TABLADA "B" 73-0 CARLOS PAZ RC (295746): conversion sin jugador, dorsal None (1T 9 Conversión 2 )
+  aviso LA TABLADA "B" 73-0 CARLOS PAZ RC (295746): try sin jugador, dorsal None (1T 14 Try 5 )
+  aviso LA TABLADA "B" 73-0 CARLOS PAZ RC (295746): conversion sin jugador, dorsal None (1T 15 Conversión 2 )
+  aviso LA TABLADA "B" 73-0 CARLOS PAZ RC (295746): try sin jugador, dorsal None (1T 20 Try 5 )
+  aviso LA TABLADA "B" 73-0 CARLOS PAZ RC (295746): conversion sin jugador, dorsal None (1T 21 Conversión 2 )
+  aviso LA TABLADA "B" 73-0 CARLOS PAZ RC (295746): try sin jugador, dorsal None (1T 24 Try 5 )
+  aviso LA TABLADA "B" 73-0 CARLOS PAZ RC (295746): conversion sin jugador, dorsal None (1T 25 Conversión 2 )
+  aviso LA TABLADA "B" 73-0 CARLOS PAZ RC (295746): try sin jugador, dorsal None (1T 28 Try 5 )
+  aviso LA TABLADA "B" 73-0 CARLOS PAZ RC (295746): conversion sin jugador, dorsal None (1T 29 Conversión 2 )
+  aviso LA TABLADA "B" 73-0 CARLOS PAZ RC (295746): try sin jugador, dorsal None (1T 35 Try 5 )
+  aviso LA TABLADA "B" 73-0 CARLOS PAZ RC (295746): conversion sin jugador, dorsal None (1T 36 Conversión 2 )
+  aviso LA TABLADA "B" 73-0 CARLOS PAZ RC (295746): try sin jugador, dorsal None (1T 40 Try 5 )
+  aviso LA TABLADA "B" 73-0 CARLOS PAZ RC (295746): conversion sin jugador, dorsal None (1T 41 Conversión 2 )
+  aviso LA TABLADA "B" 73-0 CARLOS PAZ RC (295746): try sin jugador, dorsal None (2T 49 Try 5 )
+  aviso LA TABLADA "B" 73-0 CARLOS PAZ RC (295746): conversion sin jugador, dorsal None (2T 50 Conversión 2 )
+  aviso LA TABLADA "B" 73-0 CARLOS PAZ RC (295746): try sin jugador, dorsal None (2T 62 Try 5 )
+  aviso LA TABLADA "B" 73-0 CARLOS PAZ RC (295746): conversion sin jugador, dorsal None (2T 63 Conversión 2 )
+  aviso LA TABLADA "B" 73-0 CARLOS PAZ RC (295746): try sin jugador, dorsal None (2T 80 Try 5 )
+  aviso LA TABLADA "B" 73-0 CARLOS PAZ RC (295746): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 73-0 CARLOS PAZ RC (295746): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 73-0 CARLOS PAZ RC (295746): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 33-24 JOCKEY CLUB CORDOBA "B" (295748): penalty_goal sin jugador, dorsal None (1T 7 Penal 3 )
+  aviso LA TABLADA "B" 33-24 JOCKEY CLUB CORDOBA "B" (295748): penalty_goal sin jugador, dorsal None (1T 15 Penal 3 )
+  aviso LA TABLADA "B" 33-24 JOCKEY CLUB CORDOBA "B" (295748): card_yellow sin jugador, dorsal None (1T 34 Amarilla  )
+  aviso LA TABLADA "B" 33-24 JOCKEY CLUB CORDOBA "B" (295748): penalty_goal sin jugador, dorsal None (1T 34 Penal 3 )
+  aviso LA TABLADA "B" 33-24 JOCKEY CLUB CORDOBA "B" (295748): try sin jugador, dorsal None (2T 42 Try 5 )
+  aviso LA TABLADA "B" 33-24 JOCKEY CLUB CORDOBA "B" (295748): conversion sin jugador, dorsal None (2T 42 Conversión 2 )
+  aviso LA TABLADA "B" 33-24 JOCKEY CLUB CORDOBA "B" (295748): penalty_goal sin jugador, dorsal None (2T 51 Penal 3 )
+  aviso LA TABLADA "B" 33-24 JOCKEY CLUB CORDOBA "B" (295748): card_yellow sin jugador, dorsal None (2T 52 Amarilla  )
+  aviso LA TABLADA "B" 33-24 JOCKEY CLUB CORDOBA "B" (295748): try sin jugador, dorsal None (2T 55 Try 5 )
+  aviso LA TABLADA "B" 33-24 JOCKEY CLUB CORDOBA "B" (295748): conversion sin jugador, dorsal None (2T 55 Conversión 2 )
+  aviso LA TABLADA "B" 33-24 JOCKEY CLUB CORDOBA "B" (295748): card_yellow sin jugador, dorsal None (2T 64 Amarilla  )
+  aviso LA TABLADA "B" 33-24 JOCKEY CLUB CORDOBA "B" (295748): try sin jugador, dorsal None (2T 67 Try 5 )
+  aviso LA TABLADA "B" 33-24 JOCKEY CLUB CORDOBA "B" (295748): conversion sin jugador, dorsal None (2T 67 Conversión 2 )
+  aviso LA TABLADA "B" 33-24 JOCKEY CLUB CORDOBA "B" (295748): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 33-24 JOCKEY CLUB CORDOBA "B" (295748): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 33-24 JOCKEY CLUB CORDOBA "B" (295748): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 33-24 JOCKEY CLUB CORDOBA "B" (295748): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 33-24 JOCKEY CLUB CORDOBA "B" (295748): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 33-24 JOCKEY CLUB CORDOBA "B" (295748): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 33-24 JOCKEY CLUB CORDOBA "B" (295748): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 33-24 JOCKEY CLUB CORDOBA "B" (295748): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 33-24 JOCKEY CLUB CORDOBA "B" (295748): try sin jugador, dorsal None (1T 5 Try 5 )
+  aviso LA TABLADA "B" 33-24 JOCKEY CLUB CORDOBA "B" (295748): try sin jugador, dorsal None (1T 10 Try 5 )
+  aviso LA TABLADA "B" 33-24 JOCKEY CLUB CORDOBA "B" (295748): card_yellow sin jugador, dorsal None (1T 30 Amarilla  )
+  aviso LA TABLADA "B" 33-24 JOCKEY CLUB CORDOBA "B" (295748): card_yellow sin jugador, dorsal None (2T 41 Amarilla  )
+  aviso LA TABLADA "B" 33-24 JOCKEY CLUB CORDOBA "B" (295748): card_yellow sin jugador, dorsal None (2T 63 Amarilla  )
+  aviso LA TABLADA "B" 33-24 JOCKEY CLUB CORDOBA "B" (295748): try sin jugador, dorsal None (2T 65 Try 5 )
+  aviso LA TABLADA "B" 33-24 JOCKEY CLUB CORDOBA "B" (295748): conversion sin jugador, dorsal None (2T 65 Conversión 2 )
+  aviso LA TABLADA "B" 33-24 JOCKEY CLUB CORDOBA "B" (295748): try sin jugador, dorsal None (2T 70 Try 5 )
+  aviso LA TABLADA "B" 33-24 JOCKEY CLUB CORDOBA "B" (295748): conversion sin jugador, dorsal None (2T 70 Conversión 2 )
+  aviso LA TABLADA "B" 33-24 JOCKEY CLUB CORDOBA "B" (295748): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 33-24 JOCKEY CLUB CORDOBA "B" (295748): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 33-24 JOCKEY CLUB CORDOBA "B" (295748): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 33-24 JOCKEY CLUB CORDOBA "B" (295748): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 33-24 JOCKEY CLUB CORDOBA "B" (295748): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 33-24 JOCKEY CLUB CORDOBA "B" (295748): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 33-24 JOCKEY CLUB CORDOBA "B" (295748): cambio con dorsal sin jugador None->None
+  aviso CARLOS PAZ RC 0-61 TALA R.C. "B" (295751): ingreso sin salida, dorsal 24 (2T 17)
+  aviso CORDOBA ATHLETIC "B" 31-26 JOCKEY CLUB CORDOBA "C" (295752): ingreso sin salida, dorsal 17 (2T 13)
+  aviso CORDOBA ATHLETIC "B" 31-26 JOCKEY CLUB CORDOBA "C" (295752): try sin jugador, dorsal None (1T 10 Try 5 )
+  aviso CORDOBA ATHLETIC "B" 31-26 JOCKEY CLUB CORDOBA "C" (295752): conversion sin jugador, dorsal None (1T 11 Conversión 2 )
+  aviso CORDOBA ATHLETIC "B" 31-26 JOCKEY CLUB CORDOBA "C" (295752): try sin jugador, dorsal None (1T 26 Try 5 )
+  aviso CORDOBA ATHLETIC "B" 31-26 JOCKEY CLUB CORDOBA "C" (295752): conversion sin jugador, dorsal None (1T 27 Conversión 2 )
+  aviso CORDOBA ATHLETIC "B" 31-26 JOCKEY CLUB CORDOBA "C" (295752): try sin jugador, dorsal None (2T 17 Try 5 )
+  aviso CORDOBA ATHLETIC "B" 31-26 JOCKEY CLUB CORDOBA "C" (295752): try sin jugador, dorsal None (2T 22 Try 5 )
+  aviso CORDOBA ATHLETIC "B" 31-26 JOCKEY CLUB CORDOBA "C" (295752): conversion sin jugador, dorsal None (2T 24 Conversión 2 )
+  aviso CLUB TABORIN 15-49 CORDOBA ATHLETIC "C" (295753): penalty_goal sin jugador, dorsal None (1T 15 Penal 3 )
+  aviso CLUB TABORIN 15-49 CORDOBA ATHLETIC "C" (295753): try sin jugador, dorsal None (1T 36 Try 5 )
+  aviso CLUB TABORIN 15-49 CORDOBA ATHLETIC "C" (295753): try sin jugador, dorsal None (2T 37 Try 5 )
+  aviso CLUB TABORIN 15-49 CORDOBA ATHLETIC "C" (295753): conversion sin jugador, dorsal None (2T 37 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 26-7 LA TABLADA "B" (295754): try sin jugador, dorsal None (1T 20 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 26-7 LA TABLADA "B" (295754): conversion sin jugador, dorsal None (1T 21 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 26-7 LA TABLADA "B" (295754): try sin jugador, dorsal None (1T 24 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 26-7 LA TABLADA "B" (295754): conversion sin jugador, dorsal None (1T 24 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 26-7 LA TABLADA "B" (295754): try sin jugador, dorsal None (1T 40 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 26-7 LA TABLADA "B" (295754): try sin jugador, dorsal None (2T 7 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 26-7 LA TABLADA "B" (295754): conversion sin jugador, dorsal None (2T 7 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 26-7 LA TABLADA "B" (295754): card_yellow sin jugador, dorsal None (2T 69 Amarilla  )
+  aviso JOCKEY CLUB CORDOBA "B" 26-7 LA TABLADA "B" (295754): try sin jugador, dorsal None (2T 58 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 26-7 LA TABLADA "B" (295754): conversion sin jugador, dorsal None (2T 59 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 26-7 LA TABLADA "B" (295754): card_yellow sin jugador, dorsal None (2T 69 Amarilla  )
+  aviso JOCKEY CLUB CORDOBA "C" 40-12 UNIVERSITARIO "B" (295755): try sin jugador, dorsal None (1T 5 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 40-12 UNIVERSITARIO "B" (295755): conversion sin jugador, dorsal None (1T 5 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "C" 40-12 UNIVERSITARIO "B" (295755): penalty_goal sin jugador, dorsal None (1T 12 Penal 3 )
+  aviso JOCKEY CLUB CORDOBA "C" 40-12 UNIVERSITARIO "B" (295755): conversion sin jugador, dorsal None (1T 12 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "C" 40-12 UNIVERSITARIO "B" (295755): conversion sin jugador, dorsal None (1T 12 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "C" 40-12 UNIVERSITARIO "B" (295755): try sin jugador, dorsal None (1T 12 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 40-12 UNIVERSITARIO "B" (295755): conversion sin jugador, dorsal None (1T 12 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "C" 40-12 UNIVERSITARIO "B" (295755): try sin jugador, dorsal None (2T 18 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 40-12 UNIVERSITARIO "B" (295755): conversion sin jugador, dorsal None (2T 18 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "C" 40-12 UNIVERSITARIO "B" (295755): try sin jugador, dorsal None (2T 22 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 40-12 UNIVERSITARIO "B" (295755): conversion sin jugador, dorsal None (2T 22 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "C" 40-12 UNIVERSITARIO "B" (295755): card_yellow sin jugador, dorsal None (2T 24 Amarilla  )
+  aviso JOCKEY CLUB CORDOBA "C" 40-12 UNIVERSITARIO "B" (295755): try sin jugador, dorsal None (2T 35 Try 5 )
+  aviso HURONES (ARROYITO) 25-17 CORDOBA ATHLETIC "B" (295758): conversion sin jugador, dorsal None (1T 20 Conversión 2 )
+  aviso HURONES (ARROYITO) 25-17 CORDOBA ATHLETIC "B" (295758): try sin jugador, dorsal None (1T 20 Try 5 )
+  aviso HURONES (ARROYITO) 25-17 CORDOBA ATHLETIC "B" (295758): penalty_goal sin jugador, dorsal None (1T 39 Penal 3 )
+  aviso HURONES (ARROYITO) 25-17 CORDOBA ATHLETIC "B" (295758): try sin jugador, dorsal None (2T 15 Try 5 )
+  aviso HURONES (ARROYITO) 25-17 CORDOBA ATHLETIC "B" (295758): conversion sin jugador, dorsal None (2T 15 Conversión 2 )
+  aviso HURONES (ARROYITO) 25-17 CORDOBA ATHLETIC "B" (295758): try sin jugador, dorsal None (2T 24 Try 5 )
+  aviso HURONES (ARROYITO) 25-17 CORDOBA ATHLETIC "B" (295758): card_yellow sin jugador, dorsal None (2T 28 Amarilla  )
+  aviso HURONES (ARROYITO) 25-17 CORDOBA ATHLETIC "B" (295758): penalty_goal sin jugador, dorsal None (2T 40 Penal 3 )
+295759: EVENTOS NO CIERRAN UNIV. NAC. DE CORDOBA "B" 17-16 CLUB TABORIN (295759): eventos 17-0 (UNC B VS TABO+)
+  aviso CORDOBA ATHLETIC "C" 7-40 JOCKEY CLUB CORDOBA "B" (295760): try sin jugador, dorsal None (1T 1 Try 5 )
+  aviso CORDOBA ATHLETIC "C" 7-40 JOCKEY CLUB CORDOBA "B" (295760): conversion sin jugador, dorsal None (1T 1 Conversión 2 )
+  aviso CORDOBA ATHLETIC "C" 7-40 JOCKEY CLUB CORDOBA "B" (295760): try sin jugador, dorsal None (1T 15 Try 5 )
+  aviso CORDOBA ATHLETIC "C" 7-40 JOCKEY CLUB CORDOBA "B" (295760): conversion sin jugador, dorsal None (1T 15 Conversión 2 )
+  aviso CORDOBA ATHLETIC "C" 7-40 JOCKEY CLUB CORDOBA "B" (295760): penalty_goal sin jugador, dorsal None (1T 15 Penal 3 )
+  aviso CORDOBA ATHLETIC "C" 7-40 JOCKEY CLUB CORDOBA "B" (295760): try sin jugador, dorsal None (1T 16 Try 5 )
+  aviso CORDOBA ATHLETIC "C" 7-40 JOCKEY CLUB CORDOBA "B" (295760): conversion sin jugador, dorsal None (1T 20 Conversión 2 )
+  aviso CORDOBA ATHLETIC "C" 7-40 JOCKEY CLUB CORDOBA "B" (295760): conversion sin jugador, dorsal None (1T 20 Conversión 2 )
+  aviso CORDOBA ATHLETIC "C" 7-40 JOCKEY CLUB CORDOBA "B" (295760): try sin jugador, dorsal None (1T 36 Try 5 )
+  aviso CORDOBA ATHLETIC "C" 7-40 JOCKEY CLUB CORDOBA "B" (295760): conversion sin jugador, dorsal None (1T 36 Conversión 2 )
+  aviso CORDOBA ATHLETIC "C" 7-40 JOCKEY CLUB CORDOBA "B" (295760): card_yellow sin jugador, dorsal None (2T 36 Amarilla  )
+  aviso CLUB TABORIN 32-22 HURONES (ARROYITO) (295762): try sin jugador, dorsal None (1T 18 Try 5 )
+  aviso CLUB TABORIN 32-22 HURONES (ARROYITO) (295762): conversion sin jugador, dorsal None (1T 19 Conversión 2 )
+  aviso CLUB TABORIN 32-22 HURONES (ARROYITO) (295762): try sin jugador, dorsal None (1T 35 Try 5 )
+  aviso CLUB TABORIN 32-22 HURONES (ARROYITO) (295762): try sin jugador, dorsal None (1T 40 Try 5 )
+  aviso CLUB TABORIN 32-22 HURONES (ARROYITO) (295762): conversion sin jugador, dorsal None (1T 40 Conversión 2 )
+  aviso CLUB TABORIN 32-22 HURONES (ARROYITO) (295762): penalty_goal sin jugador, dorsal None (2T 5 Penal 3 )
+  aviso CLUB TABORIN 32-22 HURONES (ARROYITO) (295762): card_yellow sin jugador, dorsal None (2T 12 Amarilla  )
+  aviso CLUB TABORIN 32-22 HURONES (ARROYITO) (295762): card_red sin jugador, dorsal None (2T 22 Roja  )
+  aviso CLUB TABORIN 32-22 HURONES (ARROYITO) (295762): try sin jugador, dorsal None (2T 23 Try 5 )
+  aviso CLUB TABORIN 32-22 HURONES (ARROYITO) (295762): conversion sin jugador, dorsal None (2T 23 Conversión 2 )
+  aviso CLUB TABORIN 32-22 HURONES (ARROYITO) (295762): penalty_goal sin jugador, dorsal None (2T 40 Penal 3 )
+  aviso CLUB TABORIN 32-22 HURONES (ARROYITO) (295762): cambio con dorsal sin jugador None->None
+  aviso CLUB TABORIN 32-22 HURONES (ARROYITO) (295762): cambio con dorsal sin jugador None->None
+  aviso CLUB TABORIN 32-22 HURONES (ARROYITO) (295762): cambio con dorsal sin jugador None->None
+  aviso CLUB TABORIN 32-22 HURONES (ARROYITO) (295762): cambio con dorsal sin jugador None->None
+  aviso CLUB TABORIN 32-22 HURONES (ARROYITO) (295762): cambio con dorsal sin jugador None->None
+  aviso CLUB TABORIN 32-22 HURONES (ARROYITO) (295762): ingreso sin salida, dorsal 18 (2T 3)
+295763: sin plantel utilizable (295763)
+  aviso UNIVERSITARIO "B" 8-37 LA TABLADA "B" (295764): penalty_goal sin jugador, dorsal None (1T 14 Penal 3 )
+  aviso UNIVERSITARIO "B" 8-37 LA TABLADA "B" (295764): penalty_goal sin jugador, dorsal None (1T 20 Penal 3 )
+  aviso UNIVERSITARIO "B" 8-37 LA TABLADA "B" (295764): try sin jugador, dorsal None (1T 27 Try 5 )
+  aviso UNIVERSITARIO "B" 8-37 LA TABLADA "B" (295764): conversion sin jugador, dorsal None (1T 28 Conversión 2 )
+  aviso UNIVERSITARIO "B" 8-37 LA TABLADA "B" (295764): penalty_goal sin jugador, dorsal None (1T 35 Penal 3 )
+  aviso UNIVERSITARIO "B" 8-37 LA TABLADA "B" (295764): try sin jugador, dorsal None (1T 38 Try 5 )
+  aviso UNIVERSITARIO "B" 8-37 LA TABLADA "B" (295764): card_yellow sin jugador, dorsal None (1T 38 Amarilla  )
+  aviso UNIVERSITARIO "B" 8-37 LA TABLADA "B" (295764): conversion sin jugador, dorsal None (1T 39 Conversión 2 )
+  aviso UNIVERSITARIO "B" 8-37 LA TABLADA "B" (295764): card_yellow sin jugador, dorsal None (2T 13 Amarilla  )
+  aviso UNIVERSITARIO "B" 8-37 LA TABLADA "B" (295764): try sin jugador, dorsal None (2T 15 Try 5 )
+  aviso UNIVERSITARIO "B" 8-37 LA TABLADA "B" (295764): conversion sin jugador, dorsal None (2T 16 Conversión 2 )
+  aviso UNIVERSITARIO "B" 8-37 LA TABLADA "B" (295764): try sin jugador, dorsal None (2T 17 Try 5 )
+  aviso UNIVERSITARIO "B" 8-37 LA TABLADA "B" (295764): conversion sin jugador, dorsal None (2T 18 Conversión 2 )
+  aviso UNIVERSITARIO "B" 8-37 LA TABLADA "B" (295764): card_yellow sin jugador, dorsal None (2T 30 Amarilla  )
+  aviso UNIVERSITARIO "B" 8-37 LA TABLADA "B" (295764): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "B" 8-37 LA TABLADA "B" (295764): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "B" 8-37 LA TABLADA "B" (295764): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "B" 8-37 LA TABLADA "B" (295764): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "B" 8-37 LA TABLADA "B" (295764): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "B" 8-37 LA TABLADA "B" (295764): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "B" 8-37 LA TABLADA "B" (295764): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "B" 8-37 LA TABLADA "B" (295764): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "B" 8-37 LA TABLADA "B" (295764): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "B" 8-37 LA TABLADA "B" (295764): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "B" 8-37 LA TABLADA "B" (295764): cambio con dorsal sin jugador None->None
+  aviso UNIV. NAC. DE CORDOBA "A" 31-20 JOCKEY CLUB CORDOBA "C" (295765): try sin jugador, dorsal None (1T 11 Try 5 )
+  aviso UNIV. NAC. DE CORDOBA "A" 31-20 JOCKEY CLUB CORDOBA "C" (295765): try sin jugador, dorsal None (1T 14 Try 5 )
+  aviso UNIV. NAC. DE CORDOBA "A" 31-20 JOCKEY CLUB CORDOBA "C" (295765): penalty_goal sin jugador, dorsal None (1T 18 Penal 3 )
+  aviso UNIV. NAC. DE CORDOBA "A" 31-20 JOCKEY CLUB CORDOBA "C" (295765): injury sin jugador, dorsal None (2T 30 Lesionado  )
+  aviso UNIV. NAC. DE CORDOBA "A" 31-20 JOCKEY CLUB CORDOBA "C" (295765): try sin jugador, dorsal None (2T 38 Try 5 )
+  aviso UNIV. NAC. DE CORDOBA "A" 31-20 JOCKEY CLUB CORDOBA "C" (295765): conversion sin jugador, dorsal None (2T 38 Conversión 2 )
+297333: sin plantel utilizable (CPRC VS HUR)
+303743: sin plantel utilizable (unc a vs cprc)
+307338: sin plantel utilizable (bvs cpcr)
+  aviso UNIV. NAC. DE CORDOBA "B" 12-60 JOCKEY CLUB CORDOBA "C" (307812): try sin jugador, dorsal None (1T 39 Try 5 )
+  aviso UNIV. NAC. DE CORDOBA "B" 12-60 JOCKEY CLUB CORDOBA "C" (307812): try sin jugador, dorsal None (1T 5 Try 5 )
+  aviso UNIV. NAC. DE CORDOBA "B" 12-60 JOCKEY CLUB CORDOBA "C" (307812): conversion sin jugador, dorsal None (1T 5 Conversión 2 )
+  aviso UNIV. NAC. DE CORDOBA "B" 12-60 JOCKEY CLUB CORDOBA "C" (307812): try sin jugador, dorsal None (1T 15 Try 5 )
+  aviso UNIV. NAC. DE CORDOBA "B" 12-60 JOCKEY CLUB CORDOBA "C" (307812): conversion sin jugador, dorsal None (1T 15 Conversión 2 )
+  aviso UNIV. NAC. DE CORDOBA "B" 12-60 JOCKEY CLUB CORDOBA "C" (307812): conversion sin jugador, dorsal None (1T 16 Conversión 2 )
+  aviso UNIV. NAC. DE CORDOBA "B" 12-60 JOCKEY CLUB CORDOBA "C" (307812): try sin jugador, dorsal None (1T 23 Try 5 )
+  aviso UNIV. NAC. DE CORDOBA "B" 12-60 JOCKEY CLUB CORDOBA "C" (307812): conversion sin jugador, dorsal None (1T 28 Conversión 2 )
+  aviso UNIV. NAC. DE CORDOBA "B" 12-60 JOCKEY CLUB CORDOBA "C" (307812): conversion sin jugador, dorsal None (1T 35 Conversión 2 )
+  aviso UNIV. NAC. DE CORDOBA "B" 12-60 JOCKEY CLUB CORDOBA "C" (307812): conversion sin jugador, dorsal None (1T 35 Conversión 2 )
+  aviso UNIV. NAC. DE CORDOBA "B" 12-60 JOCKEY CLUB CORDOBA "C" (307812): conversion sin jugador, dorsal None (1T 35 Conversión 2 )
+  aviso UNIV. NAC. DE CORDOBA "B" 12-60 JOCKEY CLUB CORDOBA "C" (307812): conversion sin jugador, dorsal None (1T 35 Conversión 2 )
+  aviso UNIV. NAC. DE CORDOBA "B" 12-60 JOCKEY CLUB CORDOBA "C" (307812): try sin jugador, dorsal None (1T 43 Try 5 )
+  aviso UNIV. NAC. DE CORDOBA "B" 12-60 JOCKEY CLUB CORDOBA "C" (307812): try sin jugador, dorsal None (1T 43 Try 5 )
+  aviso UNIV. NAC. DE CORDOBA "B" 12-60 JOCKEY CLUB CORDOBA "C" (307812): try sin jugador, dorsal None (1T 47 Try 5 )
+  aviso UNIV. NAC. DE CORDOBA "B" 12-60 JOCKEY CLUB CORDOBA "C" (307812): try sin jugador, dorsal None (1T 57 Try 5 )
+  aviso UNIV. NAC. DE CORDOBA "B" 12-60 JOCKEY CLUB CORDOBA "C" (307812): conversion sin jugador, dorsal None (1T 57 Conversión 2 )
+  aviso UNIV. NAC. DE CORDOBA "B" 12-60 JOCKEY CLUB CORDOBA "C" (307812): try sin jugador, dorsal None (1T 63 Try 5 )
+  aviso UNIV. NAC. DE CORDOBA "B" 12-60 JOCKEY CLUB CORDOBA "C" (307812): conversion sin jugador, dorsal None (1T 63 Conversión 2 )
+308635: EVENTOS NO CIERRAN UNIV. NAC. DE CORDOBA "A" 57-7 UNIV. NAC. DE CORDOBA "B" (308635): eventos 57-0 (unc vs unc b)
+311168: sin plantel utilizable (UNIV. NAC. DE CORDOBA)
+  aviso JOCKEY CLUB CORDOBA "B" 80-7 UNIVERSITARIO "B" (312590): try sin jugador, dorsal None (1T 10 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 80-7 UNIVERSITARIO "B" (312590): conversion sin jugador, dorsal None (1T 10 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 80-7 UNIVERSITARIO "B" (312590): try sin jugador, dorsal None (1T 15 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 80-7 UNIVERSITARIO "B" (312590): try sin jugador, dorsal None (1T 23 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 80-7 UNIVERSITARIO "B" (312590): conversion sin jugador, dorsal None (1T 23 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 80-7 UNIVERSITARIO "B" (312590): try sin jugador, dorsal None (1T 30 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 80-7 UNIVERSITARIO "B" (312590): conversion sin jugador, dorsal None (1T 30 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 80-7 UNIVERSITARIO "B" (312590): try sin jugador, dorsal None (1T 37 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 80-7 UNIVERSITARIO "B" (312590): conversion sin jugador, dorsal None (1T 37 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 80-7 UNIVERSITARIO "B" (312590): try sin jugador, dorsal None (1T 40 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 80-7 UNIVERSITARIO "B" (312590): conversion sin jugador, dorsal None (1T 40 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 80-7 UNIVERSITARIO "B" (312590): conversion sin jugador, dorsal None (2T 2 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 80-7 UNIVERSITARIO "B" (312590): try sin jugador, dorsal None (2T 2 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 80-7 UNIVERSITARIO "B" (312590): try sin jugador, dorsal None (2T 5 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 80-7 UNIVERSITARIO "B" (312590): conversion sin jugador, dorsal None (2T 5 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 80-7 UNIVERSITARIO "B" (312590): try sin jugador, dorsal None (2T 10 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 80-7 UNIVERSITARIO "B" (312590): conversion sin jugador, dorsal None (2T 10 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 80-7 UNIVERSITARIO "B" (312590): try sin jugador, dorsal None (2T 16 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 80-7 UNIVERSITARIO "B" (312590): conversion sin jugador, dorsal None (2T 16 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 80-7 UNIVERSITARIO "B" (312590): try sin jugador, dorsal None (2T 24 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 80-7 UNIVERSITARIO "B" (312590): conversion sin jugador, dorsal None (2T 24 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 80-7 UNIVERSITARIO "B" (312590): try sin jugador, dorsal None (2T 40 Try 5 )
+  aviso LA TABLADA "B" 32-24 PALERMO BAJO "B" (312591): penalty_goal sin jugador, dorsal None (1T 2 Penal 3 )
+  aviso LA TABLADA "B" 32-24 PALERMO BAJO "B" (312591): try sin jugador, dorsal None (1T 7 Try 5 )
+  aviso LA TABLADA "B" 32-24 PALERMO BAJO "B" (312591): card_yellow sin jugador, dorsal None (1T 36 Amarilla  )
+  aviso LA TABLADA "B" 32-24 PALERMO BAJO "B" (312591): penalty_goal sin jugador, dorsal None (2T 43 Penal 3 )
+  aviso LA TABLADA "B" 32-24 PALERMO BAJO "B" (312591): try sin jugador, dorsal None (2T 58 Try 5 )
+  aviso LA TABLADA "B" 32-24 PALERMO BAJO "B" (312591): conversion sin jugador, dorsal None (2T 59 Conversión 2 )
+  aviso LA TABLADA "B" 32-24 PALERMO BAJO "B" (312591): try sin jugador, dorsal None (2T 65 Try 5 )
+  aviso LA TABLADA "B" 32-24 PALERMO BAJO "B" (312591): conversion sin jugador, dorsal None (2T 66 Conversión 2 )
+  aviso LA TABLADA "B" 32-24 PALERMO BAJO "B" (312591): try sin jugador, dorsal None (2T 78 Try 5 )
+  aviso LA TABLADA "B" 32-24 PALERMO BAJO "B" (312591): conversion sin jugador, dorsal None (2T 79 Conversión 2 )
+  aviso LA TABLADA "B" 32-24 PALERMO BAJO "B" (312591): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 32-24 PALERMO BAJO "B" (312591): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 32-24 PALERMO BAJO "B" (312591): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 32-24 PALERMO BAJO "B" (312591): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 32-24 PALERMO BAJO "B" (312591): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 32-24 PALERMO BAJO "B" (312591): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 32-24 PALERMO BAJO "B" (312591): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 32-24 PALERMO BAJO "B" (312591): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 32-24 PALERMO BAJO "B" (312591): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 32-24 PALERMO BAJO "B" (312591): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 32-24 PALERMO BAJO "B" (312591): cambio con dorsal sin jugador None->None
+  aviso CLUB TABORIN 27-41 JOCKEY CLUB CORDOBA "C" (312592): try sin jugador, dorsal None (1T 14 Try 5 )
+  aviso CLUB TABORIN 27-41 JOCKEY CLUB CORDOBA "C" (312592): conversion sin jugador, dorsal None (1T 15 Conversión 2 )
+  aviso CLUB TABORIN 27-41 JOCKEY CLUB CORDOBA "C" (312592): penalty_goal sin jugador, dorsal None (1T 40 Penal 3 )
+  aviso CLUB TABORIN 27-41 JOCKEY CLUB CORDOBA "C" (312592): card_yellow sin jugador, dorsal None (2T 6 Amarilla  )
+  aviso CLUB TABORIN 27-41 JOCKEY CLUB CORDOBA "C" (312592): try sin jugador, dorsal None (2T 10 Try 5 )
+  aviso CLUB TABORIN 27-41 JOCKEY CLUB CORDOBA "C" (312592): try sin jugador, dorsal None (2T 20 Try 5 )
+  aviso CLUB TABORIN 27-41 JOCKEY CLUB CORDOBA "C" (312592): try sin jugador, dorsal None (2T 39 Try 5 )
+  aviso CLUB TABORIN 27-41 JOCKEY CLUB CORDOBA "C" (312592): conversion sin jugador, dorsal None (2T 40 Conversión 2 )
+  aviso CLUB TABORIN 27-41 JOCKEY CLUB CORDOBA "C" (312592): try sin jugador, dorsal None (1T 4 Try 5 )
+  aviso CLUB TABORIN 27-41 JOCKEY CLUB CORDOBA "C" (312592): conversion sin jugador, dorsal None (1T 5 Conversión 2 )
+  aviso CLUB TABORIN 27-41 JOCKEY CLUB CORDOBA "C" (312592): try sin jugador, dorsal None (1T 9 Try 5 )
+  aviso CLUB TABORIN 27-41 JOCKEY CLUB CORDOBA "C" (312592): conversion sin jugador, dorsal None (1T 10 Conversión 2 )
+  aviso CLUB TABORIN 27-41 JOCKEY CLUB CORDOBA "C" (312592): try sin jugador, dorsal None (1T 21 Try 5 )
+  aviso CLUB TABORIN 27-41 JOCKEY CLUB CORDOBA "C" (312592): conversion sin jugador, dorsal None (1T 22 Conversión 2 )
+  aviso CLUB TABORIN 27-41 JOCKEY CLUB CORDOBA "C" (312592): try sin jugador, dorsal None (1T 30 Try 5 )
+  aviso CLUB TABORIN 27-41 JOCKEY CLUB CORDOBA "C" (312592): penalty_goal sin jugador, dorsal None (1T 38 Penal 3 )
+  aviso CLUB TABORIN 27-41 JOCKEY CLUB CORDOBA "C" (312592): try sin jugador, dorsal None (2T 17 Try 5 )
+  aviso CLUB TABORIN 27-41 JOCKEY CLUB CORDOBA "C" (312592): try sin jugador, dorsal None (2T 25 Try 5 )
+  aviso CLUB TABORIN 27-41 JOCKEY CLUB CORDOBA "C" (312592): conversion sin jugador, dorsal None (2T 27 Conversión 2 )
+312593: EVENTOS NO CIERRAN TALA R.C. "B" 66-14 BAGUALES R.C. (312593): eventos 66-0 (TRC B VS BAGH)
+  aviso UNIV. NAC. DE CORDOBA "B" 10-52 UNIV. NAC. DE CORDOBA "A" (312597): try sin jugador, dorsal None (2T 70 Try 5 )
+  aviso UNIV. NAC. DE CORDOBA "B" 10-52 UNIV. NAC. DE CORDOBA "A" (312597): try sin jugador, dorsal None (2T 78 Try 5 )
+  aviso UNIV. NAC. DE CORDOBA "B" 10-52 UNIV. NAC. DE CORDOBA "A" (312597): cambio con dorsal sin jugador 7->None
+  aviso UNIV. NAC. DE CORDOBA "B" 10-52 UNIV. NAC. DE CORDOBA "A" (312597): cambio con dorsal sin jugador 11->None
+  aviso UNIV. NAC. DE CORDOBA "B" 10-52 UNIV. NAC. DE CORDOBA "A" (312597): cambio con dorsal sin jugador 14->None
+312598: sin plantel utilizable (HUR VS CPRC)
+  aviso TALA R.C. "B" 42-24 JOCKEY CLUB CORDOBA "B" (312968): cambio con dorsal sin jugador None->24
+  aviso TALA R.C. "B" 42-24 JOCKEY CLUB CORDOBA "B" (312968): try sin jugador, dorsal None (1T 14 Try 5 )
+  aviso TALA R.C. "B" 42-24 JOCKEY CLUB CORDOBA "B" (312968): conversion sin jugador, dorsal None (1T 14 Conversión 2 )
+  aviso TALA R.C. "B" 42-24 JOCKEY CLUB CORDOBA "B" (312968): try sin jugador, dorsal None (1T 38 Try 5 )
+  aviso TALA R.C. "B" 42-24 JOCKEY CLUB CORDOBA "B" (312968): conversion sin jugador, dorsal None (1T 38 Conversión 2 )
+  aviso TALA R.C. "B" 42-24 JOCKEY CLUB CORDOBA "B" (312968): card_yellow sin jugador, dorsal None (2T 30 Amarilla  )
+  aviso TALA R.C. "B" 42-24 JOCKEY CLUB CORDOBA "B" (312968): try sin jugador, dorsal None (2T 38 Try 5 )
+  aviso TALA R.C. "B" 42-24 JOCKEY CLUB CORDOBA "B" (312968): try sin jugador, dorsal None (2T 39 Try 5 )
+  aviso TALA R.C. "B" 42-24 JOCKEY CLUB CORDOBA "B" (312968): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "B" 42-24 JOCKEY CLUB CORDOBA "B" (312968): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "B" 42-24 JOCKEY CLUB CORDOBA "B" (312968): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "B" 42-24 JOCKEY CLUB CORDOBA "B" (312968): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "B" 42-24 JOCKEY CLUB CORDOBA "B" (312968): cambio con dorsal sin jugador None->None
+  aviso UNIV. NAC. DE CORDOBA "B" 8-68 CORDOBA ATHLETIC "B" (312969): ingreso sin salida, dorsal 19 (2T 6)
+312978: sin plantel utilizable (CUC B VS PB C)
+  aviso CARLOS PAZ RC 12-26 JOCKEY CLUB CORDOBA "C" (312979): try sin jugador, dorsal None (1T 2 Try 5 )
+  aviso CARLOS PAZ RC 12-26 JOCKEY CLUB CORDOBA "C" (312979): conversion sin jugador, dorsal None (1T 2 Conversión 2 )
+  aviso CARLOS PAZ RC 12-26 JOCKEY CLUB CORDOBA "C" (312979): try sin jugador, dorsal None (1T 11 Try 5 )
+  aviso CARLOS PAZ RC 12-26 JOCKEY CLUB CORDOBA "C" (312979): conversion sin jugador, dorsal None (1T 12 Conversión 2 )
+  aviso CARLOS PAZ RC 12-26 JOCKEY CLUB CORDOBA "C" (312979): card_yellow sin jugador, dorsal None (1T 14 Amarilla  )
+  aviso CARLOS PAZ RC 12-26 JOCKEY CLUB CORDOBA "C" (312979): try sin jugador, dorsal None (2T 43 Try 5 )
+  aviso CARLOS PAZ RC 12-26 JOCKEY CLUB CORDOBA "C" (312979): conversion sin jugador, dorsal None (2T 44 Conversión 2 )
+  aviso CARLOS PAZ RC 12-26 JOCKEY CLUB CORDOBA "C" (312979): try sin jugador, dorsal None (2T 67 Try 5 )
+  aviso CARLOS PAZ RC 12-26 JOCKEY CLUB CORDOBA "C" (312979): card_yellow sin jugador, dorsal None (2T 70 Amarilla  )
+  aviso HURONES (ARROYITO) 24-45 CORDOBA ATHLETIC "C" (312981): card_yellow sin jugador, dorsal None (1T 28 Amarilla  )
+  aviso HURONES (ARROYITO) 24-45 CORDOBA ATHLETIC "C" (312981): try sin jugador, dorsal None (2T 2 Try 5 )
+  aviso HURONES (ARROYITO) 24-45 CORDOBA ATHLETIC "C" (312981): conversion sin jugador, dorsal None (2T 3 Conversión 2 )
+  aviso HURONES (ARROYITO) 24-45 CORDOBA ATHLETIC "C" (312981): try sin jugador, dorsal None (2T 18 Try 5 )
+  aviso HURONES (ARROYITO) 24-45 CORDOBA ATHLETIC "C" (312981): conversion sin jugador, dorsal None (2T 19 Conversión 2 )
+  aviso HURONES (ARROYITO) 24-45 CORDOBA ATHLETIC "C" (312981): try sin jugador, dorsal None (2T 30 Try 5 )
+  aviso HURONES (ARROYITO) 24-45 CORDOBA ATHLETIC "C" (312981): try sin jugador, dorsal None (2T 39 Try 5 )
+  aviso HURONES (ARROYITO) 24-45 CORDOBA ATHLETIC "C" (312981): salida sin reemplazo, dorsal None (2T 1)
+  aviso HURONES (ARROYITO) 24-45 CORDOBA ATHLETIC "C" (312981): cambio con dorsal sin jugador None->None
+  aviso HURONES (ARROYITO) 24-45 CORDOBA ATHLETIC "C" (312981): cambio con dorsal sin jugador None->None
+  aviso HURONES (ARROYITO) 24-45 CORDOBA ATHLETIC "C" (312981): cambio con dorsal sin jugador None->None
+  aviso HURONES (ARROYITO) 24-45 CORDOBA ATHLETIC "C" (312981): cambio con dorsal sin jugador None->None
+  aviso HURONES (ARROYITO) 24-45 CORDOBA ATHLETIC "C" (312981): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 38-28 PALERMO BAJO "B" (314469): card_yellow sin jugador, dorsal None (1T 28 Amarilla  )
+  aviso JOCKEY CLUB CORDOBA "B" 38-28 PALERMO BAJO "B" (314469): conversion sin jugador, dorsal None (1T 30 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 38-28 PALERMO BAJO "B" (314469): try sin jugador, dorsal None (1T 40 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 38-28 PALERMO BAJO "B" (314469): conversion sin jugador, dorsal None (1T 40 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 38-28 PALERMO BAJO "B" (314469): try sin jugador, dorsal None (2T 42 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 38-28 PALERMO BAJO "B" (314469): try sin jugador, dorsal None (2T 49 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 38-28 PALERMO BAJO "B" (314469): try sin jugador, dorsal None (2T 54 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 38-28 PALERMO BAJO "B" (314469): conversion sin jugador, dorsal None (2T 54 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 38-28 PALERMO BAJO "B" (314469): try sin jugador, dorsal None (2T 60 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 38-28 PALERMO BAJO "B" (314469): card_yellow sin jugador, dorsal None (2T 65 Amarilla  )
+  aviso JOCKEY CLUB CORDOBA "B" 38-28 PALERMO BAJO "B" (314469): card_yellow sin jugador, dorsal None (2T 79 Amarilla  )
+  aviso JOCKEY CLUB CORDOBA "B" 38-28 PALERMO BAJO "B" (314469): try sin jugador, dorsal None (2T 79 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 38-28 PALERMO BAJO "B" (314469): conversion sin jugador, dorsal None (2T 79 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 38-28 PALERMO BAJO "B" (314469): salida sin reemplazo, dorsal None (2T 8)
+  aviso JOCKEY CLUB CORDOBA "B" 38-28 PALERMO BAJO "B" (314469): salida sin reemplazo, dorsal None (2T 8)
+  aviso JOCKEY CLUB CORDOBA "B" 38-28 PALERMO BAJO "B" (314469): salida sin reemplazo, dorsal None (2T 29)
+  aviso JOCKEY CLUB CORDOBA "B" 38-28 PALERMO BAJO "B" (314469): ingreso sin salida, dorsal None (1T 48)
+  aviso JOCKEY CLUB CORDOBA "B" 38-28 PALERMO BAJO "B" (314469): ingreso sin salida, dorsal None (1T 48)
+  aviso JOCKEY CLUB CORDOBA "B" 38-28 PALERMO BAJO "B" (314469): ingreso sin salida, dorsal None (1T 69)
+  aviso JOCKEY CLUB CORDOBA "B" 38-28 PALERMO BAJO "B" (314469): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 38-28 PALERMO BAJO "B" (314469): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 38-28 PALERMO BAJO "B" (314469): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 38-28 PALERMO BAJO "B" (314469): cambio con dorsal sin jugador None->None
+314470: sin plantel utilizable (hur v scuc b)
+  aviso CORDOBA ATHLETIC "B" 17-43 LA TABLADA "B" (314471): try sin jugador, dorsal None (1T 5 Try 5 )
+  aviso CORDOBA ATHLETIC "B" 17-43 LA TABLADA "B" (314471): penalty_goal sin jugador, dorsal None (1T 11 Penal 3 )
+  aviso CORDOBA ATHLETIC "B" 17-43 LA TABLADA "B" (314471): try sin jugador, dorsal None (1T 19 Try 5 )
+  aviso CORDOBA ATHLETIC "B" 17-43 LA TABLADA "B" (314471): conversion sin jugador, dorsal None (1T 19 Conversión 2 )
+  aviso CORDOBA ATHLETIC "B" 17-43 LA TABLADA "B" (314471): try sin jugador, dorsal None (1T 37 Try 5 )
+  aviso CORDOBA ATHLETIC "B" 17-43 LA TABLADA "B" (314471): conversion sin jugador, dorsal None (1T 37 Conversión 2 )
+  aviso CORDOBA ATHLETIC "B" 17-43 LA TABLADA "B" (314471): try sin jugador, dorsal None (2T 9 Try 5 )
+  aviso CORDOBA ATHLETIC "B" 17-43 LA TABLADA "B" (314471): conversion sin jugador, dorsal None (2T 9 Conversión 2 )
+  aviso CORDOBA ATHLETIC "B" 17-43 LA TABLADA "B" (314471): try sin jugador, dorsal None (2T 80 Try 5 )
+  aviso CORDOBA ATHLETIC "B" 17-43 LA TABLADA "B" (314471): conversion sin jugador, dorsal None (2T 80 Conversión 2 )
+  aviso CLUB TABORIN 27-5 UNIV. NAC. DE CORDOBA "B" (314472): try sin jugador, dorsal None (1T 1 Try 5 )
+  aviso CLUB TABORIN 27-5 UNIV. NAC. DE CORDOBA "B" (314472): conversion sin jugador, dorsal None (1T 1 Conversión 2 )
+  aviso CLUB TABORIN 27-5 UNIV. NAC. DE CORDOBA "B" (314472): conversion sin jugador, dorsal None (2T 1 Conversión 2 )
+  aviso CLUB TABORIN 27-5 UNIV. NAC. DE CORDOBA "B" (314472): conversion sin jugador, dorsal None (2T 1 Conversión 2 )
+  aviso CLUB TABORIN 27-5 UNIV. NAC. DE CORDOBA "B" (314472): conversion sin jugador, dorsal None (2T 1 Conversión 2 )
+  aviso CLUB TABORIN 27-5 UNIV. NAC. DE CORDOBA "B" (314472): try sin jugador, dorsal None (2T 1 Try 5 )
+  aviso CLUB TABORIN 27-5 UNIV. NAC. DE CORDOBA "B" (314472): conversion sin jugador, dorsal None (2T 1 Conversión 2 )
+  aviso CLUB TABORIN 27-5 UNIV. NAC. DE CORDOBA "B" (314472): conversion sin jugador, dorsal None (2T 1 Conversión 2 )
+  aviso CLUB TABORIN 27-5 UNIV. NAC. DE CORDOBA "B" (314472): try sin jugador, dorsal None (2T 1 Try 5 )
+  aviso CLUB TABORIN 27-5 UNIV. NAC. DE CORDOBA "B" (314472): cambio con dorsal sin jugador 1->None
+  aviso CLUB TABORIN 27-5 UNIV. NAC. DE CORDOBA "B" (314472): cambio con dorsal sin jugador 4->None
+  aviso CLUB TABORIN 27-5 UNIV. NAC. DE CORDOBA "B" (314472): cambio con dorsal sin jugador 14->None
+  aviso TALA R.C. "B" 43-19 UNIV. NAC. DE CORDOBA "A" (314473): cambio con dorsal sin jugador 1->None
+  aviso TALA R.C. "B" 43-19 UNIV. NAC. DE CORDOBA "A" (314473): cambio con dorsal sin jugador 9->None
+314474: sin plantel utilizable (JCC C VS AG)
+314475: sin plantel utilizable (CAC C BS C´RC)
+  aviso JOCKEY CLUB CORDOBA "B" 36-10 CORDOBA ATHLETIC "B" (314594): try sin jugador, dorsal None (1T 10 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 36-10 CORDOBA ATHLETIC "B" (314594): conversion sin jugador, dorsal None (1T 10 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 36-10 CORDOBA ATHLETIC "B" (314594): try sin jugador, dorsal None (1T 40 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 36-10 CORDOBA ATHLETIC "B" (314594): conversion sin jugador, dorsal None (1T 40 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 36-10 CORDOBA ATHLETIC "B" (314594): try sin jugador, dorsal None (2T 2 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 36-10 CORDOBA ATHLETIC "B" (314594): conversion sin jugador, dorsal None (2T 2 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 36-10 CORDOBA ATHLETIC "B" (314594): penalty_goal sin jugador, dorsal None (2T 14 Penal 3 )
+  aviso JOCKEY CLUB CORDOBA "B" 36-10 CORDOBA ATHLETIC "B" (314594): try sin jugador, dorsal None (2T 19 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 36-10 CORDOBA ATHLETIC "B" (314594): try sin jugador, dorsal None (2T 22 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 36-10 CORDOBA ATHLETIC "B" (314594): conversion sin jugador, dorsal None (2T 22 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 36-10 CORDOBA ATHLETIC "B" (314594): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 36-10 CORDOBA ATHLETIC "B" (314594): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 36-10 CORDOBA ATHLETIC "B" (314594): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 36-10 CORDOBA ATHLETIC "B" (314594): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 36-10 CORDOBA ATHLETIC "B" (314594): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 36-10 CORDOBA ATHLETIC "B" (314594): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 36-10 CORDOBA ATHLETIC "B" (314594): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 36-10 CORDOBA ATHLETIC "B" (314594): cambio con dorsal sin jugador None->None
+  aviso HURONES (ARROYITO) 18-17 CLUB TABORIN (314595): card_yellow sin jugador, dorsal None (1T 11 Amarilla  )
+  aviso HURONES (ARROYITO) 18-17 CLUB TABORIN (314595): try sin jugador, dorsal None (1T 27 Try 5 )
+  aviso HURONES (ARROYITO) 18-17 CLUB TABORIN (314595): penalty_goal sin jugador, dorsal None (1T 40 Penal 3 )
+  aviso HURONES (ARROYITO) 18-17 CLUB TABORIN (314595): try sin jugador, dorsal None (2T 33 Try 5 )
+  aviso HURONES (ARROYITO) 18-17 CLUB TABORIN (314595): conversion sin jugador, dorsal None (2T 33 Conversión 2 )
+  aviso HURONES (ARROYITO) 18-17 CLUB TABORIN (314595): penalty_goal sin jugador, dorsal None (2T 40 Penal 3 )
+  aviso HURONES (ARROYITO) 18-17 CLUB TABORIN (314595): penalty_goal sin jugador, dorsal None (1T 10 Penal 3 )
+  aviso HURONES (ARROYITO) 18-17 CLUB TABORIN (314595): try sin jugador, dorsal None (1T 10 Try 5 )
+  aviso HURONES (ARROYITO) 18-17 CLUB TABORIN (314595): conversion sin jugador, dorsal None (1T 11 Conversión 2 )
+  aviso HURONES (ARROYITO) 18-17 CLUB TABORIN (314595): card_yellow sin jugador, dorsal None (1T 25 Amarilla  )
+  aviso HURONES (ARROYITO) 18-17 CLUB TABORIN (314595): card_yellow sin jugador, dorsal None (2T 10 Amarilla  )
+314597: sin plantel utilizable (cac c vs cuc b)
+  aviso JOCKEY CLUB CORDOBA "C" 12-15 LA TABLADA "B" (314598): try sin jugador, dorsal None (1T 44 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 12-15 LA TABLADA "B" (314598): conversion sin jugador, dorsal None (1T 44 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "C" 12-15 LA TABLADA "B" (314598): card_yellow sin jugador, dorsal None (2T 5 Amarilla  )
+  aviso JOCKEY CLUB CORDOBA "C" 12-15 LA TABLADA "B" (314598): try sin jugador, dorsal None (2T 10 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 12-15 LA TABLADA "B" (314598): card_yellow sin jugador, dorsal None (2T 38 Amarilla  )
+  aviso JOCKEY CLUB CORDOBA "C" 12-15 LA TABLADA "B" (314598): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 12-15 LA TABLADA "B" (314598): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 12-15 LA TABLADA "B" (314598): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 12-15 LA TABLADA "B" (314598): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 12-15 LA TABLADA "B" (314598): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 12-15 LA TABLADA "B" (314598): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 12-15 LA TABLADA "B" (314598): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 12-15 LA TABLADA "B" (314598): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 12-15 LA TABLADA "B" (314598): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 12-15 LA TABLADA "B" (314598): try sin jugador, dorsal None (1T 40 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 12-15 LA TABLADA "B" (314598): conversion sin jugador, dorsal None (1T 41 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "C" 12-15 LA TABLADA "B" (314598): card_yellow sin jugador, dorsal None (2T 52 Amarilla  )
+  aviso JOCKEY CLUB CORDOBA "C" 12-15 LA TABLADA "B" (314598): card_yellow sin jugador, dorsal None (2T 56 Amarilla  )
+  aviso JOCKEY CLUB CORDOBA "C" 12-15 LA TABLADA "B" (314598): penalty_goal sin jugador, dorsal None (2T 62 Penal 3 )
+  aviso JOCKEY CLUB CORDOBA "C" 12-15 LA TABLADA "B" (314598): try sin jugador, dorsal None (2T 64 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 12-15 LA TABLADA "B" (314598): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 12-15 LA TABLADA "B" (314598): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 12-15 LA TABLADA "B" (314598): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 12-15 LA TABLADA "B" (314598): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 12-15 LA TABLADA "B" (314598): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 12-15 LA TABLADA "B" (314598): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 12-15 LA TABLADA "B" (314598): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 12-15 LA TABLADA "B" (314598): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 12-15 LA TABLADA "B" (314598): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 12-15 LA TABLADA "B" (314598): cambio con dorsal sin jugador None->None
+  aviso UNIV. NAC. DE CORDOBA "A" 31-8 BAGUALES R.C. (314599): cambio con dorsal sin jugador 6->None
+  aviso UNIV. NAC. DE CORDOBA "A" 31-8 BAGUALES R.C. (314599): cambio con dorsal sin jugador 9->None
+314600: sin plantel utilizable (cprc vs unc b)
+315059: sin plantel utilizable (315059)
+315060: sin plantel utilizable (315060)
+  aviso PALERMO BAJO "B" 38-35 JOCKEY CLUB CORDOBA "C" (315062): try sin jugador, dorsal None (1T 4 Try 5 )
+  aviso PALERMO BAJO "B" 38-35 JOCKEY CLUB CORDOBA "C" (315062): conversion sin jugador, dorsal None (1T 4 Conversión 2 )
+  aviso PALERMO BAJO "B" 38-35 JOCKEY CLUB CORDOBA "C" (315062): try sin jugador, dorsal None (1T 27 Try 5 )
+  aviso PALERMO BAJO "B" 38-35 JOCKEY CLUB CORDOBA "C" (315062): conversion sin jugador, dorsal None (1T 27 Conversión 2 )
+  aviso PALERMO BAJO "B" 38-35 JOCKEY CLUB CORDOBA "C" (315062): try sin jugador, dorsal None (1T 33 Try 5 )
+  aviso PALERMO BAJO "B" 38-35 JOCKEY CLUB CORDOBA "C" (315062): conversion sin jugador, dorsal None (1T 33 Conversión 2 )
+  aviso PALERMO BAJO "B" 38-35 JOCKEY CLUB CORDOBA "C" (315062): try sin jugador, dorsal None (2T 15 Try 5 )
+  aviso PALERMO BAJO "B" 38-35 JOCKEY CLUB CORDOBA "C" (315062): conversion sin jugador, dorsal None (2T 15 Conversión 2 )
+  aviso CLUB TABORIN 31-53 CORDOBA ATHLETIC "B" (315063): try sin jugador, dorsal None (1T 6 Try 5 )
+  aviso CLUB TABORIN 31-53 CORDOBA ATHLETIC "B" (315063): conversion sin jugador, dorsal None (1T 6 Conversión 2 )
+  aviso CLUB TABORIN 31-53 CORDOBA ATHLETIC "B" (315063): penalty_goal sin jugador, dorsal None (1T 15 Penal 3 )
+  aviso CLUB TABORIN 31-53 CORDOBA ATHLETIC "B" (315063): conversion sin jugador, dorsal None (1T 27 Conversión 2 )
+  aviso CLUB TABORIN 31-53 CORDOBA ATHLETIC "B" (315063): injury sin jugador, dorsal None (1T 30 Lesionado  )
+  aviso CLUB TABORIN 31-53 CORDOBA ATHLETIC "B" (315063): card_red sin jugador, dorsal None (1T 35 Roja  )
+  aviso CLUB TABORIN 31-53 CORDOBA ATHLETIC "B" (315063): card_yellow sin jugador, dorsal None (2T 30 Amarilla  )
+  aviso CLUB TABORIN 31-53 CORDOBA ATHLETIC "B" (315063): try sin jugador, dorsal None (2T 40 Try 5 )
+  aviso CLUB TABORIN 31-53 CORDOBA ATHLETIC "B" (315063): try sin jugador, dorsal None (2T 41 Try 5 )
+  aviso CLUB TABORIN 31-53 CORDOBA ATHLETIC "B" (315063): conversion sin jugador, dorsal None (2T 41 Conversión 2 )
+  aviso CLUB TABORIN 31-53 CORDOBA ATHLETIC "B" (315063): try sin jugador, dorsal None (2T 42 Try 5 )
+  aviso CLUB TABORIN 31-53 CORDOBA ATHLETIC "B" (315063): conversion sin jugador, dorsal None (2T 42 Conversión 2 )
+  aviso CLUB TABORIN 31-53 CORDOBA ATHLETIC "B" (315063): salida sin reemplazo, dorsal None (2T 0)
+  aviso CLUB TABORIN 31-53 CORDOBA ATHLETIC "B" (315063): cambio con dorsal sin jugador None->None
+  aviso CLUB TABORIN 31-53 CORDOBA ATHLETIC "B" (315063): cambio con dorsal sin jugador None->None
+  aviso CLUB TABORIN 31-53 CORDOBA ATHLETIC "B" (315063): ingreso sin salida, dorsal 3 (2T 35)
+315065: sin plantel utilizable (huro vs unc)
+  aviso HURONES (ARROYITO) 6-26 JOCKEY CLUB CORDOBA "B" (319782): try sin jugador, dorsal None (1T 6 Try 5 )
+  aviso HURONES (ARROYITO) 6-26 JOCKEY CLUB CORDOBA "B" (319782): card_yellow sin jugador, dorsal None (1T 13 Amarilla  )
+  aviso HURONES (ARROYITO) 6-26 JOCKEY CLUB CORDOBA "B" (319782): try sin jugador, dorsal None (1T 25 Try 5 )
+  aviso HURONES (ARROYITO) 6-26 JOCKEY CLUB CORDOBA "B" (319782): conversion sin jugador, dorsal None (1T 25 Conversión 2 )
+  aviso HURONES (ARROYITO) 6-26 JOCKEY CLUB CORDOBA "B" (319782): card_yellow sin jugador, dorsal None (1T 32 Amarilla  )
+  aviso HURONES (ARROYITO) 6-26 JOCKEY CLUB CORDOBA "B" (319782): try sin jugador, dorsal None (1T 37 Try 5 )
+  aviso HURONES (ARROYITO) 6-26 JOCKEY CLUB CORDOBA "B" (319782): conversion sin jugador, dorsal None (1T 37 Conversión 2 )
+  aviso HURONES (ARROYITO) 6-26 JOCKEY CLUB CORDOBA "B" (319782): try sin jugador, dorsal None (2T 18 Try 5 )
+  aviso HURONES (ARROYITO) 6-26 JOCKEY CLUB CORDOBA "B" (319782): conversion sin jugador, dorsal None (2T 18 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "C" 24-18 TALA R.C. "B" (319783): try sin jugador, dorsal None (1T 17 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 24-18 TALA R.C. "B" (319783): conversion sin jugador, dorsal None (1T 17 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "C" 24-18 TALA R.C. "B" (319783): card_yellow sin jugador, dorsal None (1T 21 Amarilla  )
+  aviso JOCKEY CLUB CORDOBA "C" 24-18 TALA R.C. "B" (319783): try sin jugador, dorsal None (2T 32 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 24-18 TALA R.C. "B" (319783): conversion sin jugador, dorsal None (2T 32 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "C" 24-18 TALA R.C. "B" (319783): penalty_goal sin jugador, dorsal None (2T 36 Penal 3 )
+  aviso JOCKEY CLUB CORDOBA "C" 24-18 TALA R.C. "B" (319783): try sin jugador, dorsal None (2T 41 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 24-18 TALA R.C. "B" (319783): conversion sin jugador, dorsal None (2T 41 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "C" 24-18 TALA R.C. "B" (319783): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 24-18 TALA R.C. "B" (319783): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 24-18 TALA R.C. "B" (319783): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 24-18 TALA R.C. "B" (319783): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 24-18 TALA R.C. "B" (319783): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 24-18 TALA R.C. "B" (319783): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 24-18 TALA R.C. "B" (319783): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 24-18 TALA R.C. "B" (319783): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 84-10 CLUB TABORIN (319784): penalty_goal sin jugador, dorsal None (1T 3 Penal 3 )
+  aviso LA TABLADA "B" 84-10 CLUB TABORIN (319784): try sin jugador, dorsal None (1T 4 Try 5 )
+  aviso LA TABLADA "B" 84-10 CLUB TABORIN (319784): conversion sin jugador, dorsal None (1T 5 Conversión 2 )
+  aviso LA TABLADA "B" 84-10 CLUB TABORIN (319784): try sin jugador, dorsal None (1T 11 Try 5 )
+  aviso LA TABLADA "B" 84-10 CLUB TABORIN (319784): conversion sin jugador, dorsal None (1T 12 Conversión 2 )
+  aviso LA TABLADA "B" 84-10 CLUB TABORIN (319784): try sin jugador, dorsal None (1T 14 Try 5 )
+  aviso LA TABLADA "B" 84-10 CLUB TABORIN (319784): conversion sin jugador, dorsal None (1T 15 Conversión 2 )
+  aviso LA TABLADA "B" 84-10 CLUB TABORIN (319784): try sin jugador, dorsal None (1T 19 Try 5 )
+  aviso LA TABLADA "B" 84-10 CLUB TABORIN (319784): conversion sin jugador, dorsal None (1T 20 Conversión 2 )
+  aviso LA TABLADA "B" 84-10 CLUB TABORIN (319784): try sin jugador, dorsal None (1T 22 Try 5 )
+  aviso LA TABLADA "B" 84-10 CLUB TABORIN (319784): try sin jugador, dorsal None (1T 30 Try 5 )
+  aviso LA TABLADA "B" 84-10 CLUB TABORIN (319784): try sin jugador, dorsal None (1T 57 Try 5 )
+  aviso LA TABLADA "B" 84-10 CLUB TABORIN (319784): card_yellow sin jugador, dorsal None (2T 53 Amarilla  )
+  aviso LA TABLADA "B" 84-10 CLUB TABORIN (319784): try sin jugador, dorsal None (2T 61 Try 5 )
+  aviso LA TABLADA "B" 84-10 CLUB TABORIN (319784): try sin jugador, dorsal None (2T 67 Try 5 )
+  aviso LA TABLADA "B" 84-10 CLUB TABORIN (319784): conversion sin jugador, dorsal None (2T 67 Conversión 2 )
+  aviso LA TABLADA "B" 84-10 CLUB TABORIN (319784): try sin jugador, dorsal None (2T 68 Try 5 )
+  aviso LA TABLADA "B" 84-10 CLUB TABORIN (319784): conversion sin jugador, dorsal None (2T 69 Conversión 2 )
+  aviso LA TABLADA "B" 84-10 CLUB TABORIN (319784): try sin jugador, dorsal None (2T 72 Try 5 )
+  aviso LA TABLADA "B" 84-10 CLUB TABORIN (319784): conversion sin jugador, dorsal None (2T 72 Conversión 2 )
+  aviso LA TABLADA "B" 84-10 CLUB TABORIN (319784): try sin jugador, dorsal None (2T 81 Try 5 )
+  aviso LA TABLADA "B" 84-10 CLUB TABORIN (319784): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 84-10 CLUB TABORIN (319784): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 84-10 CLUB TABORIN (319784): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 84-10 CLUB TABORIN (319784): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 84-10 CLUB TABORIN (319784): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 84-10 CLUB TABORIN (319784): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 84-10 CLUB TABORIN (319784): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 84-10 CLUB TABORIN (319784): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 84-10 CLUB TABORIN (319784): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 84-10 CLUB TABORIN (319784): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 84-10 CLUB TABORIN (319784): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 84-10 CLUB TABORIN (319784): penalty_goal sin jugador, dorsal None (1T 20 Penal 3 )
+  aviso LA TABLADA "B" 84-10 CLUB TABORIN (319784): card_yellow sin jugador, dorsal None (1T 27 Amarilla  )
+  aviso LA TABLADA "B" 84-10 CLUB TABORIN (319784): try sin jugador, dorsal None (2T 29 Try 5 )
+  aviso LA TABLADA "B" 84-10 CLUB TABORIN (319784): conversion sin jugador, dorsal None (2T 29 Conversión 2 )
+319787: sin plantel utilizable (319787)
+319788: sin plantel utilizable (319788)
+  aviso JOCKEY CLUB CORDOBA "B" 17-14 UNIV. NAC. DE CORDOBA "A" (320756): try sin jugador, dorsal None (1T 7 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 17-14 UNIV. NAC. DE CORDOBA "A" (320756): conversion sin jugador, dorsal None (1T 7 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 17-14 UNIV. NAC. DE CORDOBA "A" (320756): try sin jugador, dorsal None (2T 7 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 17-14 UNIV. NAC. DE CORDOBA "A" (320756): conversion sin jugador, dorsal None (2T 7 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 17-14 UNIV. NAC. DE CORDOBA "A" (320756): card_yellow sin jugador, dorsal None (2T 15 Amarilla  )
+  aviso JOCKEY CLUB CORDOBA "B" 17-14 UNIV. NAC. DE CORDOBA "A" (320756): card_yellow sin jugador, dorsal None (2T 28 Amarilla  )
+  aviso JOCKEY CLUB CORDOBA "B" 17-14 UNIV. NAC. DE CORDOBA "A" (320756): penalty_goal sin jugador, dorsal None (2T 30 Penal 3 )
+  aviso JOCKEY CLUB CORDOBA "B" 17-14 UNIV. NAC. DE CORDOBA "A" (320756): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 17-14 UNIV. NAC. DE CORDOBA "A" (320756): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 17-14 UNIV. NAC. DE CORDOBA "A" (320756): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 17-14 UNIV. NAC. DE CORDOBA "A" (320756): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 17-14 UNIV. NAC. DE CORDOBA "A" (320756): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 17-14 UNIV. NAC. DE CORDOBA "A" (320756): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 17-14 UNIV. NAC. DE CORDOBA "A" (320756): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 17-14 UNIV. NAC. DE CORDOBA "A" (320756): cambio con dorsal sin jugador None->None
+  aviso CORDOBA ATHLETIC "B" 31-27 PALERMO BAJO "B" (320757): ingreso sin salida, dorsal 21 (2T 10)
+  aviso CORDOBA ATHLETIC "B" 31-27 PALERMO BAJO "B" (320757): ingreso sin salida, dorsal 24 (2T 12)
+  aviso TALA R.C. "B" 40-14 LA TABLADA "B" (320758): penalty_goal sin jugador, dorsal None (1T 4 Penal 3 )
+  aviso TALA R.C. "B" 40-14 LA TABLADA "B" (320758): penalty_goal sin jugador, dorsal None (1T 15 Penal 3 )
+  aviso TALA R.C. "B" 40-14 LA TABLADA "B" (320758): card_yellow sin jugador, dorsal None (1T 26 Amarilla  )
+  aviso TALA R.C. "B" 40-14 LA TABLADA "B" (320758): penalty_goal sin jugador, dorsal None (1T 32 Penal 3 )
+  aviso TALA R.C. "B" 40-14 LA TABLADA "B" (320758): try sin jugador, dorsal None (1T 38 Try 5 )
+  aviso TALA R.C. "B" 40-14 LA TABLADA "B" (320758): card_yellow sin jugador, dorsal None (2T 54 Amarilla  )
+  aviso TALA R.C. "B" 40-14 LA TABLADA "B" (320758): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "B" 40-14 LA TABLADA "B" (320758): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "B" 40-14 LA TABLADA "B" (320758): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "B" 40-14 LA TABLADA "B" (320758): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "B" 40-14 LA TABLADA "B" (320758): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "B" 40-14 LA TABLADA "B" (320758): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "B" 40-14 LA TABLADA "B" (320758): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "B" 40-14 LA TABLADA "B" (320758): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "B" 40-14 LA TABLADA "B" (320758): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "B" 40-14 LA TABLADA "B" (320758): cambio con dorsal sin jugador None->None
+320759: EVENTOS NO CIERRAN CORDOBA ATHLETIC "C" 67-15 CLUB TABORIN (320759): eventos 67-0 (320759)
+  aviso UNIV. NAC. DE CORDOBA "B" 15-47 BAGUALES R.C. (320760): try sin jugador, dorsal None (1T 4 Try 5 )
+  aviso UNIV. NAC. DE CORDOBA "B" 15-47 BAGUALES R.C. (320760): penalty_goal sin jugador, dorsal None (1T 8 Penal 3 )
+  aviso UNIV. NAC. DE CORDOBA "B" 15-47 BAGUALES R.C. (320760): card_yellow sin jugador, dorsal None (2T 9 Amarilla  )
+  aviso UNIV. NAC. DE CORDOBA "B" 15-47 BAGUALES R.C. (320760): try sin jugador, dorsal None (2T 37 Try 5 )
+  aviso UNIV. NAC. DE CORDOBA "B" 15-47 BAGUALES R.C. (320760): conversion sin jugador, dorsal None (2T 37 Conversión 2 )
+  aviso UNIV. NAC. DE CORDOBA "B" 15-47 BAGUALES R.C. (320760): cambio con dorsal sin jugador None->None
+  aviso UNIV. NAC. DE CORDOBA "B" 15-47 BAGUALES R.C. (320760): cambio con dorsal sin jugador None->None
+  aviso UNIV. NAC. DE CORDOBA "B" 15-47 BAGUALES R.C. (320760): cambio con dorsal sin jugador None->None
+  aviso UNIV. NAC. DE CORDOBA "B" 15-47 BAGUALES R.C. (320760): cambio con dorsal sin jugador None->None
+  aviso UNIV. NAC. DE CORDOBA "B" 15-47 BAGUALES R.C. (320760): cambio con dorsal sin jugador None->None
+  aviso UNIV. NAC. DE CORDOBA "B" 15-47 BAGUALES R.C. (320760): cambio con dorsal sin jugador None->None
+  aviso UNIV. NAC. DE CORDOBA "B" 15-47 BAGUALES R.C. (320760): cambio con dorsal sin jugador None->None
+  aviso HURONES (ARROYITO) 13-44 JOCKEY CLUB CORDOBA "C" (320761): try sin jugador, dorsal None (1T 23 Try 5 )
+  aviso HURONES (ARROYITO) 13-44 JOCKEY CLUB CORDOBA "C" (320761): card_yellow sin jugador, dorsal None (1T 23 Amarilla  )
+  aviso HURONES (ARROYITO) 13-44 JOCKEY CLUB CORDOBA "C" (320761): try sin jugador, dorsal None (1T 33 Try 5 )
+  aviso HURONES (ARROYITO) 13-44 JOCKEY CLUB CORDOBA "C" (320761): conversion sin jugador, dorsal None (1T 33 Conversión 2 )
+  aviso HURONES (ARROYITO) 13-44 JOCKEY CLUB CORDOBA "C" (320761): try sin jugador, dorsal None (1T 40 Try 5 )
+  aviso HURONES (ARROYITO) 13-44 JOCKEY CLUB CORDOBA "C" (320761): try sin jugador, dorsal None (2T 1 Try 5 )
+  aviso HURONES (ARROYITO) 13-44 JOCKEY CLUB CORDOBA "C" (320761): try sin jugador, dorsal None (2T 12 Try 5 )
+  aviso HURONES (ARROYITO) 13-44 JOCKEY CLUB CORDOBA "C" (320761): try sin jugador, dorsal None (2T 17 Try 5 )
+  aviso HURONES (ARROYITO) 13-44 JOCKEY CLUB CORDOBA "C" (320761): conversion sin jugador, dorsal None (2T 17 Conversión 2 )
+  aviso HURONES (ARROYITO) 13-44 JOCKEY CLUB CORDOBA "C" (320761): card_yellow sin jugador, dorsal None (2T 29 Amarilla  )
+  aviso HURONES (ARROYITO) 13-44 JOCKEY CLUB CORDOBA "C" (320761): try sin jugador, dorsal None (2T 40 Try 5 )
+  aviso HURONES (ARROYITO) 13-44 JOCKEY CLUB CORDOBA "C" (320761): try sin jugador, dorsal None (2T 42 Try 5 )
+  aviso HURONES (ARROYITO) 13-44 JOCKEY CLUB CORDOBA "C" (320761): cambio con dorsal sin jugador None->None
+  aviso HURONES (ARROYITO) 13-44 JOCKEY CLUB CORDOBA "C" (320761): cambio con dorsal sin jugador None->None
+  aviso HURONES (ARROYITO) 13-44 JOCKEY CLUB CORDOBA "C" (320761): cambio con dorsal sin jugador None->None
+  aviso HURONES (ARROYITO) 13-44 JOCKEY CLUB CORDOBA "C" (320761): cambio con dorsal sin jugador None->None
+  aviso HURONES (ARROYITO) 13-44 JOCKEY CLUB CORDOBA "C" (320761): cambio con dorsal sin jugador None->None
+  aviso HURONES (ARROYITO) 13-44 JOCKEY CLUB CORDOBA "C" (320761): cambio con dorsal sin jugador None->None
+  aviso HURONES (ARROYITO) 13-44 JOCKEY CLUB CORDOBA "C" (320761): cambio con dorsal sin jugador None->None
+  aviso HURONES (ARROYITO) 13-44 JOCKEY CLUB CORDOBA "C" (320761): cambio con dorsal sin jugador None->None
+  aviso HURONES (ARROYITO) 13-44 JOCKEY CLUB CORDOBA "C" (320761): cambio con dorsal sin jugador None->None
+  aviso HURONES (ARROYITO) 13-44 JOCKEY CLUB CORDOBA "C" (320761): cambio con dorsal sin jugador None->None
+  aviso HURONES (ARROYITO) 13-44 JOCKEY CLUB CORDOBA "C" (320761): cambio con dorsal sin jugador None->None
+  aviso HURONES (ARROYITO) 13-44 JOCKEY CLUB CORDOBA "C" (320761): cambio con dorsal sin jugador None->None
+320845: sin plantel utilizable (320845)
+  aviso LA TABLADA "B" 34-26 CORDOBA ATHLETIC "C" (322717): try sin jugador, dorsal None (1T 11 Try 5 )
+  aviso LA TABLADA "B" 34-26 CORDOBA ATHLETIC "C" (322717): conversion sin jugador, dorsal None (1T 12 Conversión 2 )
+  aviso LA TABLADA "B" 34-26 CORDOBA ATHLETIC "C" (322717): try sin jugador, dorsal None (1T 15 Try 5 )
+  aviso LA TABLADA "B" 34-26 CORDOBA ATHLETIC "C" (322717): conversion sin jugador, dorsal None (1T 15 Conversión 2 )
+  aviso LA TABLADA "B" 34-26 CORDOBA ATHLETIC "C" (322717): card_yellow sin jugador, dorsal None (1T 35 Amarilla  )
+  aviso LA TABLADA "B" 34-26 CORDOBA ATHLETIC "C" (322717): penalty_goal sin jugador, dorsal None (2T 45 Penal 3 )
+  aviso LA TABLADA "B" 34-26 CORDOBA ATHLETIC "C" (322717): try sin jugador, dorsal None (2T 49 Try 5 )
+  aviso LA TABLADA "B" 34-26 CORDOBA ATHLETIC "C" (322717): card_yellow sin jugador, dorsal None (2T 52 Amarilla  )
+  aviso LA TABLADA "B" 34-26 CORDOBA ATHLETIC "C" (322717): card_yellow sin jugador, dorsal None (2T 55 Amarilla  )
+  aviso LA TABLADA "B" 34-26 CORDOBA ATHLETIC "C" (322717): try sin jugador, dorsal None (2T 59 Try 5 )
+  aviso LA TABLADA "B" 34-26 CORDOBA ATHLETIC "C" (322717): conversion sin jugador, dorsal None (2T 60 Conversión 2 )
+  aviso LA TABLADA "B" 34-26 CORDOBA ATHLETIC "C" (322717): try sin jugador, dorsal None (2T 65 Try 5 )
+  aviso LA TABLADA "B" 34-26 CORDOBA ATHLETIC "C" (322717): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 34-26 CORDOBA ATHLETIC "C" (322717): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 34-26 CORDOBA ATHLETIC "C" (322717): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 34-26 CORDOBA ATHLETIC "C" (322717): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 34-26 CORDOBA ATHLETIC "C" (322717): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 34-26 CORDOBA ATHLETIC "C" (322717): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 34-26 CORDOBA ATHLETIC "C" (322717): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 34-26 CORDOBA ATHLETIC "C" (322717): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 33-28 CORDOBA ATHLETIC "B" (322720): try sin jugador, dorsal None (1T 18 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 33-28 CORDOBA ATHLETIC "B" (322720): try sin jugador, dorsal None (1T 27 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 33-28 CORDOBA ATHLETIC "B" (322720): conversion sin jugador, dorsal None (1T 27 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "C" 33-28 CORDOBA ATHLETIC "B" (322720): try sin jugador, dorsal None (1T 38 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 33-28 CORDOBA ATHLETIC "B" (322720): conversion sin jugador, dorsal None (1T 38 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "C" 33-28 CORDOBA ATHLETIC "B" (322720): try sin jugador, dorsal None (2T 17 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 33-28 CORDOBA ATHLETIC "B" (322720): conversion sin jugador, dorsal None (2T 17 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "C" 33-28 CORDOBA ATHLETIC "B" (322720): card_yellow sin jugador, dorsal None (2T 30 Amarilla  )
+  aviso JOCKEY CLUB CORDOBA "C" 33-28 CORDOBA ATHLETIC "B" (322720): try sin jugador, dorsal None (2T 40 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 33-28 CORDOBA ATHLETIC "B" (322720): conversion sin jugador, dorsal None (2T 40 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "C" 33-28 CORDOBA ATHLETIC "B" (322720): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 33-28 CORDOBA ATHLETIC "B" (322720): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 33-28 CORDOBA ATHLETIC "B" (322720): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 33-28 CORDOBA ATHLETIC "B" (322720): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 33-28 CORDOBA ATHLETIC "B" (322720): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 33-28 CORDOBA ATHLETIC "B" (322720): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 33-28 CORDOBA ATHLETIC "B" (322720): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 33-28 CORDOBA ATHLETIC "B" (322720): cambio con dorsal sin jugador None->None
+  aviso UNIV. NAC. DE CORDOBA "B" 10-73 PALERMO BAJO "B" (322721): try sin jugador, dorsal None (1T 20 Try 5 )
+  aviso UNIV. NAC. DE CORDOBA "B" 10-73 PALERMO BAJO "B" (322721): try sin jugador, dorsal None (2T 23 Try 5 )
+  aviso UNIV. NAC. DE CORDOBA "B" 10-73 PALERMO BAJO "B" (322721): ingreso sin salida, dorsal 20 (2T 1)
+322723: EVENTOS NO CIERRAN HURONES (ARROYITO) 20-27 UNIV. NAC. DE CORDOBA "A" (322723): eventos 20-0 (322723)
+322724: sin plantel utilizable (322724)
+322725: sin plantel utilizable (322725)
+323365: sin plantel utilizable (323365)
+323366: sin plantel utilizable (323366)
+  aviso LA TABLADA "B" 22-12 JOCKEY CLUB CORDOBA "C" (323367): penalty_goal sin jugador, dorsal None (1T 7 Penal 3 )
+  aviso LA TABLADA "B" 22-12 JOCKEY CLUB CORDOBA "C" (323367): penalty_goal sin jugador, dorsal None (1T 13 Penal 3 )
+  aviso LA TABLADA "B" 22-12 JOCKEY CLUB CORDOBA "C" (323367): penalty_goal sin jugador, dorsal None (1T 39 Penal 3 )
+  aviso LA TABLADA "B" 22-12 JOCKEY CLUB CORDOBA "C" (323367): penalty_goal sin jugador, dorsal None (1T 43 Penal 3 )
+  aviso LA TABLADA "B" 22-12 JOCKEY CLUB CORDOBA "C" (323367): try sin jugador, dorsal None (2T 42 Try 5 )
+  aviso LA TABLADA "B" 22-12 JOCKEY CLUB CORDOBA "C" (323367): conversion sin jugador, dorsal None (2T 43 Conversión 2 )
+  aviso LA TABLADA "B" 22-12 JOCKEY CLUB CORDOBA "C" (323367): penalty_goal sin jugador, dorsal None (2T 50 Penal 3 )
+  aviso LA TABLADA "B" 22-12 JOCKEY CLUB CORDOBA "C" (323367): card_yellow sin jugador, dorsal None (2T 61 Amarilla  )
+  aviso LA TABLADA "B" 22-12 JOCKEY CLUB CORDOBA "C" (323367): card_yellow sin jugador, dorsal None (2T 78 Amarilla  )
+  aviso LA TABLADA "B" 22-12 JOCKEY CLUB CORDOBA "C" (323367): card_yellow sin jugador, dorsal None (2T 80 Amarilla  )
+  aviso LA TABLADA "B" 22-12 JOCKEY CLUB CORDOBA "C" (323367): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 22-12 JOCKEY CLUB CORDOBA "C" (323367): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 22-12 JOCKEY CLUB CORDOBA "C" (323367): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 22-12 JOCKEY CLUB CORDOBA "C" (323367): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 22-12 JOCKEY CLUB CORDOBA "C" (323367): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 22-12 JOCKEY CLUB CORDOBA "C" (323367): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 22-12 JOCKEY CLUB CORDOBA "C" (323367): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 22-12 JOCKEY CLUB CORDOBA "C" (323367): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 22-12 JOCKEY CLUB CORDOBA "C" (323367): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 22-12 JOCKEY CLUB CORDOBA "C" (323367): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 22-12 JOCKEY CLUB CORDOBA "C" (323367): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 22-12 JOCKEY CLUB CORDOBA "C" (323367): try sin jugador, dorsal None (1T 17 Try 5 )
+  aviso LA TABLADA "B" 22-12 JOCKEY CLUB CORDOBA "C" (323367): conversion sin jugador, dorsal None (1T 17 Conversión 2 )
+  aviso LA TABLADA "B" 22-12 JOCKEY CLUB CORDOBA "C" (323367): card_yellow sin jugador, dorsal None (1T 23 Amarilla  )
+  aviso LA TABLADA "B" 22-12 JOCKEY CLUB CORDOBA "C" (323367): card_yellow sin jugador, dorsal None (2T 33 Amarilla  )
+  aviso LA TABLADA "B" 22-12 JOCKEY CLUB CORDOBA "C" (323367): try sin jugador, dorsal None (2T 40 Try 5 )
+  aviso LA TABLADA "B" 22-12 JOCKEY CLUB CORDOBA "C" (323367): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 22-12 JOCKEY CLUB CORDOBA "C" (323367): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 22-12 JOCKEY CLUB CORDOBA "C" (323367): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 22-12 JOCKEY CLUB CORDOBA "C" (323367): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 22-12 JOCKEY CLUB CORDOBA "C" (323367): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 22-12 JOCKEY CLUB CORDOBA "C" (323367): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 22-12 JOCKEY CLUB CORDOBA "C" (323367): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 22-12 JOCKEY CLUB CORDOBA "C" (323367): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 22-12 JOCKEY CLUB CORDOBA "C" (323367): cambio con dorsal sin jugador None->None
+  aviso UNIV. NAC. DE CORDOBA "A" 14-23 JOCKEY CLUB CORDOBA "B" (323368): penalty_goal sin jugador, dorsal None (1T 14 Penal 3 )
+  aviso UNIV. NAC. DE CORDOBA "A" 14-23 JOCKEY CLUB CORDOBA "B" (323368): penalty_goal sin jugador, dorsal None (1T 25 Penal 3 )
+  aviso UNIV. NAC. DE CORDOBA "A" 14-23 JOCKEY CLUB CORDOBA "B" (323368): penalty_goal sin jugador, dorsal None (1T 30 Penal 3 )
+  aviso UNIV. NAC. DE CORDOBA "A" 14-23 JOCKEY CLUB CORDOBA "B" (323368): try sin jugador, dorsal None (2T 15 Try 5 )
+  aviso UNIV. NAC. DE CORDOBA "A" 14-23 JOCKEY CLUB CORDOBA "B" (323368): card_yellow sin jugador, dorsal None (1T 20 Amarilla  )
+  aviso UNIV. NAC. DE CORDOBA "A" 14-23 JOCKEY CLUB CORDOBA "B" (323368): try sin jugador, dorsal None (1T 35 Try 5 )
+  aviso UNIV. NAC. DE CORDOBA "A" 14-23 JOCKEY CLUB CORDOBA "B" (323368): conversion sin jugador, dorsal None (1T 35 Conversión 2 )
+  aviso UNIV. NAC. DE CORDOBA "A" 14-23 JOCKEY CLUB CORDOBA "B" (323368): try sin jugador, dorsal None (2T 7 Try 5 )
+  aviso UNIV. NAC. DE CORDOBA "A" 14-23 JOCKEY CLUB CORDOBA "B" (323368): penalty_goal sin jugador, dorsal None (2T 17 Penal 3 )
+  aviso UNIV. NAC. DE CORDOBA "A" 14-23 JOCKEY CLUB CORDOBA "B" (323368): try sin jugador, dorsal None (2T 23 Try 5 )
+  aviso UNIV. NAC. DE CORDOBA "A" 14-23 JOCKEY CLUB CORDOBA "B" (323368): card_yellow sin jugador, dorsal None (2T 30 Amarilla  )
+  aviso UNIV. NAC. DE CORDOBA "A" 14-23 JOCKEY CLUB CORDOBA "B" (323368): penalty_goal sin jugador, dorsal None (2T 35 Penal 3 )
+  aviso UNIV. NAC. DE CORDOBA "A" 14-23 JOCKEY CLUB CORDOBA "B" (323368): cambio con dorsal sin jugador None->None
+  aviso UNIV. NAC. DE CORDOBA "A" 14-23 JOCKEY CLUB CORDOBA "B" (323368): cambio con dorsal sin jugador None->None
+  aviso UNIV. NAC. DE CORDOBA "A" 14-23 JOCKEY CLUB CORDOBA "B" (323368): cambio con dorsal sin jugador None->None
+  aviso UNIV. NAC. DE CORDOBA "A" 14-23 JOCKEY CLUB CORDOBA "B" (323368): cambio con dorsal sin jugador None->None
+  aviso UNIV. NAC. DE CORDOBA "A" 14-23 JOCKEY CLUB CORDOBA "B" (323368): cambio con dorsal sin jugador None->None
+  aviso UNIV. NAC. DE CORDOBA "A" 14-23 JOCKEY CLUB CORDOBA "B" (323368): cambio con dorsal sin jugador None->None
+  aviso UNIV. NAC. DE CORDOBA "A" 14-23 JOCKEY CLUB CORDOBA "B" (323368): cambio con dorsal sin jugador None->None
+  aviso UNIV. NAC. DE CORDOBA "A" 14-23 JOCKEY CLUB CORDOBA "B" (323368): cambio con dorsal sin jugador None->None
+  aviso UNIV. NAC. DE CORDOBA "A" 14-23 JOCKEY CLUB CORDOBA "B" (323368): cambio con dorsal sin jugador None->None
+  aviso UNIV. NAC. DE CORDOBA "A" 14-23 JOCKEY CLUB CORDOBA "B" (323368): cambio con dorsal sin jugador None->None
+  aviso CORDOBA ATHLETIC "B" 64-7 UNIV. NAC. DE CORDOBA "B" (323370): try sin jugador, dorsal None (2T 76 Try 5 )
+  aviso CORDOBA ATHLETIC "B" 64-7 UNIV. NAC. DE CORDOBA "B" (323370): conversion sin jugador, dorsal None (2T 77 Conversión 2 )
+323977: EVENTOS NO CIERRAN CORDOBA ATHLETIC "B" 48-12 CLUB TABORIN (323977): eventos 48-0 (323977)
+  aviso CORDOBA ATHLETIC "B" 48-12 CLUB TABORIN (323977): ingreso sin salida, dorsal 8 (2T 20)
+  aviso CORDOBA ATHLETIC "B" 48-12 CLUB TABORIN (323977): ingreso sin salida, dorsal 18 (2T 29)
+323979: sin plantel utilizable (323979)
+  aviso LA TABLADA "B" 53-0 HURONES (ARROYITO) (323980): penalty_goal sin jugador, dorsal None (1T 12 Penal 3 )
+  aviso LA TABLADA "B" 53-0 HURONES (ARROYITO) (323980): try sin jugador, dorsal None (1T 18 Try 5 )
+  aviso LA TABLADA "B" 53-0 HURONES (ARROYITO) (323980): try sin jugador, dorsal None (1T 33 Try 5 )
+  aviso LA TABLADA "B" 53-0 HURONES (ARROYITO) (323980): conversion sin jugador, dorsal None (1T 34 Conversión 2 )
+  aviso LA TABLADA "B" 53-0 HURONES (ARROYITO) (323980): try sin jugador, dorsal None (2T 44 Try 5 )
+  aviso LA TABLADA "B" 53-0 HURONES (ARROYITO) (323980): card_yellow sin jugador, dorsal None (2T 56 Amarilla  )
+  aviso LA TABLADA "B" 53-0 HURONES (ARROYITO) (323980): try sin jugador, dorsal None (2T 66 Try 5 )
+  aviso LA TABLADA "B" 53-0 HURONES (ARROYITO) (323980): conversion sin jugador, dorsal None (2T 67 Conversión 2 )
+  aviso LA TABLADA "B" 53-0 HURONES (ARROYITO) (323980): try sin jugador, dorsal None (2T 69 Try 5 )
+  aviso LA TABLADA "B" 53-0 HURONES (ARROYITO) (323980): conversion sin jugador, dorsal None (2T 70 Conversión 2 )
+  aviso LA TABLADA "B" 53-0 HURONES (ARROYITO) (323980): try sin jugador, dorsal None (2T 71 Try 5 )
+  aviso LA TABLADA "B" 53-0 HURONES (ARROYITO) (323980): conversion sin jugador, dorsal None (2T 72 Conversión 2 )
+  aviso LA TABLADA "B" 53-0 HURONES (ARROYITO) (323980): card_yellow sin jugador, dorsal None (2T 75 Amarilla  )
+  aviso LA TABLADA "B" 53-0 HURONES (ARROYITO) (323980): try sin jugador, dorsal None (2T 77 Try 5 )
+  aviso LA TABLADA "B" 53-0 HURONES (ARROYITO) (323980): conversion sin jugador, dorsal None (2T 78 Conversión 2 )
+  aviso LA TABLADA "B" 53-0 HURONES (ARROYITO) (323980): try sin jugador, dorsal None (2T 80 Try 5 )
+  aviso LA TABLADA "B" 53-0 HURONES (ARROYITO) (323980): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 53-0 HURONES (ARROYITO) (323980): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 53-0 HURONES (ARROYITO) (323980): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "B" 53-0 HURONES (ARROYITO) (323980): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 19-39 JOCKEY CLUB CORDOBA "B" (323981): try sin jugador, dorsal None (1T 22 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 19-39 JOCKEY CLUB CORDOBA "B" (323981): try sin jugador, dorsal None (1T 37 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 19-39 JOCKEY CLUB CORDOBA "B" (323981): conversion sin jugador, dorsal None (1T 37 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "C" 19-39 JOCKEY CLUB CORDOBA "B" (323981): conversion sin jugador, dorsal None (2T 33 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "C" 19-39 JOCKEY CLUB CORDOBA "B" (323981): try sin jugador, dorsal None (2T 33 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 19-39 JOCKEY CLUB CORDOBA "B" (323981): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 19-39 JOCKEY CLUB CORDOBA "B" (323981): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 19-39 JOCKEY CLUB CORDOBA "B" (323981): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 19-39 JOCKEY CLUB CORDOBA "B" (323981): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 19-39 JOCKEY CLUB CORDOBA "B" (323981): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 19-39 JOCKEY CLUB CORDOBA "B" (323981): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 19-39 JOCKEY CLUB CORDOBA "B" (323981): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 19-39 JOCKEY CLUB CORDOBA "B" (323981): try sin jugador, dorsal None (1T 19 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 19-39 JOCKEY CLUB CORDOBA "B" (323981): conversion sin jugador, dorsal None (1T 19 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "C" 19-39 JOCKEY CLUB CORDOBA "B" (323981): try sin jugador, dorsal None (1T 40 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 19-39 JOCKEY CLUB CORDOBA "B" (323981): try sin jugador, dorsal None (2T 6 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 19-39 JOCKEY CLUB CORDOBA "B" (323981): conversion sin jugador, dorsal None (2T 6 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "C" 19-39 JOCKEY CLUB CORDOBA "B" (323981): try sin jugador, dorsal None (2T 25 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 19-39 JOCKEY CLUB CORDOBA "B" (323981): try sin jugador, dorsal None (2T 30 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 19-39 JOCKEY CLUB CORDOBA "B" (323981): try sin jugador, dorsal None (2T 35 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 19-39 JOCKEY CLUB CORDOBA "B" (323981): try sin jugador, dorsal None (2T 39 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 19-39 JOCKEY CLUB CORDOBA "B" (323981): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 19-39 JOCKEY CLUB CORDOBA "B" (323981): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 19-39 JOCKEY CLUB CORDOBA "B" (323981): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 19-39 JOCKEY CLUB CORDOBA "B" (323981): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 19-39 JOCKEY CLUB CORDOBA "B" (323981): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 19-39 JOCKEY CLUB CORDOBA "B" (323981): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 19-39 JOCKEY CLUB CORDOBA "B" (323981): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 19-39 JOCKEY CLUB CORDOBA "B" (323981): cambio con dorsal sin jugador None->None
+323982: sin plantel utilizable (323982)
+  aviso UNIV. NAC. DE CORDOBA "A" 12-22 PALERMO BAJO "B" (323983): conversion sin jugador, dorsal None (1T 13 Conversión 2 )
+  aviso UNIV. NAC. DE CORDOBA "A" 12-22 PALERMO BAJO "B" (323983): try sin jugador, dorsal None (1T 13 Try 5 )
+  aviso UNIV. NAC. DE CORDOBA "A" 12-22 PALERMO BAJO "B" (323983): try sin jugador, dorsal None (2T 10 Try 5 )
+324496: sin plantel utilizable (324496)
+324497: sin plantel utilizable (324497)
+  aviso JOCKEY CLUB CORDOBA "B" 38-36 CORDOBA ATHLETIC "C" (324498): try sin jugador, dorsal None (1T 3 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 38-36 CORDOBA ATHLETIC "C" (324498): conversion sin jugador, dorsal None (1T 3 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 38-36 CORDOBA ATHLETIC "C" (324498): try sin jugador, dorsal None (1T 12 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 38-36 CORDOBA ATHLETIC "C" (324498): conversion sin jugador, dorsal None (1T 12 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 38-36 CORDOBA ATHLETIC "C" (324498): try sin jugador, dorsal None (1T 22 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 38-36 CORDOBA ATHLETIC "C" (324498): card_yellow sin jugador, dorsal None (1T 29 Amarilla  )
+  aviso JOCKEY CLUB CORDOBA "B" 38-36 CORDOBA ATHLETIC "C" (324498): try sin jugador, dorsal None (1T 33 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 38-36 CORDOBA ATHLETIC "C" (324498): conversion sin jugador, dorsal None (1T 33 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 38-36 CORDOBA ATHLETIC "C" (324498): conversion sin jugador, dorsal None (2T 8 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 38-36 CORDOBA ATHLETIC "C" (324498): try sin jugador, dorsal None (2T 8 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 38-36 CORDOBA ATHLETIC "C" (324498): card_yellow sin jugador, dorsal None (2T 20 Amarilla  )
+  aviso JOCKEY CLUB CORDOBA "B" 38-36 CORDOBA ATHLETIC "C" (324498): try sin jugador, dorsal None (2T 28 Try 5 )
+324499: sin plantel utilizable (324499)
+  aviso LA TABLADA "B" 73-5 UNIV. NAC. DE CORDOBA "B" (324501): try sin jugador, dorsal None (1T 5 Try 5 )
+  aviso LA TABLADA "B" 73-5 UNIV. NAC. DE CORDOBA "B" (324501): conversion sin jugador, dorsal None (1T 5 Conversión 2 )
+  aviso LA TABLADA "B" 73-5 UNIV. NAC. DE CORDOBA "B" (324501): try sin jugador, dorsal None (1T 11 Try 5 )
+  aviso LA TABLADA "B" 73-5 UNIV. NAC. DE CORDOBA "B" (324501): conversion sin jugador, dorsal None (1T 11 Conversión 2 )
+  aviso LA TABLADA "B" 73-5 UNIV. NAC. DE CORDOBA "B" (324501): try sin jugador, dorsal None (1T 16 Try 5 )
+  aviso LA TABLADA "B" 73-5 UNIV. NAC. DE CORDOBA "B" (324501): conversion sin jugador, dorsal None (1T 16 Conversión 2 )
+  aviso LA TABLADA "B" 73-5 UNIV. NAC. DE CORDOBA "B" (324501): try sin jugador, dorsal None (1T 23 Try 5 )
+  aviso LA TABLADA "B" 73-5 UNIV. NAC. DE CORDOBA "B" (324501): conversion sin jugador, dorsal None (1T 23 Conversión 2 )
+  aviso LA TABLADA "B" 73-5 UNIV. NAC. DE CORDOBA "B" (324501): try sin jugador, dorsal None (1T 33 Try 5 )
+  aviso LA TABLADA "B" 73-5 UNIV. NAC. DE CORDOBA "B" (324501): try sin jugador, dorsal None (1T 36 Try 5 )
+  aviso LA TABLADA "B" 73-5 UNIV. NAC. DE CORDOBA "B" (324501): conversion sin jugador, dorsal None (1T 37 Conversión 2 )
+  aviso LA TABLADA "B" 73-5 UNIV. NAC. DE CORDOBA "B" (324501): try sin jugador, dorsal None (2T 1 Try 5 )
+  aviso LA TABLADA "B" 73-5 UNIV. NAC. DE CORDOBA "B" (324501): conversion sin jugador, dorsal None (2T 1 Conversión 2 )
+  aviso LA TABLADA "B" 73-5 UNIV. NAC. DE CORDOBA "B" (324501): card_yellow sin jugador, dorsal None (2T 5 Amarilla  )
+  aviso LA TABLADA "B" 73-5 UNIV. NAC. DE CORDOBA "B" (324501): try sin jugador, dorsal None (2T 15 Try 5 )
+  aviso LA TABLADA "B" 73-5 UNIV. NAC. DE CORDOBA "B" (324501): try sin jugador, dorsal None (2T 19 Try 5 )
+  aviso LA TABLADA "B" 73-5 UNIV. NAC. DE CORDOBA "B" (324501): conversion sin jugador, dorsal None (2T 19 Conversión 2 )
+  aviso LA TABLADA "B" 73-5 UNIV. NAC. DE CORDOBA "B" (324501): try sin jugador, dorsal None (2T 26 Try 5 )
+  aviso LA TABLADA "B" 73-5 UNIV. NAC. DE CORDOBA "B" (324501): conversion sin jugador, dorsal None (2T 26 Conversión 2 )
+  aviso LA TABLADA "B" 73-5 UNIV. NAC. DE CORDOBA "B" (324501): try sin jugador, dorsal None (2T 30 Try 5 )
+  aviso LA TABLADA "B" 73-5 UNIV. NAC. DE CORDOBA "B" (324501): conversion sin jugador, dorsal None (2T 30 Conversión 2 )
+  aviso LA TABLADA "B" 73-5 UNIV. NAC. DE CORDOBA "B" (324501): card_red sin jugador, dorsal None (2T 30 Roja  )
+  aviso LA TABLADA "B" 73-5 UNIV. NAC. DE CORDOBA "B" (324501): card_yellow sin jugador, dorsal None (1T 31 Amarilla  )
+  aviso LA TABLADA "B" 73-5 UNIV. NAC. DE CORDOBA "B" (324501): injury sin jugador, dorsal None (1T 35 Lesionado  )
+  aviso LA TABLADA "B" 73-5 UNIV. NAC. DE CORDOBA "B" (324501): try sin jugador, dorsal None (2T 46 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 27-50 PALERMO BAJO "B" (324502): try sin jugador, dorsal None (1T 2 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 27-50 PALERMO BAJO "B" (324502): conversion sin jugador, dorsal None (1T 2 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "C" 27-50 PALERMO BAJO "B" (324502): try sin jugador, dorsal None (1T 19 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 27-50 PALERMO BAJO "B" (324502): try sin jugador, dorsal None (1T 22 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 27-50 PALERMO BAJO "B" (324502): conversion sin jugador, dorsal None (1T 22 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "C" 27-50 PALERMO BAJO "B" (324502): penalty_goal sin jugador, dorsal None (2T 8 Penal 3 )
+  aviso JOCKEY CLUB CORDOBA "C" 27-50 PALERMO BAJO "B" (324502): try sin jugador, dorsal None (2T 17 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 27-50 PALERMO BAJO "B" (324502): card_yellow sin jugador, dorsal None (2T 20 Amarilla  )
+  aviso JOCKEY CLUB CORDOBA "C" 27-50 PALERMO BAJO "B" (324502): card_yellow sin jugador, dorsal None (2T 20 Amarilla  )
+  aviso JOCKEY CLUB CORDOBA "C" 27-50 PALERMO BAJO "B" (324502): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 27-50 PALERMO BAJO "B" (324502): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 27-50 PALERMO BAJO "B" (324502): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 27-50 PALERMO BAJO "B" (324502): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 27-50 PALERMO BAJO "B" (324502): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 27-50 PALERMO BAJO "B" (324502): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 27-50 PALERMO BAJO "B" (324502): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 27-50 PALERMO BAJO "B" (324502): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 27-50 PALERMO BAJO "B" (324502): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 27-50 PALERMO BAJO "B" (324502): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 27-50 PALERMO BAJO "B" (324502): salida sin reemplazo, dorsal 25 (2T 11)
+  aviso JOCKEY CLUB CORDOBA "C" 27-50 PALERMO BAJO "B" (324502): salida sin reemplazo, dorsal 1 (2T 11)
+  aviso JOCKEY CLUB CORDOBA "C" 27-50 PALERMO BAJO "B" (324502): salida sin reemplazo, dorsal 6 (2T 30)
+325081: sin plantel utilizable (325081)
+  aviso JOCKEY CLUB CORDOBA "C" 71-12 UNIV. NAC. DE CORDOBA "B" (325082): try sin jugador, dorsal None (1T 3 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 71-12 UNIV. NAC. DE CORDOBA "B" (325082): conversion sin jugador, dorsal None (1T 3 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "C" 71-12 UNIV. NAC. DE CORDOBA "B" (325082): try sin jugador, dorsal None (1T 5 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 71-12 UNIV. NAC. DE CORDOBA "B" (325082): conversion sin jugador, dorsal None (1T 5 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "C" 71-12 UNIV. NAC. DE CORDOBA "B" (325082): try sin jugador, dorsal None (1T 12 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 71-12 UNIV. NAC. DE CORDOBA "B" (325082): conversion sin jugador, dorsal None (1T 12 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "C" 71-12 UNIV. NAC. DE CORDOBA "B" (325082): try sin jugador, dorsal None (1T 20 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 71-12 UNIV. NAC. DE CORDOBA "B" (325082): conversion sin jugador, dorsal None (1T 20 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "C" 71-12 UNIV. NAC. DE CORDOBA "B" (325082): try sin jugador, dorsal None (1T 26 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 71-12 UNIV. NAC. DE CORDOBA "B" (325082): try sin jugador, dorsal None (1T 36 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 71-12 UNIV. NAC. DE CORDOBA "B" (325082): try sin jugador, dorsal None (1T 38 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 71-12 UNIV. NAC. DE CORDOBA "B" (325082): conversion sin jugador, dorsal None (1T 38 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "C" 71-12 UNIV. NAC. DE CORDOBA "B" (325082): try sin jugador, dorsal None (2T 17 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 71-12 UNIV. NAC. DE CORDOBA "B" (325082): try sin jugador, dorsal None (2T 29 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 71-12 UNIV. NAC. DE CORDOBA "B" (325082): conversion sin jugador, dorsal None (2T 29 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "C" 71-12 UNIV. NAC. DE CORDOBA "B" (325082): try sin jugador, dorsal None (2T 34 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 71-12 UNIV. NAC. DE CORDOBA "B" (325082): conversion sin jugador, dorsal None (2T 34 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "C" 71-12 UNIV. NAC. DE CORDOBA "B" (325082): try sin jugador, dorsal None (2T 38 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 71-12 UNIV. NAC. DE CORDOBA "B" (325082): conversion sin jugador, dorsal None (2T 38 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "C" 71-12 UNIV. NAC. DE CORDOBA "B" (325082): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 71-12 UNIV. NAC. DE CORDOBA "B" (325082): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 71-12 UNIV. NAC. DE CORDOBA "B" (325082): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 71-12 UNIV. NAC. DE CORDOBA "B" (325082): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 71-12 UNIV. NAC. DE CORDOBA "B" (325082): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 71-12 UNIV. NAC. DE CORDOBA "B" (325082): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 71-12 UNIV. NAC. DE CORDOBA "B" (325082): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 71-12 UNIV. NAC. DE CORDOBA "B" (325082): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "C" 71-12 UNIV. NAC. DE CORDOBA "B" (325082): try sin jugador, dorsal None (2T 52 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "C" 71-12 UNIV. NAC. DE CORDOBA "B" (325082): conversion sin jugador, dorsal None (2T 53 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "C" 71-12 UNIV. NAC. DE CORDOBA "B" (325082): card_yellow sin jugador, dorsal None (2T 59 Amarilla  )
+  aviso JOCKEY CLUB CORDOBA "C" 71-12 UNIV. NAC. DE CORDOBA "B" (325082): try sin jugador, dorsal None (2T 63 Try 5 )
+  aviso UNIV. NAC. DE CORDOBA "A" 14-45 TALA R.C. "B" (325083): card_yellow sin jugador, dorsal None (1T 21 Amarilla  )
+  aviso UNIV. NAC. DE CORDOBA "A" 14-45 TALA R.C. "B" (325083): try sin jugador, dorsal None (1T 31 Try 5 )
+  aviso UNIV. NAC. DE CORDOBA "A" 14-45 TALA R.C. "B" (325083): conversion sin jugador, dorsal None (1T 31 Conversión 2 )
+  aviso UNIV. NAC. DE CORDOBA "A" 14-45 TALA R.C. "B" (325083): try sin jugador, dorsal None (2T 80 Try 5 )
+  aviso UNIV. NAC. DE CORDOBA "A" 14-45 TALA R.C. "B" (325083): conversion sin jugador, dorsal None (2T 80 Conversión 2 )
+325084: sin plantel utilizable (325084)
+325085: sin plantel utilizable (325085)
+  aviso PALERMO BAJO "B" 42-17 HURONES (ARROYITO) (325086): salida sin reemplazo, dorsal 1 (2T 24)
+  aviso JOCKEY CLUB CORDOBA "B" 47-23 CLUB TABORIN (325087): try sin jugador, dorsal None (1T 1 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 47-23 CLUB TABORIN (325087): conversion sin jugador, dorsal None (1T 1 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 47-23 CLUB TABORIN (325087): try sin jugador, dorsal None (1T 8 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 47-23 CLUB TABORIN (325087): conversion sin jugador, dorsal None (1T 8 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 47-23 CLUB TABORIN (325087): try sin jugador, dorsal None (1T 16 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 47-23 CLUB TABORIN (325087): try sin jugador, dorsal None (1T 27 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 47-23 CLUB TABORIN (325087): conversion sin jugador, dorsal None (1T 27 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 47-23 CLUB TABORIN (325087): try sin jugador, dorsal None (2T 14 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 47-23 CLUB TABORIN (325087): conversion sin jugador, dorsal None (2T 14 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 47-23 CLUB TABORIN (325087): try sin jugador, dorsal None (2T 20 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 47-23 CLUB TABORIN (325087): conversion sin jugador, dorsal None (2T 20 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 47-23 CLUB TABORIN (325087): card_yellow sin jugador, dorsal None (2T 25 Amarilla  )
+  aviso JOCKEY CLUB CORDOBA "B" 47-23 CLUB TABORIN (325087): try sin jugador, dorsal None (2T 27 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 47-23 CLUB TABORIN (325087): conversion sin jugador, dorsal None (2T 27 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 47-23 CLUB TABORIN (325087): card_yellow sin jugador, dorsal None (2T 33 Amarilla  )
+  aviso JOCKEY CLUB CORDOBA "B" 47-23 CLUB TABORIN (325087): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 47-23 CLUB TABORIN (325087): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 47-23 CLUB TABORIN (325087): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 47-23 CLUB TABORIN (325087): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 47-23 CLUB TABORIN (325087): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 47-23 CLUB TABORIN (325087): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 47-23 CLUB TABORIN (325087): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 47-23 CLUB TABORIN (325087): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 47-23 CLUB TABORIN (325087): card_yellow sin jugador, dorsal None (1T 0 Amarilla  )
+  aviso JOCKEY CLUB CORDOBA "B" 47-23 CLUB TABORIN (325087): penalty_goal sin jugador, dorsal None (1T 6 Penal 3 )
+  aviso JOCKEY CLUB CORDOBA "B" 47-23 CLUB TABORIN (325087): penalty_goal sin jugador, dorsal None (1T 23 Penal 3 )
+  aviso JOCKEY CLUB CORDOBA "B" 47-23 CLUB TABORIN (325087): card_yellow sin jugador, dorsal None (2T 0 Amarilla  )
+  aviso JOCKEY CLUB CORDOBA "B" 47-23 CLUB TABORIN (325087): card_yellow sin jugador, dorsal None (2T 0 Amarilla  )
+  aviso JOCKEY CLUB CORDOBA "B" 47-23 CLUB TABORIN (325087): try sin jugador, dorsal None (2T 7 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 47-23 CLUB TABORIN (325087): try sin jugador, dorsal None (2T 17 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 47-23 CLUB TABORIN (325087): try sin jugador, dorsal None (2T 22 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 47-23 CLUB TABORIN (325087): conversion sin jugador, dorsal None (2T 22 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 47-23 CLUB TABORIN (325087): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 47-23 CLUB TABORIN (325087): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 47-23 CLUB TABORIN (325087): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 47-23 CLUB TABORIN (325087): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 47-23 CLUB TABORIN (325087): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 47-23 CLUB TABORIN (325087): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 47-23 CLUB TABORIN (325087): cambio con dorsal sin jugador None->None
+  aviso UNIV. NAC. DE CORDOBA "A" 24-44 CORDOBA ATHLETIC "B" (326142): try sin jugador, dorsal None (1T 20 Try 5 )
+  aviso UNIV. NAC. DE CORDOBA "A" 24-44 CORDOBA ATHLETIC "B" (326142): try sin jugador, dorsal None (2T 45 Try 5 )
+  aviso UNIV. NAC. DE CORDOBA "A" 24-44 CORDOBA ATHLETIC "B" (326142): try sin jugador, dorsal None (2T 50 Try 5 )
+  aviso UNIV. NAC. DE CORDOBA "A" 24-44 CORDOBA ATHLETIC "B" (326142): conversion sin jugador, dorsal None (2T 50 Conversión 2 )
+  aviso UNIV. NAC. DE CORDOBA "A" 24-44 CORDOBA ATHLETIC "B" (326142): cambio con dorsal sin jugador None->None
+  aviso UNIV. NAC. DE CORDOBA "A" 24-44 CORDOBA ATHLETIC "B" (326142): cambio con dorsal sin jugador None->None
+  aviso UNIV. NAC. DE CORDOBA "A" 24-44 CORDOBA ATHLETIC "B" (326142): cambio con dorsal sin jugador None->None
+  aviso UNIV. NAC. DE CORDOBA "A" 24-44 CORDOBA ATHLETIC "B" (326142): cambio con dorsal sin jugador None->None
+  aviso UNIV. NAC. DE CORDOBA "A" 24-44 CORDOBA ATHLETIC "B" (326142): cambio con dorsal sin jugador None->None
+326143: sin plantel utilizable (326143)
+  aviso JOCKEY CLUB CORDOBA "B" 64-5 HURONES (ARROYITO) (326144): try sin jugador, dorsal None (1T 7 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 64-5 HURONES (ARROYITO) (326144): conversion sin jugador, dorsal None (1T 7 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 64-5 HURONES (ARROYITO) (326144): try sin jugador, dorsal None (1T 12 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 64-5 HURONES (ARROYITO) (326144): conversion sin jugador, dorsal None (1T 12 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 64-5 HURONES (ARROYITO) (326144): try sin jugador, dorsal None (1T 20 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 64-5 HURONES (ARROYITO) (326144): conversion sin jugador, dorsal None (1T 20 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 64-5 HURONES (ARROYITO) (326144): card_yellow sin jugador, dorsal None (1T 25 Amarilla  )
+  aviso JOCKEY CLUB CORDOBA "B" 64-5 HURONES (ARROYITO) (326144): try sin jugador, dorsal None (1T 28 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 64-5 HURONES (ARROYITO) (326144): try sin jugador, dorsal None (1T 32 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 64-5 HURONES (ARROYITO) (326144): card_yellow sin jugador, dorsal None (2T 15 Amarilla  )
+  aviso JOCKEY CLUB CORDOBA "B" 64-5 HURONES (ARROYITO) (326144): try sin jugador, dorsal None (2T 20 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 64-5 HURONES (ARROYITO) (326144): conversion sin jugador, dorsal None (2T 20 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 64-5 HURONES (ARROYITO) (326144): card_yellow sin jugador, dorsal None (2T 32 Amarilla  )
+  aviso JOCKEY CLUB CORDOBA "B" 64-5 HURONES (ARROYITO) (326144): try sin jugador, dorsal None (2T 34 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 64-5 HURONES (ARROYITO) (326144): conversion sin jugador, dorsal None (2T 34 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "B" 64-5 HURONES (ARROYITO) (326144): try sin jugador, dorsal None (2T 38 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "B" 64-5 HURONES (ARROYITO) (326144): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 64-5 HURONES (ARROYITO) (326144): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 64-5 HURONES (ARROYITO) (326144): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 64-5 HURONES (ARROYITO) (326144): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 64-5 HURONES (ARROYITO) (326144): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 64-5 HURONES (ARROYITO) (326144): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 64-5 HURONES (ARROYITO) (326144): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 64-5 HURONES (ARROYITO) (326144): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "B" 64-5 HURONES (ARROYITO) (326144): cambio con dorsal sin jugador None->None
+  aviso UNIV. NAC. DE CORDOBA "B" 0-34 CORDOBA ATHLETIC "C" (326145): cambio con dorsal sin jugador None->None
+  aviso UNIV. NAC. DE CORDOBA "B" 0-34 CORDOBA ATHLETIC "C" (326145): cambio con dorsal sin jugador None->None
+  aviso UNIV. NAC. DE CORDOBA "B" 0-34 CORDOBA ATHLETIC "C" (326145): cambio con dorsal sin jugador None->None
+  aviso UNIV. NAC. DE CORDOBA "B" 0-34 CORDOBA ATHLETIC "C" (326145): cambio con dorsal sin jugador None->None
+  aviso UNIV. NAC. DE CORDOBA "B" 0-34 CORDOBA ATHLETIC "C" (326145): cambio con dorsal sin jugador None->None
+  aviso UNIV. NAC. DE CORDOBA "B" 0-34 CORDOBA ATHLETIC "C" (326145): cambio con dorsal sin jugador None->None
+  aviso CLUB TABORIN 11-33 LA TABLADA "B" (326147): penalty_goal sin jugador, dorsal None (1T 22 Penal 3 )
+  aviso CLUB TABORIN 11-33 LA TABLADA "B" (326147): penalty_goal sin jugador, dorsal None (2T 7 Penal 3 )
+  aviso CLUB TABORIN 11-33 LA TABLADA "B" (326147): card_yellow sin jugador, dorsal None (2T 8 Amarilla  )
+  aviso CLUB TABORIN 11-33 LA TABLADA "B" (326147): injury sin jugador, dorsal None (2T 10 Lesionado  )
+  aviso CLUB TABORIN 11-33 LA TABLADA "B" (326147): injury sin jugador, dorsal None (2T 16 Lesionado  )
+  aviso CLUB TABORIN 11-33 LA TABLADA "B" (326147): try sin jugador, dorsal None (2T 30 Try 5 )
+  aviso CLUB TABORIN 11-33 LA TABLADA "B" (326147): try sin jugador, dorsal None (1T 9 Try 5 )
+  aviso CLUB TABORIN 11-33 LA TABLADA "B" (326147): conversion sin jugador, dorsal None (1T 10 Conversión 2 )
+  aviso CLUB TABORIN 11-33 LA TABLADA "B" (326147): try sin jugador, dorsal None (1T 11 Try 5 )
+  aviso CLUB TABORIN 11-33 LA TABLADA "B" (326147): conversion sin jugador, dorsal None (1T 12 Conversión 2 )
+  aviso CLUB TABORIN 11-33 LA TABLADA "B" (326147): card_yellow sin jugador, dorsal None (1T 24 Amarilla  )
+  aviso CLUB TABORIN 11-33 LA TABLADA "B" (326147): try sin jugador, dorsal None (1T 39 Try 5 )
+  aviso CLUB TABORIN 11-33 LA TABLADA "B" (326147): conversion sin jugador, dorsal None (1T 40 Conversión 2 )
+  aviso CLUB TABORIN 11-33 LA TABLADA "B" (326147): try sin jugador, dorsal None (2T 53 Try 5 )
+  aviso CLUB TABORIN 11-33 LA TABLADA "B" (326147): try sin jugador, dorsal None (2T 59 Try 5 )
+  aviso CLUB TABORIN 11-33 LA TABLADA "B" (326147): conversion sin jugador, dorsal None (2T 60 Conversión 2 )
+  aviso CLUB TABORIN 11-33 LA TABLADA "B" (326147): cambio con dorsal sin jugador None->None
+  aviso CLUB TABORIN 11-33 LA TABLADA "B" (326147): cambio con dorsal sin jugador None->None
+  aviso CLUB TABORIN 11-33 LA TABLADA "B" (326147): cambio con dorsal sin jugador None->None
+  aviso CLUB TABORIN 11-33 LA TABLADA "B" (326147): cambio con dorsal sin jugador None->None
+  aviso CLUB TABORIN 11-33 LA TABLADA "B" (326147): cambio con dorsal sin jugador None->None
+  aviso CLUB TABORIN 11-33 LA TABLADA "B" (326147): cambio con dorsal sin jugador None->None
+  aviso CLUB TABORIN 11-33 LA TABLADA "B" (326147): cambio con dorsal sin jugador None->None
+  aviso CLUB TABORIN 11-33 LA TABLADA "B" (326147): cambio con dorsal sin jugador None->None
+  aviso CLUB TABORIN 11-33 LA TABLADA "B" (326147): cambio con dorsal sin jugador None->None
+  aviso CLUB TABORIN 11-33 LA TABLADA "B" (326147): cambio con dorsal sin jugador None->None
+326148: sin plantel utilizable (326148)
+326737: sin plantel utilizable (326737)
+326738: sin plantel utilizable (326738)
+326739: EVENTOS NO CIERRAN CORDOBA ATHLETIC "B" 28-0 CORDOBA ATHLETIC "C" (326739): eventos 0-0 (326739)
+326740: sin plantel utilizable (326740)
+  aviso CLUB TABORIN 24-5 UNIV. NAC. DE CORDOBA "A" (326741): try sin jugador, dorsal None (1T 2 Try 5 )
+  aviso CLUB TABORIN 24-5 UNIV. NAC. DE CORDOBA "A" (326741): conversion sin jugador, dorsal None (1T 3 Conversión 2 )
+  aviso CLUB TABORIN 24-5 UNIV. NAC. DE CORDOBA "A" (326741): card_yellow sin jugador, dorsal None (1T 15 Amarilla  )
+  aviso CLUB TABORIN 24-5 UNIV. NAC. DE CORDOBA "A" (326741): penalty_goal sin jugador, dorsal None (1T 28 Penal 3 )
+  aviso CLUB TABORIN 24-5 UNIV. NAC. DE CORDOBA "A" (326741): try sin jugador, dorsal None (1T 34 Try 5 )
+  aviso CLUB TABORIN 24-5 UNIV. NAC. DE CORDOBA "A" (326741): conversion sin jugador, dorsal None (1T 35 Conversión 2 )
+  aviso CLUB TABORIN 24-5 UNIV. NAC. DE CORDOBA "A" (326741): card_red sin jugador, dorsal None (2T 20 Roja  )
+  aviso CLUB TABORIN 24-5 UNIV. NAC. DE CORDOBA "A" (326741): try sin jugador, dorsal None (2T 27 Try 5 )
+  aviso CLUB TABORIN 24-5 UNIV. NAC. DE CORDOBA "A" (326741): conversion sin jugador, dorsal None (2T 28 Conversión 2 )
+  aviso CLUB TABORIN 24-5 UNIV. NAC. DE CORDOBA "A" (326741): try sin jugador, dorsal None (1T 15 Try 5 )
+  aviso CLUB TABORIN 24-5 UNIV. NAC. DE CORDOBA "A" (326741): card_yellow sin jugador, dorsal None (2T 51 Amarilla  )
+  aviso CLUB TABORIN 24-5 UNIV. NAC. DE CORDOBA "A" (326741): card_red sin jugador, dorsal None (2T 52 Roja  )
+326742: sin plantel utilizable (326742)
+326743: sin plantel utilizable (326743)
+327330: sin plantel utilizable (327330)
+327331: sin plantel utilizable (327331)
+
+Partidos de la base SIN tarjeta: 45
+  2026-03-14 B Jockey Club Córdoba Preintermedia "C" 28-0 Carlos Paz Rugby Club Preintermedia "B"
+  2026-03-24 B Carlos Paz Rugby Club Preintermedia "B" 0-28 Córdoba Athletic Club Preintermedia "C"
+  2026-03-28 B Carlos Paz Rugby Club Preintermedia "B" 0-28 Los Hurones Preintermedia "B"
+  2026-04-11 B Universidad Nacional de Córdoba Preintermedia "A" 28-0 Carlos Paz Rugby Club Preintermedia "B"
+  2026-04-11 B Tala Rugby Club Preintermedia "B" 28-0 Taborín RC Preintermedia "B"
+  2026-04-11 B Córdoba Athletic Club Preintermedia "B" 28-0 Club Universitario de Córdoba Preintermedia "B"
+  2026-04-18 B Taborín RC Preintermedia "B" 0-28 Jockey Club Córdoba Preintermedia "B"
+  2026-04-18 B Baguales R.C. Preintermedia "B" 28-0 Carlos Paz Rugby Club Preintermedia "B"
+  2026-04-25 B Carlos Paz Rugby Club Preintermedia "B" 0-28 Taborín RC Preintermedia "B"
+  2026-05-16 B Club Universitario de Córdoba Preintermedia "B" 28-0 Baguales R.C. Preintermedia "B"
+  2026-06-13 B Club Palermo Bajo Preintermedia "B" 28-0 Baguales R.C. Preintermedia "B"
+  2026-06-13 B Universidad Nacional de Córdoba Preintermedia "B" 28-0 Carlos Paz Rugby Club Preintermedia "B"
+  2026-06-20 B Los Hurones Preintermedia "B" 28-0 Carlos Paz Rugby Club Preintermedia "B"
+  2026-06-27 B Club Universitario de Córdoba Preintermedia "B" 0-28 Club Palermo Bajo Preintermedia "B"
+  2026-07-18 B Jockey Club Córdoba Preintermedia "C" 28-0 Baguales R.C. Preintermedia "B"
+  2026-07-18 B Córdoba Athletic Club Preintermedia "C" 28-0 Carlos Paz Rugby Club Preintermedia "B"
+  2026-07-18 B Los Hurones Preintermedia "B" 28-0 Club Universitario de Córdoba Preintermedia "B"
+  2026-07-24 B Córdoba Athletic Club Preintermedia "C" 28-0 Club Universitario de Córdoba Preintermedia "B"
+  2026-07-25 B Carlos Paz Rugby Club Preintermedia "B" 0-28 Universidad Nacional de Córdoba Preintermedia "B"
+  2026-08-01 B La Tablada "B" - Pre Intermedia 28-0 Baguales R.C. Preintermedia "B"
+  2026-08-01 B Los Hurones Preintermedia "B" 28-0 Universidad Nacional de Córdoba Preintermedia "B"
+  2026-08-01 B Carlos Paz Rugby Club Preintermedia "B" 0-28 Jockey Club Córdoba Preintermedia "B"
+  2026-08-08 B Córdoba Athletic Club Preintermedia "C" 28-0 Baguales R.C. Preintermedia "B"
+  2026-08-08 B Universidad Nacional de Córdoba Preintermedia "A" 28-0 Carlos Paz Rugby Club Preintermedia "B"
+  2026-08-22 B Carlos Paz Rugby Club Preintermedia "B" 28-0 Club Universitario de Córdoba Preintermedia "B"
+  2026-08-29 B Taborín RC Preintermedia "B" 0-28 Tala Rugby Club Preintermedia "B"
+  2026-08-29 B Baguales R.C. Preintermedia "B" 0-28 Jockey Club Córdoba Preintermedia "B"
+  2026-09-05 B Tala Rugby Club Preintermedia "B" 28-0 Carlos Paz Rugby Club Preintermedia "B"
+  2026-09-05 B Taborín RC Preintermedia "B" 28-0 Club Universitario de Córdoba Preintermedia "B"
+  2026-09-12 B Universidad Nacional de Córdoba Preintermedia "B" 28-0 Club Universitario de Córdoba Preintermedia "B"
+  2026-09-12 B Carlos Paz Rugby Club Preintermedia "B" 0-28 Baguales R.C. Preintermedia "B"
+  2026-09-19 B Baguales R.C. Preintermedia "B" 0-28 Córdoba Athletic Club Preintermedia "B"
+  2026-09-19 B Taborín RC Preintermedia "B" 28-0 Carlos Paz Rugby Club Preintermedia "B"
+  2026-09-19 B Universidad Nacional de Córdoba Preintermedia "A" 28-0 Club Universitario de Córdoba Preintermedia "B"
+  2026-09-26 B Carlos Paz Rugby Club Preintermedia "B" 0-28 Córdoba Athletic Club Preintermedia "B"
+  2026-09-26 B Club Universitario de Córdoba Preintermedia "B" 0-28 Córdoba Athletic Club Preintermedia "C"
+  2026-09-26 B Baguales R.C. Preintermedia "B" 0-28 La Tablada "B" - Pre Intermedia
+  2026-10-10 B Club Universitario de Córdoba Preintermedia "B" 0-28 Jockey Club Córdoba Preintermedia "C"
+  2026-10-10 B Baguales R.C. Preintermedia "B" 0-28 Tala Rugby Club Preintermedia "B"
+  2026-10-10 B Club Palermo Bajo Preintermedia "B" 28-0 Carlos Paz Rugby Club Preintermedia "B"
+  2026-10-17 B Tala Rugby Club Preintermedia "B" 28-0 Jockey Club Córdoba Preintermedia "C"
+  2026-10-17 B Club Universitario de Córdoba Preintermedia "B" 0-28 Los Hurones Preintermedia "B"
+  2026-10-17 B Baguales R.C. Preintermedia "B" 0-28 Club Palermo Bajo Preintermedia "B"
+  2026-10-17 B Carlos Paz Rugby Club Preintermedia "B" 0-28 La Tablada "B" - Pre Intermedia
+  2026-10-17 B Universidad Nacional de Córdoba Preintermedia "B" 28-0 Jockey Club Córdoba Preintermedia "B"

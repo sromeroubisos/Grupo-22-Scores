@@ -1,0 +1,208 @@
+[
+  {
+    "tab": "general",
+    "theme": "dark",
+    "overflow": false,
+    "sw": 370,
+    "iw": 375,
+    "coveredCount": 0,
+    "firstCovered": []
+  },
+  {
+    "tab": "planteles",
+    "theme": "dark",
+    "overflow": false,
+    "sw": 370,
+    "iw": 375,
+    "coveredCount": 0,
+    "firstCovered": []
+  },
+  {
+    "tab": "entrenamientos",
+    "theme": "dark",
+    "overflow": false,
+    "sw": 370,
+    "iw": 375,
+    "coveredCount": 0,
+    "firstCovered": []
+  },
+  {
+    "tab": "rendimiento",
+    "theme": "dark",
+    "overflow": false,
+    "sw": 370,
+    "iw": 375,
+    "coveredCount": 0,
+    "firstCovered": []
+  },
+  {
+    "tab": "competencias",
+    "theme": "dark",
+    "overflow": false,
+    "sw": 370,
+    "iw": 375,
+    "coveredCount": 0,
+    "firstCovered": []
+  },
+  {
+    "tab": "partidos",
+    "theme": "dark",
+    "overflow": false,
+    "sw": 370,
+    "iw": 375,
+    "coveredCount": 0,
+    "firstCovered": []
+  },
+  {
+    "tab": "contenido",
+    "theme": "dark",
+    "overflow": false,
+    "sw": 370,
+    "iw": 375,
+    "coveredCount": 0,
+    "firstCovered": []
+  },
+  {
+    "tab": "pizarra",
+    "theme": "dark",
+    "overflow": false,
+    "sw": 370,
+    "iw": 375,
+    "coveredCount": 1,
+    "firstCovered": [
+      {
+        "el": {
+          "tag": "button",
+          "cls": "pizarra-mobile-back",
+          "text": "VOLVER"
+        },
+        "top": {
+          "tag": "section",
+          "cls": "club-mobile-console",
+          "text": "G22 CORE\nSISTEMA OPERATIVO DE "
+        }
+      }
+    ]
+  },
+  {
+    "tab": "usuarios",
+    "theme": "dark",
+    "overflow": false,
+    "sw": 370,
+    "iw": 375,
+    "coveredCount": 0,
+    "firstCovered": []
+  },
+  {
+    "tab": "configuracion",
+    "theme": "dark",
+    "overflow": false,
+    "sw": 370,
+    "iw": 375,
+    "coveredCount": 0,
+    "firstCovered": []
+  },
+  {
+    "tab": "general",
+    "theme": "light",
+    "overflow": false,
+    "sw": 370,
+    "iw": 375,
+    "coveredCount": 0,
+    "firstCovered": []
+  },
+  {
+    "tab": "planteles",
+    "theme": "light",
+    "overflow": false,
+    "sw": 370,
+    "iw": 375,
+    "coveredCount": 0,
+    "firstCovered": []
+  },
+  {
+    "tab": "entrenamientos",
+    "theme": "light",
+    "overflow": false,
+    "sw": 370,
+    "iw": 375,
+    "coveredCount": 0,
+    "firstCovered": []
+  },
+  {
+    "tab": "rendimiento",
+    "theme": "light",
+    "overflow": false,
+    "sw": 370,
+    "iw": 375,
+    "coveredCount": 0,
+    "firstCovered": []
+  },
+  {
+    "tab": "competencias",
+    "theme": "light",
+    "overflow": false,
+    "sw": 370,
+    "iw": 375,
+    "coveredCount": 0,
+    "firstCovered": []
+  },
+  {
+    "tab": "partidos",
+    "theme": "light",
+    "overflow": false,
+    "sw": 370,
+    "iw": 375,
+    "coveredCount": 0,
+    "firstCovered": []
+  },
+  {
+    "tab": "contenido",
+    "theme": "light",
+    "overflow": false,
+    "sw": 370,
+    "iw": 375,
+    "coveredCount": 0,
+    "firstCovered": []
+  },
+  {
+    "tab": "pizarra",
+    "theme": "light",
+    "overflow": false,
+    "sw": 370,
+    "iw": 375,
+    "coveredCount": 1,
+    "firstCovered": [
+      {
+        "el": {
+          "tag": "button",
+          "cls": "pizarra-mobile-back",
+          "text": "VOLVER"
+        },
+        "top": {
+          "tag": "section",
+          "cls": "club-mobile-console",
+          "text": "G22 CORE\nSISTEMA OPERATIVO DE "
+        }
+      }
+    ]
+  },
+  {
+    "tab": "usuarios",
+    "theme": "light",
+    "overflow": false,
+    "sw": 370,
+    "iw": 375,
+    "coveredCount": 0,
+    "firstCovered": []
+  },
+  {
+    "tab": "configuracion",
+    "theme": "light",
+    "overflow": false,
+    "sw": 370,
+    "iw": 375,
+    "coveredCount": 0,
+    "firstCovered": []
+  }
+]

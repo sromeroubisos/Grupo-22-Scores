@@ -1,0 +1,6061 @@
+{
+ "descripcion": "tarjetas oficiales 4baab70e",
+ "partidos": [
+  {
+   "id": "1fd2ff45-b562-4c1a-bfee-728c9933772c",
+   "rotulo": "cardenales-r-c-femenino vs universitario-de-mendoza-femenino · 4baab70e · tarjeta 325781",
+   "arbitro": "VIVIANA GARAT",
+   "local": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Joselin Nathalie Castillo Nieva"
+     },
+     {
+      "numero": 2,
+      "nombre": "Geovana Andrea Bortolozzo"
+     },
+     {
+      "numero": 3,
+      "nombre": "Maria Belen Maroni"
+     },
+     {
+      "numero": 4,
+      "nombre": "Antonella Slame"
+     },
+     {
+      "numero": 5,
+      "nombre": "Morena Astorga"
+     },
+     {
+      "numero": 6,
+      "nombre": "Rita Beatriz Cazorla"
+     },
+     {
+      "numero": 7,
+      "nombre": "Camila Cardozo"
+     },
+     {
+      "numero": 8,
+      "nombre": "Victoria Giardelli"
+     },
+     {
+      "numero": 9,
+      "nombre": "Azul Medina"
+     },
+     {
+      "numero": 10,
+      "nombre": "Agostina Campos Ruiz"
+     },
+     {
+      "numero": 11,
+      "nombre": "Brisa Malena Medina"
+     },
+     {
+      "numero": 12,
+      "nombre": "Virginia Lucrecia Leiva Rojas"
+     },
+     {
+      "numero": 13,
+      "nombre": "Camila Alvarez Costas"
+     },
+     {
+      "numero": 14,
+      "nombre": "Norién Candela Casola"
+     },
+     {
+      "numero": 15,
+      "nombre": "Morena Antonella Costilla"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Alina Marlene Valdez"
+     },
+     {
+      "numero": 17,
+      "nombre": "Fátima Gisela Juarez"
+     },
+     {
+      "numero": 18,
+      "nombre": "Ursula Iovane"
+     }
+    ],
+    "nombre": "cardenales-r-c-femenino"
+   },
+   "visitante": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Celeste Cecilia Genco"
+     },
+     {
+      "numero": 2,
+      "nombre": "Luciana Aguilar"
+     },
+     {
+      "numero": 3,
+      "nombre": "Lourdes Marianela Castillo"
+     },
+     {
+      "numero": 4,
+      "nombre": "Caterina Aldana Gil"
+     },
+     {
+      "numero": 5,
+      "nombre": "Priscila Bertinatto"
+     },
+     {
+      "numero": 6,
+      "nombre": "Gabriela Algañaras"
+     },
+     {
+      "numero": 7,
+      "nombre": "Magdalena Vera Muñoz"
+     },
+     {
+      "numero": 8,
+      "nombre": "Valentina Verdejo"
+     },
+     {
+      "numero": 9,
+      "nombre": "Emilce Desirée Gomez Lopresti"
+     },
+     {
+      "numero": 10,
+      "nombre": "Esmeralda Beatriz Olivera Aldalla"
+     },
+     {
+      "numero": 11,
+      "nombre": "Natasha Garnica"
+     },
+     {
+      "numero": 12,
+      "nombre": "Guada Palero"
+     },
+     {
+      "numero": 13,
+      "nombre": "Antonella Ballester"
+     },
+     {
+      "numero": 14,
+      "nombre": "Florencia Robles Alarcón"
+     },
+     {
+      "numero": 15,
+      "nombre": "Julieta Rios"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "María José Zeitune"
+     }
+    ],
+    "nombre": "universitario-de-mendoza-femenino"
+   },
+   "eventos": [
+    {
+     "minuto": 3,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Azul Medina",
+     "equipo": "local"
+    },
+    {
+     "minuto": 6,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Azul Medina",
+     "equipo": "local"
+    },
+    {
+     "minuto": 6,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Victoria Giardelli",
+     "equipo": "local"
+    },
+    {
+     "minuto": 15,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Virginia Lucrecia Leiva Rojas",
+     "equipo": "local"
+    },
+    {
+     "minuto": 20,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Virginia Lucrecia Leiva Rojas",
+     "equipo": "local"
+    },
+    {
+     "minuto": 2,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Geovana Andrea Bortolozzo",
+     "equipo": "local"
+    },
+    {
+     "minuto": 2,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Azul Medina",
+     "equipo": "local"
+    },
+    {
+     "minuto": 2,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Virginia Lucrecia Leiva Rojas",
+     "equipo": "local"
+    },
+    {
+     "minuto": 11,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "jugador": "Julieta Rios",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 14,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Victoria Giardelli",
+     "equipo": "local"
+    },
+    {
+     "minuto": 18,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Azul Medina",
+     "equipo": "local"
+    },
+    {
+     "minuto": 20,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Antonella Slame",
+     "equipo": "local"
+    }
+   ]
+  },
+  {
+   "id": "ac08d93b-3c8f-4b0b-82a8-df3b7c9e9647",
+   "rotulo": "cha-roga-r-c-femenino vs universitario-de-mendoza-femenino · 4baab70e · tarjeta 325731",
+   "arbitro": "SOFIA MIRTHA VILDOZO FUENTES",
+   "local": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Micaela Aylen Gutiérrez"
+     },
+     {
+      "numero": 2,
+      "nombre": "Tamara Rojas"
+     },
+     {
+      "numero": 3,
+      "nombre": "Triana Villordo"
+     },
+     {
+      "numero": 4,
+      "nombre": "Fernanda Lorena Correa"
+     },
+     {
+      "numero": 5,
+      "nombre": "Cintia Peralta"
+     },
+     {
+      "numero": 6,
+      "nombre": "Magali Rodríguez"
+     },
+     {
+      "numero": 7,
+      "nombre": "Valentina Abril Miranda Ldesma"
+     },
+     {
+      "numero": 8,
+      "nombre": "Fiama Mattei"
+     },
+     {
+      "numero": 9,
+      "nombre": "Joana Arce"
+     },
+     {
+      "numero": 10,
+      "nombre": "Oriana Bernardi"
+     },
+     {
+      "numero": 11,
+      "nombre": "Macarena Bello"
+     },
+     {
+      "numero": 12,
+      "nombre": "Joana Carolina Casal"
+     },
+     {
+      "numero": 13,
+      "nombre": "Nahir Ianela Macaine"
+     },
+     {
+      "numero": 14,
+      "nombre": "Valentina Duarte"
+     },
+     {
+      "numero": 15,
+      "nombre": "Martina Walburg"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Nerina Luciana Villa"
+     },
+     {
+      "numero": 17,
+      "nombre": "Victoria Rojas"
+     },
+     {
+      "numero": 18,
+      "nombre": "Lara Tatiana Yuskowich"
+     }
+    ],
+    "nombre": "cha-roga-r-c-femenino"
+   },
+   "visitante": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Celeste Cecilia Genco"
+     },
+     {
+      "numero": 2,
+      "nombre": "Luciana Aguilar"
+     },
+     {
+      "numero": 3,
+      "nombre": "Lourdes Marianela Castillo"
+     },
+     {
+      "numero": 4,
+      "nombre": "Caterina Aldana Gil"
+     },
+     {
+      "numero": 5,
+      "nombre": "Priscila Bertinatto"
+     },
+     {
+      "numero": 6,
+      "nombre": "Gabriela Algañaras"
+     },
+     {
+      "numero": 7,
+      "nombre": "Maria Laura Verdejo"
+     },
+     {
+      "numero": 8,
+      "nombre": "Emilce Desirée Gomez Lopresti"
+     },
+     {
+      "numero": 9,
+      "nombre": "Esmeralda Beatriz Olivera Aldalla"
+     },
+     {
+      "numero": 10,
+      "nombre": "Natasha Garnica"
+     },
+     {
+      "numero": 11,
+      "nombre": "Guada Palero"
+     },
+     {
+      "numero": 12,
+      "nombre": "Magdalena Vera Muñoz"
+     },
+     {
+      "numero": 13,
+      "nombre": "Antonella Ballester"
+     },
+     {
+      "numero": 14,
+      "nombre": "Julieta Rios"
+     },
+     {
+      "numero": 15,
+      "nombre": "María José Zeitune"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Florencia Robles Alarcón"
+     }
+    ],
+    "nombre": "universitario-de-mendoza-femenino"
+   },
+   "eventos": [
+    {
+     "minuto": 1,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Guada Palero",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 2,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Lourdes Marianela Castillo",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 3,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Emilce Desirée Gomez Lopresti",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 4,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Maria Laura Verdejo",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 5,
+     "periodo": "1T",
+     "tipo": "injury",
+     "jugador": "Cintia Peralta",
+     "detalle": "Tarjeta azul",
+     "equipo": "local"
+    },
+    {
+     "minuto": 5,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Esmeralda Beatriz Olivera Aldalla",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 17,
+     "periodo": "1T",
+     "tipo": "substitution",
+     "jugador": "Tamara Rojas",
+     "detalle": "Entra: Valentina Duarte",
+     "equipo": "local"
+    },
+    {
+     "minuto": 2,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Joana Carolina Casal",
+     "equipo": "local"
+    },
+    {
+     "minuto": 2,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Oriana Bernardi",
+     "detalle": "Entra: Nerina Luciana Villa",
+     "equipo": "local"
+    },
+    {
+     "minuto": 2,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Micaela Aylen Gutiérrez",
+     "detalle": "Entra: Lara Tatiana Yuskowich",
+     "equipo": "local"
+    },
+    {
+     "minuto": 7,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Joana Carolina Casal",
+     "equipo": "local"
+    },
+    {
+     "minuto": 12,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "jugador": "Emilce Desirée Gomez Lopresti",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 14,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Valentina Duarte",
+     "equipo": "local"
+    },
+    {
+     "minuto": 17,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Cintia Peralta",
+     "detalle": "Entra: Nahir Ianela Macaine",
+     "equipo": "local"
+    },
+    {
+     "minuto": 19,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Fiama Mattei",
+     "equipo": "local"
+    }
+   ]
+  },
+  {
+   "id": "4dd3d283-6009-4b11-b3a5-4b8024e008eb",
+   "rotulo": "cardenales-r-c-femenino vs cha-roga-r-c-femenino · 4baab70e · tarjeta 325732",
+   "arbitro": "NEREA LIVONI",
+   "local": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Joselin Nathalie Castillo Nieva"
+     },
+     {
+      "numero": 2,
+      "nombre": "Rita Beatriz Cazorla"
+     },
+     {
+      "numero": 3,
+      "nombre": "Camila Alvarez Costas"
+     },
+     {
+      "numero": 4,
+      "nombre": "Norién Candela Casola"
+     },
+     {
+      "numero": 5,
+      "nombre": "Geovana Andrea Bortolozzo"
+     },
+     {
+      "numero": 6,
+      "nombre": "Antonella Slame"
+     },
+     {
+      "numero": 7,
+      "nombre": "Camila Cardozo"
+     },
+     {
+      "numero": 8,
+      "nombre": "Victoria Giardelli"
+     },
+     {
+      "numero": 9,
+      "nombre": "Azul Medina"
+     },
+     {
+      "numero": 10,
+      "nombre": "Brisa Malena Medina"
+     },
+     {
+      "numero": 11,
+      "nombre": "Ursula Iovane"
+     },
+     {
+      "numero": 12,
+      "nombre": "Virginia Lucrecia Leiva Rojas"
+     },
+     {
+      "numero": 13,
+      "nombre": "Morena Antonella Costilla"
+     },
+     {
+      "numero": 14,
+      "nombre": "Morena Astorga"
+     },
+     {
+      "numero": 15,
+      "nombre": "Fátima Gisela Juarez"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Alina Marlene Valdez"
+     },
+     {
+      "numero": 17,
+      "nombre": "Agostina Campos Ruiz"
+     },
+     {
+      "numero": 18,
+      "nombre": "Maria Belen Maroni"
+     }
+    ],
+    "nombre": "cardenales-r-c-femenino"
+   },
+   "visitante": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Joana Arce"
+     },
+     {
+      "numero": 2,
+      "nombre": "Nahir Ianela Macaine"
+     },
+     {
+      "numero": 3,
+      "nombre": "Triana Villordo"
+     },
+     {
+      "numero": 4,
+      "nombre": "Valentina Duarte"
+     },
+     {
+      "numero": 5,
+      "nombre": "Martina Walburg"
+     },
+     {
+      "numero": 6,
+      "nombre": "Magali Rodríguez"
+     },
+     {
+      "numero": 7,
+      "nombre": "Valentina Abril Miranda Ldesma"
+     },
+     {
+      "numero": 8,
+      "nombre": "Nerina Luciana Villa"
+     },
+     {
+      "numero": 9,
+      "nombre": "Fiama Mattei"
+     },
+     {
+      "numero": 10,
+      "nombre": "Oriana Bernardi"
+     },
+     {
+      "numero": 11,
+      "nombre": "Lara Tatiana Yuskowich"
+     },
+     {
+      "numero": 12,
+      "nombre": "Joana Carolina Casal"
+     },
+     {
+      "numero": 13,
+      "nombre": "Micaela Aylen Gutiérrez"
+     },
+     {
+      "numero": 14,
+      "nombre": "Tamara Rojas"
+     },
+     {
+      "numero": 15,
+      "nombre": "Fernanda Lorena Correa"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Macarena Bello"
+     },
+     {
+      "numero": 17,
+      "nombre": "Victoria Rojas"
+     }
+    ],
+    "nombre": "cha-roga-r-c-femenino"
+   },
+   "eventos": [
+    {
+     "minuto": 1,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Norién Candela Casola",
+     "equipo": "local"
+    },
+    {
+     "minuto": 1,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Victoria Giardelli",
+     "equipo": "local"
+    },
+    {
+     "minuto": 5,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Azul Medina",
+     "equipo": "local"
+    },
+    {
+     "minuto": 6,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "jugador": "Victoria Giardelli",
+     "equipo": "local"
+    },
+    {
+     "minuto": 15,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Ursula Iovane",
+     "equipo": "local"
+    },
+    {
+     "minuto": 21,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Ursula Iovane",
+     "equipo": "local"
+    },
+    {
+     "minuto": 1,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Nahir Ianela Macaine",
+     "detalle": "Entra: Tamara Rojas",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 6,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Lara Tatiana Yuskowich",
+     "detalle": "Entra: Victoria Rojas",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 8,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Rita Beatriz Cazorla",
+     "equipo": "local"
+    },
+    {
+     "minuto": 8,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Fátima Gisela Juarez",
+     "equipo": "local"
+    },
+    {
+     "minuto": 12,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Norién Candela Casola",
+     "equipo": "local"
+    },
+    {
+     "minuto": 15,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Triana Villordo",
+     "detalle": "Entra: Micaela Aylen Gutiérrez",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 16,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Oriana Bernardi",
+     "detalle": "Entra: Macarena Bello",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 20,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Victoria Giardelli",
+     "equipo": "local"
+    },
+    {
+     "minuto": 20,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Fátima Gisela Juarez",
+     "equipo": "local"
+    }
+   ]
+  },
+  {
+   "id": "ac8a4eb4-e458-4a71-9ca1-8d1bfc6558ce",
+   "rotulo": "aguilas-rc-saenz-pena-femenino vs aguara-guazu-femenino · 4baab70e · tarjeta 325736",
+   "arbitro": "DAIANA DEL MILAGRO CESARETTI",
+   "local": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Alexandra Antonella Cabral"
+     },
+     {
+      "numero": 2,
+      "nombre": "Daniela Lucia Saravia"
+     },
+     {
+      "numero": 3,
+      "nombre": "Estefania Alvares"
+     },
+     {
+      "numero": 4,
+      "nombre": "Milagros Jaqueline Cabrera"
+     },
+     {
+      "numero": 5,
+      "nombre": "Erica Yamila Espindola"
+     },
+     {
+      "numero": 6,
+      "nombre": "Lucia Gicel Ramirez"
+     },
+     {
+      "numero": 7,
+      "nombre": "Zaira Florencia Gonzalez"
+     },
+     {
+      "numero": 8,
+      "nombre": "Ayelen Araceli Goy"
+     },
+     {
+      "numero": 9,
+      "nombre": "Alexandra Monzon"
+     },
+     {
+      "numero": 10,
+      "nombre": "Patricia Soledad Ojeda"
+     },
+     {
+      "numero": 11,
+      "nombre": "Melisa Soledad Rodich"
+     },
+     {
+      "numero": 12,
+      "nombre": "Vanesa Soledad Fernandez"
+     },
+     {
+      "numero": 13,
+      "nombre": "Catherine Francia"
+     },
+     {
+      "numero": 14,
+      "nombre": "Veronica Pamela Acevedo"
+     },
+     {
+      "numero": 15,
+      "nombre": "Veronica Alejandra Ojeda"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Maria Ayelen Monte"
+     },
+     {
+      "numero": 17,
+      "nombre": "Sabrina Jaqueline Verón"
+     }
+    ],
+    "nombre": "aguilas-rc-saenz-pena-femenino"
+   },
+   "visitante": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Valentina Aguero"
+     },
+     {
+      "numero": 2,
+      "nombre": "Camila Villagra"
+     },
+     {
+      "numero": 3,
+      "nombre": "Silvina Ramirez"
+     },
+     {
+      "numero": 4,
+      "nombre": "Paula Ledesma"
+     },
+     {
+      "numero": 5,
+      "nombre": "Sofía Abril Diaz"
+     },
+     {
+      "numero": 6,
+      "nombre": "Ana Balceda"
+     },
+     {
+      "numero": 7,
+      "nombre": "Nahir Argañaraz"
+     },
+     {
+      "numero": 8,
+      "nombre": "Graciela Yanina Serrano"
+     },
+     {
+      "numero": 9,
+      "nombre": "Andrea Gabriela Moreno"
+     },
+     {
+      "numero": 10,
+      "nombre": "Candela Romano"
+     },
+     {
+      "numero": 11,
+      "nombre": "Mayra Anahí Albornoz"
+     },
+     {
+      "numero": 12,
+      "nombre": "María Florencia Moreno"
+     },
+     {
+      "numero": 13,
+      "nombre": "Emilia Alarcón"
+     },
+     {
+      "numero": 14,
+      "nombre": "Ana Gabriela Gramajo"
+     },
+     {
+      "numero": 15,
+      "nombre": "Ana Maria Fadel Quintana"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Agostina Del Valle Carreño"
+     },
+     {
+      "numero": 17,
+      "nombre": "Samira Maricel Sanchez"
+     },
+     {
+      "numero": 18,
+      "nombre": "Marianela Gambarte"
+     }
+    ],
+    "nombre": "aguara-guazu-femenino"
+   },
+   "eventos": [
+    {
+     "minuto": 1,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Zaira Florencia Gonzalez",
+     "equipo": "local"
+    },
+    {
+     "minuto": 1,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Lucia Gicel Ramirez",
+     "equipo": "local"
+    },
+    {
+     "minuto": 1,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Graciela Yanina Serrano",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 8,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Silvina Ramirez",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 18,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Camila Villagra",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 1,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "jugador": "Estefania Alvares",
+     "equipo": "local"
+    },
+    {
+     "minuto": 9,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Silvina Ramirez",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 19,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Agostina Del Valle Carreño",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 19,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "María Florencia Moreno",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 20,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Ana Balceda",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 20,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Silvina Ramirez",
+     "equipo": "visitante"
+    }
+   ]
+  },
+  {
+   "id": "385f4d16-3905-46bb-a6da-6342071beaaf",
+   "rotulo": "aguara-guazu-femenino vs palihue-rc-femenino · 4baab70e · tarjeta 325735",
+   "arbitro": "NEREA LIVONI",
+   "local": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Valentina Aguero"
+     },
+     {
+      "numero": 2,
+      "nombre": "Camila Villagra"
+     },
+     {
+      "numero": 3,
+      "nombre": "Silvina Ramirez"
+     },
+     {
+      "numero": 4,
+      "nombre": "Sofía Abril Diaz"
+     },
+     {
+      "numero": 5,
+      "nombre": "Paula Ledesma"
+     },
+     {
+      "numero": 6,
+      "nombre": "Ana Balceda"
+     },
+     {
+      "numero": 7,
+      "nombre": "Nahir Argañaraz"
+     },
+     {
+      "numero": 8,
+      "nombre": "Graciela Yanina Serrano"
+     },
+     {
+      "numero": 9,
+      "nombre": "Andrea Gabriela Moreno"
+     },
+     {
+      "numero": 10,
+      "nombre": "Candela Romano"
+     },
+     {
+      "numero": 11,
+      "nombre": "Mayra Anahí Albornoz"
+     },
+     {
+      "numero": 12,
+      "nombre": "María Florencia Moreno"
+     },
+     {
+      "numero": 13,
+      "nombre": "Emilia Alarcón"
+     },
+     {
+      "numero": 14,
+      "nombre": "Marianela Gambarte"
+     },
+     {
+      "numero": 15,
+      "nombre": "Ana Maria Fadel Quintana"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Agostina Del Valle Carreño"
+     },
+     {
+      "numero": 17,
+      "nombre": "Ana Gabriela Gramajo"
+     },
+     {
+      "numero": 18,
+      "nombre": "Samira Maricel Sanchez"
+     }
+    ],
+    "nombre": "aguara-guazu-femenino"
+   },
+   "visitante": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Betina Ailen Roriguez Manzi"
+     },
+     {
+      "numero": 2,
+      "nombre": "Mayra Rodriguez"
+     },
+     {
+      "numero": 3,
+      "nombre": "Sheila Noemi Gonzalez Basualdo"
+     },
+     {
+      "numero": 4,
+      "nombre": "Brisa Abigail Cools"
+     },
+     {
+      "numero": 5,
+      "nombre": "Antonella Abigail Azcarate"
+     },
+     {
+      "numero": 6,
+      "nombre": "Naara Jurado"
+     },
+     {
+      "numero": 7,
+      "nombre": "Sofia Almiron"
+     },
+     {
+      "numero": 8,
+      "nombre": "Gianela Nicole Gimenez Valenzuela"
+     },
+     {
+      "numero": 9,
+      "nombre": "María Victoria Canepa"
+     },
+     {
+      "numero": 10,
+      "nombre": "Adriana Gaspar"
+     },
+     {
+      "numero": 11,
+      "nombre": "Florencia Guadalupe Wirscke Urbicain"
+     },
+     {
+      "numero": 12,
+      "nombre": "Amy Jensen"
+     },
+     {
+      "numero": 13,
+      "nombre": "Sasha Noemí Prost Alan"
+     },
+     {
+      "numero": 14,
+      "nombre": "Juana Cabello"
+     },
+     {
+      "numero": 15,
+      "nombre": "Maria Belen Canepa"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Emilia Cos"
+     },
+     {
+      "numero": 17,
+      "nombre": "Amparo Lucotti"
+     },
+     {
+      "numero": 18,
+      "nombre": "Agustina Maribel Almiron"
+     }
+    ],
+    "nombre": "palihue-rc-femenino"
+   },
+   "eventos": [
+    {
+     "minuto": 2,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Mayra Anahí Albornoz",
+     "equipo": "local"
+    },
+    {
+     "minuto": 2,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Silvina Ramirez",
+     "equipo": "local"
+    },
+    {
+     "minuto": 4,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Mayra Anahí Albornoz",
+     "equipo": "local"
+    },
+    {
+     "minuto": 7,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "María Florencia Moreno",
+     "equipo": "local"
+    },
+    {
+     "minuto": 7,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "María Florencia Moreno",
+     "equipo": "local"
+    },
+    {
+     "minuto": 10,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "María Florencia Moreno",
+     "equipo": "local"
+    },
+    {
+     "minuto": 11,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Silvina Ramirez",
+     "equipo": "local"
+    },
+    {
+     "minuto": 14,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "jugador": "Sofía Abril Diaz",
+     "equipo": "local"
+    },
+    {
+     "minuto": 16,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Mayra Anahí Albornoz",
+     "equipo": "local"
+    },
+    {
+     "minuto": 17,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Silvina Ramirez",
+     "equipo": "local"
+    },
+    {
+     "minuto": 20,
+     "periodo": "1T",
+     "tipo": "injury",
+     "jugador": "Brisa Abigail Cools",
+     "detalle": "Lesionado",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 1,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Antonella Abigail Azcarate",
+     "detalle": "Entra: Maria Belen Canepa",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 7,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Ana Balceda",
+     "equipo": "local"
+    },
+    {
+     "minuto": 7,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Brisa Abigail Cools",
+     "detalle": "Entra: Agustina Maribel Almiron",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 7,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Sofia Almiron",
+     "detalle": "Entra: Emilia Cos",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 9,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Betina Ailen Roriguez Manzi",
+     "detalle": "Entra: Sasha Noemí Prost Alan",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "María Florencia Moreno",
+     "equipo": "local"
+    },
+    {
+     "minuto": 11,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "María Florencia Moreno",
+     "equipo": "local"
+    },
+    {
+     "minuto": 19,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "jugador": "María Florencia Moreno",
+     "equipo": "local"
+    },
+    {
+     "minuto": 20,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Brisa Abigail Cools",
+     "detalle": "Entra: Juana Cabello",
+     "equipo": "visitante"
+    }
+   ]
+  },
+  {
+   "id": "54fb19f8-9f2c-45f3-9605-b32bf4f6fef2",
+   "rotulo": "aguilas-rc-saenz-pena-femenino vs palihue-rc-femenino · 4baab70e · tarjeta 325734",
+   "arbitro": "FLORENCIA LEDESMA",
+   "local": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Alexandra Antonella Cabral"
+     },
+     {
+      "numero": 2,
+      "nombre": "Erica Yamila Espindola"
+     },
+     {
+      "numero": 3,
+      "nombre": "Daniela Lucia Saravia"
+     },
+     {
+      "numero": 4,
+      "nombre": "Alexandra Monzon"
+     },
+     {
+      "numero": 5,
+      "nombre": "Vanesa Soledad Fernandez"
+     },
+     {
+      "numero": 6,
+      "nombre": "Ayelen Araceli Goy"
+     },
+     {
+      "numero": 7,
+      "nombre": "Veronica Alejandra Ojeda"
+     },
+     {
+      "numero": 8,
+      "nombre": "Patricia Soledad Ojeda"
+     },
+     {
+      "numero": 9,
+      "nombre": "Milagros Jaqueline Cabrera"
+     },
+     {
+      "numero": 10,
+      "nombre": "Melisa Soledad Rodich"
+     },
+     {
+      "numero": 11,
+      "nombre": "Estefania Alvares"
+     },
+     {
+      "numero": 12,
+      "nombre": "Zaira Florencia Gonzalez"
+     },
+     {
+      "numero": 13,
+      "nombre": "Lucia Gicel Ramirez"
+     },
+     {
+      "numero": 14,
+      "nombre": "Veronica Pamela Acevedo"
+     },
+     {
+      "numero": 15,
+      "nombre": "Catherine Francia"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Maria Ayelen Monte"
+     },
+     {
+      "numero": 17,
+      "nombre": "Sabrina Jaqueline Verón"
+     }
+    ],
+    "nombre": "aguilas-rc-saenz-pena-femenino"
+   },
+   "visitante": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Betina Ailen Roriguez Manzi"
+     },
+     {
+      "numero": 2,
+      "nombre": "Mayra Rodriguez"
+     },
+     {
+      "numero": 3,
+      "nombre": "Sheila Noemi Gonzalez Basualdo"
+     },
+     {
+      "numero": 4,
+      "nombre": "Sasha Noemí Prost Alan"
+     },
+     {
+      "numero": 5,
+      "nombre": "Antonella Abigail Azcarate"
+     },
+     {
+      "numero": 6,
+      "nombre": "Naara Jurado"
+     },
+     {
+      "numero": 7,
+      "nombre": "Emilia Cos"
+     },
+     {
+      "numero": 8,
+      "nombre": "Gianela Nicole Gimenez Valenzuela"
+     },
+     {
+      "numero": 9,
+      "nombre": "María Victoria Canepa"
+     },
+     {
+      "numero": 10,
+      "nombre": "Adriana Gaspar"
+     },
+     {
+      "numero": 11,
+      "nombre": "Amy Jensen"
+     },
+     {
+      "numero": 12,
+      "nombre": "Sofia Almiron"
+     },
+     {
+      "numero": 13,
+      "nombre": "Maria Belen Canepa"
+     },
+     {
+      "numero": 14,
+      "nombre": "Florencia Guadalupe Wirscke Urbicain"
+     },
+     {
+      "numero": 15,
+      "nombre": "Agustina Maribel Almiron"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Brisa Abigail Cools"
+     },
+     {
+      "numero": 17,
+      "nombre": "Juana Cabello"
+     },
+     {
+      "numero": 18,
+      "nombre": "Amparo Lucotti"
+     }
+    ],
+    "nombre": "palihue-rc-femenino"
+   },
+   "eventos": [
+    {
+     "minuto": 5,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "jugador": "Ayelen Araceli Goy",
+     "equipo": "local"
+    },
+    {
+     "minuto": 7,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Milagros Jaqueline Cabrera",
+     "equipo": "local"
+    },
+    {
+     "minuto": 10,
+     "periodo": "1T",
+     "tipo": "penalty_try",
+     "jugador": "Antonella Abigail Azcarate",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 16,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Gianela Nicole Gimenez Valenzuela",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 16,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Naara Jurado",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 17,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Milagros Jaqueline Cabrera",
+     "equipo": "local"
+    },
+    {
+     "minuto": 20,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "María Victoria Canepa",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 1,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Emilia Cos",
+     "detalle": "Entra: Agustina Maribel Almiron",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 2,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "jugador": "Milagros Jaqueline Cabrera",
+     "equipo": "local"
+    },
+    {
+     "minuto": 2,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Sasha Noemí Prost Alan",
+     "detalle": "Entra: Juana Cabello",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Alexandra Monzon",
+     "equipo": "local"
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Lucia Gicel Ramirez",
+     "equipo": "local"
+    },
+    {
+     "minuto": 11,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Zaira Florencia Gonzalez",
+     "equipo": "local"
+    },
+    {
+     "minuto": 14,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Melisa Soledad Rodich",
+     "equipo": "local"
+    },
+    {
+     "minuto": 19,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Daniela Lucia Saravia",
+     "equipo": "local"
+    }
+   ]
+  },
+  {
+   "id": "1270342f-1741-40a4-ad7a-b759b8a68b1c",
+   "rotulo": "club-universitario-de-cordoba-femenino vs marabunta-r-c-femenino · 4baab70e · tarjeta 325737",
+   "arbitro": "ARIADNA FLORENCIA AVALOS",
+   "local": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Maira Barrionuevo"
+     },
+     {
+      "numero": 2,
+      "nombre": "Maite Perez"
+     },
+     {
+      "numero": 3,
+      "nombre": "Dayana Micaela Juncos"
+     },
+     {
+      "numero": 4,
+      "nombre": "Romina Blandamuro"
+     },
+     {
+      "numero": 5,
+      "nombre": "Ayelen Vega"
+     },
+     {
+      "numero": 6,
+      "nombre": "Camila Sofia Paredes Masin"
+     },
+     {
+      "numero": 7,
+      "nombre": "Maria Aime Morro David"
+     },
+     {
+      "numero": 8,
+      "nombre": "Dolores Berti Baila"
+     },
+     {
+      "numero": 9,
+      "nombre": "Agustina Retamar"
+     },
+     {
+      "numero": 10,
+      "nombre": "Celmira Quiroga"
+     },
+     {
+      "numero": 11,
+      "nombre": "Renata Giraudo"
+     },
+     {
+      "numero": 12,
+      "nombre": "Brisa Nazarena Trigo Alday"
+     },
+     {
+      "numero": 13,
+      "nombre": "Maria Sol Serran Croce"
+     },
+     {
+      "numero": 14,
+      "nombre": "Ema Lucia Morro Fergola"
+     },
+     {
+      "numero": 15,
+      "nombre": "Sol Destefanis"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Valentina Flores"
+     },
+     {
+      "numero": 17,
+      "nombre": "Celeste Gómez"
+     },
+     {
+      "numero": 18,
+      "nombre": "Victoria Catania Barbano"
+     }
+    ],
+    "nombre": "club-universitario-de-cordoba-femenino"
+   },
+   "visitante": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "María Luz Camacho"
+     },
+     {
+      "numero": 2,
+      "nombre": "Angeles Martina Matamala Carvajal"
+     },
+     {
+      "numero": 3,
+      "nombre": "Maria Candela Kristensen"
+     },
+     {
+      "numero": 4,
+      "nombre": "Yesica Banegas"
+     },
+     {
+      "numero": 5,
+      "nombre": "Leila Daniela Sandoval"
+     },
+     {
+      "numero": 6,
+      "nombre": "Lurdes Montenegro"
+     },
+     {
+      "numero": 7,
+      "nombre": "Guadalupe Santana"
+     },
+     {
+      "numero": 8,
+      "nombre": "Maria Pia Perea"
+     },
+     {
+      "numero": 9,
+      "nombre": "Daniza Gutierrez"
+     },
+     {
+      "numero": 10,
+      "nombre": "Agustina Belén Sandoval"
+     },
+     {
+      "numero": 11,
+      "nombre": "Pamela Florencia Esquivel"
+     },
+     {
+      "numero": 12,
+      "nombre": "Tiziana Silva"
+     },
+     {
+      "numero": 13,
+      "nombre": "Tania Jimena Capdevila"
+     },
+     {
+      "numero": 14,
+      "nombre": "Lucía Macarena Velázquez Loncomán"
+     },
+     {
+      "numero": 15,
+      "nombre": "Florencia Farroni Reina"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Gisela Celeste Neyra"
+     },
+     {
+      "numero": 17,
+      "nombre": "Muriel Balboa"
+     },
+     {
+      "numero": 18,
+      "nombre": "Soledad Yanet Farfan"
+     }
+    ],
+    "nombre": "marabunta-r-c-femenino"
+   },
+   "eventos": [
+    {
+     "minuto": 2,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Agustina Belén Sandoval",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 5,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Renata Giraudo",
+     "equipo": "local"
+    },
+    {
+     "minuto": 8,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Agustina Belén Sandoval",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 11,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Celmira Quiroga",
+     "equipo": "local"
+    },
+    {
+     "minuto": 12,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Dolores Berti Baila",
+     "equipo": "local"
+    },
+    {
+     "minuto": 18,
+     "periodo": "1T",
+     "tipo": "substitution",
+     "jugador": "Lurdes Montenegro",
+     "detalle": "Entra: Florencia Farroni Reina",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 2,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Camila Sofia Paredes Masin",
+     "equipo": "local"
+    },
+    {
+     "minuto": 6,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Ayelen Vega",
+     "detalle": "Entra: Sol Destefanis",
+     "equipo": "local"
+    },
+    {
+     "minuto": 6,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Renata Giraudo",
+     "detalle": "Entra: Ema Lucia Morro Fergola",
+     "equipo": "local"
+    },
+    {
+     "minuto": 14,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "jugador": "Sol Destefanis",
+     "equipo": "local"
+    },
+    {
+     "minuto": 18,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Leila Daniela Sandoval",
+     "detalle": "Entra: Lucía Macarena Velázquez Loncomán",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 18,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Tiziana Silva",
+     "detalle": "Entra: Gisela Celeste Neyra",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 19,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Camila Sofia Paredes Masin",
+     "equipo": "local"
+    },
+    {
+     "minuto": 19,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Dolores Berti Baila",
+     "equipo": "local"
+    },
+    {
+     "minuto": 19,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Maira Barrionuevo",
+     "detalle": "Entra: Victoria Catania Barbano",
+     "equipo": "local"
+    }
+   ]
+  },
+  {
+   "id": "00456ad5-63c4-42d8-9f6d-0a7254fa506e",
+   "rotulo": "taborin-rc-femenino vs marabunta-r-c-femenino · 4baab70e · tarjeta 325739",
+   "arbitro": "MARTINA GERALDINE GARABATOS BONARD",
+   "local": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Brisa Agustina Turra"
+     },
+     {
+      "numero": 2,
+      "nombre": "Macarena Fernanda Burgos"
+     },
+     {
+      "numero": 3,
+      "nombre": "Yamila Liliana Barrera"
+     },
+     {
+      "numero": 4,
+      "nombre": "Nazarena Yael Gigena Ramallo"
+     },
+     {
+      "numero": 5,
+      "nombre": "Maiara Abril Lopez Cejas"
+     },
+     {
+      "numero": 6,
+      "nombre": "Ana Paula Quintero Chiesa"
+     },
+     {
+      "numero": 7,
+      "nombre": "Giuliana Antonella Lincoman"
+     },
+     {
+      "numero": 8,
+      "nombre": "Ana Rieger"
+     },
+     {
+      "numero": 9,
+      "nombre": "Gimena Sala"
+     },
+     {
+      "numero": 10,
+      "nombre": "Dana Birreto"
+     },
+     {
+      "numero": 11,
+      "nombre": "Araceli Soledad Oviedo"
+     },
+     {
+      "numero": 12,
+      "nombre": "Aldana Robledo"
+     },
+     {
+      "numero": 13,
+      "nombre": "Tatiana Rocio Falcón"
+     },
+     {
+      "numero": 14,
+      "nombre": "Yesica Agustina Saucedo"
+     },
+     {
+      "numero": 15,
+      "nombre": "Rosa Analía Torres Fernández"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Ludmila Boca"
+     },
+     {
+      "numero": 17,
+      "nombre": "Antonella Crosetto"
+     },
+     {
+      "numero": 18,
+      "nombre": "Valentina Ponce"
+     }
+    ],
+    "nombre": "taborin-rc-femenino"
+   },
+   "visitante": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Yesica Banegas"
+     },
+     {
+      "numero": 2,
+      "nombre": "Angeles Martina Matamala Carvajal"
+     },
+     {
+      "numero": 3,
+      "nombre": "María Luz Camacho"
+     },
+     {
+      "numero": 4,
+      "nombre": "Lucía Macarena Velázquez Loncomán"
+     },
+     {
+      "numero": 5,
+      "nombre": "Leila Daniela Sandoval"
+     },
+     {
+      "numero": 6,
+      "nombre": "Tania Jimena Capdevila"
+     },
+     {
+      "numero": 7,
+      "nombre": "Guadalupe Santana"
+     },
+     {
+      "numero": 8,
+      "nombre": "Maria Pia Perea"
+     },
+     {
+      "numero": 9,
+      "nombre": "Daniza Gutierrez"
+     },
+     {
+      "numero": 10,
+      "nombre": "Agustina Belén Sandoval"
+     },
+     {
+      "numero": 11,
+      "nombre": "Pamela Florencia Esquivel"
+     },
+     {
+      "numero": 12,
+      "nombre": "Florencia Farroni Reina"
+     },
+     {
+      "numero": 13,
+      "nombre": "Maria Candela Kristensen"
+     },
+     {
+      "numero": 14,
+      "nombre": "Lurdes Montenegro"
+     },
+     {
+      "numero": 15,
+      "nombre": "Tiziana Silva"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Gisela Celeste Neyra"
+     },
+     {
+      "numero": 17,
+      "nombre": "Muriel Balboa"
+     },
+     {
+      "numero": 18,
+      "nombre": "Soledad Yanet Farfan"
+     }
+    ],
+    "nombre": "marabunta-r-c-femenino"
+   },
+   "eventos": [
+    {
+     "minuto": 3,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Araceli Soledad Oviedo",
+     "equipo": "local"
+    },
+    {
+     "minuto": 9,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "jugador": "Tania Jimena Capdevila",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 10,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Araceli Soledad Oviedo",
+     "equipo": "local"
+    },
+    {
+     "minuto": 13,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Ana Rieger",
+     "equipo": "local"
+    },
+    {
+     "minuto": 13,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Ana Rieger",
+     "equipo": "local"
+    },
+    {
+     "minuto": 17,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "jugador": "Macarena Fernanda Burgos",
+     "equipo": "local"
+    },
+    {
+     "minuto": 17,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Daniza Gutierrez",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 17,
+     "periodo": "1T",
+     "tipo": "substitution",
+     "jugador": "Lucía Macarena Velázquez Loncomán",
+     "detalle": "Entra: Maria Candela Kristensen",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 17,
+     "periodo": "1T",
+     "tipo": "substitution",
+     "jugador": "Yesica Banegas",
+     "detalle": "Entra: Lurdes Montenegro",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 23,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Araceli Soledad Oviedo",
+     "equipo": "local"
+    },
+    {
+     "minuto": 23,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Ana Rieger",
+     "equipo": "local"
+    },
+    {
+     "minuto": 1,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Brisa Agustina Turra",
+     "detalle": "Entra: Yesica Agustina Saucedo",
+     "equipo": "local"
+    },
+    {
+     "minuto": 1,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Yamila Liliana Barrera",
+     "detalle": "Entra: Rosa Analía Torres Fernández",
+     "equipo": "local"
+    },
+    {
+     "minuto": 1,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Macarena Fernanda Burgos",
+     "detalle": "Entra: Maiara Abril Lopez Cejas",
+     "equipo": "local"
+    },
+    {
+     "minuto": 2,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Yesica Agustina Saucedo",
+     "equipo": "local"
+    },
+    {
+     "minuto": 2,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Ana Rieger",
+     "equipo": "local"
+    },
+    {
+     "minuto": 5,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "María Luz Camacho",
+     "detalle": "Entra: María Luz Camacho",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 6,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Ana Rieger",
+     "equipo": "local"
+    },
+    {
+     "minuto": 6,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Gimena Sala",
+     "equipo": "local"
+    },
+    {
+     "minuto": 9,
+     "periodo": "2T",
+     "tipo": "card_red",
+     "jugador": "Lurdes Montenegro",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 17,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Tania Jimena Capdevila",
+     "detalle": "Entra: Soledad Yanet Farfan",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 17,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Leila Daniela Sandoval",
+     "detalle": "Entra: Muriel Balboa",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 18,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Ana Rieger",
+     "equipo": "local"
+    },
+    {
+     "minuto": 18,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Ana Rieger",
+     "equipo": "local"
+    },
+    {
+     "minuto": 20,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Maiara Abril Lopez Cejas",
+     "equipo": "local"
+    },
+    {
+     "minuto": 20,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Ana Rieger",
+     "equipo": "local"
+    }
+   ]
+  },
+  {
+   "id": "9fab8a15-d4b0-40a1-9242-2acdaaa11fc2",
+   "rotulo": "club-universitario-de-cordoba-femenino vs taborin-rc-femenino · 4baab70e · tarjeta 325740",
+   "arbitro": "VIVIANA GARAT",
+   "local": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Maira Barrionuevo"
+     },
+     {
+      "numero": 2,
+      "nombre": "Maite Perez"
+     },
+     {
+      "numero": 3,
+      "nombre": "Ayelen Vega"
+     },
+     {
+      "numero": 4,
+      "nombre": "Romina Blandamuro"
+     },
+     {
+      "numero": 5,
+      "nombre": "Camila Sofia Paredes Masin"
+     },
+     {
+      "numero": 6,
+      "nombre": "Ema Lucia Morro Fergola"
+     },
+     {
+      "numero": 7,
+      "nombre": "Maria Aime Morro David"
+     },
+     {
+      "numero": 8,
+      "nombre": "Dolores Berti Baila"
+     },
+     {
+      "numero": 9,
+      "nombre": "Agustina Retamar"
+     },
+     {
+      "numero": 10,
+      "nombre": "Celmira Quiroga"
+     },
+     {
+      "numero": 11,
+      "nombre": "Sol Destefanis"
+     },
+     {
+      "numero": 12,
+      "nombre": "Brisa Nazarena Trigo Alday"
+     },
+     {
+      "numero": 13,
+      "nombre": "Maria Sol Serran Croce"
+     },
+     {
+      "numero": 14,
+      "nombre": "Victoria Catania Barbano"
+     },
+     {
+      "numero": 15,
+      "nombre": "Dayana Micaela Juncos"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Renata Giraudo"
+     },
+     {
+      "numero": 17,
+      "nombre": "Valentina Flores"
+     },
+     {
+      "numero": 18,
+      "nombre": "Celeste Gómez"
+     }
+    ],
+    "nombre": "club-universitario-de-cordoba-femenino"
+   },
+   "visitante": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Brisa Agustina Turra"
+     },
+     {
+      "numero": 2,
+      "nombre": "Macarena Fernanda Burgos"
+     },
+     {
+      "numero": 3,
+      "nombre": "Yamila Liliana Barrera"
+     },
+     {
+      "numero": 4,
+      "nombre": "Nazarena Yael Gigena Ramallo"
+     },
+     {
+      "numero": 5,
+      "nombre": "Maiara Abril Lopez Cejas"
+     },
+     {
+      "numero": 6,
+      "nombre": "Ana Paula Quintero Chiesa"
+     },
+     {
+      "numero": 7,
+      "nombre": "Giuliana Antonella Lincoman"
+     },
+     {
+      "numero": 8,
+      "nombre": "Ana Rieger"
+     },
+     {
+      "numero": 9,
+      "nombre": "Gimena Sala"
+     },
+     {
+      "numero": 10,
+      "nombre": "Dana Birreto"
+     },
+     {
+      "numero": 11,
+      "nombre": "Araceli Soledad Oviedo"
+     },
+     {
+      "numero": 12,
+      "nombre": "Aldana Robledo"
+     },
+     {
+      "numero": 13,
+      "nombre": "Tatiana Rocio Falcón"
+     },
+     {
+      "numero": 14,
+      "nombre": "Yesica Agustina Saucedo"
+     },
+     {
+      "numero": 15,
+      "nombre": "Rosa Analía Torres Fernández"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Antonella Crosetto"
+     },
+     {
+      "numero": 17,
+      "nombre": "Ludmila Boca"
+     },
+     {
+      "numero": 18,
+      "nombre": "Valentina Ponce"
+     }
+    ],
+    "nombre": "taborin-rc-femenino"
+   },
+   "eventos": [
+    {
+     "minuto": 4,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "jugador": "Maiara Abril Lopez Cejas",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 15,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Maite Perez",
+     "equipo": "local"
+    },
+    {
+     "minuto": 20,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Sol Destefanis",
+     "equipo": "local"
+    },
+    {
+     "minuto": 4,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Camila Sofia Paredes Masin",
+     "equipo": "local"
+    },
+    {
+     "minuto": 4,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "jugador": "Ana Rieger",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 12,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "jugador": "Brisa Agustina Turra",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 13,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "jugador": "Romina Blandamuro",
+     "equipo": "local"
+    },
+    {
+     "minuto": 13,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "jugador": "Romina Blandamuro",
+     "equipo": "local"
+    },
+    {
+     "minuto": 17,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Dolores Berti Baila",
+     "detalle": "Entra: Renata Giraudo",
+     "equipo": "local"
+    }
+   ]
+  },
+  {
+   "id": "ba0c5da3-1c84-412c-8107-5b33fb3fb1a4",
+   "rotulo": "la-plata-femenino vs ciudad-femenino · 4baab70e · tarjeta 325747",
+   "arbitro": "ARIADNA FLORENCIA AVALOS",
+   "local": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Nahir Sheila Taborda"
+     },
+     {
+      "numero": 2,
+      "nombre": "Rocio Ale"
+     },
+     {
+      "numero": 3,
+      "nombre": "Sol Josefina Rodriguez"
+     },
+     {
+      "numero": 4,
+      "nombre": "Dina Ariadna Galech Berrojalbiz"
+     },
+     {
+      "numero": 5,
+      "nombre": "Barbara Rodriguez"
+     },
+     {
+      "numero": 6,
+      "nombre": "Camila Luna Contreras"
+     },
+     {
+      "numero": 7,
+      "nombre": "Isabella Cappellani"
+     },
+     {
+      "numero": 8,
+      "nombre": "Avril Rahmer Morgantini"
+     },
+     {
+      "numero": 9,
+      "nombre": "Yael Cardoso"
+     },
+     {
+      "numero": 10,
+      "nombre": "Carolina Charamone"
+     },
+     {
+      "numero": 11,
+      "nombre": "Magali Gervasio"
+     },
+     {
+      "numero": 12,
+      "nombre": "Rocio Sabrina Osorio"
+     },
+     {
+      "numero": 13,
+      "nombre": "Luz Marina Fiol Lopez"
+     },
+     {
+      "numero": 14,
+      "nombre": "Fabiola Mercedes Escobar Díaz"
+     },
+     {
+      "numero": 15,
+      "nombre": "Catalina Latorre"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Nur Fatima Diaz"
+     }
+    ],
+    "nombre": "la-plata-femenino"
+   },
+   "visitante": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Alejandra Salas"
+     },
+     {
+      "numero": 3,
+      "nombre": "Paola Candia"
+     },
+     {
+      "numero": 4,
+      "nombre": "Maria Belen Garcia Remiro"
+     },
+     {
+      "numero": 5,
+      "nombre": "Ludmila Elena Toledo Pacher"
+     },
+     {
+      "numero": 6,
+      "nombre": "Renata Sosa Quintana"
+     },
+     {
+      "numero": 7,
+      "nombre": "Valentina Larluz"
+     },
+     {
+      "numero": 8,
+      "nombre": "Valentina Castro"
+     },
+     {
+      "numero": 9,
+      "nombre": "Carolina Ariana Carrera Venegoni"
+     },
+     {
+      "numero": 10,
+      "nombre": "Alfonsina Avendaño"
+     },
+     {
+      "numero": 11,
+      "nombre": "Julieta Monjes"
+     },
+     {
+      "numero": 12,
+      "nombre": "Lara Rioboo"
+     },
+     {
+      "numero": 13,
+      "nombre": "Catalina Senders"
+     },
+     {
+      "numero": 14,
+      "nombre": "Tais Marinov Frendo"
+     },
+     {
+      "numero": 15,
+      "nombre": "Pilar Ailin Aguero Mares"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Camila De Los Ángeles Vargaz"
+     },
+     {
+      "numero": 17,
+      "nombre": "Daniela Agustina Rovelli"
+     }
+    ],
+    "nombre": "ciudad-femenino"
+   },
+   "eventos": [
+    {
+     "minuto": 2,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Magali Gervasio",
+     "equipo": "local"
+    },
+    {
+     "minuto": 2,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Avril Rahmer Morgantini",
+     "equipo": "local"
+    },
+    {
+     "minuto": 10,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "jugador": "Rocio Ale",
+     "equipo": "local"
+    },
+    {
+     "minuto": 16,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Magali Gervasio",
+     "equipo": "local"
+    },
+    {
+     "minuto": 16,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Avril Rahmer Morgantini",
+     "equipo": "local"
+    },
+    {
+     "minuto": 18,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Magali Gervasio",
+     "equipo": "local"
+    },
+    {
+     "minuto": 11,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Magali Gervasio",
+     "equipo": "local"
+    },
+    {
+     "minuto": 11,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Avril Rahmer Morgantini",
+     "equipo": "local"
+    },
+    {
+     "minuto": 15,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Magali Gervasio",
+     "equipo": "local"
+    },
+    {
+     "minuto": 18,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Carolina Charamone",
+     "equipo": "local"
+    },
+    {
+     "minuto": 18,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Avril Rahmer Morgantini",
+     "equipo": "local"
+    },
+    {
+     "minuto": 20,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Avril Rahmer Morgantini",
+     "equipo": "local"
+    },
+    {
+     "minuto": 20,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Avril Rahmer Morgantini",
+     "equipo": "local"
+    }
+   ]
+  },
+  {
+   "id": "cd18c31e-fcea-4019-9bba-eacc1f581444",
+   "rotulo": "ciudad-femenino vs regatas-de-resistencia-femenino · 4baab70e · tarjeta 325745",
+   "arbitro": "DAIANA DEL MILAGRO CESARETTI",
+   "local": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Renata Sosa Quintana"
+     },
+     {
+      "numero": 2,
+      "nombre": "Alejandra Salas"
+     },
+     {
+      "numero": 3,
+      "nombre": "Paola Candia"
+     },
+     {
+      "numero": 4,
+      "nombre": "Ludmila Elena Toledo Pacher"
+     },
+     {
+      "numero": 5,
+      "nombre": "Maria Belen Garcia Remiro"
+     },
+     {
+      "numero": 6,
+      "nombre": "Camila De Los Ángeles Vargaz"
+     },
+     {
+      "numero": 7,
+      "nombre": "Valentina Larluz"
+     },
+     {
+      "numero": 8,
+      "nombre": "Valentina Castro"
+     },
+     {
+      "numero": 9,
+      "nombre": "Alfonsina Avendaño"
+     },
+     {
+      "numero": 10,
+      "nombre": "Carolina Ariana Carrera Venegoni"
+     },
+     {
+      "numero": 11,
+      "nombre": "Lara Rioboo"
+     },
+     {
+      "numero": 12,
+      "nombre": "Julieta Monjes"
+     },
+     {
+      "numero": 14,
+      "nombre": "Tais Marinov Frendo"
+     },
+     {
+      "numero": 15,
+      "nombre": "Catalina Senders"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Pilar Ailin Aguero Mares"
+     },
+     {
+      "numero": 17,
+      "nombre": "Daniela Agustina Rovelli"
+     }
+    ],
+    "nombre": "ciudad-femenino"
+   },
+   "visitante": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Marina Ortiz"
+     },
+     {
+      "numero": 2,
+      "nombre": "Cristina Florencia Gomez"
+     },
+     {
+      "numero": 3,
+      "nombre": "Nair Soledad Alvarez"
+     },
+     {
+      "numero": 4,
+      "nombre": "Bibiana Patricia Dure"
+     },
+     {
+      "numero": 5,
+      "nombre": "Juana Celeste Siacia"
+     },
+     {
+      "numero": 6,
+      "nombre": "Oriana Micaela Fernandez"
+     },
+     {
+      "numero": 7,
+      "nombre": "Veronica Soledad Zacarias"
+     },
+     {
+      "numero": 8,
+      "nombre": "Melisa Silvana Ojeda"
+     },
+     {
+      "numero": 9,
+      "nombre": "Eira Lelies Mikaela Mesa"
+     },
+     {
+      "numero": 10,
+      "nombre": "Claudia Noemi Gimenez"
+     },
+     {
+      "numero": 11,
+      "nombre": "Marianela Rita Soledad Maidana"
+     },
+     {
+      "numero": 12,
+      "nombre": "Sabrina Nair Osuna"
+     },
+     {
+      "numero": 13,
+      "nombre": "Darka Bondar"
+     },
+     {
+      "numero": 14,
+      "nombre": "Nilda Gomez"
+     },
+     {
+      "numero": 15,
+      "nombre": "Florencia Fernandez"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Flavia Noelia Rolheiser"
+     },
+     {
+      "numero": 17,
+      "nombre": "Guadalupe Del Carmen Villa"
+     },
+     {
+      "numero": 18,
+      "nombre": "Danai Maiten Malen Romero Carrazan"
+     }
+    ],
+    "nombre": "regatas-de-resistencia-femenino"
+   },
+   "eventos": [
+    {
+     "minuto": 1,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Julieta Monjes",
+     "equipo": "local"
+    },
+    {
+     "minuto": 2,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Carolina Ariana Carrera Venegoni",
+     "equipo": "local"
+    },
+    {
+     "minuto": 5,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Marianela Rita Soledad Maidana",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 5,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Melisa Silvana Ojeda",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 7,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Alejandra Salas",
+     "equipo": "local"
+    },
+    {
+     "minuto": 21,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Ludmila Elena Toledo Pacher",
+     "equipo": "local"
+    },
+    {
+     "minuto": 21,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Carolina Ariana Carrera Venegoni",
+     "equipo": "local"
+    },
+    {
+     "minuto": 1,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Lara Rioboo",
+     "equipo": "local"
+    },
+    {
+     "minuto": 8,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Carolina Ariana Carrera Venegoni",
+     "equipo": "local"
+    },
+    {
+     "minuto": 8,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Ludmila Elena Toledo Pacher",
+     "detalle": "Entra: Kassidy Duffney",
+     "equipo": "local"
+    },
+    {
+     "minuto": 8,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Camila De Los Ángeles Vargaz",
+     "detalle": "Entra: Pilar Ailin Aguero Mares",
+     "equipo": "local"
+    },
+    {
+     "minuto": 8,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Paola Candia",
+     "detalle": "Entra: Catalina Senders",
+     "equipo": "local"
+    },
+    {
+     "minuto": 8,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Julieta Monjes",
+     "detalle": "Entra: Daniela Agustina Rovelli",
+     "equipo": "local"
+    }
+   ]
+  },
+  {
+   "id": "35bfc6b5-b43a-4163-a5b0-158c84316082",
+   "rotulo": "la-plata-femenino vs regatas-de-resistencia-femenino · 4baab70e · tarjeta 325744",
+   "arbitro": "SOFIA MIRTHA VILDOZO FUENTES",
+   "local": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Nahir Sheila Taborda"
+     },
+     {
+      "numero": 2,
+      "nombre": "Rocio Ale"
+     },
+     {
+      "numero": 3,
+      "nombre": "Sol Josefina Rodriguez"
+     },
+     {
+      "numero": 4,
+      "nombre": "Dina Ariadna Galech Berrojalbiz"
+     },
+     {
+      "numero": 5,
+      "nombre": "Barbara Rodriguez"
+     },
+     {
+      "numero": 6,
+      "nombre": "Camila Luna Contreras"
+     },
+     {
+      "numero": 7,
+      "nombre": "Isabella Cappellani"
+     },
+     {
+      "numero": 8,
+      "nombre": "Avril Rahmer Morgantini"
+     },
+     {
+      "numero": 9,
+      "nombre": "Yael Cardoso"
+     },
+     {
+      "numero": 10,
+      "nombre": "Carolina Charamone"
+     },
+     {
+      "numero": 11,
+      "nombre": "Magali Gervasio"
+     },
+     {
+      "numero": 12,
+      "nombre": "Rocio Sabrina Osorio"
+     },
+     {
+      "numero": 13,
+      "nombre": "Luz Marina Fiol Lopez"
+     },
+     {
+      "numero": 14,
+      "nombre": "Fabiola Mercedes Escobar Díaz"
+     },
+     {
+      "numero": 15,
+      "nombre": "Catalina Latorre"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Nur Fatima Diaz"
+     }
+    ],
+    "nombre": "la-plata-femenino"
+   },
+   "visitante": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Nair Soledad Alvarez"
+     },
+     {
+      "numero": 2,
+      "nombre": "Cristina Florencia Gomez"
+     },
+     {
+      "numero": 3,
+      "nombre": "Marina Ortiz"
+     },
+     {
+      "numero": 4,
+      "nombre": "Darka Bondar"
+     },
+     {
+      "numero": 5,
+      "nombre": "Bibiana Patricia Dure"
+     },
+     {
+      "numero": 6,
+      "nombre": "Florencia Fernandez"
+     },
+     {
+      "numero": 7,
+      "nombre": "Veronica Soledad Zacarias"
+     },
+     {
+      "numero": 8,
+      "nombre": "Melisa Silvana Ojeda"
+     },
+     {
+      "numero": 9,
+      "nombre": "Eira Lelies Mikaela Mesa"
+     },
+     {
+      "numero": 10,
+      "nombre": "Juana Celeste Siacia"
+     },
+     {
+      "numero": 11,
+      "nombre": "Marianela Rita Soledad Maidana"
+     },
+     {
+      "numero": 12,
+      "nombre": "Sabrina Nair Osuna"
+     },
+     {
+      "numero": 13,
+      "nombre": "Oriana Micaela Fernandez"
+     },
+     {
+      "numero": 14,
+      "nombre": "Danai Maiten Malen Romero Carrazan"
+     },
+     {
+      "numero": 15,
+      "nombre": "Claudia Noemi Gimenez"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Flavia Noelia Rolheiser"
+     },
+     {
+      "numero": 17,
+      "nombre": "Nilda Gomez"
+     },
+     {
+      "numero": 18,
+      "nombre": "Guadalupe Del Carmen Villa"
+     }
+    ],
+    "nombre": "regatas-de-resistencia-femenino"
+   },
+   "eventos": [
+    {
+     "minuto": 9,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "jugador": "Marianela Rita Soledad Maidana",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 10,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Carolina Charamone",
+     "equipo": "local"
+    },
+    {
+     "minuto": 10,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Carolina Charamone",
+     "equipo": "local"
+    },
+    {
+     "minuto": 10,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Carolina Charamone",
+     "equipo": "local"
+    },
+    {
+     "minuto": 10,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Carolina Charamone",
+     "equipo": "local"
+    },
+    {
+     "minuto": 10,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Carolina Charamone",
+     "equipo": "local"
+    },
+    {
+     "minuto": 10,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Carolina Charamone",
+     "equipo": "local"
+    },
+    {
+     "minuto": 10,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Magali Gervasio",
+     "equipo": "local"
+    },
+    {
+     "minuto": 10,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Magali Gervasio",
+     "equipo": "local"
+    },
+    {
+     "minuto": 10,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Magali Gervasio",
+     "equipo": "local"
+    },
+    {
+     "minuto": 10,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Magali Gervasio",
+     "equipo": "local"
+    },
+    {
+     "minuto": 10,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Avril Rahmer Morgantini",
+     "equipo": "local"
+    },
+    {
+     "minuto": 10,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Avril Rahmer Morgantini",
+     "equipo": "local"
+    },
+    {
+     "minuto": 10,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Eira Lelies Mikaela Mesa",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 14,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "jugador": "Sabrina Nair Osuna",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 18,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Sabrina Nair Osuna",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 18,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Melisa Silvana Ojeda",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 8,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Sabrina Nair Osuna",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Avril Rahmer Morgantini",
+     "equipo": "local"
+    }
+   ]
+  },
+  {
+   "id": "5eb7a2d0-2290-4399-8ecb-fc363a0da01a",
+   "rotulo": "aguara-guazu-femenino vs club-universitario-de-cordoba-femenino · 4baab70e · tarjeta 325897",
+   "arbitro": "ARIADNA FLORENCIA AVALOS",
+   "local": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Valentina Aguero"
+     },
+     {
+      "numero": 2,
+      "nombre": "Camila Villagra"
+     },
+     {
+      "numero": 3,
+      "nombre": "Silvina Ramirez"
+     },
+     {
+      "numero": 4,
+      "nombre": "Sofía Abril Diaz"
+     },
+     {
+      "numero": 5,
+      "nombre": "Paula Ledesma"
+     },
+     {
+      "numero": 6,
+      "nombre": "Ana Balceda"
+     },
+     {
+      "numero": 7,
+      "nombre": "Nahir Argañaraz"
+     },
+     {
+      "numero": 8,
+      "nombre": "Graciela Yanina Serrano"
+     },
+     {
+      "numero": 9,
+      "nombre": "Andrea Gabriela Moreno"
+     },
+     {
+      "numero": 10,
+      "nombre": "Candela Romano"
+     },
+     {
+      "numero": 11,
+      "nombre": "Mayra Anahí Albornoz"
+     },
+     {
+      "numero": 12,
+      "nombre": "María Florencia Moreno"
+     },
+     {
+      "numero": 13,
+      "nombre": "Emilia Alarcón"
+     },
+     {
+      "numero": 14,
+      "nombre": "Samira Maricel Sanchez"
+     },
+     {
+      "numero": 15,
+      "nombre": "Marianela Gambarte"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Agostina Del Valle Carreño"
+     },
+     {
+      "numero": 17,
+      "nombre": "Ana Gabriela Gramajo"
+     },
+     {
+      "numero": 18,
+      "nombre": "Ana Maria Fadel Quintana"
+     }
+    ],
+    "nombre": "aguara-guazu-femenino"
+   },
+   "visitante": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Maira Barrionuevo"
+     },
+     {
+      "numero": 2,
+      "nombre": "Maite Perez"
+     },
+     {
+      "numero": 3,
+      "nombre": "Ayelen Vega"
+     },
+     {
+      "numero": 4,
+      "nombre": "Romina Blandamuro"
+     },
+     {
+      "numero": 5,
+      "nombre": "Camila Sofia Paredes Masin"
+     },
+     {
+      "numero": 6,
+      "nombre": "Ema Lucia Morro Fergola"
+     },
+     {
+      "numero": 7,
+      "nombre": "Maria Aime Morro David"
+     },
+     {
+      "numero": 8,
+      "nombre": "Dolores Berti Baila"
+     },
+     {
+      "numero": 9,
+      "nombre": "Agustina Retamar"
+     },
+     {
+      "numero": 10,
+      "nombre": "Celmira Quiroga"
+     },
+     {
+      "numero": 11,
+      "nombre": "Sol Destefanis"
+     },
+     {
+      "numero": 12,
+      "nombre": "Brisa Nazarena Trigo Alday"
+     },
+     {
+      "numero": 13,
+      "nombre": "Dayana Micaela Juncos"
+     },
+     {
+      "numero": 14,
+      "nombre": "Maria Sol Serran Croce"
+     },
+     {
+      "numero": 15,
+      "nombre": "Victoria Catania Barbano"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Valentina Flores"
+     },
+     {
+      "numero": 17,
+      "nombre": "Renata Giraudo"
+     },
+     {
+      "numero": 18,
+      "nombre": "Celeste Gómez"
+     }
+    ],
+    "nombre": "club-universitario-de-cordoba-femenino"
+   },
+   "eventos": [
+    {
+     "minuto": 4,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Graciela Yanina Serrano",
+     "equipo": "local"
+    },
+    {
+     "minuto": 12,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "jugador": "Dolores Berti Baila",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 2,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "jugador": "Camila Sofia Paredes Masin",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 2,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Sol Destefanis",
+     "detalle": "Entra: Renata Giraudo",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 4,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "jugador": "Camila Villagra",
+     "equipo": "local"
+    },
+    {
+     "minuto": 6,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Sofía Abril Diaz",
+     "detalle": "Entra: Emilia Alarcón",
+     "equipo": "local"
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "jugador": "Nahir Argañaraz",
+     "equipo": "local"
+    },
+    {
+     "minuto": 13,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Dolores Berti Baila",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 13,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Ema Lucia Morro Fergola",
+     "equipo": "visitante"
+    }
+   ]
+  },
+  {
+   "id": "1e1e68fe-53c7-472d-9553-bb37d6b73f38",
+   "rotulo": "cardenales-r-c-femenino vs la-plata-femenino · 4baab70e · tarjeta 325898",
+   "arbitro": "DAIANA DEL MILAGRO CESARETTI",
+   "local": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Joselin Nathalie Castillo Nieva"
+     },
+     {
+      "numero": 2,
+      "nombre": "Rita Beatriz Cazorla"
+     },
+     {
+      "numero": 3,
+      "nombre": "Camila Alvarez Costas"
+     },
+     {
+      "numero": 4,
+      "nombre": "Norién Candela Casola"
+     },
+     {
+      "numero": 5,
+      "nombre": "Geovana Andrea Bortolozzo"
+     },
+     {
+      "numero": 6,
+      "nombre": "Antonella Slame"
+     },
+     {
+      "numero": 7,
+      "nombre": "Camila Cardozo"
+     },
+     {
+      "numero": 8,
+      "nombre": "Fátima Gisela Juarez"
+     },
+     {
+      "numero": 9,
+      "nombre": "Azul Medina"
+     },
+     {
+      "numero": 10,
+      "nombre": "Victoria Giardelli"
+     },
+     {
+      "numero": 11,
+      "nombre": "Virginia Lucrecia Leiva Rojas"
+     },
+     {
+      "numero": 12,
+      "nombre": "Agostina Campos Ruiz"
+     },
+     {
+      "numero": 13,
+      "nombre": "Morena Antonella Costilla"
+     },
+     {
+      "numero": 14,
+      "nombre": "Morena Astorga"
+     },
+     {
+      "numero": 15,
+      "nombre": "Alina Marlene Valdez"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Brisa Malena Medina"
+     },
+     {
+      "numero": 17,
+      "nombre": "Ursula Iovane"
+     },
+     {
+      "numero": 18,
+      "nombre": "Maria Belen Maroni"
+     }
+    ],
+    "nombre": "cardenales-r-c-femenino"
+   },
+   "visitante": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Nahir Sheila Taborda"
+     },
+     {
+      "numero": 2,
+      "nombre": "Rocio Ale"
+     },
+     {
+      "numero": 3,
+      "nombre": "Sol Josefina Rodriguez"
+     },
+     {
+      "numero": 4,
+      "nombre": "Dina Ariadna Galech Berrojalbiz"
+     },
+     {
+      "numero": 5,
+      "nombre": "Barbara Rodriguez"
+     },
+     {
+      "numero": 6,
+      "nombre": "Camila Luna Contreras"
+     },
+     {
+      "numero": 7,
+      "nombre": "Isabella Cappellani"
+     },
+     {
+      "numero": 8,
+      "nombre": "Avril Rahmer Morgantini"
+     },
+     {
+      "numero": 9,
+      "nombre": "Yael Cardoso"
+     },
+     {
+      "numero": 10,
+      "nombre": "Carolina Charamone"
+     },
+     {
+      "numero": 11,
+      "nombre": "Magali Gervasio"
+     },
+     {
+      "numero": 12,
+      "nombre": "Rocio Sabrina Osorio"
+     },
+     {
+      "numero": 13,
+      "nombre": "Luz Marina Fiol Lopez"
+     },
+     {
+      "numero": 14,
+      "nombre": "Fabiola Mercedes Escobar Díaz"
+     },
+     {
+      "numero": 15,
+      "nombre": "Catalina Latorre"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Nur Fatima Diaz"
+     }
+    ],
+    "nombre": "la-plata-femenino"
+   },
+   "eventos": [
+    {
+     "minuto": 2,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Geovana Andrea Bortolozzo",
+     "equipo": "local"
+    },
+    {
+     "minuto": 2,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Fátima Gisela Juarez",
+     "equipo": "local"
+    },
+    {
+     "minuto": 9,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Magali Gervasio",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 11,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Magali Gervasio",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 11,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Avril Rahmer Morgantini",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 17,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Magali Gervasio",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 17,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Avril Rahmer Morgantini",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 5,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Victoria Giardelli",
+     "equipo": "local"
+    },
+    {
+     "minuto": 5,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Virginia Lucrecia Leiva Rojas",
+     "equipo": "local"
+    },
+    {
+     "minuto": 8,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Isabella Cappellani",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 15,
+     "periodo": "2T",
+     "tipo": "injury",
+     "jugador": "Geovana Andrea Bortolozzo",
+     "detalle": "Lesionado",
+     "equipo": "local"
+    },
+    {
+     "minuto": 18,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Antonella Slame",
+     "equipo": "local"
+    },
+    {
+     "minuto": 40,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Camila Alvarez Costas",
+     "detalle": "Entra: Camila Alvarez Costas",
+     "equipo": "local"
+    },
+    {
+     "minuto": 40,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Morena Antonella Costilla",
+     "detalle": "Entra: Morena Astorga",
+     "equipo": "local"
+    },
+    {
+     "minuto": 40,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Fátima Gisela Juarez",
+     "detalle": "Entra: Brisa Malena Medina",
+     "equipo": "local"
+    },
+    {
+     "minuto": 40,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Geovana Andrea Bortolozzo",
+     "detalle": "Entra: Ursula Iovane",
+     "equipo": "local"
+    }
+   ],
+   "_difiere": true
+  },
+  {
+   "id": "0c1308da-8e96-4eaf-a985-2c608d3e0ddc",
+   "rotulo": "universitario-de-mendoza-femenino vs ciudad-femenino · 4baab70e · tarjeta 325899",
+   "arbitro": "VIVIANA GARAT",
+   "local": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Celeste Cecilia Genco"
+     },
+     {
+      "numero": 2,
+      "nombre": "Luciana Aguilar"
+     },
+     {
+      "numero": 3,
+      "nombre": "Lourdes Marianela Castillo"
+     },
+     {
+      "numero": 4,
+      "nombre": "Caterina Aldana Gil"
+     },
+     {
+      "numero": 5,
+      "nombre": "Priscila Bertinatto"
+     },
+     {
+      "numero": 6,
+      "nombre": "Gabriela Algañaras"
+     },
+     {
+      "numero": 7,
+      "nombre": "Magdalena Vera Muñoz"
+     },
+     {
+      "numero": 8,
+      "nombre": "Valentina Verdejo"
+     },
+     {
+      "numero": 9,
+      "nombre": "Emilce Desirée Gomez Lopresti"
+     },
+     {
+      "numero": 10,
+      "nombre": "Esmeralda Beatriz Olivera Aldalla"
+     },
+     {
+      "numero": 11,
+      "nombre": "Natasha Garnica"
+     },
+     {
+      "numero": 12,
+      "nombre": "Guada Palero"
+     },
+     {
+      "numero": 13,
+      "nombre": "Florencia Robles Alarcón"
+     },
+     {
+      "numero": 14,
+      "nombre": "Antonella Ballester"
+     },
+     {
+      "numero": 15,
+      "nombre": "Julieta Rios"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "María José Zeitune"
+     }
+    ],
+    "nombre": "universitario-de-mendoza-femenino"
+   },
+   "visitante": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Alejandra Salas"
+     },
+     {
+      "numero": 3,
+      "nombre": "Paola Candia"
+     },
+     {
+      "numero": 4,
+      "nombre": "Ludmila Elena Toledo Pacher"
+     },
+     {
+      "numero": 5,
+      "nombre": "Maria Belen Garcia Remiro"
+     },
+     {
+      "numero": 6,
+      "nombre": "Renata Sosa Quintana"
+     },
+     {
+      "numero": 7,
+      "nombre": "Valentina Larluz"
+     },
+     {
+      "numero": 8,
+      "nombre": "Alfonsina Avendaño"
+     },
+     {
+      "numero": 9,
+      "nombre": "Valentina Castro"
+     },
+     {
+      "numero": 11,
+      "nombre": "Lara Rioboo"
+     },
+     {
+      "numero": 12,
+      "nombre": "Julieta Monjes"
+     },
+     {
+      "numero": 13,
+      "nombre": "Catalina Senders"
+     },
+     {
+      "numero": 14,
+      "nombre": "Tais Marinov Frendo"
+     },
+     {
+      "numero": 15,
+      "nombre": "Camila De Los Ángeles Vargaz"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Pilar Ailin Aguero Mares"
+     },
+     {
+      "numero": 17,
+      "nombre": "Daniela Agustina Rovelli"
+     },
+     {
+      "numero": 18,
+      "nombre": "Carolina Ariana Carrera Venegoni"
+     }
+    ],
+    "nombre": "ciudad-femenino"
+   },
+   "eventos": [
+    {
+     "minuto": 5,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "jugador": "Luciana Aguilar",
+     "equipo": "local"
+    },
+    {
+     "minuto": 6,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Renata Sosa Quintana",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 8,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Magdalena Vera Muñoz",
+     "equipo": "local"
+    },
+    {
+     "minuto": 18,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Emilce Desirée Gomez Lopresti",
+     "equipo": "local"
+    },
+    {
+     "minuto": 1,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Julieta Monjes",
+     "detalle": "Entra: Daniela Agustina Rovelli",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 8,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Ludmila Elena Toledo Pacher",
+     "detalle": "Entra: Camila De Los Ángeles Vargaz",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 15,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Lara Rioboo",
+     "detalle": "Entra: Carolina Ariana Carrera Venegoni",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 19,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Carolina Ariana Carrera Venegoni",
+     "equipo": "visitante"
+    }
+   ]
+  },
+  {
+   "id": "07e86b72-9b7c-4001-a0b7-4a76c3644641",
+   "rotulo": "aguilas-rc-saenz-pena-femenino vs taborin-rc-femenino · 4baab70e · tarjeta 325900",
+   "arbitro": "NEREA LIVONI",
+   "local": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Alexandra Antonella Cabral"
+     },
+     {
+      "numero": 2,
+      "nombre": "Veronica Alejandra Ojeda"
+     },
+     {
+      "numero": 3,
+      "nombre": "Estefania Alvares"
+     },
+     {
+      "numero": 4,
+      "nombre": "Daniela Lucia Saravia"
+     },
+     {
+      "numero": 5,
+      "nombre": "Vanesa Soledad Fernandez"
+     },
+     {
+      "numero": 6,
+      "nombre": "Alexandra Monzon"
+     },
+     {
+      "numero": 7,
+      "nombre": "Erica Yamila Espindola"
+     },
+     {
+      "numero": 8,
+      "nombre": "Melisa Soledad Rodich"
+     },
+     {
+      "numero": 9,
+      "nombre": "Milagros Jaqueline Cabrera"
+     },
+     {
+      "numero": 10,
+      "nombre": "Zaira Florencia Gonzalez"
+     },
+     {
+      "numero": 11,
+      "nombre": "Patricia Soledad Ojeda"
+     },
+     {
+      "numero": 12,
+      "nombre": "Ayelen Araceli Goy"
+     },
+     {
+      "numero": 13,
+      "nombre": "Maria Ayelen Monte"
+     },
+     {
+      "numero": 14,
+      "nombre": "Lucia Gicel Ramirez"
+     },
+     {
+      "numero": 15,
+      "nombre": "Veronica Pamela Acevedo"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Catherine Francia"
+     },
+     {
+      "numero": 17,
+      "nombre": "Sabrina Jaqueline Verón"
+     }
+    ],
+    "nombre": "aguilas-rc-saenz-pena-femenino"
+   },
+   "visitante": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Yesica Agustina Saucedo"
+     },
+     {
+      "numero": 2,
+      "nombre": "Yamila Liliana Barrera"
+     },
+     {
+      "numero": 3,
+      "nombre": "Macarena Fernanda Burgos"
+     },
+     {
+      "numero": 4,
+      "nombre": "Maiara Abril Lopez Cejas"
+     },
+     {
+      "numero": 5,
+      "nombre": "Nazarena Yael Gigena Ramallo"
+     },
+     {
+      "numero": 6,
+      "nombre": "Ana Paula Quintero Chiesa"
+     },
+     {
+      "numero": 7,
+      "nombre": "Antonella Crosetto"
+     },
+     {
+      "numero": 8,
+      "nombre": "Ana Rieger"
+     },
+     {
+      "numero": 9,
+      "nombre": "Tatiana Rocio Falcón"
+     },
+     {
+      "numero": 10,
+      "nombre": "Araceli Soledad Oviedo"
+     },
+     {
+      "numero": 11,
+      "nombre": "Aldana Robledo"
+     },
+     {
+      "numero": 12,
+      "nombre": "Ludmila Boca"
+     },
+     {
+      "numero": 13,
+      "nombre": "Valentina Ponce"
+     },
+     {
+      "numero": 14,
+      "nombre": "Rosa Analía Torres Fernández"
+     },
+     {
+      "numero": 15,
+      "nombre": "Brisa Agustina Turra"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Gimena Sala"
+     },
+     {
+      "numero": 17,
+      "nombre": "Dana Birreto"
+     },
+     {
+      "numero": 18,
+      "nombre": "Giuliana Antonella Lincoman"
+     }
+    ],
+    "nombre": "taborin-rc-femenino"
+   },
+   "eventos": [
+    {
+     "minuto": 3,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Ludmila Boca",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 16,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Araceli Soledad Oviedo",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 16,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Ana Rieger",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 16,
+     "periodo": "1T",
+     "tipo": "substitution",
+     "jugador": "Nazarena Yael Gigena Ramallo",
+     "detalle": "Entra: Valentina Ponce",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 19,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Ludmila Boca",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 5,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Tatiana Rocio Falcón",
+     "detalle": "Entra: Dana Birreto",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 5,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Araceli Soledad Oviedo",
+     "detalle": "Entra: Giuliana Antonella Lincoman",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 12,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Alexandra Antonella Cabral",
+     "equipo": "local"
+    },
+    {
+     "minuto": 13,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Alexandra Antonella Cabral",
+     "detalle": "Entra: Maria Ayelen Monte",
+     "equipo": "local"
+    },
+    {
+     "minuto": 40,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Alexandra Monzon",
+     "detalle": "Entra: Alexandra Monzon",
+     "equipo": "local"
+    },
+    {
+     "minuto": 40,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Daniela Lucia Saravia",
+     "detalle": "Entra: Veronica Pamela Acevedo",
+     "equipo": "local"
+    },
+    {
+     "minuto": 40,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Ayelen Araceli Goy",
+     "detalle": "Entra: Catherine Francia",
+     "equipo": "local"
+    },
+    {
+     "minuto": 40,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Yamila Liliana Barrera",
+     "detalle": "Entra: Rosa Analía Torres Fernández",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 40,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Macarena Fernanda Burgos",
+     "detalle": "Entra: Brisa Agustina Turra",
+     "equipo": "visitante"
+    }
+   ]
+  },
+  {
+   "id": "b9c9aa18-04f5-4370-9f3c-f070417048f6",
+   "rotulo": "palihue-rc-femenino vs marabunta-r-c-femenino · 4baab70e · tarjeta 325902",
+   "arbitro": "SOFIA MIRTHA VILDOZO FUENTES",
+   "local": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Sheila Noemi Gonzalez Basualdo"
+     },
+     {
+      "numero": 2,
+      "nombre": "Mayra Rodriguez"
+     },
+     {
+      "numero": 3,
+      "nombre": "Betina Ailen Roriguez Manzi"
+     },
+     {
+      "numero": 4,
+      "nombre": "Sasha Noemí Prost Alan"
+     },
+     {
+      "numero": 5,
+      "nombre": "Antonella Abigail Azcarate"
+     },
+     {
+      "numero": 6,
+      "nombre": "Naara Jurado"
+     },
+     {
+      "numero": 7,
+      "nombre": "Emilia Cos"
+     },
+     {
+      "numero": 8,
+      "nombre": "Amparo Lucotti"
+     },
+     {
+      "numero": 9,
+      "nombre": "María Victoria Canepa"
+     },
+     {
+      "numero": 10,
+      "nombre": "Adriana Gaspar"
+     },
+     {
+      "numero": 11,
+      "nombre": "Gianela Nicole Gimenez Valenzuela"
+     },
+     {
+      "numero": 12,
+      "nombre": "Sofia Almiron"
+     },
+     {
+      "numero": 13,
+      "nombre": "Amy Jensen"
+     },
+     {
+      "numero": 14,
+      "nombre": "Maria Belen Canepa"
+     },
+     {
+      "numero": 15,
+      "nombre": "Agustina Maribel Almiron"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Juana Cabello"
+     },
+     {
+      "numero": 17,
+      "nombre": "Brisa Abigail Cools"
+     },
+     {
+      "numero": 18,
+      "nombre": "Florencia Guadalupe Wirscke Urbicain"
+     }
+    ],
+    "nombre": "palihue-rc-femenino"
+   },
+   "visitante": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Maria Candela Kristensen"
+     },
+     {
+      "numero": 2,
+      "nombre": "Angeles Martina Matamala Carvajal"
+     },
+     {
+      "numero": 3,
+      "nombre": "María Luz Camacho"
+     },
+     {
+      "numero": 4,
+      "nombre": "Leila Daniela Sandoval"
+     },
+     {
+      "numero": 5,
+      "nombre": "Florencia Farroni Reina"
+     },
+     {
+      "numero": 6,
+      "nombre": "Yesica Banegas"
+     },
+     {
+      "numero": 7,
+      "nombre": "Guadalupe Santana"
+     },
+     {
+      "numero": 8,
+      "nombre": "Maria Pia Perea"
+     },
+     {
+      "numero": 9,
+      "nombre": "Daniza Gutierrez"
+     },
+     {
+      "numero": 10,
+      "nombre": "Pamela Florencia Esquivel"
+     },
+     {
+      "numero": 11,
+      "nombre": "Agustina Belén Sandoval"
+     },
+     {
+      "numero": 12,
+      "nombre": "Tiziana Silva"
+     },
+     {
+      "numero": 13,
+      "nombre": "Gisela Celeste Neyra"
+     },
+     {
+      "numero": 14,
+      "nombre": "Muriel Balboa"
+     },
+     {
+      "numero": 15,
+      "nombre": "Soledad Yanet Farfan"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Tania Jimena Capdevila"
+     },
+     {
+      "numero": 17,
+      "nombre": "Lucía Macarena Velázquez Loncomán"
+     }
+    ],
+    "nombre": "marabunta-r-c-femenino"
+   },
+   "eventos": [
+    {
+     "minuto": 22,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Florencia Farroni Reina",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 22,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Tiziana Silva",
+     "detalle": "Entra: Gisela Celeste Neyra",
+     "equipo": "visitante"
+    }
+   ]
+  },
+  {
+   "id": "c1a2cf68-08fd-4251-b845-3b3c983310bb",
+   "rotulo": "cha-roga-r-c-femenino vs regatas-de-resistencia-femenino · 4baab70e · tarjeta 325901",
+   "arbitro": "CAMILA ABRIL DÍAZ",
+   "local": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Micaela Aylen Gutiérrez"
+     },
+     {
+      "numero": 2,
+      "nombre": "Tamara Rojas"
+     },
+     {
+      "numero": 3,
+      "nombre": "Triana Villordo"
+     },
+     {
+      "numero": 4,
+      "nombre": "Valentina Duarte"
+     },
+     {
+      "numero": 5,
+      "nombre": "Magali Rodríguez"
+     },
+     {
+      "numero": 6,
+      "nombre": "Joana Arce"
+     },
+     {
+      "numero": 7,
+      "nombre": "Valentina Abril Miranda Ldesma"
+     },
+     {
+      "numero": 8,
+      "nombre": "Nerina Luciana Villa"
+     },
+     {
+      "numero": 9,
+      "nombre": "Fiama Mattei"
+     },
+     {
+      "numero": 10,
+      "nombre": "Oriana Bernardi"
+     },
+     {
+      "numero": 11,
+      "nombre": "Lara Tatiana Yuskowich"
+     },
+     {
+      "numero": 12,
+      "nombre": "Joana Carolina Casal"
+     },
+     {
+      "numero": 13,
+      "nombre": "Fernanda Lorena Correa"
+     },
+     {
+      "numero": 14,
+      "nombre": "Martina Walburg"
+     },
+     {
+      "numero": 15,
+      "nombre": "Macarena Bello"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Nahir Ianela Macaine"
+     },
+     {
+      "numero": 17,
+      "nombre": "Victoria Rojas"
+     }
+    ],
+    "nombre": "cha-roga-r-c-femenino"
+   },
+   "visitante": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Nair Soledad Alvarez"
+     },
+     {
+      "numero": 2,
+      "nombre": "Cristina Florencia Gomez"
+     },
+     {
+      "numero": 3,
+      "nombre": "Marina Ortiz"
+     },
+     {
+      "numero": 4,
+      "nombre": "Darka Bondar"
+     },
+     {
+      "numero": 5,
+      "nombre": "Oriana Micaela Fernandez"
+     },
+     {
+      "numero": 6,
+      "nombre": "Juana Celeste Siacia"
+     },
+     {
+      "numero": 7,
+      "nombre": "Veronica Soledad Zacarias"
+     },
+     {
+      "numero": 8,
+      "nombre": "Melisa Silvana Ojeda"
+     },
+     {
+      "numero": 9,
+      "nombre": "Eira Lelies Mikaela Mesa"
+     },
+     {
+      "numero": 10,
+      "nombre": "Claudia Noemi Gimenez"
+     },
+     {
+      "numero": 11,
+      "nombre": "Marianela Rita Soledad Maidana"
+     },
+     {
+      "numero": 12,
+      "nombre": "Sabrina Nair Osuna"
+     },
+     {
+      "numero": 13,
+      "nombre": "Bibiana Patricia Dure"
+     },
+     {
+      "numero": 14,
+      "nombre": "Nilda Gomez"
+     },
+     {
+      "numero": 15,
+      "nombre": "Flavia Noelia Rolheiser"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Florencia Fernandez"
+     },
+     {
+      "numero": 17,
+      "nombre": "Guadalupe Del Carmen Villa"
+     },
+     {
+      "numero": 18,
+      "nombre": "Danai Maiten Malen Romero Carrazan"
+     }
+    ],
+    "nombre": "regatas-de-resistencia-femenino"
+   },
+   "eventos": [
+    {
+     "minuto": 8,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Sabrina Nair Osuna",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 9,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Melisa Silvana Ojeda",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 11,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Joana Carolina Casal",
+     "equipo": "local"
+    },
+    {
+     "minuto": 11,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Joana Arce",
+     "equipo": "local"
+    },
+    {
+     "minuto": 14,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Juana Celeste Siacia",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 15,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "jugador": "Joana Arce",
+     "equipo": "local"
+    },
+    {
+     "minuto": 8,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Oriana Bernardi",
+     "detalle": "Entra: Macarena Bello",
+     "equipo": "local"
+    },
+    {
+     "minuto": 15,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Joana Carolina Casal",
+     "equipo": "local"
+    }
+   ]
+  },
+  {
+   "id": "2ea7facc-a9bb-4046-b3f2-3a084bcf158f",
+   "rotulo": "cha-roga-r-c-femenino vs palihue-rc-femenino · 4baab70e · tarjeta 325915",
+   "arbitro": "SOFIA MIRTHA VILDOZO FUENTES",
+   "local": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Micaela Aylen Gutiérrez"
+     },
+     {
+      "numero": 2,
+      "nombre": "Nahir Ianela Macaine"
+     },
+     {
+      "numero": 3,
+      "nombre": "Triana Villordo"
+     },
+     {
+      "numero": 4,
+      "nombre": "Valentina Duarte"
+     },
+     {
+      "numero": 5,
+      "nombre": "Magali Rodríguez"
+     },
+     {
+      "numero": 6,
+      "nombre": "Joana Arce"
+     },
+     {
+      "numero": 7,
+      "nombre": "Valentina Abril Miranda Ldesma"
+     },
+     {
+      "numero": 8,
+      "nombre": "Nerina Luciana Villa"
+     },
+     {
+      "numero": 9,
+      "nombre": "Fiama Mattei"
+     },
+     {
+      "numero": 10,
+      "nombre": "Victoria Rojas"
+     },
+     {
+      "numero": 11,
+      "nombre": "Macarena Bello"
+     },
+     {
+      "numero": 12,
+      "nombre": "Joana Carolina Casal"
+     },
+     {
+      "numero": 13,
+      "nombre": "Fernanda Lorena Correa"
+     },
+     {
+      "numero": 14,
+      "nombre": "Martina Walburg"
+     },
+     {
+      "numero": 15,
+      "nombre": "Tamara Rojas"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Oriana Bernardi"
+     },
+     {
+      "numero": 17,
+      "nombre": "Lara Tatiana Yuskowich"
+     }
+    ],
+    "nombre": "cha-roga-r-c-femenino"
+   },
+   "visitante": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Sheila Noemi Gonzalez Basualdo"
+     },
+     {
+      "numero": 2,
+      "nombre": "Mayra Rodriguez"
+     },
+     {
+      "numero": 3,
+      "nombre": "Juana Cabello"
+     },
+     {
+      "numero": 4,
+      "nombre": "Antonella Abigail Azcarate"
+     },
+     {
+      "numero": 5,
+      "nombre": "Sasha Noemí Prost Alan"
+     },
+     {
+      "numero": 6,
+      "nombre": "Naara Jurado"
+     },
+     {
+      "numero": 7,
+      "nombre": "Emilia Cos"
+     },
+     {
+      "numero": 8,
+      "nombre": "Amparo Lucotti"
+     },
+     {
+      "numero": 9,
+      "nombre": "María Victoria Canepa"
+     },
+     {
+      "numero": 10,
+      "nombre": "Gianela Nicole Gimenez Valenzuela"
+     },
+     {
+      "numero": 11,
+      "nombre": "Amy Jensen"
+     },
+     {
+      "numero": 12,
+      "nombre": "Sofia Almiron"
+     },
+     {
+      "numero": 13,
+      "nombre": "Agustina Maribel Almiron"
+     },
+     {
+      "numero": 14,
+      "nombre": "Florencia Guadalupe Wirscke Urbicain"
+     },
+     {
+      "numero": 15,
+      "nombre": "Betina Ailen Roriguez Manzi"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Maria Belen Canepa"
+     },
+     {
+      "numero": 17,
+      "nombre": "Adriana Gaspar"
+     },
+     {
+      "numero": 18,
+      "nombre": "Brisa Abigail Cools"
+     }
+    ],
+    "nombre": "palihue-rc-femenino"
+   },
+   "eventos": [
+    {
+     "minuto": 12,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Joana Carolina Casal",
+     "equipo": "local"
+    },
+    {
+     "minuto": 17,
+     "periodo": "1T",
+     "tipo": "substitution",
+     "jugador": "Victoria Rojas",
+     "detalle": "Entra: Lara Tatiana Yuskowich",
+     "equipo": "local"
+    },
+    {
+     "minuto": 17,
+     "periodo": "1T",
+     "tipo": "substitution",
+     "jugador": "Triana Villordo",
+     "detalle": "Entra: Tamara Rojas",
+     "equipo": "local"
+    },
+    {
+     "minuto": 17,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Gianela Nicole Gimenez Valenzuela",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 21,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Macarena Bello",
+     "equipo": "local"
+    },
+    {
+     "minuto": 2,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Triana Villordo",
+     "equipo": "local"
+    },
+    {
+     "minuto": 2,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Joana Arce",
+     "equipo": "local"
+    },
+    {
+     "minuto": 8,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Micaela Aylen Gutiérrez",
+     "detalle": "Entra: Fernanda Lorena Correa",
+     "equipo": "local"
+    },
+    {
+     "minuto": 8,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Macarena Bello",
+     "detalle": "Entra: Oriana Bernardi",
+     "equipo": "local"
+    },
+    {
+     "minuto": 15,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Adriana Gaspar",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 17,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Nahir Ianela Macaine",
+     "detalle": "Entra: Martina Walburg",
+     "equipo": "local"
+    },
+    {
+     "minuto": 18,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Amparo Lucotti",
+     "detalle": "Entra: Adriana Gaspar",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 18,
+     "periodo": "2T",
+     "tipo": "injury",
+     "jugador": "Amparo Lucotti",
+     "detalle": "Lesionado",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 19,
+     "periodo": "2T",
+     "tipo": "injury",
+     "jugador": "Emilia Cos",
+     "detalle": "Conmoción cerebral",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 40,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Antonella Abigail Azcarate",
+     "detalle": "Entra: Maria Belen Canepa",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 40,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Juana Cabello",
+     "detalle": "Entra: Florencia Guadalupe Wirscke Urbicain",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 40,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Amy Jensen",
+     "detalle": "Entra: Agustina Maribel Almiron",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 40,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Sasha Noemí Prost Alan",
+     "detalle": "Entra: Betina Ailen Roriguez Manzi",
+     "equipo": "visitante"
+    }
+   ],
+   "_difiere": true
+  },
+  {
+   "id": "935e20b7-2027-4bea-92bb-dfcff0b0388f",
+   "rotulo": "regatas-de-resistencia-femenino vs marabunta-r-c-femenino · 4baab70e · tarjeta 325916",
+   "arbitro": "CAMILA ABRIL DÍAZ",
+   "local": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Nair Soledad Alvarez"
+     },
+     {
+      "numero": 2,
+      "nombre": "Cristina Florencia Gomez"
+     },
+     {
+      "numero": 3,
+      "nombre": "Marina Ortiz"
+     },
+     {
+      "numero": 4,
+      "nombre": "Bibiana Patricia Dure"
+     },
+     {
+      "numero": 5,
+      "nombre": "Oriana Micaela Fernandez"
+     },
+     {
+      "numero": 6,
+      "nombre": "Juana Celeste Siacia"
+     },
+     {
+      "numero": 7,
+      "nombre": "Veronica Soledad Zacarias"
+     },
+     {
+      "numero": 8,
+      "nombre": "Melisa Silvana Ojeda"
+     },
+     {
+      "numero": 9,
+      "nombre": "Eira Lelies Mikaela Mesa"
+     },
+     {
+      "numero": 10,
+      "nombre": "Claudia Noemi Gimenez"
+     },
+     {
+      "numero": 11,
+      "nombre": "Marianela Rita Soledad Maidana"
+     },
+     {
+      "numero": 12,
+      "nombre": "Sabrina Nair Osuna"
+     },
+     {
+      "numero": 13,
+      "nombre": "Darka Bondar"
+     },
+     {
+      "numero": 14,
+      "nombre": "Nilda Gomez"
+     },
+     {
+      "numero": 15,
+      "nombre": "Flavia Noelia Rolheiser"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Florencia Fernandez"
+     },
+     {
+      "numero": 17,
+      "nombre": "Guadalupe Del Carmen Villa"
+     },
+     {
+      "numero": 18,
+      "nombre": "Danai Maiten Malen Romero Carrazan"
+     }
+    ],
+    "nombre": "regatas-de-resistencia-femenino"
+   },
+   "visitante": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Maria Candela Kristensen"
+     },
+     {
+      "numero": 2,
+      "nombre": "Angeles Martina Matamala Carvajal"
+     },
+     {
+      "numero": 3,
+      "nombre": "María Luz Camacho"
+     },
+     {
+      "numero": 4,
+      "nombre": "Florencia Farroni Reina"
+     },
+     {
+      "numero": 5,
+      "nombre": "Leila Daniela Sandoval"
+     },
+     {
+      "numero": 6,
+      "nombre": "Yesica Banegas"
+     },
+     {
+      "numero": 7,
+      "nombre": "Guadalupe Santana"
+     },
+     {
+      "numero": 8,
+      "nombre": "Maria Pia Perea"
+     },
+     {
+      "numero": 9,
+      "nombre": "Daniza Gutierrez"
+     },
+     {
+      "numero": 10,
+      "nombre": "Pamela Florencia Esquivel"
+     },
+     {
+      "numero": 11,
+      "nombre": "Agustina Belén Sandoval"
+     },
+     {
+      "numero": 12,
+      "nombre": "Muriel Balboa"
+     },
+     {
+      "numero": 13,
+      "nombre": "Soledad Yanet Farfan"
+     },
+     {
+      "numero": 14,
+      "nombre": "Gisela Celeste Neyra"
+     },
+     {
+      "numero": 15,
+      "nombre": "Tiziana Silva"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Tania Jimena Capdevila"
+     }
+    ],
+    "nombre": "marabunta-r-c-femenino"
+   },
+   "eventos": [
+    {
+     "minuto": 1,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Maria Pia Perea",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 3,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Nair Soledad Alvarez",
+     "equipo": "local"
+    },
+    {
+     "minuto": 7,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Marianela Rita Soledad Maidana",
+     "equipo": "local"
+    },
+    {
+     "minuto": 9,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Marianela Rita Soledad Maidana",
+     "equipo": "local"
+    },
+    {
+     "minuto": 10,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Melisa Silvana Ojeda",
+     "equipo": "local"
+    },
+    {
+     "minuto": 14,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Nair Soledad Alvarez",
+     "equipo": "local"
+    },
+    {
+     "minuto": 15,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Melisa Silvana Ojeda",
+     "equipo": "local"
+    },
+    {
+     "minuto": 20,
+     "periodo": "1T",
+     "tipo": "substitution",
+     "jugador": "María Luz Camacho",
+     "detalle": "Entra: Gisela Celeste Neyra",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 1,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Nair Soledad Alvarez",
+     "equipo": "local"
+    },
+    {
+     "minuto": 7,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Marianela Rita Soledad Maidana",
+     "equipo": "local"
+    },
+    {
+     "minuto": 8,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Melisa Silvana Ojeda",
+     "equipo": "local"
+    },
+    {
+     "minuto": 8,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Agustina Belén Sandoval",
+     "detalle": "Entra: Tiziana Silva",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Marianela Rita Soledad Maidana",
+     "equipo": "local"
+    },
+    {
+     "minuto": 20,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Muriel Balboa",
+     "detalle": "Entra: Soledad Yanet Farfan",
+     "equipo": "visitante"
+    }
+   ],
+   "_difiere": true
+  },
+  {
+   "id": "81073f30-3a22-4bb4-b620-4b4b2ca40ec6",
+   "rotulo": "universitario-de-mendoza-femenino vs aguilas-rc-saenz-pena-femenino · 4baab70e · tarjeta 325917",
+   "arbitro": "DAIANA DEL MILAGRO CESARETTI",
+   "local": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Celeste Cecilia Genco"
+     },
+     {
+      "numero": 2,
+      "nombre": "Luciana Aguilar"
+     },
+     {
+      "numero": 3,
+      "nombre": "Lourdes Marianela Castillo"
+     },
+     {
+      "numero": 4,
+      "nombre": "Caterina Aldana Gil"
+     },
+     {
+      "numero": 5,
+      "nombre": "Priscila Bertinatto"
+     },
+     {
+      "numero": 6,
+      "nombre": "Gabriela Algañaras"
+     },
+     {
+      "numero": 7,
+      "nombre": "Magdalena Vera Muñoz"
+     },
+     {
+      "numero": 8,
+      "nombre": "Valentina Verdejo"
+     },
+     {
+      "numero": 9,
+      "nombre": "Emilce Desirée Gomez Lopresti"
+     },
+     {
+      "numero": 10,
+      "nombre": "Esmeralda Beatriz Olivera Aldalla"
+     },
+     {
+      "numero": 11,
+      "nombre": "Natasha Garnica"
+     },
+     {
+      "numero": 12,
+      "nombre": "Guada Palero"
+     },
+     {
+      "numero": 13,
+      "nombre": "Antonella Ballester"
+     },
+     {
+      "numero": 14,
+      "nombre": "María José Zeitune"
+     },
+     {
+      "numero": 15,
+      "nombre": "Julieta Rios"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Florencia Robles Alarcón"
+     }
+    ],
+    "nombre": "universitario-de-mendoza-femenino"
+   },
+   "visitante": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Alexandra Antonella Cabral"
+     },
+     {
+      "numero": 2,
+      "nombre": "Erica Yamila Espindola"
+     },
+     {
+      "numero": 3,
+      "nombre": "Estefania Alvares"
+     },
+     {
+      "numero": 4,
+      "nombre": "Milagros Jaqueline Cabrera"
+     },
+     {
+      "numero": 5,
+      "nombre": "Vanesa Soledad Fernandez"
+     },
+     {
+      "numero": 6,
+      "nombre": "Ayelen Araceli Goy"
+     },
+     {
+      "numero": 7,
+      "nombre": "Zaira Florencia Gonzalez"
+     },
+     {
+      "numero": 8,
+      "nombre": "Alexandra Monzon"
+     },
+     {
+      "numero": 9,
+      "nombre": "Melisa Soledad Rodich"
+     },
+     {
+      "numero": 10,
+      "nombre": "Patricia Soledad Ojeda"
+     },
+     {
+      "numero": 11,
+      "nombre": "Daniela Lucia Saravia"
+     },
+     {
+      "numero": 12,
+      "nombre": "Veronica Alejandra Ojeda"
+     },
+     {
+      "numero": 13,
+      "nombre": "Maria Ayelen Monte"
+     },
+     {
+      "numero": 14,
+      "nombre": "Veronica Pamela Acevedo"
+     },
+     {
+      "numero": 15,
+      "nombre": "Sabrina Jaqueline Verón"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Catherine Francia"
+     },
+     {
+      "numero": 17,
+      "nombre": "Lucia Gicel Ramirez"
+     }
+    ],
+    "nombre": "aguilas-rc-saenz-pena-femenino"
+   },
+   "eventos": [
+    {
+     "minuto": 15,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Alexandra Monzon",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 4,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Emilce Desirée Gomez Lopresti",
+     "equipo": "local"
+    },
+    {
+     "minuto": 9,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Emilce Desirée Gomez Lopresti",
+     "equipo": "local"
+    },
+    {
+     "minuto": 9,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Emilce Desirée Gomez Lopresti",
+     "equipo": "local"
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Vanesa Soledad Fernandez",
+     "detalle": "Entra: Catherine Francia",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 15,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Alexandra Antonella Cabral",
+     "detalle": "Entra: Maria Ayelen Monte",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 15,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Zaira Florencia Gonzalez",
+     "detalle": "Entra: Sabrina Jaqueline Verón",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 16,
+     "periodo": "2T",
+     "tipo": "injury",
+     "jugador": "Alexandra Monzon",
+     "detalle": "Tarjeta azul",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 16,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Alexandra Monzon",
+     "detalle": "Entra: Veronica Pamela Acevedo",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 16,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Daniela Lucia Saravia",
+     "detalle": "Entra: Daniela Lucia Saravia",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 40,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Natasha Garnica",
+     "detalle": "Entra: María José Zeitune",
+     "equipo": "local"
+    },
+    {
+     "minuto": 40,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Priscila Bertinatto",
+     "detalle": "Entra: Julieta Rios",
+     "equipo": "local"
+    }
+   ]
+  },
+  {
+   "id": "a71193cf-094d-413b-8d10-895893c65ee4",
+   "rotulo": "ciudad-femenino vs taborin-rc-femenino · 4baab70e · tarjeta 325918",
+   "arbitro": "ARIADNA FLORENCIA AVALOS",
+   "local": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Alejandra Salas"
+     },
+     {
+      "numero": 2,
+      "nombre": "Renata Sosa Quintana"
+     },
+     {
+      "numero": 3,
+      "nombre": "Paola Candia"
+     },
+     {
+      "numero": 4,
+      "nombre": "Ludmila Elena Toledo Pacher"
+     },
+     {
+      "numero": 5,
+      "nombre": "Maria Belen Garcia Remiro"
+     },
+     {
+      "numero": 6,
+      "nombre": "Camila De Los Ángeles Vargaz"
+     },
+     {
+      "numero": 7,
+      "nombre": "Alfonsina Avendaño"
+     },
+     {
+      "numero": 8,
+      "nombre": "Valentina Castro"
+     },
+     {
+      "numero": 9,
+      "nombre": "Lara Rioboo"
+     },
+     {
+      "numero": 10,
+      "nombre": "Carolina Ariana Carrera Venegoni"
+     },
+     {
+      "numero": 12,
+      "nombre": "Julieta Monjes"
+     },
+     {
+      "numero": 13,
+      "nombre": "Pilar Ailin Aguero Mares"
+     },
+     {
+      "numero": 14,
+      "nombre": "Catalina Senders"
+     },
+     {
+      "numero": 15,
+      "nombre": "Tais Marinov Frendo"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Daniela Agustina Rovelli"
+     },
+     {
+      "numero": 17,
+      "nombre": "Valentina Larluz"
+     }
+    ],
+    "nombre": "ciudad-femenino"
+   },
+   "visitante": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Valentina Ponce"
+     },
+     {
+      "numero": 2,
+      "nombre": "Yamila Liliana Barrera"
+     },
+     {
+      "numero": 3,
+      "nombre": "Macarena Fernanda Burgos"
+     },
+     {
+      "numero": 4,
+      "nombre": "Ana Paula Quintero Chiesa"
+     },
+     {
+      "numero": 5,
+      "nombre": "Maiara Abril Lopez Cejas"
+     },
+     {
+      "numero": 6,
+      "nombre": "Aldana Robledo"
+     },
+     {
+      "numero": 7,
+      "nombre": "Antonella Crosetto"
+     },
+     {
+      "numero": 8,
+      "nombre": "Ana Rieger"
+     },
+     {
+      "numero": 9,
+      "nombre": "Gimena Sala"
+     },
+     {
+      "numero": 10,
+      "nombre": "Ludmila Boca"
+     },
+     {
+      "numero": 11,
+      "nombre": "Tatiana Rocio Falcón"
+     },
+     {
+      "numero": 12,
+      "nombre": "Dana Birreto"
+     },
+     {
+      "numero": 13,
+      "nombre": "Brisa Agustina Turra"
+     },
+     {
+      "numero": 14,
+      "nombre": "Rosa Analía Torres Fernández"
+     },
+     {
+      "numero": 15,
+      "nombre": "Giuliana Antonella Lincoman"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Araceli Soledad Oviedo"
+     },
+     {
+      "numero": 17,
+      "nombre": "Yesica Agustina Saucedo"
+     },
+     {
+      "numero": 18,
+      "nombre": "Nazarena Yael Gigena Ramallo"
+     }
+    ],
+    "nombre": "taborin-rc-femenino"
+   },
+   "eventos": [
+    {
+     "minuto": 14,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "jugador": "Gimena Sala",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 20,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Antonella Crosetto",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 7,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Maria Belen Garcia Remiro",
+     "detalle": "Entra: Valentina Larluz",
+     "equipo": "local"
+    },
+    {
+     "minuto": 8,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Renata Sosa Quintana",
+     "equipo": "local"
+    },
+    {
+     "minuto": 9,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Alejandra Salas",
+     "detalle": "Entra: Pilar Ailin Aguero Mares",
+     "equipo": "local"
+    },
+    {
+     "minuto": 9,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Viktoria Koleva",
+     "detalle": "Entra: Kassidy Duffney",
+     "equipo": "local"
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "injury",
+     "jugador": "Valentina Ponce",
+     "detalle": "Lesionado",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 14,
+     "periodo": "2T",
+     "tipo": "injury",
+     "jugador": "Macarena Fernanda Burgos",
+     "detalle": "Conmoción cerebral",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 16,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "jugador": "Gimena Sala",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 16,
+     "periodo": "2T",
+     "tipo": "card_red",
+     "jugador": "Gimena Sala",
+     "equipo": "visitante"
+    }
+   ]
+  },
+  {
+   "id": "db5b99cc-3e63-467c-8ca9-9d4daaa62237",
+   "rotulo": "aguara-guazu-femenino vs cardenales-r-c-femenino · 4baab70e · tarjeta 325919",
+   "arbitro": "VIVIANA GARAT",
+   "local": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Camila Villagra"
+     },
+     {
+      "numero": 2,
+      "nombre": "Ana Maria Fadel Quintana"
+     },
+     {
+      "numero": 3,
+      "nombre": "Silvina Ramirez"
+     },
+     {
+      "numero": 4,
+      "nombre": "Ana Balceda"
+     },
+     {
+      "numero": 5,
+      "nombre": "Emilia Alarcón"
+     },
+     {
+      "numero": 6,
+      "nombre": "Valentina Aguero"
+     },
+     {
+      "numero": 7,
+      "nombre": "Nahir Argañaraz"
+     },
+     {
+      "numero": 8,
+      "nombre": "Graciela Yanina Serrano"
+     },
+     {
+      "numero": 9,
+      "nombre": "Andrea Gabriela Moreno"
+     },
+     {
+      "numero": 10,
+      "nombre": "Candela Romano"
+     },
+     {
+      "numero": 11,
+      "nombre": "Mayra Anahí Albornoz"
+     },
+     {
+      "numero": 12,
+      "nombre": "María Florencia Moreno"
+     },
+     {
+      "numero": 13,
+      "nombre": "Paula Ledesma"
+     },
+     {
+      "numero": 14,
+      "nombre": "Sofía Abril Diaz"
+     },
+     {
+      "numero": 15,
+      "nombre": "Samira Maricel Sanchez"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Marianela Gambarte"
+     },
+     {
+      "numero": 17,
+      "nombre": "Agostina Del Valle Carreño"
+     },
+     {
+      "numero": 18,
+      "nombre": "Ana Gabriela Gramajo"
+     }
+    ],
+    "nombre": "aguara-guazu-femenino"
+   },
+   "visitante": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Joselin Nathalie Castillo Nieva"
+     },
+     {
+      "numero": 2,
+      "nombre": "Rita Beatriz Cazorla"
+     },
+     {
+      "numero": 3,
+      "nombre": "Camila Alvarez Costas"
+     },
+     {
+      "numero": 4,
+      "nombre": "Morena Astorga"
+     },
+     {
+      "numero": 5,
+      "nombre": "Norién Candela Casola"
+     },
+     {
+      "numero": 6,
+      "nombre": "Antonella Slame"
+     },
+     {
+      "numero": 7,
+      "nombre": "Fátima Gisela Juarez"
+     },
+     {
+      "numero": 8,
+      "nombre": "Victoria Giardelli"
+     },
+     {
+      "numero": 9,
+      "nombre": "Azul Medina"
+     },
+     {
+      "numero": 10,
+      "nombre": "Agostina Campos Ruiz"
+     },
+     {
+      "numero": 11,
+      "nombre": "Brisa Malena Medina"
+     },
+     {
+      "numero": 12,
+      "nombre": "Virginia Lucrecia Leiva Rojas"
+     },
+     {
+      "numero": 13,
+      "nombre": "Morena Antonella Costilla"
+     },
+     {
+      "numero": 14,
+      "nombre": "Alina Marlene Valdez"
+     },
+     {
+      "numero": 15,
+      "nombre": "Ursula Iovane"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Camila Cardozo"
+     },
+     {
+      "numero": 17,
+      "nombre": "Geovana Andrea Bortolozzo"
+     },
+     {
+      "numero": 18,
+      "nombre": "Maria Belen Maroni"
+     }
+    ],
+    "nombre": "cardenales-r-c-femenino"
+   },
+   "eventos": [
+    {
+     "minuto": 5,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Brisa Malena Medina",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 20,
+     "periodo": "1T",
+     "tipo": "injury",
+     "jugador": "Brisa Malena Medina",
+     "detalle": "Lesionado",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 20,
+     "periodo": "1T",
+     "tipo": "substitution",
+     "jugador": "Brisa Malena Medina",
+     "detalle": "Entra: Ursula Iovane",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 13,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "jugador": "Silvina Ramirez",
+     "equipo": "local"
+    },
+    {
+     "minuto": 20,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "jugador": "Nahir Argañaraz",
+     "equipo": "local"
+    }
+   ]
+  },
+  {
+   "id": "3420556a-7b96-48cb-a028-d9182c04fae7",
+   "rotulo": "club-universitario-de-cordoba-femenino vs la-plata-femenino · 4baab70e · tarjeta 325920",
+   "arbitro": "NEREA LIVONI",
+   "local": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Maira Barrionuevo"
+     },
+     {
+      "numero": 2,
+      "nombre": "Maite Perez"
+     },
+     {
+      "numero": 3,
+      "nombre": "Ayelen Vega"
+     },
+     {
+      "numero": 4,
+      "nombre": "Camila Sofia Paredes Masin"
+     },
+     {
+      "numero": 5,
+      "nombre": "Romina Blandamuro"
+     },
+     {
+      "numero": 6,
+      "nombre": "Ema Lucia Morro Fergola"
+     },
+     {
+      "numero": 7,
+      "nombre": "Maria Aime Morro David"
+     },
+     {
+      "numero": 8,
+      "nombre": "Dolores Berti Baila"
+     },
+     {
+      "numero": 9,
+      "nombre": "Agustina Retamar"
+     },
+     {
+      "numero": 10,
+      "nombre": "Celmira Quiroga"
+     },
+     {
+      "numero": 11,
+      "nombre": "Renata Giraudo"
+     },
+     {
+      "numero": 12,
+      "nombre": "Brisa Nazarena Trigo Alday"
+     },
+     {
+      "numero": 13,
+      "nombre": "Maria Sol Serran Croce"
+     },
+     {
+      "numero": 14,
+      "nombre": "Sol Destefanis"
+     },
+     {
+      "numero": 15,
+      "nombre": "Valentina Flores"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Celeste Gómez"
+     },
+     {
+      "numero": 17,
+      "nombre": "Victoria Catania Barbano"
+     },
+     {
+      "numero": 18,
+      "nombre": "Dayana Micaela Juncos"
+     }
+    ],
+    "nombre": "club-universitario-de-cordoba-femenino"
+   },
+   "visitante": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Nahir Sheila Taborda"
+     },
+     {
+      "numero": 2,
+      "nombre": "Rocio Ale"
+     },
+     {
+      "numero": 3,
+      "nombre": "Sol Josefina Rodriguez"
+     },
+     {
+      "numero": 4,
+      "nombre": "Dina Ariadna Galech Berrojalbiz"
+     },
+     {
+      "numero": 5,
+      "nombre": "Barbara Rodriguez"
+     },
+     {
+      "numero": 6,
+      "nombre": "Camila Luna Contreras"
+     },
+     {
+      "numero": 7,
+      "nombre": "Isabella Cappellani"
+     },
+     {
+      "numero": 8,
+      "nombre": "Avril Rahmer Morgantini"
+     },
+     {
+      "numero": 9,
+      "nombre": "Yael Cardoso"
+     },
+     {
+      "numero": 10,
+      "nombre": "Carolina Charamone"
+     },
+     {
+      "numero": 11,
+      "nombre": "Magali Gervasio"
+     },
+     {
+      "numero": 12,
+      "nombre": "Rocio Sabrina Osorio"
+     },
+     {
+      "numero": 13,
+      "nombre": "Luz Marina Fiol Lopez"
+     },
+     {
+      "numero": 14,
+      "nombre": "Fabiola Mercedes Escobar Díaz"
+     },
+     {
+      "numero": 15,
+      "nombre": "Catalina Latorre"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Nur Fatima Diaz"
+     }
+    ],
+    "nombre": "la-plata-femenino"
+   },
+   "eventos": [
+    {
+     "minuto": 10,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Dolores Berti Baila",
+     "equipo": "local"
+    },
+    {
+     "minuto": 20,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Brisa Nazarena Trigo Alday",
+     "equipo": "local"
+    },
+    {
+     "minuto": 5,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Carolina Charamone",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 9,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Magali Gervasio",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 9,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Avril Rahmer Morgantini",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 11,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "jugador": "Sol Josefina Rodriguez",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 20,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Romina Blandamuro",
+     "equipo": "local"
+    }
+   ]
+  }
+ ]
+}

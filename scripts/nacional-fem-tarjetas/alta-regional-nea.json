@@ -1,0 +1,143 @@
+{
+ "nombre": "Torneo Regional Femenino del NEA",
+ "slug": "regional-femenino-nea-2026",
+ "origen": "regional-femenino-nea-2026-tarjetas",
+ "fechaInicio": "2026-09-13",
+ "unionId": "urne",
+ "gender": "femenino",
+ "category": "Femenino",
+ "ageGrade": "Mayores",
+ "fases": [
+  {
+   "nombre": "Clasificación A",
+   "orden": 1,
+   "clubes": [
+    "aguilas-rc-saenz-pena-femenino",
+    "centro-cazadores-femenino",
+    "san-cipriano-femenino"
+   ]
+  },
+  {
+   "nombre": "Clasificación B",
+   "orden": 2,
+   "clubes": [
+    "capri-femenino",
+    "caza-y-pesca-femenino",
+    "regatas-de-resistencia-femenino"
+   ]
+  },
+  {
+   "nombre": "Final",
+   "orden": 3,
+   "clubes": [
+    "aguilas-rc-saenz-pena-femenino",
+    "regatas-de-resistencia-femenino"
+   ]
+  }
+ ],
+ "clubes": [
+  {
+   "id": "aguilas-rc-saenz-pena-femenino",
+   "corto": "Águilas"
+  },
+  {
+   "id": "capri-femenino",
+   "corto": "CAPRI"
+  },
+  {
+   "id": "caza-y-pesca-femenino",
+   "corto": "Caza y Pesca"
+  },
+  {
+   "id": "centro-cazadores-femenino",
+   "corto": "Centro Cazadores"
+  },
+  {
+   "id": "regatas-de-resistencia-femenino",
+   "corto": "Regatas"
+  },
+  {
+   "id": "san-cipriano-femenino",
+   "corto": "San Cipriano"
+  }
+ ],
+ "partidos": [
+  {
+   "fase": "Clasificación A",
+   "fecha": "2026-09-13",
+   "hora": "16:40",
+   "home": "aguilas-rc-saenz-pena-femenino",
+   "away": "san-cipriano-femenino",
+   "homeScore": 49,
+   "awayScore": 0,
+   "cerrado": true,
+   "tarjeta": "324251"
+  },
+  {
+   "fase": "Clasificación A",
+   "fecha": "2026-09-13",
+   "hora": "11:00",
+   "home": "aguilas-rc-saenz-pena-femenino",
+   "away": "centro-cazadores-femenino",
+   "homeScore": 31,
+   "awayScore": 5,
+   "cerrado": true,
+   "tarjeta": "324249"
+  },
+  {
+   "fase": "Clasificación A",
+   "fecha": "2026-09-13",
+   "hora": "15:00",
+   "home": "centro-cazadores-femenino",
+   "away": "san-cipriano-femenino",
+   "homeScore": 19,
+   "awayScore": 5,
+   "cerrado": true,
+   "tarjeta": "324250"
+  },
+  {
+   "fase": "Clasificación B",
+   "fecha": "2026-09-13",
+   "hora": "10:00",
+   "home": "capri-femenino",
+   "away": "regatas-de-resistencia-femenino",
+   "homeScore": 7,
+   "awayScore": 10,
+   "cerrado": true,
+   "tarjeta": "324252"
+  },
+  {
+   "fase": "Clasificación B",
+   "fecha": "2026-09-13",
+   "hora": "16:00",
+   "home": "capri-femenino",
+   "away": "caza-y-pesca-femenino",
+   "homeScore": 59,
+   "awayScore": 5,
+   "cerrado": true,
+   "tarjeta": "324254"
+  },
+  {
+   "fase": "Clasificación B",
+   "fecha": "2026-09-13",
+   "hora": "14:00",
+   "home": "regatas-de-resistencia-femenino",
+   "away": "caza-y-pesca-femenino",
+   "homeScore": 17,
+   "awayScore": 5,
+   "cerrado": true,
+   "tarjeta": "324253"
+  },
+  {
+   "fase": "Final",
+   "fecha": "2026-09-13",
+   "hora": "18:30",
+   "home": "aguilas-rc-saenz-pena-femenino",
+   "away": "regatas-de-resistencia-femenino",
+   "homeScore": 10,
+   "awayScore": 0,
+   "cerrado": true,
+   "tarjeta": "324382"
+  }
+ ]
+}

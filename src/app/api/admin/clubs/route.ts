@@ -63,7 +63,10 @@ function getSportVariants(sport: string): string[] {
 
 export async function GET(request: NextRequest) {
   try {
-    await requireAdminApiUser();
+    // El invitado de la demo de club busca clubes desde RelatedClubsTab. Es
+    // una lectura del catalogo publico: se le deja pasar solo aca, no en las
+    // escrituras de este archivo.
+    await requireAdminApiUser({ allowGuest: true });
     const supabase = await getReadClient();
     const searchParams = request.nextUrl.searchParams;
     const search = String(searchParams.get('search') || '').trim();

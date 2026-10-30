@@ -4,31 +4,16 @@
  * dependencias — el que escribe en la base es `seed.mjs`.
  *
  * Fuentes:
- * - Afiche oficial de la UAR (Instagram @unionargentina, 30/9/2026): fechas
- *   (viernes 2 y domingo 4 de octubre, Carlos Paz Rugby Club) y las zonas de
- *   Mayores y Juveniles.
- * - carlospazvivo.com (30/9/2026): Mayores son 12 equipos en modalidad de 12
- *   jugadoras; el viernes es la fase clasificatoria y el domingo las
- *   definiciones. Juveniles son 8 equipos en modalidad de seven: fechas 1 y 2
- *   el sábado, fecha 3 el domingo a la mañana y finales el domingo a la tarde.
- * - uar.com.ar, "Comienza la gran fiesta del Nacional de Clubes Femenino"
- *   (2025): el fixture completo de la edición anterior, del que salen el orden
- *   de los partidos de zona y los cruces de Oro, Plata y Bronce. Y el cuadro de
- *   honor 2011-2024.
+ * - uar.com.ar, "Vuelve el Nacional de Clubes Femenino" (2/10/2026): el
+ *   FIXTURE OFICIAL de las dos ramas, con horarios, cruces del domingo y
+ *   duración (Mayores 12s a 2x20', Juveniles seven a 2x7'). Cuadro de honor.
+ * - Afiche oficial de la UAR (Instagram @unionargentina, 30/9/2026): zonas.
  * - Wikipedia, "Torneo Nacional de Clubes Femenino": finales y subcampeones.
  *
- * ── LO QUE TODAVÍA NO SE SABE ───────────────────────────────────────────────
- * Al 30/9/2026 la UAR publicó las zonas pero NO el fixture con horarios. Los
- * horarios de acá abajo son PROVISORIOS: copian la grilla de 2025, que fue la
- * misma sede y el mismo formato. Los cruces de Mayores (P13-P24) son los del
- * reglamento de 2025 y es muy probable que se repitan.
- *
- * Los cruces finales de Juveniles son una INFERENCIA: con dos zonas de cuatro y
- * "finales el domingo a la tarde" después de la fecha 3, el formato natural es
- * cruzar por posición (1º vs 1º, 2º vs 2º...). Cuando salga el fixture oficial
- * se corrige acá y se corre `seed.mjs --horarios --execute`.
- *
- * Cambiar un horario es editar una línea y correr eso.
+ * Hasta el 2/10 la carga usaba horarios PROVISORIOS (la grilla de 2025) y
+ * cruces de Juveniles inferidos. Con el fixture oficial se reemplazó todo y se
+ * bajó a la base con `seed.mjs --fixture --execute`, que corrige horarios,
+ * cruces, etiquetas y reglas de avance sin recrear los torneos.
  */
 
 export const TEMPORADA = '2026';
@@ -119,42 +104,44 @@ export const TORNEOS = [
       { nombre: 'Zona 3', clubes: ['club-universitario-de-cordoba', 'taborin-rc', 'marabunta-r-c'] },
       { nombre: 'Zona 4', clubes: ['la-plata', 'ciudad-de-buenos-aires', 'regatas-de-resistencia'] },
     ],
-    // Zonas de tres, todas contra todas el viernes. Orden y horas de la grilla
-    // de 2025: 1º vs 3º, 2º vs 3º y cierra 1º vs 2º, de la zona 4 a la 1.
+    // Zonas de tres, todas contra todas el viernes. Grilla oficial de la UAR:
+    // un partido cada 50 minutos desde las 10:00.
     fechas: [
       { n: 1, nombre: 'Fase clasificatoria', dia: 'viernes' },
       { n: 2, nombre: 'Definiciones', dia: 'domingo' },
     ],
     grupos: [
-      { n: 1, fecha: 1, hora: '12:00', zona: 'Zona 4', local: 'la-plata', visitante: 'regatas-de-resistencia' },
-      { n: 2, fecha: 1, hora: '12:30', zona: 'Zona 3', local: 'club-universitario-de-cordoba', visitante: 'marabunta-r-c' },
-      { n: 3, fecha: 1, hora: '13:00', zona: 'Zona 2', local: 'aguilas-rc-saenz-pena', visitante: 'palihue-rc' },
-      { n: 4, fecha: 1, hora: '13:30', zona: 'Zona 1', local: 'cardenales-r-c', visitante: 'cha-roga-r-c' },
-      { n: 5, fecha: 1, hora: '14:00', zona: 'Zona 4', local: 'ciudad-de-buenos-aires', visitante: 'regatas-de-resistencia' },
-      { n: 6, fecha: 1, hora: '14:30', zona: 'Zona 3', local: 'taborin-rc', visitante: 'marabunta-r-c' },
-      { n: 7, fecha: 1, hora: '16:00', zona: 'Zona 2', local: 'aguara-guazu', visitante: 'palihue-rc' },
-      { n: 8, fecha: 1, hora: '16:30', zona: 'Zona 1', local: 'universitario-de-mendoza', visitante: 'cha-roga-r-c' },
-      { n: 9, fecha: 1, hora: '17:00', zona: 'Zona 4', local: 'la-plata', visitante: 'ciudad-de-buenos-aires' },
+      { n: 1, fecha: 1, hora: '10:00', zona: 'Zona 4', local: 'la-plata', visitante: 'regatas-de-resistencia' },
+      { n: 2, fecha: 1, hora: '10:50', zona: 'Zona 3', local: 'club-universitario-de-cordoba', visitante: 'marabunta-r-c' },
+      { n: 3, fecha: 1, hora: '11:40', zona: 'Zona 2', local: 'aguilas-rc-saenz-pena', visitante: 'palihue-rc' },
+      { n: 4, fecha: 1, hora: '12:30', zona: 'Zona 1', local: 'cardenales-r-c', visitante: 'universitario-de-mendoza' },
+      { n: 5, fecha: 1, hora: '13:20', zona: 'Zona 4', local: 'ciudad-de-buenos-aires', visitante: 'regatas-de-resistencia' },
+      { n: 6, fecha: 1, hora: '14:10', zona: 'Zona 3', local: 'taborin-rc', visitante: 'marabunta-r-c' },
+      { n: 7, fecha: 1, hora: '15:00', zona: 'Zona 2', local: 'aguara-guazu', visitante: 'palihue-rc' },
+      { n: 8, fecha: 1, hora: '15:50', zona: 'Zona 1', local: 'cha-roga-r-c', visitante: 'universitario-de-mendoza' },
+      { n: 9, fecha: 1, hora: '16:40', zona: 'Zona 4', local: 'la-plata', visitante: 'ciudad-de-buenos-aires' },
       { n: 10, fecha: 1, hora: '17:30', zona: 'Zona 3', local: 'club-universitario-de-cordoba', visitante: 'taborin-rc' },
-      { n: 11, fecha: 1, hora: '18:00', zona: 'Zona 2', local: 'aguilas-rc-saenz-pena', visitante: 'aguara-guazu' },
-      { n: 12, fecha: 1, hora: '18:30', zona: 'Zona 1', local: 'cardenales-r-c', visitante: 'universitario-de-mendoza' },
+      { n: 11, fecha: 1, hora: '18:20', zona: 'Zona 2', local: 'aguilas-rc-saenz-pena', visitante: 'aguara-guazu' },
+      { n: 12, fecha: 1, hora: '19:30', zona: 'Zona 1', local: 'cardenales-r-c', visitante: 'cha-roga-r-c' },
     ],
-    // Los primeros juegan la Copa de Oro, los segundos la de Plata y los
-    // terceros la de Bronce. Semis el domingo a la mañana, finales a la tarde.
+    // El domingo se define TODA la tabla: los primeros juegan del 1º al 4º,
+    // los segundos del 5º al 8º y los terceros del 9º al 12º.
+    faseFinalNombre: 'Definiciones por puesto',
     fechaFinal: 2,
     final: [
-      { n: 13, hora: '10:00', definicion: 'Semifinal Copa de Bronce', local: { pos: 3, zona: 'Zona 1' }, visitante: { pos: 3, zona: 'Zona 4' } },
-      { n: 14, hora: '10:30', definicion: 'Semifinal Copa de Bronce', local: { pos: 3, zona: 'Zona 2' }, visitante: { pos: 3, zona: 'Zona 3' } },
-      { n: 15, hora: '11:00', definicion: 'Semifinal Copa de Plata', local: { pos: 2, zona: 'Zona 2' }, visitante: { pos: 2, zona: 'Zona 3' } },
-      { n: 16, hora: '11:30', definicion: 'Semifinal Copa de Plata', local: { pos: 2, zona: 'Zona 1' }, visitante: { pos: 2, zona: 'Zona 4' } },
-      { n: 17, hora: '12:00', definicion: 'Semifinal Copa de Oro', local: { pos: 1, zona: 'Zona 1' }, visitante: { pos: 1, zona: 'Zona 4' } },
-      { n: 18, hora: '12:30', definicion: 'Semifinal Copa de Oro', local: { pos: 1, zona: 'Zona 2' }, visitante: { pos: 1, zona: 'Zona 3' } },
-      { n: 19, hora: '14:30', definicion: '3º puesto Copa de Bronce', local: { de: 13, resultado: 'loser' }, visitante: { de: 14, resultado: 'loser' } },
-      { n: 20, hora: '15:00', definicion: 'Final Copa de Bronce', local: { de: 13, resultado: 'winner' }, visitante: { de: 14, resultado: 'winner' } },
-      { n: 21, hora: '15:30', definicion: '3º puesto Copa de Plata', local: { de: 15, resultado: 'loser' }, visitante: { de: 16, resultado: 'loser' } },
-      { n: 22, hora: '16:00', definicion: 'Final Copa de Plata', local: { de: 15, resultado: 'winner' }, visitante: { de: 16, resultado: 'winner' } },
-      { n: 23, hora: '16:30', definicion: '3º puesto Copa de Oro', local: { de: 17, resultado: 'loser' }, visitante: { de: 18, resultado: 'loser' } },
-      { n: 24, hora: '17:25', definicion: 'Final Copa de Oro', local: { de: 17, resultado: 'winner' }, visitante: { de: 18, resultado: 'winner' } },
+      { n: 13, hora: '09:00', definicion: 'Semifinal 9º puesto', local: { pos: 3, zona: 'Zona 1' }, visitante: { pos: 3, zona: 'Zona 4' } },
+      { n: 14, hora: '09:50', definicion: 'Semifinal 9º puesto', local: { pos: 3, zona: 'Zona 2' }, visitante: { pos: 3, zona: 'Zona 3' } },
+      { n: 15, hora: '10:40', definicion: 'Semifinal 5º puesto', local: { pos: 2, zona: 'Zona 1' }, visitante: { pos: 2, zona: 'Zona 4' } },
+      { n: 16, hora: '11:30', definicion: 'Semifinal 5º puesto', local: { pos: 2, zona: 'Zona 2' }, visitante: { pos: 2, zona: 'Zona 3' } },
+      { n: 17, hora: '12:20', definicion: 'Semifinal', local: { pos: 1, zona: 'Zona 2' }, visitante: { pos: 1, zona: 'Zona 3' } },
+      { n: 18, hora: '13:10', definicion: 'Semifinal', local: { pos: 1, zona: 'Zona 1' }, visitante: { pos: 1, zona: 'Zona 4' } },
+      { n: 19, hora: '14:00', definicion: '11º puesto', local: { de: 13, resultado: 'loser' }, visitante: { de: 14, resultado: 'loser' } },
+      { n: 20, hora: '14:50', definicion: '9º puesto', local: { de: 13, resultado: 'winner' }, visitante: { de: 14, resultado: 'winner' } },
+      { n: 21, hora: '15:40', definicion: '7º puesto', local: { de: 15, resultado: 'loser' }, visitante: { de: 16, resultado: 'loser' } },
+      { n: 22, hora: '16:30', definicion: '5º puesto', local: { de: 15, resultado: 'winner' }, visitante: { de: 16, resultado: 'winner' } },
+      { n: 23, hora: '17:20', definicion: '3º puesto', local: { de: 17, resultado: 'loser' }, visitante: { de: 18, resultado: 'loser' } },
+      // La UAR la publicó como un segundo "P23": es el P24.
+      { n: 24, hora: '18:10', definicion: 'Final', local: { de: 17, resultado: 'winner' }, visitante: { de: 18, resultado: 'winner' } },
     ],
     // Cuadro de honor. 2020 no se jugó. `nota` va a la temporada.
     palmares: [
@@ -181,41 +168,46 @@ export const TORNEOS = [
     edad: 'Juveniles',
     modalidad: 'Seven',
     edicion: 'VII',
-    desde: DIAS.sabado,
+    desde: DIAS.viernes,
     hasta: DIAS.domingo,
     zonas: [
       { nombre: 'Zona 1', clubes: ['indios-de-bolivar', 'capri', 'bajo-hondo', 'tiro-federal-salta'] },
       { nombre: 'Zona 2', clubes: ['trelew-r-c', 'ciudad-de-buenos-aires', 'cordoba-athletic-club', 'taborin-rc'] },
     ],
-    // Zonas de cuatro, todas contra todas en tres fechas. El cruce de cada
-    // fecha es el round-robin estándar sobre el orden del afiche (1-2 3-4 /
-    // 1-3 2-4 / 1-4 2-3): la UAR todavía no dijo cuál va en qué fecha.
+    // Zonas de cuatro, todas contra todas: dos fechas el viernes (mañana y
+    // tarde) y la tercera el domingo a la mañana. Grilla oficial de la UAR.
     fechas: [
-      { n: 1, nombre: 'Fecha 1', dia: 'sabado' },
-      { n: 2, nombre: 'Fecha 2', dia: 'sabado' },
+      { n: 1, nombre: 'Fecha 1', dia: 'viernes' },
+      { n: 2, nombre: 'Fecha 2', dia: 'viernes' },
       { n: 3, nombre: 'Fecha 3', dia: 'domingo' },
       { n: 4, nombre: 'Finales', dia: 'domingo' },
     ],
     grupos: [
-      { n: 1, fecha: 1, hora: '12:00', zona: 'Zona 1', local: 'indios-de-bolivar', visitante: 'capri' },
-      { n: 2, fecha: 1, hora: '12:25', zona: 'Zona 2', local: 'trelew-r-c', visitante: 'ciudad-de-buenos-aires' },
-      { n: 3, fecha: 1, hora: '12:50', zona: 'Zona 1', local: 'bajo-hondo', visitante: 'tiro-federal-salta' },
-      { n: 4, fecha: 1, hora: '13:15', zona: 'Zona 2', local: 'cordoba-athletic-club', visitante: 'taborin-rc' },
-      { n: 5, fecha: 2, hora: '16:00', zona: 'Zona 1', local: 'indios-de-bolivar', visitante: 'bajo-hondo' },
-      { n: 6, fecha: 2, hora: '16:25', zona: 'Zona 2', local: 'trelew-r-c', visitante: 'cordoba-athletic-club' },
-      { n: 7, fecha: 2, hora: '16:50', zona: 'Zona 1', local: 'capri', visitante: 'tiro-federal-salta' },
-      { n: 8, fecha: 2, hora: '17:15', zona: 'Zona 2', local: 'ciudad-de-buenos-aires', visitante: 'taborin-rc' },
-      { n: 9, fecha: 3, hora: '10:00', zona: 'Zona 1', local: 'indios-de-bolivar', visitante: 'tiro-federal-salta' },
-      { n: 10, fecha: 3, hora: '10:25', zona: 'Zona 2', local: 'trelew-r-c', visitante: 'taborin-rc' },
-      { n: 11, fecha: 3, hora: '10:50', zona: 'Zona 1', local: 'capri', visitante: 'bajo-hondo' },
-      { n: 12, fecha: 3, hora: '11:15', zona: 'Zona 2', local: 'ciudad-de-buenos-aires', visitante: 'cordoba-athletic-club' },
+      { n: 1, fecha: 1, hora: '10:00', zona: 'Zona 2', local: 'trelew-r-c', visitante: 'ciudad-de-buenos-aires' },
+      { n: 2, fecha: 1, hora: '10:20', zona: 'Zona 1', local: 'indios-de-bolivar', visitante: 'capri' },
+      { n: 3, fecha: 1, hora: '10:40', zona: 'Zona 2', local: 'cordoba-athletic-club', visitante: 'taborin-rc' },
+      { n: 4, fecha: 1, hora: '11:00', zona: 'Zona 1', local: 'bajo-hondo', visitante: 'tiro-federal-salta' },
+      { n: 5, fecha: 2, hora: '16:00', zona: 'Zona 2', local: 'trelew-r-c', visitante: 'taborin-rc' },
+      { n: 6, fecha: 2, hora: '16:20', zona: 'Zona 1', local: 'indios-de-bolivar', visitante: 'tiro-federal-salta' },
+      { n: 7, fecha: 2, hora: '16:40', zona: 'Zona 2', local: 'cordoba-athletic-club', visitante: 'ciudad-de-buenos-aires' },
+      { n: 8, fecha: 2, hora: '17:00', zona: 'Zona 1', local: 'bajo-hondo', visitante: 'capri' },
+      { n: 9, fecha: 3, hora: '09:00', zona: 'Zona 2', local: 'ciudad-de-buenos-aires', visitante: 'taborin-rc' },
+      { n: 10, fecha: 3, hora: '09:20', zona: 'Zona 1', local: 'capri', visitante: 'tiro-federal-salta' },
+      { n: 11, fecha: 3, hora: '09:50', zona: 'Zona 2', local: 'cordoba-athletic-club', visitante: 'trelew-r-c' },
+      { n: 12, fecha: 3, hora: '10:10', zona: 'Zona 1', local: 'bajo-hondo', visitante: 'indios-de-bolivar' },
     ],
+    // Semis cruzadas entre zonas y después los cuatro partidos por puesto.
+    faseFinalNombre: 'Definiciones por puesto',
     fechaFinal: 4,
     final: [
-      { n: 13, hora: '14:30', definicion: '7º puesto', local: { pos: 4, zona: 'Zona 1' }, visitante: { pos: 4, zona: 'Zona 2' } },
-      { n: 14, hora: '15:00', definicion: 'Final Copa de Plata', local: { pos: 3, zona: 'Zona 1' }, visitante: { pos: 3, zona: 'Zona 2' } },
-      { n: 15, hora: '15:30', definicion: '3º puesto Copa de Oro', local: { pos: 2, zona: 'Zona 1' }, visitante: { pos: 2, zona: 'Zona 2' } },
-      { n: 16, hora: '17:00', definicion: 'Final Copa de Oro', local: { pos: 1, zona: 'Zona 1' }, visitante: { pos: 1, zona: 'Zona 2' } },
+      { n: 13, hora: '12:10', definicion: 'Semifinal 5º puesto', local: { pos: 3, zona: 'Zona 1' }, visitante: { pos: 4, zona: 'Zona 2' } },
+      { n: 14, hora: '12:30', definicion: 'Semifinal 5º puesto', local: { pos: 3, zona: 'Zona 2' }, visitante: { pos: 4, zona: 'Zona 1' } },
+      { n: 15, hora: '12:50', definicion: 'Semifinal', local: { pos: 1, zona: 'Zona 1' }, visitante: { pos: 2, zona: 'Zona 2' } },
+      { n: 16, hora: '13:10', definicion: 'Semifinal', local: { pos: 1, zona: 'Zona 2' }, visitante: { pos: 2, zona: 'Zona 1' } },
+      { n: 17, hora: '16:00', definicion: '7º puesto', local: { de: 13, resultado: 'loser' }, visitante: { de: 14, resultado: 'loser' } },
+      { n: 18, hora: '16:20', definicion: '5º puesto', local: { de: 13, resultado: 'winner' }, visitante: { de: 14, resultado: 'winner' } },
+      { n: 19, hora: '16:40', definicion: '3º puesto', local: { de: 15, resultado: 'loser' }, visitante: { de: 16, resultado: 'loser' } },
+      { n: 20, hora: '17:00', definicion: 'Final', local: { de: 15, resultado: 'winner' }, visitante: { de: 16, resultado: 'winner' } },
     ],
     // La categoría existe desde 2019; 2020 no se jugó.
     palmares: [

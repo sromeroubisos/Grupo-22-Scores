@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireGlobalAdminContext } from '@/lib/auth/permissions';
+import { guardRejection } from '@/lib/auth/apiAdmin';
 import { DEFAULT_RUGBY_TAXONOMY, type RugbyTaxonomyItem } from '@/lib/performance/rugbyStaff';
 import {
     getRugbyMatchEventTaxonomy,
@@ -53,8 +54,13 @@ function missingTableResponse() {
 
 export async function GET() {
     const supabase = await createClient();
-    const context = await requireGlobalAdminContext(supabase).catch(() => null);
-    if (!context) return err('Unauthorized', 401);
+    // El error se guarda en vez de tirarlo: el segundo factor va con 403.
+    let authError: unknown = null;
+    const context = await requireGlobalAdminContext(supabase).catch((error: unknown) => {
+        authError = error;
+        return null;
+    });
+    if (!context) return err(...guardRejection(authError));
 
     try {
         const data = await getRugbyMatchEventTaxonomy();
@@ -71,8 +77,13 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
     const supabase = await createClient();
-    const context = await requireGlobalAdminContext(supabase).catch(() => null);
-    if (!context) return err('Unauthorized', 401);
+    // El error se guarda en vez de tirarlo: el segundo factor va con 403.
+    let authError: unknown = null;
+    const context = await requireGlobalAdminContext(supabase).catch((error: unknown) => {
+        authError = error;
+        return null;
+    });
+    if (!context) return err(...guardRejection(authError));
 
     try {
         const body = await request.json() as Record<string, unknown>;

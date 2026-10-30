@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "src/app/api/db/tournaments/[id]/route.ts",
+    "src/app/api/club-admin/matches/route.ts",
+    "src/lib/**/*.ts",
+    "src/types/**/*.ts"
+  ]
+}

@@ -60,7 +60,11 @@ export function tipoDeLista(t: TorneoClasificable): TipoDeLista {
  * Devuelve sólo las secciones que tienen algo. El orden de entrada se respeta
  * adentro de cada una, salvo que en Competiciones los regionales van primero.
  */
-export function gruposPorTipo<T extends TorneoClasificable>(lista: T[]): Array<GrupoDeTipo<ConFamilia<T>>> {
+export function gruposPorTipo<T extends TorneoClasificable>(
+  lista: T[],
+  /** Rango de división; menor va antes. El sort es estable: los empates conservan el orden de entrada. */
+  rango?: (t: { name: string }) => number,
+): Array<GrupoDeTipo<ConFamilia<T>>> {
   const partes: Record<TipoDeLista, T[]> = { competiciones: [], reserva: [], juveniles: [] };
   for (const t of lista) partes[tipoDeLista(t)].push(t);
 
@@ -70,6 +74,40 @@ export function gruposPorTipo<T extends TorneoClasificable>(lista: T[]): Array<G
   ];
 
   return ORDEN
-    .map((tipo) => ({ key: tipo, title: TITULOS[tipo], tournaments: agruparEnFamilias(partes[tipo]) }))
+    .map((tipo) => {
+      const familias = agruparEnFamilias(partes[tipo]);
+      if (rango && tipo !== 'juveniles') familias.sort((a, b) => rango(a) - rango(b));
+      return { key: tipo, title: TITULOS[tipo], tournaments: familias };
+    })
     .filter((grupo) => grupo.tournaments.length > 0);
+}
+
+/**
+ * El nivel de un torneo dentro del bloque de regionales de su región: el torneo
+ * grande (Top 10, Copa Oro, el Cordobés) antes que el Regional A, y éste antes que
+ * el B, el C, el ascenso y el femenino. Sin letra, el regional va con el A.
+ */
+export function rangoDeRegional(t: { name: string }): number {
+  const n = t.name.toLowerCase().replace(/["“”]/g, '');
+  if (/femenino/.test(n)) return 8;
+  if (/\btop\s?\d+\b|cordob[eé]s|\boro\b/.test(n)) return 0;
+  if (/reclasificatorio/.test(n)) return 4;
+  if (/\bascenso\b|\bc\b|bronce/.test(n)) return 3;
+  if (/\bplata\b|\bb\b/.test(n)) return 2;
+  return 1;
+}
+
+/**
+ * El escalafón de la URBA, de arriba hacia abajo: Top 14 (o Top 12), Primera A, B y
+ * C, Segunda, Tercera, Desarrollo, y al final el universitario y el femenino. Lo que
+ * no reconoce queda atrás, en el orden en que llegó.
+ */
+export function rangoDeDivisionUrba(t: { name: string }): number {
+  const n = t.name.toLowerCase();
+  const escalones: RegExp[] = [
+    /\btop\s?1[234]\b/, /primera\s+"?a\b/, /primera\s+"?b\b/, /primera\s+"?c\b/,
+    /segunda\b/, /tercera\b/, /desarrollo\b/, /universitario\b/, /femenino\b/,
+  ];
+  const i = escalones.findIndex((re) => re.test(n));
+  return i === -1 ? 99 : i;
 }

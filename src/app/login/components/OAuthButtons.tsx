@@ -63,8 +63,11 @@ export default function OAuthButtons({ onError }: { onError?: (msg: string | nul
             })
             const payload = await response.json().catch(() => ({})) as { url?: string; error?: string }
 
-            if (!response.ok || payload.error) {
-                throw new Error(payload.error || `OAuth start failed (HTTP ${response.status})`)
+            // `.trim()`: un `error` en blanco que venga del endpoint le ganaba al
+            // texto con el HTTP y terminaba en la pantalla como un cartel rojo
+            // sin nada adentro. Si no dice nada, que hable el status.
+            if (!response.ok || payload.error?.trim()) {
+                throw new Error(payload.error?.trim() || `OAuth start failed (HTTP ${response.status})`)
             }
 
             const targetUrl = payload.url

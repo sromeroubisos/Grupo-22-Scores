@@ -150,7 +150,8 @@ test('la fase lleva el 4/2/0 de URBA y los dos bonus', () => {
   assert.deepEqual(s.points, { win: 4, draw: 2, loss: 0 });
   assert.equal(s.pointsSystem.win, 4);
   assert.equal(s.pointsSystem.allowBonusPoints, true);
-  assert.equal(s.bonus.offensive.tries, 4);
+  assert.equal(s.bonus.offensive.tries, 3);
+  assert.equal(s.bonus.offensive.mode, 'difference');
   assert.equal(s.bonus.defensive.margin, 7);
   // La tabla se calcula sola desde los partidos: si entra en manual, queda vacía.
   assert.deepEqual(s.standings, { mode: 'automatic', editable: false });

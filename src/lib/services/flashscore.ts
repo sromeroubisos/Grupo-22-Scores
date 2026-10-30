@@ -32,6 +32,7 @@ import {
     isOdesurSport,
 } from '@/lib/services/odesur2026';
 import { mergeHockeyProviders } from '@/lib/services/hockeyProviderMerge';
+import { mergeAmericanFootballProviders } from '@/lib/services/americanFootballProviderMerge';
 import {
     getEspnAmericanFootballLiveMatches,
     getEspnAmericanFootballMatches,
@@ -613,8 +614,24 @@ async function getProviderDailyMatches(
     sportId: string,
     options?: { timeZone?: string; targetDateKey?: string }
 ): Promise<Match[]> {
+    // Fútbol americano: ESPN trae la NFL, la NCAA y la UFL con más datos y sin
+    // cuota; FlashScore (deporte 5) aporta lo que ESPN no cubre —CFL, Europa,
+    // México— y de él se descarta SOLO la copia de las ligas que ESPN ya sirve.
+    // Ver `mergeAmericanFootballProviders`. Una caída de FlashScore (cuota,
+    // clave) no tira el feed de ESPN.
     if (sportId === 'american-football') {
-        return getEspnAmericanFootballMatches(date, options);
+        const [espn, flashScore] = await Promise.all([
+            getEspnAmericanFootballMatches(date, options).catch((error) => {
+                console.warn('[ESPN] fútbol americano no disponible:', error?.message);
+                return [] as Match[];
+            }),
+            fetchFlashScoreDailyMatches(date, sportId, options).catch((error) => {
+                console.warn('[FlashScore] fútbol americano no disponible:', error?.message);
+                return [] as Match[];
+            }),
+        ]);
+
+        return mergeAmericanFootballProviders(espn, flashScore);
     }
 
     if (sportId === 'motorsport') {
@@ -797,7 +814,12 @@ export async function getFlashScoreLiveMatches(sportId: string): Promise<Match[]
 
 async function getProviderLiveMatches(sportId: string): Promise<Match[]> {
     if (sportId === 'american-football') {
-        return getEspnAmericanFootballLiveMatches();
+        const [espn, flashScore] = await Promise.all([
+            getEspnAmericanFootballLiveMatches().catch(() => [] as Match[]),
+            getFlashScoreLiveMatchesRaw(sportId).catch(() => [] as Match[]),
+        ]);
+
+        return mergeAmericanFootballProviders(espn, flashScore);
     }
 
     if (sportId === 'motorsport') {

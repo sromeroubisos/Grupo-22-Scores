@@ -31,6 +31,30 @@
       "cup": "Plata",
       "club": "Universitario",
       "note": "Final Four Plata, 14 pts (nota del 26/9)"
+    },
+    {
+      "division": "M16",
+      "cup": "Oro",
+      "club": "Santa Fe RC",
+      "note": "Final Four Oro, 11 pts (nota del 4/10)"
+    },
+    {
+      "division": "M16",
+      "cup": "Plata",
+      "club": "CRAR",
+      "note": "Final Four Plata, 13 pts (nota del 4/10)"
+    },
+    {
+      "division": "M17",
+      "cup": "Oro",
+      "club": "Santa Fe RC",
+      "note": "Final Four Oro, 13 pts (nota del 4/10)"
+    },
+    {
+      "division": "M17",
+      "cup": "Plata",
+      "club": "La Salle",
+      "note": "Final Four Plata, 14 pts; faltan CRAR-CRAI y CRAI-Tilcara (nota del 4/10)"
     }
   ],
   "phases": [
@@ -5382,13 +5406,13 @@
       "date": "2026-10-03",
       "home": "Tilcara",
       "away": "Estudiantes",
-      "hs": null,
-      "as": null,
-      "hp": null,
-      "ap": null,
-      "status": "scheduled",
+      "hs": 7,
+      "as": 35,
+      "hp": 0,
+      "ap": 5,
+      "status": "final",
       "note": "",
-      "src": "2026-09-30_585",
+      "src": "2026-10-04_nota-campeones",
       "time": "13:30"
     },
     {
@@ -5399,13 +5423,13 @@
       "date": "2026-10-03",
       "home": "Santa Fe RC",
       "away": "Universitario",
-      "hs": null,
-      "as": null,
-      "hp": null,
-      "ap": null,
-      "status": "scheduled",
+      "hs": 26,
+      "as": 17,
+      "hp": 4,
+      "ap": 0,
+      "status": "final",
       "note": "",
-      "src": "2026-09-30_585",
+      "src": "2026-10-04_nota-campeones",
       "time": "13:30"
     },
     {
@@ -5484,13 +5508,13 @@
       "date": "2026-10-03",
       "home": "Rowing",
       "away": "CRAI",
-      "hs": null,
-      "as": null,
-      "hp": null,
-      "ap": null,
-      "status": "scheduled",
+      "hs": 26,
+      "as": 27,
+      "hp": 1,
+      "ap": 4,
+      "status": "final",
       "note": "",
-      "src": "2026-09-30_585",
+      "src": "2026-10-04_nota-campeones",
       "time": "12:00"
     },
     {
@@ -5501,13 +5525,13 @@
       "date": "2026-10-03",
       "home": "CRAR",
       "away": "Cha Roga Club",
-      "hs": null,
-      "as": null,
-      "hp": null,
-      "ap": null,
-      "status": "scheduled",
+      "hs": 17,
+      "as": 13,
+      "hp": 4,
+      "ap": 1,
+      "status": "final",
       "note": "",
-      "src": "2026-09-30_585",
+      "src": "2026-10-04_nota-campeones",
       "time": "12:30"
     },
     {
@@ -5589,9 +5613,9 @@
       "as": null,
       "hp": null,
       "ap": null,
-      "status": "scheduled",
-      "note": "",
-      "src": "2026-09-30_585",
+      "status": "not_played",
+      "note": "disputado sin marcador publicado",
+      "src": "2026-10-04_nota-campeones",
       "time": "12:00"
     },
     {
@@ -5602,13 +5626,13 @@
       "date": "2026-10-03",
       "home": "Alma Juniors",
       "away": "San Carlos",
-      "hs": null,
-      "as": null,
-      "hp": null,
-      "ap": null,
-      "status": "scheduled",
+      "hs": 31,
+      "as": 29,
+      "hp": 5,
+      "ap": 2,
+      "status": "final",
       "note": "",
-      "src": "2026-09-30_585",
+      "src": "2026-10-04_nota-campeones",
       "time": "11:00"
     },
     {
@@ -5687,13 +5711,13 @@
       "date": "2026-10-01",
       "home": "Estudiantes",
       "away": "Santa Fe RC",
-      "hs": null,
-      "as": null,
-      "hp": null,
-      "ap": null,
-      "status": "scheduled",
-      "note": "adelantado al jueves 1/10",
-      "src": "2026-09-30_585",
+      "hs": 10,
+      "as": 12,
+      "hp": 1,
+      "ap": 4,
+      "status": "final",
+      "note": "",
+      "src": "2026-10-04_nota-campeones",
       "time": "13:00"
     },
     {
@@ -5704,13 +5728,13 @@
       "date": "2026-10-03",
       "home": "Universitario",
       "away": "Rowing",
-      "hs": null,
-      "as": null,
-      "hp": null,
-      "ap": null,
-      "status": "scheduled",
+      "hs": 54,
+      "as": 28,
+      "hp": 5,
+      "ap": 1,
+      "status": "final",
       "note": "",
-      "src": "2026-09-30_585",
+      "src": "2026-10-04_nota-campeones",
       "time": "13:30"
     },
     {
@@ -5789,13 +5813,13 @@
       "date": "2026-10-03",
       "home": "CRAR",
       "away": "La Salle",
-      "hs": null,
-      "as": null,
-      "hp": null,
-      "ap": null,
-      "status": "scheduled",
+      "hs": 19,
+      "as": 33,
+      "hp": 0,
+      "ap": 5,
+      "status": "final",
       "note": "",
-      "src": "2026-09-30_585",
+      "src": "2026-10-04_nota-campeones",
       "time": "14:00"
     },
     {
@@ -8436,6 +8460,9 @@
     "M16 Final Four Bronce: La Salle - Alma Juniors (26/9) sin marcador y las posiciones no cambian (not_played). At. Brown - San Carlos postergado al 10/10 (scheduled).",
     "M17 Final Four Plata: CRAR-CRAI postergado al 29/9 19.30 hs; la nota del 30/9 no trae resultado y lo sigue dando pendiente (postponed, fecha 29/9).",
     "Campeones: confirmados en la nota del 26/9 M15 Oro Santa Fe RC, M15 Plata Tilcara, M19 Oro Estudiantes, M19 Plata Universitario y M17 Bronce Querandí RC. M16 (Oro, Plata, Bronce) y M17 (Oro, Plata) se definen el 3/10 (y 6/10, 10/10); M15 y M19 Bronce sin dato.",
-    "El calendario anunciado el 25/3 decía Final Four 5, 12 y 29/9; se jugó 5, 12 y 26/9 (M16/M17 hasta 3/10). La nota del 13/6 decía que la Final Six arrancaba el 27/6; solo se adelantaron algunos partidos de Plata."
+    "El calendario anunciado el 25/3 decía Final Four 5, 12 y 29/9; se jugó 5, 12 y 26/9 (M16/M17 hasta 3/10). La nota del 13/6 decía que la Final Six arrancaba el 27/6; solo se adelantaron algunos partidos de Plata.",
+    "M16 Final Four Bronce (nota del 4/10): La Salle - At. Brown figura sin marcador y las posiciones no cambian: not_played. Alma Jrs 31-29 San Carlos (5-2) no se refleja en las posiciones publicadas (Alma 5, San Carlos 0): se cargó el partido, así que la tabla calculada va a diferir de la publicada. Quedan pendientes La Salle - Alma Jrs (2ª fecha) y At. Brown - San Carlos (10/10).",
+    "M16 Final Four Oro (nota del 4/10): Santa Fe RC y Estudiantes terminan con 11 puntos y la nota marca campeón a Santa Fe RC sin explicar el desempate. La 2ª fecha ya traía una diferencia de 1 punto con la publicada.",
+    "M17 Final Four Plata (nota del 4/10): La Salle campeón con CRAR - CRAI (29/9) y CRAI - Tilcara (6/10) sin resultado publicado; siguen postponed y scheduled."
   ]
 }

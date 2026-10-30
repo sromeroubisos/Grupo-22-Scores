@@ -1,0 +1,222 @@
+Región Centro 2026 · tarjetas UCR del 24/10 (Top 10 A F18, Revalida, Intermedia semi, Pre-Inter B F26)
+
+Club Universitario de Córdoba vs Jockey Club Córdoba · Top 10 A F18 · tarjeta 276640  ·  db17b565-aa1a-4fa4-bc89-c10324517f3f
+  local     · — · 23 jugadores · 0 con ficha fijada
+  visitante · — · 23 jugadores · 0 con ficha fijada
+  eventos   · 32
+    min 13 (1T 13) local     penalty_goal Joaquin Castillo
+    min 19 (1T 19) visitante try          Leandro Martin Nassif
+    min 27 (1T 27) visitante try          Gonzalo Maldonado
+    min 27 (1T 27) visitante conversion   Julian Viola
+    min 27 (1T 27) visitante substitution Gonzalo Maldonado
+    min 37 (1T 37) local     card_yellow  Galo Fernández
+    min 44 (1T 44) local     penalty_goal Joaquin Castillo
+    min 47 (2T 7) visitante substitution Uriel Sposito
+    min 47 (2T 7) visitante substitution Octavio Filippa
+    min 49 (2T 9) local     substitution Galo Fernández
+    min 51 (2T 11) local     card_yellow  Enzo Ocampo
+    min 52 (2T 12) visitante substitution Leonardo Gea Salim
+    min 52 (2T 12) visitante penalty_goal Julian Viola
+    min 53 (2T 13) visitante substitution Tomas Bergero
+    min 54 (2T 14) local     try          Francisco Aguirre Gallardo
+    min 54 (2T 14) visitante substitution Marcelo Blanco
+    min 55 (2T 15) visitante substitution Lautaro Esteban De Jesús Ramirez Juncos
+    min 57 (2T 17) visitante try          Leandro Martin Nassif
+    min 58 (2T 18) local     substitution Luciano Lampasona
+    min 60 (2T 20) local     substitution Agustin Perez Soria
+    min 65 (2T 25) local     substitution Francisco Aldonza
+    min 67 (2T 27) local     substitution José Ignacio Castro
+    min 67 (2T 27) local     substitution Tiago Acaredda
+    min 71 (2T 31) local     card_yellow  Fernando Martinez
+    min 75 (2T 35) local     substitution Ramiro Iglesias Quintana
+    min 75 (2T 35) local     substitution Conrado Iglesias Quintana
+    min 75 (2T 35) visitante substitution Leandro Martin Nassif
+    min 75 (2T 35) visitante try          Nicolas Viola
+    min 75 (2T 35) visitante conversion   Julian Viola
+    min 76 (2T 36) visitante substitution Francisco Etchegorry
+    min 83 (2T 43) local     try          Enzo Ocampo
+    min 83 (2T 43) local     conversion   Joaquin Castillo
+  marcador  · eventos 18-27 · guardado 18-27
+  tries     · 2-4 (guardado 2-4)
+  guardado  · 23 local · 23 visitante · 32 eventos
+
+Palermo Bajo vs La Tablada · Top 10 A F18 · tarjeta 276641  ·  a023e633-4f52-478d-9300-b8a3c562b9b7
+  local     · — · 23 jugadores · 0 con ficha fijada
+  visitante · — · 23 jugadores · 0 con ficha fijada
+  eventos   · 36
+    min 17 (1T 17) visitante try          Estanislao Gomez Fernandez
+    min 17 (1T 17) visitante conversion   Estanislao Gomez Fernandez
+    min 20 (1T 20) visitante try          Alfredo Pueyrredon
+    min 20 (1T 20) visitante conversion   Estanislao Gomez Fernandez
+    min 23 (1T 23) local     try          Fabricio Griffo Zaradnik
+    min 23 (1T 23) local     conversion   Mateo Francisco Frontera Croizet
+    min 40 (1T 40) visitante try          Salvador Solana
+    min 46 (2T 6) local     substitution Jairo Peralta Banegas
+    min 46 (2T 6) local     substitution Martin Quiñonero
+    min 48 (2T 8) local     substitution Lisandro Pinto Ferreyra
+    min 55 (2T 15) local     substitution Juan Sagrera
+    min 60 (2T 20) local     substitution Mateo Francisco Frontera Croizet
+    min 65 (2T 25) local     substitution Santino Vercellone
+    min 67 (2T 27) local     substitution Benjamin Cafure
+    min 67 (2T 27) local     substitution Lautaro Jose Garzon
+    min 72 (2T 32) local     try          Fidel Sanchez Valarolo
+    min 72 (2T 32) local     conversion   Fabricio Griffo Zaradnik
+    min 78 (2T 38) local     try          Lautaro Canepa
+    min 78 (2T 38) local     conversion   Matías Tomas Peralta Banegas
+    min 86 (2T 46) visitante substitution Asael Gaston Acosta
+    min 87 (2T 47) visitante card_yellow  Lautaro Diaz
+    min 88 (2T 48) visitante try          Estanislao Gomez Fernandez
+    min 88 (2T 48) visitante conversion   Estanislao Gomez Fernandez
+    min 91 (2T 51) visitante substitution Facundo Gustavo Alemanno
+    min 97 (2T 57) visitante substitution Alfredo Pueyrredon
+    min 99 (2T 59) visitante substitution Agustin Basly
+    min 99 (2T 59) visitante substitution Federico Gutierrez Marquez
+    min 102 (2T 62) visitante try          Santiago Tobal
+    min 102 (2T 62) visitante conversion   Estanislao Gomez Fernandez
+    min 102 (2T 62) visitante substitution Nicolas Revol Pitt
+    min 102 (2T 62) visitante substitution Estanislao Gomez Fernandez
+    min 102 (2T 62) visitante substitution Bautista Echeverria
+    min 108 (2T 68) visitante try          Santiago Tobal
+    min 108 (2T 68) visitante conversion   Gabriel Alejandro Roldán
+    min 120 (2T 80) visitante try          Nicolas Hitt Reyes
+    min 120 (2T 80) visitante conversion   Gabriel Alejandro Roldán
+  marcador  · eventos 21-47 · guardado 21-47
+  tries     · 3-7 (guardado 3-7)
+  guardado  · 23 local · 23 visitante · 36 eventos
+
+Carlos Paz vs Uru Cure · Top 10 A F18 · tarjeta 276642  ·  17c238c7-40ab-4b27-9bc6-d074be839573
+  local     · — · 23 jugadores · 0 con ficha fijada
+  visitante · — · 23 jugadores · 0 con ficha fijada
+  eventos   · 30
+    min 32 (1T 32) visitante try          Gonzalo Losada
+    min 32 (1T 32) visitante conversion   Jeronimo Losada
+    min 32 (1T 32) visitante try          Jeronimo Losada
+    min 35 (1T 35) local     try          Nicolas Ezequiel Aspera Contreras
+    min 42 (2T 2) visitante substitution Horacio De La Mota Boehler
+    min 42 (2T 2) visitante substitution Juan Patricio Arqué Latour
+    min 46 (2T 6) visitante substitution Francisco Caramuti
+    min 46 (2T 6) visitante try          Ignacio Raul Abrile
+    min 48 (2T 8) local     injury       Gaston Ezequiel Varela
+    min 48 (2T 8) local     substitution Gaston Ezequiel Varela
+    min 51 (2T 11) visitante conversion   Jeronimo Losada
+    min 51 (2T 11) visitante try          Santiago Ismael Cabello
+    min 56 (2T 16) local     substitution Nicolas Ezequiel Aspera Contreras
+    min 57 (2T 17) local     substitution Gaspar Alejo Lopez
+    min 57 (2T 17) local     substitution Manuel Ceballos
+    min 60 (2T 20) visitante substitution Fidel Rins
+    min 61 (2T 21) visitante try          Gonzalo Losada
+    min 62 (2T 22) visitante substitution Ignacio Raul Abrile
+    min 65 (2T 25) local     try          Lautaro Nahuel Orazi
+    min 65 (2T 25) local     conversion   Juan Cruz Calamita
+    min 65 (2T 25) local     substitution Ariel Boyd
+    min 65 (2T 25) local     substitution Juan Cruz Calamita
+    min 65 (2T 25) visitante substitution Mateo Anino
+    min 70 (2T 30) visitante substitution Máximo Flores Macías
+    min 71 (2T 31) local     substitution Santiago Jorge
+    min 72 (2T 32) visitante try          Jeronimo Losada
+    min 72 (2T 32) visitante substitution Alejo Freymann
+    min 75 (2T 35) local     substitution Jeronimo Osores
+    min 79 (2T 39) visitante try          Juan Ignacio Guerrieri
+    min 79 (2T 39) visitante conversion   Jeronimo Losada
+  marcador  · eventos 12-41 · guardado 12-41
+  tries     · 2-7 (guardado 2-7)
+  guardado  · 23 local · 23 visitante · 30 eventos
+
+Dolores vs La Carlota · Revalida fecha 5 · tarjeta 310464  ·  006d3194-97cd-4d2d-a4d9-dd0a13c7b2ce
+  local     · — · 23 jugadores · 0 con ficha fijada
+  visitante · — · 23 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min  1 (1T 1) local     try          Fernando Raul Juarez
+    min  7 (1T 7) local     try          Nicolas Ravotti
+    min 15 (1T 15) visitante card_yellow  Santino Augusto Pizarro
+    min 16 (1T 16) local     try          Emanuel Ordoñez
+    min 36 (1T 36) local     try          Matias David Abrigo
+    min 38 (1T 38) local     conversion   Matias David Abrigo
+    min 44 (2T 4) local     card_yellow  Valentín Luna
+    min 46 (2T 6) visitante try          Martin Benausse
+    min 46 (2T 6) visitante conversion   Joaquin Gomez
+    min 53 (2T 13) local     penalty_try  
+    min 53 (2T 13) visitante card_yellow  Santino Augusto Pizarro
+    min 53 (2T 13) visitante card_red     Santino Augusto Pizarro
+    min 55 (2T 15) visitante try          Francisco Andrada
+    min 55 (2T 15) visitante conversion   Santiago Gomez Bies
+    min 59 (2T 19) visitante try          Santiago Gomez Bies
+    min 59 (2T 19) visitante conversion   Santiago Gomez Bies
+    min 67 (2T 27) local     injury       Agustin Jose Abrigo
+  marcador  · eventos 29-21 · guardado 29-21
+  tries     · 5-3 (guardado —-—)
+  guardado  · 23 local · 23 visitante · 17 eventos
+
+Tala vs La Tablada · Intermedia semifinal · tarjeta 327318  ·  04330ad5-4881-4a05-9905-ef79e5ae5cb0
+  local     · — · 23 jugadores · 0 con ficha fijada
+  visitante · — · 23 jugadores · 0 con ficha fijada
+  eventos   · 33
+    min  5 (1T 5) local     try          Valentin Cantarutti
+    min  5 (1T 5) local     conversion   Juan Cruz Capdevila Soler
+    min  7 (1T 7) visitante penalty_goal Bautista Demarchi
+    min 16 (1T 16) visitante card_yellow  Juan Cruz Pilotto
+    min 20 (1T 20) local     try          Agustin Cordoba
+    min 26 (1T 26) local     penalty_goal Juan Cruz Capdevila Soler
+    min 31 (1T 31) visitante try          Juan Pablo Ruiz
+    min 35 (1T 35) local     try          Santiago Benjamin Luna
+    min 40 (1T 40) local     try          Francesco Chiesa
+    min 40 (1T 40) local     conversion   Juan Cruz Capdevila Soler
+    min 40 (1T 40) visitante substitution Baltazar Monforte Ortiz
+    min 41 (1T 41) visitante substitution Juan Pablo Ruiz
+    min 42 (1T 42) visitante substitution Zair Leonel Acosta
+    min 42 (1T 42) visitante substitution Felipe Sanchez Vila
+    min 57 (1T 57) visitante substitution Javier Diaz Otañez
+    min 57 (1T 57) visitante substitution Alvaro Solana Allende
+    min 62 (1T 62) visitante substitution Felipe Mercau
+    min 62 (1T 62) visitante substitution Juan Cruz Pilotto
+    min 84 (2T 44) local     substitution Juan Cruz Carballo Argañaraz
+    min 84 (2T 44) local     substitution Valentín Ucar
+    min 84 (2T 44) local     substitution Valentin Cantarutti
+    min 84 (2T 44) local     substitution Francesco Chiesa
+    min 84 (2T 44) local     substitution David Alvaro
+    min 86 (2T 46) local     card_yellow  Fausto Ferrero
+    min 87 (2T 47) visitante try          Franco Feretti
+    min 87 (2T 47) visitante conversion   Bautista Demarchi
+    min 91 (2T 51) local     substitution Santiago Benjamin Luna
+    min 98 (2T 58) local     substitution Ramiro Agustin Farias Vivas
+    min 100 (2T 60) local     substitution Juan Cruz Capdevila Soler
+    min 107 (2T 67) visitante card_yellow  Pedro Allende
+    min 108 (2T 68) local     try          Felipe Spagnuolo Garzon
+    min 117 (2T 77) visitante try          Thomas Mariani
+    min 117 (2T 77) visitante conversion   Bautista Demarchi
+  marcador  · eventos 32-22 · guardado 32-22
+  tries     · 5-3 (guardado 5-3)
+  guardado  · 23 local · 23 visitante · 33 eventos
+
+Córdoba Athletic C vs Jockey C · Pre-Intermedia B F26 · tarjeta 327325  ·  6b51b3e8-88bd-4c0d-8c33-786496e518f4
+  local     · — · 24 jugadores · 0 con ficha fijada
+  visitante · — · 27 jugadores · 0 con ficha fijada
+  eventos   · 23
+    min  6 (1T 6) local     try          Diego Stocker
+    min 39 (1T 39) visitante card_red     Agustín Garcia Cortinez
+    min 43 (2T 3) local     try          Felipe Marangone
+    min 44 (2T 4) local     conversion   Eros Parada
+    min 44 (2T 4) visitante substitution Pedro Sfeir
+    min 44 (2T 4) visitante substitution Cristobal Ortega
+    min 45 (2T 5) visitante substitution Juan Ignacio Escobar Caceres
+    min 47 (2T 7) local     substitution Cameron Puryear
+    min 55 (2T 15) local     substitution Matias Lazarte
+    min 56 (2T 16) visitante substitution Francisco Galliano
+    min 58 (2T 18) visitante try          Ignacio Heredia Sanchez
+    min 62 (2T 22) local     substitution Antonio Martinez
+    min 67 (2T 27) local     try          Eros Parada
+    min 72 (2T 32) visitante try          Juan Palacios
+    min 72 (2T 32) visitante conversion   Mateo Andersson
+    min 80 (2T 40) local     substitution Agustin Mansilla
+    min 80 (2T 40) local     substitution Fernando Bustos Fierro
+    min 80 (2T 40) visitante substitution David Llabres
+    min 80 (2T 40) visitante substitution Santiago Pereyra
+    min 80 (2T 40) visitante substitution Manuel Franchi
+    min 80 (2T 40) visitante substitution Bautista Salas Frias
+    min 80 (2T 40) visitante substitution Nicolas Anderson Lendzian
+    min 80 (2T 40) visitante substitution Ignacio Heredia Sanchez
+  marcador  · eventos 17-12 · guardado 17-12
+  tries     · 3-2 (guardado 3-2)
+  guardado  · 24 local · 27 visitante · 23 eventos
+
+listo · 6 partidos

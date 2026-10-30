@@ -28,6 +28,7 @@ import { collectMentions, plainTextOf, wordCountOf } from '@/lib/news/richText';
 import { timeAgo } from '@/lib/news/timeAgo';
 import { resolveNewsMentions } from '@/lib/server/newsMentions';
 import { absoluteUrl } from '@/lib/seo/siteUrl';
+import { serializeJsonLd } from '@/lib/utils/jsonLd';
 import TodayMatchesRail from './TodayMatchesRail';
 import styles from './page.module.css';
 
@@ -379,7 +380,7 @@ export default async function NewsPage({ params }: NewsPageProps) {
         // overflow-x: clip, para que la columna lateral pueda quedarse pegada.
         <div className={styles.readerPage} data-sticky-tabs="">
             {jsonLd && (
-                <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+                <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }} />
             )}
             {/* Quien administra no suma: sus visitas para editar no son lectores. */}
             {!canManageNews && news.status === 'published' && <NewsViewBeacon newsId={news.id} />}

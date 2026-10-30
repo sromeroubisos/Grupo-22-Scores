@@ -29,10 +29,18 @@ export function SquadManagementPage() {
         setError(null);
 
         try {
-            const response = await fetch(`/api/clubs/${encodeURIComponent(id)}/divisions`, {
-                cache: 'no-store',
-            });
+            // El club viaja en paralelo solo por su deporte: el plantel base no es
+            // una categoría y no tiene deporte propio, así que hereda el del club.
+            // Antes decía "Rugby" fijo y un club de hockey veía puestos de rugby.
+            const [response, clubResponse] = await Promise.all([
+                fetch(`/api/clubs/${encodeURIComponent(id)}/divisions`, { cache: 'no-store' }),
+                fetch(`/api/clubs/${encodeURIComponent(id)}`, { cache: 'no-store' }).catch(() => null),
+            ]);
             const payload = await response.json().catch(() => ({})) as DivisionsResponse;
+            const clubPayload = clubResponse?.ok
+                ? await clubResponse.json().catch(() => null) as { data?: { sport?: string | null; sport_id?: string | null } } | null
+                : null;
+            const clubSport = clubPayload?.data?.sport ?? clubPayload?.data?.sport_id ?? '';
 
             if (!response.ok) {
                 throw new Error(payload.error || 'No se pudieron cargar las divisiones del club.');
@@ -52,7 +60,7 @@ export function SquadManagementPage() {
                     name: 'Plantel base del club',
                     season: String(new Date().getFullYear()),
                     status: 'active',
-                    sport: 'Rugby',
+                    sport: clubSport,
                     gender: 'Masculino',
                     category: 'Plantel base',
                     players_count: 0,

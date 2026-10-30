@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { guardRejection } from '@/lib/auth/apiAdmin';
 import { requireSuperAdmin } from '@/lib/auth/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { isMissingTableError } from '@/lib/utils/supabaseSchema';
@@ -250,8 +251,8 @@ async function writeAudit(actorUserId: string, action: string, row: Partial<Tele
 export async function GET() {
   try {
     await requireSuperAdmin();
-  } catch {
-    return jsonError('Unauthorized', 401);
+  } catch (authError) {
+    return jsonError(...guardRejection(authError));
   }
 
   const { data, error } = await getTelegramUsersTable()
@@ -278,8 +279,8 @@ export async function POST(request: NextRequest) {
   try {
     const user = await requireSuperAdmin();
     actorUserId = user.id;
-  } catch {
-    return jsonError('Unauthorized', 401);
+  } catch (authError) {
+    return jsonError(...guardRejection(authError));
   }
 
   try {
@@ -312,8 +313,8 @@ export async function PATCH(request: NextRequest) {
   try {
     const user = await requireSuperAdmin();
     actorUserId = user.id;
-  } catch {
-    return jsonError('Unauthorized', 401);
+  } catch (authError) {
+    return jsonError(...guardRejection(authError));
   }
 
   try {
@@ -357,8 +358,8 @@ export async function DELETE(request: NextRequest) {
   try {
     const user = await requireSuperAdmin();
     actorUserId = user.id;
-  } catch {
-    return jsonError('Unauthorized', 401);
+  } catch (authError) {
+    return jsonError(...guardRejection(authError));
   }
 
   const id = readText(new URL(request.url).searchParams.get('id'));

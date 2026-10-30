@@ -17,3 +17,36 @@ export function instanciaDePlayoff(roundLabel: string | null | undefined): Insta
   if (etiqueta === 'final') return 'final';
   return null;
 }
+
+export interface RondaDeFase {
+  id: string;
+  name: string;
+  order_index: number | null;
+}
+
+/** Cómo se llama la ronda que el sync crea cuando la fase todavía no la tiene. */
+export function nombreDeRonda(instancia: InstanciaDePlayoff): string {
+  return instancia === 'final' ? 'Final' : 'Semifinales';
+}
+
+/**
+ * La ronda de la fase de playoff a la que pertenece una instancia.
+ *
+ * El cuadro del torneo cruza los partidos con sus rondas por `round_uuid` en
+ * cuanto la fase tiene rondas: un partido que entra a la fase sin ronda no se
+ * dibuja. Se reconoce por el nombre porque es lo único que comparten las rondas
+ * que armó el constructor ("Semifinal · Copa"), las importadas ("Promotion
+ * semifinals", "Final por el ascenso") y las que crea el sync ("Semifinales").
+ * La final arranca con "Final": "Semifinales" contiene la palabra y no cuenta.
+ */
+export function rondaDeInstancia<R extends RondaDeFase>(
+  rondas: readonly R[],
+  instancia: InstanciaDePlayoff,
+): R | null {
+  const coincide = instancia === 'final' ? /^final\b/i : /semi/i;
+  const ordenadas = [...rondas].sort(
+    (a, b) => (a.order_index ?? Number.MAX_SAFE_INTEGER) - (b.order_index ?? Number.MAX_SAFE_INTEGER)
+      || a.id.localeCompare(b.id),
+  );
+  return ordenadas.find((r) => coincide.test(String(r.name ?? '').trim())) ?? null;
+}

@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -8,6 +9,7 @@ import {
     etiquetaDeSuperficie,
 } from '@/lib/tennis/labels';
 import { getTennisMatch } from '@/lib/services/tennis';
+import type { TennisMatchDetails, TennisPathStep, TennisPlayerProfile } from '@/lib/services/tennis';
 import type { TennisMatch, TennisSide } from '@/types/tennis';
 
 import LiveRefresh from './LiveRefresh';
@@ -28,9 +30,55 @@ export const dynamic = 'force-dynamic';
  * portada no debería sentir que cambió de producto. Lo que cambia es con qué se
  * llena cada pieza: donde el fútbol pone dos escudos y un número, el tenis pone
  * dos personas y la línea de games set por set, que es como se lee un partido.
+ *
+ * Lo que ESPN no da (estadísticas del partido, superficie) no se inventa. Lo
+ * que sí da y antes no se mostraba —la ficha de cada jugador, el camino de los
+ * dos en el cuadro, el formato, el campeón anterior— ahora está abajo del
+ * marcador, en el orden en que uno lo pregunta: qué pasó, quiénes son, cómo
+ * llegaron hasta acá.
  */
 
 const USER_TZ = 'America/Argentina/Buenos_Aires';
+
+const DESCRIPCION_MAX = 155;
+
+function recortar(texto: string): string {
+    if (texto.length <= DESCRIPCION_MAX) return texto;
+    return `${texto.slice(0, DESCRIPCION_MAX - 1).trimEnd()}…`;
+}
+
+export async function generateMetadata({
+    params,
+}: {
+    params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+    const { id } = await params;
+    // El título no puede tumbar la página: si el proveedor no contesta, la
+    // ficha igual tiene que renderizar y decir lo suyo.
+    let details: TennisMatchDetails | null = null;
+    try {
+        details = await getTennisMatch(id);
+    } catch {
+        details = null;
+    }
+    if (!details) return { title: 'Partido de tenis · G22 Scores' };
+
+    const { match, resumen } = details;
+    const cruce = `${match.home.name} vs ${match.away.name}`;
+    const ronda = etiquetaDeRonda(match.round);
+    const torneo = match.tournament.name;
+    const contexto = [ronda, torneo].filter(Boolean).join(' · ');
+
+    const base = `${cruce}${contexto ? `, ${contexto}` : ''}.`;
+    const cuerpo = match.status === 'final' && resumen
+        ? `Resultado: ${resumen}. Marcador set por set y estadísticas del partido.`
+        : 'Marcador en vivo, set por set, y estadísticas del partido.';
+
+    return {
+        title: `${cruce}${contexto ? ` · ${contexto}` : ''} · G22 Scores`,
+        description: recortar(`${base} ${cuerpo}`),
+    };
+}
 
 function ladoGanador(match: TennisMatch): 'home' | 'away' | null {
     const home = match.home.setsWon;
@@ -43,6 +91,16 @@ function ladoGanador(match: TennisMatch): 'home' | 'away' | null {
 function setEnCurso(match: TennisMatch): number | null {
     if (!match.isLive || match.sets.length === 0) return null;
     return match.sets[match.sets.length - 1].set;
+}
+
+function fechaCorta(date: Date | null): string | null {
+    if (!date) return null;
+    return date.toLocaleDateString('es-AR', { day: 'numeric', month: 'short', timeZone: USER_TZ });
+}
+
+function horaLocal(date: Date | null): string | null {
+    if (!date) return null;
+    return date.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: USER_TZ });
 }
 
 function Jugador({
@@ -98,6 +156,135 @@ function Chip({ label, value }: { label: string; value: string }) {
     );
 }
 
+/**
+ * La ficha del jugador: lo que el cronista dice antes del partido. El ranking
+ * va primero porque es lo que ordena el cuadro; el sembrado ya está arriba.
+ */
+function FichaJugador({
+    side,
+    profile,
+    lado,
+}: {
+    side: TennisSide;
+    profile: TennisPlayerProfile | null;
+    lado: 'home' | 'away';
+}) {
+    const datos: Array<{ label: string; value: string }> = [];
+    if (profile?.ranking != null) datos.push({ label: 'Ranking', value: `${profile.ranking}°` });
+    if (profile?.age != null) datos.push({ label: 'Edad', value: `${profile.age} años` });
+    if (profile?.heightCm != null) datos.push({ label: 'Altura', value: `${(profile.heightCm / 100).toFixed(2).replace('.', ',')} m` });
+    if (profile?.hand) datos.push({ label: 'Mano', value: profile.hand });
+    if (profile?.debutYear != null) {
+        datos.push({
+            label: 'En el circuito',
+            value: profile.seasons != null ? `desde ${profile.debutYear} · ${profile.seasons} temporadas` : `desde ${profile.debutYear}`,
+        });
+    }
+    if (profile?.birthPlace) datos.push({ label: 'Nacido en', value: profile.birthPlace });
+
+    return (
+        <article className={`${styles.ficha} ${lado === 'away' ? styles.fichaAway : ''}`}>
+            <header className={styles.fichaHead}>
+                <span className={styles.fichaMark} aria-hidden="true" />
+                <div className={styles.fichaTitle}>
+                    <span className={styles.fichaName}>{side.name}</span>
+                    {side.country?.name ? (
+                        <span className={styles.fichaCountry}>
+                            <CountryFlag countryId={side.country.code} countryName={side.country.name} size={14} />
+                            <span>{side.country.name}</span>
+                        </span>
+                    ) : null}
+                </div>
+            </header>
+            {datos.length > 0 ? (
+                <dl className={styles.fichaList}>
+                    {datos.map((dato) => (
+                        <div key={dato.label} className={styles.fichaRow}>
+                            <dt className={styles.fichaLabel}>{dato.label}</dt>
+                            <dd className={styles.fichaValue}>{dato.value}</dd>
+                        </div>
+                    ))}
+                </dl>
+            ) : (
+                <p className={styles.fichaEmpty}>La fuente no publica la ficha de este jugador.</p>
+            )}
+        </article>
+    );
+}
+
+function rotuloDeResultado(step: TennisPathStep): { text: string; tone: 'won' | 'lost' | 'live' | 'pending' } {
+    if (step.status === 'live') return { text: etiquetaDeEstado(step.statusLabel, step.status), tone: 'live' };
+    if (step.won === true) return { text: step.statusLabel === 'Walkover' ? 'W.O. a favor' : 'Ganó', tone: 'won' };
+    if (step.won === false) return { text: step.statusLabel === 'Retired' ? 'Abandonó' : 'Perdió', tone: 'lost' };
+    if (step.status === 'other') return { text: etiquetaDeEstado(step.statusLabel, step.status), tone: 'pending' };
+    return { text: 'Por jugar', tone: 'pending' };
+}
+
+/**
+ * El camino en el cuadro, de la primera ronda a la última. El cruce que se está
+ * mirando queda marcado; el que sigue aparece aunque el rival no exista todavía,
+ * porque el lugar en la llave ya es del jugador.
+ */
+function Camino({ side, steps, lado }: { side: TennisSide; steps: TennisPathStep[]; lado: 'home' | 'away' }) {
+    return (
+        <article className={`${styles.camino} ${lado === 'away' ? styles.caminoAway : ''}`}>
+            <h3 className={styles.caminoName}>
+                <span className={styles.fichaMark} aria-hidden="true" />
+                {side.name}
+            </h3>
+            <ol className={styles.caminoList}>
+                {steps.map((step) => {
+                    const rotulo = rotuloDeResultado(step);
+                    const contenido = (
+                        <>
+                            <span className={styles.caminoRound}>{etiquetaDeRonda(step.round) ?? '—'}</span>
+                            <span className={styles.caminoRival}>
+                                {step.opponent ? (
+                                    <>
+                                        {step.opponent.country?.code || step.opponent.country?.name ? (
+                                            <CountryFlag
+                                                countryId={step.opponent.country.code}
+                                                countryName={step.opponent.country.name}
+                                                size={14}
+                                                className={styles.caminoFlag}
+                                            />
+                                        ) : null}
+                                        <span className={styles.caminoRivalName}>{step.opponent.name}</span>
+                                        {step.opponent.seed != null ? (
+                                            <span className={styles.caminoSeed}>({step.opponent.seed})</span>
+                                        ) : null}
+                                    </>
+                                ) : (
+                                    <span className={styles.caminoRivalName}>Rival por definir</span>
+                                )}
+                            </span>
+                            <span className={styles.caminoScore}>
+                                {step.score || (step.status === 'scheduled' ? fechaCorta(step.startsAt) ?? '' : '')}
+                            </span>
+                            <span className={`${styles.caminoTag} ${styles[`caminoTag_${rotulo.tone}`]}`}>{rotulo.text}</span>
+                        </>
+                    );
+                    return (
+                        <li
+                            key={step.matchId}
+                            className={`${styles.caminoItem} ${step.isCurrent ? styles.caminoCurrent : ''}`}
+                            aria-current={step.isCurrent ? 'true' : undefined}
+                        >
+                            {step.isCurrent || !step.opponent ? (
+                                <span className={styles.caminoRow}>{contenido}</span>
+                            ) : (
+                                <Link href={`/tenis/partido/${encodeURIComponent(step.matchId)}`} className={styles.caminoRow}>
+                                    {contenido}
+                                </Link>
+                            )}
+                        </li>
+                    );
+                })}
+            </ol>
+        </article>
+    );
+}
+
 function Aviso({ children }: { children: React.ReactNode }) {
     return (
         <main className={styles.page}>
@@ -113,7 +300,7 @@ function Aviso({ children }: { children: React.ReactNode }) {
 export default async function TenisPartidoPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
 
-    let details = null;
+    let details: TennisMatchDetails | null = null;
     try {
         details = await getTennisMatch(id);
     } catch {
@@ -124,7 +311,7 @@ export default async function TenisPartidoPage({ params }: { params: Promise<{ i
 
     if (!details) notFound();
 
-    const { match, statistics } = details;
+    const { match, statistics, resumen, profiles, paths, tournament, broadcast } = details;
     const gana = ladoGanador(match);
     const enCurso = setEnCurso(match);
     const superficie = etiquetaDeSuperficie(match.surface);
@@ -132,12 +319,15 @@ export default async function TenisPartidoPage({ params }: { params: Promise<{ i
     const estado = etiquetaDeEstado(match.statusLabel, match.status);
     const puntoEnJuego = match.isLive && Boolean(match.home.gamePoint || match.away.gamePoint);
 
-    const fecha = match.startsAt
-        ? match.startsAt.toLocaleDateString('es-AR', { day: 'numeric', month: 'short', timeZone: USER_TZ })
-        : null;
-    const hora = match.startsAt
-        ? match.startsAt.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: USER_TZ })
-        : null;
+    const fecha = fechaCorta(match.startsAt);
+    // Sin `timeValid` la hora es un relleno del proveedor, no el orden de juego.
+    const hora = match.timeValid ? horaLocal(match.startsAt) : null;
+    const cuadroHref = `/tenis/torneo/${encodeURIComponent(match.tournament.id)}`;
+    const fechasTorneo = tournament.startsAt && tournament.endsAt
+        ? `${fechaCorta(tournament.startsAt)} – ${fechaCorta(tournament.endsAt)}`
+        : fechaCorta(tournament.startsAt);
+    const hayFichas = !match.isDoubles && (profiles.home || profiles.away);
+    const hayCamino = paths.home.length > 1 || paths.away.length > 1;
 
     return (
         <main className={styles.page}>
@@ -153,7 +343,9 @@ export default async function TenisPartidoPage({ params }: { params: Promise<{ i
                     <nav className={styles.breadcrumbs} aria-label="Contexto del partido">
                         <span className={styles.crumb}>Tenis</span>
                         {match.tournament.tour ? <span className={styles.crumb}>{match.tournament.tour}</span> : null}
-                        <span className={styles.crumb}>{match.tournament.name}</span>
+                        <Link href={cuadroHref} className={`${styles.crumb} ${styles.crumbLink}`} title="Ver el cuadro">
+                            {match.tournament.name}
+                        </Link>
                         {ronda ? <span className={`${styles.crumb} ${styles.crumbStrong}`}>{ronda}</span> : null}
                     </nav>
                 </header>
@@ -254,13 +446,88 @@ export default async function TenisPartidoPage({ params }: { params: Promise<{ i
                         </p>
                     )}
 
+                    {resumen ? <p className={styles.resumen}>{resumen}</p> : null}
+
                     <div className={styles.chips}>
                         {fecha ? <Chip label="Fecha" value={hora ? `${fecha} · ${hora}` : fecha} /> : null}
+                        {!hora && match.status === 'scheduled' ? <Chip label="Hora" value="A confirmar" /> : null}
+                        {match.bestOf ? <Chip label="Formato" value={`Al mejor de ${match.bestOf} sets`} /> : null}
                         {superficie ? <Chip label="Superficie" value={superficie} /> : null}
                         {ronda ? <Chip label="Instancia" value={ronda} /> : null}
                         {match.tournament.tour ? <Chip label="Circuito" value={match.tournament.tour} /> : null}
                         <Chip label="Modalidad" value={match.draw ?? (match.isDoubles ? 'Dobles' : 'Individual')} />
                         {match.court ? <Chip label="Cancha" value={match.court} /> : null}
+                    </div>
+                </section>
+
+                {hayFichas ? (
+                    <section className={styles.block} aria-labelledby="tenis-fichas-title">
+                        <div className={styles.statsHead}>
+                            <h2 id="tenis-fichas-title" className={styles.sectionTitle}>Los jugadores</h2>
+                            <p className={styles.blockHint}>Ranking de la semana y ficha del circuito.</p>
+                        </div>
+                        <div className={styles.fichas}>
+                            <FichaJugador side={match.home} profile={profiles.home} lado="home" />
+                            <FichaJugador side={match.away} profile={profiles.away} lado="away" />
+                        </div>
+                    </section>
+                ) : null}
+
+                {hayCamino ? (
+                    <section className={styles.block} aria-labelledby="tenis-camino-title">
+                        <div className={styles.statsHead}>
+                            <h2 id="tenis-camino-title" className={styles.sectionTitle}>Camino en el torneo</h2>
+                            <p className={styles.blockHint}>Cada cruce abre su ficha. El que se está mirando queda marcado.</p>
+                        </div>
+                        <div className={styles.caminos}>
+                            <Camino side={match.home} steps={paths.home} lado="home" />
+                            <Camino side={match.away} steps={paths.away} lado="away" />
+                        </div>
+                    </section>
+                ) : null}
+
+                <section className={styles.block} aria-labelledby="tenis-torneo-title">
+                    <div className={styles.statsHead}>
+                        <h2 id="tenis-torneo-title" className={styles.sectionTitle}>El torneo</h2>
+                        <Link href={cuadroHref} className={styles.blockLink}>Ver el cuadro completo</Link>
+                    </div>
+                    <div className={styles.torneo}>
+                        <div className={styles.torneoMain}>
+                            <p className={styles.torneoName}>{match.tournament.name}</p>
+                            <p className={styles.torneoMeta}>
+                                {[match.tournament.tour, match.draw, tournament.venue].filter(Boolean).join(' · ')}
+                            </p>
+                        </div>
+                        <dl className={styles.torneoFacts}>
+                            {fechasTorneo ? (
+                                <div className={styles.fichaRow}>
+                                    <dt className={styles.fichaLabel}>Fechas</dt>
+                                    <dd className={styles.fichaValue}>{fechasTorneo}</dd>
+                                </div>
+                            ) : null}
+                            {tournament.previousWinner ? (
+                                <div className={styles.fichaRow}>
+                                    <dt className={styles.fichaLabel}>Campeón anterior</dt>
+                                    <dd className={`${styles.fichaValue} ${styles.torneoChampion}`}>
+                                        {tournament.previousWinner.headshot ? (
+                                            <img
+                                                src={tournament.previousWinner.headshot}
+                                                alt=""
+                                                loading="lazy"
+                                                className={styles.torneoChampionPhoto}
+                                            />
+                                        ) : null}
+                                        <span>{tournament.previousWinner.name}</span>
+                                    </dd>
+                                </div>
+                            ) : null}
+                            {broadcast.length > 0 ? (
+                                <div className={styles.fichaRow}>
+                                    <dt className={styles.fichaLabel}>TV (EE.UU.)</dt>
+                                    <dd className={styles.fichaValue}>{broadcast.join(', ')}</dd>
+                                </div>
+                            ) : null}
+                        </dl>
                     </div>
                 </section>
 

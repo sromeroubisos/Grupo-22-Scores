@@ -20,7 +20,11 @@ import {
 } from '@/lib/timezone';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
+import { requireAdminApiContext, getApiErrorStatus } from '@/lib/auth/apiAdmin';
+import { requireTournamentMutationContext, tournamentApiErrorResponse } from '@/lib/auth/tournamentApi';
+import { canManageClubContext, getClubManagementTarget, type UserAccessContext } from '@/lib/auth/permissions';
+import { isGlobalAdminRole } from '@/lib/auth/roles';
+import { SPORTS } from '@/lib/data/sports';
 import { getCountryById } from '@/lib/data/countries';
 import { memoryCache } from '@/lib/cache';
 import { dedupeCrossSourceMatches, hasStaleRowsNeedingRepair } from '@/lib/matchFeedDedupe';
@@ -951,6 +955,57 @@ function logSlowComputeStageWarnings(trace: MatchesTraceContext) {
     });
 }
 
+/**
+ * Lo que el feed acepta por query. Antes `date`, `sport` y `status` entraban
+ * tal cual a la clave de caché y a `matches_feed_cache`: cualquiera podía
+ * fabricar claves infinitas (`?sport=x1`, `x2`…) y cada una era un cálculo, un
+ * fan-out al proveedor y una fila persistida. Con la lista cerrada, una clave
+ * que no corresponde a una pantalla real no se calcula ni se guarda.
+ */
+const MATCHES_SPORT_WHITELIST: ReadonlySet<string> = new Set(['all', ...Object.keys(SPORTS)]);
+const MATCHES_STATUS_WHITELIST: ReadonlySet<string> = new Set([
+    'scheduled', 'live', 'final', 'finished', 'postponed', 'suspended', 'cancelled', 'abandoned',
+]);
+const MATCHES_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+const MATCHES_DATE_RANGE_DAYS = 2 * 366;
+
+function isValidMatchesDate(value: string): boolean {
+    if (!MATCHES_DATE_PATTERN.test(value)) return false;
+    const parsed = Date.parse(`${value}T00:00:00Z`);
+    if (!Number.isFinite(parsed)) return false;
+    // `2026-02-31` parsea como 3 de marzo: se rechaza si no vuelve igual.
+    if (new Date(parsed).toISOString().slice(0, 10) !== value) return false;
+    return Math.abs(parsed - Date.now()) <= MATCHES_DATE_RANGE_DAYS * 24 * 60 * 60 * 1000;
+}
+
+/** Devuelve el motivo del 400, o null si la query es una de las que existen. */
+function validateMatchesQuery(request: Request): string | null {
+    const { searchParams } = new URL(request.url);
+    const date = searchParams.get('date');
+    const sport = searchParams.get('sport');
+    const status = searchParams.get('status');
+
+    if (date !== null && date !== '' && !isValidMatchesDate(date)) {
+        return 'Fecha inválida: se espera AAAA-MM-DD dentro de los dos años de hoy.';
+    }
+    if (sport !== null && sport !== '' && !MATCHES_SPORT_WHITELIST.has(sport)) {
+        return 'Deporte desconocido.';
+    }
+    if (status !== null && status !== '' && !MATCHES_STATUS_WHITELIST.has(status)) {
+        return 'Estado desconocido.';
+    }
+    return null;
+}
+
+/** Defensa en profundidad del snapshot: sólo se persisten claves canónicas. */
+function isCanonicalMatchesParams(params: MatchesRequestParams): boolean {
+    if (params.date && !isValidMatchesDate(params.date)) return false;
+    if (!isValidMatchesDate(params.requestedDate)) return false;
+    if (params.sport && !MATCHES_SPORT_WHITELIST.has(params.sport)) return false;
+    if (params.status && !MATCHES_STATUS_WHITELIST.has(params.status)) return false;
+    return true;
+}
+
 function normalizeMatchesRequest(request: Request): MatchesRequestParams {
     const { searchParams } = new URL(request.url);
     const date = searchParams.get('date');
@@ -1286,6 +1341,9 @@ async function persistMatchesFeedSnapshot(
     if (!process.env.SUPABASE_SERVICE_ROLE_KEY || !shouldUsePersistedFeedCache(params)) {
         return false;
     }
+    if (!isCanonicalMatchesParams(params)) {
+        return false;
+    }
 
     const { freshTtlSec, staleTtlSec } = getMatchesResponseCachePolicy(params, payload);
     const persistStartedAt = Date.now();
@@ -1570,7 +1628,8 @@ async function computeMatchesPayload(
                             stageName: (m as any).leagueStageName || undefined
                         },
                         liveEnabled: true,
-                        source: 'flashscore' as const
+                        source: 'flashscore' as const,
+                        ...((m as any).motorsport ? { motorsport: (m as any).motorsport } : {}),
                     };
                 });
                 if (trace) {
@@ -2064,7 +2123,10 @@ async function computeMatchesPayload(
                             stageName: (m as any).leagueStageName || undefined
                         },
                         liveEnabled: false,
-                        source: 'flashscore' as const
+                        source: 'flashscore' as const,
+                        // El automovilismo trae su fin de semana (sesiones del
+                        // día, ganador) para la tarjeta de la portada.
+                        ...((m as any).motorsport ? { motorsport: (m as any).motorsport } : {}),
                     };
                 });
                 if (trace) {
@@ -2256,6 +2318,10 @@ async function computeMatchesPayload(
 
 export async function GET(request: Request) {
     const requestStartedAt = Date.now();
+    const invalidQuery = validateMatchesQuery(request);
+    if (invalidQuery) {
+        return NextResponse.json({ error: invalidQuery }, { status: 400 });
+    }
     const params = normalizeMatchesRequest(request);
     const cacheKey = buildMatchesCacheKey(params);
     const trace: MatchesTraceContext = {
@@ -2374,7 +2440,9 @@ export async function GET(request: Request) {
         console.error('Fatal API Error [GET /api/matches]:', error);
         finalizeRequestMetrics(trace, requestStartedAt);
         logMatchesEvent('error', 'matches_request_failed', trace, { error: String(error) });
-        const response = NextResponse.json({ error: 'Internal Server Error', details: String(error) }, { status: 500 });
+        // El detalle va sólo al log: `String(error)` filtraba mensajes de
+        // Postgres y del proveedor (nombres de columnas, URLs internas).
+        const response = NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
         attachObservabilityHeaders(response, trace, 'ERROR');
         return response;
     }
@@ -2385,10 +2453,16 @@ export async function GET(request: Request) {
 // Create a new match
 export async function POST(request: Request) {
     try {
+        // `requireAdminApiUser` solo no alcanza: acepta cualquier rol de panel
+        // (admin_club incluido) y el insert va con service_role. El alcance se
+        // decide más abajo, cuando se sabe si el partido es de un torneo o un
+        // amistoso entre clubes.
+        let accessContext: UserAccessContext;
         try {
-            await requireAdminApiUser();
-        } catch {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+            accessContext = await requireAdminApiContext();
+        } catch (error) {
+            const status = getApiErrorStatus(error, 401);
+            return NextResponse.json({ error: status === 403 ? 'Forbidden' : 'Unauthorized' }, { status });
         }
 
         const supabase = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -2499,6 +2573,77 @@ export async function POST(request: Request) {
             );
         }
 
+        // Club que crea el amistoso (sólo cuando no es un admin global).
+        let creatorClubId: string | null = null;
+
+        if (finalTournamentId) {
+            // Partido de torneo: hay que poder gestionar ESE torneo, y la fase y
+            // la jornada tienen que ser suyas. Sin esto, cualquier admin de panel
+            // insertaba en el torneo y la fase que quisiera.
+            try {
+                await requireTournamentMutationContext(finalTournamentId);
+            } catch (error) {
+                return tournamentApiErrorResponse(error);
+            }
+
+            if (phaseId) {
+                const { data: phaseRow, error: phaseError } = await supabase
+                    .from('tournament_phases')
+                    .select('id')
+                    .eq('id', phaseId)
+                    .eq('tournament_id', finalTournamentId)
+                    .maybeSingle();
+                if (phaseError || !phaseRow) {
+                    return NextResponse.json({ error: 'La fase no pertenece a este torneo' }, { status: 400 });
+                }
+            }
+
+            if (normalizedRoundId) {
+                const { data: roundRow, error: roundError } = await supabase
+                    .from('tournament_rounds')
+                    .select('id, phase_id, tournament_phases(tournament_id)')
+                    .eq('id', normalizedRoundId)
+                    .maybeSingle();
+                const rawRoundPhase = roundRow
+                    ? (Array.isArray(roundRow.tournament_phases) ? roundRow.tournament_phases[0] : roundRow.tournament_phases)
+                    : null;
+                const roundTournamentId = (rawRoundPhase as { tournament_id?: unknown } | null)?.tournament_id;
+                if (
+                    roundError ||
+                    !roundRow ||
+                    roundTournamentId !== finalTournamentId ||
+                    (phaseId && roundRow.phase_id !== phaseId)
+                ) {
+                    return NextResponse.json({ error: 'La jornada no pertenece a esta fase del torneo' }, { status: 400 });
+                }
+            }
+        } else {
+            if (phaseId) {
+                return NextResponse.json({ error: 'Una fase requiere un torneo' }, { status: 400 });
+            }
+
+            // Amistoso: el admin global pasa; el resto tiene que gestionar al
+            // menos uno de los dos clubes, y el partido queda a nombre de ese club.
+            if (!isGlobalAdminRole(accessContext.role)) {
+                const authClient = await createClient();
+                for (const candidateClubId of [homeClubId, awayClubId]) {
+                    if (typeof candidateClubId !== 'string' || !candidateClubId) continue;
+                    const clubTarget = await getClubManagementTarget(authClient, candidateClubId).catch(() => null);
+                    if (clubTarget && canManageClubContext(accessContext, clubTarget)) {
+                        creatorClubId = clubTarget.clubId;
+                        break;
+                    }
+                }
+
+                if (!creatorClubId) {
+                    return NextResponse.json(
+                        { error: 'Para crear un amistoso tenés que gestionar alguno de los dos clubes' },
+                        { status: 403 }
+                    );
+                }
+            }
+        }
+
         const [
             supportsRoundUuid,
             supportsRoundLabel,
@@ -2522,6 +2667,9 @@ export async function POST(request: Request) {
             category ? supportsMatchesColumn(supabase, 'category') : Promise.resolve(false),
             typeof requestedVisibility === 'boolean' ? supportsMatchesColumn(supabase, 'is_visible') : Promise.resolve(false),
         ]);
+        const supportsCreatedByClub = creatorClubId
+            ? await supportsMatchesColumn(supabase, 'created_by_club_id')
+            : false;
 
         // Insert match
         // Only include columns that are confirmed in the database schema
@@ -2580,6 +2728,10 @@ export async function POST(request: Request) {
 
         if (supportsIsVisible && typeof requestedVisibility === 'boolean') {
             matchPayload.is_visible = requestedVisibility;
+        }
+
+        if (supportsCreatedByClub && creatorClubId) {
+            matchPayload.created_by_club_id = creatorClubId;
         }
 
         const { data: match, error: insertError } = await supabase

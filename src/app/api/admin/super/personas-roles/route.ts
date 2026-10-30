@@ -5,6 +5,7 @@
 
 import { NextResponse } from 'next/server';
 import { requireGlobalAdminContext } from '@/lib/auth/permissions';
+import { guardRejection } from '@/lib/auth/apiAdmin';
 import { normalizeRole } from '@/lib/auth/roles';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -61,7 +62,8 @@ export async function GET(request: Request) {
     try {
         await ensureGlobalAdmin();
     } catch (error) {
-        return jsonError('Unauthorized', 401, error instanceof Error ? error.message : String(error));
+        const [message, status] = guardRejection(error);
+        return jsonError(message, status, error instanceof Error ? error.message : String(error));
     }
 
     const { searchParams } = new URL(request.url);

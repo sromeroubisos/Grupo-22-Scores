@@ -1,0 +1,57 @@
+tarjetas oficiales 683363b8
+
+villa-general-belgrano-r-c vs union-oncativo-rugby · 683363b8 · tarjeta 326218  ·  40733327-224b-4746-9333-5f1c117fce78
+  local     · villa-general-belgrano-r-c · 25 jugadores · 25 con ficha fijada
+  visitante · union-oncativo-rugby · 23 jugadores · 23 con ficha fijada
+  eventos   · 17
+    min  9 (1T 9) visitante try          Aguilar Elias
+    min 10 (1T 10) visitante conversion   Adrian Santiago Diaz
+    min 28 (1T 28) local     try          Juan Ramirez
+    min 28 (1T 28) local     conversion   Damián Funes
+    min 40 (1T 40) local     try          Lautaro Ramirez
+    min 40 (1T 40) local     conversion   Cristian Federico Ramírez
+    min 85 (2T 45) visitante penalty_try  
+    min 88 (2T 48) visitante try          Fabricio Carolini
+    min 88 (2T 48) visitante conversion   Adrian Santiago Diaz
+    min 90 (2T 50) visitante substitution Brian Sala
+    min 94 (2T 54) local     substitution Ezequiel Ceballos Larrea
+    min 94 (2T 54) local     substitution Guillermo Corti
+    min 103 (2T 63) visitante substitution Fabricio Carolini
+    min 103 (2T 63) visitante substitution Federico Savio
+    min 111 (2T 71) local     penalty_goal Cristian Federico Ramírez
+    min 116 (2T 76) local     substitution Nicolas Facchin
+    min 118 (2T 78) visitante try          Santiago Fraresso
+  marcador  · eventos 17-26 · guardado 17-26
+  tries     · 2-4 (guardado 2-4)
+  arbitro   · PABLO GERARDO RONCO (guardado: PABLO GERARDO RONCO)
+  guardado  · 25 local · 23 visitante · 17 eventos
+
+nautico-fitz-simon vs aguilas-general-deheza · 683363b8 · tarjeta 327316  ·  0d0b5950-2120-4465-afc5-40ddfcf72f37
+  local     · nautico-fitz-simon · 29 jugadores · 29 con ficha fijada
+  visitante · aguilas-general-deheza · 30 jugadores · 30 con ficha fijada
+  eventos   · 19
+    min  5 (1T 5) local     try          Leonardo Bustos
+    min  9 (1T 9) local     try          Leonardo Bustos
+    min  9 (1T 9) local     conversion   Leonardo Bustos
+    min 13 (1T 13) visitante try          Jeremías Luciano Moreno
+    min 18 (1T 18) local     penalty_goal Leonardo Bustos
+    min 21 (1T 21) visitante try          Jeremías Luciano Moreno
+    min 30 (1T 30) local     try          Leonardo Bustos
+    min 30 (1T 30) local     conversion   Leonardo Bustos
+    min 39 (1T 39) local     card_red     Martin Luna Jara
+    min 42 (2T 2) visitante card_yellow  Adrian Zarate
+    min 50 (2T 10) visitante card_yellow  Jeremías Luciano Moreno
+    min 60 (2T 20) local     try          Leonardo Bustos
+    min 60 (2T 20) visitante conversion   Jeremías Luciano Moreno
+    min 60 (2T 20) visitante try          Jeremías Luciano Moreno
+    min 65 (2T 25) local     try          Leonardo Bustos
+    min 65 (2T 25) local     card_yellow  Ramiro Gonzalez
+    min 74 (2T 34) local     penalty_goal Leonardo Bustos
+    min 78 (2T 38) local     try          Leonardo Bustos
+    min 78 (2T 38) local     conversion   Leonardo Bustos
+  marcador  · eventos 42-17 · guardado 42-17
+  tries     · 6-3 (guardado —-—)
+  arbitro   · LEANDRO LUCHETTI (guardado: Luchetti L. (RA1 Altobelli C., RA2 Biondi E.))
+  guardado  · 29 local · 30 visitante · 19 eventos
+
+listo · 2 partidos

@@ -1,0 +1,307 @@
+{
+  "descripcion": "Torneo Menores de 19 \"A\" · Semifinal · 17/10/2026 · tarjeta de partido N° 326763 (PDF de la Unión Cordobesa). La planilla no trae dorsal en las incidencias locales: esos eventos van sin jugador.",
+  "torneo": "Torneo Cordobés M19 \"A\"",
+  "partidos": [
+    {
+      "id": "a4bfc7cf-7621-4493-892d-efe7ab6f20b4",
+      "rotulo": "Jockey Club Córdoba \"A\" vs Jockey Club Villa María",
+      "arbitro": "Ignacio Santiago Olmedo Ramirez",
+      "local": {
+        "nombre": "Jockey Club Córdoba \"A\"",
+        "titulares": [
+          {
+            "numero": 1,
+            "nombre": "Francisco Antonio Gimenez"
+          },
+          {
+            "numero": 2,
+            "nombre": "Juan Cruz Ouro",
+            "id": "137a8920-2f20-42ac-9349-0cb2e0d47579"
+          },
+          {
+            "numero": 3,
+            "nombre": "Dylan Farias"
+          },
+          {
+            "numero": 4,
+            "nombre": "Juan Ignacio Cavallero"
+          },
+          {
+            "numero": 5,
+            "nombre": "Angelo Echeverría"
+          },
+          {
+            "numero": 6,
+            "nombre": "Bautista Perec Larroque"
+          },
+          {
+            "numero": 7,
+            "nombre": "Francisco Vigo"
+          },
+          {
+            "numero": 8,
+            "nombre": "Alvaro Molina"
+          },
+          {
+            "numero": 9,
+            "nombre": "Santiago De Benito"
+          },
+          {
+            "numero": 10,
+            "nombre": "Jeronimo Ortiz Araya",
+            "id": "d64207d6-0786-45de-9c29-b33b3ba00873"
+          },
+          {
+            "numero": 11,
+            "nombre": "Tomas Binda"
+          },
+          {
+            "numero": 12,
+            "nombre": "Bruno Irusta",
+            "id": "4cd4766c-8342-4df8-8398-2cc4750192a9"
+          },
+          {
+            "numero": 13,
+            "nombre": "Felipe Narda",
+            "id": "24e59341-5300-4443-8376-af55cef267f1"
+          },
+          {
+            "numero": 14,
+            "nombre": "Bautista Fernández Pugliese"
+          },
+          {
+            "numero": 15,
+            "nombre": "Felipe Joaquin Vazquez"
+          }
+        ],
+        "suplentes": [
+          {
+            "numero": 16,
+            "nombre": "Tomás Ernesto Guevara Ortiz"
+          },
+          {
+            "numero": 17,
+            "nombre": "Santino Pizzi"
+          },
+          {
+            "numero": 18,
+            "nombre": "Elias Gerez"
+          },
+          {
+            "numero": 19,
+            "nombre": "Santiago Mazzuferi"
+          },
+          {
+            "numero": 20,
+            "nombre": "Francisco Vaccarini"
+          },
+          {
+            "numero": 21,
+            "nombre": "Manuel Ojeda"
+          },
+          {
+            "numero": 22,
+            "nombre": "Salvador Franco Curvino"
+          },
+          {
+            "numero": 23,
+            "nombre": "Martin Robinson"
+          }
+        ]
+      },
+      "visitante": {
+        "nombre": "Jockey Club Villa María",
+        "titulares": [
+          {
+            "numero": 1,
+            "nombre": "Joaquín Julián Lopez"
+          },
+          {
+            "numero": 2,
+            "nombre": "Tiago Requena",
+            "id": "5c120a3c-fd48-444f-bc3e-fbedf42eebd1"
+          },
+          {
+            "numero": 3,
+            "nombre": "Maximiliano Ghione"
+          },
+          {
+            "numero": 4,
+            "nombre": "Lorenzo David"
+          },
+          {
+            "numero": 5,
+            "nombre": "Walter Igancio Bosio"
+          },
+          {
+            "numero": 6,
+            "nombre": "Jeronimo Jesús Colusso"
+          },
+          {
+            "numero": 7,
+            "nombre": "Santino Rubiola"
+          },
+          {
+            "numero": 8,
+            "nombre": "Bruno Geremias"
+          },
+          {
+            "numero": 9,
+            "nombre": "Juan Cruz Colusso"
+          },
+          {
+            "numero": 10,
+            "nombre": "Francisco Salomon"
+          },
+          {
+            "numero": 11,
+            "nombre": "Bautista Arbarello"
+          },
+          {
+            "numero": 12,
+            "nombre": "Antonio Calcagno"
+          },
+          {
+            "numero": 13,
+            "nombre": "Benjamin Poloni Avaro",
+            "id": "a029718b-6bff-4aed-b76b-a53df27dcc19"
+          },
+          {
+            "numero": 14,
+            "nombre": "Renzo Mariani Mulinetti"
+          },
+          {
+            "numero": 15,
+            "nombre": "Valentín Fracarolli"
+          }
+        ],
+        "suplentes": [
+          {
+            "numero": 16,
+            "nombre": "Augusto Chialvo"
+          },
+          {
+            "numero": 17,
+            "nombre": "Julian Alcalino Araoz"
+          },
+          {
+            "numero": 18,
+            "nombre": "Jeremias Trigg"
+          },
+          {
+            "numero": 19,
+            "nombre": "Santiago Barrionuevo"
+          },
+          {
+            "numero": 20,
+            "nombre": "Alvaro Rosso"
+          },
+          {
+            "numero": 21,
+            "nombre": "Gennaro Battisti"
+          },
+          {
+            "numero": 22,
+            "nombre": "Bautista Rojas"
+          },
+          {
+            "numero": 23,
+            "nombre": "Octavio Trillini"
+          }
+        ]
+      },
+      "eventos": [
+        {
+          "minuto": 5,
+          "periodo": "1T",
+          "tipo": "penalty_try",
+          "equipo": "local"
+        },
+        {
+          "minuto": 5,
+          "periodo": "1T",
+          "tipo": "card_yellow",
+          "equipo": "visitante",
+          "jugador": "Tiago Requena",
+          "detalle": "Amarilla Juego General (J. G.)"
+        },
+        {
+          "minuto": 19,
+          "periodo": "1T",
+          "tipo": "try",
+          "equipo": "visitante",
+          "jugador": "Tiago Requena"
+        },
+        {
+          "minuto": 28,
+          "periodo": "1T",
+          "tipo": "try",
+          "equipo": "local"
+        },
+        {
+          "minuto": 29,
+          "periodo": "1T",
+          "tipo": "conversion",
+          "equipo": "local"
+        },
+        {
+          "minuto": 30,
+          "periodo": "1T",
+          "tipo": "try",
+          "equipo": "visitante",
+          "jugador": "Tiago Requena"
+        },
+        {
+          "minuto": 32,
+          "periodo": "1T",
+          "tipo": "conversion",
+          "equipo": "visitante",
+          "jugador": "Antonio Calcagno"
+        },
+        {
+          "minuto": 8,
+          "periodo": "2T",
+          "tipo": "try",
+          "equipo": "local"
+        },
+        {
+          "minuto": 9,
+          "periodo": "2T",
+          "tipo": "conversion",
+          "equipo": "local"
+        },
+        {
+          "minuto": 20,
+          "periodo": "2T",
+          "tipo": "try",
+          "equipo": "visitante",
+          "jugador": "Tiago Requena"
+        },
+        {
+          "minuto": 31,
+          "periodo": "2T",
+          "tipo": "try",
+          "equipo": "local"
+        },
+        {
+          "minuto": 31,
+          "periodo": "2T",
+          "tipo": "conversion",
+          "equipo": "local"
+        },
+        {
+          "minuto": 35,
+          "periodo": "2T",
+          "tipo": "try",
+          "equipo": "local"
+        },
+        {
+          "minuto": 35,
+          "periodo": "2T",
+          "tipo": "conversion",
+          "equipo": "local"
+        }
+      ]
+    }
+  ]
+}

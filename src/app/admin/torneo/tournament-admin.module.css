@@ -1,3 +1,7 @@
+/* Theme tokens live on .themeScope so an overlay portaled to <body> (outside
+   .shell, see usuarios/page.tsx) still resolves the same palette. .shell
+   composes it; nothing in this first block is layout. */
+.themeScope,
 .shell {
     /* ── Theme tokens (dark defaults) ─────────────────────────────────────── */
     --basalt-dark: #080808;
@@ -55,9 +59,12 @@
 
     --panel-header-offset: 52px;
 
-    background-color: var(--t-bg);
     color: var(--t-text);
     font-family: var(--font-jakarta), 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+.shell {
+    background-color: var(--t-bg);
     min-height: calc(100vh - var(--panel-header-offset));
     position: relative;
     overflow-x: hidden;
@@ -70,6 +77,8 @@
 }
 
 /* ── Light theme overrides ────────────────────────────────────────────────── */
+:global(html[data-theme="light"]) .themeScope,
+:global([data-theme="light"]) .themeScope,
 :global(html[data-theme="light"]) .shell,
 :global([data-theme="light"]) .shell {
     --basalt-dark: #eef0f3;
@@ -916,6 +925,34 @@
 .clubPick:hover {
     border-color: var(--t-border-strong);
     background: var(--t-soft-bg-hover);
+}
+
+/* Pick without a crest column (tournaments in usuarios/): with the 34px avatar
+   track and no avatar, the name lands in the 34px cell and the ADD/ON tag
+   takes the 1fr one — every name was cut to three letters. */
+.clubPickNoAvatar {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+}
+
+/* Medido a 320 y 390: con el nombre en una sola linea la tarjeta queda en 38px,
+   por debajo del minimo tactil. En el teclado/mouse el alto sigue siendo el de
+   antes. */
+@media (hover: none), (pointer: coarse) {
+    .clubPick {
+        min-height: 44px;
+    }
+}
+
+/* El nombre del torneo se lee entero: sin escudo no hay marcador ni dato al
+   lado que un nombre largo pueda tapar, asi que en vez de cortar con puntos
+   suspensivos la tarjeta crece a lo alto. El ADD/ON queda arriba a la derecha. */
+.clubPickNoAvatar .clubPickBody strong {
+    white-space: normal;
+    overflow: visible;
+    overflow-wrap: anywhere;
+    text-overflow: clip;
+    line-height: 1.35;
 }
 
 .clubPickSelected {

@@ -115,18 +115,19 @@ export function isFootballSport(value: unknown): boolean {
 /**
  * Deportes ACTIVOS que todavía no tienen fuente externa declarada.
  *
- * No es lo mismo que "deporte apagado": un deporte de acá está a la vista y se
- * le pueden crear torneos y cargar partidos a mano. Lo que no tiene es
- * sincronismo. La distinción hace falta porque FlashScore mapea más deportes de
- * los que la plataforma sigue: sin esta puerta, `fixture-sync` y `live-sync`
- * traerían el deporte entero del mundo y la portada mostraría partidos que
- * nadie de la plataforma cargó.
+ * No es lo mismo que "deporte apagado": handball está a la vista, se le pueden
+ * crear torneos y cargar partidos a mano. Lo que no tiene es sincronismo. La
+ * distinción hace falta porque FlashScore SÍ lo mapea (`SPORT_MAPPING` lo manda
+ * al deporte 7): sin esta puerta, activarlo pondría a `fixture-sync` y
+ * `live-sync` a traer el handball del mundo entero, y la portada mostraría
+ * partidos que nadie de la plataforma cargó.
  *
  * Para darle fuente: sacarlo de acá y mapear el proveedor en
  * `getPreferredExternalProviderForSport`.
  */
 export const SPORTS_WITHOUT_EXTERNAL_PROVIDER = new Set<string>([
-    // El tenis está acá por lo contrario que un deporte sin fuente: le sobra —ESPN
+    'handball',
+    // El tenis está acá por lo contrario que handball: fuente le sobra —ESPN
     // sirve vivo, día, ranking y cuadro con modelo propio (`TennisMatch`)—
     // pero NO pasa por `Match`, así que `fixture-sync` y `live-sync` no tienen
     // nada que sincronizar. Sin esta puerta resolverían tenis por el camino de

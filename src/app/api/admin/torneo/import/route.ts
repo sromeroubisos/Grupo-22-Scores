@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { guardRejection } from '@/lib/auth/apiAdmin';
 import { createClient } from '@/lib/supabase/server';
 import { getServiceWriter } from '@/lib/supabase/serviceWriter';
 import { requireTournamentAdminContext } from '@/lib/auth/permissions';
+import { resolveTournamentAdminScope } from '@/lib/auth/tournamentAdminScope';
 import { interpretWorkbook } from '@/lib/tournamentImport/interpret';
 import { commitInterpretedTournament } from '@/lib/tournamentImport/commit';
 import type {
@@ -22,8 +24,8 @@ export async function POST(request: NextRequest) {
   let context;
   try {
     context = await requireTournamentAdminContext(supabase);
-  } catch {
-    return err('Unauthorized', 401);
+  } catch (authError) {
+    return err(...guardRejection(authError));
   }
 
   let body: Record<string, unknown>;
@@ -66,11 +68,15 @@ export async function POST(request: NextRequest) {
     };
     const writer = getServiceWriter(supabase, 'admin/torneo/import');
     try {
+      // El alcance decide qué clubes existentes puede adoptar la importación
+      // (ver `ensureClub` en commit.ts): sin él, se adoptaba cualquiera por nombre.
+      const scope = await resolveTournamentAdminScope(supabase, context);
       const result = await commitInterpretedTournament(writer, {
         interpreted,
         selection,
         userId: context.userId,
         fileName: typeof body.fileName === 'string' ? body.fileName : null,
+        clubScope: { isUnlimited: scope.isUnlimited, clubIds: scope.clubIds },
       });
       if (!result.ok) return err(result.error || 'No se pudo crear el torneo.', 400, result);
       return NextResponse.json({ ok: true, ...result });

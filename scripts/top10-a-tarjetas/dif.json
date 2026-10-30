@@ -1,0 +1,919 @@
+{
+ "bad": [
+  [
+   "276644",
+   "home",
+   1,
+   "Francisco Cabanillas Martinez",
+   "Francisco Imanol Cabanillas Martinez",
+   "44076259"
+  ],
+  [
+   "276641",
+   "away",
+   20,
+   "Carlos Facundo Molina Martinez",
+   "Calos Facundo Nahuel Molina Martinez",
+   "38281722"
+  ],
+  [
+   "276640",
+   "away",
+   5,
+   "Lautaro Esteban Ramírez Juncos",
+   "Lautaro Esteban De Jesús Ramirez Juncos",
+   "40521423"
+  ],
+  [
+   "276639",
+   "home",
+   19,
+   "Carlos Facundo Molina Martinez",
+   "Calos Facundo Nahuel Molina Martinez",
+   "38281722"
+  ],
+  [
+   "276637",
+   "away",
+   20,
+   "Franco Marincolo",
+   "Franco Luciano Marincolo",
+   "39486265"
+  ],
+  [
+   "276635",
+   "home",
+   5,
+   "Lautaro Esteban Ramírez Juncos",
+   "Lautaro Esteban De Jesús Ramirez Juncos",
+   "40521423"
+  ],
+  [
+   "276635",
+   "away",
+   1,
+   "Francisco Cabanillas Martinez",
+   "Francisco Imanol Cabanillas Martinez",
+   "44076259"
+  ],
+  [
+   "276633",
+   "home",
+   20,
+   "Franco Marincolo",
+   "Franco Luciano Marincolo",
+   "39486265"
+  ],
+  [
+   "276630",
+   "home",
+   19,
+   "Carlos Facundo Molina Martinez",
+   "Calos Facundo Nahuel Molina Martinez",
+   "38281722"
+  ],
+  [
+   "276630",
+   "away",
+   5,
+   "Lautaro Esteban Ramírez Juncos",
+   "Lautaro Esteban De Jesús Ramirez Juncos",
+   "40521423"
+  ],
+  [
+   "276634",
+   "away",
+   17,
+   "Francisco Cabanillas Martinez",
+   "Francisco Imanol Cabanillas Martinez",
+   "44076259"
+  ],
+  [
+   "276626",
+   "home",
+   17,
+   "Francisco Cabanillas Martinez",
+   "Francisco Imanol Cabanillas Martinez",
+   "44076259"
+  ],
+  [
+   "276625",
+   "home",
+   5,
+   "Lautaro Esteban Ramírez Juncos",
+   "Lautaro Esteban De Jesús Ramirez Juncos",
+   "40521423"
+  ],
+  [
+   "276629",
+   "away",
+   19,
+   "Carlos Facundo Molina Martinez",
+   "Calos Facundo Nahuel Molina Martinez",
+   "38281722"
+  ],
+  [
+   "276623",
+   "away",
+   17,
+   "Francisco Cabanillas Martinez",
+   "Francisco Imanol Cabanillas Martinez",
+   "44076259"
+  ],
+  [
+   "276621",
+   "home",
+   19,
+   "Carlos Facundo Molina Martinez",
+   "Calos Facundo Nahuel Molina Martinez",
+   "38281722"
+  ],
+  [
+   "276620",
+   "away",
+   5,
+   "Lautaro Esteban Ramírez Juncos",
+   "Lautaro Esteban De Jesús Ramirez Juncos",
+   "40521423"
+  ],
+  [
+   "276618",
+   "away",
+   19,
+   "Carlos Facundo Molina Martinez",
+   "Calos Facundo Nahuel Molina Martinez",
+   "38281722"
+  ],
+  [
+   "276618",
+   "away",
+   21,
+   "Samuel Severine Luna",
+   "Samuel Fabrizio Severine Luna",
+   "47577162"
+  ],
+  [
+   "276617",
+   "home",
+   17,
+   "Francisco Cabanillas Martinez",
+   "Francisco Imanol Cabanillas Martinez",
+   "44076259"
+  ],
+  [
+   "276615",
+   "home",
+   5,
+   "Lautaro Esteban Ramírez Juncos",
+   "Lautaro Esteban De Jesús Ramirez Juncos",
+   "40521423"
+  ],
+  [
+   "276615",
+   "away",
+   19,
+   "Franco Marincolo",
+   "Franco Luciano Marincolo",
+   "39486265"
+  ],
+  [
+   "276614",
+   "away",
+   19,
+   "Franco Marincolo",
+   "Franco Luciano Marincolo",
+   "39486265"
+  ],
+  [
+   "276612",
+   "home",
+   4,
+   "Samuel Severine Luna",
+   "Samuel Fabrizio Severine Luna",
+   "47577162"
+  ],
+  [
+   "276612",
+   "home",
+   19,
+   "Carlos Facundo Molina Martinez",
+   "Calos Facundo Nahuel Molina Martinez",
+   "38281722"
+  ],
+  [
+   "276612",
+   "away",
+   17,
+   "Francisco Cabanillas Martinez",
+   "Francisco Imanol Cabanillas Martinez",
+   "44076259"
+  ],
+  [
+   "276610",
+   "away",
+   5,
+   "Lautaro Esteban Ramírez Juncos",
+   "Lautaro Esteban De Jesús Ramirez Juncos",
+   "40521423"
+  ],
+  [
+   "276608",
+   "home",
+   17,
+   "Francisco Cabanillas Martinez",
+   "Francisco Imanol Cabanillas Martinez",
+   "44076259"
+  ],
+  [
+   "276607",
+   "away",
+   4,
+   "Samuel Severine Luna",
+   "Samuel Fabrizio Severine Luna",
+   "47577162"
+  ],
+  [
+   "276607",
+   "away",
+   19,
+   "Carlos Facundo Molina Martinez",
+   "Calos Facundo Nahuel Molina Martinez",
+   "38281722"
+  ],
+  [
+   "276605",
+   "home",
+   5,
+   "Lautaro Esteban Ramírez Juncos",
+   "Lautaro Esteban De Jesús Ramirez Juncos",
+   "40521423"
+  ],
+  [
+   "276601",
+   "away",
+   17,
+   "Francisco Cabanillas Martinez",
+   "Francisco Imanol Cabanillas Martinez",
+   "44076259"
+  ],
+  [
+   "276600",
+   "away",
+   5,
+   "Lautaro Esteban Ramírez Juncos",
+   "Lautaro Esteban De Jesús Ramirez Juncos",
+   "40521423"
+  ],
+  [
+   "276599",
+   "away",
+   1,
+   "Francisco Cabanillas Martinez",
+   "Francisco Imanol Cabanillas Martinez",
+   "44076259"
+  ],
+  [
+   "276596",
+   "home",
+   19,
+   "Samuel Severine Luna",
+   "Samuel Fabrizio Severine Luna",
+   "47577162"
+  ],
+  [
+   "276595",
+   "home",
+   5,
+   "Lautaro Esteban Ramírez Juncos",
+   "Lautaro Esteban De Jesús Ramirez Juncos",
+   "40521423"
+  ],
+  [
+   "276594",
+   "away",
+   19,
+   "Samuel Severine Luna",
+   "Samuel Fabrizio Severine Luna",
+   "47577162"
+  ],
+  [
+   "276591",
+   "home",
+   14,
+   "Constantino Keller",
+   "Ignacio Lopez",
+   "44578995"
+  ],
+  [
+   "276591",
+   "home",
+   11,
+   "Ignacio Lopez",
+   "Constantino Keller",
+   "47265117"
+  ],
+  [
+   "276591",
+   "home",
+   22,
+   "Lucio Willington",
+   "Juan Cruz Bocco",
+   "45933151"
+  ],
+  [
+   "276591",
+   "home",
+   20,
+   "Juan Cruz Bocco",
+   "Lucio Willington",
+   "44970828"
+  ],
+  [
+   "276591",
+   "away",
+   17,
+   "Francisco Caturelli",
+   "Julian Escanilla",
+   "46034304"
+  ],
+  [
+   "276591",
+   "away",
+   3,
+   "Julián Escanilla",
+   "Francisco Caturelli",
+   "44653890"
+  ],
+  [
+   "276590",
+   "home",
+   1,
+   "Francisco Cabanillas Martinez",
+   "Francisco Imanol Cabanillas Martinez",
+   "44076259"
+  ],
+  [
+   "276590",
+   "away",
+   5,
+   "Lautaro Esteban Ramírez Juncos",
+   "Lautaro Esteban De Jesús Ramirez Juncos",
+   "40521423"
+  ],
+  [
+   "276589",
+   "home",
+   1,
+   "Francisco Cabanillas Martinez",
+   "Francisco Imanol Cabanillas Martinez",
+   "44076259"
+  ],
+  [
+   "276589",
+   "away",
+   17,
+   "Gonzalo Thomas Gargallo Bazan",
+   "Facundo Almeida",
+   "45487844"
+  ],
+  [
+   "276589",
+   "away",
+   16,
+   "Facundo Almeida",
+   "Gonzalo Thomas Gargallo Bazan",
+   "46035919"
+  ],
+  [
+   "276585",
+   "home",
+   5,
+   "Lautaro Esteban Ramírez Juncos",
+   "Lautaro Esteban De Jesús Ramirez Juncos",
+   "40521423"
+  ],
+  [
+   "276585",
+   "away",
+   25,
+   "Juan Cruz Caballero",
+   "(dorsal no está en la tarjeta)"
+  ],
+  [
+   "276584",
+   "home",
+   6,
+   "Tomás Altamira",
+   "Tomás Facundo Altamira Pasqualini",
+   "39693555"
+  ],
+  [
+   "276584",
+   "home",
+   21,
+   "Juan Pablo Rojas",
+   "Bautista Otero",
+   "47000726"
+  ],
+  [
+   "276584",
+   "home",
+   9,
+   "Bautista Otero",
+   "Juan Pablo Rojas",
+   "43231177"
+  ],
+  [
+   "276582",
+   "away",
+   17,
+   "Francisco Caturelli",
+   "Juan Cruz Romero",
+   "43370399"
+  ],
+  [
+   "276582",
+   "away",
+   13,
+   "Mauricio Kember",
+   "Ignacio De Vertiz",
+   "45833376"
+  ],
+  [
+   "276582",
+   "away",
+   12,
+   "Ignacio de Vértiz",
+   "Mauricio Kember",
+   "44192622"
+  ],
+  [
+   "276582",
+   "away",
+   3,
+   "Juan Cruz Romero",
+   "Francisco Caturelli",
+   "44653890"
+  ],
+  [
+   "276581",
+   "away",
+   1,
+   "Francisco Cabanillas Martinez",
+   "Francisco Imanol Cabanillas Martinez",
+   "44076259"
+  ],
+  [
+   "276580",
+   "home",
+   17,
+   "Máximo Maero",
+   "Santos Maria Juarez Estrada",
+   "44739670"
+  ],
+  [
+   "276580",
+   "home",
+   16,
+   "Santos Maria Juarez Estrada",
+   "Maximo Maero",
+   "45887943"
+  ],
+  [
+   "276580",
+   "home",
+   23,
+   "Luciano Keller",
+   "Ignacio Romero",
+   "45408555"
+  ],
+  [
+   "276580",
+   "home",
+   20,
+   "Ignacio Romero",
+   "Luciano Keller",
+   "41888514"
+  ],
+  [
+   "276580",
+   "away",
+   5,
+   "Lautaro Esteban Ramírez Juncos",
+   "Lautaro Esteban De Jesús Ramirez Juncos",
+   "40521423"
+  ],
+  [
+   "276579",
+   "home",
+   24,
+   "Rogelio Quiroga",
+   "(dorsal no está en la tarjeta)"
+  ],
+  [
+   "276578",
+   "home",
+   1,
+   "Francisco Cabanillas Martinez",
+   "Francisco Imanol Cabanillas Martinez",
+   "44076259"
+  ],
+  [
+   "276576",
+   "away",
+   20,
+   "Tomás Altamira",
+   "Tomás Facundo Altamira Pasqualini",
+   "39693555"
+  ],
+  [
+   "276575",
+   "home",
+   5,
+   "Lautaro Esteban Ramírez Juncos",
+   "Lautaro Esteban De Jesús Ramirez Juncos",
+   "40521423"
+  ],
+  [
+   "276573",
+   "home",
+   5,
+   "Federico Rolotti",
+   "Federico Gutierrez Marquez",
+   "36423610"
+  ],
+  [
+   "276573",
+   "home",
+   4,
+   "Federico Gutierrez Marquez",
+   "Federico Rolotti",
+   "44872864"
+  ],
+  [
+   "276573",
+   "home",
+   21,
+   "Franco Feretti",
+   "Alfredo Pueyrredon",
+   "39690740"
+  ],
+  [
+   "276573",
+   "home",
+   25,
+   "Agustin Vucovich",
+   "(dorsal no está en la tarjeta)"
+  ],
+  [
+   "276573",
+   "home",
+   19,
+   "Juan Cruz Caballero",
+   "Agustin Vucovich",
+   "43997276"
+  ],
+  [
+   "276573",
+   "home",
+   9,
+   "Alfredo Pueyrredón",
+   "Franco Feretti",
+   "43141880"
+  ],
+  [
+   "276573",
+   "away",
+   14,
+   "Felipe Onnis",
+   "Geronimo Vittar",
+   "45271434"
+  ],
+  [
+   "276573",
+   "away",
+   13,
+   "Ignacio Giaimo",
+   "Mauricio Kember",
+   "44192622"
+  ],
+  [
+   "276573",
+   "away",
+   12,
+   "Mauricio Kember",
+   "Ignacio Giaimo",
+   "43812122"
+  ],
+  [
+   "276573",
+   "away",
+   11,
+   "Gerónimo Vittar",
+   "Felipe Onnis",
+   "45086322"
+  ],
+  [
+   "276572",
+   "away",
+   16,
+   "Francisco Cabanillas Martinez",
+   "Francisco Imanol Cabanillas Martinez",
+   "44076259"
+  ],
+  [
+   "276570",
+   "away",
+   5,
+   "Lautaro Esteban Ramírez Juncos",
+   "Lautaro Esteban De Jesús Ramirez Juncos",
+   "40521423"
+  ],
+  [
+   "276567",
+   "home",
+   16,
+   "Francisco Cabanillas Martinez",
+   "Francisco Imanol Cabanillas Martinez",
+   "44076259"
+  ],
+  [
+   "276567",
+   "away",
+   5,
+   "Federico Rolotti",
+   "Federico Gutierrez Marquez",
+   "36423610"
+  ],
+  [
+   "276567",
+   "away",
+   4,
+   "Federico Gutierrez Marquez",
+   "Federico Rolotti",
+   "44872864"
+  ],
+  [
+   "276567",
+   "away",
+   21,
+   "Franco Feretti",
+   "Juan Pablo Rojas",
+   "43231177"
+  ],
+  [
+   "276567",
+   "away",
+   25,
+   "Agustin Vucovich",
+   "(dorsal no está en la tarjeta)"
+  ],
+  [
+   "276567",
+   "away",
+   19,
+   "Juan Cruz Caballero",
+   "Agustin Vucovich",
+   "43997276"
+  ],
+  [
+   "276567",
+   "away",
+   9,
+   "Juan Pablo Rojas",
+   "Franco Feretti",
+   "43141880"
+  ],
+  [
+   "276566",
+   "home",
+   14,
+   "Felipe Onnis",
+   "Geronimo Vittar",
+   "45271434"
+  ],
+  [
+   "276566",
+   "home",
+   13,
+   "Agustín Cordoba",
+   "Mauricio Kember",
+   "44192622"
+  ],
+  [
+   "276566",
+   "home",
+   12,
+   "Mauricio Kember",
+   "Agustin Cordoba",
+   "43926975"
+  ],
+  [
+   "276566",
+   "home",
+   11,
+   "Gerónimo Vittar",
+   "Felipe Onnis",
+   "45086322"
+  ],
+  [
+   "276565",
+   "home",
+   5,
+   "Lautaro Esteban Ramírez Juncos",
+   "Lautaro Esteban De Jesús Ramirez Juncos",
+   "40521423"
+  ],
+  [
+   "276564",
+   "away",
+   13,
+   "Ignacio Giaimo",
+   "Mauricio Kember",
+   "44192622"
+  ],
+  [
+   "276564",
+   "away",
+   12,
+   "Mauricio Kember",
+   "Ignacio Giaimo",
+   "43812122"
+  ],
+  [
+   "276563",
+   "home",
+   18,
+   "Horacio De La Mota Boehler",
+   "Valentino Nicolas Cerrano",
+   "46593271"
+  ],
+  [
+   "276563",
+   "home",
+   3,
+   "Valentino Nicolás Cerrano",
+   "Horacio De La Mota Boehler",
+   "39394990"
+  ],
+  [
+   "276563",
+   "away",
+   16,
+   "Francisco Cabanillas Martinez",
+   "Francisco Imanol Cabanillas Martinez",
+   "44076259"
+  ],
+  [
+   "276562",
+   "home",
+   5,
+   "Agustin Vucovich",
+   "Federico Gutierrez Marquez",
+   "36423610"
+  ],
+  [
+   "276562",
+   "home",
+   4,
+   "Federico Gutierrez Marquez",
+   "Agustin Vucovich",
+   "43997276"
+  ],
+  [
+   "276562",
+   "home",
+   6,
+   "Tomás Altamira",
+   "Tomás Facundo Altamira Pasqualini",
+   "39693555"
+  ],
+  [
+   "276560",
+   "away",
+   5,
+   "Lautaro Esteban Ramírez Juncos",
+   "Lautaro Esteban De Jesús Ramirez Juncos",
+   "40521423"
+  ],
+  [
+   "276558",
+   "away",
+   6,
+   "Tomás Altamira",
+   "Tomás Facundo Altamira Pasqualini",
+   "39693555"
+  ],
+  [
+   "276558",
+   "away",
+   21,
+   "Franco Feretti",
+   "Gabriel Alejandro Roldán",
+   "38179410"
+  ],
+  [
+   "276558",
+   "away",
+   23,
+   "Gabriel Alejandro Roldán",
+   "Javier Diaz Otañez",
+   "45695180"
+  ],
+  [
+   "276558",
+   "away",
+   26,
+   "Javier Diaz Otañez",
+   "(dorsal no está en la tarjeta)"
+  ],
+  [
+   "276557",
+   "home",
+   24,
+   "Gonzalo Thomas Gargallo Bazan",
+   "(dorsal no está en la tarjeta)"
+  ],
+  [
+   "276557",
+   "away",
+   18,
+   "Horacio De La Mota Boehler",
+   "Valentino Nicolas Cerrano",
+   "46593271"
+  ],
+  [
+   "276557",
+   "away",
+   3,
+   "Valentino Nicolás Cerrano",
+   "Horacio De La Mota Boehler",
+   "39394990"
+  ],
+  [
+   "276556",
+   "home",
+   16,
+   "Francisco Cabanillas Martinez",
+   "Francisco Imanol Cabanillas Martinez",
+   "44076259"
+  ],
+  [
+   "276555",
+   "home",
+   5,
+   "Lautaro Esteban Ramírez Juncos",
+   "Lautaro Esteban De Jesús Ramirez Juncos",
+   "40521423"
+  ],
+  [
+   "276555",
+   "away",
+   17,
+   "Julián Escanilla",
+   "Manuel Arroyo",
+   "42979960"
+  ],
+  [
+   "276555",
+   "away",
+   14,
+   "Hernán Crespo",
+   "Felipe Onnis",
+   "45086322"
+  ],
+  [
+   "276555",
+   "away",
+   13,
+   "Ignacio Giaimo",
+   "Mauricio Kember",
+   "44192622"
+  ],
+  [
+   "276555",
+   "away",
+   12,
+   "Mauricio Kember",
+   "Ignacio Giaimo",
+   "43812122"
+  ],
+  [
+   "276555",
+   "away",
+   11,
+   "Felipe Onnis",
+   "Hernán Crespo",
+   "45080646"
+  ],
+  [
+   "276555",
+   "away",
+   1,
+   "Manuel Arroyo",
+   "Julian Escanilla",
+   "46034304"
+  ]
+ ],
+ "scorebad": []
+}

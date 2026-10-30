@@ -1,0 +1,1099 @@
+NEAB 2026 · tarjetas oficiales
+
+capri vs caza-y-pesca · NEAB 2026 · tarjeta 322220  ·  f5caeb75-29fe-4fa2-8f58-79418be53f0c
+  local     · capri · 23 jugadores · 23 con ficha fijada
+  visitante · caza-y-pesca · 23 jugadores · 0 con ficha fijada
+  eventos   · 36
+    min  2 (1T 2) visitante conversion   Marcos Fabian Idoyaga
+    min  2 (1T 2) visitante try          Marcos Fabian Idoyaga
+    min  5 (1T 5) local     conversion   Tomas Bautista Estigarribia Marambio
+    min  5 (1T 5) local     try          Ignacio Maximiliano Florentin
+    min 13 (1T 13) local     try          Felipe Solis
+    min 18 (1T 18) visitante try          Antonio Rafael Idoyaga
+    min 18 (1T 18) visitante conversion   Marcos Fabian Idoyaga
+    min 22 (1T 22) local     try          Giuseppe Ceccarini
+    min 22 (1T 22) local     conversion   Tomas Bautista Estigarribia Marambio
+    min 41 (2T 1) local     try          Felipe Solis
+    min 54 (2T 14) local     try          Angel Venialgo
+    min 54 (2T 14) local     conversion   Tomas Bautista Estigarribia Marambio
+    min 61 (2T 21) local     substitution Marcio Oliveira
+    min 61 (2T 21) local     substitution Elias Gimenez
+    min 63 (2T 23) local     try          Felipe Solis
+    min 65 (2T 25) local     substitution Nicolas Enrique
+    min 65 (2T 25) local     substitution Fabricio Muena
+    min 65 (2T 25) local     card_red     Carlos Fernando Gomez
+    min 71 (2T 31) local     try          Federico Ezequiel Palaguerra
+    min 75 (2T 35) local     conversion   Tomas Bautista Estigarribia Marambio
+    min 75 (2T 35) local     try          Giuseppe Ceccarini
+    min 78 (2T 38) local     substitution Ignacio Maximiliano Florentin
+    min 78 (2T 38) local     substitution Nicolas Eduardo Palaguerra
+    min 78 (2T 38) local     substitution Felipe Solis
+    min 79 (2T 39) local     card_red     Claudio Benitez
+    min 92 (2T 52) visitante substitution Sergio Andrés Nuñez Argañaraz
+    min 92 (2T 52) visitante substitution Victor Emanuel Fontana Acosta
+    min 95 (2T 55) visitante substitution Máximo Bautista Nuñez
+    min 99 (2T 59) visitante substitution Diego David García
+    min 102 (2T 62) visitante substitution Edgardo Juan Pablo Fernandez
+    min 104 (2T 64) visitante substitution Mauro Sánchez
+    min 104 (2T 64) visitante card_yellow  Antonio Rafael Idoyaga
+    min 104 (2T 64) visitante substitution Jeronimo Daniel Medina
+    min 107 (2T 67) visitante substitution Luciano Javier Urbieta
+    min 118 (2T 78) visitante conversion   Marcos Fabian Idoyaga
+    min 118 (2T 78) visitante try          Marcos Fabian Idoyaga
+  marcador  · eventos 48-21 · guardado 48-21
+  tries     · 8-3 (guardado 8-3)
+  arbitro   · CRISTIAN GABRIEL SALDIAS (guardado: CRISTIAN GABRIEL SALDIAS)
+  guardado  · 23 local · 23 visitante · 36 eventos
+
+abipones vs lomas-r-c-posadas · NEAB 2026 · tarjeta 322219  ·  9de736d8-6936-4e3f-ac3c-6c8aa0455bfd
+  local     · abipones · 23 jugadores · 0 con ficha fijada
+  visitante · lomas-r-c-posadas · 23 jugadores · 0 con ficha fijada
+  eventos   · 15
+    min 18 (1T 18) visitante penalty_goal Ivan Zanek
+    min 24 (1T 24) visitante try          Diego Perez
+    min 24 (1T 24) visitante conversion   Ivan Zanek
+    min 28 (1T 28) visitante card_yellow  Luis Exequiel Dos Santos
+    min 29 (1T 29) local     try          Joaquin Acevedo
+    min 50 (2T 10) visitante try          German Nicolas Napoli
+    min 51 (2T 11) visitante conversion   Ivan Zanek
+    min 60 (2T 20) local     penalty_try  
+    min 62 (2T 22) visitante card_yellow  Julian Rodrigo Knutson
+    min 66 (2T 26) visitante try          Franco Ivan Flieger
+    min 67 (2T 27) visitante conversion   Ivan Zanek
+    min 68 (2T 28) local     try          Matias Adrian Baustian
+    min 68 (2T 28) local     conversion   Jonatan Flekenstein
+    min 73 (2T 33) visitante try          Franco Ivan Flieger
+    min 74 (2T 34) visitante conversion   Ivan Zanek
+  marcador  · eventos 19-31 · guardado 19-31
+  tries     · 3-4 (guardado —-—)
+  arbitro   · MARCOS ANDRÉS SABALICH (guardado: —)
+  guardado  · 23 local · 23 visitante · 15 eventos
+
+tacuru-social-club vs pay-ubre · NEAB 2026 · tarjeta 322218  ·  e9c798a3-03b3-4941-a362-36d15342c9b4
+  local     · tacuru-social-club · 23 jugadores · 0 con ficha fijada
+  visitante · pay-ubre · 23 jugadores · 0 con ficha fijada
+  eventos   · 55
+    min  3 (1T 3) local     try          Francisco Mackinnon
+    min  7 (1T 7) local     conversion   Francisco Mackinnon
+    min  7 (1T 7) local     try          Joaquin Polattini
+    min 12 (1T 12) local     try          Carlos Facundo Gutierrez
+    min 14 (1T 14) local     conversion   Francisco Mackinnon
+    min 14 (1T 14) local     try          Maresca Cristian Agustin
+    min 17 (1T 17) local     substitution Ramón Andrés Quintana
+    min 17 (1T 17) local     conversion   Francisco Mackinnon
+    min 17 (1T 17) local     try          Francisco Mackinnon
+    min 20 (1T 20) local     conversion   Francisco Mackinnon
+    min 20 (1T 20) local     try          Maresca Cristian Agustin
+    min 23 (1T 23) local     conversion   Francisco Mackinnon
+    min 23 (1T 23) local     try          Maresca Cristian Agustin
+    min 27 (1T 27) local     conversion   Francisco Mackinnon
+    min 27 (1T 27) local     try          Mario Ignacio Menendez
+    min 30 (1T 30) local     conversion   Francisco Mackinnon
+    min 30 (1T 30) local     try          Mario Ignacio Menendez
+    min 35 (1T 35) local     conversion   Francisco Mackinnon
+    min 35 (1T 35) local     try          Juan José Artley Balor
+    min 37 (1T 37) local     try          Ariel Alberto Fassi
+    min 41 (2T 1) visitante substitution Enrique Von Wernich
+    min 44 (2T 4) local     conversion   Francisco Mackinnon
+    min 44 (2T 4) local     try          Carlos Nicolás Insaurralde
+    min 46 (2T 6) local     try          Maresca Cristian Agustin
+    min 47 (2T 7) local     try          Carlos Nicolás Insaurralde
+    min 48 (2T 8) local     conversion   Francisco Mackinnon
+    min 48 (2T 8) local     try          Carlos Nicolás Insaurralde
+    min 50 (2T 10) visitante substitution Tomas Zibecchi
+    min 50 (2T 10) visitante substitution Federico Nicolas Ivanoff
+    min 50 (2T 10) visitante substitution Mario Sebastian Gonzalez
+    min 51 (2T 11) local     substitution Carlos Facundo Gutierrez
+    min 51 (2T 11) local     substitution Alejanro Georg Hnatiuk Rajoy
+    min 52 (2T 12) local     try          Maresca Cristian Agustin
+    min 54 (2T 14) local     conversion   Francisco Mackinnon
+    min 54 (2T 14) local     try          Joaquin Polattini
+    min 55 (2T 15) local     try          Jeremias Pelinski
+    min 58 (2T 18) local     substitution Juan José Artley Balor
+    min 58 (2T 18) local     substitution Francisco Mackinnon
+    min 58 (2T 18) local     substitution Fabricio Daniel Rivas
+    min 58 (2T 18) local     substitution Julio Cardoso
+    min 58 (2T 18) local     substitution Mario Ignacio Menendez
+    min 59 (2T 19) local     try          Bautista Bianchi
+    min 59 (2T 19) local     conversion   Bautista Bianchi
+    min 63 (2T 23) local     try          Joaquin Palisa
+    min 63 (2T 23) local     conversion   Joaquin Palisa
+    min 65 (2T 25) visitante substitution Emiliano Javier Veron Marzoratti
+    min 65 (2T 25) visitante substitution Juan Ignacio Figueroa
+    min 66 (2T 26) local     try          Joaquin Polattini
+    min 68 (2T 28) local     try          Mirko Brajkovic
+    min 68 (2T 28) local     conversion   Bautista Bianchi
+    min 70 (2T 30) local     try          Joaquin Palisa
+    min 70 (2T 30) local     conversion   Bautista Bianchi
+    min 75 (2T 35) visitante substitution Gonzalo Pintos
+    min 75 (2T 35) visitante substitution Marcelo Poloni
+    min 79 (2T 39) local     try          Leandro Benitez
+  marcador  · eventos 150-0 · guardado 150-0
+  tries     · 24-0 (guardado —-—)
+  arbitro   · LEANDRO PEKER (guardado: —)
+  guardado  · 23 local · 23 visitante · 55 eventos
+
+sixty-r-c vs qompi · NEAB 2026 · tarjeta 322214  ·  7da2d4db-9085-4235-afe0-ae39dd8107dd
+  local     · sixty-r-c · 23 jugadores · 23 con ficha fijada
+  visitante · qompi · 22 jugadores · 0 con ficha fijada
+  eventos   · 40
+    min  3 (1T 3) local     conversion   Matias Juric
+    min  3 (1T 3) local     try          Francisco Galassi
+    min  5 (1T 5) local     try          Tiago Gonzalez
+    min  5 (1T 5) local     conversion   Matias Juric
+    min  9 (1T 9) local     try          Rodrigo Lotero
+    min  9 (1T 9) local     conversion   Matias Juric
+    min 17 (1T 17) local     try          Galo Santino Maglione
+    min 17 (1T 17) local     conversion   Matias Juric
+    min 23 (1T 23) local     card_yellow  Tiago Gonzalez
+    min 29 (1T 29) local     conversion   Matias Juric
+    min 29 (1T 29) local     try          Galo Santino Maglione
+    min 31 (1T 31) local     try          Galo Santino Maglione
+    min 31 (1T 31) visitante try          Lucas Alcides Sosa
+    min 35 (1T 35) visitante penalty_goal Juan Carlos Suarez
+    min 37 (1T 37) local     try          Matias Juric
+    min 37 (1T 37) local     conversion   Rodrigo Lotero
+    min 39 (1T 39) local     try          Dario Saúl Alejandro Galarza
+    min 39 (1T 39) local     conversion   Rodrigo Lotero
+    min 45 (2T 5) local     try          Donato Contarde
+    min 50 (2T 10) visitante penalty_goal Juan Carlos Suarez
+    min 51 (2T 11) local     try          Tiago Gonzalez
+    min 55 (2T 15) visitante card_yellow  Juan Sebastian Vega
+    min 60 (2T 20) local     substitution Dario Luis Kiverling
+    min 60 (2T 20) local     substitution Axel Daniel Romero
+    min 60 (2T 20) local     substitution Rodrigo Lotero
+    min 60 (2T 20) local     try          Facundo Daniel Vargas
+    min 62 (2T 22) local     try          Facundo Daniel Vargas
+    min 63 (2T 23) local     substitution Matias Juric
+    min 63 (2T 23) local     substitution Lautaro Pisarello
+    min 64 (2T 24) local     conversion   Matias Juric
+    min 64 (2T 24) local     try          Bruno Carlisi
+    min 65 (2T 25) local     substitution Juan Manuel Zabala
+    min 67 (2T 27) local     conversion   Atilio Lotero
+    min 67 (2T 27) local     try          Galo Santino Maglione
+    min 71 (2T 31) local     try          Galo Santino Maglione
+    min 74 (2T 34) local     conversion   Atilio Lotero
+    min 74 (2T 34) local     try          Francisco Galassi
+    min 77 (2T 37) local     try          Dario Saúl Alejandro Galarza
+    min 80 (2T 40) local     substitution Horacio Gabriel Ybarra
+    min 80 (2T 40) local     substitution Augusto Gonzalez
+  marcador  · eventos 105-11 · guardado 105-11
+  tries     · 17-1 (guardado —-—)
+  arbitro   · BRAIAN SEBASTIAN GOMEZ (guardado: —)
+  guardado  · 23 local · 22 visitante · 40 eventos
+
+pay-ubre vs abipones · NEAB 2026 · tarjeta 322667  ·  29205b7d-87ed-4f08-8188-770b91772f43
+  local     · pay-ubre · 23 jugadores · 0 con ficha fijada
+  visitante · abipones · 23 jugadores · 0 con ficha fijada
+  eventos   · 19
+    min  9 (1T 9) visitante penalty_goal Jonatan Flekenstein
+    min 14 (1T 14) visitante try          Diego Olivera
+    min 20 (1T 20) local     card_yellow  Mario Sebastian Gonzalez
+    min 29 (1T 29) visitante try          Alexis Yamil Aranda
+    min 35 (1T 35) local     try          Ian Javier Fernández
+    min 35 (1T 35) local     conversion   Ian Javier Fernández
+    min 41 (2T 1) local     substitution Mario Sebastian Gonzalez
+    min 41 (2T 1) local     substitution Enrique Von Wernich
+    min 41 (2T 1) local     substitution Federico Nicolas Ivanoff
+    min 43 (2T 3) visitante try          Juan Ignacio Acuña
+    min 43 (2T 3) visitante conversion   Jonatan Flekenstein
+    min 46 (2T 6) local     try          Ian Javier Fernández
+    min 46 (2T 6) local     conversion   Ian Javier Fernández
+    min 53 (2T 13) visitante card_yellow  Andrés Mansilla
+    min 66 (2T 26) visitante try          Jonatan Flekenstein
+    min 66 (2T 26) visitante conversion   Jonatan Flekenstein
+    min 70 (2T 30) local     substitution Fabio Amarilla
+    min 70 (2T 30) local     substitution Juan Ignacio Figueroa
+    min 75 (2T 35) visitante try          Jonatan Flekenstein
+  marcador  · eventos 14-32 · guardado 14-32
+  tries     · 2-5 (guardado —-—)
+  arbitro   · FACUNDO MARTIN GOMEZ (guardado: —)
+  guardado  · 23 local · 23 visitante · 19 eventos
+
+qompi vs tacuru-social-club · NEAB 2026 · tarjeta 322668  ·  f451e56d-2ef9-4946-bf22-3c7bbc45ed87
+  local     · qompi · 23 jugadores · 0 con ficha fijada
+  visitante · tacuru-social-club · 23 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min  1 (1T 1) local     try          Genaro Martin
+    min  1 (1T 1) local     conversion   Juan Carlos Suarez
+    min  5 (1T 5) visitante conversion   Francisco Mackinnon
+    min  5 (1T 5) visitante try          Joaquin Palisa
+    min 10 (1T 10) visitante try          Ariel Alberto Fassi
+    min 12 (1T 12) visitante try          Augusto Miguel Prokopio
+    min 12 (1T 12) visitante conversion   Francisco Mackinnon
+    min 23 (1T 23) visitante try          Francisco Mackinnon
+    min 26 (1T 26) visitante substitution Augusto Miguel Prokopio
+    min 35 (1T 35) local     try          Mauro Fernando Ariel Camacho
+    min 35 (1T 35) local     conversion   Juan Carlos Suarez
+    min 45 (2T 5) visitante conversion   Francisco Mackinnon
+    min 45 (2T 5) visitante try          Carlos Nicolás Insaurralde
+    min 49 (2T 9) local     try          Fernan Sanchez
+    min 49 (2T 9) visitante substitution Juan José Artley Balor
+    min 52 (2T 12) local     try          Cristino Rolando Toribio
+    min 59 (2T 19) visitante conversion   Francisco Mackinnon
+    min 59 (2T 19) visitante substitution Walter Alejandro Acuña
+    min 59 (2T 19) visitante try          Bautista Bianchi
+    min 62 (2T 22) visitante conversion   Francisco Mackinnon
+    min 62 (2T 22) visitante try          Joaquin Palisa
+    min 63 (2T 23) visitante substitution Julio Cardoso
+    min 63 (2T 23) visitante substitution Mirko Brajkovic
+    min 63 (2T 23) visitante substitution Juan Martin Diaz
+    min 63 (2T 23) visitante substitution Jeremias Pelinski
+    min 74 (2T 34) visitante conversion   Francisco Mackinnon
+    min 74 (2T 34) visitante try          Nicolas Reinsch
+  marcador  · eventos 24-52 · guardado 24-52
+  tries     · 4-8 (guardado —-—)
+  arbitro   · GONZALO RODAS RODAS (guardado: —)
+  guardado  · 23 local · 23 visitante · 27 eventos
+
+lomas-r-c-posadas vs capri · NEAB 2026 · tarjeta 322666  ·  cff17a25-d8cb-4066-9994-b8e89aed4d7a
+  local     · lomas-r-c-posadas · 23 jugadores · 0 con ficha fijada
+  visitante · capri · 23 jugadores · 22 con ficha fijada
+  eventos   · 28
+    min  1 (1T 1) visitante try          Elias Gimenez
+    min  1 (1T 1) visitante conversion   Tomas Bautista Estigarribia Marambio
+    min 17 (1T 17) local     try          Mathias Nicolás Morcillo
+    min 18 (1T 18) local     conversion   Ivan Zanek
+    min 22 (1T 22) visitante card_yellow  Tomas Bautista Estigarribia Marambio
+    min 28 (1T 28) local     card_yellow  Eduardo Casco
+    min 30 (1T 30) local     try          Julian Rodrigo Knutson
+    min 31 (1T 31) local     conversion   Ivan Zanek
+    min 47 (2T 7) local     substitution Eduardo Casco
+    min 47 (2T 7) local     substitution Ian Dapremont
+    min 47 (2T 7) local     substitution German Nicolas Napoli
+    min 47 (2T 7) local     substitution Agustín Acosta
+    min 49 (2T 9) visitante substitution Nicolas Enrique
+    min 50 (2T 10) local     try          Franco Ivan Flieger
+    min 50 (2T 10) local     substitution Luca Chamba
+    min 51 (2T 11) local     conversion   Ivan Zanek
+    min 60 (2T 20) visitante card_yellow  Nicolas Eduardo Palaguerra
+    min 60 (2T 20) visitante substitution Angel Venialgo
+    min 62 (2T 22) visitante card_yellow  Jorge Orlando Mendez
+    min 64 (2T 24) local     try          Jose María Benitez
+    min 70 (2T 30) visitante substitution Nicolas Eduardo Palaguerra
+    min 70 (2T 30) visitante substitution Pablo Daniel Roa
+    min 75 (2T 35) local     try          Mathias Nicolás Morcillo
+    min 75 (2T 35) local     substitution Mauricio Esquivel
+    min 76 (2T 36) local     conversion   Nahuel Alvez
+    min 76 (2T 36) local     substitution Gabriel Jorge Ferreyra
+    min 77 (2T 37) local     substitution Rodrigo Flores
+    min 80 (2T 40) local     card_red     Agustín Acosta
+  marcador  · eventos 33-7 · guardado 33-7
+  tries     · 5-1 (guardado —-—)
+  arbitro   · VICTOR SANABRIA (guardado: —)
+  guardado  · 23 local · 23 visitante · 28 eventos
+
+caza-y-pesca vs sixty-r-c · NEAB 2026 · tarjeta 322665  ·  0536af7b-4218-4a81-9e9b-4671b3e9240f
+  local     · caza-y-pesca · 23 jugadores · 0 con ficha fijada
+  visitante · sixty-r-c · 22 jugadores · 20 con ficha fijada
+  eventos   · 30
+    min  4 (1T 4) visitante conversion   Francisco Galassi
+    min  4 (1T 4) visitante try          Luca Sclippa
+    min 13 (1T 13) visitante try          Francisco Galassi
+    min 13 (1T 13) visitante conversion   Francisco Galassi
+    min 39 (1T 39) visitante substitution Tiago Gonzalez
+    min 39 (1T 39) visitante injury       Tiago Gonzalez
+    min 40 (1T 40) visitante conversion   Francisco Galassi
+    min 40 (1T 40) visitante try          Francisco Galassi
+    min 47 (2T 7) visitante substitution Luca Sclippa
+    min 47 (2T 7) visitante substitution Juan Manuel Zabala
+    min 55 (2T 15) visitante substitution Dario Saúl Alejandro Galarza
+    min 58 (2T 18) visitante substitution Tiago Exequiel Tiago
+    min 61 (2T 21) visitante conversion   Francisco Galassi
+    min 61 (2T 21) visitante try          Ricardo Lautaro Pardo
+    min 63 (2T 23) visitante try          Bruno Carlisi
+    min 63 (2T 23) visitante conversion   Francisco Galassi
+    min 69 (2T 29) visitante card_yellow  Horacio Gabriel Ybarra
+    min 74 (2T 34) visitante substitution Axel Daniel Romero
+    min 74 (2T 34) visitante try          Agustin Pagno
+    min 77 (2T 37) visitante card_yellow  Mateo Freysson
+    min 80 (2T 40) local     substitution Ramiro Hernán Ávalos
+    min 80 (2T 40) local     substitution Victor Emanuel Fontana Acosta
+    min 80 (2T 40) local     substitution Sergio Andrés Nuñez Argañaraz
+    min 83 (2T 43) local     try          Gabriel Ramirez
+    min 83 (2T 43) local     try          Marcos Fabian Idoyaga
+    min 89 (2T 49) local     substitution Josue Arzamendia
+    min 89 (2T 49) local     substitution Edgardo Juan Pablo Fernandez
+    min 95 (2T 55) local     substitution Mauro Sánchez
+    min 113 (2T 73) local     substitution Luciano Javier Urbieta
+    min 113 (2T 73) local     substitution Ivan Campuzano
+  marcador  · eventos 10-40 · guardado 10-40
+  tries     · 2-6 (guardado —-—)
+  arbitro   · MARIANO JESUS VERGARA (guardado: —)
+  guardado  · 23 local · 22 visitante · 30 eventos
+
+caza-y-pesca vs lomas-r-c-posadas · NEAB 2026 · tarjeta 323395  ·  28c36ff9-f13e-49be-aa95-cd1de49fe30a
+  local     · caza-y-pesca · 23 jugadores · 0 con ficha fijada
+  visitante · lomas-r-c-posadas · 23 jugadores · 0 con ficha fijada
+  eventos   · 28
+    min 18 (1T 18) local     substitution Jeronimo Daniel Medina
+    min 23 (1T 23) visitante try          Ezequiel Gonano
+    min 32 (1T 32) local     conversion   Antonio Rafael Idoyaga
+    min 32 (1T 32) local     try          Fabián Aron Arzamendia
+    min 38 (1T 38) local     try          Marcos Fabian Idoyaga
+    min 40 (1T 40) visitante substitution César Durante
+    min 49 (2T 9) visitante substitution Eduardo Casco
+    min 49 (2T 9) visitante substitution German Nicolas Napoli
+    min 53 (2T 13) visitante try          Mauricio Esquivel
+    min 54 (2T 14) visitante conversion   Ivan Zanek
+    min 63 (2T 23) visitante substitution Luca Chamba
+    min 66 (2T 26) visitante card_yellow  Mauricio Protto
+    min 68 (2T 28) visitante card_yellow  Ivan Zanek
+    min 74 (2T 34) visitante try          Franco Ivan Flieger
+    min 75 (2T 35) visitante conversion   Nahuel Alvez
+    min 79 (2T 39) visitante card_yellow  Franco Ivan Flieger
+    min 80 (2T 40) visitante card_yellow  Jose María Benitez
+    min 83 (2T 43) local     substitution Oscar Aparicio Lezcano
+    min 93 (2T 53) local     substitution Diego David García
+    min 93 (2T 53) local     substitution Camilo Gonzalo Miranda Frontela
+    min 100 (2T 60) local     penalty_goal Antonio Rafael Idoyaga
+    min 103 (2T 63) local     card_yellow  Antonio Vergara
+    min 108 (2T 68) local     try          Ivan Campuzano
+    min 110 (2T 70) local     card_yellow  Lucas Martin Biloni
+    min 116 (2T 76) local     substitution Ivan Campuzano
+    min 116 (2T 76) local     substitution Rodrigo Adan Argañaraz
+    min 116 (2T 76) local     substitution Alex Nahuel Lopez
+    min 119 (2T 79) local     try          Antonio Rafael Idoyaga
+  marcador  · eventos 25-19 · guardado 25-19
+  tries     · 4-3 (guardado —-—)
+  arbitro   · JOSE FELICIANO ACOSTA (guardado: —)
+  guardado  · 23 local · 23 visitante · 28 eventos
+
+abipones vs qompi · NEAB 2026 · tarjeta 323393  ·  15cb7bcd-a065-4cf1-83b4-5d3df98af1c4
+  local     · abipones · 23 jugadores · 0 con ficha fijada
+  visitante · qompi · 23 jugadores · 0 con ficha fijada
+  eventos   · 29
+    min  4 (1T 4) visitante penalty_goal Lucas Alcides Sosa
+    min 13 (1T 13) local     try          Alan Sandoval
+    min 18 (1T 18) local     try          Hector Prester
+    min 20 (1T 20) local     try          Martin Gustavo Lopez
+    min 20 (1T 20) local     conversion   Jonatan Flekenstein
+    min 23 (1T 23) visitante try          Daniel Jose Luis Sosa
+    min 30 (1T 30) visitante try          Luis Abenamar Francia
+    min 30 (1T 30) visitante conversion   Lucas Alcides Sosa
+    min 33 (1T 33) local     try          Hector Prester
+    min 33 (1T 33) local     conversion   Alan Sandoval
+    min 45 (2T 5) local     try          Matias Adrian Baustian
+    min 45 (2T 5) local     conversion   Alan Sandoval
+    min 48 (2T 8) local     substitution Lucas Duarte
+    min 48 (2T 8) local     substitution Fabian Tomás David Soraire
+    min 48 (2T 8) local     substitution Hector Prester
+    min 48 (2T 8) local     substitution Rodrigo Exequiel Coronel
+    min 48 (2T 8) local     conversion   Alan Sandoval
+    min 48 (2T 8) local     try          Alan Sandoval
+    min 53 (2T 13) local     try          Matias Adrian Baustian
+    min 58 (2T 18) local     conversion   Diego Sebastián Behr
+    min 58 (2T 18) local     try          Matias Adrian Baustian
+    min 61 (2T 21) local     conversion   Diego Sebastián Behr
+    min 61 (2T 21) local     try          Martin René Martina
+    min 65 (2T 25) local     conversion   Diego Sebastián Behr
+    min 65 (2T 25) local     try          Diego Sebastián Behr
+    min 65 (2T 25) visitante substitution Nelson Maximiliano Torrent
+    min 65 (2T 25) visitante substitution Joel Serafin Chajari
+    min 65 (2T 25) visitante substitution Daniel Jose Luis Sosa
+    min 73 (2T 33) local     try          Mariano Baustian
+  marcador  · eventos 69-15 · guardado 69-15
+  tries     · 11-2 (guardado —-—)
+  arbitro   · FACUNDO MARTIN GOMEZ (guardado: —)
+  guardado  · 23 local · 23 visitante · 29 eventos
+
+capri vs pay-ubre · NEAB 2026 · tarjeta 323394  ·  ad4baf39-610b-49dd-b7cb-6529d368201c
+  local     · capri · 23 jugadores · 21 con ficha fijada
+  visitante · pay-ubre · 23 jugadores · 0 con ficha fijada
+  eventos   · 38
+    min  5 (1T 5) local     try          Lautaro Bohn
+    min 12 (1T 12) local     try          Agustín Caro
+    min 12 (1T 12) local     conversion   Genaro Martin Kruka
+    min 18 (1T 18) local     try          Elias Gimenez
+    min 22 (1T 22) local     try          Elias Gimenez
+    min 31 (1T 31) local     try          Elias Gimenez
+    min 31 (1T 31) local     conversion   Genaro Martin Kruka
+    min 38 (1T 38) visitante card_yellow  Enrique Von Wernich
+    min 39 (1T 39) local     try          Sebastian Falero
+    min 39 (1T 39) local     conversion   Genaro Martin Kruka
+    min 41 (2T 1) local     try          Fabricio Muena
+    min 41 (2T 1) local     conversion   Genaro Martin Kruka
+    min 45 (2T 5) local     try          Angel Venialgo
+    min 45 (2T 5) local     conversion   Genaro Martin Kruka
+    min 45 (2T 5) visitante substitution Mario Sebastian Gonzalez
+    min 45 (2T 5) visitante substitution Fabio Amarilla
+    min 47 (2T 7) local     substitution Joel Velozo
+    min 47 (2T 7) local     substitution Pablo Daniel Roa
+    min 48 (2T 8) local     substitution Genaro Martin Kruka
+    min 48 (2T 8) local     substitution Lautaro Bohn
+    min 48 (2T 8) local     substitution Fabricio Muena
+    min 48 (2T 8) local     substitution Máximo Noguera
+    min 48 (2T 8) local     substitution Alan Lautaro Gomez
+    min 50 (2T 10) local     conversion   Genaro Martin Kruka
+    min 50 (2T 10) local     try          Agustín Caro
+    min 52 (2T 12) local     conversion   Tomas Bautista Estigarribia Marambio
+    min 52 (2T 12) local     try          Sebastian Falero
+    min 55 (2T 15) visitante substitution Enrique Von Wernich
+    min 56 (2T 16) local     conversion   Tomas Bautista Estigarribia Marambio
+    min 56 (2T 16) local     try          Marcio Oliveira
+    min 60 (2T 20) visitante substitution Marcos Martin Mosca Tressens
+    min 60 (2T 20) visitante substitution Federico Nicolas Ivanoff
+    min 65 (2T 25) local     try          Marcio Oliveira
+    min 65 (2T 25) local     conversion   Tomas Bautista Estigarribia Marambio
+    min 66 (2T 26) local     try          Lisandro Aron Esteche
+    min 70 (2T 30) local     card_yellow  Tomas Bautista Estigarribia Marambio
+    min 76 (2T 36) local     try          Jorge Orlando Mendez
+    min 79 (2T 39) local     try          Elias Gimenez
+  marcador  · eventos 93-0 · guardado 93-0
+  tries     · 15-0 (guardado —-—)
+  arbitro   · LEANDRO PEKER (guardado: —)
+  guardado  · 23 local · 23 visitante · 38 eventos
+
+sixty-r-c vs tacuru-social-club · NEAB 2026 · tarjeta 323392  ·  1833cc33-8bb8-4690-944d-2332f8ae4b6b
+  local     · sixty-r-c · 23 jugadores · 22 con ficha fijada
+  visitante · tacuru-social-club · 23 jugadores · 0 con ficha fijada
+  eventos   · 31
+    min  7 (1T 7) visitante conversion   Francisco Mackinnon
+    min  7 (1T 7) visitante try          Joaquin Palisa
+    min 14 (1T 14) visitante conversion   Francisco Mackinnon
+    min 14 (1T 14) visitante try          Ariel Alberto Fassi
+    min 19 (1T 19) visitante substitution Walter Alejandro Acuña
+    min 28 (1T 28) local     substitution Horacio Gabriel Ybarra
+    min 34 (1T 34) local     conversion   Francisco Galassi
+    min 34 (1T 34) local     try          Juan Manuel Zabala
+    min 41 (2T 1) visitante substitution Carlos Facundo Gutierrez
+    min 41 (2T 1) visitante substitution Bautista Bianchi
+    min 46 (2T 6) local     conversion   Facundo Caceres
+    min 46 (2T 6) local     try          Francisco Galassi
+    min 49 (2T 9) visitante penalty_goal Francisco Mackinnon
+    min 51 (2T 11) local     try          Tiago Exequiel Tiago
+    min 58 (2T 18) visitante penalty_goal Francisco Mackinnon
+    min 60 (2T 20) local     conversion   Facundo Caceres
+    min 60 (2T 20) local     try          Francisco Galassi
+    min 61 (2T 21) visitante substitution Nicolas Reinsch
+    min 66 (2T 26) visitante penalty_goal Francisco Mackinnon
+    min 72 (2T 32) visitante substitution Enzo Rafael Dos Santos
+    min 72 (2T 32) visitante substitution Maresca Cristian Agustin
+    min 72 (2T 32) visitante substitution Julio Cardoso
+    min 73 (2T 33) visitante penalty_goal Francisco Mackinnon
+    min 79 (2T 39) local     try          Galo Santino Maglione
+    min 80 (2T 40) local     substitution Ricardo Lautaro Pardo
+    min 80 (2T 40) local     substitution Alberto Bria
+    min 80 (2T 40) local     substitution Dario Saúl Alejandro Galarza
+    min 80 (2T 40) local     substitution Lautaro Pisarello
+    min 80 (2T 40) local     substitution Alessandro Fantin
+    min 80 (2T 40) local     substitution Axel Daniel Romero
+    min 80 (2T 40) local     substitution Dario Luis Kiverling
+  marcador  · eventos 31-26 · guardado 31-26
+  tries     · 5-2 (guardado —-—)
+  arbitro   · MARCOS KULIG (guardado: —)
+  guardado  · 23 local · 23 visitante · 31 eventos
+
+tacuru-social-club vs abipones · NEAB 2026 · tarjeta 324573  ·  c027e045-a0a1-4d32-a1cd-d49a7bcb8db8
+  local     · tacuru-social-club · 23 jugadores · 0 con ficha fijada
+  visitante · abipones · 23 jugadores · 0 con ficha fijada
+  eventos   · 32
+    min  4 (1T 4) local     conversion   Francisco Mackinnon
+    min  4 (1T 4) local     try          Francisco Mackinnon
+    min  9 (1T 9) local     try          Joaquin Palisa
+    min  9 (1T 9) local     conversion   Francisco Mackinnon
+    min 15 (1T 15) local     try          Nicolas Reinsch
+    min 15 (1T 15) local     conversion   Francisco Mackinnon
+    min 17 (1T 17) local     substitution Mario Ignacio Menendez
+    min 28 (1T 28) local     try          Nicolas Reinsch
+    min 28 (1T 28) local     conversion   Francisco Mackinnon
+    min 32 (1T 32) visitante penalty_goal Alan Sandoval
+    min 44 (2T 4) local     try          Bautista Bianchi
+    min 46 (2T 6) local     try          Joaquin Palisa
+    min 48 (2T 8) local     substitution Enzo Rafael Dos Santos
+    min 48 (2T 8) local     substitution Nahuel Nicolas Baez
+    min 48 (2T 8) local     substitution Tomas Ignacio Gimenez
+    min 53 (2T 13) local     try          Juan José Artley Balor
+    min 54 (2T 14) local     substitution Alejanro Georg Hnatiuk Rajoy
+    min 55 (2T 15) local     conversion   Francisco Mackinnon
+    min 55 (2T 15) local     try          Carlos Nicolás Insaurralde
+    min 57 (2T 17) local     substitution Fabricio Daniel Rivas
+    min 59 (2T 19) local     substitution Bautista Bianchi
+    min 61 (2T 21) local     try          Carlos Nicolás Insaurralde
+    min 63 (2T 23) local     substitution Nicolas Reinsch
+    min 64 (2T 24) local     conversion   Francisco Mackinnon
+    min 64 (2T 24) local     try          Francisco Mackinnon
+    min 66 (2T 26) local     conversion   Francisco Mackinnon
+    min 66 (2T 26) local     try          Ariel Alberto Fassi
+    min 69 (2T 29) visitante try          Alan Sandoval
+    min 69 (2T 29) visitante conversion   Alan Sandoval
+    min 70 (2T 30) local     try          Augusto Miguel Prokopio
+    min 74 (2T 34) visitante try          Hector Prester
+    min 74 (2T 34) visitante conversion   Alan Sandoval
+  marcador  · eventos 74-17 · guardado 74-17
+  tries     · 12-2 (guardado —-—)
+  arbitro   · JUAN IGNACIO VERGARA (guardado: —)
+  guardado  · 23 local · 23 visitante · 32 eventos
+
+pay-ubre vs caza-y-pesca · NEAB 2026 · tarjeta 324571  ·  24b36f97-efba-4bbd-960b-5bc29215d193
+  local     · pay-ubre · 23 jugadores · 0 con ficha fijada
+  visitante · caza-y-pesca · 23 jugadores · 0 con ficha fijada
+  eventos   · 26
+    min  3 (1T 3) local     try          Federico Nicolas Ivanoff
+    min  6 (1T 6) visitante conversion   Marcos Fabian Idoyaga
+    min  6 (1T 6) visitante try          Victor Emanuel Fontana Acosta
+    min 14 (1T 14) visitante try          Fabián Aron Arzamendia
+    min 24 (1T 24) local     try          Juan Cruz Willington
+    min 24 (1T 24) local     conversion   Juan Cruz Willington
+    min 27 (1T 27) visitante try          Camilo Gonzalo Miranda Frontela
+    min 32 (1T 32) local     card_yellow  Bernardo Regidor
+    min 35 (1T 35) local     substitution Carlos Zacarias
+    min 37 (1T 37) visitante try          Ramiro Hernán Ávalos
+    min 37 (1T 37) visitante conversion   Marcos Fabian Idoyaga
+    min 50 (2T 10) local     substitution Fabio Amarilla
+    min 60 (2T 20) visitante card_yellow  Luciano Javier Urbieta
+    min 64 (2T 24) local     penalty_try  
+    min 64 (2T 24) local     try          Juan Gonzalez Balcarce
+    min 66 (2T 26) visitante try          Mauricio Palacios
+    min 66 (2T 26) visitante conversion   Marcos Fabian Idoyaga
+    min 70 (2T 30) local     substitution Marcos Gonzalo Ramirez
+    min 70 (2T 30) local     substitution Federico Nicolas Ivanoff
+    min 70 (2T 30) local     substitution Nahuel Contreras
+    min 77 (2T 37) visitante card_yellow  Agustin Ezequiel Acosta
+    min 85 (2T 45) visitante substitution Ramiro Hernán Ávalos
+    min 85 (2T 45) visitante substitution Mauro Sánchez
+    min 90 (2T 50) visitante substitution Gustavo Nahuel Ocampo
+    min 100 (2T 60) visitante substitution Ulises Duarte
+    min 100 (2T 60) visitante substitution Gabriel Ramirez
+  marcador  · eventos 24-31 · guardado 24-31
+  tries     · 4-5 (guardado —-—)
+  arbitro   · VIVIANA GARAT (guardado: —)
+  guardado  · 23 local · 23 visitante · 26 eventos
+
+qompi vs capri · NEAB 2026 · tarjeta 324572  ·  b019ad3f-3e28-46fb-919d-bcfbf11c6a6e
+  local     · qompi · 23 jugadores · 0 con ficha fijada
+  visitante · capri · 23 jugadores · 20 con ficha fijada
+  eventos   · 27
+    min 11 (1T 11) visitante conversion   Tomas Bautista Estigarribia Marambio
+    min 11 (1T 11) visitante try          Federico Ezequiel Palaguerra
+    min 20 (1T 20) visitante try          Agustín Caro
+    min 27 (1T 27) local     try          Fernan Sanchez
+    min 27 (1T 27) local     conversion   Luis Abenamar Francia
+    min 29 (1T 29) visitante card_yellow  Lisandro Aron Esteche
+    min 38 (1T 38) visitante try          Giuseppe Ceccarini
+    min 38 (1T 38) visitante conversion   Tomas Bautista Estigarribia Marambio
+    min 40 (1T 40) visitante substitution Alan Lautaro Gomez
+    min 42 (1T 42) visitante try          Giuseppe Ceccarini
+    min 45 (2T 5) local     card_yellow  Luis Abenamar Francia
+    min 45 (2T 5) visitante substitution Tomas Bautista Estigarribia Marambio
+    min 45 (2T 5) visitante substitution Genaro Martin Kruka
+    min 45 (2T 5) visitante conversion   Tomas Bautista Estigarribia Marambio
+    min 45 (2T 5) visitante try          Marcio Oliveira
+    min 47 (2T 7) visitante substitution Joel Velozo
+    min 50 (2T 10) local     substitution Mauro Fernando Ariel Camacho
+    min 50 (2T 10) local     substitution Hugo Ismael Burgos
+    min 50 (2T 10) visitante substitution Felipe Solis
+    min 63 (2T 23) visitante card_yellow  Federico Ezequiel Palaguerra
+    min 64 (2T 24) visitante try          Sebastian Falero
+    min 67 (2T 27) local     try          Elias Maza
+    min 67 (2T 27) local     conversion   Luis Abenamar Francia
+    min 68 (2T 28) local     card_yellow  Genaro Martin
+    min 72 (2T 32) local     try          Luis Abenamar Francia
+    min 72 (2T 32) local     conversion   Luis Abenamar Francia
+    min 80 (2T 40) visitante substitution Nicolas Eduardo Palaguerra
+  marcador  · eventos 21-36 · guardado 21-36
+  tries     · 3-6 (guardado —-—)
+  arbitro   · SANTIAGO EZEQUIEL FOLETTO (guardado: —)
+  guardado  · 23 local · 23 visitante · 27 eventos
+
+lomas-r-c-posadas vs sixty-r-c · NEAB 2026 · tarjeta 324570  ·  19c65d4b-56bf-4e73-b7bd-87cf411c269c
+  local     · lomas-r-c-posadas · 23 jugadores · 0 con ficha fijada
+  visitante · sixty-r-c · 23 jugadores · 22 con ficha fijada
+  eventos   · 28
+    min  2 (1T 2) visitante penalty_goal Atilio Lotero
+    min 19 (1T 19) visitante conversion   Francisco Galassi
+    min 19 (1T 19) visitante try          Atilio Lotero
+    min 26 (1T 26) local     try          César Durante
+    min 27 (1T 27) local     conversion   Nahuel Alvez
+    min 38 (1T 38) visitante try          Pablo Martinez Arce
+    min 38 (1T 38) visitante conversion   Francisco Galassi
+    min 45 (2T 5) local     substitution Agustín Acosta
+    min 45 (2T 5) local     substitution German Nicolas Napoli
+    min 45 (2T 5) local     substitution Ian Dapremont
+    min 45 (2T 5) local     substitution Rodrigo Flores
+    min 49 (2T 9) visitante substitution Dario Luis Kiverling
+    min 50 (2T 10) local     card_yellow  Mauricio Esquivel
+    min 50 (2T 10) visitante try          Bruno Carlisi
+    min 58 (2T 18) visitante substitution Atilio Lotero
+    min 58 (2T 18) visitante substitution Victor Julio Galarza
+    min 65 (2T 25) visitante card_yellow  Sebastian Romero
+    min 66 (2T 26) visitante card_yellow  Bruno Carlisi
+    min 74 (2T 34) local     penalty_try  Mathias Nicolás Morcillo
+    min 75 (2T 35) local     substitution Eduardo Casco
+    min 75 (2T 35) local     substitution Ezequiel Gonano
+    min 79 (2T 39) visitante try          Francisco Galassi
+    min 79 (2T 39) visitante conversion   Bruno Carlisi
+    min 79 (2T 39) visitante card_yellow  Juan Manuel Zabala
+    min 80 (2T 40) visitante substitution Rodrigo Lotero
+    min 80 (2T 40) visitante substitution Augusto Gonzalez
+    min 80 (2T 40) visitante substitution Alberto Bria
+    min 80 (2T 40) visitante substitution Mateo Freysson
+  marcador  · eventos 14-29 · guardado 14-29
+  tries     · 2-4 (guardado —-—)
+  arbitro   · JUAN MANUEL REQUINO (guardado: —)
+  guardado  · 23 local · 23 visitante · 28 eventos
+
+sixty-r-c vs abipones · NEAB 2026 · tarjeta 325549  ·  75d4c7fa-5bc3-437a-838e-6714fb8841bc
+  local     · sixty-r-c · 23 jugadores · 22 con ficha fijada
+  visitante · abipones · 20 jugadores · 0 con ficha fijada
+  eventos   · 31
+    min  2 (1T 2) local     conversion   Bruno Carlisi
+    min  2 (1T 2) local     try          Alberto Bria
+    min  5 (1T 5) local     try          Augusto Gonzalez
+    min  9 (1T 9) local     try          Luca Sclippa
+    min  9 (1T 9) local     conversion   Bruno Carlisi
+    min 14 (1T 14) local     try          Ricardo Lautaro Pardo
+    min 14 (1T 14) local     conversion   Bruno Carlisi
+    min 15 (1T 15) local     try          Luca Sclippa
+    min 23 (1T 23) visitante try          Alan Sandoval
+    min 40 (1T 40) local     try          Donato Contarde
+    min 45 (2T 5) local     try          Tizziano Fernández
+    min 45 (2T 5) local     conversion   Carlos Florencio Navarro
+    min 47 (2T 7) local     substitution Juan Manuel Zabala
+    min 47 (2T 7) local     substitution Dario Luis Kiverling
+    min 47 (2T 7) local     substitution Victor Julio Galarza
+    min 47 (2T 7) local     substitution Luca Sclippa
+    min 53 (2T 13) local     injury       Ricardo Lautaro Pardo
+    min 53 (2T 13) local     substitution Ricardo Lautaro Pardo
+    min 53 (2T 13) local     try          Galo Santino Maglione
+    min 59 (2T 19) local     conversion   Carlos Florencio Navarro
+    min 59 (2T 19) local     try          Genaro Leonel Aquino Retamozo
+    min 63 (2T 23) local     try          Rodrigo Agustín Aguirre
+    min 67 (2T 27) local     card_yellow  Axel Daniel Romero
+    min 69 (2T 29) local     card_yellow  Donato Contarde
+    min 75 (2T 35) visitante conversion   Alan Sandoval
+    min 75 (2T 35) visitante try          Jonatan Flekenstein
+    min 78 (2T 38) local     conversion   Carlos Florencio Navarro
+    min 78 (2T 38) local     try          Joaquin Acevedo
+    min 80 (2T 40) local     substitution Facundo Daniel Vargas
+    min 80 (2T 40) local     substitution Dario Saúl Alejandro Galarza
+    min 80 (2T 40) local     substitution Bruno Carlisi
+  marcador  · eventos 67-12 · guardado 67-12
+  tries     · 11-2 (guardado —-—)
+  arbitro   · BAUTISTA CARBO (guardado: —)
+  guardado  · 23 local · 20 visitante · 31 eventos
+
+caza-y-pesca vs qompi · NEAB 2026 · tarjeta 325551  ·  068a3683-204e-47a2-8e3e-8cf647fdf9ea
+  local     · caza-y-pesca · 23 jugadores · 0 con ficha fijada
+  visitante · qompi · 23 jugadores · 0 con ficha fijada
+  eventos   · 29
+    min 14 (1T 14) local     penalty_goal Antonio Vergara
+    min 25 (1T 25) visitante substitution Kevin Brian Rojas
+    min 26 (1T 26) local     try          Leandro Aiba
+    min 35 (1T 35) visitante try          Luis Abenamar Francia
+    min 45 (2T 5) visitante try          Mauro Fernando Ariel Camacho
+    min 45 (2T 5) visitante conversion   Luis Abenamar Francia
+    min 50 (2T 10) visitante try          Hugo Ismael Burgos
+    min 52 (2T 12) visitante card_yellow  Genaro Martin
+    min 55 (2T 15) visitante substitution Hugo Ismael Burgos
+    min 55 (2T 15) visitante injury       Lucas Alcides Sosa
+    min 55 (2T 15) visitante substitution Lucas Alcides Sosa
+    min 60 (2T 20) visitante try          Luis Abenamar Francia
+    min 73 (2T 33) visitante try          Genaro Martin
+    min 73 (2T 33) visitante conversion   Luis Abenamar Francia
+    min 75 (2T 35) visitante try          Genaro Martin
+    min 75 (2T 35) visitante conversion   Luis Abenamar Francia
+    min 80 (2T 40) local     substitution Ramiro Guillermo Frias Estigarribia
+    min 80 (2T 40) local     substitution Mauricio Palacios
+    min 80 (2T 40) local     substitution Sergio Daniel López
+    min 80 (2T 40) local     substitution Gustavo Nahuel Ocampo
+    min 83 (2T 43) local     try          Marcos Fabian Idoyaga
+    min 83 (2T 43) local     conversion   Marcos Fabian Idoyaga
+    min 85 (2T 45) local     substitution Agustin Ezequiel Acosta
+    min 85 (2T 45) local     substitution Leandro Aiba
+    min 100 (2T 60) local     try          Marcos Fabian Idoyaga
+    min 102 (2T 62) local     conversion   Marcos Fabian Idoyaga
+    min 102 (2T 62) local     try          Antonio Vergara
+    min 107 (2T 67) local     substitution Luciano Javier Urbieta
+    min 109 (2T 69) local     substitution Alejandro Nicolas Gimenez
+  marcador  · eventos 27-36 · guardado 27-36
+  tries     · 4-6 (guardado —-—)
+  arbitro   · SANTIAGO EZEQUIEL FOLETTO (guardado: —)
+  guardado  · 23 local · 23 visitante · 29 eventos
+
+capri vs tacuru-social-club · NEAB 2026 · tarjeta 325550  ·  f9cce7ea-af6f-4ffc-bc54-b18ce11a0e37
+  local     · capri · 23 jugadores · 20 con ficha fijada
+  visitante · tacuru-social-club · 23 jugadores · 0 con ficha fijada
+  eventos   · 39
+    min  1 (1T 1) local     conversion   Genaro Martin Kruka
+    min  1 (1T 1) local     try          Angel Venialgo
+    min  1 (1T 1) visitante penalty_goal Francisco Mackinnon
+    min 14 (1T 14) local     conversion   Genaro Martin Kruka
+    min 14 (1T 14) local     try          Lisandro Aron Esteche
+    min 16 (1T 16) visitante try          Joaquin Palisa
+    min 20 (1T 20) visitante conversion   Francisco Mackinnon
+    min 20 (1T 20) visitante try          Joaquin Palisa
+    min 24 (1T 24) local     penalty_try  
+    min 29 (1T 29) local     conversion   Genaro Martin Kruka
+    min 29 (1T 29) local     try          Tomas Bautista Estigarribia Marambio
+    min 30 (1T 30) visitante conversion   Bautista Bianchi
+    min 30 (1T 30) visitante try          Bautista Bianchi
+    min 30 (1T 30) visitante card_yellow  Walter Alejandro Acuña
+    min 34 (1T 34) visitante conversion   Francisco Mackinnon
+    min 34 (1T 34) visitante try          Augusto Miguel Prokopio
+    min 37 (1T 37) local     penalty_goal Genaro Martin Kruka
+    min 41 (2T 1) visitante substitution Walter Alejandro Acuña
+    min 49 (2T 9) visitante conversion   Francisco Mackinnon
+    min 49 (2T 9) visitante try          Carlos Nicolás Insaurralde
+    min 50 (2T 10) visitante card_yellow  Augusto Miguel Prokopio
+    min 50 (2T 10) visitante substitution Tomas Ignacio Gimenez
+    min 54 (2T 14) visitante substitution Carlos Facundo Gutierrez
+    min 57 (2T 17) visitante penalty_goal Francisco Mackinnon
+    min 60 (2T 20) visitante card_yellow  Joaquin Polattini
+    min 60 (2T 20) visitante substitution Fabricio Daniel Rivas
+    min 65 (2T 25) visitante substitution Alejanro Georg Hnatiuk Rajoy
+    min 67 (2T 27) local     substitution Camilo Insaurralde
+    min 67 (2T 27) local     substitution Santiago Agustin Esteche
+    min 70 (2T 30) local     injury       Giuseppe Ceccarini
+    min 70 (2T 30) visitante substitution Maresca Cristian Agustin
+    min 72 (2T 32) local     substitution Lisandro Aron Esteche
+    min 74 (2T 34) visitante substitution Enzo Rafael Dos Santos
+    min 74 (2T 34) visitante substitution Nicolas Reinsch
+    min 77 (2T 37) visitante penalty_goal Francisco Mackinnon
+    min 80 (2T 40) local     substitution Jorge Orlando Mendez
+    min 80 (2T 40) local     substitution Alan Lautaro Gomez
+    min 80 (2T 40) visitante try          Jeremias Pelinski
+    min 82 (2T 42) local     card_yellow  Sebastian Falero
+  marcador  · eventos 31-47 · guardado 31-47
+  tries     · 4-6 (guardado —-—)
+  arbitro   · LEANDRO PEKER (guardado: —)
+  guardado  · 23 local · 23 visitante · 39 eventos
+
+abipones vs capri · NEAB 2026 · tarjeta 326087  ·  423138cd-38d3-4463-a0f3-f3402b2002e4
+  local     · abipones · 23 jugadores · 0 con ficha fijada
+  visitante · capri · 23 jugadores · 16 con ficha fijada
+  eventos   · 24
+    min  7 (1T 7) local     try          Hector Prester
+    min  7 (1T 7) local     conversion   Alan Sandoval
+    min 19 (1T 19) visitante try          Marcio Oliveira
+    min 26 (1T 26) local     try          Hector Prester
+    min 37 (1T 37) visitante try          Alan Lautaro Gomez
+    min 37 (1T 37) visitante conversion   Genaro Martin Kruka
+    min 38 (1T 38) local     try          Alan Sandoval
+    min 38 (1T 38) local     conversion   Alan Sandoval
+    min 42 (2T 2) visitante try          Genaro Martin Kruka
+    min 47 (2T 7) local     card_yellow  Nicolas Ramirez
+    min 50 (2T 10) visitante substitution Lautaro Bohn
+    min 54 (2T 14) local     try          Javier Alberto Acevedo
+    min 54 (2T 14) local     conversion   Diego Sebastián Behr
+    min 65 (2T 25) visitante try          Santiago Agustin Esteche
+    min 65 (2T 25) visitante try          Santiago Ismael Pires
+    min 65 (2T 25) visitante conversion   Genaro Martin Kruka
+    min 66 (2T 26) visitante substitution Angel Venialgo
+    min 69 (2T 29) visitante card_yellow  Juan Villalba
+    min 70 (2T 30) local     try          Martin Gustavo Lopez
+    min 70 (2T 30) local     conversion   Diego Sebastián Behr
+    min 70 (2T 30) visitante substitution Camilo Insaurralde
+    min 70 (2T 30) visitante substitution Adrian Agustin Vargas
+    min 80 (2T 40) visitante substitution Marcio Oliveira
+    min 80 (2T 40) visitante substitution Alan Lautaro Gomez
+  marcador  · eventos 33-29 · guardado 33-29
+  tries     · 5-5 (guardado —-—)
+  arbitro   · WALTER ALEJANDRO ESQUIVEL (guardado: —)
+  guardado  · 23 local · 23 visitante · 24 eventos
+
+tacuru-social-club vs caza-y-pesca · NEAB 2026 · tarjeta 326086  ·  0201b4f8-b84b-44e1-b174-14bd6936f764
+  local     · tacuru-social-club · 23 jugadores · 0 con ficha fijada
+  visitante · caza-y-pesca · 23 jugadores · 0 con ficha fijada
+  eventos   · 40
+    min 14 (1T 14) local     conversion   Francisco Mackinnon
+    min 14 (1T 14) local     try          Maresca Cristian Agustin
+    min 16 (1T 16) local     conversion   Francisco Mackinnon
+    min 16 (1T 16) local     try          Carlos Nicolás Insaurralde
+    min 23 (1T 23) local     conversion   Francisco Mackinnon
+    min 23 (1T 23) local     try          Nicolas Reinsch
+    min 33 (1T 33) local     conversion   Francisco Mackinnon
+    min 33 (1T 33) local     try          Nicolas Reinsch
+    min 38 (1T 38) local     conversion   Francisco Mackinnon
+    min 38 (1T 38) local     try          Carlos Facundo Gutierrez
+    min 40 (1T 40) local     try          Nicolas Reinsch
+    min 49 (2T 9) local     try          Nicolas Reinsch
+    min 50 (2T 10) local     substitution Tomas Ignacio Gimenez
+    min 50 (2T 10) local     substitution Enzo Rafael Dos Santos
+    min 55 (2T 15) local     substitution Nicolas Reinsch
+    min 56 (2T 16) local     conversion   Francisco Mackinnon
+    min 56 (2T 16) local     try          Ariel Alberto Fassi
+    min 59 (2T 19) local     conversion   Francisco Mackinnon
+    min 59 (2T 19) local     try          Joaquin Palisa
+    min 62 (2T 22) local     substitution Julio Cardoso
+    min 62 (2T 22) local     substitution Fabricio Daniel Rivas
+    min 69 (2T 29) local     try          Carlos Facundo Gutierrez
+    min 72 (2T 32) local     substitution Maresca Cristian Agustin
+    min 72 (2T 32) local     substitution Augusto Miguel Prokopio
+    min 79 (2T 39) local     try          Joaquin Palisa
+    min 79 (2T 39) local     conversion   Francisco Mackinnon
+    min 80 (2T 40) local     try          Ramiro Golke
+    min 80 (2T 40) local     conversion   Francisco Mackinnon
+    min 83 (2T 43) visitante conversion   Máximo Bautista Nuñez
+    min 83 (2T 43) visitante try          Victor Emanuel Fontana Acosta
+    min 87 (2T 47) visitante try          Camilo Gonzalo Miranda Frontela
+    min 87 (2T 47) visitante conversion   Alejandro Nicolas Gimenez
+    min 90 (2T 50) visitante substitution Mauro Sánchez
+    min 100 (2T 60) visitante substitution Edgardo Juan Pablo Fernandez
+    min 100 (2T 60) visitante substitution Luciano Javier Urbieta
+    min 100 (2T 60) visitante substitution Sergio Andrés Nuñez Argañaraz
+    min 100 (2T 60) visitante substitution Santiago Sebastian Vazquez
+    min 105 (2T 65) visitante substitution Alex Nahuel Lopez
+    min 117 (2T 77) visitante conversion   Máximo Bautista Nuñez
+    min 117 (2T 77) visitante try          Ulises Duarte
+  marcador  · eventos 78-21 · guardado 78-21
+  tries     · 12-3 (guardado —-—)
+  arbitro   · JUAN MANUEL REQUINO (guardado: —)
+  guardado  · 23 local · 23 visitante · 40 eventos
+
+qompi vs lomas-r-c-posadas · NEAB 2026 · tarjeta 326085  ·  562b05e1-d760-410b-8b28-e9674ea3f2bc
+  local     · qompi · 23 jugadores · 0 con ficha fijada
+  visitante · lomas-r-c-posadas · 23 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min  8 (1T 8) local     card_yellow  Nelson Rodrigo Torrent
+    min 13 (1T 13) visitante penalty_try  Mathias Nicolás Morcillo
+    min 27 (1T 27) visitante penalty_goal Nahuel Alvez
+    min 36 (1T 36) local     card_yellow  Alexander Gordillo
+    min 38 (1T 38) visitante try          Mathias Nicolás Morcillo
+    min 39 (1T 39) visitante conversion   Nahuel Alvez
+    min 43 (2T 3) visitante penalty_try  Mathias Nicolás Morcillo
+    min 51 (2T 11) visitante try          Franco Ivan Flieger
+    min 52 (2T 12) visitante conversion   Nahuel Alvez
+    min 56 (2T 16) visitante substitution Alejo Valentin Sosa
+    min 60 (2T 20) visitante substitution Matías Aguirre
+    min 63 (2T 23) visitante try          Gabriel Jorge Ferreyra
+    min 64 (2T 24) visitante conversion   Nahuel Alvez
+    min 65 (2T 25) visitante substitution Franco Ivan Flieger
+    min 65 (2T 25) visitante substitution Rodrigo Flores
+    min 65 (2T 25) visitante substitution Mathias Nicolás Morcillo
+    min 70 (2T 30) visitante substitution Luis Exequiel Dos Santos
+    min 71 (2T 31) visitante card_yellow  Carlos Valentin Procopovich
+    min 78 (2T 38) local     try          Luis Abenamar Francia
+    min 78 (2T 38) local     conversion   Genaro Martin
+  marcador  · eventos 7-38 · guardado 7-38
+  tries     · 1-5 (guardado —-—)
+  arbitro   · SANTIAGO EZEQUIEL FOLETTO (guardado: —)
+  guardado  · 23 local · 23 visitante · 20 eventos
+
+pay-ubre vs sixty-r-c · NEAB 2026 · tarjeta 326084  ·  a375b49a-24e1-40a6-b587-1cf9eec3da70
+  local     · pay-ubre · 23 jugadores · 0 con ficha fijada
+  visitante · sixty-r-c · 20 jugadores · 18 con ficha fijada
+  eventos   · 31
+    min  3 (1T 3) visitante conversion   Bruno Carlisi
+    min  3 (1T 3) visitante try          Augusto Gonzalez
+    min  6 (1T 6) visitante try          Carlos Florencio Navarro
+    min  6 (1T 6) visitante conversion   Bruno Carlisi
+    min 10 (1T 10) visitante try          Alberto Bria
+    min 17 (1T 17) visitante try          Carlos Florencio Navarro
+    min 20 (1T 20) local     try          Marcelo Poloni
+    min 20 (1T 20) local     conversion   Ian Javier Fernández
+    min 22 (1T 22) visitante try          Rodrigo Agustín Aguirre
+    min 39 (1T 39) visitante try          Yamil Allem Zurita
+    min 39 (1T 39) visitante conversion   Bruno Carlisi
+    min 47 (2T 7) visitante substitution Mateo Freysson
+    min 47 (2T 7) visitante substitution Carlos Florencio Navarro
+    min 48 (2T 8) visitante conversion   Tizziano Fernández
+    min 48 (2T 8) visitante try          Donato Contarde
+    min 52 (2T 12) visitante conversion   Tizziano Fernández
+    min 52 (2T 12) visitante try          Tizziano Fernández
+    min 58 (2T 18) visitante try          Tizziano Fernández
+    min 60 (2T 20) local     substitution Marcos Gonzalo Ramirez
+    min 63 (2T 23) visitante card_yellow  Tizziano Fernández
+    min 70 (2T 30) local     substitution Santiago Ponce De León
+    min 72 (2T 32) local     card_yellow  Mauricio Gaston Silvero
+    min 75 (2T 35) visitante try          Facundo Herrera
+    min 80 (2T 40) local     substitution Marcelo Poloni
+    min 80 (2T 40) local     substitution Federico Nicolas Ivanoff
+    min 80 (2T 40) local     substitution Bruno Avalos
+    min 80 (2T 40) local     substitution Pedro Villan
+    min 80 (2T 40) visitante try          Yamil Allem Zurita
+    min 80 (2T 40) visitante substitution Lautaro Pisarello
+    min 80 (2T 40) visitante substitution Axel Daniel Romero
+    min 80 (2T 40) visitante substitution Rodrigo Agustín Aguirre
+  marcador  · eventos 7-65 · guardado 7-65
+  tries     · 1-11 (guardado —-—)
+  arbitro   · JOAQUÍN DE JESÚS ROMERO (guardado: —)
+  guardado  · 23 local · 20 visitante · 31 eventos
+
+caza-y-pesca vs abipones · NEAB 2026 · tarjeta 326932  ·  2bcca231-bc91-4920-8685-82401bc1d6e7
+  local     · caza-y-pesca · 23 jugadores · 0 con ficha fijada
+  visitante · abipones · 22 jugadores · 0 con ficha fijada
+  eventos   · 30
+    min  4 (1T 4) visitante try          Martin Gustavo Lopez
+    min  4 (1T 4) visitante conversion   Diego Sebastián Behr
+    min 12 (1T 12) visitante try          Martin Gustavo Lopez
+    min 12 (1T 12) visitante conversion   Diego Sebastián Behr
+    min 16 (1T 16) local     conversion   Antonio Vergara
+    min 16 (1T 16) local     try          Ulises Duarte
+    min 19 (1T 19) visitante try          Javier Alberto Acevedo
+    min 24 (1T 24) visitante try          Juan Ignacio Acuña
+    min 26 (1T 26) local     try          Edgardo Juan Pablo Fernandez
+    min 26 (1T 26) local     conversion   Antonio Vergara
+    min 30 (1T 30) visitante try          Alan Sandoval
+    min 30 (1T 30) visitante conversion   Alan Sandoval
+    min 35 (1T 35) visitante penalty_goal Diego Sebastián Behr
+    min 39 (1T 39) visitante try          Juan Ignacio Acuña
+    min 41 (2T 1) visitante try          Mariano Baustian
+    min 54 (2T 14) visitante try          Alan Sandoval
+    min 69 (2T 29) visitante card_yellow  Nicolas Ramirez
+    min 73 (2T 33) visitante try          Martin Gustavo Lopez
+    min 81 (2T 41) visitante penalty_goal Diego Sebastián Behr
+    min 84 (2T 44) local     substitution Ramiro Hernán Ávalos
+    min 84 (2T 44) local     substitution Sergio Andrés Nuñez Argañaraz
+    min 87 (2T 47) local     try          Edgardo Juan Pablo Fernandez
+    min 87 (2T 47) local     substitution Santiago Sebastian Vazquez
+    min 90 (2T 50) local     card_yellow  Carlos Alberto Romero
+    min 95 (2T 55) local     substitution Máximo Bautista Nuñez
+    min 105 (2T 65) local     conversion   Antonio Vergara
+    min 105 (2T 65) local     try          Ivan Campuzano
+    min 105 (2T 65) local     substitution Victor Emanuel Fontana Acosta
+    min 105 (2T 65) local     substitution Mauro Sánchez
+    min 119 (2T 79) local     try          Antonio Vergara
+  marcador  · eventos 31-57 · guardado 31-57
+  tries     · 5-9 (guardado —-—)
+  arbitro   · WALTER ALEJANDRO ESQUIVEL (guardado: —)
+  guardado  · 23 local · 22 visitante · 30 eventos
+
+pay-ubre vs qompi · NEAB 2026 · tarjeta 327128  ·  d994827a-ff90-4d3f-aef2-cae50ed3c995
+  local     · pay-ubre · 23 jugadores · 0 con ficha fijada
+  visitante · qompi · 23 jugadores · 0 con ficha fijada
+  eventos   · 34
+    min  2 (1T 2) visitante card_yellow  Andres Gabriel Almada
+    min  4 (1T 4) local     penalty_goal Ian Javier Fernández
+    min  7 (1T 7) local     try          Ian Javier Fernández
+    min  7 (1T 7) local     conversion   Ian Javier Fernández
+    min 10 (1T 10) visitante try          Mauro Fernando Ariel Camacho
+    min 10 (1T 10) visitante conversion   Luis Abenamar Francia
+    min 15 (1T 15) local     try          Marcos Gonzalo Ramirez
+    min 18 (1T 18) visitante try          Daniel Jose Luis Sosa
+    min 33 (1T 33) local     try          Lucas Cayetano Niveyro
+    min 34 (1T 34) visitante try          Luis Abenamar Francia
+    min 34 (1T 34) visitante conversion   Luis Abenamar Francia
+    min 35 (1T 35) local     try          Bruno Avalos
+    min 35 (1T 35) local     conversion   Ian Javier Fernández
+    min 40 (1T 40) local     try          Marcelo Poloni
+    min 40 (1T 40) local     conversion   Ian Javier Fernández
+    min 41 (2T 1) visitante try          Nelson Maximiliano Torrent
+    min 41 (2T 1) visitante conversion   Nelson Maximiliano Torrent
+    min 42 (2T 2) visitante try          Daniel Jose Luis Sosa
+    min 45 (2T 5) local     conversion   Ian Javier Fernández
+    min 45 (2T 5) local     try          Federico Nicolas Ivanoff
+    min 50 (2T 10) local     substitution Pedro Villan
+    min 50 (2T 10) local     substitution Marcos Gonzalo Ramirez
+    min 50 (2T 10) local     substitution Carlos Zacarias
+    min 56 (2T 16) local     conversion   Ian Javier Fernández
+    min 56 (2T 16) local     try          Ian Javier Fernández
+    min 57 (2T 17) local     conversion   Ian Javier Fernández
+    min 57 (2T 17) local     try          Enrique Von Wernich
+    min 60 (2T 20) local     substitution Lucas Cayetano Niveyro
+    min 62 (2T 22) local     substitution Federico Nicolas Ivanoff
+    min 66 (2T 26) local     card_yellow  Mariano Julian Alvarez
+    min 72 (2T 32) visitante card_yellow  Luis Abenamar Francia
+    min 74 (2T 34) local     conversion   Ian Javier Fernández
+    min 74 (2T 34) local     try          Juan Ignacio Figueroa
+    min 75 (2T 35) local     card_yellow  Juan Ignacio Figueroa
+  marcador  · eventos 62-31 · guardado 62-31
+  tries     · 9-5 (guardado —-—)
+  arbitro   · VIVIANA GARAT (guardado: —)
+  guardado  · 23 local · 23 visitante · 34 eventos
+
+lomas-r-c-posadas vs tacuru-social-club · NEAB 2026 · tarjeta 326933  ·  faee90ff-674f-4925-ba0c-85a325dd1d3a
+  local     · lomas-r-c-posadas · 23 jugadores · 0 con ficha fijada
+  visitante · tacuru-social-club · 23 jugadores · 0 con ficha fijada
+  eventos   · 39
+    min  4 (1T 4) visitante penalty_goal Francisco Mackinnon
+    min 11 (1T 11) visitante penalty_goal Francisco Mackinnon
+    min 12 (1T 12) local     try          Mauricio Esquivel
+    min 17 (1T 17) local     try          Franco Ivan Flieger
+    min 18 (1T 18) local     conversion   Nahuel Alvez
+    min 20 (1T 20) visitante conversion   Francisco Mackinnon
+    min 20 (1T 20) visitante try          Ariel Alberto Fassi
+    min 28 (1T 28) visitante conversion   Francisco Mackinnon
+    min 28 (1T 28) visitante try          Nicolas Reinsch
+    min 30 (1T 30) visitante conversion   Francisco Mackinnon
+    min 30 (1T 30) visitante try          Ariel Alberto Fassi
+    min 34 (1T 34) local     penalty_goal Nahuel Alvez
+    min 39 (1T 39) visitante conversion   Francisco Mackinnon
+    min 39 (1T 39) visitante try          Hugo David Letviñiuk
+    min 42 (1T 42) visitante try          Bautista Bianchi
+    min 44 (1T 44) local     try          Franco Ivan Flieger
+    min 45 (1T 45) local     conversion   Nahuel Alvez
+    min 41 (2T 1) local     try          Ivan Zanek
+    min 41 (2T 1) visitante substitution Carlos Facundo Gutierrez
+    min 47 (2T 7) local     substitution Agustín Acosta
+    min 47 (2T 7) local     substitution Eduardo Casco
+    min 49 (2T 9) local     try          Luis Exequiel Dos Santos
+    min 49 (2T 9) visitante substitution Nicolas Reinsch
+    min 49 (2T 9) visitante substitution Alejanro Georg Hnatiuk Rajoy
+    min 49 (2T 9) visitante substitution Tomas Ignacio Gimenez
+    min 50 (2T 10) local     conversion   Nahuel Alvez
+    min 55 (2T 15) local     penalty_goal Nahuel Alvez
+    min 58 (2T 18) visitante substitution Maresca Cristian Agustin
+    min 58 (2T 18) visitante substitution Ariel Alberto Fassi
+    min 61 (2T 21) local     try          Franco Ivan Flieger
+    min 62 (2T 22) local     conversion   Nahuel Alvez
+    min 63 (2T 23) local     card_yellow  Carlos Valentin Procopovich
+    min 66 (2T 26) visitante substitution Fabricio Daniel Rivas
+    min 66 (2T 26) visitante substitution Walter Alejandro Acuña
+    min 66 (2T 26) visitante card_yellow  Agustin Zanivan
+    min 79 (2T 39) local     substitution Matías Aguirre
+    min 79 (2T 39) local     card_yellow  Rodrigo Flores
+    min 79 (2T 39) local     substitution Jose María Benitez
+    min 79 (2T 39) local     substitution Gabriel Jorge Ferreyra
+  marcador  · eventos 44-39 · guardado 44-39
+  tries     · 6-5 (guardado —-—)
+  arbitro   · CRISTIAN GABRIEL SALDIAS (guardado: —)
+  guardado  · 23 local · 23 visitante · 39 eventos
+
+sixty-r-c vs capri · NEAB 2026 · tarjeta 326931  ·  8f882bba-4ebe-4b95-b6ef-86e0bde308a2
+  local     · sixty-r-c · 22 jugadores · 20 con ficha fijada
+  visitante · capri · 23 jugadores · 16 con ficha fijada
+  eventos   · 47
+    min  8 (1T 8) local     conversion   Atilio Lotero
+    min  8 (1T 8) local     try          Juan Manuel Zabala
+    min 11 (1T 11) local     try          Francisco Galassi
+    min 11 (1T 11) local     conversion   Atilio Lotero
+    min 15 (1T 15) visitante penalty_goal Genaro Martin Kruka
+    min 17 (1T 17) local     try          Juan Manuel Zabala
+    min 28 (1T 28) local     try          Rodrigo Lotero
+    min 28 (1T 28) local     conversion   Atilio Lotero
+    min 30 (1T 30) visitante substitution Jeremías Stuber
+    min 31 (1T 31) local     try          Alberto Bria
+    min 31 (1T 31) local     conversion   Atilio Lotero
+    min 35 (1T 35) local     try          Alberto Bria
+    min 35 (1T 35) local     conversion   Atilio Lotero
+    min 41 (1T 41) local     try          Carlos Florencio Navarro
+    min 42 (2T 2) local     try          Alberto Bria
+    min 44 (2T 4) local     card_yellow  Mateo Freysson
+    min 45 (2T 5) visitante try          Lucas Noel Diaz
+    min 45 (2T 5) visitante conversion   Genaro Martin Kruka
+    min 48 (2T 8) local     try          Diego Sebastian Martinez
+    min 48 (2T 8) local     conversion   Tizziano Fernández
+    min 50 (2T 10) local     substitution Francisco Galassi
+    min 50 (2T 10) local     substitution Victor Julio Galarza
+    min 50 (2T 10) local     substitution Juan Manuel Zabala
+    min 50 (2T 10) local     substitution Yamil Allem Zurita
+    min 52 (2T 12) local     try          Alberto Bria
+    min 53 (2T 13) local     substitution Joaquin Acevedo
+    min 55 (2T 15) visitante try          Nicolas Eduardo Palaguerra
+    min 55 (2T 15) visitante conversion   Genaro Martin Kruka
+    min 56 (2T 16) local     try          Donato Contarde
+    min 60 (2T 20) local     substitution Diego Sebastian Martinez
+    min 62 (2T 22) visitante substitution Alan Lautaro Gomez
+    min 63 (2T 23) local     conversion   Tizziano Fernández
+    min 63 (2T 23) local     try          Facundo Herrera
+    min 68 (2T 28) local     conversion   Tizziano Fernández
+    min 68 (2T 28) local     try          Carlos Florencio Navarro
+    min 69 (2T 29) visitante substitution Camilo Insaurralde
+    min 69 (2T 29) visitante substitution Santiago Agustin Esteche
+    min 69 (2T 29) visitante substitution Nicolas Eduardo Palaguerra
+    min 70 (2T 30) local     card_yellow  Facundo Daniel Vargas
+    min 72 (2T 32) local     card_yellow  Dario Luis Kiverling
+    min 73 (2T 33) visitante conversion   Tomas Bautista Estigarribia Marambio
+    min 73 (2T 33) visitante try          Tomas Bautista Estigarribia Marambio
+    min 76 (2T 36) local     conversion   Tizziano Fernández
+    min 76 (2T 36) local     try          Alberto Bria
+    min 80 (2T 40) local     substitution Atilio Lotero
+    min 80 (2T 40) visitante substitution Joel Velozo
+    min 80 (2T 40) visitante substitution Elias Gimenez
+  marcador  · eventos 88-24 · guardado 88-24
+  tries     · 14-3 (guardado —-—)
+  arbitro   · RODRIGO SAUCO (guardado: —)
+  guardado  · 22 local · 23 visitante · 47 eventos
+
+listo · 27 partidos

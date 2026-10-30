@@ -1,0 +1,367 @@
+<title>G22 Scores ante App Review</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@87.5,500;87.5,700;87.5,800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --bg: #F6F8F5;
+    --bg-2: #FFFFFF;
+    --bg-3: #ECF0EA;
+    --ink: #151A17;
+    --ink-2: #4E5A53;
+    --ink-3: #7B857F;
+    --line: #D9E0D8;
+    --accent: #1F6B3A;
+    --accent-ink: #FFFFFF;
+    --crit: #B8321F;
+    --crit-bg: #FBE9E5;
+    --warn: #9A6A0C;
+    --warn-bg: #FBF1D8;
+    --ok: #237A47;
+    --ok-bg: #E2F2E6;
+    --code-bg: #EEF2EC;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0F1311;
+      --bg-2: #161B18;
+      --bg-3: #1D241F;
+      --ink: #EDF1EC;
+      --ink-2: #A9B4AC;
+      --ink-3: #737E76;
+      --line: #2A332C;
+      --accent: #A6FF2E;
+      --accent-ink: #0F1311;
+      --crit: #FF7A66;
+      --crit-bg: #3A1A15;
+      --warn: #F2C05A;
+      --warn-bg: #3A2D10;
+      --ok: #6FD694;
+      --ok-bg: #15301F;
+      --code-bg: #1A211C;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0F1311;
+    --bg-2: #161B18;
+    --bg-3: #1D241F;
+    --ink: #EDF1EC;
+    --ink-2: #A9B4AC;
+    --ink-3: #737E76;
+    --line: #2A332C;
+    --accent: #A6FF2E;
+    --accent-ink: #0F1311;
+    --crit: #FF7A66;
+    --crit-bg: #3A1A15;
+    --warn: #F2C05A;
+    --warn-bg: #3A2D10;
+    --ok: #6FD694;
+    --ok-bg: #15301F;
+    --code-bg: #1A211C;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 48px 24px 96px; }
+  h1, h2, h3 { font-family: "Archivo", "Arial Narrow", "Helvetica Neue", sans-serif; font-stretch: 87.5%; margin: 0; text-wrap: balance; }
+  h1 { font-size: clamp(34px, 5vw, 52px); font-weight: 800; line-height: 1; letter-spacing: -0.01em; }
+  h2 { font-size: 24px; font-weight: 700; line-height: 1.15; }
+  h3 { font-size: 18px; font-weight: 700; line-height: 1.25; }
+  p { margin: 0; }
+  a { color: var(--accent); }
+  code, .mono { font-family: "IBM Plex Mono", "Consolas", monospace; font-size: 0.86em; }
+  code { background: var(--code-bg); padding: 1px 5px; border-radius: 3px; word-break: break-all; }
+  .eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
+
+  header { display: grid; gap: 14px; padding-bottom: 28px; border-bottom: 2px solid var(--ink); }
+  header .lede { font-size: 18px; color: var(--ink-2); max-width: 62ch; }
+  .verdict {
+    display: grid; grid-template-columns: auto 1fr; gap: 0 18px; align-items: start;
+    margin-top: 28px; padding: 20px 22px; background: var(--bg-2); border: 1px solid var(--line); border-left: 6px solid var(--crit); border-radius: 6px;
+  }
+  .verdict .word { font-family: "Archivo", sans-serif; font-stretch: 87.5%; font-weight: 800; font-size: 28px; color: var(--crit); line-height: 1; padding-top: 2px; }
+  .verdict p { color: var(--ink-2); max-width: 66ch; }
+
+  .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 28px 0 8px; }
+  .tile { background: var(--bg-2); border: 1px solid var(--line); border-radius: 6px; padding: 16px 18px; display: grid; gap: 4px; }
+  .tile .n { font-family: "Archivo", sans-serif; font-stretch: 87.5%; font-weight: 800; font-size: 44px; line-height: 1; font-variant-numeric: tabular-nums; }
+  .tile .l { font-size: 13px; color: var(--ink-2); }
+  .tile.crit .n { color: var(--crit); }
+  .tile.warn .n { color: var(--warn); }
+  .tile.ok .n { color: var(--ok); }
+  .context { margin-top: 18px; padding: 14px 18px; background: var(--bg-3); border-radius: 6px; font-size: 15px; color: var(--ink-2); }
+  .context strong { color: var(--ink); }
+
+  section { margin-top: 56px; }
+  section > .eyebrow { margin-bottom: 6px; }
+  section > h2 { margin-bottom: 6px; }
+  section > .intro { color: var(--ink-2); max-width: 66ch; margin-bottom: 22px; }
+  .findings { display: grid; gap: 14px; }
+  .f {
+    display: grid; grid-template-columns: 96px 1fr; gap: 6px 18px;
+    background: var(--bg-2); border: 1px solid var(--line); border-radius: 6px; padding: 18px 20px 18px 16px; position: relative; overflow: hidden;
+  }
+  .f::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--sev); }
+  .f.crit { --sev: var(--crit); }
+  .f.warn { --sev: var(--warn); }
+  .f.ok { --sev: var(--ok); }
+  .f .ref { grid-row: 1 / span 3; display: grid; align-content: start; gap: 6px; }
+  .f .ref .g { font-family: "IBM Plex Mono", monospace; font-size: 13px; font-weight: 500; }
+  .f .ref .pill { justify-self: start; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .f.crit .pill { color: var(--crit); background: var(--crit-bg); }
+  .f.warn .pill { color: var(--warn); background: var(--warn-bg); }
+  .f.ok .pill { color: var(--ok); background: var(--ok-bg); }
+  .f h3 { grid-column: 2; }
+  .f .ev { grid-column: 2; color: var(--ink-2); font-size: 15px; max-width: 70ch; }
+  .f .fix { grid-column: 2; margin-top: 6px; padding-top: 10px; border-top: 1px dashed var(--line); font-size: 15px; max-width: 70ch; }
+  .f .fix::before { content: "Qué hacer"; display: block; font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 4px; }
+  .f ul { margin: 6px 0 0; padding-left: 18px; }
+  .f li { margin: 3px 0; }
+
+  .check { display: grid; border: 1px solid var(--line); border-radius: 6px; background: var(--bg-2); overflow: hidden; }
+  .check .row { display: grid; grid-template-columns: 28px 1fr; gap: 12px; padding: 12px 16px; border-top: 1px solid var(--line); font-size: 15px; }
+  .check .row:first-child { border-top: 0; }
+  .check .box { width: 16px; height: 16px; margin-top: 4px; border: 1.5px solid var(--ink-3); border-radius: 3px; }
+  .check .row.done .box { background: var(--ok); border-color: var(--ok); position: relative; }
+  .check .row.done .box::after { content: ""; position: absolute; left: 4px; top: 1px; width: 5px; height: 9px; border: solid var(--bg-2); border-width: 0 2px 2px 0; transform: rotate(45deg); }
+  .check .row.done { color: var(--ink-2); }
+
+  .order { display: grid; gap: 0; }
+  .order .step { display: grid; grid-template-columns: 40px 1fr; gap: 14px; align-items: start; padding: 14px 0; border-top: 1px solid var(--line); }
+  .order .step:first-child { border-top: 0; }
+  .order .step .k { font-family: "Archivo", sans-serif; font-stretch: 87.5%; font-weight: 800; font-size: 26px; line-height: 1; color: var(--accent); font-variant-numeric: tabular-nums; }
+  .order .step p { max-width: 68ch; }
+  .order .step .why { color: var(--ink-2); font-size: 15px; }
+
+  footer { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--ink-3); font-size: 13px; max-width: 70ch; }
+
+  @media (max-width: 640px) {
+    .board { grid-template-columns: 1fr; }
+    .f { grid-template-columns: 1fr; }
+    .f .ref { grid-row: auto; grid-template-columns: auto auto; align-items: center; }
+    .f h3, .f .ev, .f .fix { grid-column: 1; }
+    .verdict { grid-template-columns: 1fr; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .f { transition: border-color 120ms ease; }
+    .f:hover { border-color: var(--ink-3); }
+  }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Auditoría · App Review Guidelines · 27 de agosto de 2026 · rama feat/carrera-rugby-v2</p>
+    <h1>G22 Scores ante App Review</h1>
+    <p class="lede">Qué pasa hoy si la app se envuelve y se manda al App Store, punto por punto contra las guidelines de Apple, con la evidencia en el código y lo que hay que tocar.</p>
+    <div class="verdict">
+      <div class="word">Rechazo</div>
+      <p>Tal como está, la app no pasa la primera revisión. Hay seis motivos que Apple detecta en los primeros minutos: dos páginas legales que son placeholders, un botón de eliminar cuenta que solo muestra un alert, login con Google sin Sign in with Apple, planes cobrados por MercadoPago que desbloquean funciones dentro de la app, botones del perfil que no hacen nada, y la ausencia de un binario nativo con algo más que una WebView. Ninguno es de arquitectura: son cerrables en días, salvo el de pagos, que es una decisión de negocio.</p>
+    </div>
+  </header>
+
+  <div class="board">
+    <div class="tile crit"><div class="n">6</div><div class="l">Bloqueantes. Rechazo seguro en la primera revisión.</div></div>
+    <div class="tile warn"><div class="n">7</div><div class="l">Riesgos. Apple suele pedir cambios o documentación.</div></div>
+    <div class="tile ok"><div class="n">6</div><div class="l">Ya cumplen. Conviene no romperlos.</div></div>
+  </div>
+
+  <p class="context"><strong>Punto de partida.</strong> Hoy no existe app nativa: G22 es Next.js 16 en Vercel, con PWA (<code>src/app/manifest.ts</code>, <code>public/sw.js</code>), push web cifrado, login por Supabase (Google y email) y suscripciones por MercadoPago. No hay Capacitor, Expo ni React Native en el repo. Todo lo que sigue asume que se envuelve con Capacitor o similar; sin eso no hay nada que mandar.</p>
+
+  <section>
+    <p class="eyebrow">Sección A</p>
+    <h2>Bloqueantes</h2>
+    <p class="intro">Cada uno alcanza solo para el rechazo. Están ordenados por lo fácil que es cerrarlos, no por gravedad.</p>
+    <div class="findings">
+
+      <article class="f crit">
+        <div class="ref"><span class="g">5.1.1(i) · 2.1(a)</span><span class="pill">Bloqueante</span></div>
+        <h3>La política de privacidad y los términos son texto de relleno</h3>
+        <p class="ev"><code>src/app/privacidad/page.tsx</code> dice "Esta página se publicará con la política oficial de privacidad" y <code>src/app/terminos/page.tsx</code> lo mismo con los términos. Están linkeadas desde <code>Footer.tsx:25-26</code> y <code>MobileBottomNav.tsx:28-29</code>, así que el revisor las va a abrir. 2.1(a) prohíbe placeholders explícitamente, y 5.1.1(i) exige una política de privacidad linkeada en App Store Connect y adentro de la app.</p>
+        <div class="fix">Publicar los dos textos reales. La política tiene que decir qué se recolecta (email, nombre y avatar de Google, favoritos, suscripción de push, pronósticos, datos de pago), para qué, con quién se comparte (Supabase, Vercel Analytics, MercadoPago), cuánto se retiene y cómo se borra o se pide el borrado. La misma URL va en el campo Privacy Policy de Connect.</div>
+      </article>
+
+      <article class="f crit">
+        <div class="ref"><span class="g">5.1.1(v)</span><span class="pill">Bloqueante</span></div>
+        <h3>"Eliminar cuenta" solo muestra un alert que manda a soporte</h3>
+        <p class="ev"><code>src/app/profile/page.tsx:996</code>: <code>onClick={() =&gt; alert('Para eliminar tu cuenta, contacta a soporte.')}</code>. Desde 2022 Apple exige que el borrado se inicie desde la app y borre la cuenta entera, no solo la desactive. "Escribí a soporte" es uno de los motivos de rechazo más frecuentes. No hay ningún endpoint de borrado en <code>src/app/api/</code>.</p>
+        <div class="fix">Un flujo de dos pasos (confirmación con el email escrito o reautenticación) que pegue a un endpoint nuevo con <code>service_role</code>: <code>auth.admin.deleteUser(id)</code> más limpieza de <code>users</code>, favoritos, <code>push_subscriptions</code>, membresías de ligas de prode, pronósticos y suscripción de billing (cancelar el preapproval de MercadoPago antes de borrar). Si algo tiene que quedar por obligación fiscal, decirlo en la pantalla.</div>
+      </article>
+
+      <article class="f crit">
+        <div class="ref"><span class="g">4.8</span><span class="pill">Bloqueante</span></div>
+        <h3>Hay login con Google pero no Sign in with Apple</h3>
+        <p class="ev">El único proveedor social es Google (<code>src/app/api/auth/google-start/route.ts:78</code>, <code>provider: 'google'</code>). La regla 4.8 dice que si la app ofrece un login de terceros, tiene que ofrecer también una opción equivalente que limite la recolección al nombre y email y permita ocultar el email. Sign in with Apple es la que cumple sin discusión.</p>
+        <div class="fix">Supabase ya soporta <code>provider: 'apple'</code>; en nativo conviene el flujo con <code>signInWithIdToken</code> desde el plugin de Capacitor para no pasar por Safari. Hay que contemplar el "Hide My Email" (un relay <code>@privaterelay.appleid.com</code>) en cualquier lógica que asuma un mail real, como <code>SUPER_ADMIN_ROLE_EMAILS</code>. El login por email y contraseña puede quedarse; no reemplaza el requisito.</div>
+      </article>
+
+      <article class="f crit">
+        <div class="ref"><span class="g">3.1.1 · 3.1.3</span><span class="pill">Bloqueante</span></div>
+        <h3>Los planes Inicial y Pro se cobran por MercadoPago y desbloquean funciones digitales</h3>
+        <p class="ev"><code>src/lib/billing/plans.ts</code> vende Inicial (USD 15) y Pro (USD 39) a un usuario individual y con eso se destraban exportación, estadísticas detalladas, fixture avanzado y la quita de marca de agua; el checkout vive en <code>src/app/checkout/[plan]</code>. Eso es exactamente lo que 3.1.1 obliga a vender con In-App Purchase. No entra en 3.1.3(c) (enterprise) porque se vende a personas, no a organizaciones por contrato; y fuera de la tienda de Estados Unidos ni siquiera se puede linkear a un pago externo. La excepción "multiplataforma" 3.1.3(b) permite usar en la app lo comprado en la web, pero <em>solo si el mismo ítem también existe como IAP</em>.</p>
+        <div class="fix">Son dos caminos y hay que elegir uno:
+          <ul>
+            <li><strong>IAP para Inicial y Pro.</strong> Suscripciones auto-renovables en StoreKit, sincronizadas con la tabla de suscripciones vía App Store Server Notifications. La promo fundador de 6 meses se modela como oferta introductoria. Comisión de Apple: 15 % en el Small Business Program. Lo comprado en la web sigue valiendo en la app.</li>
+            <li><strong>App iOS solo para hinchas.</strong> Sacar <code>/billing</code>, <code>/checkout</code>, <code>/para-clubes</code> y <code>/para-torneos</code> del build nativo y no mencionar precios ni planes en ninguna pantalla. El gestor de torneos queda en la web. Ojo con las pantallas de admin que digan "disponible en el plan Pro": también son una llamada a comprar afuera.</li>
+          </ul>
+          El plan "Organización" (contacto comercial, USD 149) puede vivir afuera bajo 3.1.3(c) si se factura a una entidad; en la app solo se puede mostrar "contactanos", sin precio.</div>
+      </article>
+
+      <article class="f crit">
+        <div class="ref"><span class="g">2.1(a)</span><span class="pill">Bloqueante</span></div>
+        <h3>Botones del perfil que no hacen nada</h3>
+        <p class="ev"><code>src/app/profile/page.tsx:230</code>: "Editar perfil" abre <code>alert('Edicion de perfil proximamente.')</code>. Los tiles "Notificaciones", "Privacidad: Público" y "Cambiar contraseña" (<code>profile/page.tsx:962-985</code>) no tienen <code>onClick</code>: son decorativos. El revisor los toca, y 2.1(a) lo trata como app incompleta. El cambio de contraseña sí existe en <code>/auth/forgot-password</code>; solo no está conectado.</p>
+        <div class="fix">Implementar o sacar, sin punto medio. Lo mínimo: "Cambiar contraseña" linkea al flujo de reset, "Notificaciones" abre <code>/notifications</code> con el toggle real de push, y los otros dos desaparecen hasta que existan.</div>
+      </article>
+
+      <article class="f crit">
+        <div class="ref"><span class="g">4.2 · 2.5.4</span><span class="pill">Bloqueante</span></div>
+        <h3>Una WebView de g22scores.com se rechaza por "mínima funcionalidad"</h3>
+        <p class="ev">4.2 rechaza apps que son "un sitio web empaquetado". No es que Apple prohíba híbridas: rechaza las que no hacen nada que Safari no haga. Y dos piezas de hoy directamente no funcionan en WKWebView: el push web (el service worker de <code>public/sw.js</code> y las suscripciones VAPID de <code>systemPush.ts</code>) y el botón de "instalar app" (<code>InstallAppButton.tsx</code>, que además distingue Android e iOS en la interfaz, lo que roza 2.3.10).</p>
+        <div class="fix">Capacitor con al menos tres cosas nativas: push por APNs (registrar el token en la misma tabla de <code>push_subscriptions</code> con un campo <code>platform</code>, y que <code>systemPush.ts</code> despache por canal), share sheet nativo para las placas de <code>ExportImage</code>, y navegación con historial que respete el gesto de volver. Ocultar <code>InstallAppButton</code> cuando corre nativo. El bottom nav que ya existe (<code>MobileBottomNav.tsx</code>) juega a favor.</div>
+      </article>
+
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">Sección B</p>
+    <h2>Riesgos</h2>
+    <p class="intro">No garantizan rechazo, pero cada uno tiene un historial conocido de "necesitamos más información" o de pedidos de cambio. Conviene llegar con la respuesta preparada.</p>
+    <div class="findings">
+
+      <article class="f warn">
+        <div class="ref"><span class="g">1.2</span><span class="pill">Riesgo</span></div>
+        <h3>Hay contenido generado por usuarios y ningún mecanismo de moderación</h3>
+        <p class="ev">Los usuarios escriben texto que otros ven: el nombre de las ligas privadas de prode (<code>api/prode/private-leagues/route.ts</code>, acción <code>rename_league</code>, tope de 80 caracteres y nada más), su nombre y avatar en rankings y ligas, y las invitaciones a club. 1.2 pide cuatro cosas para cualquier app con UGC: filtro de contenido ofensivo, botón de reportar con respuesta en tiempo, bloqueo de usuarios y contacto publicado. Solo existe la última (<code>hola@g22scores.com</code> en <code>/contacto</code>). No hay ningún "reportar" ni "bloquear" en el código.</p>
+        <div class="fix">Para el volumen actual alcanza con lo mínimo: filtro de palabras al guardar nombres de liga y de perfil, "Reportar" en la liga y en el perfil de otro usuario (una tabla <code>reports</code> y un aviso al admin), y "Bloquear" que lo saque de tus rankings. En las notas de revisión, contar cómo se responde a un reporte y en cuánto tiempo.</div>
+      </article>
+
+      <article class="f warn">
+        <div class="ref"><span class="g">5.2.2 · 5.2.3</span><span class="pill">Riesgo</span></div>
+        <h3>Los datos en vivo vienen de APIs no oficiales</h3>
+        <p class="ev">Rugby sale de <code>flashscore4.p.rapidapi.com</code> (<code>src/lib/services/flashscore.ts:78</code>), un wrapper de terceros sobre FlashScore sin licencia del titular; fútbol de la API pública no documentada de ESPN; y SofaScore de un microservicio propio (<code>docs/ARQUITECTURA_API.md</code>). Los escudos de clubes se sirven desde esos mismos proveedores. 5.2.2 dice que si la app usa contenido de terceros tiene que tener el derecho, y Apple puede pedir la documentación. Las apps de resultados en vivo son un rubro que la revisión mira con atención por esto.</p>
+        <div class="fix">No hay fix de código: es de derechos. Lo realista para presentarse: que el nombre del proveedor no aparezca nunca en la interfaz de usuario (hoy solo está en pantallas de admin, bien), que el contenido propio (torneos locales de URBA, hockey, noticias, juegos) sea el centro de la propuesta ante la revisión, y tener una respuesta escrita para "¿tienen licencia de FlashScore?". Si la respuesta es no, la decisión de fondo es si la app iOS muestra ese contenido o solo los torneos cargados por G22.</div>
+      </article>
+
+      <article class="f warn">
+        <div class="ref"><span class="g">5.1.1(iii) · 5.1.2</span><span class="pill">Riesgo</span></div>
+        <h3>La ficha de privacidad de App Store Connect tiene que coincidir con lo que la app hace</h3>
+        <p class="ev">Lo que se recolecta hoy, según el código: email, nombre y foto (de Google o del registro), favoritos, suscripción de push, pronósticos y ligas, historial de pagos (MercadoPago), y uso anónimo por <code>@vercel/analytics</code> (sin cookies ni identificador de dispositivo). No hay geolocalización, cámara ni micrófono. La cookie de invitado del prode identifica una sesión.</p>
+        <div class="fix">Declarar en App Privacy: Contact Info (email, nombre), User Content (pronósticos), Identifiers (user ID), Purchases, Usage Data (analytics). Nada se usa para tracking entre apps, así que no hace falta el prompt de ATT, y hay que no agregarlo por las dudas. Si más adelante entra un SDK de anuncios, esto se rehace.</div>
+      </article>
+
+      <article class="f warn">
+        <div class="ref"><span class="g">4.5.4</span><span class="pill">Riesgo</span></div>
+        <h3>El permiso de push se tiene que pedir con contexto y la app tiene que andar sin él</h3>
+        <p class="ev">Los tipos de aviso son solo dos, <code>match_finished</code> y <code>team_event</code> (<code>src/lib/notifications/types.ts:1</code>): resultados y eventos de clubes seguidos. No hay push de marketing, que es lo que 4.5.4 prohíbe sin consentimiento. Bien. El riesgo es de implementación nativa: pedir el permiso del sistema en el arranque, sin explicar para qué, es motivo de rechazo habitual.</p>
+        <div class="fix">Pedir el permiso recién cuando el usuario sigue un club o activa "avisarme" en un partido, con una pantalla previa que diga qué va a recibir. Nada de la app puede depender de haber aceptado.</div>
+      </article>
+
+      <article class="f warn">
+        <div class="ref"><span class="g">2.3.6 · 5.3</span><span class="pill">Riesgo</span></div>
+        <h3>La clasificación por edad depende del prode y de lo que se responda sobre UGC</h3>
+        <p class="ev">El prode se presenta como "gratis, sin apuestas ni premios" (<code>ProdeLobby.tsx:208</code>), y no hay ninguna referencia a casas de apuestas en el código. Eso lo saca de 5.3 (juego con dinero) y de "apuestas simuladas" en el cuestionario de edad. Los juegos (Carrera de Rugby, El Capitán) usan plata ficticia del contrato, sin compras reales (<code>features/captain/data/shop.ts</code>). Las noticias son editoriales, cargadas por super_admin.</p>
+        <div class="fix">Responder el cuestionario tal cual: sin apuestas, sin premios, contenido de usuarios "poco frecuente" (nombres de liga). Eso da 4+ o 9+. Y sostenerlo: si un día el prode reparte premios, entra 5.3.4 (reglas oficiales, sponsor identificado y aclarar que Apple no participa).</div>
+      </article>
+
+      <article class="f warn">
+        <div class="ref"><span class="g">2.1(a) · 2.3.1</span><span class="pill">Riesgo</span></div>
+        <h3>Cuenta demo y notas de revisión</h3>
+        <p class="ev">La app tiene login, prode, club-admin y gestor de torneos. Apple exige una cuenta demo activa con acceso a todo lo que se quiera mostrar, y una descripción específica de cada función que no sea obvia. Hoy el super_admin se resuelve por email reservado (<code>SUPER_ADMIN_ROLE_EMAILS</code>), que no sirve para un revisor.</p>
+        <div class="fix">Una cuenta de revisor con contraseña, rol de club-admin sobre un club de prueba y una liga de prode ya armada. En las notas: qué es el prode, qué son los juegos, de dónde salen los datos y cómo se reporta contenido. Y dejar el backend en verde durante la ventana de revisión, incluido el cron de URBA.</div>
+      </article>
+
+      <article class="f warn">
+        <div class="ref"><span class="g">1.5 · 2.3</span><span class="pill">Riesgo</span></div>
+        <h3>Metadatos: Support URL, capturas y nombre</h3>
+        <p class="ev">Existe una página de contacto que funciona con <code>mailto:hola@g22scores.com</code> (<code>src/app/contacto/page.tsx:72</code>); sirve como Support URL. Falta que el nombre de la app en Connect coincida con el de la interfaz ("G22 Scores", 30 caracteres máximo), que las capturas muestren la app en uso y no la portada, y que ningún texto de la tienda mencione precios en dólares si se opta por sacar el billing.</p>
+        <div class="fix">Support URL <code>/contacto</code>, Privacy URL <code>/privacidad</code> (una vez escrita), capturas del feed de partidos, una tabla, el match center y el prode. Sin la palabra "Android" ni "Play Store" en ningún texto (2.3.10).</div>
+      </article>
+
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">Sección C</p>
+    <h2>Lo que ya cumple</h2>
+    <p class="intro">Para no romperlo mientras se arregla el resto.</p>
+    <div class="findings">
+
+      <article class="f ok">
+        <div class="ref"><span class="g">5.1.1(ii)</span><span class="pill">Cumple</span></div>
+        <h3>Se puede usar sin cuenta</h3>
+        <p class="ev">Partidos, tablas, clubes, noticias y juegos son públicos; el login se pide solo para prode, favoritos y administración (<code>src/proxy.ts</code>). Apple exige exactamente eso: no obligar a registrarse para lo que no lo necesita.</p>
+      </article>
+
+      <article class="f ok">
+        <div class="ref"><span class="g">5.3.4</span><span class="pill">Cumple</span></div>
+        <h3>El prode no es apuesta</h3>
+        <p class="ev">Sin dinero, sin premios, sin enlaces a casas de apuestas, y lo declara en la interfaz. Es la diferencia entre 4+ y un rubro que en muchos países pide licencia.</p>
+      </article>
+
+      <article class="f ok">
+        <div class="ref"><span class="g">3.1.1</span><span class="pill">Cumple</span></div>
+        <h3>Los juegos no venden nada</h3>
+        <p class="ev">La tienda de El Capitán y la carrera se pagan con la plata ficticia del contrato; no hay moneda comprable ni cajas de botín. Si se mantiene así, no toca IAP ni la regla de divulgar probabilidades.</p>
+      </article>
+
+      <article class="f ok">
+        <div class="ref"><span class="g">4.5.4</span><span class="pill">Cumple</span></div>
+        <h3>Los avisos son solo de resultados y eventos</h3>
+        <p class="ev">Dos tipos, ambos ligados a algo que el usuario eligió seguir. Nada promocional.</p>
+      </article>
+
+      <article class="f ok">
+        <div class="ref"><span class="g">2.5.14</span><span class="pill">Cumple</span></div>
+        <h3>No usa cámara, micrófono ni ubicación</h3>
+        <p class="ev">No hay <code>getUserMedia</code> ni <code>geolocation</code> en el cliente. El OCR de planillas (Tesseract) procesa archivos que sube un administrador, no una captura en vivo.</p>
+      </article>
+
+      <article class="f ok">
+        <div class="ref"><span class="g">1.5</span><span class="pill">Cumple</span></div>
+        <h3>Hay forma de contactar al desarrollador</h3>
+        <p class="ev"><code>/contacto</code> con formulario que arma un mail a <code>hola@g22scores.com</code>, y el mismo mail como <code>subject</code> VAPID. Solo falta cargarlo como Support URL.</p>
+      </article>
+
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">Sección D</p>
+    <h2>En qué orden</h2>
+    <p class="intro">La decisión de pagos condiciona el alcance del build nativo, así que va primero aunque no sea código.</p>
+    <div class="order">
+      <div class="step"><div class="k">1</div><div><p>Decidir pagos: IAP para Inicial y Pro, o app iOS sin gestor de torneos.</p><p class="why">Cambia qué rutas entran al build y qué textos hay que revisar. Todo lo demás se puede hacer en paralelo.</p></div></div>
+      <div class="step"><div class="k">2</div><div><p>Escribir y publicar privacidad y términos.</p><p class="why">Es texto, no código, y traba tanto la app como el formulario de Connect.</p></div></div>
+      <div class="step"><div class="k">3</div><div><p>Borrado de cuenta real y perfil sin botones muertos.</p><p class="why">Un endpoint, un modal y una limpieza de tablas. Un día de trabajo con pruebas.</p></div></div>
+      <div class="step"><div class="k">4</div><div><p>Sign in with Apple en Supabase y en el cliente.</p><p class="why">Pide el App ID y la Service ID en el portal de Apple; conviene arrancar el trámite temprano.</p></div></div>
+      <div class="step"><div class="k">5</div><div><p>Reportar, bloquear y filtro de nombres en prode y perfil.</p><p class="why">Chico en código, pero Apple lo va a buscar porque hay nombres de liga escritos por usuarios.</p></div></div>
+      <div class="step"><div class="k">6</div><div><p>Capacitor: push por APNs, share nativo, ocultar el botón de instalar, cuenta demo.</p><p class="why">Recién acá tiene sentido armar el binario; antes se estaría empaquetando algo que se rechaza.</p></div></div>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">Sección E</p>
+    <h2>Lista para App Store Connect</h2>
+    <div class="check">
+      <div class="row done"><span class="box"></span><span>Support URL: <code>https://www.g22scores.com/contacto</code></span></div>
+      <div class="row"><span class="box"></span><span>Privacy Policy URL: <code>/privacidad</code> con el texto real</span></div>
+      <div class="row"><span class="box"></span><span>App Privacy: Contact Info, User Content, Identifiers, Purchases (si hay IAP), Usage Data; sin tracking</span></div>
+      <div class="row"><span class="box"></span><span>Cuestionario de edad: sin apuestas, sin premios, UGC poco frecuente</span></div>
+      <div class="row"><span class="box"></span><span>Cuenta demo con club-admin sobre un club de prueba y una liga de prode armada</span></div>
+      <div class="row"><span class="box"></span><span>Notas de revisión: prode, juegos, origen de los datos, cómo se reporta contenido, cómo se borra la cuenta</span></div>
+      <div class="row"><span class="box"></span><span>Capturas de la app en uso (feed, tabla, match center, prode), sin precios ni menciones a Android</span></div>
+      <div class="row"><span class="box"></span><span>Si hay IAP: productos creados, visibles y funcionando en el build que se manda (2.1(b))</span></div>
+      <div class="row"><span class="box"></span><span>Backend y crons en verde durante la ventana de revisión</span></div>
+    </div>
+  </section>
+
+  <footer>Relevado sobre el código de la rama <span class="mono">feat/carrera-rugby-v2</span> el 27 de agosto de 2026. Las referencias numéricas son a las App Review Guidelines vigentes; los criterios de 4.2 y 5.2.2 dependen del revisor y se describen según el historial conocido de rechazos, no como regla exacta.</footer>
+</div>

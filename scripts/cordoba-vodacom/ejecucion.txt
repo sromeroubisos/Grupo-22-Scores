@@ -1,0 +1,787 @@
+Copa Córdoba - Torneo Vodacom 2026 (Unión Cordobesa) · tarjetas de partido (JSON de tablas) · validado contra el marcador de la base
+
+Córdoba Athletic Club Intermedia vs Urú Curé Rugby Club Intermedia · copa-cordoba-torneo-vodacom · tarjeta 297556  ·  84cb8158-234c-4ec9-a9a6-27ffcba0efc6
+  local     · Córdoba Athletic Club Intermedia · 23 jugadores · 23 con ficha fijada
+  visitante · Urú Curé Rugby Club Intermedia · 23 jugadores · 23 con ficha fijada
+  eventos   · 22
+    min 11 (1T 11) local     try          Alejo Yammal
+    min 23 (1T 23) local     try          Simon Courtis
+    min 23 (1T 23) local     conversion   Augusto Guillamondegui
+    min 28 (1T 28) local     try          Ignacio Lopez
+    min 32 (1T 32) local     card_yellow  Valentín Pieretto Heiland
+    min 35 (1T 35) local     card_yellow  Facundo Miguel Morandini
+    min 37 (1T 37) local     try          Mateo Chessel
+    min 37 (1T 37) local     conversion   Augusto Guillamondegui
+    min 40 (1T 40) local     try          Ignacio Arana
+    min 45 (2T 5) visitante penalty_goal Juan Cruz Pispieiro
+    min 50 (2T 10) local     substitution Valentín Pieretto Heiland
+    min 50 (2T 10) local     substitution Facundo Coraglio
+    min 52 (2T 12) local     substitution Ignacio Lopez
+    min 52 (2T 12) local     substitution Felipe Saliba
+    min 53 (2T 13) local     try          Ignacio Arana
+    min 54 (2T 14) local     substitution Felipe Acuña
+    min 55 (2T 15) local     try          Mateo Chessel
+    min 55 (2T 15) local     conversion   Augusto Guillamondegui
+    min 60 (2T 20) visitante try          Facundo Dalvit
+    min 61 (2T 21) visitante conversion   Juan Cruz Pispieiro
+    min 65 (2T 25) local     substitution Alejo Yammal
+    min 65 (2T 25) local     substitution Lucas Adamo
+  marcador  · eventos 41-10 · guardado 41-10
+  tries     · 7-1 (guardado —-—)
+  arbitro   · Octavio Damia Patiño (guardado: —)
+  guardado  · 23 local · 23 visitante · 22 eventos
+
+La Tablada - Intermedia vs Jockey Club de Villa María Intermedia · copa-cordoba-torneo-vodacom · tarjeta 297557  ·  1def7964-a796-4a91-88b4-84485ee28aac
+  local     · La Tablada - Intermedia · 23 jugadores · 21 con ficha fijada
+  visitante · Jockey Club de Villa María Intermedia · 23 jugadores · 23 con ficha fijada
+  eventos   · 20
+    min 20 (1T 20) visitante try          Benjamin Farias
+    min 20 (1T 20) visitante conversion   Bautista Portesio
+    min 24 (1T 24) local     card_yellow  Agustin Altamira Pasqualini
+    min 26 (1T 26) visitante try          Bautista Portesio
+    min 26 (1T 26) visitante conversion   Bautista Portesio
+    min 33 (1T 33) visitante try          Iglesias Simon
+    min 40 (2T 0) local     substitution Valentín Tomas Aguero
+    min 40 (2T 0) local     substitution Zair Leonel Acosta
+    min 43 (2T 3) local     substitution Facundo Perrone
+    min 43 (2T 3) visitante try          Benjamin Farias
+    min 43 (2T 3) visitante conversion   Bautista Portesio
+    min 52 (2T 12) local     try          Julian Issidoro
+    min 56 (2T 16) local     substitution Julian Issidoro
+    min 61 (2T 21) local     substitution Valentino Pizoni Morales
+    min 62 (2T 22) local     substitution Felipe Sanchez Vila
+    min 67 (2T 27) local     substitution Pablo Lozada
+    min 70 (2T 30) visitante penalty_goal Bautista Portesio
+    min 70 (2T 30) local     substitution Javier Diaz Otañez
+    min 77 (2T 37) visitante try          Carando Mateo
+    min 77 (2T 37) visitante conversion   Bautista Portesio
+  marcador  · eventos 5-36 · guardado 5-36
+  tries     · 1-5 (guardado —-—)
+  arbitro   · Fernando Martin Pettina (guardado: —)
+  guardado  · 23 local · 23 visitante · 20 eventos
+
+Jockey Club Córdoba Intermedia vs Club Universitario de Córdoba Intermedia · copa-cordoba-torneo-vodacom · tarjeta 297558  ·  7f5a00f7-3e6d-45af-821e-37ecb5c0c9cd
+  local     · Jockey Club Córdoba Intermedia · 23 jugadores · 21 con ficha fijada
+  visitante · Club Universitario de Córdoba Intermedia · 23 jugadores · 21 con ficha fijada
+  eventos   · 37
+    min  3 (1T 3) local     try          Conrado Alonso
+    min  4 (1T 4) local     conversion   Pedro Benjamín Yapur
+    min  6 (1T 6) visitante try          Álvaro Garmendia
+    min 13 (1T 13) visitante injury       Nicolás Villella Navarta
+    min 13 (1T 13) local     substitution Octavio Cortes
+    min 14 (1T 14) local     try          Lautaro Gualdieri
+    min 15 (1T 15) local     conversion   Pedro Benjamín Yapur
+    min 19 (1T 19) visitante card_yellow  Tomas Cuello
+    min 21 (1T 21) local     try          Juan Manuel Freytes Echenique
+    min 27 (1T 27) local     try          Lucio Gil
+    min 28 (1T 28) local     conversion   Pedro Benjamín Yapur
+    min 34 (1T 34) visitante card_yellow  Fernando Martinez
+    min 34 (1T 34) local     try          Mateo Dominguez Peralta
+    min 35 (1T 35) local     conversion   Pedro Benjamín Yapur
+    min 40 (2T 0) visitante substitution Benjamin Castro
+    min 40 (2T 0) visitante substitution Joaquin Gelos
+    min 41 (2T 1) local     substitution Nahuel Ordóñez
+    min 45 (2T 5) local     substitution Juan Manuel Freytes Echenique
+    min 46 (2T 6) visitante substitution Valentino Combina Dalmasso
+    min 47 (2T 7) visitante substitution Mateo Lucero Farias
+    min 49 (2T 9) local     substitution Francisco Nicolás Burgos
+    min 50 (2T 10) local     substitution Horacio Urtubey
+    min 50 (2T 10) local     substitution Simón Trejo
+    min 51 (2T 11) visitante try          Felipe Ramirez Presta
+    min 51 (2T 11) visitante conversion   Felipe Ramirez Presta
+    min 52 (2T 12) visitante substitution Álvaro Garmendia
+    min 52 (2T 12) visitante substitution Alejo Ferreyra
+    min 52 (2T 12) local     substitution Lucio Gil
+    min 52 (2T 12) local     substitution Lucas Mateo Moyano Aguirre
+    min 59 (2T 19) local     try          Conrado Alonso
+    min 60 (2T 20) local     conversion   Alvaro Areco Penalba
+    min 63 (2T 23) visitante substitution Álvaro Garmendia
+    min 64 (2T 24) local     try          Maximo Goldaracena
+    min 65 (2T 25) local     conversion   Pedro Benjamín Yapur
+    min 72 (2T 32) visitante try          Francisco Sosa Rey
+    min 72 (2T 32) visitante conversion   Felipe Ramirez Presta
+    min 79 (2T 39) local     card_yellow  Tomas Albiero Vallania
+  marcador  · eventos 47-19 · guardado 47-19
+  tries     · 7-3 (guardado —-—)
+  arbitro   · Luciano Francisco Romero (guardado: —)
+  guardado  · 23 local · 23 visitante · 37 eventos
+
+Tala Rugby Club Intermedia vs Club Palermo Bajo Intermedia · copa-cordoba-torneo-vodacom · tarjeta 297564  ·  36a00298-770b-4c54-a889-3d3c302343e5
+  local     · Tala Rugby Club Intermedia · 23 jugadores · 22 con ficha fijada
+  visitante · Club Palermo Bajo Intermedia · 23 jugadores · 20 con ficha fijada
+  eventos   · 26
+    min  8 (1T 8) local     card_yellow  Agustin Sugasti
+    min  8 (1T 8) visitante penalty_try  
+    min 15 (1T 15) local     try          Valentín Ucar
+    min 15 (1T 15) local     conversion   Benjamín Spagnuolo
+    min 26 (1T 26) visitante penalty_goal Mateo Francisco Frontera Croizet
+    min 31 (1T 31) local     substitution Valentin Cantarutti
+    min 35 (1T 35) visitante try          Facundo Rossini
+    min 40 (2T 0) visitante substitution Valentin Rossi
+    min 40 (2T 0) local     substitution Santiago Benjamin Luna
+    min 40 (2T 0) visitante substitution Facundo Nicolas Marengo
+    min 40 (2T 0) local     substitution Mateo Raimundi
+    min 40 (2T 0) visitante substitution Ariel Francisco Olmedo Ramirez
+    min 40 (2T 0) visitante substitution Lautaro Jose Garzon
+    min 46 (2T 6) visitante substitution Tomas Lopresti
+    min 49 (2T 9) visitante substitution Tomas Piscitello
+    min 49 (2T 9) visitante substitution Bautista Cafure
+    min 53 (2T 13) local     substitution Francisco Kember
+    min 55 (2T 15) local     substitution Valentín Ucar
+    min 55 (2T 15) local     substitution Manuel Zulueta
+    min 55 (2T 15) local     substitution Lisandro Vittar
+    min 67 (2T 27) visitante try          Lautaro Canepa
+    min 67 (2T 27) visitante conversion   Mateo Francisco Frontera Croizet
+    min 69 (2T 29) visitante substitution Facundo Rossini
+    min 70 (2T 30) local     try          Agustin Sugasti
+    min 70 (2T 30) local     conversion   Benjamín Spagnuolo
+    min 73 (2T 33) visitante card_yellow  Lautaro Canepa
+  marcador  · eventos 14-22 · guardado 14-22
+  tries     · 2-3 (guardado —-—)
+  arbitro   · Juan Francisco Gomez (guardado: —)
+  guardado  · 23 local · 23 visitante · 26 eventos
+
+Jockey Club de Villa María Intermedia vs Córdoba Athletic Club Intermedia · copa-cordoba-torneo-vodacom · tarjeta 308022  ·  486450f9-d7b9-4427-8193-20adbf6a31dc
+  local     · Jockey Club de Villa María Intermedia · 23 jugadores · 23 con ficha fijada
+  visitante · Córdoba Athletic Club Intermedia · 23 jugadores · 23 con ficha fijada
+  eventos   · 25
+    min  1 (1T 1) local     try          Renzo Alessio
+    min  8 (1T 8) local     try          Fausto Paez
+    min  8 (1T 8) local     conversion   Bautista Portesio
+    min 12 (1T 12) local     penalty_goal Bautista Portesio
+    min 17 (1T 17) visitante try          Estanislao Arrias
+    min 18 (1T 18) visitante conversion   Felipe Acuña
+    min 35 (1T 35) local     try          Lautaro Vera
+    min 35 (1T 35) local     conversion   Bautista Portesio
+    min 40 (2T 0) local     substitution Bernardo Vit Marti
+    min 42 (2T 2) visitante try          Martín Vaccarello
+    min 45 (2T 5) visitante conversion   Felipe Acuña
+    min 48 (2T 8) visitante try          Ignacio Arana
+    min 50 (2T 10) local     card_yellow  Bautista Portesio
+    min 50 (2T 10) local     substitution Joaquin Perez Vittoria
+    min 50 (2T 10) local     substitution Joaquin Mabel Bono
+    min 55 (2T 15) local     substitution Juan Martin Pacheco
+    min 57 (2T 17) local     card_yellow  Juan Martin Pacheco
+    min 61 (2T 21) visitante try          Juan Bocco
+    min 62 (2T 22) visitante conversion   Felipe Acuña
+    min 65 (2T 25) visitante card_yellow  Facundo Miguel Morandini
+    min 65 (2T 25) visitante conversion   Facundo Miguel Morandini
+    min 65 (2T 25) local     substitution Santiago Meyer
+    min 70 (2T 30) visitante try          Ezequiel Manzur
+    min 74 (2T 34) visitante try          Felipe Cañas
+    min 77 (2T 37) local     try          Lautaro Vera
+  marcador  · eventos 27-38 · guardado 27-38
+  tries     · 4-6 (guardado —-—)
+  arbitro   · Eugenio Morra (guardado: —)
+  guardado  · 23 local · 23 visitante · 25 eventos
+
+Club Palermo Bajo Intermedia vs Jockey Club Córdoba Intermedia · copa-cordoba-torneo-vodacom · tarjeta 308024  ·  e80724b3-1a6b-45c1-b1f5-016335cc538f
+  local     · Club Palermo Bajo Intermedia · 23 jugadores · 22 con ficha fijada
+  visitante · Jockey Club Córdoba Intermedia · 23 jugadores · 20 con ficha fijada
+  eventos   · 32
+    min  8 (1T 8) visitante try          Julián Nereo Pelcer
+    min  9 (1T 9) visitante conversion   Alvaro Areco Penalba
+    min 11 (1T 11) local     card_yellow  Lautaro Canepa
+    min 11 (1T 11) visitante card_yellow  Julián Nereo Pelcer
+    min 19 (1T 19) visitante try          Jeronimo Cortes
+    min 20 (1T 20) visitante conversion   Alvaro Areco Penalba
+    min 23 (1T 23) visitante try          Simón Trejo
+    min 23 (1T 23) visitante conversion   Alvaro Areco Penalba
+    min 39 (1T 39) local     substitution Valentin Rossi
+    min 41 (2T 1) local     substitution Lucas Cuello
+    min 41 (2T 1) local     substitution Lautaro Canepa
+    min 48 (2T 8) visitante substitution Julián Nereo Pelcer
+    min 48 (2T 8) visitante substitution Tomas Molina Becerra
+    min 49 (2T 9) local     substitution Jairo Peralta Banegas
+    min 49 (2T 9) local     substitution Juan Cruz Moreno
+    min 49 (2T 9) local     substitution Facundo Rossini
+    min 50 (2T 10) visitante substitution Jeronimo Cortes
+    min 50 (2T 10) local     substitution Ezequiel Andres Parola
+    min 51 (2T 11) visitante substitution Isidoro Carrara
+    min 55 (2T 15) local     substitution Mateo Nicolas Berbel
+    min 55 (2T 15) visitante substitution Francisco Nicolás Burgos
+    min 55 (2T 15) visitante substitution Nahuel Ordóñez
+    min 58 (2T 18) visitante substitution Alvaro Areco Penalba
+    min 59 (2T 19) local     try          Ariel Francisco Olmedo Ramirez
+    min 59 (2T 19) local     conversion   Lorenzo Velez Navarro
+    min 59 (2T 19) visitante substitution Tomas Albiero Vallania
+    min 67 (2T 27) local     try          Agustin Carabajal
+    min 67 (2T 27) local     conversion   Lorenzo Velez Navarro
+    min 72 (2T 32) local     try          Juan Sagrera
+    min 72 (2T 32) local     conversion   Lorenzo Velez Navarro
+    min 77 (2T 37) visitante try          Conrado Alonso
+    min 78 (2T 38) visitante conversion   Fausto Salvador Gangemi
+  marcador  · eventos 21-28 · guardado 21-28
+  tries     · 3-4 (guardado —-—)
+  arbitro   · Enzo Riva (guardado: —)
+  guardado  · 23 local · 23 visitante · 32 eventos
+
+Club Universitario de Córdoba Intermedia vs San Martín de Villa María Intermedia · copa-cordoba-torneo-vodacom · tarjeta 308025  ·  6be2fecf-fb1d-4dab-9544-4c26eb13b244
+  local     · Club Universitario de Córdoba Intermedia · 23 jugadores · 22 con ficha fijada
+  visitante · San Martín de Villa María Intermedia · 23 jugadores · 20 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 39-31
+  tries     · 0-0 (guardado —-—)
+  arbitro   · Nahuel Sabena (guardado: —)
+  guardado  · 23 local · 23 visitante · 0 eventos
+
+Jockey Club Córdoba Intermedia vs Tala Rugby Club Intermedia · copa-cordoba-torneo-vodacom · tarjeta 309918  ·  bbb1769d-1991-4496-b0af-ab72debbd265
+  local     · Jockey Club Córdoba Intermedia · 23 jugadores · 19 con ficha fijada
+  visitante · Tala Rugby Club Intermedia · 23 jugadores · 23 con ficha fijada
+  eventos   · 28
+    min  1 (1T 1) visitante penalty_try  
+    min  1 (1T 1) visitante try          Manuel Arroyo
+    min  1 (1T 1) visitante try          Manuel Arroyo
+    min  1 (1T 1) visitante try          Manuel Arroyo
+    min  1 (1T 1) visitante try          Manuel Arroyo
+    min  1 (1T 1) visitante try          Manuel Arroyo
+    min  1 (1T 1) visitante conversion   Manuel Arroyo
+    min  1 (1T 1) visitante conversion   Manuel Arroyo
+    min  1 (1T 1) visitante card_yellow  Adrián Guillermo Nieva
+    min 13 (1T 13) local     try          Maximo Goldaracena
+    min 14 (1T 14) local     conversion   Tomas Trejo
+    min 20 (1T 20) local     try          Maximo Goldaracena
+    min 21 (1T 21) local     conversion   Tomas Trejo
+    min 26 (1T 26) local     card_yellow  Juan Franco
+    min 31 (1T 31) local     try          Juan Manuel Freytes Echenique
+    min 40 (2T 0) local     card_yellow  Lucas Tomas Busdrago Marinelli
+    min 40 (2T 0) local     substitution Ivo Pelcer
+    min 40 (2T 0) local     substitution Conrado Alonso
+    min 50 (2T 10) local     try          Juan Manuel Freytes Echenique
+    min 50 (2T 10) local     substitution Maximo Goldaracena
+    min 50 (2T 10) local     substitution Renzo Rebori
+    min 54 (2T 14) local     substitution Juan Manuel Freytes Echenique
+    min 54 (2T 14) local     substitution Lucas Mateo Moyano Aguirre
+    min 57 (2T 17) local     try          Facundo Ludueña Gómez
+    min 63 (2T 23) local     substitution Tiziano Marchetto
+    min 67 (2T 27) local     penalty_goal Tomas Trejo
+    min 76 (2T 36) local     try          Facundo Ludueña Gómez
+    min 77 (2T 37) local     conversion   Tomas Trejo
+  marcador  · eventos 39-36 · guardado 39-36
+  tries     · 6-6 (guardado —-—)
+  arbitro   · Fernando Martin Pettina (guardado: —)
+  guardado  · 23 local · 23 visitante · 28 eventos
+
+Carlos Paz Rugby Club Intermedia vs Jockey Club de Villa María Intermedia · copa-cordoba-torneo-vodacom · tarjeta 310320  ·  070afbeb-b301-43c0-a22e-988fe4a9fd47
+  local     · Carlos Paz Rugby Club Intermedia · 23 jugadores · 20 con ficha fijada
+  visitante · Jockey Club de Villa María Intermedia · 23 jugadores · 21 con ficha fijada
+  eventos   · 28
+    min 13 (1T 13) visitante try          Nicolas Turecki
+    min 13 (1T 13) visitante conversion   Bautista Portesio
+    min 21 (1T 21) local     try          Mauro Cabrera Sancho
+    min 27 (1T 27) visitante penalty_goal Bautista Portesio
+    min 32 (1T 32) visitante try          Valentin Baleani
+    min 32 (1T 32) visitante conversion   Bautista Portesio
+    min 40 (1T 40) visitante try          Bautista Portesio
+    min 40 (2T 0) visitante substitution Joaquin Perez Vittoria
+    min 40 (2T 0) visitante substitution Juan Martin Pacheco
+    min 40 (2T 0) local     card_red     Enzo Guido Regali
+    min 40 (2T 0) local     substitution Matias Daniel Crivello
+    min 45 (2T 5) local     substitution Gaston Ezequiel Varela
+    min 45 (2T 5) local     substitution Lucas Pablo Bellitti
+    min 45 (2T 5) local     substitution Ignacio Podesta
+    min 45 (2T 5) visitante substitution Carando Mateo
+    min 45 (2T 5) local     try          Enzo Guido Regali
+    min 45 (2T 5) visitante substitution Renzo Alessio
+    min 45 (2T 5) visitante substitution Santiago Meyer
+    min 50 (2T 10) local     substitution Manuel Ceballos
+    min 50 (2T 10) local     try          Enzo Guido Regali
+    min 51 (2T 11) local     conversion   Enzo Guido Regali
+    min 60 (2T 20) local     substitution Santiago Jorge
+    min 60 (2T 20) visitante card_yellow  Fausto Paez
+    min 63 (2T 23) local     substitution Martin Sanchez
+    min 63 (2T 23) local     substitution Agustin Ricardo Rosales Paur
+    min 69 (2T 29) visitante try          Valentin Baleani
+    min 69 (2T 29) visitante conversion   Bautista Portesio
+    min 74 (2T 34) local     try          Enzo Guido Regali
+  marcador  · eventos 22-29 · guardado 22-29
+  tries     · 4-4 (guardado —-—)
+  arbitro   · Reartes Gustavo . (No Oficial) (guardado: —)
+  guardado  · 23 local · 23 visitante · 28 eventos
+
+Córdoba Athletic Club Intermedia vs La Tablada - Intermedia · copa-cordoba-torneo-vodacom · tarjeta 310321  ·  d547bbae-d9db-4476-903f-ca7a1468b766
+  local     · Córdoba Athletic Club Intermedia · 23 jugadores · 22 con ficha fijada
+  visitante · La Tablada - Intermedia · 23 jugadores · 21 con ficha fijada
+  eventos   · 14
+    min 32 (1T 32) visitante penalty_goal Gonzalo Retta
+    min 40 (2T 0) visitante substitution Lucas Rolotti
+    min 44 (2T 4) local     try          Ignacio Romero
+    min 44 (2T 4) local     conversion   Santiago Segura
+    min 53 (2T 13) visitante substitution Nicolas Montenegro
+    min 53 (2T 13) visitante substitution Jacinto Villegas
+    min 56 (2T 16) visitante substitution Juan Pablo Ruiz
+    min 56 (2T 16) visitante substitution Gonzalo Retta
+    min 63 (2T 23) visitante substitution Ramiro Valdes Iribarren
+    min 63 (2T 23) visitante substitution Valentín Tomas Aguero
+    min 63 (2T 23) visitante substitution Juan Cruz Corral
+    min 65 (2T 25) visitante try          Felipe Mercau
+    min 76 (2T 36) local     try          Facundo Coraglio
+    min 76 (2T 36) local     conversion   Nazareno Fonzo
+  marcador  · eventos 14-8 · guardado 14-8
+  tries     · 2-1 (guardado —-—)
+  arbitro   · Lucas Humeres (guardado: —)
+  guardado  · 23 local · 23 visitante · 14 eventos
+
+San Martín de Villa María Intermedia vs Club Palermo Bajo Intermedia · copa-cordoba-torneo-vodacom · tarjeta 310322  ·  9372e191-2f62-4e14-b069-c6fc119aa94c
+  local     · San Martín de Villa María Intermedia · 23 jugadores · 21 con ficha fijada
+  visitante · Club Palermo Bajo Intermedia · 23 jugadores · 21 con ficha fijada
+  eventos   · 23
+    min  1 (1T 1) local     penalty_goal Augusto Lopez Frossasco
+    min  1 (1T 1) local     penalty_goal Augusto Lopez Frossasco
+    min  1 (1T 1) local     penalty_goal Augusto Lopez Frossasco
+    min  1 (1T 1) local     penalty_goal Augusto Lopez Frossasco
+    min  1 (1T 1) local     try          Augusto Lopez Frossasco
+    min  1 (1T 1) local     conversion   Augusto Lopez Frossasco
+    min  1 (1T 1) local     try          Misael Agustin Astorga
+    min 34 (1T 34) visitante try          Lautaro Jose Garzon
+    min 35 (1T 35) visitante conversion   Lorenzo Velez Navarro
+    min 40 (1T 40) local     substitution Benjamin Blangetti
+    min 40 (1T 40) local     substitution Nahuel Pascuali
+    min 40 (1T 40) local     substitution Alan Giraudo
+    min 40 (1T 40) local     substitution Emiliano Ferreyra
+    min 40 (1T 40) local     substitution Mateo Alaniz Rivata
+    min 40 (1T 40) local     substitution Máximo Cotaimich
+    min 41 (2T 1) visitante substitution Ariel Francisco Olmedo Ramirez
+    min 41 (2T 1) visitante substitution Tomas Piscitello
+    min 50 (2T 10) visitante try          Juan Cruz Moreno
+    min 51 (2T 11) visitante conversion   Lorenzo Velez Navarro
+    min 53 (2T 13) visitante substitution Lucas Cuello
+    min 60 (2T 20) visitante substitution Juan Cruz Moreno
+    min 64 (2T 24) visitante substitution Pedro Benjamin Valera Morillo
+    min 70 (2T 30) visitante card_yellow  Martin Quiñonero
+  marcador  · eventos 24-14 · guardado 24-14
+  tries     · 2-2 (guardado —-—)
+  arbitro   · Abel Esteban Turek (guardado: —)
+  guardado  · 23 local · 23 visitante · 23 eventos
+
+Jockey Club de Villa María Intermedia vs Urú Curé Rugby Club Intermedia · copa-cordoba-torneo-vodacom · tarjeta 313001  ·  15678dfb-e4a4-4f54-b733-e9b34843fca3
+  local     · Jockey Club de Villa María Intermedia · 23 jugadores · 22 con ficha fijada
+  visitante · Urú Curé Rugby Club Intermedia · 23 jugadores · 21 con ficha fijada
+  eventos   · 27
+    min  3 (1T 3) local     penalty_goal Bautista Portesio
+    min  4 (1T 4) visitante try          Joaquín Anino
+    min  5 (1T 5) visitante conversion   Francisco Susperregui
+    min 19 (1T 19) local     try          Benjamin Brugiafreddo
+    min 35 (1T 35) visitante try          Máximo Flores Macías
+    min 37 (1T 37) visitante card_yellow  Benjamin Quiros
+    min 40 (2T 0) local     try          Pedro Pussetto
+    min 42 (2T 2) local     try          Luciano Astutti
+    min 45 (2T 5) local     card_yellow  Carando Mateo
+    min 46 (2T 6) visitante substitution Bautista Formini Lopez
+    min 48 (2T 8) visitante substitution Theo Menichetti
+    min 49 (2T 9) visitante try          Santino Pariani
+    min 50 (2T 10) local     substitution Luciano Astutti
+    min 50 (2T 10) local     substitution Bautista Portesio
+    min 50 (2T 10) visitante substitution Felipe Joaquin Ambroggio
+    min 50 (2T 10) visitante conversion   Francisco Susperregui
+    min 55 (2T 15) visitante penalty_goal Francisco Susperregui
+    min 59 (2T 19) visitante substitution Joaquin Padula
+    min 60 (2T 20) local     substitution Juan Ignacio Ramallo
+    min 61 (2T 21) visitante penalty_goal Francisco Susperregui
+    min 65 (2T 25) local     try          Pedro Pussetto
+    min 67 (2T 27) visitante card_yellow  Máximo Flores Macías
+    min 70 (2T 30) visitante substitution Joaquín Anino
+    min 71 (2T 31) local     card_yellow  Joaquin Perazzio
+    min 72 (2T 32) visitante substitution Santino Pariani
+    min 75 (2T 35) visitante penalty_goal Francisco Susperregui
+    min 78 (2T 38) visitante card_yellow  Imanol Rins
+  marcador  · eventos 23-28 · guardado 23-28
+  tries     · 4-3 (guardado —-—)
+  arbitro   · Horacio Coronado (guardado: —)
+  guardado  · 23 local · 23 visitante · 27 eventos
+
+La Tablada - Intermedia vs Carlos Paz Rugby Club Intermedia · copa-cordoba-torneo-vodacom · tarjeta 313002  ·  122e9548-2ffd-4f92-b0e1-facc1a073843
+  local     · La Tablada - Intermedia · 23 jugadores · 21 con ficha fijada
+  visitante · Carlos Paz Rugby Club Intermedia · 23 jugadores · 22 con ficha fijada
+  eventos   · 38
+    min  6 (1T 6) visitante try          Ariel Boyd
+    min  7 (1T 7) visitante conversion   Benjamin Ignacio Ruta
+    min 11 (1T 11) local     try          Lucas Rolotti
+    min 11 (1T 11) local     conversion   Nicolas Gauna
+    min 17 (1T 17) local     try          Julian Issidoro
+    min 17 (1T 17) local     conversion   Nicolas Gauna
+    min 23 (1T 23) local     try          Agustin Altamira Pasqualini
+    min 38 (1T 38) local     try          Felipe Mercau
+    min 38 (1T 38) local     conversion   Nicolas Gauna
+    min 40 (1T 40) local     try          Julian Issidoro
+    min 40 (1T 40) local     conversion   Nicolas Gauna
+    min 42 (1T 42) local     try          Tomás Hugo Cristiani
+    min 42 (1T 42) local     conversion   Nicolas Gauna
+    min 53 (1T 53) local     try          Felipe Mercau
+    min 53 (1T 53) local     conversion   Nicolas Gauna
+    min 40 (2T 0) local     substitution Santiago Tobal
+    min 45 (2T 5) visitante substitution Mateo Rafael Suarez Lauber
+    min 45 (2T 5) visitante substitution Tigran Metrebián
+    min 46 (2T 6) visitante substitution Franco Luciano Marincolo
+    min 46 (2T 6) visitante substitution Bruno Pavese
+    min 46 (2T 6) local     substitution Samuel Fabrizio Severine Luna
+    min 46 (2T 6) local     substitution Felipe Mercau
+    min 50 (2T 10) local     substitution Baltazar Monforte Ortiz
+    min 51 (2T 11) local     substitution Alvaro Solana Allende
+    min 54 (2T 14) local     try          Felipe Mercau
+    min 58 (2T 18) local     card_yellow  Gino Amata
+    min 59 (2T 19) visitante substitution Lucas Pablo Bellitti
+    min 60 (2T 20) visitante substitution Manuel Ceballos
+    min 60 (2T 20) visitante substitution Ariel Boyd
+    min 60 (2T 20) local     substitution Julian Issidoro
+    min 62 (2T 22) local     conversion   Nicolas Gauna
+    min 68 (2T 28) visitante card_yellow  Mauro Cabrera Sancho
+    min 68 (2T 28) local     substitution Gino Amata
+    min 70 (2T 30) local     conversion   Agustin Altamira Pasqualini
+    min 70 (2T 30) local     try          Matias Petrini
+    min 73 (2T 33) local     try          Tomás Hugo Cristiani
+    min 75 (2T 35) local     try          Pedro Allende
+    min 78 (2T 38) local     try          Agustin Altamira Pasqualini
+  marcador  · eventos 76-7 · guardado 76-7
+  tries     · 12-1 (guardado —-—)
+  arbitro   · Lucas Humeres (guardado: —)
+  guardado  · 23 local · 23 visitante · 38 eventos
+
+Club Palermo Bajo Intermedia vs Club Universitario de Córdoba Intermedia · copa-cordoba-torneo-vodacom · tarjeta 313004  ·  79f97a2a-c7ff-44b8-8915-63c3ce41af7d
+  local     · Club Palermo Bajo Intermedia · 23 jugadores · 22 con ficha fijada
+  visitante · Club Universitario de Córdoba Intermedia · 23 jugadores · 20 con ficha fijada
+  eventos   · 27
+    min 10 (1T 10) visitante try          Tomas Diaz
+    min 19 (1T 19) visitante try          Fernando Martinez
+    min 23 (1T 23) local     try          Federico José Ferraro Negri
+    min 23 (1T 23) local     conversion   Matias Daniel Jabase
+    min 34 (1T 34) local     try          Federico José Ferraro Negri
+    min 34 (1T 34) local     conversion   Matias Daniel Jabase
+    min 40 (2T 0) local     penalty_goal Matias Daniel Jabase
+    min 41 (2T 1) local     substitution Mateo Lozano Carabajal
+    min 41 (2T 1) local     substitution Facundo Rossini
+    min 41 (2T 1) local     substitution Martin Quiñonero
+    min 45 (2T 5) local     substitution Francisco Galmes
+    min 45 (2T 5) local     substitution Facundo Gutierrez
+    min 46 (2T 6) local     substitution Juan Cruz Moreno
+    min 49 (2T 9) visitante substitution Joaquin Tomas Moyano Pinchasowicz
+    min 49 (2T 9) local     substitution Ezequiel Andres Parola
+    min 52 (2T 12) local     substitution Benjamin Cafure
+    min 53 (2T 13) visitante try          Fernando Martinez
+    min 53 (2T 13) visitante conversion   Joaquin Mercado
+    min 56 (2T 16) visitante substitution Luis Fabian Farias
+    min 56 (2T 16) local     penalty_goal Matias Daniel Jabase
+    min 57 (2T 17) visitante injury       Juan Manuel Dorrego
+    min 58 (2T 18) visitante substitution Joaquin Gelos
+    min 58 (2T 18) visitante substitution Tomas Diaz
+    min 60 (2T 20) local     penalty_goal Matias Daniel Jabase
+    min 66 (2T 26) visitante substitution Ezequiel Bustos
+    min 66 (2T 26) visitante substitution Mateo Lucero Farias
+    min 70 (2T 30) visitante substitution Tomas Cuello
+  marcador  · eventos 23-17 · guardado 23-17
+  tries     · 2-3 (guardado —-—)
+  arbitro   · Abel Esteban Turek (guardado: —)
+  guardado  · 23 local · 23 visitante · 27 eventos
+
+Tala Rugby Club Intermedia vs San Martín de Villa María Intermedia · copa-cordoba-torneo-vodacom · tarjeta 313005  ·  f4e85849-424a-4d01-bb31-3c0a9fd3d6eb
+  local     · Tala Rugby Club Intermedia · 23 jugadores · 21 con ficha fijada
+  visitante · San Martín de Villa María Intermedia · 22 jugadores · 20 con ficha fijada
+  eventos   · 28
+    min  1 (1T 1) visitante penalty_try  
+    min  1 (1T 1) visitante try          Agustin Amantini
+    min  1 (1T 1) visitante try          Agustin Amantini
+    min  1 (1T 1) visitante conversion   Agustin Amantini
+    min  1 (1T 1) visitante card_yellow  Máximo Cotaimich
+    min  4 (1T 4) local     try          Mateo Copello
+    min  4 (1T 4) local     conversion   Juan Cruz Capdevila Soler
+    min  8 (1T 8) local     try          Tobias Rojas
+    min  8 (1T 8) local     conversion   Juan Cruz Capdevila Soler
+    min 12 (1T 12) local     try          Santiago Benjamin Luna
+    min 12 (1T 12) local     conversion   Juan Cruz Capdevila Soler
+    min 17 (1T 17) local     try          Rodrigo Marin
+    min 17 (1T 17) local     conversion   Juan Cruz Capdevila Soler
+    min 22 (1T 22) local     try          Rodrigo Marin
+    min 27 (1T 27) local     try          Juan Cruz Capdevila Soler
+    min 27 (1T 27) local     conversion   Juan Cruz Capdevila Soler
+    min 40 (1T 40) local     try          Hernán Crespo
+    min 40 (1T 40) local     conversion   Juan Cruz Capdevila Soler
+    min 40 (2T 0) local     substitution Salvador Ortiz
+    min 40 (2T 0) local     substitution Facundo Almada
+    min 40 (2T 0) local     substitution Juan Cruz Capdevila Soler
+    min 45 (2T 5) local     substitution Francisco Kember
+    min 45 (2T 5) local     substitution Rodrigo Marin
+    min 50 (2T 10) local     substitution Juan Cruz Carballo Argañaraz
+    min 50 (2T 10) local     substitution Santiago Benjamin Luna
+    min 60 (2T 20) local     substitution Hernán Crespo
+    min 61 (2T 21) local     card_yellow  Valentin Cantarutti
+    min 78 (2T 38) local     try          Valentin Cantarutti
+  marcador  · eventos 52-19 · guardado 52-19
+  tries     · 8-3 (guardado —-—)
+  arbitro   · Fernando Martin Pettina (guardado: —)
+  guardado  · 23 local · 22 visitante · 28 eventos
+
+Urú Curé Rugby Club Intermedia vs La Tablada - Intermedia · copa-cordoba-torneo-vodacom · tarjeta 314590  ·  0b2b748e-fab0-48b8-9114-a69c381bce30
+  local     · Urú Curé Rugby Club Intermedia · 23 jugadores · 21 con ficha fijada
+  visitante · La Tablada - Intermedia · 23 jugadores · 21 con ficha fijada
+  eventos   · 27
+    min  2 (1T 2) visitante try          Pablo Lozada
+    min  2 (1T 2) visitante conversion   Nicolas Gauna
+    min 34 (1T 34) local     try          Francisco Lamborizzio
+    min 34 (1T 34) local     conversion   Francisco Susperregui
+    min 36 (1T 36) visitante try          Pedro Allende
+    min 40 (2T 0) local     try          Roman Silva Torrejon
+    min 40 (2T 0) local     conversion   Francisco Susperregui
+    min 42 (2T 2) visitante card_yellow  Felipe Mercau
+    min 44 (2T 4) visitante substitution Lucas Rolotti
+    min 49 (2T 9) local     substitution Ignacio Gabriel Farias Decarlini
+    min 50 (2T 10) local     substitution Joaquin Padula
+    min 50 (2T 10) local     card_red     Theo Menichetti
+    min 50 (2T 10) visitante card_red     Luca D'ugo Vivanco
+    min 52 (2T 12) local     try          Juan Bautista Carrillo Lopez
+    min 55 (2T 15) local     substitution Juan Patricio Arqué Latour
+    min 60 (2T 20) visitante substitution Baltazar Monforte Ortiz
+    min 60 (2T 20) visitante substitution Julian Issidoro
+    min 60 (2T 20) local     substitution Joaquín Anino
+    min 60 (2T 20) visitante substitution Agustin Altamira Pasqualini
+    min 70 (2T 30) visitante penalty_goal Nicolas Gauna
+    min 70 (2T 30) visitante substitution Nicolas Gauna
+    min 70 (2T 30) visitante substitution Javier Diaz Otañez
+    min 75 (2T 35) visitante try          Pedro Allende
+    min 75 (2T 35) visitante conversion   Franco Nicolas Galliano
+    min 77 (2T 37) local     substitution Juan Bautista Carrillo Lopez
+    min 79 (2T 39) local     substitution Máximo Flores Macías
+    min 79 (2T 39) visitante try          Lorenzo Bianco Masso
+  marcador  · eventos 19-27 · guardado 19-27
+  tries     · 3-4 (guardado —-—)
+  arbitro   · Enzo Riva (guardado: —)
+  guardado  · 23 local · 23 visitante · 27 eventos
+
+Carlos Paz Rugby Club Intermedia vs Córdoba Athletic Club Intermedia · copa-cordoba-torneo-vodacom · tarjeta 314591  ·  c506b17e-84fe-497e-8c02-3bfde2fdafa1
+  local     · Carlos Paz Rugby Club Intermedia · 23 jugadores · 21 con ficha fijada
+  visitante · Córdoba Athletic Club Intermedia · 23 jugadores · 22 con ficha fijada
+  eventos   · 30
+    min  2 (1T 2) visitante try          Santiago Villalba Kohn
+    min  3 (1T 3) visitante conversion   Augusto Guillamondegui
+    min 20 (1T 20) local     substitution Agustin Ricardo Rosales Paur
+    min 20 (1T 20) visitante try          Augusto Guillamondegui
+    min 21 (1T 21) visitante conversion   Augusto Guillamondegui
+    min 23 (1T 23) visitante try          Santiago Villalba Kohn
+    min 24 (1T 24) visitante conversion   Augusto Guillamondegui
+    min 26 (1T 26) visitante try          Agustin Benavides
+    min 32 (1T 32) visitante try          Maximo Leon
+    min 33 (1T 33) visitante conversion   Augusto Guillamondegui
+    min 38 (1T 38) visitante try          Ignacio Arana
+    min 38 (1T 38) visitante try          Omar Mauricio Gutierrez
+    min 38 (1T 38) visitante conversion   Augusto Guillamondegui
+    min 39 (1T 39) visitante conversion   Augusto Guillamondegui
+    min 40 (2T 0) local     try          Santiago Jorge
+    min 40 (2T 0) local     substitution Ocean Torres
+    min 42 (2T 2) local     substitution Tigran Metrebián
+    min 42 (2T 2) visitante try          Martín Vaccarello
+    min 43 (2T 3) visitante try          Augusto Guillamondegui
+    min 50 (2T 10) local     substitution Martin Sanchez
+    min 50 (2T 10) visitante try          Ignacio Lopez
+    min 51 (2T 11) visitante conversion   Augusto Guillamondegui
+    min 53 (2T 13) visitante try          Santiago Villalba Kohn
+    min 54 (2T 14) visitante conversion   Augusto Guillamondegui
+    min 60 (2T 20) local     substitution Rodrigo Gaston Lucero
+    min 60 (2T 20) visitante try          Ignacio Lopez
+    min 61 (2T 21) visitante conversion   Augusto Guillamondegui
+    min 64 (2T 24) local     substitution Mateo Rafael Suarez Lauber
+    min 68 (2T 28) local     substitution Lucas Pablo Bellitti
+    min 73 (2T 33) local     substitution Benjamin Ignacio Ruta
+  marcador  · eventos 5-78 · guardado 5-78
+  tries     · 1-12 (guardado —-—)
+  arbitro   · Florencia Ledesma (guardado: —)
+  guardado  · 23 local · 23 visitante · 30 eventos
+
+Club Universitario de Córdoba Intermedia vs Tala Rugby Club Intermedia · copa-cordoba-torneo-vodacom · tarjeta 314592  ·  2e891c43-26bd-4f8a-aec4-b479115e7697
+  local     · Club Universitario de Córdoba Intermedia · 23 jugadores · 21 con ficha fijada
+  visitante · Tala Rugby Club Intermedia · 23 jugadores · 23 con ficha fijada
+  eventos   · 39
+    min 10 (1T 10) visitante try          Hernán Crespo
+    min 10 (1T 10) visitante conversion   Tobias Rojas
+    min 14 (1T 14) visitante try          Francesco Chiesa
+    min 14 (1T 14) visitante conversion   Tobias Rojas
+    min 26 (1T 26) visitante try          Francisco Ponssa
+    min 29 (1T 29) local     try          Mateo Lucero Farias
+    min 29 (1T 29) local     conversion   Juan Cruz Menendez
+    min 37 (1T 37) local     try          Gaston Pérez Soria
+    min 37 (1T 37) local     conversion   Juan Cruz Menendez
+    min 40 (2T 0) local     substitution Joaquin Mercado
+    min 40 (2T 0) local     substitution Juan Benjamin Spat
+    min 40 (2T 0) local     substitution Valentino Combina Dalmasso
+    min 44 (2T 4) visitante try          Juan Ignacio Perez Luquez
+    min 44 (2T 4) visitante conversion   Tobias Rojas
+    min 48 (2T 8) local     substitution Mateo Lucero Farias
+    min 49 (2T 9) visitante substitution Mateo Copello
+    min 49 (2T 9) visitante substitution Mateo Raimundi
+    min 49 (2T 9) visitante substitution Francisco Ponssa
+    min 49 (2T 9) visitante try          Felipe Spagnuolo Garzon
+    min 49 (2T 9) visitante conversion   Tobias Rojas
+    min 50 (2T 10) local     substitution Ramiro Granillo
+    min 50 (2T 10) local     substitution Maximiliano Riveros
+    min 51 (2T 11) local     substitution Benjamin Castro
+    min 55 (2T 15) local     substitution Joaquin Nicolas Mimessi
+    min 56 (2T 16) visitante substitution Valentin Cantarutti
+    min 56 (2T 16) visitante try          Felipe Spagnuolo Garzon
+    min 56 (2T 16) visitante conversion   Tobias Rojas
+    min 58 (2T 18) visitante substitution Felipe Spagnuolo Garzon
+    min 60 (2T 20) visitante substitution Francisco Caturelli
+    min 63 (2T 23) visitante substitution Juan Cruz Carballo Argañaraz
+    min 63 (2T 23) visitante substitution Hilario Fernandez Frontera
+    min 64 (2T 24) visitante card_yellow  Manuel Zulueta
+    min 67 (2T 27) local     try          Luciano Vieyra
+    min 67 (2T 27) local     conversion   Juan Cruz Menendez
+    min 69 (2T 29) local     try          Francisco Sosa Rey
+    min 71 (2T 31) visitante try          Facundo Sahonero Rahal
+    min 71 (2T 31) visitante conversion   Benjamín Spagnuolo
+    min 76 (2T 36) visitante try          Juan Ignacio Perez Luquez
+    min 76 (2T 36) visitante conversion   Benjamín Spagnuolo
+  marcador  · eventos 26-54 · guardado 26-54
+  tries     · 4-8 (guardado —-—)
+  arbitro   · Ignacio Santiago Olmedo Ramirez (guardado: —)
+  guardado  · 23 local · 23 visitante · 39 eventos
+
+San Martín de Villa María Intermedia vs Jockey Club Córdoba Intermedia · copa-cordoba-torneo-vodacom · tarjeta 314593  ·  cf115da4-2432-4e03-ac53-c9a74363b917
+  local     · San Martín de Villa María Intermedia · 23 jugadores · 20 con ficha fijada
+  visitante · Jockey Club Córdoba Intermedia · 23 jugadores · 20 con ficha fijada
+  eventos   · 36
+    min  1 (1T 1) local     try          Elias Benjamin Sanchez
+    min  1 (1T 1) local     conversion   Valentin Andrada Gorostidi
+    min  2 (1T 2) local     penalty_try  
+    min  3 (1T 3) local     try          Valentin Andrada Gorostidi
+    min  3 (1T 3) local     try          Lautaro Martin Oliveros
+    min  3 (1T 3) local     conversion   Valentin Andrada Gorostidi
+    min 10 (1T 10) visitante card_yellow  Lucas Mateo Moyano Aguirre
+    min 20 (1T 20) visitante try          Vicente Carretero
+    min 30 (1T 30) visitante try          Matias Fischer
+    min 31 (1T 31) visitante conversion   Tomas Trejo
+    min 37 (1T 37) visitante try          Juan Manuel Freytes Echenique
+    min 37 (1T 37) visitante conversion   Tomas Trejo
+    min 40 (1T 40) local     substitution Santiago Destefanis
+    min 40 (1T 40) local     substitution Mateo Alaniz Rivata
+    min 40 (1T 40) local     substitution Ramiro Nadal
+    min 40 (1T 40) local     substitution Alan Giraudo
+    min 40 (1T 40) local     substitution Luciano Matellica
+    min 40 (1T 40) local     substitution Salvador Mateo Cabanillas Martinez
+    min 40 (1T 40) local     substitution Agustin Andreosi
+    min 40 (1T 40) local     substitution Francisco Imanol Cabanillas Martinez
+    min 52 (1T 52) local     card_yellow  Ramiro Nadal
+    min 79 (1T 79) local     card_yellow  Elias Benjamin Sanchez
+    min 79 (1T 79) local     card_yellow  Francisco Imanol Cabanillas Martinez
+    min 44 (2T 4) visitante substitution Francisco Nicolás Burgos
+    min 44 (2T 4) visitante substitution Joaquin Lopez
+    min 44 (2T 4) visitante substitution Conrado Alonso
+    min 44 (2T 4) visitante substitution Renzo Rebori
+    min 49 (2T 9) visitante try          Juan Manuel Freytes Echenique
+    min 50 (2T 10) visitante conversion   Tomas Trejo
+    min 53 (2T 13) visitante try          Simón Trejo
+    min 54 (2T 14) visitante conversion   Tomas Trejo
+    min 59 (2T 19) visitante substitution Mateo Dominguez Peralta
+    min 66 (2T 26) visitante card_yellow  Jeronimo Cortes
+    min 66 (2T 26) visitante substitution Tomas Trejo
+    min 70 (2T 30) visitante card_yellow  Nahuel Ordóñez
+    min 79 (2T 39) visitante penalty_try  
+  marcador  · eventos 26-40 · guardado 26-40
+  tries     · 4-6 (guardado —-—)
+  arbitro   · Abel Esteban Turek (guardado: —)
+  guardado  · 23 local · 23 visitante · 36 eventos
+
+Córdoba Athletic Club Intermedia vs Tala Rugby Club Intermedia · copa-cordoba-torneo-vodacom · tarjeta 315217  ·  137a7cf6-7c79-4e7c-9ec6-8ad456c2ff60
+  local     · Córdoba Athletic Club Intermedia · 23 jugadores · 23 con ficha fijada
+  visitante · Tala Rugby Club Intermedia · 23 jugadores · 23 con ficha fijada
+  eventos   · 18
+    min  2 (1T 2) visitante penalty_goal Tobias Rojas
+    min 28 (1T 28) local     try          Matias Soria
+    min 28 (1T 28) local     conversion   Augusto Guillamondegui
+    min 32 (1T 32) local     penalty_goal Augusto Guillamondegui
+    min 40 (1T 40) local     try          Cristian Agustin Antoncic
+    min 40 (1T 40) local     conversion   Augusto Guillamondegui
+    min 46 (2T 6) visitante try          Juan Cruz Carballo Argañaraz
+    min 62 (2T 22) local     try          Martín Vaccarello
+    min 62 (2T 22) local     conversion   Augusto Guillamondegui
+    min 66 (2T 26) visitante try          Alvaro Ortega Domenino
+    min 66 (2T 26) visitante conversion   Benjamín Spagnuolo
+    min 66 (2T 26) local     card_yellow  Ignacio Romero
+    min 72 (2T 32) local     try          Martín Vaccarello
+    min 72 (2T 32) local     conversion   Augusto Guillamondegui
+    min 74 (2T 34) local     try          Felipe Bocco
+    min 74 (2T 34) local     conversion   Augusto Guillamondegui
+    min 78 (2T 38) visitante try          Benjamín Spagnuolo
+    min 78 (2T 38) visitante conversion   Benjamín Spagnuolo
+  marcador  · eventos 38-22 · guardado 38-22
+  tries     · 5-3 (guardado —-—)
+  arbitro   · Valentin Ferrero (guardado: —)
+  guardado  · 23 local · 23 visitante · 18 eventos
+
+Jockey Club Córdoba Intermedia vs Jockey Club de Villa María Intermedia · copa-cordoba-torneo-vodacom · tarjeta 315218  ·  ab299db4-2a9b-48ad-902f-41405492cfea
+  local     · Jockey Club Córdoba Intermedia · 23 jugadores · 21 con ficha fijada
+  visitante · Jockey Club de Villa María Intermedia · 23 jugadores · 23 con ficha fijada
+  eventos   · 31
+    min 17 (1T 17) local     try          Juan Manuel Freytes Echenique
+    min 18 (1T 18) local     conversion   Tomas Trejo
+    min 27 (1T 27) local     try          Simón Trejo
+    min 28 (1T 28) local     conversion   Tomas Trejo
+    min 34 (1T 34) local     try          Tomas Trejo
+    min 35 (1T 35) local     conversion   Tomas Trejo
+    min 37 (1T 37) local     try          Conrado Alonso
+    min 38 (1T 38) local     conversion   Tomas Trejo
+    min 40 (2T 0) visitante try          Santiago Montero
+    min 40 (2T 0) visitante conversion   Bautista Portesio
+    min 40 (2T 0) local     card_yellow  Agustin Rey
+    min 44 (2T 4) visitante try          Renzo Alessio
+    min 45 (2T 5) visitante substitution Carando Mateo
+    min 45 (2T 5) local     substitution Francisco Nicolás Burgos
+    min 45 (2T 5) local     substitution Conrado Alonso
+    min 50 (2T 10) visitante substitution Genaro Daglio
+    min 50 (2T 10) visitante substitution Nicolas Turecki
+    min 51 (2T 11) local     try          Matias Fischer
+    min 52 (2T 12) local     conversion   Tomas Trejo
+    min 54 (2T 14) visitante try          Santiago Garrido
+    min 54 (2T 14) visitante conversion   Bautista Portesio
+    min 54 (2T 14) local     substitution Joaquin Lopez
+    min 54 (2T 14) local     substitution Felipe Mallia
+    min 60 (2T 20) visitante substitution Fausto Paez
+    min 60 (2T 20) visitante substitution Bernardo Vit Marti
+    min 60 (2T 20) visitante substitution Benjamin Brugiafreddo
+    min 61 (2T 21) local     substitution Juan Manuel Freytes Echenique
+    min 64 (2T 24) local     substitution Nahuel Ordóñez
+    min 70 (2T 30) local     substitution Mateo Dominguez Peralta
+    min 73 (2T 33) local     try          Vicente Carretero
+    min 74 (2T 34) local     conversion   Tomas Trejo
+  marcador  · eventos 42-19 · guardado 42-19
+  tries     · 6-3 (guardado —-—)
+  arbitro   · Octavio Damia Patiño (guardado: —)
+  guardado  · 23 local · 23 visitante · 31 eventos
+
+Córdoba Athletic Club Intermedia vs Jockey Club Córdoba Intermedia · copa-cordoba-torneo-vodacom · tarjeta 323946  ·  90e95474-fa49-4a56-b514-20070e0006c4
+  local     · Córdoba Athletic Club Intermedia · 23 jugadores · 22 con ficha fijada
+  visitante · Jockey Club Córdoba Intermedia · 23 jugadores · 23 con ficha fijada
+  eventos   · 30
+    min 26 (1T 26) visitante penalty_goal Joaquín Chaves Bertin
+    min 29 (1T 29) visitante substitution Lisandro Rebori
+    min 29 (1T 29) visitante injury       Lisandro Rebori
+    min 35 (1T 35) local     card_yellow  Lucas Adamo
+    min 43 (2T 3) visitante try          Renzo Rebori
+    min 44 (2T 4) local     substitution Augusto Guillamondegui
+    min 44 (2T 4) visitante conversion   Joaquín Chaves Bertin
+    min 48 (2T 8) local     substitution Valentino Carranza
+    min 48 (2T 8) local     penalty_goal Augusto Guillamondegui
+    min 50 (2T 10) local     substitution Gonzalo Thomas Gargallo Bazan
+    min 50 (2T 10) local     substitution Juan Bocco
+    min 54 (2T 14) visitante penalty_try  
+    min 54 (2T 14) local     card_yellow  Felipe Cañas
+    min 55 (2T 15) visitante substitution Genaro Merola Moreschi
+    min 55 (2T 15) visitante substitution Mateo Dominguez Peralta
+    min 55 (2T 15) local     substitution Tomas Agustin Fitte
+    min 59 (2T 19) local     substitution Maximo Leon
+    min 60 (2T 20) visitante substitution Joaquín Chaves Bertin
+    min 62 (2T 22) visitante substitution Renzo Rebori
+    min 62 (2T 22) visitante substitution Santiago Gatsch Becerra
+    min 66 (2T 26) local     substitution Santiago Villalba Kohn
+    min 68 (2T 28) local     substitution Matias Soria
+    min 68 (2T 28) visitante card_yellow  Horacio Urtubey
+    min 68 (2T 28) local     penalty_try  
+    min 69 (2T 29) visitante substitution Tomas Albiero Vallania
+    min 69 (2T 29) visitante card_yellow  Julián Nereo Pelcer
+    min 75 (2T 35) local     penalty_goal Augusto Guillamondegui
+    min 78 (2T 38) visitante try          Conrado Alonso
+    min 78 (2T 38) visitante conversion   Tomas Trejo
+    min 78 (2T 38) visitante substitution Jeronimo Cortes
+  marcador  · eventos 13-24 · guardado 13-24
+  tries     · 1-3 (guardado —-—)
+  arbitro   · Horacio Coronado (guardado: —)
+  guardado  · 23 local · 23 visitante · 30 eventos
+
+listo · 22 partidos

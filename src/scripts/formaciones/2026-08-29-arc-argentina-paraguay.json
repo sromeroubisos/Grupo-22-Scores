@@ -1,0 +1,91 @@
+{
+  "descripcion": "Americas Rugby Championship 2026 · fecha 1 · Argentina XV 58-11 Paraguay (Talcahuano, 29/08/2026)",
+  "torneo": "Americas Rugby Championship",
+  "partidos": [
+    {
+      "id": "595c75da-d294-48f2-9ab2-70284fbcba6e",
+      "rotulo": "Argentina XV 58-11 Paraguay",
+      "arbitro": "Raimundo Fuenzalida",
+      "local": {
+        "nombre": "Argentina XV",
+        "titulares": [
+          { "numero": 1, "nombre": "Diego Correa" },
+          { "numero": 2, "nombre": "Martín Vaca" },
+          { "numero": 3, "nombre": "Enzo Avaca" },
+          { "numero": 4, "nombre": "Francisco Sluga" },
+          { "numero": 5, "nombre": "Joaquín Domínguez" },
+          { "numero": 6, "nombre": "Ignacio Gandini" },
+          { "numero": 7, "nombre": "Joaquín Pascual Viale" },
+          { "numero": 8, "nombre": "Juan Pedro Bernasconi" },
+          { "numero": 9, "nombre": "Alejo Sugasti" },
+          { "numero": 10, "nombre": "Ignacio Dogliani", "capitan": true },
+          { "numero": 11, "nombre": "Franco Rossetto" },
+          { "numero": 12, "nombre": "Bautista Estellés" },
+          { "numero": 13, "nombre": "Pedro Coll" },
+          { "numero": 14, "nombre": "Bautista Lescano" },
+          { "numero": 15, "nombre": "Simón Pfister" }
+        ],
+        "suplentes": [
+          { "numero": 16, "nombre": "Juan Ignacio Greising Revol" },
+          { "numero": 17, "nombre": "Nicolás Revol Pitt" },
+          { "numero": 18, "nombre": "Bautista Salinas Mallea" },
+          { "numero": 19, "nombre": "Rodrigo Fernández Criado" },
+          { "numero": 20, "nombre": "Thiago Sbrocco" },
+          { "numero": 21, "nombre": "Nicolás Viola" },
+          { "numero": 22, "nombre": "Federico Serpa" },
+          { "numero": 23, "nombre": "Luciano Avaca" }
+        ]
+      },
+      "visitante": {
+        "nombre": "Paraguay",
+        "titulares": [
+          { "numero": 1, "nombre": "José Mazacotte" },
+          { "numero": 2, "nombre": "Agustín Benítez" },
+          { "numero": 3, "nombre": "Enrique Quinteros" },
+          { "numero": 4, "nombre": "Nahuel Kacerosky" },
+          { "numero": 5, "nombre": "Juan Martín Sebriano" },
+          { "numero": 6, "nombre": "Francisco Bareiro" },
+          { "numero": 7, "nombre": "Ariel Núñez" },
+          { "numero": 8, "nombre": "Leonardo Segovia" },
+          { "numero": 9, "nombre": "Diego Miño" },
+          { "numero": 10, "nombre": "Thomás Guzmán" },
+          { "numero": 11, "nombre": "Juan González" },
+          { "numero": 12, "nombre": "Ramiro Amarilla", "capitan": true },
+          { "numero": 13, "nombre": "Gianfranco Parodi" },
+          { "numero": 14, "nombre": "Arturo López" },
+          { "numero": 15, "nombre": "Joaquín Mussi" }
+        ],
+        "suplentes": [
+          { "numero": 16, "nombre": "Jordi Chávez" },
+          { "numero": 17, "nombre": "Sebastián Ortíz" },
+          { "numero": 18, "nombre": "Marcello Fretes" },
+          { "numero": 19, "nombre": "Emanuel Cáceres" },
+          { "numero": 20, "nombre": "Carlos Martins" },
+          { "numero": 21, "nombre": "Thiago Fernández Bedoya" },
+          { "numero": 22, "nombre": "Patricio Cabrera" },
+          { "numero": 23, "nombre": "Facundo Paiva" }
+        ]
+      },
+      "eventos": [
+        { "minuto": 9, "periodo": "1T", "tipo": "try", "equipo": "local", "jugador": "Martín Vaca" },
+        { "minuto": 11, "periodo": "1T", "tipo": "card_yellow", "equipo": "visitante", "jugador": "Juan Martín Sebriano" },
+        { "minuto": 13, "periodo": "1T", "tipo": "try", "equipo": "local", "jugador": "Franco Rossetto" },
+        { "minuto": 32, "periodo": "1T", "tipo": "try", "equipo": "local", "jugador": "Franco Rossetto" },
+        { "minuto": 38, "periodo": "1T", "tipo": "penalty_goal", "equipo": "visitante", "jugador": "Joaquín Mussi" },
+        { "minuto": 2, "periodo": "2T", "tipo": "try", "equipo": "local", "jugador": "Ignacio Dogliani" },
+        { "minuto": 6, "periodo": "2T", "tipo": "penalty_goal", "equipo": "visitante", "jugador": "Thomás Guzmán" },
+        { "minuto": 12, "periodo": "2T", "tipo": "try", "equipo": "local", "jugador": "Martín Vaca" },
+        { "minuto": 16, "periodo": "2T", "tipo": "try", "equipo": "local", "jugador": "Nicolás Viola" },
+        { "minuto": 16, "periodo": "2T", "tipo": "conversion", "equipo": "local", "jugador": "Federico Serpa" },
+        { "minuto": 22, "periodo": "2T", "tipo": "try", "equipo": "local", "jugador": "Juan Ignacio Greising Revol" },
+        { "minuto": 26, "periodo": "2T", "tipo": "try", "equipo": "local", "jugador": "Luciano Avaca" },
+        { "minuto": 26, "periodo": "2T", "tipo": "conversion", "equipo": "local", "jugador": "Federico Serpa" },
+        { "minuto": 30, "periodo": "2T", "tipo": "try", "equipo": "local", "jugador": "Pedro Coll" },
+        { "minuto": 30, "periodo": "2T", "tipo": "conversion", "equipo": "local", "jugador": "Federico Serpa" },
+        { "minuto": 33, "periodo": "2T", "tipo": "try", "equipo": "visitante", "jugador": "Diego Miño" },
+        { "minuto": 36, "periodo": "2T", "tipo": "try", "equipo": "local", "jugador": "Nicolás Viola" },
+        { "minuto": 36, "periodo": "2T", "tipo": "conversion", "equipo": "local", "jugador": "Federico Serpa" }
+      ]
+    }
+  ]
+}

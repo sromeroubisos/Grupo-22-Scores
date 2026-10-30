@@ -1,0 +1,27 @@
+{
+  "fuente": "Tabla de posiciones del boletín semanal de la URT (placa del 06/09/2026).",
+  "partidos": [
+    {
+      "id": "0a156445-f191-4eaf-bc5a-e4ca14dcba11",
+      "antes": {
+        "home_base_points": 4,
+        "away_base_points": 0,
+        "home_bonus_points": 0,
+        "away_bonus_points": 1,
+        "points_autocalculated": false,
+        "points_override_reason": null
+      }
+    },
+    {
+      "id": "0ee2a394-364d-47dc-87df-4bcadc505204",
+      "antes": {
+        "home_base_points": 4,
+        "away_base_points": 0,
+        "home_bonus_points": 0,
+        "away_bonus_points": 0,
+        "points_autocalculated": true,
+        "points_override_reason": null
+      }
+    }
+  ]
+}

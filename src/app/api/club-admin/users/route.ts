@@ -7,7 +7,7 @@ import {
     MEMBERSHIP_ROLE_OPTIONS,
     requireUserAccessContext,
 } from '@/lib/auth/permissions';
-import { EDIT_MEMBERSHIP_ROLES } from '@/lib/auth/roles';
+import { canAdministerClubAccess, explainGrantDenial, type GrantScopeType } from '@/lib/club-admin/grantAuthority';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 
@@ -63,6 +63,12 @@ function err(message: string, status: number) {
     return NextResponse.json({ ok: false, error: message }, { status });
 }
 
+/** El detalle de Supabase va al log; a la pantalla, un mensaje fijo. */
+function failure(scope: string, error: unknown, fallback: string) {
+    console.error(`[api/club-admin/users][${scope}]`, error);
+    return err(fallback, 500);
+}
+
 function membershipScopeLabel(membership: MembershipRow, clubNameById: Map<string, string>) {
     const baseLabel = clubNameById.get(membership.scope_id) || membership.scope_id;
     return membership.scope_type === 'club_family' ? `Familia ${baseLabel}` : baseLabel;
@@ -78,23 +84,31 @@ function isRelevantMembership(
     );
 }
 
-async function resolveClubAccess(clubId: string, allowedRoles = ACCESS_VIEW_ROLE_SET) {
+/**
+ * `view`: cualquiera con membresía del club ve el equipo. `grant`: crear,
+ * cambiar o revocar accesos es SOLO del admin del club (o global) — ver
+ * grantAuthority.ts. Antes un editor se subía a admin a sí mismo.
+ */
+async function resolveClubAccess(clubId: string, mode: 'view' | 'grant') {
     const supabase = await createClient();
     const context = await requireUserAccessContext(supabase).catch(() => null);
     if (!context) {
-        return { error: err('No autenticado', 401), target: null };
+        return { error: err('No autenticado', 401), target: null, context: null };
     }
 
     const target = await getClubManagementTarget(supabase, clubId);
     if (!target) {
-        return { error: err('Club no encontrado', 404), target: null };
+        return { error: err('Club no encontrado', 404), target: null, context: null };
     }
 
-    if (!canManageClubContext(context, target, allowedRoles)) {
-        return { error: err('Sin permisos para administrar este club', 403), target: null };
+    const allowed = mode === 'view'
+        ? canManageClubContext(context, target, ACCESS_VIEW_ROLE_SET)
+        : canAdministerClubAccess(context, target);
+    if (!allowed) {
+        return { error: err('Solo un admin del club puede gestionar accesos', 403), target: null, context: null };
     }
 
-    return { error: null, target };
+    return { error: null, target, context };
 }
 
 async function buildUsersPayload(target: NonNullable<Awaited<ReturnType<typeof getClubManagementTarget>>>) {
@@ -209,7 +223,7 @@ export async function GET(request: NextRequest) {
             return err('club param required', 400);
         }
 
-        const access = await resolveClubAccess(clubId, ACCESS_VIEW_ROLE_SET);
+        const access = await resolveClubAccess(clubId, 'view');
         if (access.error || !access.target) {
             return access.error!;
         }
@@ -217,8 +231,7 @@ export async function GET(request: NextRequest) {
         const payload = await buildUsersPayload(access.target);
         return NextResponse.json({ ok: true, data: payload.users, meta: payload.meta });
     } catch (error) {
-        const message = error instanceof Error ? error.message : 'No se pudo cargar el equipo de usuarios';
-        return err(message, 500);
+        return failure('GET', error, 'No se pudo cargar el equipo de usuarios');
     }
 }
 
@@ -230,24 +243,24 @@ export async function POST(request: NextRequest) {
         }
 
         const { clubId, email, scopeId, scopeType, membershipRole } = parsed.data;
-        const access = await resolveClubAccess(clubId, EDIT_MEMBERSHIP_ROLES);
-        if (access.error || !access.target) {
+        const access = await resolveClubAccess(clubId, 'grant');
+        if (access.error || !access.target || !access.context) {
             return access.error!;
         }
 
-        const validScope =
-            (scopeType === 'club' && scopeId === access.target.clubId) ||
-            (scopeType === 'club_family' && scopeId === access.target.familyRootId);
-
-        if (!validScope) {
-            return err('El alcance elegido no corresponde al club activo', 400);
+        const denial = explainGrantDenial(access.context, access.target, scopeType, scopeId, membershipRole);
+        if (denial) {
+            return err(denial, 403);
         }
 
         const admin = createAdminClient();
+        // `ilike` sin escapar: un "%" en el email matchea a cualquiera. El email
+        // ya pasó por z.email(); igual se escapan los comodines.
+        const emailPattern = email.trim().replace(/[\\%_]/g, (char) => `\\${char}`);
         const { data: user, error: userError } = await admin
             .from('users')
             .select('id, email')
-            .ilike('email', email.trim())
+            .ilike('email', emailPattern)
             .maybeSingle();
 
         if (userError) throw userError;
@@ -255,15 +268,27 @@ export async function POST(request: NextRequest) {
             return err('Ese email todavia no existe en users. El colaborador debe registrarse o iniciar sesion al menos una vez.', 404);
         }
 
+        if (user.id === access.context.userId) {
+            return err('No podés modificar tu propio acceso. Pedíselo a otro admin del club.', 403);
+        }
+
         const { data: existingMembership, error: existingError } = await admin
             .from('memberships')
-            .select('id')
+            .select('id, role')
             .eq('user_id', user.id)
             .eq('scope_type', scopeType)
             .eq('scope_id', scopeId)
             .maybeSingle();
 
         if (existingError) throw existingError;
+
+        // Pisar un rol más alto que el propio sería degradar a un superior.
+        if (existingMembership) {
+            const existingDenial = explainGrantDenial(
+                access.context, access.target, scopeType, scopeId, String(existingMembership.role)
+            );
+            if (existingDenial) return err(existingDenial, 403);
+        }
 
         if (existingMembership) {
             const { error: updateError } = await admin
@@ -288,8 +313,7 @@ export async function POST(request: NextRequest) {
         const payload = await buildUsersPayload(access.target);
         return NextResponse.json({ ok: true, data: payload.users, meta: payload.meta, targetUserId: user.id });
     } catch (error) {
-        const message = error instanceof Error ? error.message : 'No se pudo crear el acceso';
-        return err(message, 500);
+        return failure('POST', error, 'No se pudo crear el acceso');
     }
 }
 
@@ -301,15 +325,15 @@ export async function PATCH(request: NextRequest) {
         }
 
         const { clubId, membershipId, membershipRole } = parsed.data;
-        const access = await resolveClubAccess(clubId, EDIT_MEMBERSHIP_ROLES);
-        if (access.error || !access.target) {
+        const access = await resolveClubAccess(clubId, 'grant');
+        if (access.error || !access.target || !access.context) {
             return access.error!;
         }
 
         const admin = createAdminClient();
         const { data: membership, error: membershipError } = await admin
             .from('memberships')
-            .select('id, scope_type, scope_id')
+            .select('id, user_id, scope_type, scope_id, role')
             .eq('id', membershipId)
             .maybeSingle();
 
@@ -322,6 +346,19 @@ export async function PATCH(request: NextRequest) {
             return err('No puedes editar una membership fuera del alcance del club actual', 403);
         }
 
+        if (membership.user_id === access.context.userId) {
+            return err('No podés modificar tu propio acceso. Pedíselo a otro admin del club.', 403);
+        }
+
+        // Tiene que poder dar el rol nuevo Y el que la fila tiene hoy.
+        const scopeType = membership.scope_type as GrantScopeType;
+        const denial =
+            explainGrantDenial(access.context, access.target, scopeType, membership.scope_id, membershipRole) ??
+            explainGrantDenial(access.context, access.target, scopeType, membership.scope_id, String(membership.role));
+        if (denial) {
+            return err(denial, 403);
+        }
+
         const { error: updateError } = await admin
             .from('memberships')
             .update({ role: membershipRole })
@@ -332,8 +369,7 @@ export async function PATCH(request: NextRequest) {
         const payload = await buildUsersPayload(access.target);
         return NextResponse.json({ ok: true, data: payload.users, meta: payload.meta });
     } catch (error) {
-        const message = error instanceof Error ? error.message : 'No se pudo actualizar el acceso';
-        return err(message, 500);
+        return failure('PATCH', error, 'No se pudo actualizar el acceso');
     }
 }
 
@@ -348,15 +384,15 @@ export async function DELETE(request: NextRequest) {
             return err('Payload invalido para revocar acceso', 400);
         }
 
-        const access = await resolveClubAccess(parsed.data.clubId, EDIT_MEMBERSHIP_ROLES);
-        if (access.error || !access.target) {
+        const access = await resolveClubAccess(parsed.data.clubId, 'grant');
+        if (access.error || !access.target || !access.context) {
             return access.error!;
         }
 
         const admin = createAdminClient();
         const { data: membership, error: membershipError } = await admin
             .from('memberships')
-            .select('id, scope_type, scope_id')
+            .select('id, user_id, scope_type, scope_id, role')
             .eq('id', parsed.data.membershipId)
             .maybeSingle();
 
@@ -369,6 +405,18 @@ export async function DELETE(request: NextRequest) {
             return err('No puedes revocar una membership fuera del alcance del club actual', 403);
         }
 
+        if (membership.user_id === access.context.userId) {
+            return err('No podés revocar tu propio acceso. Pedíselo a otro admin del club.', 403);
+        }
+
+        // Revocar es tan fuerte como otorgar: un admin de filial no saca al de la familia.
+        const denial = explainGrantDenial(
+            access.context, access.target, membership.scope_type as GrantScopeType, membership.scope_id, String(membership.role)
+        );
+        if (denial) {
+            return err(denial, 403);
+        }
+
         const { error: deleteError } = await admin
             .from('memberships')
             .delete()
@@ -379,7 +427,6 @@ export async function DELETE(request: NextRequest) {
         const payload = await buildUsersPayload(access.target);
         return NextResponse.json({ ok: true, data: payload.users, meta: payload.meta });
     } catch (error) {
-        const message = error instanceof Error ? error.message : 'No se pudo revocar el acceso';
-        return err(message, 500);
+        return failure('DELETE', error, 'No se pudo revocar el acceso');
     }
 }

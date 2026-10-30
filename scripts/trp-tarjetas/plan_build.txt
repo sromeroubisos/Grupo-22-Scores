@@ -1,0 +1,314 @@
+594fcb55 310438 Cerrado comercial-r-c 41-0 argentino-de-bahia-blanca eventos 41 0 base 43 0 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23 local: sin pareja: (7, '2T', 3, 'Ignacio Zanetti')
+   DUDOSO ('Tomas Osvaldo Sestelo Cangelli', ['Tomas Sestelo Cangelli', 'Tomás sestelo'])
+594fcb55 310439 Cerrado mar-del-plata-club 19-17 san-ignacio-r-c eventos 19 17 base 19 17 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 0 nuevas 23 visitante: sin pareja: (-1, '2T', 1, 'Ignacio Gandara') visitante: sin pareja: (-1, '2T', 34, 'Lautaro Garcia')
+594fcb55 310440 Cerrado sociedad-sportiva-de-bahia-blanca 30-20 los-cardos-r-c eventos 30 20 base 30 20 nL 23 nV 23 local: fichas 22 nuevas 1 visitante: fichas 0 nuevas 23
+594fcb55 310441 Cerrado ipr-sporting 10-22 universitario-de-mar-del-plata eventos 10 22 base 10 22 nL 23 nV 23 local: fichas 22 nuevas 1 visitante: fichas 0 nuevas 23
+594fcb55 310442 Cerrado argentino-de-bahia-blanca 18-62 universitario-de-mar-del-plata eventos 18 62 base 18 62 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23 local: sin pareja: (-1, '2T', 1, 'Agustin Grunewald') local: sin pareja: (-1, '2T', 40, 'Santiago Ramos Apphatie')
+594fcb55 310443 Cerrado los-cardos-r-c 24-31 ipr-sporting eventos 24 31 base 24 31 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 22 nuevas 1 local: sin pareja: (17, '2T', 78, 'Bautista Palacio')
+594fcb55 310444 Cerrado san-ignacio-r-c 23-43 sociedad-sportiva-de-bahia-blanca eventos 23 43 base 23 43 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 22 nuevas 1 local: sin pareja: (-1, '1T', 27, 'Bruno Costales')
+   DUDOSO ('Tomas Osvaldo Sestelo Cangelli', ['Tomas Sestelo Cangelli', 'Tomás sestelo'])
+594fcb55 310445 Cerrado comercial-r-c 22-38 mar-del-plata-club eventos 22 38 base 22 39 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 23 nuevas 0 visitante: sin pareja: (8, '2T', 50, 'Joaquín Solovioff')
+   DUDOSO ('Tomas Osvaldo Sestelo Cangelli', ['Tomas Sestelo Cangelli', 'Tomás sestelo'])
+594fcb55 310446 Cerrado mar-del-plata-club 69-5 argentino-de-bahia-blanca eventos 69 5 base 69 5 nL 23 nV 23 local: fichas 20 nuevas 3 visitante: fichas 0 nuevas 23
+594fcb55 310447 Cerrado sociedad-sportiva-de-bahia-blanca 24-8 comercial-r-c eventos 24 8 base 24 8 nL 23 nV 23 local: fichas 21 nuevas 2 visitante: fichas 0 nuevas 23
+594fcb55 310448 Cerrado ipr-sporting 66-17 san-ignacio-r-c eventos 66 17 base 66 17 nL 23 nV 23 local: fichas 22 nuevas 1 visitante: fichas 0 nuevas 23 visitante: sin pareja: (10, '2T', 16, 'Thomas Helguera')
+594fcb55 310449 Cerrado universitario-de-mar-del-plata 57-10 los-cardos-r-c eventos 57 10 base 57 10 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+594fcb55 310634 Cerrado argentino-de-bahia-blanca 15-27 los-cardos-r-c eventos 15 27 base 15 27 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23 visitante: sin pareja: (14, '2T', 74, 'Fermin García Guerrero')
+594fcb55 310635 Cerrado san-ignacio-r-c 22-32 universitario-de-mar-del-plata eventos 22 32 base 22 32 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23 local: sin pareja: (-1, '2T', 0, 'Juan Martin Elvira Durdos')
+594fcb55 310636 Cerrado comercial-r-c 15-20 ipr-sporting eventos 15 20 base 15 20 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 22 nuevas 1
+   DUDOSO ('Tomas Osvaldo Sestelo Cangelli', ['Tomas Sestelo Cangelli', 'Tomás sestelo'])
+594fcb55 310637 Cerrado mar-del-plata-club 21-10 sociedad-sportiva-de-bahia-blanca eventos 21 10 base 21 10 nL 23 nV 23 local: fichas 22 nuevas 1 visitante: fichas 20 nuevas 3
+594fcb55 310638 Cerrado sociedad-sportiva-de-bahia-blanca 66-10 argentino-de-bahia-blanca eventos 66 10 base 66 10 nL 23 nV 23 local: fichas 21 nuevas 2 visitante: fichas 0 nuevas 23 visitante: sin pareja: (10, '2T', 22, 'Franco De Rosa') visitante: sin pareja: (15, '2T', 32, 'Martín Olivero') visitante: sin pareja: (-1, '2T', 40, 'Franco Carrera')
+   DUDOSO ('Tomas Osvaldo Sestelo Cangelli', ['Tomas Sestelo Cangelli', 'Tomás sestelo'])
+594fcb55 310639 Cerrado ipr-sporting 39-31 mar-del-plata-club eventos 39 31 base 39 31 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 23 nuevas 0 local: sin pareja: (16, '2T', 23, 'Agustín Zelezen') visitante: sin pareja: (6, '2T', 48, 'Tomas Catuogno')
+594fcb55 310640 Cerrado universitario-de-mar-del-plata 15-25 comercial-r-c eventos 15 25 base 15 25 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+594fcb55 310641 Cerrado los-cardos-r-c 31-19 san-ignacio-r-c eventos 31 19 base 31 19 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+594fcb55 310642 Cerrado argentino-de-bahia-blanca 19-27 san-ignacio-r-c eventos 19 27 base 19 26 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23 local: sin pareja: (-1, '2T', 36, 'Emiliano Bruno Barrera') local: sin pareja: (-1, '2T', 40, 'Pascual Gonzalez')
+594fcb55 310643 Cerrado comercial-r-c 24-19 los-cardos-r-c eventos 24 19 base 24 19 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+   DUDOSO ('Tomas Osvaldo Sestelo Cangelli', ['Tomas Sestelo Cangelli', 'Tomás sestelo'])
+594fcb55 310644 Cerrado mar-del-plata-club 30-21 universitario-de-mar-del-plata eventos 30 21 base 30 21 nL 23 nV 23 local: fichas 21 nuevas 2 visitante: fichas 0 nuevas 23
+594fcb55 310645 Cerrado sociedad-sportiva-de-bahia-blanca 31-35 ipr-sporting eventos 31 35 base 31 35 nL 23 nV 23 local: fichas 17 nuevas 6 visitante: fichas 22 nuevas 1
+594fcb55 310646 Cerrado ipr-sporting 94-14 argentino-de-bahia-blanca eventos 94 14 base 94 14 nL 23 nV 23 local: fichas 18 nuevas 5 visitante: fichas 0 nuevas 23 local: sin pareja: (38, '2T', 24, 'Pedro Tomás Dieguez Buccella') visitante: sin pareja: (0, '2T', 3, 'Nicolás Alejandro Marengo') visitante: sin pareja: (-1, '2T', 3, 'Bautista Gortari')
+594fcb55 310647 Cerrado universitario-de-mar-del-plata 16-23 sociedad-sportiva-de-bahia-blanca eventos 16 23 base 16 23 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 17 nuevas 6
+594fcb55 310648 Cerrado los-cardos-r-c 5-38 mar-del-plata-club eventos 5 38 base 5 38 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 21 nuevas 2
+594fcb55 310649 Cerrado san-ignacio-r-c 27-41 comercial-r-c eventos 27 41 base 27 41 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+594fcb55 313633 Cerrado universitario-de-mar-del-plata 31-33 ipr-sporting eventos 31 33 base 31 33 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 20 nuevas 3
+594fcb55 313632 Cerrado los-cardos-r-c 35-28 sociedad-sportiva-de-bahia-blanca eventos 35 28 base 35 28 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 19 nuevas 4
+594fcb55 313631 Cerrado san-ignacio-r-c 14-57 mar-del-plata-club eventos 14 57 base 14 57 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 21 nuevas 2
+594fcb55 313630 Cerrado argentino-de-bahia-blanca 17-45 comercial-r-c eventos 17 45 base 17 45 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23 local: sin pareja: (3, '2T', 16, 'Nicolas Hernandez')
+594fcb55 313634 Cerrado universitario-de-mar-del-plata 81-19 argentino-de-bahia-blanca eventos 81 19 base 81 19 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23 local: sin pareja: (16, '2T', 16, 'Juan Blas Morales')
+594fcb55 313635 Cerrado ipr-sporting 54-22 los-cardos-r-c eventos 54 22 base 54 22 nL 23 nV 23 local: fichas 19 nuevas 4 visitante: fichas 0 nuevas 23
+594fcb55 313636 Cerrado sociedad-sportiva-de-bahia-blanca 39-24 san-ignacio-r-c eventos 39 24 base 39 24 nL 23 nV 23 local: fichas 21 nuevas 2 visitante: fichas 0 nuevas 23
+594fcb55 313637 Cerrado mar-del-plata-club 46-19 comercial-r-c eventos 46 19 base 48 17 nL 23 nV 23 local: fichas 21 nuevas 2 visitante: fichas 0 nuevas 23
+   DUDOSO ('Tomas Osvaldo Sestelo Cangelli', ['Tomas Sestelo Cangelli', 'Tomás sestelo'])
+594fcb55 313638 Cerrado argentino-de-bahia-blanca 10-52 mar-del-plata-club eventos 10 52 base 10 52 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 18 nuevas 5 local: sin pareja: (-1, '2T', 30, 'Thiago Zaballa') local: sin pareja: (-1, '2T', 31, 'Francisco Ramirez Vita') visitante: sin pareja: (14, '2T', 58, 'Gonzalo Recalde')
+594fcb55 313639 Cerrado comercial-r-c 29-23 sociedad-sportiva-de-bahia-blanca eventos 29 23 base 29 23 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 19 nuevas 4
+594fcb55 313640 Cerrado san-ignacio-r-c 22-44 ipr-sporting eventos 22 44 base 22 44 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 20 nuevas 3
+594fcb55 313641 Cerrado los-cardos-r-c 12-52 universitario-de-mar-del-plata eventos 12 52 base 12 57 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+   DUDOSO ('Tomas Osvaldo Sestelo Cangelli', ['Tomas Sestelo Cangelli', 'Tomás sestelo'])
+594fcb55 313645 Cerrado sociedad-sportiva-de-bahia-blanca 25-31 mar-del-plata-club eventos 25 31 base 25 31 nL 23 nV 23 local: fichas 22 nuevas 1 visitante: fichas 19 nuevas 4
+594fcb55 313644 Cerrado ipr-sporting 69-31 comercial-r-c eventos 69 31 base 69 31 nL 23 nV 23 local: fichas 21 nuevas 2 visitante: fichas 0 nuevas 23
+594fcb55 313643 Cerrado universitario-de-mar-del-plata 63-19 san-ignacio-r-c eventos 63 19 base 63 19 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23 visitante: sin pareja: (9, '2T', 5, 'Diego Gonzalez') visitante: sin pareja: (-1, '2T', 7, 'Felipe Fortte')
+594fcb55 313642 Cerrado los-cardos-r-c 39-31 argentino-de-bahia-blanca eventos 39 31 base 39 31 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+594fcb55 313649 Cerrado san-ignacio-r-c 24-36 los-cardos-r-c eventos 24 36 base 24 36 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+594fcb55 313648 Cerrado comercial-r-c 32-39 universitario-de-mar-del-plata eventos 32 39 base 32 39 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+   DUDOSO ('Tomas Osvaldo Sestelo Cangelli', ['Tomas Sestelo Cangelli', 'Tomás sestelo'])
+594fcb55 313647 Cerrado mar-del-plata-club 31-21 ipr-sporting eventos 31 21 base 31 21 nL 23 nV 23 local: fichas 20 nuevas 3 visitante: fichas 21 nuevas 2
+594fcb55 313646 Cerrado argentino-de-bahia-blanca 19-41 sociedad-sportiva-de-bahia-blanca eventos 19 41 base 19 41 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 21 nuevas 2
+594fcb55 313653 Cerrado ipr-sporting 35-22 sociedad-sportiva-de-bahia-blanca eventos 35 22 base 35 22 nL 23 nV 23 local: fichas 22 nuevas 1 visitante: fichas 21 nuevas 2
+   DUDOSO ('Tomas Osvaldo Sestelo Cangelli', ['Tomas Sestelo Cangelli', 'Tomás sestelo'])
+594fcb55 313652 Cerrado universitario-de-mar-del-plata 20-15 mar-del-plata-club eventos 20 15 base 20 15 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 21 nuevas 2
+594fcb55 313651 Cerrado los-cardos-r-c 22-38 comercial-r-c eventos 22 38 base 22 38 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+594fcb55 313650 Cerrado san-ignacio-r-c 29-3 argentino-de-bahia-blanca eventos 29 3 base 29 3 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23 visitante: sin pareja: (-1, '2T', 18, 'Ramiro Valentin Correa')
+594fcb55 313657 Cerrado comercial-r-c 10-3 san-ignacio-r-c eventos 10 3 base 10 3 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+   DUDOSO ('Tomas Osvaldo Sestelo Cangelli', ['Tomas Sestelo Cangelli', 'Tomás sestelo'])
+594fcb55 313656 Cerrado mar-del-plata-club 50-5 los-cardos-r-c eventos 50 5 base 50 5 nL 23 nV 23 local: fichas 20 nuevas 3 visitante: fichas 0 nuevas 23
+594fcb55 313655 Cerrado sociedad-sportiva-de-bahia-blanca 40-21 universitario-de-mar-del-plata eventos 40 21 base 40 21 nL 23 nV 23 local: fichas 22 nuevas 1 visitante: fichas 0 nuevas 23
+594fcb55 313654 Cerrado argentino-de-bahia-blanca 15-75 ipr-sporting eventos 15 75 base 15 75 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 18 nuevas 5
+594fcb55 327759 Cerrado ipr-sporting 22-29 universitario-de-mar-del-plata eventos 22 29 base 22 29 nL 23 nV 23 local: fichas 21 nuevas 2 visitante: fichas 0 nuevas 23
+9bd1fc54 280989 Cerrado sociedad-sportiva-de-bahia-blanca 125-0 santa-rosa-r-c eventos 125 0 base 125 0 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 0 nuevas 23
+9bd1fc54 280990 Cerrado argentino-de-bahia-blanca 71-3 universitario-de-bahia-blanca eventos 71 3 base 71 3 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+9bd1fc54 280991 Cerrado santa-rosa-r-c 29-22 club-el-nacional eventos 29 22 base 29 22 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23 visitante: sin pareja: (-1, '2T', 50, 'Danilo Valero') visitante: sin pareja: (-1, '2T', 60, 'Gonzalo Ezequiel Rivero') visitante: sin pareja: (-1, '2T', 80, 'Nicolas Coronel')
+9bd1fc54 280992 Cerrado universitario-de-bahia-blanca 16-59 sociedad-sportiva-de-bahia-blanca eventos 16 59 base 16 59 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 23 nuevas 0
+9bd1fc54 280994 Cerrado club-el-nacional 0-63 sociedad-sportiva-de-bahia-blanca eventos 0 63 base 0 63 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 23 nuevas 0 local: sin pareja: (3, '2T', 48, 'Lucas Filliotrani')
+9bd1fc54 280993 Cerrado argentino-de-bahia-blanca 64-0 santa-rosa-r-c eventos 64 0 base 30 0 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+9bd1fc54 280996 Cerrado club-el-nacional 0-92 argentino-de-bahia-blanca eventos 0 92 base 0 92 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23 local: sin pareja: (1, '2T', 10, 'Santiago Pastrana') visitante: sin pareja: (29, '2T', 16, 'Manuel Saldaño Rocha')
+9bd1fc54 280995 Cerrado santa-rosa-r-c 5-13 universitario-de-bahia-blanca eventos 5 13 base 5 13 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+9bd1fc54 281008 Cerrado universitario-de-bahia-blanca 29-14 club-el-nacional eventos 29 14 base 29 14 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+9bd1fc54 281007 Cerrado argentino-de-bahia-blanca 3-25 sociedad-sportiva-de-bahia-blanca eventos 3 25 base 3 25 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 21 nuevas 2
+9bd1fc54 281006 Cerrado club-el-nacional 33-38 universitario-de-bahia-blanca eventos 33 38 base 33 38 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+9bd1fc54 281005 Cerrado sociedad-sportiva-de-bahia-blanca 66-0 argentino-de-bahia-blanca eventos 66 0 base 66 0 nL 23 nV 23 local: fichas 22 nuevas 1 visitante: fichas 0 nuevas 23 visitante: sin pareja: (-1, '1T', 5, 'Manuel Molina') visitante: sin pareja: (3, '1T', 34, 'Manuel Saldaño Rocha') visitante: sin pareja: (9, '2T', 19, 'Baltazar Montero')
+9bd1fc54 281004 Cerrado sociedad-sportiva-de-bahia-blanca 85-0 club-el-nacional eventos 85 0 base 85 0 nL 23 nV 23 local: fichas 16 nuevas 7 visitante: fichas 0 nuevas 23
+9bd1fc54 281003 Cerrado santa-rosa-r-c 9-17 argentino-de-bahia-blanca eventos 9 17 base 9 17 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23 visitante: sin pareja: (12, '2T', 31, 'Francisco Ramirez Vita')
+9bd1fc54 281002 Cerrado argentino-de-bahia-blanca 50-19 club-el-nacional eventos 50 19 base 50 19 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+9bd1fc54 281001 Cerrado universitario-de-bahia-blanca 23-24 santa-rosa-r-c eventos 23 24 base 23 24 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+9bd1fc54 281000 Cerrado sociedad-sportiva-de-bahia-blanca 78-10 universitario-de-bahia-blanca eventos 78 10 base 78 10 nL 23 nV 23 local: fichas 19 nuevas 4 visitante: fichas 0 nuevas 23
+9bd1fc54 280999 Cerrado club-el-nacional 19-19 santa-rosa-r-c eventos 19 19 base 19 19 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+9bd1fc54 280998 Cerrado universitario-de-bahia-blanca 18-48 argentino-de-bahia-blanca eventos 18 48 base 18 48 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23 visitante: sin pareja: (17, '2T', 24, 'Agustin Grunewald')
+9bd1fc54 280997 Cerrado santa-rosa-r-c 5-66 sociedad-sportiva-de-bahia-blanca eventos 5 66 base 5 66 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 19 nuevas 4
+62bf0694 296836 Cerrado cuises-portena-rugby 34-32 villa-libertador-r-c eventos 34 32 base 34 32 nL 26 nV 30 local: fichas 0 nuevas 26 visitante: fichas 0 nuevas 30
+62bf0694 296837 Cerrado manke-la-calera 25-39 rosedal-r-c eventos 25 39 base 25 39 nL 26 nV 29 local: fichas 0 nuevas 26 visitante: fichas 0 nuevas 29
+62bf0694 296838 Cerrado asociacion-cordobesa-volantes 35-15 salsipuedes-r-c eventos 35 15 base 35 15 nL 21 nV 23 local: fichas 0 nuevas 21 visitante: fichas 0 nuevas 23
+62bf0694 296839 Cerrado ajedrez-cosquin-r-c 71-34 chelcos-de-villa-del-rosario eventos 71 34 base 71 34 nL 17 nV 21 local: fichas 0 nuevas 17 visitante: fichas 0 nuevas 21
+62bf0694 296841 Cerrado ajedrez-cosquin-r-c 7-78 conas-r-c eventos 7 78 base 7 78 nL 17 nV 23 local: fichas 0 nuevas 17 visitante: fichas 0 nuevas 23 local: sin pareja: (2, '2T', 0, 'Cristian Eduardo Nazarre')
+62bf0694 296843 Cerrado chelcos-de-villa-del-rosario 28-31 asociacion-cordobesa-volantes eventos 28 31 base 28 31 nL 19 nV 21 local: fichas 0 nuevas 19 visitante: fichas 0 nuevas 21 local: sin pareja: (13, '2T', 35, 'Roberto Hernan Almada')
+62bf0694 296844 Cerrado salsipuedes-r-c 17-41 manke-la-calera eventos 17 41 base 17 41 nL 23 nV 19 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 19
+62bf0694 296845 Cerrado rosedal-r-c 55-14 cuises-portena-rugby eventos 55 14 base 55 14 nL 29 nV 26 local: fichas 0 nuevas 29 visitante: fichas 0 nuevas 26
+62bf0694 296847 Cerrado universidad-siglo-21-rugby 24-17 villa-libertador-r-c eventos 24 17 base 24 17 nL 23 nV 21 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 21
+62bf0694 296848 Cerrado cuises-portena-rugby 49-7 salsipuedes-r-c eventos 49 7 base 49 7 nL 30 nV 19 local: fichas 0 nuevas 30 visitante: fichas 0 nuevas 19
+62bf0694 296849 Cerrado manke-la-calera 49-19 chelcos-de-villa-del-rosario eventos 49 19 base 49 19 nL 20 nV 20 local: fichas 0 nuevas 20 visitante: fichas 0 nuevas 20
+62bf0694 296850 Cerrado asociacion-cordobesa-volantes 0-52 conas-r-c eventos 0 52 base 0 52 nL 21 nV 23 local: fichas 0 nuevas 21 visitante: fichas 0 nuevas 23
+62bf0694 296854 Cerrado conas-r-c 64-15 manke-la-calera eventos 64 15 base 64 15 nL 23 nV 19 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 19
+62bf0694 296858 Cerrado rosedal-r-c 38-20 villa-libertador-r-c eventos 38 20 base 38 20 nL 28 nV 17 local: fichas 0 nuevas 28 visitante: fichas 0 nuevas 17
+62bf0694 296856 Cerrado chelcos-de-villa-del-rosario 21-38 cuises-portena-rugby eventos 21 38 base 21 38 nL 21 nV 30 local: fichas 0 nuevas 21 visitante: fichas 0 nuevas 30 local: sin pareja: (4, '2T', 1, 'Tiago Rodriguez')
+62bf0694 296853 Cerrado ajedrez-cosquin-r-c 12-63 universidad-siglo-21-rugby eventos 12 63 base 12 63 nL 19 nV 23 local: fichas 0 nuevas 19 visitante: fichas 0 nuevas 23
+62bf0694 296864 Cerrado asociacion-cordobesa-volantes 40-28 ajedrez-cosquin-r-c eventos 40 28 base 40 28 nL 23 nV 18 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 18
+62bf0694 296863 Cerrado cuises-portena-rugby 14-48 conas-r-c eventos 14 48 base 14 48 nL 30 nV 23 local: fichas 0 nuevas 30 visitante: fichas 0 nuevas 23
+62bf0694 296860 Cerrado villa-libertador-r-c 82-3 salsipuedes-r-c eventos 82 3 base 82 3 nL 21 nV 24 local: fichas 0 nuevas 21 visitante: fichas 0 nuevas 24
+62bf0694 296859 Cerrado universidad-siglo-21-rugby 28-34 rosedal-r-c eventos 28 34 base 28 34 nL 22 nV 30 local: fichas 0 nuevas 22 visitante: fichas 0 nuevas 30
+62bf0694 296870 Cerrado salsipuedes-r-c 7-24 rosedal-r-c eventos 7 24 base 7 24 nL 26 nV 30 local: fichas 0 nuevas 26 visitante: fichas 0 nuevas 30
+62bf0694 296869 Cerrado chelcos-de-villa-del-rosario 7-41 villa-libertador-r-c eventos 7 41 base 7 41 nL 21 nV 29 local: fichas 0 nuevas 21 visitante: fichas 0 nuevas 29
+62bf0694 296866 Cerrado ajedrez-cosquin-r-c 19-25 manke-la-calera eventos 19 25 base 19 25 nL 19 nV 22 local: fichas 0 nuevas 19 visitante: fichas 0 nuevas 22
+62bf0694 296865 Cerrado asociacion-cordobesa-volantes 27-19 universidad-siglo-21-rugby eventos 27 19 base 27 19 nL 23 nV 21 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 21
+62bf0694 296876 Cerrado manke-la-calera 22-14 asociacion-cordobesa-volantes eventos 22 14 base 22 14 nL 24 nV 23 local: fichas 0 nuevas 24 visitante: fichas 0 nuevas 23 visitante: sin pareja: (-1, '2T', 38, 'Maximo Juan Renzi')
+62bf0694 296875 Cerrado cuises-portena-rugby 43-24 ajedrez-cosquin-r-c eventos 43 24 base 43 24 nL 30 nV 20 local: fichas 0 nuevas 30 visitante: fichas 0 nuevas 20
+62bf0694 296874 Cerrado villa-libertador-r-c 7-46 conas-r-c eventos 7 46 base 7 46 nL 30 nV 23 local: fichas 0 nuevas 30 visitante: fichas 0 nuevas 23
+62bf0694 296871 Cerrado universidad-siglo-21-rugby 22-15 salsipuedes-r-c eventos 22 15 base 22 15 nL 21 nV 26 local: fichas 0 nuevas 21 visitante: fichas 0 nuevas 26
+62bf0694 296872 Cerrado rosedal-r-c 96-7 chelcos-de-villa-del-rosario eventos 96 7 base 96 7 nL 30 nV 14 local: fichas 0 nuevas 30 visitante: fichas 0 nuevas 14
+62bf0694 296882 Cerrado chelcos-de-villa-del-rosario 5-8 salsipuedes-r-c eventos 5 8 base 5 8 nL 24 nV 26 local: fichas 0 nuevas 24 visitante: fichas 0 nuevas 26
+62bf0694 296877 Cerrado manke-la-calera 32-29 universidad-siglo-21-rugby eventos 32 29 base 32 29 nL 24 nV 21 local: fichas 0 nuevas 24 visitante: fichas 0 nuevas 21
+62bf0694 296880 Cerrado conas-r-c 45-15 rosedal-r-c eventos 45 15 base 45 15 nL 23 nV 30 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 30
+62bf0694 296878 Cerrado asociacion-cordobesa-volantes 34-40 cuises-portena-rugby eventos 34 40 base 34 40 nL 30 nV 30 local: fichas 0 nuevas 30 visitante: fichas 0 nuevas 30
+62bf0694 296888 Cerrado cuises-portena-rugby 31-5 manke-la-calera eventos 31 5 base 31 5 nL 30 nV 25 local: fichas 0 nuevas 30 visitante: fichas 0 nuevas 25
+62bf0694 296885 Cerrado salsipuedes-r-c 6-50 conas-r-c eventos 6 50 base 6 50 nL 26 nV 23 local: fichas 0 nuevas 26 visitante: fichas 0 nuevas 23
+62bf0694 296883 Cerrado universidad-siglo-21-rugby 69-34 chelcos-de-villa-del-rosario eventos 69 34 base 69 34 nL 19 nV 18 local: fichas 0 nuevas 19 visitante: fichas 0 nuevas 18
+62bf0694 296886 Cerrado villa-libertador-r-c 36-46 ajedrez-cosquin-r-c eventos 36 46 base 36 46 nL 30 nV 19 local: fichas 0 nuevas 30 visitante: fichas 0 nuevas 19
+62bf0694 296892 Cerrado ajedrez-cosquin-r-c 8-52 rosedal-r-c eventos 8 52 base 8 52 nL 20 nV 30 local: fichas 0 nuevas 20 visitante: fichas 0 nuevas 30
+62bf0694 296891 Cerrado asociacion-cordobesa-volantes 13-39 villa-libertador-r-c eventos 13 39 base 13 39 nL 30 nV 30 local: fichas 0 nuevas 30 visitante: fichas 0 nuevas 30
+62bf0694 296889 Cerrado cuises-portena-rugby 23-25 universidad-siglo-21-rugby eventos 23 25 base 23 25 nL 30 nV 23 local: fichas 0 nuevas 30 visitante: fichas 0 nuevas 23
+62bf0694 296899 Cerrado villa-libertador-r-c 25-26 manke-la-calera eventos 25 26 base 25 26 nL 30 nV 28 local: fichas 0 nuevas 30 visitante: fichas 0 nuevas 28
+62bf0694 296898 Cerrado rosedal-r-c 38-0 asociacion-cordobesa-volantes eventos 38 0 base 38 0 nL 30 nV 30 local: fichas 0 nuevas 30 visitante: fichas 0 nuevas 30 local: sin pareja: (14, '2T', 45, 'Benjamin Tobares')
+62bf0694 296897 Cerrado salsipuedes-r-c 25-33 ajedrez-cosquin-r-c eventos 25 33 base 25 33 nL 24 nV 22 local: fichas 0 nuevas 24 visitante: fichas 0 nuevas 22
+62bf0694 296896 Cerrado universidad-siglo-21-rugby 5-45 conas-r-c eventos 5 45 base 5 45 nL 25 nV 23 local: fichas 0 nuevas 25 visitante: fichas 0 nuevas 23
+62bf0694 320912 Cerrado cuises-portena-rugby 47-21 asociacion-cordobesa-volantes eventos 47 21 base 47 21 nL 30 nV 30 local: fichas 0 nuevas 30 visitante: fichas 0 nuevas 30
+62bf0694 320911 Cerrado rosedal-r-c 47-19 manke-la-calera eventos 47 19 base 47 19 nL 30 nV 28 local: fichas 0 nuevas 30 visitante: fichas 0 nuevas 28
+62bf0694 320910 Cerrado conas-r-c 32-13 universidad-siglo-21-rugby eventos 32 13 base 32 13 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+62bf0694 322776 Cerrado rosedal-r-c 38-15 cuises-portena-rugby eventos 38 15 base 38 15 nL 30 nV 30 local: fichas 0 nuevas 30 visitante: fichas 0 nuevas 30
+62bf0694 322774 Cerrado manke-la-calera 25-41 conas-r-c eventos 25 41 base 25 41 nL 30 nV 23 local: fichas 0 nuevas 30 visitante: fichas 0 nuevas 23
+62bf0694 322773 ? universidad-siglo-21-rugby 0-28 asociacion-cordobesa-volantes eventos 0 0 base 0 28 nL 26 nV 30 local: fichas 0 nuevas 26 visitante: fichas 0 nuevas 30
+62bf0694 324552 Cerrado asociacion-cordobesa-volantes 22-17 manke-la-calera eventos 22 17 base 22 17 nL 30 nV 30 local: fichas 0 nuevas 30 visitante: fichas 0 nuevas 30
+62bf0694 324551 Cerrado conas-r-c 23-20 rosedal-r-c eventos 23 20 base 23 20 nL 23 nV 30 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 30
+62bf0694 325286 Cerrado manke-la-calera 17-60 universidad-siglo-21-rugby eventos 17 60 base 17 60 nL 30 nV 23 local: fichas 0 nuevas 30 visitante: fichas 0 nuevas 23
+62bf0694 325285 Cerrado rosedal-r-c 33-15 asociacion-cordobesa-volantes eventos 33 15 base 33 15 nL 30 nV 30 local: fichas 0 nuevas 30 visitante: fichas 0 nuevas 30 visitante: sin pareja: (5, '2T', 20, 'Lorenzo Cumino')
+62bf0694 325284 Cerrado conas-r-c 76-5 cuises-portena-rugby eventos 76 5 base 76 5 nL 23 nV 30 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 30
+62bf0694 326220 Cerrado universidad-siglo-21-rugby 43-29 rosedal-r-c eventos 43 29 base 43 29 nL 23 nV 30 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 30
+62bf0694 326221 Cerrado asociacion-cordobesa-volantes 10-60 conas-r-c eventos 10 60 base 10 60 nL 30 nV 23 local: fichas 0 nuevas 30 visitante: fichas 0 nuevas 23
+62bf0694 327315 Cerrado salsipuedes-r-c 56-10 chelcos-de-villa-del-rosario eventos 56 10 base 0 0 nL 24 nV 21 local: fichas 0 nuevas 24 visitante: fichas 0 nuevas 21
+62bf0694 326224 Cerrado villa-libertador-r-c 57-25 chelcos-de-villa-del-rosario eventos 57 25 base 57 25 nL 23 nV 22 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 22
+62bf0694 326223 Cerrado ajedrez-cosquin-r-c 27-10 salsipuedes-r-c eventos 27 10 base 27 10 nL 22 nV 24 local: fichas 0 nuevas 22 visitante: fichas 0 nuevas 24
+62bf0694 325288 Cerrado chelcos-de-villa-del-rosario 45-45 ajedrez-cosquin-r-c eventos 45 45 base 45 45 nL 22 nV 21 local: fichas 0 nuevas 22 visitante: fichas 0 nuevas 21
+62bf0694 325287 Cerrado salsipuedes-r-c 13-38 villa-libertador-r-c eventos 13 38 base 13 38 nL 26 nV 24 local: fichas 0 nuevas 26 visitante: fichas 0 nuevas 24 local: sin pareja: (-1, '2T', 38, 'Santiago Misael Robledo')
+62bf0694 324554 Cerrado chelcos-de-villa-del-rosario 35-24 salsipuedes-r-c eventos 35 24 base 35 24 nL 22 nV 26 local: fichas 0 nuevas 22 visitante: fichas 0 nuevas 26 local: sin pareja: (-1, '1T', 15, 'Tobias Moukarzel') local: sin pareja: (-1, '2T', 20, 'Joaquin Berdasco')
+62bf0694 324553 Cerrado villa-libertador-r-c 35-19 ajedrez-cosquin-r-c eventos 35 19 base 35 19 nL 23 nV 21 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 21
+62bf0694 322771 Cerrado salsipuedes-r-c 23-32 ajedrez-cosquin-r-c eventos 23 32 base 23 32 nL 25 nV 23 local: fichas 0 nuevas 25 visitante: fichas 0 nuevas 23
+62bf0694 322770 Cerrado chelcos-de-villa-del-rosario 23-24 villa-libertador-r-c eventos 23 24 base 23 24 nL 20 nV 23 local: fichas 0 nuevas 20 visitante: fichas 0 nuevas 23
+62bf0694 320909 Cerrado villa-libertador-r-c 65-7 salsipuedes-r-c eventos 65 7 base 65 7 nL 30 nV 25 local: fichas 0 nuevas 30 visitante: fichas 0 nuevas 25
+62bf0694 320908 Cerrado ajedrez-cosquin-r-c 42-25 chelcos-de-villa-del-rosario eventos 42 25 base 42 25 nL 20 nV 20 local: fichas 0 nuevas 20 visitante: fichas 0 nuevas 20
+683363b8 322766 Cerrado universitario-villa-maria-rugby 17-32 villa-general-belgrano-r-c eventos 17 32 base 17 32 nL 21 nV 28 local: fichas 0 nuevas 21 visitante: fichas 21 nuevas 7
+683363b8 322765 Cerrado union-oncativo-rugby 33-24 los-tordos-hernando eventos 33 24 base 33 24 nL 23 nV 23 local: fichas 19 nuevas 4 visitante: fichas 0 nuevas 23
+683363b8 322764 Cerrado nautico-fitz-simon 35-8 oliva-rugby-club eventos 35 8 base 35 8 nL 23 nV 24 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 24
+683363b8 320900 Cerrado los-tordos-hernando 12-49 nautico-fitz-simon eventos 12 49 base 12 49 nL 23 nV 27 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 27
+683363b8 320899 Cerrado villa-general-belgrano-r-c 23-25 union-oncativo-rugby eventos 23 25 base 23 25 nL 30 nV 25 local: fichas 22 nuevas 8 visitante: fichas 19 nuevas 6
+683363b8 319797 Cerrado nautico-fitz-simon 27-19 villa-general-belgrano-r-c eventos 27 19 base 27 19 nL 23 nV 30 local: fichas 0 nuevas 23 visitante: fichas 21 nuevas 9
+683363b8 319796 Cerrado los-tordos-hernando 0-10 oliva-rugby-club eventos 0 10 base 0 10 nL 23 nV 24 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 24
+683363b8 319798 Cerrado union-oncativo-rugby 103-0 universitario-villa-maria-rugby eventos 103 0 base 103 0 nL 23 nV 19 local: fichas 19 nuevas 4 visitante: fichas 0 nuevas 19
+683363b8 315222 Cerrado villa-general-belgrano-r-c 50-26 los-tordos-hernando eventos 50 26 base 50 26 nL 30 nV 23 local: fichas 20 nuevas 10 visitante: fichas 0 nuevas 23
+683363b8 315221 Cerrado universitario-villa-maria-rugby 0-52 nautico-fitz-simon eventos 0 52 base 0 52 nL 21 nV 26 local: fichas 0 nuevas 21 visitante: fichas 0 nuevas 26
+683363b8 315220 Cerrado oliva-rugby-club 13-13 union-oncativo-rugby eventos 13 13 base 13 13 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 19 nuevas 4 local: sin pareja: (3, '2T', 1, 'Noel Mattia') local: sin pareja: (4, '2T', 1, 'Noel Mattia')
+683363b8 314192 Cerrado nautico-fitz-simon 28-27 union-oncativo-rugby eventos 28 27 base 28 27 nL 24 nV 23 local: fichas 0 nuevas 24 visitante: fichas 18 nuevas 5
+683363b8 314191 Cerrado los-tordos-hernando 33-14 universitario-villa-maria-rugby eventos 33 14 base 33 14 nL 19 nV 19 local: fichas 0 nuevas 19 visitante: fichas 0 nuevas 19
+683363b8 314190 Cerrado villa-general-belgrano-r-c 32-8 oliva-rugby-club eventos 32 8 base 32 8 nL 28 nV 23 local: fichas 21 nuevas 7 visitante: fichas 0 nuevas 23
+683363b8 312189 Cerrado los-tordos-hernando 20-33 union-oncativo-rugby eventos 20 33 base 20 33 nL 22 nV 24 local: fichas 0 nuevas 22 visitante: fichas 19 nuevas 5 local: sin pareja: (9, '2T', 30, 'Elias Humberto Gallardo')
+683363b8 312188 Cerrado oliva-rugby-club 14-28 nautico-fitz-simon eventos 14 28 base 14 28 nL 25 nV 27 local: fichas 0 nuevas 25 visitante: fichas 0 nuevas 27 visitante: sin pareja: (16, '2T', 30, 'Lucas Vivas')
+683363b8 311725 Cerrado nautico-fitz-simon 31-0 los-tordos-hernando eventos 31 0 base 31 0 nL 24 nV 21 local: fichas 0 nuevas 24 visitante: fichas 0 nuevas 21
+683363b8 311724 Cerrado union-oncativo-rugby 22-21 villa-general-belgrano-r-c eventos 22 21 base 22 21 nL 24 nV 26 local: fichas 20 nuevas 4 visitante: fichas 17 nuevas 9
+683363b8 311723 Cerrado universitario-villa-maria-rugby 19-32 oliva-rugby-club eventos 19 32 base 19 32 nL 24 nV 25 local: fichas 0 nuevas 24 visitante: fichas 0 nuevas 25
+683363b8 309467 Cerrado universitario-villa-maria-rugby 14-24 union-oncativo-rugby eventos 14 24 base 14 24 nL 26 nV 23 local: fichas 0 nuevas 26 visitante: fichas 19 nuevas 4
+683363b8 309466 Cerrado villa-general-belgrano-r-c 0-41 nautico-fitz-simon eventos 0 41 base 0 41 nL 25 nV 22 local: fichas 17 nuevas 8 visitante: fichas 0 nuevas 22 local: sin pareja: (4, '2T', 22, 'Rodrigo Gabriel Ramirez')
+683363b8 309464 Cerrado oliva-rugby-club 17-21 los-tordos-hernando eventos 17 21 base 17 21 nL 26 nV 20 local: fichas 0 nuevas 26 visitante: fichas 0 nuevas 20
+683363b8 308656 Cerrado los-tordos-hernando 22-52 villa-general-belgrano-r-c eventos 22 52 base 22 52 nL 19 nV 26 local: fichas 0 nuevas 19 visitante: fichas 16 nuevas 10
+683363b8 308655 Cerrado nautico-fitz-simon 50-7 universitario-villa-maria-rugby eventos 50 7 base 50 7 nL 24 nV 21 local: fichas 0 nuevas 24 visitante: fichas 0 nuevas 21 local: sin pareja: (-1, '2T', 11, 'Lucas Aguirre')
+683363b8 308654 Cerrado union-oncativo-rugby 37-24 oliva-rugby-club eventos 37 24 base 37 24 nL 23 nV 24 local: fichas 20 nuevas 3 visitante: fichas 0 nuevas 24
+683363b8 296903 Cerrado union-oncativo-rugby 12-19 nautico-fitz-simon eventos 12 19 base 12 19 nL 23 nV 17 local: fichas 15 nuevas 8 visitante: fichas 0 nuevas 17
+683363b8 296902 Cerrado universitario-villa-maria-rugby 20-29 los-tordos-hernando eventos 20 29 base 20 29 nL 22 nV 16 local: fichas 0 nuevas 22 visitante: fichas 0 nuevas 16
+683363b8 296901 Cerrado oliva-rugby-club 27-30 villa-general-belgrano-r-c eventos 27 30 base 27 30 nL 24 nV 23 local: fichas 0 nuevas 24 visitante: fichas 14 nuevas 9
+683363b8 320902 Cerrado ranqueles-rugby 21-21 aguilas-general-deheza eventos 21 21 base 21 21 nL 24 nV 27 local: fichas 0 nuevas 24 visitante: fichas 0 nuevas 27
+683363b8 320901 Cerrado mackenna-r-c 67-14 mirage-rugby-club eventos 67 14 base 67 14 nL 18 nV 17 local: fichas 0 nuevas 18 visitante: fichas 0 nuevas 17
+683363b8 319794 Cerrado las-iguanas-independiente-dolores 45-12 mackenna-r-c eventos 45 12 base 45 12 nL 29 nV 23 local: fichas 22 nuevas 7 visitante: fichas 0 nuevas 23 local: sin pareja: (12, '2T', 41, 'Tomás Andrés Ciallella')
+683363b8 319793 Cerrado mirage-rugby-club 7-54 jockey-club-rio-cuarto eventos 7 54 base 7 54 nL 24 nV 23 local: fichas 0 nuevas 24 visitante: fichas 0 nuevas 23
+683363b8 315224 Cerrado mackenna-r-c 24-22 aguilas-general-deheza eventos 24 22 base 24 22 nL 23 nV 25 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 25
+683363b8 315223 Cerrado jockey-club-rio-cuarto 32-22 las-iguanas-independiente-dolores eventos 32 22 base 32 22 nL 23 nV 30 local: fichas 0 nuevas 23 visitante: fichas 20 nuevas 10
+683363b8 314478 Cerrado las-iguanas-independiente-dolores 27-17 mirage-rugby-club eventos 27 17 base 27 17 nL 30 nV 20 local: fichas 20 nuevas 10 visitante: fichas 0 nuevas 20
+683363b8 314477 Cerrado aguilas-general-deheza 14-40 jockey-club-rio-cuarto eventos 14 40 base 14 40 nL 27 nV 24 local: fichas 0 nuevas 27 visitante: fichas 0 nuevas 24
+683363b8 314187 Cerrado mirage-rugby-club 15-27 aguilas-general-deheza eventos 15 27 base 15 27 nL 21 nV 26 local: fichas 0 nuevas 21 visitante: fichas 0 nuevas 26 visitante: sin pareja: (-1, '2T', 20, 'Axel Leonel López')
+683363b8 314188 Cerrado jockey-club-rio-cuarto 22-22 ranqueles-rugby eventos 22 22 base 22 22 nL 24 nV 24 local: fichas 0 nuevas 24 visitante: fichas 0 nuevas 24
+683363b8 312748 Cerrado ranqueles-rugby 34-12 mirage-rugby-club eventos 34 12 base 34 12 nL 24 nV 17 local: fichas 0 nuevas 24 visitante: fichas 0 nuevas 17 local: sin pareja: (22, '2T', 32, 'Matias Fenoglio')
+683363b8 312572 Cerrado aguilas-general-deheza 23-20 las-iguanas-independiente-dolores eventos 23 20 base 23 20 nL 25 nV 30 local: fichas 0 nuevas 25 visitante: fichas 21 nuevas 9
+683363b8 312193 Cerrado mackenna-r-c 5-43 jockey-club-rio-cuarto eventos 5 43 base 5 43 nL 22 nV 23 local: fichas 0 nuevas 22 visitante: fichas 0 nuevas 23
+683363b8 312191 Cerrado ranqueles-rugby 27-17 las-iguanas-independiente-dolores eventos 27 17 base 27 17 nL 23 nV 27 local: fichas 0 nuevas 23 visitante: fichas 18 nuevas 9
+683363b8 311730 Cerrado aguilas-general-deheza 22-10 ranqueles-rugby eventos 22 10 base 22 10 nL 23 nV 25 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 25 visitante: sin pareja: (5, '2T', 19, 'Alejandro Barnard')
+683363b8 311728 Cerrado mirage-rugby-club 29-17 mackenna-r-c eventos 29 17 base 29 17 nL 25 nV 22 local: fichas 0 nuevas 25 visitante: fichas 0 nuevas 22
+683363b8 309472 Cerrado jockey-club-rio-cuarto 41-28 mirage-rugby-club eventos 41 28 base 41 28 nL 24 nV 21 local: fichas 0 nuevas 24 visitante: fichas 0 nuevas 21
+683363b8 309470 Cerrado mackenna-r-c 46-36 las-iguanas-independiente-dolores eventos 46 36 base 46 36 nL 22 nV 30 local: fichas 0 nuevas 22 visitante: fichas 19 nuevas 11
+683363b8 296907 Cerrado las-iguanas-independiente-dolores 13-14 aguilas-general-deheza eventos 13 14 base 13 14 nL 29 nV 30 local: fichas 17 nuevas 12 visitante: fichas 0 nuevas 30
+683363b8 296906 Cerrado mirage-rugby-club 36-11 ranqueles-rugby eventos 36 11 base 36 11 nL 20 nV 23 local: fichas 0 nuevas 20 visitante: fichas 0 nuevas 23
+683363b8 296905 Cerrado jockey-club-rio-cuarto 88-5 los-patriotas-ucacha eventos 88 5 base 88 5 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+683363b8 302126 Cerrado los-patriotas-ucacha 26-36 mackenna-r-c eventos 26 36 base 26 36 nL 21 nV 21 local: fichas 0 nuevas 21 visitante: fichas 0 nuevas 21
+683363b8 302125 Cerrado ranqueles-rugby 27-19 jockey-club-rio-cuarto eventos 27 19 base 27 19 nL 28 nV 18 local: fichas 0 nuevas 28 visitante: fichas 0 nuevas 18
+683363b8 302124 Cerrado aguilas-general-deheza 53-23 mirage-rugby-club eventos 53 23 base 53 23 nL 21 nV 18 local: fichas 0 nuevas 21 visitante: fichas 0 nuevas 18
+683363b8 322768 Cerrado jockey-club-rio-cuarto 19-26 mackenna-r-c eventos 19 26 base 19 26 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23 visitante: sin pareja: (8, '2T', 33, 'Rafael Gorostarzu')
+683363b8 322767 Cerrado las-iguanas-independiente-dolores 26-29 ranqueles-rugby eventos 26 29 base 26 29 nL 30 nV 23 local: fichas 20 nuevas 10 visitante: fichas 0 nuevas 23
+683363b8 307463 Cerrado jockey-club-rio-cuarto 10-7 aguilas-general-deheza eventos 10 7 base 10 7 nL 22 nV 23 local: fichas 0 nuevas 22 visitante: fichas 0 nuevas 23
+683363b8 307462 Cerrado mackenna-r-c 31-10 ranqueles-rugby eventos 31 10 base 31 10 nL 21 nV 24 local: fichas 0 nuevas 21 visitante: fichas 0 nuevas 24
+683363b8 308653 Cerrado ranqueles-rugby 47-0 los-patriotas-ucacha eventos 47 0 base 47 0 nL 24 nV 22 local: fichas 0 nuevas 24 visitante: fichas 0 nuevas 22 visitante: sin pareja: (-1, '1T', 30, 'German Guzman') visitante: sin pareja: (-1, '2T', 5, 'Maximiliano José Grispo')
+683363b8 308652 Cerrado aguilas-general-deheza 26-7 mackenna-r-c eventos 26 7 base 26 7 nL 22 nV 21 local: fichas 0 nuevas 22 visitante: fichas 0 nuevas 21
+683363b8 308651 Cerrado las-iguanas-independiente-dolores 34-33 jockey-club-rio-cuarto eventos 34 33 base 34 33 nL 30 nV 23 local: fichas 20 nuevas 10 visitante: fichas 0 nuevas 23
+683363b8 326848 Cerrado mackenna-r-c 24-16 oliva-rugby-club eventos 24 16 base None None nL 23 nV 24 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 24
+683363b8 326219 Cerrado las-iguanas-independiente-dolores 17-36 oliva-rugby-club eventos 17 36 base 17 36 nL 29 nV 24 local: fichas 19 nuevas 10 visitante: fichas 0 nuevas 24
+683363b8 325283 Cerrado mackenna-r-c 68-19 las-iguanas-independiente-dolores eventos 68 19 base 68 19 nL 23 nV 28 local: fichas 0 nuevas 23 visitante: fichas 19 nuevas 9
+683363b8 324546 Cerrado oliva-rugby-club 10-14 mackenna-r-c eventos 10 14 base 10 14 nL 24 nV 23 local: fichas 0 nuevas 24 visitante: fichas 0 nuevas 23
+683363b8 326851 Cerrado nautico-fitz-simon 18-10 ranqueles-rugby eventos 18 10 base 18 10 nL 28 nV 25 local: fichas 0 nuevas 28 visitante: fichas 0 nuevas 25
+683363b8 326852 Cerrado aguilas-general-deheza 31-33 union-oncativo-rugby eventos 31 33 base 31 33 nL 30 nV 30 local: fichas 0 nuevas 30 visitante: fichas 23 nuevas 7 visitante: sin pareja: (-1, '1T', 10, 'Valentino Girotti')
+683363b8 326218 Cerrado villa-general-belgrano-r-c 17-26 union-oncativo-rugby eventos 17 26 base 17 26 nL 25 nV 23 local: fichas 25 nuevas 0 visitante: fichas 23 nuevas 0 local: sin pareja: (9, '2T', 73, 'Martin Alejandro Rojo Pisano')
+683363b8 326217 Cerrado ranqueles-rugby 31-26 aguilas-general-deheza eventos 31 26 base 31 26 nL 26 nV 30 local: fichas 0 nuevas 26 visitante: fichas 0 nuevas 30
+683363b8 326216 Cerrado jockey-club-rio-cuarto 46-24 nautico-fitz-simon eventos 46 24 base 46 24 nL 23 nV 27 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 27
+683363b8 325281 Cerrado union-oncativo-rugby 17-38 ranqueles-rugby eventos 17 38 base 17 38 nL 30 nV 30 local: fichas 21 nuevas 9 visitante: fichas 0 nuevas 30
+683363b8 325280 Cerrado aguilas-general-deheza 31-36 jockey-club-rio-cuarto eventos 31 36 base 31 36 nL 28 nV 23 local: fichas 0 nuevas 28 visitante: fichas 0 nuevas 23
+683363b8 325279 Cerrado nautico-fitz-simon 24-19 villa-general-belgrano-r-c eventos 24 19 base 24 19 nL 24 nV 22 local: fichas 0 nuevas 24 visitante: fichas 18 nuevas 4
+683363b8 324548 Cerrado villa-general-belgrano-r-c 17-25 ranqueles-rugby eventos 17 25 base 17 25 nL 28 nV 24 local: fichas 23 nuevas 5 visitante: fichas 0 nuevas 24
+683363b8 324547 Cerrado jockey-club-rio-cuarto 31-19 union-oncativo-rugby eventos 31 19 base 31 19 nL 25 nV 23 local: fichas 0 nuevas 25 visitante: fichas 19 nuevas 4
+PROBLEMA XVII TRP A - Primera 310438 comercial-r-c vs argentino-de-bahia-blanca · 594fcb55 · tarjeta 310438: eventos 41-0 / tarjeta 41-0 / base 43-0
+PROBLEMA XVII TRP A - Primera 310445 comercial-r-c vs mar-del-plata-club · 594fcb55 · tarjeta 310445: eventos 22-38 / tarjeta 22-38 / base 22-39
+PROBLEMA XVII TRP A - Primera 310642 argentino-de-bahia-blanca vs san-ignacio-r-c · 594fcb55 · tarjeta 310642: eventos 19-27 / tarjeta 19-27 / base 19-26
+PROBLEMA XVII TRP A - Primera 313637 mar-del-plata-club vs comercial-r-c · 594fcb55 · tarjeta 313637: eventos 46-19 / tarjeta 46-19 / base 48-17
+PROBLEMA XVII TRP A - Primera 313641 los-cardos-r-c vs universitario-de-mar-del-plata · 594fcb55 · tarjeta 313641: eventos 12-52 / tarjeta 12-52 / base 12-57
+PROBLEMA XVII TRP A - Primera 327758: tarjeta sin marcador (partido en juego o sin cerrar), se omite
+PROBLEMA Torneo Recla 326244: 0 candidatos para "SAN IGNACIO" vs "BIGUA" 24/10/2026 
+PROBLEMA Torneo Recla 326245: 0 candidatos para "ARGENTINO B B" vs "UNION DEL SUR" 24/10/2026 
+PROBLEMA URS Campeonato Oficial 2026 ORO - Primera 280993 argentino-de-bahia-blanca vs santa-rosa-r-c · 9bd1fc54 · tarjeta 280993: eventos 64-0 / tarjeta 64-0 / base 30-0
+PROBLEMA URS Campeona 296351: 0 candidatos para "CRAI" vs "QUERANDI RC" 28/03/2026 
+PROBLEMA URS Campeona 296352: 0 candidatos para "ALMA JRS" vs "CHA ROGA" 28/03/2026 
+PROBLEMA 2026 - Copa  296353: 0 candidatos para "UNIVERSITARIO" vs "ATL. BROWN" 28/03/2026 
+PROBLEMA 2026 - Copa  296354: 0 candidatos para "CRAR" vs "LA SALLE" 28/03/2026 
+PROBLEMA 2026 - Copa  307656: 0 candidatos para "QUERANDI RC" vs "ALMA JRS" 25/04/2026 
+PROBLEMA 2026 - Copa  307655: 0 candidatos para "CHA ROGA" vs "UNIVERSITARIO" 25/04/2026 
+PROBLEMA 2026 - Copa  307654: 0 candidatos para "ATL. BROWN" vs "CRAR" 25/04/2026 
+PROBLEMA 2026 - Copa  307657: 0 candidatos para "SANTA FE R.C." vs "CRAI" 24/04/2026 
+PROBLEMA 2026 - Copa  309562: 0 candidatos para "LA SALLE" vs "ATL. BROWN" 30/05/2026 
+PROBLEMA 2026 - Copa  309561: 0 candidatos para "CRAR" vs "CHA ROGA" 30/05/2026 
+PROBLEMA 2026 - Copa  309560: 0 candidatos para "UNIVERSITARIO" vs "QUERANDI RC" 30/05/2026 
+PROBLEMA 2026 - Copa  309559: 0 candidatos para "SANTA FE R.C." vs "ALMA JRS" 30/05/2026 
+PROBLEMA 2026 - Copa  311952: 0 candidatos para "ALMA JRS" vs "CRAI" 27/06/2026 
+PROBLEMA 2026 - Copa  311951: 0 candidatos para "UNIVERSITARIO" vs "SANTA FE R.C." 27/06/2026 
+PROBLEMA 2026 - Copa  311950: 0 candidatos para "CRAR" vs "QUERANDI RC" 27/06/2026 
+PROBLEMA 2026 - Copa  311949: 0 candidatos para "CHA ROGA" vs "LA SALLE" 27/06/2026 
+PROBLEMA 2026 - Copa  314037: 0 candidatos para "ATL. BROWN" vs "CHA ROGA" 25/07/2026 
+PROBLEMA 2026 - Copa  314036: 0 candidatos para "LA SALLE" vs "QUERANDI RC" 25/07/2026 
+PROBLEMA 2026 - Copa  314035: 0 candidatos para "SANTA FE R.C." vs "CRAR" 25/07/2026 
+PROBLEMA 2026 - Copa  314034: 0 candidatos para "CRAI" vs "UNIVERSITARIO" 25/07/2026 
+PROBLEMA 2026 - Copa  314989: 0 candidatos para "ALMA JRS" vs "UNIVERSITARIO" 01/08/2026 
+PROBLEMA 2026 - Copa  314988: 0 candidatos para "CRAI" vs "CRAR" 01/08/2026 
+PROBLEMA 2026 - Copa  314987: 0 candidatos para "SANTA FE R.C." vs "LA SALLE" 01/08/2026 
+PROBLEMA 2026 - Copa  314986: 0 candidatos para "QUERANDI RC" vs "ATL. BROWN" 01/08/2026 
+PROBLEMA 2026 - Copa  322597: 0 candidatos para "CHA ROGA" vs "QUERANDI RC" 05/09/2026 
+PROBLEMA 2026 - Copa  322596: 0 candidatos para "ATL. BROWN" vs "SANTA FE R.C." 05/09/2026 
+PROBLEMA 2026 - Copa  322595: 0 candidatos para "LA SALLE" vs "CRAI" 05/09/2026 
+PROBLEMA 2026 - Copa  322594: 0 candidatos para "CRAR" vs "ALMA JRS" 05/09/2026 
+PROBLEMA 2026 - Copa  322605: 0 candidatos para "UNIVERSITARIO" vs "CRAR" 11/09/2026 
+PROBLEMA 2026 - Copa  322603: 0 candidatos para "CRAI" vs "ATL. BROWN" 11/09/2026 
+PROBLEMA 2026 - Copa  322604: 0 candidatos para "ALMA JRS" vs "LA SALLE" 10/09/2026 
+PROBLEMA 2026 - Copa  322602: 0 candidatos para "SANTA FE R.C." vs "CHA ROGA" 10/09/2026 
+PROBLEMA 2026 - Copa  322613: 0 candidatos para "QUERANDI RC" vs "SANTA FE R.C." 03/10/2026 
+PROBLEMA 2026 - Copa  322612: 0 candidatos para "CHA ROGA" vs "CRAI" 03/10/2026 
+PROBLEMA 2026 - Copa  322611: 0 candidatos para "ATL. BROWN" vs "ALMA JRS" 03/10/2026 
+PROBLEMA 2026 - Copa  322610: 0 candidatos para "LA SALLE" vs "UNIVERSITARIO" 03/10/2026 
+PROBLEMA TORNEO LIGA DESARROLLO CAPITAL - ESTE - 2026 296835: tarjeta sin planteles ni marcador, se omite
+PROBLEMA TORNEO LIGA DESARROLLO CAPITAL - ESTE - 2026 296846: tarjeta sin planteles ni marcador, se omite
+PROBLEMA TORNEO LIGA DESARROLLO CAPITAL - ESTE - 2026 296852: tarjeta sin planteles ni marcador, se omite
+PROBLEMA TORNEO LIGA DESARROLLO CAPITAL - ESTE - 2026 296857: tarjeta sin planteles ni marcador, se omite
+PROBLEMA TORNEO LIGA DESARROLLO CAPITAL - ESTE - 2026 296861: tarjeta sin planteles ni marcador, se omite
+PROBLEMA TORNEO LIGA DESARROLLO CAPITAL - ESTE - 2026 296867: tarjeta sin planteles ni marcador, se omite
+PROBLEMA TORNEO LIGA DESARROLLO CAPITAL - ESTE - 2026 296879: tarjeta sin planteles ni marcador, se omite
+PROBLEMA TORNEO LIGA DESARROLLO CAPITAL - ESTE - 2026 296887: tarjeta sin planteles ni marcador, se omite
+PROBLEMA TORNEO LIGA DESARROLLO CAPITAL - ESTE - 2026 296893: tarjeta sin planteles ni marcador, se omite
+PROBLEMA TORNEO LIGA DESARROLLO CAPITAL - ESTE - 2026 296890: tarjeta sin planteles ni marcador, se omite
+PROBLEMA TORNEO LIGA DESARROLLO CAPITAL - ESTE - 2026 296900: tarjeta sin planteles ni marcador, se omite
+PROBLEMA TORNEO LIGA DESARROLLO CAPITAL - ESTE - 2026 322773 universidad-siglo-21-rugby vs asociacion-cordobesa-volantes · 62bf0694 · tarjeta 322773: eventos 0-0 / tarjeta 0-28 / base 0-28
+PROBLEMA TORNEO LIGA DESARROLLO CAPITAL - ESTE - 2026 324550: tarjeta sin planteles ni marcador, se omite
+PROBLEMA TORNEO LIGA DESARROLLO CAPITAL - ESTE - 2026 326222: tarjeta sin planteles ni marcador, se omite
+PROBLEMA TORNEO LIGA DESARROLLO CAPITAL - ESTE - 2026 327315 salsipuedes-r-c vs chelcos-de-villa-del-rosario · 62bf0694 · tarjeta 327315: eventos 56-10 / tarjeta 56-10 / base 0-0
+PROBLEMA TORNEO LIGA DESARROLLO SUR - CENTRO - 2026 320898: tarjeta sin planteles ni marcador, se omite
+PROBLEMA TORNEO LIGA DESARROLLO SUR - CENTRO - 2026 312190: tarjeta sin planteles ni marcador, se omite
+PROBLEMA TORNEO LIGA DESARROLLO SUR - CENTRO - 2026 320903: tarjeta sin planteles ni marcador, se omite
+PROBLEMA TORNEO LIGA DESARROLLO SUR - CENTRO - 2026 319795: tarjeta sin planteles ni marcador, se omite
+PROBLEMA TORNEO LIGA DESARROLLO SUR - CENTRO - 2026 315225: tarjeta sin planteles ni marcador, se omite
+PROBLEMA TORNEO LIGA DESARROLLO SUR - CENTRO - 2026 314476: tarjeta sin planteles ni marcador, se omite
+PROBLEMA TORNEO LIGA DESARROLLO SUR - CENTRO - 2026 314189: tarjeta sin planteles ni marcador, se omite
+PROBLEMA TORNEO LIGA DESARROLLO SUR - CENTRO - 2026 312749: tarjeta sin planteles ni marcador, se omite
+PROBLEMA TORNEO LIGA DESARROLLO SUR - CENTRO - 2026 312192: tarjeta sin marcador (partido en juego o sin cerrar), se omite
+PROBLEMA TORNEO LIGA DESARROLLO SUR - CENTRO - 2026 311729: tarjeta sin planteles ni marcador, se omite
+PROBLEMA TORNEO LIGA DESARROLLO SUR - CENTRO - 2026 311534: tarjeta sin planteles ni marcador, se omite
+PROBLEMA TORNEO LIGA DESARROLLO SUR - CENTRO - 2026 322769: tarjeta sin planteles ni marcador, se omite
+PROBLEMA TORNEO LIGA DESARROLLO SUR - CENTRO - 2026 311532: tarjeta sin planteles ni marcador, se omite
+PROBLEMA TORNEO LIGA DESARROLLO SUR - CENTRO - 2026 326848 mackenna-r-c vs oliva-rugby-club · 683363b8 · tarjeta 326848: eventos 24-16 / tarjeta 24-16 / base None-None
+PROBLEMA TORNEO LIGA DESARROLLO SUR - CENTRO - 2026 326849: tarjeta sin planteles ni marcador, se omite
+PROBLEMA TORNEO LIGA DESARROLLO SUR - CENTRO - 2026 327317: tarjeta sin planteles ni marcador, se omite
+PROBLEMA TORNEO LIGA DESARROLLO SUR - CENTRO - 2026 325282: tarjeta sin planteles ni marcador, se omite
+PROBLEMA TORNEO LIGA DESARROLLO SUR - CENTRO - 2026 324545: tarjeta sin planteles ni marcador, se omite
+PROBLEMA TORNEO LIGA DESARROLLO SUR - CENTRO - 2026 327316: tarjeta sin marcador (partido en juego o sin cerrar), se omite
+PROBLEMA TORNEO LIGA DESARROLLO SUR - CENTRO - 2026 326850: tarjeta sin planteles ni marcador, se omite
+PROBLEMA TORNEO LIGA DESARROLLO SUR - CENTRO - 2026 324549: tarjeta sin marcador (partido en juego o sin cerrar), se omite
+594fcb55 57 partidos
+9bd1fc54 20 partidos
+62bf0694 68 partidos
+683363b8 73 partidos

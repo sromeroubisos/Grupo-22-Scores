@@ -1,0 +1,100 @@
+f48723bc 324226 Cerrado palermo-bajo-carlos-paz-femenino 37-5 cordoba-rc-la-tablada-femenino eventos 37 5 base 37 5 nL 16 nV 14 local: fichas 0 nuevas 16 visitante: fichas 0 nuevas 14
+f48723bc 322740 Cerrado club-universitario-de-cordoba-femenino 46-10 taborin-rc-femenino-verde eventos 46 10 base 46 10 nL 19 nV 15 local: fichas 0 nuevas 19 visitante: fichas 0 nuevas 15
+f48723bc 320869 Cerrado palermo-bajo-carlos-paz-femenino 35-79 taborin-rc-femenino-verde eventos 35 79 base 35 79 nL 16 nV 16 local: fichas 0 nuevas 16 visitante: fichas 0 nuevas 16
+f48723bc 319790 Cerrado taborin-rc-femenino-verde 57-24 cordoba-athletic-club-femenino eventos 57 24 base 57 24 nL 17 nV 17 local: fichas 0 nuevas 17 visitante: fichas 0 nuevas 17
+f48723bc 319789 Cerrado cordoba-rc-la-tablada-femenino 5-72 palermo-bajo-carlos-paz-femenino eventos 5 72 base 5 72 nL 19 nV 15 local: fichas 0 nuevas 19 visitante: fichas 0 nuevas 15
+f48723bc 315229 Cerrado club-universitario-de-cordoba-femenino 66-33 cordoba-athletic-club-femenino eventos 66 33 base 66 33 nL 19 nV 19 local: fichas 0 nuevas 19 visitante: fichas 0 nuevas 19
+f48723bc 315226 Cerrado cordoba-rc-la-tablada-femenino 5-76 taborin-rc-femenino-verde eventos 5 76 base 5 76 nL 18 nV 13 local: fichas 0 nuevas 18 visitante: fichas 0 nuevas 13 local: sin pareja: (-1, '2T', 12, 'Celeste Marianela Rosemberg') local: sin pareja: (-1, '2T', 20, 'Lucila Ludueña')
+f48723bc 314711 Cerrado taborin-rc-femenino-verde 17-27 club-universitario-de-cordoba-femenino eventos 17 27 base 17 27 nL 15 nV 19 local: fichas 0 nuevas 15 visitante: fichas 0 nuevas 19
+f48723bc 297611 Cerrado palermo-bajo-carlos-paz-femenino 10-47 cordoba-athletic-club-femenino eventos 10 47 base 10 47 nL 15 nV 19 local: fichas 0 nuevas 15 visitante: fichas 0 nuevas 19
+f48723bc 297608 Cerrado cordoba-athletic-club-femenino 90-5 cordoba-rc-la-tablada-femenino eventos 90 5 base 90 5 nL 16 nV 17 local: fichas 0 nuevas 16 visitante: fichas 0 nuevas 17
+f48723bc 297603 Cerrado cordoba-rc-la-tablada-femenino 0-92 club-universitario-de-cordoba-femenino eventos 0 92 base 0 92 nL 17 nV 17 local: fichas 0 nuevas 17 visitante: fichas 0 nuevas 17
+f48723bc 297600 Cerrado taborin-rc-femenino-verde 62-17 palermo-bajo-carlos-paz-femenino eventos 62 17 base 62 17 nL 16 nV 13 local: fichas 0 nuevas 16 visitante: fichas 0 nuevas 13 local: sin pareja: (-1, '2T', 4, 'Ana Matto')
+f48723bc 297599 Cerrado palermo-bajo-carlos-paz-femenino 48-5 cordoba-rc-la-tablada-femenino eventos 48 5 base 48 5 nL 15 nV 14 local: fichas 0 nuevas 15 visitante: fichas 0 nuevas 14
+f48723bc 297597 Cerrado cordoba-athletic-club-femenino 27-31 taborin-rc-femenino-verde eventos 27 31 base 27 31 nL 19 nV 18 local: fichas 0 nuevas 19 visitante: fichas 0 nuevas 18
+f48723bc 308672 Cerrado cordoba-athletic-club-femenino 26-29 club-universitario-de-cordoba-femenino eventos 26 29 base 26 29 nL 19 nV 18 local: fichas 0 nuevas 19 visitante: fichas 0 nuevas 18 local: sin pareja: (-1, '2T', 30, 'Milagros Arguello')
+f48723bc 297591 Cerrado club-universitario-de-cordoba-femenino 25-29 taborin-rc-femenino-verde eventos 25 29 base 25 29 nL 18 nV 17 local: fichas 0 nuevas 18 visitante: fichas 0 nuevas 17
+f48723bc 297590 Cerrado cordoba-athletic-club-femenino 46-7 palermo-bajo-carlos-paz-femenino eventos 46 7 base 46 7 nL 18 nV 14 local: fichas 0 nuevas 18 visitante: fichas 0 nuevas 14 visitante: sin pareja: (-1, '2T', 15, 'Paloma Lozano Carabajal')
+f48723bc 297587 Cerrado cordoba-rc-la-tablada-femenino 0-135 cordoba-athletic-club-femenino eventos 0 135 base 0 135 nL 11 nV 17 local: fichas 0 nuevas 11 visitante: fichas 0 nuevas 17 local: sin pareja: (-1, '1T', 2, 'Mairy Calfayan')
+f48723bc 297586 Cerrado palermo-bajo-carlos-paz-femenino 0-34 club-universitario-de-cordoba-femenino eventos 0 34 base 0 34 nL 14 nV 18 local: fichas 0 nuevas 14 visitante: fichas 0 nuevas 18
+f48723bc 297582 Cerrado club-universitario-de-cordoba-femenino 109-0 cordoba-rc-la-tablada-femenino eventos 109 0 base 109 0 nL 19 nV 11 local: fichas 0 nuevas 19 visitante: fichas 0 nuevas 11
+PROBLEMA 2026 Naciona 325781: 0 candidatos para "CARDENALES R.C. - Tucuman" vs "UNIVERSITARIO R.C. - CUYO" 02/10/2026 
+PROBLEMA 2026 Naciona 325731: 0 candidatos para "CHA ROGA - Santafesina" vs "UNIVERSITARIO R.C. - CUYO" 02/10/2026 
+PROBLEMA 2026 Naciona 325732: 0 candidatos para "CARDENALES R.C. - Tucuman" vs "CHA ROGA - Santafesina" 02/10/2026 
+PROBLEMA 2026 Naciona 325736: 0 candidatos para "LAS AGUILAS R.C. - NORESTE" vs "AGUARA GUAZU - Tucuman" 02/10/2026 
+PROBLEMA 2026 Naciona 325735: 0 candidatos para "AGUARA GUAZU - Tucuman" vs "PALIHUE - Sur" 02/10/2026 
+PROBLEMA 2026 Naciona 325734: 0 candidatos para "LAS AGUILAS R.C. - NORESTE" vs "PALIHUE - Sur" 02/10/2026 
+PROBLEMA 2026 Naciona 325737: 0 candidatos para "UNIVERSITARIO - CORDOBA" vs "MARABUNTA R.C. - ALTO VALLE" 02/10/2026 
+PROBLEMA 2026 Naciona 325739: 0 candidatos para "ASOCIACION CIVIL CLUB TABORIN - Cordobesa" vs "MARABUNTA R.C. - ALTO VALLE" 02/10/2026 
+PROBLEMA 2026 Naciona 325740: 0 candidatos para "UNIVERSITARIO - CORDOBA" vs "ASOCIACION CIVIL CLUB TABORIN - Cordobesa" 02/10/2026 
+PROBLEMA 2026 Naciona 325747: 0 candidatos para "LA PLATA - URBA" vs "CIUDAD DE BUENOS AIRES - URBA" 02/10/2026 
+PROBLEMA 2026 Naciona 325745: 0 candidatos para "CIUDAD DE BUENOS AIRES - URBA" vs "REGATAS RESISTENCIA - Nordeste" 02/10/2026 
+PROBLEMA 2026 Naciona 325744: 0 candidatos para "LA PLATA - URBA" vs "REGATAS RESISTENCIA - Nordeste" 02/10/2026 
+PROBLEMA 2026 Naciona 325897: 0 candidatos para "AGUARA GUAZU - Tucuman" vs "UNIVERSITARIO - CORDOBA" 04/10/2026 
+PROBLEMA 2026 Naciona 325898: 0 candidatos para "CARDENALES R.C. - Tucuman" vs "LA PLATA - URBA" 04/10/2026 
+PROBLEMA 2026 Naciona 325899: 0 candidatos para "UNIVERSITARIO R.C. - CUYO" vs "CIUDAD DE BUENOS AIRES - URBA" 04/10/2026 
+PROBLEMA 2026 Naciona 325900: 0 candidatos para "LAS AGUILAS R.C. - NORESTE" vs "ASOCIACION CIVIL CLUB TABORIN - Cordobesa" 04/10/2026 
+PROBLEMA 2026 Naciona 325902: 0 candidatos para "PALIHUE - Sur" vs "MARABUNTA R.C. - ALTO VALLE" 04/10/2026 
+PROBLEMA 2026 Naciona 325901: 0 candidatos para "CHA ROGA - Santafesina" vs "REGATAS RESISTENCIA - Nordeste" 04/10/2026 
+PROBLEMA 2026 Naciona 325915: 0 candidatos para "CHA ROGA - Santafesina" vs "PALIHUE - Sur" 04/10/2026 
+PROBLEMA 2026 Naciona 325916: 0 candidatos para "REGATAS RESISTENCIA - Nordeste" vs "MARABUNTA R.C. - ALTO VALLE" 04/10/2026 
+PROBLEMA Regional Fem 324251: 0 candidatos para "LAS AGUILAS R.C. - NORESTE - Nordeste" vs "SAN CIPRIANO - Formosa" 13/09/2026 
+PROBLEMA Regional Fem 324249: 0 candidatos para "LAS AGUILAS R.C. - NORESTE - Nordeste" vs "CENTRO DE CAZADORES DE MISIONES - Misiones" 13/09/2026 
+PROBLEMA Regional Fem 324250: 0 candidatos para "CENTRO DE CAZADORES DE MISIONES - Misiones" vs "SAN CIPRIANO - Formosa" 13/09/2026 
+PROBLEMA Regional Fem 324252: 0 candidatos para "CAPRI - Misiones" vs "REGATAS RESISTENCIA - Nordeste" 13/09/2026 
+PROBLEMA Regional Fem 324254: 0 candidatos para "CAPRI - Misiones" vs "CAZA Y PESCA - Formosa" 13/09/2026 
+PROBLEMA Regional Fem 324253: 0 candidatos para "REGATAS RESISTENCIA - Nordeste" vs "CAZA Y PESCA - Formosa" 13/09/2026 
+PROBLEMA Torneo Ofici 315531: 0 candidatos para "REGATAS RESISTENCIA - Nordeste" vs "SOC. ITALIANA DE CHARATA - Nordeste" 02/08/2026 
+PROBLEMA Torneo Ofici 315532: 0 candidatos para "LAS AGUILAS R.C. - NORESTE - Nordeste" vs "Los Toros RC - Nordeste" 02/08/2026 
+PROBLEMA Torneo Ofici 315533: 0 candidatos para "REGATAS RESISTENCIA - Nordeste" vs "Los Toros RC - Nordeste" 02/08/2026 
+PROBLEMA Torneo Ofici 315534: 0 candidatos para "SOC. ITALIANA DE CHARATA - Nordeste" vs "LAS AGUILAS R.C. - NORESTE - Nordeste" 02/08/2026 
+PROBLEMA Torneo Ofici 315535: 0 candidatos para "Los Toros RC - Nordeste" vs "SOC. ITALIANA DE CHARATA - Nordeste" 02/08/2026 
+PROBLEMA Torneo Ofici 315536: 0 candidatos para "REGATAS RESISTENCIA - Nordeste" vs "LAS AGUILAS R.C. - NORESTE - Nordeste" 02/08/2026 
+PROBLEMA Torneo Ofici 322225: 0 candidatos para "LAS AGUILAS R.C. - NORESTE - Nordeste" vs "SOC. ITALIANA DE CHARATA - Nordeste" 23/08/2026 
+PROBLEMA Torneo Ofici 322227: 0 candidatos para "LAS AGUILAS R.C. - NORESTE - Nordeste" vs "REGATAS RESISTENCIA - Nordeste" 23/08/2026 
+PROBLEMA Torneo Ofici 322226: 0 candidatos para "SOC. ITALIANA DE CHARATA - Nordeste" vs "REGATAS RESISTENCIA - Nordeste" 23/08/2026 
+PROBLEMA Regional Fem 324382: 0 candidatos para "LAS AGUILAS R.C. - NORESTE - Nordeste" vs "REGATAS RESISTENCIA - Nordeste" 13/09/2026 
+PROBLEMA 2026 Naciona 325917: 0 candidatos para "UNIVERSITARIO R.C. - CUYO" vs "LAS AGUILAS R.C. - NORESTE" 04/10/2026 
+PROBLEMA 2026 Naciona 325918: 0 candidatos para "CIUDAD DE BUENOS AIRES - URBA" vs "ASOCIACION CIVIL CLUB TABORIN - Cordobesa" 04/10/2026 
+PROBLEMA 2026 Naciona 325919: 0 candidatos para "AGUARA GUAZU - Tucuman" vs "CARDENALES R.C. - Tucuman" 04/10/2026 
+PROBLEMA 2026 Naciona 325920: 0 candidatos para "UNIVERSITARIO - CORDOBA" vs "LA PLATA - URBA" 04/10/2026 
+PROBLEMA TORNEO FEMEN 322739: 0 candidatos para "CLUB TABORIN "BLANCO"" vs "CORDOBA ATHLETIC" 30/08/2026 
+PROBLEMA TORNEO FEMEN 320871: 0 candidatos para "UNIVERSITARIO" vs "MAÑKE (LA CALERA)" 23/08/2026 
+PROBLEMA TORNEO FEMEN 320870: 0 candidatos para "AERO CLUB RIO CUARTO" vs "CORDOBA R.C./ LA TABLADA" 23/08/2026 
+PROBLEMA TORNEO FEMEN 320872: 0 candidatos para "CORDOBA ATHLETIC" vs "CLUB TABORIN "BLANCO"" 23/08/2026 
+PROBLEMA TORNEO FEMEN 319792: 0 candidatos para "MAÑKE (LA CALERA)" vs "AERO CLUB RIO CUARTO" 09/08/2026 
+PROBLEMA TORNEO FEMEN 319791: 0 candidatos para "CLUB TABORIN "BLANCO"" vs "UNIVERSITARIO" 09/08/2026 
+PROBLEMA TORNEO FEMEN 315228: 0 candidatos para "AERO CLUB RIO CUARTO" vs "CLUB TABORIN "BLANCO"" 02/08/2026 
+PROBLEMA TORNEO FEMEN 315227: 0 candidatos para "PALERMO BAJO / CARLOS PAZ" vs "MAÑKE (LA CALERA)" 31/07/2026 
+PROBLEMA TORNEO FEMEN 314714: 0 candidatos para "MAÑKE (LA CALERA)" vs "CORDOBA R.C./ LA TABLADA" 26/07/2026 
+PROBLEMA TORNEO FEMEN 314713: 0 candidatos para "CORDOBA ATHLETIC" vs "AERO CLUB RIO CUARTO" 26/07/2026 
+PROBLEMA TORNEO FEMEN 314712: 0 candidatos para "CLUB TABORIN "BLANCO"" vs "PALERMO BAJO / CARLOS PAZ" 26/07/2026 
+PROBLEMA TORNEO FEMEN 297609: 0 candidatos para "AERO CLUB RIO CUARTO" vs "UNIVERSITARIO" 05/07/2026 
+PROBLEMA TORNEO FEMEN 313896: 0 candidatos para "CLUB TABORIN "VERDE"" vs "MAÑKE (LA CALERA)" 05/07/2026 
+PROBLEMA TORNEO FEMEN 297610: 0 candidatos para "CORDOBA R.C./ LA TABLADA" vs "CLUB TABORIN "BLANCO"" 05/07/2026 
+PROBLEMA TORNEO FEMEN 297606: 0 candidatos para "AERO CLUB RIO CUARTO" vs "CLUB TABORIN "VERDE"" 19/07/2026 
+PROBLEMA TORNEO FEMEN 313112: 0 candidatos para "MAÑKE (LA CALERA)" vs "CLUB TABORIN "BLANCO"" 17/07/2026 
+PROBLEMA TORNEO FEMEN 297607: 2 candidatos para "UNIVERSITARIO" vs "PALERMO BAJO / CARLOS PAZ" 10/07/2026 55f28144 f48723bc
+PROBLEMA TORNEO FEMEN 311722: 0 candidatos para "MAÑKE (LA CALERA)" vs "CORDOBA ATHLETIC" 14/06/2026 
+PROBLEMA TORNEO FEMEN 297605: 0 candidatos para "CLUB TABORIN "VERDE"" vs "CLUB TABORIN "BLANCO"" 14/06/2026 
+PROBLEMA TORNEO FEMEN 297604: 0 candidatos para "PALERMO BAJO / CARLOS PAZ" vs "AERO CLUB RIO CUARTO" 14/06/2026 
+PROBLEMA TORNEO FEMEN 311614: 0 candidatos para "MAÑKE (LA CALERA)" vs "UNIVERSITARIO" 07/06/2026 
+PROBLEMA TORNEO FEMEN 297602: 0 candidatos para "CORDOBA R.C./ LA TABLADA" vs "AERO CLUB RIO CUARTO" 07/06/2026 
+PROBLEMA TORNEO FEMEN 297601: 0 candidatos para "CLUB TABORIN "BLANCO"" vs "CORDOBA ATHLETIC" 07/06/2026 
+PROBLEMA TORNEO FEMEN 309809: 0 candidatos para "AERO CLUB RIO CUARTO" vs "MAÑKE (LA CALERA)" 17/05/2026 
+PROBLEMA TORNEO FEMEN 297598: 0 candidatos para "UNIVERSITARIO" vs "CLUB TABORIN "BLANCO"" 17/05/2026 
+PROBLEMA TORNEO FEMEN 297596: 0 candidatos para "CLUB TABORIN "BLANCO"" vs "AERO CLUB RIO CUARTO" 10/05/2026 
+PROBLEMA TORNEO FEMEN 297595: 0 candidatos para "MAÑKE (LA CALERA)" vs "PALERMO BAJO / CARLOS PAZ" 10/05/2026 
+PROBLEMA TORNEO FEMENINO TOP 8 - MAYORES - 2026 297594: tarjeta sin planteles ni marcador, se omite
+PROBLEMA TORNEO FEMEN 308115: 0 candidatos para "CORDOBA R.C./ LA TABLADA" vs "MAÑKE (LA CALERA)" 26/04/2026 
+PROBLEMA TORNEO FEMEN 297592: 0 candidatos para "AERO CLUB RIO CUARTO" vs "CORDOBA ATHLETIC" 26/04/2026 
+PROBLEMA TORNEO FEMEN 297593: 0 candidatos para "PALERMO BAJO / CARLOS PAZ" vs "CLUB TABORIN "BLANCO"" 25/04/2026 
+PROBLEMA TORNEO FEMEN 297589: 0 candidatos para "CLUB TABORIN "BLANCO"" vs "CORDOBA R.C./ LA TABLADA" 19/04/2026 
+PROBLEMA TORNEO FEMEN 297588: 0 candidatos para "CLUB TABORIN "VERDE"" vs "MAÑKE (LA CALERA)" 19/04/2026 
+PROBLEMA TORNEO FEMEN 307344: 0 candidatos para "UNIVERSITARIO" vs "AERO CLUB RIO CUARTO" 19/04/2026 
+PROBLEMA TORNEO FEMEN 303754: 0 candidatos para "MAÑKE (LA CALERA)" vs "CLUB TABORIN "BLANCO"" 12/04/2026 
+PROBLEMA TORNEO FEMEN 297585: 0 candidatos para "CLUB TABORIN "VERDE"" vs "AERO CLUB RIO CUARTO" 12/04/2026 
+PROBLEMA TORNEO FEMEN 297657: 0 candidatos para "CLUB TABORIN "BLANCO"" vs "CLUB TABORIN "VERDE"" 09/04/2026 
+PROBLEMA TORNEO FEMEN 297583: 0 candidatos para "AERO CLUB RIO CUARTO" vs "PALERMO BAJO / CARLOS PAZ" 29/03/2026 
+PROBLEMA TORNEO FEMEN 297584: 0 candidatos para "CORDOBA ATHLETIC" vs "MAÑKE (LA CALERA)" 28/03/2026 
+f48723bc 20 partidos

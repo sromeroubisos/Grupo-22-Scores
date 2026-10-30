@@ -1,0 +1,133 @@
+Torneo : Torneo Regional NEA 2026 - Primera
+Ronda : 1° Rueda
+
+Fecha : 6° Fecha
+
+Partido número : 314217
+
+Fecha de juego : 11/07/2026 14:30 hs
+
+Referee : Sauco, Rodrigo
+
+Lugar: TARAGUY
+
+ Cerrado
+
+34 [4]
+TARAGUY R.C. - Nordeste
+ CONFIRMADO
+
+
+Modificaciones deshabilitadas
+
+-
+30 [1]
+SAN PATRICIO R.C. - NORESTE - Nordeste
+ CONFIRMADO
+
+
+Modificaciones deshabilitadas
+
+Partido
+
+Incidencias LOCAL
+Tie.	Min.	Símbolo	Incidencia	Pun.	Jugador	Detalle	Sanción
+1T	4	tarjeta-amarilla.ico	Amarilla		Roca, Joaquín	Juego General (J. G.)
+1T	12		Try	5	Meabe, Juan Martin
+1T	18		Try	5	Rossello, Sebastian
+1T	25	tarjeta-amarilla.ico	Amarilla		Albornoz, Geronimo Ramon	Juego General (J. G.)
+1T	36	tarjeta-roja.ico	Roja		Grillo, Renzo	Regular - Disciplina (DI)	20319
+1T	39		Penal	3	Meabe, Ignacio
+1T	40		Try	5	Rossello, Sebastian
+1T	40		Conversión	2	Meabe, Ignacio
+2T	3		Try	5	Sosa, Agustin
+2T	3		Conversión	2	Meabe, Ignacio
+2T	5	sale.ico	Se retiró		Sosa, Agustin
+2T	5	entra.ico	Ingresó		Nuñez, Marco Agustin
+2T	10	sale.ico	Se retiró		Fey, Valentino
+2T	10	entra.ico	Ingresó		Solari, Martin
+2T	10	sale.ico	Se retiró		Sequeira, Renzo Maximiliano
+2T	10	entra.ico	Ingresó		Ivancovich, Ignacio
+2T	10	entra.ico	Ingresó		Gomez Coll, Emiliano
+2T	10	sale.ico	Se retiró		Rossello, Sebastian
+2T	18	sale.ico	Se retiró		Meabe, Juan Martin
+2T	18	entra.ico	Ingresó		Schiavi, Benjamin Cruz
+2T	18	tarjeta-amarilla.ico	Amarilla		Meabe, Santiago	Juego General (J. G.)	21239
+2T	18	sale.ico	Se retiró		Gomez, Joaquin
+2T	18	entra.ico	Ingresó		Chapresto, Benjamin
+2T	18	sale.ico	Se retiró		Roca, Joaquín
+2T	18	entra.ico	Ingresó		Gallardo, Alejandro
+2T	18	entra.ico	Ingresó		Insfran, Tiago Jorge Sebastian
+2T	18	sale.ico	Se retiró		Amadey, Emilio
+2T	27		Try	5	Solari, Martin
+2T	27		Conversión	2	Meabe, Ignacio
+Incidencias VISITANTE
+Tie.	Min.	Símbolo	Incidencia	Pun.	Jugador	Detalle	Sanción
+1T	24		Penal	3	Alvarez Rodriguez, Elias Gabriel
+1T	30	entra.ico	Ingresó		Vidal, Nahuel Ivan
+1T	30	sale.ico	Se retiró		Ramos, Lautaro
+1T	35		Try	5	Fiat, Mateo
+1T	35		Conversión	2	Alvarez Rodriguez, Elias Gabriel
+1T	38		Penal	3	Alvarez Rodriguez, Elias Gabriel
+2T	4	sale.ico	Se retiró		Camps, Eduardo Nicolas
+2T	4	entra.ico	Ingresó		Voelki Berenz, Germán Nicolás
+2T	10	tarjeta-amarilla.ico	Amarilla		Basilis, Ayrton	Juego General (J. G.)
+2T	20	entra.ico	Ingresó		Escalante Benvenutti, Gaspar
+2T	20	sale.ico	Se retiró		Bastarrica, Agustín
+2T	20		Try	5	Gómez Escobar, Marcos Serafin
+2T	20	sale.ico	Se retiró		Leiva Prieto, Juan Cruz
+2T	20	entra.ico	Ingresó		Núñez Huel, Daniel Martin
+2T	30		Try	5	Fiat, Mateo
+2T	30		Conversión	2	Alvarez Rodriguez, Elias Gabriel
+2T	39		Try	5	Vidal, Nahuel Ivan
+Entrenador LOCAL: Federico Daniel Romero Garrido 29464385
+Miembros del equipo LOCAL
+Pos	Doc.	Nombre	APL	Cert.	Pos.	Pos.Alt	Pos.Alt.2	Ult.Fich.
+1	43330413	Sequeira, Renzo Maximiliano			03	01	02	2026
+2	34207401	Rossello, Sebastian			02	08	08	2026
+3	46716004	Grillo, Renzo			03	02	01	2026
+4	46773327	Mendiondo, Evaristo			05	06	08	2026
+5	37062733	Gomez, Joaquin			04	05	08	2026
+6	45373277	Sosa, Agustin			06	08	07	2026
+7	46773734	Roca, Joaquín			06	04	08	2026
+8	46076781	Amadey, Emilio			08	07	06	2026
+9	46241515	Amadey, Joaquín			09	12	13	2026
+10	44718932	Meabe, Ignacio			10	12	15	2026
+11	41498191	Meabe, Juan Martin			14	11	15	2026
+12	44198568	Albornoz, Geronimo Ramon			12	10	13	2026
+13	44718933	Meabe, Santiago			13	12	14	2026
+14	43135239	Fey, Valentino			11	15	13	2026
+15	42222190	De La Vega, Agustin			15	10	10	2026
+16	44198501	Ivancovich, Ignacio			01	02	06	2026
+17	40589166	Gomez Coll, Emiliano			01	02	04	2026
+18	43747111	Nuñez, Marco Agustin			01	02	03	2026
+19	42004630	Chapresto, Benjamin			06	04	08	2026
+20	39779788	Gallardo, Alejandro			06	07	08	2026
+21	44345158	Insfran, Tiago Jorge Sebastian			07	08	05	2026
+22	47421542	Schiavi, Benjamin Cruz			10	15	13	2026
+23	41842214	Solari, Martin			11	13	14	2026
+Entrenador VISITANTE: Vicente Farias 20085145
+Miembros del equipo VISITANTE
+Pos	Doc.	Nombre	APL	Cert.	Pos.	Pos.Alt	Pos.Alt.2	Ult.Fich.
+1	45455638	Sambrana Silvero, Santino Nahuel			01	02	03	2026
+2	42996342	Camps, Eduardo Nicolas			02	01	06	2026
+3	44976561	Cabral, Gonzalo Sebastian			01	03	02	2026
+4	39863254	Leiva Prieto, Juan Cruz			04	08	05	2026
+5	42792616	Gonzalez, Augusto Daniel			05	07	08	2026
+6	43746314	Núñez Huel, Rafael Bautista			06	07	08	2026
+7	45529156	Bastarrica, Agustín			06	07	08	2026
+8	46077150	Basilis, Ayrton			07	06	08	2026
+9	37391406	Gómez Escobar, Marcos Serafin			09	10	14	2026
+10	45845708	Alvarez Rodriguez, Elias Gabriel			10	09	15	2026
+11	38714711	Pucciariello, José María			14	12	10	2026
+12	46461781	Ramos, Lautaro			12	13	14	2026
+13	43752059	Fiat, Mateo			13	15	10	2026
+14	44196496	Basilis, Lautaro			12	13	07	2026
+15	44622195	Demichelli, Gino			15	10	14	2026
+16	46460482	Romero, Fabricio Luciano			01	02	03	2026
+17	39186753	Voelki Berenz, Germán Nicolás			01	02	03	2026
+18	42347011	Núñez Huel, Daniel Martin			08	07	06	2026
+19	38313343	Silvestrini, Franco Oscar			06	05	07	2026
+20	44573828	Escalante Benvenutti, Gaspar			14	13	15	2026
+21	39864437	Vidal, Nahuel Ivan			10	12	13	2026
+Incidencias PARTIDO

@@ -15,8 +15,14 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import ExportImage from '@/components/ExportImage';
 import type { SportLineup, LineupSlot } from '@/lib/data/lineupPositions';
+import dynamic from 'next/dynamic';
+
+// El export es la pieza mas pesada que carga esta pagina y solo hace falta cuando
+// alguien aprieta el boton. Diferido, deja de viajar en la primera carga: en el
+// telefono eso es codigo que no se baja, no se parsea y no se compila.
+const ExportImage = dynamic(() => import('@/components/ExportImage'), { ssr: false });
+
 
 type SquadPlayer = {
     id: string;

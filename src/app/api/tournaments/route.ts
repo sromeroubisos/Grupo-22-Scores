@@ -25,6 +25,7 @@ import {
     parseEspnMotorsportTournamentId,
 } from '@/lib/services/espnMotorsport';
 import { StandingsEngine } from '@/lib/services/standingsEngine';
+import { limitAnonymousRequest } from '@/lib/server/publicRouteGuards';
 import { getReadClient } from '@/lib/supabase/read';
 import { db } from '@/lib/mock-db';
 import {
@@ -115,6 +116,34 @@ function stripFsPrefix(val?: string): string | undefined {
 function sameProviderId(a?: string | null, b?: string | null): boolean {
     if (!a || !b) return false;
     return String(a).trim().toLowerCase() === String(b).trim().toLowerCase();
+}
+
+// Forma de una URL de torneo de FlashScore, ya reducida al path por
+// normalizeTournamentUrl: `/american-football/austria/afl/`,
+// `/rugby-union/argentina/top-12/`. Deporte + país + torneo, con algún tramo más
+// en los archivos de temporada. Nada de querystrings ni hosts.
+const FLASHSCORE_TOURNAMENT_PATH = /^\/[a-z0-9-]+(?:\/[a-z0-9._-]+){1,4}\/?$/i;
+const MAX_TOURNAMENT_URL_LENGTH = 200;
+
+/**
+ * `?url=` viene del cliente y cada valor distinto es una llamada paga a
+ * RapidAPI (más una entrada de caché). Se acepta solo lo que tiene forma de
+ * torneo de FlashScore; un host ajeno o un path arbitrario no llega al
+ * proveedor.
+ */
+function isAcceptableTournamentUrlParam(raw: string): boolean {
+    const trimmed = raw.trim();
+    if (!trimmed || trimmed.length > MAX_TOURNAMENT_URL_LENGTH) return false;
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+        try {
+            const host = new URL(trimmed).hostname.toLowerCase();
+            if (!/(^|\.)flashscore\.[a-z.]+$/.test(host)) return false;
+        } catch {
+            return false;
+        }
+    }
+    const path = normalizeTournamentUrl(trimmed);
+    return Boolean(path && FLASHSCORE_TOURNAMENT_PATH.test(path));
 }
 
 function normalizeTournamentUrl(raw?: string): string | undefined {
@@ -984,6 +1013,19 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id') || '';
     let url = searchParams.get('url') || searchParams.get('tournament_url') || searchParams.get('tournamentUrl') || '';
+    // Una URL explícita es el camino caro (cada valor, un pedido nuevo al
+    // proveedor). Se valida la forma y se limita por IP; el resto de la ruta
+    // —torneos por id, que es lo que usa la app— sigue sin tope.
+    if (url) {
+        if (!isAcceptableTournamentUrlParam(url)) {
+            return perf.json(
+                { ok: false, error: 'URL de torneo inválida.' },
+                { status: 400 },
+            );
+        }
+        const limited = await limitAnonymousRequest(request, 'tournaments-url');
+        if (limited) return limited;
+    }
     const sport = searchParams.get('sport') || searchParams.get('sportId') || 'rugby'; // Default to rugby
     const requestedName = normalizeId(searchParams.get('name') || searchParams.get('display_name') || searchParams.get('displayName'));
     const requestedSeason =
@@ -1683,7 +1725,9 @@ export async function GET(request: Request) {
                 details: detailsPayload,
                 results: bundle.results,
                 fixtures: bundle.fixtures,
-                standings: standingsPayload,
+                // Las filas llegan planas con `group_name` (división de la NFL, conferencia
+                // de la NCAA); la página conoce la forma agrupada { group_name, rows }.
+                standings: groupFlatStandings(standingsPayload),
                 standingsForm: standingsFormPayload,
                 standingsHtFt: standingsHtFtPayload,
                 standingsOverUnder: standingsOverUnderPayload,
@@ -2597,7 +2641,9 @@ export async function GET(request: Request) {
             console.error('Tournament fallback error', fallbackError);
         }
         return perf.json(
-            { ok: false, error: 'Failed to load tournament data', details: e.message || String(e) },
+            // El mensaje del error queda en el log: hacia afuera, genérico (podía
+            // filtrar la URL del proveedor o detalles de la consulta).
+            { ok: false, error: 'Failed to load tournament data' },
             { status: 500 }
         );
     }

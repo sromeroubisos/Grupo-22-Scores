@@ -1,0 +1,362 @@
+{
+ "descripcion": "Encuentro Femenino de Selecciones de XV 2026 · tarjeta oficial",
+ "partidos": [
+  {
+   "id": "9e1fa344-841d-4f51-b2f2-3f1e5c73830a",
+   "rotulo": "La Tablada A vs Jockey Club Cordoba A · Final M15 A · tarjeta 327347",
+   "arbitro": "Francisco Romero Brondino",
+   "local": {
+    "nombre": "club-la-tablada-m15-a",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Juan Martin Radi Cafaro"
+     },
+     {
+      "numero": 2,
+      "nombre": "Bruno Stenfer"
+     },
+     {
+      "numero": 3,
+      "nombre": "Nicolas Lozada Pagani"
+     },
+     {
+      "numero": 4,
+      "nombre": "Santiago Montironi"
+     },
+     {
+      "numero": 5,
+      "nombre": "Nicolas Arri"
+     },
+     {
+      "numero": 6,
+      "nombre": "Juan Pedro Masjoan Amestegui"
+     },
+     {
+      "numero": 7,
+      "nombre": "Facundo Bulacio Lascano"
+     },
+     {
+      "numero": 8,
+      "nombre": "Baltazar Ignacio Campana"
+     },
+     {
+      "numero": 9,
+      "nombre": "Agustin Scaroni Cornejo"
+     },
+     {
+      "numero": 10,
+      "nombre": "Felipe Velasco"
+     },
+     {
+      "numero": 11,
+      "nombre": "Valentin Auad"
+     },
+     {
+      "numero": 12,
+      "nombre": "Tomas Hermida"
+     },
+     {
+      "numero": 13,
+      "nombre": "Benjamin Castillo Lancioni"
+     },
+     {
+      "numero": 14,
+      "nombre": "Pedro Jaime"
+     },
+     {
+      "numero": 15,
+      "nombre": "Pedro Caeiro Rolotti"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Valentino Cura Tey"
+     },
+     {
+      "numero": 17,
+      "nombre": "Clemente Pignata"
+     },
+     {
+      "numero": 18,
+      "nombre": "Lisandro Imanol Parellada Ivanoff"
+     },
+     {
+      "numero": 19,
+      "nombre": "Valentino Milani"
+     },
+     {
+      "numero": 20,
+      "nombre": "Francisco Picone"
+     },
+     {
+      "numero": 21,
+      "nombre": "Juan Bautista Araya Balbi"
+     },
+     {
+      "numero": 22,
+      "nombre": "Franco Becher"
+     },
+     {
+      "numero": 23,
+      "nombre": "Alejandro Damonte"
+     }
+    ]
+   },
+   "visitante": {
+    "nombre": "jockey-club-cordoba-m15-a",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Felipe Juarez Bustos"
+     },
+     {
+      "numero": 2,
+      "nombre": "Santiago Ferreyra"
+     },
+     {
+      "numero": 3,
+      "nombre": "Ignacio Esteban Rosales"
+     },
+     {
+      "numero": 4,
+      "nombre": "Agustin Yapur"
+     },
+     {
+      "numero": 5,
+      "nombre": "Augusto Cesar Borrini"
+     },
+     {
+      "numero": 6,
+      "nombre": "Leandro Emiliano Rosales"
+     },
+     {
+      "numero": 7,
+      "nombre": "Jose Ignacio Campora Arrambide"
+     },
+     {
+      "numero": 8,
+      "nombre": "Justo Arrambide"
+     },
+     {
+      "numero": 9,
+      "nombre": "Jerónimo Freytes Echenique"
+     },
+     {
+      "numero": 10,
+      "nombre": "Juan Ignacio Gimenez"
+     },
+     {
+      "numero": 11,
+      "nombre": "Santino Nicolás Genesio Molinar"
+     },
+     {
+      "numero": 12,
+      "nombre": "Pedro Albiero"
+     },
+     {
+      "numero": 13,
+      "nombre": "Lucio Sparaino"
+     },
+     {
+      "numero": 14,
+      "nombre": "Cristóbal Caminos"
+     },
+     {
+      "numero": 15,
+      "nombre": "Felipe Candisano Ferreyra"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Felipe Santacroce"
+     },
+     {
+      "numero": 17,
+      "nombre": "Luca Valentin Regueiro Lascano"
+     },
+     {
+      "numero": 18,
+      "nombre": "Tomás Bazan Soaje"
+     },
+     {
+      "numero": 19,
+      "nombre": "Benjamín Genaro Ganigian"
+     },
+     {
+      "numero": 20,
+      "nombre": "Felipe Poderti"
+     },
+     {
+      "numero": 21,
+      "nombre": "Salvador Ceballos"
+     },
+     {
+      "numero": 22,
+      "nombre": "Matias Rubi Arcurio"
+     },
+     {
+      "numero": 23,
+      "nombre": "Isidro García Faure"
+     }
+    ]
+   },
+   "eventos": [
+    {
+     "minuto": 10,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Nicolas Lozada Pagani",
+     "detalle": ""
+    },
+    {
+     "minuto": 35,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Felipe Velasco",
+     "detalle": ""
+    },
+    {
+     "minuto": 5,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Valentin Auad",
+     "detalle": ""
+    },
+    {
+     "minuto": 15,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Baltazar Ignacio Campana",
+     "detalle": "Entra: Clemente Pignata"
+    },
+    {
+     "minuto": 15,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": null,
+     "detalle": "Entra: Francisco Picone"
+    },
+    {
+     "minuto": 17,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "equipo": "local",
+     "jugador": "Nicolas Arri",
+     "detalle": "Amarilla Juego General (J. G.)"
+    },
+    {
+     "minuto": 25,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Pedro Jaime",
+     "detalle": "Entra: Lisandro Imanol Parellada Ivanoff"
+    },
+    {
+     "minuto": 25,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": null,
+     "detalle": "Entra: Franco Becher"
+    },
+    {
+     "minuto": 29,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Juan Martin Radi Cafaro",
+     "detalle": ""
+    },
+    {
+     "minuto": 30,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Agustin Scaroni Cornejo",
+     "detalle": "Entra: Juan Bautista Araya Balbi"
+    },
+    {
+     "minuto": 30,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Felipe Velasco",
+     "detalle": ""
+    },
+    {
+     "minuto": 7,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Santino Nicolás Genesio Molinar",
+     "detalle": ""
+    },
+    {
+     "minuto": 7,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Felipe Candisano Ferreyra",
+     "detalle": ""
+    },
+    {
+     "minuto": 8,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Ignacio Esteban Rosales",
+     "detalle": ""
+    },
+    {
+     "minuto": 9,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": null,
+     "detalle": "Entra: Felipe Poderti"
+    },
+    {
+     "minuto": 19,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Jose Ignacio Campora Arrambide",
+     "detalle": ""
+    },
+    {
+     "minuto": 19,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Felipe Candisano Ferreyra",
+     "detalle": ""
+    },
+    {
+     "minuto": 27,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Augusto Cesar Borrini",
+     "detalle": "Entra: Benjamín Genaro Ganigian"
+    },
+    {
+     "minuto": 32,
+     "periodo": "2T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Felipe Candisano Ferreyra",
+     "detalle": ""
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,17 @@
+{
+  "fecha": "2026-09-06",
+  "descripcion": "Torneo Regional del NOA \"A\" 2026 · Lince 40-43 Cardenales",
+  "fuente": "Resultado pasado por Santiago (06/09/2026): «Cardenales 43-40 Lince, BD».",
+  "motivo": "Carga manual del resultado.",
+  "partidos": [
+    {
+      "partido": "9a728af6-7e33-4016-8a25-a94b83298b54",
+      "local": "Lince Rugby Club",
+      "visitante": "Cardenales R.C.",
+      "marcador": {
+        "local": 40,
+        "visitante": 43
+      }
+    }
+  ]
+}

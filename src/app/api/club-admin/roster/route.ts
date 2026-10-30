@@ -12,6 +12,7 @@ import {
     fetchPeopleByDivision,
     updatePersonInClub,
 } from '@/lib/services/personService';
+import { FOREIGN_ROSTER_MESSAGE, assertDivisionBelongsToClub } from '@/lib/server/rosterScope';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 
@@ -47,6 +48,23 @@ async function ensureManagedClub(clubId: string, allowedRoles = VIEW_MEMBERSHIP_
     return { supabase, context, target, error: null };
 }
 
+/**
+ * El permiso de arriba es sobre `clubId`; el `divisionId` puede nombrar el
+ * plantel de otro club. Ver `rosterScope.ts`.
+ */
+async function ensureDivisionInScope(
+    admin: ReturnType<typeof createAdminClient>,
+    clubId: string,
+    divisionId: string | null | undefined,
+) {
+    try {
+        await assertDivisionBelongsToClub(admin, clubId, divisionId);
+        return null;
+    } catch {
+        return jsonError(FOREIGN_ROSTER_MESSAGE, 403);
+    }
+}
+
 export async function GET(request: NextRequest) {
     const clubId = request.nextUrl.searchParams.get('clubId');
     const divisionId = request.nextUrl.searchParams.get('divisionId');
@@ -57,8 +75,11 @@ export async function GET(request: NextRequest) {
     const access = await ensureManagedClub(clubId);
     if (access.error) return access.error;
 
+    const admin = createAdminClient();
+    const scopeError = await ensureDivisionInScope(admin, clubId, divisionId);
+    if (scopeError) return scopeError;
+
     try {
-        const admin = createAdminClient();
         const people = divisionId
             ? await fetchPeopleByDivision(clubId, divisionId, admin)
             : await fetchPeopleByClub(clubId, admin);
@@ -79,6 +100,9 @@ export async function POST(request: NextRequest) {
     if (access.error) return access.error;
 
     const admin = createAdminClient();
+    const scopeError = await ensureDivisionInScope(admin, clubId, typeof body?.division_id === 'string' ? body.division_id : undefined);
+    if (scopeError) return scopeError;
+
     const result = await addPersonToClub(clubId, {
         first_name: typeof body?.first_name === 'string' ? body.first_name : '',
         last_name: typeof body?.last_name === 'string' ? body.last_name : '',
@@ -122,6 +146,9 @@ export async function PATCH(request: NextRequest) {
     if (access.error) return access.error;
 
     const admin = createAdminClient();
+    const scopeError = await ensureDivisionInScope(admin, clubId, typeof body?.division_id === 'string' ? body.division_id : undefined);
+    if (scopeError) return scopeError;
+
     const result = await updatePersonInClub(clubId, personId, {
         first_name: typeof body?.first_name === 'string' ? body.first_name : '',
         last_name: typeof body?.last_name === 'string' ? body.last_name : '',
@@ -158,6 +185,9 @@ export async function DELETE(request: NextRequest) {
     if (access.error) return access.error;
 
     const admin = createAdminClient();
+    const scopeError = await ensureDivisionInScope(admin, clubId, divisionId);
+    if (scopeError) return scopeError;
+
     const result = await deletePersonFromClub(clubId, personId, divisionId, admin);
     if (!result.success) {
         return jsonError(result.error || 'No se pudo eliminar la ficha', 400);

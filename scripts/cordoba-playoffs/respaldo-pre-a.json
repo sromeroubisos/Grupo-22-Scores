@@ -1,0 +1,243 @@
+{
+ "fase": [
+  {
+   "id": "28ad2f76-d44d-4ff9-944e-9a7da4fadcd7",
+   "tournament_id": "8ead4164-fe7e-4837-a4de-b804d18f7038",
+   "name": "Semifinales",
+   "phase_type": "playoff",
+   "order_index": 2,
+   "is_active": false,
+   "settings": {
+    "legs": 1,
+    "bonus": {
+     "defensive": {
+      "margin": 7,
+      "points": 1
+     },
+     "offensive": {
+      "tries": 4,
+      "points": 1
+     }
+    },
+    "points": {
+     "win": 4,
+     "draw": 2,
+     "loss": 0
+    },
+    "source": "cordoba-torneos-2026",
+    "phaseMode": "playoff",
+    "standings": {
+     "mode": "automatic",
+     "editable": true
+    },
+    "bracketMode": "manual",
+    "tiebreakers": [
+     {
+      "label": "Puntos obtenidos",
+      "metric": "points",
+      "enabled": true,
+      "priority": 1
+     },
+     {
+      "label": "Resultado entre sí",
+      "metric": "head_to_head",
+      "enabled": true,
+      "priority": 2
+     },
+     {
+      "label": "Diferencia de tantos",
+      "metric": "points_difference",
+      "enabled": true,
+      "priority": 3
+     },
+     {
+      "label": "Tries a favor",
+      "metric": "tries_for",
+      "enabled": true,
+      "priority": 4
+     },
+     {
+      "label": "Partidos ganados",
+      "metric": "won",
+      "enabled": true,
+      "priority": 5
+     }
+    ],
+    "advanceCount": 1,
+    "pointsSystem": {
+     "win": 4,
+     "draw": 2,
+     "loss": 0,
+     "bonusTry": 1,
+     "bonusLoss": 1,
+     "allowBonusPoints": true
+    },
+    "playoffStages": [
+     {
+      "id": "playoff_stage_1",
+      "name": "Semifinales",
+      "matchCount": 2,
+      "orderIndex": 1
+     }
+    ]
+   },
+   "created_at": "2026-10-16T15:08:12.521+00:00",
+   "updated_at": "2026-10-16T15:08:12.521+00:00",
+   "season_id": "bb17a997-d573-47ff-9c0e-4f7f24c93f23"
+  }
+ ],
+ "ronda": [
+  {
+   "id": "a600c15c-e486-43ec-beaf-57fa2402c9ad",
+   "phase_id": "28ad2f76-d44d-4ff9-944e-9a7da4fadcd7",
+   "name": "Semifinales",
+   "order_index": 1,
+   "start_date": "2026-10-17T00:00:00+00:00",
+   "end_date": "2026-10-17T00:00:00+00:00",
+   "is_completed": true,
+   "notes": null,
+   "created_at": "2026-10-16T15:08:12.521+00:00",
+   "updated_at": "2026-10-18T22:11:33.24955+00:00",
+   "season_id": "bb17a997-d573-47ff-9c0e-4f7f24c93f23",
+   "group_id": null
+  }
+ ],
+ "partidos": [
+  {
+   "id": "04209f34-12e8-45d1-a8a0-58e43ffa275a",
+   "tournament_id": "8ead4164-fe7e-4837-a4de-b804d18f7038",
+   "round_id": null,
+   "date_time": "2026-10-17T16:30:00+00:00",
+   "venue": null,
+   "home_club_id": "tala-rugby-club-preintermedia-a",
+   "away_club_id": "jockey-club-cordoba-preintermedia-a",
+   "status": "final",
+   "score": {
+    "away": 17,
+    "home": 14,
+    "awayTries": 2,
+    "homeTries": 2
+   },
+   "created_at": "2026-10-16T15:08:12.521+00:00",
+   "updated_at": "2026-10-17T18:57:57.044173+00:00",
+   "notes": null,
+   "round_label": "Semifinales",
+   "phase_id": "28ad2f76-d44d-4ff9-944e-9a7da4fadcd7",
+   "group_id": null,
+   "round_uuid": "a600c15c-e486-43ec-beaf-57fa2402c9ad",
+   "home_base_points": 0,
+   "away_base_points": 0,
+   "home_bonus_points": 0,
+   "away_bonus_points": 0,
+   "points_autocalculated": true,
+   "points_override_reason": null,
+   "live_enabled": false,
+   "category": null,
+   "home_division_id": null,
+   "away_division_id": null,
+   "lineups": {
+    "away": [],
+    "home": []
+   },
+   "events": [],
+   "sport_id": "rugby",
+   "sport": "rugby",
+   "clock": null,
+   "referee": null,
+   "pitch": null,
+   "broadcast_url": null,
+   "replay_url": null,
+   "stream_url": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 9,
+   "is_visible": true,
+   "review_status": "approved",
+   "created_by_user_id": null,
+   "created_by_club_id": null,
+   "reviewed_by_user_id": null,
+   "reviewed_at": null,
+   "review_notes": null,
+   "season_id": "bb17a997-d573-47ff-9c0e-4f7f24c93f23",
+   "home_team_id": null,
+   "away_team_id": null,
+   "home_season_entry_id": null,
+   "away_season_entry_id": null,
+   "bracket_match_code": null,
+   "home_source_label": null,
+   "away_source_label": null,
+   "participant_source": null,
+   "auto_scheduled": false,
+   "scheduling_status": null,
+   "external_id": null,
+   "official_sheet_number": null
+  },
+  {
+   "id": "3d329a6d-fc2b-4781-b79a-5233dbf04532",
+   "tournament_id": "8ead4164-fe7e-4837-a4de-b804d18f7038",
+   "round_id": null,
+   "date_time": "2026-10-17T17:00:00+00:00",
+   "venue": null,
+   "home_club_id": "club-palermo-bajo-preintermedia-a",
+   "away_club_id": "la-tablada-a-pre-intermedia",
+   "status": "final",
+   "score": {
+    "away": 30,
+    "home": 25
+   },
+   "created_at": "2026-10-16T15:08:12.521+00:00",
+   "updated_at": "2026-10-19T11:56:42.146304+00:00",
+   "notes": "Marcador de la base de datos de la UAR (bd.uar.com.ar).",
+   "round_label": "Semifinales",
+   "phase_id": "28ad2f76-d44d-4ff9-944e-9a7da4fadcd7",
+   "group_id": null,
+   "round_uuid": "a600c15c-e486-43ec-beaf-57fa2402c9ad",
+   "home_base_points": 0,
+   "away_base_points": 0,
+   "home_bonus_points": 0,
+   "away_bonus_points": 0,
+   "points_autocalculated": true,
+   "points_override_reason": null,
+   "live_enabled": false,
+   "category": null,
+   "home_division_id": null,
+   "away_division_id": null,
+   "lineups": {
+    "away": [],
+    "home": []
+   },
+   "events": [],
+   "sport_id": "rugby",
+   "sport": "rugby",
+   "clock": null,
+   "referee": null,
+   "pitch": null,
+   "broadcast_url": null,
+   "replay_url": null,
+   "stream_url": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "is_visible": true,
+   "review_status": "approved",
+   "created_by_user_id": null,
+   "created_by_club_id": null,
+   "reviewed_by_user_id": null,
+   "reviewed_at": null,
+   "review_notes": null,
+   "season_id": "bb17a997-d573-47ff-9c0e-4f7f24c93f23",
+   "home_team_id": null,
+   "away_team_id": null,
+   "home_season_entry_id": null,
+   "away_season_entry_id": null,
+   "bracket_match_code": null,
+   "home_source_label": null,
+   "away_source_label": null,
+   "participant_source": null,
+   "auto_scheduled": false,
+   "scheduling_status": null,
+   "external_id": null,
+   "official_sheet_number": null
+  }
+ ]
+}

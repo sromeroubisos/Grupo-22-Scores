@@ -1,0 +1,15 @@
+intento 1 fallo:   message: 'Error: server:SUPABASE:insert timed out after 8000ms',
+intento 2 fallo: Error: no se pudo leer Club La Tablada M15 "B" vs Jockey Club Córdoba M15 "C" · torneo-cordobes-m15-b · tarjeta 290963: Error: server:SUPABASE:select timed out after 8000ms
+intento 3 fallo:   message: 'Error: server:SUPABASE:insert timed out after 8000ms',
+intento 4 fallo: Error: no se pudo leer Club La Tablada M15 "B" vs Jockey Club Córdoba M15 "C" · torneo-cordobes-m15-b · tarjeta 290963: Error: server:SUPABASE:select timed out after 8000ms
+intento 5 fallo: Error: no se pudo leer Club La Tablada M15 "B" vs Jockey Club Córdoba M15 "C" · torneo-cordobes-m15-b · tarjeta 290963: Error: server:SUPABASE:select timed out after 8000ms
+intento 6 fallo: Error: no se pudo leer Club La Tablada M15 "B" vs Jockey Club Córdoba M15 "C" · torneo-cordobes-m15-b · tarjeta 290963: Error: server:SUPABASE:select timed out after 8000ms
+intento 7 fallo: Error: no se pudo leer Club La Tablada M15 "B" vs Jockey Club Córdoba M15 "C" · torneo-cordobes-m15-b · tarjeta 290963: Error: server:SUPABASE:select timed out after 8000ms
+intento 8 fallo: Binary file scripts/cordoba-m15-b-tarjetas/ejecucion.txt matches
+intento 1 fallo: Binary file scripts/cordoba-m15-b-tarjetas/ejecucion.txt matches
+intento 2 fallo: Error: no se pudo leer Club La Tablada M15 "B" vs Jockey Club Córdoba M15 "C" · torneo-cordobes-m15-b · tarjeta 290963: Error: server:SUPABASE:select timed out after 8000ms
+intento 3 fallo: Error: Error: server:SUPABASE:select timed out after 8000ms
+intento 4 fallo: Error: Error: server:SUPABASE:select timed out after 8000ms
+intento 5 fallo: Error: Error: server:SUPABASE:select timed out after 8000ms
+intento 6 fallo: Error: no se pudo leer Club La Tablada M15 "B" vs Jockey Club Córdoba M15 "C" · torneo-cordobes-m15-b · tarjeta 290963: Error: server:SUPABASE:select timed out after 8000ms
+intento 7 fallo: Error: TypeError: fetch failed

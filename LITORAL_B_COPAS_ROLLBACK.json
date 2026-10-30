@@ -1,0 +1,586 @@
+{
+  "borrado": {
+    "fase": {
+      "id": "678173c9-9f75-42d5-ab4b-72a41a1acff5",
+      "tournament_id": "b28a55ac-b372-4b89-ba81-ee43232abffb",
+      "name": "Top 6 – Copa Oro",
+      "phase_type": "league",
+      "order_index": 2,
+      "is_active": false,
+      "settings": {
+        "legs": 1,
+        "groupTags": [],
+        "teamsCount": 12,
+        "groupLabels": [],
+        "group_names": [],
+        "matchFormat": {
+          "type": "single_match",
+          "label": "Partido Único",
+          "behavior": {
+            "series": {
+              "seriesLength": 2,
+              "tieResolution": "extra_time_then_penalty_shootout",
+              "aggregateMethod": "points_sum"
+            },
+            "single_match": {
+              "seriesLength": 1,
+              "winnerDetermination": "most_points_in_match"
+            }
+          }
+        },
+        "playerStats": {
+          "behavior": {
+            "attribution": {
+              "howToApply": "for_each_eligible_player_add_same_team_stat_delta_as_in_team_totals",
+              "teamStatsToPlayers": [
+                "points_for",
+                "points_against",
+                "wins",
+                "draws",
+                "losses",
+                "bonus_points"
+              ]
+            },
+            "eligibility": {
+              "mode": "played_or_starter",
+              "rules": [
+                {
+                  "if": {
+                    "assignOnlyToStarters": true
+                  },
+                  "then": {
+                    "eligiblePlayers": "starters_only"
+                  }
+                },
+                {
+                  "if": {
+                    "assignOnlyToStarters": false
+                  },
+                  "then": {
+                    "eligiblePlayers": "played_true"
+                  }
+                }
+              ],
+              "playedFlagField": "lineup.played",
+              "starterFlagField": "lineup.is_starter"
+            },
+            "whenToAttribute": "on_match_finalized"
+          },
+          "assignOnlyToStarters": false,
+          "assignTeamStatsToPlayersWhoPlayed": true
+        },
+        "tiebreakers": [
+          {
+            "order": "desc",
+            "metric": "points",
+            "enabled": true,
+            "priority": 1
+          },
+          {
+            "order": "desc",
+            "metric": "headToHead",
+            "enabled": true,
+            "priority": 2
+          },
+          {
+            "order": "desc",
+            "metric": "pointsDiff",
+            "enabled": true,
+            "priority": 3
+          },
+          {
+            "order": "desc",
+            "metric": "pointsFor",
+            "enabled": true,
+            "priority": 4
+          },
+          {
+            "order": "desc",
+            "metric": "won",
+            "enabled": false,
+            "priority": 5
+          },
+          {
+            "order": "desc",
+            "metric": "drawn",
+            "enabled": false,
+            "priority": 6
+          },
+          {
+            "order": "desc",
+            "metric": "percentage",
+            "enabled": false,
+            "priority": 7
+          },
+          {
+            "order": "desc",
+            "metric": "tries",
+            "enabled": false,
+            "priority": 8
+          },
+          {
+            "order": "desc",
+            "metric": "conversions",
+            "enabled": false,
+            "priority": 9
+          }
+        ],
+        "advanceCount": 0,
+        "pointsSystem": {
+          "win": 4,
+          "draw": 2,
+          "loss": 0,
+          "behavior": {
+            "input": {
+              "requires": [
+                "score"
+              ],
+              "statusRequired": "finalized"
+            },
+            "output": {
+              "writesTo": [
+                "standings"
+              ]
+            },
+            "idempotency": {
+              "key": "match_id",
+              "rule": "ignore_if_already_processed"
+            },
+            "basePointsLogic": [
+              {
+                "if": {
+                  "win": true
+                },
+                "then": {
+                  "add": 4
+                }
+              },
+              {
+                "if": {
+                  "draw": true
+                },
+                "then": {
+                  "add": 2
+                }
+              },
+              {
+                "if": {
+                  "loss": true
+                },
+                "then": {
+                  "add": 0
+                }
+              }
+            ],
+            "whenToCalculate": "on_match_finalized"
+          },
+          "allowBonusPoints": true,
+          "extraTimeAlternativeSystem": false
+        },
+        "tableColumns": {
+          "won": true,
+          "lost": true,
+          "runs": true,
+          "drawn": true,
+          "tries": true,
+          "played": true,
+          "points": true,
+          "tackles": true,
+          "extraWon": false,
+          "dropGoals": true,
+          "extraLost": false,
+          "penalties": true,
+          "pointsFor": true,
+          "extraDrawn": false,
+          "percentage": false,
+          "pointsDiff": true,
+          "conversions": true,
+          "extraPlayed": false,
+          "posVariation": true,
+          "pointsAgainst": true,
+          "classification": false
+        },
+        "statsAssignment": "played",
+        "tiebreakerBehavior": {
+          "scope": {
+            "tableScope": "phase_group_or_pool",
+            "headToHeadScope": "only_between_tied_teams_in_that_tableScope"
+          },
+          "algorithm": {
+            "stepByStep": [
+              "points",
+              "headToHead",
+              "pointsDiff",
+              "pointsFor"
+            ],
+            "finalFallback": {
+              "mode": "stable",
+              "rule": "keep_previous_order_or_use_team_id_ascending"
+            }
+          },
+          "appliesTo": "standings_sorting_only",
+          "evaluationTime": "after_all_matches_in_scope_processed"
+        }
+      },
+      "created_at": "2026-08-23T00:31:44.199659+00:00",
+      "updated_at": "2026-08-23T00:31:44.199659+00:00",
+      "season_id": "e6f13b21-255c-4300-a68d-95f18f881dd0"
+    },
+    "asignaciones": [
+      {
+        "id": "4cc0b906-130c-4ce5-9d1f-a0d392ecaab2",
+        "tournament_id": "b28a55ac-b372-4b89-ba81-ee43232abffb",
+        "season_id": "e6f13b21-255c-4300-a68d-95f18f881dd0",
+        "phase_id": "678173c9-9f75-42d5-ab4b-72a41a1acff5",
+        "participant_id": "9b0f4d5f-b03f-40f0-a9f1-1c1ae003211a",
+        "group_id": null,
+        "status": "active",
+        "seed": null,
+        "notes": null,
+        "created_at": "2026-08-23T00:31:44.521465+00:00",
+        "updated_at": "2026-08-23T00:31:44.521465+00:00"
+      },
+      {
+        "id": "585885db-d1fd-4dce-a66a-4bdab8b44f8e",
+        "tournament_id": "b28a55ac-b372-4b89-ba81-ee43232abffb",
+        "season_id": "e6f13b21-255c-4300-a68d-95f18f881dd0",
+        "phase_id": "678173c9-9f75-42d5-ab4b-72a41a1acff5",
+        "participant_id": "3e418236-d03d-4c88-b5d2-550d82b830b9",
+        "group_id": null,
+        "status": "active",
+        "seed": null,
+        "notes": null,
+        "created_at": "2026-08-23T00:31:44.521465+00:00",
+        "updated_at": "2026-08-23T00:31:44.521465+00:00"
+      },
+      {
+        "id": "cccff06b-83d1-4925-8731-bb40682e0cda",
+        "tournament_id": "b28a55ac-b372-4b89-ba81-ee43232abffb",
+        "season_id": "e6f13b21-255c-4300-a68d-95f18f881dd0",
+        "phase_id": "678173c9-9f75-42d5-ab4b-72a41a1acff5",
+        "participant_id": "22aaf59c-d49a-4a3e-ab11-3f373706efe5",
+        "group_id": null,
+        "status": "active",
+        "seed": null,
+        "notes": null,
+        "created_at": "2026-08-23T00:31:44.521465+00:00",
+        "updated_at": "2026-08-23T00:31:44.521465+00:00"
+      },
+      {
+        "id": "842c191b-9ccb-4328-b5f6-00142e9963db",
+        "tournament_id": "b28a55ac-b372-4b89-ba81-ee43232abffb",
+        "season_id": "e6f13b21-255c-4300-a68d-95f18f881dd0",
+        "phase_id": "678173c9-9f75-42d5-ab4b-72a41a1acff5",
+        "participant_id": "be390ad8-bf1c-478f-80b2-cea7da554116",
+        "group_id": null,
+        "status": "active",
+        "seed": null,
+        "notes": null,
+        "created_at": "2026-08-23T00:31:44.521465+00:00",
+        "updated_at": "2026-08-23T00:31:44.521465+00:00"
+      },
+      {
+        "id": "ecfa9e83-e791-4ebe-a6e5-6034bb9833a8",
+        "tournament_id": "b28a55ac-b372-4b89-ba81-ee43232abffb",
+        "season_id": "e6f13b21-255c-4300-a68d-95f18f881dd0",
+        "phase_id": "678173c9-9f75-42d5-ab4b-72a41a1acff5",
+        "participant_id": "473f4433-fff1-41ad-b91a-1cdb68b08e65",
+        "group_id": null,
+        "status": "active",
+        "seed": null,
+        "notes": null,
+        "created_at": "2026-08-23T00:31:44.521465+00:00",
+        "updated_at": "2026-08-23T00:31:44.521465+00:00"
+      },
+      {
+        "id": "f2565d27-13b1-44b4-a9c0-7e815f292700",
+        "tournament_id": "b28a55ac-b372-4b89-ba81-ee43232abffb",
+        "season_id": "e6f13b21-255c-4300-a68d-95f18f881dd0",
+        "phase_id": "678173c9-9f75-42d5-ab4b-72a41a1acff5",
+        "participant_id": "7e1f3f1a-3659-4901-8ce6-8e7e0dfa6726",
+        "group_id": null,
+        "status": "active",
+        "seed": null,
+        "notes": null,
+        "created_at": "2026-08-23T00:31:44.521465+00:00",
+        "updated_at": "2026-08-23T00:31:44.521465+00:00"
+      }
+    ]
+  },
+  "fase1_antes": {
+    "id": "08b60098-aff2-4acc-bfb6-5631bf3ffee6",
+    "is_active": true,
+    "settings": {
+      "legs": 1,
+      "groupTags": [],
+      "teamsCount": 12,
+      "groupLabels": [],
+      "group_names": [],
+      "matchFormat": {
+        "type": "single_match",
+        "label": "Partido Único",
+        "behavior": {
+          "series": {
+            "seriesLength": 2,
+            "tieResolution": "extra_time_then_penalty_shootout",
+            "aggregateMethod": "points_sum"
+          },
+          "single_match": {
+            "seriesLength": 1,
+            "winnerDetermination": "most_points_in_match"
+          }
+        }
+      },
+      "playerStats": {
+        "behavior": {
+          "attribution": {
+            "howToApply": "for_each_eligible_player_add_same_team_stat_delta_as_in_team_totals",
+            "teamStatsToPlayers": [
+              "points_for",
+              "points_against",
+              "wins",
+              "draws",
+              "losses",
+              "bonus_points"
+            ]
+          },
+          "eligibility": {
+            "mode": "played_or_starter",
+            "rules": [
+              {
+                "if": {
+                  "assignOnlyToStarters": true
+                },
+                "then": {
+                  "eligiblePlayers": "starters_only"
+                }
+              },
+              {
+                "if": {
+                  "assignOnlyToStarters": false
+                },
+                "then": {
+                  "eligiblePlayers": "played_true"
+                }
+              }
+            ],
+            "playedFlagField": "lineup.played",
+            "starterFlagField": "lineup.is_starter"
+          },
+          "whenToAttribute": "on_match_finalized"
+        },
+        "assignOnlyToStarters": false,
+        "assignTeamStatsToPlayersWhoPlayed": true
+      },
+      "tiebreakers": [
+        {
+          "order": "desc",
+          "metric": "points",
+          "enabled": true,
+          "priority": 1
+        },
+        {
+          "order": "desc",
+          "metric": "headToHead",
+          "enabled": true,
+          "priority": 2
+        },
+        {
+          "order": "desc",
+          "metric": "pointsDiff",
+          "enabled": true,
+          "priority": 3
+        },
+        {
+          "order": "desc",
+          "metric": "pointsFor",
+          "enabled": true,
+          "priority": 4
+        },
+        {
+          "order": "desc",
+          "metric": "won",
+          "enabled": false,
+          "priority": 5
+        },
+        {
+          "order": "desc",
+          "metric": "drawn",
+          "enabled": false,
+          "priority": 6
+        },
+        {
+          "order": "desc",
+          "metric": "percentage",
+          "enabled": false,
+          "priority": 7
+        },
+        {
+          "order": "desc",
+          "metric": "tries",
+          "enabled": false,
+          "priority": 8
+        },
+        {
+          "order": "desc",
+          "metric": "conversions",
+          "enabled": false,
+          "priority": 9
+        }
+      ],
+      "advanceCount": 0,
+      "pointsSystem": {
+        "win": 4,
+        "draw": 2,
+        "loss": 0,
+        "behavior": {
+          "input": {
+            "requires": [
+              "score"
+            ],
+            "statusRequired": "finalized"
+          },
+          "output": {
+            "writesTo": [
+              "standings"
+            ]
+          },
+          "idempotency": {
+            "key": "match_id",
+            "rule": "ignore_if_already_processed"
+          },
+          "basePointsLogic": [
+            {
+              "if": {
+                "win": true
+              },
+              "then": {
+                "add": 4
+              }
+            },
+            {
+              "if": {
+                "draw": true
+              },
+              "then": {
+                "add": 2
+              }
+            },
+            {
+              "if": {
+                "loss": true
+              },
+              "then": {
+                "add": 0
+              }
+            }
+          ],
+          "whenToCalculate": "on_match_finalized"
+        },
+        "allowBonusPoints": true,
+        "extraTimeAlternativeSystem": false
+      },
+      "tableColumns": {
+        "won": true,
+        "lost": true,
+        "runs": true,
+        "drawn": true,
+        "tries": true,
+        "played": true,
+        "points": true,
+        "tackles": true,
+        "extraWon": false,
+        "dropGoals": true,
+        "extraLost": false,
+        "penalties": true,
+        "pointsFor": true,
+        "extraDrawn": false,
+        "percentage": false,
+        "pointsDiff": true,
+        "conversions": true,
+        "extraPlayed": false,
+        "posVariation": true,
+        "pointsAgainst": true,
+        "classification": false
+      },
+      "statsAssignment": "played",
+      "tiebreakerBehavior": {
+        "scope": {
+          "tableScope": "phase_group_or_pool",
+          "headToHeadScope": "only_between_tied_teams_in_that_tableScope"
+        },
+        "algorithm": {
+          "stepByStep": [
+            "points",
+            "headToHead",
+            "pointsDiff",
+            "pointsFor"
+          ],
+          "finalFallback": {
+            "mode": "stable",
+            "rule": "keep_previous_order_or_use_team_id_ascending"
+          }
+        },
+        "appliesTo": "standings_sorting_only",
+        "evaluationTime": "after_all_matches_in_scope_processed"
+      }
+    }
+  },
+  "creado": {
+    "fases": [
+      "f6bafcad-e1a5-4aed-9920-6959d68f44e0",
+      "308826f8-908c-4fe0-b0d0-7836a758ea2e"
+    ],
+    "asignaciones": [
+      "ca422025-9082-492d-b15d-7c3b811104f3",
+      "2ffc5f20-d1b0-4a56-b52f-dae6eb87d430",
+      "0aa5b450-468f-46b0-8d90-5b69ae93337d",
+      "1a57388f-27f7-4be7-b70f-3f3777732ba1",
+      "fcf911b0-b4bb-4cf9-96a7-51a655f18c43",
+      "0a716ad9-3c06-4813-90ae-7dd5bafbf9b8",
+      "bdb31c14-0387-4cf8-a97d-61c557caf715",
+      "fd2b404a-8aa1-4d86-bc4f-1d5132021760",
+      "3d3edab1-410e-4e6b-bb2a-74623181c0e4",
+      "973e4003-cc96-4968-a403-6805a8326f7a",
+      "4331aad2-4ae1-49dd-b87c-313909440433",
+      "7c560157-2a28-4460-9220-32dbe9e243c0"
+    ],
+    "partidos": [
+      "a9365117-fd59-4305-a68c-3a7cbb6f42b8",
+      "ea33dbad-9c05-4688-a2bf-3029e5eab807",
+      "5f55d74e-c6e1-443f-bbaa-807eac838dbf",
+      "81f45058-45f8-4687-a4d5-3e9d39d28318",
+      "1c7f18cc-d7a0-4b9f-a978-515cefb97fdb",
+      "7616f681-0278-49e1-a679-1f0e00761bd8",
+      "8756f16b-20f6-48f0-8bb3-be691239d61b",
+      "71025eac-da46-4f4a-8c0d-cb7f845b96e0",
+      "271c5232-76a5-4b5b-af16-6acb3034280f",
+      "6a17df7c-a7da-441a-aee4-4bb0f163e59e",
+      "ed88b77b-af4b-4843-92a4-134fb129e9ab",
+      "746552da-e012-4b23-beb8-9f3e217bbe62",
+      "6d3c8dc0-7607-4c65-b128-ca7125501222",
+      "f3ddea39-baf5-463c-92a1-31c7690e3ddf",
+      "2fc6405d-1667-4264-aa28-fc8f69205daf",
+      "81e1f2fb-52c8-4865-be07-8b6f89305bd3",
+      "ddc5cd8f-89e0-44ac-b3ca-b434fdff5136",
+      "fcfe062f-d844-4717-8ebd-22705285449f",
+      "555e4e19-8641-473e-a1b1-b12670367df7",
+      "0d641bf9-8151-482f-8340-52351471c1a0",
+      "f8fe5829-5e87-4cd7-8698-a2444398ddfa",
+      "db1916d1-a746-4161-8efb-42ee821b1e0e",
+      "a1617791-3df5-4a8e-b052-e963e41ca261",
+      "b8d523ce-a90b-4d31-a038-44660291ba36",
+      "594cf75d-4b9d-427e-93fe-7406e41c76a0",
+      "1366eefb-d766-4f62-8af4-fe15a9ff02a2",
+      "ed82282c-7467-4bc7-8c5b-c31009b03ab0",
+      "570bdbfd-a6f5-44f3-a712-25a9567748b3",
+      "f9ed1244-8213-47f8-a4dd-8a97fe86f741",
+      "14bf746a-0c2d-4146-b2fd-54a2fb748808"
+    ],
+    "ui_labels": [
+      "e2c521da-1d47-4369-a7f5-9f567a230d82",
+      "0960a354-6d17-4f6a-a5ea-959bbf992e44",
+      "be22a372-9f24-4f53-b3bb-0a66d9fe4284"
+    ]
+  }
+}

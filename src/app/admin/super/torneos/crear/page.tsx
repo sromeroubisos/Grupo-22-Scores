@@ -252,6 +252,7 @@ type SquadRecord = {
 
 type TournamentRecord = {
     name?: string | null;
+    primary_color?: string | null;
     sport_id?: string | null;
     is_visible?: boolean | null;
     season_id?: string | null;
@@ -1253,6 +1254,7 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
         country: '',
         unionId: '',
         logoUrl: '',
+        bannerColor: '',
         teamCount: 8,
         leagueRounds: 1,
         rules: {
@@ -1374,6 +1376,7 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                     country: normalizeCountryId(data.country_id || data.country || '', countryOptions),
                     unionId: data.union_id || '',
                     logoUrl: data.logo_url || '',
+                    bannerColor: /^#[0-9a-fA-F]{6}$/.test(data.primary_color || '') ? data.primary_color : '',
                     americanFootball: normalizeAmericanFootballRuleset(data.ruleset?.americanFootball) ?? prev.americanFootball,
                     rules: {
                         ...prev.rules,
@@ -2232,6 +2235,7 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                         country_id: formData.country ? (selectedCountryOption?.id || formData.country) : null,
                         union_id: formData.unionId || null,
                         logo_url: inlineLogo ? null : (formData.logoUrl || null),
+                        primary_color: formData.bannerColor || null,
                         status: formData.visibility === 'public' ? 'published' : 'draft',
                         is_visible: formData.visibility === 'public',
                         ruleset: {
@@ -2349,6 +2353,7 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                 country_id: formData.country ? (selectedCountryOption?.id || formData.country) : null,
                 union_id: formData.unionId || null,
                 logo_url: persistedLogoUrl,
+                primary_color: formData.bannerColor || null,
                 status: formData.visibility === 'public' ? 'published' : 'draft',
                 is_visible: formData.visibility === 'public',
                 ruleset: {
@@ -2945,6 +2950,30 @@ Listo para continuar
                                                     label="Logo del torneo"
                                                     onUpload={(url) => setFormData((prev) => ({ ...prev, logoUrl: url }))}
                                                 />
+                                            </div>
+
+                                            <div className="field-group">
+                                                <label htmlFor="tournament-banner-color">Color del banner</label>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                                    <input
+                                                        id="tournament-banner-color"
+                                                        type="color"
+                                                        value={formData.bannerColor || '#14532d'}
+                                                        onChange={(e) => setFormData((prev) => ({ ...prev, bannerColor: e.target.value }))}
+                                                        aria-label="Color del banner del torneo"
+                                                        style={{ width: 48, height: 36, padding: 0, border: 0, background: 'none', cursor: 'pointer' }}
+                                                    />
+                                                    <span>{formData.bannerColor || 'Automático (color del escudo)'}</span>
+                                                    {formData.bannerColor ? (
+                                                        <button
+                                                            type="button"
+                                                            className="btn-secondary"
+                                                            onClick={() => setFormData((prev) => ({ ...prev, bannerColor: '' }))}
+                                                        >
+                                                            Volver al automático
+                                                        </button>
+                                                    ) : null}
+                                                </div>
                                             </div>
                                         </div>
                                     </details>

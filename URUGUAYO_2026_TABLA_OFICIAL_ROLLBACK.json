@@ -1,0 +1,306 @@
+[
+  {
+    "id": "6acfd58c-3d99-4223-8f51-1fdc84e8869b",
+    "phase_id": "d5d48b2b-1696-441a-8dc9-cfa6b351f3d4",
+    "season_id": "94818e51-34a2-4872-858c-9b0423e50435",
+    "date_time": "2026-06-20T19:30:00+00:00",
+    "home_club_id": "carrasco-polo",
+    "away_club_id": "club-seminario",
+    "status": "final",
+    "score": {
+      "away": 26,
+      "home": 80
+    },
+    "home_base_points": 4,
+    "away_base_points": 0,
+    "home_bonus_points": 0,
+    "away_bonus_points": 0,
+    "points_autocalculated": true,
+    "points_override_reason": null
+  },
+  {
+    "id": "e42ef747-3e83-4566-b65c-f50e54820b3c",
+    "phase_id": "d5d48b2b-1696-441a-8dc9-cfa6b351f3d4",
+    "season_id": "94818e51-34a2-4872-858c-9b0423e50435",
+    "date_time": "2026-05-30T19:30:00+00:00",
+    "home_club_id": "trebol-de-paysandu",
+    "away_club_id": "los-cuervos",
+    "status": "final",
+    "score": {
+      "away": 24,
+      "home": 24
+    },
+    "home_base_points": 2,
+    "away_base_points": 2,
+    "home_bonus_points": 0,
+    "away_bonus_points": 0,
+    "points_autocalculated": true,
+    "points_override_reason": null
+  },
+  {
+    "id": "049550bd-2524-45b2-b83d-de45ab82ee6b",
+    "phase_id": "d5d48b2b-1696-441a-8dc9-cfa6b351f3d4",
+    "season_id": "94818e51-34a2-4872-858c-9b0423e50435",
+    "date_time": "2026-06-20T19:30:00+00:00",
+    "home_club_id": "psg",
+    "away_club_id": "los-cuervos",
+    "status": "final",
+    "score": {
+      "away": 50,
+      "home": 31
+    },
+    "home_base_points": 0,
+    "away_base_points": 4,
+    "home_bonus_points": 0,
+    "away_bonus_points": 0,
+    "points_autocalculated": true,
+    "points_override_reason": null
+  },
+  {
+    "id": "fd38d01e-7538-47a6-911a-622f04f2d4f2",
+    "phase_id": "d5d48b2b-1696-441a-8dc9-cfa6b351f3d4",
+    "season_id": "94818e51-34a2-4872-858c-9b0423e50435",
+    "date_time": "2026-06-20T19:30:00+00:00",
+    "home_club_id": "lobos-pde",
+    "away_club_id": "ceibos-club",
+    "status": "final",
+    "score": {
+      "away": 28,
+      "home": 42
+    },
+    "home_base_points": 4,
+    "away_base_points": 0,
+    "home_bonus_points": 0,
+    "away_bonus_points": 0,
+    "points_autocalculated": true,
+    "points_override_reason": null
+  },
+  {
+    "id": "513d55d9-74f7-44cd-8fb1-9e00594f5adc",
+    "phase_id": "d5d48b2b-1696-441a-8dc9-cfa6b351f3d4",
+    "season_id": "94818e51-34a2-4872-858c-9b0423e50435",
+    "date_time": "2026-03-14T19:30:00+00:00",
+    "home_club_id": "old-christians-club",
+    "away_club_id": "montevideo-c-c",
+    "status": "final",
+    "score": {
+      "away": 7,
+      "home": 59
+    },
+    "home_base_points": 4,
+    "away_base_points": 0,
+    "home_bonus_points": 1,
+    "away_bonus_points": -1,
+    "points_autocalculated": false,
+    "points_override_reason": null
+  },
+  {
+    "id": "6a79f66f-fc6c-426b-bba1-4f1636c7f22f",
+    "phase_id": "f9d51fdd-3349-414b-8a3e-44962469ccc8",
+    "season_id": "94818e51-34a2-4872-858c-9b0423e50435",
+    "date_time": "2026-08-01T18:00:00+00:00",
+    "home_club_id": "montevideo-c-c",
+    "away_club_id": "old-christians-club",
+    "status": "final",
+    "score": {
+      "away": 41,
+      "home": 17
+    },
+    "home_base_points": 0,
+    "away_base_points": 4,
+    "home_bonus_points": 0,
+    "away_bonus_points": 0,
+    "points_autocalculated": true,
+    "points_override_reason": null
+  },
+  {
+    "id": "892a20ff-1046-4edc-99ef-6706f5c8ebf6",
+    "phase_id": "f9d51fdd-3349-414b-8a3e-44962469ccc8",
+    "season_id": "94818e51-34a2-4872-858c-9b0423e50435",
+    "date_time": "2026-08-01T18:00:00+00:00",
+    "home_club_id": "old-boys-girls-club",
+    "away_club_id": "los-cuervos",
+    "status": "final",
+    "score": {
+      "away": 12,
+      "home": 18
+    },
+    "home_base_points": 4,
+    "away_base_points": 0,
+    "home_bonus_points": 0,
+    "away_bonus_points": 0,
+    "points_autocalculated": true,
+    "points_override_reason": null
+  },
+  {
+    "id": "32c59e6c-8046-4411-8910-39aa53027847",
+    "phase_id": "f9d51fdd-3349-414b-8a3e-44962469ccc8",
+    "season_id": "94818e51-34a2-4872-858c-9b0423e50435",
+    "date_time": "2026-08-01T18:00:00+00:00",
+    "home_club_id": "trebol-de-paysandu",
+    "away_club_id": "carrasco-polo",
+    "status": "final",
+    "score": {
+      "away": 35,
+      "home": 22
+    },
+    "home_base_points": 0,
+    "away_base_points": 4,
+    "home_bonus_points": 0,
+    "away_bonus_points": 0,
+    "points_autocalculated": true,
+    "points_override_reason": null
+  },
+  {
+    "id": "3ea3ada4-b530-4419-9cf4-f85b80a0360e",
+    "phase_id": "f9d51fdd-3349-414b-8a3e-44962469ccc8",
+    "season_id": "94818e51-34a2-4872-858c-9b0423e50435",
+    "date_time": "2026-08-01T18:00:00+00:00",
+    "home_club_id": "champagnat",
+    "away_club_id": "lobos-pde",
+    "status": "final",
+    "score": {
+      "away": 15,
+      "home": 20
+    },
+    "home_base_points": 4,
+    "away_base_points": 0,
+    "home_bonus_points": 0,
+    "away_bonus_points": 0,
+    "points_autocalculated": true,
+    "points_override_reason": null
+  },
+  {
+    "id": "42704297-77e7-4412-954f-2f083e38d4be",
+    "phase_id": "f9d51fdd-3349-414b-8a3e-44962469ccc8",
+    "season_id": "94818e51-34a2-4872-858c-9b0423e50435",
+    "date_time": "2026-08-01T18:00:00+00:00",
+    "home_club_id": "circulo-de-tenis",
+    "away_club_id": "psg",
+    "status": "final",
+    "score": {
+      "away": 16,
+      "home": 13
+    },
+    "home_base_points": 0,
+    "away_base_points": 4,
+    "home_bonus_points": 0,
+    "away_bonus_points": 0,
+    "points_autocalculated": true,
+    "points_override_reason": null
+  },
+  {
+    "id": "4cf53a01-54d0-4ecd-abf3-c5efd21a0fd5",
+    "phase_id": "f9d51fdd-3349-414b-8a3e-44962469ccc8",
+    "season_id": "94818e51-34a2-4872-858c-9b0423e50435",
+    "date_time": "2026-08-08T18:00:00+00:00",
+    "home_club_id": "carrasco-polo",
+    "away_club_id": "los-cuervos",
+    "status": "final",
+    "score": {
+      "away": 24,
+      "home": 12
+    },
+    "home_base_points": 0,
+    "away_base_points": 4,
+    "home_bonus_points": 0,
+    "away_bonus_points": 0,
+    "points_autocalculated": true,
+    "points_override_reason": null
+  },
+  {
+    "id": "1de576b9-a836-4268-8647-3aa6f055ee56",
+    "phase_id": "f9d51fdd-3349-414b-8a3e-44962469ccc8",
+    "season_id": "94818e51-34a2-4872-858c-9b0423e50435",
+    "date_time": "2026-08-08T18:00:00+00:00",
+    "home_club_id": "ceibos-club",
+    "away_club_id": "old-christians-club",
+    "status": "final",
+    "score": {
+      "away": 26,
+      "home": 0
+    },
+    "home_base_points": 0,
+    "away_base_points": 4,
+    "home_bonus_points": 0,
+    "away_bonus_points": 0,
+    "points_autocalculated": true,
+    "points_override_reason": null
+  },
+  {
+    "id": "a5f57786-127b-4074-903b-55cfe3222b61",
+    "phase_id": "f9d51fdd-3349-414b-8a3e-44962469ccc8",
+    "season_id": "94818e51-34a2-4872-858c-9b0423e50435",
+    "date_time": "2026-08-08T18:00:00+00:00",
+    "home_club_id": "champagnat",
+    "away_club_id": "trebol-de-paysandu",
+    "status": "final",
+    "score": {
+      "away": 13,
+      "home": 19
+    },
+    "home_base_points": 4,
+    "away_base_points": 0,
+    "home_bonus_points": 0,
+    "away_bonus_points": 0,
+    "points_autocalculated": true,
+    "points_override_reason": null
+  },
+  {
+    "id": "2d6ecdee-d083-43a4-b437-ce434dc9caa3",
+    "phase_id": "f9d51fdd-3349-414b-8a3e-44962469ccc8",
+    "season_id": "94818e51-34a2-4872-858c-9b0423e50435",
+    "date_time": "2026-08-08T18:00:00+00:00",
+    "home_club_id": "circulo-de-tenis",
+    "away_club_id": "club-seminario",
+    "status": "final",
+    "score": {
+      "away": 19,
+      "home": 14
+    },
+    "home_base_points": 0,
+    "away_base_points": 4,
+    "home_bonus_points": 0,
+    "away_bonus_points": 0,
+    "points_autocalculated": true,
+    "points_override_reason": null
+  },
+  {
+    "id": "cffaab64-118f-495e-909c-4961b719021e",
+    "phase_id": "f9d51fdd-3349-414b-8a3e-44962469ccc8",
+    "season_id": "94818e51-34a2-4872-858c-9b0423e50435",
+    "date_time": "2026-08-08T18:00:00+00:00",
+    "home_club_id": "lobos-pde",
+    "away_club_id": "psg",
+    "status": "final",
+    "score": {
+      "away": 14,
+      "home": 27
+    },
+    "home_base_points": 4,
+    "away_base_points": 0,
+    "home_bonus_points": 0,
+    "away_bonus_points": 0,
+    "points_autocalculated": true,
+    "points_override_reason": null
+  },
+  {
+    "id": "bdc5e71f-fe32-4a66-a623-e335d045463d",
+    "phase_id": "f9d51fdd-3349-414b-8a3e-44962469ccc8",
+    "season_id": "94818e51-34a2-4872-858c-9b0423e50435",
+    "date_time": "2026-08-08T18:00:00+00:00",
+    "home_club_id": "montevideo-c-c",
+    "away_club_id": "old-boys-girls-club",
+    "status": "final",
+    "score": {
+      "away": 46,
+      "home": 33
+    },
+    "home_base_points": 0,
+    "away_base_points": 4,
+    "home_bonus_points": 0,
+    "away_bonus_points": 0,
+    "points_autocalculated": true,
+    "points_override_reason": null
+  }
+]

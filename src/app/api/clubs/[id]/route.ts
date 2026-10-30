@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { canManageClubContext, getClubManagementTarget, requireUserAccessContext } from '@/lib/auth/permissions';
-import { EDIT_MEMBERSHIP_ROLES } from '@/lib/auth/roles';
+import { ADMIN_ONLY_MEMBERSHIP_ROLES, EDIT_MEMBERSHIP_ROLES } from '@/lib/auth/roles';
 import { syncClubLogoToExternalSources } from '@/lib/server/clubLogoExternalSync';
 import { persistClubLogo } from '@/lib/server/persistClubLogo';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -12,10 +12,16 @@ function err(message: string, status: number, details?: unknown) {
     return NextResponse.json({ error: message, details: details ?? null }, { status });
 }
 
+/**
+ * `allowed`: editor o más (edita nombre, colores, escudo, redes).
+ * `isClubAdmin`: admin del club, de su familia, unión o deporte, o admin
+ * global. Solo él publica/oculta, cambia la unión o el slug, y borra el club.
+ * Antes un editor hacía todo eso.
+ */
 async function resolvePermission(
     supabase: Awaited<ReturnType<typeof createClient>>,
     clubId: string
-): Promise<{ userId: string; allowed: boolean } | null> {
+): Promise<{ userId: string; allowed: boolean; isClubAdmin: boolean } | null> {
     const context = await requireUserAccessContext(supabase).catch(() => null);
     if (!context) return null;
 
@@ -24,8 +30,16 @@ async function resolvePermission(
     return {
         userId: context.userId,
         allowed: Boolean(target && canManageClubContext(context, target, EDIT_MEMBERSHIP_ROLES)),
+        isClubAdmin: Boolean(
+            target &&
+            !context.userId.startsWith('guest:') &&
+            canManageClubContext(context, target, ADMIN_ONLY_MEMBERSHIP_ROLES)
+        ),
     };
 }
+
+/** Campos que cambian quién ve el club o dónde está: solo admin. */
+const SENSITIVE_FIELDS = ['union_id', 'slug', 'is_visible'];
 
 // El sitio web y las redes NO son columnas de `clubs`: viven en `club_profile`,
 // una fila por club. Mandarlas en el update de `clubs` no fallaba solo ese campo,
@@ -113,6 +127,15 @@ export async function PATCH(
         if (field in body) updates[field] = body[field];
     }
 
+    const sensitive = SENSITIVE_FIELDS.filter((field) => field in updates);
+    if (sensitive.length > 0 && !perm.isClubAdmin) {
+        return err(
+            'Solo un admin del club puede cambiar la visibilidad, la unión o la dirección del club.',
+            403,
+            { fields: sensitive },
+        );
+    }
+
     const profileUpdates: Record<string, unknown> = {};
     for (const [field, column] of Object.entries(PROFILE_FIELD_MAP)) {
         if (!(field in body)) continue;
@@ -143,6 +166,10 @@ export async function PATCH(
     let logoWarning: string | undefined;
     if ('logo_url' in updates) {
         const persisted = await persistClubLogo(id, updates.logo_url, { supabaseClient: adminClient() });
+        if (persisted.origin === 'rejected') {
+            // No se pisa el escudo actual con un archivo que no es imagen.
+            return err(persisted.warning || 'El escudo no es una imagen válida.', 400);
+        }
         updates.logo_url = persisted.url;
         logoWarning = persisted.warning;
     }
@@ -204,7 +231,10 @@ export async function PATCH(
         if (error?.code === '23505' && error.message.includes('slug')) {
             return err('El slug ya está en uso. Elegí uno diferente.', 409);
         }
-        if (error) return err('Error al actualizar club', 500, error.message);
+        if (error) {
+            console.error('[api/clubs/[id]][PATCH]', error);
+            return err('Error al actualizar club', 500);
+        }
     }
 
     // El permiso ya se resolvió arriba; el perfil se escribe con el cliente admin
@@ -216,7 +246,8 @@ export async function PATCH(
             .upsert({ club_id: id, ...profileUpdates }, { onConflict: 'club_id' });
 
         if (profileError) {
-            return err('Error al actualizar el perfil del club', 500, profileError.message);
+            console.error('[api/clubs/[id]][PATCH] club_profile', profileError);
+            return err('Error al actualizar el perfil del club', 500);
         }
     }
 
@@ -247,13 +278,17 @@ export async function DELETE(
 
     const perm = await resolvePermission(supabase, id);
     if (!perm) return err('No autenticado', 401);
-    if (!perm.allowed) return err('Sin permisos para eliminar este club', 403);
+    // Borrar un club es de su admin (o global), no de cualquier editor.
+    if (!perm.isClubAdmin) return err('Solo un admin del club puede eliminarlo', 403);
 
     const { error } = await supabase
         .from('clubs')
         .delete()
         .eq('id', id);
 
-    if (error) return err('Error al eliminar club', 500, error.message);
+    if (error) {
+        console.error('[api/clubs/[id]][DELETE]', error);
+        return err('Error al eliminar club', 500);
+    }
     return NextResponse.json({ success: true });
 }

@@ -1,0 +1,197 @@
+<title>Tarifario G22</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<style>
+:root{
+  --paper:#FAF8F4; --surface:#FFFFFF; --surface-2:#F3F0E9;
+  --ink:#161B21; --ink-2:#4B555F; --ink-3:#7C858E;
+  --line:#DDD6C9; --line-2:#EBE6DC;
+  --accent:#0F5C68; --accent-soft:#E1EDEF; --accent-line:#9CC4CA;
+  --pos:#3C6B51; --pos-soft:#E5EFE8;
+  --warn:#8E6A14; --warn-soft:#F4ECD8;
+  --neg:#A5382B; --neg-soft:#F6E4E0;
+  --shadow:0 1px 2px rgba(22,27,33,.05),0 8px 24px -16px rgba(22,27,33,.28);
+  --ff-display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --ff-body:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --ff-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#0F1317; --surface:#151A20; --surface-2:#1C232A;
+  --ink:#EBE7DF; --ink-2:#A9B1B9; --ink-3:#7A838C;
+  --line:#2B333B; --line-2:#222A31;
+  --accent:#57B8C4; --accent-soft:#16333A; --accent-line:#2C5A63;
+  --pos:#82BA98; --pos-soft:#1A2A21;
+  --warn:#D5AB57; --warn-soft:#2C2617;
+  --neg:#DE8B7D; --neg-soft:#2D1D1A;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -16px rgba(0,0,0,.7);
+}}
+:root[data-theme="dark"]{
+  --paper:#0F1317; --surface:#151A20; --surface-2:#1C232A;
+  --ink:#EBE7DF; --ink-2:#A9B1B9; --ink-3:#7A838C;
+  --line:#2B333B; --line-2:#222A31;
+  --accent:#57B8C4; --accent-soft:#16333A; --accent-line:#2C5A63;
+  --pos:#82BA98; --pos-soft:#1A2A21;
+  --warn:#D5AB57; --warn-soft:#2C2617;
+  --neg:#DE8B7D; --neg-soft:#2D1D1A;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -16px rgba(0,0,0,.7);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--ff-body);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1000px;margin:0 auto;padding:0 22px 80px}
+h1,h2,h3{font-family:var(--ff-display);text-wrap:balance;margin:0}
+p{margin:0 0 .85em}
+a{color:var(--accent)}
+
+.mast{border-bottom:2px solid var(--ink);background:var(--surface)}
+.mast-in{max-width:1000px;margin:0 auto;padding:44px 22px 30px}
+.kicker{font-family:var(--ff-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin:0 0 14px;display:flex;gap:14px;flex-wrap:wrap}
+.kicker span:not(:first-child){color:var(--ink-3)}
+h1{font-size:clamp(34px,6vw,52px);line-height:1.02;font-weight:800;letter-spacing:-.03em}
+.dek{font-size:16px;color:var(--ink-2);max-width:60ch;margin:14px 0 0}
+
+h2{font-size:20px;font-weight:700;letter-spacing:-.015em;margin:44px 0 4px;display:flex;align-items:baseline;gap:12px}
+h2 em{font-family:var(--ff-mono);font-style:normal;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:500}
+.sub{font-family:var(--ff-mono);font-size:11.5px;color:var(--ink-3);margin:0 0 14px}
+
+.tw{overflow-x:auto;margin:0 0 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);box-shadow:var(--shadow)}
+table{border-collapse:collapse;width:100%;font-family:var(--ff-display);font-size:13.5px;line-height:1.42}
+th{text-align:left;font-family:var(--ff-mono);font-size:10px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);padding:10px 13px;background:var(--surface-2);border-bottom:1px solid var(--line);vertical-align:bottom;white-space:nowrap}
+td{padding:12px 13px;border-bottom:1px solid var(--line-2);vertical-align:top;color:var(--ink-2)}
+td:first-child{color:var(--ink);font-weight:600}
+tr:last-child td{border-bottom:none}
+.p{font-family:var(--ff-mono);font-variant-numeric:tabular-nums;white-space:nowrap;font-size:16px;font-weight:600;color:var(--ink)}
+.p small{display:block;font-size:10.5px;font-weight:400;color:var(--ink-3);letter-spacing:.04em;margin-top:2px}
+.n{font-family:var(--ff-mono);font-variant-numeric:tabular-nums;font-size:12px;white-space:nowrap}
+.ok{color:var(--pos);font-weight:600}
+
+.box{border:1px solid var(--line);border-radius:6px;padding:16px 18px;margin:18px 0;background:var(--surface)}
+.box-k{border-left:3px solid var(--accent)}
+.box-g{border-left:3px solid var(--pos)}
+.box-w{border-left:3px solid var(--neg)}
+.box h3{font-size:12.5px;font-family:var(--ff-mono);font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin:0 0 9px}
+.box>*:last-child{margin-bottom:0}
+.box ul{margin:0;padding-left:19px;font-size:15px}
+.box li{margin:0 0 .35em}
+.free{display:grid;grid-template-columns:1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:0 0 8px}
+@media(min-width:720px){.free{grid-template-columns:repeat(3,1fr)}}
+.free div{background:var(--surface);padding:15px 17px}
+.free b{display:block;font-family:var(--ff-mono);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--pos);margin-bottom:6px}
+.free span{font-size:14.5px;color:var(--ink-2);line-height:1.45}
+footer{border-top:1px solid var(--line);margin-top:48px;padding:20px 0 0;font-family:var(--ff-mono);font-size:11px;color:var(--ink-3);line-height:1.6}
+</style>
+
+<header class="mast">
+  <div class="mast-in">
+    <p class="kicker"><span>G22 Scores</span><span>Lista de precios</span><span>Agosto 2026</span></p>
+    <h1>Tarifario G22</h1>
+    <p class="dek">Todo en una página. Precios en dólares como unidad de cuenta, facturados en pesos al tipo de cambio del día; la referencia usa 1.100. El razonamiento detrás de cada número está en el manual de venta.</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+<h2>Clubes <em>según la división de su primer equipo</em></h2>
+<p class="sub">Todas las categorías y la ficha de jugador con historial van en las tres bandas.</p>
+<div class="tw"><table>
+<thead><tr><th>Banda</th><th>Quién entra</th><th>Mensual</th><th>Por temporada</th><th>Contra quién compite</th></tr></thead>
+<tbody>
+<tr>
+<td><strong>A · Alta</strong></td>
+<td>Máxima división de su unión — Top 14 URBA, Top 10 de Córdoba — o club polideportivo con más de un deporte federado</td>
+<td class="p">US$ 79<small>≈ $ 87.000</small></td>
+<td class="p">US$ 790</td>
+<td class="n">Clupik Élite <strong>101</strong> <span class="ok">−22%</span><br>Rugby Manager Plus <strong>95</strong> <span class="ok">−17%</span><br>Competize Manager <strong>88</strong> <span class="ok">−10%</span></td>
+</tr>
+<tr>
+<td><strong>B · Media</strong><br><em style="font-weight:400;color:var(--ink-3)">el objetivo</em></td>
+<td>Primera A o B de su unión. Entre 300 y 1.000 socios, algún sponsor local</td>
+<td class="p">US$ 45<small>≈ $ 50.000</small></td>
+<td class="p">US$ 450</td>
+<td class="n">Rugby Manager Básico <strong>64</strong> <span class="ok">−30%</span><br>Clupik Pro <strong>50</strong> <span class="ok">−10%</span><br>Clupik Comp. Top <strong>50</strong> <span class="ok">−10%</span></td>
+</tr>
+<tr>
+<td><strong>C · Baja</strong></td>
+<td>Divisiones de ascenso, clubes rurales, escuelas de rugby, clubes de femenino exclusivo. Menos de 300 socios</td>
+<td class="p">US$ 15<small>≈ $ 16.500</small></td>
+<td class="p">US$ 150<small>o sin cargo con contrapartida</small></td>
+<td class="n">Competize <strong>20,50</strong> <span class="ok">−27%</span><br>Score7 Pro <strong>18</strong> <span class="ok">−17%</span><br>Clupik Comp. Amateur <strong>17</strong> <span class="ok">−12%</span></td>
+</tr>
+<tr>
+<td><strong>A+ · A medida</strong></td>
+<td>Franquicia, club con tres deportes federados, más de 3.000 socios</td>
+<td class="p">A cotizar</td>
+<td class="p">—</td>
+<td class="n">No se publica</td>
+</tr>
+</tbody></table></div>
+<p class="sub">Los precios de Clupik incluyen su cargo por MercadoPago —US$ 15 en Pro y US$ 12 en Élite—, que en G22 va incluido. La banda C sin cargo se otorga a cambio de que carguen todas sus categorías todas las fechas.</p>
+
+<h2>Uniones <em>según equipos inscriptos en el torneo</em></h2>
+<p class="sub">Se cuentan equipos, no clubes: una unión de 30 clubes con seis categorías son 180 equipos. El canon cubre el torneo; cada club contrata su página aparte.</p>
+<div class="tw"><table>
+<thead><tr><th>Banda</th><th>Equipos</th><th>Por temporada</th><th>Costo por equipo</th><th>Licencias C sin cargo incluidas</th></tr></thead>
+<tbody>
+<tr><td><strong>C · Chica</strong></td><td class="n">hasta 60</td><td class="p">US$ 1.200</td><td class="n">≈ US$ 20</td><td class="n">3</td></tr>
+<tr><td><strong>B · Mediana</strong><br><em style="font-weight:400;color:var(--ink-3)">el objetivo</em></td><td class="n">61 – 200</td><td class="p">US$ 2.400</td><td class="n">≈ US$ 12</td><td class="n">6</td></tr>
+<tr><td><strong>A · Grande</strong></td><td class="n">201 – 500</td><td class="p">US$ 4.800</td><td class="n">≈ US$ 10</td><td class="n">12</td></tr>
+<tr><td><strong>A+ · URBA o federación</strong></td><td class="n">500 +</td><td class="p">US$ 6.000 – 12.000<small>a medida</small></td><td class="n">≈ US$ 8 o menos</td><td class="n">A convenir</td></tr>
+</tbody></table></div>
+<p class="sub">Implementación, capacitación y acompañamiento de la primera fecha incluidos hasta la banda A. En A+ se cotiza aparte.</p>
+
+<h2>Torneo único <em>por evento, no por temporada</em></h2>
+<p class="sub">Para seven, encuentros de infantiles, torneos de verano, cuadrangulares y copas de un fin de semana.</p>
+<div class="tw"><table>
+<thead><tr><th>Formato</th><th>Alcance</th><th>Precio</th><th>Referencia del mercado</th></tr></thead>
+<tbody>
+<tr><td><strong>Evento chico</strong></td><td>Hasta 24 equipos, hasta 30 días</td><td class="p">US$ 39</td><td class="n">Tournify € 40 ≈ <strong>43</strong> <span class="ok">−9%</span></td></tr>
+<tr><td><strong>Evento grande</strong></td><td>Equipos ilimitados, hasta 30 días</td><td class="p">US$ 89</td><td class="n">Tournify € 120 ≈ <strong>130</strong> <span class="ok">−32%</span></td></tr>
+</tbody></table></div>
+<div class="box box-g">
+<h3>La cláusula que lo convierte en piloto pago</h3>
+<p>Lo abonado por el torneo único <strong>se descuenta del plan de temporada si contratan dentro de los 90 días.</strong> Cada seven de verano deja de ser una venta chica: el club ya cargó, ya vio su página y ya tiene los datos adentro, y la conversación de marzo arranca con el producto funcionando en vez de con una demo.</p>
+</div>
+
+<h2>Siempre sin cargo</h2>
+<div class="free">
+  <div><b>El hincha</b><span>Ve todo — fixture, resultados en vivo, tabla, fichas de jugador— sin cuenta y sin registro. Nunca detrás de un login.</span></div>
+  <div><b>El club sin plan</b><span>Aparece igual en el torneo, con su resultado y su posición. Ningún club queda rehén de una decisión de la unión.</span></div>
+  <div><b>El piloto</b><span>Cuatro fechas acompañadas, sin costo. Lo que se carga queda publicado aunque después no contraten.</span></div>
+</div>
+
+<h2>Adicionales</h2>
+<div class="tw"><table>
+<thead><tr><th>Concepto</th><th>Precio</th><th>Nota</th></tr></thead>
+<tbody>
+<tr><td>Carga histórica</td><td class="p">US$ 500 – 3.000</td><td>Según profundidad y estado de las fuentes. Incluida —1 temporada— en club A y en canon de unión</td></tr>
+<tr><td>Deporte adicional en el mismo club</td><td class="p">+50%</td><td>Sobre el plan. Incluido en la banda A</td></tr>
+<tr><td>Marca blanca y dominio propio</td><td class="p">Incluido</td><td>En club A y en todo canon de unión</td></tr>
+<tr><td>Acceso API a los datos del torneo</td><td class="p">A cotizar</td><td>Para medios locales o el sitio propio de la unión</td></tr>
+<tr><td>Instalación</td><td class="p">US$ 0</td><td>No hay nada que instalar, y decirlo es un argumento</td></tr>
+<tr><td>Mantenimiento</td><td class="p">Incluido</td><td>Cobrarlo aparte lo haría parecer un desarrollo a medida</td></tr>
+<tr><td>Permanencia mínima</td><td class="p">Ninguna</td><td>Salida sin penalidad, y los datos se entregan</td></tr>
+</tbody></table></div>
+
+<h2>Las cinco reglas de esta lista</h2>
+<div class="box box-w">
+<ul>
+<li><strong>El precio sale de un criterio público, no de una negociación.</strong> La división del primer equipo y los equipos inscriptos están en el fixture. Nunca preguntes cuánto pueden pagar.</li>
+<li><strong>No se descuenta.</strong> Si un club de máxima división dice que US$ 790 es mucho, no es capacidad: es que todavía no ve el valor. Se vuelve al piloto, no al descuento.</li>
+<li><strong>No se cobra por categoría.</strong> Cobrar por categoría sube el ticket de hoy y frena que carguen juveniles, que es lo que construye el activo.</li>
+<li><strong>No se inventa un plan intermedio en la reunión.</strong> Tres bandas y ninguna más: el plan improvisado para cerrar hoy rompe la escalera para todos los que vienen.</li>
+<li><strong>«No tenemos presupuesto» casi siempre significa «no en este momento del año».</strong> Se corre la fecha, no el número.</li>
+</ul>
+</div>
+
+<div class="box box-k">
+<h3>Dónde está tu equilibrio</h3>
+<p>Costos fijos de <strong>US$ 470 por mes</strong> — Supabase 200, Vercel 150, Claude Code 100, RapidAPI 20. Con un 7% entre MercadoPago e impuestos, hacen falta <strong>US$ 505 brutos mensuales.</strong></p>
+<p><strong>Una unión mediana, dos clubes A y cuatro B</strong> son US$ 538 y ya estás en equilibrio — y todo eso entra dentro de una sola unión provincial bien trabajada. Con clubes C solos no alcanza nunca: harían falta 34. C es suministro de datos, no línea de ingreso.</p>
+</div>
+
+<footer>
+<p>Tarifario G22 Scores · Agosto 2026 · Precios en dólares, facturados en pesos al cambio del día (referencia 1.100)<br>
+Los precios de competidores son de sus páginas públicas de pricing, consultadas en agosto de 2026.<br>
+El razonamiento detrás de cada banda está en el Manual de cancha; el análisis competitivo completo, en el informe de estrategia.</p>
+</footer>
+</div>

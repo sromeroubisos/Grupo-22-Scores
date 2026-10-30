@@ -1,0 +1,87 @@
+{
+ "source": "BD UAR (bd.uar.com.ar), Goleadores",
+ "categories": [
+  {
+   "id": "points",
+   "rows": [
+    {
+     "name": "Joaquín Lamas",
+     "rank": 1,
+     "value": 180,
+     "club_id": "san-jose",
+     "club_name": "San José"
+    },
+    {
+     "name": "Elías Gabriel Álvarez Rodríguez",
+     "rank": 2,
+     "value": 159,
+     "club_id": "san-patricio",
+     "club_name": "San Patricio"
+    },
+    {
+     "name": "Ignacio Meabe",
+     "rank": 3,
+     "value": 153,
+     "club_id": "taraguy-r-c",
+     "club_name": "Taraguy R.C.",
+     "person_id": "ee5335e2-bf21-4b78-bbeb-7cd107ef200d"
+    },
+    {
+     "name": "Alfredo Gastón Fernández Bedoya",
+     "rank": 4,
+     "value": 133,
+     "club_id": "aguara",
+     "club_name": "Aguará"
+    },
+    {
+     "name": "Joaquín Mussi Sbesa",
+     "rank": 5,
+     "value": 121,
+     "club_id": "curda",
+     "club_name": "CURDA"
+    },
+    {
+     "name": "Enzo González",
+     "rank": 6,
+     "value": 113,
+     "club_id": "aranduroga-r-c",
+     "club_name": "Aranduroga R.C."
+    },
+    {
+     "name": "Octavio Luque",
+     "rank": 7,
+     "value": 90,
+     "club_id": "curne",
+     "club_name": "CURNE",
+     "person_id": "36f74a1c-e44c-412d-8cfb-03182473654d"
+    },
+    {
+     "name": "Luciano Paparo",
+     "rank": 8,
+     "value": 88,
+     "club_id": "aranduroga-r-c",
+     "club_name": "Aranduroga R.C."
+    },
+    {
+     "name": "Juan Sánchez Castelán",
+     "rank": 9,
+     "value": 82,
+     "club_id": "curne",
+     "club_name": "CURNE",
+     "person_id": "2120d9de-4803-481f-a089-3d1d36ab65be"
+    },
+    {
+     "name": "Juan Martín Meabe",
+     "rank": 10,
+     "value": 77,
+     "club_id": "taraguy-r-c",
+     "club_name": "Taraguy R.C.",
+     "person_id": "57497d97-d475-45b8-a9ef-dbfc8397bad9"
+    }
+   ],
+   "unit": "Tantos",
+   "label": "Goleadores"
+  }
+ ],
+ "captured_at": "2026-10-22"
+}

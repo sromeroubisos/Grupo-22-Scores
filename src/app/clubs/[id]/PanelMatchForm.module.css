@@ -1,0 +1,751 @@
+/* Alta de partido del club (Panel del Día y gestor de club). Hoja propia: no
+   depende de page.module.css de la ficha, así el formulario se ve igual en las
+   dos puertas. Tokens de globals.css; píldora para lo tocable, 14px para cajas.
+
+   Animación: cada movimiento dice algo. El paso que se abre crece (dónde estoy),
+   el número pasa a tilde (esto ya está), la píldora de localía se desliza (qué
+   elegí), el resumen se rearma (cómo va quedando). Nada se mueve en bucle, y con
+   "reducir movimiento" todo queda quieto. */
+
+.form {
+    --pmf-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    display: grid;
+    gap: 10px;
+    padding: 16px;
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    margin-bottom: 20px;
+    animation: pmf-rise 260ms var(--pmf-ease) both;
+}
+
+.head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 2px;
+}
+
+.title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+}
+
+/* ── Pasos ───────────────────────────────────────────────────────────── */
+
+.step {
+    border-radius: 14px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-primary);
+    scroll-margin-top: 84px;
+    transition: border-color 200ms ease, box-shadow 200ms ease;
+}
+
+.stepOpen {
+    border-color: color-mix(in srgb, var(--color-accent) 50%, var(--color-border));
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 10%, transparent);
+}
+
+.stepHead {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 56px;
+    padding: 10px 14px;
+    border: none;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.stepBadge {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-tertiary);
+    font-size: 13px;
+    font-weight: 800;
+    transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease;
+}
+
+.stepOpen .stepBadge {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+.stepDone:not(.stepOpen) .stepBadge {
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+    color: #04150d;
+}
+
+.stepCheck {
+    animation: pmf-pop 320ms var(--pmf-ease) both;
+}
+
+.stepHeadCopy {
+    display: grid;
+    gap: 1px;
+    min-width: 0;
+    flex: 1;
+}
+
+.stepTitle {
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.stepSummary {
+    font-size: 13px;
+    color: var(--color-text-secondary, var(--color-text-tertiary));
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    animation: pmf-fade 220ms ease both;
+}
+
+.stepSummary::first-letter {
+    text-transform: uppercase;
+}
+
+.stepChevron {
+    flex-shrink: 0;
+    color: var(--color-text-tertiary);
+    transition: transform 260ms var(--pmf-ease);
+}
+
+.stepOpen .stepChevron {
+    transform: rotate(180deg);
+}
+
+/* Altura animada sin medir en JS: la fila de la grilla va de 0fr a 1fr. */
+.stepBody {
+    display: grid;
+    grid-template-rows: 0fr;
+    visibility: hidden;
+    transition:
+        grid-template-rows 300ms var(--pmf-ease),
+        visibility 0s linear 300ms;
+}
+
+.stepOpen .stepBody {
+    grid-template-rows: 1fr;
+    visibility: visible;
+    transition:
+        grid-template-rows 300ms var(--pmf-ease),
+        visibility 0s linear 0s;
+}
+
+.stepInner {
+    min-height: 0;
+    overflow: hidden;
+}
+
+.stepContent {
+    display: grid;
+    gap: 12px;
+    padding: 2px 14px 16px;
+    opacity: 0;
+    transform: translateY(-6px);
+    transition: opacity 200ms ease, transform 300ms var(--pmf-ease);
+}
+
+.stepOpen .stepContent {
+    opacity: 1;
+    transform: none;
+    transition-delay: 60ms;
+}
+
+.next {
+    justify-self: end;
+    min-height: 44px;
+    padding: 0 18px;
+    border-radius: 999px;
+    border: 1px solid var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 14%, transparent);
+    color: var(--color-text-primary);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 160ms ease, transform 120ms ease;
+}
+
+.next:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--color-accent) 24%, transparent);
+}
+
+.next:disabled {
+    cursor: default;
+    border-color: var(--color-border);
+    background: transparent;
+    color: var(--color-text-tertiary);
+}
+
+/* ── Campos ──────────────────────────────────────────────────────────── */
+
+.label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-tertiary);
+}
+
+.field {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+}
+
+.fieldWide {
+    flex: 2 1 220px;
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.row > .field:first-child {
+    flex: 1 1 120px;
+}
+
+.input {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    padding: 9px 12px;
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    font: inherit;
+    font-size: 16px; /* 16px: menos y el iPhone hace zoom al enfocar */
+    transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 18%, transparent);
+}
+
+.searchField {
+    position: relative;
+}
+
+.searchIcon {
+    position: absolute;
+    left: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-text-tertiary);
+    pointer-events: none;
+}
+
+.searchInput {
+    padding-left: 38px;
+}
+
+.results {
+    display: grid;
+    gap: 6px;
+}
+
+.result {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 50px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    font: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+    animation: pmf-rise 240ms var(--pmf-ease) both;
+    transition: border-color 140ms ease, transform 120ms ease;
+}
+
+.result:hover {
+    border-color: var(--color-accent);
+}
+
+.resultMeta {
+    flex-shrink: 0;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-text-tertiary);
+}
+
+.rivalPicked {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    min-height: 50px;
+    padding: 6px 6px 6px 14px;
+    border-radius: 12px;
+    border: 1px solid color-mix(in srgb, var(--color-accent) 45%, var(--color-border));
+    background: color-mix(in srgb, var(--color-accent) 8%, var(--color-bg-secondary));
+    animation: pmf-rise 240ms var(--pmf-ease) both;
+}
+
+.rivalName {
+    min-width: 0;
+    font-size: 15px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.iconButton {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-primary);
+    color: var(--color-text-secondary, var(--color-text-tertiary));
+    cursor: pointer;
+}
+
+.iconButton:hover {
+    color: var(--color-text-primary);
+    border-color: var(--color-accent);
+}
+
+/* Localía: la píldora verde se desliza al lado elegido. */
+.segmented {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 4px;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+}
+
+.segmentThumb {
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: 4px;
+    width: calc(50% - 4px);
+    border-radius: 999px;
+    background: var(--color-accent);
+    transition: transform 320ms var(--pmf-ease);
+}
+
+.segmented[data-away='true'] .segmentThumb {
+    transform: translateX(100%);
+}
+
+.segment,
+.segmentOn {
+    position: relative;
+    z-index: 1;
+    min-height: 42px;
+    border-radius: 999px;
+    border: none;
+    background: transparent;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: color 200ms ease;
+}
+
+.segment {
+    color: var(--color-text-tertiary);
+}
+
+.segment:hover {
+    color: var(--color-text-primary);
+}
+
+.segmentOn {
+    color: #04150d;
+}
+
+.quick {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.quickChip,
+.quickOn {
+    min-height: 40px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, transform 120ms ease;
+}
+
+.quickChip {
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+}
+
+.quickChip:hover {
+    border-color: var(--color-accent);
+}
+
+.quickOn {
+    border: 1px solid var(--color-accent);
+    background: var(--color-accent);
+    color: #04150d;
+    animation: pmf-pop 260ms var(--pmf-ease);
+}
+
+.disclosure {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    min-height: 48px;
+    padding: 4px 0 0;
+    border: none;
+    border-top: 1px solid var(--color-border);
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.disclosureCopy {
+    display: grid;
+    gap: 2px;
+    padding-top: 8px;
+}
+
+.disclosureMeta {
+    font-size: 13px;
+    color: var(--color-text-secondary, var(--color-text-tertiary));
+}
+
+.chevron,
+.chevronOpen {
+    flex-shrink: 0;
+    color: var(--color-text-tertiary);
+    transition: transform 260ms var(--pmf-ease);
+}
+
+.chevronOpen {
+    transform: rotate(180deg);
+}
+
+.competition {
+    display: grid;
+    gap: 8px;
+    animation: pmf-rise 220ms var(--pmf-ease) both;
+}
+
+.inline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.inline .input {
+    flex: 1 1 200px;
+    width: auto;
+}
+
+.secondary {
+    min-height: 44px;
+    padding: 0 16px;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.secondary:disabled {
+    cursor: default;
+    color: var(--color-text-tertiary);
+}
+
+/* ── Resumen y envío ─────────────────────────────────────────────────── */
+
+.summary {
+    display: grid;
+    gap: 3px;
+    padding: 14px;
+    border-radius: 14px;
+    border: 1px dashed var(--color-border);
+}
+
+.summaryMatch {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 8px;
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.35;
+}
+
+/* Cada nombre está "keyed": cuando cambia, se vuelve a montar y entra. */
+.summaryTeam {
+    font-weight: 800;
+    color: var(--color-text-primary);
+    animation: pmf-fade 260ms ease both;
+}
+
+.summaryEmpty {
+    font-weight: 600;
+    color: var(--color-text-tertiary);
+}
+
+.summaryVs {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--color-text-tertiary);
+}
+
+.summaryMeta {
+    margin: 0;
+    font-size: 13px;
+    color: var(--color-text-secondary, var(--color-text-tertiary));
+}
+
+.summaryMeta:first-letter {
+    text-transform: uppercase;
+}
+
+.primary,
+.primaryPending {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 52px;
+    padding: 0 18px;
+    border-radius: 999px;
+    font: inherit;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease, transform 120ms ease;
+}
+
+.primary {
+    border: 1px solid var(--color-accent);
+    background: var(--color-accent);
+    color: #04150d;
+}
+
+/* Le falta algo: el botón dice qué y, al tocarlo, abre el paso que corresponde. */
+.primaryPending {
+    border: 1px dashed var(--color-border);
+    background: transparent;
+    color: var(--color-text-secondary, var(--color-text-tertiary));
+}
+
+.primary:active:not(:disabled),
+.primaryPending:active:not(:disabled),
+.next:active:not(:disabled),
+.result:active,
+.quickChip:active {
+    transform: scale(0.97);
+}
+
+.primary:disabled {
+    cursor: progress;
+    opacity: 0.85;
+}
+
+.hint {
+    margin: 0;
+    font-size: 13px;
+    color: var(--color-text-tertiary);
+}
+
+.error {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-error, #ef4444);
+    animation: pmf-shake 320ms ease;
+}
+
+.linkButton {
+    min-height: 44px;
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--color-accent);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.linkButton:hover {
+    text-decoration: underline;
+}
+
+.stepHead:focus-visible,
+.next:focus-visible,
+.result:focus-visible,
+.iconButton:focus-visible,
+.segment:focus-visible,
+.segmentOn:focus-visible,
+.quickChip:focus-visible,
+.quickOn:focus-visible,
+.disclosure:focus-visible,
+.secondary:focus-visible,
+.primary:focus-visible,
+.primaryPending:focus-visible,
+.linkButton:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+/* En el teléfono no hay caja exterior: el formulario es la pantalla, y cada
+   paso es la única tarjeta. Tres cajas una dentro de otra eran el ruido. */
+@media (max-width: 640px) {
+    .form {
+        padding: 0;
+        border: none;
+        background: transparent;
+        gap: 10px;
+    }
+
+    .stepContent {
+        padding: 2px 12px 14px;
+    }
+
+    .stepHead {
+        padding: 10px 12px;
+    }
+}
+
+@media (min-width: 768px) {
+    .form {
+        padding: 20px;
+        gap: 12px;
+    }
+
+    .primary,
+    .primaryPending {
+        width: auto;
+        justify-self: end;
+        min-width: 260px;
+    }
+}
+
+@keyframes pmf-rise {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes pmf-fade {
+    from {
+        opacity: 0;
+        transform: translateY(3px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes pmf-pop {
+    0% {
+        transform: scale(0.6);
+        opacity: 0;
+    }
+    60% {
+        transform: scale(1.12);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes pmf-shake {
+    0%, 100% { transform: none; }
+    25% { transform: translateX(-3px); }
+    75% { transform: translateX(3px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .form,
+    .result,
+    .rivalPicked,
+    .competition,
+    .stepCheck,
+    .stepSummary,
+    .summaryTeam,
+    .quickOn,
+    .error {
+        animation: none;
+    }
+
+    .step,
+    .stepBadge,
+    .stepChevron,
+    .stepBody,
+    .stepOpen .stepBody,
+    .stepContent,
+    .stepOpen .stepContent,
+    .segmentThumb,
+    .segment,
+    .segmentOn,
+    .quickChip,
+    .quickOn,
+    .chevron,
+    .chevronOpen,
+    .next,
+    .primary,
+    .primaryPending {
+        transition: none;
+    }
+
+    .primary:active:not(:disabled),
+    .primaryPending:active:not(:disabled),
+    .next:active:not(:disabled),
+    .result:active,
+    .quickChip:active {
+        transform: none;
+    }
+}

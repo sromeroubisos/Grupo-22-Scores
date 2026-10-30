@@ -1,0 +1,4 @@
+intento 1 fallo: Error: Error: server:SUPABASE:update timed out after 8000ms
+intento 2 fallo: Error: no se pudo leer Córdoba Athletic Club Preintermedia "B" vs Universidad Nacional de Córdoba Preintermedia "A" · torneo-cordobes-preintermedia-b · tarjeta 295700: Error: server:SUPABASE:select timed out after 8000ms
+intento 3 fallo: Error: no se pudo leer Córdoba Athletic Club Preintermedia "B" vs Universidad Nacional de Córdoba Preintermedia "A" · torneo-cordobes-preintermedia-b · tarjeta 295700: Error: server:SUPABASE:select timed out after 8000ms
+intento 4 fallo: Error: TypeError: fetch failed

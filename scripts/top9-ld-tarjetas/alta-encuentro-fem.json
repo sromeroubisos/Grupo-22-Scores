@@ -1,0 +1,57 @@
+{
+ "nombre": "Encuentro Femenino de Selecciones de XV 2026",
+ "slug": "encuentro-femenino-selecciones-xv-2026",
+ "origen": "encuentro-femenino-selecciones-xv-2026-tarjetas",
+ "fechaInicio": "2026-10-30",
+ "unionId": "union-argentina-de-rugby",
+ "gender": "femenino",
+ "category": "Femenino",
+ "ageGrade": "Mayores",
+ "fases": [
+  {
+   "nombre": "Zona B - Clasificación",
+   "orden": 1,
+   "clubes": [
+    "cuyo-femenino",
+    "cordobesa-femenino",
+    "tucuman-femenino"
+   ]
+  }
+ ],
+ "clubes": [
+  {
+   "id": "cuyo-femenino",
+   "corto": "Cuyo"
+  },
+  {
+   "id": "cordobesa-femenino",
+   "corto": "Cordobesa"
+  },
+  {
+   "id": "tucuman-femenino",
+   "corto": "Tucumán"
+  }
+ ],
+ "partidos": [
+  {
+   "fase": "Zona B - Clasificación",
+   "fecha": "2026-10-30",
+   "hora": "09:50",
+   "home": "cuyo-femenino",
+   "away": "cordobesa-femenino",
+   "homeScore": null,
+   "awayScore": null,
+   "cerrado": false
+  },
+  {
+   "fase": "Zona B - Clasificación",
+   "fecha": "2026-10-30",
+   "hora": "15:50",
+   "home": "cordobesa-femenino",
+   "away": "tucuman-femenino",
+   "homeScore": null,
+   "awayScore": null,
+   "cerrado": false
+  }
+ ]
+}

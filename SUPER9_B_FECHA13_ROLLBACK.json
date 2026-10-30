@@ -1,0 +1,66 @@
+[
+  {
+    "id": "415df927-d2d1-4bf3-be3b-a6383872191c",
+    "antes": {
+      "status": "scheduled",
+      "score": {
+        "away": 0,
+        "home": 0
+      },
+      "home_base_points": 0,
+      "away_base_points": 0,
+      "home_bonus_points": 0,
+      "away_bonus_points": 0,
+      "points_autocalculated": true,
+      "points_override_reason": null
+    }
+  },
+  {
+    "id": "0b616c1a-ee4d-4cf3-b2d2-2037b071053d",
+    "antes": {
+      "status": "scheduled",
+      "score": {
+        "away": 0,
+        "home": 0
+      },
+      "home_base_points": 0,
+      "away_base_points": 0,
+      "home_bonus_points": 0,
+      "away_bonus_points": 0,
+      "points_autocalculated": true,
+      "points_override_reason": null
+    }
+  },
+  {
+    "id": "8afeeeeb-c9aa-403c-abd9-d285bac9d425",
+    "antes": {
+      "status": "scheduled",
+      "score": {
+        "away": 0,
+        "home": 0
+      },
+      "home_base_points": 0,
+      "away_base_points": 0,
+      "home_bonus_points": 0,
+      "away_bonus_points": 0,
+      "points_autocalculated": true,
+      "points_override_reason": null
+    }
+  },
+  {
+    "id": "d99ff34e-f3fc-4d8d-b0ba-14e29756f840",
+    "antes": {
+      "status": "scheduled",
+      "score": {
+        "away": 0,
+        "home": 0
+      },
+      "home_base_points": 0,
+      "away_base_points": 0,
+      "home_bonus_points": 0,
+      "away_bonus_points": 0,
+      "points_autocalculated": true,
+      "points_override_reason": null
+    }
+  }
+]

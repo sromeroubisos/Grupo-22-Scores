@@ -1,0 +1,408 @@
+tarjetas con DNI: 676 · con partido: 673
+fichas con DNI: 3728 · renglones sin cruce: 1
+clubes: 99 · grupos a fusionar: 132 · fichas que sobran: 137
+grupos con DNI distinto (no se tocan): 0
+
+aero-club-rio-iv                         -> Brian Nahuel Sebastian Farini  [nombre]
+       1 Brian Nahuel Sebastián Farini            
+   *   5 Brian Nahuel Sebastian Farini            
+alta-gracia-r-c                          -> Agustin Homero Cañas  [nombre]
+       4 Agustín Homero Cañas                     
+   *   7 Agustin Homero Cañas                     
+alta-gracia-r-c                          -> Dario Sanchez  [nombre]
+       2 Darío Sanchez                            
+   *   2 Dario Sanchez                            
+alta-gracia-r-c                          -> Elías Fabricio Cuello Villarreal  [nombre]
+       6 Elias Fabricio Cuello Villarreal         
+   *   6 Elías Fabricio Cuello Villarreal         
+alta-gracia-r-c                          -> Jesús Emanuel Cena  [nombre]
+   *   8 Jesús Emanuel Cena                       
+       6 Jesus Emanuel Cena                       
+alta-gracia-r-c                          -> Joaquin Villegas  [nombre]
+       3 Joaquín Villegas                         
+   *   7 Joaquin Villegas                         
+alta-gracia-r-c                          -> Martin Flores  [nombre]
+       3 Martín Flores                            
+   *  10 Martin Flores                            
+alta-gracia-r-c                          -> Nicolas Homero Alisio  [nombre]
+   *   2 Nicolas Homero Alisio                    
+       1 Nicolás Homero Alisio                    
+baguales-r-c                             -> Gastón Ignacio San  [nombre]
+       3 Gaston Ignacio San                       
+   *  12 Gastón Ignacio San                       
+baguales-r-c                             -> Juan Agustin Vicens  [nombre]
+       2 Juan Agustín Vicens                      
+   *   9 Juan Agustin Vicens                      
+baguales-r-c                             -> Julian Octavio Bortoli  [nombre]
+   *   4 Julian Octavio Bortoli                   
+       1 Julián Octavio Bortoli                   
+c-s-la-carlota                           -> Matias Mariano Gomez  [nombre]
+       5 Matías Mariano Gómez                     
+   *   9 Matias Mariano Gomez                     
+c-s-la-carlota                           -> Nicolas Gaston Garafulic  [nombre]
+   *   8 Nicolas Gaston Garafulic                 
+       6 Nicolás Gaston Garafulic                 
+c-s-la-carlota                           -> Nicolás Facchini  [nombre]
+       3 Nicolas Facchini                         
+   *   5 Nicolás Facchini                         
+carlos-paz-rugby-club                    -> Joaquín Alejand Castillo Ceballos  [dni]
+       6 Joaquín Alejan Castillo Ceballos         46228242
+   *   7 Joaquín Alejand Castillo Ceballos        6228242
+carlos-paz-rugby-club                    -> Juan Cruz Calamita  [nombre]
+   *  17 Calamita Juan Cruz                       44369936
+       0 Juan Cruz Calamita                       
+carlos-paz-rugby-club                    -> Lautaro Nahuel Orazi  [nombre]
+   *  17 Orazi Lautaro Nahuel                     44899443
+       0 Lautaro Nahuel Orazi                     
+carlos-paz-rugby-club                    -> Lucas Bur  [nombre]
+       0 Lucas Bur                                
+   *  12 Bur Lucas                                45702324
+club-la-tablada                          -> Agustin Vucovich  [nombre]
+       0 Agustín Vucovich                         
+   *  15 Agustin Vucovich                         43997276
+club-la-tablada                          -> Agustín Basly  [nombre]
+       0 Basly Agustin                            
+   *  24 Agustín Basly                            44580029
+club-la-tablada                          -> Alfredo Pueyrredón  [nombre]
+   *  17 Alfredo Pueyrredón                       39690740
+       0 Alfredo Pueyrredon                       
+club-la-tablada                          -> Auca Nahuel Pucheta  [nombre]
+   *   4 Nahuel Auca Pucheta                      36353930
+       2 Auca Nahuel Pucheta                      
+club-la-tablada                          -> Baltazar Monforte Ortiz  [nombre]
+   *  12 Baltazar Monforte                        46587524
+       3 Baltazar Monforte Ortiz                  
+club-la-tablada                          -> Bautista Echeverria  [nombre]
+       0 Bautista Echeverría                      
+   *  24 Bautista Echeverria                      45082664
+club-la-tablada                          -> Estanislao Gómez  [nombre]
+       0 Estanislao Gomez                         
+   *   0 Estanislao Gómez                         
+club-la-tablada                          -> Facundo Gustavo Alemanno  [nombre]
+   *  16 Facundo Alemanno                         40402323
+       6 Facundo Gustavo Alemanno                 
+club-la-tablada                          -> Fausto Echeverria  [nombre]
+   *  17 Fausto Echeverria                        42641541
+       0 Fausto Echeverría                        
+club-la-tablada                          -> Federico Gutiérrez  [nombre]
+       0 Federico Gutierrez                       
+   *   0 Federico Gutiérrez                       
+club-la-tablada                          -> Gabriel Alejandro Roldán  [nombre]
+   *   3 Gabriel Alejandro Roldán                 
+       2 Gabriel Roldan                           38179410
+club-la-tablada                          -> Juan Cruz Corral  [nombre]
+   *  12 Juan Corral                              44580111
+       3 Juan Cruz Corral                         
+club-la-tablada                          -> Lorenzo Bianco Masso  [dni+nombre]
+   *   4 Lorenzo Bianco Masso                     46708553
+       2 Lorenzo Bianco                           46708553
+club-la-tablada                          -> Martín Tobal  [nombre]
+   *  20 Martín Tobal                             37853465
+       0 Martin Tobal                             
+club-la-tablada                          -> Nicolás Hitt Reyes  [dni+nombre]
+       8 Nicolas Hitt Reyes                       44348465
+   *  17 Nicolás Hitt                             44348465
+club-la-tablada                          -> Nicolás Olguín  [nombre]
+       0 Nicolas Olguin                           
+   *  17 Nicolás Olguín                           41762905
+club-la-tablada                          -> Nicolás Revol Pitt  [nombre]
+   *   9 Nicolás Revol Pitt                       42853726
+       0 Nicolas Revol Pitt                       
+club-universitario-de-cordoba            -> Agustín Novillo  [dni+nombre]
+   *  14 Novillo, Agustin                         41681356
+       7 Agustin Novillo                          41681356
+club-universitario-de-cordoba            -> Benjamín Castro  [dni+nombre]
+   *   8 Castro, Benjamin                         43614037
+       2 Benjamin Castro                          43614037
+club-universitario-de-cordoba            -> Conrado Iglesias Quintana  [dni+nombre]
+       4 Conrado Lglesias Quintana                42641768
+   *  20 Conrado Iglesias Quintana                42641768,47641768
+       0 Iglesias Quintana, Conrado               
+club-universitario-de-cordoba            -> Emir Agustín Karqui  [dni+nombre]
+       7 Emir Agustin Karqui                      40683635
+   *  15 Karqui, Emir Agustín                     40683635
+club-universitario-de-cordoba            -> Facundo Agustín Vergara  [dni+nombre]
+       7 Facundo Agustin Vergara                  43231624
+   *  13 VERGARA, facundo agustin                 43231624
+club-universitario-de-cordoba            -> Francisco Aguirre Gallardo  [dni+nombre]
+       4 Francisco Aguirre Gallardo               43884578
+   *   8 aguirre gallardo, Francisco              43884578
+club-universitario-de-cordoba            -> Francisco Aldonza  [dni+nombre]
+   *  17 Aldonza, Francisco                       44970356
+       8 Francisco Aldonza                        44970356
+club-universitario-de-cordoba            -> Galo Fernández  [dni]
+       1 Galo Femández                            46182796
+   *   6 Galo Fernández                           46182796
+club-universitario-de-cordoba            -> Ignacio Pérez Soria  [dni+nombre]
+       5 Ignacio Perez Soria                      38501732
+   *  14 Perez Soria, Ignacio                     38501732
+club-universitario-de-cordoba            -> Jerónimo Aramayo  [dni+nombre]
+       6 Jeronimo Aramayo                         42978301,472978301
+   *  10 Aramayo, Jeronimo                        42978301
+club-universitario-de-cordoba            -> Joaquín Ameijeiras  [dni+nombre]
+   *  17 ameijeiras, joaquin                      37989521
+       6 Joaquin Ameijeiras                       37989521
+club-universitario-de-cordoba            -> Joaquín Castillo  [dni+nombre]
+       8 Joaquin Castillo                         40750299
+   *  16 Castillo, Joaquin                        40750299
+club-universitario-de-cordoba            -> José Ignacio Castro  [dni+nombre]
+       6 José Ignacio Castro                      41642573
+   *  15 Castro, José Ignacio                     41642523
+club-universitario-de-cordoba            -> Juan Altamirano  [dni+nombre]
+   *  14 Altamirano, Juan                         46310946
+       5 Juan Altamirano                          46310946
+club-universitario-de-cordoba            -> Juan Cruz Menendez  [dni+nombre]
+   *  12 MENENDEZ, JUAN CRUZ                      42107226
+       6 Juan Cruz Menendez                       42107226
+club-universitario-de-cordoba            -> Lorenzo Aramayo  [dni+nombre]
+       5 Lorenzo Aramayo                          43881889
+   *  16 Aramayo, Lorenzo                         43881889
+club-universitario-de-cordoba            -> Lucas Villalba Rustichelli  [dni+nombre]
+       7 Lucas Villalba Rustichelli               44273731
+   *  15 VILLALBA RUSTICHELLI, LUCAS              44273731
+club-universitario-de-cordoba            -> Luciano Lampasona  [dni+nombre]
+   *  16 Lampasona, Luciano                       43881759
+       7 Luciano Lampasona                        43881759
+club-universitario-de-cordoba            -> Ramiro Iglesias Quintana  [dni]
+       4 Ramiro Lglesias Quintana                 40522939
+   *  13 Ramiro Iglesias Quintana                 40522939
+club-universitario-de-cordoba            -> Sabino Moras Caula  [dni+nombre]
+   *  15 Moras Caula, Sabino                      46451197
+       4 Sabino Moras Caula                       46451197
+club-universitario-de-cordoba            -> Santiago Ramírez  [dni+nombre]
+       4 Santiago Ramirez                         44274761
+   *  14 Ramirez, Santiago                        44274761
+club-universitario-de-cordoba            -> Tomás Díaz  [dni+nombre]
+       3 Tomas Diaz                               45695278
+   *   8 Diaz, Tomas                              45695278
+club-universitario-de-cordoba            -> Tomás Salva  [dni+nombre]
+   *  17 Salva, Tomas                             42641100
+       8 Tomas Salva                              42641100,47641100
+club-universitario-de-cordoba            -> Valentín D'angelo  [dni+inicial+nombre]
+       5 Valentin D'angelo                        43449319
+   *  14 D'Angelo, Valentín                       43449319
+cordoba-athletic-club                    -> Agustín Brasca  [dni+nombre]
+   *  16 Brasca Agustin                           45596264
+       7 Agustin Brasca                           45596264
+cordoba-athletic-club                    -> Constantino Keller  [dni+nombre]
+   *  14 Keller Constantino                       47265117
+       6 Constantino Keller                       47265117
+cordoba-athletic-club                    -> Estanislao Arrias  [dni+nombre]
+   *   7 Arrias Estanislao                        44152015
+       3 Estanislao Arrias                        44152015
+cordoba-athletic-club                    -> Facundo Lopez Lopez  [dni+nombre]
+       3 Facundo López Lopez                      40835765
+   *   8 Lopez Facundo                            40835765
+cordoba-athletic-club                    -> Federico Rodríguez Cirer  [dni+nombre]
+       4 Federico Rodriguez Cirer                 44897105
+   *   7 Federico Rodriguez                       44897105
+cordoba-athletic-club                    -> Felipe Acuña  [dni+nombre]
+       3 Felipe Acuña                             44653298
+   *   7 Acuña Felipe                             44653298
+cordoba-athletic-club                    -> Genaro Keller  [dni+nombre]
+   *  16 Keller Genaro                            44828022
+       6 Genaro Keller                            44828022
+cordoba-athletic-club                    -> Juan Segundo Villa  [dni+nombre]
+       5 Juan Segundo Villa                       43138195
+   *  11 Villa Juan Segundo                       43138195
+cordoba-athletic-club                    -> Luciano Keller  [dni+nombre]
+   *  15 Keller Luciano                           41888514
+       6 Luciano Keller                           41888514
+cordoba-athletic-club                    -> Mateo Sanchez Mauro  [dni+nombre]
+   *   8 Mateo Sanchez                            41711272
+       4 Mateo Sanchez Mauro                      41711272
+cordoba-athletic-club                    -> Rogelio Quiroga  [nombre]
+   *  12 Quiroga Rogelio                          42895929
+       5 Rogelio Quiroga                          47895979
+cordoba-athletic-club                    -> Tomás Agustín Fitte  [dni+nombre]
+       5 Tomas Agustin Fitte                      45486394
+   *  11 Agustín Fitte                            45486394
+curne                                    -> Ignacio Sebastian Biscay  [dni]
+   *   4 Ignacio Sebastian Biscay                 32062753
+       1 Lgnacio Sebastian Biscay                 32062753
+curne                                    -> Máximo Luliano  [dni]
+   *   3 Máximo Luliano                           45371372
+       1 Máximo Iuliano                           45371372
+estudiantes-de-parana                    -> Juan Manuel Lescano  [inicial]
+       1 Juan M. Lescano                          
+   *   2 Juan Manuel Lescano                      
+jockey-club-cordoba                      -> Facundo Rodríguez  [nombre]
+       0 Facundo Rodriguez                        
+   *  13 Facundo Rodríguez                        46846259,46846759
+jockey-club-cordoba                      -> Genaro Merola Moreschi  [dni+nombre]
+       6 Genaro Merola Moreschi                   44719439
+   *  14 Genaro Merola                            44719439
+jockey-club-cordoba                      -> Juan Ignacio Ludueña Fassi  [dni+nombre]
+   *  13 Juan Ludueña                             42108654
+       8 Juan Ignacio Ludueña Fassi               42108654,472108654
+jockey-club-cordoba                      -> Juan Manuel Freytes Echenique  [dni]
+       2 Juan Manue Freytes Echenique             46450227
+   *   6 Juan Manuel Freytes Echenique            46450227
+jockey-club-cordoba                      -> Lautaro Esteban Ramírez Juncos  [nombre]
+       8 Lautaro Esteban Ramirez Juncos           
+   *  17 Lautaro Ramírez                          
+jockey-club-cordoba                      -> Lucas Mateo Moyano Aguirre  [dni+nombre]
+   *  12 Lucas Moyano                             41050961
+       6 Lucas Mateo Moyano Aguirre               41050961
+jockey-club-cordoba                      -> Segura Agustín  [dni+nombre]
+   *   5 Agustín Segura                           41015231
+       4 Segura Agustin                           41015231
+jockey-club-cordoba                      -> Tomás Bergero  [nombre]
+   *  11 Tomás Bergero                            42788311
+       0 Tomas Bergero                            
+jockey-club-cordoba                      -> Uriel Spósito  [nombre]
+       0 Uriel Sposito                            
+   *  22 Uriel Spósito                            46224479
+jockey-club-de-rosario                   -> Ignacio Dogliani  [dni]
+       1 Lgnacio Dogliani                         40999323
+   *   6 Ignacio Dogliani                         40999323
+jockey-club-de-rosario                   -> Juan Bautista Baronio  [nombre]
+       2 Juan Bautista Baronio                    
+   *   5 Juan Baronio                             45505559
+jockey-club-de-villa-maria               -> Iglesias Simon  [dni]
+       2 Lglesias Simon                           46851199
+   *  18 Iglesias Simon                           46851199
+los-cuervos-r-c                          -> Joaquin Ismael Morosan Bunzli  [nombre]
+       3 Joaquín Ismael Morosan Bunzli            
+   *   5 Joaquin Ismael Morosan Bunzli            
+los-cuervos-r-c                          -> Juan Manuel Aragon  [nombre]
+       3 Juan Manuel Aragón                       
+   *   6 Juan Manuel Aragon                       
+parana-rowing                            -> Franco Dall’Ava  [nombre]
+       1 Franco Dall´Ava                          
+   *   1 Franco Dall’Ava                          
+rio-tercero-r-c                          -> Nicolás Ezequiel Castelari  [nombre]
+       6 Nicolas Ezequiel Castelari               
+   *   8 Nicolás Ezequiel Castelari               
+rio-tercero-r-c                          -> Santiago Ezequiel Galvan  [nombre]
+   *  10 Santiago Ezequiel Galvan                 
+       5 Santiago Ezequiel Galván                 
+san-francisco-r-c                        -> Julian Ernesto Riva  [nombre]
+       3 Julián Ernesto Riva                      
+   *  10 Julian Ernesto Riva                      
+san-francisco-r-c                        -> Matias Cejas  [nombre]
+   *   6 Matias Cejas                             
+       3 Matías Cejas                             
+san-francisco-r-c                        -> Roman Andrés Pérez Cervetto  [nombre]
+   *  11 Roman Andrés Pérez Cervetto              
+       4 Román Andrés Pérez Cervetto              
+san-francisco-r-c                        -> Valentin Santino Garay  [nombre]
+       4 Valentín Santino Garay                   
+   *   7 Valentin Santino Garay                   
+santa-rosa-r-c-c                         -> Alexis Agustin Maldonado  [nombre]
+   *   7 Alexis Agustin Maldonado                 
+       3 Alexis Agustín Maldonado                 
+santa-rosa-r-c-c                         -> Matias Benjamin Herrera  [nombre]
+   *  11 Matias Benjamin Herrera                  
+       2 Matías Benjamin Herrera                  
+tala-rugby-club                          -> Facundo Nicolás Ortiz  [dni+nombre]
+       7 Facundo Nicolas Ortiz                    447720569
+   *  16 ORTIZ, FACUNDO NICOLAS                   44720569
+tala-rugby-club                          -> Farid Salazar  [nombre]
+   *  24 Farid Salazar                            44653493
+       0 Salazar, Farid                           
+tala-rugby-club                          -> Fausto Ferrero  [nombre]
+       1 Fausto Ferrero                           
+   *   2 Ferrero, Fausto                          44828532
+tala-rugby-club                          -> Felipe Onnis  [dni+nombre]
+   *  13 Onnis, Felipe                            45086322
+       5 Felipe Onnis                             45086322
+tala-rugby-club                          -> Francisco Caturelli  [nombre]
+       0 Caturelli, Francisco                     
+   *  20 Francisco Caturelli                      44653890
+tala-rugby-club                          -> Gerónimo Vittar  [nombre]
+   *  23 Gerónimo Vittar                          45271434
+       0 Geronimo Vittar                          
+       0 Vittar, Geronimo                         
+tala-rugby-club                          -> Gregorio Hernández Cardinali  [dni+nombre]
+   *  14 Hernandez Cardinali, Gregorio            43811844
+       8 Gregorio Hernandez Cardinali             43811844
+tala-rugby-club                          -> Hilario Fernández Frontera  [dni+nombre]
+   *  10 Fernandez Frontera, Hilario              42160834
+       2 Hilario Femandez Frontera                47160834
+       2 Hilario Fernandez Frontera               
+tala-rugby-club                          -> Ignacio Díaz Centeno  [dni+nombre]
+   *  17 Diaz Centeno, Ignacio                    45932597
+       8 Ignacio Diaz Centeno                     45932597
+tala-rugby-club                          -> Ignacio Giaimo  [nombre]
+       0 Giaimo, ignacio                          
+   *  19 Ignacio Giaimo                           43812122
+tala-rugby-club                          -> Ignacio de Vértiz  [nombre]
+       0 Ignacio De Vertiz                        
+       0 De vertiz, Ignacio                       
+   *  23 Ignacio de Vértiz                        45833376
+tala-rugby-club                          -> Juan Ignacio Pérez Jaime  [dni+nombre]
+   *   5 Juan Pérez Jaime                         44474727
+       2 Juan Ignacio Perez Jaime                 44474727
+tala-rugby-club                          -> Julián Escanilla  [nombre]
+   *  22 Julián Escanilla                         46034304
+       0 escanilla, julian                        
+tala-rugby-club                          -> Lautaro Szkuhra  [nombre]
+       0 Szkuhra, Lautaro                         
+   *  16 Lautaro Szkuhra                          45260060
+tala-rugby-club                          -> Lucas Bredanini  [nombre]
+       0 Bredanini, Lucas                         
+   *  25 Lucas Bredanini                          44192726,44192776
+tala-rugby-club                          -> Luciano Agustin Avaca  [dni+inicial+nombre]
+       3 Luciano Avaca                            47353269
+       0 Avaca L                                  
+   *   3 Luciano Agustin Avaca                    47353269
+tala-rugby-club                          -> Manuel Arroyo  [nombre]
+   *  20 Manuel Arroyo                            42979960,472979960
+       0 Arroyo, Manuel                           
+tala-rugby-club                          -> Manuel Giannantonio  [nombre]
+   *  13 Manuel Giannantonio                      51706927
+       0 Giannantonio, Manuel                     
+tala-rugby-club                          -> Mateo Cajal  [nombre]
+       0 Cajal, Mateo                             
+   *  24 Mateo Cajal                              41711029
+tala-rugby-club                          -> Mauricio Kember  [nombre]
+   *  18 Mauricio Kember                          44192622
+       0 Kember, Mauricio                         
+tala-rugby-club                          -> Pedro Cajal  [nombre]
+   *  18 Pedro Cajal                              43370466
+       0 Cajal, Pedro                             
+tala-rugby-club                          -> Ramiro Agustín Farías Vivas  [dni+nombre]
+   *   5 Agustín Farías Vivas                     43271166
+       2 Ramiro Agustin Farias Vivas              43271166
+tala-rugby-club                          -> Salvador Ortiz  [nombre]
+       0 ORTIZ, SALVADOR                          
+   *  16 Salvador Ortiz                           47263824
+tala-rugby-club                          -> Tomás Acevedo Ferreyra  [dni+nombre]
+       3 Tomás Acevedo Ferreyra                   40416339
+   *   7 Acevedo Ferreyra, Tomás                  40416339
+tala-rugby-club                          -> Valentín Soler Filloy  [nombre]
+   *  21 Valentín Soler Filloy                    45833550
+       0 Soler Filloy, Valentin                   
+tigres-r-c                               -> Nicolás Terán Terán Frías  [nombre]
+   *   4 Nicolás Terán Terán Frías                45580490
+       0 Nicolas Teran Frias                      
+tigres-r-c                               -> Ricardo Gauna Martin  [nombre]
+   *   2 Ricardo Gauna Martin                     
+       0 Martin Ricardo Gauna                     
+uru-cure-rugby-club                      -> Gonzalo Losada  [inicial]
+       0 Losada G                                 
+   *  24 Gonzalo Losada                           45351835
+uru-cure-rugby-club                      -> Horacio De La Mota Boehler  [dni+nombre]
+   *  15 De la Mota                               39394990
+       6 Horacio De La Mota Boehler               39394990
+uru-cure-rugby-club                      -> Ignacio Gabriel Farías Decarlini  [dni]
+   *  10 Ignacio Gabriel Farías Decarlini         44192336
+       6 Lgnacio Gabriel Farias Decarlini         44192336,441972336
+uru-cure-rugby-club                      -> Ignacio Raul Abrile  [dni]
+       4 Lgnacio Raul Abrile                      47464769
+   *  17 Ignacio Raul Abrile                      47464769
+uru-cure-rugby-club                      -> Juan Ignacio Guerrieri  [inicial]
+       0 Guerrieri J                              
+   *  15 Juan Ignacio Guerrieri                   47253351
+uru-cure-rugby-club                      -> Juan Manuel de Dios Gigena Gutierrez  [nombre]
+   *  13 Juan Manuel de Dios Gigena Gutierrez     
+       6 Juan Manuel Gigena Gutierrez             8497333
+uru-cure-rugby-club                      -> Victorio Guerrieri  [inicial]
+   *  24 Victorio Guerrieri                       45484579
+       0 Guerrieri V                              
+uru-cure-rugby-club-m19-a                -> Manuel Capriglioni  [dni]
+   *   7 Manuel Capriglioni                       48601418
+       1 Manuel Caprigliani                       48601418
+
+── CONFLICTOS (DNI distinto) ──

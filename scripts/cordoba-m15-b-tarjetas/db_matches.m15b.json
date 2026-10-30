@@ -1,0 +1,3164 @@
+[
+ {
+  "id": "3593b985-980d-445b-8190-b35ef5bd744f",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-03-14T00:00:00+00:00",
+  "home_club_id": "jockey-club-cordoba-m15-b",
+  "away_club_id": "tala-rugby-club-m15-b",
+  "score": {
+   "away": 0,
+   "home": 8
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba M15 \"B\"",
+  "a": "Tala Rugby Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 8,
+  "sa": 0,
+  "fecha": "2026-03-13"
+ },
+ {
+  "id": "2cc3aba7-2635-4aa0-880d-3a77d900b20d",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-03-14T13:00:00+00:00",
+  "home_club_id": "tala-rugby-club-m15-c",
+  "away_club_id": "club-la-tablada-m15-c",
+  "score": {
+   "away": 19,
+   "home": 21
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club M15 \"C\"",
+  "a": "Club La Tablada M15 \"C\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 21,
+  "sa": 19,
+  "fecha": "2026-03-14"
+ },
+ {
+  "id": "b12e0690-ff0e-44fe-b204-934707b66248",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-03-14T15:30:00+00:00",
+  "home_club_id": "cordoba-athletic-club-m15-b",
+  "away_club_id": "club-universitario-de-cordoba-m15-b",
+  "score": {
+   "away": 7,
+   "home": 62
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club M15 \"B\"",
+  "a": "Club Universitario de Córdoba M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 62,
+  "sa": 7,
+  "fecha": "2026-03-14"
+ },
+ {
+  "id": "9b5aef1c-82b8-45f1-bacf-90255b4c193f",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-03-14T15:30:00+00:00",
+  "home_club_id": "club-la-tablada-m15-b",
+  "away_club_id": "jockey-club-cordoba-m15-c",
+  "score": {
+   "away": 0,
+   "home": 129
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club La Tablada M15 \"B\"",
+  "a": "Jockey Club Córdoba M15 \"C\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 129,
+  "sa": 0,
+  "fecha": "2026-03-14"
+ },
+ {
+  "id": "f98c2f75-54d7-4fe2-ae66-ffd96ee97740",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-03-14T15:30:00+00:00",
+  "home_club_id": "uru-cure-rugby-club-m15-b",
+  "away_club_id": "san-francisco-r-c-m15-b",
+  "score": {
+   "away": 0,
+   "home": 80
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Urú Curé Rugby Club M15 \"B\"",
+  "a": "San Francisco R.C. M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 80,
+  "sa": 0,
+  "fecha": "2026-03-14"
+ },
+ {
+  "id": "8aa77270-abc2-47bb-a220-81e17978abb9",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-03-14T16:15:00+00:00",
+  "home_club_id": "cordoba-rugby-club-m15-b",
+  "away_club_id": "alta-gracia-r-c-m15-b",
+  "score": {
+   "away": 10,
+   "home": 52
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Rugby Club M15 \"B\"",
+  "a": "Alta Gracia R.C. M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 52,
+  "sa": 10,
+  "fecha": "2026-03-14"
+ },
+ {
+  "id": "753ea018-d9a1-46e1-bd94-80d0f873a3da",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-03-21T00:00:00+00:00",
+  "home_club_id": "club-palermo-bajo-m15-b",
+  "away_club_id": "jockey-club-cordoba-m15-b",
+  "score": {
+   "away": 43,
+   "home": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Palermo Bajo M15 \"B\"",
+  "a": "Jockey Club Córdoba M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 0,
+  "sa": 43,
+  "fecha": "2026-03-20"
+ },
+ {
+  "id": "e9fb043e-425e-4cc1-ae1a-33891ca8a4a8",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-03-21T13:00:00+00:00",
+  "home_club_id": "tala-rugby-club-m15-c",
+  "away_club_id": "cordoba-rugby-club-m15-b",
+  "score": {
+   "away": 34,
+   "home": 21
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club M15 \"C\"",
+  "a": "Córdoba Rugby Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 21,
+  "sa": 34,
+  "fecha": "2026-03-21"
+ },
+ {
+  "id": "1f68a56e-ab6f-40cf-84b6-2b3d28d1faee",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-03-21T14:30:00+00:00",
+  "home_club_id": "tala-rugby-club-m15-b",
+  "away_club_id": "club-universitario-de-cordoba-m15-b",
+  "score": {
+   "away": 5,
+   "home": 69
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club M15 \"B\"",
+  "a": "Club Universitario de Córdoba M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 69,
+  "sa": 5,
+  "fecha": "2026-03-21"
+ },
+ {
+  "id": "dd0efd47-2b14-4d4a-8215-1a7bc4736db8",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-03-21T15:30:00+00:00",
+  "home_club_id": "uru-cure-rugby-club-m15-b",
+  "away_club_id": "cordoba-athletic-club-m15-b",
+  "score": {
+   "away": 31,
+   "home": 27
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Urú Curé Rugby Club M15 \"B\"",
+  "a": "Córdoba Athletic Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 27,
+  "sa": 31,
+  "fecha": "2026-03-21"
+ },
+ {
+  "id": "bbadd3fa-3bae-4fcc-b404-59e72c1f0dba",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-03-21T16:00:00+00:00",
+  "home_club_id": "baguales-r-c-m15-b",
+  "away_club_id": "club-la-tablada-m15-b",
+  "score": {
+   "away": 33,
+   "home": 12
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Baguales R.C. M15 \"B\"",
+  "a": "Club La Tablada M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 12,
+  "sa": 33,
+  "fecha": "2026-03-21"
+ },
+ {
+  "id": "021a0c24-a0eb-418e-9bc1-48d530bf08a0",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-03-21T16:00:00+00:00",
+  "home_club_id": "jockey-club-cordoba-m15-c",
+  "away_club_id": "san-francisco-r-c-m15-b",
+  "score": {
+   "away": 34,
+   "home": 14
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba M15 \"C\"",
+  "a": "San Francisco R.C. M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 14,
+  "sa": 34,
+  "fecha": "2026-03-21"
+ },
+ {
+  "id": "2c424da5-8475-405d-a9c8-16d2efbc8116",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-03-21T16:00:00+00:00",
+  "home_club_id": "club-la-tablada-m15-c",
+  "away_club_id": "alta-gracia-r-c-m15-b",
+  "score": {
+   "away": 0,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club La Tablada M15 \"C\"",
+  "a": "Alta Gracia R.C. M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 28,
+  "sa": 0,
+  "fecha": "2026-03-21"
+ },
+ {
+  "id": "2b715f67-797f-4049-ae71-dbab8f5a8c95",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-03-28T13:45:00+00:00",
+  "home_club_id": "tala-rugby-club-m15-c",
+  "away_club_id": "jockey-club-cordoba-m15-c",
+  "score": {
+   "away": 26,
+   "home": 21
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club M15 \"C\"",
+  "a": "Jockey Club Córdoba M15 \"C\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 21,
+  "sa": 26,
+  "fecha": "2026-03-28"
+ },
+ {
+  "id": "492e4170-e58e-4b0f-b6d2-cb2d99f4b3ce",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-03-28T14:00:00+00:00",
+  "home_club_id": "club-la-tablada-m15-c",
+  "away_club_id": "cordoba-rugby-club-m15-b",
+  "score": {
+   "away": 64,
+   "home": 17
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club La Tablada M15 \"C\"",
+  "a": "Córdoba Rugby Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 17,
+  "sa": 64,
+  "fecha": "2026-03-28"
+ },
+ {
+  "id": "ca6626e2-83e3-4d66-a713-ad94b8f2b3ef",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-03-28T14:30:00+00:00",
+  "home_club_id": "club-universitario-de-cordoba-m15-b",
+  "away_club_id": "club-palermo-bajo-m15-b",
+  "score": {
+   "away": 10,
+   "home": 47
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Universitario de Córdoba M15 \"B\"",
+  "a": "Club Palermo Bajo M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 47,
+  "sa": 10,
+  "fecha": "2026-03-28"
+ },
+ {
+  "id": "b84df6ca-e2e3-4a90-a3e6-01c68c2b72c0",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-03-28T15:30:00+00:00",
+  "home_club_id": "club-la-tablada-m15-b",
+  "away_club_id": "uru-cure-rugby-club-m15-b",
+  "score": {
+   "away": 14,
+   "home": 37
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club La Tablada M15 \"B\"",
+  "a": "Urú Curé Rugby Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 37,
+  "sa": 14,
+  "fecha": "2026-03-28"
+ },
+ {
+  "id": "7d30cefa-d905-478d-9923-c0b1850031be",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-03-28T16:00:00+00:00",
+  "home_club_id": "cordoba-athletic-club-m15-b",
+  "away_club_id": "tala-rugby-club-m15-b",
+  "score": {
+   "away": 33,
+   "home": 51
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club M15 \"B\"",
+  "a": "Tala Rugby Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 51,
+  "sa": 33,
+  "fecha": "2026-03-28"
+ },
+ {
+  "id": "7c9cde6a-577b-4707-9745-e436a0662261",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-03-28T16:15:00+00:00",
+  "home_club_id": "san-francisco-r-c-m15-b",
+  "away_club_id": "alta-gracia-r-c-m15-b",
+  "score": {
+   "away": 3,
+   "home": 55
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "San Francisco R.C. M15 \"B\"",
+  "a": "Alta Gracia R.C. M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 55,
+  "sa": 3,
+  "fecha": "2026-03-28"
+ },
+ {
+  "id": "8885f449-27a0-4d16-af8d-8c39887c6d7c",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-03-28T17:15:00+00:00",
+  "home_club_id": "jockey-club-cordoba-m15-b",
+  "away_club_id": "baguales-r-c-m15-b",
+  "score": {
+   "away": 5,
+   "home": 106
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba M15 \"B\"",
+  "a": "Baguales R.C. M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 106,
+  "sa": 5,
+  "fecha": "2026-03-28"
+ },
+ {
+  "id": "defc22a5-9fbd-4d9b-b6a4-73bc085e6888",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-04-10T22:30:00+00:00",
+  "home_club_id": "club-la-tablada-m15-c",
+  "away_club_id": "club-universitario-de-cordoba-m15-b",
+  "score": {
+   "away": 31,
+   "home": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club La Tablada M15 \"C\"",
+  "a": "Club Universitario de Córdoba M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 0,
+  "sa": 31,
+  "fecha": "2026-04-10"
+ },
+ {
+  "id": "e1cde51c-5540-4066-986f-acce8fd4ed3c",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-04-11T13:30:00+00:00",
+  "home_club_id": "alta-gracia-r-c-m15-b",
+  "away_club_id": "tala-rugby-club-m15-c",
+  "score": {
+   "away": 31,
+   "home": 10
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Alta Gracia R.C. M15 \"B\"",
+  "a": "Tala Rugby Club M15 \"C\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 10,
+  "sa": 31,
+  "fecha": "2026-04-11"
+ },
+ {
+  "id": "a06d08fe-f518-4cc1-8ec9-b1eefd04a1ec",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-04-11T14:30:00+00:00",
+  "home_club_id": "jockey-club-cordoba-m15-c",
+  "away_club_id": "jockey-club-cordoba-m15-b",
+  "score": {
+   "away": 43,
+   "home": 19
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba M15 \"C\"",
+  "a": "Jockey Club Córdoba M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 19,
+  "sa": 43,
+  "fecha": "2026-04-11"
+ },
+ {
+  "id": "65e4d02f-6eb7-47d7-80f9-a0181c7fa23e",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-04-11T16:30:00+00:00",
+  "home_club_id": "club-la-tablada-m15-b",
+  "away_club_id": "cordoba-athletic-club-m15-b",
+  "score": {
+   "away": 12,
+   "home": 43
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club La Tablada M15 \"B\"",
+  "a": "Córdoba Athletic Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 43,
+  "sa": 12,
+  "fecha": "2026-04-11"
+ },
+ {
+  "id": "3dd29c75-fa0b-4c00-9bbd-9783f7206b33",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-04-11T17:15:00+00:00",
+  "home_club_id": "san-francisco-r-c-m15-b",
+  "away_club_id": "cordoba-rugby-club-m15-b",
+  "score": {
+   "away": 24,
+   "home": 26
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "San Francisco R.C. M15 \"B\"",
+  "a": "Córdoba Rugby Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 26,
+  "sa": 24,
+  "fecha": "2026-04-11"
+ },
+ {
+  "id": "29ed02b7-a8b0-435a-99dc-f02bd4949bc2",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-04-11T18:30:00+00:00",
+  "home_club_id": "uru-cure-rugby-club-m15-b",
+  "away_club_id": "baguales-r-c-m15-b",
+  "score": {
+   "away": 5,
+   "home": 88
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Urú Curé Rugby Club M15 \"B\"",
+  "a": "Baguales R.C. M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 88,
+  "sa": 5,
+  "fecha": "2026-04-11"
+ },
+ {
+  "id": "59472cbf-aa86-4877-a73d-06decf825c97",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-04-15T23:30:00+00:00",
+  "home_club_id": "club-la-tablada-m15-c",
+  "away_club_id": "club-la-tablada-m15-b",
+  "score": {
+   "away": 45,
+   "home": 10
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club La Tablada M15 \"C\"",
+  "a": "Club La Tablada M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 10,
+  "sa": 45,
+  "fecha": "2026-04-15"
+ },
+ {
+  "id": "7b294b5e-30a1-46a3-9af1-d8ef6e7adc74",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-04-18T12:30:00+00:00",
+  "home_club_id": "cordoba-athletic-club-m15-b",
+  "away_club_id": "club-palermo-bajo-m15-b",
+  "score": {
+   "away": 5,
+   "home": 62
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club M15 \"B\"",
+  "a": "Club Palermo Bajo M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 62,
+  "sa": 5,
+  "fecha": "2026-04-18"
+ },
+ {
+  "id": "ea9b6df5-c95a-47d5-ab11-06616d6a2c92",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-04-18T13:00:00+00:00",
+  "home_club_id": "club-universitario-de-cordoba-m15-b",
+  "away_club_id": "tala-rugby-club-m15-c",
+  "score": {
+   "away": 28,
+   "home": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Universitario de Córdoba M15 \"B\"",
+  "a": "Tala Rugby Club M15 \"C\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 0,
+  "sa": 28,
+  "fecha": "2026-04-18"
+ },
+ {
+  "id": "ecb68260-5898-4111-86f1-c5a33ea8d579",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-04-18T13:00:00+00:00",
+  "home_club_id": "jockey-club-cordoba-m15-c",
+  "away_club_id": "cordoba-rugby-club-m15-b",
+  "score": {
+   "away": 54,
+   "home": 5
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba M15 \"C\"",
+  "a": "Córdoba Rugby Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 5,
+  "sa": 54,
+  "fecha": "2026-04-18"
+ },
+ {
+  "id": "9d9d63f7-20d2-40bf-bad2-9c45c295ca2d",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-04-18T14:30:00+00:00",
+  "home_club_id": "jockey-club-cordoba-m15-b",
+  "away_club_id": "uru-cure-rugby-club-m15-b",
+  "score": {
+   "away": 10,
+   "home": 40
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba M15 \"B\"",
+  "a": "Urú Curé Rugby Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 40,
+  "sa": 10,
+  "fecha": "2026-04-18"
+ },
+ {
+  "id": "966d1127-bd96-466a-b96b-65da38dcb74d",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-04-18T15:30:00+00:00",
+  "home_club_id": "alta-gracia-r-c-m15-b",
+  "away_club_id": "baguales-r-c-m15-b",
+  "score": {
+   "away": 7,
+   "home": 44
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Alta Gracia R.C. M15 \"B\"",
+  "a": "Baguales R.C. M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 44,
+  "sa": 7,
+  "fecha": "2026-04-18"
+ },
+ {
+  "id": "956736a1-24ad-4e26-91e8-b2e8bbe89b8e",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-04-18T16:00:00+00:00",
+  "home_club_id": "tala-rugby-club-m15-b",
+  "away_club_id": "san-francisco-r-c-m15-b",
+  "score": {
+   "away": 17,
+   "home": 67
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club M15 \"B\"",
+  "a": "San Francisco R.C. M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 67,
+  "sa": 17,
+  "fecha": "2026-04-18"
+ },
+ {
+  "id": "a8331135-ab8c-4580-abf6-485342fa1d68",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-04-24T00:00:00+00:00",
+  "home_club_id": "tala-rugby-club-m15-c",
+  "away_club_id": "cordoba-athletic-club-m15-b",
+  "score": {
+   "away": 31,
+   "home": 12
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club M15 \"C\"",
+  "a": "Córdoba Athletic Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 12,
+  "sa": 31,
+  "fecha": "2026-04-23"
+ },
+ {
+  "id": "6ffc0db2-a96a-4683-9927-3c1f642cbf06",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-04-24T22:00:00+00:00",
+  "home_club_id": "club-la-tablada-m15-c",
+  "away_club_id": "club-palermo-bajo-m15-b",
+  "score": {
+   "away": 24,
+   "home": 5
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club La Tablada M15 \"C\"",
+  "a": "Club Palermo Bajo M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 5,
+  "sa": 24,
+  "fecha": "2026-04-24"
+ },
+ {
+  "id": "c2e89a48-b9f5-4738-9b37-86c3a33a1076",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-04-24T23:10:00+00:00",
+  "home_club_id": "club-la-tablada-m15-b",
+  "away_club_id": "jockey-club-cordoba-m15-b",
+  "score": {
+   "away": 10,
+   "home": 27
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club La Tablada M15 \"B\"",
+  "a": "Jockey Club Córdoba M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 27,
+  "sa": 10,
+  "fecha": "2026-04-24"
+ },
+ {
+  "id": "48bb30a0-841c-4aff-aedd-320262296e06",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-04-25T13:00:00+00:00",
+  "home_club_id": "jockey-club-cordoba-m15-c",
+  "away_club_id": "alta-gracia-r-c-m15-b",
+  "score": {
+   "away": 22,
+   "home": 17
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba M15 \"C\"",
+  "a": "Alta Gracia R.C. M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 17,
+  "sa": 22,
+  "fecha": "2026-04-25"
+ },
+ {
+  "id": "05a492d4-5b49-4112-9cde-5241fc757de1",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-04-25T15:00:00+00:00",
+  "home_club_id": "cordoba-rugby-club-m15-b",
+  "away_club_id": "tala-rugby-club-m15-b",
+  "score": {
+   "away": 26,
+   "home": 24
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Rugby Club M15 \"B\"",
+  "a": "Tala Rugby Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 24,
+  "sa": 26,
+  "fecha": "2026-04-25"
+ },
+ {
+  "id": "06318cc6-57c9-4bd6-9fa3-8296c7212240",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-04-25T15:45:00+00:00",
+  "home_club_id": "baguales-r-c-m15-b",
+  "away_club_id": "san-francisco-r-c-m15-b",
+  "score": {
+   "away": 40,
+   "home": 19
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Baguales R.C. M15 \"B\"",
+  "a": "San Francisco R.C. M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 19,
+  "sa": 40,
+  "fecha": "2026-04-25"
+ },
+ {
+  "id": "b75b1ae1-92f3-4e22-b394-3df29e76b588",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-04-25T17:00:00+00:00",
+  "home_club_id": "uru-cure-rugby-club-m15-b",
+  "away_club_id": "club-universitario-de-cordoba-m15-b",
+  "score": {
+   "away": 27,
+   "home": 53
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Urú Curé Rugby Club M15 \"B\"",
+  "a": "Club Universitario de Córdoba M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 53,
+  "sa": 27,
+  "fecha": "2026-04-25"
+ },
+ {
+  "id": "6636ce6c-fb50-462f-b06c-bffaa70496bb",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-05-09T13:30:00+00:00",
+  "home_club_id": "cordoba-athletic-club-m15-b",
+  "away_club_id": "jockey-club-cordoba-m15-c",
+  "score": {
+   "away": 17,
+   "home": 50
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club M15 \"B\"",
+  "a": "Jockey Club Córdoba M15 \"C\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 50,
+  "sa": 17,
+  "fecha": "2026-05-09"
+ },
+ {
+  "id": "54a5598f-4347-4383-b252-c7b024d6db0a",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-05-09T15:00:00+00:00",
+  "home_club_id": "club-universitario-de-cordoba-m15-b",
+  "away_club_id": "club-la-tablada-m15-b",
+  "score": {
+   "away": 89,
+   "home": 5
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Universitario de Córdoba M15 \"B\"",
+  "a": "Club La Tablada M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 5,
+  "sa": 89,
+  "fecha": "2026-05-09"
+ },
+ {
+  "id": "3596314c-e8a1-4edc-98c6-4f94a3e022a0",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-05-09T15:50:00+00:00",
+  "home_club_id": "jockey-club-cordoba-m15-b",
+  "away_club_id": "alta-gracia-r-c-m15-b",
+  "score": {
+   "away": 17,
+   "home": 44
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba M15 \"B\"",
+  "a": "Alta Gracia R.C. M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 44,
+  "sa": 17,
+  "fecha": "2026-05-09"
+ },
+ {
+  "id": "60dd0ded-c9c5-448b-8561-3f777ea09d45",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-05-09T16:00:00+00:00",
+  "home_club_id": "tala-rugby-club-m15-b",
+  "away_club_id": "uru-cure-rugby-club-m15-b",
+  "score": {
+   "away": 0,
+   "home": 78
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club M15 \"B\"",
+  "a": "Urú Curé Rugby Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 78,
+  "sa": 0,
+  "fecha": "2026-05-09"
+ },
+ {
+  "id": "f01b67c7-ade7-4ac5-ad7a-4ac606c59956",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-05-09T16:00:00+00:00",
+  "home_club_id": "club-palermo-bajo-m15-b",
+  "away_club_id": "cordoba-rugby-club-m15-b",
+  "score": {
+   "away": 64,
+   "home": 17
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Palermo Bajo M15 \"B\"",
+  "a": "Córdoba Rugby Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 17,
+  "sa": 64,
+  "fecha": "2026-05-09"
+ },
+ {
+  "id": "879622e5-e29b-4322-b096-313e00a8431e",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-05-09T16:00:00+00:00",
+  "home_club_id": "san-francisco-r-c-m15-b",
+  "away_club_id": "club-la-tablada-m15-c",
+  "score": {
+   "away": 14,
+   "home": 26
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "San Francisco R.C. M15 \"B\"",
+  "a": "Club La Tablada M15 \"C\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 26,
+  "sa": 14,
+  "fecha": "2026-05-09"
+ },
+ {
+  "id": "1a3f22f6-7974-4ed9-bf4e-2507a56b6e63",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-05-09T17:30:00+00:00",
+  "home_club_id": "baguales-r-c-m15-b",
+  "away_club_id": "tala-rugby-club-m15-c",
+  "score": {
+   "away": 31,
+   "home": 52
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Baguales R.C. M15 \"B\"",
+  "a": "Tala Rugby Club M15 \"C\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 52,
+  "sa": 31,
+  "fecha": "2026-05-09"
+ },
+ {
+  "id": "090a26cb-917d-4dc6-9a69-79b8b5ddd5b3",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-05-16T15:40:00+00:00",
+  "home_club_id": "jockey-club-cordoba-m15-c",
+  "away_club_id": "club-la-tablada-m15-c",
+  "score": {
+   "away": 38,
+   "home": 12
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba M15 \"C\"",
+  "a": "Club La Tablada M15 \"C\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 12,
+  "sa": 38,
+  "fecha": "2026-05-16"
+ },
+ {
+  "id": "99fe94e6-6434-44fc-9788-1491498150cf",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-05-16T16:00:00+00:00",
+  "home_club_id": "baguales-r-c-m15-b",
+  "away_club_id": "cordoba-rugby-club-m15-b",
+  "score": {
+   "away": 40,
+   "home": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Baguales R.C. M15 \"B\"",
+  "a": "Córdoba Rugby Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 0,
+  "sa": 40,
+  "fecha": "2026-05-16"
+ },
+ {
+  "id": "c399097b-81a6-47fb-ac01-b2d715ce2807",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-05-16T17:00:00+00:00",
+  "home_club_id": "uru-cure-rugby-club-m15-b",
+  "away_club_id": "club-palermo-bajo-m15-b",
+  "score": {
+   "away": 42,
+   "home": 57
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Urú Curé Rugby Club M15 \"B\"",
+  "a": "Club Palermo Bajo M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 57,
+  "sa": 42,
+  "fecha": "2026-05-16"
+ },
+ {
+  "id": "8fc0dfbe-081a-4bda-9c38-c2b91e7ff425",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-05-16T17:30:00+00:00",
+  "home_club_id": "club-la-tablada-m15-b",
+  "away_club_id": "tala-rugby-club-m15-b",
+  "score": {
+   "away": 7,
+   "home": 12
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club La Tablada M15 \"B\"",
+  "a": "Tala Rugby Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 12,
+  "sa": 7,
+  "fecha": "2026-05-16"
+ },
+ {
+  "id": "e39a9581-8293-4c48-8957-7631d1d3f3a9",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-05-16T17:30:00+00:00",
+  "home_club_id": "san-francisco-r-c-m15-b",
+  "away_club_id": "tala-rugby-club-m15-c",
+  "score": {
+   "away": 0,
+   "home": 97
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "San Francisco R.C. M15 \"B\"",
+  "a": "Tala Rugby Club M15 \"C\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 97,
+  "sa": 0,
+  "fecha": "2026-05-16"
+ },
+ {
+  "id": "7d44fac2-8c81-48a8-a99c-133bfba0b555",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-05-16T18:20:00+00:00",
+  "home_club_id": "jockey-club-cordoba-m15-b",
+  "away_club_id": "cordoba-athletic-club-m15-b",
+  "score": {
+   "away": 12,
+   "home": 22
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba M15 \"B\"",
+  "a": "Córdoba Athletic Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 22,
+  "sa": 12,
+  "fecha": "2026-05-16"
+ },
+ {
+  "id": "e72c2d7b-ff39-4ce1-94f7-aabdd2c9eb01",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-05-30T13:30:00+00:00",
+  "home_club_id": "jockey-club-cordoba-m15-c",
+  "away_club_id": "uru-cure-rugby-club-m15-b",
+  "score": {
+   "away": 22,
+   "home": 22
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba M15 \"C\"",
+  "a": "Urú Curé Rugby Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 22,
+  "sa": 22,
+  "fecha": "2026-05-30"
+ },
+ {
+  "id": "7fa47745-a15b-4ede-875b-547d811af50a",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-05-30T13:30:00+00:00",
+  "home_club_id": "tala-rugby-club-m15-b",
+  "away_club_id": "tala-rugby-club-m15-c",
+  "score": {
+   "away": 19,
+   "home": 69
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club M15 \"B\"",
+  "a": "Tala Rugby Club M15 \"C\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 69,
+  "sa": 19,
+  "fecha": "2026-05-30"
+ },
+ {
+  "id": "080cbaaa-38a8-4e0c-8b16-5861a3b7aaa4",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-05-30T13:30:00+00:00",
+  "home_club_id": "alta-gracia-r-c-m15-b",
+  "away_club_id": "cordoba-rugby-club-m15-b",
+  "score": {
+   "away": 37,
+   "home": 10
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Alta Gracia R.C. M15 \"B\"",
+  "a": "Córdoba Rugby Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 10,
+  "sa": 37,
+  "fecha": "2026-05-30"
+ },
+ {
+  "id": "b8f25ca5-9779-404b-a344-8173eb44c12e",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-05-30T14:00:00+00:00",
+  "home_club_id": "club-palermo-bajo-m15-b",
+  "away_club_id": "club-la-tablada-m15-b",
+  "score": {
+   "away": 134,
+   "home": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Palermo Bajo M15 \"B\"",
+  "a": "Club La Tablada M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 0,
+  "sa": 134,
+  "fecha": "2026-05-30"
+ },
+ {
+  "id": "374a830f-b672-40db-982e-934ba8414f95",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-05-30T16:30:00+00:00",
+  "home_club_id": "club-universitario-de-cordoba-m15-b",
+  "away_club_id": "jockey-club-cordoba-m15-b",
+  "score": {
+   "away": 32,
+   "home": 7
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Universitario de Córdoba M15 \"B\"",
+  "a": "Jockey Club Córdoba M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 7,
+  "sa": 32,
+  "fecha": "2026-05-30"
+ },
+ {
+  "id": "f9c09190-ad56-4d0e-a989-3df82f786d4c",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-05-30T16:45:00+00:00",
+  "home_club_id": "baguales-r-c-m15-b",
+  "away_club_id": "club-la-tablada-m15-c",
+  "score": {
+   "away": 31,
+   "home": 17
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Baguales R.C. M15 \"B\"",
+  "a": "Club La Tablada M15 \"C\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 17,
+  "sa": 31,
+  "fecha": "2026-05-30"
+ },
+ {
+  "id": "2294606d-c3fc-4004-bf86-57be2ff298f9",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-05-30T17:00:00+00:00",
+  "home_club_id": "cordoba-athletic-club-m15-b",
+  "away_club_id": "san-francisco-r-c-m15-b",
+  "score": {
+   "away": 21,
+   "home": 72
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club M15 \"B\"",
+  "a": "San Francisco R.C. M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 72,
+  "sa": 21,
+  "fecha": "2026-05-30"
+ },
+ {
+  "id": "6b02e7a8-b7f5-47cf-b333-21762c5b5af7",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-06-06T12:30:00+00:00",
+  "home_club_id": "tala-rugby-club-m15-b",
+  "away_club_id": "jockey-club-cordoba-m15-b",
+  "score": {
+   "away": 35,
+   "home": 10
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club M15 \"B\"",
+  "a": "Jockey Club Córdoba M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 10,
+  "sa": 35,
+  "fecha": "2026-06-06"
+ },
+ {
+  "id": "64749393-7fbd-4268-94cf-26d06fbee9cd",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-06-06T13:30:00+00:00",
+  "home_club_id": "alta-gracia-r-c-m15-b",
+  "away_club_id": "club-la-tablada-m15-c",
+  "score": {
+   "away": 24,
+   "home": 5
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Alta Gracia R.C. M15 \"B\"",
+  "a": "Club La Tablada M15 \"C\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 5,
+  "sa": 24,
+  "fecha": "2026-06-06"
+ },
+ {
+  "id": "981824f7-68d8-46b6-b1b8-8ff2d9674bf0",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-06-06T14:30:00+00:00",
+  "home_club_id": "baguales-r-c-m15-b",
+  "away_club_id": "jockey-club-cordoba-m15-c",
+  "score": {
+   "away": 19,
+   "home": 31
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Baguales R.C. M15 \"B\"",
+  "a": "Jockey Club Córdoba M15 \"C\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 31,
+  "sa": 19,
+  "fecha": "2026-06-06"
+ },
+ {
+  "id": "bbb622e5-a178-4eb2-9b55-7c96fb40985d",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-06-06T15:30:00+00:00",
+  "home_club_id": "tala-rugby-club-m15-c",
+  "away_club_id": "club-la-tablada-m15-b",
+  "score": {
+   "away": 92,
+   "home": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club M15 \"C\"",
+  "a": "Club La Tablada M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 0,
+  "sa": 92,
+  "fecha": "2026-06-06"
+ },
+ {
+  "id": "28d68367-971c-451a-bc08-e46f5c4e1e46",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-06-06T15:30:00+00:00",
+  "home_club_id": "cordoba-rugby-club-m15-b",
+  "away_club_id": "uru-cure-rugby-club-m15-b",
+  "score": {
+   "away": 0,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Rugby Club M15 \"B\"",
+  "a": "Urú Curé Rugby Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 28,
+  "sa": 0,
+  "fecha": "2026-06-06"
+ },
+ {
+  "id": "f51223e1-f287-4023-aa4b-4b9ed3f37c2e",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-06-06T16:45:00+00:00",
+  "home_club_id": "club-palermo-bajo-m15-b",
+  "away_club_id": "san-francisco-r-c-m15-b",
+  "score": {
+   "away": 64,
+   "home": 12
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Palermo Bajo M15 \"B\"",
+  "a": "San Francisco R.C. M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 12,
+  "sa": 64,
+  "fecha": "2026-06-06"
+ },
+ {
+  "id": "1fc63599-1e9b-4d3f-b6aa-9da2739aa36a",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-06-06T17:00:00+00:00",
+  "home_club_id": "club-universitario-de-cordoba-m15-b",
+  "away_club_id": "cordoba-athletic-club-m15-b",
+  "score": {
+   "away": 54,
+   "home": 14
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Universitario de Córdoba M15 \"B\"",
+  "a": "Córdoba Athletic Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 14,
+  "sa": 54,
+  "fecha": "2026-06-06"
+ },
+ {
+  "id": "6f07f952-5090-495f-bcea-c9dff9ff76d7",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-06-20T14:20:00+00:00",
+  "home_club_id": "jockey-club-cordoba-m15-b",
+  "away_club_id": "club-palermo-bajo-m15-b",
+  "score": {
+   "away": 10,
+   "home": 75
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba M15 \"B\"",
+  "a": "Club Palermo Bajo M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 75,
+  "sa": 10,
+  "fecha": "2026-06-20"
+ },
+ {
+  "id": "4114538f-e346-4bdf-ae61-dd5cc9f8b664",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-06-20T15:20:00+00:00",
+  "home_club_id": "cordoba-rugby-club-m15-b",
+  "away_club_id": "club-la-tablada-m15-c",
+  "score": {
+   "away": 0,
+   "home": 31
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Rugby Club M15 \"B\"",
+  "a": "Club La Tablada M15 \"C\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 31,
+  "sa": 0,
+  "fecha": "2026-06-20"
+ },
+ {
+  "id": "946a5081-2581-48d9-bc74-c91860d1a48a",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-06-20T15:40:00+00:00",
+  "home_club_id": "jockey-club-cordoba-m15-c",
+  "away_club_id": "baguales-r-c-m15-b",
+  "score": {
+   "away": 19,
+   "home": 34
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba M15 \"C\"",
+  "a": "Baguales R.C. M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 34,
+  "sa": 19,
+  "fecha": "2026-06-20"
+ },
+ {
+  "id": "e5c11175-22b1-41d0-a911-73cb259b2dc7",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-06-20T16:00:00+00:00",
+  "home_club_id": "tala-rugby-club-m15-c",
+  "away_club_id": "alta-gracia-r-c-m15-b",
+  "score": {
+   "away": 26,
+   "home": 29
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club M15 \"C\"",
+  "a": "Alta Gracia R.C. M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 29,
+  "sa": 26,
+  "fecha": "2026-06-20"
+ },
+ {
+  "id": "c1ccf4aa-f19c-4598-add7-66e21e8135e3",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-06-20T17:00:00+00:00",
+  "home_club_id": "club-universitario-de-cordoba-m15-b",
+  "away_club_id": "tala-rugby-club-m15-b",
+  "score": {
+   "away": 27,
+   "home": 19
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Universitario de Córdoba M15 \"B\"",
+  "a": "Tala Rugby Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 19,
+  "sa": 27,
+  "fecha": "2026-06-20"
+ },
+ {
+  "id": "d0a10e98-005c-40f9-bee0-578866c5e610",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-06-20T17:00:00+00:00",
+  "home_club_id": "club-la-tablada-m15-b",
+  "away_club_id": "san-francisco-r-c-m15-b",
+  "score": {
+   "away": 0,
+   "home": 85
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club La Tablada M15 \"B\"",
+  "a": "San Francisco R.C. M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 85,
+  "sa": 0,
+  "fecha": "2026-06-20"
+ },
+ {
+  "id": "4549d7d2-95ac-4666-a544-62b8602a92e0",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-06-20T17:30:00+00:00",
+  "home_club_id": "cordoba-athletic-club-m15-b",
+  "away_club_id": "uru-cure-rugby-club-m15-b",
+  "score": {
+   "away": 24,
+   "home": 33
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club M15 \"B\"",
+  "a": "Urú Curé Rugby Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 33,
+  "sa": 24,
+  "fecha": "2026-06-20"
+ },
+ {
+  "id": "83c4dba5-1877-4dc0-ae43-4b4a35cbccd4",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-06-27T12:30:00+00:00",
+  "home_club_id": "tala-rugby-club-m15-b",
+  "away_club_id": "cordoba-athletic-club-m15-b",
+  "score": {
+   "away": 31,
+   "home": 34
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club M15 \"B\"",
+  "a": "Córdoba Athletic Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 34,
+  "sa": 31,
+  "fecha": "2026-06-27"
+ },
+ {
+  "id": "ec0ad52a-88ee-4760-b77a-17f612a2cdcb",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-06-27T14:00:00+00:00",
+  "home_club_id": "club-la-tablada-m15-c",
+  "away_club_id": "baguales-r-c-m15-b",
+  "score": {
+   "away": 17,
+   "home": 47
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club La Tablada M15 \"C\"",
+  "a": "Baguales R.C. M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 47,
+  "sa": 17,
+  "fecha": "2026-06-27"
+ },
+ {
+  "id": "62527b4a-b8df-42f2-a0c3-343f4539f80e",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-06-27T15:15:00+00:00",
+  "home_club_id": "cordoba-rugby-club-m15-b",
+  "away_club_id": "tala-rugby-club-m15-c",
+  "score": {
+   "away": 10,
+   "home": 74
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Rugby Club M15 \"B\"",
+  "a": "Tala Rugby Club M15 \"C\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 74,
+  "sa": 10,
+  "fecha": "2026-06-27"
+ },
+ {
+  "id": "867dcc11-c69b-4bb9-8407-9757fb9fcd22",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-06-27T15:30:00+00:00",
+  "home_club_id": "club-palermo-bajo-m15-b",
+  "away_club_id": "club-universitario-de-cordoba-m15-b",
+  "score": {
+   "away": 36,
+   "home": 33
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Palermo Bajo M15 \"B\"",
+  "a": "Club Universitario de Córdoba M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 33,
+  "sa": 36,
+  "fecha": "2026-06-27"
+ },
+ {
+  "id": "68c55fa8-4e57-4d84-a3d1-fd2a8438834d",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-06-27T16:30:00+00:00",
+  "home_club_id": "san-francisco-r-c-m15-b",
+  "away_club_id": "jockey-club-cordoba-m15-b",
+  "score": {
+   "away": 54,
+   "home": 40
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "San Francisco R.C. M15 \"B\"",
+  "a": "Jockey Club Córdoba M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 40,
+  "sa": 54,
+  "fecha": "2026-06-27"
+ },
+ {
+  "id": "06208124-75ef-4ca7-96b1-78030687a98b",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-06-27T17:00:00+00:00",
+  "home_club_id": "uru-cure-rugby-club-m15-b",
+  "away_club_id": "club-la-tablada-m15-b",
+  "score": {
+   "away": 57,
+   "home": 22
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Urú Curé Rugby Club M15 \"B\"",
+  "a": "Club La Tablada M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 22,
+  "sa": 57,
+  "fecha": "2026-06-27"
+ },
+ {
+  "id": "3bab533c-4208-44f9-949e-5be0428066cf",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-06-27T17:45:00+00:00",
+  "home_club_id": "alta-gracia-r-c-m15-b",
+  "away_club_id": "jockey-club-cordoba-m15-c",
+  "score": {
+   "away": 33,
+   "home": 31
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Alta Gracia R.C. M15 \"B\"",
+  "a": "Jockey Club Córdoba M15 \"C\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 31,
+  "sa": 33,
+  "fecha": "2026-06-27"
+ },
+ {
+  "id": "04a6d8d0-35c0-4755-9132-4707ba40d11a",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-07-24T23:00:00+00:00",
+  "home_club_id": "tala-rugby-club-m15-c",
+  "away_club_id": "uru-cure-rugby-club-m15-b",
+  "score": {
+   "away": 55,
+   "home": 17
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club M15 \"C\"",
+  "a": "Urú Curé Rugby Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 17,
+  "sa": 55,
+  "fecha": "2026-07-24"
+ },
+ {
+  "id": "79a44668-659a-4a33-9cb4-712f453d6471",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-07-25T12:30:00+00:00",
+  "home_club_id": "jockey-club-cordoba-m15-b",
+  "away_club_id": "club-la-tablada-m15-c",
+  "score": {
+   "away": 0,
+   "home": 53
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba M15 \"B\"",
+  "a": "Club La Tablada M15 \"C\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 53,
+  "sa": 0,
+  "fecha": "2026-07-25"
+ },
+ {
+  "id": "aa4439b3-9a55-40b4-a9c6-64e2cb0d27d1",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-07-25T14:00:00+00:00",
+  "home_club_id": "tala-rugby-club-m15-b",
+  "away_club_id": "club-palermo-bajo-m15-b",
+  "score": {
+   "away": 5,
+   "home": 77
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club M15 \"B\"",
+  "a": "Club Palermo Bajo M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 77,
+  "sa": 5,
+  "fecha": "2026-07-25"
+ },
+ {
+  "id": "30795155-a1ce-4794-93ef-887f9eb76eb4",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-07-25T14:00:00+00:00",
+  "home_club_id": "club-universitario-de-cordoba-m15-b",
+  "away_club_id": "baguales-r-c-m15-b",
+  "score": {
+   "away": 3,
+   "home": 68
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Universitario de Córdoba M15 \"B\"",
+  "a": "Baguales R.C. M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 68,
+  "sa": 3,
+  "fecha": "2026-07-25"
+ },
+ {
+  "id": "40d159be-fecb-4de2-b01b-2af1b35a99ac",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-07-25T15:30:00+00:00",
+  "home_club_id": "cordoba-athletic-club-m15-b",
+  "away_club_id": "club-la-tablada-m15-b",
+  "score": {
+   "away": 29,
+   "home": 10
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club M15 \"B\"",
+  "a": "Club La Tablada M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 10,
+  "sa": 29,
+  "fecha": "2026-07-25"
+ },
+ {
+  "id": "c2fa2661-bf86-4f52-be08-9ee2c65d6d81",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-07-25T15:30:00+00:00",
+  "home_club_id": "cordoba-rugby-club-m15-b",
+  "away_club_id": "jockey-club-cordoba-m15-c",
+  "score": {
+   "away": 34,
+   "home": 61
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Rugby Club M15 \"B\"",
+  "a": "Jockey Club Córdoba M15 \"C\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 61,
+  "sa": 34,
+  "fecha": "2026-07-25"
+ },
+ {
+  "id": "4b35f927-9cae-43ec-b7e8-28d308855ada",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-07-25T15:30:00+00:00",
+  "home_club_id": "alta-gracia-r-c-m15-b",
+  "away_club_id": "san-francisco-r-c-m15-b",
+  "score": {
+   "away": 38,
+   "home": 17
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Alta Gracia R.C. M15 \"B\"",
+  "a": "San Francisco R.C. M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 17,
+  "sa": 38,
+  "fecha": "2026-07-25"
+ },
+ {
+  "id": "7c27b265-eb1e-45ce-a726-707baf8ac76d",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-08-01T12:30:00+00:00",
+  "home_club_id": "club-la-tablada-m15-c",
+  "away_club_id": "tala-rugby-club-m15-c",
+  "score": {
+   "away": 12,
+   "home": 45
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club La Tablada M15 \"C\"",
+  "a": "Tala Rugby Club M15 \"C\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 45,
+  "sa": 12,
+  "fecha": "2026-08-01"
+ },
+ {
+  "id": "2a5e387a-c82f-4241-b0dc-c229cdde8589",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-08-01T14:00:00+00:00",
+  "home_club_id": "club-palermo-bajo-m15-b",
+  "away_club_id": "cordoba-athletic-club-m15-b",
+  "score": {
+   "away": 95,
+   "home": 5
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Palermo Bajo M15 \"B\"",
+  "a": "Córdoba Athletic Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 5,
+  "sa": 95,
+  "fecha": "2026-08-01"
+ },
+ {
+  "id": "a52c4948-84f3-4c37-8a91-7a23b65fa0bc",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-08-01T14:00:00+00:00",
+  "home_club_id": "club-la-tablada-m15-b",
+  "away_club_id": "alta-gracia-r-c-m15-b",
+  "score": {
+   "away": 0,
+   "home": 76
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club La Tablada M15 \"B\"",
+  "a": "Alta Gracia R.C. M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 76,
+  "sa": 0,
+  "fecha": "2026-08-01"
+ },
+ {
+  "id": "8321f5e3-4096-486a-af03-1665c779bcff",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-08-01T15:30:00+00:00",
+  "home_club_id": "baguales-r-c-m15-b",
+  "away_club_id": "tala-rugby-club-m15-b",
+  "score": {
+   "away": 77,
+   "home": 5
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Baguales R.C. M15 \"B\"",
+  "a": "Tala Rugby Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 5,
+  "sa": 77,
+  "fecha": "2026-08-01"
+ },
+ {
+  "id": "003d825b-cf93-4c62-9322-a994e14d8ae5",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-08-01T15:30:00+00:00",
+  "home_club_id": "jockey-club-cordoba-m15-c",
+  "away_club_id": "club-universitario-de-cordoba-m15-b",
+  "score": {
+   "away": 0,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba M15 \"C\"",
+  "a": "Club Universitario de Córdoba M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 28,
+  "sa": 0,
+  "fecha": "2026-08-01"
+ },
+ {
+  "id": "da335466-26d9-401c-a38f-3d117d9735b5",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-08-01T15:30:00+00:00",
+  "home_club_id": "cordoba-rugby-club-m15-b",
+  "away_club_id": "san-francisco-r-c-m15-b",
+  "score": {
+   "away": 26,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Rugby Club M15 \"B\"",
+  "a": "San Francisco R.C. M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 28,
+  "sa": 26,
+  "fecha": "2026-08-01"
+ },
+ {
+  "id": "3d2ff406-b2a6-4856-9b5d-e999333acef7",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-08-01T17:00:00+00:00",
+  "home_club_id": "uru-cure-rugby-club-m15-b",
+  "away_club_id": "jockey-club-cordoba-m15-b",
+  "score": {
+   "away": 24,
+   "home": 38
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Urú Curé Rugby Club M15 \"B\"",
+  "a": "Jockey Club Córdoba M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 38,
+  "sa": 24,
+  "fecha": "2026-08-01"
+ },
+ {
+  "id": "cf202977-93e5-4345-9407-a2a0e4b4d7eb",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-08-08T12:30:00+00:00",
+  "home_club_id": "cordoba-rugby-club-m15-b",
+  "away_club_id": "baguales-r-c-m15-b",
+  "score": {
+   "away": 17,
+   "home": 45
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Rugby Club M15 \"B\"",
+  "a": "Baguales R.C. M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 45,
+  "sa": 17,
+  "fecha": "2026-08-08"
+ },
+ {
+  "id": "ef3d6a7a-bbba-446b-adcb-b3be3e72f067",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-08-08T14:00:00+00:00",
+  "home_club_id": "club-palermo-bajo-m15-b",
+  "away_club_id": "alta-gracia-r-c-m15-b",
+  "score": {
+   "away": 37,
+   "home": 35
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Palermo Bajo M15 \"B\"",
+  "a": "Alta Gracia R.C. M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 35,
+  "sa": 37,
+  "fecha": "2026-08-08"
+ },
+ {
+  "id": "752dd2d6-1933-4b41-94b2-598f0c25a3b7",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-08-08T14:00:00+00:00",
+  "home_club_id": "tala-rugby-club-m15-c",
+  "away_club_id": "san-francisco-r-c-m15-b",
+  "score": {
+   "away": 50,
+   "home": 10
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club M15 \"C\"",
+  "a": "San Francisco R.C. M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 10,
+  "sa": 50,
+  "fecha": "2026-08-08"
+ },
+ {
+  "id": "89ff5f89-09fb-4862-9448-75a6272887b5",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-08-08T15:00:00+00:00",
+  "home_club_id": "jockey-club-cordoba-m15-b",
+  "away_club_id": "club-la-tablada-m15-b",
+  "score": {
+   "away": 26,
+   "home": 31
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba M15 \"B\"",
+  "a": "Club La Tablada M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 31,
+  "sa": 26,
+  "fecha": "2026-08-08"
+ },
+ {
+  "id": "0ec38dbc-5f28-48a0-a53a-67b7cabd9e9b",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-08-08T15:30:00+00:00",
+  "home_club_id": "club-universitario-de-cordoba-m15-b",
+  "away_club_id": "uru-cure-rugby-club-m15-b",
+  "score": {
+   "away": 55,
+   "home": 14
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Universitario de Córdoba M15 \"B\"",
+  "a": "Urú Curé Rugby Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 14,
+  "sa": 55,
+  "fecha": "2026-08-08"
+ },
+ {
+  "id": "a08394f6-496b-45a2-bf11-b3b0bf52073b",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-08-08T16:30:00+00:00",
+  "home_club_id": "cordoba-athletic-club-m15-b",
+  "away_club_id": "club-la-tablada-m15-c",
+  "score": {
+   "away": 26,
+   "home": 29
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club M15 \"B\"",
+  "a": "Club La Tablada M15 \"C\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 29,
+  "sa": 26,
+  "fecha": "2026-08-08"
+ },
+ {
+  "id": "a22c134f-4df9-4f83-ac09-bbc3983ca927",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-08-08T17:00:00+00:00",
+  "home_club_id": "tala-rugby-club-m15-b",
+  "away_club_id": "jockey-club-cordoba-m15-c",
+  "score": {
+   "away": 0,
+   "home": 66
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club M15 \"B\"",
+  "a": "Jockey Club Córdoba M15 \"C\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 66,
+  "sa": 0,
+  "fecha": "2026-08-08"
+ },
+ {
+  "id": "d0d83a01-cac7-4940-b56b-1a9072f22ae8",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-08-15T17:30:00+00:00",
+  "home_club_id": "uru-cure-rugby-club-m15-b",
+  "away_club_id": "tala-rugby-club-m15-b",
+  "score": {
+   "away": 24,
+   "home": 5
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Urú Curé Rugby Club M15 \"B\"",
+  "a": "Tala Rugby Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 5,
+  "sa": 24,
+  "fecha": "2026-08-15"
+ },
+ {
+  "id": "ebc39b6b-1938-4a06-bda5-03cb96f982c2",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-08-20T22:00:00+00:00",
+  "home_club_id": "tala-rugby-club-m15-c",
+  "away_club_id": "club-palermo-bajo-m15-b",
+  "score": {
+   "away": 24,
+   "home": 29
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club M15 \"C\"",
+  "a": "Club Palermo Bajo M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 29,
+  "sa": 24,
+  "fecha": "2026-08-20"
+ },
+ {
+  "id": "06881915-724a-4dd7-ba84-935571df6944",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-08-22T12:30:00+00:00",
+  "home_club_id": "club-la-tablada-m15-c",
+  "away_club_id": "jockey-club-cordoba-m15-c",
+  "score": {
+   "away": 0,
+   "home": 50
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club La Tablada M15 \"C\"",
+  "a": "Jockey Club Córdoba M15 \"C\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 50,
+  "sa": 0,
+  "fecha": "2026-08-22"
+ },
+ {
+  "id": "f7722d09-6083-4e1b-a7d3-5df5355800d9",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-08-22T14:00:00+00:00",
+  "home_club_id": "club-la-tablada-m15-b",
+  "away_club_id": "club-universitario-de-cordoba-m15-b",
+  "score": {
+   "away": 0,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club La Tablada M15 \"B\"",
+  "a": "Club Universitario de Córdoba M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 28,
+  "sa": 0,
+  "fecha": "2026-08-22"
+ },
+ {
+  "id": "30008a9b-179d-4681-a4c5-6436b20cfbab",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-08-22T14:00:00+00:00",
+  "home_club_id": "alta-gracia-r-c-m15-b",
+  "away_club_id": "cordoba-athletic-club-m15-b",
+  "score": {
+   "away": 48,
+   "home": 19
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Alta Gracia R.C. M15 \"B\"",
+  "a": "Córdoba Athletic Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 19,
+  "sa": 48,
+  "fecha": "2026-08-22"
+ },
+ {
+  "id": "3821a081-e66b-4a30-8b26-0a61a67cbaee",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-08-22T14:00:00+00:00",
+  "home_club_id": "cordoba-rugby-club-m15-b",
+  "away_club_id": "jockey-club-cordoba-m15-b",
+  "score": {
+   "away": 24,
+   "home": 22
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Rugby Club M15 \"B\"",
+  "a": "Jockey Club Córdoba M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 22,
+  "sa": 24,
+  "fecha": "2026-08-22"
+ },
+ {
+  "id": "bd3e7c1d-d832-403a-877f-66e56ecebc68",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-08-22T17:00:00+00:00",
+  "home_club_id": "san-francisco-r-c-m15-b",
+  "away_club_id": "baguales-r-c-m15-b",
+  "score": {
+   "away": 7,
+   "home": 48
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "San Francisco R.C. M15 \"B\"",
+  "a": "Baguales R.C. M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 48,
+  "sa": 7,
+  "fecha": "2026-08-22"
+ },
+ {
+  "id": "c222e15a-e0fe-4e9f-9282-d7b9a9ce29cf",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-08-29T12:30:00+00:00",
+  "home_club_id": "jockey-club-cordoba-m15-c",
+  "away_club_id": "tala-rugby-club-m15-c",
+  "score": {
+   "away": 0,
+   "home": 21
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba M15 \"C\"",
+  "a": "Tala Rugby Club M15 \"C\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 21,
+  "sa": 0,
+  "fecha": "2026-08-29"
+ },
+ {
+  "id": "3c8234c2-e5e4-46a9-b1a6-84ee83c30172",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-08-29T13:00:00+00:00",
+  "home_club_id": "tala-rugby-club-m15-b",
+  "away_club_id": "club-la-tablada-m15-b",
+  "score": {
+   "away": 25,
+   "home": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club M15 \"B\"",
+  "a": "Club La Tablada M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 0,
+  "sa": 25,
+  "fecha": "2026-08-29"
+ },
+ {
+  "id": "80105b26-0a1a-4659-8fd6-28b0534ad784",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-08-29T14:00:00+00:00",
+  "home_club_id": "club-la-tablada-m15-c",
+  "away_club_id": "san-francisco-r-c-m15-b",
+  "score": {
+   "away": 31,
+   "home": 15
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club La Tablada M15 \"C\"",
+  "a": "San Francisco R.C. M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 15,
+  "sa": 31,
+  "fecha": "2026-08-29"
+ },
+ {
+  "id": "78b53a0d-e94d-4130-8f18-210d444c3196",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-08-29T15:00:00+00:00",
+  "home_club_id": "cordoba-athletic-club-m15-b",
+  "away_club_id": "jockey-club-cordoba-m15-b",
+  "score": {
+   "away": 36,
+   "home": 10
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club M15 \"B\"",
+  "a": "Jockey Club Córdoba M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 10,
+  "sa": 36,
+  "fecha": "2026-08-29"
+ },
+ {
+  "id": "ff236a5b-9235-4ee2-a2db-fc879072772f",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-08-29T15:00:00+00:00",
+  "home_club_id": "club-universitario-de-cordoba-m15-b",
+  "away_club_id": "cordoba-rugby-club-m15-b",
+  "score": {
+   "away": 59,
+   "home": 12
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Universitario de Córdoba M15 \"B\"",
+  "a": "Córdoba Rugby Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 12,
+  "sa": 59,
+  "fecha": "2026-08-29"
+ },
+ {
+  "id": "88137d67-c6ea-4e85-a0aa-1b84792e0166",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-08-29T15:30:00+00:00",
+  "home_club_id": "club-palermo-bajo-m15-b",
+  "away_club_id": "uru-cure-rugby-club-m15-b",
+  "score": {
+   "away": 86,
+   "home": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Palermo Bajo M15 \"B\"",
+  "a": "Urú Curé Rugby Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 0,
+  "sa": 86,
+  "fecha": "2026-08-29"
+ },
+ {
+  "id": "25cc0834-58c4-45f5-920f-a7b96a3732c0",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-09-05T14:00:00+00:00",
+  "home_club_id": "baguales-r-c-m15-b",
+  "away_club_id": "alta-gracia-r-c-m15-b",
+  "score": {
+   "away": 12,
+   "home": 59
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Baguales R.C. M15 \"B\"",
+  "a": "Alta Gracia R.C. M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 59,
+  "sa": 12,
+  "fecha": "2026-09-05"
+ },
+ {
+  "id": "15c8171b-d93d-4f90-815d-64df5f33e6cb",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-09-12T12:30:00+00:00",
+  "home_club_id": "club-la-tablada-m15-b",
+  "away_club_id": "club-palermo-bajo-m15-b",
+  "score": {
+   "away": 0,
+   "home": 57
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club La Tablada M15 \"B\"",
+  "a": "Club Palermo Bajo M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 57,
+  "sa": 0,
+  "fecha": "2026-09-12"
+ },
+ {
+  "id": "868a8c6f-45f6-41f1-acff-f3e8290ea701",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-09-12T12:30:00+00:00",
+  "home_club_id": "cordoba-rugby-club-m15-b",
+  "away_club_id": "cordoba-athletic-club-m15-b",
+  "score": {
+   "away": 15,
+   "home": 15
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Rugby Club M15 \"B\"",
+  "a": "Córdoba Athletic Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 15,
+  "sa": 15,
+  "fecha": "2026-09-12"
+ },
+ {
+  "id": "7dec7be8-3ca4-47ba-87e3-d8dbcd2cb636",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-09-12T13:00:00+00:00",
+  "home_club_id": "tala-rugby-club-m15-c",
+  "away_club_id": "baguales-r-c-m15-b",
+  "score": {
+   "away": 28,
+   "home": 10
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club M15 \"C\"",
+  "a": "Baguales R.C. M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 10,
+  "sa": 28,
+  "fecha": "2026-09-12"
+ },
+ {
+  "id": "cad1dc81-a1d0-4219-978d-7b082421f3c7",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-09-12T14:00:00+00:00",
+  "home_club_id": "jockey-club-cordoba-m15-b",
+  "away_club_id": "club-universitario-de-cordoba-m15-b",
+  "score": {
+   "away": 7,
+   "home": 64
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba M15 \"B\"",
+  "a": "Club Universitario de Córdoba M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 64,
+  "sa": 7,
+  "fecha": "2026-09-12"
+ },
+ {
+  "id": "3379bb97-86e3-4b74-92ad-e148a27d0d24",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-09-12T15:30:00+00:00",
+  "home_club_id": "alta-gracia-r-c-m15-b",
+  "away_club_id": "tala-rugby-club-m15-b",
+  "score": {
+   "away": 64,
+   "home": 12
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Alta Gracia R.C. M15 \"B\"",
+  "a": "Tala Rugby Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 12,
+  "sa": 64,
+  "fecha": "2026-09-12"
+ },
+ {
+  "id": "44c80b95-165f-49e6-a8e9-a4024852d2e9",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-09-12T15:30:00+00:00",
+  "home_club_id": "san-francisco-r-c-m15-b",
+  "away_club_id": "jockey-club-cordoba-m15-c",
+  "score": {
+   "away": 15,
+   "home": 43
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "San Francisco R.C. M15 \"B\"",
+  "a": "Jockey Club Córdoba M15 \"C\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 43,
+  "sa": 15,
+  "fecha": "2026-09-12"
+ },
+ {
+  "id": "9ef1aeda-a07e-40c6-8700-a5aa6decc632",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-09-12T17:00:00+00:00",
+  "home_club_id": "uru-cure-rugby-club-m15-b",
+  "away_club_id": "club-la-tablada-m15-c",
+  "score": {
+   "away": 14,
+   "home": 40
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Urú Curé Rugby Club M15 \"B\"",
+  "a": "Club La Tablada M15 \"C\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 40,
+  "sa": 14,
+  "fecha": "2026-09-12"
+ },
+ {
+  "id": "3eda485b-dff2-4687-8079-acb507a7b4b6",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-09-19T14:00:00+00:00",
+  "home_club_id": "jockey-club-cordoba-m15-b",
+  "away_club_id": "tala-rugby-club-m15-c",
+  "score": {
+   "away": 0,
+   "home": 87
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba M15 \"B\"",
+  "a": "Tala Rugby Club M15 \"C\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 87,
+  "sa": 0,
+  "fecha": "2026-09-19"
+ },
+ {
+  "id": "51b78d1c-e4fb-473c-8dd5-f1e9d8686ee1",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-09-19T15:00:00+00:00",
+  "home_club_id": "cordoba-athletic-club-m15-b",
+  "away_club_id": "baguales-r-c-m15-b",
+  "score": {
+   "away": 0,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club M15 \"B\"",
+  "a": "Baguales R.C. M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 28,
+  "sa": 0,
+  "fecha": "2026-09-19"
+ },
+ {
+  "id": "6182b052-0196-482e-8e98-15fb23579f24",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-09-19T15:00:00+00:00",
+  "home_club_id": "san-francisco-r-c-m15-b",
+  "away_club_id": "club-universitario-de-cordoba-m15-b",
+  "score": {
+   "away": 0,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "San Francisco R.C. M15 \"B\"",
+  "a": "Club Universitario de Córdoba M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 28,
+  "sa": 0,
+  "fecha": "2026-09-19"
+ },
+ {
+  "id": "3b3b887c-5683-4494-a186-43dbedef7856",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-09-19T15:15:00+00:00",
+  "home_club_id": "alta-gracia-r-c-m15-b",
+  "away_club_id": "uru-cure-rugby-club-m15-b",
+  "score": {
+   "away": 90,
+   "home": 10
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Alta Gracia R.C. M15 \"B\"",
+  "a": "Urú Curé Rugby Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 10,
+  "sa": 90,
+  "fecha": "2026-09-19"
+ },
+ {
+  "id": "1f7a858d-8ceb-4ade-a146-3629de425736",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-09-19T15:30:00+00:00",
+  "home_club_id": "jockey-club-cordoba-m15-c",
+  "away_club_id": "club-palermo-bajo-m15-b",
+  "score": {
+   "away": 5,
+   "home": 22
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba M15 \"C\"",
+  "a": "Club Palermo Bajo M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 22,
+  "sa": 5,
+  "fecha": "2026-09-19"
+ },
+ {
+  "id": "ef7269d2-fe00-475d-b572-1c404aca709a",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-09-19T15:30:00+00:00",
+  "home_club_id": "cordoba-rugby-club-m15-b",
+  "away_club_id": "club-la-tablada-m15-b",
+  "score": {
+   "away": 36,
+   "home": 7
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Rugby Club M15 \"B\"",
+  "a": "Club La Tablada M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 7,
+  "sa": 36,
+  "fecha": "2026-09-19"
+ },
+ {
+  "id": "83c8733e-8f0f-43a3-9a6b-17ad66b89b97",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-09-19T16:30:00+00:00",
+  "home_club_id": "tala-rugby-club-m15-b",
+  "away_club_id": "club-la-tablada-m15-c",
+  "score": {
+   "away": 17,
+   "home": 22
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club M15 \"B\"",
+  "a": "Club La Tablada M15 \"C\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 22,
+  "sa": 17,
+  "fecha": "2026-09-19"
+ },
+ {
+  "id": "d88b4932-7b91-43c7-9e08-f590df3574f7",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-09-25T23:00:00+00:00",
+  "home_club_id": "club-palermo-bajo-m15-b",
+  "away_club_id": "club-la-tablada-m15-c",
+  "score": {
+   "away": 19,
+   "home": 32
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Palermo Bajo M15 \"B\"",
+  "a": "Club La Tablada M15 \"C\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 32,
+  "sa": 19,
+  "fecha": "2026-09-25"
+ },
+ {
+  "id": "b517e38c-7376-454e-8b00-28c299749692",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-09-26T12:00:00+00:00",
+  "home_club_id": "baguales-r-c-m15-b",
+  "away_club_id": "jockey-club-cordoba-m15-b",
+  "score": {
+   "away": 68,
+   "home": 12
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Baguales R.C. M15 \"B\"",
+  "a": "Jockey Club Córdoba M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 12,
+  "sa": 68,
+  "fecha": "2026-09-26"
+ },
+ {
+  "id": "dc0bf99d-fd2f-45b9-8d68-0057d9007dc4",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-09-26T13:30:00+00:00",
+  "home_club_id": "tala-rugby-club-m15-c",
+  "away_club_id": "club-universitario-de-cordoba-m15-b",
+  "score": {
+   "away": 26,
+   "home": 26
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club M15 \"C\"",
+  "a": "Club Universitario de Córdoba M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 26,
+  "sa": 26,
+  "fecha": "2026-09-26"
+ },
+ {
+  "id": "229e9c2d-4d6c-489f-8b73-23908bd9405b",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-09-26T14:30:00+00:00",
+  "home_club_id": "san-francisco-r-c-m15-b",
+  "away_club_id": "tala-rugby-club-m15-b",
+  "score": {
+   "away": 46,
+   "home": 33
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "San Francisco R.C. M15 \"B\"",
+  "a": "Tala Rugby Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 33,
+  "sa": 46,
+  "fecha": "2026-09-26"
+ },
+ {
+  "id": "4e3887aa-39a7-4ae5-86c8-1776835ab488",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-09-26T15:00:00+00:00",
+  "home_club_id": "uru-cure-rugby-club-m15-b",
+  "away_club_id": "cordoba-rugby-club-m15-b",
+  "score": {
+   "away": 0,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Urú Curé Rugby Club M15 \"B\"",
+  "a": "Córdoba Rugby Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 28,
+  "sa": 0,
+  "fecha": "2026-09-26"
+ },
+ {
+  "id": "fed9649a-fcad-4d79-9ce7-de6c5f1c8c50",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-09-26T15:30:00+00:00",
+  "home_club_id": "jockey-club-cordoba-m15-c",
+  "away_club_id": "cordoba-athletic-club-m15-b",
+  "score": {
+   "away": 38,
+   "home": 34
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba M15 \"C\"",
+  "a": "Córdoba Athletic Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 34,
+  "sa": 38,
+  "fecha": "2026-09-26"
+ },
+ {
+  "id": "754a79b9-9e20-4d40-89bc-85b467f25171",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-09-26T15:30:00+00:00",
+  "home_club_id": "alta-gracia-r-c-m15-b",
+  "away_club_id": "club-la-tablada-m15-b",
+  "score": {
+   "away": 71,
+   "home": 7
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Alta Gracia R.C. M15 \"B\"",
+  "a": "Club La Tablada M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 7,
+  "sa": 71,
+  "fecha": "2026-09-26"
+ },
+ {
+  "id": "a056ac70-d914-4d55-91dc-2681c5630233",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-10-03T13:00:00+00:00",
+  "home_club_id": "tala-rugby-club-m15-c",
+  "away_club_id": "jockey-club-cordoba-m15-b",
+  "score": {
+   "away": 48,
+   "home": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club M15 \"C\"",
+  "a": "Jockey Club Córdoba M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 0,
+  "sa": 48,
+  "fecha": "2026-10-03"
+ },
+ {
+  "id": "f188befa-e218-4a3d-be37-a55966b4a7b0",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-10-03T14:00:00+00:00",
+  "home_club_id": "baguales-r-c-m15-b",
+  "away_club_id": "club-universitario-de-cordoba-m15-b",
+  "score": {
+   "away": 46,
+   "home": 31
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Baguales R.C. M15 \"B\"",
+  "a": "Club Universitario de Córdoba M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 31,
+  "sa": 46,
+  "fecha": "2026-10-03"
+ },
+ {
+  "id": "ddc7c3f0-f8dc-4039-93ea-edebc0e2bfab",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-10-03T14:30:00+00:00",
+  "home_club_id": "jockey-club-cordoba-m15-c",
+  "away_club_id": "tala-rugby-club-m15-b",
+  "score": {
+   "away": 43,
+   "home": 15
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba M15 \"C\"",
+  "a": "Tala Rugby Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 15,
+  "sa": 43,
+  "fecha": "2026-10-03"
+ },
+ {
+  "id": "aa88f69f-94ce-42ca-bebf-3c5ecda63524",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-10-03T15:00:00+00:00",
+  "home_club_id": "cordoba-rugby-club-m15-b",
+  "away_club_id": "club-palermo-bajo-m15-b",
+  "score": {
+   "away": 28,
+   "home": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Rugby Club M15 \"B\"",
+  "a": "Club Palermo Bajo M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 0,
+  "sa": 28,
+  "fecha": "2026-10-03"
+ },
+ {
+  "id": "59976ec8-75c4-41e1-948c-c4de3c65773f",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-10-03T15:30:00+00:00",
+  "home_club_id": "cordoba-athletic-club-m15-b",
+  "away_club_id": "alta-gracia-r-c-m15-b",
+  "score": {
+   "away": 7,
+   "home": 78
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club M15 \"B\"",
+  "a": "Alta Gracia R.C. M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 78,
+  "sa": 7,
+  "fecha": "2026-10-03"
+ },
+ {
+  "id": "b7301c4b-4cbf-44d3-9982-055c122a430a",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-10-03T15:30:00+00:00",
+  "home_club_id": "san-francisco-r-c-m15-b",
+  "away_club_id": "club-la-tablada-m15-b",
+  "score": {
+   "away": 43,
+   "home": 5
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "San Francisco R.C. M15 \"B\"",
+  "a": "Club La Tablada M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 5,
+  "sa": 43,
+  "fecha": "2026-10-03"
+ },
+ {
+  "id": "e39ec126-24d9-4702-a7b9-de707fc0321f",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-10-03T17:00:00+00:00",
+  "home_club_id": "club-la-tablada-m15-c",
+  "away_club_id": "uru-cure-rugby-club-m15-b",
+  "score": {
+   "away": 0,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club La Tablada M15 \"C\"",
+  "a": "Urú Curé Rugby Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 28,
+  "sa": 0,
+  "fecha": "2026-10-03"
+ },
+ {
+  "id": "49a7659f-8648-4aac-9f02-3388388856ee",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-10-09T22:00:00+00:00",
+  "home_club_id": "tala-rugby-club-m15-c",
+  "away_club_id": "tala-rugby-club-m15-b",
+  "score": {
+   "away": 26,
+   "home": 5
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club M15 \"C\"",
+  "a": "Tala Rugby Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 5,
+  "sa": 26,
+  "fecha": "2026-10-09"
+ },
+ {
+  "id": "c7f0be09-6338-471a-b2df-f4beb7272db0",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-10-09T23:15:00+00:00",
+  "home_club_id": "club-palermo-bajo-m15-b",
+  "away_club_id": "baguales-r-c-m15-b",
+  "score": {
+   "away": 28,
+   "home": 31
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Palermo Bajo M15 \"B\"",
+  "a": "Baguales R.C. M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 31,
+  "sa": 28,
+  "fecha": "2026-10-09"
+ },
+ {
+  "id": "22da4ac9-d6e2-4d82-b0a8-4b7ab9f43c30",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-10-10T00:00:00+00:00",
+  "home_club_id": "club-la-tablada-m15-b",
+  "away_club_id": "club-la-tablada-m15-c",
+  "score": {
+   "away": 7,
+   "home": 69
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club La Tablada M15 \"B\"",
+  "a": "Club La Tablada M15 \"C\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 69,
+  "sa": 7,
+  "fecha": "2026-10-09"
+ },
+ {
+  "id": "8c0b5e0b-e27b-4b9f-9403-6817319a2338",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-10-10T14:00:00+00:00",
+  "home_club_id": "jockey-club-cordoba-m15-b",
+  "away_club_id": "san-francisco-r-c-m15-b",
+  "score": {
+   "away": 5,
+   "home": 26
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba M15 \"B\"",
+  "a": "San Francisco R.C. M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 26,
+  "sa": 5,
+  "fecha": "2026-10-10"
+ },
+ {
+  "id": "459ff288-0f79-4ce0-8679-0e666c0fc9db",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-10-10T14:00:00+00:00",
+  "home_club_id": "uru-cure-rugby-club-m15-b",
+  "away_club_id": "jockey-club-cordoba-m15-c",
+  "score": {
+   "away": 14,
+   "home": 85
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Urú Curé Rugby Club M15 \"B\"",
+  "a": "Jockey Club Córdoba M15 \"C\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 85,
+  "sa": 14,
+  "fecha": "2026-10-10"
+ },
+ {
+  "id": "ce38f091-b826-4023-8cf7-903e25004d4c",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-10-10T15:00:00+00:00",
+  "home_club_id": "club-universitario-de-cordoba-m15-b",
+  "away_club_id": "alta-gracia-r-c-m15-b",
+  "score": {
+   "away": 28,
+   "home": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Universitario de Córdoba M15 \"B\"",
+  "a": "Alta Gracia R.C. M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 0,
+  "sa": 28,
+  "fecha": "2026-10-10"
+ },
+ {
+  "id": "9be6cd50-81c0-4291-84ca-85a5637a35f1",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-10-10T15:30:00+00:00",
+  "home_club_id": "cordoba-athletic-club-m15-b",
+  "away_club_id": "cordoba-rugby-club-m15-b",
+  "score": {
+   "away": 38,
+   "home": 60
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club M15 \"B\"",
+  "a": "Córdoba Rugby Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 60,
+  "sa": 38,
+  "fecha": "2026-10-10"
+ },
+ {
+  "id": "ec8826f0-5701-461a-94e2-d5c88f638cf4",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-10-17T00:30:00+00:00",
+  "home_club_id": "club-palermo-bajo-m15-b",
+  "away_club_id": "tala-rugby-club-m15-c",
+  "score": {
+   "away": 28,
+   "home": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Palermo Bajo M15 \"B\"",
+  "a": "Tala Rugby Club M15 \"C\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 0,
+  "sa": 28,
+  "fecha": "2026-10-16"
+ },
+ {
+  "id": "fb1690a4-01e0-4189-b6b4-9dccd562f391",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-10-17T12:30:00+00:00",
+  "home_club_id": "jockey-club-cordoba-m15-c",
+  "away_club_id": "club-la-tablada-m15-b",
+  "score": {
+   "away": 53,
+   "home": 7,
+   "awayTries": 8,
+   "homeTries": 1
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 18,
+  "h": "Jockey Club Córdoba M15 \"C\"",
+  "a": "Club La Tablada M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 7,
+  "sa": 53,
+  "fecha": "2026-10-17"
+ },
+ {
+  "id": "b5505710-2ee4-4a27-9c77-a39e07248cdd",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-10-17T15:00:00+00:00",
+  "home_club_id": "club-universitario-de-cordoba-m15-b",
+  "away_club_id": "san-francisco-r-c-m15-b",
+  "score": {
+   "away": 28,
+   "home": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Universitario de Córdoba M15 \"B\"",
+  "a": "San Francisco R.C. M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 0,
+  "sa": 28,
+  "fecha": "2026-10-17"
+ },
+ {
+  "id": "b16515c9-2420-40dc-a298-52fe510f0146",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-10-17T15:00:00+00:00",
+  "home_club_id": "alta-gracia-r-c-m15-b",
+  "away_club_id": "jockey-club-cordoba-m15-b",
+  "score": {
+   "away": 28,
+   "home": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Alta Gracia R.C. M15 \"B\"",
+  "a": "Jockey Club Córdoba M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 0,
+  "sa": 28,
+  "fecha": "2026-10-17"
+ },
+ {
+  "id": "c28ec747-9068-4ccc-a58a-5a35a427686d",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-10-17T15:20:00+00:00",
+  "home_club_id": "baguales-r-c-m15-b",
+  "away_club_id": "uru-cure-rugby-club-m15-b",
+  "score": {
+   "away": 62,
+   "home": 14
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Baguales R.C. M15 \"B\"",
+  "a": "Urú Curé Rugby Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 14,
+  "sa": 62,
+  "fecha": "2026-10-17"
+ },
+ {
+  "id": "9cc0aa73-00c3-4685-aceb-0d73cfc31029",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-10-17T16:30:00+00:00",
+  "home_club_id": "tala-rugby-club-m15-b",
+  "away_club_id": "cordoba-rugby-club-m15-b",
+  "score": {
+   "away": 28,
+   "home": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club M15 \"B\"",
+  "a": "Córdoba Rugby Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 0,
+  "sa": 28,
+  "fecha": "2026-10-17"
+ },
+ {
+  "id": "440f2084-d841-4fa8-8afd-a8cff10a389f",
+  "tournament_id": "ffaaab95-59d4-4a2c-a4c3-5d16b1216064",
+  "date_time": "2026-10-29T23:00:00+00:00",
+  "home_club_id": "jockey-club-cordoba-m15-b",
+  "away_club_id": "cordoba-rugby-club-m15-b",
+  "score": {
+   "away": 29,
+   "home": 61
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba M15 \"B\"",
+  "a": "Córdoba Rugby Club M15 \"B\"",
+  "torneo": "torneo-cordobes-m15-b",
+  "sh": 61,
+  "sa": 29,
+  "fecha": "2026-10-29"
+ }
+]

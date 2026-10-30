@@ -1,0 +1,1039 @@
+  aviso CBA. ATHLETIC CLUB "A" 17-31 UNIVERSITARIO "A" (291027): try sin jugador, dorsal None (1T 6 Try 5 )
+  aviso CBA. ATHLETIC CLUB "A" 17-31 UNIVERSITARIO "A" (291027): conversion sin jugador, dorsal None (1T 6 Conversión 2 )
+  aviso CBA. ATHLETIC CLUB "A" 17-31 UNIVERSITARIO "A" (291027): try sin jugador, dorsal None (1T 21 Try 5 )
+  aviso CBA. ATHLETIC CLUB "A" 17-31 UNIVERSITARIO "A" (291027): try sin jugador, dorsal None (1T 28 Try 5 )
+  aviso CBA. ATHLETIC CLUB "A" 17-31 UNIVERSITARIO "A" (291027): conversion sin jugador, dorsal None (1T 28 Conversión 2 )
+  aviso CBA. ATHLETIC CLUB "A" 17-31 UNIVERSITARIO "A" (291027): card_yellow sin jugador, dorsal None (1T 33 Amarilla  )
+  aviso CBA. ATHLETIC CLUB "A" 17-31 UNIVERSITARIO "A" (291027): try sin jugador, dorsal None (2T 9 Try 5 )
+  aviso CBA. ATHLETIC CLUB "A" 17-31 UNIVERSITARIO "A" (291027): try sin jugador, dorsal None (2T 20 Try 5 )
+  aviso CBA. ATHLETIC CLUB "A" 17-31 UNIVERSITARIO "A" (291027): conversion sin jugador, dorsal None (2T 20 Conversión 2 )
+  aviso CBA. ATHLETIC CLUB "A" 17-31 UNIVERSITARIO "A" (291027): card_yellow sin jugador, dorsal None (2T 29 Amarilla  )
+  aviso CBA. ATHLETIC CLUB "A" 17-31 UNIVERSITARIO "A" (291027): card_yellow sin jugador, dorsal None (2T 38 Amarilla  )
+  aviso CBA. ATHLETIC CLUB "A" 17-31 UNIVERSITARIO "A" (291027): cambio con dorsal sin jugador None->None
+  aviso CBA. ATHLETIC CLUB "A" 17-31 UNIVERSITARIO "A" (291027): cambio con dorsal sin jugador None->None
+  aviso CBA. ATHLETIC CLUB "A" 17-31 UNIVERSITARIO "A" (291027): cambio con dorsal sin jugador None->None
+  aviso CBA. ATHLETIC CLUB "A" 17-31 UNIVERSITARIO "A" (291027): cambio con dorsal sin jugador None->None
+  aviso CBA. ATHLETIC CLUB "A" 17-31 UNIVERSITARIO "A" (291027): cambio con dorsal sin jugador None->None
+  aviso CBA. ATHLETIC CLUB "A" 17-31 UNIVERSITARIO "A" (291027): cambio con dorsal sin jugador None->None
+  aviso CBA. ATHLETIC CLUB "A" 17-31 UNIVERSITARIO "A" (291027): cambio con dorsal sin jugador None->None
+  aviso CBA. ATHLETIC CLUB "A" 17-31 UNIVERSITARIO "A" (291027): cambio con dorsal sin jugador None->None
+291028: EVENTOS NO CIERRAN JOCKEY CLUB CORDOBA "A" 14-36 TALA R.C. "A" (291028): eventos 0-0 (291028)
+  aviso JOCKEY C. VILLA MARIA 20-43 PALERMO BAJO "A" (291029): injury sin jugador, dorsal None (1T 3 Lesionado  )
+  aviso JOCKEY C. VILLA MARIA 20-43 PALERMO BAJO "A" (291029): try sin jugador, dorsal None (1T 3 Try 5 )
+  aviso JOCKEY C. VILLA MARIA 20-43 PALERMO BAJO "A" (291029): try sin jugador, dorsal None (1T 8 Try 5 )
+  aviso JOCKEY C. VILLA MARIA 20-43 PALERMO BAJO "A" (291029): try sin jugador, dorsal None (1T 11 Try 5 )
+  aviso JOCKEY C. VILLA MARIA 20-43 PALERMO BAJO "A" (291029): conversion sin jugador, dorsal None (1T 12 Conversión 2 )
+  aviso JOCKEY C. VILLA MARIA 20-43 PALERMO BAJO "A" (291029): try sin jugador, dorsal None (1T 35 Try 5 )
+  aviso JOCKEY C. VILLA MARIA 20-43 PALERMO BAJO "A" (291029): conversion sin jugador, dorsal None (1T 35 Conversión 2 )
+  aviso JOCKEY C. VILLA MARIA 20-43 PALERMO BAJO "A" (291029): try sin jugador, dorsal None (2T 19 Try 5 )
+  aviso JOCKEY C. VILLA MARIA 20-43 PALERMO BAJO "A" (291029): try sin jugador, dorsal None (2T 27 Try 5 )
+  aviso JOCKEY C. VILLA MARIA 20-43 PALERMO BAJO "A" (291029): conversion sin jugador, dorsal None (2T 28 Conversión 2 )
+  aviso JOCKEY C. VILLA MARIA 20-43 PALERMO BAJO "A" (291029): try sin jugador, dorsal None (2T 34 Try 5 )
+  aviso JOCKEY C. VILLA MARIA 20-43 PALERMO BAJO "A" (291029): conversion sin jugador, dorsal None (2T 35 Conversión 2 )
+  aviso LA TABLADA "A" 140-0 CARLOS PAZ R.C. (291030): try sin jugador, dorsal None (1T 1 Try 5 )
+  aviso LA TABLADA "A" 140-0 CARLOS PAZ R.C. (291030): conversion sin jugador, dorsal None (1T 1 Conversión 2 )
+  aviso LA TABLADA "A" 140-0 CARLOS PAZ R.C. (291030): try sin jugador, dorsal None (1T 4 Try 5 )
+  aviso LA TABLADA "A" 140-0 CARLOS PAZ R.C. (291030): conversion sin jugador, dorsal None (1T 5 Conversión 2 )
+  aviso LA TABLADA "A" 140-0 CARLOS PAZ R.C. (291030): try sin jugador, dorsal None (1T 7 Try 5 )
+  aviso LA TABLADA "A" 140-0 CARLOS PAZ R.C. (291030): conversion sin jugador, dorsal None (1T 7 Conversión 2 )
+  aviso LA TABLADA "A" 140-0 CARLOS PAZ R.C. (291030): try sin jugador, dorsal None (1T 10 Try 5 )
+  aviso LA TABLADA "A" 140-0 CARLOS PAZ R.C. (291030): conversion sin jugador, dorsal None (1T 10 Conversión 2 )
+  aviso LA TABLADA "A" 140-0 CARLOS PAZ R.C. (291030): try sin jugador, dorsal None (1T 14 Try 5 )
+  aviso LA TABLADA "A" 140-0 CARLOS PAZ R.C. (291030): conversion sin jugador, dorsal None (1T 14 Conversión 2 )
+  aviso LA TABLADA "A" 140-0 CARLOS PAZ R.C. (291030): try sin jugador, dorsal None (1T 17 Try 5 )
+  aviso LA TABLADA "A" 140-0 CARLOS PAZ R.C. (291030): conversion sin jugador, dorsal None (1T 17 Conversión 2 )
+  aviso LA TABLADA "A" 140-0 CARLOS PAZ R.C. (291030): try sin jugador, dorsal None (1T 21 Try 5 )
+  aviso LA TABLADA "A" 140-0 CARLOS PAZ R.C. (291030): try sin jugador, dorsal None (1T 25 Try 5 )
+  aviso LA TABLADA "A" 140-0 CARLOS PAZ R.C. (291030): conversion sin jugador, dorsal None (1T 25 Conversión 2 )
+  aviso LA TABLADA "A" 140-0 CARLOS PAZ R.C. (291030): try sin jugador, dorsal None (1T 31 Try 5 )
+  aviso LA TABLADA "A" 140-0 CARLOS PAZ R.C. (291030): try sin jugador, dorsal None (1T 35 Try 5 )
+  aviso LA TABLADA "A" 140-0 CARLOS PAZ R.C. (291030): try sin jugador, dorsal None (2T 1 Try 5 )
+  aviso LA TABLADA "A" 140-0 CARLOS PAZ R.C. (291030): try sin jugador, dorsal None (2T 3 Try 5 )
+  aviso LA TABLADA "A" 140-0 CARLOS PAZ R.C. (291030): conversion sin jugador, dorsal None (2T 3 Conversión 2 )
+  aviso LA TABLADA "A" 140-0 CARLOS PAZ R.C. (291030): try sin jugador, dorsal None (2T 4 Try 5 )
+  aviso LA TABLADA "A" 140-0 CARLOS PAZ R.C. (291030): conversion sin jugador, dorsal None (2T 4 Conversión 2 )
+  aviso LA TABLADA "A" 140-0 CARLOS PAZ R.C. (291030): try sin jugador, dorsal None (2T 10 Try 5 )
+  aviso LA TABLADA "A" 140-0 CARLOS PAZ R.C. (291030): try sin jugador, dorsal None (2T 12 Try 5 )
+  aviso LA TABLADA "A" 140-0 CARLOS PAZ R.C. (291030): conversion sin jugador, dorsal None (2T 12 Conversión 2 )
+  aviso LA TABLADA "A" 140-0 CARLOS PAZ R.C. (291030): try sin jugador, dorsal None (2T 15 Try 5 )
+  aviso LA TABLADA "A" 140-0 CARLOS PAZ R.C. (291030): conversion sin jugador, dorsal None (2T 15 Conversión 2 )
+  aviso LA TABLADA "A" 140-0 CARLOS PAZ R.C. (291030): try sin jugador, dorsal None (2T 16 Try 5 )
+  aviso LA TABLADA "A" 140-0 CARLOS PAZ R.C. (291030): conversion sin jugador, dorsal None (2T 16 Conversión 2 )
+  aviso LA TABLADA "A" 140-0 CARLOS PAZ R.C. (291030): try sin jugador, dorsal None (2T 20 Try 5 )
+  aviso LA TABLADA "A" 140-0 CARLOS PAZ R.C. (291030): conversion sin jugador, dorsal None (2T 20 Conversión 2 )
+  aviso LA TABLADA "A" 140-0 CARLOS PAZ R.C. (291030): try sin jugador, dorsal None (2T 23 Try 5 )
+  aviso LA TABLADA "A" 140-0 CARLOS PAZ R.C. (291030): conversion sin jugador, dorsal None (2T 23 Conversión 2 )
+  aviso LA TABLADA "A" 140-0 CARLOS PAZ R.C. (291030): try sin jugador, dorsal None (2T 25 Try 5 )
+  aviso LA TABLADA "A" 140-0 CARLOS PAZ R.C. (291030): try sin jugador, dorsal None (2T 27 Try 5 )
+  aviso LA TABLADA "A" 140-0 CARLOS PAZ R.C. (291030): conversion sin jugador, dorsal None (2T 27 Conversión 2 )
+  aviso LA TABLADA "A" 140-0 CARLOS PAZ R.C. (291030): try sin jugador, dorsal None (2T 29 Try 5 )
+  aviso URU CURE "A" 24-19 SAN MARTIN R.C. (291031): try sin jugador, dorsal None (1T 3 Try 5 )
+  aviso URU CURE "A" 24-19 SAN MARTIN R.C. (291031): conversion sin jugador, dorsal None (1T 3 Conversión 2 )
+  aviso URU CURE "A" 24-19 SAN MARTIN R.C. (291031): try sin jugador, dorsal None (1T 3 Try 5 )
+  aviso URU CURE "A" 24-19 SAN MARTIN R.C. (291031): conversion sin jugador, dorsal None (1T 3 Conversión 2 )
+  aviso URU CURE "A" 24-19 SAN MARTIN R.C. (291031): try sin jugador, dorsal None (1T 3 Try 5 )
+  aviso SAN MARTIN R.C. 10-54 LA TABLADA "A" (296626): card_yellow sin jugador, dorsal None (1T 26 Amarilla  )
+  aviso SAN MARTIN R.C. 10-54 LA TABLADA "A" (296626): try sin jugador, dorsal None (2T 15 Try 5 )
+  aviso SAN MARTIN R.C. 10-54 LA TABLADA "A" (296626): card_yellow sin jugador, dorsal None (2T 19 Amarilla  )
+  aviso SAN MARTIN R.C. 10-54 LA TABLADA "A" (296626): card_yellow sin jugador, dorsal None (2T 23 Amarilla  )
+  aviso SAN MARTIN R.C. 10-54 LA TABLADA "A" (296626): try sin jugador, dorsal None (2T 30 Try 5 )
+  aviso SAN MARTIN R.C. 10-54 LA TABLADA "A" (296626): try sin jugador, dorsal None (1T 11 Try 5 )
+  aviso SAN MARTIN R.C. 10-54 LA TABLADA "A" (296626): conversion sin jugador, dorsal None (1T 11 Conversión 2 )
+  aviso SAN MARTIN R.C. 10-54 LA TABLADA "A" (296626): try sin jugador, dorsal None (1T 20 Try 5 )
+  aviso SAN MARTIN R.C. 10-54 LA TABLADA "A" (296626): conversion sin jugador, dorsal None (1T 20 Conversión 2 )
+  aviso SAN MARTIN R.C. 10-54 LA TABLADA "A" (296626): try sin jugador, dorsal None (1T 29 Try 5 )
+  aviso SAN MARTIN R.C. 10-54 LA TABLADA "A" (296626): conversion sin jugador, dorsal None (1T 29 Conversión 2 )
+  aviso SAN MARTIN R.C. 10-54 LA TABLADA "A" (296626): try sin jugador, dorsal None (1T 31 Try 5 )
+  aviso SAN MARTIN R.C. 10-54 LA TABLADA "A" (296626): conversion sin jugador, dorsal None (1T 31 Conversión 2 )
+  aviso SAN MARTIN R.C. 10-54 LA TABLADA "A" (296626): try sin jugador, dorsal None (2T 3 Try 5 )
+  aviso SAN MARTIN R.C. 10-54 LA TABLADA "A" (296626): try sin jugador, dorsal None (2T 13 Try 5 )
+  aviso SAN MARTIN R.C. 10-54 LA TABLADA "A" (296626): conversion sin jugador, dorsal None (2T 13 Conversión 2 )
+  aviso SAN MARTIN R.C. 10-54 LA TABLADA "A" (296626): try sin jugador, dorsal None (2T 19 Try 5 )
+  aviso SAN MARTIN R.C. 10-54 LA TABLADA "A" (296626): conversion sin jugador, dorsal None (2T 19 Conversión 2 )
+  aviso SAN MARTIN R.C. 10-54 LA TABLADA "A" (296626): try sin jugador, dorsal None (2T 27 Try 5 )
+  aviso SAN MARTIN R.C. 10-54 LA TABLADA "A" (296626): conversion sin jugador, dorsal None (2T 27 Conversión 2 )
+296627: EVENTOS NO CIERRAN CARLOS PAZ R.C. 0-42 JOCKEY C. VILLA MARIA (296627): eventos 0-40 (296627)
+  aviso PALERMO BAJO "A" 18-7 JOCKEY CLUB CORDOBA "A" (296628): try sin jugador, dorsal None (2T 5 Try 5 )
+  aviso PALERMO BAJO "A" 18-7 JOCKEY CLUB CORDOBA "A" (296628): penalty_goal sin jugador, dorsal None (2T 20 Penal 3 )
+  aviso PALERMO BAJO "A" 18-7 JOCKEY CLUB CORDOBA "A" (296628): try sin jugador, dorsal None (2T 30 Try 5 )
+  aviso PALERMO BAJO "A" 18-7 JOCKEY CLUB CORDOBA "A" (296628): try sin jugador, dorsal None (2T 35 Try 5 )
+  aviso PALERMO BAJO "A" 18-7 JOCKEY CLUB CORDOBA "A" (296628): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "A" 18-7 JOCKEY CLUB CORDOBA "A" (296628): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "A" 18-7 JOCKEY CLUB CORDOBA "A" (296628): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "A" 18-7 JOCKEY CLUB CORDOBA "A" (296628): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "A" 18-7 JOCKEY CLUB CORDOBA "A" (296628): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "A" 18-7 JOCKEY CLUB CORDOBA "A" (296628): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 33-19 UNIVERSITARIO "A" (296629): try sin jugador, dorsal None (1T 8 Try 5 )
+  aviso TALA R.C. "A" 33-19 UNIVERSITARIO "A" (296629): try sin jugador, dorsal None (1T 16 Try 5 )
+  aviso TALA R.C. "A" 33-19 UNIVERSITARIO "A" (296629): conversion sin jugador, dorsal None (1T 16 Conversión 2 )
+  aviso TALA R.C. "A" 33-19 UNIVERSITARIO "A" (296629): try sin jugador, dorsal None (1T 21 Try 5 )
+  aviso TALA R.C. "A" 33-19 UNIVERSITARIO "A" (296629): conversion sin jugador, dorsal None (1T 21 Conversión 2 )
+  aviso TALA R.C. "A" 33-19 UNIVERSITARIO "A" (296629): try sin jugador, dorsal None (1T 25 Try 5 )
+  aviso TALA R.C. "A" 33-19 UNIVERSITARIO "A" (296629): conversion sin jugador, dorsal None (1T 25 Conversión 2 )
+  aviso TALA R.C. "A" 33-19 UNIVERSITARIO "A" (296629): try sin jugador, dorsal None (1T 27 Try 5 )
+  aviso TALA R.C. "A" 33-19 UNIVERSITARIO "A" (296629): conversion sin jugador, dorsal None (1T 27 Conversión 2 )
+  aviso TALA R.C. "A" 33-19 UNIVERSITARIO "A" (296629): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 33-19 UNIVERSITARIO "A" (296629): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 33-19 UNIVERSITARIO "A" (296629): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 33-19 UNIVERSITARIO "A" (296629): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 33-19 UNIVERSITARIO "A" (296629): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 33-19 UNIVERSITARIO "A" (296629): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 33-19 UNIVERSITARIO "A" (296629): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 33-19 UNIVERSITARIO "A" (296629): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 33-19 UNIVERSITARIO "A" (296629): try sin jugador, dorsal None (1T 32 Try 5 )
+  aviso TALA R.C. "A" 33-19 UNIVERSITARIO "A" (296629): conversion sin jugador, dorsal None (1T 32 Conversión 2 )
+  aviso TALA R.C. "A" 33-19 UNIVERSITARIO "A" (296629): try sin jugador, dorsal None (2T 14 Try 5 )
+  aviso TALA R.C. "A" 33-19 UNIVERSITARIO "A" (296629): try sin jugador, dorsal None (2T 27 Try 5 )
+  aviso TALA R.C. "A" 33-19 UNIVERSITARIO "A" (296629): conversion sin jugador, dorsal None (2T 27 Conversión 2 )
+  aviso TALA R.C. "A" 33-19 UNIVERSITARIO "A" (296629): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 33-19 UNIVERSITARIO "A" (296629): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 33-19 UNIVERSITARIO "A" (296629): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 33-19 UNIVERSITARIO "A" (296629): cambio con dorsal sin jugador None->None
+  aviso CBA. ATHLETIC CLUB "A" 17-36 TALA R.C. "A" (297302): try sin jugador, dorsal None (1T 5 Try 5 )
+  aviso CBA. ATHLETIC CLUB "A" 17-36 TALA R.C. "A" (297302): try sin jugador, dorsal None (1T 24 Try 5 )
+  aviso CBA. ATHLETIC CLUB "A" 17-36 TALA R.C. "A" (297302): card_yellow sin jugador, dorsal None (1T 27 Amarilla  )
+  aviso CBA. ATHLETIC CLUB "A" 17-36 TALA R.C. "A" (297302): try sin jugador, dorsal None (2T 9 Try 5 )
+  aviso CBA. ATHLETIC CLUB "A" 17-36 TALA R.C. "A" (297302): conversion sin jugador, dorsal None (2T 9 Conversión 2 )
+  aviso CBA. ATHLETIC CLUB "A" 17-36 TALA R.C. "A" (297302): try sin jugador, dorsal None (2T 11 Try 5 )
+  aviso CBA. ATHLETIC CLUB "A" 17-36 TALA R.C. "A" (297302): try sin jugador, dorsal None (2T 15 Try 5 )
+  aviso CBA. ATHLETIC CLUB "A" 17-36 TALA R.C. "A" (297302): conversion sin jugador, dorsal None (2T 15 Conversión 2 )
+  aviso CBA. ATHLETIC CLUB "A" 17-36 TALA R.C. "A" (297302): try sin jugador, dorsal None (2T 25 Try 5 )
+  aviso CBA. ATHLETIC CLUB "A" 17-36 TALA R.C. "A" (297302): conversion sin jugador, dorsal None (2T 25 Conversión 2 )
+  aviso CBA. ATHLETIC CLUB "A" 17-36 TALA R.C. "A" (297302): card_yellow sin jugador, dorsal None (2T 53 Amarilla  )
+  aviso CBA. ATHLETIC CLUB "A" 17-36 TALA R.C. "A" (297302): cambio con dorsal sin jugador None->None
+  aviso CBA. ATHLETIC CLUB "A" 17-36 TALA R.C. "A" (297302): cambio con dorsal sin jugador None->None
+  aviso CBA. ATHLETIC CLUB "A" 17-36 TALA R.C. "A" (297302): cambio con dorsal sin jugador None->None
+  aviso CBA. ATHLETIC CLUB "A" 17-36 TALA R.C. "A" (297302): cambio con dorsal sin jugador None->None
+  aviso CBA. ATHLETIC CLUB "A" 17-36 TALA R.C. "A" (297302): cambio con dorsal sin jugador None->None
+  aviso CBA. ATHLETIC CLUB "A" 17-36 TALA R.C. "A" (297302): cambio con dorsal sin jugador None->None
+  aviso CBA. ATHLETIC CLUB "A" 17-36 TALA R.C. "A" (297302): cambio con dorsal sin jugador None->None
+  aviso CBA. ATHLETIC CLUB "A" 17-36 TALA R.C. "A" (297302): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 29-30 PALERMO BAJO "A" (297303): penalty_goal sin jugador, dorsal None (1T 5 Penal 3 )
+  aviso UNIVERSITARIO "A" 29-30 PALERMO BAJO "A" (297303): try sin jugador, dorsal None (1T 17 Try 5 )
+  aviso UNIVERSITARIO "A" 29-30 PALERMO BAJO "A" (297303): conversion sin jugador, dorsal None (1T 17 Conversión 2 )
+  aviso UNIVERSITARIO "A" 29-30 PALERMO BAJO "A" (297303): conversion sin jugador, dorsal None (1T 26 Conversión 2 )
+  aviso UNIVERSITARIO "A" 29-30 PALERMO BAJO "A" (297303): try sin jugador, dorsal None (1T 26 Try 5 )
+  aviso UNIVERSITARIO "A" 29-30 PALERMO BAJO "A" (297303): try sin jugador, dorsal None (2T 2 Try 5 )
+  aviso UNIVERSITARIO "A" 29-30 PALERMO BAJO "A" (297303): try sin jugador, dorsal None (2T 31 Try 5 )
+  aviso UNIVERSITARIO "A" 29-30 PALERMO BAJO "A" (297303): conversion sin jugador, dorsal None (2T 31 Conversión 2 )
+  aviso UNIVERSITARIO "A" 29-30 PALERMO BAJO "A" (297303): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 29-30 PALERMO BAJO "A" (297303): penalty_goal sin jugador, dorsal None (1T 12 Penal 3 )
+  aviso UNIVERSITARIO "A" 29-30 PALERMO BAJO "A" (297303): try sin jugador, dorsal None (1T 15 Try 5 )
+  aviso UNIVERSITARIO "A" 29-30 PALERMO BAJO "A" (297303): conversion sin jugador, dorsal None (1T 16 Conversión 2 )
+  aviso UNIVERSITARIO "A" 29-30 PALERMO BAJO "A" (297303): penalty_goal sin jugador, dorsal None (1T 23 Penal 3 )
+  aviso UNIVERSITARIO "A" 29-30 PALERMO BAJO "A" (297303): penalty_goal sin jugador, dorsal None (2T 6 Penal 3 )
+  aviso UNIVERSITARIO "A" 29-30 PALERMO BAJO "A" (297303): try sin jugador, dorsal None (2T 12 Try 5 )
+  aviso UNIVERSITARIO "A" 29-30 PALERMO BAJO "A" (297303): conversion sin jugador, dorsal None (2T 13 Conversión 2 )
+  aviso UNIVERSITARIO "A" 29-30 PALERMO BAJO "A" (297303): try sin jugador, dorsal None (2T 29 Try 5 )
+  aviso UNIVERSITARIO "A" 29-30 PALERMO BAJO "A" (297303): conversion sin jugador, dorsal None (2T 30 Conversión 2 )
+  aviso UNIVERSITARIO "A" 29-30 PALERMO BAJO "A" (297303): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 29-30 PALERMO BAJO "A" (297303): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 29-30 PALERMO BAJO "A" (297303): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 29-30 PALERMO BAJO "A" (297303): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 29-30 PALERMO BAJO "A" (297303): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "A" 59-7 CARLOS PAZ R.C. (297304): try sin jugador, dorsal None (2T 25 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "A" 59-7 CARLOS PAZ R.C. (297304): conversion sin jugador, dorsal None (2T 26 Conversión 2 )
+  aviso LA TABLADA "A" 54-14 URU CURE "A" (297306): try sin jugador, dorsal None (1T 2 Try 5 )
+  aviso LA TABLADA "A" 54-14 URU CURE "A" (297306): conversion sin jugador, dorsal None (1T 2 Conversión 2 )
+  aviso LA TABLADA "A" 54-14 URU CURE "A" (297306): try sin jugador, dorsal None (1T 4 Try 5 )
+  aviso LA TABLADA "A" 54-14 URU CURE "A" (297306): conversion sin jugador, dorsal None (1T 4 Conversión 2 )
+  aviso LA TABLADA "A" 54-14 URU CURE "A" (297306): conversion sin jugador, dorsal None (1T 6 Conversión 2 )
+  aviso LA TABLADA "A" 54-14 URU CURE "A" (297306): try sin jugador, dorsal None (1T 6 Try 5 )
+  aviso LA TABLADA "A" 54-14 URU CURE "A" (297306): try sin jugador, dorsal None (1T 12 Try 5 )
+  aviso LA TABLADA "A" 54-14 URU CURE "A" (297306): conversion sin jugador, dorsal None (1T 12 Conversión 2 )
+  aviso LA TABLADA "A" 54-14 URU CURE "A" (297306): try sin jugador, dorsal None (1T 35 Try 5 )
+  aviso LA TABLADA "A" 54-14 URU CURE "A" (297306): try sin jugador, dorsal None (2T 1 Try 5 )
+  aviso LA TABLADA "A" 54-14 URU CURE "A" (297306): conversion sin jugador, dorsal None (2T 1 Conversión 2 )
+  aviso LA TABLADA "A" 54-14 URU CURE "A" (297306): try sin jugador, dorsal None (2T 11 Try 5 )
+  aviso LA TABLADA "A" 54-14 URU CURE "A" (297306): conversion sin jugador, dorsal None (2T 11 Conversión 2 )
+  aviso LA TABLADA "A" 54-14 URU CURE "A" (297306): conversion sin jugador, dorsal None (2T 14 Conversión 2 )
+  aviso LA TABLADA "A" 54-14 URU CURE "A" (297306): try sin jugador, dorsal None (2T 27 Try 5 )
+  aviso LA TABLADA "A" 54-14 URU CURE "A" (297306): salida sin reemplazo, dorsal None (2T 24)
+  aviso LA TABLADA "A" 54-14 URU CURE "A" (297306): salida sin reemplazo, dorsal None (2T 25)
+  aviso LA TABLADA "A" 54-14 URU CURE "A" (297306): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 54-14 URU CURE "A" (297306): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 54-14 URU CURE "A" (297306): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 54-14 URU CURE "A" (297306): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 54-14 URU CURE "A" (297306): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 29-12 CBA. ATHLETIC CLUB "A" (298458): try sin jugador, dorsal None (1T 26 Try 5 )
+  aviso LA TABLADA "A" 29-12 CBA. ATHLETIC CLUB "A" (298458): conversion sin jugador, dorsal None (1T 27 Conversión 2 )
+  aviso LA TABLADA "A" 29-12 CBA. ATHLETIC CLUB "A" (298458): try sin jugador, dorsal None (1T 35 Try 5 )
+  aviso LA TABLADA "A" 29-12 CBA. ATHLETIC CLUB "A" (298458): conversion sin jugador, dorsal None (1T 35 Conversión 2 )
+  aviso LA TABLADA "A" 29-12 CBA. ATHLETIC CLUB "A" (298458): try sin jugador, dorsal None (2T 10 Try 5 )
+  aviso LA TABLADA "A" 29-12 CBA. ATHLETIC CLUB "A" (298458): penalty_goal sin jugador, dorsal None (2T 23 Penal 3 )
+  aviso LA TABLADA "A" 29-12 CBA. ATHLETIC CLUB "A" (298458): card_yellow sin jugador, dorsal None (2T 31 Amarilla  )
+  aviso LA TABLADA "A" 29-12 CBA. ATHLETIC CLUB "A" (298458): try sin jugador, dorsal None (2T 35 Try 5 )
+  aviso LA TABLADA "A" 29-12 CBA. ATHLETIC CLUB "A" (298458): conversion sin jugador, dorsal None (2T 35 Conversión 2 )
+  aviso LA TABLADA "A" 29-12 CBA. ATHLETIC CLUB "A" (298458): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 29-12 CBA. ATHLETIC CLUB "A" (298458): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 29-12 CBA. ATHLETIC CLUB "A" (298458): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 29-12 CBA. ATHLETIC CLUB "A" (298458): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 29-12 CBA. ATHLETIC CLUB "A" (298458): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 29-12 CBA. ATHLETIC CLUB "A" (298458): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 29-12 CBA. ATHLETIC CLUB "A" (298458): cambio con dorsal sin jugador None->None
+  aviso CARLOS PAZ R.C. 5-82 UNIVERSITARIO "A" (300952): try sin jugador, dorsal None (1T 23 Try 5 )
+  aviso CARLOS PAZ R.C. 5-82 UNIVERSITARIO "A" (300952): try sin jugador, dorsal None (1T 5 Try 5 )
+  aviso CARLOS PAZ R.C. 5-82 UNIVERSITARIO "A" (300952): try sin jugador, dorsal None (1T 8 Try 5 )
+  aviso CARLOS PAZ R.C. 5-82 UNIVERSITARIO "A" (300952): conversion sin jugador, dorsal None (1T 8 Conversión 2 )
+  aviso CARLOS PAZ R.C. 5-82 UNIVERSITARIO "A" (300952): try sin jugador, dorsal None (1T 10 Try 5 )
+  aviso CARLOS PAZ R.C. 5-82 UNIVERSITARIO "A" (300952): conversion sin jugador, dorsal None (1T 10 Conversión 2 )
+  aviso CARLOS PAZ R.C. 5-82 UNIVERSITARIO "A" (300952): try sin jugador, dorsal None (1T 14 Try 5 )
+  aviso CARLOS PAZ R.C. 5-82 UNIVERSITARIO "A" (300952): conversion sin jugador, dorsal None (1T 14 Conversión 2 )
+  aviso CARLOS PAZ R.C. 5-82 UNIVERSITARIO "A" (300952): try sin jugador, dorsal None (1T 33 Try 5 )
+  aviso CARLOS PAZ R.C. 5-82 UNIVERSITARIO "A" (300952): conversion sin jugador, dorsal None (1T 33 Conversión 2 )
+  aviso CARLOS PAZ R.C. 5-82 UNIVERSITARIO "A" (300952): try sin jugador, dorsal None (1T 35 Try 5 )
+  aviso CARLOS PAZ R.C. 5-82 UNIVERSITARIO "A" (300952): conversion sin jugador, dorsal None (1T 35 Conversión 2 )
+  aviso CARLOS PAZ R.C. 5-82 UNIVERSITARIO "A" (300952): try sin jugador, dorsal None (2T 2 Try 5 )
+  aviso CARLOS PAZ R.C. 5-82 UNIVERSITARIO "A" (300952): conversion sin jugador, dorsal None (2T 2 Conversión 2 )
+  aviso CARLOS PAZ R.C. 5-82 UNIVERSITARIO "A" (300952): try sin jugador, dorsal None (2T 9 Try 5 )
+  aviso CARLOS PAZ R.C. 5-82 UNIVERSITARIO "A" (300952): conversion sin jugador, dorsal None (2T 9 Conversión 2 )
+  aviso CARLOS PAZ R.C. 5-82 UNIVERSITARIO "A" (300952): try sin jugador, dorsal None (2T 20 Try 5 )
+  aviso CARLOS PAZ R.C. 5-82 UNIVERSITARIO "A" (300952): conversion sin jugador, dorsal None (2T 20 Conversión 2 )
+  aviso CARLOS PAZ R.C. 5-82 UNIVERSITARIO "A" (300952): card_yellow sin jugador, dorsal None (2T 28 Amarilla  )
+  aviso CARLOS PAZ R.C. 5-82 UNIVERSITARIO "A" (300952): try sin jugador, dorsal None (2T 31 Try 5 )
+  aviso CARLOS PAZ R.C. 5-82 UNIVERSITARIO "A" (300952): conversion sin jugador, dorsal None (2T 31 Conversión 2 )
+  aviso CARLOS PAZ R.C. 5-82 UNIVERSITARIO "A" (300952): try sin jugador, dorsal None (2T 33 Try 5 )
+  aviso CARLOS PAZ R.C. 5-82 UNIVERSITARIO "A" (300952): conversion sin jugador, dorsal None (2T 33 Conversión 2 )
+  aviso CARLOS PAZ R.C. 5-82 UNIVERSITARIO "A" (300952): try sin jugador, dorsal None (2T 36 Try 5 )
+  aviso CARLOS PAZ R.C. 5-82 UNIVERSITARIO "A" (300952): conversion sin jugador, dorsal None (2T 36 Conversión 2 )
+  aviso CARLOS PAZ R.C. 5-82 UNIVERSITARIO "A" (300952): cambio con dorsal sin jugador None->None
+  aviso CARLOS PAZ R.C. 5-82 UNIVERSITARIO "A" (300952): cambio con dorsal sin jugador None->None
+  aviso CARLOS PAZ R.C. 5-82 UNIVERSITARIO "A" (300952): cambio con dorsal sin jugador None->None
+  aviso CARLOS PAZ R.C. 5-82 UNIVERSITARIO "A" (300952): cambio con dorsal sin jugador None->None
+  aviso CARLOS PAZ R.C. 5-82 UNIVERSITARIO "A" (300952): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "A" 14-38 TALA R.C. "A" (300953): conversion sin jugador, dorsal None (1T 34 Conversión 2 )
+  aviso PALERMO BAJO "A" 14-38 TALA R.C. "A" (300953): try sin jugador, dorsal None (1T 35 Try 5 )
+  aviso PALERMO BAJO "A" 14-38 TALA R.C. "A" (300953): try sin jugador, dorsal None (2T 7 Try 5 )
+  aviso PALERMO BAJO "A" 14-38 TALA R.C. "A" (300953): conversion sin jugador, dorsal None (2T 8 Conversión 2 )
+  aviso PALERMO BAJO "A" 14-38 TALA R.C. "A" (300953): try sin jugador, dorsal None (1T 8 Try 5 )
+  aviso PALERMO BAJO "A" 14-38 TALA R.C. "A" (300953): try sin jugador, dorsal None (1T 10 Try 5 )
+  aviso PALERMO BAJO "A" 14-38 TALA R.C. "A" (300953): penalty_goal sin jugador, dorsal None (1T 25 Penal 3 )
+  aviso PALERMO BAJO "A" 14-38 TALA R.C. "A" (300953): try sin jugador, dorsal None (1T 32 Try 5 )
+  aviso PALERMO BAJO "A" 14-38 TALA R.C. "A" (300953): try sin jugador, dorsal None (2T 10 Try 5 )
+  aviso PALERMO BAJO "A" 14-38 TALA R.C. "A" (300953): try sin jugador, dorsal None (2T 12 Try 5 )
+  aviso PALERMO BAJO "A" 14-38 TALA R.C. "A" (300953): penalty_goal sin jugador, dorsal None (2T 21 Penal 3 )
+  aviso PALERMO BAJO "A" 14-38 TALA R.C. "A" (300953): try sin jugador, dorsal None (2T 33 Try 5 )
+  aviso PALERMO BAJO "A" 14-38 TALA R.C. "A" (300953): conversion sin jugador, dorsal None (2T 34 Conversión 2 )
+  aviso CBA. ATHLETIC CLUB "A" 27-24 PALERMO BAJO "A" (307123): try sin jugador, dorsal None (1T 8 Try 5 )
+  aviso CBA. ATHLETIC CLUB "A" 27-24 PALERMO BAJO "A" (307123): try sin jugador, dorsal None (1T 30 Try 5 )
+  aviso CBA. ATHLETIC CLUB "A" 27-24 PALERMO BAJO "A" (307123): conversion sin jugador, dorsal None (1T 31 Conversión 2 )
+  aviso CBA. ATHLETIC CLUB "A" 27-24 PALERMO BAJO "A" (307123): try sin jugador, dorsal None (2T 4 Try 5 )
+  aviso CBA. ATHLETIC CLUB "A" 27-24 PALERMO BAJO "A" (307123): conversion sin jugador, dorsal None (2T 5 Conversión 2 )
+  aviso CBA. ATHLETIC CLUB "A" 27-24 PALERMO BAJO "A" (307123): try sin jugador, dorsal None (2T 8 Try 5 )
+  aviso TALA R.C. "A" 29-0 CARLOS PAZ R.C. (307124): try sin jugador, dorsal None (1T 10 Try 5 )
+  aviso TALA R.C. "A" 29-0 CARLOS PAZ R.C. (307124): conversion sin jugador, dorsal None (1T 10 Conversión 2 )
+  aviso TALA R.C. "A" 29-0 CARLOS PAZ R.C. (307124): try sin jugador, dorsal None (1T 24 Try 5 )
+  aviso TALA R.C. "A" 29-0 CARLOS PAZ R.C. (307124): conversion sin jugador, dorsal None (1T 24 Conversión 2 )
+  aviso TALA R.C. "A" 29-0 CARLOS PAZ R.C. (307124): try sin jugador, dorsal None (2T 9 Try 5 )
+  aviso TALA R.C. "A" 29-0 CARLOS PAZ R.C. (307124): try sin jugador, dorsal None (2T 12 Try 5 )
+  aviso TALA R.C. "A" 29-0 CARLOS PAZ R.C. (307124): try sin jugador, dorsal None (2T 18 Try 5 )
+  aviso TALA R.C. "A" 29-0 CARLOS PAZ R.C. (307124): card_yellow sin jugador, dorsal None (2T 40 Amarilla  )
+  aviso TALA R.C. "A" 29-0 CARLOS PAZ R.C. (307124): salida sin reemplazo, dorsal None (1T 47)
+  aviso TALA R.C. "A" 29-0 CARLOS PAZ R.C. (307124): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 29-0 CARLOS PAZ R.C. (307124): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 29-0 CARLOS PAZ R.C. (307124): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 29-0 CARLOS PAZ R.C. (307124): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 29-0 CARLOS PAZ R.C. (307124): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 29-0 CARLOS PAZ R.C. (307124): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 54-28 SAN MARTIN R.C. (307125): try sin jugador, dorsal None (1T 7 Try 5 )
+  aviso UNIVERSITARIO "A" 54-28 SAN MARTIN R.C. (307125): conversion sin jugador, dorsal None (1T 7 Conversión 2 )
+  aviso UNIVERSITARIO "A" 54-28 SAN MARTIN R.C. (307125): try sin jugador, dorsal None (1T 9 Try 5 )
+  aviso UNIVERSITARIO "A" 54-28 SAN MARTIN R.C. (307125): conversion sin jugador, dorsal None (1T 9 Conversión 2 )
+  aviso UNIVERSITARIO "A" 54-28 SAN MARTIN R.C. (307125): try sin jugador, dorsal None (1T 19 Try 5 )
+  aviso UNIVERSITARIO "A" 54-28 SAN MARTIN R.C. (307125): conversion sin jugador, dorsal None (1T 19 Conversión 2 )
+  aviso UNIVERSITARIO "A" 54-28 SAN MARTIN R.C. (307125): try sin jugador, dorsal None (1T 26 Try 5 )
+  aviso UNIVERSITARIO "A" 54-28 SAN MARTIN R.C. (307125): try sin jugador, dorsal None (1T 29 Try 5 )
+  aviso UNIVERSITARIO "A" 54-28 SAN MARTIN R.C. (307125): conversion sin jugador, dorsal None (1T 29 Conversión 2 )
+  aviso UNIVERSITARIO "A" 54-28 SAN MARTIN R.C. (307125): try sin jugador, dorsal None (1T 35 Try 5 )
+  aviso UNIVERSITARIO "A" 54-28 SAN MARTIN R.C. (307125): conversion sin jugador, dorsal None (1T 35 Conversión 2 )
+  aviso UNIVERSITARIO "A" 54-28 SAN MARTIN R.C. (307125): try sin jugador, dorsal None (2T 11 Try 5 )
+  aviso UNIVERSITARIO "A" 54-28 SAN MARTIN R.C. (307125): conversion sin jugador, dorsal None (2T 11 Conversión 2 )
+  aviso UNIVERSITARIO "A" 54-28 SAN MARTIN R.C. (307125): card_yellow sin jugador, dorsal None (2T 20 Amarilla  )
+  aviso UNIVERSITARIO "A" 54-28 SAN MARTIN R.C. (307125): try sin jugador, dorsal None (2T 22 Try 5 )
+  aviso UNIVERSITARIO "A" 54-28 SAN MARTIN R.C. (307125): conversion sin jugador, dorsal None (2T 22 Conversión 2 )
+  aviso UNIVERSITARIO "A" 54-28 SAN MARTIN R.C. (307125): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 54-28 SAN MARTIN R.C. (307125): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 54-28 SAN MARTIN R.C. (307125): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 54-28 SAN MARTIN R.C. (307125): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 54-28 SAN MARTIN R.C. (307125): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 54-28 SAN MARTIN R.C. (307125): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 54-28 SAN MARTIN R.C. (307125): cambio con dorsal sin jugador None->None
+  aviso JOCKEY C. VILLA MARIA 21-17 LA TABLADA "A" (307127): penalty_goal sin jugador, dorsal None (1T 8 Penal 3 )
+  aviso JOCKEY C. VILLA MARIA 21-17 LA TABLADA "A" (307127): try sin jugador, dorsal None (1T 18 Try 5 )
+  aviso JOCKEY C. VILLA MARIA 21-17 LA TABLADA "A" (307127): conversion sin jugador, dorsal None (1T 19 Conversión 2 )
+  aviso JOCKEY C. VILLA MARIA 21-17 LA TABLADA "A" (307127): try sin jugador, dorsal None (2T 26 Try 5 )
+  aviso JOCKEY C. VILLA MARIA 21-17 LA TABLADA "A" (307127): conversion sin jugador, dorsal None (2T 27 Conversión 2 )
+  aviso LA TABLADA "A" 27-26 JOCKEY CLUB CORDOBA "A" (308290): penalty_goal sin jugador, dorsal None (1T 8 Penal 3 )
+  aviso LA TABLADA "A" 27-26 JOCKEY CLUB CORDOBA "A" (308290): try sin jugador, dorsal None (1T 26 Try 5 )
+  aviso LA TABLADA "A" 27-26 JOCKEY CLUB CORDOBA "A" (308290): conversion sin jugador, dorsal None (1T 26 Conversión 2 )
+  aviso LA TABLADA "A" 27-26 JOCKEY CLUB CORDOBA "A" (308290): try sin jugador, dorsal None (2T 25 Try 5 )
+  aviso LA TABLADA "A" 27-26 JOCKEY CLUB CORDOBA "A" (308290): conversion sin jugador, dorsal None (2T 25 Conversión 2 )
+  aviso LA TABLADA "A" 27-26 JOCKEY CLUB CORDOBA "A" (308290): penalty_goal sin jugador, dorsal None (2T 32 Penal 3 )
+  aviso LA TABLADA "A" 27-26 JOCKEY CLUB CORDOBA "A" (308290): try sin jugador, dorsal None (2T 35 Try 5 )
+  aviso LA TABLADA "A" 27-26 JOCKEY CLUB CORDOBA "A" (308290): conversion sin jugador, dorsal None (2T 35 Conversión 2 )
+  aviso LA TABLADA "A" 27-26 JOCKEY CLUB CORDOBA "A" (308290): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 27-26 JOCKEY CLUB CORDOBA "A" (308290): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 27-26 JOCKEY CLUB CORDOBA "A" (308290): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 27-26 JOCKEY CLUB CORDOBA "A" (308290): cambio con dorsal sin jugador None->None
+  aviso URU CURE "A" 27-14 UNIVERSITARIO "A" (308291): salida sin reemplazo, dorsal 10 (1T 35)
+  aviso URU CURE "A" 27-14 UNIVERSITARIO "A" (308291): ingreso sin salida, dorsal 22 (2T 36)
+  aviso URU CURE "A" 27-14 UNIVERSITARIO "A" (308291): try sin jugador, dorsal None (1T 6 Try 5 )
+  aviso URU CURE "A" 27-14 UNIVERSITARIO "A" (308291): conversion sin jugador, dorsal None (1T 6 Conversión 2 )
+  aviso URU CURE "A" 27-14 UNIVERSITARIO "A" (308291): try sin jugador, dorsal None (1T 15 Try 5 )
+  aviso URU CURE "A" 27-14 UNIVERSITARIO "A" (308291): conversion sin jugador, dorsal None (1T 15 Conversión 2 )
+  aviso URU CURE "A" 27-14 UNIVERSITARIO "A" (308291): card_yellow sin jugador, dorsal None (2T 12 Amarilla  )
+  aviso URU CURE "A" 27-14 UNIVERSITARIO "A" (308291): cambio con dorsal sin jugador None->None
+  aviso URU CURE "A" 27-14 UNIVERSITARIO "A" (308291): cambio con dorsal sin jugador None->None
+  aviso URU CURE "A" 27-14 UNIVERSITARIO "A" (308291): cambio con dorsal sin jugador None->None
+308292: EVENTOS NO CIERRAN SAN MARTIN R.C. 21-38 TALA R.C. "A" (308292): eventos 0-0 (308292)
+  aviso CARLOS PAZ R.C. 0-78 PALERMO BAJO "A" (308293): card_yellow sin jugador, dorsal None (1T 27 Amarilla  )
+  aviso CARLOS PAZ R.C. 0-78 PALERMO BAJO "A" (308293): injury sin jugador, dorsal None (2T 6 Lesionado  )
+  aviso CARLOS PAZ R.C. 0-78 PALERMO BAJO "A" (308293): try sin jugador, dorsal None (1T 2 Try 5 )
+  aviso CARLOS PAZ R.C. 0-78 PALERMO BAJO "A" (308293): try sin jugador, dorsal None (1T 5 Try 5 )
+  aviso CARLOS PAZ R.C. 0-78 PALERMO BAJO "A" (308293): conversion sin jugador, dorsal None (1T 6 Conversión 2 )
+  aviso CARLOS PAZ R.C. 0-78 PALERMO BAJO "A" (308293): try sin jugador, dorsal None (1T 11 Try 5 )
+  aviso CARLOS PAZ R.C. 0-78 PALERMO BAJO "A" (308293): try sin jugador, dorsal None (1T 21 Try 5 )
+  aviso CARLOS PAZ R.C. 0-78 PALERMO BAJO "A" (308293): try sin jugador, dorsal None (1T 24 Try 5 )
+  aviso CARLOS PAZ R.C. 0-78 PALERMO BAJO "A" (308293): conversion sin jugador, dorsal None (1T 25 Conversión 2 )
+  aviso CARLOS PAZ R.C. 0-78 PALERMO BAJO "A" (308293): try sin jugador, dorsal None (1T 30 Try 5 )
+  aviso CARLOS PAZ R.C. 0-78 PALERMO BAJO "A" (308293): conversion sin jugador, dorsal None (1T 31 Conversión 2 )
+  aviso CARLOS PAZ R.C. 0-78 PALERMO BAJO "A" (308293): try sin jugador, dorsal None (1T 38 Try 5 )
+  aviso CARLOS PAZ R.C. 0-78 PALERMO BAJO "A" (308293): conversion sin jugador, dorsal None (1T 38 Conversión 2 )
+  aviso CARLOS PAZ R.C. 0-78 PALERMO BAJO "A" (308293): try sin jugador, dorsal None (2T 1 Try 5 )
+  aviso CARLOS PAZ R.C. 0-78 PALERMO BAJO "A" (308293): conversion sin jugador, dorsal None (2T 2 Conversión 2 )
+  aviso CARLOS PAZ R.C. 0-78 PALERMO BAJO "A" (308293): try sin jugador, dorsal None (2T 7 Try 5 )
+  aviso CARLOS PAZ R.C. 0-78 PALERMO BAJO "A" (308293): conversion sin jugador, dorsal None (2T 8 Conversión 2 )
+  aviso CARLOS PAZ R.C. 0-78 PALERMO BAJO "A" (308293): try sin jugador, dorsal None (2T 28 Try 5 )
+  aviso CARLOS PAZ R.C. 0-78 PALERMO BAJO "A" (308293): conversion sin jugador, dorsal None (2T 29 Conversión 2 )
+  aviso CARLOS PAZ R.C. 0-78 PALERMO BAJO "A" (308293): try sin jugador, dorsal None (2T 31 Try 5 )
+  aviso CARLOS PAZ R.C. 0-78 PALERMO BAJO "A" (308293): conversion sin jugador, dorsal None (2T 32 Conversión 2 )
+  aviso CARLOS PAZ R.C. 0-78 PALERMO BAJO "A" (308293): try sin jugador, dorsal None (2T 35 Try 5 )
+  aviso CARLOS PAZ R.C. 0-78 PALERMO BAJO "A" (308293): injury sin jugador, dorsal None (2T 35 Lesionado  )
+  aviso CARLOS PAZ R.C. 0-78 PALERMO BAJO "A" (308293): conversion sin jugador, dorsal None (2T 36 Conversión 2 )
+  aviso CARLOS PAZ R.C. 0-78 PALERMO BAJO "A" (308293): cambio con dorsal sin jugador None->None
+  aviso CARLOS PAZ R.C. 0-78 PALERMO BAJO "A" (308293): cambio con dorsal sin jugador None->None
+  aviso CARLOS PAZ R.C. 0-78 PALERMO BAJO "A" (308293): cambio con dorsal sin jugador None->None
+  aviso CARLOS PAZ R.C. 0-78 PALERMO BAJO "A" (308293): cambio con dorsal sin jugador None->None
+  aviso CARLOS PAZ R.C. 0-78 PALERMO BAJO "A" (308293): cambio con dorsal sin jugador None->None
+308662: sin plantel utilizable (308662)
+308663: sin plantel utilizable (308663)
+  aviso TALA R.C. "A" 92-0 URU CURE "A" (308664): try sin jugador, dorsal None (1T 2 Try 5 )
+  aviso TALA R.C. "A" 92-0 URU CURE "A" (308664): conversion sin jugador, dorsal None (1T 2 Conversión 2 )
+  aviso TALA R.C. "A" 92-0 URU CURE "A" (308664): try sin jugador, dorsal None (1T 4 Try 5 )
+  aviso TALA R.C. "A" 92-0 URU CURE "A" (308664): try sin jugador, dorsal None (1T 7 Try 5 )
+  aviso TALA R.C. "A" 92-0 URU CURE "A" (308664): conversion sin jugador, dorsal None (1T 7 Conversión 2 )
+  aviso TALA R.C. "A" 92-0 URU CURE "A" (308664): try sin jugador, dorsal None (1T 12 Try 5 )
+  aviso TALA R.C. "A" 92-0 URU CURE "A" (308664): try sin jugador, dorsal None (1T 14 Try 5 )
+  aviso TALA R.C. "A" 92-0 URU CURE "A" (308664): conversion sin jugador, dorsal None (1T 14 Conversión 2 )
+  aviso TALA R.C. "A" 92-0 URU CURE "A" (308664): try sin jugador, dorsal None (1T 20 Try 5 )
+  aviso TALA R.C. "A" 92-0 URU CURE "A" (308664): conversion sin jugador, dorsal None (1T 20 Conversión 2 )
+  aviso TALA R.C. "A" 92-0 URU CURE "A" (308664): try sin jugador, dorsal None (1T 27 Try 5 )
+  aviso TALA R.C. "A" 92-0 URU CURE "A" (308664): conversion sin jugador, dorsal None (1T 27 Conversión 2 )
+  aviso TALA R.C. "A" 92-0 URU CURE "A" (308664): try sin jugador, dorsal None (1T 35 Try 5 )
+  aviso TALA R.C. "A" 92-0 URU CURE "A" (308664): conversion sin jugador, dorsal None (1T 35 Conversión 2 )
+  aviso TALA R.C. "A" 92-0 URU CURE "A" (308664): try sin jugador, dorsal None (2T 6 Try 5 )
+  aviso TALA R.C. "A" 92-0 URU CURE "A" (308664): conversion sin jugador, dorsal None (2T 6 Conversión 2 )
+  aviso TALA R.C. "A" 92-0 URU CURE "A" (308664): try sin jugador, dorsal None (2T 8 Try 5 )
+  aviso TALA R.C. "A" 92-0 URU CURE "A" (308664): conversion sin jugador, dorsal None (2T 8 Conversión 2 )
+  aviso TALA R.C. "A" 92-0 URU CURE "A" (308664): try sin jugador, dorsal None (2T 17 Try 5 )
+  aviso TALA R.C. "A" 92-0 URU CURE "A" (308664): conversion sin jugador, dorsal None (2T 17 Conversión 2 )
+  aviso TALA R.C. "A" 92-0 URU CURE "A" (308664): try sin jugador, dorsal None (2T 20 Try 5 )
+  aviso TALA R.C. "A" 92-0 URU CURE "A" (308664): try sin jugador, dorsal None (2T 22 Try 5 )
+  aviso TALA R.C. "A" 92-0 URU CURE "A" (308664): try sin jugador, dorsal None (2T 34 Try 5 )
+  aviso TALA R.C. "A" 92-0 URU CURE "A" (308664): conversion sin jugador, dorsal None (2T 34 Conversión 2 )
+  aviso TALA R.C. "A" 92-0 URU CURE "A" (308664): conversion sin jugador, dorsal None (2T 34 Conversión 2 )
+  aviso TALA R.C. "A" 92-0 URU CURE "A" (308664): salida sin reemplazo, dorsal None (2T 10)
+  aviso TALA R.C. "A" 92-0 URU CURE "A" (308664): salida sin reemplazo, dorsal None (2T 10)
+  aviso TALA R.C. "A" 92-0 URU CURE "A" (308664): salida sin reemplazo, dorsal None (2T 10)
+  aviso TALA R.C. "A" 92-0 URU CURE "A" (308664): salida sin reemplazo, dorsal None (2T 10)
+  aviso TALA R.C. "A" 92-0 URU CURE "A" (308664): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 92-0 URU CURE "A" (308664): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 92-0 URU CURE "A" (308664): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 92-0 URU CURE "A" (308664): card_yellow sin jugador, dorsal None (1T 23 Amarilla  )
+  aviso UNIVERSITARIO "A" 21-31 LA TABLADA "A" (308665): penalty_goal sin jugador, dorsal None (1T 10 Penal 3 )
+  aviso UNIVERSITARIO "A" 21-31 LA TABLADA "A" (308665): penalty_goal sin jugador, dorsal None (1T 25 Penal 3 )
+  aviso UNIVERSITARIO "A" 21-31 LA TABLADA "A" (308665): try sin jugador, dorsal None (1T 35 Try 5 )
+  aviso UNIVERSITARIO "A" 21-31 LA TABLADA "A" (308665): penalty_goal sin jugador, dorsal None (2T 3 Penal 3 )
+  aviso UNIVERSITARIO "A" 21-31 LA TABLADA "A" (308665): try sin jugador, dorsal None (2T 12 Try 5 )
+  aviso UNIVERSITARIO "A" 21-31 LA TABLADA "A" (308665): conversion sin jugador, dorsal None (2T 12 Conversión 2 )
+  aviso UNIVERSITARIO "A" 21-31 LA TABLADA "A" (308665): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 21-31 LA TABLADA "A" (308665): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 21-31 LA TABLADA "A" (308665): try sin jugador, dorsal None (1T 15 Try 5 )
+  aviso UNIVERSITARIO "A" 21-31 LA TABLADA "A" (308665): conversion sin jugador, dorsal None (1T 15 Conversión 2 )
+  aviso UNIVERSITARIO "A" 21-31 LA TABLADA "A" (308665): try sin jugador, dorsal None (1T 25 Try 5 )
+  aviso UNIVERSITARIO "A" 21-31 LA TABLADA "A" (308665): conversion sin jugador, dorsal None (1T 25 Conversión 2 )
+  aviso UNIVERSITARIO "A" 21-31 LA TABLADA "A" (308665): penalty_goal sin jugador, dorsal None (2T 19 Penal 3 )
+  aviso UNIVERSITARIO "A" 21-31 LA TABLADA "A" (308665): try sin jugador, dorsal None (2T 20 Try 5 )
+  aviso UNIVERSITARIO "A" 21-31 LA TABLADA "A" (308665): conversion sin jugador, dorsal None (2T 20 Conversión 2 )
+  aviso UNIVERSITARIO "A" 21-31 LA TABLADA "A" (308665): try sin jugador, dorsal None (2T 25 Try 5 )
+  aviso UNIVERSITARIO "A" 21-31 LA TABLADA "A" (308665): conversion sin jugador, dorsal None (2T 25 Conversión 2 )
+  aviso UNIVERSITARIO "A" 21-31 LA TABLADA "A" (308665): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 21-31 LA TABLADA "A" (308665): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 21-31 LA TABLADA "A" (308665): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 21-31 LA TABLADA "A" (308665): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 21-31 LA TABLADA "A" (308665): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 21-31 LA TABLADA "A" (308665): cambio con dorsal sin jugador None->None
+  aviso SAN MARTIN R.C. 31-14 CARLOS PAZ R.C. (309577): try sin jugador, dorsal None (1T 5 Try 5 )
+  aviso SAN MARTIN R.C. 31-14 CARLOS PAZ R.C. (309577): conversion sin jugador, dorsal None (1T 5 Conversión 2 )
+  aviso SAN MARTIN R.C. 31-14 CARLOS PAZ R.C. (309577): try sin jugador, dorsal None (2T 27 Try 5 )
+  aviso SAN MARTIN R.C. 31-14 CARLOS PAZ R.C. (309577): conversion sin jugador, dorsal None (2T 27 Conversión 2 )
+  aviso JOCKEY C. VILLA MARIA 12-26 UNIVERSITARIO "A" (309578): conversion sin jugador, dorsal None (1T 18 Conversión 2 )
+  aviso JOCKEY C. VILLA MARIA 12-26 UNIVERSITARIO "A" (309578): try sin jugador, dorsal None (1T 18 Try 5 )
+  aviso JOCKEY C. VILLA MARIA 12-26 UNIVERSITARIO "A" (309578): try sin jugador, dorsal None (1T 35 Try 5 )
+  aviso JOCKEY C. VILLA MARIA 12-26 UNIVERSITARIO "A" (309578): conversion sin jugador, dorsal None (1T 35 Conversión 2 )
+  aviso JOCKEY C. VILLA MARIA 12-26 UNIVERSITARIO "A" (309578): try sin jugador, dorsal None (2T 11 Try 5 )
+  aviso JOCKEY C. VILLA MARIA 12-26 UNIVERSITARIO "A" (309578): conversion sin jugador, dorsal None (2T 11 Conversión 2 )
+  aviso JOCKEY C. VILLA MARIA 12-26 UNIVERSITARIO "A" (309578): try sin jugador, dorsal None (2T 14 Try 5 )
+  aviso JOCKEY C. VILLA MARIA 12-26 UNIVERSITARIO "A" (309578): cambio con dorsal sin jugador None->None
+  aviso JOCKEY C. VILLA MARIA 12-26 UNIVERSITARIO "A" (309578): cambio con dorsal sin jugador None->None
+  aviso JOCKEY C. VILLA MARIA 12-26 UNIVERSITARIO "A" (309578): cambio con dorsal sin jugador None->None
+  aviso JOCKEY C. VILLA MARIA 12-26 UNIVERSITARIO "A" (309578): cambio con dorsal sin jugador None->None
+  aviso JOCKEY C. VILLA MARIA 12-26 UNIVERSITARIO "A" (309578): cambio con dorsal sin jugador None->None
+  aviso JOCKEY C. VILLA MARIA 12-26 UNIVERSITARIO "A" (309578): cambio con dorsal sin jugador None->None
+  aviso JOCKEY C. VILLA MARIA 12-26 UNIVERSITARIO "A" (309578): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 14-28 TALA R.C. "A" (309579): try sin jugador, dorsal None (2T 16 Try 5 )
+  aviso LA TABLADA "A" 14-28 TALA R.C. "A" (309579): conversion sin jugador, dorsal None (2T 16 Conversión 2 )
+  aviso LA TABLADA "A" 14-28 TALA R.C. "A" (309579): try sin jugador, dorsal None (2T 35 Try 5 )
+  aviso LA TABLADA "A" 14-28 TALA R.C. "A" (309579): conversion sin jugador, dorsal None (2T 35 Conversión 2 )
+  aviso LA TABLADA "A" 14-28 TALA R.C. "A" (309579): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 14-28 TALA R.C. "A" (309579): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 14-28 TALA R.C. "A" (309579): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 14-28 TALA R.C. "A" (309579): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 14-28 TALA R.C. "A" (309579): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 14-28 TALA R.C. "A" (309579): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 14-28 TALA R.C. "A" (309579): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 14-28 TALA R.C. "A" (309579): try sin jugador, dorsal None (1T 6 Try 5 )
+  aviso LA TABLADA "A" 14-28 TALA R.C. "A" (309579): conversion sin jugador, dorsal None (1T 6 Conversión 2 )
+  aviso LA TABLADA "A" 14-28 TALA R.C. "A" (309579): try sin jugador, dorsal None (1T 22 Try 5 )
+  aviso LA TABLADA "A" 14-28 TALA R.C. "A" (309579): conversion sin jugador, dorsal None (1T 22 Conversión 2 )
+  aviso LA TABLADA "A" 14-28 TALA R.C. "A" (309579): try sin jugador, dorsal None (2T 20 Try 5 )
+  aviso LA TABLADA "A" 14-28 TALA R.C. "A" (309579): conversion sin jugador, dorsal None (2T 20 Conversión 2 )
+  aviso LA TABLADA "A" 14-28 TALA R.C. "A" (309579): try sin jugador, dorsal None (2T 25 Try 5 )
+  aviso LA TABLADA "A" 14-28 TALA R.C. "A" (309579): conversion sin jugador, dorsal None (2T 25 Conversión 2 )
+  aviso LA TABLADA "A" 14-28 TALA R.C. "A" (309579): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 14-28 TALA R.C. "A" (309579): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 14-28 TALA R.C. "A" (309579): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 14-28 TALA R.C. "A" (309579): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 14-28 TALA R.C. "A" (309579): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 14-28 TALA R.C. "A" (309579): cambio con dorsal sin jugador None->None
+  aviso URU CURE "A" 16-17 PALERMO BAJO "A" (309580): try sin jugador, dorsal None (1T 16 Try 5 )
+  aviso URU CURE "A" 16-17 PALERMO BAJO "A" (309580): try sin jugador, dorsal None (2T 20 Try 5 )
+  aviso URU CURE "A" 16-17 PALERMO BAJO "A" (309580): conversion sin jugador, dorsal None (2T 21 Conversión 2 )
+  aviso URU CURE "A" 16-17 PALERMO BAJO "A" (309580): try sin jugador, dorsal None (2T 38 Try 5 )
+  aviso URU CURE "A" 16-17 PALERMO BAJO "A" (309580): cambio con dorsal sin jugador None->None
+  aviso URU CURE "A" 16-17 PALERMO BAJO "A" (309580): cambio con dorsal sin jugador None->None
+  aviso URU CURE "A" 16-17 PALERMO BAJO "A" (309580): cambio con dorsal sin jugador None->None
+  aviso CARLOS PAZ R.C. 15-52 URU CURE "A" (310334): try sin jugador, dorsal None (1T 15 Try 5 )
+  aviso CARLOS PAZ R.C. 15-52 URU CURE "A" (310334): try sin jugador, dorsal None (1T 20 Try 5 )
+  aviso CARLOS PAZ R.C. 15-52 URU CURE "A" (310334): try sin jugador, dorsal None (2T 20 Try 5 )
+  aviso CARLOS PAZ R.C. 15-52 URU CURE "A" (310334): blue sin jugador, dorsal None (2T 35 Tarjeta azul  )
+  aviso CARLOS PAZ R.C. 15-52 URU CURE "A" (310334): cambio con dorsal sin jugador 7->None
+  aviso PALERMO BAJO "A" 25-22 LA TABLADA "A" (310335): try sin jugador, dorsal None (1T 4 Try 5 )
+  aviso PALERMO BAJO "A" 25-22 LA TABLADA "A" (310335): try sin jugador, dorsal None (2T 4 Try 5 )
+  aviso PALERMO BAJO "A" 25-22 LA TABLADA "A" (310335): try sin jugador, dorsal None (2T 14 Try 5 )
+  aviso PALERMO BAJO "A" 25-22 LA TABLADA "A" (310335): try sin jugador, dorsal None (2T 30 Try 5 )
+  aviso PALERMO BAJO "A" 25-22 LA TABLADA "A" (310335): conversion sin jugador, dorsal None (2T 31 Conversión 2 )
+  aviso PALERMO BAJO "A" 25-22 LA TABLADA "A" (310335): penalty_goal sin jugador, dorsal None (2T 35 Penal 3 )
+  aviso PALERMO BAJO "A" 25-22 LA TABLADA "A" (310335): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "A" 25-22 LA TABLADA "A" (310335): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "A" 25-22 LA TABLADA "A" (310335): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "A" 25-22 LA TABLADA "A" (310335): try sin jugador, dorsal None (1T 21 Try 5 )
+  aviso PALERMO BAJO "A" 25-22 LA TABLADA "A" (310335): penalty_goal sin jugador, dorsal None (1T 21 Penal 3 )
+  aviso PALERMO BAJO "A" 25-22 LA TABLADA "A" (310335): try sin jugador, dorsal None (1T 21 Try 5 )
+  aviso PALERMO BAJO "A" 25-22 LA TABLADA "A" (310335): conversion sin jugador, dorsal None (1T 21 Conversión 2 )
+  aviso PALERMO BAJO "A" 25-22 LA TABLADA "A" (310335): try sin jugador, dorsal None (1T 21 Try 5 )
+  aviso PALERMO BAJO "A" 25-22 LA TABLADA "A" (310335): conversion sin jugador, dorsal None (1T 21 Conversión 2 )
+  aviso TALA R.C. "A" 66-7 JOCKEY C. VILLA MARIA (310336): try sin jugador, dorsal None (1T 4 Try 5 )
+  aviso TALA R.C. "A" 66-7 JOCKEY C. VILLA MARIA (310336): conversion sin jugador, dorsal None (1T 4 Conversión 2 )
+  aviso TALA R.C. "A" 66-7 JOCKEY C. VILLA MARIA (310336): try sin jugador, dorsal None (1T 13 Try 5 )
+  aviso TALA R.C. "A" 66-7 JOCKEY C. VILLA MARIA (310336): conversion sin jugador, dorsal None (1T 13 Conversión 2 )
+  aviso TALA R.C. "A" 66-7 JOCKEY C. VILLA MARIA (310336): try sin jugador, dorsal None (1T 20 Try 5 )
+  aviso TALA R.C. "A" 66-7 JOCKEY C. VILLA MARIA (310336): try sin jugador, dorsal None (1T 22 Try 5 )
+  aviso TALA R.C. "A" 66-7 JOCKEY C. VILLA MARIA (310336): conversion sin jugador, dorsal None (1T 22 Conversión 2 )
+  aviso TALA R.C. "A" 66-7 JOCKEY C. VILLA MARIA (310336): try sin jugador, dorsal None (1T 31 Try 5 )
+  aviso TALA R.C. "A" 66-7 JOCKEY C. VILLA MARIA (310336): try sin jugador, dorsal None (1T 34 Try 5 )
+  aviso TALA R.C. "A" 66-7 JOCKEY C. VILLA MARIA (310336): conversion sin jugador, dorsal None (1T 34 Conversión 2 )
+  aviso TALA R.C. "A" 66-7 JOCKEY C. VILLA MARIA (310336): try sin jugador, dorsal None (2T 2 Try 5 )
+  aviso TALA R.C. "A" 66-7 JOCKEY C. VILLA MARIA (310336): conversion sin jugador, dorsal None (2T 2 Conversión 2 )
+  aviso TALA R.C. "A" 66-7 JOCKEY C. VILLA MARIA (310336): try sin jugador, dorsal None (2T 5 Try 5 )
+  aviso TALA R.C. "A" 66-7 JOCKEY C. VILLA MARIA (310336): conversion sin jugador, dorsal None (2T 5 Conversión 2 )
+  aviso TALA R.C. "A" 66-7 JOCKEY C. VILLA MARIA (310336): try sin jugador, dorsal None (2T 22 Try 5 )
+  aviso TALA R.C. "A" 66-7 JOCKEY C. VILLA MARIA (310336): conversion sin jugador, dorsal None (2T 22 Conversión 2 )
+  aviso TALA R.C. "A" 66-7 JOCKEY C. VILLA MARIA (310336): try sin jugador, dorsal None (2T 34 Try 5 )
+  aviso TALA R.C. "A" 66-7 JOCKEY C. VILLA MARIA (310336): conversion sin jugador, dorsal None (2T 34 Conversión 2 )
+  aviso UNIVERSITARIO "A" 28-31 JOCKEY CLUB CORDOBA "A" (310337): try sin jugador, dorsal None (1T 5 Try 5 )
+  aviso UNIVERSITARIO "A" 28-31 JOCKEY CLUB CORDOBA "A" (310337): conversion sin jugador, dorsal None (1T 5 Conversión 2 )
+  aviso UNIVERSITARIO "A" 28-31 JOCKEY CLUB CORDOBA "A" (310337): try sin jugador, dorsal None (1T 30 Try 5 )
+  aviso UNIVERSITARIO "A" 28-31 JOCKEY CLUB CORDOBA "A" (310337): conversion sin jugador, dorsal None (1T 30 Conversión 2 )
+  aviso UNIVERSITARIO "A" 28-31 JOCKEY CLUB CORDOBA "A" (310337): penalty_goal sin jugador, dorsal None (1T 35 Penal 3 )
+  aviso UNIVERSITARIO "A" 28-31 JOCKEY CLUB CORDOBA "A" (310337): penalty_goal sin jugador, dorsal None (2T 5 Penal 3 )
+  aviso UNIVERSITARIO "A" 28-31 JOCKEY CLUB CORDOBA "A" (310337): try sin jugador, dorsal None (2T 10 Try 5 )
+  aviso UNIVERSITARIO "A" 28-31 JOCKEY CLUB CORDOBA "A" (310337): card_yellow sin jugador, dorsal None (2T 20 Amarilla  )
+  aviso UNIVERSITARIO "A" 28-31 JOCKEY CLUB CORDOBA "A" (310337): penalty_goal sin jugador, dorsal None (2T 29 Penal 3 )
+  aviso UNIVERSITARIO "A" 28-31 JOCKEY CLUB CORDOBA "A" (310337): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 28-31 JOCKEY CLUB CORDOBA "A" (310337): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 5-29 CBA. ATHLETIC CLUB "A" (311558): try sin jugador, dorsal None (1T 7 Try 5 )
+  aviso TALA R.C. "A" 52-42 JOCKEY CLUB CORDOBA "A" (311559): try sin jugador, dorsal None (1T 10 Try 5 )
+  aviso TALA R.C. "A" 52-42 JOCKEY CLUB CORDOBA "A" (311559): conversion sin jugador, dorsal None (1T 10 Conversión 2 )
+  aviso TALA R.C. "A" 52-42 JOCKEY CLUB CORDOBA "A" (311559): try sin jugador, dorsal None (1T 14 Try 5 )
+  aviso TALA R.C. "A" 52-42 JOCKEY CLUB CORDOBA "A" (311559): conversion sin jugador, dorsal None (1T 14 Conversión 2 )
+  aviso TALA R.C. "A" 52-42 JOCKEY CLUB CORDOBA "A" (311559): try sin jugador, dorsal None (1T 22 Try 5 )
+  aviso TALA R.C. "A" 52-42 JOCKEY CLUB CORDOBA "A" (311559): conversion sin jugador, dorsal None (1T 22 Conversión 2 )
+  aviso TALA R.C. "A" 52-42 JOCKEY CLUB CORDOBA "A" (311559): try sin jugador, dorsal None (1T 28 Try 5 )
+  aviso TALA R.C. "A" 52-42 JOCKEY CLUB CORDOBA "A" (311559): conversion sin jugador, dorsal None (1T 28 Conversión 2 )
+  aviso TALA R.C. "A" 52-42 JOCKEY CLUB CORDOBA "A" (311559): try sin jugador, dorsal None (1T 34 Try 5 )
+  aviso TALA R.C. "A" 52-42 JOCKEY CLUB CORDOBA "A" (311559): try sin jugador, dorsal None (2T 12 Try 5 )
+  aviso TALA R.C. "A" 52-42 JOCKEY CLUB CORDOBA "A" (311559): conversion sin jugador, dorsal None (2T 12 Conversión 2 )
+  aviso TALA R.C. "A" 52-42 JOCKEY CLUB CORDOBA "A" (311559): try sin jugador, dorsal None (2T 24 Try 5 )
+  aviso TALA R.C. "A" 52-42 JOCKEY CLUB CORDOBA "A" (311559): try sin jugador, dorsal None (2T 32 Try 5 )
+  aviso TALA R.C. "A" 52-42 JOCKEY CLUB CORDOBA "A" (311559): conversion sin jugador, dorsal None (2T 32 Conversión 2 )
+  aviso TALA R.C. "A" 52-42 JOCKEY CLUB CORDOBA "A" (311559): card_yellow sin jugador, dorsal None (2T 42 Amarilla  )
+  aviso TALA R.C. "A" 52-42 JOCKEY CLUB CORDOBA "A" (311559): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 52-42 JOCKEY CLUB CORDOBA "A" (311559): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 52-42 JOCKEY CLUB CORDOBA "A" (311559): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 52-42 JOCKEY CLUB CORDOBA "A" (311559): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 52-42 JOCKEY CLUB CORDOBA "A" (311559): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "A" 19-19 JOCKEY C. VILLA MARIA (311560): try sin jugador, dorsal None (1T 14 Try 5 )
+  aviso PALERMO BAJO "A" 19-19 JOCKEY C. VILLA MARIA (311560): conversion sin jugador, dorsal None (1T 15 Conversión 2 )
+  aviso PALERMO BAJO "A" 19-19 JOCKEY C. VILLA MARIA (311560): try sin jugador, dorsal None (1T 20 Try 5 )
+  aviso PALERMO BAJO "A" 19-19 JOCKEY C. VILLA MARIA (311560): try sin jugador, dorsal None (2T 26 Try 5 )
+  aviso PALERMO BAJO "A" 19-19 JOCKEY C. VILLA MARIA (311560): conversion sin jugador, dorsal None (2T 27 Conversión 2 )
+  aviso PALERMO BAJO "A" 19-19 JOCKEY C. VILLA MARIA (311560): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "A" 19-19 JOCKEY C. VILLA MARIA (311560): cambio con dorsal sin jugador None->None
+311561: sin plantel utilizable (311561)
+  aviso LA TABLADA "A" 53-12 SAN MARTIN R.C. (312567): try sin jugador, dorsal None (1T 7 Try 5 )
+  aviso LA TABLADA "A" 53-12 SAN MARTIN R.C. (312567): try sin jugador, dorsal None (1T 12 Try 5 )
+  aviso LA TABLADA "A" 53-12 SAN MARTIN R.C. (312567): card_yellow sin jugador, dorsal None (1T 20 Amarilla  )
+  aviso LA TABLADA "A" 53-12 SAN MARTIN R.C. (312567): try sin jugador, dorsal None (1T 22 Try 5 )
+  aviso LA TABLADA "A" 53-12 SAN MARTIN R.C. (312567): conversion sin jugador, dorsal None (1T 23 Conversión 2 )
+  aviso LA TABLADA "A" 53-12 SAN MARTIN R.C. (312567): try sin jugador, dorsal None (1T 24 Try 5 )
+  aviso LA TABLADA "A" 53-12 SAN MARTIN R.C. (312567): conversion sin jugador, dorsal None (1T 25 Conversión 2 )
+  aviso LA TABLADA "A" 53-12 SAN MARTIN R.C. (312567): try sin jugador, dorsal None (1T 32 Try 5 )
+  aviso LA TABLADA "A" 53-12 SAN MARTIN R.C. (312567): try sin jugador, dorsal None (2T 1 Try 5 )
+  aviso LA TABLADA "A" 53-12 SAN MARTIN R.C. (312567): card_yellow sin jugador, dorsal None (2T 10 Amarilla  )
+  aviso LA TABLADA "A" 53-12 SAN MARTIN R.C. (312567): try sin jugador, dorsal None (2T 15 Try 5 )
+  aviso LA TABLADA "A" 53-12 SAN MARTIN R.C. (312567): try sin jugador, dorsal None (2T 28 Try 5 )
+  aviso LA TABLADA "A" 53-12 SAN MARTIN R.C. (312567): conversion sin jugador, dorsal None (2T 29 Conversión 2 )
+  aviso LA TABLADA "A" 53-12 SAN MARTIN R.C. (312567): try sin jugador, dorsal None (2T 35 Try 5 )
+  aviso LA TABLADA "A" 53-12 SAN MARTIN R.C. (312567): conversion sin jugador, dorsal None (2T 36 Conversión 2 )
+  aviso JOCKEY C. VILLA MARIA 115-5 CARLOS PAZ R.C. (312568): card_yellow sin jugador, dorsal None (1T 15 Amarilla  )
+  aviso JOCKEY C. VILLA MARIA 115-5 CARLOS PAZ R.C. (312568): try sin jugador, dorsal None (2T 40 Try 5 )
+  aviso JOCKEY C. VILLA MARIA 115-5 CARLOS PAZ R.C. (312568): card_yellow sin jugador, dorsal None (2T 55 Amarilla  )
+  aviso JOCKEY CLUB CORDOBA "A" 14-32 PALERMO BAJO "A" (312569): try sin jugador, dorsal None (1T 10 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "A" 14-32 PALERMO BAJO "A" (312569): conversion sin jugador, dorsal None (1T 10 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "A" 14-32 PALERMO BAJO "A" (312569): try sin jugador, dorsal None (1T 10 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "A" 14-32 PALERMO BAJO "A" (312569): conversion sin jugador, dorsal None (1T 10 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "A" 14-32 PALERMO BAJO "A" (312569): try sin jugador, dorsal None (1T 10 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "A" 14-32 PALERMO BAJO "A" (312569): conversion sin jugador, dorsal None (1T 11 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "A" 14-32 PALERMO BAJO "A" (312569): penalty_goal sin jugador, dorsal None (1T 16 Penal 3 )
+  aviso JOCKEY CLUB CORDOBA "A" 14-32 PALERMO BAJO "A" (312569): injury sin jugador, dorsal None (1T 20 Lesionado  )
+  aviso JOCKEY CLUB CORDOBA "A" 14-32 PALERMO BAJO "A" (312569): try sin jugador, dorsal None (1T 23 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "A" 14-32 PALERMO BAJO "A" (312569): conversion sin jugador, dorsal None (1T 24 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "A" 14-32 PALERMO BAJO "A" (312569): try sin jugador, dorsal None (1T 34 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "A" 14-32 PALERMO BAJO "A" (312569): try sin jugador, dorsal None (2T 10 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "A" 14-32 PALERMO BAJO "A" (312569): try sin jugador, dorsal None (2T 30 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "A" 14-32 PALERMO BAJO "A" (312569): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "A" 14-32 PALERMO BAJO "A" (312569): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "A" 14-32 PALERMO BAJO "A" (312569): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "A" 14-32 PALERMO BAJO "A" (312569): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "A" 14-32 PALERMO BAJO "A" (312569): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 19-29 TALA R.C. "A" (312570): try sin jugador, dorsal None (1T 23 Try 5 )
+  aviso UNIVERSITARIO "A" 19-29 TALA R.C. "A" (312570): conversion sin jugador, dorsal None (1T 23 Conversión 2 )
+  aviso UNIVERSITARIO "A" 19-29 TALA R.C. "A" (312570): try sin jugador, dorsal None (1T 34 Try 5 )
+  aviso UNIVERSITARIO "A" 19-29 TALA R.C. "A" (312570): conversion sin jugador, dorsal None (1T 34 Conversión 2 )
+  aviso UNIVERSITARIO "A" 19-29 TALA R.C. "A" (312570): try sin jugador, dorsal None (2T 5 Try 5 )
+  aviso UNIVERSITARIO "A" 19-29 TALA R.C. "A" (312570): card_yellow sin jugador, dorsal None (2T 5 Amarilla  )
+  aviso UNIVERSITARIO "A" 19-29 TALA R.C. "A" (312570): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 19-29 TALA R.C. "A" (312570): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 19-29 TALA R.C. "A" (312570): try sin jugador, dorsal None (1T 15 Try 5 )
+  aviso UNIVERSITARIO "A" 19-29 TALA R.C. "A" (312570): try sin jugador, dorsal None (1T 20 Try 5 )
+  aviso UNIVERSITARIO "A" 19-29 TALA R.C. "A" (312570): conversion sin jugador, dorsal None (1T 20 Conversión 2 )
+  aviso UNIVERSITARIO "A" 19-29 TALA R.C. "A" (312570): try sin jugador, dorsal None (1T 27 Try 5 )
+  aviso UNIVERSITARIO "A" 19-29 TALA R.C. "A" (312570): conversion sin jugador, dorsal None (1T 27 Conversión 2 )
+  aviso UNIVERSITARIO "A" 19-29 TALA R.C. "A" (312570): try sin jugador, dorsal None (2T 7 Try 5 )
+  aviso UNIVERSITARIO "A" 19-29 TALA R.C. "A" (312570): try sin jugador, dorsal None (2T 14 Try 5 )
+  aviso UNIVERSITARIO "A" 19-29 TALA R.C. "A" (312570): card_yellow sin jugador, dorsal None (2T 22 Amarilla  )
+  aviso UNIVERSITARIO "A" 19-29 TALA R.C. "A" (312570): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 19-29 TALA R.C. "A" (312570): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 19-29 TALA R.C. "A" (312570): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 19-29 TALA R.C. "A" (312570): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 19-29 TALA R.C. "A" (312570): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 19-29 TALA R.C. "A" (312570): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 19-29 TALA R.C. "A" (312570): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 19-29 TALA R.C. "A" (312570): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 24-27 CBA. ATHLETIC CLUB "A" (313082): try sin jugador, dorsal None (1T 9 Try 5 )
+  aviso TALA R.C. "A" 24-27 CBA. ATHLETIC CLUB "A" (313082): conversion sin jugador, dorsal None (1T 10 Conversión 2 )
+  aviso TALA R.C. "A" 24-27 CBA. ATHLETIC CLUB "A" (313082): try sin jugador, dorsal None (1T 18 Try 5 )
+  aviso TALA R.C. "A" 24-27 CBA. ATHLETIC CLUB "A" (313082): conversion sin jugador, dorsal None (1T 19 Conversión 2 )
+  aviso TALA R.C. "A" 24-27 CBA. ATHLETIC CLUB "A" (313082): try sin jugador, dorsal None (2T 23 Try 5 )
+  aviso TALA R.C. "A" 24-27 CBA. ATHLETIC CLUB "A" (313082): try sin jugador, dorsal None (2T 26 Try 5 )
+  aviso TALA R.C. "A" 24-27 CBA. ATHLETIC CLUB "A" (313082): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 24-27 CBA. ATHLETIC CLUB "A" (313082): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 24-27 CBA. ATHLETIC CLUB "A" (313082): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 24-27 CBA. ATHLETIC CLUB "A" (313082): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "A" 29-15 UNIVERSITARIO "A" (313083): try sin jugador, dorsal None (1T 4 Try 5 )
+  aviso PALERMO BAJO "A" 29-15 UNIVERSITARIO "A" (313083): try sin jugador, dorsal None (1T 15 Try 5 )
+  aviso PALERMO BAJO "A" 29-15 UNIVERSITARIO "A" (313083): try sin jugador, dorsal None (1T 27 Try 5 )
+  aviso PALERMO BAJO "A" 29-15 UNIVERSITARIO "A" (313083): conversion sin jugador, dorsal None (1T 28 Conversión 2 )
+  aviso PALERMO BAJO "A" 29-15 UNIVERSITARIO "A" (313083): try sin jugador, dorsal None (1T 35 Try 5 )
+  aviso PALERMO BAJO "A" 29-15 UNIVERSITARIO "A" (313083): conversion sin jugador, dorsal None (1T 35 Conversión 2 )
+  aviso PALERMO BAJO "A" 29-15 UNIVERSITARIO "A" (313083): try sin jugador, dorsal None (2T 21 Try 5 )
+  aviso PALERMO BAJO "A" 29-15 UNIVERSITARIO "A" (313083): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "A" 29-15 UNIVERSITARIO "A" (313083): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "A" 29-15 UNIVERSITARIO "A" (313083): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "A" 29-15 UNIVERSITARIO "A" (313083): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "A" 29-15 UNIVERSITARIO "A" (313083): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "A" 29-15 UNIVERSITARIO "A" (313083): penalty_goal sin jugador, dorsal None (1T 7 Penal 3 )
+  aviso PALERMO BAJO "A" 29-15 UNIVERSITARIO "A" (313083): try sin jugador, dorsal None (2T 8 Try 5 )
+  aviso PALERMO BAJO "A" 29-15 UNIVERSITARIO "A" (313083): card_yellow sin jugador, dorsal None (2T 23 Amarilla  )
+  aviso PALERMO BAJO "A" 29-15 UNIVERSITARIO "A" (313083): try sin jugador, dorsal None (2T 33 Try 5 )
+  aviso PALERMO BAJO "A" 29-15 UNIVERSITARIO "A" (313083): conversion sin jugador, dorsal None (2T 33 Conversión 2 )
+  aviso PALERMO BAJO "A" 29-15 UNIVERSITARIO "A" (313083): cambio con dorsal sin jugador None->None
+313084: EVENTOS NO CIERRAN CARLOS PAZ R.C. 0-28 JOCKEY CLUB CORDOBA "A" (313084): eventos 0-0 (313084)
+313085: EVENTOS NO CIERRAN URU CURE "A" 27-32 LA TABLADA "A" (313085): eventos 27-0 (313085)
+  aviso CBA. ATHLETIC CLUB "A" 17-12 LA TABLADA "A" (314667): try sin jugador, dorsal None (1T 20 Try 5 )
+  aviso CBA. ATHLETIC CLUB "A" 17-12 LA TABLADA "A" (314667): conversion sin jugador, dorsal None (1T 20 Conversión 2 )
+  aviso CBA. ATHLETIC CLUB "A" 17-12 LA TABLADA "A" (314667): try sin jugador, dorsal None (2T 28 Try 5 )
+  aviso CBA. ATHLETIC CLUB "A" 17-12 LA TABLADA "A" (314667): card_yellow sin jugador, dorsal None (2T 36 Amarilla  )
+  aviso CBA. ATHLETIC CLUB "A" 17-12 LA TABLADA "A" (314667): card_yellow sin jugador, dorsal None (2T 36 Amarilla  )
+  aviso UNIVERSITARIO "A" 66-7 CARLOS PAZ R.C. (314669): try sin jugador, dorsal None (1T 2 Try 5 )
+  aviso UNIVERSITARIO "A" 66-7 CARLOS PAZ R.C. (314669): try sin jugador, dorsal None (1T 4 Try 5 )
+  aviso UNIVERSITARIO "A" 66-7 CARLOS PAZ R.C. (314669): conversion sin jugador, dorsal None (1T 4 Conversión 2 )
+  aviso UNIVERSITARIO "A" 66-7 CARLOS PAZ R.C. (314669): try sin jugador, dorsal None (1T 7 Try 5 )
+  aviso UNIVERSITARIO "A" 66-7 CARLOS PAZ R.C. (314669): conversion sin jugador, dorsal None (1T 7 Conversión 2 )
+  aviso UNIVERSITARIO "A" 66-7 CARLOS PAZ R.C. (314669): try sin jugador, dorsal None (1T 16 Try 5 )
+  aviso UNIVERSITARIO "A" 66-7 CARLOS PAZ R.C. (314669): conversion sin jugador, dorsal None (1T 16 Conversión 2 )
+  aviso UNIVERSITARIO "A" 66-7 CARLOS PAZ R.C. (314669): try sin jugador, dorsal None (1T 21 Try 5 )
+  aviso UNIVERSITARIO "A" 66-7 CARLOS PAZ R.C. (314669): conversion sin jugador, dorsal None (1T 21 Conversión 2 )
+  aviso UNIVERSITARIO "A" 66-7 CARLOS PAZ R.C. (314669): conversion sin jugador, dorsal None (1T 26 Conversión 2 )
+  aviso UNIVERSITARIO "A" 66-7 CARLOS PAZ R.C. (314669): try sin jugador, dorsal None (1T 26 Try 5 )
+  aviso UNIVERSITARIO "A" 66-7 CARLOS PAZ R.C. (314669): try sin jugador, dorsal None (1T 28 Try 5 )
+  aviso UNIVERSITARIO "A" 66-7 CARLOS PAZ R.C. (314669): conversion sin jugador, dorsal None (1T 28 Conversión 2 )
+  aviso UNIVERSITARIO "A" 66-7 CARLOS PAZ R.C. (314669): try sin jugador, dorsal None (2T 5 Try 5 )
+  aviso UNIVERSITARIO "A" 66-7 CARLOS PAZ R.C. (314669): try sin jugador, dorsal None (2T 6 Try 5 )
+  aviso UNIVERSITARIO "A" 66-7 CARLOS PAZ R.C. (314669): conversion sin jugador, dorsal None (2T 6 Conversión 2 )
+  aviso UNIVERSITARIO "A" 66-7 CARLOS PAZ R.C. (314669): try sin jugador, dorsal None (2T 35 Try 5 )
+  aviso UNIVERSITARIO "A" 66-7 CARLOS PAZ R.C. (314669): conversion sin jugador, dorsal None (2T 35 Conversión 2 )
+  aviso UNIVERSITARIO "A" 66-7 CARLOS PAZ R.C. (314669): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 66-7 CARLOS PAZ R.C. (314669): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 66-7 CARLOS PAZ R.C. (314669): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 66-7 CARLOS PAZ R.C. (314669): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 66-7 CARLOS PAZ R.C. (314669): card_yellow sin jugador, dorsal None (1T 22 Amarilla  )
+  aviso UNIVERSITARIO "A" 66-7 CARLOS PAZ R.C. (314669): try sin jugador, dorsal None (2T 23 Try 5 )
+  aviso UNIVERSITARIO "A" 66-7 CARLOS PAZ R.C. (314669): conversion sin jugador, dorsal None (2T 23 Conversión 2 )
+  aviso TALA R.C. "A" 26-22 PALERMO BAJO "A" (314670): try sin jugador, dorsal None (1T 5 Try 5 )
+  aviso TALA R.C. "A" 26-22 PALERMO BAJO "A" (314670): try sin jugador, dorsal None (1T 17 Try 5 )
+  aviso TALA R.C. "A" 26-22 PALERMO BAJO "A" (314670): conversion sin jugador, dorsal None (1T 17 Conversión 2 )
+  aviso TALA R.C. "A" 26-22 PALERMO BAJO "A" (314670): try sin jugador, dorsal None (1T 19 Try 5 )
+  aviso TALA R.C. "A" 26-22 PALERMO BAJO "A" (314670): conversion sin jugador, dorsal None (1T 19 Conversión 2 )
+  aviso TALA R.C. "A" 26-22 PALERMO BAJO "A" (314670): card_yellow sin jugador, dorsal None (1T 30 Amarilla  )
+  aviso TALA R.C. "A" 26-22 PALERMO BAJO "A" (314670): conversion sin jugador, dorsal None (2T 10 Conversión 2 )
+  aviso TALA R.C. "A" 26-22 PALERMO BAJO "A" (314670): try sin jugador, dorsal None (2T 10 Try 5 )
+  aviso TALA R.C. "A" 26-22 PALERMO BAJO "A" (314670): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 26-22 PALERMO BAJO "A" (314670): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 26-22 PALERMO BAJO "A" (314670): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 26-22 PALERMO BAJO "A" (314670): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 26-22 PALERMO BAJO "A" (314670): card_yellow sin jugador, dorsal None (1T 4 Amarilla  )
+  aviso TALA R.C. "A" 26-22 PALERMO BAJO "A" (314670): try sin jugador, dorsal None (1T 29 Try 5 )
+  aviso TALA R.C. "A" 26-22 PALERMO BAJO "A" (314670): conversion sin jugador, dorsal None (1T 30 Conversión 2 )
+  aviso TALA R.C. "A" 26-22 PALERMO BAJO "A" (314670): try sin jugador, dorsal None (2T 3 Try 5 )
+  aviso TALA R.C. "A" 26-22 PALERMO BAJO "A" (314670): try sin jugador, dorsal None (2T 25 Try 5 )
+  aviso TALA R.C. "A" 26-22 PALERMO BAJO "A" (314670): try sin jugador, dorsal None (2T 34 Try 5 )
+  aviso TALA R.C. "A" 26-22 PALERMO BAJO "A" (314670): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 26-22 PALERMO BAJO "A" (314670): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 26-22 PALERMO BAJO "A" (314670): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 26-22 PALERMO BAJO "A" (314670): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "A" 24-24 CBA. ATHLETIC CLUB "A" (315197): try sin jugador, dorsal None (1T 10 Try 5 )
+  aviso PALERMO BAJO "A" 24-24 CBA. ATHLETIC CLUB "A" (315197): try sin jugador, dorsal None (1T 28 Try 5 )
+  aviso PALERMO BAJO "A" 24-24 CBA. ATHLETIC CLUB "A" (315197): card_yellow sin jugador, dorsal None (2T 7 Amarilla  )
+  aviso PALERMO BAJO "A" 24-24 CBA. ATHLETIC CLUB "A" (315197): try sin jugador, dorsal None (2T 7 Try 5 )
+  aviso PALERMO BAJO "A" 24-24 CBA. ATHLETIC CLUB "A" (315197): conversion sin jugador, dorsal None (2T 8 Conversión 2 )
+  aviso PALERMO BAJO "A" 24-24 CBA. ATHLETIC CLUB "A" (315197): card_yellow sin jugador, dorsal None (2T 17 Amarilla  )
+  aviso PALERMO BAJO "A" 24-24 CBA. ATHLETIC CLUB "A" (315197): try sin jugador, dorsal None (2T 34 Try 5 )
+  aviso PALERMO BAJO "A" 24-24 CBA. ATHLETIC CLUB "A" (315197): conversion sin jugador, dorsal None (2T 35 Conversión 2 )
+  aviso PALERMO BAJO "A" 24-24 CBA. ATHLETIC CLUB "A" (315197): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "A" 24-24 CBA. ATHLETIC CLUB "A" (315197): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "A" 24-24 CBA. ATHLETIC CLUB "A" (315197): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "A" 24-24 CBA. ATHLETIC CLUB "A" (315197): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "A" 24-24 CBA. ATHLETIC CLUB "A" (315197): cambio con dorsal sin jugador None->None
+  aviso CARLOS PAZ R.C. 10-94 TALA R.C. "A" (315198): try sin jugador, dorsal None (1T 10 Try 5 )
+  aviso CARLOS PAZ R.C. 10-94 TALA R.C. "A" (315198): try sin jugador, dorsal None (2T 30 Try 5 )
+  aviso CARLOS PAZ R.C. 10-94 TALA R.C. "A" (315198): try sin jugador, dorsal None (1T 2 Try 5 )
+  aviso CARLOS PAZ R.C. 10-94 TALA R.C. "A" (315198): conversion sin jugador, dorsal None (1T 2 Conversión 2 )
+  aviso CARLOS PAZ R.C. 10-94 TALA R.C. "A" (315198): try sin jugador, dorsal None (1T 5 Try 5 )
+  aviso CARLOS PAZ R.C. 10-94 TALA R.C. "A" (315198): conversion sin jugador, dorsal None (1T 5 Conversión 2 )
+  aviso CARLOS PAZ R.C. 10-94 TALA R.C. "A" (315198): try sin jugador, dorsal None (1T 10 Try 5 )
+  aviso CARLOS PAZ R.C. 10-94 TALA R.C. "A" (315198): conversion sin jugador, dorsal None (1T 10 Conversión 2 )
+  aviso CARLOS PAZ R.C. 10-94 TALA R.C. "A" (315198): try sin jugador, dorsal None (1T 12 Try 5 )
+  aviso CARLOS PAZ R.C. 10-94 TALA R.C. "A" (315198): conversion sin jugador, dorsal None (1T 12 Conversión 2 )
+  aviso CARLOS PAZ R.C. 10-94 TALA R.C. "A" (315198): try sin jugador, dorsal None (1T 16 Try 5 )
+  aviso CARLOS PAZ R.C. 10-94 TALA R.C. "A" (315198): conversion sin jugador, dorsal None (1T 16 Conversión 2 )
+  aviso CARLOS PAZ R.C. 10-94 TALA R.C. "A" (315198): try sin jugador, dorsal None (1T 23 Try 5 )
+  aviso CARLOS PAZ R.C. 10-94 TALA R.C. "A" (315198): conversion sin jugador, dorsal None (1T 23 Conversión 2 )
+  aviso CARLOS PAZ R.C. 10-94 TALA R.C. "A" (315198): try sin jugador, dorsal None (1T 27 Try 5 )
+  aviso CARLOS PAZ R.C. 10-94 TALA R.C. "A" (315198): try sin jugador, dorsal None (1T 32 Try 5 )
+  aviso CARLOS PAZ R.C. 10-94 TALA R.C. "A" (315198): conversion sin jugador, dorsal None (1T 32 Conversión 2 )
+  aviso CARLOS PAZ R.C. 10-94 TALA R.C. "A" (315198): try sin jugador, dorsal None (1T 34 Try 5 )
+  aviso CARLOS PAZ R.C. 10-94 TALA R.C. "A" (315198): conversion sin jugador, dorsal None (1T 34 Conversión 2 )
+  aviso CARLOS PAZ R.C. 10-94 TALA R.C. "A" (315198): try sin jugador, dorsal None (2T 3 Try 5 )
+  aviso CARLOS PAZ R.C. 10-94 TALA R.C. "A" (315198): conversion sin jugador, dorsal None (2T 3 Conversión 2 )
+  aviso CARLOS PAZ R.C. 10-94 TALA R.C. "A" (315198): try sin jugador, dorsal None (2T 9 Try 5 )
+  aviso CARLOS PAZ R.C. 10-94 TALA R.C. "A" (315198): conversion sin jugador, dorsal None (2T 9 Conversión 2 )
+  aviso CARLOS PAZ R.C. 10-94 TALA R.C. "A" (315198): try sin jugador, dorsal None (2T 19 Try 5 )
+  aviso CARLOS PAZ R.C. 10-94 TALA R.C. "A" (315198): conversion sin jugador, dorsal None (2T 19 Conversión 2 )
+  aviso CARLOS PAZ R.C. 10-94 TALA R.C. "A" (315198): try sin jugador, dorsal None (2T 27 Try 5 )
+  aviso CARLOS PAZ R.C. 10-94 TALA R.C. "A" (315198): conversion sin jugador, dorsal None (2T 27 Conversión 2 )
+  aviso CARLOS PAZ R.C. 10-94 TALA R.C. "A" (315198): try sin jugador, dorsal None (2T 35 Try 5 )
+  aviso SAN MARTIN R.C. 7-74 UNIVERSITARIO "A" (315199): try sin jugador, dorsal None (1T 3 Try 5 )
+  aviso SAN MARTIN R.C. 7-74 UNIVERSITARIO "A" (315199): try sin jugador, dorsal None (1T 6 Try 5 )
+  aviso SAN MARTIN R.C. 7-74 UNIVERSITARIO "A" (315199): conversion sin jugador, dorsal None (1T 6 Conversión 2 )
+  aviso SAN MARTIN R.C. 7-74 UNIVERSITARIO "A" (315199): try sin jugador, dorsal None (1T 11 Try 5 )
+  aviso SAN MARTIN R.C. 7-74 UNIVERSITARIO "A" (315199): conversion sin jugador, dorsal None (1T 11 Conversión 2 )
+  aviso SAN MARTIN R.C. 7-74 UNIVERSITARIO "A" (315199): card_yellow sin jugador, dorsal None (1T 19 Amarilla  )
+  aviso SAN MARTIN R.C. 7-74 UNIVERSITARIO "A" (315199): try sin jugador, dorsal None (1T 22 Try 5 )
+  aviso SAN MARTIN R.C. 7-74 UNIVERSITARIO "A" (315199): conversion sin jugador, dorsal None (1T 22 Conversión 2 )
+  aviso SAN MARTIN R.C. 7-74 UNIVERSITARIO "A" (315199): try sin jugador, dorsal None (1T 27 Try 5 )
+  aviso SAN MARTIN R.C. 7-74 UNIVERSITARIO "A" (315199): conversion sin jugador, dorsal None (1T 27 Conversión 2 )
+  aviso SAN MARTIN R.C. 7-74 UNIVERSITARIO "A" (315199): try sin jugador, dorsal None (2T 5 Try 5 )
+  aviso SAN MARTIN R.C. 7-74 UNIVERSITARIO "A" (315199): conversion sin jugador, dorsal None (2T 5 Conversión 2 )
+  aviso SAN MARTIN R.C. 7-74 UNIVERSITARIO "A" (315199): try sin jugador, dorsal None (2T 20 Try 5 )
+  aviso SAN MARTIN R.C. 7-74 UNIVERSITARIO "A" (315199): try sin jugador, dorsal None (2T 23 Try 5 )
+  aviso SAN MARTIN R.C. 7-74 UNIVERSITARIO "A" (315199): try sin jugador, dorsal None (2T 26 Try 5 )
+  aviso SAN MARTIN R.C. 7-74 UNIVERSITARIO "A" (315199): try sin jugador, dorsal None (2T 30 Try 5 )
+  aviso SAN MARTIN R.C. 7-74 UNIVERSITARIO "A" (315199): conversion sin jugador, dorsal None (2T 30 Conversión 2 )
+  aviso SAN MARTIN R.C. 7-74 UNIVERSITARIO "A" (315199): try sin jugador, dorsal None (2T 31 Try 5 )
+  aviso SAN MARTIN R.C. 7-74 UNIVERSITARIO "A" (315199): conversion sin jugador, dorsal None (2T 32 Conversión 2 )
+  aviso SAN MARTIN R.C. 7-74 UNIVERSITARIO "A" (315199): try sin jugador, dorsal None (2T 34 Try 5 )
+  aviso SAN MARTIN R.C. 7-74 UNIVERSITARIO "A" (315199): cambio con dorsal sin jugador None->None
+  aviso SAN MARTIN R.C. 7-74 UNIVERSITARIO "A" (315199): cambio con dorsal sin jugador None->None
+  aviso SAN MARTIN R.C. 7-74 UNIVERSITARIO "A" (315199): cambio con dorsal sin jugador None->None
+  aviso SAN MARTIN R.C. 7-74 UNIVERSITARIO "A" (315199): cambio con dorsal sin jugador None->None
+  aviso SAN MARTIN R.C. 7-74 UNIVERSITARIO "A" (315199): cambio con dorsal sin jugador None->None
+  aviso SAN MARTIN R.C. 7-74 UNIVERSITARIO "A" (315199): cambio con dorsal sin jugador None->None
+  aviso SAN MARTIN R.C. 7-74 UNIVERSITARIO "A" (315199): cambio con dorsal sin jugador None->None
+  aviso SAN MARTIN R.C. 7-74 UNIVERSITARIO "A" (315199): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 50-35 JOCKEY C. VILLA MARIA (315201): try sin jugador, dorsal None (1T 1 Try 5 )
+  aviso LA TABLADA "A" 50-35 JOCKEY C. VILLA MARIA (315201): conversion sin jugador, dorsal None (1T 1 Conversión 2 )
+  aviso LA TABLADA "A" 50-35 JOCKEY C. VILLA MARIA (315201): try sin jugador, dorsal None (1T 14 Try 5 )
+  aviso LA TABLADA "A" 50-35 JOCKEY C. VILLA MARIA (315201): try sin jugador, dorsal None (1T 17 Try 5 )
+  aviso LA TABLADA "A" 50-35 JOCKEY C. VILLA MARIA (315201): conversion sin jugador, dorsal None (1T 17 Conversión 2 )
+  aviso LA TABLADA "A" 50-35 JOCKEY C. VILLA MARIA (315201): try sin jugador, dorsal None (1T 32 Try 5 )
+  aviso LA TABLADA "A" 50-35 JOCKEY C. VILLA MARIA (315201): conversion sin jugador, dorsal None (1T 32 Conversión 2 )
+  aviso LA TABLADA "A" 50-35 JOCKEY C. VILLA MARIA (315201): try sin jugador, dorsal None (2T 1 Try 5 )
+  aviso LA TABLADA "A" 50-35 JOCKEY C. VILLA MARIA (315201): try sin jugador, dorsal None (2T 12 Try 5 )
+  aviso LA TABLADA "A" 50-35 JOCKEY C. VILLA MARIA (315201): try sin jugador, dorsal None (2T 24 Try 5 )
+  aviso LA TABLADA "A" 50-35 JOCKEY C. VILLA MARIA (315201): conversion sin jugador, dorsal None (2T 24 Conversión 2 )
+  aviso LA TABLADA "A" 50-35 JOCKEY C. VILLA MARIA (315201): try sin jugador, dorsal None (2T 33 Try 5 )
+  aviso LA TABLADA "A" 50-35 JOCKEY C. VILLA MARIA (315201): conversion sin jugador, dorsal None (2T 33 Conversión 2 )
+  aviso LA TABLADA "A" 50-35 JOCKEY C. VILLA MARIA (315201): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 50-35 JOCKEY C. VILLA MARIA (315201): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 50-35 JOCKEY C. VILLA MARIA (315201): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 50-35 JOCKEY C. VILLA MARIA (315201): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 50-35 JOCKEY C. VILLA MARIA (315201): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 50-35 JOCKEY C. VILLA MARIA (315201): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 50-35 JOCKEY C. VILLA MARIA (315201): cambio con dorsal sin jugador None->None
+  aviso CBA. ATHLETIC CLUB "A" 63-12 JOCKEY C. VILLA MARIA (319632): salida sin reemplazo, dorsal 6 (2T 26)
+  aviso JOCKEY CLUB CORDOBA "A" 14-15 LA TABLADA "A" (319633): try sin jugador, dorsal None (1T 22 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "A" 14-15 LA TABLADA "A" (319633): try sin jugador, dorsal None (2T 6 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "A" 14-15 LA TABLADA "A" (319633): conversion sin jugador, dorsal None (2T 7 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "A" 14-15 LA TABLADA "A" (319633): penalty_goal sin jugador, dorsal None (2T 23 Penal 3 )
+  aviso UNIVERSITARIO "A" 37-31 URU CURE "A" (319634): try sin jugador, dorsal None (1T 10 Try 5 )
+  aviso UNIVERSITARIO "A" 37-31 URU CURE "A" (319634): try sin jugador, dorsal None (1T 18 Try 5 )
+  aviso UNIVERSITARIO "A" 37-31 URU CURE "A" (319634): try sin jugador, dorsal None (1T 26 Try 5 )
+  aviso UNIVERSITARIO "A" 37-31 URU CURE "A" (319634): card_yellow sin jugador, dorsal None (2T 4 Amarilla  )
+  aviso UNIVERSITARIO "A" 37-31 URU CURE "A" (319634): conversion sin jugador, dorsal None (2T 14 Conversión 2 )
+  aviso UNIVERSITARIO "A" 37-31 URU CURE "A" (319634): try sin jugador, dorsal None (2T 14 Try 5 )
+  aviso UNIVERSITARIO "A" 37-31 URU CURE "A" (319634): penalty_goal sin jugador, dorsal None (2T 18 Penal 3 )
+  aviso UNIVERSITARIO "A" 37-31 URU CURE "A" (319634): try sin jugador, dorsal None (2T 31 Try 5 )
+  aviso UNIVERSITARIO "A" 37-31 URU CURE "A" (319634): try sin jugador, dorsal None (2T 34 Try 5 )
+  aviso UNIVERSITARIO "A" 37-31 URU CURE "A" (319634): conversion sin jugador, dorsal None (2T 34 Conversión 2 )
+  aviso UNIVERSITARIO "A" 37-31 URU CURE "A" (319634): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 37-31 URU CURE "A" (319634): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 37-31 URU CURE "A" (319634): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 37-31 URU CURE "A" (319634): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 75-7 SAN MARTIN R.C. (319635): try sin jugador, dorsal None (1T 1 Try 5 )
+  aviso TALA R.C. "A" 75-7 SAN MARTIN R.C. (319635): conversion sin jugador, dorsal None (1T 1 Conversión 2 )
+  aviso TALA R.C. "A" 75-7 SAN MARTIN R.C. (319635): try sin jugador, dorsal None (1T 3 Try 5 )
+  aviso TALA R.C. "A" 75-7 SAN MARTIN R.C. (319635): conversion sin jugador, dorsal None (1T 3 Conversión 2 )
+  aviso TALA R.C. "A" 75-7 SAN MARTIN R.C. (319635): try sin jugador, dorsal None (1T 10 Try 5 )
+  aviso TALA R.C. "A" 75-7 SAN MARTIN R.C. (319635): conversion sin jugador, dorsal None (1T 10 Conversión 2 )
+  aviso TALA R.C. "A" 75-7 SAN MARTIN R.C. (319635): try sin jugador, dorsal None (1T 17 Try 5 )
+  aviso TALA R.C. "A" 75-7 SAN MARTIN R.C. (319635): conversion sin jugador, dorsal None (1T 17 Conversión 2 )
+  aviso TALA R.C. "A" 75-7 SAN MARTIN R.C. (319635): try sin jugador, dorsal None (1T 23 Try 5 )
+  aviso TALA R.C. "A" 75-7 SAN MARTIN R.C. (319635): conversion sin jugador, dorsal None (1T 23 Conversión 2 )
+  aviso TALA R.C. "A" 75-7 SAN MARTIN R.C. (319635): try sin jugador, dorsal None (1T 27 Try 5 )
+  aviso TALA R.C. "A" 75-7 SAN MARTIN R.C. (319635): conversion sin jugador, dorsal None (1T 27 Conversión 2 )
+  aviso TALA R.C. "A" 75-7 SAN MARTIN R.C. (319635): try sin jugador, dorsal None (2T 1 Try 5 )
+  aviso TALA R.C. "A" 75-7 SAN MARTIN R.C. (319635): conversion sin jugador, dorsal None (2T 1 Conversión 2 )
+  aviso TALA R.C. "A" 75-7 SAN MARTIN R.C. (319635): try sin jugador, dorsal None (2T 10 Try 5 )
+  aviso TALA R.C. "A" 75-7 SAN MARTIN R.C. (319635): try sin jugador, dorsal None (2T 13 Try 5 )
+  aviso TALA R.C. "A" 75-7 SAN MARTIN R.C. (319635): conversion sin jugador, dorsal None (2T 13 Conversión 2 )
+  aviso TALA R.C. "A" 75-7 SAN MARTIN R.C. (319635): try sin jugador, dorsal None (2T 27 Try 5 )
+  aviso TALA R.C. "A" 75-7 SAN MARTIN R.C. (319635): conversion sin jugador, dorsal None (2T 27 Conversión 2 )
+  aviso TALA R.C. "A" 75-7 SAN MARTIN R.C. (319635): try sin jugador, dorsal None (2T 32 Try 5 )
+  aviso TALA R.C. "A" 75-7 SAN MARTIN R.C. (319635): conversion sin jugador, dorsal None (2T 32 Conversión 2 )
+  aviso TALA R.C. "A" 75-7 SAN MARTIN R.C. (319635): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 75-7 SAN MARTIN R.C. (319635): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 75-7 SAN MARTIN R.C. (319635): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 75-7 SAN MARTIN R.C. (319635): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 75-7 SAN MARTIN R.C. (319635): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 75-7 SAN MARTIN R.C. (319635): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 75-7 SAN MARTIN R.C. (319635): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "A" 50-24 CARLOS PAZ R.C. (319636): try sin jugador, dorsal None (1T 2 Try 5 )
+  aviso PALERMO BAJO "A" 50-24 CARLOS PAZ R.C. (319636): conversion sin jugador, dorsal None (1T 3 Conversión 2 )
+  aviso PALERMO BAJO "A" 50-24 CARLOS PAZ R.C. (319636): try sin jugador, dorsal None (1T 9 Try 5 )
+  aviso PALERMO BAJO "A" 50-24 CARLOS PAZ R.C. (319636): try sin jugador, dorsal None (1T 19 Try 5 )
+  aviso PALERMO BAJO "A" 50-24 CARLOS PAZ R.C. (319636): conversion sin jugador, dorsal None (1T 20 Conversión 2 )
+  aviso PALERMO BAJO "A" 50-24 CARLOS PAZ R.C. (319636): try sin jugador, dorsal None (1T 30 Try 5 )
+  aviso PALERMO BAJO "A" 50-24 CARLOS PAZ R.C. (319636): try sin jugador, dorsal None (1T 33 Try 5 )
+  aviso PALERMO BAJO "A" 50-24 CARLOS PAZ R.C. (319636): conversion sin jugador, dorsal None (1T 34 Conversión 2 )
+  aviso PALERMO BAJO "A" 50-24 CARLOS PAZ R.C. (319636): try sin jugador, dorsal None (2T 4 Try 5 )
+  aviso PALERMO BAJO "A" 50-24 CARLOS PAZ R.C. (319636): try sin jugador, dorsal None (2T 9 Try 5 )
+  aviso PALERMO BAJO "A" 50-24 CARLOS PAZ R.C. (319636): conversion sin jugador, dorsal None (2T 10 Conversión 2 )
+  aviso PALERMO BAJO "A" 50-24 CARLOS PAZ R.C. (319636): try sin jugador, dorsal None (2T 38 Try 5 )
+  aviso PALERMO BAJO "A" 50-24 CARLOS PAZ R.C. (319636): conversion sin jugador, dorsal None (2T 38 Conversión 2 )
+  aviso PALERMO BAJO "A" 50-24 CARLOS PAZ R.C. (319636): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "A" 50-24 CARLOS PAZ R.C. (319636): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "A" 50-24 CARLOS PAZ R.C. (319636): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "A" 50-24 CARLOS PAZ R.C. (319636): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "A" 50-24 CARLOS PAZ R.C. (319636): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "A" 50-24 CARLOS PAZ R.C. (319636): try sin jugador, dorsal None (1T 16 Try 5 )
+  aviso PALERMO BAJO "A" 50-24 CARLOS PAZ R.C. (319636): conversion sin jugador, dorsal None (1T 16 Conversión 2 )
+  aviso PALERMO BAJO "A" 50-24 CARLOS PAZ R.C. (319636): try sin jugador, dorsal None (2T 14 Try 5 )
+  aviso PALERMO BAJO "A" 50-24 CARLOS PAZ R.C. (319636): try sin jugador, dorsal None (2T 27 Try 5 )
+  aviso PALERMO BAJO "A" 50-24 CARLOS PAZ R.C. (319636): try sin jugador, dorsal None (2T 32 Try 5 )
+  aviso PALERMO BAJO "A" 50-24 CARLOS PAZ R.C. (319636): conversion sin jugador, dorsal None (2T 32 Conversión 2 )
+  aviso CARLOS PAZ R.C. 7-66 CBA. ATHLETIC CLUB "A" (320651): try sin jugador, dorsal None (2T 27 Try 5 )
+  aviso CARLOS PAZ R.C. 7-66 CBA. ATHLETIC CLUB "A" (320651): conversion sin jugador, dorsal None (2T 27 Conversión 2 )
+  aviso CARLOS PAZ R.C. 7-66 CBA. ATHLETIC CLUB "A" (320651): ingreso sin salida, dorsal 20 (2T 3)
+  aviso SAN MARTIN R.C. 12-27 PALERMO BAJO "A" (320652): salida sin reemplazo, dorsal 19 (2T 26)
+  aviso SAN MARTIN R.C. 12-27 PALERMO BAJO "A" (320652): try sin jugador, dorsal None (1T 4 Try 5 )
+  aviso SAN MARTIN R.C. 12-27 PALERMO BAJO "A" (320652): conversion sin jugador, dorsal None (1T 4 Conversión 2 )
+  aviso SAN MARTIN R.C. 12-27 PALERMO BAJO "A" (320652): try sin jugador, dorsal None (2T 11 Try 5 )
+  aviso SAN MARTIN R.C. 12-27 PALERMO BAJO "A" (320652): card_yellow sin jugador, dorsal None (2T 22 Amarilla  )
+  aviso SAN MARTIN R.C. 12-27 PALERMO BAJO "A" (320652): try sin jugador, dorsal None (2T 26 Try 5 )
+  aviso SAN MARTIN R.C. 12-27 PALERMO BAJO "A" (320652): penalty_goal sin jugador, dorsal None (2T 33 Penal 3 )
+  aviso SAN MARTIN R.C. 12-27 PALERMO BAJO "A" (320652): try sin jugador, dorsal None (2T 35 Try 5 )
+  aviso SAN MARTIN R.C. 12-27 PALERMO BAJO "A" (320652): conversion sin jugador, dorsal None (2T 35 Conversión 2 )
+  aviso SAN MARTIN R.C. 12-27 PALERMO BAJO "A" (320652): cambio con dorsal sin jugador None->None
+  aviso SAN MARTIN R.C. 12-27 PALERMO BAJO "A" (320652): cambio con dorsal sin jugador None->None
+  aviso SAN MARTIN R.C. 12-27 PALERMO BAJO "A" (320652): cambio con dorsal sin jugador None->None
+  aviso SAN MARTIN R.C. 12-27 PALERMO BAJO "A" (320652): cambio con dorsal sin jugador None->None
+  aviso URU CURE "A" 33-40 TALA R.C. "A" (320653): try sin jugador, dorsal None (1T 1 Try 5 )
+  aviso URU CURE "A" 33-40 TALA R.C. "A" (320653): conversion sin jugador, dorsal None (1T 1 Conversión 2 )
+  aviso URU CURE "A" 33-40 TALA R.C. "A" (320653): try sin jugador, dorsal None (1T 4 Try 5 )
+  aviso URU CURE "A" 33-40 TALA R.C. "A" (320653): try sin jugador, dorsal None (1T 10 Try 5 )
+  aviso URU CURE "A" 33-40 TALA R.C. "A" (320653): conversion sin jugador, dorsal None (1T 10 Conversión 2 )
+  aviso URU CURE "A" 33-40 TALA R.C. "A" (320653): try sin jugador, dorsal None (1T 24 Try 5 )
+  aviso URU CURE "A" 33-40 TALA R.C. "A" (320653): conversion sin jugador, dorsal None (1T 24 Conversión 2 )
+  aviso URU CURE "A" 33-40 TALA R.C. "A" (320653): try sin jugador, dorsal None (2T 11 Try 5 )
+  aviso URU CURE "A" 33-40 TALA R.C. "A" (320653): conversion sin jugador, dorsal None (2T 11 Conversión 2 )
+  aviso URU CURE "A" 33-40 TALA R.C. "A" (320653): try sin jugador, dorsal None (2T 13 Try 5 )
+  aviso URU CURE "A" 33-40 TALA R.C. "A" (320653): conversion sin jugador, dorsal None (2T 13 Conversión 2 )
+  aviso URU CURE "A" 33-40 TALA R.C. "A" (320653): cambio con dorsal sin jugador None->None
+  aviso URU CURE "A" 33-40 TALA R.C. "A" (320653): cambio con dorsal sin jugador None->None
+  aviso URU CURE "A" 33-40 TALA R.C. "A" (320653): cambio con dorsal sin jugador None->None
+  aviso URU CURE "A" 33-40 TALA R.C. "A" (320653): cambio con dorsal sin jugador None->None
+  aviso URU CURE "A" 33-40 TALA R.C. "A" (320653): cambio con dorsal sin jugador None->None
+  aviso URU CURE "A" 33-40 TALA R.C. "A" (320653): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 25-22 UNIVERSITARIO "A" (320654): try sin jugador, dorsal None (1T 7 Try 5 )
+  aviso LA TABLADA "A" 25-22 UNIVERSITARIO "A" (320654): penalty_goal sin jugador, dorsal None (1T 16 Penal 3 )
+  aviso LA TABLADA "A" 25-22 UNIVERSITARIO "A" (320654): penalty_goal sin jugador, dorsal None (1T 30 Penal 3 )
+  aviso LA TABLADA "A" 25-22 UNIVERSITARIO "A" (320654): try sin jugador, dorsal None (2T 12 Try 5 )
+  aviso LA TABLADA "A" 25-22 UNIVERSITARIO "A" (320654): conversion sin jugador, dorsal None (2T 13 Conversión 2 )
+  aviso LA TABLADA "A" 25-22 UNIVERSITARIO "A" (320654): try sin jugador, dorsal None (2T 16 Try 5 )
+  aviso LA TABLADA "A" 25-22 UNIVERSITARIO "A" (320654): conversion sin jugador, dorsal None (2T 17 Conversión 2 )
+  aviso LA TABLADA "A" 25-22 UNIVERSITARIO "A" (320654): card_yellow sin jugador, dorsal None (2T 20 Amarilla  )
+  aviso LA TABLADA "A" 25-22 UNIVERSITARIO "A" (320654): card_yellow sin jugador, dorsal None (2T 24 Amarilla  )
+  aviso LA TABLADA "A" 25-22 UNIVERSITARIO "A" (320654): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 25-22 UNIVERSITARIO "A" (320654): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 25-22 UNIVERSITARIO "A" (320654): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 25-22 UNIVERSITARIO "A" (320654): injury sin jugador, dorsal None (1T 18 Lesionado  )
+  aviso LA TABLADA "A" 25-22 UNIVERSITARIO "A" (320654): try sin jugador, dorsal None (1T 28 Try 5 )
+  aviso LA TABLADA "A" 25-22 UNIVERSITARIO "A" (320654): conversion sin jugador, dorsal None (1T 28 Conversión 2 )
+  aviso LA TABLADA "A" 25-22 UNIVERSITARIO "A" (320654): penalty_goal sin jugador, dorsal None (1T 33 Penal 3 )
+  aviso LA TABLADA "A" 25-22 UNIVERSITARIO "A" (320654): try sin jugador, dorsal None (2T 5 Try 5 )
+  aviso LA TABLADA "A" 25-22 UNIVERSITARIO "A" (320654): conversion sin jugador, dorsal None (2T 5 Conversión 2 )
+  aviso LA TABLADA "A" 25-22 UNIVERSITARIO "A" (320654): try sin jugador, dorsal None (2T 26 Try 5 )
+  aviso LA TABLADA "A" 25-22 UNIVERSITARIO "A" (320654): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 25-22 UNIVERSITARIO "A" (320654): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 25-22 UNIVERSITARIO "A" (320654): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 20-48 JOCKEY C. VILLA MARIA (322626): try sin jugador, dorsal None (1T 5 Try 5 )
+  aviso UNIVERSITARIO "A" 20-48 JOCKEY C. VILLA MARIA (322626): try sin jugador, dorsal None (2T 5 Try 5 )
+  aviso UNIVERSITARIO "A" 20-48 JOCKEY C. VILLA MARIA (322626): try sin jugador, dorsal None (2T 9 Try 5 )
+  aviso UNIVERSITARIO "A" 20-48 JOCKEY C. VILLA MARIA (322626): try sin jugador, dorsal None (2T 19 Try 5 )
+  aviso UNIVERSITARIO "A" 20-48 JOCKEY C. VILLA MARIA (322626): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 20-48 JOCKEY C. VILLA MARIA (322626): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 20-48 JOCKEY C. VILLA MARIA (322626): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 20-48 JOCKEY C. VILLA MARIA (322626): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 20-48 JOCKEY C. VILLA MARIA (322626): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 20-48 JOCKEY C. VILLA MARIA (322626): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 20-48 JOCKEY C. VILLA MARIA (322626): cambio con dorsal sin jugador None->None
+  aviso UNIVERSITARIO "A" 20-48 JOCKEY C. VILLA MARIA (322626): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 15-15 LA TABLADA "A" (322627): penalty_goal sin jugador, dorsal None (1T 17 Penal 3 )
+  aviso TALA R.C. "A" 15-15 LA TABLADA "A" (322627): try sin jugador, dorsal None (1T 31 Try 5 )
+  aviso TALA R.C. "A" 15-15 LA TABLADA "A" (322627): conversion sin jugador, dorsal None (1T 31 Conversión 2 )
+  aviso TALA R.C. "A" 15-15 LA TABLADA "A" (322627): try sin jugador, dorsal None (2T 35 Try 5 )
+  aviso TALA R.C. "A" 15-15 LA TABLADA "A" (322627): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 15-15 LA TABLADA "A" (322627): cambio con dorsal sin jugador None->None
+  aviso TALA R.C. "A" 15-15 LA TABLADA "A" (322627): card_yellow sin jugador, dorsal None (1T 9 Amarilla  )
+  aviso TALA R.C. "A" 15-15 LA TABLADA "A" (322627): penalty_goal sin jugador, dorsal None (1T 22 Penal 3 )
+  aviso TALA R.C. "A" 15-15 LA TABLADA "A" (322627): conversion sin jugador, dorsal None (2T 5 Conversión 2 )
+  aviso TALA R.C. "A" 15-15 LA TABLADA "A" (322627): try sin jugador, dorsal None (2T 5 Try 5 )
+  aviso TALA R.C. "A" 15-15 LA TABLADA "A" (322627): try sin jugador, dorsal None (2T 27 Try 5 )
+  aviso TALA R.C. "A" 15-15 LA TABLADA "A" (322627): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "A" 50-22 URU CURE "A" (322628): try sin jugador, dorsal None (1T 7 Try 5 )
+  aviso PALERMO BAJO "A" 50-22 URU CURE "A" (322628): try sin jugador, dorsal None (1T 14 Try 5 )
+  aviso PALERMO BAJO "A" 50-22 URU CURE "A" (322628): conversion sin jugador, dorsal None (1T 15 Conversión 2 )
+  aviso PALERMO BAJO "A" 50-22 URU CURE "A" (322628): try sin jugador, dorsal None (1T 22 Try 5 )
+  aviso PALERMO BAJO "A" 50-22 URU CURE "A" (322628): conversion sin jugador, dorsal None (1T 23 Conversión 2 )
+  aviso PALERMO BAJO "A" 50-22 URU CURE "A" (322628): try sin jugador, dorsal None (1T 33 Try 5 )
+  aviso PALERMO BAJO "A" 50-22 URU CURE "A" (322628): conversion sin jugador, dorsal None (1T 34 Conversión 2 )
+  aviso PALERMO BAJO "A" 50-22 URU CURE "A" (322628): try sin jugador, dorsal None (2T 2 Try 5 )
+  aviso PALERMO BAJO "A" 50-22 URU CURE "A" (322628): conversion sin jugador, dorsal None (2T 3 Conversión 2 )
+  aviso PALERMO BAJO "A" 50-22 URU CURE "A" (322628): try sin jugador, dorsal None (2T 22 Try 5 )
+  aviso PALERMO BAJO "A" 50-22 URU CURE "A" (322628): conversion sin jugador, dorsal None (2T 23 Conversión 2 )
+  aviso PALERMO BAJO "A" 50-22 URU CURE "A" (322628): try sin jugador, dorsal None (2T 25 Try 5 )
+  aviso PALERMO BAJO "A" 50-22 URU CURE "A" (322628): try sin jugador, dorsal None (2T 35 Try 5 )
+  aviso PALERMO BAJO "A" 50-22 URU CURE "A" (322628): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "A" 50-22 URU CURE "A" (322628): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "A" 50-22 URU CURE "A" (322628): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "A" 50-22 URU CURE "A" (322628): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "A" 50-22 URU CURE "A" (322628): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "A" 50-22 URU CURE "A" (322628): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "A" 50-22 URU CURE "A" (322628): cambio con dorsal sin jugador None->None
+  aviso PALERMO BAJO "A" 50-22 URU CURE "A" (322628): cambio con dorsal sin jugador None->None
+  aviso CARLOS PAZ R.C. 17-53 SAN MARTIN R.C. (322629): try sin jugador, dorsal None (1T 11 Try 5 )
+  aviso CARLOS PAZ R.C. 17-53 SAN MARTIN R.C. (322629): conversion sin jugador, dorsal None (1T 11 Conversión 2 )
+  aviso CARLOS PAZ R.C. 17-53 SAN MARTIN R.C. (322629): try sin jugador, dorsal None (1T 25 Try 5 )
+  aviso CARLOS PAZ R.C. 17-53 SAN MARTIN R.C. (322629): conversion sin jugador, dorsal None (1T 25 Conversión 2 )
+  aviso CARLOS PAZ R.C. 17-53 SAN MARTIN R.C. (322629): penalty_goal sin jugador, dorsal None (1T 34 Penal 3 )
+  aviso CARLOS PAZ R.C. 17-53 SAN MARTIN R.C. (322629): card_yellow sin jugador, dorsal None (2T 18 Amarilla  )
+  aviso CARLOS PAZ R.C. 17-53 SAN MARTIN R.C. (322629): card_yellow sin jugador, dorsal None (2T 23 Amarilla  )
+  aviso URU CURE "A" 36-15 CARLOS PAZ R.C. (324068): try sin jugador, dorsal None (1T 8 Try 5 )
+  aviso URU CURE "A" 36-15 CARLOS PAZ R.C. (324068): try sin jugador, dorsal None (1T 15 Try 5 )
+  aviso URU CURE "A" 36-15 CARLOS PAZ R.C. (324068): try sin jugador, dorsal None (2T 10 Try 5 )
+  aviso LA TABLADA "A" 3-33 PALERMO BAJO "A" (324069): penalty_goal sin jugador, dorsal None (1T 15 Penal 3 )
+  aviso LA TABLADA "A" 3-33 PALERMO BAJO "A" (324069): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 3-33 PALERMO BAJO "A" (324069): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 3-33 PALERMO BAJO "A" (324069): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 3-33 PALERMO BAJO "A" (324069): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 3-33 PALERMO BAJO "A" (324069): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 3-33 PALERMO BAJO "A" (324069): try sin jugador, dorsal None (1T 5 Try 5 )
+  aviso LA TABLADA "A" 3-33 PALERMO BAJO "A" (324069): conversion sin jugador, dorsal None (1T 6 Conversión 2 )
+  aviso LA TABLADA "A" 3-33 PALERMO BAJO "A" (324069): try sin jugador, dorsal None (1T 22 Try 5 )
+  aviso LA TABLADA "A" 3-33 PALERMO BAJO "A" (324069): conversion sin jugador, dorsal None (1T 23 Conversión 2 )
+  aviso LA TABLADA "A" 3-33 PALERMO BAJO "A" (324069): try sin jugador, dorsal None (2T 8 Try 5 )
+  aviso LA TABLADA "A" 3-33 PALERMO BAJO "A" (324069): conversion sin jugador, dorsal None (2T 9 Conversión 2 )
+  aviso LA TABLADA "A" 3-33 PALERMO BAJO "A" (324069): try sin jugador, dorsal None (2T 21 Try 5 )
+  aviso LA TABLADA "A" 3-33 PALERMO BAJO "A" (324069): conversion sin jugador, dorsal None (2T 22 Conversión 2 )
+  aviso LA TABLADA "A" 3-33 PALERMO BAJO "A" (324069): try sin jugador, dorsal None (2T 27 Try 5 )
+  aviso LA TABLADA "A" 3-33 PALERMO BAJO "A" (324069): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 3-33 PALERMO BAJO "A" (324069): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 3-33 PALERMO BAJO "A" (324069): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 3-33 PALERMO BAJO "A" (324069): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 3-33 PALERMO BAJO "A" (324069): cambio con dorsal sin jugador None->None
+  aviso LA TABLADA "A" 3-33 PALERMO BAJO "A" (324069): cambio con dorsal sin jugador None->None
+  aviso JOCKEY C. VILLA MARIA 19-25 TALA R.C. "A" (324071): try sin jugador, dorsal None (1T 27 Try 5 )
+  aviso JOCKEY C. VILLA MARIA 19-25 TALA R.C. "A" (324071): try sin jugador, dorsal None (1T 35 Try 5 )
+  aviso JOCKEY C. VILLA MARIA 19-25 TALA R.C. "A" (324071): conversion sin jugador, dorsal None (1T 35 Conversión 2 )
+  aviso JOCKEY C. VILLA MARIA 19-25 TALA R.C. "A" (324071): try sin jugador, dorsal None (2T 14 Try 5 )
+  aviso JOCKEY C. VILLA MARIA 19-25 TALA R.C. "A" (324071): try sin jugador, dorsal None (2T 23 Try 5 )
+  aviso JOCKEY C. VILLA MARIA 19-25 TALA R.C. "A" (324071): penalty_goal sin jugador, dorsal None (2T 33 Penal 3 )
+  aviso JOCKEY C. VILLA MARIA 19-25 TALA R.C. "A" (324071): cambio con dorsal sin jugador None->None
+  aviso JOCKEY C. VILLA MARIA 19-25 TALA R.C. "A" (324071): cambio con dorsal sin jugador None->None
+  aviso JOCKEY C. VILLA MARIA 19-25 TALA R.C. "A" (324071): cambio con dorsal sin jugador None->None
+  aviso JOCKEY C. VILLA MARIA 19-25 TALA R.C. "A" (324071): cambio con dorsal sin jugador None->None
+  aviso JOCKEY C. VILLA MARIA 19-25 TALA R.C. "A" (324071): cambio con dorsal sin jugador None->None
+  aviso JOCKEY C. VILLA MARIA 19-25 TALA R.C. "A" (324071): cambio con dorsal sin jugador None->None
+  aviso JOCKEY C. VILLA MARIA 19-25 TALA R.C. "A" (324071): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "A" 24-25 UNIVERSITARIO "A" (324072): try sin jugador, dorsal None (1T 6 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "A" 24-25 UNIVERSITARIO "A" (324072): try sin jugador, dorsal None (1T 25 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "A" 24-25 UNIVERSITARIO "A" (324072): conversion sin jugador, dorsal None (1T 25 Conversión 2 )
+  aviso JOCKEY CLUB CORDOBA "A" 24-25 UNIVERSITARIO "A" (324072): try sin jugador, dorsal None (1T 32 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "A" 24-25 UNIVERSITARIO "A" (324072): card_yellow sin jugador, dorsal None (2T 18 Amarilla  )
+  aviso JOCKEY CLUB CORDOBA "A" 24-25 UNIVERSITARIO "A" (324072): try sin jugador, dorsal None (2T 25 Try 5 )
+  aviso JOCKEY CLUB CORDOBA "A" 24-25 UNIVERSITARIO "A" (324072): card_yellow sin jugador, dorsal None (2T 33 Amarilla  )
+  aviso JOCKEY CLUB CORDOBA "A" 24-25 UNIVERSITARIO "A" (324072): penalty_goal sin jugador, dorsal None (2T 35 Penal 3 )
+  aviso JOCKEY CLUB CORDOBA "A" 24-25 UNIVERSITARIO "A" (324072): cambio con dorsal sin jugador None->None
+  aviso JOCKEY CLUB CORDOBA "A" 24-25 UNIVERSITARIO "A" (324072): cambio con dorsal sin jugador None->None
+325111: EVENTOS NO CIERRAN LA TABLADA "A" 40-24 JOCKEY C. VILLA MARIA (325111): eventos 0-0 (325111)
+  aviso CBA. ATHLETIC CLUB "A" 28-22 URU CURE "A" (325112): try sin jugador, dorsal None (1T 10 Try 5 )
+  aviso CBA. ATHLETIC CLUB "A" 28-22 URU CURE "A" (325112): try sin jugador, dorsal None (1T 19 Try 5 )
+  aviso CBA. ATHLETIC CLUB "A" 28-22 URU CURE "A" (325112): try sin jugador, dorsal None (2T 19 Try 5 )
+  aviso CBA. ATHLETIC CLUB "A" 28-22 URU CURE "A" (325112): try sin jugador, dorsal None (2T 24 Try 5 )
+  aviso CBA. ATHLETIC CLUB "A" 28-22 URU CURE "A" (325112): conversion sin jugador, dorsal None (2T 24 Conversión 2 )
+  aviso TALA R.C. "A" 45-10 CBA. ATHLETIC CLUB "A" (326176): try sin jugador, dorsal None (1T 33 Try 5 )
+  aviso TALA R.C. "A" 45-10 CBA. ATHLETIC CLUB "A" (326176): conversion sin jugador, dorsal None (1T 33 Conversión 2 )
+  aviso TALA R.C. "A" 45-10 CBA. ATHLETIC CLUB "A" (326176): try sin jugador, dorsal None (1T 41 Try 5 )
+  aviso TALA R.C. "A" 45-10 CBA. ATHLETIC CLUB "A" (326176): conversion sin jugador, dorsal None (1T 41 Conversión 2 )
+  aviso TALA R.C. "A" 45-10 CBA. ATHLETIC CLUB "A" (326176): try sin jugador, dorsal None (2T 1 Try 5 )
+  aviso TALA R.C. "A" 45-10 CBA. ATHLETIC CLUB "A" (326176): conversion sin jugador, dorsal None (2T 1 Conversión 2 )
+  aviso TALA R.C. "A" 45-10 CBA. ATHLETIC CLUB "A" (326176): try sin jugador, dorsal None (2T 5 Try 5 )
+  aviso TALA R.C. "A" 45-10 CBA. ATHLETIC CLUB "A" (326176): try sin jugador, dorsal None (2T 13 Try 5 )
+  aviso TALA R.C. "A" 45-10 CBA. ATHLETIC CLUB "A" (326176): try sin jugador, dorsal None (2T 16 Try 5 )
+  aviso TALA R.C. "A" 45-10 CBA. ATHLETIC CLUB "A" (326176): conversion sin jugador, dorsal None (2T 16 Conversión 2 )
+  aviso TALA R.C. "A" 45-10 CBA. ATHLETIC CLUB "A" (326176): try sin jugador, dorsal None (2T 23 Try 5 )
+  aviso TALA R.C. "A" 45-10 CBA. ATHLETIC CLUB "A" (326176): conversion sin jugador, dorsal None (2T 23 Conversión 2 )
+  aviso PALERMO BAJO "A" 27-39 LA TABLADA "A" (326177): try sin jugador, dorsal None (1T 15 Try 5 )
+  aviso PALERMO BAJO "A" 27-39 LA TABLADA "A" (326177): try sin jugador, dorsal None (1T 35 Try 5 )
+  aviso PALERMO BAJO "A" 27-39 LA TABLADA "A" (326177): try sin jugador, dorsal None (2T 2 Try 5 )
+  aviso PALERMO BAJO "A" 27-39 LA TABLADA "A" (326177): conversion sin jugador, dorsal None (2T 2 Conversión 2 )
+  aviso PALERMO BAJO "A" 27-39 LA TABLADA "A" (326177): card_yellow sin jugador, dorsal None (2T 17 Amarilla  )
+  aviso PALERMO BAJO "A" 27-39 LA TABLADA "A" (326177): try sin jugador, dorsal None (2T 19 Try 5 )
+  aviso PALERMO BAJO "A" 27-39 LA TABLADA "A" (326177): try sin jugador, dorsal None (2T 33 Try 5 )
+  aviso PALERMO BAJO "A" 27-39 LA TABLADA "A" (326177): try sin jugador, dorsal None (1T 2 Try 5 )
+  aviso PALERMO BAJO "A" 27-39 LA TABLADA "A" (326177): try sin jugador, dorsal None (1T 2 Try 5 )
+  aviso PALERMO BAJO "A" 27-39 LA TABLADA "A" (326177): conversion sin jugador, dorsal None (1T 2 Conversión 2 )
+  aviso PALERMO BAJO "A" 27-39 LA TABLADA "A" (326177): penalty_goal sin jugador, dorsal None (1T 25 Penal 3 )
+  aviso PALERMO BAJO "A" 27-39 LA TABLADA "A" (326177): try sin jugador, dorsal None (2T 6 Try 5 )
+  aviso PALERMO BAJO "A" 27-39 LA TABLADA "A" (326177): conversion sin jugador, dorsal None (2T 6 Conversión 2 )
+  aviso PALERMO BAJO "A" 27-39 LA TABLADA "A" (326177): penalty_goal sin jugador, dorsal None (2T 12 Penal 3 )
+  aviso PALERMO BAJO "A" 27-39 LA TABLADA "A" (326177): try sin jugador, dorsal None (2T 29 Try 5 )
+  aviso PALERMO BAJO "A" 27-39 LA TABLADA "A" (326177): conversion sin jugador, dorsal None (2T 29 Conversión 2 )
+  aviso PALERMO BAJO "A" 27-39 LA TABLADA "A" (326177): card_yellow sin jugador, dorsal None (2T 29 Amarilla  )
+
+Partidos de la base SIN tarjeta: 3
+  2026-05-08 A Córdoba Athletic Club M16 "A" 28-0 Carlos Paz Rugby Club M16 "A"
+  2026-05-09 A Club Palermo Bajo M16 "A" 63-14 San Martín de Villa María M16 "A"
+  2026-06-06 A Carlos Paz Rugby Club M16 "A" 0-28 Club La Tablada M16 "A"

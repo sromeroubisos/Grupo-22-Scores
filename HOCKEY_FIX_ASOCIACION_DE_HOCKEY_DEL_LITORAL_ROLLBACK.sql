@@ -1,0 +1,17 @@
+UPDATE clubs SET sport = 'rugby', sport_id = 'rugby' WHERE id = 'atl-del-rosario-b';
+UPDATE clubs SET sport = 'rugby', sport_id = 'rugby' WHERE id = 'regatas-de-san-nicolas';
+UPDATE clubs SET sport = 'rugby', sport_id = 'rugby' WHERE id = 'parana-rowing-hockey-2';
+UPDATE clubs SET sport = 'rugby', sport_id = 'rugby' WHERE id = 'jockey-rosario-b';
+UPDATE clubs SET sport = 'rugby', sport_id = 'rugby' WHERE id = 'jockey-rosario-b-hockey';
+UPDATE clubs SET sport = 'rugby', sport_id = 'rugby' WHERE id = 'regatas-de-san-nicolas-hockey';
+UPDATE clubs SET sport = 'rugby', sport_id = 'rugby' WHERE id = 'jockey-club-de-rosario-hockey';
+UPDATE clubs SET sport = 'rugby', sport_id = 'rugby' WHERE id = 'jockey-club-de-rosario-hockey-2';
+UPDATE clubs SET sport = 'rugby', sport_id = 'rugby' WHERE id = 'universitario-de-rosario-hockey';
+UPDATE clubs SET sport = 'rugby', sport_id = 'rugby' WHERE id = 'old-resian-club-hockey';
+UPDATE clubs SET sport = 'rugby', sport_id = 'rugby' WHERE id = 'duendes-damas-a';
+UPDATE clubs SET sport = 'rugby', sport_id = 'rugby' WHERE id = 'los-caranchos-hockey';
+UPDATE clubs SET sport = 'rugby', sport_id = 'rugby' WHERE id = 'ger-a';
+UPDATE clubs SET sport = 'rugby', sport_id = 'rugby' WHERE id = 'logaritmo-rugby-club-hockey';
+UPDATE clubs SET sport = 'rugby', sport_id = 'rugby' WHERE id = 'jockey-club-de-rosario-a';
+UPDATE clubs SET sport = 'rugby', sport_id = 'rugby' WHERE id = 'atletico-del-rosario-a';
+UPDATE clubs SET sport = 'rugby', sport_id = 'rugby' WHERE id = 'c-a-provincial-a';

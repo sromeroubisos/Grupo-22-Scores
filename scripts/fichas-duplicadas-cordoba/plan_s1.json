@@ -1,0 +1,1172 @@
+{
+ "plan": [
+  {
+   "club_id": "cobras-brasil-xv",
+   "por": [
+    "contenido"
+   ],
+   "fichas": [
+    {
+     "id": "0b0a588c-ddd4-428f-bf76-ded2360dc901",
+     "full_name": "Cleber “Gelado” Dias",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "b63b529d-f0ae-4cb8-8d89-9e0c91dd7eec",
+     "full_name": "Cleber Dias",
+     "usos": 13,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "keep": "b63b529d-f0ae-4cb8-8d89-9e0c91dd7eec",
+   "nombre": "Cleber Dias",
+   "borrar": [
+    "0b0a588c-ddd4-428f-bf76-ded2360dc901"
+   ],
+   "first": "Cleber",
+   "last": "Dias"
+  },
+  {
+   "club_id": "cobras-brasil-xv",
+   "por": [
+    "contenido"
+   ],
+   "fichas": [
+    {
+     "id": "7c695e44-9a7d-416e-92b6-6a30184fb833",
+     "full_name": "João Arraez",
+     "usos": 5,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "9112b7e3-d25a-4876-92a4-38acbfe59c48",
+     "full_name": "João “Boi” Arraez",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "keep": "7c695e44-9a7d-416e-92b6-6a30184fb833",
+   "nombre": "João Arraez",
+   "borrar": [
+    "9112b7e3-d25a-4876-92a4-38acbfe59c48"
+   ],
+   "first": "João",
+   "last": "Arraez"
+  },
+  {
+   "club_id": "penarol",
+   "por": [
+    "contenido",
+    "parecido"
+   ],
+   "fichas": [
+    {
+     "id": "1a13862f-65fb-4232-b23d-459638f4384d",
+     "full_name": "Foster Douglas Dewitt",
+     "usos": 4,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "2268045f-cfd6-4f0b-bc04-b641d2a3268b",
+     "full_name": "Foster Dewitt",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "ed7cbdb7-0a78-4cba-9e56-2e4fcffbda07",
+     "full_name": "Foster Dewit",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "keep": "1a13862f-65fb-4232-b23d-459638f4384d",
+   "nombre": "Foster Douglas Dewitt",
+   "borrar": [
+    "2268045f-cfd6-4f0b-bc04-b641d2a3268b",
+    "ed7cbdb7-0a78-4cba-9e56-2e4fcffbda07"
+   ],
+   "first": "Foster Douglas",
+   "last": "Dewitt"
+  },
+  {
+   "club_id": "penarol",
+   "por": [
+    "contenido"
+   ],
+   "fichas": [
+    {
+     "id": "589ef281-924d-425b-b0a1-2da6a2a4ee75",
+     "full_name": "Reinaldo Piussi",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "a7a350e8-64b8-4721-84b7-1edbd251a1bb",
+     "full_name": "Reinaldo Piussi Mendoza",
+     "usos": 3,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "keep": "a7a350e8-64b8-4721-84b7-1edbd251a1bb",
+   "nombre": "Reinaldo Piussi Mendoza",
+   "borrar": [
+    "589ef281-924d-425b-b0a1-2da6a2a4ee75"
+   ],
+   "first": "Reinaldo Piussi",
+   "last": "Mendoza"
+  },
+  {
+   "club_id": "penarol",
+   "por": [
+    "contenido"
+   ],
+   "fichas": [
+    {
+     "id": "86d7fcf7-a981-4650-ae92-73aa63c567b7",
+     "full_name": "Mateo Perillo",
+     "usos": 14,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "d0b6e8d9-433e-4e91-80a4-c85b6ebaf88c",
+     "full_name": "Mateo Perillo Albarracín",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "keep": "d0b6e8d9-433e-4e91-80a4-c85b6ebaf88c",
+   "nombre": "Mateo Perillo Albarracín",
+   "borrar": [
+    "86d7fcf7-a981-4650-ae92-73aa63c567b7"
+   ],
+   "first": "Mateo Perillo",
+   "last": "Albarracín"
+  },
+  {
+   "club_id": "penarol",
+   "por": [
+    "contenido"
+   ],
+   "fichas": [
+    {
+     "id": "e10f86fb-2d8e-4b05-89cf-a723d68c3693",
+     "full_name": "Felipe Aliaga Bonnet",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "e5c16c51-bc08-4916-9f9e-cc9ec9560919",
+     "full_name": "Felipe Aliaga",
+     "usos": 10,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "keep": "e5c16c51-bc08-4916-9f9e-cc9ec9560919",
+   "nombre": "Felipe Aliaga",
+   "borrar": [
+    "e10f86fb-2d8e-4b05-89cf-a723d68c3693"
+   ],
+   "first": "Felipe",
+   "last": "Aliaga"
+  },
+  {
+   "club_id": "uruguay-xv",
+   "por": [
+    "parecido"
+   ],
+   "fichas": [
+    {
+     "id": "0d0ce720-c840-4d1b-b6f6-e6e5e01ffa33",
+     "full_name": "Reinaldo Puissi",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "592c32a4-c681-4224-a819-d7c3dc36f72d",
+     "full_name": "Reinaldo Piussi",
+     "usos": 1,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "keep": "592c32a4-c681-4224-a819-d7c3dc36f72d",
+   "nombre": "Reinaldo Piussi",
+   "borrar": [
+    "0d0ce720-c840-4d1b-b6f6-e6e5e01ffa33"
+   ],
+   "first": "Reinaldo",
+   "last": "Piussi"
+  },
+  {
+   "club_id": "uruguay-xv",
+   "por": [
+    "igual"
+   ],
+   "fichas": [
+    {
+     "id": "2fc9a159-c190-4bf4-ba5d-16db1b5198f9",
+     "full_name": "Justo Ferrario",
+     "usos": 1,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "74d2051a-d93b-4304-a256-8ecda1c69126",
+     "full_name": "Ferrario, Justo",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "keep": "2fc9a159-c190-4bf4-ba5d-16db1b5198f9",
+   "nombre": "Justo Ferrario",
+   "borrar": [
+    "74d2051a-d93b-4304-a256-8ecda1c69126"
+   ],
+   "first": "Justo",
+   "last": "Ferrario"
+  },
+  {
+   "club_id": "uruguay-xv",
+   "por": [
+    "parecido"
+   ],
+   "fichas": [
+    {
+     "id": "9c67b534-5a81-4798-ba33-7caaa1494f13",
+     "full_name": "Ignacio Péculo",
+     "usos": 1,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "f4f3a709-82d1-477f-8938-e3c09c362472",
+     "full_name": "Ignacio Pécule",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "keep": "9c67b534-5a81-4798-ba33-7caaa1494f13",
+   "nombre": "Ignacio Péculo",
+   "borrar": [
+    "f4f3a709-82d1-477f-8938-e3c09c362472"
+   ],
+   "first": "Ignacio",
+   "last": "Péculo"
+  },
+  {
+   "club_id": "selknam",
+   "por": [
+    "igual"
+   ],
+   "fichas": [
+    {
+     "id": "44c52781-eed7-4f3f-9615-bd0b359bdf70",
+     "full_name": "Augusto Böhme",
+     "usos": 11,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "ae5fd595-5d85-4c02-ae30-33855067ac05",
+     "full_name": "Augusto Bohme",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "keep": "44c52781-eed7-4f3f-9615-bd0b359bdf70",
+   "nombre": "Augusto Böhme",
+   "borrar": [
+    "ae5fd595-5d85-4c02-ae30-33855067ac05"
+   ],
+   "first": "Augusto",
+   "last": "Böhme"
+  },
+  {
+   "club_id": "tarucas",
+   "por": [
+    "igual",
+    "parecido"
+   ],
+   "fichas": [
+    {
+     "id": "0cd006a4-44dd-40c8-ab0d-fa0bb9d1aaaa",
+     "full_name": "Tomás Yanni",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "4a3f44d2-7724-497c-88a4-c812cfd86177",
+     "full_name": "Tomas Vanni",
+     "usos": 13,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "510f542c-3350-4b54-92c2-1a7baa58edd3",
+     "full_name": "Tomás Vanni",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "keep": "510f542c-3350-4b54-92c2-1a7baa58edd3",
+   "nombre": "Tomás Vanni",
+   "borrar": [
+    "0cd006a4-44dd-40c8-ab0d-fa0bb9d1aaaa",
+    "4a3f44d2-7724-497c-88a4-c812cfd86177"
+   ],
+   "first": "Tomás",
+   "last": "Vanni"
+  },
+  {
+   "club_id": "tarucas",
+   "por": [
+    "igual"
+   ],
+   "fichas": [
+    {
+     "id": "323ff5f4-4aa4-48bf-b5ba-115ebbbcaa19",
+     "full_name": "Tomas Elizalde",
+     "usos": 13,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "719865ab-d4d8-495f-a207-466796d6f7fb",
+     "full_name": "Tomás Elizalde",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "keep": "719865ab-d4d8-495f-a207-466796d6f7fb",
+   "nombre": "Tomás Elizalde",
+   "borrar": [
+    "323ff5f4-4aa4-48bf-b5ba-115ebbbcaa19"
+   ],
+   "first": "Tomás",
+   "last": "Elizalde"
+  },
+  {
+   "club_id": "tarucas",
+   "por": [
+    "igual"
+   ],
+   "fichas": [
+    {
+     "id": "509e7579-595c-4795-b43d-e1636687bbe0",
+     "full_name": "Nicolás Macome",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "fa6397a9-583a-4bca-80b0-0aa422ad26eb",
+     "full_name": "Nicolas Macome",
+     "usos": 6,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "keep": "509e7579-595c-4795-b43d-e1636687bbe0",
+   "nombre": "Nicolás Macome",
+   "borrar": [
+    "fa6397a9-583a-4bca-80b0-0aa422ad26eb"
+   ],
+   "first": "Nicolás",
+   "last": "Macome"
+  },
+  {
+   "club_id": "tarucas",
+   "por": [
+    "contenido"
+   ],
+   "fichas": [
+    {
+     "id": "e40868c3-1dca-4e57-870c-1106f9bc9ec7",
+     "full_name": "Juan Manuel Vivas",
+     "usos": 10,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "e74d31e3-bc04-4110-8afb-be703f52f8c1",
+     "full_name": "Juan M. Vivas",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "keep": "e40868c3-1dca-4e57-870c-1106f9bc9ec7",
+   "nombre": "Juan Manuel Vivas",
+   "borrar": [
+    "e74d31e3-bc04-4110-8afb-be703f52f8c1"
+   ],
+   "first": "Juan Manuel",
+   "last": "Vivas"
+  },
+  {
+   "club_id": "argentina-m20",
+   "por": [
+    "parecido"
+   ],
+   "fichas": [
+    {
+     "id": "10918dbd-911e-4cae-9f54-2aa2d8ec407e",
+     "full_name": "BAUTISTA SALINAS MALLEA",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "2929f2bb-0d4e-4cd7-a46b-7d7e00b4584a",
+     "full_name": "Bautista Salinas Mealla",
+     "usos": 1,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "keep": "2929f2bb-0d4e-4cd7-a46b-7d7e00b4584a",
+   "nombre": "Bautista Salinas Mealla",
+   "borrar": [
+    "10918dbd-911e-4cae-9f54-2aa2d8ec407e"
+   ],
+   "first": "Bautista Salinas",
+   "last": "Mealla"
+  },
+  {
+   "club_id": "argentina-m20",
+   "por": [
+    "igual"
+   ],
+   "fichas": [
+    {
+     "id": "1d28754f-9135-4cbf-9148-d9d3835bf65a",
+     "full_name": "BENJAMÍN FARIAS CERIONI",
+     "usos": 1,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "29e882f0-30c1-477d-b3cb-ae6d45eaf088",
+     "full_name": "Benjamín FARÍAS CERIONI",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "keep": "29e882f0-30c1-477d-b3cb-ae6d45eaf088",
+   "nombre": "Benjamín Farías Cerioni",
+   "borrar": [
+    "1d28754f-9135-4cbf-9148-d9d3835bf65a"
+   ],
+   "first": null,
+   "last": null
+  },
+  {
+   "club_id": "argentina-m20",
+   "por": [
+    "igual"
+   ],
+   "fichas": [
+    {
+     "id": "9b4ccfaa-e96b-4ddf-a82d-632f0c33c7ad",
+     "full_name": "Federico Narváez",
+     "usos": 1,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "b87e5c22-9613-415e-b7de-5926055e4ca2",
+     "full_name": "FEDERICO NARVAEZ",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "keep": "9b4ccfaa-e96b-4ddf-a82d-632f0c33c7ad",
+   "nombre": "Federico Narváez",
+   "borrar": [
+    "b87e5c22-9613-415e-b7de-5926055e4ca2"
+   ],
+   "first": "Federico",
+   "last": "Narváez"
+  },
+  {
+   "club_id": "yacare-xv",
+   "por": [
+    "igual",
+    "parecido"
+   ],
+   "fichas": [
+    {
+     "id": "4a23712c-713a-483d-8d8a-38f69d4446da",
+     "full_name": "Artum López",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "b398bb46-9187-48a1-b5af-64c4bab55920",
+     "full_name": "Arturo Lopez",
+     "usos": 11,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "e429865c-d4ed-4165-9f82-af808cdda99a",
+     "full_name": "Arturo López",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "keep": "4a23712c-713a-483d-8d8a-38f69d4446da",
+   "nombre": "Artum López",
+   "borrar": [
+    "b398bb46-9187-48a1-b5af-64c4bab55920",
+    "e429865c-d4ed-4165-9f82-af808cdda99a"
+   ],
+   "first": "Artum",
+   "last": "López"
+  },
+  {
+   "club_id": "yacare-xv",
+   "por": [
+    "igual",
+    "parecido"
+   ],
+   "fichas": [
+    {
+     "id": "6403e6e4-034b-4c41-a611-ffbcbf11f91a",
+     "full_name": "Juan González",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "b51f1aa0-9651-479f-a122-294191174c0a",
+     "full_name": "Juan Gonzalez",
+     "usos": 13,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "f1188551-7b6f-4b37-bdb4-cedd08f429f8",
+     "full_name": "Ivan Gonzalez",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "keep": "6403e6e4-034b-4c41-a611-ffbcbf11f91a",
+   "nombre": "Juan González",
+   "borrar": [
+    "b51f1aa0-9651-479f-a122-294191174c0a",
+    "f1188551-7b6f-4b37-bdb4-cedd08f429f8"
+   ],
+   "first": "Juan",
+   "last": "González"
+  },
+  {
+   "club_id": "yacare-xv",
+   "por": [
+    "igual"
+   ],
+   "fichas": [
+    {
+     "id": "8c40d8a3-4097-4b22-937f-ba0e827c9f64",
+     "full_name": "Joaquin Lamas",
+     "usos": 11,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "bfe53e7d-2d69-4fbe-b379-6983ad2296e5",
+     "full_name": "Joaquín Lamas",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "keep": "bfe53e7d-2d69-4fbe-b379-6983ad2296e5",
+   "nombre": "Joaquín Lamas",
+   "borrar": [
+    "8c40d8a3-4097-4b22-937f-ba0e827c9f64"
+   ],
+   "first": "Joaquín",
+   "last": "Lamas"
+  },
+  {
+   "club_id": "chile-xv",
+   "por": [
+    "igual"
+   ],
+   "fichas": [
+    {
+     "id": "3f5b04cc-2a81-4815-aa11-4b4f259edfd7",
+     "full_name": "Tomas Salas",
+     "usos": 1,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "9f2e4fb9-c70b-4f89-8dc2-de02300b54bf",
+     "full_name": "Tomás Salas",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "keep": "9f2e4fb9-c70b-4f89-8dc2-de02300b54bf",
+   "nombre": "Tomás Salas",
+   "borrar": [
+    "3f5b04cc-2a81-4815-aa11-4b4f259edfd7"
+   ],
+   "first": "Tomás",
+   "last": "Salas"
+  },
+  {
+   "club_id": "chile-u20",
+   "por": [
+    "igual"
+   ],
+   "fichas": [
+    {
+     "id": "06ce9362-11bc-412f-ae1d-609d237d83b2",
+     "full_name": "Jose Tomas Bonilla",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "1eb9f5f5-10c6-4330-a8d9-7865ed1cec4f",
+     "full_name": "José Tomás Bonilla",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "keep": "1eb9f5f5-10c6-4330-a8d9-7865ed1cec4f",
+   "nombre": "José Tomás Bonilla",
+   "borrar": [
+    "06ce9362-11bc-412f-ae1d-609d237d83b2"
+   ],
+   "first": "José Tomás",
+   "last": "Bonilla"
+  },
+  {
+   "club_id": "chile-u20",
+   "por": [
+    "igual"
+   ],
+   "fichas": [
+    {
+     "id": "2cf2f1a1-af0b-45ee-9f58-0b9c517f8286",
+     "full_name": "Cristóbal Escobar",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "91635975-9a65-4a25-a025-1e67447f4042",
+     "full_name": "Cristobal Escobar",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "keep": "2cf2f1a1-af0b-45ee-9f58-0b9c517f8286",
+   "nombre": "Cristóbal Escobar",
+   "borrar": [
+    "91635975-9a65-4a25-a025-1e67447f4042"
+   ],
+   "first": "Cristóbal",
+   "last": "Escobar"
+  },
+  {
+   "club_id": "chile-u20",
+   "por": [
+    "igual"
+   ],
+   "fichas": [
+    {
+     "id": "c88c3430-966a-4fae-af5d-c3cc48eb8c0b",
+     "full_name": "Nicolás Weitzel",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "d5b0d5bf-49b1-498a-abb2-b81066ba83cf",
+     "full_name": "Nicolas Weitzel",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "keep": "c88c3430-966a-4fae-af5d-c3cc48eb8c0b",
+   "nombre": "Nicolás Weitzel",
+   "borrar": [
+    "d5b0d5bf-49b1-498a-abb2-b81066ba83cf"
+   ],
+   "first": "Nicolás",
+   "last": "Weitzel"
+  },
+  {
+   "club_id": "paraguay",
+   "por": [
+    "igual"
+   ],
+   "fichas": [
+    {
+     "id": "3aec989d-510a-480b-9c79-b4604994139e",
+     "full_name": "Joaquín Mussi",
+     "usos": 1,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "d8803a50-a3b3-4333-a83e-08cf091c3e11",
+     "full_name": "Mussi, Joaquin",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "keep": "3aec989d-510a-480b-9c79-b4604994139e",
+   "nombre": "Joaquín Mussi",
+   "borrar": [
+    "d8803a50-a3b3-4333-a83e-08cf091c3e11"
+   ],
+   "first": "Joaquín",
+   "last": "Mussi"
+  },
+  {
+   "club_id": "pampas",
+   "por": [
+    "contenido"
+   ],
+   "fichas": [
+    {
+     "id": "09150e52-5fd7-49b0-a25f-a8c9757bed5f",
+     "full_name": "Juan Cruz Corso",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "896e0f92-7d89-4b4f-84ef-dde9d33d2ed2",
+     "full_name": "Juan Corso",
+     "usos": 8,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "keep": "896e0f92-7d89-4b4f-84ef-dde9d33d2ed2",
+   "nombre": "Juan Corso",
+   "borrar": [
+    "09150e52-5fd7-49b0-a25f-a8c9757bed5f"
+   ],
+   "first": "Juan",
+   "last": "Corso"
+  },
+  {
+   "club_id": "pampas",
+   "por": [
+    "igual"
+   ],
+   "fichas": [
+    {
+     "id": "496115df-5f5a-44f3-99b9-bdf739d7fa84",
+     "full_name": "Alejo Lavayén",
+     "usos": 16,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "b648566a-1e97-4707-a43c-c9158ee210c7",
+     "full_name": "Alejo Lavayen",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "keep": "496115df-5f5a-44f3-99b9-bdf739d7fa84",
+   "nombre": "Alejo Lavayén",
+   "borrar": [
+    "b648566a-1e97-4707-a43c-c9158ee210c7"
+   ],
+   "first": "Alejo",
+   "last": "Lavayén"
+  },
+  {
+   "club_id": "pampas",
+   "por": [
+    "igual"
+   ],
+   "fichas": [
+    {
+     "id": "5ddc458c-cc43-4fd7-9e15-380c27d249e5",
+     "full_name": "Tobías Wade",
+     "usos": 13,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "958892f1-8177-4185-b716-ee3000ee5cda",
+     "full_name": "Tobiás Wade",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "keep": "5ddc458c-cc43-4fd7-9e15-380c27d249e5",
+   "nombre": "Tobías Wade",
+   "borrar": [
+    "958892f1-8177-4185-b716-ee3000ee5cda"
+   ],
+   "first": "Tobías",
+   "last": "Wade"
+  },
+  {
+   "club_id": "pampas",
+   "por": [
+    "parecido"
+   ],
+   "fichas": [
+    {
+     "id": "841ddc64-e365-49c0-8bf1-c55c09513ade",
+     "full_name": "Ignacio Bottazzini",
+     "usos": 16,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "e1d33869-1fed-4abf-8197-00508b386c26",
+     "full_name": "Ignacio Botazzini",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "keep": "841ddc64-e365-49c0-8bf1-c55c09513ade",
+   "nombre": "Ignacio Bottazzini",
+   "borrar": [
+    "e1d33869-1fed-4abf-8197-00508b386c26"
+   ],
+   "first": "Ignacio",
+   "last": "Bottazzini"
+  },
+  {
+   "club_id": "capibaras-xv",
+   "por": [
+    "igual"
+   ],
+   "fichas": [
+    {
+     "id": "1920a929-49d2-4821-9a01-31131df67a7d",
+     "full_name": "Martín Vaca",
+     "usos": 9,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "3bd8a656-ac73-4eeb-a2a1-1cb12fbe8fdd",
+     "full_name": "Martin Vaca",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "keep": "1920a929-49d2-4821-9a01-31131df67a7d",
+   "nombre": "Martín Vaca",
+   "borrar": [
+    "3bd8a656-ac73-4eeb-a2a1-1cb12fbe8fdd"
+   ],
+   "first": "Martín",
+   "last": "Vaca"
+  },
+  {
+   "club_id": "capibaras-xv",
+   "por": [
+    "parecido"
+   ],
+   "fichas": [
+    {
+     "id": "6e4ea0fb-b514-4b71-90af-0b03abe578e2",
+     "full_name": "Ignacio Dogliani",
+     "usos": 14,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "a777e218-c873-4ee9-b952-c83208dbd266",
+     "full_name": "Ignacio Doglini",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "keep": "6e4ea0fb-b514-4b71-90af-0b03abe578e2",
+   "nombre": "Ignacio Dogliani",
+   "borrar": [
+    "a777e218-c873-4ee9-b952-c83208dbd266"
+   ],
+   "first": "Ignacio",
+   "last": "Dogliani"
+  },
+  {
+   "club_id": "argentina-xv",
+   "por": [
+    "igual"
+   ],
+   "fichas": [
+    {
+     "id": "0e0966a7-c4af-432b-a8f1-e01a57add268",
+     "full_name": "Ignacio Orsetti",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "e5239580-8030-4952-b26c-7bc47464d342",
+     "full_name": "ORSETTI, Ignacio",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "keep": "0e0966a7-c4af-432b-a8f1-e01a57add268",
+   "nombre": "Ignacio Orsetti",
+   "borrar": [
+    "e5239580-8030-4952-b26c-7bc47464d342"
+   ],
+   "first": "Ignacio",
+   "last": "Orsetti"
+  },
+  {
+   "club_id": "argentina-xv",
+   "por": [
+    "igual"
+   ],
+   "fichas": [
+    {
+     "id": "2363c000-6114-4eee-bb8e-d41169883369",
+     "full_name": "Rodrigo Fernández Criado",
+     "usos": 1,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "2d103611-1727-4cf6-8a51-6c8eb1703407",
+     "full_name": "FERNÁNDEZ CRIADO, Rodrigo",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "keep": "2363c000-6114-4eee-bb8e-d41169883369",
+   "nombre": "Rodrigo Fernández Criado",
+   "borrar": [
+    "2d103611-1727-4cf6-8a51-6c8eb1703407"
+   ],
+   "first": "Rodrigo Fernández",
+   "last": "Criado"
+  },
+  {
+   "club_id": "argentina-xv",
+   "por": [
+    "igual"
+   ],
+   "fichas": [
+    {
+     "id": "36a8e825-916c-43e8-9c22-c5542ed39287",
+     "full_name": "ESTELLÉS, Bautista",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "9c364c05-4448-46c5-9ba9-c74da3798ad0",
+     "full_name": "Bautista Estellés",
+     "usos": 1,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "keep": "9c364c05-4448-46c5-9ba9-c74da3798ad0",
+   "nombre": "Bautista Estellés",
+   "borrar": [
+    "36a8e825-916c-43e8-9c22-c5542ed39287"
+   ],
+   "first": "Bautista",
+   "last": "Estellés"
+  },
+  {
+   "club_id": "argentina-xv",
+   "por": [
+    "igual"
+   ],
+   "fichas": [
+    {
+     "id": "3ca604f1-3eb5-4798-a1d2-7c2129efc2d6",
+     "full_name": "Nicolás Viola",
+     "usos": 1,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "97379e60-690f-41b4-a666-2f30aa0b2ca5",
+     "full_name": "VIOLA, Nicolás",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "keep": "3ca604f1-3eb5-4798-a1d2-7c2129efc2d6",
+   "nombre": "Nicolás Viola",
+   "borrar": [
+    "97379e60-690f-41b4-a666-2f30aa0b2ca5"
+   ],
+   "first": "Nicolás",
+   "last": "Viola"
+  },
+  {
+   "club_id": "argentina-xv",
+   "por": [
+    "igual"
+   ],
+   "fichas": [
+    {
+     "id": "4e5b66d2-7fa3-4d39-9a75-aef2822ee0b2",
+     "full_name": "GREISING REVOL, Juan Ignacio",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "5ca5c8de-6727-49b4-a547-6c74a02c895a",
+     "full_name": "Juan Ignacio Greising Revol",
+     "usos": 1,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "keep": "5ca5c8de-6727-49b4-a547-6c74a02c895a",
+   "nombre": "Juan Ignacio Greising Revol",
+   "borrar": [
+    "4e5b66d2-7fa3-4d39-9a75-aef2822ee0b2"
+   ],
+   "first": "Juan Ignacio Greising",
+   "last": "Revol"
+  },
+  {
+   "club_id": "argentina-xv",
+   "por": [
+    "igual"
+   ],
+   "fichas": [
+    {
+     "id": "5b0d5002-5201-4d7b-9268-69a1c41b44ed",
+     "full_name": "AVACA, Enzo",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "fc9edcd6-4051-4143-a453-5aca3bf2be77",
+     "full_name": "Enzo Avaca",
+     "usos": 1,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "keep": "fc9edcd6-4051-4143-a453-5aca3bf2be77",
+   "nombre": "Enzo Avaca",
+   "borrar": [
+    "5b0d5002-5201-4d7b-9268-69a1c41b44ed"
+   ],
+   "first": "Enzo",
+   "last": "Avaca"
+  },
+  {
+   "club_id": "argentina-xv",
+   "por": [
+    "igual"
+   ],
+   "fichas": [
+    {
+     "id": "77f4106b-836e-4277-b7dd-b0fe069503ca",
+     "full_name": "Ignacio Gandini",
+     "usos": 1,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "ebb1fb77-f9de-4bfa-bbd0-f7adec31cca5",
+     "full_name": "GANDINI, Ignacio",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "keep": "77f4106b-836e-4277-b7dd-b0fe069503ca",
+   "nombre": "Ignacio Gandini",
+   "borrar": [
+    "ebb1fb77-f9de-4bfa-bbd0-f7adec31cca5"
+   ],
+   "first": "Ignacio",
+   "last": "Gandini"
+  },
+  {
+   "club_id": "argentina-xv",
+   "por": [
+    "igual"
+   ],
+   "fichas": [
+    {
+     "id": "bb421072-8087-4ecb-8ca0-888f87782367",
+     "full_name": "Luciano Avaca",
+     "usos": 1,
+     "nombres": {},
+     "dni": []
+    },
+    {
+     "id": "dfc8b491-7410-4fb4-ab61-20f676536ba2",
+     "full_name": "AVACA, Luciano",
+     "usos": 0,
+     "nombres": {},
+     "dni": []
+    }
+   ],
+   "keep": "bb421072-8087-4ecb-8ca0-888f87782367",
+   "nombre": "Luciano Avaca",
+   "borrar": [
+    "dfc8b491-7410-4fb4-ab61-20f676536ba2"
+   ],
+   "first": "Luciano",
+   "last": "Avaca"
+  }
+ ],
+ "conflictos": []
+}

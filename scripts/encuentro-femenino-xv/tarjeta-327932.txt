@@ -1,0 +1,90 @@
+Torneo : 2026 Encuentro Femenino de Selecciones de XV
+Ronda : Clasificacion
+Fecha : Zona A - Clasificacion
+Partido número : 327932
+
+Fecha de juego : 30/10/2026 09:00 hs
+
+Referee : Garabatos Bonard, Martina Geraldine
+
+Incidencias LOCAL
+Tie.	Min.	Símbolo	Incidencia	Pun.	Jugador	Detalle	Sanción
+1T	3	sale.ico	Se retiró		4 - Banegas, Yesica
+1T	3	entra.ico	Ingresó		2 - Velázquez Loncomán, Lucía Macarena
+2T	3	sale.ico	Se retiró		1 - Benavidez, Daira
+2T	3	entra.ico	Ingresó		17 - Kristensen, Maria Candela
+2T	3	sale.ico	Se retiró		13 - Toledo, Florencia
+2T	3	entra.ico	Ingresó		15 - Sanhueza, Gianella
+2T	3	sale.ico	Se retiró		12 - Sandoval, Agustina Belén
+2T	3	entra.ico	Ingresó		21 - Guzman, Génesis
+2T	3	sale.ico	Se retiró		10 - Nieva, María Florencia
+2T	3	entra.ico	Ingresó		23 - Roldán, Morena Agustina
+2T	3	sale.ico	Se retiró		8 - Oyola, Yesica Cecilia
+2T	3	entra.ico	Ingresó		19 - Saez, Pia
+2T	3	sale.ico	Se retiró		14 - Esquivel, Pamela Florencia
+2T	3	entra.ico	Ingresó		22 - Sanchez Jara, Morena Paloma
+Incidencias VISITANTE
+Tie.	Min.	Símbolo	Incidencia	Pun.	Jugador	Detalle	Sanción
+1T	20		Try	5	15 - Lecuona, Milagros
+1T	20		Conversión	2	10 - Rahmer Morgantini, Avril
+1T	29		Try	5	11 - Charamone, Carolina
+1T	29		Conversión	2	10 - Rahmer Morgantini, Avril
+2T	1		Conversión	2	10 - Rahmer Morgantini, Avril
+2T	1		Try	5	10 - Rahmer Morgantini, Avril
+2T	4		Try	5	11 - Charamone, Carolina
+2T	4		Conversión	2	10 - Rahmer Morgantini, Avril
+2T	15		Try	5	11 - Charamone, Carolina
+2T	15		Try	5	12 - Altini, Cecilia
+2T	15		Try	5	12 - Altini, Cecilia
+2T	15		Conversión	2	10 - Rahmer Morgantini, Avril
+Entrenador LOCAL: Sergio Pilia 21541265
+Miembros del equipo LOCAL
+Pos	Doc.	Nombre	APL	Cert.	Pos.	Pos.Alt	Pos.Alt.2	Ult.Fich.
+1	37858310	Benavidez, Daira			01	03	04	2026
+2	42153680	Morro Seguiel, Amy Fabiana			02	05	12	2026
+3	46481284	Zuñiga, Bianca Lujan			(no esp.)	(no esp.)	(no esp.)	2026
+4	33931352	Banegas, Yesica			(no esp.)	05	13	2026
+5	35886666	Farroni Reina, Florencia			(no esp.)	08	09	2026
+6	39131932	Guerci, Aldana Micaela			03	01	04	2026
+7	35312371	Sepúlveda, Ailin			01	03	04	2026
+8	35060346	Oyola, Yesica Cecilia			02	03	01	2026
+9	46931081	Perea, Maria Pia			09	11	13	2026
+10	42467366	Nieva, María Florencia			12	13	10	2026
+11	43156673	Toledo, Florencia			12	09	15	2026
+12	39650296	Gutierrez, Daniza			02	01	03	2026
+13	39115686	Esquivel, Pamela Florencia			12	10	05	2026
+14	48731972	Sandoval, Agustina Belén			11	12	14	2026
+15	45782414	Santana, Guadalupe			09	04	11	2026
+16	45978962	Guzman, Génesis			13	11	04	2026
+17	41619952	Kristensen, Maria Candela			01	03	02	2026
+18	45797683	Roldán, Morena Agustina			03	(no esp.)	11	2026
+19	48969798	Saez, Pia			02	01	12	2026
+20	48821540	Sanchez Jara, Morena Paloma			10	09	(no esp.)	2026
+21	43421416	Sanhueza, Gianella			09	14	11	2026
+22	42264965	Velázquez Loncomán, Lucía Macarena			03	01	02	2026
+Entrenador VISITANTE: Juan Manuel Algañaraz 28362839
+Miembros del equipo VISITANTE
+Pos	Doc.	Nombre	APL	Cert.	Pos.	Pos.Alt	Pos.Alt.2	Ult.Fich.
+1	46431341	Torres, Milagros			01	03	02	2026
+2	44666114	Sosa Quintana, Renata			01	02	08	2026
+3	46431340	Torres, Natalia			03	01	02	2026
+4	47742584	Rodriguez, Barbara			14	11	12	2026
+5	48385697	Toledo Pacher, Ludmila Elena			05	14	(no esp.)	2026
+6	47235795	Mercado, Melina			12	10	02	2026
+7	46558711	Luis, Morena Abril			10	09	12	2026
+8	45887360	Contreras, Camila Luna			05	12	08	2026
+9	47054539	Cappellani, Isabella			09	12	13	2026
+10	44955465	Rahmer Morgantini, Avril			10	12	15	2026
+11	44839890	Charamone, Carolina			13	11	04	2026
+12	43096989	Altini, Cecilia			12	13	14	2026
+13	39458678	Alcaraz, Melina Rosa			10	13	15	2026
+14	47736947	Gervasio, Magali			14	13	15	2026
+15	42159927	Lecuona, Milagros			13	10	15	2026
+16	43904771	Tevez, Jimena Sofia			01	02	08	2026
+17	39388429	Lugo, Iara			02	01	03	2026
+18	43906904	Rodriguez, Sol Josefina			03	01	03	2026
+19	47862390	Tachini, Aisha			13	05	11	2026
+20	41402694	Osorio, Rocio Sabrina			15	09	11	2026
+21	44839844	Cardoso, Yael			12	13	05	2026
+22	42328391	Lezcano, Antonella			12	10	13	2026
+Incidencias PARTIDO

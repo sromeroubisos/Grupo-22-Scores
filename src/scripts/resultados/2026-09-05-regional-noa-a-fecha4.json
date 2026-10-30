@@ -1,0 +1,27 @@
+{
+  "fecha": "2026-09-05",
+  "descripcion": "Torneo Regional del NOA \"A\" · los tres partidos del sábado",
+  "fuente": "Resultados pasados a mano.",
+  "motivo": "Los tres perdedores caen por siete o menos y se llevan el defensivo, que el ruleset del torneo deduce solo. Sin ofensivo declarado: la fuente da el marcador, no los tries. Universitario de Salta vs Universitario de Tucumán y Lince vs Cardenales se juegan el domingo.",
+  "puntosBonusOfensivo": 1,
+  "partidos": [
+    {
+      "partido": "363e1610-626f-4b7b-a260-01b83982f7e6",
+      "local": "Los Tarcos", "visitante": "Jockey de Salta",
+      "marcador": { "local": 36, "visitante": 31 },
+      "bonusOfensivo": []
+    },
+    {
+      "partido": "e62e5618-8abe-44fd-815c-47b7ae43a978",
+      "local": "Natacion y Gimnasia", "visitante": "Tucuman Lawn Tennis",
+      "marcador": { "local": 31, "visitante": 27 },
+      "bonusOfensivo": []
+    },
+    {
+      "partido": "f1ec8ad6-ef21-4ed3-b03d-3a8116f0415c",
+      "local": "Huirapuca", "visitante": "Tucuman Rugby Club",
+      "marcador": { "local": 37, "visitante": 33 },
+      "bonusOfensivo": []
+    }
+  ]
+}

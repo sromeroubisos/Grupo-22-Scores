@@ -1,0 +1,884 @@
+{
+ "descripcion": "tarjetas oficiales 62bf0694",
+ "partidos": [
+  {
+   "id": "0c4f5a04-34fc-4688-ab40-5b45317ee6cc",
+   "rotulo": "rosedal-r-c vs cuises-portena-rugby · 62bf0694 · tarjeta 327314",
+   "arbitro": "DANIEL ALEJANDRO FUNES",
+   "local": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Pablo Martín Pereyra",
+      "id": "64367343-76b9-4287-9484-5368a29b9ca8"
+     },
+     {
+      "numero": 2,
+      "nombre": "Franco Agustin Cabral Gonzalez",
+      "id": "35a30a20-1bc2-47de-9040-bb378093479e"
+     },
+     {
+      "numero": 3,
+      "nombre": "Ivan Forni",
+      "id": "c124eed1-8052-4f2c-b74f-f2e45db40daf"
+     },
+     {
+      "numero": 4,
+      "nombre": "Nicolas Kaba",
+      "id": "07a466ea-245c-4a7a-b073-c5c500cb50ca"
+     },
+     {
+      "numero": 5,
+      "nombre": "Benjamin Tobares",
+      "id": "80259e58-8245-4d6f-8c2c-3b1a7c9e25db"
+     },
+     {
+      "numero": 6,
+      "nombre": "Ruben Cuello",
+      "id": "3197f383-53dc-46dd-b3d1-f4b3e2fe508d"
+     },
+     {
+      "numero": 7,
+      "nombre": "Joaquín Gutierrez",
+      "id": "df17b243-b39b-4fd2-8d22-7b89bf7287fd"
+     },
+     {
+      "numero": 8,
+      "nombre": "Maximiliano González",
+      "id": "3c64b871-59d8-4394-aef9-8338864e4aba"
+     },
+     {
+      "numero": 9,
+      "nombre": "Tomas Gutierrez",
+      "id": "313af873-e2f6-4986-99ee-6db9a721d1bc"
+     },
+     {
+      "numero": 10,
+      "nombre": "Bruno Aleman",
+      "id": "46da74d9-b834-47f2-980d-43f776836cef"
+     },
+     {
+      "numero": 11,
+      "nombre": "Iñaki Jaureguibehere",
+      "id": "8f1f0359-e06f-4ae9-8edb-cb91ac2608d9"
+     },
+     {
+      "numero": 12,
+      "nombre": "Joaquin Marciante Brizuela",
+      "id": "7bb260c8-4e3e-4510-b46a-2127508692c0"
+     },
+     {
+      "numero": 13,
+      "nombre": "Francisco Busleiman",
+      "id": "0060ae12-bc4f-4539-9ded-ed3569e6ce8a"
+     },
+     {
+      "numero": 14,
+      "nombre": "Tobias Gallardo",
+      "id": "5c23e7e0-07c8-4605-aac6-899268951914"
+     },
+     {
+      "numero": 15,
+      "nombre": "Elias Nuñez",
+      "id": "87db6dd8-87cb-484f-871b-a210cf347401"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Matías Alejandro Sileoni",
+      "id": "42c8a9a5-741d-40bb-8983-4536dca5fc7d"
+     },
+     {
+      "numero": 17,
+      "nombre": "Daniel Gerban",
+      "id": "12141c53-a1a4-4e0e-a41b-a6f89e6715f4"
+     },
+     {
+      "numero": 18,
+      "nombre": "Marcos Herrera",
+      "id": "76a01f38-7339-49f7-9178-b4f3c703db11"
+     },
+     {
+      "numero": 19,
+      "nombre": "Nelson Federico Gomez Monge",
+      "id": "635b20ea-582e-4d19-add4-32cf44b2fe0a"
+     },
+     {
+      "numero": 20,
+      "nombre": "Santiago Gabriel Gomez Vega",
+      "id": "883143b0-e0c9-437a-990b-8ed3eaa3bd74"
+     },
+     {
+      "numero": 21,
+      "nombre": "Ignacio Exequiel Cuneo",
+      "id": "f344670c-1bac-416c-ac68-a4a07112c45b"
+     },
+     {
+      "numero": 22,
+      "nombre": "Edgardo Omar González",
+      "id": "e1f7ceae-41f3-4bc2-9c0d-981ec7937e2c"
+     },
+     {
+      "numero": 23,
+      "nombre": "Facundo González",
+      "id": "c0bcbf37-5f3b-4cbb-b8d5-caa8c4fe0e3e"
+     },
+     {
+      "numero": 24,
+      "nombre": "Matias José Tedesco Sánchez",
+      "id": "ad484930-58d1-49a9-82f5-c388c4917235"
+     },
+     {
+      "numero": 25,
+      "nombre": "Fernando Valentín Marzano",
+      "id": "16c568d2-fa2b-430c-b512-e807650c981e"
+     },
+     {
+      "numero": 26,
+      "nombre": "Nicolás Barki",
+      "id": "6ddadd0f-d66a-40ec-aa7f-d202c744da08"
+     },
+     {
+      "numero": 27,
+      "nombre": "Mateo Povedano",
+      "id": "e2447d99-0347-4524-bd1d-127d3fd0ddf9"
+     },
+     {
+      "numero": 28,
+      "nombre": "Juan Ignacio Elias",
+      "id": "c4a341d9-14d8-4182-95b2-3dd503875b51"
+     },
+     {
+      "numero": 29,
+      "nombre": "Mauro Abel Pinos",
+      "id": "af430d15-8af1-4e5c-b293-c80d9e6ff686"
+     },
+     {
+      "numero": 30,
+      "nombre": "Alan Torrez",
+      "id": "b05ad00a-b221-4cea-acd3-07791df7ccb6"
+     }
+    ],
+    "nombre": "rosedal-r-c"
+   },
+   "visitante": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Emilio Vilar",
+      "id": "f63e7bae-ef73-44a6-9af5-ea87d6db028f"
+     },
+     {
+      "numero": 2,
+      "nombre": "Leandro Fabian Reisenauer",
+      "id": "680ec791-90ec-42ba-bd53-da4273b911de"
+     },
+     {
+      "numero": 3,
+      "nombre": "Carlos Rivoira",
+      "id": "07b3434f-7dd4-4561-9b1e-1432ec0f4de1"
+     },
+     {
+      "numero": 4,
+      "nombre": "Marcos Martin Aghemo",
+      "id": "d48ad9d2-4260-4923-891d-1b5f8949b0be"
+     },
+     {
+      "numero": 5,
+      "nombre": "Leonardo Damian Massini",
+      "id": "132142e1-b3e9-4075-a042-375b24303845"
+     },
+     {
+      "numero": 6,
+      "nombre": "Nicolás Macello",
+      "id": "9d502905-ba82-4037-bb21-dd42f1023a8d"
+     },
+     {
+      "numero": 7,
+      "nombre": "Fabián Gustavo Alessandria",
+      "id": "02b6f5d0-d9a5-4e2e-86c6-c312314edc9f"
+     },
+     {
+      "numero": 8,
+      "nombre": "Gerónimo Calatroni",
+      "id": "6ff08910-5a88-4b38-958b-9252a3b2ed74"
+     },
+     {
+      "numero": 9,
+      "nombre": "Gastón Alejandro Ladner",
+      "id": "3f924488-80fd-41a8-ba4e-8de4c972d919"
+     },
+     {
+      "numero": 10,
+      "nombre": "Hector Velez",
+      "id": "d3a0ece7-9ba4-4310-926b-7906bac688dc"
+     },
+     {
+      "numero": 11,
+      "nombre": "Salvador Acevedo",
+      "id": "1b688f0b-1903-4bb7-b63c-7a0d4706574e"
+     },
+     {
+      "numero": 12,
+      "nombre": "Lucas Pratti",
+      "id": "8897d8a5-6b65-42cb-9fdf-f02ace83e7c2"
+     },
+     {
+      "numero": 13,
+      "nombre": "Nicolás Guillermo Bruna",
+      "id": "d4ba6898-2bbc-4aa3-84fc-d616a9a93474"
+     },
+     {
+      "numero": 14,
+      "nombre": "Pablo Bianco",
+      "id": "7dfd9c81-c685-4bfd-a3ef-27164c134a51"
+     },
+     {
+      "numero": 15,
+      "nombre": "Juan De La Cruz Acevedo",
+      "id": "336fbb98-19d3-4b20-a7a0-8909712c4aa8"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Javier Maletto",
+      "id": "661e4d71-80a2-43a9-ad5c-515c0c0f5f3a"
+     },
+     {
+      "numero": 17,
+      "nombre": "Montu Lautaro Alexis",
+      "id": "5cc13ce7-1f70-473a-b140-5f0a18754fac"
+     },
+     {
+      "numero": 18,
+      "nombre": "Edelmar Beccaria",
+      "id": "f94395a9-6220-4cc9-9daf-17d428f61570"
+     },
+     {
+      "numero": 19,
+      "nombre": "Mayco Gonzalo Bertotti",
+      "id": "5bc2dbf7-b544-432c-822d-7c92d3130fe2"
+     },
+     {
+      "numero": 20,
+      "nombre": "Federico Ostertag",
+      "id": "dbe545e0-81eb-41b4-95a7-3272a87e3390"
+     },
+     {
+      "numero": 21,
+      "nombre": "Alan Gontero",
+      "id": "c495d820-114b-4c46-8382-e49155edd4eb"
+     },
+     {
+      "numero": 22,
+      "nombre": "Mayco Marcelo Cabrera Ardusso",
+      "id": "9cef8ac4-ff0f-4023-bdcd-a2460e87e954"
+     },
+     {
+      "numero": 23,
+      "nombre": "Francisco Rivoira",
+      "id": "0bb6f7b0-a89f-4c07-84c3-b47eefec9c57"
+     },
+     {
+      "numero": 24,
+      "nombre": "Carlos Vega",
+      "id": "b02ec2b0-19c0-420f-98f1-faa8e4ea0150"
+     },
+     {
+      "numero": 25,
+      "nombre": "Rafael Barros",
+      "id": "11fae796-a718-49de-9671-c34874f1cb38"
+     },
+     {
+      "numero": 26,
+      "nombre": "Carlos Vaca",
+      "id": "6d8b1583-7474-421c-b820-94937d655b6f"
+     },
+     {
+      "numero": 27,
+      "nombre": "Emanuel Reusa",
+      "id": "005cbfa9-6551-4eb9-a161-416bdfebe4ea"
+     },
+     {
+      "numero": 28,
+      "nombre": "Jonatan Gongora",
+      "id": "605d3af1-b53d-49bd-80e2-563b84cf9131"
+     },
+     {
+      "numero": 29,
+      "nombre": "Mateo Alessandria",
+      "id": "0ca06710-e43c-4de3-a7ab-d02d0cf80fff"
+     },
+     {
+      "numero": 30,
+      "nombre": "Jonatan Gongora",
+      "id": "605d3af1-b53d-49bd-80e2-563b84cf9131"
+     }
+    ],
+    "nombre": "cuises-portena-rugby"
+   },
+   "eventos": [
+    {
+     "minuto": -23,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "jugador": "Nicolas Kaba",
+     "equipo": "local"
+    },
+    {
+     "minuto": -15,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "jugador": "Ivan Forni",
+     "equipo": "local"
+    },
+    {
+     "minuto": 1,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Francisco Busleiman",
+     "equipo": "local"
+    },
+    {
+     "minuto": 13,
+     "periodo": "1T",
+     "tipo": "substitution",
+     "jugador": "Franco Agustin Cabral Gonzalez",
+     "detalle": "Entra: Marcos Herrera",
+     "equipo": "local"
+    },
+    {
+     "minuto": 35,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Juan De La Cruz Acevedo",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": -34,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Francisco Busleiman",
+     "equipo": "local"
+    },
+    {
+     "minuto": -21,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "jugador": "Ignacio Exequiel Cuneo",
+     "equipo": "local"
+    },
+    {
+     "minuto": -12,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "jugador": "Joaquin Marciante Brizuela",
+     "equipo": "local"
+    },
+    {
+     "minuto": 11,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Elias Nuñez",
+     "equipo": "local"
+    },
+    {
+     "minuto": 17,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Pablo Bianco",
+     "detalle": "Entra: Alan Gontero",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 17,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Leonardo Damian Massini",
+     "detalle": "Entra: Montu Lautaro Alexis",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 17,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Fabián Gustavo Alessandria",
+     "detalle": "Entra: Edelmar Beccaria",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 17,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Lucas Pratti",
+     "detalle": "Entra: Mayco Gonzalo Bertotti",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 22,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Juan De La Cruz Acevedo",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 24,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Francisco Busleiman",
+     "equipo": "local"
+    },
+    {
+     "minuto": 24,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Elias Nuñez",
+     "equipo": "local"
+    },
+    {
+     "minuto": 30,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Gerónimo Calatroni",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 31,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Hector Velez",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 35,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Nelson Federico Gomez Monge",
+     "detalle": "Entra: Benjamin Tobares",
+     "equipo": "local"
+    },
+    {
+     "minuto": 35,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Joaquín Gutierrez",
+     "detalle": "Entra: Ruben Cuello",
+     "equipo": "local"
+    },
+    {
+     "minuto": 35,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Nicolas Kaba",
+     "detalle": "Entra: Daniel Gerban",
+     "equipo": "local"
+    },
+    {
+     "minuto": 35,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Nicolás Guillermo Bruna",
+     "detalle": "Entra: Mayco Marcelo Cabrera Ardusso",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 38,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Montu Lautaro Alexis",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 39,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Hector Velez",
+     "equipo": "visitante"
+    }
+   ]
+  },
+  {
+   "id": "989c6b89-bfc4-4f51-bb3f-6ec8599c1e1a",
+   "rotulo": "conas-r-c vs universidad-siglo-21-rugby · 62bf0694 · tarjeta 327313",
+   "arbitro": "CARLOS RAFAEL HERNANDEZ",
+   "local": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Tomas Nieto",
+      "id": "14b24ddf-b3f8-42e5-a49c-2e4547e76095"
+     },
+     {
+      "numero": 2,
+      "nombre": "Maximiliano Ferreyra",
+      "id": "92cced4f-809e-420e-bcd9-43632e1ce5f0"
+     },
+     {
+      "numero": 3,
+      "nombre": "Paulo Farias",
+      "id": "8dba7fed-3ecb-471d-8621-acbb1da105f3"
+     },
+     {
+      "numero": 4,
+      "nombre": "Marcos Luna",
+      "id": "1056e22a-737e-47b3-aadc-4d3e5aa7ada6"
+     },
+     {
+      "numero": 5,
+      "nombre": "Juan Gabriel Almada",
+      "id": "1a2fad02-ca2a-4ec4-9e79-3642444617c5"
+     },
+     {
+      "numero": 6,
+      "nombre": "Facundo Sabre",
+      "id": "d923f892-1cdb-4014-a7bb-34466567c4df"
+     },
+     {
+      "numero": 7,
+      "nombre": "Nicolas Barrera Grillo",
+      "id": "2b17158b-a0a6-4b0d-89fc-b58f7578953a"
+     },
+     {
+      "numero": 8,
+      "nombre": "Alexis Cravero",
+      "id": "22fc112b-76de-4cfe-9f75-bea0c2088729"
+     },
+     {
+      "numero": 9,
+      "nombre": "Miqueas Moretto",
+      "id": "3062697d-b052-44be-bd3d-71650ffed1a7"
+     },
+     {
+      "numero": 10,
+      "nombre": "Luciano Aprile",
+      "id": "aa1c5326-5003-423f-8036-f9ba8ebbef97"
+     },
+     {
+      "numero": 11,
+      "nombre": "Geronimo Facundo Gomez Lelli",
+      "id": "2d79f289-30d0-40ec-8dd3-90d65f8cb7d2"
+     },
+     {
+      "numero": 12,
+      "nombre": "Nicolas Rey",
+      "id": "977217bf-8da5-4692-a501-d1d6eab938a1"
+     },
+     {
+      "numero": 13,
+      "nombre": "Alan Agustín Quinteros Carrizo",
+      "id": "10eaef6e-b151-4642-a4f5-a0ee5f565a44"
+     },
+     {
+      "numero": 14,
+      "nombre": "Marcelo Ariel Coria",
+      "id": "ca35e9c4-7a36-47d0-ab57-aaa76bf47523"
+     },
+     {
+      "numero": 15,
+      "nombre": "Guido Bobatto",
+      "id": "595990d3-94d7-4d6e-8aaa-73f0fda09aed"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Pablo Aguirres",
+      "id": "77a56118-0950-4091-8b21-5020b5b2a321"
+     },
+     {
+      "numero": 17,
+      "nombre": "Alexis Ariel Araoz",
+      "id": "43a114ea-d7f7-44f6-ae54-f5b2ee28694d"
+     },
+     {
+      "numero": 18,
+      "nombre": "Favio Ariel Ontivero",
+      "id": "74f97914-6083-45ea-a2f4-3cf0fcc20f54"
+     },
+     {
+      "numero": 19,
+      "nombre": "Victor Hugo Demarco",
+      "id": "ae6c7bd8-1dc5-4b55-8f38-054efe823d02"
+     },
+     {
+      "numero": 20,
+      "nombre": "Antonio Palavecino",
+      "id": "4582cae0-73cf-41f9-b9d0-534894a383e4"
+     },
+     {
+      "numero": 21,
+      "nombre": "Joaquin Matias Aguirre",
+      "id": "2fd50cf5-184a-4e32-9e3f-fa8604bb091e"
+     },
+     {
+      "numero": 22,
+      "nombre": "Santiago Timolati",
+      "id": "5ebeb4e9-6bc5-4ba4-8c2a-ab0fa9b52952"
+     },
+     {
+      "numero": 23,
+      "nombre": "Federico Martin Simes",
+      "id": "da7ea089-6e21-4409-a21c-028b66f50ebd"
+     }
+    ],
+    "nombre": "conas-r-c"
+   },
+   "visitante": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Luca Rodrigo Rivadero",
+      "id": "d1bcc83a-245c-4ccd-961c-322a496776f5"
+     },
+     {
+      "numero": 2,
+      "nombre": "Franco De Chiara",
+      "id": "c2c00f20-2848-488e-9f50-c406663691ce"
+     },
+     {
+      "numero": 3,
+      "nombre": "Bruno Savarella",
+      "id": "09661144-fa8a-44e2-be70-271ada8d7891"
+     },
+     {
+      "numero": 4,
+      "nombre": "Martin Laion",
+      "id": "0a43e8f5-e428-4da3-ab82-ad6d9d57505c"
+     },
+     {
+      "numero": 5,
+      "nombre": "Octavio Laporte",
+      "id": "91bf6771-c93c-465b-9a61-3103d4a50667"
+     },
+     {
+      "numero": 6,
+      "nombre": "Matias Presidente",
+      "id": "d15f04eb-a79a-4792-a908-2359cc2def53"
+     },
+     {
+      "numero": 7,
+      "nombre": "Pedro José Depalo",
+      "id": "fa7d9b4a-b962-4b41-ac58-03bcc3f37f07"
+     },
+     {
+      "numero": 8,
+      "nombre": "Maximiliano Tomas Carpio Crembil",
+      "id": "fa4c1cf7-506a-405f-9764-b4909489c785"
+     },
+     {
+      "numero": 9,
+      "nombre": "Lucas Ezequiel Ceballos Faas",
+      "id": "7f0e4f35-3691-4588-9565-edbc0cbeef25"
+     },
+     {
+      "numero": 10,
+      "nombre": "Facundo Tachini",
+      "id": "1918eb94-5fa9-42cc-b492-0ef014a4cc71"
+     },
+     {
+      "numero": 11,
+      "nombre": "Juan Pero",
+      "id": "87700834-f674-4783-a4b2-cec436ce72ba"
+     },
+     {
+      "numero": 12,
+      "nombre": "Joaquin Iscaro",
+      "id": "099f0294-4c4b-44ef-aa24-482de659ef4f"
+     },
+     {
+      "numero": 13,
+      "nombre": "Agustin Mazzarini",
+      "id": "8d7a9d10-2477-4344-ab36-bf9939316a70"
+     },
+     {
+      "numero": 14,
+      "nombre": "Gustavo Pedrocca",
+      "id": "a004f973-68df-4dfe-adef-2d08fc73d3b0"
+     },
+     {
+      "numero": 15,
+      "nombre": "Ezequiel Murillo",
+      "id": "f0fed98f-e174-45fb-8b12-d511656f4f0b"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Nicolas Taglioli Gomar",
+      "id": "7718732e-dd9e-4e9d-b1b4-0cc693e02a2d"
+     },
+     {
+      "numero": 17,
+      "nombre": "Paul Cornu",
+      "id": "ca72625b-c275-45e9-b8ae-b1a42b6647c1"
+     },
+     {
+      "numero": 18,
+      "nombre": "Mateo Fait",
+      "id": "ec447e56-ccb6-4efe-9bb8-5db3da022fd8"
+     },
+     {
+      "numero": 19,
+      "nombre": "Homero Álvarez",
+      "id": "563f6793-af46-42c5-9480-384e0fa3db54"
+     },
+     {
+      "numero": 20,
+      "nombre": "Ignacio Amin Castro Sleiman",
+      "id": "e2c0a3b0-4407-4ecc-950f-cc16b3fe4e6c"
+     },
+     {
+      "numero": 21,
+      "nombre": "Pedro Diez Cuenca",
+      "id": "5830c81c-0518-4dbc-8d9c-2b1b7ae20640"
+     },
+     {
+      "numero": 22,
+      "nombre": "Agustin Villanova",
+      "id": "fde0ecbc-619d-4f72-956b-1a4454be8d7d"
+     },
+     {
+      "numero": 23,
+      "nombre": "Mateo Vargas Martinovic",
+      "id": "e304c421-7891-4952-ac78-12b4a27fbb83"
+     }
+    ],
+    "nombre": "universidad-siglo-21-rugby"
+   },
+   "eventos": [
+    {
+     "minuto": 22,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Geronimo Facundo Gomez Lelli",
+     "equipo": "local"
+    },
+    {
+     "minuto": 22,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Luciano Aprile",
+     "equipo": "local"
+    },
+    {
+     "minuto": 24,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "jugador": "Luciano Aprile",
+     "equipo": "local"
+    },
+    {
+     "minuto": 32,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Maximiliano Tomas Carpio Crembil",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 32,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Facundo Tachini",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 37,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "jugador": "Victor Hugo Demarco",
+     "equipo": "local"
+    },
+    {
+     "minuto": 40,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "jugador": "Paulo Farias",
+     "equipo": "local"
+    },
+    {
+     "minuto": 5,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Marcos Luna",
+     "detalle": "Entra: Federico Martin Simes",
+     "equipo": "local"
+    },
+    {
+     "minuto": 9,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Guido Bobatto",
+     "equipo": "local"
+    },
+    {
+     "minuto": 11,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Matias Presidente",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 11,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Facundo Tachini",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 14,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "jugador": "Juan Gabriel Almada",
+     "equipo": "local"
+    },
+    {
+     "minuto": 20,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Maximiliano Ferreyra",
+     "detalle": "Entra: Alexis Ariel Araoz",
+     "equipo": "local"
+    },
+    {
+     "minuto": 22,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Paulo Farias",
+     "detalle": "Entra: Antonio Palavecino",
+     "equipo": "local"
+    },
+    {
+     "minuto": 22,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Guido Bobatto",
+     "detalle": "Entra: Pablo Aguirres",
+     "equipo": "local"
+    },
+    {
+     "minuto": 27,
+     "periodo": "2T",
+     "tipo": "penalty_goal",
+     "jugador": "Facundo Tachini",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 40,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Federico Martin Simes",
+     "equipo": "local"
+    },
+    {
+     "minuto": 40,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Luciano Aprile",
+     "equipo": "local"
+    }
+   ]
+  }
+ ]
+}

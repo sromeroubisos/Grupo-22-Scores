@@ -1,0 +1,3442 @@
+[
+ {
+  "id": "a66ee3fe-fbeb-4194-b02d-012fc00dbbe7",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-03-14T13:00:00+00:00",
+  "home_club_id": "jockey-club-cordoba-preintermedia-c",
+  "away_club_id": "carlos-paz-rugby-club-preintermedia-b",
+  "score": {
+   "away": 0,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba Preintermedia \"C\"",
+  "a": "Carlos Paz Rugby Club Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 28,
+  "sa": 0,
+  "fecha": "2026-03-14"
+ },
+ {
+  "id": "88aa48a6-9143-40f8-aff0-6f065c19516b",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-03-14T14:00:00+00:00",
+  "home_club_id": "cordoba-athletic-club-preintermedia-b",
+  "away_club_id": "universidad-nacional-de-cordoba-preintermedia-a",
+  "score": {
+   "away": 31,
+   "home": 40
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club Preintermedia \"B\"",
+  "a": "Universidad Nacional de Córdoba Preintermedia \"A\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 40,
+  "sa": 31,
+  "fecha": "2026-03-14"
+ },
+ {
+  "id": "d6a6ba4e-02ff-4fb0-81b4-7a4cc547a554",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-03-14T15:50:00+00:00",
+  "home_club_id": "jockey-club-cordoba-preintermedia-b",
+  "away_club_id": "tala-rugby-club-preintermedia-b",
+  "score": {
+   "away": 7,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba Preintermedia \"B\"",
+  "a": "Tala Rugby Club Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 28,
+  "sa": 7,
+  "fecha": "2026-03-14"
+ },
+ {
+  "id": "18c5f3c9-0c7e-4865-8b97-10315e411ae0",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-03-14T16:00:00+00:00",
+  "home_club_id": "club-palermo-bajo-preintermedia-b",
+  "away_club_id": "club-universitario-de-cordoba-preintermedia-b",
+  "score": {
+   "away": 5,
+   "home": 38
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Palermo Bajo Preintermedia \"B\"",
+  "a": "Club Universitario de Córdoba Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 38,
+  "sa": 5,
+  "fecha": "2026-03-14"
+ },
+ {
+  "id": "924cba9b-c878-41cc-bba4-4ed874f60558",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-03-14T17:00:00+00:00",
+  "home_club_id": "universidad-nacional-de-cordoba-preintermedia-b",
+  "away_club_id": "la-tablada-b-pre-intermedia",
+  "score": {
+   "away": 36,
+   "home": 14
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Universidad Nacional de Córdoba Preintermedia \"B\"",
+  "a": "La Tablada \"B\" - Pre Intermedia",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 14,
+  "sa": 36,
+  "fecha": "2026-03-14"
+ },
+ {
+  "id": "0afdae26-43d8-4eec-a3a8-57c76113ee65",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-03-14T18:00:00+00:00",
+  "home_club_id": "taborin-rc-preintermedia-b",
+  "away_club_id": "baguales-r-c-preintermedia-b",
+  "score": {
+   "away": 14,
+   "home": 21
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Taborín RC Preintermedia \"B\"",
+  "a": "Baguales R.C. Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 21,
+  "sa": 14,
+  "fecha": "2026-03-14"
+ },
+ {
+  "id": "afdca8ca-05e3-42fe-a81d-41bf71ec3aea",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-03-21T00:00:00+00:00",
+  "home_club_id": "club-universitario-de-cordoba-preintermedia-b",
+  "away_club_id": "taborin-rc-preintermedia-b",
+  "score": {
+   "away": 10,
+   "home": 41
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Universitario de Córdoba Preintermedia \"B\"",
+  "a": "Taborín RC Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 41,
+  "sa": 10,
+  "fecha": "2026-03-20"
+ },
+ {
+  "id": "b2b101d0-f928-4ead-b40b-b62116c23a78",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-03-21T00:00:00+00:00",
+  "home_club_id": "la-tablada-b-pre-intermedia",
+  "away_club_id": "cordoba-athletic-club-preintermedia-b",
+  "score": {
+   "away": 29,
+   "home": 23
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "La Tablada \"B\" - Pre Intermedia",
+  "a": "Córdoba Athletic Club Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 23,
+  "sa": 29,
+  "fecha": "2026-03-20"
+ },
+ {
+  "id": "85a1b3e9-f3ee-471d-968d-9ff118df137d",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-03-21T00:00:00+00:00",
+  "home_club_id": "jockey-club-cordoba-preintermedia-c",
+  "away_club_id": "universidad-nacional-de-cordoba-preintermedia-a",
+  "score": {
+   "away": 35,
+   "home": 3
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba Preintermedia \"C\"",
+  "a": "Universidad Nacional de Córdoba Preintermedia \"A\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 3,
+  "sa": 35,
+  "fecha": "2026-03-20"
+ },
+ {
+  "id": "74e6ea0f-e2f9-420e-8844-3119c0bc03b2",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-03-21T14:00:00+00:00",
+  "home_club_id": "club-palermo-bajo-preintermedia-b",
+  "away_club_id": "jockey-club-cordoba-preintermedia-b",
+  "score": {
+   "away": 19,
+   "home": 24
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Palermo Bajo Preintermedia \"B\"",
+  "a": "Jockey Club Córdoba Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 24,
+  "sa": 19,
+  "fecha": "2026-03-21"
+ },
+ {
+  "id": "e4ed85b3-c9d0-4cd5-8ab6-ecd33493afc3",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-03-21T16:00:00+00:00",
+  "home_club_id": "los-hurones-preintermedia-b",
+  "away_club_id": "tala-rugby-club-preintermedia-b",
+  "score": {
+   "away": 59,
+   "home": 14
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Los Hurones Preintermedia \"B\"",
+  "a": "Tala Rugby Club Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 14,
+  "sa": 59,
+  "fecha": "2026-03-21"
+ },
+ {
+  "id": "a903384f-1765-4e33-b3b1-f9ff37dc3565",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-03-21T19:00:00+00:00",
+  "home_club_id": "baguales-r-c-preintermedia-b",
+  "away_club_id": "universidad-nacional-de-cordoba-preintermedia-b",
+  "score": {
+   "away": 24,
+   "home": 23
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Baguales R.C. Preintermedia \"B\"",
+  "a": "Universidad Nacional de Córdoba Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 23,
+  "sa": 24,
+  "fecha": "2026-03-21"
+ },
+ {
+  "id": "0eb4933e-1963-489c-afcf-9b788f2cea5a",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-03-24T23:30:00+00:00",
+  "home_club_id": "carlos-paz-rugby-club-preintermedia-b",
+  "away_club_id": "cordoba-athletic-club-preintermedia-c",
+  "score": {
+   "away": 28,
+   "home": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Carlos Paz Rugby Club Preintermedia \"B\"",
+  "a": "Córdoba Athletic Club Preintermedia \"C\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 0,
+  "sa": 28,
+  "fecha": "2026-03-24"
+ },
+ {
+  "id": "f8f414c1-f2cf-46c3-a6d4-dd0f6c6fce99",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-03-28T00:00:00+00:00",
+  "home_club_id": "cordoba-athletic-club-preintermedia-b",
+  "away_club_id": "baguales-r-c-preintermedia-b",
+  "score": {
+   "away": 17,
+   "home": 66
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club Preintermedia \"B\"",
+  "a": "Baguales R.C. Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 66,
+  "sa": 17,
+  "fecha": "2026-03-27"
+ },
+ {
+  "id": "26750265-adf0-4762-8d65-be14832e4bc3",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-03-28T14:40:00+00:00",
+  "home_club_id": "club-universitario-de-cordoba-preintermedia-b",
+  "away_club_id": "jockey-club-cordoba-preintermedia-b",
+  "score": {
+   "away": 62,
+   "home": 7
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Universitario de Córdoba Preintermedia \"B\"",
+  "a": "Jockey Club Córdoba Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 7,
+  "sa": 62,
+  "fecha": "2026-03-28"
+ },
+ {
+  "id": "8a8b4dd0-6c41-4181-b507-d505e484c277",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-03-28T15:00:00+00:00",
+  "home_club_id": "club-palermo-bajo-preintermedia-b",
+  "away_club_id": "la-tablada-b-pre-intermedia",
+  "score": {
+   "away": 27,
+   "home": 15
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Palermo Bajo Preintermedia \"B\"",
+  "a": "La Tablada \"B\" - Pre Intermedia",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 15,
+  "sa": 27,
+  "fecha": "2026-03-28"
+ },
+ {
+  "id": "70563a1a-48ef-4037-8de0-b8f5c99f9acf",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-03-28T17:00:00+00:00",
+  "home_club_id": "universidad-nacional-de-cordoba-preintermedia-b",
+  "away_club_id": "tala-rugby-club-preintermedia-b",
+  "score": {
+   "away": 49,
+   "home": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Universidad Nacional de Córdoba Preintermedia \"B\"",
+  "a": "Tala Rugby Club Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 0,
+  "sa": 49,
+  "fecha": "2026-03-28"
+ },
+ {
+  "id": "f61d7c6b-2acf-4f6d-8462-d7712b077178",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-03-28T17:15:00+00:00",
+  "home_club_id": "jockey-club-cordoba-preintermedia-c",
+  "away_club_id": "cordoba-athletic-club-preintermedia-c",
+  "score": {
+   "away": 27,
+   "home": 7
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba Preintermedia \"C\"",
+  "a": "Córdoba Athletic Club Preintermedia \"C\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 7,
+  "sa": 27,
+  "fecha": "2026-03-28"
+ },
+ {
+  "id": "28e338ba-824e-487b-b834-4f9344661095",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-03-28T19:00:00+00:00",
+  "home_club_id": "universidad-nacional-de-cordoba-preintermedia-a",
+  "away_club_id": "taborin-rc-preintermedia-b",
+  "score": {
+   "away": 5,
+   "home": 69
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Universidad Nacional de Córdoba Preintermedia \"A\"",
+  "a": "Taborín RC Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 69,
+  "sa": 5,
+  "fecha": "2026-03-28"
+ },
+ {
+  "id": "239c6f1b-6738-4d77-b26e-6b817f034714",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-03-28T19:00:00+00:00",
+  "home_club_id": "carlos-paz-rugby-club-preintermedia-b",
+  "away_club_id": "los-hurones-preintermedia-b",
+  "score": {
+   "away": 28,
+   "home": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Carlos Paz Rugby Club Preintermedia \"B\"",
+  "a": "Los Hurones Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 0,
+  "sa": 28,
+  "fecha": "2026-03-28"
+ },
+ {
+  "id": "da1884fb-aefc-4fb5-889f-68aae094cf18",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-04-10T23:00:00+00:00",
+  "home_club_id": "cordoba-athletic-club-preintermedia-c",
+  "away_club_id": "la-tablada-b-pre-intermedia",
+  "score": {
+   "away": 10,
+   "home": 13
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club Preintermedia \"C\"",
+  "a": "La Tablada \"B\" - Pre Intermedia",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 13,
+  "sa": 10,
+  "fecha": "2026-04-10"
+ },
+ {
+  "id": "8d60c427-ab30-4e2f-8cd6-f587a024587e",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-04-11T15:00:00+00:00",
+  "home_club_id": "universidad-nacional-de-cordoba-preintermedia-a",
+  "away_club_id": "carlos-paz-rugby-club-preintermedia-b",
+  "score": {
+   "away": 0,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Universidad Nacional de Córdoba Preintermedia \"A\"",
+  "a": "Carlos Paz Rugby Club Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 28,
+  "sa": 0,
+  "fecha": "2026-04-11"
+ },
+ {
+  "id": "7f37e92a-54ec-4427-afe2-cb2d9ddd9fa3",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-04-11T15:45:00+00:00",
+  "home_club_id": "tala-rugby-club-preintermedia-b",
+  "away_club_id": "taborin-rc-preintermedia-b",
+  "score": {
+   "away": 0,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club Preintermedia \"B\"",
+  "a": "Taborín RC Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 28,
+  "sa": 0,
+  "fecha": "2026-04-11"
+ },
+ {
+  "id": "25ddf517-5faf-4cab-a015-fa6b3bccf201",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-04-11T16:00:00+00:00",
+  "home_club_id": "cordoba-athletic-club-preintermedia-b",
+  "away_club_id": "club-universitario-de-cordoba-preintermedia-b",
+  "score": {
+   "away": 0,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club Preintermedia \"B\"",
+  "a": "Club Universitario de Córdoba Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 28,
+  "sa": 0,
+  "fecha": "2026-04-11"
+ },
+ {
+  "id": "32673d6b-fefd-4f2d-8135-8f1bdf13c535",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-04-11T16:00:00+00:00",
+  "home_club_id": "baguales-r-c-preintermedia-b",
+  "away_club_id": "jockey-club-cordoba-preintermedia-c",
+  "score": {
+   "away": 48,
+   "home": 5
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Baguales R.C. Preintermedia \"B\"",
+  "a": "Jockey Club Córdoba Preintermedia \"C\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 5,
+  "sa": 48,
+  "fecha": "2026-04-11"
+ },
+ {
+  "id": "75acfd52-3500-4102-a5e5-462616ff1b06",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-04-11T16:30:00+00:00",
+  "home_club_id": "jockey-club-cordoba-preintermedia-b",
+  "away_club_id": "universidad-nacional-de-cordoba-preintermedia-b",
+  "score": {
+   "away": 19,
+   "home": 59
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba Preintermedia \"B\"",
+  "a": "Universidad Nacional de Córdoba Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 59,
+  "sa": 19,
+  "fecha": "2026-04-11"
+ },
+ {
+  "id": "75496da0-910c-4bb1-812c-16c11dd59dae",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-04-11T18:00:00+00:00",
+  "home_club_id": "los-hurones-preintermedia-b",
+  "away_club_id": "club-palermo-bajo-preintermedia-b",
+  "score": {
+   "away": 34,
+   "home": 7
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Los Hurones Preintermedia \"B\"",
+  "a": "Club Palermo Bajo Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 7,
+  "sa": 34,
+  "fecha": "2026-04-11"
+ },
+ {
+  "id": "3debd2cc-be8f-48ce-98ee-5f7ec974512e",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-04-14T00:00:00+00:00",
+  "home_club_id": "cordoba-athletic-club-preintermedia-c",
+  "away_club_id": "los-hurones-preintermedia-b",
+  "score": {
+   "away": 29,
+   "home": 35
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club Preintermedia \"C\"",
+  "a": "Los Hurones Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 35,
+  "sa": 29,
+  "fecha": "2026-04-13"
+ },
+ {
+  "id": "bf2c7cef-7b8b-44a1-a060-6485a7f6adaf",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-04-18T00:00:00+00:00",
+  "home_club_id": "la-tablada-b-pre-intermedia",
+  "away_club_id": "tala-rugby-club-preintermedia-b",
+  "score": {
+   "away": 19,
+   "home": 18
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "La Tablada \"B\" - Pre Intermedia",
+  "a": "Tala Rugby Club Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 18,
+  "sa": 19,
+  "fecha": "2026-04-17"
+ },
+ {
+  "id": "7fec31e1-f260-4284-a5a3-43e69777828d",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-04-18T12:30:00+00:00",
+  "home_club_id": "club-universitario-de-cordoba-preintermedia-b",
+  "away_club_id": "universidad-nacional-de-cordoba-preintermedia-a",
+  "score": {
+   "away": 23,
+   "home": 18
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Universitario de Córdoba Preintermedia \"B\"",
+  "a": "Universidad Nacional de Córdoba Preintermedia \"A\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 18,
+  "sa": 23,
+  "fecha": "2026-04-18"
+ },
+ {
+  "id": "e66f5580-4447-4998-a3ac-4b463d97a030",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-04-18T13:00:00+00:00",
+  "home_club_id": "taborin-rc-preintermedia-b",
+  "away_club_id": "jockey-club-cordoba-preintermedia-b",
+  "score": {
+   "away": 28,
+   "home": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Taborín RC Preintermedia \"B\"",
+  "a": "Jockey Club Córdoba Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 0,
+  "sa": 28,
+  "fecha": "2026-04-18"
+ },
+ {
+  "id": "3b52bc52-54ea-4226-8097-8b3d0c7227b9",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-04-18T14:00:00+00:00",
+  "home_club_id": "club-palermo-bajo-preintermedia-b",
+  "away_club_id": "cordoba-athletic-club-preintermedia-b",
+  "score": {
+   "away": 38,
+   "home": 36
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Palermo Bajo Preintermedia \"B\"",
+  "a": "Córdoba Athletic Club Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 36,
+  "sa": 38,
+  "fecha": "2026-04-18"
+ },
+ {
+  "id": "9f4a1d15-c446-4372-ba3e-a6afd88c8786",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-04-18T15:00:00+00:00",
+  "home_club_id": "baguales-r-c-preintermedia-b",
+  "away_club_id": "carlos-paz-rugby-club-preintermedia-b",
+  "score": {
+   "away": 0,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Baguales R.C. Preintermedia \"B\"",
+  "a": "Carlos Paz Rugby Club Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 28,
+  "sa": 0,
+  "fecha": "2026-04-18"
+ },
+ {
+  "id": "aec8fe5e-d4ff-408c-bba3-790a67403610",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-04-18T17:00:00+00:00",
+  "home_club_id": "cordoba-athletic-club-preintermedia-c",
+  "away_club_id": "universidad-nacional-de-cordoba-preintermedia-b",
+  "score": {
+   "away": 5,
+   "home": 39
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club Preintermedia \"C\"",
+  "a": "Universidad Nacional de Córdoba Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 39,
+  "sa": 5,
+  "fecha": "2026-04-18"
+ },
+ {
+  "id": "4b01acd3-8d7d-4378-aa9c-683c745e124c",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-04-18T19:00:00+00:00",
+  "home_club_id": "jockey-club-cordoba-preintermedia-c",
+  "away_club_id": "los-hurones-preintermedia-b",
+  "score": {
+   "away": 20,
+   "home": 27
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba Preintermedia \"C\"",
+  "a": "Los Hurones Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 27,
+  "sa": 20,
+  "fecha": "2026-04-18"
+ },
+ {
+  "id": "24b3ea76-b417-4a4c-bcb5-0f84cd8cf961",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-04-25T12:30:00+00:00",
+  "home_club_id": "la-tablada-b-pre-intermedia",
+  "away_club_id": "club-universitario-de-cordoba-preintermedia-b",
+  "score": {
+   "away": 5,
+   "home": 52
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "La Tablada \"B\" - Pre Intermedia",
+  "a": "Club Universitario de Córdoba Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 52,
+  "sa": 5,
+  "fecha": "2026-04-25"
+ },
+ {
+  "id": "a1076651-add9-4ec1-9a95-ec81d85d2f7d",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-04-25T14:30:00+00:00",
+  "home_club_id": "tala-rugby-club-preintermedia-b",
+  "away_club_id": "cordoba-athletic-club-preintermedia-b",
+  "score": {
+   "away": 15,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club Preintermedia \"B\"",
+  "a": "Córdoba Athletic Club Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 28,
+  "sa": 15,
+  "fecha": "2026-04-25"
+ },
+ {
+  "id": "254f259b-ce64-42eb-953f-5bad50eeb502",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-04-25T17:00:00+00:00",
+  "home_club_id": "cordoba-athletic-club-preintermedia-c",
+  "away_club_id": "club-palermo-bajo-preintermedia-b",
+  "score": {
+   "away": 22,
+   "home": 18
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club Preintermedia \"C\"",
+  "a": "Club Palermo Bajo Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 18,
+  "sa": 22,
+  "fecha": "2026-04-25"
+ },
+ {
+  "id": "ce7a23f5-c554-4a64-be3a-e0be547632f2",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-04-25T17:00:00+00:00",
+  "home_club_id": "universidad-nacional-de-cordoba-preintermedia-b",
+  "away_club_id": "jockey-club-cordoba-preintermedia-c",
+  "score": {
+   "away": 60,
+   "home": 12
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Universidad Nacional de Córdoba Preintermedia \"B\"",
+  "a": "Jockey Club Córdoba Preintermedia \"C\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 12,
+  "sa": 60,
+  "fecha": "2026-04-25"
+ },
+ {
+  "id": "bd74dead-c51c-47fd-931a-07a09933f64d",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-04-25T19:00:00+00:00",
+  "home_club_id": "jockey-club-cordoba-preintermedia-b",
+  "away_club_id": "baguales-r-c-preintermedia-b",
+  "score": {
+   "away": 22,
+   "home": 64
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba Preintermedia \"B\"",
+  "a": "Baguales R.C. Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 64,
+  "sa": 22,
+  "fecha": "2026-04-25"
+ },
+ {
+  "id": "3eb7bd7c-55cc-4ffc-90e8-92231f0e8f6d",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-04-25T19:00:00+00:00",
+  "home_club_id": "universidad-nacional-de-cordoba-preintermedia-a",
+  "away_club_id": "los-hurones-preintermedia-b",
+  "score": {
+   "away": 35,
+   "home": 22
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Universidad Nacional de Córdoba Preintermedia \"A\"",
+  "a": "Los Hurones Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 22,
+  "sa": 35,
+  "fecha": "2026-04-25"
+ },
+ {
+  "id": "4aa21aa3-bd58-4aae-ab27-dad65bef7ec1",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-04-25T20:00:00+00:00",
+  "home_club_id": "carlos-paz-rugby-club-preintermedia-b",
+  "away_club_id": "taborin-rc-preintermedia-b",
+  "score": {
+   "away": 28,
+   "home": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Carlos Paz Rugby Club Preintermedia \"B\"",
+  "a": "Taborín RC Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 0,
+  "sa": 28,
+  "fecha": "2026-04-25"
+ },
+ {
+  "id": "7d98f83d-fb4e-4b1f-af1f-0e09c96cad73",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-05-08T23:00:00+00:00",
+  "home_club_id": "cordoba-athletic-club-preintermedia-b",
+  "away_club_id": "carlos-paz-rugby-club-preintermedia-b",
+  "score": {
+   "away": 0,
+   "home": 78
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club Preintermedia \"B\"",
+  "a": "Carlos Paz Rugby Club Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 78,
+  "sa": 0,
+  "fecha": "2026-05-08"
+ },
+ {
+  "id": "f7ca6e71-0faf-42e2-a59d-63adefbb798c",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-05-09T00:30:00+00:00",
+  "home_club_id": "baguales-r-c-preintermedia-b",
+  "away_club_id": "cordoba-athletic-club-preintermedia-c",
+  "score": {
+   "away": 57,
+   "home": 10
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Baguales R.C. Preintermedia \"B\"",
+  "a": "Córdoba Athletic Club Preintermedia \"C\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 10,
+  "sa": 57,
+  "fecha": "2026-05-08"
+ },
+ {
+  "id": "8efef4db-ac25-49dc-be75-5ae0ec7c3a0e",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-05-09T13:00:00+00:00",
+  "home_club_id": "jockey-club-cordoba-preintermedia-b",
+  "away_club_id": "jockey-club-cordoba-preintermedia-c",
+  "score": {
+   "away": 26,
+   "home": 31
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba Preintermedia \"B\"",
+  "a": "Jockey Club Córdoba Preintermedia \"C\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 31,
+  "sa": 26,
+  "fecha": "2026-05-09"
+ },
+ {
+  "id": "a3608029-acb1-4738-94b9-8adcb9c0de21",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-05-09T13:00:00+00:00",
+  "home_club_id": "tala-rugby-club-preintermedia-b",
+  "away_club_id": "club-universitario-de-cordoba-preintermedia-b",
+  "score": {
+   "away": 23,
+   "home": 38
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club Preintermedia \"B\"",
+  "a": "Club Universitario de Córdoba Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 38,
+  "sa": 23,
+  "fecha": "2026-05-09"
+ },
+ {
+  "id": "6a834f5f-6a29-4760-a557-4ef219dc9a8a",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-05-09T17:00:00+00:00",
+  "home_club_id": "universidad-nacional-de-cordoba-preintermedia-a",
+  "away_club_id": "universidad-nacional-de-cordoba-preintermedia-b",
+  "score": {
+   "away": 7,
+   "home": 57
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Universidad Nacional de Córdoba Preintermedia \"A\"",
+  "a": "Universidad Nacional de Córdoba Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 57,
+  "sa": 7,
+  "fecha": "2026-05-09"
+ },
+ {
+  "id": "2f86cd04-db2f-446f-be85-6a1543d4c2c5",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-05-09T17:30:00+00:00",
+  "home_club_id": "taborin-rc-preintermedia-b",
+  "away_club_id": "club-palermo-bajo-preintermedia-b",
+  "score": {
+   "away": 39,
+   "home": 6
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Taborín RC Preintermedia \"B\"",
+  "a": "Club Palermo Bajo Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 6,
+  "sa": 39,
+  "fecha": "2026-05-09"
+ },
+ {
+  "id": "32893530-0bfe-4756-b9fd-8eb09ac43923",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-05-09T19:00:00+00:00",
+  "home_club_id": "los-hurones-preintermedia-b",
+  "away_club_id": "la-tablada-b-pre-intermedia",
+  "score": {
+   "away": 31,
+   "home": 7
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Los Hurones Preintermedia \"B\"",
+  "a": "La Tablada \"B\" - Pre Intermedia",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 7,
+  "sa": 31,
+  "fecha": "2026-05-09"
+ },
+ {
+  "id": "1c28f084-32ba-4364-9e0e-5c92f073043a",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-05-15T23:00:00+00:00",
+  "home_club_id": "la-tablada-b-pre-intermedia",
+  "away_club_id": "carlos-paz-rugby-club-preintermedia-b",
+  "score": {
+   "away": 0,
+   "home": 73
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "La Tablada \"B\" - Pre Intermedia",
+  "a": "Carlos Paz Rugby Club Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 73,
+  "sa": 0,
+  "fecha": "2026-05-15"
+ },
+ {
+  "id": "e3253fa5-d6cb-429a-9ee1-0a152caefec2",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-05-16T00:00:00+00:00",
+  "home_club_id": "jockey-club-cordoba-preintermedia-c",
+  "away_club_id": "taborin-rc-preintermedia-b",
+  "score": {
+   "away": 15,
+   "home": 55
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba Preintermedia \"C\"",
+  "a": "Taborín RC Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 55,
+  "sa": 15,
+  "fecha": "2026-05-15"
+ },
+ {
+  "id": "a8648b89-69cf-425d-a68d-6eae56a47aba",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-05-16T13:00:00+00:00",
+  "home_club_id": "club-universitario-de-cordoba-preintermedia-b",
+  "away_club_id": "baguales-r-c-preintermedia-b",
+  "score": {
+   "away": 0,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Universitario de Córdoba Preintermedia \"B\"",
+  "a": "Baguales R.C. Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 28,
+  "sa": 0,
+  "fecha": "2026-05-16"
+ },
+ {
+  "id": "6866aaa5-5b9d-4635-8a14-c3c30fd74795",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-05-16T17:00:00+00:00",
+  "home_club_id": "universidad-nacional-de-cordoba-preintermedia-a",
+  "away_club_id": "cordoba-athletic-club-preintermedia-c",
+  "score": {
+   "away": 20,
+   "home": 14
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Universidad Nacional de Córdoba Preintermedia \"A\"",
+  "a": "Córdoba Athletic Club Preintermedia \"C\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 14,
+  "sa": 20,
+  "fecha": "2026-05-16"
+ },
+ {
+  "id": "71cbe223-ab3c-4e5f-aeaf-f14f777723c2",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-05-16T17:15:00+00:00",
+  "home_club_id": "club-palermo-bajo-preintermedia-b",
+  "away_club_id": "tala-rugby-club-preintermedia-b",
+  "score": {
+   "away": 19,
+   "home": 9
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Palermo Bajo Preintermedia \"B\"",
+  "a": "Tala Rugby Club Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 9,
+  "sa": 19,
+  "fecha": "2026-05-16"
+ },
+ {
+  "id": "60ae4b05-0837-4b50-9473-57704f5b4dec",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-05-16T18:30:00+00:00",
+  "home_club_id": "cordoba-athletic-club-preintermedia-b",
+  "away_club_id": "jockey-club-cordoba-preintermedia-b",
+  "score": {
+   "away": 25,
+   "home": 14
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club Preintermedia \"B\"",
+  "a": "Jockey Club Córdoba Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 14,
+  "sa": 25,
+  "fecha": "2026-05-16"
+ },
+ {
+  "id": "80c76173-05c3-4eed-bb63-43987571dcdd",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-05-16T19:00:00+00:00",
+  "home_club_id": "universidad-nacional-de-cordoba-preintermedia-b",
+  "away_club_id": "los-hurones-preintermedia-b",
+  "score": {
+   "away": 26,
+   "home": 7
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Universidad Nacional de Córdoba Preintermedia \"B\"",
+  "a": "Los Hurones Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 7,
+  "sa": 26,
+  "fecha": "2026-05-16"
+ },
+ {
+  "id": "b2538381-9ca6-44f0-99dd-accab3a2951c",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-05-29T23:00:00+00:00",
+  "home_club_id": "club-universitario-de-cordoba-preintermedia-b",
+  "away_club_id": "universidad-nacional-de-cordoba-preintermedia-b",
+  "score": {
+   "away": 5,
+   "home": 24
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Universitario de Córdoba Preintermedia \"B\"",
+  "a": "Universidad Nacional de Córdoba Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 24,
+  "sa": 5,
+  "fecha": "2026-05-29"
+ },
+ {
+  "id": "6e6282d6-cb87-4de4-8d66-773d11aa7a4c",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-05-30T12:30:00+00:00",
+  "home_club_id": "cordoba-athletic-club-preintermedia-b",
+  "away_club_id": "jockey-club-cordoba-preintermedia-c",
+  "score": {
+   "away": 26,
+   "home": 31
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club Preintermedia \"B\"",
+  "a": "Jockey Club Córdoba Preintermedia \"C\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 31,
+  "sa": 26,
+  "fecha": "2026-05-30"
+ },
+ {
+  "id": "f7ddd83e-2422-40e2-8380-ba928f5c6108",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-05-30T15:00:00+00:00",
+  "home_club_id": "la-tablada-b-pre-intermedia",
+  "away_club_id": "jockey-club-cordoba-preintermedia-b",
+  "score": {
+   "away": 24,
+   "home": 33
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "La Tablada \"B\" - Pre Intermedia",
+  "a": "Jockey Club Córdoba Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 33,
+  "sa": 24,
+  "fecha": "2026-05-30"
+ },
+ {
+  "id": "93907200-a09f-464f-b0c3-2bfa758eea1e",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-05-30T17:00:00+00:00",
+  "home_club_id": "club-palermo-bajo-preintermedia-b",
+  "away_club_id": "universidad-nacional-de-cordoba-preintermedia-a",
+  "score": {
+   "away": 14,
+   "home": 51
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Palermo Bajo Preintermedia \"B\"",
+  "a": "Universidad Nacional de Córdoba Preintermedia \"A\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 51,
+  "sa": 14,
+  "fecha": "2026-05-30"
+ },
+ {
+  "id": "83b3d82c-37df-4b61-a474-b903167a253f",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-05-30T17:30:00+00:00",
+  "home_club_id": "taborin-rc-preintermedia-b",
+  "away_club_id": "cordoba-athletic-club-preintermedia-c",
+  "score": {
+   "away": 49,
+   "home": 15
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Taborín RC Preintermedia \"B\"",
+  "a": "Córdoba Athletic Club Preintermedia \"C\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 15,
+  "sa": 49,
+  "fecha": "2026-05-30"
+ },
+ {
+  "id": "358d12a6-14ee-4792-9db0-81cd9a66cf06",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-05-30T19:00:00+00:00",
+  "home_club_id": "carlos-paz-rugby-club-preintermedia-b",
+  "away_club_id": "tala-rugby-club-preintermedia-b",
+  "score": {
+   "away": 61,
+   "home": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Carlos Paz Rugby Club Preintermedia \"B\"",
+  "a": "Tala Rugby Club Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 0,
+  "sa": 61,
+  "fecha": "2026-05-30"
+ },
+ {
+  "id": "26fdf016-e9d3-4feb-8772-5158d93a863b",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-05-30T19:30:00+00:00",
+  "home_club_id": "baguales-r-c-preintermedia-b",
+  "away_club_id": "los-hurones-preintermedia-b",
+  "score": {
+   "away": 31,
+   "home": 27
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Baguales R.C. Preintermedia \"B\"",
+  "a": "Los Hurones Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 27,
+  "sa": 31,
+  "fecha": "2026-05-30"
+ },
+ {
+  "id": "c73abeba-5512-49f4-bbad-d0973a289414",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-06-05T00:00:00+00:00",
+  "home_club_id": "carlos-paz-rugby-club-preintermedia-b",
+  "away_club_id": "club-palermo-bajo-preintermedia-b",
+  "score": {
+   "away": 45,
+   "home": 10
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Carlos Paz Rugby Club Preintermedia \"B\"",
+  "a": "Club Palermo Bajo Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 10,
+  "sa": 45,
+  "fecha": "2026-06-04"
+ },
+ {
+  "id": "1bbccbca-80cb-49eb-b59d-7a0a95180dd1",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-06-06T00:00:00+00:00",
+  "home_club_id": "tala-rugby-club-preintermedia-b",
+  "away_club_id": "cordoba-athletic-club-preintermedia-c",
+  "score": {
+   "away": 21,
+   "home": 12
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club Preintermedia \"B\"",
+  "a": "Córdoba Athletic Club Preintermedia \"C\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 12,
+  "sa": 21,
+  "fecha": "2026-06-05"
+ },
+ {
+  "id": "5f12b327-e543-4b9e-aaf6-4b1437961775",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-06-06T14:30:00+00:00",
+  "home_club_id": "jockey-club-cordoba-preintermedia-b",
+  "away_club_id": "la-tablada-b-pre-intermedia",
+  "score": {
+   "away": 7,
+   "home": 26
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba Preintermedia \"B\"",
+  "a": "La Tablada \"B\" - Pre Intermedia",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 26,
+  "sa": 7,
+  "fecha": "2026-06-06"
+ },
+ {
+  "id": "d299a0a2-5524-441b-8189-7b7e8160d9fd",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-06-06T17:30:00+00:00",
+  "home_club_id": "jockey-club-cordoba-preintermedia-c",
+  "away_club_id": "club-universitario-de-cordoba-preintermedia-b",
+  "score": {
+   "away": 12,
+   "home": 40
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba Preintermedia \"C\"",
+  "a": "Club Universitario de Córdoba Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 40,
+  "sa": 12,
+  "fecha": "2026-06-06"
+ },
+ {
+  "id": "983d9365-13bd-4398-9b03-cfc9bc5fea97",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-06-06T18:00:00+00:00",
+  "home_club_id": "baguales-r-c-preintermedia-b",
+  "away_club_id": "universidad-nacional-de-cordoba-preintermedia-a",
+  "score": {
+   "away": 51,
+   "home": 12
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Baguales R.C. Preintermedia \"B\"",
+  "a": "Universidad Nacional de Córdoba Preintermedia \"A\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 12,
+  "sa": 51,
+  "fecha": "2026-06-06"
+ },
+ {
+  "id": "952c6fca-fadd-42c5-95ac-074fa52acdb4",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-06-06T18:30:00+00:00",
+  "home_club_id": "universidad-nacional-de-cordoba-preintermedia-b",
+  "away_club_id": "taborin-rc-preintermedia-b",
+  "score": {
+   "away": 16,
+   "home": 17
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Universidad Nacional de Córdoba Preintermedia \"B\"",
+  "a": "Taborín RC Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 17,
+  "sa": 16,
+  "fecha": "2026-06-06"
+ },
+ {
+  "id": "fa754bbc-cbe5-44a3-a337-8bd6462ba5dd",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-06-06T19:00:00+00:00",
+  "home_club_id": "los-hurones-preintermedia-b",
+  "away_club_id": "cordoba-athletic-club-preintermedia-b",
+  "score": {
+   "away": 17,
+   "home": 25
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Los Hurones Preintermedia \"B\"",
+  "a": "Córdoba Athletic Club Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 25,
+  "sa": 17,
+  "fecha": "2026-06-06"
+ },
+ {
+  "id": "b95e799f-59df-423a-8d75-500da1f70ea8",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-06-13T14:00:00+00:00",
+  "home_club_id": "club-universitario-de-cordoba-preintermedia-b",
+  "away_club_id": "la-tablada-b-pre-intermedia",
+  "score": {
+   "away": 37,
+   "home": 8
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Universitario de Córdoba Preintermedia \"B\"",
+  "a": "La Tablada \"B\" - Pre Intermedia",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 8,
+  "sa": 37,
+  "fecha": "2026-06-13"
+ },
+ {
+  "id": "5f3044db-c7e2-457b-b7c8-dd84caa7b232",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-06-13T15:00:00+00:00",
+  "home_club_id": "club-palermo-bajo-preintermedia-b",
+  "away_club_id": "baguales-r-c-preintermedia-b",
+  "score": {
+   "away": 0,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Palermo Bajo Preintermedia \"B\"",
+  "a": "Baguales R.C. Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 28,
+  "sa": 0,
+  "fecha": "2026-06-13"
+ },
+ {
+  "id": "225b8f93-b827-478d-ab84-27dab26a15d4",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-06-13T15:30:00+00:00",
+  "home_club_id": "cordoba-athletic-club-preintermedia-b",
+  "away_club_id": "tala-rugby-club-preintermedia-b",
+  "score": {
+   "away": 26,
+   "home": 27
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club Preintermedia \"B\"",
+  "a": "Tala Rugby Club Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 27,
+  "sa": 26,
+  "fecha": "2026-06-13"
+ },
+ {
+  "id": "1ad62007-8b3a-4169-8eaa-2995207726ed",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-06-13T16:00:00+00:00",
+  "home_club_id": "universidad-nacional-de-cordoba-preintermedia-b",
+  "away_club_id": "carlos-paz-rugby-club-preintermedia-b",
+  "score": {
+   "away": 0,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Universidad Nacional de Córdoba Preintermedia \"B\"",
+  "a": "Carlos Paz Rugby Club Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 28,
+  "sa": 0,
+  "fecha": "2026-06-13"
+ },
+ {
+  "id": "848913a7-2c95-4a93-83d0-44dac0837078",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-06-13T17:00:00+00:00",
+  "home_club_id": "cordoba-athletic-club-preintermedia-c",
+  "away_club_id": "jockey-club-cordoba-preintermedia-b",
+  "score": {
+   "away": 40,
+   "home": 7
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club Preintermedia \"C\"",
+  "a": "Jockey Club Córdoba Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 7,
+  "sa": 40,
+  "fecha": "2026-06-13"
+ },
+ {
+  "id": "406a3076-616f-4c02-aa3e-bb7f008a42a0",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-06-13T18:00:00+00:00",
+  "home_club_id": "universidad-nacional-de-cordoba-preintermedia-a",
+  "away_club_id": "jockey-club-cordoba-preintermedia-c",
+  "score": {
+   "away": 20,
+   "home": 31
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Universidad Nacional de Córdoba Preintermedia \"A\"",
+  "a": "Jockey Club Córdoba Preintermedia \"C\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 31,
+  "sa": 20,
+  "fecha": "2026-06-13"
+ },
+ {
+  "id": "ec03de02-0616-482d-b54f-197d4e26d06c",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-06-13T18:30:00+00:00",
+  "home_club_id": "taborin-rc-preintermedia-b",
+  "away_club_id": "los-hurones-preintermedia-b",
+  "score": {
+   "away": 22,
+   "home": 32
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Taborín RC Preintermedia \"B\"",
+  "a": "Los Hurones Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 32,
+  "sa": 22,
+  "fecha": "2026-06-13"
+ },
+ {
+  "id": "ff1b536a-1f07-461c-9b84-84790ca43e56",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-06-19T00:00:00+00:00",
+  "home_club_id": "tala-rugby-club-preintermedia-b",
+  "away_club_id": "baguales-r-c-preintermedia-b",
+  "score": {
+   "away": 14,
+   "home": 66
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club Preintermedia \"B\"",
+  "a": "Baguales R.C. Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 66,
+  "sa": 14,
+  "fecha": "2026-06-18"
+ },
+ {
+  "id": "3fc3dddc-2bf4-49e9-9c92-32adfa68b1c4",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-06-19T00:00:00+00:00",
+  "home_club_id": "cordoba-athletic-club-preintermedia-c",
+  "away_club_id": "cordoba-athletic-club-preintermedia-b",
+  "score": {
+   "away": 43,
+   "home": 38
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club Preintermedia \"C\"",
+  "a": "Córdoba Athletic Club Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 38,
+  "sa": 43,
+  "fecha": "2026-06-18"
+ },
+ {
+  "id": "b604806e-3fff-477a-83eb-975cb7ef6790",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-06-19T00:00:00+00:00",
+  "home_club_id": "universidad-nacional-de-cordoba-preintermedia-b",
+  "away_club_id": "universidad-nacional-de-cordoba-preintermedia-a",
+  "score": {
+   "away": 52,
+   "home": 10
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Universidad Nacional de Córdoba Preintermedia \"B\"",
+  "a": "Universidad Nacional de Córdoba Preintermedia \"A\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 10,
+  "sa": 52,
+  "fecha": "2026-06-18"
+ },
+ {
+  "id": "cf81b5af-6f57-4b46-9a3f-cde699767470",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-06-20T12:30:00+00:00",
+  "home_club_id": "la-tablada-b-pre-intermedia",
+  "away_club_id": "club-palermo-bajo-preintermedia-b",
+  "score": {
+   "away": 24,
+   "home": 32
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "La Tablada \"B\" - Pre Intermedia",
+  "a": "Club Palermo Bajo Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 32,
+  "sa": 24,
+  "fecha": "2026-06-20"
+ },
+ {
+  "id": "661d47ca-9c39-401f-bb04-40cc4770ea0f",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-06-20T13:00:00+00:00",
+  "home_club_id": "jockey-club-cordoba-preintermedia-b",
+  "away_club_id": "club-universitario-de-cordoba-preintermedia-b",
+  "score": {
+   "away": 7,
+   "home": 80
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba Preintermedia \"B\"",
+  "a": "Club Universitario de Córdoba Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 80,
+  "sa": 7,
+  "fecha": "2026-06-20"
+ },
+ {
+  "id": "d4f4977c-8976-4a45-9ffe-a54938b87fab",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-06-20T15:00:00+00:00",
+  "home_club_id": "los-hurones-preintermedia-b",
+  "away_club_id": "carlos-paz-rugby-club-preintermedia-b",
+  "score": {
+   "away": 0,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Los Hurones Preintermedia \"B\"",
+  "a": "Carlos Paz Rugby Club Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 28,
+  "sa": 0,
+  "fecha": "2026-06-20"
+ },
+ {
+  "id": "5ba5e74c-a99c-4fe9-94ec-7b1a90a6790c",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-06-20T18:00:00+00:00",
+  "home_club_id": "taborin-rc-preintermedia-b",
+  "away_club_id": "jockey-club-cordoba-preintermedia-c",
+  "score": {
+   "away": 41,
+   "home": 27
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Taborín RC Preintermedia \"B\"",
+  "a": "Jockey Club Córdoba Preintermedia \"C\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 27,
+  "sa": 41,
+  "fecha": "2026-06-20"
+ },
+ {
+  "id": "e4014006-5414-47dd-b548-af562112aa19",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-06-27T01:00:00+00:00",
+  "home_club_id": "la-tablada-b-pre-intermedia",
+  "away_club_id": "universidad-nacional-de-cordoba-preintermedia-a",
+  "score": {
+   "away": 10,
+   "home": 37
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "La Tablada \"B\" - Pre Intermedia",
+  "a": "Universidad Nacional de Córdoba Preintermedia \"A\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 37,
+  "sa": 10,
+  "fecha": "2026-06-26"
+ },
+ {
+  "id": "9c3a4854-fd56-43df-ab73-864d88fce3cf",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-06-27T01:00:00+00:00",
+  "home_club_id": "los-hurones-preintermedia-b",
+  "away_club_id": "cordoba-athletic-club-preintermedia-c",
+  "score": {
+   "away": 45,
+   "home": 24
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Los Hurones Preintermedia \"B\"",
+  "a": "Córdoba Athletic Club Preintermedia \"C\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 24,
+  "sa": 45,
+  "fecha": "2026-06-26"
+ },
+ {
+  "id": "eed7390e-2993-4946-93ed-d78feab26455",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-06-27T13:30:00+00:00",
+  "home_club_id": "tala-rugby-club-preintermedia-b",
+  "away_club_id": "jockey-club-cordoba-preintermedia-b",
+  "score": {
+   "away": 24,
+   "home": 42
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club Preintermedia \"B\"",
+  "a": "Jockey Club Córdoba Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 42,
+  "sa": 24,
+  "fecha": "2026-06-27"
+ },
+ {
+  "id": "53eb8c14-b9c0-4d85-a7fc-463f546856b8",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-06-27T15:00:00+00:00",
+  "home_club_id": "club-universitario-de-cordoba-preintermedia-b",
+  "away_club_id": "club-palermo-bajo-preintermedia-b",
+  "score": {
+   "away": 28,
+   "home": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Universitario de Córdoba Preintermedia \"B\"",
+  "a": "Club Palermo Bajo Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 0,
+  "sa": 28,
+  "fecha": "2026-06-27"
+ },
+ {
+  "id": "b6fc6b74-ea18-429a-8dd4-5bc59b598248",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-06-27T18:00:00+00:00",
+  "home_club_id": "universidad-nacional-de-cordoba-preintermedia-b",
+  "away_club_id": "cordoba-athletic-club-preintermedia-b",
+  "score": {
+   "away": 68,
+   "home": 8
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Universidad Nacional de Córdoba Preintermedia \"B\"",
+  "a": "Córdoba Athletic Club Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 8,
+  "sa": 68,
+  "fecha": "2026-06-27"
+ },
+ {
+  "id": "af347883-22d7-4d3a-a143-1e4664c91c52",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-06-27T18:00:00+00:00",
+  "home_club_id": "carlos-paz-rugby-club-preintermedia-b",
+  "away_club_id": "jockey-club-cordoba-preintermedia-c",
+  "score": {
+   "away": 26,
+   "home": 12
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Carlos Paz Rugby Club Preintermedia \"B\"",
+  "a": "Jockey Club Córdoba Preintermedia \"C\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 12,
+  "sa": 26,
+  "fecha": "2026-06-27"
+ },
+ {
+  "id": "4f7e3efd-a85d-4f31-b7b1-558d8001b2f9",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-07-18T14:00:00+00:00",
+  "home_club_id": "tala-rugby-club-preintermedia-b",
+  "away_club_id": "universidad-nacional-de-cordoba-preintermedia-a",
+  "score": {
+   "away": 19,
+   "home": 43
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club Preintermedia \"B\"",
+  "a": "Universidad Nacional de Córdoba Preintermedia \"A\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 43,
+  "sa": 19,
+  "fecha": "2026-07-18"
+ },
+ {
+  "id": "3505db53-9315-4f5e-a3a4-41cd2dc06a0d",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-07-18T15:00:00+00:00",
+  "home_club_id": "jockey-club-cordoba-preintermedia-c",
+  "away_club_id": "baguales-r-c-preintermedia-b",
+  "score": {
+   "away": 0,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba Preintermedia \"C\"",
+  "a": "Baguales R.C. Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 28,
+  "sa": 0,
+  "fecha": "2026-07-18"
+ },
+ {
+  "id": "6f25705d-7e37-4c49-b204-00cb0ae324ed",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-07-18T15:00:00+00:00",
+  "home_club_id": "cordoba-athletic-club-preintermedia-c",
+  "away_club_id": "carlos-paz-rugby-club-preintermedia-b",
+  "score": {
+   "away": 0,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club Preintermedia \"C\"",
+  "a": "Carlos Paz Rugby Club Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 28,
+  "sa": 0,
+  "fecha": "2026-07-18"
+ },
+ {
+  "id": "5401bc2a-c4bb-4f41-87b9-d9674c1bca19",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-07-18T15:15:00+00:00",
+  "home_club_id": "jockey-club-cordoba-preintermedia-b",
+  "away_club_id": "club-palermo-bajo-preintermedia-b",
+  "score": {
+   "away": 28,
+   "home": 38
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba Preintermedia \"B\"",
+  "a": "Club Palermo Bajo Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 38,
+  "sa": 28,
+  "fecha": "2026-07-18"
+ },
+ {
+  "id": "3628d0aa-66a8-4505-8485-427cf10003cb",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-07-18T15:30:00+00:00",
+  "home_club_id": "cordoba-athletic-club-preintermedia-b",
+  "away_club_id": "la-tablada-b-pre-intermedia",
+  "score": {
+   "away": 43,
+   "home": 17
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club Preintermedia \"B\"",
+  "a": "La Tablada \"B\" - Pre Intermedia",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 17,
+  "sa": 43,
+  "fecha": "2026-07-18"
+ },
+ {
+  "id": "227ce16a-a0e5-4690-bf7f-f34f2f2ca6ea",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-07-18T17:00:00+00:00",
+  "home_club_id": "los-hurones-preintermedia-b",
+  "away_club_id": "club-universitario-de-cordoba-preintermedia-b",
+  "score": {
+   "away": 0,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Los Hurones Preintermedia \"B\"",
+  "a": "Club Universitario de Córdoba Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 28,
+  "sa": 0,
+  "fecha": "2026-07-18"
+ },
+ {
+  "id": "2ce41898-74cf-421d-bd34-4b1968764f5e",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-07-18T17:30:00+00:00",
+  "home_club_id": "taborin-rc-preintermedia-b",
+  "away_club_id": "universidad-nacional-de-cordoba-preintermedia-b",
+  "score": {
+   "away": 5,
+   "home": 27
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Taborín RC Preintermedia \"B\"",
+  "a": "Universidad Nacional de Córdoba Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 27,
+  "sa": 5,
+  "fecha": "2026-07-18"
+ },
+ {
+  "id": "fd2e6d9c-9f3f-426b-9365-f087975558e2",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-07-25T00:30:00+00:00",
+  "home_club_id": "cordoba-athletic-club-preintermedia-c",
+  "away_club_id": "club-universitario-de-cordoba-preintermedia-b",
+  "score": {
+   "away": 0,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club Preintermedia \"C\"",
+  "a": "Club Universitario de Córdoba Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 28,
+  "sa": 0,
+  "fecha": "2026-07-24"
+ },
+ {
+  "id": "a221d7c1-32b9-445e-9362-dd3ea4900a6c",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-07-25T00:30:00+00:00",
+  "home_club_id": "jockey-club-cordoba-preintermedia-c",
+  "away_club_id": "la-tablada-b-pre-intermedia",
+  "score": {
+   "away": 15,
+   "home": 12
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba Preintermedia \"C\"",
+  "a": "La Tablada \"B\" - Pre Intermedia",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 12,
+  "sa": 15,
+  "fecha": "2026-07-24"
+ },
+ {
+  "id": "841093ce-b4ad-4843-9263-b17ab32747cc",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-07-25T15:00:00+00:00",
+  "home_club_id": "tala-rugby-club-preintermedia-b",
+  "away_club_id": "club-palermo-bajo-preintermedia-b",
+  "score": {
+   "away": 20,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club Preintermedia \"B\"",
+  "a": "Club Palermo Bajo Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 28,
+  "sa": 20,
+  "fecha": "2026-07-25"
+ },
+ {
+  "id": "4da5e689-661e-4b66-a465-5ceadb1fa336",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-07-25T15:00:00+00:00",
+  "home_club_id": "carlos-paz-rugby-club-preintermedia-b",
+  "away_club_id": "universidad-nacional-de-cordoba-preintermedia-b",
+  "score": {
+   "away": 28,
+   "home": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Carlos Paz Rugby Club Preintermedia \"B\"",
+  "a": "Universidad Nacional de Córdoba Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 0,
+  "sa": 28,
+  "fecha": "2026-07-25"
+ },
+ {
+  "id": "c1f2debf-1e9b-40ae-b9f1-a3c50f588e4f",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-07-25T15:30:00+00:00",
+  "home_club_id": "jockey-club-cordoba-preintermedia-b",
+  "away_club_id": "cordoba-athletic-club-preintermedia-b",
+  "score": {
+   "away": 10,
+   "home": 36
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba Preintermedia \"B\"",
+  "a": "Córdoba Athletic Club Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 36,
+  "sa": 10,
+  "fecha": "2026-07-25"
+ },
+ {
+  "id": "477e7b53-a79d-4968-bff8-a6ded610e0bd",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-07-25T17:00:00+00:00",
+  "home_club_id": "universidad-nacional-de-cordoba-preintermedia-a",
+  "away_club_id": "baguales-r-c-preintermedia-b",
+  "score": {
+   "away": 8,
+   "home": 31
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Universidad Nacional de Córdoba Preintermedia \"A\"",
+  "a": "Baguales R.C. Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 31,
+  "sa": 8,
+  "fecha": "2026-07-25"
+ },
+ {
+  "id": "a061832c-01b2-4043-a592-dc9c1c6ee18c",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-07-25T19:00:00+00:00",
+  "home_club_id": "los-hurones-preintermedia-b",
+  "away_club_id": "taborin-rc-preintermedia-b",
+  "score": {
+   "away": 17,
+   "home": 18
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Los Hurones Preintermedia \"B\"",
+  "a": "Taborín RC Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 18,
+  "sa": 17,
+  "fecha": "2026-07-25"
+ },
+ {
+  "id": "f42db8b9-aa18-4611-9c0d-6475dde69683",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-08-01T00:30:00+00:00",
+  "home_club_id": "taborin-rc-preintermedia-b",
+  "away_club_id": "cordoba-athletic-club-preintermedia-b",
+  "score": {
+   "away": 53,
+   "home": 31
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Taborín RC Preintermedia \"B\"",
+  "a": "Córdoba Athletic Club Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 31,
+  "sa": 53,
+  "fecha": "2026-07-31"
+ },
+ {
+  "id": "f4a8c161-2dc3-44f1-946f-d7f9925d00c0",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-08-01T15:00:00+00:00",
+  "home_club_id": "club-universitario-de-cordoba-preintermedia-b",
+  "away_club_id": "tala-rugby-club-preintermedia-b",
+  "score": {
+   "away": 36,
+   "home": 15
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Universitario de Córdoba Preintermedia \"B\"",
+  "a": "Tala Rugby Club Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 15,
+  "sa": 36,
+  "fecha": "2026-08-01"
+ },
+ {
+  "id": "6957c538-1f50-445c-a825-45c0be1e7339",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-08-01T15:00:00+00:00",
+  "home_club_id": "club-palermo-bajo-preintermedia-b",
+  "away_club_id": "jockey-club-cordoba-preintermedia-c",
+  "score": {
+   "away": 35,
+   "home": 38
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Palermo Bajo Preintermedia \"B\"",
+  "a": "Jockey Club Córdoba Preintermedia \"C\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 38,
+  "sa": 35,
+  "fecha": "2026-08-01"
+ },
+ {
+  "id": "c7989308-eace-42f4-a327-1ea43fc37f99",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-08-01T15:00:00+00:00",
+  "home_club_id": "la-tablada-b-pre-intermedia",
+  "away_club_id": "baguales-r-c-preintermedia-b",
+  "score": {
+   "away": 0,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "La Tablada \"B\" - Pre Intermedia",
+  "a": "Baguales R.C. Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 28,
+  "sa": 0,
+  "fecha": "2026-08-01"
+ },
+ {
+  "id": "c3996cbc-719a-4cd1-89a4-67fab6f3ae92",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-08-01T15:00:00+00:00",
+  "home_club_id": "los-hurones-preintermedia-b",
+  "away_club_id": "universidad-nacional-de-cordoba-preintermedia-b",
+  "score": {
+   "away": 0,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Los Hurones Preintermedia \"B\"",
+  "a": "Universidad Nacional de Córdoba Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 28,
+  "sa": 0,
+  "fecha": "2026-08-01"
+ },
+ {
+  "id": "af74a5b0-2b60-478d-9c4b-0e8f9c957124",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-08-01T15:30:00+00:00",
+  "home_club_id": "cordoba-athletic-club-preintermedia-c",
+  "away_club_id": "universidad-nacional-de-cordoba-preintermedia-a",
+  "score": {
+   "away": 25,
+   "home": 50
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club Preintermedia \"C\"",
+  "a": "Universidad Nacional de Córdoba Preintermedia \"A\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 50,
+  "sa": 25,
+  "fecha": "2026-08-01"
+ },
+ {
+  "id": "1c028dc6-b03b-47f3-a6b6-4864a86c3103",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-08-01T17:00:00+00:00",
+  "home_club_id": "carlos-paz-rugby-club-preintermedia-b",
+  "away_club_id": "jockey-club-cordoba-preintermedia-b",
+  "score": {
+   "away": 28,
+   "home": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Carlos Paz Rugby Club Preintermedia \"B\"",
+  "a": "Jockey Club Córdoba Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 0,
+  "sa": 28,
+  "fecha": "2026-08-01"
+ },
+ {
+  "id": "17eac206-81af-49dd-992a-18604ffdf77b",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-08-08T00:00:00+00:00",
+  "home_club_id": "jockey-club-cordoba-preintermedia-c",
+  "away_club_id": "tala-rugby-club-preintermedia-b",
+  "score": {
+   "away": 18,
+   "home": 24
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba Preintermedia \"C\"",
+  "a": "Tala Rugby Club Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 24,
+  "sa": 18,
+  "fecha": "2026-08-07"
+ },
+ {
+  "id": "346c05cd-0a94-4b95-8c93-dff1090d4c04",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-08-08T00:00:00+00:00",
+  "home_club_id": "la-tablada-b-pre-intermedia",
+  "away_club_id": "taborin-rc-preintermedia-b",
+  "score": {
+   "away": 10,
+   "home": 84
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "La Tablada \"B\" - Pre Intermedia",
+  "a": "Taborín RC Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 84,
+  "sa": 10,
+  "fecha": "2026-08-07"
+ },
+ {
+  "id": "67f8acc9-b1ae-46df-a92e-bce261382353",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-08-08T12:30:00+00:00",
+  "home_club_id": "club-universitario-de-cordoba-preintermedia-b",
+  "away_club_id": "cordoba-athletic-club-preintermedia-b",
+  "score": {
+   "away": 53,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Universitario de Córdoba Preintermedia \"B\"",
+  "a": "Córdoba Athletic Club Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 28,
+  "sa": 53,
+  "fecha": "2026-08-08"
+ },
+ {
+  "id": "49ffa6b6-a123-495e-b1e4-d40ae8d2ce66",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-08-08T14:00:00+00:00",
+  "home_club_id": "club-palermo-bajo-preintermedia-b",
+  "away_club_id": "universidad-nacional-de-cordoba-preintermedia-b",
+  "score": {
+   "away": 21,
+   "home": 74
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Palermo Bajo Preintermedia \"B\"",
+  "a": "Universidad Nacional de Córdoba Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 74,
+  "sa": 21,
+  "fecha": "2026-08-08"
+ },
+ {
+  "id": "f5e075f3-9045-4808-bd80-c261c201837d",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-08-08T15:00:00+00:00",
+  "home_club_id": "cordoba-athletic-club-preintermedia-c",
+  "away_club_id": "baguales-r-c-preintermedia-b",
+  "score": {
+   "away": 0,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club Preintermedia \"C\"",
+  "a": "Baguales R.C. Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 28,
+  "sa": 0,
+  "fecha": "2026-08-08"
+ },
+ {
+  "id": "6568d7e9-9538-454a-a845-59df77c367e1",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-08-08T15:00:00+00:00",
+  "home_club_id": "universidad-nacional-de-cordoba-preintermedia-a",
+  "away_club_id": "carlos-paz-rugby-club-preintermedia-b",
+  "score": {
+   "away": 0,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Universidad Nacional de Córdoba Preintermedia \"A\"",
+  "a": "Carlos Paz Rugby Club Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 28,
+  "sa": 0,
+  "fecha": "2026-08-08"
+ },
+ {
+  "id": "84f85fd3-56b6-4c87-9ec5-22344b994b04",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-08-08T16:30:00+00:00",
+  "home_club_id": "los-hurones-preintermedia-b",
+  "away_club_id": "jockey-club-cordoba-preintermedia-b",
+  "score": {
+   "away": 26,
+   "home": 6
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Los Hurones Preintermedia \"B\"",
+  "a": "Jockey Club Córdoba Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 6,
+  "sa": 26,
+  "fecha": "2026-08-08"
+ },
+ {
+  "id": "24389246-2076-4bb6-b4fb-0ab3bed932cf",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-08-22T00:30:00+00:00",
+  "home_club_id": "jockey-club-cordoba-preintermedia-b",
+  "away_club_id": "universidad-nacional-de-cordoba-preintermedia-a",
+  "score": {
+   "away": 14,
+   "home": 17
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba Preintermedia \"B\"",
+  "a": "Universidad Nacional de Córdoba Preintermedia \"A\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 17,
+  "sa": 14,
+  "fecha": "2026-08-21"
+ },
+ {
+  "id": "fc96c8b6-4b6d-4092-ab0c-cb7ed0ac9c85",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-08-22T00:45:00+00:00",
+  "home_club_id": "cordoba-athletic-club-preintermedia-c",
+  "away_club_id": "taborin-rc-preintermedia-b",
+  "score": {
+   "away": 15,
+   "home": 67
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club Preintermedia \"C\"",
+  "a": "Taborín RC Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 67,
+  "sa": 15,
+  "fecha": "2026-08-21"
+ },
+ {
+  "id": "40ddf2c2-2a02-41f6-ba84-a26d047e0b7d",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-08-22T14:00:00+00:00",
+  "home_club_id": "tala-rugby-club-preintermedia-b",
+  "away_club_id": "la-tablada-b-pre-intermedia",
+  "score": {
+   "away": 14,
+   "home": 40
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club Preintermedia \"B\"",
+  "a": "La Tablada \"B\" - Pre Intermedia",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 40,
+  "sa": 14,
+  "fecha": "2026-08-22"
+ },
+ {
+  "id": "f8f7bd0c-f2a8-4a9b-8351-0be69b46ed89",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-08-22T15:00:00+00:00",
+  "home_club_id": "carlos-paz-rugby-club-preintermedia-b",
+  "away_club_id": "club-universitario-de-cordoba-preintermedia-b",
+  "score": {
+   "away": 0,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Carlos Paz Rugby Club Preintermedia \"B\"",
+  "a": "Club Universitario de Córdoba Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 28,
+  "sa": 0,
+  "fecha": "2026-08-22"
+ },
+ {
+  "id": "218db28e-242c-4fa7-8af2-978bd39ff78a",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-08-22T15:45:00+00:00",
+  "home_club_id": "cordoba-athletic-club-preintermedia-b",
+  "away_club_id": "club-palermo-bajo-preintermedia-b",
+  "score": {
+   "away": 27,
+   "home": 31
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club Preintermedia \"B\"",
+  "a": "Club Palermo Bajo Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 31,
+  "sa": 27,
+  "fecha": "2026-08-22"
+ },
+ {
+  "id": "f1078b25-1757-4f75-b4d9-5ccfd552b5a4",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-08-22T18:00:00+00:00",
+  "home_club_id": "universidad-nacional-de-cordoba-preintermedia-b",
+  "away_club_id": "baguales-r-c-preintermedia-b",
+  "score": {
+   "away": 47,
+   "home": 15
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Universidad Nacional de Córdoba Preintermedia \"B\"",
+  "a": "Baguales R.C. Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 15,
+  "sa": 47,
+  "fecha": "2026-08-22"
+ },
+ {
+  "id": "bace90c9-b1ff-4751-9da0-dce2c9b5f855",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-08-22T19:00:00+00:00",
+  "home_club_id": "los-hurones-preintermedia-b",
+  "away_club_id": "jockey-club-cordoba-preintermedia-c",
+  "score": {
+   "away": 44,
+   "home": 13
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Los Hurones Preintermedia \"B\"",
+  "a": "Jockey Club Córdoba Preintermedia \"C\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 13,
+  "sa": 44,
+  "fecha": "2026-08-22"
+ },
+ {
+  "id": "235356b1-6526-4e01-9733-194a7cbee365",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-08-29T00:30:00+00:00",
+  "home_club_id": "la-tablada-b-pre-intermedia",
+  "away_club_id": "cordoba-athletic-club-preintermedia-c",
+  "score": {
+   "away": 26,
+   "home": 34
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "La Tablada \"B\" - Pre Intermedia",
+  "a": "Córdoba Athletic Club Preintermedia \"C\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 34,
+  "sa": 26,
+  "fecha": "2026-08-28"
+ },
+ {
+  "id": "bc698788-6b9a-4ac1-b652-85e0579565d7",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-08-29T15:00:00+00:00",
+  "home_club_id": "universidad-nacional-de-cordoba-preintermedia-b",
+  "away_club_id": "club-palermo-bajo-preintermedia-b",
+  "score": {
+   "away": 73,
+   "home": 10
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Universidad Nacional de Córdoba Preintermedia \"B\"",
+  "a": "Club Palermo Bajo Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 10,
+  "sa": 73,
+  "fecha": "2026-08-29"
+ },
+ {
+  "id": "2c733665-e0f1-4c2b-89d9-4d65564f49d5",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-08-29T15:00:00+00:00",
+  "home_club_id": "taborin-rc-preintermedia-b",
+  "away_club_id": "tala-rugby-club-preintermedia-b",
+  "score": {
+   "away": 28,
+   "home": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Taborín RC Preintermedia \"B\"",
+  "a": "Tala Rugby Club Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 0,
+  "sa": 28,
+  "fecha": "2026-08-29"
+ },
+ {
+  "id": "c62ab0b1-23c6-4456-a866-1e645bff4abe",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-08-29T15:00:00+00:00",
+  "home_club_id": "baguales-r-c-preintermedia-b",
+  "away_club_id": "jockey-club-cordoba-preintermedia-b",
+  "score": {
+   "away": 28,
+   "home": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Baguales R.C. Preintermedia \"B\"",
+  "a": "Jockey Club Córdoba Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 0,
+  "sa": 28,
+  "fecha": "2026-08-29"
+ },
+ {
+  "id": "96678b2f-f47b-43f3-b41a-1cdcd3104572",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-08-29T16:30:00+00:00",
+  "home_club_id": "jockey-club-cordoba-preintermedia-c",
+  "away_club_id": "cordoba-athletic-club-preintermedia-b",
+  "score": {
+   "away": 28,
+   "home": 33
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba Preintermedia \"C\"",
+  "a": "Córdoba Athletic Club Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 33,
+  "sa": 28,
+  "fecha": "2026-08-29"
+ },
+ {
+  "id": "3fdeb37e-6e6f-4be2-b28b-da80140d8857",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-08-29T17:30:00+00:00",
+  "home_club_id": "los-hurones-preintermedia-b",
+  "away_club_id": "universidad-nacional-de-cordoba-preintermedia-a",
+  "score": {
+   "away": 27,
+   "home": 20
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Los Hurones Preintermedia \"B\"",
+  "a": "Universidad Nacional de Córdoba Preintermedia \"A\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 20,
+  "sa": 27,
+  "fecha": "2026-08-29"
+ },
+ {
+  "id": "d8b51125-0a56-4a6c-bbb9-c39f8a357263",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-09-04T23:30:00+00:00",
+  "home_club_id": "club-palermo-bajo-preintermedia-b",
+  "away_club_id": "cordoba-athletic-club-preintermedia-c",
+  "score": {
+   "away": 12,
+   "home": 22
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Palermo Bajo Preintermedia \"B\"",
+  "a": "Córdoba Athletic Club Preintermedia \"C\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 22,
+  "sa": 12,
+  "fecha": "2026-09-04"
+ },
+ {
+  "id": "412fa140-b50c-4b7f-a695-95133fa047ff",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-09-05T14:00:00+00:00",
+  "home_club_id": "cordoba-athletic-club-preintermedia-b",
+  "away_club_id": "universidad-nacional-de-cordoba-preintermedia-b",
+  "score": {
+   "away": 7,
+   "home": 64
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club Preintermedia \"B\"",
+  "a": "Universidad Nacional de Córdoba Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 64,
+  "sa": 7,
+  "fecha": "2026-09-05"
+ },
+ {
+  "id": "16b3f548-c374-4f54-86f4-87ce178e07a4",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-09-05T15:00:00+00:00",
+  "home_club_id": "la-tablada-b-pre-intermedia",
+  "away_club_id": "jockey-club-cordoba-preintermedia-c",
+  "score": {
+   "away": 12,
+   "home": 22
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "La Tablada \"B\" - Pre Intermedia",
+  "a": "Jockey Club Córdoba Preintermedia \"C\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 22,
+  "sa": 12,
+  "fecha": "2026-09-05"
+ },
+ {
+  "id": "e88a4f00-9228-4eaf-8028-cd89b45288e7",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-09-05T15:00:00+00:00",
+  "home_club_id": "tala-rugby-club-preintermedia-b",
+  "away_club_id": "carlos-paz-rugby-club-preintermedia-b",
+  "score": {
+   "away": 0,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club Preintermedia \"B\"",
+  "a": "Carlos Paz Rugby Club Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 28,
+  "sa": 0,
+  "fecha": "2026-09-05"
+ },
+ {
+  "id": "21cadd8a-36ba-4a8b-9f17-d3edbdc4909d",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-09-05T16:30:00+00:00",
+  "home_club_id": "universidad-nacional-de-cordoba-preintermedia-a",
+  "away_club_id": "jockey-club-cordoba-preintermedia-b",
+  "score": {
+   "away": 23,
+   "home": 14
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Universidad Nacional de Córdoba Preintermedia \"A\"",
+  "a": "Jockey Club Córdoba Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 14,
+  "sa": 23,
+  "fecha": "2026-09-05"
+ },
+ {
+  "id": "ebcda8b3-d80c-4b23-a256-51ffabe78c6e",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-09-05T17:30:00+00:00",
+  "home_club_id": "taborin-rc-preintermedia-b",
+  "away_club_id": "club-universitario-de-cordoba-preintermedia-b",
+  "score": {
+   "away": 0,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Taborín RC Preintermedia \"B\"",
+  "a": "Club Universitario de Córdoba Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 28,
+  "sa": 0,
+  "fecha": "2026-09-05"
+ },
+ {
+  "id": "52ebf8bc-faeb-42f7-94c4-d25fb4c7eae9",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-09-11T00:00:00+00:00",
+  "home_club_id": "jockey-club-cordoba-preintermedia-c",
+  "away_club_id": "jockey-club-cordoba-preintermedia-b",
+  "score": {
+   "away": 39,
+   "home": 19
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba Preintermedia \"C\"",
+  "a": "Jockey Club Córdoba Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 19,
+  "sa": 39,
+  "fecha": "2026-09-10"
+ },
+ {
+  "id": "9d99a4f7-fefa-43a2-ace6-a30640f58a9d",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-09-12T12:30:00+00:00",
+  "home_club_id": "cordoba-athletic-club-preintermedia-c",
+  "away_club_id": "tala-rugby-club-preintermedia-b",
+  "score": {
+   "away": 47,
+   "home": 21
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club Preintermedia \"C\"",
+  "a": "Tala Rugby Club Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 21,
+  "sa": 47,
+  "fecha": "2026-09-12"
+ },
+ {
+  "id": "6d470044-bb0b-4469-8ecf-6d3838eb01bc",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-09-12T15:00:00+00:00",
+  "home_club_id": "universidad-nacional-de-cordoba-preintermedia-b",
+  "away_club_id": "club-universitario-de-cordoba-preintermedia-b",
+  "score": {
+   "away": 0,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Universidad Nacional de Córdoba Preintermedia \"B\"",
+  "a": "Club Universitario de Córdoba Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 28,
+  "sa": 0,
+  "fecha": "2026-09-12"
+ },
+ {
+  "id": "966554a4-f203-439c-bdc9-0aae0095f047",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-09-12T16:00:00+00:00",
+  "home_club_id": "universidad-nacional-de-cordoba-preintermedia-a",
+  "away_club_id": "club-palermo-bajo-preintermedia-b",
+  "score": {
+   "away": 22,
+   "home": 12
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Universidad Nacional de Córdoba Preintermedia \"A\"",
+  "a": "Club Palermo Bajo Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 12,
+  "sa": 22,
+  "fecha": "2026-09-12"
+ },
+ {
+  "id": "d6139e09-69da-4232-89e8-9c0435e7e0f3",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-09-12T17:30:00+00:00",
+  "home_club_id": "la-tablada-b-pre-intermedia",
+  "away_club_id": "los-hurones-preintermedia-b",
+  "score": {
+   "away": 0,
+   "home": 53
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "La Tablada \"B\" - Pre Intermedia",
+  "a": "Los Hurones Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 53,
+  "sa": 0,
+  "fecha": "2026-09-12"
+ },
+ {
+  "id": "25cd9b0a-9a3d-4d1a-9bf9-9ea686a170b3",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-09-12T18:00:00+00:00",
+  "home_club_id": "carlos-paz-rugby-club-preintermedia-b",
+  "away_club_id": "baguales-r-c-preintermedia-b",
+  "score": {
+   "away": 28,
+   "home": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Carlos Paz Rugby Club Preintermedia \"B\"",
+  "a": "Baguales R.C. Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 0,
+  "sa": 28,
+  "fecha": "2026-09-12"
+ },
+ {
+  "id": "2157c550-8f48-423d-b6ed-8b3a3d37a718",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-09-12T23:00:00+00:00",
+  "home_club_id": "cordoba-athletic-club-preintermedia-b",
+  "away_club_id": "taborin-rc-preintermedia-b",
+  "score": {
+   "away": 12,
+   "home": 48
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club Preintermedia \"B\"",
+  "a": "Taborín RC Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 48,
+  "sa": 12,
+  "fecha": "2026-09-12"
+ },
+ {
+  "id": "b634783e-efba-4e7d-bc0b-959cfe5f2b48",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-09-19T00:00:00+00:00",
+  "home_club_id": "la-tablada-b-pre-intermedia",
+  "away_club_id": "universidad-nacional-de-cordoba-preintermedia-b",
+  "score": {
+   "away": 5,
+   "home": 73
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "La Tablada \"B\" - Pre Intermedia",
+  "a": "Universidad Nacional de Córdoba Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 73,
+  "sa": 5,
+  "fecha": "2026-09-18"
+ },
+ {
+  "id": "5876647c-e81c-41a2-bc40-7a7081760c76",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-09-19T14:00:00+00:00",
+  "home_club_id": "jockey-club-cordoba-preintermedia-b",
+  "away_club_id": "cordoba-athletic-club-preintermedia-c",
+  "score": {
+   "away": 36,
+   "home": 38
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba Preintermedia \"B\"",
+  "a": "Córdoba Athletic Club Preintermedia \"C\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 38,
+  "sa": 36,
+  "fecha": "2026-09-19"
+ },
+ {
+  "id": "ef940e5c-8214-48a4-87e0-a97e420b18ce",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-09-19T15:00:00+00:00",
+  "home_club_id": "baguales-r-c-preintermedia-b",
+  "away_club_id": "cordoba-athletic-club-preintermedia-b",
+  "score": {
+   "away": 28,
+   "home": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Baguales R.C. Preintermedia \"B\"",
+  "a": "Córdoba Athletic Club Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 0,
+  "sa": 28,
+  "fecha": "2026-09-19"
+ },
+ {
+  "id": "a78ead2c-e0eb-4a86-a232-7e8e08e999e7",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-09-19T15:00:00+00:00",
+  "home_club_id": "taborin-rc-preintermedia-b",
+  "away_club_id": "carlos-paz-rugby-club-preintermedia-b",
+  "score": {
+   "away": 0,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Taborín RC Preintermedia \"B\"",
+  "a": "Carlos Paz Rugby Club Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 28,
+  "sa": 0,
+  "fecha": "2026-09-19"
+ },
+ {
+  "id": "70a60dce-e614-4b13-9691-9288c596acda",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-09-19T15:00:00+00:00",
+  "home_club_id": "universidad-nacional-de-cordoba-preintermedia-a",
+  "away_club_id": "club-universitario-de-cordoba-preintermedia-b",
+  "score": {
+   "away": 0,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Universidad Nacional de Córdoba Preintermedia \"A\"",
+  "a": "Club Universitario de Córdoba Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 28,
+  "sa": 0,
+  "fecha": "2026-09-19"
+ },
+ {
+  "id": "cd55a3d6-1f54-4390-9180-a57cf708307e",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-09-19T15:30:00+00:00",
+  "home_club_id": "jockey-club-cordoba-preintermedia-c",
+  "away_club_id": "club-palermo-bajo-preintermedia-b",
+  "score": {
+   "away": 50,
+   "home": 27
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba Preintermedia \"C\"",
+  "a": "Club Palermo Bajo Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 27,
+  "sa": 50,
+  "fecha": "2026-09-19"
+ },
+ {
+  "id": "f130d0f9-b800-431e-977b-35d5d269d69f",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-09-19T18:00:00+00:00",
+  "home_club_id": "los-hurones-preintermedia-b",
+  "away_club_id": "tala-rugby-club-preintermedia-b",
+  "score": {
+   "away": 59,
+   "home": 7
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Los Hurones Preintermedia \"B\"",
+  "a": "Tala Rugby Club Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 7,
+  "sa": 59,
+  "fecha": "2026-09-19"
+ },
+ {
+  "id": "24fefb3c-b713-4825-a0cc-68eb6ee1efd6",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-09-25T23:00:00+00:00",
+  "home_club_id": "jockey-club-cordoba-preintermedia-b",
+  "away_club_id": "taborin-rc-preintermedia-b",
+  "score": {
+   "away": 23,
+   "home": 47
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba Preintermedia \"B\"",
+  "a": "Taborín RC Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 47,
+  "sa": 23,
+  "fecha": "2026-09-25"
+ },
+ {
+  "id": "0b44bb72-f925-44bd-902c-20c0ac0ced8b",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-09-26T00:30:00+00:00",
+  "home_club_id": "jockey-club-cordoba-preintermedia-c",
+  "away_club_id": "universidad-nacional-de-cordoba-preintermedia-b",
+  "score": {
+   "away": 12,
+   "home": 71
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba Preintermedia \"C\"",
+  "a": "Universidad Nacional de Córdoba Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 71,
+  "sa": 12,
+  "fecha": "2026-09-25"
+ },
+ {
+  "id": "f6433ef9-423b-4248-9562-583e705c171f",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-09-26T15:00:00+00:00",
+  "home_club_id": "carlos-paz-rugby-club-preintermedia-b",
+  "away_club_id": "cordoba-athletic-club-preintermedia-b",
+  "score": {
+   "away": 28,
+   "home": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Carlos Paz Rugby Club Preintermedia \"B\"",
+  "a": "Córdoba Athletic Club Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 0,
+  "sa": 28,
+  "fecha": "2026-09-26"
+ },
+ {
+  "id": "e046d79a-ddc9-410f-96a0-49698c121da3",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-09-26T15:00:00+00:00",
+  "home_club_id": "club-universitario-de-cordoba-preintermedia-b",
+  "away_club_id": "cordoba-athletic-club-preintermedia-c",
+  "score": {
+   "away": 28,
+   "home": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Universitario de Córdoba Preintermedia \"B\"",
+  "a": "Córdoba Athletic Club Preintermedia \"C\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 0,
+  "sa": 28,
+  "fecha": "2026-09-26"
+ },
+ {
+  "id": "a5492320-d529-4967-85f8-e7e6928896ed",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-09-26T15:00:00+00:00",
+  "home_club_id": "baguales-r-c-preintermedia-b",
+  "away_club_id": "la-tablada-b-pre-intermedia",
+  "score": {
+   "away": 28,
+   "home": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Baguales R.C. Preintermedia \"B\"",
+  "a": "La Tablada \"B\" - Pre Intermedia",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 0,
+  "sa": 28,
+  "fecha": "2026-09-26"
+ },
+ {
+  "id": "32471b62-7856-4312-b5a6-af84cd166e10",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-09-26T16:00:00+00:00",
+  "home_club_id": "universidad-nacional-de-cordoba-preintermedia-a",
+  "away_club_id": "tala-rugby-club-preintermedia-b",
+  "score": {
+   "away": 45,
+   "home": 14
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Universidad Nacional de Córdoba Preintermedia \"A\"",
+  "a": "Tala Rugby Club Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 14,
+  "sa": 45,
+  "fecha": "2026-09-26"
+ },
+ {
+  "id": "9a3243d8-c0e5-488d-9fd0-3e4a617d1c88",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-09-26T18:00:00+00:00",
+  "home_club_id": "club-palermo-bajo-preintermedia-b",
+  "away_club_id": "los-hurones-preintermedia-b",
+  "score": {
+   "away": 17,
+   "home": 42
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Palermo Bajo Preintermedia \"B\"",
+  "a": "Los Hurones Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 42,
+  "sa": 17,
+  "fecha": "2026-09-26"
+ },
+ {
+  "id": "bb700d3d-4d6b-466c-9722-d51f9c87ec65",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-10-10T01:30:00+00:00",
+  "home_club_id": "jockey-club-cordoba-preintermedia-b",
+  "away_club_id": "los-hurones-preintermedia-b",
+  "score": {
+   "away": 5,
+   "home": 64
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba Preintermedia \"B\"",
+  "a": "Los Hurones Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 64,
+  "sa": 5,
+  "fecha": "2026-10-09"
+ },
+ {
+  "id": "c392ad53-b6e0-4e08-969f-3cfa906cbe21",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-10-10T15:00:00+00:00",
+  "home_club_id": "club-universitario-de-cordoba-preintermedia-b",
+  "away_club_id": "jockey-club-cordoba-preintermedia-c",
+  "score": {
+   "away": 28,
+   "home": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Universitario de Córdoba Preintermedia \"B\"",
+  "a": "Jockey Club Córdoba Preintermedia \"C\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 0,
+  "sa": 28,
+  "fecha": "2026-10-10"
+ },
+ {
+  "id": "23ad4cf4-4b7f-444d-8b57-65ae67a74ca6",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-10-10T15:00:00+00:00",
+  "home_club_id": "baguales-r-c-preintermedia-b",
+  "away_club_id": "tala-rugby-club-preintermedia-b",
+  "score": {
+   "away": 28,
+   "home": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Baguales R.C. Preintermedia \"B\"",
+  "a": "Tala Rugby Club Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 0,
+  "sa": 28,
+  "fecha": "2026-10-10"
+ },
+ {
+  "id": "51908376-630d-42c9-aa37-2b5dca13463e",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-10-10T15:00:00+00:00",
+  "home_club_id": "club-palermo-bajo-preintermedia-b",
+  "away_club_id": "carlos-paz-rugby-club-preintermedia-b",
+  "score": {
+   "away": 0,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Palermo Bajo Preintermedia \"B\"",
+  "a": "Carlos Paz Rugby Club Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 28,
+  "sa": 0,
+  "fecha": "2026-10-10"
+ },
+ {
+  "id": "70ca7e9f-7658-470a-9cff-3e9a2a1508db",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-10-10T16:15:00+00:00",
+  "home_club_id": "universidad-nacional-de-cordoba-preintermedia-b",
+  "away_club_id": "cordoba-athletic-club-preintermedia-c",
+  "score": {
+   "away": 34,
+   "home": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Universidad Nacional de Córdoba Preintermedia \"B\"",
+  "a": "Córdoba Athletic Club Preintermedia \"C\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 0,
+  "sa": 34,
+  "fecha": "2026-10-10"
+ },
+ {
+  "id": "565ae115-5875-48da-a9ed-d4c1f4bb6d34",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-10-10T18:00:00+00:00",
+  "home_club_id": "universidad-nacional-de-cordoba-preintermedia-a",
+  "away_club_id": "cordoba-athletic-club-preintermedia-b",
+  "score": {
+   "away": 44,
+   "home": 24
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Universidad Nacional de Córdoba Preintermedia \"A\"",
+  "a": "Córdoba Athletic Club Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 24,
+  "sa": 44,
+  "fecha": "2026-10-10"
+ },
+ {
+  "id": "26ddb1e1-ecb0-4d46-80f1-0ed60b963346",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-10-10T18:00:00+00:00",
+  "home_club_id": "taborin-rc-preintermedia-b",
+  "away_club_id": "la-tablada-b-pre-intermedia",
+  "score": {
+   "away": 33,
+   "home": 11
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Taborín RC Preintermedia \"B\"",
+  "a": "La Tablada \"B\" - Pre Intermedia",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 11,
+  "sa": 33,
+  "fecha": "2026-10-10"
+ },
+ {
+  "id": "aea5147e-a97e-4c6e-ab8e-6d5e54c231ad",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-10-16T01:00:00+00:00",
+  "home_club_id": "cordoba-athletic-club-preintermedia-b",
+  "away_club_id": "cordoba-athletic-club-preintermedia-c",
+  "score": {
+   "away": 0,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club Preintermedia \"B\"",
+  "a": "Córdoba Athletic Club Preintermedia \"C\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 28,
+  "sa": 0,
+  "fecha": "2026-10-15"
+ },
+ {
+  "id": "91f610f2-2b63-4581-a512-8481fcec8f26",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-10-17T15:00:00+00:00",
+  "home_club_id": "tala-rugby-club-preintermedia-b",
+  "away_club_id": "jockey-club-cordoba-preintermedia-c",
+  "score": {
+   "away": 0,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club Preintermedia \"B\"",
+  "a": "Jockey Club Córdoba Preintermedia \"C\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 28,
+  "sa": 0,
+  "fecha": "2026-10-17"
+ },
+ {
+  "id": "690b7209-6bbd-4ac0-be8b-14b6d32657f8",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-10-17T15:00:00+00:00",
+  "home_club_id": "club-universitario-de-cordoba-preintermedia-b",
+  "away_club_id": "los-hurones-preintermedia-b",
+  "score": {
+   "away": 28,
+   "home": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Universitario de Córdoba Preintermedia \"B\"",
+  "a": "Los Hurones Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 0,
+  "sa": 28,
+  "fecha": "2026-10-17"
+ },
+ {
+  "id": "803a260d-c607-4950-8afb-672c8b0b599a",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-10-17T15:00:00+00:00",
+  "home_club_id": "baguales-r-c-preintermedia-b",
+  "away_club_id": "club-palermo-bajo-preintermedia-b",
+  "score": {
+   "away": 28,
+   "home": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Baguales R.C. Preintermedia \"B\"",
+  "a": "Club Palermo Bajo Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 0,
+  "sa": 28,
+  "fecha": "2026-10-17"
+ },
+ {
+  "id": "bc30b665-47f0-481e-a0fb-66acf00402f2",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-10-17T15:00:00+00:00",
+  "home_club_id": "carlos-paz-rugby-club-preintermedia-b",
+  "away_club_id": "la-tablada-b-pre-intermedia",
+  "score": {
+   "away": 28,
+   "home": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Carlos Paz Rugby Club Preintermedia \"B\"",
+  "a": "La Tablada \"B\" - Pre Intermedia",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 0,
+  "sa": 28,
+  "fecha": "2026-10-17"
+ },
+ {
+  "id": "b3265540-f434-4413-878c-47ce4c73da3a",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-10-17T16:00:00+00:00",
+  "home_club_id": "universidad-nacional-de-cordoba-preintermedia-b",
+  "away_club_id": "jockey-club-cordoba-preintermedia-b",
+  "score": {
+   "away": 0,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Universidad Nacional de Córdoba Preintermedia \"B\"",
+  "a": "Jockey Club Córdoba Preintermedia \"B\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 28,
+  "sa": 0,
+  "fecha": "2026-10-17"
+ },
+ {
+  "id": "cf8005be-df6d-4d3c-85c9-af6c3f2dbc30",
+  "tournament_id": "97cfa9ad-348c-4652-bb3f-7905bb92ef65",
+  "date_time": "2026-10-17T19:00:00+00:00",
+  "home_club_id": "taborin-rc-preintermedia-b",
+  "away_club_id": "universidad-nacional-de-cordoba-preintermedia-a",
+  "score": {
+   "away": 5,
+   "home": 24
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Taborín RC Preintermedia \"B\"",
+  "a": "Universidad Nacional de Córdoba Preintermedia \"A\"",
+  "torneo": "torneo-cordobes-preintermedia-b",
+  "sh": 24,
+  "sa": 5,
+  "fecha": "2026-10-17"
+ }
+]

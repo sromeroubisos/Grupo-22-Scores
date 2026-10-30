@@ -13,6 +13,7 @@ import {
     jsonError,
     pollErrorResponse,
     requireEditor,
+    requirePollTournamentAccess,
     verifiedUserId,
     PollClosesAtSchema,
     PollNameSchema,
@@ -64,6 +65,9 @@ export async function POST(request: NextRequest) {
     if (!parsed.success) {
         return jsonError('La votación no tiene la forma esperada.', 400, parsed.error.issues);
     }
+
+    const denied = await requirePollTournamentAccess(editor, parsed.data.tournamentId);
+    if (denied) return denied;
 
     try {
         const options = normalizePollOptions(parsed.data.options);

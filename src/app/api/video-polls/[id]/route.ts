@@ -13,6 +13,7 @@ import {
     jsonError,
     pollErrorResponse,
     requireEditor,
+    requirePollTournamentAccess,
     PollClosesAtSchema,
     PollNameSchema,
     PollOptionsSchema,
@@ -61,6 +62,9 @@ export async function PATCH(
     try {
         const poll = await getVideoPoll(id);
         if (!poll) return jsonError('Esa votación no existe.', 404);
+        // El torneo sale de la votación guardada, no del body.
+        const denied = await requirePollTournamentAccess(editor, poll.tournamentId);
+        if (denied) return denied;
 
         let options: VideoPollOption[] | undefined;
         if (parsed.data.options) {
@@ -101,6 +105,11 @@ export async function DELETE(
     if (!id) return jsonError('Invalid poll id', 400);
 
     try {
+        const poll = await getVideoPoll(id);
+        if (!poll) return json({ ok: true });
+        const denied = await requirePollTournamentAccess(editor, poll.tournamentId);
+        if (denied) return denied;
+
         await deleteVideoPoll(id);
         return json({ ok: true });
     } catch (error) {

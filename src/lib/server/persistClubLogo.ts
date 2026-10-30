@@ -1,6 +1,7 @@
 import { createHash } from 'crypto';
 import sharp from 'sharp';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { IMAGE_MAX_BYTES, RASTER_IMAGE_KINDS, sniffFile } from '@/lib/server/fileSniff';
 
 /**
  * Manda el escudo de un club a Storage y devuelve una URL corta.
@@ -37,7 +38,12 @@ const MIME_TO_EXTENSION: Record<string, string> = {
     'image/avif': 'avif',
 };
 
-export type ClubLogoOrigin = 'empty' | 'url' | 'storage' | 'inline-fallback';
+/**
+ * `rejected`: el archivo no es una imagen raster que aceptemos (SVG, HTML,
+ * cualquier otra cosa) o pasa el tope. No se sube ni se guarda: el que llama
+ * corta con un 400 en vez de pisar el escudo actual.
+ */
+export type ClubLogoOrigin = 'empty' | 'url' | 'storage' | 'inline-fallback' | 'rejected';
 
 export interface ClubLogoPersistResult {
     url: string | null;
@@ -122,7 +128,20 @@ export async function persistClubLogo(
         return { url: value, origin: 'inline-fallback', warning: 'El archivo del escudo llegó vacío; quedó embebido.' };
     }
 
-    const { bytes, mimeType } = await normalizeCrest(rawMimeType, rawBytes);
+    // El MIME del data URI lo escribe el cliente. Antes se subía con ese
+    // content-type tal cual: un `data:image/svg+xml` (o un HTML disfrazado)
+    // terminaba servido desde nuestro bucket público con scripts adentro. El
+    // tipo sale de los bytes y solo pasan imágenes raster, con tope.
+    if (rawBytes.byteLength > IMAGE_MAX_BYTES) {
+        return { url: null, origin: 'rejected', warning: 'El escudo pesa más de 5 MB. Achicalo antes de subirlo.' };
+    }
+    const sniffed = sniffFile(rawBytes);
+    if (!sniffed || !RASTER_IMAGE_KINDS.has(sniffed.kind)) {
+        void rawMimeType;
+        return { url: null, origin: 'rejected', warning: 'El escudo tiene que ser PNG, JPG, WebP, GIF o AVIF.' };
+    }
+
+    const { bytes, mimeType } = await normalizeCrest(sniffed.mime, rawBytes);
 
     // El nombre sale del CONTENIDO, no de la hora: subir dos veces el mismo
     // escudo escribe el mismo archivo en vez de dejar huérfanos acumulándose en

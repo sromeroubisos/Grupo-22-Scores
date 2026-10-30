@@ -7,12 +7,15 @@ import {
     getAllowedScopesForRole,
     getDefaultScopeForRole,
     isAppRole,
+    isGlobalAdminRole,
     type MembershipRole,
     type MembershipScope,
 } from '@/lib/auth/roles';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 import { getReservedAdminRole } from '@/lib/types/user';
+import { getApiErrorMessageForClient, guardRejection } from '@/lib/auth/apiAdmin';
+import { isMfaError } from '@/lib/auth/mfa';
 
 const accessPayloadSchema = z.object({
     role: z.string().min(1),
@@ -27,6 +30,21 @@ function badRequest(message: string, details?: unknown) {
 
 function forbidden(message = 'Forbidden') {
     return NextResponse.json({ error: message }, { status: 403 });
+}
+
+/**
+ * El catch de estos handlers contestaba 403 con el mensaje crudo a todo. El
+ * segundo factor sigue en 403 pero con un mensaje que dice que hacer, y la
+ * falta de sesion pasa a 401.
+ */
+function guardFailure(error: unknown) {
+    if (isMfaError(error)) return forbidden(getApiErrorMessageForClient(error));
+    if (error instanceof Error && error.message === 'Unauthorized') {
+        const [message, status] = guardRejection(error);
+        return NextResponse.json({ error: message }, { status });
+    }
+    const message = error instanceof Error ? error.message : 'Forbidden';
+    return forbidden(message);
 }
 
 function serializePostgrestError(error: PostgrestError) {
@@ -86,8 +104,7 @@ export async function GET(
             },
         });
     } catch (error) {
-        const message = error instanceof Error ? error.message : 'Forbidden';
-        return forbidden(message);
+        return guardFailure(error);
     }
 }
 
@@ -96,8 +113,14 @@ export async function PUT(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        await ensureGlobalAdmin();
+        const actor = await ensureGlobalAdmin();
         const { id: targetUserId } = await params;
+
+        // Nadie se toca su propio acceso: reescribe rol y membresias, o sea
+        // que seria una autoescalada (o un autobloqueo) sin testigos.
+        if (targetUserId === actor.userId) {
+            return forbidden('No podés cambiar tu propio rol ni tus accesos.');
+        }
 
         let body: unknown;
         try {
@@ -133,7 +156,7 @@ export async function PUT(
 
         const { data: targetUser } = await admin
             .from('users')
-            .select('id, email')
+            .select('id, email, role')
             .eq('id', targetUserId)
             .maybeSingle();
 
@@ -144,6 +167,13 @@ export async function PUT(
         const reservedRole = getReservedAdminRole(targetUser.email);
         if (reservedRole && role !== reservedRole) {
             return badRequest('Esta cuenta tiene un rol reservado y no puede recibir un rol operativo.');
+        }
+
+        // Jerarquia: dar un rol global, o tocarle el acceso a quien ya lo
+        // tiene, es cosa de un super_admin exacto. Un admin_general no fabrica
+        // pares ni degrada a un super admin.
+        if ((isGlobalAdminRole(role) || isGlobalAdminRole(targetUser.role)) && actor.role !== 'super_admin') {
+            return forbidden('Solo un super admin puede asignar o quitar roles globales.');
         }
 
         const { error: roleError } = await admin
@@ -197,7 +227,6 @@ export async function PUT(
         const payload = await getUserAccessPayload(targetUserId);
         return NextResponse.json({ data: payload });
     } catch (error) {
-        const message = error instanceof Error ? error.message : 'Forbidden';
-        return forbidden(message);
+        return guardFailure(error);
     }
 }

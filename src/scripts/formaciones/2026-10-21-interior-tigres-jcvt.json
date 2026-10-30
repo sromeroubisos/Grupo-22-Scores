@@ -1,0 +1,534 @@
+{
+ "descripcion": "Tigres 25-24 Jockey Club de Venado Tuerto · tarjeta 297058 sin las conversiones sobrantes",
+ "partidos": [
+  {
+   "id": "8b21f345-8130-4b66-8467-9fbc961b00a2",
+   "rotulo": "Tigres R.C. vs Jockey Club de Venado Tuerto · tarjeta 297058 (corregida: conversiones de mas)",
+   "local": {
+    "nombre": "Tigres R.C.",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Ricardo Gauna Martin",
+      "puesto": "Pilar",
+      "id": "906e83b2-331b-4106-86a2-9d1b474181d0"
+     },
+     {
+      "numero": 2,
+      "nombre": "Pedro Calderoni",
+      "puesto": "Hooker",
+      "id": "84afd1ef-d0aa-4773-b8a5-55a7adf86990"
+     },
+     {
+      "numero": 3,
+      "nombre": "Santiago Lanfranco",
+      "puesto": "Pilar",
+      "id": "59ba168c-c2bb-4948-95a5-4d3f86eeaf07"
+     },
+     {
+      "numero": 4,
+      "nombre": "Marco Saravia Buffa",
+      "puesto": "Segunda línea",
+      "id": "efc446d4-7360-4e80-9f9e-64e34e234e89"
+     },
+     {
+      "numero": 5,
+      "nombre": "Rodrigo Sola Alsina",
+      "puesto": "Segunda línea",
+      "id": "cecae027-a6da-46da-b19b-4c676bfd287b"
+     },
+     {
+      "numero": 6,
+      "nombre": "Octavio Sola",
+      "puesto": "Tercera línea",
+      "id": "ff19fce1-0090-422c-bd8f-4be5ed806682"
+     },
+     {
+      "numero": 7,
+      "nombre": "Ariel Fernando Gasparini",
+      "puesto": "Tercera línea",
+      "id": "036e0dc3-44c1-49d6-963a-f1a8e9668479"
+     },
+     {
+      "numero": 8,
+      "nombre": "Tomas Varisco",
+      "puesto": "Tercera línea",
+      "id": "8975a392-370e-4cde-8c76-748f79d42b80"
+     },
+     {
+      "numero": 9,
+      "nombre": "Santiago Uriburu",
+      "puesto": "Medio scrum",
+      "id": "0852a838-efa1-460b-afa8-e4578b5308ae"
+     },
+     {
+      "numero": 10,
+      "nombre": "Evaristo Ramasco Padilla",
+      "puesto": "Apertura",
+      "id": "3c236d19-9cd8-42d3-8b88-508d5e205950"
+     },
+     {
+      "numero": 11,
+      "nombre": "Jaime Durand Ferandez",
+      "puesto": "Wing",
+      "id": "5bfa4ed3-4bdb-4fdc-b066-d11cbb2690bd"
+     },
+     {
+      "numero": 12,
+      "nombre": "Pedro Sylvester",
+      "puesto": "Centro",
+      "id": "e297622a-d566-493b-b0a9-14917cbea577"
+     },
+     {
+      "numero": 13,
+      "nombre": "Nicolas Henry Casas",
+      "puesto": "Centro",
+      "id": "48fdb2c5-a6a6-4e1b-8f33-f8d7c8b1c1b1"
+     },
+     {
+      "numero": 14,
+      "nombre": "Nicolás Terán Terán Frías",
+      "puesto": "Wing",
+      "id": "a983766d-db93-4b63-85d3-cbe84c33c521"
+     },
+     {
+      "numero": 15,
+      "nombre": "Federico Salazar",
+      "puesto": "Fullback",
+      "id": "bf849f61-d0bc-4c8a-872d-f044aac3a27a"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Jeronimo Leopolos",
+      "id": "3c32c3e4-daa9-403a-b1b6-92d81b889414"
+     },
+     {
+      "numero": 17,
+      "nombre": "Darío Alberto Arnedo",
+      "id": "42baaecc-351e-459d-8867-ae6681ca7412"
+     },
+     {
+      "numero": 18,
+      "nombre": "Lian Ortiz",
+      "id": "75fbfdb5-f51d-4d28-b2e7-1eb1942306be"
+     },
+     {
+      "numero": 19,
+      "nombre": "Ignacio Maria Coll",
+      "id": "b3f4cd88-3856-4dcd-9166-bca9b51624d5"
+     },
+     {
+      "numero": 20,
+      "nombre": "Ignacio Jesús Solá Zambrano",
+      "id": "909ae40d-e200-489b-b9f8-8dfdfff45831"
+     },
+     {
+      "numero": 21,
+      "nombre": "Vicente Velez Zambrano",
+      "id": "ec5e4d0c-b99a-4c98-aef4-a3030df750dc"
+     },
+     {
+      "numero": 22,
+      "nombre": "Jeronimo Diez Poviña",
+      "id": "4ac8f6b7-96c6-434a-943b-00a064f66e92"
+     },
+     {
+      "numero": 23,
+      "nombre": "Baltasar Zapiola",
+      "id": "74348f81-76a7-4b26-8450-9ef9ad27bf14"
+     }
+    ]
+   },
+   "visitante": {
+    "nombre": "Jockey Club de Venado Tuerto",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Daniel Dassetto",
+      "puesto": "Pilar",
+      "id": "af150005-a76b-4b74-9762-7db7e0fb76a1"
+     },
+     {
+      "numero": 2,
+      "nombre": "Juan Petersen",
+      "puesto": "Hooker",
+      "id": "e9630f25-f770-49aa-ae2b-e15180a70fec"
+     },
+     {
+      "numero": 3,
+      "nombre": "Felipe Kuhn",
+      "puesto": "Pilar",
+      "id": "b2ad8af2-2ded-4245-93af-594af965d269"
+     },
+     {
+      "numero": 4,
+      "nombre": "Juan Martin Balarini",
+      "puesto": "Segunda línea",
+      "id": "c161e8b2-ff28-4072-afb3-3a0e02f34af5"
+     },
+     {
+      "numero": 5,
+      "nombre": "Lautaro Valentin Ghignone",
+      "puesto": "Segunda línea",
+      "id": "b3904acb-8b86-4be1-bfb6-21af14ff3f7f"
+     },
+     {
+      "numero": 6,
+      "nombre": "Manuel Moran",
+      "puesto": "Tercera línea",
+      "id": "ae376d87-dab7-4f50-b493-e874a0221552"
+     },
+     {
+      "numero": 7,
+      "nombre": "Ignacio Brogliatti",
+      "puesto": "Tercera línea",
+      "id": "3bfbc73d-0271-4022-9a03-84ac5cafea82"
+     },
+     {
+      "numero": 8,
+      "nombre": "Pedro Espíndola",
+      "puesto": "Tercera línea",
+      "id": "d9c83803-a5be-4836-aa33-a790cd5aeb60"
+     },
+     {
+      "numero": 9,
+      "nombre": "Justo Espindola",
+      "puesto": "Medio scrum",
+      "id": "107268b4-ac28-4709-8c90-1cdd30979d50"
+     },
+     {
+      "numero": 10,
+      "nombre": "Nicolás Herrmann",
+      "puesto": "Apertura",
+      "id": "ae875d97-d220-46bc-8b99-1493aeed93bc"
+     },
+     {
+      "numero": 11,
+      "nombre": "Guido Martinotti",
+      "puesto": "Wing",
+      "id": "9b591595-7c64-4e19-8b8f-2529d06079bd"
+     },
+     {
+      "numero": 12,
+      "nombre": "Pedro Borello",
+      "puesto": "Centro",
+      "id": "f7fbd7ce-25b2-44a3-84b1-af3c0bdb5193"
+     },
+     {
+      "numero": 13,
+      "nombre": "Joaquin Brogliatti",
+      "puesto": "Centro",
+      "id": "48d532ce-b751-4612-b2c4-43120f3592a5"
+     },
+     {
+      "numero": 14,
+      "nombre": "Tomás Moyano",
+      "puesto": "Wing",
+      "id": "3e677ba0-a26d-48e2-91d8-0ad1667b7475"
+     },
+     {
+      "numero": 15,
+      "nombre": "Tomás Espejo",
+      "puesto": "Fullback",
+      "id": "4782d15e-c35b-4781-8dc6-9c7c77fb11e8"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Juan Ramiro",
+      "id": "9e628909-5bca-44df-9952-88456334247a"
+     },
+     {
+      "numero": 17,
+      "nombre": "Lorenzo Piera",
+      "id": "1bdb9d7d-8e51-4c03-ac6f-de6a59b7e5fb"
+     },
+     {
+      "numero": 18,
+      "nombre": "Valentino Giovannini",
+      "id": "efef902c-a4f3-4b67-a4b8-97f0c1064017"
+     },
+     {
+      "numero": 19,
+      "nombre": "Maximo Santino Gentili",
+      "id": "72661e5d-974c-431b-8837-0cbd75c96ccf"
+     },
+     {
+      "numero": 20,
+      "nombre": "Jeronimo Valdata",
+      "id": "ce9bce33-c59d-476e-8da3-5e09c684a26f"
+     },
+     {
+      "numero": 21,
+      "nombre": "Matías Alejandro Oroná",
+      "id": "0f7e7e49-89cf-4a93-b112-7c1795d40e17"
+     },
+     {
+      "numero": 22,
+      "nombre": "Lautaro Lopez Yasci",
+      "id": "b96acd5b-2870-4295-bc77-c3c6124002cd"
+     },
+     {
+      "numero": 23,
+      "nombre": "Geronimo Tro",
+      "id": "7fc2577c-2af8-4c2a-9ec1-5555bed75989"
+     }
+    ]
+   },
+   "eventos": [
+    {
+     "minuto": 8,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Daniel Dassetto"
+    },
+    {
+     "minuto": 9,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Nicolas Henry Casas"
+    },
+    {
+     "minuto": 9,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Nicolás Herrmann"
+    },
+    {
+     "minuto": 10,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Federico Salazar"
+    },
+    {
+     "minuto": 15,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Daniel Dassetto"
+    },
+    {
+     "minuto": 16,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Nicolás Herrmann"
+    },
+    {
+     "minuto": 16,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "visitante",
+     "jugador": "Ignacio Brogliatti"
+    },
+    {
+     "minuto": 25,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Santiago Uriburu"
+    },
+    {
+     "minuto": 26,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Federico Salazar"
+    },
+    {
+     "minuto": 37,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Nicolás Terán Terán Frías"
+    },
+    {
+     "minuto": 40,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "visitante",
+     "jugador": "Justo Espindola"
+    },
+    {
+     "minuto": 2,
+     "periodo": "2T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Federico Salazar"
+    },
+    {
+     "minuto": 4,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Ignacio Brogliatti",
+     "detalle": "Entra: Maximo Santino Gentili"
+    },
+    {
+     "minuto": 4,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Manuel Moran",
+     "detalle": "Entra: Jeronimo Valdata"
+    },
+    {
+     "minuto": 5,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Santiago Uriburu",
+     "detalle": "Entra: Vicente Velez Zambrano"
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Rodrigo Sola Alsina",
+     "detalle": "Entra: Ignacio Jesús Solá Zambrano"
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Nicolás Herrmann",
+     "detalle": "Entra: Lautaro Lopez Yasci"
+    },
+    {
+     "minuto": 12,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "equipo": "local",
+     "jugador": "Tomas Varisco",
+     "detalle": "Juego general"
+    },
+    {
+     "minuto": 12,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Ricardo Gauna Martin",
+     "detalle": "Entra: Jeronimo Leopolos"
+    },
+    {
+     "minuto": 16,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Ariel Fernando Gasparini",
+     "detalle": "Entra: Ignacio Maria Coll"
+    },
+    {
+     "minuto": 16,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Evaristo Ramasco Padilla",
+     "detalle": "Entra: Jeronimo Diez Poviña"
+    },
+    {
+     "minuto": 23,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Marco Saravia Buffa",
+     "detalle": "Entra: Lian Ortiz"
+    },
+    {
+     "minuto": 23,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Tomas Varisco",
+     "detalle": "Entra: Darío Alberto Arnedo"
+    },
+    {
+     "minuto": 23,
+     "periodo": "2T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Federico Salazar"
+    },
+    {
+     "minuto": 24,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Juan Petersen",
+     "detalle": "Entra: Geronimo Tro"
+    },
+    {
+     "minuto": 24,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Juan Petersen",
+     "detalle": "Entra: Juan Ramiro"
+    },
+    {
+     "minuto": 24,
+     "periodo": "2T",
+     "tipo": "injury",
+     "equipo": "visitante",
+     "jugador": "Tomás Moyano",
+     "detalle": "Tarjeta azul"
+    },
+    {
+     "minuto": 26,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Nicolas Henry Casas",
+     "detalle": "Entra: Baltasar Zapiola"
+    },
+    {
+     "minuto": 28,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "equipo": "local",
+     "jugador": "Ignacio Maria Coll",
+     "detalle": "Juego general"
+    },
+    {
+     "minuto": 32,
+     "periodo": "2T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Lautaro Lopez Yasci"
+    },
+    {
+     "minuto": 37,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Daniel Dassetto"
+    },
+    {
+     "minuto": 38,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Lautaro Lopez Yasci"
+    },
+    {
+     "minuto": 39,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Pedro Borello",
+     "detalle": "Entra: Matías Alejandro Oroná"
+    }
+   ],
+   "arbitro": "Pedro Pablo López Vildoza"
+  }
+ ]
+}

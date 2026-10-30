@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Search, UserPlus, X } from 'lucide-react';
+import { jakarta, mono } from '../fonts';
 import styles from '../tournament-admin.module.css';
 
 type Assignment = {
@@ -40,10 +41,14 @@ export default function TournamentAdminUsersPage() {
     const [membershipRole, setMembershipRole] = useState<'admin' | 'editor'>('admin');
     const [selectedTournamentIds, setSelectedTournamentIds] = useState<string[]>([]);
     const [submitting, setSubmitting] = useState(false);
-    // The modal must portal to <body>: it lives inside .main, which is a
-    // stacking context (position:relative;z-index:10) sitting below the
-    // sticky global header (.g22-header, z-index:1000). Rendered in place no
-    // z-index can lift it above the header — only escaping .main can.
+    // The modal must portal to <body>. Every ancestor inside the admin shell
+    // is trapped under a stacking context below the sticky global header
+    // (.g22-header, z-index:1000): .main here (z-index:10) and, above it, the
+    // `relative z-10` wrapper in AdminWrapper.tsx. A node in the torneo layout
+    // does not escape the second one, so the only place a z-index of 1200
+    // actually beats the header is <body>, where the header is a sibling.
+    // The backdrop carries .themeScope + the font variables because, outside
+    // .shell, nothing else provides the palette or the families.
     const [mounted, setMounted] = useState(false);
     useEffect(() => { setMounted(true); }, []);
 
@@ -220,9 +225,13 @@ export default function TournamentAdminUsersPage() {
                     <div className={`${styles.cardStatic} ${styles.empty}`}>
                         Todavía no tenés torneos. Creá uno en Torneos para poder asignar usuarios.
                     </div>
-                ) : filtered.length === 0 ? (
+                ) : users.length === 0 ? (
                     <div className={`${styles.cardStatic} ${styles.empty}`}>
                         No asignaste usuarios todavía. Usá &quot;Agregar usuario&quot; para sumar uno.
+                    </div>
+                ) : filtered.length === 0 ? (
+                    <div className={`${styles.cardStatic} ${styles.empty}`}>
+                        Ningún usuario coincide con &quot;{search.trim()}&quot;.
                     </div>
                 ) : (
                     filtered.map((u) => (
@@ -275,7 +284,7 @@ export default function TournamentAdminUsersPage() {
 
             {formOpen && mounted && createPortal(
                 <div
-                    className={styles.modalBackdrop}
+                    className={`${styles.modalBackdrop} ${styles.themeScope} ${jakarta.variable} ${mono.variable}`}
                     role="dialog"
                     aria-modal="true"
                     onClick={(event) => { if (event.target === event.currentTarget) closeForm(); }}
@@ -351,8 +360,10 @@ export default function TournamentAdminUsersPage() {
                                             <button
                                                 key={t.id}
                                                 type="button"
-                                                className={`${styles.clubPick} ${selected ? styles.clubPickSelected : ''}`}
+                                                className={`${styles.clubPick} ${styles.clubPickNoAvatar} ${selected ? styles.clubPickSelected : ''}`}
                                                 onClick={() => toggleTournament(t.id)}
+                                                title={t.name}
+                                                aria-pressed={selected}
                                             >
                                                 <span className={styles.clubPickBody}>
                                                     <strong>{t.name}</strong>
@@ -380,7 +391,7 @@ export default function TournamentAdminUsersPage() {
                         </div>
                     </div>
                 </div>,
-                document.getElementById('torneo-overlay-root') ?? document.body,
+                document.body,
             )}
         </div>
     );

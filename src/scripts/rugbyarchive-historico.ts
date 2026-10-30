@@ -61,6 +61,9 @@ const modo = process.argv.includes('--execute') ? 'execute'
   : process.argv.includes('--plan') ? 'plan' : null;
 if (!modo) { console.error('usá --plan o --execute'); process.exit(2); }
 const soloAnio = process.argv.find((a) => a.startsWith('--anio='))?.slice(7) || null;
+// --rehacer (solo con --anio): borra la temporada existente de ese año y la
+// vuelve a escribir con la estructura fiel. Para las que entraron por el wizard.
+const rehacer = process.argv.includes('--rehacer') && Boolean(soloAnio);
 
 const URL_BASE = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
 const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
@@ -347,6 +350,8 @@ async function main() {
   const temporadasEnBase = await selectAll<{ id: string; season_code: string; created_by_user_id: string | null }>(
     `tournament_seasons?select=id,season_code,created_by_user_id&tournament_id=eq.${TOURNAMENT_ID}`);
   const codigosExistentes = new Set(temporadasEnBase.map((s) => s.season_code));
+  const aRehacerId = rehacer ? temporadasEnBase.find((s) => s.season_code === soloAnio)?.id : undefined;
+  if (rehacer) codigosExistentes.delete(soloAnio!);
   const actor = process.argv.find((a) => a.startsWith('--user='))?.slice(7)
     || temporadasEnBase.find((s) => s.created_by_user_id)?.created_by_user_id;
   if (!actor) throw new Error('No hay un usuario creador en las temporadas existentes: pasá --user=<uuid>');
@@ -538,6 +543,10 @@ async function main() {
   for (const { plan, est } of completas) {
     const etiqueta = `[${plan.year}] ${plan.nombre}`;
     try {
+      if (aRehacerId) {
+        await limpiarTemporada(aRehacerId);
+        console.log(`${etiqueta}: temporada anterior ${aRehacerId} borrada`);
+      }
       const r = await escribirTemporadaCompleta({ plan, est: est!, actor, clubes, puntos });
       hechas++;
       console.log(`${etiqueta} ok · fases ${r.fases} · grupos ${r.grupos} · rondas ${r.rondas} · partidos ${r.partidos} · tabla ${r.tabla}`);

@@ -116,6 +116,21 @@ export default function MinijuegosPage() {
                     <span className={styles.playBtn}>Jugar <ChevronRight /></span>
                 </Link>
 
+                {/* Rugby Manager todavía no tiene afiche: va como tarjeta de texto
+                    hasta que lo haya (Fase 5 del port). */}
+                <Link href="/juegos/minijuegos/rugby-manager" className={styles.card}>
+                    <div className={styles.cardTop}>
+                        <span className={styles.badge}>Beta</span>
+                    </div>
+                    <div className={styles.cardBody}>
+                        <h2 className={styles.cardTitle}>Rugby Manager</h2>
+                        <p className={styles.cardDesc}>
+                            Dirigí un club en un mundo de más de 130 clubes: plantel, táctica y temporada a temporada.
+                        </p>
+                        <span className={styles.cardCta}>Jugar <ChevronRight /></span>
+                    </div>
+                </Link>
+
                 {/* El afiche de lo que viene. No es un enlace ni un botón: no hay
                     adónde ir todavía, así que va como div y sin la pastilla de
                     "Jugar". El único guiño al mouse es el cambio de afiche —

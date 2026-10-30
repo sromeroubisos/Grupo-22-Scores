@@ -1,0 +1,14 @@
+99fbd2d  feat(urba): la capa de identidad -- de que competencia, de que club y de que anio habla un payload
+7b6e1a0  feat(urba): el conector y el cron, con la temporada sacada del reloj
+01df79c  feat(urba): la carga historica 2021-2025, con sus rollbacks y su evidencia
+26a1f31  fix(utils): una ruta desde la raiz no es un dominio, y la reserva no es la portada
+0d4fbb7  feat(torneos): navegar una division por grado y por temporada
+ef2cb87  feat(urba): la capa de staging y el inventario con el que se decidio que cargar
+6ab9dd7  feat(urba): publicada la temporada 2025 -- 141 torneos y 10.709 partidos
+a3aace1  feat(torneos): el listado muestra una temporada, y dice cual cuando no es la de hoy
+a4cdaf0  feat(urba): publicada la temporada 2024, y el listado no se movio
+6bf5dd2  fix(torneos): el filtro es de URBA, y un Play Off no es la Superior
+ebb684d  feat(urba): publicadas 2023, 2022 y 2021 -- las seis temporadas estan arriba
+7fe38e2  chore(urba): las tres entradas de cron en vercel.json
+4f43b14  fix(urba): el scope del cron no puede depender de un query string sin documentar
+0c67923  feat(torneos): la temporada regular va primero, y las consultas del lunes

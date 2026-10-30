@@ -1,7 +1,86 @@
 import type { NextConfig } from "next";
 import withBundleAnalyzer from "@next/bundle-analyzer";
 
+// ─── Encabezados de seguridad ────────────────────────────────────────────────
+//
+// La CSP va en REPORT-ONLY a propósito: el sitio carga fuentes de Google y de
+// Typekit, embebe videos de seis plataformas, el captcha de Cloudflare y la
+// analítica de Vercel, y una lista incompleta en modo enforced rompe pantallas
+// sin aviso. Report-only deja ver en la consola qué bloquearía; cuando quede
+// limpia, se pasa a `Content-Security-Policy`. 'unsafe-inline' en script-src
+// sigue porque el layout tiene scripts inline (tema, JSON-LD) y Next mete los
+// suyos; sacarlo pide nonces en el proxy.
+const isDev = process.env.NODE_ENV !== 'production';
+
+// El servicio de Python (sofascore) se llama desde el cliente cuando está configurado.
+function originOf(raw: string | undefined): string | null {
+  if (!raw) return null;
+  try {
+    return new URL(raw).origin;
+  } catch {
+    return null;
+  }
+}
+
+const contentSecurityPolicy = [
+  "default-src 'self'",
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} https://challenges.cloudflare.com https://va.vercel-scripts.com`,
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://use.typekit.net https://p.typekit.net",
+  "font-src 'self' data: https://fonts.gstatic.com https://use.typekit.net",
+  "img-src 'self' data: blob: https:",
+  "media-src 'self' blob: https:",
+  [
+    "connect-src 'self'",
+    'https://*.supabase.co',
+    'wss://*.supabase.co',
+    'https://challenges.cloudflare.com',
+    'https://vitals.vercel-insights.com',
+    'https://va.vercel-scripts.com',
+    originOf(process.env.NEXT_PUBLIC_SOFASCORE_SERVICE_URL),
+    isDev ? 'ws://localhost:* http://localhost:*' : null,
+  ].filter(Boolean).join(' '),
+  // Los reproductores que arma `videoLinks.ts` (embedUrl) y el captcha.
+  [
+    "frame-src 'self'",
+    'https://www.youtube-nocookie.com',
+    'https://www.youtube.com',
+    'https://player.vimeo.com',
+    'https://www.dailymotion.com',
+    'https://www.facebook.com',
+    'https://player.twitch.tv',
+    'https://clips.twitch.tv',
+    'https://platform.twitter.com',
+    'https://www.instagram.com',
+    'https://www.tiktok.com',
+    'https://challenges.cloudflare.com',
+  ].join(' '),
+  "worker-src 'self' blob:",
+  "manifest-src 'self'",
+  "frame-ancestors 'self'",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+].join('; ');
+
+const securityHeaders = [
+  { key: 'X-Content-Type-Options', value: 'nosniff' },
+  { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+  // Ninguna página del sitio se enmarca desde afuera; las placas del export se
+  // dibujan en canvas, no en iframe. SAMEORIGIN deja abierta la puerta propia.
+  { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+  // Sin `includeSubDomains` ni `preload` a propósito: la lista de preload de los
+  // navegadores tarda meses en revertirse, y no está relevado si algún subdominio
+  // de g22scores.com sirve solo http. Subirlo cuando eso esté confirmado.
+  { key: 'Strict-Transport-Security', value: 'max-age=31536000' },
+  // payment=(self): el checkout de MercadoPago es por redirect, pero no cuesta
+  // dejarle la API de pagos al propio origen.
+  { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), payment=(self)' },
+  { key: 'Content-Security-Policy-Report-Only', value: contentSecurityPolicy },
+];
+
 const nextConfig: NextConfig = {
+  // No anunciar el framework en cada respuesta.
+  poweredByHeader: false,
   /* config options here */
   images: {
     // Next 16 cambio el default de `localPatterns`: si no se declara, la config
@@ -35,6 +114,13 @@ const nextConfig: NextConfig = {
         // Banderas y logo del Mundial de Hockey, servidos por la FIH (Altius RT).
         protocol: 'https',
         hostname: 'hockey-cdn.altius.live',
+      },
+      {
+        // Escudos de los clubes y logos de competicion de RugbyPass. Sin
+        // declarar el host, el escudo no carga — y un host no declarado puede
+        // voltear la pantalla entera, no solo dejar el hueco.
+        protocol: 'https',
+        hostname: 'eu-cdn.rugbypass.com',
       },
       {
         // Escudos de las franquicias y logo de la liga Ultimate Sevens, servidos
@@ -100,6 +186,23 @@ const nextConfig: NextConfig = {
     ];
 
     return [
+      {
+        source: '/:path*',
+        headers: securityHeaders,
+      },
+      {
+        // El proxy de escudos sirve imagenes desde NUESTRO origen. Aunque la ruta ya
+        // verifica el contenido, si algo se le escapara (un SVG, un HTML) esta CSP
+        // lo deja inerte: sin scripts, sin formularios, sin navegar, como sandbox.
+        // Va enforced, no report-only: una imagen no necesita nada de eso.
+        source: '/api/assets/team-logo',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: "default-src 'none'; img-src 'self' data:; style-src 'unsafe-inline'; sandbox",
+          },
+        ],
+      },
       {
         source: '/login',
         headers: authNoStoreHeaders,

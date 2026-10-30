@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { requireSuperAdmin } from '@/lib/auth/server';
+import { isMfaError } from '@/lib/auth/mfa';
+import { getApiErrorMessageForClient } from '@/lib/auth/apiAdmin';
 import { createClient } from '@/lib/supabase/server';
 import {
     getExternalTeamLogoOverride,
@@ -104,6 +106,9 @@ export async function GET(
         );
         return NextResponse.json({ ok: true, data: merged });
     } catch (err) {
+        if (isMfaError(err)) {
+            return NextResponse.json({ ok: false, error: getApiErrorMessageForClient(err) }, { status: 403 });
+        }
         const message = err instanceof Error ? err.message : 'Unauthorized';
         return NextResponse.json({ ok: false, error: message }, { status: message.includes('Forbidden') ? 403 : 401 });
     }
@@ -176,6 +181,9 @@ export async function PATCH(
 
         return NextResponse.json({ ok: true, data: merged, storage: 'database' });
     } catch (err) {
+        if (isMfaError(err)) {
+            return NextResponse.json({ ok: false, error: getApiErrorMessageForClient(err) }, { status: 403 });
+        }
         const message = err instanceof Error ? err.message : 'Unauthorized';
         return NextResponse.json({ ok: false, error: message }, { status: message.includes('Forbidden') ? 403 : 401 });
     }

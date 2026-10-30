@@ -1,0 +1,17 @@
+clubes de Córdoba: 224 · fichas leídas: 7173
+grupos a fusionar: 4 · fichas que sobran: 4 · conflictos: 0
+
+san-francisco-r-c-m17-b                -> Felipe Martino  [parecido]
+   *   5 Felipe Martino
+       1 Felipe Martinez
+tala-rugby-club-intermedia             -> Agustín Farías Vivas  [contenido]
+   *   0 Agustín Farías Vivas
+       7 Ramiro Agustin Farias Vivas
+tala-rugby-club-intermedia             -> Francesco Chiesa  [parecido]
+       0 Francisco Chiesa
+   *  22 Francesco Chiesa
+tala-rugby-club-intermedia             -> Álvaro David  [igual]
+   *   0 Álvaro David
+      17 David Alvaro
+
+── CONFLICTOS (juegan juntos; no se tocan) ──

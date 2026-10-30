@@ -1123,7 +1123,10 @@ export async function getOdesurSportDays(code: string): Promise<string[]> {
 export async function getOdesurUnitRanking(code: string, resCode: string): Promise<OdesurRankingRow[]> {
     const discipline = code.trim().toUpperCase();
     return readResource(
-        `ranking:${resCode}`,
+        // La disciplina va en la clave: el `resCode` solo no identifica la
+        // unidad entre deportes, y la URL que se pide sí la lleva. Sin ella, el
+        // ranking de un deporte podía servirse cacheado en otro.
+        `ranking:${discipline}:${resCode}`,
         `clasificación ${resCode}`,
         async () => parseOdesurRanking(await fetchJson(`${discipline}/results/${resCode}`)),
         (rows) => (rows.length > 0 && rows.every((row) => row.rank !== null || row.note !== '')

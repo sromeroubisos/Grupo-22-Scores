@@ -3,7 +3,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { parseClubBaseRosterId } from '@/lib/clubRoster';
+import { parseClubBaseRosterId, parseFamilyDivisionId } from '@/lib/clubRoster';
 
 export interface PersonWithRole {
     id: string;
@@ -125,7 +125,6 @@ type DivisionLookupRow = {
 };
 
 const MISSING_TABLE_CODES = new Set(['PGRST204', 'PGRST205', '42P01']);
-const FAMILY_DIVISION_ID_PREFIX = 'family-division';
 
 function isMissingTableError(error: any) {
     return Boolean(error && typeof error.code === 'string' && MISSING_TABLE_CODES.has(error.code));
@@ -138,17 +137,6 @@ function normalizePersonText(value: string | null | undefined) {
 function normalizeOptionalText(value: string | null | undefined) {
     const normalized = normalizePersonText(value);
     return normalized || undefined;
-}
-
-function parseFamilyDivisionId(divisionId?: string) {
-    if (!divisionId?.startsWith(`${FAMILY_DIVISION_ID_PREFIX}|`)) return null;
-    const [, rosterOwnerClubId, encodedName] = divisionId.split('|');
-    if (!rosterOwnerClubId) return null;
-
-    return {
-        rosterOwnerClubId,
-        groupName: encodedName ? decodeURIComponent(encodedName) : null,
-    };
 }
 
 async function resolveSharedRosterOwnerClubId(clubId: string, supabaseClient?: any): Promise<string> {
@@ -710,6 +698,45 @@ async function isPersonInClubScope(
     return Boolean(directPerson) || await isPersonLinkedToClub(supabase, clubId, personId);
 }
 
+/**
+ * ¿La ficha está atada a ALGÚN club? `people.club_id`, un rol o una
+ * membresía de equipo. Ante un error de lectura se asume que sí: mejor pedir
+ * una ficha nueva que pisar la de otro club.
+ */
+async function personHasAnyClub(supabase: any, personId: string): Promise<boolean> {
+    const [personRes, rolesRes, membershipsRes] = await Promise.all([
+        supabase.from('people').select('club_id').eq('id', personId).maybeSingle(),
+        supabase.from('club_person_roles').select('id').eq('person_id', personId).not('club_id', 'is', null).limit(1),
+        supabase.from('team_memberships').select('id').eq('person_id', personId).not('club_id', 'is', null).limit(1),
+    ]);
+
+    if (personRes.error && !isMissingTableError(personRes.error)) return true;
+    if (personRes.data?.club_id) return true;
+    if (rolesRes.error && !isMissingTableError(rolesRes.error)) return true;
+    if (Array.isArray(rolesRes.data) && rolesRes.data.length > 0) return true;
+    if (membershipsRes.error && !isMissingTableError(membershipsRes.error)) return true;
+    return Array.isArray(membershipsRes.data) && membershipsRes.data.length > 0;
+}
+
+/**
+ * Lo que se muestra de un candidato para reconocerlo, no para copiarlo: el
+ * documento con sus últimos 3 dígitos y la fecha de nacimiento con el año.
+ * La búsqueda corre con service_role sobre TODA la tabla `people` y la ve
+ * cualquier editor de cualquier club: antes devolvía DNI y fecha completos de
+ * jugadores ajenos.
+ */
+function maskIdNumber(value: string | null | undefined): string | undefined {
+    const text = normalizeOptionalText(value ?? undefined);
+    if (!text) return undefined;
+    const tail = text.replace(/\s+/g, '').slice(-3);
+    return text.length <= 3 ? '•••' : `•••${tail}`;
+}
+
+function maskBirthDate(value: string | null | undefined): string | undefined {
+    const match = /^(\d{4})/.exec(String(value ?? '').trim());
+    return match ? match[1] : undefined;
+}
+
 export async function findPotentialPersonIdentityMatches(
     clubId: string,
     personData: Pick<PersonClubInput, 'first_name' | 'last_name' | 'id_number' | 'doc_country'>,
@@ -842,8 +869,8 @@ export async function findPotentialPersonIdentityMatches(
             first_name: person.first_name,
             last_name: person.last_name,
             full_name: person.full_name || `${person.first_name} ${person.last_name}`.trim(),
-            birth_date: person.birth_date || undefined,
-            id_number: person.id_number || undefined,
+            birth_date: maskBirthDate(person.birth_date),
+            id_number: maskIdNumber(person.id_number),
             photo_url: person.photo_url || person.avatar_url || undefined,
             already_linked_to_club: personLinks.some((link) => link.club_id === clubId),
             club_links: personLinks,
@@ -1076,6 +1103,19 @@ export async function addPersonToClub(clubId: string, personData: PersonClubInpu
         const existingPerson = await fetchPersonRowById(supabase, normalizedPayload.existing_person_id);
         if (!existingPerson) {
             return { success: false, error: 'No se encontro la ficha seleccionada para reutilizar.' };
+        }
+
+        // Reutilizar una ficha la PISA (nombre, DNI, nacimiento, club_id). Solo
+        // vale para una persona de este club o una sin club: si no, cualquier
+        // editor con un person_id reescribía la ficha de un jugador ajeno.
+        const reuseAllowed =
+            await isPersonInClubScope(db, rosterClubId, normalizedPayload.existing_person_id) ||
+            !(await personHasAnyClub(db, normalizedPayload.existing_person_id));
+        if (!reuseAllowed) {
+            return {
+                success: false,
+                error: 'Esa ficha pertenece a otro club. Pedí el pase al club de origen o creá una ficha nueva.',
+            };
         }
 
         const mergedPerson = mergePersonRecord(existingPerson, normalizedPayload);

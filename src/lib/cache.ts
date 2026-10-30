@@ -5,19 +5,44 @@ interface CacheEntry<T> {
     ttl: number;
 }
 
+// Tope de entradas por instancia. Sin tope, las rutas anónimas que arman la
+// clave con parámetros libres (search, url, season, fecha) hacen crecer el Map
+// sin límite: cada combinación distinta es una entrada nueva que solo se va por
+// TTL, y un script puede llenar la memoria de la lambda antes de que venza.
+// 1000 alcanza de sobra para el uso legítimo (los feeds canónicos son decenas).
+const MAX_ENTRIES = 1000;
+
 class MemoryCache {
     private cache: Map<string, CacheEntry<unknown>>;
+    private readonly maxEntries: number;
 
-    constructor() {
+    constructor(maxEntries: number = MAX_ENTRIES) {
         this.cache = new Map();
+        this.maxEntries = maxEntries;
     }
 
     set<T>(key: string, data: T, ttlSeconds: number = 300): void {
+        // delete + set la manda al final: el Map conserva el orden de inserción
+        // y eso es lo que usamos como orden LRU (el primero es el más viejo).
+        this.cache.delete(key);
         this.cache.set(key, {
             data,
             timestamp: Date.now(),
             ttl: ttlSeconds * 1000
         });
+        this.evictOverflow();
+    }
+
+    private evictOverflow(): void {
+        if (this.cache.size <= this.maxEntries) return;
+        // Primero lo vencido, que no le cuesta nada a nadie; si con eso no
+        // alcanza, se va lo menos usado recientemente.
+        this.cleanup();
+        while (this.cache.size > this.maxEntries) {
+            const oldest = this.cache.keys().next();
+            if (oldest.done) break;
+            this.cache.delete(oldest.value);
+        }
     }
 
     get<T>(key: string): T | null {
@@ -35,6 +60,10 @@ class MemoryCache {
             this.cache.delete(key);
             return null;
         }
+
+        // Un acierto la vuelve "reciente" para el desalojo LRU.
+        this.cache.delete(key);
+        this.cache.set(key, entry);
 
         return entry.data as T;
     }

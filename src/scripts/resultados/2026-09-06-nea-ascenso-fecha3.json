@@ -1,0 +1,29 @@
+{
+  "fecha": "2026-09-06",
+  "descripcion": "Torneo Regional del NEA Ascenso 2026 · fecha 3 · Caza y Pesca 25-19 Lomas R.C. (Posadas) · Abipones 69-15 Qompi",
+  "fuente": "Resultados pasados por Santiago (06/09/2026): «Caza y Pesca le gano a Lomas 25-19, BD para Lomas» y «Abipones BO 69-15 Qompi».",
+  "motivo": "Carga manual del resultado de la fecha 3.",
+  "partidos": [
+    {
+      "partido": "28c36ff9-f13e-49be-aa95-cd1de49fe30a",
+      "local": "Caza y Pesca",
+      "visitante": "Lomas R.C. (Posadas)",
+      "marcador": {
+        "local": 25,
+        "visitante": 19
+      }
+    },
+    {
+      "partido": "15cb7bcd-a065-4cf1-83b4-5d3df98af1c4",
+      "local": "Abipones",
+      "visitante": "Qompi Rugby Club",
+      "marcador": {
+        "local": 69,
+        "visitante": 15
+      },
+      "bonusOfensivo": [
+        "local"
+      ]
+    }
+  ]
+}

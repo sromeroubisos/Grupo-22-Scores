@@ -1,0 +1,63 @@
+tarjetas oficiales 62bf0694
+
+rosedal-r-c vs cuises-portena-rugby · 62bf0694 · tarjeta 327314  ·  0c4f5a04-34fc-4688-ab40-5b45317ee6cc
+  local     · rosedal-r-c · 30 jugadores · 30 con ficha fijada
+  visitante · cuises-portena-rugby · 30 jugadores · 30 con ficha fijada
+  eventos   · 24
+    min -23 (1T -23) local     card_yellow  Nicolas Kaba
+    min -15 (1T -15) local     card_yellow  Ivan Forni
+    min  1 (1T 1) local     try          Francisco Busleiman
+    min 13 (1T 13) local     substitution Franco Agustin Cabral Gonzalez
+    min 35 (1T 35) visitante try          Juan De La Cruz Acevedo
+    min  6 (2T -34) local     try          Francisco Busleiman
+    min 19 (2T -21) local     card_yellow  Ignacio Exequiel Cuneo
+    min 28 (2T -12) local     card_yellow  Joaquin Marciante Brizuela
+    min 51 (2T 11) local     try          Elias Nuñez
+    min 57 (2T 17) visitante substitution Pablo Bianco
+    min 57 (2T 17) visitante substitution Leonardo Damian Massini
+    min 57 (2T 17) visitante substitution Fabián Gustavo Alessandria
+    min 57 (2T 17) visitante substitution Lucas Pratti
+    min 62 (2T 22) visitante try          Juan De La Cruz Acevedo
+    min 64 (2T 24) local     try          Francisco Busleiman
+    min 64 (2T 24) local     conversion   Elias Nuñez
+    min 70 (2T 30) visitante try          Gerónimo Calatroni
+    min 71 (2T 31) visitante conversion   Hector Velez
+    min 75 (2T 35) local     substitution Nelson Federico Gomez Monge
+    min 75 (2T 35) local     substitution Joaquín Gutierrez
+    min 75 (2T 35) local     substitution Nicolas Kaba
+    min 75 (2T 35) visitante substitution Nicolás Guillermo Bruna
+    min 78 (2T 38) visitante try          Montu Lautaro Alexis
+    min 79 (2T 39) visitante conversion   Hector Velez
+  marcador  · eventos 22-24 · guardado 22-24
+  tries     · 4-4 (guardado —-—)
+  arbitro   · DANIEL ALEJANDRO FUNES (guardado: —)
+  guardado  · 30 local · 30 visitante · 24 eventos
+
+conas-r-c vs universidad-siglo-21-rugby · 62bf0694 · tarjeta 327313  ·  989c6b89-bfc4-4f51-bb3f-6ec8599c1e1a
+  local     · conas-r-c · 23 jugadores · 23 con ficha fijada
+  visitante · universidad-siglo-21-rugby · 23 jugadores · 23 con ficha fijada
+  eventos   · 18
+    min 22 (1T 22) local     try          Geronimo Facundo Gomez Lelli
+    min 22 (1T 22) local     conversion   Luciano Aprile
+    min 24 (1T 24) local     penalty_goal Luciano Aprile
+    min 32 (1T 32) visitante try          Maximiliano Tomas Carpio Crembil
+    min 32 (1T 32) visitante conversion   Facundo Tachini
+    min 37 (1T 37) local     card_yellow  Victor Hugo Demarco
+    min 40 (1T 40) local     card_yellow  Paulo Farias
+    min 45 (2T 5) local     substitution Marcos Luna
+    min 49 (2T 9) local     try          Guido Bobatto
+    min 51 (2T 11) visitante try          Matias Presidente
+    min 51 (2T 11) visitante conversion   Facundo Tachini
+    min 54 (2T 14) local     card_yellow  Juan Gabriel Almada
+    min 60 (2T 20) local     substitution Maximiliano Ferreyra
+    min 62 (2T 22) local     substitution Paulo Farias
+    min 62 (2T 22) local     substitution Guido Bobatto
+    min 67 (2T 27) visitante penalty_goal Facundo Tachini
+    min 80 (2T 40) local     try          Federico Martin Simes
+    min 80 (2T 40) local     conversion   Luciano Aprile
+  marcador  · eventos 22-17 · guardado 22-17
+  tries     · 3-2 (guardado 3-2)
+  arbitro   · CARLOS RAFAEL HERNANDEZ (guardado: Hernandez, Carlos Rafael)
+  guardado  · 23 local · 23 visitante · 18 eventos
+
+listo · 2 partidos

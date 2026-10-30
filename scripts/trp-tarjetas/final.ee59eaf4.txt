@@ -1,0 +1,88 @@
+tarjetas oficiales ee59eaf4
+
+san-ignacio-r-c vs bigua-rugby-club · ee59eaf4 · tarjeta 326244  ·  dcdfc6e2-9874-4f3f-bca6-99f647d637ad
+  local     · san-ignacio-r-c · 23 jugadores · 22 con ficha fijada
+  visitante · bigua-rugby-club · 23 jugadores · 0 con ficha fijada
+  eventos   · 34
+    min  8 (1T 8) visitante try          Franco Spaltro
+    min 12 (1T 12) local     try          Francisco Paklayan
+    min 13 (1T 13) local     conversion   Lautaro Garcia
+    min 23 (1T 23) visitante penalty_goal Alan Gonzalez
+    min 29 (1T 29) local     try          Joaquin De Rosa
+    min 36 (1T 36) visitante try          Valentino Carballo
+    min 38 (1T 38) local     injury       Kevin Ibarra
+    min 38 (1T 38) local     substitution Kevin Ibarra
+    min 40 (1T 40) local     try          Joaquin De Rosa
+    min 40 (2T 0) local     substitution Bautista Barbero
+    min 40 (2T 0) local     substitution Ignacio Gandara
+    min 42 (2T 2) local     card_yellow  Joaquin Ramirez
+    min 44 (2T 4) local     try          Lautaro Garcia
+    min 49 (2T 9) local     try          Francisco Paklayan
+    min 50 (2T 10) visitante substitution Santiago Emanuel Sanchez
+    min 50 (2T 10) visitante substitution Octavio Di Luca
+    min 52 (2T 12) local     substitution Joaquin Gauna
+    min 58 (2T 18) local     try          Francisco Paklayan
+    min 59 (2T 19) local     substitution Joel Ledesma
+    min 59 (2T 19) local     substitution Leon Omar Pelaez
+    min 62 (2T 22) visitante try          Julian Bonavita
+    min 66 (2T 26) local     try          Lautaro Garcia
+    min 67 (2T 27) local     conversion   Manuel Fortte
+    min 70 (2T 30) visitante substitution Valentino Poli
+    min 70 (2T 30) visitante substitution Juan Manuel Vincenzetti
+    min 73 (2T 33) local     card_yellow  Franco Cavalli
+    min 73 (2T 33) visitante try          Mauro Julian Ponce
+    min 73 (2T 33) visitante conversion   Felipe Bruno
+    min 73 (2T 33) visitante substitution Nahuel Correa
+    min 78 (2T 38) local     substitution Kevin Ibarra
+    min 80 (2T 40) local     card_yellow  Thomas Helguera
+    min 80 (2T 40) local     try          Lautaro Garcia
+    min 80 (2T 40) local     conversion   Manuel Fortte
+    min 80 (2T 40) visitante try          Raul Horacio Brischetto
+  marcador  · eventos 46-30 · guardado 46-30
+  tries     · 8-5 (guardado —-—)
+  arbitro   · GASTON ROGE (guardado: —)
+  guardado  · 23 local · 23 visitante · 34 eventos
+
+argentino-de-bahia-blanca vs union-del-sur · ee59eaf4 · tarjeta 326245  ·  482b4a0e-47f4-437b-8a22-4ebf00c5c4f6
+  local     · argentino-de-bahia-blanca · 23 jugadores · 23 con ficha fijada
+  visitante · union-del-sur · 23 jugadores · 0 con ficha fijada
+  eventos   · 33
+    min  6 (1T 6) visitante injury       Francisco Casarini
+    min  6 (1T 6) visitante substitution Francisco Casarini
+    min 12 (1T 12) local     injury       Nicolas Hernandez
+    min 12 (1T 12) local     substitution Nicolas Hernandez
+    min 19 (1T 19) local     try          Tomas Moro
+    min 26 (1T 26) local     try          Tomas Moro
+    min 27 (1T 27) local     conversion   Ramiro Valentin Correa
+    min 29 (1T 29) visitante try          Vicente Maraude
+    min 29 (1T 29) visitante conversion   Franco Marino
+    min 37 (1T 37) local     injury       Marcelo Tomas Exposito
+    min 37 (1T 37) local     substitution Tomas Moro
+    min 40 (1T 40) visitante try          Leandro Perovich
+    min 46 (2T 6) local     try          Tomas Moro
+    min 49 (2T 9) visitante try          Leandro Perovich
+    min 55 (2T 15) visitante try          Leandro Perovich
+    min 55 (2T 15) visitante conversion   Franco Marino
+    min 56 (2T 16) local     substitution Santiago Ramos Apphatie
+    min 56 (2T 16) local     substitution Francisco Maenza
+    min 58 (2T 18) local     try          Pedro Selvarolo
+    min 62 (2T 22) local     substitution Ramiro Valentin Correa
+    min 62 (2T 22) visitante penalty_goal Franco Marino
+    min 66 (2T 26) visitante try          Santiago Ponce
+    min 67 (2T 27) local     injury       Emiliano Bruno Barrera
+    min 67 (2T 27) local     substitution Emiliano Bruno Barrera
+    min 68 (2T 28) visitante try          Leandro Perovich
+    min 69 (2T 29) visitante conversion   Franco Marino
+    min 70 (2T 30) visitante substitution Santiago Ponce
+    min 72 (2T 32) visitante card_yellow  Alan Haegeli
+    min 77 (2T 37) local     substitution Marcelo Tomas Exposito
+    min 77 (2T 37) local     substitution Marcelo Tomas Exposito
+    min 77 (2T 37) visitante card_yellow  Brian Molina
+    min 80 (2T 40) visitante substitution Lautaro Gavilán
+    min 81 (2T 41) local     try          Alejo Marconi
+  marcador  · eventos 27-39 · guardado 27-39
+  tries     · 5-6 (guardado —-—)
+  arbitro   · SANTIAGO BEVACQUA (guardado: —)
+  guardado  · 23 local · 23 visitante · 33 eventos
+
+listo · 2 partidos

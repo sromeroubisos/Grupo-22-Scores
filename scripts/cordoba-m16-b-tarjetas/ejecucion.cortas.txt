@@ -1,0 +1,60 @@
+Torneo Cordobés M16 "B" 2026 (Unión Cordobesa) · tarjetas de partido (texto del SIGER) · validado contra el marcador de la base
+
+Aero Club Río IV M16 "B" vs San Francisco R.C. M16 "B" · torneo-cordobes-m16-b · tarjeta 291036  ·  5e4bf02a-3579-40dd-bf55-db4a6152eaaa
+  local     · Aero Club Río IV M16 "B" · 12 jugadores · 11 con ficha fijada
+  visitante · San Francisco R.C. M16 "B" · 22 jugadores · 20 con ficha fijada
+  eventos   · 18
+    min  9 (1T 9) visitante try          Vicente Mallarino
+    min 15 (1T 15) local     card_yellow  Pablo Hernan Moyano
+    min 15 (1T 15) visitante try          Jose Ignacio Arca
+    min 15 (1T 15) visitante conversion   Jose Ignacio Arca
+    min 31 (1T 31) visitante try          Jeremías Bustamante
+    min 35 (1T 35) local     try          Gabriel Isaias Cappellari
+    min 41 (2T 1) visitante substitution Mateo Escobares
+    min 41 (2T 1) visitante substitution Santiago Cavagliato
+    min 41 (2T 1) visitante substitution Andres Ibarra
+    min 50 (2T 10) local     try          Rodrigo Esteban Moran
+    min 50 (2T 10) visitante try          Tomas Leonardo Olocco
+    min 50 (2T 10) visitante conversion   Jose Ignacio Arca
+    min 51 (2T 11) local     conversion   Facundo Isaias Gautier
+    min 55 (2T 15) visitante card_yellow  Alejo Cejas
+    min 55 (2T 15) visitante card_yellow  Alejo Cejas
+    min 72 (2T 32) visitante try          Santino Terraf Vaudagna
+    min 72 (2T 32) visitante conversion   Jose Ignacio Arca
+    min 75 (2T 35) visitante try          Benjamin Videla
+  marcador  · eventos 12-36 · guardado 12-36
+  tries     · 2-6 (guardado —-—)
+  arbitro   · Oyola Ricardo 33233283 (No Oficial) (guardado: —)
+  guardado  · 12 local · 22 visitante · 18 eventos
+
+Club La Tablada M16 "B" vs Aero Club Río IV M16 "B" · torneo-cordobes-m16-b · tarjeta 291048  ·  c77ebf39-487c-4dd6-a21f-33d0e746ccdd
+  local     · Club La Tablada M16 "B" · 22 jugadores · 21 con ficha fijada
+  visitante · Aero Club Río IV M16 "B" · 12 jugadores · 11 con ficha fijada
+  eventos   · 21
+    min  4 (1T 4) local     try          Andres Saturnini
+    min  5 (1T 5) local     conversion   Ulises Carmona Burton
+    min 10 (1T 10) local     try          Andres Saturnini
+    min 11 (1T 11) local     conversion   Ulises Carmona Burton
+    min 12 (1T 12) local     try          Ulises Carmona Burton
+    min 12 (1T 12) local     conversion   Ulises Carmona Burton
+    min 20 (1T 20) visitante injury       Samuel Reyna López
+    min 24 (1T 24) local     try          Juan Martin Molina
+    min 30 (1T 30) local     conversion   Ulises Carmona Burton
+    min 30 (1T 30) local     try          Manuel Villalba Zamboni
+    min 35 (1T 35) visitante try          Bautista Isaac Minhondo
+    min 41 (2T 1) local     try          Nicolas Lozada Pagani
+    min 42 (2T 2) local     conversion   Ulises Carmona Burton
+    min 47 (2T 7) local     try          Bartolome Beslich De La Cuesta
+    min 48 (2T 8) local     conversion   Bartolome Beslich De La Cuesta
+    min 52 (2T 12) local     conversion   Bartolome Beslich De La Cuesta
+    min 52 (2T 12) local     try          Tomás Furst
+    min 62 (2T 22) visitante card_yellow  Facundo Isaias Gautier
+    min 70 (2T 30) local     try          Nicolas Lozada Pagani
+    min 70 (2T 30) local     conversion   Bartolome Beslich De La Cuesta
+    min 75 (2T 35) local     try          Baldomero Andres Gonzalez Viale
+  marcador  · eventos 66-5 · guardado 66-5
+  tries     · 10-1 (guardado —-—)
+  arbitro   · Santiago Herrera Albano (guardado: —)
+  guardado  · 22 local · 12 visitante · 21 eventos
+
+listo · 2 partidos

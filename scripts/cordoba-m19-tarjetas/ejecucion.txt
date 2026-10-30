@@ -1,0 +1,3061 @@
+Torneo Menores de 19 "A" 2026 (Unión Cordobesa) · tarjetas de partido (JSON de tablas) · validado contra el marcador de la base
+
+Jockey Club Córdoba M19 "A" vs Tala Rugby Club M19 "A" · torneo-cordobes-m19-a · tarjeta 277185  ·  65e20b72-f7eb-4f12-9c52-879ac22f3c76
+  local     · Jockey Club Córdoba M19 "A" · 23 jugadores · 12 con ficha fijada
+  visitante · Tala Rugby Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 16
+    min  5 (1T 5) local     penalty_goal 
+    min 11 (1T 11) visitante try          
+    min 12 (1T 12) visitante conversion   
+    min 15 (1T 15) local     try          
+    min 15 (1T 15) local     conversion   
+    min 22 (1T 22) visitante card_yellow  
+    min 28 (1T 28) local     penalty_goal 
+    min 29 (1T 29) visitante card_yellow  
+    min 53 (2T 13) local     card_yellow  
+    min 55 (2T 15) local     penalty_goal 
+    min 60 (2T 20) local     try          
+    min 60 (2T 20) local     conversion   
+    min 65 (2T 25) visitante try          
+    min 69 (2T 29) visitante try          
+    min 69 (2T 29) visitante conversion   
+    min 70 (2T 30) local     penalty_goal 
+  marcador  · eventos 26-19 · guardado 26-19
+  tries     · 2-3 (guardado —-—)
+  arbitro   · Enzo Riva (guardado: —)
+  guardado  · 23 local · 23 visitante · 16 eventos
+
+San Martín de Villa María M19 "A" vs Jockey Club de Villa María M19 "A" · torneo-cordobes-m19-a · tarjeta 277186  ·  0fdeb852-08fb-4f56-893b-3c15de206efa
+  local     · San Martín de Villa María M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club de Villa María M19 "A" · 23 jugadores · 19 con ficha fijada
+  eventos   · 17
+    min 22 (1T 22) visitante penalty_goal Francisco Salomon
+    min 25 (1T 25) local     try          
+    min 26 (1T 26) local     conversion   
+    min 26 (1T 26) visitante card_yellow  Jeremias Trigp
+    min 32 (1T 32) visitante try          Bruno Geremias
+    min 32 (1T 32) visitante conversion   Francisco Salomon
+    min 35 (1T 35) visitante substitution Maximiliano Ghione
+    min 41 (2T 1) local     try          
+    min 42 (2T 2) local     conversion   
+    min 44 (2T 4) visitante try          Bautista Morre
+    min 49 (2T 9) local     card_yellow  
+    min 50 (2T 10) local     penalty_goal 
+    min 52 (2T 12) visitante card_yellow  Jeronimo Jesús Colusso
+    min 55 (2T 15) visitante try          Bruno Geremias
+    min 60 (2T 20) visitante substitution Renzo Mariani Mulinetti
+    min 62 (2T 22) visitante try          Bautista Arbarello
+    min 67 (2T 27) visitante card_yellow  Walter Igancio Bosio
+  marcador  · eventos 17-25 · guardado 17-25
+  tries     · 2-4 (guardado —-—)
+  arbitro   · Florencia Ledesma (guardado: —)
+  guardado  · 23 local · 23 visitante · 17 eventos
+
+Córdoba Athletic Club M19 "A" vs Urú Curé Rugby Club M19 "A" · torneo-cordobes-m19-a · tarjeta 277187  ·  4f93872c-cff7-4f30-b62d-6dcdae96d585
+  local     · Córdoba Athletic Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Urú Curé Rugby Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min  6 (1T 6) local     try          Fabrizio Barco Orozco
+    min  7 (1T 7) local     conversion   Bautista Caldo Navarro
+    min 13 (1T 13) local     try          Bautista Caldo Navarro
+    min 14 (1T 14) local     conversion   Bautista Caldo Navarro
+    min 15 (1T 15) visitante try          Salvador Aramburu
+    min 28 (1T 28) local     try          Santiago Vedia
+    min 29 (1T 29) local     conversion   Bautista Caldo Navarro
+    min 34 (1T 34) local     try          Federico Torre
+    min 35 (1T 35) local     conversion   Bautista Caldo Navarro
+    min 45 (2T 5) visitante try          Salvador Aramburu
+    min 45 (2T 5) visitante conversion   Juan Martín San Millan
+    min 47 (2T 7) local     substitution Matias Nicolas Godoy Pignatta
+    min 50 (2T 10) local     card_yellow  Juan Ignacio Reinoso Santander
+    min 53 (2T 13) local     substitution Lorenzo Carranza
+    min 53 (2T 13) local     substitution Juan Martin Ledesma
+    min 57 (2T 17) local     substitution Federico Torre
+    min 60 (2T 20) local     substitution Federico Molina
+    min 63 (2T 23) local     substitution Santiago Vedia
+    min 63 (2T 23) local     substitution Santiago Agustin Manzur
+    min 64 (2T 24) local     substitution Facundo Ortiz
+    min 66 (2T 26) local     try          Fabrizio Barco Orozco
+    min 67 (2T 27) local     conversion   Bautista Caldo Navarro
+    min 75 (2T 35) local     try          Simon Camargo
+    min 76 (2T 36) local     conversion   Teo Peña
+  marcador  · eventos 42-12 · guardado 42-12
+  tries     · 6-2 (guardado —-—)
+  arbitro   · Daiana Del Milagro Cesaretti (guardado: —)
+  guardado  · 23 local · 23 visitante · 24 eventos
+
+Carlos Paz Rugby Club M19 "A" vs Club La Tablada M19 "A" · torneo-cordobes-m19-a · tarjeta 277188  ·  f6952094-69ab-4c88-9a20-481c89b51d5c
+  local     · Carlos Paz Rugby Club M19 "A" · 22 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 29
+    min  3 (1T 3) visitante try          
+    min  5 (1T 5) visitante try          
+    min  5 (1T 5) visitante conversion   
+    min 10 (1T 10) visitante try          
+    min 10 (1T 10) visitante conversion   
+    min 12 (1T 12) visitante try          
+    min 12 (1T 12) visitante conversion   
+    min 20 (1T 20) visitante try          
+    min 20 (1T 20) visitante conversion   
+    min 32 (1T 32) visitante try          
+    min 35 (1T 35) visitante try          
+    min 35 (1T 35) visitante conversion   
+    min 46 (2T 6) visitante try          
+    min 46 (2T 6) visitante conversion   
+    min 52 (2T 12) visitante try          
+    min 52 (2T 12) visitante conversion   
+    min 55 (2T 15) visitante try          
+    min 55 (2T 15) visitante conversion   
+    min 58 (2T 18) visitante try          
+    min 58 (2T 18) visitante conversion   
+    min 59 (2T 19) local     try          
+    min 60 (2T 20) local     conversion   
+    min 66 (2T 26) visitante try          
+    min 66 (2T 26) visitante conversion   
+    min 68 (2T 28) local     card_yellow  
+    min 70 (2T 30) visitante try          
+    min 70 (2T 30) visitante conversion   
+    min 73 (2T 33) visitante try          
+    min 73 (2T 33) visitante conversion   
+  marcador  · eventos 7-94 · guardado 7-94
+  tries     · 1-14 (guardado —-—)
+  arbitro   · Lautaro Joaquin Quiroga Cafure (guardado: —)
+  guardado  · 22 local · 23 visitante · 29 eventos
+
+Club Palermo Bajo M19 "A" vs Club Universitario de Córdoba M19 "A" · torneo-cordobes-m19-a · tarjeta 277189  ·  7ccd72dd-6cc2-4eab-8722-f1f0209ff362
+  local     · Club Palermo Bajo M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min  1 (1T 1) visitante substitution Francisco Pizzatti Pertegarini
+    min 20 (1T 20) local     try          Justiniano Pavoni
+    min 20 (1T 20) local     conversion   Leon Haschisch
+    min 23 (1T 23) local     penalty_goal Leon Haschisch
+    min 25 (1T 25) local     card_yellow  Ramiro Bersano
+    min 34 (1T 34) local     card_yellow  Benicio Ligato
+    min 39 (1T 39) local     try          Tomas Salamin
+    min 39 (1T 39) local     conversion   Leon Haschisch
+    min 40 (2T 0) visitante substitution Atilio Eugenio Guaiman Urtubey
+    min 40 (2T 0) visitante substitution Ramiro Matias Bacci
+    min 40 (2T 0) visitante substitution Franco Capozucca
+    min 49 (2T 9) visitante substitution Tomas Balaguer
+    min 49 (2T 9) visitante substitution Thiago Nicolas Sanchez
+    min 52 (2T 12) local     try          Tomas Salamin
+    min 58 (2T 18) visitante card_yellow  Nicolás Allende Peralta
+    min 58 (2T 18) local     card_yellow  Angel Valentin Alarcon
+    min 64 (2T 24) visitante substitution Valentino Fernandez
+    min 65 (2T 25) local     try          Bruno Battan Frasca
+    min 68 (2T 28) visitante substitution Valentin Alvarez
+    min 68 (2T 28) visitante try          Juan Cruz Morrogh Bernard
+    min 68 (2T 28) visitante conversion   Pedro Marchetti
+    min 75 (2T 35) local     try          Bruno Battan Frasca
+  marcador  · eventos 32-7 · guardado 32-7
+  tries     · 5-1 (guardado —-—)
+  arbitro   · Nahuel Sabena (guardado: —)
+  guardado  · 23 local · 23 visitante · 22 eventos
+
+Club Palermo Bajo M19 "A" vs Jockey Club Córdoba M19 "A" · torneo-cordobes-m19-a · tarjeta 277190  ·  68556bd4-46bc-40e9-b3c2-a2c7a5720309
+  local     · Club Palermo Bajo M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M19 "A" · 23 jugadores · 12 con ficha fijada
+  eventos   · 22
+    min  4 (1T 4) visitante penalty_goal 
+    min  9 (1T 9) local     try          Francisco Tomás Cali
+    min 11 (1T 11) local     try          Leon Haschisch
+    min 17 (1T 17) local     conversion   Leon Haschisch
+    min 17 (1T 17) local     try          Tomas Garcia Ravellia
+    min 19 (1T 19) visitante try          
+    min 19 (1T 19) visitante conversion   
+    min 23 (1T 23) visitante try          
+    min 35 (1T 35) local     card_yellow  Jeremias Flores Bur
+    min 36 (1T 36) visitante try          
+    min 47 (2T 7) local     substitution Tomas Ignacio Gianelli
+    min 55 (2T 15) local     substitution Ramiro Bee Sellares
+    min 56 (2T 16) local     substitution Benjamin Issidoros
+    min 57 (2T 17) local     substitution Ramiro Bersano
+    min 57 (2T 17) local     substitution Jeremias Flores Bur
+    min 57 (2T 17) visitante try          
+    min 60 (2T 20) visitante try          
+    min 61 (2T 21) local     substitution Matias Lionel Sanchez
+    min 62 (2T 22) visitante penalty_goal 
+    min 64 (2T 24) visitante try          
+    min 65 (2T 25) local     card_yellow  Martín Fernando Flores
+    min 69 (2T 29) local     try          Justiniano Pavoni
+  marcador  · eventos 22-38 · guardado 22-38
+  tries     · 4-6 (guardado —-—)
+  arbitro   · Octavio Damia Patiño (guardado: —)
+  guardado  · 23 local · 23 visitante · 22 eventos
+
+Club Universitario de Córdoba M19 "A" vs Carlos Paz Rugby Club M19 "A" · torneo-cordobes-m19-a · tarjeta 277191  ·  39b2fae8-f61f-431e-b60f-d9c62ff8cd60
+  local     · Club Universitario de Córdoba M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Carlos Paz Rugby Club M19 "A" · 19 jugadores · 0 con ficha fijada
+  eventos   · 23
+    min  3 (1T 3) local     try          Pedro Marchetti
+    min 20 (1T 20) local     substitution Tomas Balaguer
+    min 30 (1T 30) local     try          Pedro Marchetti
+    min 30 (1T 30) local     conversion   Pedro Marchetti
+    min 34 (1T 34) local     try          Mateo Moyano
+    min 34 (1T 34) local     conversion   Pedro Marchetti
+    min 35 (1T 35) local     try          Juan Cruz Morrogh Bernard
+    min 35 (1T 35) local     conversion   Pedro Marchetti
+    min 43 (2T 3) local     try          Tomas Ripa Zanuttin
+    min 45 (2T 5) local     substitution Tomas Ripa Zanuttin
+    min 45 (2T 5) local     substitution Atilio Eugenio Guaiman Urtubey
+    min 45 (2T 5) local     substitution Santiago Baima Arreguez
+    min 47 (2T 7) local     substitution Francisco Octavio Ariza
+    min 55 (2T 15) local     try          Juan Cruz Morrogh Bernard
+    min 55 (2T 15) local     conversion   Pedro Marchetti
+    min 61 (2T 21) local     substitution Franco Capozucca
+    min 61 (2T 21) local     substitution Lucas Jose Maldonado Gomez
+    min 64 (2T 24) local     try          Fermin Tissera
+    min 64 (2T 24) local     conversion   Pedro Marchetti
+    min 67 (2T 27) local     try          Gino Fozzatti Stival
+    min 69 (2T 29) local     substitution Valentino Fernandez
+    min 73 (2T 33) local     try          Micael Mateo Bustos Lopez
+    min 73 (2T 33) local     conversion   Pedro Marchetti
+  marcador  · eventos 57-0 · guardado 57-0
+  tries     · 9-0 (guardado —-—)
+  arbitro   · Florencia Ledesma (guardado: —)
+  guardado  · 23 local · 19 visitante · 23 eventos
+
+Club La Tablada M19 "A" vs Córdoba Athletic Club M19 "A" · torneo-cordobes-m19-a · tarjeta 277192  ·  3c9dc3ff-3935-4cd7-ae77-56c4358237d3
+  local     · Club La Tablada M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min  5 (1T 5) local     penalty_goal 
+    min 10 (1T 10) visitante try          Simon Camargo
+    min 11 (1T 11) visitante conversion   Bautista Caldo Navarro
+    min 19 (1T 19) visitante try          Facundo Ortiz
+    min 20 (1T 20) visitante conversion   Bautista Caldo Navarro
+    min 27 (1T 27) visitante card_yellow  Facundo Ortiz
+    min 28 (1T 28) local     try          
+    min 28 (1T 28) local     conversion   
+    min 46 (2T 6) visitante substitution Matias Nicolas Godoy Pignatta
+    min 47 (2T 7) visitante substitution Lorenzo Carranza
+    min 54 (2T 14) visitante substitution Facundo Ortiz
+    min 58 (2T 18) visitante substitution Federico Molina
+    min 60 (2T 20) visitante substitution Juan Cruz Polanco Garcia
+    min 66 (2T 26) visitante substitution Santiago Agustin Manzur
+    min 67 (2T 27) local     try          
+    min 67 (2T 27) local     conversion   
+    min 67 (2T 27) local     card_yellow  
+    min 73 (2T 33) local     injury       
+  marcador  · eventos 17-14 · guardado 17-14
+  tries     · 2-2 (guardado —-—)
+  arbitro   · Enzo Riva (guardado: —)
+  guardado  · 23 local · 23 visitante · 18 eventos
+
+Urú Curé Rugby Club M19 "A" vs San Martín de Villa María M19 "A" · torneo-cordobes-m19-a · tarjeta 277193  ·  5944531b-9c87-4d48-8dea-b769455e19c6
+  local     · Urú Curé Rugby Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · San Martín de Villa María M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min 11 (1T 11) visitante try          Federico Cabanillas
+    min 11 (1T 11) visitante conversion   Conrado Bicego
+    min 13 (1T 13) local     try          
+    min 13 (1T 13) local     conversion   Juan Martín San Millan
+    min 22 (1T 22) visitante try          Walter Geremias Ciarez
+    min 22 (1T 22) visitante conversion   Conrado Bicego
+    min 26 (1T 26) local     try          Geronimo Mossetti
+    min 26 (1T 26) local     conversion   Juan Martín San Millan
+    min 33 (1T 33) visitante try          Isaias Uriel Zoy
+    min 33 (1T 33) visitante conversion   Conrado Bicego
+    min 35 (1T 35) local     card_yellow  Serafin Caggiano
+    min 41 (2T 1) visitante substitution Franco Benjamin Alvarez Leiva
+    min 48 (2T 8) visitante try          Francesco Atilio Basso
+    min 48 (2T 8) visitante conversion   Conrado Bicego
+    min 50 (2T 10) local     substitution Juan Martín San Millan
+    min 52 (2T 12) local     try          Benjamin Cerra
+    min 52 (2T 12) local     conversion   Cristobal Aguilera
+    min 54 (2T 14) local     substitution Geronimo Mossetti
+    min 60 (2T 20) visitante substitution Benjamin Ezequiel Ferrari
+    min 60 (2T 20) visitante substitution Lucio Sarmiento
+    min 62 (2T 22) local     substitution Lautaro Torres Issa
+    min 64 (2T 24) visitante card_yellow  Thomas Isaias Ponce
+    min 67 (2T 27) local     try          Iñaki Rins
+    min 70 (2T 30) visitante penalty_goal Conrado Bicego
+    min 74 (2T 34) visitante substitution Thomas Isaias Ponce
+  marcador  · eventos 26-31 · guardado 26-31
+  tries     · 4-4 (guardado —-—)
+  arbitro   · Nahuel Sabena (guardado: —)
+  guardado  · 23 local · 23 visitante · 25 eventos
+
+Jockey Club de Villa María M19 "A" vs Tala Rugby Club M19 "A" · torneo-cordobes-m19-a · tarjeta 277194  ·  f166469e-9279-48d1-bbba-11f7ed7d8c4d
+  local     · Jockey Club de Villa María M19 "A" · 23 jugadores · 18 con ficha fijada
+  visitante · Tala Rugby Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min  3 (1T 3) local     try          Augusto Chialvo
+    min  3 (1T 3) local     conversion   Francisco Salomon
+    min 16 (1T 16) visitante try          
+    min 17 (1T 17) local     card_yellow  Jeremias Trigp
+    min 19 (1T 19) local     try          Jeronimo Jesús Colusso
+    min 19 (1T 19) local     conversion   Francisco Salomon
+    min 23 (1T 23) visitante try          
+    min 23 (1T 23) visitante conversion   
+    min 34 (1T 34) local     try          Jeronimo Jesús Colusso
+    min 34 (1T 34) local     conversion   Francisco Salomon
+    min 41 (2T 1) visitante try          
+    min 41 (2T 1) visitante conversion   
+    min 48 (2T 8) local     card_yellow  Santiago Barrionuevo
+    min 56 (2T 16) local     penalty_goal Francisco Salomon
+    min 65 (2T 25) visitante try          
+    min 69 (2T 29) local     try          Benjamin Poloni Avaro
+    min 69 (2T 29) local     conversion   Francisco Salomon
+    min 74 (2T 34) local     try          Santino Rubiola
+  marcador  · eventos 36-24 · guardado 36-24
+  tries     · 5-4 (guardado —-—)
+  arbitro   · Lautaro Joaquin Quiroga Cafure (guardado: —)
+  guardado  · 23 local · 23 visitante · 18 eventos
+
+Jockey Club Córdoba M19 "A" vs Jockey Club de Villa María M19 "A" · torneo-cordobes-m19-a · tarjeta 277195  ·  f2ecfc0e-fe42-41bd-ae98-8cc7bd22dc65
+  local     · Jockey Club Córdoba M19 "A" · 23 jugadores · 10 con ficha fijada
+  visitante · Jockey Club de Villa María M19 "A" · 23 jugadores · 20 con ficha fijada
+  eventos   · 18
+    min  2 (1T 2) visitante try          Tiago Requena
+    min 10 (1T 10) local     try          
+    min 10 (1T 10) local     conversion   
+    min 21 (1T 21) visitante try          Tiago Requena
+    min 21 (1T 21) visitante conversion   Francisco Salomon
+    min 31 (1T 31) local     card_yellow  
+    min 31 (1T 31) visitante penalty_goal Francisco Salomon
+    min 34 (1T 34) visitante substitution Maximiliano Ghione
+    min 35 (1T 35) local     try          
+    min 35 (1T 35) local     conversion   
+    min 46 (2T 6) local     try          
+    min 46 (2T 6) local     conversion   
+    min 50 (2T 10) local     penalty_goal 
+    min 51 (2T 11) visitante substitution Renzo Pavone
+    min 51 (2T 11) visitante substitution Tiago Requena
+    min 54 (2T 14) visitante card_yellow  Bautista Morre
+    min 56 (2T 16) visitante substitution Lorenzo David
+    min 78 (2T 38) local     card_yellow  
+  marcador  · eventos 24-15 · guardado 24-15
+  tries     · 3-2 (guardado —-—)
+  arbitro   · Enzo Riva (guardado: —)
+  guardado  · 23 local · 23 visitante · 18 eventos
+
+Tala Rugby Club M19 "A" vs Urú Curé Rugby Club M19 "A" · torneo-cordobes-m19-a · tarjeta 277196  ·  b21e7d6a-82df-42e9-aef8-9b309e895a2b
+  local     · Tala Rugby Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Urú Curé Rugby Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min  3 (1T 3) local     try          
+    min  3 (1T 3) local     conversion   
+    min  7 (1T 7) visitante penalty_goal Juan Martín San Millan
+    min 15 (1T 15) local     try          
+    min 15 (1T 15) local     conversion   
+    min 16 (1T 16) visitante try          Geronimo Mossetti
+    min 28 (1T 28) visitante try          Serafin Caggiano
+    min 28 (1T 28) visitante conversion   Juan Martín San Millan
+    min 31 (1T 31) visitante card_red     Evaristo Jose Fissore
+    min 46 (2T 6) local     try          
+    min 46 (2T 6) local     conversion   
+    min 48 (2T 8) visitante try          Nicolás Ochoa
+    min 62 (2T 22) local     card_yellow  
+    min 68 (2T 28) visitante try          Facundo Maccio
+    min 69 (2T 29) visitante conversion   Juan Martín San Millan
+    min 72 (2T 32) local     try          
+    min 72 (2T 32) local     conversion   
+    min 73 (2T 33) visitante card_yellow  Nicolás Ochoa
+  marcador  · eventos 28-27 · guardado 28-27
+  tries     · 4-4 (guardado —-—)
+  arbitro   · Ignacio Santiago Olmedo Ramirez (guardado: —)
+  guardado  · 23 local · 23 visitante · 18 eventos
+
+Córdoba Athletic Club M19 "A" vs Club Universitario de Córdoba M19 "A" · torneo-cordobes-m19-a · tarjeta 277198  ·  768d29d9-7c73-4258-8f09-b296adf9eb10
+  local     · Córdoba Athletic Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 32
+    min  0 (1T 0) local     substitution Simon Camargo
+    min  0 (1T 0) local     substitution Juan Ignacio Reinoso Santander
+    min  9 (1T 9) local     try          Santiago Vedia
+    min 15 (1T 15) visitante penalty_goal Franco Capozucca
+    min 20 (1T 20) local     try          Bautista Caldo Navarro
+    min 29 (1T 29) local     try          Samuel Carranza
+    min 30 (1T 30) local     conversion   Bautista Caldo Navarro
+    min 35 (1T 35) visitante try          Santiago Martin Rodrigo
+    min 35 (1T 35) visitante conversion   Franco Capozucca
+    min 40 (2T 0) local     substitution Francisco Racedo
+    min 40 (2T 0) local     substitution Mauricio Bazan Gonzalez
+    min 43 (2T 3) visitante substitution Ramiro Matias Bacci
+    min 44 (2T 4) visitante substitution Valentino Fernandez
+    min 46 (2T 6) local     substitution Samuel Carranza
+    min 50 (2T 10) local     card_yellow  Simon Camargo
+    min 51 (2T 11) local     substitution Juan Pablo Soria
+    min 52 (2T 12) visitante try          Francisco Pizzatti Pertegarini
+    min 52 (2T 12) visitante conversion   Franco Capozucca
+    min 55 (2T 15) local     substitution Valentino Luka Suarez Carmganola
+    min 55 (2T 15) local     substitution Santiago Vedia
+    min 55 (2T 15) local     substitution Facundo Ortiz
+    min 60 (2T 20) visitante substitution Lautaro Gabriel Roteda
+    min 60 (2T 20) visitante substitution Gino Fozzatti Stival
+    min 62 (2T 22) visitante substitution Francisco Pizzatti Pertegarini
+    min 65 (2T 25) local     substitution Federico Molina
+    min 67 (2T 27) local     try          Valentin Nuñez Pereyra
+    min 68 (2T 28) local     conversion   Bautista Caldo Navarro
+    min 69 (2T 29) visitante substitution Valentin Alvarez
+    min 69 (2T 29) visitante card_yellow  Pedro Marchetti
+    min 69 (2T 29) local     try          Juan Ignacio Reinoso Santander
+    min 73 (2T 33) visitante substitution Franco Capozucca
+    min 73 (2T 33) local     try          Teo Peña
+  marcador  · eventos 34-17 · guardado 34-17
+  tries     · 6-2 (guardado —-—)
+  arbitro   · Daiana Del Milagro Cesaretti (guardado: —)
+  guardado  · 23 local · 23 visitante · 32 eventos
+
+San Martín de Villa María M19 "A" vs Club La Tablada M19 "A" · torneo-cordobes-m19-a · tarjeta 277199  ·  1c3a24cb-1e49-4329-bb69-78dbfc3d10e8
+  local     · San Martín de Villa María M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min 11 (1T 11) visitante try          
+    min 11 (1T 11) visitante conversion   
+    min 15 (1T 15) local     substitution Cipriano Sabas Unzueta Pivetta
+    min 15 (1T 15) visitante try          
+    min 19 (1T 19) visitante try          
+    min 19 (1T 19) visitante conversion   
+    min 20 (1T 20) local     card_yellow  Federico Cabanillas
+    min 35 (1T 35) local     try          Eliseo Sachetto
+    min 43 (2T 3) visitante try          
+    min 43 (2T 3) visitante conversion   
+    min 56 (2T 16) local     try          Lucio Sarmiento
+    min 56 (2T 16) local     conversion   Conrado Bicego
+    min 60 (2T 20) local     substitution Benjamin Ezequiel Ferrari
+    min 63 (2T 23) visitante card_yellow  
+    min 64 (2T 24) local     try          Pedro Caballero
+    min 64 (2T 24) local     conversion   Conrado Bicego
+    min 68 (2T 28) local     substitution Thomas Isaias Ponce
+    min 68 (2T 28) local     substitution Franco Benjamin Alvarez Leiva
+    min 68 (2T 28) visitante try          
+    min 68 (2T 28) visitante conversion   
+    min 73 (2T 33) visitante try          
+    min 73 (2T 33) visitante conversion   
+    min 75 (2T 35) visitante try          
+    min 75 (2T 35) visitante conversion   
+  marcador  · eventos 19-47 · guardado 19-47
+  tries     · 3-7 (guardado —-—)
+  arbitro   · Lautaro Joaquin Quiroga Cafure (guardado: —)
+  guardado  · 23 local · 23 visitante · 24 eventos
+
+Carlos Paz Rugby Club M19 "A" vs Jockey Club Córdoba M19 "A" · torneo-cordobes-m19-a · tarjeta 277200  ·  b7403b0c-4fad-4a47-b45b-3ff53cbbc314
+  local     · Carlos Paz Rugby Club M19 "A" · 18 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M19 "A" · 23 jugadores · 14 con ficha fijada
+  eventos   · 21
+    min 12 (1T 12) visitante try          
+    min 12 (1T 12) visitante conversion   
+    min 17 (1T 17) visitante try          
+    min 17 (1T 17) visitante conversion   
+    min 30 (1T 30) local     try          
+    min 30 (1T 30) local     conversion   
+    min 31 (1T 31) local     card_yellow  
+    min 35 (1T 35) visitante try          
+    min 40 (2T 0) visitante try          
+    min 40 (2T 0) visitante conversion   
+    min 47 (2T 7) visitante try          
+    min 49 (2T 9) visitante try          
+    min 49 (2T 9) visitante conversion   
+    min 51 (2T 11) visitante try          
+    min 55 (2T 15) visitante try          
+    min 55 (2T 15) visitante conversion   
+    min 63 (2T 23) visitante try          
+    min 63 (2T 23) visitante conversion   
+    min 69 (2T 29) visitante card_yellow  
+    min 75 (2T 35) local     try          
+    min 76 (2T 36) visitante try          
+  marcador  · eventos 12-62 · guardado 12-62
+  tries     · 2-10 (guardado —-—)
+  arbitro   · Ángeles Murua (guardado: —)
+  guardado  · 18 local · 23 visitante · 21 eventos
+
+Club Palermo Bajo M19 "A" vs Córdoba Athletic Club M19 "A" · torneo-cordobes-m19-a · tarjeta 277201  ·  f97daa75-fea3-41ce-b884-e713bb6e772b
+  local     · Club Palermo Bajo M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min  6 (1T 6) local     card_yellow  Justiniano Pavoni
+    min 12 (1T 12) visitante try          Benjamin Osvaldo Campi
+    min 18 (1T 18) visitante card_yellow  Bautista Caldo Navarro
+    min 19 (1T 19) local     penalty_goal Leon Haschisch
+    min 21 (1T 21) local     try          Bruno Battan Frasca
+    min 21 (1T 21) local     conversion   Leon Haschisch
+    min 28 (1T 28) local     penalty_goal Leon Haschisch
+    min 40 (2T 0) visitante substitution Samuel Carranza
+    min 40 (2T 0) visitante substitution Santiago Vedia
+    min 48 (2T 8) local     try          Santiago Serdan
+    min 50 (2T 10) visitante substitution Mauricio Bazan Gonzalez
+    min 50 (2T 10) local     substitution Joaquin Feliú
+    min 52 (2T 12) visitante substitution Francisco Racedo
+    min 53 (2T 13) visitante try          Bautista Caldo Navarro
+    min 54 (2T 14) visitante substitution Facundo Ortiz
+    min 54 (2T 14) local     substitution Benicio Ligato
+    min 54 (2T 14) visitante conversion   Bautista Caldo Navarro
+    min 58 (2T 18) visitante card_yellow  Matias Nicolas Godoy Pignatta
+    min 60 (2T 20) visitante substitution Juan Martin Ledesma
+    min 64 (2T 24) local     substitution Santiago Serdan
+    min 64 (2T 24) local     substitution Matias Lionel Sanchez
+    min 68 (2T 28) visitante substitution Benjamin Osvaldo Campi
+  marcador  · eventos 18-12 · guardado 18-12
+  tries     · 2-2 (guardado —-—)
+  arbitro   · Nahuel Sabena (guardado: —)
+  guardado  · 23 local · 23 visitante · 22 eventos
+
+Club Universitario de Córdoba M19 "A" vs San Martín de Villa María M19 "A" · torneo-cordobes-m19-a · tarjeta 277202  ·  e7cd98ee-882e-4b5f-bd46-d948ede4b5a9
+  local     · Club Universitario de Córdoba M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · San Martín de Villa María M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 21
+    min  9 (1T 9) visitante substitution Luca Carrizo
+    min 13 (1T 13) visitante card_yellow  Benjamin Ezequiel Ferrari
+    min 14 (1T 14) visitante penalty_goal Conrado Bicego
+    min 25 (1T 25) visitante substitution Santiago Merani
+    min 32 (1T 32) visitante substitution Eliseo Sachetto
+    min 32 (1T 32) visitante substitution Thomas Isaias Ponce
+    min 40 (2T 0) local     substitution Franco Capozucca
+    min 41 (2T 1) local     card_yellow  Matías Molina
+    min 48 (2T 8) local     card_yellow  Tomas Balaguer
+    min 49 (2T 9) local     try          Pedro Marchetti
+    min 50 (2T 10) local     substitution Santiago Baima Arreguez
+    min 53 (2T 13) local     substitution Fermin Tissera
+    min 64 (2T 24) local     try          Bautista Villarruel
+    min 66 (2T 26) local     try          Santiago Martin Rodrigo
+    min 68 (2T 28) local     substitution Santiago Martin Rodrigo
+    min 68 (2T 28) local     substitution Tomas Balaguer
+    min 70 (2T 30) local     substitution Matías Molina
+    min 72 (2T 32) local     substitution Joaquin Litvin
+    min 72 (2T 32) local     substitution Lisandro Ismael Peralta Sanchez
+    min 74 (2T 34) local     conversion   Pedro Marchetti
+    min 74 (2T 34) local     try          Micael Mateo Bustos Lopez
+  marcador  · eventos 22-3 · guardado 22-3
+  tries     · 4-0 (guardado —-—)
+  arbitro   · Florencia Ledesma (guardado: —)
+  guardado  · 23 local · 23 visitante · 21 eventos
+
+Club La Tablada M19 "A" vs Tala Rugby Club M19 "A" · torneo-cordobes-m19-a · tarjeta 277203  ·  9aeff499-686e-40a4-92b4-93ef3183c913
+  local     · Club La Tablada M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 13
+    min  7 (1T 7) local     penalty_goal 
+    min 27 (1T 27) local     card_yellow  
+    min 33 (1T 33) local     card_yellow  
+    min 36 (1T 36) local     try          
+    min 36 (1T 36) local     conversion   
+    min 37 (1T 37) visitante card_yellow  
+    min 37 (1T 37) local     card_yellow  
+    min 46 (2T 6) visitante card_yellow  
+    min 50 (2T 10) local     try          
+    min 50 (2T 10) local     conversion   
+    min 55 (2T 15) visitante try          
+    min 67 (2T 27) local     penalty_goal 
+    min 71 (2T 31) local     penalty_goal 
+  marcador  · eventos 23-5 · guardado 23-5
+  tries     · 2-1 (guardado —-—)
+  arbitro   · Nahuel Sabena (guardado: —)
+  guardado  · 23 local · 23 visitante · 13 eventos
+
+Urú Curé Rugby Club M19 "A" vs Jockey Club de Villa María M19 "A" · torneo-cordobes-m19-a · tarjeta 277204  ·  5cea048b-4063-4fb7-8c4e-ca2d74f681fe
+  local     · Urú Curé Rugby Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club de Villa María M19 "A" · 23 jugadores · 20 con ficha fijada
+  eventos   · 37
+    min  4 (1T 4) local     try          Valentino Demaestri
+    min  4 (1T 4) local     conversion   Juan Martín San Millan
+    min 10 (1T 10) local     try          Juan Martín San Millan
+    min 10 (1T 10) local     conversion   Juan Martín San Millan
+    min 14 (1T 14) local     penalty_goal Juan Martín San Millan
+    min 25 (1T 25) local     try          
+    min 25 (1T 25) local     conversion   Juan Martín San Millan
+    min 30 (1T 30) visitante try          Maximiliano Ghione
+    min 30 (1T 30) visitante conversion   Francisco Salomon
+    min 35 (1T 35) visitante try          Walter Igancio Bosio
+    min 35 (1T 35) visitante conversion   Francisco Salomon
+    min 41 (2T 1) visitante substitution Joaquín Julián Lopez
+    min 43 (2T 3) local     penalty_goal Juan Martín San Millan
+    min 44 (2T 4) visitante substitution Tiago Requena
+    min 46 (2T 6) local     try          Facundo Maccio
+    min 47 (2T 7) visitante substitution Renzo Pavone
+    min 50 (2T 10) local     try          
+    min 50 (2T 10) local     conversion   Juan Martín San Millan
+    min 54 (2T 14) local     substitution Octavio Cerrano
+    min 54 (2T 14) local     substitution Felipe Hipermayen
+    min 54 (2T 14) local     try          Nicolás Ochoa
+    min 54 (2T 14) local     conversion   Juan Martín San Millan
+    min 56 (2T 16) visitante card_yellow  Alvaro Rosso
+    min 58 (2T 18) local     card_yellow  Valentino Demaestri
+    min 58 (2T 18) local     substitution Pedro Joaquín Nicolás Remedi
+    min 59 (2T 19) visitante substitution Jeronimo Jesús Colusso
+    min 59 (2T 19) visitante substitution Jeremias Trigp
+    min 60 (2T 20) visitante card_red     Augusto Chialvo
+    min 61 (2T 21) local     substitution Serafin Caggiano
+    min 61 (2T 21) local     substitution Bautista Rossi Jaume
+    min 61 (2T 21) local     try          
+    min 61 (2T 21) local     conversion   Juan Martín San Millan
+    min 62 (2T 22) local     substitution Facundo Maccio
+    min 69 (2T 29) local     try          Nicolás Ochoa
+    min 69 (2T 29) local     conversion   Juan Martín San Millan
+    min 74 (2T 34) local     try          
+    min 74 (2T 34) local     conversion   Juan Martín San Millan
+  marcador  · eventos 67-14 · guardado 67-14
+  tries     · 9-2 (guardado —-—)
+  arbitro   · Lautaro Joaquin Quiroga Cafure (guardado: —)
+  guardado  · 23 local · 23 visitante · 37 eventos
+
+Jockey Club Córdoba M19 "A" vs Urú Curé Rugby Club M19 "A" · torneo-cordobes-m19-a · tarjeta 277205  ·  8a75918c-0320-4b61-b3c4-28edfcc5e6f3
+  local     · Jockey Club Córdoba M19 "A" · 23 jugadores · 16 con ficha fijada
+  visitante · Urú Curé Rugby Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 15
+    min  4 (1T 4) local     try          
+    min  4 (1T 4) local     conversion   
+    min 11 (1T 11) visitante try          Facundo Maccio
+    min 11 (1T 11) visitante conversion   Juan Martín San Millan
+    min 24 (1T 24) visitante try          Juan Martín San Millan
+    min 24 (1T 24) visitante conversion   Juan Martín San Millan
+    min 27 (1T 27) local     try          
+    min 29 (1T 29) local     try          
+    min 35 (1T 35) local     try          
+    min 35 (1T 35) local     conversion   
+    min 44 (2T 4) local     card_yellow  
+    min 59 (2T 19) local     try          
+    min 59 (2T 19) local     conversion   
+    min 64 (2T 24) local     penalty_goal 
+    min 74 (2T 34) visitante try          Valentino Demaestri
+  marcador  · eventos 34-19 · guardado 34-19
+  tries     · 5-3 (guardado —-—)
+  arbitro   · Enzo Riva (guardado: —)
+  guardado  · 23 local · 23 visitante · 15 eventos
+
+Jockey Club de Villa María M19 "A" vs Club La Tablada M19 "A" · torneo-cordobes-m19-a · tarjeta 277206  ·  334b432c-b9b3-4fc4-a4bb-411d139b5823
+  local     · Jockey Club de Villa María M19 "A" · 23 jugadores · 21 con ficha fijada
+  visitante · Club La Tablada M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min 13 (1T 13) visitante card_yellow  
+    min 23 (1T 23) local     try          Francisco Salomon
+    min 35 (1T 35) local     try          Juan Cruz Colusso
+    min 46 (2T 6) local     try          Tiago Requena
+    min 46 (2T 6) local     conversion   Francisco Salomon
+    min 55 (2T 15) local     card_yellow  Alvaro Rosso
+    min 55 (2T 15) visitante try          
+    min 55 (2T 15) visitante conversion   
+    min 57 (2T 17) local     substitution Maximiliano Ghione
+    min 58 (2T 18) local     substitution Joaquín Julián Lopez
+    min 58 (2T 18) local     card_yellow  Renzo Mariani Mulinetti
+    min 60 (2T 20) visitante try          
+    min 60 (2T 20) visitante conversion   
+    min 71 (2T 31) local     try          Jeronimo Jesús Colusso
+    min 75 (2T 35) local     card_yellow  Renzo Mariani Mulinetti
+    min 75 (2T 35) local     card_red     Renzo Mariani Mulinetti
+    min 75 (2T 35) visitante penalty_try  
+  marcador  · eventos 22-21 · guardado 22-21
+  tries     · 4-3 (guardado —-—)
+  arbitro   · Ignacio Santiago Olmedo Ramirez (guardado: —)
+  guardado  · 23 local · 23 visitante · 17 eventos
+
+Tala Rugby Club M19 "A" vs Club Universitario de Córdoba M19 "A" · torneo-cordobes-m19-a · tarjeta 277207  ·  326d497e-4f6d-454f-8b28-d45bab74d5ec
+  local     · Tala Rugby Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min  1 (1T 1) local     try          
+    min  6 (1T 6) local     try          
+    min  6 (1T 6) local     conversion   
+    min 16 (1T 16) local     try          
+    min 16 (1T 16) local     conversion   
+    min 26 (1T 26) local     penalty_goal 
+    min 32 (1T 32) visitante try          Francisco Pizzatti Pertegarini
+    min 35 (1T 35) local     penalty_goal 
+    min 40 (2T 0) visitante substitution Francisco Pizzatti Pertegarini
+    min 40 (2T 0) visitante substitution Nicolás Allende Peralta
+    min 40 (2T 0) visitante substitution Pedro Marchetti
+    min 48 (2T 8) visitante try          Bautista Villarruel
+    min 48 (2T 8) visitante conversion   Mauro Llamas Bruno
+    min 53 (2T 13) visitante substitution Santiago Martin Rodrigo
+    min 54 (2T 14) visitante substitution Ramiro Matias Bacci
+    min 58 (2T 18) visitante substitution Juan Cruz Morrogh Bernard
+    min 60 (2T 20) local     card_yellow  
+    min 62 (2T 22) local     try          
+    min 62 (2T 22) local     conversion   
+    min 65 (2T 25) visitante substitution Santiago Baima Arreguez
+    min 66 (2T 26) visitante substitution Valentino Fernandez
+    min 67 (2T 27) visitante try          Franco Capozucca
+    min 67 (2T 27) visitante conversion   Mauro Llamas Bruno
+    min 75 (2T 35) local     try          
+    min 75 (2T 35) local     conversion   
+  marcador  · eventos 39-19 · guardado 39-19
+  tries     · 5-3 (guardado —-—)
+  arbitro   · Daiana Del Milagro Cesaretti (guardado: —)
+  guardado  · 23 local · 23 visitante · 25 eventos
+
+San Martín de Villa María M19 "A" vs Club Palermo Bajo M19 "A" · torneo-cordobes-m19-a · tarjeta 277208  ·  881e2156-b4f2-4ccd-ad3c-b39dfcc477f0
+  local     · San Martín de Villa María M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min  2 (1T 2) visitante try          
+    min  3 (1T 3) visitante conversion   
+    min  6 (1T 6) visitante try          
+    min  6 (1T 6) visitante conversion   
+    min 11 (1T 11) local     try          Santiago Merani
+    min 11 (1T 11) local     conversion   Franco Benjamin Alvarez Leiva
+    min 15 (1T 15) visitante try          
+    min 16 (1T 16) visitante conversion   
+    min 23 (1T 23) local     try          Juan Ignacio Morre Castelli
+    min 27 (1T 27) visitante card_yellow  
+    min 30 (1T 30) visitante try          
+    min 31 (1T 31) visitante conversion   
+    min 54 (2T 14) visitante try          
+    min 61 (2T 21) visitante try          
+    min 67 (2T 27) visitante try          
+    min 73 (2T 33) visitante try          
+    min 74 (2T 34) visitante conversion   
+  marcador  · eventos 12-50 · guardado 12-50
+  tries     · 2-8 (guardado —-—)
+  arbitro   · Lautaro Joaquin Quiroga Cafure (guardado: —)
+  guardado  · 23 local · 23 visitante · 17 eventos
+
+Córdoba Athletic Club M19 "A" vs Carlos Paz Rugby Club M19 "A" · torneo-cordobes-m19-a · tarjeta 277209  ·  fae5e972-d3c9-48c1-ab53-697d1153ceb5
+  local     · Córdoba Athletic Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Carlos Paz Rugby Club M19 "A" · 18 jugadores · 0 con ficha fijada
+  eventos   · 30
+    min  6 (1T 6) local     try          Benjamin Osvaldo Campi
+    min 15 (1T 15) local     try          Santiago Vedia
+    min 16 (1T 16) local     conversion   Bautista Caldo Navarro
+    min 17 (1T 17) local     try          Bautista Caldo Navarro
+    min 18 (1T 18) local     conversion   Bautista Caldo Navarro
+    min 21 (1T 21) visitante injury       
+    min 21 (1T 21) local     card_yellow  Juan Ignacio Reinoso Santander
+    min 23 (1T 23) local     try          Cristobal Ferreyra
+    min 24 (1T 24) local     conversion   Bautista Caldo Navarro
+    min 32 (1T 32) local     try          Simon Camargo
+    min 33 (1T 33) local     conversion   Bautista Caldo Navarro
+    min 45 (2T 5) local     substitution Matias Nicolas Godoy Pignatta
+    min 45 (2T 5) local     substitution Teo Peña
+    min 45 (2T 5) local     substitution Juan Ignacio Reinoso Santander
+    min 49 (2T 9) local     card_yellow  Joaquin Martinez
+    min 51 (2T 11) visitante try          
+    min 51 (2T 11) local     card_yellow  Santiago Agustin Manzur
+    min 54 (2T 14) local     try          Facundo Ortiz
+    min 55 (2T 15) local     conversion   Bautista Caldo Navarro
+    min 55 (2T 15) local     substitution Francisco Racedo
+    min 55 (2T 15) local     substitution Santiago Sucani Cancian
+    min 55 (2T 15) local     substitution Benjamin Osvaldo Campi
+    min 60 (2T 20) local     try          Facundo Ortiz
+    min 61 (2T 21) visitante injury       
+    min 61 (2T 21) local     substitution Facundo Ortiz
+    min 63 (2T 23) local     try          Santino Prieto Martínez
+    min 65 (2T 25) visitante injury       
+    min 66 (2T 26) local     substitution Santiago Vedia
+    min 69 (2T 29) local     try          Federico Molina
+    min 70 (2T 30) local     conversion   Bautista Caldo Navarro
+  marcador  · eventos 57-5 · guardado 57-5
+  tries     · 9-1 (guardado —-—)
+  arbitro   · Gabriel Hernán Tirante (guardado: —)
+  guardado  · 23 local · 18 visitante · 30 eventos
+
+Córdoba Athletic Club M19 "A" vs Jockey Club Córdoba M19 "A" · torneo-cordobes-m19-a · tarjeta 277210  ·  1a9fe5e3-9421-4b1f-ad9a-8200b55fbeff
+  local     · Córdoba Athletic Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M19 "A" · 23 jugadores · 15 con ficha fijada
+  eventos   · 19
+    min 12 (1T 12) visitante try          
+    min 12 (1T 12) visitante conversion   
+    min 20 (1T 20) local     try          Facundo Ortiz
+    min 26 (1T 26) visitante try          
+    min 49 (2T 9) local     try          Bautista Caldo Navarro
+    min 49 (2T 9) local     substitution Santiago Vedia
+    min 49 (2T 9) local     substitution Santiago Sucani Cancian
+    min 50 (2T 10) local     conversion   Bautista Caldo Navarro
+    min 56 (2T 16) local     substitution Benjamin Osvaldo Campi
+    min 58 (2T 18) local     try          Olivier Courtis
+    min 59 (2T 19) local     conversion   Bautista Caldo Navarro
+    min 59 (2T 19) local     substitution Francisco Racedo
+    min 60 (2T 20) visitante try          
+    min 60 (2T 20) visitante conversion   
+    min 65 (2T 25) local     try          Simon Camargo
+    min 66 (2T 26) local     conversion   Bautista Caldo Navarro
+    min 70 (2T 30) local     substitution Juan Ignacio Reinoso Santander
+    min 71 (2T 31) visitante try          
+    min 74 (2T 34) local     substitution Santiago Agustin Manzur
+  marcador  · eventos 26-24 · guardado 26-24
+  tries     · 4-4 (guardado —-—)
+  arbitro   · Ignacio Santiago Olmedo Ramirez (guardado: —)
+  guardado  · 23 local · 23 visitante · 19 eventos
+
+Carlos Paz Rugby Club M19 "A" vs San Martín de Villa María M19 "A" · torneo-cordobes-m19-a · tarjeta 277211  ·  5e84055a-c01e-4886-9f59-3af3d4ba1d5c
+  local     · Carlos Paz Rugby Club M19 "A" · 19 jugadores · 0 con ficha fijada
+  visitante · San Martín de Villa María M19 "A" · 22 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min 13 (1T 13) visitante try          
+    min 13 (1T 13) visitante conversion   
+    min 26 (1T 26) visitante try          
+    min 26 (1T 26) visitante conversion   
+    min 30 (1T 30) visitante try          
+    min 30 (1T 30) visitante conversion   
+    min 46 (2T 6) local     try          
+    min 48 (2T 8) local     injury       
+    min 54 (2T 14) visitante try          
+    min 54 (2T 14) visitante conversion   
+    min 58 (2T 18) visitante try          
+    min 58 (2T 18) visitante conversion   
+    min 62 (2T 22) local     injury       
+    min 65 (2T 25) visitante try          
+    min 65 (2T 25) visitante conversion   
+    min 68 (2T 28) visitante try          
+    min 68 (2T 28) visitante conversion   
+    min 73 (2T 33) local     injury       
+    min 75 (2T 35) local     card_yellow  
+    min 75 (2T 35) visitante penalty_try  
+  marcador  · eventos 5-56 · guardado 5-56
+  tries     · 1-8 (guardado —-—)
+  arbitro   · Ángeles Murua (guardado: —)
+  guardado  · 19 local · 22 visitante · 20 eventos
+
+Club Palermo Bajo M19 "A" vs Tala Rugby Club M19 "A" · torneo-cordobes-m19-a · tarjeta 277212  ·  473642b4-346c-43c4-87ac-7e862dad884f
+  local     · Club Palermo Bajo M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min  6 (1T 6) local     try          
+    min  6 (1T 6) local     conversion   
+    min  9 (1T 9) local     try          
+    min 16 (1T 16) local     penalty_goal 
+    min 25 (1T 25) local     try          
+    min 30 (1T 30) visitante card_yellow  
+    min 30 (1T 30) local     card_yellow  
+    min 31 (1T 31) visitante try          
+    min 31 (1T 31) visitante conversion   
+    min 52 (2T 12) local     card_yellow  
+    min 54 (2T 14) visitante try          
+    min 62 (2T 22) local     try          
+    min 70 (2T 30) local     penalty_goal 
+    min 71 (2T 31) local     try          
+    min 72 (2T 32) local     conversion   
+    min 74 (2T 34) local     try          
+    min 74 (2T 34) local     conversion   
+  marcador  · eventos 42-12 · guardado 42-12
+  tries     · 6-2 (guardado —-—)
+  arbitro   · REARTES GUSTAVO 39446797 (No Oficial) (guardado: —)
+  guardado  · 23 local · 23 visitante · 17 eventos
+
+Club Universitario de Córdoba M19 "A" vs Jockey Club de Villa María M19 "A" · torneo-cordobes-m19-a · tarjeta 277213  ·  4ab19392-62bc-47f0-becf-d64162ac3eb2
+  local     · Club Universitario de Córdoba M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club de Villa María M19 "A" · 23 jugadores · 19 con ficha fijada
+  eventos   · 25
+    min  2 (1T 2) visitante try          Juan Cruz Colusso
+    min  5 (1T 5) visitante try          Benjamin Poloni Avaro
+    min  5 (1T 5) visitante conversion   Francisco Salomon
+    min 16 (1T 16) local     try          Santiago Martin Rodrigo
+    min 16 (1T 16) local     conversion   Mauro Llamas Bruno
+    min 34 (1T 34) visitante try          Tiago Requena
+    min 34 (1T 34) visitante conversion   Francisco Salomon
+    min 40 (2T 0) local     substitution Gaspar Ignacio Negrete Mendez
+    min 40 (2T 0) local     substitution Benjamin Apfelbaum
+    min 43 (2T 3) visitante try          Jeronimo Jesús Colusso
+    min 43 (2T 3) visitante conversion   Francisco Salomon
+    min 46 (2T 6) local     substitution Ramiro Matias Bacci
+    min 46 (2T 6) local     substitution Mauro Llamas Bruno
+    min 49 (2T 9) local     substitution Santiago Martin Rodrigo
+    min 54 (2T 14) visitante try          Bruno Geremias
+    min 54 (2T 14) visitante conversion   Francisco Salomon
+    min 59 (2T 19) visitante substitution Joaquín Julián Lopez
+    min 59 (2T 19) visitante substitution Tiago Requena
+    min 60 (2T 20) visitante substitution Maximiliano Ghione
+    min 61 (2T 21) local     substitution Valentino Cinalli
+    min 66 (2T 26) visitante substitution Alvaro Rosso
+    min 71 (2T 31) local     substitution Tomas Ripa Zanuttin
+    min 71 (2T 31) local     substitution Gino Fozzatti Stival
+    min 71 (2T 31) visitante try          Augusto Chialvo
+    min 71 (2T 31) visitante conversion   Francisco Salomon
+  marcador  · eventos 7-40 · guardado 7-40
+  tries     · 1-6 (guardado —-—)
+  arbitro   · Florencia Ledesma (guardado: —)
+  guardado  · 23 local · 23 visitante · 25 eventos
+
+Club La Tablada M19 "A" vs Urú Curé Rugby Club M19 "A" · torneo-cordobes-m19-a · tarjeta 277214  ·  4578469c-6e72-48ff-b13c-8be9cabe9c5e
+  local     · Club La Tablada M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Urú Curé Rugby Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 9
+    min 12 (1T 12) visitante card_yellow  Francisco Oscar Rivarola Fernández
+    min 15 (1T 15) local     try          
+    min 18 (1T 18) visitante try          Nicolás Ochoa
+    min 18 (1T 18) visitante conversion   Juan Martín San Millan
+    min 27 (1T 27) local     card_yellow  
+    min 30 (1T 30) visitante try          Felipe Hipermayen
+    min 35 (1T 35) visitante try          Evaristo Jose Fissore
+    min 52 (2T 12) local     try          
+    min 65 (2T 25) local     try          
+  marcador  · eventos 15-17 · guardado 15-17
+  tries     · 3-3 (guardado —-—)
+  arbitro   · Lucas Humeres (guardado: —)
+  guardado  · 23 local · 23 visitante · 9 eventos
+
+Jockey Club Córdoba M19 "A" vs Club La Tablada M19 "A" · torneo-cordobes-m19-a · tarjeta 277215  ·  39bbc744-15f0-4407-baaf-b0e589dc3e7f
+  local     · Jockey Club Córdoba M19 "A" · 23 jugadores · 17 con ficha fijada
+  visitante · Club La Tablada M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 14
+    min  2 (1T 2) local     try          
+    min  5 (1T 5) local     try          
+    min 10 (1T 10) visitante penalty_goal 
+    min 13 (1T 13) visitante try          
+    min 17 (1T 17) local     conversion   
+    min 17 (1T 17) local     try          
+    min 35 (1T 35) visitante try          
+    min 35 (1T 35) visitante conversion   
+    min 38 (1T 38) visitante penalty_goal 
+    min 41 (2T 1) visitante penalty_goal 
+    min 50 (2T 10) visitante injury       
+    min 60 (2T 20) visitante injury       
+    min 73 (2T 33) local     try          
+    min 73 (2T 33) local     conversion   
+  marcador  · eventos 24-21 · guardado 24-21
+  tries     · 4-2 (guardado —-—)
+  arbitro   · Ignacio Santiago Olmedo Ramirez (guardado: —)
+  guardado  · 23 local · 23 visitante · 14 eventos
+
+Urú Curé Rugby Club M19 "A" vs Club Universitario de Córdoba M19 "A" · torneo-cordobes-m19-a · tarjeta 277216  ·  515c42fc-e2d1-478f-ab7d-a9e38c26af27
+  local     · Urú Curé Rugby Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min  5 (1T 5) visitante try          Juan Cruz Morrogh Bernard
+    min 15 (1T 15) local     try          Santiago Ismael Cabello
+    min 15 (1T 15) local     conversion   Juan Martín San Millan
+    min 15 (1T 15) visitante substitution Ramiro Matias Bacci
+    min 18 (1T 18) visitante penalty_goal Pedro Marchetti
+    min 23 (1T 23) visitante card_yellow  Mauro Llamas Bruno
+    min 24 (1T 24) local     try          Gustavo Jose Echenique
+    min 35 (1T 35) local     try          Lucas Bernardini
+    min 35 (1T 35) local     conversion   Juan Martín San Millan
+    min 43 (2T 3) visitante try          Nicolás Allende Peralta
+    min 56 (2T 16) local     card_yellow  Valentino Demaestri
+    min 56 (2T 16) visitante card_yellow  Nicolás Allende Peralta
+    min 57 (2T 17) visitante substitution Lisandro Ismael Peralta Sanchez
+    min 63 (2T 23) local     card_yellow  Benjamin Cerra
+    min 63 (2T 23) visitante substitution Lautaro Gabriel Roteda
+    min 63 (2T 23) visitante substitution Nicolás Allende Peralta
+    min 65 (2T 25) visitante substitution Tomas Ripa Zanuttin
+    min 65 (2T 25) visitante substitution Valentino Cinalli
+    min 65 (2T 25) visitante substitution Pedro Marchetti
+    min 67 (2T 27) local     penalty_goal Juan Martín San Millan
+    min 73 (2T 33) visitante penalty_goal Mauro Llamas Bruno
+    min 73 (2T 33) visitante card_yellow  Atilio Eugenio Guaiman Urtubey
+    min 74 (2T 34) local     try          Jeronimo Suino Borghi
+    min 76 (2T 36) local     try          Valentino Demaestri
+    min 76 (2T 36) local     conversion   Juan Martín San Millan
+  marcador  · eventos 34-16 · guardado 34-16
+  tries     · 5-2 (guardado —-—)
+  arbitro   · Lautaro Joaquin Quiroga Cafure (guardado: —)
+  guardado  · 23 local · 23 visitante · 25 eventos
+
+Jockey Club de Villa María M19 "A" vs Club Palermo Bajo M19 "A" · torneo-cordobes-m19-a · tarjeta 277217  ·  6a6357db-4318-4972-924f-548e38797be2
+  local     · Jockey Club de Villa María M19 "A" · 23 jugadores · 21 con ficha fijada
+  visitante · Club Palermo Bajo M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min  5 (1T 5) local     card_yellow  Maximiliano Ghione
+    min 15 (1T 15) visitante try          
+    min 16 (1T 16) visitante conversion   
+    min 32 (1T 32) local     try          Juan Cruz Colusso
+    min 33 (1T 33) local     conversion   Francisco Salomon
+    min 41 (2T 1) local     injury       Antonio Calcagno
+    min 41 (2T 1) local     substitution Antonio Calcagno
+    min 45 (2T 5) local     card_yellow  Renzo Pavone
+    min 48 (2T 8) local     substitution Lorenzo David
+    min 51 (2T 11) local     substitution Valentín Fracarolli
+    min 52 (2T 12) visitante penalty_goal 
+    min 55 (2T 15) local     penalty_goal Francisco Salomon
+    min 60 (2T 20) visitante penalty_goal 
+    min 62 (2T 22) local     substitution Maximiliano Ghione
+    min 63 (2T 23) local     substitution Joaquín Julián Lopez
+    min 68 (2T 28) local     try          Jeronimo Jesús Colusso
+    min 69 (2T 29) local     conversion   Francisco Salomon
+    min 75 (2T 35) local     card_yellow  Walter Igancio Bosio
+  marcador  · eventos 17-13 · guardado 17-13
+  tries     · 2-1 (guardado —-—)
+  arbitro   · Gabriel Hernán Tirante (guardado: —)
+  guardado  · 23 local · 23 visitante · 18 eventos
+
+San Martín de Villa María M19 "A" vs Córdoba Athletic Club M19 "A" · torneo-cordobes-m19-a · tarjeta 277219  ·  4b6c4f3f-a399-4bdf-b87b-057b2ae4d446
+  local     · San Martín de Villa María M19 "A" · 22 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club M19 "A" · 22 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min  2 (1T 2) local     try          Manuel Nicolas Rodriguez
+    min  3 (1T 3) local     conversion   Conrado Bicego
+    min 15 (1T 15) visitante try          Olivier Courtis
+    min 16 (1T 16) visitante conversion   Bautista Caldo Navarro
+    min 22 (1T 22) local     card_yellow  Benjamin Ezequiel Ferrari
+    min 29 (1T 29) visitante try          Francisco Racedo
+    min 30 (1T 30) visitante conversion   Bautista Caldo Navarro
+    min 40 (2T 0) visitante substitution Faustino Castillo
+    min 40 (2T 0) visitante substitution Samuel Carranza
+    min 40 (2T 0) visitante substitution Francisco Racedo
+    min 40 (2T 0) visitante substitution Juan Cruz Valdivia
+    min 40 (2T 0) visitante substitution Santiago Sucani Cancian
+    min 40 (2T 0) visitante substitution Facundo Isao Mishima
+    min 40 (2T 0) visitante substitution Fabrizio Barco Orozco
+    min 66 (2T 26) visitante try          Tomas Zuain Fornillo
+    min 67 (2T 27) visitante conversion   Bautista Caldo Navarro
+    min 77 (2T 37) local     penalty_goal Franco Benjamin Alvarez Leiva
+    min 79 (2T 39) local     try          Juan Ignacio Morre Castelli
+  marcador  · eventos 15-21 · guardado 15-21
+  tries     · 2-3 (guardado —-—)
+  arbitro   · Florencia Ledesma (guardado: —)
+  guardado  · 22 local · 22 visitante · 18 eventos
+
+San Martín de Villa María M19 "A" vs Jockey Club Córdoba M19 "A" · torneo-cordobes-m19-a · tarjeta 277220  ·  1e27b143-3ec8-4aea-ad68-f6d49163e81d
+  local     · San Martín de Villa María M19 "A" · 21 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M19 "A" · 23 jugadores · 16 con ficha fijada
+  eventos   · 22
+    min  8 (1T 8) visitante try          
+    min  8 (1T 8) visitante conversion   
+    min 13 (1T 13) local     try          Santiago Merani
+    min 20 (1T 20) visitante penalty_goal 
+    min 29 (1T 29) visitante penalty_goal 
+    min 31 (1T 31) visitante conversion   
+    min 31 (1T 31) visitante try          
+    min 35 (1T 35) local     try          Santiago Merani
+    min 41 (2T 1) visitante try          
+    min 41 (2T 1) visitante conversion   
+    min 46 (2T 6) local     substitution Santiago Ceballos
+    min 46 (2T 6) local     substitution Ramiro Locanetto
+    min 48 (2T 8) visitante try          
+    min 49 (2T 9) local     try          Manuel Nicolas Rodriguez
+    min 50 (2T 10) local     substitution Luca Carrizo
+    min 53 (2T 13) visitante try          
+    min 57 (2T 17) local     card_yellow  Manuel Nicolas Rodriguez
+    min 57 (2T 17) visitante try          
+    min 57 (2T 17) visitante conversion   
+    min 62 (2T 22) visitante try          
+    min 62 (2T 22) visitante conversion   
+    min 75 (2T 35) local     try          Manuel Nicolas Rodriguez
+  marcador  · eventos 20-51 · guardado 20-51
+  tries     · 4-7 (guardado —-—)
+  arbitro   · Lautaro Joaquin Quiroga Cafure (guardado: —)
+  guardado  · 21 local · 23 visitante · 22 eventos
+
+Córdoba Athletic Club M19 "A" vs Tala Rugby Club M19 "A" · torneo-cordobes-m19-a · tarjeta 277221  ·  fca6181c-7a91-4a04-b804-5fbf19d5428c
+  local     · Córdoba Athletic Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min  8 (1T 8) local     substitution Olivier Courtis
+    min 15 (1T 15) visitante penalty_goal 
+    min 19 (1T 19) visitante penalty_goal 
+    min 31 (1T 31) visitante try          
+    min 31 (1T 31) visitante conversion   
+    min 40 (2T 0) local     substitution Samuel Carranza
+    min 40 (2T 0) local     substitution Alex Mateo Pugni Albanesi
+    min 45 (2T 5) local     try          Valentin Nuñez Pereyra
+    min 46 (2T 6) local     conversion   Bautista Caldo Navarro
+    min 50 (2T 10) visitante try          
+    min 50 (2T 10) visitante conversion   
+    min 53 (2T 13) local     substitution Facundo Ortiz
+    min 53 (2T 13) local     substitution Juan Cruz Polanco Garcia
+    min 56 (2T 16) local     try          Juan Cruz Valdivia
+    min 56 (2T 16) local     conversion   Bautista Caldo Navarro
+    min 60 (2T 20) local     substitution Teo Peña
+    min 62 (2T 22) visitante penalty_goal 
+    min 71 (2T 31) local     substitution Juan Martin Castro
+    min 72 (2T 32) visitante penalty_goal 
+    min 76 (2T 36) visitante try          
+  marcador  · eventos 14-31 · guardado 14-31
+  tries     · 2-3 (guardado —-—)
+  arbitro   · Ignacio Santiago Olmedo Ramirez (guardado: —)
+  guardado  · 23 local · 23 visitante · 20 eventos
+
+Carlos Paz Rugby Club M19 "A" vs Jockey Club de Villa María M19 "A" · torneo-cordobes-m19-a · tarjeta 277222  ·  cff96123-63b1-43fd-b686-e55e9d8b77a9
+  local     · Carlos Paz Rugby Club M19 "A" · 15 jugadores · 0 con ficha fijada
+  visitante · Jockey Club de Villa María M19 "A" · 23 jugadores · 19 con ficha fijada
+  eventos   · 32
+    min  1 (1T 1) visitante try          Jeronimo Jesús Colusso
+    min  1 (1T 1) visitante conversion   Francisco Salomon
+    min  6 (1T 6) visitante try          Jeremias Trigp
+    min  6 (1T 6) visitante conversion   Francisco Salomon
+    min 17 (1T 17) visitante try          Jeremias Trigp
+    min 17 (1T 17) visitante conversion   Francisco Salomon
+    min 19 (1T 19) visitante try          Bautista Rojas
+    min 19 (1T 19) visitante conversion   Francisco Salomon
+    min 22 (1T 22) visitante try          Jeremias Trigp
+    min 25 (1T 25) visitante try          Juan Cruz Colusso
+    min 29 (1T 29) visitante try          Jeremias Trigp
+    min 29 (1T 29) visitante conversion   Francisco Salomon
+    min 31 (1T 31) visitante try          Juan Cruz Colusso
+    min 31 (1T 31) visitante conversion   Francisco Salomon
+    min 41 (2T 1) visitante substitution Maximiliano Ghione
+    min 42 (2T 2) visitante substitution Augusto Chialvo
+    min 42 (2T 2) visitante try          Julian Alcalino Araoz
+    min 42 (2T 2) visitante conversion   Francisco Salomon
+    min 45 (2T 5) local     try          
+    min 45 (2T 5) visitante card_yellow  Bruno Geremias
+    min 47 (2T 7) visitante substitution Jeronimo Jesús Colusso
+    min 49 (2T 9) visitante try          Tiago Requena
+    min 55 (2T 15) visitante substitution Bruno Geremias
+    min 56 (2T 16) visitante try          Renzo Pavone
+    min 59 (2T 19) visitante substitution Bautista Arbarello
+    min 60 (2T 20) visitante substitution Alvaro Rosso
+    min 61 (2T 21) visitante substitution Jeremias Trigp
+    min 62 (2T 22) local     card_yellow  
+    min 63 (2T 23) visitante try          Juan Cruz Colusso
+    min 63 (2T 23) visitante conversion   Francisco Salomon
+    min 70 (2T 30) visitante substitution Valentín Fracarolli
+    min 74 (2T 34) local     try          
+  marcador  · eventos 10-76 · guardado 10-76
+  tries     · 2-12 (guardado —-—)
+  arbitro   · Florencia Ledesma (guardado: —)
+  guardado  · 15 local · 23 visitante · 32 eventos
+
+Club Palermo Bajo M19 "A" vs Urú Curé Rugby Club M19 "A" · torneo-cordobes-m19-a · tarjeta 277223  ·  dad5a417-5c78-4583-af97-ef40c8129541
+  local     · Club Palermo Bajo M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Urú Curé Rugby Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 13
+    min  5 (1T 5) local     try          
+    min 11 (1T 11) visitante try          
+    min 11 (1T 11) visitante conversion   
+    min 14 (1T 14) local     card_yellow  
+    min 22 (1T 22) local     injury       
+    min 25 (1T 25) visitante card_yellow  
+    min 29 (1T 29) local     card_yellow  
+    min 31 (1T 31) local     try          
+    min 31 (1T 31) local     conversion   
+    min 35 (1T 35) visitante try          
+    min 35 (1T 35) visitante conversion   
+    min 48 (2T 8) visitante try          
+    min 70 (2T 30) visitante penalty_goal 
+  marcador  · eventos 12-22 · guardado 12-22
+  tries     · 2-3 (guardado —-—)
+  arbitro   · Nahuel Sabena (guardado: —)
+  guardado  · 23 local · 23 visitante · 13 eventos
+
+Club Universitario de Córdoba M19 "A" vs Club La Tablada M19 "A" · torneo-cordobes-m19-a · tarjeta 277224  ·  e0bc5bc4-9677-482a-a7d5-d57ab23e9904
+  local     · Club Universitario de Córdoba M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min 12 (1T 12) local     try          Valentino Fernandez
+    min 21 (1T 21) visitante try          
+    min 22 (1T 22) local     substitution Bautista Villarruel
+    min 22 (1T 22) visitante conversion   
+    min 22 (1T 22) local     injury       Pedro Marchetti
+    min 23 (1T 23) visitante try          
+    min 23 (1T 23) visitante conversion   
+    min 27 (1T 27) local     try          Franco Capozucca
+    min 27 (1T 27) local     conversion   Franco Capozucca
+    min 27 (1T 27) local     substitution Valentino Cinalli
+    min 31 (1T 31) visitante try          
+    min 33 (1T 33) visitante try          
+    min 33 (1T 33) visitante conversion   
+    min 36 (1T 36) visitante try          
+    min 36 (1T 36) visitante conversion   
+    min 46 (2T 6) local     substitution Santiago Gelos
+    min 46 (2T 6) local     substitution Francisco Pizzatti Pertegarini
+    min 47 (2T 7) visitante card_yellow  
+    min 57 (2T 17) local     try          Micael Mateo Bustos Lopez
+    min 66 (2T 26) local     try          Bautista Sartor Musso
+    min 66 (2T 26) local     conversion   Mauro Llamas Bruno
+    min 72 (2T 32) local     card_yellow  Mateo Moyano
+  marcador  · eventos 24-33 · guardado 24-33
+  tries     · 4-5 (guardado —-—)
+  arbitro   · Daiana Del Milagro Cesaretti (guardado: —)
+  guardado  · 23 local · 23 visitante · 22 eventos
+
+Jockey Club Córdoba M19 "A" vs Club Universitario de Córdoba M19 "A" · torneo-cordobes-m19-a · tarjeta 277225  ·  b777ab33-3d9d-49d8-a2b8-e25e6132338b
+  local     · Jockey Club Córdoba M19 "A" · 23 jugadores · 18 con ficha fijada
+  visitante · Club Universitario de Córdoba M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 29
+    min  2 (1T 2) local     try          
+    min  2 (1T 2) local     conversion   
+    min  5 (1T 5) local     try          
+    min  5 (1T 5) local     conversion   
+    min  7 (1T 7) visitante substitution Santiago Martin Rodrigo
+    min  7 (1T 7) visitante substitution Gino Fozzatti Stival
+    min  7 (1T 7) visitante substitution Mauro Llamas Bruno
+    min  8 (1T 8) visitante substitution Lisandro Ismael Peralta Sanchez
+    min  9 (1T 9) visitante try          Mateo Moyano
+    min 11 (1T 11) local     card_yellow  
+    min 15 (1T 15) visitante substitution Bautista Villarruel
+    min 17 (1T 17) local     try          
+    min 17 (1T 17) local     conversion   
+    min 19 (1T 19) visitante substitution Francisco Pizzatti Pertegarini
+    min 19 (1T 19) visitante substitution Tomas Ripa Zanuttin
+    min 34 (1T 34) local     try          
+    min 34 (1T 34) local     conversion   
+    min 47 (2T 7) visitante try          Tomas Ripa Zanuttin
+    min 47 (2T 7) visitante conversion   Mauro Llamas Bruno
+    min 49 (2T 9) local     try          
+    min 49 (2T 9) local     conversion   
+    min 53 (2T 13) local     try          
+    min 53 (2T 13) local     conversion   
+    min 62 (2T 22) local     try          
+    min 62 (2T 22) local     conversion   
+    min 75 (2T 35) visitante conversion   Franco Capozucca
+    min 75 (2T 35) visitante try          Santiago Gelos
+    min 78 (2T 38) local     try          
+    min 78 (2T 38) local     conversion   
+  marcador  · eventos 56-19 · guardado 56-19
+  tries     · 8-3 (guardado —-—)
+  arbitro   · Daiana Del Milagro Cesaretti (guardado: —)
+  guardado  · 23 local · 23 visitante · 29 eventos
+
+Club La Tablada M19 "A" vs Club Palermo Bajo M19 "A" · torneo-cordobes-m19-a · tarjeta 277226  ·  4544e141-0cff-45d6-9564-48f6aabc5739
+  local     · Club La Tablada M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 11
+    min  9 (1T 9) visitante try          
+    min  9 (1T 9) visitante conversion   
+    min 28 (1T 28) visitante try          
+    min 29 (1T 29) visitante conversion   
+    min 47 (2T 7) visitante penalty_goal 
+    min 47 (2T 7) visitante card_yellow  
+    min 53 (2T 13) local     card_yellow  
+    min 55 (2T 15) visitante try          
+    min 70 (2T 30) visitante card_yellow  
+    min 73 (2T 33) local     try          
+    min 73 (2T 33) local     conversion   
+  marcador  · eventos 7-22 · guardado 7-22
+  tries     · 1-3 (guardado —-—)
+  arbitro   · Enzo Riva (guardado: —)
+  guardado  · 23 local · 23 visitante · 11 eventos
+
+Jockey Club de Villa María M19 "A" vs Córdoba Athletic Club M19 "A" · torneo-cordobes-m19-a · tarjeta 277228  ·  1198e549-9aeb-4b28-9d6d-2ede1d9e32a8
+  local     · Jockey Club de Villa María M19 "A" · 23 jugadores · 20 con ficha fijada
+  visitante · Córdoba Athletic Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 29
+    min  6 (1T 6) local     try          Tiago Requena
+    min  7 (1T 7) local     conversion   Francisco Salomon
+    min 16 (1T 16) local     try          Renzo Mariani Mulinetti
+    min 27 (1T 27) visitante try          Mauricio Bazan Gonzalez
+    min 28 (1T 28) visitante conversion   Bautista Caldo Navarro
+    min 30 (1T 30) local     card_yellow  Joaquín Julián Lopez
+    min 40 (2T 0) visitante substitution Samuel Carranza
+    min 44 (2T 4) local     try          Benjamin Poloni Avaro
+    min 45 (2T 5) local     conversion   Francisco Salomon
+    min 48 (2T 8) visitante substitution Benjamin Osvaldo Campi
+    min 48 (2T 8) visitante substitution Francisco Racedo
+    min 49 (2T 9) local     try          Bruno Geremias
+    min 54 (2T 14) visitante substitution Juan Martin Castro
+    min 54 (2T 14) local     substitution Lorenzo David
+    min 54 (2T 14) visitante substitution Juan Cruz Polanco Garcia
+    min 58 (2T 18) visitante substitution Teo Peña
+    min 58 (2T 18) visitante try          Teo Peña
+    min 59 (2T 19) visitante conversion   Bautista Caldo Navarro
+    min 59 (2T 19) visitante substitution Bautista Caldo Navarro
+    min 62 (2T 22) local     try          Bruno Geremias
+    min 62 (2T 22) visitante substitution Mateo Nicolas Ragazzini
+    min 63 (2T 23) local     conversion   Francisco Salomon
+    min 63 (2T 23) local     substitution Joaquín Julián Lopez
+    min 63 (2T 23) local     substitution Renzo Mariani Mulinetti
+    min 66 (2T 26) local     substitution Jeronimo Jesús Colusso
+    min 68 (2T 28) local     try          Juan Cruz Colusso
+    min 69 (2T 29) local     conversion   Francisco Salomon
+    min 71 (2T 31) local     substitution Bautista Arbarello
+    min 71 (2T 31) local     substitution Maximiliano Ghione
+  marcador  · eventos 38-14 · guardado 38-14
+  tries     · 6-2 (guardado —-—)
+  arbitro   · Florencia Ledesma (guardado: —)
+  guardado  · 23 local · 23 visitante · 29 eventos
+
+Tala Rugby Club M19 "A" vs San Martín de Villa María M19 "A" · torneo-cordobes-m19-a · tarjeta 277229  ·  7124bf87-1fe1-42fc-bb16-1568aba759e4
+  local     · Tala Rugby Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · San Martín de Villa María M19 "A" · 22 jugadores · 0 con ficha fijada
+  eventos   · 26
+    min  1 (1T 1) local     try          
+    min  1 (1T 1) local     conversion   
+    min  6 (1T 6) local     try          
+    min  6 (1T 6) local     conversion   
+    min 20 (1T 20) local     try          
+    min 23 (1T 23) local     try          
+    min 23 (1T 23) local     conversion   
+    min 27 (1T 27) local     try          
+    min 27 (1T 27) local     conversion   
+    min 32 (1T 32) local     card_yellow  
+    min 34 (1T 34) visitante try          Manuel Nicolas Rodriguez
+    min 46 (2T 6) local     try          
+    min 46 (2T 6) local     conversion   
+    min 49 (2T 9) visitante try          Walter Geremias Ciarez
+    min 50 (2T 10) visitante conversion   Hector Lautaro Orrantia
+    min 51 (2T 11) visitante card_yellow  Isaias Uriel Zoy
+    min 52 (2T 12) local     try          
+    min 52 (2T 12) local     conversion   
+    min 56 (2T 16) visitante try          Luca Carrizo
+    min 57 (2T 17) visitante conversion   Hector Lautaro Orrantia
+    min 58 (2T 18) local     try          
+    min 58 (2T 18) local     conversion   
+    min 63 (2T 23) local     try          
+    min 63 (2T 23) local     conversion   
+    min 68 (2T 28) local     try          
+    min 68 (2T 28) local     conversion   
+  marcador  · eventos 68-19 · guardado 68-19
+  tries     · 10-3 (guardado —-—)
+  arbitro   · Lautaro Joaquin Quiroga Cafure (guardado: —)
+  guardado  · 23 local · 22 visitante · 26 eventos
+
+Tala Rugby Club M19 "A" vs Jockey Club Córdoba M19 "A" · torneo-cordobes-m19-a · tarjeta 277230  ·  1a4c3345-3b08-4248-b599-174c863b141a
+  local     · Tala Rugby Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M19 "A" · 23 jugadores · 19 con ficha fijada
+  eventos   · 14
+    min 15 (1T 15) visitante try          
+    min 15 (1T 15) visitante conversion   
+    min 18 (1T 18) local     penalty_goal 
+    min 25 (1T 25) visitante card_yellow  
+    min 31 (1T 31) local     penalty_goal 
+    min 40 (2T 0) visitante try          
+    min 46 (2T 6) visitante try          
+    min 48 (2T 8) local     try          
+    min 48 (2T 8) local     conversion   
+    min 56 (2T 16) local     try          
+    min 58 (2T 18) visitante penalty_goal 
+    min 60 (2T 20) local     try          
+    min 60 (2T 20) local     conversion   
+    min 63 (2T 23) local     card_yellow  
+  marcador  · eventos 25-20 · guardado 25-20
+  tries     · 3-3 (guardado —-—)
+  arbitro   · Enzo Riva (guardado: —)
+  guardado  · 23 local · 23 visitante · 14 eventos
+
+Jockey Club de Villa María M19 "A" vs San Martín de Villa María M19 "A" · torneo-cordobes-m19-a · tarjeta 277231  ·  40825a00-cd26-429d-8f6d-7e858748edc3
+  local     · Jockey Club de Villa María M19 "A" · 23 jugadores · 21 con ficha fijada
+  visitante · San Martín de Villa María M19 "A" · 22 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min  7 (1T 7) visitante try          Manuel Nicolas Rodriguez
+    min  8 (1T 8) visitante conversion   Franco Benjamin Alvarez Leiva
+    min 10 (1T 10) local     try          Bruno Geremias
+    min 11 (1T 11) local     conversion   Francisco Salomon
+    min 14 (1T 14) visitante card_yellow  Walter Geremias Ciarez
+    min 15 (1T 15) local     try          Joaquín Julián Lopez
+    min 16 (1T 16) local     conversion   Francisco Salomon
+    min 41 (2T 1) local     penalty_goal Francisco Salomon
+    min 44 (2T 4) local     try          Maximiliano Ghione
+    min 45 (2T 5) local     conversion   Francisco Salomon
+    min 45 (2T 5) local     substitution Joaquín Julián Lopez
+    min 50 (2T 10) local     substitution Renzo Pavone
+    min 52 (2T 12) local     card_yellow  Bruno Geremias
+    min 55 (2T 15) visitante try          Juan Ignacio Morre Castelli
+    min 55 (2T 15) visitante conversion   Franco Benjamin Alvarez Leiva
+    min 55 (2T 15) local     card_yellow  Santino Rubiola
+    min 72 (2T 32) visitante try          Hector Lautaro Orrantia
+  marcador  · eventos 24-19 · guardado 24-19
+  tries     · 3-3 (guardado —-—)
+  arbitro   · Lautaro Joaquin Quiroga Cafure (guardado: —)
+  guardado  · 23 local · 22 visitante · 17 eventos
+
+Urú Curé Rugby Club M19 "A" vs Córdoba Athletic Club M19 "A" · torneo-cordobes-m19-a · tarjeta 277232  ·  ea11f49f-d17c-42b8-bc6d-32e44c622f11
+  local     · Urú Curé Rugby Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 30
+    min  4 (1T 4) local     penalty_goal Juan Martín San Millan
+    min  6 (1T 6) visitante card_yellow  Simon Camargo
+    min 12 (1T 12) visitante try          Bautista Caldo Navarro
+    min 13 (1T 13) visitante conversion   Bautista Caldo Navarro
+    min 21 (1T 21) visitante try          Francisco Racedo
+    min 21 (1T 21) visitante conversion   Bautista Caldo Navarro
+    min 26 (1T 26) local     injury       Benjamin Cerra
+    min 31 (1T 31) local     try          Nicolás Canigiani
+    min 31 (1T 31) local     conversion   Juan Martín San Millan
+    min 35 (1T 35) visitante penalty_goal Bautista Caldo Navarro
+    min 41 (2T 1) local     substitution Jeronimo Suino Borghi
+    min 41 (2T 1) local     substitution Santhino Gutierrez
+    min 45 (2T 5) visitante substitution Facundo Ortiz
+    min 45 (2T 5) visitante substitution Santiago Vedia
+    min 45 (2T 5) local     try          Bautista Rossi Jaume
+    min 45 (2T 5) local     conversion   Juan Martín San Millan
+    min 45 (2T 5) visitante substitution Samuel Carranza
+    min 45 (2T 5) visitante substitution Mateo Nicolas Ragazzini
+    min 45 (2T 5) visitante substitution Federico Molina
+    min 49 (2T 9) local     try          Santiago Ismael Cabello
+    min 51 (2T 11) local     substitution Mirco Rene Dalmasso
+    min 54 (2T 14) local     try          Guido Ghiglione
+    min 55 (2T 15) visitante substitution Teo Peña
+    min 55 (2T 15) visitante substitution Santiago Agustin Manzur
+    min 55 (2T 15) visitante substitution Juan Cruz Valdivia
+    min 56 (2T 16) local     penalty_goal Juan Martín San Millan
+    min 58 (2T 18) visitante penalty_goal Bautista Caldo Navarro
+    min 65 (2T 25) visitante injury       Mateo Godoy Brupbacher
+    min 66 (2T 26) local     card_yellow  Santiago Ismael Cabello
+    min 70 (2T 30) local     card_yellow  Guido Ghiglione
+  marcador  · eventos 30-20 · guardado 30-20
+  tries     · 4-2 (guardado —-—)
+  arbitro   · Ignacio Santiago Olmedo Ramirez (guardado: —)
+  guardado  · 23 local · 23 visitante · 30 eventos
+
+Club La Tablada M19 "A" vs Carlos Paz Rugby Club M19 "A" · torneo-cordobes-m19-a · tarjeta 277233  ·  076fa7cf-8c01-47f3-aa18-f00359817657
+  local     · Club La Tablada M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Carlos Paz Rugby Club M19 "A" · 19 jugadores · 0 con ficha fijada
+  eventos   · 28
+    min  4 (1T 4) local     try          
+    min  4 (1T 4) local     conversion   
+    min 12 (1T 12) local     try          
+    min 12 (1T 12) local     conversion   
+    min 22 (1T 22) local     try          
+    min 22 (1T 22) local     conversion   
+    min 26 (1T 26) local     try          
+    min 28 (1T 28) local     try          
+    min 28 (1T 28) local     conversion   
+    min 32 (1T 32) local     try          
+    min 32 (1T 32) local     conversion   
+    min 34 (1T 34) local     try          
+    min 42 (2T 2) local     try          
+    min 43 (2T 3) local     conversion   
+    min 44 (2T 4) local     try          
+    min 44 (2T 4) local     conversion   
+    min 50 (2T 10) local     try          
+    min 51 (2T 11) local     conversion   
+    min 53 (2T 13) local     try          
+    min 54 (2T 14) local     conversion   
+    min 58 (2T 18) local     try          
+    min 62 (2T 22) local     try          
+    min 62 (2T 22) local     conversion   
+    min 67 (2T 27) visitante try          
+    min 67 (2T 27) visitante conversion   
+    min 73 (2T 33) visitante try          
+    min 75 (2T 35) local     try          
+    min 75 (2T 35) local     conversion   
+  marcador  · eventos 92-12 · guardado 92-12
+  tries     · 14-2 (guardado —-—)
+  arbitro   · Ángeles Murua (guardado: —)
+  guardado  · 23 local · 19 visitante · 28 eventos
+
+Club Universitario de Córdoba M19 "A" vs Club Palermo Bajo M19 "A" · torneo-cordobes-m19-a · tarjeta 277234  ·  21ffe74a-4324-43e3-b924-3dabf0eb0c8e
+  local     · Club Universitario de Córdoba M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min  3 (1T 3) local     try          
+    min  7 (1T 7) visitante try          
+    min 17 (1T 17) visitante try          
+    min 17 (1T 17) visitante conversion   
+    min 22 (1T 22) visitante try          
+    min 22 (1T 22) visitante conversion   
+    min 27 (1T 27) local     try          
+    min 44 (2T 4) visitante try          
+    min 44 (2T 4) visitante conversion   
+    min 49 (2T 9) visitante try          
+    min 49 (2T 9) visitante conversion   
+    min 51 (2T 11) visitante try          
+    min 52 (2T 12) visitante conversion   
+    min 55 (2T 15) local     try          
+    min 55 (2T 15) local     conversion   
+    min 56 (2T 16) local     card_yellow  
+    min 65 (2T 25) visitante try          
+    min 66 (2T 26) visitante conversion   
+    min 69 (2T 29) visitante try          
+    min 69 (2T 29) visitante conversion   
+    min 75 (2T 35) visitante try          
+    min 75 (2T 35) visitante conversion   
+  marcador  · eventos 17-61 · guardado 17-61
+  tries     · 3-9 (guardado —-—)
+  arbitro   · Nahuel Sabena (guardado: —)
+  guardado  · 23 local · 23 visitante · 22 eventos
+
+Jockey Club Córdoba M19 "A" vs Club Palermo Bajo M19 "A" · torneo-cordobes-m19-a · tarjeta 277235  ·  7ab86794-ce2b-4a76-b0ef-7337c8d1b2f8
+  local     · Jockey Club Córdoba M19 "A" · 23 jugadores · 16 con ficha fijada
+  visitante · Club Palermo Bajo M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min 11 (1T 11) local     try          
+    min 11 (1T 11) local     conversion   
+    min 14 (1T 14) local     try          
+    min 21 (1T 21) local     try          
+    min 21 (1T 21) local     conversion   
+    min 26 (1T 26) local     try          
+    min 26 (1T 26) local     conversion   
+    min 34 (1T 34) visitante try          
+    min 34 (1T 34) visitante conversion   
+    min 50 (2T 10) local     card_yellow  
+    min 56 (2T 16) visitante try          
+    min 57 (2T 17) visitante conversion   
+    min 57 (2T 17) local     card_yellow  
+    min 60 (2T 20) visitante try          
+    min 60 (2T 20) visitante conversion   
+    min 65 (2T 25) visitante try          
+    min 66 (2T 26) visitante conversion   
+    min 66 (2T 26) local     penalty_goal 
+    min 71 (2T 31) local     penalty_goal 
+    min 77 (2T 37) visitante try          
+  marcador  · eventos 32-33 · guardado 32-33
+  tries     · 4-5 (guardado —-—)
+  arbitro   · Lautaro Joaquin Quiroga Cafure (guardado: —)
+  guardado  · 23 local · 23 visitante · 20 eventos
+
+Córdoba Athletic Club M19 "A" vs Club La Tablada M19 "A" · torneo-cordobes-m19-a · tarjeta 277237  ·  d8905540-c4af-4417-88fa-40a4bf2ee055
+  local     · Córdoba Athletic Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min  4 (1T 4) local     penalty_goal Bautista Caldo Navarro
+    min 12 (1T 12) visitante try          
+    min 12 (1T 12) visitante conversion   
+    min 18 (1T 18) visitante try          
+    min 20 (1T 20) local     try          Teo Peña
+    min 21 (1T 21) local     conversion   Bautista Caldo Navarro
+    min 21 (1T 21) local     card_yellow  Juan Ignacio Reinoso Santander
+    min 31 (1T 31) visitante penalty_goal 
+    min 35 (1T 35) visitante penalty_goal 
+    min 36 (1T 36) local     card_yellow  Santiago Vedia
+    min 42 (2T 2) visitante try          
+    min 42 (2T 2) visitante conversion   
+    min 45 (2T 5) visitante try          
+    min 45 (2T 5) visitante conversion   
+    min 51 (2T 11) local     substitution Benjamin Osvaldo Campi
+    min 53 (2T 13) local     substitution Mauricio Bazan Gonzalez
+    min 58 (2T 18) local     substitution Joaquin Maiquez Grosso
+    min 58 (2T 18) local     substitution Santiago Sucani Cancian
+    min 58 (2T 18) local     substitution Federico Molina
+    min 61 (2T 21) visitante try          
+    min 61 (2T 21) visitante conversion   
+    min 62 (2T 22) local     substitution Facundo Ortiz
+    min 62 (2T 22) local     substitution Santiago Vedia
+    min 66 (2T 26) visitante try          
+    min 66 (2T 26) visitante conversion   
+    min 76 (2T 36) local     try          Bautista Caldo Navarro
+    min 77 (2T 37) visitante card_yellow  
+  marcador  · eventos 15-46 · guardado 15-46
+  tries     · 2-6 (guardado —-—)
+  arbitro   · Nahuel Sabena (guardado: —)
+  guardado  · 23 local · 23 visitante · 27 eventos
+
+San Martín de Villa María M19 "A" vs Urú Curé Rugby Club M19 "A" · torneo-cordobes-m19-a · tarjeta 277238  ·  5c9a8fe3-7af2-4cd5-b0d9-00a8bf967684
+  local     · San Martín de Villa María M19 "A" · 21 jugadores · 0 con ficha fijada
+  visitante · Urú Curé Rugby Club M19 "A" · 22 jugadores · 0 con ficha fijada
+  eventos   · 33
+    min 13 (1T 13) local     card_yellow  Walter Geremias Ciarez
+    min 15 (1T 15) visitante try          Lucas Bernardini
+    min 18 (1T 18) visitante try          Segundo Sanz
+    min 18 (1T 18) visitante conversion   Juan Martín San Millan
+    min 19 (1T 19) local     substitution Enzo David Geremia
+    min 19 (1T 19) local     card_yellow  Santiago Merani
+    min 19 (1T 19) local     injury       Thomas Isaias Ponce
+    min 19 (1T 19) local     substitution Thomas Isaias Ponce
+    min 23 (1T 23) visitante try          Evaristo Jose Fissore
+    min 23 (1T 23) visitante conversion   Juan Martín San Millan
+    min 26 (1T 26) local     card_yellow  Santiago Ceballos
+    min 27 (1T 27) visitante try          Salvador Aramburu
+    min 27 (1T 27) visitante conversion   Juan Martín San Millan
+    min 33 (1T 33) visitante try          Juani Elizondo
+    min 41 (2T 1) local     injury       Pedro Caballero
+    min 41 (2T 1) local     substitution Pedro Caballero
+    min 46 (2T 6) visitante substitution Lautaro Torres Issa
+    min 46 (2T 6) local     substitution Santiago Merani
+    min 49 (2T 9) visitante substitution Evaristo Jose Fissore
+    min 55 (2T 15) visitante substitution Felipe Hipermayen
+    min 56 (2T 16) visitante substitution Valentino Demaestri
+    min 59 (2T 19) visitante try          Salvador Aramburu
+    min 59 (2T 19) visitante substitution Lucas Bernardini
+    min 60 (2T 20) visitante substitution Juani Elizondo
+    min 61 (2T 21) local     substitution Ramiro Locanetto
+    min 63 (2T 23) local     try          Ignacio Cornejo
+    min 67 (2T 27) local     try          Federico Cabanillas
+    min 69 (2T 29) visitante try          Santiago Ismael Cabello
+    min 69 (2T 29) visitante conversion   Juan Martín San Millan
+    min 71 (2T 31) visitante try          Santiago Ismael Cabello
+    min 71 (2T 31) visitante conversion   Juan Martín San Millan
+    min 73 (2T 33) visitante try          Salvador Aramburu
+    min 73 (2T 33) visitante conversion   Juan Martín San Millan
+  marcador  · eventos 10-57 · guardado 10-57
+  tries     · 2-9 (guardado —-—)
+  arbitro   · Florencia Ledesma (guardado: —)
+  guardado  · 21 local · 22 visitante · 33 eventos
+
+Tala Rugby Club M19 "A" vs Jockey Club de Villa María M19 "A" · torneo-cordobes-m19-a · tarjeta 277239  ·  fb1f149a-3c12-456c-895f-d9b0862e20d6
+  local     · Tala Rugby Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club de Villa María M19 "A" · 23 jugadores · 20 con ficha fijada
+  eventos   · 24
+    min  8 (1T 8) visitante card_yellow  Juan Cruz Colusso
+    min  9 (1T 9) visitante card_yellow  Renzo Mariani Mulinetti
+    min 10 (1T 10) local     try          
+    min 23 (1T 23) visitante penalty_goal Francisco Salomon
+    min 26 (1T 26) visitante try          Juan Cruz Colusso
+    min 27 (1T 27) local     penalty_goal 
+    min 27 (1T 27) visitante conversion   Francisco Salomon
+    min 35 (1T 35) local     penalty_goal 
+    min 35 (1T 35) visitante try          Juan Cruz Colusso
+    min 36 (1T 36) visitante conversion   Francisco Salomon
+    min 44 (2T 4) local     penalty_try  
+    min 45 (2T 5) visitante card_yellow  Santino Rubiola
+    min 48 (2T 8) visitante try          Tiago Requena
+    min 49 (2T 9) visitante conversion   Francisco Salomon
+    min 53 (2T 13) local     card_yellow  
+    min 55 (2T 15) visitante try          Jeronimo Jesús Colusso
+    min 55 (2T 15) local     try          
+    min 55 (2T 15) local     conversion   
+    min 65 (2T 25) visitante card_yellow  Santino Rubiola
+    min 65 (2T 25) visitante card_red     Santino Rubiola
+    min 73 (2T 33) local     try          
+    min 74 (2T 34) visitante card_red     Lorenzo David
+    min 75 (2T 35) local     card_red     
+    min 75 (2T 35) local     try          
+  marcador  · eventos 35-29 · guardado 35-29
+  tries     · 5-4 (guardado —-—)
+  arbitro   · Lucas Humeres (guardado: —)
+  guardado  · 23 local · 23 visitante · 24 eventos
+
+Jockey Club de Villa María M19 "A" vs Jockey Club Córdoba M19 "A" · torneo-cordobes-m19-a · tarjeta 277240  ·  eb8a2cda-ac7b-43aa-bc0c-14d47d614cf3
+  local     · Jockey Club de Villa María M19 "A" · 23 jugadores · 21 con ficha fijada
+  visitante · Jockey Club Córdoba M19 "A" · 23 jugadores · 19 con ficha fijada
+  eventos   · 12
+    min  7 (1T 7) visitante try          
+    min  7 (1T 7) visitante conversion   
+    min 15 (1T 15) visitante try          
+    min 24 (1T 24) local     try          Bruno Geremias
+    min 35 (1T 35) local     try          Benjamin Poloni Avaro
+    min 52 (2T 12) visitante try          
+    min 53 (2T 13) local     card_yellow  Maximiliano Ghione
+    min 56 (2T 16) local     substitution Lorenzo David
+    min 63 (2T 23) local     substitution Maximiliano Ghione
+    min 72 (2T 32) local     try          Juan Cruz Colusso
+    min 73 (2T 33) local     conversion   Antonio Calcagno
+    min 76 (2T 36) local     penalty_goal Antonio Calcagno
+  marcador  · eventos 20-17 · guardado 20-17
+  tries     · 3-3 (guardado —-—)
+  arbitro   · Octavio Damia Patiño (guardado: —)
+  guardado  · 23 local · 23 visitante · 12 eventos
+
+Urú Curé Rugby Club M19 "A" vs Tala Rugby Club M19 "A" · torneo-cordobes-m19-a · tarjeta 277241  ·  9cea85e0-ef5c-4efa-8da8-b68314dc88bb
+  local     · Urú Curé Rugby Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 15
+    min  2 (1T 2) local     penalty_try  
+    min  2 (1T 2) visitante card_yellow  
+    min 21 (1T 21) visitante try          
+    min 21 (1T 21) visitante conversion   
+    min 26 (1T 26) visitante try          
+    min 41 (2T 1) local     try          Segundo Sanz
+    min 47 (2T 7) visitante card_yellow  
+    min 48 (2T 8) local     penalty_goal Juan Martín San Millan
+    min 51 (2T 11) local     try          Nicolás Ochoa
+    min 51 (2T 11) local     conversion   Juan Martín San Millan
+    min 53 (2T 13) visitante try          
+    min 55 (2T 15) local     substitution Francisco Fia
+    min 62 (2T 22) local     substitution Felipe Hipermayen
+    min 62 (2T 22) local     substitution Segundo Sanz
+    min 65 (2T 25) local     substitution Guido Ghiglione
+  marcador  · eventos 22-17 · guardado 22-17
+  tries     · 3-3 (guardado —-—)
+  arbitro   · Enzo Riva (guardado: —)
+  guardado  · 23 local · 23 visitante · 15 eventos
+
+Club La Tablada M19 "A" vs San Martín de Villa María M19 "A" · torneo-cordobes-m19-a · tarjeta 277242  ·  77c28cba-727a-4e01-bb39-9c6fd8f42d2b
+  local     · Club La Tablada M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · San Martín de Villa María M19 "A" · 17 jugadores · 0 con ficha fijada
+  eventos   · 15
+    min  2 (1T 2) local     try          
+    min  3 (1T 3) local     conversion   
+    min  5 (1T 5) visitante try          Manuel Nicolas Rodriguez
+    min 10 (1T 10) visitante try          Manuel Nicolas Rodriguez
+    min 18 (1T 18) local     try          
+    min 19 (1T 19) local     conversion   
+    min 20 (1T 20) local     try          
+    min 27 (1T 27) local     try          
+    min 28 (1T 28) local     conversion   
+    min 33 (1T 33) local     try          
+    min 50 (2T 10) local     try          
+    min 51 (2T 11) local     conversion   
+    min 58 (2T 18) visitante substitution Lautaro Dario Alanis
+    min 62 (2T 22) visitante substitution Walter Geremias Ciarez
+    min 69 (2T 29) visitante try          Manuel Nicolas Rodriguez
+  marcador  · eventos 38-15 · guardado 38-15
+  tries     · 6-3 (guardado —-—)
+  arbitro   · Florencia Ledesma (guardado: —)
+  guardado  · 23 local · 17 visitante · 15 eventos
+
+Club Universitario de Córdoba M19 "A" vs Córdoba Athletic Club M19 "A" · torneo-cordobes-m19-a · tarjeta 277243  ·  09db53bf-e0ba-4022-bd1b-6eb1a4d21ed2
+  local     · Club Universitario de Córdoba M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 40-21
+  tries     · 0-0 (guardado —-—)
+  arbitro   · Nahuel Sabena (guardado: —)
+  guardado  · 23 local · 23 visitante · 0 eventos
+
+Córdoba Athletic Club M19 "A" vs Club Palermo Bajo M19 "A" · torneo-cordobes-m19-a · tarjeta 277246  ·  9bf49780-fb26-409e-9c3c-5db7953a4dc5
+  local     · Córdoba Athletic Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min  1 (1T 1) local     try          Fabrizio Ceretti
+    min 16 (1T 16) visitante try          
+    min 20 (1T 20) local     try          Santiago Ojeda
+    min 21 (1T 21) local     conversion   Teo Peña
+    min 28 (1T 28) local     card_yellow  Juan Cruz Valdivia
+    min 45 (2T 5) local     injury       Facundo Ortiz
+    min 45 (2T 5) local     substitution Facundo Ortiz
+    min 49 (2T 9) visitante try          
+    min 57 (2T 17) local     substitution Benjamin Osvaldo Campi
+    min 58 (2T 18) visitante try          
+    min 59 (2T 19) visitante conversion   
+    min 62 (2T 22) local     substitution Matias Nicolas Godoy Pignatta
+    min 62 (2T 22) local     substitution Santiago Sucani Cancian
+    min 62 (2T 22) local     try          Matias Nicolas Godoy Pignatta
+    min 63 (2T 23) local     conversion   Bautista Caldo Navarro
+    min 64 (2T 24) local     substitution Santiago Vedia
+    min 68 (2T 28) visitante try          
+    min 68 (2T 28) local     substitution Juan Ignacio Reinoso Santander
+  marcador  · eventos 19-22 · guardado 19-22
+  tries     · 3-4 (guardado —-—)
+  arbitro   · Gustavo Reartes (guardado: —)
+  guardado  · 23 local · 23 visitante · 18 eventos
+
+San Martín de Villa María M19 "A" vs Club Universitario de Córdoba M19 "A" · torneo-cordobes-m19-a · tarjeta 277247  ·  793ce913-2dac-4a9c-8602-fb7e4c2be33f
+  local     · San Martín de Villa María M19 "A" · 21 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba M19 "A" · 21 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min  1 (1T 1) visitante card_yellow  Atilio Eugenio Guaiman Urtubey
+    min 13 (1T 13) local     conversion   Conrado Bicego
+    min 13 (1T 13) local     try          Franco Benjamin Alvarez Leiva
+    min 15 (1T 15) local     try          Conrado Bicego
+    min 15 (1T 15) local     conversion   Conrado Bicego
+    min 18 (1T 18) visitante card_yellow  Franco Capozucca
+    min 27 (1T 27) local     penalty_goal Conrado Bicego
+    min 32 (1T 32) local     try          Manuel Nicolas Rodriguez
+    min 40 (1T 40) local     card_yellow  Enzo David Geremia
+    min 43 (2T 3) local     try          Manuel Nicolas Rodriguez
+    min 44 (2T 4) visitante substitution Benjamin Apfelbaum
+    min 44 (2T 4) local     conversion   Conrado Bicego
+    min 47 (2T 7) visitante substitution Francisco Pizzatti Pertegarini
+    min 47 (2T 7) visitante substitution Mauro Llamas Bruno
+    min 47 (2T 7) local     penalty_goal Conrado Bicego
+    min 50 (2T 10) local     substitution Juan Ignacio Morre Castelli
+    min 50 (2T 10) local     injury       Juan Ignacio Morre Castelli
+    min 52 (2T 12) visitante try          
+    min 53 (2T 13) visitante conversion   
+    min 60 (2T 20) local     try          Franco Benjamin Alvarez Leiva
+    min 65 (2T 25) visitante substitution Tomas Balaguer
+    min 68 (2T 28) local     card_yellow  Eliseo Sachetto
+    min 69 (2T 29) visitante try          
+    min 70 (2T 30) local     injury       Franco Benjamin Alvarez Leiva
+    min 72 (2T 32) local     conversion   Conrado Bicego
+  marcador  · eventos 39-12 · guardado 39-12
+  tries     · 5-2 (guardado —-—)
+  arbitro   · Nahuel Sabena (guardado: —)
+  guardado  · 21 local · 21 visitante · 25 eventos
+
+Tala Rugby Club M19 "A" vs Club La Tablada M19 "A" · torneo-cordobes-m19-a · tarjeta 277248  ·  c731341b-f707-4037-bed4-d52ceafd4f85
+  local     · Tala Rugby Club M19 "A" · 22 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 10
+    min 28 (1T 28) visitante penalty_goal 
+    min 44 (2T 4) visitante card_yellow  
+    min 50 (2T 10) local     card_yellow  
+    min 52 (2T 12) visitante try          
+    min 52 (2T 12) visitante conversion   
+    min 55 (2T 15) visitante try          
+    min 56 (2T 16) visitante conversion   
+    min 62 (2T 22) visitante try          
+    min 70 (2T 30) local     try          
+    min 78 (2T 38) local     try          
+  marcador  · eventos 10-22 · guardado 10-22
+  tries     · 2-3 (guardado —-—)
+  arbitro   · Ignacio Santiago Olmedo Ramirez (guardado: —)
+  guardado  · 22 local · 23 visitante · 10 eventos
+
+Jockey Club de Villa María M19 "A" vs Urú Curé Rugby Club M19 "A" · torneo-cordobes-m19-a · tarjeta 277249  ·  e20db177-beee-4230-9558-f6814b251d49
+  local     · Jockey Club de Villa María M19 "A" · 23 jugadores · 21 con ficha fijada
+  visitante · Urú Curé Rugby Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 14
+    min  5 (1T 5) visitante try          Lucas Bernardini
+    min  8 (1T 8) local     card_yellow  Benjamin Poloni Avaro
+    min 26 (1T 26) local     penalty_goal Antonio Calcagno
+    min 30 (1T 30) local     penalty_goal Antonio Calcagno
+    min 35 (1T 35) visitante penalty_goal Manuel Capriglioni
+    min 44 (2T 4) local     try          Tiago Requena
+    min 44 (2T 4) local     conversion   Antonio Calcagno
+    min 46 (2T 6) visitante card_yellow  Jeronimo Suino Borghi
+    min 57 (2T 17) local     penalty_goal Antonio Calcagno
+    min 62 (2T 22) local     try          Maximiliano Ghione
+    min 62 (2T 22) local     conversion   Antonio Calcagno
+    min 67 (2T 27) local     card_yellow  Santino Rubiola
+    min 75 (2T 35) visitante try          Manuel Coll
+    min 75 (2T 35) local     card_yellow  Juan Cruz Colusso
+  marcador  · eventos 23-13 · guardado 23-13
+  tries     · 2-2 (guardado —-—)
+  arbitro   · Lautaro Joaquin Quiroga Cafure (guardado: —)
+  guardado  · 23 local · 23 visitante · 14 eventos
+
+Urú Curé Rugby Club M19 "A" vs Jockey Club Córdoba M19 "A" · torneo-cordobes-m19-a · tarjeta 277250  ·  ff1e437d-2cd3-43d6-8cb2-ed41bb5fa16e
+  local     · Urú Curé Rugby Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M19 "A" · 23 jugadores · 17 con ficha fijada
+  eventos   · 17
+    min  2 (1T 2) local     try          Evaristo Jose Fissore
+    min  5 (1T 5) visitante try          
+    min  5 (1T 5) visitante conversion   
+    min  9 (1T 9) local     penalty_goal Juan Martín San Millan
+    min 15 (1T 15) visitante try          
+    min 15 (1T 15) visitante conversion   
+    min 31 (1T 31) visitante try          
+    min 49 (2T 9) local     substitution Nicolás Canigiani
+    min 49 (2T 9) visitante injury       
+    min 50 (2T 10) local     substitution Felipe Hipermayen
+    min 50 (2T 10) local     substitution Santhino Gutierrez
+    min 54 (2T 14) local     substitution Francesco Medina
+    min 57 (2T 17) local     try          Valentino Demaestri
+    min 57 (2T 17) local     conversion   Juan Martín San Millan
+    min 60 (2T 20) visitante card_yellow  
+    min 65 (2T 25) visitante card_yellow  
+    min 69 (2T 29) local     substitution Francisco Fia
+  marcador  · eventos 15-19 · guardado 15-19
+  tries     · 2-3 (guardado —-—)
+  arbitro   · Ignacio Santiago Olmedo Ramirez (guardado: —)
+  guardado  · 23 local · 23 visitante · 17 eventos
+
+Club La Tablada M19 "A" vs Jockey Club de Villa María M19 "A" · torneo-cordobes-m19-a · tarjeta 277251  ·  73fcbded-b764-4278-a9ca-9df14f934ccd
+  local     · Club La Tablada M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club de Villa María M19 "A" · 23 jugadores · 21 con ficha fijada
+  eventos   · 21
+    min  8 (1T 8) local     try          
+    min  8 (1T 8) local     conversion   
+    min 13 (1T 13) local     penalty_goal 
+    min 15 (1T 15) visitante try          Jeronimo Jesús Colusso
+    min 16 (1T 16) visitante conversion   Francisco Salomon
+    min 19 (1T 19) local     penalty_goal 
+    min 24 (1T 24) visitante try          Tiago Requena
+    min 27 (1T 27) visitante card_yellow  Antonio Calcagno
+    min 33 (1T 33) local     try          
+    min 33 (1T 33) local     conversion   
+    min 36 (1T 36) visitante try          Tiago Requena
+    min 45 (2T 5) visitante card_yellow  Walter Igancio Bosio
+    min 46 (2T 6) local     try          
+    min 46 (2T 6) visitante substitution Maximiliano Ghione
+    min 49 (2T 9) visitante try          Tiago Requena
+    min 54 (2T 14) visitante substitution Renzo Pavone
+    min 57 (2T 17) local     penalty_goal 
+    min 58 (2T 18) visitante substitution Santino Rubiola
+    min 70 (2T 30) local     card_yellow  
+    min 72 (2T 32) local     try          
+    min 72 (2T 32) local     conversion   
+  marcador  · eventos 35-22 · guardado 35-22
+  tries     · 4-4 (guardado —-—)
+  arbitro   · Enzo Riva (guardado: —)
+  guardado  · 23 local · 23 visitante · 21 eventos
+
+Club Universitario de Córdoba M19 "A" vs Tala Rugby Club M19 "A" · torneo-cordobes-m19-a · tarjeta 277252  ·  9a56c5ac-4c61-4c94-89fc-b4278aaaabfa
+  local     · Club Universitario de Córdoba M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 26
+    min  1 (1T 1) visitante try          
+    min  1 (1T 1) visitante conversion   
+    min  5 (1T 5) local     card_yellow  Franco Capozucca
+    min 20 (1T 20) visitante card_yellow  
+    min 23 (1T 23) visitante try          
+    min 23 (1T 23) visitante conversion   
+    min 27 (1T 27) visitante try          
+    min 27 (1T 27) visitante conversion   
+    min 34 (1T 34) visitante try          
+    min 34 (1T 34) visitante conversion   
+    min 40 (2T 0) local     substitution Tomas Balaguer
+    min 40 (2T 0) local     substitution Benjamin Apfelbaum
+    min 40 (2T 0) local     substitution Juan Cruz Morrogh Bernard
+    min 43 (2T 3) visitante try          
+    min 43 (2T 3) visitante conversion   
+    min 51 (2T 11) local     substitution Tobias Moreno
+    min 51 (2T 11) local     substitution Ramiro Matias Bacci
+    min 51 (2T 11) local     substitution Pedro Marchetti
+    min 52 (2T 12) visitante try          
+    min 52 (2T 12) visitante conversion   
+    min 56 (2T 16) local     card_yellow  Lisandro Ismael Peralta Sanchez
+    min 59 (2T 19) local     substitution Fermin Tissera
+    min 66 (2T 26) local     substitution Jeremías Molinari Maidana
+    min 66 (2T 26) visitante try          
+    min 74 (2T 34) visitante try          
+    min 74 (2T 34) visitante conversion   
+  marcador  · eventos 0-54 · guardado 0-54
+  tries     · 0-8 (guardado —-—)
+  arbitro   · Florencia Ledesma (guardado: —)
+  guardado  · 23 local · 23 visitante · 26 eventos
+
+Club Palermo Bajo M19 "A" vs San Martín de Villa María M19 "A" · torneo-cordobes-m19-a · tarjeta 277253  ·  d7dcded2-ece3-4295-908f-6fc5c0d8fc5e
+  local     · Club Palermo Bajo M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · San Martín de Villa María M19 "A" · 21 jugadores · 0 con ficha fijada
+  eventos   · 28
+    min  6 (1T 6) local     try          
+    min  6 (1T 6) local     conversion   
+    min  8 (1T 8) local     try          
+    min  8 (1T 8) local     conversion   
+    min 12 (1T 12) local     try          
+    min 12 (1T 12) local     conversion   
+    min 13 (1T 13) visitante try          Hector Lautaro Orrantia
+    min 15 (1T 15) visitante try          Ramiro Locanetto
+    min 15 (1T 15) visitante conversion   Conrado Bicego
+    min 31 (1T 31) local     try          
+    min 32 (1T 32) local     conversion   
+    min 33 (1T 33) visitante try          Isaias Uriel Zoy
+    min 33 (1T 33) visitante conversion   Conrado Bicego
+    min 42 (2T 2) local     try          
+    min 42 (2T 2) local     conversion   
+    min 47 (2T 7) visitante card_yellow  Francesco Atilio Basso
+    min 47 (2T 7) visitante try          Eliseo Sachetto
+    min 47 (2T 7) visitante conversion   Conrado Bicego
+    min 50 (2T 10) visitante card_yellow  Santiago Merani
+    min 53 (2T 13) local     try          
+    min 54 (2T 14) visitante substitution Hector Lautaro Orrantia
+    min 59 (2T 19) visitante substitution Santiago Ceballos
+    min 59 (2T 19) visitante substitution Walter Geremias Ciarez
+    min 69 (2T 29) visitante substitution Santiago Merani
+    min 71 (2T 31) visitante substitution Eliseo Sachetto
+    min 71 (2T 31) local     try          
+    min 71 (2T 31) visitante substitution Ramiro Locanetto
+    min 71 (2T 31) local     conversion   
+  marcador  · eventos 47-26 · guardado 47-26
+  tries     · 7-4 (guardado —-—)
+  arbitro   · Lautaro Joaquin Quiroga Cafure (guardado: —)
+  guardado  · 23 local · 21 visitante · 28 eventos
+
+Jockey Club Córdoba M19 "A" vs Córdoba Athletic Club M19 "A" · torneo-cordobes-m19-a · tarjeta 277255  ·  6c19fb06-1b06-4384-989b-7d6bc2accf96
+  local     · Jockey Club Córdoba M19 "A" · 23 jugadores · 17 con ficha fijada
+  visitante · Córdoba Athletic Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min  7 (1T 7) visitante penalty_goal Bautista Caldo Navarro
+    min 20 (1T 20) visitante penalty_goal Bautista Caldo Navarro
+    min 24 (1T 24) visitante penalty_goal Bautista Caldo Navarro
+    min 26 (1T 26) local     card_yellow  
+    min 32 (1T 32) local     penalty_try  
+    min 33 (1T 33) visitante card_yellow  Santiago Sucani Cancian
+    min 35 (1T 35) local     try          
+    min 36 (1T 36) visitante card_yellow  Matias Nicolas Godoy Pignatta
+    min 44 (2T 4) visitante try          Olivier Courtis
+    min 45 (2T 5) visitante conversion   Bautista Caldo Navarro
+    min 49 (2T 9) local     try          
+    min 49 (2T 9) local     conversion   
+    min 50 (2T 10) visitante substitution Mauricio Bazan Gonzalez
+    min 51 (2T 11) local     penalty_goal 
+    min 56 (2T 16) visitante substitution Santiago Sucani Cancian
+    min 57 (2T 17) visitante substitution Matias Nicolas Godoy Pignatta
+    min 63 (2T 23) visitante try          Simon Camargo
+    min 63 (2T 23) visitante substitution Francisco Racedo
+    min 63 (2T 23) visitante substitution Teo Peña
+    min 63 (2T 23) local     try          
+    min 63 (2T 23) local     conversion   
+    min 64 (2T 24) visitante conversion   Bautista Caldo Navarro
+    min 67 (2T 27) local     try          
+    min 68 (2T 28) visitante card_red     Simon Camargo
+  marcador  · eventos 34-23 · guardado 34-23
+  tries     · 5-2 (guardado —-—)
+  arbitro   · Nahuel Sabena (guardado: —)
+  guardado  · 23 local · 23 visitante · 24 eventos
+
+Tala Rugby Club M19 "A" vs Club Palermo Bajo M19 "A" · torneo-cordobes-m19-a · tarjeta 277257  ·  d9adea15-4370-4758-8bfc-b5c5be9504dc
+  local     · Tala Rugby Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min  5 (1T 5) visitante penalty_goal 
+    min 12 (1T 12) local     try          
+    min 12 (1T 12) local     conversion   
+    min 19 (1T 19) local     penalty_goal 
+    min 21 (1T 21) visitante try          
+    min 21 (1T 21) visitante conversion   
+    min 31 (1T 31) visitante try          
+    min 31 (1T 31) visitante conversion   
+    min 34 (1T 34) local     try          
+    min 34 (1T 34) local     conversion   
+    min 50 (2T 10) visitante card_yellow  
+    min 50 (2T 10) local     penalty_goal 
+    min 61 (2T 21) visitante try          
+    min 61 (2T 21) visitante conversion   
+    min 64 (2T 24) visitante try          
+    min 65 (2T 25) visitante conversion   
+    min 67 (2T 27) visitante try          
+  marcador  · eventos 20-36 · guardado 20-36
+  tries     · 2-5 (guardado —-—)
+  arbitro   · Octavio Damia Patiño (guardado: —)
+  guardado  · 23 local · 23 visitante · 17 eventos
+
+Urú Curé Rugby Club M19 "A" vs Club La Tablada M19 "A" · torneo-cordobes-m19-a · tarjeta 277259  ·  257e051b-824f-4e09-bdd5-68d8e0a7cd72
+  local     · Urú Curé Rugby Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M19 "A" · 22 jugadores · 0 con ficha fijada
+  eventos   · 21
+    min  4 (1T 4) visitante penalty_goal 
+    min  6 (1T 6) local     try          Lucas Bernardini
+    min  6 (1T 6) local     conversion   Juan Martín San Millan
+    min  6 (1T 6) visitante card_yellow  
+    min  9 (1T 9) local     try          Lucas Bernardini
+    min 16 (1T 16) visitante injury       
+    min 19 (1T 19) visitante try          
+    min 24 (1T 24) visitante injury       
+    min 28 (1T 28) local     penalty_goal Juan Martín San Millan
+    min 34 (1T 34) local     try          Juan Martín San Millan
+    min 34 (1T 34) local     conversion   Juan Martín San Millan
+    min 44 (2T 4) local     card_yellow  Bautista Rossi Jaume
+    min 46 (2T 6) visitante card_yellow  
+    min 48 (2T 8) local     substitution Segundo Sanz
+    min 51 (2T 11) local     substitution Jeronimo Suino Borghi
+    min 55 (2T 15) local     substitution Evaristo Jose Fissore
+    min 57 (2T 17) local     try          Lucas Bernardini
+    min 57 (2T 17) local     conversion   Juan Martín San Millan
+    min 65 (2T 25) local     substitution Nicolás Canigiani
+    min 69 (2T 29) local     injury       Facundo Maccio
+    min 73 (2T 33) local     try          Juan Martín San Millan
+  marcador  · eventos 34-8 · guardado 34-8
+  tries     · 5-1 (guardado —-—)
+  arbitro   · Enzo Riva (guardado: —)
+  guardado  · 23 local · 22 visitante · 21 eventos
+
+Club La Tablada M19 "A" vs Jockey Club Córdoba M19 "A" · torneo-cordobes-m19-a · tarjeta 277260  ·  bcd5f70b-4a2a-4d56-887e-8a02af780fe1
+  local     · Club La Tablada M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M19 "A" · 23 jugadores · 16 con ficha fijada
+  eventos   · 14
+    min 11 (1T 11) local     try          
+    min 11 (1T 11) local     conversion   
+    min 21 (1T 21) local     try          
+    min 22 (1T 22) local     conversion   
+    min 25 (1T 25) visitante try          
+    min 25 (1T 25) visitante conversion   
+    min 31 (1T 31) visitante penalty_goal 
+    min 34 (1T 34) local     penalty_goal 
+    min 46 (2T 6) visitante try          
+    min 46 (2T 6) visitante conversion   
+    min 49 (2T 9) local     card_yellow  
+    min 63 (2T 23) local     try          
+    min 63 (2T 23) local     conversion   
+    min 68 (2T 28) visitante try          
+  marcador  · eventos 24-22 · guardado 24-22
+  tries     · 3-3 (guardado —-—)
+  arbitro   · Enzo Riva (guardado: —)
+  guardado  · 23 local · 23 visitante · 14 eventos
+
+Club Universitario de Córdoba M19 "A" vs Urú Curé Rugby Club M19 "A" · torneo-cordobes-m19-a · tarjeta 277261  ·  7b4f90b2-a5b1-49c1-9507-940c1bf13a0d
+  local     · Club Universitario de Córdoba M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Urú Curé Rugby Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 39
+    min  2 (1T 2) visitante injury       Facundo Maccio
+    min 13 (1T 13) visitante try          Santiago Ismael Cabello
+    min 13 (1T 13) visitante conversion   Juan Martín San Millan
+    min 17 (1T 17) visitante try          Santiago Ismael Cabello
+    min 17 (1T 17) visitante conversion   Juan Martín San Millan
+    min 20 (1T 20) visitante try          Lucas Bernardini
+    min 20 (1T 20) visitante conversion   Juan Martín San Millan
+    min 28 (1T 28) visitante try          Salvador Aramburu
+    min 31 (1T 31) local     try          Santiago Martin Rodrigo
+    min 31 (1T 31) local     conversion   Mauro Llamas Bruno
+    min 37 (1T 37) visitante try          Valentino Demaestri
+    min 37 (1T 37) visitante conversion   Juan Martín San Millan
+    min 40 (2T 0) local     substitution Santiago Martin Rodrigo
+    min 42 (2T 2) visitante try          Juan Martín San Millan
+    min 42 (2T 2) visitante conversion   Juan Martín San Millan
+    min 47 (2T 7) local     substitution Franco Capozucca
+    min 47 (2T 7) local     substitution Bautista Villarruel
+    min 47 (2T 7) visitante card_yellow  Gustavo Jose Echenique
+    min 52 (2T 12) visitante substitution Nicolás Ochoa
+    min 54 (2T 14) local     substitution Ramiro Matias Bacci
+    min 55 (2T 15) local     try          Pedro Marchetti
+    min 55 (2T 15) local     conversion   Pedro Marchetti
+    min 56 (2T 16) visitante substitution Bautista Rossi Jaume
+    min 56 (2T 16) visitante substitution Guido Ghiglione
+    min 56 (2T 16) visitante substitution Lucas Bernardini
+    min 59 (2T 19) local     try          Pedro Marchetti
+    min 59 (2T 19) local     conversion   Pedro Marchetti
+    min 60 (2T 20) local     substitution Luca Emiliano Quevedo Croccia
+    min 60 (2T 20) visitante substitution Benjamin Cerra
+    min 60 (2T 20) visitante substitution Santhino Gutierrez
+    min 66 (2T 26) visitante try          Salvador Aramburu
+    min 66 (2T 26) visitante conversion   Juan Martín San Millan
+    min 67 (2T 27) local     substitution Lautaro Gabriel Roteda
+    min 67 (2T 27) visitante substitution Nicolás Canigiani
+    min 69 (2T 29) local     try          Francisco Pizzatti Pertegarini
+    min 71 (2T 31) local     substitution Nicolás Allende Peralta
+    min 71 (2T 31) local     substitution Francisco Pizzatti Pertegarini
+    min 74 (2T 34) visitante try          Valentino Demaestri
+    min 74 (2T 34) visitante conversion   Juan Martín San Millan
+  marcador  · eventos 26-54 · guardado 26-54
+  tries     · 4-8 (guardado —-—)
+  arbitro   · Nahuel Sabena (guardado: —)
+  guardado  · 23 local · 23 visitante · 39 eventos
+
+Club Palermo Bajo M19 "A" vs Jockey Club de Villa María M19 "A" · torneo-cordobes-m19-a · tarjeta 277262  ·  ee385d92-5d40-4d32-a1de-99fe4a41e094
+  local     · Club Palermo Bajo M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club de Villa María M19 "A" · 23 jugadores · 21 con ficha fijada
+  eventos   · 18
+    min 17 (1T 17) visitante try          Antonio Calcagno
+    min 17 (1T 17) visitante conversion   Francisco Salomon
+    min 21 (1T 21) local     penalty_goal 
+    min 26 (1T 26) visitante card_yellow  Antonio Calcagno
+    min 28 (1T 28) visitante try          Maximiliano Ghione
+    min 28 (1T 28) visitante conversion   Francisco Salomon
+    min 36 (1T 36) local     penalty_goal 
+    min 50 (2T 10) visitante substitution Benjamin Poloni Avaro
+    min 52 (2T 12) visitante try          Tiago Requena
+    min 52 (2T 12) visitante conversion   Francisco Salomon
+    min 52 (2T 12) visitante try          Bruno Geremias
+    min 53 (2T 13) visitante substitution Tiago Requena
+    min 53 (2T 13) visitante substitution Maximiliano Ghione
+    min 54 (2T 14) visitante card_yellow  Santiago Barrionuevo
+    min 60 (2T 20) local     try          
+    min 61 (2T 21) local     conversion   
+    min 63 (2T 23) local     try          
+    min 64 (2T 24) local     conversion   
+  marcador  · eventos 20-26 · guardado 20-26
+  tries     · 2-4 (guardado —-—)
+  arbitro   · Lautaro Joaquin Quiroga Cafure (guardado: —)
+  guardado  · 23 local · 23 visitante · 18 eventos
+
+Carlos Paz Rugby Club M19 "A" vs Tala Rugby Club M19 "A" · torneo-cordobes-m19-a · tarjeta 277263  ·  23e36f72-3f28-440c-af0c-2db502175154
+  local     · Carlos Paz Rugby Club M19 "A" · 18 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min  3 (1T 3) visitante try          
+    min  3 (1T 3) visitante conversion   
+    min  9 (1T 9) visitante try          
+    min 16 (1T 16) visitante try          
+    min 16 (1T 16) visitante conversion   
+    min 25 (1T 25) visitante try          
+    min 25 (1T 25) visitante conversion   
+    min 35 (1T 35) visitante try          
+    min 41 (2T 1) local     card_yellow  
+    min 43 (2T 3) visitante try          
+    min 48 (2T 8) visitante try          
+    min 48 (2T 8) visitante conversion   
+    min 50 (2T 10) local     try          
+    min 54 (2T 14) visitante card_yellow  
+    min 57 (2T 17) visitante try          
+    min 60 (2T 20) visitante try          
+    min 60 (2T 20) visitante conversion   
+    min 62 (2T 22) visitante try          
+    min 64 (2T 24) local     try          
+    min 68 (2T 28) visitante conversion   
+    min 68 (2T 28) visitante try          
+    min 70 (2T 30) local     injury       
+    min 75 (2T 35) visitante try          
+    min 75 (2T 35) visitante conversion   
+  marcador  · eventos 10-74 · guardado 10-74
+  tries     · 2-12 (guardado —-—)
+  arbitro   · Florencia Ledesma (guardado: —)
+  guardado  · 18 local · 23 visitante · 24 eventos
+
+Córdoba Athletic Club M19 "A" vs San Martín de Villa María M19 "A" · torneo-cordobes-m19-a · tarjeta 277264  ·  2e989f25-69b0-4a2d-91c9-5ca7a9f1c84c
+  local     · Córdoba Athletic Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · San Martín de Villa María M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 29
+    min  3 (1T 3) visitante try          Juan Ignacio Morre Castelli
+    min  4 (1T 4) visitante conversion   Conrado Bicego
+    min 12 (1T 12) local     try          Benjamin Osvaldo Campi
+    min 13 (1T 13) local     conversion   Bautista Caldo Navarro
+    min 16 (1T 16) local     try          Francisco Racedo
+    min 17 (1T 17) local     conversion   Bautista Caldo Navarro
+    min 23 (1T 23) local     try          Simon Camargo
+    min 23 (1T 23) local     conversion   Bautista Caldo Navarro
+    min 34 (1T 34) local     try          Benjamin Osvaldo Campi
+    min 35 (1T 35) local     try          Bautista Caldo Navarro
+    min 36 (1T 36) local     conversion   Bautista Caldo Navarro
+    min 40 (2T 0) local     substitution Facundo Ortiz
+    min 40 (2T 0) local     substitution Santiago Sucani Cancian
+    min 40 (2T 0) local     substitution Teo Peña
+    min 40 (2T 0) local     substitution Benjamin Osvaldo Campi
+    min 41 (2T 1) visitante try          Ramiro Locanetto
+    min 42 (2T 2) visitante conversion   Conrado Bicego
+    min 48 (2T 8) local     substitution Samuel Carranza
+    min 52 (2T 12) local     try          Juan Martin Castro
+    min 53 (2T 13) local     conversion   Bautista Caldo Navarro
+    min 54 (2T 14) local     substitution Juan Martin Castro
+    min 54 (2T 14) local     substitution Federico Molina
+    min 54 (2T 14) local     substitution Cristobal Ferreyra
+    min 56 (2T 16) visitante try          Thomas Isaias Ponce
+    min 61 (2T 21) local     try          Facundo Isao Mishima
+    min 65 (2T 25) visitante try          Conrado Bicego
+    min 66 (2T 26) visitante conversion   Conrado Bicego
+    min 73 (2T 33) local     try          Bautista Caldo Navarro
+    min 74 (2T 34) local     conversion   Bautista Caldo Navarro
+  marcador  · eventos 52-26 · guardado 52-26
+  tries     · 8-4 (guardado —-—)
+  arbitro   · Ignacio Santiago Olmedo Ramirez (guardado: —)
+  guardado  · 23 local · 23 visitante · 29 eventos
+
+Jockey Club Córdoba M19 "A" vs San Martín de Villa María M19 "A" · torneo-cordobes-m19-a · tarjeta 277265  ·  09608dd4-e47f-4025-9456-df251534565e
+  local     · Jockey Club Córdoba M19 "A" · 23 jugadores · 15 con ficha fijada
+  visitante · San Martín de Villa María M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 16
+    min  8 (1T 8) visitante try          Pedro Caballero
+    min  9 (1T 9) visitante conversion   Conrado Bicego
+    min 12 (1T 12) local     try          
+    min 12 (1T 12) local     conversion   
+    min 14 (1T 14) visitante card_yellow  Francesco Atilio Basso
+    min 18 (1T 18) local     try          
+    min 34 (1T 34) local     try          
+    min 50 (2T 10) visitante try          Thomas Isaias Ponce
+    min 51 (2T 11) visitante conversion   Conrado Bicego
+    min 53 (2T 13) local     penalty_goal 
+    min 54 (2T 14) visitante try          Federico Cabanillas
+    min 55 (2T 15) visitante conversion   Conrado Bicego
+    min 70 (2T 30) local     try          
+    min 71 (2T 31) visitante try          Manuel Nicolas Rodriguez
+    min 72 (2T 32) visitante conversion   Conrado Bicego
+    min 78 (2T 38) local     try          
+  marcador  · eventos 30-28 · guardado 30-28
+  tries     · 5-4 (guardado —-—)
+  arbitro   · Octavio Damia Patiño (guardado: —)
+  guardado  · 23 local · 23 visitante · 16 eventos
+
+Tala Rugby Club M19 "A" vs Córdoba Athletic Club M19 "A" · torneo-cordobes-m19-a · tarjeta 277266  ·  838c9f9b-aaab-4213-8a6e-6d12a620561e
+  local     · Tala Rugby Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min  9 (1T 9) local     penalty_goal 
+    min 13 (1T 13) local     penalty_goal 
+    min 19 (1T 19) local     try          
+    min 20 (1T 20) local     conversion   
+    min 20 (1T 20) local     card_yellow  
+    min 29 (1T 29) local     try          
+    min 40 (2T 0) visitante substitution Mateo Meyer
+    min 41 (2T 1) visitante try          Federico Molina
+    min 42 (2T 2) visitante conversion   Bautista Caldo Navarro
+    min 47 (2T 7) visitante penalty_goal Bautista Caldo Navarro
+    min 48 (2T 8) visitante substitution Benjamin Osvaldo Campi
+    min 52 (2T 12) visitante substitution Francisco Racedo
+    min 56 (2T 16) visitante substitution Matias Nicolas Godoy Pignatta
+    min 62 (2T 22) visitante substitution Santiago Sucani Cancian
+    min 62 (2T 22) visitante substitution Santiago Agustin Manzur
+    min 62 (2T 22) visitante penalty_goal Bautista Caldo Navarro
+    min 65 (2T 25) visitante substitution Federico Molina
+    min 71 (2T 31) local     penalty_goal 
+  marcador  · eventos 21-13 · guardado 21-13
+  tries     · 2-1 (guardado —-—)
+  arbitro   · Fernando Martin Pettina (guardado: —)
+  guardado  · 23 local · 23 visitante · 18 eventos
+
+Jockey Club de Villa María M19 "A" vs Carlos Paz Rugby Club M19 "A" · torneo-cordobes-m19-a · tarjeta 277267  ·  e0f74738-4cc8-4c03-bbe2-a5c856ac18f5
+  local     · Jockey Club de Villa María M19 "A" · 23 jugadores · 19 con ficha fijada
+  visitante · Carlos Paz Rugby Club M19 "A" · 15 jugadores · 0 con ficha fijada
+  eventos   · 23
+    min  4 (1T 4) local     try          Tiago Requena
+    min  4 (1T 4) local     conversion   Francisco Salomon
+    min 14 (1T 14) visitante injury       
+    min 15 (1T 15) local     try          Walter Igancio Bosio
+    min 15 (1T 15) local     conversion   Francisco Salomon
+    min 25 (1T 25) local     card_yellow  Lorenzo David
+    min 32 (1T 32) local     try          Alvaro Rosso
+    min 32 (1T 32) local     card_yellow  Walter Igancio Bosio
+    min 42 (2T 2) local     card_yellow  Jeronimo Jesús Colusso
+    min 43 (2T 3) local     card_yellow  Jeremias Trigp
+    min 47 (2T 7) local     try          Bruno Geremias
+    min 47 (2T 7) local     conversion   Francisco Salomon
+    min 53 (2T 13) local     substitution Jeronimo Jesús Colusso
+    min 54 (2T 14) local     substitution Jeremias Trigp
+    min 59 (2T 19) local     try          Tiago Requena
+    min 62 (2T 22) local     try          Santino Rubiola
+    min 62 (2T 22) local     conversion   Francisco Salomon
+    min 67 (2T 27) local     try          Antonio Calcagno
+    min 67 (2T 27) local     conversion   Francisco Salomon
+    min 67 (2T 27) local     card_yellow  Lorenzo David
+    min 67 (2T 27) local     card_red     Lorenzo David
+    min 70 (2T 30) local     try          Santino Rubiola
+    min 70 (2T 30) local     conversion   Francisco Salomon
+  marcador  · eventos 52-0 · guardado 52-0
+  tries     · 8-0 (guardado —-—)
+  arbitro   · Santiago Geronimo Lozada Chaves (guardado: —)
+  guardado  · 23 local · 15 visitante · 23 eventos
+
+Urú Curé Rugby Club M19 "A" vs Club Palermo Bajo M19 "A" · torneo-cordobes-m19-a · tarjeta 277268  ·  63017ef7-90e2-4c70-8ac8-2889365a0fae
+  local     · Urú Curé Rugby Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min 22 (1T 22) visitante penalty_goal Leon Haschisch
+    min 25 (1T 25) visitante try          Justiniano Pavoni
+    min 26 (1T 26) visitante conversion   Leon Haschisch
+    min 45 (2T 5) local     substitution Octavio Cerrano
+    min 47 (2T 7) local     penalty_goal Juan Martín San Millan
+    min 47 (2T 7) visitante substitution Benicio Ligato
+    min 47 (2T 7) visitante substitution Tobías Holmquist
+    min 47 (2T 7) visitante substitution Santiago Adrian Baudino
+    min 55 (2T 15) visitante substitution Francisco Tomás Cali
+    min 58 (2T 18) local     substitution Iñaki Rins
+    min 58 (2T 18) visitante penalty_goal Leon Haschisch
+    min 60 (2T 20) local     try          Bautista Rossi Jaume
+    min 60 (2T 20) local     conversion   Juan Martín San Millan
+    min 63 (2T 23) visitante try          Leon Haschisch
+    min 64 (2T 24) local     substitution Pedro Joaquín Nicolás Remedi
+    min 64 (2T 24) local     substitution Geronimo Mossetti
+    min 74 (2T 34) local     try          Nicolás Ochoa
+  marcador  · eventos 15-18 · guardado 15-18
+  tries     · 2-2 (guardado —-—)
+  arbitro   · Gabriel Hernán Tirante (guardado: —)
+  guardado  · 23 local · 23 visitante · 17 eventos
+
+Club La Tablada M19 "A" vs Club Universitario de Córdoba M19 "A" · torneo-cordobes-m19-a · tarjeta 277269  ·  11068300-fbdb-46e0-8d56-aa353435868d
+  local     · Club La Tablada M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min  2 (1T 2) local     penalty_goal 
+    min  4 (1T 4) visitante penalty_goal Pedro Marchetti
+    min  6 (1T 6) local     try          
+    min 33 (1T 33) visitante substitution Fermin Tissera
+    min 35 (1T 35) visitante try          Matías Molina
+    min 35 (1T 35) visitante conversion   Pedro Marchetti
+    min 43 (2T 3) visitante substitution Tomas Balaguer
+    min 43 (2T 3) local     try          
+    min 43 (2T 3) local     conversion   
+    min 44 (2T 4) visitante substitution Santiago Baima Arreguez
+    min 48 (2T 8) local     try          
+    min 55 (2T 15) visitante substitution Gino Fozzatti Stival
+    min 59 (2T 19) local     try          
+    min 59 (2T 19) local     conversion   
+    min 62 (2T 22) visitante substitution Juan Cruz Morrogh Bernard
+    min 62 (2T 22) visitante substitution Nicolás Allende Peralta
+    min 62 (2T 22) visitante substitution Micael Mateo Bustos Lopez
+    min 63 (2T 23) visitante try          Bautista Villarruel
+    min 63 (2T 23) visitante conversion   Pedro Marchetti
+    min 70 (2T 30) visitante substitution Tomas Ripa Zanuttin
+    min 76 (2T 36) local     try          
+    min 76 (2T 36) local     conversion   
+  marcador  · eventos 34-17 · guardado 34-17
+  tries     · 5-2 (guardado —-—)
+  arbitro   · Lautaro Joaquin Quiroga Cafure (guardado: —)
+  guardado  · 23 local · 23 visitante · 22 eventos
+
+Club Universitario de Córdoba M19 "A" vs Jockey Club Córdoba M19 "A" · torneo-cordobes-m19-a · tarjeta 277270  ·  d9fe1f42-7d85-4d4a-9cf3-eff7bfbc2823
+  local     · Club Universitario de Córdoba M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M19 "A" · 23 jugadores · 12 con ficha fijada
+  eventos   · 30
+    min  8 (1T 8) visitante try          
+    min  9 (1T 9) visitante try          
+    min 12 (1T 12) visitante try          
+    min 12 (1T 12) visitante conversion   
+    min 13 (1T 13) local     try          Juan Cruz Morrogh Bernard
+    min 14 (1T 14) local     conversion   Pedro Marchetti
+    min 21 (1T 21) local     penalty_goal Pedro Marchetti
+    min 24 (1T 24) local     penalty_goal Pedro Marchetti
+    min 32 (1T 32) visitante try          
+    min 32 (1T 32) visitante conversion   
+    min 35 (1T 35) visitante penalty_goal 
+    min 42 (2T 2) local     substitution Juan Cruz Barone
+    min 43 (2T 3) local     try          Matías Molina
+    min 44 (2T 4) local     conversion   Pedro Marchetti
+    min 45 (2T 5) local     substitution Santiago Martin Rodrigo
+    min 48 (2T 8) local     card_yellow  Fermin Tissera
+    min 51 (2T 11) visitante try          
+    min 51 (2T 11) visitante conversion   
+    min 52 (2T 12) local     try          Joaquin Litvin
+    min 52 (2T 12) local     conversion   Pedro Marchetti
+    min 52 (2T 12) visitante try          
+    min 52 (2T 12) visitante conversion   
+    min 62 (2T 22) local     substitution Tomas Balaguer
+    min 65 (2T 25) local     substitution Atilio Eugenio Guaiman Urtubey
+    min 67 (2T 27) local     card_yellow  Pedro Marchetti
+    min 67 (2T 27) visitante penalty_goal 
+    min 70 (2T 30) local     substitution Gaspar Ignacio Negrete Mendez
+    min 70 (2T 30) local     substitution Santiago Baima Arreguez
+    min 73 (2T 33) local     substitution Matías Molina
+    min 73 (2T 33) local     substitution Micael Mateo Bustos Lopez
+  marcador  · eventos 27-44 · guardado 27-44
+  tries     · 3-6 (guardado —-—)
+  arbitro   · Nahuel Sabena (guardado: —)
+  guardado  · 23 local · 23 visitante · 30 eventos
+
+Club Palermo Bajo M19 "A" vs Club La Tablada M19 "A" · torneo-cordobes-m19-a · tarjeta 277271  ·  c7d43e59-6333-41f5-baeb-8c5171c367ba
+  local     · Club Palermo Bajo M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 19
+    min  4 (1T 4) visitante penalty_goal 
+    min 15 (1T 15) local     try          Benicio Ligato
+    min 16 (1T 16) local     conversion   Leon Haschisch
+    min 17 (1T 17) visitante try          
+    min 18 (1T 18) visitante conversion   
+    min 22 (1T 22) visitante penalty_goal 
+    min 27 (1T 27) local     try          Jeremias Flores Bur
+    min 27 (1T 27) visitante card_yellow  
+    min 28 (1T 28) local     conversion   Leon Haschisch
+    min 34 (1T 34) local     try          Bautista Bergese
+    min 35 (1T 35) local     conversion   Leon Haschisch
+    min 49 (2T 9) local     card_yellow  Tomas Garcia Ravellia
+    min 49 (2T 9) visitante penalty_goal 
+    min 54 (2T 14) visitante penalty_goal 
+    min 68 (2T 28) visitante try          
+    min 68 (2T 28) visitante conversion   
+    min 74 (2T 34) visitante penalty_goal 
+    min 75 (2T 35) local     try          Justiniano Pavoni
+    min 75 (2T 35) local     conversion   Leon Haschisch
+  marcador  · eventos 28-29 · guardado 28-29
+  tries     · 4-2 (guardado —-—)
+  arbitro   · Lautaro Joaquin Quiroga Cafure (guardado: —)
+  guardado  · 23 local · 23 visitante · 19 eventos
+
+Carlos Paz Rugby Club M19 "A" vs Urú Curé Rugby Club M19 "A" · torneo-cordobes-m19-a · tarjeta 277272  ·  d043221c-9540-4e33-85af-77135bd08404
+  local     · Carlos Paz Rugby Club M19 "A" · 22 jugadores · 0 con ficha fijada
+  visitante · Urú Curé Rugby Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min  5 (1T 5) visitante try          Facundo Maccio
+    min  5 (1T 5) visitante conversion   Juan Martín San Millan
+    min 10 (1T 10) visitante injury       Benjamin Cerra
+    min 19 (1T 19) visitante try          Juan Martín San Millan
+    min 30 (1T 30) visitante card_yellow  Serafin Caggiano
+    min 44 (2T 4) visitante try          Segundo Sanz
+    min 44 (2T 4) visitante conversion   Juan Martín San Millan
+    min 46 (2T 6) local     card_yellow  
+    min 49 (2T 9) visitante substitution Pedro Joaquín Nicolás Remedi
+    min 49 (2T 9) visitante substitution Octavio Cerrano
+    min 52 (2T 12) visitante substitution Manuel Coll
+    min 61 (2T 21) local     try          
+    min 61 (2T 21) local     conversion   
+    min 62 (2T 22) visitante substitution Facundo Maccio
+    min 65 (2T 25) visitante substitution Bautista Rossi Jaume
+    min 65 (2T 25) visitante try          Geronimo Mossetti
+    min 65 (2T 25) visitante conversion   Juan Martín San Millan
+    min 67 (2T 27) visitante substitution Valentino Demaestri
+    min 67 (2T 27) visitante substitution Evaristo Jose Fissore
+    min 72 (2T 32) visitante try          Garcia Agustin
+    min 74 (2T 34) visitante try          Nicolás Ochoa
+    min 74 (2T 34) visitante conversion   Juan Martín San Millan
+    min 75 (2T 35) visitante try          Juan Martín San Millan
+    min 75 (2T 35) visitante conversion   Juan Martín San Millan
+  marcador  · eventos 7-45 · guardado 7-45
+  tries     · 1-7 (guardado —-—)
+  arbitro   · Florencia Ledesma (guardado: —)
+  guardado  · 22 local · 23 visitante · 24 eventos
+
+Córdoba Athletic Club M19 "A" vs Jockey Club de Villa María M19 "A" · torneo-cordobes-m19-a · tarjeta 277273  ·  b9ebf0f4-d1c2-4fec-965c-d142fe2c1b66
+  local     · Córdoba Athletic Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club de Villa María M19 "A" · 23 jugadores · 20 con ficha fijada
+  eventos   · 30
+    min  3 (1T 3) local     try          Federico Torre
+    min  4 (1T 4) local     conversion   Bautista Caldo Navarro
+    min  5 (1T 5) local     try          Fabrizio Barco Orozco
+    min 10 (1T 10) local     try          Bautista Caldo Navarro
+    min 11 (1T 11) local     conversion   Bautista Caldo Navarro
+    min 17 (1T 17) local     try          Fabrizio Barco Orozco
+    min 18 (1T 18) local     conversion   Bautista Caldo Navarro
+    min 26 (1T 26) local     try          Bautista Caldo Navarro
+    min 27 (1T 27) local     conversion   Bautista Caldo Navarro
+    min 30 (1T 30) visitante try          Lorenzo David
+    min 33 (1T 33) local     card_yellow  Bautista Caldo Navarro
+    min 36 (1T 36) visitante card_yellow  Lorenzo David
+    min 36 (1T 36) local     card_yellow  Simon Camargo
+    min 38 (1T 38) local     try          Juan Ignacio Reinoso Santander
+    min 39 (1T 39) local     conversion   Juan Pablo Soria
+    min 41 (2T 1) local     try          Facundo Ortiz
+    min 42 (2T 2) local     conversion   Juan Pablo Soria
+    min 43 (2T 3) visitante injury       Joaquín Julián Lopez
+    min 43 (2T 3) visitante substitution Joaquín Julián Lopez
+    min 46 (2T 6) local     penalty_try  
+    min 46 (2T 6) local     substitution Samuel Carranza
+    min 46 (2T 6) local     substitution Francisco Arguello
+    min 49 (2T 9) local     substitution Juan Ignacio Reinoso Santander
+    min 53 (2T 13) local     substitution Facundo Ortiz
+    min 53 (2T 13) local     substitution Santiago Vedia
+    min 53 (2T 13) local     substitution Santiago Sucani Cancian
+    min 57 (2T 17) local     substitution Santiago Agustin Manzur
+    min 64 (2T 24) local     try          Bautista Caldo Navarro
+    min 65 (2T 25) local     conversion   Bautista Caldo Navarro
+    min 70 (2T 30) visitante card_yellow  Santino Rubiola
+  marcador  · eventos 61-5 · guardado 61-5
+  tries     · 9-1 (guardado —-—)
+  arbitro   · Valentin Ferrero (guardado: —)
+  guardado  · 23 local · 23 visitante · 30 eventos
+
+San Martín de Villa María M19 "A" vs Tala Rugby Club M19 "A" · torneo-cordobes-m19-a · tarjeta 277274  ·  b0855918-fc00-42fc-aad8-cfc76682f226
+  local     · San Martín de Villa María M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min  8 (1T 8) visitante penalty_goal 
+    min 15 (1T 15) local     try          Manuel Nicolas Rodriguez
+    min 20 (1T 20) visitante try          
+    min 20 (1T 20) visitante conversion   
+    min 27 (1T 27) local     try          Manuel Nicolas Rodriguez
+    min 27 (1T 27) local     conversion   Conrado Bicego
+    min 41 (2T 1) visitante try          
+    min 43 (2T 3) local     try          Francesco Atilio Basso
+    min 43 (2T 3) local     conversion   Conrado Bicego
+    min 45 (2T 5) visitante try          
+    min 60 (2T 20) visitante try          
+    min 61 (2T 21) visitante conversion   
+    min 68 (2T 28) local     try          Manuel Nicolas Rodriguez
+    min 68 (2T 28) local     conversion   Conrado Bicego
+    min 68 (2T 28) visitante try          
+    min 68 (2T 28) visitante conversion   
+    min 74 (2T 34) visitante try          
+    min 74 (2T 34) visitante conversion   
+  marcador  · eventos 26-41 · guardado 26-41
+  tries     · 4-6 (guardado —-—)
+  arbitro   · Ignacio Santiago Olmedo Ramirez (guardado: —)
+  guardado  · 23 local · 23 visitante · 18 eventos
+
+Jockey Club Córdoba M19 "A" vs Club Universitario de Córdoba M19 "A" · torneo-cordobes-m19-a · tarjeta 322736  ·  474c267c-5a71-471b-a695-c3f01086b7a4
+  local     · Jockey Club Córdoba M19 "A" · 23 jugadores · 19 con ficha fijada
+  visitante · Club Universitario de Córdoba M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 31
+    min  2 (1T 2) local     try          
+    min  2 (1T 2) local     conversion   
+    min  8 (1T 8) local     try          
+    min  9 (1T 9) local     conversion   
+    min 15 (1T 15) local     try          
+    min 18 (1T 18) local     try          
+    min 28 (1T 28) visitante try          Atilio Eugenio Guaiman Urtubey
+    min 29 (1T 29) visitante conversion   Mauro Llamas Bruno
+    min 32 (1T 32) local     try          
+    min 33 (1T 33) local     conversion   
+    min 35 (1T 35) visitante substitution Francisco Octavio Ariza
+    min 35 (1T 35) local     card_yellow  
+    min 41 (2T 1) visitante try          Francisco Pizzatti Pertegarini
+    min 41 (2T 1) visitante substitution Mateo Moyano
+    min 42 (2T 2) visitante conversion   Mauro Llamas Bruno
+    min 45 (2T 5) visitante card_yellow  Lucas Jose Maldonado Gomez
+    min 45 (2T 5) local     penalty_try  
+    min 45 (2T 5) visitante substitution Francisco Pizzatti Pertegarini
+    min 45 (2T 5) visitante substitution Santiago Gelos
+    min 47 (2T 7) local     try          
+    min 48 (2T 8) local     conversion   
+    min 49 (2T 9) local     try          
+    min 50 (2T 10) local     conversion   
+    min 53 (2T 13) visitante try          Tomas Balaguer
+    min 54 (2T 14) visitante conversion   Mauro Llamas Bruno
+    min 66 (2T 26) visitante substitution Mauro Llamas Bruno
+    min 67 (2T 27) visitante try          Nicolás Allende Peralta
+    min 69 (2T 29) visitante conversion   Pedro Marchetti
+    min 74 (2T 34) visitante card_yellow  Nicolás Allende Peralta
+    min 75 (2T 35) local     try          
+    min 76 (2T 36) local     conversion   
+  marcador  · eventos 59-28 · guardado 59-28
+  tries     · 9-4 (guardado —-—)
+  arbitro   · Lautaro Joaquin Quiroga Cafure (guardado: —)
+  guardado  · 23 local · 23 visitante · 31 eventos
+
+Club La Tablada M19 "A" vs San Martín de Villa María M19 "A" · torneo-cordobes-m19-a · tarjeta 322737  ·  1f77c5f2-a70e-4452-bef5-dd44845b0ec7
+  local     · Club La Tablada M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · San Martín de Villa María M19 "A" · 21 jugadores · 0 con ficha fijada
+  eventos   · 28
+    min  3 (1T 3) local     try          
+    min  3 (1T 3) local     conversion   
+    min  5 (1T 5) local     try          
+    min  5 (1T 5) local     conversion   
+    min  8 (1T 8) visitante try          Enzo David Geremia
+    min  8 (1T 8) visitante conversion   Conrado Bicego
+    min 10 (1T 10) visitante card_yellow  Pedro Caballero
+    min 27 (1T 27) local     try          
+    min 27 (1T 27) local     conversion   
+    min 31 (1T 31) local     try          
+    min 32 (1T 32) local     conversion   
+    min 41 (2T 1) visitante conversion   Conrado Bicego
+    min 41 (2T 1) visitante try          Manuel Nicolas Rodriguez
+    min 51 (2T 11) local     try          
+    min 52 (2T 12) local     conversion   
+    min 56 (2T 16) visitante try          Manuel Nicolas Rodriguez
+    min 56 (2T 16) visitante conversion   Conrado Bicego
+    min 60 (2T 20) local     penalty_goal 
+    min 65 (2T 25) visitante substitution Hector Lautaro Orrantia
+    min 65 (2T 25) visitante substitution Santiago Merani
+    min 65 (2T 25) visitante substitution Eliseo Sachetto
+    min 67 (2T 27) local     try          
+    min 67 (2T 27) local     conversion   
+    min 70 (2T 30) visitante substitution Ramiro Locanetto
+    min 70 (2T 30) visitante substitution Santiago Ceballos
+    min 74 (2T 34) visitante try          Manuel Nicolas Rodriguez
+    min 76 (2T 36) local     try          
+    min 76 (2T 36) local     conversion   
+  marcador  · eventos 52-26 · guardado 52-26
+  tries     · 7-4 (guardado —-—)
+  arbitro   · Enzo Riva (guardado: —)
+  guardado  · 23 local · 21 visitante · 28 eventos
+
+Jockey Club de Villa María M19 "A" vs Córdoba Athletic Club M19 "A" · torneo-cordobes-m19-a · tarjeta 322738  ·  1a753fd0-6006-403b-b28a-4f7863173384
+  local     · Jockey Club de Villa María M19 "A" · 23 jugadores · 20 con ficha fijada
+  visitante · Córdoba Athletic Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 32
+    min  4 (1T 4) local     try          Jeronimo Jesús Colusso
+    min  4 (1T 4) local     conversion   Antonio Calcagno
+    min  8 (1T 8) visitante card_yellow  
+    min 30 (1T 30) local     card_yellow  Juan Cruz Colusso
+    min 34 (1T 34) visitante try          Olivier Courtis
+    min 34 (1T 34) visitante conversion   Bautista Caldo Navarro
+    min 40 (2T 0) visitante substitution Matias Nicolas Godoy Pignatta
+    min 48 (2T 8) visitante substitution Santiago Vedia
+    min 49 (2T 9) local     try          Jeronimo Jesús Colusso
+    min 49 (2T 9) local     conversion   Antonio Calcagno
+    min 52 (2T 12) local     try          Juan Cruz Colusso
+    min 52 (2T 12) local     conversion   Antonio Calcagno
+    min 53 (2T 13) visitante injury       Facundo Ortiz
+    min 54 (2T 14) visitante substitution Juan Ignacio Reinoso Santander
+    min 57 (2T 17) local     try          Renzo Mariani Mulinetti
+    min 57 (2T 17) local     conversion   Antonio Calcagno
+    min 57 (2T 17) visitante substitution Teo Peña
+    min 58 (2T 18) local     substitution Walter Igancio Bosio
+    min 58 (2T 18) visitante substitution Benjamin Osvaldo Campi
+    min 59 (2T 19) local     substitution Maximiliano Ghione
+    min 60 (2T 20) visitante substitution Fabrizio Ceretti
+    min 60 (2T 20) visitante try          Federico Molina
+    min 62 (2T 22) local     penalty_goal Antonio Calcagno
+    min 62 (2T 22) visitante conversion   Bautista Caldo Navarro
+    min 65 (2T 25) local     substitution Bruno Geremias
+    min 69 (2T 29) local     try          Jeremias Trigp
+    min 70 (2T 30) local     substitution Joaquín Julián Lopez
+    min 70 (2T 30) local     substitution Jeronimo Jesús Colusso
+    min 70 (2T 30) local     substitution Renzo Mariani Mulinetti
+    min 70 (2T 30) local     substitution Benjamin Poloni Avaro
+    min 75 (2T 35) visitante try          Federico Molina
+    min 75 (2T 35) visitante conversion   Santiago Ojeda
+  marcador  · eventos 36-21 · guardado 36-21
+  tries     · 5-3 (guardado —-—)
+  arbitro   · Carlos Prieto (guardado: —)
+  guardado  · 23 local · 23 visitante · 32 eventos
+
+Jockey Club Córdoba M19 "A" vs San Martín de Villa María M19 "A" · torneo-cordobes-m19-a · tarjeta 323985  ·  50517d83-bd06-4ade-9ab6-0fa5cf7de854
+  local     · Jockey Club Córdoba M19 "A" · 23 jugadores · 18 con ficha fijada
+  visitante · San Martín de Villa María M19 "A" · 20 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min  2 (1T 2) local     try          
+    min  2 (1T 2) local     conversion   
+    min 15 (1T 15) local     try          
+    min 15 (1T 15) local     conversion   
+    min 17 (1T 17) visitante card_yellow  Eliseo Sachetto
+    min 30 (1T 30) local     try          
+    min 35 (1T 35) local     try          
+    min 35 (1T 35) local     conversion   
+    min 36 (1T 36) local     try          
+    min 36 (1T 36) local     conversion   
+    min 45 (2T 5) visitante try          Santiago Merani
+    min 45 (2T 5) visitante conversion   Franco Benjamin Alvarez Leiva
+    min 49 (2T 9) local     try          
+    min 51 (2T 11) visitante try          Santiago Merani
+    min 51 (2T 11) visitante conversion   Franco Benjamin Alvarez Leiva
+    min 53 (2T 13) local     try          
+    min 53 (2T 13) local     conversion   
+    min 60 (2T 20) local     try          
+    min 67 (2T 27) visitante substitution Cipriano Sabas Unzueta Pivetta
+    min 67 (2T 27) visitante substitution Eliseo Sachetto
+    min 67 (2T 27) visitante substitution Hector Lautaro Orrantia
+    min 68 (2T 28) local     card_yellow  
+  marcador  · eventos 50-14 · guardado 50-14
+  tries     · 8-2 (guardado —-—)
+  arbitro   · Lucas Gaston Dopaso (guardado: —)
+  guardado  · 23 local · 20 visitante · 22 eventos
+
+Club La Tablada M19 "A" vs Urú Curé Rugby Club M19 "A" · torneo-cordobes-m19-a · tarjeta 323986  ·  a9d42a79-a9f2-449e-95b2-7476e8eea950
+  local     · Club La Tablada M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Urú Curé Rugby Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 15
+    min 24 (1T 24) local     penalty_goal 
+    min 30 (1T 30) visitante try          Nicolás Ochoa
+    min 32 (1T 32) visitante card_yellow  Lucas Bernardini
+    min 33 (1T 33) local     try          
+    min 42 (2T 2) local     penalty_goal 
+    min 44 (2T 4) local     try          
+    min 44 (2T 4) local     conversion   
+    min 49 (2T 9) visitante try          Salvador Aramburu
+    min 49 (2T 9) visitante substitution Segundo Sanz
+    min 52 (2T 12) visitante try          Nicolás Ochoa
+    min 52 (2T 12) visitante conversion   Juan Martín San Millan
+    min 61 (2T 21) visitante try          Jeronimo Suino Borghi
+    min 64 (2T 24) visitante substitution Pedro Joaquín Nicolás Remedi
+    min 67 (2T 27) visitante card_yellow  Benjamin Cerra
+    min 68 (2T 28) local     try          
+  marcador  · eventos 23-22 · guardado 23-22
+  tries     · 3-4 (guardado —-—)
+  arbitro   · Nahuel Sabena (guardado: —)
+  guardado  · 23 local · 23 visitante · 15 eventos
+
+Club Palermo Bajo M19 "A" vs Córdoba Athletic Club M19 "A" · torneo-cordobes-m19-a · tarjeta 323987  ·  eac476b4-9d64-42c9-8db1-3b8927136fb2
+  local     · Club Palermo Bajo M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 31
+    min  1 (1T 1) local     try          
+    min  6 (1T 6) local     try          
+    min  6 (1T 6) local     conversion   
+    min  9 (1T 9) local     try          
+    min  9 (1T 9) local     conversion   
+    min 24 (1T 24) local     card_yellow  
+    min 26 (1T 26) local     try          
+    min 28 (1T 28) visitante injury       Valentin Lauret Luna
+    min 28 (1T 28) visitante substitution Valentin Lauret Luna
+    min 31 (1T 31) visitante try          Santino Tissera
+    min 35 (1T 35) visitante try          Santino Tissera
+    min 36 (1T 36) visitante conversion   Teo Peña
+    min 40 (2T 0) visitante substitution Santiago Sucani Cancian
+    min 42 (2T 2) local     try          
+    min 43 (2T 3) visitante substitution Mauricio Bazan Gonzalez
+    min 44 (2T 4) visitante substitution Tiziano Barco Prozco
+    min 48 (2T 8) local     try          
+    min 48 (2T 8) local     conversion   
+    min 49 (2T 9) visitante substitution Juan Pablo Marquez
+    min 55 (2T 15) visitante injury       Lorenzo Carranza
+    min 55 (2T 15) visitante substitution Lorenzo Carranza
+    min 56 (2T 16) local     try          
+    min 57 (2T 17) local     conversion   
+    min 58 (2T 18) visitante substitution Matias Nicolas Godoy Pignatta
+    min 62 (2T 22) visitante try          Emiliano D'amario
+    min 62 (2T 22) local     card_yellow  
+    min 67 (2T 27) local     try          
+    min 67 (2T 27) local     conversion   
+    min 75 (2T 35) local     try          
+    min 75 (2T 35) local     conversion   
+    min 79 (2T 39) visitante card_yellow  Juan Martin Castro
+  marcador  · eventos 57-17 · guardado 57-17
+  tries     · 9-3 (guardado —-—)
+  arbitro   · Octavio Damia Patiño (guardado: —)
+  guardado  · 23 local · 23 visitante · 31 eventos
+
+Jockey Club de Villa María M19 "A" vs Tala Rugby Club M19 "A" · torneo-cordobes-m19-a · tarjeta 323988  ·  90077c20-cfdc-4f68-8082-cfb0f689092a
+  local     · Jockey Club de Villa María M19 "A" · 23 jugadores · 20 con ficha fijada
+  visitante · Tala Rugby Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 13
+    min  5 (1T 5) visitante try          
+    min 15 (1T 15) local     try          Tiago Requena
+    min 20 (1T 20) visitante penalty_goal 
+    min 28 (1T 28) local     card_yellow  Jeremias Trigp
+    min 29 (1T 29) visitante try          
+    min 33 (1T 33) visitante try          
+    min 38 (1T 38) local     try          Tiago Requena
+    min 55 (2T 15) local     substitution Tiago Requena
+    min 56 (2T 16) visitante penalty_goal 
+    min 60 (2T 20) local     substitution Maximiliano Ghione
+    min 60 (2T 20) visitante penalty_goal 
+    min 62 (2T 22) local     substitution Jeremias Trigp
+    min 79 (2T 39) visitante try          
+  marcador  · eventos 10-29 · guardado 10-29
+  tries     · 2-4 (guardado —-—)
+  arbitro   · Lautaro Joaquin Quiroga Cafure (guardado: —)
+  guardado  · 23 local · 23 visitante · 13 eventos
+
+Urú Curé Rugby Club M19 "A" vs Jockey Club Córdoba M19 "A" · torneo-cordobes-m19-a · tarjeta 324503  ·  b07bad9f-fc41-4acd-a8ab-70d5a5fdc83d
+  local     · Urú Curé Rugby Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M19 "A" · 23 jugadores · 18 con ficha fijada
+  eventos   · 9
+    min  5 (1T 5) local     penalty_goal Juan Martín San Millan
+    min 12 (1T 12) local     try          Evaristo Jose Fissore
+    min 12 (1T 12) local     conversion   Juan Martín San Millan
+    min 35 (1T 35) visitante penalty_try  
+    min 36 (1T 36) local     card_yellow  Juan Martín San Millan
+    min 58 (2T 18) visitante card_yellow  
+    min 66 (2T 26) visitante penalty_goal 
+    min 67 (2T 27) local     try          Nicolás Ochoa
+    min 68 (2T 28) local     conversion   Juan Martín San Millan
+  marcador  · eventos 17-10 · guardado 17-10
+  tries     · 2-1 (guardado —-—)
+  arbitro   · Ignacio Santiago Olmedo Ramirez (guardado: —)
+  guardado  · 23 local · 23 visitante · 9 eventos
+
+San Martín de Villa María M19 "A" vs Club Universitario de Córdoba M19 "A" · torneo-cordobes-m19-a · tarjeta 324504  ·  75a7e80d-cb66-4c24-a052-ced603bbe849
+  local     · San Martín de Villa María M19 "A" · 21 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 29
+    min  3 (1T 3) local     penalty_goal Conrado Bicego
+    min 12 (1T 12) local     try          Walter Geremias Ciarez
+    min 12 (1T 12) local     conversion   Conrado Bicego
+    min 20 (1T 20) visitante try          Juan Cruz Morrogh Bernard
+    min 20 (1T 20) visitante conversion   Mauro Llamas Bruno
+    min 35 (1T 35) visitante try          Nicolás Allende Peralta
+    min 35 (1T 35) visitante conversion   Mauro Llamas Bruno
+    min 37 (1T 37) local     try          Manuel Nicolas Rodriguez
+    min 37 (1T 37) local     conversion   Conrado Bicego
+    min 41 (2T 1) visitante substitution Santiago Gelos
+    min 41 (2T 1) visitante substitution Fermin Tissera
+    min 46 (2T 6) local     try          Thomas Isaias Ponce
+    min 46 (2T 6) local     conversion   Conrado Bicego
+    min 55 (2T 15) local     conversion   Conrado Bicego
+    min 55 (2T 15) local     try          Manuel Nicolas Rodriguez
+    min 58 (2T 18) visitante try          Lautaro Gabriel Roteda
+    min 61 (2T 21) local     try          Isaias Uriel Zoy
+    min 61 (2T 21) visitante conversion   Mauro Llamas Bruno
+    min 61 (2T 21) local     conversion   Conrado Bicego
+    min 62 (2T 22) visitante try          Emilio Navarro Rizzo
+    min 65 (2T 25) local     substitution Santiago Merani
+    min 65 (2T 25) local     try          Juan Ignacio Morre Castelli
+    min 65 (2T 25) local     conversion   Conrado Bicego
+    min 73 (2T 33) visitante try          Ramiro Matias Bacci
+    min 74 (2T 34) local     substitution Santiago Ceballos
+    min 74 (2T 34) local     substitution Hector Lautaro Orrantia
+    min 75 (2T 35) visitante substitution Luca Emiliano Quevedo Croccia
+    min 77 (2T 37) visitante card_yellow  Ramiro Matias Bacci
+    min 77 (2T 37) visitante conversion   Mauro Llamas Bruno
+  marcador  · eventos 45-33 · guardado 45-33
+  tries     · 6-5 (guardado —-—)
+  arbitro   · Lucas Gaston Dopaso (guardado: —)
+  guardado  · 21 local · 23 visitante · 29 eventos
+
+Tala Rugby Club M19 "A" vs Club Palermo Bajo M19 "A" · torneo-cordobes-m19-a · tarjeta 324505  ·  ae6177fc-8969-40ad-84c5-c55fc5d835a7
+  local     · Tala Rugby Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 12
+    min 13 (1T 13) local     try          
+    min 13 (1T 13) local     conversion   
+    min 22 (1T 22) local     penalty_goal 
+    min 33 (1T 33) visitante try          
+    min 34 (1T 34) visitante conversion   
+    min 50 (2T 10) visitante try          
+    min 56 (2T 16) local     penalty_goal 
+    min 58 (2T 18) visitante try          
+    min 58 (2T 18) visitante conversion   
+    min 58 (2T 18) visitante card_yellow  
+    min 63 (2T 23) local     card_yellow  
+    min 66 (2T 26) local     penalty_goal 
+  marcador  · eventos 16-19 · guardado 16-19
+  tries     · 1-3 (guardado —-—)
+  arbitro   · Enzo Riva (guardado: —)
+  guardado  · 23 local · 23 visitante · 12 eventos
+
+Club Universitario de Córdoba M19 "A" vs Urú Curé Rugby Club M19 "A" · torneo-cordobes-m19-a · tarjeta 325088  ·  712a1c2f-567a-461d-8b56-9b873aaa85af
+  local     · Club Universitario de Córdoba M19 "A" · 22 jugadores · 0 con ficha fijada
+  visitante · Urú Curé Rugby Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 38
+    min  2 (1T 2) visitante try          Lucas Bernardini
+    min  2 (1T 2) visitante conversion   Juan Martín San Millan
+    min 10 (1T 10) visitante try          Felipe Hipermayen
+    min 10 (1T 10) visitante conversion   Juan Martín San Millan
+    min 18 (1T 18) visitante try          Nicolás Ochoa
+    min 18 (1T 18) visitante conversion   Juan Martín San Millan
+    min 23 (1T 23) visitante try          Iñaki Rins
+    min 40 (2T 0) visitante substitution Octavio Cerrano
+    min 40 (2T 0) visitante substitution Bautista Rossi Jaume
+    min 40 (2T 0) visitante substitution Felipe Hipermayen
+    min 41 (2T 1) local     substitution Atilio Eugenio Guaiman Urtubey
+    min 41 (2T 1) local     substitution Benjamin Apfelbaum
+    min 43 (2T 3) visitante try          Manuel Capriglioni
+    min 43 (2T 3) visitante substitution Salvador Aramburu
+    min 45 (2T 5) local     try          Bautista Villarruel
+    min 45 (2T 5) local     conversion   Pedro Marchetti
+    min 47 (2T 7) visitante try          Nicolás Ochoa
+    min 47 (2T 7) visitante conversion   Juan Martín San Millan
+    min 48 (2T 8) visitante substitution Pedro Joaquín Nicolás Remedi
+    min 48 (2T 8) visitante substitution Serafin Caggiano
+    min 49 (2T 9) local     card_yellow  Emilio Navarro Rizzo
+    min 49 (2T 9) local     try          Francisco Pizzatti Pertegarini
+    min 49 (2T 9) local     conversion   Pedro Marchetti
+    min 53 (2T 13) visitante try          Nicolás Ochoa
+    min 53 (2T 13) visitante conversion   Juan Martín San Millan
+    min 54 (2T 14) visitante substitution Valentino Demaestri
+    min 54 (2T 14) visitante substitution Gustavo Jose Echenique
+    min 55 (2T 15) visitante try          Iñaki Rins
+    min 55 (2T 15) visitante conversion   Juan Martín San Millan
+    min 58 (2T 18) visitante try          Santiago Ismael Cabello
+    min 58 (2T 18) visitante conversion   Juan Martín San Millan
+    min 65 (2T 25) visitante try          Lucas Bernardini
+    min 65 (2T 25) visitante conversion   Juan Martín San Millan
+    min 68 (2T 28) local     try          Tobias Moreno
+    min 72 (2T 32) visitante try          Nicolás Ochoa
+    min 72 (2T 32) visitante conversion   Juan Martín San Millan
+    min 74 (2T 34) visitante try          Lucas Bernardini
+    min 74 (2T 34) visitante conversion   Juan Martín San Millan
+  marcador  · eventos 19-80 · guardado 19-80
+  tries     · 3-12 (guardado —-—)
+  arbitro   · Leonel Sorbera (guardado: —)
+  guardado  · 22 local · 23 visitante · 38 eventos
+
+Jockey Club Córdoba M19 "A" vs Club La Tablada M19 "A" · torneo-cordobes-m19-a · tarjeta 325089  ·  a88ff118-727e-452f-a090-88353f2a5272
+  local     · Jockey Club Córdoba M19 "A" · 23 jugadores · 19 con ficha fijada
+  visitante · Club La Tablada M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 23
+    min  1 (1T 1) visitante penalty_goal 
+    min 11 (1T 11) visitante penalty_goal 
+    min 16 (1T 16) visitante try          
+    min 16 (1T 16) visitante conversion   
+    min 17 (1T 17) local     card_yellow  
+    min 21 (1T 21) visitante try          
+    min 21 (1T 21) visitante conversion   
+    min 26 (1T 26) local     try          
+    min 26 (1T 26) local     conversion   
+    min 32 (1T 32) visitante penalty_goal 
+    min 34 (1T 34) visitante card_yellow  
+    min 35 (1T 35) local     try          
+    min 35 (1T 35) local     conversion   
+    min 35 (1T 35) visitante card_yellow  
+    min 40 (2T 0) local     try          
+    min 42 (2T 2) visitante penalty_goal 
+    min 43 (2T 3) local     try          
+    min 43 (2T 3) local     conversion   
+    min 52 (2T 12) visitante try          
+    min 52 (2T 12) visitante conversion   
+    min 55 (2T 15) visitante try          
+    min 55 (2T 15) visitante conversion   
+    min 62 (2T 22) local     try          
+  marcador  · eventos 31-40 · guardado 31-40
+  tries     · 5-4 (guardado —-—)
+  arbitro   · Lucas Humeres (guardado: —)
+  guardado  · 23 local · 23 visitante · 23 eventos
+
+Club Palermo Bajo M19 "A" vs Jockey Club de Villa María M19 "A" · torneo-cordobes-m19-a · tarjeta 325090  ·  977c9414-c320-4d28-b73b-52ac1c7a377b
+  local     · Club Palermo Bajo M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club de Villa María M19 "A" · 23 jugadores · 22 con ficha fijada
+  eventos   · 29
+    min  3 (1T 3) visitante try          Francisco Salomon
+    min 13 (1T 13) local     try          
+    min 22 (1T 22) visitante try          Francisco Salomon
+    min 23 (1T 23) visitante conversion   Antonio Calcagno
+    min 26 (1T 26) local     penalty_goal 
+    min 28 (1T 28) visitante try          Bruno Geremias
+    min 29 (1T 29) visitante conversion   Antonio Calcagno
+    min 35 (1T 35) local     try          
+    min 35 (1T 35) visitante card_yellow  Lorenzo David
+    min 42 (2T 2) visitante try          Juan Cruz Colusso
+    min 43 (2T 3) visitante conversion   Antonio Calcagno
+    min 47 (2T 7) local     try          
+    min 47 (2T 7) local     conversion   
+    min 51 (2T 11) local     try          
+    min 51 (2T 11) local     conversion   
+    min 51 (2T 11) visitante substitution Joaquín Julián Lopez
+    min 55 (2T 15) local     try          
+    min 55 (2T 15) local     conversion   
+    min 55 (2T 15) visitante substitution Maximiliano Ghione
+    min 57 (2T 17) visitante substitution Jeronimo Jesús Colusso
+    min 57 (2T 17) visitante substitution Bautista Arbarello
+    min 59 (2T 19) local     try          
+    min 59 (2T 19) local     conversion   
+    min 59 (2T 19) visitante substitution Lorenzo David
+    min 64 (2T 24) visitante try          Tiago Requena
+    min 66 (2T 26) visitante substitution Santino Rubiola
+    min 69 (2T 29) local     try          
+    min 69 (2T 29) local     conversion   
+    min 70 (2T 30) visitante substitution Benjamin Poloni Avaro
+  marcador  · eventos 48-31 · guardado 48-31
+  tries     · 7-5 (guardado —-—)
+  arbitro   · Lucas Gaston Dopaso (guardado: —)
+  guardado  · 23 local · 23 visitante · 29 eventos
+
+Club La Tablada M19 "A" vs Club Universitario de Córdoba M19 "A" · torneo-cordobes-m19-a · tarjeta 326167  ·  ebbb9859-b1a9-4605-a374-4fa477dbd465
+  local     · Club La Tablada M19 "A" · 22 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 21
+    min 14 (1T 14) visitante try          Francisco Pizzatti Pertegarini
+    min 21 (1T 21) local     try          
+    min 35 (1T 35) visitante try          Bautista Villarruel
+    min 35 (1T 35) visitante conversion   Mauro Llamas Bruno
+    min 35 (1T 35) visitante substitution Ramiro Matias Bacci
+    min 43 (2T 3) visitante penalty_goal Mauro Llamas Bruno
+    min 51 (2T 11) local     try          
+    min 52 (2T 12) local     conversion   
+    min 52 (2T 12) visitante substitution Francisco Pizzatti Pertegarini
+    min 52 (2T 12) visitante substitution Tomas Balaguer
+    min 56 (2T 16) local     try          
+    min 57 (2T 17) local     conversion   
+    min 63 (2T 23) visitante substitution Bautista Villarruel
+    min 63 (2T 23) visitante try          Atilio Eugenio Guaiman Urtubey
+    min 64 (2T 24) visitante conversion   Mauro Llamas Bruno
+    min 67 (2T 27) visitante substitution Benjamin Apfelbaum
+    min 73 (2T 33) visitante substitution Valentino Fernandez
+    min 73 (2T 33) visitante substitution Juan Cruz Morrogh Bernard
+    min 74 (2T 34) visitante card_yellow  Mateo Moyano
+    min 75 (2T 35) local     try          
+    min 75 (2T 35) local     conversion   
+  marcador  · eventos 26-22 · guardado 26-22
+  tries     · 4-3 (guardado —-—)
+  arbitro   · Enzo Riva (guardado: —)
+  guardado  · 22 local · 23 visitante · 21 eventos
+
+Urú Curé Rugby Club M19 "A" vs San Martín de Villa María M19 "A" · torneo-cordobes-m19-a · tarjeta 326168  ·  b8a8907c-2057-4283-9208-c63350ce55ac
+  local     · Urú Curé Rugby Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · San Martín de Villa María M19 "A" · 19 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min  2 (1T 2) local     try          Serafin Caggiano
+    min  2 (1T 2) local     conversion   Serafin Caggiano
+    min  4 (1T 4) visitante try          Conrado Bicego
+    min  8 (1T 8) local     try          Guido Ghiglione
+    min  8 (1T 8) local     conversion   Facundo Maccio
+    min 15 (1T 15) local     try          Lucas Bernardini
+    min 15 (1T 15) local     conversion   Juan Martín San Millan
+    min 15 (1T 15) local     conversion   Facundo Maccio
+    min 25 (1T 25) local     try          Salvador Aramburu
+    min 35 (1T 35) visitante try          Manuel Nicolas Rodriguez
+    min 35 (1T 35) visitante conversion   Conrado Bicego
+    min 35 (1T 35) local     try          Salvador Aramburu
+    min 44 (2T 4) visitante card_yellow  Francesco Atilio Basso
+    min 45 (2T 5) local     try          Guido Ghiglione
+    min 45 (2T 5) local     conversion   Guido Ghiglione
+    min 50 (2T 10) visitante try          Manuel Nicolas Rodriguez
+    min 50 (2T 10) visitante conversion   Conrado Bicego
+    min 50 (2T 10) local     try          Geronimo Mossetti
+    min 55 (2T 15) local     conversion   Gino Albelo
+    min 55 (2T 15) local     try          Facundo Maccio
+    min 60 (2T 20) visitante injury       Santiago Merani
+    min 69 (2T 29) visitante substitution Eliseo Sachetto
+    min 71 (2T 31) visitante substitution Thomas Isaias Ponce
+    min 72 (2T 32) visitante penalty_try  
+  marcador  · eventos 52-26 · guardado 52-26
+  tries     · 8-4 (guardado —-—)
+  arbitro   · Santiago Geronimo Lozada Chaves (guardado: —)
+  guardado  · 23 local · 19 visitante · 24 eventos
+
+Tala Rugby Club M19 "A" vs Córdoba Athletic Club M19 "A" · torneo-cordobes-m19-a · tarjeta 326169  ·  99e5f3b3-c7b8-48b6-a9bd-ce77a7eed2d9
+  local     · Tala Rugby Club M19 "A" · 22 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 26
+    min  1 (1T 1) local     try          
+    min  1 (1T 1) local     conversion   
+    min 11 (1T 11) local     try          
+    min 11 (1T 11) local     conversion   
+    min 18 (1T 18) local     try          
+    min 18 (1T 18) local     conversion   
+    min 20 (1T 20) visitante card_yellow  Santiago Vedia
+    min 22 (1T 22) local     try          
+    min 22 (1T 22) local     conversion   
+    min 31 (1T 31) local     try          
+    min 31 (1T 31) local     conversion   
+    min 32 (1T 32) visitante substitution Oscar Iván Nieva Sandoval
+    min 40 (2T 0) visitante substitution Matias Nicolas Godoy Pignatta
+    min 40 (2T 0) visitante substitution Jeremias Gordillo Molina
+    min 41 (2T 1) visitante card_yellow  Samuel Carranza
+    min 45 (2T 5) visitante substitution Mateo Nicolas Ragazzini
+    min 45 (2T 5) local     card_yellow  
+    min 47 (2T 7) visitante substitution Teo Peña
+    min 50 (2T 10) visitante try          Olivier Courtis
+    min 51 (2T 11) visitante conversion   Salvador Acuña
+    min 55 (2T 15) visitante try          Santino Tissera
+    min 56 (2T 16) visitante conversion   Salvador Acuña
+    min 57 (2T 17) visitante substitution Cristobal Ferreyra
+    min 64 (2T 24) local     try          
+    min 64 (2T 24) local     conversion   
+    min 65 (2T 25) visitante try          Federico Molina
+  marcador  · eventos 42-19 · guardado 42-19
+  tries     · 6-3 (guardado —-—)
+  arbitro   · Martin Leiva (guardado: —)
+  guardado  · 22 local · 23 visitante · 26 eventos
+
+Urú Curé Rugby Club M19 "A" vs Córdoba Athletic Club M19 "A" · torneo-cordobes-m19-a · tarjeta 326761  ·  4c4d428a-0038-4e5e-bde8-968d93eafd80
+  local     · Urú Curé Rugby Club M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club M19 "A" · 20 jugadores · 0 con ficha fijada
+  eventos   · 26
+    min  6 (1T 6) local     try          Gustavo Jose Echenique
+    min  9 (1T 9) local     try          Bautista Rossi Jaume
+    min 10 (1T 10) local     conversion   Juan Martín San Millan
+    min 17 (1T 17) visitante try          Matias Nicolas Godoy Pignatta
+    min 17 (1T 17) visitante conversion   Facundo Isao Mishima
+    min 28 (1T 28) local     try          Iñaki Rins
+    min 33 (1T 33) visitante try          Agustin Gabriel Campos Campos Varela
+    min 41 (2T 1) local     try          Manuel Capriglioni
+    min 42 (2T 2) local     conversion   Juan Martín San Millan
+    min 43 (2T 3) local     try          Manuel Capriglioni
+    min 44 (2T 4) local     conversion   Juan Martín San Millan
+    min 47 (2T 7) visitante try          Mateo Godoy Brupbacher
+    min 47 (2T 7) visitante conversion   Salvador Acuña
+    min 55 (2T 15) visitante try          Teo Peña
+    min 55 (2T 15) visitante conversion   Salvador Acuña
+    min 59 (2T 19) visitante try          Federico Molina
+    min 60 (2T 20) local     card_yellow  Karim Safadi
+    min 60 (2T 20) visitante conversion   Teo Peña
+    min 61 (2T 21) local     card_red     Karim Safadi
+    min 62 (2T 22) visitante card_yellow  Valentino Luka Suarez Carmganola
+    min 62 (2T 22) local     penalty_try  
+    min 65 (2T 25) visitante card_yellow  Matias Nicolas Godoy Pignatta
+    min 65 (2T 25) local     try          Guido Ghiglione
+    min 65 (2T 25) local     conversion   Cristobal Aguilera
+    min 70 (2T 30) visitante try          Mateo Nicolas Ragazzini
+    min 70 (2T 30) visitante conversion   Salvador Acuña
+  marcador  · eventos 45-40 · guardado 45-40
+  tries     · 7-6 (guardado —-—)
+  arbitro   · Gustavo Reartes (guardado: —)
+  guardado  · 23 local · 20 visitante · 26 eventos
+
+Club Palermo Bajo M19 "A" vs Club La Tablada M19 "A" · torneo-cordobes-m19-a · tarjeta 326762  ·  a3eebace-de23-418c-9432-5d7d13da2f40
+  local     · Club Palermo Bajo M19 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M19 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min  3 (1T 3) visitante penalty_goal 
+    min  6 (1T 6) local     try          
+    min  6 (1T 6) local     conversion   
+    min 15 (1T 15) local     try          
+    min 21 (1T 21) local     card_yellow  
+    min 25 (1T 25) visitante try          
+    min 25 (1T 25) visitante conversion   
+    min 32 (1T 32) local     card_yellow  
+    min 41 (2T 1) local     try          
+    min 41 (2T 1) local     conversion   
+    min 46 (2T 6) visitante try          
+    min 46 (2T 6) visitante conversion   
+    min 49 (2T 9) local     try          
+    min 57 (2T 17) local     penalty_goal 
+    min 61 (2T 21) visitante penalty_try  
+    min 65 (2T 25) visitante try          
+    min 65 (2T 25) visitante conversion   
+    min 71 (2T 31) visitante try          
+    min 75 (2T 35) local     try          
+    min 75 (2T 35) local     conversion   
+  marcador  · eventos 34-36 · guardado 34-36
+  tries     · 5-5 (guardado —-—)
+  arbitro   · Lautaro Joaquin Quiroga Cafure (guardado: —)
+  guardado  · 23 local · 23 visitante · 20 eventos
+
+Jockey Club Córdoba M19 "A" vs Jockey Club de Villa María M19 "A" · torneo-cordobes-m19-a · tarjeta 326763  ·  a4bfc7cf-7621-4493-892d-efe7ab6f20b4
+  local     · Jockey Club Córdoba M19 "A" · 23 jugadores · 22 con ficha fijada
+  visitante · Jockey Club de Villa María M19 "A" · 23 jugadores · 22 con ficha fijada
+  eventos   · 18
+    min  5 (1T 5) local     penalty_try  
+    min  5 (1T 5) visitante card_yellow  Tiago Requena
+    min 19 (1T 19) visitante try          Tiago Requena
+    min 28 (1T 28) local     try          
+    min 29 (1T 29) local     conversion   
+    min 30 (1T 30) visitante try          Tiago Requena
+    min 32 (1T 32) visitante conversion   Antonio Calcagno
+    min 48 (2T 8) local     try          
+    min 49 (2T 9) local     conversion   
+    min 55 (2T 15) visitante substitution Joaquín Julián Lopez
+    min 60 (2T 20) visitante try          Tiago Requena
+    min 65 (2T 25) visitante substitution Maximiliano Ghione
+    min 68 (2T 28) visitante substitution Bautista Arbarello
+    min 71 (2T 31) local     try          
+    min 71 (2T 31) local     conversion   
+    min 74 (2T 34) visitante injury       Augusto Chialvo
+    min 75 (2T 35) local     try          
+    min 75 (2T 35) local     conversion   
+  marcador  · eventos 35-17 · guardado 35-17
+  tries     · 5-3 (guardado 5-3)
+  guardado  · 23 local · 23 visitante · 18 eventos
+
+listo · 100 partidos

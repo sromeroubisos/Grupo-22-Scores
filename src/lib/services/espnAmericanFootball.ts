@@ -1,109 +1,79 @@
+/**
+ * Fútbol americano por ESPN: red, caché y armado de los bundles.
+ *
+ * Toda la interpretación del JSON vive en `espnAmericanFootballParser.ts`
+ * (puro, con tests). Acá solo se decide QUÉ pedir y cómo se junta.
+ *
+ * Endpoints (medidos el 2026-09-10):
+ * - scoreboard `?dates=AAAAMMDD-AAAAMMDD&limit=1000`: sin `limit` la NCAA corta
+ *   en 300 eventos por rango y un tramo de 45 días tiene unos 390.
+ * - standings `?level=3` para la NFL: baja hasta la división. Sin `level` viene
+ *   por conferencia.
+ * - summary `?event=`: trae `standings.groups[]` (las divisiones de los dos
+ *   equipos), boxscore, drives, jugadas de anotación y árbitros.
+ * - teams/{id}/schedule: el marcador viene como objeto; lo resuelve el parser.
+ *
+ * Solo se consultan las ligas ACTIVAS: la CFL y la XFL están muertas en ESPN
+ * (ver `LEAGUES`) y las cubre FlashScore.
+ */
+
 import { apiFetch } from '@/lib/apiFetch';
 import { memoryCache } from '@/lib/cache';
-import type {
-    ExternalMatchWithMapping,
-    ExternalStandingsRow,
-    MatchConfidence,
-} from '@/lib/types/flashscore-integration';
-import type { Match, MatchStatus } from '@/types/match';
+import type { Match } from '@/types/match';
+import {
+    ACTIVE_ESPN_AMERICAN_FOOTBALL_LEAGUES,
+    LEAGUES,
+    buildAmericanFootballDrives,
+    buildAmericanFootballPlayerStats,
+    buildAmericanFootballScoringPlays,
+    buildAmericanFootballTeamStats,
+    buildRosterPlayers,
+    enrichStandingsRowsForUi,
+    getEspnAttendance,
+    getEspnCoachName,
+    getEspnLinescores,
+    getEspnLiveClock,
+    getEspnLogo,
+    getEspnReferee,
+    getEspnRoundLabel,
+    getEspnSeasonPhase,
+    getEspnSituation,
+    getEspnTeamDisplayName,
+    getLeagueLogo,
+    getLeagueSeason,
+    isEspnAmericanFootballLeagueSlug,
+    isEspnTournamentViewEvent,
+    isRecord,
+    mapEspnStatus,
+    normalizeEspnAmericanFootballStandingsRows,
+    normalizeEspnEventCore,
+    normalizeEspnEventForTournamentViews,
+    normalizeEspnSummaryStandingsRows,
+    normalizeString,
+    parseDate,
+    parseScore,
+    toEspnAmericanFootballMatchId,
+    toEspnAmericanFootballTeamId,
+    toEspnAmericanFootballTournamentId,
+    toFeedPhaseId,
+    type EspnAmericanFootballLeague,
+    type EspnAmericanFootballLeagueSlug,
+    type EspnNormalizedEvent,
+} from './espnAmericanFootballParser';
 
-export type EspnAmericanFootballLeagueSlug =
-    | 'nfl'
-    | 'college-football'
-    | 'cfl'
-    | 'ufl'
-    | 'xfl';
-
-type EspnAmericanFootballLeague = {
-    slug: EspnAmericanFootballLeagueSlug;
-    name: string;
-    shortName: string;
-    countryName: string;
-    tournamentUrl: string;
-    aliases: string[];
-};
+export * from './espnAmericanFootballParser';
 
 type EspnScoreboardEvent = Record<string, any>;
 type EspnSummaryPayload = Record<string, any>;
 type EspnStandingsPayload = Record<string, any>;
-
-type EspnParticipant = {
-    club_id: string;
-    clubs: {
-        id: string;
-        name: string;
-        short_name: string | null;
-    };
-};
 
 const SCOREBOARD_CACHE_TTL = 300;
 const MATCH_CACHE_TTL = 300;
 const TEAM_CACHE_TTL = 1800;
 const STANDINGS_CACHE_TTL = 1800;
 const TEAM_SCHEDULE_RANGE_DAYS = 240;
-
-const LEAGUES: Record<EspnAmericanFootballLeagueSlug, EspnAmericanFootballLeague> = {
-    nfl: {
-        slug: 'nfl',
-        name: 'National Football League',
-        shortName: 'NFL',
-        countryName: 'USA',
-        tournamentUrl: '/american-football/usa/nfl/',
-        aliases: ['nfl'],
-    },
-    'college-football': {
-        slug: 'college-football',
-        name: 'College Football',
-        shortName: 'NCAA',
-        countryName: 'USA',
-        tournamentUrl: '/american-football/usa/ncaa/',
-        aliases: ['college-football', 'ncaa', 'ncaa football', 'ncaaf', 'college'],
-    },
-    cfl: {
-        slug: 'cfl',
-        name: 'Canadian Football League',
-        shortName: 'CFL',
-        countryName: 'Canada',
-        tournamentUrl: '/american-football/canada/cfl/',
-        aliases: ['cfl'],
-    },
-    ufl: {
-        slug: 'ufl',
-        name: 'United Football League',
-        shortName: 'UFL',
-        countryName: 'USA',
-        tournamentUrl: '/american-football/usa/ufl/',
-        aliases: ['ufl'],
-    },
-    xfl: {
-        slug: 'xfl',
-        name: 'XFL',
-        shortName: 'XFL',
-        countryName: 'USA',
-        tournamentUrl: '/american-football/usa/xfl/',
-        aliases: ['xfl'],
-    },
-};
-
-export const SUPPORTED_ESPN_AMERICAN_FOOTBALL_LEAGUES = Object.values(LEAGUES);
-
-function isRecord(value: unknown): value is Record<string, any> {
-    return typeof value === 'object' && value !== null;
-}
-
-function normalizeString(value: unknown): string | null {
-    if (typeof value === 'number' && Number.isFinite(value)) {
-        return String(value);
-    }
-    if (typeof value !== 'string') return null;
-    const trimmed = value.trim();
-    return trimmed || null;
-}
-
-function normalizeKey(value: unknown): string | null {
-    const normalized = normalizeString(value);
-    return normalized ? normalized.toLowerCase() : null;
-}
+const SCOREBOARD_CHUNK_DAYS = 44;
+const SCOREBOARD_LIMIT = 1000;
 
 function toDateOnly(date: Date) {
     return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
@@ -120,228 +90,6 @@ function formatEspnDate(date: Date) {
     const month = String(date.getUTCMonth() + 1).padStart(2, '0');
     const day = String(date.getUTCDate()).padStart(2, '0');
     return `${year}${month}${day}`;
-}
-
-function parseDate(value: unknown): Date | null {
-    const normalized = normalizeString(value);
-    if (!normalized) return null;
-    const parsed = new Date(normalized);
-    return Number.isNaN(parsed.getTime()) ? null : parsed;
-}
-
-function getCompetitors(event: Record<string, any>) {
-    const competition = Array.isArray(event.competitions) ? event.competitions[0] : null;
-    const competitors = Array.isArray(competition?.competitors) ? competition.competitors : [];
-    const home = competitors.find((competitor: any) => competitor?.homeAway === 'home') || competitors[0] || null;
-    const away = competitors.find((competitor: any) => competitor?.homeAway === 'away') || competitors[1] || null;
-    return { competition, competitors, home, away };
-}
-
-function getEspnLogo(entity: any): string {
-    const logos = Array.isArray(entity?.logos) ? entity.logos : [];
-    for (const logo of logos) {
-        if (typeof logo?.href === 'string' && logo.href.trim()) {
-            return logo.href.trim();
-        }
-    }
-    if (typeof entity?.logo === 'string' && entity.logo.trim()) {
-        return entity.logo.trim();
-    }
-    if (typeof entity?.href === 'string' && entity.href.trim()) {
-        return entity.href.trim();
-    }
-    return '';
-}
-
-function getEspnTeamDisplayName(competitor: any) {
-    return (
-        competitor?.team?.displayName ||
-        competitor?.team?.shortDisplayName ||
-        competitor?.team?.name ||
-        competitor?.displayName ||
-        competitor?.name ||
-        'Equipo'
-    );
-}
-
-function getEspnTeamAbbreviation(competitor: any) {
-    return (
-        competitor?.team?.abbreviation ||
-        competitor?.abbreviation ||
-        competitor?.team?.shortDisplayName ||
-        null
-    );
-}
-
-function parseScore(value: unknown) {
-    const raw = normalizeString(value);
-    if (!raw) return null;
-    const numeric = Number(raw);
-    return Number.isFinite(numeric) ? numeric : null;
-}
-
-function getEspnWeekLabel(event: Record<string, any>) {
-    if (typeof event?.week?.text === 'string' && event.week.text.trim()) {
-        return event.week.text.trim();
-    }
-    if (typeof event?.week?.number === 'number') {
-        return `Week ${event.week.number}`;
-    }
-    return 'General';
-}
-
-function mapEspnStatus(statusType: any): MatchStatus {
-    const state = normalizeKey(statusType?.state);
-    const description = normalizeKey(statusType?.description);
-    const detail = normalizeKey(statusType?.detail);
-    const shortDetail = normalizeKey(statusType?.shortDetail);
-
-    if (state === 'post' || statusType?.completed) return 'final';
-    if (state === 'in' || description === 'in progress') return 'live';
-    if (description?.includes('postponed') || detail?.includes('postponed') || shortDetail?.includes('postponed')) return 'postponed';
-    if (description?.includes('canceled') || description?.includes('cancelled')) return 'cancelled';
-    return 'scheduled';
-}
-
-function getLeagueLogo(payload: Record<string, any> | null | undefined) {
-    return (
-        getEspnLogo(payload?.league) ||
-        getEspnLogo(Array.isArray(payload?.leagues) ? payload.leagues[0] : null)
-    );
-}
-
-function getLeagueSeason(payload: Record<string, any> | null | undefined) {
-    const season =
-        payload?.season?.year ??
-        payload?.requestedSeason?.year ??
-        payload?.header?.season?.year ??
-        null;
-    return typeof season === 'number' ? season : null;
-}
-
-function getLeagueStandingEntries(payload: EspnStandingsPayload | null | undefined) {
-    const direct = Array.isArray(payload?.standings?.entries) ? payload.standings.entries : [];
-    if (direct.length > 0) return direct;
-
-    const children = Array.isArray(payload?.children) ? payload.children : [];
-    return children.flatMap((child) => {
-        const entries = Array.isArray(child?.standings?.entries) ? child.standings.entries : [];
-        return entries.map((entry: any) => ({
-            ...entry,
-            _groupName: child?.name || child?.abbreviation || null,
-        }));
-    });
-}
-
-function getStatValue(stats: any[], names: string[]) {
-    for (const stat of stats) {
-        const statName = normalizeKey(stat?.name);
-        if (!statName) continue;
-        if (names.includes(statName)) {
-            const numeric = Number(stat?.value);
-            if (Number.isFinite(numeric)) return numeric;
-        }
-    }
-    return null;
-}
-
-export function isEspnAmericanFootballLeagueSlug(value: unknown): value is EspnAmericanFootballLeagueSlug {
-    const normalized = normalizeKey(value);
-    return Boolean(normalized && normalized in LEAGUES);
-}
-
-export function getEspnAmericanFootballLeague(slug: EspnAmericanFootballLeagueSlug) {
-    return LEAGUES[slug];
-}
-
-export function toEspnAmericanFootballTournamentId(leagueSlug: EspnAmericanFootballLeagueSlug) {
-    return `espn-league-${leagueSlug}`;
-}
-
-export function parseEspnAmericanFootballTournamentId(value: unknown): EspnAmericanFootballLeagueSlug | null {
-    const normalized = normalizeKey(value);
-    if (!normalized?.startsWith('espn-league-')) return null;
-    const slug = normalized.slice('espn-league-'.length);
-    return isEspnAmericanFootballLeagueSlug(slug) ? slug : null;
-}
-
-export function toEspnAmericanFootballTeamId(teamId: string | number) {
-    return `espn-team-${String(teamId)}`;
-}
-
-export function parseEspnAmericanFootballTeamId(value: unknown) {
-    const normalized = normalizeString(value);
-    if (!normalized) return null;
-    const match = /^espn-team-(\d+)$/i.exec(normalized);
-    return match?.[1] || null;
-}
-
-export function toEspnAmericanFootballMatchId(matchId: string | number) {
-    return `espn-game-${String(matchId)}`;
-}
-
-export function parseEspnAmericanFootballMatchId(value: unknown) {
-    const normalized = normalizeString(value);
-    if (!normalized) return null;
-    const match = /^espn-game-(\d+)$/i.exec(normalized);
-    return match?.[1] || null;
-}
-
-export function inferEspnAmericanFootballLeague(input: {
-    id?: unknown;
-    externalId?: unknown;
-    tournamentUrl?: unknown;
-    leagueSlug?: unknown;
-    name?: unknown;
-    ruleset?: unknown;
-}) {
-    const explicitLeague = normalizeKey(input.leagueSlug);
-    if (isEspnAmericanFootballLeagueSlug(explicitLeague)) {
-        return explicitLeague;
-    }
-
-    const prefixedIds = [
-        parseEspnAmericanFootballTournamentId(input.id),
-        parseEspnAmericanFootballTournamentId(input.externalId),
-    ].filter(Boolean) as EspnAmericanFootballLeagueSlug[];
-    if (prefixedIds.length > 0) {
-        return prefixedIds[0];
-    }
-
-    const rawRuleset = isRecord(input.ruleset) ? input.ruleset : null;
-    const rawExternal = isRecord(rawRuleset?.external) ? rawRuleset.external : null;
-    const rulesetLeague = normalizeKey(
-        rawExternal?.espn?.league_slug ??
-        rawExternal?.espnAmericanFootball?.league_slug ??
-        rawRuleset?.espn?.league_slug ??
-        rawRuleset?.espnAmericanFootball?.league_slug
-    );
-    if (isEspnAmericanFootballLeagueSlug(rulesetLeague)) {
-        return rulesetLeague;
-    }
-
-    const normalizedUrl = normalizeKey(input.tournamentUrl);
-    if (normalizedUrl) {
-        for (const league of SUPPORTED_ESPN_AMERICAN_FOOTBALL_LEAGUES) {
-            if (normalizedUrl.includes(league.tournamentUrl.toLowerCase())) {
-                return league.slug;
-            }
-        }
-    }
-
-    const normalizedName = normalizeKey(input.name);
-    if (normalizedName) {
-        for (const league of SUPPORTED_ESPN_AMERICAN_FOOTBALL_LEAGUES) {
-            if (league.aliases.some((alias) => normalizedName.includes(alias))) {
-                return league.slug;
-            }
-            if (normalizedName.includes(league.shortName.toLowerCase()) || normalizedName.includes(league.name.toLowerCase())) {
-                return league.slug;
-            }
-        }
-    }
-
-    return null;
 }
 
 const inflightEspnAmFootRequests = new Map<string, Promise<unknown>>();
@@ -385,10 +133,10 @@ async function fetchScoreboardRangeEvents(
 
     let cursor = safeStart;
     while (cursor <= safeEnd) {
-        const chunkEnd = addDays(cursor, 44);
+        const chunkEnd = addDays(cursor, SCOREBOARD_CHUNK_DAYS);
         const boundedEnd = chunkEnd <= safeEnd ? chunkEnd : safeEnd;
         const datesParam = `${formatEspnDate(cursor)}-${formatEspnDate(boundedEnd)}`;
-        const url = `https://site.api.espn.com/apis/site/v2/sports/football/${leagueSlug}/scoreboard?dates=${datesParam}`;
+        const url = `https://site.api.espn.com/apis/site/v2/sports/football/${leagueSlug}/scoreboard?dates=${datesParam}&limit=${SCOREBOARD_LIMIT}`;
         const payload = await fetchEspnJson<Record<string, any>>(url, 'EspnAmFootScoreboard', SCOREBOARD_CACHE_TTL);
         const events = Array.isArray(payload?.events) ? payload.events : [];
 
@@ -410,7 +158,9 @@ async function fetchScoreboardRangeEvents(
 }
 
 async function fetchLeagueStandingsRaw(leagueSlug: EspnAmericanFootballLeagueSlug) {
-    const url = `https://site.api.espn.com/apis/v2/sports/football/${leagueSlug}/standings`;
+    const league = LEAGUES[leagueSlug];
+    const level = league.standingsLevel ? `?level=${league.standingsLevel}` : '';
+    const url = `https://site.api.espn.com/apis/v2/sports/football/${leagueSlug}/standings${level}`;
     return fetchEspnJson<EspnStandingsPayload>(url, 'EspnAmFootStandings', STANDINGS_CACHE_TTL);
 }
 
@@ -424,7 +174,7 @@ async function fetchMatchSummaryForLeague(
 
 async function resolveMatchLeagueAndSummary(matchId: string) {
     const results = await Promise.allSettled(
-        SUPPORTED_ESPN_AMERICAN_FOOTBALL_LEAGUES.map(async (league) => ({
+        ACTIVE_ESPN_AMERICAN_FOOTBALL_LEAGUES.map(async (league) => ({
             league,
             summary: await fetchMatchSummaryForLeague(league.slug, matchId),
         })),
@@ -443,10 +193,12 @@ async function resolveMatchLeagueAndSummary(matchId: string) {
 }
 
 async function resolveTeamLeague(teamId: string, preferredLeague?: string | null) {
-    const preferred = isEspnAmericanFootballLeagueSlug(preferredLeague) ? preferredLeague : null;
+    const preferred = isEspnAmericanFootballLeagueSlug(preferredLeague) && LEAGUES[preferredLeague].active
+        ? preferredLeague
+        : null;
     const orderedLeagues = preferred
-        ? [LEAGUES[preferred], ...SUPPORTED_ESPN_AMERICAN_FOOTBALL_LEAGUES.filter((league) => league.slug !== preferred)]
-        : SUPPORTED_ESPN_AMERICAN_FOOTBALL_LEAGUES;
+        ? [LEAGUES[preferred], ...ACTIVE_ESPN_AMERICAN_FOOTBALL_LEAGUES.filter((league) => league.slug !== preferred)]
+        : ACTIVE_ESPN_AMERICAN_FOOTBALL_LEAGUES;
 
     const results = await Promise.allSettled(
         orderedLeagues.map(async (league) => ({
@@ -468,274 +220,6 @@ async function resolveTeamLeague(teamId: string, preferredLeague?: string | null
     }
 
     return null;
-}
-
-function normalizeEspnEventCore(event: Record<string, any>, league: EspnAmericanFootballLeague) {
-    const { competition, home, away } = getCompetitors(event);
-    const status = mapEspnStatus(competition?.status?.type || event?.status?.type);
-    const kickoff = parseDate(competition?.date || event?.date);
-    const homeScore = parseScore(home?.score);
-    const awayScore = parseScore(away?.score);
-    const eventId = normalizeString(event?.id || competition?.id);
-    const venue = normalizeString(competition?.venue?.fullName);
-
-    if (!eventId || !kickoff || !home || !away) {
-        return null;
-    }
-
-    const homeId = normalizeString(home?.team?.id || home?.id);
-    const awayId = normalizeString(away?.team?.id || away?.id);
-    const leagueId = toEspnAmericanFootballTournamentId(league.slug);
-    const leagueLogo = getLeagueLogo(event);
-    const round = typeof event?.week?.number === 'number' ? event.week.number : 1;
-
-    return {
-        id: toEspnAmericanFootballMatchId(eventId),
-        rawId: eventId,
-        status,
-        kickoff,
-        round,
-        weekText: getEspnWeekLabel(event),
-        venue,
-        season: typeof event?.season?.year === 'number' ? event.season.year : null,
-        tournament: {
-            id: leagueId,
-            rawId: league.slug,
-            name: league.shortName,
-            fullName: league.name,
-            countryName: league.countryName,
-            logo: leagueLogo,
-            league: league.slug,
-            url: league.tournamentUrl,
-        },
-        home: {
-            id: homeId ? toEspnAmericanFootballTeamId(homeId) : null,
-            rawId: homeId,
-            name: getEspnTeamDisplayName(home),
-            shortName: getEspnTeamAbbreviation(home),
-            logo: getEspnLogo(home?.team || home),
-            league: league.slug,
-        },
-        away: {
-            id: awayId ? toEspnAmericanFootballTeamId(awayId) : null,
-            rawId: awayId,
-            name: getEspnTeamDisplayName(away),
-            shortName: getEspnTeamAbbreviation(away),
-            logo: getEspnLogo(away?.team || away),
-            league: league.slug,
-        },
-        score: {
-            home: homeScore,
-            away: awayScore,
-        },
-    };
-}
-
-function normalizeEspnEventForTournamentViews(event: Record<string, any>, league: EspnAmericanFootballLeague) {
-    const normalized = normalizeEspnEventCore(event, league);
-    if (!normalized) return null;
-
-    return {
-        match_id: normalized.id,
-        event_key: normalized.id,
-        timestamp: Math.floor(normalized.kickoff.getTime() / 1000),
-        date: normalized.kickoff.toISOString(),
-        match_status: normalized.status,
-        event_status: normalized.status,
-        status: normalized.status,
-        week: normalized.weekText,
-        season: normalized.season,
-        tournament_id: normalized.tournament.id,
-        tournament_name: normalized.tournament.fullName,
-        tournament_name_short: normalized.tournament.name,
-        tournament_logo: normalized.tournament.logo,
-        country_name: normalized.tournament.countryName,
-        sport_id: 'american-football',
-        home_team: {
-            id: normalized.home.id,
-            team_id: normalized.home.id,
-            name: normalized.home.name,
-            short_name: normalized.home.shortName,
-            logo: normalized.home.logo,
-            image_path: normalized.home.logo,
-            small_image_path: normalized.home.logo,
-            team_url: '',
-            league: normalized.home.league,
-            provider: 'espn',
-            source: 'espn',
-        },
-        away_team: {
-            id: normalized.away.id,
-            team_id: normalized.away.id,
-            name: normalized.away.name,
-            short_name: normalized.away.shortName,
-            logo: normalized.away.logo,
-            image_path: normalized.away.logo,
-            small_image_path: normalized.away.logo,
-            team_url: '',
-            league: normalized.away.league,
-            provider: 'espn',
-            source: 'espn',
-        },
-        home_team_name: normalized.home.name,
-        away_team_name: normalized.away.name,
-        home_team_logo: normalized.home.logo,
-        away_team_logo: normalized.away.logo,
-        scores: normalized.score,
-        score: normalized.score,
-        venue: normalized.venue,
-        source: 'espn',
-        provider: 'espn',
-    };
-}
-
-type EspnTournamentViewEvent = NonNullable<ReturnType<typeof normalizeEspnEventForTournamentViews>>;
-
-function isEspnTournamentViewEvent(
-    event: ReturnType<typeof normalizeEspnEventForTournamentViews>,
-): event is EspnTournamentViewEvent {
-    return Boolean(event);
-}
-
-function matchParticipantTeamName(name: string, participants: EspnParticipant[]) {
-    const lower = name.toLowerCase().trim();
-
-    for (const participant of participants) {
-        const clubName = participant.clubs.name.toLowerCase().trim();
-        const shortName = (participant.clubs.short_name ?? '').toLowerCase().trim();
-
-        if (clubName === lower || (shortName.length >= 2 && shortName === lower)) {
-            return { club_id: participant.club_id, confidence: 'exact' as MatchConfidence };
-        }
-    }
-
-    for (const participant of participants) {
-        const clubName = participant.clubs.name.toLowerCase().trim();
-        const shortName = (participant.clubs.short_name ?? '').toLowerCase().trim();
-
-        if (clubName.length >= 3 && (lower.includes(clubName) || clubName.includes(lower))) {
-            return { club_id: participant.club_id, confidence: 'partial' as MatchConfidence };
-        }
-        if (shortName.length >= 3 && (lower.includes(shortName) || shortName.includes(lower))) {
-            return { club_id: participant.club_id, confidence: 'partial' as MatchConfidence };
-        }
-    }
-
-    return { club_id: null, confidence: 'none' as MatchConfidence };
-}
-
-export function normalizeEspnAmericanFootballEventForSyncPreview(
-    event: Record<string, any>,
-    leagueSlug: EspnAmericanFootballLeagueSlug,
-    participants: EspnParticipant[],
-): ExternalMatchWithMapping | null {
-    const league = LEAGUES[leagueSlug];
-    const normalized = normalizeEspnEventCore(event, league);
-    if (!normalized) return null;
-
-    const homeMatch = matchParticipantTeamName(normalized.home.name, participants);
-    const awayMatch = matchParticipantTeamName(normalized.away.name, participants);
-
-    return {
-        external_match_id: normalized.id,
-        home_team_name: normalized.home.name,
-        away_team_name: normalized.away.name,
-        timestamp: Math.floor(normalized.kickoff.getTime() / 1000),
-        date_time: normalized.kickoff.toISOString(),
-        venue: normalized.venue || undefined,
-        status: normalized.status,
-        score: normalized.score.home != null && normalized.score.away != null ? normalized.score : undefined,
-        home_club_id: homeMatch.club_id,
-        away_club_id: awayMatch.club_id,
-        home_match_confidence: homeMatch.confidence,
-        away_match_confidence: awayMatch.confidence,
-    };
-}
-
-export function normalizeEspnAmericanFootballStandingsRows(
-    payload: EspnStandingsPayload | null | undefined,
-    leagueSlug: EspnAmericanFootballLeagueSlug,
-): ExternalStandingsRow[] {
-    const entries = getLeagueStandingEntries(payload);
-
-    return entries.map((entry: any, index: number) => {
-        const teamId = normalizeString(entry?.team?.id);
-        const stats = Array.isArray(entry?.stats) ? entry.stats : [];
-        const played = getStatValue(stats, ['gamesplayed', 'played']) ?? 0;
-        const wins = getStatValue(stats, ['wins']) ?? 0;
-        const draws = getStatValue(stats, ['ties']) ?? 0;
-        const losses = getStatValue(stats, ['losses']) ?? 0;
-        const scored = getStatValue(stats, ['pointsfor']) ?? undefined;
-        const conceded = getStatValue(stats, ['pointsagainst']) ?? undefined;
-        const differential = getStatValue(stats, ['pointdifferential', 'differential']) ?? undefined;
-        const position = getStatValue(stats, ['playoffseed', 'rank']) ?? index + 1;
-
-        return {
-            position,
-            team_name: entry?.team?.displayName || entry?.team?.shortDisplayName || entry?.team?.name || 'Equipo',
-            team_id: teamId ? toEspnAmericanFootballTeamId(teamId) : null,
-            team_logo: getEspnLogo(entry?.team),
-            team_url: '',
-            played,
-            won: wins,
-            drawn: draws,
-            lost: losses,
-            points: wins,
-            scored,
-            conceded,
-            ...(typeof differential === 'number' ? { differential } : {}),
-            ...(normalizeString(entry?._groupName) ? { group_name: String(entry._groupName) } : {}),
-        };
-    });
-}
-
-function enrichStandingsRowsForUi(
-    standings: ExternalStandingsRow[],
-    leagueSlug: EspnAmericanFootballLeagueSlug,
-) {
-    return standings.map((row) => ({
-        rank: row.position,
-        name: row.team_name,
-        team_id: row.team_id,
-        team_name: row.team_name,
-        team_url: row.team_url,
-        team_logo: row.team_logo,
-        logo: row.team_logo || '',
-        team: {
-            id: row.team_id,
-            team_id: row.team_id,
-            name: row.team_name,
-            logo: row.team_logo || '',
-            image_path: row.team_logo || '',
-            small_image_path: row.team_logo || '',
-            team_url: '',
-            league: leagueSlug,
-            provider: 'espn',
-            source: 'espn',
-        },
-        participant: {
-            id: row.team_id,
-            name: row.team_name,
-            logo: row.team_logo || '',
-            image_path: row.team_logo || '',
-            small_image_path: row.team_logo || '',
-            team_url: '',
-            league: leagueSlug,
-            provider: 'espn',
-            source: 'espn',
-        },
-        matches_played: row.played,
-        played: row.played,
-        won: row.won,
-        drawn: row.drawn,
-        lost: row.lost,
-        points: row.points,
-        goal_difference: (row.scored ?? 0) - (row.conceded ?? 0),
-        scored: row.scored ?? 0,
-        conceded: row.conceded ?? 0,
-        provider: 'espn',
-        source: 'espn',
-    }));
 }
 
 async function buildRecentH2H(
@@ -805,54 +289,64 @@ function buildTournamentDetails(
     };
 }
 
+function toFeedMatch(event: EspnNormalizedEvent): Match {
+    return {
+        id: event.id,
+        tournamentId: event.tournament.id,
+        // Denormalizado para el feed y para la fila de cache: sin esto el
+        // partido de la NFL se agrupaba como "Internacional: Liga (cache)" en
+        // vez de "USA: NFL".
+        leagueName: event.tournament.name,
+        countryName: event.tournament.countryName,
+        leagueUrl: event.tournament.url,
+        leagueLogo: event.tournament.logo || undefined,
+        // Pretemporada, temporada regular y playoffs reinician la semana: sin
+        // la fase, la semana 1 de playoffs se confundía con la 1 regular.
+        phaseId: toFeedPhaseId(event.phase),
+        round: event.round,
+        homeTeamId: event.home.id || 'espn-team-home',
+        homeTeamName: event.home.name,
+        awayTeamId: event.away.id || 'espn-team-away',
+        awayTeamName: event.away.name,
+        homeTeamLogo: event.home.logo,
+        awayTeamLogo: event.away.logo,
+        scheduledAt: event.kickoff,
+        venueName: event.venue || undefined,
+        status: event.status,
+        score: event.score,
+        currentMinute: event.live.label || undefined,
+        result: {
+            isComplete: event.status === 'final',
+            updatedAt: new Date(),
+            updatedBy: 'espn',
+            version: 1,
+        },
+        createdFrom: 'generator' as const,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+    };
+}
+
 export async function getEspnAmericanFootballMatches(
     date: Date,
     _options?: { timeZone?: string; targetDateKey?: string },
 ): Promise<Match[]> {
+    // ESPN interpreta `dates=` en hora del Este de Estados Unidos. Coincide con
+    // el día argentino salvo para partidos que arrancan después de las 23 ET,
+    // que en la práctica no existen.
     const targetDate = toDateOnly(date);
     const eventsByLeague = await Promise.all(
-        SUPPORTED_ESPN_AMERICAN_FOOTBALL_LEAGUES.map((league) =>
+        ACTIVE_ESPN_AMERICAN_FOOTBALL_LEAGUES.map((league) =>
             fetchScoreboardRangeEvents(league.slug, targetDate, targetDate),
         ),
     );
 
     return eventsByLeague.flatMap((events, index) => {
-        const league = SUPPORTED_ESPN_AMERICAN_FOOTBALL_LEAGUES[index];
+        const league = ACTIVE_ESPN_AMERICAN_FOOTBALL_LEAGUES[index];
         return events
             .map((event) => normalizeEspnEventCore(event, league))
-            .filter((event): event is NonNullable<ReturnType<typeof normalizeEspnEventCore>> => Boolean(event))
-            .map((event) => ({
-                id: event.id,
-                tournamentId: event.tournament.id,
-                // Denormalizado para el feed y para la fila de cache: sin esto
-                // el partido de la NFL se agrupaba como "Internacional: Liga
-                // (cache)" en vez de "USA: NFL".
-                leagueName: event.tournament.name,
-                countryName: event.tournament.countryName,
-                leagueUrl: event.tournament.url,
-                leagueLogo: event.tournament.logo || undefined,
-                phaseId: 'group',
-                round: event.round,
-                homeTeamId: event.home.id || 'espn-team-home',
-                homeTeamName: event.home.name,
-                awayTeamId: event.away.id || 'espn-team-away',
-                awayTeamName: event.away.name,
-                homeTeamLogo: event.home.logo,
-                awayTeamLogo: event.away.logo,
-                scheduledAt: event.kickoff,
-                venueName: event.venue || undefined,
-                status: event.status,
-                score: event.score,
-                result: {
-                    isComplete: event.status === 'final',
-                    updatedAt: new Date(),
-                    updatedBy: 'espn',
-                    version: 1,
-                },
-                createdFrom: 'generator' as const,
-                createdAt: new Date(),
-                updatedAt: new Date(),
-            }));
+            .filter((event): event is EspnNormalizedEvent => Boolean(event))
+            .map(toFeedMatch);
     });
 }
 
@@ -967,14 +461,30 @@ export async function getEspnAmericanFootballMatchBundle(matchId: string) {
     }
 
     const league = resolved.league;
-    const standingsRaw = summary?.standings ?? await fetchLeagueStandingsRaw(league.slug);
-    const standings = enrichStandingsRowsForUi(
-        normalizeEspnAmericanFootballStandingsRows(standingsRaw, league.slug),
-        league.slug,
-    );
+    const status = mapEspnStatus(competition?.status?.type);
+
+    // La tabla de la ficha: primero las divisiones de los dos equipos que trae el
+    // resumen; si no vienen, la tabla de liga entera.
+    let standingsRows = normalizeEspnSummaryStandingsRows(summary);
+    if (standingsRows.length === 0) {
+        const standingsRaw = await fetchLeagueStandingsRaw(league.slug).catch(() => null);
+        standingsRows = normalizeEspnAmericanFootballStandingsRows(standingsRaw, league.slug);
+    }
+    const standings = enrichStandingsRowsForUi(standingsRows, league.slug);
+
     const homeTeamId = normalizeString(home?.team?.id || home?.id);
     const awayTeamId = normalizeString(away?.team?.id || away?.id);
-    const h2h = await buildRecentH2H(league.slug, matchId, homeTeamId, awayTeamId);
+    const h2h = await buildRecentH2H(league.slug, matchId, homeTeamId, awayTeamId).catch(() => []);
+    const live = getEspnLiveClock(competition?.status);
+    const events = buildAmericanFootballScoringPlays(summary, homeTeamId);
+    const stats = buildAmericanFootballTeamStats(summary);
+    const drives = buildAmericanFootballDrives(summary);
+    const playerStats = buildAmericanFootballPlayerStats(summary);
+    const roundLabel = getEspnRoundLabel({
+        season: header?.season,
+        week: { number: header?.week },
+        competitions: [competition],
+    });
 
     return {
         source: 'espn' as const,
@@ -983,7 +493,11 @@ export async function getEspnAmericanFootballMatchBundle(matchId: string) {
             id: toEspnAmericanFootballMatchId(matchId),
             externalProvider: 'espn',
             sportId: 'american-football',
-            status: mapEspnStatus(competition?.status?.type),
+            status,
+            currentMinute: live.label,
+            period: live.period,
+            clock: live.clock,
+            situation: status === 'live' ? getEspnSituation(competition) : null,
             date: kickoff.toISOString(),
             time: kickoff.toLocaleTimeString('es-AR', {
                 hour: '2-digit',
@@ -995,15 +509,19 @@ export async function getEspnAmericanFootballMatchBundle(matchId: string) {
             tournamentLogo: getLeagueLogo(summary),
             tournamentId: toEspnAmericanFootballTournamentId(league.slug),
             tournamentSeason: header?.season?.year || null,
+            seasonPhase: getEspnSeasonPhase(header),
             category: league.countryName,
-            round: getEspnWeekLabel(header),
-            venue: normalizeString(competition?.venue?.fullName) || '',
-            referee: null,
+            round: roundLabel,
+            venue: normalizeString(competition?.venue?.fullName) || normalizeString(summary?.gameInfo?.venue?.fullName) || '',
+            neutralSite: competition?.neutralSite === true,
+            referee: getEspnReferee(summary),
+            attendance: getEspnAttendance(summary),
             home: {
                 id: homeTeamId ? toEspnAmericanFootballTeamId(homeTeamId) : null,
                 name: getEspnTeamDisplayName(home),
                 logo: getEspnLogo(home?.team || home),
                 score: parseScore(home?.score),
+                linescores: getEspnLinescores(home),
                 teamUrl: '',
                 league: league.slug,
             },
@@ -1012,37 +530,28 @@ export async function getEspnAmericanFootballMatchBundle(matchId: string) {
                 name: getEspnTeamDisplayName(away),
                 logo: getEspnLogo(away?.team || away),
                 score: parseScore(away?.score),
+                linescores: getEspnLinescores(away),
                 teamUrl: '',
                 league: league.slug,
             },
             lineups: null,
             standings,
             h2h,
+            events,
+            stats,
+            drives,
+            playerStats,
             draw: [],
             form: [],
             topScorers: [],
         },
         h2h,
         standings,
+        events,
+        stats,
+        drives,
+        playerStats,
     };
-}
-
-function buildRosterPlayers(payload: Record<string, any> | null | undefined) {
-    const athleteGroups = Array.isArray(payload?.athletes) ? payload.athletes : [];
-    return athleteGroups.flatMap((group: any) => {
-        const positionName = normalizeString(group?.position) || 'other';
-        const items = Array.isArray(group?.items) ? group.items : [];
-        return items.map((item: any) => ({
-            name: item?.displayName || item?.fullName || 'Jugador',
-            number: item?.jersey || '',
-            jersey_number: item?.jersey || '',
-            age: item?.age || '',
-            nationality: item?.birthPlace?.country || '',
-            position: item?.position?.displayName || item?.position?.name || positionName,
-            position_name: item?.position?.displayName || item?.position?.name || positionName,
-            image_path: item?.headshot?.href || '',
-        }));
-    });
 }
 
 export async function getEspnAmericanFootballTeamBundle(teamId: string, preferredLeague?: string | null) {
@@ -1071,7 +580,7 @@ export async function getEspnAmericanFootballTeamBundle(teamId: string, preferre
     const standingsRows = normalizeEspnAmericanFootballStandingsRows(standingsPayload, league.slug);
     const standingRow = standingsRows.find((row) => row.team_id === toEspnAmericanFootballTeamId(teamId)) || null;
     const team = resolved.details?.team;
-    const venue = resolved.details?.franchise?.venue;
+    const venue = team?.franchise?.venue || resolved.details?.franchise?.venue;
     const logo = getEspnLogo(team);
 
     return {
@@ -1091,13 +600,18 @@ export async function getEspnAmericanFootballTeamBundle(teamId: string, preferre
             current_league: league.shortName,
             current_league_logo: getLeagueLogo(standingsPayload),
             current_season: getLeagueSeason(schedulePayload) || getLeagueSeason(standingsPayload),
+            coach: getEspnCoachName(rosterPayload),
             standing: standingRow ? {
                 position: standingRow.position,
+                group_name: standingRow.group_name ?? null,
                 points: standingRow.points,
                 played: standingRow.played,
                 won: standingRow.won,
                 drawn: standingRow.drawn,
                 lost: standingRow.lost,
+                win_percentage: standingRow.win_percentage ?? null,
+                seed: standingRow.seed ?? null,
+                streak: standingRow.streak ?? null,
             } : null,
             statistics: standingRow ? {
                 played: standingRow.played,
@@ -1106,9 +620,10 @@ export async function getEspnAmericanFootballTeamBundle(teamId: string, preferre
                 losses: standingRow.lost,
                 pointsFor: standingRow.scored ?? null,
                 pointsAgainst: standingRow.conceded ?? null,
+                winPercentage: standingRow.win_percentage ?? null,
             } : null,
             short_code: team?.abbreviation || '',
-            description: normalizeString(resolved.details?.standingSummary) || '',
+            description: normalizeString(team?.standingSummary) || normalizeString(resolved.details?.standingSummary) || '',
         },
         results: normalizedEvents
             .filter((event) => event.status === 'final')

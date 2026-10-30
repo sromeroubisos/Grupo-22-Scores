@@ -1,0 +1,371 @@
+[
+  {
+    "id": "a4a4f502-d9a9-451b-84de-21a72102ac27",
+    "cruce": "santiago-lawn-tennis-club|santiago-rugby-club",
+    "fecha": 1,
+    "antes": {
+      "round_label": null
+    }
+  },
+  {
+    "id": "3b7eb630-cf73-44b0-9401-670b3c6f09e9",
+    "cruce": "gimnasia-y-tiro|tiro-federal-salta",
+    "fecha": 1,
+    "antes": {
+      "round_label": null
+    }
+  },
+  {
+    "id": "d8c20eb7-5366-419e-9590-777885d96585",
+    "cruce": "old-lions-r-c|jockey-club-de-tucuman",
+    "fecha": 1,
+    "antes": {
+      "round_label": null
+    }
+  },
+  {
+    "id": "a0e7ae22-3e32-456f-8108-0fa6054a9f81",
+    "cruce": "tigres-r-c|aguara-guazu",
+    "fecha": 1,
+    "antes": {
+      "round_label": null
+    }
+  },
+  {
+    "id": "0ec2e89f-f176-46cc-8a35-d9a194a3785a",
+    "cruce": "santiago-rugby-club|gimnasia-y-tiro",
+    "fecha": 2,
+    "antes": {
+      "round_label": null,
+      "date_time": "2026-08-23T18:30:00+00:00",
+      "status": "scheduled",
+      "score": {
+        "home": 0,
+        "away": 0
+      },
+      "home_base_points": 0,
+      "away_base_points": 0,
+      "home_bonus_points": 0,
+      "away_bonus_points": 0,
+      "points_autocalculated": true,
+      "points_override_reason": null
+    }
+  },
+  {
+    "id": "2d8cdbfc-cc6a-4976-83f9-335c21ca4d11",
+    "cruce": "tiro-federal-salta|old-lions-r-c",
+    "fecha": 2,
+    "antes": {
+      "round_label": null,
+      "date_time": "2026-08-23T18:30:00+00:00",
+      "status": "scheduled",
+      "score": {
+        "home": 0,
+        "away": 0
+      },
+      "home_base_points": 0,
+      "away_base_points": 0,
+      "home_bonus_points": 0,
+      "away_bonus_points": 0,
+      "points_autocalculated": true,
+      "points_override_reason": null
+    }
+  },
+  {
+    "id": "4a4f1062-cf70-46e4-b0a0-e44af7e7d90b",
+    "cruce": "aguara-guazu|jockey-club-de-tucuman",
+    "fecha": 2,
+    "antes": {
+      "round_label": null,
+      "date_time": "2026-08-23T18:30:00+00:00",
+      "status": "scheduled",
+      "score": {
+        "home": 0,
+        "away": 0
+      },
+      "home_base_points": 0,
+      "away_base_points": 0,
+      "home_bonus_points": 0,
+      "away_bonus_points": 0,
+      "points_autocalculated": true,
+      "points_override_reason": null
+    }
+  },
+  {
+    "id": "3b1b1744-fa98-4802-9c43-dd880ed05812",
+    "cruce": "tigres-r-c|santiago-lawn-tennis-club",
+    "fecha": 2,
+    "antes": {
+      "round_label": null,
+      "date_time": "2026-08-23T18:30:00+00:00",
+      "status": "scheduled",
+      "score": {
+        "home": 0,
+        "away": 0
+      },
+      "home_base_points": 0,
+      "away_base_points": 0,
+      "home_bonus_points": 0,
+      "away_bonus_points": 0,
+      "points_autocalculated": true,
+      "points_override_reason": null
+    }
+  },
+  {
+    "id": "4c651cb5-9ec3-4927-97aa-2d06b4b509c6",
+    "cruce": "old-lions-r-c|santiago-rugby-club",
+    "fecha": 3,
+    "antes": {
+      "round_label": null,
+      "date_time": "2026-08-30T18:30:00+00:00",
+      "status": "scheduled",
+      "score": {
+        "home": 0,
+        "away": 0
+      },
+      "home_base_points": 0,
+      "away_base_points": 0,
+      "home_bonus_points": 0,
+      "away_bonus_points": 0,
+      "points_autocalculated": true,
+      "points_override_reason": null
+    }
+  },
+  {
+    "id": "7dd7a326-df5e-468d-90d6-8ca079add080",
+    "cruce": "santiago-lawn-tennis-club|aguara-guazu",
+    "fecha": 3,
+    "antes": {
+      "round_label": null,
+      "date_time": "2026-08-30T18:30:00+00:00",
+      "status": "scheduled",
+      "score": {
+        "home": 0,
+        "away": 0
+      },
+      "home_base_points": 0,
+      "away_base_points": 0,
+      "home_bonus_points": 0,
+      "away_bonus_points": 0,
+      "points_autocalculated": true,
+      "points_override_reason": null
+    }
+  },
+  {
+    "id": "8bb2357b-2ed5-4c49-bfae-d04d6bc88489",
+    "cruce": "gimnasia-y-tiro|tigres-r-c",
+    "fecha": 3,
+    "antes": {
+      "round_label": null,
+      "date_time": "2026-08-30T18:30:00+00:00",
+      "status": "scheduled",
+      "score": {
+        "home": 0,
+        "away": 0
+      },
+      "home_base_points": 0,
+      "away_base_points": 0,
+      "home_bonus_points": 0,
+      "away_bonus_points": 0,
+      "points_autocalculated": true,
+      "points_override_reason": null
+    }
+  },
+  {
+    "id": "015ed8d2-c5e5-4c03-8609-081f7f61dcdf",
+    "cruce": "jockey-club-de-tucuman|tiro-federal-salta",
+    "fecha": 3,
+    "antes": {
+      "round_label": null,
+      "date_time": "2026-08-30T18:30:00+00:00",
+      "status": "scheduled",
+      "score": {
+        "home": 0,
+        "away": 0
+      },
+      "home_base_points": 0,
+      "away_base_points": 0,
+      "home_bonus_points": 0,
+      "away_bonus_points": 0,
+      "points_autocalculated": true,
+      "points_override_reason": null
+    }
+  },
+  {
+    "id": "f72a5ba4-d0e8-4db8-a149-e70388b1ffdf",
+    "cruce": "santiago-lawn-tennis-club|gimnasia-y-tiro",
+    "fecha": 4,
+    "antes": {
+      "round_label": null,
+      "date_time": "2026-09-20T18:30:00+00:00",
+      "status": "scheduled",
+      "score": {
+        "home": 0,
+        "away": 0
+      },
+      "home_base_points": 0,
+      "away_base_points": 0,
+      "home_bonus_points": 0,
+      "away_bonus_points": 0,
+      "points_autocalculated": true,
+      "points_override_reason": null
+    }
+  },
+  {
+    "id": "d7c852db-fb3a-4f6f-821d-36691eb452bd",
+    "cruce": "santiago-rugby-club|jockey-club-de-tucuman",
+    "fecha": 4,
+    "antes": {
+      "round_label": null,
+      "date_time": "2026-09-20T18:30:00+00:00",
+      "status": "scheduled",
+      "score": {
+        "home": 0,
+        "away": 0
+      },
+      "home_base_points": 0,
+      "away_base_points": 0,
+      "home_bonus_points": 0,
+      "away_bonus_points": 0,
+      "points_autocalculated": true,
+      "points_override_reason": null
+    }
+  },
+  {
+    "id": "d7a601f1-633c-459f-ae03-cbc955616b1d",
+    "cruce": "tigres-r-c|old-lions-r-c",
+    "fecha": 4,
+    "antes": {
+      "round_label": null,
+      "date_time": "2026-09-20T18:30:00+00:00",
+      "status": "scheduled",
+      "score": {
+        "home": 0,
+        "away": 0
+      },
+      "home_base_points": 0,
+      "away_base_points": 0,
+      "home_bonus_points": 0,
+      "away_bonus_points": 0,
+      "points_autocalculated": true,
+      "points_override_reason": null
+    }
+  },
+  {
+    "id": "1cdd30f0-7ea7-4945-bbb6-04209e2d32fb",
+    "cruce": "aguara-guazu|tiro-federal-salta",
+    "fecha": 4,
+    "antes": {
+      "round_label": null,
+      "date_time": "2026-09-20T18:30:00+00:00"
+    }
+  },
+  {
+    "id": "fdddd375-3de9-4a69-b90b-7407f2debb2a",
+    "cruce": "gimnasia-y-tiro|aguara-guazu",
+    "fecha": 5,
+    "antes": {
+      "round_label": null,
+      "date_time": "2026-09-27T18:30:00+00:00"
+    }
+  },
+  {
+    "id": "aaf493fd-c0f3-4d6c-b071-536215082a98",
+    "cruce": "old-lions-r-c|santiago-lawn-tennis-club",
+    "fecha": 5,
+    "antes": {
+      "round_label": null,
+      "date_time": "2026-09-27T18:30:00+00:00"
+    }
+  },
+  {
+    "id": "5619baf0-9743-4531-8562-0a43c7a34313",
+    "cruce": "jockey-club-de-tucuman|tigres-r-c",
+    "fecha": 5,
+    "antes": {
+      "round_label": null,
+      "date_time": "2026-09-27T18:30:00+00:00"
+    }
+  },
+  {
+    "id": "c0dac096-413e-493e-a8b9-879e10619455",
+    "cruce": "tiro-federal-salta|santiago-rugby-club",
+    "fecha": 5,
+    "antes": {
+      "round_label": null,
+      "date_time": "2026-09-27T18:30:00+00:00"
+    }
+  },
+  {
+    "id": "79ebf599-40a9-4ab4-87be-8a0dbad9f5ce",
+    "cruce": "aguara-guazu|santiago-rugby-club",
+    "fecha": 6,
+    "antes": {
+      "round_label": null,
+      "date_time": "2026-10-04T18:30:00+00:00"
+    }
+  },
+  {
+    "id": "e99eb09c-791e-4ace-91e8-8f11e385163a",
+    "cruce": "tigres-r-c|tiro-federal-salta",
+    "fecha": 6,
+    "antes": {
+      "round_label": null,
+      "date_time": "2026-10-04T18:30:00+00:00"
+    }
+  },
+  {
+    "id": "0ec0d342-f901-4999-8ac7-b439a8d61e1f",
+    "cruce": "santiago-lawn-tennis-club|jockey-club-de-tucuman",
+    "fecha": 6,
+    "antes": {
+      "round_label": null,
+      "date_time": "2026-10-04T18:30:00+00:00"
+    }
+  },
+  {
+    "id": "07861687-4ba3-4c66-b766-a7162d7faddb",
+    "cruce": "gimnasia-y-tiro|old-lions-r-c",
+    "fecha": 6,
+    "antes": {
+      "round_label": null,
+      "date_time": "2026-10-04T18:30:00+00:00"
+    }
+  },
+  {
+    "id": "c6a0315b-d170-4839-965a-ab1f2f8ef479",
+    "cruce": "old-lions-r-c|aguara-guazu",
+    "fecha": 7,
+    "antes": {
+      "round_label": null,
+      "date_time": "2026-10-18T18:30:00+00:00"
+    }
+  },
+  {
+    "id": "dcb896e0-1b01-451f-b694-8b3d5b890955",
+    "cruce": "jockey-club-de-tucuman|gimnasia-y-tiro",
+    "fecha": 7,
+    "antes": {
+      "round_label": null,
+      "date_time": "2026-10-18T18:30:00+00:00"
+    }
+  },
+  {
+    "id": "06eb3ccb-d57f-452c-ab96-348556331bc4",
+    "cruce": "tiro-federal-salta|santiago-lawn-tennis-club",
+    "fecha": 7,
+    "antes": {
+      "round_label": null,
+      "date_time": "2026-10-18T18:30:00+00:00"
+    }
+  },
+  {
+    "id": "4693f6ac-d178-4fdd-95e9-4e2ca4277471",
+    "cruce": "santiago-rugby-club|tigres-r-c",
+    "fecha": 7,
+    "antes": {
+      "round_label": null,
+      "date_time": "2026-10-18T18:30:00+00:00"
+    }
+  }
+]

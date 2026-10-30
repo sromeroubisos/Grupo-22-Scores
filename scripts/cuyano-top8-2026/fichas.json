@@ -1,0 +1,2924 @@
+{
+ "01-mendoza-liceo.html": {
+  "local": {
+   "titulares": [
+    [
+     1,
+     "LAURENAO VALLE"
+    ],
+    [
+     2,
+     "RENATO BAROLO"
+    ],
+    [
+     3,
+     "BENJAMÍN COSTANTINI"
+    ],
+    [
+     4,
+     "JUAN FURLÁN"
+    ],
+    [
+     5,
+     "MARTÍN CRUZ"
+    ],
+    [
+     6,
+     "XAVIER OTEGUI"
+    ],
+    [
+     7,
+     "GENARO BUSSO"
+    ],
+    [
+     8,
+     "FRANCISCO ÁLVAREZ (C)"
+    ],
+    [
+     9,
+     "SANTIAGO PUPATTO"
+    ],
+    [
+     10,
+     "TOMÁS CANEDO"
+    ],
+    [
+     11,
+     "SANTIAGO TAPIA"
+    ],
+    [
+     12,
+     "SANTIAGO DAPAS"
+    ],
+    [
+     13,
+     "FEDERICO VIDAL"
+    ],
+    [
+     14,
+     "JULIÁN COSSUTTA"
+    ],
+    [
+     15,
+     "IGNACIO LUCERO"
+    ]
+   ],
+   "ingresaron": [
+    "LUCIANO MORALES",
+    "RAMIRO MUSRI",
+    "MARIANO CICCONI",
+    "SANTIAGO REZ MASUD",
+    "EMANUEL GUZMAN",
+    "FRANCO GAROFOLI",
+    "JEREMÍAS RIQUELME"
+   ],
+   "amonestados": [],
+   "expulsados": []
+  },
+  "visitante": {
+   "titulares": [
+    [
+     1,
+     "JOAQUÍN AMÉZAGA"
+    ],
+    [
+     2,
+     "TOMÁS BAZÁN"
+    ],
+    [
+     3,
+     "FELIPE ALTAMIRANDA"
+    ],
+    [
+     4,
+     "ADRIÁN CURA"
+    ],
+    [
+     5,
+     "FRANCISCO BERTAINA"
+    ],
+    [
+     6,
+     "ENZO CIRRINCIONE"
+    ],
+    [
+     7,
+     "SANTINO VILLEGAS"
+    ],
+    [
+     8,
+     "JULIÁN ROSSI"
+    ],
+    [
+     9,
+     "JOAQUÍN MÚÑOZ"
+    ],
+    [
+     10,
+     "TIAGO GILI"
+    ],
+    [
+     11,
+     "GINO CASTELLINO"
+    ],
+    [
+     12,
+     "JUAN MATEO SANCHO"
+    ],
+    [
+     13,
+     "BRUNO CIRRINCIONE"
+    ],
+    [
+     14,
+     "AGUSTÍN CORREA LLANO (C)"
+    ],
+    [
+     15,
+     "TOMÁS VIDELA"
+    ]
+   ],
+   "ingresaron": [
+    "SANTIAGO VIDEAU",
+    "SANTIAGO LEYES",
+    "JUAN CRUZ ZABALETA",
+    "JUAN PABLO ÁLVAREZ",
+    "TOMÁS DRIS",
+    "JUAN PEREZ CARAM",
+    "AGUSTÍN DEMARÍA"
+   ],
+   "amonestados": [
+    "TOMÁS VIDELA",
+    "BRUNO CIRRINCIONE"
+   ],
+   "expulsados": []
+  },
+  "eventos": [
+   {
+    "minuto": 1,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "COSSUTTA",
+    "conv": "CANEDO"
+   },
+   {
+    "minuto": 3,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "visitante",
+    "jugador": "SANCHO",
+    "conv": "VIDELA"
+   },
+   {
+    "minuto": 9,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "visitante",
+    "jugador": "ROSSI",
+    "conv": "VIDELA"
+   },
+   {
+    "minuto": 11,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "COSSUTTA",
+    "conv": "CANEDO"
+   },
+   {
+    "minuto": 16,
+    "periodo": "1T",
+    "tipo": "PENAL",
+    "equipo": "local",
+    "jugador": "CANEDO",
+    "conv": ""
+   },
+   {
+    "minuto": 2,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "visitante",
+    "jugador": "ALTAMIRANDA",
+    "conv": "VIDELA"
+   },
+   {
+    "minuto": 25,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "GUZMÁN",
+    "conv": ""
+   },
+   {
+    "minuto": 30,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "RIQUELME",
+    "conv": "CANEDO"
+   },
+   {
+    "minuto": 35,
+    "periodo": "2T",
+    "tipo": "PENAL",
+    "equipo": "visitante",
+    "jugador": "VIDELA",
+    "conv": ""
+   },
+   {
+    "minuto": 39,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "visitante",
+    "jugador": "A CORREA LLANO",
+    "conv": ""
+   }
+  ],
+  "fecha_texto": "Sábado 23 de Mayo de 2026",
+  "arbitro": "NICOLÁS QUINTANA",
+  "cancha": "MENDOZA RUGBY CLUB (EL BERMEJO)"
+ },
+ "02-tordos-marista.html": {
+  "local": {
+   "titulares": [
+    [
+     1,
+     "MARTÍN SANTIAGO"
+    ],
+    [
+     2,
+     "FACUNDO PLACERES"
+    ],
+    [
+     3,
+     "BAUTISTA SALINAS"
+    ],
+    [
+     4,
+     "ROQUE ONGAY"
+    ],
+    [
+     5,
+     "JUAN MARCHENA"
+    ],
+    [
+     6,
+     "TOMÁS DÍAZ"
+    ],
+    [
+     7,
+     "MATÍAS HERRERA"
+    ],
+    [
+     8,
+     "JUAN ENRIQUE ARNUT"
+    ],
+    [
+     9,
+     "JUAN BAUTISTA BRUNO"
+    ],
+    [
+     10,
+     "FEDERICO SERPA"
+    ],
+    [
+     11,
+     "JUAN IGNACIO DANGELO"
+    ],
+    [
+     12,
+     "TOMÁS ARRIGONI (C)"
+    ],
+    [
+     13,
+     "GONZALO INTZES"
+    ],
+    [
+     14,
+     "FACUNDO TONÓN"
+    ],
+    [
+     15,
+     "FRANCISCO GALDEANO"
+    ]
+   ],
+   "ingresaron": [
+    "MANUEL ARROYO",
+    "FRANCO PIZZI",
+    "CONRADO BERTRANOU",
+    "LAUTARO VARELA",
+    "PEDRO LÉRTORA",
+    "GINO AMBROSI"
+   ],
+   "amonestados": [
+    "FRANCO PIZZI",
+    "PEDRO LÉRTORA"
+   ],
+   "expulsados": []
+  },
+  "visitante": {
+   "titulares": [
+    [
+     1,
+     "ESTANISLAO RODRIGUEZ"
+    ],
+    [
+     2,
+     "ANTONIO FERNÁNDEZ"
+    ],
+    [
+     3,
+     "RAFAEL CARDOZO"
+    ],
+    [
+     4,
+     "JUAN PABLO SORIA"
+    ],
+    [
+     5,
+     "JUAN PABLO LABORDE"
+    ],
+    [
+     6,
+     "MATÍAS CID"
+    ],
+    [
+     7,
+     "FRANCISCO ALLAMAND"
+    ],
+    [
+     8,
+     "GERÓNIMO TEJADA"
+    ],
+    [
+     9,
+     "LUCCA FILIZZOLA"
+    ],
+    [
+     10,
+     "BENJAMÍN FILIZZOLA"
+    ],
+    [
+     11,
+     "JULIÁN GAFFURI"
+    ],
+    [
+     12,
+     "LISANDRO SOSA"
+    ],
+    [
+     13,
+     "ALEJO VIDELA (C)"
+    ],
+    [
+     14,
+     "LUCIANO FARIELLO"
+    ],
+    [
+     15,
+     "MATÍAS COLOMER"
+    ]
+   ],
+   "ingresaron": [
+    "MAXI MONTILLA",
+    "MARCOS PORRO",
+    "TELMO FERNÁNDEZ",
+    "IGNACIO LINARES",
+    "BAUTISTA ECRENAZ",
+    "FRANCO CANCIANI",
+    "BAUTISTA CURTO"
+   ],
+   "amonestados": [],
+   "expulsados": []
+  },
+  "eventos": [
+   {
+    "minuto": 7,
+    "periodo": "1T",
+    "tipo": "PENAL",
+    "equipo": "local",
+    "jugador": "F SERPA",
+    "conv": ""
+   },
+   {
+    "minuto": 13,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "F TONÓN",
+    "conv": ""
+   },
+   {
+    "minuto": 18,
+    "periodo": "1T",
+    "tipo": "PENAL",
+    "equipo": "visitante",
+    "jugador": "B FILIZZOLA",
+    "conv": ""
+   },
+   {
+    "minuto": 25,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "F SERPA",
+    "conv": "F SERPA"
+   },
+   {
+    "minuto": 28,
+    "periodo": "1T",
+    "tipo": "PENAL",
+    "equipo": "local",
+    "jugador": "F SERPA",
+    "conv": ""
+   },
+   {
+    "minuto": 32,
+    "periodo": "1T",
+    "tipo": "PENAL",
+    "equipo": "local",
+    "jugador": "F SERPA",
+    "conv": ""
+   },
+   {
+    "minuto": 38,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "visitante",
+    "jugador": "L FILIZZOLA",
+    "conv": "B FILIZZOLA"
+   },
+   {
+    "minuto": 7,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "INTZES",
+    "conv": "F SERPA"
+   },
+   {
+    "minuto": 18,
+    "periodo": "2T",
+    "tipo": "TRY PENAL",
+    "equipo": "visitante",
+    "jugador": "",
+    "conv": ""
+   },
+   {
+    "minuto": 30,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "visitante",
+    "jugador": "A VIDELA",
+    "conv": "B FILIZZOLA"
+   },
+   {
+    "minuto": 39,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "visitante",
+    "jugador": "A FERNÁNDEZ",
+    "conv": "B FILIZZOLA"
+   },
+   {
+    "minuto": 42,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "LÉRTORA",
+    "conv": "F SERPA"
+   }
+  ],
+  "fecha_texto": "Sábado 6 de Junio de 2026",
+  "arbitro": "FRANCISCO NANCLARES",
+  "cancha": "LOS TORDOS RUGBY CLUB (GUAYMALLÉN)"
+ },
+ "03-teque-liceo.html": {
+  "local": {
+   "titulares": [
+    [
+     1,
+     "ESTEBAN FERNÁNDEZ"
+    ],
+    [
+     2,
+     "JULIÁN MARTÍN"
+    ],
+    [
+     3,
+     "PABLO SÁEZ"
+    ],
+    [
+     4,
+     "BENJAMÍN PÉREZ"
+    ],
+    [
+     5,
+     "IGNACIO ACOSTA"
+    ],
+    [
+     6,
+     "SANTINO SABATELLI"
+    ],
+    [
+     7,
+     "PABLO ECHALECU"
+    ],
+    [
+     8,
+     "JUAN MANUEL MAURE"
+    ],
+    [
+     9,
+     "AUGUSTO KRETSCHMAR"
+    ],
+    [
+     10,
+     "LAUTARO CALLE"
+    ],
+    [
+     11,
+     "GABRIEL REGULES"
+    ],
+    [
+     12,
+     "MAURO QUIROGA"
+    ],
+    [
+     13,
+     "GASTÓN GIACHINI (C)"
+    ],
+    [
+     14,
+     "LUCA SALGUERO"
+    ],
+    [
+     15,
+     "IVÁN MOLINA"
+    ]
+   ],
+   "ingresaron": [
+    "RENZO MARTÍN",
+    "FRANCISCO VEGA",
+    "GONZALO PÉREZ",
+    "FERMÍN CASTRO",
+    "JOAQUÍN LÓPEZ",
+    "TOMÁS KONJAK"
+   ],
+   "amonestados": [
+    "BENJAMÍN PÉREZ"
+   ],
+   "expulsados": []
+  },
+  "visitante": {
+   "titulares": [
+    [
+     1,
+     "SANTIAGO VIDEAU"
+    ],
+    [
+     2,
+     "TOMÁS BAZÁN"
+    ],
+    [
+     3,
+     "FELIPE ALTAMIRANDA"
+    ],
+    [
+     4,
+     "AGUSTÍN QUIROGA"
+    ],
+    [
+     5,
+     "FRANCISCO BERTAINA"
+    ],
+    [
+     6,
+     "ENZO CIRRINCIONE"
+    ],
+    [
+     7,
+     "SANTINO VILLEGAS"
+    ],
+    [
+     8,
+     "TOMÁS CASTRO"
+    ],
+    [
+     9,
+     "JUAN MANUEL PÉREZ CARAM"
+    ],
+    [
+     10,
+     "JUAN MATEO SANCHO"
+    ],
+    [
+     11,
+     "GINO CASTELLINO"
+    ],
+    [
+     12,
+     "TOMÁS VIDELA"
+    ],
+    [
+     13,
+     "FACUNDO LUCERO"
+    ],
+    [
+     14,
+     "AGUSTÍN CORREA LLANO (C)"
+    ],
+    [
+     15,
+     "IGNACIO GAIDO"
+    ]
+   ],
+   "ingresaron": [
+    "JOAQUÍN AMÉZAGA",
+    "JULIÁN ROSSI",
+    "JOAQUÍN MÚÑOZ",
+    "BRUNO CIRRINCIONE",
+    "FRANCISCO OLGUÍN"
+   ],
+   "amonestados": [
+    "FELIPE ALTAMIRANDA",
+    "JOAQUÍN AMÉZAGA"
+   ],
+   "expulsados": []
+  },
+  "eventos": [
+   {
+    "minuto": 8,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "visitante",
+    "jugador": "JM SANCHO",
+    "conv": "VIDELA"
+   },
+   {
+    "minuto": 16,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "visitante",
+    "jugador": "A CORREA LLANO",
+    "conv": "VIDELA"
+   },
+   {
+    "minuto": 31,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "visitante",
+    "jugador": "S VIDEAU",
+    "conv": "VIDELA"
+   },
+   {
+    "minuto": 38,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "visitante",
+    "jugador": "E CIRRINCIONE",
+    "conv": "VIDELA"
+   },
+   {
+    "minuto": 26,
+    "periodo": "2T",
+    "tipo": "TRY PENAL",
+    "equipo": "local",
+    "jugador": "",
+    "conv": ""
+   },
+   {
+    "minuto": 37,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "visitante",
+    "jugador": "G CASTELLINO",
+    "conv": "VIDELA"
+   }
+  ],
+  "fecha_texto": "Sábado 13 de Junio de 2026",
+  "arbitro": "JUAN MANUEL MARTÍNEZ",
+  "cancha": "TEQÜE  RUGBY CLUB (GENERAL ORTEGA)"
+ },
+ "04-tordos-liceo.html": {
+  "local": {
+   "titulares": [
+    [
+     1,
+     "MARTÍN SANTIAGO"
+    ],
+    [
+     2,
+     "MANUEL ARROYO (C)"
+    ],
+    [
+     3,
+     "JUAN MANUEL VIVAS"
+    ],
+    [
+     4,
+     "LAUTARO VARELA"
+    ],
+    [
+     5,
+     "FACUNDO DÍAZ"
+    ],
+    [
+     6,
+     "VALENTINO MIRANDA"
+    ],
+    [
+     7,
+     "JUAN ENRIQUE ARNUT"
+    ],
+    [
+     8,
+     "JULIÁN ORTÍZ"
+    ],
+    [
+     9,
+     "GONZALO BERTRANOU"
+    ],
+    [
+     10,
+     "FRANCISCO GALDEANO"
+    ],
+    [
+     11,
+     "JUAN IGNACIO DANGELO"
+    ],
+    [
+     12,
+     "TOMÁS ARRIGONI"
+    ],
+    [
+     13,
+     "GONZALO INTZES"
+    ],
+    [
+     14,
+     "FRANCISCO CASSONE"
+    ],
+    [
+     15,
+     "FACUNDO TONÓN"
+    ]
+   ],
+   "ingresaron": [
+    "FRANCISCO RUGOSO",
+    "JOSÉ DÁNGELO",
+    "SANTIAGO BUSTAMANTE",
+    "MATÍAS HERRERA",
+    "MARTÍN ORRICO",
+    "ENZO FILICE"
+   ],
+   "amonestados": [
+    "MARTÍN SANTIAGO"
+   ],
+   "expulsados": []
+  },
+  "visitante": {
+   "titulares": [
+    [
+     1,
+     "SANTIAGO VIDEAU"
+    ],
+    [
+     2,
+     "TOMÁS BAZÁN"
+    ],
+    [
+     3,
+     "FELIPE ALTAMIRANDA"
+    ],
+    [
+     4,
+     "AGUSTÍN QUIROGA"
+    ],
+    [
+     5,
+     "ADRIÁN CURA"
+    ],
+    [
+     6,
+     "TOMÁS CASTRO"
+    ],
+    [
+     7,
+     "SANTINO VILLEGAS"
+    ],
+    [
+     8,
+     "JULIÁN ROSSI"
+    ],
+    [
+     9,
+     "JOAQUÍN MÚÑOZ"
+    ],
+    [
+     10,
+     "JUAN MATEO SANCHO"
+    ],
+    [
+     11,
+     "GINO CASTELLINO"
+    ],
+    [
+     12,
+     "BRUNO CIRRINCIONE"
+    ],
+    [
+     13,
+     "FACUNDO LUCERO"
+    ],
+    [
+     14,
+     "AGUSTÍN CORREA LLANO (C)"
+    ],
+    [
+     15,
+     "IGNACIO GAIDO"
+    ]
+   ],
+   "ingresaron": [
+    "JUAN IGNACIO RODRÍGUEZ",
+    "PABLO BERRÍOS",
+    "ENZO CIRRINCIONE",
+    "JUAN IGNACIO CALDERÓN",
+    "JUAN MANUEL PÉREZ CARAM",
+    "TIAGO GILI",
+    "TOMÁS MOLINA"
+   ],
+   "amonestados": [],
+   "expulsados": []
+  },
+  "eventos": [
+   {
+    "minuto": 3,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "M ARROYO",
+    "conv": "GALDEANO"
+   },
+   {
+    "minuto": 17,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "V MIRANDA",
+    "conv": "GALDEANO"
+   },
+   {
+    "minuto": 20,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "visitante",
+    "jugador": "G CASTELLINO",
+    "conv": "GILI"
+   },
+   {
+    "minuto": 27,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "GALDEANO",
+    "conv": "GALDEANO"
+   },
+   {
+    "minuto": 40,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "visitante",
+    "jugador": "S VILLEGAS",
+    "conv": ""
+   },
+   {
+    "minuto": 3,
+    "periodo": "2T",
+    "tipo": "PENAL",
+    "equipo": "visitante",
+    "jugador": "IGNACIO GAIDO",
+    "conv": ""
+   },
+   {
+    "minuto": 5,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "M ORRICO",
+    "conv": "GALDEANO"
+   },
+   {
+    "minuto": 13,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "visitante",
+    "jugador": "E CIRRINCIONE",
+    "conv": ""
+   },
+   {
+    "minuto": 17,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "visitante",
+    "jugador": "T GILI",
+    "conv": "GAIDO"
+   },
+   {
+    "minuto": 28,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "visitante",
+    "jugador": "J ROSSI",
+    "conv": "GAIDO"
+   },
+   {
+    "minuto": 31,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "F TONÓN",
+    "conv": "GALDEANO"
+   }
+  ],
+  "fecha_texto": "Sábado 4 de Julio de 2026",
+  "arbitro": "CIRO DICIANO",
+  "cancha": "LOS TORDOS RUGBY CLUB (GUAYMALLÉN)"
+ },
+ "05-mendoza-marista.html": {
+  "local": {
+   "titulares": [
+    [
+     1,
+     "MAURO SAVINA"
+    ],
+    [
+     2,
+     "RENATO BAROLO"
+    ],
+    [
+     3,
+     "BENJAMÍN COSTANTINI"
+    ],
+    [
+     4,
+     "FELIPE RUBIOLO"
+    ],
+    [
+     5,
+     "MARTÍN CRUZ"
+    ],
+    [
+     6,
+     "XAVIER OTEGUI"
+    ],
+    [
+     7,
+     "FRANCISCO ÁLVAREZ (C)"
+    ],
+    [
+     8,
+     "FRANCISCO STÁVILE"
+    ],
+    [
+     9,
+     "SANTIAGO PUPPATO"
+    ],
+    [
+     10,
+     "SANTIAGO REZ MASUD"
+    ],
+    [
+     11,
+     "SANTIAGO TAPIA"
+    ],
+    [
+     12,
+     "SANTIAGO DAPAS"
+    ],
+    [
+     13,
+     "ERNESTO GIUDICE"
+    ],
+    [
+     14,
+     "JULIÁN COSSUTTA"
+    ],
+    [
+     15,
+     "IGNACIO LUCERO"
+    ]
+   ],
+   "ingresaron": [
+    "LUCIANO MORALES",
+    "EXEQUIEL RIQUERO",
+    "JUAN FURLÁN",
+    "JUAN PABLO ÁLVAREZ",
+    "FEDERICO VIDAL",
+    "EMANUEL GUZMAN"
+   ],
+   "amonestados": [
+    "JUAN PABLO ÁLVAREZ"
+   ],
+   "expulsados": []
+  },
+  "visitante": {
+   "titulares": [
+    [
+     1,
+     "MAXI MONTILLA"
+    ],
+    [
+     2,
+     "TOMÁS MONTILLA"
+    ],
+    [
+     3,
+     "MARCOS PORRO"
+    ],
+    [
+     4,
+     "JUAN PABLO SORIA"
+    ],
+    [
+     5,
+     "JUAN PABLO LABORDE"
+    ],
+    [
+     6,
+     "FRANCISCO ALLAMAND"
+    ],
+    [
+     7,
+     "GERÓNIMO TEJADA"
+    ],
+    [
+     8,
+     "TELMO FERNÁNDEZ"
+    ],
+    [
+     9,
+     "BAUTISTA CURTO"
+    ],
+    [
+     10,
+     "LISANDRO SOSA"
+    ],
+    [
+     11,
+     "JULIÁN GUEVARA"
+    ],
+    [
+     12,
+     "CONALL UNGER"
+    ],
+    [
+     13,
+     "BORJA FILIZZOLA"
+    ],
+    [
+     14,
+     "LUCAS BARTOLINI"
+    ],
+    [
+     15,
+     "MATÍAS COLOMER (C)"
+    ]
+   ],
+   "ingresaron": [
+    "ESTANISLAO RODRIGUEZ",
+    "JESÚS PORRO",
+    "ALEJANDRO PRONCE",
+    "TOMÁS GOMEZ",
+    "GENARO PODESTÁ",
+    "IGNACIO LINARES"
+   ],
+   "amonestados": [
+    "JESÚS PORRO"
+   ],
+   "expulsados": []
+  },
+  "eventos": [
+   {
+    "minuto": 3,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "visitante",
+    "jugador": "T MONTILLA",
+    "conv": "SOSA"
+   },
+   {
+    "minuto": 16,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "visitante",
+    "jugador": "L BARTOLINI",
+    "conv": "SOSA"
+   },
+   {
+    "minuto": 21,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "BAROLO",
+    "conv": ""
+   },
+   {
+    "minuto": 24,
+    "periodo": "1T",
+    "tipo": "PENAL",
+    "equipo": "visitante",
+    "jugador": "L SOSA",
+    "conv": ""
+   },
+   {
+    "minuto": 2,
+    "periodo": "2T",
+    "tipo": "PENAL",
+    "equipo": "local",
+    "jugador": "REZ MASUD",
+    "conv": ""
+   },
+   {
+    "minuto": 6,
+    "periodo": "2T",
+    "tipo": "PENAL",
+    "equipo": "local",
+    "jugador": "REZ MASUD",
+    "conv": ""
+   },
+   {
+    "minuto": 11,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "visitante",
+    "jugador": "A PRONCE",
+    "conv": ""
+   }
+  ],
+  "fecha_texto": "Jueves 9 de Julio de 2026",
+  "arbitro": "SEBASTIÁN LÓPEZ",
+  "cancha": "MENDOZA RUGBY CLUB (EL BERMEJO)"
+ },
+ "06-marista-liceo.html": {
+  "local": {
+   "titulares": [
+    [
+     1,
+     "ESTANISLAO RODRIGUEZ"
+    ],
+    [
+     2,
+     "ALEJANDRO PRONCE"
+    ],
+    [
+     3,
+     "GERMÁN TELLO"
+    ],
+    [
+     4,
+     "JUAN PABLO SORIA"
+    ],
+    [
+     5,
+     "JUAN PABLO LABORDE"
+    ],
+    [
+     6,
+     "FRANCISCO ALLAMAND"
+    ],
+    [
+     7,
+     "MATÍAS CID"
+    ],
+    [
+     8,
+     "TELMO FERNÁNDEZ"
+    ],
+    [
+     9,
+     "LUCCA FILIZZOLA"
+    ],
+    [
+     10,
+     "LISANDRO SOSA"
+    ],
+    [
+     11,
+     "JULIÁN GUEVARA"
+    ],
+    [
+     12,
+     "CONALL UNGER"
+    ],
+    [
+     13,
+     "IGNACO LINARES"
+    ],
+    [
+     14,
+     "LUCAS BARTOLINI"
+    ],
+    [
+     15,
+     "MATÍAS COLOMER (C)"
+    ]
+   ],
+   "ingresaron": [
+    "ALVARO LLAVER",
+    "TOMÁS MONTILLA",
+    "MARCOS PORRO",
+    "BAUTISTA CURTO",
+    "TOMÁS GOMEZ",
+    "JUAN DE LA CRUZ CALLE",
+    "ALEJO VIDELA"
+   ],
+   "amonestados": [
+    "ALVARO LLAVER"
+   ],
+   "expulsados": []
+  },
+  "visitante": {
+   "titulares": [
+    [
+     1,
+     "SANTIAGO VIDEAU"
+    ],
+    [
+     2,
+     "TOMÁS BAZÁN"
+    ],
+    [
+     3,
+     "FELIPE ALTAMIRANDA"
+    ],
+    [
+     4,
+     "JULIÁN ROSSI"
+    ],
+    [
+     5,
+     "ADRIÁN CURA"
+    ],
+    [
+     6,
+     "ENZO CIRRINCIONE"
+    ],
+    [
+     7,
+     "SANTINO VILLEGAS"
+    ],
+    [
+     8,
+     "TOMÁS CASTRO"
+    ],
+    [
+     9,
+     "JUAN MANUEL PÉREZ CARAM"
+    ],
+    [
+     10,
+     "TIAGO GILI"
+    ],
+    [
+     11,
+     "GINO CASTELLINO"
+    ],
+    [
+     12,
+     "ÁLVARO GUILLEN"
+    ],
+    [
+     13,
+     "FACUNDO LUCERO"
+    ],
+    [
+     14,
+     "AGUSTÍN CORREA LLANO (C)"
+    ],
+    [
+     15,
+     "IGNACIO GAIDO"
+    ]
+   ],
+   "ingresaron": [
+    "JUAN IGNACIO RODRÍGUEZ",
+    "JOAQUÍN AMEZAGA",
+    "AGUSTÍN QUIROGA",
+    "JOAQUÍN MÚÑOZ",
+    "RAMIRO GASSULL",
+    "TOMÁS VIDELA",
+    "TOMÁS MOLINA"
+   ],
+   "amonestados": [
+    "FELIPE ALTAMIRANDA"
+   ],
+   "expulsados": []
+  },
+  "eventos": [
+   {
+    "minuto": 5,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "A PRONCE",
+    "conv": ""
+   },
+   {
+    "minuto": 20,
+    "periodo": "1T",
+    "tipo": "TRY PENAL",
+    "equipo": "local",
+    "jugador": "",
+    "conv": ""
+   },
+   {
+    "minuto": 31,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "visitante",
+    "jugador": "A CORREA LLANO",
+    "conv": "GAÍDO"
+   },
+   {
+    "minuto": 4,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "visitante",
+    "jugador": "BAZÁN",
+    "conv": ""
+   },
+   {
+    "minuto": 5,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "L BARTOLINI",
+    "conv": "SOSA"
+   },
+   {
+    "minuto": 20,
+    "periodo": "2T",
+    "tipo": "PENAL",
+    "equipo": "visitante",
+    "jugador": "T VIDELA",
+    "conv": ""
+   },
+   {
+    "minuto": 27,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "visitante",
+    "jugador": "T CASTRO",
+    "conv": "VIDELA"
+   },
+   {
+    "minuto": 35,
+    "periodo": "2T",
+    "tipo": "PENAL",
+    "equipo": "visitante",
+    "jugador": "T VIDELA",
+    "conv": ""
+   }
+  ],
+  "fecha_texto": "Sábado 18 de Julio de 2026",
+  "arbitro": "JUAN ESPÍNDOLA",
+  "cancha": "MARISTA RUGBY CLUB (LA CARRODILLA)"
+ },
+ "07-tordos-mendoza.html": {
+  "local": {
+   "titulares": [
+    [
+     1,
+     "MARTÍN SANTIAGO"
+    ],
+    [
+     2,
+     "MARCO VENTRERA"
+    ],
+    [
+     3,
+     "JUAN ANTONIO DANGELO"
+    ],
+    [
+     4,
+     "JUAN MARCHENA"
+    ],
+    [
+     5,
+     "SANTIAGO BUSTAMANTE"
+    ],
+    [
+     6,
+     "VALENTINO MIRANDA"
+    ],
+    [
+     7,
+     "MANUEL ARROYO (C)"
+    ],
+    [
+     8,
+     "MATÍAS FARAH"
+    ],
+    [
+     9,
+     "CONRADO BERTRANOU"
+    ],
+    [
+     10,
+     "FRANCISCO GALDEANO"
+    ],
+    [
+     11,
+     "FACUNDO TONÓN"
+    ],
+    [
+     12,
+     "ANGELO LIZZOLA"
+    ],
+    [
+     13,
+     "GONZALO INTZES"
+    ],
+    [
+     14,
+     "JULIÁN TOMAS"
+    ],
+    [
+     15,
+     "TOMÁS ARRIGONI"
+    ]
+   ],
+   "ingresaron": [
+    "JUAN ARNUT",
+    "BAUTISTA SALINAS",
+    "LAUTARO VARELA",
+    "MARTÍN ORRICO",
+    "ENZO FILICE",
+    "JUAN BAUTISTA BRUNO",
+    "JULIÁN ORTÍZ"
+   ],
+   "amonestados": [
+    "ANGELO LIZZOLA",
+    "FACUNDO TONÓN"
+   ],
+   "expulsados": []
+  },
+  "visitante": {
+   "titulares": [
+    [
+     1,
+     "LAUREANO VALLE"
+    ],
+    [
+     2,
+     "RENATO BAROLO"
+    ],
+    [
+     3,
+     "BENJAMÍN COSTANTINI"
+    ],
+    [
+     4,
+     "JOAQUÍN BOHM"
+    ],
+    [
+     5,
+     "FELIPE RUBIO"
+    ],
+    [
+     6,
+     "EMANUEL GUZMAN"
+    ],
+    [
+     7,
+     "FRANCISCO ÁLVAREZ"
+    ],
+    [
+     8,
+     "IGNACIO VIDAL (C)"
+    ],
+    [
+     9,
+     "SANTIAGO PUPPATO"
+    ],
+    [
+     10,
+     "SANTIAGO REZ MASUD"
+    ],
+    [
+     11,
+     "SANTIAGO TAPIA"
+    ],
+    [
+     12,
+     "TOMÁS CANEDO"
+    ],
+    [
+     13,
+     "ERNESTO GIUDICE"
+    ],
+    [
+     14,
+     "IGNACIO LUCERO"
+    ],
+    [
+     15,
+     "JULIÁN COSSUTTA"
+    ]
+   ],
+   "ingresaron": [
+    "LUCIANO MORALES",
+    "MARIANO CICCONI",
+    "MAURO SAVINA",
+    "JUAN PABLO ÁLVAREZ",
+    "XAVIER OTEGUI",
+    "FRANCO GAROFOLI",
+    "SANTIAGO DAPAS"
+   ],
+   "amonestados": [
+    "ERNESTO GIUDICE"
+   ],
+   "expulsados": []
+  },
+  "eventos": [
+   {
+    "minuto": 2,
+    "periodo": "1T",
+    "tipo": "PENAL",
+    "equipo": "local",
+    "jugador": "F GALDEANO",
+    "conv": ""
+   },
+   {
+    "minuto": 17,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "J TOMAS",
+    "conv": "GALDEANO"
+   },
+   {
+    "minuto": 20,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "visitante",
+    "jugador": "B COSTANTINI",
+    "conv": "CANEDO"
+   },
+   {
+    "minuto": 28,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "visitante",
+    "jugador": "S PUPPATO",
+    "conv": ""
+   },
+   {
+    "minuto": 35,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "M ARROYO",
+    "conv": "GALDEANO"
+   },
+   {
+    "minuto": 40,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "visitante",
+    "jugador": "S TAPIA",
+    "conv": "CANEDO"
+   },
+   {
+    "minuto": 2,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "T ARRIGONI",
+    "conv": "GALDEANO"
+   },
+   {
+    "minuto": 16,
+    "periodo": "2T",
+    "tipo": "PENAL",
+    "equipo": "local",
+    "jugador": "F GALDEANO",
+    "conv": ""
+   },
+   {
+    "minuto": 20,
+    "periodo": "2T",
+    "tipo": "TRY PENAL",
+    "equipo": "visitante",
+    "jugador": "",
+    "conv": ""
+   },
+   {
+    "minuto": 28,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "visitante",
+    "jugador": "T CANEDO",
+    "conv": "CANEDO"
+   },
+   {
+    "minuto": 40,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "T ARRIGONI",
+    "conv": ""
+   }
+  ],
+  "fecha_texto": "Sábado 8 de Agosto de 2026",
+  "arbitro": "JOAQUÍN LÓPEZ",
+  "cancha": "LOS TORDOS RUGBY CLUB (GUAYMALLÉN)"
+ },
+ "08-liceo-mendoza.html": {
+  "local": {
+   "titulares": [
+    [
+     1,
+     "JUAN IGNACIO RODRÍGUEZ"
+    ],
+    [
+     2,
+     "TOMÁS BAZÁN"
+    ],
+    [
+     3,
+     "FELIPE ALTAMIRANDA"
+    ],
+    [
+     4,
+     "FRANCISCO BERTAINA"
+    ],
+    [
+     5,
+     "MARTÍN VILA"
+    ],
+    [
+     6,
+     "ENZO CIRRINCIONE"
+    ],
+    [
+     7,
+     "SANTINO VILLEGAS"
+    ],
+    [
+     8,
+     "AGUSTÍN QUIROGA"
+    ],
+    [
+     9,
+     "RAMIRO GASSULL"
+    ],
+    [
+     10,
+     "IGNACIO GAIDO"
+    ],
+    [
+     11,
+     "FRANCISCO RICCI"
+    ],
+    [
+     12,
+     "BRUNO CIRRINCIONE"
+    ],
+    [
+     13,
+     "FACUNDO LUCERO"
+    ],
+    [
+     14,
+     "AGUSTÍN CORREA LLANO (C)"
+    ],
+    [
+     15,
+     "TOMÁS VIDELA"
+    ]
+   ],
+   "ingresaron": [
+    "SANTIAGO VIDEAU",
+    "JOAQUÍN AMEZAGA",
+    "TOMÁS DRIS",
+    "ADRIÁN CURA",
+    "JUAN MANUEL PÉREZ CARAM",
+    "JUAN MATEO SANCHO",
+    "GINO CASTELLINO"
+   ],
+   "amonestados": [],
+   "expulsados": []
+  },
+  "visitante": {
+   "titulares": [
+    [
+     1,
+     "MARIANO CICCONI"
+    ],
+    [
+     2,
+     "RENATO BAROLO"
+    ],
+    [
+     3,
+     "BENJAMÍN COSTANTINI"
+    ],
+    [
+     4,
+     "JOAQUÍN BOHM"
+    ],
+    [
+     5,
+     "FELIPE RUBIO"
+    ],
+    [
+     6,
+     "XAVIER OTEGUI"
+    ],
+    [
+     7,
+     "FRANCISCO ÁLVAREZ"
+    ],
+    [
+     8,
+     "IGNACIO VIDAL (C)"
+    ],
+    [
+     9,
+     "SANTIAGO PUPPATO"
+    ],
+    [
+     10,
+     "SANTIAGO REZ MASUD"
+    ],
+    [
+     11,
+     "SANTIAGO TAPIA"
+    ],
+    [
+     12,
+     "TOMÁS CANEDO"
+    ],
+    [
+     13,
+     "ERNESTO GIUDICE"
+    ],
+    [
+     14,
+     "IGNACIO LUCERO"
+    ],
+    [
+     15,
+     "JULIÁN COSSUTTA"
+    ]
+   ],
+   "ingresaron": [
+    "LUCIANO MORALES",
+    "LAUREANO VALLE",
+    "MAURO SAVINA",
+    "JUAN PABLO ÁLVAREZ",
+    "FRANCISCO STÁVILE",
+    "EMANUEL GUZMAN",
+    "AGUSTÍN LOMBARDO"
+   ],
+   "amonestados": [],
+   "expulsados": []
+  },
+  "eventos": [
+   {
+    "minuto": 8,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "visitante",
+    "jugador": "B COSTANTINI",
+    "conv": "CANEDO"
+   },
+   {
+    "minuto": 15,
+    "periodo": "1T",
+    "tipo": "PENAL",
+    "equipo": "visitante",
+    "jugador": "CANEDO",
+    "conv": ""
+   },
+   {
+    "minuto": 20,
+    "periodo": "1T",
+    "tipo": "PENAL",
+    "equipo": "local",
+    "jugador": "VIDELA",
+    "conv": ""
+   },
+   {
+    "minuto": 22,
+    "periodo": "1T",
+    "tipo": "PENAL",
+    "equipo": "visitante",
+    "jugador": "CANEDO",
+    "conv": ""
+   },
+   {
+    "minuto": 33,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "A CORREA LLANO",
+    "conv": "VIDELA"
+   },
+   {
+    "minuto": 38,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "T BAZÁN",
+    "conv": "VIDELA"
+   },
+   {
+    "minuto": 40,
+    "periodo": "1T",
+    "tipo": "PENAL",
+    "equipo": "visitante",
+    "jugador": "CANEDO",
+    "conv": ""
+   },
+   {
+    "minuto": 1,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "visitante",
+    "jugador": "IGNACIO VIDAL",
+    "conv": ""
+   },
+   {
+    "minuto": 9,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "T DRIS",
+    "conv": "VIDELA"
+   },
+   {
+    "minuto": 31,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "visitante",
+    "jugador": "F STÁVILE",
+    "conv": "CANEDO"
+   },
+   {
+    "minuto": 38,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "T BAZÁN",
+    "conv": "SANCHO"
+   }
+  ],
+  "fecha_texto": "Sábado 22 de Agosto de 2026",
+  "arbitro": "JUAN ESPÍNDOLA",
+  "cancha": "LICEO  RUGBY CLUB (LA CARRODILLA)"
+ },
+ "09-marista-tordos.html": {
+  "local": {
+   "titulares": [
+    [
+     1,
+     "ALVARO LLAVER (C)"
+    ],
+    [
+     2,
+     "ALEJANDRO PRONCE"
+    ],
+    [
+     3,
+     "MARCOS PORRO"
+    ],
+    [
+     4,
+     "JUAN PABLO LABORDE"
+    ],
+    [
+     5,
+     "VALENTÍN GOZÁLVEZ"
+    ],
+    [
+     6,
+     "TELMO FERNÁNDEZ"
+    ],
+    [
+     7,
+     "TOMÁS GÓMEZ"
+    ],
+    [
+     8,
+     "GERÓNIMO TEJADA"
+    ],
+    [
+     9,
+     "GENARO PODESTÁ"
+    ],
+    [
+     10,
+     "BENJAMÍN FILIZZOLA"
+    ],
+    [
+     11,
+     "MATÍAS COLOMER"
+    ],
+    [
+     12,
+     "CONALL UNGER"
+    ],
+    [
+     13,
+     "BORJA FILIZZOLA"
+    ],
+    [
+     14,
+     "LUCAS BARTOLINI"
+    ],
+    [
+     15,
+     "TOBÍAS FILIZZOLA"
+    ]
+   ],
+   "ingresaron": [
+    "ESTANISLAO RODRIGUEZ",
+    "TOMÁS MONTILLA",
+    "GERMÁN TELLO",
+    "TOMÁS BEKERMAN",
+    "JULIÁN GUEVARA",
+    "JUAN DE LA CRUZ CALLE",
+    "ALEJO VIDELA",
+    "IGNACIO LABORDE"
+   ],
+   "amonestados": [
+    "TELMO FERNÁNDEZ"
+   ],
+   "expulsados": []
+  },
+  "visitante": {
+   "titulares": [
+    [
+     1,
+     "MARTÍN SANTIAGO"
+    ],
+    [
+     2,
+     "MANUEL ARROYO (C)"
+    ],
+    [
+     3,
+     "JUAN MANUEL VIVAS"
+    ],
+    [
+     4,
+     "JUAN MARCHENA"
+    ],
+    [
+     5,
+     "LAUTARO VARELA"
+    ],
+    [
+     6,
+     "TOMÁS DIAZ"
+    ],
+    [
+     7,
+     "MARTÍN ORRICO"
+    ],
+    [
+     8,
+     "JUAN ENRIQUE ARNUT"
+    ],
+    [
+     9,
+     "CONRADO BERTRANOU"
+    ],
+    [
+     10,
+     "FRANCISCO GALDEANO"
+    ],
+    [
+     11,
+     "FACUNDO TONÓN"
+    ],
+    [
+     12,
+     "ANGELO LIZZOLA"
+    ],
+    [
+     13,
+     "GONZALO INTZES"
+    ],
+    [
+     14,
+     "FRANCISCO CASSONE"
+    ],
+    [
+     15,
+     "TOMÁS ARRIGONI"
+    ]
+   ],
+   "ingresaron": [
+    "JOSÉ ANTONIO DANGELO",
+    "THIAGO SOSA",
+    "FACUNDO DÍAZ",
+    "VALENTINO MIRANDA",
+    "JUAN BAUTISTA BRUNO",
+    "FRANCISCO MARTOS",
+    "JUAN BAUTISTA BRUNO",
+    "JULIÁN TOMAS"
+   ],
+   "amonestados": [
+    "FRANCISCO GALDEANO"
+   ],
+   "expulsados": []
+  },
+  "eventos": [
+   {
+    "minuto": 12,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "visitante",
+    "jugador": "T DÍAZ",
+    "conv": ""
+   },
+   {
+    "minuto": 17,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "visitante",
+    "jugador": "SANTIAGO",
+    "conv": "GALDEANO"
+   },
+   {
+    "minuto": 26,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "visitante",
+    "jugador": "LIZZOLA",
+    "conv": "GLADEANO"
+   },
+   {
+    "minuto": 28,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "L BARTOLINI",
+    "conv": "T FILIZZOLA"
+   },
+   {
+    "minuto": 38,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "L BARTOLINI",
+    "conv": ""
+   },
+   {
+    "minuto": 1,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "L BARTOLINI",
+    "conv": ""
+   },
+   {
+    "minuto": 6,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "visitante",
+    "jugador": "F DÍAZ",
+    "conv": "GALDEANO"
+   },
+   {
+    "minuto": 10,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "L BARTOLINI",
+    "conv": ""
+   },
+   {
+    "minuto": 18,
+    "periodo": "2T",
+    "tipo": "PENAL",
+    "equipo": "visitante",
+    "jugador": "GALDEANO",
+    "conv": ""
+   },
+   {
+    "minuto": 20,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "VIDELA",
+    "conv": "I LABORDE"
+   },
+   {
+    "minuto": 27,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "L BARTOLINI",
+    "conv": "I LABORDE"
+   },
+   {
+    "minuto": 30,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "B FILIZZOLA",
+    "conv": "I LABORDE"
+   },
+   {
+    "minuto": 36,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "GOZALVEZ",
+    "conv": ""
+   },
+   {
+    "minuto": 40,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "FERNÁNDEZ",
+    "conv": "LABORDE"
+   }
+  ],
+  "fecha_texto": "Sábado 29 de Agosto de 2026",
+  "arbitro": "JUAN ESPÍNDOLA",
+  "cancha": "MARISTA  RUGBY CLUB (LA CARRODILLA)"
+ },
+ "10-liceo-teque.html": {
+  "local": {
+   "titulares": [
+    [
+     1,
+     "JUAN IGNACIO RODRÍGUEZ"
+    ],
+    [
+     2,
+     "PEDRO TULIÁN"
+    ],
+    [
+     3,
+     "FELIPE ALTAMIRANDA"
+    ],
+    [
+     4,
+     "FRANCISCO BERTAINA"
+    ],
+    [
+     5,
+     "ADRIÁN CURA"
+    ],
+    [
+     6,
+     "ENZO CIRRINCIONE"
+    ],
+    [
+     7,
+     "SANTINO VILLEGAS"
+    ],
+    [
+     8,
+     "AGUSTÍN QUIROGA"
+    ],
+    [
+     9,
+     "JUAN MANUEL PÉREZ CARAM"
+    ],
+    [
+     10,
+     "JUAN MATEO SANCHO"
+    ],
+    [
+     11,
+     "FRANCISCO RICCI"
+    ],
+    [
+     12,
+     "BRUNO CIRRINCIONE"
+    ],
+    [
+     13,
+     "AGUSTÍN CORREA LLANO (C)"
+    ],
+    [
+     14,
+     "GINO CASTELLINO"
+    ],
+    [
+     15,
+     "TOMÁS VIDELA"
+    ]
+   ],
+   "ingresaron": [
+    "TOMÁS BAZÁN",
+    "AGUSTÍN AMEZAGA",
+    "MARTÍN VILA",
+    "JULIÁN ROSSI",
+    "RAMIRO GASSULL",
+    "IGNACIO GAIDO",
+    "FACUNDO LUCERO",
+    "FRANCO GÓMEZ"
+   ],
+   "amonestados": [
+    "SANTINO VILLEGAS",
+    "FELIPE ALTAMIRANDA"
+   ],
+   "expulsados": []
+  },
+  "visitante": {
+   "titulares": [
+    [
+     1,
+     "ESTEBAN FERNÁNDEZ"
+    ],
+    [
+     2,
+     "JULIÁN MARTÍN"
+    ],
+    [
+     3,
+     "PABLO SÁEZ"
+    ],
+    [
+     4,
+     "GONZALO PÉREZ"
+    ],
+    [
+     5,
+     "JULIÁN MAGNONI"
+    ],
+    [
+     6,
+     "SANTINO SABATELLI"
+    ],
+    [
+     7,
+     "BENJAMÍN PÉREZ"
+    ],
+    [
+     8,
+     "PABLO ECHALECU"
+    ],
+    [
+     9,
+     "AUGUSTO KRETSCHMAR"
+    ],
+    [
+     10,
+     "GASTÓN GIACHINI"
+    ],
+    [
+     11,
+     "ALEJO ELST"
+    ],
+    [
+     12,
+     "MAURO QUIROGA"
+    ],
+    [
+     13,
+     "ROMÁN ZELADA"
+    ],
+    [
+     14,
+     "VALENTÍN KRETSCHMAR"
+    ],
+    [
+     15,
+     "IVÁN MOLINA (C)"
+    ]
+   ],
+   "ingresaron": [
+    "RENZO MARTÍN",
+    "FRANCISCO VEGA",
+    "FRANCISCO GODOY",
+    "IGNACIO ACOSTA",
+    "ISMAEL VILLANUEVA",
+    "JUAN MANUEL MAURE",
+    "SANTIAGO SÁEZ",
+    "SANTIAGO MONTIVERO"
+   ],
+   "amonestados": [
+    "AUGUSTO KRETSCHMAR",
+    "JULIÁN MAGNONI"
+   ],
+   "expulsados": []
+  },
+  "eventos": [
+   {
+    "minuto": 6,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "F RICCI",
+    "conv": "VIDELA"
+   },
+   {
+    "minuto": 10,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "visitante",
+    "jugador": "J MARTÍN",
+    "conv": ""
+   },
+   {
+    "minuto": 11,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "A CORREA LLANO",
+    "conv": "VIDELA"
+   },
+   {
+    "minuto": 17,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "G CASTELLINO",
+    "conv": ""
+   },
+   {
+    "minuto": 22,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "visitante",
+    "jugador": "P ECHALECU",
+    "conv": "KRETSCHMAR"
+   },
+   {
+    "minuto": 33,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "F RICCI",
+    "conv": "VIDELA"
+   },
+   {
+    "minuto": 36,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "F RICCI",
+    "conv": ""
+   },
+   {
+    "minuto": 38,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "F RICCI",
+    "conv": "VIDELA"
+   },
+   {
+    "minuto": 5,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "visitante",
+    "jugador": "J MARTÍN",
+    "conv": "KRETSCHMAR"
+   },
+   {
+    "minuto": 20,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "G CASTELLINO",
+    "conv": "VIDELA"
+   },
+   {
+    "minuto": 25,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "G CASTELLINO",
+    "conv": "VIDELA"
+   },
+   {
+    "minuto": 33,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "J ROSSI",
+    "conv": ""
+   },
+   {
+    "minuto": 40,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "visitante",
+    "jugador": "VEGA",
+    "conv": "KRETSCHMAR"
+   }
+  ],
+  "fecha_texto": "Domingo 6 de Septiembre de 2026",
+  "arbitro": "DANTE DIEZ",
+  "cancha": "LICEO RUGBY CLUB (LA CARRODILLA)"
+ },
+ "11-liceo-tordos.html": {
+  "local": {
+   "titulares": [
+    [
+     1,
+     "JUAN IGNACIO RODRÍGUEZ"
+    ],
+    [
+     2,
+     "TOMÁS BAZÁN"
+    ],
+    [
+     3,
+     "MARTINIANO SGATTONI"
+    ],
+    [
+     4,
+     "FRANCISCO BERTAINA"
+    ],
+    [
+     5,
+     "ADRIÁN CURA"
+    ],
+    [
+     6,
+     "ENZO CIRRINCIONE"
+    ],
+    [
+     7,
+     "SANTINO VILLEGAS"
+    ],
+    [
+     8,
+     "JULIÁN ROSSI"
+    ],
+    [
+     9,
+     "RAMIRO GASSULL"
+    ],
+    [
+     10,
+     "JUAN MATEO SANCHO"
+    ],
+    [
+     11,
+     "FRANCISCO RICCI"
+    ],
+    [
+     12,
+     "BRUNO CIRRINCIONE"
+    ],
+    [
+     13,
+     "FACUNDO LUCERO"
+    ],
+    [
+     14,
+     "AGUSTÍN CORREA LLANO (C)"
+    ],
+    [
+     15,
+     "IGNACIO GAIDO"
+    ]
+   ],
+   "ingresaron": [
+    "PEDRO TULIÁN",
+    "JOAQUÍN AMEZAGA",
+    "LAUTARO PERALTA",
+    "MARTÍN VILA",
+    "AGUSTÍN QUIROGA",
+    "JUAN MANUEL PÉREZ CARAM",
+    "TOMÁS VIDELA",
+    "AGUSTÍN DEMARÍA"
+   ],
+   "amonestados": [
+    "JUAN IGNACIO RODRIGUEZ",
+    "MARTÍN VILA",
+    "TOMÁS VIDELA"
+   ],
+   "expulsados": []
+  },
+  "visitante": {
+   "titulares": [
+    [
+     1,
+     "MARTÍN SANTIAGO"
+    ],
+    [
+     2,
+     "JUAN MANUEL VIVAS"
+    ],
+    [
+     3,
+     "JOSÉ ANTONIO DANGELO"
+    ],
+    [
+     4,
+     "LAUTARO VARELA"
+    ],
+    [
+     5,
+     "FRANCISCO PANNOCCHIA"
+    ],
+    [
+     6,
+     "VALENTINO MIRANDA"
+    ],
+    [
+     7,
+     "TOMÁS DÍAZ"
+    ],
+    [
+     8,
+     "JUAN ENRIQUE ARNUT"
+    ],
+    [
+     9,
+     "GONZALO BERTRANOU"
+    ],
+    [
+     10,
+     "FEDERICO SERPA"
+    ],
+    [
+     11,
+     "FACUNDO TONÓN"
+    ],
+    [
+     12,
+     "ANGELO LIZZOLA"
+    ],
+    [
+     13,
+     "FRANCISCO MARTOS"
+    ],
+    [
+     14,
+     "FRANCISCO CASSONE"
+    ],
+    [
+     15,
+     "FRANCISCO GALDEANO"
+    ]
+   ],
+   "ingresaron": [
+    "FRANCISCO RUGOSO",
+    "FRANCO PIZZI",
+    "MARTÍN ORRICO",
+    "MARCOS CASSONE",
+    "MATÍAS HERRERA",
+    "JULIÁN ORTÍZ"
+   ],
+   "amonestados": [],
+   "expulsados": []
+  },
+  "eventos": [
+   {
+    "minuto": 8,
+    "periodo": "1T",
+    "tipo": "PENAL",
+    "equipo": "visitante",
+    "jugador": "F SERPA",
+    "conv": ""
+   },
+   {
+    "minuto": 11,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "F RICCI",
+    "conv": "SANCHO"
+   },
+   {
+    "minuto": 14,
+    "periodo": "1T",
+    "tipo": "PENAL",
+    "equipo": "visitante",
+    "jugador": "F SERPA",
+    "conv": ""
+   },
+   {
+    "minuto": 18,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "visitante",
+    "jugador": "F CASSONE",
+    "conv": "SERPA"
+   },
+   {
+    "minuto": 26,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "CORREA LLANO",
+    "conv": "SANCHO"
+   },
+   {
+    "minuto": 40,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "F RICCI",
+    "conv": ""
+   },
+   {
+    "minuto": 2,
+    "periodo": "2T",
+    "tipo": "PENAL",
+    "equipo": "visitante",
+    "jugador": "F SERPA",
+    "conv": ""
+   },
+   {
+    "minuto": 18,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "visitante",
+    "jugador": "F SERPA",
+    "conv": "SERPA"
+   },
+   {
+    "minuto": 15,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "visitante",
+    "jugador": "JM VIVAS",
+    "conv": "SERPA"
+   },
+   {
+    "minuto": 28,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "visitante",
+    "jugador": "JE ARNUT",
+    "conv": ""
+   },
+   {
+    "minuto": 40,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "S VILLEGAS",
+    "conv": "VIDELA"
+   }
+  ],
+  "fecha_texto": "Sábado 19 de Septiembre de 2026",
+  "arbitro": "NICOLÁS QUINTANA",
+  "cancha": "LICEO RUGBY CLUB (LA CARRODILLA)"
+ },
+ "12-marista-mendoza.html": {
+  "local": {
+   "titulares": [
+    [
+     1,
+     "ESTANISLAO RODRIGUEZ"
+    ],
+    [
+     2,
+     "ALEJANDRO PRONCE"
+    ],
+    [
+     3,
+     "MARCOS PORRO"
+    ],
+    [
+     4,
+     "JUAN PABLO LABORDE"
+    ],
+    [
+     5,
+     "JUAN DE LA CRUZ CALLE"
+    ],
+    [
+     6,
+     "FRANCISCO ALLAMAND"
+    ],
+    [
+     7,
+     "AGUSTÍN SARELLI"
+    ],
+    [
+     8,
+     "TELMO FERNÁNDEZ"
+    ],
+    [
+     9,
+     "GENARO PODESTÁ"
+    ],
+    [
+     10,
+     "LISANDRO SOSA"
+    ],
+    [
+     11,
+     "MATÍAS COLOMER"
+    ],
+    [
+     12,
+     "BORJA FILIZZOLA"
+    ],
+    [
+     13,
+     "ALEJO VIDELA (C)"
+    ],
+    [
+     14,
+     "LUCAS BARTOLINI"
+    ],
+    [
+     15,
+     "TOBÍAS FILIZZOLA"
+    ]
+   ],
+   "ingresaron": [
+    "ALVARO LLAVER",
+    "MAXI MONTILLA",
+    "TOMÁS GÓMEZ",
+    "TOMÁS BEKERMAN",
+    "GASPAR LUPIAÑEZ",
+    "CONALL UNGER",
+    "LUCCA FILIZZOLA",
+    "JULIÁN GUEVARA"
+   ],
+   "amonestados": [],
+   "expulsados": []
+  },
+  "visitante": {
+   "titulares": [
+    [
+     1,
+     "LAUREANO VALLE"
+    ],
+    [
+     2,
+     "EXEQUIEL RIQUERO"
+    ],
+    [
+     3,
+     "LUCIANO MORALES"
+    ],
+    [
+     4,
+     "JUAN PABLO ÁLVAREZ"
+    ],
+    [
+     5,
+     "FELIPE RUBIO"
+    ],
+    [
+     6,
+     "ANGELO CIPOLLA"
+    ],
+    [
+     7,
+     "FRANCISCO ÁLVAREZ"
+    ],
+    [
+     8,
+     "IGNACIO VIDAL (C)"
+    ],
+    [
+     9,
+     "SANTIAGO PUPPATO"
+    ],
+    [
+     10,
+     "TOMÁS CANEDO"
+    ],
+    [
+     11,
+     "SANTIAGO TAPIA"
+    ],
+    [
+     12,
+     "SANTIAGO DAPAS"
+    ],
+    [
+     13,
+     "FRANCISCO ÁLVAREZ"
+    ],
+    [
+     14,
+     "IGNACIO LUCERO"
+    ],
+    [
+     15,
+     "JULIÁN COSSUTTA"
+    ]
+   ],
+   "ingresaron": [
+    "BENJAMÍN COSTANTINI",
+    "RENATO BAROLO",
+    "RAMIRO MURRI",
+    "XAVIER OTEGUI",
+    "AGUSTÍN LOMBARDO",
+    "TOMÁS RODRIGUEZ",
+    "ERNESTO GIUDICE"
+   ],
+   "amonestados": [],
+   "expulsados": []
+  },
+  "eventos": [
+   {
+    "minuto": 2,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "visitante",
+    "jugador": "CIPOLLA",
+    "conv": "CANEDO"
+   },
+   {
+    "minuto": 20,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "A PRONCE",
+    "conv": "T FILIZZOLA"
+   },
+   {
+    "minuto": 30,
+    "periodo": "1T",
+    "tipo": "PENAL",
+    "equipo": "visitante",
+    "jugador": "CANEDO",
+    "conv": ""
+   },
+   {
+    "minuto": 36,
+    "periodo": "1T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "FERNÁNDEZ",
+    "conv": "T FILIZZOLA"
+   },
+   {
+    "minuto": 40,
+    "periodo": "1T",
+    "tipo": "PENAL",
+    "equipo": "visitante",
+    "jugador": "CANEDO",
+    "conv": ""
+   },
+   {
+    "minuto": 12,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "PODESTÁ",
+    "conv": "T FILIZZOLA"
+   },
+   {
+    "minuto": 16,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "PODESTÁ",
+    "conv": "T FILIZZOLA"
+   },
+   {
+    "minuto": 19,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "visitante",
+    "jugador": "LUCERO",
+    "conv": "CANEDO"
+   },
+   {
+    "minuto": 25,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "CALLE",
+    "conv": "T FILIZZOLA"
+   },
+   {
+    "minuto": 30,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "LLAVER",
+    "conv": ""
+   },
+   {
+    "minuto": 35,
+    "periodo": "2T",
+    "tipo": "TRY",
+    "equipo": "local",
+    "jugador": "LLAVER",
+    "conv": "T FILIZZOLA"
+   }
+  ],
+  "fecha_texto": "Sábado 17 de Octubre de 2026",
+  "arbitro": "NICOLÁS QUINTANA",
+  "cancha": "MARISTA  RUGBY CLUB (LA CARRODILLA)"
+ }
+}

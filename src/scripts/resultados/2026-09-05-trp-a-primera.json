@@ -1,0 +1,33 @@
+{
+  "fecha": "2026-09-05",
+  "descripcion": "Torneo Regional Pampeano A · Primera · resultados de la fecha",
+  "fuente": "@rugbymdq (Instagram), presenta @restingagin",
+  "motivo": "Resultados de Primera del TRP A publicados por @rugbymdq. El bonus ofensivo va declarado: la fuente da el marcador, no los tries.",
+  "puntosBonusOfensivo": 1,
+  "partidos": [
+    {
+      "partido": "bd29a078-301a-4f83-902e-f33a9cb33b6e",
+      "local": "Argentino", "visitante": "Mar del Plata",
+      "marcador": { "local": 10, "visitante": 52 },
+      "bonusOfensivo": ["visitante"]
+    },
+    {
+      "partido": "30e66eb8-4f46-40b1-ba39-75c41b19ea7a",
+      "local": "SIR", "visitante": "Sporting",
+      "marcador": { "local": 22, "visitante": 44 },
+      "bonusOfensivo": ["visitante"]
+    },
+    {
+      "partido": "44152be6-6acf-4a32-b7e4-cc143d847154",
+      "local": "Comercial", "visitante": "Sportiva",
+      "marcador": { "local": 29, "visitante": 23 },
+      "bonusOfensivo": []
+    },
+    {
+      "partido": "93b49669-469b-450a-82c0-db9a3936c9a0",
+      "local": "Los Cardos", "visitante": "Universitario",
+      "marcador": { "local": 12, "visitante": 52 },
+      "bonusOfensivo": ["visitante"]
+    }
+  ]
+}

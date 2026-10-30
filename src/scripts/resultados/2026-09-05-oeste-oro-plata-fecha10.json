@@ -1,0 +1,21 @@
+{
+  "fecha": "2026-09-05",
+  "descripcion": "Copas del Oeste · 10ª fecha · los dos partidos del sábado (Oro y Plata)",
+  "fuente": "RDC (Rugby de Cuyo)",
+  "motivo": "Placas de resultado de RDC. Sin ofensivo declarado: publican el marcador y nada más. Los dos perdedores caen por dos y por uno, así que el defensivo lo deduce solo el ruleset de cada copa.",
+  "puntosBonusOfensivo": 1,
+  "partidos": [
+    {
+      "partido": "738e423b-ef4f-4a8b-a23c-4558ce329fef",
+      "local": "San Juan", "visitante": "Marista",
+      "marcador": { "local": 27, "visitante": 29 },
+      "bonusOfensivo": []
+    },
+    {
+      "partido": "2b167db5-c710-4aea-a237-cbc1a88200d0",
+      "local": "Universitario", "visitante": "Huazihul",
+      "marcador": { "local": 32, "visitante": 31 },
+      "bonusOfensivo": []
+    }
+  ]
+}

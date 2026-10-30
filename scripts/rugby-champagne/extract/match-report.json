@@ -1,0 +1,7058 @@
+{
+ "19": {
+  "sitio": "URBA Primera A 2026",
+  "enSitio": 182,
+  "enBase": 182,
+  "jugados": 175,
+  "conCronologia": 33,
+  "emparejados": 172,
+  "emparejadosConCronologia": 31,
+  "yaConEventos": 0,
+  "conCronologiaYaConEventos": 0,
+  "sinPareja": [
+   {
+    "sitioId": 65123,
+    "ronda": "Fecha 16",
+    "fecha": "2026-07-25",
+    "local": "Pueyrredón",
+    "visitante": "San Andrés",
+    "marcador": [
+     27,
+     31
+    ],
+    "conCronologia": true
+   },
+   {
+    "sitioId": 57730,
+    "ronda": "Fecha 14",
+    "fecha": "2026-07-11",
+    "local": "Pueyrredón",
+    "visitante": "Lomas Athletic",
+    "marcador": [
+     20,
+     45
+    ],
+    "conCronologia": false
+   },
+   {
+    "sitioId": 56852,
+    "ronda": "Fecha 9",
+    "fecha": "2026-05-23",
+    "local": "Universitario de La Plata",
+    "visitante": "Gimnasia y Esgrima",
+    "marcador": [
+     26,
+     45
+    ],
+    "conCronologia": true
+   }
+  ],
+  "ambiguos": [],
+  "soloMarcador": [],
+  "pares": [
+   {
+    "sitioId": 60709,
+    "matchId": "6c27b896-9dbf-4bcd-a95d-71e9a0fda55f",
+    "homeClubId": "club-pucara",
+    "awayClubId": "hurling",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 69348,
+    "matchId": "2e62f725-0d27-493c-994f-28b615bf6b8a",
+    "homeClubId": "san-andres",
+    "awayClubId": "lomas-athletic",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57037,
+    "matchId": "c2ad822c-df76-47a4-902c-e54cffe12d2d",
+    "homeClubId": "universitario-de-la-plata",
+    "awayClubId": "curupayti",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66880,
+    "matchId": "b3251137-d48b-4688-afa9-86171456c4b6",
+    "homeClubId": "pueyrredon",
+    "awayClubId": "san-luis",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58088,
+    "matchId": "9934b262-8f70-4a32-a16e-426d4f500678",
+    "homeClubId": "san-fernando",
+    "awayClubId": "olivos-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64126,
+    "matchId": "655509ee-80a9-41a5-a077-e1a3b1490537",
+    "homeClubId": "deportiva-francesa",
+    "awayClubId": "geba",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65144,
+    "matchId": "bb91978f-3283-463a-84db-643bc3be6f1d",
+    "homeClubId": "san-cirano",
+    "awayClubId": "san-albano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61329,
+    "matchId": "0bb806b0-c210-479f-b6bc-8c603c0bb885",
+    "homeClubId": "san-cirano",
+    "awayClubId": "club-pucara",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57224,
+    "matchId": "9b418098-8611-4e7f-af17-eea9f3282147",
+    "homeClubId": "san-albano",
+    "awayClubId": "deportiva-francesa",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61344,
+    "matchId": "24db4264-362f-44aa-909e-3bf0d189f9ed",
+    "homeClubId": "geba",
+    "awayClubId": "san-fernando",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58952,
+    "matchId": "df79cb1c-f432-4954-b83a-17ee2ead6bc1",
+    "homeClubId": "olivos-r-c",
+    "awayClubId": "pueyrredon",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66860,
+    "matchId": "299596e2-836f-47ce-9c51-44ad786a7e18",
+    "homeClubId": "san-luis",
+    "awayClubId": "universitario-de-la-plata",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 55621,
+    "matchId": "d3ddc2e4-7fa8-47b2-921a-514a7585f1ba",
+    "homeClubId": "curupayti",
+    "awayClubId": "san-andres",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68805,
+    "matchId": "938b61ab-c3ea-4f43-a83f-f1f6ed279abb",
+    "homeClubId": "lomas-athletic",
+    "awayClubId": "hurling",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63266,
+    "matchId": "3fb23bf2-4c3d-4208-90b7-f86b33e6d066",
+    "homeClubId": "club-pucara",
+    "awayClubId": "lomas-athletic",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63674,
+    "matchId": "426743ad-984d-4455-b120-bc3512fc085b",
+    "homeClubId": "hurling",
+    "awayClubId": "curupayti",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62253,
+    "matchId": "f6389dfc-7520-4c0c-b8aa-257fbed27851",
+    "homeClubId": "san-andres",
+    "awayClubId": "san-luis",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62740,
+    "matchId": "4776861c-c0d5-4029-b571-cf99a66412f4",
+    "homeClubId": "universitario-de-la-plata",
+    "awayClubId": "olivos-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57814,
+    "matchId": "f1301cfa-9226-4cba-b388-b63ce065e589",
+    "homeClubId": "pueyrredon",
+    "awayClubId": "geba",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 67180,
+    "matchId": "979a73a4-121e-4fb2-87b8-f8ffed51c02a",
+    "homeClubId": "san-fernando",
+    "awayClubId": "san-albano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 55164,
+    "matchId": "86300cf6-1a92-4f17-b4d0-ab0eee8d4c81",
+    "homeClubId": "deportiva-francesa",
+    "awayClubId": "san-cirano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66577,
+    "matchId": "b5c3b8dc-3ebf-4486-a8a1-cc7beefbed5e",
+    "homeClubId": "deportiva-francesa",
+    "awayClubId": "club-pucara",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 67827,
+    "matchId": "876297bd-95c0-4d97-be8b-0e7690daad48",
+    "homeClubId": "san-cirano",
+    "awayClubId": "san-fernando",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66992,
+    "matchId": "804097d4-71aa-48a5-abf3-7dec697fe39d",
+    "homeClubId": "san-albano",
+    "awayClubId": "pueyrredon",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66407,
+    "matchId": "e4c0337e-06db-4b7f-8ab8-4f3758f4ff7f",
+    "homeClubId": "geba",
+    "awayClubId": "universitario-de-la-plata",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56494,
+    "matchId": "54267224-f9b5-48ce-a52b-62c60254d6c9",
+    "homeClubId": "olivos-r-c",
+    "awayClubId": "san-andres",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56862,
+    "matchId": "67c405e5-58f7-4e67-945d-92b7c467d26f",
+    "homeClubId": "san-luis",
+    "awayClubId": "hurling",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 60117,
+    "matchId": "655a15b5-077a-4cfc-b227-5851d8bac441",
+    "homeClubId": "curupayti",
+    "awayClubId": "lomas-athletic",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61614,
+    "matchId": "05cd5b43-5a6f-43e8-a21b-927efca1ed63",
+    "homeClubId": "club-pucara",
+    "awayClubId": "curupayti",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58232,
+    "matchId": "361dfd4b-5886-45cd-bfd4-f9e53544c76a",
+    "homeClubId": "lomas-athletic",
+    "awayClubId": "san-luis",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68074,
+    "matchId": "a4582c20-fadf-4058-a381-6e220646b8b7",
+    "homeClubId": "hurling",
+    "awayClubId": "olivos-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57325,
+    "matchId": "b436e66d-b81e-40ba-a0b5-f2761c5db4ff",
+    "homeClubId": "san-andres",
+    "awayClubId": "geba",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58564,
+    "matchId": "2fc182d2-9a0f-4960-9d50-53fa980909d7",
+    "homeClubId": "universitario-de-la-plata",
+    "awayClubId": "san-albano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68782,
+    "matchId": "e15d5ce5-2561-48d0-88a1-6ceb39081ebd",
+    "homeClubId": "pueyrredon",
+    "awayClubId": "san-cirano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58814,
+    "matchId": "b30196e6-3adb-49f1-8e5d-41e361c19013",
+    "homeClubId": "san-fernando",
+    "awayClubId": "deportiva-francesa",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61412,
+    "matchId": "b898666a-bac6-4ce5-9ce7-eee505cd42c4",
+    "homeClubId": "san-fernando",
+    "awayClubId": "club-pucara",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58327,
+    "matchId": "7d3625f3-b576-4beb-8c83-886aa370b896",
+    "homeClubId": "deportiva-francesa",
+    "awayClubId": "pueyrredon",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63910,
+    "matchId": "3d807c97-0e36-4e57-b8d2-a9f5b8902e5f",
+    "homeClubId": "san-cirano",
+    "awayClubId": "universitario-de-la-plata",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59961,
+    "matchId": "0d7bfdb4-f8b4-41bc-bbc2-08594263f1d6",
+    "homeClubId": "san-albano",
+    "awayClubId": "san-andres",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59743,
+    "matchId": "461fa3cb-8113-4000-94f7-7e25feeeca3f",
+    "homeClubId": "geba",
+    "awayClubId": "hurling",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61033,
+    "matchId": "9af6b7dc-dd70-4590-b0aa-36cc224a9f1b",
+    "homeClubId": "olivos-r-c",
+    "awayClubId": "lomas-athletic",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65724,
+    "matchId": "873157d7-d5ba-4ed3-b1ce-218074ceeee9",
+    "homeClubId": "san-luis",
+    "awayClubId": "curupayti",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58821,
+    "matchId": "d81c85a0-121e-4103-91ef-47d4cd56cc0b",
+    "homeClubId": "club-pucara",
+    "awayClubId": "san-luis",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 67628,
+    "matchId": "3cae5e94-93af-4496-ac72-b4d52a933320",
+    "homeClubId": "curupayti",
+    "awayClubId": "olivos-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59786,
+    "matchId": "eee9723a-65fc-42de-952a-7111db394118",
+    "homeClubId": "lomas-athletic",
+    "awayClubId": "geba",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59773,
+    "matchId": "e3fa4c6c-00ff-4211-80fb-fc5e89c2420a",
+    "homeClubId": "hurling",
+    "awayClubId": "san-albano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57236,
+    "matchId": "64783a28-9a01-4472-b666-b1096560594b",
+    "homeClubId": "san-andres",
+    "awayClubId": "san-cirano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56774,
+    "matchId": "d9938e31-ae16-4c48-a282-78e8323c3cef",
+    "homeClubId": "universitario-de-la-plata",
+    "awayClubId": "deportiva-francesa",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64018,
+    "matchId": "fa80a5dc-aa98-461c-b87e-593c17e2e12a",
+    "homeClubId": "pueyrredon",
+    "awayClubId": "san-fernando",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66730,
+    "matchId": "8e977407-c759-4e82-a0d0-8f030b7608f9",
+    "homeClubId": "pueyrredon",
+    "awayClubId": "club-pucara",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 55858,
+    "matchId": "6bb42920-de16-4723-adbd-bdeb161b8ea3",
+    "homeClubId": "san-fernando",
+    "awayClubId": "universitario-de-la-plata",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66372,
+    "matchId": "46e98636-6261-44ca-bb5d-e789c425fdc5",
+    "homeClubId": "deportiva-francesa",
+    "awayClubId": "san-andres",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 60216,
+    "matchId": "156fc52e-a509-4d53-818b-4f21becefa2c",
+    "homeClubId": "san-cirano",
+    "awayClubId": "hurling",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 67481,
+    "matchId": "e378e557-798e-4e7f-a602-adf0e5ac45d3",
+    "homeClubId": "san-albano",
+    "awayClubId": "lomas-athletic",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62736,
+    "matchId": "fe600ed3-a519-42ca-b00d-6e6cbd6495bd",
+    "homeClubId": "geba",
+    "awayClubId": "curupayti",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63801,
+    "matchId": "12ac0d10-c4f0-4834-b202-962496ae7d07",
+    "homeClubId": "olivos-r-c",
+    "awayClubId": "san-luis",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62710,
+    "matchId": "8f4cd4b2-04a8-456e-a63d-0fdd85e19ec2",
+    "homeClubId": "club-pucara",
+    "awayClubId": "olivos-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 60242,
+    "matchId": "14e2acb6-fd26-4cd0-86ff-c5c07d42e87d",
+    "homeClubId": "san-luis",
+    "awayClubId": "geba",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66684,
+    "matchId": "416bfdcb-03ac-4fdd-8d1b-a55a2740cadc",
+    "homeClubId": "curupayti",
+    "awayClubId": "san-albano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57939,
+    "matchId": "9fe1b708-6517-44a9-8d4c-b0c1ed772c40",
+    "homeClubId": "lomas-athletic",
+    "awayClubId": "san-cirano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59788,
+    "matchId": "c0e6d303-0395-443b-9796-116db63b1c26",
+    "homeClubId": "hurling",
+    "awayClubId": "deportiva-francesa",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 69295,
+    "matchId": "dfc0f51a-5fab-4f3e-94ce-f115b211e9bd",
+    "homeClubId": "san-andres",
+    "awayClubId": "san-fernando",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57327,
+    "matchId": "be27a38c-6aa5-4019-afc8-c5e53ea571c8",
+    "homeClubId": "universitario-de-la-plata",
+    "awayClubId": "pueyrredon",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59143,
+    "matchId": "2d774817-a9ff-41a7-a384-23ea7a948c67",
+    "homeClubId": "universitario-de-la-plata",
+    "awayClubId": "club-pucara",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68432,
+    "matchId": "f103260c-08d9-4e7a-93e7-bbee5c954ffe",
+    "homeClubId": "deportiva-francesa",
+    "awayClubId": "lomas-athletic",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 60090,
+    "matchId": "8ab89629-e443-4bc1-b5e3-bed5a0c7a69e",
+    "homeClubId": "san-fernando",
+    "awayClubId": "hurling",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61533,
+    "matchId": "11da7764-93ac-42e1-9e73-44933c3869d7",
+    "homeClubId": "san-cirano",
+    "awayClubId": "curupayti",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64550,
+    "matchId": "bbd06e85-7511-4d7c-a7bc-59371e227e46",
+    "homeClubId": "san-albano",
+    "awayClubId": "san-luis",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63455,
+    "matchId": "3c956516-78e8-4e5e-9450-5765f4b90f26",
+    "homeClubId": "geba",
+    "awayClubId": "olivos-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68592,
+    "matchId": "ce12f085-dca9-4aac-bfeb-921fd9529d6e",
+    "homeClubId": "club-pucara",
+    "awayClubId": "geba",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 55463,
+    "matchId": "1b71bc62-3c78-4309-9241-5ff10d81fd06",
+    "homeClubId": "olivos-r-c",
+    "awayClubId": "san-albano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58481,
+    "matchId": "aa54ad80-6f68-4629-9a3d-3ed862eaeb75",
+    "homeClubId": "san-luis",
+    "awayClubId": "san-cirano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56120,
+    "matchId": "5348c9ae-d00b-4841-872b-447bb72522b4",
+    "homeClubId": "curupayti",
+    "awayClubId": "deportiva-francesa",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63772,
+    "matchId": "1b06f79e-659b-448e-ae52-68272df268d0",
+    "homeClubId": "lomas-athletic",
+    "awayClubId": "san-fernando",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66862,
+    "matchId": "8d431829-f887-48a9-9a58-d053dcbb63e2",
+    "homeClubId": "hurling",
+    "awayClubId": "pueyrredon",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 55491,
+    "matchId": "6a449b0e-40cc-4d59-8a56-4c91dbd5417c",
+    "homeClubId": "san-andres",
+    "awayClubId": "universitario-de-la-plata",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59109,
+    "matchId": "502942c1-9a7c-472f-bb71-d3f8867f8ef9",
+    "homeClubId": "san-andres",
+    "awayClubId": "club-pucara",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58895,
+    "matchId": "ccec02e4-f0db-47c6-8b37-50400377cf21",
+    "homeClubId": "universitario-de-la-plata",
+    "awayClubId": "hurling",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 55206,
+    "matchId": "4bcfdb2e-351b-4563-88ed-0eb18f0731ae",
+    "homeClubId": "san-fernando",
+    "awayClubId": "curupayti",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 67829,
+    "matchId": "54fa978b-c9de-4df9-b08f-641b89e895bf",
+    "homeClubId": "deportiva-francesa",
+    "awayClubId": "san-luis",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59740,
+    "matchId": "f94fa8a6-8ab5-49ba-8cc2-80b13dc013f9",
+    "homeClubId": "san-cirano",
+    "awayClubId": "olivos-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61915,
+    "matchId": "0f8599e1-c589-4d19-b93c-2b90af2832cf",
+    "homeClubId": "san-albano",
+    "awayClubId": "geba",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56534,
+    "matchId": "7cb27919-ecc2-48bc-8be9-d017f2df2fba",
+    "homeClubId": "club-pucara",
+    "awayClubId": "san-albano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62718,
+    "matchId": "8cc96ae9-75cf-414d-8d5f-2a9650607b77",
+    "homeClubId": "san-cirano",
+    "awayClubId": "geba",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65865,
+    "matchId": "f3f4f299-922f-482a-8774-e162294f7178",
+    "homeClubId": "deportiva-francesa",
+    "awayClubId": "olivos-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64060,
+    "matchId": "6ab988e8-474e-4450-9c45-2dfa1055c67b",
+    "homeClubId": "san-fernando",
+    "awayClubId": "san-luis",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57752,
+    "matchId": "a1116a52-1921-452d-838b-c449c6df0162",
+    "homeClubId": "pueyrredon",
+    "awayClubId": "curupayti",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63594,
+    "matchId": "87f5d2c2-ad1c-4fa1-ba39-977302df2e8a",
+    "homeClubId": "universitario-de-la-plata",
+    "awayClubId": "lomas-athletic",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64737,
+    "matchId": "adb0ec7a-f7c4-4a18-b088-aa9dc84d452f",
+    "homeClubId": "san-andres",
+    "awayClubId": "hurling",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56188,
+    "matchId": "c7804d0b-b9dd-48e0-9593-3af51e580d68",
+    "homeClubId": "hurling",
+    "awayClubId": "club-pucara",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64146,
+    "matchId": "42547ba2-3b9e-446e-b8a5-253193d91317",
+    "homeClubId": "lomas-athletic",
+    "awayClubId": "san-andres",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56055,
+    "matchId": "12ab4b68-8288-4dd1-82fd-0e4992e2a103",
+    "homeClubId": "curupayti",
+    "awayClubId": "universitario-de-la-plata",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61310,
+    "matchId": "7f64280a-ced8-407b-9804-3da082a7fcf8",
+    "homeClubId": "san-luis",
+    "awayClubId": "pueyrredon",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 67855,
+    "matchId": "5da46d1c-8b44-487f-8d5a-330ea028df76",
+    "homeClubId": "olivos-r-c",
+    "awayClubId": "san-fernando",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64439,
+    "matchId": "80c8063b-fcbb-410c-af3b-2bdfae1e0c3a",
+    "homeClubId": "geba",
+    "awayClubId": "deportiva-francesa",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62906,
+    "matchId": "a5b0c9a3-924a-41a3-9211-67106adeca3e",
+    "homeClubId": "san-albano",
+    "awayClubId": "san-cirano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63221,
+    "matchId": "1ba278bc-b3d8-46d5-9bc9-c166fba0c65f",
+    "homeClubId": "club-pucara",
+    "awayClubId": "san-cirano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59472,
+    "matchId": "f4737989-d7c4-48c4-91d7-37980b8bdece",
+    "homeClubId": "deportiva-francesa",
+    "awayClubId": "san-albano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 55660,
+    "matchId": "36060932-a380-4981-b6e9-ad35c34066a4",
+    "homeClubId": "san-fernando",
+    "awayClubId": "geba",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62017,
+    "matchId": "11a210a0-cc0b-4b4b-9908-0f8b51982eca",
+    "homeClubId": "pueyrredon",
+    "awayClubId": "olivos-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58992,
+    "matchId": "58b11f4e-8781-4bfc-83bd-a3f4c186ca23",
+    "homeClubId": "universitario-de-la-plata",
+    "awayClubId": "san-luis",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66550,
+    "matchId": "1f60955c-65eb-4373-9510-5d4b6385962b",
+    "homeClubId": "san-andres",
+    "awayClubId": "curupayti",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 69874,
+    "matchId": "2e804642-e824-43cc-8444-58a8249ab95c",
+    "homeClubId": "hurling",
+    "awayClubId": "lomas-athletic",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58420,
+    "matchId": "80acb2d5-6b8b-4513-aa65-9556d301756c",
+    "homeClubId": "lomas-athletic",
+    "awayClubId": "club-pucara",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 69117,
+    "matchId": "e0d56af7-5e3c-4d4e-bf95-8d65f365be4a",
+    "homeClubId": "curupayti",
+    "awayClubId": "hurling",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62098,
+    "matchId": "4d8106c6-cc4c-40d9-ace4-c577e1e8bf39",
+    "homeClubId": "san-luis",
+    "awayClubId": "san-andres",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64891,
+    "matchId": "a1bbbffc-9142-48b9-b573-1f6b5844cd6b",
+    "homeClubId": "olivos-r-c",
+    "awayClubId": "universitario-de-la-plata",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63529,
+    "matchId": "cbb83e99-b70c-4f61-8f74-26e0985e49a5",
+    "homeClubId": "geba",
+    "awayClubId": "pueyrredon",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63109,
+    "matchId": "d89b0655-d6da-48d3-a785-3733d9583d84",
+    "homeClubId": "san-albano",
+    "awayClubId": "san-fernando",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57765,
+    "matchId": "3a70ed92-67f2-40f3-95fd-6cd6530bbfe8",
+    "homeClubId": "san-cirano",
+    "awayClubId": "deportiva-francesa",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 60259,
+    "matchId": "6a345544-d114-4341-befa-11dfb5ce8fe1",
+    "homeClubId": "club-pucara",
+    "awayClubId": "deportiva-francesa",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 55393,
+    "matchId": "b185dc74-aa84-4276-8ab9-a3799a35f939",
+    "homeClubId": "san-fernando",
+    "awayClubId": "san-cirano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68729,
+    "matchId": "87395de3-1c8f-41b4-b93b-e4897c8ab04d",
+    "homeClubId": "pueyrredon",
+    "awayClubId": "san-albano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58450,
+    "matchId": "76d97da3-d432-47c9-b43b-04f54b2496ee",
+    "homeClubId": "san-andres",
+    "awayClubId": "olivos-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 69302,
+    "matchId": "ce5dc35f-4838-4e1f-b2b5-074f00196f27",
+    "homeClubId": "hurling",
+    "awayClubId": "san-luis",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63376,
+    "matchId": "208a03e1-a120-4af5-b009-9e22bb0d0a93",
+    "homeClubId": "lomas-athletic",
+    "awayClubId": "curupayti",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63924,
+    "matchId": "f5ec522f-0ade-4d93-bcd6-503468e23199",
+    "homeClubId": "curupayti",
+    "awayClubId": "club-pucara",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64213,
+    "matchId": "cbc50af4-4cbf-463a-a3af-4955e5a751ee",
+    "homeClubId": "san-luis",
+    "awayClubId": "lomas-athletic",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61937,
+    "matchId": "2df1ba43-6bed-4cd1-a868-8b8e75156591",
+    "homeClubId": "olivos-r-c",
+    "awayClubId": "hurling",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61715,
+    "matchId": "1355880e-d04c-4b5d-8e52-6f33a6777ff0",
+    "homeClubId": "geba",
+    "awayClubId": "san-andres",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 67246,
+    "matchId": "2dedf4de-a3a6-452e-adaf-f766dbbd7e55",
+    "homeClubId": "san-albano",
+    "awayClubId": "universitario-de-la-plata",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62672,
+    "matchId": "e08825e3-d8fd-4422-87e4-406a177f2206",
+    "homeClubId": "san-cirano",
+    "awayClubId": "pueyrredon",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63847,
+    "matchId": "1f64b1d1-8c8c-4cb2-9b15-79a01e258df7",
+    "homeClubId": "deportiva-francesa",
+    "awayClubId": "san-fernando",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59053,
+    "matchId": "f56fff41-9ba0-40e9-85dc-67a41b6c504a",
+    "homeClubId": "club-pucara",
+    "awayClubId": "san-fernando",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57846,
+    "matchId": "c96fcd94-009c-4235-bdcd-0f0cb65b279f",
+    "homeClubId": "pueyrredon",
+    "awayClubId": "deportiva-francesa",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 4670,
+    "matchId": "cf0e8408-cb73-4efe-a4a6-ba3e17919e73",
+    "homeClubId": "universitario-de-la-plata",
+    "awayClubId": "san-cirano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 4673,
+    "matchId": "cfb7b9c8-2aa9-412c-957d-399f5740ce7e",
+    "homeClubId": "san-andres",
+    "awayClubId": "san-albano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 4672,
+    "matchId": "01e5539e-acd6-4d49-951c-963b8c65cce9",
+    "homeClubId": "hurling",
+    "awayClubId": "geba",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 4671,
+    "matchId": "9916670d-f762-414f-85c4-431368f6a9a1",
+    "homeClubId": "lomas-athletic",
+    "awayClubId": "olivos-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64230,
+    "matchId": "efc83e32-4127-4dca-8579-a785aa099b47",
+    "homeClubId": "curupayti",
+    "awayClubId": "san-luis",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63211,
+    "matchId": "9df2f214-aa6b-44a8-9668-bf18b12f1e60",
+    "homeClubId": "san-luis",
+    "awayClubId": "club-pucara",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 67111,
+    "matchId": "80df440c-9159-4bf2-a2f3-4427531210a8",
+    "homeClubId": "olivos-r-c",
+    "awayClubId": "curupayti",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 60031,
+    "matchId": "595920fe-2ace-4123-b47f-84e28d16da6a",
+    "homeClubId": "geba",
+    "awayClubId": "lomas-athletic",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 3650,
+    "matchId": "5bc9e23c-3ffe-4c2a-bc22-7ff73d36891c",
+    "homeClubId": "san-albano",
+    "awayClubId": "hurling",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 3651,
+    "matchId": "3731c9cb-c9d7-43ca-9fc9-f3e917993f9a",
+    "homeClubId": "san-cirano",
+    "awayClubId": "san-andres",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 3652,
+    "matchId": "e61a1ccb-7720-470a-b305-9650682fe308",
+    "homeClubId": "deportiva-francesa",
+    "awayClubId": "universitario-de-la-plata",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 3655,
+    "matchId": "f537af7b-67b6-4c27-9cb3-6104bdf5ed8c",
+    "homeClubId": "san-fernando",
+    "awayClubId": "pueyrredon",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56459,
+    "matchId": "9df17f02-3a12-43cd-9c82-4cffe2ddc7ad",
+    "homeClubId": "club-pucara",
+    "awayClubId": "pueyrredon",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 3617,
+    "matchId": "af48ec0b-ad6e-4da2-9901-401241dd299f",
+    "homeClubId": "universitario-de-la-plata",
+    "awayClubId": "san-fernando",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57203,
+    "matchId": "7f517913-7910-4fbc-990b-ec0f809878fe",
+    "homeClubId": "san-andres",
+    "awayClubId": "deportiva-francesa",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 3618,
+    "matchId": "ca33de97-4264-4ac6-ae13-8fdf98053eb8",
+    "homeClubId": "hurling",
+    "awayClubId": "san-cirano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 3619,
+    "matchId": "cb284a87-9c8e-48fc-b163-425f0b24e053",
+    "homeClubId": "lomas-athletic",
+    "awayClubId": "san-albano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61734,
+    "matchId": "2b43cd0e-51e4-4ebf-b5e4-1e6a37fe9817",
+    "homeClubId": "curupayti",
+    "awayClubId": "geba",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 60529,
+    "matchId": "7d3ff581-5797-46dc-be38-ea5362536a7f",
+    "homeClubId": "san-luis",
+    "awayClubId": "olivos-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 3604,
+    "matchId": "bc035011-2514-4bfc-b3de-acb60f223174",
+    "homeClubId": "olivos-r-c",
+    "awayClubId": "club-pucara",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68044,
+    "matchId": "e01630a5-b80c-4ed3-8bb6-b3ea624b7ca6",
+    "homeClubId": "geba",
+    "awayClubId": "san-luis",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 3605,
+    "matchId": "7e724c40-245c-4399-b2df-22bb291509d9",
+    "homeClubId": "san-albano",
+    "awayClubId": "curupayti",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 3606,
+    "matchId": "7c416f8d-8a27-45df-a562-41428dcc4043",
+    "homeClubId": "san-cirano",
+    "awayClubId": "lomas-athletic",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64898,
+    "matchId": "cbc64f89-37e7-4c9a-b6a4-c083af3df3e3",
+    "homeClubId": "deportiva-francesa",
+    "awayClubId": "hurling",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 3607,
+    "matchId": "0832bd3c-163e-4c04-a44f-078824827e11",
+    "homeClubId": "san-fernando",
+    "awayClubId": "san-andres",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62772,
+    "matchId": "8260fc81-6053-4c99-9ba1-0604e8855b3c",
+    "homeClubId": "pueyrredon",
+    "awayClubId": "universitario-de-la-plata",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57143,
+    "matchId": "d129641e-e113-4a24-9235-5f8e4076dda7",
+    "homeClubId": "club-pucara",
+    "awayClubId": "universitario-de-la-plata",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66758,
+    "matchId": "420a87fb-8726-4f9b-8d04-f919d7c7fc31",
+    "homeClubId": "san-andres",
+    "awayClubId": "pueyrredon",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2579,
+    "matchId": "9d296ed4-c7cb-415d-8f11-3ce2a19b3ac9",
+    "homeClubId": "hurling",
+    "awayClubId": "san-fernando",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65519,
+    "matchId": "780d40cf-dca3-4cb0-8af2-2d4b5c7bae5f",
+    "homeClubId": "lomas-athletic",
+    "awayClubId": "deportiva-francesa",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2580,
+    "matchId": "d8a0856b-67f9-4af0-9296-90277bae7127",
+    "homeClubId": "curupayti",
+    "awayClubId": "san-cirano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2581,
+    "matchId": "54fcff53-5864-47ec-8477-f5343b494336",
+    "homeClubId": "san-luis",
+    "awayClubId": "san-albano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63282,
+    "matchId": "08904250-d0fc-46e6-a7a8-7861efa5bff7",
+    "homeClubId": "olivos-r-c",
+    "awayClubId": "geba",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2567,
+    "matchId": "8740279c-f4c1-446d-878a-3592a6193360",
+    "homeClubId": "geba",
+    "awayClubId": "club-pucara",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2561,
+    "matchId": "409e0069-10ac-4b99-a024-1895eed32020",
+    "homeClubId": "san-albano",
+    "awayClubId": "olivos-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64555,
+    "matchId": "3dbdb289-c483-40e1-ba53-3212dddcdfa8",
+    "homeClubId": "san-cirano",
+    "awayClubId": "san-luis",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 60425,
+    "matchId": "27757da6-bc91-420e-ba66-7b378edf35f6",
+    "homeClubId": "deportiva-francesa",
+    "awayClubId": "curupayti",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 55220,
+    "matchId": "6be2db49-5e55-413b-abf3-5829f94eb033",
+    "homeClubId": "san-fernando",
+    "awayClubId": "lomas-athletic",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68740,
+    "matchId": "ffef38a3-47ce-443c-a30e-370b27291718",
+    "homeClubId": "pueyrredon",
+    "awayClubId": "hurling",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2562,
+    "matchId": "2a23221e-76f3-40f0-99a9-5e709b59c05e",
+    "homeClubId": "universitario-de-la-plata",
+    "awayClubId": "san-andres",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66584,
+    "matchId": "b84d2955-e9a8-455e-a4f4-dc106b141b73",
+    "homeClubId": "club-pucara",
+    "awayClubId": "san-andres",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2528,
+    "matchId": "01091940-b942-4ca2-b5f3-da9511a0fa3a",
+    "homeClubId": "hurling",
+    "awayClubId": "universitario-de-la-plata",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57017,
+    "matchId": "e5d27ff7-8007-47a8-9bb9-f79c1c973be8",
+    "homeClubId": "lomas-athletic",
+    "awayClubId": "pueyrredon",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56878,
+    "matchId": "355a7b07-fde4-4c16-a642-368c52d97b77",
+    "homeClubId": "curupayti",
+    "awayClubId": "san-fernando",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2542,
+    "matchId": "c0eb30f0-bf71-4b1d-a6d6-7ed1ebb75344",
+    "homeClubId": "san-luis",
+    "awayClubId": "deportiva-francesa",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56002,
+    "matchId": "5f848956-8c79-49fb-a676-31e13cce1d4d",
+    "homeClubId": "olivos-r-c",
+    "awayClubId": "san-cirano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2533,
+    "matchId": "e268b0f6-e5e0-439d-a1b8-69b2a719b583",
+    "homeClubId": "geba",
+    "awayClubId": "san-albano",
+    "yaConEventos": false
+   }
+  ]
+ },
+ "20": {
+  "sitio": "URBA Primera B 2026",
+  "enSitio": 182,
+  "enBase": 182,
+  "jugados": 175,
+  "conCronologia": 18,
+  "emparejados": 174,
+  "emparejadosConCronologia": 18,
+  "yaConEventos": 0,
+  "conCronologiaYaConEventos": 0,
+  "sinPareja": [
+   {
+    "sitioId": 60884,
+    "ronda": "Fecha 20",
+    "fecha": "2026-09-05",
+    "local": "Manuel Belgrano",
+    "visitante": "San Patricio",
+    "marcador": [
+     34,
+     13
+    ],
+    "conCronologia": false
+   }
+  ],
+  "ambiguos": [],
+  "soloMarcador": [],
+  "pares": [
+   {
+    "sitioId": 67499,
+    "matchId": "355c731c-44b2-4094-a74f-25b246b57648",
+    "homeClubId": "banco-nacion",
+    "awayClubId": "liceo-naval",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66637,
+    "matchId": "c712b9b3-f24d-4811-8479-d041cf2709fe",
+    "homeClubId": "club-italiano",
+    "awayClubId": "cuq",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58497,
+    "matchId": "b8301863-7a95-496e-ab6f-e6eea619cb94",
+    "homeClubId": "club-san-patricio",
+    "awayClubId": "argentino-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61069,
+    "matchId": "8aab6954-e9f7-470e-a32d-c830df54873c",
+    "homeClubId": "liceo-militar",
+    "awayClubId": "don-bosco",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59860,
+    "matchId": "8339d782-2953-4848-834c-434d4bd7d323",
+    "homeClubId": "vicentinos",
+    "awayClubId": "san-martin",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 67049,
+    "matchId": "366e0624-b674-4a15-b58b-aaeedb548281",
+    "homeClubId": "delta-r-c",
+    "awayClubId": "monte-grande",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 67939,
+    "matchId": "1a624382-3b34-4e7f-84df-3d53365bc6cf",
+    "homeClubId": "manuel-belgrano",
+    "awayClubId": "mariano-moreno",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65572,
+    "matchId": "89e92af8-19c6-4951-972b-cff9c8bee613",
+    "homeClubId": "manuel-belgrano",
+    "awayClubId": "banco-nacion",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 69100,
+    "matchId": "fcfafc1d-bf96-474c-9f8e-103d31837ec4",
+    "homeClubId": "mariano-moreno",
+    "awayClubId": "delta-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 55753,
+    "matchId": "49e2eab2-d795-4e1f-8759-7c3f15d4f2ba",
+    "homeClubId": "monte-grande",
+    "awayClubId": "vicentinos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56108,
+    "matchId": "62dacebe-4e24-4d83-8889-48e78eb5628e",
+    "homeClubId": "san-martin",
+    "awayClubId": "liceo-militar",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64535,
+    "matchId": "5ff784f3-e982-406c-a433-afd1d13f4abd",
+    "homeClubId": "don-bosco",
+    "awayClubId": "club-san-patricio",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58976,
+    "matchId": "43932231-8b1a-43d6-a06c-bd8fe1a83c97",
+    "homeClubId": "argentino-r-c",
+    "awayClubId": "club-italiano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66100,
+    "matchId": "3e6a8b78-ec21-4c09-a763-d76d05347d27",
+    "homeClubId": "cuq",
+    "awayClubId": "liceo-naval",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63325,
+    "matchId": "5b153762-03a0-4e3a-8995-5ce8c6cde0e7",
+    "homeClubId": "banco-nacion",
+    "awayClubId": "cuq",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59876,
+    "matchId": "a848c94e-1218-433d-bb93-f738f3fe23aa",
+    "homeClubId": "liceo-naval",
+    "awayClubId": "argentino-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58230,
+    "matchId": "e32cc1e8-b78e-4b30-b1a6-7bcd82c86ed4",
+    "homeClubId": "club-italiano",
+    "awayClubId": "don-bosco",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57351,
+    "matchId": "962bc66e-bbef-470c-bbcc-bf1af8f09931",
+    "homeClubId": "club-san-patricio",
+    "awayClubId": "san-martin",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64623,
+    "matchId": "79f94448-5746-4aca-bbfb-b09ec70ebb3b",
+    "homeClubId": "liceo-militar",
+    "awayClubId": "monte-grande",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58027,
+    "matchId": "11792538-aaf8-4df3-8b5c-f4d383ce0782",
+    "homeClubId": "vicentinos",
+    "awayClubId": "mariano-moreno",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 67039,
+    "matchId": "0d3d11de-cf86-40c4-818c-acb31e268dcc",
+    "homeClubId": "delta-r-c",
+    "awayClubId": "manuel-belgrano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59085,
+    "matchId": "bcfb0ba7-7e69-4cb3-a132-69db98aefe2c",
+    "homeClubId": "delta-r-c",
+    "awayClubId": "banco-nacion",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65613,
+    "matchId": "68627cab-2a98-4fd9-8dac-77978236dead",
+    "homeClubId": "manuel-belgrano",
+    "awayClubId": "vicentinos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 69374,
+    "matchId": "ce824ecd-e77c-4db2-b4e8-64d42110c6e0",
+    "homeClubId": "mariano-moreno",
+    "awayClubId": "liceo-militar",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 69300,
+    "matchId": "6a708102-5645-44cf-a515-f75d259acafa",
+    "homeClubId": "monte-grande",
+    "awayClubId": "club-san-patricio",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 60041,
+    "matchId": "edbe7d0b-96d9-4a67-b792-421869b45314",
+    "homeClubId": "san-martin",
+    "awayClubId": "club-italiano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62451,
+    "matchId": "7b209a11-6d72-4f5e-b731-141bc2838cd2",
+    "homeClubId": "don-bosco",
+    "awayClubId": "liceo-naval",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66339,
+    "matchId": "8071a339-2de0-48eb-afeb-3e5f49ad9af6",
+    "homeClubId": "argentino-r-c",
+    "awayClubId": "cuq",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64174,
+    "matchId": "df9a89c4-1847-43ae-bf14-74e2773e0d7d",
+    "homeClubId": "banco-nacion",
+    "awayClubId": "argentino-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59334,
+    "matchId": "0b866858-2f92-4cb8-95e3-f2c4d8840e6c",
+    "homeClubId": "cuq",
+    "awayClubId": "don-bosco",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 60229,
+    "matchId": "757bacc4-c9fd-4e29-8e2e-4379a5362e46",
+    "homeClubId": "liceo-naval",
+    "awayClubId": "san-martin",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65870,
+    "matchId": "82242538-7028-4b82-b1d0-b6bb8794f071",
+    "homeClubId": "club-italiano",
+    "awayClubId": "monte-grande",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59787,
+    "matchId": "b9e13dcd-d629-4189-b841-626eb39aa339",
+    "homeClubId": "club-san-patricio",
+    "awayClubId": "mariano-moreno",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57915,
+    "matchId": "4358eb11-6e00-4193-b734-ee9cb11f5c07",
+    "homeClubId": "liceo-militar",
+    "awayClubId": "manuel-belgrano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62516,
+    "matchId": "331ebb0b-68a2-4c09-930a-36044c797dea",
+    "homeClubId": "vicentinos",
+    "awayClubId": "delta-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63171,
+    "matchId": "5a53cfd0-fbeb-4aa1-ba65-a6a803d5b7af",
+    "homeClubId": "vicentinos",
+    "awayClubId": "banco-nacion",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59609,
+    "matchId": "e95bd5c7-d685-4ff3-b0a2-c2cb3c2c1b34",
+    "homeClubId": "delta-r-c",
+    "awayClubId": "liceo-militar",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68452,
+    "matchId": "2e248ee9-2bab-42ac-9443-043e901df8cc",
+    "homeClubId": "mariano-moreno",
+    "awayClubId": "club-italiano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 67391,
+    "matchId": "8f497782-1e94-43d7-8f67-41009b44deb8",
+    "homeClubId": "monte-grande",
+    "awayClubId": "liceo-naval",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 55998,
+    "matchId": "6c3f9361-9581-4cab-b90f-98b3422e9c6b",
+    "homeClubId": "san-martin",
+    "awayClubId": "cuq",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68543,
+    "matchId": "4b423e55-1676-4c11-92a9-bddd82d7251c",
+    "homeClubId": "don-bosco",
+    "awayClubId": "argentino-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64793,
+    "matchId": "d2f1ea9e-8ee5-4030-a1d3-cfa53056c6e7",
+    "homeClubId": "banco-nacion",
+    "awayClubId": "don-bosco",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65496,
+    "matchId": "25939bbf-2093-4de8-8295-ff57493ee432",
+    "homeClubId": "argentino-r-c",
+    "awayClubId": "san-martin",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68087,
+    "matchId": "ab52c4dd-7dc7-42c3-b348-573cabb4b455",
+    "homeClubId": "cuq",
+    "awayClubId": "monte-grande",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68561,
+    "matchId": "8e35a387-42df-438e-9012-cae098663337",
+    "homeClubId": "liceo-naval",
+    "awayClubId": "mariano-moreno",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68527,
+    "matchId": "5d5bae6c-8110-4535-836d-6036b8650224",
+    "homeClubId": "club-italiano",
+    "awayClubId": "manuel-belgrano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58104,
+    "matchId": "5a8bc0c8-e23a-4af6-8c0e-f8a985f83cb4",
+    "homeClubId": "club-san-patricio",
+    "awayClubId": "delta-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56668,
+    "matchId": "00d7c8d9-b565-46df-b7cc-8aab6fb9a61c",
+    "homeClubId": "liceo-militar",
+    "awayClubId": "vicentinos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 69228,
+    "matchId": "c5223532-c3cd-4a84-961e-3e6452641a49",
+    "homeClubId": "liceo-militar",
+    "awayClubId": "banco-nacion",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63106,
+    "matchId": "0909a60f-139c-45a4-bf34-ee814e63e33c",
+    "homeClubId": "vicentinos",
+    "awayClubId": "club-san-patricio",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64024,
+    "matchId": "18c76702-d8fa-4a35-89f6-c1d017b91319",
+    "homeClubId": "delta-r-c",
+    "awayClubId": "club-italiano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58502,
+    "matchId": "ebb118f5-e2e2-4c61-bf5b-aa47933739ae",
+    "homeClubId": "manuel-belgrano",
+    "awayClubId": "liceo-naval",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66884,
+    "matchId": "9d7e593b-b0d0-4abd-a980-77e384ee43a6",
+    "homeClubId": "mariano-moreno",
+    "awayClubId": "cuq",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57393,
+    "matchId": "e08eb338-8284-4758-ace4-a853739156d5",
+    "homeClubId": "monte-grande",
+    "awayClubId": "argentino-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57886,
+    "matchId": "371756e6-2d3d-4b61-9513-0a4ac66e536c",
+    "homeClubId": "san-martin",
+    "awayClubId": "don-bosco",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56650,
+    "matchId": "b71ffce6-67e1-45eb-b32e-0a4f495f3cf8",
+    "homeClubId": "banco-nacion",
+    "awayClubId": "san-martin",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61008,
+    "matchId": "e3e7b9f1-3cf4-4749-a348-4898625db77e",
+    "homeClubId": "don-bosco",
+    "awayClubId": "monte-grande",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 55725,
+    "matchId": "4c748136-3e07-43c8-97cd-d7a33d5ae270",
+    "homeClubId": "argentino-r-c",
+    "awayClubId": "mariano-moreno",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57214,
+    "matchId": "196dfba4-8576-4e7c-9460-0e45cd1e58eb",
+    "homeClubId": "cuq",
+    "awayClubId": "manuel-belgrano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68785,
+    "matchId": "b0921999-c115-4a82-82a9-ede9900ae3f2",
+    "homeClubId": "liceo-naval",
+    "awayClubId": "delta-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57708,
+    "matchId": "3b74dd03-c111-44fe-87d2-e8d372b8b6f0",
+    "homeClubId": "club-italiano",
+    "awayClubId": "vicentinos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58049,
+    "matchId": "0c6bdb0f-728b-4688-8757-857ffcb7f233",
+    "homeClubId": "club-san-patricio",
+    "awayClubId": "liceo-militar",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56097,
+    "matchId": "a3a4f4c8-e4a4-4567-874c-7c50144a7db3",
+    "homeClubId": "club-san-patricio",
+    "awayClubId": "banco-nacion",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 60390,
+    "matchId": "d3afa30a-c572-4f06-ae79-7437871a2945",
+    "homeClubId": "liceo-militar",
+    "awayClubId": "club-italiano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66578,
+    "matchId": "e0de336c-ba94-4b49-bea5-37f9414fabda",
+    "homeClubId": "vicentinos",
+    "awayClubId": "liceo-naval",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68556,
+    "matchId": "fd299cfd-a72e-45e8-a8b8-346a54b93598",
+    "homeClubId": "delta-r-c",
+    "awayClubId": "cuq",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56838,
+    "matchId": "251f6d8a-d8e3-428d-b5df-ee61d32132ea",
+    "homeClubId": "manuel-belgrano",
+    "awayClubId": "argentino-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59590,
+    "matchId": "328c42ae-605b-4488-996e-b35a7db437f7",
+    "homeClubId": "mariano-moreno",
+    "awayClubId": "don-bosco",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59487,
+    "matchId": "69277683-594f-4f1c-a84e-9770c8c4dedd",
+    "homeClubId": "monte-grande",
+    "awayClubId": "san-martin",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 69614,
+    "matchId": "298ee772-9abb-414d-8f65-872ceb595cd0",
+    "homeClubId": "banco-nacion",
+    "awayClubId": "monte-grande",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65010,
+    "matchId": "6c5926cb-d41f-4d56-b27d-ed0e6157bae2",
+    "homeClubId": "san-martin",
+    "awayClubId": "mariano-moreno",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65392,
+    "matchId": "7950f193-4709-40bc-857d-0ffe7bde6a2c",
+    "homeClubId": "don-bosco",
+    "awayClubId": "manuel-belgrano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59679,
+    "matchId": "31341cc1-ab64-4d38-8b75-789e5945c108",
+    "homeClubId": "argentino-r-c",
+    "awayClubId": "delta-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56317,
+    "matchId": "03abd60a-e84e-4453-9d16-ef9207903c8d",
+    "homeClubId": "cuq",
+    "awayClubId": "vicentinos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68927,
+    "matchId": "74bc739c-910c-484d-becc-47b9eebb9bae",
+    "homeClubId": "liceo-naval",
+    "awayClubId": "liceo-militar",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57345,
+    "matchId": "5c208cb7-5628-4667-a551-059362f2deab",
+    "homeClubId": "club-italiano",
+    "awayClubId": "club-san-patricio",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 67186,
+    "matchId": "d5864b23-02b0-43ae-ab08-5ada766c76c4",
+    "homeClubId": "club-italiano",
+    "awayClubId": "banco-nacion",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56709,
+    "matchId": "d95b2c0c-25df-47f1-aa1d-3176790f2083",
+    "homeClubId": "club-san-patricio",
+    "awayClubId": "liceo-naval",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64546,
+    "matchId": "85d8bae9-4e66-46fb-8abb-fdf41fd5d2f2",
+    "homeClubId": "liceo-militar",
+    "awayClubId": "cuq",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56608,
+    "matchId": "4be0ad09-5a7f-41a3-ac05-94019f91d02e",
+    "homeClubId": "vicentinos",
+    "awayClubId": "argentino-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58918,
+    "matchId": "7d6a3c5c-9fb3-46c0-9dcc-fba84865b74f",
+    "homeClubId": "delta-r-c",
+    "awayClubId": "don-bosco",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62365,
+    "matchId": "931fbed1-d912-4f8a-b353-3982ca134adc",
+    "homeClubId": "manuel-belgrano",
+    "awayClubId": "san-martin",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 67130,
+    "matchId": "2591e124-2065-47dd-9bd8-9e127bfbc64d",
+    "homeClubId": "mariano-moreno",
+    "awayClubId": "monte-grande",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65778,
+    "matchId": "709334e3-f792-4f2f-980d-0d527502efc3",
+    "homeClubId": "banco-nacion",
+    "awayClubId": "mariano-moreno",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64470,
+    "matchId": "66256c85-6d82-4957-ae04-9640431449f2",
+    "homeClubId": "manuel-belgrano",
+    "awayClubId": "monte-grande",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68380,
+    "matchId": "3f981308-056d-402d-83cf-72c609d2e92f",
+    "homeClubId": "delta-r-c",
+    "awayClubId": "san-martin",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 67920,
+    "matchId": "4a95ebf0-a877-4f8c-a8f6-b32ce8eb4a74",
+    "homeClubId": "vicentinos",
+    "awayClubId": "don-bosco",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62245,
+    "matchId": "a5596f30-91ab-4dc7-94e8-81a564797ca9",
+    "homeClubId": "liceo-militar",
+    "awayClubId": "argentino-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66107,
+    "matchId": "7e09c8d7-d689-4f7b-aeb2-bcf5940e25c7",
+    "homeClubId": "club-san-patricio",
+    "awayClubId": "cuq",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68383,
+    "matchId": "bb831aaf-283a-466d-ae0c-700c4db3804b",
+    "homeClubId": "club-italiano",
+    "awayClubId": "liceo-naval",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64829,
+    "matchId": "6b565eaf-3c53-4818-abaf-8d0eafc02544",
+    "homeClubId": "liceo-naval",
+    "awayClubId": "banco-nacion",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56681,
+    "matchId": "da01f94d-0f55-4b43-9529-52e5b179df57",
+    "homeClubId": "cuq",
+    "awayClubId": "club-italiano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64322,
+    "matchId": "bc0f3eec-e2a3-4e08-b138-730e356028bc",
+    "homeClubId": "argentino-r-c",
+    "awayClubId": "club-san-patricio",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66976,
+    "matchId": "a0894ee8-37cb-4695-bbaa-8133c0488d99",
+    "homeClubId": "don-bosco",
+    "awayClubId": "liceo-militar",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57362,
+    "matchId": "843ae9a4-a073-41d8-9d28-5e8b57f86879",
+    "homeClubId": "san-martin",
+    "awayClubId": "vicentinos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65328,
+    "matchId": "b0a53ec8-710b-49fd-b9a7-f817ed935bf5",
+    "homeClubId": "monte-grande",
+    "awayClubId": "delta-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 67498,
+    "matchId": "0829eede-7f86-429c-8df3-d43f5e707b96",
+    "homeClubId": "mariano-moreno",
+    "awayClubId": "manuel-belgrano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63978,
+    "matchId": "c2f51576-1b8b-4569-9db4-3a002feee2d0",
+    "homeClubId": "banco-nacion",
+    "awayClubId": "manuel-belgrano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64094,
+    "matchId": "e971c996-d1dd-4d24-b80b-36b72fd8b892",
+    "homeClubId": "delta-r-c",
+    "awayClubId": "mariano-moreno",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58079,
+    "matchId": "b11cb0e5-5494-40f0-83d7-901e662b28b6",
+    "homeClubId": "vicentinos",
+    "awayClubId": "monte-grande",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64852,
+    "matchId": "40d1f6a6-bd95-4868-80f3-94a78995ffa7",
+    "homeClubId": "liceo-militar",
+    "awayClubId": "san-martin",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63813,
+    "matchId": "0c40c1e9-13e9-4409-b15a-5d871c8bb699",
+    "homeClubId": "club-san-patricio",
+    "awayClubId": "don-bosco",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65357,
+    "matchId": "e0fb1870-f015-4e0b-8f55-7c6a2d5131bb",
+    "homeClubId": "club-italiano",
+    "awayClubId": "argentino-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 60428,
+    "matchId": "7d1a404a-998a-4e80-9664-db5288531f54",
+    "homeClubId": "liceo-naval",
+    "awayClubId": "cuq",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 69595,
+    "matchId": "31dd9132-ead6-4937-8864-c1027ff5723f",
+    "homeClubId": "cuq",
+    "awayClubId": "banco-nacion",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57944,
+    "matchId": "2c7c5c52-875a-471b-9a6c-c7d440f1f374",
+    "homeClubId": "argentino-r-c",
+    "awayClubId": "liceo-naval",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63520,
+    "matchId": "9b8847d1-5309-4100-8576-ca464ccd4940",
+    "homeClubId": "don-bosco",
+    "awayClubId": "club-italiano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 69250,
+    "matchId": "0410a166-3912-4715-b599-6d497ca4b7ab",
+    "homeClubId": "san-martin",
+    "awayClubId": "club-san-patricio",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59399,
+    "matchId": "b2db3855-558e-4663-8f86-358a0b263805",
+    "homeClubId": "monte-grande",
+    "awayClubId": "liceo-militar",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56137,
+    "matchId": "eb78993f-1a2e-483f-84a2-ba6d1a1080ac",
+    "homeClubId": "mariano-moreno",
+    "awayClubId": "vicentinos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61942,
+    "matchId": "9e521b0a-4b96-4cac-b104-660798d7e169",
+    "homeClubId": "manuel-belgrano",
+    "awayClubId": "delta-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59521,
+    "matchId": "16833df7-9f86-4137-8ba8-7cf974bd7d7f",
+    "homeClubId": "banco-nacion",
+    "awayClubId": "delta-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 55363,
+    "matchId": "02efd622-ec9f-4133-b280-4dadf610641c",
+    "homeClubId": "vicentinos",
+    "awayClubId": "manuel-belgrano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64709,
+    "matchId": "c9ae0e70-0c80-4dbf-8157-bcca5fb98e6c",
+    "homeClubId": "liceo-militar",
+    "awayClubId": "mariano-moreno",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65585,
+    "matchId": "a291fed7-bdf4-495f-97a2-134fc688a51c",
+    "homeClubId": "club-san-patricio",
+    "awayClubId": "monte-grande",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63416,
+    "matchId": "aa3611fc-86e7-44f5-a590-f7cbf88a3486",
+    "homeClubId": "club-italiano",
+    "awayClubId": "san-martin",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56330,
+    "matchId": "610f6661-7807-43ef-8209-915c06f40901",
+    "homeClubId": "liceo-naval",
+    "awayClubId": "don-bosco",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66521,
+    "matchId": "a3301a73-035d-41e1-8704-f441ea1431c0",
+    "homeClubId": "cuq",
+    "awayClubId": "argentino-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 55523,
+    "matchId": "068e31bc-65ce-4bef-907f-f043cb5bd7cb",
+    "homeClubId": "argentino-r-c",
+    "awayClubId": "banco-nacion",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 60871,
+    "matchId": "486a3e54-2246-424a-b0cb-e52430f808de",
+    "homeClubId": "don-bosco",
+    "awayClubId": "cuq",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62285,
+    "matchId": "8251bab2-0a9a-483a-8bc4-1957e6a95ae7",
+    "homeClubId": "san-martin",
+    "awayClubId": "liceo-naval",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 55184,
+    "matchId": "df4b94da-a541-4cf4-bffc-474b99a751d8",
+    "homeClubId": "monte-grande",
+    "awayClubId": "club-italiano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65770,
+    "matchId": "22e6a645-fd46-40ff-a99d-eb1373a10943",
+    "homeClubId": "mariano-moreno",
+    "awayClubId": "club-san-patricio",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58641,
+    "matchId": "21306f35-e759-488b-9d5f-be93d2ec2251",
+    "homeClubId": "manuel-belgrano",
+    "awayClubId": "liceo-militar",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65711,
+    "matchId": "91be49bf-c935-4f90-b5a7-4accfbe2b792",
+    "homeClubId": "delta-r-c",
+    "awayClubId": "vicentinos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65199,
+    "matchId": "0c4f6ebc-601f-47be-835c-77b12eb896ab",
+    "homeClubId": "banco-nacion",
+    "awayClubId": "vicentinos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64324,
+    "matchId": "d508f25d-654f-4dee-bf8c-ab9a2065aad9",
+    "homeClubId": "liceo-militar",
+    "awayClubId": "delta-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64188,
+    "matchId": "63a32b4f-3639-4749-9153-f426416a070e",
+    "homeClubId": "club-san-patricio",
+    "awayClubId": "manuel-belgrano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 67179,
+    "matchId": "c1f5ce70-e0d4-45d3-9f80-48669ce01296",
+    "homeClubId": "club-italiano",
+    "awayClubId": "mariano-moreno",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58702,
+    "matchId": "a34c2dd2-c69a-4202-9787-f7c8d63dc96d",
+    "homeClubId": "liceo-naval",
+    "awayClubId": "monte-grande",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 4674,
+    "matchId": "07cbf526-a23f-4da8-8a7c-b5f4c8dc46b0",
+    "homeClubId": "cuq",
+    "awayClubId": "san-martin",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 4675,
+    "matchId": "28b92414-e2f9-4820-9b96-60d614a0cb0d",
+    "homeClubId": "argentino-r-c",
+    "awayClubId": "don-bosco",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58533,
+    "matchId": "8016d78c-89b7-494b-ada9-22715b246012",
+    "homeClubId": "don-bosco",
+    "awayClubId": "banco-nacion",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 69410,
+    "matchId": "c47cd8c7-fef3-4093-ba0e-b8120ef68907",
+    "homeClubId": "san-martin",
+    "awayClubId": "argentino-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 3653,
+    "matchId": "a5fca426-c354-4f2c-8811-2713333a5a00",
+    "homeClubId": "monte-grande",
+    "awayClubId": "cuq",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58689,
+    "matchId": "798bf59e-627c-4c40-b8d8-52fa4f44dd34",
+    "homeClubId": "mariano-moreno",
+    "awayClubId": "liceo-naval",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65824,
+    "matchId": "9adf0d7d-5ce4-4615-84ba-330b13abeaee",
+    "homeClubId": "manuel-belgrano",
+    "awayClubId": "club-italiano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63030,
+    "matchId": "c28b2e69-21fe-4fc8-8ca3-221671783c6a",
+    "homeClubId": "delta-r-c",
+    "awayClubId": "club-san-patricio",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68871,
+    "matchId": "aaa29eb4-e635-4b55-8216-f0e5e0870bb5",
+    "homeClubId": "vicentinos",
+    "awayClubId": "liceo-militar",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56671,
+    "matchId": "1c463577-dc49-4834-92f5-43217487de3a",
+    "homeClubId": "banco-nacion",
+    "awayClubId": "liceo-militar",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61946,
+    "matchId": "88f6949d-cc50-42ae-8296-a61c38e5e909",
+    "homeClubId": "club-san-patricio",
+    "awayClubId": "vicentinos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 67445,
+    "matchId": "5725c635-7cf5-4f6d-a406-22b8c26a69d8",
+    "homeClubId": "club-italiano",
+    "awayClubId": "delta-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59447,
+    "matchId": "fd7f6642-d612-4e04-a763-14c248680971",
+    "homeClubId": "liceo-naval",
+    "awayClubId": "manuel-belgrano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 3620,
+    "matchId": "31eb1170-a02f-4b2c-a109-88d48d441bf9",
+    "homeClubId": "cuq",
+    "awayClubId": "mariano-moreno",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57021,
+    "matchId": "b4dd05a1-f92a-4922-b46d-e08114acda24",
+    "homeClubId": "argentino-r-c",
+    "awayClubId": "monte-grande",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68857,
+    "matchId": "3621a621-ba41-44a8-ba9e-ea943e64d26b",
+    "homeClubId": "don-bosco",
+    "awayClubId": "san-martin",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61004,
+    "matchId": "584c5551-4cd1-449e-a22a-395bfea44dc6",
+    "homeClubId": "san-martin",
+    "awayClubId": "banco-nacion",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59347,
+    "matchId": "70b35197-8fed-4284-a91c-ca8285018537",
+    "homeClubId": "monte-grande",
+    "awayClubId": "don-bosco",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65130,
+    "matchId": "b61be1d8-c099-4cdc-a1bb-2fb1c6356b73",
+    "homeClubId": "mariano-moreno",
+    "awayClubId": "argentino-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 3608,
+    "matchId": "8ce17d07-454d-4c9b-b0d4-af6df6dbfa74",
+    "homeClubId": "manuel-belgrano",
+    "awayClubId": "cuq",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63415,
+    "matchId": "1b247d08-7cef-448c-8655-024b55cb5a45",
+    "homeClubId": "delta-r-c",
+    "awayClubId": "liceo-naval",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 55343,
+    "matchId": "deb07a95-4b8d-4d4c-8e0e-e496acccd9e9",
+    "homeClubId": "vicentinos",
+    "awayClubId": "club-italiano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68222,
+    "matchId": "93907f43-4654-456b-91b2-cfd9d9a361b8",
+    "homeClubId": "liceo-militar",
+    "awayClubId": "club-san-patricio",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2592,
+    "matchId": "dc510625-4714-43f2-b04a-2e7c5d807960",
+    "homeClubId": "banco-nacion",
+    "awayClubId": "club-san-patricio",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68721,
+    "matchId": "defe0611-bb21-4d60-83dd-7cddce00961e",
+    "homeClubId": "club-italiano",
+    "awayClubId": "liceo-militar",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62699,
+    "matchId": "4893623f-bd3f-437f-8b9a-43f6647defec",
+    "homeClubId": "liceo-naval",
+    "awayClubId": "vicentinos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2589,
+    "matchId": "b1d3fde6-4618-4640-906b-64e9f5ac7eaa",
+    "homeClubId": "cuq",
+    "awayClubId": "delta-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2590,
+    "matchId": "a3ef0784-6534-4db2-866f-86f27b33b7b9",
+    "homeClubId": "argentino-r-c",
+    "awayClubId": "manuel-belgrano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61360,
+    "matchId": "e6797b46-f8c9-44ee-81c5-9f92ecd67d26",
+    "homeClubId": "don-bosco",
+    "awayClubId": "mariano-moreno",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 67602,
+    "matchId": "4936b262-012c-4b27-96d8-1dcdf7d54234",
+    "homeClubId": "san-martin",
+    "awayClubId": "monte-grande",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62929,
+    "matchId": "8d9f26a3-151a-4f14-86fc-9fcd1fe53f6c",
+    "homeClubId": "monte-grande",
+    "awayClubId": "banco-nacion",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66655,
+    "matchId": "812589db-dcb5-4278-a2df-3034caf82ded",
+    "homeClubId": "mariano-moreno",
+    "awayClubId": "san-martin",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63918,
+    "matchId": "42db409c-64f6-46b8-a136-881680c56ec2",
+    "homeClubId": "manuel-belgrano",
+    "awayClubId": "don-bosco",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2563,
+    "matchId": "3c4c9935-41c1-4695-ba88-6212b2c00f3b",
+    "homeClubId": "delta-r-c",
+    "awayClubId": "argentino-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2564,
+    "matchId": "3a6c7f3f-4905-4825-b97b-fd3911f441e6",
+    "homeClubId": "vicentinos",
+    "awayClubId": "cuq",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2565,
+    "matchId": "b0b891e3-8fc2-4b34-8d42-6bb8340ed7b0",
+    "homeClubId": "liceo-militar",
+    "awayClubId": "liceo-naval",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2566,
+    "matchId": "0d13399d-9c86-4260-bc7a-5487ac96737f",
+    "homeClubId": "club-san-patricio",
+    "awayClubId": "club-italiano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63937,
+    "matchId": "3d1b54ff-0bd9-40aa-be5f-bd9fad9a73ba",
+    "homeClubId": "banco-nacion",
+    "awayClubId": "club-italiano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2529,
+    "matchId": "e5ae6a96-43dc-427e-a4ee-529e8db65518",
+    "homeClubId": "liceo-naval",
+    "awayClubId": "club-san-patricio",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2530,
+    "matchId": "d7058321-31da-4d5f-9f8c-9e84783475c0",
+    "homeClubId": "cuq",
+    "awayClubId": "liceo-militar",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2531,
+    "matchId": "e218131c-d18b-42a7-ac86-b10b1c351bea",
+    "homeClubId": "argentino-r-c",
+    "awayClubId": "vicentinos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61387,
+    "matchId": "eaa3a352-f5a8-48c4-b3c1-3b49d99edc3a",
+    "homeClubId": "don-bosco",
+    "awayClubId": "delta-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57882,
+    "matchId": "f74a6fe7-5957-4977-99d6-0631fff04249",
+    "homeClubId": "san-martin",
+    "awayClubId": "manuel-belgrano",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 60236,
+    "matchId": "226af350-1e1b-458a-a981-36e1b1a7401d",
+    "homeClubId": "monte-grande",
+    "awayClubId": "mariano-moreno",
+    "yaConEventos": false
+   }
+  ]
+ },
+ "22": {
+  "sitio": "URBA Segunda División 2026",
+  "enSitio": 182,
+  "enBase": 182,
+  "jugados": 175,
+  "conCronologia": 3,
+  "emparejados": 172,
+  "emparejadosConCronologia": 2,
+  "yaConEventos": 0,
+  "conCronologiaYaConEventos": 0,
+  "sinPareja": [
+   {
+    "sitioId": 58852,
+    "ronda": "Fecha 25",
+    "fecha": "2026-10-17",
+    "local": "El Retiro",
+    "visitante": "La Salle",
+    "marcador": [
+     29,
+     13
+    ],
+    "conCronologia": false
+   },
+   {
+    "sitioId": 55361,
+    "ronda": "Fecha 8",
+    "fecha": "2026-05-16",
+    "local": "Albatros",
+    "visitante": "Las Cañas R.C.",
+    "marcador": [
+     59,
+     15
+    ],
+    "conCronologia": false
+   },
+   {
+    "sitioId": 3592,
+    "ronda": "Fecha 3",
+    "fecha": "2026-03-28",
+    "local": "Mercedes R.C",
+    "visitante": "Tiro Federal de San Pedro",
+    "marcador": [
+     33,
+     11
+    ],
+    "conCronologia": true
+   }
+  ],
+  "ambiguos": [],
+  "soloMarcador": [],
+  "pares": [
+   {
+    "sitioId": 68727,
+    "matchId": "9be85920-4f45-4a9a-b9e3-f8a55275bb66",
+    "homeClubId": "las-canas",
+    "awayClubId": "mercedes",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64693,
+    "matchId": "30bf6544-b84c-4d2b-b38b-270486c3b1bc",
+    "homeClubId": "old-georgian",
+    "awayClubId": "varela-jr",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58615,
+    "matchId": "cad09da4-5387-4d11-bd44-c00f2b77a52f",
+    "homeClubId": "vicente-lopez",
+    "awayClubId": "albatros",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57703,
+    "matchId": "70dcb3a5-edd5-4639-81ed-36ed4b725079",
+    "homeClubId": "atletico-y-progreso",
+    "awayClubId": "tigre",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59752,
+    "matchId": "c04e396c-d2d1-4b63-bd26-ae114f9f7a3e",
+    "homeClubId": "tiro-federal-de-san-pedro",
+    "awayClubId": "atletico-chascomus",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68812,
+    "matchId": "303e3882-96b9-4ba1-9b7f-4f14cc0c2f2b",
+    "homeClubId": "san-marcos",
+    "awayClubId": "los-pinos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63216,
+    "matchId": "7c47793b-7646-4493-a1f7-9c478f7f420a",
+    "homeClubId": "el-retiro",
+    "awayClubId": "las-canas",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61869,
+    "matchId": "99bcfb74-1d66-44c9-a07a-f4459df38491",
+    "homeClubId": "la-salle",
+    "awayClubId": "san-marcos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59101,
+    "matchId": "c43615da-c0c2-4810-8dbd-2868cd3d9b86",
+    "homeClubId": "los-pinos",
+    "awayClubId": "tiro-federal-de-san-pedro",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61744,
+    "matchId": "2d80f571-bb55-4174-9099-e700a36347bb",
+    "homeClubId": "atletico-chascomus",
+    "awayClubId": "atletico-y-progreso",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65450,
+    "matchId": "7efa3495-456e-440e-8d53-963d6ab632ba",
+    "homeClubId": "tigre",
+    "awayClubId": "vicente-lopez",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 67483,
+    "matchId": "c37b3643-adb2-4ec1-9782-48dfb890f1fe",
+    "homeClubId": "albatros",
+    "awayClubId": "old-georgian",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59579,
+    "matchId": "ea53babe-689c-48af-92e9-189d9df949ed",
+    "homeClubId": "varela-jr",
+    "awayClubId": "mercedes",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59677,
+    "matchId": "e9df7399-448d-44a0-aaa0-ad8a745c151d",
+    "homeClubId": "las-canas",
+    "awayClubId": "varela-jr",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63399,
+    "matchId": "240133ce-830a-4dec-9eda-70ac15c907e6",
+    "homeClubId": "mercedes",
+    "awayClubId": "albatros",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56175,
+    "matchId": "38c96725-3dec-4b2f-8f7c-c175505278c0",
+    "homeClubId": "old-georgian",
+    "awayClubId": "tigre",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 69350,
+    "matchId": "e77450c8-a870-4f90-af40-6727bc116de0",
+    "homeClubId": "vicente-lopez",
+    "awayClubId": "atletico-chascomus",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68301,
+    "matchId": "75690004-d026-46b3-a12f-0de2431e28fe",
+    "homeClubId": "atletico-y-progreso",
+    "awayClubId": "los-pinos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59176,
+    "matchId": "4ac619d2-fb27-4459-8309-c5d4e213f497",
+    "homeClubId": "tiro-federal-de-san-pedro",
+    "awayClubId": "la-salle",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68206,
+    "matchId": "60d001d3-55ed-40da-84e6-4accb673c2d6",
+    "homeClubId": "san-marcos",
+    "awayClubId": "el-retiro",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62633,
+    "matchId": "3f2594e1-3605-4831-bbb9-5d75b83b07c6",
+    "homeClubId": "san-marcos",
+    "awayClubId": "las-canas",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57242,
+    "matchId": "08f4e759-25aa-4286-9013-29f088172164",
+    "homeClubId": "el-retiro",
+    "awayClubId": "tiro-federal-de-san-pedro",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62012,
+    "matchId": "00f832dc-3790-4e6a-80b0-5b222e5dfeb6",
+    "homeClubId": "la-salle",
+    "awayClubId": "atletico-y-progreso",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63762,
+    "matchId": "89021007-0ede-430d-b2da-2cafb35aba79",
+    "homeClubId": "los-pinos",
+    "awayClubId": "vicente-lopez",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62572,
+    "matchId": "c2ca5b4b-5645-4f65-8233-73c9b77ac4d7",
+    "homeClubId": "atletico-chascomus",
+    "awayClubId": "old-georgian",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 55233,
+    "matchId": "8a60c689-5e79-4d17-999b-7ca02ea87222",
+    "homeClubId": "tigre",
+    "awayClubId": "mercedes",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56474,
+    "matchId": "bba29849-ce6e-4704-9495-cb78d7cde06c",
+    "homeClubId": "albatros",
+    "awayClubId": "varela-jr",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58375,
+    "matchId": "ac8ed619-8c20-4f2f-9cb5-8dad3a797e5a",
+    "homeClubId": "las-canas",
+    "awayClubId": "albatros",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59168,
+    "matchId": "d694bb67-32db-4bb8-8493-d02196654004",
+    "homeClubId": "varela-jr",
+    "awayClubId": "tigre",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 69009,
+    "matchId": "7253dc9c-ccf1-446f-9487-fc3c0fdeadfb",
+    "homeClubId": "mercedes",
+    "awayClubId": "atletico-chascomus",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64594,
+    "matchId": "4239cfbc-c1c5-41f5-a4d4-1cd09e51623b",
+    "homeClubId": "old-georgian",
+    "awayClubId": "los-pinos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61218,
+    "matchId": "188c0a64-1cb3-46d2-9a0f-43bb200c4877",
+    "homeClubId": "vicente-lopez",
+    "awayClubId": "la-salle",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56911,
+    "matchId": "caea7aca-c67b-4d0f-9dbe-63da1e9e46b3",
+    "homeClubId": "atletico-y-progreso",
+    "awayClubId": "el-retiro",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62198,
+    "matchId": "ad7a7ffb-3c37-4ba8-86d3-ad48bd25fbd5",
+    "homeClubId": "tiro-federal-de-san-pedro",
+    "awayClubId": "san-marcos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63831,
+    "matchId": "72a84a46-b128-4af6-88ab-0f8db2ab4a80",
+    "homeClubId": "tiro-federal-de-san-pedro",
+    "awayClubId": "las-canas",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66806,
+    "matchId": "3e30b20b-1a38-4f9e-8937-c4cb7d94bfc1",
+    "homeClubId": "san-marcos",
+    "awayClubId": "atletico-y-progreso",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65959,
+    "matchId": "1b752dfe-baf2-4077-ae70-c5e4e2733efb",
+    "homeClubId": "el-retiro",
+    "awayClubId": "vicente-lopez",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 69572,
+    "matchId": "6ab0e605-8098-4d9a-bab6-17575623c371",
+    "homeClubId": "la-salle",
+    "awayClubId": "old-georgian",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57131,
+    "matchId": "955e6524-2e77-4e9b-a835-f78c83c2c872",
+    "homeClubId": "los-pinos",
+    "awayClubId": "mercedes",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61896,
+    "matchId": "528468db-4598-41a1-acf1-17b0c903ad63",
+    "homeClubId": "atletico-chascomus",
+    "awayClubId": "varela-jr",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66746,
+    "matchId": "2c602552-bed7-4fd6-b49e-6a891edd110b",
+    "homeClubId": "tigre",
+    "awayClubId": "albatros",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66912,
+    "matchId": "a3fa5368-0660-43ed-b47b-c39f4b1ebef6",
+    "homeClubId": "las-canas",
+    "awayClubId": "tigre",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63179,
+    "matchId": "37e7dfbf-1ac7-4fde-9d3f-114c57dc19c6",
+    "homeClubId": "albatros",
+    "awayClubId": "atletico-chascomus",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58928,
+    "matchId": "79b44f99-cf30-4d33-bb35-71f20257e6e2",
+    "homeClubId": "varela-jr",
+    "awayClubId": "los-pinos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 67929,
+    "matchId": "5b78d809-7bf7-414d-8933-f924ffb2e795",
+    "homeClubId": "mercedes",
+    "awayClubId": "la-salle",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57064,
+    "matchId": "398bacf0-2484-437e-aaff-33cec3671d2e",
+    "homeClubId": "old-georgian",
+    "awayClubId": "el-retiro",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 55888,
+    "matchId": "e8e2ab03-8f33-47f3-92d9-a67970c19dfc",
+    "homeClubId": "vicente-lopez",
+    "awayClubId": "san-marcos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63027,
+    "matchId": "519db47d-00df-4dc9-8ffc-9cd30adf3759",
+    "homeClubId": "atletico-y-progreso",
+    "awayClubId": "tiro-federal-de-san-pedro",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64338,
+    "matchId": "77214ea3-2c55-40cb-b231-76c2c71a8485",
+    "homeClubId": "atletico-y-progreso",
+    "awayClubId": "las-canas",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68092,
+    "matchId": "48da321f-04dd-4c3c-8148-7afb78173b98",
+    "homeClubId": "tiro-federal-de-san-pedro",
+    "awayClubId": "vicente-lopez",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 67504,
+    "matchId": "dbd091fd-94c9-446a-b936-199454777400",
+    "homeClubId": "san-marcos",
+    "awayClubId": "old-georgian",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 60754,
+    "matchId": "282a122f-45e1-43fa-b175-88655d6ca91c",
+    "homeClubId": "el-retiro",
+    "awayClubId": "mercedes",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64992,
+    "matchId": "9c0cc1f4-3746-4973-8b72-47265a532ea6",
+    "homeClubId": "la-salle",
+    "awayClubId": "varela-jr",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61684,
+    "matchId": "7c6a492a-bcdb-4988-9368-25ba1324f160",
+    "homeClubId": "los-pinos",
+    "awayClubId": "albatros",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63224,
+    "matchId": "7a1947c7-3224-4a6d-bae9-8a09b1d55324",
+    "homeClubId": "atletico-chascomus",
+    "awayClubId": "tigre",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63314,
+    "matchId": "db6971ba-ab63-4c0d-95c5-236919b4cfc2",
+    "homeClubId": "las-canas",
+    "awayClubId": "atletico-chascomus",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59352,
+    "matchId": "11aa8639-4b2e-43a7-b949-8df091f4cda0",
+    "homeClubId": "tigre",
+    "awayClubId": "los-pinos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63063,
+    "matchId": "7214918d-754c-4745-9f79-b41f1d7347c8",
+    "homeClubId": "albatros",
+    "awayClubId": "la-salle",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57280,
+    "matchId": "0245475b-5eb9-4e47-a0e4-f28997799c6d",
+    "homeClubId": "varela-jr",
+    "awayClubId": "el-retiro",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62459,
+    "matchId": "d7261f06-2926-4ef7-b263-b8d3c18367b4",
+    "homeClubId": "mercedes",
+    "awayClubId": "san-marcos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64853,
+    "matchId": "3a796be8-7361-4a59-b23e-861e1802e172",
+    "homeClubId": "old-georgian",
+    "awayClubId": "tiro-federal-de-san-pedro",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 55957,
+    "matchId": "0d712b8f-6793-4242-b889-ba5cd786f042",
+    "homeClubId": "vicente-lopez",
+    "awayClubId": "atletico-y-progreso",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64802,
+    "matchId": "81ca2c99-6abb-4203-99eb-970073ceef9d",
+    "homeClubId": "vicente-lopez",
+    "awayClubId": "las-canas",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66233,
+    "matchId": "7f08889e-0684-4764-8520-a01baacaeca6",
+    "homeClubId": "atletico-y-progreso",
+    "awayClubId": "old-georgian",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61133,
+    "matchId": "e2e63073-afb8-4dd5-bb1d-abf5337431d9",
+    "homeClubId": "tiro-federal-de-san-pedro",
+    "awayClubId": "mercedes",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68211,
+    "matchId": "617d6cfb-4d7c-4f29-988f-0f532d3677fc",
+    "homeClubId": "san-marcos",
+    "awayClubId": "varela-jr",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65616,
+    "matchId": "2cf645b0-c447-491e-8068-ca9b2fd020d3",
+    "homeClubId": "el-retiro",
+    "awayClubId": "albatros",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 60751,
+    "matchId": "fb3ba147-2cb0-4af6-98bc-4c96f8753530",
+    "homeClubId": "la-salle",
+    "awayClubId": "tigre",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58982,
+    "matchId": "74c1da2a-06c2-403b-b9d2-208fc9349094",
+    "homeClubId": "los-pinos",
+    "awayClubId": "atletico-chascomus",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61168,
+    "matchId": "7f3eb019-beab-4847-9a7f-b58143dc111e",
+    "homeClubId": "las-canas",
+    "awayClubId": "los-pinos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62069,
+    "matchId": "275648d8-4b2b-43b3-a737-320fccdd7f98",
+    "homeClubId": "atletico-chascomus",
+    "awayClubId": "la-salle",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68563,
+    "matchId": "34d63589-c41f-41a9-b976-f016477ee379",
+    "homeClubId": "tigre",
+    "awayClubId": "el-retiro",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63624,
+    "matchId": "27b7690a-60c8-4df3-bcc5-08c39b60db38",
+    "homeClubId": "albatros",
+    "awayClubId": "san-marcos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66835,
+    "matchId": "5220c158-40e2-4046-8619-5135beabb5c2",
+    "homeClubId": "varela-jr",
+    "awayClubId": "tiro-federal-de-san-pedro",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68184,
+    "matchId": "5fbf3d0e-09ea-42dc-97ac-50d9588189c3",
+    "homeClubId": "mercedes",
+    "awayClubId": "atletico-y-progreso",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56509,
+    "matchId": "9cb023bc-1b6e-4f79-bb81-875e3ea400c2",
+    "homeClubId": "old-georgian",
+    "awayClubId": "vicente-lopez",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63066,
+    "matchId": "ec105d2a-57eb-48f4-9a12-59f602acea66",
+    "homeClubId": "old-georgian",
+    "awayClubId": "las-canas",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61400,
+    "matchId": "725b2334-87a4-4172-b1b2-91880a9cdb1a",
+    "homeClubId": "vicente-lopez",
+    "awayClubId": "mercedes",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62541,
+    "matchId": "fa356137-3239-4be0-a68f-3bc3809761b4",
+    "homeClubId": "atletico-y-progreso",
+    "awayClubId": "varela-jr",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 67284,
+    "matchId": "f42b016d-d9d9-4c15-a950-a2c36583abea",
+    "homeClubId": "tiro-federal-de-san-pedro",
+    "awayClubId": "albatros",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 55342,
+    "matchId": "c60a3ab8-e67d-44ed-beb5-2f9103c3b575",
+    "homeClubId": "san-marcos",
+    "awayClubId": "tigre",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64352,
+    "matchId": "7e64ab91-3e1b-4f43-98f6-0331a62e8c1c",
+    "homeClubId": "el-retiro",
+    "awayClubId": "atletico-chascomus",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56307,
+    "matchId": "ab678c8e-2db3-459a-abc8-c7e4457f8583",
+    "homeClubId": "la-salle",
+    "awayClubId": "los-pinos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 55965,
+    "matchId": "6dc17623-cd8a-4c09-bb9b-3b8c1eb772fb",
+    "homeClubId": "las-canas",
+    "awayClubId": "la-salle",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63232,
+    "matchId": "dd8f9c34-8254-4240-a046-063faa06b45e",
+    "homeClubId": "el-retiro",
+    "awayClubId": "los-pinos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66883,
+    "matchId": "e90375fc-241b-4edf-8678-de0041c41a2b",
+    "homeClubId": "san-marcos",
+    "awayClubId": "atletico-chascomus",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62847,
+    "matchId": "d927086e-1631-4ccd-b138-1452f4bfdd8c",
+    "homeClubId": "tiro-federal-de-san-pedro",
+    "awayClubId": "tigre",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59554,
+    "matchId": "b7e0471a-254b-49c8-b0aa-2f76a250ff25",
+    "homeClubId": "atletico-y-progreso",
+    "awayClubId": "albatros",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 69059,
+    "matchId": "148d5877-df9d-491d-b9c7-1ff13537c679",
+    "homeClubId": "vicente-lopez",
+    "awayClubId": "varela-jr",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56678,
+    "matchId": "7afad855-5a36-4d0c-87f0-f584210cc7a2",
+    "homeClubId": "old-georgian",
+    "awayClubId": "mercedes",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66914,
+    "matchId": "cf60209c-c79c-4be6-b980-6150ada01010",
+    "homeClubId": "mercedes",
+    "awayClubId": "las-canas",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 69266,
+    "matchId": "048eba34-c135-47f1-a950-f3a0b9cbb6d4",
+    "homeClubId": "varela-jr",
+    "awayClubId": "old-georgian",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66148,
+    "matchId": "e7417e12-5d8e-46bf-8321-00f35649fe30",
+    "homeClubId": "albatros",
+    "awayClubId": "vicente-lopez",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 69002,
+    "matchId": "0e1647ef-bf71-41cb-a0b8-65644fa60f41",
+    "homeClubId": "tigre",
+    "awayClubId": "atletico-y-progreso",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65406,
+    "matchId": "118593ca-8629-4f59-90b9-166fdc8bf550",
+    "homeClubId": "atletico-chascomus",
+    "awayClubId": "tiro-federal-de-san-pedro",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64778,
+    "matchId": "9ef2a556-bf46-48fb-84f5-8d0e30676440",
+    "homeClubId": "los-pinos",
+    "awayClubId": "san-marcos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61429,
+    "matchId": "2c365b28-d57c-41a1-a8cf-b00d7a1eff36",
+    "homeClubId": "la-salle",
+    "awayClubId": "el-retiro",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58068,
+    "matchId": "0a7cc6f1-61d9-485c-8486-007e5483d2f1",
+    "homeClubId": "las-canas",
+    "awayClubId": "el-retiro",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59793,
+    "matchId": "f109ca21-c084-4000-a3b6-6ac4cf899a3d",
+    "homeClubId": "san-marcos",
+    "awayClubId": "la-salle",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62698,
+    "matchId": "fd9ce2f6-e740-4558-bfe7-ea7d31bc4f8d",
+    "homeClubId": "tiro-federal-de-san-pedro",
+    "awayClubId": "los-pinos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 55262,
+    "matchId": "951f6c4c-1a06-410b-a81d-3e015b2f269f",
+    "homeClubId": "atletico-y-progreso",
+    "awayClubId": "atletico-chascomus",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61602,
+    "matchId": "3cd153af-1595-45b5-8603-67dc13bbbb22",
+    "homeClubId": "vicente-lopez",
+    "awayClubId": "tigre",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64734,
+    "matchId": "2c96725e-b77f-4a43-8458-88a52eaff3bf",
+    "homeClubId": "old-georgian",
+    "awayClubId": "albatros",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 67987,
+    "matchId": "46cd241d-aa1b-4823-9b22-396b8e718fa5",
+    "homeClubId": "mercedes",
+    "awayClubId": "varela-jr",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 69390,
+    "matchId": "a3966bde-6e87-4281-9699-1a02b22effbd",
+    "homeClubId": "varela-jr",
+    "awayClubId": "las-canas",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 55731,
+    "matchId": "7d590682-f36a-49f7-b74b-55e6a38ce5ee",
+    "homeClubId": "albatros",
+    "awayClubId": "mercedes",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 69356,
+    "matchId": "9f6e08b5-7cbc-473b-bd5d-0e8099b66c4f",
+    "homeClubId": "tigre",
+    "awayClubId": "old-georgian",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59555,
+    "matchId": "2c7acb90-5d14-428e-b3f2-5b173eb11450",
+    "homeClubId": "atletico-chascomus",
+    "awayClubId": "vicente-lopez",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66742,
+    "matchId": "2db89ba3-ae63-4f2a-a209-5d3bc51965fd",
+    "homeClubId": "los-pinos",
+    "awayClubId": "atletico-y-progreso",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66327,
+    "matchId": "575a2f80-e930-47f3-b82c-edc92ee98024",
+    "homeClubId": "la-salle",
+    "awayClubId": "tiro-federal-de-san-pedro",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59033,
+    "matchId": "60ee2950-76b4-4492-9b1f-90cd70d646b8",
+    "homeClubId": "el-retiro",
+    "awayClubId": "san-marcos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62666,
+    "matchId": "298b28ad-4224-43fe-bc01-bba10b849a04",
+    "homeClubId": "las-canas",
+    "awayClubId": "san-marcos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66647,
+    "matchId": "14630541-0d8e-40b0-869b-1e567bbc093d",
+    "homeClubId": "tiro-federal-de-san-pedro",
+    "awayClubId": "el-retiro",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61408,
+    "matchId": "9474dbe9-4a7f-4919-974d-b20b63cbb41d",
+    "homeClubId": "atletico-y-progreso",
+    "awayClubId": "la-salle",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 55297,
+    "matchId": "e7419b2c-8d45-4e0a-8edb-93e4cfda24b1",
+    "homeClubId": "vicente-lopez",
+    "awayClubId": "los-pinos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64252,
+    "matchId": "63252d89-aef2-4d52-9b6c-fed013259aba",
+    "homeClubId": "old-georgian",
+    "awayClubId": "atletico-chascomus",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63108,
+    "matchId": "bd4af19b-03aa-404d-8bef-f182f56c9921",
+    "homeClubId": "mercedes",
+    "awayClubId": "tigre",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62236,
+    "matchId": "43678a0a-d4fa-4ce3-97bf-20b0fd6f8694",
+    "homeClubId": "varela-jr",
+    "awayClubId": "albatros",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58666,
+    "matchId": "3d77cf9a-e8ad-4f95-a66a-381a60902bd1",
+    "homeClubId": "tigre",
+    "awayClubId": "varela-jr",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 55767,
+    "matchId": "c4069946-7d92-4491-9e0b-43b79c5ac2e2",
+    "homeClubId": "atletico-chascomus",
+    "awayClubId": "mercedes",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63764,
+    "matchId": "de47fff0-49c5-42fa-a059-4e4616b32197",
+    "homeClubId": "los-pinos",
+    "awayClubId": "old-georgian",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56834,
+    "matchId": "2971120a-08fb-4e7e-bf3f-1fe4c0f41083",
+    "homeClubId": "la-salle",
+    "awayClubId": "vicente-lopez",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63476,
+    "matchId": "bd7c96d1-de5f-4fb1-9bb2-f875d74d5b8e",
+    "homeClubId": "el-retiro",
+    "awayClubId": "atletico-y-progreso",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 69539,
+    "matchId": "976cb070-744c-4fff-a1ec-1af982a8ac8b",
+    "homeClubId": "san-marcos",
+    "awayClubId": "tiro-federal-de-san-pedro",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61835,
+    "matchId": "1690e340-8ca0-4859-bdf8-e1389be14525",
+    "homeClubId": "las-canas",
+    "awayClubId": "tiro-federal-de-san-pedro",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65284,
+    "matchId": "41c7608f-5c1f-45a6-97db-46a0026cabb7",
+    "homeClubId": "atletico-y-progreso",
+    "awayClubId": "san-marcos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63740,
+    "matchId": "524abeec-8ee0-4151-a8cf-1758756f119d",
+    "homeClubId": "vicente-lopez",
+    "awayClubId": "el-retiro",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68660,
+    "matchId": "bb629c7d-84cb-46e1-9599-6f21577ed29c",
+    "homeClubId": "old-georgian",
+    "awayClubId": "la-salle",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66724,
+    "matchId": "d980768c-2295-4555-8e2a-aa25844811fe",
+    "homeClubId": "mercedes",
+    "awayClubId": "los-pinos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61120,
+    "matchId": "85b76bd0-7d20-4400-8b9c-ec8a09bcdff0",
+    "homeClubId": "varela-jr",
+    "awayClubId": "atletico-chascomus",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63952,
+    "matchId": "2b0e4771-34f8-4e51-9aae-8d4eab133231",
+    "homeClubId": "albatros",
+    "awayClubId": "tigre",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64201,
+    "matchId": "ec339d12-e77e-4394-b2a1-11dbf477bcf6",
+    "homeClubId": "tigre",
+    "awayClubId": "las-canas",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 69463,
+    "matchId": "f762da32-9853-4e84-9545-c75539904a9e",
+    "homeClubId": "atletico-chascomus",
+    "awayClubId": "albatros",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64968,
+    "matchId": "255a3347-d682-4d6b-8a76-ff8a3829036c",
+    "homeClubId": "los-pinos",
+    "awayClubId": "varela-jr",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 67470,
+    "matchId": "1c5a8aeb-3f96-49a4-b58c-154af34f4bc8",
+    "homeClubId": "la-salle",
+    "awayClubId": "mercedes",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68983,
+    "matchId": "9552fa44-f31f-4b27-b27b-1aafc60ae1bd",
+    "homeClubId": "el-retiro",
+    "awayClubId": "old-georgian",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62392,
+    "matchId": "335eaf75-e1ee-4ba2-80cb-2445bedd935c",
+    "homeClubId": "san-marcos",
+    "awayClubId": "vicente-lopez",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65502,
+    "matchId": "859aba02-f023-409d-861c-a39669a051c5",
+    "homeClubId": "tiro-federal-de-san-pedro",
+    "awayClubId": "atletico-y-progreso",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64314,
+    "matchId": "cd239aed-fef3-4150-b83b-f0483b74c5ac",
+    "homeClubId": "las-canas",
+    "awayClubId": "atletico-y-progreso",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 3621,
+    "matchId": "f9a6264a-f000-4e7b-a57b-004cd0d324ee",
+    "homeClubId": "vicente-lopez",
+    "awayClubId": "tiro-federal-de-san-pedro",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61293,
+    "matchId": "4ea7c683-14c5-4958-b7c5-918172e791cd",
+    "homeClubId": "old-georgian",
+    "awayClubId": "san-marcos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68772,
+    "matchId": "eb08fcec-ecdf-449e-93e6-8b8a7e4508a4",
+    "homeClubId": "mercedes",
+    "awayClubId": "el-retiro",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 69372,
+    "matchId": "2d9abf81-fdbf-41c9-b79b-8936f80ffb0c",
+    "homeClubId": "varela-jr",
+    "awayClubId": "la-salle",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65228,
+    "matchId": "d5b828bd-e28c-465a-a7f4-30f03a53d6a4",
+    "homeClubId": "albatros",
+    "awayClubId": "los-pinos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66930,
+    "matchId": "ffe91e90-1819-41d4-8b6c-0c8e5689cb3c",
+    "homeClubId": "tigre",
+    "awayClubId": "atletico-chascomus",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 67975,
+    "matchId": "2ee295ca-058f-412e-861f-687f37c08f3f",
+    "homeClubId": "atletico-chascomus",
+    "awayClubId": "las-canas",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 55341,
+    "matchId": "299f8c17-84a5-484e-9ad0-59841e39e669",
+    "homeClubId": "los-pinos",
+    "awayClubId": "tigre",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57070,
+    "matchId": "f684f462-87ea-4f29-8384-aa251236b27c",
+    "homeClubId": "la-salle",
+    "awayClubId": "albatros",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 60193,
+    "matchId": "3221a5f1-067e-4f04-ada8-a62a10ad3ce5",
+    "homeClubId": "el-retiro",
+    "awayClubId": "varela-jr",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63616,
+    "matchId": "e5ad980d-cf8d-4f49-8a8f-fed287cdb221",
+    "homeClubId": "san-marcos",
+    "awayClubId": "mercedes",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61469,
+    "matchId": "c216d830-be77-4c56-9d24-74a159238c25",
+    "homeClubId": "tiro-federal-de-san-pedro",
+    "awayClubId": "old-georgian",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 60493,
+    "matchId": "77552e4d-e341-458d-8a5a-5f25673a116b",
+    "homeClubId": "atletico-y-progreso",
+    "awayClubId": "vicente-lopez",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 55197,
+    "matchId": "99adb0e2-b3ba-4fe6-be90-7aa9bbb1098b",
+    "homeClubId": "las-canas",
+    "awayClubId": "vicente-lopez",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66645,
+    "matchId": "3137eb29-e98f-44ee-a86f-4251a8939e86",
+    "homeClubId": "old-georgian",
+    "awayClubId": "atletico-y-progreso",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57009,
+    "matchId": "d7804f8f-36f3-44a2-a4f5-28ccaa198a92",
+    "homeClubId": "varela-jr",
+    "awayClubId": "san-marcos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66307,
+    "matchId": "399a0885-7286-4bb4-b9b2-093b3880e8d1",
+    "homeClubId": "albatros",
+    "awayClubId": "el-retiro",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2591,
+    "matchId": "3c767d04-65c8-4dcb-87c6-d63de6bab20d",
+    "homeClubId": "tigre",
+    "awayClubId": "la-salle",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56815,
+    "matchId": "44d69463-e407-4dbc-b39f-e65c0b59457e",
+    "homeClubId": "atletico-chascomus",
+    "awayClubId": "los-pinos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 67348,
+    "matchId": "8b817c67-97ac-44b9-b2e8-0b5fc7131fc4",
+    "homeClubId": "los-pinos",
+    "awayClubId": "las-canas",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57589,
+    "matchId": "19f82c2a-420e-4e63-b1e9-216d40bd9222",
+    "homeClubId": "la-salle",
+    "awayClubId": "atletico-chascomus",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2568,
+    "matchId": "203d3d48-d2f6-4091-a14e-860294eae19a",
+    "homeClubId": "el-retiro",
+    "awayClubId": "tigre",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65721,
+    "matchId": "dcf5b2b5-a484-4a09-964f-eef7f922f27b",
+    "homeClubId": "san-marcos",
+    "awayClubId": "albatros",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68456,
+    "matchId": "69cb103b-6c36-4a79-9721-bd1a5634f4d9",
+    "homeClubId": "tiro-federal-de-san-pedro",
+    "awayClubId": "varela-jr",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66243,
+    "matchId": "44f2fc02-0e33-40f7-a831-596e2cc7872f",
+    "homeClubId": "atletico-y-progreso",
+    "awayClubId": "mercedes",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62186,
+    "matchId": "62b90102-270c-405a-82a3-89a61113cccf",
+    "homeClubId": "vicente-lopez",
+    "awayClubId": "old-georgian",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63697,
+    "matchId": "fd00d7ec-5867-45f4-8cb0-9887cb83e773",
+    "homeClubId": "las-canas",
+    "awayClubId": "old-georgian",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63663,
+    "matchId": "7bf871ee-72fc-4e61-9f48-ead233349256",
+    "homeClubId": "mercedes",
+    "awayClubId": "vicente-lopez",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62605,
+    "matchId": "b5f117cf-d7de-40e3-83dd-950e4999e8ab",
+    "homeClubId": "varela-jr",
+    "awayClubId": "atletico-y-progreso",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59685,
+    "matchId": "dc8978a2-42ef-4a55-8728-9d171121acdb",
+    "homeClubId": "albatros",
+    "awayClubId": "tiro-federal-de-san-pedro",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2532,
+    "matchId": "9d3ea3c2-bfed-4c64-a979-0dc4958cf2b9",
+    "homeClubId": "tigre",
+    "awayClubId": "san-marcos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65729,
+    "matchId": "38aea43e-8c51-4400-bc9f-330ab2b88c53",
+    "homeClubId": "atletico-chascomus",
+    "awayClubId": "el-retiro",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 55437,
+    "matchId": "cc66eccc-0826-40af-b175-c1bd569aaf1b",
+    "homeClubId": "los-pinos",
+    "awayClubId": "la-salle",
+    "yaConEventos": false
+   }
+  ]
+ },
+ "24": {
+  "sitio": "URBA Desarrollo 2026",
+  "enSitio": 110,
+  "enBase": 180,
+  "jugados": 103,
+  "conCronologia": 3,
+  "emparejados": 85,
+  "emparejadosConCronologia": 3,
+  "yaConEventos": 0,
+  "conCronologiaYaConEventos": 0,
+  "sinPareja": [
+   {
+    "sitioId": 70172,
+    "ronda": "Fecha 4 - FORMATIVA",
+    "fecha": "2026-10-17",
+    "local": "Sociedad Hebraica",
+    "visitante": "Marcos Paz",
+    "marcador": [
+     16,
+     25
+    ],
+    "conCronologia": false
+   },
+   {
+    "sitioId": 70161,
+    "ronda": "Fecha 4- CAMPEONATO",
+    "fecha": "2026-10-17",
+    "local": "Municipalidad de Berazategui",
+    "visitante": "Ezeiza",
+    "marcador": [
+     56,
+     14
+    ],
+    "conCronologia": false
+   },
+   {
+    "sitioId": 70162,
+    "ronda": "Fecha 4- CAMPEONATO",
+    "fecha": "2026-10-17",
+    "local": "Floresta RC",
+    "visitante": "San José",
+    "marcador": [
+     21,
+     9
+    ],
+    "conCronologia": false
+   },
+   {
+    "sitioId": 70169,
+    "ronda": "Fecha 3 - FORMATIVA",
+    "fecha": "2026-10-10",
+    "local": "Rivadavia de Lobos",
+    "visitante": "Sociedad Hebraica",
+    "marcador": [
+     33,
+     36
+    ],
+    "conCronologia": false
+   },
+   {
+    "sitioId": 70159,
+    "ronda": "Fecha 3 - CAMPEONATO",
+    "fecha": "2026-10-10",
+    "local": "Ezeiza",
+    "visitante": "Floresta RC",
+    "marcador": [
+     24,
+     25
+    ],
+    "conCronologia": false
+   },
+   {
+    "sitioId": 70160,
+    "ronda": "Fecha 3 - CAMPEONATO",
+    "fecha": "2026-10-10",
+    "local": "Defensores de Glew",
+    "visitante": "Municipalidad de Berazategui",
+    "marcador": [
+     17,
+     0
+    ],
+    "conCronologia": false
+   },
+   {
+    "sitioId": 70167,
+    "ronda": "Fecha 2 - FORMATIVA",
+    "fecha": "2026-10-03",
+    "local": "Sociedad Hebraica",
+    "visitante": "Obras Sanitarias",
+    "marcador": [
+     22,
+     17
+    ],
+    "conCronologia": false
+   },
+   {
+    "sitioId": 70168,
+    "ronda": "Fecha 2 - FORMATIVA",
+    "fecha": "2026-10-03",
+    "local": "Marcos Paz",
+    "visitante": "Rivadavia de Lobos",
+    "marcador": [
+     31,
+     22
+    ],
+    "conCronologia": false
+   },
+   {
+    "sitioId": 70157,
+    "ronda": "Fecha 2 - CAMPEONATO",
+    "fecha": "2026-10-03",
+    "local": "Floresta RC",
+    "visitante": "Defensores de Glew",
+    "marcador": [
+     7,
+     29
+    ],
+    "conCronologia": false
+   },
+   {
+    "sitioId": 70158,
+    "ronda": "Fecha 2 - CAMPEONATO",
+    "fecha": "2026-10-03",
+    "local": "San José",
+    "visitante": "Ezeiza",
+    "marcador": [
+     22,
+     10
+    ],
+    "conCronologia": false
+   },
+   {
+    "sitioId": 70165,
+    "ronda": "Fecha 1 - FORMATIVA",
+    "fecha": "2026-09-26",
+    "local": "Obras Sanitarias",
+    "visitante": "Marcos Paz",
+    "marcador": [
+     22,
+     22
+    ],
+    "conCronologia": false
+   },
+   {
+    "sitioId": 70166,
+    "ronda": "Fecha 1 - FORMATIVA",
+    "fecha": "2026-09-26",
+    "local": "Atlético San Andrés",
+    "visitante": "Sociedad Hebraica",
+    "marcador": [
+     26,
+     32
+    ],
+    "conCronologia": false
+   },
+   {
+    "sitioId": 70155,
+    "ronda": "Fecha 1 - CAMPEONATO",
+    "fecha": "2026-09-26",
+    "local": "Defensores de Glew",
+    "visitante": "San José",
+    "marcador": [
+     42,
+     8
+    ],
+    "conCronologia": false
+   },
+   {
+    "sitioId": 70156,
+    "ronda": "Fecha 1 - CAMPEONATO",
+    "fecha": "2026-09-26",
+    "local": "Municipalidad de Berazategui",
+    "visitante": "Floresta RC",
+    "marcador": [
+     41,
+     12
+    ],
+    "conCronologia": false
+   },
+   {
+    "sitioId": 65772,
+    "ronda": "Fecha 18",
+    "fecha": "2026-09-12",
+    "local": "Sociedad Hebraica",
+    "visitante": "Marcos Paz",
+    "marcador": [
+     27,
+     17
+    ],
+    "conCronologia": false
+   },
+   {
+    "sitioId": 60805,
+    "ronda": "Fecha 12",
+    "fecha": "2026-07-18",
+    "local": "Defensores de Glew",
+    "visitante": "San José",
+    "marcador": [
+     55,
+     3
+    ],
+    "conCronologia": false
+   },
+   {
+    "sitioId": 55917,
+    "ronda": "Fecha 7",
+    "fecha": "2026-06-06",
+    "local": "Municipalidad de Berazategui",
+    "visitante": "Ezeiza",
+    "marcador": [
+     45,
+     24
+    ],
+    "conCronologia": false
+   },
+   {
+    "sitioId": 64016,
+    "ronda": "Fecha 3",
+    "fecha": "2026-05-02",
+    "local": "Municipalidad de Berazategui",
+    "visitante": "Rivadavia de Lobos",
+    "marcador": [
+     59,
+     12
+    ],
+    "conCronologia": false
+   }
+  ],
+  "ambiguos": [],
+  "soloMarcador": [],
+  "pares": [
+   {
+    "sitioId": 65605,
+    "matchId": "f9abf127-ab8a-4635-acbe-6bf63d4a5336",
+    "homeClubId": "defensores-de-glew",
+    "awayClubId": "floresta",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57936,
+    "matchId": "94b43506-fbd3-4abc-949d-6c7247ba2585",
+    "homeClubId": "ezeiza",
+    "awayClubId": "rivadavia-de-lobos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 55705,
+    "matchId": "51a6c48f-5f02-4111-93a9-4c0f99c93281",
+    "homeClubId": "san-jose-buenos-aires",
+    "awayClubId": "atletico-san-andres",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58772,
+    "matchId": "4bd84edf-003e-43c9-a9a4-3cbd19ccd820",
+    "homeClubId": "obras-sanitarias",
+    "awayClubId": "municipalidad-de-berazategui",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66881,
+    "matchId": "eb52771f-7eaf-4082-b657-c955a3cfabe8",
+    "homeClubId": "floresta",
+    "awayClubId": "obras-sanitarias",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59319,
+    "matchId": "65e9690a-e8c4-4927-a087-962b220168bc",
+    "homeClubId": "atletico-san-andres",
+    "awayClubId": "ezeiza",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64287,
+    "matchId": "5897c43b-ef01-4334-afeb-4b5b05f344ef",
+    "homeClubId": "rivadavia-de-lobos",
+    "awayClubId": "sociedad-hebraica",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59601,
+    "matchId": "fa10e477-2194-4f65-bc26-975039a2e170",
+    "homeClubId": "marcos-paz",
+    "awayClubId": "defensores-de-glew",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58748,
+    "matchId": "7f24dca7-8f5a-415a-bff9-ef6a3982456e",
+    "homeClubId": "marcos-paz",
+    "awayClubId": "floresta",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61118,
+    "matchId": "79d68420-232c-4152-8371-7377d27809c0",
+    "homeClubId": "defensores-de-glew",
+    "awayClubId": "rivadavia-de-lobos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59584,
+    "matchId": "74991e63-5ec8-4e26-87a9-633cf0885157",
+    "homeClubId": "sociedad-hebraica",
+    "awayClubId": "atletico-san-andres",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62356,
+    "matchId": "df1bcea9-9ad9-4e8d-adc7-bf517211c596",
+    "homeClubId": "ezeiza",
+    "awayClubId": "municipalidad-de-berazategui",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 69417,
+    "matchId": "fec3a3e3-1f1c-45be-b460-8ee1bb5c4a10",
+    "homeClubId": "san-jose-buenos-aires",
+    "awayClubId": "obras-sanitarias",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57780,
+    "matchId": "a06e6606-abc4-4c1b-9a54-de628fe83f86",
+    "homeClubId": "floresta",
+    "awayClubId": "san-jose-buenos-aires",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61255,
+    "matchId": "9375ef58-c0af-48f7-964a-08c96e3c5cd4",
+    "homeClubId": "obras-sanitarias",
+    "awayClubId": "ezeiza",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68327,
+    "matchId": "4b7967d5-0c79-4e01-96d6-7d78981cb1cd",
+    "homeClubId": "municipalidad-de-berazategui",
+    "awayClubId": "sociedad-hebraica",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62889,
+    "matchId": "ce339606-a3bd-493d-b1ca-f824e637ec1b",
+    "homeClubId": "atletico-san-andres",
+    "awayClubId": "defensores-de-glew",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58734,
+    "matchId": "5220ddb7-faca-46a4-a044-1b9b20968896",
+    "homeClubId": "rivadavia-de-lobos",
+    "awayClubId": "marcos-paz",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 69260,
+    "matchId": "84e22063-5085-4a2d-aa5d-30c7514c58cd",
+    "homeClubId": "rivadavia-de-lobos",
+    "awayClubId": "floresta",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58355,
+    "matchId": "e1807684-4bf8-44db-9886-e30e69844316",
+    "homeClubId": "marcos-paz",
+    "awayClubId": "atletico-san-andres",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 60114,
+    "matchId": "491a1fdc-16b9-4eae-a556-627bb314bfdc",
+    "homeClubId": "defensores-de-glew",
+    "awayClubId": "municipalidad-de-berazategui",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 67213,
+    "matchId": "f90723dd-0394-4b69-8f3e-bb0505e904f2",
+    "homeClubId": "sociedad-hebraica",
+    "awayClubId": "obras-sanitarias",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66958,
+    "matchId": "759ad31c-f895-4055-ba0c-5b4b7ae3c865",
+    "homeClubId": "ezeiza",
+    "awayClubId": "san-jose-buenos-aires",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59761,
+    "matchId": "affe3f4a-7f0f-46ef-8b65-650da2b291c7",
+    "homeClubId": "floresta",
+    "awayClubId": "ezeiza",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65975,
+    "matchId": "75b96521-c157-416b-8fdc-3f01cd3bc35f",
+    "homeClubId": "san-jose-buenos-aires",
+    "awayClubId": "sociedad-hebraica",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 60796,
+    "matchId": "a92dea3e-c6d3-4336-ab98-5b729d60c2c4",
+    "homeClubId": "obras-sanitarias",
+    "awayClubId": "defensores-de-glew",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64763,
+    "matchId": "92fff349-16a8-4882-beef-b857157b4793",
+    "homeClubId": "municipalidad-de-berazategui",
+    "awayClubId": "marcos-paz",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 55205,
+    "matchId": "3cc1f6d7-b2f7-4366-8923-5445de3dc58e",
+    "homeClubId": "atletico-san-andres",
+    "awayClubId": "rivadavia-de-lobos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56160,
+    "matchId": "92ae02b6-1432-453c-842d-c2bc5626a4c2",
+    "homeClubId": "atletico-san-andres",
+    "awayClubId": "floresta",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56031,
+    "matchId": "93052999-9e5c-4188-931e-c31d718cd57f",
+    "homeClubId": "rivadavia-de-lobos",
+    "awayClubId": "municipalidad-de-berazategui",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59343,
+    "matchId": "6f458708-eddd-465d-9d92-dc9e0ac975da",
+    "homeClubId": "marcos-paz",
+    "awayClubId": "obras-sanitarias",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63548,
+    "matchId": "38614ccb-8fca-472a-a5c5-b4e72ee19268",
+    "homeClubId": "sociedad-hebraica",
+    "awayClubId": "ezeiza",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61222,
+    "matchId": "bdb0bff6-ff20-460b-ba89-94651a5c4a03",
+    "homeClubId": "floresta",
+    "awayClubId": "sociedad-hebraica",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59920,
+    "matchId": "ed912a4b-97d3-4b4f-9784-b1b34f5f13ca",
+    "homeClubId": "ezeiza",
+    "awayClubId": "defensores-de-glew",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64776,
+    "matchId": "211911c1-7c7c-47a5-b384-491546d003c3",
+    "homeClubId": "san-jose-buenos-aires",
+    "awayClubId": "marcos-paz",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 67243,
+    "matchId": "0d7649ec-2c51-4233-8fd5-133a96475c70",
+    "homeClubId": "obras-sanitarias",
+    "awayClubId": "rivadavia-de-lobos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 55698,
+    "matchId": "d7cec206-b74f-4aea-aeb0-4630dfca16f2",
+    "homeClubId": "municipalidad-de-berazategui",
+    "awayClubId": "atletico-san-andres",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61157,
+    "matchId": "1e73a738-e506-4e63-b4f3-8cdf81774560",
+    "homeClubId": "municipalidad-de-berazategui",
+    "awayClubId": "floresta",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68922,
+    "matchId": "36073cee-bff0-42ea-9bb9-f263e3c06914",
+    "homeClubId": "atletico-san-andres",
+    "awayClubId": "obras-sanitarias",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68108,
+    "matchId": "9b15b51d-900e-40ff-a694-20e1be75e262",
+    "homeClubId": "rivadavia-de-lobos",
+    "awayClubId": "san-jose-buenos-aires",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59171,
+    "matchId": "890ecaab-ea50-432a-88fb-2820a0c5063d",
+    "homeClubId": "marcos-paz",
+    "awayClubId": "ezeiza",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58301,
+    "matchId": "9d4ce316-ceac-4cb0-b246-0beeb38ffc07",
+    "homeClubId": "defensores-de-glew",
+    "awayClubId": "sociedad-hebraica",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 60548,
+    "matchId": "9060b277-a687-46ef-acca-1d9c102529cf",
+    "homeClubId": "floresta",
+    "awayClubId": "defensores-de-glew",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59162,
+    "matchId": "fe2f8cb2-21a0-4d02-9e7f-0ea74b553d9b",
+    "homeClubId": "marcos-paz",
+    "awayClubId": "sociedad-hebraica",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62109,
+    "matchId": "86af46e7-79e8-4f41-8d9f-b7e3b5911f30",
+    "homeClubId": "rivadavia-de-lobos",
+    "awayClubId": "ezeiza",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65723,
+    "matchId": "70b74f95-5b19-4139-91c9-5a0012207397",
+    "homeClubId": "atletico-san-andres",
+    "awayClubId": "san-jose-buenos-aires",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64248,
+    "matchId": "bff0ab57-fbff-4aa6-b275-cbad8edef5a9",
+    "homeClubId": "municipalidad-de-berazategui",
+    "awayClubId": "obras-sanitarias",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56965,
+    "matchId": "0fea37d8-eff3-4a7f-8437-7da80665dcc5",
+    "homeClubId": "obras-sanitarias",
+    "awayClubId": "floresta",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 60454,
+    "matchId": "bbe14578-7c8f-4e6f-bdff-c59810f1290c",
+    "homeClubId": "san-jose-buenos-aires",
+    "awayClubId": "municipalidad-de-berazategui",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61749,
+    "matchId": "f1b8ac83-30a4-4ed5-8578-1ace96a6eb41",
+    "homeClubId": "ezeiza",
+    "awayClubId": "atletico-san-andres",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62630,
+    "matchId": "8bce44dc-8e97-4ff6-a64d-9b7aeba5d463",
+    "homeClubId": "sociedad-hebraica",
+    "awayClubId": "rivadavia-de-lobos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59580,
+    "matchId": "79a6a873-ba79-4103-b69b-67fa9336d2b9",
+    "homeClubId": "defensores-de-glew",
+    "awayClubId": "marcos-paz",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58117,
+    "matchId": "22b51f97-ad28-42de-9bfe-5d5c146cc192",
+    "homeClubId": "floresta",
+    "awayClubId": "marcos-paz",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66374,
+    "matchId": "c593233c-57d0-4606-b890-45efa85944fe",
+    "homeClubId": "rivadavia-de-lobos",
+    "awayClubId": "defensores-de-glew",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58894,
+    "matchId": "0b7cff23-4abe-4b5e-a20d-a4c3162606db",
+    "homeClubId": "atletico-san-andres",
+    "awayClubId": "sociedad-hebraica",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66445,
+    "matchId": "1dc5a9ad-e3e1-4a16-a991-edbb1dbc3300",
+    "homeClubId": "obras-sanitarias",
+    "awayClubId": "san-jose-buenos-aires",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63853,
+    "matchId": "9a2eee93-dd9b-4b1a-b6db-a233b148b128",
+    "homeClubId": "san-jose-buenos-aires",
+    "awayClubId": "floresta",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66515,
+    "matchId": "fdd0e474-2e39-4145-be50-2568a6286310",
+    "homeClubId": "ezeiza",
+    "awayClubId": "obras-sanitarias",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 55376,
+    "matchId": "de6013df-c551-4814-a6db-951c3d82e5c3",
+    "homeClubId": "sociedad-hebraica",
+    "awayClubId": "municipalidad-de-berazategui",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 67044,
+    "matchId": "2a7cded5-3fc0-438f-99da-98c6cbbf9279",
+    "homeClubId": "defensores-de-glew",
+    "awayClubId": "atletico-san-andres",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61210,
+    "matchId": "dc924283-3289-47f0-bb49-96e63c394c37",
+    "homeClubId": "marcos-paz",
+    "awayClubId": "rivadavia-de-lobos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59942,
+    "matchId": "5b1ccc47-a72b-40a0-806b-fc5e4cfa0146",
+    "homeClubId": "floresta",
+    "awayClubId": "rivadavia-de-lobos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65472,
+    "matchId": "3826c073-8231-4d3f-8a09-09856df86d70",
+    "homeClubId": "atletico-san-andres",
+    "awayClubId": "marcos-paz",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65620,
+    "matchId": "fb66c1ae-498d-4951-a2fb-ba802697c80e",
+    "homeClubId": "municipalidad-de-berazategui",
+    "awayClubId": "defensores-de-glew",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 55696,
+    "matchId": "58b3f029-e097-4a5e-b1e0-8a3ad7b36b0b",
+    "homeClubId": "obras-sanitarias",
+    "awayClubId": "sociedad-hebraica",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56501,
+    "matchId": "8993b9b3-834a-4350-b614-a855d6e42586",
+    "homeClubId": "san-jose-buenos-aires",
+    "awayClubId": "ezeiza",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 60200,
+    "matchId": "106a7215-b572-4f09-b109-b94a1d91b6bc",
+    "homeClubId": "ezeiza",
+    "awayClubId": "floresta",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 4683,
+    "matchId": "5d2c382a-8272-4744-85de-0689523a0293",
+    "homeClubId": "sociedad-hebraica",
+    "awayClubId": "san-jose-buenos-aires",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65027,
+    "matchId": "96221630-51dc-4f7b-8098-127b1207178a",
+    "homeClubId": "defensores-de-glew",
+    "awayClubId": "obras-sanitarias",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65546,
+    "matchId": "428c60ec-a354-4c1e-bbec-c94b2ba30a94",
+    "homeClubId": "marcos-paz",
+    "awayClubId": "municipalidad-de-berazategui",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57709,
+    "matchId": "39cbe1e6-3145-4d47-aabc-2b4a0d22c10a",
+    "homeClubId": "rivadavia-de-lobos",
+    "awayClubId": "atletico-san-andres",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61958,
+    "matchId": "2983eccb-357f-4045-90f6-46dd097160d1",
+    "homeClubId": "floresta",
+    "awayClubId": "atletico-san-andres",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63525,
+    "matchId": "216e8def-acc2-4413-8ea0-cf1692550092",
+    "homeClubId": "obras-sanitarias",
+    "awayClubId": "marcos-paz",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 3654,
+    "matchId": "8c019fa4-e43f-4ee3-9a30-b499ff800c32",
+    "homeClubId": "san-jose-buenos-aires",
+    "awayClubId": "defensores-de-glew",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64705,
+    "matchId": "4a350b8c-4568-4e92-b976-367470a5bf85",
+    "homeClubId": "ezeiza",
+    "awayClubId": "sociedad-hebraica",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58335,
+    "matchId": "882253fb-fb4c-495b-8e58-02761bfc21ab",
+    "homeClubId": "sociedad-hebraica",
+    "awayClubId": "floresta",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 60731,
+    "matchId": "20e45f6a-64e2-405c-8fe0-131a4fa881d9",
+    "homeClubId": "defensores-de-glew",
+    "awayClubId": "ezeiza",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58131,
+    "matchId": "5558ee16-e30d-4d53-9066-96ab237b3375",
+    "homeClubId": "marcos-paz",
+    "awayClubId": "san-jose-buenos-aires",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63522,
+    "matchId": "1876cee8-6a7a-4044-987b-38d517e88578",
+    "homeClubId": "rivadavia-de-lobos",
+    "awayClubId": "obras-sanitarias",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56250,
+    "matchId": "4d23cbfe-296f-445c-8b99-9f4c0f1d20ce",
+    "homeClubId": "atletico-san-andres",
+    "awayClubId": "municipalidad-de-berazategui",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57478,
+    "matchId": "095534b6-6d9c-47ae-a0e5-587cc8c10f58",
+    "homeClubId": "floresta",
+    "awayClubId": "municipalidad-de-berazategui",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62200,
+    "matchId": "7c307cc9-c1dc-43d9-a09f-f478f8aa635c",
+    "homeClubId": "obras-sanitarias",
+    "awayClubId": "atletico-san-andres",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57482,
+    "matchId": "1489adfc-2315-440c-9a25-8ed636e8d49d",
+    "homeClubId": "san-jose-buenos-aires",
+    "awayClubId": "rivadavia-de-lobos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61926,
+    "matchId": "3e17ee04-9d3a-4f96-a752-ed3a58ad1fe3",
+    "homeClubId": "ezeiza",
+    "awayClubId": "marcos-paz",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 69492,
+    "matchId": "fe0d1e5f-bf30-41a1-aca9-91439eb2cfe6",
+    "homeClubId": "sociedad-hebraica",
+    "awayClubId": "defensores-de-glew",
+    "yaConEventos": false
+   }
+  ]
+ },
+ "27": {
+  "sitio": "URBA Top 14 2026",
+  "enSitio": 184,
+  "enBase": 184,
+  "jugados": 182,
+  "conCronologia": 182,
+  "emparejados": 181,
+  "emparejadosConCronologia": 181,
+  "yaConEventos": 21,
+  "conCronologiaYaConEventos": 21,
+  "sinPareja": [
+   {
+    "sitioId": 57525,
+    "ronda": "Fecha 16",
+    "fecha": "2026-07-18",
+    "local": "CUBA",
+    "visitante": "Hindú Club",
+    "marcador": [
+     18,
+     26
+    ],
+    "conCronologia": true
+   }
+  ],
+  "ambiguos": [],
+  "soloMarcador": [],
+  "pares": [
+   {
+    "sitioId": 66273,
+    "matchId": "e1e50c0e-1b95-4d4a-ae43-c648662b4ba6",
+    "homeClubId": "belgrano-athletic",
+    "awayClubId": "los-matreros",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 61697,
+    "matchId": "464f8189-37ce-4b4d-b138-43aa546a04ba",
+    "homeClubId": "san-isidro-club",
+    "awayClubId": "buenos-aires-crc",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 55639,
+    "matchId": "402e3bf1-5328-42fb-af6c-397e058e14d3",
+    "homeClubId": "club-newman",
+    "awayClubId": "cuba",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 65034,
+    "matchId": "da4d9792-77e6-451a-9e4b-fb2534b34b8d",
+    "homeClubId": "asoc-alumni",
+    "awayClubId": "casi",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 67913,
+    "matchId": "f36fa832-4132-4a36-b1dd-38083b43f2f6",
+    "homeClubId": "club-champagnat",
+    "awayClubId": "los-tilos",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 57600,
+    "matchId": "4214f7c4-34ab-4315-a569-f19f187d42cd",
+    "homeClubId": "hindu-club",
+    "awayClubId": "atletico-del-rosario",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 59056,
+    "matchId": "854714ac-7c3c-4a20-809f-2430b501276b",
+    "homeClubId": "la-plata",
+    "awayClubId": "regatas-de-bella-vista",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 56727,
+    "matchId": "56eda30f-9ddd-4fed-927f-a52b7ac43592",
+    "homeClubId": "los-matreros",
+    "awayClubId": "la-plata",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 69378,
+    "matchId": "af67a85e-b259-476f-85b5-ab3c10bf3157",
+    "homeClubId": "regatas-de-bella-vista",
+    "awayClubId": "hindu-club",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 60105,
+    "matchId": "90658d0e-08cb-4a8c-922c-8c9e7e50f719",
+    "homeClubId": "atletico-del-rosario",
+    "awayClubId": "club-champagnat",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 60942,
+    "matchId": "1b7ad913-8645-4ec6-8941-bcba8c707a0d",
+    "homeClubId": "los-tilos",
+    "awayClubId": "asoc-alumni",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 64739,
+    "matchId": "3a323fd1-81d3-46e2-afe0-6a07421b5589",
+    "homeClubId": "casi",
+    "awayClubId": "club-newman",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 59316,
+    "matchId": "517cb5eb-d2f7-4cb2-a6e6-fd85d89a1d49",
+    "homeClubId": "cuba",
+    "awayClubId": "san-isidro-club",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 67899,
+    "matchId": "44764d35-3bef-4714-8fd0-f951d43764b3",
+    "homeClubId": "buenos-aires-crc",
+    "awayClubId": "belgrano-athletic",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 67260,
+    "matchId": "1fa4cd20-1444-485e-b30e-f9a16295c30e",
+    "homeClubId": "buenos-aires-crc",
+    "awayClubId": "los-matreros",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 56669,
+    "matchId": "55a6cf91-9c27-4d02-9295-919397ed0134",
+    "homeClubId": "belgrano-athletic",
+    "awayClubId": "cuba",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 68557,
+    "matchId": "1a6d5891-3c75-4632-9086-0b0311291c58",
+    "homeClubId": "san-isidro-club",
+    "awayClubId": "casi",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 61956,
+    "matchId": "e17231b7-73ea-4d66-b82d-22bebaa36778",
+    "homeClubId": "club-newman",
+    "awayClubId": "los-tilos",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 65801,
+    "matchId": "0822012c-b523-48e3-9e9e-83d78214aa15",
+    "homeClubId": "asoc-alumni",
+    "awayClubId": "atletico-del-rosario",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 58911,
+    "matchId": "bf9c1e2b-52b0-4ad8-bc79-bdc1d271350e",
+    "homeClubId": "club-champagnat",
+    "awayClubId": "regatas-de-bella-vista",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 56074,
+    "matchId": "89772e09-d812-42f1-be8e-10d557a3ccb2",
+    "homeClubId": "hindu-club",
+    "awayClubId": "la-plata",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 55477,
+    "matchId": "51ab8aac-03cc-4345-aaeb-d10cddeee467",
+    "homeClubId": "los-matreros",
+    "awayClubId": "hindu-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68183,
+    "matchId": "202c0500-cca2-4817-ae18-58a3e0fe6bf6",
+    "homeClubId": "la-plata",
+    "awayClubId": "club-champagnat",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56966,
+    "matchId": "1b7bca1e-1cea-44f0-9a63-f3f1a40351db",
+    "homeClubId": "regatas-de-bella-vista",
+    "awayClubId": "asoc-alumni",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68230,
+    "matchId": "5c8ed15b-406e-49e4-9135-3ad820b4612f",
+    "homeClubId": "atletico-del-rosario",
+    "awayClubId": "club-newman",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 67193,
+    "matchId": "75b087dc-fba8-4a6e-b200-337aa03b3d54",
+    "homeClubId": "los-tilos",
+    "awayClubId": "san-isidro-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 60830,
+    "matchId": "8dfb6a4d-a6ff-4999-b6b2-614211cacf97",
+    "homeClubId": "casi",
+    "awayClubId": "belgrano-athletic",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58867,
+    "matchId": "1b106c78-937a-4b29-ba63-0a07f2856275",
+    "homeClubId": "cuba",
+    "awayClubId": "buenos-aires-crc",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61289,
+    "matchId": "41bff19f-b1a5-4f3b-b719-126550c33245",
+    "homeClubId": "cuba",
+    "awayClubId": "los-matreros",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57705,
+    "matchId": "e4b164bb-11ef-4815-832a-94789b3d097e",
+    "homeClubId": "buenos-aires-crc",
+    "awayClubId": "casi",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58658,
+    "matchId": "440b1c48-0343-4d2a-bcb3-6b473c9ae53b",
+    "homeClubId": "belgrano-athletic",
+    "awayClubId": "los-tilos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 60909,
+    "matchId": "d174a21d-4db8-4af6-822e-4784921c5d50",
+    "homeClubId": "san-isidro-club",
+    "awayClubId": "atletico-del-rosario",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68702,
+    "matchId": "13b992ce-9af6-481f-9b2e-a652ec526ca4",
+    "homeClubId": "club-newman",
+    "awayClubId": "regatas-de-bella-vista",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59524,
+    "matchId": "c94fea70-2fe5-402a-81fe-40db8fadac02",
+    "homeClubId": "asoc-alumni",
+    "awayClubId": "la-plata",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58630,
+    "matchId": "4c1b64b8-a1fd-449e-9bae-32e07cccfe50",
+    "homeClubId": "club-champagnat",
+    "awayClubId": "hindu-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66765,
+    "matchId": "19adc19d-b776-4f8c-a96e-11d0454addf7",
+    "homeClubId": "los-matreros",
+    "awayClubId": "club-champagnat",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58202,
+    "matchId": "dc9fde1f-c7fd-4857-86d0-4ead1add64a3",
+    "homeClubId": "hindu-club",
+    "awayClubId": "asoc-alumni",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62289,
+    "matchId": "fae3a871-4c2a-452d-b5ac-a70283d582d5",
+    "homeClubId": "la-plata",
+    "awayClubId": "club-newman",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56561,
+    "matchId": "1df0b13c-4cd5-45c6-a79d-c805b252701e",
+    "homeClubId": "regatas-de-bella-vista",
+    "awayClubId": "san-isidro-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68683,
+    "matchId": "64436792-2d4c-4367-8117-459aa0b69faa",
+    "homeClubId": "atletico-del-rosario",
+    "awayClubId": "belgrano-athletic",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 69224,
+    "matchId": "a9569753-54f9-4a18-8120-f6b2ab42b1cc",
+    "homeClubId": "los-tilos",
+    "awayClubId": "buenos-aires-crc",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62741,
+    "matchId": "a01f6918-81a5-4305-a2be-b295f550fdc0",
+    "homeClubId": "casi",
+    "awayClubId": "cuba",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65593,
+    "matchId": "c1c4e3f1-c03d-4cc8-a6d0-b34fa516b9af",
+    "homeClubId": "casi",
+    "awayClubId": "los-matreros",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 67679,
+    "matchId": "23338894-9045-4ec9-b6c0-5daeeaf269b5",
+    "homeClubId": "cuba",
+    "awayClubId": "los-tilos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 55504,
+    "matchId": "3d8d4f73-d083-4f75-ad54-b07c6edd3c69",
+    "homeClubId": "buenos-aires-crc",
+    "awayClubId": "atletico-del-rosario",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56649,
+    "matchId": "e6f5cf17-67d1-4f77-8585-480220377e22",
+    "homeClubId": "belgrano-athletic",
+    "awayClubId": "regatas-de-bella-vista",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 60381,
+    "matchId": "60606298-b24f-4897-9a3f-d9e4e7a186e2",
+    "homeClubId": "san-isidro-club",
+    "awayClubId": "la-plata",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61249,
+    "matchId": "3dbd98b8-bc53-4537-8622-5907eab6ec38",
+    "homeClubId": "club-newman",
+    "awayClubId": "hindu-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63098,
+    "matchId": "59897c49-0cde-45be-8c0b-d84fb5845bcf",
+    "homeClubId": "asoc-alumni",
+    "awayClubId": "club-champagnat",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58264,
+    "matchId": "e7d1e529-b57c-457e-8a90-77e0ab08096d",
+    "homeClubId": "los-matreros",
+    "awayClubId": "asoc-alumni",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 67566,
+    "matchId": "73cf9d99-2c31-4b08-a073-6eae31df2258",
+    "homeClubId": "club-champagnat",
+    "awayClubId": "club-newman",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68936,
+    "matchId": "db1fbc47-859e-420c-a158-52c3fa167055",
+    "homeClubId": "hindu-club",
+    "awayClubId": "san-isidro-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65587,
+    "matchId": "bea3971b-6a72-4dae-b332-9c89c692b5ea",
+    "homeClubId": "la-plata",
+    "awayClubId": "belgrano-athletic",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63005,
+    "matchId": "32aadc34-8d25-4938-b42e-8e906320c388",
+    "homeClubId": "regatas-de-bella-vista",
+    "awayClubId": "buenos-aires-crc",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59834,
+    "matchId": "1c2d490a-d044-4fdb-8767-8a6374a08a12",
+    "homeClubId": "atletico-del-rosario",
+    "awayClubId": "cuba",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61597,
+    "matchId": "f8c470cd-abd3-4213-9da9-e73daef2d4b0",
+    "homeClubId": "los-tilos",
+    "awayClubId": "casi",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61921,
+    "matchId": "011fd477-3ddd-4e3e-b19e-c2347340cd1c",
+    "homeClubId": "los-tilos",
+    "awayClubId": "los-matreros",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65420,
+    "matchId": "83e6ecf7-e6cb-4f09-8a9f-51463de53920",
+    "homeClubId": "casi",
+    "awayClubId": "atletico-del-rosario",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66187,
+    "matchId": "e2f1bb02-0876-4963-8aa1-1410ba8d011e",
+    "homeClubId": "cuba",
+    "awayClubId": "regatas-de-bella-vista",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 67334,
+    "matchId": "7de1bdd1-3c4e-4f8a-9024-351638776e44",
+    "homeClubId": "buenos-aires-crc",
+    "awayClubId": "la-plata",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64034,
+    "matchId": "bd4033e7-4685-4223-a93b-0ebc8906ca0c",
+    "homeClubId": "belgrano-athletic",
+    "awayClubId": "hindu-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65562,
+    "matchId": "575b1634-05f8-47c6-8095-112c3feb766c",
+    "homeClubId": "san-isidro-club",
+    "awayClubId": "club-champagnat",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63578,
+    "matchId": "25931b02-a2ad-4ee0-8355-18912fc58566",
+    "homeClubId": "club-newman",
+    "awayClubId": "asoc-alumni",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59245,
+    "matchId": "00b3b26e-3cd4-4457-8e46-d6c4d6551b00",
+    "homeClubId": "los-matreros",
+    "awayClubId": "club-newman",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61386,
+    "matchId": "f3c1d8de-3497-4b1e-bb86-8dbd31a908b6",
+    "homeClubId": "asoc-alumni",
+    "awayClubId": "san-isidro-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68314,
+    "matchId": "166e9e9a-8e1f-4e27-acdb-d4656d68b9f3",
+    "homeClubId": "club-champagnat",
+    "awayClubId": "belgrano-athletic",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61881,
+    "matchId": "a7d899c1-92d8-446f-a155-b09aea0cad67",
+    "homeClubId": "hindu-club",
+    "awayClubId": "buenos-aires-crc",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 55899,
+    "matchId": "7d63754c-8529-4889-b0f9-7f727697155a",
+    "homeClubId": "la-plata",
+    "awayClubId": "cuba",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65520,
+    "matchId": "3a2c79b0-424b-404c-a69d-c334ba802142",
+    "homeClubId": "regatas-de-bella-vista",
+    "awayClubId": "casi",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63500,
+    "matchId": "9f2f367d-4b44-46fd-bd77-35d73546273a",
+    "homeClubId": "atletico-del-rosario",
+    "awayClubId": "los-tilos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57617,
+    "matchId": "9335ec6e-a995-4e18-98a1-36759aa97564",
+    "homeClubId": "atletico-del-rosario",
+    "awayClubId": "los-matreros",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57220,
+    "matchId": "4da5f18f-4ab6-4680-bd39-9ddeae02c748",
+    "homeClubId": "los-tilos",
+    "awayClubId": "regatas-de-bella-vista",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68015,
+    "matchId": "c4696616-32bd-40cb-a67c-eca1f1bc19f8",
+    "homeClubId": "casi",
+    "awayClubId": "la-plata",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 55238,
+    "matchId": "69963371-8a7d-479c-adab-4a9e5854625b",
+    "homeClubId": "buenos-aires-crc",
+    "awayClubId": "club-champagnat",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61280,
+    "matchId": "1f3d0255-97a2-4f4f-9612-cdb342600ba9",
+    "homeClubId": "belgrano-athletic",
+    "awayClubId": "asoc-alumni",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63365,
+    "matchId": "cf55fb2b-b517-41fa-a85a-9585945bffbf",
+    "homeClubId": "san-isidro-club",
+    "awayClubId": "club-newman",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 67764,
+    "matchId": "8b7b9ace-abd2-495b-a542-0158000704bb",
+    "homeClubId": "los-matreros",
+    "awayClubId": "san-isidro-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64764,
+    "matchId": "ae1fae29-3067-4690-95e6-b98474beb430",
+    "homeClubId": "club-newman",
+    "awayClubId": "belgrano-athletic",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63647,
+    "matchId": "e64d5e25-5f20-4135-951e-e0869e702f0b",
+    "homeClubId": "asoc-alumni",
+    "awayClubId": "buenos-aires-crc",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57845,
+    "matchId": "bb6abb7a-c360-4e48-aca2-1a9cf65d274e",
+    "homeClubId": "club-champagnat",
+    "awayClubId": "cuba",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59179,
+    "matchId": "5d8a2511-ebbb-40a9-89dc-fd55ce589380",
+    "homeClubId": "hindu-club",
+    "awayClubId": "casi",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65459,
+    "matchId": "55590d63-e53a-4a5e-a146-52d0f848ae29",
+    "homeClubId": "la-plata",
+    "awayClubId": "los-tilos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64700,
+    "matchId": "31eed66c-1a7b-48b9-97f9-db2f805625b4",
+    "homeClubId": "regatas-de-bella-vista",
+    "awayClubId": "atletico-del-rosario",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68468,
+    "matchId": "3709f240-a164-4b0a-a8f8-62f7c30bbbb4",
+    "homeClubId": "regatas-de-bella-vista",
+    "awayClubId": "los-matreros",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 67526,
+    "matchId": "c84b6d62-0457-4fe9-941d-568166cd2c88",
+    "homeClubId": "atletico-del-rosario",
+    "awayClubId": "la-plata",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 69112,
+    "matchId": "75315f26-dd5e-4ae3-95f9-02aaa29d0cf8",
+    "homeClubId": "los-tilos",
+    "awayClubId": "hindu-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65434,
+    "matchId": "0f456621-a612-4b4c-8059-c7feff6823ba",
+    "homeClubId": "casi",
+    "awayClubId": "club-champagnat",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58367,
+    "matchId": "9af05425-6e9b-45e0-ab73-d15c4fe7aaf2",
+    "homeClubId": "cuba",
+    "awayClubId": "asoc-alumni",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56557,
+    "matchId": "6507b5ab-091c-48a7-88bc-321f5eca9b76",
+    "homeClubId": "buenos-aires-crc",
+    "awayClubId": "club-newman",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56285,
+    "matchId": "52020617-ca78-4129-b65c-c663968148e0",
+    "homeClubId": "belgrano-athletic",
+    "awayClubId": "san-isidro-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66448,
+    "matchId": "11493d88-ac27-40d7-9a83-c57619413532",
+    "homeClubId": "los-matreros",
+    "awayClubId": "belgrano-athletic",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68540,
+    "matchId": "62f3f9e2-2b3c-4048-b847-736f0bd37aa8",
+    "homeClubId": "buenos-aires-crc",
+    "awayClubId": "san-isidro-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59152,
+    "matchId": "b6cbaf2e-6c5c-4b39-bd3b-28f0ca14c137",
+    "homeClubId": "cuba",
+    "awayClubId": "club-newman",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 60275,
+    "matchId": "cbc3bb53-edd2-40cd-875e-38c976b83415",
+    "homeClubId": "casi",
+    "awayClubId": "asoc-alumni",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58431,
+    "matchId": "b7caeefe-0675-4af9-aec2-8ae14046f4de",
+    "homeClubId": "los-tilos",
+    "awayClubId": "club-champagnat",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 55239,
+    "matchId": "410861a4-3cf5-4981-b5ba-967617fe9bb8",
+    "homeClubId": "atletico-del-rosario",
+    "awayClubId": "hindu-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 60210,
+    "matchId": "cde0d845-395a-41d6-ae3a-4625ca8e4967",
+    "homeClubId": "regatas-de-bella-vista",
+    "awayClubId": "la-plata",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56182,
+    "matchId": "ba8e6be4-fb0f-4fff-8ba2-abc43c3d6d43",
+    "homeClubId": "la-plata",
+    "awayClubId": "los-matreros",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65476,
+    "matchId": "e8453172-e3d2-43e8-baef-95c7e2fa3069",
+    "homeClubId": "hindu-club",
+    "awayClubId": "regatas-de-bella-vista",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 55597,
+    "matchId": "ba71defd-e46a-48eb-ae1b-faf8f5176926",
+    "homeClubId": "club-champagnat",
+    "awayClubId": "atletico-del-rosario",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 69305,
+    "matchId": "41ff7cb0-6a08-4703-aed3-baa7ca61ba73",
+    "homeClubId": "asoc-alumni",
+    "awayClubId": "los-tilos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68266,
+    "matchId": "3fc117d8-c41c-4bd0-96c5-aa9cc2d9e492",
+    "homeClubId": "club-newman",
+    "awayClubId": "casi",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57495,
+    "matchId": "1ccda060-a77e-4cbc-b772-5648b0d9846d",
+    "homeClubId": "san-isidro-club",
+    "awayClubId": "cuba",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57991,
+    "matchId": "259de6c9-de2c-4108-9eeb-dbe574895948",
+    "homeClubId": "belgrano-athletic",
+    "awayClubId": "buenos-aires-crc",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56512,
+    "matchId": "ffcb1a6f-4050-47a9-b16f-5f89f9f9a425",
+    "homeClubId": "los-matreros",
+    "awayClubId": "buenos-aires-crc",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 67743,
+    "matchId": "64795b3b-d8b1-4dfb-bc6f-e66f7d03573c",
+    "homeClubId": "cuba",
+    "awayClubId": "belgrano-athletic",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57566,
+    "matchId": "de6a99ae-2424-4035-9088-6a529866c2a5",
+    "homeClubId": "casi",
+    "awayClubId": "san-isidro-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66210,
+    "matchId": "97a86c8f-836b-4bcd-b852-076a1a899f26",
+    "homeClubId": "los-tilos",
+    "awayClubId": "club-newman",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 55835,
+    "matchId": "926b5d4e-639d-4a13-afa4-53118b7c2292",
+    "homeClubId": "atletico-del-rosario",
+    "awayClubId": "asoc-alumni",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64183,
+    "matchId": "9bc6b8d5-1c4c-4eba-9f3f-63ff7afe1792",
+    "homeClubId": "regatas-de-bella-vista",
+    "awayClubId": "club-champagnat",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 69411,
+    "matchId": "22b867bc-babc-4e69-950f-241683da593f",
+    "homeClubId": "la-plata",
+    "awayClubId": "hindu-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65771,
+    "matchId": "d14a201a-6668-438e-9015-f784ce7c0938",
+    "homeClubId": "hindu-club",
+    "awayClubId": "los-matreros",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 60579,
+    "matchId": "dd9b5016-15dd-40bb-b025-352d0d64169f",
+    "homeClubId": "club-champagnat",
+    "awayClubId": "la-plata",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65367,
+    "matchId": "3031c01f-aa8e-4d2e-918d-760c590d31fa",
+    "homeClubId": "asoc-alumni",
+    "awayClubId": "regatas-de-bella-vista",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 69186,
+    "matchId": "a9ced6c2-f23c-496d-85f6-61c911ed4066",
+    "homeClubId": "club-newman",
+    "awayClubId": "atletico-del-rosario",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56845,
+    "matchId": "123a58fd-87ae-4ef0-ad35-bd5db33a5de7",
+    "homeClubId": "san-isidro-club",
+    "awayClubId": "los-tilos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 67967,
+    "matchId": "182c4d6a-a961-4b0f-adfd-26aea68b770a",
+    "homeClubId": "belgrano-athletic",
+    "awayClubId": "casi",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62727,
+    "matchId": "c3e9a607-76a9-4600-baaa-37b3310c2ed2",
+    "homeClubId": "buenos-aires-crc",
+    "awayClubId": "cuba",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 69217,
+    "matchId": "41969953-20cf-4507-8e43-b2e6b16649e8",
+    "homeClubId": "los-matreros",
+    "awayClubId": "cuba",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63056,
+    "matchId": "3152d30c-d760-4a16-a7cd-63728b421c16",
+    "homeClubId": "casi",
+    "awayClubId": "buenos-aires-crc",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58272,
+    "matchId": "82c1bc06-8170-4850-b2ad-9c67218b8fbf",
+    "homeClubId": "los-tilos",
+    "awayClubId": "belgrano-athletic",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65536,
+    "matchId": "db4d237a-360f-4bba-9c8b-8907ac17aa67",
+    "homeClubId": "atletico-del-rosario",
+    "awayClubId": "san-isidro-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63352,
+    "matchId": "0324db55-2a86-4251-ace3-9eb0fbaebf4f",
+    "homeClubId": "regatas-de-bella-vista",
+    "awayClubId": "club-newman",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 67322,
+    "matchId": "0c59b436-1b89-4d3f-9272-77f9cb1c8f76",
+    "homeClubId": "la-plata",
+    "awayClubId": "asoc-alumni",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58000,
+    "matchId": "b3d5748b-8a3a-4e2b-862c-6bf637090c9e",
+    "homeClubId": "hindu-club",
+    "awayClubId": "club-champagnat",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61740,
+    "matchId": "8cc10c2f-4578-4ea6-bbe4-ccd5b75a0b1d",
+    "homeClubId": "club-champagnat",
+    "awayClubId": "los-matreros",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65769,
+    "matchId": "4e65bd2e-459f-496f-afa3-4570cce91016",
+    "homeClubId": "asoc-alumni",
+    "awayClubId": "hindu-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64115,
+    "matchId": "23c85299-7d92-4558-a126-cd0fe9b7763b",
+    "homeClubId": "club-newman",
+    "awayClubId": "la-plata",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 69355,
+    "matchId": "8771d1c6-c1d3-45b4-ac47-fdab91fee860",
+    "homeClubId": "san-isidro-club",
+    "awayClubId": "regatas-de-bella-vista",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 55212,
+    "matchId": "c88d1fb2-df4d-4067-be5f-2056f0e750da",
+    "homeClubId": "belgrano-athletic",
+    "awayClubId": "atletico-del-rosario",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65272,
+    "matchId": "e606c5fa-7e32-4bf9-b6fe-c88c87390a1f",
+    "homeClubId": "buenos-aires-crc",
+    "awayClubId": "los-tilos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62844,
+    "matchId": "8cd215b5-d625-4c64-b530-50233fdb761b",
+    "homeClubId": "cuba",
+    "awayClubId": "casi",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 4663,
+    "matchId": "51cdcf91-7536-4e44-9fc5-589a80dae923",
+    "homeClubId": "los-matreros",
+    "awayClubId": "casi",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 4664,
+    "matchId": "67079d22-9f2d-4254-b99f-d92a8efc3390",
+    "homeClubId": "los-tilos",
+    "awayClubId": "cuba",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 4665,
+    "matchId": "12444866-160d-4f70-9c91-99ad4547e112",
+    "homeClubId": "atletico-del-rosario",
+    "awayClubId": "buenos-aires-crc",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 4666,
+    "matchId": "5498eaa9-6fb7-4eb9-9913-954c8e449f01",
+    "homeClubId": "regatas-de-bella-vista",
+    "awayClubId": "belgrano-athletic",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 4667,
+    "matchId": "1a865782-d70c-4005-9c24-574d616f7231",
+    "homeClubId": "la-plata",
+    "awayClubId": "san-isidro-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 4668,
+    "matchId": "4a340f65-e393-441a-a605-9de01629a2c5",
+    "homeClubId": "hindu-club",
+    "awayClubId": "club-newman",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 4669,
+    "matchId": "dada8f1c-3e6f-4d30-9f25-1bd34eafe5fa",
+    "homeClubId": "club-champagnat",
+    "awayClubId": "asoc-alumni",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 3643,
+    "matchId": "c8b7b01f-3d32-4e4e-8a78-ce0675684537",
+    "homeClubId": "asoc-alumni",
+    "awayClubId": "los-matreros",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 3644,
+    "matchId": "e2336a5f-12d4-4405-80b0-7b0e9d6f30a3",
+    "homeClubId": "club-newman",
+    "awayClubId": "club-champagnat",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 3645,
+    "matchId": "ed7eaf21-5681-4559-9383-290d701e8ace",
+    "homeClubId": "san-isidro-club",
+    "awayClubId": "hindu-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 3646,
+    "matchId": "34fe4db2-8010-438e-a7e7-d409348041d8",
+    "homeClubId": "belgrano-athletic",
+    "awayClubId": "la-plata",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 3647,
+    "matchId": "28970fea-3361-45ff-97c9-faeb620d5ae8",
+    "homeClubId": "buenos-aires-crc",
+    "awayClubId": "regatas-de-bella-vista",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 3648,
+    "matchId": "d993d4c5-aba1-4db9-ab38-fd75357b316d",
+    "homeClubId": "cuba",
+    "awayClubId": "atletico-del-rosario",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 3649,
+    "matchId": "7fd1586a-8fe8-4b1f-9f8a-d6019d8bc559",
+    "homeClubId": "casi",
+    "awayClubId": "los-tilos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 3611,
+    "matchId": "540bda4a-73bb-404d-a118-464a4a0d89d3",
+    "homeClubId": "los-matreros",
+    "awayClubId": "los-tilos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 3625,
+    "matchId": "ed040fc6-d437-4b20-b070-126138b89a80",
+    "homeClubId": "atletico-del-rosario",
+    "awayClubId": "casi",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 3626,
+    "matchId": "a4093655-9f36-4fd7-9ac9-c3d310cd051a",
+    "homeClubId": "regatas-de-bella-vista",
+    "awayClubId": "cuba",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 3627,
+    "matchId": "93b323c6-7f99-4da2-8520-85f83eddb496",
+    "homeClubId": "la-plata",
+    "awayClubId": "buenos-aires-crc",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 3628,
+    "matchId": "249d2695-fb5f-49f7-9152-fb9cfff34e62",
+    "homeClubId": "hindu-club",
+    "awayClubId": "belgrano-athletic",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 3629,
+    "matchId": "6f122296-64e9-4b6e-be0d-0ed604a5a73c",
+    "homeClubId": "club-champagnat",
+    "awayClubId": "san-isidro-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 3630,
+    "matchId": "34c64015-ba04-493f-a737-07a04780125b",
+    "homeClubId": "asoc-alumni",
+    "awayClubId": "club-newman",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 3594,
+    "matchId": "e9932eb5-8f1f-43b6-992c-a7eea770f692",
+    "homeClubId": "club-newman",
+    "awayClubId": "los-matreros",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 3595,
+    "matchId": "18b9d457-7e34-4e96-ba8a-04f7674c640c",
+    "homeClubId": "san-isidro-club",
+    "awayClubId": "asoc-alumni",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 3596,
+    "matchId": "4ac92910-a693-4932-84c4-987c744cb293",
+    "homeClubId": "belgrano-athletic",
+    "awayClubId": "club-champagnat",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 3597,
+    "matchId": "826bab86-f0d6-4ab5-a13e-c8c77a870013",
+    "homeClubId": "buenos-aires-crc",
+    "awayClubId": "hindu-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 3598,
+    "matchId": "72a12832-32c4-4791-8366-12455ca14527",
+    "homeClubId": "cuba",
+    "awayClubId": "la-plata",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 3599,
+    "matchId": "de4f6474-d708-4a6d-b426-1438ac654112",
+    "homeClubId": "casi",
+    "awayClubId": "regatas-de-bella-vista",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 3600,
+    "matchId": "b1087885-26e4-4d41-9a44-a514d96a1488",
+    "homeClubId": "los-tilos",
+    "awayClubId": "atletico-del-rosario",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2582,
+    "matchId": "d29261cf-45a5-4167-9cf7-7872b2a319ce",
+    "homeClubId": "los-matreros",
+    "awayClubId": "atletico-del-rosario",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2583,
+    "matchId": "e2c49b93-557b-400c-a45b-70870beb2441",
+    "homeClubId": "regatas-de-bella-vista",
+    "awayClubId": "los-tilos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2584,
+    "matchId": "dfd9dab9-f0c6-4140-b96c-ed2166914c5b",
+    "homeClubId": "la-plata",
+    "awayClubId": "casi",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2585,
+    "matchId": "3c29e0d9-daf1-4a0c-961e-064f9da7b082",
+    "homeClubId": "hindu-club",
+    "awayClubId": "cuba",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2586,
+    "matchId": "bddf08c7-482c-4143-bf9d-c23016109d19",
+    "homeClubId": "club-champagnat",
+    "awayClubId": "buenos-aires-crc",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2587,
+    "matchId": "2fbd5c26-57dd-45e0-9230-8f97d839e59b",
+    "homeClubId": "asoc-alumni",
+    "awayClubId": "belgrano-athletic",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2588,
+    "matchId": "18820718-8e6d-49c9-a5f7-57a597d0d4fe",
+    "homeClubId": "club-newman",
+    "awayClubId": "san-isidro-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2554,
+    "matchId": "c12ce8ef-9bb4-42b5-bcdc-4ff08315902b",
+    "homeClubId": "san-isidro-club",
+    "awayClubId": "los-matreros",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2555,
+    "matchId": "40a5ebb6-5176-4a8d-a4b9-c7a80bcd9f64",
+    "homeClubId": "belgrano-athletic",
+    "awayClubId": "club-newman",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2556,
+    "matchId": "ca82acbc-a9a5-44cf-bb8b-4ca358cbcf9f",
+    "homeClubId": "buenos-aires-crc",
+    "awayClubId": "asoc-alumni",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2557,
+    "matchId": "58d1667d-5099-467b-925c-76e4c1dd5c59",
+    "homeClubId": "cuba",
+    "awayClubId": "club-champagnat",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2558,
+    "matchId": "f14522fe-a616-48ab-a5d9-e15eb3bc8a92",
+    "homeClubId": "casi",
+    "awayClubId": "hindu-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2559,
+    "matchId": "dded3bef-c7bc-4214-9ea9-1642497d4f64",
+    "homeClubId": "los-tilos",
+    "awayClubId": "la-plata",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2560,
+    "matchId": "ab0ba4e1-551f-4137-83d7-5dc075945e62",
+    "homeClubId": "atletico-del-rosario",
+    "awayClubId": "regatas-de-bella-vista",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2521,
+    "matchId": "611b3985-1dfb-4cf9-ab30-191026b73fe2",
+    "homeClubId": "los-matreros",
+    "awayClubId": "regatas-de-bella-vista",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2522,
+    "matchId": "3ea9c4ba-34e4-48c0-8e92-6ced1c742238",
+    "homeClubId": "la-plata",
+    "awayClubId": "atletico-del-rosario",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2523,
+    "matchId": "6d5af976-6014-43a9-9d27-2c38b32a91a7",
+    "homeClubId": "hindu-club",
+    "awayClubId": "los-tilos",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2524,
+    "matchId": "2fef26a2-a521-42c2-a9b8-c7b70801692c",
+    "homeClubId": "club-champagnat",
+    "awayClubId": "casi",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2525,
+    "matchId": "ac03cb70-17e1-41d5-8c86-4679959c5194",
+    "homeClubId": "asoc-alumni",
+    "awayClubId": "cuba",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2526,
+    "matchId": "3e790d85-a26b-419b-8a7a-944c2c3d5119",
+    "homeClubId": "club-newman",
+    "awayClubId": "buenos-aires-crc",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2527,
+    "matchId": "3ba7d536-b733-4105-9c85-f38ad8e7b486",
+    "homeClubId": "san-isidro-club",
+    "awayClubId": "belgrano-athletic",
+    "yaConEventos": false
+   }
+  ]
+ },
+ "30": {
+  "sitio": "Torneo del Interior A 2026",
+  "enSitio": 61,
+  "enBase": 63,
+  "jugados": 61,
+  "conCronologia": 1,
+  "emparejados": 59,
+  "emparejadosConCronologia": 1,
+  "yaConEventos": 9,
+  "conCronologiaYaConEventos": 1,
+  "sinPareja": [
+   {
+    "sitioId": 63304,
+    "ronda": "Fecha 6",
+    "fecha": "2026-08-01",
+    "local": "Tala RC",
+    "visitante": "Estudiantes (Paraná)",
+    "marcador": [
+     28,
+     0
+    ],
+    "conCronologia": false
+   },
+   {
+    "sitioId": 61346,
+    "ronda": "Fecha 5",
+    "fecha": "2026-07-25",
+    "local": "Old Resian",
+    "visitante": "Duendes (R)",
+    "marcador": [
+     26,
+     56
+    ],
+    "conCronologia": false
+   }
+  ],
+  "ambiguos": [],
+  "soloMarcador": [],
+  "pares": [
+   {
+    "sitioId": 70199,
+    "matchId": "287970fb-65e8-421d-946c-22f0a16e8a63",
+    "homeClubId": "tala-rugby-club",
+    "awayClubId": "jockey-club-de-rosario",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 70151,
+    "matchId": "301364c7-4c50-4a4b-9458-a4b4bffe6047",
+    "homeClubId": "club-universitario-de-cordoba",
+    "awayClubId": "parana-rowing",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 70152,
+    "matchId": "d959d0a7-4009-40f7-a52f-3d705173901a",
+    "homeClubId": "club-la-tablada",
+    "awayClubId": "sociedad-sportiva-de-bahia-blanca",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 70153,
+    "matchId": "ad9a5c4d-db76-4d20-ae9f-e4f2791d72de",
+    "homeClubId": "tucuman-lawn-tennis",
+    "awayClubId": "mendoza-rugby-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 70154,
+    "matchId": "352621b7-7c46-4535-807a-aa350f2c621f",
+    "homeClubId": "natacion-y-gimnasia",
+    "awayClubId": "curne",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 70150,
+    "matchId": "86bae874-ad7f-42a5-a8d3-37dc5a8348e1",
+    "homeClubId": "tala-rugby-club",
+    "awayClubId": "jockey-club-cordoba",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 70149,
+    "matchId": "07ba8b7a-173d-47ec-b4b3-dd65b0ffc5d3",
+    "homeClubId": "jockey-club-de-rosario",
+    "awayClubId": "duendes-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 70123,
+    "matchId": "38a2b8db-82e2-4e07-980d-af98c53716f4",
+    "homeClubId": "gimnasia-y-esgrima-de-rosario",
+    "awayClubId": "club-la-tablada",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 70124,
+    "matchId": "ad7963b3-aed1-465f-a20e-39ee6359c96b",
+    "homeClubId": "uru-cure-rugby-club",
+    "awayClubId": "club-universitario-de-cordoba",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 70125,
+    "matchId": "22a53b0b-bb0e-4114-ba1a-4f328b9b2c2f",
+    "homeClubId": "cordoba-athletic-club",
+    "awayClubId": "curne",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 70126,
+    "matchId": "84d045c5-5115-4c66-b008-45f5004516ba",
+    "homeClubId": "old-resian-club",
+    "awayClubId": "mendoza-rugby-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 70119,
+    "matchId": "d345fb3d-3851-4c90-a8a5-6d6029d9621c",
+    "homeClubId": "tucuman-rugby-club",
+    "awayClubId": "duendes-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 70120,
+    "matchId": "868923ab-b802-446a-804a-765255532708",
+    "homeClubId": "tala-rugby-club",
+    "awayClubId": "santa-fe-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 70121,
+    "matchId": "eab1230c-ef3a-4876-91f1-6db2c2503b2f",
+    "homeClubId": "jockey-club-de-rosario",
+    "awayClubId": "estudiantes-de-parana",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 70122,
+    "matchId": "84aea9af-01c4-4d27-b04e-6ad440b3ccde",
+    "homeClubId": "jockey-club-cordoba",
+    "awayClubId": "marista-rugby-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57038,
+    "matchId": "be8ffc19-f586-4a06-9a0f-754ee9204daa",
+    "homeClubId": "marista-rugby-club",
+    "awayClubId": "gimnasia-y-esgrima-de-rosario",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58253,
+    "matchId": "766f2ce0-a96a-4d43-b89f-61cfa090f2ec",
+    "homeClubId": "mendoza-rugby-club",
+    "awayClubId": "tucuman-rugby-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57973,
+    "matchId": "e90c9c01-03bd-4038-ba80-1abb0263cc1e",
+    "homeClubId": "curne",
+    "awayClubId": "uru-cure-rugby-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61191,
+    "matchId": "1a73d001-4933-49a3-9e62-c1aa389aab4d",
+    "homeClubId": "jockey-club-de-rosario",
+    "awayClubId": "club-universitario-de-cordoba",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68579,
+    "matchId": "e012dbad-456e-4ab8-98f9-e8713c50b14a",
+    "homeClubId": "cordoba-athletic-club",
+    "awayClubId": "santa-fe-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63782,
+    "matchId": "9b9e990c-3d6e-4760-83bd-fc2cd658be16",
+    "homeClubId": "duendes-r-c",
+    "awayClubId": "jockey-club-cordoba",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65480,
+    "matchId": "336dfe18-44a0-465e-a583-6a10d7e7d7f0",
+    "homeClubId": "club-la-tablada",
+    "awayClubId": "old-resian-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66026,
+    "matchId": "418cc02b-51cc-47fa-ad2d-7936cf0e881e",
+    "homeClubId": "tucuman-rugby-club",
+    "awayClubId": "marista-rugby-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62525,
+    "matchId": "7af140f4-34f3-4998-9221-55a964000666",
+    "homeClubId": "gimnasia-y-esgrima-de-rosario",
+    "awayClubId": "mendoza-rugby-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64949,
+    "matchId": "e386077c-430f-451e-a089-4041a88daaa5",
+    "homeClubId": "uru-cure-rugby-club",
+    "awayClubId": "tala-rugby-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63675,
+    "matchId": "712b969d-fcae-4a00-8c46-2ab479e6fb1b",
+    "homeClubId": "estudiantes-de-parana",
+    "awayClubId": "curne",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 67444,
+    "matchId": "04af575a-1caa-497f-9443-d9ae1b61b979",
+    "homeClubId": "santa-fe-r-c",
+    "awayClubId": "jockey-club-de-rosario",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58446,
+    "matchId": "f876c009-8041-44ac-a34b-9d7c2a38242b",
+    "homeClubId": "club-universitario-de-cordoba",
+    "awayClubId": "cordoba-athletic-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61765,
+    "matchId": "246dc817-e46e-4899-b933-5a884d6d546d",
+    "homeClubId": "jockey-club-cordoba",
+    "awayClubId": "club-la-tablada",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 57651,
+    "matchId": "242d8120-16b8-4dee-bb61-8aeaa34acccf",
+    "homeClubId": "marista-rugby-club",
+    "awayClubId": "mendoza-rugby-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65165,
+    "matchId": "648e1ff4-4481-4a1e-abe7-e30d46cf4995",
+    "homeClubId": "gimnasia-y-esgrima-de-rosario",
+    "awayClubId": "tucuman-rugby-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 67497,
+    "matchId": "8be3644a-47ca-407d-8cbf-1b9221700dd4",
+    "homeClubId": "tala-rugby-club",
+    "awayClubId": "curne",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59107,
+    "matchId": "d25cd44f-50f6-4c0d-975e-35516c52e26d",
+    "homeClubId": "estudiantes-de-parana",
+    "awayClubId": "uru-cure-rugby-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 60887,
+    "matchId": "9f940803-c3cf-4ecd-b857-ec3c799786e9",
+    "homeClubId": "jockey-club-de-rosario",
+    "awayClubId": "cordoba-athletic-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56968,
+    "matchId": "455076d8-024c-4359-8b63-f923ab9e7249",
+    "homeClubId": "club-universitario-de-cordoba",
+    "awayClubId": "santa-fe-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62563,
+    "matchId": "35899e45-12bc-450a-8724-89892c6cfc44",
+    "homeClubId": "mendoza-rugby-club",
+    "awayClubId": "marista-rugby-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 60057,
+    "matchId": "fdc62748-c21c-4aab-a8dc-cb25ab0845d7",
+    "homeClubId": "tucuman-rugby-club",
+    "awayClubId": "gimnasia-y-esgrima-de-rosario",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66181,
+    "matchId": "68c8092b-e9f5-460d-b52f-0f8cd171ce64",
+    "homeClubId": "curne",
+    "awayClubId": "tala-rugby-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57629,
+    "matchId": "6e9bb983-dbd3-495f-a0d6-800393e769ff",
+    "homeClubId": "uru-cure-rugby-club",
+    "awayClubId": "estudiantes-de-parana",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59384,
+    "matchId": "e675dd79-c1e3-4743-ac3d-cd1151f88b22",
+    "homeClubId": "cordoba-athletic-club",
+    "awayClubId": "jockey-club-de-rosario",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 66275,
+    "matchId": "69d162fa-754c-45f7-88a7-e20a7de0461a",
+    "homeClubId": "santa-fe-r-c",
+    "awayClubId": "club-universitario-de-cordoba",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63956,
+    "matchId": "b30eedb2-0c54-4e08-a8b5-45d2e3c5e40e",
+    "homeClubId": "club-la-tablada",
+    "awayClubId": "duendes-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57614,
+    "matchId": "5abd44e2-810e-4308-8388-c4fc6aaee279",
+    "homeClubId": "old-resian-club",
+    "awayClubId": "jockey-club-cordoba",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61607,
+    "matchId": "c0536a9b-390b-4b42-b450-1dd4f1b10d29",
+    "homeClubId": "marista-rugby-club",
+    "awayClubId": "tucuman-rugby-club",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 68180,
+    "matchId": "137b2f2a-c92d-4f53-85c5-fd8ba54557be",
+    "homeClubId": "mendoza-rugby-club",
+    "awayClubId": "gimnasia-y-esgrima-de-rosario",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 63686,
+    "matchId": "2ddc202d-7947-4399-84ae-5ba729d4b292",
+    "homeClubId": "tala-rugby-club",
+    "awayClubId": "uru-cure-rugby-club",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 58476,
+    "matchId": "e96b4324-80ce-47d8-abc7-fb436aa2b058",
+    "homeClubId": "curne",
+    "awayClubId": "estudiantes-de-parana",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64775,
+    "matchId": "1f391f01-a4bd-4963-b813-2246371f6a28",
+    "homeClubId": "jockey-club-de-rosario",
+    "awayClubId": "santa-fe-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 69412,
+    "matchId": "69fe7d7e-3be3-4294-b1e7-3a6b765c88b6",
+    "homeClubId": "cordoba-athletic-club",
+    "awayClubId": "club-universitario-de-cordoba",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65651,
+    "matchId": "155d8d44-20c1-4a71-86f6-cd7ea4dc6a87",
+    "homeClubId": "duendes-r-c",
+    "awayClubId": "old-resian-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62947,
+    "matchId": "edfa695f-ef59-4eaf-908b-6b40df27536e",
+    "homeClubId": "club-la-tablada",
+    "awayClubId": "jockey-club-cordoba",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 62757,
+    "matchId": "a698f3ba-2a16-44d3-810a-f71d50cfd5d7",
+    "homeClubId": "gimnasia-y-esgrima-de-rosario",
+    "awayClubId": "marista-rugby-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56479,
+    "matchId": "644ae4c6-a448-41de-9d48-55808db6bf89",
+    "homeClubId": "tucuman-rugby-club",
+    "awayClubId": "mendoza-rugby-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 60104,
+    "matchId": "a39081a8-21d3-4f46-89f7-b74e35f6f828",
+    "homeClubId": "estudiantes-de-parana",
+    "awayClubId": "tala-rugby-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58897,
+    "matchId": "921f49a1-7ed4-403f-a596-2775b5b3fa9b",
+    "homeClubId": "uru-cure-rugby-club",
+    "awayClubId": "curne",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62175,
+    "matchId": "67fb5c42-5a0e-4d88-8926-8ec2d142d72a",
+    "homeClubId": "club-universitario-de-cordoba",
+    "awayClubId": "jockey-club-de-rosario",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 60938,
+    "matchId": "9f4ce3a6-663b-4e5d-bc76-794fa981a8d5",
+    "homeClubId": "santa-fe-r-c",
+    "awayClubId": "cordoba-athletic-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 69074,
+    "matchId": "8e189d7d-4c96-4a05-806e-108ba78e2b20",
+    "homeClubId": "jockey-club-cordoba",
+    "awayClubId": "duendes-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59478,
+    "matchId": "82ca49cc-f613-4b82-9e34-f9999490f7c9",
+    "homeClubId": "old-resian-club",
+    "awayClubId": "club-la-tablada",
+    "yaConEventos": false
+   }
+  ]
+ },
+ "31": {
+  "sitio": "Torneo del Interior B 2026",
+  "enSitio": 35,
+  "enBase": 42,
+  "jugados": 35,
+  "conCronologia": 0,
+  "emparejados": 31,
+  "emparejadosConCronologia": 0,
+  "yaConEventos": 3,
+  "conCronologiaYaConEventos": 0,
+  "sinPareja": [
+   {
+    "sitioId": 70127,
+    "ronda": "Final",
+    "fecha": "2026-09-12",
+    "local": "Tucumán Lawn Tennis",
+    "visitante": "Natación y Gimnasia (T)",
+    "marcador": [
+     15,
+     23
+    ],
+    "conCronologia": false
+   },
+   {
+    "sitioId": 57935,
+    "ronda": "Fecha 2",
+    "fecha": "2026-05-30",
+    "local": "Natación y Gimnasia (T)",
+    "visitante": "Paraná Rowing",
+    "marcador": [
+     49,
+     17
+    ],
+    "conCronologia": false
+   },
+   {
+    "sitioId": 61331,
+    "ronda": "Fecha 2",
+    "fecha": "2026-05-30",
+    "local": "Huirapuca (T)",
+    "visitante": "Soc. Sportiva (BB)",
+    "marcador": [
+     17,
+     23
+    ],
+    "conCronologia": false
+   },
+   {
+    "sitioId": 62926,
+    "ronda": "Fecha 2",
+    "fecha": "2026-05-30",
+    "local": "Jockey (VM)",
+    "visitante": "Tigres RC (Salta)",
+    "marcador": [
+     33,
+     22
+    ],
+    "conCronologia": false
+   }
+  ],
+  "ambiguos": [],
+  "soloMarcador": [],
+  "pares": [
+   {
+    "sitioId": 70117,
+    "matchId": "6a6778a7-39ef-429e-9425-e44a305c0e59",
+    "homeClubId": "natacion-y-gimnasia",
+    "awayClubId": "sociedad-sportiva-de-bahia-blanca",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 70116,
+    "matchId": "36e46f40-37b6-4d0c-a068-3b7c019c1627",
+    "homeClubId": "tucuman-lawn-tennis",
+    "awayClubId": "parana-rowing",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 70106,
+    "matchId": "5b600f46-421d-450f-9f2d-b828a7736c57",
+    "homeClubId": "natacion-y-gimnasia",
+    "awayClubId": "universitario-de-tucuman",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 70110,
+    "matchId": "310d038e-116a-486f-9e7b-33f92ee0e48b",
+    "homeClubId": "tucuman-lawn-tennis",
+    "awayClubId": "huirapuca",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 70111,
+    "matchId": "c374f242-60cd-4bdc-a0cc-5f1b132260a3",
+    "homeClubId": "sociedad-sportiva-de-bahia-blanca",
+    "awayClubId": "ipr-sporting",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 70112,
+    "matchId": "5eee8319-d60b-4298-aaff-8ee7974ad990",
+    "homeClubId": "club-palermo-bajo",
+    "awayClubId": "parana-rowing",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 70098,
+    "matchId": "dd9bb508-93a0-4717-bcc1-7c39133e86b5",
+    "homeClubId": "cardenales-r-c",
+    "awayClubId": "tigres-r-c",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 70099,
+    "matchId": "3e8ab0b1-3a9d-4fab-a5ce-12580c477041",
+    "homeClubId": "mar-del-plata-club",
+    "awayClubId": "los-tordos-rugby-club",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 70100,
+    "matchId": "4ad68de0-26f8-4e9b-b7fd-4247fa8a44b0",
+    "homeClubId": "liceo-rugby-club",
+    "awayClubId": "universitario-de-san-juan",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 70101,
+    "matchId": "9a75c1a4-1b72-4d45-953f-a635e456959e",
+    "homeClubId": "jockey-club-de-villa-maria",
+    "awayClubId": "crai",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 63313,
+    "matchId": "f7fb649d-c9b2-43d4-b5e3-f7ebde51f2c4",
+    "homeClubId": "natacion-y-gimnasia",
+    "awayClubId": "crai",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62863,
+    "matchId": "c47f4dbc-bac0-49a6-9845-f00a5d357a50",
+    "homeClubId": "parana-rowing",
+    "awayClubId": "cardenales-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59957,
+    "matchId": "fa477181-5c32-4302-aad7-e15106398184",
+    "homeClubId": "tucuman-lawn-tennis",
+    "awayClubId": "ipr-sporting",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58980,
+    "matchId": "e6b7a84a-0634-4661-8bc9-8f4132c6c2fd",
+    "homeClubId": "mar-del-plata-club",
+    "awayClubId": "universitario-de-san-juan",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 61517,
+    "matchId": "d66ba2a4-a4af-4484-a324-ca108ef3b914",
+    "homeClubId": "liceo-rugby-club",
+    "awayClubId": "huirapuca",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59489,
+    "matchId": "790c65b0-c120-4556-9075-538455e71249",
+    "homeClubId": "los-tordos-rugby-club",
+    "awayClubId": "sociedad-sportiva-de-bahia-blanca",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56124,
+    "matchId": "ce277154-62d8-4932-ac71-59e91579402f",
+    "homeClubId": "club-palermo-bajo",
+    "awayClubId": "jockey-club-de-villa-maria",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57462,
+    "matchId": "6a398955-6e98-40c9-9066-442d023e042b",
+    "homeClubId": "universitario-de-tucuman",
+    "awayClubId": "tigres-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68715,
+    "matchId": "09d434b9-da3b-4308-9233-4155f24b902b",
+    "homeClubId": "crai",
+    "awayClubId": "cardenales-r-c",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68758,
+    "matchId": "3c81b263-7589-4476-b9bb-190e2b7991c9",
+    "homeClubId": "tucuman-lawn-tennis",
+    "awayClubId": "mar-del-plata-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 58282,
+    "matchId": "09ae9ae2-febe-4973-9f35-c0e97f0cc4a7",
+    "homeClubId": "ipr-sporting",
+    "awayClubId": "universitario-de-san-juan",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 60645,
+    "matchId": "8c9a735f-9d06-4686-9a74-29ef677dc40f",
+    "homeClubId": "liceo-rugby-club",
+    "awayClubId": "los-tordos-rugby-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65816,
+    "matchId": "666d6b68-26e0-4ba7-8862-36f047d8fa17",
+    "homeClubId": "club-palermo-bajo",
+    "awayClubId": "universitario-de-tucuman",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65313,
+    "matchId": "2907d9e2-81c9-46a1-8efb-07e01eac4cdf",
+    "homeClubId": "cardenales-r-c",
+    "awayClubId": "natacion-y-gimnasia",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 59340,
+    "matchId": "85aca9ce-f153-42a2-b43d-0235e02ab657",
+    "homeClubId": "parana-rowing",
+    "awayClubId": "crai",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57875,
+    "matchId": "d9bbdd69-4e98-460a-a786-de05d20ba3da",
+    "homeClubId": "universitario-de-san-juan",
+    "awayClubId": "tucuman-lawn-tennis",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 60768,
+    "matchId": "e1871349-d35a-4d67-979a-0d54402dedc8",
+    "homeClubId": "mar-del-plata-club",
+    "awayClubId": "ipr-sporting",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 68156,
+    "matchId": "5bb8758a-2d3d-4e71-aefe-5f3df445254f",
+    "homeClubId": "sociedad-sportiva-de-bahia-blanca",
+    "awayClubId": "liceo-rugby-club",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64239,
+    "matchId": "c40ddc3a-4c27-4c36-93af-ab2d88395f0a",
+    "homeClubId": "los-tordos-rugby-club",
+    "awayClubId": "huirapuca",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 67564,
+    "matchId": "3087d314-b143-4211-a09a-b9eca31b2123",
+    "homeClubId": "tigres-r-c",
+    "awayClubId": "club-palermo-bajo",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 63237,
+    "matchId": "3ea86483-cf28-4967-903e-88546ac24044",
+    "homeClubId": "universitario-de-tucuman",
+    "awayClubId": "jockey-club-de-villa-maria",
+    "yaConEventos": false
+   }
+  ]
+ },
+ "73": {
+  "sitio": "Súper Rugby Américas 2026",
+  "enSitio": 59,
+  "enBase": 59,
+  "jugados": 59,
+  "conCronologia": 59,
+  "emparejados": 58,
+  "emparejadosConCronologia": 58,
+  "yaConEventos": 20,
+  "conCronologiaYaConEventos": 20,
+  "sinPareja": [
+   {
+    "sitioId": 2495,
+    "ronda": "Fecha 1",
+    "fecha": "2026-02-23",
+    "local": "Dogos XV (Argentina)",
+    "visitante": "Cobras Brasil Rugby",
+    "marcador": [
+     21,
+     19
+    ],
+    "conCronologia": true
+   }
+  ],
+  "ambiguos": [],
+  "soloMarcador": [],
+  "pares": [
+   {
+    "sitioId": 69877,
+    "matchId": "37c0183f-0f9e-47f3-8f6a-fe937fce6540",
+    "homeClubId": "dogos-xv",
+    "awayClubId": "pampas",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 69875,
+    "matchId": "474a216a-de8b-4e95-a7db-14ebd3aa19e8",
+    "homeClubId": "dogos-xv",
+    "awayClubId": "tarucas",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 69876,
+    "matchId": "9f62ad14-8e7b-4c31-a0cb-fdf6d19d3dd9",
+    "homeClubId": "pampas",
+    "awayClubId": "capibaras-xv",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57199,
+    "matchId": "587ae4d6-dacd-4be9-8c56-8f6a8dd6bdcf",
+    "homeClubId": "penarol",
+    "awayClubId": "pampas",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 65374,
+    "matchId": "82c31b16-8590-431d-9862-b09deac9b17a",
+    "homeClubId": "tarucas",
+    "awayClubId": "capibaras-xv",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 64076,
+    "matchId": "13b87770-1bee-46bd-b8e7-0bd75278e62f",
+    "homeClubId": "dogos-xv",
+    "awayClubId": "yacare-xv",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 56773,
+    "matchId": "0e230c13-c1e8-483e-aa33-a981c6dc7ce3",
+    "homeClubId": "selknam",
+    "awayClubId": "cobras-brasil-xv",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 57466,
+    "matchId": "7ae4999b-ca21-40fd-b0b3-58d20ae0ca60",
+    "homeClubId": "capibaras-xv",
+    "awayClubId": "dogos-xv",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 69547,
+    "matchId": "7bda422f-295e-4883-b4c2-2f4ae2c34892",
+    "homeClubId": "pampas",
+    "awayClubId": "selknam",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 64404,
+    "matchId": "cd78122a-4093-47dc-82c7-1636faf1b0f4",
+    "homeClubId": "cobras-brasil-xv",
+    "awayClubId": "tarucas",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 62794,
+    "matchId": "231ff4ad-7801-45c9-ba0d-7ce85262f8ed",
+    "homeClubId": "yacare-xv",
+    "awayClubId": "penarol",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 58387,
+    "matchId": "94fb4c64-d120-4a9a-a4b4-07ad0614c8f6",
+    "homeClubId": "pampas",
+    "awayClubId": "cobras-brasil-xv",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 57788,
+    "matchId": "a64c541e-518e-4284-ba6f-a385e3645f70",
+    "homeClubId": "penarol",
+    "awayClubId": "dogos-xv",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 64937,
+    "matchId": "3c50dc9a-d8f0-4208-b57e-42116abcbcad",
+    "homeClubId": "capibaras-xv",
+    "awayClubId": "selknam",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 68535,
+    "matchId": "d19fefc2-d5e0-49e5-aca2-0ffa703eeed8",
+    "homeClubId": "tarucas",
+    "awayClubId": "yacare-xv",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 4677,
+    "matchId": "5512399c-6abd-41b9-81f3-fb94e26302a9",
+    "homeClubId": "capibaras-xv",
+    "awayClubId": "yacare-xv",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 4678,
+    "matchId": "04482ba2-761e-42f6-bec6-6d7fb3dfc958",
+    "homeClubId": "selknam",
+    "awayClubId": "dogos-xv",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 4679,
+    "matchId": "0c9161d4-0d42-4c15-aa3e-f8efcc9be5d6",
+    "homeClubId": "cobras-brasil-xv",
+    "awayClubId": "penarol",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 4680,
+    "matchId": "26c3a59a-099a-4f76-802b-8b258f4e9190",
+    "homeClubId": "pampas",
+    "awayClubId": "tarucas",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 4657,
+    "matchId": "05878338-a267-4ea2-8f02-440b776b58c1",
+    "homeClubId": "capibaras-xv",
+    "awayClubId": "pampas",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 4658,
+    "matchId": "66ef1a5d-5dae-461e-9ec2-41faafa17ccf",
+    "homeClubId": "yacare-xv",
+    "awayClubId": "cobras-brasil-xv",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 4659,
+    "matchId": "83edeb73-fa26-4e65-8413-f7d7664febd2",
+    "homeClubId": "dogos-xv",
+    "awayClubId": "tarucas",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 4660,
+    "matchId": "79c646ca-6361-49a9-8428-c5bf457dc0c6",
+    "homeClubId": "selknam",
+    "awayClubId": "penarol",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 3639,
+    "matchId": "b5146bc5-8e0f-4c7e-9f6f-65d3eaa56c77",
+    "homeClubId": "dogos-xv",
+    "awayClubId": "pampas",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 3640,
+    "matchId": "e37eed9c-6899-4ef4-bf8b-431f7518c253",
+    "homeClubId": "yacare-xv",
+    "awayClubId": "selknam",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 3641,
+    "matchId": "1fc47837-c0bf-40e5-946d-922987873fe8",
+    "homeClubId": "cobras-brasil-xv",
+    "awayClubId": "capibaras-xv",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 3642,
+    "matchId": "4628e8fc-8c62-41ca-ad05-55cd460633dc",
+    "homeClubId": "tarucas",
+    "awayClubId": "penarol",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 3616,
+    "matchId": "d24a3aee-9da0-4530-ae0f-cd90ec211921",
+    "homeClubId": "pampas",
+    "awayClubId": "yacare-xv",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 3623,
+    "matchId": "3345f3ec-529b-4193-8568-0e4469dca85d",
+    "homeClubId": "cobras-brasil-xv",
+    "awayClubId": "dogos-xv",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 3622,
+    "matchId": "f7c4d086-6438-4ad3-8d1f-0446d1412d25",
+    "homeClubId": "selknam",
+    "awayClubId": "tarucas",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 3624,
+    "matchId": "eae719d6-8473-4a3b-a65c-edb30f3055ac",
+    "homeClubId": "penarol",
+    "awayClubId": "capibaras-xv",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 3593,
+    "matchId": "bcc94c8e-6089-4047-ac28-46175bd831fb",
+    "homeClubId": "pampas",
+    "awayClubId": "penarol",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 3601,
+    "matchId": "b93f00be-8df2-4770-957d-826df03f0c3a",
+    "homeClubId": "yacare-xv",
+    "awayClubId": "dogos-xv",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 3602,
+    "matchId": "b8962e86-dbbb-40ae-8c60-3c4eab2b03a1",
+    "homeClubId": "cobras-brasil-xv",
+    "awayClubId": "selknam",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 3603,
+    "matchId": "3e314b46-62ad-46bb-9391-fb0321ca5d7c",
+    "homeClubId": "capibaras-xv",
+    "awayClubId": "tarucas",
+    "yaConEventos": true
+   },
+   {
+    "sitioId": 2570,
+    "matchId": "fceae6af-e4eb-4c0e-a5c2-2b92cc328237",
+    "homeClubId": "tarucas",
+    "awayClubId": "cobras-brasil-xv",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2571,
+    "matchId": "fabd8a74-bff0-4073-9697-0ba3f780e7a5",
+    "homeClubId": "penarol",
+    "awayClubId": "yacare-xv",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2572,
+    "matchId": "144693f9-e685-43cd-98a1-0fdb7413bd3e",
+    "homeClubId": "selknam",
+    "awayClubId": "pampas",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2573,
+    "matchId": "478716ae-3aea-4f1a-8ae9-439eb35b2b4a",
+    "homeClubId": "dogos-xv",
+    "awayClubId": "capibaras-xv",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2545,
+    "matchId": "9be814e9-0281-4b84-af2d-cb02af626aac",
+    "homeClubId": "dogos-xv",
+    "awayClubId": "penarol",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2546,
+    "matchId": "a6f4dfef-4ddf-403e-87ce-c15a7b7c99be",
+    "homeClubId": "selknam",
+    "awayClubId": "capibaras-xv",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2547,
+    "matchId": "f06f51b1-fe5e-43a1-8df4-93089d74b7ed",
+    "homeClubId": "yacare-xv",
+    "awayClubId": "tarucas",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2548,
+    "matchId": "d311995d-f972-4253-b801-dff1d12f78fa",
+    "homeClubId": "cobras-brasil-xv",
+    "awayClubId": "pampas",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2535,
+    "matchId": "1a762263-48b0-4b86-a641-81b617acd20c",
+    "homeClubId": "penarol",
+    "awayClubId": "cobras-brasil-xv",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2536,
+    "matchId": "472e3d6c-5fb1-48fe-b70a-c7cd83c27745",
+    "homeClubId": "tarucas",
+    "awayClubId": "pampas",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2534,
+    "matchId": "3e11d3e1-ea9f-4c0c-9787-8132f1e8e147",
+    "homeClubId": "yacare-xv",
+    "awayClubId": "capibaras-xv",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2537,
+    "matchId": "1dce840e-a6ef-44fb-ad04-26e8a6761590",
+    "homeClubId": "dogos-xv",
+    "awayClubId": "selknam",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2507,
+    "matchId": "3b4a1d6d-5853-4947-b986-d0b14f48832f",
+    "homeClubId": "pampas",
+    "awayClubId": "capibaras-xv",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2508,
+    "matchId": "e09b82f3-f9e7-41e2-b5f7-aa46ca309b10",
+    "homeClubId": "tarucas",
+    "awayClubId": "dogos-xv",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2512,
+    "matchId": "43005a54-24a9-4ff0-b453-04a75a35cc20",
+    "homeClubId": "penarol",
+    "awayClubId": "selknam",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2513,
+    "matchId": "06fbb9e3-259b-48e4-9f0b-44b74940d3a2",
+    "homeClubId": "cobras-brasil-xv",
+    "awayClubId": "yacare-xv",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2503,
+    "matchId": "47f25afa-8aba-4c34-99b8-e6ab45ac3b76",
+    "homeClubId": "penarol",
+    "awayClubId": "tarucas",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2504,
+    "matchId": "54a917a9-05d6-4083-b62a-8e15f5cfaa24",
+    "homeClubId": "selknam",
+    "awayClubId": "yacare-xv",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2505,
+    "matchId": "357f2dd6-7b2b-4600-bb85-97dac842f9ac",
+    "homeClubId": "capibaras-xv",
+    "awayClubId": "cobras-brasil-xv",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2506,
+    "matchId": "da5e900c-ac79-4eb7-8049-4ebfe90029b8",
+    "homeClubId": "pampas",
+    "awayClubId": "dogos-xv",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2496,
+    "matchId": "f1cd30a8-436e-43a8-a264-133a89982aec",
+    "homeClubId": "tarucas",
+    "awayClubId": "selknam",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2497,
+    "matchId": "647cfe0f-94f2-4383-be94-6ee9f70a71f5",
+    "homeClubId": "yacare-xv",
+    "awayClubId": "pampas",
+    "yaConEventos": false
+   },
+   {
+    "sitioId": 2498,
+    "matchId": "613e38f8-e670-4947-bf4f-f1a7272497a2",
+    "homeClubId": "capibaras-xv",
+    "awayClubId": "penarol",
+    "yaConEventos": false
+   }
+  ]
+ }
+}

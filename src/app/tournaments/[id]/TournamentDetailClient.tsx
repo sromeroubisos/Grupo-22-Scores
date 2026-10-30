@@ -4,8 +4,9 @@ import React, { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import styles from './page.module.css';
+import { useBannerColor } from './useBannerColor';
 import { getTournamentById } from '@/lib/data/tournaments';
-import { AlertTriangle, ArrowLeft, Calendar, Trophy, Users, ChevronRight, Share2, MapPin } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, Calendar, Trophy, Users, ChevronRight, Share2, MapPin, Star } from 'lucide-react';
 import ShareLinkButton from '@/components/ShareLinkButton';
 import dynamic from 'next/dynamic';
 import { useFavorites } from '@/hooks/useFavorites';
@@ -20,7 +21,22 @@ import TournamentPublicStats from './TournamentPublicStats';
 import TournamentScoresPanel, { hasRatedLineups, sondaDePuntajes } from './TournamentScoresPanel';
 import TournamentChampionsTab, { ClubCrest, buildPalmares, buildPalmaresExportData, palmaresSubtitle, type ChampionRef } from './TournamentChampionsTab';
 import TournamentSofascoreStats from './TournamentSofascoreStats';
+import TournamentHistoricalTab from './TournamentHistoricalTab';
+import TournamentSquadTab, { type SquadTableData } from './TournamentSquadTab';
+import type { StandingsData } from '@/components/ExportImage';
+import TournamentRugbyPassStats from './TournamentRugbyPassStats';
 import TournamentNavigation from './TournamentNavigation';
+import {
+    EvolutionToggle,
+    PositionDeltaChip,
+    StandingsEvolutionChart,
+    StandingsRoundPicker,
+    formatRoundDays,
+    useFlipReorder,
+    type EvolutionColumn,
+} from './StandingsTimeline';
+import timelineStyles from './StandingsTimeline.module.css';
+import { computeRoundCutoffs, dayKeyInZone } from '@/lib/standings/standingsTimeline';
 import { resolveSofascoreLeague } from '@/lib/sofascoreLeagueMap';
 import { StandingsEngine } from '@/lib/services/standingsEngine';
 import { getAllCountries, getCountryById } from '@/lib/data/countries';
@@ -63,6 +79,8 @@ const BASE_TABS = [
     { id: 'scores', label: 'Puntajes' },
     { id: 'stats', label: 'Estadísticas' },
     { id: 'champions', label: 'Campeones' },
+    { id: 'historical', label: 'Histórica' },
+    { id: 'squads', label: 'Tabla de Planteles' },
 ];
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -126,6 +144,18 @@ function isWorldRugbyTournamentId(id: string): boolean {
  */
 function isRugbyPassTournamentId(id: string): boolean {
     return /^rp-comp-\d+$/i.test(id);
+}
+
+/**
+ * `203` de `rp-comp-203`, `null` si el id no es de RugbyPass.
+ *
+ * Se calcula aca y no se importa de `rugbyPassTournamentBundle`: ese modulo
+ * arrastra el conector entero —con su `fetch` al sitio— y esto es un componente
+ * de cliente.
+ */
+function rugbyPassCompetitionIdOf(id: string): number | null {
+    const m = String(id ?? '').match(/^rp-comp-(\d+)$/i);
+    return m ? Number(m[1]) : null;
 }
 
 function isExternalCatalogRoute(id: string, search: string): boolean {
@@ -580,8 +610,13 @@ function getMotorsportSeasonYear(details: any, yearDisplay: string | null | unde
     return match ? Number(match[1]) : null;
 }
 
+/* Una columna por carrera (R1, R2…) entra en la tabla sólo si alguna fila
+   trae un valor de verdad. ESPN manda la lista de carreras aunque el puntaje
+   por carrera venga vacío, y trece columnas de guiones no son un dato: son
+   ruido que además empuja la tabla a scroll horizontal. */
 function collectMotorsportRaceColumns(rows: any[]) {
     const seen = new Set<string>();
+    const conDatos = new Set<string>();
     const columns: Array<{ key: string; label: string }> = [];
 
     rows.forEach((row: any) => {
@@ -589,13 +624,66 @@ function collectMotorsportRaceColumns(rows: any[]) {
         racePoints.forEach((item: any) => {
             const key = String(item?.key || '').trim();
             const label = String(item?.label || '').trim();
-            if (!key || !label || seen.has(key)) return;
+            if (!key || !label) return;
+            const value = item?.value;
+            if (value != null && value !== '' && value !== '—' && value !== '-') conDatos.add(key);
+            if (seen.has(key)) return;
             seen.add(key);
             columns.push({ key, label });
         });
     });
 
-    return columns;
+    return columns.filter((column) => conDatos.has(column.key));
+}
+
+/* Colores de los equipos de F1: identidad de marca, no dato deportivo. Sirven
+   para reconocer el equipo de un vistazo, como la placa de color de cualquier
+   clasificación de automovilismo. Un equipo que no está acá cae a un gris
+   neutro y la fila se lee igual. Sólo entran los equipos con librea conocida. */
+const MOTORSPORT_TEAM_COLORS: Array<[string, string]> = [
+    ['mercedes', '#27f4d2'],
+    ['ferrari', '#e8002d'],
+    ['mclaren', '#ff8000'],
+    ['racing bulls', '#6692ff'],
+    ['red bull', '#3671c6'],
+    ['alpine', '#0093cc'],
+    ['aston martin', '#229971'],
+    ['williams', '#64c4ff'],
+    ['haas', '#8f969c'],
+];
+
+function getMotorsportTeamColor(name: unknown): string | null {
+    const key = String(name || '').trim().toLowerCase();
+    if (!key) return null;
+    const match = MOTORSPORT_TEAM_COLORS.find(([team]) => key.includes(team));
+    return match ? match[1] : null;
+}
+
+/* El `rank` viene por grupo (pilotos 1..N, equipos 1..M). `position` es el
+   índice en la lista mezclada que arma el normalizador y por eso la tabla de
+   pilotos arrancaba en 4: no sirve para mostrar. */
+function getMotorsportRank(row: any, idx: number) {
+    const rank = Number(row?.rank);
+    return Number.isFinite(rank) && rank > 0 ? rank : idx + 1;
+}
+
+/* La foto del piloto es lo que ESPN trae como `logo` de la fila; no se pasa por
+   el resolvedor de escudos, que para un piloto devuelve el logo de su equipo y
+   mezclaba fotos con escudos en la misma columna. */
+function getMotorsportDriverPhoto(row: any): string {
+    return row?.logo || row?.team_logo || row?.team?.logo || '';
+}
+
+function getMotorsportInitials(name: unknown) {
+    const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return '·';
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+function getMotorsportLastName(name: unknown) {
+    const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+    return parts.length > 0 ? parts[parts.length - 1] : '';
 }
 
 /** Derive tournament status label from available data */
@@ -1343,14 +1431,36 @@ function buildCalculatedStandings(dbData: TournamentInitialData, preferredPhaseI
         participants,
         phaseParticipants,
         matches,
+        activePhase,
         activePhaseId,
         activeGroups,
         resolvedRules,
     } = getDbStandingsContext(dbData, preferredPhaseId);
 
     if (phaseParticipants.length === 0) return [];
+    // Zonas interzonales: los partidos cruzan zonas, así que la tabla de cada
+    // una sale de toda la fase recortada a sus equipos (ver recalculateStandings).
+    const zoneRanking = (activePhase as any)?.settings?.zoneRanking === true;
 
-    const engineParticipants = phaseParticipants.map((participant: any) => ({
+    // Una temporada importada no dice quién jugó cada fase: el plantel es el de
+    // toda la temporada, y un club que solo jugó la permanencia aparecía en la
+    // tabla de la fase regular con cero partidos. Ahí la fase es de quien tiene
+    // partidos en ella (jugados o no: la tabla de una fecha temprana no puede
+    // perder a un club que todavía no debutó).
+    let scopedParticipants = phaseParticipants;
+    if (activePhaseId && isReconstructedManualPhase(dbData, activePhaseId)) {
+        const clubsInPhase = new Set<string>();
+        matches
+            .filter((match: any) => String(match?.phase_id ?? '') === String(activePhaseId))
+            .forEach((match: any) => {
+                if (match?.home_club_id) clubsInPhase.add(String(match.home_club_id));
+                if (match?.away_club_id) clubsInPhase.add(String(match.away_club_id));
+            });
+        const inPhase = phaseParticipants.filter((participant: any) => clubsInPhase.has(String(participant?.club_id ?? '')));
+        if (inPhase.length > 0) scopedParticipants = inPhase;
+    }
+
+    const engineParticipants = scopedParticipants.map((participant: any) => ({
         ...participant,
         clubs: participant.clubs || participant.club,
     }));
@@ -1378,6 +1488,13 @@ function buildCalculatedStandings(dbData: TournamentInitialData, preferredPhaseI
                 const groupClubIds = new Set(
                     groupParticipants.map((participant: any) => String(participant.club_id || participant.id)),
                 );
+                if (zoneRanking) {
+                    const zoneRows = StandingsEngine.generateTable(engineParticipants, finalMatches, resolvedRules)
+                        .filter((row: any) => groupClubIds.has(String(row.teamId)))
+                        .map((row: any, index: number) => ({ ...row, position: index + 1 }))
+                        .map((row: any) => mapCalculatedDbStanding(row, participants, activePhaseId, group.id));
+                    return { group_name: group.name, rows: zoneRows };
+                }
                 const groupMatches = finalMatches.filter((match: any) => {
                     if (match?.group_id) return String(match.group_id) === String(group.id);
 
@@ -1421,8 +1538,13 @@ function buildStandingsSnapshot(dbData: TournamentInitialData, preferredPhaseId?
     // the phase (otherwise fall back to the recompute so the table isn't blank).
     const carryOverPhaseWithPersistedRows =
         isPhaseCarryOverEnabled(activePhase?.settings) && persistedStandings.length > 0;
+    // Una fase manual SIN tabla cargada se arma con los partidos. Es el caso de
+    // las temporadas importadas de rugbyarchive que trajeron los resultados y no
+    // la tabla oficial (el Top 14 de 2000 a 2025): antes la temporada se quedaba
+    // sin pestaña Clasificación aunque tuviera todos los partidos.
     const shouldUsePersistedStandings =
-        resolvedRules?.calculation_mode === 'fully_manual' || carryOverPhaseWithPersistedRows;
+        (resolvedRules?.calculation_mode === 'fully_manual' && persistedStandings.length > 0) ||
+        carryOverPhaseWithPersistedRows;
 
     if (!shouldUsePersistedStandings && canSafelyCalculate) {
         const calculatedStandings = buildCalculatedStandings(dbData, preferredPhaseId);
@@ -1439,6 +1561,134 @@ function buildStandingsSnapshot(dbData: TournamentInitialData, preferredPhaseId?
 
     const grouped = buildGroupedStandings(persistedStandings, activeGroups, participants);
     return grouped.length > 0 ? grouped : persistedStandings;
+}
+
+/**
+ * Fase manual sin tabla cargada: la que se ve es la armada con los partidos.
+ * Los partidos importados no traen bonus, así que la pantalla lo aclara.
+ */
+function isReconstructedManualPhase(dbData: TournamentInitialData, phaseId: string | null): boolean {
+    const { activePhaseId, resolvedRules } = getDbStandingsContext(dbData, phaseId);
+    if (resolvedRules?.calculation_mode !== 'fully_manual') return false;
+    return filterStandingsToActivePhase(
+        Array.isArray(dbData.standings) ? (dbData.standings as any[]) : [],
+        activePhaseId,
+        { strict: true },
+    ).length === 0;
+}
+
+/**
+ * ¿La tabla cargada a mano de esta fase sale de sus partidos?
+ *
+ * - 'exact': mismos PJ, G, E, P y puntos, club por club (o no hay tabla
+ *   cargada y la que se ve ya es la calculada).
+ * - 'without-bonus': todo coincide salvo el bonus. Es lo normal en lo
+ *   importado de rugbyarchive: la tabla oficial trae el bonus total de cada
+ *   club y los partidos no dicen en cuál se ganó. Las fechas se pueden armar,
+ *   sin bonus.
+ * - null: no cuadra (falta un partido, hay una quita, otra fase arrastrada).
+ */
+function manualTableMatchesResults(
+    dbData: TournamentInitialData,
+    phaseId: string | null,
+): 'exact' | 'without-bonus' | null {
+    const official = filterStandingsToActivePhase(
+        (Array.isArray(dbData.standings) ? dbData.standings : []).map(mapPersistedDbStanding),
+        phaseId,
+        { strict: true },
+    );
+    if (official.length === 0) return 'exact';
+
+    const calculated = new Map<string, any>();
+    flattenStandingsRows(buildCalculatedStandings(dbData, phaseId)).forEach((row: any) => {
+        const teamId = String(row?.team?.id ?? '');
+        if (teamId) calculated.set(teamId, row);
+    });
+    if (calculated.size !== official.length) return null;
+
+    const pairs = official.map((row: any) => [row, calculated.get(String(row?.team?.id ?? ''))] as const);
+    const sameRecord = pairs.every(([row, mine]) =>
+        Boolean(mine) &&
+        (['matches_total', 'wins_total', 'draws_total', 'losses_total'] as const)
+            .every((field) => Number(mine[field] ?? 0) === Number(row[field] ?? 0)),
+    );
+    if (!sameRecord) return null;
+
+    const pointsOf = (row: any) => Number(row?.points_total ?? 0);
+    if (pairs.every(([row, mine]) => pointsOf(mine) === pointsOf(row))) return 'exact';
+
+    // Sin el bonus de ninguno de los dos lados, ¿dan lo mismo?
+    const withoutBonus = (row: any) => pointsOf(row) - Number(row?.bonus_points ?? 0);
+    return pairs.every(([row, mine]) => withoutBonus(mine) === withoutBonus(row)) ? 'without-bonus' : null;
+}
+
+type StandingsTimelineEntry = {
+    round: number;
+    dayKey: string;
+    fromDayKey: string;
+    matchesPlayed: number;
+    standings: any[];
+    /** Foto armada sin el bonus que la tabla oficial sí tiene. */
+    withoutBonus: boolean;
+};
+
+/**
+ * La tabla al cierre de cada fecha (src/lib/standings/standingsTimeline.ts
+ * decide dónde cierra cada una). Cada foto es la MISMA cuenta que la tabla
+ * actual —buildCalculatedStandings— con los partidos jugados hasta ese día.
+ *
+ * Una tabla cargada a mano (la oficial, copiada) también tiene fechas, pero
+ * solo si los partidos la explican (manualTableMatchesResults). Si la única
+ * diferencia es el bonus, las fechas salen sin bonus —`withoutBonus`, y la
+ * pantalla lo dice— y la última, la que cierra la fase, es la tabla oficial.
+ * Si no cuadra —una quita, un partido que falta— no hay fotos: una fecha
+ * calculada distinta de la tabla publicada sería peor que no mostrar nada. Por
+ * lo mismo quedan afuera las fases que arrastran puntos de otra fase.
+ */
+function buildStandingsTimeline(dbData: TournamentInitialData, phaseId: string | null): StandingsTimelineEntry[] {
+    if (dbData.queryErrors?.matches || dbData.queryErrors?.participants) return [];
+
+    const { activePhase, activePhaseId, resolvedRules, matches } = getDbStandingsContext(dbData, phaseId);
+    const isManual = resolvedRules?.calculation_mode === 'fully_manual';
+    const fit = isManual ? manualTableMatchesResults(dbData, activePhaseId) : 'exact';
+    if (!fit) return [];
+    if (isPhaseCarryOverEnabled(activePhase?.settings)) return [];
+    if (activePhase && isKnockoutPhaseType(activePhase.phase_type)) return [];
+
+    const phaseMatches = matches.filter(
+        (match: any) => !activePhaseId || !match?.phase_id || String(match.phase_id) === String(activePhaseId),
+    );
+    const cutoffs = computeRoundCutoffs(
+        phaseMatches.map((match: any) => ({
+            homeId: match.home_club_id,
+            awayId: match.away_club_id,
+            dateTime: match.date_time,
+            isFinal: isDbFinalStatus(match.status),
+        })),
+        APP_TIMEZONE,
+    );
+
+    const entries: StandingsTimelineEntry[] = cutoffs.map((cutoff) => {
+        const scoped = {
+            ...dbData,
+            // Lo jugado después del cierre vuelve a estar "por jugar" en vez de
+            // desaparecer: el partido sigue diciendo quién juega la fase.
+            matches: matches.map((match: any) => {
+                if (!isDbFinalStatus(match?.status)) return match;
+                const key = match?.date_time ? dayKeyInZone(match.date_time, APP_TIMEZONE) : null;
+                return key !== null && key <= cutoff.dayKey ? match : { ...match, status: 'scheduled' };
+            }),
+        } as TournamentInitialData;
+        return { ...cutoff, standings: buildCalculatedStandings(scoped, activePhaseId), withoutBonus: fit === 'without-bonus' };
+    });
+
+    // La fecha que cierra la fase es la tabla oficial, con su bonus.
+    const last = entries[entries.length - 1];
+    const totalPlayed = phaseMatches.filter((match: any) => isDbFinalStatus(match?.status)).length;
+    if (last && fit === 'without-bonus' && last.matchesPlayed >= totalPlayed) {
+        entries[entries.length - 1] = { ...last, standings: buildStandingsSnapshot(dbData, activePhaseId), withoutBonus: false };
+    }
+    return entries;
 }
 
 function buildPhaseFlatStandingsRows(dbData: TournamentInitialData, phaseId: string) {
@@ -1566,7 +1816,14 @@ function buildDbPlayoffDraw(dbData: TournamentInitialData, preferredPhaseId?: st
         roundIndex: number,
         roundMatches: any[],
     ) => {
-        const configuredMatchCount = configuredStages[roundIndex]?.matchCount ?? 0;
+        // Con rondas reales en la base la plantilla solo dimensiona la ronda
+        // del mismo nombre: emparejar por índice le ponía a una semifinal el
+        // cupo de otra etapa.
+        const normalizeStageName = (value: unknown) => String(value ?? '').trim().toLowerCase();
+        const configuredStage = phaseRounds.length === 0
+            ? configuredStages[roundIndex]
+            : configuredStages.find((stage: any) => normalizeStageName(stage?.name) === normalizeStageName(roundName));
+        const configuredMatchCount = configuredStage?.matchCount ?? 0;
         const visibleRoundMatches = configuredMatchCount > 0 && roundMatches.length > configuredMatchCount
             ? [
                 ...roundMatches.filter((match: any) => match?.home_club_id || match?.away_club_id || match?.home || match?.away),
@@ -1595,7 +1852,13 @@ function buildDbPlayoffDraw(dbData: TournamentInitialData, preferredPhaseId?: st
         };
     };
 
-    const configuredRoundCount = Math.max(phaseRounds.length, configuredStages.length);
+    // Las etapas de la plantilla solo arman columnas cuando la fase no tiene
+    // rondas propias. Si las tiene, rellenar hasta el largo de la plantilla
+    // agregaba cuartos vacíos y volvía a dibujar las semifinales (la etapa sin
+    // ronda busca sus partidos por `round_label`).
+    const configuredRoundCount = phaseRounds.length > 0
+        ? phaseRounds.length
+        : configuredStages.length;
     if (configuredRoundCount > 0) {
         const roundEntries = Array.from({ length: configuredRoundCount }, (_, index) => {
             const round = phaseRounds[index];
@@ -1879,6 +2142,7 @@ function buildDbTournamentSnapshot(dbData: TournamentInitialData, id: string) {
             sportId: tournament.sport_id || 'rugby',
             countryId: tournament.country_id || 'international',
             logoUrl: tournament.logo_url || tournament.banner_url || '',
+            primary_color: (tournament as { primary_color?: string | null }).primary_color ?? null,
             externalId: tournament.external_id || null,
             ruleset: tournamentRuleset,
             url: tournament.url || '',
@@ -2050,7 +2314,25 @@ export default function TournamentDetailPage({
     } | null>(null);
 
     const [tournamentData, setTournamentData] = useState<any>(preloaded?.tournamentMeta ?? null);
+    // Color del banner estilo FotMob: el del editor, o el del escudo.
+    const bannerColor = useBannerColor(
+        tournamentData?.primary_color,
+        tournamentData?.logoUrl || tournamentData?.logo_url,
+    );
     const [standings, setStandings] = useState<any[]>(preloaded?.standings ?? []);
+    // Los datos crudos de la base, para reconstruir la tabla de cada fecha. Solo
+    // en torneos que se cargan acá: en los de proveedor externo la tabla es la
+    // del proveedor y no hay con qué fotografiar el pasado.
+    const [timelineDbData, setTimelineDbData] = useState<TournamentInitialData | null>(() =>
+        initialData?.ok && preloaded?.tournamentMeta?.__isDbOnly ? initialData : null,
+    );
+    // Índice de la fecha que se mira; null es la tabla actual.
+    const [timelineRound, setTimelineRound] = useState<number | null>(null);
+    const [evolutionOpen, setEvolutionOpen] = useState(false);
+    // La placa de la tabla histórica, armada por su pestaña: en el celular el
+    // botón de exportar vive en la cabecera, no en la pestaña.
+    const [historicalExportData, setHistoricalExportData] = useState<StandingsData | null>(null);
+    const [squadExportData, setSquadExportData] = useState<StandingsData | null>(null);
     const [standingsForm, setStandingsForm] = useState<any[]>([]);
     const [standingsFormTeamLabels, setStandingsFormTeamLabels] = useState<any[]>([]);
     const [standingsHtFt, setStandingsHtFt] = useState<any[]>([]);
@@ -2274,6 +2556,7 @@ export default function TournamentDetailPage({
                                             sportId: (t as any).sport_id || tournamentMeta?.sportId || 'rugby',
                                             countryId: (t as any).country_id || tournamentMeta?.countryId || 'international',
                                             logoUrl: resolvedLogo,
+                                            primary_color: (t as any).primary_color ?? tournamentMeta?.primary_color ?? null,
                                             externalId: (t as any).external_id || tournamentMeta?.externalId || null,
                                             ruleset: (t as any).ruleset ?? tournamentMeta?.ruleset ?? null,
                                             url: dbStoredUrl,
@@ -2314,6 +2597,8 @@ export default function TournamentDetailPage({
                             setFixtures(sortMatchesByDate(snapshot.fixtures || [], 'asc'));
                             setDraw(snapshot.draw ?? []);
                             setStandings(snapshot.standings);
+                            setTimelineDbData(dbData);
+                            setTimelineRound(null);
                         }
 
                             // Map DB matches → frontend match format
@@ -2596,7 +2881,36 @@ export default function TournamentDetailPage({
         () => standingsScopeViews.filter((view) => view.kind === 'global' || !isKnockoutPhaseType(view.phase?.phase_type)),
         [standingsScopeViews],
     );
-    const hasVisibleStandingsData = visibleStandingsScopeViews.length > 0 || (!hasDbKnockoutPhase && (
+
+    // ── Tabla por fechas ──────────────────────────────────────────────────
+    // La fase que muestra la tabla: la vista elegida, o la única que hay. La
+    // tabla global de un circuito no tiene fechas (suma etapas, no partidos).
+    const timelinePhaseId = useMemo<string | null | undefined>(() => {
+        const view = visibleStandingsScopeViews.find((v) => v.id === activeStandingsScope) || visibleStandingsScopeViews[0] || null;
+        if (!view) return null;
+        if (view.kind === 'global') return undefined;
+        return String(view.phase?.id ?? view.id);
+    }, [activeStandingsScope, visibleStandingsScopeViews]);
+
+    const timelineEntries = useMemo<StandingsTimelineEntry[]>(() => {
+        if (!timelineDbData || timelinePhaseId === undefined || activeTab !== 'standings') return [];
+        try {
+            return buildStandingsTimeline(timelineDbData, timelinePhaseId);
+        } catch (timelineError) {
+            // Un dato raro en un partido viejo no puede tumbar la tabla actual.
+            console.warn('[tabla por fechas] no se pudo reconstruir:', timelineError);
+            return [];
+        }
+    }, [activeTab, timelineDbData, timelinePhaseId]);
+
+    useEffect(() => {
+        setTimelineRound(null);
+    }, [timelinePhaseId]);
+
+    const standingsFlipRef = React.useRef<HTMLDivElement | null>(null);
+    useFlipReorder(standingsFlipRef, timelineRound);
+
+    const hasVisibleStandingsData =visibleStandingsScopeViews.length > 0 || (!hasDbKnockoutPhase && (
         standings.length > 0 ||
         standingsForm.length > 0 ||
         standingsHtFt.length > 0 ||
@@ -2652,6 +2966,32 @@ export default function TournamentDetailPage({
     const shouldForceStandingsTabVisible = tournamentData?.sportId === 'basketball';
     const hasEspnSoccerTopScorers = isEspnSoccerSource && topScorers.length > 0;
     const hasChampionSeasons = seasonOptions.some((season) => Boolean(season.champion));
+    // La tabla histórica suma las tablas de cada temporada: hace falta más de
+    // una, y que sean de un torneo cargado acá (de un proveedor externo no hay
+    // tablas viejas guardadas para sumar).
+    const hasHistoricalTable = Boolean((tournamentData as any)?.__isDbOnly) && seasonOptions.length > 1;
+
+    /* Tabla de planteles: solo existe si el torneo pertenece a una agrupación
+       (tournament_squad_members). Se pregunta una vez; mientras no contesta, la
+       pestaña no se muestra y un deep link ?tab=squads espera. */
+    const isDbOnlyTournament = Boolean((tournamentData as any)?.__isDbOnly);
+    const [squadData, setSquadData] = useState<SquadTableData | null>(null);
+    const [squadLoaded, setSquadLoaded] = useState(false);
+    useEffect(() => {
+        setSquadData(null);
+        setSquadLoaded(false);
+        if (!isDbOnlyTournament) return;
+        const controller = new AbortController();
+        fetch(`/api/db/tournaments/${encodeURIComponent(id)}/squad-table`, { signal: controller.signal })
+            .then((response) => (response.ok ? response.json() : null))
+            .then((payload) => {
+                if (payload?.ok && payload.available) setSquadData(payload as SquadTableData);
+                setSquadLoaded(true);
+            })
+            .catch(() => { if (!controller.signal.aborted) setSquadLoaded(true); });
+        return () => controller.abort();
+    }, [id, isDbOnlyTournament]);
+    const hasSquadTable = Boolean(squadData?.available);
 
     /* ── ¿La pestaña Puntajes tiene algo que mostrar? ─────────────────────
        Una pestaña que abre a "Sin puntajes cargados" no es una pestaña: es un
@@ -2698,6 +3038,8 @@ export default function TournamentDetailPage({
             .filter((tab: { id: string; label: string }) => !(tab.id === 'standings' && !shouldUseIntegratedBracketView && !hasVisibleStandingsData && !shouldForceStandingsTabVisible))
             .filter((tab: { id: string; label: string }) => !(tab.id === 'playoff' && !hasDedicatedPlayoffTab))
             .filter((tab: { id: string; label: string }) => !(tab.id === 'champions' && !hasChampionSeasons))
+            .filter((tab: { id: string; label: string }) => !(tab.id === 'historical' && !hasHistoricalTable))
+            .filter((tab: { id: string; label: string }) => !(tab.id === 'squads' && !hasSquadTable))
             .filter((tab: { id: string; label: string }) => !(tab.id === 'scores' && !scoresTabConDatos))
             .map((tab: { id: string; label: string }) => {
                 if (tab.id === 'standings' && shouldUseIntegratedBracketView) {
@@ -2708,8 +3050,8 @@ export default function TournamentDetailPage({
                 }
                 if (!isMotorsportTournament) return tab;
                 if (tab.id === 'results') return { ...tab, label: 'Calendario' };
-                if (tab.id === 'fixtures') return { ...tab, label: 'Proximas' };
-                if (tab.id === 'standings') return { ...tab, label: 'Clasificacion' };
+                if (tab.id === 'fixtures') return { ...tab, label: 'Próximas' };
+                if (tab.id === 'standings') return { ...tab, label: 'Clasificación' };
                 if (tab.id === 'teams') return { ...tab, label: 'Equipos' };
                 return tab;
             });
@@ -2726,13 +3068,14 @@ export default function TournamentDetailPage({
         }
 
         return tabs;
-    }, [hasChampionSeasons, hasDedicatedPlayoffTab, hasEspnSoccerTopScorers, hasVisibleStandingsData, isLimitedExternalProvider, isEspnSoccerSource, isMotorsportTournament, scoresTabConDatos, shouldForceStandingsTabVisible, shouldUseIntegratedBracketView, isFifaWorldCup, isPhoneViewport]);
+    }, [hasChampionSeasons, hasHistoricalTable, hasSquadTable, hasDedicatedPlayoffTab, hasEspnSoccerTopScorers, hasVisibleStandingsData, isLimitedExternalProvider, isEspnSoccerSource, isMotorsportTournament, scoresTabConDatos, shouldForceStandingsTabVisible, shouldUseIntegratedBracketView, isFifaWorldCup, isPhoneViewport]);
 
     useEffect(() => {
         if (navigationTabs.some((tab: { id: string; label: string }) => tab.id === activeTab)) return;
         // Deep link a Campeones: el tab recién existe cuando llegó la lista de
         // temporadas — no lo patees a Resumen mientras el fetch está en vuelo.
-        if (activeTab === 'champions' && !seasonOptionsLoaded) return;
+        if ((activeTab === 'champions' || activeTab === 'historical') && !seasonOptionsLoaded) return;
+        if (activeTab === 'squads' && !squadLoaded) return;
         /* Mismo criterio para todo lo que depende de los datos del torneo:
            Clasificación no existe hasta que llega la tabla, y en un torneo
            externo (sin snapshot del servidor) eso tarda un fetch entero. Patear
@@ -3038,8 +3381,67 @@ export default function TournamentDetailPage({
                     : standingsView === 'overunder'
                         ? standingsOverUnderTeamLabels
                         : dbTeamLabels;
-    const activeRows = normalizeStandingsRows(standingsSource);
-    const activeFlatRows = flattenStandingsRows(standingsSource);
+    // La tabla por fechas vive solo en la vista General de una tabla de
+    // partidos: Forma, HT/FT o la global de un circuito no tienen "fechas".
+    const timelineAvailable =
+        timelineEntries.length > 0 &&
+        !isMotorsportTournament &&
+        !isCircuitGlobalTable &&
+        activeStandingsRenderer === 'standard' &&
+        (Boolean(selectedStandingsScopeView) || standingsView === 'overall');
+    const timelineEntry = timelineAvailable && timelineRound !== null ? timelineEntries[timelineRound] ?? null : null;
+    const timelineSource = timelineEntry ? timelineEntry.standings : standingsSource;
+    const activeRows = normalizeStandingsRows(timelineSource);
+    const activeFlatRows = flattenStandingsRows(timelineSource);
+
+    // Cuántos puestos se movió cada club respecto de la fecha anterior. En la
+    // tabla actual no se muestra: la flecha es parte de mirar una fecha.
+    const timelineDeltaByTeam = new Map<string, number>();
+    if (timelineEntry && timelineRound !== null && timelineRound > 0) {
+        const positionsOf = (rows: any[]) => {
+            const out = new Map<string, number>();
+            rows.forEach((row: any, index: number) => {
+                const teamId = String(getStandingsTeamId(row) ?? '');
+                if (teamId) out.set(teamId, row.position || index + 1);
+            });
+            return out;
+        };
+        const before = positionsOf(flattenStandingsRows(timelineEntries[timelineRound - 1].standings));
+        positionsOf(activeFlatRows).forEach((position, teamId) => {
+            const previous = before.get(teamId);
+            if (previous) timelineDeltaByTeam.set(teamId, previous - position);
+        });
+    }
+
+    // Columnas del gráfico: una por fecha cerrada, y "Hoy" si después de la
+    // última hubo partidos que todavía no completan una fecha.
+    const evolutionColumns: EvolutionColumn[] = (() => {
+        if (!timelineAvailable) return [];
+        const toColumnRows = (standingsRows: any[]) =>
+            flattenStandingsRows(standingsRows)
+                .map((row: any, index: number) => ({
+                    teamId: String(getStandingsTeamId(row) ?? ''),
+                    name: getStandingsTeamName(row),
+                    logo: getStandingsTeamLogo(row) || null,
+                    position: row.position || index + 1,
+                }))
+                .filter((row) => row.teamId);
+        const columns: EvolutionColumn[] = timelineEntries.map((entry) => ({
+            label: `F${entry.round}`,
+            title: `Fecha ${entry.round}, ${formatRoundDays(entry.fromDayKey, entry.dayKey)}`,
+            rows: toColumnRows(entry.standings),
+        }));
+        const lastEntry = timelineEntries[timelineEntries.length - 1];
+        const currentPlayed = flattenStandingsRows(standingsSource)
+            .reduce((total: number, row: any) => total + (Number(row.matches_total) || 0), 0) / 2;
+        if (lastEntry && currentPlayed > lastEntry.matchesPlayed) {
+            columns.push({ label: 'Hoy', title: 'Tabla actual', rows: toColumnRows(standingsSource) });
+        }
+        return columns;
+    })();
+    const evolutionHighlightColumn = timelineRound !== null
+        ? timelineRound
+        : (evolutionColumns.length > 0 ? evolutionColumns.length - 1 : null);
     const motorsportOverallGroups = isMotorsportTournament ? splitMotorsportStandingsRows(overallRows) : null;
     const motorsportActiveGroups = isMotorsportTournament ? splitMotorsportStandingsRows(activeFlatRows) : null;
     const motorsportDriverRows = isMotorsportTournament
@@ -3315,12 +3717,12 @@ export default function TournamentDetailPage({
             || tournamentData.sportId.charAt(0).toUpperCase() + tournamentData.sportId.slice(1))
         : '';
     const standingsEntityLabel = isMotorsportTournament ? 'Piloto' : 'Equipo';
-    const summaryResultsTitle = isMotorsportTournament ? 'Ultimas carreras' : 'Últimos Resultados';
-    const summaryFixturesTitle = isMotorsportTournament ? 'Proximos eventos' : 'Próximos Partidos';
+    const summaryResultsTitle = isMotorsportTournament ? 'Últimas carreras' : 'Últimos Resultados';
+    const summaryFixturesTitle = isMotorsportTournament ? 'Próximas carreras' : 'Próximos Partidos';
     const resultsPageTitle = isMotorsportTournament ? 'Calendario de la temporada' : 'Resultados';
-    const fixturesPageTitle = isMotorsportTournament ? 'Proximas carreras' : 'Fixture';
+    const fixturesPageTitle = isMotorsportTournament ? 'Próximas carreras' : 'Fixture';
     const standingsCardTitle = isMotorsportTournament ? 'Pilotos' : 'Posiciones';
-    const infoParticipantsLabel = isMotorsportTournament ? 'Competidores' : 'Equipos';
+    const infoParticipantsLabel = isMotorsportTournament ? 'Pilotos' : 'Equipos';
     const isSuperAdminUser = !authLoading && canUseRestrictedContentActions(user?.role);
     const isExactSuperAdmin = isSuperAdminUser;
     const externalTournamentOverrideId = resolveExternalTournamentId({
@@ -3437,14 +3839,26 @@ export default function TournamentDetailPage({
 
     // Quick stats
     const stats = getQuickStats(results, fixtures, overallRows, teamsList.length, zonaDelVisitante);
+    /* En automovilismo la cabecera habla de pilotos: el conteo es el de la
+       clasificación de pilotos (no la lista mezclada con constructores, que
+       daba 47) y el líder es el primer piloto, no el primer constructor. */
+    const statsCabecera = isMotorsportTournament && motorsportDriverRows.length > 0
+        ? {
+            ...stats,
+            teams: motorsportDriverRows.length,
+            leaderName: getStandingsTeamName(motorsportDriverRows[0]) || stats.leaderName,
+            leaderLogo: getMotorsportDriverPhoto(motorsportDriverRows[0]) || null,
+            leaderRow: motorsportDriverRows[0],
+        }
+        : stats;
 
     /* El escudo del líder pasa por el MISMO doble camino que la tabla de posiciones:
        primero el que trae la fila y, si no trae, el del plantel resuelto por
        `resolveTeamFallback`. Con sólo el primero, la ficha salía sin escudo en este
        torneo aunque la tabla de abajo sí lo mostraba — que es el motivo por el que
        las dos cosas tienen que compartir el resolvedor y no cada una el suyo. */
-    const leaderCrest = stats.leaderLogo
-        || (stats.leaderRow ? resolveTeamFallback(stats.leaderRow)?.logo || null : null);
+    const leaderCrest = statsCabecera.leaderLogo
+        || (statsCabecera.leaderRow ? resolveTeamFallback(statsCabecera.leaderRow)?.logo || null : null);
 
     // Status
     const tournamentStatus = getTournamentStatus(details);
@@ -3517,7 +3931,6 @@ export default function TournamentDetailPage({
         : [];
     const motorsportDriverRaceColumns = isMotorsportTournament ? collectMotorsportRaceColumns(motorsportStandingsRows) : [];
     const motorsportTeamRaceColumns = isMotorsportTournament ? collectMotorsportRaceColumns(motorsportTeamRows) : [];
-    const motorsportLeaders = standingsPreviewRows.slice(0, 3);
     const standingsLegendItems = collectStandingsLegendItems(activeFlatRows, activeStandingsTeamLabels);
     const standingsPreviewLegendItems = collectStandingsLegendItems(standingsPreviewRows, activeStandingsTeamLabels);
     const standingsExportColumnLabels = standingsColumnMode === 'circuit-global'
@@ -3717,6 +4130,30 @@ export default function TournamentDetailPage({
             );
         }
 
+        if (activeTab === 'historical') {
+            if (!historicalExportData) return null;
+            return (
+                <ExportImage
+                    className={styles.mobileHeroExportAction}
+                    template="standings"
+                    filename={`tabla-historica-${tournamentData?.name}`}
+                    data={historicalExportData}
+                />
+            );
+        }
+
+        if (activeTab === 'squads') {
+            if (!squadExportData) return null;
+            return (
+                <ExportImage
+                    className={styles.mobileHeroExportAction}
+                    template="standings"
+                    filename={`tabla-de-planteles-${tournamentData?.name}`}
+                    data={squadExportData}
+                />
+            );
+        }
+
         if (activeTab === 'standings') {
             return (
                 <ExportImage
@@ -3874,145 +4311,6 @@ export default function TournamentDetailPage({
         );
     };
 
-    const renderMotorsportMatchItem = (match: any, isResult: boolean, index: number) => {
-        const timestamp = match.timestamp || match.start_time || match.time;
-        const date = timestamp ? new Date(timestamp * 1000) : null;
-        const isLive = match.status === 'live' || match.status === 'in_play';
-        const isFinished = match.status === 'finished' || match.status === 'ft' || isResult;
-        const eventTitle = match.event_name || match.tournament_name_short || match.tournament_name || tournamentName || 'Evento';
-        const venue = match.venue || match.country_name || countryName || '';
-        const dateLabel = date ? fechaEnZonaDelVisitante(date, { weekday: 'short', day: '2-digit', month: 'short' }) : '';
-        const timeLabel = date ? fechaEnZonaDelVisitante(date, { hour: '2-digit', minute: '2-digit', hour12: false }) : '';
-        const primaryName = match.home_team?.name || match.event_home_team || match.home_team_name || 'Competidor 1';
-        const secondaryName = match.away_team?.name || match.event_away_team || match.away_team_name || 'Competidor 2';
-        const primaryLogo = getTeamLogo(match.home_team) || match.home_team_logo || '';
-        const secondaryLogo = getTeamLogo(match.away_team) || match.away_team_logo || '';
-        const estadoEvento = resolverEstado(match.status, { estaEnResultados: isResult });
-        const eventoSuspendido = estadoEvento.estado === 'suspendido';
-        const statusLabel = isLive ? 'En vivo' : eventoSuspendido ? estadoEvento.etiqueta : isFinished ? 'Finalizada' : 'Programada';
-        const footerLabel = isLive ? 'Telemetry' : isFinished ? 'Resultados' : 'Event details';
-
-        return (
-            <Link
-                href={`/matches/${match.event_key || match.match_id || 'unknown'}`}
-                key={getMatchRenderKey(match, index)}
-                className={styles.motorsportEventRow}
-            >
-                <div className={styles.motorsportEventTop}>
-                    <div className={styles.motorsportEventHeader}>
-                        <span className={styles.motorsportEventSeriesBadge}>{match.tournament_name_short || tournamentName}</span>
-                        <h3 className={styles.motorsportEventTitle}>{eventTitle}</h3>
-                        <div className={styles.motorsportEventMeta}>
-                            {dateLabel && <span>{dateLabel}</span>}
-                            {timeLabel && !eventoSuspendido && <span>{timeLabel} hs</span>}
-                            {venue && <span>{venue}</span>}
-                        </div>
-                    </div>
-                    <span className={`${styles.motorsportEventStatus} ${isLive ? styles.motorsportEventStatusLive : ''}`}>
-                        {statusLabel}
-                    </span>
-                </div>
-                <div className={styles.motorsportEventCompetitors}>
-                    <div className={styles.motorsportEventCompetitor}>
-                        {primaryLogo
-                            ? <img src={primaryLogo} alt={primaryName} className={styles.motorsportEventCompetitorLogo} loading="lazy" onError={(e) => (e.currentTarget.style.display = 'none')} />
-                            : <div className={styles.motorsportEventCompetitorPlaceholder}>{primaryName[0]}</div>}
-                        <span className={styles.motorsportEventCompetitorName}>{primaryName}</span>
-                    </div>
-                    <div className={styles.motorsportEventCompetitorDivider}>•</div>
-                    <div className={styles.motorsportEventCompetitor}>
-                        {secondaryLogo
-                            ? <img src={secondaryLogo} alt={secondaryName} className={styles.motorsportEventCompetitorLogo} loading="lazy" onError={(e) => (e.currentTarget.style.display = 'none')} />
-                            : <div className={styles.motorsportEventCompetitorPlaceholder}>{secondaryName[0]}</div>}
-                        <span className={styles.motorsportEventCompetitorName}>{secondaryName}</span>
-                    </div>
-                </div>
-                <div className={styles.motorsportEventFooter}>
-                    <span className={styles.motorsportEventFooterLabel}>{footerLabel}</span>
-                    <span className={styles.motorsportEventFooterAction}>Open</span>
-                </div>
-            </Link>
-        );
-    };
-
-    const renderMotorsportMatchItemV2 = (match: any, isResult: boolean, index: number) => {
-        const timestamp = match.timestamp || match.start_time || match.time;
-        const date = timestamp ? new Date(timestamp * 1000) : null;
-        const isLive = match.status === 'live' || match.status === 'in_play';
-        const isFinished = match.status === 'finished' || match.status === 'ft' || isResult;
-        const eventTitle = match.event_name || match.tournament_name_short || match.tournament_name || tournamentName || 'Evento';
-        const venue = match.venue || match.country_name || countryName || '';
-        const dateLabel = date ? fechaEnZonaDelVisitante(date, { weekday: 'short', day: '2-digit', month: 'short' }) : '';
-        const timeLabel = date ? fechaEnZonaDelVisitante(date, { hour: '2-digit', minute: '2-digit', hour12: false }) : '';
-        const primaryName = match.home_team?.name || match.event_home_team || match.home_team_name || 'Competidor 1';
-        const secondaryName = match.away_team?.name || match.event_away_team || match.away_team_name || 'Competidor 2';
-        const primaryLogo = getTeamLogo(match.home_team) || match.home_team_logo || '';
-        const secondaryLogo = getTeamLogo(match.away_team) || match.away_team_logo || '';
-        const estadoEvento = resolverEstado(match.status, { estaEnResultados: isResult });
-        const eventoSuspendido = estadoEvento.estado === 'suspendido';
-        const statusLabel = isLive ? 'En vivo' : eventoSuspendido ? estadoEvento.etiqueta : isFinished ? 'Finalizada' : 'Programada';
-        const footerLabel = match.session_label || 'Carrera';
-        const podiumSource = Array.isArray(match.podium) && match.podium.length > 0
-            ? match.podium.slice(0, 3)
-            : [
-                { position: 1, name: primaryName, logo: primaryLogo, countryName: null },
-                { position: 2, name: secondaryName, logo: secondaryLogo, countryName: null },
-            ];
-        const shadeClass = Math.floor(index / 2) % 2 === 1 ? styles.motorsportEventRowAlt : '';
-
-        return (
-            <Link
-                href={`/matches/${match.event_key || match.match_id || 'unknown'}`}
-                key={`${getMatchRenderKey(match, index)}-podium`}
-                className={`${styles.motorsportEventRow} ${shadeClass}`}
-            >
-                <div className={styles.motorsportEventTop}>
-                    <div className={styles.motorsportEventHeader}>
-                        <span className={styles.motorsportEventSeriesBadge}>{match.tournament_name_short || tournamentName}</span>
-                        <h3 className={styles.motorsportEventTitle}>{eventTitle}</h3>
-                        <div className={styles.motorsportEventMeta}>
-                            {dateLabel && <span>{dateLabel}</span>}
-                            {timeLabel && !eventoSuspendido && <span>{timeLabel} hs</span>}
-                            {venue && <span>{venue}</span>}
-                        </div>
-                    </div>
-                    <span className={`${styles.motorsportEventStatus} ${isLive ? styles.motorsportEventStatusLive : ''}`}>
-                        {statusLabel}
-                    </span>
-                </div>
-                <div className={styles.motorsportPodiumList}>
-                    {podiumSource.map((driver: any, podiumIndex: number) => {
-                        const driverName = driver?.name || `Competidor ${podiumIndex + 1}`;
-                        const driverLogo = driver?.logo || '';
-                        const driverFlag = getCountryFlagByName(driver?.countryName);
-                        const position = Number(driver?.position || podiumIndex + 1);
-
-                        return (
-                            <div key={`${driverName}-${position}-${podiumIndex}`} className={styles.motorsportPodiumRow}>
-                                <span className={`${styles.motorsportPodiumPos} ${position === 1 ? styles.motorsportPodiumPosP1 : position === 2 ? styles.motorsportPodiumPosP2 : styles.motorsportPodiumPosP3}`}>
-                                    {position}
-                                </span>
-                                <div className={styles.motorsportPodiumIdentity}>
-                                    {driverLogo
-                                        ? <img src={driverLogo} alt={driverName} className={styles.motorsportEventCompetitorLogo} loading="lazy" onError={(e) => (e.currentTarget.style.display = 'none')} />
-                                        : <div className={styles.motorsportEventCompetitorPlaceholder}>{driverName[0]}</div>}
-                                    <div className={styles.motorsportPodiumMeta}>
-                                        <span className={styles.motorsportEventCompetitorName}>{driverName}</span>
-                                        {driverFlag && <span className={styles.motorsportPodiumFlag}>{driverFlag}</span>}
-                                    </div>
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-                <div className={styles.motorsportEventFooter}>
-                    <span className={styles.motorsportEventFooterLabel}>{footerLabel}</span>
-                    <span className={styles.motorsportEventFooterAction}>Open</span>
-                </div>
-            </Link>
-        );
-    };
-
     const renderStandingsHeader = (columns = standingsColumns, entityLabel = standingsEntityLabel) => (
         <div className={styles.tableHeader}>
             <div className={styles.colPos}>#</div>
@@ -4045,9 +4343,14 @@ export default function TournamentDetailPage({
                     ? row.goals_for - row.goals_against
                     : 0;
 
+        // La clave es el club y no el índice: así la fila es el mismo nodo entre
+        // una fecha y otra, y puede viajar a su puesto nuevo (useFlipReorder).
+        const flipKey = teamId ? String(teamId) : undefined;
+
         return (
             <div
-                key={idx}
+                key={flipKey ? `team-${flipKey}` : idx}
+                data-flip-key={flipKey}
                 className={`${styles.tableRow} ${rowAccentStyle ? styles.tableRowTinted : ''}`}
                 style={rowAccentStyle}
             >
@@ -4071,6 +4374,9 @@ export default function TournamentDetailPage({
                             ? <Link href={teamHref} className={styles.colTeamName}>{teamName}</Link>
                             : <span className={styles.colTeamName}>{teamName}</span>}
                     </div>
+                    {flipKey && timelineDeltaByTeam.has(flipKey) && (
+                        <PositionDeltaChip key={`delta-${timelineRound}`} delta={timelineDeltaByTeam.get(flipKey)} />
+                    )}
                 </div>
                 {columns.map((column) => {
                     // La columna 'diff' se resuelve acá y no por su value(): el
@@ -4092,6 +4398,124 @@ export default function TournamentDetailPage({
     };
 
     // ── Featured match renderer ───────────────────────────────────────────
+
+    // El selector de fecha: en escritorio va en la barra de herramientas, a la
+    // derecha y al lado de Exportar; en el celular, en una fila propia.
+    const showTimelinePicker = timelineAvailable && activeRows.length > 0;
+    // Las filas que arma el motor no traen escudo: se resuelve igual que en la
+    // tabla, por el registro de clubes de la pantalla.
+    const timelineLogoOf = (teamId: string, name: string, own?: string | null) =>
+        own ||
+        teamMap.get(`id:${teamId}`)?.logo ||
+        teamMap.get(`name:${name.toLowerCase()}`)?.logo ||
+        null;
+    const timelineOptions = timelineEntries.map((entry) => {
+        const leader = flattenStandingsRows(entry.standings)[0];
+        const leaderName = leader ? getStandingsTeamName(leader) : null;
+        return {
+            round: entry.round,
+            dayKey: entry.dayKey,
+            fromDayKey: entry.fromDayKey,
+            leaderName,
+            leaderLogo: leader && leaderName
+                ? timelineLogoOf(String(getStandingsTeamId(leader) ?? ''), leaderName, getStandingsTeamLogo(leader))
+                : null,
+        };
+    });
+    const evolutionChartColumns: EvolutionColumn[] = evolutionColumns.map((column) => ({
+        ...column,
+        rows: column.rows.map((row) => ({ ...row, logo: timelineLogoOf(row.teamId, row.name, row.logo) })),
+    }));
+    const renderTimelineBar = (placement: 'toolbar' | 'mobile') => (
+        <div className={`${timelineStyles.bar} ${placement === 'toolbar' ? timelineStyles.barToolbar : timelineStyles.barMobile}`}>
+            {timelineEntry && (
+                <p key={timelineEntry.round} className={timelineStyles.barCaption} aria-live="polite">
+                    Así estaba la tabla al cierre de la <strong>fecha {timelineEntry.round}</strong>
+                </p>
+            )}
+            <StandingsRoundPicker options={timelineOptions} value={timelineRound} onChange={setTimelineRound} />
+        </div>
+    );
+
+    // La leyenda de la tabla principal, con el botón del gráfico de evolución al
+    // lado. Si la tabla no tiene etiquetas, el botón queda solo.
+    const evolutionPanelId = 'standings-evolution';
+    // Temporada importada sin tabla oficial: la tabla sale de los resultados y
+    // los partidos viejos no traen bonus. Que no se lea como la tabla publicada.
+    const standingsReconstructed = Boolean(
+        timelineDbData &&
+        timelinePhaseId !== undefined &&
+        isReconstructedManualPhase(timelineDbData, timelinePhaseId),
+    );
+    const bonusNote = standingsReconstructed
+        ? 'Tabla armada con los resultados de los partidos: no incluye puntos bonus.'
+        : timelineEntry?.withoutBonus || (evolutionOpen && timelineEntries.some((entry) => entry.withoutBonus))
+            ? 'Las fechas se arman con los resultados y no incluyen puntos bonus. La tabla actual es la oficial, con bonus.'
+            : null;
+    const renderStandingsFooter = (items: StandingsLegendItem[]) => (
+        <>
+            {renderStandingsFooterControls(items)}
+            {bonusNote && <p className={timelineStyles.reconstructedNote}>{bonusNote}</p>}
+            {/* En el celular la pestaña Histórica queda fuera de pantalla, al final
+                de la barra de pestañas: desde la tabla se llega con un toque. */}
+            {hasHistoricalTable && (
+                <button
+                    type="button"
+                    className={timelineStyles.historicalLink}
+                    onClick={() => {
+                        setActiveTab('historical');
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                >
+                    <span>
+                        <strong>Tabla histórica</strong>
+                        <span className={timelineStyles.historicalLinkSub}>Todas las temporadas sumadas</span>
+                    </span>
+                    <ChevronRight size={16} aria-hidden="true" />
+                </button>
+            )}
+        </>
+    );
+    const renderStandingsFooterControls = (items: StandingsLegendItem[]) => {
+        const legend = renderStandingsLegend(items);
+        const hasEvolution = evolutionColumns.length >= 2;
+        if (!hasEvolution && !showTimelinePicker) return legend;
+
+        const toggle = (compact: boolean) => (
+            <EvolutionToggle
+                open={evolutionOpen}
+                onToggle={() => setEvolutionOpen((open) => !open)}
+                controls={evolutionPanelId}
+                compact={compact}
+            />
+        );
+
+        return (
+            <>
+                {/* Celular: una sola fila de controles debajo de la tabla, el
+                    gráfico a la izquierda y la fecha a la derecha. En escritorio
+                    no se ve: la fecha va en la barra de arriba. */}
+                <div className={timelineStyles.mobileControls}>
+                    {hasEvolution ? toggle(true) : <span aria-hidden="true" />}
+                    {showTimelinePicker && renderTimelineBar('mobile')}
+                </div>
+                {hasEvolution ? (
+                    <div className={timelineStyles.legendRow}>
+                        {legend}
+                        <div className={timelineStyles.toggleSlot}>{toggle(false)}</div>
+                    </div>
+                ) : legend}
+                {hasEvolution && evolutionOpen && (
+                    <StandingsEvolutionChart
+                        id={evolutionPanelId}
+                        columns={evolutionChartColumns}
+                        highlightColumn={evolutionHighlightColumn}
+                        onColumnClick={(index) => setTimelineRound(index < timelineEntries.length ? index : null)}
+                    />
+                )}
+            </>
+        );
+    };
 
     const renderStandingsLegend = (items: StandingsLegendItem[]) => {
         if (items.length === 0) return null;
@@ -4222,296 +4646,392 @@ export default function TournamentDetailPage({
 
     // ── Main render ───────────────────────────────────────────────────────
 
-    const renderMotorsportFeaturedEvent = () => {
-        if (!featured) return null;
-        const { match, isResult } = featured;
-        const timestamp = match.timestamp || match.start_time || match.time;
-        const date = timestamp ? new Date(timestamp * 1000) : null;
-        const estadoEvento = resolverEstado(match.status, { estaEnResultados: isResult });
-        const isLive = estadoEvento.estado === 'en-vivo' || estadoEvento.estado === 'entretiempo';
-        const eventoSuspendido = estadoEvento.estado === 'suspendido';
-        const badgeLabel = isLive ? 'Carrera en vivo'
-            : eventoSuspendido ? estadoEvento.etiqueta
-            : isResult ? 'Resultado oficial'
-            : 'Proxima carrera';
-        const eventTitle = match.event_name || match.tournament_name_short || match.tournament_name || tournamentName || 'Evento';
-        const venue = match.venue || match.country_name || countryName || '';
-        const dateLabel = date ? fechaEnZonaDelVisitante(date, { weekday: 'long', day: '2-digit', month: 'long' }) : '';
-        const timeLabel = date ? fechaEnZonaDelVisitante(date, { hour: '2-digit', minute: '2-digit', hour12: false }) : '';
-        const primaryName = match.home_team?.name || match.event_home_team || match.home_team_name || 'Competidor 1';
-        const secondaryName = match.away_team?.name || match.event_away_team || match.away_team_name || 'Competidor 2';
-        const primaryLogo = getTeamLogo(match.home_team) || match.home_team_logo || '';
-        const secondaryLogo = getTeamLogo(match.away_team) || match.away_team_logo || '';
-        const telemetrySource = motorsportLeaders.length > 0
-            ? motorsportLeaders.slice(0, 3).map((row: any, idx: number) => ({
-                position: row.position || idx + 1,
-                name: getStandingsTeamName(row),
-                logo: getStandingsTeamLogo(row) || '',
-                points: Number(row.points_total ?? row.points ?? 0),
-            }))
-            : [
-                { position: 1, name: primaryName, logo: primaryLogo, points: null },
-                { position: 2, name: secondaryName, logo: secondaryLogo, points: null },
-            ];
-        const leaderPoints = typeof telemetrySource[0]?.points === 'number' ? telemetrySource[0].points : null;
-        const statusMetric = match.session_label || 'Carrera';
-        const flagMetric = isLive ? 'En vivo' : eventoSuspendido ? estadoEvento.etiqueta : isResult ? 'Finalizada' : 'Programada';
-        const footerPrimary = 'Evento';
-        const footerPrimaryState = isResult || isLive ? 'completed' : 'pending';
-        const footerRaceState = isLive ? 'active' : isResult ? 'completed' : 'pending';
+    /* ── Automovilismo ──────────────────────────────────────────────────
+       Tres piezas con un mismo vocabulario: la tabla de clasificación
+       (pilotos y equipos), la fila del calendario y el estado del campeonato
+       del Resumen. Al piloto se lo reconoce por su foto y a su equipo por la
+       placa de color; los escudos de club no pintan nada acá. */
 
-        return (
-            <div className={styles.motorsportFeaturedCard}>
-                <div className={styles.motorsportFeaturedFrame} aria-hidden="true" />
-                <div className={styles.motorsportFeaturedHeader}>
-                    <div className={styles.motorsportFeaturedHeaderLeft}>
-                        <span className={styles.motorsportSeriesBadge}>{match.tournament_name_short || tournamentName}</span>
-                    </div>
-                    <div className={styles.motorsportLiveStatus}>
-                        <span className={`${styles.motorsportLiveDot} ${isLive ? styles.motorsportLiveDotActive : ''}`} />
-                        <span>{badgeLabel}</span>
-                    </div>
-                </div>
-                <div className={styles.motorsportFeaturedBody}>
-                    <div className={styles.motorsportFeaturedMain}>
-                        <div className={styles.motorsportFeaturedVenue}>{venue || match.tournament_name || tournamentName}</div>
-                        <h2 className={styles.motorsportFeaturedTitle}>{eventTitle}</h2>
-                        <div className={styles.motorsportFeaturedMeta}>
-                            {dateLabel && <span style={{ textTransform: 'capitalize' }}>{dateLabel}</span>}
-                            {timeLabel && !eventoSuspendido && <span>{timeLabel} hs</span>}
-                        </div>
-                        <div className={styles.motorsportMetricsRow}>
-                            <div className={styles.motorsportMetricItem}>
-                                <span className={styles.motorsportMetricLabel}>Status</span>
-                                <span className={styles.motorsportMetricValue}>{statusMetric}</span>
-                            </div>
-                            <div className={styles.motorsportMetricItem}>
-                                <span className={styles.motorsportMetricLabel}>Flag</span>
-                                <span className={`${styles.motorsportMetricValue} ${isLive ? styles.motorsportMetricValueAccent : ''}`}>{flagMetric}</span>
-                            </div>
-                            <div className={styles.motorsportMetricItem}>
-                                <span className={styles.motorsportMetricLabel}>Leader</span>
-                                <span className={styles.motorsportMetricValue}>{telemetrySource[0]?.name || primaryName}</span>
-                            </div>
-                        </div>
-                        <div className={styles.motorsportTelemetryGrid}>
-                            <div className={styles.motorsportTelemetryHeader}>
-                                <span>Pos</span>
-                                <span>Driver</span>
-                                <span>Gap</span>
-                            </div>
-                            {telemetrySource.map((row) => {
-                                const gapLabel = row.position === 1
-                                    ? 'Leader'
-                                    : leaderPoints != null && typeof row.points === 'number'
-                                        ? `-${Math.max(leaderPoints - row.points, 0)} pts`
-                                        : 'Tracking';
-                                const posClassName = [
-                                    styles.motorsportTelemetryPos,
-                                    row.position === 1 ? styles.motorsportTelemetryPosP1 : '',
-                                    row.position === 2 ? styles.motorsportTelemetryPosP2 : '',
-                                    row.position === 3 ? styles.motorsportTelemetryPosP3 : '',
-                                ].filter(Boolean).join(' ');
+    const motorsportDriversByTeam = new Map<string, string[]>();
+    motorsportDriverRows.forEach((row: any) => {
+        const team = String(row?.affiliation_name || row?.team?.affiliation_name || '').trim().toLowerCase();
+        const apellido = getMotorsportLastName(getStandingsTeamName(row));
+        if (!team || !apellido) return;
+        motorsportDriversByTeam.set(team, [...(motorsportDriversByTeam.get(team) || []), apellido]);
+    });
 
-                                return (
-                                    <div key={`${row.position}-${row.name}`} className={styles.motorsportTelemetryRow}>
-                                        <span className={posClassName}>{String(row.position).padStart(2, '0')}</span>
-                                        <div className={styles.motorsportTelemetryDriver}>
-                                            {row.logo
-                                                ? <img src={row.logo} alt={row.name} className={styles.motorsportTelemetryLogo} loading="lazy" onError={(e) => (e.currentTarget.style.display = 'none')} />
-                                                : <div className={styles.motorsportTelemetryLogoFallback}>{row.name[0]}</div>}
-                                            <span className={styles.motorsportTelemetryName}>{row.name}</span>
-                                        </div>
-                                        <span className={styles.motorsportTelemetryGap}>{gapLabel}</span>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                    <div className={styles.motorsportFeaturedFooter}>
-                        <div className={styles.motorsportSessionsTimeline}>
-                            <div className={`${styles.motorsportSession} ${footerPrimaryState === 'completed' ? styles.motorsportSessionCompleted : ''}`}>
-                                <span className={styles.motorsportSessionIcon}>{footerPrimaryState === 'completed' ? 'OK' : '...'}</span>
-                                <span>{footerPrimary}</span>
-                            </div>
-                            <div className={`${styles.motorsportSession} ${footerRaceState === 'active' ? styles.motorsportSessionActive : ''} ${footerRaceState === 'completed' ? styles.motorsportSessionCompleted : ''}`}>
-                                <span className={styles.motorsportSessionIcon}>{footerRaceState === 'active' ? 'ON' : footerRaceState === 'completed' ? 'OK' : '...'}</span>
-                                <span>Race</span>
-                            </div>
-                        </div>
-                        <button type="button" className={styles.motorsportActionBtn} onClick={() => setActiveTab('standings')}>
-                            Event details
-                        </button>
-                    </div>
-                </div>
-            </div>
+    const renderMotorsportAvatar = (photo: string, name: string, size: number) => {
+        const sizeStyle = { '--ms-avatar': `${size}px` } as CSSProperties;
+        return photo ? (
+            <img
+                src={photo}
+                alt=""
+                className={styles.motorsportAvatar}
+                style={sizeStyle}
+                loading="lazy"
+                decoding="async"
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+            />
+        ) : (
+            <span className={`${styles.motorsportAvatar} ${styles.motorsportAvatarInitials}`} style={sizeStyle} aria-hidden="true">
+                {getMotorsportInitials(name)}
+            </span>
         );
     };
 
     const renderMotorsportStandingsTable = (
         rows: any[],
-        options: { entityLabel: string; detailLabel: string; compact?: boolean; emptyLabel: string; raceColumns?: Array<{ key: string; label: string }> },
+        options: { kind: 'drivers' | 'teams'; limit?: number; compact?: boolean; emptyLabel: string; raceColumns?: Array<{ key: string; label: string }> },
     ) => {
-        const limitedRows = options.compact ? rows.slice(0, 5) : rows;
-        const leaderPoints = Number(limitedRows[0]?.points_total ?? limitedRows[0]?.points ?? 0);
-        const raceColumns = options.compact ? [] : (options.raceColumns || []);
-        const gridTemplateColumns = `48px minmax(0, 1.35fr) minmax(110px, 0.95fr) 70px 70px${raceColumns.map(() => ' 60px').join('')}`;
-
-        if (limitedRows.length === 0) {
+        const visibles = options.limit ? rows.slice(0, options.limit) : rows;
+        if (visibles.length === 0) {
             return <p className={styles.emptyState}>{options.emptyLabel}</p>;
         }
+        const compact = Boolean(options.compact);
+        const raceColumns = compact ? [] : (options.raceColumns || []);
+        const esPilotos = options.kind === 'drivers';
+        const leaderPoints = Number(visibles[0]?.points_total ?? visibles[0]?.points ?? 0);
+        /* La columna de victorias sólo entra cuando alguien ganó algo: al
+           principio de la temporada una columna de ceros no dice nada. */
+        const showWins = !compact && visibles.some((row: any) => Number(row?.won ?? 0) > 0);
 
         return (
             <div className={styles.tableScroll}>
-                <div className={styles.motorsportStandingsTable}>
-                <div className={styles.motorsportStandingsHeader} style={{ gridTemplateColumns }}>
-                    <span>Pos</span>
-                    <span>{options.entityLabel}</span>
-                    <span>{options.detailLabel}</span>
-                    <span>Pts</span>
-                    <span>Dif</span>
-                    {raceColumns.map((column) => (
-                        <span key={`head-${column.key}`}>{column.label}</span>
-                    ))}
-                </div>
-                {limitedRows.map((row: any, idx: number) => {
-                    const points = Number(row.points_total ?? row.points ?? 0);
-                    const diff = idx === 0 || !Number.isFinite(leaderPoints) ? '—' : `-${Math.max(leaderPoints - points, 0)}`;
-                    const detail = row.team?.affiliation_name || row.participant?.affiliation_name || row.affiliation_name || '—';
-                    const flagAsset = getStandingsCountryFlagAsset(row);
-                    const flag = getCountryFlagByName(row.country_name || row.team?.country_name || row.participant?.country_name);
-                    const logo = getStandingsTeamLogo(row);
-                    const position = row.position || (idx + 1);
-                    const racePoints = new Map(
-                        (Array.isArray(row.race_points) ? row.race_points : []).map((item: any) => [String(item?.key || ''), item?.value ?? '—']),
-                    );
-
-                    return (
-                        <div
-                            key={`${options.entityLabel}-${position}-${getStandingsTeamName(row)}`}
-                            className={styles.motorsportStandingsDataRow}
-                            style={{ gridTemplateColumns }}
-                        >
-                            <span className={styles.motorsportStandingsPos}>{position}</span>
-                            <div className={styles.motorsportStandingsIdentity}>
-                                {logo
-                                    ? <img src={logo} alt={getStandingsTeamName(row)} className={styles.motorsportStandingsLogo} loading="lazy" onError={(e) => (e.currentTarget.style.display = 'none')} />
-                                    : <div className={styles.motorsportStandingsLogoFallback}>{getStandingsTeamName(row)[0]}</div>}
-                                <div className={styles.motorsportStandingsIdentityMeta}>
-                                    <div className={styles.motorsportStandingsIdentityTop}>
-                                        <span className={styles.motorsportStandingsName}>{getStandingsTeamName(row)}</span>
-                                        {flagAsset
-                                            ? <img src={flagAsset} alt={row.country_name || 'Bandera'} className={styles.motorsportStandingsFlagIcon} loading="lazy" />
-                                            : flag
-                                                ? <span className={styles.motorsportStandingsFlag}>{flag}</span>
-                                                : null}
-                                    </div>
-                                    <span className={styles.motorsportStandingsIdentitySubline}>
-                                        {detail} · {points} pts
-                                    </span>
-                                </div>
-                            </div>
-                            <span className={styles.motorsportStandingsDetail}>{detail}</span>
-                            <span className={styles.motorsportStandingsPoints}>{points}</span>
-                            <span className={styles.motorsportStandingsDiff}>{diff}</span>
+                <table className={`${styles.motorsportTable} ${compact ? styles.motorsportTableCompact : ''}`}>
+                    <thead>
+                        <tr>
+                            <th scope="col" className={styles.motorsportPos}>#</th>
+                            <th scope="col">{esPilotos ? 'Piloto' : 'Equipo'}</th>
+                            {!compact && (
+                                <th scope="col" className={styles.motorsportColTeam}>{esPilotos ? 'Equipo' : 'Pilotos'}</th>
+                            )}
+                            {showWins && (
+                                <th scope="col" className={`${styles.motorsportNum} ${styles.motorsportColWins}`}>
+                                    <abbr title="Victorias">Vict.</abbr>
+                                </th>
+                            )}
+                            <th scope="col" className={styles.motorsportNum}>Pts</th>
+                            <th scope="col" className={styles.motorsportNum}>
+                                <abbr title="Diferencia con el líder">Dif.</abbr>
+                            </th>
                             {raceColumns.map((column) => (
-                                <span key={`${position}-${column.key}`} className={styles.motorsportStandingsRaceValue}>
-                                    {String(racePoints.get(column.key) ?? '—')}
-                                </span>
+                                <th key={`head-${column.key}`} scope="col" className={`${styles.motorsportNum} ${styles.motorsportColRace}`}>
+                                    {column.label}
+                                </th>
                             ))}
-                        </div>
-                    );
-                })}
-                </div>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {visibles.map((row: any, idx: number) => {
+                            const name = getStandingsTeamName(row);
+                            const rank = getMotorsportRank(row, idx);
+                            const points = Number(row?.points_total ?? row?.points ?? 0);
+                            const gap = idx === 0 ? null : Math.max(leaderPoints - points, 0);
+                            const teamName = esPilotos
+                                ? String(row?.affiliation_name || row?.team?.affiliation_name || '').trim()
+                                : name;
+                            const teamColor = getMotorsportTeamColor(teamName);
+                            const teamStyle = teamColor ? ({ '--ms-team': teamColor } as CSSProperties) : undefined;
+                            const flagAsset = getStandingsCountryFlagAsset(row);
+                            /* Para los equipos tampoco pasa por el resolvedor de escudos:
+                               arma una URL del proxy con sport=football que para la mitad
+                               de los constructores devuelve vacío y deja un círculo en
+                               blanco. Sin foto, las iniciales; todas las filas iguales. */
+                            const photo = getMotorsportDriverPhoto(row);
+                            const drivers = esPilotos ? [] : (motorsportDriversByTeam.get(teamName.toLowerCase()) || []);
+                            const racePoints = new Map<string, unknown>(
+                                (Array.isArray(row?.race_points) ? row.race_points : []).map((item: any) => [String(item?.key || ''), item?.value]),
+                            );
+                            const pct = leaderPoints > 0 ? Math.max(0, Math.min(100, (points / leaderPoints) * 100)) : 0;
+
+                            return (
+                                <tr key={`${options.kind}-${rank}-${name}`} className={idx === 0 ? styles.motorsportRowLeader : undefined} style={teamStyle}>
+                                    <td className={styles.motorsportPos}>{rank}</td>
+                                    <td>
+                                        <div className={styles.motorsportIdentity}>
+                                            {renderMotorsportAvatar(photo, name, compact ? 26 : 32)}
+                                            <div className={styles.motorsportIdentityText}>
+                                                <span className={styles.motorsportName}>
+                                                    <span>{name}</span>
+                                                    {flagAsset ? (
+                                                        <img src={flagAsset} alt={row?.country_name || ''} className={styles.motorsportFlag} loading="lazy" decoding="async" />
+                                                    ) : null}
+                                                </span>
+                                                {esPilotos && teamName ? (
+                                                    <span className={styles.motorsportSub}>
+                                                        <i className={styles.motorsportSwatch} aria-hidden="true" />
+                                                        {teamName}
+                                                    </span>
+                                                ) : null}
+                                                {!esPilotos && drivers.length > 0 ? (
+                                                    <span className={styles.motorsportSub}>{drivers.join(' · ')}</span>
+                                                ) : null}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    {!compact && (
+                                        <td className={styles.motorsportColTeam}>
+                                            {esPilotos ? (
+                                                teamName ? (
+                                                    <span className={styles.motorsportTeamCell}>
+                                                        <i className={styles.motorsportSwatch} aria-hidden="true" />
+                                                        {teamName}
+                                                    </span>
+                                                ) : <span className={styles.motorsportDriversCell}>—</span>
+                                            ) : (
+                                                <span className={styles.motorsportDriversCell}>{drivers.length > 0 ? drivers.join(' · ') : '—'}</span>
+                                            )}
+                                        </td>
+                                    )}
+                                    {showWins && (
+                                        <td className={`${styles.motorsportNum} ${styles.motorsportWins} ${styles.motorsportColWins}`}>{Number(row?.won ?? 0)}</td>
+                                    )}
+                                    <td className={`${styles.motorsportNum} ${styles.motorsportPts}`}>
+                                        <span className={styles.motorsportPtsInner}>
+                                            <span>{points}</span>
+                                            <span className={styles.motorsportPtsBar} aria-hidden="true">
+                                                <span className={styles.motorsportPtsFill} style={{ width: `${pct}%` }} />
+                                            </span>
+                                        </span>
+                                    </td>
+                                    <td className={`${styles.motorsportNum} ${styles.motorsportDiff}`}>{gap == null ? '—' : `−${gap}`}</td>
+                                    {raceColumns.map((column) => {
+                                        const value = racePoints.get(column.key);
+                                        const vacio = value == null || value === '' || value === '—' || value === '-';
+                                        return (
+                                            <td key={`${rank}-${column.key}`} className={`${styles.motorsportNum} ${styles.motorsportRacePts} ${styles.motorsportColRace}`}>
+                                                {vacio ? '—' : String(value)}
+                                            </td>
+                                        );
+                                    })}
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
             </div>
         );
     };
+
+    const diasHastaClave = (dayKey: string | null) => (
+        dayKey ? Math.round((Date.parse(dayKey) - Date.parse(renderTodayKey)) / 86400000) : null
+    );
+    const etiquetaDeDias = (dias: number | null) => (
+        dias == null ? 'Próxima' : dias <= 0 ? 'Hoy' : dias === 1 ? 'Mañana' : `En ${dias} días`
+    );
 
     const renderMotorsportSeasonCalendarItem = (match: any, index: number) => {
         const timestamp = match.timestamp || match.start_time || match.time;
         const date = timestamp ? new Date(timestamp * 1000) : null;
         const roundNumber = getMotorsportRoundNumber(match, index);
         const statusLabel = getMotorsportEventStatusLabel(match);
-        const winnerName = Array.isArray(match.podium) && match.podium[0]?.name ? match.podium[0].name : null;
+        const esLive = statusLabel === 'Live';
+        const finalizada = statusLabel === 'Finalizado';
+        const suspendida = !esLive && !finalizada && statusLabel !== 'Proximo';
+        const esProxima = !esLive && motorsportNextEvent != null && motorsportNextEvent === match;
+        const podium = Array.isArray(match.podium) ? match.podium.slice(0, 3) : [];
+        const winnerName = podium[0]?.name || null;
+        const resto = podium
+            .slice(1)
+            .map((driver: any, i: number) => {
+                const apellido = getMotorsportLastName(driver?.name);
+                return apellido ? `${i + 2}. ${apellido}` : '';
+            })
+            .filter(Boolean)
+            .join('   ');
         const eventTitle = match.event_name || match.tournament_name_short || tournamentName || 'Gran Premio';
         const href = `/matches/${match.event_key || match.match_id || 'unknown'}`;
+        const dias = diasHastaClave(date ? formatDateKey(date, zonaDelVisitante) : null);
+        const rowClass = [
+            styles.motorsportRaceRow,
+            esLive ? styles.motorsportRaceRowLive : '',
+            esProxima ? styles.motorsportRaceRowNext : '',
+        ].filter(Boolean).join(' ');
 
         return (
-            <Link key={`${href}-${roundNumber}`} href={href} className={styles.motorsportSeasonCalendarItem}>
-                <div className={styles.motorsportSeasonRound}>R{roundNumber}</div>
-                <div className={styles.motorsportSeasonCalendarMain}>
-                    <div className={styles.motorsportSeasonCalendarTitleRow}>
-                        <h3 className={styles.motorsportSeasonCalendarTitle}>{eventTitle}</h3>
-                        <span className={`${styles.motorsportSeasonCalendarStatus} ${statusLabel === 'Live' ? styles.motorsportSeasonCalendarStatusLive : statusLabel === 'Finalizado' ? styles.motorsportSeasonCalendarStatusDone : ''}`}>
-                            {statusLabel}
-                        </span>
-                    </div>
-                    <div className={styles.motorsportSeasonCalendarMeta}>
-                        {match.venue && <span>{match.venue}</span>}
-                        {date && <span>{fechaEnZonaDelVisitante(date, { day: '2-digit', month: 'short' })}</span>}
-                        {date && <span>{fechaEnZonaDelVisitante(date, { hour: '2-digit', minute: '2-digit', hour12: false })} hs</span>}
-                    </div>
-                    {winnerName && statusLabel === 'Finalizado' && (
-                        <div className={styles.motorsportSeasonCalendarWinner}>Ganador: {winnerName}</div>
+            <Link key={`${href}-${roundNumber}`} href={href} className={rowClass}>
+                <div className={styles.motorsportRaceDate}>
+                    <span className={styles.motorsportRaceDay}>{date ? fechaEnZonaDelVisitante(date, { day: '2-digit' }) : '—'}</span>
+                    <span className={styles.motorsportRaceMonth}>{date ? fechaEnZonaDelVisitante(date, { month: 'short' }).replace('.', '') : ''}</span>
+                </div>
+                <div className={styles.motorsportRaceMain}>
+                    <strong className={styles.motorsportRaceTitle}>
+                        <span className={styles.motorsportRaceRoundTag}>R{roundNumber}</span>
+                        <span>{eventTitle}</span>
+                    </strong>
+                    {match.venue ? <span className={styles.motorsportRaceVenue}>{match.venue}</span> : null}
+                </div>
+                <div className={styles.motorsportRaceAside}>
+                    {esLive ? (
+                        <span className={`${styles.motorsportSeasonChip} ${styles.motorsportSeasonChipLive}`}>En vivo</span>
+                    ) : suspendida ? (
+                        <span className={styles.motorsportRaceMuted}>{statusLabel}</span>
+                    ) : finalizada ? (
+                        winnerName ? (
+                            <>
+                                <span className={styles.motorsportRaceAsideLabel}>Ganador</span>
+                                <span className={styles.motorsportRaceWinner}>{winnerName}</span>
+                                {resto ? <span className={styles.motorsportRacePodiumRest}>{resto}</span> : null}
+                            </>
+                        ) : (
+                            <span className={styles.motorsportRaceMuted}>Finalizada</span>
+                        )
+                    ) : (
+                        <>
+                            {esProxima ? <span className={styles.motorsportSeasonChip}>{etiquetaDeDias(dias)}</span> : null}
+                            {date ? (
+                                <>
+                                    <span className={styles.motorsportRaceTime}>{fechaEnZonaDelVisitante(date, { hour: '2-digit', minute: '2-digit', hour12: false })} hs</span>
+                                    <span className={styles.motorsportRaceWeekday}>{fechaEnZonaDelVisitante(date, { weekday: 'long' })}</span>
+                                </>
+                            ) : null}
+                        </>
                     )}
                 </div>
+                <ChevronRight size={16} className={styles.motorsportRaceChevron} aria-hidden="true" />
             </Link>
         );
     };
 
     const renderMotorsportSeasonHero = () => {
-        const leaderName = motorsportSeasonLeader ? getStandingsTeamName(motorsportSeasonLeader) : '—';
-        const leaderPoints = motorsportSeasonLeader ? Number(motorsportSeasonLeader.points_total ?? motorsportSeasonLeader.points ?? 0) : null;
-        const lastWinner = motorsportLastEvent?.podium?.[0]?.name || null;
-        const nextDate = motorsportNextEvent?.timestamp
-            ? new Date(motorsportNextEvent.timestamp * 1000)
-            : null;
+        const pilotos = motorsportOverallGroups?.drivers.length
+            ? motorsportOverallGroups.drivers
+            : (motorsportOverallGroups?.ungrouped || []);
+        const lider = pilotos[0] || null;
+        const segundo = pilotos[1] || null;
+        const liderNombre = lider ? getStandingsTeamName(lider) : '';
+        const liderPuntos = lider ? Number(lider.points_total ?? lider.points ?? 0) : null;
+        const segundoPuntos = segundo ? Number(segundo.points_total ?? segundo.points ?? 0) : null;
+        const ventaja = liderPuntos != null && segundoPuntos != null ? liderPuntos - segundoPuntos : null;
+        const liderEquipo = lider ? String(lider.affiliation_name || lider.team?.affiliation_name || '').trim() : '';
+        const liderColor = getMotorsportTeamColor(liderEquipo);
+        const corridas = motorsportCompletedEvents.length;
+        const total = motorsportTotalRounds;
+        const enVivo = motorsportLiveEvent;
+        const ultima = motorsportLastEvent;
+        const proxima = motorsportUpcomingEvents.find((event: any) => event !== enVivo) || null;
+        const actual = enVivo || ultima;
+        const actualDate = actual?.timestamp ? new Date(actual.timestamp * 1000) : null;
+        const proximaDate = proxima?.timestamp ? new Date(proxima.timestamp * 1000) : null;
+        const dias = diasHastaClave(proximaDate ? formatDateKey(proximaDate, zonaDelVisitante) : null);
+        const podium = Array.isArray(actual?.podium) ? actual.podium.slice(0, 3) : [];
+        const estado = enVivo
+            ? 'Carrera en vivo'
+            : tournamentStatus === 'finished'
+                ? 'Temporada terminada'
+                : corridas === 0
+                    ? 'Por empezar'
+                    : 'En curso';
+        const capitalizar = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
 
         return (
-            <div className={styles.motorsportSeasonHero}>
-                <div className={styles.motorsportSeasonHeroHeader}>
+            <section className={styles.motorsportSeason} aria-label="Estado del campeonato">
+                <div className={styles.motorsportSeasonHead}>
                     <div>
-                        <span className={styles.motorsportSeasonHeroEyebrow}>Campeonato</span>
-                        <h2 className={styles.motorsportSeasonHeroTitle}>{tournamentName} - {yearDisplay || 'Temporada'}</h2>
+                        <h2 className={styles.motorsportSeasonTitle}>Temporada {motorsportSeasonYear || yearDisplay || ''}</h2>
+                        <p className={styles.motorsportSeasonRound}>
+                            {total > 0 ? <><b>{corridas}</b> de <b>{total}</b> carreras corridas</> : 'Calendario sin cargar'}
+                            {' · '}{estado}
+                        </p>
                     </div>
-                    <span className={styles.motorsportSeasonHeroStatus}>
-                        {tournamentStatus === 'active' ? 'En curso' : tournamentStatus === 'finished' ? 'Finalizado' : 'Proximo'}
-                    </span>
+                    {total > 0 && (
+                        <div
+                            className={styles.motorsportSeasonProgress}
+                            role="progressbar"
+                            aria-label="Avance de la temporada"
+                            aria-valuemin={0}
+                            aria-valuemax={total}
+                            aria-valuenow={corridas}
+                        >
+                            <span className={styles.motorsportSeasonProgressFill} style={{ width: `${Math.round((corridas / total) * 100)}%` }} />
+                        </div>
+                    )}
                 </div>
-                <div className={styles.motorsportSeasonHeroGrid}>
-                    <div className={styles.motorsportSeasonHeroLeader}>
-                        <span className={styles.motorsportSeasonHeroLabel}>Lider del campeonato</span>
-                        <strong className={styles.motorsportSeasonHeroLeaderName}>{leaderName}</strong>
-                        <span className={styles.motorsportSeasonHeroLeaderPts}>{leaderPoints != null ? `${leaderPoints} pts` : 'Sin puntos'}</span>
+                <div className={styles.motorsportSeasonGrid}>
+                    <div className={styles.motorsportSeasonCell} style={liderColor ? ({ '--ms-team': liderColor } as CSSProperties) : undefined}>
+                        <span className={styles.motorsportSeasonLabel}>Líder del campeonato</span>
+                        {lider ? (
+                            <>
+                                <div className={styles.motorsportSeasonLeader}>
+                                    {renderMotorsportAvatar(getMotorsportDriverPhoto(lider), liderNombre, 44)}
+                                    <div className={styles.motorsportIdentityText}>
+                                        <span className={styles.motorsportSeasonName}>{liderNombre}</span>
+                                        {liderEquipo ? (
+                                            <span className={styles.motorsportSeasonTeam}>
+                                                <i className={styles.motorsportSwatch} aria-hidden="true" />
+                                                {liderEquipo}
+                                            </span>
+                                        ) : null}
+                                    </div>
+                                </div>
+                                <div className={styles.motorsportSeasonFigures}>
+                                    <span className={styles.motorsportSeasonPts}>{liderPuntos}<small>pts</small></span>
+                                    {ventaja != null && segundo ? (
+                                        <span className={styles.motorsportSeasonMargin}>
+                                            {ventaja > 0 ? `${ventaja} sobre ${getStandingsTeamName(segundo)}` : `Empatado con ${getStandingsTeamName(segundo)}`}
+                                        </span>
+                                    ) : null}
+                                </div>
+                            </>
+                        ) : (
+                            <span className={styles.motorsportSeasonMeta}>Clasificación no disponible todavía.</span>
+                        )}
                     </div>
-                    <div className={styles.motorsportSeasonHeroStats}>
-                        <div className={styles.motorsportSeasonHeroStat}>
-                            <span className={styles.motorsportSeasonHeroLabel}>Ronda actual</span>
-                            <strong>{motorsportCurrentRound != null ? `Ronda ${motorsportCurrentRound} de ${motorsportTotalRounds}` : 'Sin definir'}</strong>
-                        </div>
-                        <div className={styles.motorsportSeasonHeroStat}>
-                            <span className={styles.motorsportSeasonHeroLabel}>Ultimo GP</span>
-                            <strong>{motorsportLastEvent?.event_name || 'Sin carrera previa'}</strong>
-                            {lastWinner && <span className={styles.motorsportSeasonHeroSub}>Ganador: {lastWinner}</span>}
-                        </div>
-                        <div className={styles.motorsportSeasonHeroStat}>
-                            <span className={styles.motorsportSeasonHeroLabel}>Proximo GP</span>
-                            <strong>{motorsportNextEvent?.event_name || 'Calendario completo'}</strong>
-                            {nextDate && <span className={styles.motorsportSeasonHeroSub}>{fechaEnZonaDelVisitante(nextDate, { day: '2-digit', month: 'long' })} - {fechaEnZonaDelVisitante(nextDate, { hour: '2-digit', minute: '2-digit', hour12: false })} hs</span>}
-                        </div>
+                    <div className={styles.motorsportSeasonCell}>
+                        <span className={styles.motorsportSeasonLabel}>{enVivo ? 'Ahora en pista' : 'Última carrera'}</span>
+                        {actual ? (
+                            <>
+                                <strong className={styles.motorsportSeasonEvent}>{actual.event_name}</strong>
+                                <span className={styles.motorsportSeasonMeta}>
+                                    {[actual.venue, actualDate ? fechaEnZonaDelVisitante(actualDate, { day: 'numeric', month: 'long' }) : null].filter(Boolean).join(' · ')}
+                                </span>
+                                {enVivo ? (
+                                    <span className={`${styles.motorsportSeasonChip} ${styles.motorsportSeasonChipLive}`}>En vivo</span>
+                                ) : podium.length > 0 ? (
+                                    <ol className={styles.motorsportSeasonPodium}>
+                                        {podium.map((driver: any, i: number) => (
+                                            <li key={`${driver?.name || i}-${i}`}>
+                                                <b>{i + 1}</b>
+                                                <span>{driver?.name}</span>
+                                            </li>
+                                        ))}
+                                    </ol>
+                                ) : (
+                                    <span className={styles.motorsportSeasonMeta}>Resultado sin cargar.</span>
+                                )}
+                            </>
+                        ) : (
+                            <span className={styles.motorsportSeasonMeta}>Todavía no se corrió ninguna carrera.</span>
+                        )}
+                    </div>
+                    <div className={styles.motorsportSeasonCell}>
+                        <span className={styles.motorsportSeasonLabel}>Próxima carrera</span>
+                        {proxima ? (
+                            <>
+                                <strong className={styles.motorsportSeasonEvent}>{proxima.event_name}</strong>
+                                {proxima.venue ? <span className={styles.motorsportSeasonMeta}>{proxima.venue}</span> : null}
+                                {proximaDate ? (
+                                    <span className={styles.motorsportSeasonMeta}>
+                                        {capitalizar(fechaEnZonaDelVisitante(proximaDate, { weekday: 'long', day: 'numeric', month: 'long' }))}
+                                        {' · '}{fechaEnZonaDelVisitante(proximaDate, { hour: '2-digit', minute: '2-digit', hour12: false })} hs
+                                    </span>
+                                ) : null}
+                                {dias != null ? <span className={styles.motorsportSeasonChip}>{etiquetaDeDias(dias)}</span> : null}
+                            </>
+                        ) : (
+                            <span className={styles.motorsportSeasonMeta}>
+                                {tournamentStatus === 'finished' ? 'Temporada terminada.' : 'Sin próxima carrera en el calendario.'}
+                            </span>
+                        )}
                     </div>
                 </div>
-            </div>
+            </section>
         );
     };
 
-    const renderCompetitionCard = () => (
-        isMotorsportTournament ? renderMotorsportFeaturedEvent() : renderFeaturedMatch()
-    );
+    const renderCompetitionCard = () => renderFeaturedMatch();
 
-    const renderCompetitionItem = (match: any, isResult: boolean, index: number) => (
-        isMotorsportTournament ? renderMotorsportMatchItemV2(match, isResult, index) : renderMatchItem(match, isResult, index)
-    );
+    const renderCompetitionItem = (match: any, isResult: boolean, index: number) => renderMatchItem(match, isResult, index);
 
     const formatDayDividerLabel = (date: Date | null, dayKey: string): string => {
         if (!date) return 'Sin fecha';
@@ -4550,7 +5070,11 @@ export default function TournamentDetailPage({
     // overflow-x clip para que el sticky del header y de la barra de
     // pestañas funcione en esta página (con hidden, el sticky muere).
     return (
-        <div className={`${styles.page}${isFifaWorldCup ? ` ${styles.fwc26}` : ''}`} data-sticky-tabs="">
+        <div
+            className={`${styles.page}${isFifaWorldCup ? ` ${styles.fwc26}` : ''}`}
+            data-sticky-tabs=""
+            style={{ ['--banner' as string]: bannerColor }}
+        >
 
             {isFifaWorldCup && (
                 <div className={styles.fwc26TopBar} aria-hidden="true" />
@@ -4686,15 +5210,17 @@ export default function TournamentDetailPage({
                                 <ShareLinkButton title={tournamentName} className={styles.heroShareDesktop} />
                             </div>
                             <div className={styles.heroCTAs}>
+                                {/* Atajos a pestañas: en el celular las pestañas están justo
+                                    debajo, así que se esconden (heroNavShortcut). */}
                                 <button
-                                    className={styles.ctaBtnSecondary}
+                                    className={`${styles.ctaBtnSecondary} ${styles.heroNavShortcut}`}
                                     onClick={() => setActiveTab(isMotorsportTournament ? 'results' : 'fixtures')}
                                     type="button"
                                 >
                                     {isMotorsportTournament ? 'Ver Calendario' : 'Ver Fixture'}
                                 </button>
                                 <button
-                                    className={styles.ctaBtnSecondary}
+                                    className={`${styles.ctaBtnSecondary} ${styles.heroNavShortcut}`}
                                     onClick={() => setActiveTab(hasDedicatedPlayoffTab ? 'playoff' : 'standings')}
                                     type="button"
                                 >
@@ -4722,7 +5248,12 @@ export default function TournamentDetailPage({
                                     })}
                                     type="button"
                                 >
-                                    {isLeagueFavorite(favoriteTournamentId) ? '★ Siguiendo' : '☆ Seguir'}
+                                    <Star
+                                        size={15}
+                                        aria-hidden="true"
+                                        fill={isLeagueFavorite(favoriteTournamentId) ? 'currentColor' : 'none'}
+                                    />
+                                    {isLeagueFavorite(favoriteTournamentId) ? 'Siguiendo' : 'Seguir'}
                                     </button>
                                 )}
                             </div>
@@ -4732,15 +5263,15 @@ export default function TournamentDetailPage({
                     {/* ── Quick Stats Row ─────────────────────────────── */}
                     <div className={styles.quickStatsRow}>
                         <div className={styles.statCard}>
-                            <span className={styles.statCardValue}>{stats.teams || '—'}</span>
+                            <span className={styles.statCardValue}>{statsCabecera.teams || '—'}</span>
                             <span className={styles.statCardLabel}>{infoParticipantsLabel}</span>
                         </div>
                         <div className={styles.statCard}>
-                            <span className={styles.statCardValue}>{stats.played}</span>
-                            <span className={styles.statCardLabel}>Jugados</span>
+                            <span className={styles.statCardValue}>{statsCabecera.played}</span>
+                            <span className={styles.statCardLabel}>{isMotorsportTournament ? 'Corridas' : 'Jugados'}</span>
                         </div>
                         <div className={styles.statCard}>
-                            <span className={styles.statCardValue}>{stats.upcoming}</span>
+                            <span className={styles.statCardValue}>{statsCabecera.upcoming}</span>
                             <span className={styles.statCardLabel}>Restantes</span>
                         </div>
                         {/* El líder es un CLUB, no un número: va con su escudo. Antes
@@ -4757,13 +5288,13 @@ export default function TournamentDetailPage({
                                         decoding="async"
                                     />
                                 ) : null}
-                                <span className={styles.statCardValueSm}>{stats.leaderName}</span>
+                                <span className={styles.statCardValueSm}>{statsCabecera.leaderName}</span>
                             </span>
                             <span className={styles.statCardLabel}>Líder</span>
                         </div>
                         <div className={styles.statCard}>
-                            <span className={styles.statCardValue}>{stats.nextDate}</span>
-                            <span className={styles.statCardLabel}>Próxima Fecha</span>
+                            <span className={styles.statCardValue}>{statsCabecera.nextDate}</span>
+                            <span className={styles.statCardLabel}>{isMotorsportTournament ? 'Próxima carrera' : 'Próxima Fecha'}</span>
                         </div>
                     </div>
                 </div>
@@ -4874,14 +5405,13 @@ export default function TournamentDetailPage({
                             {(isMotorsportTournament || results.length > 0) && (
                                 <div className={styles.sectionCard}>
                                     <div className={styles.sectionHeader}>
-                                        <h2 className={styles.sectionTitle}>{isMotorsportTournament ? 'Clasificacion de pilotos' : summaryResultsTitle}</h2>
-                                        <button className={styles.linkButton} onClick={() => setActiveTab(isMotorsportTournament ? 'standings' : 'results')}>{isMotorsportTournament ? 'Ver clasificacion' : 'Ver todos'}</button>
+                                        <h2 className={styles.sectionTitle}>{isMotorsportTournament ? 'Clasificación de pilotos' : summaryResultsTitle}</h2>
+                                        <button className={styles.linkButton} onClick={() => setActiveTab(isMotorsportTournament ? 'standings' : 'results')}>{isMotorsportTournament ? 'Ver clasificación' : 'Ver todos'}</button>
                                     </div>
                                     {isMotorsportTournament ? renderMotorsportStandingsTable(motorsportStandingsRows, {
-                                        entityLabel: 'Piloto',
-                                        detailLabel: 'Equipo',
-                                        emptyLabel: 'Clasificacion de pilotos no disponible.',
-                                        raceColumns: motorsportDriverRaceColumns,
+                                        kind: 'drivers',
+                                        limit: 10,
+                                        emptyLabel: 'Clasificación de pilotos no disponible.',
                                     }) : (
                                         <div className={styles.matchList}>
                                             {results.slice(0, 5).map((m, idx) => renderCompetitionItem(m, true, idx))}
@@ -4901,7 +5431,7 @@ export default function TournamentDetailPage({
                                         <div className={styles.motorsportSeasonCalendarList}>
                                             {motorsportSeasonEvents.length > 0
                                                 ? motorsportSeasonEvents.slice(0, 8).map((match: any, idx: number) => renderMotorsportSeasonCalendarItem(match, idx))
-                                                : <p className={styles.emptyState}>No hay carreras cargadas aun.</p>}
+                                                : <p className={styles.emptyState}>No hay carreras cargadas aún.</p>}
                                         </div>
                                     ) : (
                                         <div className={styles.matchList}>
@@ -4915,7 +5445,7 @@ export default function TournamentDetailPage({
                             {!isMotorsportTournament && !featured && results.length === 0 && fixtures.length === 0 && (
                                 <div className={styles.sectionCard}>
                                     <p className={styles.emptyState}>
-                                        {isMotorsportTournament ? 'No hay eventos cargados aun.' : 'No hay partidos cargados aún.'}
+                                        {isMotorsportTournament ? 'No hay carreras cargadas aún.' : 'No hay partidos cargados aún.'}
                                     </p>
                                 </div>
                             )}
@@ -4932,7 +5462,7 @@ export default function TournamentDetailPage({
                                             className={styles.linkButton}
                                             onClick={() => setActiveTab(hasDedicatedPlayoffTab ? 'playoff' : 'standings')}
                                         >
-                                            {shouldUseIntegratedBracketView ? 'Ver cuadro' : isMotorsportTournament ? 'Ver clasificacion' : 'Ver cuadro'}
+                                            {shouldUseIntegratedBracketView ? 'Ver cuadro' : isMotorsportTournament ? 'Ver clasificación' : 'Ver cuadro'}
                                         </button>
                                     </div>
                                     <div className={styles.infoCardBody}>
@@ -4958,58 +5488,13 @@ export default function TournamentDetailPage({
                                 <>
                                     <div className={styles.infoCard}>
                                         <div className={styles.infoCardHeader}>
-                                            <h3 className={styles.infoCardTitle}>Ultimo GP</h3>
-                                        </div>
-                                        <div className={styles.infoCardBody}>
-                                            {motorsportLastEvent ? (
-                                                <div className={styles.motorsportContextBlock}>
-                                                    <strong className={styles.motorsportContextTitle}>{motorsportLastEvent.event_name}</strong>
-                                                    <div className={styles.motorsportContextPodium}>
-                                                        {(motorsportLastEvent.podium || []).slice(0, 3).map((driver: any, idx: number) => (
-                                                            <div key={`${motorsportLastEvent.event_name}-${driver.name}-${idx}`} className={styles.motorsportContextPodiumRow}>
-                                                                <span className={styles.motorsportContextPodiumPos}>P{idx + 1}</span>
-                                                                <span>{driver.name}</span>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            ) : (
-                                                <p className={styles.emptyState}>Sin carrera previa.</p>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    <div className={styles.infoCard}>
-                                        <div className={styles.infoCardHeader}>
-                                            <h3 className={styles.infoCardTitle}>Proximo GP</h3>
-                                        </div>
-                                        <div className={styles.infoCardBody}>
-                                            {motorsportNextEvent ? (
-                                                <div className={styles.motorsportContextBlock}>
-                                                    <strong className={styles.motorsportContextTitle}>{motorsportNextEvent.event_name}</strong>
-                                                    {motorsportNextEvent.venue && <div className={styles.motorsportContextMeta}>{motorsportNextEvent.venue}</div>}
-                                                    {motorsportNextEvent.timestamp && (
-                                                        <div className={styles.motorsportContextMeta}>
-                                                            {fechaEnZonaDelVisitante(new Date(motorsportNextEvent.timestamp * 1000), { day: '2-digit', month: 'long' })} - {fechaEnZonaDelVisitante(new Date(motorsportNextEvent.timestamp * 1000), { hour: '2-digit', minute: '2-digit', hour12: false })} hs
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            ) : (
-                                                <p className={styles.emptyState}>No hay proxima carrera definida.</p>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    <div className={styles.infoCard}>
-                                        <div className={styles.infoCardHeader}>
                                             <h3 className={styles.infoCardTitle}>Constructores</h3>
                                         </div>
                                         <div className={styles.infoCardBody}>
                                             {renderMotorsportStandingsTable(motorsportTeamRows, {
-                                                entityLabel: 'Equipo',
-                                                detailLabel: 'Detalle',
+                                                kind: 'teams',
                                                 compact: true,
-                                                emptyLabel: 'Clasificacion de equipos no disponible.',
+                                                emptyLabel: 'Clasificación de equipos no disponible.',
                                             })}
                                         </div>
                                     </div>
@@ -5022,7 +5507,7 @@ export default function TournamentDetailPage({
                                     <div className={styles.sectionHeader}>
                                         <h2 className={styles.sectionTitle}>{standingsCardTitle}</h2>
                                         <button className={styles.linkButton} onClick={() => setActiveTab('standings')}>
-                                            {isMotorsportTournament ? 'Ver clasificacion' : 'Ver tabla'}
+                                            {isMotorsportTournament ? 'Ver clasificación' : 'Ver tabla'}
                                         </button>
                                     </div>
                                     <div className={styles.tableCard}>
@@ -5184,7 +5669,7 @@ export default function TournamentDetailPage({
                                 <div className={styles.motorsportSeasonCalendarList}>
                                     {motorsportUpcomingEvents.length > 0
                                         ? motorsportUpcomingEvents.map((match: any, idx: number) => renderMotorsportSeasonCalendarItem(match, idx))
-                                        : <p className={styles.emptyState}>No hay proximas carreras programadas.</p>}
+                                        : <p className={styles.emptyState}>No hay próximas carreras programadas.</p>}
                                 </div>
                             ) : (
                                 <div className={styles.matchList}>
@@ -5243,7 +5728,12 @@ export default function TournamentDetailPage({
                                 </div>
                             </div>
                         )}
-                        <div className={styles.standingsToolbar}>
+                        <div
+                            className={styles.standingsToolbar}
+                            // El scroll horizontal de la barra recortaría la lista del
+                            // selector de fecha, que se despliega hacia abajo.
+                            style={showTimelinePicker ? { overflow: 'visible' } : undefined}
+                        >
                             {!isMotorsportTournament && !selectedStandingsScopeView && !isCircuitTournament && (
                                 <div className={styles.pillsGroup}>
                                     <button className={`${styles.pillBtn} ${standingsView === 'overall' ? styles.pillBtnActive : ''}`} onClick={() => setStandingsView('overall')}>General</button>
@@ -5261,12 +5751,16 @@ export default function TournamentDetailPage({
                                     ))}
                                 </div>
                             )}
+                            {showTimelinePicker && renderTimelineBar('toolbar')}
                             <ExportImage
                                 template="standings"
                                 filename={`tabla-${tournamentData?.name}`}
                                 data={{
                                     title: tournamentData?.name || 'Tabla de Posiciones',
-                                    subtitle: selectedStandingsScopeView?.subtitle || details?.season || 'Clasificación',
+                                    // Mirando una fecha se exporta esa tabla: que la placa lo diga.
+                                    subtitle: timelineEntry
+                                        ? `Al cierre de la fecha ${timelineEntry.round}`
+                                        : (selectedStandingsScopeView?.subtitle || details?.season || 'Clasificación'),
                                     tournamentLogo,
                                     rows: isMotorsportTournament ? motorsportStandingsExportRows : standingsExportRows,
                                     groups: isMotorsportTournament ? [] : standingsExportGroups,
@@ -5279,14 +5773,13 @@ export default function TournamentDetailPage({
 
                         {isMotorsportTournament ? (
                             <>
-                                {motorsportStandingsRows.length === 0 && <p className={styles.emptyState}>Clasificacion de pilotos no disponible.</p>}
+                                {motorsportStandingsRows.length === 0 && <p className={styles.emptyState}>Clasificación de pilotos no disponible.</p>}
                                 {motorsportStandingsRows.length > 0 && (
                                     <div className={styles.standingsContainer}>
                                         <div className={styles.sectionCard}>
                                             {renderMotorsportStandingsTable(motorsportStandingsRows, {
-                                                entityLabel: 'Piloto',
-                                                detailLabel: 'Equipo',
-                                                emptyLabel: 'Clasificacion de pilotos no disponible.',
+                                                kind: 'drivers',
+                                                emptyLabel: 'Clasificación de pilotos no disponible.',
                                                 raceColumns: motorsportDriverRaceColumns,
                                             })}
                                         </div>
@@ -5299,7 +5792,10 @@ export default function TournamentDetailPage({
                                 {activeRows.length === 0 && <p className={styles.emptyState}>Tabla no disponible.</p>}
 
                                 {activeRows.length > 0 && activeStandingsRenderer === 'standard' && (
-                                    <div className={styles.standingsContainer}>
+                                    <div
+                                        ref={standingsFlipRef}
+                                        className={`${styles.standingsContainer} ${timelineStyles.flipRoot}`}
+                                    >
                                         {activeRows[0]?.rows ? (
                                             <div className={styles.groupsStack}>
                                                 {activeRows.map((group: any, gidx: number) => (
@@ -5320,7 +5816,7 @@ export default function TournamentDetailPage({
                                                     </div>
                                                 </div>
                                         )}
-                                        {renderStandingsLegend(standingsLegendItems)}
+                                        {renderStandingsFooter(standingsLegendItems)}
                                     </div>
                                 )}
                             </>
@@ -5393,21 +5889,20 @@ export default function TournamentDetailPage({
                 {/* ── TEAMS TAB ─────────────────────────────────────────── */}
                 {activeTab === 'teams' && (
                     <div className={styles.section}>
-                        <h2 className={styles.pageTitle}>{isMotorsportTournament ? 'Equipos' : 'Equipos'}</h2>
+                        <h2 className={styles.pageTitle}>Equipos</h2>
                         {isMotorsportTournament ? (
                             motorsportTeamRows.length > 0 ? (
                                 <div className={styles.standingsContainer}>
                                     <div className={styles.sectionCard}>
                                         {renderMotorsportStandingsTable(motorsportTeamRows, {
-                                            entityLabel: 'Equipo',
-                                            detailLabel: 'Detalle',
-                                            emptyLabel: 'Clasificacion de equipos no disponible.',
+                                            kind: 'teams',
+                                            emptyLabel: 'Clasificación de equipos no disponible.',
                                             raceColumns: motorsportTeamRaceColumns,
                                         })}
                                     </div>
                                 </div>
                             ) : (
-                                <p className={styles.emptyState}>Clasificacion de equipos no disponible.</p>
+                                <p className={styles.emptyState}>Clasificación de equipos no disponible.</p>
                             )
                         ) : (() => {
                             const isDbOnly = (tournamentData as any)?.__isDbOnly;
@@ -5508,6 +6003,21 @@ export default function TournamentDetailPage({
 
                 {/* ── STATS TAB ─────────────────────────────────────────── */}
                 {activeTab === 'stats' && (() => {
+                    /* RugbyPass tiene panel propio: sus partidos llegan de la
+                       cache SIN eventos, asi que `TournamentPublicStats` —que
+                       arma sus tablas con los eventos— abria vacia. El dato
+                       existe pero del lado del proveedor y por competicion. */
+                    const rugbyPassCompetitionId = rugbyPassCompetitionIdOf(id);
+                    if (rugbyPassCompetitionId !== null) {
+                        return (
+                            <TournamentRugbyPassStats
+                                competitionId={rugbyPassCompetitionId}
+                                season={details?.season_id ? String(details.season_id) : null}
+                                tournamentName={tournamentData?.name}
+                            />
+                        );
+                    }
+
                     const sofascoreLeague = resolveSofascoreLeague(
                         tournamentData?.name,
                         tournamentData?.sportId,
@@ -5522,6 +6032,7 @@ export default function TournamentDetailPage({
                             tournamentName={tournamentData?.name}
                             tournamentLogo={tournamentLogo}
                             sportId={tournamentData?.sportId}
+                            ruleset={tournamentData?.ruleset}
                         />
                     );
                 })()}
@@ -5546,6 +6057,27 @@ export default function TournamentDetailPage({
                         tournamentName={tournamentData?.name}
                         tournamentLogo={tournamentLogo}
                         onNavigate={() => setActiveTab('summary')}
+                    />
+                )}
+
+                {/* ── HISTORICAL TAB ────────────────────────────────────── */}
+                {activeTab === 'historical' && seasonOptionsLoaded && hasHistoricalTable && (
+                    <TournamentHistoricalTab
+                        tournamentId={String(tournamentData?.id || id)}
+                        tournamentName={tournamentData?.name}
+                        tournamentLogo={tournamentLogo}
+                        seasons={seasonOptions}
+                        onExportData={setHistoricalExportData}
+                    />
+                )}
+
+                {/* ── SQUADS TAB ────────────────────────────────────────── */}
+                {activeTab === 'squads' && hasSquadTable && squadData && (
+                    <TournamentSquadTab
+                        data={squadData}
+                        tournamentName={tournamentData?.name}
+                        tournamentLogo={tournamentLogo}
+                        onExportData={setSquadExportData}
                     />
                 )}
 

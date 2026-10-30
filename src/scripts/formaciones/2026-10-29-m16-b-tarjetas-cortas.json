@@ -1,0 +1,716 @@
+{
+ "descripcion": "Torneo Cordobés M16 \"B\" 2026 (Unión Cordobesa) · tarjetas de partido (texto del SIGER) · validado contra el marcador de la base",
+ "torneo": "Torneo Cordobés M16 \"B\"",
+ "partidos": [
+  {
+   "id": "5e4bf02a-3579-40dd-bf55-db4a6152eaaa",
+   "rotulo": "Aero Club Río IV M16 \"B\" vs San Francisco R.C. M16 \"B\" · torneo-cordobes-m16-b · tarjeta 291036",
+   "local": {
+    "nombre": "Aero Club Río IV M16 \"B\"",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Gabriel Isaias Cappellari",
+      "puesto": "Pilar",
+      "id": "65add0ab-9c5e-40ad-87c7-b5e56cd0932a"
+     },
+     {
+      "numero": 2,
+      "nombre": "Patricio Castro",
+      "puesto": "Hooker",
+      "id": "5706ccea-906d-49a8-86ae-1a96d386eb56"
+     },
+     {
+      "numero": 3,
+      "nombre": "Facundo Isaias Gautier",
+      "puesto": "Pilar",
+      "id": "b21135d7-57af-457b-9873-8d51d9af3b7c"
+     },
+     {
+      "numero": 4,
+      "nombre": "Bautista Isaac Minhondo",
+      "puesto": "Segunda línea",
+      "id": "7edb2b74-750e-47fe-ae03-f2b0568c1996"
+     },
+     {
+      "numero": 5,
+      "nombre": "Pablo Hernan Moyano",
+      "puesto": "Segunda línea",
+      "id": "40b422d3-e7b3-4f06-bf6b-c22ee54ae206"
+     },
+     {
+      "numero": 6,
+      "nombre": "Simón Ezequiel Farias",
+      "puesto": "Tercera línea",
+      "id": "cf08706f-ccc5-43bc-a76f-26b3a01dba08"
+     },
+     {
+      "numero": 7,
+      "nombre": "Pedro Mateo Acuña Belver",
+      "puesto": "Tercera línea",
+      "id": "9d5d4056-8e57-4c87-9e65-bbfcdd6e8bd0"
+     },
+     {
+      "numero": 8,
+      "nombre": "Jonás Joel Cuello Ortolano",
+      "puesto": "Tercera línea",
+      "id": "353b576d-1ec6-45d7-bea4-c5e62d003a0b"
+     },
+     {
+      "numero": 9,
+      "nombre": "Laureano Lorenzo Lucero",
+      "puesto": "Medio scrum",
+      "id": "5f05aae7-9d58-47e3-9111-8f2e66f57771"
+     },
+     {
+      "numero": 10,
+      "nombre": "Rodrigo Esteban Moran",
+      "puesto": "Apertura",
+      "id": "aebd431d-db7b-4fb3-be0f-e69db57a761e"
+     },
+     {
+      "numero": 11,
+      "nombre": "Alejo Fernandez",
+      "puesto": "Wing",
+      "id": "8cca4f13-2921-40f6-80ae-e375c59037f5"
+     },
+     {
+      "numero": 12,
+      "nombre": "Samuel Reyna López",
+      "puesto": "Centro"
+     }
+    ],
+    "suplentes": []
+   },
+   "visitante": {
+    "nombre": "San Francisco R.C. M16 \"B\"",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Andres Ibarra",
+      "puesto": "Pilar",
+      "id": "2af57564-d121-4e5f-8b02-9754819f421f"
+     },
+     {
+      "numero": 2,
+      "nombre": "Benjamin Boretti",
+      "puesto": "Hooker",
+      "id": "9059b99e-31d5-4fa5-b3a9-29f0b761c048"
+     },
+     {
+      "numero": 3,
+      "nombre": "Jeremías Bustamante",
+      "puesto": "Pilar",
+      "id": "28baf26e-9054-4c7c-9795-f9625f53a6fb"
+     },
+     {
+      "numero": 4,
+      "nombre": "Santiago Cavagliato",
+      "puesto": "Segunda línea",
+      "id": "aa96bcda-d548-4b92-947a-89796017dfef"
+     },
+     {
+      "numero": 5,
+      "nombre": "Santino Terraf Vaudagna",
+      "puesto": "Segunda línea",
+      "id": "ec6030e4-4037-459e-9a7f-3e7678c55abc"
+     },
+     {
+      "numero": 6,
+      "nombre": "Leonardo Martín Guglielmone",
+      "puesto": "Tercera línea",
+      "id": "8f6fed86-08cf-4107-9ca6-17eaae60e6ba"
+     },
+     {
+      "numero": 7,
+      "nombre": "Tomas Leonardo Olocco",
+      "puesto": "Tercera línea",
+      "id": "27c3b578-62be-40a4-852a-6059990799cc"
+     },
+     {
+      "numero": 8,
+      "nombre": "Mateo Escobares",
+      "puesto": "Tercera línea",
+      "id": "3fb9e02f-9a03-437c-a4c8-38f5b562a73c"
+     },
+     {
+      "numero": 9,
+      "nombre": "Geronimo Andreo Actis",
+      "puesto": "Medio scrum",
+      "id": "8307eabf-9215-433b-81e5-6323135b4767"
+     },
+     {
+      "numero": 10,
+      "nombre": "Jose Ignacio Arca",
+      "puesto": "Apertura",
+      "id": "36ff752b-e434-4be7-81d0-cc80b4ca1fc7"
+     },
+     {
+      "numero": 11,
+      "nombre": "Juan Ignacio Bustamante Fiore",
+      "puesto": "Wing",
+      "id": "14dbff8e-bfd2-4dca-92d8-6d3e9c007556"
+     },
+     {
+      "numero": 12,
+      "nombre": "Benjamin Videla",
+      "puesto": "Centro",
+      "id": "1b6d0856-6276-4271-8ffe-08ae7eda50c7"
+     },
+     {
+      "numero": 13,
+      "nombre": "Lautaro Jorge Vicentin",
+      "puesto": "Centro",
+      "id": "26ef59ba-82d7-4e28-aed7-216d2b369917"
+     },
+     {
+      "numero": 14,
+      "nombre": "Benjamín Berazategui",
+      "puesto": "Wing",
+      "id": "fe5f9ee6-ad55-466d-bfd1-b5ef34a201d4"
+     },
+     {
+      "numero": 15,
+      "nombre": "Alejo Cejas",
+      "puesto": "Fullback",
+      "id": "9adfd830-a88f-4b17-97b8-d40d8f69e0ff"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Joaquín Nahuel Vairolatti",
+      "id": "f31b487d-23df-4d95-9523-4cd4dc450d29"
+     },
+     {
+      "numero": 17,
+      "nombre": "Joaquin Gullino"
+     },
+     {
+      "numero": 18,
+      "nombre": "Ciro Rossi"
+     },
+     {
+      "numero": 19,
+      "nombre": "Bautista Andres Boscarol",
+      "id": "73ca60c5-0a60-4e10-81fa-cd466fc0985d"
+     },
+     {
+      "numero": 20,
+      "nombre": "Maximo Giampieri Vignolo",
+      "id": "257b6c55-2f02-4065-bf88-a15543d0a2fc"
+     },
+     {
+      "numero": 21,
+      "nombre": "Urbano Boero",
+      "id": "bcc40672-3793-4db3-95e8-2a7105264c29"
+     },
+     {
+      "numero": 22,
+      "nombre": "Vicente Mallarino",
+      "id": "40fc7e90-489a-460a-b1bb-e2629400d760"
+     }
+    ]
+   },
+   "eventos": [
+    {
+     "minuto": 9,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Vicente Mallarino"
+    },
+    {
+     "minuto": 15,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "local",
+     "jugador": "Pablo Hernan Moyano",
+     "detalle": "Juego general"
+    },
+    {
+     "minuto": 15,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Jose Ignacio Arca"
+    },
+    {
+     "minuto": 15,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Jose Ignacio Arca"
+    },
+    {
+     "minuto": 31,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Jeremías Bustamante"
+    },
+    {
+     "minuto": 35,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Gabriel Isaias Cappellari"
+    },
+    {
+     "minuto": 1,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Mateo Escobares",
+     "detalle": "Entra: Urbano Boero"
+    },
+    {
+     "minuto": 1,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Santiago Cavagliato",
+     "detalle": "Entra: Maximo Giampieri Vignolo"
+    },
+    {
+     "minuto": 1,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Andres Ibarra",
+     "detalle": "Entra: Joaquín Nahuel Vairolatti"
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Rodrigo Esteban Moran"
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Tomas Leonardo Olocco"
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Jose Ignacio Arca"
+    },
+    {
+     "minuto": 11,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Facundo Isaias Gautier"
+    },
+    {
+     "minuto": 15,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "equipo": "visitante",
+     "jugador": "Alejo Cejas",
+     "detalle": "Juego general"
+    },
+    {
+     "minuto": 15,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "equipo": "visitante",
+     "jugador": "Alejo Cejas",
+     "detalle": "Juego general"
+    },
+    {
+     "minuto": 32,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Santino Terraf Vaudagna"
+    },
+    {
+     "minuto": 32,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Jose Ignacio Arca"
+    },
+    {
+     "minuto": 35,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Benjamin Videla"
+    }
+   ],
+   "arbitro": "Oyola Ricardo 33233283 (No Oficial)"
+  },
+  {
+   "id": "c77ebf39-487c-4dd6-a21f-33d0e746ccdd",
+   "rotulo": "Club La Tablada M16 \"B\" vs Aero Club Río IV M16 \"B\" · torneo-cordobes-m16-b · tarjeta 291048",
+   "local": {
+    "nombre": "Club La Tablada M16 \"B\"",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Nicanor Ceballos",
+      "puesto": "Pilar",
+      "id": "fdeda0a0-0deb-4033-8763-d260111e39c4"
+     },
+     {
+      "numero": 2,
+      "nombre": "Tomás Segovia",
+      "puesto": "Hooker",
+      "id": "fecf41ed-fad7-4128-b5db-158ed20c1424"
+     },
+     {
+      "numero": 3,
+      "nombre": "Pedro Gonzalez",
+      "puesto": "Pilar",
+      "id": "3446ab6d-a556-4f40-bda4-5b9fa04ef316"
+     },
+     {
+      "numero": 4,
+      "nombre": "Michele Gerardo Viotti",
+      "puesto": "Segunda línea",
+      "id": "713b32f1-35f9-4241-8ae4-94b1425c4c53"
+     },
+     {
+      "numero": 5,
+      "nombre": "Santiago Gueydan",
+      "puesto": "Segunda línea",
+      "id": "2ac4b00a-4a3b-4da2-98d3-4800459fd002"
+     },
+     {
+      "numero": 6,
+      "nombre": "Geronimo Suarez Zampino",
+      "puesto": "Tercera línea",
+      "id": "2cfde247-ad28-41a4-9cce-c8cf0331c7b5"
+     },
+     {
+      "numero": 7,
+      "nombre": "Simon Cabello Molina",
+      "puesto": "Tercera línea",
+      "id": "98daa6f8-fe6e-4920-989a-a8accef60235"
+     },
+     {
+      "numero": 8,
+      "nombre": "Lautaro Troche Nescier",
+      "puesto": "Tercera línea",
+      "id": "39c58fd4-2909-4d12-bdfa-ed3d27422926"
+     },
+     {
+      "numero": 9,
+      "nombre": "Manuel Villalba Zamboni",
+      "puesto": "Medio scrum",
+      "id": "cc01940c-6673-4cf8-86b0-9ec8b1ca3663"
+     },
+     {
+      "numero": 10,
+      "nombre": "Tomas Ravenna Monforte",
+      "puesto": "Apertura",
+      "id": "727754d8-9728-45d3-9f46-1666191bcab9"
+     },
+     {
+      "numero": 11,
+      "nombre": "Ulises Carmona Burton",
+      "puesto": "Wing",
+      "id": "5e0677cf-e2dc-4fb9-bd8d-10b9f5177142"
+     },
+     {
+      "numero": 12,
+      "nombre": "Baldomero Andres Gonzalez Viale",
+      "puesto": "Centro",
+      "id": "4cb4065c-be0c-48cc-89bf-4cec091abd9e"
+     },
+     {
+      "numero": 13,
+      "nombre": "Fidel Urtubey",
+      "puesto": "Centro",
+      "id": "87d1fa2f-1975-43e6-85bd-3a862d6e0617"
+     },
+     {
+      "numero": 14,
+      "nombre": "Juan Martin Molina",
+      "puesto": "Wing",
+      "id": "6fe7fd35-c8d7-426d-80fe-01bf6564a63b"
+     },
+     {
+      "numero": 15,
+      "nombre": "Andres Saturnini",
+      "puesto": "Fullback",
+      "id": "86b12278-92be-4b61-a900-dc230cad1106"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Tomas Campos Castro",
+      "id": "14745b55-39fd-4f45-b7b8-dbc0bb29eb86"
+     },
+     {
+      "numero": 17,
+      "nombre": "Francesco Della Giustina",
+      "id": "0f8fa333-a06c-422d-8069-aca1289a3f29"
+     },
+     {
+      "numero": 18,
+      "nombre": "Leonardo Hevia"
+     },
+     {
+      "numero": 19,
+      "nombre": "Nicolas Lozada Pagani",
+      "id": "ca5da253-9944-4218-9fc5-0596c1127848"
+     },
+     {
+      "numero": 20,
+      "nombre": "Tomás Furst",
+      "id": "c53715b6-3f58-4e5a-b799-0e079106eb92"
+     },
+     {
+      "numero": 21,
+      "nombre": "Bartolome Beslich De La Cuesta",
+      "id": "871a298e-ee8f-4c9c-a470-70a48697343a"
+     },
+     {
+      "numero": 22,
+      "nombre": "Matias Saravia",
+      "id": "5f96bf7e-5322-4bea-8242-83861e320eb8"
+     }
+    ]
+   },
+   "visitante": {
+    "nombre": "Aero Club Río IV M16 \"B\"",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Gabriel Isaias Cappellari",
+      "puesto": "Pilar",
+      "id": "65add0ab-9c5e-40ad-87c7-b5e56cd0932a"
+     },
+     {
+      "numero": 2,
+      "nombre": "Patricio Castro",
+      "puesto": "Hooker",
+      "id": "5706ccea-906d-49a8-86ae-1a96d386eb56"
+     },
+     {
+      "numero": 3,
+      "nombre": "Facundo Isaias Gautier",
+      "puesto": "Pilar",
+      "id": "b21135d7-57af-457b-9873-8d51d9af3b7c"
+     },
+     {
+      "numero": 4,
+      "nombre": "Bautista Isaac Minhondo",
+      "puesto": "Segunda línea",
+      "id": "7edb2b74-750e-47fe-ae03-f2b0568c1996"
+     },
+     {
+      "numero": 5,
+      "nombre": "Pablo Hernan Moyano",
+      "puesto": "Segunda línea",
+      "id": "40b422d3-e7b3-4f06-bf6b-c22ee54ae206"
+     },
+     {
+      "numero": 6,
+      "nombre": "Simón Ezequiel Farias",
+      "puesto": "Tercera línea",
+      "id": "cf08706f-ccc5-43bc-a76f-26b3a01dba08"
+     },
+     {
+      "numero": 7,
+      "nombre": "Pedro Mateo Acuña Belver",
+      "puesto": "Tercera línea",
+      "id": "9d5d4056-8e57-4c87-9e65-bbfcdd6e8bd0"
+     },
+     {
+      "numero": 8,
+      "nombre": "Jonás Joel Cuello Ortolano",
+      "puesto": "Tercera línea",
+      "id": "353b576d-1ec6-45d7-bea4-c5e62d003a0b"
+     },
+     {
+      "numero": 9,
+      "nombre": "Laureano Lorenzo Lucero",
+      "puesto": "Medio scrum",
+      "id": "5f05aae7-9d58-47e3-9111-8f2e66f57771"
+     },
+     {
+      "numero": 10,
+      "nombre": "Rodrigo Esteban Moran",
+      "puesto": "Apertura",
+      "id": "aebd431d-db7b-4fb3-be0f-e69db57a761e"
+     },
+     {
+      "numero": 11,
+      "nombre": "Alejo Fernandez",
+      "puesto": "Wing",
+      "id": "8cca4f13-2921-40f6-80ae-e375c59037f5"
+     },
+     {
+      "numero": 12,
+      "nombre": "Samuel Reyna López",
+      "puesto": "Centro"
+     }
+    ],
+    "suplentes": []
+   },
+   "eventos": [
+    {
+     "minuto": 4,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Andres Saturnini"
+    },
+    {
+     "minuto": 5,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Ulises Carmona Burton"
+    },
+    {
+     "minuto": 10,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Andres Saturnini"
+    },
+    {
+     "minuto": 11,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Ulises Carmona Burton"
+    },
+    {
+     "minuto": 12,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Ulises Carmona Burton"
+    },
+    {
+     "minuto": 12,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Ulises Carmona Burton"
+    },
+    {
+     "minuto": 20,
+     "periodo": "1T",
+     "tipo": "injury",
+     "equipo": "visitante",
+     "jugador": "Samuel Reyna López",
+     "detalle": "Tarjeta azul"
+    },
+    {
+     "minuto": 24,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Juan Martin Molina"
+    },
+    {
+     "minuto": 30,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Ulises Carmona Burton"
+    },
+    {
+     "minuto": 30,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Manuel Villalba Zamboni"
+    },
+    {
+     "minuto": 35,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Bautista Isaac Minhondo"
+    },
+    {
+     "minuto": 1,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Nicolas Lozada Pagani"
+    },
+    {
+     "minuto": 2,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Ulises Carmona Burton"
+    },
+    {
+     "minuto": 7,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Bartolome Beslich De La Cuesta"
+    },
+    {
+     "minuto": 8,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Bartolome Beslich De La Cuesta"
+    },
+    {
+     "minuto": 12,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Bartolome Beslich De La Cuesta"
+    },
+    {
+     "minuto": 12,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Tomás Furst"
+    },
+    {
+     "minuto": 22,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "equipo": "visitante",
+     "jugador": "Facundo Isaias Gautier",
+     "detalle": "Juego sucio"
+    },
+    {
+     "minuto": 30,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Nicolas Lozada Pagani"
+    },
+    {
+     "minuto": 30,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Bartolome Beslich De La Cuesta"
+    },
+    {
+     "minuto": 35,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Baldomero Andres Gonzalez Viale"
+    }
+   ],
+   "arbitro": "Santiago Herrera Albano"
+  }
+ ]
+}

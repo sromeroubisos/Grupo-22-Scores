@@ -1,0 +1,87 @@
+/*
+ * El acceso a los Awards. Pinta su propio fondo, igual en tema claro y oscuro:
+ * es la marca de los premios (negro cálido y oro), no una tarjeta más del
+ * feed. Texto claro sobre #16140f = 14:1; el oro del título 9:1.
+ */
+
+.acceso {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: var(--radius-lg, 12px);
+    border: 1px solid #8a6414;
+    background:
+        radial-gradient(140px 90px at 0% 0%, rgba(246, 226, 122, 0.18), transparent 70%),
+        #0e0d0a;
+    color: #f3ecd9;
+    text-decoration: none;
+    transition: border-color 0.15s ease, box-shadow 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.acceso:hover {
+    border-color: #e6c35c;
+    box-shadow: 0 0 22px rgba(246, 226, 122, 0.16);
+}
+
+.acceso:focus-visible {
+    outline: 2px solid #f6e27a;
+    outline-offset: 3px;
+}
+
+/* En el feed solo abajo de 1500 px: arriba de ese corte existe la columna derecha. */
+.feed {
+    display: none;
+}
+
+@media (max-width: 1499px) {
+    .feed {
+        display: flex;
+    }
+}
+
+.sidebar {
+    padding: 16px;
+}
+
+.logo {
+    flex: none;
+    width: 88px;
+    height: auto;
+}
+
+.texto {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1;
+}
+
+.titulo {
+    font-weight: 800;
+    font-size: 0.95rem;
+    line-height: 1.2;
+    color: #e6c35c;
+    text-wrap: balance;
+}
+
+.accion {
+    font-size: 0.8rem;
+    line-height: 1.3;
+    color: #cfc5a8;
+}
+
+.flecha {
+    flex: none;
+    color: #e6c35c;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .acceso {
+        transition: none;
+    }
+}

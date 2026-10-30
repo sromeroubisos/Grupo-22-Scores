@@ -1,0 +1,8671 @@
+{
+ "descripcion": "Top 8 Cuyano 2026 (Copa Oro del Oeste) · 12 fichas completas + 36 desde la cronica de rugbydecuyo.com.ar",
+ "torneo": "a41f13a6-0c70-4ab1-9dd7-dc1a68df28c0",
+ "partidos": [
+  {
+   "id": "12ef715d-167c-43bc-8930-5f7244ae70f4",
+   "rotulo": "F1 · Teqüe 26-32 Los Tordos",
+   "local": {
+    "nombre": "Teqüe",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "visitante": {
+    "nombre": "Los Tordos",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "eventos": [
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Benjamín Pérez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_try",
+     "equipo": "local",
+     "jugador": ""
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Augusto Kretschmar"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Augusto Kretschmar"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Augusto Kretschmar"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Augusto Kretschmar"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Augusto Kretschmar"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Francisco Cassone"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Francisco Cassone"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Federico Serpa"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Federico Serpa"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Federico Serpa"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Federico Serpa"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Federico Serpa"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Federico Serpa"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Federico Serpa"
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "8219ca38-2094-4381-b5ab-da42afb8a0f4",
+   "rotulo": "F1 · San Juan 14-32 CPBM",
+   "local": {
+    "nombre": "San Juan",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "visitante": {
+    "nombre": "CPBM",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "eventos": [
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Mariano Reinoso"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Joaquín Bridge"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Bautista Cúneo"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Bautista Cúneo"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Alejo Magliano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Santiago Videla"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Alejo Magliano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Alejo Magliano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Alejo Magliano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Alejo Magliano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Alejo Magliano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Alejo Magliano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Alejo Magliano"
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "e5d69111-19e1-4c3a-8266-ff33d301eac9",
+   "rotulo": "F1 · Mendoza 29-29 Liceo",
+   "arbitro": "Nicolás Quintana",
+   "cancha": "MENDOZA RUGBY CLUB (EL BERMEJO)",
+   "local": {
+    "nombre": "Mendoza",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Laurenao Valle"
+     },
+     {
+      "numero": 2,
+      "nombre": "Renato Barolo"
+     },
+     {
+      "numero": 3,
+      "nombre": "Benjamín Costantini"
+     },
+     {
+      "numero": 4,
+      "nombre": "Juan Furlán"
+     },
+     {
+      "numero": 5,
+      "nombre": "Martín Cruz"
+     },
+     {
+      "numero": 6,
+      "nombre": "Xavier Otegui"
+     },
+     {
+      "numero": 7,
+      "nombre": "Genaro Busso"
+     },
+     {
+      "numero": 8,
+      "nombre": "Francisco Álvarez",
+      "capitan": true
+     },
+     {
+      "numero": 9,
+      "nombre": "Santiago Pupatto"
+     },
+     {
+      "numero": 10,
+      "nombre": "Tomás Canedo"
+     },
+     {
+      "numero": 11,
+      "nombre": "Santiago Tapia"
+     },
+     {
+      "numero": 12,
+      "nombre": "Santiago Dapas"
+     },
+     {
+      "numero": 13,
+      "nombre": "Federico Vidal"
+     },
+     {
+      "numero": 14,
+      "nombre": "Julián Cossutta"
+     },
+     {
+      "numero": 15,
+      "nombre": "Ignacio Lucero"
+     }
+    ],
+    "suplentes": [
+     {
+      "nombre": "Luciano Morales"
+     },
+     {
+      "nombre": "Ramiro Musri"
+     },
+     {
+      "nombre": "Mariano Cicconi"
+     },
+     {
+      "nombre": "Santiago Rez Masud"
+     },
+     {
+      "nombre": "Emanuel Guzmán"
+     },
+     {
+      "nombre": "Franco Garofoli"
+     },
+     {
+      "nombre": "Jeremías Riquelme"
+     }
+    ]
+   },
+   "visitante": {
+    "nombre": "Liceo",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Joaquín Amézaga"
+     },
+     {
+      "numero": 2,
+      "nombre": "Tomás Bazán"
+     },
+     {
+      "numero": 3,
+      "nombre": "Felipe Altamiranda"
+     },
+     {
+      "numero": 4,
+      "nombre": "Adrián Cura"
+     },
+     {
+      "numero": 5,
+      "nombre": "Francisco Bertaina"
+     },
+     {
+      "numero": 6,
+      "nombre": "Enzo Cirrincione"
+     },
+     {
+      "numero": 7,
+      "nombre": "Santino Villegas"
+     },
+     {
+      "numero": 8,
+      "nombre": "Julián Rossi"
+     },
+     {
+      "numero": 9,
+      "nombre": "Joaquín Múñoz"
+     },
+     {
+      "numero": 10,
+      "nombre": "Tiago Gili"
+     },
+     {
+      "numero": 11,
+      "nombre": "Gino Castellino"
+     },
+     {
+      "numero": 12,
+      "nombre": "Juan Mateo Sancho"
+     },
+     {
+      "numero": 13,
+      "nombre": "Bruno Cirrincione"
+     },
+     {
+      "numero": 14,
+      "nombre": "Agustín Correa Llano",
+      "capitan": true
+     },
+     {
+      "numero": 15,
+      "nombre": "Tomás Videla"
+     }
+    ],
+    "suplentes": [
+     {
+      "nombre": "Santiago Videau"
+     },
+     {
+      "nombre": "Santiago Leyes"
+     },
+     {
+      "nombre": "Juan Cruz Zabaleta"
+     },
+     {
+      "nombre": "Juan Pablo Álvarez"
+     },
+     {
+      "nombre": "Tomás Dris"
+     },
+     {
+      "nombre": "Juan Perez Caram"
+     },
+     {
+      "nombre": "Agustín Demaría"
+     }
+    ]
+   },
+   "eventos": [
+    {
+     "minuto": 1,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Julián Cossutta"
+    },
+    {
+     "minuto": 1,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Tomás Canedo"
+    },
+    {
+     "minuto": 3,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Juan Mateo Sancho"
+    },
+    {
+     "minuto": 3,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Tomás Videla"
+    },
+    {
+     "minuto": 9,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Julián Rossi"
+    },
+    {
+     "minuto": 9,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Tomás Videla"
+    },
+    {
+     "minuto": 11,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Julián Cossutta"
+    },
+    {
+     "minuto": 11,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Tomás Canedo"
+    },
+    {
+     "minuto": 16,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Tomás Canedo"
+    },
+    {
+     "minuto": 2,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Felipe Altamiranda"
+    },
+    {
+     "minuto": 2,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Tomás Videla"
+    },
+    {
+     "minuto": 25,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Emanuel Guzmán"
+    },
+    {
+     "minuto": 30,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Jeremías Riquelme"
+    },
+    {
+     "minuto": 30,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Tomás Canedo"
+    },
+    {
+     "minuto": 35,
+     "periodo": "2T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Tomás Videla"
+    },
+    {
+     "minuto": 39,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Agustín Correa Llano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "visitante",
+     "jugador": "Tomás Videla"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "visitante",
+     "jugador": "Bruno Cirrincione"
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "ed13d3e2-ca35-4a1f-a47b-f3a4e6029763",
+   "rotulo": "F1 · Universitario SJ 25-27 Marista",
+   "local": {
+    "nombre": "Universitario SJ",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "visitante": {
+    "nombre": "Marista",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "eventos": [
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Nicolás Martínez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Nicolás Martínez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Vito Sambrizzi"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Teo Azar"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Teo Azar"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Teo Azar"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Teo Azar"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Gabriel Pronce"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Rafael Cardozo"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Octavio Soria"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Juan Pablo Soria"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Bautista Filizzola"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Bautista Filizzola"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Bautista Filizzola"
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "ac1baa75-724d-4a8a-a686-b0e5b4223683",
+   "rotulo": "F2 · Los Tordos 35-31 Marista",
+   "arbitro": "Francisco Nanclares",
+   "cancha": "LOS TORDOS RUGBY CLUB (GUAYMALLÉN)",
+   "local": {
+    "nombre": "Los Tordos",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Martín Santiago"
+     },
+     {
+      "numero": 2,
+      "nombre": "Facundo Placeres"
+     },
+     {
+      "numero": 3,
+      "nombre": "Bautista Salinas"
+     },
+     {
+      "numero": 4,
+      "nombre": "Roque Ongay"
+     },
+     {
+      "numero": 5,
+      "nombre": "Juan Marchena"
+     },
+     {
+      "numero": 6,
+      "nombre": "Tomás Díaz"
+     },
+     {
+      "numero": 7,
+      "nombre": "Matías Herrera"
+     },
+     {
+      "numero": 8,
+      "nombre": "Juan Enrique Arnut"
+     },
+     {
+      "numero": 9,
+      "nombre": "Juan Bautista Bruno"
+     },
+     {
+      "numero": 10,
+      "nombre": "Federico Serpa"
+     },
+     {
+      "numero": 11,
+      "nombre": "Juan Ignacio Dángelo"
+     },
+     {
+      "numero": 12,
+      "nombre": "Tomás Arrigoni",
+      "capitan": true
+     },
+     {
+      "numero": 13,
+      "nombre": "Gonzalo Intzes"
+     },
+     {
+      "numero": 14,
+      "nombre": "Facundo Tonón"
+     },
+     {
+      "numero": 15,
+      "nombre": "Francisco Galdeano"
+     }
+    ],
+    "suplentes": [
+     {
+      "nombre": "Manuel Arroyo"
+     },
+     {
+      "nombre": "Franco Pizzi"
+     },
+     {
+      "nombre": "Conrado Bertranou"
+     },
+     {
+      "nombre": "Lautaro Varela"
+     },
+     {
+      "nombre": "Pedro Lértora"
+     },
+     {
+      "nombre": "Gino Ambrosi"
+     }
+    ]
+   },
+   "visitante": {
+    "nombre": "Marista",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Estanislao Rodriguez"
+     },
+     {
+      "numero": 2,
+      "nombre": "Antonio Fernández"
+     },
+     {
+      "numero": 3,
+      "nombre": "Rafael Cardozo"
+     },
+     {
+      "numero": 4,
+      "nombre": "Juan Pablo Soria"
+     },
+     {
+      "numero": 5,
+      "nombre": "Juan Pablo Laborde"
+     },
+     {
+      "numero": 6,
+      "nombre": "Matías Cid"
+     },
+     {
+      "numero": 7,
+      "nombre": "Francisco Allamand"
+     },
+     {
+      "numero": 8,
+      "nombre": "Gerónimo Tejada"
+     },
+     {
+      "numero": 9,
+      "nombre": "Lucca Filizzola"
+     },
+     {
+      "numero": 10,
+      "nombre": "Benjamín Filizzola"
+     },
+     {
+      "numero": 11,
+      "nombre": "Julián Gaffuri"
+     },
+     {
+      "numero": 12,
+      "nombre": "Lisandro Sosa"
+     },
+     {
+      "numero": 13,
+      "nombre": "Alejo Videla",
+      "capitan": true
+     },
+     {
+      "numero": 14,
+      "nombre": "Luciano Fariello"
+     },
+     {
+      "numero": 15,
+      "nombre": "Matías Colomer"
+     }
+    ],
+    "suplentes": [
+     {
+      "nombre": "Maxi Montilla"
+     },
+     {
+      "nombre": "Marcos Porro"
+     },
+     {
+      "nombre": "Telmo Fernández"
+     },
+     {
+      "nombre": "Ignacio Linares"
+     },
+     {
+      "nombre": "Bautista Ecrenaz"
+     },
+     {
+      "nombre": "Franco Canciani"
+     },
+     {
+      "nombre": "Bautista Curto"
+     }
+    ]
+   },
+   "eventos": [
+    {
+     "minuto": 7,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Federico Serpa"
+    },
+    {
+     "minuto": 13,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Facundo Tonón"
+    },
+    {
+     "minuto": 18,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Bautista Filizzola"
+    },
+    {
+     "minuto": 25,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Federico Serpa"
+    },
+    {
+     "minuto": 25,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Federico Serpa"
+    },
+    {
+     "minuto": 28,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Federico Serpa"
+    },
+    {
+     "minuto": 32,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Federico Serpa"
+    },
+    {
+     "minuto": 38,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Lucca Filizzola"
+    },
+    {
+     "minuto": 38,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Bautista Filizzola"
+    },
+    {
+     "minuto": 7,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Gonzalo Intzes"
+    },
+    {
+     "minuto": 7,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Federico Serpa"
+    },
+    {
+     "minuto": 18,
+     "periodo": "2T",
+     "tipo": "penalty_try",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 30,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Alejo Videla"
+    },
+    {
+     "minuto": 30,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Bautista Filizzola"
+    },
+    {
+     "minuto": 39,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Antonio Fernández"
+    },
+    {
+     "minuto": 39,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Bautista Filizzola"
+    },
+    {
+     "minuto": 42,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Pedro Lértora"
+    },
+    {
+     "minuto": 42,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Federico Serpa"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "local",
+     "jugador": "Franco Pizzi"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "local",
+     "jugador": "Pedro Lértora"
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "c69155b8-ff12-4f6b-97e8-ca66650ece08",
+   "rotulo": "F2 · CPBM 3-39 Mendoza",
+   "local": {
+    "nombre": "CPBM",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "visitante": {
+    "nombre": "Mendoza",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "eventos": [
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Alejo Magliano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Julián Cossutta"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Julián Cossutta"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Julián Cossutta"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Ignacio Vidal"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Ignacio Vidal"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_try",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Tomás Canedo"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Tomás Canedo"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Tomás Canedo"
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "eab845c4-2f43-46c0-98e8-15540f8f84f7",
+   "rotulo": "F2 · San Juan 30-13 Teqüe",
+   "local": {
+    "nombre": "San Juan",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "visitante": {
+    "nombre": "Teqüe",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "eventos": [
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Felipe González"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Felipe González"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Santiago Peñafort"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Joaquín Farré"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Bautista Cúneo"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Bautista Cúneo"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Bautista Cúneo"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Estiliano Battezzati"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Benjamín Pérez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Augusto Kretschmar"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Augusto Kretschmar"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Augusto Kretschmar"
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "fdcd817a-5075-4f84-a54f-351066b7b74d",
+   "rotulo": "F2 · Liceo 35-24 Universitario SJ",
+   "local": {
+    "nombre": "Liceo",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "visitante": {
+    "nombre": "Universitario SJ",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "eventos": [
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Facundo Lucero"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Facundo Lucero"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Ignacio Caldo"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Santiago Videau"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Tomás Videla"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Tomás Videla"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Tomás Videla"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Tomás Videla"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Tomás Videla"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Tomás Videla"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Nicolás Martínez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Santiago Achem"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Bautista Suarez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Gerónimo Arabel"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Gerónimo Arabel"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Gerónimo Arabel"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Teo Azar"
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "25d975ee-e15d-4a95-bda7-3acb169d192c",
+   "rotulo": "F3 · Teqüe 7-35 Liceo",
+   "arbitro": "Juan Manuel Martínez",
+   "cancha": "TEQÜE  RUGBY CLUB (GENERAL ORTEGA)",
+   "local": {
+    "nombre": "Teqüe",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Esteban Fernández"
+     },
+     {
+      "numero": 2,
+      "nombre": "Julián Martín"
+     },
+     {
+      "numero": 3,
+      "nombre": "Pablo Sáez"
+     },
+     {
+      "numero": 4,
+      "nombre": "Benjamín Pérez"
+     },
+     {
+      "numero": 5,
+      "nombre": "Ignacio Acosta"
+     },
+     {
+      "numero": 6,
+      "nombre": "Santino Sabatelli"
+     },
+     {
+      "numero": 7,
+      "nombre": "Pablo Echalecu"
+     },
+     {
+      "numero": 8,
+      "nombre": "Juan Manuel Maure"
+     },
+     {
+      "numero": 9,
+      "nombre": "Augusto Kretschmar"
+     },
+     {
+      "numero": 10,
+      "nombre": "Lautaro Calle"
+     },
+     {
+      "numero": 11,
+      "nombre": "Gabriel Regules"
+     },
+     {
+      "numero": 12,
+      "nombre": "Mauro Quiroga"
+     },
+     {
+      "numero": 13,
+      "nombre": "Gastón Giachini",
+      "capitan": true
+     },
+     {
+      "numero": 14,
+      "nombre": "Luca Salguero"
+     },
+     {
+      "numero": 15,
+      "nombre": "Iván Molina"
+     }
+    ],
+    "suplentes": [
+     {
+      "nombre": "Renzo Martín"
+     },
+     {
+      "nombre": "Francisco Vega"
+     },
+     {
+      "nombre": "Gonzalo Pérez"
+     },
+     {
+      "nombre": "Fermín Castro"
+     },
+     {
+      "nombre": "Joaquín López"
+     },
+     {
+      "nombre": "Tomás Konjak"
+     }
+    ]
+   },
+   "visitante": {
+    "nombre": "Liceo",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Santiago Videau"
+     },
+     {
+      "numero": 2,
+      "nombre": "Tomás Bazán"
+     },
+     {
+      "numero": 3,
+      "nombre": "Felipe Altamiranda"
+     },
+     {
+      "numero": 4,
+      "nombre": "Agustín Quiroga"
+     },
+     {
+      "numero": 5,
+      "nombre": "Francisco Bertaina"
+     },
+     {
+      "numero": 6,
+      "nombre": "Enzo Cirrincione"
+     },
+     {
+      "numero": 7,
+      "nombre": "Santino Villegas"
+     },
+     {
+      "numero": 8,
+      "nombre": "Tomás Castro"
+     },
+     {
+      "numero": 9,
+      "nombre": "Juan Manuel Pérez Caram"
+     },
+     {
+      "numero": 10,
+      "nombre": "Juan Mateo Sancho"
+     },
+     {
+      "numero": 11,
+      "nombre": "Gino Castellino"
+     },
+     {
+      "numero": 12,
+      "nombre": "Tomás Videla"
+     },
+     {
+      "numero": 13,
+      "nombre": "Facundo Lucero"
+     },
+     {
+      "numero": 14,
+      "nombre": "Agustín Correa Llano",
+      "capitan": true
+     },
+     {
+      "numero": 15,
+      "nombre": "Ignacio Gaido"
+     }
+    ],
+    "suplentes": [
+     {
+      "nombre": "Joaquín Amézaga"
+     },
+     {
+      "nombre": "Julián Rossi"
+     },
+     {
+      "nombre": "Joaquín Múñoz"
+     },
+     {
+      "nombre": "Bruno Cirrincione"
+     },
+     {
+      "nombre": "Francisco Olguín"
+     }
+    ]
+   },
+   "eventos": [
+    {
+     "minuto": 8,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Juan Mateo Sancho"
+    },
+    {
+     "minuto": 8,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Tomás Videla"
+    },
+    {
+     "minuto": 16,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Agustín Correa Llano"
+    },
+    {
+     "minuto": 16,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Tomás Videla"
+    },
+    {
+     "minuto": 31,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Santiago Videau"
+    },
+    {
+     "minuto": 31,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Tomás Videla"
+    },
+    {
+     "minuto": 38,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Enzo Cirrincione"
+    },
+    {
+     "minuto": 38,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Tomás Videla"
+    },
+    {
+     "minuto": 26,
+     "periodo": "2T",
+     "tipo": "penalty_try",
+     "equipo": "local",
+     "jugador": ""
+    },
+    {
+     "minuto": 37,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Gino Castellino"
+    },
+    {
+     "minuto": 37,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Tomás Videla"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "local",
+     "jugador": "Benjamín Pérez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "visitante",
+     "jugador": "Felipe Altamiranda"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "visitante",
+     "jugador": "Joaquín Amézaga"
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "936c5bae-d163-4721-aace-055c7658f22d",
+   "rotulo": "F3 · CPBM 21-34 Los Tordos",
+   "local": {
+    "nombre": "CPBM",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "visitante": {
+    "nombre": "Los Tordos",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "eventos": [
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Branco Gutierrez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Joaquín Rodriguez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Alejo Magliano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Alejo Magliano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Alejo Magliano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Facundo Consorte"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Juan Ignacio Dángelo"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Facundo Tonón"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Francisco Cassone"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Bautista Bruno"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Francisco Galdeano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Francisco Galdeano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Francisco Galdeano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Francisco Galdeano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Pedro Lértora"
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "d8a76630-947c-4654-b466-6a7b5d162977",
+   "rotulo": "F3 · Mendoza 33-29 Universitario SJ",
+   "local": {
+    "nombre": "Mendoza",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "visitante": {
+    "nombre": "Universitario SJ",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "eventos": [
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Santiago Tapia"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Agustín Lombardo"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Santiago Dapas"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Francisco Álvarez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_try",
+     "equipo": "local",
+     "jugador": ""
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Tomás Canedo"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Tomás Canedo"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Tomás Canedo"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Gerónimo Adarvez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Agustín Sales"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Julián Aguiar"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Nicolás Martínez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Gerónimo Arabel"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Gerónimo Arabel"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Gerónimo Arabel"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Gerónimo Arabel"
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "e8b4e644-d7af-4407-8fac-a9a6ae22b38b",
+   "rotulo": "F3 · Marista 26-22 San Juan",
+   "local": {
+    "nombre": "Marista",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "visitante": {
+    "nombre": "San Juan",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "eventos": [
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Marcos Porro"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Benjamín Filizzola"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Matías Colomer"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Bautista Curto"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Lisandro Sosa"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Lisandro Sosa"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Bautista Filizzola"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Bautista Scadding"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Estiliano Battezzati"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Estiliano Battezzati"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Estiliano Battezzati"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Estiliano Battezzati"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Estiliano Battezzati"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Estiliano Battezzati"
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "43dba851-f30f-4a12-b2f4-b6893815e512",
+   "rotulo": "F4 · Universitario SJ 47-5 Teqüe",
+   "local": {
+    "nombre": "Universitario SJ",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "visitante": {
+    "nombre": "Teqüe",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "eventos": [
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Gerónimo Arabel"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Gerónimo Arabel"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Julián Aguiar"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Lautaro Torcivia"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Juan Ignacio Del Carril"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Agustín Sales"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Gerónimo Arabel"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Gerónimo Arabel"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Gerónimo Arabel"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Gerónimo Arabel"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Gerónimo Arabel"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Gerónimo Arabel"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "drop_goal",
+     "equipo": "local",
+     "jugador": "Gerónimo Arabel"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Mauricio Godoy"
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "5968fa0c-c6a4-44b1-bc55-9821ca4dddb9",
+   "rotulo": "F4 · Los Tordos 35-34 Liceo",
+   "arbitro": "Ciro Diciano",
+   "cancha": "LOS TORDOS RUGBY CLUB (GUAYMALLÉN)",
+   "local": {
+    "nombre": "Los Tordos",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Martín Santiago"
+     },
+     {
+      "numero": 2,
+      "nombre": "Manuel Arroyo",
+      "capitan": true
+     },
+     {
+      "numero": 3,
+      "nombre": "Juan Manuel Vivas"
+     },
+     {
+      "numero": 4,
+      "nombre": "Lautaro Varela"
+     },
+     {
+      "numero": 5,
+      "nombre": "Facundo Díaz"
+     },
+     {
+      "numero": 6,
+      "nombre": "Valentino Miranda"
+     },
+     {
+      "numero": 7,
+      "nombre": "Juan Enrique Arnut"
+     },
+     {
+      "numero": 8,
+      "nombre": "Julián Ortíz"
+     },
+     {
+      "numero": 9,
+      "nombre": "Gonzalo Bertranou"
+     },
+     {
+      "numero": 10,
+      "nombre": "Francisco Galdeano"
+     },
+     {
+      "numero": 11,
+      "nombre": "Juan Ignacio Dángelo"
+     },
+     {
+      "numero": 12,
+      "nombre": "Tomás Arrigoni"
+     },
+     {
+      "numero": 13,
+      "nombre": "Gonzalo Intzes"
+     },
+     {
+      "numero": 14,
+      "nombre": "Francisco Cassone"
+     },
+     {
+      "numero": 15,
+      "nombre": "Facundo Tonón"
+     }
+    ],
+    "suplentes": [
+     {
+      "nombre": "Francisco Rugoso"
+     },
+     {
+      "nombre": "José Dángelo"
+     },
+     {
+      "nombre": "Santiago Bustamante"
+     },
+     {
+      "nombre": "Matías Herrera"
+     },
+     {
+      "nombre": "Martín Orrico"
+     },
+     {
+      "nombre": "Enzo Filice"
+     }
+    ]
+   },
+   "visitante": {
+    "nombre": "Liceo",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Santiago Videau"
+     },
+     {
+      "numero": 2,
+      "nombre": "Tomás Bazán"
+     },
+     {
+      "numero": 3,
+      "nombre": "Felipe Altamiranda"
+     },
+     {
+      "numero": 4,
+      "nombre": "Agustín Quiroga"
+     },
+     {
+      "numero": 5,
+      "nombre": "Adrián Cura"
+     },
+     {
+      "numero": 6,
+      "nombre": "Tomás Castro"
+     },
+     {
+      "numero": 7,
+      "nombre": "Santino Villegas"
+     },
+     {
+      "numero": 8,
+      "nombre": "Julián Rossi"
+     },
+     {
+      "numero": 9,
+      "nombre": "Joaquín Múñoz"
+     },
+     {
+      "numero": 10,
+      "nombre": "Juan Mateo Sancho"
+     },
+     {
+      "numero": 11,
+      "nombre": "Gino Castellino"
+     },
+     {
+      "numero": 12,
+      "nombre": "Bruno Cirrincione"
+     },
+     {
+      "numero": 13,
+      "nombre": "Facundo Lucero"
+     },
+     {
+      "numero": 14,
+      "nombre": "Agustín Correa Llano",
+      "capitan": true
+     },
+     {
+      "numero": 15,
+      "nombre": "Ignacio Gaido"
+     }
+    ],
+    "suplentes": [
+     {
+      "nombre": "Juan Ignacio Rodríguez"
+     },
+     {
+      "nombre": "Pablo Berríos"
+     },
+     {
+      "nombre": "Enzo Cirrincione"
+     },
+     {
+      "nombre": "Juan Ignacio Calderón"
+     },
+     {
+      "nombre": "Juan Manuel Pérez Caram"
+     },
+     {
+      "nombre": "Tiago Gili"
+     },
+     {
+      "nombre": "Tomás Molina"
+     }
+    ]
+   },
+   "eventos": [
+    {
+     "minuto": 3,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Manuel Arroyo"
+    },
+    {
+     "minuto": 3,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Francisco Galdeano"
+    },
+    {
+     "minuto": 17,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Valentino Miranda"
+    },
+    {
+     "minuto": 17,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Francisco Galdeano"
+    },
+    {
+     "minuto": 20,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Gino Castellino"
+    },
+    {
+     "minuto": 20,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Tiago Gili"
+    },
+    {
+     "minuto": 27,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Francisco Galdeano"
+    },
+    {
+     "minuto": 27,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Francisco Galdeano"
+    },
+    {
+     "minuto": 40,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Santino Villegas"
+    },
+    {
+     "minuto": 3,
+     "periodo": "2T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Ignacio Gaido"
+    },
+    {
+     "minuto": 5,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Martín Orrico"
+    },
+    {
+     "minuto": 5,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Francisco Galdeano"
+    },
+    {
+     "minuto": 13,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Enzo Cirrincione"
+    },
+    {
+     "minuto": 17,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Tiago Gili"
+    },
+    {
+     "minuto": 17,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Ignacio Gaido"
+    },
+    {
+     "minuto": 28,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Julián Rossi"
+    },
+    {
+     "minuto": 28,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Ignacio Gaido"
+    },
+    {
+     "minuto": 31,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Facundo Tonón"
+    },
+    {
+     "minuto": 31,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Francisco Galdeano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "local",
+     "jugador": "Martín Santiago"
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "6d982e19-413f-4bfb-8a0a-74ac3a6404dd",
+   "rotulo": "F4 · San Juan 23-34 Mendoza",
+   "local": {
+    "nombre": "San Juan",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "visitante": {
+    "nombre": "Mendoza",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "eventos": [
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Bautista Domanico"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Juan Pablo Venier"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Estiliano Battezzati"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Estiliano Battezzati"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Estiliano Battezzati"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Estiliano Battezzati"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Renato Barolo"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Julián Cossutta"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Ernesto Giudice"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Santiago Tapia"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Franco Palazzini"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Franco Palazzini"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Santiago Rez Masud"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Santiago Rez Masud"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Santiago Rez Masud"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Santiago Rez Masud"
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "bf8e08fa-91b5-4ae3-a65e-5e23cbe46064",
+   "rotulo": "F4 · Marista 62-27 CPBM",
+   "local": {
+    "nombre": "Marista",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "visitante": {
+    "nombre": "CPBM",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "eventos": [
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Alejandro Pronce"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Alejandro Pronce"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Conall Unger"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Conall Unger"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Luciano Fariello"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Telmo Fernández"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Julián Guevara"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Matías Colomer"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Lisandro Sosa"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Tomás Montilla"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Lisandro Sosa"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Lisandro Sosa"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Lisandro Sosa"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Lisandro Sosa"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Lisandro Sosa"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Lisandro Sosa"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Facundo Consorte"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Luciano Gutierrez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Manuel Sonzogni"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Alejo Magliano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Alejo Magliano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Alejo Magliano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Alejo Magliano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Alejo Magliano"
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "adbcec2c-5180-49a6-a6e4-314c48b15a3e",
+   "rotulo": "F5 · Los Tordos 55-52 Universitario SJ",
+   "local": {
+    "nombre": "Los Tordos",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "visitante": {
+    "nombre": "Universitario SJ",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "eventos": [
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Facundo Tonón"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Facundo Tonón"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Facundo Tonón"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Juan Ignacio Dángelo"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Juan Ignacio Dángelo"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Juan Ignacio Dángelo"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Martín Orrico"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Juan Enrique Arnut"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Gonzalo Intzes"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Francisco Galdeano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Francisco Galdeano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Francisco Galdeano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Francisco Galdeano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Francisco Galdeano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Gerónimo Arabel"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Nicolás Martínez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Gerónimo Adarvez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Joaquín Sánchez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Francisco Marcucci"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Santiago Baldi"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Lucas Bulóz"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_try",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Gerónimo Arabel"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Gerónimo Arabel"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Gerónimo Arabel"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Gerónimo Arabel"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Gerónimo Arabel"
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "b1822431-cc06-430f-9cd2-184efe3dc633",
+   "rotulo": "F5 · Liceo 48-26 San Juan",
+   "local": {
+    "nombre": "Liceo",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "visitante": {
+    "nombre": "San Juan",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "eventos": [
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Agustín Correa Llano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Agustín Correa Llano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Facundo Lucero"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Julián Rossi"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Enzo Cirrincione"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Gino Castellino"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_try",
+     "equipo": "local",
+     "jugador": ""
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Ignacio Gaido"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Ignacio Gaido"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Ignacio Gaido"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Ignacio Gaido"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Ignacio Gaido"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Joaquín Farré"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Felipe González"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Gonzalo Roldán"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Santiago Albarracín"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Estiliano Battezzati"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Estiliano Battezzati"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Estiliano Battezzati"
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "bbe93b69-d0e0-4100-8a75-d007f0b5b48e",
+   "rotulo": "F5 · Mendoza 11-22 Marista",
+   "arbitro": "Sebastián López",
+   "cancha": "MENDOZA RUGBY CLUB (EL BERMEJO)",
+   "local": {
+    "nombre": "Mendoza",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Mauro Savina"
+     },
+     {
+      "numero": 2,
+      "nombre": "Renato Barolo"
+     },
+     {
+      "numero": 3,
+      "nombre": "Benjamín Costantini"
+     },
+     {
+      "numero": 4,
+      "nombre": "Felipe Rubiolo"
+     },
+     {
+      "numero": 5,
+      "nombre": "Martín Cruz"
+     },
+     {
+      "numero": 6,
+      "nombre": "Xavier Otegui"
+     },
+     {
+      "numero": 7,
+      "nombre": "Francisco Álvarez",
+      "capitan": true
+     },
+     {
+      "numero": 8,
+      "nombre": "Francisco Stávile"
+     },
+     {
+      "numero": 9,
+      "nombre": "Santiago Puppato"
+     },
+     {
+      "numero": 10,
+      "nombre": "Santiago Rez Masud"
+     },
+     {
+      "numero": 11,
+      "nombre": "Santiago Tapia"
+     },
+     {
+      "numero": 12,
+      "nombre": "Santiago Dapas"
+     },
+     {
+      "numero": 13,
+      "nombre": "Ernesto Giudice"
+     },
+     {
+      "numero": 14,
+      "nombre": "Julián Cossutta"
+     },
+     {
+      "numero": 15,
+      "nombre": "Ignacio Lucero"
+     }
+    ],
+    "suplentes": [
+     {
+      "nombre": "Luciano Morales"
+     },
+     {
+      "nombre": "Exequiel Riquero"
+     },
+     {
+      "nombre": "Juan Furlán"
+     },
+     {
+      "nombre": "Juan Pablo Álvarez"
+     },
+     {
+      "nombre": "Federico Vidal"
+     },
+     {
+      "nombre": "Emanuel Guzmán"
+     }
+    ]
+   },
+   "visitante": {
+    "nombre": "Marista",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Maxi Montilla"
+     },
+     {
+      "numero": 2,
+      "nombre": "Tomás Montilla"
+     },
+     {
+      "numero": 3,
+      "nombre": "Marcos Porro"
+     },
+     {
+      "numero": 4,
+      "nombre": "Juan Pablo Soria"
+     },
+     {
+      "numero": 5,
+      "nombre": "Juan Pablo Laborde"
+     },
+     {
+      "numero": 6,
+      "nombre": "Francisco Allamand"
+     },
+     {
+      "numero": 7,
+      "nombre": "Gerónimo Tejada"
+     },
+     {
+      "numero": 8,
+      "nombre": "Telmo Fernández"
+     },
+     {
+      "numero": 9,
+      "nombre": "Bautista Curto"
+     },
+     {
+      "numero": 10,
+      "nombre": "Lisandro Sosa"
+     },
+     {
+      "numero": 11,
+      "nombre": "Julián Guevara"
+     },
+     {
+      "numero": 12,
+      "nombre": "Conall Unger"
+     },
+     {
+      "numero": 13,
+      "nombre": "Borja Filizzola"
+     },
+     {
+      "numero": 14,
+      "nombre": "Lucas Bartolini"
+     },
+     {
+      "numero": 15,
+      "nombre": "Matías Colomer",
+      "capitan": true
+     }
+    ],
+    "suplentes": [
+     {
+      "nombre": "Estanislao Rodriguez"
+     },
+     {
+      "nombre": "Jesús Porro"
+     },
+     {
+      "nombre": "Alejandro Pronce"
+     },
+     {
+      "nombre": "Tomás Gómez"
+     },
+     {
+      "nombre": "Genaro Podestá"
+     },
+     {
+      "nombre": "Ignacio Linares"
+     }
+    ]
+   },
+   "eventos": [
+    {
+     "minuto": 3,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Tomás Montilla"
+    },
+    {
+     "minuto": 3,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Lisandro Sosa"
+    },
+    {
+     "minuto": 16,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Lucas Bartolini"
+    },
+    {
+     "minuto": 16,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Lisandro Sosa"
+    },
+    {
+     "minuto": 21,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Renato Barolo"
+    },
+    {
+     "minuto": 24,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Lisandro Sosa"
+    },
+    {
+     "minuto": 2,
+     "periodo": "2T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Santiago Rez Masud"
+    },
+    {
+     "minuto": 6,
+     "periodo": "2T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Santiago Rez Masud"
+    },
+    {
+     "minuto": 11,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Alejandro Pronce"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "local",
+     "jugador": "Juan Pablo Álvarez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "visitante",
+     "jugador": "Jesús Porro"
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "eeb0cc5e-691f-469e-beb9-e48bc788708d",
+   "rotulo": "F5 · Teqüe 22-33 CPBM",
+   "local": {
+    "nombre": "Teqüe",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "visitante": {
+    "nombre": "CPBM",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "eventos": [
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Nicolás Quiroga"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Nicolás Quiroga"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Lautaro Calle"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Lautaro Calle"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Lautaro Calle"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Lautaro Calle"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Fausto Martinez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Fausto Martinez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Luciano Gutierrez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Francisco García Salazar"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Alejo Magliano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Alejo Magliano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Alejo Magliano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Alejo Magliano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Alejo Magliano"
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "63c7af5e-3fab-478a-a1c5-7f435c6e146f",
+   "rotulo": "F6 · Marista 19-25 Liceo",
+   "arbitro": "Juan Espíndola",
+   "cancha": "MARISTA RUGBY CLUB (LA CARRODILLA)",
+   "local": {
+    "nombre": "Marista",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Estanislao Rodriguez"
+     },
+     {
+      "numero": 2,
+      "nombre": "Alejandro Pronce"
+     },
+     {
+      "numero": 3,
+      "nombre": "Germán Tello"
+     },
+     {
+      "numero": 4,
+      "nombre": "Juan Pablo Soria"
+     },
+     {
+      "numero": 5,
+      "nombre": "Juan Pablo Laborde"
+     },
+     {
+      "numero": 6,
+      "nombre": "Francisco Allamand"
+     },
+     {
+      "numero": 7,
+      "nombre": "Matías Cid"
+     },
+     {
+      "numero": 8,
+      "nombre": "Telmo Fernández"
+     },
+     {
+      "numero": 9,
+      "nombre": "Lucca Filizzola"
+     },
+     {
+      "numero": 10,
+      "nombre": "Lisandro Sosa"
+     },
+     {
+      "numero": 11,
+      "nombre": "Julián Guevara"
+     },
+     {
+      "numero": 12,
+      "nombre": "Conall Unger"
+     },
+     {
+      "numero": 13,
+      "nombre": "Ignaco Linares"
+     },
+     {
+      "numero": 14,
+      "nombre": "Lucas Bartolini"
+     },
+     {
+      "numero": 15,
+      "nombre": "Matías Colomer",
+      "capitan": true
+     }
+    ],
+    "suplentes": [
+     {
+      "nombre": "Alvaro Llaver"
+     },
+     {
+      "nombre": "Tomás Montilla"
+     },
+     {
+      "nombre": "Marcos Porro"
+     },
+     {
+      "nombre": "Bautista Curto"
+     },
+     {
+      "nombre": "Tomás Gómez"
+     },
+     {
+      "nombre": "Juan De La Cruz Calle"
+     },
+     {
+      "nombre": "Alejo Videla"
+     }
+    ]
+   },
+   "visitante": {
+    "nombre": "Liceo",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Santiago Videau"
+     },
+     {
+      "numero": 2,
+      "nombre": "Tomás Bazán"
+     },
+     {
+      "numero": 3,
+      "nombre": "Felipe Altamiranda"
+     },
+     {
+      "numero": 4,
+      "nombre": "Julián Rossi"
+     },
+     {
+      "numero": 5,
+      "nombre": "Adrián Cura"
+     },
+     {
+      "numero": 6,
+      "nombre": "Enzo Cirrincione"
+     },
+     {
+      "numero": 7,
+      "nombre": "Santino Villegas"
+     },
+     {
+      "numero": 8,
+      "nombre": "Tomás Castro"
+     },
+     {
+      "numero": 9,
+      "nombre": "Juan Manuel Pérez Caram"
+     },
+     {
+      "numero": 10,
+      "nombre": "Tiago Gili"
+     },
+     {
+      "numero": 11,
+      "nombre": "Gino Castellino"
+     },
+     {
+      "numero": 12,
+      "nombre": "Álvaro Guillen"
+     },
+     {
+      "numero": 13,
+      "nombre": "Facundo Lucero"
+     },
+     {
+      "numero": 14,
+      "nombre": "Agustín Correa Llano",
+      "capitan": true
+     },
+     {
+      "numero": 15,
+      "nombre": "Ignacio Gaido"
+     }
+    ],
+    "suplentes": [
+     {
+      "nombre": "Juan Ignacio Rodríguez"
+     },
+     {
+      "nombre": "Joaquín Amezaga"
+     },
+     {
+      "nombre": "Agustín Quiroga"
+     },
+     {
+      "nombre": "Joaquín Múñoz"
+     },
+     {
+      "nombre": "Ramiro Gassull"
+     },
+     {
+      "nombre": "Tomás Videla"
+     },
+     {
+      "nombre": "Tomás Molina"
+     }
+    ]
+   },
+   "eventos": [
+    {
+     "minuto": 5,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Alejandro Pronce"
+    },
+    {
+     "minuto": 20,
+     "periodo": "1T",
+     "tipo": "penalty_try",
+     "equipo": "local",
+     "jugador": ""
+    },
+    {
+     "minuto": 31,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Agustín Correa Llano"
+    },
+    {
+     "minuto": 31,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Ignacio Gaido"
+    },
+    {
+     "minuto": 4,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Tomás Bazán"
+    },
+    {
+     "minuto": 5,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Lucas Bartolini"
+    },
+    {
+     "minuto": 5,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Lisandro Sosa"
+    },
+    {
+     "minuto": 20,
+     "periodo": "2T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Tomás Videla"
+    },
+    {
+     "minuto": 27,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Tomás Castro"
+    },
+    {
+     "minuto": 27,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Tomás Videla"
+    },
+    {
+     "minuto": 35,
+     "periodo": "2T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Tomás Videla"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "local",
+     "jugador": "Alvaro Llaver"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "visitante",
+     "jugador": "Felipe Altamiranda"
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "aa02aa0b-100a-464c-aeae-ccdf8eca9fd2",
+   "rotulo": "F6 · CPBM 25-16 Universitario SJ",
+   "local": {
+    "nombre": "CPBM",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "visitante": {
+    "nombre": "Universitario SJ",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "eventos": [
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Fausto Martinez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Fausto Martinez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Manuel Sonzogni"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Facundo Consorte"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Alejo Magliano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Alejo Magliano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Alejo Magliano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Guillermo Quiroga"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Juan Martin Uzair"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Gerónimo Arabel"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Gerónimo Arabel"
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "b063572e-d16e-432a-a097-ee0cfa4252ce",
+   "rotulo": "F6 · Teqüe 5-54 Mendoza",
+   "local": {
+    "nombre": "Teqüe",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "visitante": {
+    "nombre": "Mendoza",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "eventos": [
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Román Zelada"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Julián Cossutta"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Julián Cossutta"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Santiago Rez Masud"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Santiago Rez Masud"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Francisco Álvarez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Emanuel Guzmán"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Santiago Tapia"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Mariano Cicconi"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Santiago Rez Masud"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Santiago Rez Masud"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Santiago Rez Masud"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Santiago Rez Masud"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Santiago Rez Masud"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Santiago Rez Masud"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Santiago Rez Masud"
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "f70c734d-ea18-4f55-a4d8-5d705c267b2a",
+   "rotulo": "F6 · San Juan 32-66 Los Tordos",
+   "local": {
+    "nombre": "San Juan",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "visitante": {
+    "nombre": "Los Tordos",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "eventos": [
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Juan Cruz Yuba"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Estiliano Battezzati"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Tobías Cabeza"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_try",
+     "equipo": "local",
+     "jugador": ""
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Estiliano Battezzati"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Estiliano Battezzati"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Estiliano Battezzati"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Estiliano Battezzati"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Matías Farah"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Matías Farah"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Matías Farah"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Facundo Tonón"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Juan Ignacio Dángelo"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Martín Orrico"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Lautaro Varela"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Gonzalo Intzes"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Tomás Arrigoni"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Julián Tomas"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Francisco Galdeano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Francisco Galdeano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Francisco Galdeano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Francisco Galdeano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Francisco Galdeano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Francisco Galdeano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Tomás Arrigoni"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Tomás Arrigoni"
+    }
+   ],
+   "marcadorFuente": [
+    32,
+    66
+   ]
+  },
+  {
+   "id": "3589d6ca-efb9-4914-a52e-f1f96a8ab652",
+   "rotulo": "F7 · Los Tordos 32-33 Mendoza",
+   "arbitro": "Joaquín López",
+   "cancha": "LOS TORDOS RUGBY CLUB (GUAYMALLÉN)",
+   "local": {
+    "nombre": "Los Tordos",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Martín Santiago"
+     },
+     {
+      "numero": 2,
+      "nombre": "Marco Ventrera"
+     },
+     {
+      "numero": 3,
+      "nombre": "Juan Antonio Dangelo"
+     },
+     {
+      "numero": 4,
+      "nombre": "Juan Marchena"
+     },
+     {
+      "numero": 5,
+      "nombre": "Santiago Bustamante"
+     },
+     {
+      "numero": 6,
+      "nombre": "Valentino Miranda"
+     },
+     {
+      "numero": 7,
+      "nombre": "Manuel Arroyo",
+      "capitan": true
+     },
+     {
+      "numero": 8,
+      "nombre": "Matías Farah"
+     },
+     {
+      "numero": 9,
+      "nombre": "Conrado Bertranou"
+     },
+     {
+      "numero": 10,
+      "nombre": "Francisco Galdeano"
+     },
+     {
+      "numero": 11,
+      "nombre": "Facundo Tonón"
+     },
+     {
+      "numero": 12,
+      "nombre": "Angelo Lizzola"
+     },
+     {
+      "numero": 13,
+      "nombre": "Gonzalo Intzes"
+     },
+     {
+      "numero": 14,
+      "nombre": "Julián Tomas"
+     },
+     {
+      "numero": 15,
+      "nombre": "Tomás Arrigoni"
+     }
+    ],
+    "suplentes": [
+     {
+      "nombre": "Juan Arnut"
+     },
+     {
+      "nombre": "Bautista Salinas"
+     },
+     {
+      "nombre": "Lautaro Varela"
+     },
+     {
+      "nombre": "Martín Orrico"
+     },
+     {
+      "nombre": "Enzo Filice"
+     },
+     {
+      "nombre": "Juan Bautista Bruno"
+     },
+     {
+      "nombre": "Julián Ortíz"
+     }
+    ]
+   },
+   "visitante": {
+    "nombre": "Mendoza",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Laureano Valle"
+     },
+     {
+      "numero": 2,
+      "nombre": "Renato Barolo"
+     },
+     {
+      "numero": 3,
+      "nombre": "Benjamín Costantini"
+     },
+     {
+      "numero": 4,
+      "nombre": "Joaquín Bohm"
+     },
+     {
+      "numero": 5,
+      "nombre": "Felipe Rubio"
+     },
+     {
+      "numero": 6,
+      "nombre": "Emanuel Guzmán"
+     },
+     {
+      "numero": 7,
+      "nombre": "Francisco Álvarez"
+     },
+     {
+      "numero": 8,
+      "nombre": "Ignacio Vidal",
+      "capitan": true
+     },
+     {
+      "numero": 9,
+      "nombre": "Santiago Puppato"
+     },
+     {
+      "numero": 10,
+      "nombre": "Santiago Rez Masud"
+     },
+     {
+      "numero": 11,
+      "nombre": "Santiago Tapia"
+     },
+     {
+      "numero": 12,
+      "nombre": "Tomás Canedo"
+     },
+     {
+      "numero": 13,
+      "nombre": "Ernesto Giudice"
+     },
+     {
+      "numero": 14,
+      "nombre": "Ignacio Lucero"
+     },
+     {
+      "numero": 15,
+      "nombre": "Julián Cossutta"
+     }
+    ],
+    "suplentes": [
+     {
+      "nombre": "Luciano Morales"
+     },
+     {
+      "nombre": "Mariano Cicconi"
+     },
+     {
+      "nombre": "Mauro Savina"
+     },
+     {
+      "nombre": "Juan Pablo Álvarez"
+     },
+     {
+      "nombre": "Xavier Otegui"
+     },
+     {
+      "nombre": "Franco Garofoli"
+     },
+     {
+      "nombre": "Santiago Dapas"
+     }
+    ]
+   },
+   "eventos": [
+    {
+     "minuto": 2,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Francisco Galdeano"
+    },
+    {
+     "minuto": 17,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Julián Tomas"
+    },
+    {
+     "minuto": 17,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Francisco Galdeano"
+    },
+    {
+     "minuto": 20,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Benjamín Costantini"
+    },
+    {
+     "minuto": 20,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Tomás Canedo"
+    },
+    {
+     "minuto": 28,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Santiago Puppato"
+    },
+    {
+     "minuto": 35,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Manuel Arroyo"
+    },
+    {
+     "minuto": 35,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Francisco Galdeano"
+    },
+    {
+     "minuto": 40,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Santiago Tapia"
+    },
+    {
+     "minuto": 40,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Tomás Canedo"
+    },
+    {
+     "minuto": 2,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Tomás Arrigoni"
+    },
+    {
+     "minuto": 2,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Francisco Galdeano"
+    },
+    {
+     "minuto": 16,
+     "periodo": "2T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Francisco Galdeano"
+    },
+    {
+     "minuto": 20,
+     "periodo": "2T",
+     "tipo": "penalty_try",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 28,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Tomás Canedo"
+    },
+    {
+     "minuto": 28,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Tomás Canedo"
+    },
+    {
+     "minuto": 40,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Tomás Arrigoni"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "local",
+     "jugador": "Angelo Lizzola"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "local",
+     "jugador": "Facundo Tonón"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "visitante",
+     "jugador": "Ernesto Giudice"
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "ca29f360-79a0-423f-9a2c-37bee7fe4a33",
+   "rotulo": "F7 · Universitario SJ 15-22 San Juan",
+   "local": {
+    "nombre": "Universitario SJ",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "visitante": {
+    "nombre": "San Juan",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "eventos": [
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Joaquín Sánchez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Joaquín Sánchez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Gerónimo Arabel"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Gerónimo Arabel"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Juan Manuel Ruiz"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Bautista Scadding"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Bautista Domanico"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Estiliano Battezzati"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Estiliano Battezzati"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Estiliano Battezzati"
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "dc5073b4-093b-4886-a9a0-75fbf5e5b539",
+   "rotulo": "F7 · Liceo 34-21 CPBM",
+   "local": {
+    "nombre": "Liceo",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "visitante": {
+    "nombre": "CPBM",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "eventos": [
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Juan Manuel Pérez Caram"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Ignacio Gaido"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Tomás Castro"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Álvaro Oyonarte"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Santiago Videau"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Tomás Videla"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Tomás Videla"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Tomás Videla"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Tomás Videla"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Santiago Videla"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Juan Manuel Montilla"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Manuel Sonzogni"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Alejo Magliano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Alejo Magliano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Alejo Magliano"
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "f2aa05d5-fe99-418e-9ae7-c64600e90309",
+   "rotulo": "F7 · Marista 33-19 Teqüe",
+   "local": {
+    "nombre": "Marista",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "visitante": {
+    "nombre": "Teqüe",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "eventos": [
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Gerónimo Tejada"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Lucas Bartolini"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Ignacio Laborde"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Tomás Montilla"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Telmo Fernández"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Genaro Podestá"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Genaro Podestá"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Benjamin Barcenilla"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Benjamin Barcenilla"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Esteban Fernández"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Lucas Salguero"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Luciano Castellanos"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Lautaro Calle"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Lautaro Calle"
+    }
+   ],
+   "marcadorFuente": [
+    33,
+    19
+   ]
+  },
+  {
+   "id": "0d1dd154-7ee8-474e-9174-3d73c9661a07",
+   "rotulo": "F8 · Los Tordos 110-7 Teqüe",
+   "local": {
+    "nombre": "Los Tordos",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "visitante": {
+    "nombre": "Teqüe",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "eventos": [
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Facundo Tonón"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Facundo Tonón"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Facundo Tonón"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Facundo Tonón"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Facundo Tonón"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Facundo Tonón"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Conrado Bertranou"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Conrado Bertranou"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Conrado Bertranou"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Tomás Arrigoni"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Tomás Arrigoni"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Bautista Bruno"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Bautista Bruno"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Federico Serpa"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Juan Enrique Arnut"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_try",
+     "equipo": "local",
+     "jugador": ""
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Federico Serpa"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Federico Serpa"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Federico Serpa"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Federico Serpa"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Federico Serpa"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Federico Serpa"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Federico Serpa"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Federico Serpa"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Federico Serpa"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Federico Serpa"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Federico Serpa"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Federico Serpa"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Federico Serpa"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Federico Serpa"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Pablo Echalecu"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Lautaro Calle"
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "25a2b6a1-cbd0-4f68-9130-bdbec0e58c5a",
+   "rotulo": "F8 · Marista 38-27 Universitario SJ",
+   "local": {
+    "nombre": "Marista",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "visitante": {
+    "nombre": "Universitario SJ",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "eventos": [
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Francisco Allamand"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Francisco Allamand"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Lucas Bartolini"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Alejandro Pronce"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Matías Colomer"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Telmo Fernández"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Tobías Filizzola"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Tobías Filizzola"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Tobías Filizzola"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Tobías Filizzola"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Alan Pedrol"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Joaquín Sánchez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Tomás Gimenez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Teo Azar"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Teo Azar"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Teo Azar"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Teo Azar"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Teo Azar"
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "3b1ecaca-ab2f-463e-a5aa-6c3d25b116fa",
+   "rotulo": "F8 · CPBM 18-29 San Juan",
+   "local": {
+    "nombre": "CPBM",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "visitante": {
+    "nombre": "San Juan",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "eventos": [
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Juan Martín Bazán"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Juan Martín Bazán"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Branco Gutierrez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Fabricio Stirpa"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Gonzalo Roldán"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Santiago Albarracín"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Estiliano Battezzati"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Estiliano Battezzati"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Estiliano Battezzati"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Estiliano Battezzati"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Estiliano Battezzati"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Estiliano Battezzati"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Estiliano Battezzati"
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "78df7f2b-f957-49e4-bd81-058a20469252",
+   "rotulo": "F8 · Liceo 31-28 Mendoza",
+   "arbitro": "Juan Espíndola",
+   "cancha": "LICEO  RUGBY CLUB (LA CARRODILLA)",
+   "local": {
+    "nombre": "Liceo",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Juan Ignacio Rodríguez"
+     },
+     {
+      "numero": 2,
+      "nombre": "Tomás Bazán"
+     },
+     {
+      "numero": 3,
+      "nombre": "Felipe Altamiranda"
+     },
+     {
+      "numero": 4,
+      "nombre": "Francisco Bertaina"
+     },
+     {
+      "numero": 5,
+      "nombre": "Martín Vila"
+     },
+     {
+      "numero": 6,
+      "nombre": "Enzo Cirrincione"
+     },
+     {
+      "numero": 7,
+      "nombre": "Santino Villegas"
+     },
+     {
+      "numero": 8,
+      "nombre": "Agustín Quiroga"
+     },
+     {
+      "numero": 9,
+      "nombre": "Ramiro Gassull"
+     },
+     {
+      "numero": 10,
+      "nombre": "Ignacio Gaido"
+     },
+     {
+      "numero": 11,
+      "nombre": "Francisco Ricci"
+     },
+     {
+      "numero": 12,
+      "nombre": "Bruno Cirrincione"
+     },
+     {
+      "numero": 13,
+      "nombre": "Facundo Lucero"
+     },
+     {
+      "numero": 14,
+      "nombre": "Agustín Correa Llano",
+      "capitan": true
+     },
+     {
+      "numero": 15,
+      "nombre": "Tomás Videla"
+     }
+    ],
+    "suplentes": [
+     {
+      "nombre": "Santiago Videau"
+     },
+     {
+      "nombre": "Joaquín Amezaga"
+     },
+     {
+      "nombre": "Tomás Dris"
+     },
+     {
+      "nombre": "Adrián Cura"
+     },
+     {
+      "nombre": "Juan Manuel Pérez Caram"
+     },
+     {
+      "nombre": "Juan Mateo Sancho"
+     },
+     {
+      "nombre": "Gino Castellino"
+     }
+    ]
+   },
+   "visitante": {
+    "nombre": "Mendoza",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Mariano Cicconi"
+     },
+     {
+      "numero": 2,
+      "nombre": "Renato Barolo"
+     },
+     {
+      "numero": 3,
+      "nombre": "Benjamín Costantini"
+     },
+     {
+      "numero": 4,
+      "nombre": "Joaquín Bohm"
+     },
+     {
+      "numero": 5,
+      "nombre": "Felipe Rubio"
+     },
+     {
+      "numero": 6,
+      "nombre": "Xavier Otegui"
+     },
+     {
+      "numero": 7,
+      "nombre": "Francisco Álvarez"
+     },
+     {
+      "numero": 8,
+      "nombre": "Ignacio Vidal",
+      "capitan": true
+     },
+     {
+      "numero": 9,
+      "nombre": "Santiago Puppato"
+     },
+     {
+      "numero": 10,
+      "nombre": "Santiago Rez Masud"
+     },
+     {
+      "numero": 11,
+      "nombre": "Santiago Tapia"
+     },
+     {
+      "numero": 12,
+      "nombre": "Tomás Canedo"
+     },
+     {
+      "numero": 13,
+      "nombre": "Ernesto Giudice"
+     },
+     {
+      "numero": 14,
+      "nombre": "Ignacio Lucero"
+     },
+     {
+      "numero": 15,
+      "nombre": "Julián Cossutta"
+     }
+    ],
+    "suplentes": [
+     {
+      "nombre": "Luciano Morales"
+     },
+     {
+      "nombre": "Laureano Valle"
+     },
+     {
+      "nombre": "Mauro Savina"
+     },
+     {
+      "nombre": "Juan Pablo Álvarez"
+     },
+     {
+      "nombre": "Francisco Stávile"
+     },
+     {
+      "nombre": "Emanuel Guzmán"
+     },
+     {
+      "nombre": "Agustín Lombardo"
+     }
+    ]
+   },
+   "eventos": [
+    {
+     "minuto": 8,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Benjamín Costantini"
+    },
+    {
+     "minuto": 8,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Tomás Canedo"
+    },
+    {
+     "minuto": 15,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Tomás Canedo"
+    },
+    {
+     "minuto": 20,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Tomás Videla"
+    },
+    {
+     "minuto": 22,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Tomás Canedo"
+    },
+    {
+     "minuto": 33,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Agustín Correa Llano"
+    },
+    {
+     "minuto": 33,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Tomás Videla"
+    },
+    {
+     "minuto": 38,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Tomás Bazán"
+    },
+    {
+     "minuto": 38,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Tomás Videla"
+    },
+    {
+     "minuto": 40,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Tomás Canedo"
+    },
+    {
+     "minuto": 1,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Ignacio Vidal"
+    },
+    {
+     "minuto": 9,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Tomás Dris"
+    },
+    {
+     "minuto": 9,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Tomás Videla"
+    },
+    {
+     "minuto": 31,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Francisco Stávile"
+    },
+    {
+     "minuto": 31,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Tomás Canedo"
+    },
+    {
+     "minuto": 38,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Tomás Bazán"
+    },
+    {
+     "minuto": 38,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Juan Mateo Sancho"
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "0009f63f-4dc3-407c-a401-cd2b09488698",
+   "rotulo": "F9 · Universitario SJ 36-45 Liceo",
+   "local": {
+    "nombre": "Universitario SJ",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "visitante": {
+    "nombre": "Liceo",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "eventos": [
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Joaquín Sánchez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Joaquín Sánchez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Joaquín Sánchez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Joaquín Sánchez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Valentino Solda"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Teo Azar"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Gerónimo Arabel"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Gerónimo Arabel"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Santiago Baldi"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Teo Azar"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Ignacio Gaido"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Ignacio Gaido"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Ignacio Gaido"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Ramiro Gassull"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Felipe Altamiranda"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Francisco Ricci"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Bruno Cirrincione"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Juan Mateo Sancho"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Juan Mateo Sancho"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Juan Mateo Sancho"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Juan Mateo Sancho"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Juan Mateo Sancho"
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "7188acc9-e062-40d3-b76d-f4e88e343753",
+   "rotulo": "F9 · Marista 55-29 Los Tordos",
+   "arbitro": "Juan Espíndola",
+   "cancha": "MARISTA  RUGBY CLUB (LA CARRODILLA)",
+   "local": {
+    "nombre": "Marista",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Alvaro Llaver",
+      "capitan": true
+     },
+     {
+      "numero": 2,
+      "nombre": "Alejandro Pronce"
+     },
+     {
+      "numero": 3,
+      "nombre": "Marcos Porro"
+     },
+     {
+      "numero": 4,
+      "nombre": "Juan Pablo Laborde"
+     },
+     {
+      "numero": 5,
+      "nombre": "Valentín Gozálvez"
+     },
+     {
+      "numero": 6,
+      "nombre": "Telmo Fernández"
+     },
+     {
+      "numero": 7,
+      "nombre": "Tomás Gómez"
+     },
+     {
+      "numero": 8,
+      "nombre": "Gerónimo Tejada"
+     },
+     {
+      "numero": 9,
+      "nombre": "Genaro Podestá"
+     },
+     {
+      "numero": 10,
+      "nombre": "Benjamín Filizzola"
+     },
+     {
+      "numero": 11,
+      "nombre": "Matías Colomer"
+     },
+     {
+      "numero": 12,
+      "nombre": "Conall Unger"
+     },
+     {
+      "numero": 13,
+      "nombre": "Borja Filizzola"
+     },
+     {
+      "numero": 14,
+      "nombre": "Lucas Bartolini"
+     },
+     {
+      "numero": 15,
+      "nombre": "Tobías Filizzola"
+     }
+    ],
+    "suplentes": [
+     {
+      "nombre": "Estanislao Rodriguez"
+     },
+     {
+      "nombre": "Tomás Montilla"
+     },
+     {
+      "nombre": "Germán Tello"
+     },
+     {
+      "nombre": "Tomás Bekerman"
+     },
+     {
+      "nombre": "Julián Guevara"
+     },
+     {
+      "nombre": "Juan De La Cruz Calle"
+     },
+     {
+      "nombre": "Alejo Videla"
+     },
+     {
+      "nombre": "Ignacio Laborde"
+     }
+    ]
+   },
+   "visitante": {
+    "nombre": "Los Tordos",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Martín Santiago"
+     },
+     {
+      "numero": 2,
+      "nombre": "Manuel Arroyo",
+      "capitan": true
+     },
+     {
+      "numero": 3,
+      "nombre": "Juan Manuel Vivas"
+     },
+     {
+      "numero": 4,
+      "nombre": "Juan Marchena"
+     },
+     {
+      "numero": 5,
+      "nombre": "Lautaro Varela"
+     },
+     {
+      "numero": 6,
+      "nombre": "Tomás Díaz"
+     },
+     {
+      "numero": 7,
+      "nombre": "Martín Orrico"
+     },
+     {
+      "numero": 8,
+      "nombre": "Juan Enrique Arnut"
+     },
+     {
+      "numero": 9,
+      "nombre": "Conrado Bertranou"
+     },
+     {
+      "numero": 10,
+      "nombre": "Francisco Galdeano"
+     },
+     {
+      "numero": 11,
+      "nombre": "Facundo Tonón"
+     },
+     {
+      "numero": 12,
+      "nombre": "Angelo Lizzola"
+     },
+     {
+      "numero": 13,
+      "nombre": "Gonzalo Intzes"
+     },
+     {
+      "numero": 14,
+      "nombre": "Francisco Cassone"
+     },
+     {
+      "numero": 15,
+      "nombre": "Tomás Arrigoni"
+     }
+    ],
+    "suplentes": [
+     {
+      "nombre": "José Antonio Dangelo"
+     },
+     {
+      "nombre": "Thiago Sosa"
+     },
+     {
+      "nombre": "Facundo Díaz"
+     },
+     {
+      "nombre": "Valentino Miranda"
+     },
+     {
+      "nombre": "Juan Bautista Bruno"
+     },
+     {
+      "nombre": "Francisco Martos"
+     },
+     {
+      "nombre": "Juan Bautista Bruno"
+     },
+     {
+      "nombre": "Julián Tomas"
+     }
+    ]
+   },
+   "eventos": [
+    {
+     "minuto": 12,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Tomás Díaz"
+    },
+    {
+     "minuto": 17,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Martín Santiago"
+    },
+    {
+     "minuto": 17,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Francisco Galdeano"
+    },
+    {
+     "minuto": 26,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Angelo Lizzola"
+    },
+    {
+     "minuto": 26,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Francisco Galdeano"
+    },
+    {
+     "minuto": 28,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Lucas Bartolini"
+    },
+    {
+     "minuto": 28,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Tobías Filizzola"
+    },
+    {
+     "minuto": 38,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Lucas Bartolini"
+    },
+    {
+     "minuto": 1,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Lucas Bartolini"
+    },
+    {
+     "minuto": 6,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Facundo Díaz"
+    },
+    {
+     "minuto": 6,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Francisco Galdeano"
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Lucas Bartolini"
+    },
+    {
+     "minuto": 18,
+     "periodo": "2T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Francisco Galdeano"
+    },
+    {
+     "minuto": 20,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Alejo Videla"
+    },
+    {
+     "minuto": 20,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Ignacio Laborde"
+    },
+    {
+     "minuto": 27,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Lucas Bartolini"
+    },
+    {
+     "minuto": 27,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Ignacio Laborde"
+    },
+    {
+     "minuto": 30,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Borja Filizzola"
+    },
+    {
+     "minuto": 30,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Ignacio Laborde"
+    },
+    {
+     "minuto": 36,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Valentín Gozálvez"
+    },
+    {
+     "minuto": 40,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Telmo Fernández"
+    },
+    {
+     "minuto": 40,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Ignacio Laborde"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "local",
+     "jugador": "Telmo Fernández"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "visitante",
+     "jugador": "Francisco Galdeano"
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "72398032-350c-44ce-b865-55569b7041d4",
+   "rotulo": "F9 · Mendoza 26-34 CPBM",
+   "local": {
+    "nombre": "Mendoza",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "visitante": {
+    "nombre": "CPBM",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "eventos": [
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Ignacio Lucero"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Ignacio Lucero"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Julián Cossutta"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Francisco Stávile"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Tomás Canedo"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Tomás Canedo"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Tomás Canedo"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Fabricio Stirpa"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Fabricio Stirpa"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Branco Gutierrez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Alejo Magliano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Alejo Magliano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Alejo Magliano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Alejo Magliano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Fabricio Stirpa"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Alejo Magliano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Fabricio Stirpa"
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "90c10795-4bb4-436d-867f-8465e63f3048",
+   "rotulo": "F9 · Teqüe 21-28 San Juan",
+   "local": {
+    "nombre": "Teqüe",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "visitante": {
+    "nombre": "San Juan",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "eventos": [
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Lautaro Calle"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Román Zelada"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Gastón Giachini"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Augusto Kretschmar"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Augusto Kretschmar"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Augusto Kretschmar"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Bautista Scadding"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Bautista Scadding"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Bautista Scadding"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Alejo Olguín"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Estiliano Battezzati"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Estiliano Battezzati"
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "738e423b-ef4f-4a8b-a23c-4558ce329fef",
+   "rotulo": "F10 · San Juan 27-29 Marista",
+   "local": {
+    "nombre": "San Juan",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "visitante": {
+    "nombre": "Marista",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "eventos": [
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Bautista Scadding"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Francisco Nievas"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Bautista Cúneo"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Rodrigo Licciardi"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Estiliano Battezzati"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Estiliano Battezzati"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Estiliano Battezzati"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Lautaro Sturniolo"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Alejandro Pronce"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Telmo Fernández"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Tobías Filizzola"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Tomás Montilla"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Tobías Filizzola"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Tobías Filizzola"
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "2bea7517-8e2b-4665-82f9-741afb0dcbc0",
+   "rotulo": "F10 · Universitario SJ 35-32 Mendoza",
+   "local": {
+    "nombre": "Universitario SJ",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "visitante": {
+    "nombre": "Mendoza",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "eventos": [
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Tomás Gimenez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Tomás Gimenez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Mariano Lloveras"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Javier Fernández"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Francisco Marcucci"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Gerónimo Arabel"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Gerónimo Arabel"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Gerónimo Arabel"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Mariano Lloveras"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Santiago Tapia"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Ignacio Vidal"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Julián Cossutta"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Francisco Stávile"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Tomás Canedo"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Tomás Canedo"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Tomás Canedo"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Tomás Canedo"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Tomás Canedo"
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "768cc86c-03b0-4a1d-a45f-8b6618a00e64",
+   "rotulo": "F10 · Liceo 57-26 Teqüe",
+   "arbitro": "Dante Diez",
+   "cancha": "LICEO RUGBY CLUB (LA CARRODILLA)",
+   "local": {
+    "nombre": "Liceo",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Juan Ignacio Rodríguez"
+     },
+     {
+      "numero": 2,
+      "nombre": "Pedro Tulián"
+     },
+     {
+      "numero": 3,
+      "nombre": "Felipe Altamiranda"
+     },
+     {
+      "numero": 4,
+      "nombre": "Francisco Bertaina"
+     },
+     {
+      "numero": 5,
+      "nombre": "Adrián Cura"
+     },
+     {
+      "numero": 6,
+      "nombre": "Enzo Cirrincione"
+     },
+     {
+      "numero": 7,
+      "nombre": "Santino Villegas"
+     },
+     {
+      "numero": 8,
+      "nombre": "Agustín Quiroga"
+     },
+     {
+      "numero": 9,
+      "nombre": "Juan Manuel Pérez Caram"
+     },
+     {
+      "numero": 10,
+      "nombre": "Juan Mateo Sancho"
+     },
+     {
+      "numero": 11,
+      "nombre": "Francisco Ricci"
+     },
+     {
+      "numero": 12,
+      "nombre": "Bruno Cirrincione"
+     },
+     {
+      "numero": 13,
+      "nombre": "Agustín Correa Llano",
+      "capitan": true
+     },
+     {
+      "numero": 14,
+      "nombre": "Gino Castellino"
+     },
+     {
+      "numero": 15,
+      "nombre": "Tomás Videla"
+     }
+    ],
+    "suplentes": [
+     {
+      "nombre": "Tomás Bazán"
+     },
+     {
+      "nombre": "Agustín Amezaga"
+     },
+     {
+      "nombre": "Martín Vila"
+     },
+     {
+      "nombre": "Julián Rossi"
+     },
+     {
+      "nombre": "Ramiro Gassull"
+     },
+     {
+      "nombre": "Ignacio Gaido"
+     },
+     {
+      "nombre": "Facundo Lucero"
+     },
+     {
+      "nombre": "Franco Gómez"
+     }
+    ]
+   },
+   "visitante": {
+    "nombre": "Teqüe",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Esteban Fernández"
+     },
+     {
+      "numero": 2,
+      "nombre": "Julián Martín"
+     },
+     {
+      "numero": 3,
+      "nombre": "Pablo Sáez"
+     },
+     {
+      "numero": 4,
+      "nombre": "Gonzalo Pérez"
+     },
+     {
+      "numero": 5,
+      "nombre": "Julián Magnoni"
+     },
+     {
+      "numero": 6,
+      "nombre": "Santino Sabatelli"
+     },
+     {
+      "numero": 7,
+      "nombre": "Benjamín Pérez"
+     },
+     {
+      "numero": 8,
+      "nombre": "Pablo Echalecu"
+     },
+     {
+      "numero": 9,
+      "nombre": "Augusto Kretschmar"
+     },
+     {
+      "numero": 10,
+      "nombre": "Gastón Giachini"
+     },
+     {
+      "numero": 11,
+      "nombre": "Alejo Elst"
+     },
+     {
+      "numero": 12,
+      "nombre": "Mauro Quiroga"
+     },
+     {
+      "numero": 13,
+      "nombre": "Román Zelada"
+     },
+     {
+      "numero": 14,
+      "nombre": "Valentín Kretschmar"
+     },
+     {
+      "numero": 15,
+      "nombre": "Iván Molina",
+      "capitan": true
+     }
+    ],
+    "suplentes": [
+     {
+      "nombre": "Renzo Martín"
+     },
+     {
+      "nombre": "Francisco Vega"
+     },
+     {
+      "nombre": "Francisco Godoy"
+     },
+     {
+      "nombre": "Ignacio Acosta"
+     },
+     {
+      "nombre": "Ismael Villanueva"
+     },
+     {
+      "nombre": "Juan Manuel Maure"
+     },
+     {
+      "nombre": "Santiago Sáez"
+     },
+     {
+      "nombre": "Santiago Montivero"
+     }
+    ]
+   },
+   "eventos": [
+    {
+     "minuto": 6,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Francisco Ricci"
+    },
+    {
+     "minuto": 6,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Tomás Videla"
+    },
+    {
+     "minuto": 10,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Julián Martín"
+    },
+    {
+     "minuto": 11,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Agustín Correa Llano"
+    },
+    {
+     "minuto": 11,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Tomás Videla"
+    },
+    {
+     "minuto": 17,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Gino Castellino"
+    },
+    {
+     "minuto": 22,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Pablo Echalecu"
+    },
+    {
+     "minuto": 22,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Augusto Kretschmar"
+    },
+    {
+     "minuto": 33,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Francisco Ricci"
+    },
+    {
+     "minuto": 33,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Tomás Videla"
+    },
+    {
+     "minuto": 36,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Francisco Ricci"
+    },
+    {
+     "minuto": 38,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Francisco Ricci"
+    },
+    {
+     "minuto": 38,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Tomás Videla"
+    },
+    {
+     "minuto": 5,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Julián Martín"
+    },
+    {
+     "minuto": 5,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Augusto Kretschmar"
+    },
+    {
+     "minuto": 20,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Gino Castellino"
+    },
+    {
+     "minuto": 20,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Tomás Videla"
+    },
+    {
+     "minuto": 25,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Gino Castellino"
+    },
+    {
+     "minuto": 25,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Tomás Videla"
+    },
+    {
+     "minuto": 33,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Julián Rossi"
+    },
+    {
+     "minuto": 40,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Francisco Vega"
+    },
+    {
+     "minuto": 40,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Augusto Kretschmar"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "local",
+     "jugador": "Santino Villegas"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "local",
+     "jugador": "Felipe Altamiranda"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "visitante",
+     "jugador": "Augusto Kretschmar"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "visitante",
+     "jugador": "Julián Magnoni"
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "03a5e972-c186-4bdb-8a9b-02d29effa4d1",
+   "rotulo": "F11 · Mendoza 41-40 San Juan",
+   "local": {
+    "nombre": "Mendoza",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "visitante": {
+    "nombre": "San Juan",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "eventos": [
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Julián Cossutta"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Julián Cossutta"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Julián Cossutta"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Tomás Canedo"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Francisco Stávile"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Juan Pablo Álvarez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Tomás Canedo"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Tomás Canedo"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Tomás Canedo"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Tomás Canedo"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Tomás Canedo"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Bautista Scadding"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Juan Manuel Ruiz"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Gonzalo Roldán"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Tobías Cabeza"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Estiliano Battezzati"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Estiliano Battezzati"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Estiliano Battezzati"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Estiliano Battezzati"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Estiliano Battezzati"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Estiliano Battezzati"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Estiliano Battezzati"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Estiliano Battezzati"
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "80c3fce2-b53e-4aea-9e52-e5c18fad9e43",
+   "rotulo": "F11 · CPBM 10-27 Marista",
+   "local": {
+    "nombre": "CPBM",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "visitante": {
+    "nombre": "Marista",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "eventos": [
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Marcos Montilla"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Alejo Magliano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Alejo Magliano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Alejo Videla"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Lucas Bartolini"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Francisco Allamand"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Tomás Gómez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Tobías Filizzola"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Tobías Filizzola"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Tobías Filizzola"
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "93a805b0-94a1-499a-8e53-f510d6a89924",
+   "rotulo": "F11 · Liceo 26-35 Los Tordos",
+   "arbitro": "Nicolás Quintana",
+   "cancha": "LICEO RUGBY CLUB (LA CARRODILLA)",
+   "local": {
+    "nombre": "Liceo",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Juan Ignacio Rodríguez"
+     },
+     {
+      "numero": 2,
+      "nombre": "Tomás Bazán"
+     },
+     {
+      "numero": 3,
+      "nombre": "Martiniano Sgattoni"
+     },
+     {
+      "numero": 4,
+      "nombre": "Francisco Bertaina"
+     },
+     {
+      "numero": 5,
+      "nombre": "Adrián Cura"
+     },
+     {
+      "numero": 6,
+      "nombre": "Enzo Cirrincione"
+     },
+     {
+      "numero": 7,
+      "nombre": "Santino Villegas"
+     },
+     {
+      "numero": 8,
+      "nombre": "Julián Rossi"
+     },
+     {
+      "numero": 9,
+      "nombre": "Ramiro Gassull"
+     },
+     {
+      "numero": 10,
+      "nombre": "Juan Mateo Sancho"
+     },
+     {
+      "numero": 11,
+      "nombre": "Francisco Ricci"
+     },
+     {
+      "numero": 12,
+      "nombre": "Bruno Cirrincione"
+     },
+     {
+      "numero": 13,
+      "nombre": "Facundo Lucero"
+     },
+     {
+      "numero": 14,
+      "nombre": "Agustín Correa Llano",
+      "capitan": true
+     },
+     {
+      "numero": 15,
+      "nombre": "Ignacio Gaido"
+     }
+    ],
+    "suplentes": [
+     {
+      "nombre": "Pedro Tulián"
+     },
+     {
+      "nombre": "Joaquín Amezaga"
+     },
+     {
+      "nombre": "Lautaro Peralta"
+     },
+     {
+      "nombre": "Martín Vila"
+     },
+     {
+      "nombre": "Agustín Quiroga"
+     },
+     {
+      "nombre": "Juan Manuel Pérez Caram"
+     },
+     {
+      "nombre": "Tomás Videla"
+     },
+     {
+      "nombre": "Agustín Demaría"
+     }
+    ]
+   },
+   "visitante": {
+    "nombre": "Los Tordos",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Martín Santiago"
+     },
+     {
+      "numero": 2,
+      "nombre": "Juan Manuel Vivas"
+     },
+     {
+      "numero": 3,
+      "nombre": "José Antonio Dangelo"
+     },
+     {
+      "numero": 4,
+      "nombre": "Lautaro Varela"
+     },
+     {
+      "numero": 5,
+      "nombre": "Francisco Pannocchia"
+     },
+     {
+      "numero": 6,
+      "nombre": "Valentino Miranda"
+     },
+     {
+      "numero": 7,
+      "nombre": "Tomás Díaz"
+     },
+     {
+      "numero": 8,
+      "nombre": "Juan Enrique Arnut"
+     },
+     {
+      "numero": 9,
+      "nombre": "Gonzalo Bertranou"
+     },
+     {
+      "numero": 10,
+      "nombre": "Federico Serpa"
+     },
+     {
+      "numero": 11,
+      "nombre": "Facundo Tonón"
+     },
+     {
+      "numero": 12,
+      "nombre": "Angelo Lizzola"
+     },
+     {
+      "numero": 13,
+      "nombre": "Francisco Martos"
+     },
+     {
+      "numero": 14,
+      "nombre": "Francisco Cassone"
+     },
+     {
+      "numero": 15,
+      "nombre": "Francisco Galdeano"
+     }
+    ],
+    "suplentes": [
+     {
+      "nombre": "Francisco Rugoso"
+     },
+     {
+      "nombre": "Franco Pizzi"
+     },
+     {
+      "nombre": "Martín Orrico"
+     },
+     {
+      "nombre": "Marcos Cassone"
+     },
+     {
+      "nombre": "Matías Herrera"
+     },
+     {
+      "nombre": "Julián Ortíz"
+     }
+    ]
+   },
+   "eventos": [
+    {
+     "minuto": 8,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Federico Serpa"
+    },
+    {
+     "minuto": 11,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Francisco Ricci"
+    },
+    {
+     "minuto": 11,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Juan Mateo Sancho"
+    },
+    {
+     "minuto": 14,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Federico Serpa"
+    },
+    {
+     "minuto": 18,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Francisco Cassone"
+    },
+    {
+     "minuto": 18,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Federico Serpa"
+    },
+    {
+     "minuto": 26,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Agustín Correa Llano"
+    },
+    {
+     "minuto": 26,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Juan Mateo Sancho"
+    },
+    {
+     "minuto": 40,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Francisco Ricci"
+    },
+    {
+     "minuto": 2,
+     "periodo": "2T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Federico Serpa"
+    },
+    {
+     "minuto": 18,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Federico Serpa"
+    },
+    {
+     "minuto": 18,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Federico Serpa"
+    },
+    {
+     "minuto": 15,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Juan Manuel Vivas"
+    },
+    {
+     "minuto": 15,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Federico Serpa"
+    },
+    {
+     "minuto": 28,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Juan Enrique Arnut"
+    },
+    {
+     "minuto": 40,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Santino Villegas"
+    },
+    {
+     "minuto": 40,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Tomás Videla"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "local",
+     "jugador": "Juan Ignacio Rodríguez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "local",
+     "jugador": "Martín Vila"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "local",
+     "jugador": "Tomás Videla"
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "9858749f-f464-48bb-ac40-b9f02075817a",
+   "rotulo": "F11 · Teqüe 28-47 Universitario SJ",
+   "local": {
+    "nombre": "Teqüe",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "visitante": {
+    "nombre": "Universitario SJ",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "eventos": [
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Román Zelada"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Román Zelada"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Gonzalo Pérez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Francisco Vega"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Augusto Kretschmar"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Augusto Kretschmar"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Augusto Kretschmar"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Augusto Kretschmar"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Vito Sambrizzi"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Vito Sambrizzi"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Juan Ignacio Del Carril"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Gerónimo Arabel"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Joaquín Sánchez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Mariano Lloveras"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Gerónimo Adarvez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Gerónimo Arabel"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Gerónimo Arabel"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Gerónimo Arabel"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Gerónimo Arabel"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Gerónimo Adarvez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Gerónimo Adarvez"
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "594fd3d3-ed61-4c50-a308-10f4bd273f4a",
+   "rotulo": "F10 · Los Tordos 21-21 CPBM",
+   "local": {
+    "nombre": "Los Tordos",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "visitante": {
+    "nombre": "CPBM",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "eventos": [
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Marcos Cassone"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Facundo Tonón"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Gonzalo Bertranou"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Francisco Galdeano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Francisco Galdeano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Federico Serpa"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Valentín Stirpa"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Alejo Magliano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Alejo Magliano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Alejo Magliano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Facundo Consorte"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "drop_goal",
+     "equipo": "visitante",
+     "jugador": "Fabricio Stirpa"
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "0335bedf-6c31-4b61-8f86-9c4e68900763",
+   "rotulo": "F12 · Marista 47-20 Mendoza",
+   "arbitro": "Nicolás Quintana",
+   "cancha": "MARISTA  RUGBY CLUB (LA CARRODILLA)",
+   "local": {
+    "nombre": "Marista",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Estanislao Rodriguez"
+     },
+     {
+      "numero": 2,
+      "nombre": "Alejandro Pronce"
+     },
+     {
+      "numero": 3,
+      "nombre": "Marcos Porro"
+     },
+     {
+      "numero": 4,
+      "nombre": "Juan Pablo Laborde"
+     },
+     {
+      "numero": 5,
+      "nombre": "Juan De La Cruz Calle"
+     },
+     {
+      "numero": 6,
+      "nombre": "Francisco Allamand"
+     },
+     {
+      "numero": 7,
+      "nombre": "Agustín Sarelli"
+     },
+     {
+      "numero": 8,
+      "nombre": "Telmo Fernández"
+     },
+     {
+      "numero": 9,
+      "nombre": "Genaro Podestá"
+     },
+     {
+      "numero": 10,
+      "nombre": "Lisandro Sosa"
+     },
+     {
+      "numero": 11,
+      "nombre": "Matías Colomer"
+     },
+     {
+      "numero": 12,
+      "nombre": "Borja Filizzola"
+     },
+     {
+      "numero": 13,
+      "nombre": "Alejo Videla",
+      "capitan": true
+     },
+     {
+      "numero": 14,
+      "nombre": "Lucas Bartolini"
+     },
+     {
+      "numero": 15,
+      "nombre": "Tobías Filizzola"
+     }
+    ],
+    "suplentes": [
+     {
+      "nombre": "Alvaro Llaver"
+     },
+     {
+      "nombre": "Maxi Montilla"
+     },
+     {
+      "nombre": "Tomás Gómez"
+     },
+     {
+      "nombre": "Tomás Bekerman"
+     },
+     {
+      "nombre": "Gaspar Lupiañez"
+     },
+     {
+      "nombre": "Conall Unger"
+     },
+     {
+      "nombre": "Lucca Filizzola"
+     },
+     {
+      "nombre": "Julián Guevara"
+     }
+    ]
+   },
+   "visitante": {
+    "nombre": "Mendoza",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Laureano Valle"
+     },
+     {
+      "numero": 2,
+      "nombre": "Exequiel Riquero"
+     },
+     {
+      "numero": 3,
+      "nombre": "Luciano Morales"
+     },
+     {
+      "numero": 4,
+      "nombre": "Juan Pablo Álvarez"
+     },
+     {
+      "numero": 5,
+      "nombre": "Felipe Rubio"
+     },
+     {
+      "numero": 6,
+      "nombre": "Angelo Cipolla"
+     },
+     {
+      "numero": 7,
+      "nombre": "Francisco Álvarez"
+     },
+     {
+      "numero": 8,
+      "nombre": "Ignacio Vidal",
+      "capitan": true
+     },
+     {
+      "numero": 9,
+      "nombre": "Santiago Puppato"
+     },
+     {
+      "numero": 10,
+      "nombre": "Tomás Canedo"
+     },
+     {
+      "numero": 11,
+      "nombre": "Santiago Tapia"
+     },
+     {
+      "numero": 12,
+      "nombre": "Santiago Dapas"
+     },
+     {
+      "numero": 13,
+      "nombre": "Francisco Álvarez"
+     },
+     {
+      "numero": 14,
+      "nombre": "Ignacio Lucero"
+     },
+     {
+      "numero": 15,
+      "nombre": "Julián Cossutta"
+     }
+    ],
+    "suplentes": [
+     {
+      "nombre": "Benjamín Costantini"
+     },
+     {
+      "nombre": "Renato Barolo"
+     },
+     {
+      "nombre": "Ramiro Murri"
+     },
+     {
+      "nombre": "Xavier Otegui"
+     },
+     {
+      "nombre": "Agustín Lombardo"
+     },
+     {
+      "nombre": "Tomás Rodriguez"
+     },
+     {
+      "nombre": "Ernesto Giudice"
+     }
+    ]
+   },
+   "eventos": [
+    {
+     "minuto": 2,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Angelo Cipolla"
+    },
+    {
+     "minuto": 2,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Tomás Canedo"
+    },
+    {
+     "minuto": 20,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Alejandro Pronce"
+    },
+    {
+     "minuto": 20,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Tobías Filizzola"
+    },
+    {
+     "minuto": 30,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Tomás Canedo"
+    },
+    {
+     "minuto": 36,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Telmo Fernández"
+    },
+    {
+     "minuto": 36,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Tobías Filizzola"
+    },
+    {
+     "minuto": 40,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Tomás Canedo"
+    },
+    {
+     "minuto": 12,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Genaro Podestá"
+    },
+    {
+     "minuto": 12,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Tobías Filizzola"
+    },
+    {
+     "minuto": 16,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Genaro Podestá"
+    },
+    {
+     "minuto": 16,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Tobías Filizzola"
+    },
+    {
+     "minuto": 19,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Ignacio Lucero"
+    },
+    {
+     "minuto": 19,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Tomás Canedo"
+    },
+    {
+     "minuto": 25,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Juan De La Cruz Calle"
+    },
+    {
+     "minuto": 25,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Tobías Filizzola"
+    },
+    {
+     "minuto": 30,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Alvaro Llaver"
+    },
+    {
+     "minuto": 35,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Alvaro Llaver"
+    },
+    {
+     "minuto": 35,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Tobías Filizzola"
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "4bbb3720-be72-494b-ad26-a852a01dea6a",
+   "rotulo": "F12 · CPBM 31-26 Teqüe",
+   "local": {
+    "nombre": "CPBM",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "visitante": {
+    "nombre": "Teqüe",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "eventos": [
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Fabricio Stirpa"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Valentín Caprioli"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Facundo Consorte"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Pedro Martínez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_try",
+     "equipo": "local",
+     "jugador": ""
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Alejo Magliano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Francisco García Salazar"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "local",
+     "jugador": ""
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "local",
+     "jugador": ""
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Lautaro Calle"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Luciano Castellanos"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Juan Manuel Maure"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Augusto Kretschmar"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Augusto Kretschmar"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Augusto Kretschmar"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Augusto Kretschmar"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "card_red",
+     "equipo": "visitante",
+     "jugador": ""
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "9743e2f3-0f83-445a-9bd6-c71367171914",
+   "rotulo": "F12 · Universitario SJ 31-40 Los Tordos",
+   "local": {
+    "nombre": "Universitario SJ",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "visitante": {
+    "nombre": "Los Tordos",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "eventos": [
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Nicolás Martínez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Nicolás Martínez"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Vito Sambrizzi"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Francisco Marcucci"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Juan Cruz Magariños"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Gerónimo Arabel"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Gerónimo Arabel"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Gerónimo Arabel"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Gino Ambrosi"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Gino Ambrosi"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Tomás Díaz"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Facundo Tonón"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Enzo Filice"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Tomás Arrigoni"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Federico Serpa"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Federico Serpa"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Federico Serpa"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Federico Serpa"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Federico Serpa"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "card_red",
+     "equipo": "visitante",
+     "jugador": ""
+    }
+   ],
+   "marcadorFuente": null
+  },
+  {
+   "id": "d0aac0bb-f205-4922-990c-2969f2537fad",
+   "rotulo": "F12 · San Juan 35-34 Liceo",
+   "local": {
+    "nombre": "San Juan",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "visitante": {
+    "nombre": "Liceo",
+    "sinDatos": true,
+    "titulares": []
+   },
+   "eventos": [
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Felipe González"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Felipe González"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Tobías Cabeza"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Bautista Scadding"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Estiliano Battezzati"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Estiliano Battezzati"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Estiliano Battezzati"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Estiliano Battezzati"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Estiliano Battezzati"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Estiliano Battezzati"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "local",
+     "jugador": ""
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Julián Rossi"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Agustín Correa Llano"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Tomás Bazán"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Bruno Cirrincione"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_try",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Tomás Videla"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Tomás Videla"
+    },
+    {
+     "minuto": 0,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Tomás Videla"
+    }
+   ],
+   "marcadorFuente": null
+  }
+ ]
+}

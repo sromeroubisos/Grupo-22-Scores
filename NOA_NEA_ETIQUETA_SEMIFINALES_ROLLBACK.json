@@ -1,0 +1,271 @@
+{
+  "objetivos": [
+    {
+      "rotulo": "Regional del NOA \"A\" 2026 · Regular Season",
+      "fase": "88bb0e41-7872-43b7-8f53-8bf52fa6dee3",
+      "etiqueta_creada": null,
+      "settings_antes": {
+        "legs": 1,
+        "carryOver": {
+          "mode": "table_totals",
+          "source": "previous_phase",
+          "enabled": false,
+          "include": {
+            "form": true,
+            "points": true,
+            "scores": true,
+            "standings": true
+          },
+          "sourcePhaseId": null
+        },
+        "groupTags": [
+          "Semifinales"
+        ],
+        "teamsCount": 10,
+        "groupLabels": [
+          {
+            "id": "addcf981-946f-4b8e-8144-2a68c844f1cf",
+            "name": "Semifinales",
+            "color": "#00a365",
+            "colorMode": "auto",
+            "autoColorIndex": 0
+          }
+        ],
+        "group_names": [],
+        "matchFormat": {
+          "type": "single_match",
+          "label": "Partido Único",
+          "behavior": {
+            "series": {
+              "seriesLength": 2,
+              "tieResolution": "extra_time_then_penalty_shootout",
+              "aggregateMethod": "points_sum"
+            },
+            "single_match": {
+              "seriesLength": 1,
+              "winnerDetermination": "most_points_in_match"
+            }
+          }
+        },
+        "playerStats": {
+          "behavior": {
+            "attribution": {
+              "howToApply": "for_each_eligible_player_add_same_team_stat_delta_as_in_team_totals",
+              "teamStatsToPlayers": [
+                "points_for",
+                "points_against",
+                "wins",
+                "draws",
+                "losses",
+                "bonus_points"
+              ]
+            },
+            "eligibility": {
+              "mode": "played_or_starter",
+              "rules": [
+                {
+                  "if": {
+                    "assignOnlyToStarters": true
+                  },
+                  "then": {
+                    "eligiblePlayers": "starters_only"
+                  }
+                },
+                {
+                  "if": {
+                    "assignOnlyToStarters": false
+                  },
+                  "then": {
+                    "eligiblePlayers": "played_true"
+                  }
+                }
+              ],
+              "playedFlagField": "lineup.played",
+              "starterFlagField": "lineup.is_starter"
+            },
+            "whenToAttribute": "on_match_finalized"
+          },
+          "assignOnlyToStarters": false,
+          "assignTeamStatsToPlayersWhoPlayed": true
+        },
+        "tiebreakers": [
+          {
+            "order": 1,
+            "metric": "points_table",
+            "enabled": true,
+            "priority": 1
+          },
+          {
+            "order": 2,
+            "metric": "points_diff",
+            "enabled": true,
+            "priority": 2
+          }
+        ],
+        "advanceCount": 2,
+        "pointsSystem": {
+          "win": 4,
+          "draw": 2,
+          "loss": 0,
+          "behavior": {
+            "input": {
+              "requires": [
+                "score"
+              ],
+              "statusRequired": "finalized"
+            },
+            "output": {
+              "writesTo": [
+                "standings"
+              ]
+            },
+            "idempotency": {
+              "key": "match_id",
+              "rule": "ignore_if_already_processed"
+            },
+            "basePointsLogic": [
+              {
+                "if": {
+                  "win": true
+                },
+                "then": {
+                  "add": 4
+                }
+              },
+              {
+                "if": {
+                  "draw": true
+                },
+                "then": {
+                  "add": 2
+                }
+              },
+              {
+                "if": {
+                  "loss": true
+                },
+                "then": {
+                  "add": 0
+                }
+              }
+            ],
+            "whenToCalculate": "on_match_finalized"
+          },
+          "allowBonusPoints": false,
+          "extraTimeAlternativeSystem": false
+        },
+        "tableColumns": {
+          "won": true,
+          "lost": true,
+          "runs": true,
+          "drawn": true,
+          "tries": true,
+          "played": true,
+          "points": true,
+          "tackles": true,
+          "extraWon": false,
+          "dropGoals": true,
+          "extraLost": false,
+          "penalties": true,
+          "pointsFor": true,
+          "extraDrawn": false,
+          "percentage": false,
+          "pointsDiff": true,
+          "conversions": true,
+          "extraPlayed": false,
+          "posVariation": true,
+          "pointsAgainst": true,
+          "classification": false
+        },
+        "playoffStages": [],
+        "statsAssignment": "played",
+        "tiebreakerBehavior": {
+          "scope": {
+            "tableScope": "phase_group_or_pool",
+            "headToHeadScope": "only_between_tied_teams_in_that_tableScope"
+          },
+          "algorithm": {
+            "stepByStep": [
+              "points_table",
+              "points_diff"
+            ],
+            "finalFallback": {
+              "mode": "stable",
+              "rule": "keep_previous_order_or_use_team_id_ascending"
+            }
+          },
+          "appliesTo": "standings_sorting_only",
+          "evaluationTime": "after_all_matches_in_scope_processed"
+        },
+        "playoff_stage_names": [],
+        "playoff_match_counts": [],
+        "carryOverPreviousPhase": false,
+        "playoffStageMatchCounts": []
+      },
+      "team_labels_antes": []
+    },
+    {
+      "rotulo": "Regional del NEA 2026 · Segunda Fase",
+      "fase": "36496ee9-0fa1-417c-9597-e77c75b6a9ac",
+      "etiqueta_creada": "cf204c9b-c255-4e4d-b575-8c470de42072",
+      "settings_antes": {
+        "legs": 1,
+        "carryOver": {
+          "enabled": true,
+          "sourcePhaseId": "c56764e6-b400-489d-81eb-07b768d61eb2"
+        },
+        "phaseMode": "league",
+        "tableTags": [
+          {
+            "id": "1",
+            "color": "#00a365",
+            "label": "Clasifica a Semifinales",
+            "toPosition": 4,
+            "fromPosition": 1
+          }
+        ],
+        "teamsCount": 8,
+        "groupLabels": [],
+        "group_names": [],
+        "tiebreakers": [
+          {
+            "label": "Puntos obtenidos",
+            "order": 1,
+            "metric": "points_table",
+            "enabled": true,
+            "priority": 1
+          },
+          {
+            "label": "Diferencia de Tantos",
+            "order": 2,
+            "metric": "points_diff",
+            "enabled": true,
+            "priority": 2
+          }
+        ],
+        "advanceCount": 4,
+        "pointsSystem": {
+          "win": 4,
+          "draw": 2,
+          "loss": 0,
+          "bonusTry": 1,
+          "bonusLoss": 1
+        },
+        "playoffStages": [],
+        "selectedTeamIds": [
+          "regatas-de-resistencia",
+          "taraguy-r-c",
+          "san-jose",
+          "san-patricio",
+          "aguara",
+          "curne",
+          "aranduroga-r-c",
+          "curda"
+        ],
+        "groupAssignments": {},
+        "playoffThirdPlace": false
+      },
+      "team_labels_antes": []
+    }
+  ]
+}

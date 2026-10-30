@@ -119,6 +119,23 @@ async function fetchSeason(db: DbClient, seasonId: string) {
     return data;
 }
 
+/**
+ * El torneo dueño de una temporada, o null si no existe. Las rutas
+ * `/api/tournament-seasons/[seasonId]/*` lo usan para pedir permiso sobre ESE
+ * torneo: antes alcanzaba con cualquier rol de panel y el service_role hacía
+ * el resto.
+ */
+export async function resolveSeasonTournamentId(db: DbClient, seasonId: string): Promise<string | null> {
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(seasonId)) return null;
+    const { data, error } = await db
+        .from('tournament_seasons')
+        .select('id, tournament_id')
+        .eq('id', seasonId)
+        .maybeSingle();
+    if (error) throw new Error(error.message || 'No se pudo cargar la temporada.');
+    return data?.tournament_id ? String(data.tournament_id) : null;
+}
+
 async function assertEditableSeason(db: DbClient, seasonId: string) {
     const season = await fetchSeason(db, seasonId);
     if (LOCKED_SEASON_STATUSES.has(season.status)) {
@@ -573,6 +590,20 @@ export async function createSeasonRoster(db: DbClient, seasonId: string, input: 
     const clubId = cleanText(input.clubId);
     if (!clubId) throw new Error('clubId es requerido.');
 
+    const teamSeasonEntryId = cleanText(input.teamSeasonEntryId);
+    if (teamSeasonEntryId) {
+        // La inscripción tiene que ser de esta temporada: si no, el plantel
+        // quedaba colgado de la entrada de otro torneo.
+        const { data: entry } = await db
+            .from('team_season_entries')
+            .select('id, season_id')
+            .eq('id', teamSeasonEntryId)
+            .maybeSingle();
+        if (!entry || entry.season_id !== season.id) {
+            throw new Error('La inscripción no pertenece a esta temporada.');
+        }
+    }
+
     const rosterType = cleanText(input.rosterType) || 'official';
     const name = cleanText(input.name) || `Plantel ${season.season_code}`;
     const payload = {
@@ -641,7 +672,23 @@ export async function ensureRostersForSeasonEntries(db: DbClient, seasonId: stri
     return data ?? [];
 }
 
-export async function listSeasonRosters(db: DbClient, seasonId: string, includeMemberships = false) {
+/**
+ * Lo que ve un anónimo de un plantel: nombre, número, puesto. Sin fecha de
+ * nacimiento, notas ni elegibilidad — `roster_memberships.*` con `people.birth_date`
+ * salía por una ruta pública sin sesión.
+ */
+const PUBLIC_MEMBERSHIP_COLUMNS =
+    'id, roster_id, season_id, club_id, team_id, player_id, status, jersey_number, position, role, joined_at, left_at, created_at, ' +
+    'player:people(id, first_name, last_name, full_name, name, photo_url, avatar_url, position)';
+const FULL_MEMBERSHIP_COLUMNS =
+    '*, player:people(id, first_name, last_name, full_name, name, birth_date, photo_url, avatar_url, position)';
+
+export async function listSeasonRosters(
+    db: DbClient,
+    seasonId: string,
+    includeMemberships = false,
+    options: { publicView?: boolean } = {},
+) {
     const { data: rosters, error } = await db
         .from('season_rosters')
         .select('*, club:clubs(id, name, short_name, logo_url), team:club_teams(id, name, category, gender, sport)')
@@ -654,7 +701,7 @@ export async function listSeasonRosters(db: DbClient, seasonId: string, includeM
     const rosterIds = rosters.map((roster: any) => roster.id);
     const { data: memberships, error: membershipError } = await db
         .from('roster_memberships')
-        .select('*, player:people(id, first_name, last_name, full_name, name, birth_date, photo_url, avatar_url, position)')
+        .select(options.publicView ? PUBLIC_MEMBERSHIP_COLUMNS : FULL_MEMBERSHIP_COLUMNS)
         .in('roster_id', rosterIds)
         .order('jersey_number', { ascending: true, nullsFirst: false })
         .order('created_at', { ascending: true });
@@ -772,7 +819,12 @@ async function ensurePlayer(db: DbClient, roster: any, input: AddPlayerToRosterI
     return data.id;
 }
 
-export async function addPlayerToSeasonRoster(db: DbClient, rosterId: string, input: AddPlayerToRosterInput) {
+export async function addPlayerToSeasonRoster(
+    db: DbClient,
+    rosterId: string,
+    input: AddPlayerToRosterInput,
+    expectedSeasonId?: string,
+) {
     const { data: roster, error: rosterError } = await db
         .from('season_rosters')
         .select('*, season:tournament_seasons(id, status, tournament_id)')
@@ -781,6 +833,11 @@ export async function addPlayerToSeasonRoster(db: DbClient, rosterId: string, in
 
     if (rosterError) throw new Error(rosterError.message || 'No se pudo cargar el plantel.');
     if (!roster) throw new Error('Plantel no encontrado.');
+    // El permiso se pidió sobre la temporada de la URL: el plantel tiene que
+    // ser de esa misma temporada, no de otra que el body nombre.
+    if (expectedSeasonId && roster.season_id !== expectedSeasonId) {
+        throw new Error('Plantel no encontrado.');
+    }
 
     const season = Array.isArray(roster.season) ? roster.season[0] : roster.season;
     if (season && LOCKED_SEASON_STATUSES.has(season.status)) {

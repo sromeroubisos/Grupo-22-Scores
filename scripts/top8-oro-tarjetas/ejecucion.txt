@@ -1,0 +1,1994 @@
+Top 8 Oro Cuyano 2026 · tarjetas oficiales
+
+Teqüe vs Los Tordos · Top 8 Oro · tarjeta 309947  ·  12ef715d-167c-43bc-8930-5f7244ae70f4
+  local     · Teqüe · 23 jugadores · 20 con ficha fijada
+  visitante · Los Tordos · 23 jugadores · 22 con ficha fijada
+  eventos   · 32
+    min  3 (1T 3) visitante penalty_goal Federico Serpa
+    min  5 (1T 5) local     penalty_goal Augusto Kretschmar
+    min 10 (1T 10) local     penalty_try  
+    min 10 (1T 10) visitante card_yellow  Facundo Placeres
+    min 16 (1T 16) local     penalty_goal Augusto Kretschmar
+    min 24 (1T 24) visitante try          Francisco Luis Cassone
+    min 25 (1T 25) visitante conversion   Federico Serpa
+    min 39 (1T 39) visitante card_yellow  Martin Santiago
+    min 41 (2T 1) visitante try          Federico Serpa
+    min 42 (2T 2) visitante conversion   Federico Serpa
+    min 46 (2T 6) local     card_red     Renzo Martín
+    min 46 (2T 6) visitante card_red     Martin Orrico
+    min 50 (2T 10) visitante card_yellow  Juan Leonel Marchena
+    min 51 (2T 11) local     penalty_goal Augusto Kretschmar
+    min 52 (2T 12) local     substitution Juan Manuel Maure Spinelli
+    min 53 (2T 13) local     card_yellow  Iván Eyen Molina Señio
+    min 53 (2T 13) visitante try          Federico Serpa
+    min 54 (2T 14) local     substitution Esteban Fernandez
+    min 54 (2T 14) local     substitution Ignacio Acosta
+    min 54 (2T 14) local     substitution Santino Sabatelli
+    min 56 (2T 16) visitante substitution Gonzalo Intzes
+    min 59 (2T 19) local     substitution Luca Octavio Salguero Quintero
+    min 60 (2T 20) visitante penalty_goal Federico Serpa
+    min 62 (2T 22) local     penalty_goal Augusto Kretschmar
+    min 62 (2T 22) visitante substitution Tomás Diaz Michel
+    min 62 (2T 22) visitante substitution Roque Ongay
+    min 66 (2T 26) visitante try          Francisco Luis Cassone
+    min 67 (2T 27) local     substitution Julian Martin
+    min 67 (2T 27) visitante conversion   Federico Serpa
+    min 70 (2T 30) local     try          Juan Francisco Echalecu Bunader
+    min 70 (2T 30) local     conversion   Augusto Kretschmar
+    min 74 (2T 34) visitante card_red     Martin Santiago
+  marcador  · eventos 26-32 · guardado 26-32
+  tries     · 2-4 (guardado 2-4)
+  arbitro   · JOAQUIN LOPEZ (guardado: —)
+  guardado  · 23 local · 23 visitante · 32 eventos
+
+Universitario SJ vs Marista · Top 8 Oro · tarjeta 309953  ·  ed13d3e2-ca35-4a1f-a47b-f3a4e6029763
+  local     · Universitario SJ · 23 jugadores · 23 con ficha fijada
+  visitante · Marista · 23 jugadores · 23 con ficha fijada
+  eventos   · 25
+    min 13 (1T 13) visitante penalty_goal Bautista Filizzola
+    min 25 (1T 25) visitante try          Gabriel Pronce
+    min 25 (1T 25) visitante conversion   Bautista Filizzola
+    min 32 (1T 32) local     penalty_goal Teo Azar
+    min 35 (1T 35) visitante injury       Gabriel Pronce
+    min 35 (1T 35) visitante substitution Gabriel Pronce
+    min 36 (1T 36) visitante try          Rafael Lucas Cardozo
+    min 36 (1T 36) visitante conversion   Bautista Filizzola
+    min 39 (1T 39) visitante try          Octavio Soria Venturini
+    min 42 (1T 42) local     try          Carlos Nicolas Martinez Vallejos
+    min 43 (1T 43) local     conversion   Teo Azar
+    min 43 (2T 3) local     try          Carlos Nicolas Martinez Vallejos
+    min 50 (2T 10) visitante substitution Borja Filizzola
+    min 51 (2T 11) visitante substitution Matias Cid Arizu
+    min 56 (2T 16) local     try          Vito Sambrizzi
+    min 57 (2T 17) local     conversion   Teo Azar
+    min 59 (2T 19) visitante substitution Estanislao Rodriguez
+    min 59 (2T 19) visitante substitution Rafael Lucas Cardozo
+    min 60 (2T 20) visitante substitution Francisco Allamand
+    min 63 (2T 23) visitante substitution Rogelio Nazar Bustos
+    min 70 (2T 30) visitante card_yellow  Bautista Filizzola
+    min 71 (2T 31) local     penalty_goal Teo Azar
+    min 71 (2T 31) visitante substitution Geronimo Tejada
+    min 79 (2T 39) local     card_yellow  Francisco Jose Marcucci Varese
+    min 80 (2T 40) visitante try          Juan Pablo Soria Hanna
+  marcador  · eventos 25-27 · guardado 25-27
+  tries     · 3-4 (guardado 3-4)
+  arbitro   · FEDERICO GONZALEZ (guardado: —)
+  guardado  · 23 local · 23 visitante · 25 eventos
+
+San Juan vs CPBM · Top 8 Oro · tarjeta 309954  ·  8219ca38-2094-4381-b5ab-da42afb8a0f4
+  local     · San Juan · 23 jugadores · 15 con ficha fijada
+  visitante · CPBM · 23 jugadores · 12 con ficha fijada
+  eventos   · 29
+    min  2 (1T 2) visitante penalty_goal Alejo Magliano
+    min 11 (1T 11) visitante penalty_goal Alejo Magliano
+    min 22 (1T 22) local     try          Mariano Gabriel Reinoso
+    min 22 (1T 22) local     conversion   Bautista Cuneo Camargo
+    min 26 (1T 26) visitante try          Santiago Videla
+    min 26 (1T 26) visitante conversion   Alejo Magliano
+    min 31 (1T 31) local     card_yellow  Agustín Bridge
+    min 32 (1T 32) visitante penalty_goal Alejo Magliano
+    min 39 (1T 39) visitante penalty_goal Alejo Magliano
+    min 45 (2T 5) visitante substitution Francisco García Salazar
+    min 55 (2T 15) visitante card_red     Fausto Martinez Roge
+    min 58 (2T 18) visitante penalty_goal Alejo Magliano
+    min 64 (2T 24) visitante penalty_goal Alejo Magliano
+    min 68 (2T 28) local     try          Joaquin Bridge
+    min 68 (2T 28) local     conversion   Bautista Cuneo Camargo
+    min 70 (2T 30) visitante substitution Julián Cazorla
+    min 80 (2T 40) local     card_yellow  Juan Cruz Yuba
+    min 80 (2T 40) visitante try          Alejo Magliano
+    min 80 (2T 40) visitante conversion   Facundo Consorte
+    min 80 (2T 40) visitante substitution Fabricio Stirpa
+    min 80 (2T 40) visitante substitution Fermin Roo
+    min 80 (2T 40) visitante substitution Manuel Sonzogni
+    min 90 (2T 50) local     substitution Juan Pablo Venier
+    min 95 (2T 55) local     substitution Mariano Gabriel Reinoso
+    min 99 (2T 59) local     substitution Sebastian Diez
+    min 105 (2T 65) local     substitution Agustín Bridge
+    min 105 (2T 65) local     substitution Juan Pablo Venier
+    min 105 (2T 65) local     substitution Agustin Matias Rodriguez Mostazo
+    min 115 (2T 75) local     substitution Juan Manuel Ruiz
+  marcador  · eventos 14-32 · guardado 14-32
+  tries     · 2-2 (guardado 2-2)
+  arbitro   · JUAN DIEGO ESPINDOLA (guardado: —)
+  guardado  · 23 local · 23 visitante · 29 eventos
+
+Mendoza vs Liceo · Top 8 Oro · tarjeta 309955  ·  e5d69111-19e1-4c3a-8266-ff33d301eac9
+  local     · Mendoza · 23 jugadores · 23 con ficha fijada
+  visitante · Liceo · 23 jugadores · 23 con ficha fijada
+  eventos   · 32
+    min  1 (1T 1) local     try          Julian Cossutta
+    min  1 (1T 1) local     conversion   Tomas Canedo
+    min  3 (1T 3) visitante try          Juan Mateo Sancho
+    min  3 (1T 3) visitante conversion   Tomas Videla Raganato
+    min 11 (1T 11) visitante try          Julian Rossi Castillo
+    min 11 (1T 11) visitante conversion   Tomas Videla Raganato
+    min 12 (1T 12) local     try          Julian Cossutta
+    min 13 (1T 13) local     conversion   Tomas Canedo
+    min 15 (1T 15) visitante card_yellow  Bruno Cirrincione Caviggia
+    min 16 (1T 16) local     penalty_goal Tomas Canedo
+    min 17 (1T 17) visitante card_yellow  Tomas Videla Raganato
+    min 42 (2T 2) visitante try          Felipe Altamiranda
+    min 42 (2T 2) visitante conversion   Tomas Videla Raganato
+    min 45 (2T 5) visitante substitution Francisco Bertaina
+    min 48 (2T 8) local     substitution Federico Vidal
+    min 50 (2T 10) local     substitution Santiago Puppato
+    min 50 (2T 10) visitante substitution Joaquín Amézaga
+    min 58 (2T 18) visitante substitution Felipe Altamiranda
+    min 58 (2T 18) visitante substitution Enzo Cirrincione
+    min 59 (2T 19) local     substitution Renato Barolo
+    min 59 (2T 19) local     substitution Martin Guillermo Cruz
+    min 60 (2T 20) local     substitution Julian Cossutta
+    min 61 (2T 21) local     substitution Laureano Valle
+    min 61 (2T 21) local     substitution Benjamin Nicolás Costantini Luján
+    min 65 (2T 25) local     try          Julian Cossutta
+    min 68 (2T 28) visitante substitution Joaquín Muñoz
+    min 69 (2T 29) local     try          Jeremias Riquelme
+    min 70 (2T 30) local     conversion   Tomas Canedo
+    min 72 (2T 32) visitante penalty_goal Tomas Videla Raganato
+    min 75 (2T 35) visitante substitution Gino Castellino
+    min 75 (2T 35) visitante substitution Tiago Martin Gili
+    min 78 (2T 38) visitante try          Agustin Correa Llano
+  marcador  · eventos 29-29 · guardado 29-29
+  tries     · 4-4 (guardado 4-4)
+  guardado  · 23 local · 23 visitante · 32 eventos
+
+Los Tordos vs Marista · Top 8 Oro · tarjeta 311198  ·  ac1baa75-724d-4a8a-a686-b0e5b4223683
+  local     · Los Tordos · 23 jugadores · 23 con ficha fijada
+  visitante · Marista · 23 jugadores · 23 con ficha fijada
+  eventos   · 34
+    min  6 (1T 6) local     penalty_goal Federico Serpa
+    min 13 (1T 13) local     try          Facundo Tonon
+    min 18 (1T 18) visitante penalty_goal Bautista Filizzola
+    min 23 (1T 23) local     try          Federico Serpa
+    min 23 (1T 23) local     conversion   Federico Serpa
+    min 28 (1T 28) local     penalty_goal Federico Serpa
+    min 31 (1T 31) local     penalty_goal Federico Serpa
+    min 38 (1T 38) visitante try          Lucca Filizzola
+    min 39 (1T 39) visitante conversion   Bautista Filizzola
+    min 44 (2T 4) local     substitution Facundo Placeres
+    min 44 (2T 4) local     substitution Matias Augusto Herrera Linares
+    min 47 (2T 7) local     try          Gonzalo Intzes
+    min 47 (2T 7) local     conversion   Federico Serpa
+    min 48 (2T 8) visitante substitution Rafael Lucas Cardozo
+    min 54 (2T 14) visitante substitution Matias Cid Arizu
+    min 56 (2T 16) visitante penalty_try  
+    min 57 (2T 17) local     card_yellow  Franco Pizzi
+    min 60 (2T 20) local     substitution Juan Bautista Bruno Merlo
+    min 60 (2T 20) local     substitution Gonzalo Intzes
+    min 62 (2T 22) visitante substitution Lucca Filizzola
+    min 63 (2T 23) local     card_yellow  Pedro Lértora
+    min 66 (2T 26) visitante try          Alejo Videla Raganato
+    min 66 (2T 26) visitante conversion   Bautista Filizzola
+    min 75 (2T 35) local     substitution Franco Pizzi
+    min 75 (2T 35) local     substitution Roque Ongay
+    min 75 (2T 35) local     try          Pedro Lértora
+    min 75 (2T 35) local     conversion   Federico Serpa
+    min 75 (2T 35) visitante substitution Estanislao Rodriguez
+    min 76 (2T 36) visitante substitution Francisco Allamand
+    min 76 (2T 36) visitante substitution Juan Pablo Laborde
+    min 76 (2T 36) visitante substitution Julián Gaffuri
+    min 76 (2T 36) visitante substitution Alejo Videla Raganato
+    min 77 (2T 37) visitante try          Antonio Fernández Lores
+    min 78 (2T 38) visitante conversion   Bautista Filizzola
+  marcador  · eventos 35-31 · guardado 35-31
+  tries     · 4-4 (guardado 4-4)
+  guardado  · 23 local · 23 visitante · 34 eventos
+
+San Juan vs Teqüe · Top 8 Oro · tarjeta 311199  ·  eab845c4-2f43-46c0-98e8-15540f8f84f7
+  local     · San Juan · 23 jugadores · 14 con ficha fijada
+  visitante · Teqüe · 23 jugadores · 21 con ficha fijada
+  eventos   · 25
+    min  3 (1T 3) local     penalty_goal Estiliano Battezzati
+    min 11 (1T 11) visitante try          Benjamin Perez
+    min 11 (1T 11) visitante conversion   Augusto Kretschmar
+    min 14 (1T 14) local     try          Joaquin Farre
+    min 28 (1T 28) visitante penalty_goal Augusto Kretschmar
+    min 36 (1T 36) local     try          Felipe Gonzalez Moreno
+    min 40 (2T 0) visitante substitution Juan Francisco Echalecu Bunader
+    min 49 (2T 9) visitante penalty_goal Augusto Kretschmar
+    min 58 (2T 18) local     try          Felipe Gonzalez Moreno
+    min 58 (2T 18) local     conversion   Bautista Cuneo Camargo
+    min 64 (2T 24) visitante substitution Gonzalo Perez
+    min 64 (2T 24) visitante substitution Roman Zelada
+    min 66 (2T 26) visitante substitution Pablo Echalecu
+    min 72 (2T 32) local     try          Santiago Mario Peñafort Sánchez
+    min 72 (2T 32) local     conversion   Bautista Cuneo Camargo
+    min 73 (2T 33) visitante substitution Francisco Bautista Vega Battagion
+    min 80 (2T 40) local     penalty_goal Bautista Cuneo Camargo
+    min 90 (2T 50) local     substitution Juan Manuel Ruiz
+    min 102 (2T 62) local     substitution Juan Pablo Venier
+    min 105 (2T 65) local     substitution Francisco Ivan Nievas
+    min 105 (2T 65) local     substitution Joaquin Bridge
+    min 110 (2T 70) local     substitution Santiago Andres Albarracin Bruni
+    min 112 (2T 72) local     substitution Joaquin Farre
+    min 112 (2T 72) local     substitution Lautaro Gil
+    min 119 (2T 79) local     substitution Sebastian Diez
+  marcador  · eventos 30-13 · guardado 30-13
+  tries     · 4-1 (guardado 4-1)
+  arbitro   · FEDERICO GONZALEZ (guardado: —)
+  guardado  · 23 local · 23 visitante · 25 eventos
+
+Liceo vs Universitario SJ · Top 8 Oro · tarjeta 311200  ·  fdcd817a-5075-4f84-a54f-351066b7b74d
+  local     · Liceo · 23 jugadores · 21 con ficha fijada
+  visitante · Universitario SJ · 23 jugadores · 23 con ficha fijada
+  eventos   · 31
+    min  5 (1T 5) local     try          Facundo Ezequiel Lucero Scalzi
+    min  5 (1T 5) local     conversion   Tomas Videla Raganato
+    min 10 (1T 10) local     try          Ignacio Albino Gaido Corral
+    min 15 (1T 15) local     card_yellow  Gino Castellino
+    min 17 (1T 17) visitante penalty_goal Teo Azar
+    min 21 (1T 21) local     try          Santiago Videau
+    min 21 (1T 21) local     conversion   Tomas Videla Raganato
+    min 29 (1T 29) local     penalty_goal Tomas Videla Raganato
+    min 31 (1T 31) visitante card_yellow  Julián Ernesto Aguiar Gonzalez
+    min 33 (1T 33) visitante card_yellow  Julián Ernesto Aguiar Gonzalez
+    min 36 (1T 36) local     try          Facundo Ezequiel Lucero Scalzi
+    min 36 (1T 36) local     conversion   Tomas Videla Raganato
+    min 40 (2T 0) local     substitution Francisco Olguin
+    min 42 (2T 2) visitante try          Carlos Nicolas Martinez Vallejos
+    min 43 (2T 3) visitante conversion   Arabel Geronimo
+    min 46 (2T 6) local     penalty_goal Tomas Videla Raganato
+    min 49 (2T 9) local     substitution Francisco Bertaina
+    min 53 (2T 13) local     substitution Gino Castellino
+    min 53 (2T 13) visitante try          Santiago Achem
+    min 53 (2T 13) visitante conversion   Arabel Geronimo
+    min 57 (2T 17) local     substitution Adrián Nahir Cura Morello
+    min 60 (2T 20) visitante injury       Luciano Jara
+    min 61 (2T 21) local     penalty_goal Tomas Videla Raganato
+    min 62 (2T 22) visitante try          Juan Bautista Suarez Aragon
+    min 63 (2T 23) visitante conversion   Arabel Geronimo
+    min 65 (2T 25) local     card_yellow  Juan Manuel Perez Caram
+    min 67 (2T 27) visitante substitution Juan Francisco Caroprese Cantoni
+    min 69 (2T 29) visitante substitution Geronimo Adarvez
+    min 73 (2T 33) visitante substitution Santiago Achem
+    min 75 (2T 35) local     substitution Juan Manuel Perez Caram
+    min 75 (2T 35) local     substitution Ignacio Albino Gaido Corral
+  marcador  · eventos 35-24 · guardado 35-24
+  tries     · 4-3 (guardado 4-3)
+  arbitro   · JUAN DIEGO ESPINDOLA (guardado: —)
+  guardado  · 23 local · 23 visitante · 31 eventos
+
+CPBM vs Mendoza · Top 8 Oro · tarjeta 311201  ·  c69155b8-ff12-4f6b-97e8-ca66650ece08
+  local     · CPBM · 23 jugadores · 11 con ficha fijada
+  visitante · Mendoza · 23 jugadores · 23 con ficha fijada
+  eventos   · 23
+    min 13 (1T 13) local     card_yellow  Nicolás Andrés Miteff
+    min 13 (1T 13) visitante penalty_try  
+    min 14 (1T 14) visitante card_yellow  Luciano Morales
+    min 29 (1T 29) local     penalty_goal Alejo Magliano
+    min 37 (1T 37) visitante try          Julian Cossutta
+    min 48 (2T 8) visitante penalty_goal Tomas Canedo
+    min 49 (2T 9) visitante try          Julian Cossutta
+    min 49 (2T 9) visitante substitution Mariano Cicconi
+    min 50 (2T 10) local     substitution Julian Lopez
+    min 50 (2T 10) local     substitution Juan Manuel Montilla Lerena
+    min 50 (2T 10) local     substitution Julián Cazorla
+    min 52 (2T 12) visitante substitution Juan Ignacio Furlan
+    min 54 (2T 14) visitante try          Julian Cossutta
+    min 60 (2T 20) visitante substitution Martin Guillermo Cruz
+    min 62 (2T 22) visitante substitution Luciano Morales
+    min 65 (2T 25) visitante try          Ignacio Vidal
+    min 66 (2T 26) visitante substitution Santiago Puppato
+    min 66 (2T 26) visitante conversion   Tomas Canedo
+    min 67 (2T 27) visitante substitution Julian Cossutta
+    min 68 (2T 28) visitante substitution Federico Vidal
+    min 69 (2T 29) visitante substitution Ramiro Murri
+    min 75 (2T 35) visitante try          Ignacio Vidal
+    min 76 (2T 36) visitante conversion   Tomas Canedo
+  marcador  · eventos 3-39 · guardado 3-39
+  tries     · 0-6 (guardado 0-6)
+  arbitro   · JOAQUIN LOPEZ (guardado: —)
+  guardado  · 23 local · 23 visitante · 23 eventos
+
+CPBM vs Los Tordos · Top 8 Oro · tarjeta 312103  ·  936c5bae-d163-4721-aace-055c7658f22d
+  local     · CPBM · 23 jugadores · 12 con ficha fijada
+  visitante · Los Tordos · 23 jugadores · 23 con ficha fijada
+  eventos   · 22
+    min  5 (1T 5) visitante penalty_goal Francisco Galdeano Orrico
+    min  8 (1T 8) visitante try          Juan Dangelo
+    min 17 (1T 17) visitante penalty_goal Francisco Galdeano Orrico
+    min 26 (1T 26) local     penalty_goal Alejo Magliano
+    min 27 (1T 27) visitante card_red     Arroyo Manuel
+    min 31 (1T 31) visitante penalty_goal Francisco Galdeano Orrico
+    min 40 (1T 40) local     penalty_goal Alejo Magliano
+    min 40 (1T 40) visitante substitution Juan Balzarelli
+    min 55 (2T 15) local     penalty_goal Facundo Consorte
+    min 57 (2T 17) local     card_yellow  Santiago Videla
+    min 65 (2T 25) local     try          Branco Agustin Gutiérrez Sauli
+    min 65 (2T 25) local     conversion   Facundo Consorte
+    min 76 (2T 36) local     try          Lucas Joaquin Rodriguez
+    min 81 (2T 41) visitante try          Facundo Tonon
+    min 82 (2T 42) visitante conversion   Francisco Galdeano Orrico
+    min 92 (2T 52) visitante substitution Gonzalo Intzes
+    min 98 (2T 58) visitante penalty_goal Pedro Lértora
+    min 100 (2T 60) visitante substitution Facundo Placeres
+    min 100 (2T 60) visitante substitution Facundo Tonon
+    min 104 (2T 64) visitante try          Francisco Luis Cassone
+    min 109 (2T 69) visitante try          Juan Bautista Bruno Merlo
+    min 111 (2T 71) visitante card_yellow  Juan Enrique Arnut
+  marcador  · eventos 21-34 · guardado 21-34
+  tries     · 2-4 (guardado 2-4)
+  arbitro   · FEDERICO GONZALEZ (guardado: —)
+  guardado  · 23 local · 23 visitante · 22 eventos
+
+Mendoza vs Universitario SJ · Top 8 Oro · tarjeta 312104  ·  d8a76630-947c-4654-b466-6a7b5d162977
+  local     · Mendoza · 23 jugadores · 22 con ficha fijada
+  visitante · Universitario SJ · 23 jugadores · 22 con ficha fijada
+  eventos   · 30
+    min  3 (1T 3) visitante card_yellow  Bautista Sambrizzi
+    min  5 (1T 5) local     card_yellow  Xavier Otegui
+    min  6 (1T 6) visitante penalty_goal Arabel Geronimo
+    min  8 (1T 8) local     try          Santiago Martin Tapia
+    min  9 (1T 9) local     conversion   Tomas Canedo
+    min 11 (1T 11) local     try          Santiago Dapas Cabut
+    min 12 (1T 12) local     conversion   Tomas Canedo
+    min 13 (1T 13) local     try          Agustin Lombardo
+    min 13 (1T 13) local     conversion   Tomas Canedo
+    min 20 (1T 20) local     penalty_try  
+    min 22 (1T 22) visitante try          Geronimo Adarvez
+    min 23 (1T 23) visitante conversion   Arabel Geronimo
+    min 25 (1T 25) local     card_yellow  Federico Vidal
+    min 33 (1T 33) local     try          Francisco Javier Alvarez
+    min 39 (1T 39) visitante try          Agustin Sales
+    min 44 (2T 4) local     substitution Luciano Morales
+    min 46 (2T 6) local     card_yellow  Agustin Lombardo
+    min 46 (2T 6) visitante try          Carlos Nicolas Martinez Vallejos
+    min 47 (2T 7) visitante conversion   Arabel Geronimo
+    min 50 (2T 10) local     substitution Agustin Lombardo
+    min 51 (2T 11) local     substitution Martin Guillermo Cruz
+    min 54 (2T 14) local     substitution Laureano Valle
+    min 56 (2T 16) local     substitution Santiago Dapas Cabut
+    min 57 (2T 17) visitante substitution Juan Francisco Caroprese Cantoni
+    min 57 (2T 17) visitante substitution Agustin Sales
+    min 58 (2T 18) local     substitution Renato Barolo
+    min 58 (2T 18) visitante try          Carlos Nicolas Martinez Vallejos
+    min 59 (2T 19) visitante conversion   Arabel Geronimo
+    min 65 (2T 25) visitante substitution Santiago Achem
+    min 68 (2T 28) visitante substitution Juan Cruz Magariños
+  marcador  · eventos 33-29 · guardado 33-29
+  tries     · 5-4 (guardado 5-4)
+  arbitro   · CARLOS MATIAS RIVAROLA (guardado: —)
+  guardado  · 23 local · 23 visitante · 30 eventos
+
+Teqüe vs Liceo · Top 8 Oro · tarjeta 312105  ·  25d975ee-e15d-4a95-bda7-3acb169d192c
+  local     · Teqüe · 23 jugadores · 22 con ficha fijada
+  visitante · Liceo · 23 jugadores · 22 con ficha fijada
+  eventos   · 27
+    min  7 (1T 7) visitante try          Juan Mateo Sancho
+    min  7 (1T 7) visitante conversion   Tomas Videla Raganato
+    min 15 (1T 15) visitante try          Agustin Correa Llano
+    min 15 (1T 15) visitante conversion   Tomas Videla Raganato
+    min 26 (1T 26) local     card_yellow  Benjamin Perez
+    min 28 (1T 28) visitante try          Santiago Videau
+    min 28 (1T 28) visitante conversion   Tomas Videla Raganato
+    min 34 (1T 34) visitante try          Tomás Castro
+    min 34 (1T 34) visitante conversion   Tomas Videla Raganato
+    min 44 (2T 4) visitante card_yellow  Felipe Altamiranda
+    min 50 (2T 10) local     substitution Julian Martin
+    min 50 (2T 10) local     substitution Ignacio Acosta
+    min 57 (2T 17) local     substitution Santino Sabatelli
+    min 57 (2T 17) local     substitution Juan Manuel Maure Spinelli
+    min 59 (2T 19) visitante substitution Juan Mateo Sancho
+    min 60 (2T 20) local     substitution Augusto Kretschmar
+    min 65 (2T 25) visitante substitution Felipe Altamiranda
+    min 66 (2T 26) local     penalty_try  
+    min 66 (2T 26) visitante substitution Francisco Olguin
+    min 66 (2T 26) visitante injury       Francisco Olguin
+    min 66 (2T 26) visitante substitution Santiago Videau
+    min 66 (2T 26) visitante card_yellow  Joaquín Amézaga
+    min 73 (2T 33) visitante substitution Juan Manuel Perez Caram
+    min 73 (2T 33) visitante substitution Agustin Quiroga
+    min 73 (2T 33) visitante substitution Francisco Olguin
+    min 77 (2T 37) visitante try          Gino Castellino
+    min 77 (2T 37) visitante conversion   Tomas Videla Raganato
+  marcador  · eventos 7-35 · guardado 7-35
+  tries     · 1-5 (guardado 1-5)
+  guardado  · 23 local · 23 visitante · 27 eventos
+
+Marista vs San Juan · Top 8 Oro · tarjeta 312106  ·  e8b4e644-d7af-4407-8fac-a9a6ae22b38b
+  local     · Marista · 23 jugadores · 23 con ficha fijada
+  visitante · San Juan · 23 jugadores · 14 con ficha fijada
+  eventos   · 32
+    min 15 (1T 15) visitante card_yellow  Santiago Andres Albarracin Bruni
+    min 21 (1T 21) visitante penalty_goal Estiliano Battezzati
+    min 32 (1T 32) visitante penalty_goal Estiliano Battezzati
+    min 35 (1T 35) visitante penalty_goal Estiliano Battezzati
+    min 40 (1T 40) local     try          Marcos Andrés Porro
+    min 40 (1T 40) local     conversion   Lisandro Sosa Jiranek
+    min 46 (2T 6) local     try          Benjamín Filizzola Falcioni
+    min 46 (2T 6) local     conversion   Lisandro Sosa Jiranek
+    min 48 (2T 8) local     substitution Marcos Andrés Porro
+    min 48 (2T 8) local     substitution Lisandro Sosa Jiranek
+    min 48 (2T 8) local     substitution Julián Gaffuri
+    min 48 (2T 8) local     substitution Matias Cid Arizu
+    min 56 (2T 16) local     card_yellow  Alejo Videla Raganato
+    min 57 (2T 17) visitante penalty_goal Estiliano Battezzati
+    min 57 (2T 17) visitante substitution Sebastian Diez
+    min 57 (2T 17) visitante substitution Lautaro Gil
+    min 57 (2T 17) visitante substitution Lautaro Gil
+    min 63 (2T 23) local     try          Matías Agustín Colomer Queiroz
+    min 65 (2T 25) visitante substitution Joaquin Bridge
+    min 65 (2T 25) visitante substitution Francisco Ivan Nievas
+    min 67 (2T 27) local     substitution Estanislao Rodriguez
+    min 68 (2T 28) local     substitution Benjamín Filizzola Falcioni
+    min 70 (2T 30) local     substitution Juan Pablo Laborde
+    min 70 (2T 30) visitante substitution Joaquin Farre
+    min 72 (2T 32) visitante penalty_goal Estiliano Battezzati
+    min 73 (2T 33) local     substitution Antonio Fernández Lores
+    min 73 (2T 33) visitante substitution Juan Bautista Domanico Gonzalez
+    min 74 (2T 34) visitante substitution Bautista Cuneo Camargo
+    min 75 (2T 35) visitante try          Bautista Scadding
+    min 76 (2T 36) visitante conversion   Estiliano Battezzati
+    min 84 (2T 44) local     try          Bautista Curto
+    min 84 (2T 44) local     conversion   Bautista Filizzola
+  marcador  · eventos 26-22 · guardado 26-22
+  tries     · 4-1 (guardado 4-1)
+  arbitro   · NICOLÁS QUINTANA (guardado: —)
+  guardado  · 23 local · 23 visitante · 32 eventos
+
+Los Tordos vs Liceo · Top 8 Oro · tarjeta 313711  ·  5968fa0c-c6a4-44b1-bc55-9821ca4dddb9
+  local     · Los Tordos · 23 jugadores · 23 con ficha fijada
+  visitante · Liceo · 23 jugadores · 23 con ficha fijada
+  eventos   · 32
+    min  2 (1T 2) local     try          Arroyo Manuel
+    min  3 (1T 3) local     conversion   Francisco Galdeano Orrico
+    min 15 (1T 15) local     try          Valentino Alejo Miranda Conti
+    min 15 (1T 15) visitante injury       Juan Mateo Sancho
+    min 16 (1T 16) local     conversion   Francisco Galdeano Orrico
+    min 18 (1T 18) visitante try          Gino Castellino
+    min 18 (1T 18) visitante conversion   Tiago Martin Gili
+    min 19 (1T 19) local     substitution Julian Ortiz Maldonado
+    min 20 (1T 20) visitante substitution Bruno Cirrincione Caviggia
+    min 25 (1T 25) local     try          Francisco Galdeano Orrico
+    min 26 (1T 26) local     conversion   Francisco Galdeano Orrico
+    min 40 (1T 40) visitante try          Santino Villegas
+    min 42 (2T 2) visitante penalty_goal Ignacio Albino Gaido Corral
+    min 43 (2T 3) local     try          Martin Orrico
+    min 43 (2T 3) visitante substitution Joaquín Muñoz
+    min 43 (2T 3) visitante substitution Santino Villegas
+    min 44 (2T 4) local     conversion   Francisco Galdeano Orrico
+    min 50 (2T 10) local     substitution Facundo Diaz
+    min 51 (2T 11) visitante try          Enzo Cirrincione
+    min 57 (2T 17) visitante try          Tiago Martin Gili
+    min 57 (2T 17) visitante conversion   Ignacio Albino Gaido Corral
+    min 59 (2T 19) local     substitution Juan Enrique Arnut
+    min 60 (2T 20) visitante substitution Juan Mateo Sancho
+    min 66 (2T 26) local     substitution Lautaro Varela Gomina
+    min 66 (2T 26) local     card_yellow  Martin Santiago
+    min 66 (2T 26) visitante substitution Felipe Altamiranda
+    min 66 (2T 26) visitante substitution Santiago Videau
+    min 66 (2T 26) visitante try          Juan Ignacio Rodriguez
+    min 66 (2T 26) visitante conversion   Ignacio Albino Gaido Corral
+    min 69 (2T 29) local     try          Facundo Tonon
+    min 70 (2T 30) local     conversion   Francisco Galdeano Orrico
+    min 78 (2T 38) visitante card_yellow  Tomas Molina
+  marcador  · eventos 35-34 · guardado 35-34
+  tries     · 5-5 (guardado 5-5)
+  guardado  · 23 local · 23 visitante · 32 eventos
+
+San Juan vs Mendoza · Top 8 Oro · tarjeta 313712  ·  6d982e19-413f-4bfb-8a0a-74ac3a6404dd
+  local     · San Juan · 23 jugadores · 15 con ficha fijada
+  visitante · Mendoza · 23 jugadores · 23 con ficha fijada
+  eventos   · 32
+    min  8 (1T 8) visitante try          Renato Barolo
+    min  8 (1T 8) visitante conversion   Franco Palazzini
+    min 21 (1T 21) local     try          Juan Pablo Venier
+    min 22 (1T 22) local     conversion   Estiliano Battezzati
+    min 30 (1T 30) local     penalty_goal Estiliano Battezzati
+    min 32 (1T 32) visitante try          Julian Cossutta
+    min 32 (1T 32) visitante conversion   Franco Palazzini
+    min 36 (1T 36) local     penalty_goal Estiliano Battezzati
+    min 38 (1T 38) local     try          Juan Bautista Domanico Gonzalez
+    min 44 (2T 4) visitante substitution Franco Palazzini
+    min 45 (2T 5) visitante substitution Benjamin Nicolás Costantini Luján
+    min 48 (2T 8) local     card_yellow  Estiliano Battezzati
+    min 48 (2T 8) visitante substitution Mauro Savina
+    min 49 (2T 9) local     substitution Tobias Cabeza
+    min 49 (2T 9) visitante try          Ernesto Giudice
+    min 49 (2T 9) visitante conversion   Santiago Rez Masud
+    min 50 (2T 10) visitante substitution Jeremias Riquelme
+    min 50 (2T 10) visitante penalty_goal Santiago Rez Masud
+    min 55 (2T 15) local     substitution Lautaro Gil
+    min 55 (2T 15) local     card_yellow  Joaquin Bridge
+    min 59 (2T 19) local     substitution Sebastian Diez
+    min 59 (2T 19) local     substitution Francisco Ivan Nievas
+    min 62 (2T 22) visitante substitution Felipe Dario Rubio
+    min 65 (2T 25) local     substitution Joaquin Bridge
+    min 66 (2T 26) visitante try          Santiago Martin Tapia
+    min 66 (2T 26) visitante conversion   Santiago Rez Masud
+    min 68 (2T 28) local     substitution Bautista Cuneo Camargo
+    min 68 (2T 28) local     substitution Felipe Gonzalez Moreno
+    min 70 (2T 30) local     card_yellow  Agustin Sanchez Derito
+    min 70 (2T 30) visitante penalty_goal Santiago Rez Masud
+    min 72 (2T 32) local     try          Estiliano Battezzati
+    min 79 (2T 39) visitante substitution Renato Barolo
+  marcador  · eventos 23-34 · guardado 23-34
+  tries     · 3-4 (guardado 3-4)
+  arbitro   · FRANCISCO NANCLARES (guardado: —)
+  guardado  · 23 local · 23 visitante · 32 eventos
+
+Marista vs CPBM · Top 8 Oro · tarjeta 313713  ·  bf8e08fa-91b5-4ae3-a65e-5e23cbe46064
+  local     · Marista · 23 jugadores · 23 con ficha fijada
+  visitante · CPBM · 23 jugadores · 12 con ficha fijada
+  eventos   · 35
+    min  2 (1T 2) local     try          Luciano Fariello
+    min  2 (1T 2) local     conversion   Lisandro Sosa Jiranek
+    min  5 (1T 5) visitante penalty_goal Alejo Magliano
+    min  6 (1T 6) local     try          Telmo Fernández
+    min  6 (1T 6) local     conversion   Lisandro Sosa Jiranek
+    min 15 (1T 15) visitante penalty_goal Alejo Magliano
+    min 17 (1T 17) local     try          Alejandro Pronce
+    min 17 (1T 17) local     conversion   Lisandro Sosa Jiranek
+    min 22 (1T 22) local     try          Conall Unger
+    min 22 (1T 22) visitante card_yellow  Luciano Gutierrez Sauli
+    min 25 (1T 25) local     try          Alejandro Pronce
+    min 30 (1T 30) visitante try          Facundo Consorte
+    min 30 (1T 30) visitante conversion   Alejo Magliano
+    min 43 (2T 3) local     try          Conall Unger
+    min 43 (2T 3) local     conversion   Lisandro Sosa Jiranek
+    min 45 (2T 5) local     substitution Juan Pablo Soria Hanna
+    min 51 (2T 11) local     substitution Maximiliano Montilla
+    min 51 (2T 11) local     substitution Alejandro Pronce
+    min 51 (2T 11) local     substitution Marcos Andrés Porro
+    min 51 (2T 11) local     substitution Lucca Filizzola
+    min 54 (2T 14) local     try          Matías Agustín Colomer Queiroz
+    min 54 (2T 14) local     conversion   Lisandro Sosa Jiranek
+    min 57 (2T 17) local     substitution Ignacio Linares
+    min 59 (2T 19) visitante try          Luciano Gutierrez Sauli
+    min 59 (2T 19) visitante conversion   Alejo Magliano
+    min 60 (2T 20) local     substitution Francisco Allamand
+    min 62 (2T 22) local     try          Tomas Montilla
+    min 65 (2T 25) local     try          Julián Guevara Aguinaga
+    min 65 (2T 25) visitante card_yellow  Fabricio Stirpa
+    min 66 (2T 26) local     substitution Julián Guevara Aguinaga
+    min 72 (2T 32) visitante try          Manuel Sonzogni
+    min 72 (2T 32) visitante conversion   Alejo Magliano
+    min 78 (2T 38) local     card_yellow  Tomas Montilla
+    min 79 (2T 39) local     try          Lisandro Sosa Jiranek
+    min 79 (2T 39) local     conversion   Lisandro Sosa Jiranek
+  marcador  · eventos 62-27 · guardado 62-27
+  tries     · 10-3 (guardado 10-3)
+  arbitro   · JUAN DIEGO ESPINDOLA (guardado: —)
+  guardado  · 23 local · 23 visitante · 35 eventos
+
+Universitario SJ vs Teqüe · Top 8 Oro · tarjeta 313714  ·  43dba851-f30f-4a12-b2f4-b6893815e512
+  local     · Universitario SJ · 23 jugadores · 23 con ficha fijada
+  visitante · Teqüe · 23 jugadores · 22 con ficha fijada
+  eventos   · 31
+    min  9 (1T 9) local     penalty_goal Arabel Geronimo
+    min 10 (1T 10) local     injury       Vito Sambrizzi
+    min 10 (1T 10) local     substitution Vito Sambrizzi
+    min 12 (1T 12) local     try          Julián Ernesto Aguiar Gonzalez
+    min 13 (1T 13) local     conversion   Arabel Geronimo
+    min 17 (1T 17) local     drop_goal    Arabel Geronimo
+    min 33 (1T 33) visitante card_yellow  Fermin Castro
+    min 34 (1T 34) local     penalty_goal Arabel Geronimo
+    min 39 (1T 39) local     try          Agustin Sales
+    min 40 (1T 40) local     conversion   Arabel Geronimo
+    min 40 (2T 0) visitante substitution Pablo Saez
+    min 43 (2T 3) visitante substitution Fermin Castro
+    min 50 (2T 10) local     substitution Santiago Achem
+    min 52 (2T 12) local     try          Arabel Geronimo
+    min 53 (2T 13) local     substitution Juan Ignacio Magariños
+    min 53 (2T 13) local     substitution Juan Cruz Magariños
+    min 53 (2T 13) local     substitution Guillermo Quiroga Oliver
+    min 53 (2T 13) local     substitution Geronimo Adarvez
+    min 56 (2T 16) local     try          Juan Ignacio Del Carril
+    min 57 (2T 17) local     conversion   Arabel Geronimo
+    min 60 (2T 20) local     substitution Julián Ernesto Aguiar Gonzalez
+    min 60 (2T 20) local     substitution Carlos Nicolas Martinez Vallejos
+    min 64 (2T 24) local     try          Lautaro Torcivia
+    min 65 (2T 25) local     conversion   Arabel Geronimo
+    min 65 (2T 25) visitante substitution Francisco Bautista Vega Battagion
+    min 65 (2T 25) visitante substitution Gonzalo Perez
+    min 65 (2T 25) visitante substitution Luca Octavio Salguero Quintero
+    min 65 (2T 25) visitante substitution Esteban Fernandez
+    min 73 (2T 33) local     try          Arabel Geronimo
+    min 77 (2T 37) local     card_yellow  Luciano Muñoz
+    min 77 (2T 37) visitante try          Mauricio Godoy
+  marcador  · eventos 47-5 · guardado 47-5
+  tries     · 6-1 (guardado 6-1)
+  arbitro   · SEBASTIAN LOPEZ SIMONASSI (guardado: —)
+  guardado  · 23 local · 23 visitante · 31 eventos
+
+Los Tordos vs Universitario SJ · Top 8 Oro · tarjeta 314129  ·  adbcec2c-5180-49a6-a6e4-314c48b15a3e
+  local     · Los Tordos · 23 jugadores · 23 con ficha fijada
+  visitante · Universitario SJ · 23 jugadores · 23 con ficha fijada
+  eventos   · 43
+    min  2 (1T 2) local     try          Facundo Tonon
+    min 10 (1T 10) local     try          Juan Enrique Arnut
+    min 11 (1T 11) local     conversion   Francisco Galdeano Orrico
+    min 16 (1T 16) visitante try          Arabel Geronimo
+    min 19 (1T 19) local     try          Facundo Tonon
+    min 21 (1T 21) local     try          Juan Dangelo
+    min 22 (1T 22) local     conversion   Francisco Galdeano Orrico
+    min 24 (1T 24) local     substitution Pedro Lértora
+    min 24 (1T 24) visitante try          Geronimo Adarvez
+    min 25 (1T 25) visitante conversion   Arabel Geronimo
+    min 26 (1T 26) local     try          Martin Orrico
+    min 27 (1T 27) local     conversion   Francisco Galdeano Orrico
+    min 32 (1T 32) local     try          Juan Dangelo
+    min 35 (1T 35) local     injury       Juan Enrique Arnut
+    min 38 (1T 38) visitante try          Carlos Nicolas Martinez Vallejos
+    min 39 (1T 39) visitante conversion   Arabel Geronimo
+    min 41 (2T 1) local     substitution Santiago Bustamante
+    min 44 (2T 4) local     card_yellow  Juan Dangelo
+    min 44 (2T 4) visitante try          Francisco Jose Marcucci Varese
+    min 45 (2T 5) visitante conversion   Arabel Geronimo
+    min 45 (2T 5) visitante substitution Santiago Achem
+    min 47 (2T 7) local     try          Facundo Tonon
+    min 50 (2T 10) local     substitution Matias Augusto Herrera Linares
+    min 50 (2T 10) visitante substitution Geronimo Adarvez
+    min 52 (2T 12) visitante try          Joaquin Sanchez Barrozo
+    min 53 (2T 13) visitante conversion   Arabel Geronimo
+    min 57 (2T 17) visitante substitution Guillermo Quiroga Oliver
+    min 57 (2T 17) visitante substitution Agustin Sales
+    min 61 (2T 21) local     substitution Jose Antonio Dangelo
+    min 61 (2T 21) local     substitution Arroyo Manuel
+    min 63 (2T 23) local     try          Juan Dangelo
+    min 64 (2T 24) local     substitution Francisco Luis Cassone
+    min 64 (2T 24) local     conversion   Francisco Galdeano Orrico
+    min 65 (2T 25) visitante try          Lucas Buloz
+    min 66 (2T 26) visitante substitution Joaquin Sanchez Barrozo
+    min 67 (2T 27) local     substitution Thiago Sosa Ledesma
+    min 68 (2T 28) local     try          Gonzalo Intzes
+    min 69 (2T 29) local     conversion   Francisco Galdeano Orrico
+    min 72 (2T 32) local     card_yellow  Juan Bautista Bruno Merlo
+    min 72 (2T 32) visitante penalty_try  
+    min 75 (2T 35) visitante try          Santiago Baldi
+    min 76 (2T 36) visitante conversion   Arabel Geronimo
+    min 79 (2T 39) visitante card_yellow  Lucas Buloz
+  marcador  · eventos 55-52 · guardado 55-52
+  tries     · 9-8 (guardado 9-8)
+  arbitro   · JUAN MANUEL MARTINEZ (guardado: —)
+  guardado  · 23 local · 23 visitante · 43 eventos
+
+Teqüe vs CPBM · Top 8 Oro · tarjeta 314130  ·  eeb0cc5e-691f-469e-beb9-e48bc788708d
+  local     · Teqüe · 23 jugadores · 21 con ficha fijada
+  visitante · CPBM · 23 jugadores · 12 con ficha fijada
+  eventos   · 26
+    min 14 (1T 14) visitante penalty_goal Alejo Magliano
+    min 24 (1T 24) visitante card_red     Marcos Montilla
+    min 26 (1T 26) local     try          Lautaro Martin Calle Rivas
+    min 30 (1T 30) visitante penalty_goal Alejo Magliano
+    min 36 (1T 36) visitante try          Fausto Martinez Roge
+    min 40 (1T 40) local     try          Mauro Nicolás Quiroga
+    min 40 (1T 40) local     conversion   Lautaro Martin Calle Rivas
+    min 42 (2T 2) local     penalty_goal Lautaro Martin Calle Rivas
+    min 50 (2T 10) local     try          Mauro Nicolás Quiroga
+    min 50 (2T 10) local     conversion   Lautaro Martin Calle Rivas
+    min 53 (2T 13) visitante penalty_goal Alejo Magliano
+    min 55 (2T 15) visitante substitution Ramiro Japaz
+    min 60 (2T 20) visitante try          Luciano Gutierrez Sauli
+    min 60 (2T 20) visitante conversion   Alejo Magliano
+    min 61 (2T 21) local     substitution Esteban Fernandez
+    min 63 (2T 23) visitante substitution Juan Martin Bazan
+    min 63 (2T 23) visitante substitution Juan Manuel Luquez
+    min 63 (2T 23) visitante substitution Valentin Mausbach
+    min 63 (2T 23) visitante substitution Julián Cazorla
+    min 67 (2T 27) visitante try          Fausto Martinez Roge
+    min 68 (2T 28) local     substitution Gonzalo Perez
+    min 68 (2T 28) local     substitution Renzo Martín
+    min 75 (2T 35) visitante substitution Nicolás Andrés Miteff
+    min 75 (2T 35) visitante substitution Manuel Sonzogni
+    min 78 (2T 38) visitante try          Francisco García Salazar
+    min 78 (2T 38) visitante conversion   Alejo Magliano
+  marcador  · eventos 22-33 · guardado 22-33
+  tries     · 3-4 (guardado 3-4)
+  arbitro   · JOAQUIN LOPEZ (guardado: —)
+  guardado  · 23 local · 23 visitante · 26 eventos
+
+Mendoza vs Marista · Top 8 Oro · tarjeta 314131  ·  bbe93b69-d0e0-4100-8a75-d007f0b5b48e
+  local     · Mendoza · 23 jugadores · 23 con ficha fijada
+  visitante · Marista · 23 jugadores · 23 con ficha fijada
+  eventos   · 25
+    min  2 (1T 2) visitante try          Tomas Montilla
+    min  3 (1T 3) visitante conversion   Lisandro Sosa Jiranek
+    min 15 (1T 15) visitante try          Lucas Bartolini
+    min 16 (1T 16) visitante conversion   Lisandro Sosa Jiranek
+    min 19 (1T 19) local     try          Renato Barolo
+    min 23 (1T 23) visitante penalty_goal Lisandro Sosa Jiranek
+    min 42 (2T 2) local     penalty_goal Santiago Rez Masud
+    min 46 (2T 6) local     penalty_goal Santiago Rez Masud
+    min 46 (2T 6) local     substitution Santiago Dapas Cabut
+    min 49 (2T 9) visitante substitution Maximiliano Montilla
+    min 49 (2T 9) visitante substitution Tomas Montilla
+    min 49 (2T 9) visitante substitution Marcos Andrés Porro
+    min 49 (2T 9) visitante substitution Bautista Curto
+    min 49 (2T 9) visitante substitution Telmo Fernández
+    min 50 (2T 10) local     substitution Mauro Savina
+    min 52 (2T 12) visitante try          Alejandro Pronce
+    min 56 (2T 16) local     substitution Xavier Otegui
+    min 60 (2T 20) local     substitution Felipe Dario Rubio
+    min 65 (2T 25) visitante card_yellow  Jesús Ariel Porro
+    min 66 (2T 26) local     substitution Benjamin Nicolás Costantini Luján
+    min 66 (2T 26) local     substitution Martin Guillermo Cruz
+    min 68 (2T 28) visitante substitution Borja Filizzola
+    min 70 (2T 30) visitante substitution Juan Pablo Soria Hanna
+    min 75 (2T 35) visitante substitution Matías Agustín Colomer Queiroz
+    min 76 (2T 36) local     card_yellow  Juan Pablo Alvarez
+  marcador  · eventos 11-22 · guardado 11-22
+  tries     · 1-3 (guardado 1-3)
+  guardado  · 23 local · 23 visitante · 25 eventos
+
+Liceo vs San Juan · Top 8 Oro · tarjeta 314132  ·  b1822431-cc06-430f-9cd2-184efe3dc633
+  local     · Liceo · 23 jugadores · 22 con ficha fijada
+  visitante · San Juan · 23 jugadores · 14 con ficha fijada
+  eventos   · 37
+    min  6 (1T 6) local     try          Facundo Ezequiel Lucero Scalzi
+    min  6 (1T 6) local     conversion   Ignacio Albino Gaido Corral
+    min 10 (1T 10) local     try          Julian Rossi Castillo
+    min 13 (1T 13) visitante try          Joaquin Farre
+    min 13 (1T 13) visitante conversion   Estiliano Battezzati
+    min 24 (1T 24) local     try          Agustin Correa Llano
+    min 24 (1T 24) local     conversion   Ignacio Albino Gaido Corral
+    min 32 (1T 32) local     try          Enzo Cirrincione
+    min 32 (1T 32) local     conversion   Ignacio Albino Gaido Corral
+    min 36 (1T 36) local     card_yellow  Tomas Ignacio Ortiz Gavotto
+    min 39 (1T 39) visitante card_yellow  Joaquin Farre
+    min 40 (1T 40) local     penalty_try  
+    min 41 (2T 1) visitante try          Felipe Gonzalez Moreno
+    min 41 (2T 1) visitante conversion   Estiliano Battezzati
+    min 45 (2T 5) local     try          Gino Castellino
+    min 50 (2T 10) local     substitution Gino Castellino
+    min 50 (2T 10) local     substitution Juan Manuel Perez Caram
+    min 50 (2T 10) local     substitution Tomas Jesus Bazan Marziani
+    min 50 (2T 10) local     substitution Juan Ignacio Rodriguez
+    min 53 (2T 13) visitante try          Santiago Andres Albarracin Bruni
+    min 57 (2T 17) local     try          Agustin Correa Llano
+    min 57 (2T 17) local     conversion   Ignacio Albino Gaido Corral
+    min 65 (2T 25) local     substitution Tomas Ignacio Ortiz Gavotto
+    min 65 (2T 25) local     injury       Tomas Ignacio Ortiz Gavotto
+    min 69 (2T 29) local     substitution Santiago Videau
+    min 71 (2T 31) local     substitution Agustin Quiroga
+    min 71 (2T 31) local     substitution Santino Villegas
+    min 74 (2T 34) local     penalty_goal Ignacio Albino Gaido Corral
+    min 75 (2T 35) visitante try          Gonzalo Roldan
+    min 75 (2T 35) visitante conversion   Gonzalo Roldan
+    min 90 (2T 50) visitante substitution Santiago Mario Peñafort Sánchez
+    min 100 (2T 60) visitante substitution Agustin Matias Rodriguez Mostazo
+    min 105 (2T 65) visitante substitution Alejo Olguin
+    min 110 (2T 70) visitante substitution Joaquin Farre
+    min 115 (2T 75) visitante substitution Juan Manuel Ruiz
+    min 115 (2T 75) visitante substitution Sebastian Diez
+    min 115 (2T 75) visitante substitution Mateo Licciardi
+  marcador  · eventos 48-26 · guardado 48-26
+  tries     · 7-4 (guardado 7-4)
+  arbitro   · FRANCISCO NANCLARES (guardado: —)
+  guardado  · 23 local · 23 visitante · 37 eventos
+
+San Juan vs Los Tordos · Top 8 Oro · tarjeta 314394  ·  f70c734d-ea18-4f55-a4d8-5d705c267b2a
+  local     · San Juan · 23 jugadores · 15 con ficha fijada
+  visitante · Los Tordos · 23 jugadores · 23 con ficha fijada
+  eventos   · 46
+    min  2 (1T 2) visitante try          Juan Dangelo
+    min  3 (1T 3) visitante conversion   Francisco Galdeano Orrico
+    min  6 (1T 6) local     try          Juan Cruz Yuba
+    min  7 (1T 7) local     conversion   Estiliano Battezzati
+    min 12 (1T 12) visitante try          Facundo Tonon
+    min 17 (1T 17) local     try          Estiliano Battezzati
+    min 27 (1T 27) local     penalty_goal Estiliano Battezzati
+    min 32 (1T 32) local     try          Tobias Cabeza
+    min 33 (1T 33) local     conversion   Estiliano Battezzati
+    min 35 (1T 35) visitante try          Martin Orrico
+    min 36 (1T 36) visitante conversion   Francisco Galdeano Orrico
+    min 39 (1T 39) local     penalty_goal Estiliano Battezzati
+    min 43 (2T 3) visitante try          Lautaro Varela Gomina
+    min 43 (2T 3) visitante conversion   Francisco Galdeano Orrico
+    min 43 (2T 3) visitante substitution Juan Dangelo
+    min 46 (2T 6) local     substitution Santiago Andres Albarracin Bruni
+    min 46 (2T 6) local     substitution Mateo Echegaray
+    min 49 (2T 9) visitante try          Gonzalo Intzes
+    min 50 (2T 10) local     substitution Agustin Matias Rodriguez Mostazo
+    min 50 (2T 10) local     substitution Lautaro Gil
+    min 50 (2T 10) visitante conversion   Francisco Galdeano Orrico
+    min 53 (2T 13) local     card_yellow  Juan Cruz Yuba
+    min 55 (2T 15) visitante try          Matías Farah
+    min 56 (2T 16) visitante conversion   Francisco Galdeano Orrico
+    min 58 (2T 18) visitante substitution Matias Augusto Herrera Linares
+    min 58 (2T 18) visitante substitution Martin Orrico
+    min 59 (2T 19) visitante try          Tomás Arrigoni
+    min 60 (2T 20) visitante conversion   Francisco Galdeano Orrico
+    min 63 (2T 23) local     substitution Franco Lara
+    min 63 (2T 23) local     substitution Bautista Cuneo Camargo
+    min 63 (2T 23) visitante try          Matías Farah
+    min 65 (2T 25) visitante substitution Francisco Galdeano Orrico
+    min 65 (2T 25) visitante try          Matías Farah
+    min 66 (2T 26) local     substitution Juan Manuel Ruiz
+    min 66 (2T 26) local     substitution Santiago Mario Peñafort Sánchez
+    min 66 (2T 26) visitante conversion   Tomás Arrigoni
+    min 66 (2T 26) visitante substitution Facundo Tonon
+    min 66 (2T 26) visitante substitution Martin Santiago
+    min 66 (2T 26) visitante substitution Arroyo Manuel
+    min 66 (2T 26) visitante substitution Jose Antonio Dangelo
+    min 68 (2T 28) visitante card_yellow  Roque Ongay
+    min 70 (2T 30) local     penalty_try  
+    min 70 (2T 30) visitante card_yellow  Gonzalo Bertranou
+    min 75 (2T 35) visitante card_yellow  Lautaro Varela Gomina
+    min 78 (2T 38) visitante try          Julian Tomas
+    min 79 (2T 39) visitante conversion   Tomás Arrigoni
+  marcador  · eventos 32-66 · guardado 32-66
+  tries     · 4-10 (guardado 4-10)
+  arbitro   · FEDERICO GONZALEZ (guardado: —)
+  guardado  · 23 local · 23 visitante · 46 eventos
+
+Marista vs Liceo · Top 8 Oro · tarjeta 314395  ·  63c7af5e-3fab-478a-a1c5-7f435c6e146f
+  local     · Marista · 23 jugadores · 23 con ficha fijada
+  visitante · Liceo · 23 jugadores · 23 con ficha fijada
+  eventos   · 27
+    min  5 (1T 5) local     try          Alejandro Pronce
+    min 20 (1T 20) local     penalty_try  
+    min 20 (1T 20) visitante card_yellow  Felipe Altamiranda
+    min 30 (1T 30) visitante try          Agustin Correa Llano
+    min 30 (1T 30) visitante conversion   Ignacio Albino Gaido Corral
+    min 41 (2T 1) visitante substitution Santino Villegas
+    min 43 (2T 3) visitante try          Tomas Jesus Bazan Marziani
+    min 45 (2T 5) visitante substitution Juan Manuel Perez Caram
+    min 46 (2T 6) local     try          Lucas Bartolini
+    min 46 (2T 6) local     conversion   Lisandro Sosa Jiranek
+    min 48 (2T 8) local     substitution Estanislao Rodriguez
+    min 48 (2T 8) local     substitution Alejandro Pronce
+    min 48 (2T 8) local     substitution Germán Joel Tello Fredes
+    min 48 (2T 8) local     substitution Ignacio Linares
+    min 48 (2T 8) visitante substitution Santiago Videau
+    min 50 (2T 10) local     substitution Julián Guevara Aguinaga
+    min 51 (2T 11) local     substitution Matias Cid Arizu
+    min 51 (2T 11) local     substitution Francisco Allamand
+    min 58 (2T 18) visitante penalty_goal Tomas Videla Raganato
+    min 58 (2T 18) visitante substitution Julian Rossi Castillo
+    min 61 (2T 21) visitante substitution Agustin Correa Llano
+    min 61 (2T 21) visitante substitution Gino Castellino
+    min 65 (2T 25) visitante try          Tomás Castro
+    min 65 (2T 25) visitante conversion   Tomas Videla Raganato
+    min 66 (2T 26) local     card_yellow  Alvaro Llaver
+    min 75 (2T 35) visitante penalty_goal Tomas Videla Raganato
+    min 78 (2T 38) local     substitution Lucca Filizzola
+  marcador  · eventos 19-25 · guardado 19-25
+  tries     · 3-3 (guardado 3-3)
+  guardado  · 23 local · 23 visitante · 27 eventos
+
+Teqüe vs Mendoza · Top 8 Oro · tarjeta 314396  ·  b063572e-d16e-432a-a097-ee0cfa4252ce
+  local     · Teqüe · 23 jugadores · 20 con ficha fijada
+  visitante · Mendoza · 23 jugadores · 23 con ficha fijada
+  eventos   · 33
+    min  2 (1T 2) visitante try          Julian Cossutta
+    min  2 (1T 2) visitante conversion   Santiago Rez Masud
+    min 10 (1T 10) visitante try          Julian Cossutta
+    min 10 (1T 10) visitante conversion   Santiago Rez Masud
+    min 14 (1T 14) visitante card_yellow  Francisco Javier Alvarez
+    min 22 (1T 22) local     try          Roman Zelada
+    min 24 (1T 24) visitante try          Santiago Martin Tapia
+    min 24 (1T 24) visitante conversion   Santiago Rez Masud
+    min 37 (1T 37) visitante try          Francisco Javier Alvarez
+    min 46 (2T 6) visitante substitution Francisco Javier Alvarez
+    min 46 (2T 6) visitante substitution Ignacio Lucero
+    min 46 (2T 6) visitante try          Santiago Rez Masud
+    min 46 (2T 6) visitante conversion   Santiago Rez Masud
+    min 50 (2T 10) visitante substitution Mauro Savina
+    min 51 (2T 11) local     substitution Julián Magnoni
+    min 51 (2T 11) local     substitution Renzo Martín
+    min 52 (2T 12) local     substitution Luca Octavio Salguero Quintero
+    min 52 (2T 12) visitante try          Exequiel Riquero
+    min 52 (2T 12) visitante conversion   Santiago Rez Masud
+    min 57 (2T 17) local     substitution Matias Roberto Castello Grillo
+    min 57 (2T 17) visitante substitution Julian Cossutta
+    min 59 (2T 19) visitante try          Santiago Rez Masud
+    min 59 (2T 19) visitante conversion   Santiago Rez Masud
+    min 61 (2T 21) local     substitution Joaquín López Román
+    min 62 (2T 22) visitante substitution Xavier Otegui
+    min 62 (2T 22) visitante substitution Martin Guillermo Cruz
+    min 63 (2T 23) local     substitution Fermin Castro
+    min 63 (2T 23) local     substitution Francisco Bautista Vega Battagion
+    min 65 (2T 25) visitante substitution Benjamin Nicolás Costantini Luján
+    min 71 (2T 31) visitante substitution Renato Barolo
+    min 72 (2T 32) local     substitution Gaston Giachini
+    min 80 (2T 40) visitante try          Xavier Otegui
+    min 80 (2T 40) visitante conversion   Santiago Rez Masud
+  marcador  · eventos 5-54 · guardado 5-54
+  tries     · 1-8 (guardado 1-8)
+  arbitro   · JUAN MANUEL MARTINEZ (guardado: —)
+  guardado  · 23 local · 23 visitante · 33 eventos
+
+CPBM vs Universitario SJ · Top 8 Oro · tarjeta 314397  ·  aa02aa0b-100a-464c-aeae-ccdf8eca9fd2
+  local     · CPBM · 23 jugadores · 11 con ficha fijada
+  visitante · Universitario SJ · 23 jugadores · 22 con ficha fijada
+  eventos   · 21
+    min 12 (1T 12) local     penalty_goal Alejo Magliano
+    min 17 (1T 17) visitante try          Guillermo Quiroga Oliver
+    min 21 (1T 21) local     try          Fausto Martinez Roge
+    min 21 (1T 21) local     conversion   Alejo Magliano
+    min 39 (1T 39) local     try          Fausto Martinez Roge
+    min 40 (2T 0) visitante substitution Santiago Achem
+    min 44 (2T 4) visitante substitution Guillermo Quiroga Oliver
+    min 45 (2T 5) local     substitution Julián Cazorla
+    min 47 (2T 7) visitante card_yellow  Alan Pedrol
+    min 56 (2T 16) local     penalty_goal Alejo Magliano
+    min 59 (2T 19) local     substitution Juan Manuel Montilla Lerena
+    min 59 (2T 19) local     substitution Fabricio Stirpa
+    min 63 (2T 23) visitante penalty_goal Arabel Geronimo
+    min 65 (2T 25) visitante penalty_goal Arabel Geronimo
+    min 69 (2T 29) local     substitution Alejo Magliano
+    min 69 (2T 29) local     substitution Fausto Martinez Roge
+    min 70 (2T 30) local     try          Manuel Sonzogni
+    min 70 (2T 30) local     conversion   Facundo Consorte
+    min 71 (2T 31) visitante substitution Leopoldo Mas
+    min 77 (2T 37) local     card_yellow  Lucas Joaquin Rodriguez
+    min 80 (2T 40) visitante try          Juan Uzair
+  marcador  · eventos 25-16 · guardado 25-16
+  tries     · 3-2 (guardado 3-2)
+  arbitro   · DANTE DIEZ BOSSI (guardado: —)
+  guardado  · 23 local · 23 visitante · 21 eventos
+
+Los Tordos vs Mendoza · Top 8 Oro · tarjeta 319902  ·  3589d6ca-efb9-4914-a52e-f1f96a8ab652
+  local     · Los Tordos · 23 jugadores · 23 con ficha fijada
+  visitante · Mendoza · 23 jugadores · 23 con ficha fijada
+  eventos   · 30
+    min  2 (1T 2) local     penalty_goal Francisco Galdeano Orrico
+    min 14 (1T 14) local     try          Julian Tomas
+    min 14 (1T 14) local     conversion   Francisco Galdeano Orrico
+    min 19 (1T 19) visitante try          Benjamin Nicolás Costantini Luján
+    min 27 (1T 27) visitante try          Santiago Puppato
+    min 33 (1T 33) local     try          Arroyo Manuel
+    min 33 (1T 33) local     conversion   Francisco Galdeano Orrico
+    min 36 (1T 36) local     card_yellow  Angelo Lizzola
+    min 40 (1T 40) visitante try          Santiago Martin Tapia
+    min 40 (1T 40) visitante conversion   Tomas Canedo
+    min 42 (2T 2) local     try          Tomás Arrigoni
+    min 42 (2T 2) local     conversion   Francisco Galdeano Orrico
+    min 48 (2T 8) visitante substitution Joaquín Bohm
+    min 50 (2T 10) visitante substitution Santiago Puppato
+    min 56 (2T 16) local     penalty_goal Francisco Galdeano Orrico
+    min 59 (2T 19) local     card_yellow  Facundo Tonon
+    min 59 (2T 19) visitante penalty_try  Ernesto Giudice
+    min 60 (2T 20) visitante conversion   Tomas Canedo
+    min 64 (2T 24) visitante substitution Laureano Valle
+    min 64 (2T 24) visitante substitution Renato Barolo
+    min 64 (2T 24) visitante substitution Benjamin Nicolás Costantini Luján
+    min 66 (2T 26) visitante try          Tomas Canedo
+    min 67 (2T 27) visitante conversion   Tomas Canedo
+    min 72 (2T 32) visitante card_yellow  Ernesto Giudice
+    min 79 (2T 39) local     try          Tomás Arrigoni
+    min 81 (2T 41) local     substitution Juan Leonel Marchena
+    min 81 (2T 41) local     substitution Martin Santiago
+    min 81 (2T 41) local     substitution Jose Antonio Dangelo
+    min 104 (2T 64) local     substitution Valentino Alejo Miranda Conti
+    min 104 (2T 64) local     substitution Marco Ventrera Ciccarelli
+  marcador  · eventos 32-33 · guardado 32-33
+  tries     · 4-5 (guardado 4-5)
+  guardado  · 23 local · 23 visitante · 30 eventos
+
+Liceo vs CPBM · Top 8 Oro · tarjeta 319903  ·  dc5073b4-093b-4886-a9a0-75fbf5e5b539
+  local     · Liceo · 23 jugadores · 23 con ficha fijada
+  visitante · CPBM · 23 jugadores · 13 con ficha fijada
+  eventos   · 32
+    min  9 (1T 9) visitante try          Santiago Videla
+    min  9 (1T 9) visitante conversion   Alejo Magliano
+    min 15 (1T 15) local     card_yellow  Agustin Quiroga
+    min 20 (1T 20) local     try          Alvaro Oyonarte
+    min 23 (1T 23) local     penalty_goal Tomas Videla Raganato
+    min 29 (1T 29) visitante card_yellow  Juan Manuel Montilla Lerena
+    min 30 (1T 30) local     try          Santiago Videau
+    min 30 (1T 30) local     conversion   Tomas Videla Raganato
+    min 32 (1T 32) local     try          Juan Manuel Perez Caram
+    min 32 (1T 32) local     conversion   Tomas Videla Raganato
+    min 39 (1T 39) local     try          Tomás Castro
+    min 39 (1T 39) local     conversion   Tomas Videla Raganato
+    min 41 (2T 1) local     substitution Felipe Altamiranda
+    min 42 (2T 2) visitante try          Juan Manuel Montilla Lerena
+    min 42 (2T 2) visitante conversion   Alejo Magliano
+    min 49 (2T 9) visitante try          Manuel Sonzogni
+    min 49 (2T 9) visitante conversion   Alejo Magliano
+    min 50 (2T 10) local     substitution Juan Manuel Perez Caram
+    min 50 (2T 10) local     substitution Francisco Bertaina
+    min 50 (2T 10) visitante substitution Julián Cazorla
+    min 55 (2T 15) visitante injury       Santiago Videla
+    min 55 (2T 15) visitante substitution Santiago Videla
+    min 57 (2T 17) local     substitution Tiago Martin Gili
+    min 58 (2T 18) visitante substitution Juan Manuel Luquez
+    min 63 (2T 23) local     substitution Tomas Videla Raganato
+    min 63 (2T 23) local     substitution Enzo Cirrincione
+    min 63 (2T 23) local     substitution Tomás Castro
+    min 63 (2T 23) local     substitution Santiago Videau
+    min 63 (2T 23) local     try          Ignacio Albino Gaido Corral
+    min 63 (2T 23) visitante substitution Juan Martin Bazan
+    min 63 (2T 23) visitante substitution Juan Manuel Montilla Lerena
+    min 63 (2T 23) visitante substitution Tomás Astesiano
+  marcador  · eventos 34-21 · guardado 34-21
+  tries     · 5-3 (guardado 5-3)
+  arbitro   · CARLOS MATIAS RIVAROLA (guardado: —)
+  guardado  · 23 local · 23 visitante · 32 eventos
+
+Universitario SJ vs San Juan · Top 8 Oro · tarjeta 319904  ·  ca29f360-79a0-423f-9a2c-37bee7fe4a33
+  local     · Universitario SJ · 23 jugadores · 23 con ficha fijada
+  visitante · San Juan · 23 jugadores · 14 con ficha fijada
+  eventos   · 26
+    min 17 (1T 17) visitante try          Juan Manuel Ruiz
+    min 18 (1T 18) visitante conversion   Estiliano Battezzati
+    min 30 (1T 30) visitante penalty_goal Estiliano Battezzati
+    min 33 (1T 33) local     try          Joaquin Sanchez Barrozo
+    min 34 (1T 34) local     conversion   Arabel Geronimo
+    min 41 (2T 1) visitante try          Bautista Scadding
+    min 41 (2T 1) visitante substitution Agustin Matias Rodriguez Mostazo
+    min 42 (2T 2) visitante conversion   Estiliano Battezzati
+    min 45 (2T 5) local     substitution Leopoldo Mas
+    min 45 (2T 5) visitante try          Juan Bautista Domanico Gonzalez
+    min 48 (2T 8) visitante substitution Santiago Andres Albarracin Bruni
+    min 49 (2T 9) local     penalty_goal Arabel Geronimo
+    min 50 (2T 10) local     substitution Alan Pedrol
+    min 50 (2T 10) local     substitution Juan Cruz Magariños
+    min 54 (2T 14) visitante injury       Mateo Licciardi
+    min 58 (2T 18) local     try          Joaquin Sanchez Barrozo
+    min 60 (2T 20) visitante substitution Franco Lara
+    min 61 (2T 21) local     substitution Juan Martin Echegaray
+    min 61 (2T 21) local     substitution Juan Ignacio Magariños
+    min 61 (2T 21) visitante substitution Juan Manuel Ruiz
+    min 61 (2T 21) visitante substitution Tobias Cabeza
+    min 62 (2T 22) local     injury       Juan Manuel Lloveras
+    min 62 (2T 22) local     substitution Juan Manuel Lloveras
+    min 62 (2T 22) visitante injury       Mateo Licciardi
+    min 67 (2T 27) visitante card_yellow  Juan Cruz Yuba
+    min 70 (2T 30) visitante substitution Bautista Cuneo Camargo
+  marcador  · eventos 15-22 · guardado 15-22
+  tries     · 2-3 (guardado 2-3)
+  arbitro   · JUAN MANUEL MARTINEZ (guardado: —)
+  guardado  · 23 local · 23 visitante · 26 eventos
+
+Marista vs Teqüe · Top 8 Oro · tarjeta 319905  ·  f2aa05d5-fe99-418e-9ae7-c64600e90309
+  local     · Marista · 23 jugadores · 23 con ficha fijada
+  visitante · Teqüe · 23 jugadores · 20 con ficha fijada
+  eventos   · 30
+    min  6 (1T 6) local     try          Geronimo Tejada
+    min 16 (1T 16) local     try          Lucas Bartolini
+    min 16 (1T 16) local     conversion   Genaro Podestá Pulenta
+    min 29 (1T 29) visitante try          Esteban Fernandez
+    min 40 (1T 40) visitante try          Luca Octavio Salguero Quintero
+    min 40 (1T 40) visitante conversion   Lautaro Martin Calle Rivas
+    min 40 (2T 0) visitante substitution Pablo Saez
+    min 43 (2T 3) local     substitution Estanislao Rodriguez
+    min 45 (2T 5) local     substitution Juan Pablo Laborde
+    min 54 (2T 14) visitante substitution Esteban Fernandez
+    min 55 (2T 15) local     substitution Alvaro Llaver
+    min 55 (2T 15) local     substitution Germán Joel Tello Fredes
+    min 56 (2T 16) local     substitution Matias Cid Arizu
+    min 57 (2T 17) local     substitution Ignacio Linares
+    min 57 (2T 17) local     substitution Julián Guevara Aguinaga
+    min 58 (2T 18) local     try          Ignacio Laborde
+    min 58 (2T 18) local     conversion   Genaro Podestá Pulenta
+    min 60 (2T 20) visitante card_yellow  Fermin Castro
+    min 66 (2T 26) local     substitution Conall Unger
+    min 66 (2T 26) visitante substitution Julián Magnoni
+    min 67 (2T 27) local     try          Tomas Montilla
+    min 67 (2T 27) local     conversion   Benjamín Barcenilla
+    min 71 (2T 31) visitante substitution Luca Octavio Salguero Quintero
+    min 71 (2T 31) visitante substitution Ignacio Acosta
+    min 74 (2T 34) visitante substitution Iván Eyen Molina Señio
+    min 74 (2T 34) visitante substitution Joaquín López Román
+    min 77 (2T 37) local     try          Telmo Fernández
+    min 77 (2T 37) local     conversion   Benjamín Barcenilla
+    min 79 (2T 39) visitante try          Luciano Castellanos
+    min 79 (2T 39) visitante conversion   Lautaro Martin Calle Rivas
+  marcador  · eventos 33-19 · guardado 33-19
+  tries     · 5-3 (guardado 5-3)
+  arbitro   · DANTE DIEZ BOSSI (guardado: —)
+  guardado  · 23 local · 23 visitante · 30 eventos
+
+Los Tordos vs Teqüe · Top 8 Oro · tarjeta 322180  ·  0d1dd154-7ee8-474e-9174-3d73c9661a07
+  local     · Los Tordos · 23 jugadores · 23 con ficha fijada
+  visitante · Teqüe · 23 jugadores · 18 con ficha fijada
+  eventos   · 50
+    min  1 (1T 1) local     try          Conrado Bertranou
+    min  1 (1T 1) local     conversion   Federico Serpa
+    min  4 (1T 4) local     try          Conrado Bertranou
+    min  4 (1T 4) local     conversion   Federico Serpa
+    min 16 (1T 16) visitante substitution Luca Octavio Salguero Quintero
+    min 16 (1T 16) visitante injury       Luca Octavio Salguero Quintero
+    min 18 (1T 18) local     penalty_try  
+    min 18 (1T 18) visitante card_yellow  Iván Eyen Molina Señio
+    min 23 (1T 23) local     conversion   Federico Serpa
+    min 23 (1T 23) local     try          Tomás Arrigoni
+    min 31 (1T 31) local     try          Facundo Tonon
+    min 31 (1T 31) local     conversion   Federico Serpa
+    min 33 (1T 33) local     try          Conrado Bertranou
+    min 33 (1T 33) local     conversion   Federico Serpa
+    min 36 (1T 36) local     try          Facundo Tonon
+    min 37 (1T 37) visitante card_yellow  Lautaro Martin Calle Rivas
+    min 39 (1T 39) local     try          Facundo Tonon
+    min 39 (1T 39) local     conversion   Federico Serpa
+    min 40 (1T 40) local     substitution Jose Antonio Dangelo
+    min 40 (1T 40) local     substitution Angelo Lizzola
+    min 41 (2T 1) local     try          Federico Serpa
+    min 41 (2T 1) local     conversion   Federico Serpa
+    min 45 (2T 5) local     try          Facundo Tonon
+    min 45 (2T 5) local     conversion   Federico Serpa
+    min 45 (2T 5) visitante substitution Esteban Fernandez
+    min 45 (2T 5) visitante substitution Francisco Bautista Vega Battagion
+    min 45 (2T 5) visitante substitution Matías López
+    min 49 (2T 9) visitante try          Pablo Echalecu
+    min 49 (2T 9) visitante conversion   Lautaro Martin Calle Rivas
+    min 50 (2T 10) local     substitution Juan Leonel Marchena
+    min 50 (2T 10) local     substitution Tomás Diaz Michel
+    min 50 (2T 10) local     substitution Martin Santiago
+    min 50 (2T 10) local     substitution Conrado Bertranou
+    min 51 (2T 11) local     try          Juan Bautista Bruno Merlo
+    min 51 (2T 11) local     conversion   Federico Serpa
+    min 56 (2T 16) visitante substitution Julián Magnoni
+    min 59 (2T 19) local     try          Facundo Tonon
+    min 59 (2T 19) local     conversion   Federico Serpa
+    min 60 (2T 20) local     substitution Martin Orrico
+    min 60 (2T 20) local     substitution Arroyo Manuel
+    min 60 (2T 20) visitante substitution Pablo Echalecu
+    min 60 (2T 20) visitante substitution Iván Eyen Molina Señio
+    min 64 (2T 24) local     try          Juan Enrique Arnut
+    min 64 (2T 24) local     conversion   Federico Serpa
+    min 73 (2T 33) local     try          Facundo Tonon
+    min 73 (2T 33) local     conversion   Federico Serpa
+    min 75 (2T 35) local     try          Tomás Arrigoni
+    min 75 (2T 35) local     conversion   Federico Serpa
+    min 79 (2T 39) local     try          Juan Bautista Bruno Merlo
+    min 79 (2T 39) local     conversion   Federico Serpa
+  marcador  · eventos 110-7 · guardado 110-7
+  tries     · 16-1 (guardado 16-1)
+  arbitro   · JUAN MANUEL MARTINEZ (guardado: —)
+  guardado  · 23 local · 23 visitante · 50 eventos
+
+Marista vs Universitario SJ · Top 8 Oro · tarjeta 322183  ·  25a2b6a1-cbd0-4f68-9130-bdbec0e58c5a
+  local     · Marista · 23 jugadores · 23 con ficha fijada
+  visitante · Universitario SJ · 23 jugadores · 20 con ficha fijada
+  eventos   · 30
+    min  4 (1T 4) local     try          Francisco Allamand
+    min  4 (1T 4) local     conversion   Tobias Filizzola
+    min 15 (1T 15) visitante penalty_goal Teo Azar
+    min 31 (1T 31) visitante try          Alan Pedrol
+    min 32 (1T 32) visitante conversion   Teo Azar
+    min 42 (2T 2) local     try          Lucas Bartolini
+    min 45 (2T 5) local     substitution Rafael Lucas Cardozo
+    min 45 (2T 5) local     substitution Matias Cid Arizu
+    min 46 (2T 6) visitante try          Tomas Gimenez
+    min 47 (2T 7) visitante conversion   Teo Azar
+    min 52 (2T 12) visitante try          Joaquin Sanchez Barrozo
+    min 53 (2T 13) visitante conversion   Teo Azar
+    min 55 (2T 15) local     substitution Tomas Montilla
+    min 57 (2T 17) local     try          Telmo Fernández
+    min 58 (2T 18) local     substitution Estanislao Rodriguez
+    min 58 (2T 18) local     substitution Julián Guevara Aguinaga
+    min 58 (2T 18) local     substitution Ignacio Linares
+    min 60 (2T 20) local     substitution Lucas Bartolini
+    min 63 (2T 23) local     try          Alejandro Pronce
+    min 63 (2T 23) local     conversion   Tobias Filizzola
+    min 66 (2T 26) local     substitution Telmo Fernández
+    min 66 (2T 26) visitante substitution Alan Pedrol
+    min 66 (2T 26) visitante substitution Juan Cruz Magariños
+    min 66 (2T 26) visitante substitution Federico Fernández
+    min 69 (2T 29) visitante substitution Vito Sambrizzi
+    min 73 (2T 33) local     try          Francisco Allamand
+    min 73 (2T 33) local     conversion   Tobias Filizzola
+    min 76 (2T 36) visitante penalty_goal Teo Azar
+    min 79 (2T 39) local     try          Matías Agustín Colomer Queiroz
+    min 79 (2T 39) local     conversion   Tobias Filizzola
+  marcador  · eventos 38-27 · guardado 38-27
+  tries     · 6-3 (guardado 6-3)
+  arbitro   · SEBASTIAN LOPEZ SIMONASSI (guardado: —)
+  guardado  · 23 local · 23 visitante · 30 eventos
+
+CPBM vs San Juan · Top 8 Oro · tarjeta 322186  ·  3b1ecaca-ab2f-463e-a5aa-6c3d25b116fa
+  local     · CPBM · 23 jugadores · 13 con ficha fijada
+  visitante · San Juan · 23 jugadores · 14 con ficha fijada
+  eventos   · 15
+    min  5 (1T 5) local     try          Juan Martin Bazan
+    min 13 (1T 13) visitante penalty_goal Estiliano Battezzati
+    min 18 (1T 18) visitante try          Santiago Andres Albarracin Bruni
+    min 19 (1T 19) visitante conversion   Estiliano Battezzati
+    min 25 (1T 25) visitante try          Gonzalo Roldan
+    min 26 (1T 26) visitante conversion   Estiliano Battezzati
+    min 29 (1T 29) local     card_yellow  Marcos Montilla
+    min 29 (1T 29) visitante card_yellow  Francisco Ivan Nievas
+    min 33 (1T 33) local     try          Juan Martin Bazan
+    min 37 (1T 37) visitante penalty_goal Estiliano Battezzati
+    min 48 (2T 8) local     try          Branco Agustin Gutiérrez Sauli
+    min 48 (2T 8) visitante penalty_goal Estiliano Battezzati
+    min 58 (2T 18) local     penalty_goal Fabricio Stirpa
+    min 63 (2T 23) visitante penalty_goal Estiliano Battezzati
+    min 71 (2T 31) visitante penalty_goal Estiliano Battezzati
+  marcador  · eventos 18-29 · guardado 18-29
+  tries     · 3-2 (guardado 3-2)
+  arbitro   · NEREA LIVONI (guardado: —)
+  guardado  · 23 local · 23 visitante · 15 eventos
+
+Liceo vs Mendoza · Top 8 Oro · tarjeta 322190  ·  78df7f2b-f957-49e4-bd81-058a20469252
+  local     · Liceo · 23 jugadores · 23 con ficha fijada
+  visitante · Mendoza · 23 jugadores · 23 con ficha fijada
+  eventos   · 29
+    min  3 (1T 3) visitante try          Benjamin Nicolás Costantini Luján
+    min  4 (1T 4) visitante conversion   Tomas Canedo
+    min 13 (1T 13) visitante penalty_goal Tomas Canedo
+    min 18 (1T 18) local     penalty_goal Tomas Videla Raganato
+    min 22 (1T 22) visitante penalty_goal Tomas Canedo
+    min 32 (1T 32) local     try          Agustin Correa Llano
+    min 32 (1T 32) local     conversion   Tomas Videla Raganato
+    min 38 (1T 38) local     try          Tomas Jesus Bazan Marziani
+    min 38 (1T 38) local     conversion   Tomas Videla Raganato
+    min 40 (1T 40) visitante penalty_goal Tomas Canedo
+    min 40 (2T 0) local     substitution Martin Vila
+    min 40 (2T 0) visitante substitution Mariano Cicconi
+    min 41 (2T 1) visitante try          Ignacio Vidal
+    min 42 (2T 2) local     substitution Agustin Quiroga
+    min 46 (2T 6) local     try          Tomas Dris
+    min 46 (2T 6) local     conversion   Tomas Videla Raganato
+    min 46 (2T 6) visitante substitution Joaquín Bohm
+    min 48 (2T 8) local     substitution Tomas Videla Raganato
+    min 54 (2T 14) visitante substitution Benjamin Nicolás Costantini Luján
+    min 55 (2T 15) visitante substitution Santiago Puppato
+    min 61 (2T 21) visitante substitution Xavier Otegui
+    min 61 (2T 21) visitante substitution Felipe Dario Rubio
+    min 62 (2T 22) local     substitution Juan Ignacio Rodriguez
+    min 68 (2T 28) visitante try          Francisco Stavile Bravin
+    min 68 (2T 28) visitante conversion   Tomas Canedo
+    min 71 (2T 31) visitante substitution Renato Barolo
+    min 72 (2T 32) local     substitution Francisco Ricci
+    min 75 (2T 35) local     try          Santiago Videau
+    min 75 (2T 35) local     conversion   Juan Mateo Sancho
+  marcador  · eventos 31-28 · guardado 31-28
+  tries     · 4-3 (guardado 4-3)
+  guardado  · 23 local · 23 visitante · 29 eventos
+
+Marista vs Los Tordos · Top 8 Oro · tarjeta 322702  ·  7188acc9-e062-40d3-b76d-f4e88e343753
+  local     · Marista · 23 jugadores · 23 con ficha fijada
+  visitante · Los Tordos · 23 jugadores · 23 con ficha fijada
+  eventos   · 40
+    min  8 (1T 8) visitante try          Tomás Diaz Michel
+    min 15 (1T 15) visitante try          Juan Enrique Arnut
+    min 15 (1T 15) visitante conversion   Francisco Galdeano Orrico
+    min 23 (1T 23) local     card_yellow  Telmo Fernández
+    min 23 (1T 23) visitante try          Angelo Lizzola
+    min 23 (1T 23) visitante conversion   Francisco Galdeano Orrico
+    min 25 (1T 25) visitante substitution Arroyo Manuel
+    min 26 (1T 26) local     try          Lucas Bartolini
+    min 26 (1T 26) local     conversion   Tobias Filizzola
+    min 36 (1T 36) visitante card_yellow  Francisco Galdeano Orrico
+    min 37 (1T 37) local     try          Lucas Bartolini
+    min 39 (1T 39) visitante substitution Juan Leonel Marchena
+    min 39 (1T 39) visitante substitution Lautaro Varela Gomina
+    min 41 (2T 1) local     try          Lucas Bartolini
+    min 45 (2T 5) visitante substitution Martin Santiago
+    min 45 (2T 5) visitante try          Facundo Diaz
+    min 45 (2T 5) visitante conversion   Francisco Galdeano Orrico
+    min 47 (2T 7) local     substitution Alvaro Llaver
+    min 47 (2T 7) local     substitution Alejandro Pronce
+    min 47 (2T 7) local     substitution Conall Unger
+    min 47 (2T 7) local     substitution Benjamín Filizzola Falcioni
+    min 49 (2T 9) local     try          Lucas Bartolini
+    min 50 (2T 10) local     substitution Marcos Andrés Porro
+    min 52 (2T 12) visitante substitution Juan Enrique Arnut
+    min 55 (2T 15) local     substitution Juan Pablo Laborde
+    min 56 (2T 16) visitante penalty_goal Francisco Galdeano Orrico
+    min 59 (2T 19) local     try          Alejo Videla Raganato
+    min 59 (2T 19) local     conversion   Ignacio Laborde
+    min 60 (2T 20) visitante substitution Conrado Bertranou
+    min 60 (2T 20) visitante substitution Gonzalo Intzes
+    min 60 (2T 20) visitante substitution Tomás Arrigoni
+    min 62 (2T 22) local     substitution Tobias Filizzola
+    min 65 (2T 25) local     try          Lucas Bartolini
+    min 65 (2T 25) local     conversion   Ignacio Laborde
+    min 71 (2T 31) local     try          Borja Filizzola
+    min 71 (2T 31) local     conversion   Ignacio Laborde
+    min 72 (2T 32) local     substitution Borja Filizzola
+    min 76 (2T 36) local     try          Valentín Gozálvez
+    min 80 (2T 40) local     try          Telmo Fernández
+    min 80 (2T 40) local     conversion   Ignacio Laborde
+  marcador  · eventos 55-29 · guardado 55-29
+  tries     · 9-4 (guardado 9-4)
+  guardado  · 23 local · 23 visitante · 40 eventos
+
+Teqüe vs San Juan · Top 8 Oro · tarjeta 322703  ·  90c10795-4bb4-436d-867f-8465e63f3048
+  local     · Teqüe · 23 jugadores · 22 con ficha fijada
+  visitante · San Juan · 23 jugadores · 14 con ficha fijada
+  eventos   · 25
+    min  3 (1T 3) visitante penalty_goal Estiliano Battezzati
+    min 11 (1T 11) visitante try          Estiliano Battezzati
+    min 14 (1T 14) visitante try          Bautista Scadding
+    min 29 (1T 29) visitante try          Bautista Scadding
+    min 37 (1T 37) visitante try          Bautista Scadding
+    min 40 (2T 0) local     substitution Pablo Saez
+    min 41 (2T 1) visitante substitution Gonzalo Roldan
+    min 43 (2T 3) local     substitution Julián Magnoni
+    min 50 (2T 10) local     try          Lautaro Martin Calle Rivas
+    min 50 (2T 10) local     conversion   Augusto Kretschmar
+    min 53 (2T 13) visitante substitution Juan Manuel Ruiz
+    min 57 (2T 17) visitante try          Alejo Olguin
+    min 58 (2T 18) local     substitution Francisco Bautista Vega Battagion
+    min 58 (2T 18) local     substitution Esteban Fernandez
+    min 60 (2T 20) local     try          Roman Zelada
+    min 60 (2T 20) local     conversion   Augusto Kretschmar
+    min 61 (2T 21) local     substitution Iván Eyen Molina Señio
+    min 66 (2T 26) visitante substitution Tobias Cabeza
+    min 68 (2T 28) visitante substitution Bautista Cuneo Camargo
+    min 70 (2T 30) visitante substitution Agustin Matias Rodriguez Mostazo
+    min 72 (2T 32) visitante substitution Juan Pablo Venier
+    min 75 (2T 35) local     try          Gaston Giachini
+    min 75 (2T 35) local     conversion   Augusto Kretschmar
+    min 76 (2T 36) local     substitution Gaston Giachini
+    min 76 (2T 36) local     substitution Pablo Echalecu
+  marcador  · eventos 21-28 · guardado 21-28
+  tries     · 3-5 (guardado 3-5)
+  arbitro   · FRANCISCO NANCLARES (guardado: —)
+  guardado  · 23 local · 23 visitante · 25 eventos
+
+Universitario SJ vs Liceo · Top 8 Oro · tarjeta 322704  ·  0009f63f-4dc3-407c-a401-cd2b09488698
+  local     · Universitario SJ · 23 jugadores · 21 con ficha fijada
+  visitante · Liceo · 23 jugadores · 23 con ficha fijada
+  eventos   · 40
+    min  5 (1T 5) visitante try          Ignacio Albino Gaido Corral
+    min  9 (1T 9) local     try          Joaquin Sanchez Barrozo
+    min 10 (1T 10) local     conversion   Teo Azar
+    min 14 (1T 14) local     penalty_goal Teo Azar
+    min 19 (1T 19) visitante try          Ramiro Gassull
+    min 19 (1T 19) visitante conversion   Juan Mateo Sancho
+    min 23 (1T 23) visitante try          Bruno Cirrincione Caviggia
+    min 23 (1T 23) visitante conversion   Juan Mateo Sancho
+    min 30 (1T 30) visitante try          Francisco Ricci
+    min 30 (1T 30) visitante conversion   Juan Mateo Sancho
+    min 36 (1T 36) visitante try          Felipe Altamiranda
+    min 36 (1T 36) visitante conversion   Juan Mateo Sancho
+    min 41 (2T 1) visitante substitution Francisco Bertaina
+    min 44 (2T 4) visitante try          Ignacio Albino Gaido Corral
+    min 44 (2T 4) visitante conversion   Juan Mateo Sancho
+    min 48 (2T 8) local     substitution Teo Azar
+    min 50 (2T 10) visitante try          Ignacio Albino Gaido Corral
+    min 51 (2T 11) local     substitution Mariano Lloveras
+    min 54 (2T 14) local     try          Joaquin Sanchez Barrozo
+    min 55 (2T 15) local     conversion   Arabel Geronimo
+    min 55 (2T 15) visitante substitution Joaquín Amézaga
+    min 60 (2T 20) local     substitution Tomas Gimenez
+    min 60 (2T 20) visitante substitution Ramiro Gassull
+    min 61 (2T 21) local     substitution Alan Pedrol
+    min 62 (2T 22) local     try          Joaquin Sanchez Barrozo
+    min 62 (2T 22) visitante substitution Juan Mateo Sancho
+    min 63 (2T 23) local     conversion   Arabel Geronimo
+    min 65 (2T 25) local     substitution Juan Ignacio Magariños
+    min 65 (2T 25) local     substitution Javier Fernández
+    min 65 (2T 25) local     injury       Federico Fernández
+    min 65 (2T 25) visitante substitution Ignacio Albino Gaido Corral
+    min 65 (2T 25) visitante substitution Agustin Correa Llano
+    min 68 (2T 28) visitante substitution Tomas Jesus Bazan Marziani
+    min 69 (2T 29) local     substitution Juan Cruz Magariños
+    min 70 (2T 30) local     try          Valentino Solda
+    min 72 (2T 32) visitante substitution Felipe Altamiranda
+    min 77 (2T 37) visitante card_yellow  Francisco Ricci
+    min 79 (2T 39) visitante card_yellow  Adrián Nahir Cura Morello
+    min 80 (2T 40) local     try          Joaquin Sanchez Barrozo
+    min 81 (2T 41) local     conversion   Santiago Baldi
+  marcador  · eventos 36-45 · guardado 36-45
+  tries     · 5-7 (guardado 5-7)
+  arbitro   · JOAQUIN LOPEZ (guardado: —)
+  guardado  · 23 local · 23 visitante · 40 eventos
+
+Mendoza vs CPBM · Top 8 Oro · tarjeta 322705  ·  72398032-350c-44ce-b865-55569b7041d4
+  local     · Mendoza · 23 jugadores · 23 con ficha fijada
+  visitante · CPBM · 23 jugadores · 11 con ficha fijada
+  eventos   · 30
+    min  6 (1T 6) visitante try          Fabricio Stirpa
+    min  6 (1T 6) visitante conversion   Alejo Magliano
+    min  9 (1T 9) local     try          Julian Cossutta
+    min 10 (1T 10) local     conversion   Tomas Canedo
+    min 25 (1T 25) local     try          Ignacio Lucero
+    min 33 (1T 33) visitante try          Fabricio Stirpa
+    min 33 (1T 33) visitante conversion   Alejo Magliano
+    min 40 (1T 40) visitante penalty_goal Fabricio Stirpa
+    min 45 (2T 5) local     try          Francisco Stavile Bravin
+    min 46 (2T 6) local     substitution Agustin Lombardo
+    min 46 (2T 6) local     conversion   Tomas Canedo
+    min 51 (2T 11) local     substitution Luciano Morales
+    min 51 (2T 11) local     substitution Santiago Dapas Cabut
+    min 53 (2T 13) local     card_yellow  Santiago Rez Masud
+    min 53 (2T 13) visitante substitution Julián Cazorla
+    min 54 (2T 14) visitante try          Branco Agustin Gutiérrez Sauli
+    min 54 (2T 14) visitante conversion   Fabricio Stirpa
+    min 61 (2T 21) local     substitution Laureano Valle
+    min 61 (2T 21) local     substitution Renato Barolo
+    min 61 (2T 21) local     substitution Emanuel Guzman
+    min 65 (2T 25) local     try          Ignacio Lucero
+    min 65 (2T 25) visitante substitution Ramiro Japaz
+    min 65 (2T 25) visitante substitution Marcos Montilla
+    min 66 (2T 26) local     conversion   Tomas Canedo
+    min 70 (2T 30) visitante injury       Valentin Mausbach
+    min 70 (2T 30) visitante substitution Valentin Mausbach
+    min 70 (2T 30) visitante substitution Francisco García Salazar
+    min 71 (2T 31) visitante penalty_goal Alejo Magliano
+    min 78 (2T 38) visitante try          Alejo Magliano
+    min 78 (2T 38) visitante conversion   Alejo Magliano
+  marcador  · eventos 26-34 · guardado 26-34
+  tries     · 4-4 (guardado 4-4)
+  arbitro   · SEBASTIAN LOPEZ SIMONASSI (guardado: —)
+  guardado  · 23 local · 23 visitante · 30 eventos
+
+San Juan vs Marista · Top 8 Oro · tarjeta 323427  ·  738e423b-ef4f-4a8b-a23c-4558ce329fef
+  local     · San Juan · 23 jugadores · 15 con ficha fijada
+  visitante · Marista · 23 jugadores · 23 con ficha fijada
+  eventos   · 31
+    min  3 (1T 3) local     penalty_goal Estiliano Battezzati
+    min  4 (1T 4) visitante try          Lautaro Sturniolo
+    min  4 (1T 4) visitante conversion   Tobias Filizzola
+    min  8 (1T 8) visitante try          Alejandro Pronce
+    min 26 (1T 26) local     try          Bautista Scadding
+    min 29 (1T 29) visitante try          Telmo Fernández
+    min 31 (1T 31) local     try          Francisco Ivan Nievas
+    min 36 (1T 36) local     try          Bautista Cuneo Camargo
+    min 37 (1T 37) local     conversion   Estiliano Battezzati
+    min 42 (2T 2) visitante substitution Maximiliano Montilla
+    min 42 (2T 2) visitante substitution Alejandro Pronce
+    min 42 (2T 2) visitante substitution Germán Joel Tello Fredes
+    min 44 (2T 4) visitante try          Tobias Filizzola
+    min 47 (2T 7) local     card_yellow  Juan Pablo Venier
+    min 52 (2T 12) local     substitution Francisco Ivan Nievas
+    min 54 (2T 14) visitante substitution Lautaro Sturniolo
+    min 54 (2T 14) visitante substitution Francisco Allamand
+    min 56 (2T 16) local     substitution Juan Manuel Ruiz
+    min 57 (2T 17) local     card_yellow  Sebastian Diez
+    min 57 (2T 17) visitante try          Tomas Montilla
+    min 57 (2T 17) visitante conversion   Tobias Filizzola
+    min 59 (2T 19) local     substitution Franco Lara
+    min 60 (2T 20) visitante substitution Tobias Filizzola
+    min 60 (2T 20) visitante substitution Benjamín Filizzola Falcioni
+    min 60 (2T 20) visitante substitution Alejo Videla Raganato
+    min 62 (2T 22) visitante card_yellow  Alvaro Llaver
+    min 68 (2T 28) local     try          Rodrigo Nicolas Licciardi Migani
+    min 68 (2T 28) local     substitution Tobias Cabeza
+    min 68 (2T 28) local     substitution Tobias Cabeza
+    min 69 (2T 29) local     conversion   Estiliano Battezzati
+    min 70 (2T 30) local     substitution Bautista Cuneo Camargo
+  marcador  · eventos 27-29 · guardado 27-29
+  tries     · 4-5 (guardado 4-5)
+  arbitro   · CIRO ANGELO DICIANO OLIVA (guardado: —)
+  guardado  · 23 local · 23 visitante · 31 eventos
+
+Universitario SJ vs Mendoza · Top 8 Oro · tarjeta 323425  ·  2bea7517-8e2b-4665-82f9-741afb0dcbc0
+  local     · Universitario SJ · 23 jugadores · 21 con ficha fijada
+  visitante · Mendoza · 23 jugadores · 23 con ficha fijada
+  eventos   · 32
+    min  6 (1T 6) local     try          Mariano Lloveras
+    min  7 (1T 7) local     conversion   Arabel Geronimo
+    min  8 (1T 8) visitante try          Santiago Martin Tapia
+    min  9 (1T 9) visitante conversion   Tomas Canedo
+    min 16 (1T 16) local     try          Tomas Gimenez
+    min 30 (1T 30) visitante try          Ignacio Vidal
+    min 31 (1T 31) visitante conversion   Tomas Canedo
+    min 36 (1T 36) local     penalty_goal Arabel Geronimo
+    min 37 (1T 37) visitante try          Julian Cossutta
+    min 37 (1T 37) visitante card_yellow  Ignacio Lucero
+    min 41 (2T 1) visitante substitution Martin Guillermo Cruz
+    min 43 (2T 3) visitante try          Francisco Stavile Bravin
+    min 43 (2T 3) visitante conversion   Tomas Canedo
+    min 47 (2T 7) local     try          Tomas Gimenez
+    min 48 (2T 8) local     conversion   Arabel Geronimo
+    min 50 (2T 10) visitante penalty_goal Tomas Canedo
+    min 54 (2T 14) local     card_yellow  Arabel Geronimo
+    min 55 (2T 15) visitante penalty_goal Tomas Canedo
+    min 59 (2T 19) local     penalty_goal Mariano Lloveras
+    min 60 (2T 20) local     substitution Juan Ignacio Magariños
+    min 60 (2T 20) local     substitution Alan Pedrol
+    min 60 (2T 20) visitante substitution Renato Barolo
+    min 60 (2T 20) visitante substitution Benjamin Nicolás Costantini Luján
+    min 64 (2T 24) visitante substitution Emanuel Guzman
+    min 65 (2T 25) local     try          Javier Fernández
+    min 65 (2T 25) visitante substitution Santiago Dapas Cabut
+    min 68 (2T 28) local     try          Francisco Jose Marcucci Varese
+    min 69 (2T 29) visitante substitution Francisco Stavile Bravin
+    min 70 (2T 30) local     substitution Juan Cruz Magariños
+    min 71 (2T 31) visitante substitution Julian Cossutta
+    min 75 (2T 35) local     substitution Arabel Geronimo
+    min 75 (2T 35) local     substitution Guillermo Quiroga Oliver
+  marcador  · eventos 35-32 · guardado 35-32
+  tries     · 5-4 (guardado 5-4)
+  arbitro   · CIRO ANGELO DICIANO OLIVA (guardado: —)
+  guardado  · 23 local · 23 visitante · 32 eventos
+
+Liceo vs Teqüe · Top 8 Oro · tarjeta 323426  ·  768cc86c-03b0-4a1d-a45f-8b6618a00e64
+  local     · Liceo · 23 jugadores · 23 con ficha fijada
+  visitante · Teqüe · 23 jugadores · 23 con ficha fijada
+  eventos   · 39
+    min  4 (1T 4) local     try          Francisco Ricci
+    min  4 (1T 4) local     conversion   Tomas Videla Raganato
+    min  9 (1T 9) visitante try          Pablo Saez
+    min 11 (1T 11) local     try          Agustin Correa Llano
+    min 11 (1T 11) local     conversion   Tomas Videla Raganato
+    min 16 (1T 16) local     try          Gino Castellino
+    min 22 (1T 22) visitante try          Pablo Echalecu
+    min 22 (1T 22) visitante conversion   Augusto Kretschmar
+    min 26 (1T 26) local     card_yellow  Felipe Altamiranda
+    min 26 (1T 26) visitante card_yellow  Augusto Kretschmar
+    min 33 (1T 33) local     try          Francisco Ricci
+    min 33 (1T 33) local     conversion   Tomas Videla Raganato
+    min 35 (1T 35) local     try          Francisco Ricci
+    min 37 (1T 37) local     try          Francisco Ricci
+    min 37 (1T 37) local     conversion   Tomas Videla Raganato
+    min 41 (2T 1) local     substitution Pedro Tulian
+    min 45 (2T 5) local     substitution Juan Manuel Perez Caram
+    min 45 (2T 5) visitante conversion   Augusto Kretschmar
+    min 45 (2T 5) visitante try          Julian Martin
+    min 47 (2T 7) local     substitution Agustin Quiroga
+    min 48 (2T 8) visitante substitution Esteban Fernandez
+    min 55 (2T 15) local     card_yellow  Enzo Cirrincione
+    min 55 (2T 15) visitante card_yellow  Ignacio Acosta
+    min 59 (2T 19) local     substitution Francisco Bertaina
+    min 59 (2T 19) local     try          Facundo Ezequiel Lucero Scalzi
+    min 59 (2T 19) local     conversion   Tomas Videla Raganato
+    min 59 (2T 19) local     substitution Juan Mateo Sancho
+    min 59 (2T 19) local     substitution Francisco Ricci
+    min 60 (2T 20) visitante substitution Julian Martin
+    min 64 (2T 24) local     try          Gino Castellino
+    min 64 (2T 24) local     conversion   Tomas Videla Raganato
+    min 65 (2T 25) local     substitution Felipe Altamiranda
+    min 65 (2T 25) visitante substitution Gonzalo Perez
+    min 70 (2T 30) visitante substitution Valentin Kretschmar
+    min 70 (2T 30) visitante substitution Alejo Martín Elst Monclus
+    min 73 (2T 33) local     try          Julian Rossi Castillo
+    min 77 (2T 37) local     card_yellow  Bruno Cirrincione Caviggia
+    min 80 (2T 40) visitante try          Pablo Echalecu
+    min 80 (2T 40) visitante conversion   Augusto Kretschmar
+  marcador  · eventos 57-26 · guardado 57-26
+  tries     · 9-4 (guardado 9-4)
+  guardado  · 23 local · 23 visitante · 39 eventos
+
+Los Tordos vs CPBM · Top 8 Oro · tarjeta 323424  ·  594fd3d3-ed61-4c50-a308-10f4bd273f4a
+  local     · Los Tordos · 23 jugadores · 23 con ficha fijada
+  visitante · CPBM · 23 jugadores · 11 con ficha fijada
+  eventos   · 30
+    min  2 (1T 2) visitante try          Valentín Stirpa
+    min  2 (1T 2) visitante conversion   Alejo Magliano
+    min 12 (1T 12) local     substitution Angelo Lizzola
+    min 15 (1T 15) local     try          Marcos Cassone
+    min 15 (1T 15) local     conversion   Francisco Galdeano Orrico
+    min 25 (1T 25) local     substitution Martin Santiago
+    min 25 (1T 25) visitante drop_goal    Fabricio Stirpa
+    min 34 (1T 34) visitante penalty_goal Alejo Magliano
+    min 37 (1T 37) local     try          Francisco Luis Cassone
+    min 37 (1T 37) local     conversion   Francisco Galdeano Orrico
+    min 45 (2T 5) visitante substitution Julián Cazorla
+    min 45 (2T 5) visitante try          Alejo Magliano
+    min 48 (2T 8) local     card_yellow  Arroyo Manuel
+    min 48 (2T 8) visitante card_yellow  Nicolás Andrés Miteff
+    min 50 (2T 10) local     substitution Martin Orrico
+    min 54 (2T 14) visitante card_yellow  Gianni Sbriglio
+    min 55 (2T 15) visitante substitution Valentín Stirpa
+    min 59 (2T 19) local     card_red     Juan Enrique Arnut
+    min 60 (2T 20) local     substitution Francisco Pannocchia
+    min 60 (2T 20) visitante penalty_goal Facundo Consorte
+    min 63 (2T 23) local     try          Gonzalo Bertranou
+    min 63 (2T 23) local     conversion   Federico Serpa
+    min 70 (2T 30) visitante substitution Juan Manuel Montilla Lerena
+    min 70 (2T 30) visitante substitution Ramiro Japaz
+    min 72 (2T 32) local     substitution Francisco Luis Cassone
+    min 72 (2T 32) local     substitution Marcos Cassone
+    min 75 (2T 35) visitante injury       Juan Manuel Luquez
+    min 75 (2T 35) visitante substitution Juan Manuel Luquez
+    min 75 (2T 35) visitante substitution Franco Sanchez
+    min 79 (2T 39) visitante card_yellow  Alejo Magliano
+  marcador  · eventos 21-21 · guardado 21-21
+  tries     · 3-2 (guardado 3-2)
+  arbitro   · NICOLÁS QUINTANA (guardado: —)
+  guardado  · 23 local · 23 visitante · 30 eventos
+
+Liceo vs Los Tordos · Top 8 Oro · tarjeta 324459  ·  93a805b0-94a1-499a-8e53-f510d6a89924
+  local     · Liceo · 23 jugadores · 23 con ficha fijada
+  visitante · Los Tordos · 23 jugadores · 23 con ficha fijada
+  eventos   · 33
+    min  6 (1T 6) visitante penalty_goal Federico Serpa
+    min  8 (1T 8) local     try          Francisco Ricci
+    min  8 (1T 8) local     conversion   Juan Mateo Sancho
+    min 18 (1T 18) visitante penalty_goal Federico Serpa
+    min 22 (1T 22) visitante try          Francisco Luis Cassone
+    min 22 (1T 22) visitante conversion   Federico Serpa
+    min 23 (1T 23) local     substitution Ignacio Albino Gaido Corral
+    min 27 (1T 27) local     conversion   Tomas Videla Raganato
+    min 27 (1T 27) local     try          Agustin Correa Llano
+    min 39 (1T 39) local     try          Francisco Ricci
+    min 42 (2T 2) visitante penalty_goal Federico Serpa
+    min 49 (2T 9) local     card_yellow  Juan Ignacio Rodriguez
+    min 53 (2T 13) local     substitution Martiniano Sgattoni
+    min 53 (2T 13) local     substitution Francisco Bertaina
+    min 54 (2T 14) visitante substitution Lautaro Varela Gomina
+    min 58 (2T 18) visitante conversion   Federico Serpa
+    min 58 (2T 18) visitante try          Federico Serpa
+    min 58 (2T 18) visitante substitution Tomás Diaz Michel
+    min 58 (2T 18) visitante substitution Valentino Alejo Miranda Conti
+    min 60 (2T 20) local     card_yellow  Martin Vila
+    min 60 (2T 20) visitante substitution Jose Antonio Dangelo
+    min 62 (2T 22) local     card_yellow  Tomas Videla Raganato
+    min 64 (2T 24) local     substitution Juan Ignacio Rodriguez
+    min 64 (2T 24) visitante try          Juan Manuel Vivas Estrella
+    min 64 (2T 24) visitante conversion   Federico Serpa
+    min 65 (2T 25) local     substitution Ramiro Gassull
+    min 68 (2T 28) visitante try          Juan Enrique Arnut
+    min 70 (2T 30) local     substitution Tomas Jesus Bazan Marziani
+    min 70 (2T 30) local     substitution Enzo Cirrincione
+    min 70 (2T 30) local     substitution Juan Mateo Sancho
+    min 70 (2T 30) visitante substitution Francisco Luis Cassone
+    min 77 (2T 37) local     try          Santino Villegas
+    min 77 (2T 37) local     conversion   Tomas Videla Raganato
+  marcador  · eventos 26-35 · guardado 26-35
+  tries     · 4-4 (guardado 4-4)
+  guardado  · 23 local · 23 visitante · 33 eventos
+
+Mendoza vs San Juan · Top 8 Oro · tarjeta 324460  ·  03a5e972-c186-4bdb-8a9b-02d29effa4d1
+  local     · Mendoza · 23 jugadores · 23 con ficha fijada
+  visitante · San Juan · 23 jugadores · 15 con ficha fijada
+  eventos   · 38
+    min  3 (1T 3) local     try          Francisco Stavile Bravin
+    min  9 (1T 9) visitante penalty_goal Estiliano Battezzati
+    min 12 (1T 12) local     try          Tomas Canedo
+    min 13 (1T 13) local     conversion   Tomas Canedo
+    min 17 (1T 17) visitante penalty_goal Estiliano Battezzati
+    min 19 (1T 19) local     substitution Ernesto Giudice
+    min 19 (1T 19) visitante try          Bautista Scadding
+    min 19 (1T 19) visitante conversion   Estiliano Battezzati
+    min 20 (1T 20) visitante substitution Franco Lara
+    min 24 (1T 24) visitante penalty_goal Estiliano Battezzati
+    min 34 (1T 34) local     try          Felipe Dario Rubio
+    min 35 (1T 35) local     conversion   Tomas Canedo
+    min 38 (1T 38) visitante conversion   Estiliano Battezzati
+    min 38 (1T 38) visitante try          Juan Manuel Ruiz
+    min 41 (2T 1) visitante try          Gonzalo Roldan
+    min 41 (2T 1) visitante conversion   Estiliano Battezzati
+    min 49 (2T 9) local     penalty_goal Tomas Canedo
+    min 50 (2T 10) visitante try          Tobias Cabeza
+    min 50 (2T 10) visitante conversion   Estiliano Battezzati
+    min 52 (2T 12) local     substitution Francisco Stavile Bravin
+    min 54 (2T 14) local     substitution Luciano Morales
+    min 58 (2T 18) local     substitution Santiago Puppato
+    min 60 (2T 20) visitante substitution Manuel Cuneo
+    min 60 (2T 20) visitante substitution Agustin Matias Rodriguez Mostazo
+    min 60 (2T 20) visitante substitution Juan Cruz Yuba
+    min 61 (2T 21) local     substitution Felipe Dario Rubio
+    min 61 (2T 21) local     substitution Renato Barolo
+    min 61 (2T 21) local     substitution Santiago Rez Masud
+    min 65 (2T 25) local     try          Juan Pablo Alvarez
+    min 65 (2T 25) visitante substitution Bautista Cuneo Camargo
+    min 65 (2T 25) visitante substitution Tobias Cabeza
+    min 66 (2T 26) local     conversion   Tomas Canedo
+    min 70 (2T 30) visitante penalty_goal Estiliano Battezzati
+    min 76 (2T 36) local     try          Julian Cossutta
+    min 76 (2T 36) local     conversion   Tomas Canedo
+    min 78 (2T 38) visitante card_yellow  Estiliano Battezzati
+    min 80 (2T 40) local     try          Julian Cossutta
+    min 80 (2T 40) visitante substitution Felipe Gonzalez Moreno
+  marcador  · eventos 41-40 · guardado 41-40
+  tries     · 6-4 (guardado 6-4)
+  arbitro   · SEBASTIAN LOPEZ SIMONASSI (guardado: —)
+  guardado  · 23 local · 23 visitante · 38 eventos
+
+CPBM vs Marista · Top 8 Oro · tarjeta 324461  ·  80c3fce2-b53e-4aea-9e52-e5c18fad9e43
+  local     · CPBM · 23 jugadores · 12 con ficha fijada
+  visitante · Marista · 23 jugadores · 23 con ficha fijada
+  eventos   · 21
+    min  4 (1T 4) visitante try          Alejo Videla Raganato
+    min  4 (1T 4) visitante conversion   Tobias Filizzola
+    min  6 (1T 6) visitante try          Lucas Bartolini
+    min 18 (1T 18) local     penalty_goal Alejo Magliano
+    min 29 (1T 29) visitante try          Francisco Allamand
+    min 29 (1T 29) visitante conversion   Tobias Filizzola
+    min 36 (1T 36) local     card_yellow  Nicolas Gambino
+    min 40 (1T 40) visitante penalty_goal Tobias Filizzola
+    min 53 (2T 13) visitante substitution Maximiliano Montilla
+    min 53 (2T 13) visitante substitution Tomas Montilla
+    min 53 (2T 13) visitante substitution Juan De La Cruz Calle Monzó
+    min 55 (2T 15) visitante card_yellow  Alvaro Llaver
+    min 58 (2T 18) local     try          Marcos Montilla
+    min 58 (2T 18) local     conversion   Alejo Magliano
+    min 58 (2T 18) visitante substitution Marcos Andrés Porro
+    min 62 (2T 22) visitante try          Tomás María Gómez González
+    min 65 (2T 25) visitante substitution Tomás María Gómez González
+    min 68 (2T 28) visitante substitution Lucas Bartolini
+    min 68 (2T 28) visitante card_yellow  Germán Joel Tello Fredes
+    min 74 (2T 34) visitante substitution Lisandro Sosa Jiranek
+    min 74 (2T 34) visitante substitution Alejo Videla Raganato
+  marcador  · eventos 10-27 · guardado 10-27
+  tries     · 1-4 (guardado 1-4)
+  arbitro   · FEDERICO GONZALEZ (guardado: —)
+  guardado  · 23 local · 23 visitante · 21 eventos
+
+Teqüe vs Universitario SJ · Top 8 Oro · tarjeta 324462  ·  9858749f-f464-48bb-ac40-b9f02075817a
+  local     · Teqüe · 23 jugadores · 21 con ficha fijada
+  visitante · Universitario SJ · 23 jugadores · 20 con ficha fijada
+  eventos   · 35
+    min 15 (1T 15) local     try          Roman Zelada
+    min 15 (1T 15) local     conversion   Augusto Kretschmar
+    min 18 (1T 18) visitante try          Joaquin Sanchez Barrozo
+    min 19 (1T 19) visitante conversion   Arabel Geronimo
+    min 31 (1T 31) visitante try          Vito Sambrizzi
+    min 32 (1T 32) visitante conversion   Arabel Geronimo
+    min 35 (1T 35) local     try          Gonzalo Perez
+    min 35 (1T 35) local     conversion   Augusto Kretschmar
+    min 39 (1T 39) local     try          Roman Zelada
+    min 39 (1T 39) local     conversion   Augusto Kretschmar
+    min 46 (2T 6) visitante try          Juan Ignacio Del Carril
+    min 47 (2T 7) visitante conversion   Arabel Geronimo
+    min 52 (2T 12) visitante try          Arabel Geronimo
+    min 54 (2T 14) local     substitution Valentin Kretschmar
+    min 55 (2T 15) visitante try          Mariano Lloveras
+    min 56 (2T 16) visitante conversion   Arabel Geronimo
+    min 62 (2T 22) local     substitution Juan Manuel Maure Spinelli
+    min 65 (2T 25) local     substitution Julian Martin
+    min 67 (2T 27) local     substitution Roman Zelada
+    min 67 (2T 27) local     substitution Pablo Saez
+    min 67 (2T 27) local     substitution Francisco Bautista Vega Battagion
+    min 69 (2T 29) visitante card_yellow  Arabel Geronimo
+    min 70 (2T 30) visitante substitution Juan Ignacio Magariños
+    min 72 (2T 32) local     card_yellow  Mauricio Godoy
+    min 73 (2T 33) visitante try          Geronimo Adarvez
+    min 73 (2T 33) visitante substitution Alan Pedrol
+    min 73 (2T 33) visitante substitution Guillermo Quiroga Oliver
+    min 74 (2T 34) visitante conversion   Arabel Geronimo
+    min 74 (2T 34) visitante substitution Lucas Fontemachi
+    min 75 (2T 35) local     substitution Pablo Echalecu
+    min 75 (2T 35) local     substitution Gonzalo Perez
+    min 80 (2T 40) local     try          Francisco Bautista Vega Battagion
+    min 80 (2T 40) local     conversion   Augusto Kretschmar
+    min 82 (2T 42) visitante try          Vito Sambrizzi
+    min 83 (2T 43) visitante conversion   Mariano Lloveras
+  marcador  · eventos 28-47 · guardado 28-47
+  tries     · 4-7 (guardado 4-7)
+  arbitro   · CARLOS MATIAS RIVAROLA (guardado: —)
+  guardado  · 23 local · 23 visitante · 35 eventos
+
+Universitario SJ vs Los Tordos · Top 8 Oro · tarjeta 326869  ·  9743e2f3-0f83-445a-9bd6-c71367171914
+  local     · Universitario SJ · 23 jugadores · 21 con ficha fijada
+  visitante · Los Tordos · 23 jugadores · 22 con ficha fijada
+  eventos   · 38
+    min 14 (1T 14) visitante try          Tomás Diaz Michel
+    min 19 (1T 19) visitante try          Gino Ambrosi
+    min 20 (1T 20) visitante conversion   Federico Serpa
+    min 24 (1T 24) visitante try          Enzo Filice
+    min 25 (1T 25) visitante conversion   Federico Serpa
+    min 30 (1T 30) visitante try          Tomás Arrigoni
+    min 31 (1T 31) visitante conversion   Federico Serpa
+    min 36 (1T 36) visitante card_yellow  Gonzalo Bertranou
+    min 38 (1T 38) visitante card_yellow  Tomás Diaz Michel
+    min 39 (1T 39) local     try          Carlos Nicolas Martinez Vallejos
+    min 40 (1T 40) local     conversion   Arabel Geronimo
+    min 41 (2T 1) visitante substitution Arroyo Manuel
+    min 46 (2T 6) local     try          Vito Sambrizzi
+    min 46 (2T 6) visitante substitution Franco Pizzi
+    min 47 (2T 7) local     conversion   Arabel Geronimo
+    min 50 (2T 10) local     substitution Santiago Achem
+    min 50 (2T 10) local     substitution Juan Ignacio Magariños
+    min 51 (2T 11) visitante substitution Jose Antonio Dangelo
+    min 52 (2T 12) visitante try          Gino Ambrosi
+    min 53 (2T 13) visitante conversion   Federico Serpa
+    min 54 (2T 14) visitante substitution Lautaro Varela Gomina
+    min 54 (2T 14) visitante substitution Francisco Pannocchia
+    min 54 (2T 14) visitante substitution Julian Ortiz Maldonado
+    min 54 (2T 14) visitante substitution Francisco Martos Aparicio
+    min 54 (2T 14) visitante substitution Enzo Filice
+    min 60 (2T 20) local     substitution Lautaro Gonzalez
+    min 60 (2T 20) local     substitution Federico Fernández
+    min 60 (2T 20) local     substitution Juan Martin Echegaray
+    min 63 (2T 23) local     try          Juan Cruz Magariños
+    min 67 (2T 27) local     substitution Geronimo Adarvez
+    min 67 (2T 27) local     substitution Mariano Lloveras
+    min 67 (2T 27) visitante try          Facundo Tonon
+    min 68 (2T 28) visitante conversion   Federico Serpa
+    min 77 (2T 37) local     try          Carlos Nicolas Martinez Vallejos
+    min 77 (2T 37) visitante card_yellow  Juan Manuel Vivas Estrella
+    min 80 (2T 40) local     try          Francisco Jose Marcucci Varese
+    min 80 (2T 40) visitante card_red     Francisco Galdeano Orrico
+    min 81 (2T 41) local     conversion   Arabel Geronimo
+  marcador  · eventos 31-40 · guardado 31-40
+  tries     · 5-6 (guardado 5-6)
+  arbitro   · SEBASTIAN LOPEZ SIMONASSI (guardado: —)
+  guardado  · 23 local · 23 visitante · 38 eventos
+
+CPBM vs Teqüe · Top 8 Oro · tarjeta 326872  ·  4bbb3720-be72-494b-ad26-a852a01dea6a
+  local     · CPBM · 23 jugadores · 11 con ficha fijada
+  visitante · Teqüe · 23 jugadores · 21 con ficha fijada
+  eventos   · 24
+    min  7 (1T 7) visitante penalty_goal Augusto Kretschmar
+    min 10 (1T 10) local     try          Fabricio Stirpa
+    min 10 (1T 10) local     conversion   Alejo Magliano
+    min 13 (1T 13) local     card_yellow  Facundo Consorte
+    min 20 (1T 20) visitante try          Juan Manuel Maure Spinelli
+    min 26 (1T 26) local     card_yellow  Nicolás Andrés Miteff
+    min 27 (1T 27) visitante penalty_goal Augusto Kretschmar
+    min 29 (1T 29) visitante card_yellow  Valentin Kretschmar
+    min 31 (1T 31) local     penalty_try  
+    min 49 (2T 9) local     card_yellow  Julián Cazorla
+    min 51 (2T 11) visitante substitution Valentin Kretschmar
+    min 52 (2T 12) visitante try          Lautaro Martin Calle Rivas
+    min 52 (2T 12) visitante conversion   Augusto Kretschmar
+    min 53 (2T 13) visitante substitution Juan Manuel Maure Spinelli
+    min 53 (2T 13) visitante substitution Gonzalo Perez
+    min 53 (2T 13) visitante substitution Pablo Saez
+    min 56 (2T 16) visitante penalty_goal Augusto Kretschmar
+    min 68 (2T 28) visitante try          Luciano Castellanos
+    min 72 (2T 32) visitante card_red     Julian Martin
+    min 73 (2T 33) local     try          Valentin Caprioli
+    min 75 (2T 35) visitante card_yellow  Benjamin Perez
+    min 79 (2T 39) local     try          Juan Martin Bazan
+    min 80 (2T 40) local     try          Pedro Martínez Rogé
+    min 80 (2T 40) local     conversion   Francisco García Salazar
+  marcador  · eventos 31-26 · guardado 31-26
+  tries     · 5-3 (guardado 5-3)
+  arbitro   · JOAQUIN LOPEZ (guardado: —)
+  guardado  · 23 local · 23 visitante · 24 eventos
+
+Marista vs Mendoza · Top 8 Oro · tarjeta 326874  ·  0335bedf-6c31-4b61-8f86-9c4e68900763
+  local     · Marista · 23 jugadores · 23 con ficha fijada
+  visitante · Mendoza · 23 jugadores · 23 con ficha fijada
+  eventos   · 34
+    min  1 (1T 1) visitante try          Felipe Dario Rubio
+    min  1 (1T 1) visitante conversion   Tomas Canedo
+    min 19 (1T 19) local     try          Alejandro Pronce
+    min 19 (1T 19) local     conversion   Tobias Filizzola
+    min 28 (1T 28) visitante penalty_goal Tomas Canedo
+    min 36 (1T 36) local     try          Telmo Fernández
+    min 36 (1T 36) local     conversion   Tobias Filizzola
+    min 40 (1T 40) visitante penalty_goal Tomas Canedo
+    min 45 (2T 5) visitante substitution Exequiel Riquero
+    min 46 (2T 6) visitante substitution Luciano Morales
+    min 50 (2T 10) visitante substitution Santiago Dapas Cabut
+    min 52 (2T 12) local     try          Genaro Podestá Pulenta
+    min 52 (2T 12) local     conversion   Tobias Filizzola
+    min 53 (2T 13) local     substitution Francisco Allamand
+    min 54 (2T 14) visitante substitution Felipe Dario Rubio
+    min 55 (2T 15) visitante substitution Juan Pablo Alvarez
+    min 56 (2T 16) local     try          Genaro Podestá Pulenta
+    min 56 (2T 16) local     conversion   Tobias Filizzola
+    min 58 (2T 18) local     substitution Marcos Andrés Porro
+    min 58 (2T 18) visitante try          Ignacio Lucero
+    min 58 (2T 18) visitante conversion   Tomas Canedo
+    min 60 (2T 20) visitante substitution Julian Cossutta
+    min 64 (2T 24) local     try          Juan De La Cruz Calle Monzó
+    min 64 (2T 24) local     conversion   Tobias Filizzola
+    min 64 (2T 24) visitante substitution Laureano Valle
+    min 65 (2T 25) local     substitution Estanislao Rodriguez
+    min 65 (2T 25) local     substitution Telmo Fernández
+    min 65 (2T 25) local     substitution Alejandro Pronce
+    min 67 (2T 27) local     substitution Lisandro Sosa Jiranek
+    min 67 (2T 27) local     substitution Alejo Videla Raganato
+    min 69 (2T 29) local     try          Alvaro Llaver
+    min 70 (2T 30) local     substitution Lucas Bartolini
+    min 73 (2T 33) local     try          Alvaro Llaver
+    min 73 (2T 33) local     conversion   Tobias Filizzola
+  marcador  · eventos 47-20 · guardado 47-20
+  tries     · 7-2 (guardado 7-2)
+  guardado  · 23 local · 23 visitante · 34 eventos
+
+San Juan vs Liceo · Top 8 Oro · tarjeta 326875  ·  d0aac0bb-f205-4922-990c-2969f2537fad
+  local     · San Juan · 23 jugadores · 13 con ficha fijada
+  visitante · Liceo · 23 jugadores · 20 con ficha fijada
+  eventos   · 35
+    min  9 (1T 9) visitante try          Bruno Cirrincione Caviggia
+    min 10 (1T 10) visitante conversion   Tomas Videla Raganato
+    min 24 (1T 24) local     try          Felipe Gonzalez Moreno
+    min 25 (1T 25) local     conversion   Estiliano Battezzati
+    min 30 (1T 30) local     card_yellow  Gonzalo Roldan
+    min 30 (1T 30) visitante penalty_try  
+    min 31 (1T 31) local     try          Tobias Cabeza
+    min 32 (1T 32) local     conversion   Estiliano Battezzati
+    min 35 (1T 35) visitante injury       Santino Villegas
+    min 35 (1T 35) visitante substitution Santino Villegas
+    min 40 (1T 40) local     try          Bautista Scadding
+    min 41 (1T 41) local     conversion   Estiliano Battezzati
+    min 41 (2T 1) visitante penalty_goal Tomas Videla Raganato
+    min 45 (2T 5) visitante try          Tomas Jesus Bazan Marziani
+    min 49 (2T 9) visitante substitution Felipe Altamiranda
+    min 50 (2T 10) local     substitution Rodrigo Nicolas Licciardi Migani
+    min 50 (2T 10) visitante try          Agustin Correa Llano
+    min 51 (2T 11) visitante conversion   Tomas Videla Raganato
+    min 53 (2T 13) local     try          Estiliano Battezzati
+    min 54 (2T 14) local     conversion   Estiliano Battezzati
+    min 55 (2T 15) visitante substitution Agustin Correa Llano
+    min 56 (2T 16) visitante try          Julian Rossi Castillo
+    min 62 (2T 22) visitante substitution Santiago Videau
+    min 63 (2T 23) local     substitution Tobias Cabeza
+    min 63 (2T 23) local     substitution Juan Pablo Venier
+    min 65 (2T 25) local     substitution Felipe Gonzalez Moreno
+    min 67 (2T 27) local     try          Felipe Gonzalez Moreno
+    min 68 (2T 28) local     conversion   Estiliano Battezzati
+    min 68 (2T 28) visitante substitution Ramiro Gassull
+    min 72 (2T 32) local     substitution Juan Manuel Ruiz
+    min 72 (2T 32) visitante substitution Tomas Jesus Bazan Marziani
+    min 74 (2T 34) visitante substitution Tomas Videla Raganato
+    min 75 (2T 35) visitante substitution Santino Villegas
+    min 76 (2T 36) local     substitution Agustin Matias Rodriguez Mostazo
+    min 76 (2T 36) local     substitution Sebastian Diez
+  marcador  · eventos 35-34 · guardado 35-34
+  tries     · 5-5 (guardado 5-5)
+  arbitro   · ESTEBAN AGUSTIN FILIPANICS (guardado: —)
+  guardado  · 23 local · 23 visitante · 35 eventos
+
+Los Tordos vs San Juan · Top 8 Oro · tarjeta 327389  ·  a94be355-32df-44e2-935b-08d859a04d9a
+  local     · Los Tordos · 23 jugadores · 22 con ficha fijada
+  visitante · San Juan · 23 jugadores · 12 con ficha fijada
+  eventos   · 28
+    min 19 (1T 19) local     try          Federico Serpa
+    min 20 (1T 20) local     conversion   Federico Serpa
+    min 24 (1T 24) visitante try          Manuel Cuneo
+    min 25 (1T 25) visitante conversion   Estiliano Battezzati
+    min 28 (1T 28) local     try          Juan Enrique Arnut
+    min 29 (1T 29) local     conversion   Federico Serpa
+    min 38 (1T 38) visitante try          Franco Lara
+    min 48 (2T 8) local     try          Juan Manuel Vivas Estrella
+    min 52 (2T 12) visitante substitution Franco Lara
+    min 53 (2T 13) local     substitution Thiago Sosa Ledesma
+    min 53 (2T 13) local     substitution Bautista Salinas Mallea
+    min 53 (2T 13) local     substitution Tomas Duclos
+    min 53 (2T 13) local     substitution Marcos Cassone
+    min 54 (2T 14) visitante substitution Joaquin Farre
+    min 55 (2T 15) visitante substitution Bautista Cuneo Camargo
+    min 60 (2T 20) visitante substitution Agustin Matias Rodriguez Mostazo
+    min 63 (2T 23) local     substitution Juan Enrique Arnut
+    min 63 (2T 23) local     substitution Julian Ortiz Maldonado
+    min 63 (2T 23) local     substitution Tomás Arrigoni
+    min 64 (2T 24) local     try          Gonzalo Bertranou
+    min 66 (2T 26) visitante substitution Felipe Gonzalez Moreno
+    min 68 (2T 28) local     substitution Pedro Lértora
+    min 70 (2T 30) visitante substitution Manuel Cuneo
+    min 70 (2T 30) visitante substitution Sebastian Diez
+    min 71 (2T 31) visitante try          Alejo Olguin
+    min 72 (2T 32) visitante conversion   Estiliano Battezzati
+    min 77 (2T 37) local     penalty_goal Federico Serpa
+    min 79 (2T 39) local     card_yellow  Gonzalo Bertranou
+  marcador  · eventos 27-19 · guardado 27-19
+  tries     · 4-3 (guardado —-—)
+  arbitro   · JULIÁN MONTENEGRO (guardado: —)
+  guardado  · 23 local · 23 visitante · 28 eventos
+
+Liceo vs Marista · Top 8 Oro · tarjeta 327390  ·  c82c4625-fddd-4765-bf6b-12886980be5b
+  local     · Liceo · 23 jugadores · 19 con ficha fijada
+  visitante · Marista · 23 jugadores · 23 con ficha fijada
+  eventos   · 28
+    min  1 (1T 1) visitante penalty_goal Tobias Filizzola
+    min  7 (1T 7) visitante try          Borja Filizzola
+    min  7 (1T 7) visitante conversion   Tobias Filizzola
+    min 17 (1T 17) visitante card_yellow  Tomas Montilla
+    min 23 (1T 23) local     penalty_goal Juan Mateo Sancho
+    min 33 (1T 33) local     penalty_goal Juan Mateo Sancho
+    min 34 (1T 34) local     substitution Agustin Correa Llano
+    min 38 (1T 38) local     try          Gaston Legaspe
+    min 46 (2T 6) local     substitution Santiago Videau
+    min 46 (2T 6) local     substitution Felipe Altamiranda
+    min 48 (2T 8) local     substitution Gaston Legaspe
+    min 49 (2T 9) visitante try          Alejandro Pronce
+    min 49 (2T 9) visitante conversion   Tobias Filizzola
+    min 53 (2T 13) local     penalty_goal Juan Mateo Sancho
+    min 55 (2T 15) visitante card_yellow  Tomás María Gómez González
+    min 58 (2T 18) visitante substitution Tomas Montilla
+    min 62 (2T 22) visitante substitution Marcos Andrés Porro
+    min 64 (2T 24) local     card_yellow  Agustin Quiroga
+    min 70 (2T 30) local     substitution Ramiro Gassull
+    min 70 (2T 30) visitante substitution Estanislao Rodriguez
+    min 70 (2T 30) visitante substitution Alejandro Pronce
+    min 71 (2T 31) visitante substitution Juan Pablo Laborde
+    min 74 (2T 34) local     substitution Ignacio Albino Gaido Corral
+    min 76 (2T 36) visitante substitution Conall Unger
+    min 78 (2T 38) local     substitution Tomas Jesus Bazan Marziani
+    min 79 (2T 39) visitante card_yellow  Julián Guevara Aguinaga
+    min 80 (2T 40) visitante substitution Lisandro Sosa Jiranek
+    min 80 (2T 40) visitante substitution Matías Agustín Colomer Queiroz
+  marcador  · eventos 14-17 · guardado 14-17
+  tries     · 1-2 (guardado —-—)
+  arbitro   · JUAN MANUEL MARTINEZ (guardado: —)
+  guardado  · 23 local · 23 visitante · 28 eventos
+
+listo · 50 partidos

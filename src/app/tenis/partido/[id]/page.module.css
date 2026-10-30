@@ -926,3 +926,348 @@
         transition: none;
     }
 }
+
+/* ---------------------------------------------------------------------------
+   Lo que está abajo del marcador: el resumen, las fichas, el camino y el torneo.
+   Mismo lenguaje que las tarjetas de arriba: borde `--edge`, fondo `--raised`,
+   rótulos en versalita de 10px. El local es verde y el visitante azul, como en
+   la planilla, para que cada columna se reconozca sin leer el nombre.
+   --------------------------------------------------------------------------- */
+
+.crumbLink {
+    color: inherit;
+    text-decoration: none;
+}
+
+.crumbLink:hover,
+.crumbLink:focus-visible {
+    text-decoration: underline;
+}
+
+.resumen {
+    margin: 16px 0 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--ink);
+}
+
+.block {
+    margin-top: 24px;
+}
+
+.blockHint {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+}
+
+.blockLink {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--accent-ink);
+    text-decoration: none;
+}
+
+.blockLink:hover,
+.blockLink:focus-visible {
+    text-decoration: underline;
+}
+
+.fichas,
+.caminos {
+    display: grid;
+    gap: 12px;
+}
+
+.ficha,
+.camino {
+    --side: var(--accent);
+    min-width: 0;
+    border: 1px solid var(--edge);
+    border-radius: 16px;
+    background: var(--raised);
+    padding: 14px 16px 16px;
+}
+
+.fichaAway,
+.caminoAway {
+    --side: var(--rival);
+}
+
+.fichaHead {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.fichaMark {
+    flex-shrink: 0;
+    width: 4px;
+    height: 22px;
+    border-radius: 999px;
+    background: var(--side);
+}
+
+.fichaTitle {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.fichaName {
+    font-weight: 800;
+    font-size: 1rem;
+    letter-spacing: -0.01em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.fichaCountry {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+}
+
+.fichaList,
+.torneoFacts {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.fichaRow {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 7px 0;
+    border-top: 1px solid var(--edge);
+}
+
+.fichaRow:first-child {
+    border-top: 0;
+}
+
+.fichaLabel {
+    flex-shrink: 0;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+}
+
+.fichaValue {
+    margin: 0;
+    min-width: 0;
+    text-align: right;
+    font-size: 0.88rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.fichaEmpty {
+    margin: 4px 0 0;
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+}
+
+.caminoName {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 8px;
+    font-size: 0.95rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+}
+
+.caminoList {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.caminoItem {
+    border-top: 1px solid var(--edge);
+}
+
+.caminoItem:first-child {
+    border-top: 0;
+}
+
+.caminoRow {
+    display: grid;
+    grid-template-columns: minmax(64px, 0.8fr) minmax(0, 1.6fr) auto auto;
+    align-items: center;
+    gap: 6px 10px;
+    padding: 8px 6px;
+    margin: 0 -6px;
+    border-radius: 10px;
+    color: inherit;
+    text-decoration: none;
+    font-size: 0.85rem;
+}
+
+a.caminoRow:hover,
+a.caminoRow:focus-visible {
+    background: var(--raised-2);
+}
+
+a.caminoRow:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+}
+
+/* El cruce que se está mirando: filo del color del lado, fondo sólido (el
+   acento sobre su tinte no llega a AA en claro, medido). */
+.caminoCurrent .caminoRow {
+    background: var(--raised-2);
+    box-shadow: inset 3px 0 0 var(--side);
+}
+
+.caminoRound {
+    color: var(--ink-dim);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+}
+
+.caminoRival {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+
+.caminoFlag {
+    flex-shrink: 0;
+}
+
+.caminoRivalName {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.caminoSeed {
+    flex-shrink: 0;
+    font-size: 0.72rem;
+    color: var(--ink-soft);
+}
+
+.caminoScore {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    color: var(--ink-soft);
+}
+
+.caminoTag {
+    justify-self: end;
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: 1px solid var(--edge);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.caminoTag_won {
+    color: var(--accent-ink);
+    border-color: rgba(var(--accent-rgb), 0.5);
+}
+
+.caminoTag_lost {
+    color: var(--ink-soft);
+}
+
+/* En vivo: el rojo pinta el borde y el punto, no el texto. */
+.caminoTag_live {
+    border-color: var(--live);
+    color: var(--ink);
+}
+
+.caminoTag_pending {
+    color: var(--ink-dim);
+}
+
+.torneo {
+    display: grid;
+    gap: 12px;
+    border: 1px solid var(--edge);
+    border-radius: 16px;
+    background: var(--raised);
+    padding: 14px 16px 16px;
+}
+
+.torneoName {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+}
+
+.torneoMeta {
+    margin: 4px 0 0;
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+}
+
+.torneoChampion {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.torneoChampionPhoto {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--raised-2);
+}
+
+@media (max-width: 559px) {
+    .caminoRow {
+        grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .caminoRound {
+        grid-column: 1 / -1;
+    }
+
+    .caminoScore {
+        grid-column: 1;
+    }
+
+    .caminoTag {
+        grid-column: 2;
+        grid-row: 2 / 4;
+        align-self: center;
+    }
+}
+
+@media (min-width: 720px) {
+    .fichas,
+    .caminos {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .torneo {
+        grid-template-columns: minmax(0, 1fr) minmax(280px, 0.9fr);
+        align-items: start;
+    }
+}

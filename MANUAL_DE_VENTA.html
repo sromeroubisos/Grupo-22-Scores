@@ -1,0 +1,816 @@
+<title>Manual de cancha</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<style>
+:root{
+  --paper:#FAF8F4; --surface:#FFFFFF; --surface-2:#F3F0E9; --surface-3:#EBE6DC;
+  --ink:#161B21; --ink-2:#4B555F; --ink-3:#7C858E;
+  --line:#DDD6C9; --line-2:#EBE6DC;
+  --accent:#0F5C68; --accent-soft:#E1EDEF; --accent-line:#9CC4CA;
+  --pos:#3C6B51; --pos-soft:#E5EFE8;
+  --warn:#8E6A14; --warn-soft:#F4ECD8;
+  --neg:#A5382B; --neg-soft:#F6E4E0;
+  --shadow:0 1px 2px rgba(22,27,33,.05),0 8px 24px -16px rgba(22,27,33,.28);
+  --ff-display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --ff-body:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --ff-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#0F1317; --surface:#151A20; --surface-2:#1C232A; --surface-3:#242C34;
+  --ink:#EBE7DF; --ink-2:#A9B1B9; --ink-3:#7A838C;
+  --line:#2B333B; --line-2:#222A31;
+  --accent:#57B8C4; --accent-soft:#16333A; --accent-line:#2C5A63;
+  --pos:#82BA98; --pos-soft:#1A2A21;
+  --warn:#D5AB57; --warn-soft:#2C2617;
+  --neg:#DE8B7D; --neg-soft:#2D1D1A;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -16px rgba(0,0,0,.7);
+}}
+:root[data-theme="dark"]{
+  --paper:#0F1317; --surface:#151A20; --surface-2:#1C232A; --surface-3:#242C34;
+  --ink:#EBE7DF; --ink-2:#A9B1B9; --ink-3:#7A838C;
+  --line:#2B333B; --line-2:#222A31;
+  --accent:#57B8C4; --accent-soft:#16333A; --accent-line:#2C5A63;
+  --pos:#82BA98; --pos-soft:#1A2A21;
+  --warn:#D5AB57; --warn-soft:#2C2617;
+  --neg:#DE8B7D; --neg-soft:#2D1D1A;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -16px rgba(0,0,0,.7);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--ff-body);font-size:17px;line-height:1.62;-webkit-font-smoothing:antialiased}
+.wrap{max-width:940px;margin:0 auto;padding:0 24px}
+h1,h2,h3,h4{font-family:var(--ff-display);text-wrap:balance;margin:0}
+p{margin:0 0 1em}
+a{color:var(--accent);text-underline-offset:2px}
+a:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+
+.mast{border-bottom:1px solid var(--line);background:var(--surface)}
+.mast-in{max-width:940px;margin:0 auto;padding:54px 24px 40px}
+.kicker{font-family:var(--ff-mono);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin:0 0 18px;display:flex;gap:14px;flex-wrap:wrap}
+.kicker span:not(:first-child){color:var(--ink-3)}
+h1{font-size:clamp(38px,7vw,62px);line-height:1.02;font-weight:800;letter-spacing:-.03em}
+.dek{font-size:clamp(17px,2vw,20px);line-height:1.5;color:var(--ink-2);max-width:58ch;margin:20px 0 0}
+
+main{padding:40px 0 90px}
+section{scroll-margin-top:16px}
+.sec-head{display:flex;gap:15px;align-items:baseline;margin:60px 0 20px;padding-top:24px;border-top:2px solid var(--ink)}
+section:first-of-type .sec-head{margin-top:0;border-top:none;padding-top:0}
+.sec-n{font-family:var(--ff-mono);font-size:12px;font-weight:600;color:var(--accent);letter-spacing:.08em;flex:0 0 auto;padding-top:5px}
+.sec-head h2{font-size:clamp(24px,3.4vw,32px);font-weight:700;letter-spacing:-.02em;line-height:1.12}
+h3{font-size:19px;font-weight:700;letter-spacing:-.01em;margin:34px 0 10px}
+h4{font-size:12.5px;font-family:var(--ff-mono);font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin:26px 0 9px}
+.prose{max-width:68ch}
+.prose ul,.prose ol{max-width:68ch;padding-left:21px;margin:0 0 1em}
+li{margin:0 0 .4em}
+strong{font-weight:600}
+em{font-style:italic;color:var(--ink-2)}
+
+/* pasos */
+.step{border:1px solid var(--line);border-radius:6px;background:var(--surface);margin:16px 0;box-shadow:var(--shadow);overflow:hidden}
+.step-h{display:flex;gap:14px;align-items:baseline;padding:16px 20px 12px;border-bottom:1px solid var(--line-2);background:var(--surface-2)}
+.step-h b{font-family:var(--ff-mono);font-size:11px;font-weight:600;color:var(--accent);letter-spacing:.1em;flex:0 0 auto}
+.step-h h4{margin:0;font-family:var(--ff-display);font-size:17px;font-weight:700;letter-spacing:-.01em;text-transform:none;color:var(--ink)}
+.step-h span{margin-left:auto;font-family:var(--ff-mono);font-size:10.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;align-self:center}
+.step-b{padding:16px 20px}
+.step-b>*:last-child{margin-bottom:0}
+.step-b ul,.step-b ol{margin:0 0 .9em;padding-left:20px;font-size:16px}
+
+/* guion / mensaje */
+.msg{font-family:var(--ff-mono);font-size:13.5px;line-height:1.62;background:var(--surface-2);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:5px;padding:15px 17px;margin:12px 0;white-space:pre-wrap;color:var(--ink)}
+.msg-l{font-family:var(--ff-mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin:18px 0 -4px;display:block}
+
+/* tablas */
+.tw{overflow-x:auto;margin:20px 0 24px;border:1px solid var(--line);border-radius:6px;background:var(--surface);box-shadow:var(--shadow)}
+table{border-collapse:collapse;width:100%;font-family:var(--ff-display);font-size:13.5px;line-height:1.44}
+th{text-align:left;font-family:var(--ff-mono);font-size:10.5px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);padding:11px 13px;background:var(--surface-2);border-bottom:1px solid var(--line);vertical-align:bottom}
+td{padding:11px 13px;border-bottom:1px solid var(--line-2);vertical-align:top;color:var(--ink-2)}
+td:first-child{color:var(--ink);font-weight:600}
+tr:last-child td{border-bottom:none}
+.num{font-family:var(--ff-mono);font-variant-numeric:tabular-nums;white-space:nowrap;font-size:12.5px}
+
+/* cajas */
+.box{border:1px solid var(--line);border-radius:6px;padding:18px 20px;margin:22px 0;background:var(--surface)}
+.box-k{border-left:3px solid var(--accent)}
+.box-w{border-left:3px solid var(--neg)}
+.box-g{border-left:3px solid var(--pos)}
+.box h4{margin-top:0}
+.box>*:last-child{margin-bottom:0}
+
+/* regla */
+.rule{display:grid;grid-template-columns:1fr;gap:4px;border-top:1px solid var(--line);padding:15px 0}
+@media(min-width:700px){.rule{grid-template-columns:30px 1fr;gap:18px}}
+.rule:last-of-type{border-bottom:1px solid var(--line)}
+.rule b{font-family:var(--ff-mono);font-size:12px;color:var(--accent);font-weight:600;padding-top:3px}
+.rule div p:last-child{margin-bottom:0}
+.rule strong{font-family:var(--ff-display);font-size:16px}
+
+.ev{font-family:var(--ff-mono);font-size:10.5px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;padding:2px 6px;border-radius:3px;white-space:nowrap;background:var(--warn-soft);color:var(--warn);border:1px solid color-mix(in srgb,var(--warn) 35%,transparent)}
+.cap{font-family:var(--ff-mono);font-size:11.5px;color:var(--ink-3);margin:-14px 0 24px;line-height:1.5;max-width:76ch}
+footer{border-top:2px solid var(--ink);margin-top:64px;padding:24px 0 0;font-family:var(--ff-mono);font-size:11.5px;color:var(--ink-3);line-height:1.6}
+</style>
+
+<header class="mast">
+  <div class="mast-in">
+    <p class="kicker"><span>G22 Scores</span><span>Manual operativo de venta</span><span>Agosto 2026</span></p>
+    <h1>Manual de cancha</h1>
+    <p class="dek">Cómo se vende G22 a un club y a una unión: a quién se le habla, qué se le dice, con qué mensajes, en qué orden y cómo se cierra. Guiones listos para copiar.</p>
+  </div>
+</header>
+
+<div class="wrap"><main>
+
+<section>
+<div class="sec-head"><span class="sec-n">00</span><h2>Las siete reglas</h2></div>
+<div class="prose">
+<p>Todo lo que sigue son consecuencias de estas siete. Si alguna vez dudás en una reunión, volvé acá.</p>
+
+<div class="rule"><b>01</b><div><strong>Todo lo que digas de la UAR le va a llegar a la UAR.</strong><p>Las uniones trabajan con gente de la UAR: el que tenés enfrente puede haber impulsado Conecta Rugby, o ser amigo del que lo maneja. En un ambiente donde todos se conocen, <strong>quedar como «el que anda diciendo que el sistema oficial no funciona» te cierra el mercado entero</strong>, y no hay venta que lo compense. Esta regla manda sobre todas las que siguen: si alguna otra te lleva a criticar el sistema oficial, gana esta.</p></div></div>
+
+<div class="rule"><b>02</b><div><strong>La demo es el producto. No hay presentación.</strong><p>Nunca abras un PDF con funcionalidades. La demo es un partido real del club, cargado en vivo el sábado que a ellos les quede cómodo. Todo lo demás es preparación para eso o consecuencia de eso.</p></div></div>
+
+<div class="rule"><b>03</b><div><strong>No vendas gestión. Vendé que se vea y que quede.</strong><p>«Gestionamos tu torneo» te pone a competir contra la app de la UAR, que es gratis y oficial. «Tu club se ve y queda registrado» no compite con nada.</p></div></div>
+
+<div class="rule"><b>04</b><div><strong>Cerrá por calendario, no por presupuesto.</strong><p>«¿Arrancamos la temporada completa desde la fecha que viene?» es una decisión de continuidad. «¿Lo compran?» es una decisión de presupuesto, y esa la frena el tesorero.</p></div></div>
+
+<div class="rule"><b>05</b><div><strong>Entrá por la persona que hace el trabajo, no por la que firma.</strong><p>El jefe de prensa sufre el sábado todas las semanas. El dirigente no. Conseguí primero un aliado adentro y después la firma; nunca al revés.</p></div></div>
+
+<div class="rule"><b>06</b><div><strong>Prometé solo lo que la demo va a cumplir.</strong><p>Nada de IA, nada de carga sin señal, nada de exportación de estadísticas mientras no exista. Una promesa que se cae en la primera fecha te cuesta el cliente y los tres que ese cliente te iba a presentar.</p></div></div>
+
+<div class="rule"><b>07</b><div><strong>Pedí la presentación en el momento del cierre, y pedila con nombre.</strong><p>No «si conocés a alguien, avisame». Sí «¿a qué dos clubes de tu torneo les serviría esto?». En el rugby argentino todos se conocen: la referencia directa vale más que cualquier campaña.</p></div></div>
+</div>
+</section>
+
+<section>
+<div class="sec-head"><span class="sec-n">01</span><h2>El calendario manda</h2></div>
+<div class="prose">
+<p>Esto define <em>cuándo</em> hacés cada cosa, y es lo primero que hay que aceptar: no se puede vender una temporada completa en cualquier momento del año. La temporada argentina va de marzo a octubre o noviembre. Las decisiones de la comisión se toman entre noviembre y febrero.</p>
+<div class="tw"><table>
+<thead><tr><th>Momento</th><th>Qué se puede hacer</th><th>Qué NO se puede</th></tr></thead>
+<tbody>
+<tr><td>Marzo – Septiembre<br><em>temporada</em></td><td><strong>Pilotos.</strong> Es la única época en que existe la materia prima: partidos reales para cargar. Todo el trabajo de demo se hace acá</td><td>Cerrar contratos anuales. La comisión ya presupuestó el año</td></tr>
+<tr><td>Septiembre – Noviembre<br><em>definiciones y playoffs</em></td><td><strong>El mejor momento del año para pilotear.</strong> Máxima atención de socios y familias, partidos que importan, y todo lo que cargues queda como caso</td><td>—</td></tr>
+<tr><td>Noviembre – Febrero<br><em>receso y asambleas</em></td><td><strong>Cerrar.</strong> Es cuando se arma el presupuesto y se renuevan las comisiones. Llegás con el piloto ya hecho y el caso escrito</td><td>Pilotear: no hay partidos</td></tr>
+<tr><td>Enero – Febrero<br><em>pretemporada</em></td><td><strong>Onboarding.</strong> Alta de clubes, importación de planteles y fixture, capacitación, todo antes de la fecha 1</td><td>Empezar la conversación de cero y pretender arrancar en marzo</td></tr>
+</tbody></table></div>
+<div class="box box-w">
+<h4>Dónde estás parado hoy</h4>
+<p>Fines de agosto. Quedan entre seis y diez fechas de temporada — <strong>la última ventana del año para pilotear</strong>. Lo que no se cargue antes de noviembre no se puede mostrar hasta marzo. El plan realista para los próximos noventa días es: <strong>pilotos en septiembre y octubre, casos escritos en noviembre, cierres entre diciembre y febrero, temporada 2027 arrancando en marzo con clubes ya pagando.</strong> Vender ahora un contrato anual que arranque en marzo es pedirle a una comisión que apruebe un gasto por algo que no vio funcionando: no lo va a aprobar.</p>
+</div>
+</div>
+</section>
+
+<section>
+<div class="sec-head"><span class="sec-n">02</span><h2>Quién es quién</h2></div>
+<div class="prose">
+<p>En un club de rugby amateur no hay un comprador: hay cuatro personas, y cada una decide una cosa distinta. Confundirlas es el error más caro.</p>
+<div class="tw"><table>
+<thead><tr><th>Persona</th><th>Rol en la decisión</th><th>Qué le importa</th><th>Qué le mostrás</th><th>Qué NO le decís</th></tr></thead>
+<tbody>
+<tr><td>Jefe de prensa / comunicación</td><td><strong>Iniciador y aliado interno.</strong> Por acá se entra siempre</td><td>Que el sábado no sea un caos. Tener con qué publicar sin rehacer todo a mano</td><td>La página del club con las cinco categorías en vivo, y la exportación de placas</td><td>Precios. Todavía no</td></tr>
+<tr><td>Entrenador o coordinador de juveniles</td><td><strong>Influenciador.</strong> Su opinión pesa más de lo que el organigrama sugiere</td><td>Tener los números el lunes sin mirar el video entero</td><td>La ficha de un jugador con tres temporadas de historial</td><td>Que es una herramienta de comunicación. Para él es una herramienta de trabajo</td></tr>
+<tr><td>Dirigente o secretario</td><td><strong>Decide y firma</strong></td><td>Que no genere trabajo nuevo, que no dependa de una sola persona, y cuánto sale</td><td>Precio anual cerrado, cero instalación, acompañamiento de la primera fecha</td><td>Detalles técnicos. No los quiere y le generan dudas</td></tr>
+<tr><td>Tesorero</td><td><strong>Veto.</strong> No aprueba nada, pero puede frenar todo</td><td>Que entre en el presupuesto de la temporada</td><td>Tarifa anual por temporada. Si ya pagan otro software, el marco es sustitución y no gasto nuevo</td><td>«Abono mensual». Suena a gasto que no termina nunca</td></tr>
+</tbody></table></div>
+
+<h3>En la unión</h3>
+<div class="tw"><table>
+<thead><tr><th>Persona</th><th>Rol</th><th>El argumento que le llega</th></tr></thead>
+<tbody>
+<tr><td>Presidente</td><td>Decide</td><td>Institucional: «las juveniles y el femenino de tu unión hoy no existen en ningún lado, y eso es tuyo, no de un proveedor»</td></tr>
+<tr><td>Secretario / gerente</td><td>Ejecuta y recomienda</td><td>Operativo: deja de recibir resultados por WhatsApp y de armar la tabla a mano</td></tr>
+<tr><td>Comisión de prensa</td><td>Aliado natural</td><td>Es el equivalente del jefe de prensa del club: le sacás trabajo de encima todos los lunes</td></tr>
+<tr><td>Tesorero de la unión</td><td>Veto</td><td>El modelo donde la unión no paga y los clubes sí. Le sacás el problema de encima</td></tr>
+</tbody></table></div>
+</div>
+</section>
+
+<section>
+<div class="sec-head"><span class="sec-n">03</span><h2>La venta al club, paso a paso</h2></div>
+<div class="prose">
+<p>Cinco pasos, de dos a seis semanas. Los guiones están para copiar y ajustar el nombre; no los pulas de más, el mensaje demasiado prolijo en WhatsApp se lee como venta.</p>
+</div>
+
+<div class="step">
+<div class="step-h"><b>PASO 1</b><h4>Elegir el club</h4><span>30 min por semana</span></div>
+<div class="step-b">
+<p>No prospectes por tamaño: prospectá por señales de dolor. Un club chico que publica todos los sábados es mejor prospecto que un club grande que no publica nada.</p>
+<h4>Las cinco señales, en orden de valor</h4>
+<ol>
+<li><strong>Ya paga algún software de gestión.</strong> La mejor de todas: no tenés que crear presupuesto, solo sustituirlo. Y el ahorro es real, no argumental.</li>
+<li><strong>Publica resultados en Instagram todos los sábados.</strong> Ya siente el dolor y ya hace el trabajo — solo lo hace a mano.</li>
+<li><strong>Tiene juveniles compitiendo.</strong> Ahí está el argumento imposible de rebatir.</li>
+<li><strong>Hay una persona identificable ocupándose de la comunicación.</strong> Sin esa persona no hay entrada.</li>
+<li><strong>Está en un torneo que G22 ya publica.</strong> La demo empieza medio hecha.</li>
+</ol>
+<p><strong>Dónde encontrarlos:</strong> el Instagram de cada club del torneo, mirado un domingo a la mañana. En veinte minutos sabés quién publica, quién no, y quién firma los posteos. Esa lista es tu pipeline.</p>
+</div>
+</div>
+
+<div class="step">
+<div class="step-h"><b>PASO 2</b><h4>El primer mensaje</h4><span>WhatsApp o DM</span></div>
+<div class="step-b">
+<p>Corto, específico del club, sin adjuntos y sin la palabra «plataforma». El objetivo del mensaje no es vender: es conseguir que abran un link.</p>
+
+<span class="msg-l">Versión base — al jefe de prensa</span>
+<div class="msg">Hola [nombre], ¿cómo va? Te escribo por lo de [Club].
+
+Vi que los sábados publicás los resultados de todas las categorías a mano. Nosotros hicimos una página donde eso se carga una sola vez desde el celular en la cancha y se actualiza en vivo — la primera, la intermedia, la M19 y la M17 juntas, para que el que está parado en una cancha se entere de las otras.
+
+Te paso un club que ya está cargado así, para que veas de qué hablo: [link]
+
+Si te sirve, elegí un partido de ustedes del finde que quieras y lo cargamos juntos. No te cuesta nada y queda publicado igual.</div>
+
+<span class="msg-l">Si el club está en un torneo que G22 ya publica</span>
+<div class="msg">Hola [nombre]. Te escribo porque el [torneo] ya lo estamos publicando en G22 y [Club] aparece con los resultados de primera, pero las juveniles no las tiene nadie cargadas.
+
+Acá está como está hoy: [link a la página del club]
+
+Si querés, el sábado cargamos la M17 con alguien de ustedes y ves cómo queda. Son dos minutos por partido y lo que se carga queda publicado.</div>
+
+<span class="msg-l">Si ya vieron a la competencia</span>
+<div class="msg">Hola [nombre]. Sé que están viendo el tema del marcador en vivo.
+
+Una sola cosa antes de que decidan: fijate si podés abrir el partido del sábado pasado. Nosotros los guardamos todos, y de ahí sale sola la tabla y la ficha de cada jugador — el pibe que debuta en M16 llega a primera con su historial entero.
+
+Te paso un club para comparar: [link]</div>
+
+<div class="box box-w">
+<h4>Qué no hacer en el primer mensaje</h4>
+<p>No mandes PDF. No digas «me gustaría presentarte nuestra plataforma». No pidas una reunión todavía — pedí que abran un link. No menciones precio. Y no mandes audio.</p>
+</div>
+</div>
+</div>
+
+<div class="step">
+<div class="step-h"><b>PASO 3</b><h4>La llamada de quince minutos</h4><span>Preguntar, no presentar</span></div>
+<div class="step-b">
+<p>Si contestaron y abrieron el link, esta llamada es para entender su sábado, no para explicar el producto. Regla: <strong>ellos hablan el 70% del tiempo.</strong> Cada dato que te den acá vuelve después como argumento con sus propios números.</p>
+<h4>Las nueve preguntas</h4>
+<ol>
+<li>¿Cuántos partidos juega el club un sábado normal, contando todas las categorías?</li>
+<li>¿Quién carga hoy los resultados, y cómo te llegan a vos?</li>
+<li>¿Cuánto tardás desde que termina el último partido hasta que está publicado?</li>
+<li>¿Las juveniles se publican en algún lado?</li>
+<li>Si te pregunto cuántos tries hizo [un jugador] la temporada pasada, ¿dónde lo mirás?</li>
+<li><strong>¿Tienen médico fijo los sábados?</strong></li>
+<li><strong>Y cuando no hay, ¿cómo cierran el partido?</strong></li>
+<li>¿Pagan algo hoy por algún sistema?</li>
+<li>Si esto funcionara, ¿quién más tendría que verlo antes de decidir?</li>
+</ol>
+<p>La pregunta 5 es la que abre la conversación de verdad — casi siempre la respuesta es «en ningún lado» o «lo tengo anotado yo». Las <strong>6 y 7 son las que más te posicionan</strong>: preguntar por el médico demuestra que conocés su sábado de verdad, y la respuesta casi siempre es que sin médico no pueden cerrar desde la app y terminan en papel. Ahí ya no sos alguien vendiendo software: sos alguien que entiende el problema. La 9 te dice si estás hablando con la persona correcta y a quién vas a necesitar después.</p>
+<h4>Cómo cerrás la llamada</h4>
+<div class="msg">Te propongo algo concreto: elegí un partido del finde que viene, el que quieras. Yo te acompaño por WhatsApp mientras alguien de ustedes lo carga desde la cancha. Son dos minutos por partido y quince de instrucción antes.
+
+Si sale bien, seguimos con el resto de la fecha. Si no te convence, lo dejamos y lo cargado queda publicado igual.
+
+¿Qué partido te queda cómodo?</div>
+</div>
+</div>
+
+<div class="step">
+<div class="step-h"><b>PASO 4</b><h4>El piloto — cuatro fechas</h4><span>El corazón de la venta</span></div>
+<div class="step-b">
+<p>Un partido no alcanza para que se vuelva hábito; cuatro fechas sí. Y el objetivo real del piloto no es que <em>vean</em> el producto: es que <strong>dejen de poder volver atrás</strong>.</p>
+<div class="tw"><table>
+<thead><tr><th>Momento</th><th>Qué hacés vos</th><th>Qué hace el club</th></tr></thead>
+<tbody>
+<tr><td>Semana previa</td><td>Alta del club, carga del plantel, 15 min de capacitación por videollamada o audio</td><td>Elegir quién carga</td></tr>
+<tr><td>Fecha 1</td><td><strong>Estás en el WhatsApp durante todo el partido.</strong> Contestás en segundos</td><td>Carga una categoría, la que menos presión tenga</td></tr>
+<tr><td>Fecha 2</td><td>Acompañás pero no intervenís salvo que pregunten</td><td>Suma una segunda categoría</td></tr>
+<tr><td>Fecha 3</td><td>Empujás para que cargue <strong>una segunda persona</strong>. Si depende de un héroe, el piloto fracasó aunque los partidos estén cargados</td><td>Dos personas distintas cargando</td></tr>
+<tr><td>Fecha 4</td><td>Nada. Mirás si funciona solo</td><td>Todas las categorías que pueda</td></tr>
+<tr><td>Semana siguiente</td><td>Mandás el informe de cierre y pedís veinte minutos</td><td>—</td></tr>
+</tbody></table></div>
+<h4>Qué medís, y qué umbral cuenta como éxito</h4>
+<div class="tw"><table>
+<thead><tr><th>Indicador</th><th>Umbral</th><th>Por qué importa</th></tr></thead>
+<tbody>
+<tr><td>Partidos cargados sobre partidos jugados</td><td class="num">≥ 80% en la fecha 4</td><td>El único que de verdad predice si van a renovar</td></tr>
+<tr><td>Categorías activas</td><td class="num">≥ 3</td><td>Si solo cargan primera, no compraron la idea</td></tr>
+<tr><td>Personas distintas cargando</td><td class="num">≥ 2</td><td>Si es una sola, el día que se va se cae el cliente</td></tr>
+<tr><td>Trabajo extra por partido</td><td class="num">≤ 5 min</td><td>Es la objeción que aparece en la fecha 3</td></tr>
+<tr><td>Visitas a la página del club</td><td class="num">Creciente</td><td>Es tu prueba de audiencia, y hoy te falta</td></tr>
+<tr><td>Placas publicadas por el club</td><td class="num">≥ 1 por fecha</td><td>Prueba de que entró al flujo de comunicación</td></tr>
+</tbody></table></div>
+<div class="box box-k">
+<h4>La regla del piloto</h4>
+<p><strong>Lo cargado queda publicado, aunque después no sigan.</strong> Decilo en el primer mensaje y cumplilo siempre. Es lo que convierte «probar» en algo sin riesgo, y es la razón por la que aceptan. También es lo que hace que un piloto fallido te siga dejando cobertura y contenido indexado.</p>
+</div>
+</div>
+</div>
+
+<div class="step">
+<div class="step-h"><b>PASO 5</b><h4>El cierre</h4><span>Veinte minutos</span></div>
+<div class="step-b">
+<p>Acá recién aparece el precio, y aparece último. Antes van tres cosas que ellos ya vivieron.</p>
+<h4>La estructura de los veinte minutos</h4>
+<ol>
+<li><strong>Lo que ahora existe y antes no.</strong> La lista de partidos publicados, con links. Se abre en pantalla, no se cuenta.</li>
+<li><strong>Quién lo miró.</strong> Las visitas a la página del club en las cuatro fechas.</li>
+<li><strong>Lo que dejaron de hacer.</strong> La tabla se armó sola, las placas salieron del sistema, nadie transcribió nada.</li>
+<li><strong>El precio</strong>, un número anual, todo incluido, sin menú.</li>
+<li><strong>La pregunta de cierre</strong>, que es de calendario.</li>
+</ol>
+<div class="msg">Entonces: en cuatro fechas quedaron [N] partidos publicados de [N] categorías, la página del club tuvo [N] visitas y la tabla se armó sola.
+
+Para la temporada completa, con todas las categorías incluidas, son [precio] al año. No hay costo de instalación ni permanencia mínima: si en algún momento no les sirve, avisan y listo. Los datos son de ustedes y se los pasamos cuando quieran.
+
+¿Arrancamos la temporada completa desde la fecha que viene?</div>
+<h4>Y después de que dicen que sí, en la misma reunión</h4>
+<div class="msg">Una última cosa: ¿a qué dos clubes del torneo les serviría esto? Si te parece, les escribo de tu parte.</div>
+<p class="cap">No es cortesía. Es el paso más rentable de todo el manual y el que más se olvida: pedir la referencia en el minuto exacto en que el cliente está más convencido, y pedirla con nombre y apellido.</p>
+</div>
+</div>
+</section>
+
+<section>
+<div class="sec-head"><span class="sec-n">04</span><h2>La venta a la unión</h2></div>
+<div class="prose">
+<p>Es una venta distinta, no una versión más grande de la anterior. Una unión no hace pilotos: una unión ratifica lo que ya está pasando. Por eso el orden se invierte — <strong>no vas a pedir permiso, vas a mostrar un hecho consumado.</strong></p>
+<div class="box box-k">
+<h4>Cobrarle a los dos: la línea que no se puede cruzar</h4>
+<p>Se le puede cobrar a la unión y al club a la vez, y conviene — pero solo si <strong>compran cosas distintas</strong>. En el momento en que el club siente que está pagando algo que la unión ya pagó, se pudren las dos ventas juntas y la unión te pide explicaciones.</p>
+<p>La línea es una sola y hay que poder decirla en una frase: <strong>la unión paga lo que es de la unión; el club paga lo que es del club.</strong></p>
+<div class="tw"><table>
+<thead><tr><th>Quién paga</th><th>Qué compra exactamente</th><th>Precio</th></tr></thead>
+<tbody>
+<tr><td>La unión</td><td>El <strong>torneo</strong>: sitio oficial con su marca, fixture y tabla de todas las divisiones, estadísticas consolidadas, exportación, reporte de temporada, soporte dedicado. Lo usan todos sus clubes sin pagar nada</td><td class="num">US$ 1.200 – 3.600<br>por temporada</td></tr>
+<tr><td>El club</td><td>Su <strong>casa</strong>: página del club, todas sus categorías incluidas, fichas de jugador con historial, placas, sponsors, panel propio</td><td class="num">US$ 19 – 49 / mes<br>o 190 – 490 / año</td></tr>
+<tr><td>El hincha</td><td>Ver todo, siempre</td><td class="num">US$ 0</td></tr>
+</tbody></table></div>
+<p><strong>Y el corolario que hace que la línea se sostenga:</strong> el club que no paga <em>igual aparece en el torneo</em>, con sus resultados y su posición. No hay club rehén. Por eso la unión puede pagar tranquila: no está financiando algo por lo que después le cobran a sus clubes.</p>
+</div>
+
+<div class="box box-w">
+<h4>El error de precio que hay que evitar</h4>
+<p>Cobrarle a los dos <strong>no</strong> significa cobrarle más a cada uno. Significa partir el producto en dos y cobrar menos por cada parte. El canon de la unión baja de los US$ 3.000–12.000 que tendría si pagara toda la plataforma, a US$ 1.200–3.600 por la capa institucional sola.</p>
+<p>Eso no es resignar plata: es lo que hace que <strong>el número entre en la firma del presidente sin pasar por asamblea</strong>, y además el total sube. Una unión mediana de 28 clubes con 17 clubes adheridos el primer año deja US$ 2.400 de canon más US$ 3.876 de clubes: <strong>US$ 6.276</strong>, contra los US$ 6.384 del modelo de clubes solos <em>a adopción total</em>, que el primer año no se da nunca. <span class="ev">Supuesto</span></p>
+</div>
+</div>
+
+<div class="box box-w">
+<h4>La objeción que aparece primero y hunde la reunión — verificada en campo</h4>
+<p><strong>«Ya cargamos obligados en BDUAR, y eso solo ya nos cuesta caro. No vamos a cargar todo dos veces, y encima pagando.»</strong> Es la respuesta textual de una unión real —la URNE, agosto de 2026— y hay que asumir que va a aparecer en todas.</p>
+<p>Y tiene razón. El argumento de «una sola carga y todo se deriva» es cierto <em>adentro</em> de G22, pero <strong>falso a nivel ecosistema</strong>: para el club y la unión, G22 hoy es un segundo sistema encima de uno obligatorio. Negarlo en la reunión es perderla en el primer minuto.</p>
+<p><strong>Nunca la contestes con precio.</strong> No es una objeción de plata disfrazada: es de trabajo. Bajarle el canon a quien te dijo esto confirma que le estás pidiendo que trabaje el doble y encima negociás cuánto le cobrás por eso.</p>
+</div>
+
+<div class="box box-k">
+<div class="box box-w" style="margin-top:0">
+<h4 style="margin-top:0">Antes de leer esta sección: es análisis interno, no guion</h4>
+<p>Lo que sigue explica <strong>por qué</strong> tu propuesta tiene sentido. <strong>Nada de esto se dice en voz alta en una reunión.</strong> Las uniones trabajan con gente de la UAR y todo vuelve. La crítica al sistema oficial tiene que salir de la boca de ellos, nunca de la tuya — y cuando salga, tu trabajo no es coincidir con entusiasmo, es asentir corto y pasar a la solución.</p>
+</div>
+
+<h4>Por qué tu propuesta tiene sentido <em style="font-family:var(--ff-body);text-transform:none;letter-spacing:0;font-size:15px;color:var(--ink-2)">— para vos, no para la reunión</em></h4>
+<p>Dos hechos de campo <span class="ev" style="background:var(--pos-soft);color:var(--pos);border-color:var(--pos)">Verificado</span>, agosto de 2026:</p>
+<ol>
+<li><strong>Cargar en BDUAR cuesta.</strong> A la gente le resulta difícil. Coincide con las reseñas públicas de la app en Play Store —«no puedo entrar», «no salen los partidos», «no están actualizados los jugadores»— y con las 1.000+ descargas frente a los 45.000 jugadores que mueve la URBA sola.</li>
+<li><strong>Sin médico fijo, no se puede firmar desde la app.</strong> El cierre digital exige la firma médica de las incidencias, y la mayoría de los clubes no tiene médico todos los sábados. <strong>El cierre en tiempo real desde la cancha, que es la promesa de la app oficial, no le funciona a buena parte de los clubes.</strong></li>
+</ol>
+<p>La consecuencia da vuelta la conversación: <strong>hoy ya cargan dos veces.</strong> Papel en la cancha, y después alguien transcribe a BDUAR con una herramienta que le cuesta. Y de todo ese trabajo no sale nada público. No estás pidiendo una segunda carga: estás ofreciendo que <em>la primera</em> sea fácil y que además sirva para algo.</p>
+<div class="box box-k" style="margin:14px 0 0">
+<h4 style="margin-top:0">«Pero en G22 el médico tampoco puede firmar»</h4>
+<p><strong>Correcto, y es exactamente el punto.</strong> No es una carencia de G22: es la diferencia de responsabilidad entre los dos sistemas.</p>
+<div class="tw" style="margin:12px 0"><table>
+<thead><tr><th>&nbsp;</th><th>BDUAR · Conecta Rugby</th><th>G22</th></tr></thead>
+<tbody>
+<tr><td>Qué es</td><td>El <strong>registro oficial</strong>: habilitaciones, sanciones, incidencias médicas</td><td>La <strong>captura y la publicación</strong>: qué pasó en la cancha y quién lo puede ver</td></tr>
+<tr><td>Necesita firma para funcionar</td><td><strong>Sí</strong> — y por eso se traba sin médico</td><td><strong>No</strong> — nadie firma una tabla de posiciones</td></tr>
+<tr><td>Qué pasa si no hay médico</td><td>El cierre digital no se completa</td><td>El partido se publica igual, en vivo</td></tr>
+</tbody></table></div>
+<p><strong>La frase para la reunión, textual:</strong></p>
+<div class="msg">Nosotros no firmamos nada. La firma sigue donde tiene que estar: en el acta en papel, o en BDUAR cuando está el médico.
+
+Lo que hacemos es que la parte de escribir —el partido, los jugadores, los cambios, las tarjetas, el minuto de cada cosa— se haga una sola vez y bien, desde el celular. De ahí sale el acta impresa para firmar, y el torneo publicado.</div>
+</div>
+
+<div class="box box-w" style="margin:14px 0 0">
+<h4 style="margin-top:0">Tres límites que no se cruzan</h4>
+<ul>
+<li><strong>No simular ni reemplazar la firma médica.</strong> El protocolo de conmoción existe por seguridad del jugador. Facilitar saltearlo te destruye la relación con cualquier unión y es indefendible si algo sale mal.</li>
+<li><strong>No presentar la planilla de G22 como el acta oficial.</strong> Es un documento de trabajo que acelera el oficial. Si una unión cree que reemplaza al registro federativo, el problema es tuyo.</li>
+<li><strong>No construir captura de firmas todavía.</strong> El PDF sale con los casilleros en blanco para firmar en papel — que es el flujo que ya tienen. Digitalizar firmas abre preguntas de validez legal que hoy no te conviene abrir. Recién si una unión lo pide expresamente.</li>
+</ul>
+<p style="margin-top:.8em">Y al revés, hay un argumento de seguridad que sí es tuyo y conviene decirlo: <strong>cuando no hay médico, la incidencia igual ocurrió.</strong> Hoy se anota mal en un papel o se pierde. Cargada en G22 queda con el minuto, el jugador y quién tomó la decisión de sacarlo — y el lunes el club tiene un registro real para llevarle a un médico. Eso no es reemplazar el protocolo: es darle materia prima.</p>
+</div>
+
+<h4>El diccionario: lo mismo, dicho de manera que no te queme</h4>
+<div class="tw"><table>
+<thead><tr><th>Nunca digas</th><th>Decí</th><th>Por qué</th></tr></thead>
+<tbody>
+<tr><td>«La app de la UAR no funciona» · «cargar ahí es un quilombo»</td><td><strong>«¿Cómo les está resultando la carga en BDUAR?»</strong> Y después escuchá sin agregar nada</td><td>La crítica tiene que ser de ellos. Si es tuya, sos el que habla mal del sistema oficial</td></tr>
+<tr><td>«Sin médico no pueden cerrar, está mal hecho»</td><td><strong>«¿Tienen médico fijo los sábados? ¿Y cuándo no hay?»</strong></td><td>Preguntar demuestra que conocés su sábado. Afirmar suena a auditoría</td></tr>
+<tr><td>«Nosotros resolvemos lo que ellos no pudieron»</td><td>«Conecta Rugby es el registro oficial y está bien que lo sea. Nosotros somos otra cosa: el lado público»</td><td>Complemento, nunca sustituto. Es además lo que es cierto</td></tr>
+<tr><td>«Reemplazamos la planilla»</td><td>«La planilla les sale hecha desde acá, para firmar y volcar»</td><td>Reemplazar suena a disputa de autoridad</td></tr>
+<tr><td>«El sistema de ellos es cerrado»</td><td>«El sistema de la unión es para los que están adentro, y está bien que sea así: es un registro oficial. Lo que no existe es el lado de afuera»</td><td>Misma idea, sin que suene a defecto. Un registro federativo <em>debe</em> ser cerrado</td></tr>
+<tr><td>«En la URNE me dijeron que…»</td><td><strong>Nada.</strong> Lo que te cuenta una unión no sale de esa conversación</td><td>Viaja en horas y te deja como el que repite lo que le dicen en confianza</td></tr>
+<tr><td>«Tienen que elegir entre esto y lo otro»</td><td>«Esto no toca lo que ya hacen. Sigan con BDUAR igual»</td><td>Nadie quiere elegir contra su federación, y perdés esa elección siempre</td></tr>
+</tbody></table></div>
+<div class="box box-k">
+<h4>Cuando ellos critican el sistema oficial</h4>
+<p>Va a pasar, y es el momento de mayor riesgo de toda la reunión. La tentación es sumarse —«sí, es un desastre»— porque genera complicidad inmediata. <strong>No lo hagas.</strong> Esa frase se repite después con tu nombre adelante.</p>
+<p>La respuesta correcta es corta y neutra, y pasa a la solución sin opinar:</p>
+<div class="msg">Sí, me lo comentaron. Por eso lo pensamos así: que la carga que ya hacen les sirva para más de una cosa.</div>
+<p style="margin-bottom:0">Asentís, no calificás, y seguís. Nunca te vas a arrepentir de eso.</p>
+</div>
+
+<h4>Las tres respuestas, de la más fuerte a la más débil</h4>
+<ol>
+<li><strong>Invertir la carga: que G22 alimente a BDUAR, no al revés.</strong> El club carga una vez en G22 desde el celular —dos minutos, sin instalar nada, sin login federado— y de ahí sale la <em>planilla en PDF</em> lista para firmar y para volcar al sistema oficial. Reemplaza al papel, no a BDUAR. El proyecto ya genera esa planilla, así que el trabajo pendiente es que tenga el formato que la unión acepta, no construirla de cero. <strong>Es la respuesta que da vuelta la reunión</strong>, porque no les pide una carga más: les hace más fácil la que ya hacen mal.</li>
+<li><strong>Importar lo que ya cargan.</strong> Que la unión mande al cierre de cada fecha lo que ya tiene —planilla, export, o la foto del acta— y G22 lo importa. Pasa de «cargar cada partido dos veces» a «un archivo por fecha». La importación por planilla ya existe en el panel del torneo; la lectura de imagen ya está en las dependencias del proyecto.</li>
+<li><strong>Integrarse con BDUAR de verdad.</strong> Es el premio: cero carga adicional para nadie y G22 queda como la capa pública oficial. Requiere una conversación con la UAR y no está en tu control hoy. <strong>Mencionalo como hacia dónde va, nunca como algo que ya tenés.</strong></li>
+</ol>
+</div>
+
+<div class="step">
+<div class="step-h"><b>PASO 0</b><h4>Elegir la vía: canon o adopción sin costo</h4><span>Antes de pedir la reunión</span></div>
+<div class="step-b">
+<p>No todas las uniones pueden pagar un canon, y descubrirlo en la reunión te cuesta la reunión. Definilo antes, con el mismo criterio de capacidad que usás para los clubes.</p>
+<div class="tw"><table>
+<thead><tr><th>Vía</th><th>Cuándo</th><th>Qué paga la unión</th><th>De dónde sale el ingreso</th></tr></thead>
+<tbody>
+<tr><td><strong>Canon</strong></td><td>Uniones de banda A y A+, y las B con presupuesto de comunicación o sponsors propios</td><td>US$ 1.200 – 12.000 por temporada</td><td>Canon + planes de club</td></tr>
+<tr><td><strong>Adopción sin costo</strong></td><td>Uniones de banda C, y toda B que diga que el gasto no es viable</td><td class="num">US$ 0</td><td>Solo planes de club. 28 clubes a US$ 45 ya son US$ 15.120 por temporada</td></tr>
+</tbody></table></div>
+<div class="box box-w" style="margin-bottom:0">
+<h4>La regla, y es rígida</h4>
+<p>Si la unión dice que el gasto no es viable, <strong>cambiás de vía en el acto — no negociás el número.</strong> «Entonces que no lo pague la unión» cierra la puerta que «te lo dejo en la mitad» deja abierta para siempre. Un canon regateado te fija un techo con esa unión y con todas las que hablen con ella.</p>
+</div>
+</div>
+</div>
+
+<div class="step">
+<div class="step-h"><b>PASO 1</b><h4>Llegar con el hecho consumado</h4><span>Precondición</span></div>
+<div class="step-b">
+<p><strong>No pidas la reunión antes de tener dos o tres clubes de esa unión publicando.</strong> Con cero clubes, la conversación es «¿nos conviene adoptar esto?» y la respuesta natural es «lo vemos el año que viene». Con tres clubes adentro, la conversación pasa a ser «¿cómo lo ordenamos para que sea parejo?», que es una pregunta que sí se contesta ahora.</p>
+<p>Es literalmente lo que la landing de G22 ya promete: <em>muchos torneos entraron porque un club llegó primero</em>. El manual es esa frase ejecutada en orden.</p>
+</div>
+</div>
+
+<div class="step">
+<div class="step-h"><b>PASO 2</b><h4>El pedido de reunión</h4><span>Mail o WhatsApp al secretario</span></div>
+<div class="step-b">
+<div class="msg">Hola [nombre], soy [X] de G22 Scores.
+
+Te escribo porque [Club A], [Club B] y [Club C] están publicando sus partidos con nosotros — incluidas las juveniles, que hoy no están en ningún lado. Acá se ve cómo quedó la última fecha: [link]
+
+Queríamos ofrecerle a la unión que esto sea oficial del torneo, con el sitio con la marca de ustedes y sin costo para la unión. Nos ordena a todos y evita que cada club haga la suya.
+
+¿Tenés veinte minutos esta semana o la que viene?</div>
+<p class="cap">Tres cosas en cuatro líneas: prueba (clubes con nombre), el hueco (juveniles), y el pedido (sin costo). Nada de funcionalidades.</p>
+</div>
+</div>
+
+<div class="step">
+<div class="step-h"><b>PASO 3</b><h4>La reunión de treinta minutos</h4><span>Agenda cerrada</span></div>
+<div class="step-b">
+<div class="tw"><table>
+<thead><tr><th>Min</th><th>Bloque</th><th>Qué pasa</th></tr></thead>
+<tbody>
+<tr><td class="num">0–5</td><td>El torneo, hoy</td><td>Abrís el torneo en G22 con los clubes que ya cargan. No contás nada: mostrás. Que lo vean funcionando antes de escuchar una sola propuesta</td></tr>
+<tr><td class="num">5–10</td><td>Sus números</td><td>«¿Cuántos partidos juega el torneo por fecha contando todas las categorías?» Dejás que digan el número. Después: «¿de esos, cuántos se publican hoy?»</td></tr>
+<tr><td class="num">10–15</td><td>Lo que la unión gana</td><td>Sitio con su marca, todas las categorías, tabla automática, historial que queda, y una audiencia medible que hoy no tiene para mostrarle a un sponsor</td></tr>
+<tr><td class="num">15–20</td><td>La línea</td><td>«Ustedes pagan el torneo. Cada club, si quiere, paga su propia página. Y el club que no paga aparece igual en la tabla.» Es el bloque decisivo: si esto queda claro, no hay objeción después</td></tr>
+<tr><td class="num">20–25</td><td>El número y qué se les pide</td><td>El canon anual de la unión, y las dos cosas que se piden además de la plata: <strong>adoptarlo como oficial y comunicarlo a los clubes</strong></td></tr>
+<tr><td class="num">25–30</td><td>Próximo paso, con fecha</td><td>Una sola acción: la fecha del comunicado a los clubes y a quién le mandan la lista de contactos</td></tr>
+</tbody></table></div>
+<div class="box box-w">
+<h4>Los dos errores que matan esta reunión</h4>
+<ul>
+<li><strong>Empezar explicando el producto.</strong> Los primeros cinco minutos son de pantalla, no de discurso. Si arrancás explicando, perdiste el efecto de que ya está funcionando en su torneo.</li>
+<li><strong>Pedir plata.</strong> En el momento en que la unión tiene que aprobar un gasto, entrás en un circuito de comisión que dura meses. El modelo sin costo para la unión existe precisamente para saltarlo.</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div class="step">
+<div class="step-h"><b>PASO 4</b><h4>El comunicado a los clubes</h4><span>Lo escribís vos, lo firma la unión</span></div>
+<div class="step-b">
+<p>Nunca dejes que la unión redacte esto sola: se demora semanas y sale tibio. Mandáselo escrito para que solo tenga que aprobarlo.</p>
+<div class="msg">A los clubes de la [Unión]:
+
+Les informamos que a partir de la fecha [N], el torneo se publica oficialmente en G22 Scores, con fixture, resultados en vivo, posiciones y estadísticas de todas las categorías.
+
+Cada club tiene acceso para cargar sus propios partidos desde el celular. La capacitación es de quince minutos y la coordina G22 directamente con cada club.
+
+La unión cubre la publicación del torneo: ningún club paga por aparecer en el fixture ni en las posiciones.
+
+Para los clubes que quieran, además está disponible la página propia del club, con todas sus categorías, plantel, historial de jugadores y material para redes. Eso se contrata aparte y es opcional.
+
+Contacto: [teléfono / mail]</div>
+<p class="cap">Ese comunicado convierte a los clubes en leads calientes con respaldo institucional. Es el activo comercial más valioso que produce toda esta secuencia — vale más que cualquier contrato que la unión pudiera firmar.</p>
+</div>
+</div>
+
+<div class="step">
+<div class="step-h"><b>PASO 5</b><h4>Convertir los clubes</h4><span>4 a 8 semanas</span></div>
+<div class="step-b">
+<p>Con el comunicado en la mano, volvés al manual del club — pero el paso 2 cambia por completo: ya no sos un desconocido vendiendo, sos el proveedor oficial del torneo llamando para dar de alta.</p>
+<div class="msg">Hola [nombre], soy [X] de G22. La unión nos pidió que coordinemos con cada club el alta para publicar los partidos del torneo.
+
+Son quince minutos de capacitación y ya pueden cargar desde la cancha. Eso no tiene costo para el club: lo cubre la unión.
+
+Después, si les interesa, existe la página propia de [Club] con todas las categorías, el plantel y el historial de cada jugador. Eso es aparte y lo vemos cuando quieras.
+
+¿Qué día de esta semana te queda cómodo?</div>
+<p>Fijate el orden: <strong>primero das de alta gratis y después vendés.</strong> El alta la respalda la unión, así que no tiene objeción; y una vez que el club está cargando todas las semanas, la página propia se vende sola porque ya ve sus datos adentro del sistema. Vender la página en el mismo mensaje del alta arruina las dos cosas.</p>
+</div>
+</div>
+</section>
+
+<section>
+<div class="sec-head"><span class="sec-n">05</span><h2>Precios por capacidad de pago</h2></div>
+<div class="prose">
+<p>Un club de Top 14 con tres mil socios y un club de Segunda del interior no pueden pagar lo mismo, y cobrarles lo mismo significa o regalarle plata al primero o perder al segundo. Van tres categorías de cliente por capacidad económica — y lo mismo para las uniones, según cuántos equipos inscriben.</p>
+
+<div class="box box-k">
+<h4>El criterio tiene que ser objetivo, no una negociación</h4>
+<p>Nunca preguntes «¿cuánto pueden pagar?». Esa conversación no termina bien y deja al cliente sintiendo que el precio era inventado. Usá un criterio <strong>público, verificable y que nadie discute</strong>: para el club, <em>la división en la que juega su primer equipo</em>; para la unión, <em>la cantidad de equipos inscriptos en su torneo</em>. Los dos están publicados en el fixture, los dos correlacionan casi perfecto con el presupuesto, y ninguna institución de rugby miente sobre en qué división juega — todos se conocen.</p>
+</div>
+
+<h3>Clubes</h3>
+<div class="tw"><table>
+<thead><tr><th>&nbsp;</th><th>A · Alta capacidad</th><th>B · Capacidad media</th><th>C · Capacidad baja</th></tr></thead>
+<tbody>
+<tr><td><strong>Criterio objetivo</strong></td><td>Primer equipo en la <strong>máxima división</strong> de su unión, o club polideportivo con más de un deporte federado</td><td>Primer equipo en <strong>divisiones intermedias</strong> — Primera A o B de su unión</td><td><strong>Divisiones de ascenso</strong>, clubes rurales, escuelas de rugby, clubes de femenino exclusivo</td></tr>
+<tr><td>Perfil típico</td><td>Top 14 URBA, Top 10 de Córdoba, club social con rugby y hockey, +1.500 socios, sponsors propios</td><td>Club de unión provincial, 300 a 1.000 socios, algún sponsor local</td><td>Menos de 300 socios, sin ingresos publicitarios, presupuesto de cuota social</td></tr>
+<tr><td><strong>Mensual</strong></td><td class="num"><strong>US$ 79</strong><br><span style="color:var(--ink-3)">≈ $ 87.000</span></td><td class="num"><strong>US$ 45</strong><br><span style="color:var(--ink-3)">≈ $ 50.000</span></td><td class="num"><strong>US$ 15</strong><br><span style="color:var(--ink-3)">≈ $ 16.500</span></td></tr>
+<tr><td><strong>Por temporada</strong> <em>(10 meses por 12)</em></td><td class="num"><strong>US$ 790</strong></td><td class="num"><strong>US$ 450</strong></td><td class="num"><strong>US$ 150</strong></td></tr>
+<tr><td>Categorías</td><td colspan="3" style="text-align:center"><strong>Todas, sin límite, en los tres</strong> — cobrar por categoría frena justo lo que construye el activo</td></tr>
+<tr><td>Ficha de jugador con historial</td><td colspan="3" style="text-align:center"><strong>Sí, en los tres.</strong> Es lo que nadie puede copiar rápido: ponerla detrás de un plan sería regalarla</td></tr>
+<tr><td>Página del club, fixture, resultados en vivo, tabla, plantel, placas</td><td>Sí</td><td>Sí</td><td>Sí</td></tr>
+<tr><td>Estadísticas detalladas y exportación</td><td>Sí</td><td>Sí</td><td>—</td></tr>
+<tr><td>Módulo de sponsors</td><td>Sí, con reporte de exposición</td><td>Sí</td><td>—</td></tr>
+<tr><td>Marca propia y dominio del club</td><td>Sí</td><td>Marca propia</td><td>—</td></tr>
+<tr><td>Administradores</td><td>Sin límite</td><td>Hasta 5</td><td>2</td></tr>
+<tr><td>Multideporte en el mismo club</td><td>Incluido</td><td>+50%</td><td>—</td></tr>
+<tr><td>Carga histórica</td><td>1 temporada incluida</td><td>Cotizada</td><td>—</td></tr>
+<tr><td>Soporte</td><td>Dedicado, primera fecha acompañada</td><td>Prioritario</td><td>Email</td></tr>
+</tbody></table></div>
+<p class="cap">Precios en dólares como unidad de cuenta, facturados en pesos al cambio del día; la referencia usa 1.100, el valor configurado hoy en el checkout. Para el club excepcional —franquicia, club con tres deportes federados, más de 3.000 socios— hay un <strong>A+ a medida</strong>, que no se publica.</p>
+
+<div class="box box-g">
+<h4>C no es caridad: es suministro</h4>
+<p>El club de capacidad baja es donde están las juveniles y el femenino, que es exactamente el dato que nadie más tiene y el que hace que la página del torneo esté completa. Sin los clubes C, la tabla tiene agujeros y los clubes A y B pierden la razón para estar ahí.</p>
+<p>Por eso C se cobra barato y, si hace falta, <strong>gratis a cambio de una contrapartida concreta: que carguen todas sus categorías todas las fechas.</strong> Eso no es un descuento, es un trueque — ellos aportan el dato que sostiene el producto que le vendés a los otros dos. Decilo así en la reunión y nadie lo vive como limosna.</p>
+</div>
+
+<h3>Uniones, por cantidad de equipos</h3>
+<p>La unión no se mide por clubes sino por <strong>equipos inscriptos en el torneo</strong> —todas las divisiones y categorías sumadas—, porque es lo que refleja la carga real y lo que está publicado en el fixture. Una unión de 30 clubes con seis categorías cada uno son 180 equipos, no 30.</p>
+<div class="tw"><table>
+<thead><tr><th>Nivel</th><th>Equipos inscriptos</th><th>Ejemplo de referencia</th><th>Canon por temporada</th><th>Costo por equipo</th></tr></thead>
+<tbody>
+<tr><td><strong>C · Chica</strong></td><td class="num">hasta 60</td><td>Uniones del sur y en desarrollo</td><td class="num"><strong>US$ 1.200</strong></td><td class="num">≈ US$ 20</td></tr>
+<tr><td><strong>B · Mediana</strong><br><em>objetivo primario</em></td><td class="num">61 – 200</td><td>Unión Cordobesa, Rosario, Cuyo, Mar del Plata, Salta, Entre Ríos, Nordeste</td><td class="num"><strong>US$ 2.400</strong></td><td class="num">≈ US$ 12</td></tr>
+<tr><td><strong>A · Grande</strong></td><td class="num">201 – 500</td><td>Tucumán, uniones con muchas divisiones y juveniles</td><td class="num"><strong>US$ 4.800</strong></td><td class="num">≈ US$ 10</td></tr>
+<tr><td><strong>A+ · URBA o federación nacional</strong></td><td class="num">500 +</td><td>URBA: 91 clubes y ~450 partidos por fecha <span class="ev" style="background:var(--accent-soft);color:var(--accent);border-color:var(--accent-line)">Encontrado</span></td><td class="num"><strong>US$ 6.000 – 12.000</strong><br>a medida</td><td class="num">≈ US$ 8 o menos</td></tr>
+</tbody></table></div>
+<p class="cap">El costo por equipo baja a medida que la unión crece — el mismo patrón que usan PlayHQ, Spawtz y LeagueRepublic <span class="ev" style="background:var(--accent-soft);color:var(--accent);border-color:var(--accent-line)">Encontrado</span>. Que la escala esté publicada y sea degresiva vuelve el precio no negociable: la unión no discute su número, verifica en qué banda cae.</p>
+
+<div class="box box-k">
+<h4>El mecanismo solidario, que además cierra la venta</h4>
+<p>El canon de cada unión <strong>incluye licencias C sin cargo para sus clubes más chicos</strong>: 3 en la unión chica, 6 en la mediana, 12 en la grande. Tres efectos a la vez, y el tercero es el que importa:</p>
+<ol>
+<li>La unión llega a su asamblea con algo para mostrar — consiguió algo <em>para</em> sus clubes, no les impuso un gasto.</li>
+<li>Los clubes chicos entran igual, y con ellos entran las juveniles que completan la tabla.</li>
+<li><strong>Te blinda contra el reclamo de que la plataforma es solo para los grandes</strong>, que es la objeción política que hunde una adopción institucional en el deporte amateur.</li>
+</ol>
+</div>
+
+<h3>El hueco que te falta: el torneo único</h3>
+<p>Tournify vende <strong>por evento</strong> y no por temporada: gratis hasta 8 equipos, € 40 hasta 60, € 120 sin límite. Ese modelo no existe hoy en G22, y el rugby argentino está lleno de eventos de una sola vez: seven, encuentros de infantiles, torneos de verano, cuadrangulares, copas de un fin de semana. Todos esos organizadores <strong>no van a contratar una temporada</strong>, y hoy los estás perdiendo enteros.</p>
+<div class="tw"><table>
+<thead><tr><th>Torneo único</th><th>Alcance</th><th>Precio</th><th>Referencia del mercado</th></tr></thead>
+<tbody>
+<tr><td><strong>Evento chico</strong></td><td>Hasta 24 equipos, un fin de semana o hasta 30 días</td><td class="num"><strong>US$ 39</strong></td><td class="num">Tournify: € 40 ≈ US$ 43 hasta 60 equipos</td></tr>
+<tr><td><strong>Evento grande</strong></td><td>Equipos ilimitados, hasta 30 días</td><td class="num"><strong>US$ 89</strong></td><td class="num">Tournify: € 120 ≈ US$ 130 sin límite</td></tr>
+</tbody></table></div>
+<div class="box box-g">
+<h4>Y el detalle que lo convierte en canal de venta, no en ingreso suelto</h4>
+<p><strong>Lo pagado por el torneo único se descuenta del plan de temporada si contratan dentro de los 90 días.</strong> Con eso, cada seven de verano deja de ser una venta chica y pasa a ser un piloto pago: el club ya cargó, ya vio su página, ya tiene los datos adentro — y la conversación de marzo empieza con el producto funcionando en vez de con una demo.</p>
+<p>No requiere construir nada: el producto ya soporta un torneo con fecha de inicio y fin. Es empaquetado, no desarrollo.</p>
+</div>
+
+<h3>Tu precio contra el de ellos</h3>
+<div class="box box-k" style="margin-top:0">
+<h4>El mercado tiene dos pisos de precio, y hay que saber en cuál estás</h4>
+<p><strong>Herramientas de torneo genéricas</strong> —Score7 US$ 9–27, Competize € 19–81, Tournify € 40–120 por evento, Challonge US$ 12— son baratas, globales, de autoservicio, sin soporte local, sin páginas de club, sin ficha histórica de jugador y muchas con su propia marca y publicidad encima de tu página pública.</p>
+<p><strong>Plataformas de club y federación</strong> —Clupik US$ 50–101 con MercadoPago, Rugby Manager US$ 64–95, Playoff € 35–70— son más caras y se venden con relación, no con tarjeta de crédito.</p>
+<p>G22 hace las dos cosas, pero <strong>tiene que ponerle precio como el segundo grupo y defenderse del primero con profundidad de producto</strong>, no con descuento. La banda C existe justamente para no perder por precio contra Score7 en el organizador chico.</p>
+</div>
+<p>Toda la escalera está calibrada contra un principio: <strong>cada banda queda por debajo del competidor más cercano de ese segmento.</strong> No porque haya que ser el barato, sino porque hoy G22 no tiene permiso para ser el caro — sin clientes pagos, sin caso escrito y con una app oficial gratuita dando vueltas, poner el precio arriba del incumbente es perder ventas que se ganaban.</p>
+<div class="box box-g">
+<h4>El hallazgo que da vuelta el único punto flojo</h4>
+<p>Clupik <strong>cobra aparte la integración con MercadoPago</strong>: US$ 15 al mes en el plan Pro y US$ 12 en el Élite. Para un club argentino que quiere cobrarle a sus socios, eso no es opcional. El precio real de Clupik entonces no es el de la tarjeta:</p>
+<ul>
+<li><strong>Clupik Pro:</strong> US$ 35 + 15 = <strong>US$ 50</strong> · G22 B a US$ 45 queda <strong>10% más barato</strong></li>
+<li><strong>Clupik Élite:</strong> US$ 89 + 12 = <strong>US$ 101</strong> · G22 A a US$ 79 queda <strong>22% más barato</strong></li>
+</ul>
+<p>En G22 MercadoPago ya está integrado y no se cobra aparte. Con eso, <strong>la escalera queda por debajo de todos los competidores relevantes, sin una sola excepción</strong> — y desaparece el «+15% contra Clupik Pro» que era el único punto a defender.</p>
+</div>
+
+<div class="tw"><table>
+<thead><tr><th>Competidor</th><th>Su precio</th><th>Banda de G22 que compite</th><th>Diferencia</th><th>Qué se responde</th></tr></thead>
+<tbody>
+<tr><td><strong>Rugby Manager</strong> RM Plus</td><td class="num">ARS 105.000<br>≈ US$ 95</td><td>A · US$ 79</td><td class="num" style="color:var(--pos)"><strong>−17%</strong></td><td>«Más barato que su plan grande, y encima con toda la parte pública que ellos no tienen»</td></tr>
+<tr><td><strong>Rugby Manager</strong> Básico</td><td class="num">ARS 70.000<br>≈ US$ 64</td><td>B · US$ 45</td><td class="num" style="color:var(--pos)"><strong>−30%</strong></td><td>Es la comparación que más se te va a dar. Más producto, menos plata</td></tr>
+<tr><td><strong>Clupik</strong> Elite</td><td class="num">US$ 99</td><td>A · US$ 79</td><td class="num" style="color:var(--pos)"><strong>−20%</strong></td><td>Ellos gestionan el club puertas adentro; no publican el torneo ni tienen ficha histórica</td></tr>
+<tr><td><strong>Clupik</strong> Pro <em>con MercadoPago</em></td><td class="num">US$ 35 + 15 = <strong>US$ 50</strong></td><td>B · US$ 45</td><td class="num" style="color:var(--pos)"><strong>−10%</strong></td><td>«Fijate que el MercadoPago te lo cobran aparte, US$ 15 por mes. Acá va incluido»</td></tr>
+<tr><td><strong>Clupik</strong> Competiciones · Top</td><td class="num">US$ 599/año ≈ 50/mes</td><td>B · US$ 45</td><td class="num" style="color:var(--pos)"><strong>−10%</strong></td><td>Ese plan les limita a 70 equipos y 700 deportistas. En G22 no hay tope</td></tr>
+<tr><td><strong>Competize</strong> Manager profesional</td><td class="num">€ 81/mes ≈ US$ 88<br><em>por 30 competiciones</em></td><td>A · US$ 79</td><td class="num" style="color:var(--pos)"><strong>−10%</strong></td><td>Producto europeo, sin presencia ni soporte en Argentina</td></tr>
+<tr><td><strong>Playoff</strong> Top <em>(España)</em></td><td class="num">€ 69,95 ≈ US$ 76</td><td>A · US$ 79</td><td class="num" style="color:var(--warn)">+4%</td><td>Solo España, sin LatAm declarado. No lo vas a cruzar en una reunión</td></tr>
+<tr><td><strong>Score7</strong> Essentials / Pro / Unlimited</td><td class="num">US$ 9 / 18 / 27</td><td>C · US$ 15</td><td class="num">Compite en la banda baja</td><td><strong>El más barato del mercado y el que más hay que respetar en la banda C.</strong> Es una herramienta de brackets global: sin páginas de club, sin ficha de jugador, sin soporte local, y con su marca y publicidad en tu página pública</td></tr>
+<tr><td><strong>Competize</strong> Torneos pequeños</td><td class="num">€ 19 ≈ US$ 20,50</td><td>C · US$ 15</td><td class="num" style="color:var(--pos)"><strong>−27%</strong></td><td>Europeo, sin soporte local</td></tr>
+<tr><td><strong>Clupik</strong> Competiciones · Amateur</td><td class="num">US$ 199/año ≈ 17/mes</td><td>C · US$ 15</td><td class="num" style="color:var(--pos)"><strong>−12%</strong></td><td>Tope de 20 equipos y 200 deportistas; en G22 no hay tope</td></tr>
+<tr><td><strong>Tournify</strong> <em>por evento</em></td><td class="num">Gratis hasta 8 equipos · € 40 ≈ US$ 43 hasta 60 · € 120 ≈ US$ 130 ilimitado</td><td>Torneo único</td><td class="num">—</td><td>Modelo por evento, no por temporada. Ver abajo: es un hueco que G22 no cubre</td></tr>
+<tr><td><strong>Conecta Rugby</strong> (UAR)</td><td class="num">Gratis</td><td>Todas</td><td class="num">—</td><td>«Es el sistema de la unión y es obligatorio: no lo toquen. Pero pedile a la mamá de un M17 que entre a ver el partido — no puede, pide usuario»</td></tr>
+<tr><td><strong>Rugby Pro Score</strong></td><td class="num">No publicado.<br>La unión paga la Primera; el club paga cada categoría extra</td><td>Todas</td><td class="num">—</td><td>«Nosotros incluimos todas las categorías en el precio. Preguntales cuánto les sale sumar la M17 y la M19 — y si pueden abrir el partido del sábado pasado»</td></tr>
+<tr><td><strong>GesDeportiva</strong> (CABB)</td><td class="num">$ 1.500 por club/año<br><em>moneda y período ambiguos en la fuente</em></td><td>Canon de unión</td><td class="num">—</td><td>Si una unión lo cita, no discutas el número: «eso es el back-office de la federación, sin sitio público ni páginas de club. Es otro producto»</td></tr>
+</tbody></table></div>
+<div class="box box-w">
+<h4>Por qué A bajó de US$ 99 a US$ 79</h4>
+<p>A US$ 99 quedabas empatado con Clupik Elite y 4% arriba de Rugby Manager Plus. Ahí perdés el único mensaje de precio fuerte que tenés —<em>más producto, menos plata</em>— justo en el segmento que más compara. A US$ 79 quedás 17% y 20% abajo de los dos, y el argumento vuelve a funcionar en las tres bandas.</p>
+<p>Lo que cuesta: unos US$ 900 menos de margen anual en el escenario realista. Lo que compra: que ningún club grande pueda decir «me sale lo mismo que el otro». <strong>Es un cambio barato.</strong> Cuando tengas dos casos escritos y tráfico medido, A vuelve a US$ 99 sin discusión.</p>
+</div>
+
+<h3>Tu piso: US$ 470 por mes</h3>
+<div class="tw"><table>
+<thead><tr><th>Costo</th><th>Mensual</th><th>Anual</th><th>Naturaleza</th></tr></thead>
+<tbody>
+<tr><td>Supabase</td><td class="num">US$ 200</td><td class="num">US$ 2.400</td><td>Infraestructura de servicio</td></tr>
+<tr><td>Vercel</td><td class="num">US$ 150</td><td class="num">US$ 1.800</td><td>Infraestructura de servicio</td></tr>
+<tr><td>Claude Code</td><td class="num">US$ 100</td><td class="num">US$ 1.200</td><td>Desarrollo, no escala con clientes</td></tr>
+<tr><td>RapidAPI</td><td class="num">US$ 20</td><td class="num">US$ 240</td><td>Datos externos</td></tr>
+<tr><td><strong>Total</strong></td><td class="num"><strong>US$ 470</strong></td><td class="num"><strong>US$ 5.640</strong></td><td><strong>Fijo, no por cliente</strong></td></tr>
+</tbody></table></div>
+<p>Los planes de Supabase y Vercel ya están contratados y traen margen de crecimiento incluido: servir al club número treinta y uno no cuesta prácticamente nada. Por eso <strong>el precio no se calcula sobre el costo.</strong> El costo no dice cuánto cobrar — dice cuántos clientes hacen falta.</p>
+
+<h3>Cuántos clientes necesitás</h3>
+<p>Con un 7% entre comisión de MercadoPago e impuestos <span class="ev">Supuesto</span>, hacen falta unos <strong>US$ 505 brutos por mes</strong>.</p>
+<div class="tw"><table>
+<thead><tr><th>Combinación</th><th>Bruto mensual</th><th>¿Alcanza?</th></tr></thead>
+<tbody>
+<tr><td>7 clubes A</td><td class="num">US$ 553</td><td>Sí — el camino de menos cuentas, y el más difícil de conseguir</td></tr>
+<tr><td>12 clubes B</td><td class="num">US$ 540</td><td>Sí</td></tr>
+<tr><td><strong>1 unión mediana + 2 clubes A + 4 B</strong></td><td class="num">US$ 538</td><td><strong>Sí — el camino más realista</strong></td></tr>
+<tr><td>1 unión mediana + 2 A + 6 B + 8 C</td><td class="num">US$ 748</td><td>Sí, con aire. Es una sola unión trabajada a fondo</td></tr>
+<tr><td>Solo clubes C</td><td class="num">—</td><td><strong>Nunca alcanza.</strong> Harían falta 34. C es suministro, no ingreso</td></tr>
+</tbody></table></div>
+<div class="box box-g">
+<h4>El número para colgar en la pared</h4>
+<p><strong>Una unión mediana, dos clubes grandes y cuatro medianos.</strong> Ahí dejás de perder plata — y todo eso está adentro de una sola unión provincial bien trabajada.</p>
+</div>
+
+<h3>A dónde llega en doce meses</h3>
+<div class="tw"><table>
+<thead><tr><th>Escenario</th><th>Cartera</th><th>Bruto anual</th><th>Margen tras costos</th></tr></thead>
+<tbody>
+<tr><td>Conservador</td><td>1 unión mediana · 1 A · 4 B · 6 C</td><td class="num">US$ 6.588</td><td class="num">US$ 487 — 7%</td></tr>
+<tr><td><strong>Realista</strong></td><td>2 medianas + 1 chica · 4 A · 12 B · 14 C</td><td class="num">US$ 18.792</td><td class="num"><strong>US$ 11.837 — 63%</strong></td></tr>
+<tr><td>Optimista</td><td>1 grande + 2 medianas + 2 chicas · 8 A · 25 B · 25 C</td><td class="num">US$ 37.584</td><td class="num">US$ 29.313 — 78%</td></tr>
+</tbody></table></div>
+<p class="cap">Todos <span class="ev">Supuesto</span> salvo los costos, que son reales. El margen no incluye tu tiempo: si te pagás un sueldo, el conservador pasa a pérdida y el realista queda en un ingreso modesto. <strong>El negocio empieza a existir en el escenario realista</strong>, y el salto no es de precio sino de cantidad — dos o tres uniones trabajadas a fondo, no una.</p>
+
+<h3>Los tres mensajes de precio</h3>
+<p>Van recién en la reunión de cierre. Un número, no un menú.</p>
+
+<span class="msg-l">Club A — alta capacidad</span>
+<div class="msg">Te paso los números.
+
+Para [Club], con todas las categorías incluidas, el plan es de US$ 790 por temporada. Se factura en pesos al cambio del día y se puede en cuotas.
+
+Incluye la página del club con su marca y dominio propio, fixture y resultados en vivo de todas las categorías, tabla, estadísticas detalladas, la ficha de cada jugador con su historial, placas para redes, el módulo de sponsors con reporte de exposición, administradores sin límite y la carga de una temporada anterior.
+
+Sin costo de instalación, sin permanencia mínima, y los datos son de ustedes: si en algún momento no les sirve, avisan y se los pasamos.
+
+¿Arrancamos la temporada completa desde la fecha que viene?</div>
+
+<span class="msg-l">Club B — capacidad media</span>
+<div class="msg">Te paso los números.
+
+Para [Club], con todas las categorías incluidas —primera, intermedia, M19 y M17—, el plan es de US$ 450 por temporada, en pesos al cambio del día y en cuotas si les conviene.
+
+Incluye la página del club con su marca, fixture y resultados en vivo de todas las categorías, tabla, estadísticas, la ficha de cada jugador con su historial, las placas para redes y el módulo de sponsors.
+
+Sin costo de instalación, sin permanencia mínima, y los datos son de ustedes.
+
+¿Arrancamos la temporada completa desde la fecha que viene?</div>
+
+<span class="msg-l">Club C — capacidad baja</span>
+<div class="msg">Te paso lo que hablamos.
+
+Para clubes del tamaño de [Club] el plan es de US$ 150 por temporada — unos $ 16.500 por mes— con todas las categorías incluidas, la página del club, los resultados en vivo, la tabla y la ficha de cada jugador con su historial.
+
+Y te soy claro con una cosa: nos interesa especialmente que estén los clubes como el de ustedes, porque las juveniles y el femenino no las tiene cargadas nadie y son las que completan la tabla del torneo. Si el número no entra, lo hablamos: podemos arrancar sin costo esta temporada a cambio de que carguen todas sus categorías todas las fechas.
+
+¿Te sirve que arranquemos así?</div>
+
+<span class="msg-l">Unión — con la banda por equipos</span>
+<div class="msg">Como quedamos, te paso la propuesta.
+
+El canon se define por cantidad de equipos inscriptos en el torneo. [Unión] tiene [N] equipos entre todas las divisiones y categorías, así que entra en la banda de [X a Y] equipos: US$ [2.400] por temporada.
+
+Incluye el sitio oficial del torneo con la marca de [Unión] y dominio propio, fixture y tabla de todas las divisiones y categorías, estadísticas consolidadas, exportación de los datos, un administrador por club, el reporte de fin de temporada y la carga de una temporada anterior.
+
+Además incluye [6] licencias sin cargo para los clubes más chicos de la unión, que las asignan ustedes.
+
+Dos cosas importantes:
+
+1. Ningún club paga por aparecer en el torneo. El fixture, los resultados y las posiciones de todas las categorías salen publicados igual, cargue o no cargue cada club su plan.
+
+2. Aparte, el club que quiera puede contratar su propia página, con sus juveniles, sus jugadores y su historial. El precio depende de la división en la que juega: desde US$ 150 por temporada para los clubes de ascenso. Eso es del club y es opcional.
+
+Lo que les pedimos además del canon son dos cosas que no cuestan plata: adoptarlo como plataforma oficial del torneo y comunicárselo a los clubes. El comunicado se lo dejamos redactado.
+
+¿Les sirve que lo dejemos cerrado para arrancar en la fecha 1?</div>
+
+<div class="box box-w">
+<h4>Cuatro cosas que no hay que hacer con el precio</h4>
+<ul>
+<li><strong>No preguntar cuánto pueden pagar.</strong> El precio sale de la división y de la cantidad de equipos, que están publicadas. Preguntar convierte el precio en negociación y te deja sin escalera.</li>
+<li><strong>No bajarle el precio a un club A porque regatea.</strong> Si un club de la máxima división dice que no puede pagar US$ 790, no es capacidad: es que todavía no ve el valor. Volvé al piloto, no al descuento.</li>
+<li><strong>No subir un club C a B «porque está creciendo».</strong> El criterio es la división de este año. Se recategoriza cuando asciende, y ese es un momento para felicitarlos, no para sorprenderlos.</li>
+<li><strong>No inventar un plan intermedio en la reunión.</strong> Tres bandas y ninguna más. El plan improvisado para cerrar hoy rompe la escalera para todos los que vienen.</li>
+</ul>
+</div>
+</div>
+</section>
+
+<section>
+<div class="sec-head"><span class="sec-n">06</span><h2>Objeciones</h2></div>
+<div class="prose">
+<p>La columna del medio es la más importante: casi ninguna objeción significa lo que dice. Contestá lo que significa.</p>
+<div class="tw"><table>
+<thead><tr><th>Lo que dicen</th><th>Lo que en realidad significa</th><th>Qué contestás</th></tr></thead>
+<tbody>
+<tr><td><strong>«Ya cargamos obligados en BDUAR y eso ya nos cuesta caro»</strong><br><em style="font-weight:400;color:var(--ink-3)">verificada — URNE, ago-2026</em></td><td><strong>No es precio: es trabajo.</strong> Le estás pidiendo que hagan todo dos veces y encima que lo paguen</td><td>Concedé primero: «tenés razón, nadie va a cargar dos veces». Y después invertí la carga: «el club carga una sola vez con nosotros y de ahí te sale la planilla para cerrar en BDUAR. No es un trabajo más: es el mismo trabajo, hecho una vez». Si aun así no cierra, ofrecé importar lo que ya cargan: un archivo por fecha en vez de partido por partido</td></tr>
+<tr><td><strong>«El gasto de la unión no lo vemos viable»</strong><br><em style="font-weight:400;color:var(--ink-3)">verificada — URNE, ago-2026</em></td><td>La unión no tiene partida y no la va a crear</td><td><strong>Cambiá de vía en el acto, no bajes el número:</strong> «Entonces que no lo pague la unión. Ustedes lo adoptan como oficial y lo comunican; el club que quiera su página la contrata aparte. A la unión no le cuesta nada». Nunca regatees el canon: fija un techo con esa unión y con todas las que hablen con ella</td></tr>
+<tr><td>«Ya tenemos la app de la UAR»</td><td>No distingue entre gestionar y publicar</td><td>«Perfecto, y no la toques: es la oficial y es obligatoria. Pero probá esto: pedile a la mamá de un M17 que entre a ver cómo va el partido. No puede — pide usuario. Nosotros no somos el sistema de la unión, somos el lugar donde lo mira el que está afuera.»</td></tr>
+<tr><td>«Ya estamos viendo otra cosa parecida»</td><td>Está comparando y quiere una razón para decidir</td><td>No los ataques. Dos preguntas: <strong>«¿pueden abrir el partido del sábado pasado?»</strong> y <strong>«¿cuánto les sale sumar la M17 y la M19?»</strong>. Las contesta él y decide él.</td></tr>
+<tr><td>«¿Por qué pagar si hay cosas gratis?»</td><td>No ve el valor todavía, o le estás hablando de gestión</td><td>«Lo gratis te resuelve el trámite del partido. Nadie te resuelve que se vea y que quede. Fijate cuántos tries hizo tu apertura la temporada pasada y de dónde lo sacás.»</td></tr>
+<tr><td>«No tenemos presupuesto»</td><td>Casi siempre: «no en este momento del año»</td><td>«Entiendo, la temporada ya está presupuestada. Por eso el piloto no se cobra: lo hacemos ahora y lo definen cuando armen el presupuesto en diciembre.» <strong>Nunca bajes el precio acá.</strong></td></tr>
+<tr><td>«¿Y si nadie carga?»</td><td>Miedo real y fundado: ya les pasó con otras herramientas</td><td>«Pasa, y por eso en el piloto medimos que carguen dos personas distintas y no una. Si en la fecha 4 depende de una sola persona, te lo digo yo y no te lo vendo.»</td></tr>
+<tr><td>«En la cancha no hay señal»</td><td>Objeción técnica legítima</td><td>«En vivo no se puede, es cierto: publicar el momento necesita señal. Se anota en papel y se carga el partido entero al terminar, desde donde haya. El fixture, la tabla y las estadísticas quedan iguales; lo único que se pierde es el minuto a minuto.» <strong>No prometas sincronización offline: no existe.</strong></td></tr>
+<tr><td>«¿Los datos son nuestros?»</td><td>Miedo a quedar atrapado</td><td>«Sí. Si en algún momento se quieren ir, se los pasamos y listo. Y no hay permanencia mínima.»</td></tr>
+<tr><td>«Lo tengo que hablar con la comisión»</td><td>O no es el decisor, o no está convencido</td><td>«Claro. ¿Qué te parece si vas con el piloto hecho en vez de con una propuesta? Cargamos cuatro fechas, y llevás los partidos publicados y las visitas.» Y averiguá cuándo se reúne la comisión.</td></tr>
+<tr><td>«Ya publicamos todo en Instagram»</td><td>No ve el problema de la memoria</td><td>«Y está bien, seguí. Nosotros te damos la placa hecha para que publiques más rápido. La diferencia es que en Instagram el resultado del sábado pasado ya no lo encuentra nadie, y la tabla la seguís armando a mano.»</td></tr>
+<tr><td>«El año que viene lo vemos»</td><td>Está diciendo que sí, pero tarde</td><td>«Me parece bien decidirlo en diciembre. Pero para llegar con algo que mirar, el piloto hay que hacerlo ahora que quedan fechas. En marzo ya no hay con qué probar.»</td></tr>
+<tr><td>«¿Qué pasa con los datos de los chicos?»</td><td>Pregunta seria de un dirigente responsable</td><td>Contestala con política escrita, no de palabra: qué se guarda, quién accede, consentimiento por club. <strong>Si todavía no la tenés escrita, escribila antes de la próxima reunión de unión.</strong></td></tr>
+<tr><td>Silencio después de la demo</td><td>Salió mal algo que no te dijeron</td><td>Preguntá directo: «¿qué fue lo que más molestó de cargar el sábado?» Es la pregunta que más aprendizaje devuelve de todo el proceso.</td></tr>
+</tbody></table></div>
+</div>
+</section>
+
+<section>
+<div class="sec-head"><span class="sec-n">07</span><h2>Lo que necesitás tener listo</h2></div>
+<div class="prose">
+<p>Cuatro materiales. No hacen falta más, y ninguno lleva más de un día.</p>
+<div class="tw"><table>
+<thead><tr><th>Material</th><th>Qué es</th><th>Para qué paso</th></tr></thead>
+<tbody>
+<tr><td>El link de demo</td><td>La página de un club real, bien cargada, con varias categorías y fichas de jugador con historial. <strong>Es tu único material de venta.</strong> Elegí uno y mantenelo impecable</td><td>Primer mensaje</td></tr>
+<tr><td>El caso, dos páginas</td><td>Nombre del club, partidos publicados con links, categorías, visitas, y una cita textual del jefe de prensa</td><td>Cierre, y venta a la unión</td></tr>
+<tr><td>La cotización, una página</td><td>Un número anual, todo incluido, con lo que incluye en cinco líneas. Sin menú de opciones</td><td>Paso 5</td></tr>
+<tr><td>El guion de capacitación</td><td>Quince minutos, con capturas. Que lo pueda dar cualquiera, no solo vos</td><td>Piloto</td></tr>
+</tbody></table></div>
+<div class="box box-w">
+<h4>Lo que te falta hoy y frena la venta</h4>
+<ul>
+<li><strong>El número de audiencia.</strong> Todo el argumento «tu club se ve» necesita una cifra. Sin Analytics a mano no podés contestar «¿cuánta gente lo mira?», que es la primera pregunta del dirigente.</li>
+<li><strong>La exportación de datos.</strong> Una unión no debería firmar sin eso. Si te lo piden, comprometé fecha; no digas que ya está.</li>
+<li><strong>La política de datos de menores, escrita.</strong> Va a aparecer en la primera reunión de unión seria.</li>
+<li><strong>El historial visible en la primera pantalla.</strong> Es tu ventaja decisiva contra el competidor más parecido, y hoy hay que explicarla en vez de mostrarla.</li>
+</ul>
+</div>
+</div>
+</section>
+
+<section>
+<div class="sec-head"><span class="sec-n">08</span><h2>El plan de los próximos noventa días</h2></div>
+<div class="prose">
+<div class="tw"><table>
+<thead><tr><th>Cuándo</th><th>Objetivo</th><th>Actividad</th></tr></thead>
+<tbody>
+<tr><td>Semanas 1–2<br><em>septiembre</em></td><td>Pipeline armado</td><td>Recorrer el Instagram de todos los clubes de dos torneos que G22 ya publica. Lista de 30 clubes con las cinco señales y el nombre de quien comunica. Mandar 15 primeros mensajes</td></tr>
+<tr><td>Semanas 3–6</td><td><strong>3 pilotos activos</strong></td><td>Llamadas de 15 min y arranque de pilotos. Priorizar clubes con juveniles y clubes que ya pagan algo</td></tr>
+<tr><td>Semanas 7–10<br><em>octubre</em></td><td>Pilotos completos</td><td>Cuatro fechas cada uno, midiendo los seis indicadores. Empujar la segunda persona cargando en cada club</td></tr>
+<tr><td>Semanas 11–12<br><em>fin de temporada</em></td><td><strong>2 casos escritos</strong></td><td>Informe de cierre por club, reunión de veinte minutos, pedido de referencias con nombre</td></tr>
+<tr><td>Noviembre</td><td><strong>1 unión adoptando</strong></td><td>Con los clubes ya publicando, pedir la reunión de la unión. Llevar el comunicado redactado</td></tr>
+<tr><td>Diciembre – febrero</td><td><strong>Primeros contratos 2027</strong></td><td>Cierres con las comisiones nuevas y los presupuestos armándose. Onboarding en pretemporada</td></tr>
+<tr><td>Marzo 2027</td><td>Fecha 1 con clientes</td><td>La temporada arranca con clubes pagando y una unión respaldando</td></tr>
+</tbody></table></div>
+<div class="box box-g">
+<h4>La métrica única del trimestre</h4>
+<p>No mires ingresos: en noventa días no va a haber. Mirá <strong>partidos cargados por clubes que no sos vos</strong>. Es la única cifra que predice todo lo demás — si crece semana a semana, los contratos de diciembre existen; si no crece, no hay precio ni argumento que los produzca.</p>
+</div>
+</div>
+</section>
+
+<footer>
+<p>Manual operativo de venta · G22 Scores · Agosto 2026<br>
+Complementa el informe de estrategia comercial: allá está el porqué, acá el cómo.<br>
+Los guiones son un punto de partida — el que suena a guion no cierra. Adaptalos a cómo hablás vos.</p>
+</footer>
+
+</main></div>

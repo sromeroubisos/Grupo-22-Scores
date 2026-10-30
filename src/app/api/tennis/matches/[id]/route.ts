@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { limitAnonymousRequest } from '@/lib/server/publicRouteGuards';
 
 import { getTennisMatch, TennisServiceError } from '@/lib/services/tennis';
 
@@ -11,10 +12,14 @@ export const dynamic = 'force-dynamic';
  * transforma con la forma de fútbol y para un tenista devuelve una ficha vacía.
  */
 export async function GET(
-    _request: NextRequest,
+    request: NextRequest,
     context: { params: Promise<{ id: string }> },
 ) {
     const { id } = await context.params;
+
+    // Anónima y contra ESPN: tope por IP (falla abierto si no hay contador).
+    const limited = await limitAnonymousRequest(request, 'tennis-match');
+    if (limited) return limited;
 
     try {
         const details = await getTennisMatch(id);

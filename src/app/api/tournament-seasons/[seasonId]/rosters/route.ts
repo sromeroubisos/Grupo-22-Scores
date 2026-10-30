@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import {
     getApiErrorMessage,
     getApiErrorStatus,
-    requireAdminApiUser,
 } from '@/lib/auth/apiAdmin';
+import { requireTournamentMutationContext, TournamentApiError } from '@/lib/auth/tournamentApi';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getReadClient } from '@/lib/supabase/read';
 import {
@@ -11,11 +11,15 @@ import {
     createSeasonRoster,
     ensureRostersForSeasonEntries,
     listSeasonRosters,
+    resolveSeasonTournamentId,
 } from '@/lib/services/tournamentSeasonService';
 
 export const dynamic = 'force-dynamic';
 
 function jsonError(error: unknown, fallback = 500) {
+    if (error instanceof TournamentApiError) {
+        return NextResponse.json({ ok: false, error: error.message }, { status: error.status });
+    }
     return NextResponse.json(
         { ok: false, error: getApiErrorMessage(error) },
         { status: getApiErrorStatus(error, fallback) },
@@ -30,7 +34,10 @@ export async function GET(
         const { seasonId } = await params;
         const includeMemberships = request.nextUrl.searchParams.get('includeMemberships') === 'true';
         const db = await getReadClient();
-        const rosters = await listSeasonRosters(db, seasonId, includeMemberships);
+        // Ruta pública: con `includeMemberships` salía `roster_memberships.*`
+        // con la fecha de nacimiento de cada jugador. La vista pública sólo
+        // lleva lo que muestra el gestor (nombre, número, puesto).
+        const rosters = await listSeasonRosters(db, seasonId, includeMemberships, { publicView: true });
         return NextResponse.json({ ok: true, rosters });
     } catch (error) {
         return jsonError(error);
@@ -42,10 +49,16 @@ export async function POST(
     { params }: { params: Promise<{ seasonId: string }> },
 ) {
     try {
-        await requireAdminApiUser();
+        // Antes: `requireAdminApiUser` (cualquier rol de panel, admin_club
+        // incluido) + service_role sobre la temporada que dijera la URL. Ahora
+        // el permiso se pide sobre el torneo dueño de la temporada.
         const { seasonId } = await params;
+        const tournamentId = await resolveSeasonTournamentId(createAdminClient(), seasonId);
+        if (!tournamentId) {
+            return NextResponse.json({ ok: false, error: 'Temporada no encontrada.' }, { status: 404 });
+        }
+        const { writer: db } = await requireTournamentMutationContext(tournamentId);
         const body = await request.json().catch(() => ({}));
-        const db = createAdminClient();
         const action = String(body?.action || 'createRoster');
 
         if (action === 'ensureFromEntries') {
@@ -75,7 +88,7 @@ export async function POST(
                 role: body?.role ?? null,
                 notes: body?.notes ?? null,
                 eligibility: body?.eligibility ?? null,
-            });
+            }, seasonId);
 
             return NextResponse.json({ ok: true, ...result });
         }

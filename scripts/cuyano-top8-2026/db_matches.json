@@ -1,0 +1,1086 @@
+[
+ {
+  "id": "12ef715d-167c-43bc-8930-5f7244ae70f4",
+  "date_time": "2026-05-23T19:00:00+00:00",
+  "home_club_id": "teque-r-c",
+  "away_club_id": "los-tordos-rugby-club",
+  "score": {
+   "away": 32,
+   "home": 26,
+   "awayTries": 4,
+   "homeTries": 2
+  },
+  "status": "final",
+  "referee": null,
+  "venue": "Cancha 1.",
+  "home_base_points": 0,
+  "away_base_points": 4,
+  "home_bonus_points": 1,
+  "away_bonus_points": 0
+ },
+ {
+  "id": "8219ca38-2094-4381-b5ab-da42afb8a0f4",
+  "date_time": "2026-05-23T19:00:00+00:00",
+  "home_club_id": "san-juan-rugby-club",
+  "away_club_id": "c-p-b-m",
+  "score": {
+   "away": 32,
+   "home": 14,
+   "awayTries": 2,
+   "homeTries": 2
+  },
+  "status": "final",
+  "referee": null,
+  "venue": "Cancha 1.",
+  "home_base_points": 0,
+  "away_base_points": 4,
+  "home_bonus_points": 0,
+  "away_bonus_points": 0
+ },
+ {
+  "id": "e5d69111-19e1-4c3a-8266-ff33d301eac9",
+  "date_time": "2026-05-23T19:00:00+00:00",
+  "home_club_id": "mendoza-rugby-club",
+  "away_club_id": "liceo-rugby-club",
+  "score": {
+   "away": 29,
+   "home": 29,
+   "awayTries": 4,
+   "homeTries": 4
+  },
+  "status": "final",
+  "referee": "NICOLÁS QUINTANA",
+  "venue": "Cancha 1.",
+  "home_base_points": 2,
+  "away_base_points": 2,
+  "home_bonus_points": 0,
+  "away_bonus_points": 0
+ },
+ {
+  "id": "ed13d3e2-ca35-4a1f-a47b-f3a4e6029763",
+  "date_time": "2026-05-23T19:00:00+00:00",
+  "home_club_id": "universitario-de-san-juan",
+  "away_club_id": "marista-rugby-club",
+  "score": {
+   "away": 27,
+   "home": 25,
+   "awayTries": 4,
+   "homeTries": 3
+  },
+  "status": "final",
+  "referee": null,
+  "venue": "Cancha 1.",
+  "home_base_points": 0,
+  "away_base_points": 4,
+  "home_bonus_points": 1,
+  "away_bonus_points": 0
+ },
+ {
+  "id": "ac1baa75-724d-4a8a-a686-b0e5b4223683",
+  "date_time": "2026-06-06T19:00:00+00:00",
+  "home_club_id": "los-tordos-rugby-club",
+  "away_club_id": "marista-rugby-club",
+  "score": {
+   "away": 31,
+   "home": 35,
+   "awayTries": 4,
+   "homeTries": 4
+  },
+  "status": "final",
+  "referee": "FRANCISCO NANCLARES",
+  "venue": "Cancha 1.",
+  "home_base_points": 4,
+  "away_base_points": 0,
+  "home_bonus_points": 0,
+  "away_bonus_points": 1
+ },
+ {
+  "id": "c69155b8-ff12-4f6b-97e8-ca66650ece08",
+  "date_time": "2026-06-06T19:00:00+00:00",
+  "home_club_id": "c-p-b-m",
+  "away_club_id": "mendoza-rugby-club",
+  "score": {
+   "away": 39,
+   "home": 3,
+   "awayTries": 6,
+   "homeTries": 0
+  },
+  "status": "final",
+  "referee": null,
+  "venue": "Cancha 1.",
+  "home_base_points": 0,
+  "away_base_points": 4,
+  "home_bonus_points": 0,
+  "away_bonus_points": 1
+ },
+ {
+  "id": "eab845c4-2f43-46c0-98e8-15540f8f84f7",
+  "date_time": "2026-06-06T19:00:00+00:00",
+  "home_club_id": "san-juan-rugby-club",
+  "away_club_id": "teque-r-c",
+  "score": {
+   "away": 13,
+   "home": 30,
+   "awayTries": 1,
+   "homeTries": 4
+  },
+  "status": "final",
+  "referee": null,
+  "venue": "Cancha 1.",
+  "home_base_points": 4,
+  "away_base_points": 0,
+  "home_bonus_points": 0,
+  "away_bonus_points": 0
+ },
+ {
+  "id": "fdcd817a-5075-4f84-a54f-351066b7b74d",
+  "date_time": "2026-06-06T19:00:00+00:00",
+  "home_club_id": "liceo-rugby-club",
+  "away_club_id": "universitario-de-san-juan",
+  "score": {
+   "away": 24,
+   "home": 35,
+   "awayTries": 3,
+   "homeTries": 4
+  },
+  "status": "final",
+  "referee": null,
+  "venue": "Cancha 1.",
+  "home_base_points": 4,
+  "away_base_points": 0,
+  "home_bonus_points": 0,
+  "away_bonus_points": 0
+ },
+ {
+  "id": "25d975ee-e15d-4a95-bda7-3acb169d192c",
+  "date_time": "2026-06-13T19:00:00+00:00",
+  "home_club_id": "teque-r-c",
+  "away_club_id": "liceo-rugby-club",
+  "score": {
+   "away": 35,
+   "home": 7,
+   "awayTries": 5,
+   "homeTries": 1
+  },
+  "status": "final",
+  "referee": "JUAN MANUEL MARTÍNEZ",
+  "venue": "Cancha 1.",
+  "home_base_points": 0,
+  "away_base_points": 4,
+  "home_bonus_points": 0,
+  "away_bonus_points": 1
+ },
+ {
+  "id": "936c5bae-d163-4721-aace-055c7658f22d",
+  "date_time": "2026-06-13T19:00:00+00:00",
+  "home_club_id": "c-p-b-m",
+  "away_club_id": "los-tordos-rugby-club",
+  "score": {
+   "away": 34,
+   "home": 21,
+   "awayTries": 4,
+   "homeTries": 2
+  },
+  "status": "final",
+  "referee": null,
+  "venue": "Cancha 1.",
+  "home_base_points": 0,
+  "away_base_points": 4,
+  "home_bonus_points": 0,
+  "away_bonus_points": 0
+ },
+ {
+  "id": "d8a76630-947c-4654-b466-6a7b5d162977",
+  "date_time": "2026-06-13T19:00:00+00:00",
+  "home_club_id": "mendoza-rugby-club",
+  "away_club_id": "universitario-de-san-juan",
+  "score": {
+   "away": 29,
+   "home": 33,
+   "awayTries": 4,
+   "homeTries": 5
+  },
+  "status": "final",
+  "referee": null,
+  "venue": "Cancha 1.",
+  "home_base_points": 4,
+  "away_base_points": 0,
+  "home_bonus_points": 0,
+  "away_bonus_points": 1
+ },
+ {
+  "id": "e8b4e644-d7af-4407-8fac-a9a6ae22b38b",
+  "date_time": "2026-06-13T19:00:00+00:00",
+  "home_club_id": "marista-rugby-club",
+  "away_club_id": "san-juan-rugby-club",
+  "score": {
+   "away": 22,
+   "home": 26,
+   "awayTries": 1,
+   "homeTries": 4
+  },
+  "status": "final",
+  "referee": null,
+  "venue": "Cancha 1.",
+  "home_base_points": 4,
+  "away_base_points": 0,
+  "home_bonus_points": 0,
+  "away_bonus_points": 1
+ },
+ {
+  "id": "43dba851-f30f-4a12-b2f4-b6893815e512",
+  "date_time": "2026-07-04T19:00:00+00:00",
+  "home_club_id": "universitario-de-san-juan",
+  "away_club_id": "teque-r-c",
+  "score": {
+   "away": 5,
+   "home": 47,
+   "awayTries": 1,
+   "homeTries": 6
+  },
+  "status": "final",
+  "referee": null,
+  "venue": "Cancha 1.",
+  "home_base_points": 4,
+  "away_base_points": 0,
+  "home_bonus_points": 1,
+  "away_bonus_points": 0
+ },
+ {
+  "id": "5968fa0c-c6a4-44b1-bc55-9821ca4dddb9",
+  "date_time": "2026-07-04T19:00:00+00:00",
+  "home_club_id": "los-tordos-rugby-club",
+  "away_club_id": "liceo-rugby-club",
+  "score": {
+   "away": 34,
+   "home": 35,
+   "awayTries": 5,
+   "homeTries": 5
+  },
+  "status": "final",
+  "referee": "CIRO DICIANO",
+  "venue": "Cancha 1.",
+  "home_base_points": 4,
+  "away_base_points": 0,
+  "home_bonus_points": 0,
+  "away_bonus_points": 1
+ },
+ {
+  "id": "6d982e19-413f-4bfb-8a0a-74ac3a6404dd",
+  "date_time": "2026-07-04T19:00:00+00:00",
+  "home_club_id": "san-juan-rugby-club",
+  "away_club_id": "mendoza-rugby-club",
+  "score": {
+   "away": 34,
+   "home": 23,
+   "awayTries": 4,
+   "homeTries": 3
+  },
+  "status": "final",
+  "referee": null,
+  "venue": "Cancha 1.",
+  "home_base_points": 0,
+  "away_base_points": 4,
+  "home_bonus_points": 1,
+  "away_bonus_points": 0
+ },
+ {
+  "id": "bf8e08fa-91b5-4ae3-a65e-5e23cbe46064",
+  "date_time": "2026-07-04T19:00:00+00:00",
+  "home_club_id": "marista-rugby-club",
+  "away_club_id": "c-p-b-m",
+  "score": {
+   "away": 27,
+   "home": 62,
+   "awayTries": 3,
+   "homeTries": 10
+  },
+  "status": "final",
+  "referee": null,
+  "venue": "Cancha 1.",
+  "home_base_points": 4,
+  "away_base_points": 0,
+  "home_bonus_points": 1,
+  "away_bonus_points": 0
+ },
+ {
+  "id": "adbcec2c-5180-49a6-a6e4-314c48b15a3e",
+  "date_time": "2026-07-09T19:00:00+00:00",
+  "home_club_id": "los-tordos-rugby-club",
+  "away_club_id": "universitario-de-san-juan",
+  "score": {
+   "away": 52,
+   "home": 55,
+   "awayTries": 8,
+   "homeTries": 9
+  },
+  "status": "final",
+  "referee": null,
+  "venue": "Cancha 1.",
+  "home_base_points": 4,
+  "away_base_points": 0,
+  "home_bonus_points": 0,
+  "away_bonus_points": 1
+ },
+ {
+  "id": "b1822431-cc06-430f-9cd2-184efe3dc633",
+  "date_time": "2026-07-09T19:00:00+00:00",
+  "home_club_id": "liceo-rugby-club",
+  "away_club_id": "san-juan-rugby-club",
+  "score": {
+   "away": 26,
+   "home": 48,
+   "awayTries": 4,
+   "homeTries": 7
+  },
+  "status": "final",
+  "referee": null,
+  "venue": "Cancha 1.",
+  "home_base_points": 4,
+  "away_base_points": 0,
+  "home_bonus_points": 1,
+  "away_bonus_points": 0
+ },
+ {
+  "id": "bbe93b69-d0e0-4100-8a75-d007f0b5b48e",
+  "date_time": "2026-07-09T19:00:00+00:00",
+  "home_club_id": "mendoza-rugby-club",
+  "away_club_id": "marista-rugby-club",
+  "score": {
+   "away": 22,
+   "home": 11,
+   "awayTries": 3,
+   "homeTries": 1
+  },
+  "status": "final",
+  "referee": "SEBASTIÁN LÓPEZ",
+  "venue": "Cancha 1.",
+  "home_base_points": 0,
+  "away_base_points": 4,
+  "home_bonus_points": 0,
+  "away_bonus_points": 0
+ },
+ {
+  "id": "eeb0cc5e-691f-469e-beb9-e48bc788708d",
+  "date_time": "2026-07-09T19:00:00+00:00",
+  "home_club_id": "teque-r-c",
+  "away_club_id": "c-p-b-m",
+  "score": {
+   "away": 33,
+   "home": 22,
+   "awayTries": 4,
+   "homeTries": 3
+  },
+  "status": "final",
+  "referee": null,
+  "venue": "Cancha 1.",
+  "home_base_points": 0,
+  "away_base_points": 4,
+  "home_bonus_points": 0,
+  "away_bonus_points": 0
+ },
+ {
+  "id": "63c7af5e-3fab-478a-a1c5-7f435c6e146f",
+  "date_time": "2026-07-18T19:00:00+00:00",
+  "home_club_id": "marista-rugby-club",
+  "away_club_id": "liceo-rugby-club",
+  "score": {
+   "away": 25,
+   "home": 19,
+   "awayTries": 3,
+   "homeTries": 3
+  },
+  "status": "final",
+  "referee": "JUAN ESPÍNDOLA",
+  "venue": "Cancha 1.",
+  "home_base_points": 0,
+  "away_base_points": 4,
+  "home_bonus_points": 1,
+  "away_bonus_points": 0
+ },
+ {
+  "id": "aa02aa0b-100a-464c-aeae-ccdf8eca9fd2",
+  "date_time": "2026-07-18T19:00:00+00:00",
+  "home_club_id": "c-p-b-m",
+  "away_club_id": "universitario-de-san-juan",
+  "score": {
+   "away": 16,
+   "home": 25,
+   "awayTries": 2,
+   "homeTries": 3
+  },
+  "status": "final",
+  "referee": null,
+  "venue": "Cancha 1.",
+  "home_base_points": 4,
+  "away_base_points": 0,
+  "home_bonus_points": 0,
+  "away_bonus_points": 0
+ },
+ {
+  "id": "b063572e-d16e-432a-a097-ee0cfa4252ce",
+  "date_time": "2026-07-18T19:00:00+00:00",
+  "home_club_id": "teque-r-c",
+  "away_club_id": "mendoza-rugby-club",
+  "score": {
+   "away": 54,
+   "home": 5,
+   "awayTries": 8,
+   "homeTries": 1
+  },
+  "status": "final",
+  "referee": null,
+  "venue": "Cancha 1.",
+  "home_base_points": 0,
+  "away_base_points": 4,
+  "home_bonus_points": 0,
+  "away_bonus_points": 1
+ },
+ {
+  "id": "f70c734d-ea18-4f55-a4d8-5d705c267b2a",
+  "date_time": "2026-07-18T19:00:00+00:00",
+  "home_club_id": "san-juan-rugby-club",
+  "away_club_id": "los-tordos-rugby-club",
+  "score": {
+   "away": 66,
+   "home": 32,
+   "awayTries": 10,
+   "homeTries": 4
+  },
+  "status": "final",
+  "referee": null,
+  "venue": "Cancha 1.",
+  "home_base_points": 0,
+  "away_base_points": 4,
+  "home_bonus_points": 0,
+  "away_bonus_points": 1
+ },
+ {
+  "id": "3589d6ca-efb9-4914-a52e-f1f96a8ab652",
+  "date_time": "2026-08-08T19:00:00+00:00",
+  "home_club_id": "los-tordos-rugby-club",
+  "away_club_id": "mendoza-rugby-club",
+  "score": {
+   "away": 33,
+   "home": 32,
+   "awayTries": 5,
+   "homeTries": 4
+  },
+  "status": "final",
+  "referee": "JOAQUÍN LÓPEZ",
+  "venue": "Cancha 1.",
+  "home_base_points": 0,
+  "away_base_points": 4,
+  "home_bonus_points": 1,
+  "away_bonus_points": 0
+ },
+ {
+  "id": "ca29f360-79a0-423f-9a2c-37bee7fe4a33",
+  "date_time": "2026-08-08T19:00:00+00:00",
+  "home_club_id": "universitario-de-san-juan",
+  "away_club_id": "san-juan-rugby-club",
+  "score": {
+   "away": 22,
+   "home": 15,
+   "awayTries": 3,
+   "homeTries": 2
+  },
+  "status": "final",
+  "referee": null,
+  "venue": "Cancha 1.",
+  "home_base_points": 0,
+  "away_base_points": 4,
+  "home_bonus_points": 1,
+  "away_bonus_points": 0
+ },
+ {
+  "id": "dc5073b4-093b-4886-a9a0-75fbf5e5b539",
+  "date_time": "2026-08-08T19:00:00+00:00",
+  "home_club_id": "liceo-rugby-club",
+  "away_club_id": "c-p-b-m",
+  "score": {
+   "away": 21,
+   "home": 34,
+   "awayTries": 3,
+   "homeTries": 5
+  },
+  "status": "final",
+  "referee": null,
+  "venue": "Cancha 1.",
+  "home_base_points": 4,
+  "away_base_points": 0,
+  "home_bonus_points": 0,
+  "away_bonus_points": 0
+ },
+ {
+  "id": "f2aa05d5-fe99-418e-9ae7-c64600e90309",
+  "date_time": "2026-08-08T19:00:00+00:00",
+  "home_club_id": "marista-rugby-club",
+  "away_club_id": "teque-r-c",
+  "score": {
+   "away": 19,
+   "home": 33,
+   "awayTries": 3,
+   "homeTries": 5
+  },
+  "status": "final",
+  "referee": null,
+  "venue": "Cancha 1.",
+  "home_base_points": 4,
+  "away_base_points": 0,
+  "home_bonus_points": 1,
+  "away_bonus_points": 0
+ },
+ {
+  "id": "0d1dd154-7ee8-474e-9174-3d73c9661a07",
+  "date_time": "2026-08-22T19:00:00+00:00",
+  "home_club_id": "los-tordos-rugby-club",
+  "away_club_id": "teque-r-c",
+  "score": {
+   "away": 7,
+   "home": 110,
+   "awayTries": 1,
+   "homeTries": 16
+  },
+  "status": "final",
+  "referee": null,
+  "venue": "Cancha 1.",
+  "home_base_points": 4,
+  "away_base_points": 0,
+  "home_bonus_points": 1,
+  "away_bonus_points": 0
+ },
+ {
+  "id": "25a2b6a1-cbd0-4f68-9130-bdbec0e58c5a",
+  "date_time": "2026-08-22T19:00:00+00:00",
+  "home_club_id": "marista-rugby-club",
+  "away_club_id": "universitario-de-san-juan",
+  "score": {
+   "away": 27,
+   "home": 38,
+   "awayTries": 3,
+   "homeTries": 6
+  },
+  "status": "final",
+  "referee": null,
+  "venue": "Cancha 1.",
+  "home_base_points": 4,
+  "away_base_points": 0,
+  "home_bonus_points": 0,
+  "away_bonus_points": 0
+ },
+ {
+  "id": "3b1ecaca-ab2f-463e-a5aa-6c3d25b116fa",
+  "date_time": "2026-08-22T19:00:00+00:00",
+  "home_club_id": "c-p-b-m",
+  "away_club_id": "san-juan-rugby-club",
+  "score": {
+   "away": 29,
+   "home": 18,
+   "awayTries": 2,
+   "homeTries": 3,
+   "penalties": null,
+   "manualOverride": {
+    "away": 29,
+    "home": 18,
+    "cutoffMinute": null
+   }
+  },
+  "status": "final",
+  "referee": null,
+  "venue": "Cancha 1.",
+  "home_base_points": 0,
+  "away_base_points": 4,
+  "home_bonus_points": 0,
+  "away_bonus_points": 0
+ },
+ {
+  "id": "78df7f2b-f957-49e4-bd81-058a20469252",
+  "date_time": "2026-08-22T19:00:00+00:00",
+  "home_club_id": "liceo-rugby-club",
+  "away_club_id": "mendoza-rugby-club",
+  "score": {
+   "away": 28,
+   "home": 31,
+   "awayTries": 3,
+   "homeTries": 4
+  },
+  "status": "final",
+  "referee": "JUAN ESPÍNDOLA",
+  "venue": "Cancha 1.",
+  "home_base_points": 4,
+  "away_base_points": 0,
+  "home_bonus_points": 0,
+  "away_bonus_points": 1
+ },
+ {
+  "id": "0009f63f-4dc3-407c-a401-cd2b09488698",
+  "date_time": "2026-08-29T17:00:00+00:00",
+  "home_club_id": "universitario-de-san-juan",
+  "away_club_id": "liceo-rugby-club",
+  "score": {
+   "away": 45,
+   "home": 36,
+   "awayTries": 7,
+   "homeTries": 5
+  },
+  "status": "final",
+  "referee": null,
+  "venue": "Cancha 1.",
+  "home_base_points": 0,
+  "away_base_points": 4,
+  "home_bonus_points": 0,
+  "away_bonus_points": 0
+ },
+ {
+  "id": "7188acc9-e062-40d3-b76d-f4e88e343753",
+  "date_time": "2026-08-29T17:00:00+00:00",
+  "home_club_id": "marista-rugby-club",
+  "away_club_id": "los-tordos-rugby-club",
+  "score": {
+   "away": 29,
+   "home": 55,
+   "awayTries": 4,
+   "homeTries": 9
+  },
+  "status": "final",
+  "referee": "JUAN ESPÍNDOLA",
+  "venue": "Cancha 1.",
+  "home_base_points": 4,
+  "away_base_points": 0,
+  "home_bonus_points": 2,
+  "away_bonus_points": 0
+ },
+ {
+  "id": "72398032-350c-44ce-b865-55569b7041d4",
+  "date_time": "2026-08-29T17:00:00+00:00",
+  "home_club_id": "mendoza-rugby-club",
+  "away_club_id": "c-p-b-m",
+  "score": {
+   "away": 34,
+   "home": 26,
+   "awayTries": 4,
+   "homeTries": 4
+  },
+  "status": "final",
+  "referee": null,
+  "venue": "Cancha 1.",
+  "home_base_points": 0,
+  "away_base_points": 4,
+  "home_bonus_points": 0,
+  "away_bonus_points": 0
+ },
+ {
+  "id": "90c10795-4bb4-436d-867f-8465e63f3048",
+  "date_time": "2026-08-29T17:00:00+00:00",
+  "home_club_id": "teque-r-c",
+  "away_club_id": "san-juan-rugby-club",
+  "score": {
+   "away": 28,
+   "home": 21,
+   "awayTries": 5,
+   "homeTries": 3
+  },
+  "status": "final",
+  "referee": null,
+  "venue": "Cancha 1.",
+  "home_base_points": 0,
+  "away_base_points": 4,
+  "home_bonus_points": 0,
+  "away_bonus_points": 0
+ },
+ {
+  "id": "738e423b-ef4f-4a8b-a23c-4558ce329fef",
+  "date_time": "2026-09-05T18:30:00+00:00",
+  "home_club_id": "san-juan-rugby-club",
+  "away_club_id": "marista-rugby-club",
+  "score": {
+   "away": 29,
+   "home": 27,
+   "awayTries": 5,
+   "homeTries": 4
+  },
+  "status": "final",
+  "referee": null,
+  "venue": "Cancha 1.",
+  "home_base_points": 0,
+  "away_base_points": 4,
+  "home_bonus_points": 1,
+  "away_bonus_points": 0
+ },
+ {
+  "id": "2bea7517-8e2b-4665-82f9-741afb0dcbc0",
+  "date_time": "2026-09-06T18:30:00+00:00",
+  "home_club_id": "universitario-de-san-juan",
+  "away_club_id": "mendoza-rugby-club",
+  "score": {
+   "away": 32,
+   "home": 35,
+   "awayTries": 4,
+   "homeTries": 5
+  },
+  "status": "final",
+  "referee": null,
+  "venue": "Cancha 1.",
+  "home_base_points": 4,
+  "away_base_points": 0,
+  "home_bonus_points": 0,
+  "away_bonus_points": 1
+ },
+ {
+  "id": "768cc86c-03b0-4a1d-a45f-8b6618a00e64",
+  "date_time": "2026-09-06T18:30:00+00:00",
+  "home_club_id": "liceo-rugby-club",
+  "away_club_id": "teque-r-c",
+  "score": {
+   "away": 26,
+   "home": 57,
+   "awayTries": 4,
+   "homeTries": 9
+  },
+  "status": "final",
+  "referee": "DANTE DIEZ",
+  "venue": "Cancha 1.",
+  "home_base_points": 4,
+  "away_base_points": 0,
+  "home_bonus_points": 1,
+  "away_bonus_points": 1
+ },
+ {
+  "id": "03a5e972-c186-4bdb-8a9b-02d29effa4d1",
+  "date_time": "2026-09-19T19:00:00+00:00",
+  "home_club_id": "mendoza-rugby-club",
+  "away_club_id": "san-juan-rugby-club",
+  "score": {
+   "away": 40,
+   "home": 41,
+   "awayTries": 4,
+   "homeTries": 6,
+   "penalties": null,
+   "manualOverride": {
+    "away": 40,
+    "home": 41,
+    "cutoffMinute": null
+   }
+  },
+  "status": "final",
+  "referee": null,
+  "venue": "Cancha 1.",
+  "home_base_points": 4,
+  "away_base_points": 0,
+  "home_bonus_points": 0,
+  "away_bonus_points": 1
+ },
+ {
+  "id": "80c3fce2-b53e-4aea-9e52-e5c18fad9e43",
+  "date_time": "2026-09-19T19:00:00+00:00",
+  "home_club_id": "c-p-b-m",
+  "away_club_id": "marista-rugby-club",
+  "score": {
+   "away": 27,
+   "home": 10,
+   "awayTries": 4,
+   "homeTries": 1,
+   "penalties": null,
+   "manualOverride": {
+    "away": 27,
+    "home": 10,
+    "cutoffMinute": null
+   }
+  },
+  "status": "final",
+  "referee": null,
+  "venue": "Cancha 1.",
+  "home_base_points": 0,
+  "away_base_points": 4,
+  "home_bonus_points": 0,
+  "away_bonus_points": 1
+ },
+ {
+  "id": "93a805b0-94a1-499a-8e53-f510d6a89924",
+  "date_time": "2026-09-19T19:00:00+00:00",
+  "home_club_id": "liceo-rugby-club",
+  "away_club_id": "los-tordos-rugby-club",
+  "score": {
+   "away": 35,
+   "home": 26,
+   "awayTries": 4,
+   "homeTries": 4,
+   "penalties": null,
+   "manualOverride": {
+    "away": 35,
+    "home": 26,
+    "cutoffMinute": null
+   }
+  },
+  "status": "final",
+  "referee": "NICOLÁS QUINTANA",
+  "venue": "Cancha 1.",
+  "home_base_points": 0,
+  "away_base_points": 4,
+  "home_bonus_points": 0,
+  "away_bonus_points": 0
+ },
+ {
+  "id": "9858749f-f464-48bb-ac40-b9f02075817a",
+  "date_time": "2026-09-19T19:00:00+00:00",
+  "home_club_id": "teque-r-c",
+  "away_club_id": "universitario-de-san-juan",
+  "score": {
+   "away": 47,
+   "home": 28,
+   "awayTries": 7,
+   "homeTries": 4,
+   "penalties": null,
+   "manualOverride": {
+    "away": 47,
+    "home": 28,
+    "cutoffMinute": null
+   }
+  },
+  "status": "final",
+  "referee": null,
+  "venue": "Cancha 1.",
+  "home_base_points": 0,
+  "away_base_points": 4,
+  "home_bonus_points": 0,
+  "away_bonus_points": 1
+ },
+ {
+  "id": "594fd3d3-ed61-4c50-a308-10f4bd273f4a",
+  "date_time": "2026-10-03T19:00:00+00:00",
+  "home_club_id": "los-tordos-rugby-club",
+  "away_club_id": "c-p-b-m",
+  "score": {
+   "away": 21,
+   "home": 21,
+   "awayTries": 2,
+   "homeTries": 3,
+   "penalties": null,
+   "manualOverride": {
+    "away": 21,
+    "home": 21,
+    "cutoffMinute": null
+   }
+  },
+  "status": "final",
+  "referee": null,
+  "venue": "Cancha 1.",
+  "home_base_points": 2,
+  "away_base_points": 2,
+  "home_bonus_points": 0,
+  "away_bonus_points": 0
+ },
+ {
+  "id": "0335bedf-6c31-4b61-8f86-9c4e68900763",
+  "date_time": "2026-10-17T19:00:00+00:00",
+  "home_club_id": "marista-rugby-club",
+  "away_club_id": "mendoza-rugby-club",
+  "score": {
+   "away": 20,
+   "home": 47,
+   "awayTries": 2,
+   "homeTries": 7
+  },
+  "status": "final",
+  "referee": "NICOLÁS QUINTANA",
+  "venue": "Cancha 1.",
+  "home_base_points": 4,
+  "away_base_points": 0,
+  "home_bonus_points": 1,
+  "away_bonus_points": 0
+ },
+ {
+  "id": "4bbb3720-be72-494b-ad26-a852a01dea6a",
+  "date_time": "2026-10-17T19:00:00+00:00",
+  "home_club_id": "c-p-b-m",
+  "away_club_id": "teque-r-c",
+  "score": {
+   "away": 26,
+   "home": 31,
+   "awayTries": 3,
+   "homeTries": 5
+  },
+  "status": "final",
+  "referee": null,
+  "venue": "Cancha 1.",
+  "home_base_points": 4,
+  "away_base_points": 0,
+  "home_bonus_points": 0,
+  "away_bonus_points": 1
+ },
+ {
+  "id": "9743e2f3-0f83-445a-9bd6-c71367171914",
+  "date_time": "2026-10-17T19:00:00+00:00",
+  "home_club_id": "universitario-de-san-juan",
+  "away_club_id": "los-tordos-rugby-club",
+  "score": {
+   "away": 40,
+   "home": 31,
+   "awayTries": 6,
+   "homeTries": 5
+  },
+  "status": "final",
+  "referee": null,
+  "venue": "Cancha 1.",
+  "home_base_points": 0,
+  "away_base_points": 4,
+  "home_bonus_points": 0,
+  "away_bonus_points": 0
+ },
+ {
+  "id": "d0aac0bb-f205-4922-990c-2969f2537fad",
+  "date_time": "2026-10-17T19:00:00+00:00",
+  "home_club_id": "san-juan-rugby-club",
+  "away_club_id": "liceo-rugby-club",
+  "score": {
+   "away": 34,
+   "home": 35,
+   "awayTries": 5,
+   "homeTries": 5
+  },
+  "status": "final",
+  "referee": null,
+  "venue": "Cancha 1.",
+  "home_base_points": 4,
+  "away_base_points": 0,
+  "home_bonus_points": 0,
+  "away_bonus_points": 1
+ },
+ {
+  "id": "31c7fe72-c106-4325-bc98-d37491dea706",
+  "date_time": "2026-10-24T19:00:00+00:00",
+  "home_club_id": "teque-r-c",
+  "away_club_id": "mendoza-rugby-club",
+  "score": {
+   "away": 33,
+   "home": 12
+  },
+  "status": "final",
+  "referee": null,
+  "venue": "Cancha 1.",
+  "home_base_points": 0,
+  "away_base_points": 4,
+  "home_bonus_points": 0,
+  "away_bonus_points": 1
+ },
+ {
+  "id": "a94be355-32df-44e2-935b-08d859a04d9a",
+  "date_time": "2026-10-24T19:00:00+00:00",
+  "home_club_id": "los-tordos-rugby-club",
+  "away_club_id": "san-juan-rugby-club",
+  "score": {
+   "away": 19,
+   "home": 27
+  },
+  "status": "final",
+  "referee": null,
+  "venue": "Cancha 1.",
+  "home_base_points": 4,
+  "away_base_points": 0,
+  "home_bonus_points": 0,
+  "away_bonus_points": 0
+ },
+ {
+  "id": "bf797660-5076-4a27-8dd4-400128c9b8a6",
+  "date_time": "2026-10-24T19:00:00+00:00",
+  "home_club_id": "universitario-de-san-juan",
+  "away_club_id": "c-p-b-m",
+  "score": {
+   "away": 13,
+   "home": 25
+  },
+  "status": "final",
+  "referee": null,
+  "venue": "Cancha 1.",
+  "home_base_points": 4,
+  "away_base_points": 0,
+  "home_bonus_points": 1,
+  "away_bonus_points": 0
+ },
+ {
+  "id": "c82c4625-fddd-4765-bf6b-12886980be5b",
+  "date_time": "2026-10-24T19:00:00+00:00",
+  "home_club_id": "liceo-rugby-club",
+  "away_club_id": "marista-rugby-club",
+  "score": {
+   "away": 17,
+   "home": 14
+  },
+  "status": "final",
+  "referee": null,
+  "venue": "Cancha 1.",
+  "home_base_points": 0,
+  "away_base_points": 4,
+  "home_bonus_points": 1,
+  "away_bonus_points": 0
+ },
+ {
+  "id": "0085786d-9e63-4da9-99fd-93ee41a74345",
+  "date_time": "2026-10-31T19:00:00+00:00",
+  "home_club_id": "san-juan-rugby-club",
+  "away_club_id": "universitario-de-san-juan",
+  "score": {
+   "away": 0,
+   "home": 0
+  },
+  "status": "scheduled",
+  "referee": null,
+  "venue": "Cancha 1.",
+  "home_base_points": 0,
+  "away_base_points": 0,
+  "home_bonus_points": 0,
+  "away_bonus_points": 0
+ },
+ {
+  "id": "06bbc2cb-e00c-4b7e-b2a8-aa2b8390e44b",
+  "date_time": "2026-10-31T19:00:00+00:00",
+  "home_club_id": "mendoza-rugby-club",
+  "away_club_id": "los-tordos-rugby-club",
+  "score": {
+   "away": 0,
+   "home": 0
+  },
+  "status": "scheduled",
+  "referee": null,
+  "venue": "Cancha 1.",
+  "home_base_points": 0,
+  "away_base_points": 0,
+  "home_bonus_points": 0,
+  "away_bonus_points": 0
+ },
+ {
+  "id": "226cce80-ffcf-4284-a336-ee00038b9f37",
+  "date_time": "2026-10-31T19:00:00+00:00",
+  "home_club_id": "teque-r-c",
+  "away_club_id": "marista-rugby-club",
+  "score": {
+   "away": 0,
+   "home": 0
+  },
+  "status": "scheduled",
+  "referee": null,
+  "venue": "Cancha 1.",
+  "home_base_points": 0,
+  "away_base_points": 0,
+  "home_bonus_points": 0,
+  "away_bonus_points": 0
+ },
+ {
+  "id": "565acee8-104b-4505-8ce2-11ae272f44b4",
+  "date_time": "2026-10-31T19:00:00+00:00",
+  "home_club_id": "c-p-b-m",
+  "away_club_id": "liceo-rugby-club",
+  "score": {
+   "away": 0,
+   "home": 0
+  },
+  "status": "scheduled",
+  "referee": null,
+  "venue": "Cancha 1.",
+  "home_base_points": 0,
+  "away_base_points": 0,
+  "home_bonus_points": 0,
+  "away_bonus_points": 0
+ }
+]

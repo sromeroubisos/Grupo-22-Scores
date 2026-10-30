@@ -1,0 +1,149 @@
+
+begin;
+
+create temp table fx(loser uuid primary key, keep uuid not null) on commit drop;
+insert into fx values
+('019d45e1-5382-4eb9-b87d-eba4393f5ab1'::uuid, '2fc9a159-c190-4bf4-ba5d-16db1b5198f9'::uuid),
+('5c4abe7b-8545-4c89-8b8d-5dc877153728'::uuid, '061958c6-8353-49c8-a623-e08855cd7694'::uuid),
+('0c6a2b65-d2d6-404e-8e13-3d158487ecc9'::uuid, 'd130f762-ebce-4492-b3ba-beaa14598739'::uuid),
+('af38435f-2d23-498a-bab7-a842672cd984'::uuid, 'd130f762-ebce-4492-b3ba-beaa14598739'::uuid),
+('6826fd10-c03f-4749-beed-39798353dd43'::uuid, '0f7d6db1-e3ce-4c96-b075-81bf6b579acc'::uuid),
+('138cc019-1cea-4874-af90-ce1476d1523c'::uuid, 'f86f4959-b246-44af-a33c-e570aaab99c4'::uuid),
+('d28063f7-d687-4968-a36b-4ef667106492'::uuid, 'f86f4959-b246-44af-a33c-e570aaab99c4'::uuid),
+('17a19e38-4214-4e12-86a5-8c6c1df516fc'::uuid, 'f90b3859-572e-455b-bdd5-3e31504bfdd8'::uuid),
+('4b775635-5c8a-4eb6-acf6-6b7fac769f35'::uuid, '86b6448f-54bc-49be-8468-26e07b538d6e'::uuid),
+('1a6a47ef-d607-42ce-b1c6-bd62dc479fa3'::uuid, '86b6448f-54bc-49be-8468-26e07b538d6e'::uuid),
+('c6c236d3-476e-4f91-8744-21fec13982f6'::uuid, '1f0acfb3-d043-4b3b-872a-c080cd5ce1a7'::uuid),
+('e65fd67c-0221-4760-9066-429f3d6b7d83'::uuid, '25afb149-6aca-418c-a788-54d7b29432ea'::uuid),
+('29421aaa-24d1-442b-b256-f043ddd467c0'::uuid, 'f823b19b-9880-4851-8dcb-22dd1f4428a8'::uuid),
+('45aca4fe-1577-4d35-9ebb-f77c64e51a20'::uuid, '2da00c44-440b-4846-a04c-cd5fbeee9036'::uuid),
+('bb0f55c0-8c79-442b-a8d5-b1f7fdb86f08'::uuid, '2da00c44-440b-4846-a04c-cd5fbeee9036'::uuid),
+('aa12ceef-a54c-4392-97a5-a47a7e8e47bf'::uuid, '31911110-2f6b-462e-b76e-936d28c5cc03'::uuid),
+('36a6d689-d01c-490a-9a34-8d9bd9766a66'::uuid, 'e33d7902-98a9-4df2-843e-9d8e8c5fe554'::uuid),
+('3eb33766-9a1d-4722-b345-7ff4ecc6a6ef'::uuid, '3885d732-443c-4291-a0a6-60f187cbd1e8'::uuid),
+('47137ff4-369e-4065-a93b-cf4d4006414a'::uuid, '39ca2d48-70f3-4384-be25-8d321ab286a2'::uuid),
+('95a4dd92-4c2a-4ecb-8950-a6b61a6d9762'::uuid, 'a0296d84-3c16-41be-81a9-ec81f2d61a1d'::uuid),
+('3ca604f1-3eb5-4798-a1d2-7c2129efc2d6'::uuid, 'a0296d84-3c16-41be-81a9-ec81f2d61a1d'::uuid),
+('421b955c-e320-4f0e-9251-e71672aa204b'::uuid, 'f3828245-eb79-4b03-a4c6-c77bf33ce5ad'::uuid),
+('4503268c-3db1-44eb-9aca-a51565d72824'::uuid, '774d719f-9f6a-491a-ae66-b36ffcb248c1'::uuid),
+('4e406fa1-9bf9-42c1-952d-bb9ec3ca281d'::uuid, '4a6bf5da-f3e1-4564-9929-c68e88af59f4'::uuid),
+('4e16a8f9-3c2f-43f2-9a3a-a68db2d5cc4f'::uuid, '91176827-935a-4510-8882-f471b5aca26c'::uuid),
+('a1b7bf62-e84c-481e-9dcf-439abcf478da'::uuid, '91176827-935a-4510-8882-f471b5aca26c'::uuid),
+('56250f03-9eb0-43d1-9fbe-5ac87d49aef2'::uuid, 'd2b84835-6ec7-4222-b21b-c37658b213b7'::uuid),
+('587637a1-b62a-4062-b739-f1940cdd2eef'::uuid, 'aa4e6572-4c45-4ac0-81c3-8f2380f82637'::uuid),
+('c5a2b62b-dea8-41e1-9851-f682a78595e0'::uuid, '85dbbbee-d915-4abd-b9e8-37b159212608'::uuid),
+('5ca5c8de-6727-49b4-a547-6c74a02c895a'::uuid, '85dbbbee-d915-4abd-b9e8-37b159212608'::uuid),
+('a1c39dcb-9080-40bd-a875-44768ae72733'::uuid, '61819cd8-6cfe-4668-a043-e2ea60c804f4'::uuid),
+('c04eb1e1-1760-4a35-b541-2dc5bd7a1718'::uuid, '8c3c13ed-b933-4a39-8f60-e526af4a896e'::uuid),
+('6c857ced-1d90-4010-b03c-5e68d22317d3'::uuid, 'eab9354c-6641-4956-89da-dceb00b16ece'::uuid),
+('e61d3fb8-5227-4d14-a2be-04f18250acdc'::uuid, '717cdc32-9e0f-475b-b170-7f192272dde5'::uuid),
+('797c519c-552d-4bde-accb-bf7ded5687be'::uuid, 'c940a733-1b22-472a-ac92-ee51107862ba'::uuid),
+('bc36236c-49af-4e6f-a411-13ab6388ad18'::uuid, 'c940a733-1b22-472a-ac92-ee51107862ba'::uuid),
+('eed3a8f2-60f2-4d55-9284-6455d1cd9d55'::uuid, '7e4e58b0-35c4-40c4-8b86-ccdf7b1d3116'::uuid),
+('841ddc64-e365-49c0-8bf1-c55c09513ade'::uuid, 'a1e04810-fdca-4518-9be6-07d73ffcabc1'::uuid),
+('86d063b0-afa6-42d7-8deb-8b2a9fab2dc4'::uuid, 'a6413499-d9da-4243-a17d-70f15711ede5'::uuid),
+('d53b2f02-1f9a-476d-9e9d-51873b8f35db'::uuid, '89251235-2e91-4262-96e6-5d5968889d65'::uuid),
+('af96e091-6995-40f7-9a1c-2bdda27ae3b0'::uuid, '89251235-2e91-4262-96e6-5d5968889d65'::uuid),
+('ac1053a3-ffdf-4698-bd5b-c6008c65c88e'::uuid, '8e9caa34-973c-4c5c-8f0e-b00d4779a63b'::uuid),
+('9a3d762b-7546-4252-9c07-a5df4ae999b8'::uuid, 'bb2410c1-7aac-4c3e-b60f-cdbd3bfe5cbe'::uuid),
+('a864b67b-b091-4686-bf83-2c2d5ba4ca83'::uuid, 'fa091a52-e157-4dc8-bc84-ec5a01800e2b'::uuid),
+('bb9d9b81-16f8-491e-b1ab-930c9772de13'::uuid, 'caab4a0c-4aad-45e0-98e6-5f1ac98f1823'::uuid);
+
+create temp table fn(keep uuid primary key, full_name text, first_name text, last_name text) on commit drop;
+insert into fn values
+('2fc9a159-c190-4bf4-ba5d-16db1b5198f9'::uuid, 'Justo Ferrario', 'Justo', 'Ferrario'),
+('061958c6-8353-49c8-a623-e08855cd7694'::uuid, 'Agustín Benítez', 'Agustín', 'Benítez'),
+('d130f762-ebce-4492-b3ba-beaa14598739'::uuid, 'Felipe Villagrán', 'Felipe', 'Villagrán'),
+('0f7d6db1-e3ce-4c96-b075-81bf6b579acc'::uuid, 'Ignacio Facciolo', 'Ignacio', 'Facciolo'),
+('f86f4959-b246-44af-a33c-e570aaab99c4'::uuid, 'Ramiro Amarilla', 'Ramiro', 'Amarilla'),
+('f90b3859-572e-455b-bdd5-3e31504bfdd8'::uuid, 'Juan Lovell', 'Juan', 'Lovell'),
+('86b6448f-54bc-49be-8468-26e07b538d6e'::uuid, 'Manuel Ponte', 'Manuel', 'Ponte'),
+('1f0acfb3-d043-4b3b-872a-c080cd5ce1a7'::uuid, 'Lautaro Simes', 'Lautaro', 'Simes'),
+('25afb149-6aca-418c-a788-54d7b29432ea'::uuid, 'Lautaro Cipriani', 'Lautaro', 'Cipriani'),
+('f823b19b-9880-4851-8dcb-22dd1f4428a8'::uuid, 'Nicolás Triviño', 'Nicolás', 'Triviño'),
+('2da00c44-440b-4846-a04c-cd5fbeee9036'::uuid, 'Sebastián Pérez', 'Sebastián', 'Pérez'),
+('31911110-2f6b-462e-b76e-936d28c5cc03'::uuid, 'Marcelo Toledo', 'Marcelo', 'Toledo'),
+('e33d7902-98a9-4df2-843e-9d8e8c5fe554'::uuid, 'Jordi Chávez', 'Jordi', 'Chávez'),
+('3885d732-443c-4291-a0a6-60f187cbd1e8'::uuid, 'Santos Cayol', 'Santos', 'Cayol'),
+('39ca2d48-70f3-4384-be25-8d321ab286a2'::uuid, 'Manuel Cuneo', 'Manuel', 'Cuneo'),
+('a0296d84-3c16-41be-81a9-ec81f2d61a1d'::uuid, 'Nicolás Viola', 'Nicolás', 'Viola'),
+('f3828245-eb79-4b03-a4c6-c77bf33ce5ad'::uuid, 'Octavio Filippa', 'Octavio', 'Filippa'),
+('774d719f-9f6a-491a-ae66-b36ffcb248c1'::uuid, 'Tomás Sigura', 'Tomás', 'Sigura'),
+('4a6bf5da-f3e1-4564-9929-c68e88af59f4'::uuid, 'Ezequiel Bustos', 'Ezequiel', 'Bustos'),
+('91176827-935a-4510-8882-f471b5aca26c'::uuid, 'Agustín Fraga', 'Agustín', 'Fraga'),
+('d2b84835-6ec7-4222-b21b-c37658b213b7'::uuid, 'Ignacio Díaz', 'Ignacio', 'Díaz'),
+('aa4e6572-4c45-4ac0-81c3-8f2380f82637'::uuid, 'Joaquín Domínguez', 'Joaquín', 'Domínguez'),
+('85dbbbee-d915-4abd-b9e8-37b159212608'::uuid, 'Juan Ignacio Greising Revol', 'Juan Ignacio Greising', 'Revol'),
+('61819cd8-6cfe-4668-a043-e2ea60c804f4'::uuid, 'Benjamín Diaz', 'Benjamín', 'Diaz'),
+('8c3c13ed-b933-4a39-8f60-e526af4a896e'::uuid, 'Abraham Elías', 'Abraham', 'Elías'),
+('eab9354c-6641-4956-89da-dceb00b16ece'::uuid, 'Bautista Grenon', 'Bautista', 'Grenon'),
+('717cdc32-9e0f-475b-b170-7f192272dde5'::uuid, 'Manuel Carrara', 'Manuel', 'Carrara'),
+('c940a733-1b22-472a-ac92-ee51107862ba'::uuid, 'Santiago Pernas', 'Santiago', 'Pernas'),
+('7e4e58b0-35c4-40c4-8b86-ccdf7b1d3116'::uuid, 'Stefano Ferro', 'Stefano', 'Ferro'),
+('a1e04810-fdca-4518-9be6-07d73ffcabc1'::uuid, 'Ignacio Bottazzini', 'Ignacio', 'Bottazzini'),
+('a6413499-d9da-4243-a17d-70f15711ede5'::uuid, 'Jerónimo Gómez Vara', 'Jerónimo Gómez', 'Vara'),
+('89251235-2e91-4262-96e6-5d5968889d65'::uuid, 'Gianfranco Parodi', 'Gianfranco', 'Parodi'),
+('8e9caa34-973c-4c5c-8f0e-b00d4779a63b'::uuid, 'Valentín Cabral', 'Valentín', 'Cabral'),
+('bb2410c1-7aac-4c3e-b60f-cdbd3bfe5cbe'::uuid, 'Jerónimo Ulloa', 'Jerónimo', 'Ulloa'),
+('fa091a52-e157-4dc8-bc84-ec5a01800e2b'::uuid, 'José Pablo Fernandez', 'José Pablo', 'Fernandez'),
+('caab4a0c-4aad-45e0-98e6-5f1ac98f1823'::uuid, 'Federico Kennedy', 'Federico', 'Kennedy');
+
+create temp table fall on commit drop as select loser id from fx union select keep from fn;
+-- una sola expresión regular: cada fila se recorre una vez, no una por ficha
+create temp table rx on commit drop as
+  select (select string_agg(id::text, '|') from fall) todos, (select string_agg(loser::text, '|') from fx) perdedoras;
+
+-- respaldo
+create table bak_fusion_cba_20261023_x4_people as select * from people where id in (select id from fall);
+create table bak_fusion_cba_20261023_x4_matches as select m.id, m.lineups, m.events from matches m, rx
+  where m.lineups::text ~ rx.todos or coalesce(m.events::text, '') ~ rx.todos;
+create table bak_fusion_cba_20261023_x4_match_events as select me.* from match_events me, rx
+  where me.player_id in (select id from fall) or me.details::text ~ rx.perdedoras;
+create table bak_fusion_cba_20261023_x4_roles as select * from club_person_roles where person_id in (select id from fall);
+create table bak_fusion_cba_20261023_x4_team_memberships as select * from team_memberships where person_id in (select loser from fx);
+create table bak_fusion_cba_20261023_x4_trainings as select t.id, t.attendance, t.players_snapshot, t.evaluation from club_trainings t, rx
+  where (coalesce(t.attendance::text,'')||coalesce(t.players_snapshot::text,'')||coalesce(t.evaluation::text,'')) ~ rx.perdedoras;
+
+-- reemplazo de ids embebidos (texto)
+create or replace function pg_temp.swap(t text) returns text language plpgsql as $$
+declare r record;
+begin
+  if t is null then return null; end if;
+  for r in select loser, keep from fx loop
+    if position(r.loser::text in t) > 0 then t := replace(t, r.loser::text, r.keep::text); end if;
+  end loop;
+  return t;
+end $$;
+
+update matches m set lineups = pg_temp.swap(lineups::text)::jsonb, events = pg_temp.swap(events::text)::jsonb
+  where id in (select id from bak_fusion_cba_20261023_x4_matches);
+update match_events set player_id = coalesce((select keep from fx where loser = player_id), player_id),
+  details = pg_temp.swap(details::text)::jsonb
+  where id in (select id from bak_fusion_cba_20261023_x4_match_events);
+update club_trainings t set attendance = pg_temp.swap(attendance::text)::jsonb,
+  players_snapshot = pg_temp.swap(players_snapshot::text)::jsonb, evaluation = pg_temp.swap(evaluation::text)::jsonb
+  where id in (select id from bak_fusion_cba_20261023_x4_trainings);
+
+-- nombre visible unificado en las formaciones (solo los lados que son arreglo)
+update matches m set lineups = m.lineups || coalesce((
+  select jsonb_object_agg(s.side, (
+    select coalesce(jsonb_agg(case when fn.keep is not null then x.e || jsonb_build_object('name', fn.full_name) else x.e end order by x.ord), '[]'::jsonb)
+    from jsonb_array_elements(s.arr) with ordinality x(e, ord)
+    left join fn on fn.keep::text = x.e->>'id'))
+  from jsonb_each(m.lineups) s(side, arr) where jsonb_typeof(s.arr) = 'array'), '{}'::jsonb)
+  where id in (select id from bak_fusion_cba_20261023_x4_matches);
+update match_events me set player_name = fn.full_name,
+  details = case when me.details ? 'playerName' then me.details || jsonb_build_object('playerName', fn.full_name) else me.details end
+  from fn where me.player_id = fn.keep;
+
+-- roles y membresías
+delete from club_person_roles r using fx
+  where r.person_id = fx.loser and exists (select 1 from club_person_roles k where k.person_id = fx.keep
+    and k.club_id = r.club_id and k.role = r.role and k.division_id is not distinct from r.division_id);
+update club_person_roles r set person_id = fx.keep from fx where r.person_id = fx.loser;
+update team_memberships t set person_id = fx.keep from fx where t.person_id = fx.loser;
+
+update people p set full_name = fn.full_name, first_name = fn.first_name, last_name = fn.last_name from fn where p.id = fn.keep;
+delete from people where id in (select loser from fx);
+
+commit;

@@ -19,6 +19,8 @@ import WorldCupTeamProfile from '@/components/worldcup/WorldCupTeamProfile';
 import { getWorldCupTeamProfile, type WorldCupTeamProfile as Profile } from '@/lib/server/worldCupProfiles';
 import { FIH_TOURNAMENT_ID_PREFIX, parseFihTeamRef } from '@/lib/services/fihHockeyParser';
 import { resolveLinkedNationalTeamClub } from '@/lib/services/nationalTeamLinks';
+import { clipDescription, isUuid, loadClubSeo, openGraphFor } from '@/lib/seo/entityMeta';
+import { missingMetadata } from '@/lib/seo/sectionMeta';
 import { getReadClient } from '@/lib/supabase/read';
 
 import TeamDetailClientPage from './TeamDetailClientPage';
@@ -65,6 +67,33 @@ const loadLinkedClub = cache(async (id: string): Promise<string | null> => {
     }
 });
 
+/**
+ * Un club de la base. Antes devolvía `{}` y la ficha salía con el título de la
+ * portada. El 404 solo para un UUID que la base no tiene: el resto de los ids
+ * que la base no conoce pueden ser de un proveedor (FlashScore, ESPN…) y se
+ * siguen resolviendo en el cliente.
+ */
+async function clubMetadata(id: string): Promise<Metadata> {
+    const lookup = await loadClubSeo(id);
+    // Sin `notFound()` acá: ver `missingMetadata`.
+    if (lookup.missing && isUuid(id)) return missingMetadata('Club');
+    const club = lookup.value;
+    if (!club) return { title: 'Club | G22 Scores' };
+    const where = [club.city, club.country].filter(Boolean).join(', ');
+    const description = clipDescription(
+        `${club.name}${where ? ` (${where})` : ''}: partidos, resultados, fixture, plantel e historial del club en G22 Scores.`,
+    );
+    const canonical = `/clubs/${encodeURIComponent(club.id)}`;
+
+    return {
+        title: `${club.name} | G22 Scores`,
+        description,
+        alternates: { canonical },
+        ...(club.hidden ? { robots: { index: false, follow: true } } : {}),
+        openGraph: openGraphFor({ title: club.name, description, url: canonical, image: club.logoUrl }),
+    };
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
     const { id } = await params;
 
@@ -83,7 +112,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     // viajó y una página vacía se indexaría como buena. Mismo criterio que en
     // la ficha de un jugador.
     if (!profile && isWorldCupOnlyId(id.trim())) notFound();
-    if (!profile) return {};
+    if (!profile) return clubMetadata(decodeURIComponent(id).trim());
 
     const competition = profile.competitions.length === 1 ? profile.competitions[0].competition.name : 'Mundial de Hockey 2026';
     const title = `${profile.name} · ${competition}`;

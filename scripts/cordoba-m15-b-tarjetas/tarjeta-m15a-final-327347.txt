@@ -1,0 +1,92 @@
+Torneo : TORNEO BLOQUE JUV. M15 "A" - 2026
+Ronda : FINAL
+Fecha : Final
+Partido número : 327347
+
+Fecha de juego : 24/10/2026 11:00 hs
+
+Referee : Romero Brondino, Francisco
+
+Incidencias LOCAL
+Tie.	Min.	Símbolo	Incidencia	Pun.	Jugador	Detalle	Sanción
+1T	10		Try	5	Lozada Pagani, Nicolas
+1T	35		Penal	3	Velasco, Felipe
+2T	5		Try	5	Auad, Valentin
+2T	15	sale.ico	Se retiró		Stenfer, Bruno
+2T	15	sale.ico	Se retiró		Campana, Baltazar Ignacio
+2T	15	entra.ico	Ingresó		Pignata, Clemente
+2T	15	entra.ico	Ingresó		Picone, Francisco
+2T	17	tarjeta-amarilla.ico	Amarilla		Arri, Nicolas	Amarilla Juego General (J. G.)
+2T	25	sale.ico	Se retiró		Jaime, Pedro
+2T	25	entra.ico	Ingresó		Parellada Ivanoff, Lisandro Imanol
+2T	25	entra.ico	Ingresó		Becher, Franco
+2T	29		Try	5	Radi Cafaro, Juan Martin
+2T	30	sale.ico	Se retiró		Lozada Pagani, Nicolas
+2T	30	sale.ico	Se retiró		Scaroni Cornejo, Agustin
+2T	30	entra.ico	Ingresó		Araya Balbi, Juan Bautista
+2T	30		Conversión	2	Velasco, Felipe
+Incidencias VISITANTE
+Tie.	Min.	Símbolo	Incidencia	Pun.	Jugador	Detalle	Sanción
+1T	7		Try	5	Genesio Molinar, Santino Nicolás
+1T	7		Conversión	2	Candisano Ferreyra, Felipe
+2T	8		Try	5	Rosales, Ignacio Esteban
+2T	9	entra.ico	Ingresó		Poderti, Felipe
+2T	9	sale.ico	Se retiró		Borrini, Augusto Cesar
+2T	19		Try	5	Campora Arrambide, Jose Ignacio
+2T	19		Conversión	2	Candisano Ferreyra, Felipe
+2T	27	entra.ico	Ingresó		Ganigian, Benjamín Genaro
+2T	27	sale.ico	Se retiró		Rosales, Leandro Emiliano
+2T	32		Penal	3	Candisano Ferreyra, Felipe
+Entrenador LOCAL: Diego Nicolás Beslich 27362137
+Miembros del equipo LOCAL
+Pos	Doc.	Nombre	APL	Cert.	Pos.	Pos.Alt	Pos.Alt.2	Ult.Fich.
+1	51276440	Radi Cafaro, Juan Martin			01	03	08	2026
+2	51277724	Stenfer, Bruno			02	01	03	2026
+3	51413865	Lozada Pagani, Nicolas			01	03	04	2026
+4	50628824	Montironi, Santiago			04	05	11	2026
+5	50938288	Arri, Nicolas			04	05	06	2026
+6	50994078	Masjoan Amestegui, Juan Pedro			06	08	02	2026
+7	51200003	Bulacio Lascano, Facundo			08	02	Primera linea	2026
+8	50938705	Campana, Baltazar Ignacio			04	04	08	2026
+9	51383013	Scaroni Cornejo, Agustin			09	15	10	2026
+10	50994003	Velasco, Felipe			10	12	13	2026
+11	51017911	Auad, Valentin			15	13	14	2026
+12	50903637	Hermida, Tomas			12	11	13	2026
+13	50628811	Castillo Lancioni, Benjamin			13	12	10	2026
+14	50937068	Jaime, Pedro			13	14	11	2026
+15	56147081	Caeiro Rolotti, Pedro			11	15	13	2026
+16	51017810	Cura Tey, Valentino			Primera linea	06	01	2026
+17	50935628	Pignata, Clemente			02	03	07	2026
+18	50993402	Parellada Ivanoff, Lisandro Imanol			01	03	02	2026
+19	50938334	Milani, Valentino			06	07	(no esp.)	2026
+20	50853272	Picone, Francisco			07	06	08	2026
+21	51276997	Araya Balbi, Juan Bautista			10	09	11	2026
+22	50994690	Becher, Franco			12	13	10	2026
+23	52099414	Damonte, Alejandro			14	15	09	2026
+Entrenador VISITANTE: Manuel Ignacio González del Pino 29474490
+Miembros del equipo VISITANTE
+Pos	Doc.	Nombre	APL	Cert.	Pos.	Pos.Alt	Pos.Alt.2	Ult.Fich.
+1	51277675	Juarez Bustos, Felipe			01	03	02	2026
+2	51276891	Ferreyra, Santiago			01	02	03	2026
+3	50995232	Rosales, Ignacio Esteban			03	07	06	2026
+4	50854013	Yapur, Agustin			07	08	12	2026
+5	51278605	Borrini, Augusto Cesar			05	04	04	2026
+6	51196579	Rosales, Leandro Emiliano			06	05	05	2026
+7	50935782	Campora Arrambide, Jose Ignacio			04	06	08	2026
+8	51275977	Arrambide, Justo			06	05	08	2026
+9	51276729	Freytes Echenique, Jerónimo			09	10	11	2026
+10	51364832	Gimenez, Juan Ignacio			10	12	13	2026
+11	51275514	Genesio Molinar, Santino Nicolás			14	11	15	2026
+12	51198375	Albiero, Pedro			13	11	15	2026
+13	50994753	Sparaino, Lucio			12	13	14	2026
+14	50996296	Caminos, Cristóbal			11	15	12	2026
+15	51277559	Candisano Ferreyra, Felipe			15	10	12	2026
+16	50993551	Santacroce, Felipe			02	03	03	2026
+17	50854324	Regueiro Lascano, Luca Valentin			02	08	03	2026
+18	51383332	Bazan Soaje, Tomás			03	07	01	2026
+19	50629236	Ganigian, Benjamín Genaro			(no esp.)	(no esp.)	(no esp.)	2026
+20	51400205	Poderti, Felipe			07	08	15	2026
+21	51197866	Ceballos, Salvador			09	11	10	2026
+22	50993181	Arcurio, Matias Rubi			11	14	13	2026
+23	51199434	García Faure, Isidro			12	13	11	2026
+Incidencias PARTIDO

@@ -27,7 +27,19 @@ export type EventoPromo =
     | 'demo_form_start'
     | 'demo_form_submit';
 
-export function trackEvent(nombre: EventoPromo | string, propiedades?: PropiedadesEvento): void {
+/**
+ * Los eventos de El Entrenador. Son los que deciden la fase siguiente del juego:
+ * cuántos terminan la primera temporada, cuántos llegan al retiro y cuántas
+ * carreras juega cada uno. Sin esto la próxima fase se elige a ciegas.
+ */
+export type EventoJuego =
+    | 'coach_career_start'
+    | 'coach_decision'
+    | 'coach_season_end'
+    | 'coach_new_club'
+    | 'coach_career_end';
+
+export function trackEvent(nombre: EventoPromo | EventoJuego | string, propiedades?: PropiedadesEvento): void {
     try {
         if (propiedades) {
             track(nombre, propiedades);

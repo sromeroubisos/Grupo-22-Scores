@@ -60,6 +60,139 @@ def _score(event: dict[str, Any]) -> dict[str, int | None]:
     }
 
 
+def sport_slug(event: dict[str, Any]) -> str:
+    """Sport of an event, read from its tournament category.
+
+    Falls back to "football" because that is what this bridge served before it
+    was taught another sport, and every consumer of the old shape assumes it.
+    """
+    tournament = event.get("tournament") or {}
+    category = tournament.get("category") or {}
+    sport = category.get("sport") or {}
+    return sport.get("slug") or "football"
+
+
+# Tennis is scored in sets. SofaScore puts the games of each set under
+# `periodN`, and the tie-break of that set — when there was one — under
+# `periodNTieBreak`. `current` already holds sets won, so it maps onto the
+# existing home/away score untouched: only the per-set breakdown, the point
+# being played and the seeds need somewhere new to live.
+_MAX_SETS = 5
+
+
+def _tennis_periods(event: dict[str, Any]) -> list[dict[str, Any]]:
+    home = event.get("homeScore") or {}
+    away = event.get("awayScore") or {}
+    periods: list[dict[str, Any]] = []
+    for number in range(1, _MAX_SETS + 1):
+        key = f"period{number}"
+        if home.get(key) is None and away.get(key) is None:
+            continue
+        periods.append(
+            {
+                "set": number,
+                "home": home.get(key),
+                "away": away.get(key),
+                "home_tiebreak": home.get(f"{key}TieBreak"),
+                "away_tiebreak": away.get(f"{key}TieBreak"),
+            }
+        )
+    return periods
+
+
+def _tennis_side(team: dict[str, Any], seed: Any, score: dict[str, Any]) -> dict[str, Any]:
+    """One side of a tennis match: a player, or a pair in doubles.
+
+    SofaScore models a pair as a single team named "Lammons N / Withrow J", so
+    the pair is split here — a doubles side is two people, not an entity with a
+    crest. `players` is always a list: one name in singles, two in doubles.
+    """
+    name = team.get("name") or ""
+    parts = [part.strip() for part in name.split("/") if part.strip()]
+    # El sembrado llega como texto ("24"), y a veces como cualificación ("Q",
+    # "WC", "LL"), que no es un número de sembrado.
+    try:
+        seed_number: int | None = int(str(seed).strip()) if seed not in (None, "", 0) else None
+    except (TypeError, ValueError):
+        seed_number = None
+    country = team.get("country") or {}
+    return {
+        "id": _prefix(SOFASCORE_TEAM_ID_PREFIX, team.get("id")),
+        "name": name,
+        "players": parts or ([name] if name else []),
+        # El nombre viaja además del código porque el resolutor de países del
+        # front busca por nombre y por alpha2, nunca por alpha3.
+        "country": {
+            "code": country.get("alpha2"),
+            "alpha3": country.get("alpha3"),
+            "name": country.get("name"),
+        } if country else None,
+        # Un tenista es un `team` para SofaScore, así que su foto sale de
+        # /team/<id>/image. El endpoint /player/<id>/image contesta 404.
+        "photo": team_logo_url(team.get("id")),
+        "seed": seed_number,
+        "sets_won": score.get("current"),
+        "game_point": score.get("point"),
+    }
+
+
+def tennis_event(event: dict[str, Any]) -> dict[str, Any]:
+    """A tennis match in its own shape.
+
+    Deliberately NOT the flattened football shape: there is no home/away team
+    with a crest and no integer score. A side is one or two people, the result
+    is sets, and the round is a place in a draw rather than a matchday.
+    """
+    home_team = event.get("homeTeam") or {}
+    away_team = event.get("awayTeam") or {}
+    home_score = event.get("homeScore") or {}
+    away_score = event.get("awayScore") or {}
+    tournament = event.get("tournament") or {}
+    unique = tournament.get("uniqueTournament") or {}
+    category = tournament.get("category") or {}
+    round_info = event.get("roundInfo") or {}
+    serving = event.get("firstToServe")
+    return {
+        "id": _prefix(SOFASCORE_MATCH_ID_PREFIX, event.get("id")),
+        "status": _status_from_event(event),
+        "is_live": (event.get("status") or {}).get("type") == "inprogress",
+        "starts_at": event.get("startTimestamp") or 0,
+        "sides": {
+            "home": _tennis_side(home_team, event.get("homeTeamSeed"), home_score),
+            "away": _tennis_side(away_team, event.get("awayTeamSeed"), away_score),
+        },
+        "sets": _tennis_periods(event),
+        # 1 or 2, matching the side that served first — not who is serving now.
+        "first_to_serve": serving,
+        "is_doubles": "/" in ((home_team.get("name") or "")),
+        "round": round_info.get("name"),
+        "surface": event.get("groundType"),
+        "tournament": {
+            "id": _prefix(SOFASCORE_TOURNAMENT_ID_PREFIX, unique.get("id") or tournament.get("id")),
+            "name": unique.get("name") or tournament.get("name") or "",
+            # In tennis the category is the tour ("ATP", "WTA", "Challenger").
+            "tour": category.get("name"),
+            "slug": unique.get("slug") or tournament.get("slug"),
+        },
+    }
+
+
+def group_tennis_by_tournament(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Tennis matches bucketed by tournament, ordered by start time."""
+    by_tour: dict[str, dict[str, Any]] = {}
+    for event in events:
+        match = tennis_event(event)
+        info = match["tournament"]
+        bucket = by_tour.get(info["id"])
+        if not bucket:
+            bucket = {**info, "matches": []}
+            by_tour[info["id"]] = bucket
+        bucket["matches"].append(match)
+    for bucket in by_tour.values():
+        bucket["matches"].sort(key=lambda m: m["starts_at"])
+    return list(by_tour.values())
+
+
 def event_to_match(event: dict[str, Any]) -> dict[str, Any]:
     """Mimics the flattened FlashScore match shape used in API routes."""
     home_team = event.get("homeTeam") or {}
@@ -68,7 +201,8 @@ def event_to_match(event: dict[str, Any]) -> dict[str, Any]:
     category = tournament.get("category") or {}
     season = event.get("season") or {}
     score = _score(event)
-    return {
+    sport = sport_slug(event)
+    flat = {
         "match_id": _prefix(SOFASCORE_MATCH_ID_PREFIX, event.get("id")),
         "home_team": {
             "team_id": _prefix(SOFASCORE_TEAM_ID_PREFIX, home_team.get("id")),
@@ -99,10 +233,14 @@ def event_to_match(event: dict[str, Any]) -> dict[str, Any]:
         "tournament_stage_id": _prefix(SOFASCORE_TOURNAMENT_ID_PREFIX, tournament.get("id")),
         "country_name": category.get("country", {}).get("name") if category else None,
         "country_id": category.get("id") if category else None,
-        "sport_id": "football",
+        # In tennis the category is the tour ("ATP", "WTA", "Challenger"), not a
+        # country — it is what the day view groups by, so it travels flattened.
+        "category_name": category.get("name") if category else None,
+        "sport_id": sport,
         "season_id": season.get("id"),
         "season_name": season.get("name"),
     }
+    return flat
 
 
 def group_matches_by_tournament(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -118,6 +256,7 @@ def group_matches_by_tournament(events: list[dict[str, Any]]) -> list[dict[str, 
                 "tournament_id": tid,
                 "name": flat["tournament_name"],
                 "country_name": flat["country_name"],
+                "category_name": flat["category_name"],
                 "matches": [],
             }
             by_tour[tid] = bucket

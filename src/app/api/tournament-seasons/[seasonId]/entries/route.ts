@@ -2,18 +2,22 @@ import { NextRequest, NextResponse } from 'next/server';
 import {
     getApiErrorMessage,
     getApiErrorStatus,
-    requireAdminApiUser,
 } from '@/lib/auth/apiAdmin';
+import { requireTournamentMutationContext, TournamentApiError } from '@/lib/auth/tournamentApi';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getReadClient } from '@/lib/supabase/read';
 import {
     createSeasonEntry,
     ensureRostersForSeasonEntries,
+    resolveSeasonTournamentId,
 } from '@/lib/services/tournamentSeasonService';
 
 export const dynamic = 'force-dynamic';
 
 function jsonError(error: unknown, fallback = 500) {
+    if (error instanceof TournamentApiError) {
+        return NextResponse.json({ ok: false, error: error.message }, { status: error.status });
+    }
     return NextResponse.json(
         { ok: false, error: getApiErrorMessage(error) },
         { status: getApiErrorStatus(error, fallback) },
@@ -51,10 +55,16 @@ export async function POST(
     { params }: { params: Promise<{ seasonId: string }> },
 ) {
     try {
-        await requireAdminApiUser();
+        // Antes: `requireAdminApiUser` (cualquier rol de panel, admin_club
+        // incluido) + service_role sobre la temporada que dijera la URL. Ahora
+        // el permiso se pide sobre el torneo dueño de la temporada.
         const { seasonId } = await params;
+        const tournamentId = await resolveSeasonTournamentId(createAdminClient(), seasonId);
+        if (!tournamentId) {
+            return NextResponse.json({ ok: false, error: 'Temporada no encontrada.' }, { status: 404 });
+        }
+        const { writer: db } = await requireTournamentMutationContext(tournamentId);
         const body = await request.json().catch(() => ({}));
-        const db = createAdminClient();
         const action = String(body?.action || 'createEntry');
 
         if (action === 'ensureRosters') {

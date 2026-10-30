@@ -34,6 +34,10 @@ export async function POST(
             referee: typeof rawBody?.referee === 'string' && rawBody.referee.trim()
                 ? rawBody.referee.trim()
                 : null,
+            // "Público" del alta. Si no viene, la columna queda en su default.
+            isVisible: typeof rawBody?.isVisible === 'boolean'
+                ? rawBody.isVisible
+                : (typeof rawBody?.isPublic === 'boolean' ? rawBody.isPublic : undefined),
         };
 
         const match = await perf.measureStep(

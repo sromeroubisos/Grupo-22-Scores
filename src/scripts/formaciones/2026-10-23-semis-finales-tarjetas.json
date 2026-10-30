@@ -1,0 +1,929 @@
+{
+ "descripcion": "Cordobés 2026-10-23/24 · Top 10 A semi, M15 A final, M16 A final, M17 A semi · formaciones solo (tarjetas pegadas, sin eventos)",
+ "partidos": [
+  {
+   "id": "22c0b937-19da-4eda-b75c-a31c16859c90",
+   "rotulo": "Jockey Club Córdoba vs Córdoba Athletic Club · Top 10 A semifinal · tarjeta 327319",
+   "local": {
+    "nombre": "Jockey Club Córdoba Intermedia",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Genaro Merola Moreschi",
+      "puesto": "Pilar"
+     },
+     {
+      "numero": 2,
+      "nombre": "Juan Manuel Freytes Echenique",
+      "puesto": "Hooker"
+     },
+     {
+      "numero": 3,
+      "nombre": "Renzo Rebori",
+      "puesto": "Pilar"
+     },
+     {
+      "numero": 4,
+      "nombre": "Juan Franco",
+      "puesto": "Segunda línea"
+     },
+     {
+      "numero": 5,
+      "nombre": "Mateo Dominguez Peralta",
+      "puesto": "Segunda línea"
+     },
+     {
+      "numero": 6,
+      "nombre": "Lucas Mateo Moyano Aguirre",
+      "puesto": "Tercera línea"
+     },
+     {
+      "numero": 7,
+      "nombre": "Isidoro Carrara",
+      "puesto": "Tercera línea"
+     },
+     {
+      "numero": 8,
+      "nombre": "Joaquin Lopez",
+      "puesto": "Tercera línea"
+     },
+     {
+      "numero": 9,
+      "nombre": "Jeronimo Cortes",
+      "puesto": "Medio scrum"
+     },
+     {
+      "numero": 10,
+      "nombre": "Tomas Trejo",
+      "puesto": "Apertura"
+     },
+     {
+      "numero": 11,
+      "nombre": "Conrado Alonso",
+      "puesto": "Wing"
+     },
+     {
+      "numero": 12,
+      "nombre": "Simón Trejo",
+      "puesto": "Centro"
+     },
+     {
+      "numero": 13,
+      "nombre": "Felipe Mallia",
+      "puesto": "Centro"
+     },
+     {
+      "numero": 14,
+      "nombre": "Matias Fischer",
+      "puesto": "Wing"
+     },
+     {
+      "numero": 15,
+      "nombre": "Vicente Carretero",
+      "puesto": "Fullback"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Julián Nereo Pelcer"
+     },
+     {
+      "numero": 17,
+      "nombre": "Francisco Nicolás Burgos"
+     },
+     {
+      "numero": 18,
+      "nombre": "Agustin Rey"
+     },
+     {
+      "numero": 19,
+      "nombre": "Nicolas Corso"
+     },
+     {
+      "numero": 20,
+      "nombre": "Jeronimo Deheza"
+     },
+     {
+      "numero": 21,
+      "nombre": "Alvaro Areco Penalba"
+     },
+     {
+      "numero": 22,
+      "nombre": "Fausto Salvador Gangemi"
+     },
+     {
+      "numero": 23,
+      "nombre": "Benjamin Urani"
+     }
+    ]
+   },
+   "visitante": {
+    "nombre": "Córdoba Athletic Club Intermedia",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Gonzalo Thomas Gargallo Bazan",
+      "puesto": "Pilar"
+     },
+     {
+      "numero": 2,
+      "nombre": "Lucas Adamo",
+      "puesto": "Hooker"
+     },
+     {
+      "numero": 3,
+      "nombre": "Tomas Agustin Fitte",
+      "puesto": "Pilar"
+     },
+     {
+      "numero": 4,
+      "nombre": "Maximo Leon",
+      "puesto": "Segunda línea"
+     },
+     {
+      "numero": 5,
+      "nombre": "Juan Bocco",
+      "puesto": "Segunda línea"
+     },
+     {
+      "numero": 6,
+      "nombre": "Felipe Bocco",
+      "puesto": "Tercera línea"
+     },
+     {
+      "numero": 7,
+      "nombre": "Matias Soria",
+      "puesto": "Tercera línea"
+     },
+     {
+      "numero": 8,
+      "nombre": "Ignacio Romero",
+      "puesto": "Tercera línea"
+     },
+     {
+      "numero": 9,
+      "nombre": "Santiago Villalba Kohn",
+      "puesto": "Medio scrum"
+     },
+     {
+      "numero": 10,
+      "nombre": "Augusto Guillamondegui",
+      "puesto": "Apertura"
+     },
+     {
+      "numero": 11,
+      "nombre": "Martín Vaccarello",
+      "puesto": "Wing"
+     },
+     {
+      "numero": 12,
+      "nombre": "Felipe Cañas",
+      "puesto": "Centro"
+     },
+     {
+      "numero": 13,
+      "nombre": "Bautista Rotondo Lopez",
+      "puesto": "Centro"
+     },
+     {
+      "numero": 14,
+      "nombre": "Ignacio Barrea",
+      "puesto": "Wing"
+     },
+     {
+      "numero": 15,
+      "nombre": "Felipe Acuña",
+      "puesto": "Fullback"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Facundo Almeida"
+     },
+     {
+      "numero": 17,
+      "nombre": "German Ezequiel Koth"
+     },
+     {
+      "numero": 18,
+      "nombre": "Thiago Armando"
+     },
+     {
+      "numero": 19,
+      "nombre": "Juan Segundo Villa"
+     },
+     {
+      "numero": 20,
+      "nombre": "Martín López Mirabella"
+     },
+     {
+      "numero": 21,
+      "nombre": "Simon Courtis"
+     },
+     {
+      "numero": 22,
+      "nombre": "Bautista Acuña"
+     },
+     {
+      "numero": 23,
+      "nombre": "Jose Ignacio Arias"
+     }
+    ]
+   }
+  },
+  {
+   "id": "9e1fa344-841d-4f51-b2f2-3f1e5c73830a",
+   "rotulo": "La Tablada vs Jockey Club Córdoba · M15 A final · tarjeta 327347",
+   "local": {
+    "nombre": "Club La Tablada M15 \"A\"",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Juan Martin Radi Cafaro",
+      "puesto": "Pilar"
+     },
+     {
+      "numero": 2,
+      "nombre": "Bruno Stenfer",
+      "puesto": "Hooker"
+     },
+     {
+      "numero": 3,
+      "nombre": "Nicolas Lozada Pagani",
+      "puesto": "Pilar"
+     },
+     {
+      "numero": 4,
+      "nombre": "Santiago Montironi",
+      "puesto": "Segunda línea"
+     },
+     {
+      "numero": 5,
+      "nombre": "Nicolas Arri",
+      "puesto": "Segunda línea"
+     },
+     {
+      "numero": 6,
+      "nombre": "Juan Pedro Masjoan Amestegui",
+      "puesto": "Tercera línea"
+     },
+     {
+      "numero": 7,
+      "nombre": "Facundo Bulacio Lascano",
+      "puesto": "Tercera línea"
+     },
+     {
+      "numero": 8,
+      "nombre": "Baltazar Ignacio Campana",
+      "puesto": "Tercera línea"
+     },
+     {
+      "numero": 9,
+      "nombre": "Agustin Scaroni Cornejo",
+      "puesto": "Medio scrum"
+     },
+     {
+      "numero": 10,
+      "nombre": "Felipe Velasco",
+      "puesto": "Apertura"
+     },
+     {
+      "numero": 11,
+      "nombre": "Valentin Auad",
+      "puesto": "Wing"
+     },
+     {
+      "numero": 12,
+      "nombre": "Tomas Hermida",
+      "puesto": "Centro"
+     },
+     {
+      "numero": 13,
+      "nombre": "Benjamin Castillo Lancioni",
+      "puesto": "Centro"
+     },
+     {
+      "numero": 14,
+      "nombre": "Pedro Jaime",
+      "puesto": "Wing"
+     },
+     {
+      "numero": 15,
+      "nombre": "Pedro Caeiro Rolotti",
+      "puesto": "Fullback"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Valentino Cura Tey"
+     },
+     {
+      "numero": 17,
+      "nombre": "Clemente Pignata"
+     },
+     {
+      "numero": 18,
+      "nombre": "Lisandro Imanol Parellada Ivanoff"
+     },
+     {
+      "numero": 19,
+      "nombre": "Valentino Milani"
+     },
+     {
+      "numero": 20,
+      "nombre": "Francisco Picone"
+     },
+     {
+      "numero": 21,
+      "nombre": "Juan Bautista Araya Balbi"
+     },
+     {
+      "numero": 22,
+      "nombre": "Franco Becher"
+     },
+     {
+      "numero": 23,
+      "nombre": "Alejandro Damonte"
+     }
+    ]
+   },
+   "visitante": {
+    "nombre": "Jockey Club Córdoba M15 \"A\"",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Felipe Juarez Bustos",
+      "puesto": "Pilar"
+     },
+     {
+      "numero": 2,
+      "nombre": "Santiago Ferreyra",
+      "puesto": "Hooker"
+     },
+     {
+      "numero": 3,
+      "nombre": "Ignacio Esteban Rosales",
+      "puesto": "Pilar"
+     },
+     {
+      "numero": 4,
+      "nombre": "Agustin Yapur",
+      "puesto": "Segunda línea"
+     },
+     {
+      "numero": 5,
+      "nombre": "Augusto Cesar Borrini",
+      "puesto": "Segunda línea"
+     },
+     {
+      "numero": 6,
+      "nombre": "Leandro Emiliano Rosales",
+      "puesto": "Tercera línea"
+     },
+     {
+      "numero": 7,
+      "nombre": "Jose Ignacio Campora Arrambide",
+      "puesto": "Tercera línea"
+     },
+     {
+      "numero": 8,
+      "nombre": "Justo Arrambide",
+      "puesto": "Tercera línea"
+     },
+     {
+      "numero": 9,
+      "nombre": "Jerónimo Freytes Echenique",
+      "puesto": "Medio scrum"
+     },
+     {
+      "numero": 10,
+      "nombre": "Juan Ignacio Gimenez",
+      "puesto": "Apertura"
+     },
+     {
+      "numero": 11,
+      "nombre": "Santino Nicolás Genesio Molinar",
+      "puesto": "Wing"
+     },
+     {
+      "numero": 12,
+      "nombre": "Pedro Albiero",
+      "puesto": "Centro"
+     },
+     {
+      "numero": 13,
+      "nombre": "Lucio Sparaino",
+      "puesto": "Centro"
+     },
+     {
+      "numero": 14,
+      "nombre": "Cristóbal Caminos",
+      "puesto": "Wing"
+     },
+     {
+      "numero": 15,
+      "nombre": "Felipe Candisano Ferreyra",
+      "puesto": "Fullback"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Felipe Santacroce"
+     },
+     {
+      "numero": 17,
+      "nombre": "Luca Valentin Regueiro Lascano"
+     },
+     {
+      "numero": 18,
+      "nombre": "Tomás Bazan Soaje"
+     },
+     {
+      "numero": 19,
+      "nombre": "Benjamín Genaro Ganigian"
+     },
+     {
+      "numero": 20,
+      "nombre": "Felipe Poderti"
+     },
+     {
+      "numero": 21,
+      "nombre": "Salvador Ceballos"
+     },
+     {
+      "numero": 22,
+      "nombre": "Matias Rubi Arcurio"
+     },
+     {
+      "numero": 23,
+      "nombre": "Isidro García Faure"
+     }
+    ]
+   }
+  },
+  {
+   "id": "896822c2-4628-40f7-ac02-053a0f0a1c5c",
+   "rotulo": "Tala R.C. vs La Tablada · M16 A final · tarjeta 327345",
+   "local": {
+    "nombre": "Tala Rugby Club M16 \"A\"",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Mateo Ambrosio",
+      "puesto": "Pilar"
+     },
+     {
+      "numero": 2,
+      "nombre": "Manuel Ohanian",
+      "puesto": "Hooker"
+     },
+     {
+      "numero": 3,
+      "nombre": "Genaro Neder Di Salvo",
+      "puesto": "Pilar"
+     },
+     {
+      "numero": 4,
+      "nombre": "Pedro José Martino",
+      "puesto": "Segunda línea"
+     },
+     {
+      "numero": 5,
+      "nombre": "Lautaro Gronda",
+      "puesto": "Segunda línea"
+     },
+     {
+      "numero": 6,
+      "nombre": "Pedro Ceconello Piatti",
+      "puesto": "Tercera línea"
+     },
+     {
+      "numero": 7,
+      "nombre": "Luis Francisco Coppari Simian",
+      "puesto": "Tercera línea"
+     },
+     {
+      "numero": 8,
+      "nombre": "Tiago Cuervo",
+      "puesto": "Tercera línea"
+     },
+     {
+      "numero": 9,
+      "nombre": "Facundo Amaya Torletti",
+      "puesto": "Medio scrum"
+     },
+     {
+      "numero": 10,
+      "nombre": "Luca Villarejo Garcia",
+      "puesto": "Apertura"
+     },
+     {
+      "numero": 11,
+      "nombre": "Felipe Gomez Revol",
+      "puesto": "Wing"
+     },
+     {
+      "numero": 12,
+      "nombre": "Valentino Rafael Marquez Cañon",
+      "puesto": "Centro"
+     },
+     {
+      "numero": 13,
+      "nombre": "Santino Oliva Saposnix",
+      "puesto": "Centro"
+     },
+     {
+      "numero": 14,
+      "nombre": "Mateo Aguilar",
+      "puesto": "Wing"
+     },
+     {
+      "numero": 15,
+      "nombre": "Manuel Villarejo Garcia",
+      "puesto": "Fullback"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Tomás Alfredo Becher"
+     },
+     {
+      "numero": 17,
+      "nombre": "Lucas Estanislao Belmaña"
+     },
+     {
+      "numero": 18,
+      "nombre": "Geronimo Senn"
+     },
+     {
+      "numero": 19,
+      "nombre": "Francisco Altamirano"
+     },
+     {
+      "numero": 20,
+      "nombre": "Genaro Uribe Echevarria"
+     },
+     {
+      "numero": 21,
+      "nombre": "Santino Giannico"
+     },
+     {
+      "numero": 22,
+      "nombre": "Manuel Sugasti"
+     },
+     {
+      "numero": 23,
+      "nombre": "Ciro Sacavino"
+     }
+    ]
+   },
+   "visitante": {
+    "nombre": "Club La Tablada M16 \"A\"",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Angel Francisco Castillo",
+      "puesto": "Pilar"
+     },
+     {
+      "numero": 2,
+      "nombre": "Federico Petrini",
+      "puesto": "Hooker"
+     },
+     {
+      "numero": 3,
+      "nombre": "Pedro Miguel Gianoglio",
+      "puesto": "Pilar"
+     },
+     {
+      "numero": 4,
+      "nombre": "Santiago Nahuel Severine Luna",
+      "puesto": "Segunda línea"
+     },
+     {
+      "numero": 5,
+      "nombre": "Martín Almada Ordoñez",
+      "puesto": "Segunda línea"
+     },
+     {
+      "numero": 6,
+      "nombre": "Mateo Lozada Pagani",
+      "puesto": "Tercera línea"
+     },
+     {
+      "numero": 7,
+      "nombre": "Santiago Vallania",
+      "puesto": "Tercera línea"
+     },
+     {
+      "numero": 8,
+      "nombre": "Ciro Faya",
+      "puesto": "Tercera línea"
+     },
+     {
+      "numero": 9,
+      "nombre": "Tomás Furst",
+      "puesto": "Medio scrum"
+     },
+     {
+      "numero": 10,
+      "nombre": "Maximo Robles Lepre",
+      "puesto": "Apertura"
+     },
+     {
+      "numero": 11,
+      "nombre": "Juan Cruz Lavezzo",
+      "puesto": "Wing"
+     },
+     {
+      "numero": 12,
+      "nombre": "Conrado Cabello",
+      "puesto": "Centro"
+     },
+     {
+      "numero": 13,
+      "nombre": "Augusto Paviolo Becerra",
+      "puesto": "Centro"
+     },
+     {
+      "numero": 14,
+      "nombre": "Ignacio Franceschini",
+      "puesto": "Wing"
+     },
+     {
+      "numero": 15,
+      "nombre": "Ulises Carmona Burton",
+      "puesto": "Fullback"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Francesco Della Giustina"
+     },
+     {
+      "numero": 17,
+      "nombre": "Santiago Rolleri Piccinni"
+     },
+     {
+      "numero": 18,
+      "nombre": "Constantino Belluomini"
+     },
+     {
+      "numero": 19,
+      "nombre": "Fausto Barozzi"
+     },
+     {
+      "numero": 20,
+      "nombre": "Santiago Gueydan"
+     },
+     {
+      "numero": 21,
+      "nombre": "Benjamin Bobadilla"
+     },
+     {
+      "numero": 22,
+      "nombre": "Pedro Becerra Pautasso"
+     },
+     {
+      "numero": 23,
+      "nombre": "Conrado Garcia Bas"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b1d3f832-70e6-4ac4-9f76-516358df35b7",
+   "rotulo": "Tala R.C. vs La Tablada · M17 A semifinal · tarjeta 327337",
+   "local": {
+    "nombre": "Tala Rugby Club M17 \"A\"",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Donato Masini Tagliavini",
+      "puesto": "Pilar"
+     },
+     {
+      "numero": 2,
+      "nombre": "Segundo De La Iglesia",
+      "puesto": "Hooker"
+     },
+     {
+      "numero": 3,
+      "nombre": "Nicolas Martinez Mojana",
+      "puesto": "Pilar"
+     },
+     {
+      "numero": 4,
+      "nombre": "Juan Ignacio Vélez Funes",
+      "puesto": "Segunda línea"
+     },
+     {
+      "numero": 5,
+      "nombre": "Joaquin Trettel",
+      "puesto": "Segunda línea"
+     },
+     {
+      "numero": 6,
+      "nombre": "Tomas Pozzi",
+      "puesto": "Tercera línea"
+     },
+     {
+      "numero": 7,
+      "nombre": "Mateo Benjamin Carmona Demoli",
+      "puesto": "Tercera línea"
+     },
+     {
+      "numero": 8,
+      "nombre": "Gaspar Ohanian",
+      "puesto": "Tercera línea"
+     },
+     {
+      "numero": 9,
+      "nombre": "Santiago Juan Cerviño",
+      "puesto": "Medio scrum"
+     },
+     {
+      "numero": 10,
+      "nombre": "Maximo De Vertiz",
+      "puesto": "Apertura"
+     },
+     {
+      "numero": 11,
+      "nombre": "Tiziano Depaoli",
+      "puesto": "Wing"
+     },
+     {
+      "numero": 12,
+      "nombre": "Nicolas Parizek Royon",
+      "puesto": "Centro"
+     },
+     {
+      "numero": 13,
+      "nombre": "Juan Pedro Porrini",
+      "puesto": "Centro"
+     },
+     {
+      "numero": 14,
+      "nombre": "Salvador Soirefman Miro",
+      "puesto": "Wing"
+     },
+     {
+      "numero": 15,
+      "nombre": "Valentino Giordano",
+      "puesto": "Fullback"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Maximo Nicolas Perez"
+     },
+     {
+      "numero": 17,
+      "nombre": "Franchesco Agustin Sandes Guerra"
+     },
+     {
+      "numero": 18,
+      "nombre": "Joaquin Rodriguez Madini"
+     },
+     {
+      "numero": 19,
+      "nombre": "Manuel Olmos"
+     },
+     {
+      "numero": 20,
+      "nombre": "Felipe Ambrosio"
+     },
+     {
+      "numero": 21,
+      "nombre": "Sebastian Schmitt"
+     },
+     {
+      "numero": 22,
+      "nombre": "Santino Rossetto Burger"
+     }
+    ]
+   },
+   "visitante": {
+    "nombre": "Club La Tablada M17 \"A\"",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Bautista Eliseo Cordon",
+      "puesto": "Pilar"
+     },
+     {
+      "numero": 2,
+      "nombre": "Valentin Pedeo Ali",
+      "puesto": "Hooker"
+     },
+     {
+      "numero": 3,
+      "nombre": "Santino Vittorio Corzo Poroli",
+      "puesto": "Pilar"
+     },
+     {
+      "numero": 4,
+      "nombre": "Juan Pedro Ovando",
+      "puesto": "Segunda línea"
+     },
+     {
+      "numero": 5,
+      "nombre": "Ignacio Noviski",
+      "puesto": "Segunda línea"
+     },
+     {
+      "numero": 6,
+      "nombre": "Ignacio Fernández Llop",
+      "puesto": "Tercera línea"
+     },
+     {
+      "numero": 7,
+      "nombre": "Antonio Manrique",
+      "puesto": "Tercera línea"
+     },
+     {
+      "numero": 8,
+      "nombre": "Lucas Alvarez Maina",
+      "puesto": "Tercera línea"
+     },
+     {
+      "numero": 9,
+      "nombre": "Benjamin Gonzo Martin",
+      "puesto": "Medio scrum"
+     },
+     {
+      "numero": 10,
+      "nombre": "Grechanik Pedro",
+      "puesto": "Apertura"
+     },
+     {
+      "numero": 11,
+      "nombre": "Juan Ignacio Alsina",
+      "puesto": "Wing"
+     },
+     {
+      "numero": 12,
+      "nombre": "Ignacio Rodriguez",
+      "puesto": "Centro"
+     },
+     {
+      "numero": 13,
+      "nombre": "Juan Rossi",
+      "puesto": "Centro"
+     },
+     {
+      "numero": 14,
+      "nombre": "Felipe Gonzalez Antruejo",
+      "puesto": "Wing"
+     },
+     {
+      "numero": 15,
+      "nombre": "Teo Pelaez",
+      "puesto": "Fullback"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Jeronimo Bertilotti Costa"
+     },
+     {
+      "numero": 17,
+      "nombre": "Nicolas Agustin Taborda"
+     },
+     {
+      "numero": 18,
+      "nombre": "Geronimo Albado"
+     },
+     {
+      "numero": 19,
+      "nombre": "Santiago Sánchez Pulgar"
+     },
+     {
+      "numero": 20,
+      "nombre": "Cruz Romero"
+     },
+     {
+      "numero": 21,
+      "nombre": "Ignacio Tarantino"
+     },
+     {
+      "numero": 22,
+      "nombre": "Fermin Tejerina Coloma"
+     },
+     {
+      "numero": 23,
+      "nombre": "Luis Valentin Zavala Asaad"
+     }
+    ]
+   }
+  }
+ ]
+}

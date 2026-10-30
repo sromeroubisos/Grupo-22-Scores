@@ -1,0 +1,1374 @@
+{
+ "apertura": [
+  {
+   "id": "047a33cc-8339-42ef-81f9-2d82556a3f8c",
+   "date_time": "2026-03-22T17:30:00+00:00",
+   "home_club_id": "aranduroga-r-c-m19-b",
+   "away_club_id": "sixty-r-c-m19",
+   "score": {
+    "away": 26,
+    "home": 14,
+    "manualOverride": {
+     "away": 26,
+     "home": 14,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "6502f991-33d5-4c2c-b9cf-201e471257da",
+   "date_time": "2026-03-22T19:00:00+00:00",
+   "home_club_id": "aranduroga-r-c-m19-a",
+   "away_club_id": "curne-m19",
+   "score": {
+    "away": 10,
+    "home": 20,
+    "manualOverride": {
+     "away": 10,
+     "home": 20,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "68d1098f-0f9f-4b9d-8a02-dad361a35895",
+   "date_time": "2026-03-21T16:30:00+00:00",
+   "home_club_id": "taraguy-r-c-m19-a",
+   "away_club_id": "taraguy-r-c-m19-b",
+   "score": {
+    "away": 26,
+    "home": 22,
+    "manualOverride": {
+     "away": 26,
+     "home": 22,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "1e143247-4e13-4d2b-83d3-33d84ce04232",
+   "date_time": "2026-03-21T17:30:00+00:00",
+   "home_club_id": "san-patricio-m19",
+   "away_club_id": "regatas-de-resistencia-m19",
+   "score": {
+    "away": 46,
+    "home": 5,
+    "manualOverride": {
+     "away": 46,
+     "home": 5,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "f5e8dd62-31d5-4f09-8244-c9561049f0f3",
+   "date_time": "2026-03-28T17:30:00+00:00",
+   "home_club_id": "taraguy-r-c-m19-b",
+   "away_club_id": "aranduroga-r-c-m19-b",
+   "score": {
+    "away": 29,
+    "home": 24,
+    "manualOverride": {
+     "away": 29,
+     "home": 24,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "bfb7c76a-4135-485e-b79c-1a310e3020f4",
+   "date_time": "2026-03-28T17:30:00+00:00",
+   "home_club_id": "san-patricio-m19",
+   "away_club_id": "sixty-r-c-m19",
+   "score": {
+    "away": 35,
+    "home": 24,
+    "manualOverride": {
+     "away": 35,
+     "home": 24,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "6ebc74df-016c-444b-b423-8a6085e27bb6",
+   "date_time": "2026-03-28T19:00:00+00:00",
+   "home_club_id": "curne-m19",
+   "away_club_id": "regatas-de-resistencia-m19",
+   "score": {
+    "away": 53,
+    "home": 17,
+    "manualOverride": {
+     "away": 53,
+     "home": 17,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "5b35b964-256f-490a-be2f-d3c1536df0d8",
+   "date_time": "2026-03-28T19:00:00+00:00",
+   "home_club_id": "taraguy-r-c-m19-a",
+   "away_club_id": "aranduroga-r-c-m19-a",
+   "score": {
+    "away": 8,
+    "home": 26,
+    "manualOverride": {
+     "away": 8,
+     "home": 26,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "47b8b45b-5570-41b6-872c-88c34bf6ace7",
+   "date_time": "2026-04-11T17:00:00+00:00",
+   "home_club_id": "regatas-de-resistencia-m19",
+   "away_club_id": "taraguy-r-c-m19-b",
+   "score": {
+    "away": 10,
+    "home": 45,
+    "manualOverride": {
+     "away": 10,
+     "home": 45,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "34b2d550-cd29-47d4-bfb3-21c34bdf7f4d",
+   "date_time": "2026-04-11T17:00:00+00:00",
+   "home_club_id": "aranduroga-r-c-m19-a",
+   "away_club_id": "san-patricio-m19",
+   "score": {
+    "away": 7,
+    "home": 43,
+    "manualOverride": {
+     "away": 7,
+     "home": 43,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "63bc6f9a-8ae4-4152-8a56-a2b7eb6b5397",
+   "date_time": "2026-04-11T17:00:00+00:00",
+   "home_club_id": "sixty-r-c-m19",
+   "away_club_id": "curne-m19",
+   "score": {
+    "away": 7,
+    "home": 17,
+    "manualOverride": {
+     "away": 7,
+     "home": 17,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "f168e74d-ba5f-4470-8078-174a28a5839a",
+   "date_time": "2026-04-25T17:00:00+00:00",
+   "home_club_id": "aranduroga-r-c-m19-b",
+   "away_club_id": "taraguy-r-c-m19-a",
+   "score": {
+    "away": 24,
+    "home": 0,
+    "manualOverride": {
+     "away": 24,
+     "home": 0,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "841f0912-6659-4f4a-8761-a94b6ae43412",
+   "date_time": "2026-04-18T17:00:00+00:00",
+   "home_club_id": "san-patricio-m19",
+   "away_club_id": "aranduroga-r-c-m19-b",
+   "score": {
+    "away": 38,
+    "home": 24,
+    "manualOverride": {
+     "away": 38,
+     "home": 24,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "29d2f03a-d892-4a02-bc57-3bc514bbba27",
+   "date_time": "2026-04-18T19:00:00+00:00",
+   "home_club_id": "taraguy-r-c-m19-b",
+   "away_club_id": "curne-m19",
+   "score": {
+    "away": 19,
+    "home": 12,
+    "manualOverride": {
+     "away": 19,
+     "home": 12,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "9b3a3019-40c1-44fb-9288-46d7b3d8e737",
+   "date_time": "2026-04-18T17:00:00+00:00",
+   "home_club_id": "aranduroga-r-c-m19-a",
+   "away_club_id": "regatas-de-resistencia-m19",
+   "score": {
+    "away": 63,
+    "home": 21,
+    "manualOverride": {
+     "away": 63,
+     "home": 21,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "47fddb58-6cf5-4e59-be98-7dd784b15df1",
+   "date_time": "2026-04-18T17:00:00+00:00",
+   "home_club_id": "sixty-r-c-m19",
+   "away_club_id": "taraguy-r-c-m19-a",
+   "score": {
+    "away": 67,
+    "home": 12,
+    "manualOverride": {
+     "away": 67,
+     "home": 12,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "ab1853a5-b53a-48db-8a10-27bd1f43c4fb",
+   "date_time": "2026-05-03T17:00:00+00:00",
+   "home_club_id": "regatas-de-resistencia-m19",
+   "away_club_id": "sixty-r-c-m19",
+   "score": {
+    "away": 3,
+    "home": 54,
+    "manualOverride": {
+     "away": 3,
+     "home": 54,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "f6d97af0-f083-4e85-87ee-b5ad5795d7b5",
+   "date_time": "2026-05-02T17:30:00+00:00",
+   "home_club_id": "curne-m19",
+   "away_club_id": "aranduroga-r-c-m19-b",
+   "score": {
+    "away": 26,
+    "home": 38,
+    "manualOverride": {
+     "away": 26,
+     "home": 38,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "b64c4656-f955-48b4-846f-b7518dbba88b",
+   "date_time": "2026-05-02T17:00:00+00:00",
+   "home_club_id": "taraguy-r-c-m19-a",
+   "away_club_id": "san-patricio-m19",
+   "score": {
+    "away": 19,
+    "home": 59,
+    "manualOverride": {
+     "away": 19,
+     "home": 59,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "7b2e7a8a-112c-4cc1-a172-93f75c2cd5ea",
+   "date_time": "2026-05-01T16:30:00+00:00",
+   "home_club_id": "aranduroga-r-c-m19-a",
+   "away_club_id": "taraguy-r-c-m19-b",
+   "score": {
+    "away": 33,
+    "home": 50,
+    "manualOverride": {
+     "away": 33,
+     "home": 50,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "2a35a7e2-c1ee-4134-b8f7-3452173637d7",
+   "date_time": "2026-05-09T17:30:00+00:00",
+   "home_club_id": "aranduroga-r-c-m19-b",
+   "away_club_id": "regatas-de-resistencia-m19",
+   "score": {
+    "away": 21,
+    "home": 0,
+    "manualOverride": {
+     "away": 21,
+     "home": 0,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "254badc5-3743-4905-ab01-1ec4906f2c2c",
+   "date_time": "2026-05-09T14:00:00+00:00",
+   "home_club_id": "taraguy-r-c-m19-b",
+   "away_club_id": "san-patricio-m19",
+   "score": {
+    "away": 21,
+    "home": 0,
+    "manualOverride": {
+     "away": 21,
+     "home": 0,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "61105420-9371-4e32-887a-7707c619218c",
+   "date_time": "2026-05-09T17:00:00+00:00",
+   "home_club_id": "sixty-r-c-m19",
+   "away_club_id": "aranduroga-r-c-m19-a",
+   "score": {
+    "away": 38,
+    "home": 38,
+    "manualOverride": {
+     "away": 38,
+     "home": 38,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "45cdf85d-55b5-4257-a6f8-8f15691884ea",
+   "date_time": "2026-05-09T17:00:00+00:00",
+   "home_club_id": "taraguy-r-c-m19-a",
+   "away_club_id": "curne-m19",
+   "score": {
+    "away": 10,
+    "home": 19,
+    "manualOverride": {
+     "away": 10,
+     "home": 19,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "8a78f8ac-18af-43f0-99e4-b820ed19a5ad",
+   "date_time": "2026-05-16T17:00:00+00:00",
+   "home_club_id": "aranduroga-r-c-m19-b",
+   "away_club_id": "aranduroga-r-c-m19-a",
+   "score": {
+    "away": 21,
+    "home": 0,
+    "manualOverride": {
+     "away": 21,
+     "home": 0,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "163da9ed-acf2-4cd3-a77e-6e34395c8a56",
+   "date_time": "2026-05-16T15:30:00+00:00",
+   "home_club_id": "sixty-r-c-m19",
+   "away_club_id": "taraguy-r-c-m19-b",
+   "score": {
+    "away": 14,
+    "home": 32,
+    "manualOverride": {
+     "away": 14,
+     "home": 32,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "7a539e95-cc5c-417d-b1d4-75db6971d777",
+   "date_time": "2026-05-16T17:00:00+00:00",
+   "home_club_id": "regatas-de-resistencia-m19",
+   "away_club_id": "taraguy-r-c-m19-a",
+   "score": {
+    "away": 38,
+    "home": 41,
+    "manualOverride": {
+     "away": 38,
+     "home": 41,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "056c4b3e-04c7-4785-8ca4-6f56ec09d9da",
+   "date_time": "2026-05-16T17:00:00+00:00",
+   "home_club_id": "curne-m19",
+   "away_club_id": "san-patricio-m19",
+   "score": {
+    "away": 7,
+    "home": 43,
+    "manualOverride": {
+     "away": 7,
+     "home": 43,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  }
+ ],
+ "oficial": [
+  {
+   "id": "9043ae74-fc93-4a51-83ac-3c07765b26ae",
+   "date_time": "2026-10-17T17:00:00+00:00",
+   "home_club_id": "taraguy-r-c-m19-a",
+   "away_club_id": "curne-m19",
+   "score": {
+    "away": 21,
+    "home": 0,
+    "manualOverride": {
+     "away": 21,
+     "home": 0,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "d88e9bd7-d112-41da-bdad-0ddd570385c3",
+   "date_time": "2026-10-17T17:00:00+00:00",
+   "home_club_id": "taraguy-r-c-m19-b",
+   "away_club_id": "san-patricio-m19",
+   "score": {
+    "away": 24,
+    "home": 57,
+    "manualOverride": {
+     "away": 24,
+     "home": 57,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "6e5908bd-6398-4717-aa85-9c8afed7d42d",
+   "date_time": "2026-10-17T17:00:00+00:00",
+   "home_club_id": "aranduroga-r-c-m19-a",
+   "away_club_id": "aranduroga-r-c-m19-b",
+   "score": {
+    "away": 50,
+    "home": 12,
+    "manualOverride": {
+     "away": 50,
+     "home": 12,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "577ff41c-13df-4b0a-bcfb-d8e5b17b0207",
+   "date_time": "2026-10-17T17:00:00+00:00",
+   "home_club_id": "sixty-r-c-m19",
+   "away_club_id": "regatas-de-resistencia-m19",
+   "score": {
+    "away": 57,
+    "home": 15,
+    "manualOverride": {
+     "away": 57,
+     "home": 15,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "a4f73909-0501-469f-8bdf-5eb0e3b5f4ae",
+   "date_time": "2026-10-22T00:00:00+00:00",
+   "home_club_id": "taraguy-r-c-m19-b",
+   "away_club_id": "aranduroga-r-c-m19-b",
+   "score": {
+    "away": 12,
+    "home": 24,
+    "manualOverride": {
+     "away": 12,
+     "home": 24,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "9df0fdd4-ff5c-4fb7-bc69-082cae3e7ff7",
+   "date_time": "2026-10-11T17:00:00+00:00",
+   "home_club_id": "regatas-de-resistencia-m19",
+   "away_club_id": "aranduroga-r-c-m19-a",
+   "score": {
+    "away": 10,
+    "home": 24,
+    "manualOverride": {
+     "away": 10,
+     "home": 24,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "8a7a7fea-6e2f-426d-ad54-5fa9c42b53e4",
+   "date_time": "2026-10-10T17:00:00+00:00",
+   "home_club_id": "sixty-r-c-m19",
+   "away_club_id": "curne-m19",
+   "score": {
+    "away": 20,
+    "home": 12,
+    "manualOverride": {
+     "away": 20,
+     "home": 12,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "db1619ea-b38b-4394-b0e4-d6a043e2c061",
+   "date_time": "2026-10-10T17:00:00+00:00",
+   "home_club_id": "san-patricio-m19",
+   "away_club_id": "taraguy-r-c-m19-a",
+   "score": {
+    "away": 29,
+    "home": 43,
+    "manualOverride": {
+     "away": 29,
+     "home": 43,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "76a20938-95d6-49b1-a7bc-55fc929315af",
+   "date_time": "2026-10-03T17:00:00+00:00",
+   "home_club_id": "aranduroga-r-c-m19-b",
+   "away_club_id": "san-patricio-m19",
+   "score": {
+    "away": 0,
+    "home": 58,
+    "manualOverride": {
+     "away": 0,
+     "home": 58,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "15d6d860-b8de-4055-9171-88b07b6b2d74",
+   "date_time": "2026-10-03T17:00:00+00:00",
+   "home_club_id": "curne-m19",
+   "away_club_id": "regatas-de-resistencia-m19",
+   "score": {
+    "away": 49,
+    "home": 5,
+    "manualOverride": {
+     "away": 49,
+     "home": 5,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "26c93114-3145-4f23-9807-ec9a443648a4",
+   "date_time": "2026-10-03T19:00:00+00:00",
+   "home_club_id": "aranduroga-r-c-m19-a",
+   "away_club_id": "sixty-r-c-m19",
+   "score": {
+    "away": 38,
+    "home": 22,
+    "manualOverride": {
+     "away": 38,
+     "home": 22,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "fd3fef21-40b6-4f49-bb71-4faf242409c9",
+   "date_time": "2026-10-03T19:00:00+00:00",
+   "home_club_id": "taraguy-r-c-m19-a",
+   "away_club_id": "taraguy-r-c-m19-b",
+   "score": {
+    "away": 31,
+    "home": 12,
+    "manualOverride": {
+     "away": 31,
+     "home": 12,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "f0a1cc0e-dd41-4bc0-a79e-efbc5c35dd59",
+   "date_time": "2026-09-24T00:00:00+00:00",
+   "home_club_id": "taraguy-r-c-m19-a",
+   "away_club_id": "aranduroga-r-c-m19-b",
+   "score": {
+    "away": 15,
+    "home": 29,
+    "manualOverride": {
+     "away": 15,
+     "home": 29,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "08177733-83c9-4a63-ba16-9ee014d16139",
+   "date_time": "2026-09-19T19:00:00+00:00",
+   "home_club_id": "taraguy-r-c-m19-b",
+   "away_club_id": "sixty-r-c-m19",
+   "score": {
+    "away": 10,
+    "home": 47,
+    "manualOverride": {
+     "away": 10,
+     "home": 47,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "abd4435a-b73e-4d49-9d51-6fbd753bda2c",
+   "date_time": "2026-09-19T17:00:00+00:00",
+   "home_club_id": "aranduroga-r-c-m19-a",
+   "away_club_id": "curne-m19",
+   "score": {
+    "away": 12,
+    "home": 26,
+    "manualOverride": {
+     "away": 12,
+     "home": 26,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "8814abca-cbf0-4c21-814a-3499dfaf364b",
+   "date_time": "2026-09-19T17:00:00+00:00",
+   "home_club_id": "regatas-de-resistencia-m19",
+   "away_club_id": "san-patricio-m19",
+   "score": {
+    "away": 7,
+    "home": 41,
+    "manualOverride": {
+     "away": 7,
+     "home": 41,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "5fcb1ca1-4dd6-4412-9db4-ca11b3707ed7",
+   "date_time": "2026-09-06T19:00:00+00:00",
+   "home_club_id": "taraguy-r-c-m19-b",
+   "away_club_id": "regatas-de-resistencia-m19",
+   "score": {
+    "away": 36,
+    "home": 14,
+    "manualOverride": {
+     "away": 36,
+     "home": 14,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "516edb2d-caac-45bf-b137-9f7a38a4c85c",
+   "date_time": "2026-09-05T17:00:00+00:00",
+   "home_club_id": "curne-m19",
+   "away_club_id": "san-patricio-m19",
+   "score": {
+    "away": 24,
+    "home": 24,
+    "manualOverride": {
+     "away": 24,
+     "home": 24,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "3c7464ad-a25e-47b9-841c-4c1828cd3196",
+   "date_time": "2026-09-05T17:00:00+00:00",
+   "home_club_id": "aranduroga-r-c-m19-a",
+   "away_club_id": "taraguy-r-c-m19-a",
+   "score": {
+    "away": 29,
+    "home": 5,
+    "manualOverride": {
+     "away": 29,
+     "home": 5,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "00a028d0-05c5-4e58-981e-d8236fdbd9f3",
+   "date_time": "2026-09-05T00:30:00+00:00",
+   "home_club_id": "sixty-r-c-m19",
+   "away_club_id": "aranduroga-r-c-m19-b",
+   "score": {
+    "away": 22,
+    "home": 7,
+    "manualOverride": {
+     "away": 22,
+     "home": 7,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "e9593443-fd01-4faf-adc3-a889a805470d",
+   "date_time": "2026-10-08T00:00:00+00:00",
+   "home_club_id": "san-patricio-m19",
+   "away_club_id": "aranduroga-r-c-m19-a",
+   "score": {
+    "away": 28,
+    "home": 14,
+    "manualOverride": {
+     "away": 28,
+     "home": 14,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "94b16666-1067-4565-b611-faee655a352d",
+   "date_time": "2026-08-29T16:00:00+00:00",
+   "home_club_id": "curne-m19",
+   "away_club_id": "taraguy-r-c-m19-b",
+   "score": {
+    "away": 12,
+    "home": 28,
+    "manualOverride": {
+     "away": 12,
+     "home": 28,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "3fcabed3-7db8-47c3-aae4-b26734851f29",
+   "date_time": "2026-08-30T19:00:00+00:00",
+   "home_club_id": "taraguy-r-c-m19-a",
+   "away_club_id": "sixty-r-c-m19",
+   "score": {
+    "away": 22,
+    "home": 62,
+    "manualOverride": {
+     "away": 22,
+     "home": 62,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "9fc62840-fbc0-4985-8c0d-d77ef2746ad1",
+   "date_time": "2026-08-29T16:00:00+00:00",
+   "home_club_id": "regatas-de-resistencia-m19",
+   "away_club_id": "aranduroga-r-c-m19-b",
+   "score": {
+    "away": 20,
+    "home": 48,
+    "manualOverride": {
+     "away": 20,
+     "home": 48,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "c2f84da7-2d3b-4004-867b-0d29ceb639ec",
+   "date_time": "2026-08-23T19:00:00+00:00",
+   "home_club_id": "aranduroga-r-c-m19-a",
+   "away_club_id": "taraguy-r-c-m19-b",
+   "score": {
+    "away": 27,
+    "home": 34,
+    "manualOverride": {
+     "away": 27,
+     "home": 34,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "b20a7174-2245-436a-b952-161eb1a8bf95",
+   "date_time": "2026-08-23T15:30:00+00:00",
+   "home_club_id": "aranduroga-r-c-m19-b",
+   "away_club_id": "curne-m19",
+   "score": {
+    "away": 12,
+    "home": 12,
+    "manualOverride": {
+     "away": 12,
+     "home": 12,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "76197f98-63fe-4d1e-ab98-f64a370ca144",
+   "date_time": "2026-08-22T17:30:00+00:00",
+   "home_club_id": "sixty-r-c-m19",
+   "away_club_id": "san-patricio-m19",
+   "score": {
+    "away": 15,
+    "home": 20,
+    "manualOverride": {
+     "away": 15,
+     "home": 20,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "ec5c9f32-2c91-4d3e-b0fe-59bbc92851e5",
+   "date_time": "2026-08-22T17:00:00+00:00",
+   "home_club_id": "regatas-de-resistencia-m19",
+   "away_club_id": "taraguy-r-c-m19-a",
+   "score": {
+    "away": 14,
+    "home": 21,
+    "manualOverride": {
+     "away": 14,
+     "home": 21,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "c010a665-ae9d-4aa3-9cde-b8990dd2b177",
+   "date_time": "2026-08-16T17:00:00+00:00",
+   "home_club_id": "regatas-de-resistencia-m19",
+   "away_club_id": "sixty-r-c-m19",
+   "score": {
+    "away": 19,
+    "home": 52,
+    "manualOverride": {
+     "away": 19,
+     "home": 52,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "683c7de7-9f05-4b48-8fbd-2abd38d2f418",
+   "date_time": "2026-08-15T15:30:00+00:00",
+   "home_club_id": "san-patricio-m19",
+   "away_club_id": "aranduroga-r-c-m19-b",
+   "score": {
+    "away": 33,
+    "home": 31,
+    "manualOverride": {
+     "away": 33,
+     "home": 31,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "badda0b5-7b54-4b93-9937-8b7dbb3dc7ba",
+   "date_time": "2026-08-15T17:00:00+00:00",
+   "home_club_id": "curne-m19",
+   "away_club_id": "taraguy-r-c-m19-a",
+   "score": {
+    "away": 31,
+    "home": 15,
+    "manualOverride": {
+     "away": 31,
+     "home": 15,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "7a1a58cd-9c5e-45d9-898d-a706887470c1",
+   "date_time": "2026-08-08T01:15:00+00:00",
+   "home_club_id": "aranduroga-r-c-m19-b",
+   "away_club_id": "sixty-r-c-m19",
+   "score": {
+    "away": 21,
+    "home": 38,
+    "manualOverride": {
+     "away": 21,
+     "home": 38,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "7610aebd-ae88-4e08-99f5-080e3b021ce1",
+   "date_time": "2026-08-08T14:30:00+00:00",
+   "home_club_id": "regatas-de-resistencia-m19",
+   "away_club_id": "taraguy-r-c-m19-b",
+   "score": {
+    "away": 19,
+    "home": 38,
+    "manualOverride": {
+     "away": 19,
+     "home": 38,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "498a7313-ef25-4a5f-8d7b-f3932e0a04a8",
+   "date_time": "2026-08-13T00:00:00+00:00",
+   "home_club_id": "taraguy-r-c-m19-a",
+   "away_club_id": "aranduroga-r-c-m19-a",
+   "score": {
+    "away": 14,
+    "home": 33,
+    "manualOverride": {
+     "away": 14,
+     "home": 33,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "767f5344-a385-4258-9750-2020ec4eeb7c",
+   "date_time": "2026-09-26T19:00:00+00:00",
+   "home_club_id": "sixty-r-c-m19",
+   "away_club_id": "taraguy-r-c-m19-a",
+   "score": {
+    "away": 52,
+    "home": 27,
+    "manualOverride": {
+     "away": 52,
+     "home": 27,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "d847d3b0-45c5-4112-b004-3175afb61026",
+   "date_time": "2026-08-01T16:00:00+00:00",
+   "home_club_id": "curne-m19",
+   "away_club_id": "aranduroga-r-c-m19-b",
+   "score": {
+    "away": 20,
+    "home": 14,
+    "manualOverride": {
+     "away": 20,
+     "home": 14,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "948c1278-470d-4b72-bdc6-e5efabdc5e41",
+   "date_time": "2026-07-18T15:30:00+00:00",
+   "home_club_id": "san-patricio-m19",
+   "away_club_id": "taraguy-r-c-m19-b",
+   "score": {
+    "away": 57,
+    "home": 19,
+    "manualOverride": {
+     "away": 57,
+     "home": 19,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "cbda034e-5345-4648-830b-1bf2117d590d",
+   "date_time": "2026-09-12T17:30:00+00:00",
+   "home_club_id": "sixty-r-c-m19",
+   "away_club_id": "taraguy-r-c-m19-b",
+   "score": {
+    "away": 34,
+    "home": 33,
+    "manualOverride": {
+     "away": 34,
+     "home": 33,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "f2e24f86-8184-4701-ba80-ee7e4b803d26",
+   "date_time": "2026-07-11T15:45:00+00:00",
+   "home_club_id": "aranduroga-r-c-m19-a",
+   "away_club_id": "regatas-de-resistencia-m19",
+   "score": {
+    "away": 42,
+    "home": 15,
+    "manualOverride": {
+     "away": 42,
+     "home": 15,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "906c1cca-e2f6-4807-ac48-cb63cbce8461",
+   "date_time": "2026-07-11T15:45:00+00:00",
+   "home_club_id": "taraguy-r-c-m19-a",
+   "away_club_id": "san-patricio-m19",
+   "score": {
+    "away": 19,
+    "home": 43,
+    "manualOverride": {
+     "away": 19,
+     "home": 43,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "701e1501-45fa-4e31-9e03-9be5ef9ca37f",
+   "date_time": "2026-08-27T00:00:00+00:00",
+   "home_club_id": "taraguy-r-c-m19-a",
+   "away_club_id": "taraguy-r-c-m19-b",
+   "score": {
+    "away": 0,
+    "home": 21,
+    "manualOverride": {
+     "away": 0,
+     "home": 21,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "07dc28fc-fa6c-4672-9d53-52c6b1272cae",
+   "date_time": "2026-07-05T17:00:00+00:00",
+   "home_club_id": "regatas-de-resistencia-m19",
+   "away_club_id": "curne-m19",
+   "score": {
+    "away": 17,
+    "home": 38,
+    "manualOverride": {
+     "away": 17,
+     "home": 38,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "829d75eb-f0c3-4b92-9cd1-c738bbcfaf68",
+   "date_time": "2026-07-05T14:30:00+00:00",
+   "home_club_id": "aranduroga-r-c-m19-a",
+   "away_club_id": "aranduroga-r-c-m19-b",
+   "score": {
+    "away": 24,
+    "home": 31,
+    "manualOverride": {
+     "away": 24,
+     "home": 31,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "70eb638d-d7bb-4f04-a3f5-ca5b6fa6d324",
+   "date_time": "2026-07-04T15:30:00+00:00",
+   "home_club_id": "sixty-r-c-m19",
+   "away_club_id": "san-patricio-m19",
+   "score": {
+    "away": 31,
+    "home": 56,
+    "manualOverride": {
+     "away": 31,
+     "home": 56,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "c7f6fae2-90a2-4871-a975-fb64f2cac789",
+   "date_time": "2026-06-20T17:00:00+00:00",
+   "home_club_id": "san-patricio-m19",
+   "away_club_id": "regatas-de-resistencia-m19",
+   "score": {
+    "away": 68,
+    "home": 0,
+    "manualOverride": {
+     "away": 68,
+     "home": 0,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "11d5025a-9e5f-46f0-b57b-d7b93b91745c",
+   "date_time": "2026-06-20T17:00:00+00:00",
+   "home_club_id": "curne-m19",
+   "away_club_id": "aranduroga-r-c-m19-a",
+   "score": {
+    "away": 27,
+    "home": 24,
+    "manualOverride": {
+     "away": 27,
+     "home": 24,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "cf1a51a0-caf7-44de-a584-77cf8ea64800",
+   "date_time": "2026-06-20T00:30:00+00:00",
+   "home_club_id": "aranduroga-r-c-m19-b",
+   "away_club_id": "taraguy-r-c-m19-b",
+   "score": {
+    "away": 38,
+    "home": 19,
+    "manualOverride": {
+     "away": 38,
+     "home": 19,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "51cd3b46-1323-4a9c-b28e-37c916fd133b",
+   "date_time": "2026-06-14T18:30:00+00:00",
+   "home_club_id": "san-patricio-m19",
+   "away_club_id": "curne-m19",
+   "score": {
+    "away": 26,
+    "home": 17,
+    "manualOverride": {
+     "away": 26,
+     "home": 17,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "16862045-dc49-4c48-ae20-bb84d03637a0",
+   "date_time": "2026-06-13T17:00:00+00:00",
+   "home_club_id": "sixty-r-c-m19",
+   "away_club_id": "aranduroga-r-c-m19-a",
+   "score": {
+    "away": 36,
+    "home": 40,
+    "manualOverride": {
+     "away": 36,
+     "home": 40,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "623bb457-9b4a-4627-88a7-4311ee14268f",
+   "date_time": "2026-06-13T17:00:00+00:00",
+   "home_club_id": "taraguy-r-c-m19-a",
+   "away_club_id": "regatas-de-resistencia-m19",
+   "score": {
+    "away": 27,
+    "home": 27,
+    "manualOverride": {
+     "away": 27,
+     "home": 27,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "6d1449d4-28cf-4ed9-a97a-b6fe35a7b487",
+   "date_time": "2026-06-06T17:00:00+00:00",
+   "home_club_id": "aranduroga-r-c-m19-a",
+   "away_club_id": "san-patricio-m19",
+   "score": {
+    "away": 41,
+    "home": 40,
+    "manualOverride": {
+     "away": 41,
+     "home": 40,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "67732a23-aca0-4cd0-95c7-76a3f479b673",
+   "date_time": "2026-06-06T18:30:00+00:00",
+   "home_club_id": "taraguy-r-c-m19-b",
+   "away_club_id": "curne-m19",
+   "score": {
+    "away": 22,
+    "home": 33,
+    "manualOverride": {
+     "away": 22,
+     "home": 33,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "af71d2e1-02b0-46ed-b6fa-8b322f05770a",
+   "date_time": "2026-06-06T15:30:00+00:00",
+   "home_club_id": "aranduroga-r-c-m19-b",
+   "away_club_id": "taraguy-r-c-m19-a",
+   "score": {
+    "away": 49,
+    "home": 29,
+    "manualOverride": {
+     "away": 49,
+     "home": 29,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "7d20443c-5000-4b1a-982a-3781116e9b9d",
+   "date_time": "2026-05-30T18:30:00+00:00",
+   "home_club_id": "taraguy-r-c-m19-b",
+   "away_club_id": "aranduroga-r-c-m19-a",
+   "score": {
+    "away": 22,
+    "home": 33,
+    "manualOverride": {
+     "away": 22,
+     "home": 33,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "7c5b15fb-6c85-45be-97a3-56ded475a9e7",
+   "date_time": "2026-05-30T17:00:00+00:00",
+   "home_club_id": "curne-m19",
+   "away_club_id": "sixty-r-c-m19",
+   "score": {
+    "away": 19,
+    "home": 22,
+    "manualOverride": {
+     "away": 19,
+     "home": 22,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "973ac94a-6f7b-4ecc-a8df-13d851a061a1",
+   "date_time": "2026-06-28T17:00:00+00:00",
+   "home_club_id": "aranduroga-r-c-m19-b",
+   "away_club_id": "regatas-de-resistencia-m19",
+   "score": {
+    "away": 24,
+    "home": 26,
+    "manualOverride": {
+     "away": 24,
+     "home": 26,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final"
+  },
+  {
+   "id": "ee529c5b-4726-4651-a4a3-143eec0862f0",
+   "date_time": "2026-10-31T15:30:00+00:00",
+   "home_club_id": "taraguy-r-c-m19-a",
+   "away_club_id": "taraguy-r-c-m19-b",
+   "score": null,
+   "status": "scheduled"
+  },
+  {
+   "id": "690f5e57-9e04-4127-b97b-5ed1c31d07ad",
+   "date_time": "2026-11-01T17:00:00+00:00",
+   "home_club_id": "regatas-de-resistencia-m19",
+   "away_club_id": "aranduroga-r-c-m19-b",
+   "score": null,
+   "status": "scheduled"
+  },
+  {
+   "id": "09709405-7666-4b34-98bd-3a06e37cc7a0",
+   "date_time": "2026-11-08T17:00:00+00:00",
+   "home_club_id": null,
+   "away_club_id": null,
+   "score": null,
+   "status": "scheduled"
+  }
+ ]
+}

@@ -1,0 +1,56 @@
+{
+ "nombre": "Torneo Reclasificatorio Pampeano A-B",
+ "slug": "reclasificatorio-pampeano-a-b-2026",
+ "origen": "reclasificatorio-pampeano-2026-tarjetas",
+ "fechaInicio": "2026-10-24",
+ "fases": [
+  {
+   "nombre": "Primera",
+   "orden": 1
+  }
+ ],
+ "clubes": [
+  {
+   "id": "argentino-de-bahia-blanca",
+   "corto": "Argentino BB"
+  },
+  {
+   "id": "bigua-rugby-club",
+   "corto": "Biguá"
+  },
+  {
+   "id": "san-ignacio-r-c",
+   "corto": "San Ignacio"
+  },
+  {
+   "id": "union-del-sur",
+   "corto": "Unión del Sur"
+  }
+ ],
+ "partidos": [
+  {
+   "fase": "Primera",
+   "fecha": "2026-10-24",
+   "hora": "15:45",
+   "home": "san-ignacio-r-c",
+   "away": "bigua-rugby-club",
+   "homeScore": 46,
+   "awayScore": 30,
+   "cerrado": true,
+   "tarjeta": "326244",
+   "estado": "Cerrado"
+  },
+  {
+   "fase": "Primera",
+   "fecha": "2026-10-24",
+   "hora": "15:45",
+   "home": "argentino-de-bahia-blanca",
+   "away": "union-del-sur",
+   "homeScore": 27,
+   "awayScore": 39,
+   "cerrado": false,
+   "tarjeta": "326245",
+   "estado": "Iniciado"
+  }
+ ]
+}

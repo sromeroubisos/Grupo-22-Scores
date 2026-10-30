@@ -1,0 +1,21 @@
+{
+  "fecha": "2026-09-05",
+  "descripcion": "Torneo Austral · 3ª fecha · División Primera (sábado)",
+  "fuente": "Unión Austral de Rugby",
+  "motivo": "Sólo División Primera: los resultados de M15, M16, M18 y el femenino amistoso no entran en este torneo. Sin ofensivo declarado, y el defensivo de Chenque —el (1) de la fuente, que cae por seis— lo deduce solo el ruleset.",
+  "puntosBonusOfensivo": 1,
+  "partidos": [
+    {
+      "partido": "09e62782-88db-40f4-9c3e-bc9e91a86b45",
+      "local": "Draig Goch", "visitante": "San Jorge",
+      "marcador": { "local": 46, "visitante": 24 },
+      "bonusOfensivo": []
+    },
+    {
+      "partido": "684132ac-e0f0-4a5f-9e8c-417399e588d1",
+      "local": "Chenque", "visitante": "Calafate",
+      "marcador": { "local": 40, "visitante": 46 },
+      "bonusOfensivo": []
+    }
+  ]
+}

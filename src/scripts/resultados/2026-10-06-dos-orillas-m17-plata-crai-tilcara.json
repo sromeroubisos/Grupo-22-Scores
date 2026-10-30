@@ -1,0 +1,10 @@
+{
+  "fecha": "2026-10-06",
+  "descripcion": "Torneo Juvenil Dos Orillas M17 · Final Four Copa Plata · 3ª fecha (reprogramado) · CRAI-Tilcara",
+  "fuente": "Tercer Tiempo Rugby (10/10/2026)",
+  "motivo": "Resultado del partido reprogramado CRAI-Tilcara M17 (Tercer Tiempo Rugby, 10/10/2026); el ofensivo va declarado desde el récord publicado (0-5), la fuente da el marcador y no los tries.",
+  "puntosBonusOfensivo": 1,
+  "partidos": [
+    { "partido": "429ff37d-89ff-4a9f-be8a-50bd280ccdb8", "local": "CRAI M17", "visitante": "Tilcara M17", "marcador": { "local": 14, "visitante": 28 }, "bonusOfensivo": ["visitante"] }
+  ]
+}

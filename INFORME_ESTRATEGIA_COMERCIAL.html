@@ -1,0 +1,1190 @@
+<title>G22 Scores: del código al contrato</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<style>
+:root{
+  --paper:#FAF8F4; --surface:#FFFFFF; --surface-2:#F3F0E9; --surface-3:#EBE6DC;
+  --ink:#161B21; --ink-2:#4B555F; --ink-3:#7C858E;
+  --line:#DDD6C9; --line-2:#EBE6DC;
+  --accent:#0F5C68; --accent-soft:#E1EDEF; --accent-line:#9CC4CA;
+  --pos:#3C6B51; --pos-soft:#E5EFE8;
+  --warn:#8E6A14; --warn-soft:#F4ECD8;
+  --neg:#A5382B; --neg-soft:#F6E4E0;
+  --shadow:0 1px 2px rgba(22,27,33,.05),0 8px 24px -16px rgba(22,27,33,.28);
+  --ff-display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --ff-body:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --ff-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#0F1317; --surface:#151A20; --surface-2:#1C232A; --surface-3:#242C34;
+    --ink:#EBE7DF; --ink-2:#A9B1B9; --ink-3:#7A838C;
+    --line:#2B333B; --line-2:#222A31;
+    --accent:#57B8C4; --accent-soft:#16333A; --accent-line:#2C5A63;
+    --pos:#82BA98; --pos-soft:#1A2A21;
+    --warn:#D5AB57; --warn-soft:#2C2617;
+    --neg:#DE8B7D; --neg-soft:#2D1D1A;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -16px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0F1317; --surface:#151A20; --surface-2:#1C232A; --surface-3:#242C34;
+  --ink:#EBE7DF; --ink-2:#A9B1B9; --ink-3:#7A838C;
+  --line:#2B333B; --line-2:#222A31;
+  --accent:#57B8C4; --accent-soft:#16333A; --accent-line:#2C5A63;
+  --pos:#82BA98; --pos-soft:#1A2A21;
+  --warn:#D5AB57; --warn-soft:#2C2617;
+  --neg:#DE8B7D; --neg-soft:#2D1D1A;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -16px rgba(0,0,0,.7);
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:var(--ff-body); font-size:17px; line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1240px;margin:0 auto;padding:0 24px}
+h1,h2,h3,h4{font-family:var(--ff-display);text-wrap:balance;margin:0}
+p{margin:0 0 1em}
+a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:2px}
+a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
+
+/* ── masthead ─────────────────────────────── */
+.mast{border-bottom:1px solid var(--line);background:var(--surface);}
+.mast-in{max-width:1240px;margin:0 auto;padding:56px 24px 44px}
+.kicker{font-family:var(--ff-mono);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin:0 0 20px;display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.kicker span:not(:first-child){color:var(--ink-3)}
+h1{font-size:clamp(38px,6.2vw,66px);line-height:1.02;font-weight:800;letter-spacing:-.028em;max-width:16ch}
+.dek{font-size:clamp(18px,2.1vw,21px);line-height:1.5;color:var(--ink-2);max-width:60ch;margin:22px 0 0}
+.meta-row{display:flex;flex-wrap:wrap;gap:8px 28px;margin-top:32px;font-family:var(--ff-mono);font-size:12px;color:var(--ink-3)}
+.meta-row b{color:var(--ink-2);font-weight:500}
+
+/* ── evidence chips ───────────────────────── */
+.ev{font-family:var(--ff-mono);font-size:10.5px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;padding:2px 6px;border-radius:3px;white-space:nowrap;vertical-align:2px;border:1px solid transparent}
+.ev-f{background:var(--accent-soft);color:var(--accent);border-color:var(--accent-line)}
+.ev-e{background:var(--warn-soft);color:var(--warn);border-color:color-mix(in srgb,var(--warn) 35%,transparent)}
+.ev-s{background:var(--neg-soft);color:var(--neg);border-color:color-mix(in srgb,var(--neg) 32%,transparent)}
+.ev-n{background:var(--surface-2);color:var(--ink-3);border-color:var(--line)}
+.ev-v{background:var(--pos-soft);color:var(--pos);border-color:color-mix(in srgb,var(--pos) 35%,transparent)}
+
+/* ── layout ───────────────────────────────── */
+.shell{display:grid;grid-template-columns:1fr;gap:0;padding:0 0 96px}
+@media(min-width:1080px){
+  .shell{grid-template-columns:236px minmax(0,1fr);gap:56px;align-items:start}
+}
+.toc{display:none}
+@media(min-width:1080px){
+  .toc{display:block;position:sticky;top:0;max-height:100vh;overflow-y:auto;padding:44px 0 44px;font-family:var(--ff-mono);font-size:12px;line-height:1.45}
+  .toc ol{list-style:none;margin:0;padding:0;counter-reset:t}
+  .toc li{counter-increment:t;margin:0 0 3px}
+  .toc a{display:block;padding:5px 10px 5px 30px;position:relative;color:var(--ink-2);text-decoration:none;border-radius:4px;border-left:2px solid transparent}
+  .toc a::before{content:counter(t,decimal-leading-zero);position:absolute;left:8px;color:var(--ink-3);font-size:10.5px}
+  .toc a:hover{background:var(--surface-2);color:var(--ink)}
+  .toc .toc-h{padding:18px 10px 7px;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+}
+main{padding:44px 0 0;min-width:0}
+
+/* ── sections ─────────────────────────────── */
+section{padding:0 0 12px;scroll-margin-top:20px}
+.sec-head{display:flex;gap:16px;align-items:baseline;margin:64px 0 22px;padding-top:26px;border-top:2px solid var(--ink)}
+section:first-of-type .sec-head{margin-top:0;border-top:none;padding-top:0}
+.sec-n{font-family:var(--ff-mono);font-size:12px;font-weight:600;color:var(--accent);letter-spacing:.08em;flex:0 0 auto;padding-top:6px}
+.sec-head h2{font-size:clamp(25px,3.2vw,34px);font-weight:700;letter-spacing:-.02em;line-height:1.12}
+h3{font-size:19px;font-weight:700;letter-spacing:-.01em;margin:38px 0 12px}
+h4{font-size:13px;font-family:var(--ff-mono);font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin:28px 0 10px}
+.prose{max-width:70ch}
+.prose ul,.prose ol{max-width:70ch;padding-left:22px;margin:0 0 1em}
+li{margin:0 0 .42em}
+strong{font-weight:600}
+em{font-style:italic;color:var(--ink-2)}
+
+/* ── tables ───────────────────────────────── */
+.tw{overflow-x:auto;margin:22px 0 26px;border:1px solid var(--line);border-radius:6px;background:var(--surface);box-shadow:var(--shadow)}
+table{border-collapse:collapse;width:100%;font-family:var(--ff-display);font-size:13.5px;line-height:1.42}
+th{text-align:left;font-family:var(--ff-mono);font-size:10.5px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);padding:11px 13px;background:var(--surface-2);border-bottom:1px solid var(--line);white-space:nowrap;vertical-align:bottom}
+td{padding:11px 13px;border-bottom:1px solid var(--line-2);vertical-align:top;color:var(--ink-2)}
+td:first-child{color:var(--ink);font-weight:600}
+tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:var(--surface-2)}
+.num{font-family:var(--ff-mono);font-variant-numeric:tabular-nums;white-space:nowrap;font-size:12.5px}
+table a{font-size:12px;font-family:var(--ff-mono)}
+.cap{font-family:var(--ff-mono);font-size:11.5px;color:var(--ink-3);margin:-16px 0 26px;line-height:1.5;max-width:78ch}
+
+/* ── callouts ─────────────────────────────── */
+.box{border:1px solid var(--line);border-radius:6px;padding:20px 22px;margin:26px 0;background:var(--surface)}
+.box-k{border-left:3px solid var(--accent)}
+.box-w{border-left:3px solid var(--neg)}
+.box-g{border-left:3px solid var(--pos)}
+.box h4{margin-top:0}
+.box p:last-child,.box ul:last-child{margin-bottom:0}
+.box .prose{max-width:none}
+
+/* ── stat grid ────────────────────────────── */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:26px 0}
+.stat{background:var(--surface);padding:16px 18px}
+.stat b{display:block;font-family:var(--ff-display);font-size:28px;font-weight:700;letter-spacing:-.03em;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.1}
+.stat span{display:block;font-family:var(--ff-mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-top:7px;line-height:1.35}
+
+/* ── foda ─────────────────────────────────── */
+.foda{display:grid;grid-template-columns:1fr;gap:14px;margin:26px 0}
+@media(min-width:760px){.foda{grid-template-columns:1fr 1fr}}
+.q{border:1px solid var(--line);border-radius:6px;padding:18px 20px;background:var(--surface)}
+.q h4{margin:0 0 12px;color:var(--ink)}
+.q ul{margin:0;padding-left:18px;font-family:var(--ff-display);font-size:13.5px;line-height:1.5}
+.q-f{border-top:3px solid var(--pos)} .q-o{border-top:3px solid var(--accent)}
+.q-d{border-top:3px solid var(--warn)} .q-a{border-top:3px solid var(--neg)}
+
+/* ── threat meter ─────────────────────────── */
+.th{display:inline-flex;align-items:center;gap:5px;font-family:var(--ff-mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.th i{width:7px;height:7px;border-radius:50%;display:inline-block;background:currentColor}
+.th-3{color:var(--neg)} .th-2{color:var(--warn)} .th-1{color:var(--pos)}
+
+/* ── final answers ────────────────────────── */
+.ans{border-top:1px solid var(--line);padding:20px 0;display:grid;grid-template-columns:1fr;gap:6px}
+@media(min-width:820px){.ans{grid-template-columns:210px 1fr;gap:32px}}
+.ans:last-of-type{border-bottom:1px solid var(--line)}
+.ans dt{font-family:var(--ff-display);font-weight:700;font-size:15px;letter-spacing:-.01em;line-height:1.3}
+.ans dt em{display:block;font-family:var(--ff-mono);font-style:normal;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:5px;font-weight:500}
+.ans dd{margin:0;color:var(--ink-2);font-size:16px}
+.ans dd p:last-child{margin-bottom:0}
+
+footer{border-top:2px solid var(--ink);margin-top:72px;padding:28px 0 0;font-family:var(--ff-mono);font-size:11.5px;color:var(--ink-3);line-height:1.6}
+@media print{.toc{display:none}.shell{grid-template-columns:1fr}}
+</style>
+
+<header class="mast">
+  <div class="mast-in">
+    <p class="kicker"><span>Informe de estrategia comercial</span><span>g22scores.com</span><span>28 · 08 · 2026</span></p>
+    <h1>G22 Scores: del código al contrato</h1>
+    <p class="dek">Qué es realmente el producto, quién compite, quién compra, cuánto puede cobrar y por dónde entra al mercado. Análisis construido sobre el código de producción, no sobre el brief.</p>
+    <div class="meta-row">
+      <span><b>Alcance:</b> B2B uniones y clubes + monetización B2C</span>
+      <span><b>Base técnica:</b> 806 commits, feb–ago 2026</span>
+      <span><b>Fuentes:</b> 60+ citadas</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+<div class="shell">
+<nav class="toc" aria-label="Secciones">
+  <p class="toc-h">Contenido</p>
+  <ol>
+    <li><a href="#s0">Resumen ejecutivo</a></li>
+    <li><a href="#s1">El proyecto, definido</a></li>
+    <li><a href="#s2">Competidores</a></li>
+    <li><a href="#s3">Benchmarking</a></li>
+    <li><a href="#s4">Precios de mercado</a></li>
+    <li><a href="#s5">Modelos de negocio</a></li>
+    <li><a href="#s6">Clientes potenciales</a></li>
+    <li><a href="#s7">FODA</a></li>
+    <li><a href="#s8">Viabilidad comercial</a></li>
+    <li><a href="#s9">Estrategia de precios</a></li>
+    <li><a href="#s10">ROI del cliente</a></li>
+    <li><a href="#s11">Estrategia de venta</a></li>
+    <li><a href="#s12">Entrada al mercado</a></li>
+    <li><a href="#s13">Propuesta comercial</a></li>
+    <li><a href="#s14">Recomendación final</a></li>
+    <li><a href="#s15">Fuentes y método</a></li>
+  </ol>
+</nav>
+<main>
+
+<section id="s0">
+<div class="sec-head"><span class="sec-n">00</span><h2>Resumen ejecutivo</h2></div>
+<div class="prose">
+<p>G22 Scores no es un prototipo: es una plataforma en producción con 190 migraciones de base de datos, 205 endpoints, 145 archivos de test y un sistema de cobro con MercadoPago ya implementado. Cubre las tres capas que en el mercado se venden por separado — <strong>sitio público de datos</strong> (fixtures, tablas, rankings, fichas de jugador), <strong>backend de gestión de torneos y clubes</strong>, y <strong>producto de audiencia</strong> (prode, fantasy, notificaciones). Ningún competidor relevado combina las tres.</p>
+
+<p>El hallazgo que reordena toda la estrategia llegó el 25 de junio de 2026: la UAR lanzó <strong>Conecta Rugby APP</strong>, gratuita, que reemplaza la planilla electrónica TEP dentro de BDUAR y gestiona planteles, sanciones y cierre de partido desde la cancha. <a href="https://uar.com.ar/conecta-rugby-app-la-nueva-aplicacion-movil-para-potenciar-la-gestion-y-capacitacion-del-rugby-argentino/">Fuente oficial</a> <span class="ev ev-f">Encontrado</span>. Eso cierra la puerta de «el sistema oficial de carga de partidos» — y a la vez abre la buena: Conecta Rugby es <em>hacia adentro</em>. No publica fixture navegable, ni tabla en vivo, ni ficha histórica de jugador, ni ranking, ni nada para el hincha. G22 no debe competir contra la federación por el back-office; debe ser <strong>la capa pública que la federación no va a construir</strong>.</p>
+
+<div class="box box-k">
+<h4>La tesis en una línea: sistema cerrado contra sistema abierto</h4>
+<p><strong>La UAR construyó un sistema cerrado. G22 es un sistema abierto.</strong> Esa es la frase con la que hay que abrir toda reunión, y no es una metáfora: Conecta Rugby exige usuario y contraseña de BDUAR — <a href="https://app.conecta.rugby/login">su única puerta es un login</a> <span class="ev ev-f">Encontrado</span> — y solo entra quien tiene un rol federado: jugador fichado, entrenador, referí, dirigente. La madre, el padre, el amigo, el ex jugador, el hincha, el periodista local, el sponsor: <strong>ninguno tiene forma de entrar.</strong> Están afuera por diseño, porque el sistema no fue hecho para ellos.</p>
+<p><strong>Y una precisión que importa para cómo se dice esto en una reunión:</strong> que el sistema federativo sea cerrado no es un defecto, es su naturaleza — un registro oficial con habilitaciones, sanciones e incidencias médicas <em>debe</em> ser cerrado. El diagnóstico no es «lo hicieron mal», es «eso resuelve el adentro y el afuera no existe». En un ambiente donde las uniones trabajan con gente de la UAR, la diferencia entre esas dos frases decide si el proyecto tiene mercado.</p>
+<p>G22 no le pide credenciales a nadie para mirar. Cualquiera que quiera saber cómo va el partido de su hijo un sábado a las tres de la tarde, entra y lo ve. Ese es el producto, y es exactamente lo que un sistema de gestión federativa no puede ser sin dejar de ser lo que es.</p>
+<p><strong>Pero abierto ya no alcanza solo.</strong> Rugby Pro Score — competidor argentino detectado en agosto de 2026, operando la Primera de la Unión Cordobesa — también es abierto: su marcador en vivo se ve sin cuenta. Lo que no hace es <em>guardar</em>. No archiva los partidos y no tiene tabla de posiciones. Es un marcador que se enciende el sábado y se apaga el domingo. Eso abre el segundo eje, y es el que decide contra ellos: <strong>efímero contra permanente.</strong> Un partido cargado en G22 sigue estando en 2030, y de esa carga sale sola la tabla, el acumulado del jugador y el ranking del club.</p>
+<p>La posición completa, entonces, tiene dos ejes y nadie más ocupa el cruce: <strong>abierto</strong> —contra la UAR y Rugby Manager, que piden credenciales— <strong>y permanente</strong> —contra Rugby Pro Score, que muestra y olvida.</p>
+<p>G22 no vende «software de gestión de torneos» — ese mercado ya lo están comoditizando la UAR (gratis) y Rugby Manager (ARS 70.000–105.000/mes). G22 vende <strong>acceso, visibilidad y memoria</strong>: que el sábado se sigan las cinco categorías del club en un lugar y sin barrera, que el lunes los números ya existan, y que el pibe que debuta en M16 llegue a Primera con historial. Eso no lo da ninguna planilla oficial.</p>
+</div>
+
+<div class="box box-g">
+<h4>Y en el camino, los jugadores</h4>
+<p>La consecuencia del sistema abierto es un mecanismo de adquisición que el sistema cerrado no puede tener. La madre entra a ver el partido de su hijo — no le pidieron nada, no se registró, solo miró. Vuelve el sábado siguiente. En algún momento hace clic en el nombre del hijo y aparece su ficha: partidos, puntos, tries, tarjetas, temporada tras temporada. <strong>Y ahí el que se registra es el jugador</strong>, porque nadie resiste ver su propia historia escrita.</p>
+<p>El orden importa: <strong>primero entra el que mira, después el que juega.</strong> Conecta Rugby empieza por el federado y termina ahí — 1.000+ descargas frente a los 45.000 jugadores que la URBA mueve cada fin de semana <span class="ev ev-f">Encontrado</span>. G22 empieza por el entorno del jugador, que es entre cinco y diez veces más grande, y llega al jugador gratis. Ese es el motor de la monetización B2C — prode, fantasy, notificaciones — y es un costo de adquisición que ningún competidor de este mercado puede igualar, porque todos exigen pertenecer antes de dejarte mirar.</p>
+</div>
+
+<div class="stats">
+  <div class="stat"><b>US$&nbsp;39–149</b><span>Precio recomendado por club / mes</span></div>
+  <div class="stat"><b>US$&nbsp;1.200–3.600</b><span>Canon anual de unión, más los planes de club</span></div>
+  <div class="stat"><b>US$&nbsp;75–240k</b><span>Valor por costo de reemplazo hoy</span></div>
+  <div class="stat"><b>91</b><span>Clubes solo en URBA</span></div>
+  <div class="stat"><b>25</b><span>Uniones provinciales en la UAR</span></div>
+  <div class="stat"><b>~450</b><span>Partidos por fin de semana en URBA</span></div>
+</div>
+<p class="cap">Los dos primeros son recomendación de este informe (§9). El tercero es una valuación por costo de reemplazo (§14-H). Los tres últimos son datos verificados (§6).</p>
+
+<h3>Las cinco conclusiones</h3>
+<ol>
+<li><strong>Cliente ideal: la unión provincial mediana, no el club suelto ni la UAR.</strong> Una unión del interior (Córdoba, Rosario, Cuyo, Mar del Plata, Salta, Entre Ríos, Nordeste) tiene 20–40 clubes, presupuesto de tecnología cercano a cero, ninguna cobertura pública decente de sus categorías juveniles, y una sola firma decide. Vender ahí es un contrato que arrastra 30 clubes de golpe.</li>
+<li><strong>Los cinco competidores reales</strong> son Rugby Pro Score, Conecta Rugby (UAR), Rugby Manager, el sitio de la propia unión y el statu quo de WhatsApp + Excel. Rugby Pro Score entra directo al primer puesto: es el único que hace lo mismo, abierto, con el mismo discurso —dos minutos, sin instalación, demo por WhatsApp— y publica el mismo torneo que G22 en la Unión Cordobesa. Sportlomo, PlayHQ y LeagueRepublic son referencias de pricing, no amenazas en Argentina hoy.</li>
+<li><strong>El eje del discurso es cerrado contra abierto.</strong> No «gestionamos mejor tu torneo» — ahí G22 compite contra algo gratis y oficial. Sí «tu torneo pasa a ser visible para las diez mil personas que hoy no pueden entrar a verlo».</li>
+<li><strong>El pricing actual del código está subvaluado en el tramo alto.</strong> Los planes Inicial US$ 15 y Pro US$ 39 son coherentes con el mercado; «Organización» a US$ 149/mes deja plata sobre la mesa frente a un contrato de unión, que debería ser anual y de cuatro cifras.</li>
+<li><strong>El canal es venta directa con demo de un partido real</strong> — la mecánica que las landings ya describen. No hay licitaciones públicas de software de rugby en LatAm que ganar <span class="ev ev-n">Sin dato</span>, y los integradores no existen en este vertical.</li>
+<li><strong>No hay ventana: la comparación ya está ocurriendo.</strong> Rugby Pro Score cubre la Primera de la Unión Cordobesa y G22 cubre el Top 10 del Centro — es el mismo torneo. No es un competidor que viene, es uno que ya está publicando los mismos partidos el mismo sábado. Eso no invalida la tesis, la refuerza —alguien más vio el hueco y lo está ocupando— pero mueve toda la urgencia al producto: <strong>lo que diferencia a G22 tiene que verse en la primera pantalla</strong>, porque el club va a abrir las dos y decidir sin llamar a nadie.</li>
+<li><strong>Sí conviene convertirlo en negocio</strong>, pero como <em>plataforma vertical de datos deportivos con capa SaaS</em>, no como fábrica de software a medida. El activo defendible no es el código: es la base histórica acumulada y el hábito del hincha.</li>
+</ol>
+</div>
+</section>
+
+<section id="s1">
+<div class="sec-head"><span class="sec-n">01</span><h2>El proyecto, definido</h2></div>
+<div class="prose">
+<p>Todo lo de esta sección sale de leer el repositorio y el sitio en producción, no de la descripción del proyecto. Donde el código y el discurso comercial difieren, mando el código.</p>
+
+<h3>Qué problema resuelve</h3>
+<p>El rugby amateur argentino genera un volumen de información enorme y lo pierde entero. Solo la URBA mueve <strong>~450 partidos y ~45.000 jugadores por fin de semana</strong> entre 91 clubes <span class="ev ev-f">Encontrado</span> (<a href="https://www.lanacion.com.ar/deportes/rugby/el-torneo-urba-se-expande-91-clubes-nid2228845/">La Nación</a>). De ese volumen, lo que sobrevive públicamente es la tabla de las divisiones superiores. Las juveniles — M19, M17, M16, donde está la mitad del deporte — no existen en ningún lado consultable. El resultado circula por WhatsApp el sábado a la noche y se evapora el domingo.</p>
+<p>Tres consecuencias concretas, y cada una es un argumento de venta distinto:</p>
+<ul>
+<li><strong>El club no tiene memoria.</strong> Un jugador que pasa ocho años en el club no tiene una sola estadística acumulada. El cuerpo técnico reconstruye los partidos de memoria.</li>
+<li><strong>La unión no tiene producto.</strong> No puede ofrecerle a un sponsor una audiencia medible, porque no tiene una propiedad digital donde esa audiencia esté. La UAR factura <strong>~US$ 10 millones anuales en sponsors</strong> <span class="ev ev-f">Encontrado</span> (<a href="https://www.cronista.com/apertura/empresas/los-secretos-del-rugby-argentino-para-atraer-millones-en-sponsors-sin-apostar-al-juego/">El Cronista</a>); una unión provincial no captura casi nada de eso, en parte porque no tiene dónde exhibirlo.</li>
+<li><strong>El hincha no tiene dónde mirar.</strong> El equivalente de Promiedos — que mueve ~34 millones de visitas mensuales en fútbol <span class="ev ev-e">Estimado</span> (<a href="https://www.similarweb.com/es/website/promiedos.com.ar/">Similarweb</a>) — no existe para el rugby argentino.</li>
+</ul>
+
+<h3>Qué proceso optimiza</h3>
+<p>La cadena que va del papel al público: planilla en la mesa de control → resultado en un grupo de WhatsApp → alguien lo pasa a una planilla → alguien actualiza la tabla → alguien lo publica en Instagram. G22 la colapsa a un solo acto: <strong>alguien del club carga desde el celular durante el partido, y el fixture, la tabla, las estadísticas del equipo, la ficha del jugador, el ranking, el prode y el equipo de la semana se derivan de esa única carga.</strong> No hay doble ingreso de datos en ningún punto del sistema — eso está garantizado por arquitectura, no por disciplina.</p>
+<div class="box box-w">
+<h4>El límite de esa afirmación, y es el hallazgo comercial más importante de agosto</h4>
+<p>La carga única es cierta <strong>adentro</strong> de G22 y <strong>falsa a nivel ecosistema</strong>. El club ya está obligado a cerrar el partido en BDUAR a través de Conecta Rugby: G22 es, hoy, un segundo sistema encima de uno obligatorio.</p>
+<p>La primera unión consultada lo dijo textual y por eso no avanzó — <em>«ya cargamos obligados en BDUAR y eso solo ya nos genera un costo alto»</em> (URNE, agosto de 2026) <span class="ev ev-v">Verificado en campo</span>. <strong>Es una objeción de trabajo, no de precio</strong>, y va a aparecer en toda conversación con una unión mientras no esté resuelta.</p>
+<p><strong>Pero el sistema obligatorio ya está roto, y eso convierte la objeción en la mejor puerta de entrada.</strong> Dos hechos de campo <span class="ev ev-v">Verificado</span>: cargar en BDUAR le resulta difícil a la gente —coincide con las reseñas públicas de la app, «no puedo entrar», «no salen los partidos», y con sus 1.000+ descargas frente a los 45.000 jugadores de la URBA sola—; y <strong>sin médico fijo el cierre digital no se puede firmar</strong>, de modo que la promesa de cerrar el partido en vivo desde la cancha no le funciona a buena parte de los clubes. La consecuencia es que <strong>hoy ya cargan dos veces</strong>: papel en la cancha y transcripción posterior a una herramienta que les cuesta, sin que de todo ese trabajo salga nada público. G22 no pide una segunda carga: ofrece que la primera sea fácil y sirva para algo. Ver §14-I: llevar la planilla al formato oficial pasa a ser la prioridad número uno.</p>
+<p><strong>G22 tampoco tiene firma médica, y no debe tenerla.</strong> No es una carencia: es la diferencia de responsabilidad entre los dos sistemas. BDUAR es el registro oficial —habilitaciones, sanciones, incidencias médicas— y necesita firma para cerrar, por eso se traba sin médico. G22 es la capa de captura y publicación, y <em>nadie firma una tabla de posiciones</em>: por eso publica igual. La planilla que genera sale con los casilleros en blanco para firmar en papel, que es el flujo que los clubes ya tienen.</p>
+<p><strong>Y tres límites que el proyecto no debe cruzar:</strong> no simular ni reemplazar la firma médica —el protocolo de conmoción existe por seguridad del jugador—; no presentar la planilla de G22 como el acta oficial, porque es un documento de trabajo que acelera el oficial; y no construir captura digital de firmas por ahora, que abre preguntas de validez legal sin necesidad. Lo que sí es un argumento propio y conviene decirlo: cuando no hay médico la incidencia igual ocurrió, y hoy se pierde en un papel — cargada en G22 queda con el minuto, el jugador y quién decidió sacarlo, y el club tiene el lunes un registro real para llevarle a un profesional. No reemplaza al protocolo: le da materia prima. Es lo correcto y además es lo vendible, porque ninguna unión adopta algo que parezca debilitar su cumplimiento médico.</p>
+</div>
+
+<h3>Cómo funciona hoy</h3>
+<p>Next.js 16 / React 19 sobre Supabase (Postgres) desplegado en Vercel, con MercadoPago para cobros, web-push para notificaciones, y una PWA que se opera desde el teléfono. El sitio está online en <a href="https://g22scores.com">g22scores.com</a>, con 17 disciplinas en el catálogo y torneos publicados incluyendo el Top 14 de URBA y el Top 10 del Centro <span class="ev ev-v">Verificado en producción</span>.</p>
+<p>La pieza técnica más delicada está resuelta y vale como argumento de venta: el <strong>reloj de partido se deriva del servidor</strong>, no de un contador del navegador. Sobrevive a un refresh, a la pestaña en segundo plano, al cambio de dispositivo, y a dos operadores cargando en simultáneo — la transición es atómica en una sola sentencia SQL. Cualquiera que haya intentado operar un marcador en vivo con un <em>setInterval</em> sabe por qué esto importa un sábado con cinco partidos.</p>
+
+<h3>Componentes</h3>
+<div class="tw"><table>
+<thead><tr><th>Capa</th><th>Qué incluye</th><th>Estado</th></tr></thead>
+<tbody>
+<tr><td>Sitio público</td><td>Torneos, fixtures, resultados, tablas, rankings, clubes, jugadores, estadísticas, búsqueda universal, noticias, páginas de club con pestaña «Hoy»</td><td>En producción</td></tr>
+<tr><td>Gestor de torneos</td><td>Crear torneo y temporadas, fixture, importación por planilla, alta de clubes y planteles, partidos, equipos, usuarios y permisos por club</td><td>En producción</td></tr>
+<tr><td>Panel de club</td><td>Dashboard, plantel, planteles por categoría, rivales, sponsors, noticias, documentos, invitaciones, auditoría, integraciones</td><td>En producción</td></tr>
+<tr><td>Centro de partido</td><td>Carga en vivo desde celular, eventos con minuto, reloj derivado del servidor, formaciones, planilla PDF, revisión</td><td>En producción</td></tr>
+<tr><td>Audiencia (B2C)</td><td>Prode con ligas privadas y scoring automático, fantasy / Equipo de la Semana, favoritos, notificaciones push, encuestas de video, minijuego «Carrera de Rugby»</td><td>En producción</td></tr>
+<tr><td>Datos e integraciones</td><td>Ingesta desde RugbyArchive, Flashscore y SofaScore; crons de sincronización; endpoint OpenAPI de resultados; integración WhatsApp; OCR de planillas (tesseract) y lectura de PDF/Excel</td><td>En producción, parcial</td></tr>
+<tr><td>Comercial</td><td>Landings de embudo <em>/para-clubes</em> y <em>/para-torneos</em>, captura de leads con atribución de origen, checkout MercadoPago, webhooks, gestión de suscripción</td><td>En producción</td></tr>
+<tr><td>Motor multideporte</td><td>Reglas por deporte: rugby union, hockey sobre césped (23 torneos y 105 partidos reales en producción), fútbol americano, handball, y catálogo de 17 disciplinas</td><td>En producción</td></tr>
+</tbody></table></div>
+
+<h3>Qué variables controla y qué predice</h3>
+<p>Distingo lo que el sistema <em>registra</em> de lo que <em>calcula</em> y de lo que <em>predice</em>, porque la venta se hace con lo segundo y lo tercero, no con lo primero.</p>
+<ul>
+<li><strong>Registra:</strong> partidos, eventos con minuto (tries, conversiones, penales, tarjetas, cambios), planteles, formaciones, incidencias, estado y reloj del partido.</li>
+<li><strong>Calcula, sin que nadie mantenga una tabla a mano:</strong> posiciones con reglas de bonus configurables, estadísticas de partido, acumulados de jugador y equipo por temporada, historiales cruzados entre clubes, ranking de clubes, derivados del club (familia de categorías).</li>
+<li><strong>Predice:</strong> hoy, el módulo <em>predictor</em> y el prode. Esta es la línea más débil del producto frente al discurso: hay infraestructura de predicción, no un modelo predictivo entrenado con valor comercial demostrable. <strong>No lo vendas como IA.</strong></li>
+</ul>
+
+<h3>Situación actual vs. solución propuesta</h3>
+<div class="tw"><table>
+<thead><tr><th>Dimensión</th><th>Hoy, sin G22</th><th>Con G22</th></tr></thead>
+<tbody>
+<tr><td>Resultado de juveniles</td><td>Grupo de WhatsApp; no queda registro</td><td>Publicado en vivo, permanente, con su propia tabla</td></tr>
+<tr><td>Tabla de posiciones</td><td>Planilla que alguien actualiza el lunes</td><td>Se deriva sola de la carga del partido</td></tr>
+<tr><td>Ficha del jugador</td><td>No existe</td><td>Partidos, puntos, tries, tarjetas, temporada tras temporada</td></tr>
+<tr><td>Cierre administrativo</td><td>Papel → planilla → mail</td><td>Carga única desde el celular; planilla PDF si la unión la exige</td></tr>
+<tr><td>Propiedad digital de la unión</td><td>Sitio estático o cuenta de Instagram</td><td>Sitio con tráfico medible, con marca propia en plan Organización</td></tr>
+<tr><td>Sponsors</td><td>Cartel en la cancha</td><td>Módulo de sponsors por club, con exposición en la página del club</td></tr>
+</tbody></table></div>
+
+<h3>Madurez tecnológica</h3>
+<div class="box box-g">
+<h4>TRL 8 — sistema completo, calificado en operación real</h4>
+<p><strong>Lo que respalda el TRL 8:</strong> 806 commits en 6,5 meses (feb–ago 2026), 190 migraciones aplicadas, 205 endpoints, 145 archivos de test, cobro implementado punta a punta, datos reales de dos deportes en producción, y documentación interna de auditoría y rollback por migración.</p>
+<p><strong>Lo que falta para TRL 9:</strong> no hay evidencia en el repositorio de clientes pagos activos, ni de una temporada completa operada por un tercero sin acompañamiento. El sistema está listo; la prueba comercial no está hecha. Esa es exactamente la brecha que cierra el plan de §12.</p>
+</div>
+
+<h3>Propuestas de valor, y cuáles sirven como argumento comercial</h3>
+<div class="tw"><table>
+<thead><tr><th>Propuesta de valor</th><th>¿Argumento de venta?</th><th>A quién le habla</th></tr></thead>
+<tbody>
+<tr><td><strong>Abierto: cualquiera puede mirar, sin cuenta ni rol federado</strong></td><td><strong>Sí — el eje de todo.</strong> Es la única diferencia que la federación no puede copiar sin dejar de ser federación</td><td>Todos, y en especial las familias</td></tr>
+<tr><td>Todas las categorías del club en una sola vista, en vivo</td><td><strong>Sí — el más fuerte.</strong> Es un dolor concreto de todos los sábados y ningún competidor lo cubre</td><td>Dirigente y prensa del club</td></tr>
+<tr><td>Historial de jugador que persiste temporada a temporada</td><td><strong>Sí.</strong> Emocional y único; se prueba en 10 segundos abriendo una ficha</td><td>Entrenador, jugador, familia</td></tr>
+<tr><td>Carga única: todo lo demás se deriva</td><td><strong>Sí.</strong> Ataca el trabajo duplicado, que es el costo real</td><td>Secretaría de la unión</td></tr>
+<tr><td>Audiencia ya instalada — el torneo entra donde el hincha ya mira</td><td><strong>Sí, con reserva.</strong> Es cierto en la medida en que el tráfico exista; hay que medirlo antes de afirmarlo</td><td>Organizador de torneo</td></tr>
+<tr><td>Multideporte con reglas por disciplina</td><td><strong>Sí, para la unión polideportiva y el club social</strong>, que tiene hockey además de rugby</td><td>Club grande, club social</td></tr>
+<tr><td>Cero instalación, se opera del celular</td><td>Sí, como remoción de objeción, no como titular</td><td>Todos</td></tr>
+<tr><td>Prode, fantasy y minijuegos</td><td><strong>No al comprador B2B.</strong> Al dirigente le suena a distracción; guardalo para la conversación de sponsors y engagement</td><td>Hincha, sponsor</td></tr>
+<tr><td>Predicción / IA</td><td><strong>No.</strong> Hoy no hay modelo que sostenga la afirmación. Prometerlo abre un flanco que no se puede defender en una demo</td><td>—</td></tr>
+</tbody></table></div>
+
+<div class="box box-w">
+<h4>Tres límites que el propio equipo dejó documentados — y que hay que respetar en el discurso comercial</h4>
+<p>Están escritos en el código de las landings, y esa honestidad es un activo: una landing que la demo desmiente es peor que una landing floja.</p>
+<ul>
+<li><strong>No hay carga sin señal.</strong> El service worker solo cachea GET; no hay cola de escritura. Si en la cancha no hay datos, no se publica nada en vivo. Es la objeción más probable en el interior y hay que llevarla respondida.</li>
+<li><strong>No hay exportación de datos.</strong> Existe exportación de placas (imágenes), no un export de estadísticas. Hoy se resuelve pasando una planilla a mano. Para vender a una unión, esto debería estar resuelto antes de firmar (§14-I).</li>
+<li><strong>No hay minutos jugados</strong> en la ficha del jugador. Se cuentan partidos, puntos, tries, conversiones, penales y tarjetas.</li>
+</ul>
+</div>
+</div>
+</section>
+
+<section id="s2">
+<div class="sec-head"><span class="sec-n">02</span><h2>Competidores</h2></div>
+<div class="prose">
+<p>Ordenados por amenaza real en el mercado que G22 va a atacar primero — rugby argentino — y no por tamaño de la empresa. Sportradar es una compañía enorme y una amenaza nula para este negocio; Conecta Rugby es gratis y es la amenaza número uno.</p>
+
+<h3>Competidores directos en Argentina</h3>
+<div class="tw"><table>
+<thead><tr><th>Empresa / producto</th><th>País</th><th>Qué es</th><th>Modelo y precio</th><th>Cliente</th><th>Diferencia vs. G22</th><th>Amenaza</th></tr></thead>
+<tbody>
+<tr>
+<td>Rugby Pro Score<br><em>rugbyproscore.com.ar</em></td><td>Argentina</td>
+<td>El competidor más parecido que existe. «Digitaliza todo lo que pasa en cancha: marcador en vivo, estadísticas por jugador, plantel y resumen automático». Declara 7+ módulos, creación de partido en 2 minutos, sin instalación, desde el celular, demo por WhatsApp. Cubre la Primera de la Unión Cordobesa y el Torneo del Interior 2026. Su marcador se ve <strong>sin cuenta</strong>. <strong>Choca de frente con G22 hoy:</strong> los dos cubren el Top 10 de la UCR — el mismo torneo, las mismas fechas <span class="ev ev-v">Verificado</span></td>
+<td class="num"><strong>La unión paga la Primera.</strong> El club recibe Primera sin costo y paga aparte cada categoría adicional que quiera sumar. Sin página de precios pública <span class="ev ev-n">Sin dato</span> de los montos</td>
+<td>Uniones provinciales y sus clubes</td>
+<td><strong>Es abierto, como G22 — ahí no hay diferencia.</strong> La diferencia es que <strong>no guarda los partidos y no tiene tabla de posiciones</strong>: es un marcador en vivo, no una base de datos. Sin historial, sin acumulados que se deriven, y sin páginas indexadas en buscadores — una búsqueda restringida a su dominio no devuelve ningún resultado <span class="ev ev-f">Encontrado</span></td>
+<td><span class="th th-3"><i></i>Muy alta</span></td>
+</tr>
+<tr>
+<td>Conecta Rugby APP<br><em>(UAR)</em></td><td>Argentina</td>
+<td>App oficial lanzada el 25-jun-2026. Reemplaza la planilla TEP dentro de BDUAR: cierre de partido desde la cancha, planteles, formaciones, incidencias médicas y disciplinarias, sanciones automáticas, protocolos de conmoción World Rugby, aula virtual con ~140.000 usuarios registrados</td>
+<td class="num">Gratis, con login obligatorio <span class="ev ev-f">Encontrado</span></td>
+<td>Solo roles federados: clubes, entrenadores, referís, dirigentes, uniones</td>
+<td><strong>Es un sistema cerrado.</strong> Se entra con usuario y contraseña de BDUAR y solo si tenés rol federado; 1.000+ descargas frente a 45.000 jugadores solo en URBA. No publica fixture navegable, tabla en vivo, ficha histórica ni nada al que mira desde afuera. G22 no debe competir acá: debe ser <strong>el sistema abierto</strong> que la federación no puede construir sin dejar de ser federación</td>
+<td><span class="th th-3"><i></i>Muy alta</span></td>
+</tr>
+<tr>
+<td>Rugby Manager</td><td>Argentina</td>
+<td>SaaS de organización de clubes de rugby: roles (jugador, coach, dirigente, padres), asistencia a entrenamientos, estadísticas, gestión económica del tercer tiempo con QR, buscador de amistosos, mensajería. Declara 25 uniones regionales, +400 clubes, +90.000 jugadores y +150.000 padres</td>
+<td class="num">ARS 70.000/mes (Abono Básico)<br>ARS 105.000/mes (RM Plus)<br>≈ US$ 64–95 al tipo de cambio 1.100 configurado en el propio proyecto<br>Prueba gratis 2 meses <span class="ev ev-f">Encontrado</span></td>
+<td>Clubes de rugby amateur argentinos</td>
+<td>Fuerte puertas adentro (vida del club, pagos, comunicación). <strong>Débil o nulo del lado público</strong>: no es un sitio de resultados ni tiene producto para el hincha. Es el competidor más comparable y la mejor referencia de precio</td>
+<td><span class="th th-3"><i></i>Muy alta</span></td>
+</tr>
+<tr>
+<td>Sitio de la propia unión<br><em>(URBA, uniones provinciales)</em></td><td>Argentina</td>
+<td>Canal oficial con resultados, tablas e info de clubes, mantenido a mano o con sistema propio sobre BDUAR</td>
+<td class="num">Gratis para el hincha; costo interno de la unión <span class="ev ev-n">Sin dato</span></td>
+<td>Hincha, prensa</td>
+<td>Cubre solo divisiones superiores, sin ficha de jugador ni historial navegable ni juveniles. <strong>Es el competidor institucional</strong> y a la vez el mejor cliente: G22 le reemplaza el trabajo manual</td>
+<td><span class="th th-2"><i></i>Media</span></td>
+</tr>
+<tr>
+<td>GesDeportiva</td><td>España / Argentina</td>
+<td>Software de gestión de competiciones adoptado por la Confederación Argentina de Básquetbol desde 2022: fases, fichaje, planillas, arbitraje, estadísticas en vivo</td>
+<td class="num">$ 1.500 por club/año <span class="ev ev-f">Encontrado</span> (moneda no explicitada en la fuente, probable ARS)</td>
+<td>Federaciones nacionales</td>
+<td>Precedente clave: <strong>demuestra que una federación argentina compra software de gestión</strong>. Precio por club irrisorio → el modelo de la federación es «que salga casi nada por club». Ojo con ese ancla</td>
+<td><span class="th th-2"><i></i>Media</span></td>
+</tr>
+<tr>
+<td>Apps «Torneos X» de Ibaires</td><td>Argentina</td>
+<td>Decenas de apps casi idénticas, una por liga barrial de fútbol (Torneos AHRU, Todo Lomas, Liga Máster, Baires Fútbol…): resultados, goleadores, fotos</td>
+<td class="num"><span class="ev ev-n">Sin dato</span></td>
+<td>Ligas barriales de fútbol</td>
+<td>Prueba que hay demanda de «resultados en el bolsillo» en el amateur argentino, pero fragmentada y sin marca. G22 juega el juego opuesto: una sola marca con audiencia acumulada</td>
+<td><span class="th th-1"><i></i>Baja</span></td>
+</tr>
+<tr>
+<td>DigitalClub (Tindat)</td><td>Argentina</td>
+<td>SaaS de gestión de socios y clubes: perfiles, acceso, pagos, facturación, comunicación masiva</td>
+<td class="num">Sin precio público <span class="ev ev-n">Sin dato</span></td>
+<td>Clubes y asociaciones civiles</td>
+<td>Compite por el presupuesto del club, no por el problema deportivo. Es gestión societaria, no competición</td>
+<td><span class="th th-1"><i></i>Baja</span></td>
+</tr>
+</tbody></table></div>
+
+<h3>Competidores regionales e internacionales</h3>
+<div class="tw"><table>
+<thead><tr><th>Empresa</th><th>País</th><th>Producto</th><th>Modelo y precio</th><th>Ventajas</th><th>Desventajas</th><th>Amenaza</th></tr></thead>
+<tbody>
+<tr><td>Clupik</td><td>España / LatAm</td><td>Gestión de clubes y competiciones multideporte, con vertical de rugby explícito. Inscripciones, cobros, comunicación, entrenamientos, tienda online. Declara +1.000 clubes en 25+ países</td><td class="num">Clubes AR: gratis / US$ 39 / US$ 99 mes<br>Ligas LatAm: gratis / US$ 29 / US$ 79 mes<br>App propia: +US$ 49/mes <span class="ev ev-f">Encontrado</span></td><td>Precios públicos y agresivos, localización LatAm real, vertical rugby</td><td>Producto de gestión de club, no plataforma pública de datos. Sin ficha histórica de jugador ni audiencia propia</td><td><span class="th th-3"><i></i>Alta</span></td></tr>
+<tr><td>Sportlomo</td><td>Irlanda / global</td><td>El benchmark internacional para federaciones de rugby: registro y membresía, scheduling, live scoring, gobernanza y <em>safeguarding</em>, pagos con split-fee, apps de árbitro. Cliente citado: Munster Rugby</td><td class="num">Sin tarifas públicas; declara «sin cuotas para clubes» — lo paga la federación <span class="ev ev-n">Sin dato</span></td><td>Producto más completo del vertical, credibilidad ante federaciones</td><td>Sin presencia declarada en LatAm; producto pesado y caro de implementar; nada del lado hincha</td><td><span class="th th-2"><i></i>Media a futuro</span></td></tr>
+<tr><td>PlayHQ</td><td>Australia</td><td>Plataforma de competencias de federaciones nacionales; apps marca blanca</td><td class="num">AUD 6–10 por registración según tamaño + 1,99% servicio + 1,99% comercio + AUD 0,30 <span class="ev ev-f">Encontrado</span></td><td>Modelo de fee por registración, transparente y escalable</td><td>Traslada el costo al participante — fricción alta en Argentina</td><td><span class="th th-1"><i></i>Baja</span></td></tr>
+<tr><td>LeagueRepublic</td><td>Reino Unido</td><td>Gestión de ligas amateur multideporte con sitio propio, API y widgets</td><td class="num">Gratis / US$ 17,90 / 30,40 / 60,90 / 89,60 mes según nº de equipos + 1% por transacción <span class="ev ev-f">Encontrado</span></td><td>Plan gratuito robusto; escalonado por equipos, no por usuarios</td><td>Sin capa B2C ni estadística individual profunda; sin español</td><td><span class="th th-1"><i></i>Baja</span></td></tr>
+<tr><td>Playoff</td><td>España</td><td>Gestión de clubes y <strong>federaciones</strong>: licencias federativas, fixtures, rankings, arbitraje, control QR, API. +80 federaciones</td><td class="num">€ 34,95 / 49,95 / 69,95 mes + IVA; Premiun federaciones a medida <span class="ev ev-f">Encontrado</span></td><td>Producto específico para federaciones con precio público</td><td>Solo España; sin LatAm declarado</td><td><span class="th th-1"><i></i>Baja</span></td></tr>
+<tr><td>Spawtz</td><td>Reino Unido</td><td>Gestión de ligas y sedes</td><td class="num">£ 15 → 5 por equipo/trimestre según volumen <span class="ev ev-f">Encontrado</span></td><td>Precio por equipo, sin costo fijo — modelo replicable</td><td>Solo UK, fútbol de alquiler de cancha</td><td><span class="th th-1"><i></i>Baja</span></td></tr>
+<tr><td>SportsEngine<br><em>(Stack Sports / NBC)</em></td><td>EE. UU.</td><td>Registro, pagos, sitios, comunicación y streaming para asociaciones grandes</td><td class="num">Express US$ 79/mes · Premium US$ 129/mes · Pro US$ 2.199/año; Motion: US$ 295 setup + 1% + 2,9%+0,30 <span class="ev ev-f">Encontrado</span></td><td>Ecosistema enorme, streaming propio</td><td>EE. UU., precios opacos por producto, irrelevante en rugby argentino</td><td><span class="th th-1"><i></i>Baja</span></td></tr>
+<tr><td>TeamSnap</td><td>EE. UU.</td><td>Roster, calendario, comunicación, streaming para equipos y ligas</td><td class="num">Gratis / US$ 5,84 / 8,34 / 10,84 mes por equipo; clubes y ligas a cotizar <span class="ev ev-f">Encontrado</span></td><td>UX pulida, adopción masiva</td><td>Nivel equipo, no competición; sin LatAm</td><td><span class="th th-1"><i></i>Baja</span></td></tr>
+<tr><td>Jersey Watch</td><td>EE. UU.</td><td>Sitio + registro + scheduling para ligas chicas</td><td class="num">US$ 348/año (≈29/mes); primer mes US$ 19 <span class="ev ev-f">Encontrado</span></td><td>Precio simple, sin contrato largo</td><td>Solo EE. UU.</td><td><span class="th th-1"><i></i>Baja</span></td></tr>
+<tr><td>Challonge</td><td>Global</td><td>Brackets y torneos de eliminación, muy usado en eSports</td><td class="num">Gratis con publicidad / US$ 12 mes o 6,99 anual <span class="ev ev-f">Encontrado</span></td><td>Simplísimo, gratis</td><td>Brackets, no ligas de temporada larga con estadística</td><td><span class="th th-1"><i></i>Baja</span></td></tr>
+<tr><td>Sportradar · Genius Sports</td><td>Global</td><td>Derechos y distribución de datos para apuestas y medios</td><td class="num">API desde US$ 1.250/mes; paquetes de datos in-game US$ 4.000–6.000/mes <span class="ev ev-f">Encontrado</span></td><td>Escala y derechos exclusivos</td><td>Otro negocio y otra liga. Relevante solo como <strong>referencia de cuánto vale un dato deportivo estructurado</strong> — y como comprador futuro, no como competidor</td><td><span class="th th-1"><i></i>Nula hoy</span></td></tr>
+<tr><td>Rugby Xplorer<br><em>(Rugby Australia)</em></td><td>Australia / NZ</td><td>Plataforma unificada de la federación australiana, de base a elite</td><td class="num">Infraestructura federativa <span class="ev ev-n">Sin dato</span></td><td>Modelo de referencia de «la federación construye lo suyo»</td><td>No comercializable fuera de su federación</td><td><span class="th th-1"><i></i>Nula</span></td></tr>
+</tbody></table></div>
+
+<h3>Competidores indirectos — los que realmente hay que desplazar</h3>
+<div class="tw"><table>
+<thead><tr><th>Sustituto</th><th>Por qué gana hoy</th><th>Cómo se lo desplaza</th></tr></thead>
+<tbody>
+<tr><td>WhatsApp + planilla de papel + Excel</td><td>Costo cero, cero fricción de adopción, ya funciona «lo suficiente»</td><td>No atacar el costo: atacar lo que se pierde. El grupo no deja historial ni tabla ni ficha de jugador</td></tr>
+<tr><td>Instagram del club</td><td>Es donde ya está la audiencia y es gratis</td><td>No competir: G22 alimenta a Instagram. La exportación de placas ya existe y es exactamente eso</td></tr>
+<tr><td>Google Sheets del organizador</td><td>Flexible, gratis, lo controla él</td><td>Importación desde planilla (ya implementada) para que no arranque de cero</td></tr>
+<tr><td>Wikipedia y medios deportivos</td><td>Gratis, indexado, con historial de torneos grandes</td><td>Ganar en profundidad: juveniles, femenino y ficha individual, donde ninguno llega</td></tr>
+<tr><td>No hacer nada</td><td>El competidor más frecuente en venta B2B a instituciones amateurs</td><td>Piloto gratuito de un partido: convierte una decisión de presupuesto en una decisión de calendario</td></tr>
+</tbody></table></div>
+</div>
+</section>
+
+<section id="s3">
+<div class="sec-head"><span class="sec-n">03</span><h2>Benchmarking</h2></div>
+<div class="prose">
+<p>Comparación contra los cuatro competidores que importan en la decisión de compra de una unión o un club de rugby argentino. Escala: ●●● fuerte · ●● adecuado · ● débil · — no aplica.</p>
+<div class="tw"><table>
+<thead><tr><th>Criterio</th><th>G22 Scores</th><th>Rugby Pro Score</th><th>Conecta Rugby (UAR)</th><th>Rugby Manager</th><th>Clupik</th><th>Sportlomo</th></tr></thead>
+<tbody>
+<tr><td>Precio</td><td>●●● US$ 0–149/mes</td><td>●● Unión paga Primera; el club paga las demás categorías</td><td>●●● Gratis</td><td>●● ≈US$ 64–95/mes</td><td>●● US$ 29–99/mes</td><td>● Contrato federativo</td></tr>
+<tr><td>Precisión del dato</td><td>●●● Evento con minuto, reloj de servidor</td><td>●● Marcador y estadística por jugador</td><td>●●● Es el dato oficial</td><td>●● Nivel club</td><td>●● Nivel club</td><td>●●● Grado federativo</td></tr>
+<tr><td>Automatización (tabla y stats derivadas)</td><td>●●● Todo se deriva de una carga</td><td>● Sin tabla de posiciones derivada</td><td>● Cierre administrativo</td><td>●● Parcial</td><td>●● Parcial</td><td>●●●</td></tr>
+<tr><td>Inteligencia artificial</td><td>● Predictor incipiente; <strong>no vender como IA</strong></td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><td>Predicción / prode</td><td>●●● Prode con ligas privadas y scoring automático</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><td>Integración con sistemas existentes</td><td>●● OpenAPI de resultados, importación por planilla, WhatsApp, ingesta de terceros. <strong>Falta integrar BDUAR</strong></td><td>● Sin información pública</td><td>●●● Es BDUAR</td><td>●</td><td>●●</td><td>●●●</td></tr>
+<tr><td>Compatibilidad multideporte</td><td>●●● Rugby, hockey, fútbol americano, handball + catálogo de 17</td><td>— Solo rugby</td><td>● Solo rugby</td><td>● Solo rugby</td><td>●●● Multideporte</td><td>●●● Multideporte</td></tr>
+<tr><td>Instalación</td><td>●●● Ninguna: PWA desde el navegador</td><td>●●● Ninguna</td><td>●● App a descargar</td><td>●● App</td><td>●● App</td><td>●●</td></tr>
+<tr><td>Tiempo de implementación</td><td>●●● Un partido en la primera demo</td><td>●●● Dos minutos, igual que G22</td><td>●● Alta federativa</td><td>●●</td><td>●●</td><td>● Meses</td></tr>
+<tr><td>Escalabilidad</td><td>●●● Postgres + Vercel; ya opera dos deportes</td><td>●● Sin información pública</td><td>●●●</td><td>●●</td><td>●●●</td><td>●●●</td></tr>
+<tr><td>Mantenimiento</td><td>●● 190 migraciones con rollback documentado; equipo chico</td><td>●● Sin información pública</td><td>●●● Recursos de la UAR</td><td>●●</td><td>●●●</td><td>●●●</td></tr>
+<tr><td>Soporte</td><td>●● Fundador; acompañamiento en la demo</td><td>●● Demo por WhatsApp</td><td>●● Estructura federativa</td><td>●●</td><td>●● Por plan</td><td>●●●</td></tr>
+<tr><td>Ahorro operativo para el cliente</td><td>●●● Elimina el doble ingreso de datos</td><td>●● Digitaliza la carga en cancha</td><td>●● Digitaliza la planilla</td><td>●●</td><td>●●</td><td>●●●</td></tr>
+<tr><td>Retorno de inversión</td><td>●●● Horas + sponsors + costo evitado de desarrollo</td><td>●● Primera sin costo para el club</td><td>●●● Es gratis</td><td>●●</td><td>●●</td><td>●</td></tr>
+<tr><td>Facilidad de adopción</td><td>●●● Dos minutos de instrucción por partido</td><td>●●● Muy alta</td><td>●● Obligatoria, y eso ayuda</td><td>●●</td><td>●●</td><td>●</td></tr>
+<tr><td><strong>Acceso sin cuenta ni rol federado</strong></td><td><strong>●●● Cualquiera entra y mira</strong></td><td><strong>●●● Cualquiera entra y mira</strong></td><td><strong>— Login de BDUAR obligatorio</strong></td><td><strong>— Solo usuarios del club</strong></td><td><strong>— Solo usuarios del club</strong></td><td><strong>●● Sitios públicos por federación</strong></td></tr>
+<tr><td><strong>Sitio público para el hincha</strong></td><td><strong>●●● Fixtures, tablas, rankings, fichas, búsqueda</strong></td><td><strong>●● Marcador en vivo, sin navegación del torneo</strong></td><td><strong>— No tiene</strong></td><td><strong>● Marginal</strong></td><td><strong>● Marginal</strong></td><td><strong>●● Sitios con datos en vivo</strong></td></tr>
+<tr><td><strong>Historial persistente de jugador</strong></td><td><strong>●●● Temporada tras temporada, de M16 a Primera</strong></td><td><strong>— No guarda los partidos</strong></td><td><strong>● Interno</strong></td><td><strong>●● Interno</strong></td><td><strong>●</strong></td><td><strong>●●</strong></td></tr>
+<tr><td><strong>Cobertura de juveniles</strong></td><td><strong>●●● Cada categoría con su tabla propia</strong></td><td><strong>●● Pero el club las paga aparte</strong></td><td><strong>●● Administrativa</strong></td><td><strong>●●</strong></td><td><strong>●●</strong></td><td><strong>●●</strong></td></tr>
+<tr><td><strong>Producto de audiencia</strong></td><td><strong>●●● Prode, fantasy, push, favoritos, placas</strong></td><td><strong>—</strong></td><td><strong>—</strong></td><td><strong>—</strong></td><td><strong>—</strong></td><td><strong>—</strong></td></tr>
+</tbody></table></div>
+<p class="cap">Las cinco últimas filas están en negrita a propósito: son las cinco donde G22 gana sin discusión, y son las cinco sobre las que hay que construir todo el discurso comercial. En las quince de arriba, G22 empata o pierde contra alguien. La primera de las cinco —<strong>acceso sin cuenta</strong>— es la que explica a las otras cuatro: si hay que pedir permiso para entrar, no hay hincha, no hay audiencia, no hay sponsor y no hay ficha que nadie mire. Contra Rugby Pro Score, en cambio, esa fila empata y la que decide es <strong>historial persistente</strong>: es la única de las veinte donde ellos marcan cero y G22 marca lleno.</p>
+
+<div class="box box-w">
+<h4>Cara a cara con Rugby Pro Score — el único empate real</h4>
+<p>Contra la UAR y Rugby Manager, la línea que decide es <em>abierto contra cerrado</em>. Contra Rugby Pro Score esa línea no sirve: los dos son abiertos, los dos cargan en dos minutos desde el celular, los dos hacen la demo por WhatsApp. Empatan en catorce de las veinte filas de arriba. La diferencia está en cuatro:</p>
+<ul>
+<li><strong>Permanencia.</strong> Ellos no guardan los partidos; G22 sí. Es la diferencia entre un marcador y una base de datos, y es la que se acumula: cada fin de semana que pasa, la ventaja de G22 crece sola y la de ellos vuelve a cero.</li>
+<li><strong>Tabla y acumulados derivados.</strong> Sin archivo no hay tabla de posiciones, ni acumulado de jugador, ni ranking de clubes, ni historial cruzado. Todo eso en G22 sale solo de la carga que ya se hizo.</li>
+<li><strong>Indexación.</strong> Sus páginas no aparecen en una búsqueda restringida a su propio dominio; las de G22 sí <span class="ev ev-f">Encontrado</span>. Un marcador que Google no ve no genera una sola visita orgánica: obliga a que alguien mande el link cada sábado.</li>
+<li><strong>Multideporte.</strong> Ellos son solo rugby. G22 ya opera hockey sobre césped, fútbol americano y handball en producción.</li>
+</ul>
+<p><strong>Cómo se dice en una reunión:</strong> «lo que ellos te muestran el sábado, nosotros te lo mostramos el sábado y además te lo dejamos para siempre — con la tabla armada sola y la ficha de cada jugador creciendo temporada a temporada». No hay que atacarlos: hay que preguntar qué pasa con el partido del sábado pasado.</p>
+</div>
+
+<div class="box box-k">
+<h4>Dónde G22 es mejor, más barato o más fácil</h4>
+<ul>
+<li><strong>Mejor:</strong> es el único que entrega las tres capas juntas. Un club que hoy quiera lo mismo necesita Rugby Manager <em>más</em> un sitio propio <em>más</em> alguien que lo actualice.</li>
+<li><strong>Más barato:</strong> el plan Pro (US$ 39) queda por debajo del Básico de Rugby Manager (≈US$ 64) entregando además el frente público. Contra Sportlomo o un desarrollo propio, la diferencia es de un orden de magnitud.</li>
+<li><strong>Más fácil:</strong> cero instalación y una demo que es un partido real del cliente. El ciclo «ver para creer» dura un fin de semana, no un trimestre.</li>
+<li><strong>Más rentable para el cliente:</strong> es el único cuyo output — una página con tráfico — es <em>vendible a un sponsor</em>. Los demás son costo puro.</li>
+</ul>
+</div>
+</div>
+</section>
+
+<section id="s4">
+<div class="sec-head"><span class="sec-n">04</span><h2>Precios de mercado</h2></div>
+<div class="prose">
+<p>Todas las cifras con su etiqueta de evidencia. Las conversiones a dólares usan el tipo de cambio 1.100 ARS/USD que el propio proyecto tiene configurado para el cobro con MercadoPago — es un supuesto operativo del negocio, no una cotización de mercado.</p>
+
+<h4>Software de gestión deportiva — precio de lista</h4>
+<div class="tw"><table>
+<thead><tr><th>Producto</th><th>Plan</th><th>Precio</th><th>Unidad</th><th>Evidencia</th></tr></thead>
+<tbody>
+<tr><td>Rugby Manager (AR)</td><td>Básico</td><td class="num">ARS 70.000 ≈ US$ 64</td><td>por club / mes</td><td><span class="ev ev-f">Encontrado</span> · conversión a USD <span class="ev ev-s">Supuesto</span></td></tr>
+<tr><td>Rugby Manager (AR)</td><td>RM Plus</td><td class="num">ARS 105.000 ≈ US$ 95</td><td>por club / mes</td><td><span class="ev ev-f">Encontrado</span> · conversión a USD <span class="ev ev-s">Supuesto</span></td></tr>
+<tr><td>Conecta Rugby (UAR)</td><td>App oficial</td><td class="num">US$ 0</td><td>—</td><td><span class="ev ev-f">Encontrado</span></td></tr>
+<tr><td>GesDeportiva (CABB)</td><td>Federación</td><td class="num">$ 1.500</td><td>por club / año</td><td><span class="ev ev-f">Encontrado</span></td></tr>
+<tr><td>Clupik — clubes AR</td><td>Pro / Elite</td><td class="num">US$ 39 / 99</td><td>por club / mes</td><td><span class="ev ev-f">Encontrado</span></td></tr>
+<tr><td>Clupik — ligas LatAm</td><td>Amateur / Top</td><td class="num">US$ 29 / 79 · US$ 199 / 599 anual</td><td>por liga / mes</td><td><span class="ev ev-f">Encontrado</span></td></tr>
+<tr><td>Clupik — app propia</td><td>Add-on</td><td class="num">US$ 49</td><td>mes</td><td><span class="ev ev-f">Encontrado</span></td></tr>
+<tr><td>Playoff (ES)</td><td>Base / Pro / Top</td><td class="num">€ 34,95 / 49,95 / 69,95 + IVA</td><td>por club / mes</td><td><span class="ev ev-f">Encontrado</span></td></tr>
+<tr><td>LeagueRepublic</td><td>Gold S/M/L/XL</td><td class="num">US$ 17,90 / 30,40 / 60,90 / 89,60</td><td>por liga / mes, por nº de equipos</td><td><span class="ev ev-f">Encontrado</span></td></tr>
+<tr><td>Spawtz</td><td>Escalonado</td><td class="num">£ 15 → £ 5</td><td>por equipo / trimestre</td><td><span class="ev ev-f">Encontrado</span></td></tr>
+<tr><td>Jersey Watch</td><td>Anual</td><td class="num">US$ 348</td><td>por liga / año</td><td><span class="ev ev-f">Encontrado</span></td></tr>
+<tr><td>SportsEngine</td><td>Express / Premium / Pro</td><td class="num">US$ 79 / 129 mes · US$ 2.199 año</td><td>por organización</td><td><span class="ev ev-f">Encontrado</span></td></tr>
+<tr><td>TeamSnap</td><td>Basic → Ultra</td><td class="num">US$ 5,84 → 10,84</td><td>por equipo / mes</td><td><span class="ev ev-f">Encontrado</span></td></tr>
+<tr><td>Challonge</td><td>Premier</td><td class="num">US$ 12 mes · 6,99 anual</td><td>por organizador</td><td><span class="ev ev-f">Encontrado</span></td></tr>
+<tr><td>Sportlyzer</td><td>Full anual</td><td class="num">€ 1.000</td><td>por club / año</td><td><span class="ev ev-f">Encontrado</span></td></tr>
+<tr><td>Sportlomo</td><td>Federación</td><td class="num">No publicado</td><td>—</td><td><span class="ev ev-n">Sin dato</span></td></tr>
+</tbody></table></div>
+
+<h4>Modelos por transacción — la alternativa al abono</h4>
+<div class="tw"><table>
+<thead><tr><th>Producto</th><th>Estructura</th><th>Evidencia</th></tr></thead>
+<tbody>
+<tr><td>PlayHQ</td><td class="num">AUD 10 / 8 / 6 por registración según tamaño (&lt;2.000 / &lt;10.000 / &lt;50.000 participantes) + 1,99% servicio + 1,99% comercio + AUD 0,30</td><td><span class="ev ev-f">Encontrado</span></td></tr>
+<tr><td>SportsEngine Motion</td><td class="num">US$ 295 de setup + 1% fee tecnológico + 2,9% + US$ 0,30 de procesamiento, sin abono</td><td><span class="ev ev-f">Encontrado</span></td></tr>
+<tr><td>LeagueRepublic</td><td class="num">1% por transacción sobre el plan</td><td><span class="ev ev-f">Encontrado</span></td></tr>
+<tr><td>Jersey Watch</td><td class="num">3,5% + US$ 1 por transacción, trasladable al usuario</td><td><span class="ev ev-f">Encontrado</span></td></tr>
+<tr><td>MercadoPago (el que usa G22)</td><td class="num">Comisión vigente según acreditación</td><td><span class="ev ev-n">Sin dato en esta investigación</span></td></tr>
+</tbody></table></div>
+
+<h4>Datos deportivos y audiencia — el techo del negocio</h4>
+<div class="tw"><table>
+<thead><tr><th>Concepto</th><th>Precio</th><th>Evidencia</th></tr></thead>
+<tbody>
+<tr><td>API Sportradar, entrada</td><td class="num">desde US$ 1.250 / mes</td><td><span class="ev ev-f">Encontrado</span></td></tr>
+<tr><td>Sportmonks (fútbol)</td><td class="num">desde € 34 / mes</td><td><span class="ev ev-f">Encontrado</span></td></tr>
+<tr><td>The Odds API</td><td class="num">US$ 30–249 / mes</td><td><span class="ev ev-f">Encontrado</span></td></tr>
+<tr><td>Paquete de datos in-game para apuestas (~300 líneas/mes)</td><td class="num">US$ 4.000–6.000 / mes; US$ 20–30 por partido adicional</td><td><span class="ev ev-f">Encontrado</span></td></tr>
+<tr><td>Sportradar — contrato de datos Indian Super League, 4 años</td><td class="num">&gt; ₹57 crore ≈ US$ 6,8 M</td><td><span class="ev ev-f">Encontrado</span></td></tr>
+<tr><td>Suscripción B2C de rugby (RugbyPass)</td><td class="num">US$ 9,99 / 19,99 mes · US$ 99 / 199 año</td><td><span class="ev ev-f">Encontrado</span></td></tr>
+<tr><td>Mercado global de software de gestión deportiva</td><td class="num">US$ 4,3 B (2025) → 14,8 B (2033), CAGR 17,1% — Grand View<br>US$ 11,33 B (2026) → 19,15 B (2031), CAGR 11,07% — Mordor<br>US$ 8,25 B (2024) → 23,67 B (2031), CAGR 15,53% — Verified</td><td><span class="ev ev-f">Encontrado</span> — las tres difieren por definición de alcance; usar el rango, no una cifra</td></tr>
+<tr><td>Ingresos por sponsors de la UAR</td><td class="num">≈ US$ 10 M / año, 60% al rugby amateur</td><td><span class="ev ev-f">Encontrado</span></td></tr>
+<tr><td>CPM publicitario digital en Argentina</td><td class="num">—</td><td><span class="ev ev-n">Sin dato</span> — IAB Argentina no publica una cifra accesible. No estimar el ingreso publicitario sobre un CPM inventado</td></tr>
+<tr><td>Licitaciones públicas de software de rugby en LatAm</td><td class="num">—</td><td><span class="ev ev-n">Sin dato</span> — no se halló ninguna. Las decisiones se toman por desarrollo propio o contratación directa</td></tr>
+</tbody></table></div>
+
+<div class="box box-k">
+<h4>Las tres lecturas que importan</h4>
+<ol>
+<li><strong>El piso lo pone Conecta Rugby: cero.</strong> El back-office de partido ya no se puede cobrar en rugby argentino. Cualquier precio debe justificarse con lo que la app oficial <em>no</em> hace.</li>
+<li><strong>El techo por club lo pone Rugby Manager: ≈US$ 64–95/mes.</strong> Es la prueba más valiosa de todo este informe: un club de rugby argentino ya paga ese número por software. La disposición a pagar existe y está medida.</li>
+<li><strong>El techo por federación lo pone GesDeportiva: casi nada por club.</strong> Una federación negocia por volumen y aplasta el precio unitario. Por eso el contrato de unión tiene que venderse como <em>plataforma</em> con precio de plataforma, nunca como «precio por club × cantidad de clubes».</li>
+</ol>
+</div>
+</div>
+</section>
+
+<section id="s5">
+<div class="sec-head"><span class="sec-n">05</span><h2>Modelos de negocio</h2></div>
+<div class="prose">
+<p>Doce modelos evaluados. Las columnas de margen, dificultad y riesgo son juicio comercial <span class="ev ev-s">Supuesto</span> apoyado en los precios de §4 y en la estructura del producto; el precio potencial se ancla en datos donde existen.</p>
+<div class="tw"><table>
+<thead><tr><th>Modelo</th><th>Precio potencial</th><th>Margen</th><th>Dificultad de venta</th><th>Cierre</th><th>Escalabilidad</th><th>Inversión inicial</th><th>Recurrencia</th><th>Veredicto</th></tr></thead>
+<tbody>
+<tr><td>1 · Venta del sistema completo</td><td class="num">US$ 40–120k</td><td>Alta una vez</td><td>Muy alta</td><td>9–18 meses</td><td>Nula</td><td>Alta</td><td>Ninguna</td><td><strong>Descartar.</strong> Mata el activo: si se vende el sistema, se pierde la base de datos histórica, que es lo único defendible</td></tr>
+<tr><td>2 · Hardware + software</td><td class="num">—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td><strong>No aplica.</strong> El producto no tiene hardware y no debería tenerlo</td></tr>
+<tr><td>3 · Proyecto de integración</td><td class="num">US$ 8–25k por unión</td><td>Media</td><td>Alta</td><td>6–12 meses</td><td>Baja</td><td>Media</td><td>Ninguna</td><td>Solo como <em>envoltorio contable</em> para que una unión pueda imputarlo a un proyecto en vez de a un abono</td></tr>
+<tr><td>4 · Licencia de software</td><td class="num">US$ 5–15k / año</td><td>Alta</td><td>Alta</td><td>6–12 meses</td><td>Media</td><td>Baja</td><td>Anual</td><td>Viable para una unión que exija propiedad. Segunda opción</td></tr>
+<tr><td>5 · SaaS multi-tenant</td><td class="num">US$ 15–149 / mes</td><td>Muy alta</td><td>Media</td><td>1–3 meses</td><td>Muy alta</td><td>Ya hecha</td><td>Mensual</td><td><strong>Núcleo del negocio.</strong> Ya está construido y cobrando</td></tr>
+<tr><td>6 · Suscripción anual con descuento</td><td class="num">10 meses por 12</td><td>Muy alta</td><td>Media</td><td>1–3 meses</td><td>Muy alta</td><td>Baja</td><td>Anual</td><td><strong>Sí, y prioritario.</strong> El deporte amateur es estacional: cobrar por temporada calza con cómo la unión presupuesta</td></tr>
+<tr><td>7 · Pago por «cabina» → <strong>por categoría / torneo</strong></td><td class="num">US$ 8–20 por categoría / mes</td><td>Alta</td><td>Media</td><td>1–2 meses</td><td>Alta</td><td>Baja</td><td>Mensual</td><td><strong>Sí.</strong> Es la unidad natural de valor: cada categoría es su propio torneo con su tabla. Escala con el uso real</td></tr>
+<tr><td>8 · Pago por «planta» → <strong>por club o unión</strong></td><td class="num">US$ 39–149 club · US$ 3–12k unión/año</td><td>Muy alta</td><td>Media a alta</td><td>2–6 meses</td><td>Alta</td><td>Baja</td><td>Anual</td><td><strong>Sí — el contrato grande.</strong> Una unión firma una vez y entran 30 clubes</td></tr>
+<tr><td>9 · Contrato de mantenimiento</td><td class="num">15–20% del contrato</td><td>Media</td><td>Baja</td><td>—</td><td>Media</td><td>Nula</td><td>Anual</td><td>Solo tiene sentido acompañando el modelo 4</td></tr>
+<tr><td>10 · Reparto de ahorro</td><td class="num">—</td><td>—</td><td>Muy alta</td><td>&gt;12 meses</td><td>Nula</td><td>Alta</td><td>Variable</td><td><strong>Descartar.</strong> El ahorro son horas de voluntarios y dirigentes, no una factura de energía. No es auditable, entonces no es cobrable</td></tr>
+<tr><td>11 · Piloto pago + implementación</td><td class="num">Piloto US$ 0–400</td><td>—</td><td>Baja</td><td>2–6 semanas</td><td>Alta</td><td>Baja</td><td>Convierte a 5/6/8</td><td><strong>Sí, como puerta.</strong> Pero el piloto <em>gratuito</em> de un partido es mejor: elimina la única decisión que puede frenar a un dirigente</td></tr>
+<tr><td>12 · Consultoría + implementación</td><td class="num">US$ 2–6k por carga histórica</td><td>Media</td><td>Baja</td><td>1–2 meses</td><td>Baja</td><td>Nula</td><td>Ninguna</td><td><strong>Sí, como upsell.</strong> Digitalizar el historial de un club de 100 años es un servicio con margen y crea dependencia sana</td></tr>
+<tr><td>13 · Publicidad y sponsors <em>(agregado)</em></td><td class="num">Depende del tráfico</td><td>Alta</td><td>Media</td><td>3–9 meses</td><td>Muy alta</td><td>Nula</td><td>Por campaña</td><td>Solo con audiencia medida. Antes de vender esto hay que poder mostrar un número de Analytics</td></tr>
+<tr><td>14 · Licencia de datos <em>(agregado)</em></td><td class="num">US$ 500–5.000 / mes</td><td>Muy alta</td><td>Alta</td><td>9–18 meses</td><td>Muy alta</td><td>Media</td><td>Mensual</td><td><strong>El premio a 3–5 años.</strong> El endpoint OpenAPI ya existe. Requiere ser la fuente canónica del rugby argentino primero</td></tr>
+</tbody></table></div>
+<div class="box box-g">
+<h4>El modelo de Rugby Pro Score valida la tesis — y deja ver dónde se equivocaron</h4>
+<p>Su estructura es exactamente la que este informe recomienda en §10: <strong>la unión paga poco y habilita; el club paga el resto.</strong> Que alguien más haya llegado ahí de forma independiente es la mejor confirmación disponible de que es el modelo correcto para este mercado, y ahorra el costo de probarlo.</p>
+<p><strong>Pero el corte que eligieron está invertido.</strong> Hicieron que la unión pague la <em>Primera</em> y que el club pague las <em>juveniles</em>. La Primera es justamente la categoría que ya tiene cobertura: la publica el sitio de la unión, la levanta el medio local, la sigue el hincha igual. Las juveniles son la categoría que no existe en ningún lado, donde está el dolor y donde está la carga emocional — la madre del M17 que juega a doscientos kilómetros. Le pusieron precio a la puerta de entrada y regalaron lo que ya era gratis.</p>
+<p><strong>La contrajugada de G22 es simple y no requiere construir nada:</strong> incluir todas las categorías del club en un solo precio. Que la decisión del club sea «todo mi club, un precio», y no «cuánto me sale agregar la M17». Frente a un club que ya escuchó la propuesta de ellos, esa comparación se explica en una frase y gana.</p>
+</div>
+
+<div class="box box-k">
+<h4>La combinación recomendada</h4>
+<p><strong>SaaS anual por unión (8) como motor + SaaS mensual por club (5/7) como entrada + consultoría de carga histórica (12) como upsell + licencia de datos (14) como opción a largo plazo.</strong> Los modelos 1, 2 y 10 se descartan explícitamente. El 11 se usa como táctica de entrada, no como línea de ingreso.</p>
+</div>
+</div>
+</section>
+
+<section id="s6">
+<div class="sec-head"><span class="sec-n">06</span><h2>Clientes potenciales</h2></div>
+<div class="prose">
+<p>Seis segmentos, ordenados por prioridad comercial real. La prioridad no sigue el tamaño del cliente sino el producto de <em>dolor × capacidad de decidir rápido × arrastre</em>.</p>
+<div class="tw"><table>
+<thead><tr><th>Segmento</th><th>Problema concreto</th><th>Capacidad de pago</th><th>Acceso comercial</th><th>Probabilidad de adopción</th><th>Prioridad</th></tr></thead>
+<tbody>
+<tr><td><strong>Unión provincial mediana</strong><br>20–40 clubes</td><td>Sus juveniles y su femenino no existen públicamente; la tabla la actualiza una persona a mano; no tiene con qué ir a buscar un sponsor</td><td>Media. Presupuesto chico pero real; US$ 3–8k/año es defendible</td><td><strong>Alto.</strong> Estructura chica, el presidente o el secretario deciden, se los ubica por WhatsApp</td><td>Alta</td><td><strong>1 — objetivo primario</strong></td></tr>
+<tr><td><strong>Club de rugby grande</strong><br>5+ categorías</td><td>Cinco partidos cada sábado y ninguna forma de seguirlos juntos; sin historial de jugadores; prensa del club rehaciendo todo a mano</td><td>Media-alta. Ya hay clubes pagando ≈US$ 64–95/mes a Rugby Manager</td><td><strong>Muy alto.</strong> Se entra por la prensa del club o el entrenador, sin comité</td><td>Muy alta</td><td><strong>2 — puerta de entrada</strong></td></tr>
+<tr><td><strong>Organizador de torneo independiente</strong><br>seven, TDI, copas, escuelas</td><td>Arma el torneo en Excel y lo publica por Instagram; cada edición arranca de cero</td><td>Baja-media. US$ 15–39/mes es su techo</td><td><strong>Muy alto.</strong> Autoservicio puro, sin ciclo de venta</td><td>Alta</td><td><strong>3 — volumen y autoservicio</strong></td></tr>
+<tr><td><strong>Club polideportivo / social</strong><br>rugby + hockey</td><td>Dos o tres deportes, cada uno con su planilla; ninguna vista unificada del club</td><td>Media-alta</td><td>Medio. Decide una comisión</td><td>Media</td><td><strong>4 — donde el multideporte gana</strong></td></tr>
+<tr><td><strong>Federación nacional</strong><br>UAR, Chile, Uruguay, Brasil</td><td>Tiene resuelto el back-office; le falta el frente público y el producto de audiencia</td><td>Alta</td><td><strong>Bajo.</strong> Ciclo largo, política interna, y en Argentina ya construyó lo suyo</td><td>Baja hoy</td><td><strong>5 — no antes del caso de éxito</strong></td></tr>
+<tr><td><strong>Medios y sponsors</strong></td><td>No hay dato estructurado de rugby amateur argentino para cubrir ni para segmentar audiencia</td><td>Alta</td><td>Bajo hoy</td><td>Baja hoy</td><td><strong>6 — monetización posterior</strong></td></tr>
+</tbody></table></div>
+
+<h3>Organizaciones reales, por país</h3>
+<div class="tw"><table>
+<thead><tr><th>País</th><th>Uniones y federaciones</th><th>Clubes y torneos</th><th>Lectura comercial</th></tr></thead>
+<tbody>
+<tr><td><strong>Argentina</strong></td><td>25 uniones de la UAR: URBA, Cordobesa, Tucumán, Rosario, Cuyo, Mar del Plata, Santafesina, Salta, Entrerriana, Nordeste, Oeste de Buenos Aires, Austral, Andina, Jujeña, Misiones, San Luis, Sanjuanina, Santiagueña, Santacruceña, del Sur, Valle de Chubut, Los Lagos del Sur, Tierra del Fuego, Formosa, UARV <span class="ev ev-f">Encontrado</span></td><td>91 clubes en URBA; Top 14, Primera A/B/C, Segunda, Tercera, femenino, juveniles e infantiles; Torneo del Interior A y B, Nacional de Clubes, Campeonato Argentino; CASI, SIC, Belgrano, Newman, Hindú, Alumni, CUBA, Regatas Bella Vista, Pucará, Champagnat, Los Tilos</td><td><strong>Mercado inicial.</strong> ~450 partidos por fin de semana solo en URBA. Empezar por una unión del interior, no por URBA</td></tr>
+<tr><td>Brasil</td><td>Confederação Brasileira de Rugby</td><td>Cobras Brasil Rugby (Súper Rugby Américas)</td><td>Segundo mercado por tamaño; barrera de idioma y de estructura</td></tr>
+<tr><td>Chile</td><td>Chile Rugby</td><td>Selknam; clasificado al Mundial 2027 por primera vez <span class="ev ev-f">Encontrado</span></td><td><strong>El más atractivo de la región.</strong> Clasificación al Mundial = presupuesto, atención y urgencia de profesionalizar</td></tr>
+<tr><td>Uruguay</td><td>Unión de Rugby del Uruguay</td><td>Peñarol Rugby, Yacaré XV</td><td>Chico pero maduro y cercano culturalmente</td></tr>
+<tr><td>Colombia · México · Perú · Paraguay</td><td>Federación Colombiana de Rugby, FMRU</td><td><span class="ev ev-n">Sin dato</span> de escala</td><td>Mercados de desarrollo; no priorizar</td></tr>
+<tr><td>España</td><td>FERugby</td><td>División de Honor</td><td>Ya lo cubren Playoff y Clupik con precio público. Entrar solo con un diferencial claro</td></tr>
+<tr><td>EE. UU.</td><td>USA Rugby, Major League Rugby</td><td><span class="ev ev-n">Sin dato</span> — no relevado</td><td>Mercado caro de atender; SportsEngine y TeamSnap ya instalados</td></tr>
+<tr><td>Regional</td><td>Sudamérica Rugby / CONSUR</td><td>Súper Rugby Américas: 7 franquicias en AR, BR, CL, UY</td><td>Vía de legitimación regional más que cliente pagador</td></tr>
+</tbody></table></div>
+
+<h3>Contexto de escala</h3>
+<div class="stats">
+  <div class="stat"><b>134</b><span>Uniones miembro de World Rugby</span></div>
+  <div class="stat"><b>~8 M</b><span>Jugadores registrados en el mundo</span></div>
+  <div class="stat"><b>25</b><span>Uniones provinciales argentinas</span></div>
+  <div class="stat"><b>91</b><span>Clubes en URBA</span></div>
+  <div class="stat"><b>~45.000</b><span>Jugadores URBA por fin de semana</span></div>
+  <div class="stat"><b>US$ 10 M</b><span>Sponsors anuales de la UAR</span></div>
+</div>
+<p class="cap">Todos <span class="ev ev-f">Encontrado</span>. Fuentes en §15. No se halló una cifra oficial consolidada de jugadores federados totales en Argentina <span class="ev ev-n">Sin dato</span> — no la uses en una propuesta.</p>
+
+<h3>Dimensionamiento del mercado alcanzable</h3>
+<div class="tw"><table>
+<thead><tr><th>Nivel</th><th>Definición</th><th>Cálculo</th><th>Valor anual</th></tr></thead>
+<tbody>
+<tr><td>SOM año 1<br><em>lo alcanzable</em></td><td>3 uniones provinciales + 25 clubes pagos + 40 organizadores en autoservicio</td><td class="num">3 × US$ 5.000 + 25 × US$ 60 × 12 + 40 × US$ 20 × 12</td><td class="num">≈ US$ 42.600 <span class="ev ev-s">Supuesto</span></td></tr>
+<tr><td>SAM Argentina rugby</td><td>25 uniones + ~450 clubes de rugby <span class="ev ev-e">Estimado</span> a partir de los «+400 clubes» que declara Rugby Manager</td><td class="num">25 × US$ 5.000 + 450 × US$ 60 × 12 × 35% de penetración</td><td class="num">≈ US$ 238.000 <span class="ev ev-s">Supuesto</span></td></tr>
+<tr><td>SAM ampliado</td><td>+ hockey, handball y fútbol amateur argentino, con el mismo motor multideporte</td><td class="num">Multiplicador 4–8× sobre el SAM de rugby</td><td class="num">US$ 1–2 M <span class="ev ev-s">Supuesto</span></td></tr>
+<tr><td>TAM referencia</td><td>Mercado global de software de gestión deportiva</td><td class="num">Tres consultoras, tres definiciones</td><td class="num">US$ 4,3–11,3 mil M <span class="ev ev-f">Encontrado</span></td></tr>
+</tbody></table></div>
+<p class="cap">El TAM global es contexto, no una promesa: G22 no compite por él. El número que gobierna las decisiones del próximo año es el SOM: <strong>alrededor de US$ 40.000 anuales recurrentes es un objetivo exigente pero alcanzable en doce meses</strong>, y es suficiente para probar la tesis.</p>
+</div>
+</section>
+
+<section id="s7">
+<div class="sec-head"><span class="sec-n">07</span><h2>FODA</h2></div>
+<div class="foda">
+<div class="q q-f"><h4>Fortalezas</h4><ul>
+<li><strong>Técnicas:</strong> producto en producción, no un demo. 190 migraciones con rollback documentado, 145 archivos de test, reloj de partido derivado del servidor y atómico ante operadores concurrentes.</li>
+<li><strong>Técnicas:</strong> motor multideporte real — rugby, hockey sobre césped (23 torneos y 105 partidos en producción), fútbol americano y handball, con reglas propias por disciplina.</li>
+<li><strong>Producto:</strong> única solución que integra sitio público, gestión y audiencia. Todo se deriva de una sola carga.</li>
+<li><strong>Comerciales:</strong> embudo ya construido — dos landings segmentadas, captura de leads con atribución de origen, checkout funcionando.</li>
+<li><strong>Comerciales:</strong> el argumento de venta más difícil de copiar es emocional y verificable en diez segundos: la ficha del jugador que sobrevive de M16 a Primera.</li>
+<li><strong>Económicas:</strong> costo marginal por cliente casi nulo. Vercel + Supabase escala sin equipo de infraestructura.</li>
+<li><strong>Culturales:</strong> el equipo documenta lo que el producto <em>no</em> hace y lo saca del copy. Eso sostiene la demo y evita la venta que se cae al primer uso.</li>
+</ul></div>
+<div class="q q-o"><h4>Oportunidades</h4><ul>
+<li><strong>El hueco que dejó la UAR:</strong> Conecta Rugby resuelve el back-office detrás de un login federado y no toca lo público. El espacio quedó vacío, y una federación no puede llenarlo sin renunciar al control de acceso que la define.</li>
+<li><strong>El entorno del jugador es un mercado sin atender:</strong> madres, padres, hermanos, amigos y ex jugadores son cinco a diez veces más gente que los jugadores federados, y hoy ningún sistema del rugby argentino los deja entrar.</li>
+<li><strong>Juveniles y femenino:</strong> la mitad del deporte, sin cobertura pública de nadie. Menor competencia y mayor carga emocional.</li>
+<li><strong>Mercado:</strong> software de gestión deportiva creciendo a 11–17% anual con LatAm identificado como región emergente en las tres consultoras.</li>
+<li><strong>Chile 2027:</strong> primera clasificación al Mundial. Presupuesto y urgencia de profesionalizar, en un mercado sin incumbente.</li>
+<li><strong>Multideporte:</strong> el mismo motor abre hockey y handball argentinos, ambos con menos competencia que el rugby.</li>
+<li><strong>Sponsors:</strong> la UAR mueve US$ 10 M anuales; las uniones provinciales capturan una fracción mínima por no tener propiedad digital medible.</li>
+<li><strong>Datos:</strong> el endpoint OpenAPI ya existe. Ser la fuente canónica del rugby amateur argentino habilita un negocio de licenciamiento a 3–5 años.</li>
+</ul></div>
+<div class="q q-d"><h4>Debilidades</h4><ul>
+<li><strong>Sin historial comercial:</strong> no hay evidencia de clientes pagos ni de una temporada completa operada por un tercero. Es la debilidad número uno.</li>
+<li><strong>Sin métrica de audiencia publicada:</strong> el discurso «tu torneo entra donde el hincha ya mira» necesita un número. Hoy no está a mano.</li>
+<li><strong>Sin carga offline:</strong> el service worker solo cachea GET. En canchas del interior sin señal, no se publica nada en vivo. Es la objeción más previsible.</li>
+<li><strong>Sin exportación de datos:</strong> hay export de placas, no de estadísticas. Una unión no debería firmar sin eso resuelto.</li>
+<li><strong>Dependencia de que el club cargue:</strong> el producto entero depende de un voluntario con un celular. Si no carga, el partido queda vacío y se nota.</li>
+<li><strong>Recursos humanos:</strong> equipo mínimo. Soporte, ventas y desarrollo recaen sobre las mismas personas — el cuello de botella no es técnico.</li>
+<li><strong>Dependencia de proveedores:</strong> Supabase, Vercel y MercadoPago concentran riesgo operativo y de costo en dólares.</li>
+<li><strong>Ingesta de terceros:</strong> importar de Flashscore, SofaScore y RugbyArchive tiene un riesgo de términos de uso que conviene revisar antes de vender el dato.</li>
+</ul></div>
+<div class="q q-a"><h4>Amenazas</h4><ul>
+<li><strong>Rugby Pro Score gana la comparación en Córdoba y la usa para escalar.</strong> Probabilidad alta, impacto alto: mismo producto, mismo discurso, misma jugada comercial, y publicando el mismo torneo que G22 ahora mismo — no es una amenaza futura, es una comparación en curso. <em>Mitigación:</em> velocidad, y atacar por donde ellos cobran — todas las categorías incluidas en un precio. Si además agregan archivo y tabla, la ventaja de G22 se reduce a la base histórica ya cargada y al multideporte; por eso cargar historia temprano no es un upsell, es una defensa.</li>
+<li><strong>Rugby Pro Score:</strong> mismo producto, abierto como G22, publicando el mismo torneo de la Unión Cordobesa el mismo fin de semana. Si suma archivo y tabla, el diferencial se reduce mucho.</li>
+<li><strong>Que la UAR extienda Conecta Rugby al frente público.</strong> Tiene los datos oficiales, la obligatoriedad y presupuesto, aunque su ejecución hasta hoy es floja. Si lo hace bien, el diferencial se evapora.</li>
+<li><strong>Rugby Manager,</strong> con 400+ clubes declarados y relación con 25 uniones, sumando la capa pública que hoy le falta.</li>
+<li><strong>Clupik,</strong> con vertical de rugby, presencia LatAm y precios públicos agresivos.</li>
+<li><strong>Sportlomo</strong> entrando a Sudamérica por acuerdo con World Rugby.</li>
+<li><strong>Resistencia al cambio:</strong> el dirigente amateur no cambia procesos a mitad de temporada, y la ventana de decisión es de pocas semanas al año.</li>
+<li><strong>Ciclos de venta largos:</strong> las comisiones directivas se renuevan y la decisión se reinicia con ellas.</li>
+<li><strong>Riesgo reputacional en un ecosistema chico:</strong> las uniones trabajan con gente de la UAR y todo lo que se diga vuelve. Quedar como «el que anda diciendo que el sistema oficial no funciona» cierra el mercado entero, y ninguna venta lo compensa. El análisis de los límites de BDUAR es interno: hacia afuera, la posición es siempre complementaria.</li>
+<li><strong>Ciberseguridad y datos de menores:</strong> el sistema guarda planteles juveniles. Un incidente con datos de menores es existencial, no reputacional.</li>
+<li><strong>Concentración de clientes:</strong> con tres uniones como base, perder una es perder un tercio del ingreso.</li>
+</ul></div>
+</div>
+<div class="prose">
+<div class="box box-w">
+<h4>Las cuatro amenazas que hay que gestionar activamente</h4>
+<ol>
+<li><strong>Que la UAR amplíe Conecta Rugby hacia lo público.</strong> Probabilidad media, impacto máximo — atenuada por una ejecución hasta hoy floja: adopción baja, quejas de usabilidad y un cierre digital que se traba sin médico presente. <em>Mitigación:</em> no posicionarse como sustituto sino como complemento, y buscar temprano una relación de integración con BDUAR en vez de una competencia frontal. Un G22 que <em>consume</em> el dato oficial es un aliado; uno que pretende reemplazarlo es un rival de una federación.</li>
+<li><strong>Rugby Manager sumando la capa pública.</strong> Probabilidad media-alta, impacto alto. Ya tiene la distribución que a G22 le falta. <em>Mitigación:</em> velocidad. La ventaja es de tiempo, y la base histórica cargada es lo que la vuelve durable.</li>
+<li><strong>Datos de menores.</strong> Probabilidad baja, impacto existencial. <em>Mitigación:</em> política de privacidad específica para juveniles, minimización de datos personales, consentimiento por club y auditoría de accesos, <em>antes</em> del primer contrato con una unión.</li>
+</ol>
+</div>
+<div class="box box-g">
+<h4>Las tres oportunidades que hay que capturar ya</h4>
+<ol>
+<li><strong>El hueco público que la UAR dejó abierto.</strong> Es una ventana, no un estado permanente. Se captura firmando dos o tres uniones antes de que alguien la note.</li>
+<li><strong>Juveniles y femenino como cabeza de playa.</strong> Nadie los cubre, el dolor es alto y el argumento es imposible de rebatir. Además es donde la ficha histórica genera más apego.</li>
+<li><strong>Chile rumbo al Mundial 2027.</strong> Mercado con presupuesto fresco, urgencia y sin incumbente. Es la mejor apuesta de expansión regional y hay que empezar la conversación en 2026, no en 2027.</li>
+</ol>
+</div>
+</div>
+</section>
+
+<section id="s8">
+<div class="sec-head"><span class="sec-n">08</span><h2>Viabilidad comercial</h2></div>
+<div class="prose">
+<div class="tw"><table>
+<thead><tr><th>Factor</th><th>Evaluación</th><th>Veredicto</th></tr></thead>
+<tbody>
+<tr><td>Tamaño de mercado</td><td>SOM año 1 ≈ US$ 43k; SAM rugby argentino ≈ US$ 238k; ampliado a multideporte, US$ 1–2 M</td><td><strong>Chico pero suficiente</strong> para un equipo pequeño rentable. No es un mercado de capital de riesgo</td></tr>
+<tr><td>Demanda potencial</td><td>Demostrada: Rugby Manager cobra ≈US$ 64–95/mes a clubes de rugby argentinos, la CABB compró GesDeportiva, la UAR construyó su propia app</td><td><strong>Validada.</strong> Nadie tiene que crear la categoría</td></tr>
+<tr><td>Barreras de entrada</td><td>Bajas para construir un clon; altas para acumular base histórica, confianza institucional y hábito de hincha</td><td><strong>Correr rápido.</strong> El foso se cava con datos y relaciones, no con código</td></tr>
+<tr><td>Diferenciación</td><td>Las tres capas juntas; ficha de jugador persistente; cobertura de juveniles; multideporte</td><td><strong>Real y demostrable en una demo</strong></td></tr>
+<tr><td>Competencia</td><td>Un competidor gratuito y oficial en el back-office; uno pago con distribución; uno regional con precio público</td><td><strong>Intensa, pero con un hueco claro</strong> — nadie ocupa el frente público</td></tr>
+<tr><td>Disposición a pagar</td><td>Confirmada al nivel del club. En la unión hay que probarla — no hay dato público de presupuesto de unión provincial <span class="ev ev-n">Sin dato</span></td><td><strong>Alta en club, por validar en unión</strong></td></tr>
+<tr><td>Tiempo de venta</td><td>Club: 2–6 semanas. Unión: 2–6 meses. Federación nacional: 9–18 meses</td><td><strong>Aceptable</strong> si se empieza por club y unión</td></tr>
+<tr><td>Complejidad de implementación</td><td>Un partido en la primera demo; una temporada completa migrada por planilla</td><td><strong>Baja — es la mayor ventaja operativa</strong></td></tr>
+<tr><td>Expansión a otras «plantas»</td><td>De un club a su unión, y de una unión a las 24 restantes. El caso de éxito viaja solo en un ambiente donde todos se conocen</td><td><strong>Alta</strong></td></tr>
+<tr><td>Replicación en otras industrias</td><td>El motor ya opera hockey sobre césped, fútbol americano y handball en producción</td><td><strong>Alta y ya probada,</strong> no teórica</td></tr>
+</tbody></table></div>
+
+<h3>Cómo posicionarlo</h3>
+<p>La pregunta no es cosmética: define el precio, el contrato y quién firma.</p>
+<div class="tw"><table>
+<thead><tr><th>Posicionamiento</th><th>Implicancia</th><th>¿Conviene?</th></tr></thead>
+<tbody>
+<tr><td>Producto</td><td>Cerrado, se compra y se instala</td><td>No — no hay nada que instalar</td></tr>
+<tr><td>Software / SaaS</td><td>Abono por acceso a funcionalidad</td><td>Parcialmente. Es la mecánica de cobro, no el argumento</td></tr>
+<tr><td>Servicio</td><td>Se vende trabajo humano</td><td>No — mata el margen y no escala</td></tr>
+<tr><td>Plataforma</td><td>Dos lados: clubes que cargan, hinchas que consumen; el valor crece con cada carga</td><td><strong>Sí — es lo que estructuralmente ya es</strong></td></tr>
+<tr><td>Solución industrial integral</td><td>Proyecto llave en mano</td><td>No aplica a este vertical</td></tr>
+<tr><td>Empresa especializada</td><td>Casa de software vertical deportivo</td><td>Sí como identidad de marca, junto al anterior</td></tr>
+</tbody></table></div>
+<div class="box box-k">
+<h4>El posicionamiento recomendado</h4>
+<p><strong>Plataforma vertical de datos deportivos con capa SaaS de gestión.</strong> «Plataforma» porque el valor no está en las funciones sino en la red que se forma cuando el club carga, el hincha mira y el sponsor paga por esa mirada. «Vertical» porque la ventaja es saber que el 2T de rugby arranca en 2400 segundos y que un hockey son cuartos de 15 — cosas que un genérico multideporte no modela bien. «Con capa SaaS» porque es la mecánica de cobro que ya está construida.</p>
+<p>La diferencia práctica: una plataforma se vende diciendo <em>«tu torneo entra donde el hincha ya está»</em>; un software se vende listando funcionalidades. La primera frase justifica un precio; la segunda invita a compararlo con algo gratis.</p>
+</div>
+</div>
+</section>
+
+<section id="s9">
+<div class="sec-head"><span class="sec-n">09</span><h2>Estrategia de precios</h2></div>
+<div class="prose">
+<p>El proyecto ya tiene planes implementados: Gratis, Inicial US$ 15, Pro US$ 39 y Organización US$ 149, con promo fundador de US$ 9 y US$ 29 por seis meses. La estructura es correcta. Los dos cambios que propongo son de <em>empaquetado</em>, no de números en el tramo bajo.</p>
+
+<h3>La base de costos, y por qué no define el precio</h3>
+<div class="tw"><table>
+<thead><tr><th>Costo</th><th>Mensual</th><th>Anual</th><th>Naturaleza</th></tr></thead>
+<tbody>
+<tr><td>Supabase</td><td class="num">US$ 200</td><td class="num">US$ 2.400</td><td>Infraestructura de servicio</td></tr>
+<tr><td>Vercel</td><td class="num">US$ 150</td><td class="num">US$ 1.800</td><td>Infraestructura de servicio</td></tr>
+<tr><td>Claude Code</td><td class="num">US$ 100</td><td class="num">US$ 1.200</td><td>Desarrollo, no escala con clientes</td></tr>
+<tr><td>RapidAPI</td><td class="num">US$ 20</td><td class="num">US$ 240</td><td>Datos externos</td></tr>
+<tr><td><strong>Total</strong></td><td class="num"><strong>US$ 470</strong></td><td class="num"><strong>US$ 5.640</strong></td><td><strong>Fijo</strong> <span class="ev ev-v">Real</span></td></tr>
+</tbody></table></div>
+<p>Los cuatro son <strong>costos fijos, no costos por cliente</strong>: los planes de Supabase y Vercel ya están contratados y traen margen de crecimiento incluido, así que servir al club número treinta y uno no cuesta prácticamente nada. La consecuencia es que <strong>el precio no se calcula sobre el costo</strong> — se calcula sobre el valor entregado y sobre lo que cobra la competencia. El costo no dice cuánto cobrar; dice cuántos clientes hacen falta.</p>
+<div class="tw"><table>
+<thead><tr><th>Combinación</th><th>Ingreso bruto mensual</th><th>¿Cubre los US$ 505 de equilibrio?</th></tr></thead>
+<tbody>
+<tr><td>Solo clubes C</td><td class="num">—</td><td>Nunca alcanza: harían falta 34. <strong>C es suministro de datos, no ingreso</strong></td></tr>
+<tr><td>7 clubes A</td><td class="num">US$ 553</td><td>Sí, pero es el segmento más difícil de conseguir primero</td></tr>
+<tr><td>12 clubes B</td><td class="num">US$ 540</td><td>Sí</td></tr>
+<tr><td><strong>1 unión mediana + 2 clubes A + 4 B</strong></td><td class="num">US$ 538</td><td><strong>Sí — el camino más realista, y todo dentro de una sola unión</strong></td></tr>
+</tbody></table></div>
+<p class="cap">El umbral de US$ 505 asume un 7% entre comisión de MercadoPago e impuestos <span class="ev ev-s">Supuesto</span>. Los costos son datos reales aportados por el equipo. El cálculo no incluye remuneración del fundador: incorporarla mueve el equilibrio a una escala cercana a los 30 clubes.</p>
+
+<h3>Calibración contra la competencia</h3>
+<p>Cada banda está puesta <strong>por debajo del competidor más cercano de su segmento</strong>. No por vocación de barato: sin clientes pagos, sin caso escrito y con una app oficial gratuita en el mercado, G22 todavía no tiene permiso para ser la opción cara.</p>
+<div class="tw"><table>
+<thead><tr><th>Competidor</th><th>Precio</th><th>Banda de G22</th><th>Diferencia</th></tr></thead>
+<tbody>
+<tr><td>Rugby Manager · RM Plus</td><td class="num">ARS 105.000 ≈ US$ 95 <span class="ev ev-f">Encontrado</span></td><td class="num">A · US$ 79</td><td class="num">−17%</td></tr>
+<tr><td>Rugby Manager · Básico</td><td class="num">ARS 70.000 ≈ US$ 64 <span class="ev ev-f">Encontrado</span></td><td class="num">B · US$ 45</td><td class="num">−30%</td></tr>
+<tr><td>Clupik Elite</td><td class="num">US$ 99 <span class="ev ev-f">Encontrado</span></td><td class="num">A · US$ 79</td><td class="num">−20%</td></tr>
+<tr><td>Clupik Pro <em>con MercadoPago</em></td><td class="num">US$ 35 + 15 = US$ 50 <span class="ev ev-f">Encontrado</span></td><td class="num">B · US$ 45</td><td class="num">−10%</td></tr>
+<tr><td>Clupik Élite <em>con MercadoPago</em></td><td class="num">US$ 89 + 12 = US$ 101 <span class="ev ev-f">Encontrado</span></td><td class="num">A · US$ 79</td><td class="num">−22%</td></tr>
+<tr><td>Competize · Manager profesional</td><td class="num">€ 81 ≈ US$ 88 por 30 competiciones <span class="ev ev-f">Encontrado</span></td><td class="num">A · US$ 79</td><td class="num">−10%</td></tr>
+<tr><td>Score7 · Essentials / Pro / Unlimited</td><td class="num">US$ 9 / 18 / 27 <span class="ev ev-f">Encontrado</span></td><td class="num">C · US$ 15</td><td class="num">El más barato del mercado; sin páginas de club ni ficha de jugador, y con su marca y publicidad en la página pública</td></tr>
+<tr><td>Competize · Torneos pequeños</td><td class="num">€ 19 ≈ US$ 20,50 <span class="ev ev-f">Encontrado</span></td><td class="num">C · US$ 15</td><td class="num">−27%</td></tr>
+<tr><td>Tournify <em>por evento</em></td><td class="num">Gratis hasta 8 equipos · € 40 hasta 60 · € 120 sin límite <span class="ev ev-f">Encontrado</span></td><td class="num">Torneo único</td><td class="num">Modelo que G22 no cubre hoy</td></tr>
+<tr><td>Conecta Rugby (UAR)</td><td class="num">Gratis, cerrado <span class="ev ev-f">Encontrado</span></td><td class="num">Todas</td><td class="num">Otro producto: back-office con login</td></tr>
+<tr><td>Rugby Pro Score</td><td class="num">Unión paga la Primera; el club paga cada categoría extra <span class="ev ev-n">Sin dato</span> de montos</td><td class="num">Todas</td><td class="num">G22 incluye todas las categorías</td></tr>
+</tbody></table></div>
+<p class="cap">Clupik <strong>cobra aparte la integración con MercadoPago</strong> —US$ 15 al mes en Pro, US$ 12 en Élite— y para un club argentino que le cobra a sus socios eso no es opcional. Contado así, su precio real es US$ 50 y US$ 101, y <strong>la escalera de G22 queda por debajo de todos los competidores relevantes sin una sola excepción</strong>. El mercado además tiene dos pisos: herramientas de torneo genéricas (Score7, Competize, Tournify, Challonge) entre US$ 9 y 27, y plataformas de club y federación (Clupik, Rugby Manager, Playoff) entre US$ 38 y 101. G22 debe fijar precio como el segundo grupo y defenderse del primero con profundidad de producto, no con descuento. La banda A se fijó en US$ 79 y no en US$ 99 —donde empataba con Clupik Elite y superaba a Rugby Manager Plus— porque a ese nivel se pierde el único mensaje de precio fuerte disponible. Cuesta unos US$ 900 de margen anual en el escenario realista y compra que ningún club grande pueda decir «me sale lo mismo que el otro». <strong>Con dos casos escritos y tráfico medido, A vuelve a US$ 99.</strong></p>
+
+<h3>Los tres niveles comerciales</h3>
+<div class="tw"><table>
+<thead><tr><th>&nbsp;</th><th>A · Alta capacidad<br><em>máxima división o polideportivo</em></th><th>B · Capacidad media<br><em>Primera A/B — el objetivo</em></th><th>C · Capacidad baja<br><em>ascenso, rural, escuela, femenino</em></th></tr></thead>
+<tbody>
+<tr><td>Precio mensual</td><td class="num">US$ 79</td><td class="num">US$ 45</td><td class="num">US$ 15</td></tr>
+<tr><td>Precio por temporada <em>(10 meses por 12)</em></td><td class="num">US$ 790</td><td class="num">US$ 450</td><td class="num">US$ 150 · o sin cargo a cambio de que carguen todas sus categorías</td></tr>
+<tr><td>Torneos activos</td><td>1</td><td>Hasta 5</td><td>Ilimitados</td></tr>
+<tr><td>Categorías</td><td><strong>Todas</strong></td><td><strong>Todas</strong></td><td><strong>Todas</strong> — cobrar por categoría frena lo que construye el activo</td></tr>
+<tr><td>Ficha de jugador con historial</td><td><strong>Sí</strong></td><td><strong>Sí</strong></td><td><strong>Sí</strong> — no se pone detrás de un plan</td></tr>
+<tr><td>Página pública sin marca de agua</td><td>Sí</td><td>Sí</td><td>Sí</td></tr>
+<tr><td>Fixture avanzado y estadísticas detalladas</td><td>—</td><td>Sí</td><td>Sí</td></tr>
+<tr><td>Exportación de datos <em>(a construir)</em></td><td>—</td><td>Excel / PDF</td><td>Excel / PDF / API</td></tr>
+<tr><td>Placas para redes</td><td>Sí</td><td>Sí, con marca del club</td><td>Sí, con marca de la unión</td></tr>
+<tr><td>Módulo de sponsors</td><td>—</td><td>Sí</td><td>Sí, con reporte de exposición</td></tr>
+<tr><td>Varios administradores</td><td>—</td><td>—</td><td>Sí, con permisos por club</td></tr>
+<tr><td>Marca blanca y dominio propio</td><td>—</td><td>—</td><td>Sí</td></tr>
+<tr><td>Prode y fantasy del torneo</td><td>—</td><td>Sí</td><td>Sí, con ligas privadas de la unión</td></tr>
+<tr><td>Carga histórica</td><td>—</td><td>1 temporada</td><td>Hasta 5, cotizadas aparte</td></tr>
+<tr><td>Soporte</td><td>Email</td><td>Prioritario</td><td>Dedicado + acompañamiento en la primera fecha</td></tr>
+</tbody></table></div>
+
+<h3>Los dos cambios respecto de lo implementado</h3>
+<ol>
+<li><strong>Eliminar «Inicial US$ 15» y subir el piso pago a US$ 19 con 3 categorías.</strong> El plan de una sola categoría no le sirve a ningún club de rugby real — todos tienen mínimo Primera, Intermedia y una juvenil. Un plan que nadie puede usar solo produce fricción y bajas.</li>
+<li><strong>Incluir todas las categorías del club en el precio del plan, sin cobrar por categoría adicional.</strong> Es la contrajugada directa a Rugby Pro Score, que le cobra al club cada categoría que suma sobre la Primera. Convierte la conversación de «cuánto me sale agregar la M17» en «todo mi club, un precio», y de paso empuja al club a cargar juveniles — que es donde G22 acumula el dato que nadie más tiene. Cobrar por categoría maximiza el ticket de hoy y frena exactamente el comportamiento que construye el activo.</li>
+<li><strong>Sacar Organización del abono mensual y convertirlo en contrato anual con precio a medida.</strong> US$ 149/mes son US$ 1.788 al año: por debajo de lo que vale para una unión de 30 clubes, y encima presentado en el formato equivocado. Una unión no aprueba abonos mensuales; aprueba un renglón de presupuesto por temporada.</li>
+</ol>
+
+<h3>Precio del canon de unión</h3>
+<p>Este es el precio de la <strong>capa institucional sola</strong> —el torneo—, no de la plataforma entera: los clubes compran su parte por separado (§10). Por eso los números son más bajos que un contrato central y por eso se aprueban sin asamblea.</p>
+<div class="tw"><table>
+<thead><tr><th>Nivel</th><th>Equipos inscriptos en el torneo</th><th>Canon por temporada</th><th>Costo por equipo e inclusiones</th></tr></thead>
+<tbody>
+<tr><td>C · Chica</td><td class="num">hasta 60 equipos</td><td class="num">US$ 1.200</td><td class="num">≈ US$ 20 · 3 licencias C sin cargo</td></tr>
+<tr><td>B · Mediana <em>— objetivo primario</em></td><td class="num">61 – 200 equipos</td><td class="num">US$ 2.400</td><td class="num">≈ US$ 12 · 6 licencias C sin cargo</td></tr>
+<tr><td>A · Grande</td><td class="num">201 – 500 equipos</td><td class="num">US$ 4.800</td><td class="num">≈ US$ 10 · 12 licencias C sin cargo</td></tr>
+<tr><td>A+ · URBA o federación nacional</td><td class="num">500+ equipos</td><td class="num">US$ 6.000 – 12.000</td><td class="num">≈ US$ 8 o menos · a medida</td></tr>
+</tbody></table></div>
+<p class="cap">Todos <span class="ev ev-s">Supuesto</span>: no existe un precio público de contrato de unión de rugby en LatAm. La unión se mide por <strong>equipos inscriptos</strong>, no por clubes — una unión de 30 clubes con seis categorías son 180 equipos — porque es lo que refleja la carga real y está publicado en el fixture. El costo por equipo baja con la escala, igual que en PlayHQ, Spawtz y LeagueRepublic <span class="ev ev-f">Encontrado</span>, y eso vuelve el precio no negociable: la unión no discute su número, verifica en qué banda cae. Cada banda incluye licencias C sin cargo para los clubes más chicos, que la unión asigna — es lo que la blinda del reclamo de que la plataforma es solo para los grandes.</p>
+
+<h3>Otros precios</h3>
+<div class="tw"><table>
+<thead><tr><th>Concepto</th><th>Precio</th><th>Racional</th></tr></thead>
+<tbody>
+<tr><td>Piloto</td><td class="num">US$ 0</td><td>Un partido real, acompañado. Cobrarlo agrega una decisión de presupuesto justo donde hay que eliminar fricción — y el trabajo marginal es de una tarde</td></tr>
+<tr><td>Implementación inicial, unión</td><td class="num">US$ 800 – 2.500 <span class="ev ev-s">Supuesto</span></td><td>Alta de clubes, importación de fixture y planteles, capacitación. Bonificable al firmar el anual: es un cierre, no una línea de ingreso</td></tr>
+<tr><td>Por categoría adicional</td><td class="num">US$ 8 – 15 / mes</td><td>Unidad natural de crecimiento dentro del club</td></tr>
+<tr><td>Instalación</td><td class="num">US$ 0</td><td>No hay nada que instalar, y decirlo es un argumento</td></tr>
+<tr><td>Mantenimiento</td><td class="num">Incluido</td><td>Es SaaS. Cobrarlo aparte lo haría parecer un desarrollo a medida y abriría una negociación innecesaria</td></tr>
+</tbody></table></div>
+
+<h4>Opciones de upselling</h4>
+<ul>
+<li><strong>Carga histórica:</strong> US$ 500–3.000 por club o torneo según profundidad <span class="ev ev-s">Supuesto</span>. Alto margen, crea dependencia sana y es el mejor argumento emocional que existe.</li>
+<li><strong>Marca blanca con dominio propio</strong> para la unión: +US$ 1.000–2.000 al año.</li>
+<li><strong>Módulo de sponsors con reporte de exposición:</strong> se paga solo con un anunciante.</li>
+<li><strong>Deporte adicional</strong> en el mismo club: +50% sobre el plan, no el doble.</li>
+<li><strong>Acceso API a los datos del torneo</strong> para medios locales o para el sitio propio de la unión.</li>
+<li><strong>Torneo único, por evento:</strong> US$ 39 hasta 24 equipos y US$ 89 sin límite, por hasta 30 días — el modelo que usa Tournify (€ 40 y € 120) <span class="ev ev-f">Encontrado</span> y que G22 hoy no cubre. El rugby argentino está lleno de eventos de una sola vez —seven, encuentros de infantiles, torneos de verano— cuyos organizadores nunca van a contratar una temporada. Descontando lo pagado del plan anual si contratan dentro de los 90 días, cada evento se convierte en un piloto pago. No requiere desarrollo: es empaquetado.</li>
+</ul>
+
+<div class="box box-k">
+<h4>Precio recomendado y su justificación</h4>
+<p><strong>Club: US$ 49/mes o US$ 490/año. Unión mediana: US$ 6.000/año.</strong></p>
+<ul>
+<li><strong>Contra el costo:</strong> el costo marginal de servir un club más es prácticamente cero. El costo real es soporte humano, y eso escala con la cantidad de cuentas, no con el precio.</li>
+<li><strong>Contra el valor generado:</strong> §10 estima 400–500 horas administrativas anuales para una unión mediana. A cualquier valoración razonable de esa hora, US$ 6.000 se recupera con el ahorro de tiempo antes de contar sponsors o costo evitado de desarrollo.</li>
+<li><strong>Contra la competencia:</strong> US$ 49 queda por debajo del Básico de Rugby Manager (≈US$ 64) <span class="ev ev-f">Encontrado</span> entregando además todo el frente público. Es el mensaje de precio más fuerte disponible: <em>más producto, menos plata</em>.</li>
+<li><strong>Contra el margen:</strong> con 30 clubes y 3 uniones, el ingreso bruto ronda US$ 35–40k anuales con un costo de infraestructura de tres cifras. El margen bruto queda por encima del 85% <span class="ev ev-s">Supuesto</span>.</li>
+</ul>
+<p><strong>Sobre la promo fundador:</strong> mantenerla, pero cambiarle el nombre. «Precio fundador» sugiere que después sube y activa resistencia. «Tarifa temporada 2026» calza con cómo un club piensa el calendario y hace natural la recotización el año siguiente.</p>
+</div>
+</div>
+</section>
+
+<section id="s10">
+<div class="sec-head"><span class="sec-n">10</span><h2>ROI del cliente</h2></div>
+<div class="prose">
+<p>Antes de los números, una advertencia que vale más que los números: <strong>el ROI de una unión amateur no se construye sobre horas ahorradas.</strong> Esas horas son de dirigentes y voluntarios, no salen de una factura, y ningún tesorero de unión las va a computar como ahorro. Presentar un ROI basado en costo horario es la forma más rápida de perder credibilidad en esa reunión. Los dos casos que siguen usan cada uno la palanca que corresponde a su comprador.</p>
+
+<h3>Escenario 1 · Club que hoy ya paga software — el único ROI de caja dura</h3>
+<div class="tw"><table>
+<thead><tr><th>Concepto</th><th>Valor</th><th>Evidencia</th></tr></thead>
+<tbody>
+<tr><td>Situación actual</td><td>Club de rugby con 5 categorías, pagando un SaaS de gestión de club</td><td><span class="ev ev-f">Encontrado</span> — mercado real</td></tr>
+<tr><td>Costo actual</td><td class="num">ARS 70.000 / mes ≈ US$ 64 · US$ 768 / año</td><td><span class="ev ev-f">Encontrado</span> — Abono Básico de Rugby Manager, precio en pesos verificado en su sitio · conversión a USD <span class="ev ev-s">Supuesto</span> a 1.100</td></tr>
+<tr><td>Inversión con G22 Profesional anual</td><td class="num">US$ 490 / año</td><td>Propuesta de este informe</td></tr>
+<tr><td>Ahorro directo</td><td class="num">US$ 278 / año — 36%</td><td>Cálculo</td></tr>
+<tr><td>Beneficio adicional no monetizado</td><td>Página pública del club, fixture y tabla en vivo de las 5 categorías, ficha histórica por jugador, placas para redes, módulo de sponsors</td><td>Producto verificable</td></tr>
+<tr><td><strong>ROI</strong></td><td class="num"><strong>+57% sobre la inversión, desde el primer mes</strong></td><td>Es sustitución de un gasto existente</td></tr>
+<tr><td><strong>Payback</strong></td><td class="num"><strong>Inmediato</strong></td><td>No hay inversión incremental</td></tr>
+</tbody></table></div>
+<p class="cap">Este es el caso más fácil de vender y el único cuyo ahorro aparece en un extracto bancario. Si en la prospección aparece un club que ya paga software, es la primera puerta que hay que golpear.</p>
+
+<h3>Escenario 2 · Unión provincial mediana — 28 clubes</h3>
+<h4>Situación actual y costos</h4>
+<div class="tw"><table>
+<thead><tr><th>Variable</th><th>Valor</th><th>Origen</th></tr></thead>
+<tbody>
+<tr><td>Clubes</td><td class="num">28</td><td><span class="ev ev-s">Supuesto</span> — perfil de unión del interior</td></tr>
+<tr><td>Partidos por fin de semana</td><td class="num">~70</td><td><span class="ev ev-e">Estimado</span> — 28 clubes ÷ 2 × 5 categorías. Consistente con URBA, que con 91 clubes y ~10 niveles de categoría juega ~450 <span class="ev ev-f">Encontrado</span></td></tr>
+<tr><td>Fechas por temporada</td><td class="num">18</td><td><span class="ev ev-s">Supuesto</span></td></tr>
+<tr><td>Partidos por año</td><td class="num">~1.000</td><td>Cálculo: 70 × 18 = 1.260, redondeado a la baja por fechas libres y suspensiones</td></tr>
+<tr><td>Minutos administrativos por partido, cadena completa</td><td class="num">15 – 25 – 35</td><td><span class="ev ev-s">Supuesto</span> — transcribir, consolidar, publicar</td></tr>
+<tr><td>Horas administrativas al año</td><td class="num">250 – 415 – 583</td><td>Cálculo</td></tr>
+<tr><td>Sponsors digitales vendibles hoy</td><td class="num">0</td><td>No hay propiedad digital con audiencia medible</td></tr>
+<tr><td>Costo de construir algo equivalente</td><td class="num">US$ 75.000 – 240.000</td><td><span class="ev ev-e">Estimado</span> — 2,5 a 4 años-desarrollador, derivado del volumen del repositorio (806 commits, 190 migraciones, 205 endpoints, 1.380 archivos) a un costo cargado de US$ 2.500–5.000 mensuales <span class="ev ev-s">Supuesto</span></td></tr>
+</tbody></table></div>
+
+<h4>Tres escenarios de retorno</h4>
+<div class="tw"><table>
+<thead><tr><th>Concepto</th><th>Conservador</th><th>Realista</th><th>Optimista</th></tr></thead>
+<tbody>
+<tr><td>Horas administrativas liberadas</td><td class="num">250 h</td><td class="num">415 h</td><td class="num">583 h</td></tr>
+<tr><td>Sponsors digitales vendidos</td><td class="num">1 · US$ 1.200</td><td class="num">2 · US$ 3.000</td><td class="num">3 · US$ 6.000</td></tr>
+<tr><td>Canon digital recuperado de los clubes<br><em>US$ 15 / 20 / 25 por club/mes</em></td><td class="num">US$ 5.040</td><td class="num">US$ 6.720</td><td class="num">US$ 8.400</td></tr>
+<tr><td><strong>Ingreso y ahorro monetizable</strong></td><td class="num"><strong>US$ 6.240</strong></td><td class="num"><strong>US$ 9.720</strong></td><td class="num"><strong>US$ 14.400</strong></td></tr>
+<tr><td>Inversión año 1 <em>(contrato + implementación)</em></td><td class="num">US$ 7.500</td><td class="num">US$ 7.500</td><td class="num">US$ 7.500</td></tr>
+<tr><td>Inversión recurrente</td><td class="num">US$ 6.000</td><td class="num">US$ 6.000</td><td class="num">US$ 6.000</td></tr>
+<tr><td><strong>ROI año 1</strong></td><td class="num"><strong>−17%</strong></td><td class="num"><strong>+30%</strong></td><td class="num"><strong>+92%</strong></td></tr>
+<tr><td><strong>ROI recurrente</strong></td><td class="num"><strong>+4%</strong></td><td class="num"><strong>+62%</strong></td><td class="num"><strong>+140%</strong></td></tr>
+<tr><td><strong>Payback</strong></td><td class="num"><strong>&gt; 24 meses</strong></td><td class="num"><strong>≈ 9 meses</strong></td><td class="num"><strong>≈ 6 meses</strong></td></tr>
+</tbody></table></div>
+<p class="cap">Las horas liberadas están calculadas pero <strong>no valorizadas en dinero</strong>, a propósito: no existe una cifra pública confiable de costo horario administrativo aplicable a una unión amateur argentina <span class="ev ev-n">Sin dato</span>, y valorizar horas de voluntarios es exactamente el error que vuelve inverosímil una propuesta. Se muestran como beneficio operativo, no como ingreso.</p>
+
+<div class="box box-w">
+<h4>Lo que este cálculo revela — y es la conclusión más importante del informe</h4>
+<p>Sin el canon recuperado de los clubes, <strong>el contrato de unión no cierra en ningún escenario</strong>: US$ 1.200 a 6.000 de sponsors contra US$ 6.000 de abono da negativo o apenas empata. Con el canon, cierra en dos de los tres escenarios.</p>
+<p>De ahí sale la estructura comercial correcta: <strong>dos compradores que pagan por dos productos distintos.</strong> El precedente argentino existe — GesDeportiva le cobra por club a la Confederación de Básquetbol, $ 1.500 al año por club <span class="ev ev-f">Encontrado</span> — y Rugby Pro Score ya opera una variante en Córdoba, cobrándole la Primera a la unión y las categorías extra al club.</p>
+<p><strong>Modelo recomendado — canon institucional más plan de club:</strong></p>
+<div class="tw"><table>
+<thead><tr><th>Paga</th><th>Compra</th><th>Precio</th></tr></thead>
+<tbody>
+<tr><td>La unión</td><td>El <strong>torneo</strong>: sitio oficial con su marca, fixture y tabla de todas las divisiones, estadísticas consolidadas, exportación, reporte de temporada, soporte dedicado. Lo usan todos sus clubes sin costo</td><td class="num">US$ 1.200 – 3.600 / temporada</td></tr>
+<tr><td>El club</td><td>Su <strong>casa</strong>: página propia, todas sus categorías incluidas, fichas de jugador con historial, placas, sponsors, panel</td><td class="num">US$ 19 – 49 / mes</td></tr>
+<tr><td>El hincha</td><td>Ver todo, sin cuenta</td><td class="num">US$ 0</td></tr>
+</tbody></table></div>
+<p><strong>La regla que sostiene el modelo:</strong> el club que no paga <em>igual aparece en el torneo</em>, con su resultado y su posición. Sin club rehén, la unión puede pagar tranquila —no financia algo por lo que después le cobran a sus clubes— y el club paga por su propia casa, no por el derecho a existir.</p>
+<div class="box box-w">
+<h4>Evidencia de campo: para muchas uniones el canon directamente no entra</h4>
+<p>La URNE, en agosto de 2026, rechazó avanzar diciendo que <em>no veía viable el gasto de la unión</em> <span class="ev ev-v">Verificado en campo</span>. Con eso, el modelo de cobro doble necesita <strong>dos vías, elegidas por capacidad</strong>, igual que los clubes: <strong>canon</strong> para uniones de banda A y A+ y las B con presupuesto propio; <strong>adopción sin costo</strong> para las de banda C y para toda B que diga que el gasto no es viable. En la segunda vía el ingreso sale entero de los clubes — 28 clubes en banda B son US$ 15.120 por temporada, bastante más que cualquier canon.</p>
+<p>La regla operativa es rígida: <strong>si la unión dice que el gasto no es viable, se cambia de vía en el acto, no se negocia el número.</strong> Un canon regateado fija un techo con esa unión y con todas las que hablen con ella.</p>
+</div>
+
+<p><strong>Y el efecto contraintuitivo sobre el precio:</strong> cobrarle a los dos hace que el número de la unión <em>baje</em>, de los US$ 3.000–12.000 que costaría toda la plataforma a US$ 1.200–3.600 por la capa institucional sola. Eso no resigna ingreso: lo aumenta, porque el canon entra en la firma del presidente sin pasar por asamblea y se suma a la adopción progresiva de los clubes. Una unión mediana con 17 de 28 clubes adheridos el primer año deja US$ 2.400 más US$ 3.876 = <strong>US$ 6.276</strong>, contra los US$ 6.384 del modelo de clubes solos <em>a adopción total</em>, que el primer año no ocurre nunca <span class="ev ev-s">Supuesto</span>.</p>
+</div>
+
+<h4>Qué es dato y qué es supuesto en esta sección</h4>
+<ul>
+<li><strong>Datos reales:</strong> el precio de Rugby Manager, el precio de GesDeportiva a la CABB, los 450 partidos y 91 clubes de URBA, los US$ 10 M de sponsors de la UAR, y el volumen del repositorio de G22.</li>
+<li><strong>Estimaciones derivadas:</strong> partidos por fin de semana de una unión mediana (por ratio de URBA), y el costo de reconstruir el sistema (por volumen de código).</li>
+<li><strong>Supuestos puros:</strong> los 28 clubes, las 18 fechas, los minutos por partido, el valor de un sponsor digital provincial y el tipo de cambio. <strong>Ninguno debe presentarse a un cliente como si fuera un dato.</strong> En una propuesta real, estos números se completan con los del cliente en la primera reunión — y esa es, además, una buena excusa para pedirla.</li>
+</ul>
+</div>
+</section>
+
+<section id="s11">
+<div class="sec-head"><span class="sec-n">11</span><h2>Estrategia de venta</h2></div>
+<div class="prose">
+<div class="tw"><table>
+<thead><tr><th>Canal</th><th>Viabilidad</th><th>Costo de adquisición</th><th>Ciclo</th><th>Rol</th></tr></thead>
+<tbody>
+<tr><td><strong>Venta directa a clubes</strong></td><td>Muy alta — el dirigente o el jefe de prensa deciden solos</td><td>Bajo: WhatsApp y un partido de demo</td><td>2–6 semanas</td><td><strong>Canal principal</strong></td></tr>
+<tr><td><strong>Venta directa a uniones</strong></td><td>Alta — estructura chica, decisión concentrada</td><td>Medio: reuniones y acompañamiento</td><td>2–6 meses</td><td><strong>Canal principal</strong> — es lo que da escala</td></tr>
+<tr><td>Referencia entre clubes</td><td>Muy alta — el rugby argentino es un ambiente donde todos se conocen</td><td>Casi nulo</td><td>Semanas</td><td><strong>Multiplicador</strong> — hay que provocarlo, no esperarlo</td></tr>
+<tr><td>Autoservicio web</td><td>Alta para organizadores chicos: el checkout ya funciona</td><td>Nulo por venta</td><td>Días</td><td><strong>Cola larga</strong> — volumen sin costo comercial</td></tr>
+<tr><td>Prensa deportiva regional</td><td>Media — el medio local necesita el dato que G22 tiene</td><td>Bajo</td><td>Meses</td><td>Secundario: genera demanda, no cierra</td></tr>
+<tr><td>Integradores y empresas de automatización</td><td><strong>No existen en este vertical</strong></td><td>—</td><td>—</td><td>Descartar</td></tr>
+<tr><td>Alianzas con Siemens, Schneider, ABB, Rockwell</td><td><strong>No aplica.</strong> Son proveedores de automatización industrial, ajenos por completo a este mercado</td><td>—</td><td>—</td><td>Descartar</td></tr>
+<tr><td>Consultoras</td><td>Baja — el ticket no paga su intervención</td><td>Alto</td><td>Largo</td><td>Descartar</td></tr>
+<tr><td>Licitaciones</td><td>No se halló ninguna licitación pública de software de rugby en LatAm <span class="ev ev-n">Sin dato</span></td><td>—</td><td>—</td><td>Descartar hasta que aparezca evidencia</td></tr>
+<tr><td>Partners tecnológicos <em>(marcas deportivas, medios, apuestas reguladas)</em></td><td>Media a futuro</td><td>Medio</td><td>Largo</td><td>Etapa 2, con audiencia medida</td></tr>
+<tr><td>Sudamérica Rugby / World Rugby</td><td>Baja hoy, alta después del primer caso de éxito documentado</td><td>Alto</td><td>&gt;12 meses</td><td>Legitimación regional, no ingreso</td></tr>
+</tbody></table></div>
+<div class="box box-k">
+<h4>La arquitectura de canales</h4>
+<p><strong>Principal:</strong> venta directa, con la demo de un partido real como único material de venta que importa. <strong>Secundarios:</strong> referencia entre clubes — a provocar pidiendo una presentación concreta en cada cierre, no esperando que ocurra — y autoservicio para la cola larga. <strong>Descartados por ahora:</strong> integradores, consultoras y licitaciones. En un mercado de 25 uniones y unos cientos de clubes, <em>toda la lista de prospectos entra en una planilla</em>. No hace falta un canal indirecto para llegar a un universo que se puede recorrer a pie.</p>
+</div>
+</div>
+</section>
+
+<section id="s12">
+<div class="sec-head"><span class="sec-n">12</span><h2>Entrada al mercado</h2></div>
+<div class="prose">
+<p>Plan concreto para conseguir el primer cliente pago. Está construido sobre la mecánica que las landings del propio proyecto ya describen — la demo con un partido real — porque es la correcta y ya está escrita.</p>
+
+<h3>Cliente ideal del primer contrato</h3>
+<div class="box box-k">
+<p><strong>Un club de rugby del interior con cinco o más categorías, prensa activa en redes, y un torneo de unión que hoy no publica sus juveniles.</strong> No la unión: el club. El club decide en una reunión, la unión decide en una comisión. Y un club que funciona es la mejor carta de presentación para la unión un mes después.</p>
+<p>Señales de que es el club correcto: publica resultados en Instagram todos los sábados (ya siente el dolor y ya hace el trabajo); tiene juveniles compitiendo; alguien identificable se ocupa de la comunicación; y — la mejor señal de todas — ya paga algún software de gestión.</p>
+</div>
+
+<h3>Quién decide</h3>
+<div class="tw"><table>
+<thead><tr><th>Rol</th><th>Qué le importa</th><th>Cómo entrarle</th></tr></thead>
+<tbody>
+<tr><td><strong>Jefe de prensa / comunicación del club</strong><br><em>iniciador y campeón interno</em></td><td>Que el sábado no sea un caos; tener material para publicar sin rehacerlo a mano</td><td>Es la puerta. Mostrale la página del club en vivo con las cinco categorías y la exportación de placas</td></tr>
+<tr><td><strong>Entrenador o coordinador de juveniles</strong><br><em>influenciador</em></td><td>Tener los números el lunes sin mirar el video entero</td><td>Mostrale la ficha de un jugador con historial de tres temporadas</td></tr>
+<tr><td><strong>Dirigente / secretario</strong><br><em>decide y firma</em></td><td>Que no genere trabajo nuevo, que no dependa de una persona sola, y cuánto sale</td><td>Precio anual cerrado, cero instalación, y el compromiso de acompañar la primera fecha</td></tr>
+<tr><td><strong>Tesorero</strong><br><em>veto</em></td><td>Que entre en el presupuesto de la temporada</td><td>Tarifa anual por temporada, no abono mensual. Y si ya pagan otro software, el argumento es sustitución, no gasto nuevo</td></tr>
+</tbody></table></div>
+
+<h3>El problema a atacar en la primera conversación</h3>
+<p>Uno solo, y no es «tu gestión es ineficiente»: <strong>«el sábado tu club juega cinco partidos y nadie de afuera puede seguir ninguno».</strong> Es concreto, ocurre todas las semanas, lo sufre la persona con la que estás hablando, y la solución se demuestra en una pantalla. Todo lo demás — estadísticas, historial, sponsors, prode — es lo que se descubre después de entrar, no lo que abre la puerta.</p>
+<p>La versión de esa frase que cierra reuniones agrega el nombre de alguien: <strong>«la madre de un M17 que juega de visitante a doscientos kilómetros hoy no tiene forma de saber cómo va. Ni el sistema de la UAR ni el de ustedes se lo permiten, porque los dos piden usuario. El nuestro no.»</strong> Nadie discute eso, porque todos en la sala conocen a esa madre.</p>
+
+<h3>La oferta inicial</h3>
+<div class="tw"><table>
+<thead><tr><th>Elemento</th><th>Definición</th></tr></thead>
+<tbody>
+<tr><td>Qué se ofrece</td><td>Cargar un partido real del club, en vivo, acompañado, el fin de semana que le quede cómodo</td></tr>
+<tr><td>Precio del piloto</td><td class="num">US$ 0</td></tr>
+<tr><td>Duración</td><td>Un fin de semana para el primer partido; <strong>cuatro fechas</strong> para el piloto completo, que es lo que tarda en volverse hábito</td></tr>
+<tr><td>Qué hace G22</td><td>Alta del club, carga del plantel, capacitación de 15 minutos por WhatsApp, y presencia remota durante el primer partido</td></tr>
+<tr><td>Qué hace el club</td><td>Poner una persona en la mesa de control con un celular</td></tr>
+<tr><td>Qué queda</td><td>Todo lo cargado queda publicado, aunque el club no siga. La demo no se borra — y ese compromiso es lo que la vuelve creíble</td></tr>
+<tr><td>Compromiso pedido</td><td>Ninguno de compra. Uno solo: una reunión de 20 minutos al terminar la cuarta fecha</td></tr>
+</tbody></table></div>
+
+<h3>KPIs del piloto</h3>
+<div class="tw"><table>
+<thead><tr><th>KPI</th><th>Qué mide</th><th>Umbral de éxito</th></tr></thead>
+<tbody>
+<tr><td>Partidos cargados / partidos jugados</td><td>Adopción real, el único KPI que de verdad importa</td><td class="num">≥ 80% en la fecha 4</td></tr>
+<tr><td>Categorías activas</td><td>Si se expandió más allá de Primera</td><td class="num">≥ 3 de 5</td></tr>
+<tr><td>Personas distintas que cargaron</td><td>Si dejó de depender de un héroe</td><td class="num">≥ 2</td></tr>
+<tr><td>Minutos por partido cargado</td><td>Fricción operativa</td><td class="num">≤ 5 min de trabajo adicional</td></tr>
+<tr><td>Visitas a la página del club</td><td>Que la audiencia apareció</td><td class="num">Tendencia creciente en 4 fechas</td></tr>
+<tr><td>Placas exportadas y publicadas</td><td>Que se integró al flujo de comunicación del club</td><td class="num">≥ 1 por fecha</td></tr>
+<tr><td>Errores de carga corregidos a posteriori</td><td>Confianza en el dato</td><td class="num">Tendencia decreciente</td></tr>
+</tbody></table></div>
+
+<h3>Cómo demostrar el valor y convertir</h3>
+<p>El informe de cierre del piloto tiene que ser corto y tiene que mostrar cuatro cosas: <strong>lo que existe ahora y antes no existía</strong> (la lista de partidos publicados, con link), <strong>quién lo miró</strong> (visitas a la página del club), <strong>lo que se dejó de hacer</strong> (la tabla se actualizó sola, las placas salieron del sistema), y <strong>lo que queda si dicen que no</strong> (todo, publicado, pero congelado).</p>
+<p>La conversión no se pide como «¿lo compran?» sino como una pregunta de calendario: <strong>«¿arrancamos la temporada completa desde la fecha que viene?»</strong>. Es la diferencia entre pedir una decisión de presupuesto y pedir una decisión de continuidad — y a esta altura ya hay una persona adentro del club que no quiere volver a la planilla.</p>
+
+<h3>Si el club ya vio a Rugby Pro Score</h3>
+<p>Va a pasar, sobre todo en Córdoba y en el Torneo del Interior. No hay que compararse por funcionalidades, porque en la mayoría se empata y el que compara pierde. Hay que hacer dos preguntas y dejar que las conteste el club:</p>
+<ol>
+<li><strong>«¿Dónde está el partido del sábado pasado?»</strong> Si no lo pueden abrir, la diferencia queda demostrada sin que la hayas afirmado. Y si el club ya venía cargando con ellos, esa temporada perdida duele más de lo que cualquier argumento puede lograr.</li>
+<li><strong>«¿Cuánto les sale sumar la M17 y la M19?»</strong> En su modelo, cada categoría es un extra que paga el club. En el de G22, están incluidas. Es la única comparación de precio que conviene hacer, porque es la única donde el número juega a favor.</li>
+</ol>
+<p>Y una corrección sobre el orden de la prospección, porque el mapa no es el que parecía: <strong>en Córdoba no hay una ventana que cerrar — ya están los dos adentro del mismo torneo.</strong> G22 publica el Top 10 del Centro y ellos transmiten la Primera de la UCR: es el mismo campeonato, las mismas fechas, los mismos clubes. No es entrar a desplazar a un proveedor instalado; es una comparación que ya está ocurriendo delante del cliente, se juegue o no.</p>
+<p>Eso cambia dos cosas. <strong>Primero, Córdoba no se posterga: se atiende ya</strong>, porque es la única unión donde el argumento no hay que explicarlo — se abre una pantalla al lado de la otra. Ellos muestran el partido de hoy; G22 muestra el de hoy, la tabla, los cinco anteriores y la ficha de cada jugador. <strong>Segundo, la comparación deja de ser un pitch y pasa a ser producto:</strong> lo que no esté visible en la primera pantalla de G22 no cuenta, porque el club va a mirar las dos y decidir sin llamar a nadie.</p>
+<p>Hay además un argumento específico para la conducción de la UCR, con la reserva de que su contrato no es público <span class="ev ev-s">Supuesto</span>: si la unión le está pagando a un proveedor por cubrir la Primera, está pagando por una categoría que <strong>ya se publica en G22 sin costo, y con tabla e historial que el otro no tiene</strong>. Esa conversación no se gana con una propuesta comercial: se gana mandando los dos links.</p>
+
+<h3>Cómo convertir el primer caso en los siguientes</h3>
+<ol>
+<li><strong>Documentar el piloto como caso, con nombre y números.</strong> Un PDF de dos páginas: partidos publicados, categorías cubiertas, visitas, y una cita textual del jefe de prensa. Sin eso, el segundo cliente cuesta lo mismo que el primero.</li>
+<li><strong>Pedir la presentación en el mismo momento del cierre</strong>, y pedirla concreta: «¿a qué dos clubes de tu torneo les serviría esto?». En un ambiente donde todos se conocen, la referencia directa vale más que cualquier campaña.</li>
+<li><strong>Usar al club como puerta a su unión.</strong> Es literalmente lo que la landing ya promete: <em>«muchos torneos entraron porque un club llegó primero»</em>. Con dos o tres clubes de la misma unión publicando, la unión enfrenta un hecho consumado y la conversación cambia de «¿lo adoptamos?» a «¿cómo lo ordenamos?».</li>
+<li><strong>Publicar la cobertura como contenido, y dejarla abierta.</strong> Cada tabla de juveniles indexada y sin login es adquisición orgánica por partida doble: el club que la busca y la encuentra ya entiende el producto antes de la primera llamada, y la familia que la encuentra se vuelve usuaria sin que nadie le venda nada. <strong>No poner nunca el resultado detrás de un registro</strong> — sería renunciar a lo único que ningún competidor puede copiar.</li>
+<li><strong>Repetir el patrón en la unión siguiente,</strong> ya con dos casos documentados. El objetivo de doce meses es tres uniones y treinta clubes — no una federación nacional.</li>
+</ol>
+</div>
+</section>
+
+<section id="s13">
+<div class="sec-head"><span class="sec-n">13</span><h2>Propuesta comercial</h2></div>
+<div class="prose">
+<p>Estructura de la propuesta a presentar ante una unión o un club grande. Doce páginas como máximo; si no entra, es que todavía no está clara.</p>
+<div class="tw"><table>
+<thead><tr><th>#</th><th>Sección</th><th>Contenido</th><th>Regla</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Problema</td><td>«Su torneo juega 70 partidos cada fin de semana. Hoy se publican los de Primera, y para ver el resto hay que tener usuario.» Con el número real del cliente, tomado en la primera reunión</td><td>Una página. El número tiene que ser <strong>de ellos</strong>, no del informe. Cerrar con la pregunta: ¿cuántas familias quedan afuera?</td></tr>
+<tr><td>2</td><td>Solución</td><td>Una carga, y de ahí salen fixture, tabla, estadísticas, ficha de jugador y ranking</td><td>Mostrar una pantalla real, no un diagrama</td></tr>
+<tr><td>3</td><td>Tecnología</td><td>PWA sin instalación, reloj de servidor, permisos por club, multideporte</td><td>Media página. Nadie compra por la arquitectura, pero un tecnólogo del otro lado puede vetar</td></tr>
+<tr><td>4</td><td>Beneficios</td><td>Por rol: dirigente, prensa, entrenador, hincha</td><td>Cuatro bloques cortos, uno por persona en la sala</td></tr>
+<tr><td>5</td><td>Lo que cambia</td><td>Tabla de antes y después, con el proceso actual del cliente</td><td>Es la sección que más convence</td></tr>
+<tr><td>6</td><td>Números</td><td>El modelo de §10 con las cifras del cliente. Horas como beneficio operativo, sponsors y canon como ingreso</td><td><strong>Nunca valorizar horas de voluntarios en dinero</strong></td></tr>
+<tr><td>7</td><td>Implementación</td><td>Alta, importación de fixture y planteles por planilla, capacitación, primera fecha acompañada</td><td>Enfatizar que no arrancan de cero</td></tr>
+<tr><td>8</td><td>Cronograma</td><td>Semana 1 alta e importación · semana 2 capacitación · semana 3 primera fecha acompañada · semanas 4–7 piloto · semana 8 revisión</td><td>Ocho semanas, no un año</td></tr>
+<tr><td>9</td><td>Precio</td><td>Tarifa por temporada, con el escalonado de §9 y lo incluido explícito</td><td>Un número, no un menú. El menú va en anexo</td></tr>
+<tr><td>10</td><td>Soporte</td><td>Canal directo por WhatsApp, tiempos de respuesta comprometidos, acompañamiento de la primera fecha de cada temporada</td><td>Comprometer solo lo que un equipo chico puede cumplir un sábado</td></tr>
+<tr><td>11</td><td>Garantías</td><td>Los datos son del club y se entregan si se van; el contenido publicado no se borra; sin permanencia mínima; salida sin penalidad</td><td>La ausencia de permanencia es un argumento de venta, no una concesión</td></tr>
+<tr><td>12</td><td>KPIs</td><td>Los de §12, acordados antes de arrancar</td><td>Acordar el umbral <em>antes</em> convierte la renovación en una verificación, no en una negociación</td></tr>
+<tr><td>13</td><td>Caso de uso</td><td>El piloto anterior, con nombre, links y números</td><td>Sin caso, esta sección se reemplaza por la demo en vivo — nunca por una promesa</td></tr>
+<tr><td>14</td><td>Próximos pasos</td><td>Una sola acción con fecha: elegir el partido de la demo</td><td>Nunca cerrar con «quedamos a disposición»</td></tr>
+</tbody></table></div>
+<div class="box box-w">
+<h4>Lo que la propuesta NO debe decir</h4>
+<ul>
+<li><strong>Que hay inteligencia artificial o mantenimiento predictivo.</strong> No lo hay. Una sola pregunta del otro lado desarma toda la propuesta.</li>
+<li><strong>Que se puede cargar sin señal.</strong> No se puede. Mejor llevar la respuesta preparada: se anota en papel y se carga al terminar; se pierde el minuto a minuto, no el dato.</li>
+<li><strong>Que se exportan las estadísticas.</strong> Todavía no. Se exportan placas. Si la unión lo pide, se compromete con fecha (§14-I).</li>
+<li><strong>Una cifra de audiencia sin respaldo.</strong> Si no hay un número de Analytics para mostrar, no se afirma.</li>
+</ul>
+</div>
+</div>
+</section>
+
+<section id="s14">
+<div class="sec-head"><span class="sec-n">14</span><h2>Recomendación final</h2></div>
+<div class="prose">
+<dl>
+<div class="ans"><dt><em>A</em>Cliente ideal</dt><dd><p><strong>El club de rugby del interior con cinco o más categorías y prensa activa</strong> para el primer contrato, y <strong>la unión provincial mediana de 20 a 40 clubes</strong> como objetivo de escala. No la UAR ni URBA: son ciclos largos, política interna y, en el caso de la UAR, ya construyó lo suyo. La secuencia correcta es club → unión → región, y no al revés.</p></dd></div>
+
+<div class="ans"><dt><em>B</em>Cinco competidores</dt><dd><p><strong>1. Rugby Pro Score</strong> — el mismo producto, abierto como G22, mismo discurso de venta, publicando el mismo torneo que G22 en la Unión Cordobesa; le cobra la Primera a la unión y las demás categorías al club. <strong>2. Conecta Rugby (UAR)</strong> — gratis, oficial, obligatorio; define el piso de precio del back-office en cero. <strong>3. Rugby Manager</strong> — ARS 70.000–105.000/mes, 400+ clubes; es el competidor más comparable y la mejor prueba de disposición a pagar. <strong>4. El sitio de la propia unión</strong> — el incumbente institucional, y a la vez el mejor prospecto. <strong>5. WhatsApp más Excel</strong> — el sustituto que gana casi todas las veces y contra el que hay que diseñar la demo.</p></dd></div>
+
+<div class="ans"><dt><em>C</em>Ventaja competitiva</dt><dd><p><strong>Ser el sistema abierto donde todos los demás son cerrados.</strong> Conecta Rugby resolvió el back-office detrás de un login de BDUAR y dejó vacío el frente: nadie publica juveniles, nadie tiene ficha histórica de jugador, nadie le da al que mira desde afuera dónde mirar. Y la federación no puede corregirlo sin renunciar al control de acceso que es su razón de ser — <strong>no es un descuido suyo, es una imposibilidad estructural</strong>, y por eso la ventaja es defendible. Esa formulación además es la única segura: en un ecosistema donde las uniones trabajan con gente de la UAR, decir «no lo hicieron» cierra puertas y decir «no lo pueden hacer sin dejar de ser lo que son» las abre. <strong>Y ser el único que además es permanente.</strong> Rugby Pro Score también es abierto, así que contra ellos el eje se mueve: muestran el partido y lo pierden — sin archivo, sin tabla derivada, sin páginas que Google indexe. G22 gana en las cinco filas en negrita de §3, pero la que decide contra cada rival es distinta: <em>acceso sin cuenta</em> contra la UAR y Rugby Manager, <em>historial persistente</em> contra Rugby Pro Score. Todo lo demás es paridad. <strong>El discurso comercial debe pararse solo ahí</strong> — y no en «gestionamos tu torneo», que es exactamente donde G22 compite contra algo gratis.</p></dd></div>
+
+<div class="ans"><dt><em>D</em>Cuánto cobrar</dt><dd><p><strong>Club: US$ 49 al mes o US$ 490 por temporada.</strong> Queda por debajo de los ≈US$ 64 de Rugby Manager entregando además todo el frente público — <em>más producto, menos plata</em> es el mensaje de precio más fuerte disponible. <strong>Piso pago: US$ 19</strong> con tres categorías, reemplazando el plan de una sola categoría que ningún club de rugby puede usar. <strong>Unión: US$ 3.000 a 12.000 anuales</strong> según tamaño, pero preferentemente <strong>US$ 0 para la unión y el plan pago a cada club</strong> (ver E). Piloto gratis siempre.</p></dd></div>
+
+<div class="ans"><dt><em>E</em>Modelo de negocio</dt><dd><p><strong>Cobro doble sobre dos productos separados: canon institucional a la unión más plan de club.</strong> La unión paga US$ 1.200–3.600 por temporada y compra <em>el torneo</em> —sitio con su marca, tablas de todas las divisiones, datos consolidados, exportación—; cada club paga US$ 19–49 mensuales y compra <em>su casa</em> —página propia, todas sus categorías, historial de jugadores, placas, sponsors. El hincha no paga nunca. La línea es innegociable: <strong>el club que no paga igual aparece en el torneo</strong>, porque en el momento en que un club sienta que paga algo que la unión ya pagó, se caen las dos ventas. El canon de la unión es deliberadamente bajo para que entre en la firma del presidente sin pasar por asamblea, que es el obstáculo real de estas ventas. <strong>Upsell:</strong> carga histórica, marca blanca, deporte adicional. <strong>Opción a 3–5 años:</strong> licencia de datos vía el endpoint OpenAPI que ya existe. <strong>Descartar:</strong> venta del sistema, hardware y reparto de ahorro.</p></dd></div>
+
+<div class="ans"><dt><em>F</em>Canal de ventas</dt><dd><p><strong>Venta directa, con la demo de un partido real como único material que importa.</strong> Secundarios: referencia entre clubes — provocada, pidiendo dos nombres concretos en cada cierre — y autoservicio web para la cola larga, que ya está construido. Descartar integradores, consultoras y licitaciones: no existen en este vertical, y con 25 uniones y unos cientos de clubes todo el universo de prospectos entra en una planilla.</p></dd></div>
+
+<div class="ans"><dt><em>G</em>Primer cliente</dt><dd><p><strong>Piloto gratuito de cuatro fechas en un club que ya publica resultados en Instagram todos los sábados</strong> — ya siente el dolor y ya hace el trabajo. Entrada por el jefe de prensa, no por la comisión directiva. Alta, plantel cargado, quince minutos de capacitación, primera fecha acompañada. Cierre por calendario, no por presupuesto: <em>«¿arrancamos la temporada completa desde la fecha que viene?»</em>. Y de ahí a su unión, que es lo que la propia landing ya promete.</p></dd></div>
+
+<div class="ans"><dt><em>H</em>Valor comercial</dt><dd><p><strong>Hoy, sin clientes pagos verificados: US$ 75.000 a 240.000</strong>, por costo de reemplazo. La estimación deriva del volumen real del repositorio — 806 commits en 6,5 meses, 190 migraciones, 205 endpoints, 145 archivos de test, 1.380 archivos fuente — equivalente a entre 2,5 y 4 años-desarrollador <span class="ev ev-e">Estimado</span>, a un costo cargado de US$ 2.500 a 5.000 mensuales <span class="ev ev-s">Supuesto</span>.</p>
+<p><strong>Con ingreso recurrente, el múltiplo reemplaza al costo.</strong> A US$ 40.000 de ARR y un múltiplo de 3 a 6 veces — habitual en SaaS vertical de nicho <span class="ev ev-s">Supuesto</span> — la valuación va a US$ 120.000–240.000; a US$ 150.000 de ARR, a US$ 450.000–900.000. La conclusión práctica: <strong>el primer año de facturación vale más que otros seis meses de desarrollo.</strong> Cada función nueva sin cliente pago mueve el numerador equivocado.</p></dd></div>
+
+<div class="ans"><dt><em>I</em>Qué mejorar antes de vender</dt><dd><p>Cinco cosas, en orden de urgencia:</p>
+<ol>
+<li><strong>Llevar la planilla PDF al formato que la unión acepta.</strong> Es lo primero y es trabajo chico con retorno desproporcionado: el proyecto <em>ya genera</em> la planilla; lo que falta es que tenga la forma del acta oficial. Con eso el club carga una vez en G22 desde el celular y se lleva el documento listo para firmar y volcar al sistema oficial — G22 reemplaza al papel, no a BDUAR, y la objeción de la carga doble deja de existir.</li>
+<li><strong>Resolver el resto de la cadena contra BDUAR.</strong> Dos niveles más, del más rápido al más valioso: <em>(a)</em> la planilla del punto anterior, que no requiere permiso de nadie; <em>(b)</em> importación por fecha de lo que la unión ya carga, incluida la lectura de la foto del acta, con la importación por planilla y el OCR que ya están en el proyecto; <em>(c)</em> integración real con BDUAR, que es el premio pero depende de una conversación con la UAR. Mientras esto no exista, cada venta a una unión arranca cuesta arriba.</li>
+<li><strong>Exportación real de datos</strong> a Excel y PDF. Hoy solo hay placas. Ninguna unión debería firmar sin esto, y ninguna propuesta debería prometerlo sin fecha.</li>
+<li><strong>Una métrica de audiencia publicable.</strong> Todo el argumento «tu torneo entra donde el hincha ya mira» depende de un número que hoy no está a mano. Sin él, es una afirmación indefendible en la primera reunión.</li>
+<li><strong>Política de datos de menores.</strong> El sistema guarda planteles juveniles. Consentimiento por club, minimización de datos personales y auditoría de accesos — <em>antes</em> del primer contrato con una unión, no después.</li>
+<li><strong>Cola de escritura offline</strong> o, como mínimo, un modo de carga diferida para canchas sin señal. Es la objeción más previsible del interior y hoy no tiene respuesta técnica, solo una respuesta honesta.</li>
+<li><strong>Un caso documentado.</strong> Dos páginas con nombre, links y números. Es lo más barato de producir y lo que más acelera el segundo cliente.</li>
+<li><strong>Hacer visible el archivo en el producto.</strong> La permanencia es la ventaja decisiva contra el competidor más parecido, y hoy no se ve en la primera pantalla. Un «historial» navegable por club y por jugador, indexado, es lo que convierte esa ventaja en algo que el cliente nota sin que se lo expliquen.</li>
+</ol>
+<p>Y una cosa a <strong>no</strong> hacer: no construir más funcionalidades antes de tener un cliente pago. El producto ya excede lo que el mercado necesita para decidir; lo que falta es prueba comercial, no software.</p></dd></div>
+
+<div class="ans"><dt><em>J</em>¿Convertirlo en negocio?</dt><dd><p><strong>Sí, con una condición y un límite claros.</strong></p>
+<p><strong>Sí,</strong> porque las tres preguntas que hunden a la mayoría de los proyectos ya están respondidas: el producto existe y funciona en producción; la demanda está probada — un competidor cobra ≈US$ 64 al mes por menos producto y una confederación argentina ya compró software de gestión; y hay un hueco real y verificable que la propia federación acaba de dejar abierto al resolver el back-office y no tocar lo público.</p>
+<p><strong>La condición:</strong> dejar de construir y salir a vender. La brecha entre G22 y un negocio no es técnica — es que nadie pagó todavía. Seis meses más de desarrollo no mueven la aguja; tres clubes pagando la mueven entera.</p>
+<p><strong>El límite:</strong> es un negocio de nicho, no una startup de capital de riesgo. El mercado alcanzable del rugby argentino ronda los US$ 240.000 anuales y llega a US$ 1–2 millones si el motor multideporte captura hockey y handball. Eso alcanza para un negocio rentable de equipo chico con márgenes altos, y no alcanza para una ronda de inversión. <strong>Es una decisión, no una limitación</strong> — pero conviene tomarla a conciencia, porque define si el próximo año se dedica a vender o a levantar capital. Con estos números, se dedica a vender.</p></dd></div>
+</dl>
+</div>
+</section>
+
+<section id="s15">
+<div class="sec-head"><span class="sec-n">15</span><h2>Fuentes y método</h2></div>
+<div class="prose">
+<h3>Cómo se construyó</h3>
+<p>Tres fuentes de evidencia, en orden de confiabilidad. <strong>Primera:</strong> el repositorio del proyecto y el sitio en producción — todo lo de §1 se verificó leyendo código, migraciones, contenido de las landings e historial de git, y navegando g22scores.com. Donde el discurso comercial y el código diferían, mandó el código. <strong>Segunda:</strong> páginas oficiales de precios de competidores, sitios institucionales y prensa, consultadas en agosto de 2026. <strong>Tercera:</strong> informes de mercado de consultoras, usados solo como contexto de magnitud.</p>
+
+<h4>Sistema de evidencia</h4>
+<ul>
+<li><span class="ev ev-v">Verificado</span> — comprobado directamente en el código del proyecto o en el sitio en producción.</li>
+<li><span class="ev ev-f">Encontrado</span> — publicado por una fuente citada, con URL.</li>
+<li><span class="ev ev-e">Estimado</span> — derivado por cálculo a partir de un dato encontrado; la derivación se explicita.</li>
+<li><span class="ev ev-s">Supuesto</span> — juicio comercial sin respaldo externo. No presentar a un cliente como dato.</li>
+<li><span class="ev ev-n">Sin dato</span> — buscado y no hallado. Se declara en vez de rellenarse.</li>
+</ul>
+
+<h4>Vacíos declarados</h4>
+<p>No se hallaron, y por eso no se usan: cifra oficial consolidada de jugadores federados en Argentina; presupuestos o balances de la UAR, URBA y las uniones provinciales; cantidad de socios y cuota social de los clubes grandes; CPM publicitario digital argentino de IAB; tarifas de Sportlomo; licitaciones públicas de software deportivo en LatAm; y datos de tráfico propios de g22scores.com. Los cuatro primeros afectan directamente la precisión del ROI de §10 y deberían completarse con datos del cliente en la primera reunión.</p>
+
+<h3>Fuentes citadas</h3>
+<h4>El proyecto</h4>
+<ul>
+<li>Repositorio Grupo-22-Scores: <em>src/lib/billing/plans.ts</em>, <em>src/content/para-clubes.ts</em>, <em>src/content/para-torneos.ts</em>, <em>CLAUDE.md</em>, <em>ESTADO.md</em>, <em>PRODUCT.md</em>, <em>supabase/migrations/</em>, historial de git (feb–ago 2026)</li>
+<li><a href="https://g22scores.com">g22scores.com</a> — sitio en producción, consultado el 28-ago-2026</li>
+</ul>
+<h4>Competidores y precios</h4>
+<ul>
+<li><a href="https://app.conecta.rugby/login">Conecta Rugby — pantalla de login, única puerta de acceso</a> · <a href="https://play.google.com/store/apps/details?id=com.bduar.app&amp;hl=es_AR">Conecta Rugby en Google Play — 1.000+ descargas, requiere credenciales</a></li>
+<li><a href="https://uar.com.ar/conecta-rugby-app-la-nueva-aplicacion-movil-para-potenciar-la-gestion-y-capacitacion-del-rugby-argentino/">UAR — Conecta Rugby APP</a> · <a href="https://uar.com.ar/conecta-rugby-se-renueva-una-nueva-plataforma-y-la-actualizacion-de-capacitaciones-para-2026/">UAR — Conecta Rugby 2026</a></li>
+<li><a href="https://www.rugbymanager.com.ar/about/">Rugby Manager — planes y alcance</a></li>
+<li><a href="https://www.rugbyproscore.com.ar/">Rugby Pro Score — sitio y propuesta</a> · <a href="https://www.rugbyproscore.com.ar/tv/e73469486129">marcador en vivo público, Primera UCR</a>. Su modelo comercial —la unión paga la Primera, el club paga las demás categorías— fue aportado por el equipo de G22, no está publicado <span class="ev ev-s">Supuesto verificable</span></li>
+<li><a href="https://www.argentina.basketball/liga-federal/noticia/26477/digitalizacion-transparencia-y-eficiencia-las-claves-del-sistema-gesdeportiva-utilizado-por-la-cab">CABB — GesDeportiva</a></li>
+<li><a href="https://clupik.com/precios-arg/">Clupik — precios Argentina</a> · <a href="https://clupik.com/precios-competiciones-latam/">Clupik — precios competiciones LatAm</a> · <a href="https://clupik.com/software-rugby/">Clupik — vertical rugby</a></li>
+<li><a href="https://sportlomo.com/national-sports-and-federations/">Sportlomo — federaciones</a></li>
+<li><a href="https://get.playhq.com/pricing">PlayHQ — pricing</a> · <a href="https://us.leaguerepublic.com/pricing.html">LeagueRepublic</a> · <a href="https://www.spawtz.com/Products/League%20and%20Venue%20Management%20Software/Price">Spawtz</a> · <a href="https://www.jerseywatch.com/pricing">Jersey Watch</a> · <a href="https://challonge.com/pricing">Challonge</a> · <a href="https://playoffinformatica.com/precio/">Playoff</a> · <a href="https://www.sportlyzer.com/en/pricing">Sportlyzer</a></li>
+<li><a href="https://www.sportsengine.com/motion/pricing/">SportsEngine Motion</a> · <a href="https://www.capterra.com/p/134125/SportsEngine/pricing">SportsEngine (Capterra)</a> · <a href="https://www.teamsnap.com/pricing">TeamSnap</a> · <a href="https://www.trustradius.com/products/teamsnap/pricing">TeamSnap (TrustRadius)</a></li>
+<li><a href="https://xplorer.rugby/">Rugby Xplorer</a> · <a href="https://www.rugbypass.com/app/">RugbyPass</a></li>
+</ul>
+<h4>Mercado y datos deportivos</h4>
+<ul>
+<li><a href="https://uar.com.ar/union/uniones-miembros/">UAR — las 25 uniones miembro</a> · <a href="https://uar.com.ar/wp-content/uploads/REGLAMENTO_GENERAL_UAR-2025.pdf">Reglamento General UAR 2025</a></li>
+<li><a href="https://www.lanacion.com.ar/deportes/rugby/el-torneo-urba-se-expande-91-clubes-nid2228845/">La Nación — URBA: 91 clubes, 45.000 jugadores, 450 partidos por fecha</a> · <a href="https://www.lanacion.com.ar/deportes/rugby/urba-ampliara-la-cantidad-de-clubes-en-su-torneo-principal-en-2026-pasara-del-top-12-a-un-top-14-nid06122024/">La Nación — Top 12 a Top 14 en 2026</a></li>
+<li><a href="https://www.cronista.com/apertura/empresas/los-secretos-del-rugby-argentino-para-atraer-millones-en-sponsors-sin-apostar-al-juego/">El Cronista — US$ 10 M anuales en sponsors de la UAR</a></li>
+<li><a href="https://www.world.rugby/organisation/about-us/membership-growth?lang=es">World Rugby — 134 uniones, ~8 M jugadores</a></li>
+<li><a href="https://es.wikipedia.org/wiki/Chile_en_la_Copa_Mundial_de_Rugby_de_2027">Chile — clasificación al Mundial 2027</a> · <a href="https://es.wikipedia.org/wiki/Super_Rugby_Am%C3%A9ricas_2025">Súper Rugby Américas 2025</a></li>
+<li><a href="https://www.grandviewresearch.com/industry-analysis/sports-management-software-market-report">Grand View Research</a> · <a href="https://www.mordorintelligence.com/industry-reports/sportsmanagementsoftware-market">Mordor Intelligence</a> · <a href="https://www.verifiedmarketresearch.com/product/sports-management-software-market/">Verified Market Research</a> — software de gestión deportiva</li>
+<li><a href="https://www.lsports.eu/blog/sports-data-cost/">LSports — costo de datos deportivos</a> · <a href="https://sportshandle.com/sports-betting-official-data-cost/">Sports Handle — datos oficiales para apuestas</a></li>
+<li><a href="https://www.similarweb.com/es/website/promiedos.com.ar/">Similarweb — Promiedos</a> · <a href="https://www.yogonet.com/latinoamerica/noticias/2025/07/23/105076-argentina-en-que-provincias-esta-regulado-el-juego-online">Yogonet — regulación del juego online por provincia</a></li>
+<li><a href="https://urba.org.ar/">URBA</a> · <a href="https://brasilrugby.com.br/">CBRu</a> · <a href="https://chile.rugby/">Chile Rugby</a> · <a href="https://uru.org.uy/">URU</a> · <a href="https://mexrugby.com/">FMRU</a> · <a href="https://ferugby.es/">FERugby</a></li>
+</ul>
+
+<div class="box box-w">
+<h4>Nota sobre el encargo</h4>
+<p>La consigna original describía un proyecto industrial de cabinas de pintura, sistemas HVAC, control predictivo e integración con PLC y SCADA. El proyecto conectado no tiene nada de eso: es una plataforma web de datos y gestión de torneos deportivos. Este informe aplica el mismo marco de las quince secciones al producto real. Las secciones que no tenían traducción posible — alianzas con Siemens, Schneider, ABB o Rockwell; venta de hardware; reparto de ahorro energético — se responden explicando por qué no aplican, en lugar de forzarlas.</p>
+</div>
+</div>
+</section>
+
+<footer>
+  <p>Informe de estrategia comercial y competitiva · G22 Scores · 28 de agosto de 2026<br>
+  Construido sobre el repositorio del proyecto, el sitio en producción y 60+ fuentes públicas citadas.<br>
+  Los datos etiquetados como Supuesto son juicio comercial y no deben presentarse a un cliente como hechos.</p>
+</footer>
+
+</main>
+</div>
+</div>

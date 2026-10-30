@@ -139,4 +139,18 @@ export interface ExternalStandingsRow {
     points: number;
     scored?: number;
     conceded?: number;
+    /** Conferencia o división cuando la tabla viene partida (NFL, NCAA). */
+    group_name?: string;
+    differential?: number;
+    /** (G + E/2) / J. La tabla del fútbol americano ordena por esto, no por puntos. */
+    win_percentage?: number;
+    /** "W3", "L2": la racha como la publica el proveedor. */
+    streak?: string | null;
+    games_behind?: string | null;
+    /** Semilla de playoffs dentro de la conferencia; null hasta que exista. */
+    seed?: number | null;
+    /** Nota de clasificación ("Clinched Division"). */
+    note?: string | null;
+    /** Ranking AP (NCAA). */
+    rank?: number | null;
 }

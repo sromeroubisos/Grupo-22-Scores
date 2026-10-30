@@ -1,0 +1,338 @@
+{
+  "descripcion": "UCR Top 10 A 2026 · fecha 15 · Uru Cure 14-35 Club La Tablada (Soles del Oeste, 18/09/2026). Formaciones y minuto a minuto de rugbyproscore.com.ar/match/PDHNYzJgcJkbRT9taWWP",
+  "torneo": "Top 10 del Centro",
+  "partidos": [
+    {
+      "id": "9ae6e777-1bd7-4dd4-ae77-f3a5768c230c",
+      "rotulo": "Uru Cure 14-35 Club La Tablada",
+      "local": {
+        "nombre": "Uru Cure Rugby Club",
+        "titulares": [
+          {
+            "numero": 1,
+            "nombre": "Mauro Agustin Palacios"
+          },
+          {
+            "numero": 2,
+            "nombre": "Alejo Freymann"
+          },
+          {
+            "numero": 3,
+            "nombre": "Juan Manuel de Dios Gigena Gutierrez"
+          },
+          {
+            "numero": 4,
+            "nombre": "Alfonso Zottola"
+          },
+          {
+            "numero": 5,
+            "nombre": "Tomas Baudino"
+          },
+          {
+            "numero": 6,
+            "nombre": "Juan Patricio Arqué Latour"
+          },
+          {
+            "numero": 7,
+            "nombre": "Julian Conti"
+          },
+          {
+            "numero": 8,
+            "nombre": "Fidel Rins"
+          },
+          {
+            "numero": 9,
+            "nombre": "Losada G"
+          },
+          {
+            "numero": 10,
+            "nombre": "Oviedo"
+          },
+          {
+            "numero": 11,
+            "nombre": "Mateo Anino"
+          },
+          {
+            "numero": 12,
+            "nombre": "Ignacio Raul Abrile"
+          },
+          {
+            "numero": 13,
+            "nombre": "Francisco Caramuti"
+          },
+          {
+            "numero": 14,
+            "nombre": "Gonzalo Losada"
+          },
+          {
+            "numero": 15,
+            "nombre": "Francisco Susperregui"
+          }
+        ],
+        "suplentes": [
+          {
+            "numero": 16,
+            "nombre": "Juan Bautista Carrillo Lopez"
+          },
+          {
+            "numero": 17,
+            "nombre": "Máximo Flores Macías"
+          },
+          {
+            "numero": 18,
+            "nombre": "De la Mota"
+          },
+          {
+            "numero": 19,
+            "nombre": "Lopez"
+          },
+          {
+            "numero": 20,
+            "nombre": "Facundo Cerutti Cuffia"
+          },
+          {
+            "numero": 21,
+            "nombre": "Guerrieri J"
+          },
+          {
+            "numero": 22,
+            "nombre": "Tomas Principe"
+          },
+          {
+            "numero": 23,
+            "nombre": "Guerrieri V"
+          }
+        ]
+      },
+      "visitante": {
+        "nombre": "Club La Tablada",
+        "titulares": [
+          {
+            "numero": 1,
+            "nombre": "Nicolas Revol Pitt",
+            "id": "08b4f8ec-c721-4849-8d36-a3c6cebc4289"
+          },
+          {
+            "numero": 2,
+            "nombre": "Juan Ignacio Greising Revol",
+            "id": "4601c067-5636-48f9-8ef2-0d40aaf6de36"
+          },
+          {
+            "numero": 3,
+            "nombre": "Luca D'Ugo Vivanco",
+            "id": "b0f717ea-2b19-4929-b404-5ca702f6a2f1"
+          },
+          {
+            "numero": 4,
+            "nombre": "Federico Gutierrez Marquez",
+            "id": "4e15e30f-7974-458f-bfc8-04e4c78477f5"
+          },
+          {
+            "numero": 5,
+            "nombre": "Federico Rolotti",
+            "id": "649fe0e8-2ebf-46e6-aa77-e1e70f3303f6"
+          },
+          {
+            "numero": 6,
+            "nombre": "Francisco Udrisard",
+            "id": "058616e7-dbc8-47f6-91cd-5aa8f98f9e21"
+          },
+          {
+            "numero": 7,
+            "nombre": "Ignacio Flores",
+            "id": "2d2a56b1-6711-43ef-a77a-cb45119272b5"
+          },
+          {
+            "numero": 8,
+            "nombre": "Juan Cruz Caballero",
+            "id": "be42f49c-494b-498c-8a37-9ed546977a72"
+          },
+          {
+            "numero": 9,
+            "nombre": "Alfredo Pueyrredon",
+            "id": "4429db7e-1d52-48e2-a717-27c0fd4190e9"
+          },
+          {
+            "numero": 10,
+            "nombre": "Nicolas Roger Farias"
+          },
+          {
+            "numero": 11,
+            "nombre": "Salvador Solana",
+            "id": "1964384f-c4c1-4163-8024-ced190c13f78"
+          },
+          {
+            "numero": 12,
+            "nombre": "Lautaro Diaz"
+          },
+          {
+            "numero": 13,
+            "nombre": "Santiago Tobal",
+            "id": "813728d7-a478-4b0f-86ae-d913bad3e06f"
+          },
+          {
+            "numero": 14,
+            "nombre": "Nicolas Olguin",
+            "id": "9f7979f1-b288-45e4-b5b6-437f0cf03396"
+          },
+          {
+            "numero": 15,
+            "nombre": "Felipe Pelaez",
+            "id": "30edcfdc-3cde-4585-bc0e-c1a9849dfa49"
+          }
+        ],
+        "suplentes": [
+          {
+            "numero": 16,
+            "nombre": "Nicolas Hitt Reyes",
+            "id": "9bbd8cde-2c78-484c-8fd5-29a3a6921047"
+          },
+          {
+            "numero": 17,
+            "nombre": "Martin Tobal",
+            "id": "1475b0f7-6f50-4829-b27b-eebd92a60b72"
+          },
+          {
+            "numero": 18,
+            "nombre": "Nicolas Montenegro",
+            "id": "afa6b06b-62c0-4a9b-80f3-d2f19309f287"
+          },
+          {
+            "numero": 19,
+            "nombre": "Carlos Facundo Nahuel Molina Martinez",
+            "id": "c6890bbf-affd-41d8-9d7c-6f30f2abe73e"
+          },
+          {
+            "numero": 20,
+            "nombre": "Facundo Gustavo Alemanno",
+            "id": "019d4618-bb76-4e28-82cf-705d8c483748"
+          },
+          {
+            "numero": 21,
+            "nombre": "Franco Feretti",
+            "id": "515d67af-d516-42a3-9175-d4ab9e39e580"
+          },
+          {
+            "numero": 22,
+            "nombre": "Bautista Echeverria",
+            "id": "d4f5f7a7-0e16-4985-bb2a-73b1bb743843"
+          },
+          {
+            "numero": 23,
+            "nombre": "Fausto Echeverria",
+            "id": "64b3e42e-aa70-4234-be3e-4b70854f3258"
+          }
+        ]
+      },
+      "eventos": [
+        {
+          "minuto": 19,
+          "periodo": "1T",
+          "tipo": "penalty_goal",
+          "equipo": "visitante",
+          "jugador": "Nicolas Roger Farias",
+          "detalle": "[palos:ok]"
+        },
+        {
+          "minuto": 22,
+          "periodo": "1T",
+          "tipo": "penalty_goal",
+          "equipo": "local",
+          "jugador": "Gonzalo Losada",
+          "detalle": "[palos:ok]"
+        },
+        {
+          "minuto": 24,
+          "periodo": "1T",
+          "tipo": "penalty_goal",
+          "equipo": "visitante",
+          "jugador": "Nicolas Roger Farias",
+          "detalle": "[palos:ok]"
+        },
+        {
+          "minuto": 29,
+          "periodo": "1T",
+          "tipo": "try",
+          "equipo": "visitante",
+          "jugador": "Alfredo Pueyrredon"
+        },
+        {
+          "minuto": 38,
+          "periodo": "1T",
+          "tipo": "try",
+          "equipo": "visitante",
+          "jugador": "Lautaro Diaz"
+        },
+        {
+          "minuto": 39,
+          "periodo": "1T",
+          "tipo": "conversion",
+          "equipo": "visitante",
+          "jugador": "Nicolas Roger Farias",
+          "detalle": "[palos:ok]"
+        },
+        {
+          "minuto": 11,
+          "periodo": "2T",
+          "tipo": "penalty_goal",
+          "equipo": "local",
+          "jugador": "Gonzalo Losada",
+          "detalle": "[palos:ok]"
+        },
+        {
+          "minuto": 16,
+          "periodo": "2T",
+          "tipo": "penalty_goal",
+          "equipo": "local",
+          "jugador": "Gonzalo Losada",
+          "detalle": "[palos:ok]"
+        },
+        {
+          "minuto": 24,
+          "periodo": "2T",
+          "tipo": "try",
+          "equipo": "local",
+          "jugador": "Mateo Anino"
+        },
+        {
+          "minuto": 28,
+          "periodo": "2T",
+          "tipo": "try",
+          "equipo": "visitante",
+          "jugador": "Alfredo Pueyrredon"
+        },
+        {
+          "minuto": 29,
+          "periodo": "2T",
+          "tipo": "conversion",
+          "equipo": "visitante",
+          "jugador": "Nicolas Roger Farias",
+          "detalle": "[palos:ok]"
+        },
+        {
+          "minuto": 32,
+          "periodo": "2T",
+          "tipo": "penalty_goal",
+          "equipo": "visitante",
+          "jugador": "Nicolas Roger Farias",
+          "detalle": "[palos:ok]"
+        },
+        {
+          "minuto": 33,
+          "periodo": "2T",
+          "tipo": "try",
+          "equipo": "visitante",
+          "jugador": "Nicolas Olguin"
+        },
+        {
+          "minuto": 34,
+          "periodo": "2T",
+          "tipo": "conversion",
+          "equipo": "visitante",
+          "jugador": "Nicolas Roger Farias",
+          "detalle": "[palos:ok]"
+        }
+      ]
+    }
+  ]
+}

@@ -1,3 +1,7 @@
+import 'server-only';
+// Entrega un cliente con la service key: nunca puede terminar en un bundle de
+// cliente. `server-only` hace fallar el build si alguien lo importa desde un
+// componente 'use client'.
 import type { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 

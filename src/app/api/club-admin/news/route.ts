@@ -38,6 +38,29 @@ function normalizeNullableText(value: unknown) {
     return normalized.length > 0 ? normalized : null;
 }
 
+class ClubNewsValidationError extends Error {}
+
+/**
+ * La misma regla que `cleanImageUrl` de /api/news: solo un link http(s) con
+ * tope. Un `javascript:` o un `data:` acá terminaba en el <img> de la portada
+ * del club.
+ */
+function normalizeImageUrl(value: unknown) {
+    const text = normalizeNullableText(value);
+    if (!text) return null;
+    if (text.length > 2048 || !/^https?:\/\//i.test(text)) {
+        throw new ClubNewsValidationError('La imagen tiene que ser un link que empiece con https://, o subirse desde el editor.');
+    }
+    return text;
+}
+
+/** El detalle de Supabase va al log; a la pantalla, un mensaje fijo. */
+function failure(scope: string, error: unknown, fallback: string) {
+    if (error instanceof ClubNewsValidationError) return err(error.message, 400);
+    console.error(`[api/club-admin/news][${scope}]`, error);
+    return err(fallback, 500);
+}
+
 export async function GET(request: NextRequest) {
     try {
         const clubId = request.nextUrl.searchParams.get('club');
@@ -58,8 +81,7 @@ export async function GET(request: NextRequest) {
         if (error) throw error;
         return NextResponse.json({ ok: true, data: data ?? [] });
     } catch (error) {
-        const message = error instanceof Error ? error.message : 'No se pudieron cargar las noticias del club';
-        return err(message, 500);
+        return failure('GET', error, 'No se pudieron cargar las noticias del club');
     }
 }
 
@@ -81,7 +103,7 @@ export async function POST(request: NextRequest) {
             title,
             summary: normalizeNullableText(body.summary),
             content: normalizeNullableText(body.content),
-            image_url: normalizeNullableText(body.imageUrl),
+            image_url: normalizeImageUrl(body.imageUrl),
             status,
             scope: 'club',
             scope_id: clubId,
@@ -97,8 +119,7 @@ export async function POST(request: NextRequest) {
         if (error) throw error;
         return NextResponse.json({ ok: true, data }, { status: 201 });
     } catch (error) {
-        const message = error instanceof Error ? error.message : 'No se pudo guardar la noticia';
-        return err(message, 500);
+        return failure('POST', error, 'No se pudo guardar la noticia');
     }
 }
 
@@ -113,13 +134,16 @@ export async function PUT(request: NextRequest) {
         const access = await resolveClubAccess(clubId, EDIT_MEMBERSHIP_ROLES);
         if ('error' in access) return access.error;
 
+        const title = normalizeText(body.title);
+        if (!title) return err('El titulo es obligatorio', 400);
+
         const status = normalizeText(body.status) === 'published' ? 'published' : 'draft';
         const admin = createAdminClient() as any;
         const payload = {
-            title: normalizeText(body.title),
+            title,
             summary: normalizeNullableText(body.summary),
             content: normalizeNullableText(body.content),
-            image_url: normalizeNullableText(body.imageUrl),
+            image_url: normalizeImageUrl(body.imageUrl),
             status,
             scope: 'club',
             scope_id: clubId,
@@ -138,8 +162,7 @@ export async function PUT(request: NextRequest) {
         if (error) throw error;
         return NextResponse.json({ ok: true, data });
     } catch (error) {
-        const message = error instanceof Error ? error.message : 'No se pudo actualizar la noticia';
-        return err(message, 500);
+        return failure('PUT', error, 'No se pudo actualizar la noticia');
     }
 }
 
@@ -164,7 +187,6 @@ export async function DELETE(request: NextRequest) {
         if (error) throw error;
         return NextResponse.json({ ok: true, success: true });
     } catch (error) {
-        const message = error instanceof Error ? error.message : 'No se pudo eliminar la noticia';
-        return err(message, 500);
+        return failure('DELETE', error, 'No se pudo eliminar la noticia');
     }
 }

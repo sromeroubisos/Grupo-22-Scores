@@ -22,6 +22,32 @@ import { isUuid } from '@/lib/utils/postgrest';
 import { createApiPerfTracker } from '@/lib/perf/api';
 import { logOverfetchWarning } from '@/lib/perf/measure';
 
+/**
+ * La zona tiene que colgar de una fase de ESTE torneo. El writer es
+ * service_role: sin esto, un admin del torneo A asignaba sus participantes a
+ * la zona de una fase del torneo B y aparecían en la tabla ajena.
+ */
+async function groupBelongsToTournament(
+  supabase: any,
+  tournamentId: string,
+  groupId: string,
+): Promise<boolean> {
+  if (!isUuid(groupId)) return false;
+  const { data: group, error: groupError } = await supabase
+    .from('tournament_groups')
+    .select('id, phase_id')
+    .eq('id', groupId)
+    .maybeSingle();
+  if (groupError || !group?.phase_id) return false;
+  const { data: phase, error: phaseError } = await supabase
+    .from('tournament_phases')
+    .select('id')
+    .eq('id', group.phase_id)
+    .eq('tournament_id', tournamentId)
+    .maybeSingle();
+  return !phaseError && Boolean(phase);
+}
+
 type TournamentContextRow = {
   id: string;
   name: string;
@@ -120,6 +146,11 @@ type TournamentParticipantsTableClient = {
   };
   update(values: Record<string, unknown>): {
     eq(column: 'id', value: string): {
+      eq(column: 'tournament_id', value: string): {
+        select(columns: string): {
+          single(): Promise<{ data: TournamentParticipantRecord | null; error: SupabaseLikeError | null }>;
+        };
+      };
       select(columns: string): {
         single(): Promise<{ data: TournamentParticipantRecord | null; error: SupabaseLikeError | null }>;
       };
@@ -1009,6 +1040,9 @@ export async function POST(
     if (body.group_id !== undefined && body.group_id !== null && body.group_id !== '' && !isUuid(body.group_id)) {
       return NextResponse.json({ error: 'group_id no es un UUID válido' }, { status: 400 });
     }
+    if (body.group_id && !(await groupBelongsToTournament(supabase, tournamentId, String(body.group_id)))) {
+      return NextResponse.json({ error: 'La zona no pertenece a este torneo' }, { status: 400 });
+    }
 
     // Validate required fields
     if (!body.name && !body.club_id) {
@@ -1200,6 +1234,9 @@ export async function PATCH(
     if (!participantId) {
       return NextResponse.json({ error: 'Missing participant ID' }, { status: 400 });
     }
+    if (!isUuid(participantId)) {
+      return NextResponse.json({ error: 'El id del participante no es un UUID válido' }, { status: 400 });
+    }
 
     const body = await request.json();
     const supportsDivisionId = await supportsTournamentParticipantDivisionId(supabase);
@@ -1214,7 +1251,10 @@ export async function PATCH(
     let standingsToReplace: TournamentStandingReplacementRow[] = [];
     let replacementClubForStats: { name: string; logo_url?: string | null } | null = null;
 
-    if (body.division_id !== undefined || body.club_id !== undefined || shouldReplaceAcrossTournament) {
+    // El participante se carga SIEMPRE, no sólo cuando cambia el club: el
+    // writer es service_role y un PATCH de nombre o zona con el id de un
+    // participante de otro torneo lo modificaba igual.
+    {
       const participantsTable = supabase
         .from('tournament_participants') as unknown as TournamentParticipantsTableClient;
 
@@ -1241,7 +1281,13 @@ export async function PATCH(
     if (body.status !== undefined) updateData.status = body.status;
     if (body.club_id !== undefined) updateData.club_id = body.club_id;
     if (body.seed !== undefined) updateData.seed = body.seed;
-    if (body.group_id !== undefined) updateData.group_id = body.group_id;
+    if (body.group_id !== undefined) {
+      const nextGroupId = body.group_id === '' ? null : body.group_id;
+      if (nextGroupId !== null && !(await groupBelongsToTournament(supabase, tournamentId, String(nextGroupId)))) {
+        return NextResponse.json({ error: 'La zona no pertenece a este torneo' }, { status: 400 });
+      }
+      updateData.group_id = nextGroupId;
+    }
     if (body.short_code !== undefined) updateData.short_code = body.short_code;
     if (body.notes !== undefined) updateData.notes = body.notes;
 
@@ -1499,6 +1545,7 @@ export async function PATCH(
     const { data, error } = await participantsTable
       .update(updateData)
       .eq('id', participantId)
+      .eq('tournament_id', tournamentId)
       .select(getTournamentParticipantSelectColumns(supportsDivisionId))
       .single();
 

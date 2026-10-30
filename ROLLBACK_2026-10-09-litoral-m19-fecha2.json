@@ -1,0 +1,18 @@
+[
+  {
+    "id": "7369b425-01c8-477e-bfa2-f9f4b55d36d2",
+    "antes": {
+      "status": "final",
+      "score": {
+        "away": 12,
+        "home": 52
+      },
+      "home_base_points": 0,
+      "away_base_points": 0,
+      "home_bonus_points": 0,
+      "away_bonus_points": 0,
+      "points_autocalculated": true,
+      "points_override_reason": null
+    }
+  }
+]

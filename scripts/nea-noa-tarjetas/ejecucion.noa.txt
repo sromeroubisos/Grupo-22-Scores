@@ -1,0 +1,1795 @@
+NOA 2026 · tarjetas oficiales
+
+tucuman-rugby-club vs los-tarcos · NOA 2026 · tarjeta 319845  ·  151522da-375d-4f05-acc1-e0f76807d639
+  local     · tucuman-rugby-club · 23 jugadores · 21 con ficha fijada
+  visitante · los-tarcos · 23 jugadores · 0 con ficha fijada
+  eventos   · 30
+    min  3 (1T 3) local     try          Juan Pablo Pfister
+    min  9 (1T 9) local     try          Matias Sauze
+    min 10 (1T 10) local     conversion   Gonzalo Albornoz
+    min 13 (1T 13) visitante try          Bruno Gomez Urrutia
+    min 17 (1T 17) local     try          Juan Pablo Pfister
+    min 18 (1T 18) local     conversion   Gonzalo Albornoz
+    min 35 (1T 35) local     card_yellow  Matias Sauze
+    min 37 (1T 37) local     card_yellow  Juan Cruz Guzman
+    min 37 (1T 37) visitante try          Nahuel Maximo Gonzalez
+    min 42 (2T 2) visitante try          Tomas David Aguero
+    min 55 (2T 15) visitante substitution Martin Augusto Sal
+    min 55 (2T 15) visitante substitution Fabricio Navarro Luna
+    min 56 (2T 16) visitante substitution Esteban Joel Amaya Albornoz
+    min 56 (2T 16) visitante substitution Lucas Picon
+    min 56 (2T 16) visitante try          Luka Ezequiel Rosa
+    min 68 (2T 28) visitante penalty_goal Facundo Rodriguez
+    min 70 (2T 30) visitante substitution Máximo Augusto Aguero
+    min 70 (2T 30) visitante substitution Joaquin Bourguignon
+    min 75 (2T 35) visitante substitution Ignacio Rodriguez Santillan
+    min 80 (2T 40) visitante penalty_goal Facundo Rodriguez
+    min 88 (2T 48) local     try          Tomas Witte
+    min 89 (2T 49) local     substitution Gonzalo Albornoz
+    min 96 (2T 56) local     substitution Mariano Muntaner
+    min 96 (2T 56) local     substitution Emilio Alú
+    min 96 (2T 56) local     substitution Ignacio Estrada Cossio
+    min 100 (2T 60) local     card_red     Joaquín Jose Aguilar Rico
+    min 100 (2T 60) local     substitution Matias Sauze
+    min 102 (2T 62) local     substitution Mariano Carranza
+    min 106 (2T 66) local     substitution Pablo Laitan
+    min 106 (2T 66) local     substitution Juan Maria D'antuene
+  marcador  · eventos 24-26 · guardado 24-26
+  tries     · 4-4 (guardado —-—)
+  arbitro   · PEDRO PABLO LÓPEZ VILDOZA (guardado: —)
+  guardado  · 23 local · 23 visitante · 30 eventos
+
+tucuman-lawn-tennis vs universitario-de-tucuman · NOA 2026 · tarjeta 319846  ·  43e1217c-89f1-4e5e-a976-c22847a53198
+  local     · tucuman-lawn-tennis · 23 jugadores · 20 con ficha fijada
+  visitante · universitario-de-tucuman · 23 jugadores · 20 con ficha fijada
+  eventos   · 38
+    min  7 (1T 7) local     try          Thiago Soberon
+    min 13 (1T 13) local     try          Mariano Seleme
+    min 14 (1T 14) local     conversion   Ignacio Rodriguez Prados
+    min 17 (1T 17) local     penalty_goal Ignacio Rodriguez Prados
+    min 20 (1T 20) visitante card_yellow  Lautaro Acuña
+    min 24 (1T 24) local     try          Joaquin Lopez Islas
+    min 25 (1T 25) local     conversion   Ignacio Rodriguez Prados
+    min 30 (1T 30) visitante penalty_goal Martin Arregui
+    min 35 (1T 35) local     try          Ignacio Rodriguez Prados
+    min 36 (1T 36) local     conversion   Ignacio Rodriguez Prados
+    min 39 (1T 39) visitante try          Nicolas Triviño Chehuan
+    min 39 (1T 39) visitante conversion   Martin Arregui
+    min 87 (2T 47) local     penalty_goal Ignacio Rodriguez Prados
+    min 87 (2T 47) visitante substitution Felix Ogorman
+    min 87 (2T 47) visitante substitution Facundo Ezequiel Juarez
+    min 92 (2T 52) visitante substitution Nicolas Triviño Chehuan
+    min 92 (2T 52) visitante try          Tomas Vanni
+    min 92 (2T 52) visitante conversion   Martin Arregui
+    min 93 (2T 53) local     substitution Agustin Iglesias
+    min 93 (2T 53) local     substitution Maximiliano De La Jara
+    min 93 (2T 53) local     substitution Benjamin Heredia
+    min 93 (2T 53) local     substitution Joaquin Lopez Islas
+    min 98 (2T 58) local     substitution Mariano Seleme
+    min 98 (2T 58) local     substitution Tomas Arguello
+    min 98 (2T 58) visitante substitution Pablo Garreton
+    min 98 (2T 58) visitante substitution Ramiro Alejandro Ferreyra
+    min 99 (2T 59) local     try          Pedro Bottini
+    min 100 (2T 60) local     substitution Mariano Barrionuevo
+    min 103 (2T 63) local     card_red     Carlos Augusto Aguirre
+    min 103 (2T 63) visitante substitution Lautaro Acuña
+    min 105 (2T 65) visitante try          Martín Leandro Fierro Taddei
+    min 107 (2T 67) local     try          Marquieguez Ignacio
+    min 107 (2T 67) visitante substitution Benjamin Farías Cerioni
+    min 108 (2T 68) local     conversion   Ignacio Rodriguez Prados
+    min 109 (2T 69) local     substitution Lucas Solimo
+    min 109 (2T 69) visitante substitution Martín Leandro Fierro Taddei
+    min 110 (2T 70) visitante conversion   Martin Arregui
+    min 110 (2T 70) visitante try          Facundo Moreno
+  marcador  · eventos 44-29 · guardado 44-29
+  tries     · 6-4 (guardado —-—)
+  arbitro   · PABLO AGUSTIN GODOY BATAGLIA (guardado: —)
+  guardado  · 23 local · 23 visitante · 38 eventos
+
+cardenales-r-c vs jockey-club-salta · NOA 2026 · tarjeta 319848  ·  67a3e53e-60c6-4a49-ba23-dd716e3012d2
+  local     · cardenales-r-c · 23 jugadores · 23 con ficha fijada
+  visitante · jockey-club-salta · 23 jugadores · 0 con ficha fijada
+  eventos   · 34
+    min 15 (1T 15) local     penalty_goal José Ignacio Cerrutti
+    min 25 (1T 25) local     try          Francisco Abi Cheble
+    min 25 (1T 25) local     conversion   José Ignacio Cerrutti
+    min 33 (1T 33) local     substitution Juan Cruz Zamora Andole
+    min 34 (1T 34) visitante try          Estanislao Pregot Holmquist
+    min 35 (1T 35) visitante conversion   Nahuel Agustin Martinez
+    min 42 (1T 42) local     penalty_goal José Ignacio Cerrutti
+    min 45 (2T 5) local     penalty_goal José Ignacio Cerrutti
+    min 47 (2T 7) local     penalty_goal Cipriano Cerrutti
+    min 47 (2T 7) local     try          Franco Filipezuk
+    min 47 (2T 7) local     conversion   José Ignacio Cerrutti
+    min 48 (2T 8) visitante substitution Bruno Chaves
+    min 49 (2T 9) visitante try          Tomás Juárez Hernández
+    min 50 (2T 10) visitante conversion   Nahuel Agustin Martinez
+    min 51 (2T 11) visitante substitution Gaston Vaca
+    min 55 (2T 15) visitante substitution Fernando Goytia
+    min 56 (2T 16) visitante substitution Nahuel Agustin Martinez
+    min 61 (2T 21) visitante substitution Octavio Ovejero
+    min 65 (2T 25) local     substitution Gonzalo Emanuel Lazarte
+    min 67 (2T 27) visitante substitution Facundo Aguilar Jimenez
+    min 67 (2T 27) visitante substitution Tadeo Alegre
+    min 68 (2T 28) visitante try          Tomás Juárez Hernández
+    min 69 (2T 29) visitante conversion   Damian Ezequiel Huber Garcia
+    min 72 (2T 32) visitante card_yellow  Nicolas Davalos
+    min 73 (2T 33) local     substitution Juan Pablo Lobo
+    min 73 (2T 33) local     substitution Tomas Alberto Durán
+    min 73 (2T 33) local     substitution Franco Filipezuk
+    min 73 (2T 33) local     substitution Andres Odstrcil
+    min 73 (2T 33) visitante substitution Franco Giacoppo
+    min 74 (2T 34) local     try          Francisco Abi Cheble
+    min 75 (2T 35) local     substitution Joaquín Rodriguez
+    min 75 (2T 35) local     substitution Jeremias Muñoz
+    min 76 (2T 36) visitante try          Joaquin Cornejo
+    min 77 (2T 37) visitante conversion   Damian Ezequiel Huber Garcia
+  marcador  · eventos 31-28 · guardado 31-28
+  tries     · 3-4 (guardado —-—)
+  arbitro   · IÑAKY BARRAGUIRRE (guardado: —)
+  guardado  · 23 local · 23 visitante · 34 eventos
+
+huirapuca vs lince-rugby-club · NOA 2026 · tarjeta 319844  ·  a893c9af-5a19-41c9-b8bf-2216c0bd824b
+  local     · huirapuca · 23 jugadores · 20 con ficha fijada
+  visitante · lince-rugby-club · 23 jugadores · 0 con ficha fijada
+  eventos   · 35
+    min 12 (1T 12) visitante penalty_goal Lucas Mateo Pinna
+    min 15 (1T 15) local     try          Benjamin Lefebvre
+    min 24 (1T 24) visitante card_yellow  Matias Nuñez Mateu
+    min 26 (1T 26) local     try          Enzo Gutierrez
+    min 26 (1T 26) local     conversion   Juan Manue Molinuevo Lazcano
+    min 30 (1T 30) visitante penalty_goal Lucas Mateo Pinna
+    min 32 (1T 32) local     try          Tomas Dande
+    min 32 (1T 32) local     conversion   Juan Manue Molinuevo Lazcano
+    min 35 (1T 35) local     card_yellow  Matias Orlando
+    min 37 (1T 37) visitante try          Emiliano Perez
+    min 45 (2T 5) local     try          Juan Manue Molinuevo Lazcano
+    min 45 (2T 5) local     conversion   Juan Manue Molinuevo Lazcano
+    min 45 (2T 5) visitante substitution Matias Nuñez Mateu
+    min 45 (2T 5) visitante substitution Gonzalo San Millán
+    min 56 (2T 16) local     try          Enzo Gutierrez
+    min 56 (2T 16) local     substitution Matias Rene Gimenez Bueso
+    min 56 (2T 16) local     substitution Geronimo Lazcano
+    min 56 (2T 16) local     substitution Tomas Dande
+    min 57 (2T 17) local     substitution Mauricio Isaias Montoya
+    min 57 (2T 17) visitante substitution José Lacroa
+    min 57 (2T 17) visitante substitution Gonzalo Fabricio Suarez
+    min 62 (2T 22) visitante try          Mauricio Francisco Ruiz
+    min 66 (2T 26) local     substitution Enzo Gutierrez
+    min 66 (2T 26) local     substitution Benjamin Lefebvre
+    min 66 (2T 26) local     substitution Juan Manuel Herrera
+    min 70 (2T 30) local     substitution Federico Gonzalez
+    min 72 (2T 32) visitante substitution Mariano Ariza Ygel
+    min 73 (2T 33) local     try          Matias Orlando
+    min 73 (2T 33) local     conversion   Juan Manue Molinuevo Lazcano
+    min 74 (2T 34) local     try          Juan Ignacio Aguero
+    min 74 (2T 34) local     conversion   Juan Manue Molinuevo Lazcano
+    min 76 (2T 36) visitante try          Santino Nieva
+    min 80 (2T 40) visitante substitution Edgardo Gabriel Fanjul
+    min 80 (2T 40) visitante substitution Victor Emiliano Coria Marchetti
+    min 80 (2T 40) visitante substitution Juan Luis Navarro
+  marcador  · eventos 45-21 · guardado 45-21
+  tries     · 7-3 (guardado 0-0)
+  arbitro   · PATRICIO PADRON TEJERIZO (guardado: —)
+  guardado  · 23 local · 23 visitante · 35 eventos
+
+natacion-y-gimnasia vs universitario-de-salta · NOA 2026 · tarjeta 319842  ·  f109857a-7f2e-4bb9-9a85-f28ea6018756
+  local     · natacion-y-gimnasia · 23 jugadores · 23 con ficha fijada
+  visitante · universitario-de-salta · 23 jugadores · 0 con ficha fijada
+  eventos   · 32
+    min  6 (1T 6) local     try          Lucas Guc
+    min  7 (1T 7) local     conversion   Alejo Majolli
+    min 13 (1T 13) local     substitution Matias López Esteban
+    min 17 (1T 17) local     try          Mariano Perondi
+    min 30 (1T 30) local     try          Lucas Guc
+    min 38 (1T 38) visitante try          Tomas Duran
+    min 40 (1T 40) local     try          Juan Martin Barros
+    min 40 (1T 40) local     conversion   Alejo Majolli
+    min 41 (2T 1) local     substitution Matias Bascary
+    min 44 (2T 4) visitante try          Mateo Andres Segura
+    min 44 (2T 4) visitante conversion   Mariano Garcia Ascarate
+    min 48 (2T 8) local     substitution Matias Orlande Ascarate
+    min 48 (2T 8) visitante substitution Francisco Bestregui
+    min 53 (2T 13) local     substitution Mariano Galvez
+    min 56 (2T 16) visitante substitution Ezequiel Garcia Ascarate
+    min 57 (2T 17) local     penalty_goal Cesar Rivadeneira
+    min 57 (2T 17) visitante substitution Alex Leandro Benjamin Flores Vega
+    min 59 (2T 19) visitante card_yellow  Eliseo Morales
+    min 60 (2T 20) local     substitution Ramon Santiago Calderon Suasnabar
+    min 60 (2T 20) visitante substitution Lucas Perez Bordones
+    min 60 (2T 20) visitante substitution Fabrizio Gaspar Rivainera Aquenes
+    min 60 (2T 20) visitante substitution Nicolás Javier Sona Lucchelli
+    min 63 (2T 23) local     substitution Ignacio Martinez
+    min 63 (2T 23) local     substitution Mariano Aguero Daneri
+    min 64 (2T 24) visitante card_yellow  Mateo Andres Segura
+    min 64 (2T 24) visitante substitution Ramiro García Ascarate
+    min 65 (2T 25) local     try          Luis Nicolas Grosso
+    min 66 (2T 26) local     substitution Santiago Romano
+    min 66 (2T 26) visitante substitution Bernabé Bracamonte Martinez
+    min 75 (2T 35) visitante try          Mariano Garcia Ascarate
+    min 77 (2T 37) visitante try          Mateo Andres Segura
+    min 77 (2T 37) visitante conversion   Mariano Garcia Ascarate
+  marcador  · eventos 32-24 · guardado 32-24
+  tries     · 5-4 (guardado —-—)
+  arbitro   · EZEQUIEL ORCAJADA (guardado: —)
+  guardado  · 23 local · 23 visitante · 32 eventos
+
+lince-rugby-club vs tucuman-rugby-club · NOA 2026 · tarjeta 320331  ·  8b194757-6aaf-4476-9d34-fc7f9bfeb526
+  local     · lince-rugby-club · 23 jugadores · 0 con ficha fijada
+  visitante · tucuman-rugby-club · 23 jugadores · 20 con ficha fijada
+  eventos   · 37
+    min  6 (1T 6) visitante try          Nicolas Maria Macome
+    min  7 (1T 7) visitante conversion   Tomas Witte
+    min 16 (1T 16) visitante penalty_goal Tomas Witte
+    min 21 (1T 21) local     penalty_goal Heredia Joaquin
+    min 29 (1T 29) visitante penalty_goal Tomas Witte
+    min 34 (1T 34) local     try          Conrado Fanlo
+    min 35 (1T 35) local     conversion   Heredia Joaquin
+    min 44 (2T 4) local     try          Lautaro Fanlo
+    min 45 (2T 5) local     conversion   Heredia Joaquin
+    min 52 (2T 12) local     try          Gonzalo Fabricio Suarez
+    min 54 (2T 14) local     conversion   Heredia Joaquin
+    min 57 (2T 17) local     substitution Victor Emiliano Coria Marchetti
+    min 58 (2T 18) local     card_yellow  Mauricio Francisco Ruiz
+    min 63 (2T 23) local     substitution Conrado Fanlo
+    min 67 (2T 27) local     substitution Mariano Ariza Ygel
+    min 67 (2T 27) local     substitution Mirko Castro
+    min 72 (2T 32) local     substitution Heredia Joaquin
+    min 73 (2T 33) local     substitution Matias Bermejo
+    min 73 (2T 33) local     substitution José Lacroa
+    min 73 (2T 33) local     try          Lautaro Fanlo
+    min 74 (2T 34) local     conversion   Lucas Mateo Pinna
+    min 74 (2T 34) local     substitution Emiliano Perez
+    min 84 (2T 44) visitante card_yellow  Emilio Alú
+    min 86 (2T 46) visitante substitution Mariano Muntaner
+    min 86 (2T 46) visitante substitution Mariano Carranza
+    min 89 (2T 49) visitante try          Pablo Laitan
+    min 90 (2T 50) visitante conversion   Tomas Witte
+    min 94 (2T 54) visitante substitution Emilio Alú
+    min 95 (2T 55) visitante substitution Matias Sauze
+    min 98 (2T 58) visitante try          Marcelo Augusto Petray Arnut
+    min 99 (2T 59) visitante substitution Ignacio Estrada Cossio
+    min 102 (2T 62) visitante penalty_goal Octavio Berarducci
+    min 107 (2T 67) visitante substitution Nicolas Maria Macome
+    min 107 (2T 67) visitante substitution Tomas Witte
+    min 108 (2T 68) visitante substitution Pablo Laitan
+    min 115 (2T 75) visitante try          Bautista Estofan
+    min 116 (2T 76) visitante conversion   Octavio Berarducci
+  marcador  · eventos 31-35 · guardado 31-35
+  tries     · 4-4 (guardado —-—)
+  arbitro   · FACUNDO STRATTI (guardado: —)
+  guardado  · 23 local · 23 visitante · 37 eventos
+
+universitario-de-salta vs jockey-club-salta · NOA 2026 · tarjeta 322139  ·  0a156445-f191-4eaf-bc5a-e4ca14dcba11
+  local     · universitario-de-salta · 23 jugadores · 0 con ficha fijada
+  visitante · jockey-club-salta · 23 jugadores · 0 con ficha fijada
+  eventos   · 36
+    min  5 (1T 5) visitante penalty_goal Damian Ezequiel Huber Garcia
+    min  9 (1T 9) local     penalty_goal Mariano Garcia Ascarate
+    min 13 (1T 13) local     try          Eliseo Morales
+    min 13 (1T 13) local     conversion   Mariano Garcia Ascarate
+    min 15 (1T 15) visitante try          Tomás Juárez Hernández
+    min 30 (1T 30) visitante penalty_goal Damian Ezequiel Huber Garcia
+    min 34 (1T 34) visitante drop_goal    Damian Ezequiel Huber Garcia
+    min 43 (2T 3) visitante penalty_goal Damian Ezequiel Huber Garcia
+    min 46 (2T 6) local     substitution Alex Leandro Benjamin Flores Vega
+    min 48 (2T 8) local     try          Mateo Andres Segura
+    min 48 (2T 8) local     conversion   Mariano Garcia Ascarate
+    min 48 (2T 8) visitante substitution Tomas Nieva
+    min 50 (2T 10) local     substitution Nicolás Javier Sona Lucchelli
+    min 50 (2T 10) local     substitution Ezequiel Garcia Ascarate
+    min 50 (2T 10) visitante substitution Gaston Vaca
+    min 52 (2T 12) local     penalty_goal Mariano Garcia Ascarate
+    min 52 (2T 12) local     substitution Fabrizio Gaspar Rivainera Aquenes
+    min 52 (2T 12) local     substitution Francisco Bestregui
+    min 52 (2T 12) local     substitution Gaston Nicolas Frey Barrientos
+    min 56 (2T 16) local     card_yellow  Mateo Andres Segura
+    min 56 (2T 16) visitante card_yellow  Tomás Juárez Hernández
+    min 60 (2T 20) local     substitution Ramiro García Ascarate
+    min 60 (2T 20) visitante penalty_goal Damian Ezequiel Huber Garcia
+    min 61 (2T 21) local     try          Maximo Figueroa
+    min 61 (2T 21) local     conversion   Mariano Garcia Ascarate
+    min 61 (2T 21) visitante substitution Facundo Aguilar Jimenez
+    min 61 (2T 21) visitante substitution Tadeo Alegre
+    min 61 (2T 21) visitante substitution Pablo Ezequiel Fernandez
+    min 61 (2T 21) visitante substitution Nicolas Davalos
+    min 66 (2T 26) local     penalty_goal Mariano Garcia Ascarate
+    min 66 (2T 26) visitante card_yellow  Gervasio Aldao
+    min 72 (2T 32) visitante try          Franco Tiziano Enrico Costerg
+    min 73 (2T 33) local     substitution Lucas Perez Bordones
+    min 73 (2T 33) visitante conversion   Damian Ezequiel Huber Garcia
+    min 76 (2T 36) visitante substitution Gervasio Aldao
+    min 80 (2T 40) local     try          Mateo Andres Segura
+  marcador  · eventos 35-27 · guardado 35-27
+  tries     · 4-2 (guardado —-—)
+  arbitro   · PABLO AGUSTIN GODOY BATAGLIA (guardado: —)
+  guardado  · 23 local · 23 visitante · 36 eventos
+
+universitario-de-tucuman vs cardenales-r-c · NOA 2026 · tarjeta 322143  ·  090646df-fcab-4bd4-82fe-12987680ec84
+  local     · universitario-de-tucuman · 23 jugadores · 21 con ficha fijada
+  visitante · cardenales-r-c · 23 jugadores · 22 con ficha fijada
+  eventos   · 33
+    min 14 (1T 14) local     card_yellow  Tomás Delpero
+    min 15 (1T 15) visitante try          Gonzalo Emanuel Lazarte
+    min 15 (1T 15) visitante conversion   José Ignacio Cerrutti
+    min 22 (1T 22) visitante card_yellow  Jeremias Muñoz
+    min 27 (1T 27) local     try          Julian Cano Matkovich
+    min 27 (1T 27) local     conversion   Luciano Valdez Cosentino
+    min 31 (1T 31) visitante card_yellow  José Ignacio Cerrutti
+    min 33 (1T 33) local     try          Lionel Bonfiglioli
+    min 35 (1T 35) visitante substitution German Alejandro Rodriguez
+    min 35 (1T 35) visitante substitution Joaquín Rodriguez
+    min 42 (1T 42) visitante penalty_goal José Ignacio Cerrutti
+    min 72 (1T 72) local     card_yellow  Tomás Delpero
+    min 72 (1T 72) local     card_red     Tomás Delpero
+    min 46 (2T 6) visitante penalty_goal José Ignacio Cerrutti
+    min 52 (2T 12) visitante try          José Ignacio Cerrutti
+    min 60 (2T 20) visitante substitution Tomas Alberto Durán
+    min 60 (2T 20) visitante substitution Gonzalo Emanuel Lazarte
+    min 68 (2T 28) visitante card_yellow  Andres Odstrcil
+    min 70 (2T 30) visitante substitution Santiago Gayá Cerrutti
+    min 70 (2T 30) visitante substitution Francisco Abi Cheble
+    min 74 (2T 34) visitante try          Juan Ignacio Diaz
+    min 85 (2T 45) local     card_yellow  Nicolas Triviño Chehuan
+    min 87 (2T 47) local     penalty_goal Luciano Valdez Cosentino
+    min 94 (2T 54) local     substitution Enzo Brandan
+    min 94 (2T 54) local     substitution Martín Leandro Fierro Taddei
+    min 94 (2T 54) local     substitution Luciano Valdez Cosentino
+    min 95 (2T 55) local     substitution Nicolas Triviño Chehuan
+    min 103 (2T 63) local     try          Joaquín Elías
+    min 103 (2T 63) local     conversion   Martin Arregui
+    min 105 (2T 65) local     substitution Martin Arregui
+    min 110 (2T 70) local     substitution Lautaro Acuña
+    min 110 (2T 70) local     substitution Leandro Caricato
+    min 117 (2T 77) local     substitution Benjamin Farías Cerioni
+  marcador  · eventos 22-23 · guardado 22-23
+  tries     · 3-3 (guardado —-—)
+  arbitro   · PATRICIO PADRON TEJERIZO (guardado: —)
+  guardado  · 23 local · 23 visitante · 33 eventos
+
+los-tarcos vs tucuman-lawn-tennis · NOA 2026 · tarjeta 322144  ·  1a4aedad-d680-41c9-86a9-8c83d5247db7
+  local     · los-tarcos · 23 jugadores · 0 con ficha fijada
+  visitante · tucuman-lawn-tennis · 23 jugadores · 22 con ficha fijada
+  eventos   · 32
+    min 13 (1T 13) visitante try          Agustin Iglesias
+    min 14 (1T 14) visitante conversion   Sebastian Ferro
+    min 22 (1T 22) visitante try          Tomas Arguello
+    min 23 (1T 23) visitante conversion   Sebastian Ferro
+    min 36 (1T 36) visitante penalty_goal Sebastian Ferro
+    min 39 (1T 39) local     try          Luciano Politi
+    min 40 (1T 40) local     conversion   Facundo Rodriguez
+    min 42 (2T 2) local     substitution Martin Augusto Sal
+    min 44 (2T 4) local     penalty_goal Facundo Rodriguez
+    min 50 (2T 10) local     substitution Fabricio Navarro Luna
+    min 50 (2T 10) local     substitution Esteban Joel Amaya Albornoz
+    min 50 (2T 10) local     substitution Lucas Picon
+    min 54 (2T 14) local     try          Ignacio Rodriguez Santillan
+    min 55 (2T 15) local     conversion   Facundo Rodriguez
+    min 62 (2T 22) local     try          Ignacio Rodriguez Santillan
+    min 63 (2T 23) local     conversion   Facundo Rodriguez
+    min 63 (2T 23) local     substitution Luka Ezequiel Rosa
+    min 63 (2T 23) local     substitution Nahuel Maximo Gonzalez
+    min 63 (2T 23) local     substitution Joaquin Bourguignon
+    min 72 (2T 32) local     substitution Ignacio Rodriguez Santillan
+    min 72 (2T 32) local     penalty_goal Facundo Rodriguez
+    min 76 (2T 36) local     card_yellow  Tomas David Aguero
+    min 82 (2T 42) visitante penalty_goal Sebastian Ferro
+    min 84 (2T 44) visitante card_yellow  Luciano Cippitelli
+    min 87 (2T 47) visitante penalty_goal Sebastian Ferro
+    min 93 (2T 53) visitante substitution Rodrigo Navarro
+    min 93 (2T 53) visitante substitution Juan Cruz Calliera
+    min 98 (2T 58) visitante substitution Agustin Iglesias
+    min 100 (2T 60) visitante substitution Miguel Roberto Mukdise
+    min 100 (2T 60) visitante substitution Joaquin Lopez Islas
+    min 106 (2T 66) visitante substitution Mariano Barrionuevo
+    min 115 (2T 75) visitante substitution Sebastian Ferro
+  marcador  · eventos 27-23 · guardado 27-23
+  tries     · 3-2 (guardado —-—)
+  arbitro   · TOMAS BONFIGLIOLI (guardado: —)
+  guardado  · 23 local · 23 visitante · 32 eventos
+
+natacion-y-gimnasia vs huirapuca · NOA 2026 · tarjeta 322145  ·  124d0098-3c39-4d9b-8da0-8dba8012270d
+  local     · natacion-y-gimnasia · 23 jugadores · 23 con ficha fijada
+  visitante · huirapuca · 23 jugadores · 20 con ficha fijada
+  eventos   · 29
+    min  4 (1T 4) visitante penalty_goal Juan Manue Molinuevo Lazcano
+    min  7 (1T 7) local     penalty_goal Cesar Rivadeneira
+    min  8 (1T 8) visitante substitution Abel Ortega
+    min 11 (1T 11) local     try          Ignacio Martinez
+    min 15 (1T 15) local     penalty_goal Cesar Rivadeneira
+    min 19 (1T 19) visitante substitution Bernardo Molina
+    min 19 (1T 19) visitante card_yellow  Geronimo Lazcano
+    min 26 (1T 26) local     card_yellow  Juan Martin Barros
+    min 30 (1T 30) visitante card_red     Jose Ignacio Gonzalez Ponce
+    min 38 (1T 38) visitante try          Juan De La Cruz Molina
+    min 38 (1T 38) visitante conversion   Juan Manue Molinuevo Lazcano
+    min 43 (2T 3) visitante penalty_goal Juan Manue Molinuevo Lazcano
+    min 45 (2T 5) visitante substitution Enzo Gutierrez
+    min 47 (2T 7) local     try          Lucas Guc
+    min 50 (2T 10) visitante try          Mauricio Isaias Montoya
+    min 50 (2T 10) visitante conversion   Juan Manue Molinuevo Lazcano
+    min 50 (2T 10) visitante substitution Federico Gonzalez
+    min 51 (2T 11) local     substitution Patricio Jose Bonilla
+    min 51 (2T 11) local     substitution Matias López Esteban
+    min 51 (2T 11) local     substitution Agustin Ramasco
+    min 51 (2T 11) local     substitution Ramon Santiago Calderon Suasnabar
+    min 55 (2T 15) visitante substitution Juan Manuel Herrera
+    min 55 (2T 15) visitante substitution Benjamin Lefebvre
+    min 58 (2T 18) local     try          Gonzalo Terraf
+    min 59 (2T 19) local     conversion   Cesar Rivadeneira
+    min 61 (2T 21) local     substitution Ignacio Lazarte
+    min 65 (2T 25) visitante substitution Mauricio Isaias Montoya
+    min 67 (2T 27) local     substitution Cesar Rivadeneira
+    min 72 (2T 32) local     substitution Damian Alejandro Juarez Luna
+  marcador  · eventos 23-20 · guardado 23-20
+  tries     · 3-2 (guardado —-—)
+  arbitro   · IÑAKY BARRAGUIRRE (guardado: —)
+  guardado  · 23 local · 23 visitante · 29 eventos
+
+cardenales-r-c vs los-tarcos · NOA 2026 · tarjeta 322821  ·  62287a89-176a-487b-b781-2cd67834b146
+  local     · cardenales-r-c · 23 jugadores · 22 con ficha fijada
+  visitante · los-tarcos · 23 jugadores · 0 con ficha fijada
+  eventos   · 28
+    min  1 (1T 1) visitante try          Lucas Picon
+    min  2 (1T 2) visitante conversion   Facundo Rodriguez
+    min 21 (1T 21) local     card_yellow  Andres Odstrcil
+    min 25 (1T 25) local     try          Francisco Abi Cheble
+    min 25 (1T 25) local     conversion   José Ignacio Cerrutti
+    min 31 (1T 31) local     penalty_goal José Ignacio Cerrutti
+    min 31 (1T 31) visitante substitution Lucas Picon
+    min 33 (1T 33) local     try          Francisco Abi Cheble
+    min 36 (1T 36) visitante try          Franco Nicolas Juarez Haro
+    min 37 (1T 37) visitante conversion   Facundo Rodriguez
+    min 44 (2T 4) local     penalty_goal Cipriano Cerrutti
+    min 48 (2T 8) visitante penalty_goal Facundo Rodriguez
+    min 49 (2T 9) visitante substitution Pablo Federico Lazarte María
+    min 49 (2T 9) visitante substitution Fabricio Navarro Luna
+    min 49 (2T 9) visitante substitution Lisandro Gravano
+    min 50 (2T 10) local     substitution Mariano Paez
+    min 50 (2T 10) local     substitution Gonzalo Emanuel Lazarte
+    min 53 (2T 13) local     card_yellow  Jeremias Muñoz
+    min 55 (2T 15) visitante substitution Martin Augusto Sal
+    min 57 (2T 17) visitante substitution Tomas David Aguero
+    min 59 (2T 19) local     penalty_goal José Ignacio Cerrutti
+    min 65 (2T 25) local     substitution Joaquín Rodriguez
+    min 65 (2T 25) local     substitution Franco Filipezuk
+    min 65 (2T 25) local     substitution Andres Odstrcil
+    min 65 (2T 25) visitante substitution Benjamin Gravano
+    min 65 (2T 25) visitante substitution Joaquin Bourguignon
+    min 68 (2T 28) local     substitution Mariano Capparelli
+    min 69 (2T 29) local     card_yellow  Roque Javier Albornoz
+  marcador  · eventos 21-17 · guardado 21-17
+  tries     · 2-2 (guardado 0-0)
+  arbitro   · EZEQUIEL ORCAJADA (guardado: —)
+  guardado  · 23 local · 23 visitante · 28 eventos
+
+jockey-club-salta vs universitario-de-tucuman · NOA 2026 · tarjeta 322822  ·  617d023b-3627-473d-ace3-9e3486c24c5d
+  local     · jockey-club-salta · 23 jugadores · 0 con ficha fijada
+  visitante · universitario-de-tucuman · 23 jugadores · 20 con ficha fijada
+  eventos   · 39
+    min  2 (1T 2) visitante penalty_goal Luciano Valdez Cosentino
+    min 14 (1T 14) local     penalty_goal Damian Ezequiel Huber Garcia
+    min 25 (1T 25) visitante try          Nicolas Triviño Chehuan
+    min 25 (1T 25) visitante conversion   Luciano Valdez Cosentino
+    min 27 (1T 27) local     try          Damian Ezequiel Huber Garcia
+    min 28 (1T 28) local     conversion   Damian Ezequiel Huber Garcia
+    min 30 (1T 30) local     penalty_goal Damian Ezequiel Huber Garcia
+    min 34 (1T 34) visitante penalty_goal Luciano Valdez Cosentino
+    min 40 (1T 40) local     try          Segundo Casabella
+    min 40 (1T 40) local     conversion   Damian Ezequiel Huber Garcia
+    min 48 (2T 8) local     penalty_goal Damian Ezequiel Huber Garcia
+    min 53 (2T 13) local     substitution Héctor Rogelio Sanmillan
+    min 55 (2T 15) local     substitution Franco Giacoppo
+    min 55 (2T 15) local     substitution Facundo Nicolas Burgos
+    min 57 (2T 17) local     try          Baltazar Garcia
+    min 58 (2T 18) local     conversion   Damian Ezequiel Huber Garcia
+    min 61 (2T 21) local     substitution Octavio Ovejero
+    min 61 (2T 21) local     substitution Tadeo Alegre
+    min 61 (2T 21) local     substitution Gervasio Aldao
+    min 64 (2T 24) local     substitution Segundo Casabella
+    min 65 (2T 25) local     try          Estanislao Pregot Holmquist
+    min 80 (2T 40) local     try          Tomás Juárez Hernández
+    min 80 (2T 40) local     conversion   Damian Ezequiel Huber Garcia
+    min 80 (2T 40) visitante substitution Nicolas Triviño Chehuan
+    min 82 (2T 42) visitante penalty_goal Luciano Valdez Cosentino
+    min 92 (2T 52) visitante substitution Lautaro Acuña
+    min 93 (2T 53) visitante try          Patricio Mas
+    min 93 (2T 53) visitante conversion   Luciano Valdez Cosentino
+    min 94 (2T 54) visitante substitution Julian Cano Matkovich
+    min 94 (2T 54) visitante substitution Felix Ogorman
+    min 95 (2T 55) visitante try          Tomas Vanni
+    min 95 (2T 55) visitante conversion   Luciano Valdez Cosentino
+    min 100 (2T 60) visitante substitution Nayib Tazar
+    min 104 (2T 64) visitante card_yellow  Enzo Brandan
+    min 111 (2T 71) visitante substitution Leandro Caricato
+    min 112 (2T 72) visitante try          Benjamin Farías Cerioni
+    min 112 (2T 72) visitante conversion   Luciano Valdez Cosentino
+    min 118 (2T 78) visitante try          Juan Cruz Scalora
+    min 118 (2T 78) visitante conversion   Luciano Valdez Cosentino
+  marcador  · eventos 42-44 · guardado 42-44
+  tries     · 5-5 (guardado 0-0)
+  arbitro   · FACUNDO STRATTI (guardado: —)
+  guardado  · 23 local · 23 visitante · 39 eventos
+
+huirapuca vs universitario-de-salta · NOA 2026 · tarjeta 322818  ·  e19f53b2-6358-4ce1-a345-360ebcb42e2a
+  local     · huirapuca · 23 jugadores · 19 con ficha fijada
+  visitante · universitario-de-salta · 23 jugadores · 0 con ficha fijada
+  eventos   · 38
+    min  6 (1T 6) local     penalty_goal Juan Manue Molinuevo Lazcano
+    min 10 (1T 10) visitante try          Eliseo Morales
+    min 14 (1T 14) local     try          Jesus Pablo Albornoz
+    min 14 (1T 14) local     conversion   Juan Manue Molinuevo Lazcano
+    min 17 (1T 17) local     try          Ramiro Abel Beti Avellaneda
+    min 17 (1T 17) local     conversion   Juan Manue Molinuevo Lazcano
+    min 30 (1T 30) local     penalty_goal Juan Manue Molinuevo Lazcano
+    min 34 (1T 34) local     try          Jesus Pablo Albornoz
+    min 34 (1T 34) local     conversion   Juan Manue Molinuevo Lazcano
+    min 39 (1T 39) visitante try          Fabrizio Gaspar Rivainera Aquenes
+    min 39 (1T 39) visitante conversion   Mariano Garcia Ascarate
+    min 45 (2T 5) local     try          Maximo Cesar Carreras
+    min 45 (2T 5) local     conversion   Juan Manue Molinuevo Lazcano
+    min 45 (2T 5) visitante substitution Francisco Bestregui
+    min 45 (2T 5) visitante substitution Ramiro García Ascarate
+    min 45 (2T 5) visitante substitution Gaston Nicolas Frey Barrientos
+    min 45 (2T 5) visitante substitution Lucas Perez Bordones
+    min 45 (2T 5) visitante substitution Alex Leandro Benjamin Flores Vega
+    min 48 (2T 8) local     substitution Jesus Pablo Albornoz
+    min 50 (2T 10) local     substitution Ramiro Abel Beti Avellaneda
+    min 50 (2T 10) local     substitution Matias Alejandro Georgieff
+    min 50 (2T 10) visitante substitution Ignacio Ramia
+    min 50 (2T 10) visitante substitution Fabrizio Gaspar Rivainera Aquenes
+    min 56 (2T 16) visitante try          Francisco Leandro Alberto Campos
+    min 56 (2T 16) visitante conversion   Maximo Figueroa
+    min 62 (2T 22) local     substitution Juan Manuel Herrera
+    min 63 (2T 23) visitante substitution Mateo Andres Segura
+    min 64 (2T 24) local     substitution Juan De La Cruz Molina
+    min 66 (2T 26) visitante card_yellow  Lucas Perez Bordones
+    min 68 (2T 28) local     substitution Jose Baissi
+    min 68 (2T 28) local     try          Miguel Ángel Romero
+    min 68 (2T 28) local     conversion   Juan Manue Molinuevo Lazcano
+    min 70 (2T 30) local     substitution Geronimo Lazcano
+    min 70 (2T 30) local     substitution Federico Gonzalez
+    min 77 (2T 37) visitante try          Francisco Leandro Alberto Campos
+    min 80 (2T 40) local     try          Jose Ignacio Gonzalez Ponce
+    min 80 (2T 40) local     conversion   Juan Manue Molinuevo Lazcano
+    min 83 (2T 43) visitante card_yellow  Bernabé Bracamonte Martinez
+  marcador  · eventos 48-24 · guardado 48-24
+  tries     · 6-4 (guardado —-—)
+  arbitro   · TOMAS BONFIGLIOLI (guardado: —)
+  guardado  · 23 local · 23 visitante · 38 eventos
+
+tucuman-rugby-club vs natacion-y-gimnasia · NOA 2026 · tarjeta 322819  ·  c89c7049-d8d1-4144-b114-aa99a074b16e
+  local     · tucuman-rugby-club · 23 jugadores · 21 con ficha fijada
+  visitante · natacion-y-gimnasia · 23 jugadores · 22 con ficha fijada
+  eventos   · 36
+    min  7 (1T 7) visitante penalty_goal Maximo Ledesma Alfaro
+    min  9 (1T 9) visitante card_yellow  Matias Orlande Ascarate
+    min 16 (1T 16) visitante penalty_goal Maximo Ledesma Alfaro
+    min 18 (1T 18) local     try          Santiago Aguilar Rico
+    min 19 (1T 19) local     conversion   Octavio Berarducci
+    min 22 (1T 22) local     card_yellow  Franco Vanni
+    min 22 (1T 22) visitante try          Juan Martin Barros
+    min 23 (1T 23) visitante conversion   Maximo Ledesma Alfaro
+    min 26 (1T 26) local     penalty_goal Octavio Berarducci
+    min 31 (1T 31) local     penalty_goal Octavio Berarducci
+    min 37 (1T 37) local     drop_goal    Octavio Berarducci
+    min 41 (2T 1) visitante substitution Lucas Gonzalez
+    min 41 (2T 1) visitante try          Alejo Majolli
+    min 41 (2T 1) visitante substitution Federico Luna
+    min 42 (2T 2) visitante conversion   Maximo Ledesma Alfaro
+    min 47 (2T 7) visitante substitution Patricio Jose Bonilla
+    min 47 (2T 7) visitante substitution Mariano Perondi
+    min 49 (2T 9) visitante try          Ignacio Sandez
+    min 50 (2T 10) visitante conversion   Maximo Ledesma Alfaro
+    min 54 (2T 14) visitante substitution Ignacio Martinez
+    min 58 (2T 18) visitante substitution Alejo Majolli
+    min 76 (2T 36) visitante card_yellow  Lucas Guc
+    min 80 (2T 40) visitante card_yellow  Matias López Esteban
+    min 80 (2T 40) visitante card_yellow  Agustin Ramasco
+    min 85 (2T 45) local     penalty_goal Octavio Berarducci
+    min 91 (2T 51) local     substitution Emilio Alú
+    min 91 (2T 51) local     substitution Tobias Jesus Aguilar
+    min 91 (2T 51) local     substitution Mariano Carranza
+    min 91 (2T 51) local     substitution Joaquín Jose Aguilar Rico
+    min 91 (2T 51) local     substitution Matias Frias Silva
+    min 96 (2T 56) local     substitution Santiago Paz Posse
+    min 104 (2T 64) local     substitution Nicolas Maria Macome
+    min 109 (2T 69) local     substitution Pablo Laitan
+    min 114 (2T 74) local     try          Martin Beckmann
+    min 115 (2T 75) local     conversion   Octavio Berarducci
+    min 120 (2T 80) local     penalty_goal Octavio Berarducci
+  marcador  · eventos 29-27 · guardado 29-27
+  tries     · 2-3 (guardado —-—)
+  arbitro   · PEDRO PABLO LÓPEZ VILDOZA (guardado: —)
+  guardado  · 23 local · 23 visitante · 36 eventos
+
+tucuman-lawn-tennis vs lince-rugby-club · NOA 2026 · tarjeta 322820  ·  0ee2a394-364d-47dc-87df-4bcadc505204
+  local     · tucuman-lawn-tennis · 23 jugadores · 22 con ficha fijada
+  visitante · lince-rugby-club · 23 jugadores · 0 con ficha fijada
+  eventos   · 40
+    min  1 (1T 1) local     try          Lucas Solimo
+    min  6 (1T 6) visitante try          Federico Ariza Ygel
+    min  6 (1T 6) visitante conversion   Federico Ariza Ygel
+    min 16 (1T 16) local     penalty_try  
+    min 20 (1T 20) local     try          Santiago Saleme
+    min 21 (1T 21) local     conversion   Sebastian Ferro
+    min 29 (1T 29) local     try          Agustin Iglesias
+    min 30 (1T 30) local     conversion   Sebastian Ferro
+    min 31 (1T 31) local     try          Marquieguez Ignacio
+    min 32 (1T 32) local     conversion   Sebastian Ferro
+    min 35 (1T 35) local     try          Marquieguez Ignacio
+    min 36 (1T 36) local     conversion   Sebastian Ferro
+    min 36 (1T 36) visitante substitution Mirko Castro
+    min 43 (2T 3) visitante try          Mirko Castro
+    min 43 (2T 3) visitante conversion   Heredia Joaquin
+    min 46 (2T 6) visitante substitution Federico Ariza Ygel
+    min 51 (2T 11) visitante substitution Gonzalo Fabricio Suarez
+    min 59 (2T 19) visitante try          Emiliano Perez
+    min 66 (2T 26) visitante substitution Tiago De La Vega Soler
+    min 66 (2T 26) visitante try          Tiago De La Vega Soler
+    min 72 (2T 32) visitante substitution Matias Bermejo
+    min 73 (2T 33) visitante card_red     Mauricio Francisco Ruiz
+    min 76 (2T 36) visitante substitution Edgardo Gabriel Fanjul
+    min 76 (2T 36) visitante try          Federico Julian Peralta
+    min 76 (2T 36) visitante conversion   Heredia Joaquin
+    min 80 (2T 40) local     substitution Agustin Iglesias
+    min 80 (2T 40) local     substitution Mariano Barrionuevo
+    min 80 (2T 40) local     substitution Rodrigo Navarro
+    min 80 (2T 40) local     substitution Luciano Cippitelli
+    min 90 (2T 50) local     try          Stefano Ferro
+    min 91 (2T 51) local     substitution Tomas Arguello
+    min 91 (2T 51) local     substitution Santiago Saleme
+    min 91 (2T 51) local     conversion   Sebastian Ferro
+    min 97 (2T 57) local     substitution Matias Ferro
+    min 100 (2T 60) local     substitution Stefano Ferro
+    min 111 (2T 71) local     try          Pedro Bottini
+    min 115 (2T 75) local     injury       Maximiliano De La Jara
+    min 115 (2T 75) local     substitution Maximiliano De La Jara
+    min 119 (2T 79) local     try          Rodrigo Navarro
+    min 120 (2T 80) local     conversion   Sebastian Ferro
+  marcador  · eventos 59-31 · guardado 59-31
+  tries     · 9-5 (guardado —-—)
+  arbitro   · GONZALO DANERI (guardado: —)
+  guardado  · 23 local · 23 visitante · 40 eventos
+
+los-tarcos vs jockey-club-salta · NOA 2026 · tarjeta 323548  ·  363e1610-626f-4b7b-a260-01b83982f7e6
+  local     · los-tarcos · 23 jugadores · 0 con ficha fijada
+  visitante · jockey-club-salta · 23 jugadores · 0 con ficha fijada
+  eventos   · 39
+    min  4 (1T 4) local     try          Luciano Politi
+    min  5 (1T 5) local     conversion   Facundo Rodriguez
+    min  6 (1T 6) local     try          Santiago Alejandro Chehuan
+    min  7 (1T 7) local     conversion   Facundo Rodriguez
+    min  8 (1T 8) visitante try          Estanislao Pregot Holmquist
+    min 12 (1T 12) visitante try          Estanislao Pregot Holmquist
+    min 13 (1T 13) visitante conversion   Damian Ezequiel Huber Garcia
+    min 19 (1T 19) local     penalty_goal Facundo Rodriguez
+    min 24 (1T 24) local     try          Benjamin Gravano
+    min 25 (1T 25) local     conversion   Facundo Rodriguez
+    min 29 (1T 29) visitante try          Tomás Juárez Hernández
+    min 36 (1T 36) local     penalty_goal Facundo Rodriguez
+    min 42 (2T 2) visitante try          Tomás Juárez Hernández
+    min 43 (2T 3) visitante conversion   Damian Ezequiel Huber Garcia
+    min 46 (2T 6) local     penalty_goal Facundo Rodriguez
+    min 49 (2T 9) local     substitution Ignacio Rodriguez Santillan
+    min 52 (2T 12) local     substitution Nahuel Maximo Gonzalez
+    min 52 (2T 12) local     substitution Eliseo Urueña
+    min 52 (2T 12) local     substitution Tomas Cabria Nicay
+    min 52 (2T 12) local     substitution Luka Ezequiel Rosa
+    min 52 (2T 12) visitante try          Estanislao Pregot Holmquist
+    min 53 (2T 13) visitante conversion   Damian Ezequiel Huber Garcia
+    min 54 (2T 14) visitante substitution Octavio Ovejero
+    min 56 (2T 16) local     substitution Joaquin Bourguignon
+    min 58 (2T 18) local     card_yellow  Ignacio Salsench Fernández
+    min 60 (2T 20) visitante card_yellow  Hugo Gonzalo Aldao Vittar
+    min 60 (2T 20) visitante substitution Facundo Aguilar Jimenez
+    min 62 (2T 22) visitante substitution Facundo Nicolas Burgos
+    min 63 (2T 23) local     penalty_goal Facundo Rodriguez
+    min 64 (2T 24) local     substitution Martin Augusto Sal
+    min 64 (2T 24) local     substitution Fabricio Navarro Luna
+    min 70 (2T 30) visitante substitution Alvaro Simón Prieto Martinez
+    min 70 (2T 30) visitante substitution Franco Tiziano Enrico Costerg
+    min 71 (2T 31) visitante card_yellow  Matias Gustavo Michelena Colla
+    min 71 (2T 31) visitante substitution Franco Giacoppo
+    min 72 (2T 32) local     penalty_goal Facundo Rodriguez
+    min 73 (2T 33) visitante substitution Nicolas Davalos
+    min 73 (2T 33) visitante substitution Geronimo Racioppi
+    min 76 (2T 36) visitante card_yellow  Marcelo Nahuel Cardozo Russom
+  marcador  · eventos 36-31 · guardado 36-31
+  tries     · 3-5 (guardado —-—)
+  arbitro   · PEDRO PABLO LÓPEZ VILDOZA (guardado: —)
+  guardado  · 23 local · 23 visitante · 39 eventos
+
+natacion-y-gimnasia vs tucuman-lawn-tennis · NOA 2026 · tarjeta 323550  ·  e62e5618-8abe-44fd-815c-47b7ae43a978
+  local     · natacion-y-gimnasia · 23 jugadores · 23 con ficha fijada
+  visitante · tucuman-lawn-tennis · 23 jugadores · 22 con ficha fijada
+  eventos   · 33
+    min  6 (1T 6) visitante try          Stefano Ferro
+    min  7 (1T 7) visitante conversion   Sebastian Ferro
+    min 11 (1T 11) visitante penalty_goal Sebastian Ferro
+    min 15 (1T 15) local     penalty_goal Cesar Rivadeneira
+    min 27 (1T 27) local     card_yellow  Gonzalo Emanuel Paez
+    min 27 (1T 27) visitante penalty_goal Sebastian Ferro
+    min 31 (1T 31) visitante try          Lucas Solimo
+    min 33 (1T 33) local     substitution Mariano Aguero Daneri
+    min 34 (1T 34) local     substitution Lucas Gonzalez
+    min 38 (1T 38) local     substitution Gonzalo Emanuel Paez
+    min 40 (1T 40) visitante penalty_goal Sebastian Ferro
+    min 44 (2T 4) local     try          Santiago Romano
+    min 45 (2T 5) local     substitution Agustin Ramasco
+    min 45 (2T 5) local     conversion   Cesar Rivadeneira
+    min 45 (2T 5) local     substitution Ezequiel Alejandro Aguero Martinez
+    min 57 (2T 17) local     try          Ignacio Lazarte
+    min 58 (2T 18) local     conversion   Maximo Ledesma Alfaro
+    min 65 (2T 25) local     substitution Agustín Patricio Garcia
+    min 66 (2T 26) local     try          Juan Martin Barros
+    min 66 (2T 26) local     conversion   Maximo Ledesma Alfaro
+    min 78 (2T 38) local     penalty_try  
+    min 84 (2T 44) visitante card_yellow  Pedro Bottini
+    min 88 (2T 48) visitante substitution Diego Santiago Viscido
+    min 88 (2T 48) visitante substitution Mauricio Valentín Boero
+    min 88 (2T 48) visitante substitution Juan Cruz Calliera
+    min 89 (2T 49) visitante penalty_goal Sebastian Ferro
+    min 98 (2T 58) visitante substitution Miguel Roberto Mukdise
+    min 101 (2T 61) visitante substitution Luis Salazar
+    min 101 (2T 61) visitante substitution Rodrigo Navarro
+    min 101 (2T 61) visitante substitution Mariano Seleme
+    min 105 (2T 65) visitante card_yellow  Stefano Ferro
+    min 112 (2T 72) visitante penalty_goal Sebastian Ferro
+    min 118 (2T 78) visitante card_yellow  Marquieguez Ignacio
+  marcador  · eventos 31-27 · guardado 31-27
+  tries     · 4-2 (guardado —-—)
+  arbitro   · FACUNDO STRATTI (guardado: —)
+  guardado  · 23 local · 23 visitante · 33 eventos
+
+huirapuca vs tucuman-rugby-club · NOA 2026 · tarjeta 323551  ·  f1ec8ad6-ef21-4ed3-b03d-3a8116f0415c
+  local     · huirapuca · 23 jugadores · 20 con ficha fijada
+  visitante · tucuman-rugby-club · 23 jugadores · 21 con ficha fijada
+  eventos   · 40
+    min  1 (1T 1) local     try          Maximo Cesar Carreras
+    min  1 (1T 1) local     conversion   Juan Manue Molinuevo Lazcano
+    min 17 (1T 17) local     penalty_goal Juan Manue Molinuevo Lazcano
+    min 20 (1T 20) visitante try          Nicolas Maria Macome
+    min 21 (1T 21) visitante conversion   Octavio Berarducci
+    min 31 (1T 31) local     substitution Juan De La Cruz Molina
+    min 35 (1T 35) visitante try          Franco Vanni
+    min 41 (2T 1) local     substitution Matias Rene Gimenez Bueso
+    min 41 (2T 1) local     substitution Abel Ortega
+    min 44 (2T 4) local     penalty_goal Juan Manue Molinuevo Lazcano
+    min 46 (2T 6) local     substitution Jose Baissi
+    min 49 (2T 9) local     try          Federico Gonzalez
+    min 49 (2T 9) local     conversion   Juan Manue Molinuevo Lazcano
+    min 56 (2T 16) local     substitution Jesus Pablo Albornoz
+    min 56 (2T 16) local     substitution Ramiro Abel Beti Avellaneda
+    min 60 (2T 20) local     card_yellow  Jose Ignacio Gonzalez Ponce
+    min 66 (2T 26) local     substitution Juan Manuel Herrera
+    min 71 (2T 31) local     substitution Jose Ignacio Nuñez Piossek
+    min 72 (2T 32) local     try          Miguel Ángel Romero
+    min 72 (2T 32) local     conversion   Juan Manue Molinuevo Lazcano
+    min 75 (2T 35) local     try          Enzo Gutierrez
+    min 75 (2T 35) local     conversion   Juan Manue Molinuevo Lazcano
+    min 80 (2T 40) local     penalty_goal Juan Manue Molinuevo Lazcano
+    min 80 (2T 40) visitante substitution Santiago Paz Posse
+    min 85 (2T 45) visitante try          Santiago Meliton Heredia
+    min 86 (2T 46) visitante conversion   Octavio Berarducci
+    min 87 (2T 47) visitante substitution Tobias Jesus Aguilar
+    min 87 (2T 47) visitante substitution Mariano Carranza
+    min 92 (2T 52) visitante substitution Joaquín Jose Aguilar Rico
+    min 92 (2T 52) visitante substitution Matias Frias Silva
+    min 97 (2T 57) visitante try          Juan Maria D'antuene
+    min 98 (2T 58) visitante conversion   Octavio Berarducci
+    min 100 (2T 60) visitante try          Matías Amuchastegui
+    min 101 (2T 61) visitante conversion   Octavio Berarducci
+    min 107 (2T 67) visitante substitution Nicolas Maria Macome
+    min 110 (2T 70) visitante card_yellow  Tomás Le Fort
+    min 113 (2T 73) visitante substitution Mariano Muntaner
+    min 113 (2T 73) visitante injury       Mariano Muntaner
+    min 113 (2T 73) visitante substitution Emilio Alú
+    min 116 (2T 76) visitante substitution Pablo Laitan
+  marcador  · eventos 37-33 · guardado 37-33
+  tries     · 4-5 (guardado —-—)
+  arbitro   · A A (NO OFICIAL) (guardado: —)
+  guardado  · 23 local · 23 visitante · 40 eventos
+
+lince-rugby-club vs cardenales-r-c · NOA 2026 · tarjeta 323549  ·  9a728af6-7e33-4016-8a25-a94b83298b54
+  local     · lince-rugby-club · 23 jugadores · 0 con ficha fijada
+  visitante · cardenales-r-c · 23 jugadores · 21 con ficha fijada
+  eventos   · 43
+    min  2 (1T 2) visitante try          Jeremias Muñoz
+    min  2 (1T 2) visitante conversion   Cipriano Cerrutti
+    min  6 (1T 6) local     try          Tiago De La Vega Soler
+    min  6 (1T 6) local     conversion   Lucas Mateo Pinna
+    min 10 (1T 10) local     try          Federico Julian Peralta
+    min 18 (1T 18) visitante penalty_goal Cipriano Cerrutti
+    min 20 (1T 20) local     card_yellow  Emiliano Perez
+    min 22 (1T 22) visitante penalty_goal Cipriano Cerrutti
+    min 29 (1T 29) local     try          Matias Nuñez Mateu
+    min 29 (1T 29) local     conversion   Lucas Mateo Pinna
+    min 34 (1T 34) visitante try          Cipriano Cerrutti
+    min 34 (1T 34) visitante conversion   Cipriano Cerrutti
+    min 35 (1T 35) local     substitution Federico Ariza Ygel
+    min 40 (1T 40) local     try          Matias Nuñez Mateu
+    min 40 (1T 40) local     conversion   Lucas Mateo Pinna
+    min 41 (1T 41) visitante card_yellow  Mariano Jose Bellomio
+    min 41 (2T 1) local     substitution Matias Bermejo
+    min 44 (2T 4) visitante penalty_goal Cipriano Cerrutti
+    min 47 (2T 7) visitante substitution Mariano Jose Bellomio
+    min 50 (2T 10) local     try          Emiliano Perez
+    min 50 (2T 10) local     conversion   Lucas Mateo Pinna
+    min 50 (2T 10) visitante substitution Máximo Agustin Fernandez
+    min 51 (2T 11) local     substitution Lucas Mateo Pinna
+    min 52 (2T 12) visitante substitution Andres Odstrcil
+    min 53 (2T 13) visitante penalty_goal Cipriano Cerrutti
+    min 55 (2T 15) local     substitution Tiago De La Vega Soler
+    min 55 (2T 15) visitante try          Facundo Thomas Garcia
+    min 55 (2T 15) visitante conversion   Cipriano Cerrutti
+    min 55 (2T 15) visitante substitution Mariano Capparelli
+    min 57 (2T 17) visitante try          Cipriano Cerrutti
+    min 57 (2T 17) visitante conversion   Cipriano Cerrutti
+    min 58 (2T 18) local     substitution Edgardo Gabriel Fanjul
+    min 60 (2T 20) local     try          Emiliano Perez
+    min 60 (2T 20) local     conversion   Heredia Joaquin
+    min 61 (2T 21) visitante card_yellow  Gerardo Nahuel Cabrera Char
+    min 65 (2T 25) visitante penalty_goal Cipriano Cerrutti
+    min 65 (2T 25) visitante substitution Tomas Alberto Durán
+    min 65 (2T 25) visitante substitution Juan Cruz Zamora Andole
+    min 70 (2T 30) local     substitution Victor Emiliano Coria Marchetti
+    min 70 (2T 30) local     substitution Gonzalo Fabricio Suarez
+    min 74 (2T 34) visitante card_yellow  Eric Odstrcil
+    min 75 (2T 35) local     substitution Gonzalo San Millán
+    min 80 (2T 40) visitante substitution Jeremias Muñoz
+  marcador  · eventos 40-43 · guardado 40-43
+  tries     · 6-4 (guardado —-—)
+  arbitro   · IÑAKY BARRAGUIRRE (guardado: —)
+  guardado  · 23 local · 23 visitante · 43 eventos
+
+universitario-de-salta vs universitario-de-tucuman · NOA 2026 · tarjeta 324175  ·  287a9261-3515-482b-9698-8077a458d6ba
+  local     · universitario-de-salta · 23 jugadores · 0 con ficha fijada
+  visitante · universitario-de-tucuman · 23 jugadores · 17 con ficha fijada
+  eventos   · 35
+    min  9 (1T 9) visitante penalty_goal Luciano Valdez Cosentino
+    min 14 (1T 14) local     conversion   Ramiro García Ascarate
+    min 14 (1T 14) local     try          Tomas Duran
+    min 19 (1T 19) local     penalty_goal Ramiro García Ascarate
+    min 25 (1T 25) visitante penalty_goal Luciano Valdez Cosentino
+    min 34 (1T 34) visitante card_yellow  Lautaro Acuña
+    min 35 (1T 35) local     penalty_goal Ramiro García Ascarate
+    min 40 (1T 40) local     card_yellow  Francisco Bestregui
+    min 40 (1T 40) visitante try          Patricio Mas
+    min 41 (1T 41) visitante conversion   Luciano Valdez Cosentino
+    min 46 (2T 6) local     card_yellow  Alex Leandro Benjamin Flores Vega
+    min 50 (2T 10) local     card_yellow  Lucas Perez Bordones
+    min 52 (2T 12) local     substitution Gaston Nicolas Frey Barrientos
+    min 55 (2T 15) local     try          Gaston Bazan
+    min 55 (2T 15) local     substitution Ignacio Ramia
+    min 56 (2T 16) local     substitution Alex Leandro Benjamin Flores Vega
+    min 59 (2T 19) local     substitution Francisco Bestregui
+    min 60 (2T 20) local     substitution Lucas Perez Bordones
+    min 60 (2T 20) local     substitution Simón Pinikas
+    min 61 (2T 21) local     try          Tomas Duran
+    min 65 (2T 25) local     substitution Tomas Trogliero
+    min 65 (2T 25) local     substitution Gaston Bazan
+    min 70 (2T 30) local     card_yellow  Maximo Figueroa
+    min 90 (2T 50) visitante penalty_try  
+    min 94 (2T 54) visitante substitution Patricio Mas
+    min 94 (2T 54) visitante substitution Valentino Paz Alves
+    min 99 (2T 59) visitante penalty_goal Luciano Valdez Cosentino
+    min 105 (2T 65) visitante try          Lautaro Acuña
+    min 105 (2T 65) visitante conversion   Luciano Valdez Cosentino
+    min 105 (2T 65) visitante substitution Leandro Caricato
+    min 112 (2T 72) visitante substitution Lautaro Acuña
+    min 112 (2T 72) visitante substitution Julian Cano Matkovich
+    min 115 (2T 75) visitante substitution Lionel Bonfiglioli
+    min 115 (2T 75) visitante substitution Martín Leandro Fierro Taddei
+    min 119 (2T 79) visitante card_yellow  Nicolas Triviño Chehuan
+  marcador  · eventos 23-30 · guardado 23-30
+  tries     · 3-3 (guardado —-—)
+  arbitro   · EZEQUIEL ORCAJADA (guardado: —)
+  guardado  · 23 local · 23 visitante · 35 eventos
+
+tucuman-rugby-club vs universitario-de-salta · NOA 2026 · tarjeta 324684  ·  37c04bbf-0848-4789-a017-e83de6c35313
+  local     · tucuman-rugby-club · 23 jugadores · 20 con ficha fijada
+  visitante · universitario-de-salta · 23 jugadores · 0 con ficha fijada
+  eventos   · 39
+    min  1 (1T 1) visitante try          Mariano Garcia Ascarate
+    min  1 (1T 1) visitante conversion   Maximo Figueroa
+    min  7 (1T 7) local     try          Franco Vanni
+    min  8 (1T 8) local     conversion   Simón José Pfister
+    min 11 (1T 11) local     try          Bautista Estofan
+    min 12 (1T 12) local     conversion   Simón José Pfister
+    min 14 (1T 14) local     try          Simón José Pfister
+    min 15 (1T 15) local     conversion   Simón José Pfister
+    min 18 (1T 18) local     penalty_goal Simón José Pfister
+    min 20 (1T 20) local     penalty_goal Simón José Pfister
+    min 28 (1T 28) local     card_yellow  Simón José Pfister
+    min 28 (1T 28) visitante penalty_try  
+    min 30 (1T 30) visitante try          Mariano Garcia Ascarate
+    min 30 (1T 30) visitante conversion   Maximo Figueroa
+    min 51 (2T 11) visitante try          Mateo Andres Segura
+    min 52 (2T 12) visitante injury       Alex Leandro Benjamin Flores Vega
+    min 52 (2T 12) visitante substitution Alex Leandro Benjamin Flores Vega
+    min 55 (2T 15) visitante substitution Simón Pinikas
+    min 56 (2T 16) visitante substitution Francisco Bestregui
+    min 64 (2T 24) visitante substitution Bernabé Bracamonte Martinez
+    min 64 (2T 24) visitante substitution Gustavo Federico Goldenhorn Villalva
+    min 68 (2T 28) visitante substitution Lucas Perez Bordones
+    min 69 (2T 29) visitante substitution Francisco Sebastian Licudis
+    min 70 (2T 30) visitante try          Bernabé Bracamonte Martinez
+    min 70 (2T 30) visitante conversion   Maximo Figueroa
+    min 72 (2T 32) visitante card_yellow  Fabrizio Gaspar Rivainera Aquenes
+    min 77 (2T 37) visitante try          Ramiro García Ascarate
+    min 77 (2T 37) visitante conversion   Mariano Garcia Ascarate
+    min 80 (2T 40) local     substitution Marcelo Augusto Petray Arnut
+    min 88 (2T 48) local     substitution Mariano Muntaner
+    min 88 (2T 48) local     substitution Tobias Jesus Aguilar
+    min 88 (2T 48) local     substitution Joaquín Jose Aguilar Rico
+    min 103 (2T 63) local     try          Santiago Meliton Heredia
+    min 105 (2T 65) local     card_yellow  Juan Cruz Guzman
+    min 105 (2T 65) local     substitution Juan Maria D'antuene
+    min 105 (2T 65) local     substitution Nicolas Lopez Gonzalez
+    min 105 (2T 65) local     substitution Franco Vanni
+    min 105 (2T 65) local     substitution Rodrigo Galindez
+    min 113 (2T 73) local     penalty_goal Gonzalo Albornoz
+  marcador  · eventos 35-40 · guardado 35-40
+  tries     · 4-6 (guardado 4-6)
+  arbitro   · JULIÁN MONTENEGRO (guardado: Julián Montenegro)
+  guardado  · 23 local · 23 visitante · 39 eventos
+
+cardenales-r-c vs natacion-y-gimnasia · NOA 2026 · tarjeta 324686  ·  ad07e4c1-b7ec-428f-9840-e907136a3e3f
+  local     · cardenales-r-c · 23 jugadores · 21 con ficha fijada
+  visitante · natacion-y-gimnasia · 23 jugadores · 23 con ficha fijada
+  eventos   · 39
+    min  5 (1T 5) visitante penalty_goal Maximo Ledesma Alfaro
+    min  8 (1T 8) local     penalty_goal José Ignacio Cerrutti
+    min 12 (1T 12) visitante penalty_goal Maximo Ledesma Alfaro
+    min 16 (1T 16) local     penalty_goal Cipriano Cerrutti
+    min 24 (1T 24) local     penalty_goal Cipriano Cerrutti
+    min 28 (1T 28) visitante penalty_goal Maximo Ledesma Alfaro
+    min 31 (1T 31) local     card_yellow  Santiago Gayá Cerrutti
+    min 36 (1T 36) visitante try          Ramon Santiago Calderon Suasnabar
+    min 37 (1T 37) visitante conversion   Maximo Ledesma Alfaro
+    min 45 (2T 5) local     penalty_goal Cipriano Cerrutti
+    min 52 (2T 12) local     substitution Andres Odstrcil
+    min 52 (2T 12) local     substitution Jeremias Muñoz
+    min 55 (2T 15) local     substitution Mariano Capparelli
+    min 55 (2T 15) local     try          Gerardo Nahuel Cabrera Char
+    min 55 (2T 15) local     conversion   Cipriano Cerrutti
+    min 57 (2T 17) local     try          Santiago Gayá Cerrutti
+    min 57 (2T 17) local     conversion   Cipriano Cerrutti
+    min 59 (2T 19) local     try          Juan Ignacio Diaz
+    min 59 (2T 19) local     conversion   Cipriano Cerrutti
+    min 65 (2T 25) local     substitution Tomas Alberto Durán
+    min 65 (2T 25) local     substitution Matias Budeguer
+    min 69 (2T 29) local     try          Cipriano Cerrutti
+    min 69 (2T 29) local     conversion   Cipriano Cerrutti
+    min 70 (2T 30) local     substitution Gonzalo Emanuel Lazarte
+    min 70 (2T 30) local     substitution Santiago Gayá Cerrutti
+    min 75 (2T 35) local     substitution Franco Filipezuk
+    min 89 (2T 49) visitante penalty_goal Maximo Ledesma Alfaro
+    min 92 (2T 52) visitante try          Gonzalo Terraf
+    min 92 (2T 52) visitante substitution Alejo Majolli
+    min 93 (2T 53) visitante conversion   Maximo Ledesma Alfaro
+    min 96 (2T 56) visitante substitution Ramon Santiago Calderon Suasnabar
+    min 100 (2T 60) visitante substitution Ignacio Lazarte
+    min 100 (2T 60) visitante substitution Tomas Brainovich
+    min 100 (2T 60) visitante substitution Cesar Rivadeneira
+    min 100 (2T 60) visitante substitution Gonzalo Terraf
+    min 104 (2T 64) visitante substitution Matias López Esteban
+    min 104 (2T 64) visitante substitution Patricio Jose Bonilla
+    min 120 (2T 80) visitante try          Damian Alejandro Juarez Luna
+    min 121 (2T 81) visitante conversion   Maximo Ledesma Alfaro
+  marcador  · eventos 40-33 · guardado 40-33
+  tries     · 4-3 (guardado —-—)
+  arbitro   · PATRICIO PADRON TEJERIZO (guardado: Patricio Padrón)
+  guardado  · 23 local · 23 visitante · 39 eventos
+
+jockey-club-salta vs lince-rugby-club · NOA 2026 · tarjeta 324687  ·  5852c7fa-122f-4b23-bc7c-d5b9f5d50a4b
+  local     · jockey-club-salta · 23 jugadores · 0 con ficha fijada
+  visitante · lince-rugby-club · 23 jugadores · 0 con ficha fijada
+  eventos   · 39
+    min  2 (1T 2) local     try          Damian Ezequiel Huber Garcia
+    min  3 (1T 3) local     conversion   Damian Ezequiel Huber Garcia
+    min  6 (1T 6) local     try          Tomás Juárez Hernández
+    min  7 (1T 7) local     conversion   Damian Ezequiel Huber Garcia
+    min  9 (1T 9) visitante try          Emiliano Perez
+    min  9 (1T 9) visitante conversion   Lucas Mateo Pinna
+    min 16 (1T 16) local     try          Estanislao Pregot Holmquist
+    min 17 (1T 17) local     conversion   Damian Ezequiel Huber Garcia
+    min 20 (1T 20) visitante try          José Lacroa
+    min 20 (1T 20) visitante conversion   Lucas Mateo Pinna
+    min 23 (1T 23) local     card_yellow  Facundo Aguilar Jimenez
+    min 24 (1T 24) visitante try          Edgardo Gabriel Fanjul
+    min 24 (1T 24) visitante conversion   Lucas Mateo Pinna
+    min 40 (1T 40) local     try          Franco Giacoppo
+    min 42 (2T 2) local     try          Santiago Aguilar
+    min 44 (2T 4) local     try          Santiago Aguilar
+    min 44 (2T 4) visitante substitution Matias Jendrreyko
+    min 45 (2T 5) local     conversion   Damian Ezequiel Huber Garcia
+    min 46 (2T 6) local     try          Sebastian Saravia Toledo
+    min 47 (2T 7) local     conversion   Damian Ezequiel Huber Garcia
+    min 49 (2T 9) visitante try          Matias Nuñez Mateu
+    min 52 (2T 12) visitante substitution Federico Julian Peralta
+    min 52 (2T 12) visitante try          Tiago De La Vega Soler
+    min 52 (2T 12) visitante conversion   Heredia Joaquin
+    min 53 (2T 13) local     substitution Facundo Nicolas Burgos
+    min 53 (2T 13) local     substitution Facundo Aguilar Jimenez
+    min 62 (2T 22) visitante try          Gonzalo Seara
+    min 62 (2T 22) visitante conversion   Heredia Joaquin
+    min 66 (2T 26) local     substitution Alvaro Simón Prieto Martinez
+    min 66 (2T 26) local     substitution Tadeo Alegre
+    min 66 (2T 26) local     substitution Santiago Aguilar
+    min 68 (2T 28) local     card_yellow  Héctor Rogelio Sanmillan
+    min 73 (2T 33) local     card_yellow  Damian Ezequiel Huber Garcia
+    min 74 (2T 34) visitante substitution José Lacroa
+    min 74 (2T 34) visitante card_yellow  Mirko Castro
+    min 77 (2T 37) visitante substitution Edgardo Gabriel Fanjul
+    min 77 (2T 37) visitante substitution Victor Emiliano Coria Marchetti
+    min 79 (2T 39) visitante substitution Lucas Mateo Pinna
+    min 82 (2T 42) visitante try          Matias Nuñez Mateu
+  marcador  · eventos 45-45 · guardado 45-45
+  tries     · 7-7 (guardado —-—)
+  arbitro   · EZEQUIEL ORCAJADA (guardado: Ezequiel Orcajada)
+  guardado  · 23 local · 23 visitante · 39 eventos
+
+universitario-de-tucuman vs los-tarcos · NOA 2026 · tarjeta 324688  ·  d95096a6-67bb-4813-88d0-7b7f74e7748e
+  local     · universitario-de-tucuman · 23 jugadores · 18 con ficha fijada
+  visitante · los-tarcos · 23 jugadores · 0 con ficha fijada
+  eventos   · 37
+    min  1 (1T 1) local     try          Luciano Valdez Cosentino
+    min  1 (1T 1) local     conversion   Luciano Valdez Cosentino
+    min  5 (1T 5) local     try          Nicolas Agustín Brandan
+    min 18 (1T 18) visitante try          Eliseo Urueña
+    min 19 (1T 19) visitante conversion   Facundo Rodriguez
+    min 23 (1T 23) local     try          Benjamin Farías Cerioni
+    min 23 (1T 23) local     conversion   Luciano Valdez Cosentino
+    min 28 (1T 28) visitante try          Ignacio Salsench Fernández
+    min 29 (1T 29) visitante conversion   Facundo Rodriguez
+    min 31 (1T 31) local     try          Leandro Caricato
+    min 31 (1T 31) local     conversion   Luciano Valdez Cosentino
+    min 41 (1T 41) local     penalty_goal Luciano Valdez Cosentino
+    min 50 (2T 10) visitante try          Lucas Picon
+    min 51 (2T 11) visitante substitution Luka Ezequiel Rosa
+    min 51 (2T 11) visitante conversion   Facundo Rodriguez
+    min 53 (2T 13) visitante try          Luciano Politi
+    min 54 (2T 14) visitante conversion   Facundo Rodriguez
+    min 56 (2T 16) visitante substitution Nahuel Maximo Gonzalez
+    min 56 (2T 16) visitante substitution Santiago Alejandro Chehuan
+    min 62 (2T 22) visitante substitution Máximo Augusto Aguero
+    min 62 (2T 22) visitante substitution Tomas David Aguero
+    min 62 (2T 22) visitante substitution Fabricio Navarro Luna
+    min 64 (2T 24) visitante penalty_goal Facundo Rodriguez
+    min 72 (2T 32) visitante card_yellow  Lucas Picon
+    min 80 (2T 40) visitante substitution Eliseo Urueña
+    min 80 (2T 40) visitante substitution Martin Augusto Sal
+    min 92 (2T 52) local     substitution Lautaro Acuña
+    min 97 (2T 57) local     card_yellow  Facundo Cardozo
+    min 99 (2T 59) local     substitution Benjamin Farías Cerioni
+    min 99 (2T 59) local     substitution Patricio Mas
+    min 99 (2T 59) local     substitution Enzo Brandan
+    min 102 (2T 62) local     substitution Leandro Caricato
+    min 102 (2T 62) local     substitution Lionel Bonfiglioli
+    min 105 (2T 65) local     substitution Ramiro Alejandro Ferreyra
+    min 112 (2T 72) local     substitution Martín Leandro Fierro Taddei
+    min 115 (2T 75) local     try          Facundo Cardozo
+    min 115 (2T 75) local     conversion   Luciano Valdez Cosentino
+  marcador  · eventos 36-31 · guardado 36-31
+  tries     · 5-4 (guardado —-—)
+  arbitro   · FACUNDO STRATTI (guardado: Facundo Stratti)
+  guardado  · 23 local · 23 visitante · 37 eventos
+
+tucuman-lawn-tennis vs huirapuca · NOA 2026 · tarjeta 324685  ·  4fbfaee3-883c-46e6-b7be-2d2e9b5b72fc
+  local     · tucuman-lawn-tennis · 23 jugadores · 21 con ficha fijada
+  visitante · huirapuca · 23 jugadores · 18 con ficha fijada
+  eventos   · 45
+    min  3 (1T 3) local     penalty_goal Ignacio Rodriguez Prados
+    min  7 (1T 7) visitante try          Benjamin Lefebvre
+    min 10 (1T 10) visitante try          Matias Alejandro Georgieff
+    min 10 (1T 10) visitante conversion   Juan Manue Molinuevo Lazcano
+    min 16 (1T 16) local     try          Mariano Barrionuevo
+    min 17 (1T 17) local     conversion   Ignacio Rodriguez Prados
+    min 20 (1T 20) visitante penalty_goal Juan Manue Molinuevo Lazcano
+    min 29 (1T 29) visitante penalty_goal Juan Manue Molinuevo Lazcano
+    min 31 (1T 31) local     try          Santiago Saleme
+    min 37 (1T 37) local     try          Stefano Ferro
+    min 38 (1T 38) local     conversion   Sebastian Ferro
+    min 40 (1T 40) visitante card_yellow  Mauricio Isaias Montoya
+    min 41 (1T 41) local     try          Marquieguez Ignacio
+    min 42 (1T 42) local     conversion   Sebastian Ferro
+    min 72 (1T 72) local     substitution Lucas Aguero
+    min 43 (2T 3) visitante try          Matias Alejandro Georgieff
+    min 43 (2T 3) visitante conversion   Juan Manue Molinuevo Lazcano
+    min 44 (2T 4) visitante substitution Jesus Pablo Albornoz
+    min 48 (2T 8) visitante substitution Jose Ignacio Gonzalez Ponce
+    min 49 (2T 9) visitante substitution Juan Manuel Herrera
+    min 52 (2T 12) visitante substitution Matias Alejandro Georgieff
+    min 52 (2T 12) visitante injury       Matias Alejandro Georgieff
+    min 53 (2T 13) visitante try          Tomas Dande
+    min 53 (2T 13) visitante conversion   Juan Manue Molinuevo Lazcano
+    min 59 (2T 19) visitante substitution Joaquin Albornoz
+    min 59 (2T 19) visitante substitution Enzo Egea
+    min 67 (2T 27) visitante substitution Federico Gonzalez
+    min 80 (2T 40) visitante try          Paolo Contti
+    min 84 (2T 44) local     substitution Carlos Augusto Aguirre
+    min 87 (2T 47) local     try          Agustin Iglesias
+    min 88 (2T 48) local     conversion   Sebastian Ferro
+    min 89 (2T 49) local     substitution Stefano Ferro
+    min 89 (2T 49) local     try          Luciano Cippitelli
+    min 90 (2T 50) local     substitution Lucas Valentin Roldan
+    min 90 (2T 50) local     conversion   Sebastian Ferro
+    min 92 (2T 52) local     card_red     Lucas Aguero
+    min 94 (2T 54) local     substitution Mariano Barrionuevo
+    min 94 (2T 54) local     substitution Agustin Iglesias
+    min 94 (2T 54) local     substitution Rodrigo Navarro
+    min 99 (2T 59) local     penalty_goal Sebastian Ferro
+    min 105 (2T 65) local     try          Santiago Saleme
+    min 106 (2T 66) local     conversion   Sebastian Ferro
+    min 110 (2T 70) local     try          Thiago Soberon
+    min 111 (2T 71) local     conversion   Sebastian Ferro
+    min 112 (2T 72) local     substitution Ignacio Rodriguez Prados
+  marcador  · eventos 60-37 · guardado 60-37
+  tries     · 8-5 (guardado —-—)
+  arbitro   · PEDRO PABLO LÓPEZ VILDOZA (guardado: Pedro López Vildoza)
+  guardado  · 23 local · 23 visitante · 45 eventos
+
+universitario-de-salta vs los-tarcos · NOA 2026 · tarjeta 325165  ·  f47e8611-9ce0-4bef-a7d8-b854967be1db
+  local     · universitario-de-salta · 23 jugadores · 0 con ficha fijada
+  visitante · los-tarcos · 23 jugadores · 0 con ficha fijada
+  eventos   · 44
+    min  4 (1T 4) visitante try          Benjamin Gravano
+    min  5 (1T 5) visitante conversion   Facundo Rodriguez
+    min 12 (1T 12) visitante substitution Joaquin Bourguignon
+    min 14 (1T 14) visitante card_yellow  Luka Ezequiel Rosa
+    min 19 (1T 19) local     penalty_goal Maximo Figueroa
+    min 20 (1T 20) local     try          Gustavo Federico Goldenhorn Villalva
+    min 20 (1T 20) local     conversion   Maximo Figueroa
+    min 20 (1T 20) visitante card_red     Benjamin Gravano
+    min 23 (1T 23) visitante try          Ignacio Salsench Fernández
+    min 28 (1T 28) visitante try          Santiago Alejandro Chehuan
+    min 29 (1T 29) visitante conversion   Facundo Rodriguez
+    min 31 (1T 31) local     try          Maximo Figueroa
+    min 31 (1T 31) local     conversion   Maximo Figueroa
+    min 33 (1T 33) local     try          Tomas Duran
+    min 33 (1T 33) local     conversion   Maximo Figueroa
+    min 35 (1T 35) local     substitution Ezequiel Garcia Ascarate
+    min 35 (1T 35) local     try          Eliseo Morales
+    min 35 (1T 35) local     conversion   Maximo Figueroa
+    min 41 (2T 1) visitante try          Lisandro Gravano
+    min 42 (2T 2) visitante conversion   Facundo Rodriguez
+    min 47 (2T 7) visitante try          Agustín Cortes
+    min 48 (2T 8) local     substitution Simón Pinikas
+    min 48 (2T 8) visitante conversion   Facundo Rodriguez
+    min 50 (2T 10) local     substitution Eliseo Morales
+    min 50 (2T 10) local     substitution Ignacio Ramia
+    min 50 (2T 10) local     substitution Maximo Figueroa
+    min 50 (2T 10) visitante substitution Luka Ezequiel Rosa
+    min 50 (2T 10) visitante substitution Fabricio Navarro Luna
+    min 52 (2T 12) visitante substitution Lisandro Gravano
+    min 54 (2T 14) local     conversion   Ramiro García Ascarate
+    min 54 (2T 14) local     try          Mariano Garcia Ascarate
+    min 56 (2T 16) local     substitution Lucas Perez Bordones
+    min 56 (2T 16) local     substitution Francisco Bestregui
+    min 59 (2T 19) local     card_yellow  Carlos Gastón Alejandro Hoyos
+    min 62 (2T 22) local     injury       Ezequiel Garcia Ascarate
+    min 62 (2T 22) local     substitution Alex Leandro Benjamin Flores Vega
+    min 67 (2T 27) local     try          Tomas Duran
+    min 67 (2T 27) local     conversion   Ramiro García Ascarate
+    min 70 (2T 30) visitante substitution Lucas Picon
+    min 70 (2T 30) visitante substitution Franco Nicolas Juarez Haro
+    min 74 (2T 34) visitante try          Pablo Federico Lazarte María
+    min 75 (2T 35) local     substitution Bernabé Bracamonte Martinez
+    min 80 (2T 40) visitante substitution Benjamin Gravano
+    min 80 (2T 40) visitante substitution Santiago Alejandro Chehuan
+  marcador  · eventos 45-38 · guardado 45-38
+  tries     · 6-6 (guardado —-—)
+  arbitro   · NÉSTOR FABIÁN PIREZ (guardado: Néstor Pirez)
+  guardado  · 23 local · 23 visitante · 44 eventos
+
+huirapuca vs cardenales-r-c · NOA 2026 · tarjeta 325170  ·  0c434e81-0887-4223-b088-53c7cff69250
+  local     · huirapuca · 23 jugadores · 20 con ficha fijada
+  visitante · cardenales-r-c · 23 jugadores · 21 con ficha fijada
+  eventos   · 43
+    min  2 (1T 2) local     try          Maximo Cesar Carreras
+    min  2 (1T 2) local     conversion   Juan Manue Molinuevo Lazcano
+    min  5 (1T 5) local     try          Juan Manuel Herrera
+    min  5 (1T 5) local     conversion   Juan Manue Molinuevo Lazcano
+    min 10 (1T 10) local     try          Tomas Dande
+    min 10 (1T 10) local     conversion   Juan Manue Molinuevo Lazcano
+    min 12 (1T 12) visitante try          Cipriano Cerrutti
+    min 12 (1T 12) visitante conversion   Cipriano Cerrutti
+    min 16 (1T 16) local     try          Tomas Dande
+    min 16 (1T 16) local     conversion   Juan Manue Molinuevo Lazcano
+    min 19 (1T 19) local     try          Conrrado Nolasco Aguero
+    min 19 (1T 19) local     conversion   Juan Manue Molinuevo Lazcano
+    min 23 (1T 23) visitante card_red     Juan Ignacio Diaz
+    min 25 (1T 25) local     try          Enzo Gutierrez
+    min 41 (2T 1) local     substitution Tomas Dande
+    min 48 (2T 8) local     try          Cesar Gabriel Farrall
+    min 48 (2T 8) local     conversion   Juan Manue Molinuevo Lazcano
+    min 48 (2T 8) local     substitution Federico Gonzalez
+    min 48 (2T 8) local     substitution Enzo Gutierrez
+    min 50 (2T 10) visitante substitution Andres Odstrcil
+    min 50 (2T 10) visitante substitution Tomas Alberto Durán
+    min 50 (2T 10) visitante substitution Gonzalo Emanuel Lazarte
+    min 51 (2T 11) local     card_yellow  Juan Manue Molinuevo Lazcano
+    min 52 (2T 12) visitante try          Franco Filipezuk
+    min 52 (2T 12) visitante conversion   Cipriano Cerrutti
+    min 58 (2T 18) local     penalty_goal Cesar Gabriel Farrall
+    min 60 (2T 20) local     substitution Jose Andres Perez
+    min 60 (2T 20) visitante substitution Juan Cruz Zamora Andole
+    min 62 (2T 22) local     substitution Mauricio Isaias Montoya
+    min 62 (2T 22) local     substitution Geronimo Lazcano
+    min 63 (2T 23) visitante try          Santiago Gayá Cerrutti
+    min 63 (2T 23) visitante conversion   Cipriano Cerrutti
+    min 65 (2T 25) visitante substitution Franco Filipezuk
+    min 65 (2T 25) visitante substitution Jeremias Muñoz
+    min 65 (2T 25) visitante substitution Joaquín Rodriguez
+    min 66 (2T 26) local     try          Lisandro Lefebvre
+    min 66 (2T 26) local     conversion   Juan Manue Molinuevo Lazcano
+    min 69 (2T 29) local     substitution Cesar Gabriel Farrall
+    min 71 (2T 31) local     substitution Enzo Egea
+    min 73 (2T 33) local     try          Juan Manue Molinuevo Lazcano
+    min 76 (2T 36) local     try          Juan Manue Molinuevo Lazcano
+    min 78 (2T 38) local     try          Juan Manuel Herrera
+    min 78 (2T 38) local     conversion   Juan Manue Molinuevo Lazcano
+  marcador  · eventos 74-21 · guardado 74-21
+  tries     · 11-3 (guardado —-—)
+  arbitro   · A A (NO OFICIAL) (guardado: Álvaro Del Barco)
+  guardado  · 23 local · 23 visitante · 43 eventos
+
+lince-rugby-club vs universitario-de-tucuman · NOA 2026 · tarjeta 325166  ·  500a3c75-dbc5-4d14-9ada-2aa3ad8b4a07
+  local     · lince-rugby-club · 23 jugadores · 0 con ficha fijada
+  visitante · universitario-de-tucuman · 23 jugadores · 17 con ficha fijada
+  eventos   · 42
+    min  8 (1T 8) visitante try          Nicolas Agustín Brandan
+    min 10 (1T 10) visitante try          Martín Leandro Fierro Taddei
+    min 10 (1T 10) visitante conversion   Luciano Valdez Cosentino
+    min 14 (1T 14) visitante try          Leandro Caricato
+    min 14 (1T 14) visitante conversion   Luciano Valdez Cosentino
+    min 21 (1T 21) visitante card_yellow  Tomás Delpero
+    min 22 (1T 22) visitante substitution Facundo Torres Lanzavecchia
+    min 26 (1T 26) visitante try          Leandro Caricato
+    min 26 (1T 26) visitante conversion   Luciano Valdez Cosentino
+    min 29 (1T 29) local     try          Gonzalo Fabricio Suarez
+    min 29 (1T 29) local     conversion   Lucas Mateo Pinna
+    min 32 (1T 32) visitante try          Luciano Valdez Cosentino
+    min 32 (1T 32) visitante conversion   Luciano Valdez Cosentino
+    min 39 (1T 39) local     try          Santino Nieva
+    min 39 (1T 39) local     conversion   Lucas Mateo Pinna
+    min 40 (1T 40) local     substitution Victor Emiliano Coria Marchetti
+    min 45 (2T 5) local     substitution Edgardo Gabriel Fanjul
+    min 45 (2T 5) local     try          Emiliano Perez
+    min 52 (2T 12) local     substitution Lucas Mateo Pinna
+    min 54 (2T 14) local     penalty_goal Heredia Joaquin
+    min 55 (2T 15) local     substitution Gastón Arredondo
+    min 57 (2T 17) local     try          Federico Julian Peralta
+    min 61 (2T 21) local     substitution Matias Bermejo
+    min 61 (2T 21) local     substitution José Lacroa
+    min 61 (2T 21) local     substitution Matias Nuñez Mateu
+    min 64 (2T 24) local     try          Santino Nieva
+    min 64 (2T 24) local     conversion   Heredia Joaquin
+    min 72 (2T 32) local     penalty_goal Heredia Joaquin
+    min 77 (2T 37) local     card_yellow  Mirko Castro
+    min 79 (2T 39) local     penalty_goal Heredia Joaquin
+    min 80 (2T 40) visitante substitution Leandro Caricato
+    min 85 (2T 45) visitante substitution Joaquin Juarez
+    min 85 (2T 45) visitante substitution Tomás Delpero
+    min 96 (2T 56) visitante card_yellow  Nicolas Triviño Chehuan
+    min 98 (2T 58) visitante substitution Ramiro Alejandro Ferreyra
+    min 106 (2T 66) visitante substitution Enzo Brandan
+    min 106 (2T 66) visitante substitution Nicolas Agustín Brandan
+    min 107 (2T 67) visitante substitution Nicolas Triviño Chehuan
+    min 107 (2T 67) visitante penalty_goal Luciano Valdez Cosentino
+    min 117 (2T 77) visitante penalty_goal Luciano Valdez Cosentino
+    min 118 (2T 78) visitante card_yellow  Facundo Cardozo
+    min 120 (2T 80) visitante penalty_goal Luciano Valdez Cosentino
+  marcador  · eventos 40-42 · guardado 40-42
+  tries     · 5-5 (guardado —-—)
+  arbitro   · PATRICIO PADRON TEJERIZO (guardado: Patricio Padrón)
+  guardado  · 23 local · 23 visitante · 42 eventos
+
+natacion-y-gimnasia vs jockey-club-salta · NOA 2026 · tarjeta 325690  ·  14e563f6-2e11-42aa-a118-9c86cb862274
+  local     · natacion-y-gimnasia · 23 jugadores · 23 con ficha fijada
+  visitante · jockey-club-salta · 23 jugadores · 0 con ficha fijada
+  eventos   · 42
+    min  4 (1T 4) visitante penalty_goal Nahuel Agustin Martinez
+    min  7 (1T 7) local     try          Matias Orlande Ascarate
+    min  7 (1T 7) local     conversion   Maximo Ledesma Alfaro
+    min 12 (1T 12) visitante card_yellow  Facundo Nicolas Burgos
+    min 13 (1T 13) local     try          Gonzalo Terraf
+    min 13 (1T 13) local     conversion   Maximo Ledesma Alfaro
+    min 25 (1T 25) visitante try          Pablo Ezequiel Fernandez
+    min 26 (1T 26) visitante conversion   Nahuel Agustin Martinez
+    min 30 (1T 30) local     try          Federico Gallac
+    min 31 (1T 31) local     conversion   Maximo Ledesma Alfaro
+    min 34 (1T 34) local     card_yellow  Raúl Cristobal Vega
+    min 36 (1T 36) local     card_yellow  Matias Orlande Ascarate
+    min 37 (1T 37) visitante try          Segundo Casabella
+    min 38 (1T 38) visitante conversion   Nahuel Agustin Martinez
+    min 40 (1T 40) local     substitution Matias López Esteban
+    min 40 (1T 40) local     penalty_goal Maximo Ledesma Alfaro
+    min 40 (1T 40) visitante card_yellow  Matias Gustavo Michelena Colla
+    min 41 (2T 1) local     penalty_goal Maximo Ledesma Alfaro
+    min 44 (2T 4) local     penalty_goal Maximo Ledesma Alfaro
+    min 45 (2T 5) visitante try          Santiago Aguilar
+    min 46 (2T 6) visitante conversion   Nahuel Agustin Martinez
+    min 47 (2T 7) visitante substitution Facundo Nicolas Burgos
+    min 49 (2T 9) visitante substitution Alvaro Simón Prieto Martinez
+    min 52 (2T 12) local     substitution Federico Gallac
+    min 52 (2T 12) local     substitution Mariano Aguero Daneri
+    min 54 (2T 14) local     substitution Matias Orlande Ascarate
+    min 54 (2T 14) visitante substitution Facundo Aguilar Jimenez
+    min 56 (2T 16) local     substitution Raúl Cristobal Vega
+    min 59 (2T 19) visitante substitution Tomas Nieva
+    min 59 (2T 19) visitante substitution Nahuel Agustin Martinez
+    min 60 (2T 20) local     substitution Ramon Santiago Calderon Suasnabar
+    min 61 (2T 21) visitante substitution Franco Tiziano Enrico Costerg
+    min 62 (2T 22) local     try          Juan Martin Barros
+    min 63 (2T 23) local     conversion   Maximo Ledesma Alfaro
+    min 66 (2T 26) visitante substitution Sebastian Saravia Toledo
+    min 68 (2T 28) local     substitution Ignacio Lazarte
+    min 68 (2T 28) visitante card_yellow  Segundo Casabella
+    min 72 (2T 32) local     card_yellow  Alejo Majolli
+    min 72 (2T 32) visitante try          Gaston Vaca
+    min 73 (2T 33) visitante conversion   Estanislao Pregot Holmquist
+    min 76 (2T 36) visitante try          Santiago Aguilar
+    min 77 (2T 37) visitante conversion   Estanislao Pregot Holmquist
+  marcador  · eventos 37-38 · guardado 37-38
+  tries     · 4-5 (guardado —-—)
+  arbitro   · GUILLERMO LEANDRO SANTILLAN (guardado: Leandro Santillán)
+  guardado  · 23 local · 23 visitante · 42 eventos
+
+tucuman-rugby-club vs tucuman-lawn-tennis · NOA 2026 · tarjeta 325691  ·  6ee759b3-566f-4662-b086-1670c6a7956a
+  local     · tucuman-rugby-club · 23 jugadores · 22 con ficha fijada
+  visitante · tucuman-lawn-tennis · 23 jugadores · 21 con ficha fijada
+  eventos   · 41
+    min  4 (1T 4) local     penalty_goal Simón José Pfister
+    min  7 (1T 7) local     try          Mateo Pasquini
+    min  8 (1T 8) local     conversion   Simón José Pfister
+    min 12 (1T 12) visitante penalty_goal Sebastian Ferro
+    min 15 (1T 15) local     try          Santiago Aguilar Rico
+    min 16 (1T 16) local     conversion   Simón José Pfister
+    min 22 (1T 22) local     penalty_goal Simón José Pfister
+    min 24 (1T 24) visitante try          Marquieguez Ignacio
+    min 25 (1T 25) visitante conversion   Sebastian Ferro
+    min 30 (1T 30) visitante penalty_goal Sebastian Ferro
+    min 32 (1T 32) local     card_yellow  Juan Cruz Guzman
+    min 34 (1T 34) visitante try          Mariano Barrionuevo
+    min 35 (1T 35) visitante conversion   Sebastian Ferro
+    min 38 (1T 38) visitante penalty_goal Sebastian Ferro
+    min 80 (2T 40) visitante substitution Genaro Sosa Fernandez Palma
+    min 80 (2T 40) visitante substitution Luis Ignacio Manino
+    min 82 (2T 42) local     card_yellow  Juan Cruz Guzman
+    min 82 (2T 42) local     card_red     Juan Cruz Guzman
+    min 83 (2T 43) visitante try          Mariano Barrionuevo
+    min 84 (2T 44) local     substitution Mariano Muntaner
+    min 88 (2T 48) local     substitution Joaquín Jose Aguilar Rico
+    min 91 (2T 51) visitante substitution Mariano Barrionuevo
+    min 91 (2T 51) visitante substitution Agustin Iglesias
+    min 95 (2T 55) local     substitution Tobias Jesus Aguilar
+    min 95 (2T 55) visitante substitution Juan Cruz Calliera
+    min 99 (2T 59) local     substitution Santiago Paz Posse
+    min 99 (2T 59) local     substitution Franco Vanni
+    min 99 (2T 59) visitante penalty_goal Sebastian Ferro
+    min 103 (2T 63) local     try          Simón José Pfister
+    min 103 (2T 63) visitante substitution Benjamin Benci
+    min 104 (2T 64) local     conversion   Simón José Pfister
+    min 105 (2T 65) local     substitution Marcelo Augusto Petray Arnut
+    min 105 (2T 65) visitante substitution Santiago Saleme
+    min 108 (2T 68) local     substitution Matías Amuchastegui
+    min 108 (2T 68) visitante try          Matias Ferro
+    min 109 (2T 69) visitante conversion   Sebastian Ferro
+    min 110 (2T 70) visitante substitution Mariano Seleme
+    min 111 (2T 71) visitante card_yellow  Matias Ferro
+    min 119 (2T 79) visitante card_yellow  Santiago Marrupe
+    min 120 (2T 80) local     try          Simón José Pfister
+    min 120 (2T 80) local     conversion   Simón José Pfister
+  marcador  · eventos 34-38 · guardado 34-38
+  tries     · 4-4 (guardado —-—)
+  arbitro   · GONZALO DANERI (guardado: Gonzalo Daneri)
+  guardado  · 23 local · 23 visitante · 41 eventos
+
+tucuman-lawn-tennis vs universitario-de-salta · NOA 2026 · tarjeta 327064  ·  2fa56865-8635-4ef6-b2f2-61437064ab8b
+  local     · tucuman-lawn-tennis · 23 jugadores · 21 con ficha fijada
+  visitante · universitario-de-salta · 23 jugadores · 0 con ficha fijada
+  eventos   · 45
+    min  1 (1T 1) local     try          Mariano Barrionuevo
+    min  2 (1T 2) local     conversion   Sebastian Ferro
+    min  7 (1T 7) visitante try          Mariano Garcia Ascarate
+    min  7 (1T 7) visitante conversion   Maximo Figueroa
+    min 11 (1T 11) local     try          Santiago Saleme
+    min 12 (1T 12) local     conversion   Sebastian Ferro
+    min 15 (1T 15) local     substitution Benjamin Benci
+    min 22 (1T 22) local     substitution Juan Cruz Calliera
+    min 28 (1T 28) local     try          Rodrigo Navarro
+    min 29 (1T 29) local     conversion   Sebastian Ferro
+    min 33 (1T 33) local     try          Tomas Arguello
+    min 34 (1T 34) local     conversion   Sebastian Ferro
+    min 37 (1T 37) visitante card_yellow  Mariano Garcia Ascarate
+    min 39 (1T 39) local     try          Tomas Arguello
+    min 40 (1T 40) local     conversion   Sebastian Ferro
+    min 44 (2T 4) visitante substitution Salvador Bracamonte
+    min 48 (2T 8) visitante substitution Francisco Bestregui
+    min 48 (2T 8) visitante substitution Ramiro García Ascarate
+    min 49 (2T 9) visitante try          Fabrizio Gaspar Rivainera Aquenes
+    min 49 (2T 9) visitante conversion   Maximo Figueroa
+    min 57 (2T 17) visitante substitution Fabrizio Gaspar Rivainera Aquenes
+    min 57 (2T 17) visitante substitution Alex Leandro Benjamin Flores Vega
+    min 57 (2T 17) visitante substitution Lucas Perez Bordones
+    min 63 (2T 23) visitante card_yellow  Lautaro Nicolás Revilla
+    min 69 (2T 29) visitante try          Mateo Andres Segura
+    min 69 (2T 29) visitante conversion   Maximo Figueroa
+    min 73 (2T 33) visitante substitution Gustavo Federico Goldenhorn Villalva
+    min 73 (2T 33) visitante substitution Ezequiel Garcia Ascarate
+    min 80 (2T 40) visitante try          Lucas Bassi
+    min 80 (2T 40) visitante conversion   Maximo Figueroa
+    min 85 (2T 45) local     card_yellow  Tomas Arguello
+    min 89 (2T 49) local     substitution Mariano Barrionuevo
+    min 89 (2T 49) local     substitution Rodrigo Navarro
+    min 90 (2T 50) local     substitution Sebastian Ferro
+    min 95 (2T 55) local     substitution Mariano Daniel Bustamante
+    min 96 (2T 56) local     try          Tomas Arguello
+    min 97 (2T 57) local     conversion   Ignacio Rodriguez Prados
+    min 97 (2T 57) local     substitution Luis Ignacio Manino
+    min 100 (2T 60) local     substitution Santiago Saleme
+    min 105 (2T 65) local     try          Agustin Iglesias
+    min 106 (2T 66) local     conversion   Ignacio Rodriguez Prados
+    min 116 (2T 76) local     try          Ignacio Rodriguez Prados
+    min 117 (2T 77) local     conversion   Ignacio Rodriguez Prados
+    min 119 (2T 79) local     card_yellow  Diego Santiago Viscido
+    min 120 (2T 80) local     card_yellow  Agustin Iglesias
+  marcador  · eventos 56-28 · guardado 56-28
+  tries     · 8-4 (guardado —-—)
+  arbitro   · PEDRO PABLO LÓPEZ VILDOZA (guardado: —)
+  guardado  · 23 local · 23 visitante · 45 eventos
+
+jockey-club-salta vs huirapuca · NOA 2026 · tarjeta 327066  ·  d63021ae-eed3-4d20-9b93-853560d37c58
+  local     · jockey-club-salta · 23 jugadores · 0 con ficha fijada
+  visitante · huirapuca · 23 jugadores · 19 con ficha fijada
+  eventos   · 42
+    min  1 (1T 1) visitante try          Tomas Dande
+    min  1 (1T 1) visitante conversion   Juan Manue Molinuevo Lazcano
+    min  5 (1T 5) visitante penalty_goal Juan Manue Molinuevo Lazcano
+    min  8 (1T 8) local     try          Nicolas Davalos
+    min  9 (1T 9) local     conversion   Nahuel Agustin Martinez
+    min 16 (1T 16) visitante try          Paolo Contti
+    min 16 (1T 16) visitante conversion   Juan Manue Molinuevo Lazcano
+    min 19 (1T 19) visitante substitution Tadeo Francisco Lopez Miranda
+    min 20 (1T 20) local     try          Tomás Juárez Hernández
+    min 21 (1T 21) local     conversion   Nahuel Agustin Martinez
+    min 24 (1T 24) visitante try          Jesus Pablo Albornoz
+    min 28 (1T 28) local     card_yellow  Sebastian Saravia Toledo
+    min 28 (1T 28) visitante card_yellow  Federico Gonzalez
+    min 31 (1T 31) visitante try          Jose Andres Perez
+    min 36 (1T 36) local     try          Facundo Aguilar Jimenez
+    min 36 (1T 36) visitante card_yellow  Paolo Contti
+    min 37 (1T 37) local     conversion   Nahuel Agustin Martinez
+    min 40 (1T 40) visitante try          Tomas Dande
+    min 40 (1T 40) visitante conversion   Juan Manue Molinuevo Lazcano
+    min 41 (2T 1) local     try          Segundo Casabella
+    min 42 (2T 2) local     conversion   Nahuel Agustin Martinez
+    min 45 (2T 5) visitante penalty_goal Juan Manue Molinuevo Lazcano
+    min 51 (2T 11) local     card_yellow  Gaston Vaca
+    min 52 (2T 12) local     substitution Nahuel Agustin Martinez
+    min 52 (2T 12) local     substitution Santiago Aguilar
+    min 56 (2T 16) visitante try          Juan Manuel Herrera
+    min 56 (2T 16) visitante conversion   Juan Manue Molinuevo Lazcano
+    min 57 (2T 17) visitante substitution Juan Manuel Herrera
+    min 60 (2T 20) local     substitution Facundo Aguilar Jimenez
+    min 60 (2T 20) local     substitution Alvaro Simón Prieto Martinez
+    min 60 (2T 20) visitante substitution Federico Gonzalez
+    min 60 (2T 20) visitante substitution Jesus Pablo Albornoz
+    min 60 (2T 20) visitante substitution Tomas Dande
+    min 60 (2T 20) visitante try          Conrrado Nolasco Aguero
+    min 60 (2T 20) visitante conversion   Juan Manue Molinuevo Lazcano
+    min 64 (2T 24) local     substitution Sebastian Saravia Toledo
+    min 64 (2T 24) local     substitution Segundo Casabella
+    min 75 (2T 35) local     try          Franco Giacoppo
+    min 76 (2T 36) local     conversion   Estanislao Pregot Holmquist
+    min 80 (2T 40) local     card_yellow  Franco Giacoppo
+    min 80 (2T 40) local     substitution Facundo Nicolas Burgos
+    min 80 (2T 40) local     substitution Tomas Nieva
+  marcador  · eventos 35-51 · guardado 35-51
+  tries     · 5-7 (guardado —-—)
+  arbitro   · DIEGO FEDERICO TORRES (guardado: —)
+  guardado  · 23 local · 23 visitante · 42 eventos
+
+universitario-de-tucuman vs natacion-y-gimnasia · NOA 2026 · tarjeta 327067  ·  4e7b615e-93b0-4315-82aa-7603698267eb
+  local     · universitario-de-tucuman · 23 jugadores · 18 con ficha fijada
+  visitante · natacion-y-gimnasia · 23 jugadores · 23 con ficha fijada
+  eventos   · 30
+    min  3 (1T 3) visitante try          Lucas Guc
+    min  4 (1T 4) visitante conversion   Maximo Ledesma Alfaro
+    min 20 (1T 20) local     try          Enzo Brandan
+    min 20 (1T 20) local     conversion   Luciano Valdez Cosentino
+    min 24 (1T 24) local     card_yellow  Karim Ahmad
+    min 24 (1T 24) visitante penalty_goal Maximo Ledesma Alfaro
+    min 28 (1T 28) local     try          Lionel Bonfiglioli
+    min 28 (1T 28) local     conversion   Luciano Valdez Cosentino
+    min 31 (1T 31) local     drop_goal    Luciano Valdez Cosentino
+    min 40 (1T 40) visitante penalty_goal Maximo Ledesma Alfaro
+    min 81 (2T 41) local     substitution Leandro Caricato
+    min 81 (2T 41) visitante substitution Federico Gallac
+    min 84 (2T 44) local     try          Lautaro Acuña
+    min 89 (2T 49) visitante penalty_goal Maximo Ledesma Alfaro
+    min 93 (2T 53) local     substitution Tomás Delpero
+    min 95 (2T 55) local     card_yellow  Lautaro Acuña
+    min 95 (2T 55) visitante substitution Juan Martin Barros
+    min 98 (2T 58) visitante try          Mariano Aguero Daneri
+    min 99 (2T 59) local     substitution Patricio Mas
+    min 99 (2T 59) visitante substitution Ramon Santiago Calderon Suasnabar
+    min 99 (2T 59) visitante substitution Ignacio Lazarte
+    min 105 (2T 65) local     substitution Enzo Brandan
+    min 106 (2T 66) local     penalty_goal Luciano Valdez Cosentino
+    min 106 (2T 66) visitante card_yellow  Gonzalo Terraf
+    min 109 (2T 69) local     substitution Lionel Bonfiglioli
+    min 109 (2T 69) local     substitution Lautaro Acuña
+    min 113 (2T 73) visitante substitution Lucas Guc
+    min 113 (2T 73) visitante substitution Patricio Jose Bonilla
+    min 117 (2T 77) visitante try          Matias Bascary
+    min 118 (2T 78) visitante conversion   Maximo Ledesma Alfaro
+  marcador  · eventos 25-28 · guardado 25-28
+  tries     · 3-3 (guardado —-—)
+  arbitro   · FACUNDO STRATTI (guardado: —)
+  guardado  · 23 local · 23 visitante · 30 eventos
+
+los-tarcos vs lince-rugby-club · NOA 2026 · tarjeta 327068  ·  3874f8aa-3030-4413-a9f9-ee521485c8fd
+  local     · los-tarcos · 23 jugadores · 0 con ficha fijada
+  visitante · lince-rugby-club · 23 jugadores · 0 con ficha fijada
+  eventos   · 38
+    min  2 (1T 2) local     substitution Benjamin Gravano
+    min  3 (1T 3) visitante penalty_goal Heredia Joaquin
+    min  6 (1T 6) local     try          Lucas Picon
+    min  7 (1T 7) local     conversion   Facundo Rodriguez
+    min 10 (1T 10) visitante try          Emiliano Perez
+    min 10 (1T 10) visitante conversion   Heredia Joaquin
+    min 27 (1T 27) local     penalty_goal Facundo Rodriguez
+    min 33 (1T 33) local     try          Lucas Picon
+    min 36 (1T 36) visitante penalty_goal Heredia Joaquin
+    min 37 (1T 37) local     try          Ignacio Rodriguez Santillan
+    min 38 (1T 38) local     conversion   Facundo Rodriguez
+    min 42 (1T 42) visitante penalty_goal Heredia Joaquin
+    min 46 (2T 6) local     substitution Luka Ezequiel Rosa
+    min 47 (2T 7) local     card_yellow  Fabricio Navarro Luna
+    min 50 (2T 10) visitante substitution Conrado Fanlo
+    min 52 (2T 12) local     penalty_goal Facundo Rodriguez
+    min 54 (2T 14) local     substitution Lisandro Gravano
+    min 57 (2T 17) local     try          Bruno Gomez Urrutia
+    min 57 (2T 17) local     substitution Fabricio Navarro Luna
+    min 58 (2T 18) local     conversion   Facundo Rodriguez
+    min 62 (2T 22) visitante substitution Matias Jendrreyko
+    min 62 (2T 22) visitante substitution Edgardo Gabriel Fanjul
+    min 62 (2T 22) visitante substitution Gonzalo Seara
+    min 64 (2T 24) local     penalty_goal Facundo Rodriguez
+    min 65 (2T 25) visitante try          Francisco Argañaraz
+    min 67 (2T 27) visitante substitution Lautaro Fanlo
+    min 69 (2T 29) local     try          Bruno Gomez Urrutia
+    min 69 (2T 29) visitante substitution Heredia Joaquin
+    min 70 (2T 30) local     conversion   Facundo Rodriguez
+    min 70 (2T 30) local     substitution Franco Nicolas Juarez Haro
+    min 70 (2T 30) local     substitution Tomas David Aguero
+    min 70 (2T 30) visitante substitution Mauricio Francisco Ruiz
+    min 70 (2T 30) visitante substitution Tiago De La Vega Soler
+    min 73 (2T 33) local     substitution Lucas Picon
+    min 73 (2T 33) local     substitution Ignacio Rodriguez Santillan
+    min 73 (2T 33) visitante card_red     Victor Emiliano Coria Marchetti
+    min 81 (2T 41) local     try          Facundo Rodriguez
+    min 82 (2T 42) local     conversion   Facundo Rodriguez
+  marcador  · eventos 49-21 · guardado 49-21
+  tries     · 6-2 (guardado —-—)
+  arbitro   · A A (NO OFICIAL) (guardado: —)
+  guardado  · 23 local · 23 visitante · 38 eventos
+
+cardenales-r-c vs tucuman-rugby-club · NOA 2026 · tarjeta 327065  ·  e50f8281-eb83-4d29-bee2-314fe7c72fb3
+  local     · cardenales-r-c · 23 jugadores · 20 con ficha fijada
+  visitante · tucuman-rugby-club · 23 jugadores · 22 con ficha fijada
+  eventos   · 33
+    min  2 (1T 2) local     try          José Ignacio Cerrutti
+    min  2 (1T 2) local     conversion   José Ignacio Cerrutti
+    min  9 (1T 9) visitante try          Santiago Paz Posse
+    min 10 (1T 10) visitante conversion   Gonzalo Albornoz
+    min 20 (1T 20) visitante try          Tobias Jesus Aguilar
+    min 30 (1T 30) visitante penalty_goal Gonzalo Albornoz
+    min 32 (1T 32) local     penalty_goal José Ignacio Cerrutti
+    min 34 (1T 34) local     card_yellow  Mariano Capparelli
+    min 43 (2T 3) local     penalty_goal José Ignacio Cerrutti
+    min 44 (2T 4) local     substitution Gonzalo Emanuel Lazarte
+    min 45 (2T 5) local     try          José Ignacio Cerrutti
+    min 45 (2T 5) local     conversion   José Ignacio Cerrutti
+    min 60 (2T 20) local     substitution Santiago Jeremias Abi Cheble
+    min 60 (2T 20) local     substitution Matias Budeguer
+    min 70 (2T 30) local     penalty_goal José Ignacio Cerrutti
+    min 70 (2T 30) local     substitution Mariano Capparelli
+    min 70 (2T 30) local     substitution Roque Javier Albornoz
+    min 75 (2T 35) local     substitution Andres Odstrcil
+    min 76 (2T 36) local     card_yellow  Franco Filipezuk
+    min 90 (2T 50) visitante penalty_goal Gonzalo Albornoz
+    min 91 (2T 51) visitante substitution Marcelo Augusto Petray Arnut
+    min 91 (2T 51) visitante substitution Prudencio Santillan
+    min 95 (2T 55) visitante substitution Matías Amuchastegui
+    min 99 (2T 59) visitante try          Rodrigo Galindez
+    min 100 (2T 60) visitante conversion   Gonzalo Albornoz
+    min 103 (2T 63) visitante substitution Mariano Muntaner
+    min 103 (2T 63) visitante substitution Tobias Jesus Aguilar
+    min 103 (2T 63) visitante substitution Pablo Laitan
+    min 104 (2T 64) visitante card_yellow  Ignacio Estrada Cossio
+    min 109 (2T 69) visitante card_yellow  Matias Frias Silva
+    min 115 (2T 75) visitante substitution Santiago Paz Posse
+    min 115 (2T 75) visitante substitution Rodrigo Galindez
+    min 119 (2T 79) visitante penalty_goal Gonzalo Albornoz
+  marcador  · eventos 23-28 · guardado 23-28
+  tries     · 2-3 (guardado —-—)
+  arbitro   · JULIÁN MONTENEGRO (guardado: —)
+  guardado  · 23 local · 23 visitante · 33 eventos
+
+natacion-y-gimnasia vs los-tarcos · NOA 2026 · tarjeta 327383  ·  88981fab-503a-4de0-a56d-a68384118b09
+  local     · natacion-y-gimnasia · 23 jugadores · 23 con ficha fijada
+  visitante · los-tarcos · 23 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min  7 (1T 7) visitante penalty_goal Facundo Rodriguez
+    min 10 (1T 10) local     penalty_goal Maximo Ledesma Alfaro
+    min 12 (1T 12) local     try          Gonzalo Terraf
+    min 18 (1T 18) local     penalty_goal Maximo Ledesma Alfaro
+    min 21 (1T 21) local     card_red     Tomas Javier Garcia
+    min 23 (1T 23) local     try          Lucas Guc
+    min 24 (1T 24) local     conversion   Maximo Ledesma Alfaro
+    min 37 (1T 37) visitante penalty_goal Facundo Rodriguez
+    min 41 (2T 1) local     substitution Lucas Guc
+    min 41 (2T 1) local     substitution Federico Gallac
+    min 46 (2T 6) visitante try          Máximo Augusto Aguero
+    min 49 (2T 9) visitante substitution Lisandro Gravano
+    min 51 (2T 11) visitante substitution Luka Ezequiel Rosa
+    min 51 (2T 11) visitante substitution Fabricio Navarro Luna
+    min 51 (2T 11) visitante substitution Santiago Alejandro Chehuan
+    min 59 (2T 19) local     substitution Ignacio Lazarte
+    min 59 (2T 19) local     substitution Ramon Santiago Calderon Suasnabar
+    min 59 (2T 19) local     substitution Matias López Esteban
+    min 62 (2T 22) visitante penalty_goal Facundo Rodriguez
+    min 63 (2T 23) visitante substitution Lucas Picon
+    min 63 (2T 23) visitante substitution Franco Nicolas Juarez Haro
+    min 74 (2T 34) visitante substitution Tomas David Aguero
+    min 77 (2T 37) local     substitution Maximo Ledesma Alfaro
+    min 80 (2T 40) local     penalty_goal Maximo Ledesma Alfaro
+  marcador  · eventos 21-14 · guardado 21-14
+  tries     · 2-1 (guardado —-—)
+  arbitro   · (NO OFICIAL) (guardado: —)
+  guardado  · 23 local · 23 visitante · 24 eventos
+
+huirapuca vs universitario-de-tucuman · NOA 2026 · tarjeta 327384  ·  29ca843c-1951-498a-a27f-2072971ae15d
+  local     · huirapuca · 23 jugadores · 19 con ficha fijada
+  visitante · universitario-de-tucuman · 23 jugadores · 18 con ficha fijada
+  eventos   · 30
+    min  5 (1T 5) visitante penalty_goal Luciano Valdez Cosentino
+    min 14 (1T 14) visitante penalty_goal Luciano Valdez Cosentino
+    min 18 (1T 18) visitante try          Tomas Vanni
+    min 18 (1T 18) visitante conversion   Luciano Valdez Cosentino
+    min 21 (1T 21) local     substitution Maximo Cesar Carreras
+    min 24 (1T 24) local     card_red     Enzo Egea
+    min 29 (1T 29) local     try          Conrrado Nolasco Aguero
+    min 29 (1T 29) local     conversion   Juan Manue Molinuevo Lazcano
+    min 36 (1T 36) local     try          Gaston Raso
+    min 41 (2T 1) local     try          Juan Manue Molinuevo Lazcano
+    min 60 (2T 20) local     substitution Joaquin Albornoz
+    min 65 (2T 25) local     substitution Tadeo Francisco Lopez Miranda
+    min 65 (2T 25) local     substitution Jose Andres Perez
+    min 65 (2T 25) local     substitution Federico Gonzalez
+    min 69 (2T 29) local     substitution Mauricio Isaias Montoya
+    min 69 (2T 29) local     substitution Jesus Pablo Albornoz
+    min 75 (2T 35) local     try          Paolo Contti
+    min 75 (2T 35) local     conversion   Juan Manue Molinuevo Lazcano
+    min 79 (2T 39) local     penalty_goal Juan Manue Molinuevo Lazcano
+    min 84 (2T 44) visitante try          Thiago Sbrocco
+    min 84 (2T 44) visitante conversion   Luciano Valdez Cosentino
+    min 91 (2T 51) visitante penalty_goal Luciano Valdez Cosentino
+    min 101 (2T 61) visitante substitution Patricio Mas
+    min 101 (2T 61) visitante substitution Enzo Brandan
+    min 103 (2T 63) visitante substitution Lionel Bonfiglioli
+    min 106 (2T 66) visitante substitution Facundo Torres Lanzavecchia
+    min 106 (2T 66) visitante substitution Tomás Delpero
+    min 111 (2T 71) visitante substitution Leandro Caricato
+    min 112 (2T 72) visitante substitution Martin Arregui
+    min 119 (2T 79) visitante substitution Benjamin Farías Cerioni
+  marcador  · eventos 27-23 · guardado 27-23
+  tries     · 4-2 (guardado —-—)
+  arbitro   · DIEGO FEDERICO TORRES (guardado: —)
+  guardado  · 23 local · 23 visitante · 30 eventos
+
+tucuman-lawn-tennis vs cardenales-r-c · NOA 2026 · tarjeta 327386  ·  07db795a-fe60-4160-a80c-cd9e7980e8bb
+  local     · tucuman-lawn-tennis · 23 jugadores · 20 con ficha fijada
+  visitante · cardenales-r-c · 23 jugadores · 21 con ficha fijada
+  eventos   · 39
+    min  8 (1T 8) local     try          Mariano Barrionuevo
+    min  9 (1T 9) local     conversion   Sebastian Ferro
+    min 12 (1T 12) visitante try          Francisco Abi Cheble
+    min 22 (1T 22) local     try          Mariano Barrionuevo
+    min 23 (1T 23) local     conversion   Sebastian Ferro
+    min 28 (1T 28) local     try          Mariano Seleme
+    min 29 (1T 29) local     conversion   Sebastian Ferro
+    min 34 (1T 34) local     try          Mariano Barrionuevo
+    min 43 (2T 3) visitante card_yellow  Franco Filipezuk
+    min 52 (2T 12) visitante card_yellow  José Ignacio Cerrutti
+    min 55 (2T 15) visitante substitution Mariano Capparelli
+    min 55 (2T 15) visitante substitution Jeremias Muñoz
+    min 58 (2T 18) visitante card_yellow  Cipriano Cerrutti
+    min 58 (2T 18) visitante substitution Franco Filipezuk
+    min 60 (2T 20) visitante substitution Carlos Mateo Barros Sosa
+    min 60 (2T 20) visitante substitution Gonzalo Emanuel Lazarte
+    min 64 (2T 24) visitante card_red     Tomas Valentin Brito
+    min 70 (2T 30) visitante substitution Juan Ignacio Diaz
+    min 70 (2T 30) visitante substitution Andres Odstrcil
+    min 70 (2T 30) visitante substitution Joaquín Rodriguez
+    min 74 (2T 34) visitante try          Francisco Abi Cheble
+    min 74 (2T 34) visitante card_yellow  Tomas Alberto Durán
+    min 88 (2T 48) local     try          Lucas Solimo
+    min 89 (2T 49) local     conversion   Sebastian Ferro
+    min 89 (2T 49) local     substitution Lucio Juarez Chico
+    min 89 (2T 49) local     substitution Luis Ignacio Manino
+    min 93 (2T 53) local     try          Lucas Aguero
+    min 94 (2T 54) local     conversion   Sebastian Ferro
+    min 95 (2T 55) local     substitution Mariano Daniel Bustamante
+    min 95 (2T 55) local     substitution Mariano Barrionuevo
+    min 95 (2T 55) local     substitution Rodrigo Navarro
+    min 95 (2T 55) local     substitution Ignacio Rodriguez Prados
+    min 100 (2T 60) local     substitution Santiago Saleme
+    min 104 (2T 64) local     card_red     Diego Santiago Viscido
+    min 104 (2T 64) local     substitution Tomas Arguello
+    min 108 (2T 68) local     try          Miguel Roberto Mukdise
+    min 109 (2T 69) local     conversion   Sebastian Ferro
+    min 118 (2T 78) local     try          Santiago Marrupe
+    min 119 (2T 79) local     conversion   Sebastian Ferro
+  marcador  · eventos 54-10 · guardado 54-10
+  tries     · 8-2 (guardado —-—)
+  arbitro   · JUAN DIEGO ESPINDOLA (guardado: —)
+  guardado  · 23 local · 23 visitante · 39 eventos
+
+tucuman-rugby-club vs jockey-club-salta · NOA 2026 · tarjeta 327385  ·  a88bd4e5-a980-44c1-92c3-09ee2ec71ef7
+  local     · tucuman-rugby-club · 23 jugadores · 23 con ficha fijada
+  visitante · jockey-club-salta · 23 jugadores · 0 con ficha fijada
+  eventos   · 42
+    min 12 (1T 12) local     penalty_try  
+    min 15 (1T 15) local     try          Juan Maria D'antuene
+    min 19 (1T 19) local     try          Matias Frias Silva
+    min 20 (1T 20) local     conversion   Simón José Pfister
+    min 21 (1T 21) local     try          Joaquín Jose Aguilar Rico
+    min 22 (1T 22) local     conversion   Simón José Pfister
+    min 26 (1T 26) visitante try          Baltazar Garcia
+    min 31 (1T 31) visitante card_yellow  Franco Giacoppo
+    min 32 (1T 32) local     try          Juan Maria D'antuene
+    min 33 (1T 33) local     conversion   Simón José Pfister
+    min 40 (1T 40) local     try          Mateo Pasquini
+    min 40 (1T 40) local     conversion   Simón José Pfister
+    min 44 (2T 4) visitante substitution Facundo Nicolas Burgos
+    min 51 (2T 11) visitante try          Matias Gustavo Michelena Colla
+    min 52 (2T 12) visitante substitution Facundo Aguilar Jimenez
+    min 57 (2T 17) visitante injury       Sebastian Saravia Toledo
+    min 57 (2T 17) visitante card_yellow  Baltazar Garcia
+    min 57 (2T 17) visitante substitution Sebastian Saravia Toledo
+    min 58 (2T 18) visitante substitution Franco Giacoppo
+    min 62 (2T 22) visitante try          Estanislao Pregot Holmquist
+    min 63 (2T 23) visitante conversion   Estanislao Pregot Holmquist
+    min 66 (2T 26) visitante substitution Nicolas Davalos
+    min 67 (2T 27) visitante substitution Benjamin Manzur Olguin
+    min 80 (2T 40) visitante substitution Alvaro Simón Prieto Martinez
+    min 80 (2T 40) visitante substitution Franco Tiziano Enrico Costerg
+    min 81 (2T 41) local     substitution Marcelo Augusto Petray Arnut
+    min 83 (2T 43) local     try          Mateo Pasquini
+    min 84 (2T 44) local     conversion   Simón José Pfister
+    min 88 (2T 48) local     substitution Mariano Muntaner
+    min 88 (2T 48) local     substitution Tobias Jesus Aguilar
+    min 94 (2T 54) local     substitution Juan Maria D'antuene
+    min 94 (2T 54) local     substitution Santiago Paz Posse
+    min 97 (2T 57) local     card_yellow  Matias Frias Silva
+    min 97 (2T 57) local     substitution Mateo Pasquini
+    min 104 (2T 64) local     try          Nicolas Lopez Gonzalez
+    min 105 (2T 65) local     conversion   Simón José Pfister
+    min 107 (2T 67) local     substitution Joaquín Jose Aguilar Rico
+    min 107 (2T 67) local     substitution Nicolas Lopez Gonzalez
+    min 113 (2T 73) local     try          Pablo Laitan
+    min 114 (2T 74) local     conversion   Simón José Pfister
+    min 116 (2T 76) local     card_yellow  Matias Frias Silva
+    min 116 (2T 76) local     card_red     Matias Frias Silva
+  marcador  · eventos 61-17 · guardado 61-17
+  tries     · 9-3 (guardado —-—)
+  arbitro   · GUILLERMO LEANDRO SANTILLAN (guardado: —)
+  guardado  · 23 local · 23 visitante · 42 eventos
+
+listo · 39 partidos

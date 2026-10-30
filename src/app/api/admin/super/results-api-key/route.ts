@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { guardRejection } from '@/lib/auth/apiAdmin';
 import { requireSuperAdmin } from '@/lib/auth/server';
 import {
   getConfiguredResultsApiEnvNames,
@@ -42,8 +43,8 @@ async function writeAudit(actorUserId: string, preview: string) {
 export async function GET() {
   try {
     await requireSuperAdmin();
-  } catch {
-    return jsonError('Unauthorized', 401);
+  } catch (authError) {
+    return jsonError(...guardRejection(authError));
   }
 
   try {
@@ -85,8 +86,8 @@ export async function POST() {
   try {
     const user = await requireSuperAdmin();
     userId = user.id;
-  } catch {
-    return jsonError('Unauthorized', 401);
+  } catch (authError) {
+    return jsonError(...guardRejection(authError));
   }
 
   try {

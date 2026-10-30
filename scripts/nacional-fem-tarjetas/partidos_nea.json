@@ -1,0 +1,198 @@
+{
+ "Regional Femenino NEA 2026": [
+  {
+   "fecha": "2026-09-13",
+   "hora": "16:40",
+   "home": "aguilas-rc-saenz-pena-femenino",
+   "away": "san-cipriano-femenino",
+   "homeScore": 49,
+   "awayScore": 0,
+   "cerrado": true,
+   "tarjeta": "324251",
+   "estado": "Cerrado",
+   "ronda": "CLASIFICACION A"
+  },
+  {
+   "fecha": "2026-09-13",
+   "hora": "11:00",
+   "home": "aguilas-rc-saenz-pena-femenino",
+   "away": "centro-cazadores-femenino",
+   "homeScore": 31,
+   "awayScore": 5,
+   "cerrado": true,
+   "tarjeta": "324249",
+   "estado": "Cerrado",
+   "ronda": "CLASIFICACION A"
+  },
+  {
+   "fecha": "2026-09-13",
+   "hora": "15:00",
+   "home": "centro-cazadores-femenino",
+   "away": "san-cipriano-femenino",
+   "homeScore": 19,
+   "awayScore": 5,
+   "cerrado": true,
+   "tarjeta": "324250",
+   "estado": "Cerrado",
+   "ronda": "CLASIFICACION A"
+  },
+  {
+   "fecha": "2026-09-13",
+   "hora": "10:00",
+   "home": "capri-femenino",
+   "away": "regatas-de-resistencia-femenino",
+   "homeScore": 7,
+   "awayScore": 10,
+   "cerrado": true,
+   "tarjeta": "324252",
+   "estado": "Cerrado",
+   "ronda": "CLASIFICACION B"
+  },
+  {
+   "fecha": "2026-09-13",
+   "hora": "16:00",
+   "home": "capri-femenino",
+   "away": "caza-y-pesca-femenino",
+   "homeScore": 59,
+   "awayScore": 5,
+   "cerrado": true,
+   "tarjeta": "324254",
+   "estado": "Cerrado",
+   "ronda": "CLASIFICACION B"
+  },
+  {
+   "fecha": "2026-09-13",
+   "hora": "14:00",
+   "home": "regatas-de-resistencia-femenino",
+   "away": "caza-y-pesca-femenino",
+   "homeScore": 17,
+   "awayScore": 5,
+   "cerrado": true,
+   "tarjeta": "324253",
+   "estado": "Cerrado",
+   "ronda": "CLASIFICACION B"
+  },
+  {
+   "fecha": "2026-09-13",
+   "hora": "18:30",
+   "home": "aguilas-rc-saenz-pena-femenino",
+   "away": "regatas-de-resistencia-femenino",
+   "homeScore": 10,
+   "awayScore": 0,
+   "cerrado": true,
+   "tarjeta": "324382",
+   "estado": "Cerrado",
+   "ronda": "FINAL"
+  }
+ ],
+ "Torneo Oficial Femenino 2026 - XII": [
+  {
+   "fecha": "2026-08-02",
+   "hora": "12:00",
+   "home": "regatas-de-resistencia-femenino",
+   "away": "italiana-de-charata-femenino",
+   "homeScore": 71,
+   "awayScore": 0,
+   "cerrado": true,
+   "tarjeta": "315531",
+   "estado": "Cerrado",
+   "ronda": "Regatas"
+  },
+  {
+   "fecha": "2026-08-02",
+   "hora": "12:30",
+   "home": "aguilas-rc-saenz-pena-femenino",
+   "away": "los-toros-r-c-femenino",
+   "homeScore": 21,
+   "awayScore": 0,
+   "cerrado": false,
+   "tarjeta": "315532",
+   "estado": "?",
+   "ronda": "Regatas"
+  },
+  {
+   "fecha": "2026-08-02",
+   "hora": "13:20",
+   "home": "regatas-de-resistencia-femenino",
+   "away": "los-toros-r-c-femenino",
+   "homeScore": 21,
+   "awayScore": 0,
+   "cerrado": false,
+   "tarjeta": "315533",
+   "estado": "?",
+   "ronda": "Regatas"
+  },
+  {
+   "fecha": "2026-08-02",
+   "hora": "14:00",
+   "home": "italiana-de-charata-femenino",
+   "away": "aguilas-rc-saenz-pena-femenino",
+   "homeScore": 0,
+   "awayScore": 76,
+   "cerrado": true,
+   "tarjeta": "315534",
+   "estado": "Cerrado",
+   "ronda": "Regatas"
+  },
+  {
+   "fecha": "2026-08-02",
+   "hora": "15:00",
+   "home": "los-toros-r-c-femenino",
+   "away": "italiana-de-charata-femenino",
+   "homeScore": 0,
+   "awayScore": 21,
+   "cerrado": false,
+   "tarjeta": "315535",
+   "estado": "?",
+   "ronda": "Regatas"
+  },
+  {
+   "fecha": "2026-08-02",
+   "hora": "15:40",
+   "home": "regatas-de-resistencia-femenino",
+   "away": "aguilas-rc-saenz-pena-femenino",
+   "homeScore": 5,
+   "awayScore": 26,
+   "cerrado": true,
+   "tarjeta": "315536",
+   "estado": "Cerrado",
+   "ronda": "Regatas"
+  },
+  {
+   "fecha": "2026-08-23",
+   "hora": "12:00",
+   "home": "aguilas-rc-saenz-pena-femenino",
+   "away": "italiana-de-charata-femenino",
+   "homeScore": 77,
+   "awayScore": 0,
+   "cerrado": true,
+   "tarjeta": "322225",
+   "estado": "Cerrado",
+   "ronda": "Aguilas"
+  },
+  {
+   "fecha": "2026-08-23",
+   "hora": "14:30",
+   "home": "aguilas-rc-saenz-pena-femenino",
+   "away": "regatas-de-resistencia-femenino",
+   "homeScore": 15,
+   "awayScore": 0,
+   "cerrado": true,
+   "tarjeta": "322227",
+   "estado": "Cerrado",
+   "ronda": "Aguilas"
+  },
+  {
+   "fecha": "2026-08-23",
+   "hora": "13:10",
+   "home": "italiana-de-charata-femenino",
+   "away": "regatas-de-resistencia-femenino",
+   "homeScore": 0,
+   "awayScore": 64,
+   "cerrado": true,
+   "tarjeta": "322226",
+   "estado": "Cerrado",
+   "ronda": "Aguilas"
+  }
+ ]
+}

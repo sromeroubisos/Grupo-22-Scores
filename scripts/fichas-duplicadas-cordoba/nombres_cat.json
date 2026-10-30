@@ -1,0 +1,888 @@
+{
+ "solo_tildes": [
+  [
+   "san-martin-de-villa-maria-intermedia",
+   "Matías Cortese",
+   "Matias Cortese",
+   2,
+   11,
+   "1f891c56-409c-4a09-a34c-6f5eabffdd92"
+  ],
+  [
+   "san-martin-de-villa-maria-intermedia",
+   "Agustin Achaval",
+   "Agustín Achaval",
+   4,
+   22,
+   "ae774f30-5576-4092-99b6-44e65dd2a89c"
+  ],
+  [
+   "la-tablada-intermedia",
+   "Matías Petrini",
+   "Matias Petrini",
+   3,
+   14,
+   "d664a062-c1b8-4247-bbde-6e8abba6c03c"
+  ],
+  [
+   "la-tablada-intermedia",
+   "Valentin Tomas Aguero",
+   "Valentín Tomas Aguero",
+   3,
+   13,
+   "1c4f0903-62ef-4df4-ae0a-0ddf9b9b8617"
+  ],
+  [
+   "jockey-club-de-villa-maria-intermedia",
+   "Matías Ferreyra",
+   "Matias Ferreyra",
+   1,
+   10,
+   "d36d05d6-d23b-475e-863e-d3e4e45f6373"
+  ],
+  [
+   "jockey-club-de-villa-maria-intermedia",
+   "Valentino Marin",
+   "Valentino Marín",
+   4,
+   19,
+   "cdd0d01e-4dc4-4901-a268-b8352c619825"
+  ],
+  [
+   "club-universitario-de-cordoba",
+   "Agustin Perez Soria",
+   "Agustín Pérez Soria",
+   12,
+   19,
+   "a8299960-c39f-4668-9630-be3c1732a7b7"
+  ],
+  [
+   "club-universitario-de-cordoba",
+   "Valentín Moreno",
+   "Valentin Moreno",
+   4,
+   11,
+   "2de48f75-bd18-471e-8ca4-ccd0b850dfd8"
+  ],
+  [
+   "cordoba-athletic-club",
+   "Conrado Cortés",
+   "Conrado Cortes",
+   1,
+   22,
+   "f8d8cf41-c00b-4a6f-a37a-cbd439e3c43f"
+  ],
+  [
+   "cordoba-athletic-club",
+   "Omar Mauricio Gutiérrez",
+   "Omar Mauricio Gutierrez",
+   3,
+   14,
+   "efc441e0-a897-4e2a-94c7-f88ba4b1abfd"
+  ],
+  [
+   "cordoba-athletic-club",
+   "Tomás Caffaratti",
+   "Tomas Caffaratti",
+   8,
+   24,
+   "62e9f3d8-f6e8-4164-87ff-b823df584990"
+  ],
+  [
+   "cordoba-athletic-club",
+   "Facundo Lopez Lopez",
+   "Facundo López Lopez",
+   1,
+   12,
+   "b6bcfe02-053e-45bb-835b-ab96231ed2c9"
+  ],
+  [
+   "cordoba-athletic-club",
+   "Tomás Agustín Fitte",
+   "Tomas Agustin Fitte",
+   1,
+   17,
+   "de780b71-ebaa-4ca5-9951-305f2e2789d8"
+  ],
+  [
+   "cordoba-athletic-club",
+   "Federico Rodríguez Cirer",
+   "Federico Rodriguez Cirer",
+   1,
+   12,
+   "875ca712-e43f-475b-83aa-53e75980cccc"
+  ],
+  [
+   "jockey-club-cordoba-preintermedia-a",
+   "Pedro Benjamin Yapur",
+   "Pedro Benjamín Yapur",
+   2,
+   2,
+   "2abde64c-5941-40d7-b926-055a7e919eb1"
+  ],
+  [
+   "dogos-xv",
+   "Valentín Cabral",
+   "Valentin Cabral",
+   12,
+   12,
+   "ac1053a3-ffdf-4698-bd5b-c6008c65c88e"
+  ],
+  [
+   "dogos-xv",
+   "Nicolás Viola",
+   "Nicolas Viola",
+   15,
+   15,
+   "95a4dd92-4c2a-4ecb-8950-a6b61a6d9762"
+  ],
+  [
+   "dogos-xv",
+   "Facundo Rodríguez",
+   "Facundo Rodriguez",
+   13,
+   13,
+   "d5a6253a-6f13-45d6-a64c-f4653bc74466"
+  ],
+  [
+   "dogos-xv",
+   "Ernesto Giúdice",
+   "Ernesto Giudice",
+   11,
+   11,
+   "9ec38c25-24c5-4af8-9bb7-1e78c6188412"
+  ],
+  [
+   "dogos-xv",
+   "Lucio Willington",
+   "LUCIO WILLINGTON",
+   9,
+   9,
+   "3925fdb3-b241-45f8-940c-c2b390f26eed"
+  ],
+  [
+   "dogos-xv",
+   "Gastón Garayzabal",
+   "Gaston Garayzabal",
+   6,
+   9,
+   "7aaf8e33-ab93-46b5-b2de-4def22be25df"
+  ],
+  [
+   "dogos-xv",
+   "Genaro Podestá",
+   "Genaro Podesta",
+   16,
+   16,
+   "a3e8c0c6-7842-43e5-b5cd-71a9a2e10de1"
+  ],
+  [
+   "club-palermo-bajo",
+   "Martin Quiñonero",
+   "Martín Quiñonero",
+   14,
+   17,
+   "4cdb53b5-8fc4-4cf5-b891-adf22325bcb8"
+  ],
+  [
+   "club-palermo-bajo",
+   "Matías Tomas Peralta Banegas",
+   "Matías Tomás Peralta Banegas",
+   11,
+   15,
+   "cd020cb7-146c-4520-a806-00965f5bf53a"
+  ],
+  [
+   "club-palermo-bajo",
+   "Nicolas Visconti",
+   "Nicolás Visconti",
+   16,
+   21,
+   "79e4fe79-2269-4443-8533-822977d0f622"
+  ],
+  [
+   "club-palermo-bajo",
+   "Tomás Issidoros",
+   "Tomas Issidoros",
+   3,
+   10,
+   "bd360cbe-2de7-457e-9dab-4a71bbad4fbb"
+  ],
+  [
+   "jockey-club-cordoba",
+   "Joaquín Lopez",
+   "Joaquin Lopez",
+   3,
+   14,
+   "2b7af834-189e-4399-8805-47da7491b0db"
+  ],
+  [
+   "jockey-club-cordoba",
+   "Jerónimo Cortés",
+   "Jeronimo Cortes",
+   3,
+   13,
+   "2e36ea9a-efd4-4340-a6ee-375dd69fc707"
+  ],
+  [
+   "jockey-club-cordoba",
+   "Tomás Trejo",
+   "Tomas Trejo",
+   3,
+   10,
+   "c57d3e7f-dbe2-4097-bdbe-49115e5cbaf2"
+  ],
+  [
+   "jockey-club-cordoba",
+   "Matias Fischer",
+   "Matías Fischer",
+   12,
+   16,
+   "3137ea8f-b9d3-48bf-8a54-c581cfdedd3e"
+  ],
+  [
+   "carlos-paz-rugby-club-intermedia",
+   "Matías Daniel Crivello",
+   "Matias Daniel Crivello",
+   2,
+   14,
+   "e65eaf56-a5c4-4b68-b846-99af91c35cb7"
+  ],
+  [
+   "carlos-paz-rugby-club-intermedia",
+   "Arian Nicolas Bello",
+   "Arian Nicolás Bello",
+   2,
+   11,
+   "aa013745-e3be-4fa4-ac5c-32c764fea118"
+  ],
+  [
+   "jockey-club-cordoba",
+   "Lázaro Cugat",
+   "Lazaro Cugat",
+   3,
+   7,
+   "5fc8af57-2159-4fc4-a3f3-3579d5bc3aaa"
+  ],
+  [
+   "jockey-club-cordoba",
+   "Felipe Mallía",
+   "Felipe Mallia",
+   3,
+   14,
+   "b36ae2e1-4db7-4170-8bb8-2f5d91794d11"
+  ],
+  [
+   "carlos-paz-rugby-club",
+   "Jeronimo Osores",
+   "Jerónimo Osores",
+   14,
+   15,
+   "16d653f2-4f1c-41eb-afe0-4b707d333bdd"
+  ],
+  [
+   "carlos-paz-rugby-club",
+   "Martin Sanchez",
+   "Martín Sanchez",
+   3,
+   3,
+   "7104a45d-9127-456f-8465-c555ddf71392"
+  ],
+  [
+   "club-palermo-bajo-intermedia",
+   "Manuel Valentin Quintana",
+   "Manuel Valentín Quintana",
+   1,
+   9,
+   "0e47d29f-0696-47cd-8f98-b0d9c5c06a78"
+  ],
+  [
+   "jockey-club-cordoba-intermedia",
+   "Pedro Benjamin Yapur",
+   "Pedro Benjamín Yapur",
+   2,
+   12,
+   "0616cd6e-012e-49ea-9189-b5715682c670"
+  ],
+  [
+   "tala-rugby-club",
+   "Álvaro Ortega Domenino",
+   "Alvaro Ortega Domenino",
+   1,
+   6,
+   "db4a7d2b-789c-4c99-b559-d0066e129652"
+  ],
+  [
+   "jockey-club-de-villa-maria",
+   "Martin Montero",
+   "Martín Montero",
+   17,
+   22,
+   "e8f9e541-4f59-4c51-ad4f-670fd520e12e"
+  ],
+  [
+   "jockey-club-de-villa-maria",
+   "Martín Vaca",
+   "Martin Vaca",
+   1,
+   8,
+   "88462fae-9cda-44e3-881e-a87e76590218"
+  ],
+  [
+   "jockey-club-de-villa-maria",
+   "Benjamin Farias",
+   "Benjamín Farías",
+   15,
+   20,
+   "f7fe55de-7142-4f01-8c8e-74f28a5343a7"
+  ],
+  [
+   "jockey-club-de-villa-maria",
+   "Valentin Pigni",
+   "Valentín Pigni",
+   15,
+   20,
+   "5f4fcfa6-954f-4ec2-b69c-5a21742b51ed"
+  ],
+  [
+   "jockey-club-de-villa-maria",
+   "Joaquín Pérez Vittoria",
+   "Joaquin Perez Vittoria",
+   3,
+   13,
+   "3e02391c-4da2-4b90-bb38-93ebccc7e2fc"
+  ],
+  [
+   "jockey-club-de-villa-maria",
+   "Matías Ferreyra",
+   "Matias Ferreyra",
+   5,
+   18,
+   "e90d8127-3614-483c-b87f-03b14c8de8ab"
+  ],
+  [
+   "cordoba-athletic-club",
+   "Máximo Maero",
+   "Maximo Maero",
+   5,
+   20,
+   "c8abefc2-bde2-422d-86b3-080dbf6581e2"
+  ],
+  [
+   "cordoba-athletic-club",
+   "Cristian Agustín Antoncic",
+   "Cristian Agustin Antoncic",
+   2,
+   9,
+   "f2e78930-1bf5-431b-a6e4-7d7cc7d80244"
+  ],
+  [
+   "club-palermo-bajo",
+   "Nicolas Godoy",
+   "Nicolás Godoy",
+   13,
+   16,
+   "7fd87100-a936-45cb-bf78-1fddd9a07be1"
+  ],
+  [
+   "club-palermo-bajo",
+   "Matias Daniel Jabase",
+   "Matías Daniel Jabase",
+   7,
+   8,
+   "4e76bc86-54ba-4364-a378-a2aea62a7790"
+  ],
+  [
+   "dogos-xv",
+   "Galo Fernández",
+   "Galo Fernandez",
+   14,
+   14,
+   "01015be1-69a9-4e4f-8397-1afda5b5e05c"
+  ],
+  [
+   "dogos-xv",
+   "Valentín Gozálvez",
+   "Valentin Gozalvez",
+   6,
+   13,
+   "36aa6fde-14e3-4e81-9ffb-2f088848f73f"
+  ],
+  [
+   "dogos-xv",
+   "Agustín De Vertiz",
+   "Agustin De Vertiz",
+   11,
+   11,
+   "e57f9c54-d4f8-48fa-927f-e51a986e57a3"
+  ],
+  [
+   "dogos-xv",
+   "Mateo Sánchez",
+   "Mateo Sanchez",
+   10,
+   10,
+   "694e0db2-1d34-494c-bac1-fa13dbd55f05"
+  ],
+  [
+   "dogos-xv",
+   "Nicolás Roger",
+   "Nicolas Roger",
+   5,
+   5,
+   "76dcc275-2575-49a9-8d35-f45eff98c8da"
+  ],
+  [
+   "jockey-club-cordoba",
+   "Jerónimo Carballo",
+   "Jeronimo Carballo",
+   1,
+   5,
+   "55a77f73-3405-4daf-a434-3dca27e4adea"
+  ],
+  [
+   "jockey-club-de-villa-maria",
+   "Valentín Baleani",
+   "Valentin Baleani",
+   1,
+   7,
+   "6df767b4-c6b4-4d4c-8d2a-c4415cb6ea7a"
+  ],
+  [
+   "jockey-club-de-villa-maria",
+   "Álvaro Vera",
+   "Alvaro Vera",
+   3,
+   14,
+   "0a6c29de-5ca6-4e39-84bd-9ae8e65ab6dc"
+  ],
+  [
+   "jockey-club-de-villa-maria",
+   "Benjamín Brugiafreddo",
+   "Benjamin Brugiafreddo",
+   2,
+   9,
+   "1dabe96e-1cf2-4a22-95c1-d4097cf67553"
+  ],
+  [
+   "jockey-club-de-villa-maria",
+   "Nicolás Turecki",
+   "Nicolas Turecki",
+   1,
+   3,
+   "78ba4306-da23-4683-8c68-d21efe4785be"
+  ],
+  [
+   "jockey-club-cordoba-intermedia",
+   "Matias Fischer",
+   "Matías Fischer",
+   5,
+   8,
+   "70e5c00e-318b-4666-ab39-a47c690ca48f"
+  ],
+  [
+   "carlos-paz-rugby-club",
+   "Joaquin Minardi",
+   "Joaquín Minardi",
+   10,
+   11,
+   "473a1d94-16c7-4512-a806-7cb1fa887696"
+  ],
+  [
+   "carlos-paz-rugby-club",
+   "Agustin Bur",
+   "Agustín Bur",
+   10,
+   11,
+   "da2aafcd-cccd-4f84-af57-b67558851167"
+  ],
+  [
+   "carlos-paz-rugby-club",
+   "Agustin Ricardo Rosales Paur",
+   "Agustín Ricardo Rosales Paur",
+   6,
+   7,
+   "aa0353e8-fab1-42b6-9a48-19039463b583"
+  ],
+  [
+   "uru-cure-rugby-club",
+   "Tomas Baudino",
+   "Tomás Baudino",
+   16,
+   24,
+   "8214e8f3-de6c-4fb4-ac71-e365f3a5a375"
+  ],
+  [
+   "uru-cure-rugby-club",
+   "Juan Manuel de Dios Gigena Gutierrez",
+   "Juan Manuel De Dios Gigena Gutierrez",
+   1,
+   20,
+   "204ced29-27c0-4020-bce8-7dab7eebd7e9"
+  ],
+  [
+   "uru-cure-rugby-club",
+   "Joaquín Anino",
+   "Joaquin Anino",
+   2,
+   9,
+   "6078d079-1d8c-4568-bc4a-d6aa911e7a73"
+  ],
+  [
+   "cordoba-athletic-club-intermedia",
+   "Einel Inaki Knorr",
+   "Einel Iñaki Knorr",
+   1,
+   5,
+   "29c9406d-171c-4c09-97f6-b52aa3e8efd9"
+  ],
+  [
+   "la-tablada-intermedia",
+   "Matías Francisco Lopez",
+   "Matias Francisco Lopez",
+   1,
+   2,
+   "478c12a7-3aff-4e88-861c-bd8acde28fed"
+  ],
+  [
+   "jockey-club-de-villa-maria-intermedia",
+   "Matías Garcia",
+   "Matias Garcia",
+   2,
+   4,
+   "ea1e4649-29f6-4be9-86a5-4d36b8dafade"
+  ],
+  [
+   "club-universitario-de-cordoba",
+   "Tomás Alias",
+   "Tomas Alias",
+   1,
+   4,
+   "368debbb-964b-4ecb-b418-c2177292c64f"
+  ],
+  [
+   "cordoba-athletic-club",
+   "Valentín Cabral",
+   "Valentin Cabral",
+   2,
+   5,
+   "8e9caa34-973c-4c5c-8f0e-b00d4779a63b"
+  ],
+  [
+   "cordoba-athletic-club",
+   "Matías Soria",
+   "Matias Soria",
+   4,
+   14,
+   "805b3bd8-2c3e-4c33-a97f-8f6a83d851b2"
+  ],
+  [
+   "cordoba-athletic-club",
+   "Tomás Bocco",
+   "Tomas Bocco",
+   5,
+   16,
+   "fa70ceca-3e1e-4b3e-a625-cfa16dfd0610"
+  ],
+  [
+   "tala-rugby-club",
+   "Agustín Cordoba",
+   "Agustin Cordoba",
+   3,
+   9,
+   "cc8fa712-d923-4d3f-9e87-397070201eb8"
+  ],
+  [
+   "club-la-tablada",
+   "Luca D'Ugo Vivanco",
+   "Luca D'ugo Vivanco",
+   16,
+   16,
+   "eae129a7-b565-4478-8386-bcaa4ca0eaf4"
+  ],
+  [
+   "club-la-tablada",
+   "Lautaro Diaz",
+   "Lautaro Díaz",
+   5,
+   8,
+   "337e1de8-96a7-4946-8dd4-7de07cb8f5bd"
+  ],
+  [
+   "club-la-tablada",
+   "Nicolás Montenegro",
+   "Nicolas Montenegro",
+   4,
+   9,
+   "afa6b06b-62c0-4a9b-80f3-d2f19309f287"
+  ],
+  [
+   "club-la-tablada",
+   "Joaquin Soldevila",
+   "Joaquín Soldevila",
+   11,
+   16,
+   "f87c9c87-4989-453f-b47c-d8918da50919"
+  ],
+  [
+   "tala-rugby-club",
+   "Agustin De Vertiz",
+   "Agustín De Vértiz",
+   3,
+   8,
+   "5e6e2ff5-db1f-4934-bf92-1477be89f25a"
+  ],
+  [
+   "carlos-paz-rugby-club-intermedia",
+   "Matías Marchesin Kossoy",
+   "Matias Marchesin Kossoy",
+   1,
+   13,
+   "9c192ebc-4bc3-40de-ac38-ce77c65b094d"
+  ],
+  [
+   "uru-cure-rugby-club",
+   "Julian Conti",
+   "Julián Conti",
+   15,
+   22,
+   "0b335fd2-bf50-47b5-acae-4d7f14460f7c"
+  ],
+  [
+   "uru-cure-rugby-club",
+   "Tomas Principe",
+   "Tomás Principe",
+   12,
+   18,
+   "0f54f0e8-1dbf-43c6-9523-ebd28707ff1d"
+  ],
+  [
+   "club-palermo-bajo",
+   "Joaquín Ferraro Negri",
+   "Joaquin Ferraro Negri",
+   1,
+   3,
+   "c5d3bf23-3af8-4f69-807b-92e88a4b16f4"
+  ],
+  [
+   "club-universitario-de-cordoba",
+   "Mateo Lucero Farías",
+   "Mateo Lucero Farias",
+   1,
+   5,
+   "584eb54f-233d-489a-a387-b084ced821e1"
+  ],
+  [
+   "club-la-tablada",
+   "Agustín Altamira Pasqualini",
+   "Agustin Altamira Pasqualini",
+   1,
+   2,
+   "71f2a2bb-c25c-4d0d-99a9-2b73f4a68de7"
+  ],
+  [
+   "jockey-club-cordoba",
+   "Jerónimo Deheza",
+   "Jeronimo Deheza",
+   2,
+   8,
+   "f968d2c0-aecd-4fb5-9754-4ac61ee533ce"
+  ],
+  [
+   "uru-cure-rugby-club",
+   "Mauro Agustin Palacios",
+   "Mauro Agustín Palacios",
+   12,
+   17,
+   "b7e7804d-2cf9-440d-977c-7eb6c2353e8b"
+  ],
+  [
+   "jockey-club-cordoba",
+   "Agustin Peralta",
+   "Agustín Peralta",
+   4,
+   7,
+   "514d1000-f225-40a4-acc4-c57f5dbd34f5"
+  ],
+  [
+   "cordoba-athletic-club-intermedia",
+   "Valentin Pieretto Heiland",
+   "Valentín Pieretto Heiland",
+   1,
+   2,
+   "c828b784-9dd5-4904-a747-b6182f32fd4b"
+  ],
+  [
+   "club-palermo-bajo",
+   "Lautaro Jose Garzon",
+   "Lautaro José Garzón",
+   5,
+   7,
+   "f7e93cd8-63ed-446a-8725-a3b06d89eeb7"
+  ],
+  [
+   "carlos-paz-rugby-club",
+   "Matias Marchesin Kossoy",
+   "Matías Marchesin Kossoy",
+   2,
+   2,
+   "10b7ea36-f85c-4823-a3eb-de1145e0241b"
+  ],
+  [
+   "club-palermo-bajo-intermedia",
+   "Matías Daniel Jabase",
+   "Matias Daniel Jabase",
+   1,
+   3,
+   "f2aa5204-5c81-4faf-b541-2e1e7ae07f4b"
+  ],
+  [
+   "la-tablada-intermedia",
+   "Alejandro San Martin",
+   "Alejandro san Martin",
+   1,
+   4,
+   "3d5411af-b7c0-4f30-8e96-bd75d475eff1"
+  ],
+  [
+   "club-la-tablada",
+   "Nicolas Roger Farias",
+   "Nicolás Roger Farías",
+   1,
+   2,
+   "3dae09f4-734b-4ef7-8ee7-afda6941e5d4"
+  ],
+  [
+   "cordoba-athletic-club",
+   "Máximo León",
+   "Maximo Leon",
+   2,
+   4,
+   "84f45a06-8a89-420f-a088-a6a4009f09ec"
+  ],
+  [
+   "jockey-club-cordoba",
+   "Benjamín Urani",
+   "Benjamin Urani",
+   1,
+   1,
+   "c863bbed-b792-413a-8d5e-d4066f1cc1a7"
+  ]
+ ],
+ "mas_corto_o_largo": [
+  [
+   "dogos-xv",
+   "Octavio Filippa",
+   "Octavio Ignacio Filippa",
+   15,
+   15,
+   "421b955c-e320-4f0e-9251-e71672aa204b"
+  ],
+  [
+   "dogos-xv",
+   "Enzo Ocampo",
+   "Enzo Hector Jose Ocampo",
+   15,
+   15,
+   "fb690c01-211a-46cf-bcf2-9c712581a8e1"
+  ],
+  [
+   "dogos-xv",
+   "Faustino Sánchez",
+   "Faustino Sanchez Valarolo",
+   7,
+   14,
+   "a420b42f-0aba-4231-b317-4552211e2a6c"
+  ],
+  [
+   "dogos-xv",
+   "Ezequiel Bustos",
+   "Ezequiel Osvaldo Bustos Lopez",
+   4,
+   4,
+   "4e406fa1-9bf9-42c1-952d-bb9ec3ca281d"
+  ],
+  [
+   "carlos-paz-rugby-club",
+   "Franco Marincolo",
+   "Franco Luciano Marincolo",
+   4,
+   4,
+   "d6482e4c-976b-4907-91ea-c03a3e8a5d39"
+  ],
+  [
+   "dogos-xv",
+   "Alejandro Pronce",
+   "Alejandro Esteban Tomas Pronce Mezzatesta",
+   6,
+   6,
+   "a6ee4614-9a33-4980-a5cc-b9409b26c5a6"
+  ],
+  [
+   "dogos-xv",
+   "Tomás Gómez González",
+   "Tomas Maria Gomez Gonzalez",
+   6,
+   9,
+   "da992dbc-32d6-4140-b43e-ea331856e860"
+  ],
+  [
+   "dogos-xv",
+   "Ramiro Iglesias",
+   "Ramiro Iglesias Quintana",
+   8,
+   8,
+   "f00cb7f9-cf78-460f-9aca-3ae78e0de2e3"
+  ],
+  [
+   "dogos-xv",
+   "Julián Hernández",
+   "Julián Ignacio Hernandez",
+   7,
+   7,
+   "8d24cdba-dab7-40c1-ae2e-4651a170d971"
+  ],
+  [
+   "club-la-tablada",
+   "Carlos Facundo Molina Martinez",
+   "Carlos Facundo Nahuel Molina Martinez",
+   1,
+   12,
+   "68507be0-e0be-42ab-929e-0b5f51055a7f"
+  ],
+  [
+   "club-la-tablada",
+   "Samuel Severine Luna",
+   "Samuel Fabrizio Severine Luna",
+   6,
+   6,
+   "8e3a1e62-ae67-4498-8eb1-d7360ec68717"
+  ]
+ ],
+ "orden_distinto": [
+  [
+   "carlos-paz-rugby-club",
+   "Kaper Nahuel Francisco",
+   "Nahuel Francisco Kaper",
+   14,
+   14,
+   "cfcd4d04-32c4-4377-9c1a-eb9cd8530bba"
+  ],
+  [
+   "carlos-paz-rugby-club",
+   "Meyer Santiago",
+   "Santiago Meyer",
+   17,
+   17,
+   "4fa49b75-e01e-418d-9e61-cc1d3987f69b"
+  ],
+  [
+   "dogos-xv",
+   "Luciano Avaca",
+   "Avaca Luciano",
+   4,
+   4,
+   "1c06db99-080e-4143-82e1-3a1c302c925b"
+  ]
+ ]
+}

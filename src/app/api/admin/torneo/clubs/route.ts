@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { guardRejection } from '@/lib/auth/apiAdmin';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getServiceWriter } from '@/lib/supabase/serviceWriter';
@@ -171,8 +172,8 @@ export async function GET(request: NextRequest) {
     let context;
     try {
         context = await requireTournamentAdminContext(supabase);
-    } catch {
-        return err('Unauthorized', 401);
+    } catch (authError) {
+        return err(...guardRejection(authError));
     }
 
     const scope = await resolveTournamentAdminScope(supabase, context);
@@ -281,8 +282,8 @@ export async function POST(request: NextRequest) {
     let context;
     try {
         context = await requireTournamentAdminContext(supabase);
-    } catch {
-        return err('Unauthorized', 401);
+    } catch (authError) {
+        return err(...guardRejection(authError));
     }
 
     let body: JsonObject;

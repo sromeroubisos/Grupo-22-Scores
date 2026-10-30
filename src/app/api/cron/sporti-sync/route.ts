@@ -30,6 +30,7 @@ import { authorizeCronRequest } from '@/lib/server/cronAuth';
 import { NextResponse } from 'next/server';
 
 import { createAdminClient } from '@/lib/supabase/admin';
+import { reemplazarTablaDeFase } from '@/lib/server/replacePhaseStandings';
 import {
   fetchFases, fetchPartidos, fetchSumula, fetchTabla, partirFase, pausa, PAUSA_MS, HTTP_FORMA_INESPERADA,
 } from '@/lib/integrations/sporti/client.ts';
@@ -348,6 +349,11 @@ export async function GET(req: Request) {
     }
   }
 
+  // Un 200 con `ok: false` no deja rastro en los logs de Vercel: la corrida
+  // figuraba como exitosa y el conector pudo estar días sin escribir. Cada error
+  // sale por consola y la corrida con errores contesta 502.
+  for (const e of errors) console.error(`[sporti-sync] ${e}`);
+
   return NextResponse.json({
     ok: errors.length === 0,
     dry: enSeco,
@@ -355,7 +361,7 @@ export async function GET(req: Request) {
     fases: resumen,
     ...(fasesSinMapear.length && { fasesSinMapear }),
     errors,
-  });
+  }, { status: errors.length > 0 && !enSeco ? 502 : 200 });
 }
 
 /**
@@ -402,9 +408,7 @@ async function escribirTablaOficial(
     };
   });
 
-  const { error: errBorrar } = await supabase.from('tournament_standings').delete().eq('phase_id', o.faseId);
-  if (errBorrar) return { filas: 0, error: `no se pudo vaciar la tabla (${errBorrar.message})` };
-  const { error: errAlta } = await supabase.from('tournament_standings').insert(filas);
-  if (errAlta) return { filas: 0, error: `no se pudo escribir la tabla (${errAlta.message})` };
-  return { filas: filas.length };
+  // Valida todo antes de borrar y, si el alta falla, restaura la tabla previa:
+  // un delete + insert sueltos dejaban la fase vacía con el primer error.
+  return reemplazarTablaDeFase(supabase, o.faseId, filas);
 }

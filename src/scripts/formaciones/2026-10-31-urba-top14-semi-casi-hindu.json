@@ -1,0 +1,70 @@
+{
+ "descripcion": "URBA Top 14 - Semifinal CASI vs Hindú - sábado 31/10/2026 (fuente: placa de @comentarista.rugby; 15 titulares + reservas 16-23; capitanes Briatore y Ezcurra)",
+ "torneo": "d29703d0-125c-44a1-ab38-137450935a6e",
+ "partidos": [
+  {
+   "id": "3d6e57c9-7745-43c1-a14a-e278a88bfcce",
+   "rotulo": "CASI vs Hindú Club (semifinal)",
+   "local": {
+    "nombre": "casi",
+    "titulares": [
+     { "numero": 1, "nombre": "Facundo Scaiano", "id": "6391f051-6c5d-4ec4-87be-aaba9f84e53e" },
+     { "numero": 2, "nombre": "Juan Bautista Torres Obeid", "id": "73395f22-da86-4ab8-85f4-6d4a2bfd3d7f" },
+     { "numero": 3, "nombre": "Joaquín Domínguez P." },
+     { "numero": 4, "nombre": "Leo Mazzini", "id": "d6b02aea-8d49-4eb2-bc9d-bd37f08443c6" },
+     { "numero": 5, "nombre": "Ignacio Larrague", "id": "6ae09d8f-55e2-404c-91b3-ea0140663edf" },
+     { "numero": 6, "nombre": "Joaquín Saenz de Miera", "id": "eb6d16b1-a5c9-49f5-b2f3-5c5c2a3eb928" },
+     { "numero": 7, "nombre": "Eugenio Sartori", "id": "f9948887-ad29-4862-be15-9e9aed9e348c" },
+     { "numero": 8, "nombre": "Luis Briatore", "id": "a42b79ab-2be5-493c-9997-82a8ba14c4bf", "capitan": true },
+     { "numero": 9, "nombre": "Joaquín Sánchez", "id": "4a781d57-db9f-4277-a14d-fd80cab68c48" },
+     { "numero": 10, "nombre": "Felipe Hileman", "id": "9d3d75fd-7c8c-4c5b-8a84-d83b8e772f5d" },
+     { "numero": 11, "nombre": "Tomás Phelan", "id": "79408732-8590-4d32-a463-34c1317b3549" },
+     { "numero": 12, "nombre": "Jerónimo Solveyra", "id": "bbd8f7b2-9836-43b3-9ef4-7e6681dc1705" },
+     { "numero": 13, "nombre": "Benjamín Belaga", "id": "86648ba8-33c7-44e4-b485-2b6858aecb64" },
+     { "numero": 14, "nombre": "Santiago David", "id": "102016a4-fec7-4610-b0c5-b981f2a8da06" },
+     { "numero": 15, "nombre": "Juan Akemeier", "id": "f81180b2-b5b1-4745-908f-b9233fb729e6" }
+    ],
+    "suplentes": [
+     { "numero": 16, "nombre": "Rafael García" },
+     { "numero": 17, "nombre": "Juan Ignacio Albareda", "id": "e93281d9-73fb-4843-b917-272fb39fc24e" },
+     { "numero": 18, "nombre": "Félix Paolucci", "id": "d5d49b31-6982-4e23-a4b8-3c1b23c69d45" },
+     { "numero": 19, "nombre": "Salvador Ochoa", "id": "cacac6f0-bced-4402-aa1f-aa758ecc6228" },
+     { "numero": 20, "nombre": "Benito Paolucci", "id": "28fdbb10-6176-40b8-8da1-f19f5889b028" },
+     { "numero": 21, "nombre": "Ignacio Torrado", "id": "da928fcf-f70b-4f84-8b41-1a226911cc65" },
+     { "numero": 22, "nombre": "Eliseo Roger", "id": "8448e92f-94c0-4214-a807-2b62bea6e014" },
+     { "numero": 23, "nombre": "Lavayén" }
+    ]
+   },
+   "visitante": {
+    "nombre": "hindu-club",
+    "titulares": [
+     { "numero": 1, "nombre": "Franco Diviesti", "id": "1c87bb57-e620-43d4-80bb-0a9e23391594" },
+     { "numero": 2, "nombre": "Agustín Capurro", "id": "aa1ed0d5-e1b8-4092-99d9-ba230fd3a982" },
+     { "numero": 3, "nombre": "Nicolás Leiva", "id": "0659f32e-c33f-4222-afec-8272b165367b" },
+     { "numero": 4, "nombre": "Elías Banach", "id": "b688ce9d-2037-4943-b406-d95433386869" },
+     { "numero": 5, "nombre": "Carlos Repetto", "id": "142b85e0-ef9c-4fcf-9d16-711b7d02c230" },
+     { "numero": 6, "nombre": "Santino Amaya", "id": "c2958061-b621-42e0-a758-2b6845c2100a" },
+     { "numero": 7, "nombre": "Lautaro Bávaro", "id": "c93fd682-b0fc-49cc-8490-ab812c3f2e29" },
+     { "numero": 8, "nombre": "Nicolás Amaya", "id": "a150c8d2-daa7-4c72-8a49-fa7b93c4f84f" },
+     { "numero": 9, "nombre": "Felipe Ezcurra", "id": "6ae47f99-520a-4ac7-b414-1a7837c889d8", "capitan": true },
+     { "numero": 10, "nombre": "Ramón Fernández Miranda", "id": "dbfcfc9f-3ae1-4b1c-9ad8-668375fa2856" },
+     { "numero": 11, "nombre": "Martín Cancelliere", "id": "9631314a-aa80-4ed3-87e6-2f7da2cf0769" },
+     { "numero": 12, "nombre": "Bautista Farisé", "id": "25b64fd6-2e29-4297-aba4-a0b4545ebc7f" },
+     { "numero": 13, "nombre": "Santino Trivellini" },
+     { "numero": 14, "nombre": "Sebastián Cancelliere", "id": "3a1fd270-6c2b-4931-9929-d9442b3d1141" },
+     { "numero": 15, "nombre": "Pascal Senillosa", "id": "e783cde1-2120-4f59-9eb9-276e9b36b29c" }
+    ],
+    "suplentes": [
+     { "numero": 16, "nombre": "Facundo Gattas", "id": "5eea6aa2-09b5-4526-b98f-538ad162492d" },
+     { "numero": 17, "nombre": "Juan Ignacio Martínez Sosa", "id": "ea1cfcda-e44d-4988-a9aa-d058bd8b53d4" },
+     { "numero": 18, "nombre": "Ramiro Herrera", "id": "83b0306d-337a-495b-ad4e-6b92aea5fe62" },
+     { "numero": 19, "nombre": "Juan Comolli", "id": "8a51b9b5-2f23-4902-9fd6-a067ddffa938" },
+     { "numero": 20, "nombre": "Tomás Scallan", "id": "dc71cacd-9b4b-4c9e-9228-4d9e5c800682" },
+     { "numero": 21, "nombre": "L. F. Miranda" },
+     { "numero": 22, "nombre": "Lisandro Rodríguez", "id": "da0a6370-6cbe-4b02-a4ff-86801a711f05" },
+     { "numero": 23, "nombre": "Tomás Amher", "id": "b825b869-ac2a-4f04-b817-247571e5a04f" }
+    ]
+   }
+  }
+ ]
+}

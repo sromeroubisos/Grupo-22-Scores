@@ -13,11 +13,23 @@ import type { Sport, SportId } from '@/lib/types';
  * que existir en la tabla `sports` o el super admin no lo va a poder tocar
  * (`saveChanges` hace UPDATE, nunca INSERT).
  *
- * Los SEIS activos son deliberados. Cinco se juegan equipo contra equipo y
- * tienen el modelo completo (torneo → fase → partido → eventos). `motorsport`
- * es la excepción declarada: entra SOLO como deporte de lectura vía ESPN
- * (F1, IndyCar, NASCAR). No tiene catálogo de eventos ni reloj porque una
- * carrera no es un partido; ver `src/lib/services/espnMotorsport.ts`.
+ * Los OCHO activos son deliberados. Seis se juegan equipo contra equipo y
+ * tienen el modelo completo (torneo → fase → partido → eventos). Los otros dos
+ * son excepciones declaradas, cada una por su motivo:
+ *
+ * - `motorsport` entra SOLO como deporte de lectura vía ESPN (F1, IndyCar,
+ *   NASCAR). No tiene catálogo de eventos ni reloj porque una carrera no es un
+ *   partido; ver `src/lib/services/espnMotorsport.ts`.
+ * - `tennis` está a la vista pero todavía sin modelo propio. Un tenista no es
+ *   un club con escudo, en dobles la pareja es UNA entidad, y un torneo es un
+ *   cuadro con sembrados, no una tabla. Por eso no tiene `matchRules` y no
+ *   aparece en el creador de torneos: su vertical se diseña aparte. La fuente
+ *   ya existe (ESPN, `src/lib/services/tennis.ts`, con `TennisMatch` propio),
+ *   pero el sincronismo está cerrado hasta que exista la rama que delegue.
+ *
+ * Estar activo NO implica tener proveedor externo. `handball` entra con el
+ * modelo completo y sin sincronismo: se carga a mano hasta que se le declare
+ * una fuente. La puerta vive en `externalProviderPolicy.ts`, no acá.
  */
 export const SPORTS: Record<SportId, Sport> = {
     'football': {
@@ -40,7 +52,7 @@ export const SPORTS: Record<SportId, Sport> = {
         name: 'Tennis',
         nameEs: 'Tenis',
         icon: '🎾',
-        isActive: false,
+        isActive: true,
         priority: 10,
         groupLabel: 'Categories',
         groupLabelEs: 'Categorías',
@@ -91,8 +103,23 @@ export const SPORTS: Record<SportId, Sport> = {
         name: 'Handball',
         nameEs: 'Handball',
         icon: '🤾',
-        isActive: false,
-        priority: 13,
+        // Activo SIN proveedor externo, a proposito. Tiene el modelo completo
+        // (torneo -> fase -> partido -> eventos) porque tiene `matchRules`, que
+        // es lo que habilita el alta de torneos; lo que no tiene es sincronismo:
+        // esta declarado en SPORTS_WITHOUT_EXTERNAL_PROVIDER
+        // (`externalProviderPolicy.ts`) para que los crons y /api/matches ni lo
+        // pregunten. FlashScore lo mapea al deporte 7, asi que sin esa puerta el
+        // fixture-sync se pondria a traer handball del mundo entero.
+        isActive: true,
+        priority: 6,
+        matchRules: {
+            periods: 2,
+            periodDurationMinutes: 30,
+            breakDurationMinutes: 10,
+            overtimePeriods: 2,
+            overtimeDurationMinutes: 5,
+            hasShootout: true, // lanzamientos de 7 metros
+        }
     },
     'baseball': {
         id: 'baseball',
@@ -322,7 +349,7 @@ export const SPORTS: Record<SportId, Sport> = {
         // eventos de partido: el modelo es carrera + parrilla, no equipo vs
         // equipo. Los datos salen de ESPN (espnMotorsport.ts).
         isActive: true,
-        priority: 6,
+        priority: 7,
     },
     'cycling': {
         id: 'cycling',

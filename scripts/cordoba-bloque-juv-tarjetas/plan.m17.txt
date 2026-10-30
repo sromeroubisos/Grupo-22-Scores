@@ -1,0 +1,2363 @@
+Torneo Cordobés M17 "A" 2026 (Unión Cordobesa) · tarjetas de partido (JSON de tablas) · validado contra el marcador de la base
+
+Córdoba Athletic Club M17 "A" vs Club Universitario de Córdoba M17 "A" · torneo-cordobes-m17-a · tarjeta 295416  ·  20059780-b8f1-426a-a449-3e7da412045d
+  local     · Córdoba Athletic Club M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min  8 (1T 8) visitante try          
+    min  8 (1T 8) visitante conversion   
+    min 15 (1T 15) visitante try          
+    min 15 (1T 15) visitante conversion   
+    min 18 (1T 18) visitante try          
+    min 18 (1T 18) visitante conversion   
+    min 27 (1T 27) local     substitution Francisco Tomas Romero
+    min 29 (1T 29) visitante try          
+    min 32 (1T 32) local     try          Franco Peñaloza
+    min 32 (1T 32) local     conversion   Camilo Lozada Chaves
+    min 33 (1T 33) visitante card_yellow  
+    min 41 (2T 1) local     substitution Juan Cruz Cheble
+    min 41 (2T 1) local     substitution Lorenzo Busso Garlot
+    min 47 (2T 7) local     substitution Francisco Pizarro Alvarado
+    min 52 (2T 12) visitante card_yellow  
+    min 54 (2T 14) local     substitution Octavio Vallejos
+    min 56 (2T 16) visitante card_yellow  
+    min 57 (2T 17) local     try          Camilo Lozada Chaves
+    min 57 (2T 17) local     conversion   Bautista Raffaelli
+    min 61 (2T 21) local     card_yellow  Genaro Juan Iturriza
+    min 64 (2T 24) visitante try          
+    min 70 (2T 30) visitante injury       
+    min 72 (2T 32) local     try          Augusto Diomede
+    min 74 (2T 34) visitante try          
+    min 74 (2T 34) visitante conversion   
+  marcador  · eventos 19-38 · guardado 19-38
+  tries     · 3-6 (guardado —-—)
+  arbitro   · Raúl Fernando Rodriguez Almada (guardado: —)
+
+Jockey Club Córdoba M17 "A" vs Tala Rugby Club M17 "A" · torneo-cordobes-m17-a · tarjeta 295417  ·  bb459979-d9b6-4c3e-8f39-372476fa884f
+  local     · Jockey Club Córdoba M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M17 "A" · 22 jugadores · 0 con ficha fijada
+  eventos   · 14
+    min 15 (1T 15) visitante try          
+    min 15 (1T 15) visitante conversion   
+    min 25 (1T 25) local     card_yellow  
+    min 25 (1T 25) visitante card_yellow  
+    min 32 (1T 32) visitante card_yellow  
+    min 42 (2T 2) visitante try          
+    min 43 (2T 3) visitante conversion   
+    min 55 (2T 15) visitante try          
+    min 56 (2T 16) visitante conversion   
+    min 58 (2T 18) visitante try          
+    min 59 (2T 19) visitante conversion   
+    min 60 (2T 20) local     card_red     
+    min 66 (2T 26) visitante try          
+    min 67 (2T 27) visitante conversion   
+  marcador  · eventos 0-35 · guardado 0-35
+  tries     · 0-5 (guardado —-—)
+  arbitro   · Martin LEIVA . (No Oficial) (guardado: —)
+
+Jockey Club de Villa María M17 "A" vs Club Palermo Bajo M17 "A" · torneo-cordobes-m17-a · tarjeta 295419  ·  61a8a04a-3cac-431c-aa35-769dc9b3e31b
+  local     · Jockey Club de Villa María M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo M17 "A" · 20 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min  2 (1T 2) visitante try          Ignacio Laurito Correa
+    min  5 (1T 5) local     try          Tobias Coassolo
+    min  5 (1T 5) local     conversion   Octavio Calcagno
+    min 12 (1T 12) visitante try          Felipe Bersano
+    min 13 (1T 13) visitante conversion   Ignacio Castellanos
+    min 18 (1T 18) local     injury       Pedro Jeremías Manera
+    min 22 (1T 22) local     try          Leandro Boccardo Maiolo
+    min 22 (1T 22) local     conversion   Octavio Calcagno
+    min 24 (1T 24) local     card_yellow  Tomas Enzo Vaira
+    min 26 (1T 26) visitante card_yellow  Ignacio Laurito Correa
+    min 29 (1T 29) visitante substitution Lautaro Joaquin Diaz Montilla
+    min 29 (1T 29) visitante card_yellow  Juan Félix Roggero
+    min 34 (1T 34) local     try          Genaro Vilchez
+    min 34 (1T 34) local     injury       Camilo Salomon
+    min 46 (2T 6) visitante try          Ramiro Guazzaroni
+    min 51 (2T 11) visitante substitution Maximo Sosa Vera
+    min 53 (2T 13) visitante try          Felipe Bersano
+    min 57 (2T 17) visitante substitution Ramiro Guazzaroni
+    min 60 (2T 20) local     substitution Lisandro Massó
+    min 61 (2T 21) visitante substitution Lorenzo Soriano
+    min 62 (2T 22) local     try          Benjamín Pigni Sosa
+    min 66 (2T 26) local     penalty_goal Octavio Calcagno
+    min 70 (2T 30) local     card_yellow  Gino Santiago Cotichini
+    min 71 (2T 31) visitante penalty_try  
+    min 75 (2T 35) local     penalty_goal Octavio Calcagno
+  marcador  · eventos 30-29 · guardado 30-29
+  tries     · 4-5 (guardado —-—)
+  arbitro   · Pablo Daniel Dionicio Benitez (guardado: —)
+
+Club La Tablada M17 "A" vs Carlos Paz Rugby Club M17 "A" · torneo-cordobes-m17-a · tarjeta 295420  ·  75dbebf3-d73b-41d3-9082-dd6f1602fb98
+  local     · Club La Tablada M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Carlos Paz Rugby Club M17 "A" · 20 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min  6 (1T 6) local     try          Bautista Eliseo Cordon
+    min  6 (1T 6) local     conversion   Grechanik Pedro
+    min 10 (1T 10) local     try          Juan Pedro Ovando
+    min 14 (1T 14) local     try          Juan Pedro Ovando
+    min 15 (1T 15) local     conversion   Teo Pelaez
+    min 20 (1T 20) local     try          Juan Cruz Castro Moretti
+    min 20 (1T 20) local     conversion   Teo Pelaez
+    min 22 (1T 22) local     try          Juan Cruz Castro Moretti
+    min 22 (1T 22) local     conversion   Teo Pelaez
+    min 28 (1T 28) local     try          Juan Rossi
+    min 28 (1T 28) local     conversion   Teo Pelaez
+    min 45 (2T 5) local     try          Santiago Sánchez Pulgar
+    min 45 (2T 5) local     conversion   Teo Pelaez
+    min 60 (2T 20) local     try          Teo Pelaez
+    min 60 (2T 20) local     conversion   Teo Pelaez
+    min 64 (2T 24) local     card_yellow  Patricio Pastor
+    min 67 (2T 27) local     try          Gianni Luciano Porrati Polzella
+    min 67 (2T 27) local     conversion   Teo Pelaez
+    min 69 (2T 29) local     try          Juan Cruz Castro Moretti
+    min 69 (2T 29) local     conversion   Teo Pelaez
+    min 74 (2T 34) local     try          Luis Valentin Zavala Asaad
+    min 74 (2T 34) local     conversion   Teo Pelaez
+  marcador  · eventos 75-0 · guardado 75-0
+  tries     · 11-0 (guardado —-—)
+  arbitro   · Lautaro Joaquin Quiroga Cafure (guardado: —)
+
+Urú Curé Rugby Club M17 "A" vs San Martín de Villa María M17 "A" · torneo-cordobes-m17-a · tarjeta 295421  ·  4be56aab-daf1-4ca5-8a29-2635feabea8a
+  local     · Urú Curé Rugby Club M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · San Martín de Villa María M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 23
+    min  5 (1T 5) visitante try          Xavier Agustín Ruperto
+    min  5 (1T 5) visitante conversion   Roman Castellano
+    min 14 (1T 14) local     try          Mateo Sosa Gallardo Herrero
+    min 15 (1T 15) local     conversion   Agusrín Magri
+    min 16 (1T 16) local     try          Joaquin Marrero Las Heras
+    min 20 (1T 20) local     try          Juan Ignacio Tozzelli
+    min 21 (1T 21) local     conversion   Ignacio Rossi Jaume
+    min 26 (1T 26) local     try          Alvaro Jose Estevez
+    min 27 (1T 27) local     conversion   Ignacio Rossi Jaume
+    min 33 (1T 33) local     try          Pedro Di Santo
+    min 43 (2T 3) local     try          Pedro Di Santo
+    min 44 (2T 4) local     conversion   Valentin Lopez Lisa
+    min 46 (2T 6) local     try          Mateo Sosa Gallardo Herrero
+    min 46 (2T 6) local     conversion   Valentin Lopez Lisa
+    min 48 (2T 8) local     try          Mateo Sereno
+    min 48 (2T 8) local     conversion   Gonzalo Lautaro Cabello
+    min 49 (2T 9) visitante card_yellow  Máximo Amaro Rojo
+    min 54 (2T 14) visitante card_yellow  Tobias Zanellato Fontana
+    min 58 (2T 18) local     conversion   Efren Santiago Fernandez Aballay
+    min 58 (2T 18) local     conversion   Augusto Bertorello
+    min 68 (2T 28) local     try          Facundo Mosso
+    min 70 (2T 30) local     try          Facundo Mosso
+    min 73 (2T 33) local     try          Facundo Mosso
+  marcador  · eventos 71-7 · guardado 71-7
+  tries     · 11-1 (guardado —-—)
+  arbitro   · Emanuel Ordoñez (guardado: —)
+
+Urú Curé Rugby Club M17 "A" vs Córdoba Athletic Club M17 "A" · torneo-cordobes-m17-a · tarjeta 296630  ·  d2b80e44-2ab5-4bdd-9ad2-2cc5ee58d2e2
+  local     · Urú Curé Rugby Club M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 67-5
+  tries     · 0-0 (guardado —-—)
+  arbitro   · Gabriel Hernán Tirante (guardado: —)
+
+San Martín de Villa María M17 "A" vs Club La Tablada M17 "A" · torneo-cordobes-m17-a · tarjeta 296632  ·  df1a1b8b-2936-4fef-b633-3d00ef90460a
+  local     · San Martín de Villa María M17 "A" · 21 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M17 "A" · 22 jugadores · 0 con ficha fijada
+  eventos   · 21
+    min  3 (1T 3) local     try          Bautista Demaria
+    min 13 (1T 13) visitante try          Juan Pedro Ovando
+    min 23 (1T 23) visitante try          Felipe Gonzalez Antruejo
+    min 24 (1T 24) visitante conversion   Teo Pelaez
+    min 30 (1T 30) visitante card_yellow  Santiago Sánchez Pulgar
+    min 36 (1T 36) visitante conversion   Teo Pelaez
+    min 36 (1T 36) visitante try          Bautista Ovando
+    min 42 (2T 2) local     substitution Maximo Grosso
+    min 43 (2T 3) local     card_yellow  Lisandro Arias
+    min 47 (2T 7) visitante try          Juan Cruz Castro Moretti
+    min 56 (2T 16) local     substitution Tiziano Fessia
+    min 57 (2T 17) visitante conversion   Teo Pelaez
+    min 57 (2T 17) visitante try          Juan Pedro Ovando
+    min 58 (2T 18) local     substitution Lautaro Martin Rodriguez
+    min 58 (2T 18) visitante try          Santino Vittorio Corzo Poroli
+    min 58 (2T 18) visitante conversion   Teo Pelaez
+    min 61 (2T 21) visitante try          Lucas Alvarez Maina
+    min 61 (2T 21) visitante conversion   Teo Pelaez
+    min 62 (2T 22) local     substitution Igenaro Orihuela
+    min 70 (2T 30) visitante try          Benjamin Gonzo Martin
+    min 70 (2T 30) visitante conversion   Teo Pelaez
+  marcador  · eventos 5-52 · guardado 5-52
+  tries     · 1-8 (guardado —-—)
+  arbitro   · Francisco Romero Brondino (guardado: —)
+
+Carlos Paz Rugby Club M17 "A" vs Jockey Club de Villa María M17 "A" · torneo-cordobes-m17-a · tarjeta 296633  ·  2d205c2d-89d2-45a0-b433-162d7b062861
+  local     · Carlos Paz Rugby Club M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club de Villa María M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 13
+    min  7 (1T 7) visitante try          Pedro Pablo Ner
+    min  8 (1T 8) visitante conversion   Juan Cruz Doffo
+    min 11 (1T 11) local     try          Mateo Piccione
+    min 11 (1T 11) local     conversion   Lautaro José Papa
+    min 15 (1T 15) visitante penalty_goal Juan Cruz Doffo
+    min 17 (1T 17) local     card_yellow  Ciro Schiavi
+    min 23 (1T 23) local     try          Lucas Maximiliano Arias
+    min 41 (2T 1) local     try          Mateo Piccione
+    min 47 (2T 7) visitante try          Jeronimo Perez
+    min 63 (2T 23) visitante try          Emiliano Lucero Audano
+    min 64 (2T 24) visitante card_yellow  Emiliano Lucero Audano
+    min 71 (2T 31) local     try          Mateo Piccione
+    min 71 (2T 31) visitante conversion   Juan Cruz Doffo
+  marcador  · eventos 22-22 · guardado 22-22
+  tries     · 4-3 (guardado —-—)
+  arbitro   · Franco Coppetti (guardado: —)
+
+Club Palermo Bajo M17 "A" vs Jockey Club Córdoba M17 "A" · torneo-cordobes-m17-a · tarjeta 296634  ·  b0ec579b-cc67-4aeb-b040-044f5f53fb33
+  local     · Club Palermo Bajo M17 "A" · 22 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 15-21
+  tries     · 0-0 (guardado —-—)
+  arbitro   · Javier Alberto Flores (guardado: —)
+
+Tala Rugby Club M17 "A" vs Club Universitario de Córdoba M17 "A" · torneo-cordobes-m17-a · tarjeta 296635  ·  6404e7e4-7776-4417-9d75-a0dbce169184
+  local     · Tala Rugby Club M17 "A" · 22 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 10
+    min 20 (1T 20) local     try          
+    min 20 (1T 20) local     conversion   
+    min 28 (1T 28) local     try          
+    min 28 (1T 28) local     conversion   
+    min 33 (1T 33) local     try          
+    min 33 (1T 33) local     conversion   
+    min 55 (2T 15) visitante try          
+    min 56 (2T 16) local     card_yellow  
+    min 56 (2T 16) local     try          
+    min 62 (2T 22) visitante try          
+  marcador  · eventos 26-10 · guardado 26-10
+  tries     · 4-2 (guardado —-—)
+  arbitro   · Pablo Gerardo Ronco (guardado: —)
+
+Jockey Club Córdoba M17 "A" vs Carlos Paz Rugby Club M17 "A" · torneo-cordobes-m17-a · tarjeta 296904  ·  6b20ed10-fe91-4a31-ac0a-b9ba602dc0eb
+  local     · Jockey Club Córdoba M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Carlos Paz Rugby Club M17 "A" · 22 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min  9 (1T 9) local     try          
+    min  9 (1T 9) local     conversion   
+    min 11 (1T 11) local     try          
+    min 30 (1T 30) local     try          
+    min 30 (1T 30) local     conversion   
+    min 33 (1T 33) local     try          
+    min 33 (1T 33) local     conversion   
+    min 43 (2T 3) local     try          
+    min 48 (2T 8) local     try          
+    min 51 (2T 11) local     try          
+    min 51 (2T 11) local     conversion   
+    min 61 (2T 21) local     try          
+    min 61 (2T 21) local     conversion   
+    min 66 (2T 26) local     try          
+    min 66 (2T 26) local     conversion   
+    min 68 (2T 28) local     try          
+    min 68 (2T 28) local     conversion   
+  marcador  · eventos 64-0 · guardado 64-0
+  tries     · 10-0 (guardado —-—)
+  arbitro   · Paloma Vedia (guardado: —)
+
+Córdoba Athletic Club M17 "A" vs Tala Rugby Club M17 "A" · torneo-cordobes-m17-a · tarjeta 297246  ·  152e3733-7ac1-4826-b39f-008f24a4492a
+  local     · Córdoba Athletic Club M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M17 "A" · 22 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min  7 (1T 7) visitante try          
+    min 11 (1T 11) local     try          Facundo Audisio
+    min 11 (1T 11) visitante card_yellow  
+    min 21 (1T 21) local     card_yellow  Francisco Tomas Romero
+    min 22 (1T 22) visitante try          
+    min 22 (1T 22) visitante conversion   
+    min 27 (1T 27) local     card_yellow  Juan Martín Freytes
+    min 28 (1T 28) visitante try          
+    min 34 (1T 34) visitante card_yellow  
+    min 36 (1T 36) local     try          Francisco Tomas Romero
+    min 45 (2T 5) visitante try          
+    min 45 (2T 5) visitante conversion   
+    min 55 (2T 15) local     card_yellow  Bautista Raffaelli
+    min 55 (2T 15) visitante card_yellow  
+    min 63 (2T 23) visitante try          
+    min 63 (2T 23) visitante conversion   
+    min 75 (2T 35) visitante card_yellow  
+  marcador  · eventos 10-31 · guardado 10-31
+  tries     · 2-5 (guardado —-—)
+  arbitro   · Alejandro Augusto Aguero (guardado: —)
+
+Club Universitario de Córdoba M17 "A" vs Club Palermo Bajo M17 "A" · torneo-cordobes-m17-a · tarjeta 297247  ·  5228e319-59ab-4065-9b4e-a1fe825bdb9d
+  local     · Club Universitario de Córdoba M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 11
+    min  9 (1T 9) local     try          
+    min 10 (1T 10) local     conversion   
+    min 25 (1T 25) visitante try          
+    min 26 (1T 26) visitante conversion   
+    min 32 (1T 32) visitante try          
+    min 33 (1T 33) local     try          
+    min 35 (1T 35) local     conversion   
+    min 48 (2T 8) local     card_yellow  
+    min 49 (2T 9) visitante penalty_goal 
+    min 60 (2T 20) local     injury       
+    min 70 (2T 30) local     penalty_goal 
+  marcador  · eventos 17-15 · guardado 17-15
+  tries     · 2-2 (guardado —-—)
+  arbitro   · Gabriel Hernán Tirante (guardado: —)
+
+Jockey Club de Villa María M17 "A" vs San Martín de Villa María M17 "A" · torneo-cordobes-m17-a · tarjeta 297252  ·  a4c78ebc-4b90-4239-9ea0-cafaae96e856
+  local     · Jockey Club de Villa María M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · San Martín de Villa María M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 9
+    min  3 (1T 3) visitante try          Máximo Amaro Rojo
+    min  3 (1T 3) visitante conversion   Roman Castellano
+    min  6 (1T 6) visitante try          Máximo Amaro Rojo
+    min 15 (1T 15) visitante try          Roman Castellano
+    min 41 (2T 1) local     try          Juan Cruz Doffo
+    min 41 (2T 1) local     conversion   Octavio Calcagno
+    min 43 (2T 3) visitante try          Julio Ruben Felix Baldovino
+    min 59 (2T 19) local     try          Pedro Jeremías Manera
+    min 59 (2T 19) local     conversion   Octavio Calcagno
+  marcador  · eventos 14-22 · guardado 14-22
+  tries     · 2-4 (guardado —-—)
+  arbitro   · Franco Zarate (guardado: —)
+
+Club La Tablada M17 "A" vs Urú Curé Rugby Club M17 "A" · torneo-cordobes-m17-a · tarjeta 297253  ·  60b5d4a3-755c-49ba-a670-c7ba46c61bd7
+  local     · Club La Tablada M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Urú Curé Rugby Club M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min  4 (1T 4) visitante try          Valentin Lopez Lisa
+    min 19 (1T 19) local     penalty_goal Grechanik Pedro
+    min 22 (1T 22) visitante try          Mateo Sereno
+    min 23 (1T 23) visitante conversion   Agusrín Magri
+    min 28 (1T 28) visitante try          Mirko Bellina Caymes
+    min 34 (1T 34) visitante card_yellow  Joaquín González Fontana
+    min 35 (1T 35) local     try          Ignacio Fernández Llop
+    min 48 (2T 8) local     substitution Valentin Pedeo Ali
+    min 55 (2T 15) local     substitution Santiago Sánchez Pulgar
+    min 55 (2T 15) local     substitution Bautista Ovando
+    min 60 (2T 20) local     substitution Santino Vittorio Corzo Poroli
+    min 60 (2T 20) local     card_red     Luis Valentin Zavala Asaad
+    min 70 (2T 30) local     substitution Bautista Eliseo Cordon
+    min 72 (2T 32) visitante substitution Agustin Adan
+    min 74 (2T 34) visitante conversion   Agusrín Magri
+    min 74 (2T 34) visitante try          Lorenzo Martini
+    min 74 (2T 34) visitante substitution Santiago Luis Alfonso
+  marcador  · eventos 8-24 · guardado 8-24
+  tries     · 1-4 (guardado —-—)
+  arbitro   · Francisco Romero Brondino (guardado: —)
+
+Club La Tablada M17 "A" vs Córdoba Athletic Club M17 "A" · torneo-cordobes-m17-a · tarjeta 300957  ·  a54e907f-f3ee-4a6a-80e6-b86cb82a305b
+  local     · Club La Tablada M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 31
+    min  3 (1T 3) local     try          Juan Cruz Castro Moretti
+    min  3 (1T 3) local     conversion   Grechanik Pedro
+    min 12 (1T 12) local     try          Juan Ignacio Alsina
+    min 15 (1T 15) local     try          Teo Pelaez
+    min 20 (1T 20) visitante try          
+    min 20 (1T 20) visitante conversion   
+    min 23 (1T 23) local     try          Juan Rossi
+    min 23 (1T 23) local     conversion   Grechanik Pedro
+    min 30 (1T 30) local     substitution Ignacio Fernández Llop
+    min 35 (1T 35) local     try          Juan Rossi
+    min 35 (1T 35) local     conversion   Grechanik Pedro
+    min 42 (2T 2) visitante try          
+    min 42 (2T 2) visitante conversion   
+    min 45 (2T 5) local     substitution Bautista Ovando
+    min 47 (2T 7) local     card_yellow  Bautista Eliseo Cordon
+    min 47 (2T 7) local     substitution Santiago Sánchez Pulgar
+    min 52 (2T 12) visitante try          
+    min 53 (2T 13) visitante conversion   
+    min 53 (2T 13) local     penalty_goal Grechanik Pedro
+    min 57 (2T 17) local     substitution Nicolas Agustin Taborda
+    min 58 (2T 18) local     try          Juan Ignacio Alsina
+    min 60 (2T 20) local     substitution Santino Vittorio Corzo Poroli
+    min 62 (2T 22) local     substitution Teo Pelaez
+    min 62 (2T 22) local     try          Antonio Manrique
+    min 65 (2T 25) local     substitution Benjamin Gonzo Martin
+    min 65 (2T 25) local     substitution Felipe Gonzalez Antruejo
+    min 65 (2T 25) local     try          Juan Rossi
+    min 65 (2T 25) local     conversion   Grechanik Pedro
+    min 74 (2T 34) visitante try          
+    min 75 (2T 35) local     try          Lucio Novillo Corvalan
+    min 75 (2T 35) local     conversion   Grechanik Pedro
+  marcador  · eventos 58-26 · guardado 58-26
+  tries     · 9-4 (guardado —-—)
+  arbitro   · Sergio Zbura (guardado: —)
+
+Urú Curé Rugby Club M17 "A" vs Jockey Club de Villa María M17 "A" · torneo-cordobes-m17-a · tarjeta 300958  ·  4dfbbc36-075f-43e1-8d8d-98ea756bd909
+  local     · Urú Curé Rugby Club M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club de Villa María M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 31
+    min  1 (1T 1) local     try          Agustin Adan
+    min  1 (1T 1) local     conversion   Agusrín Magri
+    min  2 (1T 2) local     try          Lorenzo Martini
+    min  3 (1T 3) local     conversion   Agusrín Magri
+    min  9 (1T 9) local     try          Valentin Lopez Lisa
+    min 13 (1T 13) local     try          Mateo Sereno
+    min 14 (1T 14) local     conversion   Agusrín Magri
+    min 18 (1T 18) visitante try          Juan Cruz Doffo
+    min 21 (1T 21) local     try          Valentin Lopez Lisa
+    min 22 (1T 22) local     conversion   Agusrín Magri
+    min 24 (1T 24) local     try          Agustin Adan
+    min 29 (1T 29) local     try          Mateo Sereno
+    min 33 (1T 33) local     try          Mirko Bellina Caymes
+    min 34 (1T 34) local     conversion   Agusrín Magri
+    min 41 (2T 1) local     try          Mateo Sosa Gallardo Herrero
+    min 41 (2T 1) local     conversion   Agusrín Magri
+    min 45 (2T 5) visitante substitution Pedro Jeremías Manera
+    min 45 (2T 5) local     try          Mateo Sereno
+    min 45 (2T 5) local     conversion   Agusrín Magri
+    min 50 (2T 10) visitante substitution Emiliano Lucero Audano
+    min 50 (2T 10) local     substitution Lorenzo Jesus Crespo
+    min 50 (2T 10) local     substitution Mirko Bellina Caymes
+    min 52 (2T 12) visitante substitution Benjamín Matos
+    min 53 (2T 13) visitante card_yellow  Leandro Boccardo Maiolo
+    min 54 (2T 14) local     try          Lorenzo Martini
+    min 54 (2T 14) local     conversion   Agusrín Magri
+    min 62 (2T 22) local     substitution Bruno Cejas
+    min 70 (2T 30) local     substitution Augusto Calderon Pallotti
+    min 70 (2T 30) local     substitution Agusrín Magri
+    min 75 (2T 35) local     try          Juan Ignacio Tozzelli
+    min 75 (2T 35) local     conversion   Facundo Vicente Rojo
+  marcador  · eventos 78-5 · guardado 78-5
+  tries     · 12-1 (guardado —-—)
+  arbitro   · Pablo Gerardo Ronco (guardado: —)
+
+San Martín de Villa María M17 "A" vs Jockey Club Córdoba M17 "A" · torneo-cordobes-m17-a · tarjeta 300959  ·  c05c9c7e-860f-4ab2-ad8e-a4f6231648b6
+  local     · San Martín de Villa María M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 16
+    min 18 (1T 18) local     try          Máximo Amaro Rojo
+    min 18 (1T 18) local     conversion   Roman Castellano
+    min 27 (1T 27) visitante try          
+    min 34 (1T 34) local     penalty_goal Roman Castellano
+    min 44 (2T 4) local     conversion   Roman Castellano
+    min 44 (2T 4) local     conversion   Roman Castellano
+    min 44 (2T 4) local     try          Máximo Amaro Rojo
+    min 54 (2T 14) local     card_yellow  Lisandro Arias
+    min 56 (2T 16) local     try          Salvador Boonstra
+    min 56 (2T 16) local     conversion   Roman Castellano
+    min 62 (2T 22) visitante card_yellow  
+    min 64 (2T 24) visitante card_yellow  
+    min 68 (2T 28) visitante try          
+    min 68 (2T 28) visitante conversion   
+    min 70 (2T 30) visitante try          
+    min 74 (2T 34) local     try          Máximo Amaro Rojo
+  marcador  · eventos 31-17 · guardado 31-17
+  tries     · 4-3 (guardado —-—)
+  arbitro   · Paloma Vedia (guardado: —)
+
+Carlos Paz Rugby Club M17 "A" vs Club Universitario de Córdoba M17 "A" · torneo-cordobes-m17-a · tarjeta 300960  ·  0164f31e-b777-48ec-9fd7-7566e154e757
+  local     · Carlos Paz Rugby Club M17 "A" · 21 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min  2 (1T 2) local     try          Mateo Piccione
+    min  7 (1T 7) visitante try          
+    min  7 (1T 7) visitante conversion   
+    min 11 (1T 11) visitante try          
+    min 14 (1T 14) visitante try          
+    min 20 (1T 20) visitante try          
+    min 20 (1T 20) visitante conversion   
+    min 21 (1T 21) visitante try          
+    min 21 (1T 21) visitante conversion   
+    min 26 (1T 26) local     try          Matias Luna
+    min 26 (1T 26) local     conversion   Milo Conci
+    min 29 (1T 29) local     try          Matias Luna
+    min 30 (1T 30) visitante try          
+    min 30 (1T 30) visitante conversion   
+    min 33 (1T 33) visitante try          
+    min 43 (2T 3) visitante try          
+    min 52 (2T 12) local     card_yellow  Mateo Piccione
+    min 52 (2T 12) visitante try          
+    min 60 (2T 20) visitante try          
+    min 60 (2T 20) visitante conversion   
+    min 60 (2T 20) visitante try          
+    min 60 (2T 20) visitante conversion   
+  marcador  · eventos 17-67 · guardado 17-67
+  tries     · 3-11 (guardado —-—)
+  arbitro   · Nazarena Yael Gigena Ramallo (guardado: —)
+
+Club Palermo Bajo M17 "A" vs Tala Rugby Club M17 "A" · torneo-cordobes-m17-a · tarjeta 300961  ·  8704f427-2c9d-4bc2-83a0-b509ae6f810d
+  local     · Club Palermo Bajo M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M17 "A" · 22 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min  6 (1T 6) visitante try          
+    min  7 (1T 7) visitante conversion   
+    min 16 (1T 16) local     try          
+    min 17 (1T 17) local     conversion   
+    min 27 (1T 27) visitante try          
+    min 32 (1T 32) visitante try          
+    min 32 (1T 32) visitante conversion   
+    min 41 (2T 1) visitante try          
+    min 41 (2T 1) visitante conversion   
+    min 46 (2T 6) local     card_yellow  
+    min 47 (2T 7) visitante try          
+    min 47 (2T 7) visitante conversion   
+    min 50 (2T 10) visitante card_yellow  
+    min 62 (2T 22) local     try          
+    min 63 (2T 23) local     conversion   
+    min 67 (2T 27) local     try          
+    min 75 (2T 35) visitante try          
+    min 75 (2T 35) visitante conversion   
+  marcador  · eventos 19-40 · guardado 19-40
+  tries     · 3-6 (guardado —-—)
+  arbitro   · Emanuel Ordoñez (guardado: —)
+
+Córdoba Athletic Club M17 "A" vs Club Palermo Bajo M17 "A" · torneo-cordobes-m17-a · tarjeta 307117  ·  fdb07b51-f178-4134-b2f7-edce857a7641
+  local     · Córdoba Athletic Club M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min  1 (1T 1) local     try          Felipe Ledesma
+    min  1 (1T 1) local     conversion   Gonzalo Matias Manzur
+    min 17 (1T 17) local     try          Felipe Ledesma
+    min 17 (1T 17) local     conversion   Gonzalo Matias Manzur
+    min 19 (1T 19) visitante try          
+    min 22 (1T 22) visitante try          
+    min 22 (1T 22) visitante conversion   
+    min 40 (2T 0) local     substitution Facundo Audisio
+    min 40 (2T 0) local     substitution Octavio Vallejos
+    min 40 (2T 0) local     substitution Francisco Tomas Romero
+    min 40 (2T 0) local     substitution Agustín Acuña
+    min 40 (2T 0) local     substitution Francesco Butto Prieto
+    min 40 (2T 0) local     substitution Juan Martín Freytes
+    min 42 (2T 2) visitante try          
+    min 46 (2T 6) local     penalty_goal Gonzalo Matias Manzur
+    min 50 (2T 10) local     card_yellow  Francisco Manuel Acquaro
+    min 56 (2T 16) local     try          David Emanuel Rodriguez Dutli
+    min 56 (2T 16) local     conversion   Gonzalo Matias Manzur
+    min 64 (2T 24) visitante try          
+    min 64 (2T 24) visitante conversion   
+    min 67 (2T 27) local     try          Bautista Raffaelli
+    min 68 (2T 28) visitante try          
+    min 68 (2T 28) visitante conversion   
+    min 71 (2T 31) local     try          David Emanuel Rodriguez Dutli
+    min 71 (2T 31) local     conversion   Nicolas Gonzalez Castro
+    min 75 (2T 35) visitante try          
+    min 75 (2T 35) visitante conversion   
+  marcador  · eventos 36-38 · guardado 36-38
+  tries     · 5-6 (guardado —-—)
+  arbitro   · Daniel Edgardo Luna (guardado: —)
+
+Tala Rugby Club M17 "A" vs Carlos Paz Rugby Club M17 "A" · torneo-cordobes-m17-a · tarjeta 307119  ·  9f354470-2650-41e2-b8bc-66ac8c914b4c
+  local     · Tala Rugby Club M17 "A" · 22 jugadores · 0 con ficha fijada
+  visitante · Carlos Paz Rugby Club M17 "A" · 18 jugadores · 0 con ficha fijada
+  eventos   · 21
+    min  1 (1T 1) local     try          
+    min  1 (1T 1) local     conversion   
+    min  8 (1T 8) local     try          
+    min  8 (1T 8) local     conversion   
+    min 10 (1T 10) local     card_yellow  
+    min 14 (1T 14) local     try          
+    min 19 (1T 19) local     try          
+    min 19 (1T 19) local     conversion   
+    min 24 (1T 24) visitante try          Milo Conci
+    min 24 (1T 24) visitante conversion   Santino Joaquin Rader Burgos
+    min 35 (1T 35) local     try          
+    min 35 (1T 35) local     conversion   
+    min 53 (2T 13) local     try          
+    min 55 (2T 15) local     try          
+    min 55 (2T 15) local     conversion   
+    min 59 (2T 19) local     try          
+    min 59 (2T 19) local     conversion   
+    min 62 (2T 22) local     conversion   
+    min 62 (2T 22) local     try          
+    min 70 (2T 30) local     try          
+    min 70 (2T 30) local     conversion   
+  marcador  · eventos 66-7 · guardado 66-7
+  tries     · 10-1 (guardado —-—)
+  arbitro   · Lucas Gaston Dopaso (guardado: —)
+
+Club Universitario de Córdoba M17 "A" vs San Martín de Villa María M17 "A" · torneo-cordobes-m17-a · tarjeta 307120  ·  be96175b-9100-4c1e-9b06-4e94e6dafdfb
+  local     · Club Universitario de Córdoba M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · San Martín de Villa María M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 15
+    min  4 (1T 4) local     try          
+    min  4 (1T 4) local     conversion   
+    min 17 (1T 17) local     try          
+    min 17 (1T 17) local     conversion   
+    min 22 (1T 22) local     try          
+    min 28 (1T 28) local     try          
+    min 41 (2T 1) local     card_red     
+    min 49 (2T 9) local     penalty_goal 
+    min 50 (2T 10) visitante substitution Tobias Zanellato Fontana
+    min 50 (2T 10) visitante substitution Lisandro Arias
+    min 60 (2T 20) visitante substitution Bautista Alejandro Zurita
+    min 60 (2T 20) local     try          
+    min 60 (2T 20) local     conversion   
+    min 75 (2T 35) visitante try          Máximo Amaro Rojo
+    min 75 (2T 35) visitante conversion   Roman Castellano
+  marcador  · eventos 34-7 · guardado 34-7
+  tries     · 5-1 (guardado —-—)
+  arbitro   · Lucas Gaston Dopaso (guardado: —)
+
+Jockey Club Córdoba M17 "A" vs Urú Curé Rugby Club M17 "A" · torneo-cordobes-m17-a · tarjeta 307121  ·  8eeedb6f-1836-4f99-a5b4-79e35c23dee4
+  local     · Jockey Club Córdoba M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Urú Curé Rugby Club M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 15
+    min  4 (1T 4) visitante try          Juan Ignacio Tozzelli
+    min  4 (1T 4) visitante conversion   Agusrín Magri
+    min  4 (1T 4) visitante try          Benjamin Dalmasso
+    min  4 (1T 4) visitante conversion   Benjamin Dalmasso
+    min  9 (1T 9) visitante try          Mateo Sosa Gallardo Herrero
+    min  9 (1T 9) visitante conversion   Agusrín Magri
+    min 22 (1T 22) visitante try          Santiago Luis Alfonso
+    min 23 (1T 23) visitante conversion   Agusrín Magri
+    min 37 (1T 37) local     try          
+    min 43 (2T 3) visitante try          Augusto Calderon Pallotti
+    min 43 (2T 3) visitante conversion   Agusrín Magri
+    min 43 (2T 3) visitante try          Agusrín Magri
+    min 44 (2T 4) visitante conversion   Agusrín Magri
+    min 44 (2T 4) visitante try          Valentin Lopez Lisa
+    min 72 (2T 32) local     try          
+  marcador  · eventos 10-47 · guardado 10-47
+  tries     · 2-7 (guardado —-—)
+  arbitro   · Gustavo Reartes (guardado: —)
+
+Jockey Club de Villa María M17 "A" vs Club La Tablada M17 "A" · torneo-cordobes-m17-a · tarjeta 307122  ·  b2e4abc1-7bb4-44d4-98f1-d7b357ee6f62
+  local     · Jockey Club de Villa María M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min  1 (1T 1) local     try          Gino Santiago Cotichini
+    min  1 (1T 1) local     conversion   Gino Santiago Cotichini
+    min  2 (1T 2) local     conversion   Gino Santiago Cotichini
+    min  2 (1T 2) local     try          Gino Santiago Cotichini
+    min 10 (1T 10) visitante try          Antonio Manrique
+    min 10 (1T 10) visitante conversion   Grechanik Pedro
+    min 20 (1T 20) visitante try          Juan Rossi
+    min 20 (1T 20) visitante conversion   Grechanik Pedro
+    min 41 (2T 1) visitante substitution Antonio Manrique
+    min 42 (2T 2) local     injury       Leandro Boccardo Maiolo
+    min 43 (2T 3) visitante injury       Felipe Gonzalez Antruejo
+    min 45 (2T 5) visitante try          Ignacio Rodriguez
+    min 50 (2T 10) visitante substitution Santino Vittorio Corzo Poroli
+    min 55 (2T 15) visitante substitution Nicolas Agustin Taborda
+    min 59 (2T 19) visitante try          Lucas Alvarez Maina
+    min 59 (2T 19) visitante conversion   Grechanik Pedro
+    min 61 (2T 21) visitante try          Juan Cruz Castro Moretti
+    min 61 (2T 21) visitante conversion   Grechanik Pedro
+    min 64 (2T 24) visitante try          Ignacio Rodriguez
+    min 64 (2T 24) visitante conversion   Grechanik Pedro
+    min 65 (2T 25) visitante substitution Juan Pedro Ovando
+    min 65 (2T 25) visitante substitution Bautista Petrini
+    min 65 (2T 25) visitante substitution Teo Pelaez
+    min 69 (2T 29) visitante try          Lucas Alvarez Maina
+    min 69 (2T 29) visitante conversion   Grechanik Pedro
+    min 75 (2T 35) visitante try          Juan Ignacio Alsina
+    min 75 (2T 35) visitante conversion   Grechanik Pedro
+  marcador  · eventos 14-54 · guardado 14-54
+  tries     · 2-8 (guardado —-—)
+  arbitro   · Carlos Prieto (guardado: —)
+
+Jockey Club de Villa María M17 "A" vs Córdoba Athletic Club M17 "A" · torneo-cordobes-m17-a · tarjeta 308051  ·  25f40308-cce8-4d9c-b36f-c97238be5def
+  local     · Jockey Club de Villa María M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 16
+    min  2 (1T 2) visitante try          Felipe Ledesma
+    min  2 (1T 2) visitante conversion   Gonzalo Matias Manzur
+    min  4 (1T 4) visitante try          Bautista Raffaelli
+    min  4 (1T 4) visitante conversion   Gonzalo Matias Manzur
+    min  5 (1T 5) local     conversion   Octavio Calcagno
+    min  5 (1T 5) local     try          Juan Cruz Doffo
+    min 10 (1T 10) visitante try          Bautista Raffaelli
+    min 10 (1T 10) visitante conversion   Gonzalo Matias Manzur
+    min 16 (1T 16) visitante try          Juan Martín Freytes
+    min 16 (1T 16) visitante conversion   Gonzalo Matias Manzur
+    min 25 (1T 25) local     substitution Bruno Alves Carneiro
+    min 25 (1T 25) visitante try          Gonzalo Matias Manzur
+    min 25 (1T 25) visitante conversion   Gonzalo Matias Manzur
+    min 47 (2T 7) visitante try          Felipe Ledesma
+    min 62 (2T 22) visitante try          Felipe Ledesma
+    min 75 (2T 35) visitante try          Felipe Ledesma
+  marcador  · eventos 7-50 · guardado 7-50
+  tries     · 1-8 (guardado —-—)
+  arbitro   · Emanuel Ordoñez (guardado: —)
+
+Club La Tablada M17 "A" vs Jockey Club Córdoba M17 "A" · torneo-cordobes-m17-a · tarjeta 308053  ·  78570e21-66db-4562-ae97-6064e51bdb82
+  local     · Club La Tablada M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min  4 (1T 4) visitante try          
+    min  4 (1T 4) visitante conversion   
+    min 16 (1T 16) local     penalty_goal Grechanik Pedro
+    min 18 (1T 18) local     try          Juan Rossi
+    min 18 (1T 18) local     conversion   Grechanik Pedro
+    min 21 (1T 21) local     try          Juan Cruz Castro Moretti
+    min 42 (2T 2) local     try          Lucas Alvarez Maina
+    min 42 (2T 2) local     conversion   Grechanik Pedro
+    min 45 (2T 5) local     try          Juan Pedro Ovando
+    min 45 (2T 5) local     conversion   Grechanik Pedro
+    min 50 (2T 10) local     substitution Ignacio Fernández Llop
+    min 55 (2T 15) local     substitution Nicolas Agustin Taborda
+    min 60 (2T 20) local     substitution Juan Cruz Castro Moretti
+    min 61 (2T 21) visitante try          
+    min 65 (2T 25) local     substitution Juan Pedro Ovando
+    min 65 (2T 25) local     substitution Teo Pelaez
+    min 66 (2T 26) local     card_yellow  Bautista Eliseo Cordon
+    min 70 (2T 30) visitante try          
+    min 70 (2T 30) local     substitution Bautista Eliseo Cordon
+    min 73 (2T 33) local     substitution Grechanik Pedro
+  marcador  · eventos 29-17 · guardado 29-17
+  tries     · 4-3 (guardado —-—)
+  arbitro   · Gustavo Reartes (guardado: —)
+
+Urú Curé Rugby Club M17 "A" vs Club Universitario de Córdoba M17 "A" · torneo-cordobes-m17-a · tarjeta 308054  ·  70ee5eaa-4ace-4334-ac11-cf2ff5c9b7ad
+  local     · Urú Curé Rugby Club M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 28
+    min  2 (1T 2) local     try          Mateo Sereno
+    min  2 (1T 2) local     conversion   Agusrín Magri
+    min  5 (1T 5) local     try          Valentin Lopez Lisa
+    min 19 (1T 19) local     try          Lorenzo Martini
+    min 20 (1T 20) local     conversion   Agusrín Magri
+    min 22 (1T 22) local     try          
+    min 23 (1T 23) local     conversion   Agusrín Magri
+    min 41 (2T 1) visitante try          
+    min 41 (2T 1) visitante conversion   
+    min 45 (2T 5) local     try          Lorenzo Martini
+    min 46 (2T 6) local     conversion   Agusrín Magri
+    min 47 (2T 7) visitante try          
+    min 47 (2T 7) visitante conversion   
+    min 49 (2T 9) local     card_yellow  Joaquín González Fontana
+    min 51 (2T 11) local     substitution Juan Ignacio Tozzelli
+    min 52 (2T 12) visitante try          
+    min 57 (2T 17) local     try          Mateo Sereno
+    min 58 (2T 18) local     substitution Geronimo Bocco
+    min 58 (2T 18) local     substitution Bruno Cejas
+    min 58 (2T 18) local     conversion   Agusrín Magri
+    min 63 (2T 23) local     substitution Joaquin Marrero Las Heras
+    min 63 (2T 23) local     substitution Pedro Di Santo
+    min 67 (2T 27) visitante try          
+    min 67 (2T 27) visitante conversion   
+    min 71 (2T 31) visitante card_yellow  
+    min 71 (2T 31) local     card_yellow  Lautaro Benjamin Garay
+    min 72 (2T 32) local     try          Mateo Sereno
+    min 73 (2T 33) local     conversion   Agusrín Magri
+  marcador  · eventos 47-26 · guardado 47-26
+  tries     · 7-4 (guardado —-—)
+  arbitro   · Gabriel Hernán Tirante (guardado: —)
+
+San Martín de Villa María M17 "A" vs Tala Rugby Club M17 "A" · torneo-cordobes-m17-a · tarjeta 308056  ·  7878366e-c425-4456-b5c7-4eab37ee3c8d
+  local     · San Martín de Villa María M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M17 "A" · 22 jugadores · 0 con ficha fijada
+  eventos   · 13
+    min  5 (1T 5) visitante try          
+    min  5 (1T 5) visitante conversion   
+    min 27 (1T 27) visitante try          
+    min 27 (1T 27) visitante conversion   
+    min 41 (1T 41) local     try          Bautista Demaria
+    min 41 (1T 41) local     conversion   Roman Castellano
+    min 47 (2T 7) local     card_yellow  Igenaro Orihuela
+    min 48 (2T 8) visitante try          
+    min 48 (2T 8) visitante conversion   
+    min 69 (2T 29) visitante try          
+    min 69 (2T 29) visitante conversion   
+    min 75 (2T 35) visitante try          
+    min 75 (2T 35) visitante conversion   
+  marcador  · eventos 7-35 · guardado 7-35
+  tries     · 1-5 (guardado —-—)
+  arbitro   · Sergio Zbura (guardado: —)
+
+Carlos Paz Rugby Club M17 "A" vs Club Palermo Bajo M17 "A" · torneo-cordobes-m17-a · tarjeta 308057  ·  075d098c-12b1-48f3-91e7-31845fa3713b
+  local     · Carlos Paz Rugby Club M17 "A" · 19 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo M17 "A" · 22 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min  1 (1T 1) visitante try          
+    min  8 (1T 8) visitante try          
+    min  8 (1T 8) visitante conversion   
+    min 10 (1T 10) visitante try          
+    min 11 (1T 11) visitante conversion   
+    min 12 (1T 12) visitante card_yellow  
+    min 14 (1T 14) visitante try          
+    min 22 (1T 22) local     card_yellow  Matias Luna
+    min 23 (1T 23) visitante try          
+    min 24 (1T 24) visitante conversion   
+    min 30 (1T 30) visitante try          
+    min 31 (1T 31) visitante conversion   
+    min 44 (2T 4) visitante try          
+    min 45 (2T 5) visitante conversion   
+    min 46 (2T 6) visitante try          
+    min 47 (2T 7) visitante conversion   
+    min 48 (2T 8) visitante try          
+    min 49 (2T 9) visitante conversion   
+    min 52 (2T 12) visitante try          
+    min 62 (2T 22) visitante try          
+    min 67 (2T 27) visitante try          
+    min 68 (2T 28) visitante conversion   
+    min 71 (2T 31) local     try          Mateo Piccione
+    min 71 (2T 31) local     conversion   Milo Conci
+  marcador  · eventos 7-76 · guardado 7-76
+  tries     · 1-12 (guardado —-—)
+  arbitro   · Patricio Verdun Sheridan (guardado: —)
+
+Córdoba Athletic Club M17 "A" vs Carlos Paz Rugby Club M17 "A" · torneo-cordobes-m17-a · tarjeta 308667  ·  7372a3bf-3db0-4c41-a96c-464a83561533
+  local     · Córdoba Athletic Club M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Carlos Paz Rugby Club M17 "A" · 22 jugadores · 0 con ficha fijada
+  eventos   · 33
+    min  1 (1T 1) local     try          
+    min  1 (1T 1) local     conversion   
+    min  3 (1T 3) local     try          
+    min  7 (1T 7) local     try          
+    min  7 (1T 7) local     conversion   
+    min 12 (1T 12) local     try          
+    min 18 (1T 18) visitante try          Milo Conci
+    min 21 (1T 21) local     try          
+    min 21 (1T 21) local     conversion   
+    min 23 (1T 23) local     try          
+    min 23 (1T 23) local     conversion   
+    min 27 (1T 27) local     try          
+    min 27 (1T 27) local     conversion   
+    min 41 (2T 1) local     try          
+    min 41 (2T 1) local     conversion   
+    min 43 (2T 3) local     try          
+    min 43 (2T 3) local     conversion   
+    min 46 (2T 6) local     try          
+    min 46 (2T 6) local     conversion   
+    min 50 (2T 10) local     try          
+    min 50 (2T 10) local     conversion   
+    min 59 (2T 19) local     try          
+    min 59 (2T 19) local     conversion   
+    min 61 (2T 21) local     try          
+    min 61 (2T 21) local     conversion   
+    min 66 (2T 26) local     try          
+    min 66 (2T 26) local     conversion   
+    min 67 (2T 27) local     try          
+    min 67 (2T 27) local     conversion   
+    min 71 (2T 31) local     try          
+    min 71 (2T 31) local     conversion   
+    min 75 (2T 35) local     try          
+    min 75 (2T 35) local     conversion   
+  marcador  · eventos 115-5 · guardado 115-5
+  tries     · 17-1 (guardado —-—)
+  arbitro   · Emmanuel Boscatto (guardado: —)
+
+Club Palermo Bajo M17 "A" vs San Martín de Villa María M17 "A" · torneo-cordobes-m17-a · tarjeta 308668  ·  1577a890-bcd1-44fe-9887-c775ecc7ec06
+  local     · Club Palermo Bajo M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · San Martín de Villa María M17 "A" · 22 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min  3 (1T 3) visitante try          Darian Mendez
+    min  4 (1T 4) visitante conversion   Roman Castellano
+    min  7 (1T 7) local     card_yellow  
+    min 18 (1T 18) local     try          
+    min 19 (1T 19) local     conversion   
+    min 25 (1T 25) visitante conversion   Roman Castellano
+    min 25 (1T 25) visitante try          Guillermo Jesus Picca
+    min 30 (1T 30) local     try          
+    min 31 (1T 31) local     conversion   
+    min 43 (2T 3) visitante card_yellow  Tobias Zanellato Fontana
+    min 45 (2T 5) local     try          
+    min 45 (2T 5) local     conversion   
+    min 52 (2T 12) visitante substitution Lisandro Arias
+    min 53 (2T 13) visitante substitution Tobias Zanellato Fontana
+    min 59 (2T 19) local     card_yellow  
+    min 64 (2T 24) visitante substitution Tomás Sánchez Pastrone
+    min 64 (2T 24) visitante substitution Maximo Grosso
+  marcador  · eventos 21-14 · guardado 21-14
+  tries     · 3-2 (guardado —-—)
+  arbitro   · Raúl Fernando Rodriguez Almada (guardado: —)
+
+Tala Rugby Club M17 "A" vs Urú Curé Rugby Club M17 "A" · torneo-cordobes-m17-a · tarjeta 308669  ·  8a20bb36-2ae8-44fd-85c7-09453021654c
+  local     · Tala Rugby Club M17 "A" · 22 jugadores · 0 con ficha fijada
+  visitante · Urú Curé Rugby Club M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 12
+    min 14 (1T 14) visitante try          Agustin Adan
+    min 14 (1T 14) visitante conversion   Lorenzo Martini
+    min 28 (1T 28) local     try          
+    min 28 (1T 28) local     conversion   
+    min 41 (2T 1) visitante try          Agustin Adan
+    min 46 (2T 6) local     penalty_goal 
+    min 58 (2T 18) visitante card_yellow  Santiago Luis Alfonso
+    min 58 (2T 18) visitante card_yellow  Lorenzo Martini
+    min 58 (2T 18) visitante card_yellow  José Sobrero
+    min 58 (2T 18) visitante substitution Bautista Sebastián Rodríguez Monte
+    min 58 (2T 18) visitante substitution Bruno Cejas
+    min 58 (2T 18) visitante substitution Agustin Adan
+  marcador  · eventos 10-12 · guardado 10-12
+  tries     · 1-2 (guardado —-—)
+  arbitro   · Arturo Martinez (guardado: —)
+
+Club Universitario de Córdoba M17 "A" vs Club La Tablada M17 "A" · torneo-cordobes-m17-a · tarjeta 308670  ·  fe16b750-a29e-4420-9744-ce867b18a568
+  local     · Club Universitario de Córdoba M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 23
+    min  6 (1T 6) visitante try          Juan Rossi
+    min  6 (1T 6) visitante conversion   Teo Pelaez
+    min 12 (1T 12) visitante try          Ignacio Rodriguez
+    min 30 (1T 30) visitante try          Ignacio Fernández Llop
+    min 30 (1T 30) visitante conversion   Teo Pelaez
+    min 33 (1T 33) local     try          
+    min 33 (1T 33) local     conversion   
+    min 45 (2T 5) visitante substitution Francisco Gennaro Rollan
+    min 45 (2T 5) visitante substitution Bautista Petrini
+    min 45 (2T 5) visitante substitution Ignacio Tarantino
+    min 45 (2T 5) visitante substitution Juan Cruz Castro Moretti
+    min 54 (2T 14) visitante try          Ignacio Fernández Llop
+    min 54 (2T 14) visitante conversion   Teo Pelaez
+    min 55 (2T 15) visitante substitution Nicolas Agustin Taborda
+    min 55 (2T 15) visitante substitution Teo Pelaez
+    min 65 (2T 25) visitante try          Antonio Manrique
+    min 65 (2T 25) visitante conversion   Grechanik Pedro
+    min 65 (2T 25) visitante substitution Bautista Eliseo Cordon
+    min 65 (2T 25) visitante substitution Juan Pedro Ovando
+    min 73 (2T 33) visitante try          Ignacio Fernández Llop
+    min 73 (2T 33) visitante conversion   Grechanik Pedro
+    min 74 (2T 34) local     try          
+    min 74 (2T 34) local     conversion   
+  marcador  · eventos 14-40 · guardado 14-40
+  tries     · 2-6 (guardado —-—)
+  arbitro   · Lucas Gaston Dopaso (guardado: —)
+
+Jockey Club Córdoba M17 "A" vs Jockey Club de Villa María M17 "A" · torneo-cordobes-m17-a · tarjeta 308671  ·  73195a15-9721-46b4-8f50-4496f1f57c0a
+  local     · Jockey Club Córdoba M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club de Villa María M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 19
+    min  1 (1T 1) local     try          
+    min 10 (1T 10) visitante try          Juan Cruz Doffo
+    min 14 (1T 14) local     try          
+    min 14 (1T 14) visitante card_yellow  Bruno Alves Carneiro
+    min 14 (1T 14) local     conversion   
+    min 15 (1T 15) visitante penalty_goal Octavio Calcagno
+    min 19 (1T 19) visitante card_yellow  Tomas Enzo Vaira
+    min 22 (1T 22) local     try          
+    min 30 (1T 30) local     try          
+    min 30 (1T 30) local     conversion   
+    min 45 (2T 5) local     try          
+    min 45 (2T 5) local     conversion   
+    min 55 (2T 15) local     try          
+    min 62 (2T 22) local     conversion   
+    min 62 (2T 22) local     try          
+    min 68 (2T 28) visitante try          Juan Cruz Doffo
+    min 68 (2T 28) visitante conversion   Octavio Calcagno
+    min 74 (2T 34) visitante conversion   Juan Cruz Doffo
+    min 74 (2T 34) visitante conversion   Octavio Calcagno
+  marcador  · eventos 43-19 · guardado 43-19
+  tries     · 7-2 (guardado —-—)
+  arbitro   · Lucas Humeres (guardado: —)
+
+Jockey Club Córdoba M17 "A" vs Córdoba Athletic Club M17 "A" · torneo-cordobes-m17-a · tarjeta 309569  ·  fd66a57d-cc16-4e90-b8aa-34b81fc1359a
+  local     · Jockey Club Córdoba M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 21
+    min  4 (1T 4) local     try          
+    min 14 (1T 14) visitante try          Nicolas Gonzalez Castro
+    min 33 (1T 33) visitante try          David Emanuel Rodriguez Dutli
+    min 37 (1T 37) visitante try          David Emanuel Rodriguez Dutli
+    min 37 (1T 37) visitante conversion   Nicolas Gonzalez Castro
+    min 41 (2T 1) visitante try          Alejandro Girón
+    min 47 (2T 7) visitante try          David Emanuel Rodriguez Dutli
+    min 48 (2T 8) visitante conversion   Gonzalo Matias Manzur
+    min 50 (2T 10) visitante substitution Nicolas Gonzalez Castro
+    min 55 (2T 15) visitante substitution Franco Peñaloza
+    min 55 (2T 15) visitante substitution Francesco Butto Prieto
+    min 57 (2T 17) visitante substitution Agustín Acuña
+    min 57 (2T 17) visitante substitution Octavio Barrea Srur
+    min 59 (2T 19) visitante try          Juan Martín Freytes
+    min 60 (2T 20) visitante substitution Genaro Juan Iturriza
+    min 60 (2T 20) visitante conversion   Gonzalo Matias Manzur
+    min 62 (2T 22) visitante substitution Alejandro Girón
+    min 65 (2T 25) visitante try          Felipe Ledesma
+    min 66 (2T 26) visitante substitution Augusto Diomede
+    min 66 (2T 26) visitante conversion   Gonzalo Matias Manzur
+    min 73 (2T 33) local     try          
+  marcador  · eventos 10-43 · guardado 10-43
+  tries     · 2-7 (guardado —-—)
+  arbitro   · Ignacio Santiago Olmedo Ramirez (guardado: —)
+
+San Martín de Villa María M17 "A" vs Carlos Paz Rugby Club M17 "A" · torneo-cordobes-m17-a · tarjeta 309570  ·  73adcfa9-bca9-4741-b795-ec36a3a3e311
+  local     · San Martín de Villa María M17 "A" · 22 jugadores · 0 con ficha fijada
+  visitante · Carlos Paz Rugby Club M17 "A" · 22 jugadores · 0 con ficha fijada
+  eventos   · 7
+    min 16 (1T 16) local     try          
+    min 16 (1T 16) local     conversion   
+    min 33 (1T 33) local     card_yellow  
+    min 46 (2T 6) visitante try          Mateo Piccione
+    min 47 (2T 7) visitante conversion   Santino Joaquin Rader Burgos
+    min 56 (2T 16) local     penalty_goal 
+    min 66 (2T 26) local     try          
+  marcador  · eventos 15-7 · guardado 15-7
+  tries     · 2-1 (guardado —-—)
+  arbitro   · Emanuel Ordoñez (guardado: —)
+
+Jockey Club de Villa María M17 "A" vs Club Universitario de Córdoba M17 "A" · torneo-cordobes-m17-a · tarjeta 309571  ·  ad949c76-e7e0-411a-b20e-43d0345f861c
+  local     · Jockey Club de Villa María M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 15
+    min 11 (1T 11) local     try          Gino Santiago Cotichini
+    min 11 (1T 11) local     conversion   Gino Santiago Cotichini
+    min 12 (1T 12) visitante try          
+    min 12 (1T 12) visitante conversion   
+    min 18 (1T 18) local     try          Gino Santiago Cotichini
+    min 18 (1T 18) local     conversion   Gino Santiago Cotichini
+    min 20 (1T 20) visitante try          
+    min 35 (1T 35) visitante try          
+    min 35 (1T 35) visitante conversion   
+    min 44 (2T 4) visitante card_yellow  
+    min 49 (2T 9) visitante try          
+    min 62 (2T 22) local     try          Gino Santiago Cotichini
+    min 62 (2T 22) local     conversion   Gino Santiago Cotichini
+    min 69 (2T 29) visitante try          
+    min 69 (2T 29) visitante conversion   
+  marcador  · eventos 21-31 · guardado 21-31
+  tries     · 3-5 (guardado —-—)
+  arbitro   · Santiago Geronimo Lozada Chaves (guardado: —)
+
+Club La Tablada M17 "A" vs Tala Rugby Club M17 "A" · torneo-cordobes-m17-a · tarjeta 309572  ·  506a793e-91e7-4c76-87fb-fbb6c603c2dc
+  local     · Club La Tablada M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M17 "A" · 22 jugadores · 0 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 25-22
+  tries     · 0-0 (guardado —-—)
+  arbitro   · Francisco Romero Brondino (guardado: —)
+
+Urú Curé Rugby Club M17 "A" vs Club Palermo Bajo M17 "A" · torneo-cordobes-m17-a · tarjeta 309573  ·  44522686-016c-4da3-bca5-0260ff74d0d3
+  local     · Urú Curé Rugby Club M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 14
+    min  5 (1T 5) local     try          Benjamin Dalmasso
+    min 11 (1T 11) visitante try          
+    min 20 (1T 20) local     try          Pedro Di Santo
+    min 21 (1T 21) local     conversion   Agusrín Magri
+    min 50 (2T 10) local     try          Mateo Sereno
+    min 55 (2T 15) local     substitution Bautista Sebastián Rodríguez Monte
+    min 55 (2T 15) local     substitution Alvaro Jose Estevez
+    min 59 (2T 19) visitante card_yellow  
+    min 60 (2T 20) local     substitution Benjamin Dalmasso
+    min 60 (2T 20) local     substitution Lucas Saby
+    min 65 (2T 25) local     try          Valentin Lopez Lisa
+    min 65 (2T 25) local     substitution Vicente Cayetano Pedernera
+    min 66 (2T 26) local     conversion   Agusrín Magri
+    min 74 (2T 34) visitante injury       
+  marcador  · eventos 24-5 · guardado 24-5
+  tries     · 4-1 (guardado —-—)
+  arbitro   · Franco Zarate (guardado: —)
+
+Córdoba Athletic Club M17 "A" vs San Martín de Villa María M17 "A" · torneo-cordobes-m17-a · tarjeta 310328  ·  6fdc5e67-78ec-4993-9363-3cabd072f124
+  local     · Córdoba Athletic Club M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · San Martín de Villa María M17 "A" · 22 jugadores · 0 con ficha fijada
+  eventos   · 28
+    min 15 (1T 15) local     try          Felipe Ledesma
+    min 15 (1T 15) local     conversion   Gonzalo Matias Manzur
+    min 17 (1T 17) local     try          Bautista Raffaelli
+    min 18 (1T 18) local     conversion   Nicolas Gonzalez Castro
+    min 20 (1T 20) local     try          Bautista Raffaelli
+    min 20 (1T 20) local     conversion   Nicolas Gonzalez Castro
+    min 35 (1T 35) local     substitution Martín Bernardo Espíndola
+    min 35 (1T 35) local     substitution Nicolas Gonzalez Castro
+    min 35 (1T 35) local     try          Juan Martín Freytes
+    min 35 (1T 35) local     conversion   Gonzalo Matias Manzur
+    min 47 (2T 7) local     substitution Genaro Juan Iturriza
+    min 47 (2T 7) local     try          Franco Peñaloza
+    min 48 (2T 8) local     conversion   Gonzalo Matias Manzur
+    min 53 (2T 13) local     try          Felipe Ledesma
+    min 54 (2T 14) local     substitution Agustín Acuña
+    min 54 (2T 14) local     substitution Martin Javier Arinci Caffaratti
+    min 54 (2T 14) local     conversion   Gonzalo Matias Manzur
+    min 56 (2T 16) local     try          Bautista Raffaelli
+    min 57 (2T 17) local     conversion   Gonzalo Matias Manzur
+    min 58 (2T 18) local     try          Felipe Ledesma
+    min 59 (2T 19) local     substitution Facundo Audisio
+    min 59 (2T 19) local     conversion   Gonzalo Matias Manzur
+    min 60 (2T 20) local     substitution Bautista Blumenfeld
+    min 68 (2T 28) local     try          David Emanuel Rodriguez Dutli
+    min 68 (2T 28) local     conversion   Gonzalo Matias Manzur
+    min 72 (2T 32) local     substitution Francisco Manuel Acquaro
+    min 72 (2T 32) local     try          Bautista Raffaelli
+    min 72 (2T 32) local     conversion   Gonzalo Matias Manzur
+  marcador  · eventos 70-0 · guardado 70-0
+  tries     · 10-0 (guardado —-—)
+  arbitro   · Martin Leiva (guardado: —)
+
+Carlos Paz Rugby Club M17 "A" vs Urú Curé Rugby Club M17 "A" · torneo-cordobes-m17-a · tarjeta 310329  ·  4ca8b8b3-c6e9-4b7c-8da2-7f31a4a0bbc1
+  local     · Carlos Paz Rugby Club M17 "A" · 22 jugadores · 0 con ficha fijada
+  visitante · Urú Curé Rugby Club M17 "A" · 22 jugadores · 0 con ficha fijada
+  eventos   · 29
+    min  1 (1T 1) visitante try          Agustin Adan
+    min 12 (1T 12) visitante try          Mateo Sereno
+    min 13 (1T 13) visitante conversion   Ignacio Rossi Jaume
+    min 15 (1T 15) local     try          Matias Luna
+    min 16 (1T 16) local     conversion   Santino Joaquin Rader Burgos
+    min 18 (1T 18) visitante try          Vicente Cayetano Pedernera
+    min 19 (1T 19) visitante conversion   Ignacio Rossi Jaume
+    min 21 (1T 21) visitante try          Mateo Sosa Gallardo Herrero
+    min 22 (1T 22) visitante conversion   Ignacio Rossi Jaume
+    min 24 (1T 24) visitante try          Valentin Lopez Lisa
+    min 25 (1T 25) visitante conversion   Ignacio Rossi Jaume
+    min 30 (1T 30) visitante card_yellow  Joaquin Marrero Las Heras
+    min 42 (2T 2) visitante try          Lautaro Benjamin Garay
+    min 43 (2T 3) visitante conversion   Ignacio Rossi Jaume
+    min 46 (2T 6) visitante substitution Lautaro Benjamin Garay
+    min 46 (2T 6) visitante substitution Gonzalo Lautaro Cabello
+    min 46 (2T 6) visitante substitution Vicente Cayetano Pedernera
+    min 48 (2T 8) visitante try          Valentin Lopez Lisa
+    min 49 (2T 9) visitante conversion   Ignacio Rossi Jaume
+    min 51 (2T 11) visitante try          Joaquín González Fontana
+    min 52 (2T 12) visitante substitution Joaquin Marrero Las Heras
+    min 52 (2T 12) visitante conversion   Ignacio Rossi Jaume
+    min 52 (2T 12) visitante substitution Augusto Bertorello
+    min 53 (2T 13) visitante try          Agustin Adan
+    min 54 (2T 14) visitante conversion   Ignacio Rossi Jaume
+    min 62 (2T 22) visitante try          Valentin Lopez Lisa
+    min 63 (2T 23) visitante conversion   Ignacio Rossi Jaume
+    min 65 (2T 25) visitante try          Benjamin Dalmasso
+    min 73 (2T 33) visitante try          Ignacio Rossi Jaume
+  marcador  · eventos 7-78 · guardado 7-78
+  tries     · 1-12 (guardado —-—)
+  arbitro   · Cristian Schwartz (guardado: —)
+
+Club Palermo Bajo M17 "A" vs Club La Tablada M17 "A" · torneo-cordobes-m17-a · tarjeta 310330  ·  a755fcba-c9cf-4a23-80b7-5391b5446b6b
+  local     · Club Palermo Bajo M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 13
+    min 11 (1T 11) local     penalty_goal 
+    min 41 (2T 1) local     try          
+    min 42 (2T 2) local     conversion   
+    min 45 (2T 5) visitante substitution Salvador Ballaratti
+    min 45 (2T 5) visitante substitution Bautista Petrini
+    min 45 (2T 5) visitante substitution Teo Pelaez
+    min 52 (2T 12) local     penalty_goal 
+    min 53 (2T 13) visitante try          Juan Ignacio Alsina
+    min 53 (2T 13) visitante conversion   Grechanik Pedro
+    min 65 (2T 25) local     penalty_goal 
+    min 67 (2T 27) visitante try          Juan Ignacio Alsina
+    min 67 (2T 27) visitante conversion   Grechanik Pedro
+    min 72 (2T 32) local     penalty_goal 
+  marcador  · eventos 19-14 · guardado 19-14
+  tries     · 1-2 (guardado —-—)
+  arbitro   · Leandro Luchetti (guardado: —)
+
+Tala Rugby Club M17 "A" vs Jockey Club de Villa María M17 "A" · torneo-cordobes-m17-a · tarjeta 310331  ·  a36816ff-46c5-4118-9a17-bd9c03f11f35
+  local     · Tala Rugby Club M17 "A" · 21 jugadores · 0 con ficha fijada
+  visitante · Jockey Club de Villa María M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 23
+    min  7 (1T 7) visitante card_yellow  Camilo Salomon
+    min 14 (1T 14) local     try          
+    min 14 (1T 14) local     conversion   
+    min 21 (1T 21) local     try          
+    min 35 (1T 35) local     try          
+    min 35 (1T 35) local     conversion   
+    min 48 (2T 8) local     try          
+    min 48 (2T 8) local     conversion   
+    min 51 (2T 11) local     conversion   
+    min 51 (2T 11) local     try          
+    min 53 (2T 13) local     try          
+    min 53 (2T 13) local     conversion   
+    min 56 (2T 16) local     try          
+    min 56 (2T 16) local     conversion   
+    min 63 (2T 23) local     try          
+    min 63 (2T 23) local     conversion   
+    min 66 (2T 26) visitante card_yellow  Tomas Enzo Vaira
+    min 69 (2T 29) local     try          
+    min 69 (2T 29) local     conversion   
+    min 73 (2T 33) local     try          
+    min 73 (2T 33) local     conversion   
+    min 75 (2T 35) local     try          
+    min 75 (2T 35) local     conversion   
+  marcador  · eventos 75-0 · guardado 75-0
+  tries     · 11-0 (guardado —-—)
+  arbitro   · Leonel Sorbera (guardado: —)
+
+Club Universitario de Córdoba M17 "A" vs Jockey Club Córdoba M17 "A" · torneo-cordobes-m17-a · tarjeta 310332  ·  e7083f13-086c-4607-8b1b-c64624a492c9
+  local     · Club Universitario de Córdoba M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 15
+    min  6 (1T 6) local     try          
+    min 11 (1T 11) visitante penalty_goal 
+    min 15 (1T 15) local     try          
+    min 15 (1T 15) local     conversion   
+    min 23 (1T 23) local     try          
+    min 23 (1T 23) local     conversion   
+    min 26 (1T 26) local     try          
+    min 26 (1T 26) local     conversion   
+    min 29 (1T 29) visitante try          
+    min 29 (1T 29) visitante conversion   
+    min 50 (2T 10) visitante try          
+    min 62 (2T 22) local     try          
+    min 62 (2T 22) local     conversion   
+    min 75 (2T 35) local     try          
+    min 75 (2T 35) local     conversion   
+  marcador  · eventos 40-15 · guardado 40-15
+  tries     · 6-2 (guardado —-—)
+  arbitro   · Sergio Maldonado (guardado: —)
+
+Club Universitario de Córdoba M17 "A" vs Córdoba Athletic Club M17 "A" · torneo-cordobes-m17-a · tarjeta 311553  ·  a40ca733-e233-474f-96aa-5f1ae4e410f4
+  local     · Club Universitario de Córdoba M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club M17 "A" · 22 jugadores · 0 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 36-31
+  tries     · 0-0 (guardado —-—)
+  arbitro   · Emmanuel Boscatto (guardado: —)
+
+Tala Rugby Club M17 "A" vs Jockey Club Córdoba M17 "A" · torneo-cordobes-m17-a · tarjeta 311554  ·  038656b9-593c-45a2-8953-8016e1a1d5bf
+  local     · Tala Rugby Club M17 "A" · 22 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 16
+    min  9 (1T 9) local     try          
+    min  9 (1T 9) local     conversion   
+    min 15 (1T 15) local     injury       
+    min 15 (1T 15) local     conversion   
+    min 15 (1T 15) local     conversion   
+    min 32 (1T 32) local     try          
+    min 35 (1T 35) local     conversion   
+    min 47 (2T 7) visitante try          
+    min 47 (2T 7) visitante conversion   
+    min 54 (2T 14) visitante try          
+    min 54 (2T 14) visitante conversion   
+    min 60 (2T 20) local     penalty_goal 
+    min 60 (2T 20) local     try          
+    min 61 (2T 21) local     conversion   
+    min 73 (2T 33) local     try          
+    min 73 (2T 33) local     conversion   
+  marcador  · eventos 35-14 · guardado 35-14
+  tries     · 4-2 (guardado —-—)
+  arbitro   · Tomas Elias Gigena Ramallo (guardado: —)
+
+Club Palermo Bajo M17 "A" vs Jockey Club de Villa María M17 "A" · torneo-cordobes-m17-a · tarjeta 311555  ·  37f60380-d3a3-4072-ad6a-0d594817ec3e
+  local     · Club Palermo Bajo M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club de Villa María M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 13
+    min 15 (1T 15) visitante try          Camilo Salomon
+    min 21 (1T 21) local     try          
+    min 27 (1T 27) local     try          
+    min 28 (1T 28) local     conversion   
+    min 32 (1T 32) local     card_yellow  
+    min 50 (2T 10) local     card_yellow  
+    min 55 (2T 15) local     try          
+    min 56 (2T 16) local     conversion   
+    min 58 (2T 18) visitante try          Leandro Boccardo Maiolo
+    min 61 (2T 21) local     try          
+    min 62 (2T 22) local     conversion   
+    min 74 (2T 34) local     try          
+    min 75 (2T 35) local     conversion   
+  marcador  · eventos 33-10 · guardado 33-10
+  tries     · 5-2 (guardado —-—)
+  arbitro   · Santiago Geronimo Lozada Chaves (guardado: —)
+
+Carlos Paz Rugby Club M17 "A" vs Club La Tablada M17 "A" · torneo-cordobes-m17-a · tarjeta 311556  ·  ef65df5a-b6aa-467b-b5fa-07b0e27d013e
+  local     · Carlos Paz Rugby Club M17 "A" · 22 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 29
+    min  3 (1T 3) visitante try          Fermin Tejerina Coloma
+    min  3 (1T 3) visitante conversion   Grechanik Pedro
+    min  6 (1T 6) visitante try          Santiago Sánchez Pulgar
+    min  6 (1T 6) visitante conversion   Grechanik Pedro
+    min 12 (1T 12) visitante try          Juan Pedro Ovando
+    min 12 (1T 12) visitante conversion   Grechanik Pedro
+    min 22 (1T 22) local     try          Milo Conci
+    min 31 (1T 31) visitante try          Juan Pedro Ovando
+    min 41 (2T 1) visitante substitution Benjamin Gonzo Martin
+    min 41 (2T 1) visitante substitution Juan Rossi
+    min 41 (2T 1) visitante substitution Lucio Novillo Corvalan
+    min 41 (2T 1) visitante substitution Jeronimo Bertilotti Costa
+    min 41 (2T 1) visitante substitution Santino Vittorio Corzo Poroli
+    min 47 (2T 7) visitante try          Antonio Manrique
+    min 47 (2T 7) visitante conversion   Grechanik Pedro
+    min 50 (2T 10) visitante substitution Bautista Ovando
+    min 54 (2T 14) visitante try          Antonio Manrique
+    min 60 (2T 20) visitante try          Antonio Manrique
+    min 64 (2T 24) visitante substitution Antonio Manrique
+    min 64 (2T 24) visitante try          Santino Vittorio Corzo Poroli
+    min 64 (2T 24) visitante conversion   Grechanik Pedro
+    min 67 (2T 27) visitante try          Gianni Luciano Porrati Polzella
+    min 67 (2T 27) visitante conversion   Grechanik Pedro
+    min 68 (2T 28) visitante substitution Santiago Sánchez Pulgar
+    min 70 (2T 30) visitante try          Fermin Tejerina Coloma
+    min 73 (2T 33) visitante try          Noé José Velasco
+    min 73 (2T 33) visitante conversion   Grechanik Pedro
+    min 75 (2T 35) local     try          Mateo Piccione
+    min 75 (2T 35) local     conversion   Santino Joaquin Rader Burgos
+  marcador  · eventos 12-69 · guardado 12-69
+  tries     · 2-11 (guardado —-—)
+  arbitro   · Santiago Herrera Albano (guardado: —)
+
+San Martín de Villa María M17 "A" vs Urú Curé Rugby Club M17 "A" · torneo-cordobes-m17-a · tarjeta 311557  ·  4442ef03-bc8e-4e13-80cc-b1d23597c79a
+  local     · San Martín de Villa María M17 "A" · 21 jugadores · 0 con ficha fijada
+  visitante · Urú Curé Rugby Club M17 "A" · 22 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min  2 (1T 2) visitante try          Lorenzo Martini
+    min 21 (1T 21) visitante try          Lorenzo Martini
+    min 22 (1T 22) visitante conversion   Agusrín Magri
+    min 23 (1T 23) visitante card_yellow  José Sobrero
+    min 32 (1T 32) local     injury       
+    min 46 (2T 6) visitante try          Lorenzo Martini
+    min 50 (2T 10) visitante substitution José Sobrero
+    min 50 (2T 10) visitante try          Juan Ignacio Tozzelli
+    min 51 (2T 11) visitante conversion   Agusrín Magri
+    min 57 (2T 17) visitante substitution Juan Ignacio Tozzelli
+    min 57 (2T 17) visitante substitution Augusto Bertorello
+    min 58 (2T 18) visitante substitution Lautaro Benjamin Garay
+    min 59 (2T 19) local     try          
+    min 59 (2T 19) local     conversion   
+    min 59 (2T 19) visitante card_yellow  Joaquin Marrero Las Heras
+    min 61 (2T 21) visitante substitution Mateo Sosa Gallardo Herrero
+    min 62 (2T 22) visitante substitution Santiago Luis Alfonso
+    min 64 (2T 24) visitante substitution Benjamin Dalmasso
+    min 65 (2T 25) visitante try          Lorenzo Martini
+    min 66 (2T 26) visitante try          Valentin Lopez Lisa
+    min 67 (2T 27) visitante try          Pedro Di Santo
+    min 68 (2T 28) visitante conversion   Agusrín Magri
+  marcador  · eventos 7-41 · guardado 7-41
+  tries     · 1-7 (guardado —-—)
+  arbitro   · Franco Zarate (guardado: —)
+
+San Martín de Villa María M17 "A" vs Jockey Club de Villa María M17 "A" · torneo-cordobes-m17-a · tarjeta 313063  ·  af40e37d-2760-4a44-a0e4-3820b64491ae
+  local     · San Martín de Villa María M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club de Villa María M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 9
+    min 18 (1T 18) visitante card_yellow  Gino Santiago Cotichini
+    min 22 (1T 22) visitante card_yellow  Camilo Salomon
+    min 26 (1T 26) local     try          Igenaro Orihuela
+    min 26 (1T 26) local     conversion   Roman Castellano
+    min 32 (1T 32) local     try          Lorenzo Agustin Goicoechea
+    min 32 (1T 32) local     conversion   Roman Castellano
+    min 45 (2T 5) local     try          Tiziano Fessia
+    min 60 (2T 20) visitante card_red     Leandro Boccardo Maiolo
+    min 64 (2T 24) local     card_yellow  Tiziano Fessia
+  marcador  · eventos 19-0 · guardado 19-0
+  tries     · 3-0 (guardado —-—)
+  arbitro   · Lautaro Joaquin Quiroga Cafure (guardado: —)
+
+Tala Rugby Club M17 "A" vs Córdoba Athletic Club M17 "A" · torneo-cordobes-m17-a · tarjeta 313064  ·  6a0e5bda-e67c-431d-9d8a-3aafb034178f
+  local     · Tala Rugby Club M17 "A" · 22 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 26
+    min  4 (1T 4) visitante try          David Emanuel Rodriguez Dutli
+    min  4 (1T 4) visitante conversion   Gonzalo Matias Manzur
+    min  8 (1T 8) local     try          
+    min  8 (1T 8) local     conversion   
+    min  8 (1T 8) visitante substitution Facundo Audisio
+    min 12 (1T 12) local     card_yellow  
+    min 12 (1T 12) visitante card_yellow  Felipe Ledesma
+    min 15 (1T 15) visitante penalty_goal Gonzalo Matias Manzur
+    min 17 (1T 17) visitante substitution Agustín Acuña
+    min 18 (1T 18) local     try          
+    min 18 (1T 18) local     conversion   
+    min 22 (1T 22) local     try          
+    min 22 (1T 22) local     conversion   
+    min 25 (1T 25) visitante substitution Nicolas Gonzalez Castro
+    min 26 (1T 26) visitante try          Nicolas Gonzalez Castro
+    min 26 (1T 26) visitante conversion   Gonzalo Matias Manzur
+    min 32 (1T 32) local     try          
+    min 32 (1T 32) local     conversion   
+    min 35 (1T 35) visitante substitution Juan Pablo Gaviglio
+    min 35 (1T 35) visitante substitution Martin Javier Arinci Caffaratti
+    min 37 (1T 37) local     penalty_goal 
+    min 44 (2T 4) local     try          
+    min 44 (2T 4) local     conversion   
+    min 60 (2T 20) local     try          
+    min 62 (2T 22) local     try          
+    min 62 (2T 22) local     conversion   
+  marcador  · eventos 50-17 · guardado 50-17
+  tries     · 7-2 (guardado —-—)
+  arbitro   · Daiana Del Milagro Cesaretti (guardado: —)
+
+Club Palermo Bajo M17 "A" vs Club Universitario de Córdoba M17 "A" · torneo-cordobes-m17-a · tarjeta 313065  ·  9c41f085-2f64-4044-a057-d8d1fe0a925a
+  local     · Club Palermo Bajo M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 9
+    min 12 (1T 12) visitante card_yellow  
+    min 26 (1T 26) local     card_yellow  
+    min 34 (1T 34) visitante card_yellow  
+    min 43 (2T 3) local     penalty_goal 
+    min 56 (2T 16) visitante try          
+    min 65 (2T 25) visitante try          
+    min 65 (2T 25) visitante conversion   
+    min 68 (2T 28) local     try          
+    min 69 (2T 29) local     conversion   
+  marcador  · eventos 10-12 · guardado 10-12
+  tries     · 1-2 (guardado —-—)
+  arbitro   · Florencia Ledesma (guardado: —)
+
+Carlos Paz Rugby Club M17 "A" vs Jockey Club Córdoba M17 "A" · torneo-cordobes-m17-a · tarjeta 313066  ·  943bab33-8791-4a9b-8672-39e12d2f1a71
+  local     · Carlos Paz Rugby Club M17 "A" · 22 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min  8 (1T 8) local     card_yellow  Matias Luna
+    min  9 (1T 9) local     penalty_goal Santino Joaquin Rader Burgos
+    min 15 (1T 15) visitante try          
+    min 20 (1T 20) local     penalty_goal Santino Joaquin Rader Burgos
+    min 22 (1T 22) visitante try          
+    min 27 (1T 27) visitante try          
+    min 34 (1T 34) visitante try          
+    min 43 (2T 3) visitante try          
+    min 43 (2T 3) visitante conversion   
+    min 48 (2T 8) visitante try          
+    min 48 (2T 8) visitante conversion   
+    min 55 (2T 15) visitante try          
+    min 55 (2T 15) visitante conversion   
+    min 62 (2T 22) local     try          Mateo Piccione
+    min 68 (2T 28) visitante try          
+    min 68 (2T 28) visitante conversion   
+    min 72 (2T 32) local     try          Lautaro José Papa
+    min 72 (2T 32) local     conversion   Santino Joaquin Rader Burgos
+    min 74 (2T 34) visitante try          
+    min 74 (2T 34) visitante conversion   
+  marcador  · eventos 18-55 · guardado 18-55
+  tries     · 2-9 (guardado —-—)
+  arbitro   · Emanuel Maldonado (guardado: —)
+
+Urú Curé Rugby Club M17 "A" vs Club La Tablada M17 "A" · torneo-cordobes-m17-a · tarjeta 313068  ·  e87ef811-7b20-4031-b73c-669eee852086
+  local     · Urú Curé Rugby Club M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 28
+    min 12 (1T 12) visitante try          Fermin Tejerina Coloma
+    min 12 (1T 12) visitante conversion   Teo Pelaez
+    min 19 (1T 19) visitante drop_goal    Grechanik Pedro
+    min 22 (1T 22) visitante try          Antonio Manrique
+    min 22 (1T 22) visitante conversion   Teo Pelaez
+    min 28 (1T 28) local     try          Gonzalo Lautaro Cabello
+    min 29 (1T 29) local     conversion   Augusto Calderon Pallotti
+    min 30 (1T 30) local     try          Pedro Di Santo
+    min 30 (1T 30) local     conversion   Augusto Calderon Pallotti
+    min 30 (1T 30) visitante conversion   Teo Pelaez
+    min 30 (1T 30) visitante try          Juan Ignacio Alsina
+    min 45 (2T 5) visitante try          Ignacio Rodriguez
+    min 45 (2T 5) visitante conversion   Teo Pelaez
+    min 49 (2T 9) local     card_yellow  Joaquin Marrero Las Heras
+    min 49 (2T 9) visitante card_red     Bautista Petrini
+    min 50 (2T 10) local     substitution Juan Ignacio Tozzelli
+    min 50 (2T 10) local     substitution Bautista Sebastián Rodríguez Monte
+    min 50 (2T 10) local     substitution Lautaro Benjamin Garay
+    min 50 (2T 10) local     substitution Bautista Rodriguez
+    min 52 (2T 12) local     try          Gonzalo Lautaro Cabello
+    min 55 (2T 15) visitante try          Ignacio Rodriguez
+    min 60 (2T 20) local     substitution Agustin Adan
+    min 67 (2T 27) local     substitution Alvaro Jose Estevez
+    min 68 (2T 28) local     try          Valentin Lopez Lisa
+    min 68 (2T 28) local     conversion   Augusto Calderon Pallotti
+    min 70 (2T 30) visitante substitution Bautista Eliseo Cordon
+    min 70 (2T 30) local     try          Valentin Lopez Lisa
+    min 71 (2T 31) local     conversion   Augusto Calderon Pallotti
+  marcador  · eventos 33-36 · guardado 33-36
+  tries     · 5-5 (guardado —-—)
+  arbitro   · Francisco Romero Brondino (guardado: —)
+
+Jockey Club de Villa María M17 "A" vs Urú Curé Rugby Club M17 "A" · torneo-cordobes-m17-a · tarjeta 314671  ·  57e5e6b3-899f-40a4-b213-f49657512618
+  local     · Jockey Club de Villa María M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Urú Curé Rugby Club M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 14
+    min  5 (1T 5) visitante try          Isa Santino Saleme Garello
+    min 16 (1T 16) local     penalty_goal Octavio Calcagno
+    min 23 (1T 23) visitante try          Valentin Lopez Lisa
+    min 24 (1T 24) visitante conversion   Facundo Vicente Rojo
+    min 27 (1T 27) visitante try          Lorenzo Martini
+    min 28 (1T 28) visitante conversion   Facundo Vicente Rojo
+    min 45 (2T 5) visitante try          Isa Santino Saleme Garello
+    min 45 (2T 5) visitante conversion   Facundo Vicente Rojo
+    min 53 (2T 13) visitante try          Lorenzo Martini
+    min 53 (2T 13) visitante conversion   Augusto Calderon Pallotti
+    min 59 (2T 19) visitante try          Mateo Sereno
+    min 59 (2T 19) visitante conversion   Augusto Calderon Pallotti
+    min 66 (2T 26) local     try          Lisandro Massó
+    min 72 (2T 32) visitante card_yellow  Dylan Gaspar
+  marcador  · eventos 8-40 · guardado 8-40
+  tries     · 1-6 (guardado —-—)
+  arbitro   · Emanuel Ordoñez (guardado: —)
+
+Córdoba Athletic Club M17 "A" vs Club La Tablada M17 "A" · torneo-cordobes-m17-a · tarjeta 314672  ·  7cbc2587-7c50-4fe4-856b-7b9ad169b9f6
+  local     · Córdoba Athletic Club M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min 14 (1T 14) local     try          Gonzalo Matias Manzur
+    min 15 (1T 15) local     conversion   Gonzalo Matias Manzur
+    min 18 (1T 18) visitante try          Juan Rossi
+    min 18 (1T 18) visitante conversion   Teo Pelaez
+    min 31 (1T 31) visitante try          Fermin Tejerina Coloma
+    min 31 (1T 31) visitante conversion   Teo Pelaez
+    min 47 (2T 7) local     substitution Francesco Butto Prieto
+    min 49 (2T 9) visitante substitution Benjamin Gonzo Martin
+    min 50 (2T 10) visitante substitution Felipe José Villalba Mañá
+    min 51 (2T 11) local     try          Bautista Raffaelli
+    min 52 (2T 12) local     conversion   Gonzalo Matias Manzur
+    min 52 (2T 12) local     substitution Martin Javier Arinci Caffaratti
+    min 55 (2T 15) visitante substitution Ignacio Noviski
+    min 57 (2T 17) local     substitution Franco Peñaloza
+    min 70 (2T 30) local     substitution Agustín Acuña
+    min 70 (2T 30) visitante penalty_goal Teo Pelaez
+    min 71 (2T 31) local     substitution Genaro Juan Iturriza
+    min 73 (2T 33) local     substitution Francisco Tomas Romero
+    min 73 (2T 33) local     substitution Felipe Egea
+    min 73 (2T 33) local     substitution Bautista Raffaelli
+  marcador  · eventos 14-17 · guardado 14-17
+  tries     · 2-2 (guardado —-—)
+  arbitro   · Lucas Humeres (guardado: —)
+
+Jockey Club Córdoba M17 "A" vs San Martín de Villa María M17 "A" · torneo-cordobes-m17-a · tarjeta 314673  ·  776eaf2a-a794-4a13-832b-cb2df0ef0a25
+  local     · Jockey Club Córdoba M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · San Martín de Villa María M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min  6 (1T 6) local     try          
+    min  8 (1T 8) local     try          
+    min 14 (1T 14) local     try          
+    min 22 (1T 22) local     try          
+    min 23 (1T 23) local     conversion   
+    min 29 (1T 29) visitante substitution Roman Castellano
+    min 29 (1T 29) local     try          
+    min 30 (1T 30) local     conversion   
+    min 42 (2T 2) local     try          
+    min 46 (2T 6) visitante card_yellow  Lautaro Martin Rodriguez
+    min 47 (2T 7) local     penalty_try  
+    min 48 (2T 8) visitante card_yellow  Valentino Monaco Falvo
+    min 52 (2T 12) visitante substitution Tobias Zanellato Fontana
+    min 55 (2T 15) visitante try          Joaquin Marcos
+    min 60 (2T 20) visitante substitution Joaquin Marcos
+    min 64 (2T 24) visitante try          Máximo Amaro Rojo
+    min 64 (2T 24) visitante conversion   Roman Castellano
+    min 70 (2T 30) visitante substitution Lorenzo Agustin Goicoechea
+    min 71 (2T 31) visitante try          Máximo Amaro Rojo
+    min 71 (2T 31) visitante conversion   Roman Castellano
+    min 75 (2T 35) local     try          
+    min 75 (2T 35) local     conversion   
+  marcador  · eventos 48-19 · guardado 48-19
+  tries     · 8-3 (guardado —-—)
+  arbitro   · Francisco Romero Brondino (guardado: —)
+
+Club Universitario de Córdoba M17 "A" vs Carlos Paz Rugby Club M17 "A" · torneo-cordobes-m17-a · tarjeta 314674  ·  caaf2d63-98f9-40c0-a30b-86a48a417926
+  local     · Club Universitario de Córdoba M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Carlos Paz Rugby Club M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min  1 (1T 1) visitante try          Tao Giuliani
+    min  8 (1T 8) local     try          
+    min  8 (1T 8) local     conversion   
+    min 11 (1T 11) local     try          
+    min 11 (1T 11) local     conversion   
+    min 13 (1T 13) local     try          
+    min 13 (1T 13) local     conversion   
+    min 22 (1T 22) local     try          
+    min 29 (1T 29) local     try          
+    min 29 (1T 29) local     conversion   
+    min 31 (1T 31) local     try          
+    min 31 (1T 31) local     conversion   
+    min 35 (1T 35) local     try          
+    min 42 (2T 2) local     try          
+    min 46 (2T 6) local     try          
+    min 53 (2T 13) visitante try          Matias Luna
+    min 56 (2T 16) local     try          
+    min 56 (2T 16) local     conversion   
+    min 60 (2T 20) local     card_yellow  
+    min 62 (2T 22) visitante try          Milo Conci
+    min 63 (2T 23) visitante conversion   Santino Joaquin Rader Burgos
+    min 63 (2T 23) visitante card_yellow  Lautaro José Papa
+  marcador  · eventos 62-17 · guardado 62-17
+  tries     · 10-3 (guardado —-—)
+  arbitro   · Florencia Ledesma (guardado: —)
+
+Tala Rugby Club M17 "A" vs Club Palermo Bajo M17 "A" · torneo-cordobes-m17-a · tarjeta 314675  ·  db29e094-a301-4564-9625-960bda401182
+  local     · Tala Rugby Club M17 "A" · 22 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 16
+    min  9 (1T 9) local     try          
+    min  9 (1T 9) local     conversion   
+    min 10 (1T 10) visitante try          
+    min 10 (1T 10) visitante conversion   
+    min 10 (1T 10) visitante penalty_goal 
+    min 10 (1T 10) visitante try          
+    min 10 (1T 10) visitante conversion   
+    min 10 (1T 10) visitante penalty_goal 
+    min 17 (1T 17) local     try          
+    min 17 (1T 17) local     conversion   
+    min 29 (1T 29) local     try          
+    min 47 (2T 7) local     try          
+    min 47 (2T 7) local     conversion   
+    min 59 (2T 19) local     try          
+    min 59 (2T 19) local     conversion   
+    min 69 (2T 29) local     try          
+  marcador  · eventos 38-20 · guardado 38-20
+  tries     · 6-2 (guardado —-—)
+  arbitro   · Lucas Gaston Dopaso (guardado: —)
+
+San Martín de Villa María M17 "A" vs Club Universitario de Córdoba M17 "A" · torneo-cordobes-m17-a · tarjeta 315230  ·  abe283ae-d5c9-4b42-be83-77234e631285
+  local     · San Martín de Villa María M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min  2 (1T 2) local     try          Tobias Zanellato Fontana
+    min  6 (1T 6) visitante try          
+    min 17 (1T 17) visitante penalty_try  
+    min 18 (1T 18) local     card_yellow  Bautista Demaria
+    min 31 (1T 31) local     try          Tobias Zanellato Fontana
+    min 42 (2T 2) visitante try          
+    min 47 (2T 7) visitante try          
+    min 47 (2T 7) visitante conversion   
+    min 52 (2T 12) local     substitution Tobias Zanellato Fontana
+    min 52 (2T 12) local     substitution Joaquin Marcos
+    min 58 (2T 18) local     try          Tiziano Fessia
+    min 58 (2T 18) local     conversion   Igenaro Orihuela
+    min 62 (2T 22) visitante try          
+    min 64 (2T 24) visitante card_yellow  
+    min 70 (2T 30) visitante try          
+    min 70 (2T 30) visitante conversion   
+    min 78 (2T 38) local     try          Valentino Monaco Falvo
+  marcador  · eventos 22-36 · guardado 22-36
+  tries     · 4-6 (guardado —-—)
+  arbitro   · Sergio Zbura (guardado: —)
+
+Carlos Paz Rugby Club M17 "A" vs Tala Rugby Club M17 "A" · torneo-cordobes-m17-a · tarjeta 315598  ·  7f97bdd1-d075-41a1-8315-3a399b2d0592
+  local     · Carlos Paz Rugby Club M17 "A" · 21 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min  1 (1T 1) visitante try          
+    min  1 (1T 1) visitante conversion   
+    min  1 (1T 1) visitante try          
+    min  1 (1T 1) visitante conversion   
+    min  1 (1T 1) visitante try          
+    min  1 (1T 1) visitante conversion   
+    min  1 (1T 1) visitante try          
+    min  1 (1T 1) visitante conversion   
+    min  1 (1T 1) visitante try          
+    min  1 (1T 1) visitante conversion   
+    min  1 (1T 1) visitante try          
+    min  1 (1T 1) visitante conversion   
+    min  1 (1T 1) visitante try          
+    min  1 (1T 1) visitante conversion   
+    min  1 (1T 1) visitante try          
+    min  1 (1T 1) visitante conversion   
+    min  1 (1T 1) visitante try          
+    min  1 (1T 1) visitante conversion   
+    min  1 (1T 1) visitante try          
+    min  1 (1T 1) visitante conversion   
+    min  1 (1T 1) visitante try          
+    min  1 (1T 1) visitante conversion   
+    min  1 (1T 1) visitante try          
+    min 50 (2T 10) local     try          Matias Luna
+    min 50 (2T 10) local     conversion   Matias Luna
+  marcador  · eventos 7-82 · guardado 7-82
+  tries     · 1-12 (guardado —-—)
+  arbitro   · Emanuel Maldonado (guardado: —)
+
+Córdoba Athletic Club M17 "A" vs Jockey Club de Villa María M17 "A" · torneo-cordobes-m17-a · tarjeta 319619  ·  750f8114-ec29-4d0d-aac8-ab78a45ba202
+  local     · Córdoba Athletic Club M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club de Villa María M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 33
+    min  1 (1T 1) local     try          Gonzalo Matias Manzur
+    min  1 (1T 1) local     conversion   Gonzalo Matias Manzur
+    min  7 (1T 7) local     try          Augusto Diomede
+    min  7 (1T 7) local     conversion   Gonzalo Matias Manzur
+    min 10 (1T 10) visitante try          Camilo Salomon
+    min 10 (1T 10) visitante conversion   Octavio Calcagno
+    min 16 (1T 16) local     try          Gonzalo Matias Manzur
+    min 16 (1T 16) local     conversion   Gonzalo Matias Manzur
+    min 24 (1T 24) local     try          Franco Peñaloza
+    min 24 (1T 24) local     conversion   Gonzalo Matias Manzur
+    min 25 (1T 25) local     substitution Augusto Diomede
+    min 35 (1T 35) visitante try          Tobias Coassolo
+    min 35 (1T 35) visitante conversion   Octavio Calcagno
+    min 40 (2T 0) local     substitution Franco Peñaloza
+    min 42 (2T 2) visitante try          Juan Cruz Doffo
+    min 42 (2T 2) visitante conversion   Octavio Calcagno
+    min 47 (2T 7) local     substitution Octavio Barrea Srur
+    min 48 (2T 8) local     try          Nicolas Gonzalez Castro
+    min 48 (2T 8) local     conversion   Gonzalo Matias Manzur
+    min 50 (2T 10) visitante conversion   Octavio Calcagno
+    min 50 (2T 10) visitante try          Tobias Coassolo
+    min 50 (2T 10) local     substitution Alejandro Girón
+    min 50 (2T 10) local     substitution Francesco Butto Prieto
+    min 60 (2T 20) visitante substitution Bruno Alves Carneiro
+    min 60 (2T 20) visitante substitution Jeronimo Perez
+    min 60 (2T 20) visitante substitution Tomas Enzo Vaira
+    min 63 (2T 23) visitante try          Juan Cruz Doffo
+    min 69 (2T 29) local     try          Bautista Raffaelli
+    min 69 (2T 29) local     conversion   Gonzalo Matias Manzur
+    min 73 (2T 33) local     conversion   Gonzalo Matias Manzur
+    min 73 (2T 33) local     try          Genaro Juan Iturriza
+    min 75 (2T 35) visitante try          Pedro Jeremías Manera
+    min 75 (2T 35) visitante conversion   Octavio Calcagno
+  marcador  · eventos 49-40 · guardado 49-40
+  tries     · 7-6 (guardado —-—)
+  arbitro   · Ricardo Ezequiel Oyola (guardado: —)
+
+Jockey Club Córdoba M17 "A" vs Club La Tablada M17 "A" · torneo-cordobes-m17-a · tarjeta 319620  ·  1ac8c683-6502-4614-a723-096e39d74215
+  local     · Jockey Club Córdoba M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min 20 (1T 20) visitante card_yellow  Ignacio Noviski
+    min 21 (1T 21) local     try          
+    min 25 (1T 25) local     try          
+    min 35 (1T 35) visitante try          
+    min 35 (1T 35) visitante conversion   Teo Pelaez
+    min 42 (2T 2) visitante try          Juan Pedro Ovando
+    min 42 (2T 2) visitante conversion   Teo Pelaez
+    min 46 (2T 6) visitante try          
+    min 46 (2T 6) visitante conversion   Teo Pelaez
+    min 50 (2T 10) visitante substitution Nicolas Agustin Taborda
+    min 56 (2T 16) visitante try          Fermin Tejerina Coloma
+    min 56 (2T 16) visitante conversion   Teo Pelaez
+    min 58 (2T 18) visitante penalty_goal Teo Pelaez
+    min 60 (2T 20) visitante substitution Grechanik Pedro
+    min 64 (2T 24) visitante try          Ignacio Fernández Llop
+    min 64 (2T 24) visitante conversion   Teo Pelaez
+    min 68 (2T 28) visitante substitution Santino Vittorio Corzo Poroli
+    min 69 (2T 29) local     try          
+    min 74 (2T 34) visitante try          Ignacio Fernández Llop
+    min 74 (2T 34) visitante conversion   Teo Pelaez
+  marcador  · eventos 15-45 · guardado 15-45
+  tries     · 3-6 (guardado —-—)
+  arbitro   · Francisco Romero Brondino (guardado: —)
+
+Club Universitario de Córdoba M17 "A" vs Urú Curé Rugby Club M17 "A" · torneo-cordobes-m17-a · tarjeta 319621  ·  45171b4c-1842-4af8-bc0d-bcfe456446f6
+  local     · Club Universitario de Córdoba M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Urú Curé Rugby Club M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min  4 (1T 4) visitante try          Mateo Sereno
+    min  8 (1T 8) local     try          
+    min  8 (1T 8) local     conversion   
+    min 16 (1T 16) local     try          
+    min 16 (1T 16) local     conversion   
+    min 19 (1T 19) visitante try          Valentin Lopez Lisa
+    min 19 (1T 19) visitante conversion   Agusrín Magri
+    min 29 (1T 29) visitante try          Valentin Lopez Lisa
+    min 32 (1T 32) visitante card_yellow  Isa Santino Saleme Garello
+    min 34 (1T 34) local     try          
+    min 41 (2T 1) visitante try          Bautista Sebastián Rodríguez Monte
+    min 50 (2T 10) visitante try          Alvaro Jose Estevez
+    min 50 (2T 10) visitante conversion   Augusto Calderon Pallotti
+    min 55 (2T 15) visitante substitution Bautista Sebastián Rodríguez Monte
+    min 55 (2T 15) visitante substitution Lautaro Benjamin Garay
+    min 55 (2T 15) visitante substitution Isa Santino Saleme Garello
+    min 62 (2T 22) visitante try          Mateo Sereno
+    min 64 (2T 24) visitante substitution José Sobrero
+    min 68 (2T 28) visitante substitution Mateo Sereno
+    min 68 (2T 28) visitante substitution Facundo Mosso
+    min 70 (2T 30) visitante try          Valentin Lopez Lisa
+    min 72 (2T 32) visitante substitution Augusto Calderon Pallotti
+  marcador  · eventos 19-39 · guardado 19-39
+  tries     · 3-7 (guardado —-—)
+  arbitro   · Santiago Herrera Albano (guardado: —)
+
+Tala Rugby Club M17 "A" vs San Martín de Villa María M17 "A" · torneo-cordobes-m17-a · tarjeta 319623  ·  27b281a0-cb7f-4f9a-9480-fc65f19e97cd
+  local     · Tala Rugby Club M17 "A" · 22 jugadores · 0 con ficha fijada
+  visitante · San Martín de Villa María M17 "A" · 22 jugadores · 0 con ficha fijada
+  eventos   · 33
+    min  5 (1T 5) local     card_yellow  
+    min  5 (1T 5) visitante penalty_try  
+    min 10 (1T 10) local     try          
+    min 15 (1T 15) local     conversion   
+    min 15 (1T 15) local     try          
+    min 19 (1T 19) local     try          
+    min 19 (1T 19) local     conversion   
+    min 22 (1T 22) local     try          
+    min 22 (1T 22) local     conversion   
+    min 31 (1T 31) visitante try          Máximo Amaro Rojo
+    min 31 (1T 31) visitante conversion   Lautaro Martin Rodriguez
+    min 31 (1T 31) local     card_yellow  
+    min 34 (1T 34) local     try          
+    min 34 (1T 34) local     conversion   
+    min 41 (2T 1) local     try          
+    min 41 (2T 1) local     conversion   
+    min 42 (2T 2) local     try          
+    min 42 (2T 2) local     conversion   
+    min 45 (2T 5) local     try          
+    min 45 (2T 5) local     conversion   
+    min 51 (2T 11) local     try          
+    min 51 (2T 11) local     conversion   
+    min 53 (2T 13) visitante substitution Bautista Demaria
+    min 53 (2T 13) visitante try          Lorenzo Agustin Goicoechea
+    min 53 (2T 13) visitante conversion   Darian Mendez
+    min 54 (2T 14) local     card_yellow  
+    min 55 (2T 15) visitante substitution Lautaro Martin Rodriguez
+    min 59 (2T 19) local     try          
+    min 59 (2T 19) local     conversion   
+    min 63 (2T 23) local     card_yellow  
+    min 64 (2T 24) visitante substitution Lorenzo Agustin Goicoechea
+    min 64 (2T 24) visitante substitution Tiziano Fessia
+    min 69 (2T 29) local     try          
+  marcador  · eventos 73-21 · guardado 73-21
+  tries     · 11-3 (guardado —-—)
+  arbitro   · Lucas Humeres (guardado: —)
+
+Club Palermo Bajo M17 "A" vs Carlos Paz Rugby Club M17 "A" · torneo-cordobes-m17-a · tarjeta 319624  ·  614a767e-66ff-43cf-9f5e-e6856415bd74
+  local     · Club Palermo Bajo M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Carlos Paz Rugby Club M17 "A" · 21 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min 10 (1T 10) local     try          
+    min 11 (1T 11) local     conversion   
+    min 16 (1T 16) visitante try          Mateo Piccione
+    min 20 (1T 20) local     try          
+    min 21 (1T 21) local     conversion   
+    min 26 (1T 26) local     try          
+    min 31 (1T 31) local     try          
+    min 32 (1T 32) local     conversion   
+    min 35 (1T 35) local     try          
+    min 41 (2T 1) local     conversion   
+    min 41 (2T 1) local     try          
+    min 43 (2T 3) visitante card_yellow  Lucas Rafael Medina
+    min 52 (2T 12) visitante try          Alejo Salvatierra
+    min 53 (2T 13) visitante conversion   Santino Joaquin Rader Burgos
+    min 60 (2T 20) local     try          
+    min 61 (2T 21) local     conversion   
+    min 73 (2T 33) local     try          
+    min 334 (2T 294) local     conversion   
+  marcador  · eventos 52-12 · guardado 52-12
+  tries     · 8-2 (guardado —-—)
+  arbitro   · Tomas Elias Gigena Ramallo (guardado: —)
+
+Córdoba Athletic Club M17 "A" vs Urú Curé Rugby Club M17 "A" · torneo-cordobes-m17-a · tarjeta 320262  ·  e68af590-29fc-460d-8715-558587d47936
+  local     · Córdoba Athletic Club M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Urú Curé Rugby Club M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 34
+    min  4 (1T 4) visitante try          Facundo Mosso
+    min  5 (1T 5) visitante conversion   Augusto Calderon Pallotti
+    min  8 (1T 8) local     penalty_goal Gonzalo Matias Manzur
+    min 10 (1T 10) visitante try          Lorenzo Martini
+    min 11 (1T 11) visitante conversion   Augusto Calderon Pallotti
+    min 14 (1T 14) local     try          Gonzalo Matias Manzur
+    min 15 (1T 15) local     conversion   Gonzalo Matias Manzur
+    min 18 (1T 18) visitante try          Valentin Lopez Lisa
+    min 31 (1T 31) visitante try          Facundo Mosso
+    min 32 (1T 32) visitante conversion   Augusto Calderon Pallotti
+    min 34 (1T 34) visitante card_yellow  Alvaro Jose Estevez
+    min 34 (1T 34) visitante card_yellow  Joaquín González Fontana
+    min 38 (1T 38) local     try          Franco Peñaloza
+    min 39 (1T 39) local     conversion   Gonzalo Matias Manzur
+    min 47 (2T 7) visitante substitution Lorenzo Jesus Crespo
+    min 49 (2T 9) local     substitution Genaro Juan Iturriza
+    min 50 (2T 10) visitante substitution Pedro Di Santo
+    min 54 (2T 14) local     substitution Octavio Barrea Srur
+    min 55 (2T 15) local     substitution Alejandro Girón
+    min 55 (2T 15) local     substitution Francesco Butto Prieto
+    min 57 (2T 17) local     substitution Nicolas Gonzalez Castro
+    min 57 (2T 17) visitante substitution José Sobrero
+    min 57 (2T 17) local     substitution Tomas Marino Echeverri
+    min 57 (2T 17) visitante try          Lorenzo Martini
+    min 59 (2T 19) visitante conversion   Augusto Calderon Pallotti
+    min 63 (2T 23) visitante substitution Santiago Luis Alfonso
+    min 66 (2T 26) visitante substitution Mateo Sereno
+    min 66 (2T 26) visitante substitution Mirko Bellina Caymes
+    min 69 (2T 29) local     try          Franco Peñaloza
+    min 69 (2T 29) local     conversion   Gonzalo Matias Manzur
+    min 71 (2T 31) visitante try          Lorenzo Martini
+    min 72 (2T 32) visitante conversion   Augusto Calderon Pallotti
+    min 73 (2T 33) local     try          Felipe Ledesma
+    min 73 (2T 33) local     conversion   Gonzalo Matias Manzur
+  marcador  · eventos 31-40 · guardado 31-40
+  tries     · 4-6 (guardado —-—)
+  arbitro   · Lucas Humeres (guardado: —)
+
+Jockey Club Córdoba M17 "A" vs Club Palermo Bajo M17 "A" · torneo-cordobes-m17-a · tarjeta 320265  ·  39b503aa-7615-4c75-a94e-ba5a69aff4ad
+  local     · Jockey Club Córdoba M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 13
+    min 10 (1T 10) local     try          
+    min 11 (1T 11) local     conversion   
+    min 22 (1T 22) local     try          
+    min 22 (1T 22) local     conversion   
+    min 27 (1T 27) visitante try          
+    min 32 (1T 32) visitante try          
+    min 32 (1T 32) visitante conversion   
+    min 35 (1T 35) local     try          
+    min 54 (2T 14) local     try          
+    min 55 (2T 15) visitante penalty_goal 
+    min 67 (2T 27) local     penalty_goal 
+    min 69 (2T 29) local     penalty_goal 
+    min 74 (2T 34) local     try          
+  marcador  · eventos 35-15 · guardado 35-15
+  tries     · 5-2 (guardado —-—)
+  arbitro   · Juan Jose Sañudo Galarreta (guardado: —)
+
+Club Universitario de Córdoba M17 "A" vs Tala Rugby Club M17 "A" · torneo-cordobes-m17-a · tarjeta 320266  ·  187159d3-a06f-4a5e-ad6c-d4bb0694d4c0
+  local     · Club Universitario de Córdoba M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M17 "A" · 22 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min 12 (1T 12) local     card_yellow  
+    min 12 (1T 12) visitante try          
+    min 16 (1T 16) visitante try          
+    min 16 (1T 16) visitante conversion   
+    min 17 (1T 17) local     card_yellow  
+    min 19 (1T 19) visitante try          
+    min 19 (1T 19) visitante conversion   
+    min 25 (1T 25) visitante try          
+    min 25 (1T 25) visitante conversion   
+    min 26 (1T 26) local     card_yellow  
+    min 28 (1T 28) visitante card_yellow  
+    min 29 (1T 29) local     card_yellow  
+    min 30 (1T 30) local     try          
+    min 30 (1T 30) local     conversion   
+    min 34 (1T 34) local     try          
+    min 34 (1T 34) local     conversion   
+    min 45 (2T 5) visitante card_yellow  
+    min 50 (2T 10) local     try          
+    min 50 (2T 10) local     conversion   
+    min 54 (2T 14) visitante card_yellow  
+    min 57 (2T 17) visitante try          
+    min 60 (2T 20) visitante try          
+    min 60 (2T 20) visitante conversion   
+    min 67 (2T 27) visitante try          
+    min 67 (2T 27) visitante conversion   
+    min 70 (2T 30) local     try          
+    min 73 (2T 33) visitante card_yellow  
+  marcador  · eventos 26-45 · guardado 26-45
+  tries     · 4-7 (guardado —-—)
+  arbitro   · Ángeles Murua (guardado: —)
+
+Carlos Paz Rugby Club M17 "A" vs Córdoba Athletic Club M17 "A" · torneo-cordobes-m17-a · tarjeta 320646  ·  d2e2960f-be92-4fb8-a021-d45e93ed889a
+  local     · Carlos Paz Rugby Club M17 "A" · 21 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min  2 (1T 2) visitante conversion   Nicolas Gonzalez Castro
+    min  2 (1T 2) visitante try          David Emanuel Rodriguez Dutli
+    min 12 (1T 12) visitante try          Nicolas Gonzalez Castro
+    min 12 (1T 12) visitante conversion   Nicolas Gonzalez Castro
+    min 19 (1T 19) visitante try          David Emanuel Rodriguez Dutli
+    min 28 (1T 28) visitante try          David Emanuel Rodriguez Dutli
+    min 30 (1T 30) local     try          Ciro Schiavi
+    min 45 (2T 5) visitante try          David Emanuel Rodriguez Dutli
+    min 48 (2T 8) visitante substitution Augusto Diomede
+    min 50 (2T 10) visitante substitution Alejandro Girón
+    min 52 (2T 12) visitante substitution Bautista Blumenfeld
+    min 55 (2T 15) visitante try          Bautista Raffaelli
+    min 55 (2T 15) visitante conversion   Nicolas Gonzalez Castro
+    min 55 (2T 15) visitante conversion   Nicolas Gonzalez Castro
+    min 59 (2T 19) visitante try          Octavio Barrea Srur
+    min 65 (2T 25) visitante substitution Tomas Marino Echeverri
+    min 65 (2T 25) visitante substitution Juan Pablo Gaviglio
+    min 65 (2T 25) visitante substitution Valentin Sutter Fuentes
+    min 65 (2T 25) visitante substitution Juan Martín Freytes
+    min 73 (2T 33) local     try          Tao Giuliani
+  marcador  · eventos 10-43 · guardado 10-43
+  tries     · 2-7 (guardado —-—)
+  arbitro   · Martin Leiva (guardado: —)
+
+Córdoba Athletic Club M17 "A" vs Jockey Club Córdoba M17 "A" · torneo-cordobes-m17-a · tarjeta 322620  ·  64a2f166-aa95-4b8f-8bbe-4bacc46bb157
+  local     · Córdoba Athletic Club M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 26
+    min  8 (1T 8) local     penalty_goal Gonzalo Matias Manzur
+    min 15 (1T 15) visitante penalty_goal 
+    min 17 (1T 17) visitante try          
+    min 18 (1T 18) visitante conversion   
+    min 21 (1T 21) local     try          Martin Javier Arinci Caffaratti
+    min 22 (1T 22) local     conversion   Nicolas Gonzalez Castro
+    min 28 (1T 28) visitante try          
+    min 30 (1T 30) local     card_yellow  Octavio Barrea Srur
+    min 31 (1T 31) visitante try          
+    min 34 (1T 34) visitante card_yellow  
+    min 36 (1T 36) local     try          Felipe Ledesma
+    min 40 (2T 0) local     substitution Juan Pablo Gaviglio
+    min 46 (2T 6) local     try          Felipe Ledesma
+    min 51 (2T 11) local     substitution Alejandro Girón
+    min 51 (2T 11) local     substitution Agustín Acuña
+    min 51 (2T 11) visitante penalty_goal 
+    min 54 (2T 14) visitante penalty_goal 
+    min 63 (2T 23) local     card_yellow  Gonzalo Matias Manzur
+    min 63 (2T 23) visitante card_yellow  
+    min 63 (2T 23) visitante card_yellow  
+    min 65 (2T 25) local     card_red     Francisco Tomas Romero
+    min 65 (2T 25) local     try          Bautista Raffaelli
+    min 67 (2T 27) local     substitution Tomas Marino Echeverri
+    min 69 (2T 29) local     substitution Franco Peñaloza
+    min 70 (2T 30) local     substitution Octavio Barrea Srur
+    min 73 (2T 33) visitante card_yellow  
+  marcador  · eventos 25-26 · guardado 25-26
+  tries     · 4-3 (guardado —-—)
+  arbitro   · Enzo Riva (guardado: —)
+
+Club Universitario de Córdoba M17 "A" vs Jockey Club de Villa María M17 "A" · torneo-cordobes-m17-a · tarjeta 322621  ·  e8d06f99-f9d4-4120-8c77-7fc6e8a95e64
+  local     · Club Universitario de Córdoba M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club de Villa María M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 19
+    min  4 (1T 4) local     try          
+    min  4 (1T 4) local     conversion   
+    min 15 (1T 15) local     try          
+    min 15 (1T 15) local     conversion   
+    min 22 (1T 22) local     try          
+    min 22 (1T 22) local     conversion   
+    min 26 (1T 26) local     try          
+    min 31 (1T 31) visitante card_yellow  Benjamín Pigni Sosa
+    min 34 (1T 34) visitante card_yellow  Tobias Coassolo
+    min 35 (1T 35) local     try          
+    min 48 (2T 8) local     try          
+    min 52 (2T 12) visitante substitution Camilo Tranamil Campos
+    min 53 (2T 13) local     try          
+    min 62 (2T 22) visitante try          Camilo Salomon
+    min 62 (2T 22) visitante conversion   Octavio Calcagno
+    min 64 (2T 24) visitante substitution Gino Santiago Cotichini
+    min 71 (2T 31) local     try          
+    min 76 (2T 36) visitante try          Camilo Salomon
+    min 76 (2T 36) visitante conversion   Octavio Calcagno
+  marcador  · eventos 46-14 · guardado 46-14
+  tries     · 8-2 (guardado —-—)
+  arbitro   · Francisco Romero Brondino (guardado: —)
+
+Tala Rugby Club M17 "A" vs Club La Tablada M17 "A" · torneo-cordobes-m17-a · tarjeta 322622  ·  64af3a31-7996-4279-a71f-62ff5468cca4
+  local     · Tala Rugby Club M17 "A" · 22 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 19
+    min  2 (1T 2) local     penalty_goal 
+    min  8 (1T 8) local     try          
+    min 10 (1T 10) visitante try          
+    min 10 (1T 10) visitante conversion   Teo Pelaez
+    min 13 (1T 13) local     penalty_goal 
+    min 28 (1T 28) visitante try          Ignacio Rodriguez
+    min 35 (1T 35) local     injury       
+    min 37 (1T 37) local     try          
+    min 37 (1T 37) local     conversion   
+    min 42 (2T 2) visitante try          
+    min 49 (2T 9) local     injury       
+    min 52 (2T 12) local     penalty_goal 
+    min 52 (2T 12) local     card_yellow  
+    min 60 (2T 20) visitante card_yellow  
+    min 66 (2T 26) visitante card_yellow  Ignacio Noviski
+    min 68 (2T 28) local     card_yellow  
+    min 68 (2T 28) local     card_red     
+    min 70 (2T 30) visitante penalty_goal Teo Pelaez
+    min 73 (2T 33) local     penalty_goal 
+  marcador  · eventos 24-20 · guardado 24-20
+  tries     · 2-3 (guardado —-—)
+  arbitro   · Ignacio Santiago Olmedo Ramirez (guardado: —)
+
+Club Palermo Bajo M17 "A" vs Urú Curé Rugby Club M17 "A" · torneo-cordobes-m17-a · tarjeta 322623  ·  bdf9330e-c076-4744-87d5-8aa86ac4e3bd
+  local     · Club Palermo Bajo M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Urú Curé Rugby Club M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 16
+    min 16 (1T 16) visitante try          Benjamin Dalmasso
+    min 16 (1T 16) visitante conversion   Benjamin Dalmasso
+    min 16 (1T 16) visitante try          Benjamin Dalmasso
+    min 16 (1T 16) visitante conversion   Benjamin Dalmasso
+    min 16 (1T 16) visitante try          Benjamin Dalmasso
+    min 16 (1T 16) visitante try          Benjamin Dalmasso
+    min 16 (1T 16) visitante try          Benjamin Dalmasso
+    min 25 (1T 25) local     try          
+    min 25 (1T 25) local     conversion   
+    min 25 (1T 25) local     penalty_goal 
+    min 25 (1T 25) local     penalty_goal 
+    min 25 (1T 25) local     try          
+    min 25 (1T 25) local     conversion   
+    min 25 (1T 25) local     try          
+    min 25 (1T 25) local     conversion   
+    min 66 (2T 26) local     card_yellow  
+  marcador  · eventos 27-29 · guardado 27-29
+  tries     · 3-5 (guardado —-—)
+  arbitro   · Lucas Gaston Dopaso (guardado: —)
+
+Carlos Paz Rugby Club M17 "A" vs San Martín de Villa María M17 "A" · torneo-cordobes-m17-a · tarjeta 322624  ·  d7a939aa-d5d3-4870-985c-33dae0beaef2
+  local     · Carlos Paz Rugby Club M17 "A" · 21 jugadores · 0 con ficha fijada
+  visitante · San Martín de Villa María M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 14
+    min 13 (1T 13) local     try          Mateo Piccione
+    min 13 (1T 13) local     conversion   Santino Joaquin Rader Burgos
+    min 17 (1T 17) local     try          Matias Luna
+    min 17 (1T 17) local     conversion   Santino Joaquin Rader Burgos
+    min 20 (1T 20) visitante try          Tobias Zanellato Fontana
+    min 30 (1T 30) visitante card_yellow  Máximo Amaro Rojo
+    min 33 (1T 33) local     try          Santino Joaquin Rader Burgos
+    min 33 (1T 33) local     conversion   Santino Joaquin Rader Burgos
+    min 46 (2T 6) local     try          Milo Conci
+    min 46 (2T 6) local     conversion   Santino Joaquin Rader Burgos
+    min 60 (2T 20) visitante conversion   Roman Castellano
+    min 60 (2T 20) local     card_yellow  Lucas Rafael Medina
+    min 70 (2T 30) visitante try          Joaquin Marcos
+    min 70 (2T 30) local     injury       Emiliano Novaresio
+  marcador  · eventos 28-12 · guardado 28-12
+  tries     · 4-2 (guardado —-—)
+  arbitro   · Tomas Elias Gigena Ramallo (guardado: —)
+
+Urú Curé Rugby Club M17 "A" vs Jockey Club Córdoba M17 "A" · torneo-cordobes-m17-a · tarjeta 323372  ·  300fca0a-7897-474e-b5ac-fe4f9e51e965
+  local     · Urú Curé Rugby Club M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min 26 (1T 26) local     try          Facundo Mosso
+    min 29 (1T 29) local     card_yellow  Mirko Bellina Caymes
+    min 29 (1T 29) visitante penalty_try  
+    min 46 (2T 6) local     try          Facundo Mosso
+    min 47 (2T 7) local     conversion   Agusrín Magri
+    min 54 (2T 14) local     try          Valentin Lopez Lisa
+    min 55 (2T 15) local     conversion   Agusrín Magri
+    min 63 (2T 23) local     substitution Ignacio Rossi Jaume
+    min 67 (2T 27) local     substitution Isa Santino Saleme Garello
+    min 67 (2T 27) local     substitution Gonzalo Lautaro Cabello
+    min 67 (2T 27) local     substitution Benjamin Dalmasso
+    min 67 (2T 27) local     substitution Lucas Saby
+    min 73 (2T 33) local     try          Valentin Lopez Lisa
+    min 73 (2T 33) local     card_yellow  Juan Bautista Rins
+    min 74 (2T 34) local     conversion   Agusrín Magri
+    min 74 (2T 34) local     card_yellow  José Sobrero
+    min 76 (2T 36) visitante try          
+  marcador  · eventos 26-12 · guardado 26-12
+  tries     · 4-2 (guardado —-—)
+  arbitro   · Ignacio Santiago Olmedo Ramirez (guardado: —)
+
+Club Palermo Bajo M17 "A" vs Córdoba Athletic Club M17 "A" · torneo-cordobes-m17-a · tarjeta 323374  ·  736325a0-2336-464f-a2f2-777cb951a08b
+  local     · Club Palermo Bajo M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 38-31
+  tries     · 0-0 (guardado —-—)
+  arbitro   · Gabriel Hernán Tirante (guardado: —)
+
+San Martín de Villa María M17 "A" vs Córdoba Athletic Club M17 "A" · torneo-cordobes-m17-a · tarjeta 324061  ·  f7196743-5f2d-47e4-8405-7d05561b9aa7
+  local     · San Martín de Villa María M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club M17 "A" · 22 jugadores · 0 con ficha fijada
+  eventos   · 12
+    min 16 (1T 16) local     try          Lautaro Martin Rodriguez
+    min 16 (1T 16) local     conversion   Roman Castellano
+    min 23 (1T 23) visitante try          
+    min 24 (1T 24) visitante conversion   
+    min 45 (2T 5) visitante penalty_goal 
+    min 50 (2T 10) local     substitution Lisandro Arias
+    min 61 (2T 21) local     substitution Bautista Alejandro Zurita
+    min 63 (2T 23) local     substitution Joaquin Echeverría
+    min 65 (2T 25) local     substitution Tomás Sánchez Pastrone
+    min 65 (2T 25) visitante penalty_goal 
+    min 70 (2T 30) visitante card_red     
+    min 72 (2T 32) local     try          Tiziano Fessia
+  marcador  · eventos 12-13 · guardado 12-13
+  tries     · 2-1 (guardado —-—)
+  arbitro   · Emanuel Ordoñez (guardado: —)
+
+Urú Curé Rugby Club M17 "A" vs Carlos Paz Rugby Club M17 "A" · torneo-cordobes-m17-a · tarjeta 324062  ·  1c0eb498-b9f9-4361-a295-4cb334997e8a
+  local     · Urú Curé Rugby Club M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Carlos Paz Rugby Club M17 "A" · 21 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min  3 (1T 3) local     try          Valentin Lopez Lisa
+    min  4 (1T 4) local     conversion   Agusrín Magri
+    min  8 (1T 8) local     try          Facundo Mosso
+    min 13 (1T 13) local     try          Facundo Mosso
+    min 14 (1T 14) local     conversion   Agusrín Magri
+    min 20 (1T 20) local     try          Facundo Mosso
+    min 25 (1T 25) local     try          Isa Santino Saleme Garello
+    min 30 (1T 30) local     try          Benjamin Dalmasso
+    min 35 (1T 35) local     try          Joaquin Marrero Las Heras
+    min 35 (1T 35) local     conversion   Agusrín Magri
+    min 48 (2T 8) local     try          Agusrín Magri
+    min 50 (2T 10) local     substitution Mirko Bellina Caymes
+    min 50 (2T 10) local     substitution Joaquín González Fontana
+    min 50 (2T 10) local     substitution Augusto Calderon Pallotti
+    min 50 (2T 10) local     substitution Isa Santino Saleme Garello
+    min 50 (2T 10) local     substitution Facundo Mosso
+    min 50 (2T 10) local     substitution Benjamin Martinez Sosa
+    min 50 (2T 10) local     substitution Bautista Sebastián Rodríguez Monte
+    min 50 (2T 10) local     substitution Benjamin Dalmasso
+    min 60 (2T 20) local     try          Joaquin Marrero Las Heras
+    min 62 (2T 22) local     try          Lorenzo Martini
+    min 65 (2T 25) local     try          Agusrín Magri
+    min 66 (2T 26) local     conversion   Agusrín Magri
+    min 67 (2T 27) local     try          Gonzalo Lautaro Cabello
+    min 68 (2T 28) local     conversion   Agusrín Magri
+  marcador  · eventos 70-0 · guardado 70-0
+  tries     · 12-0 (guardado —-—)
+  arbitro   · Franco Zarate (guardado: —)
+
+Club La Tablada M17 "A" vs Club Palermo Bajo M17 "A" · torneo-cordobes-m17-a · tarjeta 324063  ·  69dbf695-8331-453f-9a19-98db1c003269
+  local     · Club La Tablada M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 15
+    min 11 (1T 11) local     penalty_goal Grechanik Pedro
+    min 15 (1T 15) local     try          
+    min 15 (1T 15) local     conversion   Grechanik Pedro
+    min 33 (1T 33) local     try          
+    min 33 (1T 33) local     conversion   Grechanik Pedro
+    min 44 (2T 4) local     try          
+    min 44 (2T 4) local     conversion   Grechanik Pedro
+    min 56 (2T 16) local     try          
+    min 56 (2T 16) local     conversion   Grechanik Pedro
+    min 57 (2T 17) local     try          Ignacio Fernández Llop
+    min 57 (2T 17) local     conversion   Grechanik Pedro
+    min 58 (2T 18) local     try          Ignacio Fernández Llop
+    min 68 (2T 28) visitante card_yellow  
+    min 68 (2T 28) local     try          
+    min 68 (2T 28) local     try          Lucas Alvarez Maina
+  marcador  · eventos 53-0 · guardado 53-0
+  tries     · 8-0 (guardado —-—)
+  arbitro   · Francisco Romero Brondino (guardado: —)
+
+Jockey Club de Villa María M17 "A" vs Tala Rugby Club M17 "A" · torneo-cordobes-m17-a · tarjeta 324064  ·  d7ce305a-00c3-4b7e-adf9-ff6353eeed43
+  local     · Jockey Club de Villa María M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M17 "A" · 22 jugadores · 0 con ficha fijada
+  eventos   · 15
+    min 13 (1T 13) visitante try          
+    min 13 (1T 13) visitante conversion   
+    min 20 (1T 20) visitante try          
+    min 44 (2T 4) visitante try          
+    min 50 (2T 10) visitante try          
+    min 50 (2T 10) visitante conversion   
+    min 55 (2T 15) local     try          Camilo Salomon
+    min 55 (2T 15) local     conversion   Octavio Calcagno
+    min 55 (2T 15) local     substitution Camilo Tranamil Campos
+    min 61 (2T 21) visitante try          
+    min 61 (2T 21) visitante conversion   
+    min 68 (2T 28) visitante conversion   
+    min 68 (2T 28) visitante try          
+    min 72 (2T 32) visitante try          
+    min 72 (2T 32) visitante conversion   
+  marcador  · eventos 7-45 · guardado 7-45
+  tries     · 1-7 (guardado —-—)
+  arbitro   · Santiago Herrera Albano (guardado: —)
+
+Jockey Club Córdoba M17 "A" vs Club Universitario de Córdoba M17 "A" · torneo-cordobes-m17-a · tarjeta 324065  ·  ad5c4853-14ac-43f4-890a-2ec425b29d41
+  local     · Jockey Club Córdoba M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 11
+    min  4 (1T 4) local     try          
+    min  5 (1T 5) visitante try          
+    min  5 (1T 5) local     conversion   
+    min 24 (1T 24) local     card_yellow  
+    min 25 (1T 25) local     try          
+    min 25 (1T 25) local     conversion   
+    min 45 (2T 5) visitante try          
+    min 45 (2T 5) visitante conversion   
+    min 63 (2T 23) local     try          
+    min 64 (2T 24) local     conversion   
+    min 74 (2T 34) local     try          
+  marcador  · eventos 26-12 · guardado 26-12
+  tries     · 4-2 (guardado —-—)
+  arbitro   · Tomas Elias Gigena Ramallo (guardado: —)
+
+San Martín de Villa María M17 "A" vs Club Palermo Bajo M17 "A" · torneo-cordobes-m17-a · tarjeta 325102  ·  7f151cfd-2adb-411e-a5b1-9c42e55141e1
+  local     · San Martín de Villa María M17 "A" · 21 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 16
+    min  2 (1T 2) visitante try          
+    min  3 (1T 3) visitante conversion   
+    min 12 (1T 12) visitante try          
+    min 15 (1T 15) local     try          Máximo Amaro Rojo
+    min 15 (1T 15) local     conversion   Tomas Espinosa Marcelloni
+    min 30 (1T 30) local     try          Darian Mendez
+    min 32 (1T 32) local     card_yellow  Igenaro Orihuela
+    min 35 (1T 35) visitante try          
+    min 36 (1T 36) visitante conversion   
+    min 42 (2T 2) local     substitution Joaquin Marcos
+    min 42 (2T 2) local     substitution Bautista Alejandro Zurita
+    min 47 (2T 7) local     substitution Lisandro Arias
+    min 48 (2T 8) visitante card_yellow  
+    min 48 (2T 8) local     try          Tomas Espinosa Marcelloni
+    min 62 (2T 22) visitante card_yellow  
+    min 77 (2T 37) local     try          Máximo Amaro Rojo
+  marcador  · eventos 22-19 · guardado 22-19
+  tries     · 4-3 (guardado —-—)
+  arbitro   · Franco Zarate (guardado: —)
+
+Urú Curé Rugby Club M17 "A" vs Tala Rugby Club M17 "A" · torneo-cordobes-m17-a · tarjeta 325103  ·  cfd57b9f-3768-4f5e-a8df-a6038858ec1a
+  local     · Urú Curé Rugby Club M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M17 "A" · 22 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min 12 (1T 12) visitante card_yellow  
+    min 13 (1T 13) local     substitution Agusrín Magri
+    min 14 (1T 14) local     try          Facundo Mosso
+    min 19 (1T 19) visitante try          
+    min 19 (1T 19) visitante conversion   
+    min 26 (1T 26) visitante try          
+    min 26 (1T 26) visitante conversion   
+    min 41 (2T 1) local     substitution Benjamin Martinez Sosa
+    min 46 (2T 6) local     try          Mirko Bellina Caymes
+    min 47 (2T 7) local     conversion   Augusto Calderon Pallotti
+    min 54 (2T 14) local     substitution Joaquín González Fontana
+    min 61 (2T 21) local     penalty_goal Augusto Calderon Pallotti
+    min 61 (2T 21) local     substitution Benjamin Dalmasso
+    min 64 (2T 24) local     substitution Facundo Mosso
+    min 64 (2T 24) local     try          Facundo Mosso
+    min 65 (2T 25) local     substitution Joaquin Marrero Las Heras
+    min 65 (2T 25) local     conversion   Augusto Calderon Pallotti
+    min 70 (2T 30) local     substitution Augusto Calderon Pallotti
+    min 71 (2T 31) local     substitution Mateo Sereno
+    min 74 (2T 34) visitante try          
+    min 74 (2T 34) visitante conversion   
+    min 76 (2T 36) visitante penalty_goal 
+  marcador  · eventos 22-24 · guardado 22-24
+  tries     · 3-3 (guardado —-—)
+  arbitro   · Santiago Geronimo Lozada Chaves (guardado: —)
+
+Club La Tablada M17 "A" vs Club Universitario de Córdoba M17 "A" · torneo-cordobes-m17-a · tarjeta 325104  ·  c794f456-4937-4b8b-94fd-e84d288589b0
+  local     · Club La Tablada M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba M17 "A" · 22 jugadores · 0 con ficha fijada
+  eventos   · 30
+    min 10 (1T 10) visitante try          
+    min 12 (1T 12) visitante try          
+    min 12 (1T 12) visitante conversion   
+    min 14 (1T 14) local     try          Ignacio Rodriguez
+    min 14 (1T 14) local     conversion   Grechanik Pedro
+    min 15 (1T 15) local     conversion   Grechanik Pedro
+    min 15 (1T 15) local     try          Ignacio Rodriguez
+    min 21 (1T 21) local     try          Valentin Pedeo Ali
+    min 21 (1T 21) local     conversion   Grechanik Pedro
+    min 26 (1T 26) visitante try          
+    min 26 (1T 26) visitante conversion   
+    min 30 (1T 30) local     try          Juan Ignacio Alsina
+    min 35 (1T 35) local     conversion   Grechanik Pedro
+    min 35 (1T 35) local     try          Luis Valentin Zavala Asaad
+    min 50 (2T 10) local     substitution Bautista Eliseo Cordon
+    min 50 (2T 10) visitante penalty_try  
+    min 50 (2T 10) local     substitution Felipe Gonzalez Antruejo
+    min 50 (2T 10) local     substitution Luis Valentin Zavala Asaad
+    min 54 (2T 14) visitante try          
+    min 54 (2T 14) visitante conversion   
+    min 54 (2T 14) local     card_yellow  Fermin Tejerina Coloma
+    min 54 (2T 14) local     try          Teo Pelaez
+    min 55 (2T 15) local     substitution Ignacio Noviski
+    min 58 (2T 18) local     try          Ignacio Fernández Llop
+    min 62 (2T 22) local     substitution Grechanik Pedro
+    min 68 (2T 28) local     substitution Cruz Romero
+    min 69 (2T 29) local     substitution Santino Vittorio Corzo Poroli
+    min 70 (2T 30) local     try          Santiago Sánchez Pulgar
+    min 70 (2T 30) local     conversion   Grechanik Pedro
+    min 70 (2T 30) local     substitution Juan Rossi
+  marcador  · eventos 50-33 · guardado 50-33
+  tries     · 8-5 (guardado —-—)
+  arbitro   · Marcos Kulig (guardado: —)
+
+Jockey Club de Villa María M17 "A" vs Jockey Club Córdoba M17 "A" · torneo-cordobes-m17-a · tarjeta 325105  ·  3c421f7c-1047-4c1b-9e24-7b7872fda8dd
+  local     · Jockey Club de Villa María M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min  3 (1T 3) local     conversion   Octavio Calcagno
+    min  3 (1T 3) local     try          Camilo Salomon
+    min  7 (1T 7) local     try          Camilo Salomon
+    min 10 (1T 10) visitante try          
+    min 10 (1T 10) visitante conversion   
+    min 14 (1T 14) visitante try          
+    min 19 (1T 19) visitante try          
+    min 20 (1T 20) visitante conversion   
+    min 22 (1T 22) visitante try          
+    min 26 (1T 26) local     try          Juan Cruz Doffo
+    min 32 (1T 32) local     try          Lisandro Massó
+    min 36 (1T 36) visitante try          
+    min 36 (1T 36) visitante conversion   
+    min 48 (2T 8) local     try          Juan Cruz Doffo
+    min 48 (2T 8) local     conversion   Octavio Calcagno
+    min 57 (2T 17) visitante try          
+    min 58 (2T 18) visitante conversion   
+    min 63 (2T 23) visitante card_yellow  
+    min 66 (2T 26) local     conversion   Octavio Calcagno
+    min 66 (2T 26) local     try          Pedro Jeremías Manera
+  marcador  · eventos 36-38 · guardado 36-38
+  tries     · 6-6 (guardado —-—)
+  arbitro   · Eugenio Morra (guardado: —)
+
+Club La Tablada M17 "A" vs Jockey Club Córdoba M17 "A" · torneo-cordobes-m17-a · tarjeta 326174  ·  53c224d6-a970-4b76-944c-15c0e08fa495
+  local     · Club La Tablada M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 14
+    min  4 (1T 4) local     try          Ignacio Rodriguez
+    min  4 (1T 4) local     conversion   Grechanik Pedro
+    min  8 (1T 8) local     drop_goal    Teo Pelaez
+    min 12 (1T 12) local     try          Juan Ignacio Alsina
+    min 16 (1T 16) local     try          Juan Ignacio Alsina
+    min 21 (1T 21) visitante try          
+    min 29 (1T 29) local     try          Ignacio Rodriguez
+    min 29 (1T 29) local     conversion   Grechanik Pedro
+    min 63 (2T 23) local     conversion   Grechanik Pedro
+    min 63 (2T 23) local     card_yellow  Valentin Pedeo Ali
+    min 63 (2T 23) local     try          Antonio Manrique
+    min 69 (2T 29) local     penalty_goal Grechanik Pedro
+    min 75 (2T 35) local     try          Antonio Manrique
+    min 75 (2T 35) local     conversion   Grechanik Pedro
+  marcador  · eventos 44-5 · guardado 44-5
+  tries     · 6-1 (guardado —-—)
+  arbitro   · Emmanuel Boscatto (guardado: —)
+
+Club Universitario de Córdoba M17 "A" vs Córdoba Athletic Club M17 "A" · torneo-cordobes-m17-a · tarjeta 326175  ·  796ac304-2ecb-4acc-b9f4-5e5d4511313c
+  local     · Club Universitario de Córdoba M17 "A" · 23 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club M17 "A" · 23 jugadores · 0 con ficha fijada
+  eventos   · 12
+    min 12 (1T 12) visitante penalty_goal 
+    min 21 (1T 21) visitante card_yellow  
+    min 34 (1T 34) visitante try          
+    min 36 (1T 36) local     try          
+    min 36 (1T 36) local     conversion   
+    min 56 (2T 16) visitante try          
+    min 57 (2T 17) visitante conversion   
+    min 61 (2T 21) local     try          
+    min 61 (2T 21) local     conversion   
+    min 66 (2T 26) local     try          
+    min 66 (2T 26) local     conversion   
+    min 74 (2T 34) visitante try          
+  marcador  · eventos 21-20 · guardado 21-20
+  tries     · 3-3 (guardado —-—)
+  arbitro   · Leonel Sorbera (guardado: —)
+
+(plan: no se escribió nada)

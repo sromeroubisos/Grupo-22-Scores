@@ -1,0 +1,2113 @@
+tarjetas oficiales 62bf0694
+
+cuises-portena-rugby vs villa-libertador-r-c · 62bf0694 · tarjeta 296836  ·  3f6481a2-0a74-49fe-8f42-1506d1221b6b
+  local     · cuises-portena-rugby · 26 jugadores · 0 con ficha fijada
+  visitante · villa-libertador-r-c · 30 jugadores · 0 con ficha fijada
+  eventos   · 28
+    min  3 (1T 3) visitante try          Braian Alexis Sanchez Rodriguez
+    min 17 (1T 17) local     penalty_goal Hector Velez
+    min 27 (1T 27) visitante try          Cristian Javier Galiano
+    min 32 (1T 32) local     try          Montu Lautaro Alexis
+    min 32 (1T 32) local     conversion   Hector Velez
+    min 35 (1T 35) local     substitution Edelmar Beccaria
+    min 43 (2T 3) visitante try          Erick Maximiliano Ortiz
+    min 43 (2T 3) visitante conversion   Isaias Falon
+    min 46 (2T 6) local     substitution Federico Ostertag
+    min 48 (2T 8) visitante try          Isaias Falon
+    min 50 (2T 10) visitante card_yellow  Franco Ezequiel Galiano
+    min 50 (2T 10) visitante card_red     Erick Maximiliano Ortiz
+    min 53 (2T 13) local     try          Gastón Alejandro Ladner
+    min 53 (2T 13) local     conversion   Emanuel Reusa
+    min 57 (2T 17) visitante try          Mauricio Noriega
+    min 58 (2T 18) local     substitution Montu Lautaro Alexis
+    min 58 (2T 18) local     substitution Nicolás Guillermo Bruna
+    min 58 (2T 18) local     substitution Emilio Vilar
+    min 60 (2T 20) local     substitution Marcos Martin Aghemo
+    min 63 (2T 23) local     try          Gerónimo Calatroni
+    min 63 (2T 23) local     conversion   Emanuel Reusa
+    min 65 (2T 25) local     substitution Carlos Rivoira
+    min 69 (2T 29) local     penalty_goal Hector Velez
+    min 72 (2T 32) local     substitution Pablo Bianco
+    min 74 (2T 34) local     try          Gastón Alejandro Ladner
+    min 74 (2T 34) local     conversion   Emanuel Reusa
+    min 76 (2T 36) local     card_yellow  Hector Velez
+    min 80 (2T 40) visitante try          Braian Alexis Sanchez Rodriguez
+  marcador  · eventos 34-32 · guardado 34-32
+  tries     · 4-6 (guardado —-—)
+  arbitro   · SERGIO MALDONADO (guardado: —)
+  guardado  · 26 local · 30 visitante · 28 eventos
+
+manke-la-calera vs rosedal-r-c · 62bf0694 · tarjeta 296837  ·  6dbd65b0-0f49-480a-ba1b-34873f5b04c1
+  local     · manke-la-calera · 26 jugadores · 0 con ficha fijada
+  visitante · rosedal-r-c · 29 jugadores · 0 con ficha fijada
+  eventos   · 29
+    min 26 (1T 26) local     try          Gabriel Mercado
+    min 34 (1T 34) local     penalty_goal Pedro Eduardo Iriarte
+    min 36 (1T 36) visitante penalty_goal Elias Nuñez
+    min 37 (1T 37) visitante try          Joaquín Gutierrez
+    min 38 (1T 38) visitante conversion   Elias Nuñez
+    min 44 (1T 44) visitante try          Franco Agustin Cabral Gonzalez
+    min 45 (2T 5) local     try          Juan Bottallo
+    min 45 (2T 5) local     conversion   Juan Bottallo
+    min 45 (2T 5) visitante substitution Franco Agustin Cabral Gonzalez
+    min 50 (2T 10) visitante card_yellow  Daniel Gerban
+    min 50 (2T 10) visitante substitution Maximiliano González
+    min 53 (2T 13) visitante try          Fernando Valentín Marzano
+    min 54 (2T 14) visitante substitution Santiago Gabriel Gomez Vega
+    min 56 (2T 16) local     penalty_goal Juan Bottallo
+    min 61 (2T 21) visitante try          Elias Nuñez
+    min 65 (2T 25) visitante substitution Ruben Cuello
+    min 65 (2T 25) visitante substitution Joaquin Marciante Brizuela
+    min 66 (2T 26) visitante substitution Fernando Valentín Marzano
+    min 67 (2T 27) local     try          Juan Pablo Riveros Marquez
+    min 67 (2T 27) local     conversion   Juan Pablo Riveros Marquez
+    min 68 (2T 28) local     card_yellow  Rodrigo Diego Boll
+    min 69 (2T 29) local     card_yellow  Rodrigo Diego Boll
+    min 69 (2T 29) local     card_red     Rodrigo Diego Boll
+    min 69 (2T 29) visitante substitution Nelson Federico Gomez Monge
+    min 71 (2T 31) visitante try          Iñaki Jaureguibehere
+    min 72 (2T 32) visitante conversion   Elias Nuñez
+    min 73 (2T 33) visitante card_yellow  Elias Nuñez
+    min 78 (2T 38) visitante try          Francisco Busleiman
+    min 79 (2T 39) visitante conversion   Tomas Gutierrez
+  marcador  · eventos 25-39 · guardado 25-39
+  tries     · 3-6 (guardado —-—)
+  arbitro   · SANTIAGO GERONIMO LOZADA CHAVES (guardado: —)
+  guardado  · 26 local · 29 visitante · 29 eventos
+
+asociacion-cordobesa-volantes vs salsipuedes-r-c · 62bf0694 · tarjeta 296838  ·  0a4e2aea-8b16-4c4c-abb8-932c2ddf0809
+  local     · asociacion-cordobesa-volantes · 21 jugadores · 0 con ficha fijada
+  visitante · salsipuedes-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 16
+    min  9 (1T 9) local     try          Andrés Benjamín Bueno
+    min 10 (1T 10) local     conversion   Gabriel Aranda
+    min 14 (1T 14) visitante try          Facu Olmos
+    min 15 (1T 15) visitante conversion   Facundo Valentin Lasa
+    min 20 (1T 20) local     try          Javier Journe
+    min 21 (1T 21) local     conversion   Gabriel Aranda
+    min 25 (1T 25) local     try          Mateo Trejo
+    min 26 (1T 26) local     conversion   Gabriel Aranda
+    min 30 (1T 30) local     try          Mateo Trejo
+    min 30 (1T 30) local     conversion   Gabriel Aranda
+    min 33 (1T 33) visitante drop_goal    Facundo Valentin Lasa
+    min 50 (2T 10) local     try          Mateo Trejo
+    min 50 (2T 10) local     conversion   Gabriel Aranda
+    min 52 (2T 12) local     card_yellow  Franco Cancinos
+    min 58 (2T 18) local     card_yellow  Diego Gonzalez
+    min 60 (2T 20) visitante try          Francis Emanuel Sepulveda Gattari
+  marcador  · eventos 35-15 · guardado 35-15
+  tries     · 5-2 (guardado —-—)
+  arbitro   · CRISTIAN SCHWARTZ (guardado: —)
+  guardado  · 21 local · 23 visitante · 16 eventos
+
+ajedrez-cosquin-r-c vs chelcos-de-villa-del-rosario · 62bf0694 · tarjeta 296839  ·  67c3cc40-6fb7-4267-bdf2-616ff183cd47
+  local     · ajedrez-cosquin-r-c · 17 jugadores · 0 con ficha fijada
+  visitante · chelcos-de-villa-del-rosario · 21 jugadores · 0 con ficha fijada
+  eventos   · 34
+    min  4 (1T 4) visitante penalty_goal Ezequiel Bianco
+    min 10 (1T 10) local     try          Milet Ludueña
+    min 11 (1T 11) local     conversion   Gabriel Guzman
+    min 18 (1T 18) visitante penalty_goal Ezequiel Bianco
+    min 20 (1T 20) local     substitution Milet Ludueña
+    min 22 (1T 22) local     try          Gabriel Cerrella
+    min 23 (1T 23) local     conversion   Gabriel Guzman
+    min 27 (1T 27) local     try          Gabriel Guzman
+    min 28 (1T 28) local     conversion   Gabriel Guzman
+    min 29 (1T 29) visitante try          Pablo Daniele
+    min 29 (1T 29) visitante conversion   Ezequiel Bianco
+    min 33 (1T 33) local     try          Gael Alvarez
+    min 38 (1T 38) local     try          Angel Tapia
+    min 39 (1T 39) local     conversion   Gabriel Guzman
+    min 40 (1T 40) local     try          Joaquín Augusto Lucero
+    min 41 (1T 41) local     conversion   Gabriel Guzman
+    min 41 (2T 1) local     substitution Mayco Nervo
+    min 48 (2T 8) local     card_yellow  Gabriel Cerrella
+    min 48 (2T 8) visitante card_yellow  Ezequiel Bianco
+    min 54 (2T 14) local     try          Cristian Eduardo Nazarre
+    min 55 (2T 15) local     conversion   Gabriel Guzman
+    min 58 (2T 18) visitante try          Bruno Guillermo Patria
+    min 58 (2T 18) visitante conversion   Ezequiel Bianco
+    min 63 (2T 23) visitante try          Pablo Daniele
+    min 63 (2T 23) visitante conversion   Ezequiel Bianco
+    min 67 (2T 27) visitante conversion   Ezequiel Bianco
+    min 67 (2T 27) visitante try          Juan Carlos Galiano
+    min 68 (2T 28) local     try          Joaquín Augusto Lucero
+    min 69 (2T 29) local     conversion   Gabriel Guzman
+    min 73 (2T 33) local     penalty_goal Gabriel Guzman
+    min 76 (2T 36) local     try          Elian Salinas
+    min 77 (2T 37) local     conversion   Gabriel Guzman
+    min 80 (2T 40) local     try          Gabriel Guzman
+    min 81 (2T 41) local     conversion   Gabriel Guzman
+  marcador  · eventos 71-34 · guardado 71-34
+  tries     · 10-4 (guardado —-—)
+  arbitro   · CLAUDIO MARCELO TEJERO (guardado: —)
+  guardado  · 17 local · 21 visitante · 34 eventos
+
+ajedrez-cosquin-r-c vs conas-r-c · 62bf0694 · tarjeta 296841  ·  ade07f49-d798-4d95-98ce-a3fa5f944a61
+  local     · ajedrez-cosquin-r-c · 17 jugadores · 0 con ficha fijada
+  visitante · conas-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min  5 (1T 5) visitante try          Patricio Verdun Sheridan
+    min 10 (1T 10) visitante try          Luciano Aprile
+    min 10 (1T 10) visitante conversion   Luciano Aprile
+    min 20 (1T 20) visitante try          Nicolas Rey
+    min 20 (1T 20) visitante conversion   Luciano Aprile
+    min 23 (1T 23) visitante try          Alan Agustín Quinteros Carrizo
+    min 27 (1T 27) visitante try          Leonel Quinteros
+    min 27 (1T 27) visitante conversion   Luciano Aprile
+    min 30 (1T 30) visitante conversion   Luciano Aprile
+    min 30 (1T 30) visitante try          Patricio Verdun Sheridan
+    min 40 (2T 0) local     substitution Gabriel Moyyss
+    min 42 (2T 2) visitante try          Alan Agustín Quinteros Carrizo
+    min 47 (2T 7) visitante try          Maximiliano Ferreyra
+    min 47 (2T 7) visitante conversion   Luciano Aprile
+    min 50 (2T 10) visitante try          Leonel Quinteros
+    min 50 (2T 10) visitante conversion   Luciano Aprile
+    min 58 (2T 18) visitante conversion   Luciano Aprile
+    min 68 (2T 28) visitante try          Alan Agustín Quinteros Carrizo
+    min 68 (2T 28) visitante conversion   Luciano Aprile
+    min 70 (2T 30) visitante try          Marcos Luna
+    min 77 (2T 37) visitante try          Alexis Ariel Araoz
+    min 77 (2T 37) visitante conversion   Luciano Aprile
+    min 80 (2T 40) local     try          Angel Tapia
+    min 81 (2T 41) local     conversion   Gabriel Guzman
+  marcador  · eventos 7-78 · guardado 7-78
+  tries     · 1-12 (guardado —-—)
+  arbitro   · LUCAS HUMERES (guardado: —)
+  guardado  · 17 local · 23 visitante · 24 eventos
+
+chelcos-de-villa-del-rosario vs asociacion-cordobesa-volantes · 62bf0694 · tarjeta 296843  ·  fe15425c-fad8-4b53-ab33-99f4c04a0399
+  local     · chelcos-de-villa-del-rosario · 19 jugadores · 0 con ficha fijada
+  visitante · asociacion-cordobesa-volantes · 21 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min  9 (1T 9) visitante try          Andrés Benjamín Bueno
+    min  9 (1T 9) visitante conversion   Gabriel Aranda
+    min 13 (1T 13) local     conversion   Ezequiel Bianco
+    min 13 (1T 13) local     try          Ignacio Cipolat
+    min 16 (1T 16) visitante try          Javier Journe
+    min 16 (1T 16) visitante conversion   Gabriel Aranda
+    min 19 (1T 19) local     try          Pablo Daniele
+    min 19 (1T 19) local     conversion   Ezequiel Bianco
+    min 36 (1T 36) visitante try          Andrés Benjamín Bueno
+    min 41 (2T 1) visitante try          Andrés Benjamín Bueno
+    min 41 (2T 1) visitante conversion   Gabriel Aranda
+    min 48 (2T 8) visitante try          Franco Nalbandian
+    min 53 (2T 13) local     try          Andrés Ezequiel Perez
+    min 53 (2T 13) local     conversion   Ezequiel Bianco
+    min 60 (2T 20) local     substitution Carlos Martin Cordoba
+    min 60 (2T 20) local     substitution Santiago Barengo
+    min 60 (2T 20) local     injury       Ezequiel Bianco
+    min 65 (2T 25) visitante injury       Javier Journe
+    min 68 (2T 28) local     try          Pablo Daniele
+    min 68 (2T 28) local     conversion   Pablo Daniele
+  marcador  · eventos 28-31 · guardado 28-31
+  tries     · 4-5 (guardado —-—)
+  arbitro   · LEANDRO LUCHETTI (guardado: —)
+  guardado  · 19 local · 21 visitante · 20 eventos
+
+salsipuedes-r-c vs manke-la-calera · 62bf0694 · tarjeta 296844  ·  8600eb7c-8689-4046-9beb-fa5268436098
+  local     · salsipuedes-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · manke-la-calera · 19 jugadores · 0 con ficha fijada
+  eventos   · 19
+    min  5 (1T 5) local     penalty_goal Facundo Valentin Lasa
+    min 14 (1T 14) visitante try          Joaquin Ricca
+    min 14 (1T 14) visitante conversion   Tomas Paez
+    min 22 (1T 22) visitante try          Matias Jamud
+    min 29 (1T 29) local     card_yellow  Jorge Gaston Almada
+    min 29 (1T 29) visitante try          Tomas Paez
+    min 29 (1T 29) visitante conversion   Tomas Paez
+    min 30 (1T 30) visitante try          Tomas Paez
+    min 30 (1T 30) visitante conversion   Tomas Paez
+    min 40 (1T 40) local     card_yellow  Leopoldo Octavio Canedi
+    min 50 (2T 10) visitante try          Marcos Congregado
+    min 51 (2T 11) local     try          Milton Grahl
+    min 52 (2T 12) local     conversion   Facundo Valentin Lasa
+    min 57 (2T 17) visitante penalty_goal Tadeo Asis
+    min 59 (2T 19) local     try          Jorge Gaston Almada
+    min 59 (2T 19) local     conversion   Facundo Valentin Lasa
+    min 79 (2T 39) local     card_yellow  Leopoldo Octavio Canedi
+    min 82 (2T 42) visitante try          Pedro Eduardo Iriarte
+    min 82 (2T 42) visitante conversion   Tomas Paez
+  marcador  · eventos 17-41 · guardado 17-41
+  tries     · 2-6 (guardado —-—)
+  arbitro   · JAVIER NICOLAS OLALLA (guardado: —)
+  guardado  · 23 local · 19 visitante · 19 eventos
+
+rosedal-r-c vs cuises-portena-rugby · 62bf0694 · tarjeta 296845  ·  eb96a874-889e-487a-847d-53189d7a050f
+  local     · rosedal-r-c · 29 jugadores · 0 con ficha fijada
+  visitante · cuises-portena-rugby · 26 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min  2 (1T 2) local     try          Tobias Gallardo
+    min 25 (1T 25) visitante penalty_try  
+    min 30 (1T 30) visitante try          Gastón Alejandro Ladner
+    min 30 (1T 30) visitante conversion   Hector Velez
+    min 32 (1T 32) local     penalty_goal Fernando Valentín Marzano
+    min 33 (1T 33) local     try          Tobias Gallardo
+    min 34 (1T 34) local     conversion   Fernando Valentín Marzano
+    min 34 (1T 34) visitante substitution Dogliani Franco
+    min 42 (2T 2) local     try          Fernando Valentín Marzano
+    min 42 (2T 2) local     conversion   Fernando Valentín Marzano
+    min 50 (2T 10) local     try          Francisco Busleiman
+    min 51 (2T 11) local     conversion   Fernando Valentín Marzano
+    min 55 (2T 15) local     try          Tobias Gallardo
+    min 55 (2T 15) local     conversion   Fernando Valentín Marzano
+    min 58 (2T 18) local     try          Tobias Gallardo
+    min 59 (2T 19) visitante substitution Pablo Bianco
+    min 62 (2T 22) visitante substitution Emilio Vilar
+    min 69 (2T 29) visitante card_yellow  Hector Velez
+    min 70 (2T 30) local     penalty_try  
+    min 75 (2T 35) visitante substitution Emanuel Reusa
+    min 75 (2T 35) visitante substitution Montu Lautaro Alexis
+    min 76 (2T 36) visitante substitution Fabián Gustavo Alessandria
+    min 78 (2T 38) visitante substitution David Giacardi
+    min 78 (2T 38) visitante substitution Marcos Martin Aghemo
+    min 78 (2T 38) visitante substitution Carlos Rivoira
+    min 81 (2T 41) local     try          Maximiliano González
+    min 82 (2T 42) local     conversion   Fernando Valentín Marzano
+  marcador  · eventos 55-14 · guardado 55-14
+  tries     · 8-2 (guardado —-—)
+  arbitro   · EDUARDO CAVAGLIA (guardado: —)
+  guardado  · 29 local · 26 visitante · 27 eventos
+
+universidad-siglo-21-rugby vs villa-libertador-r-c · 62bf0694 · tarjeta 296847  ·  ff06a1d1-bf7e-4dac-b334-46e369a17f59
+  local     · universidad-siglo-21-rugby · 23 jugadores · 0 con ficha fijada
+  visitante · villa-libertador-r-c · 21 jugadores · 0 con ficha fijada
+  eventos   · 19
+    min  7 (1T 7) visitante try          Diego Vivas
+    min  7 (1T 7) visitante conversion   Isaias Falon
+    min 14 (1T 14) local     try          Segundo Sabor Tomasini
+    min 14 (1T 14) local     conversion   Facundo Tachini
+    min 16 (1T 16) local     try          Juan Pero
+    min 25 (1T 25) local     try          Gustavo Pizarro
+    min 25 (1T 25) local     substitution Francisco Haro
+    min 37 (1T 37) visitante penalty_goal Isaias Falon
+    min 50 (2T 10) local     substitution Martin Laion
+    min 55 (2T 15) local     card_yellow  Pedro Diez Cuenca
+    min 55 (2T 15) local     substitution Gustavo Pizarro
+    min 65 (2T 25) local     substitution Juan Pero
+    min 65 (2T 25) local     substitution Joaquin Dionisi
+    min 65 (2T 25) local     substitution Santiago Joaquin Gonzalez Martinez
+    min 67 (2T 27) visitante card_yellow  Fernán Sarli
+    min 70 (2T 30) local     try          Pedro José Depalo
+    min 70 (2T 30) local     conversion   Facundo Tachini
+    min 80 (2T 40) visitante try          Isaias Falon
+    min 80 (2T 40) visitante conversion   Isaias Falon
+  marcador  · eventos 24-17 · guardado 24-17
+  tries     · 4-2 (guardado —-—)
+  arbitro   · JAVIER NICOLAS OLALLA (guardado: —)
+  guardado  · 23 local · 21 visitante · 19 eventos
+
+cuises-portena-rugby vs salsipuedes-r-c · 62bf0694 · tarjeta 296848  ·  2602cfb4-4dac-466d-a242-f67329f53729
+  local     · cuises-portena-rugby · 30 jugadores · 0 con ficha fijada
+  visitante · salsipuedes-r-c · 19 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min 11 (1T 11) local     conversion   Emanuel Reusa
+    min 11 (1T 11) local     try          David Giacardi
+    min 22 (1T 22) local     substitution Gerónimo Calatroni
+    min 23 (1T 23) local     try          Gerónimo Calatroni
+    min 23 (1T 23) local     conversion   Emanuel Reusa
+    min 25 (1T 25) local     try          Hector Velez
+    min 25 (1T 25) local     conversion   Emanuel Reusa
+    min 34 (1T 34) local     try          Gerónimo Calatroni
+    min 34 (1T 34) local     conversion   Emanuel Reusa
+    min 44 (2T 4) local     conversion   Emanuel Reusa
+    min 44 (2T 4) local     try          Gerónimo Calatroni
+    min 46 (2T 6) local     try          Gerónimo Calatroni
+    min 46 (2T 6) local     conversion   Emanuel Reusa
+    min 47 (2T 7) local     substitution Marcos Martin Aghemo
+    min 53 (2T 13) local     try          Gastón Alejandro Ladner
+    min 53 (2T 13) local     conversion   Dogliani Franco
+    min 54 (2T 14) local     substitution Hector Velez
+    min 60 (2T 20) local     substitution Fabián Gustavo Alessandria
+    min 60 (2T 20) local     substitution Leandro Fabian Reisenauer
+    min 60 (2T 20) local     substitution Carlos Rivoira
+    min 66 (2T 26) local     substitution Dogliani Franco
+    min 66 (2T 26) local     substitution David Giacardi
+    min 76 (2T 36) visitante try          Jorge Gaston Almada
+    min 76 (2T 36) visitante conversion   Jorge Gaston Almada
+  marcador  · eventos 49-7 · guardado 49-7
+  tries     · 7-1 (guardado —-—)
+  arbitro   · LEANDRO LUCHETTI (guardado: —)
+  guardado  · 30 local · 19 visitante · 24 eventos
+
+manke-la-calera vs chelcos-de-villa-del-rosario · 62bf0694 · tarjeta 296849  ·  06d0fd10-58f7-489e-a6bb-a9d44e2fb461
+  local     · manke-la-calera · 20 jugadores · 0 con ficha fijada
+  visitante · chelcos-de-villa-del-rosario · 20 jugadores · 0 con ficha fijada
+  eventos   · 21
+    min  3 (1T 3) local     penalty_try  
+    min 21 (1T 21) local     try          Diego Martin Pinet
+    min 21 (1T 21) local     conversion   Joaquin Ricca
+    min 22 (1T 22) local     try          Joan Uriel Boileau
+    min 22 (1T 22) local     conversion   Joaquin Ricca
+    min 22 (1T 22) visitante card_yellow  Julio Alvarez
+    min 30 (1T 30) local     try          Joaquin Ricca
+    min 30 (1T 30) local     conversion   Joaquin Ricca
+    min 37 (1T 37) visitante try          Gonzalo Manuel Fernandez
+    min 41 (1T 41) visitante try          Pablo Daniele
+    min 41 (1T 41) visitante conversion   Pablo Daniele
+    min 50 (2T 10) local     try          Juan Bottallo
+    min 50 (2T 10) local     conversion   Naim Oliva
+    min 52 (2T 12) visitante try          Pablo Daniele
+    min 52 (2T 12) visitante conversion   Pablo Daniele
+    min 60 (2T 20) local     try          Naim Oliva
+    min 60 (2T 20) local     conversion   Naim Oliva
+    min 70 (2T 30) local     card_yellow  Gabriel Mercado
+    min 75 (2T 35) local     try          Joaquin Ricca
+    min 75 (2T 35) local     conversion   Joaquin Ricca
+    min 78 (2T 38) local     card_yellow  Naim Oliva
+  marcador  · eventos 49-19 · guardado 49-19
+  tries     · 7-3 (guardado —-—)
+  arbitro   · ALEJANDRO AUGUSTO AGUERO (guardado: —)
+  guardado  · 20 local · 20 visitante · 21 eventos
+
+asociacion-cordobesa-volantes vs conas-r-c · 62bf0694 · tarjeta 296850  ·  58e30288-eb11-4be9-b4eb-95fdd64fc9e1
+  local     · asociacion-cordobesa-volantes · 21 jugadores · 0 con ficha fijada
+  visitante · conas-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 15
+    min  1 (1T 1) visitante try          Leonel Quinteros
+    min  1 (1T 1) visitante conversion   Luciano Aprile
+    min 15 (1T 15) visitante penalty_try  
+    min 20 (1T 20) local     card_yellow  Mateo Trejo
+    min 24 (1T 24) visitante try          Patricio Verdun Sheridan
+    min 24 (1T 24) visitante conversion   Luciano Aprile
+    min 34 (1T 34) visitante try          Alan Agustín Quinteros Carrizo
+    min 34 (1T 34) visitante conversion   Luciano Aprile
+    min 47 (2T 7) visitante try          Alexis Ariel Araoz
+    min 47 (2T 7) visitante conversion   Luciano Aprile
+    min 55 (2T 15) visitante try          Matias Montoya
+    min 61 (2T 21) visitante card_yellow  Facundo Sabre
+    min 65 (2T 25) visitante try          Alan Agustín Quinteros Carrizo
+    min 65 (2T 25) visitante conversion   Luciano Aprile
+    min 80 (2T 40) visitante try          Luciano Zacarias Rojas
+  marcador  · eventos 0-52 · guardado 0-52
+  tries     · 0-8 (guardado —-—)
+  arbitro   · FEDERICO PREGOT (guardado: —)
+  guardado  · 21 local · 23 visitante · 15 eventos
+
+conas-r-c vs manke-la-calera · 62bf0694 · tarjeta 296854  ·  f26ce4cf-852b-476d-9ef7-8eb5b43c2994
+  local     · conas-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · manke-la-calera · 19 jugadores · 0 con ficha fijada
+  eventos   · 23
+    min 11 (1T 11) local     try          Alexis Ariel Araoz
+    min 11 (1T 11) local     conversion   Luciano Aprile
+    min 21 (1T 21) local     try          Alan Agustín Quinteros Carrizo
+    min 21 (1T 21) local     conversion   Luciano Aprile
+    min 25 (1T 25) visitante try          Joan Uriel Boileau
+    min 27 (1T 27) local     try          Alexis Ariel Araoz
+    min 27 (1T 27) local     conversion   Luciano Aprile
+    min 30 (1T 30) visitante penalty_goal Tomas Paez
+    min 31 (1T 31) local     try          Alan Agustín Quinteros Carrizo
+    min 31 (1T 31) local     conversion   Luciano Aprile
+    min 33 (1T 33) local     try          Nicolas Rey
+    min 33 (1T 33) local     conversion   Luciano Aprile
+    min 40 (1T 40) local     injury       Alexis Ariel Araoz
+    min 45 (2T 5) visitante try          Tomas Paez
+    min 45 (2T 5) visitante conversion   Tomas Paez
+    min 46 (2T 6) local     try          Nicolas Rey
+    min 46 (2T 6) local     conversion   Luciano Aprile
+    min 55 (2T 15) local     penalty_goal Luciano Aprile
+    min 56 (2T 16) local     try          Miqueas Moretto
+    min 56 (2T 16) local     conversion   Luciano Aprile
+    min 73 (2T 33) local     try          Alan Agustín Quinteros Carrizo
+    min 73 (2T 33) local     conversion   Luciano Aprile
+    min 80 (2T 40) local     try          Nicolas Rey
+  marcador  · eventos 64-15 · guardado 64-15
+  tries     · 9-2 (guardado —-—)
+  arbitro   · LUCAS HUMERES (guardado: —)
+  guardado  · 23 local · 19 visitante · 23 eventos
+
+rosedal-r-c vs villa-libertador-r-c · 62bf0694 · tarjeta 296858  ·  403e90d6-6e6a-43dd-bffe-66ee309d35e2
+  local     · rosedal-r-c · 28 jugadores · 0 con ficha fijada
+  visitante · villa-libertador-r-c · 17 jugadores · 0 con ficha fijada
+  eventos   · 32
+    min  3 (1T 3) visitante penalty_goal Lihuel Corzo
+    min 15 (1T 15) local     substitution Bruno Aleman
+    min 18 (1T 18) local     substitution Daniel Gerban
+    min 18 (1T 18) local     card_yellow  Maximiliano González
+    min 20 (1T 20) visitante try          Christian David Ivanoff
+    min 20 (1T 20) visitante conversion   Lihuel Corzo
+    min 25 (1T 25) visitante card_yellow  Braian Alexis Sanchez Rodriguez
+    min 32 (1T 32) local     try          Ignacio Exequiel Cuneo
+    min 33 (1T 33) local     conversion   Fernando Valentín Marzano
+    min 33 (1T 33) local     card_yellow  Fernando Valentín Marzano
+    min 35 (1T 35) visitante card_yellow  Erick Maximiliano Ortiz
+    min 42 (2T 2) local     try          Francisco Busleiman
+    min 50 (2T 10) local     card_yellow  Fernando Valentín Marzano
+    min 50 (2T 10) local     card_red     Fernando Valentín Marzano
+    min 50 (2T 10) visitante card_yellow  Juan Sebastian Vazquez
+    min 52 (2T 12) local     card_yellow  Ruben Cuello
+    min 53 (2T 13) visitante try          Erick Maximiliano Ortiz
+    min 55 (2T 15) local     substitution David Ezequiel Silva
+    min 59 (2T 19) local     try          Tobias Gallardo
+    min 60 (2T 20) visitante card_yellow  Erick Maximiliano Ortiz
+    min 60 (2T 20) visitante card_red     Erick Maximiliano Ortiz
+    min 66 (2T 26) local     try          Francisco Busleiman
+    min 67 (2T 27) local     conversion   Elias Nuñez
+    min 69 (2T 29) local     penalty_try  
+    min 69 (2T 29) visitante try          Gaston Moyano
+    min 70 (2T 30) visitante injury       Lihuel Corzo
+    min 73 (2T 33) local     substitution Nelson Federico Gomez Monge
+    min 73 (2T 33) local     substitution Kevin Velez
+    min 76 (2T 36) local     substitution Tomas Gutierrez
+    min 76 (2T 36) local     substitution Joaquin Marciante Brizuela
+    min 79 (2T 39) local     try          Ruben Cuello
+    min 80 (2T 40) local     conversion   Nicolas Corvalán
+  marcador  · eventos 38-20 · guardado 38-20
+  tries     · 6-3 (guardado —-—)
+  arbitro   · FEDERICO PREGOT (guardado: —)
+  guardado  · 28 local · 17 visitante · 32 eventos
+
+chelcos-de-villa-del-rosario vs cuises-portena-rugby · 62bf0694 · tarjeta 296856  ·  f8861b94-09ea-481c-bfb7-4ef0ea2e03f6
+  local     · chelcos-de-villa-del-rosario · 21 jugadores · 0 con ficha fijada
+  visitante · cuises-portena-rugby · 30 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min  1 (1T 1) visitante try          Leandro Fabian Reisenauer
+    min  1 (1T 1) visitante conversion   Hector Velez
+    min 12 (1T 12) visitante try          Federico Ostertag
+    min 24 (1T 24) local     try          Andrés Ezequiel Perez
+    min 25 (1T 25) local     conversion   Pablo Daniele
+    min 40 (1T 40) visitante try          Montu Lautaro Alexis
+    min 41 (2T 1) local     substitution Juan Rosas
+    min 53 (2T 13) visitante try          Montu Lautaro Alexis
+    min 53 (2T 13) visitante conversion   Emanuel Reusa
+    min 62 (2T 22) visitante try          Nicolás Guillermo Bruna
+    min 62 (2T 22) visitante conversion   Emanuel Reusa
+    min 65 (2T 25) local     try          Pablo Daniele
+    min 65 (2T 25) local     conversion   Pablo Daniele
+    min 66 (2T 26) visitante try          Fabián Gustavo Alessandria
+    min 66 (2T 26) visitante conversion   Emanuel Reusa
+    min 66 (2T 26) visitante substitution Mayco Gonzalo Bertotti
+    min 70 (2T 30) visitante substitution Montu Lautaro Alexis
+    min 70 (2T 30) visitante substitution Hector Velez
+    min 70 (2T 30) visitante substitution Carlos Rivoira
+    min 70 (2T 30) visitante substitution Marcos Martin Aghemo
+    min 70 (2T 30) visitante substitution Federico Ostertag
+    min 72 (2T 32) visitante card_yellow  Mauricio Molina
+    min 79 (2T 39) local     try          Joaquin Berdasco
+    min 80 (2T 40) local     conversion   Gonzalo Gonzalez
+  marcador  · eventos 21-38 · guardado 21-38
+  tries     · 3-6 (guardado —-—)
+  arbitro   · PABLO GERARDO RONCO (guardado: —)
+  guardado  · 21 local · 30 visitante · 24 eventos
+
+ajedrez-cosquin-r-c vs universidad-siglo-21-rugby · 62bf0694 · tarjeta 296853  ·  9af02be3-6284-48a2-afab-657d7048fd3d
+  local     · ajedrez-cosquin-r-c · 19 jugadores · 0 con ficha fijada
+  visitante · universidad-siglo-21-rugby · 23 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min  1 (1T 1) visitante try          Facundo Tachini
+    min  1 (1T 1) visitante conversion   Facundo Tachini
+    min 10 (1T 10) visitante penalty_goal Facundo Tachini
+    min 14 (1T 14) visitante try          Lucas Ezequiel Ceballos Faas
+    min 22 (1T 22) local     try          Jose Francisco Orue
+    min 23 (1T 23) local     conversion   Gabriel Guzman
+    min 25 (1T 25) visitante try          Pedro Diez Cuenca
+    min 30 (1T 30) visitante try          Juan Pero
+    min 33 (1T 33) visitante try          Santiago Joaquin Gonzalez Martinez
+    min 34 (1T 34) visitante conversion   Facundo Tachini
+    min 40 (2T 0) local     substitution Marcos Emanuel Juarez
+    min 40 (2T 0) local     substitution Cristian Eduardo Nazarre
+    min 40 (2T 0) local     substitution Angel Agustin Zaya Galiotti
+    min 41 (2T 1) visitante try          Segundo Sabor Tomasini
+    min 45 (2T 5) local     try          Elian Salinas
+    min 53 (2T 13) visitante try          Facundo Tachini
+    min 56 (2T 16) visitante substitution Bruno Savarella
+    min 56 (2T 16) visitante substitution Mateo Fait
+    min 60 (2T 20) visitante substitution Juan Pero
+    min 67 (2T 27) visitante try          Facundo Tachini
+    min 67 (2T 27) visitante conversion   Agustin Villanova
+    min 74 (2T 34) visitante try          Santiago Joaquin Gonzalez Martinez
+    min 74 (2T 34) visitante conversion   Agustin Villanova
+    min 77 (2T 37) visitante try          Agustin Mazzarini
+    min 77 (2T 37) visitante conversion   Agustin Villanova
+  marcador  · eventos 12-63 · guardado 12-63
+  tries     · 2-10 (guardado —-—)
+  arbitro   · JAVIER NICOLAS OLALLA (guardado: —)
+  guardado  · 19 local · 23 visitante · 25 eventos
+
+asociacion-cordobesa-volantes vs ajedrez-cosquin-r-c · 62bf0694 · tarjeta 296864  ·  baae91aa-642d-4e04-91ba-6d01483c4063
+  local     · asociacion-cordobesa-volantes · 23 jugadores · 0 con ficha fijada
+  visitante · ajedrez-cosquin-r-c · 18 jugadores · 0 con ficha fijada
+  eventos   · 21
+    min  3 (1T 3) local     try          Franco Nalbandian
+    min 25 (1T 25) local     card_yellow  Ignacio Jose Berazadi
+    min 25 (1T 25) local     card_yellow  Diego Gonzalez
+    min 27 (1T 27) local     try          Ignacio Jose Berazadi
+    min 28 (1T 28) local     conversion   Gabriel Aranda
+    min 34 (1T 34) local     try          Diego Gonzalez
+    min 35 (1T 35) local     conversion   Gabriel Aranda
+    min 40 (1T 40) visitante try          Joaquín Augusto Lucero
+    min 41 (1T 41) visitante conversion   Gabriel Guzman
+    min 43 (2T 3) local     try          Gabriel Aranda
+    min 44 (2T 4) local     conversion   Gabriel Aranda
+    min 50 (2T 10) visitante try          Gabriel Guzman
+    min 51 (2T 11) visitante conversion   Gabriel Guzman
+    min 54 (2T 14) visitante try          Joaquín Augusto Lucero
+    min 55 (2T 15) visitante conversion   Gabriel Guzman
+    min 58 (2T 18) local     try          Diego Gonzalez
+    min 59 (2T 19) local     conversion   Gabriel Aranda
+    min 62 (2T 22) local     try          Gabriel Aranda
+    min 63 (2T 23) local     conversion   Gabriel Aranda
+    min 73 (2T 33) visitante try          Elian Salinas
+    min 75 (2T 35) visitante conversion   Gabriel Guzman
+  marcador  · eventos 40-28 · guardado 40-28
+  tries     · 6-4 (guardado —-—)
+  arbitro   · CRISTIAN SCHWARTZ (guardado: —)
+  guardado  · 23 local · 18 visitante · 21 eventos
+
+cuises-portena-rugby vs conas-r-c · 62bf0694 · tarjeta 296863  ·  69b009a0-2137-410f-a885-9e5cbb23ebf5
+  local     · cuises-portena-rugby · 30 jugadores · 0 con ficha fijada
+  visitante · conas-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 29
+    min  4 (1T 4) visitante try          Alan Agustín Quinteros Carrizo
+    min  4 (1T 4) visitante conversion   Luciano Aprile
+    min  9 (1T 9) visitante try          Leonel Quinteros
+    min  9 (1T 9) visitante conversion   Luciano Aprile
+    min 17 (1T 17) visitante card_red     Alexis Cravero
+    min 19 (1T 19) local     try          Montu Lautaro Alexis
+    min 19 (1T 19) local     conversion   Emanuel Reusa
+    min 23 (1T 23) visitante try          Maximiliano Ferreyra
+    min 29 (1T 29) visitante try          Alan Agustín Quinteros Carrizo
+    min 29 (1T 29) visitante conversion   Luciano Aprile
+    min 38 (1T 38) visitante card_yellow  Luciano Aprile
+    min 40 (1T 40) visitante penalty_goal Nicolas Rey
+    min 44 (2T 4) local     substitution Emanuel Reusa
+    min 57 (2T 17) visitante try          Alan Agustín Quinteros Carrizo
+    min 58 (2T 18) local     substitution Lucas Pratti
+    min 62 (2T 22) local     substitution Marcos Martin Aghemo
+    min 67 (2T 27) local     injury       Hector Velez
+    min 67 (2T 27) local     injury       Hector Velez
+    min 67 (2T 27) local     substitution Hector Velez
+    min 67 (2T 27) local     substitution Federico Ostertag
+    min 68 (2T 28) visitante try          Alan Agustín Quinteros Carrizo
+    min 68 (2T 28) visitante conversion   Nicolas Rey
+    min 73 (2T 33) local     try          Gerónimo Calatroni
+    min 73 (2T 33) local     substitution Montu Lautaro Alexis
+    min 73 (2T 33) local     substitution Nicolás Macello
+    min 73 (2T 33) local     conversion   Gastón Alejandro Ladner
+    min 73 (2T 33) local     substitution Leandro Fabian Reisenauer
+    min 78 (2T 38) visitante try          Nicolas Rey
+    min 78 (2T 38) visitante conversion   Luciano Aprile
+  marcador  · eventos 14-48 · guardado 14-48
+  tries     · 2-7 (guardado —-—)
+  arbitro   · LEANDRO LUCHETTI (guardado: —)
+  guardado  · 30 local · 23 visitante · 29 eventos
+
+villa-libertador-r-c vs salsipuedes-r-c · 62bf0694 · tarjeta 296860  ·  0c14e3a1-de52-4617-8303-bebc010d478d
+  local     · villa-libertador-r-c · 21 jugadores · 0 con ficha fijada
+  visitante · salsipuedes-r-c · 24 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min  4 (1T 4) local     try          Braian Alexis Sanchez Rodriguez
+    min  4 (1T 4) local     conversion   Isaias Falon
+    min  9 (1T 9) local     penalty_try  
+    min  9 (1T 9) visitante penalty_goal Facundo Valentin Lasa
+    min 12 (1T 12) local     try          Christian David Ivanoff
+    min 26 (1T 26) local     try          Romeo Diaz Garcia
+    min 26 (1T 26) local     conversion   Isaias Falon
+    min 31 (1T 31) local     try          Isaias Falon
+    min 31 (1T 31) local     conversion   Isaias Falon
+    min 37 (1T 37) local     try          Romeo Diaz Garcia
+    min 37 (1T 37) local     conversion   Isaias Falon
+    min 43 (1T 43) local     try          Fabrizio Pedernera
+    min 43 (1T 43) local     conversion   Isaias Falon
+    min 41 (2T 1) local     try          Diego Vivas
+    min 41 (2T 1) local     conversion   Isaias Falon
+    min 48 (2T 8) local     try          Gaston Moyano
+    min 48 (2T 8) local     conversion   Isaias Falon
+    min 49 (2T 9) visitante card_yellow  Jorge Gaston Almada
+    min 65 (2T 25) local     try          Diego Vivas
+    min 65 (2T 25) local     conversion   Isaias Falon
+    min 67 (2T 27) local     try          Romeo Diaz Garcia
+    min 67 (2T 27) local     conversion   Isaias Falon
+    min 72 (2T 32) local     try          Isaias Falon
+    min 72 (2T 32) local     conversion   Isaias Falon
+  marcador  · eventos 82-3 · guardado 82-3
+  tries     · 12-0 (guardado —-—)
+  arbitro   · LAUTARO JOAQUIN QUIROGA CAFURE (guardado: —)
+  guardado  · 21 local · 24 visitante · 24 eventos
+
+universidad-siglo-21-rugby vs rosedal-r-c · 62bf0694 · tarjeta 296859  ·  90fa219b-8d9a-4c16-93f7-373faca8eff1
+  local     · universidad-siglo-21-rugby · 22 jugadores · 0 con ficha fijada
+  visitante · rosedal-r-c · 30 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min  7 (1T 7) local     try          Octavio Laporte
+    min  7 (1T 7) local     conversion   Lucas Ezequiel Ceballos Faas
+    min 11 (1T 11) local     try          Maximiliano Tomas Carpio Crembil
+    min 11 (1T 11) local     conversion   Lucas Ezequiel Ceballos Faas
+    min 16 (1T 16) visitante try          Iñaki Jaureguibehere
+    min 23 (1T 23) visitante try          Edgardo Omar González
+    min 26 (1T 26) local     penalty_goal Lucas Ezequiel Ceballos Faas
+    min 34 (1T 34) local     card_yellow  Lucas Ezequiel Ceballos Faas
+    min 34 (1T 34) visitante conversion   Edgardo Omar González
+    min 34 (1T 34) visitante try          Iñaki Jaureguibehere
+    min 56 (2T 16) local     card_yellow  Maximiliano Tomas Carpio Crembil
+    min 59 (2T 19) local     penalty_goal Lucas Ezequiel Ceballos Faas
+    min 60 (2T 20) visitante try          Edgardo Omar González
+    min 63 (2T 23) local     penalty_goal Lucas Ezequiel Ceballos Faas
+    min 67 (2T 27) local     try          Maximiliano Tomas Carpio Crembil
+    min 71 (2T 31) visitante try          Iñaki Jaureguibehere
+    min 80 (2T 40) visitante try          Iñaki Jaureguibehere
+    min 80 (2T 40) visitante conversion   Matias José Tedesco Sánchez
+  marcador  · eventos 28-34 · guardado 28-34
+  tries     · 3-6 (guardado —-—)
+  arbitro   · FEDERICO PREGOT (guardado: —)
+  guardado  · 22 local · 30 visitante · 18 eventos
+
+salsipuedes-r-c vs rosedal-r-c · 62bf0694 · tarjeta 296870  ·  45c181bf-89b8-4c29-ac36-c0ceb7bc8d8c
+  local     · salsipuedes-r-c · 26 jugadores · 0 con ficha fijada
+  visitante · rosedal-r-c · 30 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min 16 (1T 16) local     try          Francis Emanuel Sepulveda Gattari
+    min 17 (1T 17) local     conversion   Facundo Valentin Lasa
+    min 20 (1T 20) visitante card_yellow  Tobias Gallardo
+    min 25 (1T 25) visitante try          Francisco Busleiman
+    min 26 (1T 26) visitante conversion   Bruno Aleman
+    min 38 (1T 38) visitante penalty_try  
+    min 38 (1T 38) visitante substitution Bruno Aleman
+    min 38 (1T 38) visitante substitution Nicolás Barki
+    min 77 (2T 37) local     card_yellow  Ricardo Cuello
+    min 85 (2T 45) visitante substitution Facundo González
+    min 85 (2T 45) visitante substitution Santiago Gabriel Gomez Vega
+    min 85 (2T 45) visitante substitution Kevin Velez
+    min 91 (2T 51) visitante try          Fernando Valentín Marzano
+    min 100 (2T 60) visitante try          Maximiliano González
+    min 101 (2T 61) visitante substitution Benjamin Tobares
+    min 104 (2T 64) visitante substitution Franco Agustin Cabral Gonzalez
+    min 113 (2T 73) visitante substitution Ivan Forni
+    min 115 (2T 75) visitante card_yellow  Joaquín Gutierrez
+  marcador  · eventos 7-24 · guardado 7-24
+  tries     · 1-4 (guardado —-—)
+  arbitro   · CARLOS RAFAEL HERNANDEZ (guardado: —)
+  guardado  · 26 local · 30 visitante · 18 eventos
+
+chelcos-de-villa-del-rosario vs villa-libertador-r-c · 62bf0694 · tarjeta 296869  ·  1c1f8187-94e1-4981-8312-5e4f3136b2ed
+  local     · chelcos-de-villa-del-rosario · 21 jugadores · 0 con ficha fijada
+  visitante · villa-libertador-r-c · 29 jugadores · 0 con ficha fijada
+  eventos   · 14
+    min  3 (1T 3) visitante conversion   Braian Alexis Sanchez Rodriguez
+    min  8 (1T 8) visitante try          Braian Alexis Sanchez Rodriguez
+    min  9 (1T 9) visitante conversion   Braian Alexis Sanchez Rodriguez
+    min 18 (1T 18) visitante try          Braian Alexis Sanchez Rodriguez
+    min 18 (1T 18) visitante conversion   Braian Alexis Sanchez Rodriguez
+    min 25 (1T 25) visitante try          Braian Alexis Sanchez Rodriguez
+    min 25 (1T 25) visitante conversion   Braian Alexis Sanchez Rodriguez
+    min 30 (1T 30) visitante try          Braian Alexis Sanchez Rodriguez
+    min 30 (1T 30) visitante conversion   Braian Alexis Sanchez Rodriguez
+    min 75 (2T 35) visitante try          Braian Alexis Sanchez Rodriguez
+    min 76 (2T 36) visitante penalty_goal Braian Alexis Sanchez Rodriguez
+    min 79 (2T 39) visitante penalty_goal Braian Alexis Sanchez Rodriguez
+    min 80 (2T 40) local     try          Carlos Martin Cordoba
+    min 80 (2T 40) local     conversion   Carlos Martin Cordoba
+  marcador  · eventos 7-41 · guardado 7-41
+  tries     · 1-5 (guardado —-—)
+  arbitro   · LEANDRO LUCHETTI (guardado: —)
+  guardado  · 21 local · 29 visitante · 14 eventos
+
+ajedrez-cosquin-r-c vs manke-la-calera · 62bf0694 · tarjeta 296866  ·  ebd2c88a-5b97-481a-9113-da378c2bed5e
+  local     · ajedrez-cosquin-r-c · 19 jugadores · 0 con ficha fijada
+  visitante · manke-la-calera · 22 jugadores · 0 con ficha fijada
+  eventos   · 23
+    min  9 (1T 9) visitante penalty_goal Tadeo Asis
+    min 11 (1T 11) local     try          Carlos Javier Flores Kanter
+    min 11 (1T 11) local     conversion   Gabriel Guzman
+    min 15 (1T 15) visitante substitution Cesar Varangot
+    min 20 (1T 20) local     substitution Marcos Emanuel Juarez
+    min 20 (1T 20) visitante substitution Matias Quiroga
+    min 23 (1T 23) visitante penalty_goal Tadeo Asis
+    min 28 (1T 28) visitante try          Rodrigo Diego Boll
+    min 30 (1T 30) visitante substitution Jonathan Robledo
+    min 32 (1T 32) local     try          Marcos Gabriel Areco Quinodoz
+    min 48 (2T 8) visitante try          Juan Bottallo
+    min 48 (2T 8) visitante conversion   Tadeo Asis
+    min 50 (2T 10) local     try          Claudio Rodrigo Perez
+    min 50 (2T 10) local     conversion   Gabriel Guzman
+    min 55 (2T 15) visitante card_yellow  Joaquin Ricca
+    min 65 (2T 25) local     card_yellow  Carlos Javier Flores Kanter
+    min 65 (2T 25) local     card_red     Carlos Javier Flores Kanter
+    min 65 (2T 25) local     substitution Kasem Asad
+    min 74 (2T 34) visitante try          Francisco Galarreta
+    min 75 (2T 35) local     card_yellow  Carlos Javier Flores Kanter
+    min 75 (2T 35) visitante conversion   Tadeo Asis
+    min 75 (2T 35) visitante card_yellow  Joaquin Ricca
+    min 75 (2T 35) visitante card_red     Joaquin Ricca
+  marcador  · eventos 19-25 · guardado 19-25
+  tries     · 3-3 (guardado —-—)
+  arbitro   · DANIEL ALEJANDRO FUNES (guardado: —)
+  guardado  · 19 local · 22 visitante · 23 eventos
+
+asociacion-cordobesa-volantes vs universidad-siglo-21-rugby · 62bf0694 · tarjeta 296865  ·  860cd150-e986-4b40-989a-67e7568e84ce
+  local     · asociacion-cordobesa-volantes · 23 jugadores · 0 con ficha fijada
+  visitante · universidad-siglo-21-rugby · 21 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min  2 (1T 2) local     try          Cristian Yefim Carivali
+    min  2 (1T 2) local     conversion   Gabriel Aranda
+    min 14 (1T 14) local     try          Rodrigo Arias
+    min 15 (1T 15) local     conversion   Gabriel Aranda
+    min 17 (1T 17) visitante substitution Santiago Joaquin Gonzalez Martinez
+    min 23 (1T 23) local     card_yellow  Matias Roberto Dutto
+    min 27 (1T 27) local     injury       Matias Roberto Dutto
+    min 27 (1T 27) local     substitution Matias Roberto Dutto
+    min 33 (1T 33) local     penalty_goal Gabriel Aranda
+    min 39 (1T 39) visitante try          Joaquin Iscaro
+    min 50 (2T 10) local     try          Maximo Juan Renzi
+    min 56 (2T 16) local     try          Gabriel Aranda
+    min 58 (2T 18) visitante try          Maximiliano Tomas Carpio Crembil
+    min 59 (2T 19) visitante conversion   Agustin Villanova
+    min 60 (2T 20) local     card_yellow  Ivan Verdu
+    min 63 (2T 23) visitante try          Pedro José Depalo
+    min 64 (2T 24) visitante conversion   Agustin Villanova
+    min 68 (2T 28) visitante injury       Lucas Ezequiel Ceballos Faas
+    min 70 (2T 30) visitante substitution Joaquin Bravo
+    min 73 (2T 33) visitante card_yellow  Pedro José Depalo
+  marcador  · eventos 27-19 · guardado 27-19
+  tries     · 4-3 (guardado —-—)
+  arbitro   · PABLO DANIEL DIONICIO BENITEZ (guardado: —)
+  guardado  · 23 local · 21 visitante · 20 eventos
+
+manke-la-calera vs asociacion-cordobesa-volantes · 62bf0694 · tarjeta 296876  ·  0baeca34-ff53-46f0-b40c-d9dd678f74f4
+  local     · manke-la-calera · 24 jugadores · 0 con ficha fijada
+  visitante · asociacion-cordobesa-volantes · 23 jugadores · 0 con ficha fijada
+  eventos   · 13
+    min  3 (1T 3) local     try          Naim Oliva
+    min  3 (1T 3) local     conversion   Naim Oliva
+    min 17 (1T 17) local     try          Francisco Galarreta
+    min 18 (1T 18) local     card_yellow  Juan Bottallo
+    min 18 (1T 18) visitante card_yellow  Rodrigo Arias
+    min 51 (2T 11) visitante try          Juan Palacios
+    min 52 (2T 12) visitante conversion   Gabriel Aranda
+    min 64 (2T 24) local     try          Juan Bottallo
+    min 70 (2T 30) local     try          Francisco Galarreta
+    min 70 (2T 30) local     card_yellow  Diego Martin Pinet
+    min 72 (2T 32) visitante try          Diego Gonzalez
+    min 73 (2T 33) visitante conversion   Gabriel Aranda
+    min 78 (2T 38) visitante injury       Maximo Juan Renzi
+  marcador  · eventos 22-14 · guardado 22-14
+  tries     · 4-2 (guardado —-—)
+  arbitro   · CRISTIAN SCHWARTZ (guardado: —)
+  guardado  · 24 local · 23 visitante · 13 eventos
+
+cuises-portena-rugby vs ajedrez-cosquin-r-c · 62bf0694 · tarjeta 296875  ·  d46f7e28-377c-4f44-ba0a-8e47ceb2b222
+  local     · cuises-portena-rugby · 30 jugadores · 0 con ficha fijada
+  visitante · ajedrez-cosquin-r-c · 20 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min  8 (1T 8) local     try          Fabián Gustavo Alessandria
+    min 13 (1T 13) visitante try          Jose Francisco Orue
+    min 14 (1T 14) visitante conversion   Gabriel Guzman
+    min 25 (1T 25) local     try          Mayco Gonzalo Bertotti
+    min 25 (1T 25) local     conversion   Emanuel Reusa
+    min 30 (1T 30) local     try          Mayco Gonzalo Bertotti
+    min 30 (1T 30) local     conversion   Emanuel Reusa
+    min 36 (1T 36) visitante try          Marcos Gabriel Areco Quinodoz
+    min 40 (1T 40) local     try          Mayco Gonzalo Bertotti
+    min 45 (2T 5) local     substitution Marcos Martin Aghemo
+    min 45 (2T 5) local     try          Federico Ostertag
+    min 45 (2T 5) local     conversion   Emanuel Reusa
+    min 52 (2T 12) local     try          Nicolás Guillermo Bruna
+    min 55 (2T 15) visitante try          Gabriel Guzman
+    min 56 (2T 16) visitante conversion   Gabriel Guzman
+    min 58 (2T 18) local     substitution Mayco Gonzalo Bertotti
+    min 65 (2T 25) local     substitution David Giacardi
+    min 65 (2T 25) local     substitution Nicolás Macello
+    min 65 (2T 25) local     substitution Carlos Rivoira
+    min 65 (2T 25) local     substitution Lucas Pratti
+    min 74 (2T 34) local     card_yellow  Edelmar Beccaria
+    min 74 (2T 34) visitante try          Cristian Eduardo Nazarre
+    min 78 (2T 38) visitante card_yellow  Gabriel Guzman
+    min 80 (2T 40) local     try          Gerónimo Calatroni
+    min 80 (2T 40) local     conversion   Hector Velez
+  marcador  · eventos 43-24 · guardado 43-24
+  tries     · 7-4 (guardado —-—)
+  arbitro   · LEANDRO LUCHETTI (guardado: —)
+  guardado  · 30 local · 20 visitante · 25 eventos
+
+villa-libertador-r-c vs conas-r-c · 62bf0694 · tarjeta 296874  ·  69c44e75-f919-4e19-98a9-d74da4bdb4a5
+  local     · villa-libertador-r-c · 30 jugadores · 0 con ficha fijada
+  visitante · conas-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min 16 (1T 16) visitante penalty_goal Luciano Aprile
+    min 20 (1T 20) visitante try          Juan Gabriel Almada
+    min 20 (1T 20) visitante conversion   Luciano Aprile
+    min 26 (1T 26) visitante try          Geronimo Facundo Gomez Lelli
+    min 26 (1T 26) visitante conversion   Luciano Aprile
+    min 28 (1T 28) local     card_yellow  Diego Vivas
+    min 30 (1T 30) visitante substitution Maximiliano Ferreyra
+    min 36 (1T 36) visitante substitution Marcos Luna
+    min 40 (1T 40) visitante penalty_goal Luciano Aprile
+    min 42 (2T 2) visitante substitution Tomas Nieto
+    min 50 (2T 10) local     card_yellow  Gaston Moyano
+    min 50 (2T 10) visitante try          Alan Agustín Quinteros Carrizo
+    min 53 (2T 13) visitante try          Alan Agustín Quinteros Carrizo
+    min 53 (2T 13) visitante conversion   Luciano Aprile
+    min 55 (2T 15) visitante substitution Miqueas Moretto
+    min 60 (2T 20) local     card_red     Braian Alexis Sanchez Rodriguez
+    min 60 (2T 20) visitante card_yellow  Victor Hugo Demarco
+    min 62 (2T 22) visitante substitution Paulo Farias
+    min 62 (2T 22) visitante substitution Joaquin Matias Aguirre
+    min 62 (2T 22) visitante substitution Geronimo Facundo Gomez Lelli
+    min 62 (2T 22) visitante try          Nicolas Rey
+    min 62 (2T 22) visitante conversion   Luciano Aprile
+    min 67 (2T 27) visitante try          Marcelo Ariel Coria
+    min 67 (2T 27) visitante conversion   Luciano Aprile
+    min 76 (2T 36) visitante card_yellow  Luciano Aprile
+    min 78 (2T 38) local     try          Diego Vivas
+    min 78 (2T 38) local     conversion   Lihuel Corzo
+  marcador  · eventos 7-46 · guardado 7-46
+  tries     · 1-6 (guardado —-—)
+  arbitro   · FEDERICO PREGOT (guardado: —)
+  guardado  · 30 local · 23 visitante · 27 eventos
+
+universidad-siglo-21-rugby vs salsipuedes-r-c · 62bf0694 · tarjeta 296871  ·  e014b95c-8f4c-4b4f-a77f-aa6ffc9fac57
+  local     · universidad-siglo-21-rugby · 21 jugadores · 0 con ficha fijada
+  visitante · salsipuedes-r-c · 26 jugadores · 0 con ficha fijada
+  eventos   · 10
+    min  5 (1T 5) visitante try          Facundo Valentin Lasa
+    min  5 (1T 5) visitante conversion   Facundo Valentin Lasa
+    min 15 (1T 15) local     try          Maximiliano Tomas Carpio Crembil
+    min 15 (1T 15) local     conversion   Agustin Villanova
+    min 32 (1T 32) visitante card_yellow  Ricardo Cuello
+    min 35 (1T 35) local     try          Maximiliano Tomas Carpio Crembil
+    min 35 (1T 35) visitante try          Facundo Valentin Lasa
+    min 45 (2T 5) visitante drop_goal    Facundo Valentin Lasa
+    min 50 (2T 10) local     try          Maximiliano Tomas Carpio Crembil
+    min 60 (2T 20) local     try          Maximiliano Tomas Carpio Crembil
+  marcador  · eventos 22-15 · guardado 22-15
+  tries     · 4-2 (guardado —-—)
+  arbitro   · FEDERICO PREGOT (guardado: —)
+  guardado  · 21 local · 26 visitante · 10 eventos
+
+rosedal-r-c vs chelcos-de-villa-del-rosario · 62bf0694 · tarjeta 296872  ·  281d16fb-a82d-438b-8f37-6bc3a9c29ced
+  local     · rosedal-r-c · 30 jugadores · 0 con ficha fijada
+  visitante · chelcos-de-villa-del-rosario · 14 jugadores · 0 con ficha fijada
+  eventos   · 31
+    min  3 (1T 3) local     try          Iñaki Jaureguibehere
+    min  4 (1T 4) local     conversion   Fernando Valentín Marzano
+    min  7 (1T 7) local     try          Francisco Busleiman
+    min  7 (1T 7) local     conversion   Fernando Valentín Marzano
+    min 13 (1T 13) local     try          Francisco Busleiman
+    min 14 (1T 14) local     conversion   Fernando Valentín Marzano
+    min 15 (1T 15) local     try          Francisco Busleiman
+    min 16 (1T 16) local     conversion   Fernando Valentín Marzano
+    min 28 (1T 28) local     try          Pablo Martín Pereyra
+    min 29 (1T 29) local     conversion   Fernando Valentín Marzano
+    min 30 (1T 30) local     try          Bruno Aleman
+    min 31 (1T 31) local     conversion   Fernando Valentín Marzano
+    min 39 (1T 39) local     try          Tobias Gallardo
+    min 40 (1T 40) local     conversion   Fernando Valentín Marzano
+    min 41 (2T 1) local     try          Joaquín Gutierrez
+    min 41 (2T 1) local     conversion   Fernando Valentín Marzano
+    min 46 (2T 6) local     card_yellow  Fernando Valentín Marzano
+    min 47 (2T 7) local     try          Joaquin Marciante Brizuela
+    min 48 (2T 8) local     conversion   Tomas Gutierrez
+    min 49 (2T 9) visitante injury       Juan Rosas
+    min 55 (2T 15) visitante try          Andrés Ezequiel Perez
+    min 55 (2T 15) visitante conversion   Ezequiel Bianco
+    min 58 (2T 18) local     try          Iñaki Jaureguibehere
+    min 59 (2T 19) local     conversion   Bruno Aleman
+    min 61 (2T 21) local     try          Santiago Gabriel Gomez Vega
+    min 62 (2T 22) local     conversion   Fernando Valentín Marzano
+    min 64 (2T 24) local     try          Iñaki Jaureguibehere
+    min 64 (2T 24) local     conversion   Bruno Aleman
+    min 66 (2T 26) local     try          Nelson Federico Gomez Monge
+    min 69 (2T 29) local     try          Exequiel Campetella
+    min 70 (2T 30) local     conversion   Bruno Aleman
+  marcador  · eventos 96-7 · guardado 96-7
+  tries     · 14-1 (guardado —-—)
+  arbitro   · EDUARDO CAVAGLIA (guardado: —)
+  guardado  · 30 local · 14 visitante · 31 eventos
+
+chelcos-de-villa-del-rosario vs salsipuedes-r-c · 62bf0694 · tarjeta 296882  ·  8ba02afa-0fa8-48d4-8731-c90eef2b59b4
+  local     · chelcos-de-villa-del-rosario · 24 jugadores · 0 con ficha fijada
+  visitante · salsipuedes-r-c · 26 jugadores · 0 con ficha fijada
+  eventos   · 7
+    min 27 (1T 27) local     card_yellow  Gonzalo Manuel Fernandez
+    min 27 (1T 27) visitante card_yellow  Bruno Matías Nicolás Palacios Tavolazzi
+    min 31 (1T 31) local     try          Julio Alvarez
+    min 55 (2T 15) visitante card_yellow  Santiago Misael Robledo
+    min 66 (2T 26) visitante try          Francisco Tufí Correcher Faisal
+    min 70 (2T 30) local     card_red     Roberto Hernan Almada
+    min 80 (2T 40) visitante penalty_goal Facundo Valentin Lasa
+  marcador  · eventos 5-8 · guardado 5-8
+  tries     · 1-1 (guardado —-—)
+  arbitro   · CRISTIAN SCHWARTZ (guardado: —)
+  guardado  · 24 local · 26 visitante · 7 eventos
+
+manke-la-calera vs universidad-siglo-21-rugby · 62bf0694 · tarjeta 296877  ·  90406120-e64b-463a-89e5-66b3a794305b
+  local     · manke-la-calera · 24 jugadores · 0 con ficha fijada
+  visitante · universidad-siglo-21-rugby · 21 jugadores · 0 con ficha fijada
+  eventos   · 16
+    min 13 (1T 13) visitante try          Pedro José Depalo
+    min 13 (1T 13) visitante conversion   Pedro José Depalo
+    min 18 (1T 18) local     drop_goal    Joan Uriel Boileau
+    min 21 (1T 21) visitante try          Joaquin Dionisi
+    min 21 (1T 21) visitante conversion   Joaquin Dionisi
+    min 26 (1T 26) local     try          Gabriel Mercado
+    min 31 (1T 31) visitante try          Joaquin Dionisi
+    min 42 (1T 42) local     try          Gabriel Mercado
+    min 42 (2T 2) local     try          Gabriel Mercado
+    min 56 (2T 16) visitante penalty_goal Joaquin Dionisi
+    min 62 (2T 22) local     try          Gabriel Mercado
+    min 62 (2T 22) local     conversion   Gabriel Mercado
+    min 75 (2T 35) visitante try          Mateo Fait
+    min 75 (2T 35) visitante conversion   Mateo Fait
+    min 80 (2T 40) local     try          Naim Oliva
+    min 80 (2T 40) local     conversion   Naim Oliva
+  marcador  · eventos 32-29 · guardado 32-29
+  tries     · 5-4 (guardado —-—)
+  arbitro   · SANTIAGO GERONIMO LOZADA CHAVES (guardado: —)
+  guardado  · 24 local · 21 visitante · 16 eventos
+
+conas-r-c vs rosedal-r-c · 62bf0694 · tarjeta 296880  ·  1b0d7ba9-741a-469a-aa07-fc2ce3546dbd
+  local     · conas-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · rosedal-r-c · 30 jugadores · 0 con ficha fijada
+  eventos   · 33
+    min  7 (1T 7) visitante try          Ivan Forni
+    min  7 (1T 7) visitante conversion   Fernando Valentín Marzano
+    min 12 (1T 12) visitante penalty_goal Fernando Valentín Marzano
+    min 21 (1T 21) visitante try          Joaquin Marciante Brizuela
+    min 22 (1T 22) local     try          Maximiliano Ferreyra
+    min 22 (1T 22) local     conversion   Luciano Aprile
+    min 26 (1T 26) local     try          Nicolas Rey
+    min 36 (1T 36) visitante card_yellow  Benjamin Tobares
+    min 46 (1T 46) visitante substitution Iñaki Jaureguibehere
+    min 55 (1T 55) visitante substitution Benjamin Tobares
+    min 55 (1T 55) visitante substitution Kevin Velez
+    min 55 (1T 55) visitante substitution Joaquín Gutierrez
+    min 60 (1T 60) visitante substitution Ivan Forni
+    min 75 (1T 75) visitante substitution Bruno Aleman
+    min 75 (1T 75) visitante substitution Fernando Valentín Marzano
+    min 43 (2T 3) local     card_yellow  Luciano Aprile
+    min 51 (2T 11) local     try          Santiago Timolati
+    min 51 (2T 11) local     conversion   Nicolas Rey
+    min 51 (2T 11) local     try          Alan Agustín Quinteros Carrizo
+    min 51 (2T 11) local     conversion   Alan Agustín Quinteros Carrizo
+    min 51 (2T 11) local     conversion   Luciano Aprile
+    min 55 (2T 15) visitante card_yellow  Nicolas Kaba
+    min 64 (2T 24) local     card_yellow  Luciano Aprile
+    min 64 (2T 24) local     card_red     Luciano Aprile
+    min 68 (2T 28) local     try          Marcos Luna
+    min 68 (2T 28) local     conversion   Nicolas Rey
+    min 70 (2T 30) local     try          Geronimo Facundo Gomez Lelli
+    min 75 (2T 35) local     substitution Tomas Nieto
+    min 75 (2T 35) local     substitution Maximiliano Ferreyra
+    min 75 (2T 35) local     substitution Juan Gabriel Almada
+    min 75 (2T 35) local     substitution Geronimo Facundo Gomez Lelli
+    min 75 (2T 35) local     substitution Nicolas Rey
+    min 76 (2T 36) local     try          Joaquin Matias Aguirre
+  marcador  · eventos 45-15 · guardado 45-15
+  tries     · 7-2 (guardado —-—)
+  arbitro   · ARTURO MARTINEZ (guardado: —)
+  guardado  · 23 local · 30 visitante · 33 eventos
+
+asociacion-cordobesa-volantes vs cuises-portena-rugby · 62bf0694 · tarjeta 296878  ·  38f5a34f-f4a5-455c-ac2f-ed1937b98f6e
+  local     · asociacion-cordobesa-volantes · 30 jugadores · 0 con ficha fijada
+  visitante · cuises-portena-rugby · 30 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min  5 (1T 5) visitante try          Nicolás Guillermo Bruna
+    min  5 (1T 5) visitante conversion   Hector Velez
+    min  8 (1T 8) visitante try          Leandro Fabian Reisenauer
+    min 10 (1T 10) local     try          Franco Nalbandian
+    min 19 (1T 19) visitante try          Leandro Fabian Reisenauer
+    min 19 (1T 19) visitante conversion   Hector Velez
+    min 25 (1T 25) local     try          Rodrigo Arias
+    min 26 (1T 26) local     conversion   Javier Journe
+    min 30 (1T 30) visitante try          Juan Vélez
+    min 30 (1T 30) visitante conversion   Emanuel Reusa
+    min 39 (1T 39) local     try          Javier Journe
+    min 40 (1T 40) local     conversion   Javier Journe
+    min 40 (2T 0) visitante substitution Michael Otero
+    min 49 (2T 9) visitante try          Rafael Barros
+    min 49 (2T 9) visitante conversion   Emanuel Reusa
+    min 50 (2T 10) local     drop_goal    Javier Journe
+    min 61 (2T 21) visitante substitution Carlos Rivoira
+    min 63 (2T 23) local     try          Julián Palacios
+    min 64 (2T 24) local     conversion   Javier Journe
+    min 68 (2T 28) visitante try          Gerónimo Calatroni
+    min 68 (2T 28) visitante conversion   Hector Velez
+    min 69 (2T 29) visitante substitution Nicolás Guillermo Bruna
+    min 69 (2T 29) visitante substitution Federico Ostertag
+    min 69 (2T 29) visitante substitution Juan Vélez
+    min 75 (2T 35) local     try          Javier Journe
+  marcador  · eventos 34-40 · guardado 34-40
+  tries     · 5-6 (guardado —-—)
+  arbitro   · PABLO GERARDO RONCO (guardado: —)
+  guardado  · 30 local · 30 visitante · 25 eventos
+
+cuises-portena-rugby vs manke-la-calera · 62bf0694 · tarjeta 296888  ·  ee940eb0-6c7e-4b14-90f1-68aede3cd4ba
+  local     · cuises-portena-rugby · 30 jugadores · 0 con ficha fijada
+  visitante · manke-la-calera · 25 jugadores · 0 con ficha fijada
+  eventos   · 15
+    min  5 (1T 5) local     try          Nicolás Guillermo Bruna
+    min  5 (1T 5) local     conversion   Emanuel Reusa
+    min 10 (1T 10) local     try          Hector Velez
+    min 14 (1T 14) visitante try          Francisco Galarreta
+    min 14 (1T 14) visitante card_yellow  Tadeo Asis
+    min 18 (1T 18) local     try          Federico Ostertag
+    min 18 (1T 18) local     conversion   Emanuel Reusa
+    min 31 (1T 31) local     substitution Edelmar Beccaria
+    min 39 (1T 39) local     try          Gastón Alejandro Ladner
+    min 40 (2T 0) local     substitution Mayco Gonzalo Bertotti
+    min 45 (2T 5) local     try          Juan Vélez
+    min 45 (2T 5) local     conversion   Federico Ostertag
+    min 50 (2T 10) local     substitution Federico Ostertag
+    min 50 (2T 10) local     substitution Lucas Pratti
+    min 50 (2T 10) visitante card_red     Cesar Varangot
+  marcador  · eventos 31-5 · guardado 31-5
+  tries     · 5-1 (guardado —-—)
+  arbitro   · LEANDRO LUCHETTI (guardado: —)
+  guardado  · 30 local · 25 visitante · 15 eventos
+
+salsipuedes-r-c vs conas-r-c · 62bf0694 · tarjeta 296885  ·  53d5f56d-e344-45ad-8180-426fefc6d6ad
+  local     · salsipuedes-r-c · 26 jugadores · 0 con ficha fijada
+  visitante · conas-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 34
+    min 11 (1T 11) local     penalty_goal Facundo Valentin Lasa
+    min 15 (1T 15) visitante try          Marcelo Ariel Coria
+    min 24 (1T 24) visitante try          Alexis Cravero
+    min 24 (1T 24) visitante conversion   Luciano Aprile
+    min 27 (1T 27) visitante try          Leonel Quinteros
+    min 27 (1T 27) visitante conversion   Luciano Aprile
+    min 34 (1T 34) visitante try          Leonel Quinteros
+    min 34 (1T 34) visitante conversion   Luciano Aprile
+    min 44 (2T 4) visitante card_yellow  Marcos Luna
+    min 45 (2T 5) visitante substitution Pablo Aguirres
+    min 45 (2T 5) visitante substitution Alexis Ariel Araoz
+    min 45 (2T 5) visitante substitution Favio Ariel Ontivero
+    min 45 (2T 5) visitante substitution Juan Gabriel Almada
+    min 45 (2T 5) visitante substitution Marcos Luna
+    min 51 (2T 11) local     penalty_goal Facundo Valentin Lasa
+    min 51 (2T 11) local     card_yellow  Leopoldo Octavio Canedi
+    min 55 (2T 15) local     substitution Santiago Cornejo
+    min 55 (2T 15) local     substitution Claudio Gabriel Juarez
+    min 55 (2T 15) local     substitution Franco Robledo
+    min 55 (2T 15) local     substitution Francisco Tufí Correcher Faisal
+    min 55 (2T 15) local     substitution Francis Emanuel Sepulveda Gattari
+    min 55 (2T 15) visitante penalty_goal Luciano Aprile
+    min 58 (2T 18) visitante try          Victor Hugo Demarco
+    min 58 (2T 18) visitante conversion   Luciano Aprile
+    min 60 (2T 20) visitante substitution Marcelo Ariel Coria
+    min 60 (2T 20) visitante substitution Joaquin Matias Aguirre
+    min 67 (2T 27) local     card_yellow  Leopoldo Octavio Canedi
+    min 67 (2T 27) local     card_red     Leopoldo Octavio Canedi
+    min 70 (2T 30) visitante card_yellow  Alexis Cravero
+    min 75 (2T 35) visitante substitution Santiago Timolati
+    min 76 (2T 36) visitante try          Alan Agustín Quinteros Carrizo
+    min 76 (2T 36) visitante conversion   Luciano Aprile
+    min 78 (2T 38) visitante try          Leonel Quinteros
+    min 78 (2T 38) visitante conversion   Luciano Aprile
+  marcador  · eventos 6-50 · guardado 6-50
+  tries     · 0-7 (guardado —-—)
+  arbitro   · ARTURO MARTINEZ (guardado: —)
+  guardado  · 26 local · 23 visitante · 34 eventos
+
+universidad-siglo-21-rugby vs chelcos-de-villa-del-rosario · 62bf0694 · tarjeta 296883  ·  c867be24-dcac-437d-a44e-d6d2e8866482
+  local     · universidad-siglo-21-rugby · 19 jugadores · 0 con ficha fijada
+  visitante · chelcos-de-villa-del-rosario · 18 jugadores · 0 con ficha fijada
+  eventos   · 28
+    min  1 (1T 1) local     try          Maximiliano Tomas Carpio Crembil
+    min  2 (1T 2) local     conversion   Agustin Villanova
+    min  6 (1T 6) local     try          Juan Pero
+    min  8 (1T 8) local     try          Pedro José Depalo
+    min 14 (1T 14) local     try          Lucas Ezequiel Ceballos Faas
+    min 15 (1T 15) local     conversion   Agustin Villanova
+    min 18 (1T 18) local     try          Matias Presidente
+    min 18 (1T 18) local     conversion   Agustin Villanova
+    min 23 (1T 23) local     try          Franco De Chiara
+    min 30 (1T 30) visitante try          Maicol Nieva
+    min 31 (1T 31) visitante conversion   Ezequiel Bianco
+    min 37 (1T 37) local     try          Gustavo Pizarro
+    min 37 (1T 37) local     conversion   Agustin Villanova
+    min 41 (2T 1) local     try          Paul Cornu
+    min 42 (2T 2) local     conversion   Agustin Villanova
+    min 44 (2T 4) visitante penalty_goal Ezequiel Bianco
+    min 50 (2T 10) visitante try          Joaquin Aguero Virgolini
+    min 51 (2T 11) visitante conversion   Ezequiel Bianco
+    min 58 (2T 18) visitante try          Bruno Guillermo Patria
+    min 59 (2T 19) visitante conversion   Ezequiel Bianco
+    min 63 (2T 23) local     try          Paul Cornu
+    min 64 (2T 24) local     conversion   Agustin Villanova
+    min 66 (2T 26) visitante try          Alex Nahuel Isla
+    min 67 (2T 27) visitante conversion   Ezequiel Bianco
+    min 70 (2T 30) local     try          Maximiliano Tomas Carpio Crembil
+    min 73 (2T 33) local     try          Lucas Ezequiel Ceballos Faas
+    min 74 (2T 34) local     conversion   Agustin Villanova
+    min 76 (2T 36) visitante penalty_goal Ezequiel Bianco
+  marcador  · eventos 69-34 · guardado 69-34
+  tries     · 11-4 (guardado —-—)
+  arbitro   · CRISTIAN MAURO QUILES BUTELER (guardado: —)
+  guardado  · 19 local · 18 visitante · 28 eventos
+
+villa-libertador-r-c vs ajedrez-cosquin-r-c · 62bf0694 · tarjeta 296886  ·  25ea1f38-0fd0-44c2-b1a9-94a92d258c4e
+  local     · villa-libertador-r-c · 30 jugadores · 0 con ficha fijada
+  visitante · ajedrez-cosquin-r-c · 19 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min 12 (1T 12) local     try          Braian Gastón Varela
+    min 12 (1T 12) local     conversion   Braian Gastón Varela
+    min 12 (1T 12) visitante try          Gabriel Guzman
+    min 13 (1T 13) visitante conversion   Gabriel Guzman
+    min 20 (1T 20) local     try          Braian Gastón Varela
+    min 20 (1T 20) local     conversion   Braian Gastón Varela
+    min 24 (1T 24) local     try          Braian Gastón Varela
+    min 24 (1T 24) local     conversion   Braian Gastón Varela
+    min 26 (1T 26) visitante penalty_goal Gabriel Guzman
+    min 29 (1T 29) visitante try          Joaquín Augusto Lucero
+    min 30 (1T 30) local     try          Braian Gastón Varela
+    min 30 (1T 30) visitante conversion   Gabriel Guzman
+    min 32 (1T 32) visitante card_yellow  Claudio Rodrigo Perez
+    min 43 (2T 3) visitante try          Gabriel Cerrella
+    min 50 (2T 10) local     try          Braian Gastón Varela
+    min 50 (2T 10) local     conversion   Braian Gastón Varela
+    min 50 (2T 10) visitante card_yellow  Carlos Javier Flores Kanter
+    min 55 (2T 15) local     penalty_goal Braian Gastón Varela
+    min 61 (2T 21) visitante try          Gabriel Guzman
+    min 62 (2T 22) visitante conversion   Gabriel Guzman
+    min 67 (2T 27) visitante try          Nicolas Martinez Recabarren
+    min 68 (2T 28) visitante conversion   Gabriel Guzman
+    min 76 (2T 36) visitante try          Gabriel Guzman
+    min 77 (2T 37) visitante conversion   Gabriel Guzman
+    min 80 (2T 40) visitante penalty_goal Gabriel Guzman
+  marcador  · eventos 36-46 · guardado 36-46
+  tries     · 5-6 (guardado —-—)
+  arbitro   · LEANDRO LUCHETTI (guardado: —)
+  guardado  · 30 local · 19 visitante · 25 eventos
+
+ajedrez-cosquin-r-c vs rosedal-r-c · 62bf0694 · tarjeta 296892  ·  eee20905-e38c-40aa-9954-d06cc9c8540b
+  local     · ajedrez-cosquin-r-c · 20 jugadores · 0 con ficha fijada
+  visitante · rosedal-r-c · 30 jugadores · 0 con ficha fijada
+  eventos   · 26
+    min  3 (1T 3) visitante try          Joaquín Gutierrez
+    min  4 (1T 4) visitante conversion   Fernando Valentín Marzano
+    min 15 (1T 15) local     penalty_goal Gabriel Guzman
+    min 18 (1T 18) visitante try          Ivan Forni
+    min 23 (1T 23) visitante try          Francisco Busleiman
+    min 33 (1T 33) local     card_yellow  Gabriel Cerrella
+    min 36 (1T 36) visitante try          Maximiliano González
+    min 37 (1T 37) visitante conversion   Fernando Valentín Marzano
+    min 55 (2T 15) local     try          Marcelo Vivas
+    min 75 (2T 35) local     card_yellow  Gabriel Guzman
+    min 84 (2T 44) visitante substitution Benjamin Tobares
+    min 85 (2T 45) visitante try          Iñaki Jaureguibehere
+    min 86 (2T 46) visitante conversion   Fernando Valentín Marzano
+    min 91 (2T 51) visitante substitution Ignacio Andres Bressanini
+    min 94 (2T 54) visitante try          Fernando Valentín Marzano
+    min 95 (2T 55) visitante conversion   Fernando Valentín Marzano
+    min 95 (2T 55) visitante substitution Ivan Forni
+    min 95 (2T 55) visitante substitution Franco Agustin Cabral Gonzalez
+    min 101 (2T 61) visitante substitution Iñaki Jaureguibehere
+    min 101 (2T 61) visitante substitution Joaquin Marciante Brizuela
+    min 112 (2T 72) visitante substitution Fernando Valentín Marzano
+    min 112 (2T 72) visitante substitution Facundo González
+    min 114 (2T 74) visitante try          Joaquín Gutierrez
+    min 115 (2T 75) visitante conversion   Elias Nuñez
+    min 117 (2T 77) visitante try          Juan Ignacio Elias
+    min 118 (2T 78) visitante conversion   Elias Nuñez
+  marcador  · eventos 8-52 · guardado 8-52
+  tries     · 1-8 (guardado —-—)
+  arbitro   · FEDERICO PREGOT (guardado: —)
+  guardado  · 20 local · 30 visitante · 26 eventos
+
+asociacion-cordobesa-volantes vs villa-libertador-r-c · 62bf0694 · tarjeta 296891  ·  11e58004-6a0c-4352-9351-460d908da0f3
+  local     · asociacion-cordobesa-volantes · 30 jugadores · 0 con ficha fijada
+  visitante · villa-libertador-r-c · 30 jugadores · 0 con ficha fijada
+  eventos   · 16
+    min  1 (1T 1) local     penalty_goal Diego Gonzalez
+    min  2 (1T 2) visitante penalty_goal Isaias Falon
+    min  6 (1T 6) local     try          Cristian Yefim Carivali
+    min  7 (1T 7) local     conversion   Gabriel Aranda
+    min 26 (1T 26) visitante penalty_goal Isaias Falon
+    min 34 (1T 34) visitante try          Juan Sebastian Vazquez
+    min 35 (1T 35) local     card_yellow  Salvador Renzi
+    min 35 (1T 35) visitante conversion   Isaias Falon
+    min 38 (1T 38) visitante try          Raul Sosa Garcia
+    min 39 (1T 39) visitante conversion   Isaias Falon
+    min 51 (2T 11) local     penalty_goal Gabriel Aranda
+    min 54 (2T 14) visitante try          Diego Vivas
+    min 55 (2T 15) visitante conversion   Isaias Falon
+    min 64 (2T 24) visitante try          Isaias Falon
+    min 65 (2T 25) visitante conversion   Isaias Falon
+    min 79 (2T 39) visitante try          Diego Vivas
+  marcador  · eventos 13-39 · guardado 13-39
+  tries     · 1-5 (guardado —-—)
+  arbitro   · CRISTIAN SCHWARTZ (guardado: —)
+  guardado  · 30 local · 30 visitante · 16 eventos
+
+cuises-portena-rugby vs universidad-siglo-21-rugby · 62bf0694 · tarjeta 296889  ·  4d8dfe60-b54b-442e-b06c-c6a923b319c9
+  local     · cuises-portena-rugby · 30 jugadores · 0 con ficha fijada
+  visitante · universidad-siglo-21-rugby · 23 jugadores · 0 con ficha fijada
+  eventos   · 23
+    min  5 (1T 5) visitante penalty_goal Maximiliano Tomas Carpio Crembil
+    min 10 (1T 10) visitante try          Pedro José Depalo
+    min 10 (1T 10) visitante conversion   Maximiliano Tomas Carpio Crembil
+    min 15 (1T 15) local     penalty_goal Hector Velez
+    min 30 (1T 30) visitante try          Maximiliano Tomas Carpio Crembil
+    min 35 (1T 35) local     substitution Hector Velez
+    min 38 (1T 38) local     try          Gastón Alejandro Ladner
+    min 38 (1T 38) local     conversion   Hector Velez
+    min 40 (1T 40) local     substitution Leandro Fabian Reisenauer
+    min 40 (1T 40) visitante try          Maximiliano Tomas Carpio Crembil
+    min 45 (2T 5) visitante injury       Gustavo Pizarro
+    min 48 (2T 8) local     penalty_goal Hector Velez
+    min 48 (2T 8) local     substitution Emanuel Reusa
+    min 52 (2T 12) local     penalty_goal Hector Velez
+    min 54 (2T 14) local     card_yellow  Nicolás Guillermo Bruna
+    min 67 (2T 27) local     substitution Fabián Gustavo Alessandria
+    min 67 (2T 27) local     substitution Marcos Martin Aghemo
+    min 70 (2T 30) local     substitution Edelmar Beccaria
+    min 71 (2T 31) local     try          Hector Velez
+    min 71 (2T 31) local     conversion   Hector Velez
+    min 71 (2T 31) local     substitution Carlos Rivoira
+    min 75 (2T 35) local     substitution Juan Vélez
+    min 79 (2T 39) visitante try          Pedro José Depalo
+  marcador  · eventos 23-25 · guardado 23-25
+  tries     · 2-4 (guardado —-—)
+  arbitro   · LEANDRO LUCHETTI (guardado: —)
+  guardado  · 30 local · 23 visitante · 23 eventos
+
+villa-libertador-r-c vs manke-la-calera · 62bf0694 · tarjeta 296899  ·  fce3e101-2bdc-4a89-9acd-a21f661ff5f2
+  local     · villa-libertador-r-c · 30 jugadores · 0 con ficha fijada
+  visitante · manke-la-calera · 28 jugadores · 0 con ficha fijada
+  eventos   · 13
+    min 14 (1T 14) local     penalty_goal Lihuel Corzo
+    min 14 (1T 14) local     try          Antonio Garcia
+    min 14 (1T 14) local     conversion   Lihuel Corzo
+    min 23 (1T 23) local     try          Diego Vivas
+    min 27 (1T 27) visitante try          Diego Martin Pinet
+    min 27 (1T 27) visitante conversion   Tadeo Asis
+    min 37 (1T 37) visitante try          Naim Oliva
+    min 37 (1T 37) visitante conversion   Tadeo Asis
+    min 51 (2T 11) local     try          Diego Vivas
+    min 58 (2T 18) visitante try          Tadeo Asis
+    min 70 (2T 30) visitante try          Agustín Loyola
+    min 70 (2T 30) visitante conversion   Tadeo Asis
+    min 74 (2T 34) local     try          Braian Alexis Sanchez Rodriguez
+  marcador  · eventos 25-26 · guardado 25-26
+  tries     · 4-4 (guardado —-—)
+  arbitro   · FERNANDO MIGUEL OSORES (guardado: —)
+  guardado  · 30 local · 28 visitante · 13 eventos
+
+rosedal-r-c vs asociacion-cordobesa-volantes · 62bf0694 · tarjeta 296898  ·  a5dfa3f9-39fe-476b-ac8e-639e0f5a5316
+  local     · rosedal-r-c · 30 jugadores · 0 con ficha fijada
+  visitante · asociacion-cordobesa-volantes · 30 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min  2 (1T 2) local     try          Nicolás Barki
+    min  3 (1T 3) local     conversion   Fernando Valentín Marzano
+    min 12 (1T 12) local     try          Elias Nuñez
+    min 22 (1T 22) local     try          Francisco Busleiman
+    min 23 (1T 23) local     conversion   Fernando Valentín Marzano
+    min 25 (1T 25) local     try          Francisco Busleiman
+    min 26 (1T 26) local     conversion   Fernando Valentín Marzano
+    min 37 (1T 37) local     card_yellow  Ignacio Exequiel Cuneo
+    min 37 (1T 37) visitante card_yellow  Rodrigo Arias
+    min 42 (1T 42) local     try          Nicolas Corvalán
+    min 65 (2T 25) visitante card_yellow  Rodrigo Arias
+    min 65 (2T 25) visitante card_red     Rodrigo Arias
+    min 83 (2T 43) local     substitution Facundo González
+    min 83 (2T 43) local     substitution Nicolás Barki
+    min 87 (2T 47) local     card_red     Ivan Forni
+    min 90 (2T 50) local     substitution Joaquin Marciante Brizuela
+    min 90 (2T 50) local     substitution Ignacio Andres Bressanini
+    min 97 (2T 57) local     try          Francisco Busleiman
+    min 97 (2T 57) local     conversion   Fernando Valentín Marzano
+    min 100 (2T 60) local     card_yellow  Nicolas Kaba
+    min 107 (2T 67) local     substitution Nicolas Corvalán
+    min 110 (2T 70) local     substitution Franco Agustin Cabral Gonzalez
+    min 110 (2T 70) local     substitution Fernando Valentín Marzano
+    min 120 (2T 80) local     card_yellow  Benjamin Tobares
+  marcador  · eventos 38-0 · guardado 38-0
+  tries     · 6-0 (guardado —-—)
+  arbitro   · GONZALO COSTANTINI (guardado: —)
+  guardado  · 30 local · 30 visitante · 24 eventos
+
+salsipuedes-r-c vs ajedrez-cosquin-r-c · 62bf0694 · tarjeta 296897  ·  79bb72f2-502b-4a71-8a45-9dbf44c79772
+  local     · salsipuedes-r-c · 24 jugadores · 0 con ficha fijada
+  visitante · ajedrez-cosquin-r-c · 22 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min 12 (1T 12) local     try          Juan Aliendro
+    min 12 (1T 12) local     conversion   Facundo Valentin Lasa
+    min 20 (1T 20) visitante try          Angel Tapia
+    min 24 (1T 24) local     conversion   Facundo Valentin Lasa
+    min 24 (1T 24) local     try          Francisco Tufí Correcher Faisal
+    min 30 (1T 30) visitante try          Marcos Gabriel Areco Quinodoz
+    min 30 (1T 30) visitante conversion   Gabriel Guzman
+    min 34 (1T 34) local     penalty_goal Facundo Valentin Lasa
+    min 50 (2T 10) local     card_yellow  Francisco Tufí Correcher Faisal
+    min 50 (2T 10) visitante try          Gabriel Guzman
+    min 50 (2T 10) visitante conversion   Gabriel Guzman
+    min 53 (2T 13) local     penalty_goal Facundo Valentin Lasa
+    min 55 (2T 15) visitante try          Joaquín Augusto Lucero
+    min 55 (2T 15) visitante conversion   Gabriel Guzman
+    min 60 (2T 20) local     try          Santiago Amuchastegui
+    min 60 (2T 20) local     card_yellow  Facu Olmos
+    min 60 (2T 20) visitante conversion   Gabriel Guzman
+    min 60 (2T 20) visitante try          Nicolas Martinez Recabarren
+  marcador  · eventos 25-33 · guardado 25-33
+  tries     · 3-5 (guardado —-—)
+  arbitro   · ALEJANDRO AUGUSTO AGUERO (guardado: —)
+  guardado  · 24 local · 22 visitante · 18 eventos
+
+universidad-siglo-21-rugby vs conas-r-c · 62bf0694 · tarjeta 296896  ·  83c30392-29a1-4929-8719-80efe191748f
+  local     · universidad-siglo-21-rugby · 25 jugadores · 0 con ficha fijada
+  visitante · conas-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 19
+    min 24 (1T 24) local     try          Juan Pero
+    min 45 (2T 5) visitante substitution Alexis Ariel Araoz
+    min 45 (2T 5) visitante substitution Paulo Farias
+    min 48 (2T 8) visitante try          Nicolas Rey
+    min 48 (2T 8) visitante conversion   Luciano Aprile
+    min 50 (2T 10) visitante substitution Joaquin Matias Aguirre
+    min 54 (2T 14) visitante conversion   Luciano Aprile
+    min 54 (2T 14) visitante try          Alexis Cravero
+    min 55 (2T 15) visitante substitution Marcos Luna
+    min 59 (2T 19) visitante try          Nicolas Barrera Grillo
+    min 59 (2T 19) visitante conversion   Luciano Aprile
+    min 64 (2T 24) local     card_yellow  Francisco Garcia Bazán
+    min 66 (2T 26) visitante try          Leonel Quinteros
+    min 66 (2T 26) visitante conversion   Luciano Aprile
+    min 69 (2T 29) visitante try          Alan Agustín Quinteros Carrizo
+    min 70 (2T 30) visitante substitution Luciano Zacarias Rojas
+    min 73 (2T 33) visitante try          Alan Agustín Quinteros Carrizo
+    min 73 (2T 33) visitante conversion   Luciano Aprile
+    min 79 (2T 39) visitante try          Alan Agustín Quinteros Carrizo
+  marcador  · eventos 5-45 · guardado 5-45
+  tries     · 1-7 (guardado —-—)
+  arbitro   · CRISTIAN SCHWARTZ (guardado: —)
+  guardado  · 25 local · 23 visitante · 19 eventos
+
+cuises-portena-rugby vs asociacion-cordobesa-volantes · 62bf0694 · tarjeta 320912  ·  79717123-9a2b-4a57-92d9-a55420222ec5
+  local     · cuises-portena-rugby · 30 jugadores · 0 con ficha fijada
+  visitante · asociacion-cordobesa-volantes · 30 jugadores · 0 con ficha fijada
+  eventos   · 29
+    min  2 (1T 2) local     try          Federico Ostertag
+    min  2 (1T 2) local     conversion   Federico Ostertag
+    min 11 (1T 11) local     try          Mayco Gonzalo Bertotti
+    min 11 (1T 11) local     conversion   Hector Velez
+    min 29 (1T 29) local     try          Nicolás Guillermo Bruna
+    min 29 (1T 29) local     conversion   Federico Ostertag
+    min 34 (1T 34) local     try          David Giacardi
+    min 48 (2T 8) local     try          Gerónimo Calatroni
+    min 48 (2T 8) local     conversion   Federico Ostertag
+    min 50 (2T 10) local     substitution Mayco Gonzalo Bertotti
+    min 50 (2T 10) local     substitution Michael Otero
+    min 52 (2T 12) local     card_yellow  Gastón Alejandro Ladner
+    min 52 (2T 12) visitante card_yellow  Valentino Vega Rossaroli
+    min 53 (2T 13) local     try          Leonardo Damian Massini
+    min 53 (2T 13) local     conversion   Federico Ostertag
+    min 57 (2T 17) visitante try          Andrés Benjamín Bueno
+    min 58 (2T 18) local     substitution David Giacardi
+    min 58 (2T 18) local     substitution Marcos Martin Aghemo
+    min 58 (2T 18) visitante conversion   Franco Nalbandian
+    min 63 (2T 23) visitante try          Guillermo Alejandro Sverdlik
+    min 64 (2T 24) visitante conversion   Franco Nalbandian
+    min 65 (2T 25) local     substitution Rafael Barros
+    min 65 (2T 25) local     try          Nicolás Guillermo Bruna
+    min 65 (2T 25) local     conversion   Federico Ostertag
+    min 68 (2T 28) local     card_yellow  Leonardo Damian Massini
+    min 73 (2T 33) local     substitution Federico Ostertag
+    min 73 (2T 33) local     substitution Emilio Vilar
+    min 74 (2T 34) visitante try          Maximo Juan Renzi
+    min 75 (2T 35) visitante conversion   Franco Nalbandian
+  marcador  · eventos 47-21 · guardado 47-21
+  tries     · 7-3 (guardado —-—)
+  arbitro   · CLAUDIO MARCELO TEJERO (guardado: —)
+  guardado  · 30 local · 30 visitante · 29 eventos
+
+rosedal-r-c vs manke-la-calera · 62bf0694 · tarjeta 320911  ·  b0b6b81e-a2e8-4c7f-bd0e-4b393e88cc58
+  local     · rosedal-r-c · 30 jugadores · 0 con ficha fijada
+  visitante · manke-la-calera · 28 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min  9 (1T 9) local     try          Fernando Valentín Marzano
+    min 10 (1T 10) local     conversion   Fernando Valentín Marzano
+    min 16 (1T 16) local     substitution Nicolás Barki
+    min 21 (1T 21) local     try          Francisco Busleiman
+    min 22 (1T 22) local     conversion   Fernando Valentín Marzano
+    min 32 (1T 32) visitante try          Xavier Agustin Ferreyra
+    min 34 (1T 34) local     substitution Mateo Povedano
+    min 36 (1T 36) local     substitution Elias Nuñez
+    min 36 (1T 36) visitante try          Naim Oliva
+    min 36 (1T 36) visitante conversion   Marcos Congregado
+    min 41 (2T 1) visitante try          Tomas Paez
+    min 41 (2T 1) visitante conversion   Marcos Congregado
+    min 42 (2T 2) local     try          Francisco Busleiman
+    min 43 (2T 3) local     conversion   Fernando Valentín Marzano
+    min 46 (2T 6) local     card_yellow  Fernando Valentín Marzano
+    min 46 (2T 6) visitante card_yellow  Gonzalo Capdevila
+    min 58 (2T 18) local     try          Maximiliano González
+    min 60 (2T 20) local     card_yellow  Francisco Busleiman
+    min 75 (2T 35) local     try          Francisco Busleiman
+    min 76 (2T 36) local     conversion   Fernando Valentín Marzano
+    min 77 (2T 37) local     try          Francisco Busleiman
+    min 78 (2T 38) local     conversion   Fernando Valentín Marzano
+    min 80 (2T 40) local     try          Tobias Gallardo
+    min 81 (2T 41) local     conversion   Fernando Valentín Marzano
+  marcador  · eventos 47-19 · guardado 47-19
+  tries     · 7-3 (guardado —-—)
+  arbitro   · FEDERICO PREGOT (guardado: —)
+  guardado  · 30 local · 28 visitante · 24 eventos
+
+conas-r-c vs universidad-siglo-21-rugby · 62bf0694 · tarjeta 320910  ·  0d72df09-db89-424e-9d19-cd72108921bf
+  local     · conas-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · universidad-siglo-21-rugby · 23 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min  1 (1T 1) visitante try          Lucas Jose Savarella
+    min  2 (1T 2) visitante try          Lucas Jose Savarella
+    min  3 (1T 3) visitante penalty_goal Lucas Jose Savarella
+    min 35 (1T 35) local     try          Alexis Ariel Araoz
+    min 35 (1T 35) local     conversion   Luciano Aprile
+    min 40 (1T 40) local     try          Nehuen Garzon
+    min 41 (2T 1) local     substitution Alexis Ariel Araoz
+    min 50 (2T 10) local     substitution Favio Ariel Ontivero
+    min 50 (2T 10) local     substitution Pedro Gontero
+    min 51 (2T 11) local     try          Maximiliano Ferreyra
+    min 62 (2T 22) local     substitution Marcos Luna
+    min 68 (2T 28) local     try          Tomas Nieto
+    min 68 (2T 28) local     conversion   Luciano Aprile
+    min 68 (2T 28) local     substitution Facundo Sabre
+    min 68 (2T 28) local     substitution Alexis Cravero
+    min 75 (2T 35) local     substitution Nehuen Garzon
+    min 77 (2T 37) local     penalty_goal Luciano Aprile
+    min 80 (2T 40) local     try          Alan Agustín Quinteros Carrizo
+  marcador  · eventos 32-13 · guardado 32-13
+  tries     · 5-2 (guardado —-—)
+  arbitro   · LUCAS HUMERES (guardado: —)
+  guardado  · 23 local · 23 visitante · 18 eventos
+
+rosedal-r-c vs cuises-portena-rugby · 62bf0694 · tarjeta 322776  ·  4928fb92-6f0f-4a21-a4f8-59daa8f4a6ba
+  local     · rosedal-r-c · 30 jugadores · 0 con ficha fijada
+  visitante · cuises-portena-rugby · 30 jugadores · 0 con ficha fijada
+  eventos   · 38
+    min  3 (1T 3) visitante try          Hector Velez
+    min  3 (1T 3) visitante conversion   Federico Ostertag
+    min  7 (1T 7) local     try          Tobias Gallardo
+    min 21 (1T 21) local     card_yellow  Benjamin Tobares
+    min 23 (1T 23) local     try          Ruben Cuello
+    min 24 (1T 24) local     conversion   Fernando Valentín Marzano
+    min 31 (1T 31) local     try          Tomas Gutierrez
+    min 33 (1T 33) visitante card_yellow  Alan Gontero
+    min 34 (1T 34) local     try          Tobias Gallardo
+    min 40 (1T 40) local     card_yellow  Ignacio Exequiel Cuneo
+    min 40 (2T 0) visitante substitution Marcos Martin Aghemo
+    min 40 (2T 0) visitante substitution Emilio Vilar
+    min 46 (2T 6) local     penalty_goal Fernando Valentín Marzano
+    min 46 (2T 6) visitante penalty_goal Hector Velez
+    min 48 (2T 8) local     card_yellow  Facundo González
+    min 52 (2T 12) local     card_red     Tobias Gallardo
+    min 52 (2T 12) local     substitution Benjamin Tobares
+    min 52 (2T 12) visitante card_red     David Giacardi
+    min 52 (2T 12) visitante card_red     Alan Gontero
+    min 54 (2T 14) visitante substitution Nicolás Macello
+    min 56 (2T 16) local     card_yellow  Nelson Federico Gomez Monge
+    min 56 (2T 16) local     substitution Ivan Forni
+    min 60 (2T 20) local     substitution Joaquin Marciante Brizuela
+    min 60 (2T 20) visitante card_yellow  Montu Lautaro Alexis
+    min 61 (2T 21) local     penalty_goal Fernando Valentín Marzano
+    min 62 (2T 22) local     substitution Fernando Valentín Marzano
+    min 64 (2T 24) local     card_yellow  Franco Agustin Cabral Gonzalez
+    min 65 (2T 25) local     substitution Mauro Abel Pinos
+    min 65 (2T 25) visitante try          Hector Velez
+    min 69 (2T 29) visitante substitution Gerónimo Calatroni
+    min 69 (2T 29) visitante substitution Mayco Gonzalo Bertotti
+    min 71 (2T 31) local     try          Elias Nuñez
+    min 72 (2T 32) local     card_yellow  Elias Nuñez
+    min 72 (2T 32) local     substitution Francisco Busleiman
+    min 74 (2T 34) visitante substitution Pablo Bianco
+    min 74 (2T 34) visitante substitution Federico Ostertag
+    min 74 (2T 34) visitante substitution Michael Otero
+    min 79 (2T 39) local     try          Joaquín Gutierrez
+  marcador  · eventos 38-15 · guardado 38-15
+  tries     · 6-2 (guardado —-—)
+  arbitro   · RODRIGO TIRANTI (guardado: —)
+  guardado  · 30 local · 30 visitante · 38 eventos
+
+manke-la-calera vs conas-r-c · 62bf0694 · tarjeta 322774  ·  97799dc4-65c2-4960-b84c-339bf04ccd13
+  local     · manke-la-calera · 30 jugadores · 0 con ficha fijada
+  visitante · conas-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min  6 (1T 6) local     try          Juan Bottallo
+    min  8 (1T 8) local     penalty_goal Tadeo Asis
+    min 13 (1T 13) visitante penalty_goal Luciano Aprile
+    min 16 (1T 16) visitante try          Marcelo Ariel Coria
+    min 16 (1T 16) visitante conversion   Luciano Aprile
+    min 28 (1T 28) local     try          Naim Oliva
+    min 31 (1T 31) visitante penalty_goal Luciano Aprile
+    min 35 (1T 35) visitante substitution Pablo Aguirres
+    min 39 (1T 39) visitante try          Marcelo Ariel Coria
+    min 39 (1T 39) visitante conversion   Luciano Aprile
+    min 42 (2T 2) local     try          Joaquin Ricca
+    min 44 (2T 4) visitante try          Alan Agustín Quinteros Carrizo
+    min 44 (2T 4) visitante conversion   Luciano Aprile
+    min 50 (2T 10) visitante substitution Favio Ariel Ontivero
+    min 50 (2T 10) visitante substitution Marcos Luna
+    min 60 (2T 20) local     try          Joel Williams
+    min 60 (2T 20) visitante substitution Alan Agustín Quinteros Carrizo
+    min 61 (2T 21) local     conversion   Tadeo Asis
+    min 77 (2T 37) visitante try          Luciano Aprile
+    min 77 (2T 37) visitante conversion   Luciano Aprile
+    min 78 (2T 38) visitante try          Geronimo Facundo Gomez Lelli
+    min 78 (2T 38) visitante conversion   Luciano Aprile
+    min 79 (2T 39) visitante substitution Geronimo Facundo Gomez Lelli
+    min 79 (2T 39) visitante substitution Santiago Timolati
+  marcador  · eventos 25-41 · guardado 25-41
+  tries     · 4-5 (guardado —-—)
+  arbitro   · FERNANDO MIGUEL OSORES (guardado: —)
+  guardado  · 30 local · 23 visitante · 24 eventos
+
+universidad-siglo-21-rugby vs asociacion-cordobesa-volantes · 62bf0694 · tarjeta 322773  ·  53aed315-4868-43b9-92ae-8b713fa790d6
+  local     · universidad-siglo-21-rugby · 26 jugadores · 0 con ficha fijada
+  visitante · asociacion-cordobesa-volantes · 30 jugadores · 0 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 0-28
+  tries     · 0-0 (guardado —-—)
+  arbitro   · (NO OFICIAL) (guardado: —)
+  guardado  · 26 local · 30 visitante · 0 eventos
+
+asociacion-cordobesa-volantes vs manke-la-calera · 62bf0694 · tarjeta 324552  ·  fe7968be-c3e3-4d93-9e19-6c24233dc8b4
+  local     · asociacion-cordobesa-volantes · 30 jugadores · 0 con ficha fijada
+  visitante · manke-la-calera · 30 jugadores · 0 con ficha fijada
+  eventos   · 21
+    min  5 (1T 5) local     penalty_goal Gabriel Aranda
+    min 10 (1T 10) visitante try          Paulo Williams
+    min 11 (1T 11) visitante conversion   Gonzalo Joaquin Molina
+    min 22 (1T 22) local     try          Valentino Vega Rossaroli
+    min 22 (1T 22) visitante card_yellow  Joel Williams
+    min 23 (1T 23) local     conversion   Gabriel Aranda
+    min 26 (1T 26) local     penalty_try  
+    min 39 (1T 39) visitante try          Francisco Galarreta
+    min 41 (2T 1) visitante try          Leandro Gastón Ariza
+    min 48 (2T 8) local     card_yellow  Ivan Verdu
+    min 48 (2T 8) visitante card_yellow  Joel Williams
+    min 48 (2T 8) visitante card_red     Joel Williams
+    min 60 (2T 20) local     card_yellow  Matias Roberto Dutto
+    min 78 (2T 38) local     try          Valentino Vega Rossaroli
+    min 80 (2T 40) local     substitution Ezequiel Ortuondo
+    min 80 (2T 40) local     substitution Rodrigo Arias
+    min 80 (2T 40) local     substitution Salvador Renzi
+    min 80 (2T 40) visitante substitution Rodrigo Diego Boll
+    min 80 (2T 40) visitante substitution Emiliano Orihuela
+    min 80 (2T 40) visitante substitution Claudio Ulises Alvare
+    min 80 (2T 40) visitante substitution Alan Ruben Acuña
+  marcador  · eventos 22-17 · guardado 22-17
+  tries     · 3-3 (guardado —-—)
+  arbitro   · JAVIER SORBERA FERRER (guardado: —)
+  guardado  · 30 local · 30 visitante · 21 eventos
+
+conas-r-c vs rosedal-r-c · 62bf0694 · tarjeta 324551  ·  e33e7e09-e569-4d5f-9e0b-e8f51e7a165f
+  local     · conas-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · rosedal-r-c · 30 jugadores · 0 con ficha fijada
+  eventos   · 28
+    min  4 (1T 4) local     penalty_goal Luciano Aprile
+    min  6 (1T 6) visitante penalty_goal Fernando Valentín Marzano
+    min 30 (1T 30) local     substitution Favio Ariel Ontivero
+    min 33 (1T 33) visitante penalty_goal Fernando Valentín Marzano
+    min 38 (1T 38) local     substitution Pedro Gontero
+    min 43 (2T 3) local     card_yellow  Paulo Farias
+    min 43 (2T 3) visitante card_yellow  Ivan Forni
+    min 44 (2T 4) local     try          Nicolas Rey
+    min 44 (2T 4) local     conversion   Luciano Aprile
+    min 50 (2T 10) local     substitution Joaquin Matias Aguirre
+    min 50 (2T 10) local     substitution Juan Gabriel Almada
+    min 51 (2T 11) local     try          Alan Agustín Quinteros Carrizo
+    min 51 (2T 11) local     conversion   Nicolas Rey
+    min 54 (2T 14) local     card_red     Leonel Quinteros
+    min 57 (2T 17) visitante substitution Facundo González
+    min 58 (2T 18) visitante substitution Santiago Gabriel Gomez Vega
+    min 60 (2T 20) local     card_yellow  Paulo Farias
+    min 60 (2T 20) local     card_red     Paulo Farias
+    min 62 (2T 22) visitante try          Benjamin Tobares
+    min 62 (2T 22) visitante conversion   Fernando Valentín Marzano
+    min 68 (2T 28) local     substitution Luciano Aprile
+    min 68 (2T 28) local     substitution Santiago Timolati
+    min 70 (2T 30) visitante card_yellow  Ruben Cuello
+    min 71 (2T 31) local     penalty_goal Guido Bobatto
+    min 77 (2T 37) visitante substitution Maximiliano González
+    min 78 (2T 38) visitante substitution Bruno Aleman
+    min 79 (2T 39) visitante penalty_try  
+    min 81 (2T 41) local     penalty_goal Guido Bobatto
+  marcador  · eventos 23-20 · guardado 23-20
+  tries     · 2-2 (guardado —-—)
+  arbitro   · DANIEL ALEJANDRO FUNES (guardado: —)
+  guardado  · 23 local · 30 visitante · 28 eventos
+
+manke-la-calera vs universidad-siglo-21-rugby · 62bf0694 · tarjeta 325286  ·  33af2436-b9aa-4e92-87a5-35c3b177f034
+  local     · manke-la-calera · 30 jugadores · 0 con ficha fijada
+  visitante · universidad-siglo-21-rugby · 23 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min  5 (1T 5) local     try          Joan Uriel Boileau
+    min  5 (1T 5) local     conversion   Joan Uriel Boileau
+    min  5 (1T 5) visitante try          Octavio Laporte
+    min  5 (1T 5) visitante conversion   Pedro Diez Cuenca
+    min  8 (1T 8) visitante try          Pedro Diez Cuenca
+    min 15 (1T 15) local     try          Emiliano Orihuela
+    min 15 (1T 15) visitante try          Facundo Tachini
+    min 19 (1T 19) visitante try          Agustin Villanova
+    min 19 (1T 19) visitante conversion   Agustin Villanova
+    min 25 (1T 25) visitante try          Lucas Ezequiel Ceballos Faas
+    min 25 (1T 25) visitante conversion   Pedro Diez Cuenca
+    min 32 (1T 32) visitante try          Pedro Diez Cuenca
+    min 32 (1T 32) visitante conversion   Pedro Diez Cuenca
+    min 40 (1T 40) visitante try          Pedro Diez Cuenca
+    min 40 (1T 40) visitante conversion   Juan Pero
+    min 44 (2T 4) visitante try          Fabricio Galarza
+    min 60 (2T 20) local     try          Rodrigo Diego Boll
+    min 61 (2T 21) visitante try          Fabricio Galarza
+    min 61 (2T 21) visitante conversion   Pedro Diez Cuenca
+    min 78 (2T 38) visitante penalty_goal Pedro Diez Cuenca
+  marcador  · eventos 17-60 · guardado 17-60
+  tries     · 3-9 (guardado —-—)
+  arbitro   · SANTIAGO GERONIMO LOZADA CHAVES (guardado: —)
+  guardado  · 30 local · 23 visitante · 20 eventos
+
+rosedal-r-c vs asociacion-cordobesa-volantes · 62bf0694 · tarjeta 325285  ·  4fadd91b-f4c0-4df2-ab5f-a008a3b1d569
+  local     · rosedal-r-c · 30 jugadores · 0 con ficha fijada
+  visitante · asociacion-cordobesa-volantes · 30 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min 20 (1T 20) local     substitution Facundo González
+    min 24 (1T 24) visitante penalty_goal Gabriel Aranda
+    min 25 (1T 25) local     try          Francisco Busleiman
+    min 25 (1T 25) local     conversion   Fernando Valentín Marzano
+    min 30 (1T 30) local     card_yellow  Pablo Martín Pereyra
+    min 31 (1T 31) local     try          Francisco Busleiman
+    min 35 (1T 35) local     try          Ivan Forni
+    min 35 (1T 35) local     conversion   Fernando Valentín Marzano
+    min 41 (2T 1) local     substitution Fernando Valentín Marzano
+    min 46 (2T 6) visitante try          Valentino Vega Rossaroli
+    min 56 (2T 16) local     substitution Maximiliano González
+    min 56 (2T 16) visitante try          Andrés Benjamín Bueno
+    min 56 (2T 16) visitante conversion   Gabriel Aranda
+    min 60 (2T 20) local     substitution Matias José Tedesco Sánchez
+    min 60 (2T 20) visitante injury       Gustavo Nieto
+    min 60 (2T 20) visitante card_yellow  Cristian Yefim Carivali
+    min 63 (2T 23) local     try          Joaquín Gutierrez
+    min 63 (2T 23) local     conversion   Bruno Aleman
+    min 70 (2T 30) local     try          Elias Nuñez
+    min 70 (2T 30) local     conversion   Bruno Aleman
+    min 71 (2T 31) local     substitution Ivan Forni
+    min 75 (2T 35) local     card_yellow  Franco Agustin Cabral Gonzalez
+    min 75 (2T 35) local     substitution Ruben Cuello
+    min 75 (2T 35) local     substitution Elias Nuñez
+  marcador  · eventos 33-15 · guardado 33-15
+  tries     · 5-2 (guardado —-—)
+  arbitro   · DANIEL ALEJANDRO FUNES (guardado: —)
+  guardado  · 30 local · 30 visitante · 24 eventos
+
+conas-r-c vs cuises-portena-rugby · 62bf0694 · tarjeta 325284  ·  1dfa5a91-d1f3-4334-bdd8-ace392e9bc6c
+  local     · conas-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · cuises-portena-rugby · 30 jugadores · 0 con ficha fijada
+  eventos   · 38
+    min  2 (1T 2) local     try          Joaquin Matias Aguirre
+    min  2 (1T 2) local     conversion   Luciano Aprile
+    min  7 (1T 7) visitante try          Lucas Pratti
+    min 10 (1T 10) local     try          Luciano Zacarias Rojas
+    min 10 (1T 10) local     conversion   Luciano Aprile
+    min 15 (1T 15) local     card_yellow  Paulo Farias
+    min 17 (1T 17) local     try          Geronimo Facundo Gomez Lelli
+    min 17 (1T 17) local     conversion   Luciano Aprile
+    min 25 (1T 25) local     try          Alan Agustín Quinteros Carrizo
+    min 25 (1T 25) local     conversion   Luciano Aprile
+    min 27 (1T 27) local     try          Nicolas Rey
+    min 30 (1T 30) visitante substitution Lucas Pratti
+    min 35 (1T 35) local     card_red     Luciano Zacarias Rojas
+    min 38 (1T 38) local     try          Nicolas Rey
+    min 38 (1T 38) local     conversion   Guido Bobatto
+    min 40 (1T 40) local     card_yellow  Alexis Cravero
+    min 40 (2T 0) visitante substitution Pablo Bianco
+    min 40 (2T 0) visitante substitution Francisco Rivoira
+    min 42 (2T 2) local     try          Guido Bobatto
+    min 50 (2T 10) local     substitution Paulo Farias
+    min 50 (2T 10) local     substitution Santiago Timolati
+    min 50 (2T 10) visitante substitution Marcos Martin Aghemo
+    min 55 (2T 15) visitante substitution Edelmar Beccaria
+    min 55 (2T 15) visitante substitution Nicolás Guillermo Bruna
+    min 55 (2T 15) visitante card_yellow  Juan De La Cruz Acevedo
+    min 59 (2T 19) local     try          Guido Bobatto
+    min 59 (2T 19) local     conversion   Luciano Aprile
+    min 62 (2T 22) local     try          Pablo Aguirres
+    min 64 (2T 24) local     try          Alan Agustín Quinteros Carrizo
+    min 64 (2T 24) local     conversion   Luciano Aprile
+    min 70 (2T 30) local     try          Alexis Cravero
+    min 70 (2T 30) visitante substitution Michael Otero
+    min 73 (2T 33) local     try          Alan Agustín Quinteros Carrizo
+    min 73 (2T 33) local     conversion   Luciano Aprile
+    min 75 (2T 35) local     substitution Maximiliano Ferreyra
+    min 75 (2T 35) visitante card_red     Luciano Leguizamon
+    min 78 (2T 38) local     substitution Joaquin Matias Aguirre
+    min 78 (2T 38) local     substitution Victor Hugo Demarco
+  marcador  · eventos 76-5 · guardado 76-5
+  tries     · 12-1 (guardado —-—)
+  arbitro   · ABEL ESTEBAN TUREK (guardado: —)
+  guardado  · 23 local · 30 visitante · 38 eventos
+
+universidad-siglo-21-rugby vs rosedal-r-c · 62bf0694 · tarjeta 326220  ·  6d4430f9-a9be-408b-ae84-8b5ea16f47ac
+  local     · universidad-siglo-21-rugby · 23 jugadores · 0 con ficha fijada
+  visitante · rosedal-r-c · 30 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min  2 (1T 2) visitante penalty_goal Bruno Aleman
+    min  6 (1T 6) visitante try          Joaquín Gutierrez
+    min  6 (1T 6) visitante conversion   Bruno Aleman
+    min 10 (1T 10) local     try          Pedro José Depalo
+    min 10 (1T 10) local     conversion   Facundo Tachini
+    min 12 (1T 12) local     try          Joaquin Iscaro
+    min 27 (1T 27) visitante try          Benjamin Tobares
+    min 27 (1T 27) visitante conversion   Bruno Aleman
+    min 39 (1T 39) local     try          Agustin Villanova
+    min 39 (1T 39) local     conversion   Facundo Tachini
+    min 43 (2T 3) local     try          Pedro José Depalo
+    min 43 (2T 3) local     conversion   Facundo Tachini
+    min 47 (2T 7) local     try          Pedro José Depalo
+    min 62 (2T 22) visitante try          Elias Nuñez
+    min 65 (2T 25) local     try          Pedro José Depalo
+    min 65 (2T 25) local     conversion   Facundo Tachini
+    min 72 (2T 32) local     try          Paul Cornu
+    min 72 (2T 32) visitante penalty_try  
+  marcador  · eventos 43-29 · guardado 43-29
+  tries     · 7-4 (guardado —-—)
+  arbitro   · JUAN FRANCISCO GOMEZ (guardado: —)
+  guardado  · 23 local · 30 visitante · 18 eventos
+
+asociacion-cordobesa-volantes vs conas-r-c · 62bf0694 · tarjeta 326221  ·  56101a57-8dca-4aaa-95c1-c22362db4379
+  local     · asociacion-cordobesa-volantes · 30 jugadores · 0 con ficha fijada
+  visitante · conas-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min  6 (1T 6) visitante try          Alan Agustín Quinteros Carrizo
+    min  6 (1T 6) visitante conversion   Luciano Aprile
+    min 20 (1T 20) local     try          Andrés Benjamín Bueno
+    min 22 (1T 22) visitante try          Guido Bobatto
+    min 27 (1T 27) visitante penalty_goal Luciano Aprile
+    min 30 (1T 30) local     try          Andrés Benjamín Bueno
+    min 42 (2T 2) visitante substitution Pablo Aguirres
+    min 45 (2T 5) visitante try          Luciano Aprile
+    min 45 (2T 5) visitante conversion   Luciano Aprile
+    min 50 (2T 10) visitante try          Geronimo Facundo Gomez Lelli
+    min 50 (2T 10) visitante conversion   Luciano Aprile
+    min 54 (2T 14) visitante try          Guido Bobatto
+    min 54 (2T 14) visitante conversion   Luciano Aprile
+    min 55 (2T 15) visitante substitution Juan Gabriel Almada
+    min 55 (2T 15) visitante substitution Joaquin Matias Aguirre
+    min 60 (2T 20) visitante try          Facundo Sabre
+    min 60 (2T 20) visitante substitution Tomas Nieto
+    min 64 (2T 24) visitante try          Marcelo Ariel Coria
+    min 64 (2T 24) visitante conversion   Luciano Aprile
+    min 66 (2T 26) visitante try          Luciano Aprile
+    min 71 (2T 31) visitante card_yellow  Antonio Palavecino
+    min 75 (2T 35) visitante substitution Luciano Aprile
+    min 75 (2T 35) visitante substitution Santiago Timolati
+    min 77 (2T 37) visitante try          Guido Bobatto
+    min 77 (2T 37) visitante conversion   Nicolas Rey
+  marcador  · eventos 10-60 · guardado 10-60
+  tries     · 2-9 (guardado —-—)
+  arbitro   · LEANDRO LUCHETTI (guardado: —)
+  guardado  · 30 local · 23 visitante · 25 eventos
+
+salsipuedes-r-c vs chelcos-de-villa-del-rosario · 62bf0694 · tarjeta 327315  ·  fe91a5b3-feb1-4876-a072-b25d21e77658
+  local     · salsipuedes-r-c · 24 jugadores · 0 con ficha fijada
+  visitante · chelcos-de-villa-del-rosario · 21 jugadores · 0 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 56-10
+  tries     · 0-0 (guardado —-—)
+  arbitro   · JAVIER NICOLAS OLALLA (guardado: —)
+  guardado  · 24 local · 21 visitante · 0 eventos
+
+villa-libertador-r-c vs chelcos-de-villa-del-rosario · 62bf0694 · tarjeta 326224  ·  3173dbd1-7d21-4a96-b3bd-f680eecaebee
+  local     · villa-libertador-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · chelcos-de-villa-del-rosario · 22 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min 13 (1T 13) visitante penalty_goal Pablo Daniele
+    min 23 (1T 23) local     try          Romeo Diaz Garcia
+    min 23 (1T 23) local     conversion   Isaias Falon
+    min 26 (1T 26) visitante penalty_goal Pablo Daniele
+    min 34 (1T 34) local     try          Lihuel Corzo
+    min 34 (1T 34) local     conversion   Isaias Falon
+    min 37 (1T 37) local     try          Antonio Garcia
+    min 37 (1T 37) local     conversion   Isaias Falon
+    min 40 (1T 40) visitante try          Pablo Daniele
+    min 42 (2T 2) local     try          Raul Sosa Garcia
+    min 44 (2T 4) local     try          Franco Ezequiel Galiano
+    min 51 (2T 11) local     try          Aaron Sanz
+    min 51 (2T 11) local     conversion   Isaias Falon
+    min 57 (2T 17) local     try          Braian Alexis Sanchez Rodriguez
+    min 61 (2T 21) visitante try          Bruno Guillermo Patria
+    min 62 (2T 22) visitante conversion   Pablo Daniele
+    min 64 (2T 24) visitante try          Pablo Daniele
+    min 65 (2T 25) visitante conversion   Pablo Daniele
+    min 65 (2T 25) visitante card_yellow  Ignacio Cipolat
+    min 73 (2T 33) local     penalty_try  
+    min 76 (2T 36) local     try          Braian Alexis Sanchez Rodriguez
+    min 76 (2T 36) local     conversion   Isaias Falon
+  marcador  · eventos 57-25 · guardado 57-25
+  tries     · 9-3 (guardado —-—)
+  arbitro   · CRISTIAN SCHWARTZ (guardado: —)
+  guardado  · 23 local · 22 visitante · 22 eventos
+
+ajedrez-cosquin-r-c vs salsipuedes-r-c · 62bf0694 · tarjeta 326223  ·  2225364b-b090-479f-98ed-864811fc5ccc
+  local     · ajedrez-cosquin-r-c · 22 jugadores · 0 con ficha fijada
+  visitante · salsipuedes-r-c · 24 jugadores · 0 con ficha fijada
+  eventos   · 23
+    min 40 (1T 40) local     penalty_goal Gabriel Guzman
+    min 50 (2T 10) local     card_yellow  Gabriel Guzman
+    min 53 (2T 13) local     card_yellow  Marcelo Vivas
+    min 60 (2T 20) local     substitution Mayco Nervo
+    min 60 (2T 20) local     substitution Angel Agustín Caliri
+    min 60 (2T 20) local     substitution Nahuel Matias Romero
+    min 63 (2T 23) local     card_yellow  Nahuel Matias Romero
+    min 85 (2T 45) local     try          Gabriel Moyyss
+    min 85 (2T 45) local     conversion   Gabriel Guzman
+    min 97 (2T 57) visitante penalty_goal Facundo Valentin Lasa
+    min 99 (2T 59) visitante substitution Mateo Lencinas
+    min 99 (2T 59) visitante substitution Raúl Alejandro Almada
+    min 99 (2T 59) visitante substitution Ismael Herrera
+    min 99 (2T 59) visitante substitution Milton Grahl
+    min 99 (2T 59) visitante substitution Juan Aliendro
+    min 103 (2T 63) visitante card_yellow  Guillermo Raul Lucero
+    min 104 (2T 64) local     penalty_goal Angel Agustín Caliri
+    min 110 (2T 70) local     try          Gabriel Guzman
+    min 110 (2T 70) local     conversion   Gabriel Guzman
+    min 113 (2T 73) visitante try          Milton Grahl
+    min 113 (2T 73) visitante conversion   Claudio Gabriel Juarez
+    min 119 (2T 79) local     try          Gabriel Guzman
+    min 119 (2T 79) local     conversion   Gabriel Guzman
+  marcador  · eventos 27-10 · guardado 27-10
+  tries     · 3-1 (guardado —-—)
+  arbitro   · ARTURO MARTINEZ (guardado: —)
+  guardado  · 22 local · 24 visitante · 23 eventos
+
+chelcos-de-villa-del-rosario vs ajedrez-cosquin-r-c · 62bf0694 · tarjeta 325288  ·  a8395467-8662-403d-97cb-962494dcbccc
+  local     · chelcos-de-villa-del-rosario · 22 jugadores · 0 con ficha fijada
+  visitante · ajedrez-cosquin-r-c · 21 jugadores · 0 con ficha fijada
+  eventos   · 28
+    min  1 (1T 1) local     try          Pablo Daniele
+    min  1 (1T 1) local     conversion   Ezequiel Bianco
+    min  8 (1T 8) local     penalty_goal Pablo Daniele
+    min 10 (1T 10) local     penalty_goal Pablo Daniele
+    min 15 (1T 15) visitante try          Joaquín Augusto Lucero
+    min 16 (1T 16) visitante conversion   Gabriel Guzman
+    min 18 (1T 18) visitante try          Gabriel Guzman
+    min 19 (1T 19) visitante conversion   Gabriel Guzman
+    min 26 (1T 26) visitante card_yellow  Gabriel Moyyss
+    min 36 (1T 36) local     penalty_goal Ezequiel Bianco
+    min 40 (1T 40) visitante try          Nicolas Martinez Recabarren
+    min 41 (1T 41) visitante conversion   Gabriel Guzman
+    min 41 (2T 1) local     penalty_goal Ezequiel Bianco
+    min 48 (2T 8) visitante try          Claudio Rodrigo Perez
+    min 49 (2T 9) visitante conversion   Gabriel Guzman
+    min 51 (2T 11) local     try          José Francisco Rojas Ovejero
+    min 51 (2T 11) local     conversion   Ezequiel Bianco
+    min 54 (2T 14) visitante try          Nahuel Matias Romero
+    min 55 (2T 15) visitante conversion   Gabriel Guzman
+    min 61 (2T 21) local     try          Pablo Daniele
+    min 61 (2T 21) local     conversion   Ezequiel Bianco
+    min 62 (2T 22) visitante try          Gabriel Guzman
+    min 63 (2T 23) visitante conversion   Gabriel Guzman
+    min 70 (2T 30) local     penalty_try  
+    min 70 (2T 30) local     card_yellow  Pablo Daniele
+    min 76 (2T 36) visitante card_yellow  Angel Tapia
+    min 78 (2T 38) visitante penalty_goal Gabriel Guzman
+    min 80 (2T 40) local     try          Bruno Guillermo Patria
+  marcador  · eventos 45-45 · guardado 45-45
+  tries     · 5-6 (guardado —-—)
+  arbitro   · LUCAS HUMERES (guardado: —)
+  guardado  · 22 local · 21 visitante · 28 eventos
+
+salsipuedes-r-c vs villa-libertador-r-c · 62bf0694 · tarjeta 325287  ·  648440e3-6e9d-4d2c-9957-a88a7c6986cb
+  local     · salsipuedes-r-c · 26 jugadores · 0 con ficha fijada
+  visitante · villa-libertador-r-c · 24 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min  3 (1T 3) local     penalty_goal Facundo Valentin Lasa
+    min 14 (1T 14) visitante try          Antonio Garcia
+    min 15 (1T 15) visitante conversion   Isaias Falon
+    min 32 (1T 32) local     try          Claudio Gabriel Juarez
+    min 33 (1T 33) local     conversion   Facundo Valentin Lasa
+    min 41 (2T 1) local     penalty_goal Facundo Valentin Lasa
+    min 42 (2T 2) visitante try          Diego Vivas
+    min 53 (2T 13) visitante substitution Fernán Sarli
+    min 55 (2T 15) visitante try          Isaias Falon
+    min 56 (2T 16) visitante conversion   Isaias Falon
+    min 56 (2T 16) visitante substitution Juan Manuel Rodriguez
+    min 59 (2T 19) visitante try          Antonio Garcia
+    min 60 (2T 20) visitante substitution Juan Sebastian Vazquez
+    min 68 (2T 28) visitante try          Antonio Garcia
+    min 69 (2T 29) visitante conversion   Isaias Falon
+    min 75 (2T 35) visitante try          Rodrigo Damian Taborda
+    min 78 (2T 38) local     injury       Santiago Misael Robledo
+    min 80 (2T 40) visitante substitution Agustin Russo
+    min 80 (2T 40) visitante conversion   Franco Ezequiel Galiano
+    min 80 (2T 40) visitante substitution Raul Sosa Garcia
+    min 80 (2T 40) visitante substitution Ezequiel Russo
+    min 80 (2T 40) visitante substitution Alvaro Coppa
+  marcador  · eventos 13-38 · guardado 13-38
+  tries     · 1-6 (guardado —-—)
+  arbitro   · JAVIER SORBERA FERRER (guardado: —)
+  guardado  · 26 local · 24 visitante · 22 eventos
+
+chelcos-de-villa-del-rosario vs salsipuedes-r-c · 62bf0694 · tarjeta 324554  ·  bda6ecb6-d7af-4ed7-9c5e-ab3b607c786a
+  local     · chelcos-de-villa-del-rosario · 22 jugadores · 0 con ficha fijada
+  visitante · salsipuedes-r-c · 26 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min  3 (1T 3) visitante try          Javier Giuliano
+    min  4 (1T 4) visitante conversion   Facundo Valentin Lasa
+    min 15 (1T 15) local     substitution Tobias Moukarzel
+    min 15 (1T 15) local     injury       Tobias Moukarzel
+    min 17 (1T 17) visitante card_yellow  Francisco Tufí Correcher Faisal
+    min 29 (1T 29) visitante try          Juan Aliendro
+    min 30 (1T 30) visitante conversion   Facundo Valentin Lasa
+    min 33 (1T 33) local     penalty_goal Gonzalo Manuel Fernandez
+    min 35 (1T 35) local     penalty_goal Gonzalo Manuel Fernandez
+    min 42 (1T 42) local     penalty_goal Gonzalo Manuel Fernandez
+    min 45 (2T 5) local     try          Pablo Daniele
+    min 46 (2T 6) local     conversion   Gonzalo Manuel Fernandez
+    min 49 (2T 9) local     penalty_goal Gonzalo Manuel Fernandez
+    min 53 (2T 13) visitante penalty_goal Facundo Valentin Lasa
+    min 54 (2T 14) visitante substitution Alejandro Piccardo
+    min 56 (2T 16) visitante try          Francis Emanuel Sepulveda Gattari
+    min 57 (2T 17) visitante conversion   Facundo Valentin Lasa
+    min 57 (2T 17) visitante substitution Santiago Misael Robledo
+    min 57 (2T 17) visitante substitution Santiago Cornejo
+    min 59 (2T 19) local     try          Pablo Daniele
+    min 60 (2T 20) local     conversion   Gonzalo Manuel Fernandez
+    min 60 (2T 20) local     injury       Joaquin Berdasco
+    min 63 (2T 23) local     penalty_goal Gonzalo Manuel Fernandez
+    min 68 (2T 28) local     substitution Joaquin Berdasco
+    min 78 (2T 38) local     penalty_goal Gonzalo Manuel Fernandez
+    min 80 (2T 40) local     penalty_goal Gonzalo Manuel Fernandez
+    min 108 (2T 68) local     card_yellow  Alex Nahuel Isla
+  marcador  · eventos 35-24 · guardado 35-24
+  tries     · 2-3 (guardado —-—)
+  arbitro   · CRISTIAN SCHWARTZ (guardado: —)
+  guardado  · 22 local · 26 visitante · 27 eventos
+
+villa-libertador-r-c vs ajedrez-cosquin-r-c · 62bf0694 · tarjeta 324553  ·  5ce7b48e-a9d4-46dc-9b12-e9f63b3c188c
+  local     · villa-libertador-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · ajedrez-cosquin-r-c · 21 jugadores · 0 con ficha fijada
+  eventos   · 16
+    min  3 (1T 3) local     try          Romeo Diaz Garcia
+    min  3 (1T 3) local     conversion   Isaias Falon
+    min 13 (1T 13) visitante try          Milet Ludueña
+    min 19 (1T 19) local     try          Diego Vivas
+    min 19 (1T 19) local     conversion   Isaias Falon
+    min 35 (1T 35) visitante card_yellow  Elian Salinas
+    min 36 (1T 36) local     try          Isaias Falon
+    min 36 (1T 36) local     conversion   Isaias Falon
+    min 50 (2T 10) local     try          Franco Ezequiel Galiano
+    min 50 (2T 10) local     conversion   Isaias Falon
+    min 55 (2T 15) visitante try          Gabriel Guzman
+    min 56 (2T 16) visitante conversion   Gabriel Guzman
+    min 62 (2T 22) visitante try          Angel Tapia
+    min 63 (2T 23) visitante conversion   Gabriel Guzman
+    min 78 (2T 38) local     try          Franco Ezequiel Galiano
+    min 78 (2T 38) local     conversion   Isaias Falon
+  marcador  · eventos 35-19 · guardado 35-19
+  tries     · 5-3 (guardado —-—)
+  arbitro   · RODRIGO TIRANTI (guardado: —)
+  guardado  · 23 local · 21 visitante · 16 eventos
+
+salsipuedes-r-c vs ajedrez-cosquin-r-c · 62bf0694 · tarjeta 322771  ·  886bc343-4c19-46dd-ba9a-d1e86f415fb9
+  local     · salsipuedes-r-c · 25 jugadores · 0 con ficha fijada
+  visitante · ajedrez-cosquin-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 16
+    min  3 (1T 3) local     try          Luciano Maldonado
+    min 14 (1T 14) visitante penalty_goal Gabriel Guzman
+    min 17 (1T 17) local     try          Milton Grahl
+    min 17 (1T 17) local     conversion   Facundo Valentin Lasa
+    min 25 (1T 25) local     try          Ramiro Cuello
+    min 29 (1T 29) visitante try          Gabriel Guzman
+    min 30 (1T 30) visitante conversion   Gabriel Guzman
+    min 32 (1T 32) local     penalty_goal Facundo Valentin Lasa
+    min 44 (2T 4) visitante try          Leandro David Altieri
+    min 45 (2T 5) visitante conversion   Gabriel Guzman
+    min 55 (2T 15) visitante try          Elian Salinas
+    min 56 (2T 16) visitante conversion   Gabriel Guzman
+    min 60 (2T 20) local     injury       Jorge Gaston Almada
+    min 67 (2T 27) visitante try          Angel Tapia
+    min 71 (2T 31) local     penalty_goal Facundo Valentin Lasa
+    min 80 (2T 40) visitante penalty_goal Gabriel Guzman
+  marcador  · eventos 23-32 · guardado 23-32
+  tries     · 3-4 (guardado —-—)
+  arbitro   · JAVIER NICOLAS OLALLA (guardado: —)
+  guardado  · 25 local · 23 visitante · 16 eventos
+
+chelcos-de-villa-del-rosario vs villa-libertador-r-c · 62bf0694 · tarjeta 322770  ·  e696c731-c13c-4076-af43-136996c6b305
+  local     · chelcos-de-villa-del-rosario · 20 jugadores · 0 con ficha fijada
+  visitante · villa-libertador-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min 11 (1T 11) local     penalty_goal Ezequiel Bianco
+    min 21 (1T 21) visitante card_yellow  Walter Luis Amaya
+    min 31 (1T 31) visitante try          Antonio Garcia
+    min 31 (1T 31) visitante substitution Fernán Sarli
+    min 38 (1T 38) visitante try          Antonio Garcia
+    min 38 (1T 38) visitante conversion   Isaias Falon
+    min 46 (2T 6) visitante try          Braian Alexis Sanchez Rodriguez
+    min 47 (2T 7) visitante card_yellow  Aaron Sanz
+    min 48 (2T 8) local     penalty_goal Ezequiel Bianco
+    min 60 (2T 20) local     penalty_goal Ezequiel Bianco
+    min 60 (2T 20) visitante substitution Raul Sosa Garcia
+    min 60 (2T 20) visitante substitution Walter Luis Amaya
+    min 60 (2T 20) visitante substitution Gaston Moyano
+    min 60 (2T 20) visitante substitution Juan Martin Lazo
+    min 60 (2T 20) visitante substitution Esteban Mamani
+    min 60 (2T 20) visitante substitution Romeo Diaz Garcia
+    min 60 (2T 20) visitante substitution Rodrigo Damian Taborda
+    min 62 (2T 22) local     try          Emiliano Raúl Morra
+    min 62 (2T 22) local     conversion   Ezequiel Bianco
+    min 68 (2T 28) visitante try          Franco Ezequiel Galiano
+    min 68 (2T 28) visitante conversion   Isaias Falon
+    min 73 (2T 33) local     conversion   Ezequiel Bianco
+    min 73 (2T 33) local     try          Bruno Guillermo Patria
+    min 78 (2T 38) visitante card_yellow  Lihuel Corzo
+    min 79 (2T 39) visitante card_red     Juan Sebastian Vazquez
+  marcador  · eventos 23-24 · guardado 23-24
+  tries     · 2-4 (guardado —-—)
+  arbitro   · GONZALO COSTANTINI (guardado: —)
+  guardado  · 20 local · 23 visitante · 25 eventos
+
+villa-libertador-r-c vs salsipuedes-r-c · 62bf0694 · tarjeta 320909  ·  57c3e973-4f98-4211-b2b1-fad893fdec81
+  local     · villa-libertador-r-c · 30 jugadores · 0 con ficha fijada
+  visitante · salsipuedes-r-c · 25 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min  2 (1T 2) local     try          Diego Vivas
+    min  5 (1T 5) visitante penalty_try  Santiago Amuchastegui
+    min  6 (1T 6) local     try          Juan Sebastian Vazquez
+    min  9 (1T 9) local     try          Juan Martin Lazo
+    min 12 (1T 12) local     try          Lihuel Corzo
+    min 12 (1T 12) local     try          Rodrigo Damian Taborda
+    min 12 (1T 12) local     conversion   Lihuel Corzo
+    min 15 (1T 15) local     try          Antonio Garcia
+    min 15 (1T 15) local     conversion   Lihuel Corzo
+    min 20 (1T 20) local     try          Tomas Agustin Arguello Ludueña
+    min 20 (1T 20) local     conversion   Lihuel Corzo
+    min 29 (1T 29) local     try          Romeo Diaz Garcia
+    min 29 (1T 29) local     conversion   Lihuel Corzo
+    min 42 (2T 2) local     try          Diego Vivas
+    min 42 (2T 2) local     conversion   Isaias Falon
+    min 60 (2T 20) local     try          Aaron Sanz
+    min 79 (2T 39) local     try          Facundo Valentin Lasa
+  marcador  · eventos 65-7 · guardado 65-7
+  tries     · 11-1 (guardado —-—)
+  arbitro   · RODRIGO TIRANTI (guardado: —)
+  guardado  · 30 local · 25 visitante · 17 eventos
+
+ajedrez-cosquin-r-c vs chelcos-de-villa-del-rosario · 62bf0694 · tarjeta 320908  ·  6b6d0fc7-2212-47f3-8d4f-aac97c53d0cf
+  local     · ajedrez-cosquin-r-c · 20 jugadores · 0 con ficha fijada
+  visitante · chelcos-de-villa-del-rosario · 20 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min  5 (1T 5) local     penalty_goal Gabriel Guzman
+    min 12 (1T 12) local     try          Milet Ludueña
+    min 12 (1T 12) visitante try          Julio Alvarez
+    min 12 (1T 12) visitante conversion   Julio Alvarez
+    min 13 (1T 13) local     conversion   Gabriel Guzman
+    min 15 (1T 15) visitante penalty_goal Julio Alvarez
+    min 20 (1T 20) local     try          Angel Tapia
+    min 21 (1T 21) local     conversion   Gabriel Guzman
+    min 25 (1T 25) visitante penalty_goal Julio Alvarez
+    min 30 (1T 30) local     try          Angel Tapia
+    min 38 (1T 38) local     card_yellow  Mayco Nervo
+    min 44 (2T 4) local     penalty_goal Gabriel Guzman
+    min 50 (2T 10) visitante try          Julio Alvarez
+    min 50 (2T 10) visitante conversion   Julio Alvarez
+    min 53 (2T 13) local     try          Angel Tapia
+    min 57 (2T 17) local     try          Angel Tapia
+    min 60 (2T 20) local     card_yellow  Gabriel Cerrella
+    min 68 (2T 28) local     try          Gabriel Guzman
+    min 69 (2T 29) local     conversion   Gabriel Guzman
+    min 70 (2T 30) visitante try          Julio Alvarez
+  marcador  · eventos 42-25 · guardado 42-25
+  tries     · 6-3 (guardado —-—)
+  arbitro   · LEANDRO LUCHETTI (guardado: —)
+  guardado  · 20 local · 20 visitante · 20 eventos
+
+listo · 68 partidos

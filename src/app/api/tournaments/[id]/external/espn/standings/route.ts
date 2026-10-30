@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { applyPublicShortCache, limitAnonymousRequest } from '@/lib/server/publicRouteGuards';
 import { createClient } from '@/lib/supabase/server';
 import {
     getTournamentEspnAmericanFootballConfig,
@@ -16,9 +17,13 @@ import {
 } from '@/lib/services/espnMotorsport';
 
 export async function GET(
-    _request: NextRequest,
+    request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
+    // Ruta anónima que termina en el proveedor externo: tope por IP.
+    const limited = await limitAnonymousRequest(request, 'ext-espn-standings');
+    if (limited) return limited;
+
     try {
         const tournamentId = (await params).id;
         const supabase = await createClient();
@@ -57,10 +62,10 @@ export async function GET(
             ? await getEspnAmericanFootballLeagueStandings(config!.league_slug as any)
             : await getEspnMotorsportLeagueStandings(config!.league_slug as any);
 
-        return NextResponse.json({
+        return applyPublicShortCache(NextResponse.json({
             standings: standings.rows,
             updated_at: new Date().toISOString(),
-        });
+        }), request);
     } catch (error: any) {
         return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
     }

@@ -1,0 +1,2734 @@
+Torneo Cordobés M16 "B" 2026 (Unión Cordobesa) · tarjetas de partido (texto del SIGER) · validado contra el marcador de la base
+
+Jockey Club Córdoba M16 "B" vs Tala Rugby Club M16 "B" · torneo-cordobes-m16-b · tarjeta 291033  ·  af4b9076-5c62-438f-93db-dff80147f910
+  local     · Jockey Club Córdoba M16 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M16 "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 21
+    min  1 (1T 1) visitante try          Lucas Alderete
+    min  1 (1T 1) visitante conversion   Ciro Sacavino
+    min  5 (1T 5) local     try          Martin Clerico
+    min  5 (1T 5) local     conversion   Santiago Oglietti Aguirre
+    min 13 (1T 13) visitante substitution Felipe Savid
+    min 13 (1T 13) visitante try          Ciro Sacavino
+    min 13 (1T 13) visitante conversion   Ciro Sacavino
+    min 17 (1T 17) visitante substitution Santiago Funes Racagni
+    min 19 (1T 19) local     try          Martin Clerico
+    min 19 (1T 19) local     conversion   Santiago Oglietti Aguirre
+    min 26 (1T 26) visitante try          Ciro Sacavino
+    min 31 (1T 31) local     substitution Octavio Enrique Borrini
+    min 31 (1T 31) visitante try          Lucas Alderete
+    min 46 (2T 6) local     try          Martin Clerico
+    min 46 (2T 6) local     conversion   Santiago Oglietti Aguirre
+    min 46 (2T 6) visitante substitution Nicanor Garzón González
+    min 52 (2T 12) visitante try          Lucas Badra Uez
+    min 62 (2T 22) local     card_yellow  Santiago Oglietti Aguirre
+    min 66 (2T 26) visitante try          Antonio Scandroglio Nores
+    min 66 (2T 26) visitante conversion   Ciro Sacavino
+    min 72 (2T 32) local     substitution Santiago Oglietti Aguirre
+  marcador  · eventos 21-36 · guardado 21-36
+  tries     · 3-6 (guardado —-—)
+  arbitro   · Patricio Verdun Sheridan (guardado: —)
+  guardado  · 23 local · 23 visitante · 21 eventos
+
+Club La Tablada M16 "B" vs Los Cuervos R.C. M16 "B" · torneo-cordobes-m16-b · tarjeta 291035  ·  6f1a449e-4d7f-435f-835c-5eeee21cb3ba
+  local     · Club La Tablada M16 "B" · 21 jugadores · 0 con ficha fijada
+  visitante · Los Cuervos R.C. M16 "B" · 21 jugadores · 0 con ficha fijada
+  eventos   · 47
+    min  2 (1T 2) local     try          Tomás Furst
+    min  2 (1T 2) local     conversion   Ulises Carmona Burton
+    min  2 (1T 2) local     try          Geronimo Suarez Zampino
+    min  5 (1T 5) local     conversion   Ulises Carmona Burton
+    min  5 (1T 5) local     try          Baldomero Andres Gonzalez Viale
+    min  7 (1T 7) local     conversion   Ulises Carmona Burton
+    min  7 (1T 7) local     try          Fidel Urtubey
+    min 10 (1T 10) local     conversion   Baldomero Andres Gonzalez Viale
+    min 10 (1T 10) local     try          Baldomero Andres Gonzalez Viale
+    min 15 (1T 15) local     try          Andres Saturnini
+    min 17 (1T 17) local     try          Martín Almada Ordoñez
+    min 19 (1T 19) local     conversion   Tomas Ravenna Monforte
+    min 23 (1T 23) local     try          Geronimo Suarez Zampino
+    min 23 (1T 23) local     conversion   Tomas Ravenna Monforte
+    min 25 (1T 25) local     try          Andres Saturnini
+    min 32 (1T 32) local     try          Ulises Carmona Burton
+    min 32 (1T 32) local     conversion   Ulises Carmona Burton
+    min 33 (1T 33) local     try          Baldomero Andres Gonzalez Viale
+    min 33 (1T 33) local     conversion   Tomas Ravenna Monforte
+    min 35 (1T 35) local     try          Angel Francisco Castillo
+    min 35 (1T 35) local     conversion   Tomas Ravenna Monforte
+    min 40 (2T 0) local     substitution Tomás Furst
+    min 40 (2T 0) local     substitution Ulises Carmona Burton
+    min 43 (2T 3) local     try          Martín Almada Ordoñez
+    min 43 (2T 3) local     conversion   Tomas Ravenna Monforte
+    min 46 (2T 6) local     try          Juan Martin Molina
+    min 48 (2T 8) local     try          Arturo Beltran
+    min 48 (2T 8) local     conversion   Tomas Ravenna Monforte
+    min 50 (2T 10) local     try          Angel Francisco Castillo
+    min 50 (2T 10) local     conversion   Tomas Ravenna Monforte
+    min 52 (2T 12) local     try          Pedro Gonzalez
+    min 52 (2T 12) local     conversion   Tomas Ravenna Monforte
+    min 54 (2T 14) local     try          Nicanor Ceballos
+    min 55 (2T 15) visitante substitution Juan Pepicelli
+    min 56 (2T 16) local     try          Santiago Gueydan
+    min 58 (2T 18) local     try          Manuel Villalba Zamboni
+    min 60 (2T 20) local     conversion   Tomas Ravenna Monforte
+    min 60 (2T 20) local     try          Martín Almada Ordoñez
+    min 65 (2T 25) local     conversion   Tomas Ravenna Monforte
+    min 65 (2T 25) local     try          Santiago Gueydan
+    min 67 (2T 27) local     conversion   Tomas Ravenna Monforte
+    min 67 (2T 27) local     try          Fidel Urtubey
+    min 69 (2T 29) local     try          Juan Martin Molina
+    min 73 (2T 33) local     try          Martín Almada Ordoñez
+    min 73 (2T 33) local     conversion   Tomas Ravenna Monforte
+    min 75 (2T 35) local     try          Nicanor Ceballos
+    min 75 (2T 35) local     conversion   Tomas Ravenna Monforte
+  marcador  · eventos 166-0 · guardado 166-0
+  tries     · 26-0 (guardado —-—)
+  arbitro   · Francisco Pecchio (guardado: —)
+  guardado  · 21 local · 21 visitante · 47 eventos
+
+Córdoba Rugby Club M16 "B" vs Alta Gracia R.C. M16 "B" · torneo-cordobes-m16-b · tarjeta 291037  ·  80d1579e-861b-4da8-bdf0-4d6da25dd52d
+  local     · Córdoba Rugby Club M16 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Alta Gracia R.C. M16 "B" · 20 jugadores · 0 con ficha fijada
+  eventos   · 28
+    min  3 (1T 3) local     conversion   Santino Roque Loforte
+    min  3 (1T 3) local     try          Gonzalo David Morales Palazzini
+    min  9 (1T 9) local     try          Matias Agustin Damiano Arri
+    min  9 (1T 9) local     conversion   Santino Emanuel Vanay
+    min 16 (1T 16) visitante card_yellow  Aron Nahele Dominguez
+    min 16 (1T 16) local     try          Santino Emanuel Vanay
+    min 17 (1T 17) local     conversion   Santino Roque Loforte
+    min 21 (1T 21) local     try          Aaron Pioli
+    min 29 (1T 29) local     try          Matias Agustin Damiano Arri
+    min 35 (1T 35) local     try          Octavio Cesar Ricciardi
+    min 41 (2T 1) local     try          Santino Roque Loforte
+    min 42 (2T 2) local     conversion   Santino Emanuel Vanay
+    min 43 (2T 3) local     substitution Julian Francisco Daneri Jenefes
+    min 44 (2T 4) local     substitution Joaquin Amir Fajardo
+    min 46 (2T 6) local     try          Juan Eduardo Gassmann
+    min 46 (2T 6) local     conversion   Santino Roque Loforte
+    min 47 (2T 7) local     substitution Ignacio Emanuel Balán Tolaba
+    min 54 (2T 14) local     try          Ignacio Comba
+    min 56 (2T 16) local     try          Juan Sebastian Incio Di Luca
+    min 57 (2T 17) local     conversion   Santino Roque Loforte
+    min 60 (2T 20) local     substitution Manuel Llorca Maza
+    min 60 (2T 20) local     card_yellow  Juan Sebastian Incio Di Luca
+    min 61 (2T 21) visitante try          Lucas Benjamín Villavicencio
+    min 62 (2T 22) visitante conversion   Gaston Prandini
+    min 62 (2T 22) local     substitution Aaron Pioli
+    min 64 (2T 24) visitante try          Gaston Prandini
+    min 65 (2T 25) visitante conversion   Gaston Prandini
+    min 66 (2T 26) local     try          Indio Nicolas Milich Olivares
+  marcador  · eventos 67-14 · guardado 67-14
+  tries     · 11-2 (guardado —-—)
+  arbitro   · Eduardo Cavaglia (guardado: —)
+  guardado  · 23 local · 20 visitante · 28 eventos
+
+Club Palermo Bajo M16 "B" vs Jockey Club Córdoba M16 "B" · torneo-cordobes-m16-b · tarjeta 291040  ·  c8ec2e76-b849-4817-b9a0-e93adb2081c1
+  local     · Club Palermo Bajo M16 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M16 "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 23
+    min 14 (1T 14) visitante try          Martin Clerico
+    min 18 (1T 18) local     conversion   Joaquin Masoni
+    min 18 (1T 18) local     try          Juan Cruz Miletic
+    min 22 (1T 22) visitante try          Octavio Enrique Borrini
+    min 23 (1T 23) visitante conversion   Ignacio Blasco
+    min 31 (1T 31) visitante try          Octavio Enrique Borrini
+    min 32 (1T 32) visitante conversion   Ignacio Blasco
+    min 34 (1T 34) visitante try          Octavio Enrique Borrini
+    min 41 (2T 1) local     substitution Juan Cruz Rubio
+    min 41 (2T 1) local     substitution Ramiro Genaro Ramos
+    min 41 (2T 1) local     substitution Gino Bardiz
+    min 41 (2T 1) local     substitution Felix Sanger
+    min 45 (2T 5) local     substitution Mateo Suárez Croce
+    min 47 (2T 7) local     try          Valentino Posada Lugones
+    min 54 (2T 14) local     try          Luciano Joaquin Suarez Villan
+    min 55 (2T 15) local     substitution Darian González Colazo
+    min 55 (2T 15) local     substitution Joaquin Masoni
+    min 55 (2T 15) local     substitution Juan Cruz Miletic
+    min 61 (2T 21) visitante try          Ignacio Blasco
+    min 62 (2T 22) visitante conversion   Tomas Agustín Aguirre Martin
+    min 64 (2T 24) visitante try          Lucas Vicente Inaudi
+    min 65 (2T 25) visitante conversion   Ramiro Inaudi
+    min 75 (2T 35) visitante try          Octavio Enrique Borrini
+  marcador  · eventos 17-43 · guardado 17-43
+  tries     · 3-7 (guardado —-—)
+  arbitro   · Arturo Martinez (guardado: —)
+  guardado  · 23 local · 23 visitante · 23 eventos
+
+Tala Rugby Club M16 "C" vs Córdoba Rugby Club M16 "B" · torneo-cordobes-m16-b · tarjeta 291041  ·  b293471c-db9f-42c1-9ce1-d0cd9ab6b755
+  local     · Tala Rugby Club M16 "C" · 23 jugadores · 0 con ficha fijada
+  visitante · Córdoba Rugby Club M16 "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min  1 (1T 1) visitante try          Ignacio Comba
+    min  1 (1T 1) visitante conversion   Santino Roque Loforte
+    min  7 (1T 7) visitante try          Santino Roque Loforte
+    min  7 (1T 7) visitante conversion   Santino Emanuel Vanay
+    min 14 (1T 14) visitante try          Matias Agustin Damiano Arri
+    min 14 (1T 14) visitante conversion   Santino Roque Loforte
+    min 22 (1T 22) visitante try          Gonzalo David Morales Palazzini
+    min 22 (1T 22) visitante conversion   Santino Roque Loforte
+    min 24 (1T 24) visitante try          Santino Roque Loforte
+    min 32 (1T 32) visitante try          Santino Emanuel Vanay
+    min 32 (1T 32) visitante conversion   Santino Emanuel Vanay
+    min 34 (1T 34) visitante try          Matias Agustin Damiano Arri
+    min 34 (1T 34) visitante conversion   Santino Emanuel Vanay
+    min 41 (2T 1) local     substitution Lucca Santino Dainotto
+    min 41 (2T 1) local     substitution Pedro Moyano Correa
+    min 41 (2T 1) local     substitution Tristan Revol
+    min 41 (2T 1) local     substitution Benjamin Bruno
+    min 42 (2T 2) visitante try          Ignacio Comba
+    min 42 (2T 2) visitante conversion   Santino Roque Loforte
+    min 44 (2T 4) visitante try          Gonzalo David Morales Palazzini
+    min 50 (2T 10) local     substitution Escribano Cristobal
+    min 50 (2T 10) local     substitution Benjamin Arguello Ferreira
+    min 55 (2T 15) visitante try          Santino Emanuel Vanay
+    min 55 (2T 15) visitante conversion   Santino Roque Loforte
+    min 58 (2T 18) visitante try          Lautaro Motran Maccio
+    min 63 (2T 23) visitante try          Manuel Llorca Maza
+    min 64 (2T 24) visitante card_yellow  Matias Agustin Damiano Arri
+  marcador  · eventos 0-76 · guardado 0-76
+  tries     · 0-12 (guardado —-—)
+  arbitro   · Santiago Herrera Albano (guardado: —)
+  guardado  · 23 local · 23 visitante · 27 eventos
+
+Club La Tablada M16 "C" vs Alta Gracia R.C. M16 "B" · torneo-cordobes-m16-b · tarjeta 291042  ·  1f23b639-f05e-48aa-bc44-84a1f577491f
+  local     · Club La Tablada M16 "C" · 23 jugadores · 0 con ficha fijada
+  visitante · Alta Gracia R.C. M16 "B" · 21 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min 17 (1T 17) local     try          Matias Saravia
+    min 18 (1T 18) local     conversion   Valentín Franichevich
+    min 28 (1T 28) local     try          Francisco Ahumada Noya
+    min 30 (1T 30) visitante try          Felipe José Arana
+    min 31 (1T 31) visitante conversion   Gaston Prandini
+    min 35 (1T 35) local     try          Fausto Barozzi
+    min 42 (2T 2) visitante try          Maximo Nakasone Uema
+    min 43 (2T 3) visitante conversion   Gaston Prandini
+    min 55 (2T 15) local     try          Salvador Villada
+    min 61 (2T 21) visitante try          Francisco Contrera
+    min 61 (2T 21) visitante conversion   Gaston Prandini
+    min 67 (2T 27) local     try          Salvador Cornú
+    min 70 (2T 30) visitante try          Francisco Contrera
+    min 71 (2T 31) visitante conversion   Gaston Prandini
+    min 73 (2T 33) visitante try          Gaston Prandini
+    min 73 (2T 33) visitante conversion   Gaston Prandini
+    min 76 (2T 36) visitante try          Francisco Contrera
+    min 76 (2T 36) visitante conversion   Gaston Prandini
+  marcador  · eventos 27-42 · guardado 27-42
+  tries     · 5-6 (guardado —-—)
+  arbitro   · Sergio Zbura (guardado: —)
+  guardado  · 23 local · 21 visitante · 18 eventos
+
+Club Universitario de Córdoba M16 "B" vs Club Palermo Bajo M16 "B" · torneo-cordobes-m16-b · tarjeta 291045  ·  a6287713-c98d-4c99-b73f-b7839b8cd9c1
+  local     · Club Universitario de Córdoba M16 "B" · 24 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo M16 "B" · 25 jugadores · 0 con ficha fijada
+  eventos   · 21
+    min  0 (1T 0) local     substitution Juan Ignacio Benavides Pelaytay
+    min 14 (1T 14) visitante try          Genaro Héctor Perotto
+    min 15 (1T 15) visitante conversion   Joaquin Masoni
+    min 19 (1T 19) visitante try          Nicolas Bettera
+    min 20 (1T 20) visitante conversion   Joaquin Masoni
+    min 22 (1T 22) visitante try          Valentino Posada Lugones
+    min 23 (1T 23) visitante conversion   Joaquin Masoni
+    min 24 (1T 24) visitante try          Genaro Héctor Perotto
+    min 25 (1T 25) visitante conversion   Joaquin Masoni
+    min 34 (1T 34) visitante card_yellow  Nicolas Bettera
+    min 35 (1T 35) local     try          Felipe Serran Croce
+    min 40 (2T 0) local     substitution Luis Gervino
+    min 41 (2T 1) visitante try          Bautista Acuña
+    min 42 (2T 2) visitante conversion   Joaquin Masoni
+    min 46 (2T 6) local     substitution Valentino Luca Grillo
+    min 53 (2T 13) local     card_yellow  Felipe Serran Croce
+    min 63 (2T 23) visitante card_yellow  Bautista Acuña
+    min 65 (2T 25) local     try          Felipe Serran Croce
+    min 65 (2T 25) local     conversion   Ignacio Tirao Pacharoni
+    min 75 (2T 35) visitante try          Ramiro Genaro Ramos
+    min 75 (2T 35) visitante conversion   Joaquin Masoni
+  marcador  · eventos 12-42 · guardado 12-42
+  tries     · 2-6 (guardado —-—)
+  arbitro   · Pablo Daniel Dionicio Benitez (guardado: —)
+  guardado  · 24 local · 25 visitante · 21 eventos
+
+Club La Tablada M16 "C" vs Córdoba Rugby Club M16 "B" · torneo-cordobes-m16-b · tarjeta 291046  ·  2f9160ce-9d8f-4869-889d-005b61676d6b
+  local     · Club La Tablada M16 "C" · 23 jugadores · 0 con ficha fijada
+  visitante · Córdoba Rugby Club M16 "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min  3 (1T 3) local     penalty_goal Salvador Cornú
+    min  4 (1T 4) visitante try          Matias Agustin Damiano Arri
+    min 14 (1T 14) visitante try          Sebastian Tomas Rivero Velardes
+    min 20 (1T 20) local     card_yellow  Salvador Villada
+    min 20 (1T 20) visitante card_yellow  Ignacio Comba
+    min 34 (1T 34) visitante try          Manuel Llorca Maza
+    min 35 (1T 35) visitante conversion   Santino Roque Loforte
+    min 41 (2T 1) visitante substitution Sebastian Tomas Rivero Velardes
+    min 46 (2T 6) visitante substitution Joaquin Amir Fajardo
+    min 53 (2T 13) visitante try          Santino Roque Loforte
+    min 53 (2T 13) visitante conversion   Santino Roque Loforte
+    min 59 (2T 19) visitante try          Santino Emanuel Vanay
+    min 59 (2T 19) visitante conversion   Santino Emanuel Vanay
+    min 63 (2T 23) visitante substitution Santino Emanuel Vanay
+    min 66 (2T 26) visitante substitution Valentino Jonás Obregon Heredia
+    min 66 (2T 26) visitante substitution Aaron Pioli
+    min 73 (2T 33) visitante conversion   Santino Roque Loforte
+    min 73 (2T 33) visitante try          Matias Agustin Damiano Arri
+  marcador  · eventos 3-38 · guardado 3-38
+  tries     · 0-6 (guardado —-—)
+  arbitro   · Claudio Marcelo Tejero (guardado: —)
+  guardado  · 23 local · 23 visitante · 18 eventos
+
+Jockey Club Córdoba M16 "B" vs Baguales R.C. M16 "B" · torneo-cordobes-m16-b · tarjeta 291047  ·  3e934dca-5e64-432d-94c9-2ad285a722f4
+  local     · Jockey Club Córdoba M16 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Baguales R.C. M16 "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min 15 (1T 15) visitante try          Maximo Correa Leal
+    min 16 (1T 16) visitante conversion   Ramiro Peralta
+    min 21 (1T 21) local     try          Facundo Romero Flynn
+    min 24 (1T 24) local     try          Federico Robledo Saracho
+    min 25 (1T 25) local     conversion   Agustin Siebenhaar
+    min 26 (1T 26) visitante try          Renzo Luis Casale
+    min 27 (1T 27) visitante conversion   Renzo Luis Casale
+    min 30 (1T 30) local     try          Constantino Marchiaro
+    min 31 (1T 31) local     conversion   Agustin Siebenhaar
+    min 35 (1T 35) local     try          Daniel Gansslen
+    min 51 (2T 11) local     try          Alfonso Heredia Carrara
+    min 52 (2T 12) local     conversion   Santiago Oglietti Aguirre
+    min 56 (2T 16) local     try          Francisco León Menne Barrionuevo
+    min 57 (2T 17) local     conversion   Santiago Oglietti Aguirre
+    min 60 (2T 20) local     try          Alfonso Heredia Carrara
+    min 63 (2T 23) local     try          Facundo Romero Flynn
+    min 64 (2T 24) local     conversion   Santiago Oglietti Aguirre
+    min 70 (2T 30) local     try          Gregorio Del Pino
+  marcador  · eventos 55-14 · guardado 55-14
+  tries     · 9-2 (guardado —-—)
+  arbitro   · Leonel Sorbera (guardado: —)
+  guardado  · 23 local · 23 visitante · 18 eventos
+
+Tala Rugby Club M16 "C" vs Los Cuervos R.C. M16 "B" · torneo-cordobes-m16-b · tarjeta 291049  ·  2c57b83d-1dd6-4029-a8d7-c782de9db548
+  local     · Tala Rugby Club M16 "C" · 23 jugadores · 0 con ficha fijada
+  visitante · Los Cuervos R.C. M16 "B" · 21 jugadores · 0 con ficha fijada
+  eventos   · 29
+    min  8 (1T 8) local     try          Escribano Cristobal
+    min  8 (1T 8) local     conversion   Ignacio Córdoba
+    min 16 (1T 16) local     conversion   Ignacio Córdoba
+    min 16 (1T 16) local     try          Tristan Revol
+    min 23 (1T 23) local     card_yellow  Nicolás Núñez Riera
+    min 25 (1T 25) local     conversion   Ignacio Córdoba
+    min 25 (1T 25) local     try          Franco Girbau Petroff
+    min 32 (1T 32) local     try          Escribano Cristobal
+    min 32 (1T 32) local     conversion   Ignacio Córdoba
+    min 35 (1T 35) local     conversion   Escribano Cristobal
+    min 35 (1T 35) local     try          Escribano Cristobal
+    min 43 (2T 3) local     conversion   Escribano Cristobal
+    min 43 (2T 3) local     try          Joaquin Spina
+    min 45 (2T 5) local     substitution Francisco Andres Bianchini
+    min 45 (2T 5) local     substitution Tomás Cabrera
+    min 45 (2T 5) local     substitution Nicolás Núñez Riera
+    min 45 (2T 5) local     substitution Lucca Santino Dainotto
+    min 47 (2T 7) local     try          Pedro Moyano Correa
+    min 47 (2T 7) local     conversion   Ignacio Córdoba
+    min 50 (2T 10) local     substitution Facundo Ezequiel Virgolini
+    min 50 (2T 10) local     substitution Joaquin Spina
+    min 51 (2T 11) visitante try          Bautista Marinelli
+    min 51 (2T 11) visitante conversion   Juan Ignacio Sanchez
+    min 55 (2T 15) local     try          Ignacio Córdoba
+    min 68 (2T 28) visitante try          Emiliano Agustin Marconetto
+    min 69 (2T 29) local     try          Franco Girbau Petroff
+    min 69 (2T 29) local     conversion   Ignacio Córdoba
+    min 74 (2T 34) local     try          Thomas Arrigo
+    min 74 (2T 34) local     conversion   Ignacio Córdoba
+  marcador  · eventos 68-12 · guardado 68-12
+  tries     · 10-2 (guardado —-—)
+  arbitro   · Raúl Fernando Rodriguez Almada (guardado: —)
+  guardado  · 23 local · 21 visitante · 29 eventos
+
+Aero Club Río IV M16 "B" vs Baguales R.C. M16 "B" · torneo-cordobes-m16-b · tarjeta 291052  ·  e908623a-da59-4627-8ef4-8aae0ff5c233
+  local     · Aero Club Río IV M16 "B" · 15 jugadores · 0 con ficha fijada
+  visitante · Baguales R.C. M16 "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 10
+    min 31 (1T 31) local     try          Pedro Mateo Acuña Belver
+    min 32 (1T 32) local     conversion   Facundo Isaias Gautier
+    min 34 (1T 34) local     try          Facundo Isaias Gautier
+    min 40 (2T 0) visitante substitution Rodrigo Benjamin Ordoñez Deanna
+    min 40 (2T 0) visitante substitution Mateo Machado
+    min 40 (2T 0) visitante substitution Juan Rodriguez
+    min 52 (2T 12) visitante try          Santiago Novaira
+    min 52 (2T 12) visitante conversion   Renzo Luis Casale
+    min 59 (2T 19) local     try          Rodrigo Esteban Moran
+    min 65 (2T 25) local     try          Facundo Isaias Gautier
+  marcador  · eventos 22-7 · guardado 22-7
+  tries     · 4-1 (guardado —-—)
+  arbitro   · José Octaviano Borquez (guardado: —)
+  guardado  · 15 local · 23 visitante · 10 eventos
+
+Club La Tablada M16 "C" vs Club Universitario de Córdoba M16 "B" · torneo-cordobes-m16-b · tarjeta 291054  ·  3a52e87c-4e0b-42b5-a57c-f0afe68d5478
+  local     · Club La Tablada M16 "C" · 26 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba M16 "B" · 20 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min  1 (1T 1) local     conversion   Tomas Ravenna Monforte
+    min  1 (1T 1) local     try          Francisco Ahumada Noya
+    min  6 (1T 6) local     try          Andres Saturnini
+    min  6 (1T 6) local     conversion   Tomas Ravenna Monforte
+    min 14 (1T 14) local     try          Mateo Frutos
+    min 26 (1T 26) local     try          Matias Saravia
+    min 26 (1T 26) local     conversion   Tomas Ravenna Monforte
+    min 40 (2T 0) visitante substitution Leonel Carando Rodríguez
+    min 40 (2T 0) visitante substitution Ignacio Storero
+    min 40 (2T 0) visitante substitution Agustín Ragaglia
+    min 40 (2T 0) local     substitution Tristán Maña
+    min 40 (2T 0) local     substitution Santiago Rolleri Piccinni
+    min 45 (2T 5) visitante try          Joaquin Barrera Gonzalez
+    min 45 (2T 5) visitante conversion   Ignacio Tirao Pacharoni
+    min 45 (2T 5) local     substitution Salvador Villada
+    min 48 (2T 8) local     substitution Tomás Segovia
+    min 48 (2T 8) local     substitution Ignacio Walter Quiroga Alonso
+    min 56 (2T 16) local     substitution Tomas Jose Aguirre Sala
+    min 56 (2T 16) local     substitution Manuel Lima
+    min 57 (2T 17) local     try          Francesco Della Giustina
+    min 64 (2T 24) visitante card_yellow  Benjamín Uriel Chávez
+    min 64 (2T 24) local     substitution Valentín Franichevich
+    min 65 (2T 25) local     substitution Francisco Ahumada Noya
+    min 66 (2T 26) local     substitution Mateo Frutos
+    min 70 (2T 30) local     card_yellow  Baldomero Andres Gonzalez Viale
+    min 75 (2T 35) visitante try          Joaquin Barrera Gonzalez
+    min 75 (2T 35) visitante conversion   Ignacio Tirao Pacharoni
+  marcador  · eventos 31-14 · guardado 31-14
+  tries     · 5-2 (guardado —-—)
+  arbitro   · Tomas Elias Gigena Ramallo (guardado: —)
+  guardado  · 26 local · 20 visitante · 27 eventos
+
+San Francisco R.C. M16 "B" vs Córdoba Rugby Club M16 "B" · torneo-cordobes-m16-b · tarjeta 291055  ·  38bfe72a-0fa5-4295-883d-e2800fd314a3
+  local     · San Francisco R.C. M16 "B" · 21 jugadores · 0 con ficha fijada
+  visitante · Córdoba Rugby Club M16 "B" · 19 jugadores · 0 con ficha fijada
+  eventos   · 29
+    min  9 (1T 9) visitante conversion   Santino Roque Loforte
+    min  9 (1T 9) visitante try          Ignacio Comba
+    min 17 (1T 17) local     conversion   Jose Ignacio Arca
+    min 17 (1T 17) local     try          Lautaro Jorge Vicentin
+    min 23 (1T 23) visitante try          Juan Eduardo Gassmann
+    min 28 (1T 28) local     try          Jeremías Bustamante
+    min 28 (1T 28) local     conversion   Jose Ignacio Arca
+    min 32 (1T 32) visitante try          Ignacio Comba
+    min 32 (1T 32) visitante conversion   Santino Roque Loforte
+    min 35 (1T 35) visitante try          Matias Agustin Damiano Arri
+    min 35 (1T 35) visitante conversion   Santino Roque Loforte
+    min 41 (2T 1) visitante substitution Sebastian Tomas Rivero Velardes
+    min 45 (2T 5) local     substitution Mateo Escobares
+    min 45 (2T 5) local     substitution Lautaro Jorge Vicentin
+    min 47 (2T 7) visitante conversion   Santino Roque Loforte
+    min 47 (2T 7) visitante try          Lautaro Motran Maccio
+    min 50 (2T 10) local     card_yellow  Jeremías Bustamante
+    min 53 (2T 13) visitante conversion   Santino Roque Loforte
+    min 53 (2T 13) visitante try          Santino Emanuel Vanay
+    min 55 (2T 15) local     substitution Tomas Leonardo Olocco
+    min 60 (2T 20) local     substitution Jeremías Bustamante
+    min 60 (2T 20) visitante substitution Juan Sebastian Incio Di Luca
+    min 62 (2T 22) local     substitution Martin Leandro Luciano
+    min 65 (2T 25) local     conversion   Jose Ignacio Arca
+    min 65 (2T 25) visitante injury       Aaron Pioli
+    min 65 (2T 25) local     try          Benjamin Videla
+    min 69 (2T 29) visitante substitution Ignacio Emanuel Balán Tolaba
+    min 72 (2T 32) visitante card_yellow  Gonzalo David Morales Palazzini
+    min 75 (2T 35) visitante try          Santino Roque Loforte
+  marcador  · eventos 21-45 · guardado 21-45
+  tries     · 3-7 (guardado —-—)
+  arbitro   · Isaias Sergio Ignacio Ponce (guardado: —)
+  guardado  · 21 local · 19 visitante · 29 eventos
+
+Córdoba Athletic Club M16 "B" vs Club Palermo Bajo M16 "B" · torneo-cordobes-m16-b · tarjeta 291056  ·  ab8a6163-437f-40f8-bf78-424471d11e1b
+  local     · Córdoba Athletic Club M16 "B" · 30 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo M16 "B" · 25 jugadores · 0 con ficha fijada
+  eventos   · 14
+    min  1 (1T 1) visitante try          Valentino Posada Lugones
+    min  1 (1T 1) visitante conversion   Nicolas Bettera
+    min  6 (1T 6) local     try          Máximo Flumignan
+    min  6 (1T 6) local     conversion   Mateo Tomaselli
+    min 24 (1T 24) visitante try          Benjamín Derrico
+    min 27 (1T 27) visitante try          Juan Cruz Rubio
+    min 27 (1T 27) visitante conversion   Gino Bardiz
+    min 34 (1T 34) visitante try          Juan Cruz Rubio
+    min 42 (2T 2) visitante try          Mateo Agustin Bilbao
+    min 43 (2T 3) local     try          Gaspar Florensa
+    min 51 (2T 11) local     try          Bautista Guzman Rodriguez
+    min 66 (2T 26) local     try          Juan Pablo Arinci Caffaratti
+    min 71 (2T 31) visitante try          Thiago Garcia
+    min 75 (2T 35) visitante try          Darian González Colazo
+  marcador  · eventos 22-39 · guardado 22-39
+  tries     · 4-7 (guardado —-—)
+  arbitro   · Eduardo Cavaglia (guardado: —)
+  guardado  · 30 local · 25 visitante · 14 eventos
+
+Tala Rugby Club M16 "B" vs San Francisco R.C. M16 "B" · torneo-cordobes-m16-b · tarjeta 291058  ·  c9c043b9-d28c-4401-808e-ee2d0fef75ab
+  local     · Tala Rugby Club M16 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · San Francisco R.C. M16 "B" · 21 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min  1 (1T 1) local     conversion   Manuel Sugasti
+    min  1 (1T 1) local     try          Andrés Joaquín Cañada
+    min  6 (1T 6) local     conversion   Manuel Sugasti
+    min  6 (1T 6) local     try          Manuel Villarejo Garcia
+    min  7 (1T 7) local     try          Tomas Lecco
+    min  7 (1T 7) local     conversion   Manuel Sugasti
+    min 15 (1T 15) local     try          Tomás Alfredo Becher
+    min 26 (1T 26) visitante try          Jeremías Bustamante
+    min 26 (1T 26) visitante conversion   Jose Ignacio Arca
+    min 40 (2T 0) local     substitution Felipe Savid
+    min 40 (2T 0) local     substitution Tomas Lecco
+    min 40 (2T 0) local     substitution Genaro Uribe Echevarria
+    min 40 (2T 0) local     substitution Tomás Alfredo Becher
+    min 46 (2T 6) local     substitution Andrés Joaquín Cañada
+    min 47 (2T 7) visitante substitution Juan Ignacio Bustamante Fiore
+    min 50 (2T 10) visitante try          Lautaro Jorge Vicentin
+    min 50 (2T 10) visitante substitution Mateo Escobares
+    min 57 (2T 17) visitante substitution Andres Ibarra
+    min 57 (2T 17) visitante conversion   Joaquín Nahuel Vairolatti
+    min 58 (2T 18) local     substitution Manuel Villarejo Garcia
+    min 60 (2T 20) visitante substitution Leonardo Martín Guglielmone
+    min 62 (2T 22) local     substitution Lucas Estanislao Belmaña
+    min 62 (2T 22) local     conversion   Manuel Sugasti
+    min 62 (2T 22) local     try          Camilo Aguilar Benitez
+    min 66 (2T 26) visitante substitution Santiago Cavagliato
+    min 70 (2T 30) visitante try          Jeremías Bustamante
+    min 75 (2T 35) visitante try          Geronimo Andreo Actis
+  marcador  · eventos 33-24 · guardado 33-24
+  tries     · 5-4 (guardado —-—)
+  arbitro   · Francisco Pecchio (guardado: —)
+  guardado  · 23 local · 21 visitante · 27 eventos
+
+Alta Gracia R.C. M16 "B" vs Baguales R.C. M16 "B" · torneo-cordobes-m16-b · tarjeta 291061  ·  57bb1784-0189-40f6-9a35-53457c5b1f62
+  local     · Alta Gracia R.C. M16 "B" · 19 jugadores · 0 con ficha fijada
+  visitante · Baguales R.C. M16 "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min  3 (1T 3) local     try          Francisco Contrera
+    min  3 (1T 3) local     conversion   Gaston Prandini
+    min 14 (1T 14) visitante try          Maximo Correa Leal
+    min 14 (1T 14) visitante try          Rodrigo Benjamin Ordoñez Deanna
+    min 14 (1T 14) visitante conversion   Renzo Luis Casale
+    min 15 (1T 15) visitante substitution Ricardo Jauregui
+    min 15 (1T 15) visitante substitution Rodrigo Benjamin Ordoñez Deanna
+    min 19 (1T 19) local     try          Francisco Contrera
+    min 19 (1T 19) local     conversion   Gaston Prandini
+    min 20 (1T 20) visitante substitution Santiago Novaira
+    min 20 (1T 20) visitante substitution Thiago Presidente
+    min 21 (1T 21) visitante try          Mateo Machado
+    min 21 (1T 21) visitante conversion   Renzo Luis Casale
+    min 24 (1T 24) local     try          Leandro Sebastian Carabajal Sanchez
+    min 24 (1T 24) local     conversion   Gaston Prandini
+    min 28 (1T 28) visitante conversion   Renzo Luis Casale
+    min 28 (1T 28) visitante try          Santiago Sanz
+    min 32 (1T 32) local     try          Francisco Contrera
+    min 32 (1T 32) local     conversion   Gaston Prandini
+    min 35 (1T 35) local     card_yellow  Maximo Nakasone Uema
+    min 49 (2T 9) local     try          Francisco Contrera
+    min 49 (2T 9) local     conversion   Gaston Prandini
+    min 60 (2T 20) local     card_yellow  Estefano Cesaretti
+    min 60 (2T 20) visitante card_yellow  Maximo Correa Leal
+    min 75 (2T 35) local     try          Maximo Nakasone Uema
+  marcador  · eventos 40-26 · guardado 40-26
+  tries     · 6-4 (guardado —-—)
+  arbitro   · Daniel Alejandro Funes (guardado: —)
+  guardado  · 19 local · 23 visitante · 25 eventos
+
+Club La Tablada M16 "B" vs Jockey Club Córdoba M16 "B" · torneo-cordobes-m16-b · tarjeta 291062  ·  6339d9d9-7521-42ff-8020-ea4c09007d66
+  local     · Club La Tablada M16 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M16 "B" · 22 jugadores · 0 con ficha fijada
+  eventos   · 30
+    min  6 (1T 6) local     conversion   Ulises Carmona Burton
+    min  6 (1T 6) local     try          Ulises Carmona Burton
+    min 11 (1T 11) local     try          Constantino Belluomini
+    min 18 (1T 18) local     try          Michele Gerardo Viotti
+    min 35 (1T 35) local     try          Salvador Cornú
+    min 40 (2T 0) visitante substitution Genaro Fiori
+    min 42 (2T 2) local     substitution Salvador Cornú
+    min 42 (2T 2) local     substitution Francisco Mansilla
+    min 42 (2T 2) local     substitution Matias Saravia
+    min 42 (2T 2) local     substitution Geronimo Suarez Zampino
+    min 42 (2T 2) local     substitution Constantino Belluomini
+    min 42 (2T 2) local     try          Ulises Carmona Burton
+    min 42 (2T 2) local     conversion   Tomas Ravenna Monforte
+    min 48 (2T 8) local     try          Michele Gerardo Viotti
+    min 48 (2T 8) local     conversion   Tomas Ravenna Monforte
+    min 52 (2T 12) local     try          Jorge Santiago Busso Minhot
+    min 52 (2T 12) local     conversion   Tomas Ravenna Monforte
+    min 55 (2T 15) local     substitution Nicanor Ceballos
+    min 55 (2T 15) local     substitution Michele Gerardo Viotti
+    min 57 (2T 17) local     conversion   Tomas Ravenna Monforte
+    min 57 (2T 17) local     try          Ciro Faya
+    min 60 (2T 20) local     substitution Tomas Ravenna Monforte
+    min 61 (2T 21) visitante substitution Ramiro Inaudi
+    min 64 (2T 24) local     try          Mateo Frutos
+    min 64 (2T 24) local     conversion   Pedro Becerra Pautasso
+    min 65 (2T 25) visitante substitution Pedro Heredia
+    min 67 (2T 27) local     conversion   Valentín Franichevich
+    min 67 (2T 27) local     try          Baldomero Andres Gonzalez Viale
+    min 68 (2T 28) local     conversion   Pedro Becerra Pautasso
+    min 68 (2T 28) local     try          Agustín Allende
+  marcador  · eventos 71-0 · guardado 71-0
+  tries     · 11-0 (guardado —-—)
+  arbitro   · Francisco Romero Brondino (guardado: —)
+  guardado  · 23 local · 22 visitante · 30 eventos
+
+Aero Club Río IV M16 "B" vs Club Universitario de Córdoba M16 "B" · torneo-cordobes-m16-b · tarjeta 291063  ·  17c14c5b-7967-4a35-8e15-7411b70f3fce
+  local     · Aero Club Río IV M16 "B" · 15 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba M16 "B" · 26 jugadores · 0 con ficha fijada
+  eventos   · 14
+    min  0 (1T 0) visitante substitution Benjamín Uriel Chávez
+    min  3 (1T 3) visitante try          Bautista Gelos
+    min  5 (1T 5) local     try          Gabriel Isaias Cappellari
+    min 10 (1T 10) visitante substitution Luis Gervino
+    min 15 (1T 15) local     try          Gabriel Isaias Cappellari
+    min 15 (1T 15) local     conversion   Facundo Isaias Gautier
+    min 15 (1T 15) visitante substitution Piero Mario Ceppolino
+    min 30 (1T 30) visitante substitution Leonel Carando Rodríguez
+    min 44 (2T 4) local     try          Gabriel Isaias Cappellari
+    min 44 (2T 4) local     conversion   Facundo Isaias Gautier
+    min 47 (2T 7) local     try          Valentin Hector Moreno
+    min 51 (2T 11) local     try          Valentin Hector Moreno
+    min 67 (2T 27) local     try          Gabriel Isaias Cappellari
+    min 68 (2T 28) local     conversion   Facundo Isaias Gautier
+  marcador  · eventos 36-5 · guardado 36-5
+  tries     · 6-1 (guardado —-—)
+  arbitro   · Tomas Elias Gigena Ramallo (guardado: —)
+  guardado  · 15 local · 26 visitante · 14 eventos
+
+Córdoba Rugby Club M16 "B" vs Tala Rugby Club M16 "B" · torneo-cordobes-m16-b · tarjeta 291065  ·  5d43639c-6fe8-47e1-acfd-be59e6ace6a8
+  local     · Córdoba Rugby Club M16 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M16 "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min  2 (1T 2) local     try          Ignacio Comba
+    min  3 (1T 3) local     conversion   Santino Roque Loforte
+    min 13 (1T 13) visitante card_yellow  Gregorio Muller Villalba
+    min 14 (1T 14) visitante conversion   Manuel Sugasti
+    min 14 (1T 14) visitante try          Andrés Joaquín Cañada
+    min 17 (1T 17) visitante card_yellow  Andrés Joaquín Cañada
+    min 23 (1T 23) visitante try          Tomás Alfredo Becher
+    min 23 (1T 23) visitante conversion   Manuel Sugasti
+    min 27 (1T 27) visitante try          Ciro Sacavino
+    min 27 (1T 27) visitante conversion   Manuel Sugasti
+    min 31 (1T 31) local     try          Gonzalo David Morales Palazzini
+    min 32 (1T 32) local     conversion   Santino Roque Loforte
+    min 34 (1T 34) visitante try          Manuel Sugasti
+    min 40 (2T 0) local     substitution Joaquin Amir Fajardo
+    min 49 (2T 9) visitante try          Lucas Estanislao Belmaña
+    min 50 (2T 10) visitante conversion   Manuel Sugasti
+    min 54 (2T 14) local     try          Ignacio Comba
+    min 55 (2T 15) local     conversion   Santino Roque Loforte
+    min 60 (2T 20) local     try          Ian Santiago Nicolás Sturtz
+    min 60 (2T 20) local     substitution Sebastian Tomas Rivero Velardes
+    min 61 (2T 21) local     conversion   Santino Roque Loforte
+    min 66 (2T 26) local     try          Ignacio Emanuel Balán Tolaba
+    min 67 (2T 27) local     conversion   Santino Roque Loforte
+    min 69 (2T 29) local     try          Gonzalo David Morales Palazzini
+    min 71 (2T 31) local     conversion   Santino Roque Loforte
+  marcador  · eventos 42-33 · guardado 42-33
+  tries     · 6-5 (guardado —-—)
+  arbitro   · Santiago Herrera Albano (guardado: —)
+  guardado  · 23 local · 23 visitante · 25 eventos
+
+Tala Rugby Club M16 "B" vs Aero Club Río IV M16 "B" · torneo-cordobes-m16-b · tarjeta 291068  ·  f604f7fd-0c06-462d-8a10-911226c8325c
+  local     · Tala Rugby Club M16 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Aero Club Río IV M16 "B" · 15 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min  7 (1T 7) local     conversion   Octavio Roqué
+    min  7 (1T 7) local     try          Franco Girbau Petroff
+    min 12 (1T 12) local     try          Franco Girbau Petroff
+    min 26 (1T 26) visitante card_red     Valentino Felippa Quiroga
+    min 28 (1T 28) local     substitution Francisco Altamirano
+    min 30 (1T 30) local     try          Gino Mabiglia
+    min 34 (1T 34) local     try          Antonio Scandroglio Nores
+    min 41 (2T 1) local     substitution Jaime Riera
+    min 41 (2T 1) local     substitution Nicolás Núñez Riera
+    min 43 (2T 3) local     substitution Lucas Alderete
+    min 43 (2T 3) local     conversion   Juan Ignacio Amuchastegui
+    min 43 (2T 3) local     try          Juan Cruz Sayago Morelli
+    min 45 (2T 5) local     substitution Joaquin Spina
+    min 54 (2T 14) visitante card_yellow  Frqncisco Villarroel
+    min 55 (2T 15) local     conversion   Juan Ignacio Amuchastegui
+    min 55 (2T 15) local     try          Franco Girbau Petroff
+    min 57 (2T 17) local     conversion   Juan Ignacio Amuchastegui
+    min 57 (2T 17) local     try          Benjamin Juarez Lopez Seco
+    min 62 (2T 22) local     conversion   Juan Ignacio Amuchastegui
+    min 62 (2T 22) local     try          Benicio Dentesano
+    min 68 (2T 28) visitante try          Benjamin Coria Villafañe
+    min 69 (2T 29) visitante conversion   Facundo Isaias Gautier
+  marcador  · eventos 50-7 · guardado 50-7
+  tries     · 8-1 (guardado —-—)
+  arbitro   · Francisco Romero Brondino (guardado: —)
+  guardado  · 23 local · 15 visitante · 22 eventos
+
+Club Universitario de Córdoba M16 "B" vs Club La Tablada M16 "B" · torneo-cordobes-m16-b · tarjeta 291069  ·  9165165b-f329-4662-a62f-6639d1dccc1e
+  local     · Club Universitario de Córdoba M16 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M16 "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 23
+    min  2 (1T 2) visitante conversion   Ulises Carmona Burton
+    min  2 (1T 2) visitante try          Ulises Carmona Burton
+    min  5 (1T 5) local     try          Felipe Serran Croce
+    min 10 (1T 10) visitante try          Fausto Santana
+    min 10 (1T 10) visitante conversion   Ulises Carmona Burton
+    min 12 (1T 12) visitante try          Arturo Beltran
+    min 12 (1T 12) visitante conversion   Ulises Carmona Burton
+    min 15 (1T 15) visitante try          Simon Cabello Molina
+    min 15 (1T 15) visitante conversion   Ulises Carmona Burton
+    min 20 (1T 20) local     substitution Benjamín Uriel Chávez
+    min 25 (1T 25) visitante try          Juan Martin Molina
+    min 25 (1T 25) visitante conversion   Ulises Carmona Burton
+    min 27 (1T 27) visitante try          Fausto Santana
+    min 27 (1T 27) visitante conversion   Ulises Carmona Burton
+    min 29 (1T 29) visitante try          Geronimo Suarez Zampino
+    min 29 (1T 29) visitante conversion   Ulises Carmona Burton
+    min 40 (2T 0) local     substitution Agustín Ragaglia
+    min 50 (2T 10) visitante try          Baldomero Andres Gonzalez Viale
+    min 50 (2T 10) visitante conversion   Ulises Carmona Burton
+    min 57 (2T 17) visitante try          Salvador Cornú
+    min 65 (2T 25) visitante try          Francisco Ahumada Noya
+    min 65 (2T 25) visitante conversion   Ulises Carmona Burton
+    min 70 (2T 30) visitante try          Francisco Ahumada Noya
+  marcador  · eventos 5-73 · guardado 5-73
+  tries     · 1-11 (guardado —-—)
+  arbitro   · Francisco Pecchio (guardado: —)
+  guardado  · 23 local · 23 visitante · 23 eventos
+
+Club Palermo Bajo M16 "B" vs Córdoba Rugby Club M16 "B" · torneo-cordobes-m16-b · tarjeta 291071  ·  87ea6d04-561f-40e2-aadf-c902481d849e
+  local     · Club Palermo Bajo M16 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Córdoba Rugby Club M16 "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 21
+    min  6 (1T 6) local     try          Luciano Joaquin Suarez Villan
+    min  7 (1T 7) local     conversion   Bautista Charras Aguirre
+    min 20 (1T 20) local     try          Joaquin Lechuga Cabrera
+    min 21 (1T 21) local     conversion   Bautista Charras Aguirre
+    min 30 (1T 30) local     try          Bautista Charras Aguirre
+    min 31 (1T 31) local     conversion   Bautista Charras Aguirre
+    min 35 (1T 35) visitante try          Ignacio Comba
+    min 40 (2T 0) visitante substitution Joaquin Amir Fajardo
+    min 41 (2T 1) local     substitution Juan Cruz Rubio
+    min 41 (2T 1) local     substitution Thiago Garcia
+    min 41 (2T 1) local     substitution Agustín Griffo Zaradnik
+    min 52 (2T 12) local     substitution Ignacio Agustin Del Franco
+    min 57 (2T 17) local     substitution Bautista Acuña
+    min 57 (2T 17) local     substitution Luciano Joaquin Suarez Villan
+    min 59 (2T 19) visitante injury       Ignacio Emanuel Balán Tolaba
+    min 60 (2T 20) local     try          Mateo Suárez Croce
+    min 61 (2T 21) local     substitution Joaquin Lechuga Cabrera
+    min 61 (2T 21) local     conversion   Bautista Charras Aguirre
+    min 70 (2T 30) visitante try          Santino Emanuel Vanay
+    min 72 (2T 32) local     try          Genaro Héctor Perotto
+    min 73 (2T 33) local     conversion   Bautista Charras Aguirre
+  marcador  · eventos 35-10 · guardado 35-10
+  tries     · 5-2 (guardado —-—)
+  arbitro   · Leonel Sorbera (guardado: —)
+  guardado  · 23 local · 23 visitante · 21 eventos
+
+Jockey Club Córdoba M16 "B" vs Alta Gracia R.C. M16 "B" · torneo-cordobes-m16-b · tarjeta 291072  ·  245d92eb-5eac-40c7-b387-173b92d156ee
+  local     · Jockey Club Córdoba M16 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Alta Gracia R.C. M16 "B" · 20 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min  1 (1T 1) visitante try          Francisco Contrera
+    min  2 (1T 2) visitante conversion   Gaston Prandini
+    min  3 (1T 3) local     try          Francisco León Menne Barrionuevo
+    min  6 (1T 6) visitante try          Maximo Nakasone Uema
+    min  6 (1T 6) visitante conversion   Gaston Prandini
+    min 14 (1T 14) local     try          Francisco León Menne Barrionuevo
+    min 14 (1T 14) local     conversion   Agustin Siebenhaar
+    min 19 (1T 19) local     try          Bautista Martinez Turrado
+    min 24 (1T 24) local     try          Tomas Matias Palacios
+    min 27 (1T 27) visitante injury       Felipe Besana
+    min 28 (1T 28) visitante try          Francisco Contrera
+    min 37 (1T 37) local     try          Pedro Sanmillan Seguro
+    min 37 (1T 37) local     conversion   Bautista Martinez Turrado
+    min 42 (2T 2) local     try          Pedro Santiago
+    min 51 (2T 11) visitante try          Lucas Benjamín Villavicencio
+    min 51 (2T 11) visitante injury       Benjamín Sebastian Cordoba
+    min 57 (2T 17) local     try          Martin Clerico
+    min 57 (2T 17) local     conversion   Bautista Martinez Turrado
+    min 62 (2T 22) visitante try          Lucas Benjamín Villavicencio
+    min 67 (2T 27) visitante try          Tomas Alejandro Diaz Saravia Lanzieri
+  marcador  · eventos 41-34 · guardado 41-34
+  tries     · 7-6 (guardado —-—)
+  arbitro   · Enzo Riva (guardado: —)
+  guardado  · 23 local · 20 visitante · 20 eventos
+
+Baguales R.C. M16 "B" vs Tala Rugby Club M16 "C" · torneo-cordobes-m16-b · tarjeta 291073  ·  0b0ae15f-00c5-411b-84fc-0ebaf60e7208
+  local     · Baguales R.C. M16 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M16 "C" · 23 jugadores · 0 con ficha fijada
+  eventos   · 23
+    min  2 (1T 2) local     try          Santiago Sanz
+    min  2 (1T 2) local     conversion   Santiago Sanz
+    min  9 (1T 9) visitante try          Pedro Ceconello Piatti
+    min 12 (1T 12) local     try          Santiago Sanz
+    min 12 (1T 12) local     conversion   Santiago Sanz
+    min 19 (1T 19) visitante try          Tristan Revol
+    min 28 (1T 28) visitante try          Lucca Santino Dainotto
+    min 30 (1T 30) local     card_yellow  Maximo Correa Leal
+    min 34 (1T 34) visitante substitution Facundo Ezequiel Virgolini
+    min 34 (1T 34) visitante substitution Juan Cruz Rizo Losada
+    min 34 (1T 34) visitante substitution Justiniano Barros
+    min 35 (1T 35) local     penalty_goal Santiago Sanz
+    min 42 (2T 2) visitante substitution Juan Cruz Lanza Castelli
+    min 50 (2T 10) local     card_yellow  Bautista Blaser
+    min 52 (2T 12) visitante substitution Benjamin Arguello Ferreira
+    min 52 (2T 12) visitante substitution Escribano Cristobal
+    min 52 (2T 12) visitante substitution Simon Schlatter
+    min 53 (2T 13) visitante penalty_goal Ignacio Córdoba
+    min 60 (2T 20) visitante substitution Thomas Arrigo
+    min 65 (2T 25) local     try          Maximo Correa Leal
+    min 65 (2T 25) local     card_red     Maximo Correa Leal
+    min 75 (2T 35) local     substitution Mauro Exequiel Espindola
+    min 77 (2T 37) local     substitution Rodrigo Benjamin Ordoñez Deanna
+  marcador  · eventos 22-18 · guardado 22-18
+  tries     · 3-3 (guardado —-—)
+  arbitro   · Daniel Alejandro Funes (guardado: —)
+  guardado  · 23 local · 23 visitante · 23 eventos
+
+Jockey Club Córdoba M16 "B" vs Córdoba Athletic Club M16 "B" · torneo-cordobes-m16-b · tarjeta 291074  ·  645acf24-b93b-44fc-8b99-2636fe721752
+  local     · Jockey Club Córdoba M16 "B" · 24 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club M16 "B" · 25 jugadores · 0 con ficha fijada
+  eventos   · 19
+    min  9 (1T 9) visitante try          Luca Bautista De La Iglesia
+    min 10 (1T 10) visitante conversion   Mateo Tomaselli
+    min 20 (1T 20) local     injury       Martin Clerico
+    min 22 (1T 22) visitante try          Bautista Guzman Rodriguez
+    min 23 (1T 23) visitante conversion   Mateo Tomaselli
+    min 40 (2T 0) visitante substitution Fausto Acosta Fernandez
+    min 40 (2T 0) visitante substitution Tiziano Gael Tapia Santalucia
+    min 40 (2T 0) visitante substitution Nicolas Valentino Burgos Suarez
+    min 43 (2T 3) visitante substitution Maximiliano Rojas
+    min 48 (2T 8) visitante substitution Máximo Flumignan
+    min 52 (2T 12) visitante substitution Facundo Zapata
+    min 52 (2T 12) visitante substitution Máximo Tomas Quevedo
+    min 55 (2T 15) local     try          Constantino Marchiaro
+    min 55 (2T 15) local     conversion   Bautista Martinez Turrado
+    min 56 (2T 16) visitante substitution Felipe Jose Airaldo
+    min 61 (2T 21) local     try          Tomas Agustín Aguirre Martin
+    min 61 (2T 21) local     conversion   Bautista Martinez Turrado
+    min 63 (2T 23) visitante substitution Augusto Aguirre
+    min 71 (2T 31) visitante substitution Luca Bautista De La Iglesia
+  marcador  · eventos 14-14 · guardado 14-14
+  tries     · 2-2 (guardado —-—)
+  arbitro   · Leonel Sorbera (guardado: —)
+  guardado  · 24 local · 25 visitante · 19 eventos
+
+Club La Tablada M16 "B" vs Tala Rugby Club M16 "B" · torneo-cordobes-m16-b · tarjeta 291075  ·  b280f4d6-ce3c-4dd8-b91d-1d69f59d88d9
+  local     · Club La Tablada M16 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M16 "B" · 24 jugadores · 0 con ficha fijada
+  eventos   · 28
+    min 11 (1T 11) local     conversion   Ulises Carmona Burton
+    min 11 (1T 11) local     try          Benjamin Bobadilla
+    min 19 (1T 19) local     card_yellow  Jose Manso
+    min 20 (1T 20) visitante try          Felipe Savid
+    min 20 (1T 20) visitante conversion   Octavio Roqué
+    min 28 (1T 28) local     penalty_goal Ulises Carmona Burton
+    min 34 (1T 34) visitante penalty_goal Octavio Roqué
+    min 34 (1T 34) visitante card_yellow  Jaime Riera
+    min 35 (1T 35) local     substitution Guillermo Jose Testoni
+    min 35 (1T 35) local     substitution Constantino Belluomini
+    min 41 (2T 1) visitante card_yellow  Joaquin Spina
+    min 46 (2T 6) visitante substitution Juan Cruz Sayago Morelli
+    min 46 (2T 6) visitante substitution Gregorio Muller Villalba
+    min 46 (2T 6) visitante substitution Francisco Altamirano
+    min 46 (2T 6) local     substitution Tomás Segovia
+    min 46 (2T 6) local     substitution Michele Gerardo Viotti
+    min 46 (2T 6) visitante substitution Benicio Dentesano
+    min 47 (2T 7) local     conversion   Ulises Carmona Burton
+    min 47 (2T 7) local     try          Arturo Beltran
+    min 48 (2T 8) visitante substitution Nicanor Garzón González
+    min 48 (2T 8) visitante substitution Juan Ignacio Pedrosa
+    min 50 (2T 10) visitante substitution Lorenzo Villada
+    min 58 (2T 18) local     substitution Lautaro Troche Nescier
+    min 58 (2T 18) local     substitution Baldomero Andres Gonzalez Viale
+    min 61 (2T 21) local     substitution Juan Martin Molina
+    min 62 (2T 22) local     penalty_goal Ulises Carmona Burton
+    min 62 (2T 22) local     substitution Nicanor Ceballos
+    min 65 (2T 25) local     try          Francisco Ahumada Noya
+  marcador  · eventos 25-10 · guardado 25-10
+  tries     · 3-1 (guardado —-—)
+  arbitro   · Raúl Fernando Rodriguez Almada (guardado: —)
+  guardado  · 23 local · 24 visitante · 28 eventos
+
+Aero Club Río IV M16 "B" vs Club Palermo Bajo M16 "B" · torneo-cordobes-m16-b · tarjeta 291076  ·  b1cf2ba8-648f-4311-91ca-80f851ae57b8
+  local     · Aero Club Río IV M16 "B" · 15 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo M16 "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 16
+    min 14 (1T 14) local     try          Frqncisco Villarroel
+    min 30 (1T 30) visitante try          Agustín Griffo Zaradnik
+    min 31 (1T 31) visitante conversion   Juan Pedro Banús
+    min 47 (2T 7) local     try          Frqncisco Villarroel
+    min 47 (2T 7) local     conversion   Facundo Isaias Gautier
+    min 50 (2T 10) visitante try          Benjamín Derrico
+    min 51 (2T 11) visitante conversion   Juan Pedro Banús
+    min 55 (2T 15) local     try          Benjamin Coria Villafañe
+    min 55 (2T 15) visitante substitution Lino Feliciani
+    min 57 (2T 17) visitante try          Nazareno Bautista Bringas
+    min 68 (2T 28) local     try          Valentin Hector Moreno
+    min 68 (2T 28) local     conversion   Facundo Isaias Gautier
+    min 68 (2T 28) visitante try          Benjamín Derrico
+    min 70 (2T 30) visitante substitution Bautista Acuña
+    min 70 (2T 30) visitante substitution Valentin Rodriguez Casella
+    min 75 (2T 35) visitante penalty_goal Juan Pedro Banús
+  marcador  · eventos 24-27 · guardado 24-27
+  tries     · 4-4 (guardado —-—)
+  arbitro   · José Octaviano Borquez (guardado: —)
+  guardado  · 15 local · 23 visitante · 16 eventos
+
+Baguales R.C. M16 "B" vs Córdoba Rugby Club M16 "B" · torneo-cordobes-m16-b · tarjeta 291078  ·  36231ded-5946-4349-b659-c791a311cac0
+  local     · Baguales R.C. M16 "B" · 24 jugadores · 0 con ficha fijada
+  visitante · Córdoba Rugby Club M16 "B" · 22 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min  3 (1T 3) visitante try          Ignacio Comba
+    min  8 (1T 8) visitante try          Matias Agustin Damiano Arri
+    min  9 (1T 9) visitante conversion   Santino Roque Loforte
+    min 11 (1T 11) local     try          Renzo Luis Casale
+    min 20 (1T 20) visitante card_yellow  Lautaro Motran Maccio
+    min 22 (1T 22) visitante conversion   Santino Roque Loforte
+    min 22 (1T 22) visitante try          Santino Roque Loforte
+    min 31 (1T 31) local     penalty_goal Renzo Luis Casale
+    min 31 (1T 31) visitante try          Santino Roque Loforte
+    min 31 (1T 31) visitante conversion   Santino Roque Loforte
+    min 40 (2T 0) visitante substitution Manuel Llorca Maza
+    min 41 (2T 1) visitante try          Matias Agustin Damiano Arri
+    min 50 (2T 10) local     substitution Bruno Dario Cavallin
+    min 50 (2T 10) local     substitution Mateo Machado
+    min 50 (2T 10) local     substitution Thiago Presidente
+    min 50 (2T 10) local     substitution Ramiro Peralta
+    min 50 (2T 10) local     substitution Nicolas Brandan
+    min 60 (2T 20) local     card_yellow  Valentin Cabrera
+    min 62 (2T 22) visitante try          Santino Emanuel Vanay
+    min 62 (2T 22) visitante substitution Ian Santiago Nicolás Sturtz
+    min 62 (2T 22) visitante substitution Thiago Ferrero
+    min 64 (2T 24) visitante substitution Lautaro Motran Maccio
+    min 73 (2T 33) local     try          Renzo Luis Casale
+    min 73 (2T 33) local     conversion   Renzo Luis Casale
+    min 75 (2T 35) visitante try          Santino Roque Loforte
+  marcador  · eventos 15-41 · guardado 15-41
+  tries     · 2-7 (guardado —-—)
+  arbitro   · Carlos Altobelli (guardado: —)
+  guardado  · 24 local · 22 visitante · 25 eventos
+
+Los Cuervos R.C. M16 "B" vs Club La Tablada M16 "C" · torneo-cordobes-m16-b · tarjeta 291079  ·  491366cb-59a8-4f2f-b1f9-a9c41e9d1453
+  local     · Los Cuervos R.C. M16 "B" · 22 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M16 "C" · 20 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min  4 (1T 4) visitante try          Franco Barros Facchin
+    min  8 (1T 8) local     try          Juan Pepicelli
+    min  8 (1T 8) local     conversion   Bautista Marinelli
+    min 10 (1T 10) visitante try          Tomas Jose Aguirre Sala
+    min 11 (1T 11) visitante conversion   Valentín Franichevich
+    min 17 (1T 17) local     try          Bautista Marinelli
+    min 34 (1T 34) visitante try          Valentín Franichevich
+    min 35 (1T 35) visitante conversion   Valentín Franichevich
+    min 40 (2T 0) visitante substitution Agustín Enrique Aguirre Sala
+    min 40 (2T 0) visitante substitution Tomas Jose Aguirre Sala
+    min 40 (2T 0) visitante substitution Ignacio Walter Quiroga Alonso
+    min 47 (2T 7) visitante substitution Santiago Rolleri Piccinni
+    min 53 (2T 13) local     try          Ignacio Sastre
+    min 53 (2T 13) visitante try          Fausto Barozzi
+    min 54 (2T 14) visitante conversion   Valentín Franichevich
+    min 59 (2T 19) local     try          Octavio Córdoba Brediche
+    min 59 (2T 19) local     conversion   Bautista Marinelli
+    min 64 (2T 24) visitante try          Franco Barros Facchin
+    min 65 (2T 25) visitante conversion   Valentín Franichevich
+    min 69 (2T 29) visitante try          Felipe Del Valle Cabanillas
+  marcador  · eventos 24-38 · guardado 24-38
+  tries     · 4-6 (guardado —-—)
+  arbitro   · Peirano Sebastian 21774729 (No Oficial) (guardado: —)
+  guardado  · 22 local · 20 visitante · 20 eventos
+
+Club Palermo Bajo M16 "B" vs Club La Tablada M16 "B" · torneo-cordobes-m16-b · tarjeta 291080  ·  18257957-9a20-4254-942a-00f415a1f70b
+  local     · Club Palermo Bajo M16 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M16 "B" · 25 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min  1 (1T 1) visitante try          Lautaro Troche Nescier
+    min  1 (1T 1) visitante conversion   Lautaro Troche Nescier
+    min  1 (1T 1) visitante try          Lautaro Troche Nescier
+    min  1 (1T 1) visitante try          Lautaro Troche Nescier
+    min  1 (1T 1) visitante try          Lautaro Troche Nescier
+    min  1 (1T 1) visitante conversion   Lautaro Troche Nescier
+    min  1 (1T 1) visitante try          Lautaro Troche Nescier
+    min  1 (1T 1) visitante conversion   Lautaro Troche Nescier
+    min  1 (1T 1) visitante try          Lautaro Troche Nescier
+    min  1 (1T 1) visitante conversion   Lautaro Troche Nescier
+    min 18 (1T 18) local     try          Lorenzo Diaz Re
+    min 26 (1T 26) local     penalty_goal Juan Pedro Banús
+    min 35 (1T 35) local     try          Jose Ignacio Braidot
+    min 36 (1T 36) local     conversion   Juan Pedro Banús
+    min 46 (2T 6) local     try          Jose Ignacio Braidot
+    min 47 (2T 7) local     substitution Lucas Ezequiel Ferrero Ramirez
+    min 47 (2T 7) local     conversion   Juan Pedro Banús
+    min 47 (2T 7) local     substitution Rocco Juarez Garcia
+    min 47 (2T 7) local     substitution Luciano Joaquin Suarez Villan
+    min 49 (2T 9) local     substitution Alberto Valentino Fiorenza Spada
+    min 54 (2T 14) local     substitution Lino Feliciani
+    min 58 (2T 18) local     substitution Juan Cruz Rubio
+    min 60 (2T 20) local     substitution Juan Pedro Banús
+    min 71 (2T 31) local     substitution Francisco Nicolás Romero
+  marcador  · eventos 22-38 · guardado 22-38
+  tries     · 3-6 (guardado —-—)
+  arbitro   · Lucas Gaston Dopaso (guardado: —)
+  guardado  · 23 local · 25 visitante · 24 eventos
+
+Los Cuervos R.C. M16 "B" vs Aero Club Río IV M16 "B" · torneo-cordobes-m16-b · tarjeta 291083  ·  cd992b2a-185b-41d1-af0d-fe167498ed10
+  local     · Los Cuervos R.C. M16 "B" · 22 jugadores · 0 con ficha fijada
+  visitante · Aero Club Río IV M16 "B" · 16 jugadores · 0 con ficha fijada
+  eventos   · 11
+    min  8 (1T 8) local     try          Octavio Córdoba Brediche
+    min 15 (1T 15) visitante try          Gabriel Isaias Cappellari
+    min 15 (1T 15) visitante conversion   Facundo Isaias Gautier
+    min 31 (1T 31) visitante try          Rodrigo Esteban Moran
+    min 34 (1T 34) visitante try          Valentin Hector Moreno
+    min 34 (1T 34) visitante conversion   Facundo Isaias Gautier
+    min 35 (1T 35) visitante try          Benjamin Coria Villafañe
+    min 35 (1T 35) visitante conversion   Facundo Isaias Gautier
+    min 41 (2T 1) visitante try          Benjamin Coria Villafañe
+    min 43 (2T 3) visitante try          Bautista Isaac Minhondo
+    min 56 (2T 16) visitante card_yellow  Rodrigo Esteban Moran
+  marcador  · eventos 5-36 · guardado 5-36
+  tries     · 1-6 (guardado —-—)
+  arbitro   · Peirano Sebastian 21774729 (No Oficial) (guardado: —)
+  guardado  · 22 local · 16 visitante · 11 eventos
+
+Tala Rugby Club M16 "B" vs Jockey Club Córdoba M16 "B" · torneo-cordobes-m16-b · tarjeta 291087  ·  59dd4fd3-cacf-43ae-8c16-f1ace0515328
+  local     · Tala Rugby Club M16 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M16 "B" · 22 jugadores · 0 con ficha fijada
+  eventos   · 9
+    min  4 (1T 4) local     try          Joaquin Spina
+    min  8 (1T 8) local     conversion   Lucas Alderete
+    min  8 (1T 8) local     try          Antonio Scandroglio Nores
+    min 11 (1T 11) visitante try          Genaro Fiori
+    min 11 (1T 11) visitante conversion   Bautista Gil
+    min 67 (2T 27) local     penalty_goal Lucas Alderete
+    min 74 (2T 34) visitante try          Pedro Santiago
+    min 74 (2T 34) visitante conversion   Agustin Siebenhaar
+    min 75 (2T 35) local     penalty_goal Lucas Alderete
+  marcador  · eventos 18-14 · guardado 18-14
+  tries     · 2-2 (guardado —-—)
+  arbitro   · Tomas Elias Gigena Ramallo (guardado: —)
+  guardado  · 23 local · 22 visitante · 9 eventos
+
+Tala Rugby Club M16 "C" vs Club La Tablada M16 "B" · torneo-cordobes-m16-b · tarjeta 291089  ·  de2c812c-aa9c-4c6d-b501-653f764c4253
+  local     · Tala Rugby Club M16 "C" · 30 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M16 "B" · 26 jugadores · 0 con ficha fijada
+  eventos   · 14
+    min  2 (1T 2) visitante try          Santiago Candisano
+    min  2 (1T 2) visitante conversion   Santiago Candisano
+    min  5 (1T 5) local     try          Juan Ignacio Amuchastegui
+    min  5 (1T 5) local     conversion   Juan Ignacio Amuchastegui
+    min 13 (1T 13) visitante try          Santiago Candisano
+    min 13 (1T 13) visitante conversion   Santiago Candisano
+    min 25 (1T 25) local     try          Juan Ignacio Amuchastegui
+    min 25 (1T 25) local     conversion   Juan Ignacio Amuchastegui
+    min 56 (2T 16) local     try          Juan Ignacio Amuchastegui
+    min 56 (2T 16) local     conversion   Juan Ignacio Amuchastegui
+    min 57 (2T 17) visitante try          Santiago Candisano
+    min 57 (2T 17) visitante conversion   Santiago Candisano
+    min 70 (2T 30) visitante try          Santiago Candisano
+    min 70 (2T 30) visitante conversion   Santiago Candisano
+  marcador  · eventos 21-28 · guardado 21-28
+  tries     · 3-4 (guardado —-—)
+  arbitro   · Federico Pregot (guardado: —)
+  guardado  · 30 local · 26 visitante · 14 eventos
+
+Tala Rugby Club M16 "C" vs Alta Gracia R.C. M16 "B" · torneo-cordobes-m16-b · tarjeta 291097  ·  e2e88aa8-4599-4df1-909c-5b206cf77387
+  local     · Tala Rugby Club M16 "C" · 23 jugadores · 0 con ficha fijada
+  visitante · Alta Gracia R.C. M16 "B" · 21 jugadores · 0 con ficha fijada
+  eventos   · 15
+    min  5 (1T 5) local     try          Tristan Revol
+    min  5 (1T 5) local     conversion   Tomas Fornoni
+    min 12 (1T 12) visitante try          Lucas Benjamín Villavicencio
+    min 13 (1T 13) visitante conversion   Gaston Prandini
+    min 15 (1T 15) local     try          Juan Ignacio Amuchastegui
+    min 15 (1T 15) local     conversion   Juan Ignacio Amuchastegui
+    min 22 (1T 22) visitante try          Leandro Sebastian Carabajal Sanchez
+    min 23 (1T 23) visitante conversion   Francisco Contrera
+    min 52 (2T 12) local     try          Mateo Nicolas Gomez
+    min 52 (2T 12) local     conversion   Juan Ignacio Amuchastegui
+    min 63 (2T 23) visitante try          Felipe Besana
+    min 64 (2T 24) visitante conversion   Francisco Contrera
+    min 70 (2T 30) local     try          Juan Ignacio Pedrosa
+    min 70 (2T 30) local     conversion   Juan Ignacio Amuchastegui
+    min 70 (2T 30) local     injury       Benicio Muratore Rao
+  marcador  · eventos 28-21 · guardado 28-21
+  tries     · 4-3 (guardado —-—)
+  arbitro   · Rodrigo Tiranti (guardado: —)
+  guardado  · 23 local · 21 visitante · 15 eventos
+
+Tala Rugby Club M16 "C" vs Club La Tablada M16 "C" · torneo-cordobes-m16-b · tarjeta 291101  ·  4974874d-6d69-4bb6-8ce7-f84c25a5b27e
+  local     · Tala Rugby Club M16 "C" · 23 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M16 "C" · 23 jugadores · 0 con ficha fijada
+  eventos   · 10
+    min  9 (1T 9) visitante try          Constantino Pacheco Luhning
+    min 10 (1T 10) visitante conversion   Valentín Franichevich
+    min 21 (1T 21) local     try          Salvador Gomez Martinez
+    min 22 (1T 22) local     conversion   Octavio Roqué
+    min 52 (2T 12) local     penalty_goal Octavio Roqué
+    min 60 (2T 20) visitante try          Matias Saravia
+    min 62 (2T 22) visitante try          Franco Barros Facchin
+    min 63 (2T 23) visitante conversion   Valentín Franichevich
+    min 68 (2T 28) local     penalty_goal Octavio Roqué
+    min 74 (2T 34) local     try          Benjamin Arguello Ferreira
+  marcador  · eventos 18-19 · guardado 18-19
+  tries     · 2-3 (guardado —-—)
+  arbitro   · Daniel Borsarelli (guardado: —)
+  guardado  · 23 local · 23 visitante · 10 eventos
+
+Los Cuervos R.C. M16 "B" vs San Francisco R.C. M16 "B" · torneo-cordobes-m16-b · tarjeta 296624  ·  35bc0308-eec0-4def-b456-afa9572ce2d8
+  local     · Los Cuervos R.C. M16 "B" · 21 jugadores · 0 con ficha fijada
+  visitante · San Francisco R.C. M16 "B" · 20 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min 10 (1T 10) visitante try          Benjamín Berazategui
+    min 16 (1T 16) visitante try          Jose Ignacio Arca
+    min 25 (1T 25) local     try          Juan Pepicelli
+    min 25 (1T 25) local     conversion   Bautista Marinelli
+    min 26 (1T 26) visitante try          Lautaro Jorge Vicentin
+    min 44 (2T 4) visitante try          Benjamín Berazategui
+    min 46 (2T 6) visitante conversion   Jose Ignacio Arca
+    min 46 (2T 6) visitante try          Lautaro Jorge Vicentin
+    min 51 (2T 11) visitante try          Jeremías Bustamante
+    min 56 (2T 16) visitante substitution Bautista Andres Boscarol
+    min 57 (2T 17) visitante substitution Geronimo Andreo Actis
+    min 60 (2T 20) visitante substitution Andres Ibarra
+    min 61 (2T 21) visitante try          Martin Leandro Luciano
+    min 61 (2T 21) visitante card_yellow  Martin Leandro Luciano
+    min 71 (2T 31) visitante substitution Juan Ignacio Bustamante Fiore
+    min 71 (2T 31) visitante try          Lautaro Jorge Vicentin
+    min 73 (2T 33) visitante conversion   Jose Ignacio Arca
+    min 73 (2T 33) visitante try          Maximo Giampieri Vignolo
+  marcador  · eventos 7-49 · guardado 7-49
+  tries     · 1-9 (guardado —-—)
+  arbitro   · Alejandro Martin Ceballos (guardado: —)
+  guardado  · 21 local · 20 visitante · 18 eventos
+
+Los Cuervos R.C. M16 "B" vs Alta Gracia R.C. M16 "B" · torneo-cordobes-m16-b · tarjeta 307813  ·  1a0ac2f3-19b2-4be4-ab72-2b892245f4f6
+  local     · Los Cuervos R.C. M16 "B" · 19 jugadores · 0 con ficha fijada
+  visitante · Alta Gracia R.C. M16 "B" · 20 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min  8 (1T 8) visitante try          Gaston Prandini
+    min  9 (1T 9) visitante conversion   Gaston Prandini
+    min 11 (1T 11) visitante try          Francisco Contrera
+    min 17 (1T 17) visitante try          Gaston Prandini
+    min 18 (1T 18) visitante conversion   Gaston Prandini
+    min 23 (1T 23) local     try          Apolo Touz
+    min 24 (1T 24) visitante try          Maximo Nakasone Uema
+    min 25 (1T 25) visitante conversion   Gaston Prandini
+    min 43 (2T 3) local     try          Juan Uriel Arnaud
+    min 43 (2T 3) local     conversion   Juan Ignacio Sanchez
+    min 49 (2T 9) visitante try          Francisco Contrera
+    min 50 (2T 10) visitante conversion   Gaston Prandini
+    min 51 (2T 11) visitante try          Noe Gabriel Oviedo Carmona
+    min 56 (2T 16) visitante substitution Joaquin Asua Pellegrini
+    min 59 (2T 19) visitante try          Francisco Contrera
+    min 60 (2T 20) visitante conversion   Gaston Prandini
+    min 65 (2T 25) visitante try          Lucas Benjamín Villavicencio
+    min 66 (2T 26) visitante conversion   Gaston Prandini
+    min 69 (2T 29) visitante try          Francisco Contrera
+    min 69 (2T 29) visitante conversion   Gaston Prandini
+  marcador  · eventos 12-59 · guardado 12-59
+  tries     · 2-9 (guardado —-—)
+  arbitro   · Eugenio Morra (guardado: —)
+  guardado  · 19 local · 20 visitante · 20 eventos
+
+San Francisco R.C. M16 "B" vs Club La Tablada M16 "C" · torneo-cordobes-m16-b · tarjeta 308637  ·  07c0df80-bf6e-4678-8e44-76245771046d
+  local     · San Francisco R.C. M16 "B" · 20 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M16 "C" · 22 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min  3 (1T 3) local     try          Juan Ignacio Bustamante Fiore
+    min  8 (1T 8) local     try          Jeremías Bustamante
+    min  8 (1T 8) local     conversion   Jose Ignacio Arca
+    min 22 (1T 22) visitante try          Bruno Torres León
+    min 32 (1T 32) local     substitution Martin Leandro Luciano
+    min 41 (2T 1) visitante substitution Benicio Fugante
+    min 41 (2T 1) visitante substitution Tomas Jose Aguirre Sala
+    min 41 (2T 1) visitante substitution Santiago Gonzalez Oliva
+    min 41 (2T 1) local     conversion   Jose Ignacio Arca
+    min 41 (2T 1) visitante substitution Bruno Torres León
+    min 41 (2T 1) local     try          Jeremías Bustamante
+    min 41 (2T 1) visitante substitution Agustín Enrique Aguirre Sala
+    min 47 (2T 7) visitante substitution Felipe Del Valle Cabanillas
+    min 48 (2T 8) local     substitution Geronimo Andreo Actis
+    min 49 (2T 9) visitante conversion   Valentín Franichevich
+    min 49 (2T 9) visitante try          Andres Saturnini
+    min 51 (2T 11) local     substitution Benjamín Berazategui
+    min 51 (2T 11) local     substitution Tomas Leonardo Olocco
+    min 52 (2T 12) visitante substitution Ignacio Walter Quiroga Alonso
+    min 59 (2T 19) local     try          Alejo Cejas
+    min 65 (2T 25) local     substitution Andres Ibarra
+    min 65 (2T 25) visitante try          Matias Saravia
+    min 70 (2T 30) visitante try          Fausto Barozzi
+    min 74 (2T 34) local     card_yellow  Bruno Barrionuevo
+    min 75 (2T 35) visitante penalty_goal Valentín Franichevich
+  marcador  · eventos 24-25 · guardado 24-25
+  tries     · 4-4 (guardado —-—)
+  arbitro   · Alejandro Martin Ceballos (guardado: —)
+  guardado  · 20 local · 22 visitante · 25 eventos
+
+Alta Gracia R.C. M16 "B" vs Córdoba Rugby Club M16 "B" · torneo-cordobes-m16-b · tarjeta 310318  ·  2795c189-c38d-45ba-bcb4-a7ae3f345697
+  local     · Alta Gracia R.C. M16 "B" · 20 jugadores · 0 con ficha fijada
+  visitante · Córdoba Rugby Club M16 "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 31
+    min  4 (1T 4) visitante conversion   Santino Roque Loforte
+    min  4 (1T 4) visitante try          Indio Nicolas Milich Olivares
+    min  9 (1T 9) local     try          Francisco Contrera
+    min 10 (1T 10) local     conversion   Gaston Prandini
+    min 21 (1T 21) visitante try          Gonzalo David Morales Palazzini
+    min 22 (1T 22) visitante conversion   Santino Roque Loforte
+    min 24 (1T 24) local     try          Leandro Sebastian Carabajal Sanchez
+    min 25 (1T 25) local     conversion   Gaston Prandini
+    min 26 (1T 26) visitante try          Manuel Llorca Maza
+    min 28 (1T 28) visitante try          Octavio Cesar Ricciardi
+    min 29 (1T 29) visitante conversion   Santino Roque Loforte
+    min 41 (1T 41) visitante try          Manuel Llorca Maza
+    min 46 (1T 46) visitante try          Matias Agustin Damiano Arri
+    min 47 (1T 47) visitante conversion   Santino Roque Loforte
+    min 40 (2T 0) visitante substitution Julian Francisco Daneri Jenefes
+    min 40 (2T 0) visitante substitution Pablo Santiago Nahuel Condori Choque
+    min 41 (2T 1) visitante conversion   Santino Roque Loforte
+    min 41 (2T 1) visitante try          Santino Emanuel Vanay
+    min 43 (2T 3) visitante try          Ignacio David Du Mutel De Pierrepont
+    min 43 (2T 3) visitante conversion   Juan Sebastian Incio Di Luca
+    min 46 (2T 6) visitante try          Ignacio David Du Mutel De Pierrepont
+    min 46 (2T 6) visitante conversion   Santino Roque Loforte
+    min 52 (2T 12) visitante substitution Indio Nicolas Milich Olivares
+    min 54 (2T 14) visitante try          Manuel Llorca Maza
+    min 57 (2T 17) visitante try          Ignacio Comba
+    min 60 (2T 20) local     injury       Francisco Contrera
+    min 62 (2T 22) visitante try          Matias Agustin Damiano Arri
+    min 65 (2T 25) visitante card_yellow  Gonzalo David Morales Palazzini
+    min 66 (2T 26) visitante substitution Manuel Llorca Maza
+    min 67 (2T 27) visitante substitution Joaquin Amir Fajardo
+    min 75 (2T 35) visitante substitution Aaron Pioli
+  marcador  · eventos 14-74 · guardado 14-74
+  tries     · 2-12 (guardado —-—)
+  arbitro   · Santiago Herrera Albano 47173507 (No Oficial) (guardado: —)
+  guardado  · 20 local · 23 visitante · 31 eventos
+
+Alta Gracia R.C. M16 "B" vs Club La Tablada M16 "C" · torneo-cordobes-m16-b · tarjeta 311172  ·  7de285da-e473-41cf-8ca3-c111382854d4
+  local     · Alta Gracia R.C. M16 "B" · 20 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M16 "C" · 23 jugadores · 0 con ficha fijada
+  eventos   · 23
+    min  2 (1T 2) visitante try          Augusto Paviolo Becerra
+    min  3 (1T 3) visitante conversion   Augusto Paviolo Becerra
+    min  6 (1T 6) visitante try          Augusto Paviolo Becerra
+    min 10 (1T 10) visitante try          Maximo Robles Lepre
+    min 10 (1T 10) visitante conversion   Maximo Robles Lepre
+    min 12 (1T 12) local     try          Francisco Contrera
+    min 13 (1T 13) local     conversion   Gaston Prandini
+    min 16 (1T 16) visitante try          Michele Gerardo Viotti
+    min 17 (1T 17) visitante conversion   Arturo Beltran
+    min 19 (1T 19) visitante try          Guillermo Jose Testoni
+    min 20 (1T 20) visitante conversion   Maximo Robles Lepre
+    min 22 (1T 22) visitante try          Guillermo Jose Testoni
+    min 41 (2T 1) visitante substitution Guillermo Jose Testoni
+    min 44 (2T 4) visitante try          Agustín Allende
+    min 45 (2T 5) visitante substitution Baldomero Andres Gonzalez Viale
+    min 47 (2T 7) visitante conversion   Augusto Paviolo Becerra
+    min 47 (2T 7) visitante try          Agustín Allende
+    min 53 (2T 13) local     try          Maximo Nakasone Uema
+    min 53 (2T 13) visitante try          Juan Martin Molina
+    min 54 (2T 14) visitante conversion   Augusto Paviolo Becerra
+    min 58 (2T 18) local     card_yellow  Leandro Sebastian Carabajal Sanchez
+    min 69 (2T 29) local     try          Maximo Nakasone Uema
+    min 73 (2T 33) visitante try          Agustín Allende
+  marcador  · eventos 17-62 · guardado 17-62
+  tries     · 3-10 (guardado —-—)
+  arbitro   · Alejandro Martin Ceballos (guardado: —)
+  guardado  · 20 local · 23 visitante · 23 eventos
+
+Córdoba Rugby Club M16 "B" vs Club La Tablada M16 "C" · torneo-cordobes-m16-b · tarjeta 312571  ·  4fc3b29a-9e0a-4230-ba0e-a53974003f84
+  local     · Córdoba Rugby Club M16 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M16 "C" · 23 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min 10 (1T 10) visitante try          Matias Saravia
+    min 11 (1T 11) visitante conversion   Bartolome Beslich De La Cuesta
+    min 17 (1T 17) visitante try          Francisco Ahumada Noya
+    min 35 (1T 35) visitante try          Arturo Beltran
+    min 35 (1T 35) visitante conversion   Bartolome Beslich De La Cuesta
+    min 35 (1T 35) visitante card_yellow  Pedro Becerra Pautasso
+    min 37 (1T 37) local     card_yellow  Ignacio Comba
+    min 54 (2T 14) visitante try          Matias Saravia
+    min 55 (2T 15) visitante conversion   Bartolome Beslich De La Cuesta
+    min 59 (2T 19) visitante try          Fausto Barozzi
+    min 60 (2T 20) visitante conversion   Bartolome Beslich De La Cuesta
+    min 66 (2T 26) visitante try          Fausto Barozzi
+    min 67 (2T 27) visitante conversion   Bartolome Beslich De La Cuesta
+    min 69 (2T 29) visitante try          Salvador Cornú
+    min 69 (2T 29) visitante conversion   Bartolome Beslich De La Cuesta
+    min 72 (2T 32) local     try          Ignacio Comba
+    min 72 (2T 32) local     conversion   Santino Roque Loforte
+  marcador  · eventos 7-47 · guardado 7-47
+  tries     · 1-7 (guardado —-—)
+  arbitro   · Milton Amaya (guardado: —)
+  guardado  · 23 local · 23 visitante · 17 eventos
+
+Tala Rugby Club M16 "B" vs Córdoba Athletic Club M16 "B" · torneo-cordobes-m16-b · tarjeta 313087  ·  75f831b7-1bb1-4116-ab5b-168421044d9a
+  local     · Tala Rugby Club M16 "B" · 30 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club M16 "B" · 18 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min 11 (1T 11) visitante try          Luca Bautista De La Iglesia
+    min 12 (1T 12) visitante conversion   Mateo Tomaselli
+    min 19 (1T 19) local     try          Franco Girbau Petroff
+    min 20 (1T 20) local     conversion   Ignacio Borquez
+    min 28 (1T 28) visitante substitution Sebastián Fernández
+    min 33 (1T 33) local     try          Benjamin Arguello Ferreira
+    min 34 (1T 34) local     conversion   Ignacio Borquez
+    min 40 (2T 0) visitante substitution Nicolas Valentino Burgos Suarez
+    min 50 (2T 10) local     try          Franco Girbau Petroff
+    min 51 (2T 11) visitante try          Tiziano Gael Tapia Santalucia
+    min 51 (2T 11) local     conversion   Ignacio Borquez
+    min 52 (2T 12) visitante conversion   Mateo Tomaselli
+    min 54 (2T 14) visitante substitution Elian Tomas Figueroa
+    min 55 (2T 15) local     try          Juan Ignacio Amuchastegui
+    min 56 (2T 16) local     conversion   Santino Cura Tey
+    min 66 (2T 26) visitante try          Luca Bautista De La Iglesia
+    min 67 (2T 27) visitante conversion   Mateo Tomaselli
+  marcador  · eventos 28-21 · guardado 28-21
+  tries     · 4-3 (guardado —-—)
+  arbitro   · Leonel Sorbera (guardado: —)
+  guardado  · 30 local · 18 visitante · 17 eventos
+
+Club Palermo Bajo M16 "B" vs Club Universitario de Córdoba M16 "B" · torneo-cordobes-m16-b · tarjeta 313088  ·  1f521ea5-ca6a-47db-b1fb-0fd1dccd2341
+  local     · Club Palermo Bajo M16 "B" · 28 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba M16 "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min  7 (1T 7) local     try          Nazareno Bautista Bringas
+    min  8 (1T 8) local     conversion   Joaquin Masoni
+    min 11 (1T 11) visitante try          Bautista Gelos
+    min 11 (1T 11) visitante conversion   Felipe Litvin
+    min 19 (1T 19) visitante try          Ignacio Hugo Bauer Carrizo
+    min 22 (1T 22) local     try          Nazareno Bautista Bringas
+    min 26 (1T 26) local     try          Nazareno Bautista Bringas
+    min 27 (1T 27) local     conversion   Joaquin Masoni
+    min 41 (2T 1) local     substitution Nicolas Bettera
+    min 41 (2T 1) local     substitution Mateo Agustin Bilbao
+    min 41 (2T 1) local     substitution Luca Benjamín Coronel Dorado Quiroga
+    min 41 (2T 1) local     substitution Ignacio Agustin Del Franco
+    min 47 (2T 7) local     substitution Augusto Ferreyra
+    min 55 (2T 15) local     substitution Luciano Joaquin Suarez Villan
+    min 70 (2T 30) visitante try          Maximo Cayo Guzman Ponzano
+    min 70 (2T 30) visitante conversion   Felipe Litvin
+    min 74 (2T 34) local     try          Tomás Salvador Iturbe Brouwer De Koning
+  marcador  · eventos 24-19 · guardado 24-19
+  tries     · 4-3 (guardado —-—)
+  arbitro   · Tomas Elias Gigena Ramallo (guardado: —)
+  guardado  · 28 local · 23 visitante · 17 eventos
+
+Club La Tablada M16 "C" vs Baguales R.C. M16 "B" · torneo-cordobes-m16-b · tarjeta 313091  ·  98672429-3f73-4fd7-b346-58611b500fbf
+  local     · Club La Tablada M16 "C" · 23 jugadores · 0 con ficha fijada
+  visitante · Baguales R.C. M16 "B" · 24 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min  2 (1T 2) local     try          Tristán Maña
+    min  5 (1T 5) local     try          Franco Barros Facchin
+    min  6 (1T 6) local     try          Gonzalo Villagra
+    min  6 (1T 6) local     conversion   Tomas Ravenna Monforte
+    min 18 (1T 18) visitante penalty_goal Renzo Luis Casale
+    min 30 (1T 30) local     try          Bruno Torres León
+    min 30 (1T 30) local     conversion   Tomas Ravenna Monforte
+    min 40 (2T 0) visitante substitution Rodrigo Benjamin Ordoñez Deanna
+    min 40 (2T 0) visitante substitution Mateo Saires
+    min 40 (2T 0) visitante substitution Thiago Orona
+    min 50 (2T 10) local     substitution Felipe Del Valle Cabanillas
+    min 50 (2T 10) local     substitution Valentín Franichevich
+    min 50 (2T 10) local     substitution Tomas Jose Aguirre Sala
+    min 50 (2T 10) local     substitution Gonzalo Villagra
+    min 50 (2T 10) local     substitution Santiago Gonzalez Oliva
+    min 52 (2T 12) visitante try          Ignacio Lionel Britez
+    min 52 (2T 12) visitante conversion   Renzo Luis Casale
+    min 60 (2T 20) local     conversion   Tomas Ravenna Monforte
+    min 60 (2T 20) local     try          Michele Gerardo Viotti
+    min 71 (2T 31) visitante penalty_try  
+    min 74 (2T 34) visitante try          Renzo Luis Casale
+    min 74 (2T 34) visitante conversion   Renzo Luis Casale
+  marcador  · eventos 31-24 · guardado 31-24
+  tries     · 5-3 (guardado —-—)
+  arbitro   · Federico Pregot (guardado: —)
+  guardado  · 23 local · 24 visitante · 22 eventos
+
+Córdoba Athletic Club M16 "B" vs Club La Tablada M16 "B" · torneo-cordobes-m16-b · tarjeta 314683  ·  51dd91c7-7e9a-4873-af90-00819dc106b3
+  local     · Córdoba Athletic Club M16 "B" · 24 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M16 "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min 11 (1T 11) local     try          Facundo Zapata
+    min 12 (1T 12) local     conversion   Mateo Tomaselli
+    min 21 (1T 21) visitante conversion   Bartolome Beslich De La Cuesta
+    min 22 (1T 22) visitante try          Valentín Franichevich
+    min 23 (1T 23) visitante try          Lautaro Troche Nescier
+    min 24 (1T 24) visitante conversion   Bartolome Beslich De La Cuesta
+    min 29 (1T 29) local     card_yellow  Juan Ignacio Bardavid
+    min 32 (1T 32) visitante try          Francisco Ahumada Noya
+    min 33 (1T 33) local     substitution Juan Pablo Arinci Caffaratti
+    min 33 (1T 33) visitante conversion   Bartolome Beslich De La Cuesta
+    min 40 (2T 0) local     substitution Elian Tomas Figueroa
+    min 48 (2T 8) local     substitution Máximo Flumignan
+    min 52 (2T 12) local     substitution Luca Bautista De La Iglesia
+    min 67 (2T 27) local     substitution Agustin Bossa Cassaro
+    min 68 (2T 28) visitante try          Francesco Della Giustina
+    min 69 (2T 29) visitante conversion   Bartolome Beslich De La Cuesta
+    min 69 (2T 29) local     card_yellow  Facundo Zapata
+    min 70 (2T 30) local     substitution Juan Ignacio Bardavid
+    min 70 (2T 30) local     card_yellow  Máximo Tomas Quevedo
+    min 78 (2T 38) visitante try          Fausto Santana
+    min 79 (2T 39) visitante conversion   Juan Cruz Lavezzo
+    min 79 (2T 39) visitante card_yellow  Nicanor Ceballos
+  marcador  · eventos 7-35 · guardado 7-35
+  tries     · 1-5 (guardado —-—)
+  arbitro   · Tomas Elias Gigena Ramallo (guardado: —)
+  guardado  · 24 local · 23 visitante · 22 eventos
+
+Tala Rugby Club M16 "B" vs Club Palermo Bajo M16 "B" · torneo-cordobes-m16-b · tarjeta 314686  ·  5da36c22-abbc-4d87-8524-07d7fd8e65cc
+  local     · Tala Rugby Club M16 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo M16 "B" · 24 jugadores · 0 con ficha fijada
+  eventos   · 31
+    min  2 (1T 2) local     conversion   Manuel Sugasti
+    min  2 (1T 2) local     try          Tomás Alfredo Becher
+    min 11 (1T 11) local     try          Felipe Savid
+    min 15 (1T 15) local     try          Lucas Alderete
+    min 15 (1T 15) local     conversion   Manuel Sugasti
+    min 27 (1T 27) visitante try          Agustín Griffo Zaradnik
+    min 27 (1T 27) local     card_yellow  Francisco Altamirano
+    min 28 (1T 28) local     conversion   Manuel Sugasti
+    min 28 (1T 28) local     try          Ciro Sacavino
+    min 41 (2T 1) visitante substitution Joaquin Masoni
+    min 41 (2T 1) visitante substitution Alberto Valentino Fiorenza Spada
+    min 45 (2T 5) local     substitution Ciro Sacavino
+    min 47 (2T 7) local     substitution Tomás Alfredo Becher
+    min 47 (2T 7) local     substitution Benicio Dentesano
+    min 47 (2T 7) local     conversion   Manuel Sugasti
+    min 47 (2T 7) local     try          Francisco Altamirano
+    min 50 (2T 10) local     substitution Andrés Joaquín Cañada
+    min 50 (2T 10) local     substitution Lucas Alderete
+    min 54 (2T 14) visitante substitution Lucas Ezequiel Ferrero Ramirez
+    min 54 (2T 14) visitante substitution Nicolas Bettera
+    min 54 (2T 14) local     try          Nicanor Garzón González
+    min 59 (2T 19) local     substitution Lorenzo Villada
+    min 60 (2T 20) visitante substitution Ramiro Genaro Ramos
+    min 60 (2T 20) visitante substitution Valentino Posada Lugones
+    min 62 (2T 22) visitante substitution Valentin Rodriguez Casella
+    min 62 (2T 22) visitante substitution Augusto Ferreyra
+    min 62 (2T 22) visitante substitution Agustín Griffo Zaradnik
+    min 65 (2T 25) local     card_yellow  Tomas Fornoni
+    min 69 (2T 29) local     conversion   Manuel Sugasti
+    min 69 (2T 29) local     try          Santino Maccio Llopis
+    min 75 (2T 35) visitante try          Juan Cruz Rubio
+  marcador  · eventos 45-10 · guardado 45-10
+  tries     · 7-2 (guardado —-—)
+  arbitro   · Raúl Fernando Rodriguez Almada (guardado: —)
+  guardado  · 23 local · 24 visitante · 31 eventos
+
+Club Universitario de Córdoba M16 "B" vs Baguales R.C. M16 "B" · torneo-cordobes-m16-b · tarjeta 314687  ·  0354cb9e-0d91-4f31-a019-dab18442a63b
+  local     · Club Universitario de Córdoba M16 "B" · 30 jugadores · 0 con ficha fijada
+  visitante · Baguales R.C. M16 "B" · 25 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min  4 (1T 4) visitante penalty_goal Renzo Luis Casale
+    min  7 (1T 7) local     substitution Valentino Luca Grillo
+    min 20 (1T 20) visitante try          Maximo Correa Leal
+    min 24 (1T 24) local     try          Astor Leonel Chacon
+    min 30 (1T 30) visitante try          Pedro Agustín Peralta Irala
+    min 35 (1T 35) local     try          Maximo Cayo Guzman Ponzano
+    min 35 (1T 35) local     conversion   Piero Mario Ceppolino
+    min 40 (2T 0) visitante substitution Francisco Cejas
+    min 40 (2T 0) visitante substitution Thiago Orona
+    min 40 (2T 0) local     substitution Federico Oscar Wiggenhauser
+    min 40 (2T 0) visitante substitution Valentin Cabrera
+    min 40 (2T 0) visitante substitution Santiago Sanz
+    min 50 (2T 10) local     substitution Ignacio Hugo Bauer Carrizo
+    min 50 (2T 10) local     substitution Gabriel Alejandro Lopez Urtubey
+    min 57 (2T 17) visitante try          Rodrigo Benjamin Ordoñez Deanna
+    min 57 (2T 17) visitante conversion   Renzo Luis Casale
+    min 70 (2T 30) visitante try          Mateo Saires
+    min 70 (2T 30) visitante conversion   Renzo Luis Casale
+  marcador  · eventos 12-27 · guardado 12-27
+  tries     · 2-4 (guardado —-—)
+  arbitro   · Pablo Daniel Dionicio Benitez (guardado: —)
+  guardado  · 30 local · 25 visitante · 18 eventos
+
+Alta Gracia R.C. M16 "B" vs San Francisco R.C. M16 "B" · torneo-cordobes-m16-b · tarjeta 314689  ·  febee7bc-ae9e-4f17-a3f1-f5b4c803cadc
+  local     · Alta Gracia R.C. M16 "B" · 22 jugadores · 0 con ficha fijada
+  visitante · San Francisco R.C. M16 "B" · 21 jugadores · 0 con ficha fijada
+  eventos   · 19
+    min 13 (1T 13) visitante conversion   Jose Ignacio Arca
+    min 13 (1T 13) visitante try          Bruno Barrionuevo
+    min 19 (1T 19) visitante try          Martin Leandro Luciano
+    min 19 (1T 19) visitante conversion   Jose Ignacio Arca
+    min 25 (1T 25) visitante try          Benjamín Berazategui
+    min 33 (1T 33) visitante try          Geronimo Andreo Actis
+    min 33 (1T 33) visitante conversion   Jose Ignacio Arca
+    min 34 (1T 34) local     try          Francisco Contrera
+    min 54 (2T 14) visitante substitution Santiago Cavagliato
+    min 54 (2T 14) visitante injury       Santiago Cavagliato
+    min 57 (2T 17) local     card_yellow  Benjamín Sebastian Cordoba
+    min 58 (2T 18) visitante conversion   Jose Ignacio Arca
+    min 58 (2T 18) visitante try          Geronimo Andreo Actis
+    min 62 (2T 22) visitante try          Geronimo Andreo Actis
+    min 65 (2T 25) visitante try          Bruno Barrionuevo
+    min 65 (2T 25) visitante conversion   Jose Ignacio Arca
+    min 67 (2T 27) visitante try          Geronimo Andreo Actis
+    min 67 (2T 27) visitante conversion   Jose Ignacio Arca
+    min 76 (2T 36) visitante try          Vicente Mallarino
+  marcador  · eventos 5-57 · guardado 5-57
+  tries     · 1-9 (guardado —-—)
+  arbitro   · Emmanuel Boscatto (guardado: —)
+  guardado  · 22 local · 21 visitante · 19 eventos
+
+Aero Club Río IV M16 "B" vs Jockey Club Córdoba M16 "B" · torneo-cordobes-m16-b · tarjeta 315191  ·  26046e32-5671-46f4-b84a-024c4cdeac2f
+  local     · Aero Club Río IV M16 "B" · 17 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M16 "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 40
+    min  3 (1T 3) visitante try          Facundo Romero Flynn
+    min  4 (1T 4) visitante conversion   Bautista Martinez Turrado
+    min  8 (1T 8) visitante try          Francisco León Menne Barrionuevo
+    min  9 (1T 9) visitante conversion   Bautista Martinez Turrado
+    min 11 (1T 11) visitante try          Francisco León Menne Barrionuevo
+    min 12 (1T 12) visitante conversion   Bautista Martinez Turrado
+    min 16 (1T 16) visitante conversion   Bautista Martinez Turrado
+    min 16 (1T 16) visitante try          Lorenzo Staricco Tosas
+    min 20 (1T 20) visitante substitution Pedro Sanmillan Seguro
+    min 23 (1T 23) visitante conversion   Bautista Martinez Turrado
+    min 23 (1T 23) visitante try          Constantino Marchiaro
+    min 27 (1T 27) visitante try          Federico Robledo Saracho
+    min 27 (1T 27) visitante conversion   Bautista Martinez Turrado
+    min 30 (1T 30) visitante try          Federico Robledo Saracho
+    min 30 (1T 30) visitante conversion   Bautista Martinez Turrado
+    min 40 (2T 0) visitante substitution Genaro Fiori
+    min 40 (2T 0) visitante substitution Facundo Romero Flynn
+    min 44 (2T 4) visitante try          Octavio Enrique Borrini
+    min 44 (2T 4) visitante conversion   Bautista Martinez Turrado
+    min 46 (2T 6) local     card_yellow  Alejo Fernandez
+    min 50 (2T 10) visitante try          Octavio Enrique Borrini
+    min 51 (2T 11) visitante conversion   Bautista Martinez Turrado
+    min 51 (2T 11) visitante substitution Agustin Siebenhaar
+    min 51 (2T 11) visitante try          Jeronimo Dalmases
+    min 53 (2T 13) visitante conversion   Bautista Martinez Turrado
+    min 53 (2T 13) visitante try          Federico Robledo Saracho
+    min 55 (2T 15) visitante substitution Lorenzo Staricco Tosas
+    min 57 (2T 17) visitante conversion   Bautista Martinez Turrado
+    min 57 (2T 17) visitante try          Jeronimo Dalmases
+    min 60 (2T 20) visitante conversion   Bautista Martinez Turrado
+    min 60 (2T 20) visitante try          Federico Robledo Saracho
+    min 61 (2T 21) visitante substitution Federico Robledo Saracho
+    min 62 (2T 22) visitante conversion   Bautista Martinez Turrado
+    min 62 (2T 22) visitante try          Lucio Heredia
+    min 66 (2T 26) visitante conversion   Bautista Martinez Turrado
+    min 66 (2T 26) visitante try          Francisco León Menne Barrionuevo
+    min 68 (2T 28) local     try          Alejo Fernandez
+    min 69 (2T 29) local     conversion   Facundo Isaias Gautier
+    min 71 (2T 31) visitante conversion   Bautista Martinez Turrado
+    min 71 (2T 31) visitante try          Benjamin Gonzalez Egea
+  marcador  · eventos 7-110 · guardado 7-110
+  tries     · 1-16 (guardado —-—)
+  arbitro   · José Octaviano Borquez (guardado: —)
+  guardado  · 17 local · 23 visitante · 40 eventos
+
+Baguales R.C. M16 "B" vs Tala Rugby Club M16 "B" · torneo-cordobes-m16-b · tarjeta 315192  ·  6c10624a-6e26-4733-bf8a-3cc2a9c8d541
+  local     · Baguales R.C. M16 "B" · 25 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M16 "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 26
+    min  5 (1T 5) visitante try          Ciro Sacavino
+    min  6 (1T 6) visitante conversion   Ciro Sacavino
+    min 12 (1T 12) visitante conversion   Ciro Sacavino
+    min 12 (1T 12) visitante try          Ciro Sacavino
+    min 24 (1T 24) visitante try          Lucas Alderete
+    min 30 (1T 30) visitante try          Felipe Savid
+    min 40 (2T 0) local     substitution Juan Rodriguez
+    min 40 (2T 0) local     substitution Juan Puablo Bazan
+    min 40 (2T 0) local     substitution Mateo Machado
+    min 40 (2T 0) local     substitution Bautista Gaston Díaz Domínguez
+    min 41 (2T 1) visitante substitution Tomás Alfredo Becher
+    min 41 (2T 1) visitante substitution Lucas Alderete
+    min 41 (2T 1) visitante substitution Santino Maccio Llopis
+    min 41 (2T 1) visitante substitution Felipe Savid
+    min 41 (2T 1) visitante substitution Santiago Funes Racagni
+    min 41 (2T 1) visitante substitution Lucas Estanislao Belmaña
+    min 41 (2T 1) visitante substitution Gino Mabiglia
+    min 45 (2T 5) local     try          Maximo Correa Leal
+    min 47 (2T 7) visitante try          Joaquin Spina
+    min 55 (2T 15) visitante try          Lucas Alderete
+    min 61 (2T 21) visitante try          Luis Francisco Coppari Simian
+    min 62 (2T 22) visitante conversion   Ciro Sacavino
+    min 69 (2T 29) local     try          Valentino Roggio
+    min 69 (2T 29) local     conversion   Renzo Luis Casale
+    min 70 (2T 30) local     injury       Juan Rodriguez
+    min 77 (2T 37) visitante try          Nicanor Garzón González
+  marcador  · eventos 12-46 · guardado 12-46
+  tries     · 2-8 (guardado —-—)
+  arbitro   · Pablo Daniel Dionicio Benitez (guardado: —)
+  guardado  · 25 local · 23 visitante · 26 eventos
+
+Club La Tablada M16 "B" vs Alta Gracia R.C. M16 "B" · torneo-cordobes-m16-b · tarjeta 315194  ·  d1f77b20-5591-4770-8545-714b42436e61
+  local     · Club La Tablada M16 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Alta Gracia R.C. M16 "B" · 22 jugadores · 0 con ficha fijada
+  eventos   · 30
+    min  1 (1T 1) local     try          Fausto Santana
+    min  2 (1T 2) local     conversion   Bartolome Beslich De La Cuesta
+    min  6 (1T 6) local     try          Baldomero Andres Gonzalez Viale
+    min  7 (1T 7) local     conversion   Bartolome Beslich De La Cuesta
+    min 14 (1T 14) local     try          Fausto Santana
+    min 14 (1T 14) local     conversion   Bartolome Beslich De La Cuesta
+    min 22 (1T 22) local     try          Arturo Beltran
+    min 22 (1T 22) local     conversion   Bartolome Beslich De La Cuesta
+    min 32 (1T 32) local     card_yellow  Bartolome Beslich De La Cuesta
+    min 34 (1T 34) local     try          Valentín Franichevich
+    min 34 (1T 34) local     conversion   Bartolome Beslich De La Cuesta
+    min 42 (2T 2) local     try          Agustín Allende
+    min 44 (2T 4) local     try          Geronimo Suarez Zampino
+    min 44 (2T 4) local     conversion   Bartolome Beslich De La Cuesta
+    min 48 (2T 8) local     conversion   Bartolome Beslich De La Cuesta
+    min 48 (2T 8) local     try          Fausto Santana
+    min 51 (2T 11) local     try          Fausto Santana
+    min 51 (2T 11) local     conversion   Bartolome Beslich De La Cuesta
+    min 55 (2T 15) local     try          Pedro Becerra Pautasso
+    min 55 (2T 15) local     conversion   Bartolome Beslich De La Cuesta
+    min 59 (2T 19) local     try          Leonardo Hevia
+    min 59 (2T 19) local     conversion   Bartolome Beslich De La Cuesta
+    min 60 (2T 20) visitante substitution Benjamin Martellotto
+    min 62 (2T 22) local     try          Michele Gerardo Viotti
+    min 62 (2T 22) local     try          Michele Gerardo Viotti
+    min 62 (2T 22) local     conversion   Bartolome Beslich De La Cuesta
+    min 69 (2T 29) local     try          Guillermo Jose Testoni
+    min 69 (2T 29) local     conversion   Bartolome Beslich De La Cuesta
+    min 70 (2T 30) local     card_yellow  Lautaro Troche Nescier
+    min 72 (2T 32) local     conversion   Bartolome Beslich De La Cuesta
+  marcador  · eventos 96-0 · guardado 96-0
+  tries     · 14-0 (guardado —-—)
+  arbitro   · Héctor Marcelo Villarroel (guardado: —)
+  guardado  · 23 local · 22 visitante · 30 eventos
+
+Córdoba Rugby Club M16 "B" vs San Francisco R.C. M16 "B" · torneo-cordobes-m16-b · tarjeta 315195  ·  fd526fac-e224-492a-8045-8e20c3f374a6
+  local     · Córdoba Rugby Club M16 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · San Francisco R.C. M16 "B" · 22 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min 11 (1T 11) local     try          Ignacio Comba
+    min 12 (1T 12) local     conversion   Santino Roque Loforte
+    min 41 (2T 1) visitante substitution Leonardo Martín Guglielmone
+    min 41 (2T 1) local     substitution Santino Emanuel Vanay
+    min 41 (2T 1) visitante substitution Urbano Boero
+    min 42 (2T 2) local     substitution Joaquin Amir Fajardo
+    min 45 (2T 5) local     try          Ignacio Comba
+    min 46 (2T 6) local     conversion   Santino Roque Loforte
+    min 50 (2T 10) local     card_yellow  Aaron Pioli
+    min 51 (2T 11) visitante try          Bruno Barrionuevo
+    min 51 (2T 11) visitante conversion   Alejo Cejas
+    min 51 (2T 11) local     card_yellow  Lautaro Motran Maccio
+    min 56 (2T 16) visitante try          Mateo Escobares
+    min 56 (2T 16) visitante conversion   Alejo Cejas
+    min 58 (2T 18) local     card_yellow  Gonzalo David Morales Palazzini
+    min 60 (2T 20) local     substitution Aaron Pioli
+    min 61 (2T 21) visitante try          Geronimo Andreo Actis
+    min 61 (2T 21) visitante conversion   Alejo Cejas
+    min 61 (2T 21) visitante substitution Juan Ignacio Bustamante Fiore
+    min 61 (2T 21) local     injury       Lautaro Motran Maccio
+    min 75 (2T 35) local     card_yellow  Gonzalo David Morales Palazzini
+    min 75 (2T 35) local     card_red     Gonzalo David Morales Palazzini
+  marcador  · eventos 14-21 · guardado 14-21
+  tries     · 2-3 (guardado —-—)
+  arbitro   · Tomas Elias Gigena Ramallo (guardado: —)
+  guardado  · 23 local · 22 visitante · 22 eventos
+
+Club La Tablada M16 "C" vs Tala Rugby Club M16 "C" · torneo-cordobes-m16-b · tarjeta 315196  ·  e5d69fb8-39b7-4fbc-8264-75f42c6ea441
+  local     · Club La Tablada M16 "C" · 30 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M16 "C" · 30 jugadores · 0 con ficha fijada
+  eventos   · 8
+    min  9 (1T 9) local     try          Carlos Maria Romero Victorica
+    min  9 (1T 9) local     conversion   Fidel Urtubey
+    min 13 (1T 13) local     try          Andres Saturnini
+    min 13 (1T 13) local     conversion   Fidel Urtubey
+    min 30 (1T 30) local     try          Andres Saturnini
+    min 30 (1T 30) local     conversion   Fidel Urtubey
+    min 75 (2T 35) local     try          Nicolas Lozada Pagani
+    min 75 (2T 35) local     conversion   Genaro Felizia Savio
+  marcador  · eventos 28-0 · guardado 28-0
+  tries     · 4-0 (guardado —-—)
+  arbitro   · Emmanuel Boscatto (guardado: —)
+  guardado  · 30 local · 30 visitante · 8 eventos
+
+Jockey Club Córdoba M16 "B" vs Club La Tablada M16 "B" · torneo-cordobes-m16-b · tarjeta 319637  ·  2e593418-73d1-4d76-bf69-0840810ffc10
+  local     · Jockey Club Córdoba M16 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M16 "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min  1 (1T 1) visitante try          Francisco Ahumada Noya
+    min  2 (1T 2) visitante conversion   Bartolome Beslich De La Cuesta
+    min  4 (1T 4) visitante try          Bruno Torres León
+    min  5 (1T 5) visitante conversion   Bartolome Beslich De La Cuesta
+    min 16 (1T 16) visitante try          Francisco Ahumada Noya
+    min 26 (1T 26) visitante try          Salvador Cornú
+    min 27 (1T 27) visitante conversion   Bartolome Beslich De La Cuesta
+    min 41 (2T 1) visitante try          Constantino Belluomini
+    min 42 (2T 2) visitante conversion   Bartolome Beslich De La Cuesta
+    min 43 (2T 3) visitante try          Baldomero Andres Gonzalez Viale
+    min 44 (2T 4) visitante conversion   Bartolome Beslich De La Cuesta
+    min 48 (2T 8) local     try          Martin Clerico
+    min 57 (2T 17) visitante try          Guillermo Jose Testoni
+    min 57 (2T 17) visitante conversion   Bartolome Beslich De La Cuesta
+    min 62 (2T 22) visitante try          Bartolome Beslich De La Cuesta
+    min 63 (2T 23) visitante conversion   Bartolome Beslich De La Cuesta
+    min 66 (2T 26) local     try          Matias Velazquez Cano
+  marcador  · eventos 10-54 · guardado 10-54
+  tries     · 2-8 (guardado —-—)
+  arbitro   · Daniel Borsarelli (guardado: —)
+  guardado  · 23 local · 23 visitante · 17 eventos
+
+Córdoba Athletic Club M16 "B" vs Club La Tablada M16 "C" · torneo-cordobes-m16-b · tarjeta 319639  ·  b54c8bdc-0f4a-41e5-aa22-67b7b338d8ba
+  local     · Córdoba Athletic Club M16 "B" · 22 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M16 "C" · 25 jugadores · 0 con ficha fijada
+  eventos   · 23
+    min  3 (1T 3) local     penalty_goal Mateo Tomaselli
+    min 10 (1T 10) visitante try          Agustín Allende
+    min 11 (1T 11) visitante conversion   Fidel Urtubey
+    min 18 (1T 18) visitante penalty_goal Fidel Urtubey
+    min 31 (1T 31) visitante substitution Santiago Gueydan
+    min 35 (1T 35) visitante conversion   Fidel Urtubey
+    min 35 (1T 35) visitante try          Agustín Allende
+    min 40 (2T 0) visitante substitution Gerónimo Merino Astrada
+    min 40 (2T 0) visitante substitution Genaro Jose Manzano Aramayo
+    min 40 (2T 0) visitante substitution Simon Molina
+    min 48 (2T 8) local     try          Luca Bautista De La Iglesia
+    min 49 (2T 9) local     substitution Caetano Bella Adamo
+    min 50 (2T 10) visitante substitution Franco Barros Facchin
+    min 50 (2T 10) visitante substitution Mateo Frutos
+    min 50 (2T 10) visitante substitution Tomás Segovia
+    min 51 (2T 11) local     substitution Gaspar Florensa
+    min 58 (2T 18) visitante substitution Fidel Urtubey
+    min 63 (2T 23) local     substitution Agustin Nicolasi Fernandez
+    min 63 (2T 23) local     substitution Bautista Guzman Rodriguez
+    min 63 (2T 23) local     substitution Dante Sironi Cavallera
+    min 63 (2T 23) local     injury       Dante Sironi Cavallera
+    min 75 (2T 35) local     try          Facundo Zapata
+    min 75 (2T 35) local     conversion   Mateo Tomaselli
+  marcador  · eventos 15-17 · guardado 15-17
+  tries     · 2-2 (guardado —-—)
+  arbitro   · Pablo Daniel Dionicio Benitez (guardado: —)
+  guardado  · 22 local · 25 visitante · 23 eventos
+
+Tala Rugby Club M16 "B" vs Los Cuervos R.C. M16 "B" · torneo-cordobes-m16-b · tarjeta 319640  ·  27100211-2d3a-4f79-9f26-82f75225a128
+  local     · Tala Rugby Club M16 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Los Cuervos R.C. M16 "B" · 22 jugadores · 0 con ficha fijada
+  eventos   · 35
+    min  1 (1T 1) local     conversion   Lucas Alderete
+    min  1 (1T 1) local     try          Lucas Alderete
+    min  9 (1T 9) local     try          Joaquin Spina
+    min  9 (1T 9) local     conversion   Lucas Alderete
+    min 18 (1T 18) local     try          Lucas Alderete
+    min 18 (1T 18) local     conversion   Lucas Alderete
+    min 20 (1T 20) local     try          Joaquin Spina
+    min 20 (1T 20) local     conversion   Lucas Alderete
+    min 24 (1T 24) visitante injury       Juan Ignacio Sanchez
+    min 27 (1T 27) local     try          Lucas Alderete
+    min 32 (1T 32) local     try          Ciro Sacavino
+    min 32 (1T 32) local     conversion   Lucas Alderete
+    min 41 (2T 1) local     try          Santino Maccio Llopis
+    min 41 (2T 1) local     conversion   Lucas Alderete
+    min 50 (2T 10) local     substitution Andrés Joaquín Cañada
+    min 50 (2T 10) local     substitution Genaro Uribe Echevarria
+    min 50 (2T 10) local     substitution Gino Mabiglia
+    min 50 (2T 10) local     substitution Lucas Alderete
+    min 51 (2T 11) visitante substitution Milton Román Herrera
+    min 55 (2T 15) local     substitution Juan Ignacio Amuchastegui
+    min 55 (2T 15) local     substitution Joaquin Spina
+    min 55 (2T 15) local     substitution Santino Maccio Llopis
+    min 55 (2T 15) local     conversion   Ciro Sacavino
+    min 55 (2T 15) local     try          Conrado Yorlano
+    min 58 (2T 18) local     substitution Antonio Scandroglio Nores
+    min 58 (2T 18) local     conversion   Ciro Sacavino
+    min 58 (2T 18) local     try          Gregorio Moyano Del Re
+    min 60 (2T 20) local     conversion   Ciro Sacavino
+    min 60 (2T 20) local     try          Nicanor Garzón González
+    min 64 (2T 24) local     conversion   Ciro Sacavino
+    min 64 (2T 24) local     try          Gregorio Moyano Del Re
+    min 70 (2T 30) local     conversion   Ciro Sacavino
+    min 70 (2T 30) local     try          Benicio Dentesano
+    min 72 (2T 32) local     conversion   Ciro Sacavino
+    min 72 (2T 32) local     try          Ciro Sacavino
+  marcador  · eventos 89-0 · guardado 89-0
+  tries     · 13-0 (guardado —-—)
+  arbitro   · Javier Nicolas Olalla (guardado: —)
+  guardado  · 23 local · 22 visitante · 35 eventos
+
+Córdoba Rugby Club M16 "B" vs Baguales R.C. M16 "B" · torneo-cordobes-m16-b · tarjeta 319642  ·  0e2beb9f-8608-4953-8973-37a70e8752d5
+  local     · Córdoba Rugby Club M16 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Baguales R.C. M16 "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 21
+    min  3 (1T 3) visitante try          Mateo Saires
+    min  7 (1T 7) local     conversion   Santino Emanuel Vanay
+    min  7 (1T 7) local     try          Ignacio Comba
+    min 16 (1T 16) local     try          Ignacio Comba
+    min 16 (1T 16) local     conversion   Santino Emanuel Vanay
+    min 16 (1T 16) local     try          Santino Emanuel Vanay
+    min 16 (1T 16) local     conversion   Santino Emanuel Vanay
+    min 31 (1T 31) local     try          Joaquin Amir Fajardo
+    min 31 (1T 31) local     conversion   Santino Emanuel Vanay
+    min 41 (2T 1) visitante substitution Francisco Cejas
+    min 41 (2T 1) visitante substitution Mateo Machado
+    min 41 (2T 1) visitante substitution Mauro Exequiel Espindola
+    min 44 (2T 4) local     substitution Thiago Ludueña
+    min 46 (2T 6) local     try          Ignacio Comba
+    min 49 (2T 9) visitante try          Renzo Luis Casale
+    min 49 (2T 9) visitante conversion   Renzo Luis Casale
+    min 51 (2T 11) local     try          Valentino Jonás Obregon Heredia
+    min 51 (2T 11) local     conversion   Santino Roque Loforte
+    min 52 (2T 12) local     substitution Ignacio David Du Mutel De Pierrepont
+    min 65 (2T 25) local     substitution Joaquin Amir Fajardo
+    min 66 (2T 26) local     try          Juan Eduardo Gassmann
+  marcador  · eventos 45-12 · guardado 45-12
+  tries     · 7-2 (guardado —-—)
+  arbitro   · Ignacio Santiago Olmedo Ramirez (guardado: —)
+  guardado  · 23 local · 23 visitante · 21 eventos
+
+Club La Tablada M16 "B" vs Club Universitario de Córdoba M16 "B" · torneo-cordobes-m16-b · tarjeta 320732  ·  75d9e83a-44f9-41fc-81c5-28e72f58f7e8
+  local     · Club La Tablada M16 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba M16 "B" · 30 jugadores · 0 con ficha fijada
+  eventos   · 34
+    min 10 (1T 10) local     conversion   Bartolome Beslich De La Cuesta
+    min 10 (1T 10) local     try          Pedro Becerra Pautasso
+    min 15 (1T 15) visitante substitution Piero Mario Ceppolino
+    min 15 (1T 15) visitante substitution Felipe Litvin
+    min 17 (1T 17) local     try          Guillermo Jose Testoni
+    min 17 (1T 17) local     conversion   Bartolome Beslich De La Cuesta
+    min 19 (1T 19) local     try          Matias Saravia
+    min 19 (1T 19) local     conversion   Bartolome Beslich De La Cuesta
+    min 21 (1T 21) local     try          Guillermo Jose Testoni
+    min 21 (1T 21) local     conversion   Bartolome Beslich De La Cuesta
+    min 24 (1T 24) local     try          Guillermo Jose Testoni
+    min 24 (1T 24) local     conversion   Bartolome Beslich De La Cuesta
+    min 32 (1T 32) local     try          Geronimo Suarez Zampino
+    min 32 (1T 32) local     conversion   Bartolome Beslich De La Cuesta
+    min 35 (1T 35) local     try          Simon Cabello Molina
+    min 35 (1T 35) local     conversion   Bartolome Beslich De La Cuesta
+    min 40 (2T 0) visitante substitution Lautaro Benjamín Moyano
+    min 40 (2T 0) visitante substitution Agustín Ragaglia
+    min 40 (2T 0) visitante substitution Gabriel Alejandro Lopez Urtubey
+    min 45 (2T 5) local     substitution Pedro Becerra Pautasso
+    min 45 (2T 5) local     substitution Bartolome Beslich De La Cuesta
+    min 45 (2T 5) local     substitution Benjamin Bobadilla
+    min 45 (2T 5) local     substitution Geronimo Suarez Zampino
+    min 45 (2T 5) local     substitution Santiago Rolleri Piccinni
+    min 52 (2T 12) local     conversion   Francisco Mansilla
+    min 52 (2T 12) local     try          Arturo Beltran
+    min 57 (2T 17) local     card_yellow  Santiago Gueydan
+    min 58 (2T 18) visitante try          Damiano Eleazar Jahaziel Gianfreda
+    min 58 (2T 18) visitante conversion   Bautista Ruiz Slamovits
+    min 63 (2T 23) visitante try          Astor Leonel Chacon
+    min 63 (2T 23) visitante conversion   Bautista Ruiz Slamovits
+    min 73 (2T 33) local     try          Valentín Franichevich
+    min 73 (2T 33) local     conversion   Francisco Mansilla
+    min 74 (2T 34) local     substitution Salvador Cornú
+  marcador  · eventos 63-14 · guardado 63-14
+  tries     · 9-2 (guardado —-—)
+  arbitro   · Francisco Romero Brondino (guardado: —)
+  guardado  · 23 local · 30 visitante · 34 eventos
+
+Alta Gracia R.C. M16 "B" vs Córdoba Athletic Club M16 "B" · torneo-cordobes-m16-b · tarjeta 320733  ·  c123311b-d36f-4f5e-89eb-02e84fbfd45d
+  local     · Alta Gracia R.C. M16 "B" · 22 jugadores · 0 con ficha fijada
+  visitante · Córdoba Athletic Club M16 "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 33
+    min  1 (1T 1) visitante conversion   Mateo Tomaselli
+    min  1 (1T 1) visitante try          Máximo Tomas Quevedo
+    min 16 (1T 16) visitante try          Agustin Nicolasi Fernandez
+    min 17 (1T 17) visitante conversion   Mateo Tomaselli
+    min 20 (1T 20) local     try          Francisco Contrera
+    min 21 (1T 21) local     conversion   Gaston Prandini
+    min 22 (1T 22) visitante conversion   Mateo Tomaselli
+    min 22 (1T 22) visitante try          Caetano Bella Adamo
+    min 25 (1T 25) local     try          Francisco Contrera
+    min 27 (1T 27) visitante conversion   Mateo Tomaselli
+    min 27 (1T 27) visitante try          Máximo Tomas Quevedo
+    min 29 (1T 29) visitante conversion   Mateo Tomaselli
+    min 29 (1T 29) visitante try          Agustin Bossa Cassaro
+    min 41 (2T 1) local     try          Francisco Contrera
+    min 41 (2T 1) local     substitution Santiago Nahuel Ramos
+    min 42 (2T 2) local     conversion   Francisco Contrera
+    min 43 (2T 3) local     try          Felipe José Arana
+    min 43 (2T 3) local     conversion   Gaston Prandini
+    min 43 (2T 3) visitante substitution Agustin Bossa Cassaro
+    min 49 (2T 9) local     try          Luca Oreste Pelliza Bussadori
+    min 50 (2T 10) local     conversion   Gaston Prandini
+    min 51 (2T 11) local     card_yellow  Leandro Sebastian Carabajal Sanchez
+    min 54 (2T 14) visitante substitution Elian Tomas Figueroa
+    min 55 (2T 15) visitante substitution Augusto Aguirre
+    min 55 (2T 15) visitante substitution Sebastián Fernández
+    min 55 (2T 15) visitante substitution Rafael Fernández
+    min 58 (2T 18) visitante try          Lucas Nahuel Velez
+    min 61 (2T 21) visitante try          Lucas Nahuel Velez
+    min 61 (2T 21) visitante conversion   Mateo Tomaselli
+    min 64 (2T 24) visitante substitution Agustin Nicolasi Fernandez
+    min 67 (2T 27) visitante substitution Tiziano Gael Tapia Santalucia
+    min 68 (2T 28) visitante try          Juan Ignacio Bardavid
+    min 72 (2T 32) visitante try          Luca Bautista De La Iglesia
+  marcador  · eventos 33-57 · guardado 33-57
+  tries     · 5-9 (guardado —-—)
+  arbitro   · Francisco Pecchio (guardado: —)
+  guardado  · 22 local · 23 visitante · 33 eventos
+
+Tala Rugby Club M16 "C" vs Club Palermo Bajo M16 "B" · torneo-cordobes-m16-b · tarjeta 320734  ·  fa21c7f5-a8d9-428c-a31e-0eb09cb01330
+  local     · Tala Rugby Club M16 "C" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo M16 "B" · 21 jugadores · 0 con ficha fijada
+  eventos   · 23
+    min 10 (1T 10) visitante try          Valentin Rodriguez Casella
+    min 15 (1T 15) visitante substitution Jose Ignacio Braidot
+    min 20 (1T 20) local     try          Salvador Gomez Martinez
+    min 30 (1T 30) local     try          Tristan Revol
+    min 30 (1T 30) local     conversion   Tomas Fornoni
+    min 35 (1T 35) local     try          Mateo Nicolas Gomez
+    min 35 (1T 35) local     conversion   Tomas Fornoni
+    min 47 (2T 7) local     try          Mateo Nicolas Gomez
+    min 50 (2T 10) visitante try          Joaquin Masoni
+    min 52 (2T 12) local     substitution Jaime Riera
+    min 52 (2T 12) local     substitution Benjamin Juarez Lopez Seco
+    min 52 (2T 12) local     substitution Benicio Dentesano
+    min 53 (2T 13) local     substitution Juan Ignacio Amuchastegui
+    min 53 (2T 13) local     substitution Thomas Arrigo
+    min 54 (2T 14) local     try          Salvador Gomez Martinez
+    min 58 (2T 18) visitante try          Nazareno Bautista Bringas
+    min 59 (2T 19) visitante conversion   Joaquin Masoni
+    min 60 (2T 20) local     substitution Juan Cruz Roqué
+    min 65 (2T 25) visitante card_yellow  Thiago Garcia
+    min 70 (2T 30) local     try          Camilo Aguilar Benitez
+    min 72 (2T 32) local     try          Juan Manuel Peralta
+    min 72 (2T 32) local     try          Pedro Moyano Correa
+    min 75 (2T 35) local     conversion   Octavio Roqué
+  marcador  · eventos 46-17 · guardado 46-17
+  tries     · 8-3 (guardado —-—)
+  arbitro   · Tomas Elias Gigena Ramallo (guardado: —)
+  guardado  · 23 local · 21 visitante · 23 eventos
+
+Córdoba Rugby Club M16 "B" vs Jockey Club Córdoba M16 "B" · torneo-cordobes-m16-b · tarjeta 320735  ·  295e9f85-c05a-4561-ae1e-891ba9e290f3
+  local     · Córdoba Rugby Club M16 "B" · 22 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M16 "B" · 15 jugadores · 0 con ficha fijada
+  eventos   · 26
+    min  1 (1T 1) visitante try          Jeronimo Dalmases
+    min  3 (1T 3) local     conversion   Santino Roque Loforte
+    min  3 (1T 3) local     try          Santino Emanuel Vanay
+    min 11 (1T 11) local     try          Juan Sebastian Incio Di Luca
+    min 15 (1T 15) local     try          Matias Agustin Damiano Arri
+    min 15 (1T 15) local     try          Juan Sebastian Incio Di Luca
+    min 15 (1T 15) local     conversion   Santino Emanuel Vanay
+    min 27 (1T 27) local     try          Valentino Jonás Obregon Heredia
+    min 30 (1T 30) local     try          Ignacio Comba
+    min 30 (1T 30) local     conversion   Santino Roque Loforte
+    min 34 (1T 34) local     try          Santino Emanuel Vanay
+    min 34 (1T 34) local     conversion   Santino Roque Loforte
+    min 42 (2T 2) local     try          Ignacio Comba
+    min 42 (2T 2) local     conversion   Santino Roque Loforte
+    min 50 (2T 10) local     try          Santino Roque Loforte
+    min 50 (2T 10) local     conversion   Juan Sebastian Incio Di Luca
+    min 52 (2T 12) local     try          Ignacio Comba
+    min 57 (2T 17) visitante try          Tomas Castaño
+    min 57 (2T 17) visitante try          Francisco León Menne Barrionuevo
+    min 57 (2T 17) visitante conversion   Tomas Castaño
+    min 62 (2T 22) local     try          Santino Roque Loforte
+    min 62 (2T 22) local     conversion   Santino Emanuel Vanay
+    min 65 (2T 25) local     try          Ignacio Comba
+    min 65 (2T 25) local     conversion   Santino Roque Loforte
+    min 70 (2T 30) local     try          Matias Agustin Damiano Arri
+    min 70 (2T 30) local     conversion   Santino Roque Loforte
+  marcador  · eventos 83-17 · guardado 83-17
+  tries     · 13-3 (guardado —-—)
+  arbitro   · Eduardo Cavaglia (guardado: —)
+  guardado  · 22 local · 15 visitante · 26 eventos
+
+Club La Tablada M16 "C" vs Los Cuervos R.C. M16 "B" · torneo-cordobes-m16-b · tarjeta 320737  ·  9fca2750-9398-43f9-bcf9-1ce934bdc2eb
+  local     · Club La Tablada M16 "C" · 26 jugadores · 0 con ficha fijada
+  visitante · Los Cuervos R.C. M16 "B" · 22 jugadores · 0 con ficha fijada
+  eventos   · 6
+    min  6 (1T 6) local     try          Pedro Gonzalez
+    min 19 (1T 19) local     penalty_try  
+    min 31 (1T 31) local     try          Gonzalo Villagra
+    min 55 (2T 15) local     try          Gerónimo Merino Astrada
+    min 60 (2T 20) local     card_yellow  Manuel Lima
+    min 65 (2T 25) local     card_yellow  Ignacio Walter Quiroga Alonso
+  marcador  · eventos 22-0 · guardado 22-0
+  tries     · 4-0 (guardado —-—)
+  arbitro   · Javier Nicolas Olalla (guardado: —)
+  guardado  · 26 local · 22 visitante · 6 eventos
+
+Club Palermo Bajo M16 "B" vs Aero Club Río IV M16 "B" · torneo-cordobes-m16-b · tarjeta 322673  ·  bc4ace1b-20c2-49a9-b564-832a5a5992a7
+  local     · Club Palermo Bajo M16 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Aero Club Río IV M16 "B" · 17 jugadores · 0 con ficha fijada
+  eventos   · 28
+    min  2 (1T 2) local     try          Tomás Salvador Iturbe Brouwer De Koning
+    min  6 (1T 6) local     try          Lorenzo Diaz Re
+    min  7 (1T 7) local     conversion   Tomás Salvador Iturbe Brouwer De Koning
+    min 14 (1T 14) local     try          Darian González Colazo
+    min 15 (1T 15) local     conversion   Tomás Salvador Iturbe Brouwer De Koning
+    min 25 (1T 25) visitante try          Cristhian Camilo Serna Mendoza
+    min 25 (1T 25) visitante conversion   Facundo Isaias Gautier
+    min 26 (1T 26) local     substitution Valentin Rodriguez Casella
+    min 28 (1T 28) local     try          Joaquin Lechuga Cabrera
+    min 29 (1T 29) local     conversion   Tomás Salvador Iturbe Brouwer De Koning
+    min 35 (1T 35) local     try          Nicolas Bettera
+    min 36 (1T 36) local     conversion   Tomás Salvador Iturbe Brouwer De Koning
+    min 41 (2T 1) local     substitution Tomás Salvador Iturbe Brouwer De Koning
+    min 41 (2T 1) local     substitution Joaquin Lechuga Cabrera
+    min 52 (2T 12) local     try          Nazareno Bautista Bringas
+    min 53 (2T 13) local     conversion   Joaquin Masoni
+    min 55 (2T 15) local     substitution Luciano Joaquin Suarez Villan
+    min 55 (2T 15) local     substitution Juan Cruz Rubio
+    min 55 (2T 15) local     substitution Lorenzo Diaz Re
+    min 55 (2T 15) local     substitution Jose Ignacio Braidot
+    min 55 (2T 15) local     substitution Lucas Ezequiel Ferrero Ramirez
+    min 57 (2T 17) local     try          Valentino Posada Lugones
+    min 58 (2T 18) local     conversion   Joaquin Masoni
+    min 64 (2T 24) local     try          Darian González Colazo
+    min 71 (2T 31) local     try          Nicolas Bettera
+    min 72 (2T 32) local     conversion   Joaquin Masoni
+    min 73 (2T 33) local     try          Nicolas Bettera
+    min 74 (2T 34) local     conversion   Joaquin Masoni
+  marcador  · eventos 66-7 · guardado 66-7
+  tries     · 10-1 (guardado —-—)
+  arbitro   · Tomas Elias Gigena Ramallo (guardado: —)
+  guardado  · 23 local · 17 visitante · 28 eventos
+
+Baguales R.C. M16 "B" vs Alta Gracia R.C. M16 "B" · torneo-cordobes-m16-b · tarjeta 322676  ·  936c3fb9-897c-4916-8ff2-6d3b4ec1885e
+  local     · Baguales R.C. M16 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Alta Gracia R.C. M16 "B" · 21 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min 17 (1T 17) visitante try          Elias Valentín Segado Villaverde
+    min 21 (1T 21) visitante try          Gaston Prandini
+    min 25 (1T 25) local     try          Mateo Saires
+    min 25 (1T 25) local     conversion   Renzo Luis Casale
+    min 36 (1T 36) local     try          Ramiro Peralta
+    min 36 (1T 36) local     conversion   Renzo Luis Casale
+    min 43 (2T 3) local     try          Juan Puablo Bazan
+    min 43 (2T 3) local     conversion   Renzo Luis Casale
+    min 44 (2T 4) local     try          Mateo Saires
+    min 49 (2T 9) local     try          Mateo Saires
+    min 56 (2T 16) local     try          Renzo Luis Casale
+    min 56 (2T 16) local     conversion   Renzo Luis Casale
+    min 62 (2T 22) visitante try          Leandro Sebastian Carabajal Sanchez
+    min 62 (2T 22) local     card_yellow  Santiago Sanz
+    min 62 (2T 22) local     try          Santiago Sanz
+    min 63 (2T 23) visitante conversion   Gaston Prandini
+    min 67 (2T 27) visitante try          Elias Valentín Segado Villaverde
+  marcador  · eventos 43-22 · guardado 43-22
+  tries     · 7-4 (guardado —-—)
+  arbitro   · Daniel Alejandro Funes (guardado: —)
+  guardado  · 23 local · 21 visitante · 17 eventos
+
+Los Cuervos R.C. M16 "B" vs Tala Rugby Club M16 "C" · torneo-cordobes-m16-b · tarjeta 322678  ·  7b892bf2-167f-43a2-b31d-fad8982324b8
+  local     · Los Cuervos R.C. M16 "B" · 22 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M16 "C" · 27 jugadores · 0 con ficha fijada
+  eventos   · 21
+    min  4 (1T 4) local     penalty_goal Pedro Marcos
+    min  9 (1T 9) local     try          Charbel Pereyra Valle
+    min  9 (1T 9) local     conversion   Pedro Marcos
+    min 15 (1T 15) visitante substitution Lucca Santino Dainotto
+    min 17 (1T 17) visitante try          Matias Navarro Herrera
+    min 23 (1T 23) local     try          Charbel Pereyra Valle
+    min 23 (1T 23) local     conversion   Pedro Marcos
+    min 25 (1T 25) visitante try          Octavio Roqué
+    min 29 (1T 29) local     try          Apolo Touz
+    min 29 (1T 29) local     conversion   Pedro Marcos
+    min 40 (2T 0) visitante substitution Benicio Muratore Rao
+    min 40 (2T 0) visitante substitution Francisco Pagani
+    min 40 (2T 0) visitante substitution Bruno Balestrini
+    min 40 (2T 0) visitante substitution Bautista Medrano
+    min 40 (2T 0) visitante conversion   Juan Manuel Peralta
+    min 42 (2T 2) local     try          Juan Ignacio Sanchez
+    min 55 (2T 15) local     card_yellow  Juan Uriel Arnaud
+    min 59 (2T 19) local     card_yellow  Apolo Touz
+    min 65 (2T 25) visitante try          Antonio Scandroglio Nores
+    min 68 (2T 28) local     try          Juan Ignacio Sanchez
+    min 68 (2T 28) local     conversion   Pedro Marcos
+  marcador  · eventos 36-17 · guardado 36-17
+  tries     · 5-3 (guardado —-—)
+  arbitro   · Nahuel Sabena (guardado: —)
+  guardado  · 22 local · 27 visitante · 21 eventos
+
+Club La Tablada M16 "C" vs San Francisco R.C. M16 "B" · torneo-cordobes-m16-b · tarjeta 322679  ·  20c845af-f3f5-44c9-a504-45acea6c97c8
+  local     · Club La Tablada M16 "C" · 23 jugadores · 0 con ficha fijada
+  visitante · San Francisco R.C. M16 "B" · 24 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min  1 (1T 1) local     try          Arturo Beltran
+    min  2 (1T 2) local     conversion   Tomas Ravenna Monforte
+    min  6 (1T 6) local     try          Gonzalo Villagra
+    min  7 (1T 7) local     conversion   Tomas Ravenna Monforte
+    min  9 (1T 9) visitante conversion   Jose Ignacio Arca
+    min  9 (1T 9) visitante try          Lautaro Jorge Vicentin
+    min 24 (1T 24) visitante substitution Mateo Escobares
+    min 34 (1T 34) local     try          Andres Saturnini
+    min 35 (1T 35) local     conversion   Tomas Ravenna Monforte
+    min 41 (2T 1) visitante substitution Maximo Giampieri Vignolo
+    min 41 (2T 1) visitante substitution Urbano Boero
+    min 41 (2T 1) visitante substitution Joaquín Nahuel Vairolatti
+    min 45 (2T 5) visitante substitution Leonardo Martín Guglielmone
+    min 45 (2T 5) visitante try          Juan Ignacio Bustamante Fiore
+    min 49 (2T 9) visitante substitution Juan Ignacio Bustamante Fiore
+    min 49 (2T 9) visitante conversion   Jose Ignacio Arca
+    min 49 (2T 9) visitante try          Geronimo Andreo Actis
+    min 64 (2T 24) local     penalty_goal Tomas Ravenna Monforte
+    min 66 (2T 26) visitante conversion   Jose Ignacio Arca
+    min 66 (2T 26) visitante try          Bruno Barrionuevo
+    min 70 (2T 30) local     penalty_goal Tomas Ravenna Monforte
+    min 74 (2T 34) visitante conversion   Jose Ignacio Arca
+    min 74 (2T 34) visitante try          Bruno Barrionuevo
+    min 75 (2T 35) visitante try          Jeremías Bustamante
+  marcador  · eventos 27-38 · guardado 27-38
+  tries     · 3-6 (guardado —-—)
+  arbitro   · Martin Leiva (guardado: —)
+  guardado  · 23 local · 24 visitante · 24 eventos
+
+Club La Tablada M16 "B" vs Club Palermo Bajo M16 "B" · torneo-cordobes-m16-b · tarjeta 324092  ·  8eed212c-7a16-4e45-ac18-22ac13344295
+  local     · Club La Tablada M16 "B" · 24 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo M16 "B" · 24 jugadores · 0 con ficha fijada
+  eventos   · 29
+    min  2 (1T 2) local     conversion   Bartolome Beslich De La Cuesta
+    min  2 (1T 2) local     try          Salvador Cornú
+    min 12 (1T 12) visitante try          Darian González Colazo
+    min 15 (1T 15) local     try          Francesco Della Giustina
+    min 15 (1T 15) local     conversion   Bartolome Beslich De La Cuesta
+    min 15 (1T 15) local     try          Michele Gerardo Viotti
+    min 15 (1T 15) local     conversion   Bartolome Beslich De La Cuesta
+    min 20 (1T 20) local     card_yellow  Michele Gerardo Viotti
+    min 22 (1T 22) visitante try          Valentino Posada Lugones
+    min 23 (1T 23) visitante conversion   Joaquin Masoni
+    min 28 (1T 28) local     try          Ignacio Franceschini
+    min 35 (1T 35) local     conversion   Bartolome Beslich De La Cuesta
+    min 35 (1T 35) local     try          Pedro Becerra Pautasso
+    min 40 (2T 0) local     substitution Benjamin Bobadilla
+    min 40 (2T 0) local     substitution Ignacio Franceschini
+    min 40 (2T 0) local     substitution Guillermo Jose Testoni
+    min 40 (2T 0) local     substitution Pedro Becerra Pautasso
+    min 45 (2T 5) local     substitution Santiago Rolleri Piccinni
+    min 55 (2T 15) local     try          Bartolome Beslich De La Cuesta
+    min 55 (2T 15) local     conversion   Bartolome Beslich De La Cuesta
+    min 60 (2T 20) visitante substitution Thiago Garcia
+    min 65 (2T 25) visitante try          Luciano Joaquin Suarez Villan
+    min 65 (2T 25) visitante substitution Valentino Posada Lugones
+    min 66 (2T 26) visitante conversion   Joaquin Masoni
+    min 68 (2T 28) local     try          Salvador Cornú
+    min 70 (2T 30) visitante substitution Lucas Ezequiel Ferrero Ramirez
+    min 70 (2T 30) visitante substitution Francisco Alejandro Seculin
+    min 70 (2T 30) visitante substitution Tomás Salvador Iturbe Brouwer De Koning
+    min 73 (2T 33) local     try          Michele Gerardo Viotti
+  marcador  · eventos 50-19 · guardado 50-19
+  tries     · 8-3 (guardado —-—)
+  arbitro   · Florencia Ledesma (guardado: —)
+  guardado  · 24 local · 24 visitante · 29 eventos
+
+Jockey Club Córdoba M16 "B" vs Club Universitario de Córdoba M16 "B" · torneo-cordobes-m16-b · tarjeta 324093  ·  aec35e07-6cf4-4edf-a0c4-9522ebbcd9d0
+  local     · Jockey Club Córdoba M16 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba M16 "B" · 30 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min  0 (1T 0) visitante substitution Valentino Luca Grillo
+    min  5 (1T 5) local     try          Tomas Matias Palacios
+    min  5 (1T 5) local     conversion   Tomas Agustín Aguirre Martin
+    min 10 (1T 10) local     try          Tomas Agustín Aguirre Martin
+    min 10 (1T 10) local     conversion   Tomas Agustín Aguirre Martin
+    min 13 (1T 13) local     try          Mateo Basile
+    min 13 (1T 13) local     conversion   Tomas Agustín Aguirre Martin
+    min 19 (1T 19) local     conversion   Tomas Agustín Aguirre Martin
+    min 19 (1T 19) local     try          Agustin Siebenhaar
+    min 25 (1T 25) visitante try          Ignacio Hugo Bauer Carrizo
+    min 27 (1T 27) local     try          Tomas Agustín Aguirre Martin
+    min 27 (1T 27) local     conversion   Tomas Agustín Aguirre Martin
+    min 32 (1T 32) visitante try          Lautaro Benjamín Moyano
+    min 33 (1T 33) local     try          Francisco León Menne Barrionuevo
+    min 33 (1T 33) local     conversion   Tomas Agustín Aguirre Martin
+    min 35 (1T 35) local     try          Federico Robledo Saracho
+    min 40 (2T 0) visitante substitution Agustín Ragaglia
+    min 40 (2T 0) visitante substitution Federico Oscar Wiggenhauser
+    min 40 (2T 0) visitante substitution Piero Mario Ceppolino
+    min 43 (2T 3) local     try          Mateo Basile
+    min 47 (2T 7) local     try          Genaro Levit
+    min 47 (2T 7) local     conversion   Tomas Agustín Aguirre Martin
+    min 65 (2T 25) local     try          Mateo Basile
+    min 76 (2T 36) local     try          Valentino Plaate
+  marcador  · eventos 69-10 · guardado 69-10
+  tries     · 11-2 (guardado —-—)
+  arbitro   · Francisco Pecchio (guardado: —)
+  guardado  · 23 local · 30 visitante · 24 eventos
+
+Alta Gracia R.C. M16 "B" vs Tala Rugby Club M16 "B" · torneo-cordobes-m16-b · tarjeta 324096  ·  8ca34388-e2f7-4c18-b38e-f31ecd8dc057
+  local     · Alta Gracia R.C. M16 "B" · 21 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M16 "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min 10 (1T 10) local     substitution Noe Gabriel Oviedo Carmona
+    min 10 (1T 10) visitante conversion   Manuel Sugasti
+    min 10 (1T 10) visitante try          Gregorio Muller Villalba
+    min 12 (1T 12) local     try          Benjamin Martellotto
+    min 25 (1T 25) visitante conversion   Manuel Sugasti
+    min 25 (1T 25) visitante try          Mateo Nicolas Gomez
+    min 28 (1T 28) visitante try          Ciro Sacavino
+    min 31 (1T 31) local     try          Benjamin Martellotto
+    min 32 (1T 32) local     conversion   Gaston Prandini
+    min 34 (1T 34) visitante try          Ciro Sacavino
+    min 34 (1T 34) visitante conversion   Manuel Sugasti
+    min 41 (2T 1) visitante substitution Escribano Cristobal
+    min 41 (2T 1) visitante substitution Juan Ignacio Pedrosa
+    min 41 (2T 1) visitante substitution Tomas Lecco
+    min 50 (2T 10) local     substitution Felipe José Arana
+    min 52 (2T 12) visitante substitution Benicio Dentesano
+    min 55 (2T 15) visitante substitution Juan Cruz Rizo Losada
+    min 57 (2T 17) visitante substitution Mateo Nicolas Gomez
+    min 58 (2T 18) local     try          Benjamin Martellotto
+    min 59 (2T 19) local     conversion   Gaston Prandini
+    min 66 (2T 26) local     try          Lucas Benjamín Villavicencio
+    min 67 (2T 27) local     conversion   Gaston Prandini
+    min 70 (2T 30) visitante conversion   Manuel Sugasti
+    min 70 (2T 30) visitante try          Lucas Alderete
+  marcador  · eventos 26-33 · guardado 26-33
+  tries     · 4-5 (guardado —-—)
+  arbitro   · Javier Antonio Gutierrez (guardado: —)
+  guardado  · 21 local · 23 visitante · 24 eventos
+
+Tala Rugby Club M16 "C" vs Baguales R.C. M16 "B" · torneo-cordobes-m16-b · tarjeta 324097  ·  af5ba759-3261-4870-8e65-990e27010cfe
+  local     · Tala Rugby Club M16 "C" · 23 jugadores · 0 con ficha fijada
+  visitante · Baguales R.C. M16 "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min  7 (1T 7) local     conversion   Tomas Fornoni
+    min  7 (1T 7) local     try          Tomas Fornoni
+    min 10 (1T 10) visitante try          Mateo Saires
+    min 19 (1T 19) local     try          Juan Ignacio Amuchastegui
+    min 19 (1T 19) local     conversion   Tomas Fornoni
+    min 25 (1T 25) local     try          Tomas Gramajo Minero
+    min 30 (1T 30) local     try          Tomas Fornoni
+    min 32 (1T 32) local     try          Tomas Fornoni
+    min 32 (1T 32) local     conversion   Tomas Fornoni
+    min 35 (1T 35) local     substitution Juan Manuel Peralta
+    min 35 (1T 35) local     conversion   Tomas Fornoni
+    min 35 (1T 35) local     try          Tomas Fornoni
+    min 40 (2T 0) visitante substitution Francisco Cejas
+    min 40 (2T 0) visitante substitution Mauro Exequiel Espindola
+    min 40 (2T 0) visitante substitution Thiago Presidente
+    min 50 (2T 10) visitante try          Renzo Luis Casale
+    min 50 (2T 10) visitante conversion   Renzo Luis Casale
+    min 55 (2T 15) local     substitution Lucca Santino Dainotto
+    min 55 (2T 15) local     substitution Benicio Palacio
+    min 55 (2T 15) local     substitution Tomas Gramajo Minero
+    min 55 (2T 15) local     substitution Benicio Muratore Rao
+    min 55 (2T 15) local     substitution Benjamin Bruno
+  marcador  · eventos 38-12 · guardado 38-12
+  tries     · 6-2 (guardado —-—)
+  arbitro   · Sebastián Vanella Godino (guardado: —)
+  guardado  · 23 local · 23 visitante · 22 eventos
+
+San Francisco R.C. M16 "B" vs Los Cuervos R.C. M16 "B" · torneo-cordobes-m16-b · tarjeta 324098  ·  5f3eae9f-3d3e-44fc-9e60-c5d42aec5d4f
+  local     · San Francisco R.C. M16 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Los Cuervos R.C. M16 "B" · 22 jugadores · 0 con ficha fijada
+  eventos   · 34
+    min  9 (1T 9) local     try          Lautaro Jorge Vicentin
+    min 12 (1T 12) local     try          Bruno Barrionuevo
+    min 12 (1T 12) local     conversion   Alejo Cejas
+    min 17 (1T 17) local     try          Martin Leandro Luciano
+    min 18 (1T 18) local     try          Bruno Barrionuevo
+    min 18 (1T 18) local     conversion   Alejo Cejas
+    min 24 (1T 24) local     try          Juan Ignacio Bustamante Fiore
+    min 24 (1T 24) local     conversion   Alejo Cejas
+    min 29 (1T 29) local     try          Bruno Barrionuevo
+    min 29 (1T 29) local     conversion   Alejo Cejas
+    min 31 (1T 31) local     card_yellow  Bruno Barrionuevo
+    min 35 (1T 35) local     conversion   Alejo Cejas
+    min 35 (1T 35) local     try          Santino Daniel Monesterolo Dezzi
+    min 42 (2T 2) local     try          Geronimo Andreo Actis
+    min 42 (2T 2) local     substitution Martin Leandro Luciano
+    min 42 (2T 2) local     substitution Santiago Cavagliato
+    min 42 (2T 2) local     conversion   Alejo Cejas
+    min 47 (2T 7) local     try          Tomas Leonardo Olocco
+    min 47 (2T 7) local     conversion   Alejo Cejas
+    min 50 (2T 10) local     try          Bruno Barrionuevo
+    min 50 (2T 10) local     conversion   Alejo Cejas
+    min 52 (2T 12) local     try          Alejo Cejas
+    min 52 (2T 12) local     try          Jeremías Bustamante
+    min 52 (2T 12) local     conversion   Alejo Cejas
+    min 59 (2T 19) local     try          Bruno Barrionuevo
+    min 59 (2T 19) local     conversion   Alejo Cejas
+    min 60 (2T 20) local     conversion   Alejo Cejas
+    min 60 (2T 20) local     try          Benjamín Berazategui
+    min 62 (2T 22) local     conversion   Alejo Cejas
+    min 62 (2T 22) local     try          Geronimo Andreo Actis
+    min 64 (2T 24) local     conversion   Alejo Cejas
+    min 64 (2T 24) local     try          Leonardo Martín Guglielmone
+    min 65 (2T 25) local     conversion   Alejo Cejas
+    min 65 (2T 25) local     try          Bautista Andres Boscarol
+  marcador  · eventos 113-0 · guardado 113-0
+  tries     · 17-0 (guardado —-—)
+  arbitro   · Sergio Maldonado (guardado: —)
+  guardado  · 23 local · 22 visitante · 34 eventos
+
+Jockey Club Córdoba M16 "B" vs Tala Rugby Club M16 "C" · torneo-cordobes-m16-b · tarjeta 324524  ·  46a94f2a-9512-4107-8ae4-037a46bd6d94
+  local     · Jockey Club Córdoba M16 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M16 "C" · 24 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min  2 (1T 2) local     try          Jeronimo Dalmases
+    min 15 (1T 15) visitante try          Santino Giannico
+    min 15 (1T 15) visitante conversion   Ciro Sacavino
+    min 20 (1T 20) local     try          Jeronimo Dalmases
+    min 30 (1T 30) visitante try          Tomás Alfredo Becher
+    min 32 (1T 32) local     card_yellow  Martin Clerico
+    min 35 (1T 35) visitante try          Tomás Alfredo Becher
+    min 41 (2T 1) visitante substitution Santino Giannico
+    min 41 (2T 1) visitante substitution Santiago Funes Racagni
+    min 41 (2T 1) visitante substitution Lorenzo Villada
+    min 43 (2T 3) local     try          Valentino Plaate
+    min 52 (2T 12) visitante try          Escribano Cristobal
+    min 55 (2T 15) visitante substitution Tomás Alfredo Becher
+    min 63 (2T 23) local     try          Tomas Agustín Aguirre Martin
+    min 63 (2T 23) local     conversion   Bautista Martinez Turrado
+    min 64 (2T 24) visitante substitution Ciro Sacavino
+    min 72 (2T 32) local     try          Agustin Siebenhaar
+    min 72 (2T 32) local     conversion   Bautista Martinez Turrado
+  marcador  · eventos 29-22 · guardado 29-22
+  tries     · 5-4 (guardado —-—)
+  arbitro   · Francisco Romero Brondino (guardado: —)
+  guardado  · 23 local · 24 visitante · 18 eventos
+
+Los Cuervos R.C. M16 "B" vs Club Palermo Bajo M16 "B" · torneo-cordobes-m16-b · tarjeta 324526  ·  91dfa0ad-435d-4750-9e6e-e13cf423cd24
+  local     · Los Cuervos R.C. M16 "B" · 22 jugadores · 0 con ficha fijada
+  visitante · Club Palermo Bajo M16 "B" · 19 jugadores · 0 con ficha fijada
+  eventos   · 19
+    min  3 (1T 3) visitante try          Thiago Garcia
+    min  4 (1T 4) visitante conversion   Darian González Colazo
+    min 15 (1T 15) local     substitution Gaston Ismael Pérez Pepicelli
+    min 15 (1T 15) local     card_yellow  Juan Ignacio Sanchez
+    min 15 (1T 15) visitante card_yellow  Rocco Juarez Garcia
+    min 27 (1T 27) visitante try          Luciano Joaquin Suarez Villan
+    min 28 (1T 28) local     substitution Ciro Javier Trincado
+    min 28 (1T 28) visitante conversion   Darian González Colazo
+    min 40 (2T 0) visitante substitution Mateo Agustin Bilbao
+    min 40 (2T 0) visitante substitution Enzo Fassetta Arguello
+    min 44 (2T 4) visitante try          Ramiro Genaro Ramos
+    min 50 (2T 10) local     card_yellow  Elian Benjamin Agasal Arrieta
+    min 55 (2T 15) visitante try          Rocco Juarez Garcia
+    min 60 (2T 20) visitante try          Luciano Joaquin Suarez Villan
+    min 61 (2T 21) visitante conversion   Darian González Colazo
+    min 63 (2T 23) local     substitution Mateo Nicolás Venier
+    min 65 (2T 25) visitante substitution Juan Cruz Rubio
+    min 68 (2T 28) visitante try          Rocco Juarez Garcia
+    min 69 (2T 29) visitante conversion   Darian González Colazo
+  marcador  · eventos 0-38 · guardado 0-38
+  tries     · 0-6 (guardado —-—)
+  arbitro   · Pablo Daniel Dionicio Benitez (guardado: —)
+  guardado  · 22 local · 19 visitante · 19 eventos
+
+Tala Rugby Club M16 "B" vs Club La Tablada M16 "C" · torneo-cordobes-m16-b · tarjeta 324528  ·  ffc53b46-3cda-4228-a595-8d83b7898823
+  local     · Tala Rugby Club M16 "B" · 30 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M16 "C" · 22 jugadores · 0 con ficha fijada
+  eventos   · 15
+    min  3 (1T 3) visitante try          Gonzalo Villagra
+    min  5 (1T 5) local     try          Juan Ignacio Pedrosa
+    min  8 (1T 8) local     try          Pedro Moyano Correa
+    min 20 (1T 20) visitante try          Giuliano Vecini
+    min 30 (1T 30) local     substitution Facundo Ezequiel Virgolini
+    min 30 (1T 30) local     substitution Jaime Riera
+    min 30 (1T 30) local     substitution Bautista López Borsalino
+    min 46 (2T 6) visitante try          Pedro La Rocca
+    min 50 (2T 10) visitante try          Tomas Ravenna Monforte
+    min 50 (2T 10) local     try          Thomas Arrigo
+    min 55 (2T 15) local     substitution Gregorio Moyano Del Re
+    min 55 (2T 15) local     substitution Benicio Muratore Rao
+    min 55 (2T 15) local     substitution Tristan Revol
+    min 59 (2T 19) local     try          Ignacio Bono Romero
+    min 70 (2T 30) local     try          Benjamin Arguello Ferreira
+  marcador  · eventos 25-20 · guardado 25-20
+  tries     · 5-4 (guardado —-—)
+  arbitro   · Nazarena Yael Gigena Ramallo (guardado: —)
+  guardado  · 30 local · 22 visitante · 15 eventos
+
+Tala Rugby Club M16 "C" vs Club Universitario de Córdoba M16 "B" · torneo-cordobes-m16-b · tarjeta 325124  ·  51b9bb21-d2e2-496e-ba8b-85d663cda6b8
+  local     · Tala Rugby Club M16 "C" · 29 jugadores · 0 con ficha fijada
+  visitante · Club Universitario de Córdoba M16 "B" · 30 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min  5 (1T 5) visitante try          Valentino Luca Grillo
+    min  5 (1T 5) visitante conversion   Ignacio Tirao Pacharoni
+    min 15 (1T 15) visitante card_yellow  Agustín Ragaglia
+    min 21 (1T 21) visitante try          Benjamín Uriel Chávez
+    min 21 (1T 21) visitante conversion   Ignacio Tirao Pacharoni
+    min 25 (1T 25) local     card_yellow  Jaime Riera
+    min 41 (2T 1) local     substitution Bautista López Borsalino
+    min 41 (2T 1) local     substitution Benjamin Juarez Lopez Seco
+    min 41 (2T 1) local     substitution Lautaro Cantet
+    min 41 (2T 1) local     substitution Juan Ignacio Amuchastegui
+    min 46 (2T 6) visitante substitution Maximo Cayo Guzman Ponzano
+    min 51 (2T 11) visitante try          Felipe Serran Croce
+    min 51 (2T 11) visitante conversion   Ignacio Tirao Pacharoni
+    min 55 (2T 15) local     try          Pedro Moyano Correa
+    min 55 (2T 15) local     conversion   Tomas Fornoni
+    min 65 (2T 25) visitante try          Valentino Luca Grillo
+    min 70 (2T 30) local     try          Benicio Palacio
+    min 70 (2T 30) local     conversion   Tomas Fornoni
+  marcador  · eventos 14-26 · guardado 14-26
+  tries     · 2-4 (guardado —-—)
+  arbitro   · Leandro Marcos Lubary (guardado: —)
+  guardado  · 29 local · 30 visitante · 18 eventos
+
+San Francisco R.C. M16 "B" vs Tala Rugby Club M16 "B" · torneo-cordobes-m16-b · tarjeta 325158  ·  9f33d7ae-dec2-46c6-9a2e-8a56a92145f9
+  local     · San Francisco R.C. M16 "B" · 24 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M16 "B" · 24 jugadores · 0 con ficha fijada
+  eventos   · 29
+    min  5 (1T 5) local     try          Bruno Barrionuevo
+    min 13 (1T 13) visitante try          Lautaro Gronda
+    min 14 (1T 14) visitante conversion   Manuel Sugasti
+    min 25 (1T 25) local     substitution Maximo Giampieri Vignolo
+    min 31 (1T 31) local     try          Bruno Barrionuevo
+    min 31 (1T 31) local     conversion   Jose Ignacio Arca
+    min 35 (1T 35) visitante try          Tomás Alfredo Becher
+    min 36 (1T 36) visitante conversion   Manuel Sugasti
+    min 40 (2T 0) visitante substitution Juan Cruz Rizo Losada
+    min 40 (2T 0) visitante substitution Joaquin Spina
+    min 40 (2T 0) visitante substitution Santiago Funes Racagni
+    min 40 (2T 0) visitante substitution Tomas Lecco
+    min 40 (2T 0) visitante substitution Pedro Martinez Casas
+    min 40 (2T 0) visitante substitution Tomás Alfredo Becher
+    min 40 (2T 0) visitante substitution Lautaro Gronda
+    min 41 (2T 1) local     substitution Urbano Boero
+    min 41 (2T 1) local     substitution Joaquín Nahuel Vairolatti
+    min 41 (2T 1) local     substitution Leonardo Martín Guglielmone
+    min 43 (2T 3) local     substitution Juan Ignacio Bustamante Fiore
+    min 45 (2T 5) local     substitution Santiago Cavagliato
+    min 48 (2T 8) visitante try          Lautaro Gronda
+    min 48 (2T 8) visitante conversion   Manuel Sugasti
+    min 51 (2T 11) local     substitution Benjamín Berazategui
+    min 52 (2T 12) visitante penalty_goal Manuel Sugasti
+    min 60 (2T 20) local     try          Jeremías Bustamante
+    min 60 (2T 20) local     conversion   Jose Ignacio Arca
+    min 65 (2T 25) local     substitution Santino Daniel Monesterolo Dezzi
+    min 66 (2T 26) local     conversion   Jose Ignacio Arca
+    min 66 (2T 26) local     try          Jeremías Bustamante
+  marcador  · eventos 26-24 · guardado 26-24
+  tries     · 4-3 (guardado —-—)
+  arbitro   · Javier Sorbera Ferrer (guardado: —)
+  guardado  · 24 local · 24 visitante · 29 eventos
+
+Córdoba Athletic Club M16 "B" vs Alta Gracia R.C. M16 "B" · torneo-cordobes-m16-b · tarjeta 325593  ·  291e694c-69b4-416f-b736-e25b7ae55098
+  local     · Córdoba Athletic Club M16 "B" · 22 jugadores · 0 con ficha fijada
+  visitante · Alta Gracia R.C. M16 "B" · 21 jugadores · 0 con ficha fijada
+  eventos   · 29
+    min  8 (1T 8) local     try          Caetano Bella Adamo
+    min 16 (1T 16) visitante try          Francisco Contrera
+    min 16 (1T 16) local     conversion   Mateo Tomaselli
+    min 16 (1T 16) local     try          Fausto Acosta Fernandez
+    min 17 (1T 17) visitante conversion   Gaston Prandini
+    min 21 (1T 21) local     conversion   Mateo Tomaselli
+    min 21 (1T 21) local     try          Bautista Guzman Rodriguez
+    min 22 (1T 22) visitante try          Maximo Nakasone Uema
+    min 23 (1T 23) visitante conversion   Gaston Prandini
+    min 33 (1T 33) local     substitution Nicolas Valentino Burgos Suarez
+    min 47 (2T 7) local     conversion   Mateo Tomaselli
+    min 47 (2T 7) local     try          Máximo Tomas Quevedo
+    min 48 (2T 8) local     substitution Facundo Zapata
+    min 48 (2T 8) local     substitution Luca Bautista De La Iglesia
+    min 50 (2T 10) visitante try          Francisco Contrera
+    min 51 (2T 11) visitante conversion   Gaston Prandini
+    min 51 (2T 11) local     conversion   Mateo Tomaselli
+    min 51 (2T 11) local     try          Mateo Tomaselli
+    min 51 (2T 11) local     substitution Elian Tomas Figueroa
+    min 60 (2T 20) visitante try          Francisco Contrera
+    min 60 (2T 20) local     try          Mateo Tomaselli
+    min 61 (2T 21) visitante conversion   Gaston Prandini
+    min 63 (2T 23) local     substitution Bautista Guzman Rodriguez
+    min 65 (2T 25) local     substitution Máximo Tomas Quevedo
+    min 65 (2T 25) local     substitution Tiziano Gael Tapia Santalucia
+    min 68 (2T 28) local     try          Tomas Cardona Allende
+    min 68 (2T 28) local     conversion   Mateo Tomaselli
+    min 69 (2T 29) visitante try          Leandro Sebastian Carabajal Sanchez
+    min 70 (2T 30) visitante conversion   Gaston Prandini
+  marcador  · eventos 45-35 · guardado 45-35
+  tries     · 7-5 (guardado —-—)
+  arbitro   · Federico Pregot (guardado: —)
+  guardado  · 22 local · 21 visitante · 29 eventos
+
+San Francisco R.C. M16 "B" vs Club La Tablada M16 "B" · torneo-cordobes-m16-b · tarjeta 325605  ·  70f79c2a-e836-4919-bdf9-ca12edbac595
+  local     · San Francisco R.C. M16 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M16 "B" · 22 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min  4 (1T 4) local     penalty_goal Jose Ignacio Arca
+    min 17 (1T 17) visitante conversion   Bartolome Beslich De La Cuesta
+    min 17 (1T 17) visitante try          Franco Barros Facchin
+    min 25 (1T 25) local     try          Lautaro Jorge Vicentin
+    min 25 (1T 25) local     conversion   Jose Ignacio Arca
+    min 29 (1T 29) local     try          Bruno Barrionuevo
+    min 29 (1T 29) local     conversion   Jose Ignacio Arca
+    min 32 (1T 32) local     try          Jose Ignacio Arca
+    min 32 (1T 32) local     conversion   Jose Ignacio Arca
+    min 40 (2T 0) visitante substitution Tomás Segovia
+    min 40 (2T 0) visitante substitution Lorenzo Cima Michelli
+    min 40 (2T 0) visitante substitution Salvador Cornú
+    min 40 (2T 0) visitante substitution Simon Cabello Molina
+    min 40 (2T 0) visitante substitution Carlos Maria Romero Victorica
+    min 40 (2T 0) visitante substitution Bartolome Beslich De La Cuesta
+    min 40 (2T 0) visitante substitution Tomas Campos Castro
+    min 41 (2T 1) local     substitution Urbano Boero
+    min 41 (2T 1) local     substitution Maximo Giampieri Vignolo
+    min 41 (2T 1) local     substitution Leonardo Martín Guglielmone
+    min 41 (2T 1) local     substitution Santiago Cavagliato
+    min 52 (2T 12) local     substitution Benjamín Berazategui
+    min 55 (2T 15) local     substitution Santino Terraf Vaudagna
+    min 66 (2T 26) local     try          Joaquín Nahuel Vairolatti
+    min 70 (2T 30) visitante conversion   Bartolome Beslich De La Cuesta
+    min 70 (2T 30) visitante try          Bartolome Beslich De La Cuesta
+  marcador  · eventos 29-14 · guardado 29-14
+  tries     · 4-2 (guardado —-—)
+  arbitro   · Francisco Romero Brondino (guardado: —)
+  guardado  · 23 local · 22 visitante · 25 eventos
+
+Tala Rugby Club M16 "C" vs Jockey Club Córdoba M16 "B" · torneo-cordobes-m16-b · tarjeta 325606  ·  044220ec-35ee-4f96-a622-f0fa4aa77fe2
+  local     · Tala Rugby Club M16 "C" · 30 jugadores · 0 con ficha fijada
+  visitante · Jockey Club Córdoba M16 "B" · 30 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min  1 (1T 1) visitante substitution Genaro Levit
+    min  2 (1T 2) visitante try          Benjamin Zunino
+    min  5 (1T 5) visitante conversion   Bautista Martinez Turrado
+    min  5 (1T 5) visitante try          Bautista Martinez Turrado
+    min  6 (1T 6) visitante try          Ciro Lugarisaristi
+    min  9 (1T 9) visitante try          Ciro Lugarisaristi
+    min  9 (1T 9) visitante conversion   Tomas Agustín Aguirre Martin
+    min 15 (1T 15) local     try          Joaquin Ignacio Castellano Aimale
+    min 15 (1T 15) local     conversion   Juan Cruz Lanza Castelli
+    min 16 (1T 16) visitante try          Octavio Enrique Borrini
+    min 16 (1T 16) visitante conversion   Tomas Agustín Aguirre Martin
+    min 21 (1T 21) visitante try          Francisco León Menne Barrionuevo
+    min 21 (1T 21) visitante conversion   Tomas Agustín Aguirre Martin
+    min 27 (1T 27) visitante conversion   Tomas Agustín Aguirre Martin
+    min 27 (1T 27) visitante try          Tomas Matias Palacios
+    min 29 (1T 29) visitante try          Julian Carrara Gomila
+    min 29 (1T 29) visitante try          Alfonso Heredia Carrara
+    min 29 (1T 29) visitante conversion   Bautista Martinez Turrado
+  marcador  · eventos 7-57 · guardado 7-57
+  tries     · 1-9 (guardado —-—)
+  arbitro   · Lucas Gaston Dopaso (guardado: —)
+  guardado  · 30 local · 30 visitante · 18 eventos
+
+Club La Tablada M16 "C" vs Aero Club Río IV M16 "B" · torneo-cordobes-m16-b · tarjeta 325609  ·  88ed3150-5bb9-4e9c-8c15-66d022aeed05
+  local     · Club La Tablada M16 "C" · 19 jugadores · 0 con ficha fijada
+  visitante · Aero Club Río IV M16 "B" · 17 jugadores · 0 con ficha fijada
+  eventos   · 16
+    min  3 (1T 3) local     try          Felipe Del Valle Cabanillas
+    min 20 (1T 20) local     try          Fidel Urtubey
+    min 25 (1T 25) local     try          Felipe Del Valle Cabanillas
+    min 25 (1T 25) local     conversion   Fidel Urtubey
+    min 31 (1T 31) visitante try          Valentin Hector Moreno
+    min 34 (1T 34) local     try          Felipe Del Valle Cabanillas
+    min 34 (1T 34) local     conversion   Fidel Urtubey
+    min 50 (2T 10) local     substitution Salvador Martinez Geandrevin
+    min 58 (2T 18) local     card_yellow  Felipe Del Valle Cabanillas
+    min 67 (2T 27) visitante try          Valentin Hector Moreno
+    min 67 (2T 27) visitante conversion   Facundo Isaias Gautier
+    min 70 (2T 30) local     substitution Simon Molina
+    min 70 (2T 30) local     substitution Felipe Del Valle Cabanillas
+    min 74 (2T 34) local     card_yellow  Genaro Jose Manzano Aramayo
+    min 75 (2T 35) visitante try          Cristhian Camilo Serna Mendoza
+    min 75 (2T 35) visitante conversion   Facundo Isaias Gautier
+  marcador  · eventos 24-19 · guardado 24-19
+  tries     · 4-3 (guardado —-—)
+  arbitro   · Francisco Pecchio (guardado: —)
+  guardado  · 19 local · 17 visitante · 16 eventos
+
+Tala Rugby Club M16 "C" vs Tala Rugby Club M16 "B" · torneo-cordobes-m16-b · tarjeta 326111  ·  4694efdb-9dab-46e8-afe4-8eb6d9529db1
+  local     · Tala Rugby Club M16 "C" · 30 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M16 "B" · 28 jugadores · 0 con ficha fijada
+  eventos   · 12
+    min  5 (1T 5) local     try          Escribano Cristobal
+    min 10 (1T 10) visitante try          Joaquin Spina
+    min 10 (1T 10) local     try          Bautista López Borsalino
+    min 10 (1T 10) visitante conversion   Lorenzo Villada
+    min 18 (1T 18) local     try          Tomas Martin
+    min 24 (1T 24) visitante try          Gregorio Muller Villalba
+    min 24 (1T 24) visitante conversion   Lorenzo Villada
+    min 51 (2T 11) visitante try          Antonio Scandroglio Nores
+    min 62 (2T 22) local     try          Lautaro Cantet
+    min 62 (2T 22) local     conversion   Benjamin Bruno
+    min 62 (2T 22) visitante try          Lucas Badra Uez
+    min 62 (2T 22) visitante conversion   Lorenzo Villada
+  marcador  · eventos 22-26 · guardado 22-26
+  tries     · 4-4 (guardado —-—)
+  arbitro   · Francisco Pecchio (guardado: —)
+  guardado  · 30 local · 28 visitante · 12 eventos
+
+Club La Tablada M16 "B" vs Club La Tablada M16 "C" · torneo-cordobes-m16-b · tarjeta 326113  ·  ab4e22eb-ada6-4f5c-8f29-26ee9f1d6118
+  local     · Club La Tablada M16 "B" · 20 jugadores · 0 con ficha fijada
+  visitante · Club La Tablada M16 "C" · 21 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min  2 (1T 2) local     try          Lautaro Troche Nescier
+    min  2 (1T 2) local     conversion   Baldomero Andres Gonzalez Viale
+    min  8 (1T 8) local     conversion   Baldomero Andres Gonzalez Viale
+    min  8 (1T 8) local     try          Franco Barros Facchin
+    min 19 (1T 19) local     try          Tomás Segovia
+    min 21 (1T 21) local     conversion   Baldomero Andres Gonzalez Viale
+    min 21 (1T 21) local     try          Lautaro Troche Nescier
+    min 26 (1T 26) visitante try          Alejo Muñoz Orellana
+    min 26 (1T 26) visitante conversion   Fidel Urtubey
+    min 30 (1T 30) local     conversion   Baldomero Andres Gonzalez Viale
+    min 30 (1T 30) local     try          Francisco Ahumada Noya
+    min 40 (2T 0) visitante substitution Ignacio Walter Quiroga Alonso
+    min 40 (2T 0) visitante substitution Bautista Romero Díaz
+    min 40 (2T 0) visitante substitution Genaro Jose Manzano Aramayo
+    min 40 (2T 0) visitante substitution Alejo Muñoz Orellana
+    min 40 (2T 0) visitante substitution Francisco Mansilla
+    min 40 (2T 0) visitante substitution Fidel Urtubey
+    min 40 (2T 0) local     substitution Bartolome Beslich De La Cuesta
+    min 50 (2T 10) local     substitution Geronimo Suarez Zampino
+    min 50 (2T 10) local     try          Tomas Ravenna Monforte
+    min 50 (2T 10) local     substitution Carlos Maria Romero Victorica
+    min 60 (2T 20) local     substitution Michele Gerardo Viotti
+    min 60 (2T 20) local     try          Lorenzo Cima Michelli
+    min 65 (2T 25) local     substitution Gerónimo Merino Astrada
+    min 70 (2T 30) visitante try          Fidel Urtubey
+    min 70 (2T 30) visitante conversion   Fidel Urtubey
+    min 70 (2T 30) local     try          Geronimo Suarez Zampino
+  marcador  · eventos 48-14 · guardado 48-14
+  tries     · 8-2 (guardado —-—)
+  arbitro   · Pablo Daniel Dionicio Benitez (guardado: —)
+  guardado  · 20 local · 21 visitante · 27 eventos
+
+Club Palermo Bajo M16 "B" vs Baguales R.C. M16 "B" · torneo-cordobes-m16-b · tarjeta 326166  ·  c02e8209-8c9c-400e-b9b6-2319fed6ddab
+  local     · Club Palermo Bajo M16 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · Baguales R.C. M16 "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min  7 (1T 7) local     try          Luciano Joaquin Suarez Villan
+    min 10 (1T 10) local     card_yellow  Luciano Joaquin Suarez Villan
+    min 17 (1T 17) visitante try          Mateo Machado
+    min 21 (1T 21) local     conversion   Tomás Salvador Iturbe Brouwer De Koning
+    min 21 (1T 21) local     try          Luciano Joaquin Suarez Villan
+    min 28 (1T 28) visitante try          Maximo Correa Leal
+    min 28 (1T 28) visitante conversion   Mateo Machado
+    min 30 (1T 30) visitante try          Maximo Correa Leal
+    min 35 (1T 35) local     try          Tomás Salvador Iturbe Brouwer De Koning
+    min 40 (2T 0) visitante substitution Valentin Cabrera
+    min 40 (2T 0) local     substitution Lucas Ezequiel Ferrero Ramirez
+    min 40 (2T 0) visitante substitution Ignacio Lionel Britez
+    min 40 (2T 0) visitante substitution Rodrigo Benjamin Ordoñez Deanna
+    min 40 (2T 0) local     substitution Francisco Alejandro Seculin
+    min 40 (2T 0) local     substitution Rocco Juarez Garcia
+    min 40 (2T 0) local     substitution Lino Feliciani
+    min 40 (2T 0) local     substitution Luciano Joaquin Suarez Villan
+    min 48 (2T 8) local     try          Nicolas Bettera
+    min 49 (2T 9) local     substitution Joaquin Masoni
+    min 49 (2T 9) local     conversion   Tomás Salvador Iturbe Brouwer De Koning
+    min 56 (2T 16) local     try          Tomás Salvador Iturbe Brouwer De Koning
+    min 60 (2T 20) local     substitution Bautista Moyano Muñoz
+    min 60 (2T 20) local     substitution Juan Cruz Rubio
+    min 67 (2T 27) local     try          Nicolas Bettera
+    min 68 (2T 28) local     conversion   Tomás Salvador Iturbe Brouwer De Koning
+  marcador  · eventos 36-17 · guardado 36-17
+  tries     · 6-3 (guardado —-—)
+  arbitro   · Pablo Daniel Dionicio Benitez (guardado: —)
+  guardado  · 23 local · 23 visitante · 25 eventos
+
+Córdoba Athletic Club M16 "B" vs Córdoba Rugby Club M16 "B" · torneo-cordobes-m16-b · tarjeta 326191  ·  df0921a5-ea50-44b6-ae73-5a1d749c410f
+  local     · Córdoba Athletic Club M16 "B" · 20 jugadores · 0 con ficha fijada
+  visitante · Córdoba Rugby Club M16 "B" · 22 jugadores · 0 con ficha fijada
+  eventos   · 28
+    min  1 (1T 1) visitante try          Ian Santiago Nicolás Sturtz
+    min  2 (1T 2) visitante conversion   Santino Emanuel Vanay
+    min 16 (1T 16) visitante try          Ignacio Comba
+    min 16 (1T 16) visitante conversion   Santino Roque Loforte
+    min 20 (1T 20) visitante try          Matias Agustin Damiano Arri
+    min 23 (1T 23) visitante conversion   Santino Roque Loforte
+    min 23 (1T 23) visitante try          Santino Roque Loforte
+    min 29 (1T 29) visitante try          Santino Emanuel Vanay
+    min 35 (1T 35) visitante conversion   Juan Sebastian Incio Di Luca
+    min 35 (1T 35) visitante try          Lautaro Motran Maccio
+    min 41 (2T 1) visitante substitution Julian Francisco Daneri Jenefes
+    min 41 (2T 1) visitante substitution Juan Sebastian Incio Di Luca
+    min 41 (2T 1) visitante substitution Octavio Cesar Ricciardi
+    min 42 (2T 2) local     substitution Agustin Nicolasi Fernandez
+    min 48 (2T 8) visitante try          Ian Santiago Nicolás Sturtz
+    min 48 (2T 8) visitante conversion   Santino Roque Loforte
+    min 52 (2T 12) local     substitution Augusto Aguirre
+    min 54 (2T 14) local     substitution Caetano Bella Adamo
+    min 58 (2T 18) visitante try          Santino Emanuel Vanay
+    min 60 (2T 20) local     substitution Felipe Hak
+    min 61 (2T 21) local     try          Máximo Flumignan
+    min 61 (2T 21) local     conversion   Mateo Tomaselli
+    min 63 (2T 23) visitante try          Santino Emanuel Vanay
+    min 63 (2T 23) visitante conversion   Santino Roque Loforte
+    min 69 (2T 29) visitante try          Lautaro Motran Maccio
+    min 69 (2T 29) visitante conversion   Santino Emanuel Vanay
+    min 74 (2T 34) visitante try          Lautaro Motran Maccio
+    min 74 (2T 34) visitante conversion   Santino Emanuel Vanay
+  marcador  · eventos 7-71 · guardado 7-71
+  tries     · 1-11 (guardado —-—)
+  arbitro   · Pablo Gerardo Ronco (guardado: —)
+  guardado  · 20 local · 22 visitante · 28 eventos
+
+Jockey Club Córdoba M16 "B" vs San Francisco R.C. M16 "B" · torneo-cordobes-m16-b · tarjeta 326193  ·  39e49b4a-fd6a-400c-b392-53f51a9d34ac
+  local     · Jockey Club Córdoba M16 "B" · 23 jugadores · 0 con ficha fijada
+  visitante · San Francisco R.C. M16 "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min  5 (1T 5) visitante conversion   Jose Ignacio Arca
+    min  5 (1T 5) visitante try          Bruno Barrionuevo
+    min 14 (1T 14) visitante try          Jeremías Bustamante
+    min 21 (1T 21) local     try          Jeronimo Dalmases
+    min 27 (1T 27) local     try          Jeronimo Dalmases
+    min 28 (1T 28) local     conversion   Bautista Martinez Turrado
+    min 41 (2T 1) visitante injury       Santiago Cavagliato
+    min 41 (2T 1) visitante substitution Santiago Cavagliato
+    min 41 (2T 1) visitante substitution Maximo Giampieri Vignolo
+    min 41 (2T 1) visitante substitution Urbano Boero
+    min 43 (2T 3) visitante substitution Benjamín Berazategui
+    min 44 (2T 4) local     try          Tomas Castaño
+    min 44 (2T 4) local     conversion   Bautista Martinez Turrado
+    min 44 (2T 4) visitante substitution Joaquín Nahuel Vairolatti
+    min 52 (2T 12) local     try          Francisco Alfredo Caparros
+    min 52 (2T 12) local     conversion   Bautista Martinez Turrado
+    min 53 (2T 13) visitante substitution Santino Terraf Vaudagna
+    min 59 (2T 19) visitante substitution Santino Daniel Monesterolo Dezzi
+    min 66 (2T 26) visitante conversion   Jose Ignacio Arca
+    min 66 (2T 26) visitante try          Jeremías Bustamante
+    min 71 (2T 31) local     penalty_goal Bautista Martinez Turrado
+    min 74 (2T 34) visitante try          Martin Leandro Luciano
+  marcador  · eventos 29-24 · guardado 29-24
+  tries     · 4-4 (guardado —-—)
+  arbitro   · Leandro Marcos Lubary (guardado: —)
+  guardado  · 23 local · 23 visitante · 22 eventos
+
+Aero Club Río IV M16 "B" vs Los Cuervos R.C. M16 "B" · torneo-cordobes-m16-b · tarjeta 326194  ·  1b50837a-2089-48b2-b883-61d61541e37e
+  local     · Aero Club Río IV M16 "B" · 17 jugadores · 0 con ficha fijada
+  visitante · Los Cuervos R.C. M16 "B" · 22 jugadores · 0 con ficha fijada
+  eventos   · 9
+    min 16 (1T 16) local     card_yellow  Benjamin Coria Villafañe
+    min 16 (1T 16) visitante card_yellow  Juan Ignacio Sanchez
+    min 18 (1T 18) local     try          Gabriel Isaias Cappellari
+    min 26 (1T 26) visitante try          Ciro Javier Trincado
+    min 26 (1T 26) visitante conversion   Pedro Marcos
+    min 52 (2T 12) visitante penalty_goal Juan Ignacio Sanchez
+    min 59 (2T 19) visitante try          Pedro Marcos
+    min 69 (2T 29) visitante try          Pedro Marcos
+    min 75 (2T 35) local     card_red     Valentino Felippa Quiroga
+  marcador  · eventos 5-20 · guardado 5-20
+  tries     · 1-3 (guardado —-—)
+  arbitro   · Nicolas Ambroggio (guardado: —)
+  guardado  · 17 local · 22 visitante · 9 eventos
+
+Club Universitario de Córdoba M16 "B" vs San Francisco R.C. M16 "B" · torneo-cordobes-m16-b · tarjeta 326769  ·  eecbe514-d9f3-489a-bd90-94e124d262ed
+  local     · Club Universitario de Córdoba M16 "B" · 26 jugadores · 0 con ficha fijada
+  visitante · San Francisco R.C. M16 "B" · 23 jugadores · 0 con ficha fijada
+  eventos   · 32
+    min  5 (1T 5) local     try          Facundo Chesini
+    min  5 (1T 5) local     conversion   Martin Otero
+    min 10 (1T 10) local     conversion   Martin Otero
+    min 11 (1T 11) visitante injury       Tomas Leonardo Olocco
+    min 11 (1T 11) visitante substitution Tomas Leonardo Olocco
+    min 12 (1T 12) local     try          Juan Cruz Curet Varetto
+    min 12 (1T 12) local     conversion   Martin Otero
+    min 13 (1T 13) visitante conversion   Jose Ignacio Arca
+    min 13 (1T 13) visitante try          Santino Daniel Monesterolo Dezzi
+    min 22 (1T 22) local     try          Ignacio Storero
+    min 22 (1T 22) local     conversion   Benjamín Zurita
+    min 29 (1T 29) visitante substitution Santiago Cavagliato
+    min 30 (1T 30) local     try          Facundo Chesini
+    min 30 (1T 30) visitante substitution Urbano Boero
+    min 35 (1T 35) visitante try          Bruno Barrionuevo
+    min 37 (1T 37) local     try          Valentino Luca Grillo
+    min 37 (1T 37) local     conversion   Martin Otero
+    min 41 (2T 1) visitante substitution Joaquín Nahuel Vairolatti
+    min 42 (2T 2) visitante conversion   Jose Ignacio Arca
+    min 42 (2T 2) visitante try          Jeremías Bustamante
+    min 49 (2T 9) visitante try          Leonardo Martín Guglielmone
+    min 49 (2T 9) visitante conversion   Jose Ignacio Arca
+    min 50 (2T 10) local     try          Valentino Luca Grillo
+    min 50 (2T 10) local     conversion   Benicio Tissera Colliva
+    min 55 (2T 15) visitante substitution Marcos Ezequiel Lopez
+    min 65 (2T 25) local     card_yellow  Agustín Ragaglia
+    min 67 (2T 27) local     try          Bruno Borsani
+    min 67 (2T 27) local     conversion   Bruno Borsani
+    min 70 (2T 30) local     card_yellow  Ignacio Hugo Bauer Carrizo
+    min 73 (2T 33) local     try          Santino Augusto Fisogni
+    min 75 (2T 35) visitante try          Jeremías Bustamante
+    min 75 (2T 35) visitante conversion   Jose Ignacio Arca
+  marcador  · eventos 54-33 · guardado 54-33
+  tries     · 8-5 (guardado —-—)
+  arbitro   · Javier Alberto Flores (guardado: —)
+  guardado  · 26 local · 23 visitante · 32 eventos
+
+Club Palermo Bajo M16 "B" vs Tala Rugby Club M16 "C" · torneo-cordobes-m16-b · tarjeta 326778  ·  76b300e9-4582-4230-a35c-d921d4a978a8
+  local     · Club Palermo Bajo M16 "B" · 28 jugadores · 0 con ficha fijada
+  visitante · Tala Rugby Club M16 "C" · 30 jugadores · 0 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 28-0
+  tries     · 0-0 (guardado —-—)
+  guardado  · 28 local · 30 visitante · 0 eventos
+
+listo · 88 partidos

@@ -1,0 +1,952 @@
+URNE M19 apertura 2026 · tarjetas oficiales
+
+aranduroga-r-c-m19-b vs aranduroga-r-c-m19-a · APERTURA 2026 · tarjeta 309499  ·  8a78f8ac-18af-43f0-99e4-b820ed19a5ad
+  local     · aranduroga-r-c-m19-b · 19 jugadores · 0 con ficha fijada
+  visitante · aranduroga-r-c-m19-a · 19 jugadores · 0 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 0-21
+  tries     · 0-0 (guardado —-—)
+  arbitro   · (NO OFICIAL) (guardado: (NO OFICIAL))
+  guardado  · 19 local · 19 visitante · 0 eventos
+
+sixty-r-c-m19 vs taraguy-r-c-m19-b · APERTURA 2026 · tarjeta 309498  ·  163da9ed-acf2-4cd3-a77e-6e34395c8a56
+  local     · sixty-r-c-m19 · 22 jugadores · 0 con ficha fijada
+  visitante · taraguy-r-c-m19-b · 23 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min  5 (1T 5) visitante try          Facundo Damian Gonzalez
+    min  5 (1T 5) visitante conversion   Juan Cruz Abraham
+    min 22 (1T 22) local     try          Mariano Valentino Giordan
+    min 25 (1T 25) visitante try          Ignacio Romero Ratier
+    min 25 (1T 25) visitante conversion   Juan Cruz Abraham
+    min 29 (1T 29) local     try          Iñaki Ottavis Gutierrez
+    min 31 (1T 31) local     try          Iñaki Ottavis Gutierrez
+    min 33 (1T 33) local     try          Nahuel Aguado
+    min 48 (2T 8) local     substitution Esequiel Hernan Ibarra Romero
+    min 50 (2T 10) local     card_yellow  Agustin Etienne Masdeu Paris
+    min 51 (2T 11) local     substitution Enzo Cimbaro
+    min 54 (2T 14) local     substitution Lautaro Luque
+    min 54 (2T 14) local     conversion   Maximiliano Carrasco
+    min 54 (2T 14) local     try          Mariano Valentino Giordan
+    min 54 (2T 14) local     substitution Lucas Mariano Salas Maidana
+    min 65 (2T 25) visitante substitution Ignacio Romero Ratier
+    min 68 (2T 28) local     try          Joaquin Zapata
+    min 75 (2T 35) visitante substitution Facundo Damian Gonzalez
+    min 80 (2T 40) local     substitution Mateo Sebastian Aguilar
+    min 80 (2T 40) local     substitution Joaquín Vega Gómez
+    min 80 (2T 40) local     substitution Naiel Fernando Vega
+    min 80 (2T 40) visitante substitution Ruben Torres
+    min 80 (2T 40) visitante substitution Federico Ezequiel Domínguez Tedesco
+    min 80 (2T 40) visitante substitution Tiziano Diaz Chia
+    min 80 (2T 40) visitante substitution Dylan Benjamín Gómez Molina
+  marcador  · eventos 32-14 · guardado 32-14
+  tries     · 6-2 (guardado 6-2)
+  arbitro   · VIVIANA GARAT (guardado: VIVIANA GARAT)
+  guardado  · 22 local · 23 visitante · 25 eventos
+
+regatas-de-resistencia-m19 vs taraguy-r-c-m19-a · APERTURA 2026 · tarjeta 309497  ·  7a539e95-cc5c-417d-b1d4-75db6971d777
+  local     · regatas-de-resistencia-m19 · 23 jugadores · 5 con ficha fijada
+  visitante · taraguy-r-c-m19-a · 23 jugadores · 1 con ficha fijada
+  eventos   · 33
+    min  8 (1T 8) local     try          Jeremias Agustín Lucero
+    min  9 (1T 9) local     conversion   Patricio Joaquín Carballo Chilissi
+    min 16 (1T 16) local     try          Diego Lionel Aquino
+    min 16 (1T 16) local     conversion   Patricio Joaquín Carballo Chilissi
+    min 18 (1T 18) visitante try          Jose Ruiz Diaz
+    min 24 (1T 24) visitante try          Felipe Roetti
+    min 24 (1T 24) visitante conversion   Lucas Baltazar Schiavi
+    min 31 (1T 31) visitante try          Benicio Paterlini Roch
+    min 31 (1T 31) visitante conversion   Lucas Baltazar Schiavi
+    min 32 (1T 32) local     card_yellow  Patricio Joaquín Carballo Chilissi
+    min 40 (2T 0) local     substitution Francisco Riese Michalak
+    min 41 (2T 1) visitante try          Santiago Ramón Albornoz
+    min 41 (2T 1) visitante conversion   Lucas Baltazar Schiavi
+    min 45 (2T 5) local     try          Diego Lionel Aquino
+    min 46 (2T 6) local     conversion   Maximiliano Bernad
+    min 46 (2T 6) local     substitution Enzo Ariel Dusset Matwiejuk
+    min 48 (2T 8) visitante try          Gonzalo Fernandez Pellizzari
+    min 48 (2T 8) visitante conversion   Jose Ruiz Diaz
+    min 51 (2T 11) visitante substitution Germán Benjamín Bracco
+    min 56 (2T 16) local     conversion   Maximiliano Bernad
+    min 56 (2T 16) local     try          Renzo Joaquin Gomez
+    min 57 (2T 17) local     substitution Benjamin Chacón Velázquez
+    min 57 (2T 17) visitante substitution Ignacio Innocente
+    min 60 (2T 20) local     try          Santino Aranda
+    min 60 (2T 20) visitante substitution Benicio Paterlini Roch
+    min 60 (2T 20) visitante substitution Gonzalo Fernandez Pellizzari
+    min 65 (2T 25) local     try          Patricio Joaquín Carballo Chilissi
+    min 67 (2T 27) visitante substitution Jose Ruiz Diaz
+    min 70 (2T 30) local     substitution Jeremias Agustín Lucero
+    min 70 (2T 30) local     substitution Patricio Joaquín Carballo Chilissi
+    min 70 (2T 30) local     substitution Santiago Barreto
+    min 70 (2T 30) visitante try          Sebastian Gomez Moreno
+    min 79 (2T 39) local     penalty_goal Maximiliano Bernad
+  marcador  · eventos 41-38 · guardado 41-38
+  tries     · 6-6 (guardado 6-6)
+  arbitro   · RODRIGO SAUCO (guardado: RODRIGO SAUCO)
+  guardado  · 23 local · 23 visitante · 33 eventos
+
+curne-m19 vs san-patricio-m19 · APERTURA 2026 · tarjeta 309496  ·  056c4b3e-04c7-4785-8ca4-6f56ec09d9da
+  local     · curne-m19 · 23 jugadores · 0 con ficha fijada
+  visitante · san-patricio-m19 · 23 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min  5 (1T 5) local     conversion   Santiago Grehan
+    min  5 (1T 5) local     try          Agustin Belotti Haedo
+    min  9 (1T 9) local     card_yellow  Genaro Cabaña
+    min 13 (1T 13) local     card_yellow  Nicolas Joel Gonzalez Ovalle
+    min 13 (1T 13) visitante try          Bautista Aguirre
+    min 13 (1T 13) visitante conversion   Octavio Alejo Ojeda
+    min 17 (1T 17) local     substitution Valentino Vallejos
+    min 17 (1T 17) local     substitution Mauricio Leonel Jerez Mantaras
+    min 21 (1T 21) local     substitution Lucas Rios
+    min 23 (1T 23) local     try          Genaro Cabaña
+    min 30 (1T 30) local     substitution Santino Rubiolo
+    min 31 (1T 31) local     substitution Agustin Belotti Haedo
+    min 31 (1T 31) local     substitution Gael Cuevas Corsi
+    min 31 (1T 31) local     try          Thiago Freschi
+    min 50 (2T 10) local     try          Thiago Freschi
+    min 50 (2T 10) local     conversion   Santiago Grehan
+    min 55 (2T 15) local     try          German Maximiliano Tavarez
+    min 60 (2T 20) local     try          Gaston Molfino Toscano
+    min 60 (2T 20) local     conversion   Santiago Grehan
+    min 60 (2T 20) visitante substitution Lucas Santino Cabrisas
+    min 60 (2T 20) visitante substitution Juan Ignacio Chalup
+    min 60 (2T 20) visitante substitution Benjamin Macarrein Malvido
+    min 73 (2T 33) local     try          Gustavo Ramirez
+    min 73 (2T 33) local     conversion   Santiago Grehan
+  marcador  · eventos 43-7 · guardado 43-7
+  tries     · 7-1 (guardado 7-1)
+  arbitro   · MAXIMILIANO FRESCHI DANSEY (guardado: MAXIMILIANO FRESCHI DANSEY)
+  guardado  · 23 local · 23 visitante · 24 eventos
+
+aranduroga-r-c-m19-b vs regatas-de-resistencia-m19 · APERTURA 2026 · tarjeta 309151  ·  2a35a7e2-c1ee-4134-b8f7-3452173637d7
+  local     · aranduroga-r-c-m19-b · 0 jugadores · 0 con ficha fijada
+  visitante · regatas-de-resistencia-m19 · 22 jugadores · 4 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 0-21
+  tries     · 0-0 (guardado —-—)
+  arbitro   · (NO OFICIAL) (guardado: (NO OFICIAL))
+  guardado  · 0 local · 22 visitante · 0 eventos
+
+taraguy-r-c-m19-b vs san-patricio-m19 · APERTURA 2026 · tarjeta 309150  ·  254badc5-3743-4905-ab01-1ec4906f2c2c
+  local     · taraguy-r-c-m19-b · 0 jugadores · 0 con ficha fijada
+  visitante · san-patricio-m19 · 23 jugadores · 0 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 0-21
+  tries     · 0-0 (guardado —-—)
+  arbitro   · (NO OFICIAL) (guardado: (NO OFICIAL))
+  guardado  · 0 local · 23 visitante · 0 eventos
+
+sixty-r-c-m19 vs aranduroga-r-c-m19-a · APERTURA 2026 · tarjeta 309149  ·  61105420-9371-4e32-887a-7707c619218c
+  local     · sixty-r-c-m19 · 20 jugadores · 0 con ficha fijada
+  visitante · aranduroga-r-c-m19-a · 23 jugadores · 1 con ficha fijada
+  eventos   · 33
+    min  4 (1T 4) local     conversion   Esequiel Hernan Ibarra Romero
+    min  4 (1T 4) local     try          Iñaki Ottavis Gutierrez
+    min  6 (1T 6) local     try          Joaquin Zapata
+    min 10 (1T 10) visitante conversion   Joaquín Meza
+    min 10 (1T 10) visitante try          Franco Milezzi
+    min 23 (1T 23) visitante conversion   Joaquín Meza
+    min 23 (1T 23) visitante try          Lautaro Alcalá
+    min 31 (1T 31) visitante try          Joaquín Meza
+    min 34 (1T 34) local     try          Octavio Benjamin Correa
+    min 41 (2T 1) visitante substitution Gael Grachot
+    min 43 (2T 3) local     try          Octavio Benjamin Correa
+    min 43 (2T 3) local     conversion   Esequiel Hernan Ibarra Romero
+    min 46 (2T 6) visitante try          Joaquin Cocomarola
+    min 50 (2T 10) local     substitution Enzo Cimbaro
+    min 52 (2T 12) local     try          Nahuel Aguado
+    min 52 (2T 12) local     conversion   Esequiel Hernan Ibarra Romero
+    min 54 (2T 14) visitante conversion   Joaquin Cocomarola
+    min 54 (2T 14) visitante try          Joaquín Meza
+    min 57 (2T 17) local     substitution Agustin Echeverria
+    min 58 (2T 18) visitante substitution Estanislao Drose Calabres
+    min 60 (2T 20) visitante try          Joaquín Meza
+    min 60 (2T 20) visitante substitution Benicio De Castro
+    min 60 (2T 20) visitante conversion   Joaquin Cocomarola
+    min 61 (2T 21) visitante substitution Martín Andrés Gómez Niella
+    min 61 (2T 21) visitante substitution Felix Duran
+    min 65 (2T 25) visitante substitution Rene Braun
+    min 74 (2T 34) local     conversion   Esequiel Hernan Ibarra Romero
+    min 74 (2T 34) local     try          Mariano Valentino Giordan
+    min 80 (2T 40) local     substitution Lautaro Luque
+    min 80 (2T 40) local     substitution Lucas Mariano Salas Maidana
+    min 80 (2T 40) local     substitution Mateo Sebastian Aguilar
+    min 80 (2T 40) visitante substitution Santiago Tomassone
+    min 80 (2T 40) visitante substitution Franco Martí
+  marcador  · eventos 38-38 · guardado 38-38
+  tries     · 6-6 (guardado 6-6)
+  arbitro   · GUADALUPE PEREYRA (guardado: GUADALUPE PEREYRA)
+  guardado  · 20 local · 23 visitante · 33 eventos
+
+taraguy-r-c-m19-a vs curne-m19 · APERTURA 2026 · tarjeta 309148  ·  45cdf85d-55b5-4257-a6f8-8f15691884ea
+  local     · taraguy-r-c-m19-a · 23 jugadores · 1 con ficha fijada
+  visitante · curne-m19 · 23 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min  8 (1T 8) local     conversion   Santiago Benjamin Samudio
+    min  8 (1T 8) local     try          Felipe Roetti
+    min 23 (1T 23) local     try          Felipe Roetti
+    min 35 (1T 35) visitante try          Gael Cuevas Corsi
+    min 35 (1T 35) visitante conversion   Santiago Grehan
+    min 47 (2T 7) local     substitution Santiago Benjamin Samudio
+    min 50 (2T 10) visitante penalty_goal Santiago Grehan
+    min 52 (2T 12) local     substitution Ignacio Innocente
+    min 53 (2T 13) visitante substitution Lucas Rios
+    min 57 (2T 17) local     substitution Lucas Romero Bieber
+    min 57 (2T 17) local     substitution Benjamín Franco Damián Gomez Miguel
+    min 57 (2T 17) local     substitution Angel Segovia
+    min 57 (2T 17) local     substitution Gonzalo Fernandez Pellizzari
+    min 60 (2T 20) visitante substitution Donato Lottero
+    min 70 (2T 30) visitante substitution Valentino Vallejos
+    min 75 (2T 35) local     conversion   Lucas Baltazar Schiavi
+    min 75 (2T 35) local     try          Facundo Damian Gonzalez
+  marcador  · eventos 19-10 · guardado 19-10
+  tries     · 3-1 (guardado 3-1)
+  arbitro   · ALEXIS NAHUEL FERNANDEZ (guardado: ALEXIS NAHUEL FERNANDEZ)
+  guardado  · 23 local · 23 visitante · 17 eventos
+
+regatas-de-resistencia-m19 vs sixty-r-c-m19 · APERTURA 2026 · tarjeta 308547  ·  ab1853a5-b53a-48db-8a10-27bd1f43c4fb
+  local     · regatas-de-resistencia-m19 · 23 jugadores · 6 con ficha fijada
+  visitante · sixty-r-c-m19 · 23 jugadores · 0 con ficha fijada
+  eventos   · 31
+    min  6 (1T 6) local     try          Maximo Spessot
+    min 10 (1T 10) local     try          Joaquin Santamaría
+    min 11 (1T 11) local     conversion   Maximiliano Bernad
+    min 16 (1T 16) visitante penalty_goal Esequiel Hernan Ibarra Romero
+    min 19 (1T 19) local     try          Maximiliano Bernad
+    min 20 (1T 20) local     conversion   Maximiliano Bernad
+    min 23 (1T 23) local     substitution Maximiliano Bernad
+    min 25 (1T 25) local     try          Patricio Joaquín Carballo Chilissi
+    min 26 (1T 26) local     conversion   Maximiliano Bernad
+    min 30 (1T 30) visitante injury       Octavio Cantero
+    min 30 (1T 30) visitante substitution Enzo Cimbaro
+    min 32 (1T 32) local     try          Valentino Birocco
+    min 33 (1T 33) local     conversion   Maximiliano Bernad
+    min 42 (2T 2) local     try          Valentino Birocco
+    min 43 (2T 3) local     conversion   Maximiliano Bernad
+    min 47 (2T 7) visitante card_yellow  Iñaki Ottavis Gutierrez
+    min 52 (2T 12) local     substitution Santiago Rubén Ruiz Diaz
+    min 55 (2T 15) visitante card_yellow  Agustin Meza
+    min 59 (2T 19) local     try          Joaquin Santamaría
+    min 60 (2T 20) local     substitution Valentino Birocco
+    min 60 (2T 20) local     conversion   Maximiliano Bernad
+    min 60 (2T 20) visitante substitution Lucas Mariano Salas Maidana
+    min 60 (2T 20) visitante substitution Mateo Sebastian Aguilar
+    min 64 (2T 24) local     substitution Paulo Niclis
+    min 64 (2T 24) local     substitution Diago Alejandro Romero
+    min 64 (2T 24) local     substitution Joaquín Aranda Soria Ojeda
+    min 64 (2T 24) local     substitution Maximo Spessot
+    min 64 (2T 24) local     substitution Ian Agustín Obes
+    min 70 (2T 30) visitante substitution Octavio Cantero
+    min 75 (2T 35) local     try          Joaquin Santamaría
+    min 76 (2T 36) local     conversion   Santiago Barreto
+  marcador  · eventos 54-3 · guardado 54-3
+  tries     · 8-0 (guardado 8-0)
+  arbitro   · ROCIO DEL CIELO DA COSTA (guardado: ROCIO DEL CIELO DA COSTA)
+  guardado  · 23 local · 23 visitante · 31 eventos
+
+curne-m19 vs aranduroga-r-c-m19-b · APERTURA 2026 · tarjeta 308550  ·  f6d97af0-f083-4e85-87ee-b5ad5795d7b5
+  local     · curne-m19 · 23 jugadores · 0 con ficha fijada
+  visitante · aranduroga-r-c-m19-b · 23 jugadores · 0 con ficha fijada
+  eventos   · 30
+    min  4 (1T 4) local     try          Santino Rubiolo
+    min 14 (1T 14) visitante conversion   Bautista Dandrea
+    min 14 (1T 14) visitante try          Franco Martí
+    min 15 (1T 15) local     try          Gael Cuevas Corsi
+    min 15 (1T 15) local     conversion   Santiago Grehan
+    min 28 (1T 28) local     try          Juan Ignacio Ramirez Gonzalez
+    min 28 (1T 28) local     conversion   Santiago Grehan
+    min 35 (1T 35) local     try          Tomas Miro
+    min 35 (1T 35) local     conversion   Santiago Grehan
+    min 41 (2T 1) local     substitution Bautista Zarza
+    min 43 (2T 3) local     try          Gael Cuevas Corsi
+    min 45 (2T 5) local     conversion   Santiago Grehan
+    min 45 (2T 5) local     try          Agustin Belotti Haedo
+    min 51 (2T 11) visitante try          Gianluca Dascenzo
+    min 51 (2T 11) visitante substitution Bautista Dandrea
+    min 53 (2T 13) visitante substitution Fabricio Encina
+    min 57 (2T 17) local     substitution German Maximiliano Tavarez
+    min 57 (2T 17) visitante conversion   Benjamin Romero Artaza
+    min 57 (2T 17) visitante try          Juan Glombosky
+    min 57 (2T 17) visitante substitution Ezequiel Del Yesso
+    min 59 (2T 19) visitante substitution Pedro Germán Bordón Calvano
+    min 63 (2T 23) local     substitution Agustin Belotti Haedo
+    min 68 (2T 28) local     card_yellow  Juan Ignacio Ramirez Gonzalez
+    min 68 (2T 28) visitante substitution Bautista De La Corte Cohen
+    min 70 (2T 30) local     substitution Thiago Freschi
+    min 70 (2T 30) local     substitution Santino Rubiolo
+    min 70 (2T 30) local     card_yellow  Benjamin Sanchez
+    min 71 (2T 31) visitante try          Estanislao Drose Calabres
+    min 71 (2T 31) visitante conversion   Benjamin Romero Artaza
+    min 80 (2T 40) visitante substitution Augusto Javier Ferreyra Vega
+  marcador  · eventos 38-26 · guardado 38-26
+  tries     · 6-4 (guardado 6-4)
+  arbitro   · RICHARD PONIATYCHYN (guardado: RICHARD PONIATYCHYN)
+  guardado  · 23 local · 23 visitante · 30 eventos
+
+taraguy-r-c-m19-a vs san-patricio-m19 · APERTURA 2026 · tarjeta 308548  ·  b64c4656-f955-48b4-846f-b7518dbba88b
+  local     · taraguy-r-c-m19-a · 23 jugadores · 1 con ficha fijada
+  visitante · san-patricio-m19 · 23 jugadores · 0 con ficha fijada
+  eventos   · 35
+    min  9 (1T 9) local     try          Ruben Torres
+    min 11 (1T 11) local     try          Sebastian Gomez Moreno
+    min 11 (1T 11) local     conversion   Facundo Solari
+    min 17 (1T 17) local     try          Ruben Torres
+    min 21 (1T 21) local     try          Ruben Torres
+    min 21 (1T 21) local     conversion   Facundo Solari
+    min 26 (1T 26) visitante try          Facundo Costanzo
+    min 29 (1T 29) visitante card_yellow  José Bautista Yaya
+    min 30 (1T 30) local     try          Francisco Gabriel Arias
+    min 30 (1T 30) local     conversion   Facundo Solari
+    min 37 (1T 37) local     try          Angel Segovia
+    min 37 (1T 37) local     conversion   Facundo Solari
+    min 48 (2T 8) local     substitution Ignacio Innocente
+    min 49 (2T 9) local     conversion   Facundo Solari
+    min 49 (2T 9) local     substitution Julian Ignacio Miranda Gallino
+    min 49 (2T 9) local     try          Facundo Solari
+    min 50 (2T 10) visitante substitution Juan Peralta
+    min 52 (2T 12) local     card_yellow  Francisco Gabriel Arias
+    min 55 (2T 15) visitante substitution Tobias Galarza
+    min 58 (2T 18) local     substitution Sebastian Gomez Moreno
+    min 61 (2T 21) local     substitution Angel Segovia
+    min 61 (2T 21) local     substitution Ivan Carabajal
+    min 63 (2T 23) local     conversion   Santiago Benjamin Samudio
+    min 63 (2T 23) local     try          Santiago Benjamin Samudio
+    min 63 (2T 23) local     conversion   Santiago Benjamin Samudio
+    min 63 (2T 23) local     try          Gonzalo Fernandez Pellizzari
+    min 65 (2T 25) visitante substitution Facundo Costanzo
+    min 65 (2T 25) visitante substitution Lucas Santino Cabrisas
+    min 66 (2T 26) visitante conversion   Octavio Alejo Ojeda
+    min 66 (2T 26) visitante try          Leandro Acevedo
+    min 66 (2T 26) visitante conversion   Leandro Acevedo
+    min 68 (2T 28) visitante try          Bautista Aguirre
+    min 72 (2T 32) local     card_yellow  Felipe Roetti
+    min 80 (2T 40) local     substitution Ruben Torres
+    min 80 (2T 40) local     substitution Francisco Gabriel Arias
+  marcador  · eventos 59-19 · guardado 59-19
+  tries     · 9-3 (guardado 9-3)
+  arbitro   · BRAIAN SEBASTIAN GOMEZ (guardado: BRAIAN SEBASTIAN GOMEZ)
+  guardado  · 23 local · 23 visitante · 35 eventos
+
+aranduroga-r-c-m19-a vs taraguy-r-c-m19-b · APERTURA 2026 · tarjeta 308549  ·  7b2e7a8a-112c-4cc1-a172-93f75c2cd5ea
+  local     · aranduroga-r-c-m19-a · 23 jugadores · 0 con ficha fijada
+  visitante · taraguy-r-c-m19-b · 23 jugadores · 1 con ficha fijada
+  eventos   · 40
+    min  1 (1T 1) local     try          Franco Milezzi
+    min  1 (1T 1) local     conversion   Joaquín Meza
+    min  6 (1T 6) local     try          Santiago Tomassone
+    min  6 (1T 6) local     conversion   Joaquín Meza
+    min 21 (1T 21) local     conversion   Joaquín Meza
+    min 21 (1T 21) local     try          Estanislao Drose Calabres
+    min 23 (1T 23) local     conversion   Bautista Flores Cattay
+    min 23 (1T 23) local     try          Bautista Flores Cattay
+    min 27 (1T 27) local     card_yellow  Franco Milezzi
+    min 28 (1T 28) local     card_yellow  Rene Braun
+    min 42 (2T 2) local     try          Juan Glombosky
+    min 42 (2T 2) local     conversion   Joaquín Meza
+    min 44 (2T 4) visitante penalty_try  
+    min 45 (2T 5) visitante substitution Justo Gonzalez Mortola
+    min 49 (2T 9) visitante substitution Juan Eusebio Torrent Leconte
+    min 49 (2T 9) visitante substitution Benjamín Franco Damián Gomez Miguel
+    min 49 (2T 9) visitante substitution Jose Ruiz Diaz
+    min 49 (2T 9) visitante substitution Ignacio Innocente
+    min 49 (2T 9) visitante substitution Santiago Ramón Albornoz
+    min 49 (2T 9) visitante substitution Nicolás Duarte Insaurralde
+    min 52 (2T 12) local     try          Franco Milezzi
+    min 52 (2T 12) local     conversion   Joaquín Meza
+    min 52 (2T 12) local     substitution Benicio De Castro
+    min 56 (2T 16) local     substitution Augusto Javier Ferreyra Vega
+    min 56 (2T 16) local     substitution Estanislao Drose Calabres
+    min 56 (2T 16) visitante try          Sebastian Gomez Moreno
+    min 56 (2T 16) visitante conversion   Santiago Benjamin Samudio
+    min 57 (2T 17) local     substitution Juan Glombosky
+    min 57 (2T 17) local     substitution Artemio Brianti Catapano
+    min 59 (2T 19) local     try          Joaquín Meza
+    min 62 (2T 22) local     substitution Maximo Cotelo
+    min 62 (2T 22) local     substitution Bautista Flores Cattay
+    min 62 (2T 22) visitante card_yellow  Benicio Paterlini Roch
+    min 68 (2T 28) local     card_yellow  Faustino Tanara
+    min 68 (2T 28) visitante conversion   Santiago Benjamin Samudio
+    min 68 (2T 28) visitante try          Lucas Romero Bieber
+    min 74 (2T 34) visitante try          Benjamín Franco Damián Gomez Miguel
+    min 75 (2T 35) local     penalty_goal Joaquín Meza
+    min 76 (2T 36) visitante conversion   Santiago Benjamin Samudio
+    min 76 (2T 36) visitante try          Vicente Figueroa
+  marcador  · eventos 50-33 · guardado 50-33
+  tries     · 7-5 (guardado 7-5)
+  arbitro   · SEBASTIAN LUGO (guardado: SEBASTIAN LUGO)
+  guardado  · 23 local · 23 visitante · 40 eventos
+
+san-patricio-m19 vs aranduroga-r-c-m19-b · APERTURA 2026 · tarjeta 307074  ·  841f0912-6659-4f4a-8761-a94b6ae43412
+  local     · san-patricio-m19 · 23 jugadores · 0 con ficha fijada
+  visitante · aranduroga-r-c-m19-b · 20 jugadores · 0 con ficha fijada
+  eventos   · 23
+    min  1 (1T 1) visitante conversion   Joaquín Meza
+    min  1 (1T 1) visitante try          Gabriel Brian Diaz Colodrero
+    min  4 (1T 4) visitante conversion   Joaquín Meza
+    min  4 (1T 4) visitante try          Gael Grachot
+    min 18 (1T 18) local     try          Iñaki Lujan Sosa
+    min 23 (1T 23) local     try          Octavio Alejo Ojeda
+    min 23 (1T 23) local     conversion   Octavio Alejo Ojeda
+    min 24 (1T 24) visitante substitution Shinichi Mori
+    min 34 (1T 34) visitante try          Francisco Azula
+    min 34 (1T 34) visitante injury       Gabriel Brian Diaz Colodrero
+    min 49 (2T 9) local     try          Octavio Alejo Ojeda
+    min 49 (2T 9) local     conversion   Octavio Alejo Ojeda
+    min 50 (2T 10) local     substitution Bautista Sanz
+    min 58 (2T 18) local     substitution Augusto Zaracho Moriaud
+    min 58 (2T 18) local     substitution Felipe Guillermo Martin Zabala Rodriguez
+    min 59 (2T 19) visitante substitution Santiago Mascaro Ganora
+    min 61 (2T 21) visitante try          Franco Milezzi
+    min 61 (2T 21) visitante conversion   Joaquín Meza
+    min 64 (2T 24) visitante substitution Luciano Irigoyen
+    min 67 (2T 27) visitante try          Francisco Azula
+    min 67 (2T 27) visitante conversion   Joaquín Meza
+    min 68 (2T 28) local     try          José Bautista Yaya
+    min 74 (2T 34) visitante try          Lautaro Alcalá
+  marcador  · eventos 24-38 · guardado 24-38
+  tries     · 4-6 (guardado 4-6)
+  arbitro   · VIVIANA GARAT (guardado: VIVIANA GARAT)
+  guardado  · 23 local · 20 visitante · 23 eventos
+
+taraguy-r-c-m19-b vs curne-m19 · APERTURA 2026 · tarjeta 307073  ·  29d2f03a-d892-4a02-bc57-3bc514bbba27
+  local     · taraguy-r-c-m19-b · 23 jugadores · 1 con ficha fijada
+  visitante · curne-m19 · 23 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min 20 (1T 20) local     try          Jose Ruiz Diaz
+    min 41 (2T 1) visitante substitution Mateo Casañas
+    min 42 (2T 2) local     substitution Jose Ruiz Diaz
+    min 42 (2T 2) local     substitution Federico Ezequiel Domínguez Tedesco
+    min 42 (2T 2) local     substitution Facundo Damian Gonzalez
+    min 45 (2T 5) local     try          Santiago Benjamin Samudio
+    min 45 (2T 5) local     conversion   Santiago Benjamin Samudio
+    min 50 (2T 10) visitante try          Agustin Belotti Haedo
+    min 50 (2T 10) visitante conversion   Santiago Grehan
+    min 50 (2T 10) visitante substitution Alan Arias
+    min 52 (2T 12) local     substitution Mateo Faisal
+    min 52 (2T 12) visitante try          Lucas Rios
+    min 56 (2T 16) visitante try          Maximo Moreiramasdeu
+    min 56 (2T 16) visitante conversion   Santiago Grehan
+    min 59 (2T 19) visitante substitution Genaro Cabaña
+    min 60 (2T 20) visitante substitution Lucas Rios
+    min 60 (2T 20) visitante substitution Thiago Freschi
+    min 69 (2T 29) local     substitution Juan Cruz Laurino
+  marcador  · eventos 12-19 · guardado 12-19
+  tries     · 2-3 (guardado 2-3)
+  arbitro   · GUADALUPE PEREYRA (guardado: GUADALUPE PEREYRA)
+  guardado  · 23 local · 23 visitante · 18 eventos
+
+aranduroga-r-c-m19-a vs regatas-de-resistencia-m19 · APERTURA 2026 · tarjeta 307072  ·  9b3a3019-40c1-44fb-9288-46d7b3d8e737
+  local     · aranduroga-r-c-m19-a · 19 jugadores · 0 con ficha fijada
+  visitante · regatas-de-resistencia-m19 · 23 jugadores · 6 con ficha fijada
+  eventos   · 37
+    min  5 (1T 5) visitante try          Joaquin Santamaría
+    min  6 (1T 6) visitante conversion   Maximiliano Bernad
+    min  8 (1T 8) visitante try          Joaquin Santamaría
+    min  9 (1T 9) visitante conversion   Maximiliano Bernad
+    min 12 (1T 12) visitante try          Santino Aranda
+    min 13 (1T 13) visitante conversion   Maximiliano Bernad
+    min 20 (1T 20) local     injury       Faustino Tanara
+    min 20 (1T 20) local     substitution Faustino Tanara
+    min 24 (1T 24) local     try          Estanislao Drose Calabres
+    min 24 (1T 24) local     conversion   Bautista Dandrea
+    min 31 (1T 31) visitante try          Jeremias Bieski Bejuk
+    min 32 (1T 32) visitante conversion   Maximiliano Bernad
+    min 34 (1T 34) local     try          Franco Martí
+    min 34 (1T 34) local     conversion   Bautista Dandrea
+    min 40 (2T 0) visitante substitution Joaquin Ezequiel Zalazar
+    min 41 (2T 1) visitante try          Jeremias Bieski Bejuk
+    min 42 (2T 2) visitante conversion   Maximiliano Bernad
+    min 45 (2T 5) visitante try          Maximo Spessot
+    min 46 (2T 6) visitante conversion   Maximiliano Bernad
+    min 54 (2T 14) visitante substitution Joaquin Santamaría
+    min 58 (2T 18) local     substitution Rene Braun
+    min 58 (2T 18) visitante card_yellow  Lucca Sebatian Moltrasio Romagnoli
+    min 59 (2T 19) local     try          Estanislao Drose Calabres
+    min 59 (2T 19) local     conversion   Bautista Dandrea
+    min 60 (2T 20) local     substitution Estanislao Drose Calabres
+    min 62 (2T 22) visitante try          Maximiliano Bernad
+    min 63 (2T 23) visitante conversion   Maximiliano Bernad
+    min 64 (2T 24) visitante try          Patricio Joaquín Carballo Chilissi
+    min 65 (2T 25) visitante conversion   Maximiliano Bernad
+    min 70 (2T 30) visitante substitution Santiago Rubén Ruiz Diaz
+    min 71 (2T 31) visitante try          Maximiliano Bernad
+    min 72 (2T 32) visitante conversion   Maximiliano Bernad
+    min 72 (2T 32) visitante substitution Maximo Spessot
+    min 72 (2T 32) visitante substitution Joaquín Aranda Soria Ojeda
+    min 72 (2T 32) visitante substitution Jonas Cid
+    min 72 (2T 32) visitante substitution Patricio Joaquín Carballo Chilissi
+    min 80 (2T 40) local     substitution Benjamín Sánchez Malgor
+  marcador  · eventos 21-63 · guardado 21-63
+  tries     · 3-9 (guardado 3-9)
+  arbitro   · JUAN BAUTISTA ZUBIETA (guardado: JUAN BAUTISTA ZUBIETA)
+  guardado  · 19 local · 23 visitante · 37 eventos
+
+sixty-r-c-m19 vs taraguy-r-c-m19-a · APERTURA 2026 · tarjeta 307071  ·  47fddb58-6cf5-4e59-be98-7dd784b15df1
+  local     · sixty-r-c-m19 · 23 jugadores · 0 con ficha fijada
+  visitante · taraguy-r-c-m19-a · 23 jugadores · 1 con ficha fijada
+  eventos   · 35
+    min  3 (1T 3) local     try          Iñaki Ottavis Gutierrez
+    min  9 (1T 9) visitante try          Jose Ruiz Diaz
+    min 14 (1T 14) visitante try          Jose Ruiz Diaz
+    min 14 (1T 14) visitante conversion   Lucas Baltazar Schiavi
+    min 20 (1T 20) visitante try          Gonzalo Fernandez Pellizzari
+    min 25 (1T 25) visitante try          Angel Segovia
+    min 28 (1T 28) local     substitution Octavio Benjamin Correa
+    min 32 (1T 32) local     substitution Enzo Cimbaro
+    min 35 (1T 35) visitante try          Jose Ruiz Diaz
+    min 35 (1T 35) visitante conversion   Lucas Baltazar Schiavi
+    min 44 (2T 4) visitante try          Lucas Baltazar Schiavi
+    min 45 (2T 5) local     substitution Lucas Mariano Salas Maidana
+    min 48 (2T 8) local     conversion   Esequiel Hernan Ibarra Romero
+    min 48 (2T 8) local     try          Nahuel Aguado
+    min 48 (2T 8) visitante substitution Benicio Paterlini Roch
+    min 50 (2T 10) visitante card_yellow  Ruben Torres
+    min 51 (2T 11) visitante try          Juan Baltazar Castillo Odena
+    min 53 (2T 13) visitante substitution Angel Segovia
+    min 55 (2T 15) local     substitution Joaquin Ignacio Gil Ortiz
+    min 56 (2T 16) visitante substitution Justo Gonzalez Mortola
+    min 58 (2T 18) local     substitution Julian Zuazquita
+    min 58 (2T 18) local     substitution Agustin Echeverria
+    min 59 (2T 19) visitante try          Juan Baltazar Castillo Odena
+    min 59 (2T 19) visitante conversion   Juan Cruz Abraham
+    min 63 (2T 23) visitante conversion   Lucas Baltazar Schiavi
+    min 63 (2T 23) visitante try          Rafael Garcia Meana Colodrero
+    min 63 (2T 23) visitante substitution Lucas Baltazar Schiavi
+    min 65 (2T 25) visitante card_yellow  Juan Eusebio Torrent Leconte
+    min 67 (2T 27) visitante try          Emiliano Piragine
+    min 67 (2T 27) visitante conversion   Juan Baltazar Castillo Odena
+    min 72 (2T 32) local     substitution Aaron Caballero
+    min 75 (2T 35) local     injury       Maximiliano Carrasco
+    min 80 (2T 40) local     substitution Iñaki Ottavis Gutierrez
+    min 80 (2T 40) visitante try          Juan Baltazar Castillo Odena
+    min 80 (2T 40) visitante conversion   Juan Baltazar Castillo Odena
+  marcador  · eventos 12-67 · guardado 12-67
+  tries     · 2-11 (guardado 2-11)
+  arbitro   · RODRIGO SAUCO (guardado: RODRIGO SAUCO)
+  guardado  · 23 local · 23 visitante · 35 eventos
+
+aranduroga-r-c-m19-b vs taraguy-r-c-m19-a · APERTURA 2026 · tarjeta 307886  ·  f168e74d-ba5f-4470-8078-174a28a5839a
+  local     · aranduroga-r-c-m19-b · 23 jugadores · 0 con ficha fijada
+  visitante · taraguy-r-c-m19-a · 23 jugadores · 1 con ficha fijada
+  eventos   · 23
+    min  1 (1T 1) visitante conversion   Juan Baltazar Castillo Odena
+    min  1 (1T 1) visitante try          Santiago Ramón Albornoz
+    min 19 (1T 19) visitante try          Santiago Ramón Albornoz
+    min 24 (1T 24) local     card_yellow  Rene Braun
+    min 31 (1T 31) visitante card_yellow  Sebastian Gomez Moreno
+    min 33 (1T 33) visitante card_yellow  Ignacio Romero Ratier
+    min 41 (2T 1) local     substitution Franco Martí
+    min 41 (2T 1) visitante conversion   Juan Baltazar Castillo Odena
+    min 41 (2T 1) visitante try          Benicio Paterlini Roch
+    min 42 (2T 2) local     substitution Luciano Irigoyen
+    min 42 (2T 2) local     injury       Luciano Irigoyen
+    min 47 (2T 7) visitante substitution Lucas Romero Bieber
+    min 47 (2T 7) visitante substitution Ruben Torres
+    min 47 (2T 7) visitante substitution Benjamín Franco Damián Gomez Miguel
+    min 48 (2T 8) local     substitution Benicio De Castro
+    min 50 (2T 10) local     substitution Benicio Capitani
+    min 51 (2T 11) visitante substitution Angel Segovia
+    min 54 (2T 14) local     substitution Rene Braun
+    min 54 (2T 14) visitante substitution Benicio Paterlini Roch
+    min 56 (2T 16) visitante try          Lucas Baltazar Schiavi
+    min 58 (2T 18) local     substitution Estanislao Drose Calabres
+    min 59 (2T 19) local     substitution Artemio Brianti Catapano
+    min 59 (2T 19) local     substitution Gael Grachot
+  marcador  · eventos 0-24 · guardado 0-24
+  tries     · 0-4 (guardado 0-4)
+  arbitro   · MARCOS KULIG (guardado: MARCOS KULIG)
+  guardado  · 23 local · 23 visitante · 23 eventos
+
+regatas-de-resistencia-m19 vs taraguy-r-c-m19-b · APERTURA 2026 · tarjeta 302096  ·  47b8b45b-5570-41b6-872c-88c34bf6ace7
+  local     · regatas-de-resistencia-m19 · 23 jugadores · 6 con ficha fijada
+  visitante · taraguy-r-c-m19-b · 23 jugadores · 0 con ficha fijada
+  eventos   · 29
+    min  1 (1T 1) local     try          Gonzalo Gil Gutierrez
+    min  2 (1T 2) local     conversion   Patricio Joaquín Carballo Chilissi
+    min  7 (1T 7) local     try          Patricio Joaquín Carballo Chilissi
+    min  8 (1T 8) local     conversion   Patricio Joaquín Carballo Chilissi
+    min 13 (1T 13) visitante try          Benjamín Franco Damián Gomez Miguel
+    min 19 (1T 19) local     try          Jeremias Bieski Bejuk
+    min 20 (1T 20) local     conversion   Patricio Joaquín Carballo Chilissi
+    min 30 (1T 30) local     try          Joaquín Aranda Soria Ojeda
+    min 31 (1T 31) local     conversion   Patricio Joaquín Carballo Chilissi
+    min 45 (2T 5) visitante substitution Federico Ezequiel Domínguez Tedesco
+    min 45 (2T 5) visitante substitution Santiago Benjamin Samudio
+    min 49 (2T 9) local     try          Diego Lionel Aquino
+    min 50 (2T 10) local     conversion   Patricio Joaquín Carballo Chilissi
+    min 50 (2T 10) visitante substitution Ivan Carabajal
+    min 51 (2T 11) local     substitution Santiago Rubén Ruiz Diaz
+    min 55 (2T 15) local     substitution Patricio Joaquín Carballo Chilissi
+    min 55 (2T 15) local     substitution Maximo Spessot
+    min 55 (2T 15) local     substitution Renzo Joaquin Gomez
+    min 61 (2T 21) visitante substitution Santiago Ramón Albornoz
+    min 63 (2T 23) local     try          Maximo Spessot
+    min 63 (2T 23) visitante substitution Benjamín Franco Damián Gomez Miguel
+    min 67 (2T 27) local     card_yellow  Santino Aranda
+    min 68 (2T 28) local     substitution Paulo Niclis
+    min 71 (2T 31) local     substitution Ulises Uziel Veron Aguirre
+    min 71 (2T 31) local     card_yellow  Ian Agustín Obes
+    min 71 (2T 31) local     substitution Gonzalo Gil Gutierrez
+    min 72 (2T 32) visitante try          Facundo Solari
+    min 74 (2T 34) local     try          Jeremias Bieski Bejuk
+    min 80 (2T 40) visitante substitution Rafael Garcia Meana Colodrero
+  marcador  · eventos 45-10 · guardado 45-10
+  tries     · 7-2 (guardado 7-2)
+  arbitro   · WALTER ALEJANDRO ESQUIVEL (guardado: WALTER ALEJANDRO ESQUIVEL)
+  guardado  · 23 local · 23 visitante · 29 eventos
+
+aranduroga-r-c-m19-a vs san-patricio-m19 · APERTURA 2026 · tarjeta 302095  ·  34b2d550-cd29-47d4-bfb3-21c34bdf7f4d
+  local     · aranduroga-r-c-m19-a · 23 jugadores · 0 con ficha fijada
+  visitante · san-patricio-m19 · 19 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min 23 (1T 23) visitante conversion   Iñaki Lujan Sosa
+    min 28 (1T 28) visitante card_yellow  José Bautista Yaya
+    min 30 (1T 30) local     card_yellow  Benjamin Romero Artaza
+    min 46 (2T 6) local     try          Franco Milezzi
+    min 48 (2T 8) local     conversion   Benjamin Romero Artaza
+    min 48 (2T 8) local     try          Juan Glombosky
+    min 55 (2T 15) local     try          Bautista Soto
+    min 55 (2T 15) local     substitution Martín Andrés Gómez Niella
+    min 56 (2T 16) visitante substitution Ivan Sandoval
+    min 57 (2T 17) local     substitution Bautista Dandrea
+    min 57 (2T 17) local     substitution Faustino Tanara
+    min 58 (2T 18) local     substitution Rene Braun
+    min 58 (2T 18) local     conversion   Joaquin Gómez De Llano
+    min 58 (2T 18) local     try          Bautista Soto
+    min 60 (2T 20) local     substitution Estanislao Drose Calabres
+    min 60 (2T 20) local     substitution Benicio De Castro
+    min 62 (2T 22) local     try          Bautista Flores Cattay
+    min 62 (2T 22) local     conversion   Bautista Soto
+    min 66 (2T 26) visitante card_yellow  José Bautista Yaya
+    min 66 (2T 26) visitante card_red     José Bautista Yaya
+    min 69 (2T 29) local     try          Octavio Acuña
+    min 70 (2T 30) visitante try          Bautista Aguirre
+    min 72 (2T 32) local     card_yellow  Joaquin Gómez De Llano
+    min 75 (2T 35) local     try          Artemio Brianti Catapano
+    min 75 (2T 35) local     conversion   Bautista Soto
+    min 80 (2T 40) local     substitution Benjamín Sánchez Malgor
+    min 80 (2T 40) local     substitution Benicio Capitani
+  marcador  · eventos 43-7 · guardado 43-7
+  tries     · 7-1 (guardado 7-1)
+  arbitro   · NICOLAS FAGNANI CIMA (guardado: NICOLAS FAGNANI CIMA)
+  guardado  · 23 local · 19 visitante · 27 eventos
+
+sixty-r-c-m19 vs curne-m19 · APERTURA 2026 · tarjeta 302094  ·  63bc6f9a-8ae4-4152-8a56-a2b7eb6b5397
+  local     · sixty-r-c-m19 · 23 jugadores · 0 con ficha fijada
+  visitante · curne-m19 · 22 jugadores · 0 con ficha fijada
+  eventos   · 21
+    min  9 (1T 9) visitante try          Santino Rubiolo
+    min  9 (1T 9) visitante conversion   Santiago Grehan
+    min 21 (1T 21) local     conversion   Iñaki Ottavis Gutierrez
+    min 21 (1T 21) local     try          Nahuel Aguado
+    min 41 (2T 1) visitante injury       Benjamin Sanchez
+    min 42 (2T 2) local     try          Iñaki Ottavis Gutierrez
+    min 49 (2T 9) visitante substitution Santino Rubiolo
+    min 50 (2T 10) visitante substitution Mateo Casañas
+    min 50 (2T 10) visitante substitution Santiago Grehan
+    min 53 (2T 13) local     try          Renzo Angel Damián Godoy
+    min 54 (2T 14) local     substitution Agustin Echeverria
+    min 54 (2T 14) local     substitution Lucas Mariano Salas Maidana
+    min 55 (2T 15) visitante substitution Matias Ponce
+    min 55 (2T 15) visitante substitution Benjamin Sanchez
+    min 63 (2T 23) local     substitution Renzo Angel Damián Godoy
+    min 63 (2T 23) local     substitution Joaquin Zapata
+    min 65 (2T 25) visitante substitution Matias Vañek
+    min 80 (2T 40) local     substitution Octavio Cantero
+    min 80 (2T 40) local     substitution Paulo Jair Campos Luque
+    min 80 (2T 40) local     substitution Enzo Cimbaro
+    min 80 (2T 40) local     substitution Mateo Sebastian Aguilar
+  marcador  · eventos 17-7 · guardado 17-7
+  tries     · 3-1 (guardado 3-1)
+  arbitro   · JOSE LUIS FAVRETTO (guardado: JOSE LUIS FAVRETTO)
+  guardado  · 23 local · 22 visitante · 21 eventos
+
+taraguy-r-c-m19-b vs aranduroga-r-c-m19-b · APERTURA 2026 · tarjeta 297101  ·  f5e8dd62-31d5-4f09-8244-c9561049f0f3
+  local     · taraguy-r-c-m19-b · 23 jugadores · 0 con ficha fijada
+  visitante · aranduroga-r-c-m19-b · 23 jugadores · 0 con ficha fijada
+  eventos   · 29
+    min  7 (1T 7) local     try          Santiago Ramón Albornoz
+    min  7 (1T 7) local     conversion   Santiago Benjamin Samudio
+    min 23 (1T 23) local     try          Santiago Ramón Albornoz
+    min 23 (1T 23) local     conversion   Santiago Benjamin Samudio
+    min 28 (1T 28) visitante substitution Franco Raúl Vallejos Olivieri
+    min 28 (1T 28) visitante try          Felix Duran
+    min 30 (1T 30) local     conversion   Santiago Benjamin Samudio
+    min 30 (1T 30) local     try          Nicolás Duarte Insaurralde
+    min 30 (1T 30) visitante substitution Juan Ignacio Castañeda Gomez
+    min 41 (2T 1) local     substitution Ruben Torres
+    min 42 (2T 2) visitante try          Pedro Germán Bordón Calvano
+    min 44 (2T 4) visitante conversion   Lucas Sangiorgio
+    min 44 (2T 4) visitante try          Felix Duran
+    min 45 (2T 5) local     substitution Eduardo Rodriguez
+    min 47 (2T 7) visitante try          Lucas Sangiorgio
+    min 53 (2T 13) local     substitution Ariel Tiziano Zamudio Mallorca
+    min 56 (2T 16) local     substitution Rafael Garcia Meana Colodrero
+    min 58 (2T 18) local     penalty_goal Juan Cruz Abraham
+    min 63 (2T 23) local     substitution Ignacio Romero Ratier
+    min 63 (2T 23) local     substitution Juan Cruz Soto Centurión
+    min 68 (2T 28) local     card_yellow  Ariel Tiziano Zamudio Mallorca
+    min 70 (2T 30) visitante conversion   Lucas Sangiorgio
+    min 70 (2T 30) visitante try          Felix Duran
+    min 80 (2T 40) visitante substitution Benjamin Romero Artaza
+    min 80 (2T 40) visitante substitution Bautista Dandrea
+    min 80 (2T 40) visitante substitution Lazaro Villagra
+    min 80 (2T 40) visitante substitution Gael Grachot
+    min 80 (2T 40) visitante substitution Benicio Capitani
+    min 80 (2T 40) visitante substitution Pablo Rivas
+  marcador  · eventos 24-29 · guardado 24-29
+  tries     · 3-5 (guardado 3-5)
+  arbitro   · NICOLAS FAGNANI CIMA (guardado: NICOLAS FAGNANI CIMA)
+  guardado  · 23 local · 23 visitante · 29 eventos
+
+san-patricio-m19 vs sixty-r-c-m19 · APERTURA 2026 · tarjeta 297100  ·  bfb7c76a-4135-485e-b79c-1a310e3020f4
+  local     · san-patricio-m19 · 23 jugadores · 0 con ficha fijada
+  visitante · sixty-r-c-m19 · 23 jugadores · 0 con ficha fijada
+  eventos   · 31
+    min  1 (1T 1) visitante conversion   Esequiel Hernan Ibarra Romero
+    min  1 (1T 1) visitante try          Nahuel Aguado
+    min  9 (1T 9) local     try          Octavio Alejo Ojeda
+    min 11 (1T 11) visitante conversion   Esequiel Hernan Ibarra Romero
+    min 11 (1T 11) visitante try          Joaquin Zapata
+    min 29 (1T 29) visitante conversion   Esequiel Hernan Ibarra Romero
+    min 29 (1T 29) visitante try          Nahuel Aguado
+    min 31 (1T 31) local     substitution Bautista Aguirre
+    min 31 (1T 31) local     substitution Benjamin Macarrein Malvido
+    min 46 (2T 6) local     try          Juan Simón Astorga
+    min 46 (2T 6) local     conversion   Octavio Alejo Ojeda
+    min 50 (2T 10) visitante conversion   Iñaki Ottavis Gutierrez
+    min 50 (2T 10) visitante try          Esequiel Hernan Ibarra Romero
+    min 51 (2T 11) visitante substitution Nehemias Nahuel Gauto
+    min 51 (2T 11) visitante substitution Enzo Cimbaro
+    min 52 (2T 12) local     conversion   Octavio Alejo Ojeda
+    min 52 (2T 12) local     try          José Bautista Yaya
+    min 55 (2T 15) visitante try          Nahuel Aguado
+    min 55 (2T 15) visitante conversion   Iñaki Ottavis Gutierrez
+    min 58 (2T 18) local     substitution Guillermo Vallejos
+    min 58 (2T 18) local     substitution Juan Ignacio Chalup
+    min 60 (2T 20) visitante substitution Ignacio Valentin Paz
+    min 63 (2T 23) local     substitution Alejo Rodriguez
+    min 63 (2T 23) local     try          Iñaki Lujan Sosa
+    min 64 (2T 24) visitante substitution Agustin Echeverria
+    min 68 (2T 28) local     card_yellow  Juan Peralta
+    min 68 (2T 28) visitante card_red     Renzo Angel Damián Godoy
+    min 69 (2T 29) visitante substitution Aaron Caballero
+    min 70 (2T 30) visitante substitution Lucas Mariano Salas Maidana
+    min 80 (2T 40) visitante substitution Maximiliano Carrasco
+    min 80 (2T 40) visitante substitution Octavio Cantero
+  marcador  · eventos 24-35 · guardado 24-35
+  tries     · 4-5 (guardado 4-5)
+  arbitro   · RICHARD PONIATYCHYN (guardado: RICHARD PONIATYCHYN)
+  guardado  · 23 local · 23 visitante · 31 eventos
+
+curne-m19 vs regatas-de-resistencia-m19 · APERTURA 2026 · tarjeta 297099  ·  6ebc74df-016c-444b-b423-8a6085e27bb6
+  local     · curne-m19 · 23 jugadores · 0 con ficha fijada
+  visitante · regatas-de-resistencia-m19 · 23 jugadores · 6 con ficha fijada
+  eventos   · 34
+    min  8 (1T 8) visitante try          Joaquín Aranda Soria Ojeda
+    min 16 (1T 16) visitante try          Valentino Birocco
+    min 17 (1T 17) visitante conversion   Maximiliano Bernad
+    min 20 (1T 20) local     card_yellow  Gianfranco Gambelli
+    min 27 (1T 27) visitante penalty_goal Maximiliano Bernad
+    min 32 (1T 32) local     substitution Matias Ponce
+    min 32 (1T 32) local     injury       Matias Ponce
+    min 33 (1T 33) visitante try          Maximiliano Bernad
+    min 34 (1T 34) visitante conversion   Maximiliano Bernad
+    min 35 (1T 35) local     substitution Nicolas Joel Gonzalez Ovalle
+    min 39 (1T 39) visitante try          Jeremias Agustín Lucero
+    min 45 (2T 5) visitante try          Lucca Sebatian Moltrasio Romagnoli
+    min 46 (2T 6) visitante conversion   Maximiliano Bernad
+    min 49 (2T 9) visitante try          Maximiliano Bernad
+    min 50 (2T 10) local     substitution Bonazzola Faustino Bonazzola
+    min 50 (2T 10) local     substitution Gael Cuevas Corsi
+    min 50 (2T 10) local     substitution Thiago Freschi
+    min 50 (2T 10) visitante substitution Jeremias Agustín Lucero
+    min 53 (2T 13) visitante substitution Ulises Uziel Veron Aguirre
+    min 53 (2T 13) visitante substitution Paulo Niclis
+    min 54 (2T 14) local     conversion   Maximo Moreiramasdeu
+    min 54 (2T 14) local     try          Tomas Miro
+    min 56 (2T 16) visitante substitution Renzo Joaquin Gomez
+    min 56 (2T 16) visitante substitution Jeremias Bieski Bejuk
+    min 60 (2T 20) local     try          Tomas Miro
+    min 61 (2T 21) local     substitution Donato Lottero
+    min 64 (2T 24) visitante substitution Juan Ignacio Cladera
+    min 64 (2T 24) visitante substitution Joaquín Aranda Soria Ojeda
+    min 70 (2T 30) visitante try          Jonas Cid
+    min 71 (2T 31) visitante conversion   Maximiliano Bernad
+    min 73 (2T 33) local     try          Agustin Gabriel Mendoza
+    min 75 (2T 35) local     substitution Valentino Vallejos
+    min 75 (2T 35) visitante try          Francisco Riese Michalak
+    min 76 (2T 36) visitante conversion   Maximiliano Bernad
+  marcador  · eventos 17-53 · guardado 17-53
+  tries     · 3-8 (guardado 3-8)
+  arbitro   · RODRIGO SAUCO (guardado: RODRIGO SAUCO)
+  guardado  · 23 local · 23 visitante · 34 eventos
+
+taraguy-r-c-m19-a vs aranduroga-r-c-m19-a · APERTURA 2026 · tarjeta 297098  ·  5b35b964-256f-490a-be2f-d3c1536df0d8
+  local     · taraguy-r-c-m19-a · 23 jugadores · 0 con ficha fijada
+  visitante · aranduroga-r-c-m19-a · 23 jugadores · 0 con ficha fijada
+  eventos   · 26
+    min  4 (1T 4) visitante penalty_goal Joaquín Meza
+    min 16 (1T 16) visitante card_yellow  Artemio Brianti Catapano
+    min 17 (1T 17) local     penalty_try  
+    min 23 (1T 23) local     try          Emiliano Piragine
+    min 25 (1T 25) visitante card_yellow  Joaquín Meza
+    min 35 (1T 35) visitante try          Gianluca Dascenzo
+    min 46 (2T 6) local     substitution Gonzalo Fernandez Pellizzari
+    min 52 (2T 12) visitante injury       Lucas Sangiorgio
+    min 54 (2T 14) local     substitution Ignacio Innocente
+    min 55 (2T 15) visitante substitution Rene Braun
+    min 58 (2T 18) visitante substitution Franco Martí
+    min 59 (2T 19) local     substitution Juan Eusebio Torrent Leconte
+    min 61 (2T 21) visitante card_yellow  Augusto Javier Ferreyra Vega
+    min 63 (2T 23) local     try          Benicio Paterlini Roch
+    min 63 (2T 23) local     conversion   Juan Baltazar Castillo Odena
+    min 64 (2T 24) local     try          Facundo Solari
+    min 64 (2T 24) local     conversion   Juan Baltazar Castillo Odena
+    min 65 (2T 25) local     card_yellow  Emiliano Piragine
+    min 69 (2T 29) local     card_red     Sebastian Gomez Moreno
+    min 71 (2T 31) local     substitution Ivan Carabajal
+    min 71 (2T 31) local     substitution Jose Ruiz Diaz
+    min 80 (2T 40) visitante substitution Gianluca Dascenzo
+    min 80 (2T 40) visitante substitution Benjamín Sánchez Malgor
+    min 80 (2T 40) visitante substitution Lucas Sangiorgio
+    min 80 (2T 40) visitante substitution Gael Grachot
+    min 80 (2T 40) visitante substitution Benicio Capitani
+  marcador  · eventos 26-8 · guardado 26-8
+  tries     · 4-1 (guardado 4-1)
+  arbitro   · JOAQUÍN DE JESÚS ROMERO (guardado: JOAQUÍN DE JESÚS ROMERO)
+  guardado  · 23 local · 23 visitante · 26 eventos
+
+aranduroga-r-c-m19-b vs sixty-r-c-m19 · APERTURA 2026 · tarjeta 296245  ·  047a33cc-8339-42ef-81f9-2d82556a3f8c
+  local     · aranduroga-r-c-m19-b · 23 jugadores · 0 con ficha fijada
+  visitante · sixty-r-c-m19 · 23 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min  8 (1T 8) visitante conversion   Iñaki Ottavis Gutierrez
+    min  8 (1T 8) visitante try          Joaquin Zapata
+    min 21 (1T 21) visitante conversion   Iñaki Ottavis Gutierrez
+    min 21 (1T 21) visitante try          Lautaro Angarola Sang
+    min 26 (1T 26) visitante substitution Lucas Mariano Salas Maidana
+    min 31 (1T 31) local     substitution Franco Raúl Vallejos Olivieri
+    min 34 (1T 34) visitante try          Julian Zuazquita
+    min 42 (2T 2) local     conversion   Bautista Flores Cattay
+    min 42 (2T 2) local     try          Gael Grachot
+    min 43 (2T 3) visitante substitution Octavio Benjamin Correa
+    min 50 (2T 10) local     substitution Pablo Rivas
+    min 50 (2T 10) local     substitution Rene Braun
+    min 51 (2T 11) visitante substitution Ignacio Valentin Paz
+    min 51 (2T 11) visitante substitution Agustin Echeverria
+    min 53 (2T 13) visitante substitution Enzo Cimbaro
+    min 53 (2T 13) visitante substitution Lautaro Angarola Sang
+    min 55 (2T 15) local     try          Gael Grachot
+    min 55 (2T 15) local     conversion   Bautista Flores Cattay
+    min 58 (2T 18) visitante try          Iñaki Ottavis Gutierrez
+    min 58 (2T 18) visitante conversion   Iñaki Ottavis Gutierrez
+    min 60 (2T 20) local     substitution Thiago Berger
+    min 63 (2T 23) visitante injury       Dardo Toribio Rodriguez
+    min 66 (2T 26) visitante substitution Octavio Cantero
+    min 80 (2T 40) local     substitution Lazaro Villagra
+    min 80 (2T 40) local     substitution Benjamin Romero Artaza
+    min 80 (2T 40) local     substitution Octavio Valentin Zarza
+    min 80 (2T 40) visitante substitution Dardo Toribio Rodriguez
+  marcador  · eventos 14-26 · guardado 14-26
+  tries     · 2-4 (guardado —-—)
+  arbitro   · GUADALUPE PEREYRA (guardado: —)
+  guardado  · 23 local · 23 visitante · 27 eventos
+
+aranduroga-r-c-m19-a vs curne-m19 · APERTURA 2026 · tarjeta 296243  ·  6502f991-33d5-4c2c-b9cf-201e471257da
+  local     · aranduroga-r-c-m19-a · 23 jugadores · 0 con ficha fijada
+  visitante · curne-m19 · 23 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min 17 (1T 17) local     conversion   Bautista Dandrea
+    min 17 (1T 17) local     try          Santiago Tomassone
+    min 20 (1T 20) local     penalty_goal Bautista Dandrea
+    min 20 (1T 20) local     card_yellow  Gabriel Brian Diaz Colodrero
+    min 21 (1T 21) visitante card_yellow  Lucas Rios
+    min 26 (1T 26) local     try          Gabriel Brian Diaz Colodrero
+    min 27 (1T 27) local     substitution Felipe Belo Fages
+    min 45 (2T 5) local     card_yellow  Artemio Brianti Catapano
+    min 47 (2T 7) visitante substitution Agustin Belotti Haedo
+    min 48 (2T 8) local     substitution Lazaro Villagra
+    min 48 (2T 8) local     substitution Benjamin Romero Artaza
+    min 52 (2T 12) visitante conversion   Santiago Grehan
+    min 52 (2T 12) visitante substitution Thiago Freschi
+    min 52 (2T 12) visitante try          Franco Sotto Hilgenberg
+    min 59 (2T 19) visitante substitution Benjamin Sanchez
+    min 65 (2T 25) local     substitution Gabriel Brian Diaz Colodrero
+    min 70 (2T 30) local     substitution Artemio Brianti Catapano
+    min 73 (2T 33) visitante substitution Franco Sotto Hilgenberg
+    min 73 (2T 33) visitante substitution Juan Nicolas Beker
+    min 73 (2T 33) visitante substitution Lucas Rios
+    min 73 (2T 33) visitante substitution Tomas Miro
+    min 75 (2T 35) local     try          Gianluca Dascenzo
+    min 75 (2T 35) visitante penalty_goal Santiago Grehan
+    min 80 (2T 40) local     substitution Augusto Javier Ferreyra Vega
+  marcador  · eventos 20-10 · guardado 20-10
+  tries     · 3-1 (guardado —-—)
+  arbitro   · CRISTIAN SEBASTIAN CABRERA ALMOZNI (guardado: —)
+  guardado  · 23 local · 23 visitante · 24 eventos
+
+taraguy-r-c-m19-a vs taraguy-r-c-m19-b · APERTURA 2026 · tarjeta 296244  ·  68d1098f-0f9f-4b9d-8a02-dad361a35895
+  local     · taraguy-r-c-m19-a · 21 jugadores · 0 con ficha fijada
+  visitante · taraguy-r-c-m19-b · 22 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min  1 (1T 1) visitante try          Gonzalo Fernandez Pellizzari
+    min  1 (1T 1) visitante conversion   Facundo Solari
+    min 10 (1T 10) visitante try          Gonzalo Fernandez Pellizzari
+    min 13 (1T 13) local     try          Santiago Ramón Albornoz
+    min 15 (1T 15) visitante substitution Juan Cruz Soto Centurión
+    min 22 (1T 22) visitante card_yellow  Ignacio Innocente
+    min 23 (1T 23) local     try          Santiago Ramón Albornoz
+    min 23 (1T 23) local     conversion   Juan Baltazar Castillo Odena
+    min 23 (1T 23) local     substitution Santiago Ramón Albornoz
+    min 27 (1T 27) local     substitution Felipe Prieto
+    min 33 (1T 33) visitante try          Ignacio Romero Ratier
+    min 33 (1T 33) visitante conversion   Santiago Benjamin Samudio
+    min 44 (1T 44) visitante try          Justo Gonzalez Mortola
+    min 44 (1T 44) visitante conversion   Santiago Benjamin Samudio
+    min 42 (2T 2) local     try          Emiliano Piragine
+    min 42 (2T 2) local     substitution Vicente Figueroa
+    min 46 (2T 6) visitante substitution Justo Gonzalez Mortola
+    min 47 (2T 7) local     substitution Sebastian Gomez Moreno
+    min 51 (2T 11) visitante substitution Genaro Amadey
+    min 51 (2T 11) visitante substitution Sebastian Arreseygor
+    min 57 (2T 17) local     card_yellow  Felipe Roetti
+    min 66 (2T 26) local     try          Felipe Roetti
+  marcador  · eventos 22-26 · guardado 22-26
+  tries     · 4-4 (guardado —-—)
+  arbitro   · JUAN MARQUEZ (guardado: —)
+  guardado  · 21 local · 22 visitante · 22 eventos
+
+san-patricio-m19 vs regatas-de-resistencia-m19 · APERTURA 2026 · tarjeta 296242  ·  1e143247-4e13-4d2b-83d3-33d84ce04232
+  local     · san-patricio-m19 · 23 jugadores · 0 con ficha fijada
+  visitante · regatas-de-resistencia-m19 · 22 jugadores · 6 con ficha fijada
+  eventos   · 23
+    min  5 (1T 5) visitante try          Patricio Joaquín Carballo Chilissi
+    min  6 (1T 6) visitante conversion   Maximiliano Bernad
+    min  8 (1T 8) visitante try          Joaquin Santamaría
+    min 13 (1T 13) visitante try          Jeremias Bieski Bejuk
+    min 13 (1T 13) visitante conversion   Maximiliano Bernad
+    min 19 (1T 19) visitante try          Jeremias Agustín Lucero
+    min 22 (1T 22) visitante card_yellow  Ian Agustín Obes
+    min 28 (1T 28) visitante try          Joaquín Aranda Soria Ojeda
+    min 29 (1T 29) visitante conversion   Maximiliano Bernad
+    min 35 (1T 35) visitante card_yellow  Jeremias Bieski Bejuk
+    min 40 (2T 0) visitante substitution Ian Agustín Obes
+    min 42 (2T 2) local     try          Benjamin Gomez Mondaca
+    min 46 (2T 6) visitante substitution Ulises Uziel Veron Aguirre
+    min 56 (2T 16) local     substitution Benjamin Gomez Mondaca
+    min 56 (2T 16) local     substitution Juan Peralta
+    min 56 (2T 16) local     substitution Lucas Santino Cabrisas
+    min 63 (2T 23) local     card_yellow  Octavio Alejo Ojeda
+    min 63 (2T 23) visitante substitution Santino Aranda
+    min 63 (2T 23) visitante substitution Joaquin Santamaría
+    min 63 (2T 23) visitante substitution Jeremias Bieski Bejuk
+    min 64 (2T 24) visitante try          Valentino Birocco
+    min 74 (2T 34) visitante try          Maximiliano Bernad
+    min 80 (2T 40) visitante try          Joaquin Ezequiel Zalazar
+  marcador  · eventos 5-46 · guardado 5-46
+  tries     · 1-8 (guardado —-—)
+  arbitro   · NICOLÁS BRITOS (guardado: —)
+  guardado  · 23 local · 22 visitante · 23 eventos
+
+listo · 28 partidos

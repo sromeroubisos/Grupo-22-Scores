@@ -1,0 +1,1333 @@
+tarjetas oficiales 45bfef25
+
+centro-naval-femenino vs lanus-r-c-femenino · 45bfef25 · tarjeta 290719  ·  577a7a63-59aa-491c-a212-992b299129c3
+  local     · centro-naval-femenino · 16 jugadores · 16 con ficha fijada
+  visitante · lanus-r-c-femenino · 13 jugadores · 13 con ficha fijada
+  eventos   · 15
+    min  6 (1T 6) local     try          Deborah Fretes Hernandez
+    min  6 (1T 6) local     conversion   Pierina Guerello
+    min  6 (1T 6) local     try          Chiara Polano Varela
+    min 18 (1T 18) visitante card_yellow  Polina Brisa Umede
+    min 21 (1T 21) visitante try          María Guadalupe Escudero
+    min 27 (1T 27) visitante try          Jimena Sofia Tevez
+    min 46 (2T 6) local     penalty_goal Pierina Guerello
+    min 50 (2T 10) visitante substitution Natalia Eiring
+    min 51 (2T 11) visitante substitution Ximena Ruschioni
+    min 61 (2T 21) visitante try          Polina Brisa Umede
+    min 63 (2T 23) visitante try          Iara Lugo
+    min 69 (2T 29) visitante card_yellow  Zahira Luciana Balbi
+    min 80 (2T 40) local     try          Pierina Guerello
+    min 90 (2T 50) local     try          Naiara Romero
+    min 90 (2T 50) local     conversion   Pierina Guerello
+  marcador  · eventos 27-20 · guardado 27-20
+  tries     · 4-4 (guardado 4-4)
+  arbitro   · SANTIAGO ARAOZ (guardado: SANTIAGO ARAOZ)
+  guardado  · 16 local · 13 visitante · 15 eventos
+
+ciudad-femenino vs del-oeste-rugby-femenino · 45bfef25 · tarjeta 290718  ·  7ed27ad4-c9ea-4b46-b823-525d6443bfa3
+  local     · ciudad-femenino · 18 jugadores · 18 con ficha fijada
+  visitante · del-oeste-rugby-femenino · 18 jugadores · 18 con ficha fijada
+  eventos   · 10
+    min  6 (1T 6) local     try          Daniela Agustina Rovelli
+    min  7 (1T 7) local     conversion   Alfonsina Avendaño
+    min  8 (1T 8) local     try          Daniela Agustina Rovelli
+    min  9 (1T 9) local     conversion   Alfonsina Avendaño
+    min 12 (1T 12) visitante try          Melina Mercado
+    min 24 (1T 24) local     try          Ludmila Elena Toledo Pacher
+    min 33 (1T 33) local     try          Ludmila Elena Toledo Pacher
+    min 50 (2T 10) local     try          Lara Rioboo
+    min 62 (2T 22) local     try          Valentina Castro
+    min 75 (2T 35) visitante try          Melina Mercado
+  marcador  · eventos 34-10 · guardado 34-10
+  tries     · 6-2 (guardado 6-2)
+  arbitro   · DAMIAN GONZALO DIAZ (guardado: DAMIAN GONZALO DIAZ)
+  guardado  · 18 local · 18 visitante · 10 eventos
+
+la-plata-femenino vs la-salle-femenino · 45bfef25 · tarjeta 290717  ·  1802a4c7-f342-4cf7-ad33-4dcfb6c3d8d4
+  local     · la-plata-femenino · 16 jugadores · 16 con ficha fijada
+  visitante · la-salle-femenino · 15 jugadores · 15 con ficha fijada
+  eventos   · 29
+    min  1 (1T 1) local     conversion   Sol Josefina Rodriguez
+    min  1 (1T 1) local     conversion   Sol Josefina Rodriguez
+    min  1 (1T 1) local     conversion   Sol Josefina Rodriguez
+    min  1 (1T 1) local     conversion   Sol Josefina Rodriguez
+    min  1 (1T 1) local     conversion   Sol Josefina Rodriguez
+    min  1 (1T 1) local     conversion   Sol Josefina Rodriguez
+    min  1 (1T 1) local     conversion   Sol Josefina Rodriguez
+    min  1 (1T 1) local     conversion   Sol Josefina Rodriguez
+    min  1 (1T 1) local     conversion   Sol Josefina Rodriguez
+    min  1 (1T 1) local     conversion   Sol Josefina Rodriguez
+    min  1 (1T 1) local     try          Sol Josefina Rodriguez
+    min  1 (1T 1) local     try          Sol Josefina Rodriguez
+    min  1 (1T 1) local     try          Sol Josefina Rodriguez
+    min  1 (1T 1) local     try          Sol Josefina Rodriguez
+    min  1 (1T 1) local     try          Sol Josefina Rodriguez
+    min  1 (1T 1) local     try          Sol Josefina Rodriguez
+    min  1 (1T 1) local     try          Sol Josefina Rodriguez
+    min  1 (1T 1) local     try          Sol Josefina Rodriguez
+    min  1 (1T 1) local     try          Sol Josefina Rodriguez
+    min  1 (1T 1) local     try          Sol Josefina Rodriguez
+    min  1 (1T 1) local     try          Sol Josefina Rodriguez
+    min  1 (1T 1) local     try          Sol Josefina Rodriguez
+    min  1 (1T 1) local     try          Sol Josefina Rodriguez
+    min  1 (1T 1) local     try          Sol Josefina Rodriguez
+    min  1 (1T 1) local     try          Sol Josefina Rodriguez
+    min  1 (1T 1) local     try          Sol Josefina Rodriguez
+    min  1 (1T 1) local     try          Sol Josefina Rodriguez
+    min  1 (1T 1) local     conversion   Sol Josefina Rodriguez
+    min  1 (1T 1) local     try          Sol Josefina Rodriguez
+  marcador  · eventos 112-0 · guardado 112-0
+  tries     · 18-0 (guardado 18-0)
+  arbitro   · SANTIAGO BELLO (guardado: SANTIAGO BELLO)
+  guardado  · 16 local · 15 visitante · 29 eventos
+
+beromama-femenino vs cuq-femenino · 45bfef25 · tarjeta 290716  ·  cfc21cb3-0e92-40e2-a11e-a87c2c3cd359
+  local     · beromama-femenino · 18 jugadores · 18 con ficha fijada
+  visitante · cuq-femenino · 18 jugadores · 18 con ficha fijada
+  eventos   · 33
+    min  1 (1T 1) visitante try          Priscila Vlaho
+    min  4 (1T 4) local     try          Iris Alejandra López Ledezma
+    min  7 (1T 7) visitante try          Aisha Tachini
+    min  8 (1T 8) visitante conversion   Debora Picerno
+    min  9 (1T 9) visitante try          Martina Iribarne
+    min 16 (1T 16) visitante card_yellow  Emilce Velaustegui
+    min 23 (1T 23) visitante try          Emilce Velaustegui
+    min 24 (1T 24) visitante conversion   Debora Picerno
+    min 26 (1T 26) visitante card_yellow  Emilce Velaustegui
+    min 26 (1T 26) visitante card_red     Emilce Velaustegui
+    min 32 (1T 32) visitante try          Priscila Vlaho
+    min 40 (2T 0) local     substitution Maria Ines Herrera
+    min 40 (2T 0) local     substitution Iara Lopez
+    min 40 (2T 0) local     substitution Diana Rosales
+    min 42 (2T 2) visitante substitution Elizabeth Gabriela Belen Escofet
+    min 43 (2T 3) visitante try          Sabrina Anabel Chavez
+    min 43 (2T 3) visitante conversion   Debora Picerno
+    min 47 (2T 7) visitante try          Martina Iribarne
+    min 48 (2T 8) visitante conversion   Debora Picerno
+    min 52 (2T 12) local     try          Micaela Soledad Freire
+    min 55 (2T 15) visitante try          Rocio Patricia Malsenido
+    min 56 (2T 16) visitante substitution Carla Robledo
+    min 59 (2T 19) local     substitution Iris Alejandra López Ledezma
+    min 59 (2T 19) local     substitution Eliana Sabrina Ibarra
+    min 59 (2T 19) visitante try          Josefina Castelnuovo
+    min 59 (2T 19) visitante conversion   Josefina Castelnuovo
+    min 60 (2T 20) visitante try          Josefina Castelnuovo
+    min 61 (2T 21) visitante substitution Josefina Castelnuovo
+    min 61 (2T 21) visitante conversion   Josefina Castelnuovo
+    min 65 (2T 25) visitante try          Aisha Tachini
+    min 66 (2T 26) visitante conversion   Debora Picerno
+    min 66 (2T 26) visitante try          Estefanía Picerno
+    min 68 (2T 28) visitante conversion   Debora Picerno
+  marcador  · eventos 10-76 · guardado 10-76
+  tries     · 2-12 (guardado 2-12)
+  arbitro   · CAMILA ABRIL DÍAZ (guardado: CAMILA ABRIL DÍAZ)
+  guardado  · 18 local · 18 visitante · 33 eventos
+
+ciudad-femenino vs beromama-femenino · 45bfef25 · tarjeta 290741  ·  aa866490-adb1-4c08-a29d-47debe787114
+  local     · ciudad-femenino · 18 jugadores · 18 con ficha fijada
+  visitante · beromama-femenino · 25 jugadores · 25 con ficha fijada
+  eventos   · 24
+    min  3 (1T 3) local     try          Carolina Ariana Carrera Venegoni
+    min  5 (1T 5) local     try          Candela Pedalino
+    min  8 (1T 8) local     try          Alfonsina Avendaño
+    min 12 (1T 12) local     try          Lara Rioboo
+    min 13 (1T 13) local     conversion   Paola Candia
+    min 18 (1T 18) local     try          Valentina Castro
+    min 22 (1T 22) local     try          Ludmila Elena Toledo Pacher
+    min 27 (1T 27) local     try          Candela Pedalino
+    min 44 (2T 4) local     try          Candela Pedalino
+    min 45 (2T 5) local     conversion   Paola Candia
+    min 50 (2T 10) local     substitution Lara Rioboo
+    min 50 (2T 10) local     substitution Valentina Castro
+    min 50 (2T 10) local     substitution Maria Belen Garcia Remiro
+    min 50 (2T 10) local     try          Camila De Los Ángeles Vargaz
+    min 51 (2T 11) local     conversion   Alfonsina Avendaño
+    min 55 (2T 15) local     substitution Camila De Los Ángeles Vargaz
+    min 55 (2T 15) local     substitution Paola Candia
+    min 55 (2T 15) local     try          Carolina Ariana Carrera Venegoni
+    min 56 (2T 16) local     conversion   Carolina Ariana Carrera Venegoni
+    min 58 (2T 18) local     try          Candela Pedalino
+    min 62 (2T 22) local     try          Agustina Ornella Rocca
+    min 63 (2T 23) local     conversion   Carolina Ariana Carrera Venegoni
+    min 66 (2T 26) local     try          Candela Pedalino
+    min 67 (2T 27) local     conversion   Alfonsina Avendaño
+  marcador  · eventos 77-0 · guardado 77-0
+  tries     · 13-0 (guardado 13-0)
+  arbitro   · NICOLAS OLIVER (guardado: NICOLAS OLIVER)
+  guardado  · 18 local · 25 visitante · 24 eventos
+
+lanus-r-c-femenino vs cuq-femenino · 45bfef25 · tarjeta 290743  ·  f191cca5-2e30-4568-843d-2ceb87302511
+  local     · lanus-r-c-femenino · 18 jugadores · 18 con ficha fijada
+  visitante · cuq-femenino · 16 jugadores · 16 con ficha fijada
+  eventos   · 23
+    min 11 (1T 11) local     try          Antonella Lezcano
+    min 12 (1T 12) visitante substitution Sabrina Anabel Chavez
+    min 12 (1T 12) visitante injury       Sabrina Anabel Chavez
+    min 13 (1T 13) visitante try          Estefanía Picerno
+    min 20 (1T 20) visitante try          Aisha Tachini
+    min 21 (1T 21) visitante conversion   Debora Picerno
+    min 42 (2T 2) visitante try          Luz Almonti
+    min 43 (2T 3) visitante conversion   Debora Picerno
+    min 51 (2T 11) local     substitution Macarena Alma Jurado
+    min 51 (2T 11) local     substitution Renata Arcas
+    min 54 (2T 14) local     try          Jeglys Viera
+    min 54 (2T 14) local     conversion   Antonella Lezcano
+    min 54 (2T 14) local     substitution Kiara Oliver
+    min 54 (2T 14) local     card_yellow  Jimena Sofia Tevez
+    min 57 (2T 17) local     substitution Tais Abril Lugo
+    min 58 (2T 18) local     card_red     Guadalupe Verza
+    min 58 (2T 18) visitante try          Josefina Castelnuovo
+    min 59 (2T 19) local     try          Antonella Lezcano
+    min 59 (2T 19) visitante conversion   Debora Picerno
+    min 63 (2T 23) visitante try          Emilce Velaustegui
+    min 64 (2T 24) visitante conversion   Josefina Castelnuovo
+    min 68 (2T 28) local     card_yellow  Zahira Luciana Balbi
+    min 68 (2T 28) visitante card_yellow  Martina Iribarne
+  marcador  · eventos 17-33 · guardado 17-33
+  tries     · 3-5 (guardado 3-5)
+  arbitro   · AMILCAR DIAZ (guardado: AMILCAR DIAZ)
+  guardado  · 18 local · 16 visitante · 23 eventos
+
+centro-naval-femenino vs casa-de-padua-femenino · 45bfef25 · tarjeta 290742  ·  50968f48-2413-4423-94e7-fd009a50a4b9
+  local     · centro-naval-femenino · 19 jugadores · 19 con ficha fijada
+  visitante · casa-de-padua-femenino · 16 jugadores · 16 con ficha fijada
+  eventos   · 11
+    min  2 (1T 2) visitante try          Milagros Torres
+    min  2 (1T 2) visitante conversion   Morena Abril Luis
+    min 22 (1T 22) visitante try          Milagros Torres
+    min 54 (2T 14) visitante try          Cecilia Altini
+    min 55 (2T 15) visitante substitution Ivana Cervello
+    min 58 (2T 18) visitante substitution Melody Caballero
+    min 60 (2T 20) visitante try          Leyla Nahir Amud
+    min 60 (2T 20) visitante conversion   Morena Abril Luis
+    min 60 (2T 20) visitante substitution Paula Bianca Galarza Letelier
+    min 69 (2T 29) visitante try          Cecilia Altini
+    min 145 (2T 105) visitante try          Morena Abril Luis
+  marcador  · eventos 0-34 · guardado 0-34
+  tries     · 0-6 (guardado 0-6)
+  arbitro   · LUCAS ESPINOSA (guardado: LUCAS ESPINOSA)
+  guardado  · 19 local · 16 visitante · 11 eventos
+
+beromama-femenino vs la-plata-femenino · 45bfef25 · tarjeta 290749  ·  90a1a1a4-2847-4463-995b-9303b019a9a4
+  local     · beromama-femenino · 17 jugadores · 17 con ficha fijada
+  visitante · la-plata-femenino · 12 jugadores · 12 con ficha fijada
+  eventos   · 26
+    min  1 (1T 1) visitante try          Rocio Ale
+    min  1 (1T 1) visitante conversion   Rocio Ale
+    min  1 (1T 1) visitante try          Rocio Ale
+    min  1 (1T 1) visitante conversion   Rocio Ale
+    min  1 (1T 1) visitante try          Rocio Ale
+    min  1 (1T 1) visitante conversion   Rocio Ale
+    min  1 (1T 1) visitante try          Rocio Ale
+    min  1 (1T 1) visitante try          Rocio Ale
+    min  1 (1T 1) visitante try          Rocio Ale
+    min  1 (1T 1) visitante try          Rocio Ale
+    min  1 (1T 1) visitante conversion   Rocio Ale
+    min  1 (1T 1) visitante try          Rocio Ale
+    min  1 (1T 1) visitante try          Rocio Ale
+    min  1 (1T 1) visitante conversion   Rocio Ale
+    min  1 (1T 1) visitante try          Rocio Ale
+    min  1 (1T 1) visitante try          Rocio Ale
+    min  1 (1T 1) visitante conversion   Rocio Ale
+    min  1 (1T 1) visitante try          Rocio Ale
+    min  1 (1T 1) visitante try          Rocio Ale
+    min  1 (1T 1) visitante conversion   Rocio Ale
+    min  1 (1T 1) visitante try          Rocio Ale
+    min  1 (1T 1) visitante try          Rocio Ale
+    min  1 (1T 1) visitante try          Rocio Ale
+    min  1 (1T 1) visitante try          Rocio Ale
+    min 40 (2T 0) local     substitution Natalia Paladino
+    min 69 (2T 29) local     try          Brenda Nicole Godoy
+  marcador  · eventos 5-99 · guardado 5-99
+  tries     · 1-17 (guardado 1-17)
+  arbitro   · NICOLAS RIVERA (guardado: NICOLAS RIVERA)
+  guardado  · 17 local · 12 visitante · 26 eventos
+
+casa-de-padua-femenino vs ciudad-femenino · 45bfef25 · tarjeta 290748  ·  f683d172-8701-42a6-827b-a7e996e4663f
+  local     · casa-de-padua-femenino · 15 jugadores · 15 con ficha fijada
+  visitante · ciudad-femenino · 17 jugadores · 17 con ficha fijada
+  eventos   · 19
+    min  2 (1T 2) local     try          Natalia Torres
+    min  4 (1T 4) visitante try          Ludmila Elena Toledo Pacher
+    min 18 (1T 18) local     try          Cecilia Altini
+    min 18 (1T 18) local     conversion   Morena Abril Luis
+    min 24 (1T 24) visitante try          Valentina Castro
+    min 24 (1T 24) visitante card_yellow  Alejandra Salas
+    min 24 (1T 24) visitante substitution Paola Candia
+    min 25 (1T 25) visitante conversion   Alfonsina Avendaño
+    min 29 (1T 29) visitante conversion   Alfonsina Avendaño
+    min 29 (1T 29) visitante substitution Lara Rioboo
+    min 29 (1T 29) visitante try          Candela Pedalino
+    min 29 (1T 29) visitante conversion   Alfonsina Avendaño
+    min 29 (1T 29) visitante conversion   Alfonsina Avendaño
+    min 47 (2T 7) visitante try          Daniela Agustina Rovelli
+    min 52 (2T 12) local     try          Abril Castañares
+    min 60 (2T 20) local     try          Milagros Torres
+    min 63 (2T 23) visitante substitution Eduarda Camilo
+    min 63 (2T 23) visitante try          Daniela Agustina Rovelli
+    min 64 (2T 24) visitante substitution Camila De Los Ángeles Vargaz
+  marcador  · eventos 22-33 · guardado 22-33
+  tries     · 4-5 (guardado 4-5)
+  arbitro   · NICOLAS OLIVER (guardado: NICOLAS OLIVER)
+  guardado  · 15 local · 17 visitante · 19 eventos
+
+cuq-femenino vs centro-naval-femenino · 45bfef25 · tarjeta 290747  ·  fe0f0726-e69f-4733-aa51-c4af39d25cd0
+  local     · cuq-femenino · 15 jugadores · 15 con ficha fijada
+  visitante · centro-naval-femenino · 15 jugadores · 15 con ficha fijada
+  eventos   · 15
+    min  7 (1T 7) local     try          Josefina Castelnuovo
+    min 15 (1T 15) local     substitution Elizabeth Gabriela Belen Escofet
+    min 15 (1T 15) visitante try          Naiara Romero
+    min 18 (1T 18) local     card_yellow  Luz Almonti
+    min 22 (1T 22) visitante try          Naiara Romero
+    min 28 (1T 28) local     try          Josefina Castelnuovo
+    min 29 (1T 29) local     conversion   Josefina Castelnuovo
+    min 43 (2T 3) local     try          Josefina Castelnuovo
+    min 44 (2T 4) local     conversion   Josefina Castelnuovo
+    min 45 (2T 5) visitante card_yellow  Pierina Guerello
+    min 51 (2T 11) local     try          Debora Picerno
+    min 52 (2T 12) local     conversion   Debora Picerno
+    min 61 (2T 21) local     try          Luz Almonti
+    min 62 (2T 22) local     conversion   Josefina Castelnuovo
+    min 67 (2T 27) local     substitution Aisha Tachini
+  marcador  · eventos 33-10 · guardado 33-10
+  tries     · 5-2 (guardado 5-2)
+  arbitro   · CAMILA ABRIL DÍAZ (guardado: CAMILA ABRIL DÍAZ)
+  guardado  · 15 local · 15 visitante · 15 eventos
+
+la-salle-femenino vs lanus-r-c-femenino · 45bfef25 · tarjeta 290746  ·  4009cea5-daa7-4968-8b24-81c3fd53043e
+  local     · la-salle-femenino · 18 jugadores · 18 con ficha fijada
+  visitante · lanus-r-c-femenino · 17 jugadores · 17 con ficha fijada
+  eventos   · 11
+    min  4 (1T 4) visitante try          Antonella Lezcano
+    min  4 (1T 4) visitante conversion   Jeglys Viera
+    min  8 (1T 8) visitante try          Iara Lugo
+    min  8 (1T 8) visitante conversion   Antonella Lezcano
+    min 12 (1T 12) visitante try          Jimena Sofia Tevez
+    min 16 (1T 16) visitante try          Barbara Luciana Vilches
+    min 30 (1T 30) local     injury       Natalia Daniela Anahi Araujo
+    min 49 (2T 9) visitante try          Zahira Luciana Balbi
+    min 53 (2T 13) visitante try          Jeglys Viera
+    min 58 (2T 18) visitante try          Polina Brisa Umede
+    min 60 (2T 20) visitante try          Ariana Abril Castaño
+  marcador  · eventos 0-44 · guardado 0-44
+  tries     · 0-8 (guardado 0-8)
+  arbitro   · ENZO MENEGUZ (guardado: ENZO MENEGUZ)
+  guardado  · 18 local · 17 visitante · 11 eventos
+
+lanus-r-c-femenino vs del-oeste-rugby-femenino · 45bfef25 · tarjeta 290754  ·  720322c9-5bec-4940-bc76-547a97722866
+  local     · lanus-r-c-femenino · 18 jugadores · 18 con ficha fijada
+  visitante · del-oeste-rugby-femenino · 18 jugadores · 18 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 22-17
+  tries     · 0-0 (guardado —-—)
+  arbitro   · SANTIAGO DIAZ (guardado: SANTIAGO DIAZ)
+  guardado  · 18 local · 18 visitante · 0 eventos
+
+centro-naval-femenino vs la-salle-femenino · 45bfef25 · tarjeta 290753  ·  1fa5d0b1-8433-475a-8f61-cf0443a32b25
+  local     · centro-naval-femenino · 17 jugadores · 17 con ficha fijada
+  visitante · la-salle-femenino · 13 jugadores · 13 con ficha fijada
+  eventos   · 11
+    min  3 (1T 3) local     try          Naiara Romero
+    min  3 (1T 3) local     try          Agustina Diz
+    min  3 (1T 3) local     drop_goal    Priscila Luana Ramos
+    min  3 (1T 3) local     conversion   Priscila Luana Ramos
+    min  3 (1T 3) local     try          Delfina Diaz Alberdi
+    min  3 (1T 3) visitante try          María Paula Pedrozo
+    min  3 (1T 3) visitante conversion   Ana Carla Levante
+    min  3 (1T 3) visitante try          María Paula Pedrozo
+    min 43 (2T 3) local     conversion   Priscila Luana Ramos
+    min 43 (2T 3) local     card_yellow  Yusmely Contreras
+    min 43 (2T 3) local     card_yellow  Chiara Polano Varela
+  marcador  · eventos 22-12 · guardado 22-12
+  tries     · 3-2 (guardado 3-2)
+  arbitro   · DIEGO FEDERICO BAQUERO (guardado: DIEGO FEDERICO BAQUERO)
+  guardado  · 17 local · 13 visitante · 11 eventos
+
+ciudad-femenino vs cuq-femenino · 45bfef25 · tarjeta 290752  ·  70631b42-de3e-4c3b-9bb3-65e8cb44f9f2
+  local     · ciudad-femenino · 18 jugadores · 18 con ficha fijada
+  visitante · cuq-femenino · 14 jugadores · 14 con ficha fijada
+  eventos   · 14
+    min  2 (1T 2) local     card_yellow  Renata Sosa Quintana
+    min  5 (1T 5) local     try          Candela Pedalino
+    min  6 (1T 6) local     conversion   Alfonsina Avendaño
+    min 13 (1T 13) visitante try          Luz Almonti
+    min 13 (1T 13) visitante conversion   Debora Picerno
+    min 14 (1T 14) visitante try          Josefina Castelnuovo
+    min 14 (1T 14) visitante conversion   Debora Picerno
+    min 15 (1T 15) local     try          Ludmila Elena Toledo Pacher
+    min 45 (2T 5) visitante card_yellow  Priscila Vlaho
+    min 46 (2T 6) local     try          Lara Rioboo
+    min 55 (2T 15) local     try          Eduarda Camilo
+    min 62 (2T 22) visitante card_yellow  Martina Iribarne
+    min 65 (2T 25) local     try          Candela Pedalino
+    min 66 (2T 26) local     conversion   Alfonsina Avendaño
+  marcador  · eventos 29-14 · guardado 29-14
+  tries     · 5-2 (guardado 5-2)
+  arbitro   · SIMÓN LEAVI PREUX (guardado: SIMÓN LEAVI PREUX)
+  guardado  · 18 local · 14 visitante · 14 eventos
+
+la-plata-femenino vs casa-de-padua-femenino · 45bfef25 · tarjeta 290751  ·  00ea3947-2eb0-4a63-b6ba-a4a13dc1abf5
+  local     · la-plata-femenino · 13 jugadores · 13 con ficha fijada
+  visitante · casa-de-padua-femenino · 17 jugadores · 17 con ficha fijada
+  eventos   · 14
+    min  1 (1T 1) local     try          Rocio Ale
+    min  1 (1T 1) local     conversion   Rocio Ale
+    min  1 (1T 1) local     try          Rocio Ale
+    min  1 (1T 1) local     conversion   Rocio Ale
+    min  1 (1T 1) local     try          Rocio Ale
+    min  1 (1T 1) local     conversion   Rocio Ale
+    min  1 (1T 1) local     try          Rocio Ale
+    min  1 (1T 1) local     conversion   Rocio Ale
+    min  1 (1T 1) local     conversion   Rocio Ale
+    min  1 (1T 1) local     try          Rocio Ale
+    min  1 (1T 1) local     penalty_goal Rocio Ale
+    min 21 (1T 21) visitante try          Cecilia Altini
+    min 50 (2T 10) visitante try          Iara Amud
+    min 62 (2T 22) visitante try          Cecilia Altini
+  marcador  · eventos 38-15 · guardado 38-15
+  tries     · 5-3 (guardado 5-3)
+  arbitro   · SANTIAGO BELLO (guardado: SANTIAGO BELLO)
+  guardado  · 13 local · 17 visitante · 14 eventos
+
+casa-de-padua-femenino vs beromama-femenino · 45bfef25 · tarjeta 290759  ·  59e2c258-e2af-4cff-b4eb-e42eb3e1b2ab
+  local     · casa-de-padua-femenino · 15 jugadores · 15 con ficha fijada
+  visitante · beromama-femenino · 25 jugadores · 25 con ficha fijada
+  eventos   · 29
+    min  2 (1T 2) local     try          Natalia Torres
+    min  2 (1T 2) local     conversion   Morena Abril Luis
+    min  5 (1T 5) local     try          Sofía Mariel Gonzalez
+    min  8 (1T 8) local     try          Cecilia Altini
+    min  8 (1T 8) local     conversion   Morena Abril Luis
+    min 14 (1T 14) local     try          Cecilia Altini
+    min 14 (1T 14) local     conversion   Morena Abril Luis
+    min 18 (1T 18) local     try          Leyla Nahir Amud
+    min 18 (1T 18) local     conversion   Morena Abril Luis
+    min 21 (1T 21) local     try          Iara Amud
+    min 21 (1T 21) local     conversion   Morena Abril Luis
+    min 24 (1T 24) local     try          Sofía Mariel Gonzalez
+    min 26 (1T 26) local     try          Natalia Torres
+    min 26 (1T 26) local     conversion   Morena Abril Luis
+    min 30 (1T 30) local     try          Cecilia Altini
+    min 30 (1T 30) local     conversion   Morena Abril Luis
+    min 44 (2T 4) local     try          Sofía Mariel Gonzalez
+    min 46 (2T 6) local     try          Leyla Nahir Amud
+    min 52 (2T 12) local     try          Iara Amud
+    min 52 (2T 12) local     conversion   Morena Abril Luis
+    min 58 (2T 18) local     try          Morena Abril Luis
+    min 58 (2T 18) local     conversion   Morena Abril Luis
+    min 62 (2T 22) local     try          Cecilia Altini
+    min 62 (2T 22) local     conversion   Morena Abril Luis
+    min 66 (2T 26) local     try          Leyla Nahir Amud
+    min 67 (2T 27) local     try          Cecilia Altini
+    min 67 (2T 27) local     conversion   Morena Abril Luis
+    min 69 (2T 29) local     try          Sofía Mariel Gonzalez
+    min 70 (2T 30) local     try          Lourdes Aragon
+  marcador  · eventos 112-0 · guardado 112-0
+  tries     · 18-0 (guardado 18-0)
+  arbitro   · CAMILA ABRIL DÍAZ (guardado: CAMILA ABRIL DÍAZ)
+  guardado  · 15 local · 25 visitante · 29 eventos
+
+la-salle-femenino vs ciudad-femenino · 45bfef25 · tarjeta 290757  ·  8bc592c6-956c-44f7-aa1b-a1723bbc8b4e
+  local     · la-salle-femenino · 18 jugadores · 18 con ficha fijada
+  visitante · ciudad-femenino · 18 jugadores · 18 con ficha fijada
+  eventos   · 18
+    min  3 (1T 3) visitante try          Renata Sosa Quintana
+    min  6 (1T 6) visitante try          Renata Sosa Quintana
+    min 10 (1T 10) visitante try          Candela Pedalino
+    min 15 (1T 15) local     try          Ana Carla Levante
+    min 15 (1T 15) visitante try          Candela Pedalino
+    min 25 (1T 25) visitante try          Julieta Monjes
+    min 26 (1T 26) visitante conversion   Alfonsina Avendaño
+    min 44 (2T 4) visitante try          Ludmila Elena Toledo Pacher
+    min 50 (2T 10) visitante try          Josefina Barbero
+    min 56 (2T 16) visitante try          Candela Pedalino
+    min 57 (2T 17) visitante conversion   Alfonsina Avendaño
+    min 60 (2T 20) visitante substitution Francesca Iacaruso
+    min 60 (2T 20) visitante substitution Carolina Ariana Carrera Venegoni
+    min 60 (2T 20) visitante try          Maria Belen Garcia Remiro
+    min 64 (2T 24) visitante try          Agustina Ornella Rocca
+    min 65 (2T 25) visitante substitution Tais Marinov Frendo
+    min 65 (2T 25) visitante substitution Ludmila Elena Toledo Pacher
+    min 68 (2T 28) visitante substitution Julieta Monjes
+  marcador  · eventos 5-54 · guardado 5-54
+  tries     · 1-10 (guardado 1-10)
+  arbitro   · DAMIAN GONZALO DIAZ (guardado: DAMIAN GONZALO DIAZ)
+  guardado  · 18 local · 18 visitante · 18 eventos
+
+del-oeste-rugby-femenino vs centro-naval-femenino · 45bfef25 · tarjeta 290756  ·  23dcbf81-7238-4c85-a252-dce5d40d1eca
+  local     · del-oeste-rugby-femenino · 18 jugadores · 18 con ficha fijada
+  visitante · centro-naval-femenino · 18 jugadores · 18 con ficha fijada
+  eventos   · 9
+    min  1 (1T 1) local     try          Gloria Alejandra Garcia
+    min  2 (1T 2) local     try          Gloria Alejandra Garcia
+    min 10 (1T 10) visitante try          Pierina Guerello
+    min 17 (1T 17) visitante try          Milagros Lecuona
+    min 18 (1T 18) visitante try          Milagros Lecuona
+    min 54 (2T 14) visitante try          Naiara Romero
+    min 54 (2T 14) visitante conversion   Priscila Luana Ramos
+    min 57 (2T 17) visitante try          Naiara Romero
+    min 57 (2T 17) visitante try          Julieta Begnozzi
+  marcador  · eventos 10-32 · guardado 10-32
+  tries     · 2-6 (guardado 2-6)
+  arbitro   · SANTIAGO DOEYO (guardado: SANTIAGO DOEYO)
+  guardado  · 18 local · 18 visitante · 9 eventos
+
+del-oeste-rugby-femenino vs ciudad-femenino · 45bfef25 · tarjeta 290763  ·  ed07f51a-ca50-4184-90dd-26f3622d8ba7
+  local     · del-oeste-rugby-femenino · 17 jugadores · 17 con ficha fijada
+  visitante · ciudad-femenino · 17 jugadores · 17 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 10-58
+  tries     · 0-0 (guardado —-—)
+  arbitro   · FERNANDO DAVID AGUILAR (guardado: FERNANDO DAVID AGUILAR)
+  guardado  · 17 local · 17 visitante · 0 eventos
+
+lanus-r-c-femenino vs centro-naval-femenino · 45bfef25 · tarjeta 290764  ·  0e2d88bd-9a51-4a7e-be1b-b12f23bc4196
+  local     · lanus-r-c-femenino · 16 jugadores · 16 con ficha fijada
+  visitante · centro-naval-femenino · 18 jugadores · 18 con ficha fijada
+  eventos   · 5
+    min 18 (1T 18) local     try          Iara Lugo
+    min 42 (2T 2) local     substitution Macarena Alma Jurado
+    min 43 (2T 3) local     try          Antonella Lezcano
+    min 53 (2T 13) local     substitution Ximena Ruschioni
+    min 56 (2T 16) visitante try          Julieta Begnozzi
+  marcador  · eventos 10-5 · guardado 10-5
+  tries     · 2-1 (guardado 2-1)
+  arbitro   · JUAN MANUEL CASTILLA ARNÁEZ (guardado: JUAN MANUEL CASTILLA ARNÁEZ)
+  guardado  · 16 local · 18 visitante · 5 eventos
+
+casa-de-padua-femenino vs cuq-femenino · 45bfef25 · tarjeta 290769  ·  f6e1f0ec-b322-4342-b84e-359558e278a2
+  local     · casa-de-padua-femenino · 15 jugadores · 15 con ficha fijada
+  visitante · cuq-femenino · 17 jugadores · 17 con ficha fijada
+  eventos   · 12
+    min  7 (1T 7) local     try          Morena Abril Luis
+    min  7 (1T 7) local     conversion   Morena Abril Luis
+    min 20 (1T 20) local     card_red     Natalia Torres
+    min 29 (1T 29) local     penalty_goal Morena Abril Luis
+    min 52 (2T 12) local     try          Morena Abril Luis
+    min 58 (2T 18) local     try          Leyla Nahir Amud
+    min 62 (2T 22) local     try          Cecilia Altini
+    min 65 (2T 25) visitante try          Aisha Tachini
+    min 66 (2T 26) local     try          Leyla Nahir Amud
+    min 66 (2T 26) visitante conversion   Josefina Castelnuovo
+    min 66 (2T 26) visitante substitution Gisele Laura Gambetta
+    min 68 (2T 28) visitante substitution Elizabeth Gabriela Belen Escofet
+  marcador  · eventos 30-7 · guardado 30-7
+  tries     · 5-1 (guardado 5-1)
+  arbitro   · CAMILA ABRIL DÍAZ (guardado: CAMILA ABRIL DÍAZ)
+  guardado  · 15 local · 17 visitante · 12 eventos
+
+beromama-femenino vs la-salle-femenino · 45bfef25 · tarjeta 290768  ·  d0aa868b-6523-44a3-8abe-69e324441a1f
+  local     · beromama-femenino · 18 jugadores · 18 con ficha fijada
+  visitante · la-salle-femenino · 18 jugadores · 18 con ficha fijada
+  eventos   · 16
+    min  3 (1T 3) visitante try          María Paula Pedrozo
+    min  5 (1T 5) local     try          Brenda Nicole Godoy
+    min  5 (1T 5) local     conversion   Lucia Medina
+    min  5 (1T 5) visitante try          María Paula Pedrozo
+    min  6 (1T 6) visitante conversion   Ana Carla Levante
+    min 10 (1T 10) visitante try          Emma Valingre
+    min 12 (1T 12) visitante conversion   Ana Carla Levante
+    min 14 (1T 14) visitante try          María Paula Pedrozo
+    min 47 (2T 7) visitante try          Ana Carla Levante
+    min 49 (2T 9) visitante conversion   Ana Carla Levante
+    min 55 (2T 15) local     try          Angeles Ruiz
+    min 60 (2T 20) local     try          Brenda Nicole Godoy
+    min 67 (2T 27) visitante try          María Paula Pedrozo
+    min 68 (2T 28) visitante conversion   Ana Carla Levante
+    min 68 (2T 28) visitante try          Emma Valingre
+    min 68 (2T 28) visitante conversion   Ana Carla Levante
+  marcador  · eventos 17-45 · guardado 17-45
+  tries     · 3-7 (guardado 3-7)
+  arbitro   · MARÍA NAZARENA SEUBERT ALSO (guardado: MARÍA NAZARENA SEUBERT ALSO)
+  guardado  · 18 local · 18 visitante · 16 eventos
+
+ciudad-femenino vs lanus-r-c-femenino · 45bfef25 · tarjeta 290766  ·  1f7d95ea-ad45-47ae-b6f2-a6409def6249
+  local     · ciudad-femenino · 17 jugadores · 17 con ficha fijada
+  visitante · lanus-r-c-femenino · 17 jugadores · 17 con ficha fijada
+  eventos   · 15
+    min  5 (1T 5) local     try          Valentina Larluz
+    min 10 (1T 10) visitante try          Antonella Lezcano
+    min 15 (1T 15) local     try          Candela Pedalino
+    min 16 (1T 16) local     conversion   Alfonsina Avendaño
+    min 21 (1T 21) visitante try          Antonella Lezcano
+    min 30 (1T 30) visitante injury       Iara Lugo
+    min 47 (2T 7) local     try          Francesca Iacaruso
+    min 48 (2T 8) local     conversion   Alfonsina Avendaño
+    min 50 (2T 10) local     substitution Camila De Los Ángeles Vargaz
+    min 50 (2T 10) local     try          Candela Pedalino
+    min 51 (2T 11) local     substitution Ludmila Elena Toledo Pacher
+    min 58 (2T 18) local     try          Paola Candia
+    min 60 (2T 20) local     substitution Maria Belen Garcia Remiro
+    min 60 (2T 20) local     substitution Candela Pedalino
+    min 62 (2T 22) local     substitution Carolina Ariana Carrera Venegoni
+  marcador  · eventos 29-10 · guardado 29-10
+  tries     · 5-2 (guardado 5-2)
+  arbitro   · JUAN MANUEL CASTILLA ARNÁEZ (guardado: JUAN MANUEL CASTILLA ARNÁEZ)
+  guardado  · 17 local · 17 visitante · 15 eventos
+
+centro-naval-femenino vs ciudad-femenino · 45bfef25 · tarjeta 290774  ·  4273ebf0-eaf0-4549-9b3c-ed3f421cbdb4
+  local     · centro-naval-femenino · 14 jugadores · 14 con ficha fijada
+  visitante · ciudad-femenino · 19 jugadores · 19 con ficha fijada
+  eventos   · 21
+    min  1 (1T 1) visitante try          Ludmila Elena Toledo Pacher
+    min  1 (1T 1) visitante conversion   Carolina Ariana Carrera Venegoni
+    min  7 (1T 7) local     try          Milagros Lecuona
+    min  8 (1T 8) local     conversion   Priscila Luana Ramos
+    min  9 (1T 9) visitante try          Renata Sosa Quintana
+    min 18 (1T 18) local     try          Gabriela Maldonado
+    min 18 (1T 18) visitante try          Carolina Ariana Carrera Venegoni
+    min 19 (1T 19) visitante conversion   Carolina Ariana Carrera Venegoni
+    min 25 (1T 25) visitante try          Carolina Ariana Carrera Venegoni
+    min 26 (1T 26) visitante conversion   Carolina Ariana Carrera Venegoni
+    min 41 (2T 1) visitante substitution Eduarda Camilo
+    min 41 (2T 1) visitante substitution Pilar Ailin Aguero Mares
+    min 45 (2T 5) visitante try          Lara Rioboo
+    min 61 (2T 21) visitante substitution Carolina Ariana Carrera Venegoni
+    min 65 (2T 25) visitante substitution Lara Rioboo
+    min 66 (2T 26) local     try          Deborah Fretes Hernandez
+    min 66 (2T 26) local     conversion   Priscila Luana Ramos
+    min 66 (2T 26) local     try          Naiara Romero
+    min 66 (2T 26) local     conversion   Priscila Luana Ramos
+    min 66 (2T 26) local     try          Bona Di Maio
+    min 66 (2T 26) local     conversion   Milagros Lecuona
+  marcador  · eventos 33-31 · guardado 33-31
+  tries     · 5-5 (guardado 5-5)
+  arbitro   · CAMILA ABRIL DÍAZ (guardado: CAMILA ABRIL DÍAZ)
+  guardado  · 14 local · 19 visitante · 21 eventos
+
+lanus-r-c-femenino vs la-plata-femenino · 45bfef25 · tarjeta 290773  ·  269bdff0-7206-494c-8752-6f9c29d30325
+  local     · lanus-r-c-femenino · 15 jugadores · 15 con ficha fijada
+  visitante · la-plata-femenino · 14 jugadores · 14 con ficha fijada
+  eventos   · 17
+    min  1 (1T 1) visitante try          Rocio Ale
+    min  1 (1T 1) visitante conversion   Rocio Ale
+    min  1 (1T 1) visitante try          Rocio Ale
+    min  1 (1T 1) visitante conversion   Rocio Ale
+    min  1 (1T 1) visitante try          Rocio Ale
+    min  1 (1T 1) visitante conversion   Rocio Ale
+    min  1 (1T 1) visitante try          Rocio Ale
+    min  1 (1T 1) visitante conversion   Rocio Ale
+    min  1 (1T 1) visitante try          Rocio Ale
+    min  1 (1T 1) visitante try          Rocio Ale
+    min  1 (1T 1) visitante try          Rocio Ale
+    min  1 (1T 1) visitante conversion   Rocio Ale
+    min 15 (1T 15) local     try          Polina Brisa Umede
+    min 15 (1T 15) local     conversion   Polina Brisa Umede
+    min 58 (2T 18) local     try          Antonella Lezcano
+    min 59 (2T 19) local     conversion   Jeglys Viera
+    min 60 (2T 20) local     try          Jimena Sofia Tevez
+  marcador  · eventos 19-45 · guardado 19-45
+  tries     · 3-7 (guardado 3-7)
+  arbitro   · RICARDO MUNCAL (guardado: RICARDO MUNCAL)
+  guardado  · 15 local · 14 visitante · 17 eventos
+
+del-oeste-rugby-femenino vs beromama-femenino · 45bfef25 · tarjeta 290772  ·  aef73248-057f-4f2a-a1c5-26f1e98a6f49
+  local     · del-oeste-rugby-femenino · 17 jugadores · 17 con ficha fijada
+  visitante · beromama-femenino · 18 jugadores · 18 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 49-5
+  tries     · 0-0 (guardado —-—)
+  arbitro   · SANDRA AURELIA GONZALEZ LUIS (guardado: SANDRA AURELIA GONZALEZ LUIS)
+  guardado  · 17 local · 18 visitante · 0 eventos
+
+la-salle-femenino vs casa-de-padua-femenino · 45bfef25 · tarjeta 290771  ·  2472cdd1-658b-499f-ba3f-5171b0ef20ab
+  local     · la-salle-femenino · 17 jugadores · 17 con ficha fijada
+  visitante · casa-de-padua-femenino · 15 jugadores · 15 con ficha fijada
+  eventos   · 14
+    min  6 (1T 6) local     try          María Paula Pedrozo
+    min  7 (1T 7) local     conversion   Ana Carla Levante
+    min  7 (1T 7) visitante try          Morena Abril Luis
+    min 16 (1T 16) visitante try          Morena Abril Luis
+    min 16 (1T 16) visitante conversion   Morena Abril Luis
+    min 21 (1T 21) visitante try          Leyla Nahir Amud
+    min 21 (1T 21) visitante conversion   Morena Abril Luis
+    min 45 (2T 5) visitante substitution Agustina Martinez
+    min 45 (2T 5) visitante substitution Alexia Belen Salinas
+    min 52 (2T 12) local     try          Chiara Barrionuevo
+    min 52 (2T 12) visitante try          Milagros Torres
+    min 53 (2T 13) local     conversion   Ana Carla Levante
+    min 60 (2T 20) local     try          María Paula Pedrozo
+    min 62 (2T 22) local     conversion   Ana Carla Levante
+  marcador  · eventos 21-24 · guardado 21-24
+  tries     · 3-4 (guardado 3-4)
+  arbitro   · URIEL DÍAZ PRIETO (guardado: URIEL DÍAZ PRIETO)
+  guardado  · 17 local · 15 visitante · 14 eventos
+
+cuq-femenino vs la-salle-femenino · 45bfef25 · tarjeta 290779  ·  64be3d38-eb46-4cf8-aa0e-3464b3f24817
+  local     · cuq-femenino · 17 jugadores · 17 con ficha fijada
+  visitante · la-salle-femenino · 18 jugadores · 18 con ficha fijada
+  eventos   · 13
+    min  1 (1T 1) local     try          Aisha Tachini
+    min  1 (1T 1) local     conversion   Josefina Castelnuovo
+    min 13 (1T 13) local     try          Priscila Vlaho
+    min 16 (1T 16) local     card_yellow  Rocio Patricia Malsenido
+    min 19 (1T 19) local     try          Luz Almonti
+    min 19 (1T 19) local     conversion   Josefina Castelnuovo
+    min 22 (1T 22) local     try          Martina Iribarne
+    min 62 (2T 22) local     try          Luz Almonti
+    min 62 (2T 22) local     conversion   Josefina Castelnuovo
+    min 65 (2T 25) local     try          Martina Iribarne
+    min 65 (2T 25) local     conversion   Josefina Castelnuovo
+    min 67 (2T 27) local     conversion   Josefina Castelnuovo
+    min 67 (2T 27) local     try          Carla Robledo
+  marcador  · eventos 45-0 · guardado 45-0
+  tries     · 7-0 (guardado 7-0)
+  arbitro   · SANTIAGO BELLO (guardado: SANTIAGO BELLO)
+  guardado  · 17 local · 18 visitante · 13 eventos
+
+casa-de-padua-femenino vs del-oeste-rugby-femenino · 45bfef25 · tarjeta 290778  ·  20d2ae58-48b8-4528-8f37-e555d799ffd0
+  local     · casa-de-padua-femenino · 16 jugadores · 16 con ficha fijada
+  visitante · del-oeste-rugby-femenino · 14 jugadores · 14 con ficha fijada
+  eventos   · 21
+    min  1 (1T 1) local     try          Natalia Torres
+    min  1 (1T 1) local     conversion   Morena Abril Luis
+    min  5 (1T 5) local     try          Morena Abril Luis
+    min  8 (1T 8) local     try          Cecilia Altini
+    min 12 (1T 12) local     try          Leyla Nahir Amud
+    min 18 (1T 18) local     conversion   Morena Abril Luis
+    min 18 (1T 18) local     try          Iara Amud
+    min 22 (1T 22) local     try          Morena Abril Luis
+    min 26 (1T 26) local     try          Cecilia Altini
+    min 26 (1T 26) local     conversion   Morena Abril Luis
+    min 28 (1T 28) local     try          Melody Caballero
+    min 28 (1T 28) local     conversion   Morena Abril Luis
+    min 44 (2T 4) local     try          Morena Abril Luis
+    min 44 (2T 4) local     conversion   Morena Abril Luis
+    min 48 (2T 8) local     try          Leyla Nahir Amud
+    min 52 (2T 12) local     try          Cecilia Altini
+    min 58 (2T 18) local     try          Natalia Torres
+    min 61 (2T 21) local     try          Florencia Lucía Battagliotto
+    min 64 (2T 24) local     try          Iara Amud
+    min 67 (2T 27) local     try          Morena Abril Luis
+    min 69 (2T 29) local     try          Cecilia Altini
+  marcador  · eventos 90-0 · guardado 90-0
+  tries     · 16-0 (guardado 16-0)
+  arbitro   · JORGELINA AVALOS (guardado: JORGELINA AVALOS)
+  guardado  · 16 local · 14 visitante · 21 eventos
+
+la-plata-femenino vs centro-naval-femenino · 45bfef25 · tarjeta 290776  ·  214a2591-cae1-4641-a1bc-4735ddfe2637
+  local     · la-plata-femenino · 15 jugadores · 15 con ficha fijada
+  visitante · centro-naval-femenino · 21 jugadores · 21 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 50-7
+  tries     · 0-0 (guardado —-—)
+  arbitro   · DIEGO FEDERICO BAQUERO (guardado: DIEGO FEDERICO BAQUERO)
+  guardado  · 15 local · 21 visitante · 0 eventos
+
+lanus-r-c-femenino vs casa-de-padua-femenino · 45bfef25 · tarjeta 290782  ·  bd15991f-4a3d-49b2-a126-e739c171d24a
+  local     · lanus-r-c-femenino · 16 jugadores · 16 con ficha fijada
+  visitante · casa-de-padua-femenino · 21 jugadores · 21 con ficha fijada
+  eventos   · 10
+    min  6 (1T 6) visitante try          Cecilia Altini
+    min  6 (1T 6) visitante conversion   Morena Abril Luis
+    min 10 (1T 10) visitante try          Cecilia Altini
+    min 10 (1T 10) visitante conversion   Morena Abril Luis
+    min 15 (1T 15) visitante try          Leyla Nahir Amud
+    min 15 (1T 15) visitante conversion   Morena Abril Luis
+    min 25 (1T 25) visitante try          Cecilia Altini
+    min 25 (1T 25) visitante conversion   Morena Abril Luis
+    min 51 (2T 11) visitante try          Cecilia Altini
+    min 58 (2T 18) local     injury       Jeglys Viera
+  marcador  · eventos 0-33 · guardado 0-33
+  tries     · 0-5 (guardado 0-5)
+  arbitro   · AMILCAR DIAZ (guardado: AMILCAR DIAZ)
+  guardado  · 16 local · 21 visitante · 10 eventos
+
+ciudad-femenino vs la-plata-femenino · 45bfef25 · tarjeta 290784  ·  8deba762-70e4-4186-a5c9-6225d3a0e28e
+  local     · ciudad-femenino · 15 jugadores · 15 con ficha fijada
+  visitante · la-plata-femenino · 15 jugadores · 15 con ficha fijada
+  eventos   · 12
+    min 28 (1T 28) local     try          Julieta Monjes
+    min 50 (2T 10) visitante try          Rocio Ale
+    min 51 (2T 11) local     substitution Camila De Los Ángeles Vargaz
+    min 52 (2T 12) local     substitution Valentina Larluz
+    min 55 (2T 15) visitante try          Rocio Sabrina Osorio
+    min 55 (2T 15) visitante conversion   Rocio Sabrina Osorio
+    min 59 (2T 19) local     try          Ludmila Elena Toledo Pacher
+    min 60 (2T 20) local     substitution Julieta Monjes
+    min 60 (2T 20) local     substitution Camila De Los Ángeles Vargaz
+    min 65 (2T 25) visitante try          Isabella Cappellani
+    min 68 (2T 28) local     try          Viktoria Koleva
+    min 68 (2T 28) visitante try          Yael Cardoso
+  marcador  · eventos 15-22 · guardado 15-22
+  tries     · 3-4 (guardado 3-4)
+  arbitro   · LAUTARO SAN PEDRO BOURNISSEN (guardado: LAUTARO SAN PEDRO BOURNISSEN)
+  guardado  · 15 local · 15 visitante · 12 eventos
+
+centro-naval-femenino vs beromama-femenino · 45bfef25 · tarjeta 290783  ·  8b41eccf-470c-4d19-aa9a-052b5c82a128
+  local     · centro-naval-femenino · 16 jugadores · 16 con ficha fijada
+  visitante · beromama-femenino · 16 jugadores · 16 con ficha fijada
+  eventos   · 20
+    min  3 (1T 3) local     try          Naiara Romero
+    min  9 (1T 9) local     try          Naiara Romero
+    min  9 (1T 9) local     conversion   Priscila Luana Ramos
+    min 14 (1T 14) local     try          Priscila Luana Ramos
+    min 14 (1T 14) local     try          Naiara Romero
+    min 14 (1T 14) local     conversion   Priscila Luana Ramos
+    min 22 (1T 22) local     try          Naiara Romero
+    min 22 (1T 22) local     conversion   Priscila Luana Ramos
+    min 26 (1T 26) local     try          Naiara Romero
+    min 45 (2T 5) local     try          Yusmely Contreras
+    min 46 (2T 6) local     try          Pierina Guerello
+    min 50 (2T 10) visitante substitution Analia Geronima Forneron Insaurralde
+    min 66 (2T 26) local     try          Gabriela Maldonado
+    min 66 (2T 26) local     conversion   Gabriela Maldonado
+    min 70 (2T 30) local     try          Naiara Romero
+    min 70 (2T 30) local     conversion   Gabriela Maldonado
+    min 72 (2T 32) local     try          Pierina Guerello
+    min 74 (2T 34) local     try          Fatima Schillaci
+    min 74 (2T 34) local     try          Naiara Romero
+    min 74 (2T 34) local     conversion   Gabriela Maldonado
+  marcador  · eventos 77-0 · guardado 77-0
+  tries     · 13-0 (guardado 13-0)
+  arbitro   · ANDRES VEGA (guardado: ANDRES VEGA)
+  guardado  · 16 local · 16 visitante · 20 eventos
+
+del-oeste-rugby-femenino vs cuq-femenino · 45bfef25 · tarjeta 290781  ·  8e88f72b-40d2-4437-b9e3-d2ac42587d12
+  local     · del-oeste-rugby-femenino · 14 jugadores · 14 con ficha fijada
+  visitante · cuq-femenino · 18 jugadores · 18 con ficha fijada
+  eventos   · 18
+    min  6 (1T 6) visitante try          Aisha Tachini
+    min 11 (1T 11) visitante try          Aisha Tachini
+    min 11 (1T 11) visitante conversion   Josefina Castelnuovo
+    min 15 (1T 15) visitante try          Aisha Tachini
+    min 15 (1T 15) visitante conversion   Josefina Castelnuovo
+    min 25 (1T 25) visitante substitution Emilce Velaustegui
+    min 27 (1T 27) visitante try          Josefina Castelnuovo
+    min 27 (1T 27) visitante conversion   Josefina Castelnuovo
+    min 47 (2T 7) visitante try          Priscila Vlaho
+    min 52 (2T 12) local     try          Constanza Vilches
+    min 52 (2T 12) visitante try          Priscila Vlaho
+    min 52 (2T 12) visitante substitution Elizabeth Gabriela Belen Escofet
+    min 57 (2T 17) visitante try          Aisha Tachini
+    min 60 (2T 20) visitante try          Aisha Tachini
+    min 61 (2T 21) visitante conversion   Josefina Castelnuovo
+    min 65 (2T 25) visitante try          Aisha Tachini
+    min 65 (2T 25) visitante conversion   Josefina Castelnuovo
+    min 65 (2T 25) visitante substitution Debora Picerno
+  marcador  · eventos 5-55 · guardado 5-55
+  tries     · 1-9 (guardado 1-9)
+  arbitro   · MARCELO TALPALAR (guardado: MARCELO TALPALAR)
+  guardado  · 14 local · 18 visitante · 18 eventos
+
+la-salle-femenino vs del-oeste-rugby-femenino · 45bfef25 · tarjeta 290789  ·  085ab3f6-33c4-475e-a22a-a279d8fd6243
+  local     · la-salle-femenino · 17 jugadores · 17 con ficha fijada
+  visitante · del-oeste-rugby-femenino · 16 jugadores · 16 con ficha fijada
+  eventos   · 5
+    min 15 (1T 15) local     try          Ana Carla Levante
+    min 24 (1T 24) visitante try          Melina Mercado
+    min 42 (2T 2) visitante try          Brenda Villarreal
+    min 48 (2T 8) visitante try          Huilen Ojeda
+    min 49 (2T 9) visitante conversion   Constanza Vilches
+  marcador  · eventos 5-17 · guardado 5-17
+  tries     · 1-3 (guardado 1-3)
+  arbitro   · ANDRES RANALLI (guardado: ANDRES RANALLI)
+  guardado  · 17 local · 16 visitante · 5 eventos
+
+cuq-femenino vs lanus-r-c-femenino · 45bfef25 · tarjeta 290788  ·  58533917-54db-4a6c-9e47-5abf813bc10e
+  local     · cuq-femenino · 16 jugadores · 16 con ficha fijada
+  visitante · lanus-r-c-femenino · 15 jugadores · 15 con ficha fijada
+  eventos   · 13
+    min  1 (1T 1) local     substitution Hannah Judith Ponce
+    min 15 (1T 15) visitante try          Barbara Luciana Vilches
+    min 20 (1T 20) visitante try          Barbara Luciana Vilches
+    min 22 (1T 22) visitante card_yellow  Antonella Lezcano
+    min 25 (1T 25) local     try          Josefina Castelnuovo
+    min 26 (1T 26) local     conversion   Josefina Castelnuovo
+    min 51 (2T 11) visitante try          Barbara Luciana Vilches
+    min 52 (2T 12) local     card_yellow  Gisele Laura Gambetta
+    min 60 (2T 20) local     try          Aisha Tachini
+    min 60 (2T 20) visitante card_yellow  Macarena Alma Jurado
+    min 65 (2T 25) visitante card_yellow  Iara Lugo
+    min 68 (2T 28) local     card_yellow  Martina Iribarne
+    min 69 (2T 29) local     card_yellow  Luz Almonti
+  marcador  · eventos 12-15 · guardado 12-15
+  tries     · 2-3 (guardado 2-3)
+  arbitro   · WALTER REZA (guardado: WALTER REZA)
+  guardado  · 16 local · 15 visitante · 13 eventos
+
+casa-de-padua-femenino vs centro-naval-femenino · 45bfef25 · tarjeta 290787  ·  9d813058-23e8-41ea-9e32-94c60d4bff81
+  local     · casa-de-padua-femenino · 15 jugadores · 15 con ficha fijada
+  visitante · centro-naval-femenino · 16 jugadores · 16 con ficha fijada
+  eventos   · 5
+    min  2 (1T 2) local     try          Morena Abril Luis
+    min 12 (1T 12) local     try          Cecilia Altini
+    min 14 (1T 14) visitante try          Agustina Diz
+    min 20 (1T 20) local     try          Cecilia Altini
+    min 50 (2T 10) local     try          Morena Abril Luis
+  marcador  · eventos 20-5 · guardado 20-5
+  tries     · 4-1 (guardado 4-1)
+  arbitro   · CAMILA ABRIL DÍAZ (guardado: CAMILA ABRIL DÍAZ)
+  guardado  · 15 local · 16 visitante · 5 eventos
+
+beromama-femenino vs ciudad-femenino · 45bfef25 · tarjeta 290786  ·  067753cd-e063-4ecd-81cd-3e4fdff407d8
+  local     · beromama-femenino · 15 jugadores · 15 con ficha fijada
+  visitante · ciudad-femenino · 15 jugadores · 15 con ficha fijada
+  eventos   · 27
+    min  7 (1T 7) visitante try          Maria Belen Garcia Remiro
+    min 13 (1T 13) visitante try          Julieta Monjes
+    min 13 (1T 13) visitante conversion   Alfonsina Avendaño
+    min 19 (1T 19) visitante try          Valentina Larluz
+    min 22 (1T 22) visitante try          Viktoria Koleva
+    min 25 (1T 25) visitante try          Viktoria Koleva
+    min 40 (2T 0) local     substitution Martina Julieta Mauro
+    min 40 (2T 0) local     substitution Sheila Coronel
+    min 40 (2T 0) local     substitution Micaela Soledad Freire
+    min 50 (2T 10) visitante try          Renata Sosa Quintana
+    min 50 (2T 10) visitante try          Maria Belen Garcia Remiro
+    min 50 (2T 10) visitante substitution Alejandra Salas
+    min 50 (2T 10) visitante substitution Pilar Ailin Aguero Mares
+    min 50 (2T 10) visitante substitution Renata Sosa Quintana
+    min 50 (2T 10) visitante substitution Ludmila Elena Toledo Pacher
+    min 50 (2T 10) visitante substitution Catalina Senders
+    min 55 (2T 15) local     card_yellow  Luana Macarena Coronel
+    min 58 (2T 18) visitante try          Maria Belen Garcia Remiro
+    min 59 (2T 19) visitante try          Valentina Larluz
+    min 60 (2T 20) visitante try          Maria Belen Garcia Remiro
+    min 61 (2T 21) visitante try          Julieta Monjes
+    min 62 (2T 22) visitante try          Daniela Agustina Rovelli
+    min 62 (2T 22) visitante try          Maria Belen Garcia Remiro
+    min 67 (2T 27) visitante try          Daniela Agustina Rovelli
+    min 67 (2T 27) visitante conversion   Valentina Castro
+    min 69 (2T 29) visitante conversion   Valentina Castro
+    min 69 (2T 29) visitante try          Maria Belen Garcia Remiro
+  marcador  · eventos 0-81 · guardado 0-81
+  tries     · 0-15 (guardado 0-15)
+  arbitro   · RODRIGO BARCIOCCO (guardado: RODRIGO BARCIOCCO)
+  guardado  · 15 local · 15 visitante · 27 eventos
+
+ciudad-femenino vs casa-de-padua-femenino · 45bfef25 · tarjeta 290793  ·  441b9add-aa96-455e-b7a9-8b99a40ba715
+  local     · ciudad-femenino · 15 jugadores · 15 con ficha fijada
+  visitante · casa-de-padua-femenino · 21 jugadores · 21 con ficha fijada
+  eventos   · 10
+    min  3 (1T 3) visitante try          Cecilia Altini
+    min  3 (1T 3) visitante conversion   Morena Abril Luis
+    min 10 (1T 10) visitante try          Natalia Torres
+    min 10 (1T 10) visitante try          Morena Abril Luis
+    min 45 (2T 5) local     substitution Julieta Monjes
+    min 45 (2T 5) local     substitution Pilar Ailin Aguero Mares
+    min 45 (2T 5) local     substitution Catalina Senders
+    min 52 (2T 12) visitante try          Natalia Torres
+    min 60 (2T 20) local     try          Daniela Agustina Rovelli
+    min 61 (2T 21) visitante try          Cecilia Altini
+  marcador  · eventos 5-27 · guardado 5-27
+  tries     · 1-5 (guardado 1-5)
+  arbitro   · DIEGO FERNANDO CHOQUEMISA CALDERON (guardado: DIEGO FERNANDO CHOQUEMISA CALDERON)
+  guardado  · 15 local · 21 visitante · 10 eventos
+
+centro-naval-femenino vs cuq-femenino · 45bfef25 · tarjeta 290792  ·  b5b06b79-ecde-49a3-9082-13cabe087063
+  local     · centro-naval-femenino · 17 jugadores · 17 con ficha fijada
+  visitante · cuq-femenino · 18 jugadores · 18 con ficha fijada
+  eventos   · 20
+    min  3 (1T 3) visitante try          Martina Iribarne
+    min  9 (1T 9) local     try          Milagros Lecuona
+    min 12 (1T 12) local     try          Naiara Romero
+    min 12 (1T 12) local     conversion   Gabriela Maldonado
+    min 16 (1T 16) local     try          Gabriela Maldonado
+    min 16 (1T 16) local     conversion   Milagros Lecuona
+    min 19 (1T 19) local     try          Naiara Romero
+    min 19 (1T 19) local     conversion   Gabriela Maldonado
+    min 22 (1T 22) visitante card_yellow  Estefanía Picerno
+    min 29 (1T 29) visitante try          Priscila Vlaho
+    min 29 (1T 29) visitante conversion   Josefina Castelnuovo
+    min 42 (2T 2) local     card_yellow  Yusmely Contreras
+    min 45 (2T 5) local     try          Milagros Lecuona
+    min 47 (2T 7) visitante try          Aisha Tachini
+    min 47 (2T 7) visitante conversion   Josefina Castelnuovo
+    min 57 (2T 17) visitante card_yellow  Sabrina Anabel Chavez
+    min 64 (2T 24) visitante substitution Gisele Laura Gambetta
+    min 64 (2T 24) visitante substitution Abril Lujan
+    min 64 (2T 24) visitante substitution Priscila Vlaho
+    min 70 (2T 30) visitante try          Aisha Tachini
+  marcador  · eventos 31-24 · guardado 31-24
+  tries     · 5-4 (guardado 5-4)
+  arbitro   · SIMÓN LEAVI PREUX (guardado: SIMÓN LEAVI PREUX)
+  guardado  · 17 local · 18 visitante · 20 eventos
+
+lanus-r-c-femenino vs la-salle-femenino · 45bfef25 · tarjeta 290791  ·  f8549b7e-e146-475d-ab14-28b634aa9a5d
+  local     · lanus-r-c-femenino · 16 jugadores · 16 con ficha fijada
+  visitante · la-salle-femenino · 22 jugadores · 22 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 41-7
+  tries     · 0-0 (guardado —-—)
+  arbitro   · ALEJO GRACHOT (guardado: ALEJO GRACHOT)
+  guardado  · 16 local · 22 visitante · 0 eventos
+
+la-salle-femenino vs centro-naval-femenino · 45bfef25 · tarjeta 290798  ·  28e10ea7-7b98-415e-8905-fa834d506bd4
+  local     · la-salle-femenino · 22 jugadores · 22 con ficha fijada
+  visitante · centro-naval-femenino · 23 jugadores · 23 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 10-29
+  tries     · 0-0 (guardado —-—)
+  arbitro   · MARÍA NAZARENA SEUBERT ALSO (guardado: MARÍA NAZARENA SEUBERT ALSO)
+  guardado  · 22 local · 23 visitante · 0 eventos
+
+cuq-femenino vs ciudad-femenino · 45bfef25 · tarjeta 290797  ·  ef176c64-090f-465d-b74b-0d5ac304fd87
+  local     · cuq-femenino · 18 jugadores · 18 con ficha fijada
+  visitante · ciudad-femenino · 17 jugadores · 17 con ficha fijada
+  eventos   · 10
+    min  7 (1T 7) visitante try          Daniela Agustina Rovelli
+    min 24 (1T 24) local     try          Martina Iribarne
+    min 56 (2T 16) local     card_yellow  Rocio Patricia Malsenido
+    min 60 (2T 20) visitante try          Ludmila Elena Toledo Pacher
+    min 61 (2T 21) local     try          Josefina Castelnuovo
+    min 61 (2T 21) visitante substitution Valentina Larluz
+    min 64 (2T 24) visitante substitution Catalina Senders
+    min 68 (2T 28) local     try          Rocio Patricia Malsenido
+    min 68 (2T 28) local     conversion   Josefina Castelnuovo
+    min 68 (2T 28) visitante card_yellow  Daniela Agustina Rovelli
+  marcador  · eventos 17-10 · guardado 17-10
+  tries     · 3-2 (guardado 3-2)
+  arbitro   · LAUTARO EZEQUIEL FERNANDEZ (guardado: LAUTARO EZEQUIEL FERNANDEZ)
+  guardado  · 18 local · 17 visitante · 10 eventos
+
+la-plata-femenino vs ciudad-femenino · 45bfef25 · tarjeta 290739  ·  57ca31f3-bb70-4098-baed-f1b780d6a10a
+  local     · la-plata-femenino · 12 jugadores · 12 con ficha fijada
+  visitante · ciudad-femenino · 17 jugadores · 17 con ficha fijada
+  eventos   · 14
+    min  1 (1T 1) local     card_yellow  Anabela Vanesa Alvarez
+    min  1 (1T 1) local     try          Catalina Latorre
+    min  1 (1T 1) local     try          Catalina Latorre
+    min  1 (1T 1) local     conversion   Catalina Latorre
+    min  1 (1T 1) local     try          Catalina Latorre
+    min  1 (1T 1) local     try          Catalina Latorre
+    min  1 (1T 1) local     conversion   Catalina Latorre
+    min  1 (1T 1) local     try          Catalina Latorre
+    min  1 (1T 1) local     conversion   Catalina Latorre
+    min 41 (2T 1) local     card_yellow  Fabiola Mercedes Escobar Díaz
+    min 47 (2T 7) visitante substitution Agustina Ornella Rocca
+    min 58 (2T 18) visitante substitution Camila De Los Ángeles Vargaz
+    min 58 (2T 18) visitante substitution Eduarda Camilo
+    min 65 (2T 25) visitante try          Carolina Ariana Carrera Venegoni
+  marcador  · eventos 31-5 · guardado 31-5
+  tries     · 5-1 (guardado 5-1)
+  arbitro   · CAMILA ABRIL DÍAZ (guardado: CAMILA ABRIL DÍAZ)
+  guardado  · 12 local · 17 visitante · 14 eventos
+
+beromama-femenino vs centro-naval-femenino · 45bfef25 · tarjeta 290738  ·  2e784d9f-4404-4163-877a-5f9ee7c5f176
+  local     · beromama-femenino · 18 jugadores · 18 con ficha fijada
+  visitante · centro-naval-femenino · 18 jugadores · 18 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 12-75
+  tries     · 0-0 (guardado —-—)
+  arbitro   · JORGELINA AVALOS (guardado: JORGELINA AVALOS)
+  guardado  · 18 local · 18 visitante · 0 eventos
+
+casa-de-padua-femenino vs lanus-r-c-femenino · 45bfef25 · tarjeta 290737  ·  473ff44f-45e1-4752-9628-1ce5310a00c1
+  local     · casa-de-padua-femenino · 15 jugadores · 15 con ficha fijada
+  visitante · lanus-r-c-femenino · 17 jugadores · 17 con ficha fijada
+  eventos   · 9
+    min  1 (1T 1) local     try          Natalia Torres
+    min 10 (1T 10) local     try          Macarena Noralí González
+    min 14 (1T 14) visitante try          Polina Brisa Umede
+    min 17 (1T 17) local     try          Cecilia Altini
+    min 24 (1T 24) local     try          Leyla Nahir Amud
+    min 24 (1T 24) local     conversion   Morena Abril Luis
+    min 45 (2T 5) local     substitution Iara Amud
+    min 55 (2T 15) visitante try          Polina Brisa Umede
+    min 58 (2T 18) local     try          Cecilia Altini
+  marcador  · eventos 27-10 · guardado 27-10
+  tries     · 5-2 (guardado 5-2)
+  arbitro   · DIEGO FEDERICO BAQUERO (guardado: DIEGO FEDERICO BAQUERO)
+  guardado  · 15 local · 17 visitante · 9 eventos
+
+cuq-femenino vs del-oeste-rugby-femenino · 45bfef25 · tarjeta 290736  ·  9e61f52d-adaf-46c0-a4c0-471f3f9d6a2a
+  local     · cuq-femenino · 16 jugadores · 16 con ficha fijada
+  visitante · del-oeste-rugby-femenino · 18 jugadores · 18 con ficha fijada
+  eventos   · 13
+    min  5 (1T 5) local     try          Emilce Velaustegui
+    min 12 (1T 12) local     try          Priscila Vlaho
+    min 19 (1T 19) local     try          Luz Almonti
+    min 25 (1T 25) visitante try          Roxana Vallejos
+    min 26 (1T 26) visitante conversion   Huilen Ojeda
+    min 30 (1T 30) local     try          Luz Almonti
+    min 30 (1T 30) local     conversion   Debora Picerno
+    min 51 (2T 11) local     try          Estefanía Picerno
+    min 52 (2T 12) local     substitution Gisele Laura Gambetta
+    min 55 (2T 15) local     substitution Yasmin Nicole Nefle
+    min 58 (2T 18) local     try          Priscila Vlaho
+    min 60 (2T 20) local     substitution Martina Iribarne
+    min 70 (2T 30) local     try          Luz Almonti
+  marcador  · eventos 37-7 · guardado 37-7
+  tries     · 7-1 (guardado 7-1)
+  arbitro   · LAUTARO SAN PEDRO BOURNISSEN (guardado: LAUTARO SAN PEDRO BOURNISSEN)
+  guardado  · 16 local · 18 visitante · 13 eventos
+
+cuq-femenino vs casa-de-padua-femenino · 45bfef25 · tarjeta 290724  ·  4f3e30a5-f4e3-4438-b416-20bbd6219c89
+  local     · cuq-femenino · 23 jugadores · 23 con ficha fijada
+  visitante · casa-de-padua-femenino · 23 jugadores · 23 con ficha fijada
+  eventos   · 16
+    min  5 (1T 5) local     try          Josefina Castelnuovo
+    min 10 (1T 10) visitante conversion   Morena Abril Luis
+    min 12 (1T 12) local     try          Aisha Tachini
+    min 15 (1T 15) visitante try          Cecilia Altini
+    min 17 (1T 17) local     card_yellow  Sabrina Anabel Chavez
+    min 27 (1T 27) local     try          Martina Iribarne
+    min 28 (1T 28) local     conversion   Josefina Castelnuovo
+    min 30 (1T 30) visitante penalty_goal Morena Abril Luis
+    min 45 (2T 5) local     substitution Yasmin Nicole Nefle
+    min 50 (2T 10) visitante try          Leyla Nahir Amud
+    min 54 (2T 14) local     card_yellow  Emilce Velaustegui
+    min 56 (2T 16) local     substitution Josefina Castelnuovo
+    min 58 (2T 18) local     try          Emilce Velaustegui
+    min 59 (2T 19) local     conversion   Debora Picerno
+    min 63 (2T 23) local     substitution Emilce Velaustegui
+    min 65 (2T 25) visitante try          Macarena Noralí González
+  marcador  · eventos 24-20 · guardado 24-20
+  tries     · 4-3 (guardado 4-3)
+  arbitro   · ALEJO GRACHOT (guardado: ALEJO GRACHOT)
+  guardado  · 23 local · 23 visitante · 16 eventos
+
+la-salle-femenino vs beromama-femenino · 45bfef25 · tarjeta 290723  ·  622f1c78-24cc-4b6d-a252-2247777ee2bf
+  local     · la-salle-femenino · 18 jugadores · 18 con ficha fijada
+  visitante · beromama-femenino · 18 jugadores · 18 con ficha fijada
+  eventos   · 5
+    min 20 (1T 20) visitante try          Iris Alejandra López Ledezma
+    min 40 (2T 0) visitante substitution Eliana Sabrina Ibarra
+    min 40 (2T 0) visitante substitution Natalia Paladino
+    min 40 (2T 0) visitante substitution Gabriela Etter Roa
+    min 68 (2T 28) visitante try          Iara Lopez
+  marcador  · eventos 0-10 · guardado 0-10
+  tries     · 0-2 (guardado 0-2)
+  arbitro   · ENZO MENEGUZ (guardado: ENZO MENEGUZ)
+  guardado  · 18 local · 18 visitante · 5 eventos
+
+del-oeste-rugby-femenino vs la-plata-femenino · 45bfef25 · tarjeta 290722  ·  35becd67-2d1d-41ba-9e45-57e10442dadd
+  local     · del-oeste-rugby-femenino · 18 jugadores · 18 con ficha fijada
+  visitante · la-plata-femenino · 16 jugadores · 16 con ficha fijada
+  eventos   · 20
+    min  1 (1T 1) visitante try          Sol Josefina Rodriguez
+    min 10 (1T 10) visitante try          Carolina Charamone
+    min 10 (1T 10) visitante try          Yael Cardoso
+    min 10 (1T 10) visitante try          Avril Rahmer Morgantini
+    min 10 (1T 10) visitante try          Dina Ariadna Galech Berrojalbiz
+    min 10 (1T 10) visitante try          Camila Luna Contreras
+    min 10 (1T 10) visitante try          Avril Rahmer Morgantini
+    min 10 (1T 10) visitante try          Sol Josefina Rodriguez
+    min 10 (1T 10) visitante try          Soledad Cerisola
+    min 10 (1T 10) visitante try          Catalina Latorre
+    min 10 (1T 10) visitante try          Camila Luna Contreras
+    min 10 (1T 10) visitante try          Barbara Rodriguez
+    min 10 (1T 10) visitante try          Isabella Cappellani
+    min 10 (1T 10) visitante try          Nahir Sheila Taborda
+    min 10 (1T 10) visitante try          Barbara Rodriguez
+    min 10 (1T 10) visitante try          Camila Luna Contreras
+    min 10 (1T 10) visitante try          Isabella Cappellani
+    min 10 (1T 10) visitante try          Avril Rahmer Morgantini
+    min 10 (1T 10) visitante try          Avril Rahmer Morgantini
+    min 50 (2T 10) visitante injury       Nahir Sheila Taborda
+  marcador  · eventos 0-95 · guardado 0-95
+  tries     · 0-19 (guardado 0-19)
+  arbitro   · ANDRES VEGA (guardado: ANDRES VEGA)
+  guardado  · 18 local · 16 visitante · 20 eventos
+
+lanus-r-c-femenino vs ciudad-femenino · 45bfef25 · tarjeta 290721  ·  f0964aaf-fff9-4f72-8ce3-103a32334c0c
+  local     · lanus-r-c-femenino · 15 jugadores · 15 con ficha fijada
+  visitante · ciudad-femenino · 18 jugadores · 18 con ficha fijada
+  eventos   · 13
+    min 11 (1T 11) local     try          Ximena Ruschioni
+    min 12 (1T 12) visitante substitution Camila De Los Ángeles Vargaz
+    min 15 (1T 15) visitante penalty_try  
+    min 18 (1T 18) visitante try          Agustina Ornella Rocca
+    min 19 (1T 19) visitante conversion   Carolina Ariana Carrera Venegoni
+    min 20 (1T 20) local     try          Antonella Lezcano
+    min 26 (1T 26) visitante try          Julieta Monjes
+    min 52 (2T 12) local     substitution Natalia Eiring
+    min 52 (2T 12) local     substitution Ximena Ruschioni
+    min 55 (2T 15) visitante substitution Eduarda Camilo
+    min 55 (2T 15) visitante substitution Paola Candia
+    min 60 (2T 20) visitante substitution Julieta Monjes
+    min 62 (2T 22) visitante try          Candela Pedalino
+  marcador  · eventos 10-24 · guardado 10-24
+  tries     · 2-4 (guardado 2-4)
+  arbitro   · JORGELINA AVALOS (guardado: JORGELINA AVALOS)
+  guardado  · 15 local · 18 visitante · 13 eventos
+
+ciudad-femenino vs centro-naval-femenino · 45bfef25 · tarjeta 290729  ·  53220126-641d-460d-b071-ee2b6c80f1e5
+  local     · ciudad-femenino · 22 jugadores · 22 con ficha fijada
+  visitante · centro-naval-femenino · 18 jugadores · 18 con ficha fijada
+  eventos   · 13
+    min  2 (1T 2) local     try          Candela Pedalino
+    min  3 (1T 3) local     conversion   Carolina Ariana Carrera Venegoni
+    min  8 (1T 8) local     try          Carolina Ariana Carrera Venegoni
+    min  8 (1T 8) local     try          Ludmila Elena Toledo Pacher
+    min 50 (2T 10) visitante try          Pierina Guerello
+    min 50 (2T 10) visitante card_yellow  Naiara Romero
+    min 54 (2T 14) local     card_yellow  Carolina Ariana Carrera Venegoni
+    min 59 (2T 19) local     card_yellow  Catalina Senders
+    min 60 (2T 20) local     substitution Julieta Monjes
+    min 63 (2T 23) local     try          Daniela Agustina Rovelli
+    min 64 (2T 24) local     conversion   Carolina Ariana Carrera Venegoni
+    min 65 (2T 25) local     try          Lara Rioboo
+    min 65 (2T 25) local     substitution Catalina Senders
+  marcador  · eventos 29-5 · guardado 29-5
+  tries     · 5-1 (guardado 5-1)
+  arbitro   · SIMÓN LEAVI PREUX (guardado: SIMÓN LEAVI PREUX)
+  guardado  · 22 local · 18 visitante · 13 eventos
+
+la-plata-femenino vs lanus-r-c-femenino · 45bfef25 · tarjeta 290728  ·  b8fea1dd-f5a6-4ec5-ad48-bbfbf2bf2e53
+  local     · la-plata-femenino · 14 jugadores · 14 con ficha fijada
+  visitante · lanus-r-c-femenino · 17 jugadores · 17 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 61-5
+  tries     · 0-0 (guardado —-—)
+  arbitro   · THIAGO CASTAGNARO (guardado: THIAGO CASTAGNARO)
+  guardado  · 14 local · 17 visitante · 0 eventos
+
+beromama-femenino vs del-oeste-rugby-femenino · 45bfef25 · tarjeta 290727  ·  c2256b83-5df3-4515-ac62-8dc9b1cfb995
+  local     · beromama-femenino · 17 jugadores · 17 con ficha fijada
+  visitante · del-oeste-rugby-femenino · 16 jugadores · 16 con ficha fijada
+  eventos   · 18
+    min  5 (1T 5) visitante try          Melina Mercado
+    min  6 (1T 6) visitante conversion   Huilen Ojeda
+    min 12 (1T 12) visitante try          Melina Mercado
+    min 13 (1T 13) visitante conversion   Huilen Ojeda
+    min 25 (1T 25) visitante try          Roxana Pochetti
+    min 40 (2T 0) local     substitution Natalia Paladino
+    min 40 (2T 0) local     substitution Gabriela Etter Roa
+    min 40 (2T 0) local     substitution Brenda Nicole Godoy
+    min 54 (2T 14) local     substitution Liliana Torrez
+    min 54 (2T 14) local     substitution Iara Lopez
+    min 74 (2T 34) visitante try          Florencia Aylen Noya
+    min 75 (2T 35) visitante conversion   Huilen Ojeda
+    min 80 (2T 40) visitante try          Melina Mercado
+    min 86 (2T 46) visitante try          Melina Mercado
+    min 86 (2T 46) visitante conversion   Huilen Ojeda
+    min 88 (2T 48) visitante try          Guadalupe Cáceres
+    min 89 (2T 49) visitante conversion   Huilen Ojeda
+    min 95 (2T 55) visitante try          Guadalupe Cáceres
+  marcador  · eventos 0-50 · guardado 0-50
+  tries     · 0-8 (guardado 0-8)
+  arbitro   · DIEGO FEDERICO BAQUERO (guardado: DIEGO FEDERICO BAQUERO)
+  guardado  · 17 local · 16 visitante · 18 eventos
+
+casa-de-padua-femenino vs la-salle-femenino · 45bfef25 · tarjeta 290726  ·  1e91ff50-e9b3-4af4-8933-5feeb60c46bf
+  local     · casa-de-padua-femenino · 23 jugadores · 23 con ficha fijada
+  visitante · la-salle-femenino · 18 jugadores · 18 con ficha fijada
+  eventos   · 15
+    min  2 (1T 2) local     try          Morena Abril Luis
+    min  5 (1T 5) local     try          Cecilia Altini
+    min  7 (1T 7) local     try          Jacqueline Iñigo
+    min 10 (1T 10) local     try          Morena Abril Luis
+    min 10 (1T 10) local     conversion   Morena Abril Luis
+    min 15 (1T 15) local     try          Leyla Nahir Amud
+    min 20 (1T 20) local     try          Cecilia Altini
+    min 44 (2T 4) local     try          Jacqueline Iñigo
+    min 50 (2T 10) visitante try          Emma Valingre
+    min 52 (2T 12) local     try          Cecilia Altini
+    min 61 (2T 21) local     try          Cecilia Altini
+    min 61 (2T 21) local     conversion   Morena Abril Luis
+    min 62 (2T 22) local     try          Cecilia Altini
+    min 64 (2T 24) local     conversion   Morena Abril Luis
+    min 64 (2T 24) local     try          Constanza Graffioli Bozan
+  marcador  · eventos 61-5 · guardado 61-5
+  tries     · 11-1 (guardado —-—)
+  arbitro   · GUSTAVO GONZALEZ GIACONE (guardado: —)
+  guardado  · 23 local · 18 visitante · 15 eventos
+
+la-salle-femenino vs cuq-femenino · 45bfef25 · tarjeta 290734  ·  af128d19-5031-4b49-9242-a5ad9f826b39
+  local     · la-salle-femenino · 18 jugadores · 18 con ficha fijada
+  visitante · cuq-femenino · 17 jugadores · 17 con ficha fijada
+  eventos   · 18
+    min  4 (1T 4) visitante try          Luz Almonti
+    min  5 (1T 5) visitante conversion   Debora Picerno
+    min 15 (1T 15) visitante try          Aisha Tachini
+    min 15 (1T 15) visitante conversion   Debora Picerno
+    min 20 (1T 20) visitante try          Martina Iribarne
+    min 22 (1T 22) visitante try          Estefanía Picerno
+    min 22 (1T 22) visitante conversion   Debora Picerno
+    min 25 (1T 25) visitante try          Emilce Velaustegui
+    min 25 (1T 25) visitante conversion   Debora Picerno
+    min 45 (2T 5) visitante substitution Gisele Laura Gambetta
+    min 49 (2T 9) visitante substitution Elizabeth Gabriela Belen Escofet
+    min 55 (2T 15) visitante try          Aisha Tachini
+    min 55 (2T 15) visitante conversion   Debora Picerno
+    min 61 (2T 21) visitante try          Luz Almonti
+    min 61 (2T 21) visitante conversion   Debora Picerno
+    min 69 (2T 29) visitante try          Estefanía Picerno
+    min 69 (2T 29) visitante conversion   Debora Picerno
+    min 70 (2T 30) visitante injury       Rocio Patricia Malsenido
+  marcador  · eventos 0-54 · guardado 0-54
+  tries     · 0-8 (guardado —-—)
+  arbitro   · PABLO BARDI (guardado: —)
+  guardado  · 18 local · 17 visitante · 18 eventos
+
+del-oeste-rugby-femenino vs casa-de-padua-femenino · 45bfef25 · tarjeta 290733  ·  2e5ad4e9-62d0-4b47-ada2-5e42a4426c2a
+  local     · del-oeste-rugby-femenino · 18 jugadores · 18 con ficha fijada
+  visitante · casa-de-padua-femenino · 15 jugadores · 15 con ficha fijada
+  eventos   · 14
+    min  2 (1T 2) visitante try          Cecilia Altini
+    min  4 (1T 4) visitante try          Cecilia Altini
+    min  4 (1T 4) visitante conversion   Morena Abril Luis
+    min 10 (1T 10) visitante try          Leyla Nahir Amud
+    min 18 (1T 18) visitante try          Morena Abril Luis
+    min 18 (1T 18) visitante conversion   Morena Abril Luis
+    min 45 (2T 5) visitante try          Natalia Torres
+    min 45 (2T 5) visitante substitution Morena Abril Luis
+    min 45 (2T 5) visitante substitution Paula Bianca Galarza Letelier
+    min 45 (2T 5) visitante substitution Lucila Dahiana Coria
+    min 50 (2T 10) visitante try          Iara Amud
+    min 55 (2T 15) visitante try          Macarena Noralí González
+    min 55 (2T 15) visitante conversion   Iara Amud
+    min 60 (2T 20) visitante try          Cecilia Altini
+  marcador  · eventos 0-46 · guardado 0-46
+  tries     · 0-8 (guardado —-—)
+  arbitro   · JAISON HERNANDEZ (guardado: —)
+  guardado  · 18 local · 15 visitante · 14 eventos
+
+lanus-r-c-femenino vs beromama-femenino · 45bfef25 · tarjeta 290732  ·  61f23a26-4e85-4581-88c0-89d90da0b812
+  local     · lanus-r-c-femenino · 18 jugadores · 18 con ficha fijada
+  visitante · beromama-femenino · 16 jugadores · 16 con ficha fijada
+  eventos   · 24
+    min  4 (1T 4) local     try          Jocelyn Cardozo
+    min  6 (1T 6) local     conversion   Jocelyn Cardozo
+    min  8 (1T 8) local     try          Jimena Sofia Tevez
+    min 12 (1T 12) local     try          Iara Lugo
+    min 14 (1T 14) local     conversion   Jocelyn Cardozo
+    min 16 (1T 16) local     try          María Guadalupe Escudero
+    min 18 (1T 18) local     try          Tais Abril Lugo
+    min 27 (1T 27) visitante try          Angeles Ruiz
+    min 40 (2T 0) visitante substitution Dalma Carina Caceres
+    min 40 (2T 0) visitante substitution Estefania Eugenia Cepeda Leguizamon
+    min 42 (2T 2) local     try          Jimena Sofia Tevez
+    min 45 (2T 5) local     substitution Ximena Ruschioni
+    min 45 (2T 5) local     substitution Natalia Eiring
+    min 49 (2T 9) local     substitution Jimena Sofia Tevez
+    min 50 (2T 10) local     conversion   Jocelyn Cardozo
+    min 50 (2T 10) local     substitution Polina Brisa Umede
+    min 52 (2T 12) local     try          Barbara Luciana Vilches
+    min 54 (2T 14) local     try          Zahira Luciana Balbi
+    min 57 (2T 17) local     substitution María Milagros Sosa
+    min 59 (2T 19) local     try          Jeglys Viera
+    min 60 (2T 20) visitante substitution Liliana Torrez
+    min 60 (2T 20) visitante substitution Rocio Magali Larrea
+    min 65 (2T 25) visitante try          Brenda Nicole Godoy
+    min 65 (2T 25) visitante conversion   Lucia Medina
+  marcador  · eventos 51-12 · guardado 51-12
+  tries     · 9-2 (guardado —-—)
+  arbitro   · ALEJO GRACHOT (guardado: —)
+  guardado  · 18 local · 16 visitante · 24 eventos
+
+centro-naval-femenino vs la-plata-femenino · 45bfef25 · tarjeta 290731  ·  d93b2709-4c2f-44a9-a1cc-528bfdb5313f
+  local     · centro-naval-femenino · 18 jugadores · 18 con ficha fijada
+  visitante · la-plata-femenino · 17 jugadores · 17 con ficha fijada
+  eventos   · 12
+    min  1 (1T 1) visitante try          Catalina Latorre
+    min  1 (1T 1) visitante try          Catalina Latorre
+    min  1 (1T 1) visitante conversion   Avril Rahmer Morgantini
+    min  1 (1T 1) visitante try          Catalina Latorre
+    min 15 (1T 15) local     try          Lucia Colombo
+    min 15 (1T 15) visitante conversion   Avril Rahmer Morgantini
+    min 15 (1T 15) visitante try          Catalina Latorre
+    min 15 (1T 15) visitante conversion   Avril Rahmer Morgantini
+    min 15 (1T 15) visitante conversion   Avril Rahmer Morgantini
+    min 15 (1T 15) visitante try          Catalina Latorre
+    min 15 (1T 15) visitante try          Catalina Latorre
+    min 15 (1T 15) visitante try          Catalina Latorre
+  marcador  · eventos 5-43 · guardado 5-43
+  tries     · 1-7 (guardado —-—)
+  arbitro   · MATIAS CALEGARI (guardado: —)
+  guardado  · 18 local · 17 visitante · 12 eventos
+
+listo · 59 partidos

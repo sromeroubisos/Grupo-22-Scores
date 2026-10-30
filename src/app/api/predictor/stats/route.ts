@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { consumeRateLimit } from '@/lib/rateLimit';
+import { getClientIp } from '@/lib/server/publicRouteGuards';
 
 // Contadores GLOBALES del predictor (compartidos por todos los usuarios). El estado
 // vive en Supabase (ver migración 20260630120000_predictor_global_stats.sql). Si la
@@ -17,6 +19,27 @@ const SEED_CHAMPIONS: Array<{ name: string; count: number }> = [
     { name: 'Portugal', count: 20 },
     { name: 'Brasil', count: 1 },
 ];
+
+// El POST es público y escribe en una tabla que se muestra a todos: el nombre
+// del campeón se recorta y se limpia, y cada IP tiene un tope de jugadas.
+const CHAMPION_NAME_MAX = 60;
+const VOTES_PER_IP_PER_HOUR = 30;
+
+/**
+ * Un nombre de selección, no un texto libre: sin caracteres de control ni
+ * marcas raras, espacios colapsados y con tope. null si no queda nada usable.
+ */
+function cleanChampionName(raw: unknown): string | null {
+    if (typeof raw !== 'string') return null;
+    const cleaned = raw
+        .normalize('NFC')
+        .replace(/[\u0000-\u001f\u007f-\u009f​-‏‪-‮⁠-⁯﻿]/g, '')
+        .replace(/[<>]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+    if (!cleaned || cleaned.length > CHAMPION_NAME_MAX) return null;
+    return cleaned;
+}
 
 type ChampionEntry = { name: string; count: number };
 type AnyRow = Record<string, unknown>;
@@ -85,12 +108,19 @@ export async function POST(request: Request) {
     let championName: string | null = null;
     try {
         const body = await request.json().catch(() => ({}));
-        const raw = (body as AnyRow)?.champion;
-        if (typeof raw === 'string' && raw.trim()) {
-            championName = raw.trim();
-        }
+        championName = cleanChampionName((body as AnyRow)?.champion);
     } catch {
         championName = null;
+    }
+
+    if (championName) {
+        const limit = await consumeRateLimit(`predictor-stats:${getClientIp(request)}`, VOTES_PER_IP_PER_HOUR, 3600);
+        if (!limit.allowed) {
+            return NextResponse.json(
+                { error: 'Demasiadas jugadas seguidas. Probá de nuevo más tarde.' },
+                { status: 429, headers: { 'Retry-After': String(limit.retryAfter ?? 3600) } },
+            );
+        }
     }
 
     try {

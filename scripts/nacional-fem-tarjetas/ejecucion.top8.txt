@@ -1,0 +1,1503 @@
+tarjetas oficiales f48723bc
+
+palermo-bajo-carlos-paz-femenino vs cordoba-rc-la-tablada-femenino · f48723bc · tarjeta 324226  ·  4d3b85da-e65e-41cc-8e7d-5bcdb8371abd
+  local     · palermo-bajo-carlos-paz-femenino · 16 jugadores · 0 con ficha fijada
+  visitante · cordoba-rc-la-tablada-femenino · 14 jugadores · 0 con ficha fijada
+  eventos   · 9
+    min  4 (1T 4) visitante try          Rocio Calderon
+    min 10 (1T 10) local     try          Paloma Lozano Carabajal
+    min 15 (1T 15) local     try          Paloma Lozano Carabajal
+    min 16 (1T 16) local     conversion   Lourdes Martina Lozano Barcena
+    min 47 (2T 7) local     try          Dayana Herrera
+    min 51 (2T 11) local     try          Fernanda Lucia Obregon
+    min 55 (2T 15) local     try          Fernanda Lucia Obregon
+    min 60 (2T 20) local     try          Lourdes Martina Lozano Barcena
+    min 61 (2T 21) local     try          Fernanda Lucia Obregon
+  marcador  · eventos 37-5 · guardado 37-5
+  tries     · 7-1 (guardado —-—)
+  arbitro   · DANIEL BORSARELLI (guardado: —)
+  guardado  · 16 local · 14 visitante · 9 eventos
+
+club-universitario-de-cordoba-femenino vs taborin-rc-femenino-verde · f48723bc · tarjeta 322740  ·  4986d508-01c6-400c-be38-258990b2396e
+  local     · club-universitario-de-cordoba-femenino · 19 jugadores · 17 con ficha fijada
+  visitante · taborin-rc-femenino-verde · 15 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min  2 (1T 2) local     try          Romina Blandamuro
+    min  2 (1T 2) local     conversion   Dolores Berti Baila
+    min  6 (1T 6) local     try          Brisa Nazarena Trigo Alday
+    min  6 (1T 6) local     try          Celmira Quiroga
+    min  6 (1T 6) local     conversion   Dolores Berti Baila
+    min 12 (1T 12) local     try          Dolores Berti Baila
+    min 16 (1T 16) local     card_yellow  Camila Sofia Paredes Masin
+    min 20 (1T 20) visitante try          Ludmila Boca
+    min 55 (1T 55) visitante substitution Milagros Jazmin Mella
+    min 42 (2T 2) local     try          Brisa Nazarena Trigo Alday
+    min 48 (2T 8) local     try          Dolores Berti Baila
+    min 53 (2T 13) local     try          Sol Destefanis
+    min 56 (2T 16) local     try          Camila Sofia Paredes Masin
+    min 56 (2T 16) local     conversion   Dolores Berti Baila
+    min 60 (2T 20) visitante try          Ludmila Boca
+    min 95 (2T 55) visitante substitution Nahir Urquiza
+    min 95 (2T 55) visitante substitution Alexia Herrera
+  marcador  · eventos 46-10 · guardado 46-10
+  tries     · 8-2 (guardado —-—)
+  arbitro   · DAIANA DEL MILAGRO CESARETTI (guardado: —)
+  guardado  · 19 local · 15 visitante · 17 eventos
+
+taborin-rc-femenino vs cordoba-athletic-club-femenino · f48723bc · tarjeta 322739  ·  5aea415c-9549-41c7-99f6-469c7df3e6c8
+  local     · taborin-rc-femenino · 15 jugadores · 10 con ficha fijada
+  visitante · cordoba-athletic-club-femenino · 18 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min  5 (1T 5) local     try          Tatiana Rocio Falcón
+    min  6 (1T 6) local     conversion   Ana Rieger
+    min 10 (1T 10) local     try          Yesica Agustina Saucedo
+    min 12 (1T 12) visitante try          Candela Agustina Gorosito
+    min 12 (1T 12) visitante conversion   Manuela Marti
+    min 15 (1T 15) local     card_yellow  Tatiana Rocio Falcón
+    min 19 (1T 19) visitante try          Constanza Baudoin
+    min 20 (1T 20) visitante conversion   Manuela Marti
+    min 21 (1T 21) local     try          Naiara Yael Ponce
+    min 42 (2T 2) visitante try          Maria Fernanda Wilberger
+    min 45 (2T 5) local     try          Rosa Analía Torres Fernández
+    min 50 (2T 10) local     try          Martina Valentina Ibarra
+    min 51 (2T 11) local     conversion   Ana Rieger
+    min 52 (2T 12) visitante try          Victoria Valentina Lopez
+    min 55 (2T 15) local     try          Brisa Agustina Turra
+    min 62 (2T 22) local     conversion   Ana Rieger
+    min 64 (2T 24) visitante try          Manuela Marti
+  marcador  · eventos 36-29 · guardado 36-29
+  tries     · 6-5 (guardado —-—)
+  arbitro   · FLORENCIA LEDESMA (guardado: —)
+  guardado  · 15 local · 18 visitante · 17 eventos
+
+palermo-bajo-carlos-paz-femenino vs taborin-rc-femenino-verde · f48723bc · tarjeta 320869  ·  c99b342f-a202-4642-bb04-3c2dce67eb0f
+  local     · palermo-bajo-carlos-paz-femenino · 16 jugadores · 0 con ficha fijada
+  visitante · taborin-rc-femenino-verde · 16 jugadores · 0 con ficha fijada
+  eventos   · 32
+    min  2 (1T 2) visitante try          Ludmila Boca
+    min  4 (1T 4) visitante try          Ludmila Boca
+    min  4 (1T 4) visitante conversion   Gimena Sala
+    min  9 (1T 9) visitante try          Brisa Borda
+    min  9 (1T 9) visitante conversion   Gimena Sala
+    min 12 (1T 12) local     try          Fernanda Lucia Obregon
+    min 12 (1T 12) local     conversion   Lourdes Martina Lozano Barcena
+    min 13 (1T 13) visitante try          Brisa Borda
+    min 17 (1T 17) local     try          Nadia Jacqueline Fernandez
+    min 17 (1T 17) local     conversion   Lourdes Martina Lozano Barcena
+    min 20 (1T 20) visitante try          Araceli Soledad Oviedo
+    min 20 (1T 20) visitante card_yellow  Gimena Sala
+    min 23 (1T 23) local     card_yellow  Lourdes Martina Lozano Barcena
+    min 28 (1T 28) visitante try          Araceli Soledad Oviedo
+    min 28 (1T 28) visitante conversion   Gimena Sala
+    min 30 (1T 30) visitante try          Ludmila Boca
+    min 45 (2T 5) local     try          Lara Ferrero
+    min 45 (2T 5) local     conversion   Lourdes Martina Lozano Barcena
+    min 49 (2T 9) visitante try          Brisa Borda
+    min 53 (2T 13) visitante try          Brisa Borda
+    min 53 (2T 13) visitante conversion   Gimena Sala
+    min 55 (2T 15) visitante try          Ludmila Boca
+    min 55 (2T 15) visitante conversion   Gimena Sala
+    min 57 (2T 17) visitante try          Brisa Borda
+    min 57 (2T 17) visitante conversion   Gimena Sala
+    min 60 (2T 20) visitante try          Brisa Borda
+    min 60 (2T 20) visitante conversion   Gimena Sala
+    min 61 (2T 21) local     try          Jazmín Sáez
+    min 61 (2T 21) local     conversion   Lourdes Martina Lozano Barcena
+    min 68 (2T 28) visitante try          Brisa Borda
+    min 71 (2T 31) local     try          Paloma Lozano Carabajal
+    min 71 (2T 31) local     conversion   Lourdes Martina Lozano Barcena
+  marcador  · eventos 35-79 · guardado 35-79
+  tries     · 5-13 (guardado —-—)
+  arbitro   · FLORENCIA LEDESMA (guardado: —)
+  guardado  · 16 local · 16 visitante · 32 eventos
+
+club-universitario-de-cordoba-femenino vs manke-la-calera-femenino · f48723bc · tarjeta 320871  ·  17bc0c61-07ac-4837-89cf-2c0f1a2facf5
+  local     · club-universitario-de-cordoba-femenino · 18 jugadores · 17 con ficha fijada
+  visitante · manke-la-calera-femenino · 19 jugadores · 0 con ficha fijada
+  eventos   · 31
+    min  1 (1T 1) local     try          Camila Sofia Paredes Masin
+    min  2 (1T 2) local     try          Celmira Quiroga
+    min  2 (1T 2) local     conversion   Maira Barrionuevo
+    min  3 (1T 3) local     try          Maria Aime Morro David
+    min  5 (1T 5) local     try          Sol Destefanis
+    min  9 (1T 9) local     try          Sol Destefanis
+    min 16 (1T 16) local     try          Camila Sofia Paredes Masin
+    min 16 (1T 16) local     conversion   Maira Barrionuevo
+    min 18 (1T 18) local     try          Maite Perez
+    min 18 (1T 18) local     conversion   Maira Barrionuevo
+    min 21 (1T 21) local     try          Sol Destefanis
+    min 23 (1T 23) local     try          Sol Destefanis
+    min 41 (2T 1) local     substitution Camila Sofia Paredes Masin
+    min 41 (2T 1) local     substitution Romina Blandamuro
+    min 41 (2T 1) local     substitution Maite Perez
+    min 41 (2T 1) local     substitution Maria Aime Morro David
+    min 41 (2T 1) local     substitution Maira Barrionuevo
+    min 41 (2T 1) local     substitution Dayana Micaela Juncos
+    min 41 (2T 1) local     try          Ayelen Vega
+    min 41 (2T 1) local     conversion   Dolores Berti Baila
+    min 46 (2T 6) local     try          Sol Destefanis
+    min 46 (2T 6) local     conversion   Dolores Berti Baila
+    min 48 (2T 8) local     substitution Celmira Quiroga
+    min 50 (2T 10) local     substitution Agustina Retamar
+    min 53 (2T 13) local     try          Brisa Nazarena Trigo Alday
+    min 53 (2T 13) local     conversion   Dolores Berti Baila
+    min 56 (2T 16) local     try          Valentina Flores
+    min 56 (2T 16) local     conversion   Dolores Berti Baila
+    min 61 (2T 21) local     try          Sol Destefanis
+    min 64 (2T 24) local     try          Dolores Berti Baila
+    min 64 (2T 24) local     conversion   Dolores Berti Baila
+  marcador  · eventos 91-0 · guardado 91-0
+  tries     · 15-0 (guardado —-—)
+  arbitro   · ABEL ESTEBAN TUREK (guardado: —)
+  guardado  · 18 local · 19 visitante · 31 eventos
+
+cordoba-athletic-club-femenino vs taborin-rc-femenino · f48723bc · tarjeta 320872  ·  034c2b9b-633d-4296-9615-4b822a3a51ec
+  local     · cordoba-athletic-club-femenino · 16 jugadores · 0 con ficha fijada
+  visitante · taborin-rc-femenino · 14 jugadores · 10 con ficha fijada
+  eventos   · 18
+    min  1 (1T 1) visitante try          Mariel Velay Fossat
+    min  2 (1T 2) visitante conversion   Ana Rieger
+    min  3 (1T 3) local     try          Constanza Baudoin
+    min 23 (1T 23) visitante try          Ana Rieger
+    min 27 (1T 27) visitante card_yellow  Ana Paula Quintero Chiesa
+    min 27 (1T 27) visitante conversion   Ana Paula Quintero Chiesa
+    min 28 (1T 28) local     try          Melina Lopez
+    min 43 (2T 3) local     try          Maria Fernanda Wilberger
+    min 46 (2T 6) visitante try          Mariel Velay Fossat
+    min 46 (2T 6) visitante conversion   Ana Rieger
+    min 49 (2T 9) local     try          Constanza Baudoin
+    min 50 (2T 10) visitante try          Mariel Velay Fossat
+    min 50 (2T 10) visitante conversion   Ana Rieger
+    min 55 (2T 15) local     try          Candela Agustina Gorosito
+    min 56 (2T 16) local     conversion   Lurdes Pacheco
+    min 60 (2T 20) visitante try          Mariel Velay Fossat
+    min 61 (2T 21) visitante card_yellow  Giuliana Antonella Lincoman
+    min 63 (2T 23) visitante try          Mariel Velay Fossat
+  marcador  · eventos 27-38 · guardado 27-38
+  tries     · 5-6 (guardado —-—)
+  arbitro   · EUGENIO MORRA (guardado: —)
+  guardado  · 16 local · 14 visitante · 18 eventos
+
+taborin-rc-femenino vs club-universitario-de-cordoba-femenino · f48723bc · tarjeta 319791  ·  6efec8cc-dddd-4a56-b094-a784bcf41850
+  local     · taborin-rc-femenino · 16 jugadores · 11 con ficha fijada
+  visitante · club-universitario-de-cordoba-femenino · 19 jugadores · 17 con ficha fijada
+  eventos   · 19
+    min  1 (1T 1) local     card_yellow  Luciana Clarice Kraus
+    min  4 (1T 4) local     card_yellow  Ana Rieger
+    min  4 (1T 4) visitante try          Renata Giraudo
+    min  4 (1T 4) visitante conversion   Maira Barrionuevo
+    min  8 (1T 8) local     try          Mariel Velay Fossat
+    min 19 (1T 19) local     card_yellow  Brisa Agustina Turra
+    min 20 (1T 20) visitante try          Maite Perez
+    min 23 (1T 23) visitante card_yellow  Camila Sofia Paredes Masin
+    min 27 (1T 27) local     try          Macarena Fernanda Burgos
+    min 29 (1T 29) visitante substitution Noelia Del Carmen Reyes
+    min 49 (2T 9) visitante substitution Julieta Carolina González Amarfil
+    min 52 (2T 12) visitante card_yellow  Ayelen Vega
+    min 59 (2T 19) local     card_yellow  Yesica Agustina Saucedo
+    min 60 (2T 20) local     substitution Yesica Agustina Saucedo
+    min 60 (2T 20) visitante substitution Ayelen Vega
+    min 61 (2T 21) visitante substitution Renata Giraudo
+    min 61 (2T 21) visitante substitution Agustina Retamar
+    min 67 (2T 27) local     substitution Ana Rieger
+    min 67 (2T 27) local     substitution Brisa Agustina Turra
+  marcador  · eventos 10-12 · guardado 10-12
+  tries     · 2-2 (guardado —-—)
+  arbitro   · OCTAVIO DAMIA PATIÑO (guardado: —)
+  guardado  · 16 local · 19 visitante · 19 eventos
+
+taborin-rc-femenino-verde vs cordoba-athletic-club-femenino · f48723bc · tarjeta 319790  ·  2cb3cebc-f903-48ba-844f-c3f49a31a8ef
+  local     · taborin-rc-femenino-verde · 17 jugadores · 0 con ficha fijada
+  visitante · cordoba-athletic-club-femenino · 17 jugadores · 0 con ficha fijada
+  eventos   · 30
+    min  3 (1T 3) visitante try          Melina Lopez
+    min  4 (1T 4) visitante conversion   Lurdes Pacheco
+    min 12 (1T 12) local     try          Araceli Soledad Oviedo
+    min 12 (1T 12) local     conversion   Yamila Gonzalez
+    min 17 (1T 17) local     try          Ludmila Boca
+    min 20 (1T 20) local     injury       Maiara Abril Lopez Cejas
+    min 20 (1T 20) local     try          Yamila Gonzalez
+    min 20 (1T 20) local     conversion   Yamila Gonzalez
+    min 24 (1T 24) local     substitution Priscila Boca
+    min 29 (1T 29) local     try          Yamila Gonzalez
+    min 41 (2T 1) local     conversion   Yamila Gonzalez
+    min 41 (2T 1) local     try          Brisa Borda
+    min 44 (2T 4) visitante try          Maria Fernanda Wilberger
+    min 50 (2T 10) local     try          Yamila Gonzalez
+    min 50 (2T 10) local     conversion   Yamila Gonzalez
+    min 51 (2T 11) local     substitution Juliana Rodriguez
+    min 53 (2T 13) visitante try          Lurdes Pacheco
+    min 59 (2T 19) local     try          Araceli Soledad Oviedo
+    min 59 (2T 19) local     conversion   Gimena Sala
+    min 62 (2T 22) visitante injury       Manuela Marti
+    min 62 (2T 22) visitante substitution Manuela Marti
+    min 64 (2T 24) local     substitution Maiara Abril Lopez Cejas
+    min 64 (2T 24) local     try          Catalina Díaz
+    min 64 (2T 24) local     conversion   Yamila Gonzalez
+    min 64 (2T 24) visitante injury       Milagros Arguello
+    min 64 (2T 24) visitante substitution Milagros Arguello
+    min 65 (2T 25) visitante try          Lurdes Pacheco
+    min 66 (2T 26) visitante conversion   Maria Emilia Monti
+    min 70 (2T 30) local     try          Araceli Soledad Oviedo
+    min 80 (2T 40) local     substitution Rocio Lourdes Salinas
+  marcador  · eventos 57-24 · guardado 57-24
+  tries     · 9-4 (guardado —-—)
+  arbitro   · HORACIO CORONADO (guardado: —)
+  guardado  · 17 local · 17 visitante · 30 eventos
+
+cordoba-rc-la-tablada-femenino vs palermo-bajo-carlos-paz-femenino · f48723bc · tarjeta 319789  ·  2448a76b-5963-4735-90be-09e339a0e16d
+  local     · cordoba-rc-la-tablada-femenino · 19 jugadores · 0 con ficha fijada
+  visitante · palermo-bajo-carlos-paz-femenino · 15 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min  1 (1T 1) local     try          Violeta Anahi Fajardo
+    min  2 (1T 2) visitante try          Fernanda Lucia Obregon
+    min  7 (1T 7) visitante try          Milagros Strada
+    min 10 (1T 10) visitante try          Milagros Coronel Peralta
+    min 13 (1T 13) visitante try          Camila Pizarro
+    min 13 (1T 13) visitante conversion   Lourdes Martina Lozano Barcena
+    min 17 (1T 17) visitante try          Milagros Coronel Peralta
+    min 30 (1T 30) visitante try          Dayana Herrera
+    min 30 (1T 30) visitante conversion   Lourdes Martina Lozano Barcena
+    min 43 (2T 3) visitante try          Sofia Roch Borettini
+    min 43 (2T 3) visitante conversion   Lourdes Martina Lozano Barcena
+    min 50 (2T 10) visitante try          Milagros Strada
+    min 53 (2T 13) visitante try          Camila Pizarro
+    min 63 (2T 23) visitante try          Dayana Herrera
+    min 63 (2T 23) visitante conversion   Lourdes Martina Lozano Barcena
+    min 66 (2T 26) visitante penalty_try  
+    min 68 (2T 28) visitante try          Milagros Coronel Peralta
+    min 68 (2T 28) visitante conversion   Lourdes Martina Lozano Barcena
+  marcador  · eventos 5-72 · guardado 5-72
+  tries     · 1-12 (guardado —-—)
+  arbitro   · FLORENCIA LEDESMA (guardado: —)
+  guardado  · 19 local · 15 visitante · 18 eventos
+
+club-universitario-de-cordoba-femenino vs cordoba-athletic-club-femenino · f48723bc · tarjeta 315229  ·  ba557ef5-bf00-4aa3-a1a2-f112f3c90441
+  local     · club-universitario-de-cordoba-femenino · 19 jugadores · 16 con ficha fijada
+  visitante · cordoba-athletic-club-femenino · 19 jugadores · 0 con ficha fijada
+  eventos   · 37
+    min  5 (1T 5) local     try          Renata Giraudo
+    min  5 (1T 5) local     conversion   Maira Barrionuevo
+    min  8 (1T 8) visitante try          Tiziana Carolina Sandoval
+    min  9 (1T 9) visitante conversion   Lurdes Pacheco
+    min 13 (1T 13) local     try          Renata Giraudo
+    min 13 (1T 13) local     conversion   Maira Barrionuevo
+    min 18 (1T 18) local     try          Maira Barrionuevo
+    min 18 (1T 18) local     conversion   Maira Barrionuevo
+    min 20 (1T 20) local     card_yellow  Maite Perez
+    min 21 (1T 21) visitante try          Constanza Baudoin
+    min 26 (1T 26) visitante card_yellow  Maria Fernanda Wilberger
+    min 27 (1T 27) local     penalty_goal Maira Barrionuevo
+    min 29 (1T 29) local     try          Camila Sofia Paredes Masin
+    min 29 (1T 29) local     conversion   Maira Barrionuevo
+    min 41 (2T 1) local     try          Brisa Nazarena Trigo Alday
+    min 41 (2T 1) local     conversion   Maira Barrionuevo
+    min 44 (2T 4) visitante try          Maria Emilia Monti
+    min 45 (2T 5) visitante conversion   Lurdes Pacheco
+    min 45 (2T 5) visitante penalty_try  
+    min 49 (2T 9) local     try          Celmira Quiroga
+    min 49 (2T 9) local     conversion   Maira Barrionuevo
+    min 50 (2T 10) local     card_yellow  Agustina Retamar
+    min 59 (2T 19) local     penalty_try  
+    min 60 (2T 20) local     card_yellow  Renata Giraudo
+    min 60 (2T 20) visitante card_yellow  Constanza Baudoin
+    min 62 (2T 22) local     substitution Ayelen Vega
+    min 62 (2T 22) local     try          Romina Blandamuro
+    min 62 (2T 22) local     conversion   Maira Barrionuevo
+    min 64 (2T 24) local     substitution Renata Giraudo
+    min 64 (2T 24) local     substitution Julieta Carolina González Amarfil
+    min 65 (2T 25) local     substitution Maira Barrionuevo
+    min 65 (2T 25) local     substitution Noelia Del Carmen Reyes
+    min 65 (2T 25) local     try          Maira Barrionuevo
+    min 65 (2T 25) local     conversion   Maira Barrionuevo
+    min 66 (2T 26) local     substitution Maite Perez
+    min 69 (2T 29) visitante try          Maria Emilia Monti
+    min 70 (2T 30) visitante conversion   Lurdes Pacheco
+  marcador  · eventos 66-33 · guardado 66-33
+  tries     · 9-5 (guardado —-—)
+  arbitro   · EUGENIO MORRA (guardado: —)
+  guardado  · 19 local · 19 visitante · 37 eventos
+
+cordoba-rc-la-tablada-femenino vs taborin-rc-femenino-verde · f48723bc · tarjeta 315226  ·  d016294d-6e96-4918-9685-13f841d13242
+  local     · cordoba-rc-la-tablada-femenino · 18 jugadores · 0 con ficha fijada
+  visitante · taborin-rc-femenino-verde · 13 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min  3 (1T 3) visitante try          Gimena Sala
+    min  4 (1T 4) visitante try          Maiara Abril Lopez Cejas
+    min  8 (1T 8) visitante try          Ludmila Boca
+    min  8 (1T 8) visitante conversion   Yamila Gonzalez
+    min  8 (1T 8) visitante try          Ludmila Boca
+    min 10 (1T 10) visitante try          Ludmila Boca
+    min 10 (1T 10) visitante conversion   Yamila Gonzalez
+    min 13 (1T 13) visitante try          Rocio Lourdes Salinas
+    min 13 (1T 13) visitante conversion   Yamila Gonzalez
+    min 14 (1T 14) visitante try          Rocio Lourdes Salinas
+    min 14 (1T 14) visitante conversion   Yamila Gonzalez
+    min 19 (1T 19) visitante substitution Milagros Enriquez
+    min 19 (1T 19) visitante substitution Juliana Rodriguez
+    min 21 (1T 21) visitante substitution Ludmila Boca
+    min 21 (1T 21) visitante try          Ludmila Boca
+    min 21 (1T 21) visitante conversion   Yamila Gonzalez
+    min 25 (1T 25) visitante try          Araceli Soledad Oviedo
+    min 25 (1T 25) visitante conversion   Yamila Gonzalez
+    min 45 (2T 5) visitante try          Rocio Lourdes Salinas
+    min 48 (2T 8) visitante try          Araceli Soledad Oviedo
+    min 48 (2T 8) visitante conversion   Yamila Gonzalez
+    min 51 (2T 11) local     try          Celeste Marianela Rosemberg
+    min 52 (2T 12) local     card_yellow  Sofia Martin Mayorga
+    min 52 (2T 12) local     injury       Celeste Marianela Rosemberg
+    min 60 (2T 20) local     injury       Lucila Ludueña
+    min 64 (2T 24) visitante try          Solange Reinoso
+    min 64 (2T 24) visitante conversion   Yamila Gonzalez
+  marcador  · eventos 5-76 · guardado 5-76
+  tries     · 1-12 (guardado —-—)
+  arbitro   · LUCIANO FRANCISCO ROMERO (guardado: —)
+  guardado  · 18 local · 13 visitante · 27 eventos
+
+palermo-bajo-carlos-paz-femenino vs manke-la-calera-femenino · f48723bc · tarjeta 315227  ·  94bea2f7-3f30-48b6-a219-4499f1ea6d0c
+  local     · palermo-bajo-carlos-paz-femenino · 15 jugadores · 0 con ficha fijada
+  visitante · manke-la-calera-femenino · 19 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min  1 (1T 1) local     try          Milagros Coronel Peralta
+    min  1 (1T 1) local     conversion   Dayana Herrera
+    min  2 (1T 2) local     try          Milagros Coronel Peralta
+    min  5 (1T 5) local     try          Dayana Herrera
+    min  5 (1T 5) local     conversion   Dayana Herrera
+    min  7 (1T 7) local     try          Camila Pizarro
+    min 10 (1T 10) local     try          Milagros Strada
+    min 12 (1T 12) local     try          Dayana Herrera
+    min 14 (1T 14) local     try          Camila Pizarro
+    min 14 (1T 14) local     conversion   Dayana Herrera
+    min 16 (1T 16) local     try          Milagros Coronel Peralta
+    min 41 (2T 1) local     try          Paloma Lozano Carabajal
+    min 42 (2T 2) local     try          Paloma Lozano Carabajal
+    min 44 (2T 4) local     try          Paloma Lozano Carabajal
+    min 44 (2T 4) local     conversion   Lourdes Martina Lozano Barcena
+    min 46 (2T 6) local     try          Paloma Lozano Carabajal
+    min 49 (2T 9) local     try          Milagros Coronel Peralta
+    min 53 (2T 13) local     try          Jazmín Sáez
+    min 57 (2T 17) local     try          Dayana Herrera
+    min 58 (2T 18) local     conversion   Lourdes Martina Lozano Barcena
+    min 59 (2T 19) local     try          Milagros Coronel Peralta
+    min 60 (2T 20) local     penalty_try  
+    min 65 (2T 25) visitante card_yellow  Carla Melina Muñoz
+    min 80 (2T 40) local     substitution Camila Pizarro
+    min 80 (2T 40) local     substitution Cintia Anahi Soveron
+    min 80 (2T 40) local     substitution Nadia Jacqueline Fernandez
+    min 80 (2T 40) local     substitution Florencia Morano
+  marcador  · eventos 97-0 · guardado 97-0
+  tries     · 17-0 (guardado —-—)
+  arbitro   · ÁNGELES MURUA (guardado: —)
+  guardado  · 15 local · 19 visitante · 27 eventos
+
+taborin-rc-femenino-verde vs club-universitario-de-cordoba-femenino · f48723bc · tarjeta 314711  ·  b5f8852e-cef8-4b59-8af3-9abcafe66061
+  local     · taborin-rc-femenino-verde · 15 jugadores · 0 con ficha fijada
+  visitante · club-universitario-de-cordoba-femenino · 19 jugadores · 16 con ficha fijada
+  eventos   · 15
+    min  2 (1T 2) visitante try          Camila Sofia Paredes Masin
+    min 15 (1T 15) visitante card_yellow  Maira Barrionuevo
+    min 20 (1T 20) local     try          Yamila Gonzalez
+    min 20 (1T 20) local     conversion   Yamila Gonzalez
+    min 21 (1T 21) local     card_yellow  Yamila Gonzalez
+    min 21 (1T 21) visitante card_yellow  Romina Blandamuro
+    min 24 (1T 24) local     try          Brisa Borda
+    min 29 (1T 29) visitante try          Renata Giraudo
+    min 30 (1T 30) local     try          Brisa Borda
+    min 44 (2T 4) visitante try          Camila Sofia Paredes Masin
+    min 55 (2T 15) local     substitution Solange Reinoso
+    min 58 (2T 18) visitante try          Renata Giraudo
+    min 60 (2T 20) local     card_yellow  Brisa Borda
+    min 65 (2T 25) visitante try          Maite Perez
+    min 65 (2T 25) visitante conversion   Celmira Quiroga
+  marcador  · eventos 17-27 · guardado 17-27
+  tries     · 3-5 (guardado —-—)
+  arbitro   · SANTIAGO CORVALÁN RT (guardado: —)
+  guardado  · 15 local · 19 visitante · 15 eventos
+
+manke-la-calera-femenino vs cordoba-rc-la-tablada-femenino · f48723bc · tarjeta 314714  ·  9348cf94-c2bf-4ed3-a174-15ac3903cf70
+  local     · manke-la-calera-femenino · 18 jugadores · 0 con ficha fijada
+  visitante · cordoba-rc-la-tablada-femenino · 16 jugadores · 0 con ficha fijada
+  eventos   · 10
+    min  3 (1T 3) visitante try          Celeste Marianela Rosemberg
+    min  3 (1T 3) visitante conversion   Agostina Scarponi
+    min  5 (1T 5) visitante try          Celeste Marianela Rosemberg
+    min  7 (1T 7) visitante try          Celeste Marianela Rosemberg
+    min 14 (1T 14) local     try          María Laura Luna
+    min 46 (2T 6) visitante try          Martina Celeste Gonzalez
+    min 46 (2T 6) visitante conversion   Agostina Scarponi
+    min 52 (2T 12) visitante try          Agostina Scarponi
+    min 52 (2T 12) visitante conversion   Agostina Scarponi
+    min 55 (2T 15) visitante try          Antonella Pilar Gorosito
+  marcador  · eventos 5-36 · guardado 5-36
+  tries     · 1-6 (guardado —-—)
+  arbitro   · FEDERICO PREGOT (guardado: —)
+  guardado  · 18 local · 16 visitante · 10 eventos
+
+taborin-rc-femenino vs palermo-bajo-carlos-paz-femenino · f48723bc · tarjeta 314712  ·  53de3117-1da4-48d8-85e9-92d6c17061fb
+  local     · taborin-rc-femenino · 14 jugadores · 10 con ficha fijada
+  visitante · palermo-bajo-carlos-paz-femenino · 15 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min  3 (1T 3) local     try          Luciana Clarice Kraus
+    min  3 (1T 3) local     conversion   Ana Rieger
+    min  4 (1T 4) local     try          Ana Paula Quintero Chiesa
+    min  4 (1T 4) local     conversion   Ana Rieger
+    min  7 (1T 7) local     try          Antonella Crosetto
+    min 16 (1T 16) visitante try          Dayana Herrera
+    min 17 (1T 17) local     try          Aldana Robledo
+    min 17 (1T 17) local     conversion   Ana Rieger
+    min 22 (1T 22) local     try          Mariel Velay Fossat
+    min 24 (1T 24) local     try          Aldana Robledo
+    min 24 (1T 24) local     conversion   Ana Rieger
+    min 40 (1T 40) visitante substitution Camila Pizarro
+    min 42 (2T 2) local     try          Antonella Crosetto
+    min 46 (2T 6) visitante substitution Lara Ferrero
+    min 46 (2T 6) visitante substitution Dayana Herrera
+    min 50 (2T 10) local     try          Mariel Velay Fossat
+    min 52 (2T 12) local     try          Mariel Velay Fossat
+    min 55 (2T 15) local     try          Aldana Robledo
+    min 55 (2T 15) local     conversion   Ana Rieger
+    min 58 (2T 18) local     try          Mariel Velay Fossat
+    min 58 (2T 18) local     conversion   Ana Rieger
+    min 60 (2T 20) local     substitution Luciana Clarice Kraus
+    min 64 (2T 24) visitante try          Lara Ferrero
+    min 64 (2T 24) visitante conversion   Paloma Lozano Carabajal
+    min 65 (2T 25) local     try          Aldana Robledo
+    min 65 (2T 25) local     conversion   Ana Rieger
+    min 80 (2T 40) visitante substitution Cintia Anahi Soveron
+  marcador  · eventos 74-12 · guardado 74-12
+  tries     · 12-2 (guardado —-—)
+  arbitro   · DAIANA DEL MILAGRO CESARETTI (guardado: —)
+  guardado  · 14 local · 15 visitante · 27 eventos
+
+aero-club-rio-iv-femenino vs club-universitario-de-cordoba-femenino · f48723bc · tarjeta 297609  ·  6bc4ee05-f094-432e-ad74-0f023a42ea85
+  local     · aero-club-rio-iv-femenino · 14 jugadores · 0 con ficha fijada
+  visitante · club-universitario-de-cordoba-femenino · 18 jugadores · 14 con ficha fijada
+  eventos   · 16
+    min  2 (1T 2) visitante try          Maite Perez
+    min  5 (1T 5) visitante try          Maira Barrionuevo
+    min 20 (1T 20) visitante try          Julieta Carolina González Amarfil
+    min 25 (1T 25) visitante try          Julieta Carolina González Amarfil
+    min 41 (2T 1) visitante substitution Dayana Micaela Juncos
+    min 44 (2T 4) visitante try          Renata Giraudo
+    min 48 (2T 8) visitante substitution Valentina Flores
+    min 50 (2T 10) visitante substitution Maite Perez
+    min 51 (2T 11) visitante try          Renata Giraudo
+    min 53 (2T 13) visitante try          Ayelen Vega
+    min 54 (2T 14) visitante substitution Ayelen Vega
+    min 55 (2T 15) visitante try          Brisa Nazarena Trigo Alday
+    min 55 (2T 15) visitante substitution Noelia Del Carmen Reyes
+    min 65 (2T 25) visitante try          Maira Barrionuevo
+    min 69 (2T 29) visitante try          Maira Barrionuevo
+    min 69 (2T 29) visitante conversion   Maria Aime Morro David
+  marcador  · eventos 0-52 · guardado 0-52
+  tries     · 0-10 (guardado —-—)
+  arbitro   · JOSÉ OCTAVIANO BORQUEZ (guardado: —)
+  guardado  · 14 local · 18 visitante · 16 eventos
+
+taborin-rc-femenino-verde vs manke-la-calera-femenino · f48723bc · tarjeta 313896  ·  66830929-4a82-4fe5-8896-2cc52940744c
+  local     · taborin-rc-femenino-verde · 15 jugadores · 0 con ficha fijada
+  visitante · manke-la-calera-femenino · 16 jugadores · 0 con ficha fijada
+  eventos   · 31
+    min  1 (1T 1) local     try          Yamila Gonzalez
+    min  1 (1T 1) local     conversion   Gimena Sala
+    min  1 (1T 1) local     try          Ludmila Boca
+    min  4 (1T 4) local     try          Ludmila Boca
+    min  4 (1T 4) local     conversion   Gimena Sala
+    min  6 (1T 6) local     try          Yamila Liliana Barrera
+    min  6 (1T 6) local     conversion   Gimena Sala
+    min  8 (1T 8) local     try          Ludmila Boca
+    min  8 (1T 8) local     conversion   Gimena Sala
+    min 10 (1T 10) local     try          Ludmila Boca
+    min 41 (2T 1) local     try          Brisa Borda
+    min 41 (2T 1) local     conversion   Gimena Sala
+    min 44 (2T 4) local     conversion   Gimena Sala
+    min 44 (2T 4) local     try          Solange Reinoso
+    min 45 (2T 5) local     try          Ludmila Boca
+    min 47 (2T 7) local     try          Brisa Borda
+    min 49 (2T 9) local     try          Ludmila Boca
+    min 50 (2T 10) local     try          Maiara Abril Lopez Cejas
+    min 50 (2T 10) local     conversion   Yamila Gonzalez
+    min 51 (2T 11) local     try          Maiara Abril Lopez Cejas
+    min 53 (2T 13) local     try          Solange Reinoso
+    min 53 (2T 13) local     conversion   Yamila Gonzalez
+    min 55 (2T 15) local     try          Maiara Abril Lopez Cejas
+    min 55 (2T 15) local     conversion   Yamila Gonzalez
+    min 56 (2T 16) local     try          Solange Reinoso
+    min 56 (2T 16) local     conversion   Yamila Gonzalez
+    min 58 (2T 18) local     try          Brisa Borda
+    min 58 (2T 18) local     conversion   Yamila Gonzalez
+    min 59 (2T 19) local     try          Brisa Borda
+    min 60 (2T 20) local     try          Maiara Abril Lopez Cejas
+    min 60 (2T 20) local     conversion   Yamila Gonzalez
+  marcador  · eventos 119-0 · guardado 119-0
+  tries     · 19-0 (guardado —-—)
+  arbitro   · ÁNGELES MURUA (guardado: —)
+  guardado  · 15 local · 16 visitante · 31 eventos
+
+palermo-bajo-carlos-paz-femenino vs cordoba-athletic-club-femenino · f48723bc · tarjeta 297611  ·  1f7e6029-dba7-44f2-9ce6-c15cd07ac67b
+  local     · palermo-bajo-carlos-paz-femenino · 15 jugadores · 0 con ficha fijada
+  visitante · cordoba-athletic-club-femenino · 19 jugadores · 0 con ficha fijada
+  eventos   · 15
+    min  2 (1T 2) visitante try          Victoria Valentina Lopez
+    min  7 (1T 7) visitante try          Maria Fernanda Wilberger
+    min 12 (1T 12) visitante try          Melina Lopez
+    min 21 (1T 21) visitante try          Constanza Baudoin
+    min 25 (1T 25) local     try          Lourdes Martina Lozano Barcena
+    min 28 (1T 28) visitante try          Victoria Valentina Lopez
+    min 30 (1T 30) local     substitution Sofia Roch Borettini
+    min 30 (1T 30) visitante try          Celeste Quinteros
+    min 30 (1T 30) visitante conversion   Melina Lopez
+    min 42 (2T 2) local     try          Camila Pizarro
+    min 46 (2T 6) local     card_yellow  Priscila Selena Galindez
+    min 51 (2T 11) visitante try          Candela Agustina Gorosito
+    min 65 (2T 25) visitante try          Maria Emilia Monti
+    min 70 (2T 30) local     substitution Florencia Morano
+    min 83 (2T 43) visitante try          Abril Castellano
+  marcador  · eventos 10-47 · guardado 10-47
+  tries     · 2-9 (guardado —-—)
+  arbitro   · DAIANA DEL MILAGRO CESARETTI (guardado: —)
+  guardado  · 15 local · 19 visitante · 15 eventos
+
+cordoba-rc-la-tablada-femenino vs taborin-rc-femenino · f48723bc · tarjeta 297610  ·  780f5e4b-28db-42a0-8328-1265d39bad14
+  local     · cordoba-rc-la-tablada-femenino · 17 jugadores · 0 con ficha fijada
+  visitante · taborin-rc-femenino · 16 jugadores · 10 con ficha fijada
+  eventos   · 30
+    min  2 (1T 2) visitante try          Luciana Clarice Kraus
+    min  2 (1T 2) visitante conversion   Ana Rieger
+    min  4 (1T 4) visitante try          Valentina Ponce
+    min  7 (1T 7) visitante try          Valentina Ponce
+    min 10 (1T 10) visitante try          Antonella Crosetto
+    min 10 (1T 10) visitante conversion   Ana Rieger
+    min 12 (1T 12) visitante try          Ana Paula Quintero Chiesa
+    min 12 (1T 12) visitante conversion   Ana Rieger
+    min 15 (1T 15) visitante try          Luciana Clarice Kraus
+    min 15 (1T 15) visitante conversion   Ana Rieger
+    min 17 (1T 17) visitante try          Aldana Robledo
+    min 17 (1T 17) visitante conversion   Ana Rieger
+    min 19 (1T 19) visitante try          Giuliana Antonella Lincoman
+    min 22 (1T 22) visitante try          Aldana Robledo
+    min 22 (1T 22) visitante conversion   Ana Rieger
+    min 25 (1T 25) visitante try          Giuliana Antonella Lincoman
+    min 42 (2T 2) visitante try          Giuliana Antonella Lincoman
+    min 42 (2T 2) visitante conversion   Ana Rieger
+    min 45 (2T 5) visitante try          Macarena Fernanda Burgos
+    min 45 (2T 5) visitante conversion   Ana Rieger
+    min 47 (2T 7) visitante try          Mariel Velay Fossat
+    min 47 (2T 7) visitante conversion   Ana Rieger
+    min 52 (2T 12) visitante try          Valentina Ponce
+    min 52 (2T 12) visitante conversion   Ana Rieger
+    min 54 (2T 14) visitante try          Macarena Fernanda Burgos
+    min 54 (2T 14) visitante conversion   Ana Rieger
+    min 55 (2T 15) visitante try          Aldana Robledo
+    min 55 (2T 15) visitante conversion   Ana Rieger
+    min 63 (2T 23) local     try          Sofia Martin Mayorga
+    min 80 (2T 40) visitante substitution Ana Paula Quintero Chiesa
+  marcador  · eventos 5-104 · guardado 5-104
+  tries     · 1-16 (guardado —-—)
+  arbitro   · FLORENCIA LEDESMA (guardado: —)
+  guardado  · 17 local · 16 visitante · 30 eventos
+
+cordoba-athletic-club-femenino vs cordoba-rc-la-tablada-femenino · f48723bc · tarjeta 297608  ·  b41d2067-dae0-43d1-b37d-c73bb2927fc7
+  local     · cordoba-athletic-club-femenino · 16 jugadores · 0 con ficha fijada
+  visitante · cordoba-rc-la-tablada-femenino · 17 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min  1 (1T 1) local     try          Abril Castellano
+    min  3 (1T 3) local     try          Milagros Arguello
+    min  3 (1T 3) local     conversion   Abril Castellano
+    min  5 (1T 5) local     try          Victoria Valentina Lopez
+    min 11 (1T 11) local     try          Abril Castellano
+    min 11 (1T 11) local     conversion   Abril Castellano
+    min 12 (1T 12) local     try          Manuela Marti
+    min 15 (1T 15) local     try          Tiziana Casaccia
+    min 18 (1T 18) local     try          Candela Agustina Gorosito
+    min 20 (1T 20) local     try          Manuela Marti
+    min 23 (1T 23) local     try          Maria Fernanda Wilberger
+    min 25 (1T 25) local     try          Martina Alexia Trancucci
+    min 41 (2T 1) local     try          Manuela Marti
+    min 46 (2T 6) local     try          Lurdes Pacheco
+    min 48 (2T 8) local     try          Maria Emilia Monti
+    min 48 (2T 8) local     conversion   Abril Castellano
+    min 51 (2T 11) local     try          Candela Agustina Gorosito
+    min 51 (2T 11) local     conversion   Melina Lopez
+    min 53 (2T 13) local     try          Lurdes Pacheco
+    min 53 (2T 13) local     conversion   Melina Lopez
+    min 60 (2T 20) local     try          Melina Lopez
+    min 62 (2T 22) visitante try          Abril Oliva Oliva Cuffaro
+  marcador  · eventos 90-5 · guardado 90-5
+  tries     · 16-1 (guardado —-—)
+  arbitro   · ALEJANDRO AUGUSTO AGUERO (guardado: —)
+  guardado  · 16 local · 17 visitante · 22 eventos
+
+manke-la-calera-femenino vs taborin-rc-femenino · f48723bc · tarjeta 313112  ·  ed2b856a-ad06-40f8-84e0-a8908d6cc911
+  local     · manke-la-calera-femenino · 18 jugadores · 0 con ficha fijada
+  visitante · taborin-rc-femenino · 14 jugadores · 11 con ficha fijada
+  eventos   · 33
+    min  1 (1T 1) visitante try          Aldana Robledo
+    min  4 (1T 4) visitante try          Luciana Clarice Kraus
+    min  5 (1T 5) visitante conversion   Ana Rieger
+    min  7 (1T 7) visitante try          Luciana Clarice Kraus
+    min 10 (1T 10) visitante card_yellow  Ana Paula Quintero Chiesa
+    min 10 (1T 10) visitante substitution Valentina Ponce
+    min 11 (1T 11) visitante try          Ana Rieger
+    min 13 (1T 13) visitante try          Luciana Clarice Kraus
+    min 16 (1T 16) visitante try          Rosa Analía Torres Fernández
+    min 17 (1T 17) visitante try          Aldana Robledo
+    min 17 (1T 17) visitante conversion   Ana Rieger
+    min 19 (1T 19) visitante try          Ana Rieger
+    min 19 (1T 19) visitante conversion   Ana Rieger
+    min 22 (1T 22) visitante try          Aldana Robledo
+    min 22 (1T 22) visitante conversion   Ana Rieger
+    min 23 (1T 23) visitante try          Tatiana Rocio Falcón
+    min 24 (1T 24) visitante try          Luciana Clarice Kraus
+    min 44 (2T 4) visitante try          Aldana Robledo
+    min 46 (2T 6) visitante try          Aldana Robledo
+    min 52 (2T 12) visitante try          Giuliana Antonella Lincoman
+    min 52 (2T 12) visitante conversion   Ana Rieger
+    min 53 (2T 13) visitante injury       Brisa Agustina Turra
+    min 53 (2T 13) visitante substitution Brisa Agustina Turra
+    min 55 (2T 15) visitante try          Rosa Analía Torres Fernández
+    min 55 (2T 15) visitante conversion   Ana Rieger
+    min 58 (2T 18) visitante try          Tatiana Rocio Falcón
+    min 58 (2T 18) visitante conversion   Ana Rieger
+    min 60 (2T 20) visitante try          Tatiana Rocio Falcón
+    min 60 (2T 20) visitante conversion   Ana Rieger
+    min 61 (2T 21) visitante try          Rosa Analía Torres Fernández
+    min 63 (2T 23) visitante try          Ana Paula Quintero Chiesa
+    min 63 (2T 23) visitante conversion   Ana Rieger
+    min 80 (2T 40) visitante substitution Luciana Clarice Kraus
+  marcador  · eventos 0-113 · guardado 0-113
+  tries     · 0-19 (guardado —-—)
+  arbitro   · FEDERICO PREGOT (guardado: —)
+  guardado  · 18 local · 14 visitante · 33 eventos
+
+club-universitario-de-cordoba-femenino vs palermo-bajo-carlos-paz-femenino · f48723bc · tarjeta 297607  ·  45dcc6c9-5ef9-4c71-9630-84e635a83c40
+  local     · club-universitario-de-cordoba-femenino · 18 jugadores · 15 con ficha fijada
+  visitante · palermo-bajo-carlos-paz-femenino · 15 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min  1 (1T 1) local     try          Renata Giraudo
+    min  3 (1T 3) local     try          Noelia Del Carmen Reyes
+    min 13 (1T 13) local     try          Renata Giraudo
+    min 22 (1T 22) local     try          Maira Barrionuevo
+    min 22 (1T 22) local     conversion   Agustina Retamar
+    min 28 (1T 28) local     try          Maria Aime Morro David
+    min 42 (2T 2) local     try          Maite Perez
+    min 44 (2T 4) local     try          Romina Blandamuro
+    min 44 (2T 4) visitante try          Milagros Coronel Peralta
+    min 44 (2T 4) visitante conversion   Lourdes Martina Lozano Barcena
+    min 48 (2T 8) local     substitution Maite Perez
+    min 50 (2T 10) local     try          Maira Barrionuevo
+    min 52 (2T 12) local     try          Brisa Nazarena Trigo Alday
+    min 52 (2T 12) local     conversion   Brisa Nazarena Trigo Alday
+    min 52 (2T 12) local     substitution Ayelen Vega
+    min 56 (2T 16) local     card_yellow  Dayana Micaela Juncos
+    min 61 (2T 21) local     substitution Maria Aime Morro David
+    min 61 (2T 21) local     substitution Renata Giraudo
+    min 62 (2T 22) local     substitution Noelia Del Carmen Reyes
+    min 64 (2T 24) local     try          Maira Barrionuevo
+  marcador  · eventos 54-7 · guardado 54-7
+  tries     · 10-1 (guardado —-—)
+  arbitro   · LAUTARO JOAQUIN QUIROGA CAFURE (guardado: —)
+  guardado  · 18 local · 15 visitante · 20 eventos
+
+manke-la-calera-femenino vs cordoba-athletic-club-femenino · f48723bc · tarjeta 311722  ·  59b73a60-08af-4c94-a663-b451432e94e0
+  local     · manke-la-calera-femenino · 17 jugadores · 0 con ficha fijada
+  visitante · cordoba-athletic-club-femenino · 17 jugadores · 0 con ficha fijada
+  eventos   · 32
+    min  1 (1T 1) visitante try          Constanza Baudoin
+    min  4 (1T 4) visitante try          Celeste María Emilia Laime
+    min  4 (1T 4) visitante conversion   Melina Lopez
+    min  5 (1T 5) visitante try          Constanza Baudoin
+    min  6 (1T 6) visitante try          Maria Laura Alvarez Correa
+    min  6 (1T 6) visitante conversion   Melina Lopez
+    min 13 (1T 13) visitante try          Maria Emilia Monti
+    min 13 (1T 13) visitante conversion   Melina Lopez
+    min 14 (1T 14) local     injury       Narella Belen Barrionuevo
+    min 15 (1T 15) visitante try          Azul Sofia Miinati Becerra
+    min 17 (1T 17) visitante try          Maria Laura Alvarez Correa
+    min 17 (1T 17) visitante conversion   Melina Lopez
+    min 18 (1T 18) visitante try          Melina Lopez
+    min 18 (1T 18) visitante conversion   Melina Lopez
+    min 19 (1T 19) visitante try          Celeste María Emilia Laime
+    min 19 (1T 19) visitante conversion   Melina Lopez
+    min 41 (2T 1) visitante try          Abril Castellano
+    min 42 (2T 2) visitante try          Celeste Quinteros
+    min 42 (2T 2) visitante conversion   Abril Castellano
+    min 44 (2T 4) visitante try          Celeste Quinteros
+    min 44 (2T 4) visitante conversion   Celeste Quinteros
+    min 46 (2T 6) visitante try          Celeste Quinteros
+    min 49 (2T 9) visitante try          Tiziana Carolina Sandoval
+    min 49 (2T 9) visitante conversion   Tiziana Carolina Sandoval
+    min 50 (2T 10) visitante try          Celeste Quinteros
+    min 50 (2T 10) visitante conversion   Celeste Quinteros
+    min 51 (2T 11) visitante try          Manuela Marti
+    min 51 (2T 11) visitante conversion   Celeste Quinteros
+    min 56 (2T 16) visitante try          Tiziana Carolina Sandoval
+    min 56 (2T 16) visitante conversion   Melina Lopez
+    min 59 (2T 19) visitante try          Abril Castellano
+    min 59 (2T 19) visitante conversion   Melina Lopez
+  marcador  · eventos 0-116 · guardado 0-116
+  tries     · 0-18 (guardado —-—)
+  arbitro   · FEDERICO PREGOT (guardado: —)
+  guardado  · 17 local · 17 visitante · 32 eventos
+
+taborin-rc-femenino-verde vs taborin-rc-femenino · f48723bc · tarjeta 297605  ·  184f6b87-edce-4b1f-8b3d-6563efc8f873
+  local     · taborin-rc-femenino-verde · 14 jugadores · 0 con ficha fijada
+  visitante · taborin-rc-femenino · 16 jugadores · 10 con ficha fijada
+  eventos   · 6
+    min  4 (1T 4) local     try          Ludmila Boca
+    min 30 (1T 30) local     try          Yamila Gonzalez
+    min 30 (1T 30) local     conversion   Gimena Sala
+    min 43 (2T 3) visitante try          Tatiana Rocio Falcón
+    min 50 (2T 10) local     injury       Nazarena Yael Gigena Ramallo
+    min 53 (2T 13) local     try          Araceli Soledad Oviedo
+  marcador  · eventos 17-5 · guardado 17-5
+  tries     · 3-1 (guardado —-—)
+  arbitro   · ALEJANDRO AUGUSTO AGUERO (guardado: —)
+  guardado  · 14 local · 16 visitante · 6 eventos
+
+palermo-bajo-carlos-paz-femenino vs aero-club-rio-iv-femenino · f48723bc · tarjeta 297604  ·  37b215c5-8030-4af7-9d1d-fbe46e2a4e22
+  local     · palermo-bajo-carlos-paz-femenino · 15 jugadores · 0 con ficha fijada
+  visitante · aero-club-rio-iv-femenino · 13 jugadores · 0 con ficha fijada
+  eventos   · 14
+    min 11 (1T 11) local     try          Milagros Coronel Peralta
+    min 15 (1T 15) visitante card_yellow  Camila Aragno
+    min 16 (1T 16) visitante try          María Belén Ochoa
+    min 18 (1T 18) visitante try          María Belén Ochoa
+    min 20 (1T 20) local     card_yellow  Priscila Selena Galindez
+    min 22 (1T 22) visitante try          Gina Agustina Galanti
+    min 23 (1T 23) local     try          Paloma Lozano Carabajal
+    min 23 (1T 23) local     conversion   Lourdes Martina Lozano Barcena
+    min 29 (1T 29) local     penalty_try  
+    min 48 (2T 8) visitante try          María Belén Ochoa
+    min 51 (2T 11) visitante try          Gina Agustina Galanti
+    min 55 (2T 15) local     injury       Gabriela Paez
+    min 62 (2T 22) visitante try          Lucia Pariani
+    min 64 (2T 24) local     try          Lourdes Martina Lozano Barcena
+  marcador  · eventos 24-30 · guardado 24-30
+  tries     · 4-6 (guardado —-—)
+  arbitro   · LUCAS HUMERES (guardado: —)
+  guardado  · 15 local · 13 visitante · 14 eventos
+
+cordoba-rc-la-tablada-femenino vs club-universitario-de-cordoba-femenino · f48723bc · tarjeta 297603  ·  1fa9073a-63b9-4e74-8425-89a4eb133e56
+  local     · cordoba-rc-la-tablada-femenino · 17 jugadores · 0 con ficha fijada
+  visitante · club-universitario-de-cordoba-femenino · 17 jugadores · 14 con ficha fijada
+  eventos   · 29
+    min  2 (1T 2) visitante try          Maira Barrionuevo
+    min  3 (1T 3) visitante try          Romina Blandamuro
+    min  5 (1T 5) visitante try          Renata Giraudo
+    min  7 (1T 7) visitante try          Brisa Nazarena Trigo Alday
+    min  8 (1T 8) visitante conversion   Maira Barrionuevo
+    min 12 (1T 12) visitante try          Brisa Nazarena Trigo Alday
+    min 12 (1T 12) visitante conversion   Celmira Quiroga
+    min 13 (1T 13) visitante try          Maira Barrionuevo
+    min 13 (1T 13) visitante conversion   Celmira Quiroga
+    min 14 (1T 14) visitante try          Renata Giraudo
+    min 17 (1T 17) visitante try          Renata Giraudo
+    min 19 (1T 19) visitante try          Maira Barrionuevo
+    min 20 (1T 20) visitante try          Romina Blandamuro
+    min 21 (1T 21) visitante conversion   Maira Barrionuevo
+    min 24 (1T 24) visitante try          Renata Giraudo
+    min 41 (2T 1) visitante substitution Maite Perez
+    min 42 (2T 2) visitante try          Brisa Nazarena Trigo Alday
+    min 45 (2T 5) visitante try          Maria Aime Morro David
+    min 45 (2T 5) visitante substitution Maira Barrionuevo
+    min 46 (2T 6) visitante substitution Camila Sofia Paredes Masin
+    min 51 (2T 11) visitante substitution Romina Blandamuro
+    min 51 (2T 11) visitante substitution Noelia Del Carmen Reyes
+    min 51 (2T 11) visitante substitution Dayana Micaela Juncos
+    min 51 (2T 11) visitante substitution Renata Giraudo
+    min 59 (2T 19) visitante try          Ayelen Vega
+    min 61 (2T 21) visitante try          Valentina Flores
+    min 62 (2T 22) visitante conversion   Celmira Quiroga
+    min 64 (2T 24) visitante try          Julieta Carolina González Amarfil
+    min 64 (2T 24) visitante conversion   Celmira Quiroga
+  marcador  · eventos 0-92 · guardado 0-92
+  tries     · 0-16 (guardado —-—)
+  arbitro   · DAIANA DEL MILAGRO CESARETTI (guardado: —)
+  guardado  · 17 local · 17 visitante · 29 eventos
+
+manke-la-calera-femenino vs club-universitario-de-cordoba-femenino · f48723bc · tarjeta 311614  ·  86643ee7-8b08-4004-9e0e-2a5daaddcf97
+  local     · manke-la-calera-femenino · 17 jugadores · 0 con ficha fijada
+  visitante · club-universitario-de-cordoba-femenino · 16 jugadores · 12 con ficha fijada
+  eventos   · 26
+    min  3 (1T 3) visitante try          Brisa Nazarena Trigo Alday
+    min  3 (1T 3) visitante conversion   Celmira Quiroga
+    min  4 (1T 4) visitante try          Brisa Nazarena Trigo Alday
+    min  4 (1T 4) visitante conversion   Celmira Quiroga
+    min  7 (1T 7) visitante try          Maira Barrionuevo
+    min  7 (1T 7) visitante conversion   Maira Barrionuevo
+    min  9 (1T 9) visitante try          Maria Aime Morro David
+    min 13 (1T 13) visitante try          Maira Barrionuevo
+    min 15 (1T 15) visitante try          Brisa Nazarena Trigo Alday
+    min 19 (1T 19) visitante try          Camila Sofia Paredes Masin
+    min 24 (1T 24) visitante try          Maira Barrionuevo
+    min 25 (1T 25) visitante conversion   Celmira Quiroga
+    min 40 (2T 0) visitante substitution Maite Perez
+    min 43 (2T 3) visitante try          Renata Giraudo
+    min 43 (2T 3) visitante conversion   Maira Barrionuevo
+    min 44 (2T 4) visitante try          Renata Giraudo
+    min 46 (2T 6) visitante substitution Romina Blandamuro
+    min 46 (2T 6) visitante try          Brisa Nazarena Trigo Alday
+    min 47 (2T 7) visitante substitution Noelia Del Carmen Reyes
+    min 52 (2T 12) visitante substitution Camila Sofia Paredes Masin
+    min 53 (2T 13) visitante try          Maria Aime Morro David
+    min 57 (2T 17) visitante try          Ayelen Vega
+    min 60 (2T 20) visitante try          Renata Giraudo
+    min 62 (2T 22) visitante try          Maria Aime Morro David
+    min 63 (2T 23) visitante conversion   Celmira Quiroga
+    min 65 (2T 25) visitante try          Ayelen Vega
+  marcador  · eventos 0-92 · guardado 0-92
+  tries     · 0-16 (guardado —-—)
+  arbitro   · ENZO RIVA (guardado: —)
+  guardado  · 17 local · 16 visitante · 26 eventos
+
+cordoba-rc-la-tablada-femenino vs aero-club-rio-iv-femenino · f48723bc · tarjeta 297602  ·  af3aea1a-90e6-4d40-b52f-90029a7f80b8
+  local     · cordoba-rc-la-tablada-femenino · 16 jugadores · 0 con ficha fijada
+  visitante · aero-club-rio-iv-femenino · 14 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min  4 (1T 4) visitante try          Camila Aragno
+    min  9 (1T 9) visitante try          Camila Sabanes Villaberde
+    min  9 (1T 9) visitante conversion   Yamila Bequi
+    min 13 (1T 13) visitante try          Gina Agustina Galanti
+    min 13 (1T 13) visitante conversion   Martina Nebolone
+    min 17 (1T 17) visitante try          Romina Zalazar
+    min 22 (1T 22) local     card_yellow  Julieta Stefania Castro
+    min 22 (1T 22) visitante try          Camila Sabanes Villaberde
+    min 41 (2T 1) local     substitution Violeta Anahi Fajardo
+    min 46 (2T 6) local     card_yellow  Lucila Ludueña
+    min 50 (2T 10) visitante try          Gina Agustina Galanti
+    min 50 (2T 10) visitante conversion   Martina Nebolone
+    min 55 (2T 15) visitante try          Yamila Bequi
+    min 62 (2T 22) visitante try          Cindia Prina
+    min 65 (2T 25) local     substitution Antonella Pilar Gorosito
+    min 65 (2T 25) local     injury       Antonella Pilar Gorosito
+    min 65 (2T 25) local     injury       Mairy Calfayan
+    min 65 (2T 25) local     try          Maria Joaquina Fernández Chiacchio
+  marcador  · eventos 5-46 · guardado 5-46
+  tries     · 1-8 (guardado —-—)
+  arbitro   · LAUTARO JOAQUIN QUIROGA CAFURE (guardado: —)
+  guardado  · 16 local · 14 visitante · 18 eventos
+
+taborin-rc-femenino vs cordoba-athletic-club-femenino · f48723bc · tarjeta 297601  ·  db915f32-7c59-4063-8cda-a546ca38e53e
+  local     · taborin-rc-femenino · 17 jugadores · 11 con ficha fijada
+  visitante · cordoba-athletic-club-femenino · 18 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min  7 (1T 7) visitante try          Constanza Baudoin
+    min 13 (1T 13) local     try          Antonella Crosetto
+    min 17 (1T 17) local     try          Aldana Robledo
+    min 28 (1T 28) visitante injury       Lola Vaccarello
+    min 30 (1T 30) visitante injury       Ursula Guazzini Campana
+    min 46 (2T 6) visitante try          Melina Lopez
+    min 50 (2T 10) local     try          Antonella Crosetto
+    min 51 (2T 11) local     conversion   Ana Rieger
+    min 55 (2T 15) local     injury       Macarena Fernanda Burgos
+    min 56 (2T 16) local     try          Fabiana Nicole Kraus
+    min 57 (2T 17) local     conversion   Ana Rieger
+    min 60 (2T 20) local     try          Ana Rieger
+    min 60 (2T 20) visitante card_yellow  Constanza Baudoin
+    min 61 (2T 21) local     conversion   Ana Rieger
+    min 63 (2T 23) visitante try          Melina Lopez
+    min 70 (2T 30) local     try          Antonella Crosetto
+    min 80 (2T 40) local     card_yellow  Yesica Agustina Saucedo
+  marcador  · eventos 36-15 · guardado 36-15
+  tries     · 6-3 (guardado —-—)
+  arbitro   · DAIANA DEL MILAGRO CESARETTI (guardado: —)
+  guardado  · 17 local · 18 visitante · 17 eventos
+
+taborin-rc-femenino-verde vs palermo-bajo-carlos-paz-femenino · f48723bc · tarjeta 297600  ·  50749f34-d60e-428a-9f2c-eb90a9949317
+  local     · taborin-rc-femenino-verde · 16 jugadores · 0 con ficha fijada
+  visitante · palermo-bajo-carlos-paz-femenino · 13 jugadores · 0 con ficha fijada
+  eventos   · 26
+    min  1 (1T 1) local     try          Araceli Soledad Oviedo
+    min  1 (1T 1) local     conversion   Gimena Sala
+    min 11 (1T 11) local     try          Araceli Soledad Oviedo
+    min 11 (1T 11) local     conversion   Gimena Sala
+    min 19 (1T 19) local     card_yellow  Yamila Liliana Barrera
+    min 20 (1T 20) visitante try          Fernanda Lucia Obregon
+    min 26 (1T 26) local     try          Araceli Soledad Oviedo
+    min 26 (1T 26) local     conversion   Gimena Sala
+    min 28 (1T 28) local     try          Ludmila Boca
+    min 29 (1T 29) local     conversion   Gimena Sala
+    min 32 (1T 32) local     try          Solange Reinoso
+    min 41 (2T 1) local     try          Maiara Abril Lopez Cejas
+    min 42 (2T 2) local     conversion   Gimena Sala
+    min 44 (2T 4) local     injury       Ana Matto
+    min 44 (2T 4) local     substitution Ana Matto
+    min 48 (2T 8) visitante substitution Florencia Morano
+    min 50 (2T 10) local     try          Araceli Soledad Oviedo
+    min 56 (2T 16) visitante try          Milagros Coronel Peralta
+    min 60 (2T 20) local     try          Sabrina Del Percio
+    min 61 (2T 21) local     card_yellow  Yamila Liliana Barrera
+    min 61 (2T 21) local     card_red     Yamila Liliana Barrera
+    min 64 (2T 24) local     try          Araceli Soledad Oviedo
+    min 66 (2T 26) local     try          Maiara Abril Lopez Cejas
+    min 66 (2T 26) local     conversion   Gimena Sala
+    min 70 (2T 30) visitante try          Paloma Lozano Carabajal
+    min 70 (2T 30) visitante conversion   Lourdes Martina Lozano Barcena
+  marcador  · eventos 62-17 · guardado 62-17
+  tries     · 10-3 (guardado —-—)
+  arbitro   · FLORENCIA LEDESMA (guardado: —)
+  guardado  · 16 local · 13 visitante · 26 eventos
+
+palermo-bajo-carlos-paz-femenino vs cordoba-rc-la-tablada-femenino · f48723bc · tarjeta 297599  ·  6ea0b0d1-eaad-4311-9c6f-8f9f044335d5
+  local     · palermo-bajo-carlos-paz-femenino · 15 jugadores · 0 con ficha fijada
+  visitante · cordoba-rc-la-tablada-femenino · 14 jugadores · 0 con ficha fijada
+  eventos   · 13
+    min  6 (1T 6) local     try          Milagros Strada
+    min  6 (1T 6) local     conversion   Lourdes Martina Lozano Barcena
+    min 13 (1T 13) local     try          Lourdes Martina Lozano Barcena
+    min 18 (1T 18) local     try          Dayana Herrera
+    min 18 (1T 18) local     conversion   Lourdes Martina Lozano Barcena
+    min 22 (1T 22) local     try          Lourdes Martina Lozano Barcena
+    min 28 (1T 28) local     try          Milagros Strada
+    min 42 (2T 2) local     try          Camila Pizarro
+    min 43 (2T 3) local     conversion   Lourdes Martina Lozano Barcena
+    min 45 (2T 5) local     try          Camila Pizarro
+    min 46 (2T 6) local     conversion   Lourdes Martina Lozano Barcena
+    min 57 (2T 17) visitante try          Lucila Ludueña
+    min 59 (2T 19) local     try          Dayana Herrera
+  marcador  · eventos 48-5 · guardado 48-5
+  tries     · 8-1 (guardado —-—)
+  arbitro   · CHRISTIAN AGUSTIN ALTABE (guardado: —)
+  guardado  · 15 local · 14 visitante · 13 eventos
+
+club-universitario-de-cordoba-femenino vs taborin-rc-femenino · f48723bc · tarjeta 297598  ·  8725e388-e323-4224-9138-bcb548f79959
+  local     · club-universitario-de-cordoba-femenino · 18 jugadores · 14 con ficha fijada
+  visitante · taborin-rc-femenino · 17 jugadores · 11 con ficha fijada
+  eventos   · 19
+    min  6 (1T 6) visitante try          Luciana Clarice Kraus
+    min  6 (1T 6) visitante conversion   Ana Rieger
+    min 14 (1T 14) local     substitution Agustina Retamar
+    min 14 (1T 14) local     try          Maira Barrionuevo
+    min 18 (1T 18) visitante try          Mariel Velay Fossat
+    min 27 (1T 27) local     try          Noelia Del Carmen Reyes
+    min 30 (1T 30) visitante try          Luciana Clarice Kraus
+    min 30 (1T 30) visitante conversion   Ana Rieger
+    min 44 (2T 4) local     card_yellow  Celmira Quiroga
+    min 45 (2T 5) visitante try          Luciana Clarice Kraus
+    min 50 (2T 10) local     try          Maira Barrionuevo
+    min 50 (2T 10) local     conversion   Brisa Nazarena Trigo Alday
+    min 54 (2T 14) visitante card_yellow  Ana Paula Quintero Chiesa
+    min 55 (2T 15) local     try          Camila Sofia Paredes Masin
+    min 58 (2T 18) local     try          Maira Barrionuevo
+    min 63 (2T 23) visitante card_yellow  Ana Rieger
+    min 65 (2T 25) visitante try          Mariel Velay Fossat
+    min 65 (2T 25) visitante conversion   Ana Rieger
+    min 69 (2T 29) local     try          Dayana Micaela Juncos
+  marcador  · eventos 32-31 · guardado 32-31
+  tries     · 6-5 (guardado —-—)
+  arbitro   · LUCIANO FRANCISCO ROMERO (guardado: —)
+  guardado  · 18 local · 17 visitante · 19 eventos
+
+cordoba-athletic-club-femenino vs taborin-rc-femenino-verde · f48723bc · tarjeta 297597  ·  e1816c8e-de62-4437-92ff-7cb8023f82d4
+  local     · cordoba-athletic-club-femenino · 19 jugadores · 0 con ficha fijada
+  visitante · taborin-rc-femenino-verde · 18 jugadores · 0 con ficha fijada
+  eventos   · 21
+    min  5 (1T 5) local     try          Ursula Guazzini Campana
+    min  5 (1T 5) local     conversion   Lola Vaccarello
+    min  8 (1T 8) local     try          Lola Vaccarello
+    min 19 (1T 19) visitante try          Araceli Soledad Oviedo
+    min 21 (1T 21) visitante try          Brisa Borda
+    min 21 (1T 21) visitante conversion   Brisa Borda
+    min 23 (1T 23) visitante try          Araceli Soledad Oviedo
+    min 23 (1T 23) visitante conversion   Gimena Sala
+    min 28 (1T 28) visitante try          Brisa Borda
+    min 28 (1T 28) visitante conversion   Gimena Sala
+    min 42 (2T 2) local     try          Lola Vaccarello
+    min 45 (2T 5) local     substitution Martina Alexia Trancucci
+    min 48 (2T 8) visitante substitution Juliana Rodriguez
+    min 52 (2T 12) visitante card_yellow  Catalina Díaz
+    min 53 (2T 13) local     try          Manuela Marti
+    min 53 (2T 13) visitante substitution Yamila Liliana Barrera
+    min 54 (2T 14) local     substitution Celeste Quinteros
+    min 54 (2T 14) local     substitution Milagros Arguello
+    min 59 (2T 19) visitante card_yellow  Maiara Abril Lopez Cejas
+    min 60 (2T 20) local     try          Maria Laura Alvarez Correa
+    min 71 (2T 31) visitante try          Brisa Borda
+  marcador  · eventos 27-31 · guardado 27-31
+  tries     · 5-5 (guardado —-—)
+  arbitro   · ALEJANDRO AUGUSTO AGUERO (guardado: —)
+  guardado  · 19 local · 18 visitante · 21 eventos
+
+cordoba-athletic-club-femenino vs club-universitario-de-cordoba-femenino · f48723bc · tarjeta 308672  ·  e64152c7-044e-4174-8776-69090122983a
+  local     · cordoba-athletic-club-femenino · 19 jugadores · 0 con ficha fijada
+  visitante · club-universitario-de-cordoba-femenino · 18 jugadores · 13 con ficha fijada
+  eventos   · 24
+    min  3 (1T 3) local     try          Giuliana Bergoglio Vamonde
+    min  3 (1T 3) local     conversion   Lola Vaccarello
+    min  6 (1T 6) local     try          Lola Vaccarello
+    min 11 (1T 11) visitante try          Maira Barrionuevo
+    min 17 (1T 17) local     try          Constanza Baudoin
+    min 17 (1T 17) local     conversion   Lola Vaccarello
+    min 23 (1T 23) visitante try          Brisa Nazarena Trigo Alday
+    min 51 (2T 11) local     try          Giuliana Bergoglio Vamonde
+    min 51 (2T 11) local     conversion   Lola Vaccarello
+    min 52 (2T 12) visitante injury       Julieta Carolina González Amarfil
+    min 52 (2T 12) visitante substitution Julieta Carolina González Amarfil
+    min 54 (2T 14) local     substitution Maria Fernanda Wilberger
+    min 54 (2T 14) visitante try          Ayelen Vega
+    min 54 (2T 14) visitante conversion   Maira Barrionuevo
+    min 60 (2T 20) local     substitution Constanza Baudoin
+    min 62 (2T 22) local     injury       Maria Laura Nuñez
+    min 62 (2T 22) local     substitution Maria Laura Nuñez
+    min 63 (2T 23) visitante try          Ayelen Vega
+    min 64 (2T 24) visitante conversion   Maira Barrionuevo
+    min 69 (2T 29) visitante try          Maria Aime Morro David
+    min 70 (2T 30) local     substitution Azul Sofia Miinati Becerra
+    min 70 (2T 30) local     injury       Milagros Arguello
+    min 70 (2T 30) local     substitution Maria Laura Alvarez Correa
+    min 70 (2T 30) local     injury       Azul Sofia Miinati Becerra
+  marcador  · eventos 26-29 · guardado 26-29
+  tries     · 4-5 (guardado —-—)
+  arbitro   · SANTIAGO CORVALÁN RT (guardado: —)
+  guardado  · 19 local · 18 visitante · 24 eventos
+
+taborin-rc-femenino vs aero-club-rio-iv-femenino · f48723bc · tarjeta 297596  ·  11a12bdb-fc0c-490c-a6f7-dc45e41712cd
+  local     · taborin-rc-femenino · 15 jugadores · 9 con ficha fijada
+  visitante · aero-club-rio-iv-femenino · 14 jugadores · 0 con ficha fijada
+  eventos   · 29
+    min  1 (1T 1) local     try          Tatiana Rocio Falcón
+    min  1 (1T 1) local     conversion   Ana Rieger
+    min  5 (1T 5) local     try          Mariel Velay Fossat
+    min  7 (1T 7) local     try          Mariel Velay Fossat
+    min  7 (1T 7) local     conversion   Ana Rieger
+    min 10 (1T 10) local     try          Luciana Clarice Kraus
+    min 10 (1T 10) local     conversion   Ana Rieger
+    min 12 (1T 12) local     try          Luciana Clarice Kraus
+    min 12 (1T 12) local     conversion   Ana Rieger
+    min 23 (1T 23) local     try          Luciana Clarice Kraus
+    min 25 (1T 25) local     try          Tatiana Rocio Falcón
+    min 43 (2T 3) local     try          Mariel Velay Fossat
+    min 43 (2T 3) local     conversion   Ana Rieger
+    min 47 (2T 7) local     try          Martina Valentina Ibarra
+    min 47 (2T 7) local     conversion   Ana Rieger
+    min 50 (2T 10) local     try          Luciana Clarice Kraus
+    min 52 (2T 12) local     try          Rosa Analía Torres Fernández
+    min 55 (2T 15) local     try          Aldana Robledo
+    min 57 (2T 17) local     conversion   Ana Rieger
+    min 57 (2T 17) local     try          Luciana Clarice Kraus
+    min 60 (2T 20) local     try          Mariel Velay Fossat
+    min 60 (2T 20) local     conversion   Ana Rieger
+    min 61 (2T 21) local     try          Mariel Velay Fossat
+    min 61 (2T 21) local     conversion   Ana Rieger
+    min 62 (2T 22) visitante card_yellow  Camila Sabanes Villaberde
+    min 65 (2T 25) local     try          Luciana Clarice Kraus
+    min 65 (2T 25) local     conversion   Ana Rieger
+    min 80 (2T 40) local     substitution Valentina Ponce
+    min 80 (2T 40) local     injury       Valentina Ponce
+  marcador  · eventos 100-0 · guardado 100-0
+  tries     · 16-0 (guardado —-—)
+  arbitro   · DAIANA DEL MILAGRO CESARETTI (guardado: —)
+  guardado  · 15 local · 14 visitante · 29 eventos
+
+manke-la-calera-femenino vs palermo-bajo-carlos-paz-femenino · f48723bc · tarjeta 297595  ·  461ef895-a4fc-4ba9-82c7-d11dfd65ce3f
+  local     · manke-la-calera-femenino · 14 jugadores · 0 con ficha fijada
+  visitante · palermo-bajo-carlos-paz-femenino · 15 jugadores · 0 con ficha fijada
+  eventos   · 21
+    min  5 (1T 5) visitante try          Jazmín Sáez
+    min  5 (1T 5) visitante conversion   Lourdes Martina Lozano Barcena
+    min  8 (1T 8) visitante try          Dayana Herrera
+    min  8 (1T 8) visitante conversion   Lourdes Martina Lozano Barcena
+    min 11 (1T 11) visitante try          Milagros Coronel Peralta
+    min 11 (1T 11) visitante conversion   Lourdes Martina Lozano Barcena
+    min 13 (1T 13) visitante try          Milagros Strada
+    min 15 (1T 15) visitante try          Camila Pizarro
+    min 19 (1T 19) visitante try          Milagros Strada
+    min 22 (1T 22) visitante try          Milagros Strada
+    min 22 (1T 22) visitante conversion   Lourdes Martina Lozano Barcena
+    min 23 (1T 23) visitante try          Fernanda Lucia Obregon
+    min 23 (1T 23) visitante conversion   Lourdes Martina Lozano Barcena
+    min 25 (1T 25) visitante try          Milagros Coronel Peralta
+    min 25 (1T 25) visitante conversion   Lourdes Martina Lozano Barcena
+    min 42 (2T 2) visitante try          Milagros Strada
+    min 45 (2T 5) visitante try          Lourdes Martina Lozano Barcena
+    min 52 (2T 12) visitante try          Dayana Herrera
+    min 55 (2T 15) local     card_yellow  Lucía Noriega Lescano
+    min 56 (2T 16) local     injury       María Laura Torren Alicera
+    min 61 (2T 21) visitante try          Lourdes Martina Lozano Barcena
+  marcador  · eventos 0-77 · guardado 0-77
+  tries     · 0-13 (guardado —-—)
+  arbitro   · ÁNGELES MURUA (guardado: —)
+  guardado  · 14 local · 15 visitante · 21 eventos
+
+cordoba-rc-la-tablada-femenino vs manke-la-calera-femenino · f48723bc · tarjeta 308115  ·  cada235a-a0d2-4ebb-8829-49c48ca73252
+  local     · cordoba-rc-la-tablada-femenino · 13 jugadores · 0 con ficha fijada
+  visitante · manke-la-calera-femenino · 13 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min  2 (1T 2) visitante try          Lucía Noriega Lescano
+    min  7 (1T 7) local     try          Agostina Scarponi
+    min  7 (1T 7) local     conversion   Agostina Scarponi
+    min 11 (1T 11) local     try          Julieta Stefania Castro
+    min 20 (1T 20) local     try          Victoria Eloisa Soriano
+    min 27 (1T 27) local     try          Lucila Ludueña
+    min 27 (1T 27) local     conversion   Agostina Scarponi
+    min 32 (1T 32) local     injury       Sofia Martin Mayorga
+    min 50 (2T 10) visitante injury       Narella Abigail Caliva
+    min 50 (2T 10) visitante injury       Rocio Belen Salinas
+    min 55 (2T 15) visitante try          Carla Sofia Allende
+    min 57 (2T 17) visitante try          Lucía Noriega Lescano
+    min 58 (2T 18) local     try          Agostina Scarponi
+    min 60 (2T 20) local     injury       Agostina Scarponi
+    min 61 (2T 21) local     try          Lucila Ludueña
+    min 61 (2T 21) local     conversion   Agostina Scarponi
+    min 64 (2T 24) local     try          Agostina Scarponi
+    min 66 (2T 26) local     try          Paula Irina Castro Molina
+  marcador  · eventos 46-15 · guardado 46-15
+  tries     · 8-3 (guardado —-—)
+  arbitro   · EMMANUEL BOSCATTO (guardado: —)
+  guardado  · 13 local · 13 visitante · 18 eventos
+
+aero-club-rio-iv-femenino vs cordoba-athletic-club-femenino · f48723bc · tarjeta 297592  ·  f7e8326e-1844-4604-bc6a-82b30f270127
+  local     · aero-club-rio-iv-femenino · 14 jugadores · 0 con ficha fijada
+  visitante · cordoba-athletic-club-femenino · 17 jugadores · 0 con ficha fijada
+  eventos   · 21
+    min 10 (1T 10) visitante card_yellow  Maria Laura Alvarez Correa
+    min 15 (1T 15) visitante try          Giuliana Bergoglio Vamonde
+    min 15 (1T 15) visitante conversion   Lola Vaccarello
+    min 21 (1T 21) local     penalty_try  
+    min 25 (1T 25) local     card_yellow  Hebe Lladser
+    min 27 (1T 27) visitante try          Constanza Baudoin
+    min 29 (1T 29) visitante try          Celeste Quinteros
+    min 29 (1T 29) visitante conversion   Maria Laura Nuñez
+    min 41 (2T 1) visitante try          Manuela Marti
+    min 41 (2T 1) visitante conversion   Maria Laura Nuñez
+    min 45 (2T 5) local     try          María Belén Ochoa
+    min 45 (2T 5) local     conversion   Yamila Bequi
+    min 50 (2T 10) local     card_yellow  Gina Agustina Galanti
+    min 55 (2T 15) visitante substitution Maria Fernanda Wilberger
+    min 57 (2T 17) visitante substitution Celeste Quinteros
+    min 61 (2T 21) visitante try          Constanza Baudoin
+    min 61 (2T 21) visitante conversion   Lola Vaccarello
+    min 65 (2T 25) visitante try          Giuliana Bergoglio Vamonde
+    min 65 (2T 25) visitante conversion   Lola Vaccarello
+    min 67 (2T 27) visitante try          Giuliana Bergoglio Vamonde
+    min 67 (2T 27) visitante conversion   Giuliana Bergoglio Vamonde
+  marcador  · eventos 14-47 · guardado 14-47
+  tries     · 2-7 (guardado —-—)
+  arbitro   · DAIANA DEL MILAGRO CESARETTI (guardado: —)
+  guardado  · 14 local · 17 visitante · 21 eventos
+
+club-universitario-de-cordoba-femenino vs taborin-rc-femenino-verde · f48723bc · tarjeta 297591  ·  cb76a30e-d288-4845-9bfa-22b55bc1fb5b
+  local     · club-universitario-de-cordoba-femenino · 18 jugadores · 14 con ficha fijada
+  visitante · taborin-rc-femenino-verde · 17 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min  3 (1T 3) local     try          Maira Barrionuevo
+    min  3 (1T 3) local     conversion   Maira Barrionuevo
+    min  5 (1T 5) visitante try          Brisa Borda
+    min 10 (1T 10) visitante try          Yamila Liliana Barrera
+    min 16 (1T 16) local     try          Maira Barrionuevo
+    min 20 (1T 20) local     try          Romina Blandamuro
+    min 29 (1T 29) visitante try          Brisa Borda
+    min 42 (2T 2) visitante card_yellow  Ana Matto
+    min 44 (2T 4) local     try          Brisa Nazarena Trigo Alday
+    min 50 (2T 10) local     penalty_goal Maira Barrionuevo
+    min 54 (2T 14) local     card_yellow  Ema Lucia Morro Fergola
+    min 66 (2T 26) visitante substitution Juliana Rodriguez
+    min 66 (2T 26) visitante substitution Priscila Boca
+    min 67 (2T 27) visitante try          Araceli Soledad Oviedo
+    min 67 (2T 27) visitante conversion   Gimena Sala
+    min 70 (2T 30) visitante try          Maiara Abril Lopez Cejas
+    min 70 (2T 30) visitante conversion   Gimena Sala
+  marcador  · eventos 25-29 · guardado 25-29
+  tries     · 4-5 (guardado —-—)
+  arbitro   · SANTIAGO CORVALÁN RT (guardado: —)
+  guardado  · 18 local · 17 visitante · 17 eventos
+
+palermo-bajo-carlos-paz-femenino vs taborin-rc-femenino · f48723bc · tarjeta 297593  ·  72af2980-235d-472a-9b71-b500160a1a4b
+  local     · palermo-bajo-carlos-paz-femenino · 14 jugadores · 0 con ficha fijada
+  visitante · taborin-rc-femenino · 15 jugadores · 9 con ficha fijada
+  eventos   · 20
+    min  3 (1T 3) visitante try          Antonella Crosetto
+    min  5 (1T 5) visitante try          Luciana Clarice Kraus
+    min  5 (1T 5) visitante conversion   Ana Rieger
+    min  9 (1T 9) visitante try          Luciana Clarice Kraus
+    min  9 (1T 9) visitante conversion   Ana Rieger
+    min 15 (1T 15) visitante try          Mariel Velay Fossat
+    min 15 (1T 15) visitante conversion   Ana Rieger
+    min 21 (1T 21) local     try          Florencia Morano
+    min 21 (1T 21) local     conversion   Nadia Jacqueline Fernandez
+    min 24 (1T 24) visitante try          Luciana Clarice Kraus
+    min 24 (1T 24) visitante conversion   Ana Rieger
+    min 25 (1T 25) visitante try          Antonella Crosetto
+    min 25 (1T 25) visitante conversion   Ana Rieger
+    min 30 (1T 30) visitante try          Giuliana Antonella Lincoman
+    min 44 (2T 4) visitante try          Luciana Clarice Kraus
+    min 44 (2T 4) visitante conversion   Ana Rieger
+    min 52 (2T 12) visitante try          Luciana Clarice Kraus
+    min 52 (2T 12) visitante conversion   Ana Rieger
+    min 58 (2T 18) visitante try          Luciana Clarice Kraus
+    min 58 (2T 18) visitante conversion   Ana Rieger
+  marcador  · eventos 7-66 · guardado 7-66
+  tries     · 1-10 (guardado —-—)
+  arbitro   · JAVIER NICOLAS OLALLA (guardado: —)
+  guardado  · 14 local · 15 visitante · 20 eventos
+
+cordoba-athletic-club-femenino vs palermo-bajo-carlos-paz-femenino · f48723bc · tarjeta 297590  ·  f9e70c90-a2b8-4d99-8c2d-05b5fff36164
+  local     · cordoba-athletic-club-femenino · 18 jugadores · 0 con ficha fijada
+  visitante · palermo-bajo-carlos-paz-femenino · 14 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min  2 (1T 2) local     try          Constanza Baudoin
+    min 14 (1T 14) local     try          Giuliana Bergoglio Vamonde
+    min 14 (1T 14) local     conversion   Maria Laura Nuñez
+    min 17 (1T 17) local     try          Ursula Guazzini Campana
+    min 17 (1T 17) local     conversion   Lola Vaccarello
+    min 24 (1T 24) local     try          Manuela Marti
+    min 26 (1T 26) local     try          Constanza Baudoin
+    min 43 (2T 3) local     substitution Martina Alexia Trancucci
+    min 55 (2T 15) visitante injury       Paloma Lozano Carabajal
+    min 56 (2T 16) local     try          Maria Fernanda Wilberger
+    min 56 (2T 16) visitante card_yellow  Nadia Jacqueline Fernandez
+    min 58 (2T 18) local     try          Giuliana Bergoglio Vamonde
+    min 58 (2T 18) local     conversion   Lola Vaccarello
+    min 59 (2T 19) local     substitution Celeste Quinteros
+    min 65 (2T 25) visitante try          Sofia Roch Borettini
+    min 65 (2T 25) visitante conversion   Dayana Herrera
+    min 66 (2T 26) local     try          Constanza Baudoin
+    min 69 (2T 29) local     substitution Manuela Marti
+    min 69 (2T 29) local     substitution Abril Castellano
+    min 69 (2T 29) local     injury       Manuela Marti
+  marcador  · eventos 46-7 · guardado 46-7
+  tries     · 8-1 (guardado —-—)
+  arbitro   · RODRIGO TIRANTI (guardado: —)
+  guardado  · 18 local · 14 visitante · 20 eventos
+
+taborin-rc-femenino-verde vs manke-la-calera-femenino · f48723bc · tarjeta 297588  ·  66c0d307-14aa-4941-9336-c9b07ea036b7
+  local     · taborin-rc-femenino-verde · 17 jugadores · 0 con ficha fijada
+  visitante · manke-la-calera-femenino · 12 jugadores · 0 con ficha fijada
+  eventos   · 33
+    min  1 (1T 1) local     try          Ana Matto
+    min  2 (1T 2) local     try          Catalina Díaz
+    min  5 (1T 5) local     try          Araceli Soledad Oviedo
+    min  5 (1T 5) local     conversion   Gimena Sala
+    min  7 (1T 7) local     try          Ana Matto
+    min  7 (1T 7) local     conversion   Gimena Sala
+    min 10 (1T 10) visitante injury       Maria Jose Carranza Moriondo
+    min 11 (1T 11) local     try          Gimena Sala
+    min 11 (1T 11) local     conversion   Gimena Sala
+    min 14 (1T 14) local     try          Araceli Soledad Oviedo
+    min 19 (1T 19) local     try          Araceli Soledad Oviedo
+    min 19 (1T 19) local     conversion   Gimena Sala
+    min 21 (1T 21) local     try          Catalina Díaz
+    min 21 (1T 21) local     conversion   Gimena Sala
+    min 22 (1T 22) local     try          Araceli Soledad Oviedo
+    min 41 (2T 1) local     try          Catalina Díaz
+    min 43 (2T 3) local     try          Catalina Díaz
+    min 44 (2T 4) local     try          Araceli Soledad Oviedo
+    min 44 (2T 4) local     conversion   Gimena Sala
+    min 47 (2T 7) local     conversion   Gimena Sala
+    min 47 (2T 7) local     try          Catalina Díaz
+    min 50 (2T 10) local     try          Gimena Sala
+    min 52 (2T 12) local     try          Ana Matto
+    min 57 (2T 17) local     try          Sabrina Del Percio
+    min 57 (2T 17) local     conversion   Gimena Sala
+    min 60 (2T 20) local     try          Gimena Sala
+    min 60 (2T 20) local     conversion   Gimena Sala
+    min 62 (2T 22) local     try          Araceli Soledad Oviedo
+    min 65 (2T 25) local     try          Ana Matto
+    min 65 (2T 25) local     conversion   Gimena Sala
+    min 65 (2T 25) local     try          Catalina Díaz
+    min 80 (2T 40) local     substitution Juliana Rodriguez
+    min 80 (2T 40) local     substitution Priscila Boca
+  marcador  · eventos 120-0 · guardado 120-0
+  tries     · 20-0 (guardado —-—)
+  arbitro   · LUCIANO FRANCISCO ROMERO (guardado: —)
+  guardado  · 17 local · 12 visitante · 33 eventos
+
+manke-la-calera-femenino vs taborin-rc-femenino · f48723bc · tarjeta 303754  ·  32b7c001-3313-417b-9538-8b01f3033d56
+  local     · manke-la-calera-femenino · 10 jugadores · 0 con ficha fijada
+  visitante · taborin-rc-femenino · 15 jugadores · 9 con ficha fijada
+  eventos   · 26
+    min  2 (1T 2) visitante try          Tatiana Rocio Falcón
+    min  2 (1T 2) visitante conversion   Tatiana Rocio Falcón
+    min  3 (1T 3) visitante try          Tatiana Rocio Falcón
+    min  7 (1T 7) visitante try          Mariel Velay Fossat
+    min  7 (1T 7) visitante conversion   Mariel Velay Fossat
+    min  9 (1T 9) visitante try          Ana Rieger
+    min  9 (1T 9) visitante conversion   Ana Rieger
+    min 10 (1T 10) visitante try          Mariel Velay Fossat
+    min 13 (1T 13) visitante try          Tatiana Rocio Falcón
+    min 13 (1T 13) visitante conversion   Mariel Velay Fossat
+    min 14 (1T 14) visitante try          Ana Rieger
+    min 17 (1T 17) visitante try          Valentina Ponce
+    min 20 (1T 20) visitante try          Antonella Crosetto
+    min 43 (2T 3) visitante try          Tatiana Rocio Falcón
+    min 43 (2T 3) visitante conversion   Tatiana Rocio Falcón
+    min 45 (2T 5) visitante try          Ana Rieger
+    min 45 (2T 5) visitante conversion   Mariel Velay Fossat
+    min 47 (2T 7) visitante try          Martina Valentina Ibarra
+    min 47 (2T 7) visitante conversion   Mariel Velay Fossat
+    min 51 (2T 11) local     card_yellow  Maria Jose Carranza Moriondo
+    min 51 (2T 11) visitante try          Aldana Robledo
+    min 51 (2T 11) visitante try          Martina Valentina Ibarra
+    min 61 (2T 21) visitante try          Mariel Velay Fossat
+    min 61 (2T 21) visitante conversion   Mariel Velay Fossat
+    min 63 (2T 23) visitante try          Tatiana Rocio Falcón
+    min 63 (2T 23) visitante conversion   Mariel Velay Fossat
+  marcador  · eventos 0-98 · guardado 0-98
+  tries     · 0-16 (guardado —-—)
+  arbitro   · DAIANA DEL MILAGRO CESARETTI (guardado: —)
+  guardado  · 10 local · 15 visitante · 26 eventos
+
+cordoba-rc-la-tablada-femenino vs cordoba-athletic-club-femenino · f48723bc · tarjeta 297587  ·  098117aa-1fe2-440f-b980-dd31aa3c1f12
+  local     · cordoba-rc-la-tablada-femenino · 11 jugadores · 0 con ficha fijada
+  visitante · cordoba-athletic-club-femenino · 17 jugadores · 0 con ficha fijada
+  eventos   · 43
+    min  1 (1T 1) visitante try          Constanza Baudoin
+    min  2 (1T 2) local     injury       Mairy Calfayan
+    min  3 (1T 3) visitante try          Giuliana Bergoglio Vamonde
+    min  3 (1T 3) visitante conversion   Abril Castellano
+    min  5 (1T 5) visitante try          Manuela Marti
+    min  6 (1T 6) visitante try          Giuliana Bergoglio Vamonde
+    min  7 (1T 7) visitante try          Maria Laura Nuñez
+    min  7 (1T 7) visitante conversion   Maria Laura Nuñez
+    min 10 (1T 10) visitante substitution Camila Sparaino
+    min 13 (1T 13) visitante try          Giuliana Bergoglio Vamonde
+    min 13 (1T 13) visitante conversion   Maria Laura Nuñez
+    min 15 (1T 15) visitante conversion   Candela Agustina Gorosito
+    min 16 (1T 16) visitante try          Giuliana Bergoglio Vamonde
+    min 16 (1T 16) visitante conversion   Maria Laura Nuñez
+    min 19 (1T 19) visitante try          Celeste Quinteros
+    min 19 (1T 19) visitante conversion   Maria Laura Nuñez
+    min 21 (1T 21) visitante try          Manuela Marti
+    min 21 (1T 21) visitante conversion   Maria Laura Nuñez
+    min 22 (1T 22) visitante try          Maria Fernanda Wilberger
+    min 25 (1T 25) visitante try          Abril Castellano
+    min 41 (2T 1) visitante substitution Constanza Baudoin
+    min 41 (2T 1) visitante try          Lola Vaccarello
+    min 41 (2T 1) visitante conversion   Maria Laura Nuñez
+    min 42 (2T 2) visitante try          Manuela Marti
+    min 42 (2T 2) visitante conversion   Lola Vaccarello
+    min 45 (2T 5) visitante conversion   Lola Vaccarello
+    min 45 (2T 5) visitante substitution Abril Castellano
+    min 45 (2T 5) visitante try          Lola Vaccarello
+    min 47 (2T 7) visitante try          Giuliana Bergoglio Vamonde
+    min 47 (2T 7) visitante conversion   Lola Vaccarello
+    min 47 (2T 7) visitante substitution Celeste Quinteros
+    min 47 (2T 7) visitante substitution Martina Alexia Trancucci
+    min 49 (2T 9) visitante try          Maria Fernanda Wilberger
+    min 49 (2T 9) visitante conversion   Lola Vaccarello
+    min 51 (2T 11) visitante try          Giuliana Bergoglio Vamonde
+    min 51 (2T 11) visitante conversion   Lola Vaccarello
+    min 51 (2T 11) visitante substitution Giuliana Bergoglio Vamonde
+    min 52 (2T 12) visitante try          Manuela Marti
+    min 52 (2T 12) visitante conversion   Manuela Marti
+    min 57 (2T 17) visitante try          Maria Laura Nuñez
+    min 61 (2T 21) visitante try          Maria Laura Alvarez Correa
+    min 61 (2T 21) visitante conversion   Maria Laura Alvarez Correa
+    min 64 (2T 24) visitante try          Lola Vaccarello
+  marcador  · eventos 0-135 · guardado 0-135
+  tries     · 0-21 (guardado —-—)
+  arbitro   · FLORENCIA LEDESMA (guardado: —)
+  guardado  · 11 local · 17 visitante · 43 eventos
+
+palermo-bajo-carlos-paz-femenino vs club-universitario-de-cordoba-femenino · f48723bc · tarjeta 297586  ·  2fb37409-c9c2-405a-9745-e577739fcf96
+  local     · palermo-bajo-carlos-paz-femenino · 14 jugadores · 0 con ficha fijada
+  visitante · club-universitario-de-cordoba-femenino · 18 jugadores · 14 con ficha fijada
+  eventos   · 15
+    min 19 (1T 19) visitante try          Brisa Nazarena Trigo Alday
+    min 19 (1T 19) visitante conversion   Agustina Retamar
+    min 20 (1T 20) visitante substitution Renata Giraudo
+    min 30 (1T 30) local     card_yellow  Milagros Strada
+    min 41 (2T 1) visitante try          Sol Destefanis
+    min 43 (2T 3) visitante try          Romina Blandamuro
+    min 45 (2T 5) visitante try          Camila Sofia Paredes Masin
+    min 46 (2T 6) visitante conversion   Brisa Nazarena Trigo Alday
+    min 46 (2T 6) visitante substitution Valentina Flores
+    min 57 (2T 17) visitante try          Noelia Del Carmen Reyes
+    min 57 (2T 17) visitante substitution Maira Barrionuevo
+    min 60 (2T 20) visitante substitution Camila Sofia Paredes Masin
+    min 63 (2T 23) visitante substitution Maite Perez
+    min 64 (2T 24) visitante substitution Noelia Del Carmen Reyes
+    min 68 (2T 28) visitante try          Julieta Carolina González Amarfil
+  marcador  · eventos 0-34 · guardado 0-34
+  tries     · 0-6 (guardado —-—)
+  arbitro   · ÁNGELES MURUA (guardado: —)
+  guardado  · 14 local · 18 visitante · 15 eventos
+
+taborin-rc-femenino vs taborin-rc-femenino-verde · f48723bc · tarjeta 297657  ·  ca5029f8-fdbd-4268-a42d-4792cdeffa03
+  local     · taborin-rc-femenino · 15 jugadores · 9 con ficha fijada
+  visitante · taborin-rc-femenino-verde · 14 jugadores · 0 con ficha fijada
+  eventos   · 6
+    min 10 (1T 10) local     try          Mariel Velay Fossat
+    min 42 (2T 2) local     card_yellow  Agustina Valdez
+    min 52 (2T 12) visitante try          Brisa Borda
+    min 63 (2T 23) visitante try          Brisa Borda
+    min 65 (2T 25) local     injury       Mariel Velay Fossat
+    min 65 (2T 25) local     substitution Mariel Velay Fossat
+  marcador  · eventos 5-10 · guardado 5-10
+  tries     · 1-2 (guardado —-—)
+  arbitro   · LUCIANO FRANCISCO ROMERO (guardado: —)
+  guardado  · 15 local · 14 visitante · 6 eventos
+
+club-universitario-de-cordoba-femenino vs cordoba-rc-la-tablada-femenino · f48723bc · tarjeta 297582  ·  08ed6a9b-4128-4a18-b052-0e5356313aaf
+  local     · club-universitario-de-cordoba-femenino · 19 jugadores · 15 con ficha fijada
+  visitante · cordoba-rc-la-tablada-femenino · 11 jugadores · 0 con ficha fijada
+  eventos   · 34
+    min  4 (1T 4) local     try          Noelia Del Carmen Reyes
+    min  9 (1T 9) local     try          Camila Sofia Paredes Masin
+    min 13 (1T 13) local     try          Maira Barrionuevo
+    min 15 (1T 15) local     try          Brisa Nazarena Trigo Alday
+    min 17 (1T 17) local     try          Valentina Flores
+    min 19 (1T 19) local     try          Renata Giraudo
+    min 21 (1T 21) local     try          Julieta Carolina González Amarfil
+    min 21 (1T 21) local     conversion   Julieta Carolina González Amarfil
+    min 24 (1T 24) local     try          Celmira Quiroga
+    min 24 (1T 24) local     conversion   Agustina Retamar
+    min 29 (1T 29) local     substitution Maria Aime Morro David
+    min 30 (1T 30) local     try          Renata Giraudo
+    min 41 (2T 1) local     try          Julieta Carolina González Amarfil
+    min 41 (2T 1) local     conversion   Brisa Nazarena Trigo Alday
+    min 42 (2T 2) local     substitution Maira Barrionuevo
+    min 42 (2T 2) local     try          Romina Blandamuro
+    min 43 (2T 3) local     substitution Renata Giraudo
+    min 43 (2T 3) local     substitution Camila Sofia Paredes Masin
+    min 44 (2T 4) local     substitution Romina Blandamuro
+    min 44 (2T 4) local     try          Julieta Carolina González Amarfil
+    min 48 (2T 8) local     try          Maria Sol Serran Croce
+    min 52 (2T 12) local     card_yellow  Maite Perez
+    min 53 (2T 13) local     try          Rebecca Sabina Marusich Escalante
+    min 54 (2T 14) local     try          Celmira Quiroga
+    min 55 (2T 15) local     conversion   Brisa Nazarena Trigo Alday
+    min 64 (2T 24) local     try          Rebecca Sabina Marusich Escalante
+    min 66 (2T 26) local     try          Agustina Retamar
+    min 66 (2T 26) local     conversion   Agustina Retamar
+    min 68 (2T 28) local     try          Brisa Nazarena Trigo Alday
+    min 68 (2T 28) local     conversion   Agustina Retamar
+    min 69 (2T 29) local     substitution Valentina Flores
+    min 70 (2T 30) local     try          María Victoria Martínez Ortiz Y Herrera
+    min 70 (2T 30) local     conversion   Agustina Retamar
+    min 85 (2T 45) visitante injury       Lucila Ludueña
+  marcador  · eventos 109-0 · guardado 109-0
+  tries     · 19-0 (guardado —-—)
+  arbitro   · FLORENCIA LEDESMA (guardado: —)
+  guardado  · 19 local · 11 visitante · 34 eventos
+
+cordoba-athletic-club-femenino vs manke-la-calera-femenino · f48723bc · tarjeta 297584  ·  50e9e195-d815-435b-b0b7-13b4b68dbc66
+  local     · cordoba-athletic-club-femenino · 16 jugadores · 0 con ficha fijada
+  visitante · manke-la-calera-femenino · 15 jugadores · 0 con ficha fijada
+  eventos   · 19
+    min  1 (1T 1) local     try          Maria Laura Nuñez
+    min  2 (1T 2) local     try          Maria Laura Nuñez
+    min  9 (1T 9) local     try          Lola Vaccarello
+    min 12 (1T 12) local     try          Celeste Quinteros
+    min 18 (1T 18) local     try          Giuliana Bergoglio Vamonde
+    min 23 (1T 23) local     try          Lola Vaccarello
+    min 42 (2T 2) local     try          Giuliana Bergoglio Vamonde
+    min 42 (2T 2) local     conversion   Lola Vaccarello
+    min 44 (2T 4) local     try          Milagros Arguello
+    min 44 (2T 4) local     conversion   Maria Laura Nuñez
+    min 47 (2T 7) local     try          Celeste Quinteros
+    min 53 (2T 13) local     try          Maria Laura Nuñez
+    min 54 (2T 14) local     try          Giuliana Bergoglio Vamonde
+    min 54 (2T 14) local     conversion   Maria Laura Nuñez
+    min 59 (2T 19) local     try          Manuela Marti
+    min 61 (2T 21) local     try          Candela Agustina Gorosito
+    min 62 (2T 22) visitante injury       Rocio Belen Salinas
+    min 63 (2T 23) local     try          Ursula Guazzini Campana
+    min 65 (2T 25) local     try          Manuela Marti
+  marcador  · eventos 81-0 · guardado 81-0
+  tries     · 15-0 (guardado —-—)
+  arbitro   · SANTIAGO CORVALÁN RT (guardado: —)
+  guardado  · 16 local · 15 visitante · 19 eventos
+
+listo · 48 partidos

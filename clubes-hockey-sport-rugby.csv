@@ -1,0 +1,96 @@
+﻿club_id,nombre,sport,sport_id,union_id,union_nombre,senal
+jockey-club-cordoba-caballeros,Jockey Club Córdoba Caballeros,rugby,rugby,0c515ac1-af49-4699-b3c5-7273bc424357,Unión Cordobesa de Rugby,nombre con Caballeros/Damas/Hockey
+palermo-bajo-damas-a,"Palermo Bajo - Damas ""A""",rugby,rugby,0c515ac1-af49-4699-b3c5-7273bc424357,Unión Cordobesa de Rugby,nombre con Caballeros/Damas/Hockey
+tacuru-rugby-hockey-club,Tacurú Rugby Hockey Club,rugby,rugby,40159cd1-5876-4720-b953-d639b09d5f5b,Unión de Rugby de Cuyo,nombre con Caballeros/Damas/Hockey
+banco-nacion-damas-a,"Banco Nación - Damas ""A""",rugby,rugby,asociacion-amateur-de-hockey-sobre-cesped-buenos-aires,Asociación Amateur de Hóckey sobre césped Buenos Aires,union de hockey + nombre con Caballeros/Damas/Hockey
+banco-provincia-caballeros,Banco Provincia - Caballeros,rugby,rugby,asociacion-amateur-de-hockey-sobre-cesped-buenos-aires,Asociación Amateur de Hóckey sobre césped Buenos Aires,union de hockey + nombre con Caballeros/Damas/Hockey
+belgrano-athletic-damas,Belgrano Athletic - Damas,rugby,rugby,asociacion-amateur-de-hockey-sobre-cesped-buenos-aires,Asociación Amateur de Hóckey sobre césped Buenos Aires,union de hockey + nombre con Caballeros/Damas/Hockey
+ciudad-caballeros,Ciudad - Caballeros,rugby,rugby,asociacion-amateur-de-hockey-sobre-cesped-buenos-aires,Asociación Amateur de Hóckey sobre césped Buenos Aires,union de hockey + nombre con Caballeros/Damas/Hockey
+ciudad-caballeros-hockey,Ciudad - Caballeros Hockey,rugby,rugby,asociacion-amateur-de-hockey-sobre-cesped-buenos-aires,Asociación Amateur de Hóckey sobre césped Buenos Aires,union de hockey + nombre con Caballeros/Damas/Hockey
+ciudad-b-caballeros,"Ciudad ""B"" - Caballeros",rugby,rugby,asociacion-amateur-de-hockey-sobre-cesped-buenos-aires,Asociación Amateur de Hóckey sobre césped Buenos Aires,union de hockey + nombre con Caballeros/Damas/Hockey
+ciudad-b-caballeros-hockey,"Ciudad ""B"" - Caballeros Hockey",rugby,rugby,asociacion-amateur-de-hockey-sobre-cesped-buenos-aires,Asociación Amateur de Hóckey sobre césped Buenos Aires,union de hockey + nombre con Caballeros/Damas/Hockey
+ciudad-de-buenos-aires-damas-a,"Ciudad de Buenos Aires - Damas ""A""",rugby,rugby,asociacion-amateur-de-hockey-sobre-cesped-buenos-aires,Asociación Amateur de Hóckey sobre césped Buenos Aires,union de hockey + nombre con Caballeros/Damas/Hockey
+club-italiano-damas-a,"Club Italiano - Damas ""A""",rugby,rugby,asociacion-amateur-de-hockey-sobre-cesped-buenos-aires,Asociación Amateur de Hóckey sobre césped Buenos Aires,union de hockey + nombre con Caballeros/Damas/Hockey
+ducilo-caballeros,Ducilo - Caballeros,rugby,rugby,asociacion-amateur-de-hockey-sobre-cesped-buenos-aires,Asociación Amateur de Hóckey sobre césped Buenos Aires,union de hockey + nombre con Caballeros/Damas/Hockey
+ducilo-caballeros-hockey,Ducilo - Caballeros Hockey,rugby,rugby,asociacion-amateur-de-hockey-sobre-cesped-buenos-aires,Asociación Amateur de Hóckey sobre césped Buenos Aires,union de hockey + nombre con Caballeros/Damas/Hockey
+geba-caballeros,GEBA - Caballeros,rugby,rugby,asociacion-amateur-de-hockey-sobre-cesped-buenos-aires,Asociación Amateur de Hóckey sobre césped Buenos Aires,union de hockey + nombre con Caballeros/Damas/Hockey
+geba-caballeros-hockey,GEBA - Caballeros Hockey,rugby,rugby,asociacion-amateur-de-hockey-sobre-cesped-buenos-aires,Asociación Amateur de Hóckey sobre césped Buenos Aires,union de hockey + nombre con Caballeros/Damas/Hockey
+geba-damas-a,"GEBA - Damas ""A""",rugby,rugby,asociacion-amateur-de-hockey-sobre-cesped-buenos-aires,Asociación Amateur de Hóckey sobre césped Buenos Aires,union de hockey + nombre con Caballeros/Damas/Hockey
+hurling-caballeros,Hurling - Caballeros,rugby,rugby,asociacion-amateur-de-hockey-sobre-cesped-buenos-aires,Asociación Amateur de Hóckey sobre césped Buenos Aires,union de hockey + nombre con Caballeros/Damas/Hockey
+hurling-caballeros-hockey,Hurling - Caballeros Hockey,rugby,rugby,asociacion-amateur-de-hockey-sobre-cesped-buenos-aires,Asociación Amateur de Hóckey sobre césped Buenos Aires,union de hockey + nombre con Caballeros/Damas/Hockey
+lomas-a-c-caballeros,Lomas A.C. - Caballeros,rugby,rugby,asociacion-amateur-de-hockey-sobre-cesped-buenos-aires,Asociación Amateur de Hóckey sobre césped Buenos Aires,union de hockey + nombre con Caballeros/Damas/Hockey
+lomas-a-c-caballeros-hockey,Lomas A.C. - Caballeros Hockey,rugby,rugby,asociacion-amateur-de-hockey-sobre-cesped-buenos-aires,Asociación Amateur de Hóckey sobre césped Buenos Aires,union de hockey + nombre con Caballeros/Damas/Hockey
+lomas-athletic-damas-a,"Lomas Athletic - Damas ""A""",rugby,rugby,asociacion-amateur-de-hockey-sobre-cesped-buenos-aires,Asociación Amateur de Hóckey sobre césped Buenos Aires,union de hockey + nombre con Caballeros/Damas/Hockey
+mitre-caballeros,Mitre - Caballeros,rugby,rugby,asociacion-amateur-de-hockey-sobre-cesped-buenos-aires,Asociación Amateur de Hóckey sobre césped Buenos Aires,union de hockey + nombre con Caballeros/Damas/Hockey
+mitre-caballeros-hockey,Mitre - Caballeros Hockey,rugby,rugby,asociacion-amateur-de-hockey-sobre-cesped-buenos-aires,Asociación Amateur de Hóckey sobre césped Buenos Aires,union de hockey + nombre con Caballeros/Damas/Hockey
+olivos-r-c-damas-a,"Olivos R.C. - Damas ""A""",rugby,rugby,asociacion-amateur-de-hockey-sobre-cesped-buenos-aires,Asociación Amateur de Hóckey sobre césped Buenos Aires,union de hockey + nombre con Caballeros/Damas/Hockey
+quilmes-a-c-caballeros,Quilmes A.C. - Caballeros,rugby,rugby,asociacion-amateur-de-hockey-sobre-cesped-buenos-aires,Asociación Amateur de Hóckey sobre césped Buenos Aires,union de hockey + nombre con Caballeros/Damas/Hockey
+quilmes-a-c-caballeros-hockey,Quilmes A.C. - Caballeros Hockey,rugby,rugby,asociacion-amateur-de-hockey-sobre-cesped-buenos-aires,Asociación Amateur de Hóckey sobre césped Buenos Aires,union de hockey + nombre con Caballeros/Damas/Hockey
+sag,SAG,rugby,rugby,asociacion-amateur-de-hockey-sobre-cesped-buenos-aires,Asociación Amateur de Hóckey sobre césped Buenos Aires,union de hockey
+sag-hockey,SAG Hockey,rugby,rugby,asociacion-amateur-de-hockey-sobre-cesped-buenos-aires,Asociación Amateur de Hóckey sobre césped Buenos Aires,union de hockey + nombre con Caballeros/Damas/Hockey
+san-fernando-caballeros,San Fernando - Caballeros,rugby,rugby,asociacion-amateur-de-hockey-sobre-cesped-buenos-aires,Asociación Amateur de Hóckey sobre césped Buenos Aires,union de hockey + nombre con Caballeros/Damas/Hockey
+san-fernando-caballeros-hockey,San Fernando - Caballeros Hockey,rugby,rugby,asociacion-amateur-de-hockey-sobre-cesped-buenos-aires,Asociación Amateur de Hóckey sobre césped Buenos Aires,union de hockey + nombre con Caballeros/Damas/Hockey
+san-fernando-damas-a,"San Fernando - Damas ""A""",rugby,rugby,asociacion-amateur-de-hockey-sobre-cesped-buenos-aires,Asociación Amateur de Hóckey sobre césped Buenos Aires,union de hockey + nombre con Caballeros/Damas/Hockey
+san-martin-caballeros,San Martín - Caballeros,rugby,rugby,asociacion-amateur-de-hockey-sobre-cesped-buenos-aires,Asociación Amateur de Hóckey sobre césped Buenos Aires,union de hockey + nombre con Caballeros/Damas/Hockey
+san-martin-hockey,San Martín Hockey,rugby,rugby,asociacion-amateur-de-hockey-sobre-cesped-buenos-aires,Asociación Amateur de Hóckey sobre césped Buenos Aires,union de hockey + nombre con Caballeros/Damas/Hockey
+san-martin-rojo-damas,San Martín Rojo - Damas,rugby,rugby,asociacion-amateur-de-hockey-sobre-cesped-buenos-aires,Asociación Amateur de Hóckey sobre césped Buenos Aires,union de hockey + nombre con Caballeros/Damas/Hockey
+santa-barbara-caballeros,Santa Barbara - Caballeros,rugby,rugby,asociacion-amateur-de-hockey-sobre-cesped-buenos-aires,Asociación Amateur de Hóckey sobre césped Buenos Aires,union de hockey + nombre con Caballeros/Damas/Hockey
+bigua-rugby-club,Biguá Rugby Club,rugby,rugby,asociacion-amateur-marplatense-de-hockey,Asociación Amateur Marplatense de Hockey,union de hockey
+club-banco-provincia-de-mar-del-plata-damas,Club Banco Provincia de Mar del Plata - Damas,rugby,rugby,asociacion-amateur-marplatense-de-hockey,Asociación Amateur Marplatense de Hockey,union de hockey + nombre con Caballeros/Damas/Hockey
+club-union-del-sur-damas,Club Unión del Sur - Damas,rugby,rugby,asociacion-amateur-marplatense-de-hockey,Asociación Amateur Marplatense de Hockey,union de hockey + nombre con Caballeros/Damas/Hockey
+hockey-club-del-valle-necochea-damas,Hockey Club Del Valle Necochea - Damas,rugby,rugby,asociacion-amateur-marplatense-de-hockey,Asociación Amateur Marplatense de Hockey,union de hockey + nombre con Caballeros/Damas/Hockey
+idra-damas,IDRA - DAMAS,rugby,rugby,asociacion-amateur-marplatense-de-hockey,Asociación Amateur Marplatense de Hockey,union de hockey + nombre con Caballeros/Damas/Hockey
+instituto-albert-einstein-club,Instituto Albert Einstein Club,rugby,rugby,asociacion-amateur-marplatense-de-hockey,Asociación Amateur Marplatense de Hockey,union de hockey
+mar-del-plata-club-damas,Mar del Plata Club - Damas,rugby,rugby,asociacion-amateur-marplatense-de-hockey,Asociación Amateur Marplatense de Hockey,union de hockey + nombre con Caballeros/Damas/Hockey
+nautico-mar-del-plata,Náutico Mar del Plata,rugby,rugby,asociacion-amateur-marplatense-de-hockey,Asociación Amateur Marplatense de Hockey,union de hockey
+once-unidos,Once Unidos,rugby,rugby,asociacion-amateur-marplatense-de-hockey,Asociación Amateur Marplatense de Hockey,union de hockey
+sporting-hockey-damas,Sporting - Hockey Damas,rugby,rugby,asociacion-amateur-marplatense-de-hockey,Asociación Amateur Marplatense de Hockey,union de hockey + nombre con Caballeros/Damas/Hockey
+trinity-club-hockey,Trinity Club Hockey,rugby,rugby,asociacion-amateur-marplatense-de-hockey,Asociación Amateur Marplatense de Hockey,union de hockey + nombre con Caballeros/Damas/Hockey
+universitario-de-mar-del-plata-hockey,Universitario de Mar del Plata - Hockey,rugby,rugby,asociacion-amateur-marplatense-de-hockey,Asociación Amateur Marplatense de Hockey,union de hockey + nombre con Caballeros/Damas/Hockey
+atl-del-rosario-b,"Atl. del Rosario ""B""",rugby,rugby,asociacion-de-hockey-del-litoral,Asociación de Hockey del Litoral,union de hockey
+atletico-del-rosario-a,"Atlético del Rosario ""A""",rugby,rugby,asociacion-de-hockey-del-litoral,Asociación de Hockey del Litoral,union de hockey
+c-a-provincial-a,"C.A. Provincial ""A""",rugby,rugby,asociacion-de-hockey-del-litoral,Asociación de Hockey del Litoral,union de hockey
+duendes-damas-a,"Duendes Damas ""A""",rugby,rugby,asociacion-de-hockey-del-litoral,Asociación de Hockey del Litoral,union de hockey + nombre con Caballeros/Damas/Hockey
+ger-a,"GER ""A""",rugby,rugby,asociacion-de-hockey-del-litoral,Asociación de Hockey del Litoral,union de hockey
+jockey-club-de-rosario-a,"Jockey Club de Rosario ""A""",rugby,rugby,asociacion-de-hockey-del-litoral,Asociación de Hockey del Litoral,union de hockey
+jockey-club-de-rosario-hockey,Jockey Club de Rosario Hockey,rugby,rugby,asociacion-de-hockey-del-litoral,Asociación de Hockey del Litoral,union de hockey + nombre con Caballeros/Damas/Hockey
+jockey-club-de-rosario-hockey-2,Jockey Club de Rosario Hockey,rugby,rugby,asociacion-de-hockey-del-litoral,Asociación de Hockey del Litoral,union de hockey + nombre con Caballeros/Damas/Hockey
+jockey-rosario-b,"Jockey Rosario ""B""",rugby,rugby,asociacion-de-hockey-del-litoral,Asociación de Hockey del Litoral,union de hockey
+jockey-rosario-b-hockey,"Jockey Rosario ""B"" Hockey",rugby,rugby,asociacion-de-hockey-del-litoral,Asociación de Hockey del Litoral,union de hockey + nombre con Caballeros/Damas/Hockey
+logaritmo-rugby-club-hockey,Logaritmo - Damas,rugby,rugby,asociacion-de-hockey-del-litoral,Asociación de Hockey del Litoral,union de hockey + nombre con Caballeros/Damas/Hockey
+los-caranchos-hockey,Los Caranchos Hockey,rugby,rugby,asociacion-de-hockey-del-litoral,Asociación de Hockey del Litoral,union de hockey + nombre con Caballeros/Damas/Hockey
+old-resian-club-hockey,"Old Resian Club ""A""",rugby,rugby,asociacion-de-hockey-del-litoral,Asociación de Hockey del Litoral,union de hockey
+parana-rowing-hockey-2,Paraná Rowing Hockey,rugby,rugby,asociacion-de-hockey-del-litoral,Asociación de Hockey del Litoral,union de hockey + nombre con Caballeros/Damas/Hockey
+regatas-de-san-nicolas,Regatas de San Nicolás,rugby,rugby,asociacion-de-hockey-del-litoral,Asociación de Hockey del Litoral,union de hockey
+regatas-de-san-nicolas-hockey,Regatas de San Nicolás Hockey,rugby,rugby,asociacion-de-hockey-del-litoral,Asociación de Hockey del Litoral,union de hockey + nombre con Caballeros/Damas/Hockey
+universitario-de-rosario-hockey,"Univ. de Rosario ""A""",rugby,rugby,asociacion-de-hockey-del-litoral,Asociación de Hockey del Litoral,union de hockey
+club-obras-mendoza,Club Obras Mendoza,rugby,"",asociacion-mendocina-de-hockey-sobre-cesped,Asociación Mendocina de Hockey sobre Cesped,union de hockey
+atl-tucuman-damas,Atl. Tucumán - Damas,rugby,rugby,asociacion-tucumana-amateur-de-hockey,Asociación Tucumana Amateur de Hockey,union de hockey + nombre con Caballeros/Damas/Hockey
+huirapuca-damas,Huirapuca - Damas,rugby,rugby,asociacion-tucumana-amateur-de-hockey,Asociación Tucumana Amateur de Hockey,union de hockey + nombre con Caballeros/Damas/Hockey
+jockey-tucuman-damas,Jockey Tucumán - Damas,rugby,rugby,asociacion-tucumana-amateur-de-hockey,Asociación Tucumana Amateur de Hockey,union de hockey + nombre con Caballeros/Damas/Hockey
+los-tarcos-rojo-damas,Los Tarcos Rojo - Damas,rugby,rugby,asociacion-tucumana-amateur-de-hockey,Asociación Tucumana Amateur de Hockey,union de hockey + nombre con Caballeros/Damas/Hockey
+natacion-y-g-rojo-damas,Natación y G. Rojo - Damas,rugby,rugby,asociacion-tucumana-amateur-de-hockey,Asociación Tucumana Amateur de Hockey,union de hockey + nombre con Caballeros/Damas/Hockey
+tucuman-ltc-azul-damas,Tucumán LTC Azul - Damas,rugby,rugby,asociacion-tucumana-amateur-de-hockey,Asociación Tucumana Amateur de Hockey,union de hockey + nombre con Caballeros/Damas/Hockey
+tucuman-rugby-a-damas,"Tucumán Rugby ""A"" - Damas",rugby,rugby,asociacion-tucumana-amateur-de-hockey,Asociación Tucumana Amateur de Hockey,union de hockey + nombre con Caballeros/Damas/Hockey
+tucuman-rugby-b-damas,"Tucumán Rugby ""B"" - Damas",rugby,rugby,asociacion-tucumana-amateur-de-hockey,Asociación Tucumana Amateur de Hockey,union de hockey + nombre con Caballeros/Damas/Hockey
+univ-tucuman-azul-damas,Univ. Tucumán Azul - Damas,rugby,rugby,asociacion-tucumana-amateur-de-hockey,Asociación Tucumana Amateur de Hockey,union de hockey + nombre con Caballeros/Damas/Hockey
+argentina-u21,Argentina U21,rugby,rugby,confederacion-argentina-de-hockey,Confederación Argentina de Hockey,union de hockey
+argentina-u21-w,Argentina U21 W,rugby,rugby,confederacion-argentina-de-hockey,Confederación Argentina de Hockey,union de hockey
+chile-u21,Chile U21,rugby,rugby,federacion-chilena-de-hockey-cesped,Federación Chilena de Hockey Césped,union de hockey
+chile-u21-w,Chile U21 W,rugby,rugby,federacion-chilena-de-hockey-cesped,Federación Chilena de Hockey Césped,union de hockey
+club-universitario-de-cordoba-hockey,Club Universitario de Córdoba Hockey,rugby,rugby,federacion-cordobesa-de-hockey,Federación Cordobesa de Hockey,union de hockey + nombre con Caballeros/Damas/Hockey
+club-universitario-de-cordoba-hockey-caballeros,Club Universitario de Córdoba Hockey Caballeros,rugby,rugby,federacion-cordobesa-de-hockey,Federación Cordobesa de Hockey,union de hockey + nombre con Caballeros/Damas/Hockey
+cordoba-athletic-club-hockey,"Córdoba Athletic Club ""A""",rugby,rugby,federacion-cordobesa-de-hockey,Federación Cordobesa de Hockey,union de hockey
+cordoba-athletic-club-caballeros,Córdoba Athletic Club Caballeros,rugby,rugby,federacion-cordobesa-de-hockey,Federación Cordobesa de Hockey,union de hockey + nombre con Caballeros/Damas/Hockey
+jockey-club-cordoba-hockey,"Jockey Club Córdoba - Damas ""A""",rugby,rugby,federacion-cordobesa-de-hockey,Federación Cordobesa de Hockey,union de hockey + nombre con Caballeros/Damas/Hockey
+tala-rugby-club-hockey,"Tala - Damas ""A""",field-hockey,rugby,federacion-cordobesa-de-hockey,Federación Cordobesa de Hockey,union de hockey + nombre con Caballeros/Damas/Hockey
+unc-hockey,UNC Hockey,rugby,rugby,federacion-cordobesa-de-hockey,Federación Cordobesa de Hockey,union de hockey + nombre con Caballeros/Damas/Hockey
+uru-cure-rugby-club-hockey-3,Urú Curé Rugby Club Hockey,rugby,rugby,federacion-cordobesa-de-hockey,Federación Cordobesa de Hockey,union de hockey + nombre con Caballeros/Damas/Hockey
+mexico-u21,México U21,rugby,rugby,federacion-mexicana-de-hockey-sobre-pasto,Federación Mexicana de Hockey sobre pasto,union de hockey
+mexico-u21-w,México U21 W,rugby,rugby,federacion-mexicana-de-hockey-sobre-pasto,Federación Mexicana de Hockey sobre pasto,union de hockey
+uruguay-u21-w,Uruguay U21 W,rugby,rugby,federacion-uruguaya-de-hockey-fuh,Federación Uruguaya de Hockey – FUH,union de hockey
+venezuela-u21,Venezuela U21,rugby,rugby,federacion-venezolana-de-hockey-sobre-cesped,Federación Venezolana de Hockey sobre Césped,union de hockey
+canada-u21,Canada U21,rugby,rugby,field-hockey-canada,Field Hockey Canada,union de hockey
+canada-u21-w,Canada U21 W,rugby,rugby,field-hockey-canada,Field Hockey Canada,union de hockey
+usa-u21,USA U21,rugby,rugby,usa-field-hockey,USA Field Hockey,union de hockey
+usa-u21-w,USA U21 W,rugby,rugby,usa-field-hockey,USA Field Hockey,union de hockey

@@ -1,0 +1,78 @@
+  aviso JOCKEY CLUB TUCUMAN 22-27 UNIVERSITARIO DE SAN JUAN (297056): salida sin reemplazo, dorsal 9 (2T 28)
+297058: MARCADOR DISTINTO tarjeta 25-32 vs base 25-24 (TIGRES R.C. 25-32 JOCKEY CLUB VENADO TUERTO (297058))
+297058: EVENTOS NO CIERRAN TIGRES R.C. 25-32 JOCKEY CLUB VENADO TUERTO (297058): eventos 25-32 (resultados (7)/TIGRES VS JCVT)
+  aviso CLUB ATLETICO ESTUDIANTES 26-34 TALAR.C. (297061): minuto ilegible "ria", se toma el de la fila vecina (2T    ria   Se retiró          5)
+  aviso CLUB ATLETICO ESTUDIANTES 26-34 TALAR.C. (297061): minuto ilegible "ria", se toma el de la fila vecina (2T    ria   Ingresó            19)
+  aviso URU-CURE 35-10 CURNE (297062): salida sin reemplazo, dorsal 8 (2T 32)
+  aviso URU-CURE 35-10 CURNE (297062): minuto ilegible "e", se toma el de la fila vecina (2T    e     Se retiró         5)
+  aviso UNIVERSITARIO - CORDOBA 17-44 JOCKEY CLUB DE ROSARIO (297063): minuto ilegible "d", se toma el de la fila vecina (2T    d     Ingresó            17)
+  aviso UNIVERSITARIO - CORDOBA 17-44 JOCKEY CLUB DE ROSARIO (297063): minuto ilegible "d", se toma el de la fila vecina (2T    d     Ingresó            20)
+  aviso UNIVERSITARIO - CORDOBA 17-44 JOCKEY CLUB DE ROSARIO (297063): minuto ilegible "d", se toma el de la fila vecina (2T    d     Se retira          1)
+  aviso SANTA FE R.C. 37-13 CORDOBA ATHLETIC (297064): minuto ilegible ".", se toma el de la fila vecina (2T    .     Try         5      14)
+  aviso OLD RESIAN CLUB 22-24 LATABLADA (297066): minuto ilegible "", se toma el de la fila vecina (2T          Conversión  2      g)
+  aviso OLD RESIAN CLUB 22-24 LATABLADA (297066): cambio con dorsal sin jugador None->19
+  aviso TALA R.C. 79-3 URU-CURE (308052): minuto ilegible "Ú", se toma el de la fila vecina (2T    Ú     Se retiró         4)
+  aviso CORDOBA ATHLETIC 36-17 UNIVERSITARIO - CORDOBA (308059): cambio con dorsal sin jugador None->20
+  aviso LA TABLADA 17-36 JOCKEY CLUB CORDOBA (308061): minuto ilegible "a1", se toma el de la fila vecina (2T    a1    Se retiró          14)
+  aviso CARDENALES R.C. 28-28 NATACION Y GIMNASIA (308063): ingreso sin salida, dorsal 22 (1T 4)
+  aviso PARANA ROWING CLUB 21-17 CRAI (308064): salida sin reemplazo, dorsal 3 (1T 40)
+  aviso PARANA ROWING CLUB 21-17 CRAI (308064): ingreso sin salida, dorsal 18 (2T 0)
+  aviso MAR DEL PLATA 28-30 IPR SPORTING (308067): ingreso sin salida, dorsal 17 (2T 1)
+  aviso MAR DEL PLATA 28-30 IPR SPORTING (308067): ingreso sin salida, dorsal 21 (2T 20)
+  aviso TIGRES R.C. 33-34 PALERMO BAJO (308071): ingreso sin salida, dorsal 19 (2T 9)
+  aviso TIGRES R.C. 33-34 PALERMO BAJO (308071): cambio con dorsal sin jugador None->17
+  aviso UNIVERSITARIO DE TUCUMAN 33-22 JOCKEY VILLA MARIA (308072): minuto ilegible ".", se toma el de la fila vecina (2T    .     Se retiro          9)
+  aviso UNIVERSITARIO DE TUCUMAN 33-22 JOCKEY VILLA MARIA (308072): card_yellow sin jugador, dorsal 151 (1T    30    Amarilla           151     Amarilla Juego General (J. G.))
+  aviso UNIVERSITARIO DE TUCUMAN 33-22 JOCKEY VILLA MARIA (308072): cambio con dorsal sin jugador 151->21
+  aviso CURNE 10-56 TALAR.C. (311017): minuto ilegible "ria", se toma el de la fila vecina (2T    ria   Try         5      15)
+  aviso CURNE 10-56 TALAR.C. (311017): minuto ilegible "7]", se toma el de la fila vecina (2T    7]    Conversión  2      10)
+  aviso CORDOBA ATHLETIC 20-27 JOCKEY CLUB DE ROSARIO (311019): ingreso sin salida, dorsal 22 (1T 36)
+  aviso SANTA FE R.C. 25-24 UNIVERSITARIO - CORDOBA (311020): cambio con dorsal sin jugador None->19
+  aviso SANTA FE R.C. 25-24 UNIVERSITARIO - CORDOBA (311020): cambio con dorsal sin jugador 5->20
+  aviso LA TABLADA 24-41 DUENDESR.C. (311021): cambio con dorsal sin jugador None->20
+  aviso LA TABLADA 24-41 DUENDESR.C. (311021): minuto ilegible "E", se toma el de la fila vecina (1T    E     Penal       3      10)
+  aviso OLD RESIAN CLUB 22-69 JOCKEY CLUB CORDOBA (311022): try sin jugador, dorsal None (2T    30    Try         5      a)
+311024: MARCADOR DISTINTO tarjeta 49-17 vs base 49-16 (NATACION Y GIMNASIA 49-17 PARANA ROWING CLUB (311024))
+311024: EVENTOS NO CIERRAN NATACION Y GIMNASIA 49-17 PARANA ROWING CLUB (311024): eventos 49-17 (resultados (7)/NYG VS PARA)
+  aviso TUCUMAN LAWN TENNIS CLUB 44-29 MAR DEL PLATA (311026): ingreso sin salida, dorsal 17 (1T 37)
+311033: MARCADOR DISTINTO tarjeta 17-23 vs base 17-24 (HUIRAPUCA R.C. 17-23 SOCIEDAD SPORTIVA (311033))
+311033: EVENTOS NO CIERRAN HUIRAPUCA R.C. 17-23 SOCIEDAD SPORTIVA (311033): eventos 17-23 (resultados (7)/HUI VS SS)
+311035: MARCADOR DISTINTO tarjeta 33-22 vs base 32-22 (JOCKEY VILLA MARIA 33-22 TIGRESR.C. (311035))
+311035: EVENTOS NO CIERRAN JOCKEY VILLA MARIA 33-22 TIGRESR.C. (311035): eventos 33-22 (resultados (6)/JVM VS TIGRES)
+  aviso JOCKEY VILLA MARIA 33-22 TIGRESR.C. (311035): ingreso sin salida, dorsal 20 (1T 1)
+  aviso TALAR.C. 90-8 CURNE (313272): cambio con dorsal sin jugador 7->None
+  aviso CLUB ATLETICO ESTUDIANTES 30-17 URU-CURE (313273): try sin jugador, dorsal None (2T    23    Try         5      e)
+  aviso JOCKEY CLUB DE ROSARIO 56-17 CORDOBA ATHLETIC (313274): minuto ilegible "a", se toma el de la fila vecina (2T    a     Se retiró          2)
+  aviso JOCKEY CLUB DE ROSARIO 56-17 CORDOBA ATHLETIC (313274): minuto ilegible "a", se toma el de la fila vecina (2T    a     Se retiró          6)
+  aviso JOCKEY CLUB DE ROSARIO 56-17 CORDOBA ATHLETIC (313274): minuto ilegible "a", se toma el de la fila vecina (2T    a     Ingresó            20)
+  aviso UNIVERSITARIO - CORDOBA 50-40 SANTAFER.C. (313275): minuto ilegible "‘", se toma el de la fila vecina (2T    ‘     Se retiró          15)
+  aviso DUENDES R.C. 28-19 LATABLADA (313276): salida sin reemplazo, dorsal 11 (2T 18)
+  aviso DUENDES R.C. 28-19 LATABLADA (313276): cambio con dorsal sin jugador None->22
+  aviso DUENDES R.C. 28-19 LATABLADA (313276): salida sin reemplazo, dorsal 3 (2T 20)
+  aviso MAR DEL PLATA 28-20 UNIVERSITARIO DE SAN JUAN (313281): salida sin reemplazo, dorsal 5 (2T 10)
+  aviso LOS TORDOS R.C. 16-32 SOCIEDAD SPORTIVA (313283): ingreso sin salida, dorsal 19 (1T 22)
+  aviso SOCIEDAD SPORTIVA 19-10 IPR SPORTING (314793): ingreso sin salida, dorsal 17 (1T 28)
+  aviso SOCIEDAD SPORTIVA 19-10 IPR SPORTING (314793): ingreso sin salida, dorsal 19 (2T 29)
+  aviso UNIVERSITARIO - CORDOBA 28-26 CORDOBA ATHLETIC (314804): minuto ilegible "ñ", se toma el de la fila vecina (2T    ñ     Se retiró          4)
+  aviso CURNE 13-8 URU-CURE (315403): cambio con dorsal sin jugador None->19
+  aviso JOCKEY CLUB DE ROSARIO 36-33 UNIVERSITARIO - CORDOBA (315404): ingreso sin salida, dorsal 21 (2T 1)
+  aviso TALA R.C. 70-29 SANTAFER.C. (324150): minuto ilegible "", se toma el de la fila vecina (2T          Try         9      7)
+  aviso TALA R.C. 70-29 SANTAFER.C. (324150): minuto ilegible "", se toma el de la fila vecina (2T          Conversión  2      10)
+  aviso GIM. Y ESG. DE ROSARIO 40-38 LA TABLADA (324153): minuto ilegible "ria", se toma el de la fila vecina (2T    ria   Se retiró          3)
+  aviso URU-CURE 13-8 UNIVERSITARIO - CORDOBA (324154): ingreso sin salida, dorsal 14 (2T 27)
+  aviso OLD RESIAN CLUB 31-17 MENDOZA R.C. (324156): ingreso sin salida, dorsal 21 (2T 28)
+  aviso OLD RESIAN CLUB 31-17 MENDOZA R.C. (324156): salida sin reemplazo, dorsal 18 (2T 18)
+  aviso TALA R.C. 34-20 JOCKEY CLUB DE ROSARIO (325843): cambio con dorsal sin jugador 5->19
+
+Partidos de la base SIN tarjeta: 11
+  2026-07-25 B Cardenales R.C. 37-31 Tigres R.C.
+  2026-07-25 A Estudiantes de Paraná 81-0 CURNE
+  2026-07-25 A Old Resian Club 26-54 Duendes R.C.
+  2026-07-25 B Mar del Plata Club 51-37 Los Tordos Rugby Club
+  2026-07-25 B Liceo Rugby Club 42-43 Universitario de San Juan
+  2026-08-01 B Natación y Gimnasia 41-22 Sociedad Sportiva de Bahía Blanca
+  2026-08-01 B Tucumán Lawn Tennis 29-24 Paraná Rowing
+  2026-08-01 A Marista Rugby Club 53-14 Gimnasia y Esgrima de Rosario
+  2026-08-01 A Mendoza Rugby Club 17-20 Tucumán Rugby Club
+  2026-08-01 A Tala Rugby Club 30-0 Estudiantes de Paraná
+  2026-09-12 B Natación y Gimnasia 23-15 Tucumán Lawn Tennis

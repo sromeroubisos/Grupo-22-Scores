@@ -1,0 +1,469 @@
+{
+ "descripcion": "Top 10 del Centro F18 · formaciones solo (tarjetas pegadas)",
+ "partidos": [
+  {
+   "id": "eea69bd9-4947-4269-9c23-6ea108defc94",
+   "rotulo": "San Martín de Villa María vs Tala R.C. · Top 10 A F18 · tarjeta 276644",
+   "local": {
+    "nombre": "San Martín de Villa María",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Francisco Imanol Cabanillas Martinez",
+      "puesto": "Pilar"
+     },
+     {
+      "numero": 2,
+      "nombre": "Valentino Avaca",
+      "puesto": "Hooker"
+     },
+     {
+      "numero": 3,
+      "nombre": "Joaquín Blangetti",
+      "puesto": "Pilar"
+     },
+     {
+      "numero": 4,
+      "nombre": "Maximiliano Avaca",
+      "puesto": "Segunda línea"
+     },
+     {
+      "numero": 5,
+      "nombre": "Alexis Ariel Barrera",
+      "puesto": "Segunda línea"
+     },
+     {
+      "numero": 6,
+      "nombre": "Francesco Atilio Basso",
+      "puesto": "Tercera línea"
+     },
+     {
+      "numero": 7,
+      "nombre": "Benjamin Vazquez Calcaterra",
+      "puesto": "Tercera línea"
+     },
+     {
+      "numero": 8,
+      "nombre": "Valentino Rovere",
+      "puesto": "Tercera línea"
+     },
+     {
+      "numero": 9,
+      "nombre": "Agustin Arias",
+      "puesto": "Medio scrum"
+     },
+     {
+      "numero": 10,
+      "nombre": "Francisco Morra",
+      "puesto": "Apertura"
+     },
+     {
+      "numero": 11,
+      "nombre": "Joel Cecere",
+      "puesto": "Wing"
+     },
+     {
+      "numero": 12,
+      "nombre": "Agustin Ludueña",
+      "puesto": "Centro"
+     },
+     {
+      "numero": 13,
+      "nombre": "Augusto Lopez Frossasco",
+      "puesto": "Centro"
+     },
+     {
+      "numero": 14,
+      "nombre": "Ignacio Valentin Lencina Gimenez",
+      "puesto": "Wing"
+     },
+     {
+      "numero": 15,
+      "nombre": "Gaspar Russo",
+      "puesto": "Fullback"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Vicente Reale"
+     },
+     {
+      "numero": 17,
+      "nombre": "Santiago Destefanis"
+     },
+     {
+      "numero": 18,
+      "nombre": "Agustin Daniel Mana"
+     },
+     {
+      "numero": 19,
+      "nombre": "Mateo Alaniz Rivata"
+     },
+     {
+      "numero": 20,
+      "nombre": "Francisco Ivan Acosta Brizuela"
+     },
+     {
+      "numero": 21,
+      "nombre": "Felipe Bollo"
+     },
+     {
+      "numero": 22,
+      "nombre": "Valentino Rosignoli"
+     },
+     {
+      "numero": 23,
+      "nombre": "Agustin Andreosi"
+     }
+    ]
+   },
+   "visitante": {
+    "nombre": "Tala Rugby Club",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Manuel Arroyo",
+      "puesto": "Pilar"
+     },
+     {
+      "numero": 2,
+      "nombre": "Salvador Ortiz",
+      "puesto": "Hooker"
+     },
+     {
+      "numero": 3,
+      "nombre": "Francisco Caturelli",
+      "puesto": "Pilar"
+     },
+     {
+      "numero": 4,
+      "nombre": "Federico Albrisi",
+      "puesto": "Segunda línea"
+     },
+     {
+      "numero": 5,
+      "nombre": "Adrián Guillermo Nieva",
+      "puesto": "Segunda línea"
+     },
+     {
+      "numero": 6,
+      "nombre": "Farid Salazar",
+      "puesto": "Tercera línea"
+     },
+     {
+      "numero": 7,
+      "nombre": "Renzo Stefani",
+      "puesto": "Tercera línea"
+     },
+     {
+      "numero": 8,
+      "nombre": "Santiago Wortley",
+      "puesto": "Tercera línea"
+     },
+     {
+      "numero": 9,
+      "nombre": "Hilario Fernandez Frontera",
+      "puesto": "Medio scrum"
+     },
+     {
+      "numero": 10,
+      "nombre": "Octavio Gavier",
+      "puesto": "Apertura"
+     },
+     {
+      "numero": 11,
+      "nombre": "Alvaro Silva",
+      "puesto": "Wing"
+     },
+     {
+      "numero": 12,
+      "nombre": "Ignacio Giaimo",
+      "puesto": "Centro"
+     },
+     {
+      "numero": 13,
+      "nombre": "Tomas Armando",
+      "puesto": "Centro"
+     },
+     {
+      "numero": 14,
+      "nombre": "Mateo Raimundi",
+      "puesto": "Wing"
+     },
+     {
+      "numero": 15,
+      "nombre": "Ramiro Kosciuk",
+      "puesto": "Fullback"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Francisco Ponssa"
+     },
+     {
+      "numero": 17,
+      "nombre": "Agustin Sugasti"
+     },
+     {
+      "numero": 18,
+      "nombre": "Manuel Zulueta"
+     },
+     {
+      "numero": 19,
+      "nombre": "Facundo Sahonero Rahal"
+     },
+     {
+      "numero": 20,
+      "nombre": "Francisco Kember"
+     },
+     {
+      "numero": 21,
+      "nombre": "Santiago Lastra"
+     },
+     {
+      "numero": 22,
+      "nombre": "Ignacio De Vertiz"
+     },
+     {
+      "numero": 23,
+      "nombre": "Valentin De Vertiz"
+     }
+    ]
+   }
+  },
+  {
+   "id": "db17b565-aa1a-4fa4-bc89-c10324517f3f",
+   "rotulo": "Club Universitario de Córdoba vs Jockey Club Córdoba · Top 10 A F18 · tarjeta 276640",
+   "local": {
+    "nombre": "Club Universitario de Córdoba",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Ramiro Iglesias Quintana",
+      "puesto": "Pilar"
+     },
+     {
+      "numero": 2,
+      "nombre": "Conrado Iglesias Quintana",
+      "puesto": "Hooker"
+     },
+     {
+      "numero": 3,
+      "nombre": "Galo Fernández",
+      "puesto": "Pilar"
+     },
+     {
+      "numero": 4,
+      "nombre": "José Ignacio Castro",
+      "puesto": "Segunda línea"
+     },
+     {
+      "numero": 5,
+      "nombre": "Enzo Ocampo",
+      "puesto": "Segunda línea"
+     },
+     {
+      "numero": 6,
+      "nombre": "Lorenzo Aramayo",
+      "puesto": "Tercera línea"
+     },
+     {
+      "numero": 7,
+      "nombre": "Tiago Acaredda",
+      "puesto": "Tercera línea"
+     },
+     {
+      "numero": 8,
+      "nombre": "Facundo Agustin Vergara",
+      "puesto": "Tercera línea"
+     },
+     {
+      "numero": 9,
+      "nombre": "Agustin Perez Soria",
+      "puesto": "Medio scrum"
+     },
+     {
+      "numero": 10,
+      "nombre": "Joaquin Ameijeiras",
+      "puesto": "Apertura"
+     },
+     {
+      "numero": 11,
+      "nombre": "Luciano Lampasona",
+      "puesto": "Wing"
+     },
+     {
+      "numero": 12,
+      "nombre": "Francisco Aldonza",
+      "puesto": "Centro"
+     },
+     {
+      "numero": 13,
+      "nombre": "Joaquin Castillo",
+      "puesto": "Centro"
+     },
+     {
+      "numero": 14,
+      "nombre": "Jeronimo Aramayo",
+      "puesto": "Wing"
+     },
+     {
+      "numero": 15,
+      "nombre": "Tomas Salva",
+      "puesto": "Fullback"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Francisco Aguirre Gallardo"
+     },
+     {
+      "numero": 17,
+      "nombre": "Ignacio Perez Soria"
+     },
+     {
+      "numero": 18,
+      "nombre": "Benjamin Castro"
+     },
+     {
+      "numero": 19,
+      "nombre": "Lucas Villalba Rustichelli"
+     },
+     {
+      "numero": 20,
+      "nombre": "Fernando Martinez"
+     },
+     {
+      "numero": 21,
+      "nombre": "Juan Altamirano"
+     },
+     {
+      "numero": 22,
+      "nombre": "Mateo Ignacio Vara Paredes"
+     },
+     {
+      "numero": 23,
+      "nombre": "Valentín D'angelo"
+     }
+    ]
+   },
+   "visitante": {
+    "nombre": "Jockey Club Córdoba",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Uriel Sposito",
+      "puesto": "Pilar"
+     },
+     {
+      "numero": 2,
+      "nombre": "Leandro Martin Nassif",
+      "puesto": "Hooker"
+     },
+     {
+      "numero": 3,
+      "nombre": "Octavio Filippa",
+      "puesto": "Pilar"
+     },
+     {
+      "numero": 4,
+      "nombre": "Santiago Toya",
+      "puesto": "Segunda línea"
+     },
+     {
+      "numero": 5,
+      "nombre": "Lautaro Esteban De Jesús Ramirez Juncos",
+      "puesto": "Segunda línea"
+     },
+     {
+      "numero": 6,
+      "nombre": "Augusto Cugnini",
+      "puesto": "Tercera línea"
+     },
+     {
+      "numero": 7,
+      "nombre": "Gonzalo Maldonado",
+      "puesto": "Tercera línea"
+     },
+     {
+      "numero": 8,
+      "nombre": "Patricio Molina",
+      "puesto": "Tercera línea"
+     },
+     {
+      "numero": 9,
+      "nombre": "Marcelo Blanco",
+      "puesto": "Medio scrum"
+     },
+     {
+      "numero": 10,
+      "nombre": "Julian Viola",
+      "puesto": "Apertura"
+     },
+     {
+      "numero": 11,
+      "nombre": "Juan Ignacio Ludueña Fassi",
+      "puesto": "Wing"
+     },
+     {
+      "numero": 12,
+      "nombre": "Julio Deheza",
+      "puesto": "Centro"
+     },
+     {
+      "numero": 13,
+      "nombre": "Leonardo Gea Salim",
+      "puesto": "Centro"
+     },
+     {
+      "numero": 14,
+      "nombre": "Manuel Carrara",
+      "puesto": "Wing"
+     },
+     {
+      "numero": 15,
+      "nombre": "Tomas Bergero",
+      "puesto": "Fullback"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Juan Manuel Freytes Echenique"
+     },
+     {
+      "numero": 17,
+      "nombre": "Agustin Peralta"
+     },
+     {
+      "numero": 18,
+      "nombre": "Francisco Etchegorry"
+     },
+     {
+      "numero": 19,
+      "nombre": "Juan Cruz Conde"
+     },
+     {
+      "numero": 20,
+      "nombre": "Abraham Elias"
+     },
+     {
+      "numero": 21,
+      "nombre": "Nicolas Viola"
+     },
+     {
+      "numero": 22,
+      "nombre": "Facundo Rodriguez"
+     },
+     {
+      "numero": 23,
+      "nombre": "Tiziano Marchetto"
+     }
+    ]
+   }
+  }
+ ]
+}

@@ -1,0 +1,1104 @@
+tarjetas oficiales fbe60cbb
+
+baguales-r-c-intermedia vs san-francisco-r-c-intermedia · fbe60cbb · tarjeta 295650  ·  da609538-2859-4546-9daa-9d4bc5bb545f
+  local     · baguales-r-c-intermedia · 23 jugadores · 0 con ficha fijada
+  visitante · san-francisco-r-c-intermedia · 18 jugadores · 0 con ficha fijada
+  eventos   · 35
+    min  2 (1T 2) local     try          Alan Ezequiel Farias
+    min  2 (1T 2) local     conversion   Valentin Brunelli
+    min  7 (1T 7) local     try          Walter Maradey
+    min  7 (1T 7) local     conversion   Valentin Brunelli
+    min  9 (1T 9) local     try          Jonathan Silva
+    min  9 (1T 9) local     conversion   Valentin Brunelli
+    min 13 (1T 13) local     try          Guillermo Ariel Salgan
+    min 13 (1T 13) local     conversion   Valentin Brunelli
+    min 15 (1T 15) local     try          Guillermo Ariel Salgan
+    min 15 (1T 15) local     conversion   Valentin Brunelli
+    min 27 (1T 27) local     try          Juan Agustín Vicens
+    min 27 (1T 27) local     conversion   Valentin Brunelli
+    min 29 (1T 29) local     try          Alan Ezequiel Farias
+    min 29 (1T 29) local     conversion   Valentin Brunelli
+    min 31 (1T 31) local     try          Walter Maradey
+    min 31 (1T 31) local     conversion   Valentin Brunelli
+    min 34 (1T 34) visitante try          Santiago Diale
+    min 42 (2T 2) visitante substitution Bruno Emmanuel Costabella
+    min 42 (2T 2) visitante substitution Andres Grimaldi
+    min 42 (2T 2) visitante substitution Gino Gandolfo
+    min 43 (2T 3) local     substitution Juan Agustín Vicens
+    min 43 (2T 3) local     substitution Jeremias Chiappero
+    min 43 (2T 3) local     substitution Jeremias Chiappero
+    min 43 (2T 3) local     substitution Valentin Sartori
+    min 47 (2T 7) local     try          Valentin Brunelli
+    min 47 (2T 7) local     conversion   Valentin Brunelli
+    min 50 (2T 10) local     try          Alan Ezequiel Farias
+    min 50 (2T 10) local     conversion   Valentin Brunelli
+    min 57 (2T 17) local     try          Guillermo Ariel Salgan
+    min 57 (2T 17) local     conversion   Valentin Brunelli
+    min 60 (2T 20) local     try          Alan Ezequiel Farias
+    min 60 (2T 20) local     conversion   Valentin Brunelli
+    min 62 (2T 22) local     substitution Matias Agustín Gonzalez
+    min 66 (2T 26) local     card_yellow  Facundo Cejas
+    min 69 (2T 29) local     try          Valentin Brunelli
+  marcador  · eventos 89-5 · guardado 89-5
+  tries     · 13-1 (guardado —-—)
+  arbitro   · LEANDRO LUCHETTI (guardado: —)
+  guardado  · 23 local · 18 visitante · 35 eventos
+
+cordoba-rugby-club-intermedia vs aero-club-rio-iv-intermedia · fbe60cbb · tarjeta 295651  ·  c1a35a97-30b4-4a0c-b7e0-46784f6c608c
+  local     · cordoba-rugby-club-intermedia · 23 jugadores · 0 con ficha fijada
+  visitante · aero-club-rio-iv-intermedia · 23 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min  4 (1T 4) local     try          Ramiro Rasmussen
+    min 10 (1T 10) local     try          Francisco Ezequiel Mori
+    min 10 (1T 10) local     conversion   Lucio Tessadri
+    min 22 (1T 22) local     try          Fabricio Leonel Conci
+    min 22 (1T 22) local     conversion   Lucio Tessadri
+    min 27 (1T 27) local     try          Lucas Carballo
+    min 28 (1T 28) visitante card_yellow  Juan Estivill
+    min 31 (1T 31) local     try          Francisco Scarafia
+    min 38 (1T 38) local     substitution Nicolas Alfredo Palomeque
+    min 38 (1T 38) visitante try          Cristian Gabriel Centeno
+    min 38 (1T 38) visitante conversion   Agustin Tabasso
+    min 41 (2T 1) local     substitution Ramiro Rasmussen
+    min 53 (2T 13) local     substitution Lisandro Romera
+    min 55 (2T 15) local     try          Fabricio Leonel Conci
+    min 55 (2T 15) local     substitution Joel Agustín Fajardo
+    min 56 (2T 16) local     substitution Tiziano Pigliacampo
+    min 63 (2T 23) local     try          Camilo Augusto Matschke Dimol
+    min 76 (2T 36) local     try          Pablo Gabriel Areco Cuello
+  marcador  · eventos 44-7 · guardado 44-7
+  tries     · 8-1 (guardado —-—)
+  arbitro   · ARTURO MARTINEZ (guardado: —)
+  guardado  · 23 local · 23 visitante · 18 eventos
+
+aero-club-rio-iv-intermedia vs baguales-r-c-intermedia · fbe60cbb · tarjeta 295653  ·  c64f0755-5116-40cf-90df-fc60c25d1194
+  local     · aero-club-rio-iv-intermedia · 23 jugadores · 0 con ficha fijada
+  visitante · baguales-r-c-intermedia · 23 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min  5 (1T 5) visitante try          Juan Agustín Vicens
+    min  6 (1T 6) visitante conversion   Matias Agustín Gonzalez
+    min 14 (1T 14) visitante try          Alan Ezequiel Farias
+    min 15 (1T 15) visitante conversion   Valentin Brunelli
+    min 22 (1T 22) local     penalty_goal Raúl Daniel Montiel
+    min 27 (1T 27) visitante try          Alan Ezequiel Farias
+    min 27 (1T 27) visitante conversion   Valentin Brunelli
+    min 30 (1T 30) visitante card_yellow  Agustin Fantini
+    min 31 (1T 31) visitante conversion   Valentin Brunelli
+    min 36 (1T 36) visitante conversion   Valentin Brunelli
+    min 41 (2T 1) visitante try          Juan Perachia
+    min 44 (2T 4) visitante try          Tomas Calderon
+    min 45 (2T 5) visitante conversion   Valentin Brunelli
+    min 49 (2T 9) local     card_yellow  Francisco Lujan
+    min 57 (2T 17) local     card_yellow  Juan Pablo Burgos Abomnel
+    min 58 (2T 18) local     card_red     Bruno Barroso
+    min 71 (2T 31) visitante try          Mateo Canale
+    min 76 (2T 36) visitante try          Juan Perachia
+  marcador  · eventos 3-47 · guardado 3-47
+  tries     · 0-7 (guardado —-—)
+  arbitro   · CLAUDIO MARCELO TEJERO (guardado: —)
+  guardado  · 23 local · 23 visitante · 18 eventos
+
+santa-rosa-r-c-c-intermedia vs c-s-la-carlota-intermedia · fbe60cbb · tarjeta 295656  ·  37eda99c-c5ae-49a7-b683-73961944bfd3
+  local     · santa-rosa-r-c-c-intermedia · 21 jugadores · 0 con ficha fijada
+  visitante · c-s-la-carlota-intermedia · 23 jugadores · 0 con ficha fijada
+  eventos   · 14
+    min 11 (1T 11) visitante try          Martin Benausse
+    min 15 (1T 15) local     card_yellow  Daniel Sebastian Claus
+    min 18 (1T 18) local     try          Facundo Pérez
+    min 18 (1T 18) visitante card_yellow  Alexis Ivan Olguin
+    min 24 (1T 24) visitante try          Walter Rojo
+    min 25 (1T 25) local     card_yellow  Matías Nahun Vasquez
+    min 43 (2T 3) visitante try          Santino Augusto Pizarro
+    min 45 (2T 5) visitante substitution Pedro Sebastian Marquez
+    min 45 (2T 5) visitante substitution Walter Rojo
+    min 46 (2T 6) visitante substitution Martin Benausse
+    min 67 (2T 27) visitante try          Luis Tomas Del Canto
+    min 68 (2T 28) visitante conversion   Pedro Nicolas Bonadeo
+    min 70 (2T 30) visitante try          Roque Carranza
+    min 71 (2T 31) visitante conversion   Pedro Nicolas Bonadeo
+  marcador  · eventos 5-29 · guardado 5-29
+  tries     · 1-5 (guardado —-—)
+  arbitro   · CARLOS ALTOBELLI (guardado: —)
+  guardado  · 21 local · 23 visitante · 14 eventos
+
+c-s-la-carlota-intermedia vs rio-tercero-r-c-intermedia · fbe60cbb · tarjeta 295657  ·  05d3c437-8305-422a-a1a3-98e1eb7c05e5
+  local     · c-s-la-carlota-intermedia · 23 jugadores · 0 con ficha fijada
+  visitante · rio-tercero-r-c-intermedia · 23 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min  2 (1T 2) local     try          Martin Gauna
+    min  3 (1T 3) local     conversion   Pedro Nicolas Bonadeo
+    min 17 (1T 17) visitante card_yellow  Santiago Ducler
+    min 24 (1T 24) local     try          Agustin Mangiarotti
+    min 28 (1T 28) local     try          Alexis Ivan Olguin
+    min 44 (2T 4) local     try          Agustín Zandonadi
+    min 45 (2T 5) local     conversion   Pedro Nicolas Bonadeo
+    min 56 (2T 16) visitante penalty_goal Santiago Ducler
+    min 57 (2T 17) local     substitution Diego Frua
+    min 57 (2T 17) local     card_yellow  Roberto Carabajal
+    min 61 (2T 21) local     try          Rubén Darío Pérez
+    min 62 (2T 22) local     substitution Claudio Ezequiel Mansilla
+    min 63 (2T 23) local     substitution Vicente Ortiz Cabral
+    min 63 (2T 23) local     substitution Roque Carranza
+    min 64 (2T 24) local     substitution Martin Gauna
+    min 64 (2T 24) local     substitution Agustin Mangiarotti
+    min 64 (2T 24) local     substitution Leonardo Martín Pedraza
+    min 72 (2T 32) visitante penalty_goal Santiago Ducler
+    min 78 (2T 38) visitante try          Emilio Pascutti
+    min 78 (2T 38) visitante conversion   Santiago Ducler
+  marcador  · eventos 29-13 · guardado 29-13
+  tries     · 5-1 (guardado —-—)
+  arbitro   · DANIEL PAUTASSO (guardado: —)
+  guardado  · 23 local · 23 visitante · 20 eventos
+
+cordoba-rugby-club-intermedia vs alta-gracia-r-c-intermedia · fbe60cbb · tarjeta 295663  ·  3aca1b5b-95f7-4b99-b1be-40ded9bccb2f
+  local     · cordoba-rugby-club-intermedia · 23 jugadores · 0 con ficha fijada
+  visitante · alta-gracia-r-c-intermedia · 23 jugadores · 0 con ficha fijada
+  eventos   · 28
+    min  8 (1T 8) local     try          Gustavo Chanquia
+    min  8 (1T 8) local     conversion   Francisco Ezequiel Mori
+    min 10 (1T 10) visitante try          Maximiliano Passera
+    min 10 (1T 10) visitante conversion   Joaquín Francisco Flamand
+    min 13 (1T 13) visitante try          Noah Francisco Tosonieri
+    min 13 (1T 13) visitante conversion   Joaquín Francisco Flamand
+    min 18 (1T 18) local     try          Ramiro Rasmussen
+    min 24 (1T 24) visitante try          Noah Francisco Tosonieri
+    min 24 (1T 24) visitante conversion   Joaquín Francisco Flamand
+    min 30 (1T 30) local     substitution Leandro Caldo
+    min 35 (1T 35) local     substitution Francisco Scarafia
+    min 40 (1T 40) local     substitution Ramiro Rasmussen
+    min 41 (1T 41) visitante try          Noah Francisco Tosonieri
+    min 41 (1T 41) visitante conversion   Joaquín Francisco Flamand
+    min 44 (2T 4) local     substitution Eduardo Andres Torres
+    min 46 (2T 6) visitante substitution Alejo Prandini
+    min 46 (2T 6) visitante substitution Ezequiel Lopez
+    min 49 (2T 9) local     card_yellow  Joel Agustín Fajardo
+    min 51 (2T 11) visitante substitution Matias Gabriel Saez Torillo
+    min 51 (2T 11) visitante substitution Ciro Dall Armellina
+    min 59 (2T 19) visitante substitution Benjamín Fernando Nakasone Uema
+    min 59 (2T 19) visitante substitution Andres Oliva Martinez
+    min 63 (2T 23) local     substitution Fabricio Re
+    min 63 (2T 23) local     substitution Fabricio Re
+    min 70 (2T 30) local     substitution Mauricio Cravero
+    min 70 (2T 30) local     substitution Francisco Scarafia
+    min 72 (2T 32) local     try          Juan Cruz Silva
+    min 80 (2T 40) local     substitution David Roberto Bustos
+  marcador  · eventos 17-28 · guardado 17-28
+  tries     · 3-4 (guardado —-—)
+  arbitro   · SANTIAGO GERONIMO LOZADA CHAVES (guardado: —)
+  guardado  · 23 local · 23 visitante · 28 eventos
+
+alta-gracia-r-c-intermedia vs baguales-r-c-intermedia · fbe60cbb · tarjeta 295671  ·  7d8fb51c-0fdc-4cdd-af19-290d28af63c8
+  local     · alta-gracia-r-c-intermedia · 21 jugadores · 0 con ficha fijada
+  visitante · baguales-r-c-intermedia · 23 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min  3 (1T 3) visitante try          Alan Ezequiel Farias
+    min  3 (1T 3) visitante conversion   Valentin Brunelli
+    min 16 (1T 16) visitante try          Lucio Alvarenga
+    min 16 (1T 16) visitante conversion   Valentin Brunelli
+    min 22 (1T 22) local     try          Ezequiel Lopez
+    min 27 (1T 27) local     penalty_goal Uriel Capdevila Leunda
+    min 34 (1T 34) visitante try          Mateo Canale
+    min 34 (1T 34) visitante substitution Guillermo Ariel Salgan
+    min 34 (1T 34) visitante conversion   Valentin Brunelli
+    min 36 (1T 36) local     card_yellow  Juan Pablo Benjamin Santamaria
+    min 39 (1T 39) local     card_yellow  Renzo Ariel Lanata
+    min 49 (2T 9) visitante substitution Valentín Ismael Acosta
+    min 54 (2T 14) local     substitution Darío Sanchez
+    min 59 (2T 19) local     substitution Juan Pablo Benjamin Santamaria
+    min 59 (2T 19) local     substitution Lucas Marmol
+    min 60 (2T 20) visitante card_yellow  Jeremias Chiappero
+    min 61 (2T 21) visitante substitution Juan Emmanuel Roldan
+    min 62 (2T 22) local     card_yellow  Ezequiel Lopez
+    min 62 (2T 22) visitante substitution Lautaro Fernandez
+    min 62 (2T 22) visitante substitution Lucio Alvarenga
+    min 62 (2T 22) visitante substitution Guillermo Serrano
+    min 72 (2T 32) visitante try          Alex Matrone
+    min 74 (2T 34) visitante substitution Alan Ezequiel Farias
+    min 80 (2T 40) local     substitution Alejo Prandini
+  marcador  · eventos 8-26 · guardado 8-26
+  tries     · 1-4 (guardado —-—)
+  arbitro   · FLORENCIA LEDESMA (guardado: —)
+  guardado  · 21 local · 23 visitante · 24 eventos
+
+los-cuervos-r-c-intermedia vs cordoba-rugby-club-intermedia · fbe60cbb · tarjeta 295670  ·  e601ea32-f240-45d2-9d84-2ec94c2130c2
+  local     · los-cuervos-r-c-intermedia · 23 jugadores · 0 con ficha fijada
+  visitante · cordoba-rugby-club-intermedia · 23 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min  1 (1T 1) local     try          Juan Bautista Calzolari
+    min 13 (1T 13) local     try          Juan Bautista Calzolari
+    min 27 (1T 27) local     substitution Maximiliano Aparicio Borda
+    min 31 (1T 31) local     penalty_try  
+    min 34 (1T 34) visitante try          Francisco Ezequiel Mori
+    min 34 (1T 34) visitante conversion   Lucio Tessadri
+    min 41 (2T 1) local     substitution Facundo Ibarra
+    min 41 (2T 1) local     substitution Juan Bautista Calzolari
+    min 41 (2T 1) local     substitution Isaias Martín Guzman
+    min 41 (2T 1) local     card_yellow  Juan Manuel Aragón
+    min 47 (2T 7) visitante try          Camilo Augusto Matschke Dimol
+    min 54 (2T 14) local     try          Juan Bautista Calzolari
+    min 67 (2T 27) local     substitution Maximiliano Oscar Cejas
+    min 70 (2T 30) local     try          Maximiliano Oscar Cejas
+    min 77 (2T 37) visitante try          Juan Cruz Silva
+    min 80 (2T 40) visitante substitution Nicolas Alfredo Palomeque
+    min 80 (2T 40) visitante substitution Francisco Ezequiel Pérez Palau
+    min 80 (2T 40) visitante substitution Francisco Scarafia
+  marcador  · eventos 27-17 · guardado 27-17
+  tries     · 5-3 (guardado —-—)
+  arbitro   · PABLO GERARDO RONCO (guardado: —)
+  guardado  · 23 local · 23 visitante · 18 eventos
+
+c-s-la-carlota-intermedia vs aero-club-rio-iv-intermedia · fbe60cbb · tarjeta 295669  ·  6131d12a-39fe-4490-b3c6-5c51d366432f
+  local     · c-s-la-carlota-intermedia · 23 jugadores · 0 con ficha fijada
+  visitante · aero-club-rio-iv-intermedia · 23 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min  9 (1T 9) local     try          Tobias Castro
+    min 10 (1T 10) local     conversion   Pedro Nicolas Bonadeo
+    min 21 (1T 21) local     substitution Renzo Nicolas Martinez
+    min 37 (1T 37) local     try          Tobias Castro
+    min 40 (1T 40) visitante substitution Mirko Urrutia Zaninovich
+    min 49 (2T 9) local     try          Diego Frua
+    min 49 (2T 9) local     substitution Roque Carranza
+    min 50 (2T 10) local     conversion   Pedro Nicolas Bonadeo
+    min 53 (2T 13) local     try          Leonardo Martín Pedraza
+    min 56 (2T 16) local     try          Maximiliano Jose Romero
+    min 62 (2T 22) local     try          Claudio Ezequiel Mansilla
+    min 63 (2T 23) local     conversion   Pedro Nicolas Bonadeo
+    min 65 (2T 25) local     try          Maximiliano Jose Romero
+    min 65 (2T 25) local     substitution Rubén Darío Pérez
+    min 71 (2T 31) local     substitution Leonardo Martín Pedraza
+    min 71 (2T 31) local     substitution Diego Frua
+    min 72 (2T 32) local     substitution Matias Mc Namara
+    min 72 (2T 32) local     substitution Tobias Castro
+    min 77 (2T 37) local     card_yellow  Nicolas Mantegazza
+    min 80 (2T 40) visitante substitution Carlos Gustavo Cengia
+  marcador  · eventos 41-0 · guardado 41-0
+  tries     · 7-0 (guardado —-—)
+  arbitro   · JOSÉ OCTAVIANO BORQUEZ (guardado: —)
+  guardado  · 23 local · 23 visitante · 20 eventos
+
+san-francisco-r-c-intermedia vs rio-tercero-r-c-intermedia · fbe60cbb · tarjeta 295676  ·  a9d95df0-101a-47c5-b3e2-36ff9cc628a2
+  local     · san-francisco-r-c-intermedia · 23 jugadores · 0 con ficha fijada
+  visitante · rio-tercero-r-c-intermedia · 23 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min  6 (1T 6) local     penalty_goal Juan Pablo Blasi
+    min 12 (1T 12) visitante try          Lucas Acornero
+    min 23 (1T 23) visitante try          Lautaro Medina
+    min 24 (1T 24) visitante conversion   Emilio Pascutti
+    min 26 (1T 26) local     try          Marcos Reynoso Bonino
+    min 27 (1T 27) local     conversion   Juan Pablo Blasi
+    min 40 (2T 0) local     substitution Lucas Aiassa
+    min 40 (2T 0) local     substitution Andres Grimaldi
+    min 40 (2T 0) local     substitution Juan Ignacio Mina Rosso
+    min 40 (2T 0) local     substitution Tomas Alberto Sabbadini
+    min 40 (2T 0) local     substitution Salvador Androetto
+    min 40 (2T 0) local     substitution Santiago Vottero
+    min 40 (2T 0) local     substitution Santiago Diale
+    min 40 (2T 0) local     substitution Lucas Gutierrez
+    min 43 (2T 3) local     try          Lucas Gutierrez
+    min 44 (2T 4) local     conversion   Juan Pablo Blasi
+    min 59 (2T 19) local     try          Juan Pablo Blasi
+    min 60 (2T 20) local     conversion   Juan Pablo Blasi
+    min 63 (2T 23) local     try          Santiago Gabriel Busso
+    min 69 (2T 29) local     conversion   Juan Pablo Blasi
+    min 79 (2T 39) local     try          Juan Pablo Blasi
+    min 80 (2T 40) visitante substitution Cristian Pereyra
+    min 80 (2T 40) visitante substitution Emilio Pascutti
+    min 80 (2T 40) visitante substitution Francisco Velez
+    min 87 (2T 47) visitante try          Martín Gastón Escalera
+    min 96 (2T 56) visitante try          Rodrigo Cabrera
+    min 97 (2T 57) visitante conversion   Mateo Piacentini
+  marcador  · eventos 36-24 · guardado 36-24
+  tries     · 5-4 (guardado —-—)
+  arbitro   · GABRIEL HERNÁN TIRANTE (guardado: —)
+  guardado  · 23 local · 23 visitante · 27 eventos
+
+los-cuervos-r-c-intermedia vs alta-gracia-r-c-intermedia · fbe60cbb · tarjeta 295680  ·  a5a4e69f-7fd5-4368-96ad-2ccf54c09206
+  local     · los-cuervos-r-c-intermedia · 23 jugadores · 0 con ficha fijada
+  visitante · alta-gracia-r-c-intermedia · 21 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min 14 (1T 14) visitante try          Elias Alejandro Gigena Lebovici
+    min 14 (1T 14) visitante conversion   Uriel Capdevila Leunda
+    min 21 (1T 21) local     try          Bruno Vasconi
+    min 45 (2T 5) visitante try          Joaquín Francisco Flamand
+    min 45 (2T 5) visitante substitution Lucas Marmol
+    min 48 (2T 8) visitante substitution Alejo Prandini
+    min 54 (2T 14) visitante substitution Ezequiel Lopez
+    min 56 (2T 16) local     try          Dario Marronkle
+    min 57 (2T 17) local     conversion   Tomas Ariel Ferreri
+    min 57 (2T 17) visitante try          Joaquín Villegas
+    min 66 (2T 26) local     conversion   Tomas Ariel Ferreri
+    min 66 (2T 26) local     try          Gonzalo Ibañez
+    min 66 (2T 26) visitante substitution Andres Oliva Martinez
+    min 70 (2T 30) local     card_yellow  Maico Viale
+    min 75 (2T 35) local     try          Tomas Ariel Ferreri
+    min 75 (2T 35) local     conversion   Tomas Ariel Ferreri
+    min 78 (2T 38) visitante try          Joaquín Villegas
+    min 80 (2T 40) visitante try          Mariano Campagnano
+  marcador  · eventos 26-27 · guardado 26-27
+  tries     · 4-5 (guardado —-—)
+  arbitro   · ÁNGELES MURUA (guardado: —)
+  guardado  · 23 local · 21 visitante · 18 eventos
+
+c-s-la-carlota-intermedia vs baguales-r-c-intermedia · fbe60cbb · tarjeta 295679  ·  549234d8-78c7-4b2f-9d12-f9f748446b53
+  local     · c-s-la-carlota-intermedia · 23 jugadores · 0 con ficha fijada
+  visitante · baguales-r-c-intermedia · 23 jugadores · 0 con ficha fijada
+  eventos   · 29
+    min 12 (1T 12) visitante penalty_goal Valentin Brunelli
+    min 13 (1T 13) local     try          Santiago Miguel Maldonado
+    min 21 (1T 21) visitante penalty_goal Valentin Brunelli
+    min 22 (1T 22) local     penalty_goal Pedro Nicolas Bonadeo
+    min 30 (1T 30) visitante penalty_goal Valentin Brunelli
+    min 34 (1T 34) visitante penalty_goal Valentin Brunelli
+    min 46 (1T 46) local     substitution Matias Mc Namara
+    min 43 (2T 3) local     card_yellow  Facundo Guzman
+    min 43 (2T 3) visitante try          Jeremias Chiappero
+    min 48 (2T 8) visitante substitution Juan Ignacio Godoy
+    min 50 (2T 10) visitante try          Juan Cruz Rizzi De La Fuente
+    min 52 (2T 12) visitante substitution Jeremias Chiappero
+    min 52 (2T 12) visitante conversion   Valentin Brunelli
+    min 56 (2T 16) local     card_yellow  Roque Carranza
+    min 59 (2T 19) local     substitution Claudio Ezequiel Mansilla
+    min 61 (2T 21) local     substitution Nicolas Mantegazza
+    min 62 (2T 22) local     substitution Leonardo Martín Pedraza
+    min 62 (2T 22) local     substitution Martin Ludueña
+    min 64 (2T 24) local     substitution Kevin Arossa
+    min 64 (2T 24) visitante try          Valentin Brunelli
+    min 70 (2T 30) visitante try          Braian Emiliano Arguello
+    min 72 (2T 32) visitante substitution Ian Uriel Galeano
+    min 74 (2T 34) visitante conversion   Valentin Brunelli
+    min 74 (2T 34) visitante conversion   Valentin Brunelli
+    min 74 (2T 34) visitante substitution Guillermo Serrano
+    min 74 (2T 34) visitante substitution Luciano Michel Vega
+    min 80 (2T 40) visitante try          Alan Ezequiel Farias
+    min 80 (2T 40) visitante conversion   Valentin Brunelli
+    min 86 (2T 46) local     substitution Diego Frua
+  marcador  · eventos 8-45 · guardado 8-45
+  tries     · 1-5 (guardado —-—)
+  arbitro   · JOSÉ OCTAVIANO BORQUEZ (guardado: —)
+  guardado  · 23 local · 23 visitante · 29 eventos
+
+santa-rosa-r-c-c-intermedia vs cordoba-rugby-club-intermedia · fbe60cbb · tarjeta 295678  ·  547f0b12-dd49-4b65-991e-b3e87cbc052b
+  local     · santa-rosa-r-c-c-intermedia · 23 jugadores · 0 con ficha fijada
+  visitante · cordoba-rugby-club-intermedia · 23 jugadores · 0 con ficha fijada
+  eventos   · 14
+    min  8 (1T 8) visitante try          Juan Pablo Ramos
+    min  9 (1T 9) visitante conversion   Daniel Aguiriano
+    min 24 (1T 24) visitante try          Martin Acosta
+    min 25 (1T 25) visitante conversion   Daniel Aguiriano
+    min 43 (2T 3) visitante try          Javier Sebastian Colazo
+    min 43 (2T 3) visitante conversion   Lucio Tessadri
+    min 47 (2T 7) visitante conversion   Daniel Aguiriano
+    min 47 (2T 7) visitante try          Javier Sebastian Colazo
+    min 53 (2T 13) visitante try          Gonzalo Alvarez
+    min 53 (2T 13) visitante conversion   Lucio Tessadri
+    min 57 (2T 17) visitante try          Daniel Aguiriano
+    min 59 (2T 19) visitante try          Francisco Scarafia
+    min 64 (2T 24) visitante try          Lucio Tessadri
+    min 65 (2T 25) visitante conversion   Lucio Tessadri
+  marcador  · eventos 0-52 · guardado 0-52
+  tries     · 0-8 (guardado —-—)
+  arbitro   · CRISTIAN MAURO QUILES BUTELER (guardado: —)
+  guardado  · 23 local · 23 visitante · 14 eventos
+
+c-s-la-carlota-intermedia vs los-cuervos-r-c-intermedia · fbe60cbb · tarjeta 295690  ·  5820edc2-4946-451d-982f-bdc5431475d3
+  local     · c-s-la-carlota-intermedia · 23 jugadores · 0 con ficha fijada
+  visitante · los-cuervos-r-c-intermedia · 23 jugadores · 0 con ficha fijada
+  eventos   · 19
+    min 21 (1T 21) local     card_yellow  Roque Carranza
+    min 23 (1T 23) visitante try          Juan Manuel Aragón
+    min 24 (1T 24) visitante conversion   Juan Manuel Aragón
+    min 26 (1T 26) local     try          Roque Carranza
+    min 27 (1T 27) local     conversion   Roque Carranza
+    min 35 (1T 35) visitante card_yellow  Alexis Patachini
+    min 36 (1T 36) local     try          Roque Carranza
+    min 37 (1T 37) local     conversion   Roque Carranza
+    min 40 (1T 40) local     try          Roque Carranza
+    min 40 (1T 40) local     conversion   Roque Carranza
+    min 40 (1T 40) visitante card_yellow  Lucio Martinez
+    min 48 (2T 8) local     penalty_goal Roque Carranza
+    min 54 (2T 14) visitante try          Juan Manuel Aragón
+    min 54 (2T 14) visitante conversion   Juan Manuel Aragón
+    min 61 (2T 21) visitante try          Juan Manuel Aragón
+    min 66 (2T 26) visitante try          Juan Manuel Aragón
+    min 91 (2T 51) local     card_yellow  Kevin Arossa
+    min 114 (2T 74) local     try          Roque Carranza
+    min 114 (2T 74) local     conversion   Roque Carranza
+  marcador  · eventos 31-24 · guardado 31-24
+  tries     · 4-4 (guardado —-—)
+  arbitro   · LEANDRO LUCHETTI (guardado: —)
+  guardado  · 23 local · 23 visitante · 19 eventos
+
+santa-rosa-r-c-c-intermedia vs alta-gracia-r-c-intermedia · fbe60cbb · tarjeta 295689  ·  3f05f191-336d-4a6c-8b1b-37c91250a19c
+  local     · santa-rosa-r-c-c-intermedia · 23 jugadores · 0 con ficha fijada
+  visitante · alta-gracia-r-c-intermedia · 22 jugadores · 0 con ficha fijada
+  eventos   · 28
+    min  5 (1T 5) visitante try          Francisco Serio
+    min  5 (1T 5) visitante conversion   Uriel Capdevila Leunda
+    min  8 (1T 8) visitante try          Mariano Jose Campagnano
+    min 10 (1T 10) visitante try          Francisco Serio
+    min 10 (1T 10) visitante conversion   Uriel Capdevila Leunda
+    min 20 (1T 20) local     substitution Alejandro Manuel Andrés
+    min 20 (1T 20) local     substitution Mariano Bearzotti
+    min 28 (1T 28) local     card_yellow  Santiago Leiva
+    min 30 (1T 30) visitante injury       Mateo Besana Volando
+    min 30 (1T 30) visitante substitution Mateo Besana Volando
+    min 41 (2T 1) local     substitution Alexi Nicolas Ramírez
+    min 43 (2T 3) local     substitution Santiago Leiva
+    min 45 (2T 5) visitante try          Renzo Ariel Lanata
+    min 45 (2T 5) visitante conversion   Uriel Capdevila Leunda
+    min 45 (2T 5) visitante substitution Andres Oliva Martinez
+    min 45 (2T 5) visitante substitution Juan Cruz Pitt Velez
+    min 45 (2T 5) visitante injury       Juan Cruz Pitt Velez
+    min 50 (2T 10) local     try          Ezequiel Ramirez
+    min 51 (2T 11) local     conversion   Rodrigo Martinez
+    min 54 (2T 14) visitante substitution Juan Cruz Pitt Velez
+    min 55 (2T 15) visitante card_yellow  Francisco Serio
+    min 56 (2T 16) visitante try          Mariano Campagnano
+    min 56 (2T 16) visitante conversion   Uriel Capdevila Leunda
+    min 58 (2T 18) visitante try          Franco Gorostegui
+    min 58 (2T 18) visitante conversion   Uriel Capdevila Leunda
+    min 68 (2T 28) visitante try          Mariano Jose Campagnano
+    min 75 (2T 35) visitante try          Juan Pablo Benjamin Santamaria
+    min 77 (2T 37) visitante try          Maximiliano Passera
+  marcador  · eventos 7-55 · guardado 7-55
+  tries     · 1-9 (guardado —-—)
+  arbitro   · DANIEL ALEJANDRO FUNES (guardado: —)
+  guardado  · 23 local · 22 visitante · 28 eventos
+
+rio-tercero-r-c-intermedia vs baguales-r-c-intermedia · fbe60cbb · tarjeta 295688  ·  2220148f-7ef9-42a8-9daa-ad4eac4881f4
+  local     · rio-tercero-r-c-intermedia · 19 jugadores · 0 con ficha fijada
+  visitante · baguales-r-c-intermedia · 23 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min  3 (1T 3) visitante try          Guillermo Luna
+    min  8 (1T 8) visitante penalty_goal Valentin Brunelli
+    min  8 (1T 8) visitante substitution Braian Emiliano Arguello
+    min 17 (1T 17) visitante conversion   Valentin Brunelli
+    min 17 (1T 17) visitante try          Emanuel Sebastian Bustos
+    min 23 (1T 23) visitante try          Ian Uriel Galeano
+    min 23 (1T 23) visitante conversion   Valentin Brunelli
+    min 28 (1T 28) visitante try          Alex Matrone
+    min 34 (1T 34) visitante try          Emanuel Sebastian Bustos
+    min 35 (1T 35) visitante conversion   Valentin Brunelli
+    min 36 (1T 36) visitante try          Ian Uriel Galeano
+    min 36 (1T 36) visitante conversion   Valentin Brunelli
+    min 42 (2T 2) visitante try          Ian Uriel Galeano
+    min 43 (2T 3) visitante conversion   Valentin Brunelli
+    min 50 (2T 10) visitante conversion   Valentin Brunelli
+    min 50 (2T 10) visitante substitution Juan Perachia
+    min 50 (2T 10) visitante substitution Guillermo Nicolas Medina Elliot
+    min 50 (2T 10) visitante try          Alan Ezequiel Farias
+    min 55 (2T 15) visitante try          Ignacio Amaranto
+    min 55 (2T 15) visitante conversion   Valentin Brunelli
+    min 63 (2T 23) visitante try          Valentin Sartori
+    min 63 (2T 23) visitante conversion   Valentin Brunelli
+    min 70 (2T 30) local     try          Francisco Velez
+    min 70 (2T 30) visitante try          Ignacio Amaranto
+    min 70 (2T 30) visitante conversion   Valentin Brunelli
+    min 72 (2T 32) visitante try          Ian Uriel Galeano
+    min 76 (2T 36) visitante conversion   Valentin Brunelli
+  marcador  · eventos 5-83 · guardado 5-83
+  tries     · 1-12 (guardado —-—)
+  arbitro   · CARLOS RAFAEL HERNANDEZ (guardado: —)
+  guardado  · 19 local · 23 visitante · 27 eventos
+
+san-francisco-r-c-intermedia vs cordoba-rugby-club-intermedia · fbe60cbb · tarjeta 295687  ·  42334154-fd30-443f-9414-8f982ee76532
+  local     · san-francisco-r-c-intermedia · 21 jugadores · 0 con ficha fijada
+  visitante · cordoba-rugby-club-intermedia · 23 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min  8 (1T 8) local     try          Lucas Vilosio
+    min  9 (1T 9) local     conversion   Juan Pablo Blasi
+    min 12 (1T 12) local     try          Lucas Gutierrez
+    min 20 (1T 20) visitante try          Juan Pablo Ramos
+    min 33 (1T 33) visitante try          Mauricio Cravero
+    min 33 (1T 33) visitante conversion   Lucio Tessadri
+    min 37 (1T 37) local     substitution Andres Grimaldi
+    min 37 (1T 37) local     penalty_goal Juan Pablo Blasi
+    min 40 (1T 40) visitante try          Juan Pablo Ramos
+    min 40 (1T 40) visitante conversion   Lucio Tessadri
+    min 41 (2T 1) local     substitution Lucas Vilosio
+    min 41 (2T 1) local     substitution Santiago Gabriel Busso
+    min 45 (2T 5) local     substitution Lucas Gutierrez
+    min 48 (2T 8) visitante substitution Camilo Augusto Matschke Dimol
+    min 48 (2T 8) visitante substitution Juan Pablo Ramos
+    min 48 (2T 8) visitante card_red     Gonzalo Orozco
+    min 51 (2T 11) local     substitution Stefano Silvestrelli
+    min 51 (2T 11) local     substitution Salvador Androetto
+    min 52 (2T 12) visitante substitution Daniel Presa
+    min 57 (2T 17) visitante try          Joel Agustín Fajardo
+    min 57 (2T 17) visitante conversion   Lucio Tessadri
+    min 61 (2T 21) visitante substitution Hugo Eduardo Salgado
+    min 61 (2T 21) visitante substitution Mauricio Cravero
+    min 63 (2T 23) visitante try          Javier Sebastian Colazo
+    min 63 (2T 23) visitante conversion   Lucio Tessadri
+  marcador  · eventos 15-33 · guardado 15-33
+  tries     · 2-5 (guardado —-—)
+  arbitro   · SERGIO MALDONADO (guardado: —)
+  guardado  · 21 local · 23 visitante · 25 eventos
+
+aero-club-rio-iv-intermedia vs cordoba-rugby-club-intermedia · fbe60cbb · tarjeta 314186  ·  87910ff8-8033-415a-b493-df3967736bb0
+  local     · aero-club-rio-iv-intermedia · 21 jugadores · 0 con ficha fijada
+  visitante · cordoba-rugby-club-intermedia · 23 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min  4 (1T 4) local     penalty_goal Francisco Castro
+    min 20 (1T 20) local     penalty_goal Francisco Castro
+    min 22 (1T 22) visitante try          Aldo Comba
+    min 30 (1T 30) visitante substitution Francisco Gabriel Cavaglia
+    min 39 (1T 39) visitante try          Tiziano Pigliacampo
+    min 40 (1T 40) visitante conversion   Lucio Tessadri
+    min 41 (2T 1) local     substitution Santiago Villarreal
+    min 41 (2T 1) local     substitution Maximiliano Torres
+    min 42 (2T 2) visitante conversion   Lucio Tessadri
+    min 42 (2T 2) visitante try          Juan Pablo Ramos
+    min 50 (2T 10) visitante substitution Juan Cruz Silva
+    min 50 (2T 10) visitante substitution Aldo Comba
+    min 50 (2T 10) visitante substitution Valentin Rodriguez
+    min 51 (2T 11) local     substitution Benicio Lanzardo
+    min 51 (2T 11) local     substitution Joaquín Andres Gigli Farragut
+    min 55 (2T 15) visitante try          Juan Pablo Ramos
+    min 56 (2T 16) visitante conversion   Lucio Tessadri
+    min 70 (2T 30) visitante try          Tiziano Pigliacampo
+    min 71 (2T 31) visitante conversion   Lucio Tessadri
+    min 75 (2T 35) visitante card_yellow  Javier Sebastian Colazo
+  marcador  · eventos 6-33 · guardado 6-33
+  tries     · 0-5 (guardado —-—)
+  arbitro   · AGUSTÍN MARÍA BAECK (guardado: —)
+  guardado  · 21 local · 23 visitante · 20 eventos
+
+san-francisco-r-c-intermedia vs baguales-r-c-intermedia · fbe60cbb · tarjeta 314185  ·  c82808aa-321c-44f3-a06b-1a6383874352
+  local     · san-francisco-r-c-intermedia · 23 jugadores · 0 con ficha fijada
+  visitante · baguales-r-c-intermedia · 23 jugadores · 0 con ficha fijada
+  eventos   · 23
+    min  9 (1T 9) visitante try          Facundo Agustin Acuña
+    min 14 (1T 14) visitante try          Lautaro Fernandez
+    min 14 (1T 14) visitante conversion   Valentin Brunelli
+    min 22 (1T 22) visitante try          Lucio Alvarenga
+    min 23 (1T 23) local     card_yellow  Salvador Androetto
+    min 23 (1T 23) visitante conversion   Valentin Brunelli
+    min 30 (1T 30) local     injury       Santiago Vottero
+    min 33 (1T 33) visitante try          Ignacio Amaranto
+    min 39 (1T 39) visitante card_yellow  Felipe Martinez
+    min 40 (1T 40) local     try          Lucas Aiassa
+    min 46 (2T 6) local     try          Tomás Moreno
+    min 46 (2T 6) local     conversion   Juan Pablo Blasi
+    min 49 (2T 9) visitante penalty_goal Valentin Brunelli
+    min 50 (2T 10) visitante try          Juan Cruz Salas
+    min 51 (2T 11) visitante conversion   Valentin Brunelli
+    min 61 (2T 21) visitante try          Juan Emmanuel Roldan
+    min 65 (2T 25) local     try          Lucas Aiassa
+    min 75 (2T 35) local     try          José Ignacio Martinez Diaz
+    min 75 (2T 35) local     card_yellow  Augusto Levrino
+    min 75 (2T 35) local     conversion   Juan Pablo Blasi
+    min 79 (2T 39) visitante try          Felipe Martinez
+    min 79 (2T 39) visitante conversion   Juan Ignacio Godoy
+    min 80 (2T 40) visitante try          Lucio Alvarenga
+  marcador  · eventos 24-51 · guardado 24-51
+  tries     · 4-8 (guardado —-—)
+  arbitro   · FLORENCIA LEDESMA (guardado: —)
+  guardado  · 23 local · 23 visitante · 23 eventos
+
+rio-tercero-r-c-intermedia vs alta-gracia-r-c-intermedia · fbe60cbb · tarjeta 314184  ·  f7bca266-7359-490d-8ebd-a3d6ac42dd17
+  local     · rio-tercero-r-c-intermedia · 19 jugadores · 0 con ficha fijada
+  visitante · alta-gracia-r-c-intermedia · 23 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min 27 (1T 27) local     penalty_goal Tomas Audagna
+    min 31 (1T 31) visitante try          Mariano Campagnano
+    min 40 (1T 40) visitante penalty_try  
+    min 45 (2T 5) local     card_yellow  Rodrigo Cabrera
+    min 46 (2T 6) visitante substitution Alejo Prandini
+    min 49 (2T 9) visitante substitution Andres Oliva Martinez
+    min 52 (2T 12) visitante try          Enzo Joaquin Duretti
+    min 52 (2T 12) visitante conversion   Tiziano Donato Beneitez
+    min 52 (2T 12) visitante substitution Gino Luca Genari
+    min 52 (2T 12) visitante substitution Mariano Jose Campagnano
+    min 58 (2T 18) visitante try          Tiziano Donato Beneitez
+    min 58 (2T 18) visitante conversion   Mariano Campagnano
+    min 60 (2T 20) visitante substitution Elias Alejandro Gigena Lebovici
+    min 60 (2T 20) visitante substitution Tiziano Donato Beneitez
+    min 60 (2T 20) visitante substitution Mateo Besana Volando
+    min 65 (2T 25) visitante try          Jorge Ezequiel Gomez
+    min 65 (2T 25) visitante conversion   Mariano Campagnano
+    min 69 (2T 29) local     card_yellow  Tomas Montoya
+    min 70 (2T 30) visitante try          Tiziano Donato Beneitez
+    min 74 (2T 34) visitante card_yellow  Juan Cruz Pitt Velez
+  marcador  · eventos 3-38 · guardado 3-38
+  tries     · 0-6 (guardado —-—)
+  arbitro   · DANIEL ALEJANDRO FUNES (guardado: —)
+  guardado  · 19 local · 23 visitante · 20 eventos
+
+alta-gracia-r-c-intermedia vs san-francisco-r-c-intermedia · fbe60cbb · tarjeta 314449  ·  4d17dd8d-6d46-4cc7-92d2-1165d95a1f77
+  local     · alta-gracia-r-c-intermedia · 23 jugadores · 0 con ficha fijada
+  visitante · san-francisco-r-c-intermedia · 14 jugadores · 0 con ficha fijada
+  eventos   · 10
+    min  3 (1T 3) local     try          Enzo Joaquin Duretti
+    min  3 (1T 3) local     conversion   Uriel Capdevila Leunda
+    min 20 (1T 20) visitante try          Juan Pablo Blasi
+    min 47 (2T 7) local     substitution Mateo Pitt Velez
+    min 48 (2T 8) visitante try          Gino Gandolfo
+    min 48 (2T 8) visitante substitution Ramiro Alejo Diale
+    min 49 (2T 9) visitante conversion   Juan Pablo Blasi
+    min 54 (2T 14) visitante substitution Lucas Gutierrez
+    min 58 (2T 18) local     try          Renzo Ariel Lanata
+    min 58 (2T 18) local     conversion   Uriel Capdevila Leunda
+  marcador  · eventos 14-12 · guardado 14-12
+  tries     · 2-2 (guardado —-—)
+  arbitro   · DANIEL ALEJANDRO FUNES (guardado: —)
+  guardado  · 23 local · 14 visitante · 10 eventos
+
+rio-tercero-r-c-intermedia vs c-s-la-carlota-intermedia · fbe60cbb · tarjeta 319778  ·  23d06f70-f48c-4abf-9d8f-0f9dee8f7536
+  local     · rio-tercero-r-c-intermedia · 16 jugadores · 0 con ficha fijada
+  visitante · c-s-la-carlota-intermedia · 23 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min  5 (1T 5) visitante try          Walter Rojo
+    min  6 (1T 6) visitante conversion   Joaquin Gomez
+    min 10 (1T 10) visitante try          Joaquin Gomez
+    min 10 (1T 10) visitante substitution Enzo Gabriel Zalazar
+    min 11 (1T 11) visitante conversion   Joaquin Gomez
+    min 19 (1T 19) visitante try          Pedro Sebastian Marquez
+    min 20 (1T 20) visitante conversion   Joaquin Gomez
+    min 26 (1T 26) local     substitution Rodrigo Cabrera
+    min 28 (1T 28) visitante try          Mateo Stefani
+    min 28 (1T 28) visitante conversion   Joaquin Gomez
+    min 48 (2T 8) local     try          Bautista Asieri
+    min 49 (2T 9) local     conversion   Leonardo Cantelli
+    min 55 (2T 15) visitante try          Roque Carranza
+    min 56 (2T 16) visitante conversion   Joaquin Gomez
+    min 72 (2T 32) visitante try          Joaquin Gomez
+    min 73 (2T 33) visitante conversion   Joaquin Gomez
+    min 80 (2T 40) visitante substitution Leonardo David Balderamos
+  marcador  · eventos 7-42 · guardado 7-42
+  tries     · 1-6 (guardado —-—)
+  arbitro   · JOSÉ OCTAVIANO BORQUEZ (guardado: —)
+  guardado  · 16 local · 23 visitante · 17 eventos
+
+cordoba-rugby-club-intermedia vs baguales-r-c-intermedia · fbe60cbb · tarjeta 319781  ·  5b171f80-d59d-4668-9f0f-46f98dcb1505
+  local     · cordoba-rugby-club-intermedia · 23 jugadores · 0 con ficha fijada
+  visitante · baguales-r-c-intermedia · 23 jugadores · 0 con ficha fijada
+  eventos   · 23
+    min 33 (1T 33) local     penalty_try  Lucio Tessadri
+    min 35 (1T 35) local     card_yellow  Rodrigo Agustin Diaz
+    min 40 (1T 40) visitante try          Juan Agustín Vicens
+    min 40 (1T 40) visitante conversion   Renzo Farrando
+    min 41 (2T 1) local     substitution Luis Alejandro Quinteros
+    min 41 (2T 1) visitante card_yellow  Guillermo Luna
+    min 41 (2T 1) visitante try          Alan Ezequiel Farias
+    min 41 (2T 1) visitante conversion   Renzo Farrando
+    min 41 (2T 1) visitante substitution Felipe Martinez
+    min 41 (2T 1) visitante substitution Gonzalo Britez
+    min 55 (2T 15) local     substitution Thomas Juarez
+    min 55 (2T 15) local     substitution Lucio Tessadri
+    min 55 (2T 15) local     substitution Mauricio Cravero
+    min 55 (2T 15) visitante try          Alan Ezequiel Farias
+    min 55 (2T 15) visitante conversion   Renzo Farrando
+    min 60 (2T 20) local     substitution Rodrigo Agustin Diaz
+    min 60 (2T 20) local     substitution Gonzalo Zalazar
+    min 60 (2T 20) local     substitution Gonzalo Zalazar
+    min 65 (2T 25) visitante card_yellow  Gonzalo Britez
+    min 69 (2T 29) local     try          Francisco Escalier
+    min 70 (2T 30) local     card_yellow  Daniel Presa
+    min 70 (2T 30) local     conversion   Nicolas Alfredo Palomeque
+    min 75 (2T 35) visitante card_yellow  Gonzalo Sebastian Ruiz Diaz
+  marcador  · eventos 14-21 · guardado 14-21
+  tries     · 2-3 (guardado —-—)
+  arbitro   · SANTIAGO GERONIMO LOZADA CHAVES (guardado: —)
+  guardado  · 23 local · 23 visitante · 23 eventos
+
+aero-club-rio-iv-intermedia vs alta-gracia-r-c-intermedia · fbe60cbb · tarjeta 319780  ·  54a29f66-512d-44de-9905-deb2334194e7
+  local     · aero-club-rio-iv-intermedia · 23 jugadores · 0 con ficha fijada
+  visitante · alta-gracia-r-c-intermedia · 22 jugadores · 0 con ficha fijada
+  eventos   · 26
+    min  2 (1T 2) local     penalty_goal Santino Martinez
+    min 15 (1T 15) local     try          Andres Wittouck
+    min 15 (1T 15) local     conversion   Santino Martinez
+    min 20 (1T 20) visitante try          Enzo Joaquin Duretti
+    min 28 (1T 28) visitante try          Andres Oliva Martinez
+    min 38 (1T 38) local     penalty_goal Santino Martinez
+    min 38 (1T 38) local     substitution Carlos Gustavo Cengia
+    min 40 (1T 40) visitante try          Lucas Marmol
+    min 40 (1T 40) visitante conversion   Joaquín Francisco Flamand
+    min 41 (2T 1) local     substitution Diego Massa
+    min 42 (2T 2) visitante try          Lucas Marmol
+    min 42 (2T 2) visitante conversion   Joaquín Francisco Flamand
+    min 43 (2T 3) local     try          Nahuel Horacio Leal
+    min 43 (2T 3) local     conversion   Santino Martinez
+    min 48 (2T 8) visitante substitution Lucas Marmol
+    min 50 (2T 10) local     substitution Daniel Oscar Garrido
+    min 50 (2T 10) local     substitution Lautaro Quiros
+    min 52 (2T 12) visitante substitution Juan Baez Albe
+    min 53 (2T 13) local     substitution Pedro Francisco Berrotaran Robinet
+    min 53 (2T 13) local     substitution Francisco Lujan
+    min 55 (2T 15) visitante penalty_goal Joaquín Francisco Flamand
+    min 60 (2T 20) local     try          Andres Wittouck
+    min 60 (2T 20) local     conversion   Santino Martinez
+    min 75 (2T 35) visitante card_yellow  Mateo Pitt Velez
+    min 79 (2T 39) local     try          Andres Wittouck
+    min 79 (2T 39) local     conversion   Santino Martinez
+  marcador  · eventos 34-27 · guardado 34-27
+  tries     · 4-4 (guardado —-—)
+  arbitro   · LAUTARO JOAQUIN QUIROGA CAFURE (guardado: —)
+  guardado  · 23 local · 22 visitante · 26 eventos
+
+san-francisco-r-c-intermedia vs los-cuervos-r-c-intermedia · fbe60cbb · tarjeta 319779  ·  6178926c-525d-4a59-8b59-cc9eb4e3d7b2
+  local     · san-francisco-r-c-intermedia · 20 jugadores · 0 con ficha fijada
+  visitante · los-cuervos-r-c-intermedia · 23 jugadores · 0 con ficha fijada
+  eventos   · 23
+    min 12 (1T 12) visitante try          Felipe Fea
+    min 12 (1T 12) visitante conversion   Juan Ignacio Laffatigue
+    min 21 (1T 21) local     try          Kevin Trucco
+    min 23 (1T 23) local     penalty_goal Juan Pablo Blasi
+    min 30 (1T 30) visitante try          Gonzalo Ibañez
+    min 35 (1T 35) local     penalty_goal Juan Pablo Blasi
+    min 35 (1T 35) visitante try          Tiziano Dettoni Ganuza
+    min 41 (1T 41) visitante try          Diogo Touz
+    min 41 (1T 41) visitante conversion   Juan Ignacio Laffatigue
+    min 42 (2T 2) local     substitution Julián Ernesto Riva
+    min 42 (2T 2) local     substitution Marcos Reynoso Bonino
+    min 42 (2T 2) local     substitution Facundo Garcia
+    min 42 (2T 2) local     substitution Gianfranco Silvestrelli
+    min 47 (2T 7) visitante try          Diogo Touz
+    min 47 (2T 7) visitante conversion   Juan Ignacio Laffatigue
+    min 50 (2T 10) visitante substitution Hernan David Martinez
+    min 54 (2T 14) local     card_yellow  Santiago Diale
+    min 60 (2T 20) visitante substitution Tiziano Dettoni Ganuza
+    min 72 (2T 32) visitante substitution Felipe Fea
+    min 73 (2T 33) visitante try          Diogo Touz
+    min 77 (2T 37) visitante card_yellow  David Di Tommaso
+    min 78 (2T 38) local     try          Augusto Levrino
+    min 80 (2T 40) visitante substitution Nelson Lambertini
+  marcador  · eventos 16-36 · guardado 16-36
+  tries     · 2-6 (guardado —-—)
+  arbitro   · GABRIEL HERNÁN TIRANTE (guardado: —)
+  guardado  · 20 local · 23 visitante · 23 eventos
+
+santa-rosa-r-c-c-intermedia vs rio-tercero-r-c-intermedia · fbe60cbb · tarjeta 320843  ·  809ee770-4458-43e1-b985-624fbc07e34c
+  local     · santa-rosa-r-c-c-intermedia · 23 jugadores · 0 con ficha fijada
+  visitante · rio-tercero-r-c-intermedia · 18 jugadores · 0 con ficha fijada
+  eventos   · 9
+    min 12 (1T 12) visitante try          Bautista Asieri
+    min 12 (1T 12) visitante conversion   Bruno Ochoa
+    min 29 (1T 29) local     try          Ciro Lautaro Zamora Gomez
+    min 91 (2T 51) local     card_yellow  Mariano Cena
+    min 93 (2T 53) visitante card_yellow  Ennio Dessi
+    min 94 (2T 54) visitante card_yellow  Mateo Piacentini
+    min 106 (2T 66) local     try          Gonzalo Gorosito
+    min 111 (2T 71) visitante try          Gabriel Quintero
+    min 112 (2T 72) visitante conversion   Bruno Ochoa
+  marcador  · eventos 10-14 · guardado 10-14
+  tries     · 2-2 (guardado —-—)
+  arbitro   · CARLOS RAFAEL HERNANDEZ (guardado: —)
+  guardado  · 23 local · 18 visitante · 9 eventos
+
+alta-gracia-r-c-intermedia vs cordoba-rugby-club-intermedia · fbe60cbb · tarjeta 320839  ·  ad505530-2620-45fc-a99f-29281563f25c
+  local     · alta-gracia-r-c-intermedia · 23 jugadores · 0 con ficha fijada
+  visitante · cordoba-rugby-club-intermedia · 23 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min  1 (1T 1) visitante try          Francisco Ezequiel Mori
+    min  7 (1T 7) visitante try          Aldo Comba
+    min 12 (1T 12) local     substitution Alejo Prandini
+    min 22 (1T 22) local     substitution Juan Cruz Pitt Velez
+    min 29 (1T 29) local     try          Ezequiel Lopez
+    min 29 (1T 29) local     conversion   Tiziano Donato Beneitez
+    min 50 (2T 10) local     card_yellow  Juan Cruz Pitt Velez
+    min 52 (2T 12) visitante try          Mauricio Cravero
+    min 53 (2T 13) visitante conversion   Nicolas Alfredo Palomeque
+    min 59 (2T 19) local     card_yellow  Mariano Campagnano
+    min 59 (2T 19) local     substitution Lucas Marmol
+    min 60 (2T 20) visitante try          Lukas Vilmes
+    min 62 (2T 22) visitante card_yellow  Francisco Ezequiel Mori
+    min 63 (2T 23) visitante try          Juan Pablo Ramos
+    min 65 (2T 25) visitante try          Juan Pablo Ramos
+    min 66 (2T 26) visitante conversion   Nicolas Alfredo Palomeque
+    min 71 (2T 31) local     try          Nahuel German Oviedo Carmona
+    min 71 (2T 31) local     conversion   Tiziano Donato Beneitez
+    min 79 (2T 39) local     try          Tiziano Donato Beneitez
+    min 80 (2T 40) local     substitution Gino Luca Genari
+  marcador  · eventos 19-34 · guardado 19-34
+  tries     · 3-6 (guardado —-—)
+  arbitro   · SANTIAGO GERONIMO LOZADA CHAVES (guardado: —)
+  guardado  · 23 local · 23 visitante · 20 eventos
+
+san-francisco-r-c-intermedia vs santa-rosa-r-c-c-intermedia · fbe60cbb · tarjeta 322745  ·  430d275b-7336-481d-bfb4-f4970add49fd
+  local     · san-francisco-r-c-intermedia · 23 jugadores · 0 con ficha fijada
+  visitante · santa-rosa-r-c-c-intermedia · 23 jugadores · 0 con ficha fijada
+  eventos   · 21
+    min  1 (1T 1) local     try          Gianfranco Silvestrelli
+    min  2 (1T 2) local     conversion   Santiago Diale
+    min  7 (1T 7) visitante try          Alejandro Nicolás Nieva Chaile
+    min  7 (1T 7) visitante conversion   Alejandro Nicolás Nieva Chaile
+    min  8 (1T 8) local     try          Stefano Silvestrelli
+    min  9 (1T 9) local     conversion   Santiago Diale
+    min 11 (1T 11) local     try          Santino Salcedo
+    min 11 (1T 11) local     conversion   Santiago Diale
+    min 16 (1T 16) local     try          Julián Ernesto Riva
+    min 17 (1T 17) local     conversion   Santiago Diale
+    min 22 (1T 22) visitante try          Alejandro Nicolás Nieva Chaile
+    min 44 (2T 4) visitante try          Alejandro Nicolás Nieva Chaile
+    min 48 (2T 8) local     try          Stefano Silvestrelli
+    min 48 (2T 8) local     conversion   Santiago Diale
+    min 51 (2T 11) visitante try          Gonzalo Gorosito
+    min 55 (2T 15) visitante try          Gonzalo Gorosito
+    min 58 (2T 18) local     try          Agustin Emmanuel Areco Quinodoz
+    min 58 (2T 18) local     conversion   Juan Pablo Blasi
+    min 62 (2T 22) local     try          Santiago Diale
+    min 62 (2T 22) local     conversion   Juan Pablo Blasi
+    min 65 (2T 25) visitante try          Carlos Rafael Vasquez
+  marcador  · eventos 49-32 · guardado 49-32
+  tries     · 7-6 (guardado —-—)
+  arbitro   · SERGIO MALDONADO (guardado: —)
+  guardado  · 23 local · 23 visitante · 21 eventos
+
+aero-club-rio-iv-intermedia vs c-s-la-carlota-intermedia · fbe60cbb · tarjeta 322746  ·  dbfe2b05-a87e-4095-be32-4021bd4392ef
+  local     · aero-club-rio-iv-intermedia · 21 jugadores · 0 con ficha fijada
+  visitante · c-s-la-carlota-intermedia · 23 jugadores · 0 con ficha fijada
+  eventos   · 23
+    min  4 (1T 4) visitante try          Nicolas Mantegazza
+    min  5 (1T 5) visitante conversion   Leonardo David Balderamos
+    min 19 (1T 19) visitante substitution Mateo Boero
+    min 23 (1T 23) visitante try          Facundo Guzman
+    min 26 (1T 26) visitante try          Leonardo David Balderamos
+    min 27 (1T 27) visitante conversion   Leonardo David Balderamos
+    min 30 (1T 30) local     substitution Cristian Andrés Solanille Flesia
+    min 32 (1T 32) visitante try          Enzo Gabriel Zalazar
+    min 38 (1T 38) local     card_yellow  Nicolas Catania
+    min 38 (1T 38) visitante penalty_goal Leonardo David Balderamos
+    min 41 (2T 1) local     substitution Brian Nahuel Sebastián Farini
+    min 41 (2T 1) local     substitution Mauricio Joel Ordoñez
+    min 41 (2T 1) local     substitution Carlos Gustavo Cengia
+    min 44 (2T 4) visitante try          Nicolas Mantegazza
+    min 46 (2T 6) local     injury       Lautaro Quiros
+    min 46 (2T 6) visitante substitution Claudio Ezequiel Mansilla
+    min 51 (2T 11) visitante substitution Tobias Castro
+    min 56 (2T 16) visitante substitution Martin Benausse
+    min 57 (2T 17) visitante substitution Ismael Mora
+    min 57 (2T 17) visitante substitution Matías Campanile
+    min 59 (2T 19) visitante substitution Nicolas Mantegazza
+    min 59 (2T 19) visitante substitution Martín Octavio Barrea
+    min 64 (2T 24) local     substitution Diego Massa
+  marcador  · eventos 0-32 · guardado 0-32
+  tries     · 0-5 (guardado —-—)
+  arbitro   · JOSÉ OCTAVIANO BORQUEZ (guardado: —)
+  guardado  · 21 local · 23 visitante · 23 eventos
+
+los-cuervos-r-c-intermedia vs baguales-r-c-intermedia · fbe60cbb · tarjeta 324489  ·  34cf833e-3243-4396-a232-2fd30660df95
+  local     · los-cuervos-r-c-intermedia · 23 jugadores · 0 con ficha fijada
+  visitante · baguales-r-c-intermedia · 23 jugadores · 0 con ficha fijada
+  eventos   · 34
+    min  2 (1T 2) visitante try          Valentín Orestes Diaz
+    min  3 (1T 3) visitante penalty_goal Valentin Brunelli
+    min  8 (1T 8) visitante penalty_goal Valentin Brunelli
+    min 16 (1T 16) local     penalty_goal Juan Ignacio Laffatigue
+    min 21 (1T 21) visitante substitution Valentín Orestes Diaz
+    min 21 (1T 21) visitante try          Guillermo Ariel Salgan
+    min 27 (1T 27) local     card_yellow  Gonzalo Ibañez
+    min 27 (1T 27) local     try          Maximiliano Oscar Cejas
+    min 27 (1T 27) local     conversion   Juan Ignacio Laffatigue
+    min 41 (2T 1) visitante substitution Victor Grabovi
+    min 42 (2T 2) visitante try          Guillermo Ariel Salgan
+    min 44 (2T 4) local     card_yellow  Lisandro Ismael Quevedo Abad
+    min 45 (2T 5) local     substitution Mateo Guzman
+    min 45 (2T 5) local     substitution Gonzalo Ibañez
+    min 46 (2T 6) visitante try          Pablo Vozzi
+    min 50 (2T 10) local     try          Lucio Martinez
+    min 52 (2T 12) visitante conversion   Valentin Brunelli
+    min 53 (2T 13) visitante substitution Guillermo Luna
+    min 54 (2T 14) visitante try          Alan Ezequiel Farias
+    min 56 (2T 16) local     substitution Alvaro Demetrio Touz
+    min 56 (2T 16) visitante substitution Lucas Emiliano Roldan
+    min 57 (2T 17) visitante substitution Alan Ezequiel Farias
+    min 60 (2T 20) local     substitution Maximiliano Aparicio Borda
+    min 63 (2T 23) visitante try          Bautista Cordero Goranescu
+    min 64 (2T 24) visitante conversion   Valentin Brunelli
+    min 70 (2T 30) local     try          Maximiliano Oscar Cejas
+    min 70 (2T 30) visitante substitution Pablo Vozzi
+    min 70 (2T 30) visitante substitution Lautaro Amaranto
+    min 70 (2T 30) visitante substitution Luciano Michel Vega
+    min 75 (2T 35) visitante try          Walter Maradey
+    min 75 (2T 35) visitante conversion   Valentin Brunelli
+    min 80 (2T 40) local     substitution Tomas Boiero
+    min 80 (2T 40) local     substitution Nelson Lambertini
+    min 80 (2T 40) local     substitution Milton Terragnolo
+  marcador  · eventos 20-47 · guardado 20-47
+  tries     · 3-7 (guardado —-—)
+  arbitro   · GABRIEL HERNÁN TIRANTE (guardado: —)
+  guardado  · 23 local · 23 visitante · 34 eventos
+
+aero-club-rio-iv-intermedia vs rio-tercero-r-c-intermedia · fbe60cbb · tarjeta 325070  ·  d8a438aa-a312-494a-9189-cf9b0e2c40f1
+  local     · aero-club-rio-iv-intermedia · 19 jugadores · 0 con ficha fijada
+  visitante · rio-tercero-r-c-intermedia · 13 jugadores · 0 con ficha fijada
+  eventos   · 19
+    min 14 (1T 14) visitante try          Tomás Benjamin Guerrero
+    min 14 (1T 14) visitante conversion   Gonzalo Martin Molina
+    min 16 (1T 16) local     try          Francisco Castro
+    min 16 (1T 16) local     conversion   Francisco Castro
+    min 19 (1T 19) visitante try          Gonzalo Martin Molina
+    min 19 (1T 19) visitante conversion   Santino Hergert
+    min 22 (1T 22) visitante try          Ennio Dessi
+    min 22 (1T 22) visitante conversion   Gonzalo Martin Molina
+    min 25 (1T 25) local     try          Francisco Castro
+    min 25 (1T 25) local     conversion   Francisco Castro
+    min 29 (1T 29) visitante try          Alexis Ezequiel Arroyo Fachini
+    min 42 (2T 2) local     try          Erick Miranda
+    min 44 (2T 4) visitante penalty_goal Jeremías Aguilera
+    min 46 (2T 6) visitante injury       Bruno Ochoa
+    min 49 (2T 9) local     try          Pedro Francisco Berrotaran Robinet
+    min 49 (2T 9) local     conversion   Daniel Oscar Garrido
+    min 58 (2T 18) visitante card_yellow  Mateo Mengo
+    min 59 (2T 19) local     try          Bruno Andrada
+    min 64 (2T 24) local     try          Nicolas Catania
+  marcador  · eventos 36-29 · guardado 36-29
+  tries     · 6-4 (guardado —-—)
+  arbitro   · SERGIO ZBURA (guardado: —)
+  guardado  · 19 local · 13 visitante · 19 eventos
+
+alta-gracia-r-c-intermedia vs los-cuervos-r-c-intermedia · fbe60cbb · tarjeta 325076  ·  a15ef5f4-53b7-44b9-bf6b-dd3d1b67d786
+  local     · alta-gracia-r-c-intermedia · 23 jugadores · 0 con ficha fijada
+  visitante · los-cuervos-r-c-intermedia · 23 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min  8 (1T 8) local     try          Maximiliano Passera
+    min 13 (1T 13) visitante try          Maico Viale
+    min 13 (1T 13) visitante conversion   Juan Ignacio Laffatigue
+    min 14 (1T 14) visitante substitution Milton Terragnolo
+    min 15 (1T 15) local     try          Mariano Jose Campagnano
+    min 23 (1T 23) local     try          Fabrizio Ernesto D Angelo
+    min 30 (1T 30) visitante substitution Lisandro Ismael Quevedo Abad
+    min 31 (1T 31) local     try          Elias Alejandro Gigena Lebovici
+    min 31 (1T 31) local     conversion   Elias Alejandro Gigena Lebovici
+    min 35 (1T 35) visitante substitution Isaias Martín Guzman
+    min 37 (1T 37) local     try          Elias Alejandro Gigena Lebovici
+    min 47 (2T 7) visitante card_yellow  Hector Rolando Garcia
+    min 48 (2T 8) local     substitution Ezequiel Lopez
+    min 49 (2T 9) local     injury       Andres Oliva Martinez
+    min 49 (2T 9) local     substitution Andres Oliva Martinez
+    min 49 (2T 9) visitante try          Isaias Martín Guzman
+    min 49 (2T 9) visitante conversion   Juan Ignacio Laffatigue
+    min 49 (2T 9) visitante penalty_try  
+    min 49 (2T 9) visitante try          Maico Viale
+    min 50 (2T 10) local     substitution Juan Cruz Pitt Velez
+    min 50 (2T 10) visitante substitution Fede Zanetta
+    min 52 (2T 12) local     substitution Agustín Homero Cañas
+    min 52 (2T 12) local     substitution Fabrizio Ernesto D Angelo
+    min 58 (2T 18) visitante substitution Hector Rolando Garcia
+    min 61 (2T 21) local     card_yellow  Daniel Santiago Bazán
+    min 68 (2T 28) visitante substitution Geronimo Catinari
+    min 70 (2T 30) visitante substitution Gonzalo Ibañez
+  marcador  · eventos 27-26 · guardado 27-26
+  tries     · 5-4 (guardado —-—)
+  arbitro   · ARTURO MARTINEZ (guardado: —)
+  guardado  · 23 local · 23 visitante · 27 eventos
+
+baguales-r-c-intermedia vs c-s-la-carlota-intermedia · fbe60cbb · tarjeta 325074  ·  fee15091-bbc9-41c7-a221-b09fab9d72d8
+  local     · baguales-r-c-intermedia · 23 jugadores · 0 con ficha fijada
+  visitante · c-s-la-carlota-intermedia · 23 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min  3 (1T 3) local     penalty_goal Victor Grabovi
+    min 10 (1T 10) visitante try          Roque Carranza
+    min 10 (1T 10) visitante conversion   Roque Carranza
+    min 20 (1T 20) local     try          Victor Grabovi
+    min 20 (1T 20) local     conversion   Victor Grabovi
+    min 30 (1T 30) visitante try          Roque Carranza
+    min 33 (1T 33) local     try          Victor Grabovi
+    min 33 (1T 33) local     conversion   Victor Grabovi
+    min 39 (1T 39) local     try          Victor Grabovi
+    min 39 (1T 39) local     conversion   Victor Grabovi
+    min 48 (2T 8) local     try          Victor Grabovi
+    min 48 (2T 8) local     conversion   Victor Grabovi
+    min 65 (2T 25) local     try          Victor Grabovi
+    min 65 (2T 25) local     conversion   Victor Grabovi
+    min 70 (2T 30) local     card_yellow  Valentin Brunelli
+    min 70 (2T 30) visitante try          Roque Carranza
+    min 78 (2T 38) local     try          Victor Grabovi
+    min 78 (2T 38) local     conversion   Victor Grabovi
+  marcador  · eventos 45-17 · guardado 45-17
+  tries     · 6-3 (guardado —-—)
+  arbitro   · LEANDRO LUCHETTI (guardado: —)
+  guardado  · 23 local · 23 visitante · 18 eventos
+
+cordoba-rugby-club-intermedia vs santa-rosa-r-c-c-intermedia · fbe60cbb · tarjeta 325073  ·  eb3d57e9-1b62-4ce9-afea-fa49ccec75a2
+  local     · cordoba-rugby-club-intermedia · 23 jugadores · 0 con ficha fijada
+  visitante · santa-rosa-r-c-c-intermedia · 23 jugadores · 0 con ficha fijada
+  eventos   · 16
+    min  3 (1T 3) local     try          Gonzalo Zalazar
+    min 10 (1T 10) local     try          Nicolas Alfredo Palomeque
+    min 26 (1T 26) local     try          Luciano Ibarra
+    min 26 (1T 26) local     conversion   Nicolas Villarreal
+    min 32 (1T 32) local     try          Lucio Tessadri
+    min 38 (1T 38) local     try          Nicolas Villarreal
+    min 81 (2T 41) local     substitution Francisco Escalier
+    min 81 (2T 41) local     substitution Hugo Eduardo Salgado
+    min 81 (2T 41) local     substitution Francisco Scarafia
+    min 82 (2T 42) visitante substitution Carlos Rafael Vasquez
+    min 82 (2T 42) visitante substitution Matías Benjamin Herrera
+    min 82 (2T 42) visitante substitution Mariano Cena
+    min 84 (2T 44) local     try          Nicolas Villarreal
+    min 96 (2T 56) local     try          Alejo Quiroga
+    min 101 (2T 61) local     try          Juan Pablo Ramos
+    min 115 (2T 75) local     try          Valentin Sosa
+  marcador  · eventos 47-0 · guardado 47-0
+  tries     · 9-0 (guardado —-—)
+  arbitro   · PABLO GERARDO RONCO (guardado: —)
+  guardado  · 23 local · 23 visitante · 16 eventos
+
+san-francisco-r-c-intermedia vs aero-club-rio-iv-intermedia · fbe60cbb · tarjeta 326124  ·  2114801e-99fe-4462-a190-80f77da10e66
+  local     · san-francisco-r-c-intermedia · 23 jugadores · 0 con ficha fijada
+  visitante · aero-club-rio-iv-intermedia · 23 jugadores · 0 con ficha fijada
+  eventos   · 15
+    min  4 (1T 4) local     penalty_goal Juan Pablo Blasi
+    min 11 (1T 11) local     try          Juan Ignacio Mina Rosso
+    min 23 (1T 23) local     try          Ramiro Alejo Diale
+    min 24 (1T 24) local     conversion   Juan Pablo Blasi
+    min 27 (1T 27) visitante try          Francisco Castro
+    min 33 (1T 33) local     try          Santino Salcedo
+    min 41 (2T 1) visitante substitution Joaquín Andres Gigli Farragut
+    min 44 (2T 4) local     try          Tiziano Pivetta
+    min 45 (2T 5) local     conversion   Juan Pablo Blasi
+    min 60 (2T 20) local     card_yellow  Mateo Crivello
+    min 62 (2T 22) visitante card_yellow  Brian Nahuel Sebastián Farini
+    min 69 (2T 29) local     try          Santino Salcedo
+    min 74 (2T 34) local     try          Gianfranco Silvestrelli
+    min 77 (2T 37) visitante try          Andres Wittouck
+    min 77 (2T 37) visitante conversion   Francisco Castro
+  marcador  · eventos 37-12 · guardado 37-12
+  tries     · 6-2 (guardado —-—)
+  arbitro   · SERGIO MALDONADO (guardado: —)
+  guardado  · 23 local · 23 visitante · 15 eventos
+
+rio-tercero-r-c-intermedia vs cordoba-rugby-club-intermedia · fbe60cbb · tarjeta 326122  ·  f72b6684-4b0e-45d4-b973-f0f2e7f46e66
+  local     · rio-tercero-r-c-intermedia · 23 jugadores · 0 con ficha fijada
+  visitante · cordoba-rugby-club-intermedia · 23 jugadores · 0 con ficha fijada
+  eventos   · 10
+    min  5 (1T 5) visitante try          Valentin Rodriguez
+    min 11 (1T 11) visitante injury       Rodrigo Agustin Diaz
+    min 21 (1T 21) visitante try          Juan Pablo Ramos
+    min 34 (1T 34) visitante try          Joel Agustín Fajardo
+    min 35 (1T 35) visitante conversion   Nicolas Alfredo Palomeque
+    min 56 (2T 16) visitante try          Valentin Rodriguez
+    min 56 (2T 16) visitante conversion   Lucio Tessadri
+    min 73 (2T 33) local     penalty_try  
+    min 79 (2T 39) local     card_red     Miqueas Rimoldi
+    min 79 (2T 39) visitante card_red     Luis Alejandro Quinteros
+  marcador  · eventos 7-24 · guardado 7-24
+  tries     · 1-4 (guardado —-—)
+  arbitro   · ERNESTO ELIAS BIONDI (guardado: —)
+  guardado  · 23 local · 23 visitante · 10 eventos
+
+los-cuervos-r-c-intermedia vs c-s-la-carlota-intermedia · fbe60cbb · tarjeta 326728  ·  e6be28b6-3f6f-47a6-8f77-83f82bb946e4
+  local     · los-cuervos-r-c-intermedia · 23 jugadores · 0 con ficha fijada
+  visitante · c-s-la-carlota-intermedia · 23 jugadores · 0 con ficha fijada
+  eventos   · 12
+    min  9 (1T 9) visitante try          Mateo Girodo
+    min  9 (1T 9) visitante conversion   Leonardo David Balderamos
+    min 22 (1T 22) visitante try          Alexis Ivan Olguin
+    min 22 (1T 22) visitante conversion   Mateo Girodo
+    min 32 (1T 32) local     try          Maximiliano Aparicio Borda
+    min 32 (1T 32) local     conversion   Juan Ignacio Laffatigue
+    min 33 (1T 33) local     card_yellow  Isaias Martín Guzman
+    min 47 (2T 7) local     penalty_try  
+    min 50 (2T 10) visitante penalty_goal Santino Augusto Pizarro
+    min 59 (2T 19) local     card_yellow  Juan Ignacio Laffatigue
+    min 73 (2T 33) local     try          David Di Tommaso
+    min 80 (2T 40) visitante penalty_goal Leonardo David Balderamos
+  marcador  · eventos 19-20 · guardado 19-20
+  tries     · 3-2 (guardado —-—)
+  arbitro   · CARLOS RAFAEL HERNANDEZ (guardado: —)
+  guardado  · 23 local · 23 visitante · 12 eventos
+
+listo · 37 partidos

@@ -399,13 +399,55 @@ export async function getRugbyPassMatchDetail(
  */
 const memoria = new Map<string, { vence: number; valor: unknown }>();
 
+/**
+ * Tope de entradas. Las claves llevan parametros que llegan de rutas anonimas
+ * (competicion, temporada, partido): sin tope, cada combinacion nueva queda
+ * hasta que alguien la vuelva a leer vencida, y eso puede no pasar nunca.
+ */
+const MEMORIA_MAX_ENTRADAS = 500;
+
+/**
+ * Pedidos en curso, por clave. Diez visitas que abren la misma pestana a la vez
+ * hacian diez barridos de ocho llamadas cada uno: ahora esperan el mismo.
+ */
+const enCurso = new Map<string, Promise<unknown>>();
+
+function guardarEnMemoria(clave: string, ttlMs: number, valor: unknown): void {
+    memoria.delete(clave);
+    memoria.set(clave, { vence: Date.now() + ttlMs, valor });
+    if (memoria.size <= MEMORIA_MAX_ENTRADAS) return;
+
+    // Primero lo vencido; si no alcanza, lo mas viejo (el Map conserva el orden
+    // de insercion, y guardar de nuevo una clave la manda al final).
+    const ahora = Date.now();
+    for (const [k, v] of memoria) {
+        if (v.vence <= ahora) memoria.delete(k);
+    }
+    while (memoria.size > MEMORIA_MAX_ENTRADAS) {
+        const primera = memoria.keys().next();
+        if (primera.done) break;
+        memoria.delete(primera.value);
+    }
+}
+
 async function conMemoria<T>(clave: string, ttlMs: number, cargar: () => Promise<T>): Promise<T> {
     const guardado = memoria.get(clave);
     if (guardado && guardado.vence > Date.now()) return guardado.valor as T;
 
-    const valor = await cargar();
-    memoria.set(clave, { vence: Date.now() + ttlMs, valor });
-    return valor;
+    const pendiente = enCurso.get(clave);
+    if (pendiente) return pendiente as Promise<T>;
+
+    const promesa = (async () => {
+        try {
+            const valor = await cargar();
+            guardarEnMemoria(clave, ttlMs, valor);
+            return valor;
+        } finally {
+            enCurso.delete(clave);
+        }
+    })();
+    enCurso.set(clave, promesa);
+    return promesa;
 }
 
 /** Un catalogo de torneos cambia un par de veces por temporada. */
@@ -416,6 +458,7 @@ const TTL_TABLA_MS = 5 * 60 * 1000;
 /** Vacia la memoria. Para los tests y para forzar una recarga a mano. */
 export function clearRugbyPassCatalogCache(): void {
     memoria.clear();
+    enCurso.clear();
 }
 
 
@@ -666,12 +709,21 @@ export async function getRugbyPassCompetitionStats(
     const competicion = rugbyPassCompetition(competitionId);
     if (!competicion) return null;
 
-    const etiqueta = normalizeRugbyPassSeasonLabel(String(season ?? ''));
+    const normalizada = normalizeRugbyPassSeasonLabel(String(season ?? ''));
+    // Un rotulo que no tiene forma de temporada (`2026`, `2026-27`) no puede
+    // existir en la lista de RugbyPass y ya caia a la temporada por defecto: se
+    // normaliza a vacio ACA para que tampoco abra una clave de memoria nueva.
+    const etiqueta = isRugbyPassSeasonLabel(normalizada) ? normalizada : '';
     return conMemoria(
         `compstats:${competitionId}:${etiqueta}`,
         TTL_STATS_MS,
         () => pedirEstadisticasDeCompeticion(competicion.slug, etiqueta)
     );
+}
+
+/** `2026`, `2026-27`, `2026-2027`: las formas de temporada que usa la app. */
+export function isRugbyPassSeasonLabel(value: string): boolean {
+    return /^\d{4}(-\d{2,4})?$/.test(value);
 }
 
 async function pedirEstadisticasDeCompeticion(

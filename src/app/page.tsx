@@ -7,7 +7,7 @@ import styles from './page.module.css';
 import LeagueDrilldown, { type DrillCountry } from '@/components/LeagueDrilldown';
 import { agruparPorRegion, seccionesDeRegion, type UnionConRegion } from '@/lib/leagueRegions';
 import { completarConFilasLocales } from '@/lib/leagueFamilies';
-import { gruposPorTipo } from '@/lib/leagueSections';
+import { gruposPorTipo, rangoDeDivisionUrba, rangoDeRegional } from '@/lib/leagueSections';
 import { etiquetaDeTemporada } from '@/lib/tournamentSeasonFilter';
 import { resolverEstado } from '@/lib/utils/matchState';
 import InstallAppButton from '@/components/InstallAppButton';
@@ -25,6 +25,7 @@ import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { loadManualTournaments } from '@/lib/catalog/manualTournaments';
 import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import ClubsPromoCard from '@/components/clubs-promo/ClubsPromoCard';
+import AwardsAcceso from '@/components/awards/AwardsAcceso';
 import TickerTitulares from '@/components/ticker/TickerTitulares';
 import GanaConTuClubBanner from '@/components/marcas/GanaConTuClubBanner';
 import SantaFe2026Acceso from '@/components/odesur/SantaFe2026Acceso';
@@ -210,6 +211,16 @@ const FEATURED_COUNTRY_MAX = 8;
  * día hay más, lo menos importante pasa al bloque plegado.
  */
 const TOP_FEED_COUNT = 14;
+
+/** Partidos que muestra un torneo antes del botón "Ver más partidos". */
+const MATCHES_PER_LEAGUE_PREVIEW = 8;
+
+/**
+ * Torneos de varias provincias (seleccionados y campeonatos nacionales): entran
+ * siempre en la tanda de arriba del feed, antes del botón que oculta el resto,
+ * pero después de los favoritos, el país del usuario y los grandes del rugby.
+ */
+const MULTIPROVINCIAL_TOURNAMENT = /select\s*12|multiprovincial|argentino\s+juvenil|nacional\s+de\s+clubes|nacional\s+de\s+desarrollo|argentino\s+de\s+seven/;
 
 /**
  * Qué cuenta como "primera división" en el país del usuario. La prioridad del
@@ -524,7 +535,14 @@ function dedupeTournamentsById(tournaments: Tournament[]) {
     const nameKey = normalizeTournamentLookupKey(tournament.displayName || tournament.name);
     const tournamentNameKey = nameKey ? `${countryKey}::${nameKey}` : '';
 
-    if (unique.has(tournament.id) || (tournamentNameKey && seenNames.has(tournamentNameKey))) return;
+    const kept = unique.get(tournament.id);
+    if (kept) {
+      // Gana la primera copia, pero la lista manual no trae `scope`: sin él un regional
+      // no entra al bloque de regionales de su región.
+      if (!kept.scope && tournament.scope) unique.set(tournament.id, { ...kept, scope: tournament.scope });
+      return;
+    }
+    if (tournamentNameKey && seenNames.has(tournamentNameKey)) return;
 
     unique.set(tournament.id, tournament);
     if (tournamentNameKey) seenNames.add(tournamentNameKey);
@@ -906,11 +924,34 @@ const MotorsportMatchRow = memo(({ match, styles }: {
   match: Match & { _dateTime: string },
   styles: any,
 }) => {
-  const isLive = match.status === 'live';
-  const isFinished = match.status === 'finished';
-  const isSuspended = match.status === 'suspended';
-  const statusLabel = isLive ? 'Live' : isFinished ? 'Final' : isSuspended ? (match.statusLabel || 'Suspendido') : 'Scheduled';
-  const footerLabel = match.footerLabel || (isLive ? 'Telemetry' : isFinished ? 'Race data' : 'Event details');
+  // Un evento de automovilismo no es un partido: es un fin de semana con
+  // sesiones. La tarjeta muestra las de HOY con su hora y su estado, y si la
+  // carrera ya se corrió, el podio. Lo que viene en `motorsport` lo arma el
+  // servicio desde el scoreboard; sin eso queda el nombre del evento solo.
+  const info = (match as any).motorsport as {
+    eventName: string;
+    seriesShort: string;
+    circuit: string | null;
+    city: string | null;
+    country: string | null;
+    sessions: Array<{ id: string; label: string; startsAt: string | null; status: string }>;
+    winner: { name: string } | null;
+    podium: Array<{ position: number; name: string }>;
+  } | undefined;
+  const status = String((match as any).status || '');
+  const isLive = status === 'live';
+  const isFinished = status === 'finished' || status === 'final';
+  const isSuspended = status === 'suspended';
+  const statusLabel = isLive ? 'En vivo' : isFinished ? 'Final' : isSuspended ? ((match as any).statusLabel || 'Suspendido') : 'Programado';
+  const title = info?.eventName || (match as any).home;
+  const series = info?.seriesShort || (match as any).away;
+  const place = [info?.circuit, info?.city].filter(Boolean).join(' · ') || (match as any).venue || '';
+  const sessions = info?.sessions ?? [];
+  const hora = (iso: string | null) => {
+    if (!iso) return '';
+    const d = new Date(iso);
+    return Number.isNaN(d.getTime()) ? '' : d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false });
+  };
 
   return (
     <Link
@@ -919,21 +960,36 @@ const MotorsportMatchRow = memo(({ match, styles }: {
     >
       <div className={styles.motorsportHomeRowTop}>
         <div className={styles.motorsportHomeRowHeader}>
-          <span className={styles.motorsportHomeRowSeries}>{match.away}</span>
-          <h3 className={styles.motorsportHomeRowTitle}>{match.home}</h3>
+          <span className={styles.motorsportHomeRowSeries}>{series}</span>
+          <h3 className={styles.motorsportHomeRowTitle}>{title}</h3>
           <div className={styles.motorsportHomeRowMeta}>
-            {/* La hora de un evento suspendido no se anuncia. */}
-            {match.time && !isSuspended && <span>{isFinished ? 'Finished' : match.time}</span>}
-            {match.venue && <span>{match.venue}</span>}
+            {place && <span>{place}</span>}
+            {info?.country && <span>{info.country}</span>}
           </div>
         </div>
         <span className={`${styles.motorsportHomeRowStatus} ${isLive ? styles.motorsportHomeRowStatusLive : ''}`}>
           {statusLabel}
         </span>
       </div>
+      {sessions.length > 0 && (
+        <ul className={styles.motorsportHomeSessions} aria-label="Sesiones de hoy">
+          {sessions.map((session) => (
+            <li key={session.id} className={`${styles.motorsportHomeSession} ${session.status === 'live' ? styles.motorsportHomeSessionLive : ''}`}>
+              <span className={styles.motorsportHomeSessionTime}>
+                {session.status === 'live' ? 'En vivo' : session.status === 'final' ? 'Final' : hora(session.startsAt)}
+              </span>
+              <span className={styles.motorsportHomeSessionLabel}>{session.label}</span>
+            </li>
+          ))}
+        </ul>
+      )}
       <div className={styles.motorsportHomeRowFooter}>
-        <span className={styles.motorsportHomeRowFooterLabel}>{footerLabel}</span>
-        <span className={styles.motorsportHomeRowFooterAction}>Open</span>
+        <span className={styles.motorsportHomeRowFooterLabel}>
+          {info?.winner
+            ? `Ganó ${info.winner.name}${info.podium[1] ? ` · 2° ${info.podium[1].name}` : ''}${info.podium[2] ? ` · 3° ${info.podium[2].name}` : ''}`
+            : isLive ? 'Sesión en curso' : 'Fin de semana de carrera'}
+        </span>
+        <span className={styles.motorsportHomeRowFooterAction}>Ver ficha</span>
       </div>
     </Link>
   );
@@ -989,6 +1045,7 @@ export default function HomePage() {
   const [expandedCountries, setExpandedCountries] = useState<Set<string>>(new Set(['international']));
   const [expandedLeagueIds, setExpandedLeagueIds] = useState<Set<string>>(new Set()); // Level 2 Accordion
   const [collapsedLeagues, setCollapsedLeagues] = useState<Set<string>>(new Set()); // Main Content Collapse
+  const [expandedLeagues, setExpandedLeagues] = useState<Set<string>>(new Set()); // "Ver más partidos"
   const [searchQuery, setSearchQuery] = useState('');
   const [isSportMenuOpen, setIsSportMenuOpen] = useState(false);
   const dateListRef = useRef<HTMLDivElement>(null);
@@ -1458,6 +1515,7 @@ export default function HomePage() {
           awayClubId: match.awayClubId,
           venue: match.venue || undefined,
           eventLabel: (match as any).eventName || undefined,
+          motorsport: (match as any).motorsport || undefined,
           footerLabel: normalizedMatchStatus === 'live'
             ? 'Telemetry'
             : (normalizedMatchStatus === 'final' || normalizedMatchStatus === 'finished' || normalizedMatchStatus === 'ft')
@@ -1543,7 +1601,9 @@ export default function HomePage() {
     );
 
     for (const league of list) {
-      if (isLeagueGroupFavorite(league)) {
+      if (MULTIPROVINCIAL_TOURNAMENT.test(normalizeForMatch(league.league))) {
+        tiers.set(league.leagueId, { tier: -1, rank: 0 });
+      } else if (isLeagueGroupFavorite(league)) {
         tiers.set(league.leagueId, { tier: 0, rank: 0 });
       } else if (countryAllowed.has(league.leagueId)) {
         tiers.set(league.leagueId, { tier: 1, rank: 0 });
@@ -1573,6 +1633,7 @@ export default function HomePage() {
     const byTier = (tier: number) => indexed.filter((entry) => info(entry.league).tier === tier);
 
     const favorites = byTier(0);
+    const multiprovincial = byTier(-1);
     const countryBest = byTier(1).sort((a, b) => (
       (b.league.priority - a.league.priority)
       || (b.league.matches.length - a.league.matches.length)
@@ -1580,9 +1641,9 @@ export default function HomePage() {
     ));
     const featured = byTier(2).sort((a, b) => (info(a.league).rank - info(b.league).rank) || (a.index - b.index));
 
-    const fillCount = Math.max(0, TOP_FEED_COUNT - favorites.length);
+    const fillCount = Math.max(0, TOP_FEED_COUNT - favorites.length - multiprovincial.length);
     const fill = [...countryBest, ...featured].slice(0, fillCount);
-    const taken = new Set([...favorites, ...fill].map((entry) => entry.index));
+    const taken = new Set([...favorites, ...fill, ...multiprovincial].map((entry) => entry.index));
     const rest = indexed
       .filter((entry) => !taken.has(entry.index))
       .sort((a, b) => (
@@ -1591,8 +1652,8 @@ export default function HomePage() {
         || (a.index - b.index)
       ));
 
-    const ordered = [...favorites, ...fill, ...rest].map((entry) => entry.league);
-    const topCount = favorites.length + fill.length;
+    const ordered = [...favorites, ...fill, ...multiprovincial, ...rest].map((entry) => entry.league);
+    const topCount = favorites.length + fill.length + multiprovincial.length;
     const top = topCount > 0 ? topCount : Math.min(3, ordered.length);
     // Un día con pocas competiciones no se agrupa: plegar dos tarjetas es fricción pura.
     return { ordered, topCount: ordered.length - top < MIN_GROUPED_LEAGUES ? ordered.length : top };
@@ -1827,7 +1888,10 @@ export default function HomePage() {
         const regiones = agruparPorRegion(crudos, leagueUnions);
         const sections = regiones
           ? seccionesDeRegion(regiones).map((seccion) => {
-            const groups = gruposPorTipo(seccion.tournaments);
+            const groups = gruposPorTipo(
+              seccion.tournaments,
+              seccion.kind === 'regionales' ? rangoDeRegional : seccion.unionId === 'urba' ? rangoDeDivisionUrba : undefined,
+            );
             return { ...seccion, groups, tournaments: groups.flatMap((g) => g.tournaments) };
           })
           : null;
@@ -2511,6 +2575,13 @@ export default function HomePage() {
                 </div>
               )}
 
+              {/* Acceso a los Awards: fuera de lo condicional a propósito, un día sin
+                  partidos (o sin favoritos) no puede ser el día en que no existe.
+                  Solo abajo de 1500 px; arriba vive en la columna derecha. */}
+              <div className={styles.bannerFeed}>
+                <AwardsAcceso variant="feed" />
+              </div>
+
               {/* Teléfono: la placa va después de los favoritos del usuario. */}
               {!esTenis && !loading && displayedFavoriteClubMatches.length > 0 && (
                 <div className={styles.bannerFeed}>
@@ -2639,8 +2710,8 @@ export default function HomePage() {
 
                     <div className={`${styles.matchesListWrapper} ${isCollapsed ? styles.collapsed : ''}`}>
                       <div className={styles.matchesList}>
-                        {league.matches.map((match) => (
-                          <MatchRow 
+                        {(expandedLeagues.has(league.leagueId) ? league.matches : league.matches.slice(0, MATCHES_PER_LEAGUE_PREVIEW)).map((match) => (
+                          <MatchRow
                             key={match.id} 
                             match={match as any} 
                             selectedSport={selectedSport} 
@@ -2652,6 +2723,22 @@ export default function HomePage() {
                           />
                         ))}
                       </div>
+                      {league.matches.length > MATCHES_PER_LEAGUE_PREVIEW && (
+                        <button
+                          type="button"
+                          className={styles.leagueMoreBtn}
+                          aria-expanded={expandedLeagues.has(league.leagueId)}
+                          onClick={() => setExpandedLeagues((prev) => {
+                            const next = new Set(prev);
+                            if (!next.delete(league.leagueId)) next.add(league.leagueId);
+                            return next;
+                          })}
+                        >
+                          {expandedLeagues.has(league.leagueId)
+                            ? 'Ver menos partidos'
+                            : `Ver más partidos (${league.matches.length - MATCHES_PER_LEAGUE_PREVIEW})`}
+                        </button>
+                      )}
                     </div>
                   </div>
                 ));
@@ -2738,6 +2825,7 @@ export default function HomePage() {
           único que un mobile ve.
         */}
         <aside className={styles.sidebarRight}>
+          <AwardsAcceso variant="sidebar" />
           <ClubsPromoCard variant="sidebar" />
         </aside>
       </div >

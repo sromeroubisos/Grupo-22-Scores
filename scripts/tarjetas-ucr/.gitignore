@@ -1,0 +1,5 @@
+ocrraw/
+cellsout/
+rev/
+cards*.json
+__pycache__/

@@ -1,0 +1,21 @@
+{
+  "fecha": "2026-09-05",
+  "descripcion": "Torneo Regional del NEA Ascenso · 3ª fecha · los dos partidos con resultado",
+  "fuente": "Resultados pasados a mano.",
+  "motivo": "La fuente publica el marcador y el bonus. El ofensivo de CAPRI va declarado; el defensivo de Tacurú, que cae por cinco, lo deduce solo el ruleset. Abipones vs Qompi y Caza y Pesca vs Lomas quedan sin resultado.",
+  "puntosBonusOfensivo": 1,
+  "partidos": [
+    {
+      "partido": "1833cc33-8bb8-4690-944d-2332f8ae4b6b",
+      "local": "Sixty", "visitante": "Tacuru",
+      "marcador": { "local": 31, "visitante": 26 },
+      "bonusOfensivo": []
+    },
+    {
+      "partido": "ad4baf39-610b-49dd-b7cb-6529d368201c",
+      "local": "CAPRI", "visitante": "Pay Ubre",
+      "marcador": { "local": 93, "visitante": 0 },
+      "bonusOfensivo": ["local"]
+    }
+  ]
+}

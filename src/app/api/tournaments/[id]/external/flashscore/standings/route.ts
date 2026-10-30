@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { applyPublicShortCache, limitAnonymousRequest } from '@/lib/server/publicRouteGuards';
 import { createClient } from '@/lib/supabase/server';
 import { getTournamentStandings } from '@/lib/services/flashscore';
 import {
@@ -7,9 +8,13 @@ import {
 import type { ExternalStandingsRow } from '@/lib/types/flashscore-integration';
 
 export async function GET(
-    _request: NextRequest,
+    request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
+    // Ruta anónima que termina en el proveedor externo: tope por IP.
+    const limited = await limitAnonymousRequest(request, 'ext-fs-standings');
+    if (limited) return limited;
+
     try {
         const tournamentId = (await params).id;
         const supabase = await createClient();
@@ -44,10 +49,10 @@ export async function GET(
         // Normalize the standings response
         const standings = normalizeStandings(raw);
 
-        return NextResponse.json({
+        return applyPublicShortCache(NextResponse.json({
             standings,
             updated_at: new Date().toISOString(),
-        });
+        }), request);
     } catch (err: any) {
         return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 });
     }

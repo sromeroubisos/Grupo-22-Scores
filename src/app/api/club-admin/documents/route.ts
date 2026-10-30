@@ -38,6 +38,59 @@ function normalizeNullableText(value: unknown) {
     return normalized.length > 0 ? normalized : null;
 }
 
+const DOCUMENTS_BUCKET = 'club-assets';
+
+class DocumentValidationError extends Error {}
+
+/**
+ * Donde viven los documentos de ESTE club (lo arma documents/upload). El
+ * `file_path` llegaba del body sin mirar y el DELETE hacía storage.remove con
+ * service_role: un editor podía apuntar a un escudo, al documento de otro club
+ * o a cualquier objeto del bucket y borrarlo.
+ */
+function clubDocumentsPrefix(clubId: string) {
+    return `clubs/${clubId}/documents/`;
+}
+
+function isClubDocumentPath(clubId: string, filePath: string) {
+    return (
+        filePath.startsWith(clubDocumentsPrefix(clubId)) &&
+        !filePath.includes('..') &&
+        !filePath.includes('\\') &&
+        !filePath.includes('//') &&
+        /^[A-Za-z0-9._\/-]+$/.test(filePath)
+    );
+}
+
+/**
+ * Valida el par (path, url). Con path, la URL se recalcula desde Storage: así
+ * no se puede guardar un path del club con una URL que apunte a otro lado.
+ * Sin path (un link externo cargado a mano), la URL tiene que ser http(s).
+ */
+function resolveDocumentLocation(admin: any, clubId: string, rawPath: unknown, rawUrl: unknown) {
+    const filePath = normalizeNullableText(rawPath);
+    if (filePath) {
+        if (!isClubDocumentPath(clubId, filePath)) {
+            throw new DocumentValidationError('El archivo no pertenece a los documentos de este club.');
+        }
+        const { data } = admin.storage.from(DOCUMENTS_BUCKET).getPublicUrl(filePath);
+        return { filePath, fileUrl: String(data?.publicUrl ?? '') };
+    }
+
+    const fileUrl = normalizeText(rawUrl);
+    if (fileUrl && (fileUrl.length > 2048 || !/^https?:\/\//i.test(fileUrl))) {
+        throw new DocumentValidationError('El link del documento tiene que empezar con https://.');
+    }
+    return { filePath: null, fileUrl };
+}
+
+/** El detalle de Supabase va al log; a la pantalla, un mensaje fijo. */
+function failure(scope: string, error: unknown, fallback: string) {
+    if (error instanceof DocumentValidationError) return err(error.message, 400);
+    console.error(`[api/club-admin/documents][${scope}]`, error);
+    return err(fallback, 500);
+}
+
 export async function GET(request: NextRequest) {
     try {
         const clubId = request.nextUrl.searchParams.get('club');
@@ -56,8 +109,7 @@ export async function GET(request: NextRequest) {
         if (error) throw error;
         return NextResponse.json({ ok: true, data: data ?? [] });
     } catch (error) {
-        const message = error instanceof Error ? error.message : 'No se pudieron cargar los documentos';
-        return err(message, 500);
+        return failure('GET', error, 'No se pudieron cargar los documentos');
     }
 }
 
@@ -71,12 +123,11 @@ export async function POST(request: NextRequest) {
         if ('error' in access) return access.error;
 
         const title = normalizeText(body.title);
-        const fileUrl = normalizeText(body.fileUrl);
-
         if (!title) return err('El titulo es obligatorio', 400);
-        if (!fileUrl) return err('fileUrl required', 400);
 
         const admin = createAdminClient() as any;
+        const { filePath, fileUrl } = resolveDocumentLocation(admin, clubId, body.filePath, body.fileUrl);
+        if (!fileUrl) return err('fileUrl required', 400);
         const payload = {
             club_id: clubId,
             title,
@@ -84,7 +135,7 @@ export async function POST(request: NextRequest) {
             folder: normalizeText(body.folder, 'General') || 'General',
             visibility: normalizeText(body.visibility, 'club') || 'club',
             file_url: fileUrl,
-            file_path: normalizeNullableText(body.filePath),
+            file_path: filePath,
             mime_type: normalizeNullableText(body.mimeType),
             size_bytes: typeof body.sizeBytes === 'number' ? body.sizeBytes : null,
             uploaded_by_user_id: access.context.userId,
@@ -99,8 +150,7 @@ export async function POST(request: NextRequest) {
         if (error) throw error;
         return NextResponse.json({ ok: true, data }, { status: 201 });
     } catch (error) {
-        const message = error instanceof Error ? error.message : 'No se pudo guardar el documento';
-        return err(message, 500);
+        return failure('POST', error, 'No se pudo guardar el documento');
     }
 }
 
@@ -116,13 +166,14 @@ export async function PUT(request: NextRequest) {
         if ('error' in access) return access.error;
 
         const admin = createAdminClient() as any;
+        const location = resolveDocumentLocation(admin, clubId, body.filePath, body.fileUrl);
         const updatePayload = {
             title: normalizeText(body.title),
             description: normalizeNullableText(body.description),
             folder: normalizeText(body.folder, 'General') || 'General',
             visibility: normalizeText(body.visibility, 'club') || 'club',
-            file_url: normalizeText(body.fileUrl) || undefined,
-            file_path: normalizeNullableText(body.filePath),
+            file_url: location.fileUrl || undefined,
+            file_path: location.filePath,
             mime_type: normalizeNullableText(body.mimeType),
             size_bytes: typeof body.sizeBytes === 'number' ? body.sizeBytes : undefined,
         };
@@ -138,8 +189,7 @@ export async function PUT(request: NextRequest) {
         if (error) throw error;
         return NextResponse.json({ ok: true, data });
     } catch (error) {
-        const message = error instanceof Error ? error.message : 'No se pudo actualizar el documento';
-        return err(message, 500);
+        return failure('PUT', error, 'No se pudo actualizar el documento');
     }
 }
 
@@ -171,13 +221,17 @@ export async function DELETE(request: NextRequest) {
 
         if (error) throw error;
 
-        if (existing?.file_path) {
-            await admin.storage.from('club-assets').remove([existing.file_path]).catch(() => null);
+        // Solo se borra el objeto si es de los documentos de ESTE club: filas
+        // viejas pueden traer cualquier path (antes no se validaba al crear).
+        const storedPath = typeof existing?.file_path === 'string' ? existing.file_path : '';
+        if (storedPath && isClubDocumentPath(clubId, storedPath)) {
+            await admin.storage.from(DOCUMENTS_BUCKET).remove([storedPath]).catch(() => null);
+        } else if (storedPath) {
+            console.warn('[api/club-admin/documents][DELETE] path fuera del club, no se borra del bucket:', { clubId, id });
         }
 
         return NextResponse.json({ ok: true, success: true });
     } catch (error) {
-        const message = error instanceof Error ? error.message : 'No se pudo eliminar el documento';
-        return err(message, 500);
+        return failure('DELETE', error, 'No se pudo eliminar el documento');
     }
 }

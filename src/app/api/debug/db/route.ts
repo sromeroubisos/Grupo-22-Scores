@@ -1,13 +1,25 @@
 import { NextResponse } from 'next/server';
-import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
+import { getApiErrorMessageForClient, getApiErrorStatus, requireGlobalAdminApiUser } from '@/lib/auth/apiAdmin';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 
+// Ruta de diagnostico: muestra conteos, errores crudos de PostgREST y detalles
+// de infraestructura. En el deploy de produccion no existe (404, no 401: ni se
+// anuncia), y en dev/preview la ve solo un admin GLOBAL — antes alcanzaba con
+// cualquier admin, incluido un admin de club.
+function isProductionDeployment(): boolean {
+    return process.env.NODE_ENV === 'production' && process.env.VERCEL_ENV === 'production';
+}
+
 export async function GET() {
+    if (isProductionDeployment()) {
+        return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    }
+
     try {
-        await requireAdminApiUser();
-    } catch {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        await requireGlobalAdminApiUser();
+    } catch (error) {
+        return NextResponse.json({ error: getApiErrorMessageForClient(error, 'Unauthorized') }, { status: getApiErrorStatus(error, 401) });
     }
 
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '(missing)';

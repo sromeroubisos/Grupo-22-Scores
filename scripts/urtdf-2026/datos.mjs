@@ -8,6 +8,9 @@
  *   horarios y libres de cada categoría.
  * - Tabla de posiciones de la fecha 2 (Instagram @unionrugbytdf, 28/9/2026):
  *   resultados y bonus de Plantel Superior y M18.
+ * - Tabla de la fecha 3 (Instagram @unionrugbytdf, 6/10/2026): marcadores de la F3
+ *   deducidos de la diferencia contra la fecha 2 (la Unión publica solo tablas).
+ *   CCDS suma un bonus de derrota (14-18): el B.DT de la placa.
  *
  * Rarezas del fixture, todas reales:
  * - La FECHA 1 de las dos categorías se juega DESPUÉS: Competencia F1 el 10/10
@@ -77,8 +80,8 @@ export const TORNEOS = [
     partidos: [
       p(2, '2026-09-26', '16:00', 'TRC', 'CCDS', [3, 60, 0, 1]),
       p(2, '2026-09-26', '16:00', 'CUR', 'CLA', [31, 8, 1, 0]),
-      p(3, '2026-10-03', '16:00', 'CLA', 'TRC'),
-      p(3, '2026-10-03', '16:00', 'CCDS', 'URC'),
+      p(3, '2026-10-03', '16:00', 'CLA', 'TRC', [77, 0, 1, 0]),
+      p(3, '2026-10-03', '16:00', 'CCDS', 'URC', [14, 18, 1, 0]),
       p(1, '2026-10-10', '16:00', 'TRC', 'URC'),
       p(1, '2026-10-10', '16:00', 'CUR', 'CCDS'),
       p(4, '2026-10-17', '16:00', 'CUR', 'TRC'),
@@ -100,8 +103,8 @@ export const TORNEOS = [
     finales: [{ nombre: 'Final', dia: '2026-12-05', hora: '16:00', local: 1, visitante: 2 }],
     // Tabla oficial de la fecha 2: PJ G E P TF TC BP PTS. Se valida antes de escribir.
     tabla: {
-      CCDS: [1, 1, 0, 0, 60, 3, 1, 5], CUR: [1, 1, 0, 0, 31, 8, 1, 5],
-      CLA: [1, 0, 0, 1, 8, 31, 0, 0], TRC: [1, 0, 0, 1, 3, 60, 0, 0], URC: [0, 0, 0, 0, 0, 0, 0, 0],
+      CCDS: [2, 1, 0, 1, 74, 21, 2, 6], CUR: [1, 1, 0, 0, 31, 8, 1, 5],
+      CLA: [2, 1, 0, 1, 85, 31, 1, 5], TRC: [2, 0, 0, 2, 3, 137, 0, 0], URC: [1, 1, 0, 0, 18, 14, 0, 4],
     },
   },
   {
@@ -118,7 +121,7 @@ export const TORNEOS = [
     partidos: [
       p(2, '2026-09-26', '14:00', 'RGHRC', 'URC', [17, 43, 0, 1]),
       p(2, '2026-09-26', '14:20', 'CUR', 'CLA', [12, 20, 0, 1]),
-      p(3, '2026-10-03', '14:20', 'CLA', 'RGHRC'),
+      p(3, '2026-10-03', '14:20', 'CLA', 'RGHRC', [20, 5, 1, 0]),
       p(4, '2026-10-10', '14:00', 'URC', 'CUR'),
       p(5, '2026-10-17', '14:20', 'CUR', 'RGHRC'),
       p(5, '2026-10-17', '14:10', 'URC', 'CLA'),
@@ -135,8 +138,8 @@ export const TORNEOS = [
       { nombre: 'Tercer puesto', dia: '2026-12-05', hora: '16:00', local: 3, visitante: 4 },
     ],
     tabla: {
-      URC: [1, 1, 0, 0, 43, 17, 1, 5], CLA: [1, 1, 0, 0, 20, 12, 1, 5],
-      RGHRC: [1, 0, 0, 1, 17, 43, 0, 0], CUR: [1, 0, 0, 1, 12, 20, 0, 0],
+      URC: [1, 1, 0, 0, 43, 17, 1, 5], CLA: [2, 2, 0, 0, 40, 17, 2, 10],
+      RGHRC: [2, 0, 0, 2, 22, 63, 0, 0], CUR: [1, 0, 0, 1, 12, 20, 0, 0],
     },
   },
 ];

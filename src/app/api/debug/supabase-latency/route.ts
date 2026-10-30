@@ -2,7 +2,15 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createApiPerfTracker } from '@/lib/perf/api';
 import { nowMs } from '@/lib/perf/measure';
-import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
+import { getApiErrorMessageForClient, getApiErrorStatus, requireGlobalAdminApiUser } from '@/lib/auth/apiAdmin';
+
+// Ruta de diagnostico: muestra conteos, errores crudos de PostgREST y detalles
+// de infraestructura. En el deploy de produccion no existe (404, no 401: ni se
+// anuncia), y en dev/preview la ve solo un admin GLOBAL — antes alcanzaba con
+// cualquier admin, incluido un admin de club.
+function isProductionDeployment(): boolean {
+  return process.env.NODE_ENV === 'production' && process.env.VERCEL_ENV === 'production';
+}
 
 export const dynamic = 'force-dynamic';
 
@@ -12,16 +20,18 @@ export async function GET() {
   const totalStartedAt = nowMs();
   const workspaceInOneDrive = process.cwd().toLowerCase().includes('onedrive');
 
-  // Latency probes touch auth + DB and reveal infra timing details. In
-  // production they must be restricted to authenticated admins to prevent
-  // anonymous DoS / fingerprinting. In dev / preview environments anyone
-  // with access to the host can keep using them freely.
-  if (process.env.NODE_ENV === 'production') {
-    try {
-      await requireAdminApiUser();
-    } catch {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+  // Latency probes touch auth + DB and reveal infra timing details. Antes, en
+  // dev/preview cualquiera las corria sin sesion (y un preview de Vercel es
+  // publico) y en prod cualquier admin. Ahora: fuera del deploy de produccion
+  // y solo para un admin global.
+  if (isProductionDeployment()) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
+
+  try {
+    await requireGlobalAdminApiUser();
+  } catch (error) {
+    return NextResponse.json({ error: getApiErrorMessageForClient(error, 'Unauthorized') }, { status: getApiErrorStatus(error, 401) });
   }
 
   try {

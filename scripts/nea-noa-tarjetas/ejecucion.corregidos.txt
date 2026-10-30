@@ -1,0 +1,272 @@
+NEA: 6 partidos con marcador corregido
+
+taraguy-r-c vs aguara · NEA 2026 · tarjeta 309939  ·  1854017f-994c-41fd-ae2c-81c02d5f1a11
+  local     · taraguy-r-c · 23 jugadores · 23 con ficha fijada
+  visitante · aguara · 23 jugadores · 23 con ficha fijada
+  eventos   · 47
+    min  1 (1T 1) local     try          Juan Martin Meabe
+    min  1 (1T 1) local     conversion   Ignacio Meabe
+    min  4 (1T 4) local     try          Juan Martin Meabe
+    min  4 (1T 4) local     conversion   Ignacio Meabe
+    min 11 (1T 11) visitante penalty_goal Alfredo Gastón Fernandez Bedoya
+    min 15 (1T 15) local     try          Joaquín Amadey
+    min 15 (1T 15) local     conversion   Ignacio Meabe
+    min 20 (1T 20) visitante penalty_goal Alfredo Gastón Fernandez Bedoya
+    min 24 (1T 24) local     try          Tiago Jorge Sebastian Insfran
+    min 30 (1T 30) local     try          Martin Solari
+    min 30 (1T 30) local     conversion   Ignacio Meabe
+    min 34 (1T 34) local     card_yellow  Emilio Amadey
+    min 35 (1T 35) local     substitution Sebastian Rossello
+    min 38 (1T 38) visitante try          Mateo Dimitroff
+    min 38 (1T 38) visitante conversion   Alfredo Gastón Fernandez Bedoya
+    min 41 (2T 1) local     substitution Martin Solari
+    min 41 (2T 1) local     substitution Tiago Jorge Sebastian Insfran
+    min 41 (2T 1) local     substitution Fausto Bianchi
+    min 41 (2T 1) local     substitution Geronimo Ramon Albornoz
+    min 42 (2T 2) visitante substitution Carlos Gabriel Amaya Fourcans
+    min 42 (2T 2) visitante penalty_goal Alfredo Gastón Fernandez Bedoya
+    min 44 (2T 4) local     substitution Emilio Amadey
+    min 45 (2T 5) local     try          Lucas Gimenez
+    min 46 (2T 6) visitante card_yellow  Rodolfo Areco
+    min 47 (2T 7) visitante penalty_goal Alfredo Gastón Fernandez Bedoya
+    min 48 (2T 8) visitante substitution Jeremias Salinas Baez
+    min 50 (2T 10) local     try          Agustin De La Vega
+    min 50 (2T 10) visitante substitution Miguel Gonzalez
+    min 52 (2T 12) local     substitution Renzo Maximiliano Sequeira
+    min 52 (2T 12) local     substitution Juan Martin Nuñez
+    min 52 (2T 12) local     try          Joaquín Amadey
+    min 52 (2T 12) local     conversion   Benjamin Cruz Schiavi
+    min 54 (2T 14) visitante substitution Axel Urbieta Torales
+    min 54 (2T 14) visitante substitution Santino Mancebo Grasso
+    min 60 (2T 20) local     try          Bruno Gasparini
+    min 60 (2T 20) visitante substitution Gaston Ramiro Benitez
+    min 60 (2T 20) visitante substitution Rodolfo Areco
+    min 61 (2T 21) visitante card_yellow  Natan Fleitas Canton
+    min 63 (2T 23) local     penalty_try  Juan Martin Meabe
+    min 65 (2T 25) local     card_yellow  Ignacio Meabe
+    min 70 (2T 30) visitante substitution Ramiro Lopez
+    min 73 (2T 33) local     card_yellow  Renzo Grillo
+    min 73 (2T 33) visitante card_yellow  Lautaro Benitez
+    min 77 (2T 37) local     try          Joaquin Gomez
+    min 77 (2T 37) local     conversion   Benjamin Cruz Schiavi
+    min 78 (2T 38) visitante try          Mateo Dimitroff
+    min 79 (2T 39) visitante conversion   Alfredo Gastón Fernandez Bedoya
+  marcador  · eventos 69-26 · guardado 69-26
+  tries     · 11-2 (guardado —-—)
+  arbitro   · JOAQUÍN DE JESÚS ROMERO (guardado: JOAQUÍN DE JESÚS ROMERO)
+  guardado  · 23 local · 23 visitante · 47 eventos
+
+curda vs curne · NEA 2026 · tarjeta 311467  ·  021f207a-35d7-46b9-b990-80183d22259f
+  local     · curda · 23 jugadores · 23 con ficha fijada
+  visitante · curne · 23 jugadores · 23 con ficha fijada
+  eventos   · 24
+    min  9 (1T 9) local     try          Carlos Eugenio Rodríguez
+    min  9 (1T 9) local     conversion   Horacio Martin Agüero Acosta
+    min 26 (1T 26) visitante try          Tomas Lobera
+    min 30 (1T 30) local     substitution Diego Daniel Argaña Noguera
+    min 38 (1T 38) local     try          Lucas Otaño
+    min 46 (2T 6) visitante drop_goal    Marcos Espinoza
+    min 50 (2T 10) visitante substitution Gadiel Cabral
+    min 51 (2T 11) local     substitution Bruno Heisecke
+    min 56 (2T 16) visitante substitution Alejandro Calvo
+    min 60 (2T 20) visitante substitution Danko Raycevich
+    min 61 (2T 21) visitante substitution Juan Sanchez Castelan
+    min 62 (2T 22) local     substitution Ignacio Murdoch
+    min 68 (2T 28) local     substitution Lucas Otaño
+    min 68 (2T 28) local     substitution Carlos Eugenio Rodríguez
+    min 70 (2T 30) local     try          Tiago Riveros Jacquet
+    min 70 (2T 30) local     conversion   Horacio Martin Agüero Acosta
+    min 70 (2T 30) local     substitution Tiago Riveros Jacquet
+    min 70 (2T 30) local     substitution Andres Manuel Martinez Vera
+    min 70 (2T 30) visitante substitution Juan Sebastian Carniel
+    min 70 (2T 30) visitante substitution Martin Elias Medina Peña
+    min 72 (2T 32) local     card_yellow  Britez Lautaro
+    min 73 (2T 33) visitante try          Lionel Jesus Chavez
+    min 73 (2T 33) visitante substitution Marcos Gomez
+    min 80 (2T 40) local     substitution Agustin Dupuy Scheitler
+  marcador  · eventos 19-13 · guardado 19-13
+  tries     · 3-2 (guardado 0-0)
+  arbitro   · ADRIAN BOGADO 0000 (NO OFICIAL) (guardado: ADRIAN BOGADO 0000 (NO OFICIAL))
+  guardado  · 23 local · 23 visitante · 24 eventos
+
+aranduroga-r-c vs san-patricio · NEA 2026 · tarjeta 311468  ·  fe42751d-2fcd-4c9f-9e23-5f8e22e14ab8
+  local     · aranduroga-r-c · 23 jugadores · 23 con ficha fijada
+  visitante · san-patricio · 23 jugadores · 23 con ficha fijada
+  eventos   · 34
+    min 13 (1T 13) local     try          Facundo Santiago Morel Alegre
+    min 14 (1T 14) local     conversion   Lucas Cerain
+    min 19 (1T 19) visitante substitution Mateo Fiat
+    min 19 (1T 19) visitante substitution Mateo Fiat
+    min 26 (1T 26) visitante penalty_goal Elias Gabriel Alvarez Rodriguez
+    min 30 (1T 30) local     penalty_goal Lucas Cerain
+    min 31 (1T 31) visitante try          Rafael Bautista Núñez Huel
+    min 31 (1T 31) visitante conversion   Elias Gabriel Alvarez Rodriguez
+    min 40 (1T 40) visitante try          Lautaro Ramos
+    min 40 (1T 40) visitante conversion   Elias Gabriel Alvarez Rodriguez
+    min 46 (2T 6) visitante penalty_goal Elias Gabriel Alvarez Rodriguez
+    min 47 (2T 7) local     substitution Pedro Nahir Gonzalez
+    min 48 (2T 8) visitante try          Gino Demichelli
+    min 48 (2T 8) visitante substitution Gonzalo Sebastian Cabral
+    min 53 (2T 13) visitante try          Lautaro Ramos
+    min 53 (2T 13) visitante conversion   Elias Gabriel Alvarez Rodriguez
+    min 59 (2T 19) local     substitution Salvador Juárez
+    min 61 (2T 21) local     substitution Ignacio Nicolás Gonzalez
+    min 61 (2T 21) visitante substitution Agustín Bastarrica
+    min 61 (2T 21) visitante substitution Marcos Serafin Gómez Escobar
+    min 65 (2T 25) local     substitution Valentin Maximiliano Almua
+    min 65 (2T 25) local     substitution Benjamin Maldonado
+    min 65 (2T 25) local     substitution Juan Pablo Navarro
+    min 65 (2T 25) local     substitution Lautaro Fey
+    min 66 (2T 26) local     try          Melitón Gieco
+    min 66 (2T 26) local     conversion   Enzo Gonzalez
+    min 66 (2T 26) visitante substitution Juan Cruz Leiva Prieto
+    min 74 (2T 34) local     substitution Facundo Santiago Morel Alegre
+    min 75 (2T 35) local     try          Nicolas Gusman Cabral
+    min 75 (2T 35) local     conversion   Enzo Gonzalez
+    min 75 (2T 35) visitante substitution Santino Zappa
+    min 80 (2T 40) local     try          Omar Bordon Calvano
+    min 80 (2T 40) local     conversion   Enzo Gonzalez
+    min 80 (2T 40) visitante penalty_goal Elias Gabriel Alvarez Rodriguez
+  marcador  · eventos 31-35 · guardado 31-35
+  tries     · 4-4 (guardado —-—)
+  arbitro   · JUAN BAUTISTA ZUBIETA (guardado: JUAN BAUTISTA ZUBIETA)
+  guardado  · 23 local · 23 visitante · 34 eventos
+
+curda vs taraguy-r-c · NEA 2026 · tarjeta 313671  ·  072897e2-c759-43d4-97fd-e528daa8c62f
+  local     · curda · 23 jugadores · 23 con ficha fijada
+  visitante · taraguy-r-c · 23 jugadores · 23 con ficha fijada
+  eventos   · 34
+    min  2 (1T 2) visitante try          Juan Martin Meabe
+    min  2 (1T 2) visitante conversion   Ignacio Meabe
+    min  5 (1T 5) local     penalty_goal Horacio Martin Agüero Acosta
+    min 18 (1T 18) visitante penalty_goal Ignacio Meabe
+    min 18 (1T 18) visitante try          Valentino Fey
+    min 20 (1T 20) local     penalty_goal Horacio Martin Agüero Acosta
+    min 22 (1T 22) local     substitution Matias Ballasch
+    min 40 (1T 40) local     penalty_goal Horacio Martin Agüero Acosta
+    min 40 (2T 0) visitante substitution Tiago Jorge Sebastian Insfran
+    min 40 (2T 0) visitante substitution Lucas Gimenez
+    min 40 (2T 0) visitante substitution Hector Osvaldo Alcaraz
+    min 45 (2T 5) local     substitution Bruno Heisecke
+    min 49 (2T 9) visitante penalty_goal Ignacio Meabe
+    min 49 (2T 9) visitante substitution Agustin Sosa
+    min 50 (2T 10) visitante substitution Renzo Maximiliano Sequeira
+    min 53 (2T 13) local     penalty_goal Horacio Martin Agüero Acosta
+    min 55 (2T 15) local     card_yellow  Carlos Plate
+    min 56 (2T 16) visitante penalty_goal Benjamin Cruz Schiavi
+    min 57 (2T 17) visitante substitution Emilio Amadey
+    min 58 (2T 18) local     try          Matias Ballasch
+    min 60 (2T 20) visitante substitution Valentino Fey
+    min 61 (2T 21) local     card_yellow  Benjamin Fernandez Micmacher
+    min 62 (2T 22) local     substitution Tiago Riveros Jacquet
+    min 69 (2T 29) visitante try          Alejandro Gallardo
+    min 69 (2T 29) visitante conversion   Ignacio Meabe
+    min 70 (2T 30) visitante substitution Benjamin Cruz Schiavi
+    min 73 (2T 33) visitante try          Rafael Rosco
+    min 73 (2T 33) visitante conversion   Ignacio Meabe
+    min 75 (2T 35) local     substitution Mariano Gabriel Maximiliano Segovia
+    min 75 (2T 35) local     substitution Ignacio Murdoch
+    min 75 (2T 35) local     substitution Carlos Eugenio Rodríguez
+    min 79 (2T 39) local     try          Carlos Plate
+    min 80 (2T 40) local     conversion   Horacio Martin Agüero Acosta
+    min 80 (2T 40) local     substitution Alvaro Allo
+  marcador  · eventos 24-35 · guardado 24-35
+  tries     · 2-4 (guardado —-—)
+  arbitro   · BOGADO ADRIAN 0000000 (NO OFICIAL) (guardado: BOGADO ADRIAN 0000000 (NO OFICIAL))
+  guardado  · 23 local · 23 visitante · 34 eventos
+
+san-jose vs aranduroga-r-c · NEA 2026 · tarjeta 325543  ·  84b316d3-feac-4ff8-bbb3-c776cdcb39ee
+  local     · san-jose · 23 jugadores · 23 con ficha fijada
+  visitante · aranduroga-r-c · 23 jugadores · 23 con ficha fijada
+  eventos   · 40
+    min  2 (1T 2) visitante try          Edgardo Rogelio Casco Martinez
+    min  2 (1T 2) visitante conversion   Luciano Paparo
+    min  6 (1T 6) local     try          Juan Daniel Gonzalez
+    min  7 (1T 7) local     conversion   Joaquin Lamas
+    min  8 (1T 8) visitante card_yellow  Valentin Maximiliano Almua
+    min  9 (1T 9) local     try          Patricio Cabrera
+    min 10 (1T 10) local     conversion   Joaquin Lamas
+    min 17 (1T 17) local     try          Juan Daniel Gonzalez
+    min 18 (1T 18) local     conversion   Joaquin Lamas
+    min 24 (1T 24) local     try          Patricio Cabrera
+    min 30 (1T 30) local     try          Thiago Fernandez Bedoya
+    min 31 (1T 31) local     conversion   Joaquin Lamas
+    min 31 (1T 31) visitante card_yellow  Ignacio Odena
+    min 45 (2T 5) visitante substitution Edgardo Rogelio Casco Martinez
+    min 46 (2T 6) local     try          Juan Daniel Gonzalez
+    min 47 (2T 7) local     conversion   Joaquin Lamas
+    min 48 (2T 8) visitante try          Luciano Paparo
+    min 48 (2T 8) visitante conversion   Luciano Paparo
+    min 52 (2T 12) local     substitution Luis Enrique Quinteros Caballero
+    min 52 (2T 12) visitante substitution Federico Espindola
+    min 53 (2T 13) local     card_yellow  Joaquin Lamas
+    min 54 (2T 14) visitante try          Hector Luciano Baez
+    min 55 (2T 15) visitante conversion   Luciano Paparo
+    min 59 (2T 19) local     penalty_goal Thomas Santiago Guzman
+    min 63 (2T 23) local     substitution Thomas Santiago Guzman
+    min 63 (2T 23) local     substitution Gaston Gibernau
+    min 63 (2T 23) visitante substitution Omar Bordon Calvano
+    min 63 (2T 23) visitante substitution Benjamin Maldonado
+    min 66 (2T 26) local     substitution Francisco Luis Bareiro Ochipinti
+    min 71 (2T 31) visitante try          Hector Luciano Baez
+    min 71 (2T 31) visitante conversion   Luciano Paparo
+    min 74 (2T 34) visitante substitution Juan Cruz De Marchi
+    min 74 (2T 34) visitante substitution Marcelo Gomez Armoa
+    min 75 (2T 35) visitante card_yellow  Juan Pablo Navarro
+    min 76 (2T 36) local     try          Joaquin Lamas
+    min 80 (2T 40) local     substitution Bruno Sanchez Garcia De Zuñiga
+    min 80 (2T 40) local     substitution Marcello Giovanni Fretes Laterra
+    min 80 (2T 40) local     substitution Luciano Benjamin Aguilar
+    min 80 (2T 40) local     substitution Adrian David Leon Cabaña
+    min 80 (2T 40) visitante substitution Salvador Juárez
+  marcador  · eventos 48-28 · guardado 48-28
+  tries     · 7-4 (guardado —-—)
+  arbitro   · BOGADO ADRIAN URP 00000 (NO OFICIAL) (guardado: BOGADO ADRIAN URP 00000 (NO OFICIAL))
+  guardado  · 23 local · 23 visitante · 40 eventos
+
+curda vs san-patricio · NEA 2026 · tarjeta 326791  ·  280a4334-073d-47de-a087-d89db95c3e07
+  local     · curda · 23 jugadores · 23 con ficha fijada
+  visitante · san-patricio · 22 jugadores · 22 con ficha fijada
+  eventos   · 36
+    min  5 (1T 5) local     try          Luis Miguel Herrera Fleitas
+    min  9 (1T 9) visitante try          Franco Oscar Silvestrini
+    min  9 (1T 9) visitante conversion   Elias Gabriel Alvarez Rodriguez
+    min 14 (1T 14) local     try          Diego Daniel Argaña Noguera
+    min 22 (1T 22) local     card_yellow  Sebastian Salinas
+    min 22 (1T 22) visitante penalty_goal Elias Gabriel Alvarez Rodriguez
+    min 25 (1T 25) visitante card_yellow  Christian Denis
+    min 27 (1T 27) local     try          Luis Miguel Herrera Fleitas
+    min 28 (1T 28) local     conversion   Joaquin Mussi Sbesa
+    min 31 (1T 31) visitante penalty_goal Elias Gabriel Alvarez Rodriguez
+    min 33 (1T 33) visitante try          Juan Cruz Leiva Prieto
+    min 33 (1T 33) visitante conversion   Elias Gabriel Alvarez Rodriguez
+    min 40 (1T 40) local     substitution Sebastian Salinas
+    min 44 (2T 4) local     try          Ignacio Cuevas
+    min 45 (2T 5) local     conversion   Joaquin Mussi Sbesa
+    min 51 (2T 11) local     try          Benjamin Fernandez Micmacher
+    min 51 (2T 11) visitante substitution Lucas German Fernandez
+    min 52 (2T 12) local     conversion   Joaquin Mussi Sbesa
+    min 52 (2T 12) visitante substitution Gonzalo Sebastian Cabral
+    min 55 (2T 15) local     substitution Martin Sitjar Da Silva
+    min 55 (2T 15) local     substitution Bruno Heisecke
+    min 56 (2T 16) visitante card_yellow  Marcos Serafin Gómez Escobar
+    min 61 (2T 21) visitante substitution Christian Denis
+    min 62 (2T 22) local     try          Joaquin Mussi Sbesa
+    min 63 (2T 23) local     conversion   Joaquin Mussi Sbesa
+    min 66 (2T 26) visitante substitution Agustín Bastarrica
+    min 66 (2T 26) visitante substitution Lautaro Ramos
+    min 66 (2T 26) visitante substitution José María Pucciariello
+    min 68 (2T 28) local     substitution Gonzalo Alvarado
+    min 70 (2T 30) visitante card_yellow  Franco Oscar Silvestrini
+    min 72 (2T 32) visitante try          Alejo Tissera
+    min 72 (2T 32) visitante conversion   Elias Gabriel Alvarez Rodriguez
+    min 74 (2T 34) local     try          Fernando Raul Gracia Ortiz
+    min 75 (2T 35) local     conversion   Joaquin Mussi Sbesa
+    min 80 (2T 40) local     substitution Diego Daniel Argaña Noguera
+    min 80 (2T 40) local     try          Gaston Alejandro Navas
+  marcador  · eventos 50-27 · guardado 50-27
+  tries     · 8-3 (guardado —-—)
+  arbitro   · MEDINA CESAR 00000 (NO OFICIAL) (guardado: MEDINA CESAR 00000 (NO OFICIAL))
+  guardado  · 23 local · 22 visitante · 36 eventos
+
+listo · 6 partidos

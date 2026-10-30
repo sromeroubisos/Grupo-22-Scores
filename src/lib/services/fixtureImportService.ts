@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createHash, randomUUID } from 'crypto';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { TournamentApiError } from '@/lib/auth/tournamentApi';
 import { FixtureService } from '@/lib/services/fixtureService';
 import { APP_TIMEZONE, combineLocalDateTimeToUtcIso } from '@/lib/timezone';
 import { isMissingRelationError } from '@/lib/utils/fixtureImportErrors';
@@ -111,7 +112,54 @@ type CachedPreviewRecord = {
 };
 
 const IMPORT_PREVIEW_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
-const importPreviewCache = new Map<string, { createdAt: number; previews: CachedPreviewRecord[] }>();
+const importPreviewCache = new Map<string, { createdAt: number; tournamentId: string; previews: CachedPreviewRecord[] }>();
+
+/**
+ * Lo único que el cliente puede corregir de una fila al confirmar.
+ *
+ * Antes se hacía `{ ...normalized, ...decision.overrides }` con el body tal
+ * cual: el cliente podía mandar `existingMatchId` de un partido de OTRO torneo
+ * y el confirm lo pisaba con el service_role. El duplicado sale sólo de lo que
+ * guardó la preview; los ids de club, jornada y zona se validan contra el
+ * torneo y la fase antes de escribir.
+ */
+const ALLOWED_OVERRIDE_KEYS = [
+  'matchDate',
+  'matchTime',
+  'venue',
+  'scoreHome',
+  'scoreAway',
+  'status',
+  'round',
+  'homeClubId',
+  'awayClubId',
+  'roundId',
+  'groupId',
+] as const;
+
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function pickAllowedOverrides(raw: unknown): Record<string, unknown> {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return {};
+  const source = raw as Record<string, unknown>;
+  const picked: Record<string, unknown> = {};
+  for (const key of ALLOWED_OVERRIDE_KEYS) {
+    if (!Object.prototype.hasOwnProperty.call(source, key)) continue;
+    const value = source[key];
+    if (key === 'scoreHome' || key === 'scoreAway') {
+      if (value === null || value === '') { picked[key] = null; continue; }
+      const numeric = Number(value);
+      if (Number.isFinite(numeric) && numeric >= 0 && numeric <= 999) picked[key] = Math.trunc(numeric);
+      continue;
+    }
+    if (value === null) { picked[key] = null; continue; }
+    if (typeof value !== 'string') continue;
+    if (key === 'matchDate' && value && !/^\d{4}-\d{2}-\d{2}$/.test(value)) continue;
+    if (key === 'matchTime' && value && !/^\d{1,2}:\d{2}(:\d{2})?$/.test(value)) continue;
+    picked[key] = value.slice(0, 200);
+  }
+  return picked;
+}
 
 export class FixtureImportService {
   static async createPreview(params: PreviewParams): Promise<FixtureImportPreviewResult> {
@@ -143,7 +191,7 @@ export class FixtureImportService {
       await this.storePreviewRows(supabase, job.id, rows, confidence);
     }
 
-    this.cachePreviewRows(job.id, rows);
+    this.cachePreviewRows(job.id, params.tournamentId, rows);
 
     await this.safeInsertImportLog(supabase, {
       job_id: job.id,
@@ -175,8 +223,14 @@ export class FixtureImportService {
   static async confirmImport(params: ConfirmParams): Promise<FixtureImportConfirmResult> {
     const supabase = createAdminClient() as any;
     const context = await this.getContext(supabase, params.tournamentId, params.phaseId);
+    // El job tiene que ser de ESTE torneo: si no, se confirmaban previews
+    // (con sus duplicados) armadas para otro.
+    await this.assertJobBelongsToTournament(supabase, params.jobId, params.tournamentId);
     const decisions = new Map(params.decisions.map((decision) => [decision.previewId, decision]));
     const previews = await this.loadStoredPreviews(supabase, params.jobId);
+    const participantClubIds = new Set(context.participants.map((participant) => participant.club_id).filter(Boolean) as string[]);
+    const phaseRoundIds = new Set((context.rounds || []).map((round: any) => String(round.id)));
+    const phaseGroupIds = new Set((context.groups || []).map((group: any) => String(group.id)));
 
     let created = 0;
     let updated = 0;
@@ -188,7 +242,7 @@ export class FixtureImportService {
     for (const preview of previews as any[]) {
       const decision = decisions.get(preview.id);
       const payload = preview.preview_payload || {};
-      const normalized = { ...(payload.normalized || {}), ...(decision?.overrides || {}) } as FixtureImportNormalizedRow & Record<string, unknown>;
+      const normalized = { ...(payload.normalized || {}), ...pickAllowedOverrides(decision?.overrides) } as FixtureImportNormalizedRow & Record<string, unknown>;
       const matched = payload.matched || {};
       const action: FixtureImportAction = decision?.action || 'omit';
       const duplicateAction: FixtureDuplicateAction = decision?.duplicateAction || preview.duplicate_action || 'skip_row';
@@ -213,14 +267,30 @@ export class FixtureImportService {
         await this.markPreview(supabase, preview.id, 'rejected', null);
         continue;
       }
+      // Un club que no participa del torneo no entra por el confirm: con el
+      // service_role, el id del body alcanzaba para meter a cualquiera.
+      if (!participantClubIds.has(homeClubId) || !participantClubIds.has(awayClubId)) {
+        rejected += 1;
+        issues.push(this.issue('error', 'club_not_participant', `La fila ${payload.sourceLabel || preview.id} tiene un club que no participa del torneo.`, 'row'));
+        await this.markPreview(supabase, preview.id, 'rejected', null);
+        continue;
+      }
+
+      const requestedRoundId = (normalized.roundId as string | null) || matched.round?.id || null;
+      const requestedGroupId = (normalized.groupId as string | null) || matched.group?.id || null;
+      if ((requestedRoundId && !phaseRoundIds.has(String(requestedRoundId))) || (requestedGroupId && !phaseGroupIds.has(String(requestedGroupId)))) {
+        rejected += 1;
+        issues.push(this.issue('error', 'round_or_group_outside_phase', `La fila ${payload.sourceLabel || preview.id} apunta a una jornada o zona que no es de esta fase.`, 'row'));
+        await this.markPreview(supabase, preview.id, 'rejected', null);
+        continue;
+      }
 
       const roundId =
-        (normalized.roundId as string | null) ||
-        matched.round?.id ||
+        requestedRoundId ||
         (normalized.round ? await FixtureService.findOrCreateRound(params.phaseId, String(normalized.round)) : null);
-      const groupId = (normalized.groupId as string | null) || matched.group?.id || null;
-      const existingMatchId =
-        (normalized.existingMatchId as string | null) || matched.duplicateMatchId || preview.duplicate_match_id || null;
+      const groupId = requestedGroupId;
+      // El duplicado sale SÓLO de lo que guardó la preview, nunca del body.
+      const existingMatchId = matched.duplicateMatchId || preview.duplicate_match_id || null;
 
       if (existingMatchId && duplicateAction === 'flag_for_manual_review') {
         rejected += 1;
@@ -258,7 +328,20 @@ export class FixtureImportService {
       };
 
       if (existingMatchId && duplicateAction === 'update_existing_match') {
-        const { error: updateError } = await supabase.from('matches').update(matchPayload).eq('id', existingMatchId);
+        // `.eq('tournament_id')` además del id: aunque la preview guardada
+        // apunte a otro partido, el update no puede salir de este torneo.
+        const { data: updatedRows, error: updateError } = await supabase
+          .from('matches')
+          .update(matchPayload)
+          .eq('id', existingMatchId)
+          .eq('tournament_id', params.tournamentId)
+          .select('id');
+        if (!updateError && (!Array.isArray(updatedRows) || updatedRows.length === 0)) {
+          rejected += 1;
+          issues.push(this.issue('error', 'duplicate_outside_tournament', `La fila ${payload.sourceLabel || preview.id} apunta a un partido que no es de este torneo.`, 'row'));
+          await this.markPreview(supabase, preview.id, 'rejected', null);
+          continue;
+        }
         if (updateError) {
           rejected += 1;
           issues.push(this.issue('error', 'match_update_failed', updateError.message, 'row'));
@@ -659,7 +742,9 @@ export class FixtureImportService {
     const [tournamentRes, phaseRes, phasesRes, roundsRes, groupsRes, participantsRes, competitionAliasesRes, venueAliasesRes, existingMatchesRes] =
       await Promise.all([
         supabase.from('tournaments').select('*').eq('id', tournamentId).single(),
-        supabase.from('tournament_phases').select('*').eq('id', phaseId).single(),
+        // La fase se busca DENTRO del torneo: el phaseId viene del body y, con
+        // el service_role, sin este filtro se importaba a la fase de otro torneo.
+        supabase.from('tournament_phases').select('*').eq('id', phaseId).eq('tournament_id', tournamentId).maybeSingle(),
         supabase.from('tournament_phases').select('id, name, season_id').eq('tournament_id', tournamentId),
         supabase.from('tournament_rounds').select('*').eq('phase_id', phaseId).order('order_index'),
         this.safeSelect(supabase, 'tournament_groups', '*', (query: any) => query.eq('phase_id', phaseId).order('order_index')),
@@ -678,7 +763,8 @@ export class FixtureImportService {
       ]);
 
     if (tournamentRes.error || !tournamentRes.data) throw new Error(tournamentRes.error?.message || 'No se encontró el torneo.');
-    if (phaseRes.error || !phaseRes.data) throw new Error(phaseRes.error?.message || 'No se encontró la fase.');
+    if (phaseRes.error) throw new Error(phaseRes.error.message || 'No se encontró la fase.');
+    if (!phaseRes.data) throw new TournamentApiError('La fase no es de este torneo.', 404);
 
     // Un torneo que vive varias temporadas (el Top 10 del Centro tiene 26) guarda
     // los participantes y las fases de TODAS. Sin recortar a la temporada de la
@@ -1721,10 +1807,11 @@ export class FixtureImportService {
     return typeof jobId === 'string' && jobId.startsWith('mem-fixture-');
   }
 
-  private static cachePreviewRows(jobId: string, rows: FixtureImportPreviewRow[]) {
+  private static cachePreviewRows(jobId: string, tournamentId: string, rows: FixtureImportPreviewRow[]) {
     this.cleanupPreviewCache();
     importPreviewCache.set(jobId, {
       createdAt: Date.now(),
+      tournamentId,
       previews: rows.map((row) => ({
         id: row.previewId,
         preview_payload: {
@@ -1742,6 +1829,45 @@ export class FixtureImportService {
         inserted_match_id: null,
       })),
     });
+  }
+
+  /**
+   * El jobId llega del body: sin esto, un admin del torneo A confirmaba el job
+   * del torneo B (y sus duplicados guardados) con el contexto de A.
+   */
+  private static async assertJobBelongsToTournament(supabase: any, jobId: string, tournamentId: string) {
+    if (typeof jobId !== 'string' || !jobId) {
+      throw new TournamentApiError('Falta el trabajo de importación.', 400);
+    }
+
+    this.cleanupPreviewCache();
+    const cached = importPreviewCache.get(jobId);
+    if (cached && cached.tournamentId !== tournamentId) {
+      throw new TournamentApiError('El trabajo de importación no es de este torneo.', 404);
+    }
+
+    if (this.isEphemeralJobId(jobId)) {
+      // Un job efímero sólo existe en la caché de este proceso.
+      if (!cached) throw new TournamentApiError('La previsualización venció. Volvé a generarla.', 404);
+      return;
+    }
+
+    if (!UUID_PATTERN.test(jobId)) {
+      throw new TournamentApiError('El trabajo de importación no es válido.', 400);
+    }
+
+    const { data, error } = await supabase
+      .from('import_jobs')
+      .select('id, tournament_id')
+      .eq('id', jobId)
+      .maybeSingle();
+
+    if (error) {
+      throw new Error(error.message || 'No se pudo validar el trabajo de importación.');
+    }
+    if (!data || data.tournament_id !== tournamentId) {
+      throw new TournamentApiError('El trabajo de importación no es de este torneo.', 404);
+    }
   }
 
   private static getCachedPreviews(jobId: string) {

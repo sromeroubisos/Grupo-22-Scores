@@ -16,15 +16,16 @@ const LOOKBACK = 14; // partidos que se miran por club
 const SAMPLE = 6; // con planilla que alcanzan
 const MIN_STARTERS = 11; // una planilla a medias no cuenta
 
-type RawPlayer = { name?: unknown; number?: unknown; role?: unknown };
-type Probable = { name: string; number: number; appearances: number };
+type RawPlayer = { id?: unknown; name?: unknown; number?: unknown; role?: unknown };
+type Probable = { id: string | null; name: string; number: number; appearances: number };
+type Starter = { id: string | null; name: string; number: number };
 type Side = { players: Probable[]; basedOn: number };
 
 const EMPTY: Side = { players: [], basedOn: 0 };
 
-function startersOf(list: unknown): Array<{ name: string; number: number }> {
+function startersOf(list: unknown): Starter[] {
     if (!Array.isArray(list)) return [];
-    const out: Array<{ name: string; number: number }> = [];
+    const out: Starter[] = [];
     const seen = new Set<number>();
     for (const raw of list as RawPlayer[]) {
         const name = typeof raw?.name === 'string' ? raw.name.trim() : '';
@@ -32,7 +33,7 @@ function startersOf(list: unknown): Array<{ name: string; number: number }> {
         if (!name || !Number.isInteger(number) || number < 1 || number > 15 || seen.has(number)) continue;
         if (raw.role && raw.role !== 'starter') continue;
         seen.add(number);
-        out.push({ name, number });
+        out.push({ id: typeof raw.id === "string" && raw.id ? raw.id : null, name, number });
     }
     return out;
 }
@@ -56,7 +57,7 @@ async function probableFor(
     if (error || !data) return EMPTY;
 
     // Mas reciente primero: el orden ya desempata.
-    const sheets: Array<Array<{ name: string; number: number }>> = [];
+    const sheets: Starter[][] = [];
     for (const row of data) {
         const side = row.home_club_id === clubId ? 'home' : 'away';
         const starters = startersOf((row.lineups as Record<string, unknown> | null)?.[side]);
@@ -67,18 +68,18 @@ async function probableFor(
 
     const players: Probable[] = [];
     for (let n = 1; n <= 15; n += 1) {
-        const tally = new Map<string, { name: string; count: number }>();
+        const tally = new Map<string, { id: string | null; name: string; count: number }>();
         for (const sheet of sheets) {
             const found = sheet.find((p) => p.number === n);
             if (!found) continue;
             const key = found.name.toLowerCase();
             const prev = tally.get(key);
-            tally.set(key, { name: prev?.name ?? found.name, count: (prev?.count ?? 0) + 1 });
+            tally.set(key, { id: prev?.id ?? found.id, name: prev?.name ?? found.name, count: (prev?.count ?? 0) + 1 });
         }
         // Map conserva el orden de insercion = mas reciente primero.
-        let best: { name: string; count: number } | null = null;
+        let best: { id: string | null; name: string; count: number } | null = null;
         for (const entry of tally.values()) if (!best || entry.count > best.count) best = entry;
-        if (best) players.push({ name: best.name, number: n, appearances: best.count });
+        if (best) players.push({ id: best.id, name: best.name, number: n, appearances: best.count });
     }
     return { players, basedOn: sheets.length };
 }

@@ -200,6 +200,36 @@ export const HORARIO_POR_SUBCATEGORIA: Readonly<Record<string, string>> = Object
   Superior: '15:30',
 });
 
+/**
+ * Jornadas en las que la URBA corre TODOS los horarios del día. La clave es el
+ * día local (`YYYY-MM-DD`) y gana sobre `HORARIO_POR_SUBCATEGORIA`.
+ *
+ * Va acá y no en la base por lo mismo que el horario por subcategoría: escrito
+ * sólo en la fila, la próxima pasada del cron lo ve distinto de lo que calcula y
+ * lo reescribe con la medianoche de URBA. La excepción tiene que vivir donde vive
+ * la regla, o dura hasta la siguiente corrida.
+ *
+ * Al ser por día se apaga sola, y sólo alcanza al día que nombra: las categorías
+ * que juegan el domingo no se enteran.
+ */
+export const HORARIO_POR_JORNADA: Readonly<Record<string, string>> = Object.freeze({
+  // Fin de semana especial: la URBA adelantó todas las categorías del sábado.
+  '2026-08-29': '14:00',
+});
+
+/**
+ * Horario fijado a mano por partido de URBA (clave: `matches.id` de URBA).
+ * Gana sobre la jornada y la subcategoría, y como ellas sólo actúa cuando URBA
+ * NO informa hora. Es para un cruce puntual (semifinales a otra hora que el resto
+ * del día) que ni `HORARIO_POR_JORNADA` ni el default pueden expresar sin mover
+ * a las demás categorías del mismo día. Hora local `HH:MM`.
+ */
+export const HORARIO_POR_PARTIDO: Readonly<Record<string, string>> = Object.freeze({
+  // Semifinales del Top 14 2026: viernes 30/10 y sábado 31/10.
+  '2023152070': '20:10', // Newman - Alumni
+  '2023152071': '17:10', // CASI - Hindú
+});
+
 /** `HH:MM` por defecto para una subcategoría, o null si no tiene uno definido. */
 export function horarioPorDefectoDe(subcategory: string | null | undefined): string | null {
   const clave = String(subcategory ?? '').trim();
@@ -226,11 +256,16 @@ const SIN_HORA = /^(\d{4}-\d{2}-\d{2})T00:00(?::00(?:\.000)?)?$/;
 export function playdateToUtcIso(
   playdate: string | null | undefined,
   subcategory?: string | null,
+  horarioDelPartido?: string | null,
 ): string | null {
   if (!playdate) return null;
 
   const sinHora = String(playdate).match(SIN_HORA);
-  const porDefecto = sinHora ? horarioPorDefectoDe(subcategory) : null;
+  // La jornada gana sobre la subcategoría: cuando la URBA corre el día entero,
+  // corre también las categorías que no tienen horario por defecto.
+  const porDefecto = sinHora
+    ? (horarioDelPartido ?? HORARIO_POR_JORNADA[sinHora[1]] ?? horarioPorDefectoDe(subcategory))
+    : null;
   if (sinHora && porDefecto) {
     return combineLocalDateTimeToUtcIso(sinHora[1], porDefecto);
   }
@@ -434,7 +469,7 @@ export function planTournamentMatches(input: {
         continue;
       }
 
-      const dateTime = playdateToUtcIso(m.playdate, input.subcategory);
+      const dateTime = playdateToUtcIso(m.playdate, input.subcategory, HORARIO_POR_PARTIDO[String(m.id)]);
       if (!dateTime) {
         // matches.date_time es NOT NULL y sin default: sin fecha no hay fila.
         plan.omitidos.push({ urba_match_id: m.id, external_id: externalId, motivo: 'sin_fecha', detalle: `playdate=${JSON.stringify(m.playdate)}` });

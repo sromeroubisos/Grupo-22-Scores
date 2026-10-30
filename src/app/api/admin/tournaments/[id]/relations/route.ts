@@ -12,6 +12,22 @@ function isMissingTableError(error: any) {
     return error?.code === '42P01' || String(error?.message || '').toLowerCase().includes('tournament_relations');
 }
 
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function isUuid(value: unknown): value is string {
+    return typeof value === 'string' && UUID_PATTERN.test(value);
+}
+
+/**
+ * Filtro "la relación toca a este torneo". El writer es service_role: con
+ * sólo `.eq('id')`, un admin del torneo A editaba o borraba la relación entre
+ * B y C sabiendo su id. Los dos valores ya pasaron por `isUuid`, así que se
+ * pueden interpolar en el `.or()` de PostgREST sin abrir una inyección.
+ */
+function touchesTournamentFilter(tournamentId: string) {
+    return `source_tournament_id.eq.${tournamentId},target_tournament_id.eq.${tournamentId}`;
+}
+
 function isValidOption(value: string | null | undefined, allowed: string[]) {
     if (!value) return false;
     return allowed.includes(value);
@@ -75,9 +91,17 @@ export async function POST(
         return NextResponse.json({ error: 'linked_tournament_id is required' }, { status: 400 });
     }
 
+    if (!isUuid(linkedTournamentId)) {
+        return NextResponse.json({ error: 'linked_tournament_id invalido' }, { status: 400 });
+    }
+
     if (linkedTournamentId === tournamentId) {
         return NextResponse.json({ error: 'No se puede vincular un torneo consigo mismo.' }, { status: 400 });
     }
+
+    // Una relación escribe sobre los DOS torneos (aparece en la pestaña de
+    // ambos): hay que poder gestionar también el vinculado.
+    await requireTournamentMutationContext(linkedTournamentId);
 
     if (!isValidOption(relationType, TYPE_VALUES)) {
         return NextResponse.json({ error: 'relation_type invalido' }, { status: 400 });
@@ -131,6 +155,9 @@ export async function PATCH(
     if (!relationId) {
         return NextResponse.json({ error: 'Missing relation id' }, { status: 400 });
     }
+    if (!isUuid(relationId) || !isUuid(tournamentId)) {
+        return NextResponse.json({ error: 'Id invalido' }, { status: 400 });
+    }
 
     const { writer: supabase, actorUserId } = await requireTournamentMutationContext(tournamentId);
 
@@ -146,9 +173,15 @@ export async function PATCH(
         return NextResponse.json({ error: 'linked_tournament_id and relation_type are required' }, { status: 400 });
     }
 
+    if (!isUuid(linkedTournamentId)) {
+        return NextResponse.json({ error: 'linked_tournament_id invalido' }, { status: 400 });
+    }
+
     if (linkedTournamentId === tournamentId) {
         return NextResponse.json({ error: 'No se puede vincular un torneo consigo mismo.' }, { status: 400 });
     }
+
+    await requireTournamentMutationContext(linkedTournamentId);
 
     if (!isValidOption(relationType, TYPE_VALUES)) {
         return NextResponse.json({ error: 'relation_type invalido' }, { status: 400 });
@@ -172,16 +205,22 @@ export async function PATCH(
         updated_at: new Date().toISOString(),
     };
 
-    const { error } = await (supabase as any)
+    const { data: updatedRows, error } = await (supabase as any)
         .from('tournament_relations')
         .update(updates)
-        .eq('id', relationId);
+        .eq('id', relationId)
+        .or(touchesTournamentFilter(tournamentId))
+        .select('id');
 
     if (error) {
         if (isMissingTableError(error)) {
             return NextResponse.json({ error: 'La tabla tournament_relations no existe todavia.' }, { status: 501 });
         }
         return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+
+    if (!Array.isArray(updatedRows) || updatedRows.length === 0) {
+        return NextResponse.json({ error: 'La relacion no es de este torneo' }, { status: 404 });
     }
 
     await writeAudit(supabase, actorUserId, tournamentId, 'update_relation', { relationId, updates });
@@ -202,19 +241,28 @@ export async function DELETE(
     if (!relationId) {
         return NextResponse.json({ error: 'Missing relation id' }, { status: 400 });
     }
+    if (!isUuid(relationId) || !isUuid(tournamentId)) {
+        return NextResponse.json({ error: 'Id invalido' }, { status: 400 });
+    }
 
     const { writer: supabase, actorUserId } = await requireTournamentMutationContext(tournamentId);
 
-    const { error } = await (supabase as any)
+    const { data: deletedRows, error } = await (supabase as any)
         .from('tournament_relations')
         .delete()
-        .eq('id', relationId);
+        .eq('id', relationId)
+        .or(touchesTournamentFilter(tournamentId))
+        .select('id');
 
     if (error) {
         if (isMissingTableError(error)) {
             return NextResponse.json({ error: 'La tabla tournament_relations no existe todavia.' }, { status: 501 });
         }
         return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+
+    if (!Array.isArray(deletedRows) || deletedRows.length === 0) {
+        return NextResponse.json({ error: 'La relacion no es de este torneo' }, { status: 404 });
     }
 
     await writeAudit(supabase, actorUserId, tournamentId, 'delete_relation', { relationId });

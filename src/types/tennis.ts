@@ -67,6 +67,12 @@ export interface TennisMatch {
     statusLabel: string;
     isLive: boolean;
     startsAt: Date | null;
+    /**
+     * Si la hora de `startsAt` es real. ESPN programa los partidos del día
+     * con una hora de relleno hasta que la organización publica el orden de
+     * juego; mostrarla diría "12:00" de un partido que se juega a la noche.
+     */
+    timeValid: boolean;
     home: TennisSide;
     away: TennisSide;
     sets: TennisSet[];
@@ -78,6 +84,8 @@ export interface TennisMatch {
     surface: string | null;
     /** La cancha: "Arthur Ashe Stadium". */
     court: string | null;
+    /** Al mejor de cuántos sets: 3 o 5. */
+    bestOf: number | null;
     tournament: TennisTournamentRef;
 }
 

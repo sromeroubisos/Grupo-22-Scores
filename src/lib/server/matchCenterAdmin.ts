@@ -1,5 +1,12 @@
-import { canManageMatchContext, getMatchManagementTarget, requireUserAccessContext, type UserAccessContext } from '@/lib/auth/permissions';
-import { MANAGEMENT_MEMBERSHIP_ROLES, isGlobalAdminRole } from '@/lib/auth/roles';
+import {
+    canManageClubContext,
+    canManageMatchContext,
+    getClubManagementTarget,
+    getMatchManagementTarget,
+    requireUserAccessContext,
+    type UserAccessContext,
+} from '@/lib/auth/permissions';
+import { MANAGEMENT_MEMBERSHIP_ROLES, isGlobalAdminRole, isTournamentAdminRole } from '@/lib/auth/roles';
 import {
     isScopeAllowedTournament,
     resolveTournamentAdminScope,
@@ -46,6 +53,23 @@ export async function ensureMatchManagementAccess(
         }
     }
 
+    // El partido que un club cargó desde su panel (`created_by_club_id`) lo
+    // edita ese club: si puede crearlo y borrarlo, tiene que poder cargarle el
+    // resultado. Se pide permiso sobre el club AUTOR, no sobre los que juegan:
+    // figurar como local en un partido de torneo no da derecho a tocarlo.
+    const { data: authorRow } = await supabase
+        .from('matches')
+        .select('created_by_club_id')
+        .eq('id', target.matchId)
+        .maybeSingle();
+    const authorClubId = (authorRow as { created_by_club_id?: string | null } | null)?.created_by_club_id;
+    if (authorClubId) {
+        const clubTarget = await getClubManagementTarget(supabase, authorClubId);
+        if (clubTarget && canManageClubContext(context, clubTarget, allowedRoles)) {
+            return context;
+        }
+    }
+
     throw new Error('Forbidden');
 }
 
@@ -85,4 +109,21 @@ export async function loadManagedMatchCenterMatch(
     }
 
     return { context, match: data };
+}
+
+/**
+ * A qué editor se manda a quien puede editar un partido.
+ *
+ * Los tres montan el mismo MatchCenterClient y las APIs validan partido por
+ * partido; lo que cambia es la sección que rodea al editor, y cada sección tiene
+ * su guarda por ROL. Un `admin_club` con membresía en un torneo pasa
+ * `ensureMatchManagementAccess` pero rebota contra `/admin/torneo` (exige el rol
+ * de gestor) y terminaba en la portada. Por eso el resto va a
+ * `/matches/[id]/editar`, que no tiene guarda de rol propia.
+ */
+export function resolveMatchEditorHref(context: Pick<UserAccessContext, 'role'>, matchId: string): string {
+    const id = encodeURIComponent(matchId);
+    if (isGlobalAdminRole(context.role)) return `/admin/super/partidos/${id}`;
+    if (isTournamentAdminRole(context.role)) return `/admin/torneo/partidos/${id}`;
+    return `/matches/${id}/editar`;
 }

@@ -1,0 +1,1882 @@
+[
+ {
+  "id": "d9f1194c-98ef-4e59-858d-0c97524b1718",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-03-13T22:30:00+00:00",
+  "home_club_id": "cordoba-athletic-club-m16-a",
+  "away_club_id": "club-universitario-de-cordoba-m16-a",
+  "score": {
+   "away": 31,
+   "home": 17
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club M16 \"A\"",
+  "a": "Club Universitario de Córdoba M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 17,
+  "sa": 31,
+  "fecha": "2026-03-13"
+ },
+ {
+  "id": "0321bb97-6683-433a-96a1-aa637197dc33",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-03-13T23:30:00+00:00",
+  "home_club_id": "uru-cure-rugby-club-m16-a",
+  "away_club_id": "san-martin-de-villa-maria-m16-a",
+  "score": {
+   "away": 19,
+   "home": 24
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Urú Curé Rugby Club M16 \"A\"",
+  "a": "San Martín de Villa María M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 24,
+  "sa": 19,
+  "fecha": "2026-03-13"
+ },
+ {
+  "id": "87e62cc7-15db-4c52-9fd1-196a149854f0",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-03-14T13:00:00+00:00",
+  "home_club_id": "jockey-club-cordoba-m16-a",
+  "away_club_id": "tala-rugby-club-m16-a",
+  "score": {
+   "away": 36,
+   "home": 14
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba M16 \"A\"",
+  "a": "Tala Rugby Club M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 14,
+  "sa": 36,
+  "fecha": "2026-03-14"
+ },
+ {
+  "id": "27e290c3-92bd-4573-a1c5-0eb896b0ce57",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-03-14T14:30:00+00:00",
+  "home_club_id": "jockey-club-de-villa-maria-m16-a",
+  "away_club_id": "club-palermo-bajo-m16-a",
+  "score": {
+   "away": 43,
+   "home": 20
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club de Villa María M16 \"A\"",
+  "a": "Club Palermo Bajo M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 20,
+  "sa": 43,
+  "fecha": "2026-03-14"
+ },
+ {
+  "id": "88942474-6bd4-4d40-9a81-0ea94b23001c",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-03-14T17:00:00+00:00",
+  "home_club_id": "club-la-tablada-m16-a",
+  "away_club_id": "carlos-paz-rugby-club-m16-a",
+  "score": {
+   "away": 0,
+   "home": 140
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club La Tablada M16 \"A\"",
+  "a": "Carlos Paz Rugby Club M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 140,
+  "sa": 0,
+  "fecha": "2026-03-14"
+ },
+ {
+  "id": "61dde5b0-d23c-4bc5-87f3-465f581b01fb",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-03-21T14:30:00+00:00",
+  "home_club_id": "tala-rugby-club-m16-a",
+  "away_club_id": "club-universitario-de-cordoba-m16-a",
+  "score": {
+   "away": 19,
+   "home": 33
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club M16 \"A\"",
+  "a": "Club Universitario de Córdoba M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 33,
+  "sa": 19,
+  "fecha": "2026-03-21"
+ },
+ {
+  "id": "8d4f8e33-cd6c-4e3f-b0da-2d166bad28b0",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-03-21T16:00:00+00:00",
+  "home_club_id": "carlos-paz-rugby-club-m16-a",
+  "away_club_id": "jockey-club-de-villa-maria-m16-a",
+  "score": {
+   "away": 42,
+   "home": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Carlos Paz Rugby Club M16 \"A\"",
+  "a": "Jockey Club de Villa María M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 0,
+  "sa": 42,
+  "fecha": "2026-03-21"
+ },
+ {
+  "id": "f4336720-0225-4610-88b3-b0ae6fc2ddc2",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-03-21T17:00:00+00:00",
+  "home_club_id": "uru-cure-rugby-club-m16-a",
+  "away_club_id": "cordoba-athletic-club-m16-a",
+  "score": {
+   "away": 17,
+   "home": 27
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Urú Curé Rugby Club M16 \"A\"",
+  "a": "Córdoba Athletic Club M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 27,
+  "sa": 17,
+  "fecha": "2026-03-21"
+ },
+ {
+  "id": "dabf002d-fa9e-4df5-8bbf-69d683b70d36",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-03-21T17:00:00+00:00",
+  "home_club_id": "san-martin-de-villa-maria-m16-a",
+  "away_club_id": "club-la-tablada-m16-a",
+  "score": {
+   "away": 54,
+   "home": 10
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "San Martín de Villa María M16 \"A\"",
+  "a": "Club La Tablada M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 10,
+  "sa": 54,
+  "fecha": "2026-03-21"
+ },
+ {
+  "id": "195b2247-e37b-44b4-8dde-735c97ef07e6",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-03-21T17:00:00+00:00",
+  "home_club_id": "club-palermo-bajo-m16-a",
+  "away_club_id": "jockey-club-cordoba-m16-a",
+  "score": {
+   "away": 7,
+   "home": 18
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Palermo Bajo M16 \"A\"",
+  "a": "Jockey Club Córdoba M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 18,
+  "sa": 7,
+  "fecha": "2026-03-21"
+ },
+ {
+  "id": "4d84dac7-1e2c-4294-8a02-c30176d1db16",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-03-27T22:30:00+00:00",
+  "home_club_id": "club-universitario-de-cordoba-m16-a",
+  "away_club_id": "club-palermo-bajo-m16-a",
+  "score": {
+   "away": 30,
+   "home": 29
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Universitario de Córdoba M16 \"A\"",
+  "a": "Club Palermo Bajo M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 29,
+  "sa": 30,
+  "fecha": "2026-03-27"
+ },
+ {
+  "id": "8f911cb9-2e2a-4e90-87dd-f10f0321a341",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-03-28T12:30:00+00:00",
+  "home_club_id": "cordoba-athletic-club-m16-a",
+  "away_club_id": "tala-rugby-club-m16-a",
+  "score": {
+   "away": 36,
+   "home": 17
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club M16 \"A\"",
+  "a": "Tala Rugby Club M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 17,
+  "sa": 36,
+  "fecha": "2026-03-28"
+ },
+ {
+  "id": "b00a91e3-68eb-499e-9c5b-4ba8a70f92bb",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-03-28T15:00:00+00:00",
+  "home_club_id": "jockey-club-de-villa-maria-m16-a",
+  "away_club_id": "san-martin-de-villa-maria-m16-a",
+  "score": {
+   "away": 7,
+   "home": 22
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club de Villa María M16 \"A\"",
+  "a": "San Martín de Villa María M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 22,
+  "sa": 7,
+  "fecha": "2026-03-28"
+ },
+ {
+  "id": "4003c634-a684-42fc-98cc-bc4b94f4887e",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-03-28T15:50:00+00:00",
+  "home_club_id": "jockey-club-cordoba-m16-a",
+  "away_club_id": "carlos-paz-rugby-club-m16-a",
+  "score": {
+   "away": 7,
+   "home": 59
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba M16 \"A\"",
+  "a": "Carlos Paz Rugby Club M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 59,
+  "sa": 7,
+  "fecha": "2026-03-28"
+ },
+ {
+  "id": "1125f857-63f1-4569-bec8-136b45d7aa6a",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-03-28T19:30:00+00:00",
+  "home_club_id": "club-la-tablada-m16-a",
+  "away_club_id": "uru-cure-rugby-club-m16-a",
+  "score": {
+   "away": 14,
+   "home": 54
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club La Tablada M16 \"A\"",
+  "a": "Urú Curé Rugby Club M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 54,
+  "sa": 14,
+  "fecha": "2026-03-28"
+ },
+ {
+  "id": "e6c2d25f-9a8d-4274-ac4c-3cfc1d34b3ed",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-04-11T14:30:00+00:00",
+  "home_club_id": "san-martin-de-villa-maria-m16-a",
+  "away_club_id": "jockey-club-cordoba-m16-a",
+  "score": {
+   "away": 36,
+   "home": 7
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "San Martín de Villa María M16 \"A\"",
+  "a": "Jockey Club Córdoba M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 7,
+  "sa": 36,
+  "fecha": "2026-04-11"
+ },
+ {
+  "id": "d198c41d-b4b7-44dc-93e3-138b63088c4b",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-04-11T15:30:00+00:00",
+  "home_club_id": "uru-cure-rugby-club-m16-a",
+  "away_club_id": "jockey-club-de-villa-maria-m16-a",
+  "score": {
+   "away": 22,
+   "home": 39
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Urú Curé Rugby Club M16 \"A\"",
+  "a": "Jockey Club de Villa María M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 39,
+  "sa": 22,
+  "fecha": "2026-04-11"
+ },
+ {
+  "id": "aeaa5cd1-6e83-4bf5-86a7-26025e36a85c",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-04-11T15:45:00+00:00",
+  "home_club_id": "carlos-paz-rugby-club-m16-a",
+  "away_club_id": "club-universitario-de-cordoba-m16-a",
+  "score": {
+   "away": 82,
+   "home": 5
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Carlos Paz Rugby Club M16 \"A\"",
+  "a": "Club Universitario de Córdoba M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 5,
+  "sa": 82,
+  "fecha": "2026-04-11"
+ },
+ {
+  "id": "3b653534-40c5-422c-bc8e-ba5918f7c4ec",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-04-11T16:30:00+00:00",
+  "home_club_id": "club-la-tablada-m16-a",
+  "away_club_id": "cordoba-athletic-club-m16-a",
+  "score": {
+   "away": 12,
+   "home": 29
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club La Tablada M16 \"A\"",
+  "a": "Córdoba Athletic Club M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 29,
+  "sa": 12,
+  "fecha": "2026-04-11"
+ },
+ {
+  "id": "92c5d1d7-99a1-4d86-b617-b969d7f4da3a",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-04-11T17:00:00+00:00",
+  "home_club_id": "club-palermo-bajo-m16-a",
+  "away_club_id": "tala-rugby-club-m16-a",
+  "score": {
+   "away": 38,
+   "home": 14
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Palermo Bajo M16 \"A\"",
+  "a": "Tala Rugby Club M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 14,
+  "sa": 38,
+  "fecha": "2026-04-11"
+ },
+ {
+  "id": "2b8c8c0a-d19c-40de-8dba-98ba4f1ec473",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-04-18T12:30:00+00:00",
+  "home_club_id": "cordoba-athletic-club-m16-a",
+  "away_club_id": "club-palermo-bajo-m16-a",
+  "score": {
+   "away": 24,
+   "home": 27
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club M16 \"A\"",
+  "a": "Club Palermo Bajo M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 27,
+  "sa": 24,
+  "fecha": "2026-04-18"
+ },
+ {
+  "id": "419763ce-a671-40fa-90e5-0bd0a16b3785",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-04-18T13:00:00+00:00",
+  "home_club_id": "tala-rugby-club-m16-a",
+  "away_club_id": "carlos-paz-rugby-club-m16-a",
+  "score": {
+   "away": 0,
+   "home": 29
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club M16 \"A\"",
+  "a": "Carlos Paz Rugby Club M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 29,
+  "sa": 0,
+  "fecha": "2026-04-18"
+ },
+ {
+  "id": "c944cea1-d2fb-4f85-94ba-0c73fab9a3fe",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-04-18T14:30:00+00:00",
+  "home_club_id": "jockey-club-cordoba-m16-a",
+  "away_club_id": "uru-cure-rugby-club-m16-a",
+  "score": {
+   "away": 27,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba M16 \"A\"",
+  "a": "Urú Curé Rugby Club M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 28,
+  "sa": 27,
+  "fecha": "2026-04-18"
+ },
+ {
+  "id": "1c407bc2-2446-444b-ad49-de2685a47737",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-04-18T14:30:00+00:00",
+  "home_club_id": "jockey-club-de-villa-maria-m16-a",
+  "away_club_id": "club-la-tablada-m16-a",
+  "score": {
+   "away": 17,
+   "home": 21
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club de Villa María M16 \"A\"",
+  "a": "Club La Tablada M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 21,
+  "sa": 17,
+  "fecha": "2026-04-18"
+ },
+ {
+  "id": "8d2a0da0-a341-4b91-b1be-001a749629fa",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-04-18T17:30:00+00:00",
+  "home_club_id": "club-universitario-de-cordoba-m16-a",
+  "away_club_id": "san-martin-de-villa-maria-m16-a",
+  "score": {
+   "away": 28,
+   "home": 54
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Universitario de Córdoba M16 \"A\"",
+  "a": "San Martín de Villa María M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 54,
+  "sa": 28,
+  "fecha": "2026-04-18"
+ },
+ {
+  "id": "a2b83ea7-c9ac-47ea-b4ba-db63001b0244",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-04-25T14:30:00+00:00",
+  "home_club_id": "jockey-club-de-villa-maria-m16-a",
+  "away_club_id": "cordoba-athletic-club-m16-a",
+  "score": {
+   "away": 19,
+   "home": 22
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club de Villa María M16 \"A\"",
+  "a": "Córdoba Athletic Club M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 22,
+  "sa": 19,
+  "fecha": "2026-04-25"
+ },
+ {
+  "id": "ecf0f712-b73c-43ed-92fa-58a7d1c23e2f",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-04-25T14:30:00+00:00",
+  "home_club_id": "club-la-tablada-m16-a",
+  "away_club_id": "jockey-club-cordoba-m16-a",
+  "score": {
+   "away": 26,
+   "home": 27
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club La Tablada M16 \"A\"",
+  "a": "Jockey Club Córdoba M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 27,
+  "sa": 26,
+  "fecha": "2026-04-25"
+ },
+ {
+  "id": "f50c5eba-7655-458c-8fb0-9864ff7dbc10",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-04-25T15:30:00+00:00",
+  "home_club_id": "uru-cure-rugby-club-m16-a",
+  "away_club_id": "club-universitario-de-cordoba-m16-a",
+  "score": {
+   "away": 14,
+   "home": 27
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Urú Curé Rugby Club M16 \"A\"",
+  "a": "Club Universitario de Córdoba M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 27,
+  "sa": 14,
+  "fecha": "2026-04-25"
+ },
+ {
+  "id": "bff092f9-bd85-45fd-9efd-0ba853711396",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-04-25T15:45:00+00:00",
+  "home_club_id": "san-martin-de-villa-maria-m16-a",
+  "away_club_id": "tala-rugby-club-m16-a",
+  "score": {
+   "away": 38,
+   "home": 21
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "San Martín de Villa María M16 \"A\"",
+  "a": "Tala Rugby Club M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 21,
+  "sa": 38,
+  "fecha": "2026-04-25"
+ },
+ {
+  "id": "a4b9e668-5246-4600-b132-a547943bdc42",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-04-25T17:05:00+00:00",
+  "home_club_id": "carlos-paz-rugby-club-m16-a",
+  "away_club_id": "club-palermo-bajo-m16-a",
+  "score": {
+   "away": 78,
+   "home": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Carlos Paz Rugby Club M16 \"A\"",
+  "a": "Club Palermo Bajo M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 0,
+  "sa": 78,
+  "fecha": "2026-04-25"
+ },
+ {
+  "id": "8ba8fae6-3e5b-4523-ae77-3aa3e82347d8",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-05-08T23:00:00+00:00",
+  "home_club_id": "cordoba-athletic-club-m16-a",
+  "away_club_id": "carlos-paz-rugby-club-m16-a",
+  "score": {
+   "away": 0,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club M16 \"A\"",
+  "a": "Carlos Paz Rugby Club M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 28,
+  "sa": 0,
+  "fecha": "2026-05-08"
+ },
+ {
+  "id": "218bd8d3-5fa8-44d5-98ef-38e0804e6e9e",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-05-09T14:30:00+00:00",
+  "home_club_id": "club-palermo-bajo-m16-a",
+  "away_club_id": "san-martin-de-villa-maria-m16-a",
+  "score": {
+   "away": 14,
+   "home": 63
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Palermo Bajo M16 \"A\"",
+  "a": "San Martín de Villa María M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 63,
+  "sa": 14,
+  "fecha": "2026-05-09"
+ },
+ {
+  "id": "7473aa1c-1f92-4bcf-a0c4-7d4d0e064d57",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-05-09T14:30:00+00:00",
+  "home_club_id": "tala-rugby-club-m16-a",
+  "away_club_id": "uru-cure-rugby-club-m16-a",
+  "score": {
+   "away": 0,
+   "home": 92
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club M16 \"A\"",
+  "a": "Urú Curé Rugby Club M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 92,
+  "sa": 0,
+  "fecha": "2026-05-09"
+ },
+ {
+  "id": "4176b71f-2ba2-41f2-a690-45434bed9765",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-05-09T14:30:00+00:00",
+  "home_club_id": "jockey-club-cordoba-m16-a",
+  "away_club_id": "jockey-club-de-villa-maria-m16-a",
+  "score": {
+   "away": 17,
+   "home": 36
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba M16 \"A\"",
+  "a": "Jockey Club de Villa María M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 36,
+  "sa": 17,
+  "fecha": "2026-05-09"
+ },
+ {
+  "id": "0c2b6c5a-f330-49df-841e-2bc287cac74d",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-05-09T15:00:00+00:00",
+  "home_club_id": "club-universitario-de-cordoba-m16-a",
+  "away_club_id": "club-la-tablada-m16-a",
+  "score": {
+   "away": 31,
+   "home": 21
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Universitario de Córdoba M16 \"A\"",
+  "a": "Club La Tablada M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 21,
+  "sa": 31,
+  "fecha": "2026-05-09"
+ },
+ {
+  "id": "b991525b-d0e2-4421-969c-716ae562d75f",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-05-16T14:30:00+00:00",
+  "home_club_id": "jockey-club-de-villa-maria-m16-a",
+  "away_club_id": "club-universitario-de-cordoba-m16-a",
+  "score": {
+   "away": 26,
+   "home": 12
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club de Villa María M16 \"A\"",
+  "a": "Club Universitario de Córdoba M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 12,
+  "sa": 26,
+  "fecha": "2026-05-16"
+ },
+ {
+  "id": "288cefc0-8eeb-4bc5-8e02-7d97dc132b10",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-05-16T15:30:00+00:00",
+  "home_club_id": "uru-cure-rugby-club-m16-a",
+  "away_club_id": "club-palermo-bajo-m16-a",
+  "score": {
+   "away": 17,
+   "home": 16
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Urú Curé Rugby Club M16 \"A\"",
+  "a": "Club Palermo Bajo M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 16,
+  "sa": 17,
+  "fecha": "2026-05-16"
+ },
+ {
+  "id": "4e64e104-9a74-4fd3-b573-5d4c4e1ce576",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-05-16T16:00:00+00:00",
+  "home_club_id": "san-martin-de-villa-maria-m16-a",
+  "away_club_id": "carlos-paz-rugby-club-m16-a",
+  "score": {
+   "away": 14,
+   "home": 31
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "San Martín de Villa María M16 \"A\"",
+  "a": "Carlos Paz Rugby Club M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 31,
+  "sa": 14,
+  "fecha": "2026-05-16"
+ },
+ {
+  "id": "1de62ff5-5118-4737-afce-845020421f9f",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-05-16T16:00:00+00:00",
+  "home_club_id": "club-la-tablada-m16-a",
+  "away_club_id": "tala-rugby-club-m16-a",
+  "score": {
+   "away": 28,
+   "home": 14
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club La Tablada M16 \"A\"",
+  "a": "Tala Rugby Club M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 14,
+  "sa": 28,
+  "fecha": "2026-05-16"
+ },
+ {
+  "id": "5ff1ad75-bd81-47e6-ad5a-a3e9178a70e9",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-05-16T17:00:00+00:00",
+  "home_club_id": "jockey-club-cordoba-m16-a",
+  "away_club_id": "cordoba-athletic-club-m16-a",
+  "score": {
+   "away": 22,
+   "home": 5
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba M16 \"A\"",
+  "a": "Córdoba Athletic Club M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 5,
+  "sa": 22,
+  "fecha": "2026-05-16"
+ },
+ {
+  "id": "d9b385aa-e178-4d46-a067-a0916f8eb957",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-05-29T22:30:00+00:00",
+  "home_club_id": "club-palermo-bajo-m16-a",
+  "away_club_id": "club-la-tablada-m16-a",
+  "score": {
+   "away": 22,
+   "home": 25
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Palermo Bajo M16 \"A\"",
+  "a": "Club La Tablada M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 25,
+  "sa": 22,
+  "fecha": "2026-05-29"
+ },
+ {
+  "id": "f37062fc-f3d1-4dec-bef4-8fbb24502d5d",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-05-30T14:00:00+00:00",
+  "home_club_id": "cordoba-athletic-club-m16-a",
+  "away_club_id": "san-martin-de-villa-maria-m16-a",
+  "score": {
+   "away": 7,
+   "home": 73
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club M16 \"A\"",
+  "a": "San Martín de Villa María M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 73,
+  "sa": 7,
+  "fecha": "2026-05-30"
+ },
+ {
+  "id": "6efd086e-cb03-42d6-bf9c-ddbb358f4729",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-05-30T14:30:00+00:00",
+  "home_club_id": "club-universitario-de-cordoba-m16-a",
+  "away_club_id": "jockey-club-cordoba-m16-a",
+  "score": {
+   "away": 31,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Universitario de Córdoba M16 \"A\"",
+  "a": "Jockey Club Córdoba M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 28,
+  "sa": 31,
+  "fecha": "2026-05-30"
+ },
+ {
+  "id": "e6ec0a89-3184-4b74-a304-e51196155d62",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-05-30T15:00:00+00:00",
+  "home_club_id": "tala-rugby-club-m16-a",
+  "away_club_id": "jockey-club-de-villa-maria-m16-a",
+  "score": {
+   "away": 7,
+   "home": 66
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club M16 \"A\"",
+  "a": "Jockey Club de Villa María M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 66,
+  "sa": 7,
+  "fecha": "2026-05-30"
+ },
+ {
+  "id": "70cc227c-964f-43ad-b959-99259c848d96",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-05-30T16:00:00+00:00",
+  "home_club_id": "carlos-paz-rugby-club-m16-a",
+  "away_club_id": "uru-cure-rugby-club-m16-a",
+  "score": {
+   "away": 52,
+   "home": 15
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Carlos Paz Rugby Club M16 \"A\"",
+  "a": "Urú Curé Rugby Club M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 15,
+  "sa": 52,
+  "fecha": "2026-05-30"
+ },
+ {
+  "id": "ad82d7b5-320a-4884-8c2b-1e708f70f277",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-06-06T13:00:00+00:00",
+  "home_club_id": "club-universitario-de-cordoba-m16-a",
+  "away_club_id": "cordoba-athletic-club-m16-a",
+  "score": {
+   "away": 29,
+   "home": 5
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Universitario de Córdoba M16 \"A\"",
+  "a": "Córdoba Athletic Club M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 5,
+  "sa": 29,
+  "fecha": "2026-06-06"
+ },
+ {
+  "id": "26a2bbdc-2a0b-49da-9ce1-6ee450d7d58c",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-06-06T13:00:00+00:00",
+  "home_club_id": "carlos-paz-rugby-club-m16-a",
+  "away_club_id": "club-la-tablada-m16-a",
+  "score": {
+   "away": 28,
+   "home": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Carlos Paz Rugby Club M16 \"A\"",
+  "a": "Club La Tablada M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 0,
+  "sa": 28,
+  "fecha": "2026-06-06"
+ },
+ {
+  "id": "2c3c515b-cc7b-40f2-9d1b-489019fa49df",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-06-06T14:30:00+00:00",
+  "home_club_id": "san-martin-de-villa-maria-m16-a",
+  "away_club_id": "uru-cure-rugby-club-m16-a",
+  "score": {
+   "away": 42,
+   "home": 22
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "San Martín de Villa María M16 \"A\"",
+  "a": "Urú Curé Rugby Club M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 22,
+  "sa": 42,
+  "fecha": "2026-06-06"
+ },
+ {
+  "id": "f2f050c8-a9a8-4b6e-93d8-0057ada5b03a",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-06-06T16:30:00+00:00",
+  "home_club_id": "club-palermo-bajo-m16-a",
+  "away_club_id": "jockey-club-de-villa-maria-m16-a",
+  "score": {
+   "away": 19,
+   "home": 19
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Palermo Bajo M16 \"A\"",
+  "a": "Jockey Club de Villa María M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 19,
+  "sa": 19,
+  "fecha": "2026-06-06"
+ },
+ {
+  "id": "e8169a4f-4bc7-40a7-865c-2b0fb1df2fe0",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-06-06T17:00:00+00:00",
+  "home_club_id": "tala-rugby-club-m16-a",
+  "away_club_id": "jockey-club-cordoba-m16-a",
+  "score": {
+   "away": 42,
+   "home": 52
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club M16 \"A\"",
+  "a": "Jockey Club Córdoba M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 52,
+  "sa": 42,
+  "fecha": "2026-06-06"
+ },
+ {
+  "id": "3f960b77-2357-400d-ad1c-6ca691dab8a3",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-06-18T22:00:00+00:00",
+  "home_club_id": "club-universitario-de-cordoba-m16-a",
+  "away_club_id": "tala-rugby-club-m16-a",
+  "score": {
+   "away": 29,
+   "home": 19
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Universitario de Córdoba M16 \"A\"",
+  "a": "Tala Rugby Club M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 19,
+  "sa": 29,
+  "fecha": "2026-06-18"
+ },
+ {
+  "id": "4fe9e93b-3ea7-46d8-98c3-d0ed33ee4895",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-06-20T14:30:00+00:00",
+  "home_club_id": "cordoba-athletic-club-m16-a",
+  "away_club_id": "uru-cure-rugby-club-m16-a",
+  "score": {
+   "away": 37,
+   "home": 40
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club M16 \"A\"",
+  "a": "Urú Curé Rugby Club M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 40,
+  "sa": 37,
+  "fecha": "2026-06-20"
+ },
+ {
+  "id": "b331aeb0-560f-4c5a-970e-0e1c3540ee3b",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-06-20T15:30:00+00:00",
+  "home_club_id": "club-la-tablada-m16-a",
+  "away_club_id": "san-martin-de-villa-maria-m16-a",
+  "score": {
+   "away": 12,
+   "home": 53
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club La Tablada M16 \"A\"",
+  "a": "San Martín de Villa María M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 53,
+  "sa": 12,
+  "fecha": "2026-06-20"
+ },
+ {
+  "id": "41deef11-e0ca-4d1a-8daf-a9fd2bebae13",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-06-20T15:40:00+00:00",
+  "home_club_id": "jockey-club-cordoba-m16-a",
+  "away_club_id": "club-palermo-bajo-m16-a",
+  "score": {
+   "away": 32,
+   "home": 14
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba M16 \"A\"",
+  "a": "Club Palermo Bajo M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 14,
+  "sa": 32,
+  "fecha": "2026-06-20"
+ },
+ {
+  "id": "4935462e-5bc5-4b46-8b3a-a72133761aee",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-06-20T17:45:00+00:00",
+  "home_club_id": "jockey-club-de-villa-maria-m16-a",
+  "away_club_id": "carlos-paz-rugby-club-m16-a",
+  "score": {
+   "away": 5,
+   "home": 115
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club de Villa María M16 \"A\"",
+  "a": "Carlos Paz Rugby Club M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 115,
+  "sa": 5,
+  "fecha": "2026-06-20"
+ },
+ {
+  "id": "8a4e5d10-4b11-4662-9caf-970c2395999d",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-06-26T23:00:00+00:00",
+  "home_club_id": "carlos-paz-rugby-club-m16-a",
+  "away_club_id": "jockey-club-cordoba-m16-a",
+  "score": {
+   "away": 28,
+   "home": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Carlos Paz Rugby Club M16 \"A\"",
+  "a": "Jockey Club Córdoba M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 0,
+  "sa": 28,
+  "fecha": "2026-06-26"
+ },
+ {
+  "id": "ba56858e-18a8-49e7-a627-6e3d7f4211b9",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-06-27T14:00:00+00:00",
+  "home_club_id": "club-palermo-bajo-m16-a",
+  "away_club_id": "club-universitario-de-cordoba-m16-a",
+  "score": {
+   "away": 15,
+   "home": 29
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Palermo Bajo M16 \"A\"",
+  "a": "Club Universitario de Córdoba M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 29,
+  "sa": 15,
+  "fecha": "2026-06-27"
+ },
+ {
+  "id": "bc362b8a-b7af-4b71-ad9e-2aaffb538702",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-06-27T15:00:00+00:00",
+  "home_club_id": "tala-rugby-club-m16-a",
+  "away_club_id": "cordoba-athletic-club-m16-a",
+  "score": {
+   "away": 27,
+   "home": 24
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club M16 \"A\"",
+  "a": "Córdoba Athletic Club M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 24,
+  "sa": 27,
+  "fecha": "2026-06-27"
+ },
+ {
+  "id": "3a1165f6-7061-4367-a162-2d8492d9d13d",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-06-27T15:30:00+00:00",
+  "home_club_id": "uru-cure-rugby-club-m16-a",
+  "away_club_id": "club-la-tablada-m16-a",
+  "score": {
+   "away": 32,
+   "home": 27
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Urú Curé Rugby Club M16 \"A\"",
+  "a": "Club La Tablada M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 27,
+  "sa": 32,
+  "fecha": "2026-06-27"
+ },
+ {
+  "id": "c835ac34-2a00-4c79-b32b-0f453b889a4f",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-06-27T16:45:00+00:00",
+  "home_club_id": "san-martin-de-villa-maria-m16-a",
+  "away_club_id": "jockey-club-de-villa-maria-m16-a",
+  "score": {
+   "away": 38,
+   "home": 7
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "San Martín de Villa María M16 \"A\"",
+  "a": "Jockey Club de Villa María M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 7,
+  "sa": 38,
+  "fecha": "2026-06-27"
+ },
+ {
+  "id": "0fc282f5-5614-434e-a286-082e3f7ef0da",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-07-25T00:00:00+00:00",
+  "home_club_id": "club-universitario-de-cordoba-m16-a",
+  "away_club_id": "carlos-paz-rugby-club-m16-a",
+  "score": {
+   "away": 7,
+   "home": 66
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Universitario de Córdoba M16 \"A\"",
+  "a": "Carlos Paz Rugby Club M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 66,
+  "sa": 7,
+  "fecha": "2026-07-24"
+ },
+ {
+  "id": "6ae7d4ee-b23f-4698-8fd1-b1a634c3b03b",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-07-25T14:00:00+00:00",
+  "home_club_id": "cordoba-athletic-club-m16-a",
+  "away_club_id": "club-la-tablada-m16-a",
+  "score": {
+   "away": 12,
+   "home": 17
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club M16 \"A\"",
+  "a": "Club La Tablada M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 17,
+  "sa": 12,
+  "fecha": "2026-07-25"
+ },
+ {
+  "id": "eb758261-8641-4e55-9a7d-e029fd07f138",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-07-25T14:00:00+00:00",
+  "home_club_id": "jockey-club-cordoba-m16-a",
+  "away_club_id": "san-martin-de-villa-maria-m16-a",
+  "score": {
+   "away": 12,
+   "home": 45
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba M16 \"A\"",
+  "a": "San Martín de Villa María M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 45,
+  "sa": 12,
+  "fecha": "2026-07-25"
+ },
+ {
+  "id": "acebd517-6ea4-4933-acae-22903f370ef5",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-07-25T14:00:00+00:00",
+  "home_club_id": "tala-rugby-club-m16-a",
+  "away_club_id": "club-palermo-bajo-m16-a",
+  "score": {
+   "away": 22,
+   "home": 26
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club M16 \"A\"",
+  "a": "Club Palermo Bajo M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 26,
+  "sa": 22,
+  "fecha": "2026-07-25"
+ },
+ {
+  "id": "e732a756-4d18-4702-a5e0-5d797d1728a9",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-07-25T14:30:00+00:00",
+  "home_club_id": "jockey-club-de-villa-maria-m16-a",
+  "away_club_id": "uru-cure-rugby-club-m16-a",
+  "score": {
+   "away": 33,
+   "home": 49
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club de Villa María M16 \"A\"",
+  "a": "Urú Curé Rugby Club M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 49,
+  "sa": 33,
+  "fecha": "2026-07-25"
+ },
+ {
+  "id": "068f0175-f72a-4e30-8199-eccdecf0afce",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-08-01T14:00:00+00:00",
+  "home_club_id": "club-palermo-bajo-m16-a",
+  "away_club_id": "cordoba-athletic-club-m16-a",
+  "score": {
+   "away": 24,
+   "home": 24
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Palermo Bajo M16 \"A\"",
+  "a": "Córdoba Athletic Club M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 24,
+  "sa": 24,
+  "fecha": "2026-08-01"
+ },
+ {
+  "id": "f521fd17-aa78-4adb-9f99-eaeaf750c6af",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-08-01T15:30:00+00:00",
+  "home_club_id": "carlos-paz-rugby-club-m16-a",
+  "away_club_id": "tala-rugby-club-m16-a",
+  "score": {
+   "away": 94,
+   "home": 10
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Carlos Paz Rugby Club M16 \"A\"",
+  "a": "Tala Rugby Club M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 10,
+  "sa": 94,
+  "fecha": "2026-08-01"
+ },
+ {
+  "id": "ac1bd9c2-d074-45e6-b420-cf18c3a12728",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-08-01T17:00:00+00:00",
+  "home_club_id": "san-martin-de-villa-maria-m16-a",
+  "away_club_id": "club-universitario-de-cordoba-m16-a",
+  "score": {
+   "away": 74,
+   "home": 7
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "San Martín de Villa María M16 \"A\"",
+  "a": "Club Universitario de Córdoba M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 7,
+  "sa": 74,
+  "fecha": "2026-08-01"
+ },
+ {
+  "id": "f761ae64-2080-434e-ae8c-36b99ff2130f",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-08-01T18:30:00+00:00",
+  "home_club_id": "uru-cure-rugby-club-m16-a",
+  "away_club_id": "jockey-club-cordoba-m16-a",
+  "score": {
+   "away": 31,
+   "home": 45
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Urú Curé Rugby Club M16 \"A\"",
+  "a": "Jockey Club Córdoba M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 45,
+  "sa": 31,
+  "fecha": "2026-08-01"
+ },
+ {
+  "id": "9be71d95-c8ba-4e69-9819-a4f468e79691",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-08-01T18:30:00+00:00",
+  "home_club_id": "club-la-tablada-m16-a",
+  "away_club_id": "jockey-club-de-villa-maria-m16-a",
+  "score": {
+   "away": 35,
+   "home": 50
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club La Tablada M16 \"A\"",
+  "a": "Jockey Club de Villa María M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 50,
+  "sa": 35,
+  "fecha": "2026-08-01"
+ },
+ {
+  "id": "2b8bc6e8-de10-45bb-a565-7490f061410a",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-08-07T23:00:00+00:00",
+  "home_club_id": "club-palermo-bajo-m16-a",
+  "away_club_id": "carlos-paz-rugby-club-m16-a",
+  "score": {
+   "away": 24,
+   "home": 50
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Palermo Bajo M16 \"A\"",
+  "a": "Carlos Paz Rugby Club M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 50,
+  "sa": 24,
+  "fecha": "2026-08-07"
+ },
+ {
+  "id": "59248378-7abb-43c9-a14b-464b407560c0",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-08-08T15:00:00+00:00",
+  "home_club_id": "cordoba-athletic-club-m16-a",
+  "away_club_id": "jockey-club-de-villa-maria-m16-a",
+  "score": {
+   "away": 12,
+   "home": 63
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club M16 \"A\"",
+  "a": "Jockey Club de Villa María M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 63,
+  "sa": 12,
+  "fecha": "2026-08-08"
+ },
+ {
+  "id": "5d2d37c3-db0b-4d52-91f0-a896d0981c6a",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-08-08T15:00:00+00:00",
+  "home_club_id": "jockey-club-cordoba-m16-a",
+  "away_club_id": "club-la-tablada-m16-a",
+  "score": {
+   "away": 15,
+   "home": 14
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba M16 \"A\"",
+  "a": "Club La Tablada M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 14,
+  "sa": 15,
+  "fecha": "2026-08-08"
+ },
+ {
+  "id": "83f3ca1e-4db7-4e4c-b356-03f4a8fdbb78",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-08-08T15:30:00+00:00",
+  "home_club_id": "club-universitario-de-cordoba-m16-a",
+  "away_club_id": "uru-cure-rugby-club-m16-a",
+  "score": {
+   "away": 31,
+   "home": 37
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Universitario de Córdoba M16 \"A\"",
+  "a": "Urú Curé Rugby Club M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 37,
+  "sa": 31,
+  "fecha": "2026-08-08"
+ },
+ {
+  "id": "894502f1-0df2-4273-b788-1a964a81f63e",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-08-08T15:30:00+00:00",
+  "home_club_id": "tala-rugby-club-m16-a",
+  "away_club_id": "san-martin-de-villa-maria-m16-a",
+  "score": {
+   "away": 7,
+   "home": 75
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club M16 \"A\"",
+  "a": "San Martín de Villa María M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 75,
+  "sa": 7,
+  "fecha": "2026-08-08"
+ },
+ {
+  "id": "11563a81-7167-4958-b283-4d8565e226bb",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-08-21T22:00:00+00:00",
+  "home_club_id": "uru-cure-rugby-club-m16-a",
+  "away_club_id": "tala-rugby-club-m16-a",
+  "score": {
+   "away": 40,
+   "home": 33
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Urú Curé Rugby Club M16 \"A\"",
+  "a": "Tala Rugby Club M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 33,
+  "sa": 40,
+  "fecha": "2026-08-21"
+ },
+ {
+  "id": "612757f9-5366-4819-a397-913433a4bf2d",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-08-21T23:00:00+00:00",
+  "home_club_id": "carlos-paz-rugby-club-m16-a",
+  "away_club_id": "cordoba-athletic-club-m16-a",
+  "score": {
+   "away": 66,
+   "home": 7
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Carlos Paz Rugby Club M16 \"A\"",
+  "a": "Córdoba Athletic Club M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 7,
+  "sa": 66,
+  "fecha": "2026-08-21"
+ },
+ {
+  "id": "ccb86195-a905-482e-aa08-55e26f8a4f6f",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-08-22T00:00:00+00:00",
+  "home_club_id": "club-la-tablada-m16-a",
+  "away_club_id": "club-universitario-de-cordoba-m16-a",
+  "score": {
+   "away": 22,
+   "home": 25
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club La Tablada M16 \"A\"",
+  "a": "Club Universitario de Córdoba M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 25,
+  "sa": 22,
+  "fecha": "2026-08-21"
+ },
+ {
+  "id": "b74e5ddd-7bdc-4b21-b25d-b9949d8082ae",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-08-22T14:00:00+00:00",
+  "home_club_id": "san-martin-de-villa-maria-m16-a",
+  "away_club_id": "club-palermo-bajo-m16-a",
+  "score": {
+   "away": 27,
+   "home": 12
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "San Martín de Villa María M16 \"A\"",
+  "a": "Club Palermo Bajo M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 12,
+  "sa": 27,
+  "fecha": "2026-08-22"
+ },
+ {
+  "id": "cab3757c-e321-4d23-9796-f8dedb000622",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-08-22T14:30:00+00:00",
+  "home_club_id": "jockey-club-de-villa-maria-m16-a",
+  "away_club_id": "jockey-club-cordoba-m16-a",
+  "score": {
+   "away": 19,
+   "home": 20
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club de Villa María M16 \"A\"",
+  "a": "Jockey Club Córdoba M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 20,
+  "sa": 19,
+  "fecha": "2026-08-22"
+ },
+ {
+  "id": "2820101a-5429-4b33-a2a1-611cf6688035",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-08-28T23:00:00+00:00",
+  "home_club_id": "cordoba-athletic-club-m16-a",
+  "away_club_id": "jockey-club-cordoba-m16-a",
+  "score": {
+   "away": 19,
+   "home": 34
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club M16 \"A\"",
+  "a": "Jockey Club Córdoba M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 34,
+  "sa": 19,
+  "fecha": "2026-08-28"
+ },
+ {
+  "id": "61c6a1f8-cf2f-4f9e-bb1b-9350ebb9a288",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-08-29T12:30:00+00:00",
+  "home_club_id": "club-universitario-de-cordoba-m16-a",
+  "away_club_id": "jockey-club-de-villa-maria-m16-a",
+  "score": {
+   "away": 48,
+   "home": 20
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Universitario de Córdoba M16 \"A\"",
+  "a": "Jockey Club de Villa María M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 20,
+  "sa": 48,
+  "fecha": "2026-08-29"
+ },
+ {
+  "id": "1f9d646d-68ad-4ac8-b2c3-940025d41a41",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-08-29T14:00:00+00:00",
+  "home_club_id": "tala-rugby-club-m16-a",
+  "away_club_id": "club-la-tablada-m16-a",
+  "score": {
+   "away": 15,
+   "home": 15
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club M16 \"A\"",
+  "a": "Club La Tablada M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 15,
+  "sa": 15,
+  "fecha": "2026-08-29"
+ },
+ {
+  "id": "40d334c2-68bc-4837-a3fc-2998cfd8376b",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-08-29T15:00:00+00:00",
+  "home_club_id": "carlos-paz-rugby-club-m16-a",
+  "away_club_id": "san-martin-de-villa-maria-m16-a",
+  "score": {
+   "away": 53,
+   "home": 17
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Carlos Paz Rugby Club M16 \"A\"",
+  "a": "San Martín de Villa María M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 17,
+  "sa": 53,
+  "fecha": "2026-08-29"
+ },
+ {
+  "id": "cfa1d736-7ad8-49ca-b5b7-a1f72a708ed8",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-08-29T16:00:00+00:00",
+  "home_club_id": "club-palermo-bajo-m16-a",
+  "away_club_id": "uru-cure-rugby-club-m16-a",
+  "score": {
+   "away": 22,
+   "home": 50
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Palermo Bajo M16 \"A\"",
+  "a": "Urú Curé Rugby Club M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 50,
+  "sa": 22,
+  "fecha": "2026-08-29"
+ },
+ {
+  "id": "6be0e983-c03e-42a5-95e2-dd61e06a349e",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-09-12T12:30:00+00:00",
+  "home_club_id": "jockey-club-de-villa-maria-m16-a",
+  "away_club_id": "tala-rugby-club-m16-a",
+  "score": {
+   "away": 25,
+   "home": 19
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club de Villa María M16 \"A\"",
+  "a": "Tala Rugby Club M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 19,
+  "sa": 25,
+  "fecha": "2026-09-12"
+ },
+ {
+  "id": "e2435868-0bcd-4895-92db-c901770034fd",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-09-12T12:30:00+00:00",
+  "home_club_id": "jockey-club-cordoba-m16-a",
+  "away_club_id": "club-universitario-de-cordoba-m16-a",
+  "score": {
+   "away": 25,
+   "home": 24
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba M16 \"A\"",
+  "a": "Club Universitario de Córdoba M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 24,
+  "sa": 25,
+  "fecha": "2026-09-12"
+ },
+ {
+  "id": "96f9fb7c-479c-401d-ad39-5d9cc95c9fc6",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-09-12T15:30:00+00:00",
+  "home_club_id": "san-martin-de-villa-maria-m16-a",
+  "away_club_id": "cordoba-athletic-club-m16-a",
+  "score": {
+   "away": 45,
+   "home": 19
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "San Martín de Villa María M16 \"A\"",
+  "a": "Córdoba Athletic Club M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 19,
+  "sa": 45,
+  "fecha": "2026-09-12"
+ },
+ {
+  "id": "5ec6a26a-2df3-4d85-ad6b-0ee095359fad",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-09-12T17:00:00+00:00",
+  "home_club_id": "uru-cure-rugby-club-m16-a",
+  "away_club_id": "carlos-paz-rugby-club-m16-a",
+  "score": {
+   "away": 15,
+   "home": 36
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Urú Curé Rugby Club M16 \"A\"",
+  "a": "Carlos Paz Rugby Club M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 36,
+  "sa": 15,
+  "fecha": "2026-09-12"
+ },
+ {
+  "id": "0fad5ca0-8835-4ea7-9d92-30c37ae781e5",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-09-12T17:00:00+00:00",
+  "home_club_id": "club-la-tablada-m16-a",
+  "away_club_id": "club-palermo-bajo-m16-a",
+  "score": {
+   "away": 33,
+   "home": 3
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club La Tablada M16 \"A\"",
+  "a": "Club Palermo Bajo M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 3,
+  "sa": 33,
+  "fecha": "2026-09-12"
+ },
+ {
+  "id": "6ba8338b-c421-4361-800f-d39eecac58b2",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-09-26T14:30:00+00:00",
+  "home_club_id": "cordoba-athletic-club-m16-a",
+  "away_club_id": "uru-cure-rugby-club-m16-a",
+  "score": {
+   "away": 22,
+   "home": 28
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club M16 \"A\"",
+  "a": "Urú Curé Rugby Club M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 28,
+  "sa": 22,
+  "fecha": "2026-09-26"
+ },
+ {
+  "id": "e60074de-149b-4076-b3ad-d416db02ec0d",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-09-26T16:30:00+00:00",
+  "home_club_id": "club-la-tablada-m16-a",
+  "away_club_id": "jockey-club-de-villa-maria-m16-a",
+  "score": {
+   "away": 24,
+   "home": 40
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club La Tablada M16 \"A\"",
+  "a": "Jockey Club de Villa María M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 40,
+  "sa": 24,
+  "fecha": "2026-09-26"
+ },
+ {
+  "id": "1ce9a805-58dc-4f2a-80b4-a55988f12758",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-10-10T13:30:00+00:00",
+  "home_club_id": "club-palermo-bajo-m16-a",
+  "away_club_id": "club-la-tablada-m16-a",
+  "score": {
+   "away": 39,
+   "home": 27
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Palermo Bajo M16 \"A\"",
+  "a": "Club La Tablada M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 27,
+  "sa": 39,
+  "fecha": "2026-10-10"
+ },
+ {
+  "id": "b7a4a6b4-da46-4ffd-8972-04f9d26d4da1",
+  "tournament_id": "a146b28f-a784-426e-96d3-8bc220d2e80f",
+  "date_time": "2026-10-10T15:00:00+00:00",
+  "home_club_id": "tala-rugby-club-m16-a",
+  "away_club_id": "cordoba-athletic-club-m16-a",
+  "score": {
+   "away": 10,
+   "home": 45
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club M16 \"A\"",
+  "a": "Córdoba Athletic Club M16 \"A\"",
+  "torneo": "torneo-cordobes-m16-a",
+  "sh": 45,
+  "sa": 10,
+  "fecha": "2026-10-10"
+ }
+]

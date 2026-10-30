@@ -9,6 +9,7 @@
 // tamaño y de destino: nada de IPs, localhost ni dominios internos.
 
 import { extractMetaImage } from '@/lib/matches/pageMeta';
+import { parseSafeHttpUrl, safeFetch, SafeFetchError } from '@/lib/server/safeFetch';
 import {
     isSafeHttpUrl,
     needsThumbnailLookup,
@@ -37,15 +38,10 @@ export type ThumbnailLookup = string | null | undefined;
 
 type Fetched = { finalUrl: string; body: string };
 
-export function isFetchableHost(hostname: string): boolean {
-    const host = hostname.toLowerCase();
-    if (!host.includes('.')) return false;
-    if (host === 'localhost' || host.endsWith('.localhost') || host.endsWith('.local') || host.endsWith('.internal')) return false;
-    if (/^\d{1,3}(\.\d{1,3}){3}$/.test(host)) return false; // IPv4 literal
-    if (host.includes(':') || host.startsWith('[')) return false; // IPv6 literal
-    return true;
-}
-
+// Antes había acá un filtro LÉXICO del host (sin IPs literales, sin localhost) y un
+// `redirect: 'follow'`: un dominio público que resolviera a 10.x, o que redirigiera a
+// 169.254.169.254, pasaba igual. El destino ahora lo valida `safeFetch` al conectar y
+// en cada salto.
 async function readCapped(response: Response): Promise<string> {
     const reader = response.body?.getReader();
     if (!reader) return '';
@@ -65,32 +61,36 @@ async function readCapped(response: Response): Promise<string> {
 
 /** null = respondió pero no sirve (4xx, destino vedado) · undefined = no se pudo consultar. */
 async function fetchOnce(target: URL, accept: string, userAgent: string): Promise<Fetched | null | undefined> {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
     try {
-        const response = await fetch(target.toString(), {
+        const { response, url: finalUrl } = await safeFetch(target, {
             headers: {
                 'user-agent': userAgent,
                 accept,
                 'accept-language': 'es-AR,es;q=0.9,en;q=0.7',
             },
-            redirect: 'follow',
-            signal: controller.signal,
-            cache: 'no-store',
+            maxRedirects: 3,
+            timeoutMs: FETCH_TIMEOUT_MS,
         });
 
-        const finalUrl = response.url || target.toString();
-        if (!isFetchableHost(new URL(finalUrl).hostname)) return null;
-        if (response.status >= 400 && response.status < 500) return null;
+        if (response.status >= 400 && response.status < 500) {
+            await response.body?.cancel().catch(() => undefined);
+            return null;
+        }
         // Solo un 200 cuenta como "consultado": un 202 (desafío anti-bot) o un
         // 5xx no dicen nada sobre la portada.
-        if (response.status !== 200) return undefined;
+        if (response.status !== 200) {
+            await response.body?.cancel().catch(() => undefined);
+            return undefined;
+        }
 
         return { finalUrl, body: await readCapped(response) };
-    } catch {
+    } catch (error) {
+        // Destino vedado (IP privada, redirect a la red interna, URL rara): es una
+        // respuesta definitiva, no se reintenta. Red y tiempo sí.
+        if (error instanceof SafeFetchError && (error.code === 'blocked_destination' || error.code === 'invalid_url')) {
+            return null;
+        }
         return undefined;
-    } finally {
-        clearTimeout(timer);
     }
 }
 
@@ -102,7 +102,7 @@ async function fetchCapped(url: string, accept: string): Promise<Fetched | null 
     } catch {
         return null;
     }
-    if (!isFetchableHost(target.hostname)) return null;
+    if (!parseSafeHttpUrl(target)) return null;
 
     let sawRejection = false;
     for (const userAgent of USER_AGENTS) {

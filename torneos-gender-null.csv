@@ -1,0 +1,69 @@
+﻿id,name,sport_id,category,age_grade,union_id,sugerencia_detectada
+7868d964-711d-48c9-a7f8-bca621d90b08,Copa Panamericana Jr. Masculina,field-hockey,"",Mayores,39b95e30-ede4-48e1-a5e5-588b0fb3eb3c,masculino
+4cd7a620-3783-45c2-9d9b-ffc867b788d4,PRO LEAGUE 2025-26 MASCULINO,field-hockey,Profesional,Mayores,confederacion-argentina-de-hockey,masculino
+a63fc7c4-707e-4c15-9191-ea0d38875baa,"Super Liga Hockey Fase 1 Caballeros ""A"" Centro Cuyo",field-hockey,Profesional,Mayores,"",masculino
+3e242455-77fc-4f9c-acd3-819156b5c22a,SUPER LIGA HOCKEY ZONA 2  CABALLEROS,field-hockey,Amateur,Mayores,"",masculino
+13fc8ae1-ae04-48bc-8e6d-1fcf720dd6a4,Super Liga Hockey Zona 2 Caballeros,field-hockey,Amateur,Mayores,confederacion-argentina-de-hockey,masculino
+3e43de84-9c68-4f9e-b712-1752bd3496cc,TORNEO CABALLEROS CÓRDOBA,field-hockey,Profesional,Mayores (Adults),federacion-cordobesa-de-hockey,masculino
+a8db0ea3-58d5-4693-bc89-51f526e9276f,Torneo Metropolitano - Caballeros,field-hockey,"",Mayores,asociacion-amateur-de-hockey-sobre-cesped-buenos-aires,masculino
+c7902ce5-d8a6-4455-b11d-7d104352e4e8,Asia Rugby Championship Womens,rugby,Profesional,Mayores (Adults),asia-rugby,femenino
+2ab697f1-057e-4c29-bd4a-6183f114804b,Rugby Premier League W,rugby,Profesional,Mayores (Adults),india-rugby-union,femenino
+a2afda69-d45a-40f5-9432-3e1086e80a6a,Six Nations Festival U18 W,rugby,"",Mayores,"",femenino
+991f1733-1c72-433a-9dbc-70dca5451bea,SVNS 2 - Masculino,rugby,"",Mayores,a2b73419-9c85-4d39-82fe-9b04b87b2500,masculino
+fc8622f7-f145-4c03-ad2c-46b0b2cc46da,Women's Rugby Europe Championship,rugby,"",Mayores,b46b7594-4049-4fde-85af-e14f6b1b10eb,femenino
+e9c55f36-43b5-47ea-8cb5-95f2cd6fb737,COPA CÓRDOBA 2026,field-hockey,Profesional,Mayores (Adults),federacion-cordobesa-de-hockey,""
+1adecb35-b00d-44d9-adf6-5b4b98b3c240,Super Liga de Hockey Zona 4,field-hockey,Amateur,Mayores (Adults),confederacion-argentina-de-hockey,""
+11111111-1111-1111-1111-111111111111,Liga Profesional 2026,football,"","","",""
+ef49cd90-c407-4a79-bf9f-e2b5b693f575,Amistoso Internacional,rugby,"",Mayores,a2b73419-9c85-4d39-82fe-9b04b87b2500,""
+271638cc-3351-42ce-81bd-ef091e82515d,Apertura - Super Uru de Clubes,rugby,"",Mayores,uru-rugby,""
+0ccbdee1-3257-4d51-a526-3610577a4678,Clasificatorio Europeo Under 18,rugby,Profesional,U18,b46b7594-4049-4fde-85af-e14f6b1b10eb,""
+166c2906-4a73-4354-a8c4-c64342ed875d,Copa Oro del Oeste,rugby,Profesional,Mayores (Adults),40159cd1-5876-4720-b953-d639b09d5f5b,""
+9bd1fc54-f686-4b06-a6c4-aaa2badb894b,Copa Oro URS,rugby,"",Mayores,union-de-rugby-del-sur,""
+8e21ce2b-459c-40f5-8012-d0968d6a4d95,Copa Plata del Oeste,rugby,Profesional,Mayores (Adults),40159cd1-5876-4720-b953-d639b09d5f5b,""
+1d302e7a-a9e7-40bb-ae86-4c7fd31d41db,FISU AMERICA GAMES,rugby,Profesional,Mayores (Adults),fisu,""
+aa87d200-4fd0-4754-ba2a-c4246758d81b,International Series U20,rugby,Profesional,U20,a2b73419-9c85-4d39-82fe-9b04b87b2500,""
+5066a11d-8b44-4e50-8481-b46ce5b18ed8,Junior World Championship,rugby,Profesional,Juveniles,a2b73419-9c85-4d39-82fe-9b04b87b2500,""
+fa737808-79e1-4667-90e4-65972051902f,Liga Norte Grande,rugby,"",Mayores (Adults),4263f793-04d6-4dd9-9b43-b7e9823bf721,""
+e5c74c61-ff94-4091-9773-ec7303088fdc,"Primera ""A"" de la URBA",rugby,"",Mayores (Adults),urba,""
+797e1b94-6397-4d73-a676-c166e40be5a9,"Primera ""B"" de la URBA",rugby,"",Mayores,urba,""
+d1c0af07-36ee-4234-8678-53fef1931e4f,"Primera ""C"" de la URBA",rugby,"",Mayores,urba,""
+f29e910b-d71c-4b37-aaeb-f2834eccfd1b,Provincial de Mendoza,rugby,Primera División,Mayores,40159cd1-5876-4720-b953-d639b09d5f5b,""
+e76e2d5a-9fa0-4fcd-8374-f1ae955dff77,Rugby Championship U20,rugby,Profesional,Juveniles,"",""
+1f4e8c2c-4956-4cca-9675-ce12e6796888,Rugby Championship U20 2024,rugby,Profesional,Juveniles,"",""
+f8e7cc5f-a435-4b43-ab2d-e0b046e92fb2,Rugby Championship U20 2025,rugby,Profesional,Juveniles,"",""
+e012c0f2-bef1-4bef-a4c0-1817e3c9a64a,Rugby Championship U20 2025,rugby,Profesional,Juveniles,"",""
+f9094d92-873f-4a23-ae09-2793760731f6,Rugby Championship U20 2025,rugby,Profesional,Juveniles,"",""
+bb064f9b-90d9-4a72-a422-f63101ec4241,Rugby Premier League,rugby,Profesional,Mayores (Adults),india-rugby-union,""
+b12830fd-1cdc-4362-9cb5-ae5fbf8ad194,Segunda División de ARUSA,rugby,"",Mayores,arusa,""
+7b678546-19e5-4145-9664-abedf37589a3,Six Nations U18,rugby,"",Mayores,b46b7594-4049-4fde-85af-e14f6b1b10eb,""
+aa8f3421-b216-488d-a360-2b7f128f315f,Sudamericano M18,rugby,"",Mayores (Adults),4edd19cb-d935-4710-a27a-f248fc87d7f3,""
+b6ed4086-2e75-4e68-962b-2d2363c9694c,"Súper 9 ""B""",rugby,"",Mayores (Adults),0c515ac1-af49-4699-b3c5-7273bc424357,""
+f76e47e2-5f9c-4f39-8f06-f6137f5a2846,Super Rugby Americas,rugby,"",Mayores,4edd19cb-d935-4710-a27a-f248fc87d7f3,""
+f7e35b62-116d-4269-942b-cfbc4d7380f1,Test Cache Invalidacion 2026,rugby,Profesional,Mayores (Adults),"",""
+43435cdc-9382-40eb-b7e1-5c640da832f0,Test Knockout Bracket 2026,rugby,Profesional,Mayores (Adults),"",""
+4de36108-63ff-4382-9f30-ecfa451ac2f1,Test Knockout Fix Bracket 2026,rugby,Profesional,Mayores (Adults),"",""
+c0abedaa-2ff1-48a1-af5a-cb1bf26587dc,Test Torneo Auto-QA 2026,rugby,Profesional,Mayores (Adults),"",""
+e0642471-423a-4a4f-af6b-3a8b60b91e71,Top 10 de ARUSA,rugby,"",Mayores,arusa,""
+55f28144-3d92-484b-a57d-646e06740808,Top 10 del Centro,rugby,Primera División,Mayores,0c515ac1-af49-4699-b3c5-7273bc424357,""
+d29703d0-125c-44a1-ab38-137450935a6e,Top 14 de la URBA,rugby,"",Mayores,urba,""
+67ded7cb-50f5-4518-9da1-f72520c26ca3,Torneo Anual Tucumano,rugby,"",Mayores,e558d0d9-c01b-40ce-a1c7-e533cb81f97c,""
+414377f0-1a7a-4a49-96a8-8ca34f94b6d0,"Torneo Anual Tucumano ""B""",rugby,Profesional,Mayores (Adults),e558d0d9-c01b-40ce-a1c7-e533cb81f97c,""
+9f46c4b5-a2f0-448e-8fa5-b043ffa8f274,Torneo David Werentizky,rugby,Juvenil,Juveniles,union-argentina-de-rugby,""
+0d6ecc59-7e35-42b2-9ce0-4f1ec858faa7,Torneo de Prueba 1,rugby,Profesional,Mayores (Adults),"",""
+ed986d61-7389-48e5-b478-c1703b0e8379,"Torneo del Interior ""A""",rugby,"",Mayores (Adults),union-argentina-de-rugby,""
+e2712855-36f4-4363-978e-5036af5c5449,"Torneo del Interior ""B""",rugby,"",Mayores (Adults),union-argentina-de-rugby,""
+0afb0f5c-15b4-417e-a436-f8626cc34cc5,Torneo Local de la Unión Austral,rugby,"",Mayores,union-austral,""
+685a9feb-bda4-41f8-b527-720e903c1bbd,Torneo Local de la URNE,rugby,"",Mayores (Adults),urne,""
+a04c8459-a254-4158-9f00-88c082f494d3,Torneo Local de Mar del Plata,rugby,"",Mayores (Adults),union-de-rugby-de-mar-del-plata,""
+38a78f38-0a2b-46b9-8c55-fe3f3bcf61ca,Torneo Oficial Chubut,rugby,"",Mayores,union-de-rugby-del-valle-del-chubut,""
+52fe4daf-322d-438d-832d-0f0c2601bf57,Torneo Provincial de San Juan,rugby,Primera División,Mayores,765e6c46-b1c1-4e44-8490-aa0085ebeb99,""
+b1ba2ecc-06e3-400f-9a45-1385321aad46,"Torneo Regional del Litoral ""A""",rugby,"",Mayores (Adults),a37639f8-197c-44c6-a095-2f16f40d7b04,""
+b28a55ac-b372-4b89-ba81-ee43232abffb,"Torneo Regional Del Litoral ""B""",rugby,"",Mayores (Adults),a37639f8-197c-44c6-a095-2f16f40d7b04,""
+594fcb55-b052-4a8f-bf24-5a288e35e4f5,Torneo Regional Pampeano,rugby,Profesional,Mayores (Adults),union-de-rugby-de-mar-del-plata,""
+0c774fd6-7153-403d-9d33-b1a4f8516a63,Torneo Regional Patagónico,rugby,"",Mayores (Adults),union-de-rugby-de-alto-valle,""
+b0562cf3-4ea1-463e-86cb-86988dc22f10,Torneo Regionale del NEA,rugby,Profesional,Mayores (Adults),urne,""
+a5e3b1f2-c5c3-4ea4-b6bf-28ccfa3261d6,Unions Cup,rugby,Profesional,Mayores (Adults),asia-rugby,""
+78d168c6-a71f-4726-89f9-44235dd6e5c4,"URBA: Menores de 17 - G2 NIVEL 1 ""A""",rugby,Menores de 17,Juveniles,"",""
+c9515ca4-4a69-454c-83ac-1760b1891943,"URBA: Menores de 17 - G2 NIVEL 1 ""B""",rugby,Menores de 17,Juveniles,"",""
+b68ceaef-298e-4c63-9964-c9a95ba43822,"URBA: MENORES DE 19 - G2 NIVEL 1 ""A""",rugby,"",Juveniles,urba,""
+8018994b-15be-4582-a054-ecaae431e60d,"URBA: MENORES DE 19 - G2 NIVEL 1 ""B""",rugby,"",Juveniles,"",""

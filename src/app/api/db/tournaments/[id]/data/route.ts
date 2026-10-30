@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { fetchTournamentData } from '@/lib/server/fetchTournamentData';
+import { getTournamentReadAccess } from '@/lib/server/tournamentReadGate';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -25,6 +26,10 @@ export async function GET(
     { params }: { params: Promise<{ id: string }> },
 ) {
     const { id } = await params;
+    // Borrador u oculto: 404 salvo para quien lo puede leer en el gestor.
+    if ((await getTournamentReadAccess(id)) === 'denied') {
+        return jsonNoStore({ ok: false, error: 'Tournament not found' }, { status: 404 });
+    }
     const seasonId =
         request.nextUrl.searchParams.get('seasonId') ||
         request.nextUrl.searchParams.get('season_id') ||

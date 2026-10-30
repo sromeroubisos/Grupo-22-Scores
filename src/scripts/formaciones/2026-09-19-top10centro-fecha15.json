@@ -1,0 +1,598 @@
+{
+  "descripcion": "Formaciones del Top 10 del Centro · Fecha 15 · sábado 19/09/2026 · fuente rugbyproscore.com.ar (app oficial UCR)",
+  "torneo": "Top 10 del Centro",
+  "partidos": [
+    {
+      "id": "9cc51174-1099-47b4-ad84-729f88a6ab28",
+      "rotulo": "Tala Rugby Club vs Club Palermo Bajo",
+      "local": {
+        "nombre": "Tala Rugby Club Primera",
+        "titulares": [
+          {
+            "numero": 1,
+            "nombre": "Manuel Arroyo",
+            "id": "072f3cd5-6548-4399-a061-ac533b10a425"
+          },
+          {
+            "numero": 2,
+            "nombre": "Lucas Bredanini",
+            "id": "b257bc32-78d5-4b1e-a48a-fd6b7c995676"
+          },
+          {
+            "numero": 3,
+            "nombre": "Francisco Caturelli",
+            "id": "c99b9f99-6471-47c5-9f51-b8b21657639c"
+          },
+          {
+            "numero": 4,
+            "nombre": "Pedro Cajal",
+            "id": "4e899128-0865-465e-ab96-6db572e9d9b2"
+          },
+          {
+            "numero": 5,
+            "nombre": "Lautaro Simes",
+            "id": "1f0acfb3-d043-4b3b-872a-c080cd5ce1a7"
+          },
+          {
+            "numero": 6,
+            "nombre": "Gaston Garayzabal"
+          },
+          {
+            "numero": 7,
+            "nombre": "Lautaro Szkuhra",
+            "id": "7846a8de-564f-460f-ab88-b27cbd03b212"
+          },
+          {
+            "numero": 8,
+            "nombre": "Federico Simondi",
+            "id": "a6afc3fd-1aee-43dc-a3f3-dd3020dba2b2"
+          },
+          {
+            "numero": 9,
+            "nombre": "Hilario Fernandez Frontera",
+            "id": "38bacd16-3265-4d6d-b5a1-6a707e85a522"
+          },
+          {
+            "numero": 10,
+            "nombre": "Manuel Giannantonio",
+            "id": "3791551d-5cd4-488f-a189-ad03e896935a"
+          },
+          {
+            "numero": 11,
+            "nombre": "Agustin De Vertiz"
+          },
+          {
+            "numero": 12,
+            "nombre": "Mauricio Kember",
+            "id": "8131190b-ae0e-4d95-81ef-4fb3ef9cf9a3"
+          },
+          {
+            "numero": 13,
+            "nombre": "Ignacio De Vertiz",
+            "id": "d97cad7e-057d-4b96-9180-2f5a866cc1ca"
+          },
+          {
+            "numero": 14,
+            "nombre": "Luciano Agustin Avaca",
+            "id": "605ef257-607a-4133-a870-8643dd56f267"
+          },
+          {
+            "numero": 15,
+            "nombre": "Mateo Soler"
+          }
+        ],
+        "suplentes": [
+          {
+            "numero": 16,
+            "nombre": "Salvador Ortiz",
+            "id": "d286fad2-5f3a-45aa-88d8-72fe956b00e0"
+          },
+          {
+            "numero": 17,
+            "nombre": "Julian Escanilla",
+            "id": "950f40e4-ba1c-432b-9921-6f49192b06b3"
+          },
+          {
+            "numero": 18,
+            "nombre": "Enzo Avaca",
+            "id": "a0d2398b-6030-4139-bd74-8f92b0fcc748"
+          },
+          {
+            "numero": 19,
+            "nombre": "Federico Albrisi"
+          },
+          {
+            "numero": 20,
+            "nombre": "Mateo Cajal",
+            "id": "870a5f99-0f79-4906-9af7-d8432f89257a"
+          },
+          {
+            "numero": 21,
+            "nombre": "Ignacio Diaz Centeno",
+            "id": "3620d519-a141-4f40-aeaa-8124f2767f2d"
+          },
+          {
+            "numero": 22,
+            "nombre": "Facundo Nicolas Ortiz",
+            "id": "c946dfe7-4538-4084-acd6-798ed61fc1ce"
+          },
+          {
+            "numero": 23,
+            "nombre": "Geronimo Vittar",
+            "id": "0f27bba7-ff69-4213-8fa4-f02f75db41d4"
+          }
+        ]
+      },
+      "visitante": {
+        "nombre": "Club Palermo Bajo Primera",
+        "titulares": [
+          {
+            "numero": 1,
+            "nombre": "Enzo Gabriel Rochetti"
+          },
+          {
+            "numero": 2,
+            "nombre": "Santino Vercellone"
+          },
+          {
+            "numero": 3,
+            "nombre": "Nicolas Godoy"
+          },
+          {
+            "numero": 4,
+            "nombre": "Lisandro Pinto Ferreyra"
+          },
+          {
+            "numero": 5,
+            "nombre": "Felipe Werlen"
+          },
+          {
+            "numero": 6,
+            "nombre": "Juan Sagrera"
+          },
+          {
+            "numero": 7,
+            "nombre": "Ignacio Gil"
+          },
+          {
+            "numero": 8,
+            "nombre": "Mateo Garzón"
+          },
+          {
+            "numero": 9,
+            "nombre": "Fabricio Griffo Zaradnik"
+          },
+          {
+            "numero": 10,
+            "nombre": "Matias Daniel Jabase"
+          },
+          {
+            "numero": 11,
+            "nombre": "Camilo Sanchez Rubio"
+          },
+          {
+            "numero": 12,
+            "nombre": "Fidel Sanchez Valarolo"
+          },
+          {
+            "numero": 13,
+            "nombre": "Lautaro Sanchez Rubio"
+          },
+          {
+            "numero": 14,
+            "nombre": "Francisco Moya"
+          },
+          {
+            "numero": 15,
+            "nombre": "Nicolas Visconti"
+          }
+        ],
+        "suplentes": [
+          {
+            "numero": 16,
+            "nombre": "Mateo Lozano Carabajal"
+          },
+          {
+            "numero": 17,
+            "nombre": "Martin Quiñonero"
+          },
+          {
+            "numero": 18,
+            "nombre": "Emanuel Ezequiel Molina"
+          },
+          {
+            "numero": 19,
+            "nombre": "Lautaro Canepa"
+          },
+          {
+            "numero": 20,
+            "nombre": "Francisco Ferraro Negri"
+          },
+          {
+            "numero": 21,
+            "nombre": "Lautaro Jose Garzon"
+          },
+          {
+            "numero": 22,
+            "nombre": "Felipe Baudino"
+          },
+          {
+            "numero": 23,
+            "nombre": "Mateo Francisco Frontera Croizet"
+          }
+        ]
+      }
+    },
+    {
+      "id": "63a07e27-ab60-4263-92d2-b02d1807830f",
+      "rotulo": "San Martín de Villa María vs Carlos Paz Rugby Club",
+      "local": {
+        "nombre": "San Martin Rugby Club Primera",
+        "sinDatos": true,
+        "titulares": [],
+        "suplentes": []
+      },
+      "visitante": {
+        "nombre": "Carlos Paz Rugby Club Primera",
+        "titulares": [
+          {
+            "numero": 1,
+            "nombre": "Lautaro Nahuel Orazi",
+            "id": "56dadc25-fa89-46e9-ba45-0c8def4c43b7"
+          },
+          {
+            "numero": 2,
+            "nombre": "Santiago Jorge"
+          },
+          {
+            "numero": 3,
+            "nombre": "Nahuel Francisco Kaper",
+            "id": "cfcd4d04-32c4-4377-9c1a-eb9cd8530bba"
+          },
+          {
+            "numero": 4,
+            "nombre": "Ocean Torres"
+          },
+          {
+            "numero": 5,
+            "nombre": "Lucas Bur",
+            "id": "c07810d0-0a65-4b9e-ac63-851bf89e1964"
+          },
+          {
+            "numero": 6,
+            "nombre": "Ariel Boyd"
+          },
+          {
+            "numero": 7,
+            "nombre": "Gaspar Alejo Lopez"
+          },
+          {
+            "numero": 8,
+            "nombre": "Santiago Meyer",
+            "id": "4fa49b75-e01e-418d-9e61-cc1d3987f69b"
+          },
+          {
+            "numero": 9,
+            "nombre": "Nicolas Ezequiel Aspera Contreras"
+          },
+          {
+            "numero": 10,
+            "nombre": "Juan Cruz Calamita",
+            "id": "c702b4df-e958-45ab-8008-502654821316"
+          },
+          {
+            "numero": 11,
+            "nombre": "Joaquin Minardi"
+          },
+          {
+            "numero": 12,
+            "nombre": "Ignacio Meyer"
+          },
+          {
+            "numero": 13,
+            "nombre": "Ignacio Pavese"
+          },
+          {
+            "numero": 14,
+            "nombre": "Agustin Bur"
+          },
+          {
+            "numero": 15,
+            "nombre": "Facundo Amezaga",
+            "id": "7bd29928-4310-4ede-9e29-59e8d4db8854"
+          }
+        ],
+        "suplentes": [
+          {
+            "numero": 16,
+            "nombre": "Manuel Ceballos"
+          },
+          {
+            "numero": 17,
+            "nombre": "Joaquin Alejandro Castillo Ceballos"
+          },
+          {
+            "numero": 18,
+            "nombre": "Matias Marchesin Kossoy"
+          },
+          {
+            "numero": 19,
+            "nombre": "Lucio Schawaller"
+          },
+          {
+            "numero": 20,
+            "nombre": "Martin Sanchez"
+          },
+          {
+            "numero": 21,
+            "nombre": "Mariano Humberto Maceira"
+          },
+          {
+            "numero": 22,
+            "nombre": "Jeronimo Osores"
+          },
+          {
+            "numero": 23,
+            "nombre": "Agustin Ricardo Rosales Paur"
+          }
+        ]
+      }
+    },
+    {
+      "id": "e4a979ca-07b5-4583-aa91-c014e09d7d47",
+      "rotulo": "Jockey Club de Villa María vs Club Universitario de Córdoba",
+      "local": {
+        "nombre": "Jockey Club Villa Maria Primera",
+        "sinDatos": true,
+        "titulares": [],
+        "suplentes": []
+      },
+      "visitante": {
+        "nombre": "Universitario Primera",
+        "titulares": [
+          {
+            "numero": 1,
+            "nombre": "Francisco Aguirre Gallardo",
+            "id": "9623fe7a-f0ca-49fa-9b6f-1e641f7b0028"
+          },
+          {
+            "numero": 2,
+            "nombre": "Ramiro Iglesias Quintana"
+          },
+          {
+            "numero": 3,
+            "nombre": "Emir Agustín Karqui",
+            "id": "fbf33373-1683-44b1-8a3f-9db699009e6a"
+          },
+          {
+            "numero": 4,
+            "nombre": "José Ignacio Castro",
+            "id": "fed84ba9-76ee-4509-ab2a-deaa67bc636e"
+          },
+          {
+            "numero": 5,
+            "nombre": "Enzo Ocampo"
+          },
+          {
+            "numero": 6,
+            "nombre": "Sabino Moras Caula",
+            "id": "6a090348-852f-43f2-91b2-c9906da41fd6"
+          },
+          {
+            "numero": 7,
+            "nombre": "Tiago Acaredda",
+            "id": "970e8ae2-80c4-4d5f-b4c5-c6016e8e2f99"
+          },
+          {
+            "numero": 8,
+            "nombre": "Agustin Novillo",
+            "id": "448d3b63-1a18-4dfd-8388-965a3139d529"
+          },
+          {
+            "numero": 9,
+            "nombre": "Agustin Perez Soria"
+          },
+          {
+            "numero": 10,
+            "nombre": "Joaquin Ameijeiras",
+            "id": "068c791a-ffd6-4473-a6f0-fa9ed5c040ff"
+          },
+          {
+            "numero": 11,
+            "nombre": "Luciano Lampasona",
+            "id": "259f78a7-fc1f-42e6-bccd-6e2166467e31"
+          },
+          {
+            "numero": 12,
+            "nombre": "Francisco Aldonza",
+            "id": "0714e931-4acf-4cdf-92f7-0195a8161b66"
+          },
+          {
+            "numero": 13,
+            "nombre": "Joaquin Castillo",
+            "id": "cfdb4e07-3fbb-49b9-9af8-b42768e23e24"
+          },
+          {
+            "numero": 14,
+            "nombre": "Jeronimo Aramayo",
+            "id": "e00fed55-47e6-4c5f-8cb4-d70ae9a9fff6"
+          },
+          {
+            "numero": 15,
+            "nombre": "Tomas Salva",
+            "id": "42a8507b-3213-4821-b92d-255acc644448"
+          }
+        ],
+        "suplentes": [
+          {
+            "numero": 16,
+            "nombre": "Benjamin Castro",
+            "id": "8e86c3cd-bd87-49f5-a731-ec79b8012e7c"
+          },
+          {
+            "numero": 17,
+            "nombre": "Ignacio Perez Soria",
+            "id": "8bc97f7c-609a-4efe-9db0-aecab6727bbf"
+          },
+          {
+            "numero": 18,
+            "nombre": "Santiago Ramirez",
+            "id": "81c4c21e-5b31-481b-a988-27599e0496c1"
+          },
+          {
+            "numero": 19,
+            "nombre": "Lucas Villalba Rustichelli",
+            "id": "e26aee4c-9740-4204-b99f-4e66b90daddb"
+          },
+          {
+            "numero": 20,
+            "nombre": "Facundo Agustin Vergara",
+            "id": "f6dc3c99-7016-414e-aa1f-64e82f79f54c"
+          },
+          {
+            "numero": 21,
+            "nombre": "Juan Altamirano",
+            "id": "417343fb-a127-4360-8af7-493c6601d21b"
+          },
+          {
+            "numero": 22,
+            "nombre": "Francisco Nuñez"
+          },
+          {
+            "numero": 23,
+            "nombre": "Juan Cruz Menendez",
+            "id": "2c541a9d-7811-4d8a-929f-4496ffcb71b4"
+          }
+        ]
+      }
+    },
+    {
+      "id": "acdf66fc-5072-44f2-90e9-44e143ea47b7",
+      "rotulo": "Jockey Club Córdoba vs Córdoba Athletic Club",
+      "local": {
+        "nombre": "Jockey Club Cordoba Primera",
+        "titulares": [
+          {
+            "numero": 1,
+            "nombre": "Agustin Peralta"
+          },
+          {
+            "numero": 2,
+            "nombre": "Juan Manuel Freytes Echenique"
+          },
+          {
+            "numero": 3,
+            "nombre": "Octavio Filippa",
+            "id": "f3828245-eb79-4b03-a4c6-c77bf33ce5ad"
+          },
+          {
+            "numero": 4,
+            "nombre": "Juan Cruz Conde",
+            "id": "f8701dcb-650e-4762-9998-5606334ae3cb"
+          },
+          {
+            "numero": 5,
+            "nombre": "Lautaro Esteban de Jesús Ramirez Juncos",
+            "id": "cad6d344-517e-42f4-8eef-04be3a2c6ca4"
+          },
+          {
+            "numero": 6,
+            "nombre": "Augusto Nicolás Cugnini",
+            "id": "26002f40-0522-4b30-af18-8e9cde4e6767"
+          },
+          {
+            "numero": 7,
+            "nombre": "Lucas Mateo Moyano Aguirre",
+            "id": "a20757d4-9ef1-4882-85a9-e6a0398d7113"
+          },
+          {
+            "numero": 8,
+            "nombre": "Patricio Molina",
+            "id": "a527e521-c4ed-498d-ab27-96f123cc44d4"
+          },
+          {
+            "numero": 9,
+            "nombre": "Nicolas Viola",
+            "id": "a0296d84-3c16-41be-81a9-ec81f2d61a1d"
+          },
+          {
+            "numero": 10,
+            "nombre": "Facundo Rodriguez",
+            "id": "cbfaa6fe-5991-4029-987a-08ff7d8cf664"
+          },
+          {
+            "numero": 11,
+            "nombre": "Matias Fischer"
+          },
+          {
+            "numero": 12,
+            "nombre": "Julio Deheza",
+            "id": "ed436c2f-2d15-480e-acfa-10126c5a94c6"
+          },
+          {
+            "numero": 13,
+            "nombre": "Tiziano Marchetto",
+            "id": "f970eedd-9bef-4ef5-b871-bae8302853ef"
+          },
+          {
+            "numero": 14,
+            "nombre": "Manuel Carrara",
+            "id": "717cdc32-9e0f-475b-b170-7f192272dde5"
+          },
+          {
+            "numero": 15,
+            "nombre": "Julián Viola",
+            "id": "eee08568-846a-4df9-a786-9fca461bee45"
+          }
+        ],
+        "suplentes": [
+          {
+            "numero": 16,
+            "nombre": "Leandro Martin Nassif",
+            "id": "97078f67-1c1e-43e7-a255-adc5b4152ac5"
+          },
+          {
+            "numero": 17,
+            "nombre": "Genaro Merola Moreschi",
+            "id": "88348a94-9cfc-43cb-8ed7-506e44e21c85"
+          },
+          {
+            "numero": 18,
+            "nombre": "Francisco Etchegorry",
+            "id": "992e159d-b02b-4282-b09a-563b9cb23147"
+          },
+          {
+            "numero": 19,
+            "nombre": "Santiago Toya"
+          },
+          {
+            "numero": 20,
+            "nombre": "Abraham Elias",
+            "id": "8c3c13ed-b933-4a39-8f60-e526af4a896e"
+          },
+          {
+            "numero": 21,
+            "nombre": "Marcelo Nicolás Blanco",
+            "id": "020d73cb-bfc2-4f16-ace9-c262b53cfc66"
+          },
+          {
+            "numero": 22,
+            "nombre": "Juan Ignacio Ludueña Fassi",
+            "id": "7305bc17-ba48-4295-ac8b-ac2425096bdc"
+          },
+          {
+            "numero": 23,
+            "nombre": "Tomas Bergero",
+            "id": "5ac822aa-7fe2-4a36-82d3-16dc52659991"
+          }
+        ]
+      },
+      "visitante": {
+        "nombre": "Cordoba Atletic Club Primera",
+        "sinDatos": true,
+        "titulares": [],
+        "suplentes": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,1606 @@
+{
+ "descripcion": "Interior: 3 tarjetas cuyo marcador difiere 1 punto de la base, eventos tal cual",
+ "partidos": [
+  {
+   "id": "1d7e5148-c8e0-4f4e-8803-6ee02243dc13",
+   "rotulo": "Natación y Gimnasia vs Paraná Rowing · tarjeta 311024",
+   "permitirDiferencia": true,
+   "local": {
+    "nombre": "Natación y Gimnasia",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Ramon Calderon Suasnabar",
+      "puesto": "Pilar",
+      "id": "950d436a-acea-4173-aee0-cc426da12ec0"
+     },
+     {
+      "numero": 2,
+      "nombre": "Damian Alejandro Juarez Luna",
+      "puesto": "Hooker",
+      "id": "76476e48-df8f-46e1-9fc0-4eb7b6123075"
+     },
+     {
+      "numero": 3,
+      "nombre": "Ignacio Lazarte",
+      "puesto": "Pilar",
+      "id": "f0e229ef-2bee-49da-b31d-aeb91598967f"
+     },
+     {
+      "numero": 4,
+      "nombre": "Mariano Galvez",
+      "puesto": "Segunda línea",
+      "id": "e50c0a50-509f-40c6-a545-dbf04519fa37"
+     },
+     {
+      "numero": 5,
+      "nombre": "Patricio Jose Bonilla",
+      "puesto": "Segunda línea",
+      "id": "c1443338-eeba-4ecc-b172-ff657f3a5582"
+     },
+     {
+      "numero": 6,
+      "nombre": "Santiago Romano",
+      "puesto": "Tercera línea",
+      "id": "5b78f393-d0a0-445f-8419-a3c377e0b48d"
+     },
+     {
+      "numero": 7,
+      "nombre": "Lucas Guc",
+      "puesto": "Tercera línea",
+      "id": "f5e44ab5-d0f6-4168-8daa-3374e1d162b9"
+     },
+     {
+      "numero": 8,
+      "nombre": "Tomas Brainovich",
+      "puesto": "Tercera línea",
+      "id": "1958b901-bf42-4b90-990a-eb23d34ed79f"
+     },
+     {
+      "numero": 9,
+      "nombre": "Federico Gallac",
+      "puesto": "Medio scrum",
+      "id": "80782286-2d77-47d3-a341-56ceb03c9cc5"
+     },
+     {
+      "numero": 10,
+      "nombre": "Tomas Javier Garcia",
+      "puesto": "Apertura",
+      "id": "4c006251-2d1c-48fb-a9bc-1be1b78bf08c"
+     },
+     {
+      "numero": 11,
+      "nombre": "Juan Martin Barros",
+      "puesto": "Wing",
+      "id": "09fc97f5-006a-43f4-94d5-b699d7f7047b"
+     },
+     {
+      "numero": 12,
+      "nombre": "Nahuel Molina Hernando",
+      "puesto": "Centro",
+      "id": "f70f1c84-182f-413d-8334-0441412aa214"
+     },
+     {
+      "numero": 13,
+      "nombre": "Gonzalo Terraf",
+      "puesto": "Centro",
+      "id": "591e7d7a-cc23-4af1-ab4c-a6fef2f04e48"
+     },
+     {
+      "numero": 14,
+      "nombre": "Ignacio Martinez",
+      "puesto": "Wing",
+      "id": "96425537-f97c-4ac8-8a38-f3981ff4feb7"
+     },
+     {
+      "numero": 15,
+      "nombre": "Cesar Rivadeneira",
+      "puesto": "Fullback",
+      "id": "61ed13b1-4f30-4c1c-aaa6-4946c92ce08c"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Gonzalo Emanuel Paez",
+      "id": "80712f8a-6bea-4328-8e0b-548c884fbaa7"
+     },
+     {
+      "numero": 17,
+      "nombre": "Ignacio Sandez",
+      "id": "80126dc5-c02a-4200-b120-1a0b57cd31a0"
+     },
+     {
+      "numero": 18,
+      "nombre": "Ruben Ricco Falu",
+      "id": "b0c5a0af-432c-4fed-a62a-f07754cfe465"
+     },
+     {
+      "numero": 19,
+      "nombre": "Santiago Nahuel Garcia",
+      "id": "22bbc890-201c-413b-bfe6-6b589ce264b8"
+     },
+     {
+      "numero": 20,
+      "nombre": "Matias López Esteban",
+      "id": "84b553bc-cfc1-44b4-88e5-00747f36775a"
+     },
+     {
+      "numero": 21,
+      "nombre": "Agustin Ramasco",
+      "id": "22657eae-ebe7-4019-ba9e-dc8ae0eec3b5"
+     },
+     {
+      "numero": 22,
+      "nombre": "Mariano Aguero Daneri",
+      "id": "fe496d77-503e-4ccd-ae2d-710b9dd87aaf"
+     },
+     {
+      "numero": 23,
+      "nombre": "Alejo Fernández",
+      "id": "ff6ea71b-0bac-45d2-83b9-aa558317dfa1"
+     }
+    ]
+   },
+   "visitante": {
+    "nombre": "Paraná Rowing",
+    "titulares": [
+     {
+      "numero": 18,
+      "nombre": "Guillermo Macchi Bargagna",
+      "puesto": "Pilar",
+      "id": "4747eb0c-28a0-4bca-a77e-0f406d8aa84c"
+     },
+     {
+      "numero": 2,
+      "nombre": "Ignacio Lagisquet",
+      "puesto": "Hooker",
+      "id": "431224da-a08b-4796-a8be-ae2d4819286f"
+     },
+     {
+      "numero": 3,
+      "nombre": "Cipriano Cislaghi",
+      "puesto": "Pilar",
+      "id": "5e0238ed-1846-492f-bf90-b7f71f0cd1a3"
+     },
+     {
+      "numero": 4,
+      "nombre": "Agustin Orlando Reding",
+      "puesto": "Segunda línea",
+      "id": "6984f2f5-66e8-4401-9fcd-c353c63f0d37"
+     },
+     {
+      "numero": 5,
+      "nombre": "Joaquin Moine",
+      "puesto": "Segunda línea",
+      "id": "02530a85-821c-4aae-a1f8-8c435332830f"
+     },
+     {
+      "numero": 6,
+      "nombre": "Franco Marizza",
+      "puesto": "Tercera línea",
+      "id": "12cd10b8-1044-4b1f-bd8e-57953dc7c0b8"
+     },
+     {
+      "numero": 7,
+      "nombre": "Estanislao Cavenaghi",
+      "puesto": "Tercera línea",
+      "id": "25a966e4-7ad4-4802-856e-47a8f4c15f2c"
+     },
+     {
+      "numero": 8,
+      "nombre": "Andres Agasse",
+      "puesto": "Tercera línea",
+      "id": "ab19cb14-28dc-4ef8-a60c-93b0eb73eb63"
+     },
+     {
+      "numero": 9,
+      "nombre": "Lautaro Wolf",
+      "puesto": "Medio scrum",
+      "id": "6ec73878-3be0-4e99-b3ae-923d9b96e570"
+     },
+     {
+      "numero": 10,
+      "nombre": "Ramiro Bornisen",
+      "puesto": "Apertura",
+      "id": "f5c205fa-01f1-437b-9ef2-e9d18559c501"
+     },
+     {
+      "numero": 11,
+      "nombre": "Franco Zatti",
+      "puesto": "Wing",
+      "id": "5cbf6cc8-296e-478f-9440-3e75e460d879"
+     },
+     {
+      "numero": 12,
+      "nombre": "Julian Pistrilli",
+      "puesto": "Centro",
+      "id": "edb59c87-c91a-42b5-afae-310ec7e6a122"
+     },
+     {
+      "numero": 13,
+      "nombre": "Tomas Osuna",
+      "puesto": "Centro",
+      "id": "1c2961f1-406a-4297-97b1-0956a0ac6c35"
+     },
+     {
+      "numero": 14,
+      "nombre": "Emanuel Schiavo",
+      "puesto": "Wing",
+      "id": "b16dca1d-1ece-4317-9ce9-5b5ec978db0a"
+     },
+     {
+      "numero": 15,
+      "nombre": "Aquiles Bourdin",
+      "puesto": "Fullback",
+      "id": "af9ddab8-ee29-4797-8392-4eb1135e41fb"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Juan Oldani",
+      "id": "3bb56917-10e7-453f-89c3-681e0a445f1a"
+     },
+     {
+      "numero": 17,
+      "nombre": "Juan Lucas Lerena",
+      "id": "7e80b1f7-2a07-4392-b7eb-25d5fb42d8e1"
+     },
+     {
+      "numero": 1,
+      "nombre": "Esteban Acosta Jazmin",
+      "id": "e27d8c73-da28-4b8d-a609-c569b5123fbf"
+     },
+     {
+      "numero": 19,
+      "nombre": "Franco Dall Ava",
+      "id": "e35d59dc-e87f-4ab8-b055-202d5b767150"
+     },
+     {
+      "numero": 20,
+      "nombre": "Tomas Bernardo Acosta",
+      "id": "2f847e5e-c5cc-4ceb-b128-2ccb7a328801"
+     },
+     {
+      "numero": 21,
+      "nombre": "Facundo Taboada",
+      "id": "135428b9-ce2c-4e62-9ee0-3954ecc65711"
+     },
+     {
+      "numero": 22,
+      "nombre": "Franco Osuna",
+      "id": "204828c9-2293-4730-8f3e-e960dcc12b65"
+     },
+     {
+      "numero": 23,
+      "nombre": "Iván Agusto Quindt Pertus",
+      "id": "0e2ad2d1-c20a-4b9c-b7a1-aba6b3359738"
+     }
+    ]
+   },
+   "eventos": [
+    {
+     "minuto": 4,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Nahuel Molina Hernando"
+    },
+    {
+     "minuto": 5,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Cesar Rivadeneira"
+    },
+    {
+     "minuto": 11,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "local",
+     "jugador": "Mariano Galvez",
+     "detalle": "Juego general"
+    },
+    {
+     "minuto": 16,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Aquiles Bourdin"
+    },
+    {
+     "minuto": 22,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "visitante",
+     "jugador": "Estanislao Cavenaghi",
+     "detalle": "Juego general"
+    },
+    {
+     "minuto": 23,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Lucas Guc"
+    },
+    {
+     "minuto": 24,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Cesar Rivadeneira"
+    },
+    {
+     "minuto": 28,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Franco Marizza"
+    },
+    {
+     "minuto": 28,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Aquiles Bourdin"
+    },
+    {
+     "minuto": 34,
+     "periodo": "1T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Ignacio Lazarte",
+     "detalle": "Entra: Ruben Ricco Falu"
+    },
+    {
+     "minuto": 1,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Ignacio Lagisquet",
+     "detalle": "Entra: Juan Lucas Lerena"
+    },
+    {
+     "minuto": 1,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Cipriano Cislaghi",
+     "detalle": "Entra: Esteban Acosta Jazmin"
+    },
+    {
+     "minuto": 3,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Patricio Jose Bonilla",
+     "detalle": "Entra: Santiago Nahuel Garcia"
+    },
+    {
+     "minuto": 4,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Lucas Guc"
+    },
+    {
+     "minuto": 4,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Federico Gallac",
+     "detalle": "Entra: Agustin Ramasco"
+    },
+    {
+     "minuto": 5,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Cesar Rivadeneira"
+    },
+    {
+     "minuto": 6,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Guillermo Macchi Bargagna",
+     "detalle": "Entra: Juan Oldani"
+    },
+    {
+     "minuto": 6,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Agustin Orlando Reding",
+     "detalle": "Entra: Franco Dall Ava"
+    },
+    {
+     "minuto": 6,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Estanislao Cavenaghi",
+     "detalle": "Entra: Tomas Bernardo Acosta"
+    },
+    {
+     "minuto": 6,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Ramiro Bornisen",
+     "detalle": "Entra: Iván Agusto Quindt Pertus"
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "equipo": "local",
+     "jugador": "Tomas Brainovich",
+     "detalle": "Juego general"
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Andres Agasse"
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Aquiles Bourdin"
+    },
+    {
+     "minuto": 13,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Juan Martin Barros"
+    },
+    {
+     "minuto": 13,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Ramon Calderon Suasnabar",
+     "detalle": "Entra: Gonzalo Emanuel Paez"
+    },
+    {
+     "minuto": 13,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Mariano Galvez",
+     "detalle": "Entra: Matias López Esteban"
+    },
+    {
+     "minuto": 13,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Nahuel Molina Hernando",
+     "detalle": "Entra: Mariano Aguero Daneri"
+    },
+    {
+     "minuto": 14,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "equipo": "visitante",
+     "jugador": "Franco Dall Ava",
+     "detalle": "Juego general"
+    },
+    {
+     "minuto": 14,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Cesar Rivadeneira"
+    },
+    {
+     "minuto": 16,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Lautaro Wolf",
+     "detalle": "Entra: Franco Osuna"
+    },
+    {
+     "minuto": 24,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Damian Alejandro Juarez Luna",
+     "detalle": "Entra: Ignacio Sandez"
+    },
+    {
+     "minuto": 26,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Franco Marizza",
+     "detalle": "Entra: Facundo Taboada"
+    },
+    {
+     "minuto": 26,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Mariano Aguero Daneri"
+    },
+    {
+     "minuto": 26,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Gonzalo Terraf",
+     "detalle": "Entra: Alejo Fernández"
+    },
+    {
+     "minuto": 27,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Cesar Rivadeneira"
+    },
+    {
+     "minuto": 28,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Ignacio Martinez"
+    },
+    {
+     "minuto": 29,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Cesar Rivadeneira"
+    },
+    {
+     "minuto": 31,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "equipo": "visitante",
+     "jugador": "Julian Pistrilli",
+     "detalle": "Juego general"
+    },
+    {
+     "minuto": 40,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Ignacio Sandez"
+    },
+    {
+     "minuto": 41,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Cesar Rivadeneira"
+    }
+   ],
+   "arbitro": "Valentin Ferrero"
+  },
+  {
+   "id": "cbeb5694-a6cd-42e7-afa9-15206f21a2a5",
+   "rotulo": "Huirapuca vs Sociedad Sportiva de Bahía Blanca · tarjeta 311033",
+   "permitirDiferencia": true,
+   "local": {
+    "nombre": "Huirapuca",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Andres Gabriel Aybar Argañaraz",
+      "puesto": "Pilar",
+      "id": "34b526ed-310a-4e45-adb9-c57646505359"
+     },
+     {
+      "numero": 2,
+      "nombre": "Enzo Gutierrez",
+      "puesto": "Hooker",
+      "id": "b129ce3d-0466-48df-82cf-e354f436d718"
+     },
+     {
+      "numero": 3,
+      "nombre": "Enzo Egea",
+      "puesto": "Pilar",
+      "id": "e2df2929-c1d9-4056-aae8-d0d71babde34"
+     },
+     {
+      "numero": 4,
+      "nombre": "Joaquin Albornoz",
+      "puesto": "Segunda línea",
+      "id": "228d9b5a-1e0b-4608-ad8a-d95025ef1f3c"
+     },
+     {
+      "numero": 5,
+      "nombre": "Geronimo Lazcano",
+      "puesto": "Segunda línea",
+      "id": "c34c7a60-3f11-4888-a79c-959eef2dcc8f"
+     },
+     {
+      "numero": 6,
+      "nombre": "Tadeo Francisco Lopez Miranda",
+      "puesto": "Tercera línea",
+      "id": "65aaed4a-1b33-480b-b839-9e6d1673fa05"
+     },
+     {
+      "numero": 7,
+      "nombre": "Víctor Nahuel Montoya",
+      "puesto": "Tercera línea",
+      "id": "d13eecc3-e152-4c9d-abe1-2137deacf943"
+     },
+     {
+      "numero": 8,
+      "nombre": "Jose Ignacio Gonzalez Ponce",
+      "puesto": "Tercera línea",
+      "id": "a4e7acbb-03c2-46f5-88bc-c581cec5f822"
+     },
+     {
+      "numero": 9,
+      "nombre": "Juan Manuel Herrera",
+      "puesto": "Medio scrum",
+      "id": "ce7f971c-89af-4b46-9863-120fded4498e"
+     },
+     {
+      "numero": 10,
+      "nombre": "Juan Ignacio Aguero",
+      "puesto": "Apertura",
+      "id": "d6f83a51-1485-4a93-aff3-5d8d133643d9"
+     },
+     {
+      "numero": 11,
+      "nombre": "Paolo Contti",
+      "puesto": "Wing",
+      "id": "fae5ef2b-6801-44e3-8a1a-d19f7f92cbc9"
+     },
+     {
+      "numero": 12,
+      "nombre": "Jose Ignacio Nuñez Piossek",
+      "puesto": "Centro",
+      "id": "35cbee9d-5cb0-444d-93d2-1f68a5ec654a"
+     },
+     {
+      "numero": 13,
+      "nombre": "Bernardo Molina",
+      "puesto": "Centro",
+      "id": "dea05c5a-6534-4892-97e2-e874755d2ad2"
+     },
+     {
+      "numero": 14,
+      "nombre": "Benjamin Lefebvre",
+      "puesto": "Wing",
+      "id": "6675ef7b-02cc-46c5-87bc-dd3a10f950eb"
+     },
+     {
+      "numero": 15,
+      "nombre": "Juan De La Cruz Molina",
+      "puesto": "Fullback",
+      "id": "45f459af-cb1e-41d0-bff6-e55d7398e37b"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Federico Diaz",
+      "id": "7121c4cb-6b1b-426a-95e3-92cdab9fa7e6"
+     },
+     {
+      "numero": 17,
+      "nombre": "Rodrigo Aragón Ibañez",
+      "id": "44a06cb7-261c-479b-bfe2-bf394ff994b0"
+     },
+     {
+      "numero": 18,
+      "nombre": "Abel Ortega",
+      "id": "94028c90-302d-480d-9965-8dbd3a66a861"
+     },
+     {
+      "numero": 19,
+      "nombre": "Luis Matías Lefebvre",
+      "id": "cb312cff-c3e4-4eb2-83b5-cf902acd6116"
+     },
+     {
+      "numero": 20,
+      "nombre": "Miguel Ángel Romero",
+      "id": "73732349-899c-486a-b881-74912dab9884"
+     },
+     {
+      "numero": 21,
+      "nombre": "Lisandro Lefebvre",
+      "id": "873c3d80-cab1-4b32-ac0c-5fd5104b9831"
+     },
+     {
+      "numero": 22,
+      "nombre": "Jose Andres Perez",
+      "id": "21b23542-b4cf-40d1-b134-39acef7cae7b"
+     },
+     {
+      "numero": 23,
+      "nombre": "Isaac Cordoba",
+      "id": "85ccddda-4ce1-4ddd-9813-06cf65036e0b"
+     }
+    ]
+   },
+   "visitante": {
+    "nombre": "Sociedad Sportiva de Bahía Blanca",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Iñaki Azcoitia",
+      "puesto": "Pilar",
+      "id": "c7ac6ca2-d387-4fbe-8df7-316d9861bc1f"
+     },
+     {
+      "numero": 2,
+      "nombre": "Santiago Bancora",
+      "puesto": "Hooker",
+      "id": "dd3c7364-1d4f-4902-83bc-83a1380384a5"
+     },
+     {
+      "numero": 3,
+      "nombre": "Ignacio Lance",
+      "puesto": "Pilar",
+      "id": "91a6eb77-1a7e-48c8-98cd-903e2a79c9db"
+     },
+     {
+      "numero": 4,
+      "nombre": "Francisco Cantalejos",
+      "puesto": "Segunda línea",
+      "id": "6b87d5db-a81f-49eb-b30a-79eec6a5789c"
+     },
+     {
+      "numero": 5,
+      "nombre": "Federico Stein",
+      "puesto": "Segunda línea",
+      "id": "002d4235-a616-4cb1-b984-c0d559099181"
+     },
+     {
+      "numero": 7,
+      "nombre": "Felipe Inchausti",
+      "puesto": "Tercera línea",
+      "id": "7df41517-5367-429b-8c94-6882ed5f539b"
+     },
+     {
+      "numero": 6,
+      "nombre": "Thiago Loiacono",
+      "puesto": "Tercera línea",
+      "id": "63cf80e1-f930-46f5-a509-d18600cab401"
+     },
+     {
+      "numero": 8,
+      "nombre": "Tomas Inchausti",
+      "puesto": "Tercera línea",
+      "id": "5b4cbd9e-9a79-48f3-bd26-f043838f0952"
+     },
+     {
+      "numero": 9,
+      "nombre": "Rafael Larrañaga",
+      "puesto": "Medio scrum",
+      "id": "ac2be513-d2ee-41e3-939b-ab16c8f9673a"
+     },
+     {
+      "numero": 10,
+      "nombre": "Tomas Bermudez Caneparis",
+      "puesto": "Apertura",
+      "id": "7242a774-2c8e-47b7-87a6-a07dabe1682f"
+     },
+     {
+      "numero": 11,
+      "nombre": "Facundo Ferrandez",
+      "puesto": "Wing",
+      "id": "b1358e33-93b2-4a97-a253-8514c1cd603d"
+     },
+     {
+      "numero": 12,
+      "nombre": "Joaquin Rey Saravia",
+      "puesto": "Centro",
+      "id": "cd81d080-3155-4742-974a-3844b6b58ac0"
+     },
+     {
+      "numero": 13,
+      "nombre": "Pedro Zorzano",
+      "puesto": "Centro",
+      "id": "f57b7c13-22c0-4575-9f8e-2f81ae052690"
+     },
+     {
+      "numero": 14,
+      "nombre": "Alan Martinez",
+      "puesto": "Wing",
+      "id": "7745cb93-8268-40f1-b874-5cbe88467573"
+     },
+     {
+      "numero": 15,
+      "nombre": "Patricio Cantalejos",
+      "puesto": "Fullback",
+      "id": "3fc53c71-349e-4495-b093-1096909e7847"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 22,
+      "nombre": "Juan Francisco Malanga",
+      "id": "ef56b836-de93-46be-b00f-19bc5ccb182f"
+     },
+     {
+      "numero": 17,
+      "nombre": "Marcelo Mauricio Torrisi",
+      "id": "880aa900-4c09-4411-8712-8c12ea3e620b"
+     },
+     {
+      "numero": 18,
+      "nombre": "Darían Troncoso",
+      "id": "cb04c55f-80da-47d8-a0c5-bd3cf4503fa5"
+     },
+     {
+      "numero": 19,
+      "nombre": "Juan Harguindeguy Puccinelli",
+      "id": "74a0174b-6caa-4ec6-8fee-429a8ebbb8e8"
+     },
+     {
+      "numero": 23,
+      "nombre": "Geronimo Rivas Pompei",
+      "id": "27724831-6cec-4246-bb23-04a452bf2668"
+     },
+     {
+      "numero": 16,
+      "nombre": "Luca Nahuel Loiacono",
+      "id": "1fae5ffe-213d-41cd-aa5b-f053e8184ac7"
+     },
+     {
+      "numero": 20,
+      "nombre": "Ignacio Ficcadenti",
+      "id": "bcca9f5b-09ca-4c59-a384-56a1f82019b0"
+     },
+     {
+      "numero": 21,
+      "nombre": "Mateo Kohler",
+      "id": "a50f05d7-4270-4b17-991b-b70d106f2a51"
+     }
+    ]
+   },
+   "eventos": [
+    {
+     "minuto": 2,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Tomas Bermudez Caneparis"
+    },
+    {
+     "minuto": 6,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Enzo Gutierrez"
+    },
+    {
+     "minuto": 11,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Patricio Cantalejos"
+    },
+    {
+     "minuto": 27,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Patricio Cantalejos"
+    },
+    {
+     "minuto": 35,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "visitante",
+     "jugador": "Tomas Bermudez Caneparis",
+     "detalle": "Juego general"
+    },
+    {
+     "minuto": 38,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "visitante",
+     "jugador": "Federico Stein",
+     "detalle": "Juego general"
+    },
+    {
+     "minuto": 39,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Joaquin Albornoz"
+    },
+    {
+     "minuto": 39,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Juan Ignacio Aguero"
+    },
+    {
+     "minuto": 0,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Ignacio Lance",
+     "detalle": "Entra: Darían Troncoso"
+    },
+    {
+     "minuto": 0,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Francisco Cantalejos"
+    },
+    {
+     "minuto": 0,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Mateo Kohler"
+    },
+    {
+     "minuto": 3,
+     "periodo": "2T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Rafael Larrañaga"
+    },
+    {
+     "minuto": 6,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "equipo": "local",
+     "jugador": "Bernardo Molina",
+     "detalle": "Juego general"
+    },
+    {
+     "minuto": 11,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Andres Gabriel Aybar Argañaraz",
+     "detalle": "Entra: Federico Diaz"
+    },
+    {
+     "minuto": 13,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Joaquin Albornoz",
+     "detalle": "Entra: Isaac Cordoba"
+    },
+    {
+     "minuto": 13,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Felipe Inchausti",
+     "detalle": "Entra: Geronimo Rivas Pompei"
+    },
+    {
+     "minuto": 13,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Facundo Ferrandez",
+     "detalle": "Entra: Mateo Kohler"
+    },
+    {
+     "minuto": 18,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Federico Stein",
+     "detalle": "Entra: Juan Harguindeguy Puccinelli"
+    },
+    {
+     "minuto": 18,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Thiago Loiacono",
+     "detalle": "Entra: Luca Nahuel Loiacono"
+    },
+    {
+     "minuto": 22,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Joaquin Rey Saravia",
+     "detalle": "Entra: Ignacio Ficcadenti"
+    },
+    {
+     "minuto": 23,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Tadeo Francisco Lopez Miranda",
+     "detalle": "Entra: Luis Matías Lefebvre"
+    },
+    {
+     "minuto": 24,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Iñaki Azcoitia",
+     "detalle": "Entra: Marcelo Mauricio Torrisi"
+    },
+    {
+     "minuto": 24,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Santiago Bancora",
+     "detalle": "Entra: Juan Francisco Malanga"
+    },
+    {
+     "minuto": 30,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Bernardo Molina",
+     "detalle": "Entra: Lisandro Lefebvre"
+    },
+    {
+     "minuto": 30,
+     "periodo": "2T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Juan Ignacio Aguero"
+    },
+    {
+     "minuto": 30,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "equipo": "visitante",
+     "jugador": "Luca Nahuel Loiacono",
+     "detalle": "Juego general"
+    },
+    {
+     "minuto": 39,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Juan Ignacio Aguero"
+    }
+   ],
+   "arbitro": "Roberto Maximiliano Busaniche"
+  },
+  {
+   "id": "18ae39a8-c244-4908-9148-af7284e99f6e",
+   "rotulo": "Jockey Club de Villa María vs Tigres R.C. · tarjeta 311035",
+   "permitirDiferencia": true,
+   "local": {
+    "nombre": "Jockey Club de Villa María",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Radamel Velazquez",
+      "puesto": "Pilar",
+      "id": "25d8b560-0d5e-4e1e-8085-003be33c2447"
+     },
+     {
+      "numero": 2,
+      "nombre": "Lglesias Simon",
+      "puesto": "Hooker",
+      "id": "3662f5e7-b073-4dbb-a78b-4237927b740d"
+     },
+     {
+      "numero": 3,
+      "nombre": "Tiago Peña",
+      "puesto": "Pilar",
+      "id": "2298f4c6-9da6-41e4-8774-3d01c73e9d75"
+     },
+     {
+      "numero": 4,
+      "nombre": "Nicanor Rossa",
+      "puesto": "Segunda línea",
+      "id": "1d7250cd-fd64-4791-940a-fad27e21b91b"
+     },
+     {
+      "numero": 5,
+      "nombre": "Martin Montero",
+      "puesto": "Segunda línea",
+      "id": "e8f9e541-4f59-4c51-ad4f-670fd520e12e"
+     },
+     {
+      "numero": 6,
+      "nombre": "Ignacio Pussetto",
+      "puesto": "Tercera línea",
+      "id": "cc5c96b3-fdcc-41e7-9536-0d949ebc429c"
+     },
+     {
+      "numero": 7,
+      "nombre": "Benjamin Farias",
+      "puesto": "Tercera línea",
+      "id": "f7fe55de-7142-4f01-8c8e-74f28a5343a7"
+     },
+     {
+      "numero": 8,
+      "nombre": "Juan Somale",
+      "puesto": "Tercera línea",
+      "id": "ece49f25-da37-4b4a-a031-fb7313e8cd1c"
+     },
+     {
+      "numero": 9,
+      "nombre": "Ramiro Kamienski",
+      "puesto": "Medio scrum",
+      "id": "4e494faf-0c09-4ffc-b3f6-9ccaa164da85"
+     },
+     {
+      "numero": 10,
+      "nombre": "Francisco Hakanson",
+      "puesto": "Apertura",
+      "id": "8f1ca2e3-3381-4ad7-a083-d49b0bb4f58a"
+     },
+     {
+      "numero": 11,
+      "nombre": "Santiago Montero",
+      "puesto": "Wing",
+      "id": "c42d8d44-6291-4af6-aa8c-5b77c9c6d462"
+     },
+     {
+      "numero": 12,
+      "nombre": "Facundo Boaglio",
+      "puesto": "Centro",
+      "id": "b7c3e285-98a1-486d-983c-89a08fa87e4d"
+     },
+     {
+      "numero": 13,
+      "nombre": "Fidel Figueroa",
+      "puesto": "Centro",
+      "id": "560e4408-caa6-46c9-afcb-6df673832c47"
+     },
+     {
+      "numero": 14,
+      "nombre": "Francisco Fracarolli",
+      "puesto": "Wing",
+      "id": "e144e220-eabb-4a38-9284-bb8c3aa32b44"
+     },
+     {
+      "numero": 15,
+      "nombre": "Gonzalo Alvarez",
+      "puesto": "Fullback",
+      "id": "c4e4bdc3-c037-4161-912e-0f8a1c2201a1"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Matias Ferreyra",
+      "id": "e90d8127-3614-483c-b87f-03b14c8de8ab"
+     },
+     {
+      "numero": 17,
+      "nombre": "Emiliano Gaston Moreno",
+      "id": "dcbdea46-2952-46bf-8c2b-68965e337828"
+     },
+     {
+      "numero": 18,
+      "nombre": "Renzo Alessio",
+      "id": "0db99913-caf0-423e-84d7-6573b74e938e"
+     },
+     {
+      "numero": 19,
+      "nombre": "Ramiro Celayes",
+      "id": "34fb23d8-3fcf-404e-96d5-0bcc9c8f9e9b"
+     },
+     {
+      "numero": 20,
+      "nombre": "Alvaro Vera",
+      "id": "0a6c29de-5ca6-4e39-84bd-9ae8e65ab6dc"
+     },
+     {
+      "numero": 21,
+      "nombre": "Valentin Pigni",
+      "id": "5f4fcfa6-954f-4ec2-b69c-5a21742b51ed"
+     },
+     {
+      "numero": 22,
+      "nombre": "Nicolas Turecki",
+      "id": "78ba4306-da23-4683-8c68-d21efe4785be"
+     },
+     {
+      "numero": 23,
+      "nombre": "Lautaro Vera",
+      "id": "fc0346b9-07df-4c14-8a77-872cfe6eea2e"
+     }
+    ]
+   },
+   "visitante": {
+    "nombre": "Tigres R.C.",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Lucas Juncosa",
+      "puesto": "Pilar",
+      "id": "8b22b2af-dbc6-4444-ba74-ea21b2d79e5b"
+     },
+     {
+      "numero": 2,
+      "nombre": "Darío Alberto Arnedo",
+      "puesto": "Hooker",
+      "id": "42baaecc-351e-459d-8867-ae6681ca7412"
+     },
+     {
+      "numero": 3,
+      "nombre": "Santiago Lanfranco",
+      "puesto": "Pilar",
+      "id": "59ba168c-c2bb-4948-95a5-4d3f86eeaf07"
+     },
+     {
+      "numero": 4,
+      "nombre": "Joaquin Famorano",
+      "puesto": "Segunda línea",
+      "id": "c56530cd-5c55-4c86-9331-54547e54cf45"
+     },
+     {
+      "numero": 5,
+      "nombre": "Andres Juncosa",
+      "puesto": "Segunda línea",
+      "id": "e8b3e642-7d9a-49b4-aa83-490c1a64e575"
+     },
+     {
+      "numero": 6,
+      "nombre": "Octavio Sola",
+      "puesto": "Tercera línea",
+      "id": "ff19fce1-0090-422c-bd8f-4be5ed806682"
+     },
+     {
+      "numero": 7,
+      "nombre": "Ignacio Maria Coll",
+      "puesto": "Tercera línea",
+      "id": "b3f4cd88-3856-4dcd-9166-bca9b51624d5"
+     },
+     {
+      "numero": 8,
+      "nombre": "Pedro Calderoni",
+      "puesto": "Tercera línea",
+      "id": "84afd1ef-d0aa-4773-b8a5-55a7adf86990"
+     },
+     {
+      "numero": 9,
+      "nombre": "Vicente Velez Zambrano",
+      "puesto": "Medio scrum",
+      "id": "ec5e4d0c-b99a-4c98-aef4-a3030df750dc"
+     },
+     {
+      "numero": 10,
+      "nombre": "Bernardo Diez Poviña",
+      "puesto": "Apertura",
+      "id": "a3362e53-2ca3-4911-9421-ec7cc8a0a889"
+     },
+     {
+      "numero": 11,
+      "nombre": "Jaime Durand Ferandez",
+      "puesto": "Wing",
+      "id": "5bfa4ed3-4bdb-4fdc-b066-d11cbb2690bd"
+     },
+     {
+      "numero": 12,
+      "nombre": "Jeronimo Diez Poviña",
+      "puesto": "Centro",
+      "id": "4ac8f6b7-96c6-434a-943b-00a064f66e92"
+     },
+     {
+      "numero": 13,
+      "nombre": "Nicolas Henry Casas",
+      "puesto": "Centro",
+      "id": "48fdb2c5-a6a6-4e1b-8f33-f8d7c8b1c1b1"
+     },
+     {
+      "numero": 14,
+      "nombre": "Baltasar Zapiola",
+      "puesto": "Wing",
+      "id": "74348f81-76a7-4b26-8450-9ef9ad27bf14"
+     },
+     {
+      "numero": 15,
+      "nombre": "Federico Salazar",
+      "puesto": "Fullback",
+      "id": "bf849f61-d0bc-4c8a-872d-f044aac3a27a"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Lian Ortiz",
+      "id": "75fbfdb5-f51d-4d28-b2e7-1eb1942306be"
+     },
+     {
+      "numero": 17,
+      "nombre": "Ricardo Patrón Costas",
+      "id": "92bfe00d-4fef-4602-a953-618c05de99c9"
+     },
+     {
+      "numero": 18,
+      "nombre": "Marco Saravia Buffa",
+      "id": "efc446d4-7360-4e80-9f9e-64e34e234e89"
+     },
+     {
+      "numero": 19,
+      "nombre": "Pedro Noblega Palomo",
+      "id": "ef96c355-103f-4ed5-80eb-22c06fb94140"
+     },
+     {
+      "numero": 20,
+      "nombre": "Ignacio Jesús Solá Zambrano",
+      "id": "909ae40d-e200-489b-b9f8-8dfdfff45831"
+     },
+     {
+      "numero": 21,
+      "nombre": "Santiago Uriburu",
+      "id": "0852a838-efa1-460b-afa8-e4578b5308ae"
+     },
+     {
+      "numero": 22,
+      "nombre": "Evaristo Ramasco Padilla",
+      "id": "3c236d19-9cd8-42d3-8b88-508d5e205950"
+     },
+     {
+      "numero": 23,
+      "nombre": "Nicolás Terán Terán Frías",
+      "id": "a983766d-db93-4b63-85d3-cbe84c33c521"
+     }
+    ]
+   },
+   "eventos": [
+    {
+     "minuto": 1,
+     "periodo": "1T",
+     "tipo": "injury",
+     "equipo": "local",
+     "jugador": "Nicanor Rossa",
+     "detalle": "Lesionado"
+    },
+    {
+     "minuto": 11,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Lglesias Simon"
+    },
+    {
+     "minuto": 19,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "local",
+     "jugador": "Juan Somale",
+     "detalle": "Juego general"
+    },
+    {
+     "minuto": 21,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Benjamin Farias"
+    },
+    {
+     "minuto": 21,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Facundo Boaglio"
+    },
+    {
+     "minuto": 34,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Federico Salazar"
+    },
+    {
+     "minuto": 40,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "visitante",
+     "jugador": "Jeronimo Diez Poviña",
+     "detalle": "Juego general"
+    },
+    {
+     "minuto": 40,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Juan Somale"
+    },
+    {
+     "minuto": 40,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Facundo Boaglio"
+    },
+    {
+     "minuto": 1,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Joaquin Famorano",
+     "detalle": "Entra: Ricardo Patrón Costas"
+    },
+    {
+     "minuto": 5,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Pedro Calderoni"
+    },
+    {
+     "minuto": 5,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Tiago Peña",
+     "detalle": "Entra: Emiliano Gaston Moreno"
+    },
+    {
+     "minuto": 5,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Lglesias Simon",
+     "detalle": "Entra: Matias Ferreyra"
+    },
+    {
+     "minuto": 6,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Federico Salazar"
+    },
+    {
+     "minuto": 8,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Fidel Figueroa"
+    },
+    {
+     "minuto": 8,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Facundo Boaglio"
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Ignacio Maria Coll",
+     "detalle": "Entra: Marco Saravia Buffa"
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Vicente Velez Zambrano",
+     "detalle": "Entra: Santiago Uriburu"
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Bernardo Diez Poviña",
+     "detalle": "Entra: Evaristo Ramasco Padilla"
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Baltasar Zapiola",
+     "detalle": "Entra: Nicolás Terán Terán Frías"
+    },
+    {
+     "minuto": 16,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Darío Alberto Arnedo"
+    },
+    {
+     "minuto": 20,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Benjamin Farias",
+     "detalle": "Entra: Renzo Alessio"
+    },
+    {
+     "minuto": 20,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Juan Somale",
+     "detalle": "Entra: Ramiro Celayes"
+    },
+    {
+     "minuto": 25,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Facundo Boaglio"
+    },
+    {
+     "minuto": 25,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Facundo Boaglio"
+    },
+    {
+     "minuto": 29,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Pedro Calderoni"
+    },
+    {
+     "minuto": 30,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Federico Salazar"
+    },
+    {
+     "minuto": 30,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Jeronimo Diez Poviña",
+     "detalle": "Entra: Pedro Noblega Palomo"
+    },
+    {
+     "minuto": 30,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "equipo": "local",
+     "jugador": "Ignacio Pussetto",
+     "detalle": "Juego general"
+    },
+    {
+     "minuto": 30,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Ramiro Kamienski",
+     "detalle": "Entra: Valentin Pigni"
+    },
+    {
+     "minuto": 30,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Francisco Fracarolli",
+     "detalle": "Entra: Lautaro Vera"
+    },
+    {
+     "minuto": 35,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Santiago Lanfranco",
+     "detalle": "Entra: Lian Ortiz"
+    },
+    {
+     "minuto": 35,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Octavio Sola",
+     "detalle": "Entra: Ignacio Jesús Solá Zambrano"
+    }
+   ],
+   "arbitro": "Juan Ignacio Vega"
+  }
+ ]
+}

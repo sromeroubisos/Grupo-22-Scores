@@ -1,0 +1,900 @@
+{
+ "descripcion": "Encuentro Femenino de Selecciones de XV 2026 · planillas 327937, 327938, 327933",
+ "partidos": [
+  {
+   "id": "f7a15a20-245b-4cc4-a502-ca2f7db7bb6a",
+   "rotulo": "Cuyo vs Cordobesa · Zona B · planilla 327937",
+   "arbitro": "Camila Abril Díaz",
+   "local": {
+    "nombre": "cuyo-femenino",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Celeste Cecilia Genco"
+     },
+     {
+      "numero": 2,
+      "nombre": "Luciana Aguilar"
+     },
+     {
+      "numero": 3,
+      "nombre": "Lourdes Marianela Castillo"
+     },
+     {
+      "numero": 4,
+      "nombre": "Priscila Bertinatto"
+     },
+     {
+      "numero": 5,
+      "nombre": "Caterina Aldana Gil"
+     },
+     {
+      "numero": 6,
+      "nombre": "Gabriela Algañaras"
+     },
+     {
+      "numero": 7,
+      "nombre": "Pau Márquez"
+     },
+     {
+      "numero": 8,
+      "nombre": "Irupé Etura José"
+     },
+     {
+      "numero": 9,
+      "nombre": "Magdalena Vera Muñoz"
+     },
+     {
+      "numero": 10,
+      "nombre": "María Lis Quiroga"
+     },
+     {
+      "numero": 11,
+      "nombre": "Guada Palero"
+     },
+     {
+      "numero": 12,
+      "nombre": "Esmeralda Beatriz Olivera Aldalla"
+     },
+     {
+      "numero": 13,
+      "nombre": "Candela Ditomassi"
+     },
+     {
+      "numero": 14,
+      "nombre": "Natasha Garnica"
+     },
+     {
+      "numero": 15,
+      "nombre": "Valentina Verdejo"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Julieta Palleres"
+     },
+     {
+      "numero": 17,
+      "nombre": "Selene Migliore"
+     },
+     {
+      "numero": 18,
+      "nombre": "Amparo Contreras"
+     },
+     {
+      "numero": 19,
+      "nombre": "Luz Camila Martínez Giaroli"
+     },
+     {
+      "numero": 20,
+      "nombre": "María José Terranova Gonzalez"
+     },
+     {
+      "numero": 21,
+      "nombre": "Emilce Desirée Gomez Lopresti"
+     },
+     {
+      "numero": 22,
+      "nombre": "Natalia Lepez"
+     }
+    ]
+   },
+   "visitante": {
+    "nombre": "cordobesa-femenino",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Rocio Roda"
+     },
+     {
+      "numero": 2,
+      "nombre": "Yamila Liliana Barrera"
+     },
+     {
+      "numero": 3,
+      "nombre": "Agustina Valdez"
+     },
+     {
+      "numero": 4,
+      "nombre": "Ursula Guazzini Campana"
+     },
+     {
+      "numero": 5,
+      "nombre": "Ana Paula Quintero Chiesa"
+     },
+     {
+      "numero": 6,
+      "nombre": "Ema Lucia Morro Fergola"
+     },
+     {
+      "numero": 7,
+      "nombre": "Melina Lopez"
+     },
+     {
+      "numero": 8,
+      "nombre": "Yamila Gonzalez"
+     },
+     {
+      "numero": 9,
+      "nombre": "Brisa Nazarena Trigo Alday"
+     },
+     {
+      "numero": 10,
+      "nombre": "Dana Birreto"
+     },
+     {
+      "numero": 11,
+      "nombre": "Ludmila Boca"
+     },
+     {
+      "numero": 12,
+      "nombre": "Celmira Quiroga"
+     },
+     {
+      "numero": 13,
+      "nombre": "Giuliana Bergoglio Vamonde"
+     },
+     {
+      "numero": 14,
+      "nombre": "Ana Rieger"
+     },
+     {
+      "numero": 15,
+      "nombre": "Mariel Velay Fossat"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Maite Perez"
+     },
+     {
+      "numero": 17,
+      "nombre": "Maira Barrionuevo"
+     },
+     {
+      "numero": 18,
+      "nombre": "Milagros Coronel Peralta"
+     },
+     {
+      "numero": 19,
+      "nombre": "Maiara Abril Lopez Cejas"
+     },
+     {
+      "numero": 20,
+      "nombre": "Constanza Baudoin"
+     },
+     {
+      "numero": 21,
+      "nombre": "Antonella Crosetto"
+     },
+     {
+      "numero": 22,
+      "nombre": "Brisa Borda"
+     }
+    ]
+   },
+   "eventos": [
+    {
+     "minuto": 1,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "local",
+     "jugador": "Priscila Bertinatto",
+     "detalle": "Juego sucio"
+    },
+    {
+     "minuto": 9,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Dana Birreto",
+     "detalle": ""
+    },
+    {
+     "minuto": 9,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Mariel Velay Fossat",
+     "detalle": ""
+    },
+    {
+     "minuto": 15,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Yamila Gonzalez",
+     "detalle": ""
+    },
+    {
+     "minuto": 20,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Yamila Gonzalez",
+     "detalle": ""
+    },
+    {
+     "minuto": 1,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Agustina Valdez",
+     "detalle": "Entra: Maira Barrionuevo"
+    },
+    {
+     "minuto": 1,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Yamila Liliana Barrera",
+     "detalle": "Entra: Maite Perez"
+    },
+    {
+     "minuto": 1,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Rocio Roda",
+     "detalle": "Entra: Milagros Coronel Peralta"
+    },
+    {
+     "minuto": 2,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Brisa Borda",
+     "detalle": ""
+    },
+    {
+     "minuto": 8,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Melina Lopez",
+     "detalle": "Entra: Maiara Abril Lopez Cejas"
+    },
+    {
+     "minuto": 8,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Giuliana Bergoglio Vamonde",
+     "detalle": "Entra: Constanza Baudoin"
+    },
+    {
+     "minuto": 13,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Ana Rieger",
+     "detalle": ""
+    },
+    {
+     "minuto": 13,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Maiara Abril Lopez Cejas",
+     "detalle": ""
+    },
+    {
+     "minuto": 17,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Ludmila Boca",
+     "detalle": ""
+    }
+   ]
+  },
+  {
+   "id": "91441bb6-50bd-4b62-bbe0-e3441b3c394f",
+   "rotulo": "Tucumán vs Cuyo · Zona B · planilla 327938",
+   "arbitro": "Daiana Del Milagro Cesaretti",
+   "local": {
+    "nombre": "tucuman-femenino",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Katherina Cattaneo"
+     },
+     {
+      "numero": 2,
+      "nombre": "Rita Beatriz Cazorla"
+     },
+     {
+      "numero": 3,
+      "nombre": "Silvina Ramirez"
+     },
+     {
+      "numero": 4,
+      "nombre": "Paula Ledesma"
+     },
+     {
+      "numero": 5,
+      "nombre": "Geovana Andrea Bortolozzo"
+     },
+     {
+      "numero": 6,
+      "nombre": "Aylen Grima"
+     },
+     {
+      "numero": 7,
+      "nombre": "Sofía Abril Diaz"
+     },
+     {
+      "numero": 8,
+      "nombre": "Antonella Slame"
+     },
+     {
+      "numero": 9,
+      "nombre": "Camila Cardozo"
+     },
+     {
+      "numero": 10,
+      "nombre": "Victoria Giardelli"
+     },
+     {
+      "numero": 11,
+      "nombre": "Agostina Campos Ruiz"
+     },
+     {
+      "numero": 12,
+      "nombre": "Azul Medina"
+     },
+     {
+      "numero": 13,
+      "nombre": "María Florencia Moreno"
+     },
+     {
+      "numero": 14,
+      "nombre": "Graciela Yanina Serrano"
+     },
+     {
+      "numero": 15,
+      "nombre": "Teresa Abril Romero"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Candelaria Robles"
+     },
+     {
+      "numero": 17,
+      "nombre": "Camila Alvarez Costas"
+     },
+     {
+      "numero": 18,
+      "nombre": "Nahiara Leguizamon"
+     },
+     {
+      "numero": 19,
+      "nombre": "Nahir Argañaraz"
+     },
+     {
+      "numero": 20,
+      "nombre": "Norién Candela Casola"
+     },
+     {
+      "numero": 21,
+      "nombre": "Candela Romano"
+     },
+     {
+      "numero": 22,
+      "nombre": "Ursula Iovane"
+     }
+    ]
+   },
+   "visitante": {
+    "nombre": "cuyo-femenino",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Celeste Cecilia Genco"
+     },
+     {
+      "numero": 2,
+      "nombre": "Luciana Aguilar"
+     },
+     {
+      "numero": 3,
+      "nombre": "Lourdes Marianela Castillo"
+     },
+     {
+      "numero": 4,
+      "nombre": "Priscila Bertinatto"
+     },
+     {
+      "numero": 5,
+      "nombre": "Caterina Aldana Gil"
+     },
+     {
+      "numero": 6,
+      "nombre": "Gabriela Algañaras"
+     },
+     {
+      "numero": 7,
+      "nombre": "Pau Márquez"
+     },
+     {
+      "numero": 8,
+      "nombre": "Irupé Etura José"
+     },
+     {
+      "numero": 9,
+      "nombre": "Magdalena Vera Muñoz"
+     },
+     {
+      "numero": 10,
+      "nombre": "María Lis Quiroga"
+     },
+     {
+      "numero": 11,
+      "nombre": "Valentina Verdejo"
+     },
+     {
+      "numero": 12,
+      "nombre": "Esmeralda Beatriz Olivera Aldalla"
+     },
+     {
+      "numero": 13,
+      "nombre": "Candela Ditomassi"
+     },
+     {
+      "numero": 14,
+      "nombre": "Emilce Desirée Gomez Lopresti"
+     },
+     {
+      "numero": 15,
+      "nombre": "Guada Palero"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Julieta Palleres"
+     },
+     {
+      "numero": 17,
+      "nombre": "Selene Migliore"
+     },
+     {
+      "numero": 18,
+      "nombre": "Amparo Contreras"
+     },
+     {
+      "numero": 19,
+      "nombre": "Luz Camila Martínez Giaroli"
+     },
+     {
+      "numero": 20,
+      "nombre": "María José Terranova Gonzalez"
+     },
+     {
+      "numero": 21,
+      "nombre": "Natasha Garnica"
+     },
+     {
+      "numero": 22,
+      "nombre": "Natalia Lepez"
+     }
+    ]
+   },
+   "eventos": [
+    {
+     "minuto": 1,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Victoria Giardelli",
+     "detalle": ""
+    },
+    {
+     "minuto": 1,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Aylen Grima",
+     "detalle": ""
+    },
+    {
+     "minuto": 17,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Teresa Abril Romero",
+     "detalle": ""
+    },
+    {
+     "minuto": 4,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Sofía Abril Diaz",
+     "detalle": ""
+    },
+    {
+     "minuto": 5,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Silvina Ramirez",
+     "detalle": "Entra: Candelaria Robles"
+    },
+    {
+     "minuto": 7,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Teresa Abril Romero",
+     "detalle": ""
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Sofía Abril Diaz",
+     "detalle": "Entra: Ursula Iovane"
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Teresa Abril Romero",
+     "detalle": "Entra: Nahiara Leguizamon"
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Agostina Campos Ruiz",
+     "detalle": "Entra: Candela Romano"
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Camila Cardozo",
+     "detalle": "Entra: Nahir Argañaraz"
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Geovana Andrea Bortolozzo",
+     "detalle": "Entra: Norién Candela Casola"
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Katherina Cattaneo",
+     "detalle": "Entra: Camila Alvarez Costas"
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Teresa Abril Romero",
+     "detalle": ""
+    },
+    {
+     "minuto": 16,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Azul Medina",
+     "detalle": ""
+    }
+   ]
+  },
+  {
+   "id": "559917df-0afc-4de1-8efb-000b9e196f9f",
+   "rotulo": "Nordeste vs Alto Valle · Zona A · planilla 327933",
+   "arbitro": "María Nazarena Seubert Also",
+   "local": {
+    "nombre": "nordeste-femenino",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Veronica Pamela Acevedo"
+     },
+     {
+      "numero": 2,
+      "nombre": "Cristina Florencia Gomez"
+     },
+     {
+      "numero": 3,
+      "nombre": "Nair Soledad Alvarez"
+     },
+     {
+      "numero": 4,
+      "nombre": "Estefania Alvares"
+     },
+     {
+      "numero": 5,
+      "nombre": "Ayelen Araceli Goy"
+     },
+     {
+      "numero": 6,
+      "nombre": "Eira Lelies Mikaela Mesa"
+     },
+     {
+      "numero": 7,
+      "nombre": "Alexandra Monzon"
+     },
+     {
+      "numero": 8,
+      "nombre": "Juana Celeste Siacia"
+     },
+     {
+      "numero": 9,
+      "nombre": "Veronica Soledad Zacarias"
+     },
+     {
+      "numero": 10,
+      "nombre": "Melisa Silvana Ojeda"
+     },
+     {
+      "numero": 11,
+      "nombre": "Sabrina Jaqueline Verón"
+     },
+     {
+      "numero": 12,
+      "nombre": "Agustina Antonella Ibañez"
+     },
+     {
+      "numero": 13,
+      "nombre": "Marianela Rita Soledad Maidana"
+     },
+     {
+      "numero": 14,
+      "nombre": "Guadalupe Del Carmen Villa"
+     },
+     {
+      "numero": 15,
+      "nombre": "Claudia Noemi Gimenez"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Bibiana Patricia Dure"
+     },
+     {
+      "numero": 17,
+      "nombre": "Oriana Micaela Fernandez"
+     },
+     {
+      "numero": 18,
+      "nombre": "Maria Ayelen Monte"
+     },
+     {
+      "numero": 19,
+      "nombre": "Maira Carina Albornoz"
+     },
+     {
+      "numero": 20,
+      "nombre": "Florencia Fernandez"
+     },
+     {
+      "numero": 21,
+      "nombre": "Ludmila Gervazoni"
+     },
+     {
+      "numero": 22,
+      "nombre": "Nilda Gomez"
+     }
+    ]
+   },
+   "visitante": {
+    "nombre": "alto-valle-femenino",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Daira Benavidez"
+     },
+     {
+      "numero": 2,
+      "nombre": "Amy Fabiana Morro Seguiel"
+     },
+     {
+      "numero": 3,
+      "nombre": "Bianca Lujan Zuñiga"
+     },
+     {
+      "numero": 4,
+      "nombre": "Yesica Banegas"
+     },
+     {
+      "numero": 5,
+      "nombre": "Florencia Farroni Reina"
+     },
+     {
+      "numero": 6,
+      "nombre": "Aldana Micaela Guerci"
+     },
+     {
+      "numero": 7,
+      "nombre": "Ailin Sepúlveda"
+     },
+     {
+      "numero": 8,
+      "nombre": "Pia Saez"
+     },
+     {
+      "numero": 9,
+      "nombre": "Maria Pia Perea"
+     },
+     {
+      "numero": 10,
+      "nombre": "María Florencia Nieva"
+     },
+     {
+      "numero": 11,
+      "nombre": "Florencia Toledo"
+     },
+     {
+      "numero": 12,
+      "nombre": "Daniza Gutierrez"
+     },
+     {
+      "numero": 13,
+      "nombre": "Pamela Florencia Esquivel"
+     },
+     {
+      "numero": 14,
+      "nombre": "Agustina Belén Sandoval"
+     },
+     {
+      "numero": 15,
+      "nombre": "Guadalupe Santana"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Génesis Guzman"
+     },
+     {
+      "numero": 17,
+      "nombre": "Maria Candela Kristensen"
+     },
+     {
+      "numero": 18,
+      "nombre": "Morena Agustina Roldán"
+     },
+     {
+      "numero": 19,
+      "nombre": "Yesica Cecilia Oyola"
+     },
+     {
+      "numero": 20,
+      "nombre": "Morena Paloma Sanchez Jara"
+     },
+     {
+      "numero": 21,
+      "nombre": "Gianella Sanhueza"
+     },
+     {
+      "numero": 22,
+      "nombre": "Lucía Macarena Velázquez Loncomán"
+     }
+    ]
+   },
+   "eventos": [
+    {
+     "minuto": 0,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Veronica Pamela Acevedo",
+     "detalle": "Entra: Oriana Micaela Fernandez"
+    },
+    {
+     "minuto": 4,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Marianela Rita Soledad Maidana",
+     "detalle": ""
+    },
+    {
+     "minuto": 5,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Melisa Silvana Ojeda",
+     "detalle": ""
+    },
+    {
+     "minuto": 5,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Guadalupe Del Carmen Villa",
+     "detalle": "Entra: Nilda Gomez"
+    },
+    {
+     "minuto": 5,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Ailin Sepúlveda",
+     "detalle": "Entra: Lucía Macarena Velázquez Loncomán"
+    },
+    {
+     "minuto": 11,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Alexandra Monzon",
+     "detalle": "Entra: Florencia Fernandez"
+    },
+    {
+     "minuto": 11,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Sabrina Jaqueline Verón",
+     "detalle": "Entra: Maira Carina Albornoz"
+    },
+    {
+     "minuto": 15,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Florencia Farroni Reina",
+     "detalle": "Entra: Yesica Cecilia Oyola"
+    },
+    {
+     "minuto": 15,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Bianca Lujan Zuñiga",
+     "detalle": "Entra: Maria Candela Kristensen"
+    },
+    {
+     "minuto": 40,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Florencia Toledo",
+     "detalle": "Entra: Génesis Guzman"
+    }
+   ]
+  }
+ ]
+}

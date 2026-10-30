@@ -1,0 +1,18 @@
+{
+  "nombre": "UCR Encuentros Prejuveniles M14 2026",
+  "slug": "ucr-encuentros-prejuveniles-m14-2026",
+  "origen": "ucr-encuentros-prejuveniles-m14-2026",
+  "fechaInicio": "2026-10-29",
+  "unionId": "0c515ac1-af49-4699-b3c5-7273bc424357",
+  "gender": "masculino",
+  "category": "Juvenil",
+  "ageGrade": "M14",
+  "fases": [{ "nombre": "Encuentros", "orden": 1 }],
+  "clubes": [
+    { "id": "club-palermo-bajo-m14", "corto": "Palermo Bajo" },
+    { "id": "gimnasia-y-esgrima-de-rosario-m14", "corto": "Gimnasia y Esgrima de Rosario" }
+  ],
+  "partidos": [
+    { "fase": "Encuentros", "fecha": "2026-10-29", "hora": "19:15", "home": "club-palermo-bajo-m14", "away": "gimnasia-y-esgrima-de-rosario-m14", "homeScore": null, "awayScore": null, "cerrado": false }
+  ]
+}

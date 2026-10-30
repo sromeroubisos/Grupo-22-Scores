@@ -1,0 +1,8 @@
+clubes de Córdoba: 21 · fichas leídas: 587
+grupos a fusionar: 1 · fichas que sobran: 1 · conflictos: 0
+
+chile-xv                               -> Alvaro Marco  [parecido]
+   *   1 Alvaro Marco
+       0 Marco Alvano
+
+── CONFLICTOS (juegan juntos; no se tocan) ──

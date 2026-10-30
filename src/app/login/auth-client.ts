@@ -86,6 +86,14 @@ export async function signInWithPasswordAndRedirect(input: {
     }
 
     if (error) {
+        // El crudo va SIEMPRE a la consola. Lo que ve el usuario esta traducido
+        // y a veces es el fallback generico; cuando eso pasa, esta linea es lo
+        // unico que dice que fallo de verdad.
+        console.warn('[login] signInWithPassword fallo:', {
+            message: error.message,
+            status: (error as { status?: unknown }).status,
+            code: (error as { code?: unknown }).code,
+        })
         throw new Error(getAuthErrorMessage(error, 'No pudimos iniciar sesion. Intenta nuevamente.'))
     }
 

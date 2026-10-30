@@ -1,0 +1,65 @@
+{
+  "partido": "0CkiV046",
+  "proveedor": "flashscore",
+  "descripcion": "Sudáfrica vs Nueva Zelanda · Rugby Championship · 05/09/2026",
+  "local": {
+    "nombre": "Sudáfrica",
+    "titulares": [
+      { "numero": 1, "nombre": "Ox Nche" },
+      { "numero": 2, "nombre": "Malcolm Marx" },
+      { "numero": 3, "nombre": "Wilco Louw" },
+      { "numero": 4, "nombre": "Eben Etzebeth" },
+      { "numero": 5, "nombre": "Ruan Nortje" },
+      { "numero": 6, "nombre": "Siya Kolisi", "capitan": true },
+      { "numero": 7, "nombre": "Pieter-Steph du Toit" },
+      { "numero": 8, "nombre": "Jasper Wiese" },
+      { "numero": 9, "nombre": "Cobus Reinach" },
+      { "numero": 10, "nombre": "Sacha Feinberg-Mngomezulu" },
+      { "numero": 11, "nombre": "Ethan Hooker" },
+      { "numero": 12, "nombre": "Damian de Allende" },
+      { "numero": 13, "nombre": "Jesse Kriel" },
+      { "numero": 14, "nombre": "Kurt-Lee Arendse" },
+      { "numero": 15, "nombre": "Cheslin Kolbe" }
+    ],
+    "suplentes": [
+      { "numero": 16, "nombre": "Deon Fourie" },
+      { "numero": 17, "nombre": "Gerhard Steenekamp" },
+      { "numero": 18, "nombre": "Thomas du Toit" },
+      { "numero": 19, "nombre": "Lood de Jager" },
+      { "numero": 20, "nombre": "Andre Esterhuizen" },
+      { "numero": 21, "nombre": "Cameron Hanekom" },
+      { "numero": 22, "nombre": "Morne van den Berg" },
+      { "numero": 23, "nombre": "Manie Libbok" }
+    ]
+  },
+  "visitante": {
+    "nombre": "Nueva Zelanda",
+    "titulares": [
+      { "numero": 1, "nombre": "George Bower" },
+      { "numero": 2, "nombre": "Asafo Aumua" },
+      { "numero": 3, "nombre": "Tyrel Lomax" },
+      { "numero": 4, "nombre": "Tupou Vaa'i" },
+      { "numero": 5, "nombre": "Sam Darry" },
+      { "numero": 6, "nombre": "Peter Lakai" },
+      { "numero": 7, "nombre": "Luke Jacobson" },
+      { "numero": 8, "nombre": "Ardie Savea" },
+      { "numero": 9, "nombre": "Cam Roigard" },
+      { "numero": 10, "nombre": "Ruben Love" },
+      { "numero": 11, "nombre": "Leroy Carter" },
+      { "numero": 12, "nombre": "Jordie Barrett" },
+      { "numero": 13, "nombre": "Quinn Tupaea" },
+      { "numero": 14, "nombre": "Will Jordan" },
+      { "numero": 15, "nombre": "Damian McKenzie" }
+    ],
+    "suplentes": [
+      { "numero": 16, "nombre": "Samisoni Taukei'aho" },
+      { "numero": 17, "nombre": "Xavier Numia" },
+      { "numero": 18, "nombre": "Fletcher Newell" },
+      { "numero": 19, "nombre": "Fabian Holland" },
+      { "numero": 20, "nombre": "Wallace Sititi" },
+      { "numero": 21, "nombre": "Kyle Preston" },
+      { "numero": 22, "nombre": "Anton Lienert-Brown" },
+      { "numero": 23, "nombre": "Josh Moorby" }
+    ]
+  }
+}

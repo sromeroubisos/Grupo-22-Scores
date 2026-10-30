@@ -1,0 +1,462 @@
+[
+ {
+  "id": "84cb8158-234c-4ec9-a9a6-27ffcba0efc6",
+  "tournament_id": "0bee851d-fc17-4dde-9214-06c8eab0eb40",
+  "date_time": "2026-03-28T00:00:00+00:00",
+  "home_club_id": "cordoba-athletic-club-intermedia",
+  "away_club_id": "uru-cure-rugby-club-intermedia",
+  "score": {
+   "away": 10,
+   "home": 41
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club Intermedia",
+  "a": "Urú Curé Rugby Club Intermedia",
+  "torneo": "copa-cordoba-torneo-vodacom",
+  "sh": 41,
+  "sa": 10,
+  "fecha": "2026-03-27"
+ },
+ {
+  "id": "1def7964-a796-4a91-88b4-84485ee28aac",
+  "tournament_id": "0bee851d-fc17-4dde-9214-06c8eab0eb40",
+  "date_time": "2026-03-28T00:30:00+00:00",
+  "home_club_id": "la-tablada-intermedia",
+  "away_club_id": "jockey-club-de-villa-maria-intermedia",
+  "score": {
+   "away": 36,
+   "home": 5
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "La Tablada - Intermedia",
+  "a": "Jockey Club de Villa María Intermedia",
+  "torneo": "copa-cordoba-torneo-vodacom",
+  "sh": 5,
+  "sa": 36,
+  "fecha": "2026-03-27"
+ },
+ {
+  "id": "36a00298-770b-4c54-a889-3d3c302343e5",
+  "tournament_id": "0bee851d-fc17-4dde-9214-06c8eab0eb40",
+  "date_time": "2026-03-28T12:00:00+00:00",
+  "home_club_id": "tala-rugby-club-intermedia",
+  "away_club_id": "club-palermo-bajo-intermedia",
+  "score": {
+   "away": 22,
+   "home": 14
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club Intermedia",
+  "a": "Club Palermo Bajo Intermedia",
+  "torneo": "copa-cordoba-torneo-vodacom",
+  "sh": 14,
+  "sa": 22,
+  "fecha": "2026-03-28"
+ },
+ {
+  "id": "7f5a00f7-3e6d-45af-821e-37ecb5c0c9cd",
+  "tournament_id": "0bee851d-fc17-4dde-9214-06c8eab0eb40",
+  "date_time": "2026-03-28T15:25:00+00:00",
+  "home_club_id": "jockey-club-cordoba-intermedia",
+  "away_club_id": "club-universitario-de-cordoba-intermedia",
+  "score": {
+   "away": 19,
+   "home": 47
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba Intermedia",
+  "a": "Club Universitario de Córdoba Intermedia",
+  "torneo": "copa-cordoba-torneo-vodacom",
+  "sh": 47,
+  "sa": 19,
+  "fecha": "2026-03-28"
+ },
+ {
+  "id": "486450f9-d7b9-4427-8193-20adbf6a31dc",
+  "tournament_id": "0bee851d-fc17-4dde-9214-06c8eab0eb40",
+  "date_time": "2026-04-25T00:00:00+00:00",
+  "home_club_id": "jockey-club-de-villa-maria-intermedia",
+  "away_club_id": "cordoba-athletic-club-intermedia",
+  "score": {
+   "away": 38,
+   "home": 27
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club de Villa María Intermedia",
+  "a": "Córdoba Athletic Club Intermedia",
+  "torneo": "copa-cordoba-torneo-vodacom",
+  "sh": 27,
+  "sa": 38,
+  "fecha": "2026-04-24"
+ },
+ {
+  "id": "6be2fecf-fb1d-4dab-9544-4c26eb13b244",
+  "tournament_id": "0bee851d-fc17-4dde-9214-06c8eab0eb40",
+  "date_time": "2026-04-25T16:30:00+00:00",
+  "home_club_id": "club-universitario-de-cordoba-intermedia",
+  "away_club_id": "san-martin-de-villa-maria-intermedia",
+  "score": {
+   "away": 31,
+   "home": 39
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Universitario de Córdoba Intermedia",
+  "a": "San Martín de Villa María Intermedia",
+  "torneo": "copa-cordoba-torneo-vodacom",
+  "sh": 39,
+  "sa": 31,
+  "fecha": "2026-04-25"
+ },
+ {
+  "id": "e80724b3-1a6b-45c1-b1f5-016335cc538f",
+  "tournament_id": "0bee851d-fc17-4dde-9214-06c8eab0eb40",
+  "date_time": "2026-04-25T19:15:00+00:00",
+  "home_club_id": "club-palermo-bajo-intermedia",
+  "away_club_id": "jockey-club-cordoba-intermedia",
+  "score": {
+   "away": 28,
+   "home": 21
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Palermo Bajo Intermedia",
+  "a": "Jockey Club Córdoba Intermedia",
+  "torneo": "copa-cordoba-torneo-vodacom",
+  "sh": 21,
+  "sa": 28,
+  "fecha": "2026-04-25"
+ },
+ {
+  "id": "fdb4f680-0fc3-45a2-b9d9-421b3eeee594",
+  "tournament_id": "0bee851d-fc17-4dde-9214-06c8eab0eb40",
+  "date_time": "2026-04-25T20:00:00+00:00",
+  "home_club_id": "uru-cure-rugby-club-intermedia",
+  "away_club_id": "carlos-paz-rugby-club-intermedia",
+  "score": {
+   "away": 28,
+   "home": 0
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Urú Curé Rugby Club Intermedia",
+  "a": "Carlos Paz Rugby Club Intermedia",
+  "torneo": "copa-cordoba-torneo-vodacom",
+  "sh": 0,
+  "sa": 28,
+  "fecha": "2026-04-25"
+ },
+ {
+  "id": "bbb1769d-1991-4496-b0af-ab72debbd265",
+  "tournament_id": "0bee851d-fc17-4dde-9214-06c8eab0eb40",
+  "date_time": "2026-05-22T00:00:00+00:00",
+  "home_club_id": "jockey-club-cordoba-intermedia",
+  "away_club_id": "tala-rugby-club-intermedia",
+  "score": {
+   "away": 36,
+   "home": 39
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba Intermedia",
+  "a": "Tala Rugby Club Intermedia",
+  "torneo": "copa-cordoba-torneo-vodacom",
+  "sh": 39,
+  "sa": 36,
+  "fecha": "2026-05-21"
+ },
+ {
+  "id": "d547bbae-d9db-4476-903f-ca7a1468b766",
+  "tournament_id": "0bee851d-fc17-4dde-9214-06c8eab0eb40",
+  "date_time": "2026-05-29T23:00:00+00:00",
+  "home_club_id": "cordoba-athletic-club-intermedia",
+  "away_club_id": "la-tablada-intermedia",
+  "score": {
+   "away": 8,
+   "home": 14
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club Intermedia",
+  "a": "La Tablada - Intermedia",
+  "torneo": "copa-cordoba-torneo-vodacom",
+  "sh": 14,
+  "sa": 8,
+  "fecha": "2026-05-29"
+ },
+ {
+  "id": "070afbeb-b301-43c0-a22e-988fe4a9fd47",
+  "tournament_id": "0bee851d-fc17-4dde-9214-06c8eab0eb40",
+  "date_time": "2026-05-30T00:45:00+00:00",
+  "home_club_id": "carlos-paz-rugby-club-intermedia",
+  "away_club_id": "jockey-club-de-villa-maria-intermedia",
+  "score": {
+   "away": 29,
+   "home": 22
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Carlos Paz Rugby Club Intermedia",
+  "a": "Jockey Club de Villa María Intermedia",
+  "torneo": "copa-cordoba-torneo-vodacom",
+  "sh": 22,
+  "sa": 29,
+  "fecha": "2026-05-29"
+ },
+ {
+  "id": "9372e191-2f62-4e14-b069-c6fc119aa94c",
+  "tournament_id": "0bee851d-fc17-4dde-9214-06c8eab0eb40",
+  "date_time": "2026-05-30T15:00:00+00:00",
+  "home_club_id": "san-martin-de-villa-maria-intermedia",
+  "away_club_id": "club-palermo-bajo-intermedia",
+  "score": {
+   "away": 14,
+   "home": 24
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "San Martín de Villa María Intermedia",
+  "a": "Club Palermo Bajo Intermedia",
+  "torneo": "copa-cordoba-torneo-vodacom",
+  "sh": 24,
+  "sa": 14,
+  "fecha": "2026-05-30"
+ },
+ {
+  "id": "122e9548-2ffd-4f92-b0e1-facc1a073843",
+  "tournament_id": "0bee851d-fc17-4dde-9214-06c8eab0eb40",
+  "date_time": "2026-06-26T23:30:00+00:00",
+  "home_club_id": "la-tablada-intermedia",
+  "away_club_id": "carlos-paz-rugby-club-intermedia",
+  "score": {
+   "away": 7,
+   "home": 76
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "La Tablada - Intermedia",
+  "a": "Carlos Paz Rugby Club Intermedia",
+  "torneo": "copa-cordoba-torneo-vodacom",
+  "sh": 76,
+  "sa": 7,
+  "fecha": "2026-06-26"
+ },
+ {
+  "id": "15678dfb-e4a4-4f54-b733-e9b34843fca3",
+  "tournament_id": "0bee851d-fc17-4dde-9214-06c8eab0eb40",
+  "date_time": "2026-06-27T00:00:00+00:00",
+  "home_club_id": "jockey-club-de-villa-maria-intermedia",
+  "away_club_id": "uru-cure-rugby-club-intermedia",
+  "score": {
+   "away": 28,
+   "home": 23
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club de Villa María Intermedia",
+  "a": "Urú Curé Rugby Club Intermedia",
+  "torneo": "copa-cordoba-torneo-vodacom",
+  "sh": 23,
+  "sa": 28,
+  "fecha": "2026-06-26"
+ },
+ {
+  "id": "f4e85849-424a-4d01-bb31-3c0a9fd3d6eb",
+  "tournament_id": "0bee851d-fc17-4dde-9214-06c8eab0eb40",
+  "date_time": "2026-06-27T01:00:00+00:00",
+  "home_club_id": "tala-rugby-club-intermedia",
+  "away_club_id": "san-martin-de-villa-maria-intermedia",
+  "score": {
+   "away": 19,
+   "home": 52
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Tala Rugby Club Intermedia",
+  "a": "San Martín de Villa María Intermedia",
+  "torneo": "copa-cordoba-torneo-vodacom",
+  "sh": 52,
+  "sa": 19,
+  "fecha": "2026-06-26"
+ },
+ {
+  "id": "79f97a2a-c7ff-44b8-8915-63c3ce41af7d",
+  "tournament_id": "0bee851d-fc17-4dde-9214-06c8eab0eb40",
+  "date_time": "2026-06-27T16:30:00+00:00",
+  "home_club_id": "club-palermo-bajo-intermedia",
+  "away_club_id": "club-universitario-de-cordoba-intermedia",
+  "score": {
+   "away": 17,
+   "home": 23
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Palermo Bajo Intermedia",
+  "a": "Club Universitario de Córdoba Intermedia",
+  "torneo": "copa-cordoba-torneo-vodacom",
+  "sh": 23,
+  "sa": 17,
+  "fecha": "2026-06-27"
+ },
+ {
+  "id": "c506b17e-84fe-497e-8c02-3bfde2fdafa1",
+  "tournament_id": "0bee851d-fc17-4dde-9214-06c8eab0eb40",
+  "date_time": "2026-07-24T00:00:00+00:00",
+  "home_club_id": "carlos-paz-rugby-club-intermedia",
+  "away_club_id": "cordoba-athletic-club-intermedia",
+  "score": {
+   "away": 78,
+   "home": 5
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Carlos Paz Rugby Club Intermedia",
+  "a": "Córdoba Athletic Club Intermedia",
+  "torneo": "copa-cordoba-torneo-vodacom",
+  "sh": 5,
+  "sa": 78,
+  "fecha": "2026-07-23"
+ },
+ {
+  "id": "cf115da4-2432-4e03-ac53-c9a74363b917",
+  "tournament_id": "0bee851d-fc17-4dde-9214-06c8eab0eb40",
+  "date_time": "2026-07-25T00:00:00+00:00",
+  "home_club_id": "san-martin-de-villa-maria-intermedia",
+  "away_club_id": "jockey-club-cordoba-intermedia",
+  "score": {
+   "away": 40,
+   "home": 26
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "San Martín de Villa María Intermedia",
+  "a": "Jockey Club Córdoba Intermedia",
+  "torneo": "copa-cordoba-torneo-vodacom",
+  "sh": 26,
+  "sa": 40,
+  "fecha": "2026-07-24"
+ },
+ {
+  "id": "0b2b748e-fab0-48b8-9114-a69c381bce30",
+  "tournament_id": "0bee851d-fc17-4dde-9214-06c8eab0eb40",
+  "date_time": "2026-07-25T00:15:00+00:00",
+  "home_club_id": "uru-cure-rugby-club-intermedia",
+  "away_club_id": "la-tablada-intermedia",
+  "score": {
+   "away": 27,
+   "home": 19
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Urú Curé Rugby Club Intermedia",
+  "a": "La Tablada - Intermedia",
+  "torneo": "copa-cordoba-torneo-vodacom",
+  "sh": 19,
+  "sa": 27,
+  "fecha": "2026-07-24"
+ },
+ {
+  "id": "2e891c43-26bd-4f8a-aec4-b479115e7697",
+  "tournament_id": "0bee851d-fc17-4dde-9214-06c8eab0eb40",
+  "date_time": "2026-07-25T16:45:00+00:00",
+  "home_club_id": "club-universitario-de-cordoba-intermedia",
+  "away_club_id": "tala-rugby-club-intermedia",
+  "score": {
+   "away": 54,
+   "home": 26
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Club Universitario de Córdoba Intermedia",
+  "a": "Tala Rugby Club Intermedia",
+  "torneo": "copa-cordoba-torneo-vodacom",
+  "sh": 26,
+  "sa": 54,
+  "fecha": "2026-07-25"
+ },
+ {
+  "id": "137a7cf6-7c79-4e7c-9ec6-8ad456c2ff60",
+  "tournament_id": "0bee851d-fc17-4dde-9214-06c8eab0eb40",
+  "date_time": "2026-07-31T00:00:00+00:00",
+  "home_club_id": "cordoba-athletic-club-intermedia",
+  "away_club_id": "tala-rugby-club-intermedia",
+  "score": {
+   "away": 22,
+   "home": 38
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club Intermedia",
+  "a": "Tala Rugby Club Intermedia",
+  "torneo": "copa-cordoba-torneo-vodacom",
+  "sh": 38,
+  "sa": 22,
+  "fecha": "2026-07-30"
+ },
+ {
+  "id": "ab299db4-2a9b-48ad-902f-41405492cfea",
+  "tournament_id": "0bee851d-fc17-4dde-9214-06c8eab0eb40",
+  "date_time": "2026-08-01T17:00:00+00:00",
+  "home_club_id": "jockey-club-cordoba-intermedia",
+  "away_club_id": "jockey-club-de-villa-maria-intermedia",
+  "score": {
+   "away": 19,
+   "home": 42
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Jockey Club Córdoba Intermedia",
+  "a": "Jockey Club de Villa María Intermedia",
+  "torneo": "copa-cordoba-torneo-vodacom",
+  "sh": 42,
+  "sa": 19,
+  "fecha": "2026-08-01"
+ },
+ {
+  "id": "90e95474-fa49-4a56-b514-20070e0006c4",
+  "tournament_id": "0bee851d-fc17-4dde-9214-06c8eab0eb40",
+  "date_time": "2026-09-11T23:00:00+00:00",
+  "home_club_id": "cordoba-athletic-club-intermedia",
+  "away_club_id": "jockey-club-cordoba-intermedia",
+  "score": {
+   "away": 24,
+   "home": 13
+  },
+  "referee": null,
+  "lineup_home_count": 0,
+  "events_count": 0,
+  "h": "Córdoba Athletic Club Intermedia",
+  "a": "Jockey Club Córdoba Intermedia",
+  "torneo": "copa-cordoba-torneo-vodacom",
+  "sh": 13,
+  "sa": 24,
+  "fecha": "2026-09-11"
+ }
+]

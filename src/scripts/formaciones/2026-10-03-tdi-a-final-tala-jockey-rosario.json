@@ -1,0 +1,256 @@
+{
+  "descripcion": "TDI A 2026 · Final · Tala R.C. vs Jockey Club Rosario (Tala, 03/10/2026, 16:00). Formación del Jockey de la planilla oficial; la de Tala de la nota de la UAR (formaciones confirmadas). Capitanes: Kember (Tala) y Pereira Tauzy (Jockey). Las 46 fichas se reusan. La UAR escribe \"Lorenzetti\": se mantiene \"Lorenzini\" de la planilla. Número = posición de la planilla (el 5 lo usa Bur con la 25).",
+  "torneo": "Torneo del Interior \"A\"",
+  "partidos": [
+    {
+      "id": "287970fb-65e8-421d-946c-22f0a16e8a63",
+      "rotulo": "Tala R.C. vs Jockey Club Rosario",
+      "local": {
+        "nombre": "Tala Rugby Club",
+        "titulares": [
+          {
+            "numero": 1,
+            "nombre": "Julián Escanilla",
+            "id": "950f40e4-ba1c-432b-9921-6f49192b06b3"
+          },
+          {
+            "numero": 2,
+            "nombre": "Lucas Bredanini",
+            "id": "b257bc32-78d5-4b1e-a48a-fd6b7c995676"
+          },
+          {
+            "numero": 3,
+            "nombre": "Enzo Avaca",
+            "id": "a0d2398b-6030-4139-bd74-8f92b0fcc748"
+          },
+          {
+            "numero": 4,
+            "nombre": "Lautaro Simes",
+            "id": "1f0acfb3-d043-4b3b-872a-c080cd5ce1a7"
+          },
+          {
+            "numero": 5,
+            "nombre": "Gregorio Hernández Cardinali",
+            "id": "2afa0b22-0d77-40da-8c9a-c21aa799bff7"
+          },
+          {
+            "numero": 6,
+            "nombre": "Gastón Garayzabal",
+            "id": "ac9a7ae8-2589-45a3-bf01-101913f2ff8b"
+          },
+          {
+            "numero": 7,
+            "nombre": "Mateo Cajal",
+            "id": "870a5f99-0f79-4906-9af7-d8432f89257a"
+          },
+          {
+            "numero": 8,
+            "nombre": "Federico Simondi",
+            "id": "a6afc3fd-1aee-43dc-a3f3-dd3020dba2b2"
+          },
+          {
+            "numero": 9,
+            "nombre": "Ignacio Díaz Centeno",
+            "id": "d45ee4e9-026a-4f9b-ba7f-b181247cc4f0"
+          },
+          {
+            "numero": 10,
+            "nombre": "Facundo Ortiz",
+            "id": "6db093d7-f8cf-4df9-8248-23e9e734c8a6"
+          },
+          {
+            "numero": 11,
+            "nombre": "Agustín de Vértiz",
+            "id": "5e6e2ff5-db1f-4934-bf92-1477be89f25a"
+          },
+          {
+            "numero": 12,
+            "nombre": "Ignacio de Vértiz",
+            "id": "d97cad7e-057d-4b96-9180-2f5a866cc1ca"
+          },
+          {
+            "numero": 13,
+            "nombre": "Mauricio Kember",
+            "id": "8131190b-ae0e-4d95-81ef-4fb3ef9cf9a3",
+            "capitan": true
+          },
+          {
+            "numero": 14,
+            "nombre": "Luciano Avaca",
+            "id": "605ef257-607a-4133-a870-8643dd56f267"
+          },
+          {
+            "numero": 15,
+            "nombre": "Mateo Soler",
+            "id": "c87a2b59-9b81-4a76-9b9e-6d020408346f"
+          }
+        ],
+        "suplentes": [
+          {
+            "numero": 16,
+            "nombre": "Salvador Ortiz",
+            "id": "d286fad2-5f3a-45aa-88d8-72fe956b00e0"
+          },
+          {
+            "numero": 17,
+            "nombre": "Manuel Arroyo",
+            "id": "072f3cd5-6548-4399-a061-ac533b10a425"
+          },
+          {
+            "numero": 18,
+            "nombre": "Francisco Caturelli",
+            "id": "c99b9f99-6471-47c5-9f51-b8b21657639c"
+          },
+          {
+            "numero": 19,
+            "nombre": "Federico Albrisi",
+            "id": "a7dd3931-14f4-47d2-8401-f7e40cbfb39a"
+          },
+          {
+            "numero": 20,
+            "nombre": "Farid Salazar",
+            "id": "a26b67f6-e779-463e-8ece-ac661aad4e4f"
+          },
+          {
+            "numero": 21,
+            "nombre": "Hilario Fernández Frontera",
+            "id": "38bacd16-3265-4d6d-b5a1-6a707e85a522"
+          },
+          {
+            "numero": 22,
+            "nombre": "Manuel Giannantonio",
+            "id": "3791551d-5cd4-488f-a189-ad03e896935a"
+          },
+          {
+            "numero": 23,
+            "nombre": "Gerónimo Vittar",
+            "id": "0f27bba7-ff69-4213-8fa4-f02f75db41d4"
+          }
+        ]
+      },
+      "visitante": {
+        "nombre": "Jockey Club de Rosario",
+        "titulares": [
+          {
+            "numero": 1,
+            "nombre": "Guido Cella",
+            "id": "aeaa54a5-a7b1-4b83-aab5-ffc0d1b925cb"
+          },
+          {
+            "numero": 2,
+            "nombre": "Alejo Pereira Tauzy",
+            "id": "969b167b-0af2-4ef1-8efc-42a1477368ce",
+            "capitan": true
+          },
+          {
+            "numero": 3,
+            "nombre": "Ignacio Orsetti",
+            "id": "7e91506e-cd7d-48d9-8f86-e2b4eb9e43a5"
+          },
+          {
+            "numero": 4,
+            "nombre": "Marcos Lorenzini",
+            "id": "7aee768d-2dab-4355-8fbd-4b2b4257c9e4"
+          },
+          {
+            "numero": 5,
+            "nombre": "Lucas Bur",
+            "id": "ab4b8469-aff4-4b93-9119-2dc1340d8b10"
+          },
+          {
+            "numero": 6,
+            "nombre": "Manuel Santi",
+            "id": "c2d1ec58-bf1b-448f-b7ac-55ffe74e25ad"
+          },
+          {
+            "numero": 7,
+            "nombre": "Felipe Baraldi",
+            "id": "09c0a936-966a-410c-9dd9-c130e0874beb"
+          },
+          {
+            "numero": 8,
+            "nombre": "Emiliano Ferrari",
+            "id": "003b77b3-dea1-4f58-a222-9bfbd83c826d"
+          },
+          {
+            "numero": 9,
+            "nombre": "Alejo Sugasti",
+            "id": "3f6c68d9-873b-46b5-a90d-db93c66f1a06"
+          },
+          {
+            "numero": 10,
+            "nombre": "Juan Bautista Baronio",
+            "id": "48a0465c-aac3-4d5c-8155-4c0ced46a61f"
+          },
+          {
+            "numero": 11,
+            "nombre": "Santiago Casiello",
+            "id": "5817f3c6-8248-4c2c-93cc-ef0dd43682b4"
+          },
+          {
+            "numero": 12,
+            "nombre": "Fermín Vergara Oroño",
+            "id": "ef31bd8f-d481-47a0-8050-2ca6ce985578"
+          },
+          {
+            "numero": 13,
+            "nombre": "Ignacio Dogliani",
+            "id": "b46268ae-7032-4ccb-ba2b-12d90390e0e0"
+          },
+          {
+            "numero": 14,
+            "nombre": "Manuel Lluch",
+            "id": "08251c3d-2ff2-4291-bac7-a5910acd7b9e"
+          },
+          {
+            "numero": 15,
+            "nombre": "Joaquín Fanjul",
+            "id": "85c88766-17e5-44dc-bdf7-42d56bedf767"
+          }
+        ],
+        "suplentes": [
+          {
+            "numero": 16,
+            "nombre": "Agustín Orsi Betria",
+            "id": "da1c6924-86d6-4867-83ec-4fd3aa2e0545"
+          },
+          {
+            "numero": 17,
+            "nombre": "Jeremías Lamas",
+            "id": "0a3a0f6e-c1e8-47c4-b2f9-7fd77fae134b"
+          },
+          {
+            "numero": 18,
+            "nombre": "Santiago Bellotti",
+            "id": "260bd6a3-48ae-46c0-94bb-66564a7dcf1d"
+          },
+          {
+            "numero": 19,
+            "nombre": "Jorge Ciro Baraldi",
+            "id": "ab396909-4fc5-44c0-a1dd-9df8c347c4e3"
+          },
+          {
+            "numero": 20,
+            "nombre": "Damián Torino",
+            "id": "9fe26bc3-6461-471b-84f8-26430266a279"
+          },
+          {
+            "numero": 21,
+            "nombre": "Agustín Maderna",
+            "id": "84b38508-c099-468b-ad59-ebe8aedd8bf2"
+          },
+          {
+            "numero": 22,
+            "nombre": "Luca Scarpello",
+            "id": "0a4e8d5c-ccb1-4ba3-8a36-efc2701edce8"
+          },
+          {
+            "numero": 23,
+            "nombre": "Pedro Quijano",
+            "id": "a51ecbb5-f8a5-4dfa-882e-75c0f9788939"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+feature,area,priority,original,clone,notes
+Repartir puntos de personalidad,creacion,must,S02,yes,perfil + ajuste ±2 por eje; suma 25 invariante
+Tres ofertas de club con tier,creacion,must,S03,yes,deterministas por semilla; RNG derivado
+Elegir club libre,creacion,should,S03 Elegir club,yes,ya existe; queda como alternativa
+Ofertas segun reputacion tras despido,carrera,must,S03 (inferido),yes,reemplaza la lista libre al cambiar de club
+Tienda de mejoras del club,pretemporada,must,S06,yes,5 mejoras x 3 niveles pagadas con la caja
+Objetivos de la directiva con pesos,temporada,must,S04,yes,deportivo 60 / caja 25 / cantera 15 + nota
+Panel de objetivos en pretemporada,pretemporada,should,S04 lateral,yes,
+Oferta por tu figura,temporada,must,S07,yes,pla- Lo llaman de Europa; sin traspaso
+Cabecera con presion y reputacion,ui,must,S04,yes,CoachHeader
+Simulacion que frena en decisiones,temporada,must,S05,yes,5 decisiones antes de jugar
+Ticker donde estabas,ui,could,S09,no,
+Formacion tactica y quimica,plantel,skip,S04,no,manager profundo; el XV sale por puesto
+Fichajes sueldos y valor de mercado,economia,skip,S04,no,no existen en rugby amateur
+Ojeador y alcance de busqueda,mejoras,skip,S06,no,no hay mercado
+Minijuego en partido decisivo,temporada,skip,S08,no,fuera de esta tajada
+Ranking misiones logros vitrina inventario,cuenta,skip,nav,no,capa de cuenta fuera de esta tajada

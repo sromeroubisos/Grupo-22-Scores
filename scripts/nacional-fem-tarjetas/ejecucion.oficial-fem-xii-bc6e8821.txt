@@ -1,0 +1,153 @@
+tarjetas oficiales bc6e8821
+
+regatas-de-resistencia-femenino vs italiana-de-charata-femenino · bc6e8821 · tarjeta 315531  ·  53ff7903-73e0-449c-979a-2744fee51956
+  local     · regatas-de-resistencia-femenino · 23 jugadores · 14 con ficha fijada
+  visitante · italiana-de-charata-femenino · 17 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min  1 (1T 1) local     try          Luciana Maira Montangie
+    min  1 (1T 1) local     conversion   Flavia Noelia Rolheiser
+    min  3 (1T 3) local     try          Ayalen Paula Suarez
+    min  3 (1T 3) local     conversion   Flavia Noelia Rolheiser
+    min 11 (1T 11) local     try          Guadalupe Del Carmen Villa
+    min 11 (1T 11) local     conversion   Flavia Noelia Rolheiser
+    min 16 (1T 16) local     try          Florencia Fernandez
+    min 19 (1T 19) local     conversion   Flavia Noelia Rolheiser
+    min 19 (1T 19) local     try          Danai Maiten Malen Romero Carrazan
+    min 41 (2T 1) local     try          Danai Maiten Malen Romero Carrazan
+    min 41 (2T 1) visitante substitution Belen Anabela Mendoza
+    min 42 (2T 2) local     conversion   Flavia Noelia Rolheiser
+    min 43 (2T 3) local     try          Guadalupe Del Carmen Villa
+    min 43 (2T 3) local     conversion   Flavia Noelia Rolheiser
+    min 46 (2T 6) local     penalty_try  
+    min 47 (2T 7) local     try          Oriana Micaela Fernandez
+    min 48 (2T 8) visitante card_yellow  Maria Bazan
+    min 53 (2T 13) local     try          Milagros Ramirez
+    min 54 (2T 14) local     conversion   Flavia Noelia Rolheiser
+    min 59 (2T 19) local     try          Milagros Ramirez
+  marcador  · eventos 71-0 · guardado 71-0
+  tries     · 11-0 (guardado —-—)
+  arbitro   · RODRIGO SAUCO (guardado: —)
+  guardado  · 23 local · 17 visitante · 20 eventos
+
+italiana-de-charata-femenino vs aguilas-rc-saenz-pena-femenino · bc6e8821 · tarjeta 315534  ·  61536d52-9adc-41cf-9624-c65c8637e6ab
+  local     · italiana-de-charata-femenino · 17 jugadores · 0 con ficha fijada
+  visitante · aguilas-rc-saenz-pena-femenino · 23 jugadores · 13 con ficha fijada
+  eventos   · 22
+    min  1 (1T 1) visitante try          Talia Jorgelina Rodich
+    min  1 (1T 1) visitante conversion   Cristal Marianela Escalante
+    min  3 (1T 3) visitante conversion   Cristal Marianela Escalante
+    min  3 (1T 3) visitante try          Maria Cristina Ramirez
+    min  5 (1T 5) visitante try          Melisa Soledad Rodich
+    min  8 (1T 8) visitante try          Ana María Fariña
+    min  9 (1T 9) visitante try          Daniela Lucia Saravia
+    min  9 (1T 9) visitante conversion   Cristal Marianela Escalante
+    min 10 (1T 10) local     substitution Candelaria Magali Jaremko Bondar
+    min 11 (1T 11) visitante try          Melisa Soledad Rodich
+    min 11 (1T 11) visitante conversion   Melisa Soledad Rodich
+    min 42 (2T 2) visitante try          Talia Jorgelina Rodich
+    min 42 (2T 2) visitante conversion   Talia Jorgelina Rodich
+    min 45 (2T 5) visitante try          Cristal Marianela Escalante
+    min 46 (2T 6) visitante try          Catherine Francia
+    min 46 (2T 6) visitante conversion   Lucia Gicel Ramirez
+    min 48 (2T 8) visitante try          Talia Jorgelina Rodich
+    min 50 (2T 10) visitante try          Patricia Soledad Ojeda
+    min 50 (2T 10) visitante conversion   Cristal Marianela Escalante
+    min 52 (2T 12) visitante try          Talia Jorgelina Rodich
+    min 52 (2T 12) visitante conversion   Talia Jorgelina Rodich
+    min 56 (2T 16) local     card_yellow  Alejandra Anabel Correa
+  marcador  · eventos 0-76 · guardado 0-76
+  tries     · 0-12 (guardado —-—)
+  arbitro   · MARIA DE LOS ANGELES VALLEJOS (guardado: —)
+  guardado  · 17 local · 23 visitante · 22 eventos
+
+regatas-de-resistencia-femenino vs aguilas-rc-saenz-pena-femenino · bc6e8821 · tarjeta 315536  ·  babf6418-aa93-43af-9eef-3c7585a3d6c6
+  local     · regatas-de-resistencia-femenino · 23 jugadores · 17 con ficha fijada
+  visitante · aguilas-rc-saenz-pena-femenino · 23 jugadores · 13 con ficha fijada
+  eventos   · 9
+    min  7 (1T 7) local     try          Marianela Rita Soledad Maidana
+    min  7 (1T 7) local     card_yellow  Melisa Silvana Ojeda
+    min 12 (1T 12) visitante try          Talia Jorgelina Rodich
+    min 12 (1T 12) visitante conversion   Cristal Marianela Escalante
+    min 44 (2T 4) visitante try          Talia Jorgelina Rodich
+    min 50 (2T 10) visitante try          Melisa Soledad Rodich
+    min 50 (2T 10) visitante conversion   Cristal Marianela Escalante
+    min 53 (2T 13) visitante try          Cristal Marianela Escalante
+    min 53 (2T 13) visitante conversion   Cristal Marianela Escalante
+  marcador  · eventos 5-26 · guardado 5-26
+  tries     · 1-4 (guardado —-—)
+  arbitro   · RODRIGO SAUCO (guardado: —)
+  guardado  · 23 local · 23 visitante · 9 eventos
+
+aguilas-rc-saenz-pena-femenino vs italiana-de-charata-femenino · bc6e8821 · tarjeta 322225  ·  e5bf6c29-d019-4475-bfc8-2bb535981d5a
+  local     · aguilas-rc-saenz-pena-femenino · 18 jugadores · 11 con ficha fijada
+  visitante · italiana-de-charata-femenino · 17 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min  2 (1T 2) local     conversion   Daniela Lucia Saravia
+    min  2 (1T 2) local     try          Sabrina Jaqueline Verón
+    min  3 (1T 3) local     try          Ana María Fariña
+    min  6 (1T 6) local     try          Sabrina Jaqueline Verón
+    min  7 (1T 7) local     try          Milagros Jaqueline Cabrera
+    min  7 (1T 7) local     conversion   Milagros Jaqueline Cabrera
+    min  9 (1T 9) local     try          Lucia Gicel Ramirez
+    min 11 (1T 11) local     conversion   Lucia Gicel Ramirez
+    min 11 (1T 11) local     try          Ayelen Araceli Goy
+    min 13 (1T 13) local     try          Daniela Lucia Saravia
+    min 14 (1T 14) local     try          Patricia Soledad Ojeda
+    min 41 (2T 1) visitante substitution Candelaria Magali Jaremko Bondar
+    min 41 (2T 1) visitante substitution Belen Anabela Mendoza
+    min 41 (2T 1) visitante substitution Tatiana Cecilia Diaz
+    min 44 (2T 4) local     try          Patricia Soledad Ojeda
+    min 46 (2T 6) local     try          Patricia Soledad Ojeda
+    min 47 (2T 7) local     try          Patricia Soledad Ojeda
+    min 48 (2T 8) local     conversion   Lucia Gicel Ramirez
+    min 50 (2T 10) local     try          Milagros Jaqueline Cabrera
+    min 50 (2T 10) local     conversion   Milagros Jaqueline Cabrera
+    min 58 (2T 18) local     try          Patricia Soledad Ojeda
+    min 58 (2T 18) local     conversion   Erica Yamila Espindola
+  marcador  · eventos 77-0 · guardado 77-0
+  tries     · 13-0 (guardado —-—)
+  arbitro   · VIVIANA GARAT (guardado: —)
+  guardado  · 18 local · 17 visitante · 22 eventos
+
+aguilas-rc-saenz-pena-femenino vs regatas-de-resistencia-femenino · bc6e8821 · tarjeta 322227  ·  ec4d5808-1d81-406d-93bc-d493cf738ca2
+  local     · aguilas-rc-saenz-pena-femenino · 17 jugadores · 14 con ficha fijada
+  visitante · regatas-de-resistencia-femenino · 19 jugadores · 15 con ficha fijada
+  eventos   · 3
+    min  9 (1T 9) local     try          Cristal Marianela Escalante
+    min 15 (1T 15) local     try          Milagros Jaqueline Cabrera
+    min 45 (2T 5) local     try          Zaira Florencia Gonzalez
+  marcador  · eventos 15-0 · guardado 15-0
+  tries     · 3-0 (guardado —-—)
+  arbitro   · VIVIANA GARAT (guardado: —)
+  guardado  · 17 local · 19 visitante · 3 eventos
+
+italiana-de-charata-femenino vs regatas-de-resistencia-femenino · bc6e8821 · tarjeta 322226  ·  87b57ae2-4f37-48f6-ae28-2bfdff330ec8
+  local     · italiana-de-charata-femenino · 17 jugadores · 0 con ficha fijada
+  visitante · regatas-de-resistencia-femenino · 19 jugadores · 15 con ficha fijada
+  eventos   · 20
+    min  1 (1T 1) visitante try          Eira Lelies Mikaela Mesa
+    min  1 (1T 1) visitante conversion   Flavia Noelia Rolheiser
+    min  3 (1T 3) visitante try          Danai Maiten Malen Romero Carrazan
+    min  3 (1T 3) visitante conversion   Flavia Noelia Rolheiser
+    min  5 (1T 5) visitante try          Guadalupe Del Carmen Villa
+    min  5 (1T 5) visitante conversion   Flavia Noelia Rolheiser
+    min  8 (1T 8) visitante try          Karen Sabrina Caja
+    min 10 (1T 10) visitante try          Eira Lelies Mikaela Mesa
+    min 10 (1T 10) visitante conversion   Flavia Noelia Rolheiser
+    min 11 (1T 11) visitante try          Danai Maiten Malen Romero Carrazan
+    min 12 (1T 12) visitante try          Danai Maiten Malen Romero Carrazan
+    min 12 (1T 12) visitante conversion   Flavia Noelia Rolheiser
+    min 41 (2T 1) local     substitution Giuliana Barrera
+    min 41 (2T 1) local     substitution Jessica Alejandra Caceres
+    min 45 (2T 5) local     substitution Aldana Leguizamon
+    min 45 (2T 5) visitante conversion   Sabrina Nair Osuna
+    min 45 (2T 5) visitante try          Sabrina Nair Osuna
+    min 51 (2T 11) visitante try          Eira Lelies Mikaela Mesa
+    min 52 (2T 12) visitante try          Sabrina Nair Osuna
+    min 52 (2T 12) visitante conversion   Marianela Rita Soledad Maidana
+  marcador  · eventos 0-64 · guardado 0-64
+  tries     · 0-10 (guardado —-—)
+  arbitro   · MARIA DE LOS ANGELES VALLEJOS (guardado: —)
+  guardado  · 17 local · 19 visitante · 20 eventos
+
+listo · 6 partidos

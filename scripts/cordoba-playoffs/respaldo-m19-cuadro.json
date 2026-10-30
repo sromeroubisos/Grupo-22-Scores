@@ -1,0 +1,1112 @@
+{
+ "fases": [
+  {
+   "id": "ecf96450-d341-4aac-a0f3-3457bef8c569",
+   "tournament_id": "1ad1a41f-a9f3-4b6f-8902-54cfe2261f2b",
+   "name": "Campeonato",
+   "phase_type": "league",
+   "order_index": 1,
+   "is_active": true,
+   "settings": {
+    "legs": 1,
+    "bonus": {
+     "defensive": {
+      "margin": 7,
+      "points": 1
+     },
+     "offensive": {
+      "tries": 4,
+      "points": 1
+     }
+    },
+    "points": {
+     "win": 4,
+     "draw": 2,
+     "loss": 0
+    },
+    "source": "cordoba-m19-2026",
+    "groupTags": [
+     "Semifinales",
+     "Posicionamiento 5° al 8°",
+     "Posicionamiento 9° y 10°"
+    ],
+    "standings": {
+     "mode": "fully_manual",
+     "source": "Tabla oficial de la Unión Cordobesa de Rugby",
+     "editable": true
+    },
+    "teamsCount": 10,
+    "groupLabels": [
+     {
+      "id": "2ee397d6-cb53-40c0-9a3e-5d9c273fce50",
+      "name": "Semifinales",
+      "color": "#00a365",
+      "colorMode": "manual",
+      "autoColorIndex": 0
+     },
+     {
+      "id": "0df37c07-45da-4ebc-9aab-c61035fd34bd",
+      "name": "Posicionamiento 5° al 8°",
+      "color": "#3b82f6",
+      "colorMode": "manual",
+      "autoColorIndex": 0
+     },
+     {
+      "id": "3113a3f1-2fcd-43c1-b2a6-14bc997c9ad6",
+      "name": "Posicionamiento 9° y 10°",
+      "color": "#eab308",
+      "colorMode": "manual",
+      "autoColorIndex": 0
+     }
+    ],
+    "tiebreakers": [
+     {
+      "label": "Puntos obtenidos",
+      "metric": "points",
+      "enabled": true,
+      "priority": 1
+     },
+     {
+      "label": "Resultado entre sí",
+      "metric": "head_to_head",
+      "enabled": true,
+      "priority": 2
+     },
+     {
+      "label": "Diferencia de tantos",
+      "metric": "points_difference",
+      "enabled": true,
+      "priority": 3
+     },
+     {
+      "label": "Tries a favor",
+      "metric": "tries_for",
+      "enabled": true,
+      "priority": 4
+     },
+     {
+      "label": "Partidos ganados",
+      "metric": "won",
+      "enabled": true,
+      "priority": 5
+     }
+    ],
+    "pointsSystem": {
+     "win": 4,
+     "draw": 2,
+     "loss": 0,
+     "bonusTry": 1,
+     "bonusLoss": 1,
+     "allowBonusPoints": true
+    }
+   },
+   "created_at": "2026-10-16T14:27:40.836+00:00",
+   "updated_at": "2026-10-16T14:27:40.836+00:00",
+   "season_id": "667bae64-081b-4c1c-b315-aa11ab535f9a"
+  },
+  {
+   "id": "7d5bc226-4a11-42a7-b4bc-c5310c0f66f7",
+   "tournament_id": "1ad1a41f-a9f3-4b6f-8902-54cfe2261f2b",
+   "name": "Semifinales",
+   "phase_type": "playoff",
+   "order_index": 2,
+   "is_active": false,
+   "settings": {
+    "legs": 1,
+    "bonus": {
+     "defensive": {
+      "margin": 7,
+      "points": 1
+     },
+     "offensive": {
+      "tries": 4,
+      "points": 1
+     }
+    },
+    "points": {
+     "win": 4,
+     "draw": 2,
+     "loss": 0
+    },
+    "source": "cordoba-m19-2026",
+    "phaseMode": "playoff",
+    "standings": {
+     "mode": "automatic",
+     "editable": true
+    },
+    "bracketMode": "manual",
+    "tiebreakers": [
+     {
+      "label": "Puntos obtenidos",
+      "metric": "points",
+      "enabled": true,
+      "priority": 1
+     },
+     {
+      "label": "Resultado entre sí",
+      "metric": "head_to_head",
+      "enabled": true,
+      "priority": 2
+     },
+     {
+      "label": "Diferencia de tantos",
+      "metric": "points_difference",
+      "enabled": true,
+      "priority": 3
+     },
+     {
+      "label": "Tries a favor",
+      "metric": "tries_for",
+      "enabled": true,
+      "priority": 4
+     },
+     {
+      "label": "Partidos ganados",
+      "metric": "won",
+      "enabled": true,
+      "priority": 5
+     }
+    ],
+    "advanceCount": 1,
+    "pointsSystem": {
+     "win": 4,
+     "draw": 2,
+     "loss": 0,
+     "bonusTry": 1,
+     "bonusLoss": 1,
+     "allowBonusPoints": true
+    },
+    "playoffStages": [
+     {
+      "id": "playoff_stage_1",
+      "name": "Semifinales",
+      "matchCount": 2,
+      "orderIndex": 1
+     }
+    ]
+   },
+   "created_at": "2026-10-16T14:27:40.836+00:00",
+   "updated_at": "2026-10-16T14:27:40.836+00:00",
+   "season_id": "667bae64-081b-4c1c-b315-aa11ab535f9a"
+  },
+  {
+   "id": "372c0564-c688-499c-88b4-6e1533525ae2",
+   "tournament_id": "1ad1a41f-a9f3-4b6f-8902-54cfe2261f2b",
+   "name": "Posicionamiento 5° al 10°",
+   "phase_type": "playoff",
+   "order_index": 3,
+   "is_active": false,
+   "settings": {
+    "legs": 1,
+    "bonus": {
+     "defensive": {
+      "margin": 7,
+      "points": 1
+     },
+     "offensive": {
+      "tries": 4,
+      "points": 1
+     }
+    },
+    "points": {
+     "win": 4,
+     "draw": 2,
+     "loss": 0
+    },
+    "source": "cordoba-m19-2026",
+    "phaseMode": "playoff",
+    "standings": {
+     "mode": "automatic",
+     "editable": true
+    },
+    "bracketMode": "manual",
+    "tiebreakers": [
+     {
+      "label": "Puntos obtenidos",
+      "metric": "points",
+      "enabled": true,
+      "priority": 1
+     },
+     {
+      "label": "Resultado entre sí",
+      "metric": "head_to_head",
+      "enabled": true,
+      "priority": 2
+     },
+     {
+      "label": "Diferencia de tantos",
+      "metric": "points_difference",
+      "enabled": true,
+      "priority": 3
+     },
+     {
+      "label": "Tries a favor",
+      "metric": "tries_for",
+      "enabled": true,
+      "priority": 4
+     },
+     {
+      "label": "Partidos ganados",
+      "metric": "won",
+      "enabled": true,
+      "priority": 5
+     }
+    ],
+    "advanceCount": 1,
+    "pointsSystem": {
+     "win": 4,
+     "draw": 2,
+     "loss": 0,
+     "bonusTry": 1,
+     "bonusLoss": 1,
+     "allowBonusPoints": true
+    },
+    "playoffStages": [
+     {
+      "id": "playoff_stage_1",
+      "name": "Semifinales 5° al 8°",
+      "matchCount": 2,
+      "orderIndex": 1
+     }
+    ]
+   },
+   "created_at": "2026-10-16T14:27:40.836+00:00",
+   "updated_at": "2026-10-16T14:27:40.836+00:00",
+   "season_id": "667bae64-081b-4c1c-b315-aa11ab535f9a"
+  },
+  {
+   "id": "9633d72a-bf47-4476-bcb1-4bf164d25b06",
+   "tournament_id": "1ad1a41f-a9f3-4b6f-8902-54cfe2261f2b",
+   "name": "Final",
+   "phase_type": "playoff",
+   "order_index": 4,
+   "is_active": false,
+   "settings": {
+    "legs": 1,
+    "bonus": {
+     "defensive": {
+      "margin": 7,
+      "points": 1
+     },
+     "offensive": {
+      "tries": 4,
+      "points": 1
+     }
+    },
+    "points": {
+     "win": 4,
+     "draw": 2,
+     "loss": 0
+    },
+    "source": "cordoba-m19-2026",
+    "phaseMode": "playoff",
+    "standings": {
+     "mode": "automatic",
+     "editable": true
+    },
+    "bracketMode": "manual",
+    "tiebreakers": [
+     {
+      "label": "Puntos obtenidos",
+      "metric": "points",
+      "enabled": true,
+      "priority": 1
+     },
+     {
+      "label": "Resultado entre sí",
+      "metric": "head_to_head",
+      "enabled": true,
+      "priority": 2
+     },
+     {
+      "label": "Diferencia de tantos",
+      "metric": "points_difference",
+      "enabled": true,
+      "priority": 3
+     },
+     {
+      "label": "Tries a favor",
+      "metric": "tries_for",
+      "enabled": true,
+      "priority": 4
+     },
+     {
+      "label": "Partidos ganados",
+      "metric": "won",
+      "enabled": true,
+      "priority": 5
+     }
+    ],
+    "advanceCount": 1,
+    "pointsSystem": {
+     "win": 4,
+     "draw": 2,
+     "loss": 0,
+     "bonusTry": 1,
+     "bonusLoss": 1,
+     "allowBonusPoints": true
+    },
+    "playoffStages": [
+     {
+      "id": "playoff_stage_1",
+      "name": "Final",
+      "matchCount": 1,
+      "orderIndex": 1
+     }
+    ]
+   },
+   "created_at": "2026-10-20T00:23:18.900605+00:00",
+   "updated_at": "2026-10-20T00:23:18.900605+00:00",
+   "season_id": "667bae64-081b-4c1c-b315-aa11ab535f9a"
+  }
+ ],
+ "rondas": [
+  {
+   "id": "16c39a93-b7d8-4e92-b588-18a8359c2543",
+   "phase_id": "9633d72a-bf47-4476-bcb1-4bf164d25b06",
+   "name": "Final",
+   "order_index": 1,
+   "start_date": "2026-10-24T00:00:00+00:00",
+   "end_date": "2026-10-24T00:00:00+00:00",
+   "is_completed": false,
+   "notes": null,
+   "created_at": "2026-10-20T00:23:18.900605+00:00",
+   "updated_at": "2026-10-20T00:23:18.900605+00:00",
+   "season_id": "667bae64-081b-4c1c-b315-aa11ab535f9a",
+   "group_id": null
+  },
+  {
+   "id": "639b58b8-e576-49d7-a3db-08e5a94c83bc",
+   "phase_id": "7d5bc226-4a11-42a7-b4bc-c5310c0f66f7",
+   "name": "Semifinales",
+   "order_index": 1,
+   "start_date": "2026-10-17T00:00:00+00:00",
+   "end_date": "2026-10-17T00:00:00+00:00",
+   "is_completed": true,
+   "notes": null,
+   "created_at": "2026-10-16T14:27:40.836+00:00",
+   "updated_at": "2026-10-17T19:08:43.848885+00:00",
+   "season_id": "667bae64-081b-4c1c-b315-aa11ab535f9a",
+   "group_id": null
+  }
+ ],
+ "partidos": [
+  {
+   "id": "a3eebace-de23-418c-9432-5d7d13da2f40",
+   "tournament_id": "1ad1a41f-a9f3-4b6f-8902-54cfe2261f2b",
+   "round_id": null,
+   "date_time": "2026-10-17T15:00:00+00:00",
+   "venue": null,
+   "home_club_id": "club-palermo-bajo-m19-a",
+   "away_club_id": "club-la-tablada-m19-a",
+   "status": "final",
+   "score": {
+    "away": 36,
+    "home": 34,
+    "penalties": null,
+    "manualOverride": {
+     "away": 36,
+     "home": 34,
+     "cutoffMinute": null
+    }
+   },
+   "created_at": "2026-10-16T14:27:40.836+00:00",
+   "updated_at": "2026-10-17T17:48:16.18656+00:00",
+   "notes": null,
+   "round_label": "Semifinales",
+   "phase_id": "7d5bc226-4a11-42a7-b4bc-c5310c0f66f7",
+   "group_id": null,
+   "round_uuid": "639b58b8-e576-49d7-a3db-08e5a94c83bc",
+   "home_base_points": 0,
+   "away_base_points": 4,
+   "home_bonus_points": 1,
+   "away_bonus_points": 0,
+   "points_autocalculated": true,
+   "points_override_reason": null,
+   "live_enabled": false,
+   "category": null,
+   "home_division_id": null,
+   "away_division_id": null,
+   "lineups": {
+    "away": [],
+    "home": []
+   },
+   "events": [],
+   "sport_id": "rugby",
+   "sport": "rugby",
+   "clock": null,
+   "referee": null,
+   "pitch": null,
+   "broadcast_url": null,
+   "replay_url": null,
+   "stream_url": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "is_visible": true,
+   "review_status": "approved",
+   "created_by_user_id": null,
+   "created_by_club_id": null,
+   "reviewed_by_user_id": null,
+   "reviewed_at": null,
+   "review_notes": null,
+   "season_id": "667bae64-081b-4c1c-b315-aa11ab535f9a",
+   "home_team_id": null,
+   "away_team_id": null,
+   "home_season_entry_id": null,
+   "away_season_entry_id": null,
+   "bracket_match_code": null,
+   "home_source_label": null,
+   "away_source_label": null,
+   "participant_source": null,
+   "auto_scheduled": false,
+   "scheduling_status": null,
+   "external_id": null,
+   "official_sheet_number": null
+  },
+  {
+   "id": "a4bfc7cf-7621-4493-892d-efe7ab6f20b4",
+   "tournament_id": "1ad1a41f-a9f3-4b6f-8902-54cfe2261f2b",
+   "round_id": null,
+   "date_time": "2026-10-17T17:00:00+00:00",
+   "venue": null,
+   "home_club_id": "jockey-club-cordoba-m19-a",
+   "away_club_id": "jockey-club-de-villa-maria-m19-a",
+   "status": "final",
+   "score": {
+    "away": 17,
+    "home": 35,
+    "awayTries": 3,
+    "homeTries": 5
+   },
+   "created_at": "2026-10-16T14:27:40.836+00:00",
+   "updated_at": "2026-10-20T00:33:16.868969+00:00",
+   "notes": null,
+   "round_label": "Semifinales",
+   "phase_id": "7d5bc226-4a11-42a7-b4bc-c5310c0f66f7",
+   "group_id": null,
+   "round_uuid": "639b58b8-e576-49d7-a3db-08e5a94c83bc",
+   "home_base_points": 0,
+   "away_base_points": 0,
+   "home_bonus_points": 0,
+   "away_bonus_points": 0,
+   "points_autocalculated": true,
+   "points_override_reason": null,
+   "live_enabled": false,
+   "category": null,
+   "home_division_id": null,
+   "away_division_id": null,
+   "lineups": {
+    "away": [
+     {
+      "id": "6fa3f555-3ad6-4696-bf94-18107801f445",
+      "name": "Joaquín Julián Lopez",
+      "role": "starter",
+      "number": 1,
+      "rating": null,
+      "position": "Pilar",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     },
+     {
+      "id": "5c120a3c-fd48-444f-bc3e-fbedf42eebd1",
+      "name": "Tiago Requena",
+      "role": "starter",
+      "number": 2,
+      "rating": null,
+      "position": "Hooker",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     },
+     {
+      "id": "54cd9e18-e8f3-4351-8a6e-23171ca8e61f",
+      "name": "Maximiliano Ghione",
+      "role": "starter",
+      "number": 3,
+      "rating": null,
+      "position": "Pilar",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     },
+     {
+      "id": "aefabcab-ccb7-4c2f-b515-060f5115fcae",
+      "name": "Lorenzo David",
+      "role": "starter",
+      "number": 4,
+      "rating": null,
+      "position": "Segunda línea",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     },
+     {
+      "id": "d629c66c-e716-4d7d-9471-d28c7ea3a493",
+      "name": "Walter Igancio Bosio",
+      "role": "starter",
+      "number": 5,
+      "rating": null,
+      "position": "Segunda línea",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     },
+     {
+      "id": "161bb68a-09d3-486d-ae00-606cf2f9cfdc",
+      "name": "Jeronimo Jesús Colusso",
+      "role": "starter",
+      "number": 6,
+      "rating": null,
+      "position": "Tercera línea",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     },
+     {
+      "id": "077f5fde-7755-43f4-85f4-92a0d9808cdd",
+      "name": "Santino Rubiola",
+      "role": "starter",
+      "number": 7,
+      "rating": null,
+      "position": "Tercera línea",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     },
+     {
+      "id": "da60c35b-3426-4e58-acaf-c52c42f58854",
+      "name": "Bruno Geremias",
+      "role": "starter",
+      "number": 8,
+      "rating": null,
+      "position": "Tercera línea",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     },
+     {
+      "id": "1bd8d3d1-1488-4ff2-87d7-950573f53a43",
+      "name": "Juan Cruz Colusso",
+      "role": "starter",
+      "number": 9,
+      "rating": null,
+      "position": "Medio scrum",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     },
+     {
+      "id": "c6cb8e9e-90c1-4831-a44d-6d23c430b3c2",
+      "name": "Francisco Salomon",
+      "role": "starter",
+      "number": 10,
+      "rating": null,
+      "position": "Apertura",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     },
+     {
+      "id": "41e43e09-14e5-4e19-9629-5bc7424812c1",
+      "name": "Bautista Arbarello",
+      "role": "starter",
+      "number": 11,
+      "rating": null,
+      "position": "Wing",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     },
+     {
+      "id": "cd5fbccb-8bc5-454b-bf81-a2ec132fbb1b",
+      "name": "Antonio Calcagno",
+      "role": "starter",
+      "number": 12,
+      "rating": null,
+      "position": "Centro",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     },
+     {
+      "id": "a029718b-6bff-4aed-b76b-a53df27dcc19",
+      "name": "Benjamin Poloni Avaro",
+      "role": "starter",
+      "number": 13,
+      "rating": null,
+      "position": "Centro",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     },
+     {
+      "id": "c2d6e720-2107-49b3-8231-21bd173a0d80",
+      "name": "Renzo Mariani Mulinetti",
+      "role": "starter",
+      "number": 14,
+      "rating": null,
+      "position": "Wing",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     },
+     {
+      "id": "c9ccd5ab-b2f3-4c8f-b65e-49c765dd2947",
+      "name": "Valentín Fracarolli",
+      "role": "starter",
+      "number": 15,
+      "rating": null,
+      "position": "Fullback",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     },
+     {
+      "id": "dfeb44d3-f5d2-47e5-bfcf-ad07854dc32b",
+      "name": "Augusto Chialvo",
+      "role": "substitute",
+      "number": 16,
+      "rating": null,
+      "position": "",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     },
+     {
+      "id": "fddf9493-0aab-40d9-8696-70c2bd83e0c2",
+      "name": "Julian Alcalino Araoz",
+      "role": "substitute",
+      "number": 17,
+      "rating": null,
+      "position": "",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     },
+     {
+      "id": "50991c32-7bc7-41ee-bcd0-6b24f86f91d1",
+      "name": "Jeremias Trigg",
+      "role": "substitute",
+      "number": 18,
+      "rating": null,
+      "position": "",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     },
+     {
+      "id": "095d0730-c4de-424c-9a1c-8e1ad4384fea",
+      "name": "Santiago Barrionuevo",
+      "role": "substitute",
+      "number": 19,
+      "rating": null,
+      "position": "",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     },
+     {
+      "id": "26d4d68e-0aac-4b4c-9477-b37604d823f5",
+      "name": "Alvaro Rosso",
+      "role": "substitute",
+      "number": 20,
+      "rating": null,
+      "position": "",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     },
+     {
+      "id": "b8d34850-72f2-4536-9c10-1b01c503a90f",
+      "name": "Gennaro Battisti",
+      "role": "substitute",
+      "number": 21,
+      "rating": null,
+      "position": "",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     },
+     {
+      "id": "f0f3873a-a01b-423d-8827-cea36c605d2a",
+      "name": "Bautista Rojas",
+      "role": "substitute",
+      "number": 22,
+      "rating": null,
+      "position": "",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     },
+     {
+      "id": "7be23ed0-def3-473d-8daf-987c612d1f13",
+      "name": "Octavio Trillini",
+      "role": "substitute",
+      "number": 23,
+      "rating": null,
+      "position": "",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     }
+    ],
+    "home": [
+     {
+      "id": "3d50d9d1-72f5-4c8b-995a-7eadbf6321f3",
+      "name": "Francisco Antonio Gimenez",
+      "role": "starter",
+      "number": 1,
+      "rating": null,
+      "position": "Pilar",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     },
+     {
+      "id": "137a8920-2f20-42ac-9349-0cb2e0d47579",
+      "name": "Juan Cruz Ouro",
+      "role": "starter",
+      "number": 2,
+      "rating": null,
+      "position": "Hooker",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     },
+     {
+      "id": "999c88f0-2bff-4315-8b94-65012dc3fa2a",
+      "name": "Dylan Farias",
+      "role": "starter",
+      "number": 3,
+      "rating": null,
+      "position": "Pilar",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     },
+     {
+      "id": "10e7b017-3107-42dc-9e0f-692f6b57cffe",
+      "name": "Juan Ignacio Cavallero",
+      "role": "starter",
+      "number": 4,
+      "rating": null,
+      "position": "Segunda línea",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     },
+     {
+      "id": "5f6e6990-18c0-40ea-98f7-1f961ee64edc",
+      "name": "Angelo Echeverría",
+      "role": "starter",
+      "number": 5,
+      "rating": null,
+      "position": "Segunda línea",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     },
+     {
+      "id": "cc60dc65-0af7-45ff-82d1-7e758fc8dd6e",
+      "name": "Bautista Perec Larroque",
+      "role": "starter",
+      "number": 6,
+      "rating": null,
+      "position": "Tercera línea",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     },
+     {
+      "id": "2e20b060-d33f-4456-b2dc-ed3af075cedd",
+      "name": "Francisco Vigo",
+      "role": "starter",
+      "number": 7,
+      "rating": null,
+      "position": "Tercera línea",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     },
+     {
+      "id": "390ad608-4087-43f0-a9c1-ea23214f6c0d",
+      "name": "Alvaro Molina",
+      "role": "starter",
+      "number": 8,
+      "rating": null,
+      "position": "Tercera línea",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     },
+     {
+      "id": "bad64285-e485-407e-8def-d652ad1624de",
+      "name": "Santiago De Benito",
+      "role": "starter",
+      "number": 9,
+      "rating": null,
+      "position": "Medio scrum",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     },
+     {
+      "id": "d64207d6-0786-45de-9c29-b33b3ba00873",
+      "name": "Jeronimo Ortiz Araya",
+      "role": "starter",
+      "number": 10,
+      "rating": null,
+      "position": "Apertura",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     },
+     {
+      "id": "37d47017-99ab-45d0-9b56-70674c5ff73e",
+      "name": "Tomas Binda",
+      "role": "starter",
+      "number": 11,
+      "rating": null,
+      "position": "Wing",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     },
+     {
+      "id": "4cd4766c-8342-4df8-8398-2cc4750192a9",
+      "name": "Bruno Irusta",
+      "role": "starter",
+      "number": 12,
+      "rating": null,
+      "position": "Centro",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     },
+     {
+      "id": "24e59341-5300-4443-8376-af55cef267f1",
+      "name": "Felipe Narda",
+      "role": "starter",
+      "number": 13,
+      "rating": null,
+      "position": "Centro",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     },
+     {
+      "id": "55ceacb8-8f23-4c3d-ab15-2f32a9a0f2ae",
+      "name": "Bautista Fernández Pugliese",
+      "role": "starter",
+      "number": 14,
+      "rating": null,
+      "position": "Wing",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     },
+     {
+      "id": "7bfbb10d-e73e-4689-8928-2f31beae5d14",
+      "name": "Felipe Joaquin Vazquez",
+      "role": "starter",
+      "number": 15,
+      "rating": null,
+      "position": "Fullback",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     },
+     {
+      "id": "d89d93bb-9392-4eb9-b755-97d883213362",
+      "name": "Tomás Ernesto Guevara Ortiz",
+      "role": "substitute",
+      "number": 16,
+      "rating": null,
+      "position": "",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     },
+     {
+      "id": "d28ccaf4-905d-4609-97d1-8ef8cd0f01cc",
+      "name": "Santino Pizzi",
+      "role": "substitute",
+      "number": 17,
+      "rating": null,
+      "position": "",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     },
+     {
+      "id": "6f9336fd-767a-4edd-a356-ac61bec56c54",
+      "name": "Elias Gerez",
+      "role": "substitute",
+      "number": 18,
+      "rating": null,
+      "position": "",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     },
+     {
+      "id": "ff285dab-9550-48cb-ab72-50c9ba185987",
+      "name": "Santiago Mazzuferi",
+      "role": "substitute",
+      "number": 19,
+      "rating": null,
+      "position": "",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     },
+     {
+      "id": "0234fa0b-b36b-4d0b-8114-d0934b266416",
+      "name": "Francisco Vaccarini",
+      "role": "substitute",
+      "number": 20,
+      "rating": null,
+      "position": "",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     },
+     {
+      "id": "527eb7d1-3a49-40a5-9ec7-fdf5dc22bed3",
+      "name": "Manuel Ojeda",
+      "role": "substitute",
+      "number": 21,
+      "rating": null,
+      "position": "",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     },
+     {
+      "id": "37698cb8-d3e7-492b-9b5e-a9e628f82398",
+      "name": "Salvador Franco Curvino",
+      "role": "substitute",
+      "number": 22,
+      "rating": null,
+      "position": "",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     },
+     {
+      "id": "e4de7307-d019-4f2f-907f-ce46b54488da",
+      "name": "Martin Robinson",
+      "role": "substitute",
+      "number": 23,
+      "rating": null,
+      "position": "",
+      "isCaptain": false,
+      "divisionId": null,
+      "squadMemberId": null
+     }
+    ]
+   },
+   "events": [],
+   "sport_id": "rugby",
+   "sport": "rugby",
+   "clock": null,
+   "referee": "Ignacio Santiago Olmedo Ramirez",
+   "pitch": null,
+   "broadcast_url": null,
+   "replay_url": null,
+   "stream_url": null,
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 14,
+   "is_visible": true,
+   "review_status": "approved",
+   "created_by_user_id": null,
+   "created_by_club_id": null,
+   "reviewed_by_user_id": null,
+   "reviewed_at": null,
+   "review_notes": null,
+   "season_id": "667bae64-081b-4c1c-b315-aa11ab535f9a",
+   "home_team_id": null,
+   "away_team_id": null,
+   "home_season_entry_id": null,
+   "away_season_entry_id": null,
+   "bracket_match_code": null,
+   "home_source_label": null,
+   "away_source_label": null,
+   "participant_source": null,
+   "auto_scheduled": false,
+   "scheduling_status": null,
+   "external_id": null,
+   "official_sheet_number": null
+  },
+  {
+   "id": "bf3f3eb7-c7d8-460c-a796-970983e1c589",
+   "tournament_id": "1ad1a41f-a9f3-4b6f-8902-54cfe2261f2b",
+   "round_id": null,
+   "date_time": "2026-10-24T18:00:00+00:00",
+   "venue": "Cancha de Jockey Club Córdoba",
+   "home_club_id": "club-la-tablada-m19-a",
+   "away_club_id": "jockey-club-cordoba-m19-a",
+   "status": "scheduled",
+   "score": {
+    "away": null,
+    "home": null
+   },
+   "created_at": "2026-10-20T00:23:18.900605+00:00",
+   "updated_at": "2026-10-20T00:25:07.206509+00:00",
+   "notes": null,
+   "round_label": "Final",
+   "phase_id": "9633d72a-bf47-4476-bcb1-4bf164d25b06",
+   "group_id": null,
+   "round_uuid": "16c39a93-b7d8-4e92-b588-18a8359c2543",
+   "home_base_points": 0,
+   "away_base_points": 0,
+   "home_bonus_points": 0,
+   "away_bonus_points": 0,
+   "points_autocalculated": true,
+   "points_override_reason": null,
+   "live_enabled": false,
+   "category": null,
+   "home_division_id": null,
+   "away_division_id": null,
+   "lineups": {
+    "away": [],
+    "home": []
+   },
+   "events": [],
+   "sport_id": "rugby",
+   "sport": "rugby",
+   "clock": null,
+   "referee": null,
+   "pitch": null,
+   "broadcast_url": null,
+   "replay_url": null,
+   "stream_url": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "is_visible": true,
+   "review_status": "approved",
+   "created_by_user_id": null,
+   "created_by_club_id": null,
+   "reviewed_by_user_id": null,
+   "reviewed_at": null,
+   "review_notes": null,
+   "season_id": "667bae64-081b-4c1c-b315-aa11ab535f9a",
+   "home_team_id": null,
+   "away_team_id": null,
+   "home_season_entry_id": null,
+   "away_season_entry_id": null,
+   "bracket_match_code": null,
+   "home_source_label": null,
+   "away_source_label": null,
+   "participant_source": null,
+   "auto_scheduled": false,
+   "scheduling_status": null,
+   "external_id": null,
+   "official_sheet_number": null
+  }
+ ]
+}

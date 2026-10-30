@@ -3,6 +3,7 @@ import { FixtureService } from '@/lib/services/fixtureService';
 import { createClient } from '@/lib/supabase/server';
 import { createApiPerfTracker } from '@/lib/perf/api';
 import { isUuid } from '@/lib/utils/postgrest';
+import { getTournamentReadAccess } from '@/lib/server/tournamentReadGate';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,6 +34,10 @@ export async function GET(
   try {
     // tournamentId no-UUID → getTournamentFixture pega columnas uuid → 22P02 → 500.
     if (!isUuid(tournamentId)) {
+      return perf.json({ error: 'Tournament not found' }, { status: 404 });
+    }
+    // Borrador u oculto: 404 salvo para quien lo puede leer en el gestor.
+    if ((await getTournamentReadAccess(tournamentId)) === 'denied') {
       return perf.json({ error: 'Tournament not found' }, { status: 404 });
     }
     console.log(`[fixture/route] GET fixture for tournament: ${tournamentId}`);

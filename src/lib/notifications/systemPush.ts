@@ -2,6 +2,7 @@ import 'server-only';
 // web-push es CommonJS: los exports nombrados no existen para un import ESM
 // (fallo al probarlo en Node puro), asi que se entra por el default.
 import webPush from 'web-push';
+import { isAllowedPushEndpoint } from '@/lib/notifications/pushEndpoint';
 
 export type StoredPushSubscription = {
     id: string;
@@ -50,6 +51,8 @@ type VapidConfig = {
 export const PUSH_TTL_SECONDS = 6 * 60 * 60;
 
 const FALLBACK_VAPID_SUBJECT = 'mailto:hola@g22scores.com';
+
+const PUSH_SEND_TIMEOUT_MS = 5000;
 
 /**
  * El `sub` de un JWT VAPID solo admite `mailto:` o `https:`. NEXT_PUBLIC_SITE_URL
@@ -115,6 +118,17 @@ export async function sendSystemPush(
         };
     }
 
+    // Las filas viejas se guardaron antes de que el POST validara el endpoint: se
+    // revisa también acá, al enviar. Una que no pasa se marca vencida y el cron la apaga.
+    if (!isAllowedPushEndpoint(subscription.endpoint)) {
+        return {
+            ok: false,
+            status: 0,
+            expired: true,
+            error: 'push_endpoint_not_allowed',
+        };
+    }
+
     try {
         const response = await webPush.sendNotification(
             {
@@ -131,6 +145,8 @@ export async function sendSystemPush(
                 TTL: PUSH_TTL_SECONDS,
                 urgency: 'high',
                 contentEncoding: 'aes128gcm',
+                // Un push service que no contesta no puede atar el cron entero.
+                timeout: PUSH_SEND_TIMEOUT_MS,
             },
         );
 

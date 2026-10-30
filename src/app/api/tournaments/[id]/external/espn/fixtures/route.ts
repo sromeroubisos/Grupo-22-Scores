@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { applyPublicShortCache, clampPageParam, limitAnonymousRequest } from '@/lib/server/publicRouteGuards';
 import { createClient } from '@/lib/supabase/server';
 import {
     getTournamentEspnAmericanFootballConfig,
@@ -43,9 +44,14 @@ export async function GET(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
+    // Ruta anónima que termina en el proveedor externo: tope por IP.
+    const limited = await limitAnonymousRequest(request, 'ext-espn-fixtures');
+    if (limited) return limited;
+
     try {
         const tournamentId = (await params).id;
-        const page = Math.max(1, Number(request.nextUrl.searchParams.get('page') || '1'));
+        // `page` sin tope era una llamada paga nueva por número: se acota a 1..20.
+        const page = clampPageParam(request.nextUrl.searchParams.get('page'));
         const supabase = await createClient();
 
         const { data: tournament, error } = await supabase
@@ -122,12 +128,12 @@ export async function GET(
             };
             });
 
-        return NextResponse.json({
+        return applyPublicShortCache(NextResponse.json({
             matches,
             page,
             has_more: fixtures.hasMore,
             total: fixtures.total,
-        });
+        }), request);
     } catch (error: any) {
         return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
     }

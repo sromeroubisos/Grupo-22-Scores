@@ -1,0 +1,122 @@
+[
+ {
+  "grupo": "interior-a",
+  "torneo": "Torneo del Interior \"A\"",
+  "encontrados": 6,
+  "exporta": 6,
+  "excluidos": [],
+  "duplicados": [],
+  "sinDatos": []
+ },
+ {
+  "grupo": "urba-top-14",
+  "torneo": "Top 14 de la URBA",
+  "encontrados": 7,
+  "exporta": 7,
+  "excluidos": [],
+  "duplicados": [],
+  "sinDatos": []
+ },
+ {
+  "grupo": "noa",
+  "torneo": "Torneo Regional del NOA \"A\"",
+  "encontrados": 5,
+  "exporta": 3,
+  "excluidos": [
+   "Natación y Gimnasia vs Jockey Club Salta (14e563f6): postponed",
+   "Tucumán Rugby Club vs Tucumán Lawn Tennis (6ee759b3): postponed"
+  ],
+  "duplicados": [],
+  "sinDatos": []
+ },
+ {
+  "grupo": "uruguayo",
+  "torneo": "Uruguayo de Clubes",
+  "encontrados": 6,
+  "exporta": 6,
+  "excluidos": [],
+  "duplicados": [],
+  "sinDatos": []
+ },
+ {
+  "grupo": "urba",
+  "torneo": "Primera \"A\" de la URBA",
+  "encontrados": 7,
+  "exporta": 7,
+  "excluidos": [],
+  "duplicados": [],
+  "sinDatos": []
+ },
+ {
+  "grupo": "urba",
+  "torneo": "Primera \"B\" de la URBA",
+  "encontrados": 7,
+  "exporta": 7,
+  "excluidos": [],
+  "duplicados": [],
+  "sinDatos": []
+ },
+ {
+  "grupo": "urba",
+  "torneo": "Primera \"C\" de la URBA",
+  "encontrados": 7,
+  "exporta": 7,
+  "excluidos": [],
+  "duplicados": [],
+  "sinDatos": []
+ },
+ {
+  "grupo": "urba",
+  "torneo": "URBA: TERCERA - Superior",
+  "encontrados": 5,
+  "exporta": 5,
+  "excluidos": [],
+  "duplicados": [],
+  "sinDatos": []
+ },
+ {
+  "grupo": "andina",
+  "torneo": "Torneo Apertura de la Unión Andina",
+  "encontrados": 2,
+  "exporta": 2,
+  "excluidos": [],
+  "duplicados": [],
+  "sinDatos": []
+ },
+ {
+  "grupo": "ascenso",
+  "torneo": "URBA: SEGUNDA - Superior",
+  "encontrados": 7,
+  "exporta": 7,
+  "excluidos": [],
+  "duplicados": [],
+  "sinDatos": []
+ },
+ {
+  "grupo": "ascenso",
+  "torneo": "Torneo Regional del NOA \"B\"",
+  "encontrados": 2,
+  "exporta": 2,
+  "excluidos": [],
+  "duplicados": [],
+  "sinDatos": []
+ },
+ {
+  "grupo": "ascenso",
+  "torneo": "Súper 9 \"B\"",
+  "encontrados": 4,
+  "exporta": 4,
+  "excluidos": [],
+  "duplicados": [],
+  "sinDatos": []
+ },
+ {
+  "grupo": "ascenso",
+  "torneo": "Copa Plata del Oeste",
+  "encontrados": 4,
+  "exporta": 4,
+  "excluidos": [],
+  "duplicados": [],
+  "sinDatos": []
+ }
+]

@@ -1,0 +1,2003 @@
+tarjetas oficiales 594fcb55
+
+comercial-r-c vs argentino-de-bahia-blanca · 594fcb55 · tarjeta 310438  ·  aadd5434-e527-4c1a-8162-4173df7dd920
+  local     · comercial-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · argentino-de-bahia-blanca · 23 jugadores · 0 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 43-0
+  tries     · 0-0 (guardado —-—)
+  arbitro   · MARIANO SCIANNA (guardado: —)
+
+mar-del-plata-club vs san-ignacio-r-c · 594fcb55 · tarjeta 310439  ·  27a8f8ad-9211-4687-b3b5-2815d575e197
+  local     · mar-del-plata-club · 23 jugadores · 23 con ficha fijada
+  visitante · san-ignacio-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min  2 (1T 2) local     try          Tomas Osvaldo Sestelo Cangelli
+    min  2 (1T 2) local     conversion   Gonzalo Recalde
+    min 29 (1T 29) local     try          Francisco De Angelis
+    min 32 (1T 32) visitante injury       Valentin Delgado
+    min 32 (1T 32) visitante substitution Valentin Delgado
+    min 41 (2T 1) visitante injury       Ignacio Gandara
+    min 41 (2T 1) visitante substitution Ignacio Gandara
+    min 46 (2T 6) visitante substitution Yamil Rodriguez
+    min 46 (2T 6) visitante substitution Tobias Balcedo
+    min 61 (2T 21) visitante try          Thomas Helguera
+    min 62 (2T 22) visitante conversion   Lautaro Garcia
+    min 71 (2T 31) visitante try          Felipe Fortte
+    min 74 (2T 34) visitante injury       Lautaro Garcia
+    min 74 (2T 34) visitante substitution Lautaro Garcia
+    min 80 (2T 40) visitante try          Juan Estavillo
+    min 90 (2T 50) local     substitution Gonzalo Recalde
+    min 90 (2T 50) local     try          Emiliano Martin Villa
+    min 90 (2T 50) local     conversion   Gonzalo Recalde
+    min 90 (2T 50) local     substitution Mateo Arambarri
+    min 95 (2T 55) local     substitution Joaquín Solovioff
+    min 97 (2T 57) local     substitution Francisco De Angelis
+    min 98 (2T 58) local     substitution Genaro Jose Rios
+    min 101 (2T 61) local     substitution Guido Zingale
+    min 120 (2T 80) local     card_yellow  Emiliano Martin Villa
+  marcador  · eventos 19-17 · guardado 19-17
+  tries     · 3-3 (guardado —-—)
+  arbitro   · GASTON ROGE (guardado: —)
+
+sociedad-sportiva-de-bahia-blanca vs los-cardos-r-c · 594fcb55 · tarjeta 310440  ·  eb45051f-a8a6-4792-a53e-b0d73baac4ea
+  local     · sociedad-sportiva-de-bahia-blanca · 23 jugadores · 22 con ficha fijada
+  visitante · los-cardos-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min  8 (1T 8) local     try          Felipe Serrat
+    min  8 (1T 8) local     conversion   Mateo Kohler
+    min 21 (1T 21) local     penalty_goal Mateo Kohler
+    min 26 (1T 26) local     penalty_goal Mateo Kohler
+    min 28 (1T 28) visitante penalty_goal Fermin Gonzalez Montaner
+    min 40 (1T 40) local     penalty_goal Mateo Kohler
+    min 46 (2T 6) local     try          Tomas Bermudez Caneparis
+    min 46 (2T 6) local     conversion   Mateo Kohler
+    min 50 (2T 10) local     substitution Thiago Loiacono
+    min 53 (2T 13) local     try          Francisco Cantalejos
+    min 53 (2T 13) local     conversion   Mateo Kohler
+    min 57 (2T 17) local     substitution Juan Francisco Malanga
+    min 57 (2T 17) local     substitution Rafael Larrañaga
+    min 57 (2T 17) local     substitution Felipe Inchausti
+    min 65 (2T 25) local     substitution Iñaki Azcoitia
+    min 65 (2T 25) local     substitution Mateo Kohler
+    min 65 (2T 25) local     card_yellow  Francisco Cantalejos
+    min 102 (2T 62) visitante card_yellow  Benjamín Elissondo
+    min 104 (2T 64) visitante card_yellow  Fermin Gonzalez Montaner
+    min 108 (2T 68) visitante try          Fernando Navarro
+    min 110 (2T 70) visitante try          Pedro Agustin Schatz
+    min 110 (2T 70) visitante substitution Benjamín Elissondo
+    min 110 (2T 70) visitante substitution Fausto Garcia
+    min 118 (2T 78) visitante try          Ivo Balbo
+    min 118 (2T 78) visitante conversion   Fermin Gonzalez Montaner
+    min 118 (2T 78) visitante substitution Agustin Lautaro Parodi Perez
+    min 120 (2T 80) visitante substitution Fermin García Guerrero
+  marcador  · eventos 30-20 · guardado 30-20
+  tries     · 3-3 (guardado —-—)
+  arbitro   · SANTIAGO BEVACQUA (guardado: —)
+
+ipr-sporting vs universitario-de-mar-del-plata · 594fcb55 · tarjeta 310441  ·  0521ee8c-a224-44fe-a267-a9423bf54514
+  local     · ipr-sporting · 23 jugadores · 22 con ficha fijada
+  visitante · universitario-de-mar-del-plata · 23 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min 13 (1T 13) visitante penalty_goal Benito Soler Villen B
+    min 16 (1T 16) visitante penalty_goal Benito Soler Villen B
+    min 23 (1T 23) visitante penalty_goal Benito Soler Villen B
+    min 33 (1T 33) visitante card_yellow  Juan Cruz Parra Videla
+    min 37 (1T 37) visitante try          Juan Bautista Victoria
+    min 37 (1T 37) visitante conversion   Benito Soler Villen B
+    min 50 (2T 10) local     penalty_goal Blas Zapiola
+    min 50 (2T 10) local     substitution Nicolas Coniglio
+    min 51 (2T 11) local     card_yellow  Blas Zapiola
+    min 52 (2T 12) visitante penalty_goal Benito Soler Villen B
+    min 53 (2T 13) visitante substitution Francisco Morales
+    min 56 (2T 16) local     substitution Gregorio Del Prete
+    min 58 (2T 18) local     substitution Felipe Mayol
+    min 58 (2T 18) local     substitution Ivan Ballesteros
+    min 60 (2T 20) visitante substitution Juan Cruz Parra Videla
+    min 63 (2T 23) local     substitution Blas Zapiola
+    min 65 (2T 25) local     substitution Nicolás Figueroa
+    min 65 (2T 25) visitante penalty_goal Benito Soler Villen B
+    min 68 (2T 28) local     substitution Bautista Dallan
+    min 68 (2T 28) visitante substitution Benjamín Darío Duarte Mendez
+    min 68 (2T 28) visitante substitution Bautista Calvo Atlante
+    min 77 (2T 37) visitante card_yellow  Nicolás Walter Blanco
+    min 78 (2T 38) visitante card_yellow  Francisco Barreca
+    min 79 (2T 39) local     try          Felipe Charles
+    min 79 (2T 39) local     conversion   Felipe Charles
+  marcador  · eventos 10-22 · guardado 10-22
+  tries     · 1-1 (guardado —-—)
+  arbitro   · NICOLÁS MIGUEL COSENTINO (guardado: —)
+
+argentino-de-bahia-blanca vs universitario-de-mar-del-plata · 594fcb55 · tarjeta 310442  ·  5c67f8ea-d1a7-4e99-b88d-34ff94ac652a
+  local     · argentino-de-bahia-blanca · 23 jugadores · 0 con ficha fijada
+  visitante · universitario-de-mar-del-plata · 23 jugadores · 0 con ficha fijada
+  eventos   · 38
+    min  1 (1T 1) visitante try          Tomas Rocco
+    min  1 (1T 1) visitante conversion   Benito Soler Villen B
+    min  4 (1T 4) visitante try          Tomas Agustin Freiz Di Meglio
+    min  7 (1T 7) local     try          Agustin Grunewald
+    min 12 (1T 12) local     penalty_goal Pedro Selvarolo
+    min 23 (1T 23) visitante try          Benjamín Darío Duarte Mendez
+    min 23 (1T 23) visitante conversion   Benito Soler Villen B
+    min 26 (1T 26) visitante try          Gonzalo Pfister
+    min 26 (1T 26) visitante conversion   Benito Soler Villen B
+    min 33 (1T 33) local     try          Baltazar Montero
+    min 36 (1T 36) local     card_yellow  Francisco Ramirez Vita
+    min 38 (1T 38) visitante try          Francisco Barreca
+    min 41 (2T 1) local     substitution Agustin Grunewald
+    min 41 (2T 1) local     injury       Agustin Grunewald
+    min 50 (2T 10) visitante try          Benjamín Darío Duarte Mendez
+    min 50 (2T 10) visitante substitution Bautista Calvo Atlante
+    min 52 (2T 12) local     substitution Manuel Otero Bertacco
+    min 52 (2T 12) local     substitution Martiniano Barsellini
+    min 52 (2T 12) visitante try          Juan Cruz Parra Videla
+    min 52 (2T 12) visitante conversion   Benito Soler Villen B
+    min 57 (2T 17) local     substitution Francisco Maenza
+    min 57 (2T 17) local     substitution Pedro Selvarolo
+    min 60 (2T 20) local     substitution Facundo Esteban Aristimuño Maidana
+    min 60 (2T 20) visitante substitution Franco Rodriguez Reinoso
+    min 69 (2T 29) local     card_yellow  Matias Dempaire
+    min 69 (2T 29) visitante try          José Arregui
+    min 70 (2T 30) visitante substitution Benjamín Darío Duarte Mendez
+    min 72 (2T 32) visitante substitution Francisco Carricart Acosta
+    min 73 (2T 33) visitante substitution Benjamin Victoria
+    min 74 (2T 34) local     try          Francisco Muñiz Bullrich
+    min 74 (2T 34) visitante card_yellow  Salvador Gerlero
+    min 77 (2T 37) visitante try          Joaquin Auzmendia
+    min 77 (2T 37) visitante conversion   Benito Soler Villen B
+    min 77 (2T 37) visitante substitution Juan Cruz Parra Videla
+    min 78 (2T 38) visitante substitution Francisco Morales
+    min 80 (2T 40) local     injury       Santiago Ramos Apphatie
+    min 80 (2T 40) visitante conversion   Benito Soler Villen B
+    min 80 (2T 40) visitante try          Fausto Poletti
+  marcador  · eventos 18-62 · guardado 18-62
+  tries     · 3-10 (guardado —-—)
+  arbitro   · ESTEBAN SZELAGOWSKI (guardado: —)
+
+los-cardos-r-c vs ipr-sporting · 594fcb55 · tarjeta 310443  ·  a5c4f497-899d-40eb-a6ca-8d66fd1ffeab
+  local     · los-cardos-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · ipr-sporting · 23 jugadores · 22 con ficha fijada
+  eventos   · 29
+    min  1 (1T 1) visitante try          Renato Abad
+    min  8 (1T 8) visitante penalty_goal Renato Abad
+    min 13 (1T 13) local     penalty_goal Fermin Gonzalez Montaner
+    min 31 (1T 31) visitante penalty_goal Renato Abad
+    min 35 (1T 35) visitante penalty_goal Renato Abad
+    min 37 (1T 37) visitante try          Agustin Area
+    min 37 (1T 37) visitante conversion   Renato Abad
+    min 39 (1T 39) visitante try          Lucas Cedarry
+    min 39 (1T 39) visitante conversion   Renato Abad
+    min 53 (2T 13) visitante card_yellow  Francisco Segundo Lombardo
+    min 55 (2T 15) visitante card_yellow  Pedro Cedarry
+    min 61 (2T 21) visitante substitution Felipe Charles
+    min 61 (2T 21) visitante substitution Luca Saracino
+    min 74 (2T 34) visitante substitution Luca Amalfitani
+    min 75 (2T 35) visitante penalty_goal Renato Abad
+    min 76 (2T 36) visitante substitution Mateo Arabia
+    min 76 (2T 36) visitante substitution Juan Ignacio Cecive
+    min 84 (2T 44) local     penalty_try  
+    min 84 (2T 44) visitante substitution Julián Soberón
+    min 98 (2T 58) local     card_red     Guido Riva
+    min 100 (2T 60) local     substitution Benjamín Elissondo
+    min 102 (2T 62) local     substitution Fausto Garcia
+    min 102 (2T 62) local     substitution Santiago Gascue
+    min 109 (2T 69) local     try          Franco Palavecino
+    min 110 (2T 70) local     conversion   Fermin Gonzalez Montaner
+    min 111 (2T 71) local     substitution Simon Gorelik
+    min 115 (2T 75) local     try          Agustin Lautaro Parodi Perez
+    min 115 (2T 75) local     substitution Fermin García Guerrero
+    min 116 (2T 76) local     conversion   Fermin Gonzalez Montaner
+  marcador  · eventos 24-31 · guardado 24-31
+  tries     · 3-3 (guardado —-—)
+  arbitro   · GASTON ROGE (guardado: —)
+
+san-ignacio-r-c vs sociedad-sportiva-de-bahia-blanca · 594fcb55 · tarjeta 310444  ·  c4f3706b-81d2-456d-9c99-2a2e8519b1f8
+  local     · san-ignacio-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · sociedad-sportiva-de-bahia-blanca · 23 jugadores · 22 con ficha fijada
+  eventos   · 36
+    min  2 (1T 2) visitante penalty_try  
+    min  3 (1T 3) local     card_yellow  Pablo Rufino
+    min 13 (1T 13) local     penalty_goal Lautaro Garcia
+    min 14 (1T 14) local     try          Lautaro Garcia
+    min 15 (1T 15) local     conversion   Lautaro Garcia
+    min 17 (1T 17) visitante penalty_goal Mateo Kohler
+    min 27 (1T 27) local     injury       Bruno Costales
+    min 27 (1T 27) local     substitution Bruno Costales
+    min 31 (1T 31) visitante try          Santiago Bancora
+    min 31 (1T 31) visitante conversion   Mateo Kohler
+    min 34 (1T 34) visitante substitution Felipe Inchausti
+    min 34 (1T 34) visitante injury       Felipe Inchausti
+    min 35 (1T 35) local     penalty_goal Lautaro Garcia
+    min 39 (1T 39) visitante try          Patricio Cantalejos
+    min 39 (1T 39) visitante conversion   Mateo Kohler
+    min 45 (2T 5) visitante try          Geronimo Rivas Pompei
+    min 49 (2T 9) local     penalty_goal Lautaro Garcia
+    min 58 (2T 18) visitante try          Tomas Inchausti
+    min 58 (2T 18) visitante conversion   Mateo Kohler
+    min 60 (2T 20) local     substitution Yamil Rodriguez
+    min 60 (2T 20) local     substitution Joel Ledesma
+    min 63 (2T 23) visitante substitution Geronimo Rivas Pompei
+    min 68 (2T 28) local     try          Felipe Fortte
+    min 68 (2T 28) local     conversion   Felipe Fortte
+    min 70 (2T 30) local     substitution Juan Martin Elvira Durdos
+    min 70 (2T 30) visitante substitution Rafael Larrañaga
+    min 75 (2T 35) local     card_yellow  Juan Caveda Amiel
+    min 75 (2T 35) visitante card_yellow  Federico Stein
+    min 79 (2T 39) visitante substitution Iñaki Azcoitia
+    min 79 (2T 39) visitante substitution Ignacio Lance
+    min 79 (2T 39) visitante substitution Santiago Bancora
+    min 79 (2T 39) visitante substitution Alan Martinez
+    min 79 (2T 39) visitante try          Pedro Zorzano
+    min 79 (2T 39) visitante conversion   Mateo Kohler
+    min 80 (2T 40) local     card_yellow  Manuel Fortte
+    min 80 (2T 40) visitante substitution Mateo Kohler
+  marcador  · eventos 23-43 · guardado 23-43
+  tries     · 2-6 (guardado —-—)
+  arbitro   · MARIANO SCIANNA (guardado: —)
+
+comercial-r-c vs mar-del-plata-club · 594fcb55 · tarjeta 310445  ·  b22c1c5b-e775-4205-a40d-fab7eb59c2b8
+  local     · comercial-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · mar-del-plata-club · 23 jugadores · 23 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 22-39
+  tries     · 0-0 (guardado —-—)
+  arbitro   · JULIAN FERNANDEZ (guardado: —)
+
+mar-del-plata-club vs argentino-de-bahia-blanca · 594fcb55 · tarjeta 310446  ·  feb6382b-a6ab-4d3e-8d3d-0cc79c8dc3f3
+  local     · mar-del-plata-club · 23 jugadores · 20 con ficha fijada
+  visitante · argentino-de-bahia-blanca · 23 jugadores · 0 con ficha fijada
+  eventos   · 28
+    min  5 (1T 5) local     try          Guido Zingale
+    min 24 (1T 24) local     try          Joaquin Jose Rojas
+    min 24 (1T 24) local     conversion   Gonzalo Recalde
+    min 28 (1T 28) local     try          Joaquin Jose Rojas
+    min 28 (1T 28) local     conversion   Gonzalo Recalde
+    min 33 (1T 33) local     try          Leandro Ahrndt
+    min 33 (1T 33) local     conversion   Gonzalo Recalde
+    min 38 (1T 38) local     try          Justo Pinilla
+    min 38 (1T 38) local     conversion   Gonzalo Recalde
+    min 77 (2T 37) visitante substitution Alejo Marconi
+    min 80 (2T 40) visitante try          Agustin Grunewald
+    min 83 (2T 43) local     try          Simon Protto Martinelli
+    min 91 (2T 51) local     try          Tomas Herrador
+    min 92 (2T 52) local     substitution Joaquin Vitale Toledo
+    min 92 (2T 52) local     substitution Tomas Herrador
+    min 92 (2T 52) local     substitution Simon Protto Martinelli
+    min 92 (2T 52) local     substitution Lorenzo Castelli
+    min 100 (2T 60) local     substitution Emiliano Martin Villa
+    min 100 (2T 60) local     substitution Joaquin Jose Rojas
+    min 100 (2T 60) local     substitution Guido Zingale
+    min 100 (2T 60) local     substitution Justo Pinilla
+    min 100 (2T 60) local     try          Leandro Ahrndt
+    min 103 (2T 63) local     try          Simon Protto Martinelli
+    min 103 (2T 63) local     conversion   Gonzalo Recalde
+    min 105 (2T 65) local     try          Agustin Echarte
+    min 105 (2T 65) local     conversion   Gonzalo Recalde
+    min 116 (2T 76) local     try          Mateo Gracia
+    min 116 (2T 76) local     conversion   Gonzalo Recalde
+  marcador  · eventos 69-5 · guardado 69-5
+  tries     · 11-1 (guardado —-—)
+  arbitro   · NICOLÁS MIGUEL COSENTINO (guardado: —)
+
+sociedad-sportiva-de-bahia-blanca vs comercial-r-c · 594fcb55 · tarjeta 310447  ·  2a4bd718-8845-49cb-83ed-8f6b4ef70dc5
+  local     · sociedad-sportiva-de-bahia-blanca · 23 jugadores · 21 con ficha fijada
+  visitante · comercial-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 19
+    min  9 (1T 9) local     try          Agustin Antinori
+    min  9 (1T 9) local     conversion   Mateo Kohler
+    min 16 (1T 16) visitante try          Emanuel Potis
+    min 19 (1T 19) local     penalty_goal Mateo Kohler
+    min 33 (1T 33) local     injury       Tomas Inchausti
+    min 33 (1T 33) local     substitution Rocco Portada
+    min 36 (1T 36) visitante penalty_goal Gaspar Jeckeln
+    min 45 (2T 5) local     substitution Juan Francisco Malanga
+    min 53 (2T 13) local     try          Patricio Cantalejos
+    min 53 (2T 13) local     conversion   Mateo Kohler
+    min 57 (2T 17) visitante substitution Iñaki Coria
+    min 67 (2T 27) local     try          Alan Martinez
+    min 67 (2T 27) local     conversion   Mateo Kohler
+    min 67 (2T 27) local     substitution Ignacio Lance
+    min 73 (2T 33) local     substitution Tomas Inchausti
+    min 74 (2T 34) visitante substitution Emanuel Potis
+    min 75 (2T 35) local     substitution Iñaki Azcoitia
+    min 75 (2T 35) local     substitution Mateo Kohler
+    min 75 (2T 35) local     substitution Patricio Cantalejos
+  marcador  · eventos 24-8 · guardado 24-8
+  tries     · 3-1 (guardado —-—)
+  arbitro   · JUAN IGNACIO ROSSELLO (guardado: —)
+
+ipr-sporting vs san-ignacio-r-c · 594fcb55 · tarjeta 310448  ·  48187c2c-e892-4fff-a5e8-2355d5b0861d
+  local     · ipr-sporting · 23 jugadores · 22 con ficha fijada
+  visitante · san-ignacio-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 41
+    min  2 (1T 2) visitante penalty_goal Lautaro Garcia
+    min  6 (1T 6) visitante try          Diego Gonzalez
+    min  6 (1T 6) visitante conversion   Diego Gonzalez
+    min 11 (1T 11) local     try          Nicolás Figueroa
+    min 14 (1T 14) local     try          Julián Soberón
+    min 25 (1T 25) local     try          Julián Soberón
+    min 25 (1T 25) local     conversion   Renato Abad
+    min 31 (1T 31) local     substitution Mateo Arabia
+    min 31 (1T 31) visitante card_yellow  Yamil Rodriguez
+    min 34 (1T 34) local     try          Agustin Area
+    min 34 (1T 34) local     conversion   Renato Abad
+    min 38 (1T 38) local     try          Julián Soberón
+    min 38 (1T 38) local     conversion   Renato Abad
+    min 41 (2T 1) visitante substitution Diego Gonzalez
+    min 43 (2T 3) visitante try          Tomás Alonso
+    min 44 (2T 4) visitante conversion   Lautaro Garcia
+    min 47 (2T 7) local     try          Julián Soberón
+    min 47 (2T 7) local     conversion   Renato Abad
+    min 53 (2T 13) local     try          Ignacio Castañon
+    min 53 (2T 13) local     conversion   Renato Abad
+    min 54 (2T 14) local     substitution Ivan Ballesteros
+    min 56 (2T 16) local     substitution Ignacio Fuscaldo
+    min 56 (2T 16) visitante substitution Pablo Rufino
+    min 58 (2T 18) local     substitution Luca Amalfitani
+    min 58 (2T 18) local     substitution Blas Zapiola
+    min 58 (2T 18) local     try          Julián Soberón
+    min 58 (2T 18) local     conversion   Renato Abad
+    min 61 (2T 21) local     substitution Julián Soberón
+    min 61 (2T 21) local     substitution Eliseo Estevan
+    min 62 (2T 22) visitante substitution Franco Gauna
+    min 62 (2T 22) visitante substitution Yamil Rodriguez
+    min 62 (2T 22) visitante substitution Juan Caveda Amiel
+    min 65 (2T 25) local     try          Nicolás Figueroa
+    min 65 (2T 25) local     conversion   Renato Abad
+    min 68 (2T 28) visitante card_yellow  Lautaro Garcia
+    min 71 (2T 31) local     substitution Francisco Segundo Lombardo
+    min 73 (2T 33) local     try          Mateo Camilion
+    min 73 (2T 33) local     conversion   Renato Abad
+    min 75 (2T 35) visitante substitution Lautaro Garcia
+    min 75 (2T 35) visitante injury       Lautaro Garcia
+    min 75 (2T 35) visitante substitution Lautaro Garcia
+  marcador  · eventos 66-17 · guardado 66-17
+  tries     · 10-2 (guardado —-—)
+  arbitro   · GASTON ROGE (guardado: —)
+
+universitario-de-mar-del-plata vs los-cardos-r-c · 594fcb55 · tarjeta 310449  ·  f74f9081-3839-449c-b5f2-5d0683c9c71c
+  local     · universitario-de-mar-del-plata · 23 jugadores · 0 con ficha fijada
+  visitante · los-cardos-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 37
+    min  1 (1T 1) local     try          Juan Bautista Victoria
+    min  1 (1T 1) local     conversion   Benito Soler Villen B
+    min  9 (1T 9) local     try          Tomas Agustin Freiz Di Meglio
+    min  9 (1T 9) local     conversion   Benito Soler Villen B
+    min 12 (1T 12) visitante try          Ignacio Migliore
+    min 12 (1T 12) visitante conversion   Francisco Linares
+    min 16 (1T 16) visitante penalty_goal Francisco Linares
+    min 19 (1T 19) local     try          Benjamin Victoria
+    min 19 (1T 19) local     conversion   Benito Soler Villen B
+    min 20 (1T 20) visitante card_yellow  Benjamín Elissondo
+    min 32 (1T 32) local     substitution Benjamin Victoria
+    min 35 (1T 35) local     try          Franco Rodriguez Reinoso
+    min 35 (1T 35) local     conversion   Benito Soler Villen B
+    min 40 (1T 40) local     penalty_goal Benito Soler Villen B
+    min 46 (2T 6) local     try          Franco Rodriguez Reinoso
+    min 46 (2T 6) local     conversion   Benito Soler Villen B
+    min 50 (2T 10) local     try          José Arregui
+    min 50 (2T 10) local     conversion   Benito Soler Villen B
+    min 53 (2T 13) visitante card_red     Simon Gorelik
+    min 54 (2T 14) local     try          Tomas Rocco
+    min 54 (2T 14) local     conversion   Benito Soler Villen B
+    min 60 (2T 20) local     substitution Juan Cruz Parra Videla
+    min 60 (2T 20) local     substitution Franco Rodriguez Reinoso
+    min 63 (2T 23) local     substitution Francisco Morales
+    min 68 (2T 28) local     try          Francisco Barreca
+    min 68 (2T 28) local     substitution Benjamín Darío Duarte Mendez
+    min 73 (2T 33) local     card_yellow  Joaquin Auzmendia
+    min 77 (2T 37) local     card_yellow  Iñaki Otamendi
+    min 83 (2T 43) visitante substitution Matias Rafael Olivera Aguirre
+    min 84 (2T 44) visitante substitution Santiago Gascue
+    min 91 (2T 51) visitante substitution Benjamín Elissondo
+    min 95 (2T 55) visitante card_yellow  Agustin Lautaro Parodi Perez
+    min 96 (2T 56) visitante substitution Sebastián Marcilla
+    min 98 (2T 58) visitante substitution Francisco Linares
+    min 102 (2T 62) visitante substitution Tomas Bardi
+    min 105 (2T 65) visitante substitution Francisco Zubiaurre
+    min 105 (2T 65) visitante substitution Agustin Lautaro Parodi Perez
+  marcador  · eventos 57-10 · guardado 57-10
+  tries     · 8-1 (guardado —-—)
+  arbitro   · MARIANO SCIANNA (guardado: —)
+
+argentino-de-bahia-blanca vs los-cardos-r-c · 594fcb55 · tarjeta 310634  ·  3038a3e6-9b6d-46ee-b02b-4e3a8620554d
+  local     · argentino-de-bahia-blanca · 23 jugadores · 0 con ficha fijada
+  visitante · los-cardos-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min  1 (1T 1) visitante try          Mateo Mesa
+    min  2 (1T 2) visitante conversion   Fernando Navarro
+    min  9 (1T 9) visitante penalty_goal Fernando Navarro
+    min 23 (1T 23) visitante try          Fermin García Guerrero
+    min 27 (1T 27) local     try          Baltazar Montero
+    min 30 (1T 30) visitante try          Fermin Adem
+    min 32 (1T 32) visitante conversion   Fernando Navarro
+    min 42 (2T 2) local     penalty_goal Pedro Selvarolo
+    min 60 (2T 20) local     substitution Agustin Grunewald
+    min 61 (2T 21) local     substitution Pedro Selvarolo
+    min 62 (2T 22) local     substitution Santiago Ramos Apphatie
+    min 75 (2T 35) local     substitution Francisco Ramirez Vita
+    min 77 (2T 37) local     substitution Emiliano Bruno Barrera
+    min 80 (2T 40) local     try          Guido Marconi
+    min 80 (2T 40) local     substitution Manuel Otero Bertacco
+    min 81 (2T 41) local     conversion   Juan Cantarelli
+    min 103 (2T 63) visitante substitution Sebastián Marcilla
+    min 103 (2T 63) visitante substitution Agustin Lautaro Parodi Perez
+    min 103 (2T 63) visitante substitution Matias Rafael Olivera Aguirre
+    min 111 (2T 71) visitante substitution Francisco Vazquez Bosch
+    min 114 (2T 74) visitante substitution Fermin Adem
+    min 114 (2T 74) visitante try          Valentin Melendi
+  marcador  · eventos 15-27 · guardado 15-27
+  tries     · 2-4 (guardado —-—)
+  arbitro   · SANTIAGO BEVACQUA (guardado: —)
+
+san-ignacio-r-c vs universitario-de-mar-del-plata · 594fcb55 · tarjeta 310635  ·  7d23b043-5fb9-4a46-bc7b-9d3d2f630a4f
+  local     · san-ignacio-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · universitario-de-mar-del-plata · 23 jugadores · 0 con ficha fijada
+  eventos   · 26
+    min  3 (1T 3) visitante try          Ernesto Rocha
+    min 28 (1T 28) local     penalty_goal Lautaro Garcia
+    min 33 (1T 33) visitante try          Francisco Barreca
+    min 33 (1T 33) visitante conversion   Benito Soler Villen B
+    min 35 (1T 35) local     card_yellow  Felipe Fortte
+    min 37 (1T 37) visitante try          Benjamín Darío Duarte Mendez
+    min 37 (1T 37) visitante conversion   Benito Soler Villen B
+    min 41 (1T 41) visitante try          Gonzalo Pfister
+    min 41 (1T 41) visitante conversion   Benito Soler Villen B
+    min 40 (2T 0) local     substitution Juan Martin Elvira Durdos
+    min 40 (2T 0) local     injury       Juan Martin Elvira Durdos
+    min 42 (2T 2) local     try          Manuel Fortte
+    min 43 (2T 3) local     conversion   Lautaro Garcia
+    min 48 (2T 8) local     try          Juan Estavillo
+    min 56 (2T 16) local     substitution Tobias Balcedo
+    min 56 (2T 16) visitante substitution Juan Cruz Parra Videla
+    min 56 (2T 16) visitante substitution Bautista Calvo Atlante
+    min 64 (2T 24) visitante penalty_goal Benito Soler Villen B
+    min 65 (2T 25) local     substitution Pablo Rufino
+    min 65 (2T 25) local     substitution Franco Gauna
+    min 65 (2T 25) local     substitution Yamil Rodriguez
+    min 65 (2T 25) visitante substitution Nicolás Walter Blanco
+    min 71 (2T 31) local     try          Francisco Paklayan
+    min 72 (2T 32) local     conversion   Lautaro Garcia
+    min 72 (2T 32) visitante substitution Joaquin Auzmendia
+    min 76 (2T 36) visitante penalty_goal Benito Soler Villen B
+  marcador  · eventos 22-32 · guardado 22-32
+  tries     · 3-4 (guardado —-—)
+  arbitro   · SANTIAGO MOLEDO (guardado: —)
+
+comercial-r-c vs ipr-sporting · 594fcb55 · tarjeta 310636  ·  83801eac-4531-44fc-9e10-b3ea15cf3b08
+  local     · comercial-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · ipr-sporting · 23 jugadores · 22 con ficha fijada
+  eventos   · 17
+    min 16 (1T 16) local     penalty_goal Gonzalo Jauregui
+    min 18 (1T 18) visitante penalty_goal Renato Abad
+    min 40 (1T 40) visitante try          Ignacio Castañon
+    min 40 (1T 40) visitante conversion   Renato Abad
+    min 42 (2T 2) local     penalty_goal Gonzalo Jauregui
+    min 45 (2T 5) visitante penalty_goal Renato Abad
+    min 47 (2T 7) local     substitution Kevin Polarolo
+    min 47 (2T 7) local     penalty_goal Gonzalo Jauregui
+    min 55 (2T 15) visitante substitution Ivan Ballesteros
+    min 56 (2T 16) local     substitution Iñaki Coria
+    min 56 (2T 16) local     penalty_goal Gonzalo Jauregui
+    min 60 (2T 20) visitante substitution Bautista Dallan
+    min 67 (2T 27) visitante substitution Luca Amalfitani
+    min 68 (2T 28) local     substitution Lucas Perez
+    min 68 (2T 28) local     penalty_goal Gonzalo Jauregui
+    min 75 (2T 35) visitante try          Felipe Charles
+    min 75 (2T 35) visitante conversion   Renato Abad
+  marcador  · eventos 15-20 · guardado 15-20
+  tries     · 0-2 (guardado —-—)
+  arbitro   · NICOLÁS MIGUEL COSENTINO (guardado: —)
+
+mar-del-plata-club vs sociedad-sportiva-de-bahia-blanca · 594fcb55 · tarjeta 310637  ·  82b33027-b93a-4d2d-8c4d-c11b9feed10d
+  local     · mar-del-plata-club · 23 jugadores · 22 con ficha fijada
+  visitante · sociedad-sportiva-de-bahia-blanca · 23 jugadores · 20 con ficha fijada
+  eventos   · 27
+    min 13 (1T 13) visitante injury       Agustin Antinori
+    min 13 (1T 13) visitante substitution Geronimo Rivas Pompei
+    min 33 (1T 33) local     penalty_goal Gonzalo Recalde
+    min 36 (1T 36) visitante injury       Joaquin Rey Saravia
+    min 36 (1T 36) visitante substitution Joaquin Rey Saravia
+    min 39 (1T 39) visitante penalty_goal Mateo Kohler
+    min 40 (1T 40) local     try          Agustin Echarte
+    min 53 (2T 13) visitante substitution Agustin Antinori
+    min 69 (2T 29) visitante substitution Ignacio Lance
+    min 69 (2T 29) visitante substitution Rafael Larrañaga
+    min 71 (2T 31) visitante substitution Santiago Bancora
+    min 71 (2T 31) visitante substitution Mateo Kohler
+    min 75 (2T 35) visitante try          Patricio Cantalejos
+    min 75 (2T 35) visitante conversion   Mateo Kohler
+    min 88 (2T 48) local     try          Justo Pinilla
+    min 88 (2T 48) local     conversion   Gonzalo Recalde
+    min 96 (2T 56) local     penalty_goal Gonzalo Recalde
+    min 100 (2T 60) local     substitution Tomas Osvaldo Sestelo Cangelli
+    min 101 (2T 61) local     card_yellow  Justo Pinilla
+    min 108 (2T 68) local     substitution Guido Zingale
+    min 109 (2T 69) local     penalty_goal Gonzalo Recalde
+    min 112 (2T 72) local     substitution Sebastian Hernando
+    min 112 (2T 72) local     substitution Franco Bombini
+    min 112 (2T 72) local     substitution Genaro Jose Rios
+    min 112 (2T 72) local     substitution Emiliano Martin Villa
+    min 112 (2T 72) local     card_yellow  Emiliano Martin Villa
+    min 118 (2T 78) local     substitution Gonzalo Recalde
+  marcador  · eventos 21-10 · guardado 21-10
+  tries     · 2-1 (guardado —-—)
+  arbitro   · JULIAN FERNANDEZ (guardado: —)
+
+sociedad-sportiva-de-bahia-blanca vs argentino-de-bahia-blanca · 594fcb55 · tarjeta 310638  ·  dd360d96-ea10-41dd-986d-5ee69f3658cb
+  local     · sociedad-sportiva-de-bahia-blanca · 23 jugadores · 21 con ficha fijada
+  visitante · argentino-de-bahia-blanca · 23 jugadores · 0 con ficha fijada
+  eventos   · 40
+    min  2 (1T 2) local     try          Iñaki Azcoitia
+    min  2 (1T 2) local     conversion   Felipe Serrat
+    min 17 (1T 17) local     card_yellow  Federico Stein
+    min 17 (1T 17) visitante penalty_goal Juan Cantarelli
+    min 21 (1T 21) local     try          Luca Nahuel Loiacono
+    min 21 (1T 21) local     conversion   Felipe Serrat
+    min 23 (1T 23) visitante substitution Juan Cantarelli
+    min 23 (1T 23) visitante injury       Juan Cantarelli
+    min 30 (1T 30) local     try          Pedro Zorzano
+    min 30 (1T 30) local     conversion   Felipe Serrat
+    min 32 (1T 32) visitante card_yellow  Nicolás Alejandro Marengo
+    min 37 (1T 37) local     try          Felipe Serrat
+    min 37 (1T 37) local     conversion   Felipe Serrat
+    min 40 (1T 40) local     try          Alan Martinez
+    min 40 (2T 0) local     substitution Iñaki Azcoitia
+    min 41 (2T 1) local     substitution Juan Francisco Malanga
+    min 46 (2T 6) visitante try          Guido Marconi
+    min 47 (2T 7) visitante conversion   Pedro Selvarolo
+    min 50 (2T 10) visitante substitution Guido Marconi
+    min 56 (2T 16) local     substitution Pedro Zorzano
+    min 56 (2T 16) local     substitution Patricio Cantalejos
+    min 59 (2T 19) local     try          Rafael Larrañaga
+    min 59 (2T 19) local     conversion   Felipe Serrat
+    min 62 (2T 22) local     try          Alan Martinez
+    min 63 (2T 23) local     substitution Thiago Loiacono
+    min 63 (2T 23) visitante substitution Francisco Ramirez Vita
+    min 65 (2T 25) local     try          Mateo Cardoso Lopes
+    min 65 (2T 25) local     conversion   Felipe Serrat
+    min 70 (2T 30) local     try          Juan Cruz Samuel
+    min 70 (2T 30) local     conversion   Felipe Serrat
+    min 72 (2T 32) local     substitution Juan Cruz Montoli
+    min 72 (2T 32) visitante substitution Santiago Ramos Apphatie
+    min 72 (2T 32) visitante substitution Santiago Ramos Apphatie
+    min 72 (2T 32) visitante substitution Juan Cantarelli
+    min 72 (2T 32) visitante injury       Santiago Ramos Apphatie
+    min 75 (2T 35) local     substitution Darían Troncoso
+    min 79 (2T 39) local     try          Juan Cruz Samuel
+    min 79 (2T 39) local     conversion   Felipe Serrat
+    min 80 (2T 40) visitante substitution Franco Carrera
+    min 80 (2T 40) visitante injury       Franco Carrera
+  marcador  · eventos 66-10 · guardado 66-10
+  tries     · 10-1 (guardado —-—)
+  arbitro   · SANTIAGO BEVACQUA (guardado: —)
+
+ipr-sporting vs mar-del-plata-club · 594fcb55 · tarjeta 310639  ·  5912d2a4-5b67-4102-9925-b4f9e7748f0a
+  local     · ipr-sporting · 23 jugadores · 23 con ficha fijada
+  visitante · mar-del-plata-club · 23 jugadores · 23 con ficha fijada
+  eventos   · 34
+    min  1 (1T 1) local     try          Blas Zapiola
+    min  1 (1T 1) local     conversion   Blas Zapiola
+    min 18 (1T 18) local     try          Blas Zapiola
+    min 18 (1T 18) local     conversion   Blas Zapiola
+    min 22 (1T 22) local     try          Ignacio Castañon
+    min 22 (1T 22) local     conversion   Blas Zapiola
+    min 33 (1T 33) local     try          Julián Soberón
+    min 33 (1T 33) local     conversion   Blas Zapiola
+    min 37 (1T 37) local     card_yellow  Federico De Siena
+    min 38 (1T 38) local     card_yellow  Ivan Ballesteros
+    min 38 (1T 38) visitante penalty_try  
+    min 55 (2T 15) local     substitution Juan Ignacio Cecive
+    min 59 (2T 19) local     card_red     Agustin Area
+    min 63 (2T 23) local     substitution Martin Naselli Zuliani
+    min 66 (2T 26) local     penalty_goal Blas Zapiola
+    min 71 (2T 31) local     penalty_goal Blas Zapiola
+    min 78 (2T 38) local     try          Ignacio Fuscaldo
+    min 79 (2T 39) local     substitution Federico De Siena
+    min 82 (2T 42) local     substitution Eliseo Estevan
+    min 82 (2T 42) local     substitution Ivan Ballesteros
+    min 82 (2T 42) visitante try          Leopoldo Branderiz
+    min 88 (2T 48) visitante substitution Tomas Osvaldo Sestelo Cangelli
+    min 88 (2T 48) visitante substitution Joaquín Solovioff
+    min 89 (2T 49) visitante try          Sebastian Hernando
+    min 89 (2T 49) visitante conversion   Gonzalo Recalde
+    min 97 (2T 57) visitante substitution Emiliano Martin Villa
+    min 102 (2T 62) visitante try          Sebastian Hernando
+    min 103 (2T 63) visitante substitution Joaquin Vitale Toledo
+    min 109 (2T 69) visitante card_yellow  Justo Pinilla
+    min 111 (2T 71) visitante substitution Guido Zingale
+    min 115 (2T 75) visitante substitution Genaro Jose Rios
+    min 120 (2T 80) visitante substitution Franco Bombini
+    min 125 (2T 85) visitante try          Leandro Ahrndt
+    min 125 (2T 85) visitante conversion   Gonzalo Recalde
+  marcador  · eventos 39-31 · guardado 39-31
+  tries     · 5-5 (guardado —-—)
+  arbitro   · GASTON ROGE (guardado: —)
+
+universitario-de-mar-del-plata vs comercial-r-c · 594fcb55 · tarjeta 310640  ·  526b4c9d-2aef-4179-beb7-1ab944c9c0a4
+  local     · universitario-de-mar-del-plata · 23 jugadores · 0 con ficha fijada
+  visitante · comercial-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min  2 (1T 2) visitante penalty_goal Gonzalo Jauregui
+    min  3 (1T 3) visitante try          Juan Ignacio Kaspin
+    min  4 (1T 4) visitante conversion   Gonzalo Jauregui
+    min 10 (1T 10) visitante try          Juan Ignacio Kaspin
+    min 11 (1T 11) local     card_yellow  Salvador Gerlero
+    min 14 (1T 14) visitante try          Marcos Jeremias Comins Diaz
+    min 19 (1T 19) local     try          Juan Bautista Victoria
+    min 21 (1T 21) visitante card_yellow  Lucas Perez
+    min 37 (1T 37) local     penalty_goal Benito Soler Villen B
+    min 42 (2T 2) local     try          Franco Rodriguez Reinoso
+    min 42 (2T 2) local     conversion   Benito Soler Villen B
+    min 46 (2T 6) local     substitution Francisco Morales
+    min 49 (2T 9) local     card_yellow  Francisco Barreca
+    min 49 (2T 9) visitante substitution Valentino Di Filippo
+    min 50 (2T 10) visitante try          Felipe Jeckeln
+    min 65 (2T 25) visitante substitution Lucas Perez
+    min 71 (2T 31) visitante substitution Franco Joaquin Picasso
+    min 76 (2T 36) visitante substitution Gonzalo Agustin Mora
+  marcador  · eventos 15-25 · guardado 15-25
+  tries     · 2-4 (guardado —-—)
+  arbitro   · MARIANO SCIANNA (guardado: —)
+
+los-cardos-r-c vs san-ignacio-r-c · 594fcb55 · tarjeta 310641  ·  bbe7b5ce-0a94-478f-98a3-416063e3e89d
+  local     · los-cardos-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · san-ignacio-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 33
+    min  4 (1T 4) local     penalty_goal Fernando Navarro
+    min 15 (1T 15) local     penalty_goal Fernando Navarro
+    min 20 (1T 20) local     card_yellow  Francisco Zubiaurre
+    min 23 (1T 23) local     try          Francisco Llanos
+    min 25 (1T 25) local     card_yellow  Matias Mihura
+    min 27 (1T 27) visitante try          Joaquin De Rosa
+    min 27 (1T 27) visitante conversion   Lautaro Garcia
+    min 31 (1T 31) local     try          Ignacio Migliore
+    min 32 (1T 32) local     conversion   Fernando Navarro
+    min 35 (1T 35) local     card_yellow  Fermin García Guerrero
+    min 38 (1T 38) local     card_yellow  Francisco Llanos
+    min 38 (1T 38) visitante card_yellow  Valentin Delgado
+    min 38 (1T 38) visitante card_red     Joel Ledesma
+    min 40 (1T 40) visitante try          Juan Caveda Amiel
+    min 40 (1T 40) visitante conversion   Lautaro Garcia
+    min 45 (2T 5) visitante card_yellow  Juan Caveda Amiel
+    min 51 (2T 11) visitante card_yellow  Felipe Fortte
+    min 59 (2T 19) visitante substitution Juan Caveda Amiel
+    min 64 (2T 24) visitante try          Joaquin De Rosa
+    min 66 (2T 26) visitante substitution Franco Gauna
+    min 73 (2T 33) visitante substitution Joaquin Ramirez
+    min 76 (2T 36) visitante substitution Joaquin De Rosa
+    min 82 (2T 42) local     try          Mateo Mesa
+    min 95 (2T 55) local     substitution Francisco Vazquez Bosch
+    min 95 (2T 55) local     substitution Matias Rafael Olivera Aguirre
+    min 96 (2T 56) local     substitution Fermin Adem
+    min 96 (2T 56) local     substitution Benjamín Elissondo
+    min 98 (2T 58) local     substitution Matias Mihura
+    min 102 (2T 62) local     substitution Agustin Lautaro Parodi Perez
+    min 110 (2T 70) local     penalty_goal Fernando Navarro
+    min 111 (2T 71) local     substitution Fermin García Guerrero
+    min 114 (2T 74) local     try          Francisco Linares
+    min 123 (2T 83) local     card_yellow  Santiago Gascue
+  marcador  · eventos 31-19 · guardado 31-19
+  tries     · 4-3 (guardado —-—)
+  arbitro   · SANTIAGO MOLEDO (guardado: —)
+
+argentino-de-bahia-blanca vs san-ignacio-r-c · 594fcb55 · tarjeta 310642  ·  3388fcb5-3f07-4b03-90d7-b678a965cd51
+  local     · argentino-de-bahia-blanca · 23 jugadores · 0 con ficha fijada
+  visitante · san-ignacio-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 19-26
+  tries     · 0-0 (guardado 0-0)
+  arbitro   · SANTIAGO BEVACQUA (guardado: —)
+
+comercial-r-c vs los-cardos-r-c · 594fcb55 · tarjeta 310643  ·  20ce0d50-c626-4c39-a0ae-41d54b1fe556
+  local     · comercial-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · los-cardos-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 23
+    min 23 (1T 23) visitante penalty_goal Fernando Navarro
+    min 29 (1T 29) local     try          Francisco Santos
+    min 29 (1T 29) local     conversion   Gonzalo Jauregui
+    min 36 (1T 36) local     try          Facundo Vazquez Irrazabal
+    min 38 (1T 38) visitante penalty_goal Fernando Navarro
+    min 43 (1T 43) local     try          Facundo Vazquez Irrazabal
+    min 65 (1T 65) visitante substitution Tomas Bardi
+    min 52 (2T 12) local     try          Lucas Perez
+    min 52 (2T 12) local     conversion   Gonzalo Jauregui
+    min 54 (2T 14) local     substitution Valentino Di Filippo
+    min 56 (2T 16) local     card_yellow  Juan Manuel Roldan
+    min 66 (2T 26) local     substitution Facundo Vazquez Irrazabal
+    min 67 (2T 27) local     substitution Lucas Perez
+    min 89 (2T 49) visitante penalty_goal Fernando Navarro
+    min 94 (2T 54) visitante substitution Benjamín Elissondo
+    min 97 (2T 57) visitante substitution Francisco Vazquez Bosch
+    min 97 (2T 57) visitante substitution Agustin Lautaro Parodi Perez
+    min 97 (2T 57) visitante substitution Matias Rafael Olivera Aguirre
+    min 100 (2T 60) visitante substitution Guido Riva
+    min 105 (2T 65) visitante substitution Fermin Adem
+    min 108 (2T 68) visitante try          Francisco Llanos
+    min 109 (2T 69) visitante conversion   Fermin Gonzalez Montaner
+    min 119 (2T 79) visitante penalty_goal Fermin Gonzalez Montaner
+  marcador  · eventos 24-19 · guardado 24-19
+  tries     · 4-1 (guardado 0-0)
+  arbitro   · MARIANO SCIANNA (guardado: —)
+
+mar-del-plata-club vs universitario-de-mar-del-plata · 594fcb55 · tarjeta 310644  ·  bd81997b-5f95-4f7e-859f-37a2e9fe1222
+  local     · mar-del-plata-club · 23 jugadores · 21 con ficha fijada
+  visitante · universitario-de-mar-del-plata · 23 jugadores · 0 con ficha fijada
+  eventos   · 29
+    min  2 (1T 2) local     try          Joaquin Jose Rojas
+    min  7 (1T 7) local     try          Franco Bombini
+    min 31 (1T 31) local     try          Gonzalo Recalde
+    min 37 (1T 37) visitante try          Franco Rodriguez Reinoso
+    min 37 (1T 37) visitante conversion   Benito Soler Villen B
+    min 37 (1T 37) visitante substitution Lautaro Salomon
+    min 53 (2T 13) visitante card_yellow  Francisco Carricart Acosta
+    min 57 (2T 17) visitante card_yellow  Benjamín Darío Duarte Mendez
+    min 59 (2T 19) visitante card_yellow  Salvador Gerlero
+    min 64 (2T 24) visitante substitution Juan Cruz Parra Videla
+    min 67 (2T 27) visitante substitution Francisco Morales
+    min 70 (2T 30) visitante substitution Francisco Carricart Acosta
+    min 74 (2T 34) visitante substitution José Arregui
+    min 75 (2T 35) visitante try          Benito Soler Villen B
+    min 75 (2T 35) visitante conversion   Benito Soler Villen B
+    min 80 (2T 40) visitante try          Gonzalo Pfister
+    min 80 (2T 40) visitante conversion   Benito Soler Villen B
+    min 90 (2T 50) local     substitution Tomas Osvaldo Sestelo Cangelli
+    min 90 (2T 50) local     substitution Felipe Lizarraga
+    min 90 (2T 50) local     substitution Justo Pinilla
+    min 90 (2T 50) local     substitution Genaro Jose Rios
+    min 92 (2T 52) local     try          Tomas Catuogno
+    min 100 (2T 60) local     try          Joaquin Jose Rojas
+    min 105 (2T 65) local     substitution Sebastian Hernando
+    min 105 (2T 65) local     substitution Franco Bombini
+    min 107 (2T 67) local     substitution Gonzalo Recalde
+    min 114 (2T 74) local     card_yellow  Joaquín Solovioff
+    min 117 (2T 77) local     try          Joaquin Jose Rojas
+    min 119 (2T 79) local     card_yellow  Valentin Recalde
+  marcador  · eventos 30-21 · guardado 30-21
+  tries     · 6-3 (guardado 0-0)
+  arbitro   · JULIAN FERNANDEZ (guardado: —)
+
+sociedad-sportiva-de-bahia-blanca vs ipr-sporting · 594fcb55 · tarjeta 310645  ·  7382a195-2875-47c0-a05d-25c320dde3ce
+  local     · sociedad-sportiva-de-bahia-blanca · 23 jugadores · 17 con ficha fijada
+  visitante · ipr-sporting · 23 jugadores · 22 con ficha fijada
+  eventos   · 30
+    min  2 (1T 2) visitante penalty_goal Renato Abad
+    min  4 (1T 4) local     penalty_goal Mateo Kohler
+    min 12 (1T 12) local     injury       Juan Cruz Harguindeguy Puccinelli
+    min 17 (1T 17) visitante substitution Eliseo Estevan
+    min 20 (1T 20) local     penalty_goal Mateo Kohler
+    min 28 (1T 28) local     substitution Felipe Inchausti
+    min 35 (1T 35) local     penalty_goal Mateo Kohler
+    min 39 (1T 39) visitante penalty_goal Renato Abad
+    min 41 (2T 1) visitante penalty_goal Renato Abad
+    min 41 (2T 1) visitante substitution Blas Zapiola
+    min 46 (2T 6) local     penalty_try  
+    min 46 (2T 6) visitante card_yellow  Fausto Iriart
+    min 49 (2T 9) visitante try          Felipe Mayol
+    min 49 (2T 9) visitante conversion   Renato Abad
+    min 50 (2T 10) local     substitution Mateo Kohler
+    min 52 (2T 12) visitante try          Felipe Charles
+    min 52 (2T 12) visitante conversion   Renato Abad
+    min 53 (2T 13) local     substitution Juan Cruz Harguindeguy Puccinelli
+    min 56 (2T 16) visitante substitution Fausto Iriart
+    min 56 (2T 16) visitante card_yellow  Lucas Cedarry
+    min 57 (2T 17) local     try          Thiago Loiacono
+    min 63 (2T 23) local     card_yellow  Martin Dosio
+    min 64 (2T 24) visitante try          Nicolás Figueroa
+    min 64 (2T 24) visitante conversion   Renato Abad
+    min 67 (2T 27) visitante try          Julián Soberón
+    min 68 (2T 28) local     substitution Federico Stein
+    min 70 (2T 30) local     try          Alan Martinez
+    min 70 (2T 30) local     try          Thiago Loiacono
+    min 72 (2T 32) visitante substitution Bautista Dallan
+    min 75 (2T 35) local     substitution Ignacio Lance
+  marcador  · eventos 31-35 · guardado 31-35
+  tries     · 4-4 (guardado —-—)
+  arbitro   · ESTEBAN SZELAGOWSKI (guardado: —)
+
+ipr-sporting vs argentino-de-bahia-blanca · 594fcb55 · tarjeta 310646  ·  a3b51518-a43d-44a4-8a56-8d29794616c2
+  local     · ipr-sporting · 23 jugadores · 18 con ficha fijada
+  visitante · argentino-de-bahia-blanca · 23 jugadores · 0 con ficha fijada
+  eventos   · 46
+    min  5 (1T 5) local     try          Tomas Garcia Fierro
+    min  8 (1T 8) local     try          Federico De Siena
+    min  8 (1T 8) local     conversion   Renato Abad
+    min 16 (1T 16) local     injury       Martin Naselli Zuliani
+    min 16 (1T 16) local     substitution Pedro Cedarry
+    min 17 (1T 17) local     try          Julián Soberón
+    min 17 (1T 17) local     conversion   Renato Abad
+    min 20 (1T 20) local     try          Pedro Cedarry
+    min 20 (1T 20) local     conversion   Renato Abad
+    min 22 (1T 22) local     try          Pedro Cedarry
+    min 22 (1T 22) local     conversion   Renato Abad
+    min 25 (1T 25) local     try          Lucas Cedarry
+    min 25 (1T 25) local     conversion   Renato Abad
+    min 28 (1T 28) local     try          Nicolás Figueroa
+    min 32 (1T 32) local     card_yellow  Manuel De Dios
+    min 40 (2T 0) local     substitution Agustin Area
+    min 43 (2T 3) visitante substitution Bautista Gortari
+    min 43 (2T 3) visitante injury       Bautista Gortari
+    min 48 (2T 8) local     try          Nicolás Figueroa
+    min 48 (2T 8) local     conversion   Renato Abad
+    min 51 (2T 11) local     try          Felipe Charles
+    min 51 (2T 11) local     conversion   Renato Abad
+    min 53 (2T 13) visitante substitution Leonardo Ponce
+    min 55 (2T 15) local     try          Luca Amalfitani
+    min 55 (2T 15) local     conversion   Renato Abad
+    min 56 (2T 16) visitante try          Guido Marconi
+    min 57 (2T 17) visitante conversion   Pedro Selvarolo
+    min 59 (2T 19) local     try          Ignacio Castañon
+    min 59 (2T 19) local     conversion   Renato Abad
+    min 60 (2T 20) local     substitution Felipe Charles
+    min 60 (2T 20) local     substitution Julián Soberón
+    min 61 (2T 21) local     try          Ignacio Castañon
+    min 61 (2T 21) local     conversion   Renato Abad
+    min 62 (2T 22) local     substitution Tomas Garcia Fierro
+    min 64 (2T 24) local     substitution Guido Potente
+    min 64 (2T 24) local     substitution Luca Amalfitani
+    min 66 (2T 26) visitante substitution Francisco Ramirez Vita
+    min 66 (2T 26) visitante substitution Francisco Ramirez Vita
+    min 66 (2T 26) visitante injury       Francisco Ramirez Vita
+    min 67 (2T 27) local     try          Federico De Siena
+    min 67 (2T 27) local     conversion   Renato Abad
+    min 69 (2T 29) local     try          Federico De Siena
+    min 69 (2T 29) local     conversion   Renato Abad
+    min 71 (2T 31) visitante substitution Guido Ermiaga
+    min 78 (2T 38) visitante try          Guido Marconi
+    min 79 (2T 39) visitante conversion   Pedro Selvarolo
+  marcador  · eventos 94-14 · guardado 94-14
+  tries     · 14-2 (guardado 0-0)
+  arbitro   · SANTIAGO MOLEDO (guardado: —)
+
+universitario-de-mar-del-plata vs sociedad-sportiva-de-bahia-blanca · 594fcb55 · tarjeta 310647  ·  b5d8779a-72ad-405a-928c-0542cfa1b738
+  local     · universitario-de-mar-del-plata · 23 jugadores · 0 con ficha fijada
+  visitante · sociedad-sportiva-de-bahia-blanca · 23 jugadores · 17 con ficha fijada
+  eventos   · 19
+    min 14 (1T 14) visitante penalty_goal Felipe Serrat
+    min 25 (1T 25) visitante try          Francisco Cantalejos
+    min 28 (1T 28) local     card_yellow  Francisco Carricart Acosta
+    min 29 (1T 29) visitante penalty_goal Felipe Serrat
+    min 39 (1T 39) local     penalty_goal Benito Soler Villen B
+    min 50 (2T 10) local     substitution Juan Cruz Parra Videla
+    min 52 (2T 12) local     penalty_goal Benito Soler Villen B
+    min 57 (2T 17) local     penalty_goal Benito Soler Villen B
+    min 60 (2T 20) visitante injury       Gino Zanoni
+    min 60 (2T 20) visitante substitution Gino Zanoni
+    min 64 (2T 24) visitante try          Patricio Cantalejos
+    min 64 (2T 24) visitante conversion   Felipe Serrat
+    min 70 (2T 30) local     substitution Gonzalo Bustos
+    min 71 (2T 31) visitante substitution Ignacio Lance
+    min 73 (2T 33) visitante card_yellow  Francisco Cantalejos
+    min 75 (2T 35) visitante card_yellow  Felipe Inchausti
+    min 76 (2T 36) local     try          Francisco Barreca
+    min 76 (2T 36) local     conversion   Benito Soler Villen B
+    min 79 (2T 39) visitante try          Patricio Cantalejos
+  marcador  · eventos 16-23 · guardado 16-23
+  tries     · 1-3 (guardado 0-0)
+  arbitro   · MARIANO SCIANNA (guardado: —)
+
+los-cardos-r-c vs mar-del-plata-club · 594fcb55 · tarjeta 310648  ·  fa9b7df5-ad07-4682-a59e-8ccb8ccadd8a
+  local     · los-cardos-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · mar-del-plata-club · 23 jugadores · 21 con ficha fijada
+  eventos   · 28
+    min  2 (1T 2) visitante try          Valentin Recalde
+    min 16 (1T 16) visitante card_yellow  Genaro Jose Rios
+    min 23 (1T 23) visitante try          Valentin Recalde
+    min 23 (1T 23) visitante conversion   Pedro Hernandez Coste
+    min 28 (1T 28) visitante try          Valentin Recalde
+    min 33 (1T 33) local     try          Fermin García Guerrero
+    min 37 (1T 37) visitante card_yellow  Gonzalo Recalde
+    min 68 (2T 28) visitante try          Emiliano Martin Villa
+    min 86 (2T 46) visitante conversion   Pedro Hernandez Coste
+    min 90 (2T 50) visitante substitution Mateo Arambarri
+    min 90 (2T 50) visitante substitution Franco Bombini
+    min 90 (2T 50) visitante substitution Tomas Herrador
+    min 91 (2T 51) local     substitution Matias Rafael Olivera Aguirre
+    min 95 (2T 55) visitante substitution Felipe Lizarraga
+    min 95 (2T 55) visitante substitution Genaro Jose Rios
+    min 95 (2T 55) visitante substitution Facundo Castelfidardo
+    min 100 (2T 60) visitante substitution Santiago Martinez Etayo
+    min 105 (2T 65) local     substitution Agustin Lautaro Parodi Perez
+    min 106 (2T 66) local     substitution Benjamín Elissondo
+    min 106 (2T 66) local     substitution Valentin Melendi
+    min 106 (2T 66) visitante try          Gonzalo Recalde
+    min 106 (2T 66) visitante conversion   Pedro Hernandez Coste
+    min 113 (2T 73) local     substitution Francisco Zubiaurre
+    min 113 (2T 73) local     substitution Santiago Gascue
+    min 115 (2T 75) visitante try          Joaquin Jose Rojas
+    min 115 (2T 75) visitante conversion   Pedro Hernandez Coste
+    min 117 (2T 77) local     substitution Mateo Mesa
+    min 117 (2T 77) local     substitution Pedro Agustin Schatz
+  marcador  · eventos 5-38 · guardado 5-38
+  tries     · 1-6 (guardado 0-0)
+  arbitro   · NICOLÁS MIGUEL COSENTINO (guardado: —)
+
+san-ignacio-r-c vs comercial-r-c · 594fcb55 · tarjeta 310649  ·  5ac6efbf-cabc-4f03-acaf-4e64b493505d
+  local     · san-ignacio-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · comercial-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min  8 (1T 8) visitante penalty_goal Gonzalo Jauregui
+    min 19 (1T 19) local     try          Joaquin Delgado
+    min 19 (1T 19) local     conversion   Lautaro Garcia
+    min 27 (1T 27) visitante penalty_try  
+    min 31 (1T 31) local     try          Bruno Costales
+    min 35 (1T 35) local     penalty_goal Lautaro Garcia
+    min 37 (1T 37) local     try          Francisco Paklayan
+    min 37 (1T 37) local     conversion   Lautaro Garcia
+    min 40 (1T 40) local     try          Lautaro Garcia
+    min 40 (1T 40) visitante substitution Lucas Perez
+    min 42 (2T 2) local     card_yellow  Tobias Balcedo
+    min 42 (2T 2) local     substitution Joaquin Gauna
+    min 44 (2T 4) visitante penalty_try  
+    min 53 (2T 13) visitante substitution Gerardo Vouilloz
+    min 57 (2T 17) visitante try          Gaspar Jeckeln
+    min 57 (2T 17) visitante conversion   Gonzalo Jauregui
+    min 60 (2T 20) local     card_yellow  Juan Caveda Amiel
+    min 60 (2T 20) local     substitution Ramiro Allamanda
+    min 60 (2T 20) local     substitution Pablo Rufino
+    min 62 (2T 22) visitante conversion   Gonzalo Jauregui
+    min 62 (2T 22) visitante try          Facundo Vazquez Irrazabal
+    min 71 (2T 31) visitante conversion   Gonzalo Jauregui
+    min 71 (2T 31) visitante try          Ignacio Zanetti
+    min 80 (2T 40) local     card_yellow  Joaquin De Rosa
+    min 80 (2T 40) visitante penalty_goal Gonzalo Jauregui
+  marcador  · eventos 27-41 · guardado 27-41
+  tries     · 4-5 (guardado 0-0)
+  arbitro   · GASTON ROGE (guardado: —)
+
+universitario-de-mar-del-plata vs ipr-sporting · 594fcb55 · tarjeta 313633  ·  48819f45-f11f-4514-8cc4-55984f83e9b7
+  local     · universitario-de-mar-del-plata · 23 jugadores · 0 con ficha fijada
+  visitante · ipr-sporting · 23 jugadores · 20 con ficha fijada
+  eventos   · 27
+    min  4 (1T 4) local     try          Nicolás Walter Blanco
+    min  4 (1T 4) local     conversion   Benito Soler Villen B
+    min  9 (1T 9) visitante try          Agustin Area
+    min  9 (1T 9) visitante conversion   Renato Abad
+    min 21 (1T 21) visitante try          Ignacio Castañon
+    min 21 (1T 21) visitante conversion   Renato Abad
+    min 26 (1T 26) local     try          Francisco Barreca
+    min 26 (1T 26) local     conversion   Benito Soler Villen B
+    min 28 (1T 28) visitante try          Felipe Charles
+    min 28 (1T 28) visitante conversion   Renato Abad
+    min 35 (1T 35) visitante try          Julián Soberón
+    min 39 (1T 39) local     penalty_try  
+    min 40 (1T 40) visitante card_yellow  Ignacio Castañon
+    min 40 (1T 40) visitante card_red     Ivan Ballesteros
+    min 40 (1T 40) visitante card_yellow  Ignacio Fuscaldo
+    min 40 (1T 40) visitante substitution Luca Saracino
+    min 43 (2T 3) local     try          Francisco Barreca
+    min 43 (2T 3) local     conversion   Benito Soler Villen B
+    min 49 (2T 9) local     penalty_goal Benito Soler Villen B
+    min 51 (2T 11) local     substitution Manuel Victoria
+    min 53 (2T 13) local     substitution Gonzalo Tomas Acuña
+    min 61 (2T 21) local     card_yellow  Juan Cruz Parra Videla
+    min 65 (2T 25) local     card_yellow  Tomas Ignacio Juarez
+    min 68 (2T 28) visitante try          Julián Soberón
+    min 68 (2T 28) visitante conversion   Renato Abad
+    min 68 (2T 28) visitante substitution Nicolás Figueroa
+    min 80 (2T 40) visitante substitution Bautista Dallan
+  marcador  · eventos 31-33 · guardado 31-33
+  tries     · 4-5 (guardado —-—)
+  arbitro   · JULIAN FERNANDEZ (guardado: —)
+
+los-cardos-r-c vs sociedad-sportiva-de-bahia-blanca · 594fcb55 · tarjeta 313632  ·  5b2ecd09-089e-4e0c-a49a-b6e5314213c1
+  local     · los-cardos-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · sociedad-sportiva-de-bahia-blanca · 23 jugadores · 19 con ficha fijada
+  eventos   · 34
+    min 10 (1T 10) local     card_yellow  Fernando Navarro
+    min 10 (1T 10) visitante card_yellow  Iñaki Azcoitia
+    min 16 (1T 16) local     try          Pedro Agustin Schatz
+    min 17 (1T 17) local     conversion   Fernando Navarro
+    min 19 (1T 19) visitante try          Patricio Cantalejos
+    min 19 (1T 19) visitante conversion   Felipe Serrat
+    min 27 (1T 27) visitante try          Francisco Cantalejos
+    min 27 (1T 27) visitante conversion   Felipe Serrat
+    min 32 (1T 32) local     penalty_goal Fernando Navarro
+    min 42 (1T 42) visitante card_yellow  Francisco Cantalejos
+    min 45 (2T 5) visitante try          Santiago Bancora
+    min 45 (2T 5) visitante conversion   Felipe Serrat
+    min 50 (2T 10) visitante substitution Felipe Inchausti
+    min 50 (2T 10) visitante substitution Juan Cruz Samuel
+    min 53 (2T 13) visitante try          Pedro Zorzano
+    min 53 (2T 13) visitante conversion   Felipe Serrat
+    min 68 (2T 28) visitante card_yellow  Iñaki Azcoitia
+    min 68 (2T 28) visitante card_red     Iñaki Azcoitia
+    min 68 (2T 28) visitante substitution Ignacio Lance
+    min 74 (2T 34) visitante card_yellow  Agustin Antinori
+    min 75 (2T 35) visitante substitution Santiago Bancora
+    min 75 (2T 35) visitante substitution Federico Stein
+    min 80 (2T 40) local     substitution Nicolás Forgue Salerno
+    min 87 (2T 47) local     try          Pedro Agustin Schatz
+    min 88 (2T 48) local     conversion   Fernando Navarro
+    min 90 (2T 50) local     substitution Tomas Bardi
+    min 96 (2T 56) local     penalty_goal Fermin Gonzalez Montaner
+    min 98 (2T 58) local     try          Fermin García Guerrero
+    min 99 (2T 59) local     substitution Mateo Mesa
+    min 103 (2T 63) local     penalty_goal Fermin Gonzalez Montaner
+    min 105 (2T 65) local     substitution Francisco Zubiaurre
+    min 105 (2T 65) local     substitution Benjamín Elissondo
+    min 108 (2T 68) local     substitution Agustin Lautaro Parodi Perez
+    min 115 (2T 75) local     penalty_try  
+  marcador  · eventos 35-28 · guardado 35-28
+  tries     · 4-4 (guardado —-—)
+  arbitro   · SANTIAGO MOLEDO (guardado: —)
+
+san-ignacio-r-c vs mar-del-plata-club · 594fcb55 · tarjeta 313631  ·  8c38d79b-611c-4fd5-8da0-a8010b2054d5
+  local     · san-ignacio-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · mar-del-plata-club · 23 jugadores · 21 con ficha fijada
+  eventos   · 35
+    min  2 (1T 2) visitante try          Mateo Arambarri
+    min  2 (1T 2) visitante conversion   Pedro Hernandez Coste
+    min  6 (1T 6) visitante try          Valentin Recalde
+    min  6 (1T 6) visitante conversion   Pedro Hernandez Coste
+    min 22 (1T 22) visitante try          Facundo Castelfidardo
+    min 26 (1T 26) visitante injury       Tomas Larraburu
+    min 26 (1T 26) visitante substitution Tomas Larraburu
+    min 32 (1T 32) visitante injury       Martin Roman Leoz
+    min 32 (1T 32) visitante substitution Martin Roman Leoz
+    min 37 (1T 37) visitante try          Franco Bombini
+    min 37 (1T 37) visitante conversion   Pedro Hernandez Coste
+    min 47 (2T 7) local     try          Pablo Rufino
+    min 47 (2T 7) local     conversion   Lautaro Garcia
+    min 61 (2T 21) local     substitution Pablo Rufino
+    min 69 (2T 29) local     substitution Joaquin Gauna
+    min 70 (2T 30) local     substitution Tobias Balcedo
+    min 73 (2T 33) local     try          Andres Caveda Amiel
+    min 74 (2T 34) local     conversion   Lautaro Garcia
+    min 75 (2T 35) local     substitution Maximiliano Fernandez
+    min 75 (2T 35) local     substitution Joaquín Hindryckx
+    min 77 (2T 37) local     substitution Bautista Barbero
+    min 85 (2T 45) visitante substitution Mateo Arambarri
+    min 85 (2T 45) visitante substitution Tomas Herrador
+    min 93 (2T 53) visitante try          Franco Bombini
+    min 93 (2T 53) visitante conversion   Pedro Hernandez Coste
+    min 97 (2T 57) visitante substitution Francisco De Angelis
+    min 97 (2T 57) visitante try          Tomas Catuogno
+    min 100 (2T 60) visitante try          Valentin Recalde
+    min 106 (2T 66) visitante substitution Franco Bombini
+    min 106 (2T 66) visitante substitution Genaro Jose Rios
+    min 108 (2T 68) visitante try          Tomas Catuogno
+    min 108 (2T 68) visitante conversion   Pedro Hernandez Coste
+    min 109 (2T 69) visitante substitution Tomas Catuogno
+    min 118 (2T 78) visitante try          Emiliano Martin Villa
+    min 118 (2T 78) visitante conversion   Pedro Hernandez Coste
+  marcador  · eventos 14-57 · guardado 14-57
+  tries     · 2-9 (guardado —-—)
+  arbitro   · GASTON ROGE (guardado: —)
+
+argentino-de-bahia-blanca vs comercial-r-c · 594fcb55 · tarjeta 313630  ·  b13a5164-5048-4ced-b632-fbb5513f22a8
+  local     · argentino-de-bahia-blanca · 23 jugadores · 0 con ficha fijada
+  visitante · comercial-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min  1 (1T 1) visitante try          Juan Ignacio Kaspin
+    min  5 (1T 5) visitante try          Gaspar Jeckeln
+    min  5 (1T 5) visitante conversion   Gonzalo Jauregui
+    min 12 (1T 12) visitante try          Juan Ignacio Kaspin
+    min 13 (1T 13) visitante conversion   Gonzalo Jauregui
+    min 16 (1T 16) local     try          Agustin Grunewald
+    min 21 (1T 21) visitante try          Lorenzo Kloberdanz
+    min 21 (1T 21) visitante conversion   Gonzalo Jauregui
+    min 28 (1T 28) local     card_yellow  Francisco Maenza
+    min 35 (1T 35) visitante try          Gaspar Jeckeln
+    min 35 (1T 35) visitante conversion   Gonzalo Jauregui
+    min 40 (1T 40) local     try          Guido Marconi
+    min 51 (2T 11) visitante try          Juan Ignacio Kaspin
+    min 52 (2T 12) visitante conversion   Gonzalo Jauregui
+    min 57 (2T 17) visitante try          Facundo Vazquez Irrazabal
+    min 58 (2T 18) local     substitution Francisco Ramirez Vita
+    min 58 (2T 18) local     substitution Marcelo Tomas Exposito
+    min 58 (2T 18) visitante substitution Gonzalo Agustin Mora
+    min 60 (2T 20) visitante substitution Gonzalo Jauregui
+    min 61 (2T 21) local     substitution Facundo Esteban Aristimuño Maidana
+    min 64 (2T 24) visitante substitution Juan Manuel Roldan
+    min 71 (2T 31) visitante substitution Franco Joaquin Picasso
+    min 72 (2T 32) local     try          Guido Marconi
+    min 73 (2T 33) local     conversion   Pedro Selvarolo
+    min 75 (2T 35) local     substitution Pedro Selvarolo
+    min 77 (2T 37) visitante substitution Rodrigo Oliver
+    min 82 (2T 42) visitante card_yellow  Facundo Vazquez Irrazabal
+  marcador  · eventos 17-45 · guardado 17-45
+  tries     · 3-7 (guardado —-—)
+  arbitro   · ESTEBAN BEVACQUA (guardado: —)
+
+universitario-de-mar-del-plata vs argentino-de-bahia-blanca · 594fcb55 · tarjeta 313634  ·  83c0f8b9-9327-41fb-a272-5c98af5abd79
+  local     · universitario-de-mar-del-plata · 23 jugadores · 0 con ficha fijada
+  visitante · argentino-de-bahia-blanca · 23 jugadores · 0 con ficha fijada
+  eventos   · 39
+    min  2 (1T 2) local     try          Ramon Layral Sanchis
+    min  2 (1T 2) local     conversion   Benito Soler Villen B
+    min  4 (1T 4) local     try          Benjamín Darío Duarte Mendez
+    min  4 (1T 4) local     conversion   Benito Soler Villen B
+    min  7 (1T 7) local     try          Tomas Agustin Freiz Di Meglio
+    min 16 (1T 16) visitante try          Agustin Grunewald
+    min 19 (1T 19) local     try          Ramon Layral Sanchis
+    min 25 (1T 25) local     try          Benjamin Victoria
+    min 25 (1T 25) local     conversion   Benito Soler Villen B
+    min 30 (1T 30) local     try          Franco Rodriguez Reinoso
+    min 30 (1T 30) local     conversion   Benito Soler Villen B
+    min 35 (1T 35) visitante try          Guido Marconi
+    min 36 (1T 36) visitante conversion   Pedro Selvarolo
+    min 42 (2T 2) local     try          Tomas Agustin Freiz Di Meglio
+    min 46 (2T 6) local     try          Juan Bautista Victoria
+    min 46 (2T 6) local     conversion   Benito Soler Villen B
+    min 50 (2T 10) local     try          Gonzalo Tomas Acuña
+    min 50 (2T 10) visitante substitution Agustin Grunewald
+    min 53 (2T 13) visitante try          Pablo Cerljenko
+    min 54 (2T 14) visitante conversion   Pedro Selvarolo
+    min 55 (2T 15) local     try          Francisco Barreca
+    min 55 (2T 15) local     conversion   Benito Soler Villen B
+    min 56 (2T 16) local     substitution Benjamin Victoria
+    min 56 (2T 16) visitante card_yellow  Nicolas Hernandez
+    min 57 (2T 17) local     substitution Benjamín Darío Duarte Mendez
+    min 57 (2T 17) local     substitution Francisco Morales
+    min 61 (2T 21) local     substitution Franco Rodriguez Reinoso
+    min 61 (2T 21) local     substitution Benito Soler Villen B
+    min 61 (2T 21) local     try          Franco Rodriguez Reinoso
+    min 61 (2T 21) local     conversion   Benito Soler Villen B
+    min 65 (2T 25) visitante card_yellow  Francisco Ramirez Vita
+    min 68 (2T 28) visitante substitution Pedro Selvarolo
+    min 70 (2T 30) visitante substitution Francisco Maenza
+    min 73 (2T 33) visitante card_yellow  Julian Angel Gargiulo
+    min 74 (2T 34) local     try          Ernesto Rocha
+    min 75 (2T 35) visitante substitution Nicolas Hernandez
+    min 75 (2T 35) visitante substitution Francisco Ramirez Vita
+    min 76 (2T 36) local     try          Tomas Agustin Freiz Di Meglio
+    min 76 (2T 36) local     conversion   Ignacio Osorno
+  marcador  · eventos 81-19 · guardado 81-19
+  tries     · 13-3 (guardado —-—)
+  arbitro   · NICOLÁS MIGUEL COSENTINO (guardado: —)
+
+ipr-sporting vs los-cardos-r-c · 594fcb55 · tarjeta 313635  ·  4925c2bc-e5ae-439f-9bd7-cd3fcf5fd7a7
+  local     · ipr-sporting · 23 jugadores · 19 con ficha fijada
+  visitante · los-cardos-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 31
+    min  8 (1T 8) local     try          Ignacio Fuscaldo
+    min  8 (1T 8) local     conversion   Renato Abad
+    min 16 (1T 16) local     try          Julián Soberón
+    min 16 (1T 16) local     conversion   Renato Abad
+    min 24 (1T 24) visitante penalty_goal Fernando Navarro
+    min 29 (1T 29) local     try          Felipe Charles
+    min 29 (1T 29) local     conversion   Renato Abad
+    min 32 (1T 32) local     try          Ignacio Castañon
+    min 32 (1T 32) local     conversion   Renato Abad
+    min 41 (2T 1) local     try          Ignacio Fuscaldo
+    min 55 (2T 15) visitante injury       Fermin García Guerrero
+    min 66 (2T 26) local     try          Felipe Charles
+    min 66 (2T 26) local     conversion   Renato Abad
+    min 69 (2T 29) local     try          Ignacio Fuscaldo
+    min 69 (2T 29) local     conversion   Renato Abad
+    min 70 (2T 30) local     substitution Luca Saracino
+    min 73 (2T 33) local     card_yellow  Agustin Area
+    min 80 (2T 40) local     try          Ignacio Castañon
+    min 80 (2T 40) local     conversion   Renato Abad
+    min 84 (2T 44) visitante try          Valentin Melendi
+    min 84 (2T 44) visitante substitution Fermin Adem
+    min 93 (2T 53) visitante substitution Fermin García Guerrero
+    min 93 (2T 53) visitante substitution Tomas Bardi
+    min 94 (2T 54) visitante try          Marcos Migliore
+    min 94 (2T 54) visitante substitution Matias Rafael Olivera Aguirre
+    min 95 (2T 55) visitante conversion   Fernando Navarro
+    min 95 (2T 55) visitante substitution Benjamín Elissondo
+    min 98 (2T 58) visitante substitution Valentin Melendi
+    min 106 (2T 66) visitante penalty_try  
+    min 110 (2T 70) visitante substitution Agustin Lautaro Parodi Perez
+    min 110 (2T 70) visitante substitution Francisco Zubiaurre
+  marcador  · eventos 54-22 · guardado 54-22
+  tries     · 8-3 (guardado —-—)
+  arbitro   · GASTON ROGE (guardado: —)
+
+sociedad-sportiva-de-bahia-blanca vs san-ignacio-r-c · 594fcb55 · tarjeta 313636  ·  0e21b7aa-77c2-49d3-9864-bf4ada0e83c5
+  local     · sociedad-sportiva-de-bahia-blanca · 23 jugadores · 21 con ficha fijada
+  visitante · san-ignacio-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 31
+    min  4 (1T 4) visitante try          Thomas Helguera
+    min  4 (1T 4) visitante conversion   Lautaro Garcia
+    min  8 (1T 8) local     conversion   Mateo Kohler
+    min  8 (1T 8) local     try          Pedro Zorzano
+    min 14 (1T 14) visitante try          Felipe Fortte
+    min 19 (1T 19) local     try          Felipe Serrat
+    min 19 (1T 19) local     conversion   Mateo Kohler
+    min 20 (1T 20) local     card_yellow  Thiago Loiacono
+    min 22 (1T 22) visitante penalty_goal Lautaro Garcia
+    min 24 (1T 24) local     card_yellow  Patricio Cantalejos
+    min 29 (1T 29) visitante penalty_goal Lautaro Garcia
+    min 33 (1T 33) local     penalty_goal Mateo Kohler
+    min 39 (1T 39) local     try          Agustin Antinori
+    min 39 (1T 39) local     conversion   Mateo Kohler
+    min 41 (2T 1) local     penalty_goal Mateo Kohler
+    min 41 (2T 1) visitante card_yellow  Felipe Fortte
+    min 42 (2T 2) visitante penalty_goal Lautaro Garcia
+    min 45 (2T 5) local     substitution Darían Troncoso
+    min 50 (2T 10) local     try          Felipe Inchausti
+    min 50 (2T 10) local     conversion   Mateo Kohler
+    min 56 (2T 16) local     substitution Federico Stein
+    min 60 (2T 20) local     substitution Santiago Bancora
+    min 60 (2T 20) visitante substitution Joaquin Gauna
+    min 63 (2T 23) visitante substitution Pablo Rufino
+    min 70 (2T 30) local     substitution Agustin Antinori
+    min 70 (2T 30) visitante penalty_goal Lautaro Garcia
+    min 74 (2T 34) visitante substitution Diego Gonzalez
+    min 78 (2T 38) local     card_yellow  Alan Martinez
+    min 78 (2T 38) local     try          Pedro Zorzano
+    min 78 (2T 38) visitante card_yellow  Lautaro Garcia
+    min 78 (2T 38) visitante substitution Tobias Balcedo
+  marcador  · eventos 39-24 · guardado 39-24
+  tries     · 5-2 (guardado —-—)
+  arbitro   · SANTIAGO BEVACQUA (guardado: —)
+
+mar-del-plata-club vs comercial-r-c · 594fcb55 · tarjeta 313637  ·  276e4e97-0a6e-4d40-89b3-ec6837d55cfc
+  local     · mar-del-plata-club · 23 jugadores · 21 con ficha fijada
+  visitante · comercial-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 48-17
+  tries     · 0-0 (guardado —-—)
+  arbitro   · JULIAN FERNANDEZ (guardado: —)
+
+argentino-de-bahia-blanca vs mar-del-plata-club · 594fcb55 · tarjeta 313638  ·  bd29a078-301a-4f83-902e-f33a9cb33b6e
+  local     · argentino-de-bahia-blanca · 23 jugadores · 0 con ficha fijada
+  visitante · mar-del-plata-club · 23 jugadores · 18 con ficha fijada
+  eventos   · 33
+    min  8 (1T 8) visitante try          Tomas Catuogno
+    min  8 (1T 8) visitante conversion   Pedro Hernandez Coste
+    min 12 (1T 12) visitante card_yellow  Joaquín Solovioff
+    min 13 (1T 13) local     card_yellow  Baltazar Montero
+    min 14 (1T 14) visitante try          Genaro Jose Rios
+    min 27 (1T 27) local     penalty_goal Ramiro Valentin Correa
+    min 38 (1T 38) visitante try          Facundo Castelfidardo
+    min 38 (1T 38) visitante conversion   Pedro Hernandez Coste
+    min 40 (1T 40) visitante conversion   Pedro Hernandez Coste
+    min 40 (1T 40) visitante substitution Tomas Osvaldo Sestelo Cangelli
+    min 40 (1T 40) visitante try          Tomas Catuogno
+    min 41 (2T 1) local     substitution Franco Litterio
+    min 59 (2T 19) local     try          Nicolás Alejandro Marengo
+    min 60 (2T 20) local     conversion   Ramiro Valentin Correa
+    min 65 (2T 25) local     substitution Facundo Esteban Aristimuño Maidana
+    min 70 (2T 30) local     injury       Thiago Zaballa
+    min 70 (2T 30) local     substitution Thiago Zaballa
+    min 71 (2T 31) local     injury       Francisco Ramirez Vita
+    min 71 (2T 31) local     substitution Francisco Ramirez Vita
+    min 77 (2T 37) local     substitution Marcelo Tomas Exposito
+    min 88 (2T 48) visitante substitution Francisco De Angelis
+    min 90 (2T 50) visitante substitution Mateo Arambarri
+    min 106 (2T 66) visitante substitution Lorenzo Castelli
+    min 106 (2T 66) visitante substitution Valentin Recalde
+    min 109 (2T 69) visitante try          Franco Salamone
+    min 109 (2T 69) visitante conversion   Pedro Hernandez Coste
+    min 111 (2T 71) visitante substitution Joaquín Solovioff
+    min 112 (2T 72) visitante substitution Genaro Jose Rios
+    min 114 (2T 74) visitante try          Manuel Fernandez Montero
+    min 114 (2T 74) visitante conversion   Pedro Hernandez Coste
+    min 117 (2T 77) visitante conversion   Pedro Hernandez Coste
+    min 117 (2T 77) visitante try          Pedro Hernandez Coste
+    min 119 (2T 79) visitante try          Pedro Hernandez Coste
+  marcador  · eventos 10-52 · guardado 10-52
+  tries     · 1-8 (guardado —-—)
+  arbitro   · ESTEBAN BEVACQUA (guardado: —)
+
+comercial-r-c vs sociedad-sportiva-de-bahia-blanca · 594fcb55 · tarjeta 313639  ·  44152be6-6acf-4a32-b7e4-cc143d847154
+  local     · comercial-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · sociedad-sportiva-de-bahia-blanca · 23 jugadores · 19 con ficha fijada
+  eventos   · 21
+    min 18 (1T 18) visitante try          Patricio Cantalejos
+    min 18 (1T 18) visitante conversion   Mateo Kohler
+    min 24 (1T 24) local     card_yellow  Franco Joaquin Picasso
+    min 30 (1T 30) visitante try          Alan Martinez
+    min 34 (1T 34) visitante card_yellow  Francisco Cantalejos
+    min 35 (1T 35) local     try          Facundo Vazquez Irrazabal
+    min 41 (2T 1) local     try          Lucas Perez
+    min 42 (2T 2) local     conversion   Rodrigo Oliver
+    min 44 (2T 4) visitante penalty_goal Mateo Kohler
+    min 54 (2T 14) local     substitution Facundo Vazquez Irrazabal
+    min 57 (2T 17) local     card_yellow  Valentino Di Filippo
+    min 58 (2T 18) visitante penalty_goal Mateo Kohler
+    min 60 (2T 20) local     try          Juan Ignacio Kaspin
+    min 63 (2T 23) local     substitution Lucas Perez
+    min 67 (2T 27) local     substitution Valentino Di Filippo
+    min 69 (2T 29) local     try          Juan Ignacio Kaspin
+    min 70 (2T 30) visitante substitution Santiago Bancora
+    min 79 (2T 39) visitante try          Francisco Cantalejos
+    min 79 (2T 39) visitante substitution Joaquin Marne
+    min 80 (2T 40) local     try          Marcos Jeremias Comins Diaz
+    min 80 (2T 40) local     conversion   Rodrigo Oliver
+  marcador  · eventos 29-23 · guardado 29-23
+  tries     · 5-3 (guardado —-—)
+  arbitro   · GASTON ROGE (guardado: —)
+
+san-ignacio-r-c vs ipr-sporting · 594fcb55 · tarjeta 313640  ·  30e66eb8-4f46-40b1-ba39-75c41b19ea7a
+  local     · san-ignacio-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · ipr-sporting · 23 jugadores · 20 con ficha fijada
+  eventos   · 28
+    min 11 (1T 11) local     try          Juan Estavillo
+    min 12 (1T 12) local     conversion   Manuel Fortte
+    min 29 (1T 29) visitante try          Tomas Garcia Fierro
+    min 37 (1T 37) local     penalty_goal Manuel Fortte
+    min 40 (1T 40) visitante penalty_goal Renato Abad
+    min 43 (2T 3) visitante try          Felipe Charles
+    min 51 (2T 11) visitante try          Felipe Charles
+    min 51 (2T 11) visitante conversion   Renato Abad
+    min 52 (2T 12) local     substitution Leon Omar Pelaez
+    min 52 (2T 12) local     substitution Diego Gonzalez
+    min 56 (2T 16) visitante try          Agustin Area
+    min 56 (2T 16) visitante conversion   Renato Abad
+    min 61 (2T 21) visitante card_yellow  Nicolás Figueroa
+    min 62 (2T 22) local     try          Tobias Balcedo
+    min 63 (2T 23) local     conversion   Manuel Fortte
+    min 64 (2T 24) visitante substitution Guido Potente
+    min 66 (2T 26) visitante try          Luca Amalfitani
+    min 69 (2T 29) visitante try          Blas Zapiola
+    min 69 (2T 29) visitante conversion   Renato Abad
+    min 70 (2T 30) local     substitution Tobias Balcedo
+    min 70 (2T 30) visitante substitution Felipe Charles
+    min 73 (2T 33) visitante substitution Luca Amalfitani
+    min 73 (2T 33) visitante substitution Ivan Ballesteros
+    min 74 (2T 34) local     substitution Pablo Rufino
+    min 75 (2T 35) local     try          Francisco Paklayan
+    min 78 (2T 38) visitante try          Blas Zapiola
+    min 79 (2T 39) visitante substitution Agustin Area
+    min 79 (2T 39) visitante substitution Nicolás Figueroa
+  marcador  · eventos 22-44 · guardado 22-44
+  tries     · 3-7 (guardado —-—)
+  arbitro   · MARIANO SCIANNA (guardado: —)
+
+los-cardos-r-c vs universitario-de-mar-del-plata · 594fcb55 · tarjeta 313641  ·  93b49669-469b-450a-82c0-db9a3936c9a0
+  local     · los-cardos-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · universitario-de-mar-del-plata · 23 jugadores · 0 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 12-57
+  tries     · 0-0 (guardado —-—)
+  arbitro   · SANTIAGO MOLEDO (guardado: —)
+
+sociedad-sportiva-de-bahia-blanca vs mar-del-plata-club · 594fcb55 · tarjeta 313645  ·  b08b8889-ffc8-4f20-81c4-454813f41561
+  local     · sociedad-sportiva-de-bahia-blanca · 23 jugadores · 22 con ficha fijada
+  visitante · mar-del-plata-club · 23 jugadores · 19 con ficha fijada
+  eventos   · 33
+    min  8 (1T 8) visitante try          Santiago Martinez Etayo
+    min 17 (1T 17) local     penalty_goal Felipe Serrat
+    min 35 (1T 35) visitante try          Gonzalo Recalde
+    min 35 (1T 35) visitante conversion   Pedro Hernandez Coste
+    min 39 (1T 39) visitante penalty_goal Pedro Hernandez Coste
+    min 45 (2T 5) local     penalty_goal Felipe Serrat
+    min 51 (2T 11) local     substitution Federico Stein
+    min 55 (2T 15) local     substitution Facundo Ferrandez
+    min 55 (2T 15) local     substitution Juan Cruz Samuel
+    min 58 (2T 18) local     substitution Agustin Antinori
+    min 63 (2T 23) local     try          Francisco Cantalejos
+    min 67 (2T 27) local     substitution Rafael Larrañaga
+    min 72 (2T 32) local     try          Pedro Zorzano
+    min 72 (2T 32) local     conversion   Felipe Serrat
+    min 78 (2T 38) local     try          Francisco Cantalejos
+    min 78 (2T 38) local     conversion   Felipe Serrat
+    min 79 (2T 39) local     card_yellow  Joaquín Gimenez
+    min 82 (2T 42) visitante penalty_goal Pedro Hernandez Coste
+    min 88 (2T 48) visitante substitution Tomas Herrador
+    min 88 (2T 48) visitante substitution Valentin Recalde
+    min 90 (2T 50) visitante drop_goal    Tomas Catuogno
+    min 94 (2T 54) local     substitution Marcelo Mauricio Torrisi
+    min 94 (2T 54) visitante try          Pedro Hernandez Coste
+    min 94 (2T 54) visitante conversion   Pedro Hernandez Coste
+    min 105 (2T 65) local     substitution Ignacio Lance
+    min 106 (2T 66) visitante substitution Lorenzo Castelli
+    min 111 (2T 71) visitante card_yellow  Gonzalo Recalde
+    min 112 (2T 72) visitante substitution Santiago Martinez Etayo
+    min 116 (2T 76) local     substitution Santiago Bancora
+    min 117 (2T 77) visitante penalty_goal Pedro Hernandez Coste
+    min 119 (2T 79) visitante substitution Tomas Catuogno
+    min 120 (2T 80) visitante injury       Felipe Lizarraga
+    min 120 (2T 80) visitante substitution Felipe Lizarraga
+  marcador  · eventos 25-31 · guardado 25-31
+  tries     · 3-3 (guardado —-—)
+  arbitro   · RODRIGO OSCAR LOFVALL (guardado: —)
+
+ipr-sporting vs comercial-r-c · 594fcb55 · tarjeta 313644  ·  1f6fe1bf-6fa4-4224-b4b5-564afe6aece3
+  local     · ipr-sporting · 23 jugadores · 21 con ficha fijada
+  visitante · comercial-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 44
+    min  5 (1T 5) visitante card_red     Juan Ignacio Kaspin
+    min  8 (1T 8) local     try          Mateo Camilion
+    min 15 (1T 15) local     try          Julián Soberón
+    min 15 (1T 15) local     conversion   Renato Abad
+    min 21 (1T 21) visitante try          Facundo Vazquez Irrazabal
+    min 22 (1T 22) visitante conversion   Rodrigo Oliver
+    min 23 (1T 23) local     try          Renato Abad
+    min 28 (1T 28) visitante card_yellow  Salvador Rugo
+    min 29 (1T 29) local     try          Ignacio Castañon
+    min 29 (1T 29) local     conversion   Renato Abad
+    min 37 (1T 37) local     try          Agustin Area
+    min 38 (1T 38) visitante substitution Noe Mariano Palacios Valente
+    min 40 (1T 40) visitante try          Facundo Vazquez Irrazabal
+    min 40 (1T 40) visitante conversion   Rodrigo Oliver
+    min 42 (1T 42) local     card_yellow  Tomas Garcia Fierro
+    min 41 (2T 1) visitante try          Valentino Di Filippo
+    min 41 (2T 1) visitante conversion   Rodrigo Oliver
+    min 43 (2T 3) visitante substitution Franco Joaquin Picasso
+    min 45 (2T 5) local     try          Blas Zapiola
+    min 45 (2T 5) local     conversion   Renato Abad
+    min 52 (2T 12) local     try          Felipe Charles
+    min 52 (2T 12) local     substitution Nicolás Figueroa
+    min 55 (2T 15) local     try          Lucas Cedarry
+    min 55 (2T 15) local     conversion   Renato Abad
+    min 57 (2T 17) local     try          Felipe Charles
+    min 57 (2T 17) local     conversion   Renato Abad
+    min 58 (2T 18) visitante substitution Valentino Di Filippo
+    min 62 (2T 22) visitante try          Gaspar Jeckeln
+    min 63 (2T 23) local     substitution Guido Potente
+    min 63 (2T 23) local     substitution Mateo Camilion
+    min 65 (2T 25) local     try          Ignacio Castañon
+    min 65 (2T 25) local     conversion   Renato Abad
+    min 68 (2T 28) local     substitution Martin Naselli Zuliani
+    min 68 (2T 28) local     substitution Manuel De Dios
+    min 68 (2T 28) local     card_yellow  Ignacio Castañon
+    min 68 (2T 28) local     substitution Felipe Charles
+    min 70 (2T 30) visitante substitution Lucas Perez
+    min 70 (2T 30) visitante try          Felipe Jeckeln
+    min 71 (2T 31) local     substitution Luca Amalfitani
+    min 71 (2T 31) local     substitution Ivan Ballesteros
+    min 77 (2T 37) visitante substitution Juan Manuel Roldan
+    min 78 (2T 38) local     try          Lucas Cedarry
+    min 78 (2T 38) local     conversion   Renato Abad
+    min 78 (2T 38) visitante substitution Gonzalo Agustin Mora
+  marcador  · eventos 69-31 · guardado 69-31
+  tries     · 11-5 (guardado —-—)
+  arbitro   · JULIAN FERNANDEZ (guardado: —)
+
+universitario-de-mar-del-plata vs san-ignacio-r-c · 594fcb55 · tarjeta 313643  ·  5f0fc573-625a-4e1e-a43c-a37a0183f327
+  local     · universitario-de-mar-del-plata · 23 jugadores · 0 con ficha fijada
+  visitante · san-ignacio-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 37
+    min  2 (1T 2) visitante try          Tomás Alonso
+    min  6 (1T 6) local     penalty_goal Benito Soler Villen B
+    min 13 (1T 13) visitante injury       Valentino Parodi
+    min 13 (1T 13) visitante substitution Valentino Parodi
+    min 16 (1T 16) local     try          Gonzalo Tomas Acuña
+    min 26 (1T 26) visitante try          Lautaro Garcia
+    min 26 (1T 26) visitante conversion   Lautaro Garcia
+    min 28 (1T 28) local     try          Francisco Barreca
+    min 29 (1T 29) local     conversion   Benito Soler Villen B
+    min 34 (1T 34) local     penalty_goal Benito Soler Villen B
+    min 37 (1T 37) local     try          Benjamín Darío Duarte Mendez
+    min 38 (1T 38) local     conversion   Benito Soler Villen B
+    min 40 (2T 0) visitante substitution Tobias Balcedo
+    min 41 (2T 1) local     penalty_goal Benito Soler Villen B
+    min 47 (2T 7) local     try          Juan Bautista Victoria
+    min 47 (2T 7) visitante injury       Felipe Fortte
+    min 47 (2T 7) visitante substitution Felipe Fortte
+    min 48 (2T 8) local     conversion   Benito Soler Villen B
+    min 50 (2T 10) visitante substitution Leon Omar Pelaez
+    min 53 (2T 13) visitante substitution Valentino Parodi
+    min 57 (2T 17) local     substitution Benjamin Victoria
+    min 58 (2T 18) local     try          Gonzalo Tomas Acuña
+    min 58 (2T 18) local     substitution Benjamín Darío Duarte Mendez
+    min 59 (2T 19) local     conversion   Benito Soler Villen B
+    min 62 (2T 22) local     substitution Ramon Layral Sanchis
+    min 62 (2T 22) visitante substitution Juan Caveda Amiel
+    min 62 (2T 22) visitante substitution Manuel Fortte
+    min 62 (2T 22) visitante substitution Ignacio Gandara
+    min 63 (2T 23) local     substitution Gonzalo Tomas Acuña
+    min 63 (2T 23) local     try          Gonzalo Bustos
+    min 64 (2T 24) local     conversion   Benito Soler Villen B
+    min 66 (2T 26) local     try          Gonzalo Pfister
+    min 66 (2T 26) local     conversion   Benito Soler Villen B
+    min 76 (2T 36) local     try          Tomas Agustin Freiz Di Meglio
+    min 77 (2T 37) local     conversion   Benito Soler Villen B
+    min 79 (2T 39) visitante try          Tomás Alonso
+    min 79 (2T 39) visitante conversion   Lautaro Garcia
+  marcador  · eventos 63-19 · guardado 63-19
+  tries     · 8-3 (guardado —-—)
+  arbitro   · FRANCO DE LEONARDIS (guardado: —)
+
+los-cardos-r-c vs argentino-de-bahia-blanca · 594fcb55 · tarjeta 313642  ·  898a5b46-a6d0-4dea-9ed4-12b38b4de334
+  local     · los-cardos-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · argentino-de-bahia-blanca · 23 jugadores · 0 con ficha fijada
+  eventos   · 32
+    min  8 (1T 8) visitante try          Tomas Moro
+    min  9 (1T 9) visitante conversion   Ramiro Valentin Correa
+    min 19 (1T 19) local     try          Valentin Melendi
+    min 19 (1T 19) visitante penalty_goal Ramiro Valentin Correa
+    min 20 (1T 20) local     conversion   Fermin Gonzalez Montaner
+    min 21 (1T 21) visitante try          Tomas Moro
+    min 22 (1T 22) visitante conversion   Ramiro Valentin Correa
+    min 29 (1T 29) visitante try          Guido Marconi
+    min 30 (1T 30) visitante conversion   Ramiro Valentin Correa
+    min 31 (1T 31) local     try          Agustin Lautaro Parodi Perez
+    min 35 (1T 35) local     try          Francisco Linares
+    min 36 (1T 36) local     conversion   Fermin Gonzalez Montaner
+    min 61 (2T 21) visitante substitution Tomas Moro
+    min 63 (2T 23) visitante card_yellow  Guido Marconi
+    min 76 (2T 36) visitante card_yellow  Nicolas Hernandez
+    min 80 (2T 40) visitante try          Franco Litterio
+    min 80 (2T 40) visitante conversion   Ramiro Valentin Correa
+    min 88 (2T 48) local     substitution Gonzalo Martinez
+    min 98 (2T 58) local     substitution Mateo Belaunzaran
+    min 101 (2T 61) local     substitution Santiago Gascue
+    min 101 (2T 61) local     substitution Agustin Lautaro Parodi Perez
+    min 101 (2T 61) local     substitution Fermin Pereyra
+    min 101 (2T 61) local     substitution Francisco Linares
+    min 101 (2T 61) local     substitution Fermin Gonzalez Montaner
+    min 101 (2T 61) local     substitution Federico Angel Sassou
+    min 103 (2T 63) local     penalty_goal Fermin Gonzalez Montaner
+    min 111 (2T 71) local     penalty_goal Fermin Gonzalez Montaner
+    min 115 (2T 75) local     try          Tomas Bardi
+    min 116 (2T 76) local     conversion   Fermin Gonzalez Montaner
+    min 119 (2T 79) local     try          Ivo Balbo
+    min 119 (2T 79) local     conversion   Fermin Gonzalez Montaner
+    min 120 (2T 80) local     card_yellow  Tomas Bardi
+  marcador  · eventos 39-31 · guardado 39-31
+  tries     · 5-4 (guardado —-—)
+  arbitro   · AGUSTIN GIAQUINTO (guardado: —)
+
+san-ignacio-r-c vs los-cardos-r-c · 594fcb55 · tarjeta 313649  ·  50d7d6d4-80ce-4725-b8cf-f0c6f74bb946
+  local     · san-ignacio-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · los-cardos-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 33
+    min 10 (1T 10) local     try          Felipe Fortte
+    min 11 (1T 11) local     conversion   Lautaro Garcia
+    min 18 (1T 18) local     card_yellow  Juan Caveda Amiel
+    min 18 (1T 18) visitante try          Marcos Migliore
+    min 19 (1T 19) visitante conversion   Fermin Gonzalez Montaner
+    min 23 (1T 23) local     penalty_goal Lautaro Garcia
+    min 23 (1T 23) visitante card_yellow  Tomas Bardi
+    min 37 (1T 37) local     try          Bruno Costales
+    min 38 (1T 38) local     conversion   Lautaro Garcia
+    min 42 (1T 42) visitante penalty_goal Fermin Gonzalez Montaner
+    min 50 (2T 10) local     substitution Tobias Balcedo
+    min 50 (2T 10) local     substitution Felipe Fortte
+    min 52 (2T 12) local     try          Diego Gonzalez
+    min 53 (2T 13) local     conversion   Lautaro Garcia
+    min 63 (2T 23) local     substitution Ignacio Gandara
+    min 63 (2T 23) local     substitution Bruno Costales
+    min 66 (2T 26) local     card_yellow  Joaquin De Rosa
+    min 69 (2T 29) local     substitution Franco Gauna
+    min 69 (2T 29) local     substitution Pablo Rufino
+    min 76 (2T 36) local     substitution Juan Caveda Amiel
+    min 83 (2T 43) visitante try          Francisco Linares
+    min 84 (2T 44) visitante conversion   Fermin Gonzalez Montaner
+    min 88 (2T 48) visitante try          Federico Angel Sassou
+    min 89 (2T 49) visitante conversion   Fermin Gonzalez Montaner
+    min 93 (2T 53) visitante substitution Matias Rafael Olivera Aguirre
+    min 97 (2T 57) visitante substitution Facundo Sansot
+    min 100 (2T 60) visitante substitution Marcos Migliore
+    min 102 (2T 62) visitante try          Federico Angel Sassou
+    min 103 (2T 63) visitante substitution Fermin Pereyra
+    min 110 (2T 70) visitante try          Francisco Linares
+    min 110 (2T 70) visitante substitution Valentin Melendi
+    min 111 (2T 71) visitante conversion   Fermin Gonzalez Montaner
+    min 115 (2T 75) visitante substitution Agustin Lautaro Parodi Perez
+  marcador  · eventos 24-36 · guardado 24-36
+  tries     · 3-5 (guardado —-—)
+  arbitro   · AGUSTIN GIAQUINTO (guardado: —)
+
+comercial-r-c vs universitario-de-mar-del-plata · 594fcb55 · tarjeta 313648  ·  7bf00580-c256-472e-af98-28c41fadb700
+  local     · comercial-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · universitario-de-mar-del-plata · 23 jugadores · 0 con ficha fijada
+  eventos   · 30
+    min  3 (1T 3) local     penalty_goal Rodrigo Oliver
+    min  9 (1T 9) local     try          Marcos Jeremias Comins Diaz
+    min 17 (1T 17) visitante try          Nicolás Walter Blanco
+    min 22 (1T 22) local     try          Lorenzo Kloberdanz
+    min 27 (1T 27) visitante try          Francisco Barreca
+    min 38 (1T 38) visitante penalty_goal Benito Soler Villen B
+    min 40 (1T 40) local     substitution Valentino Di Filippo
+    min 40 (1T 40) visitante try          Francisco Barreca
+    min 42 (2T 2) visitante try          Gonzalo Pfister
+    min 42 (2T 2) visitante conversion   Benito Soler Villen B
+    min 43 (2T 3) local     substitution Franco Joaquin Picasso
+    min 45 (2T 5) visitante substitution Ramon Layral Sanchis
+    min 47 (2T 7) visitante try          Benito Soler Villen B
+    min 47 (2T 7) visitante conversion   Benito Soler Villen B
+    min 52 (2T 12) local     substitution Lucas Perez
+    min 52 (2T 12) local     substitution Gonzalo Agustin Mora
+    min 57 (2T 17) visitante substitution Juan Cruz Parra Videla
+    min 59 (2T 19) visitante try          Benjamín Darío Duarte Mendez
+    min 59 (2T 19) visitante conversion   Benito Soler Villen B
+    min 62 (2T 22) local     penalty_try  
+    min 64 (2T 24) local     substitution Francisco Simon Farise
+    min 64 (2T 24) visitante substitution Francisco Morales
+    min 66 (2T 26) local     try          Juan Manuel Roldan
+    min 67 (2T 27) visitante card_yellow  Francisco Barreca
+    min 74 (2T 34) visitante substitution Benjamin Victoria
+    min 76 (2T 36) visitante substitution Benjamín Darío Duarte Mendez
+    min 78 (2T 38) visitante card_yellow  José Arregui
+    min 79 (2T 39) local     try          Francisco Santos
+    min 79 (2T 39) local     conversion   Gonzalo Jauregui
+    min 104 (2T 64) visitante card_yellow  Gonzalo Bustos
+  marcador  · eventos 32-39 · guardado 32-39
+  tries     · 5-6 (guardado —-—)
+  arbitro   · NICOLÁS MIGUEL COSENTINO (guardado: —)
+
+mar-del-plata-club vs ipr-sporting · 594fcb55 · tarjeta 313647  ·  ac7e4d7a-c89d-4600-8d50-20bb9c075c8b
+  local     · mar-del-plata-club · 23 jugadores · 20 con ficha fijada
+  visitante · ipr-sporting · 23 jugadores · 21 con ficha fijada
+  eventos   · 28
+    min  8 (1T 8) local     try          Gonzalo Recalde
+    min  8 (1T 8) local     conversion   Pedro Hernandez Coste
+    min 16 (1T 16) visitante try          Agustin Area
+    min 16 (1T 16) visitante conversion   Renato Abad
+    min 21 (1T 21) local     try          Sebastian Hernando
+    min 21 (1T 21) local     conversion   Pedro Hernandez Coste
+    min 38 (1T 38) local     try          Pedro Hernandez Coste
+    min 38 (1T 38) local     conversion   Pedro Hernandez Coste
+    min 40 (1T 40) visitante try          Felipe Charles
+    min 40 (1T 40) visitante conversion   Renato Abad
+    min 41 (2T 1) visitante substitution Blas Zapiola
+    min 53 (2T 13) visitante substitution Bautista Dallan
+    min 56 (2T 16) visitante card_yellow  Tomas Garcia Fierro
+    min 62 (2T 22) visitante substitution Gregorio Del Prete
+    min 62 (2T 22) visitante substitution Guido Potente
+    min 66 (2T 26) visitante substitution Tomas Garcia Fierro
+    min 69 (2T 29) visitante substitution Ivan Ballesteros
+    min 78 (2T 38) visitante try          Renato Abad
+    min 78 (2T 38) visitante conversion   Renato Abad
+    min 82 (2T 42) local     try          Joaquin Jose Rojas
+    min 84 (2T 44) local     substitution Sebastian Hernando
+    min 87 (2T 47) local     try          Pedro Hernandez Coste
+    min 88 (2T 48) local     substitution Valentin Recalde
+    min 89 (2T 49) local     substitution Tomas Herrador
+    min 98 (2T 58) local     substitution Santiago Martinez Etayo
+    min 101 (2T 61) local     substitution Benjamin Jensen
+    min 101 (2T 61) local     substitution Lorenzo Castelli
+    min 110 (2T 70) local     card_yellow  Joaquín Solovioff
+  marcador  · eventos 31-21 · guardado 31-21
+  tries     · 5-3 (guardado —-—)
+  arbitro   · GASTON ROGE (guardado: —)
+
+argentino-de-bahia-blanca vs sociedad-sportiva-de-bahia-blanca · 594fcb55 · tarjeta 313646  ·  66833909-4ae9-401f-ac6f-4f6c7bec0dcc
+  local     · argentino-de-bahia-blanca · 23 jugadores · 0 con ficha fijada
+  visitante · sociedad-sportiva-de-bahia-blanca · 23 jugadores · 21 con ficha fijada
+  eventos   · 32
+    min 18 (1T 18) local     penalty_goal Ramiro Valentin Correa
+    min 31 (1T 31) local     card_yellow  Facundo Esteban Aristimuño Maidana
+    min 31 (1T 31) local     penalty_goal Ramiro Valentin Correa
+    min 35 (1T 35) visitante try          Pedro Zorzano
+    min 35 (1T 35) visitante conversion   Felipe Serrat
+    min 40 (1T 40) local     penalty_goal Ramiro Valentin Correa
+    min 44 (2T 4) visitante try          Geronimo Rivas Pompei
+    min 44 (2T 4) visitante conversion   Felipe Serrat
+    min 49 (2T 9) local     penalty_goal Ramiro Valentin Correa
+    min 51 (2T 11) local     try          Francisco Ramirez Vita
+    min 52 (2T 12) local     conversion   Ramiro Valentin Correa
+    min 53 (2T 13) visitante substitution Federico Stein
+    min 54 (2T 14) local     substitution Manuel Otero Bertacco
+    min 55 (2T 15) visitante penalty_goal Felipe Serrat
+    min 60 (2T 20) visitante try          Felipe Serrat
+    min 61 (2T 21) local     substitution Tomas Moro
+    min 64 (2T 24) local     substitution Francisco Maenza
+    min 68 (2T 28) local     substitution Nicolas Hernandez
+    min 68 (2T 28) local     injury       Nicolas Hernandez
+    min 68 (2T 28) local     substitution Matias Dempaire
+    min 70 (2T 30) visitante substitution Ignacio Lance
+    min 70 (2T 30) visitante substitution Felipe Inchausti
+    min 71 (2T 31) visitante substitution Joaquin Rey Saravia
+    min 74 (2T 34) visitante try          Pedro Zorzano
+    min 79 (2T 39) visitante try          Rafael Larrañaga
+    min 79 (2T 39) visitante conversion   Felipe Serrat
+    min 79 (2T 39) visitante substitution Marcelo Mauricio Torrisi
+    min 79 (2T 39) visitante substitution Rafael Larrañaga
+    min 79 (2T 39) visitante substitution Juan Cruz Samuel
+    min 80 (2T 40) local     substitution Guido Marconi
+    min 80 (2T 40) visitante try          Felipe Serrat
+    min 80 (2T 40) visitante conversion   Felipe Serrat
+  marcador  · eventos 19-41 · guardado 19-41
+  tries     · 1-6 (guardado —-—)
+  arbitro   · SANTIAGO BEVACQUA (guardado: —)
+
+ipr-sporting vs sociedad-sportiva-de-bahia-blanca · 594fcb55 · tarjeta 313653  ·  a4650bf8-1d6c-4f81-9db6-a0bdd3571031
+  local     · ipr-sporting · 23 jugadores · 22 con ficha fijada
+  visitante · sociedad-sportiva-de-bahia-blanca · 23 jugadores · 21 con ficha fijada
+  eventos   · 28
+    min  6 (1T 6) local     try          Ignacio Castañon
+    min 14 (1T 14) visitante penalty_goal Felipe Serrat
+    min 28 (1T 28) local     try          Agustin Area
+    min 28 (1T 28) local     conversion   Renato Abad
+    min 38 (1T 38) local     try          Agustin Area
+    min 38 (1T 38) local     conversion   Renato Abad
+    min 43 (2T 3) visitante try          Joaquin Rey Saravia
+    min 43 (2T 3) visitante conversion   Felipe Serrat
+    min 45 (2T 5) local     penalty_goal Renato Abad
+    min 52 (2T 12) local     penalty_goal Renato Abad
+    min 54 (2T 14) visitante substitution Felipe Inchausti
+    min 54 (2T 14) visitante substitution Federico Stein
+    min 55 (2T 15) visitante try          Lautaro Cesari
+    min 55 (2T 15) visitante conversion   Felipe Serrat
+    min 59 (2T 19) local     substitution Martin Naselli Zuliani
+    min 62 (2T 22) visitante substitution Patricio Cantalejos
+    min 63 (2T 23) local     penalty_goal Renato Abad
+    min 68 (2T 28) local     card_yellow  Gregorio Del Prete
+    min 71 (2T 31) local     substitution Ivan Ballesteros
+    min 71 (2T 31) local     substitution Guido Potente
+    min 71 (2T 31) local     substitution Luca Amalfitani
+    min 71 (2T 31) visitante try          Francisco Cantalejos
+    min 73 (2T 33) local     try          Pedro Cedarry
+    min 73 (2T 33) local     conversion   Renato Abad
+    min 73 (2T 33) visitante substitution Santiago Bancora
+    min 73 (2T 33) visitante substitution Felipe Serrat
+    min 76 (2T 36) visitante substitution Juan Cruz Samuel
+    min 78 (2T 38) local     substitution Gregorio Del Prete
+  marcador  · eventos 35-22 · guardado 35-22
+  tries     · 4-3 (guardado —-—)
+  arbitro   · MARIANO SCIANNA (guardado: —)
+
+universitario-de-mar-del-plata vs mar-del-plata-club · 594fcb55 · tarjeta 313652  ·  724ae3de-0d70-426a-a1ab-0bc750d4f8bc
+  local     · universitario-de-mar-del-plata · 23 jugadores · 0 con ficha fijada
+  visitante · mar-del-plata-club · 23 jugadores · 21 con ficha fijada
+  eventos   · 22
+    min 10 (1T 10) local     penalty_goal Benito Soler Villen B
+    min 19 (1T 19) visitante try          Facundo Castelfidardo
+    min 25 (1T 25) local     penalty_goal Benito Soler Villen B
+    min 35 (1T 35) local     penalty_try  
+    min 35 (1T 35) visitante card_yellow  Joaquin Jose Rojas
+    min 37 (1T 37) local     card_yellow  Ramon Layral Sanchis
+    min 74 (2T 34) local     try          Gonzalo Pfister
+    min 74 (2T 34) local     conversion   Benito Soler Villen B
+    min 83 (2T 43) visitante penalty_goal Pedro Hernandez Coste
+    min 89 (2T 49) visitante try          Tomas Catuogno
+    min 89 (2T 49) visitante conversion   Pedro Hernandez Coste
+    min 90 (2T 50) visitante substitution Tomas Herrador
+    min 90 (2T 50) visitante substitution Sebastian Hernando
+    min 90 (2T 50) visitante substitution Benjamin Jensen
+    min 95 (2T 55) visitante substitution Santiago Martinez Etayo
+    min 98 (2T 58) local     substitution Ramon Layral Sanchis
+    min 100 (2T 60) visitante substitution Gonzalo Recalde
+    min 100 (2T 60) visitante substitution Lorenzo Castelli
+    min 100 (2T 60) visitante substitution Genaro Jose Rios
+    min 103 (2T 63) local     substitution Tomas Ignacio Juarez
+    min 105 (2T 65) local     substitution Tomas Agustin Freiz Di Meglio
+    min 113 (2T 73) visitante substitution Valentin Recalde
+  marcador  · eventos 20-15 · guardado 20-15
+  tries     · 2-2 (guardado —-—)
+  arbitro   · NICOLÁS MIGUEL COSENTINO (guardado: —)
+
+los-cardos-r-c vs comercial-r-c · 594fcb55 · tarjeta 313651  ·  48bdc32d-4a15-4e18-afea-fd3dcba65abe
+  local     · los-cardos-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · comercial-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 31
+    min 12 (1T 12) visitante try          Juan Ignacio Kaspin
+    min 12 (1T 12) visitante conversion   Gonzalo Jauregui
+    min 15 (1T 15) local     try          Pedro Agustin Schatz
+    min 20 (1T 20) local     penalty_goal Fermin Gonzalez Montaner
+    min 27 (1T 27) visitante try          Lorenzo Kloberdanz
+    min 30 (1T 30) visitante conversion   Gonzalo Jauregui
+    min 30 (1T 30) visitante try          Juan Ignacio Kaspin
+    min 39 (1T 39) visitante try          Marcos Jeremias Comins Diaz
+    min 40 (1T 40) visitante substitution Iñaki Coria
+    min 45 (2T 5) visitante substitution Marcos Jeremias Comins Diaz
+    min 47 (2T 7) visitante try          Gonzalo Jauregui
+    min 47 (2T 7) visitante conversion   Gonzalo Jauregui
+    min 48 (2T 8) visitante substitution Facundo Vazquez Irrazabal
+    min 54 (2T 14) visitante try          Juan Ignacio Kaspin
+    min 54 (2T 14) visitante conversion   Gonzalo Jauregui
+    min 68 (2T 28) visitante substitution Gonzalo Agustin Mora
+    min 73 (2T 33) visitante substitution Francisco Santos
+    min 73 (2T 33) visitante substitution Juan Manuel Roldan
+    min 93 (2T 53) local     try          Tomas Bardi
+    min 93 (2T 53) local     substitution Matias Rafael Olivera Aguirre
+    min 93 (2T 53) local     substitution Fermin Pereyra
+    min 93 (2T 53) local     substitution Braian Zar
+    min 95 (2T 55) local     conversion   Fermin Gonzalez Montaner
+    min 95 (2T 55) local     substitution Facundo Sansot
+    min 95 (2T 55) local     substitution Pedro Agustin Schatz
+    min 101 (2T 61) local     substitution Mateo Mesa
+    min 103 (2T 63) local     substitution Valentin Melendi
+    min 104 (2T 64) local     substitution Agustin Lautaro Parodi Perez
+    min 105 (2T 65) local     card_yellow  Serafin Garcia Usandizaga
+    min 113 (2T 73) local     try          Tomas Bardi
+    min 114 (2T 74) local     conversion   Fermin Gonzalez Montaner
+  marcador  · eventos 22-38 · guardado 22-38
+  tries     · 3-6 (guardado —-—)
+  arbitro   · GASTON ROGE (guardado: —)
+
+san-ignacio-r-c vs argentino-de-bahia-blanca · 594fcb55 · tarjeta 313650  ·  72dae2a1-1106-4d79-b6d8-89ccd2e106dd
+  local     · san-ignacio-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · argentino-de-bahia-blanca · 23 jugadores · 0 con ficha fijada
+  eventos   · 21
+    min  2 (1T 2) local     try          Felipe Fortte
+    min  3 (1T 3) local     conversion   Lautaro Garcia
+    min 10 (1T 10) visitante penalty_goal Ramiro Valentin Correa
+    min 14 (1T 14) local     try          Felipe Fortte
+    min 28 (1T 28) local     try          Juan Caveda Amiel
+    min 34 (1T 34) local     card_yellow  Juan Estavillo
+    min 48 (2T 8) local     substitution Juan Martin Elvira Durdos
+    min 50 (2T 10) local     card_yellow  Juan Caveda Amiel
+    min 54 (2T 14) local     substitution Tobias Balcedo
+    min 54 (2T 14) local     substitution Leon Omar Pelaez
+    min 58 (2T 18) visitante injury       Ramiro Valentin Correa
+    min 58 (2T 18) visitante substitution Ramiro Valentin Correa
+    min 63 (2T 23) local     substitution Juan Caveda Amiel
+    min 66 (2T 26) visitante substitution Manuel Otero Bertacco
+    min 73 (2T 33) local     try          Thomas Helguera
+    min 73 (2T 33) local     conversion   Lautaro Garcia
+    min 76 (2T 36) local     substitution Bautista Barbero
+    min 76 (2T 36) local     substitution Juan Estavillo
+    min 80 (2T 40) local     try          Franco Cavalli
+    min 80 (2T 40) visitante substitution Santiago Ramos Apphatie
+    min 80 (2T 40) visitante substitution Pascual Gonzalez
+  marcador  · eventos 29-3 · guardado 29-3
+  tries     · 5-0 (guardado —-—)
+  arbitro   · LAUTARO LAMAS (guardado: —)
+
+comercial-r-c vs san-ignacio-r-c · 594fcb55 · tarjeta 313657  ·  af00723f-262e-4561-9ffc-e1a0ee532bf8
+  local     · comercial-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · san-ignacio-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 12
+    min 16 (1T 16) local     try          Felipe Jeckeln
+    min 26 (1T 26) local     try          Juan Ignacio Kaspin
+    min 41 (2T 1) visitante substitution Leon Omar Pelaez
+    min 48 (2T 8) visitante penalty_goal Lautaro Garcia
+    min 50 (2T 10) visitante substitution Franco Gauna
+    min 55 (2T 15) visitante substitution Bautista Barbero
+    min 58 (2T 18) local     card_yellow  Iñaki Coria
+    min 60 (2T 20) visitante substitution Juan Martin Elvira Durdos
+    min 63 (2T 23) visitante card_yellow  Diego Gonzalez
+    min 68 (2T 28) local     substitution Franco Joaquin Picasso
+    min 78 (2T 38) local     substitution Juan Manuel Roldan
+    min 78 (2T 38) local     substitution Gonzalo Agustin Mora
+  marcador  · eventos 10-3 · guardado 10-3
+  tries     · 2-0 (guardado —-—)
+  arbitro   · MARIANO SCIANNA (guardado: —)
+
+mar-del-plata-club vs los-cardos-r-c · 594fcb55 · tarjeta 313656  ·  a8b03d82-6f50-4d47-8ecc-e144aeafb2ad
+  local     · mar-del-plata-club · 23 jugadores · 20 con ficha fijada
+  visitante · los-cardos-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 33
+    min  4 (1T 4) local     try          Facundo Castelfidardo
+    min 11 (1T 11) local     try          Valentin Recalde
+    min 14 (1T 14) visitante try          Federico Angel Sassou
+    min 34 (1T 34) local     try          Santiago Martinez Etayo
+    min 34 (1T 34) local     conversion   Gonzalo Recalde
+    min 80 (2T 40) local     substitution Tomas Osvaldo Sestelo Cangelli
+    min 80 (2T 40) local     substitution Sebastian Hernando
+    min 80 (2T 40) local     substitution Guido Bertozzi
+    min 80 (2T 40) local     substitution Martin Roman Leoz
+    min 82 (2T 42) local     try          Leopoldo Branderiz
+    min 82 (2T 42) local     conversion   Gonzalo Recalde
+    min 89 (2T 49) local     try          Mateo Arambarri
+    min 89 (2T 49) local     conversion   Gonzalo Recalde
+    min 92 (2T 52) visitante substitution Matias Rafael Olivera Aguirre
+    min 92 (2T 52) visitante substitution Franco Palavecino
+    min 93 (2T 53) visitante substitution Mateo Mesa
+    min 93 (2T 53) visitante substitution Braian Zar
+    min 93 (2T 53) visitante substitution Valentin Melendi
+    min 93 (2T 53) visitante card_red     Francisco Llanos
+    min 93 (2T 53) visitante substitution Facundo Sansot
+    min 93 (2T 53) visitante card_red     Simon Gorelik
+    min 98 (2T 58) local     try          Genaro Jose Rios
+    min 98 (2T 58) local     conversion   Gonzalo Recalde
+    min 99 (2T 59) visitante substitution Fermin Gonzalez Montaner
+    min 100 (2T 60) local     substitution Santiago Martinez Etayo
+    min 103 (2T 63) local     card_red     Ernesto Baaclini
+    min 105 (2T 65) local     substitution Leandro Ahrndt
+    min 110 (2T 70) visitante substitution Agustin Lautaro Parodi Perez
+    min 112 (2T 72) local     substitution Tomas Catuogno
+    min 112 (2T 72) local     substitution Gonzalo Recalde
+    min 118 (2T 78) local     try          Tomas Herrador
+    min 120 (2T 80) local     try          Mateo Gracia
+    min 120 (2T 80) local     conversion   Gonzalo Recalde
+  marcador  · eventos 50-5 · guardado 50-5
+  tries     · 8-1 (guardado —-—)
+  arbitro   · JULIAN FERNANDEZ (guardado: —)
+
+sociedad-sportiva-de-bahia-blanca vs universitario-de-mar-del-plata · 594fcb55 · tarjeta 313655  ·  38d023ce-45f4-45fb-9328-bec99e05ed13
+  local     · sociedad-sportiva-de-bahia-blanca · 23 jugadores · 22 con ficha fijada
+  visitante · universitario-de-mar-del-plata · 23 jugadores · 0 con ficha fijada
+  eventos   · 32
+    min  5 (1T 5) local     try          Patricio Cantalejos
+    min  5 (1T 5) local     conversion   Felipe Serrat
+    min 10 (1T 10) local     injury       Juan Cruz Harguindeguy Puccinelli
+    min 20 (1T 20) local     substitution Federico Stein
+    min 24 (1T 24) local     try          Alan Martinez
+    min 24 (1T 24) local     conversion   Felipe Serrat
+    min 33 (1T 33) visitante try          Gonzalo Pfister
+    min 33 (1T 33) visitante conversion   Benito Soler Villen B
+    min 38 (1T 38) local     try          Pedro Zorzano
+    min 48 (2T 8) local     card_yellow  Francisco Cantalejos
+    min 49 (2T 9) visitante substitution Ramon Layral Sanchis
+    min 51 (2T 11) visitante substitution Gonzalo Bustos
+    min 53 (2T 13) local     substitution Joaquin Rey Saravia
+    min 56 (2T 16) visitante try          Franco Rodriguez Reinoso
+    min 56 (2T 16) visitante conversion   Benito Soler Villen B
+    min 59 (2T 19) local     substitution Felipe Serrat
+    min 59 (2T 19) local     substitution Tomas Bermudez Caneparis
+    min 60 (2T 20) local     substitution Juan Cruz Harguindeguy Puccinelli
+    min 62 (2T 22) local     try          Agustin Antinori
+    min 62 (2T 22) local     conversion   Mateo Kohler
+    min 62 (2T 22) visitante substitution Bruno Nicolas Buresta
+    min 62 (2T 22) visitante substitution Tomas Ignacio Juarez
+    min 62 (2T 22) visitante substitution Fausto Poletti
+    min 65 (2T 25) visitante try          Gonzalo Pfister
+    min 65 (2T 25) visitante conversion   Benito Soler Villen B
+    min 69 (2T 29) local     try          Pedro Zorzano
+    min 69 (2T 29) local     conversion   Mateo Kohler
+    min 70 (2T 30) local     substitution Ignacio Lance
+    min 73 (2T 33) local     substitution Santiago Bancora
+    min 75 (2T 35) local     substitution Iñaki Azcoitia
+    min 80 (2T 40) local     try          Tomas Inchausti
+    min 81 (2T 41) local     conversion   Mateo Kohler
+  marcador  · eventos 40-21 · guardado 40-21
+  tries     · 6-3 (guardado —-—)
+  arbitro   · SANTIAGO BEVACQUA (guardado: —)
+
+argentino-de-bahia-blanca vs ipr-sporting · 594fcb55 · tarjeta 313654  ·  dcb38100-df33-40eb-b55e-e814b60e8198
+  local     · argentino-de-bahia-blanca · 23 jugadores · 0 con ficha fijada
+  visitante · ipr-sporting · 23 jugadores · 18 con ficha fijada
+  eventos   · 43
+    min  1 (1T 1) visitante try          Felipe Charles
+    min  1 (1T 1) visitante conversion   Renato Abad
+    min  6 (1T 6) local     penalty_goal Ramiro Valentin Correa
+    min  8 (1T 8) visitante try          Federico De Siena
+    min  8 (1T 8) visitante conversion   Renato Abad
+    min 11 (1T 11) visitante try          Federico De Siena
+    min 11 (1T 11) visitante conversion   Renato Abad
+    min 15 (1T 15) local     try          Marcelo Tomas Exposito
+    min 16 (1T 16) local     conversion   Ramiro Valentin Correa
+    min 18 (1T 18) visitante try          Lucas Cedarry
+    min 18 (1T 18) visitante conversion   Renato Abad
+    min 25 (1T 25) visitante try          Blas Zapiola
+    min 25 (1T 25) visitante conversion   Renato Abad
+    min 25 (1T 25) visitante substitution Felipe Charles
+    min 28 (1T 28) local     substitution Tomas Moro
+    min 28 (1T 28) visitante try          Lucas Cedarry
+    min 28 (1T 28) visitante conversion   Renato Abad
+    min 36 (1T 36) local     card_yellow  Pedro Selvarolo
+    min 37 (1T 37) visitante try          Juan Di Pace
+    min 37 (1T 37) visitante conversion   Renato Abad
+    min 40 (1T 40) local     try          Agustin Grunewald
+    min 48 (2T 8) visitante substitution Ivan Ballesteros
+    min 53 (2T 13) visitante substitution Pedro Cedarry
+    min 54 (2T 14) local     substitution Facundo Esteban Aristimuño Maidana
+    min 54 (2T 14) local     substitution Manuel Otero Bertacco
+    min 59 (2T 19) local     substitution Pedro Selvarolo
+    min 59 (2T 19) local     substitution Franco Litterio
+    min 62 (2T 22) visitante substitution Mateo Arabia
+    min 62 (2T 22) visitante try          Felipe Charles
+    min 62 (2T 22) visitante conversion   Renato Abad
+    min 63 (2T 23) local     substitution Martiniano Barsellini
+    min 65 (2T 25) visitante substitution Gregorio Del Prete
+    min 66 (2T 26) visitante try          Federico De Siena
+    min 67 (2T 27) local     substitution Nicolás Alejandro Marengo
+    min 67 (2T 27) local     substitution Emiliano Bruno Barrera
+    min 70 (2T 30) visitante substitution Juan Di Pace
+    min 70 (2T 30) visitante substitution Guido Potente
+    min 70 (2T 30) visitante substitution Luca Amalfitani
+    min 71 (2T 31) visitante try          Luciano Paciaroni
+    min 71 (2T 31) visitante conversion   Renato Abad
+    min 76 (2T 36) local     card_yellow  Ramiro Valentin Correa
+    min 79 (2T 39) visitante try          Lucas Cedarry
+    min 79 (2T 39) visitante conversion   Renato Abad
+  marcador  · eventos 15-75 · guardado 15-75
+  tries     · 2-11 (guardado —-—)
+  arbitro   · ESTEBAN BEVACQUA (guardado: —)
+
+ipr-sporting vs universitario-de-mar-del-plata · 594fcb55 · tarjeta 327759  ·  a40ac7bf-f6ce-4a8c-8afb-9be32ced26bb
+  local     · ipr-sporting · 23 jugadores · 21 con ficha fijada
+  visitante · universitario-de-mar-del-plata · 23 jugadores · 0 con ficha fijada
+  eventos   · 26
+    min  8 (1T 8) visitante penalty_goal Benito Soler Villen B
+    min  9 (1T 9) local     try          Julián Soberón
+    min  9 (1T 9) local     conversion   Renato Abad
+    min 16 (1T 16) visitante try          Franco Rodriguez Reinoso
+    min 21 (1T 21) local     penalty_goal Renato Abad
+    min 39 (1T 39) visitante penalty_goal Benito Soler Villen B
+    min 40 (1T 40) local     try          Lucas Cedarry
+    min 40 (1T 40) local     conversion   Renato Abad
+    min 41 (2T 1) local     try          Renato Abad
+    min 44 (2T 4) visitante substitution Ramon Layral Sanchis
+    min 47 (2T 7) visitante substitution Juan Bautista Victoria
+    min 50 (2T 10) visitante try          Francisco Barreca
+    min 50 (2T 10) visitante conversion   Benito Soler Villen B
+    min 51 (2T 11) visitante substitution Juan Cruz Parra Videla
+    min 54 (2T 14) local     substitution Ivan Ballesteros
+    min 56 (2T 16) visitante penalty_goal Benito Soler Villen B
+    min 57 (2T 17) local     substitution Guido Potente
+    min 59 (2T 19) local     substitution Enzo Stocco
+    min 59 (2T 19) local     substitution Gregorio Del Prete
+    min 60 (2T 20) visitante try          Gonzalo Tomas Acuña
+    min 64 (2T 24) local     substitution Luca Amalfitani
+    min 64 (2T 24) visitante penalty_goal Benito Soler Villen B
+    min 68 (2T 28) visitante substitution Gonzalo Bustos
+    min 72 (2T 32) local     substitution Martin Naselli Zuliani
+    min 72 (2T 32) visitante card_yellow  Benjamín Darío Duarte Mendez
+    min 78 (2T 38) visitante substitution Benjamin Victoria
+  marcador  · eventos 22-29 · guardado 22-29
+  tries     · 3-3 (guardado —-—)
+  arbitro   · MARIANO SCIANNA (guardado: —)
+
+(plan: no se escribió nada)

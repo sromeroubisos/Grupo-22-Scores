@@ -372,25 +372,35 @@ export async function updateClub(
 
       if (normalizedCore.union_id) {
         const unionStr = String(normalizedCore.union_id).trim();
-        // Unifica uniones: Buscar primero si existe con nombre similar (case-insensitive)
-        const { data: existingUnions } = await supabase
+        // La unión tiene que EXISTIR: por id o por nombre exacto (sin
+        // distinguir mayúsculas). Editar un club ya no crea uniones: esto corre
+        // con service_role y un editor fabricaba uniones nuevas tipeando un
+        // nombre. Los comodines del ilike (% y _) se escapan para que "%" no
+        // matchee la primera unión que aparezca.
+        const { data: byId } = await supabase
           .from('unions')
           .select('id')
-          .ilike('name', unionStr)
+          .eq('id', unionStr)
           .limit(1);
 
-        if (existingUnions && existingUnions.length > 0) {
-          // Vinculamos con el existente
-          normalizedCore.union_id = existingUnions[0].id;
-        } else {
-          // Generamos un ID amigable si se crea por primera vez
-          const newUnionId = unionStr.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
-          await supabase.from('unions').upsert([{
-            id: newUnionId,
-            name: unionStr
-          }], { onConflict: 'id', ignoreDuplicates: true });
-          normalizedCore.union_id = newUnionId;
+        let resolvedUnionId: string | null = byId && byId.length > 0 ? String(byId[0].id) : null;
+        if (!resolvedUnionId) {
+          const escaped = unionStr.replace(/[\\%_]/g, (char) => `\\${char}`);
+          const { data: byName } = await supabase
+            .from('unions')
+            .select('id')
+            .ilike('name', escaped)
+            .limit(1);
+          resolvedUnionId = byName && byName.length > 0 ? String(byName[0].id) : null;
         }
+
+        if (!resolvedUnionId) {
+          return {
+            success: false,
+            error: `La unión "${unionStr.slice(0, 80)}" no existe. Elegila de la lista o pedile a un admin general que la cree.`,
+          };
+        }
+        normalizedCore.union_id = resolvedUnionId;
       }
 
       // Update clubs table with Schema Healing

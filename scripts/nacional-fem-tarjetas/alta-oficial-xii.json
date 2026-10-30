@@ -1,0 +1,135 @@
+{
+ "nombre": "Torneo Oficial Femenino XII",
+ "slug": "torneo-oficial-femenino-xii-2026",
+ "origen": "oficial-femenino-xii-2026-tarjetas",
+ "fechaInicio": "2026-08-02",
+ "unionId": "urne",
+ "gender": "femenino",
+ "category": "Femenino",
+ "ageGrade": "Mayores",
+ "fases": [
+  {
+   "nombre": "Primera",
+   "orden": 1
+  }
+ ],
+ "clubes": [
+  {
+   "id": "aguilas-rc-saenz-pena-femenino",
+   "corto": "Águilas"
+  },
+  {
+   "id": "italiana-de-charata-femenino",
+   "corto": "Italiana"
+  },
+  {
+   "id": "los-toros-r-c-femenino",
+   "corto": "Los Toros"
+  },
+  {
+   "id": "regatas-de-resistencia-femenino",
+   "corto": "Regatas"
+  }
+ ],
+ "partidos": [
+  {
+   "fase": "Primera",
+   "fecha": "2026-08-02",
+   "hora": "12:00",
+   "home": "regatas-de-resistencia-femenino",
+   "away": "italiana-de-charata-femenino",
+   "homeScore": 71,
+   "awayScore": 0,
+   "cerrado": true,
+   "tarjeta": "315531"
+  },
+  {
+   "fase": "Primera",
+   "fecha": "2026-08-02",
+   "hora": "12:30",
+   "home": "aguilas-rc-saenz-pena-femenino",
+   "away": "los-toros-r-c-femenino",
+   "homeScore": 21,
+   "awayScore": 0,
+   "cerrado": true,
+   "tarjeta": "315532"
+  },
+  {
+   "fase": "Primera",
+   "fecha": "2026-08-02",
+   "hora": "13:20",
+   "home": "regatas-de-resistencia-femenino",
+   "away": "los-toros-r-c-femenino",
+   "homeScore": 21,
+   "awayScore": 0,
+   "cerrado": true,
+   "tarjeta": "315533"
+  },
+  {
+   "fase": "Primera",
+   "fecha": "2026-08-02",
+   "hora": "14:00",
+   "home": "italiana-de-charata-femenino",
+   "away": "aguilas-rc-saenz-pena-femenino",
+   "homeScore": 0,
+   "awayScore": 76,
+   "cerrado": true,
+   "tarjeta": "315534"
+  },
+  {
+   "fase": "Primera",
+   "fecha": "2026-08-02",
+   "hora": "15:00",
+   "home": "los-toros-r-c-femenino",
+   "away": "italiana-de-charata-femenino",
+   "homeScore": 0,
+   "awayScore": 21,
+   "cerrado": true,
+   "tarjeta": "315535"
+  },
+  {
+   "fase": "Primera",
+   "fecha": "2026-08-02",
+   "hora": "15:40",
+   "home": "regatas-de-resistencia-femenino",
+   "away": "aguilas-rc-saenz-pena-femenino",
+   "homeScore": 5,
+   "awayScore": 26,
+   "cerrado": true,
+   "tarjeta": "315536"
+  },
+  {
+   "fase": "Primera",
+   "fecha": "2026-08-23",
+   "hora": "12:00",
+   "home": "aguilas-rc-saenz-pena-femenino",
+   "away": "italiana-de-charata-femenino",
+   "homeScore": 77,
+   "awayScore": 0,
+   "cerrado": true,
+   "tarjeta": "322225"
+  },
+  {
+   "fase": "Primera",
+   "fecha": "2026-08-23",
+   "hora": "14:30",
+   "home": "aguilas-rc-saenz-pena-femenino",
+   "away": "regatas-de-resistencia-femenino",
+   "homeScore": 15,
+   "awayScore": 0,
+   "cerrado": true,
+   "tarjeta": "322227"
+  },
+  {
+   "fase": "Primera",
+   "fecha": "2026-08-23",
+   "hora": "13:10",
+   "home": "italiana-de-charata-femenino",
+   "away": "regatas-de-resistencia-femenino",
+   "homeScore": 0,
+   "awayScore": 64,
+   "cerrado": true,
+   "tarjeta": "322226"
+  }
+ ]
+}

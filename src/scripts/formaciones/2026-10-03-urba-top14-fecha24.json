@@ -1,0 +1,1149 @@
+{
+  "descripcion": "URBA Top 14 Copa Macro - Fecha 24 - sabado 03/10/2026 (fuente: ESPN, solo titulares)",
+  "torneo": "d29703d0-125c-44a1-ab38-137450935a6e",
+  "partidos": [
+    {
+      "id": "55a6cf91-9c27-4d02-9295-919397ed0134",
+      "rotulo": "Belgrano Athletic vs CUBA",
+      "local": {
+        "nombre": "belgrano-athletic",
+        "titulares": [
+          {
+            "numero": 1,
+            "nombre": "Francisco Ferronato",
+            "id": "07143e11-9b09-4967-b1ba-4cfdc4f00362"
+          },
+          {
+            "numero": 2,
+            "nombre": "Santiago Villegas",
+            "id": "a1a656b4-9685-4b50-bf03-5a31c4d5e495"
+          },
+          {
+            "numero": 3,
+            "nombre": "Franco Morales",
+            "id": "b5ba4968-520e-4a48-8353-9f30c0beb03d"
+          },
+          {
+            "numero": 4,
+            "nombre": "Ramon Duggan",
+            "id": "c9ea6968-cc63-4dbe-b7ab-ccf49d222f8c"
+          },
+          {
+            "numero": 5,
+            "nombre": "Rodrigo Fernández Criado",
+            "id": "5c6e5802-9ee2-4cdb-82e7-a1ea117b34d6"
+          },
+          {
+            "numero": 6,
+            "nombre": "Juan Penoucos",
+            "id": "7939091d-3a2e-4929-ba32-d44d6fe94e12"
+          },
+          {
+            "numero": 7,
+            "nombre": "Jerónimo Sorondo",
+            "id": "6d35249d-5835-42cb-9e19-b5159257d43f"
+          },
+          {
+            "numero": 8,
+            "nombre": "Franco Vega",
+            "id": "8fa19be7-d66f-4c0b-9c95-9541043729fe"
+          },
+          {
+            "numero": 9,
+            "nombre": "Justo Echeverria",
+            "id": "bd60ed7e-f171-4963-bd85-ef150a0522f4"
+          },
+          {
+            "numero": 10,
+            "nombre": "Juan Lando",
+            "id": "0003db4f-015f-47a2-8716-66475c029686"
+          },
+          {
+            "numero": 11,
+            "nombre": "Felix Ceñal",
+            "id": "1c7f3e8c-849e-4eaa-928b-fd5f45259337"
+          },
+          {
+            "numero": 12,
+            "nombre": "Juan Brescia",
+            "id": "ddedff4d-b99f-46f6-8ac2-b70274d74320"
+          },
+          {
+            "numero": 13,
+            "nombre": "Tomás Etchepare",
+            "id": "fa59db85-947c-46f4-9fa4-908d40893cbb"
+          },
+          {
+            "numero": 14,
+            "nombre": "Ignacio Díaz",
+            "id": "d2b84835-6ec7-4222-b21b-c37658b213b7"
+          },
+          {
+            "numero": 15,
+            "nombre": "Pedro Arana",
+            "id": "3e386453-b387-4cfd-99cc-b8d404dd85ff"
+          }
+        ]
+      },
+      "visitante": {
+        "nombre": "cuba",
+        "titulares": [
+          {
+            "numero": 1,
+            "nombre": "Joaquin Yakiche",
+            "id": "ff7b94f7-6786-44ba-9e08-9f322d2c7e31"
+          },
+          {
+            "numero": 2,
+            "nombre": "Tomas Anderlic",
+            "id": "4d216cbc-243c-4cc4-a388-3fb63a3ad5c1"
+          },
+          {
+            "numero": 3,
+            "nombre": "Francisco Garoby",
+            "id": "a2f30197-be7b-48bc-b581-26442d0543f0"
+          },
+          {
+            "numero": 4,
+            "nombre": "Santos Cayol",
+            "id": "3885d732-443c-4291-a0a6-60f187cbd1e8"
+          },
+          {
+            "numero": 5,
+            "nombre": "Santiago Uriarte",
+            "id": "c9c8baf1-a606-4881-8916-5868bb9d3f95"
+          },
+          {
+            "numero": 6,
+            "nombre": "Lucas Campion",
+            "id": "720dffb3-7b0b-4430-9b92-bf1792dfd8a4"
+          },
+          {
+            "numero": 7,
+            "nombre": "Segundo Pisani",
+            "id": "85f40a51-48c2-4d92-af92-dcba1b302054"
+          },
+          {
+            "numero": 8,
+            "nombre": "Benito Ortiz De Rosas",
+            "id": "22822871-4a55-4c49-bb3f-685d25ca52a2"
+          },
+          {
+            "numero": 9,
+            "nombre": "Felix Corleto",
+            "id": "df9ed3d0-bd16-4a6e-b4c0-07d55918d0f3"
+          },
+          {
+            "numero": 10,
+            "nombre": "Agustin Peres"
+          },
+          {
+            "numero": 11,
+            "nombre": "Agustin Fraga",
+            "id": "91176827-935a-4510-8882-f471b5aca26c"
+          },
+          {
+            "numero": 12,
+            "nombre": "Felipe Perdomo",
+            "id": "d1144248-65d1-429b-89cf-16a88b915ea5"
+          },
+          {
+            "numero": 13,
+            "nombre": "Felipe De la Vega",
+            "id": "548ba36d-9b57-4027-8bbe-7c21caf53774"
+          },
+          {
+            "numero": 14,
+            "nombre": "Iñaki Irigaray",
+            "id": "241675ab-ae44-4c41-9569-be31489b5e8d"
+          },
+          {
+            "numero": 15,
+            "nombre": "Marcos Eliçagaray",
+            "id": "a2a95d98-9290-4091-8f6d-df2355379bef"
+          }
+        ]
+      }
+    },
+    {
+      "id": "1a6d5891-3c75-4632-9086-0b0311291c58",
+      "rotulo": "SIC vs CASI",
+      "local": {
+        "nombre": "san-isidro-club",
+        "titulares": [
+          {
+            "numero": 1,
+            "nombre": "Marcos Piccinini",
+            "id": "e4f456e7-10bb-47e1-b557-ec620ae6252c"
+          },
+          {
+            "numero": 2,
+            "nombre": "Ignacio Bottazzini",
+            "id": "a1e04810-fdca-4518-9be6-07d73ffcabc1"
+          },
+          {
+            "numero": 3,
+            "nombre": "Benjamín Chiappe",
+            "id": "b56f3903-8835-4eab-89dc-86500b151654"
+          },
+          {
+            "numero": 4,
+            "nombre": "Lucas Sommer",
+            "id": "ef7903aa-f6c1-4f96-bda2-d62824710ec9"
+          },
+          {
+            "numero": 5,
+            "nombre": "Ciro Plorutti",
+            "id": "6eb7aecf-a585-4ee1-aca6-9ec677b7517d"
+          },
+          {
+            "numero": 6,
+            "nombre": "Andrea Panzarini",
+            "id": "42810f47-8a4d-4471-923b-012739332214"
+          },
+          {
+            "numero": 7,
+            "nombre": "Santos Fernández De Oliveira",
+            "id": "87eb7fe0-d097-43aa-ad1d-127e730b55c7"
+          },
+          {
+            "numero": 8,
+            "nombre": "Tomás Meyrelles",
+            "id": "b30fc8bc-ba52-400d-bf20-da0c5b369a39"
+          },
+          {
+            "numero": 9,
+            "nombre": "Mateo Albanese",
+            "id": "5e4c9886-171e-4e2d-afb8-e2f55f704811"
+          },
+          {
+            "numero": 10,
+            "nombre": "Santiago Pavlovsky",
+            "id": "cd6c2d68-8ce5-4e32-a913-95dd98959830"
+          },
+          {
+            "numero": 11,
+            "nombre": "Nicanor Acosta",
+            "id": "efcdc501-d7c2-490a-90a0-5f0929c4f309"
+          },
+          {
+            "numero": 12,
+            "nombre": "Ignacio Pietranera",
+            "id": "472f4739-9489-4a4b-b5cf-819f064377a9"
+          },
+          {
+            "numero": 13,
+            "nombre": "Carlos Pirán",
+            "id": "2a9782e7-c0b3-411e-bc02-333bbdfe40dd"
+          },
+          {
+            "numero": 14,
+            "nombre": "Timoteo Silva",
+            "id": "53cc421e-3acc-46a5-9277-bc979f929253"
+          },
+          {
+            "numero": 15,
+            "nombre": "Francisco González Capdevila",
+            "id": "4d1708ae-5746-4718-98b8-0cf1f6053aac"
+          }
+        ]
+      },
+      "visitante": {
+        "nombre": "casi",
+        "titulares": [
+          {
+            "numero": 1,
+            "nombre": "Facundo Scaiano",
+            "id": "6391f051-6c5d-4ec4-87be-aaba9f84e53e"
+          },
+          {
+            "numero": 2,
+            "nombre": "Juan Torres Obeid",
+            "id": "1dfedeef-4414-4605-9737-6e8968f40516"
+          },
+          {
+            "numero": 3,
+            "nombre": "Hugo García",
+            "id": "3e7cb0f9-4d65-4773-bf53-b587eca97118"
+          },
+          {
+            "numero": 4,
+            "nombre": "Salvador Ochoa",
+            "id": "cacac6f0-bced-4402-aa1f-aa758ecc6228"
+          },
+          {
+            "numero": 5,
+            "nombre": "Ignacio Larrague",
+            "id": "6ae09d8f-55e2-404c-91b3-ea0140663edf"
+          },
+          {
+            "numero": 6,
+            "nombre": "Benito Paolucci",
+            "id": "28fdbb10-6176-40b8-8da1-f19f5889b028"
+          },
+          {
+            "numero": 7,
+            "nombre": "Eugenio Sartori",
+            "id": "f9948887-ad29-4862-be15-9e9aed9e348c"
+          },
+          {
+            "numero": 8,
+            "nombre": "Ignacio Torrado",
+            "id": "da928fcf-f70b-4f84-8b41-1a226911cc65"
+          },
+          {
+            "numero": 9,
+            "nombre": "Joaquín Sánchez",
+            "id": "4a781d57-db9f-4277-a14d-fd80cab68c48"
+          },
+          {
+            "numero": 10,
+            "nombre": "Felipe Hileman",
+            "id": "9d3d75fd-7c8c-4c5b-8a84-d83b8e772f5d"
+          },
+          {
+            "numero": 11,
+            "nombre": "Tomás Phelan",
+            "id": "79408732-8590-4d32-a463-34c1317b3549"
+          },
+          {
+            "numero": 12,
+            "nombre": "Benjamín Belaga",
+            "id": "86648ba8-33c7-44e4-b485-2b6858aecb64"
+          },
+          {
+            "numero": 13,
+            "nombre": "Jerónimo Solveyra",
+            "id": "bbd8f7b2-9836-43b3-9ef4-7e6681dc1705"
+          },
+          {
+            "numero": 14,
+            "nombre": "Santiago David",
+            "id": "102016a4-fec7-4610-b0c5-b981f2a8da06"
+          },
+          {
+            "numero": 15,
+            "nombre": "Juan Akemeier",
+            "id": "f81180b2-b5b1-4745-908f-b9233fb729e6"
+          }
+        ]
+      }
+    },
+    {
+      "id": "e17231b7-73ea-4d66-b82d-22bebaa36778",
+      "rotulo": "Newman vs Los Tilos",
+      "local": {
+        "nombre": "club-newman",
+        "titulares": [
+          {
+            "numero": 1,
+            "nombre": "Miguel Prince",
+            "id": "093d4ad1-6705-4920-ab5c-e015474702a7"
+          },
+          {
+            "numero": 2,
+            "nombre": "Beltran Salese",
+            "id": "e2e4a2e5-1dcd-401c-ae31-1fbaf4c58025"
+          },
+          {
+            "numero": 3,
+            "nombre": "Bautista Bosch",
+            "id": "a7772b2c-de21-44bf-b339-a1c8d04b765e"
+          },
+          {
+            "numero": 4,
+            "nombre": "Pablo Cardinal",
+            "id": "7ab20c50-f9e0-4f23-b615-1ebc05553a76"
+          },
+          {
+            "numero": 5,
+            "nombre": "Francisco Lascombes",
+            "id": "477538f6-8f4f-4fc7-91fc-62c035ff06e6"
+          },
+          {
+            "numero": 6,
+            "nombre": "Mateo Montoya",
+            "id": "db6b0e26-752a-40ef-b29a-a3076b8958ec"
+          },
+          {
+            "numero": 7,
+            "nombre": "Faustino Santarelli",
+            "id": "f6e19b27-12f8-42e6-9d4d-a2ee9cc445ca"
+          },
+          {
+            "numero": 8,
+            "nombre": "Rodrigo Diaz De Vivar",
+            "id": "477d03b5-ab28-4310-853c-768c2052bbee"
+          },
+          {
+            "numero": 9,
+            "nombre": "Lucas Marguery",
+            "id": "b7a23015-6cf1-4e37-b131-629248f9355f"
+          },
+          {
+            "numero": 10,
+            "nombre": "Gonzalo Gutierrez Taboada",
+            "id": "9a70ee08-1a65-4323-a977-fbd9eddce849"
+          },
+          {
+            "numero": 11,
+            "nombre": "Jerónimo Ulloa",
+            "id": "bb2410c1-7aac-4c3e-b60f-cdbd3bfe5cbe"
+          },
+          {
+            "numero": 12,
+            "nombre": "Tomas Keena",
+            "id": "5893d154-b48d-4eb3-b8b2-fe7cf9f95f2b"
+          },
+          {
+            "numero": 13,
+            "nombre": "Simon Prince",
+            "id": "36cb75c1-0a33-4e3e-814d-98b69f300396"
+          },
+          {
+            "numero": 14,
+            "nombre": "Justo Ortiz Basualdo",
+            "id": "0baf326a-e4f2-4785-8c52-4a1c987feb9d"
+          },
+          {
+            "numero": 15,
+            "nombre": "Juan B Daireaux",
+            "id": "8c2773d9-3054-409b-b525-57e080bdadf9"
+          }
+        ]
+      },
+      "visitante": {
+        "nombre": "los-tilos",
+        "titulares": [
+          {
+            "numero": 1,
+            "nombre": "Elio Basualdo"
+          },
+          {
+            "numero": 2,
+            "nombre": "Hipólito San Sebastián",
+            "id": "2ba1bee6-dee5-492f-9bf8-e79c53a6867a"
+          },
+          {
+            "numero": 3,
+            "nombre": "Ramiro Berardi",
+            "id": "a1fca0b6-af74-4511-a376-4ddadf31d1dd"
+          },
+          {
+            "numero": 4,
+            "nombre": "Juan Blaiotta Lago",
+            "id": "a4b0832a-d686-4428-8ca4-91b0240cab6d"
+          },
+          {
+            "numero": 5,
+            "nombre": "Martin Leiva",
+            "id": "eb21f4d1-865f-41ee-b3e8-54ca0e1dbeae"
+          },
+          {
+            "numero": 6,
+            "nombre": "Eliseo Chiavassa",
+            "id": "254f00fe-f0cb-4922-8b49-77777a957a07"
+          },
+          {
+            "numero": 7,
+            "nombre": "Felipe Puertas",
+            "id": "e4332124-c7d2-47a3-9446-1700f872f1da"
+          },
+          {
+            "numero": 8,
+            "nombre": "Felipe Bares",
+            "id": "1c10f865-ac70-42a0-aba5-1be50c4f1926"
+          },
+          {
+            "numero": 9,
+            "nombre": "Marcos Albina",
+            "id": "1e8d2788-7f67-44af-b866-90b89b61d026"
+          },
+          {
+            "numero": 10,
+            "nombre": "Bautista Santamarina",
+            "id": "23dec5d6-f9d0-4d28-9eea-0c3084dca81e"
+          },
+          {
+            "numero": 11,
+            "nombre": "Nicolás Fernández Vega",
+            "id": "ffd8a852-58b0-4133-8609-6f0fbd0f09f8"
+          },
+          {
+            "numero": 12,
+            "nombre": "Tomás Fernández Armendariz",
+            "id": "25208fdd-a233-4bc6-af56-e432659e4190"
+          },
+          {
+            "numero": 13,
+            "nombre": "Thiago Bassagaisteguy",
+            "id": "5a99028e-5922-4ae8-b0dd-f34d6640e871"
+          },
+          {
+            "numero": 14,
+            "nombre": "Isidro Cortés",
+            "id": "b5f6f5c8-157d-47c4-adb5-d954ceb9d078"
+          },
+          {
+            "numero": 15,
+            "nombre": "Segundo Tuculet",
+            "id": "f1e3a477-e131-4719-af64-d27c60781c56"
+          }
+        ]
+      }
+    },
+    {
+      "id": "0822012c-b523-48e3-9e9e-83d78214aa15",
+      "rotulo": "Alumni vs Atlético del Rosario",
+      "local": {
+        "nombre": "asoc-alumni",
+        "titulares": [
+          {
+            "numero": 1,
+            "nombre": "Máximo Castrillo",
+            "id": "5e8c699b-ab08-4623-aec7-bc359c4e2e73"
+          },
+          {
+            "numero": 2,
+            "nombre": "Tomás Bivort",
+            "id": "ace7e183-b65e-48b6-b997-c8c35339eca1"
+          },
+          {
+            "numero": 3,
+            "nombre": "Francisco Bottoni",
+            "id": "079a58ba-24bf-4405-b496-9d5a22f43993"
+          },
+          {
+            "numero": 4,
+            "nombre": "Manuel Mora",
+            "id": "2c4e8d90-35b8-432b-8aa2-c12873fcd9b0"
+          },
+          {
+            "numero": 5,
+            "nombre": "Sebastián Fauve",
+            "id": "abdfd061-4938-49a7-9261-7e446ae3dbf5"
+          },
+          {
+            "numero": 6,
+            "nombre": "Ignacio Cubilla",
+            "id": "f026b006-de14-466e-a2ed-315219affd99"
+          },
+          {
+            "numero": 7,
+            "nombre": "Santiago Montagner",
+            "id": "46e7c1b3-9bbc-43af-931e-392ad29ddf02"
+          },
+          {
+            "numero": 8,
+            "nombre": "Santiago Neyra",
+            "id": "b37339cc-5815-451c-b9e6-31ef6ca3ea00"
+          },
+          {
+            "numero": 9,
+            "nombre": "Rocco Testoni",
+            "id": "60a27131-d5ac-4d19-9734-e371fce165e9"
+          },
+          {
+            "numero": 10,
+            "nombre": "Bautista Canzani",
+            "id": "ae98f6f9-08f3-42c2-9703-d803a9a08592"
+          },
+          {
+            "numero": 11,
+            "nombre": "Mateo Castanier",
+            "id": "2388b3ca-ffbc-4662-96c8-d0c49b6bfc17"
+          },
+          {
+            "numero": 12,
+            "nombre": "Santiago González Iglesias",
+            "id": "9d3dc991-8e57-4d35-9c9f-9cc41412cd96"
+          },
+          {
+            "numero": 13,
+            "nombre": "Tomás Cubilla",
+            "id": "fee016a4-50e3-4f87-b374-790ebd2976fa"
+          },
+          {
+            "numero": 14,
+            "nombre": "Ramón Fuentes",
+            "id": "74a24bd2-979f-497e-a2ec-15e0661648e0"
+          },
+          {
+            "numero": 15,
+            "nombre": "Santiago Pernas",
+            "id": "c940a733-1b22-472a-ac92-ee51107862ba"
+          }
+        ]
+      },
+      "visitante": {
+        "nombre": "atletico-del-rosario",
+        "titulares": [
+          {
+            "numero": 1,
+            "nombre": "José Carro",
+            "id": "6f8c6eec-cdb1-45ab-8e0b-33287eedd726"
+          },
+          {
+            "numero": 2,
+            "nombre": "Ramiro Rubio",
+            "id": "7aba6757-27d4-4e7b-9b5d-4707be14bd6c"
+          },
+          {
+            "numero": 3,
+            "nombre": "Bruno Montenegro",
+            "id": "dd9e6469-4c96-404f-aaeb-bc660efa4db7"
+          },
+          {
+            "numero": 4,
+            "nombre": "José Cáceres",
+            "id": "b11722f6-0de3-4f87-a3e4-d38b9ef38992"
+          },
+          {
+            "numero": 5,
+            "nombre": "Octavio Capella",
+            "id": "651af743-bc63-4214-9cf3-f67bec15fd91"
+          },
+          {
+            "numero": 6,
+            "nombre": "Federico Etcheverry",
+            "id": "55f5e464-d3ae-4920-96af-fbca0c60bbd0"
+          },
+          {
+            "numero": 7,
+            "nombre": "Jerónimo Gómez Vara",
+            "id": "a6413499-d9da-4243-a17d-70f15711ede5"
+          },
+          {
+            "numero": 8,
+            "nombre": "Lucas Malanos",
+            "id": "420a49a7-60d0-4875-8a29-27751b56b255"
+          },
+          {
+            "numero": 9,
+            "nombre": "Tomás Cornejo",
+            "id": "3a37565b-ce67-4f40-b7c6-87047ace47b8"
+          },
+          {
+            "numero": 10,
+            "nombre": "Manuel Nogués",
+            "id": "e5735e27-ad1d-409b-bd3f-0cb6edeb97cc"
+          },
+          {
+            "numero": 11,
+            "nombre": "Tomás Malanos",
+            "id": "40594879-57d3-4e42-9e44-9808ed3ed143"
+          },
+          {
+            "numero": 12,
+            "nombre": "Ramiro Musio",
+            "id": "b57f148c-033e-491e-9558-51091ed8ce4b"
+          },
+          {
+            "numero": 13,
+            "nombre": "Bautista Estellés",
+            "id": "6d938699-e675-4532-8bf9-e747ec1afce7"
+          },
+          {
+            "numero": 14,
+            "nombre": "Nicolás Casals",
+            "id": "9e5cc8ad-23cc-48be-b975-26826f52ed98"
+          },
+          {
+            "numero": 15,
+            "nombre": "Martín Elías",
+            "id": "de396717-400e-4c2b-9013-73bf23a46674"
+          }
+        ]
+      }
+    },
+    {
+      "id": "bf9c1e2b-52b0-4ad8-bc79-bdc1d271350e",
+      "rotulo": "Champagnat vs Regatas Bella Vista",
+      "local": {
+        "nombre": "club-champagnat",
+        "titulares": [
+          {
+            "numero": 1,
+            "nombre": "Alberto Adissi",
+            "id": "5fdf558d-540f-483f-9e74-ecda3d358693"
+          },
+          {
+            "numero": 2,
+            "nombre": "Simón Panelo",
+            "id": "18e42727-9ee6-4a2c-9ad8-c903b258c3eb"
+          },
+          {
+            "numero": 3,
+            "nombre": "Tomas Yanzon Rodriguez Castelli",
+            "id": "d65d0794-3ece-4bfe-930c-341c27388a8b"
+          },
+          {
+            "numero": 4,
+            "nombre": "Iñaki Alberto Ustariz",
+            "id": "c4351e56-0459-4158-af0f-37d98830f553"
+          },
+          {
+            "numero": 5,
+            "nombre": "Santiago Escuti",
+            "id": "d1bdbea4-4fe5-478d-99c3-bd358798a2b0"
+          },
+          {
+            "numero": 6,
+            "nombre": "Matias Alonso",
+            "id": "adc3a48e-e5b5-4cb8-9351-327cb51a3b89"
+          },
+          {
+            "numero": 7,
+            "nombre": "Nicolas Rojo",
+            "id": "e24a1bbf-11be-4a1c-abbf-bcf01c7a0ed6"
+          },
+          {
+            "numero": 8,
+            "nombre": "Lucas Moresco",
+            "id": "5093d036-e4ed-4af6-bb80-781a23afc40e"
+          },
+          {
+            "numero": 9,
+            "nombre": "Juan Segundo Panelo",
+            "id": "a4afbf08-c3b3-436c-95b5-5214e5213b20"
+          },
+          {
+            "numero": 10,
+            "nombre": "Santos Panelo",
+            "id": "b809381d-6604-463b-932c-86f3b2e12c58"
+          },
+          {
+            "numero": 11,
+            "nombre": "Tomás Baca Castex",
+            "id": "b4bc6c1f-247d-447c-a2be-dee7d81e1205"
+          },
+          {
+            "numero": 12,
+            "nombre": "Santino Carrara",
+            "id": "6ffd0d71-a721-4fa1-9860-29ddcb9a6990"
+          },
+          {
+            "numero": 13,
+            "nombre": "Tomás Cotter Daireaux",
+            "id": "06dd1698-b0f2-447c-a125-705c92ee1e6a"
+          },
+          {
+            "numero": 14,
+            "nombre": "Fermín Aldanondo"
+          },
+          {
+            "numero": 15,
+            "nombre": "Joaquin Nuñez",
+            "id": "5a4a393f-cf94-4e62-8b25-4ec8cce839f7"
+          }
+        ]
+      },
+      "visitante": {
+        "nombre": "regatas-de-bella-vista",
+        "titulares": [
+          {
+            "numero": 1,
+            "nombre": "Fabrizio Cebron",
+            "id": "575e8acc-a723-44d4-ab53-2a92ab024114"
+          },
+          {
+            "numero": 2,
+            "nombre": "Beltran Landivar",
+            "id": "54db88c8-5c86-467b-bcc2-389b7f34e164"
+          },
+          {
+            "numero": 3,
+            "nombre": "Felipe Galli",
+            "id": "cdb3a87d-65f6-4eca-969d-aece28dc0111"
+          },
+          {
+            "numero": 4,
+            "nombre": "Valentin Sanguinetti",
+            "id": "4697e95a-9a25-4a1e-a6e3-5c5df2d0fecf"
+          },
+          {
+            "numero": 5,
+            "nombre": "Marcelo Toledo",
+            "id": "31911110-2f6b-462e-b76e-936d28c5cc03"
+          },
+          {
+            "numero": 6,
+            "nombre": "Tomas Sanguinetti",
+            "id": "c4bcf76c-5964-42f0-a25b-5e08e5231fef"
+          },
+          {
+            "numero": 7,
+            "nombre": "Marcos Ferro",
+            "id": "b0c5923e-acba-4b6c-a5c1-9cef527945d2"
+          },
+          {
+            "numero": 8,
+            "nombre": "Felipe Camerlinckx",
+            "id": "b9b03113-e3b4-452e-af86-ab48fa720d06"
+          },
+          {
+            "numero": 9,
+            "nombre": "Marcos Joseph",
+            "id": "4ecc1541-1c6b-4b28-b641-177db7047e62"
+          },
+          {
+            "numero": 10,
+            "nombre": "Jose de la Torre",
+            "id": "536440f0-1f98-4fa0-8a11-8bda0bbc5b8c"
+          },
+          {
+            "numero": 11,
+            "nombre": "Enrique Camerlinckx",
+            "id": "5ca67a44-735a-4bfb-b223-6f4b71693460"
+          },
+          {
+            "numero": 12,
+            "nombre": "Mateo Camerlinckx",
+            "id": "cf2a408d-aa11-471b-8d62-8f8f37d76bdc"
+          },
+          {
+            "numero": 13,
+            "nombre": "Francisco Pisani",
+            "id": "334f93b4-a84b-4d87-a83f-e2662e9d19d5"
+          },
+          {
+            "numero": 14,
+            "nombre": "Felipe Rugolo",
+            "id": "13ce7c97-3a7d-464c-a83d-6ed25bd05108"
+          },
+          {
+            "numero": 15,
+            "nombre": "Santiago Cordero",
+            "id": "dc9778f2-0d21-4bef-b980-af4c823632a4"
+          }
+        ]
+      }
+    },
+    {
+      "id": "89772e09-d812-42f1-be8e-10d557a3ccb2",
+      "rotulo": "Hindú vs La Plata",
+      "local": {
+        "nombre": "hindu-club",
+        "titulares": [
+          {
+            "numero": 1,
+            "nombre": "Franco Diviesti",
+            "id": "1c87bb57-e620-43d4-80bb-0a9e23391594"
+          },
+          {
+            "numero": 2,
+            "nombre": "Agustín Capurro",
+            "id": "aa1ed0d5-e1b8-4092-99d9-ba230fd3a982"
+          },
+          {
+            "numero": 3,
+            "nombre": "Nicolás Leiva",
+            "id": "0659f32e-c33f-4222-afec-8272b165367b"
+          },
+          {
+            "numero": 4,
+            "nombre": "Elías Banach",
+            "id": "b688ce9d-2037-4943-b406-d95433386869"
+          },
+          {
+            "numero": 5,
+            "nombre": "Carlos Repetto",
+            "id": "142b85e0-ef9c-4fcf-9d16-711b7d02c230"
+          },
+          {
+            "numero": 6,
+            "nombre": "Santino Amaya",
+            "id": "c2958061-b621-42e0-a758-2b6845c2100a"
+          },
+          {
+            "numero": 7,
+            "nombre": "Lautaro Bávaro",
+            "id": "c93fd682-b0fc-49cc-8490-ab812c3f2e29"
+          },
+          {
+            "numero": 8,
+            "nombre": "Nicolás Amaya",
+            "id": "a150c8d2-daa7-4c72-8a49-fa7b93c4f84f"
+          },
+          {
+            "numero": 9,
+            "nombre": "Felipe Ezcurra",
+            "id": "6ae47f99-520a-4ac7-b414-1a7837c889d8"
+          },
+          {
+            "numero": 10,
+            "nombre": "Ramón Fernández Miranda",
+            "id": "dbfcfc9f-3ae1-4b1c-9ad8-668375fa2856"
+          },
+          {
+            "numero": 11,
+            "nombre": "Tomás Amher",
+            "id": "b825b869-ac2a-4f04-b817-247571e5a04f"
+          },
+          {
+            "numero": 12,
+            "nombre": "Bautista Farisé"
+          },
+          {
+            "numero": 13,
+            "nombre": "Federico Graglia",
+            "id": "b705aaeb-e90b-4404-944c-4e0305cfc6de"
+          },
+          {
+            "numero": 14,
+            "nombre": "Sebastián Cancelliere",
+            "id": "3a1fd270-6c2b-4931-9929-d9442b3d1141"
+          },
+          {
+            "numero": 15,
+            "nombre": "Pascal Senillosa",
+            "id": "e783cde1-2120-4f59-9eb9-276e9b36b29c"
+          }
+        ]
+      },
+      "visitante": {
+        "nombre": "la-plata",
+        "titulares": [
+          {
+            "numero": 1,
+            "nombre": "Martin Patat",
+            "id": "0e2b64e6-0218-459a-aa49-e44a5574222a"
+          },
+          {
+            "numero": 2,
+            "nombre": "Bautista Erriest",
+            "id": "8597c5b5-d4d7-4437-948b-32a4c6e0d381"
+          },
+          {
+            "numero": 3,
+            "nombre": "Ignacio Luna",
+            "id": "0e4ac0f6-f764-439c-9961-b12064ccf9fe"
+          },
+          {
+            "numero": 4,
+            "nombre": "Bautista Ozog",
+            "id": "b2a98400-4e0d-431d-a1c9-3411624bcc51"
+          },
+          {
+            "numero": 5,
+            "nombre": "Valentino Barreiro"
+          },
+          {
+            "numero": 6,
+            "nombre": "Carlos Mendieta",
+            "id": "5a2ae8ec-3586-42b0-ab0a-4019f06e3398"
+          },
+          {
+            "numero": 7,
+            "nombre": "Francisco Ringuelet",
+            "id": "12647a6c-415c-43c4-b6e1-22bc38cb2d62"
+          },
+          {
+            "numero": 8,
+            "nombre": "Juan Pedro Bernasconi",
+            "id": "7303d078-d424-4da5-83b7-3c177906518f"
+          },
+          {
+            "numero": 9,
+            "nombre": "Manuel De la Fuente",
+            "id": "9f5de586-aadd-4181-9316-387466616a77"
+          },
+          {
+            "numero": 10,
+            "nombre": "Santino Di Lucca",
+            "id": "c879365b-da6c-47cc-966e-3fb55670d48d"
+          },
+          {
+            "numero": 11,
+            "nombre": "Pedro Addiechi",
+            "id": "b3c89d4c-ca46-4324-999a-1f91cb6f566d"
+          },
+          {
+            "numero": 12,
+            "nombre": "Juan Francisco Soto",
+            "id": "fb2ef94b-57fb-4f29-a3fe-043cc756bbce"
+          },
+          {
+            "numero": 13,
+            "nombre": "Francisco Paz Rizzoli",
+            "id": "977964f4-b03a-443f-8633-3f12c9f4654d"
+          },
+          {
+            "numero": 14,
+            "nombre": "Matias Rivadema"
+          },
+          {
+            "numero": 15,
+            "nombre": "Tomas Suarez Folch",
+            "id": "b4577b14-2cc9-44c7-a603-83ef72148751"
+          }
+        ]
+      }
+    },
+    {
+      "id": "1fa4cd20-1444-485e-b30e-f9a16295c30e",
+      "rotulo": "Buenos Aires CRC vs Los Matreros",
+      "local": {
+        "nombre": "buenos-aires-crc",
+        "titulares": [
+          {
+            "numero": 1,
+            "nombre": "Tomás Gallo",
+            "id": "d82d79a6-e5ce-4fc8-8a1c-eb7b2cf1417b"
+          },
+          {
+            "numero": 2,
+            "nombre": "Tomás Rosasco",
+            "id": "1f2adda8-51bb-4a01-a6a1-2f5ad4bdd14a"
+          },
+          {
+            "numero": 3,
+            "nombre": "Renzo Zanella",
+            "id": "64f11132-ee4e-4b56-94b2-45db0a5cfc2d"
+          },
+          {
+            "numero": 4,
+            "nombre": "Pedro del Carril",
+            "id": "a0cbcb67-4a7c-42fe-bcfc-60d21ad15cbd"
+          },
+          {
+            "numero": 5,
+            "nombre": "Francisco Syriani",
+            "id": "5a76234d-5c4d-4d18-8d37-b03efdd500dd"
+          },
+          {
+            "numero": 6,
+            "nombre": "Bautista Saint Bonnet",
+            "id": "0b30ff61-a410-40c3-bc0d-a3390975e3ab"
+          },
+          {
+            "numero": 7,
+            "nombre": "Pablo Bourdal",
+            "id": "418b8478-b12b-4e1b-b7db-4725d10e3ddb"
+          },
+          {
+            "numero": 8,
+            "nombre": "Juan Segundo Campbell",
+            "id": "e1648227-6d3f-4d97-8ab4-0c1b96c7b735"
+          },
+          {
+            "numero": 9,
+            "nombre": "Mateo Freire",
+            "id": "b73ac2c5-034a-486f-a017-6c451b9cc978"
+          },
+          {
+            "numero": 10,
+            "nombre": "Tomás Bunge",
+            "id": "3e81fb9f-7d49-4498-97c9-68902797d74b"
+          },
+          {
+            "numero": 11,
+            "nombre": "Benjamín Handley",
+            "id": "2dc19060-85a3-41c6-b6c4-58975880dfe2"
+          },
+          {
+            "numero": 12,
+            "nombre": "Agustín Lamensa",
+            "capitan": true,
+            "id": "4e6ccb91-f0d6-490e-9fae-c68cdbc42457"
+          },
+          {
+            "numero": 13,
+            "nombre": "Tobías Díaz Borda",
+            "id": "54506559-8096-4119-a8eb-3f4c3ea79afd"
+          },
+          {
+            "numero": 14,
+            "nombre": "Julián Quetglas",
+            "id": "f4eac8d4-618c-4471-a8ad-bb83b3fb7d99"
+          },
+          {
+            "numero": 15,
+            "nombre": "Nicolás Pizzo",
+            "id": "8409e506-0336-4212-9f8f-35bbfef074fa"
+          }
+        ]
+      },
+      "visitante": {
+        "nombre": "los-matreros",
+        "titulares": [
+          {
+            "numero": 1,
+            "nombre": "Tomas Sánchez",
+            "id": "7b182bd6-8168-4be9-8231-68a16299452d"
+          },
+          {
+            "numero": 2,
+            "nombre": "Boris Cec",
+            "id": "6c94585f-fa2c-41db-9f0c-e79da851df10"
+          },
+          {
+            "numero": 3,
+            "nombre": "Juan Pablo Zeiss",
+            "id": "64e67f72-2b04-41ae-b202-d2690248cf3b"
+          },
+          {
+            "numero": 4,
+            "nombre": "Tomás Gahan",
+            "id": "57b135bc-6059-4258-8f65-8d3b8fce9d7c"
+          },
+          {
+            "numero": 5,
+            "nombre": "Augusto Genoud",
+            "id": "eb612885-91bf-492a-b07d-574dacd61aae"
+          },
+          {
+            "numero": 6,
+            "nombre": "Colin McCormack",
+            "id": "09cecf48-fb76-4a2f-9fea-8728611724a8"
+          },
+          {
+            "numero": 7,
+            "nombre": "Thiago Corvalán",
+            "id": "495fec3d-4633-4353-a02a-7166b5f76802"
+          },
+          {
+            "numero": 8,
+            "nombre": "Santiago Villarino",
+            "id": "de9f9ba5-75d3-4085-bf1c-cd2b4de72961"
+          },
+          {
+            "numero": 9,
+            "nombre": "Marcos Amorisa",
+            "id": "ac045a27-a6a9-417b-b7df-05873e7d6368"
+          },
+          {
+            "numero": 10,
+            "nombre": "Juan F. Morales",
+            "id": "65f1d635-2a2b-4ac4-ac4c-701267c789d7"
+          },
+          {
+            "numero": 11,
+            "nombre": "Santiago Marelli",
+            "id": "e9bd47e7-d15d-4d43-8c84-c827730c22af"
+          },
+          {
+            "numero": 12,
+            "nombre": "Pedro del Busto",
+            "id": "4ff462d1-ba38-4cd7-aaab-4cb421cb6fb9"
+          },
+          {
+            "numero": 13,
+            "nombre": "Nicolás Santecchia",
+            "id": "086f65b9-0e13-41c7-8a21-83751723bbe1"
+          },
+          {
+            "numero": 14,
+            "nombre": "Germán Gallastegui",
+            "id": "a02f9e3e-d534-48db-8d55-ac9c1b569769"
+          },
+          {
+            "numero": 15,
+            "nombre": "Juan P. García Michero",
+            "id": "0f281fb0-89eb-433d-911f-edf87b3ebca4"
+          }
+        ]
+      }
+    }
+  ]
+}

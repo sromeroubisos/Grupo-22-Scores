@@ -1,0 +1,1469 @@
+{
+"goleadores": [
+[
+"1",
+"ESTILIANO BATTEZZATI",
+"SAN JUAN",
+"22",
+"22",
+"0",
+"110"
+],
+[
+"2",
+"ALEJO MAGLIANO",
+"CPBM",
+"19",
+"17",
+"0",
+"91"
+],
+[
+"3",
+"FEDERICO SERPA",
+"LOS TORDOS",
+"8",
+"29",
+"0",
+"82"
+],
+[
+"4",
+"TOMÁS VIDELA",
+"LICEO",
+"9",
+"27",
+"0",
+"81"
+],
+[
+"5",
+"TOMÁS CANEDO",
+"MENDOZA",
+"10",
+"24",
+"0",
+"78"
+],
+[
+"6",
+"GERÓNIMO ARABEL",
+"UNIVERSITARIO SJ",
+"7",
+"27",
+"1",
+"78"
+],
+[
+"7",
+"FRANCISCO GALDEANO",
+"LOS TORDOS",
+"6",
+"25",
+"0",
+"68"
+],
+[
+"8",
+"AUGUSTO KRETSCHMAR",
+"TEQÜE",
+"9",
+"13",
+"0",
+"53"
+],
+[
+"9",
+"TOBÍAS FILIZZOLA",
+"MARISTA",
+"1",
+"16",
+"0",
+"35"
+],
+[
+"10",
+"SANTIAGO REZ MASUD",
+"MENDOZA",
+"4",
+"9",
+"0",
+"30"
+],
+[
+"11",
+"TEO AZAR",
+"UNIVERSITARIO SJ",
+"6",
+"6",
+"0",
+"30"
+],
+[
+"12",
+"LISANDRO SOSA",
+"MARISTA",
+"1",
+"11",
+"0",
+"25"
+],
+[
+"13",
+"IGNACIO GAIDO",
+"LICEO",
+"2",
+"7",
+"0",
+"20"
+],
+[
+"14",
+"BAUTISTA FILIZZOLA",
+"MARISTA",
+"2",
+"6",
+"0",
+"18"
+],
+[
+"15",
+"JUAN MATEO SANCHO",
+"LICEO",
+"0",
+"8",
+"0",
+"16"
+],
+[
+"16",
+"LAUTARO CALLE",
+"TEQÜE",
+"1",
+"5",
+"0",
+"13"
+],
+[
+"17",
+"FABRICIO STIRPA",
+"CPBM",
+"2",
+"1",
+"1",
+"11"
+],
+[
+"18",
+"BAUTISTA CÚNEO",
+"SAN JUAN",
+"1",
+"4",
+"0",
+"11"
+],
+[
+"19",
+"FACUNDO CONSORTE",
+"CPBM",
+"2",
+"1",
+"0",
+"8"
+],
+[
+"20",
+"MARIANO LLOVERAS",
+"UNIVERSITARIO SJ",
+"1",
+"2",
+"0",
+"7"
+],
+[
+"21",
+"IGNACIO LABORDE",
+"MARISTA",
+"0",
+"3",
+"0",
+"6"
+],
+[
+"22",
+"TOMÁS ARRIGONI",
+"LOS TORDOS",
+"0",
+"2",
+"0",
+"4"
+],
+[
+"23",
+"GENARO PODESTÁ",
+"MARISTA",
+"0",
+"2",
+"0",
+"4"
+],
+[
+"24",
+"BENJAMIN BARCENILLA",
+"MARISTA",
+"0",
+"2",
+"0",
+"4"
+],
+[
+"25",
+"FRANCO PALAZZINI",
+"MENDOZA",
+"0",
+"2",
+"0",
+"4"
+],
+[
+"26",
+"PEDRO LÉRTORA",
+"LOS TORDOS",
+"1",
+"0",
+"0",
+"3"
+],
+[
+"27",
+"FRAN GARCÍA SALAZAR",
+"CPBM",
+"0",
+"1",
+"0",
+"2"
+],
+[
+"29",
+"TIAGO GILI",
+"LICEO",
+"0",
+"1",
+"0",
+"2"
+],
+[
+"30",
+"SANTIAGO BALDI",
+"UNIVERSITARIO SJ",
+"0",
+"1",
+"0",
+"2"
+]
+],
+"tryman": [
+[
+"1",
+"FACUNDO TONÓN",
+"LOS TORDOS",
+"15"
+],
+[
+"2",
+"JULIÁN COSSUTTA",
+"MENDOZA",
+"13"
+],
+[
+"3",
+"LUCAS BARTOLINI",
+"MARISTA",
+"10"
+],
+[
+"4",
+"AGUSTÍN CORREA LLANO",
+"LICEO",
+"9"
+],
+[
+"5",
+"JOAQUÍN SÁNCHEZ",
+"UNIVERSITARIO SJ",
+"8"
+],
+[
+"6",
+"FRANCISCO RICCI",
+"LICEO",
+"7"
+],
+[
+"7",
+"ALEJANDRO PRONCE",
+"MARISTA",
+"7"
+],
+[
+"8",
+"BAUTISTA SCADDING",
+"SAN JUAN",
+"7"
+],
+[
+"9",
+"NICOLÁS MARTÍNEZ",
+"UNIVERSITARIO SJ",
+"7"
+],
+[
+"10",
+"GINO CASTELLINO",
+"LICEO",
+"6"
+],
+[
+"11",
+"TOMÁS ARRIGONI",
+"LOS TORDOS",
+"6"
+],
+[
+"12",
+"TELMO FERNÁNDEZ",
+"MARISTA",
+"6"
+],
+[
+"13",
+"IGNACIO GAIDO",
+"LICEO",
+"5"
+],
+[
+"14",
+"JULIÁN ROSSI",
+"LICEO",
+"5"
+],
+[
+"15",
+"JUAN IGNACIO DÁNGELO",
+"LOS TORDOS",
+"5"
+],
+[
+"16",
+"FEDERICO SERPA",
+"LOS TORDOS",
+"5"
+],
+[
+"17",
+"SANTIAGO TAPIA",
+"MENDOZA",
+"5"
+],
+[
+"18",
+"FELIPE GONZÁLEZ",
+"SAN JUAN",
+"5"
+],
+[
+"19",
+"FAUSTO MARTINEZ",
+"CPBM",
+"4"
+],
+[
+"20",
+"TOMÁS BAZÁN",
+"LICEO",
+"4"
+],
+[
+"21",
+"FRANCISCO CASSONE",
+"LOS TORDOS",
+"4"
+],
+[
+"22",
+"TOMÁS MONTILLA",
+"MARISTA",
+"4"
+],
+[
+"23",
+"IGNACIO VIDAL",
+"MENDOZA",
+"4"
+],
+[
+"24",
+"FRANCISCO STÁVILE",
+"MENDOZA",
+"4"
+],
+[
+"25",
+"ESTILIANO BATEZZATTI",
+"SAN JUAN",
+"4"
+],
+[
+"26",
+"ROMÁN ZELADA",
+"TEQÜE",
+"4"
+],
+[
+"27",
+"GERÓNIMO ARABEL",
+"UNIVERSITARIO SJ",
+"4"
+],
+[
+"28",
+"VITO SAMBRIZZI",
+"UNIVERSITARIO SJ",
+"4"
+],
+[
+"29",
+"MANUEL SONZOGNI",
+"CPBM",
+"3"
+],
+[
+"30",
+"BRANCO GUTIERREZ",
+"CPBM",
+"3"
+],
+[
+"31",
+"ALEJO MAGLIANO",
+"CPBM",
+"3"
+],
+[
+"32",
+"FABRICIO STIRPA",
+"CPBM",
+"3"
+],
+[
+"33",
+"FACUNDO LUCERO",
+"LICEO",
+"3"
+],
+[
+"34",
+"ENZO CIRRINCIONE",
+"LICEO",
+"3"
+],
+[
+"35",
+"SANTIAGO VIDEAU",
+"LICEO",
+"3"
+],
+[
+"36",
+"GONZALO INTZES",
+"LOS TORDOS",
+"3"
+],
+[
+"37",
+"MARTÍN ORRICO",
+"LOS TORDOS",
+"3"
+],
+[
+"38",
+"MATÍAS FARAH",
+"LOS TORDOS",
+"3"
+],
+[
+"39",
+"BAUTISTA BRUNO",
+"LOS TORDOS",
+"3"
+],
+[
+"40",
+"CONRADO BERTRANOU",
+"LOS TORDOS",
+"3"
+],
+[
+"41",
+"JUAN ENRIQUE ARNUT",
+"LOS TORDOS",
+"3"
+],
+[
+"42",
+"MATÍAS COLOMER",
+"MARISTA",
+"3"
+],
+[
+"43",
+"FRANCISCO ALLAMAND",
+"MARISTA",
+"3"
+],
+[
+"44",
+"ALEJO VIDELA",
+"MARISTA",
+"3"
+],
+[
+"45",
+"IGNACIO LUCERO",
+"MENDOZA",
+"3"
+],
+[
+"46",
+"GONZALO ROLDÁN",
+"SAN JUAN",
+"3"
+],
+[
+"47",
+"TOBÍAS CABEZA",
+"SAN JUAN",
+"3"
+],
+[
+"48",
+"LAUTARO CALLE",
+"TEQÜE",
+"3"
+],
+[
+"49",
+"GERÓNIMO ADARVEZ",
+"UNIVERSITARIO SJ",
+"3"
+],
+[
+"50",
+"LUCIANO GUTIERREZ",
+"CPBM",
+"2"
+],
+[
+"51",
+"SANTIAGO VIDELA",
+"CPBM",
+"2"
+],
+[
+"52",
+"JUAN MARTÍN BAZÁN",
+"CPBM",
+"2"
+],
+[
+"53",
+"FACUNDO CONSORTE",
+"CPBM",
+"2"
+],
+[
+"54",
+"JUAN MATEO SANCHO",
+"LICEO",
+"2"
+],
+[
+"55",
+"TOMÁS CASTRO",
+"LICEO",
+"2"
+],
+[
+"56",
+"FELIPE ALTAMIRANDA",
+"LICEO",
+"2"
+],
+[
+"57",
+"SANTINO VILLEGAS",
+"LICEO",
+"2"
+],
+[
+"58",
+"BRUNO CIRRINCIONE",
+"LICEO",
+"2"
+],
+[
+"59",
+"MANUEL ARROYO",
+"LOS TORDOS",
+"2"
+],
+[
+"60",
+"JULIÁN TOMAS",
+"LOS TORDOS",
+"2"
+],
+[
+"61",
+"TOMÁS DÍAZ",
+"LOS TORDOS",
+"2"
+],
+[
+"62",
+"GINO AMBROSI",
+"LOS TORDOS",
+"2"
+],
+[
+"63",
+"ALVARO LLAVER",
+"MARISTA",
+"2"
+],
+[
+"64",
+"CONALL UNGER",
+"MARISTA",
+"2"
+],
+[
+"65",
+"TOBÍAS FILIZZOLA",
+"MARISTA",
+"2"
+],
+[
+"66",
+"GENARO PODESTÁ",
+"MARISTA",
+"2"
+],
+[
+"67",
+"RENATO BAROLO",
+"MENDOZA",
+"2"
+],
+[
+"68",
+"EMANUEL GUZMÁN",
+"MENDOZA",
+"2"
+],
+[
+"69",
+"FRANCISCO ÁLVAREZ",
+"MENDOZA",
+"2"
+],
+[
+"70",
+"SANTIAGO REZ MASUD",
+"MENDOZA",
+"2"
+],
+[
+"71",
+"BENJAMÍN COSTANTINI",
+"MENDOZA",
+"2"
+],
+[
+"72",
+"TOMÁS CANEDO",
+"MENDOZA",
+"2"
+],
+[
+"73",
+"JOAQUÍN FARRÉ",
+"SAN JUAN",
+"2"
+],
+[
+"74",
+"BAUTISTA DOMANICO",
+"SAN JUAN",
+"2"
+],
+[
+"75",
+"SANTIAGO ALBARRACÍN",
+"SAN JUAN",
+"2"
+],
+[
+"76",
+"JUAN MANUEL RUIZ",
+"SAN JUAN",
+"2"
+],
+[
+"77",
+"BENJAMÍN PÉREZ",
+"TEQÜE",
+"2"
+],
+[
+"78",
+"NICOLÁS QUIROGA",
+"TEQÜE",
+"2"
+],
+[
+"79",
+"PABLO ECHALECU",
+"TEQÜE",
+"2"
+],
+[
+"80",
+"JULIÁN MARTÍN",
+"TEQÜE",
+"2"
+],
+[
+"81",
+"FRANCISCO VEGA",
+"TEQÜE",
+"2"
+],
+[
+"82",
+"LUCIANO CASTELLANOS",
+"TEQÜE",
+"2"
+],
+[
+"83",
+"JULIÁN AGUIAR",
+"UNIVERSITARIO SJ",
+"2"
+],
+[
+"84",
+"AGUSTÍN SALES",
+"UNIVERSITARIO SJ",
+"2"
+],
+[
+"85",
+"TOMÁS GIMENEZ",
+"UNIVERSITARIO SJ",
+"2"
+],
+[
+"86",
+"JUAN I DEL CARRIL",
+"UNIVERSITARIO SJ",
+"2"
+],
+[
+"87",
+"MARIANO LLOVERAS",
+"UNIVERSITARIO SJ",
+"2"
+],
+[
+"88",
+"FRANCISCO MARCUCCI",
+"UNIVERSITARIO SJ",
+"2"
+],
+[
+"89",
+"JUAN CRUZ MAGARIÑOS",
+"UNIVERSITARIO SJ",
+"2"
+],
+[
+"90",
+"JOAQUÍN RODRIGUEZ",
+"CPBM",
+"1"
+],
+[
+"91",
+"FRAN GARCÍA SALAZAR",
+"CPBM",
+"1"
+],
+[
+"92",
+"JUAN MANUEL MONTILLA",
+"CPBM",
+"1"
+],
+[
+"93",
+"MARCOS MONTILLA",
+"CPBM",
+"1"
+],
+[
+"94",
+"VALENTÍN STIRPA",
+"CPBM",
+"1"
+],
+[
+"95",
+"VALENTÍN CAPRIOLI",
+"CPBM",
+"1"
+],
+[
+"96",
+"PEDRO MARTÍNEZ",
+"CPBM",
+"1"
+],
+[
+"97",
+"TIAGO GILI",
+"LICEO",
+"1"
+],
+[
+"98",
+"ÁLVARO OYONARTE",
+"LICEO",
+"1"
+],
+[
+"99",
+"TOMÁS DRIS",
+"LICEO",
+"1"
+],
+[
+"100",
+"RAMIRO GASSULL",
+"LICEO",
+"1"
+],
+[
+"101",
+"PEDRO LÉRTORA",
+"LOS TORDOS",
+"1"
+],
+[
+"102",
+"FRANCISCO GALDEANO",
+"LOS TORDOS",
+"1"
+],
+[
+"103",
+"VALENTÍN MIRANDA",
+"LOS TORDOS",
+"1"
+],
+[
+"104",
+"LAUTARO VARELA",
+"LOS TORDOS",
+"1"
+],
+[
+"105",
+"ANGELO LIZZOLA",
+"LOS TORDOS",
+"1"
+],
+[
+"106",
+"FACUNDO DÍAZ",
+"LOS TORDOS",
+"1"
+],
+[
+"107",
+"MARTÍN SANTIAGO",
+"LOS TORDOS",
+"1"
+],
+[
+"108",
+"JUAN MANUEL VIVAS",
+"LOS TORDOS",
+"1"
+],
+[
+"109",
+"MARCOS CASSONE",
+"LOS TORDOS",
+"1"
+],
+[
+"110",
+"GONZALO BERTRANOU",
+"LOS TORDOS",
+"1"
+],
+[
+"111",
+"ENZO FILICE",
+"LOS TORDOS",
+"1"
+],
+[
+"112",
+"JUAN DE LA CRUZ CALLE",
+"MARISTA",
+"1"
+],
+[
+"113",
+"JUAN PABLO SORIA",
+"MARISTA",
+"1"
+],
+[
+"114",
+"RAFAEL CARDOZO",
+"MARISTA",
+"1"
+],
+[
+"115",
+"GABRIEL PRONCE",
+"MARISTA",
+"1"
+],
+[
+"116",
+"OCTAVIO SORIA",
+"MARISTA",
+"1"
+],
+[
+"117",
+"LUCCA FILIZZOLA",
+"MARISTA",
+"1"
+],
+[
+"118",
+"ANTONIO FERNÁNDEZ",
+"MARISTA",
+"1"
+],
+[
+"119",
+"MARCOS PORRO",
+"MARISTA",
+"1"
+],
+[
+"120",
+"BAUTISTA CURTO",
+"MARISTA",
+"1"
+],
+[
+"121",
+"BENAJMÍN FILIZZOLA",
+"MARISTA",
+"1"
+],
+[
+"122",
+"LISANDRO SOSA",
+"MARISTA",
+"1"
+],
+[
+"123",
+"JULIÁN GUEVARA",
+"MARISTA",
+"1"
+],
+[
+"124",
+"LUCIANO FARIELLO",
+"MARISTA",
+"1"
+],
+[
+"125",
+"GERÓNIMO TEJADA",
+"MARISTA",
+"1"
+],
+[
+"126",
+"IGNACIO LABORDE",
+"MARISTA",
+"1"
+],
+[
+"127",
+"VALENTÍN GOZÁLVEZ",
+"MARISTA",
+"1"
+],
+[
+"128",
+"BORJA FILIZZOLA",
+"MARISTA",
+"1"
+],
+[
+"129",
+"LAUTARO STURNIOLO",
+"MARISTA",
+"1"
+],
+[
+"130",
+"TOMÁS GÓMEZ",
+"MARISTA",
+"1"
+],
+[
+"131",
+"JEREMÍAS RIQUELME",
+"MENDOZA",
+"1"
+],
+[
+"132",
+"AGUSTÍN LOMBARDO",
+"MENDOZA",
+"1"
+],
+[
+"133",
+"SANTIAGO DAPAS",
+"MENDOZA",
+"1"
+],
+[
+"134",
+"MARIANO CICCONI",
+"MENDOZA",
+"1"
+],
+[
+"135",
+"SANTIAGO PUPPATO",
+"MENDOZA",
+"1"
+],
+[
+"136",
+"JUAN PABLO ÁLVAREZ",
+"MENDOZA",
+"1"
+],
+[
+"137",
+"ANGELO CIPOLLA",
+"MENDOZA",
+"1"
+],
+[
+"138",
+"JOAQUÍN BRIDGE",
+"SAN JUAN",
+"1"
+],
+[
+"139",
+"MARIANO REINOSO",
+"SAN JUAN",
+"1"
+],
+[
+"140",
+"SANTIAGO PEÑAFORT",
+"SAN JUAN",
+"1"
+],
+[
+"141",
+"JUAN PABLO VENIER",
+"SAN JUAN",
+"1"
+],
+[
+"142",
+"JUAN CRUZ YUBA",
+"SAN JUAN",
+"1"
+],
+[
+"143",
+"ALEJO OLGUÍN",
+"SAN JUAN",
+"1"
+],
+[
+"144",
+"RODRIGO LICCIARDI",
+"SAN JUAN",
+"1"
+],
+[
+"145",
+"FRANCISCO NIEVAS",
+"SAN JUAN",
+"1"
+],
+[
+"146",
+"BAUTISTA CÚNEO",
+"SAN JUAN",
+"1"
+],
+[
+"147",
+"MAURICIO GODOY",
+"TEQÜE",
+"1"
+],
+[
+"148",
+"ESTEBAN FERNÁMDEZ",
+"TEQÜE",
+"1"
+],
+[
+"149",
+"LUCAS SALGUERO",
+"TEQÜE",
+"1"
+],
+[
+"150",
+"GASTÓN GIACHINI",
+"TEQÜE",
+"1"
+],
+[
+"151",
+"GONZALO PÉREZ",
+"TEQÜE",
+"1"
+],
+[
+"152",
+"JUAN MANUEL MAURE",
+"TEQÜE",
+"1"
+],
+[
+"153",
+"SANTIAGO ACHEM",
+"UNIVERSITARIO SJ",
+"1"
+],
+[
+"154",
+"BAUTISTA SUAREZ",
+"UNIVERSITARIO SJ",
+"1"
+],
+[
+"155",
+"LAUTARO TORCIVIA",
+"UNIVERSITARIO SJ",
+"1"
+],
+[
+"156",
+"LUCAS BULÓZ",
+"UNIVERSITARIO SJ",
+"1"
+],
+[
+"157",
+"SANTIAGO BALDI",
+"UNIVERSITARIO SJ",
+"1"
+],
+[
+"158",
+"GUILLERMO QUIROGA",
+"UNIVERSITARIO SJ",
+"1"
+],
+[
+"159",
+"JUAN MARTIN UZAIR",
+"UNIVERSITARIO SJ",
+"1"
+],
+[
+"160",
+"TOMÁS SÁNCHEZ",
+"UNIVERSITARIO SJ",
+"1"
+],
+[
+"161",
+"ALAN PEDROL",
+"UNIVERSITARIO SJ",
+"1"
+],
+[
+"162",
+"VALENTINO SOLDA",
+"UNIVERSITARIO SJ",
+"1"
+],
+[
+"163",
+"JAVIER FERNÁNDEZ",
+"UNIVERSITARIO SJ",
+"1"
+]
+],
+"equipos_fecha12": [
+[
+"Equipos",
+"Tantos",
+"Tries",
+"TPenal",
+"Conv",
+"Penales",
+"Drop",
+"Amarillas",
+"Rojas"
+],
+[
+"MARISTA",
+"47",
+"7",
+"0",
+"6",
+"0",
+"0",
+"0",
+"0"
+],
+[
+"LOS TORDOS",
+"40",
+"6",
+"0",
+"5",
+"0",
+"0",
+"3",
+"1"
+],
+[
+"SAN JUAN",
+"35",
+"5",
+"0",
+"5",
+"0",
+"0",
+"1",
+"0"
+],
+[
+"LICEO",
+"34",
+"4",
+"1",
+"2",
+"1",
+"0",
+"0",
+"0"
+],
+[
+"UNIVERSITARIO",
+"31",
+"5",
+"0",
+"3",
+"0",
+"0",
+"0",
+"0"
+],
+[
+"CPBM",
+"31",
+"4",
+"1",
+"2",
+"0",
+"0",
+"2",
+"0"
+],
+[
+"TEQÜE",
+"26",
+"3",
+"0",
+"1",
+"3",
+"0",
+"2",
+"1"
+],
+[
+"MENDOZA",
+"20",
+"2",
+"0",
+"2",
+"2",
+"0",
+"0",
+"0"
+],
+[
+"TOTALES",
+"264",
+"36",
+"2",
+"26",
+"6",
+"0",
+"8",
+"2"
+]
+],
+"equipos_total": [
+[
+"Equipos",
+"Tantos",
+"Tries",
+"TryPenal",
+"Conv",
+"Penales",
+"Drops",
+"Amarillas",
+"Rojas"
+],
+[
+"LOS TORDOS",
+"523",
+"69",
+"1",
+"61",
+"15",
+"0",
+"17",
+"4"
+],
+[
+"LICEO",
+"433",
+"60",
+"2",
+"43",
+"11",
+"0",
+"16",
+"0"
+],
+[
+"MARISTA",
+"417",
+"62",
+"3",
+"40",
+"4",
+"0",
+"8",
+"0"
+],
+[
+"UNIVERSITARIO SJ",
+"384",
+"52",
+"1",
+"35",
+"14",
+"1",
+"9",
+"0"
+],
+[
+"MENDOZA",
+"380",
+"49",
+"3",
+"36",
+"14",
+"0",
+"9",
+"0"
+],
+[
+"SAN JUAN",
+"327",
+"40",
+"1",
+"26",
+"23",
+"0",
+"9",
+"0"
+],
+[
+"CPBM",
+"276",
+"29",
+"1",
+"17",
+"21",
+"0",
+"10",
+"2"
+],
+[
+"TEQÜE",
+"205",
+"25",
+"2",
+"18",
+"10",
+"0",
+"8",
+"2"
+],
+[
+"TOTALES",
+"2945",
+"386",
+"14",
+"276",
+"112",
+"1",
+"86",
+"8"
+]
+]
+}

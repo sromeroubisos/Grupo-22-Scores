@@ -1,0 +1,250 @@
+{
+ "descripcion": "Top 14 semifinal 1 · formaciones (placa URBA)",
+ "partidos": [
+  {
+   "id": "07e867ec-e32e-42ee-9487-c4092fce1948",
+   "rotulo": "club-newman vs asoc-alumni · Top 14 · Semifinal 1",
+   "local": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Miguel Prince",
+      "id": "093d4ad1-6705-4920-ab5c-e015474702a7"
+     },
+     {
+      "numero": 2,
+      "nombre": "Beltrán Salese",
+      "id": "e2e4a2e5-1dcd-401c-ae31-1fbaf4c58025"
+     },
+     {
+      "numero": 3,
+      "nombre": "Bautista Bosch",
+      "id": "a7772b2c-de21-44bf-b339-a1c8d04b765e"
+     },
+     {
+      "numero": 4,
+      "nombre": "Pablo Cardinal",
+      "id": "7ab20c50-f9e0-4f23-b615-1ebc05553a76"
+     },
+     {
+      "numero": 5,
+      "nombre": "Alejandro Urtubey",
+      "id": "27d71389-7e2d-4bfe-9bc6-8b91d8e2c771"
+     },
+     {
+      "numero": 6,
+      "nombre": "Faustino Santarelli"
+     },
+     {
+      "numero": 7,
+      "nombre": "Joaquín De la Vega",
+      "id": "04da31e4-4e24-4bbb-9870-fa960d02f6e9"
+     },
+     {
+      "numero": 8,
+      "nombre": "Rodrigo Díaz de Vivar",
+      "id": "477d03b5-ab28-4310-853c-768c2052bbee"
+     },
+     {
+      "numero": 9,
+      "nombre": "Lucas Marguery",
+      "id": "b7a23015-6cf1-4e37-b131-629248f9355f"
+     },
+     {
+      "numero": 10,
+      "nombre": "Gonzalo Gutiérrez Taboada",
+      "id": "9a70ee08-1a65-4323-a977-fbd9eddce849"
+     },
+     {
+      "numero": 11,
+      "nombre": "Justo Ortiz Basualdo",
+      "id": "0baf326a-e4f2-4785-8c52-4a1c987feb9d"
+     },
+     {
+      "numero": 12,
+      "nombre": "Benjamín Lanfranco",
+      "id": "adfbeb2f-67ef-4c41-af30-e9c47f54b49d"
+     },
+     {
+      "numero": 13,
+      "nombre": "Simón Prince",
+      "id": "36cb75c1-0a33-4e3e-814d-98b69f300396"
+     },
+     {
+      "numero": 14,
+      "nombre": "Santiago Marolda",
+      "id": "784130e2-ae3c-48f9-adfa-cdec448c3dd4"
+     },
+     {
+      "numero": 15,
+      "nombre": "Juan Bautista Daireaux",
+      "id": "8c2773d9-3054-409b-b525-57e080bdadf9"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Fermín Perkins"
+     },
+     {
+      "numero": 17,
+      "nombre": "Isidro Bosch",
+      "id": "9a12e54d-9a24-44c5-9943-6608835dcf72"
+     },
+     {
+      "numero": 18,
+      "nombre": "Manuel Lozano",
+      "id": "4a02fbe3-24ea-47b1-853a-622fe7cc05bd"
+     },
+     {
+      "numero": 19,
+      "nombre": "Francisco Lascombes",
+      "id": "477538f6-8f4f-4fc7-91fc-62c035ff06e6"
+     },
+     {
+      "numero": 20,
+      "nombre": "Jerónimo Ureta",
+      "id": "3d015310-3994-4c9e-9091-1f068aa0197c"
+     },
+     {
+      "numero": 21,
+      "nombre": "Lucas Nava",
+      "id": "d455a56e-8f7d-497d-95cd-e61b6fbdfc2c"
+     },
+     {
+      "numero": 22,
+      "nombre": "Florencio Llerena",
+      "id": "d299551b-0bf5-4fc7-9578-e9a7f98e18a1"
+     },
+     {
+      "numero": 23,
+      "nombre": "Jerónimo Ulloa",
+      "id": "bb2410c1-7aac-4c3e-b60f-cdbd3bfe5cbe"
+     }
+    ],
+    "nombre": "club-newman"
+   },
+   "visitante": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Juan Cruz Bottoni",
+      "id": "9438e171-efdc-48bb-a8eb-54aa7276230e"
+     },
+     {
+      "numero": 2,
+      "nombre": "Tomás Bivort",
+      "id": "ace7e183-b65e-48b6-b997-c8c35339eca1"
+     },
+     {
+      "numero": 3,
+      "nombre": "Bautista Vidal",
+      "id": "d3d235a9-ab0a-4640-995c-1581451393aa"
+     },
+     {
+      "numero": 4,
+      "nombre": "Manuel Mora",
+      "id": "2c4e8d90-35b8-432b-8aa2-c12873fcd9b0"
+     },
+     {
+      "numero": 5,
+      "nombre": "Sebastián Fauvé",
+      "id": "abdfd061-4938-49a7-9261-7e446ae3dbf5"
+     },
+     {
+      "numero": 6,
+      "nombre": "Ignacio Cubilla",
+      "id": "f026b006-de14-466e-a2ed-315219affd99"
+     },
+     {
+      "numero": 7,
+      "nombre": "Patricio Anderson",
+      "id": "39bb41b3-8f92-4346-89f6-6346403a50dd"
+     },
+     {
+      "numero": 8,
+      "nombre": "Santiago Neyra",
+      "id": "b37339cc-5815-451c-b9e6-31ef6ca3ea00"
+     },
+     {
+      "numero": 9,
+      "nombre": "Rocco Testoni",
+      "id": "60a27131-d5ac-4d19-9734-e371fce165e9"
+     },
+     {
+      "numero": 10,
+      "nombre": "Joaquín Díaz Luzzi",
+      "id": "4a40e34d-c40a-42ec-8f28-032a1fe34709"
+     },
+     {
+      "numero": 11,
+      "nombre": "Mateo Castanier",
+      "id": "2388b3ca-ffbc-4662-96c8-d0c49b6bfc17"
+     },
+     {
+      "numero": 12,
+      "nombre": "Filippo Testoni",
+      "id": "5c19156a-5755-469e-9fa7-7b52ec299db9"
+     },
+     {
+      "numero": 13,
+      "nombre": "Tomás Cubilla",
+      "id": "fee016a4-50e3-4f87-b374-790ebd2976fa"
+     },
+     {
+      "numero": 14,
+      "nombre": "Ramón Fuentes",
+      "id": "74a24bd2-979f-497e-a2ec-15e0661648e0"
+     },
+     {
+      "numero": 15,
+      "nombre": "Bautista Canzani",
+      "id": "ae98f6f9-08f3-42c2-9703-d803a9a08592"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Máximo Castrillo",
+      "id": "5e8c699b-ab08-4623-aec7-bc359c4e2e73"
+     },
+     {
+      "numero": 17,
+      "nombre": "Máximo Lamelas",
+      "id": "31008c8c-b023-4e22-960e-d3775bee34fb"
+     },
+     {
+      "numero": 18,
+      "nombre": "Francisco Bottoni",
+      "id": "079a58ba-24bf-4405-b496-9d5a22f43993"
+     },
+     {
+      "numero": 19,
+      "nombre": "Santiago Alduncin",
+      "id": "9016c3d0-4475-48ec-89e4-c94de541b716"
+     },
+     {
+      "numero": 20,
+      "nombre": "Santiago Montagner",
+      "id": "46e7c1b3-9bbc-43af-931e-392ad29ddf02"
+     },
+     {
+      "numero": 21,
+      "nombre": "Joaquín Pascual"
+     },
+     {
+      "numero": 22,
+      "nombre": "Tomás Passerotti",
+      "id": "8ddab695-181b-4c56-b272-0b6bd8fe8b45"
+     },
+     {
+      "numero": 23,
+      "nombre": "Santiago González I."
+     }
+    ],
+    "nombre": "asoc-alumni"
+   },
+   "eventos": []
+  }
+ ]
+}

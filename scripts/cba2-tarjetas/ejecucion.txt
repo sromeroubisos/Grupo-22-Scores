@@ -1,0 +1,152 @@
+CBA 2 · tarjetas UCR 22-25/10 (M17 A semi, M16 A 3er puesto, Desarrollo M2 Plata, Copa Oro Desarrollo, M19 B 5to)
+
+Urú Curé vs Universitario · M17 A semifinal · tarjeta 327338  ·  4bacc6ba-6348-4c0e-ae75-07b92ec6f7f8
+  local     · — · 23 jugadores · 0 con ficha fijada
+  visitante · — · 23 jugadores · 0 con ficha fijada
+  eventos   · 26
+    min  7 (1T 7) local     try          Valentin Lopez Lisa
+    min  8 (1T 8) local     conversion   Agusrín Magri
+    min 11 (1T 11) local     try          Facundo Mosso
+    min 12 (1T 12) local     conversion   Agusrín Magri
+    min 29 (1T 29) visitante try          Santiago Freytes Kippes
+    min 29 (1T 29) visitante conversion   Santiago Freytes Kippes
+    min 32 (1T 32) local     try          Valentin Lopez Lisa
+    min 33 (1T 33) local     conversion   Agusrín Magri
+    min 33 (1T 33) local     substitution Isa Santino Saleme Garello
+    min 34 (1T 34) local     try          Agustin Adan
+    min 34 (1T 34) visitante card_yellow  Teo Zurita
+    min 55 (2T 15) visitante try          Ignacio Cavalieri
+    min 55 (2T 15) visitante conversion   Ignacio Ojeda
+    min 56 (2T 16) local     substitution Mirko Bellina Caymes
+    min 61 (2T 21) local     substitution Agusrín Magri
+    min 61 (2T 21) local     card_yellow  Santiago Luis Alfonso
+    min 62 (2T 22) local     try          Agustin Adan
+    min 62 (2T 22) visitante try          Santiago Freytes Kippes
+    min 62 (2T 22) visitante conversion   Santiago Freytes Kippes
+    min 63 (2T 23) local     conversion   Augusto Calderon Pallotti
+    min 65 (2T 25) visitante substitution Augusto Catania Barbanoo
+    min 65 (2T 25) visitante substitution Maximo Yammal
+    min 65 (2T 25) visitante substitution Juan Tomás Paez
+    min 71 (2T 31) local     substitution Santiago Luis Alfonso
+    min 71 (2T 31) local     substitution Joaquin Marrero Las Heras
+    min 72 (2T 32) visitante substitution Lautaro Arguello
+  marcador  · eventos 33-21 · guardado 33-21
+  tries     · 5-3 (guardado —-—)
+  guardado  · 23 local · 23 visitante · 26 eventos
+
+Villa General Belgrano vs Unión Oncativo · Liga Desarrollo Copa Oro F3 · tarjeta 326218  ·  40733327-224b-4746-9333-5f1c117fce78
+  local     · — · 25 jugadores · 0 con ficha fijada
+  visitante · — · 23 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min  9 (1T 9) visitante try          Aguilar Elias
+    min 10 (1T 10) visitante conversion   Adrian Santiago Diaz
+    min 28 (1T 28) local     try          Juan Ramirez
+    min 28 (1T 28) local     conversion   Damián Funes
+    min 40 (1T 40) local     try          Lautaro Ramirez
+    min 40 (1T 40) local     conversion   Cristian Federico Ramírez
+    min 85 (2T 45) visitante penalty_try  
+    min 88 (2T 48) visitante try          Fabricio Carolini
+    min 88 (2T 48) visitante conversion   Adrian Santiago Diaz
+    min 90 (2T 50) visitante substitution Brian Sala
+    min 94 (2T 54) local     substitution Ezequiel Ceballos Larrea
+    min 94 (2T 54) local     substitution Guillermo Corti
+    min 103 (2T 63) visitante substitution Fabricio Carolini
+    min 103 (2T 63) visitante substitution Federico Savio
+    min 111 (2T 71) local     penalty_goal Cristian Federico Ramírez
+    min 116 (2T 76) local     substitution Nicolas Facchin
+    min 118 (2T 78) visitante try          Santiago Fraresso
+  marcador  · eventos 17-26 · guardado 17-26
+  tries     · 2-4 (guardado —-—)
+  guardado  · 25 local · 23 visitante · 17 eventos
+
+Combinado Capital vs Buitres/S. Basilio/Mackenna/Mirage · Desarrollo M2 Plata F4 · tarjeta 327352  ·  65a53217-4185-4cb9-9cb9-b377a909f1b6
+  local     · — · 18 jugadores · 0 con ficha fijada
+  visitante · — · 17 jugadores · 0 con ficha fijada
+  eventos   · 9
+    min 12 (1T 12) visitante try          Juan Cruz Zabala
+    min 12 (1T 12) visitante try          Román Figueroa
+    min 13 (1T 13) visitante conversion   Juan Cruz Zabala
+    min 13 (1T 13) visitante injury       Alan Esequiel Bustamante
+    min 16 (1T 16) visitante try          Juan Cruz Zabala
+    min 43 (2T 3) local     try          Gonzalo Joaquin Molina
+    min 61 (2T 21) local     try          Nahuel Montero Segovia
+    min 61 (2T 21) local     conversion   Gonzalo Joaquin Molina
+    min 65 (2T 25) visitante try          Jorge Gaston Tello
+  marcador  · eventos 12-22 · guardado 12-22
+  tries     · 2-4 (guardado —-—)
+  guardado  · 18 local · 17 visitante · 9 eventos
+
+Palermo Bajo vs Córdoba Athletic · M16 A 3er puesto · tarjeta 327344  ·  b0d166ca-68af-475f-adb2-9e678250c051
+  local     · — · 23 jugadores · 0 con ficha fijada
+  visitante · — · 22 jugadores · 0 con ficha fijada
+  eventos   · 30
+    min  6 (1T 6) local     try          Lorenzo Varrone
+    min  6 (1T 6) local     conversion   Juan Pedro Banús
+    min 11 (1T 11) visitante try          Valentino Chiappara
+    min 11 (1T 11) visitante conversion   Manuel Gonzalez D'amato
+    min 17 (1T 17) local     try          Lorenzo Varrone
+    min 17 (1T 17) local     conversion   Juan Pedro Banús
+    min 29 (1T 29) visitante try          Lucas Nahuel Velez
+    min 37 (1T 37) local     try          Antonio Armando
+    min 45 (2T 5) local     try          Alejo Cordoba
+    min 45 (2T 5) local     conversion   Juan Pedro Banús
+    min 45 (2T 5) visitante substitution Camilo Vitanza Frank
+    min 45 (2T 5) visitante substitution Caetano Bella Adamo
+    min 54 (2T 14) local     substitution Enzo Fassetta Arguello
+    min 54 (2T 14) local     substitution Agustín Griffo Zaradnik
+    min 54 (2T 14) local     substitution Lorenzo Diaz Re
+    min 54 (2T 14) local     substitution Mateo Suárez Croce
+    min 54 (2T 14) local     substitution Leon Laporte
+    min 58 (2T 18) visitante substitution Máximo Tomas Quevedo
+    min 58 (2T 18) visitante try          Manuel Gonzalez D'amato
+    min 61 (2T 21) local     try          Darian González Colazo
+    min 61 (2T 21) local     conversion   Juan Pedro Banús
+    min 61 (2T 21) visitante substitution Luca Bautista De La Iglesia
+    min 61 (2T 21) visitante substitution Felipe Hak
+    min 68 (2T 28) local     substitution Matteo Terminiello
+    min 68 (2T 28) local     substitution Lucas Ezequiel Ferrero Ramirez
+    min 68 (2T 28) visitante substitution Feix Fernandez Valle
+    min 70 (2T 30) visitante substitution Franco Emmanuel Olivetto
+    min 72 (2T 32) visitante substitution Lucas Nahuel Velez
+    min 77 (2T 37) visitante try          Bautista Martinat Bonetto
+    min 77 (2T 37) visitante conversion   Manuel Gonzalez D'amato
+  marcador  · eventos 33-24 · guardado 33-24
+  tries     · 5-4 (guardado —-—)
+  guardado  · 23 local · 22 visitante · 30 eventos
+
+Córdoba Athletic B vs Córdoba RC · M19 B 5to puesto · tarjeta 327335  ·  aff23241-b492-4aea-bd69-0433157716de
+  local     · — · 23 jugadores · 0 con ficha fijada
+  visitante · — · 23 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min  3 (1T 3) visitante try          Valentín Zacarías
+    min 12 (1T 12) local     try          Olivier Courtis
+    min 13 (1T 13) local     conversion   Salvador Acuña
+    min 17 (1T 17) local     try          Francisco Racedo
+    min 18 (1T 18) local     conversion   Salvador Acuña
+    min 26 (1T 26) local     card_yellow  Samuel Carranza
+    min 27 (1T 27) visitante try          Valentín Zacarías
+    min 47 (2T 7) local     try          Mateo Godoy Brupbacher
+    min 47 (2T 7) local     substitution Santiago Vedia
+    min 47 (2T 7) local     substitution Lautaro Bisbal
+    min 47 (2T 7) local     substitution Mateo Nicolas Ragazzini
+    min 52 (2T 12) visitante substitution Joel Manuel Gonzalez
+    min 52 (2T 12) visitante substitution Emiliano Barreras
+    min 54 (2T 14) local     substitution Lautaro Castex
+    min 54 (2T 14) local     substitution Mauricio Bazan Gonzalez
+    min 55 (2T 15) local     substitution Jeremias Gordillo Molina
+    min 55 (2T 15) local     substitution Santiago Ojeda
+    min 59 (2T 19) visitante substitution Tomas Agustin Lastra Flores
+    min 66 (2T 26) visitante try          Alvaro Quiroga
+    min 66 (2T 26) visitante conversion   Nicolas Plans
+    min 70 (2T 30) local     try          Alejo Iturria
+    min 71 (2T 31) local     conversion   Salvador Acuña
+    min 72 (2T 32) local     try          Facundo Isao Mishima
+    min 73 (2T 33) local     conversion   Salvador Acuña
+    min 75 (2T 35) local     try          Tiziano Barco Prozco
+    min 76 (2T 36) local     conversion   Salvador Acuña
+    min 80 (2T 40) local     substitution Santiago Agustin Manzur
+  marcador  · eventos 40-17 · guardado 40-17
+  tries     · 6-3 (guardado —-—)
+  guardado  · 23 local · 23 visitante · 27 eventos
+
+listo · 5 partidos

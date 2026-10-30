@@ -1,0 +1,3217 @@
+[
+ {
+  "sra": {
+   "id": "00c70c56-dfbe-4303-9b7b-3fd8a2b3dbb3",
+   "club_id": "penarol",
+   "full_name": "Joaquín Myszka"
+  },
+  "otras": [
+   {
+    "id": "49418d47-82c6-471f-9eb2-bb5ea0bd8544",
+    "club_id": "uruguay-xv",
+    "full_name": "Joaquín Myszka"
+   }
+  ],
+  "partidos_sra": 11
+ },
+ {
+  "sra": {
+   "id": "01015be1-69a9-4e4f-8397-1afda5b5e05c",
+   "club_id": "dogos-xv",
+   "full_name": "Galo Fernández"
+  },
+  "otras": [
+   {
+    "id": "9ad1cea7-6611-4592-95a4-bd09980d6b90",
+    "club_id": "club-universitario-de-cordoba",
+    "full_name": "Galo Fernández"
+   }
+  ],
+  "partidos_sra": 14
+ },
+ {
+  "sra": {
+   "id": "010dd774-42f4-4814-a9b2-b8d1446ddd73",
+   "club_id": "selknam",
+   "full_name": "Marcelo Torrealba"
+  },
+  "otras": [
+   {
+    "id": "83d397db-becc-47d5-95e2-504c741a6d19",
+    "club_id": "chile-xv",
+    "full_name": "Marcelo Torrealba"
+   }
+  ],
+  "partidos_sra": 10
+ },
+ {
+  "sra": {
+   "id": "016d46f0-f271-49eb-b290-3b8e9167283a",
+   "club_id": "tarucas",
+   "full_name": "Thiago Sbrocco"
+  },
+  "otras": [
+   {
+    "id": "2ec5d247-296b-4a56-b3d0-610bc4efde1f",
+    "club_id": "argentina-xv",
+    "full_name": "Thiago Sbrocco"
+   },
+   {
+    "id": "c69e7bdc-ca70-4583-b526-0c0e0f49e7ab",
+    "club_id": "universitario-de-tucuman",
+    "full_name": "Thiago Sbrocco"
+   }
+  ],
+  "partidos_sra": 15
+ },
+ {
+  "sra": {
+   "id": "019d45e1-5382-4eb9-b87d-eba4393f5ab1",
+   "club_id": "penarol",
+   "full_name": "Justo Ferrario"
+  },
+  "otras": [
+   {
+    "id": "2fc9a159-c190-4bf4-ba5d-16db1b5198f9",
+    "club_id": "uruguay-xv",
+    "full_name": "Justo Ferrario"
+   }
+  ],
+  "partidos_sra": 12
+ },
+ {
+  "sra": {
+   "id": "01a702e3-ac19-4bc0-a407-f94cd57bb625",
+   "club_id": "penarol",
+   "full_name": "Ignacio Merli"
+  },
+  "otras": [
+   {
+    "id": "05dc6c8c-b31f-4b64-a76c-b5ba4eaf9597",
+    "club_id": "uruguay-u20",
+    "full_name": "Ignacio Merli"
+   }
+  ],
+  "partidos_sra": 1
+ },
+ {
+  "sra": {
+   "id": "0c6a2b65-d2d6-404e-8e13-3d158487ecc9",
+   "club_id": "capibaras-xv",
+   "full_name": "Felipe Villagrán"
+  },
+  "otras": [
+   {
+    "id": "af38435f-2d23-498a-bab7-a842672cd984",
+    "club_id": "argentina-xv",
+    "full_name": "Felipe Villagrán"
+   },
+   {
+    "id": "d130f762-ebce-4492-b3ba-beaa14598739",
+    "club_id": "estudiantes-de-parana",
+    "full_name": "Felipe Villagrán"
+   }
+  ],
+  "partidos_sra": 14
+ },
+ {
+  "sra": {
+   "id": "11c152d9-512b-402d-bd69-045c26edb87a",
+   "club_id": "yacare-xv",
+   "full_name": "Mateo Gasparotti"
+  },
+  "otras": [
+   {
+    "id": "cda747b9-b988-4261-bf41-f61078751bcd",
+    "club_id": "belgrano-athletic",
+    "full_name": "Mateo Gasparotti"
+   }
+  ],
+  "partidos_sra": 14
+ },
+ {
+  "sra": {
+   "id": "138cc019-1cea-4874-af90-ce1476d1523c",
+   "club_id": "yacare-xv",
+   "full_name": "Ramiro Amarilla"
+  },
+  "otras": [
+   {
+    "id": "d28063f7-d687-4968-a36b-4ef667106492",
+    "club_id": "paraguay",
+    "full_name": "Ramiro Amarilla"
+   },
+   {
+    "id": "f86f4959-b246-44af-a33c-e570aaab99c4",
+    "club_id": "san-jose",
+    "full_name": "Ramiro Amarilla"
+   }
+  ],
+  "partidos_sra": 11
+ },
+ {
+  "sra": {
+   "id": "154c0f57-2913-4f78-9bf0-2ff074bbf3e9",
+   "club_id": "selknam",
+   "full_name": "Ernesto Tchimino"
+  },
+  "otras": [
+   {
+    "id": "72a9e3c6-5d62-4eac-9d21-f2a0e31fb331",
+    "club_id": "chile-xv",
+    "full_name": "Ernesto Tchimino"
+   }
+  ],
+  "partidos_sra": 8
+ },
+ {
+  "sra": {
+   "id": "17a19e38-4214-4e12-86a5-8c6c1df516fc",
+   "club_id": "capibaras-xv",
+   "full_name": "Juan Lovell"
+  },
+  "otras": [
+   {
+    "id": "f90b3859-572e-455b-bdd5-3e31504bfdd8",
+    "club_id": "jockey-club-de-rosario",
+    "full_name": "Juan Lovell"
+   }
+  ],
+  "partidos_sra": 15
+ },
+ {
+  "sra": {
+   "id": "1920a929-49d2-4821-9a01-31131df67a7d",
+   "club_id": "capibaras-xv",
+   "full_name": "Martín Vaca"
+  },
+  "otras": [
+   {
+    "id": "88462fae-9cda-44e3-881e-a87e76590218",
+    "club_id": "jockey-club-de-villa-maria",
+    "full_name": "Martín Vaca"
+   },
+   {
+    "id": "d94b62a3-0261-4f3c-9d06-adf27b48de5c",
+    "club_id": "argentina-xv",
+    "full_name": "Martín Vaca"
+   }
+  ],
+  "partidos_sra": 9
+ },
+ {
+  "sra": {
+   "id": "1953b3b5-44f8-4e57-b38d-d62eb3fadd77",
+   "club_id": "yacare-xv",
+   "full_name": "Gonzalo Del Pazo"
+  },
+  "otras": [
+   {
+    "id": "2c6826d8-b5c5-491e-946c-320d87bc8442",
+    "club_id": "santa-fe-r-c",
+    "full_name": "Gonzalo Del Pazo"
+   }
+  ],
+  "partidos_sra": 10
+ },
+ {
+  "sra": {
+   "id": "1c06db99-080e-4143-82e1-3a1c302c925b",
+   "club_id": "dogos-xv",
+   "full_name": "Luciano Avaca"
+  },
+  "otras": [
+   {
+    "id": "73b7d000-ad85-47b6-b861-fcdd02081d6a",
+    "club_id": "argentina-m20",
+    "full_name": "LUCIANO AVACA"
+   },
+   {
+    "id": "bb421072-8087-4ecb-8ca0-888f87782367",
+    "club_id": "argentina-xv",
+    "full_name": "Luciano Avaca"
+   }
+  ],
+  "partidos_sra": 4
+ },
+ {
+  "sra": {
+   "id": "1c2ded20-6ce6-4693-866a-19c6bae478f7",
+   "club_id": "tarucas",
+   "full_name": "Matías Orlando"
+  },
+  "otras": [
+   {
+    "id": "376e5d2c-2718-4ca2-9c1a-b330fa29e4cf",
+    "club_id": "huirapuca",
+    "full_name": "Matias Orlando"
+   }
+  ],
+  "partidos_sra": 14
+ },
+ {
+  "sra": {
+   "id": "1f52e3e4-35f7-4eb6-ae7f-1facf1250dcf",
+   "club_id": "capibaras-xv",
+   "full_name": "Ignacio Zabella"
+  },
+  "otras": [
+   {
+    "id": "1a3c1678-31d0-4a96-a1ed-cc8516a547d7",
+    "club_id": "argentina-m20",
+    "full_name": "IGNACIO ZABELLA"
+   },
+   {
+    "id": "c4b4c912-d212-41f6-b601-76dd95c3ae97",
+    "club_id": "universitario-de-rosario",
+    "full_name": "Ignacio Zabella"
+   }
+  ],
+  "partidos_sra": 1
+ },
+ {
+  "sra": {
+   "id": "216894cf-35d9-4743-aacd-08534c716781",
+   "club_id": "pampas",
+   "full_name": "Juan Pedro Bernasconi"
+  },
+  "otras": [
+   {
+    "id": "02c8036b-d85d-4958-baac-ccf44ad6fb13",
+    "club_id": "la-plata",
+    "full_name": "Juan Pedro Bernasconi"
+   },
+   {
+    "id": "a5fdd09c-28b4-48e5-9465-dbe57aea70b7",
+    "club_id": "argentina-xv",
+    "full_name": "Juan Pedro Bernasconi"
+   }
+  ],
+  "partidos_sra": 12
+ },
+ {
+  "sra": {
+   "id": "22175d65-9876-4997-ba85-04e22a51014c",
+   "club_id": "selknam",
+   "full_name": "Tomas Baguley"
+  },
+  "otras": [
+   {
+    "id": "da4e4ec9-7445-4dc8-9b1d-c042771a1985",
+    "club_id": "chile-u20",
+    "full_name": "Tomás Baguley"
+   }
+  ],
+  "partidos_sra": 1
+ },
+ {
+  "sra": {
+   "id": "2222e26d-50e8-40d0-8c9d-ad8bb252db1d",
+   "club_id": "selknam",
+   "full_name": "Santiago Montagner"
+  },
+  "otras": [
+   {
+    "id": "46e7c1b3-9bbc-43af-931e-392ad29ddf02",
+    "club_id": "asoc-alumni",
+    "full_name": "Santiago Montagner"
+   }
+  ],
+  "partidos_sra": 14
+ },
+ {
+  "sra": {
+   "id": "2262e96b-9ca7-4533-addc-308278df0d0c",
+   "club_id": "capibaras-xv",
+   "full_name": "Gino Dicapua"
+  },
+  "otras": [
+   {
+    "id": "302f40cf-18ff-451d-89b3-a1575859aeb7",
+    "club_id": "duendes-r-c",
+    "full_name": "Gino Dicapua"
+   }
+  ],
+  "partidos_sra": 11
+ },
+ {
+  "sra": {
+   "id": "2394eeb0-971d-488b-b043-4f42250bcca8",
+   "club_id": "capibaras-xv",
+   "full_name": "Alejo Sugasti"
+  },
+  "otras": [
+   {
+    "id": "3f6c68d9-873b-46b5-a90d-db93c66f1a06",
+    "club_id": "jockey-club-de-rosario",
+    "full_name": "Alejo Sugasti"
+   },
+   {
+    "id": "3f884ddd-9a5e-4f3a-88a0-0bdea5fc986f",
+    "club_id": "argentina-xv",
+    "full_name": "Alejo Sugasti"
+   }
+  ],
+  "partidos_sra": 14
+ },
+ {
+  "sra": {
+   "id": "25cbf9e8-368d-4f11-a749-eb243c3ab0fc",
+   "club_id": "yacare-xv",
+   "full_name": "Gonzalo Bareiro"
+  },
+  "otras": [
+   {
+    "id": "f8c926f7-c780-4864-82ab-4dc5e820256b",
+    "club_id": "san-jose",
+    "full_name": "Gonzalo Bareiro"
+   }
+  ],
+  "partidos_sra": 14
+ },
+ {
+  "sra": {
+   "id": "297cc19d-aa19-46de-8dbd-d398789efc72",
+   "club_id": "selknam",
+   "full_name": "Matías Garafulic"
+  },
+  "otras": [
+   {
+    "id": "c7a8a203-c67f-4e4e-a811-64c6d5a38ab9",
+    "club_id": "chile-xv",
+    "full_name": "Matías Garafulic"
+   }
+  ],
+  "partidos_sra": 12
+ },
+ {
+  "sra": {
+   "id": "2a38139c-7d9b-46d8-bf10-039b7efb6af1",
+   "club_id": "yacare-xv",
+   "full_name": "Santos María Juarez Estrada"
+  },
+  "otras": [
+   {
+    "id": "9240c615-c186-4110-9d5a-b0963d1a08f8",
+    "club_id": "cordoba-athletic-club",
+    "full_name": "Santos Maria Juarez Estrada"
+   },
+   {
+    "id": "e77aa787-1337-4660-8d67-0fb3395e30e3",
+    "club_id": "cordoba-athletic-club-intermedia",
+    "full_name": "Santos Maria Juarez Estrada"
+   }
+  ],
+  "partidos_sra": 2
+ },
+ {
+  "sra": {
+   "id": "2a786425-99a8-4551-9e2d-bf1e8d0a1291",
+   "club_id": "capibaras-xv",
+   "full_name": "Juan Segundo Huber"
+  },
+  "otras": [
+   {
+    "id": "dfa34aed-ba82-46fa-91ad-1ffddaffbedd",
+    "club_id": "logaritmo-rugby-club",
+    "full_name": "Juan Segundo Huber"
+   }
+  ],
+  "partidos_sra": 4
+ },
+ {
+  "sra": {
+   "id": "2c957eb6-0750-44d1-9619-092194f9fba5",
+   "club_id": "capibaras-xv",
+   "full_name": "Juan Ignacio Rodríguez"
+  },
+  "otras": [
+   {
+    "id": "5d154bb3-6785-4da7-953b-e085e8f0a5fc",
+    "club_id": "liceo-rugby-club",
+    "full_name": "Juan Ignacio Rodríguez"
+   },
+   {
+    "id": "eac0c1d7-bdb7-4112-9838-85453b873c43",
+    "club_id": "universitario-de-rosario",
+    "full_name": "Juan Ignacio Rodriguez"
+   }
+  ],
+  "partidos_sra": 12
+ },
+ {
+  "sra": {
+   "id": "2d841188-07fb-487d-877d-14ceeb1de366",
+   "club_id": "selknam",
+   "full_name": "Santiago Valenzuela"
+  },
+  "otras": [
+   {
+    "id": "01c7cb56-b3e4-4988-80aa-561efe2dd93a",
+    "club_id": "academia-selknam",
+    "full_name": "Santiago Valenzuela"
+   },
+   {
+    "id": "13af67f3-9112-4e4b-b8c0-9013b879630a",
+    "club_id": "chile-xv",
+    "full_name": "Santiago Valenzuela"
+   }
+  ],
+  "partidos_sra": 2
+ },
+ {
+  "sra": {
+   "id": "2f3a5d9e-9aa5-414c-b9ba-0d9ea37cb272",
+   "club_id": "selknam",
+   "full_name": "Alan Pedrol"
+  },
+  "otras": [
+   {
+    "id": "ad9f349e-3044-419d-8214-73f9e072b90c",
+    "club_id": "universitario-de-san-juan",
+    "full_name": "Alan Pedrol"
+   },
+   {
+    "id": "fa04ea1c-87b5-4513-8ed6-442f753b578c",
+    "club_id": "academia-selknam",
+    "full_name": "Alan Pedrol"
+   }
+  ],
+  "partidos_sra": 6
+ },
+ {
+  "sra": {
+   "id": "304f68ef-1863-416e-b346-9c4e613908ee",
+   "club_id": "capibaras-xv",
+   "full_name": "Juan Bautista Baronio"
+  },
+  "otras": [
+   {
+    "id": "49f8c92f-5506-4dd6-9d86-4b90727be297",
+    "club_id": "jockey-club-de-rosario",
+    "full_name": "Juan Bautista Baronio"
+   }
+  ],
+  "partidos_sra": 15
+ },
+ {
+  "sra": {
+   "id": "32b4a74a-2e43-4609-a757-2883c0c29008",
+   "club_id": "selknam",
+   "full_name": "Baltazar Gurruchaga"
+  },
+  "otras": [
+   {
+    "id": "5c4afa85-9881-4865-9f9d-9aa16a5a0fb9",
+    "club_id": "chile-xv",
+    "full_name": "Baltazar Gurruchaga"
+   },
+   {
+    "id": "c71adf15-9e92-48de-b460-526d7d3ad31f",
+    "club_id": "academia-selknam",
+    "full_name": "Baltazar Gurruchaga"
+   }
+  ],
+  "partidos_sra": 4
+ },
+ {
+  "sra": {
+   "id": "32b7784b-edae-4f12-88d3-6057d94214b6",
+   "club_id": "capibaras-xv",
+   "full_name": "Enzo Avaca"
+  },
+  "otras": [
+   {
+    "id": "a0d2398b-6030-4139-bd74-8f92b0fcc748",
+    "club_id": "tala-rugby-club",
+    "full_name": "Enzo Avaca"
+   },
+   {
+    "id": "fc9edcd6-4051-4143-a453-5aca3bf2be77",
+    "club_id": "argentina-xv",
+    "full_name": "Enzo Avaca"
+   }
+  ],
+  "partidos_sra": 11
+ },
+ {
+  "sra": {
+   "id": "335d4b9a-8f2d-4ad6-9c9c-468bab70a7fb",
+   "club_id": "selknam",
+   "full_name": "Rodrigo Fernández"
+  },
+  "otras": [
+   {
+    "id": "612c0417-0288-4f5f-af39-37d18474724a",
+    "club_id": "chile-xv",
+    "full_name": "Rodrigo Fernandez"
+   }
+  ],
+  "partidos_sra": 10
+ },
+ {
+  "sra": {
+   "id": "36a6d689-d01c-490a-9a34-8d9bd9766a66",
+   "club_id": "yacare-xv",
+   "full_name": "Jordi Chavez"
+  },
+  "otras": [
+   {
+    "id": "e33d7902-98a9-4df2-843e-9d8e8c5fe554",
+    "club_id": "paraguay",
+    "full_name": "Jordi Chávez"
+   }
+  ],
+  "partidos_sra": 8
+ },
+ {
+  "sra": {
+   "id": "36aa6fde-14e3-4e81-9ffb-2f088848f73f",
+   "club_id": "dogos-xv",
+   "full_name": "Valentín Gozálvez"
+  },
+  "otras": [
+   {
+    "id": "f029b349-f90f-4ec3-8835-57e31979a78b",
+    "club_id": "marista-rugby-club",
+    "full_name": "Valentín Gozálvez"
+   }
+  ],
+  "partidos_sra": 13
+ },
+ {
+  "sra": {
+   "id": "36cbc88d-8a7f-47a2-8386-a750f53d7efb",
+   "club_id": "penarol",
+   "full_name": "Agustín Iglesias"
+  },
+  "otras": [
+   {
+    "id": "0257bf8b-b3fd-4b42-a6fb-c86d60a80143",
+    "club_id": "tucuman-lawn-tennis",
+    "full_name": "Agustin Iglesias"
+   }
+  ],
+  "partidos_sra": 12
+ },
+ {
+  "sra": {
+   "id": "36cd7988-937a-487c-9ef0-cd60e7a884a5",
+   "club_id": "capibaras-xv",
+   "full_name": "Franco Benítez"
+  },
+  "otras": [
+   {
+    "id": "38c9f3d1-b86a-4438-96a3-7c885e265560",
+    "club_id": "club-tilcara",
+    "full_name": "Franco Benítez"
+   }
+  ],
+  "partidos_sra": 4
+ },
+ {
+  "sra": {
+   "id": "3925fdb3-b241-45f8-940c-c2b390f26eed",
+   "club_id": "dogos-xv",
+   "full_name": "Lucio Willington"
+  },
+  "otras": [
+   {
+    "id": "d31dc74c-072e-492c-a4fa-0f57fa9cf3c0",
+    "club_id": "cordoba-athletic-club",
+    "full_name": "Lucio Willington"
+   }
+  ],
+  "partidos_sra": 9
+ },
+ {
+  "sra": {
+   "id": "3eb33766-9a1d-4722-b345-7ff4ecc6a6ef",
+   "club_id": "pampas",
+   "full_name": "Santos Cayol"
+  },
+  "otras": [
+   {
+    "id": "3885d732-443c-4291-a0a6-60f187cbd1e8",
+    "club_id": "cuba",
+    "full_name": "Santos Cayol"
+   }
+  ],
+  "partidos_sra": 2
+ },
+ {
+  "sra": {
+   "id": "4024d3e7-ac5a-4471-b825-9022fcf3d76e",
+   "club_id": "selknam",
+   "full_name": "Domingo Saavedra"
+  },
+  "otras": [
+   {
+    "id": "3223e09a-93f8-46cc-a0f5-e6935f8f8683",
+    "club_id": "chile-xv",
+    "full_name": "Domingo Saavedra"
+   }
+  ],
+  "partidos_sra": 11
+ },
+ {
+  "sra": {
+   "id": "40d241c9-4b34-4768-968c-09a390321b35",
+   "club_id": "tarucas",
+   "full_name": "Ignacio Marquieguez"
+  },
+  "otras": [
+   {
+    "id": "eea7129a-a52b-4ba2-ace0-355cf3405a5f",
+    "club_id": "tucuman-lawn-tennis",
+    "full_name": "Marquieguez Ignacio"
+   }
+  ],
+  "partidos_sra": 14
+ },
+ {
+  "sra": {
+   "id": "421b955c-e320-4f0e-9251-e71672aa204b",
+   "club_id": "dogos-xv",
+   "full_name": "Octavio Filippa"
+  },
+  "otras": [
+   {
+    "id": "f3828245-eb79-4b03-a4c6-c77bf33ce5ad",
+    "club_id": "jockey-club-cordoba",
+    "full_name": "Octavio Filippa"
+   }
+  ],
+  "partidos_sra": 15
+ },
+ {
+  "sra": {
+   "id": "44c52781-eed7-4f3f-9615-bd0b359bdf70",
+   "club_id": "selknam",
+   "full_name": "Augusto Böhme"
+  },
+  "otras": [
+   {
+    "id": "ebca95e6-d338-48bd-99b5-de0337056303",
+    "club_id": "chile-xv",
+    "full_name": "Augusto Bohme"
+   }
+  ],
+  "partidos_sra": 11
+ },
+ {
+  "sra": {
+   "id": "4503268c-3db1-44eb-9aca-a51565d72824",
+   "club_id": "capibaras-xv",
+   "full_name": "Tomas Sigura"
+  },
+  "otras": [
+   {
+    "id": "774d719f-9f6a-491a-ae66-b36ffcb248c1",
+    "club_id": "club-tilcara",
+    "full_name": "Tomás Sigura"
+   }
+  ],
+  "partidos_sra": 4
+ },
+ {
+  "sra": {
+   "id": "45aca4fe-1577-4d35-9ebb-f77c64e51a20",
+   "club_id": "penarol",
+   "full_name": "Sebastián Pérez"
+  },
+  "otras": [
+   {
+    "id": "2da00c44-440b-4846-a04c-cd5fbeee9036",
+    "club_id": "uruguay-xv",
+    "full_name": "Sebastián Pérez"
+   },
+   {
+    "id": "bb0f55c0-8c79-442b-a8d5-b1f7fdb86f08",
+    "club_id": "uruguay-u20",
+    "full_name": "Sebastián Pérez"
+   }
+  ],
+  "partidos_sra": 13
+ },
+ {
+  "sra": {
+   "id": "47137ff4-369e-4065-a93b-cf4d4006414a",
+   "club_id": "capibaras-xv",
+   "full_name": "Manuel Cuneo"
+  },
+  "otras": [
+   {
+    "id": "39ca2d48-70f3-4384-be25-8d321ab286a2",
+    "club_id": "san-juan-rugby-club",
+    "full_name": "Manuel Cuneo"
+   }
+  ],
+  "partidos_sra": 7
+ },
+ {
+  "sra": {
+   "id": "47317741-3c59-4ef2-bde4-5b0752ff6860",
+   "club_id": "penarol",
+   "full_name": "Pedro Suárez"
+  },
+  "otras": [
+   {
+    "id": "432a02f8-77b4-407d-bf0d-cfa8e6aae059",
+    "club_id": "uruguay-xv",
+    "full_name": "Pedro Suárez"
+   },
+   {
+    "id": "d19dbbbd-3172-4f6b-9582-d7449a8a2d24",
+    "club_id": "uruguay-u20",
+    "full_name": "Pedro Suárez"
+   }
+  ],
+  "partidos_sra": 7
+ },
+ {
+  "sra": {
+   "id": "4757e1d6-4b9f-42be-a800-49171a8a6d5a",
+   "club_id": "pampas",
+   "full_name": "Francisco Sluga"
+  },
+  "otras": [
+   {
+    "id": "065dad66-81bd-41f5-810c-5e474f23074b",
+    "club_id": "buenos-aires-crc",
+    "full_name": "Francisco Sluga"
+   },
+   {
+    "id": "6f42d582-4aba-42f5-aff3-ffc67327c0d3",
+    "club_id": "argentina-xv",
+    "full_name": "Francisco Sluga"
+   }
+  ],
+  "partidos_sra": 13
+ },
+ {
+  "sra": {
+   "id": "4a55b0a3-b41b-41dd-9e01-221f7230e9ee",
+   "club_id": "penarol",
+   "full_name": "Tomás Baca Castex"
+  },
+  "otras": [
+   {
+    "id": "b4bc6c1f-247d-447c-a2be-dee7d81e1205",
+    "club_id": "club-champagnat",
+    "full_name": "Tomás Baca Castex"
+   }
+  ],
+  "partidos_sra": 12
+ },
+ {
+  "sra": {
+   "id": "4b775635-5c8a-4eb6-acf6-6b7fac769f35",
+   "club_id": "penarol",
+   "full_name": "Manuel Ponte"
+  },
+  "otras": [
+   {
+    "id": "1a6a47ef-d607-42ce-b1c6-bd62dc479fa3",
+    "club_id": "uruguay-u20",
+    "full_name": "Manuel Ponte"
+   },
+   {
+    "id": "86b6448f-54bc-49be-8468-26e07b538d6e",
+    "club_id": "uruguay-xv",
+    "full_name": "Manuel Ponte"
+   }
+  ],
+  "partidos_sra": 10
+ },
+ {
+  "sra": {
+   "id": "4e16a8f9-3c2f-43f2-9a3a-a68db2d5cc4f",
+   "club_id": "pampas",
+   "full_name": "Agustín Fraga"
+  },
+  "otras": [
+   {
+    "id": "91176827-935a-4510-8882-f471b5aca26c",
+    "club_id": "cuba",
+    "full_name": "Agustín Fraga"
+   },
+   {
+    "id": "a1b7bf62-e84c-481e-9dcf-439abcf478da",
+    "club_id": "argentina",
+    "full_name": "Agustín Fraga"
+   }
+  ],
+  "partidos_sra": 14
+ },
+ {
+  "sra": {
+   "id": "4e406fa1-9bf9-42c1-952d-bb9ec3ca281d",
+   "club_id": "dogos-xv",
+   "full_name": "Ezequiel Bustos"
+  },
+  "otras": [
+   {
+    "id": "4a6bf5da-f3e1-4564-9929-c68e88af59f4",
+    "club_id": "club-universitario-de-cordoba",
+    "full_name": "Ezequiel Bustos"
+   },
+   {
+    "id": "8b692653-2f0f-45c0-9be7-79ebf76a0735",
+    "club_id": "club-universitario-de-cordoba-intermedia",
+    "full_name": "Ezequiel Bustos"
+   }
+  ],
+  "partidos_sra": 4
+ },
+ {
+  "sra": {
+   "id": "4f72e660-d465-4078-ab07-1eec94a9d61a",
+   "club_id": "penarol",
+   "full_name": "Manuel Diana"
+  },
+  "otras": [
+   {
+    "id": "38565530-d5c2-4c07-83c7-b430ee42e9d9",
+    "club_id": "uruguay-xv",
+    "full_name": "Manuel Diana"
+   }
+  ],
+  "partidos_sra": 9
+ },
+ {
+  "sra": {
+   "id": "510f542c-3350-4b54-92c2-1a7baa58edd3",
+   "club_id": "tarucas",
+   "full_name": "Tomás Vanni"
+  },
+  "otras": [
+   {
+    "id": "477bfdf0-fced-4434-a20e-6536e545ea8d",
+    "club_id": "universitario-de-tucuman",
+    "full_name": "Tomas Vanni"
+   }
+  ],
+  "partidos_sra": 13
+ },
+ {
+  "sra": {
+   "id": "52fca35e-0162-445f-b417-29d1faa43f0a",
+   "club_id": "dogos-xv",
+   "full_name": "Mauricio Kember"
+  },
+  "otras": [
+   {
+    "id": "8131190b-ae0e-4d95-81ef-4fb3ef9cf9a3",
+    "club_id": "tala-rugby-club",
+    "full_name": "Mauricio Kember"
+   }
+  ],
+  "partidos_sra": 5
+ },
+ {
+  "sra": {
+   "id": "537237ae-70c2-4c72-8b3b-c505f9491e08",
+   "club_id": "penarol",
+   "full_name": "Lucas Bianchi"
+  },
+  "otras": [
+   {
+    "id": "734c9fce-c8f7-46eb-9a3e-915869e31a02",
+    "club_id": "uruguay-xv",
+    "full_name": "Lucas Bianchi"
+   }
+  ],
+  "partidos_sra": 13
+ },
+ {
+  "sra": {
+   "id": "56250f03-9eb0-43d1-9fbe-5ac87d49aef2",
+   "club_id": "pampas",
+   "full_name": "Ignacio Díaz"
+  },
+  "otras": [
+   {
+    "id": "50fd839d-095f-46d1-8f1f-62e002749598",
+    "club_id": "cardenales-r-c",
+    "full_name": "Ignacio Diaz"
+   },
+   {
+    "id": "d2b84835-6ec7-4222-b21b-c37658b213b7",
+    "club_id": "belgrano-athletic",
+    "full_name": "Ignacio Díaz"
+   }
+  ],
+  "partidos_sra": 5
+ },
+ {
+  "sra": {
+   "id": "587637a1-b62a-4062-b739-f1940cdd2eef",
+   "club_id": "yacare-xv",
+   "full_name": "Joaquín Domínguez"
+  },
+  "otras": [
+   {
+    "id": "aa4e6572-4c45-4ac0-81c3-8f2380f82637",
+    "club_id": "san-jose",
+    "full_name": "Joaquin Domínguez"
+   },
+   {
+    "id": "cccdcc88-42ee-4acf-9f32-ccdac796823e",
+    "club_id": "argentina-xv",
+    "full_name": "Joaquín Domínguez"
+   }
+  ],
+  "partidos_sra": 14
+ },
+ {
+  "sra": {
+   "id": "5a6bf40a-32a8-46a7-9ff1-00dbcd1dd7aa",
+   "club_id": "selknam",
+   "full_name": "Emilio Shea"
+  },
+  "otras": [
+   {
+    "id": "8a769242-cafb-4f31-a322-40c60c2fb721",
+    "club_id": "chile-xv",
+    "full_name": "Emilio Shea"
+   }
+  ],
+  "partidos_sra": 11
+ },
+ {
+  "sra": {
+   "id": "5c38e15d-d86d-43a5-8af7-aa6cb72d6a56",
+   "club_id": "capibaras-xv",
+   "full_name": "Ignacio Gandini"
+  },
+  "otras": [
+   {
+    "id": "77f4106b-836e-4277-b7dd-b0fe069503ca",
+    "club_id": "argentina-xv",
+    "full_name": "Ignacio Gandini"
+   },
+   {
+    "id": "db393ebf-4306-4c6a-9986-105fc78020d6",
+    "club_id": "duendes-r-c",
+    "full_name": "Ignacio Gandini"
+   }
+  ],
+  "partidos_sra": 14
+ },
+ {
+  "sra": {
+   "id": "5c4abe7b-8545-4c89-8b8d-5dc877153728",
+   "club_id": "yacare-xv",
+   "full_name": "Agustín Benítez"
+  },
+  "otras": [
+   {
+    "id": "061958c6-8353-49c8-a623-e08855cd7694",
+    "club_id": "paraguay",
+    "full_name": "Agustín Benítez"
+   }
+  ],
+  "partidos_sra": 8
+ },
+ {
+  "sra": {
+   "id": "5ddc458c-cc43-4fd7-9e15-380c27d249e5",
+   "club_id": "pampas",
+   "full_name": "Tobías Wade"
+  },
+  "otras": [
+   {
+    "id": "3baeb16b-8543-495b-a977-8899f181bc13",
+    "club_id": "asoc-alumni",
+    "full_name": "Tobías Wade"
+   },
+   {
+    "id": "781d3a63-4979-4275-83e5-0da600171d1d",
+    "club_id": "argentina",
+    "full_name": "Tobías Wade"
+   }
+  ],
+  "partidos_sra": 13
+ },
+ {
+  "sra": {
+   "id": "5fa5e415-beee-4c7f-9634-8ac456af5219",
+   "club_id": "dogos-xv",
+   "full_name": "Agustín Segura"
+  },
+  "otras": [
+   {
+    "id": "16678fb8-afc9-41d4-86e4-3264d6b53444",
+    "club_id": "jockey-club-cordoba",
+    "full_name": "Agustín Segura"
+   }
+  ],
+  "partidos_sra": 12
+ },
+ {
+  "sra": {
+   "id": "60df1d00-3f08-4083-b0e8-4e6b38a09369",
+   "club_id": "capibaras-xv",
+   "full_name": "Franco Rossetto"
+  },
+  "otras": [
+   {
+    "id": "49d51c3c-e99f-4ee4-983b-b12aa7f13f6e",
+    "club_id": "argentina-xv",
+    "full_name": "Franco Rossetto"
+   },
+   {
+    "id": "e177b3b2-b1d6-40c9-a1fc-c8617a7b8bcd",
+    "club_id": "estudiantes-de-parana",
+    "full_name": "Franco Rossetto"
+   }
+  ],
+  "partidos_sra": 14
+ },
+ {
+  "sra": {
+   "id": "63af6bbd-ecb1-4d73-8df6-bcae5a83cb4d",
+   "club_id": "dogos-xv",
+   "full_name": "Genaro Fissore"
+  },
+  "otras": [
+   {
+    "id": "76b306ae-589d-4879-a695-f3aed57c478a",
+    "club_id": "cordoba-athletic-club",
+    "full_name": "Genaro Fissore"
+   }
+  ],
+  "partidos_sra": 11
+ },
+ {
+  "sra": {
+   "id": "6403e6e4-034b-4c41-a611-ffbcbf11f91a",
+   "club_id": "yacare-xv",
+   "full_name": "Juan González"
+  },
+  "otras": [
+   {
+    "id": "308cebfc-012e-41df-86a6-b1fbb4965f4e",
+    "club_id": "paraguay",
+    "full_name": "Juan González"
+   }
+  ],
+  "partidos_sra": 13
+ },
+ {
+  "sra": {
+   "id": "64887877-7376-4374-ae0e-5191ba0f37bb",
+   "club_id": "pampas",
+   "full_name": "Lucas Moresco"
+  },
+  "otras": [
+   {
+    "id": "5093d036-e4ed-4af6-bb80-781a23afc40e",
+    "club_id": "club-champagnat",
+    "full_name": "Lucas Moresco"
+   }
+  ],
+  "partidos_sra": 13
+ },
+ {
+  "sra": {
+   "id": "64ed7db3-c00f-4642-80a1-6caca6eb3b58",
+   "club_id": "tarucas",
+   "full_name": "Agustín Sarelli"
+  },
+  "otras": [
+   {
+    "id": "85faadb2-c666-44c8-bf72-db24b248caee",
+    "club_id": "marista-rugby-club",
+    "full_name": "Agustín Sarelli"
+   }
+  ],
+  "partidos_sra": 12
+ },
+ {
+  "sra": {
+   "id": "65d95365-24ba-434e-b4cd-6e4dabea2e92",
+   "club_id": "pampas",
+   "full_name": "Bautista Farisé"
+  },
+  "otras": [
+   {
+    "id": "25b64fd6-2e29-4297-aba4-a0b4545ebc7f",
+    "club_id": "hindu-club",
+    "full_name": "Bautista Farisé"
+   }
+  ],
+  "partidos_sra": 15
+ },
+ {
+  "sra": {
+   "id": "6649806d-308d-4b00-a010-b8661a3a02c1",
+   "club_id": "selknam",
+   "full_name": "Juan Cruz Reyes"
+  },
+  "otras": [
+   {
+    "id": "048a9a9c-205c-4dfb-86a9-0569a590f6ed",
+    "club_id": "academia-selknam",
+    "full_name": "Juan Cruz Reyes"
+   },
+   {
+    "id": "c7ae199b-7459-40a9-a4d2-57c609a4dccc",
+    "club_id": "chile-xv",
+    "full_name": "Juan Cruz Reyes"
+   }
+  ],
+  "partidos_sra": 3
+ },
+ {
+  "sra": {
+   "id": "678d745d-4d0a-413f-b116-3ddd237a98be",
+   "club_id": "selknam",
+   "full_name": "Lucas Tulon"
+  },
+  "otras": [
+   {
+    "id": "de6c3c46-25cd-4c9c-a1db-d26742f920d2",
+    "club_id": "academia-selknam",
+    "full_name": "Lucas Tulón"
+   }
+  ],
+  "partidos_sra": 1
+ },
+ {
+  "sra": {
+   "id": "6826fd10-c03f-4749-beed-39798353dd43",
+   "club_id": "penarol",
+   "full_name": "Ignacio Facciolo"
+  },
+  "otras": [
+   {
+    "id": "0f7d6db1-e3ce-4c96-b075-81bf6b579acc",
+    "club_id": "uruguay-xv",
+    "full_name": "Ignacio Facciolo"
+   }
+  ],
+  "partidos_sra": 9
+ },
+ {
+  "sra": {
+   "id": "68518334-e355-4dc2-91b6-3f8698c5e8c7",
+   "club_id": "selknam",
+   "full_name": "Norman Aguayo"
+  },
+  "otras": [
+   {
+    "id": "d417b6b7-a318-4636-bc00-64e165b88889",
+    "club_id": "chile-xv",
+    "full_name": "Norman Aguayo"
+   }
+  ],
+  "partidos_sra": 10
+ },
+ {
+  "sra": {
+   "id": "691c2034-a4a7-41a7-ab89-4605e6bdbb89",
+   "club_id": "dogos-xv",
+   "full_name": "Constantino Keller"
+  },
+  "otras": [
+   {
+    "id": "3cfacfb0-80f8-4d77-a596-f022c8f1fb62",
+    "club_id": "argentina-m20",
+    "full_name": "CONSTANTINO KELLER"
+   },
+   {
+    "id": "6a3a7a2c-d647-4cc6-8f60-cc1b11642736",
+    "club_id": "cordoba-athletic-club",
+    "full_name": "Constantino Keller"
+   }
+  ],
+  "partidos_sra": 1
+ },
+ {
+  "sra": {
+   "id": "694e0db2-1d34-494c-bac1-fa13dbd55f05",
+   "club_id": "dogos-xv",
+   "full_name": "Mateo Sánchez"
+  },
+  "otras": [
+   {
+    "id": "d78662ac-27e9-484e-8f7a-caf56b51d2c7",
+    "club_id": "jockey-club-cordoba-m17-a",
+    "full_name": "Mateo Sánchez"
+   },
+   {
+    "id": "ef6188ad-4656-41dd-801d-bbe541dbc310",
+    "club_id": "jockey-club-cordoba-m17-b",
+    "full_name": "Mateo Sánchez"
+   }
+  ],
+  "partidos_sra": 10
+ },
+ {
+  "sra": {
+   "id": "694e20c4-2331-451a-8e66-4ae21c806817",
+   "club_id": "capibaras-xv",
+   "full_name": "Basilio Cañas"
+  },
+  "otras": [
+   {
+    "id": "38e5ea46-7706-45a5-8a66-7ecd7c593af9",
+    "club_id": "argentina-m20",
+    "full_name": "BASILIO CAÑAS"
+   },
+   {
+    "id": "e258ec33-18c3-4374-9987-25c40bfc4d2b",
+    "club_id": "estudiantes-de-parana",
+    "full_name": "Basilio Cañas"
+   }
+  ],
+  "partidos_sra": 4
+ },
+ {
+  "sra": {
+   "id": "699464d2-5531-4d63-bcc9-87fb73d20fb1",
+   "club_id": "pampas",
+   "full_name": "Valentino Reggiardo"
+  },
+  "otras": [
+   {
+    "id": "8a2e817b-7fb6-4272-ad0e-72b9d65b65c1",
+    "club_id": "argentina-m20",
+    "full_name": "Valentino REGGIARDO"
+   }
+  ],
+  "partidos_sra": 2
+ },
+ {
+  "sra": {
+   "id": "6b75902b-d04b-4be9-ac64-2d56c5b29764",
+   "club_id": "tarucas",
+   "full_name": "Ignacio Lazarte"
+  },
+  "otras": [
+   {
+    "id": "f0e229ef-2bee-49da-b31d-aeb91598967f",
+    "club_id": "natacion-y-gimnasia",
+    "full_name": "Ignacio Lazarte"
+   }
+  ],
+  "partidos_sra": 2
+ },
+ {
+  "sra": {
+   "id": "6c857ced-1d90-4010-b03c-5e68d22317d3",
+   "club_id": "capibaras-xv",
+   "full_name": "Bautista Grenon"
+  },
+  "otras": [
+   {
+    "id": "eab9354c-6641-4956-89da-dceb00b16ece",
+    "club_id": "alma-juniors",
+    "full_name": "Bautista Grenon"
+   }
+  ],
+  "partidos_sra": 11
+ },
+ {
+  "sra": {
+   "id": "6cb7483c-d912-4f30-ad6b-6335eee5b36c",
+   "club_id": "capibaras-xv",
+   "full_name": "Benjamín Ordiz"
+  },
+  "otras": [
+   {
+    "id": "073e067f-5675-42a4-b1be-e2a2869620c5",
+    "club_id": "argentina",
+    "full_name": "Benjamín Ordiz"
+   },
+   {
+    "id": "082561d0-0082-48e0-896f-f4656cbb7a86",
+    "club_id": "los-caranchos",
+    "full_name": "Benjamin Ordiz"
+   },
+   {
+    "id": "a52fcddd-d277-4dcd-9344-33a232c59d8b",
+    "club_id": "argentina-m20",
+    "full_name": "BENJAMÍN ORDIZ"
+   }
+  ],
+  "partidos_sra": 2
+ },
+ {
+  "sra": {
+   "id": "6d0391cd-0886-4838-b92b-86b23713fb3f",
+   "club_id": "penarol",
+   "full_name": "Santiago Marolda"
+  },
+  "otras": [
+   {
+    "id": "784130e2-ae3c-48f9-adfa-cdec448c3dd4",
+    "club_id": "club-newman",
+    "full_name": "Santiago Marolda"
+   }
+  ],
+  "partidos_sra": 14
+ },
+ {
+  "sra": {
+   "id": "6e4ea0fb-b514-4b71-90af-0b03abe578e2",
+   "club_id": "capibaras-xv",
+   "full_name": "Ignacio Dogliani"
+  },
+  "otras": [
+   {
+    "id": "506ec158-f29a-495c-a4aa-fb85d9f7ea3f",
+    "club_id": "argentina-xv",
+    "full_name": "Ignacio Dogliani"
+   },
+   {
+    "id": "b46268ae-7032-4ccb-ba2b-12d90390e0e0",
+    "club_id": "jockey-club-de-rosario",
+    "full_name": "Ignacio Dogliani"
+   }
+  ],
+  "partidos_sra": 14
+ },
+ {
+  "sra": {
+   "id": "716663cc-4e47-4f28-aec2-f821056ee282",
+   "club_id": "selknam",
+   "full_name": "Alfonso Escobar"
+  },
+  "otras": [
+   {
+    "id": "159ce095-bbe9-40f3-aa7d-2fc3b52451c9",
+    "club_id": "chile-xv",
+    "full_name": "Alfonso Escobar"
+   }
+  ],
+  "partidos_sra": 10
+ },
+ {
+  "sra": {
+   "id": "719865ab-d4d8-495f-a207-466796d6f7fb",
+   "club_id": "tarucas",
+   "full_name": "Tomás Elizalde"
+  },
+  "otras": [
+   {
+    "id": "5db0e9f2-4f4e-493b-a427-4803a3e1c7da",
+    "club_id": "tigres-r-c",
+    "full_name": "Tomas Elizalde"
+   }
+  ],
+  "partidos_sra": 13
+ },
+ {
+  "sra": {
+   "id": "71e24d03-08e4-499b-b420-34d32dc17801",
+   "club_id": "selknam",
+   "full_name": "Augusto Villanueva"
+  },
+  "otras": [
+   {
+    "id": "18b7d7ad-a53d-46e1-a7e5-1ceb53ac9947",
+    "club_id": "academia-selknam",
+    "full_name": "Augusto Villanueva"
+   }
+  ],
+  "partidos_sra": 6
+ },
+ {
+  "sra": {
+   "id": "7431be91-9b05-4d37-bb44-cf5af6bed6cc",
+   "club_id": "capibaras-xv",
+   "full_name": "Bautista Estellés"
+  },
+  "otras": [
+   {
+    "id": "5b29993d-5ece-4150-8b1b-1dabbd7d4ff2",
+    "club_id": "atletico-del-rosario",
+    "full_name": "Bautista Estelles"
+   },
+   {
+    "id": "6d938699-e675-4532-8bf9-e747ec1afce7",
+    "club_id": "atletico-del-rosario",
+    "full_name": "Bautista Estellés"
+   },
+   {
+    "id": "9c364c05-4448-46c5-9ba9-c74da3798ad0",
+    "club_id": "argentina-xv",
+    "full_name": "Bautista Estellés"
+   }
+  ],
+  "partidos_sra": 10
+ },
+ {
+  "sra": {
+   "id": "74a91285-7bbb-4c12-a7eb-583e002c0a66",
+   "club_id": "penarol",
+   "full_name": "Alex Sonneveld"
+  },
+  "otras": [
+   {
+    "id": "4dab96f9-e6b2-4b52-8358-3d69484fea45",
+    "club_id": "uruguay-u20",
+    "full_name": "Alex Sonneveld"
+   }
+  ],
+  "partidos_sra": 4
+ },
+ {
+  "sra": {
+   "id": "75bf08c1-7dea-4616-8713-86e6807609a4",
+   "club_id": "tarucas",
+   "full_name": "Bautista Estofan"
+  },
+  "otras": [
+   {
+    "id": "5e8a5c0a-92f0-44ec-a37b-5c93e8a07922",
+    "club_id": "tucuman-rugby-club",
+    "full_name": "Bautista Estofan"
+   }
+  ],
+  "partidos_sra": 12
+ },
+ {
+  "sra": {
+   "id": "76dcc275-2575-49a9-8d35-f45eff98c8da",
+   "club_id": "dogos-xv",
+   "full_name": "Nicolás Roger"
+  },
+  "otras": [
+   {
+    "id": "e655783d-7daa-4338-bada-49e795c65799",
+    "club_id": "argentina",
+    "full_name": "Nicolás Roger"
+   }
+  ],
+  "partidos_sra": 5
+ },
+ {
+  "sra": {
+   "id": "797c519c-552d-4bde-accb-bf7ded5687be",
+   "club_id": "pampas",
+   "full_name": "Santiago Pernas"
+  },
+  "otras": [
+   {
+    "id": "bc36236c-49af-4e6f-a411-13ab6388ad18",
+    "club_id": "argentina",
+    "full_name": "Santiago Pernas"
+   },
+   {
+    "id": "c940a733-1b22-472a-ac92-ee51107862ba",
+    "club_id": "asoc-alumni",
+    "full_name": "Santiago Pernas"
+   }
+  ],
+  "partidos_sra": 14
+ },
+ {
+  "sra": {
+   "id": "7aaf8e33-ab93-46b5-b2de-4def22be25df",
+   "club_id": "dogos-xv",
+   "full_name": "Gastón Garayzabal"
+  },
+  "otras": [
+   {
+    "id": "4d3e10f1-edf4-45b7-855f-ef7e246ed1c9",
+    "club_id": "tala-rugby-club-intermedia",
+    "full_name": "Gaston Garayzabal"
+   },
+   {
+    "id": "ac9a7ae8-2589-45a3-bf01-101913f2ff8b",
+    "club_id": "tala-rugby-club",
+    "full_name": "Gaston Garayzabal"
+   }
+  ],
+  "partidos_sra": 9
+ },
+ {
+  "sra": {
+   "id": "7ae1d9bf-e78d-4ec0-90b7-8b015019e69c",
+   "club_id": "dogos-xv",
+   "full_name": "Mateo Soler"
+  },
+  "otras": [
+   {
+    "id": "c87a2b59-9b81-4a76-9b9e-6d020408346f",
+    "club_id": "tala-rugby-club",
+    "full_name": "Mateo Soler"
+   },
+   {
+    "id": "e7ff9dff-8d89-4ebe-9b15-cd704dcf8f0f",
+    "club_id": "argentina",
+    "full_name": "Mateo Soler"
+   }
+  ],
+  "partidos_sra": 14
+ },
+ {
+  "sra": {
+   "id": "7fae31f2-9c63-4f89-8a76-529313ab9a67",
+   "club_id": "capibaras-xv",
+   "full_name": "Guido Chesini"
+  },
+  "otras": [
+   {
+    "id": "cf43a12a-8cb5-4fa2-96ec-e90a9b8fc560",
+    "club_id": "duendes-r-c",
+    "full_name": "Guido Chesini"
+   }
+  ],
+  "partidos_sra": 13
+ },
+ {
+  "sra": {
+   "id": "8039e3fe-888c-42c3-b996-e3aeeb7051f5",
+   "club_id": "selknam",
+   "full_name": "Santiago Pedrero"
+  },
+  "otras": [
+   {
+    "id": "b36c4116-a59b-44fb-99d0-a0174908e8c4",
+    "club_id": "chile-xv",
+    "full_name": "Santiago Pedrero"
+   }
+  ],
+  "partidos_sra": 12
+ },
+ {
+  "sra": {
+   "id": "807a8a34-1080-45f7-b8dc-59091016b306",
+   "club_id": "yacare-xv",
+   "full_name": "Francisco Bareiro"
+  },
+  "otras": [
+   {
+    "id": "1b8982b2-ae8a-4411-aa5a-4b7bf8cea3bb",
+    "club_id": "paraguay",
+    "full_name": "Francisco Bareiro"
+   }
+  ],
+  "partidos_sra": 10
+ },
+ {
+  "sra": {
+   "id": "811d9237-292b-4963-8ee4-6c22ae09f63a",
+   "club_id": "pampas",
+   "full_name": "Joaquín Pascual Viale"
+  },
+  "otras": [
+   {
+    "id": "12397f23-bd76-4eba-a813-eea13ed14bc6",
+    "club_id": "argentina-xv",
+    "full_name": "Joaquín Pascual Viale"
+   },
+   {
+    "id": "65e770e5-e6d3-45d1-82e8-c4b0d72a4043",
+    "club_id": "argentina-m20",
+    "full_name": "JOAQUÍN PASCUAL VIALE"
+   }
+  ],
+  "partidos_sra": 3
+ },
+ {
+  "sra": {
+   "id": "8146f6e7-6f47-4b58-9315-c3f05787f5c1",
+   "club_id": "tarucas",
+   "full_name": "Simón José Pfister"
+  },
+  "otras": [
+   {
+    "id": "90b78676-0839-49a3-a76a-0ded40fc1c23",
+    "club_id": "tucuman-rugby-club",
+    "full_name": "Simón José Pfister"
+   }
+  ],
+  "partidos_sra": 3
+ },
+ {
+  "sra": {
+   "id": "82607ece-04d5-4622-8782-7a7e94392daf",
+   "club_id": "pampas",
+   "full_name": "Santiago Cordero"
+  },
+  "otras": [
+   {
+    "id": "dc9778f2-0d21-4bef-b980-af4c823632a4",
+    "club_id": "regatas-de-bella-vista",
+    "full_name": "Santiago Cordero"
+   }
+  ],
+  "partidos_sra": 11
+ },
+ {
+  "sra": {
+   "id": "8401c65a-edaa-4b0b-9961-74fe869f85ef",
+   "club_id": "tarucas",
+   "full_name": "Facundo Cardozo"
+  },
+  "otras": [
+   {
+    "id": "437516b7-2b8b-4c24-a686-2ef06f8a08e6",
+    "club_id": "universitario-de-tucuman",
+    "full_name": "Facundo Cardozo"
+   },
+   {
+    "id": "64ab262f-1fed-4281-938e-38c56717b06c",
+    "club_id": "argentina",
+    "full_name": "Facundo Cardozo"
+   }
+  ],
+  "partidos_sra": 12
+ },
+ {
+  "sra": {
+   "id": "841ddc64-e365-49c0-8bf1-c55c09513ade",
+   "club_id": "pampas",
+   "full_name": "Ignacio Bottazzini"
+  },
+  "otras": [
+   {
+    "id": "a1e04810-fdca-4518-9be6-07d73ffcabc1",
+    "club_id": "san-isidro-club",
+    "full_name": "Ignacio Bottazzini"
+   }
+  ],
+  "partidos_sra": 16
+ },
+ {
+  "sra": {
+   "id": "854cddf4-1b8f-454a-900b-821b936d563c",
+   "club_id": "dogos-xv",
+   "full_name": "Facundo Pueyrredón"
+  },
+  "otras": [
+   {
+    "id": "ed74b697-c090-4dc4-9534-b6ae0d83d586",
+    "club_id": "club-la-tablada",
+    "full_name": "Facundo Pueyrredon"
+   }
+  ],
+  "partidos_sra": 15
+ },
+ {
+  "sra": {
+   "id": "85be5f8f-810e-4655-ac1d-5900b37b32d4",
+   "club_id": "pampas",
+   "full_name": "Alfonso Latorre"
+  },
+  "otras": [
+   {
+    "id": "c2d64a9b-65d2-4c57-97fe-8b67be5ec7ee",
+    "club_id": "buenos-aires-crc",
+    "full_name": "Alfonso Latorre"
+   }
+  ],
+  "partidos_sra": 6
+ },
+ {
+  "sra": {
+   "id": "86d063b0-afa6-42d7-8deb-8b2a9fab2dc4",
+   "club_id": "capibaras-xv",
+   "full_name": "Jeronimo Gomez Vara"
+  },
+  "otras": [
+   {
+    "id": "a6413499-d9da-4243-a17d-70f15711ede5",
+    "club_id": "atletico-del-rosario",
+    "full_name": "Jerónimo Gómez Vara"
+   }
+  ],
+  "partidos_sra": 7
+ },
+ {
+  "sra": {
+   "id": "87b8fa24-1276-40b7-b383-666d196188a3",
+   "club_id": "yacare-xv",
+   "full_name": "Juan Cruz Strada"
+  },
+  "otras": [
+   {
+    "id": "eea66316-34f5-4939-9fd4-49d396828285",
+    "club_id": "santa-fe-r-c",
+    "full_name": "Juan Cruz Strada"
+   }
+  ],
+  "partidos_sra": 11
+ },
+ {
+  "sra": {
+   "id": "894051ca-fab6-4716-be93-d0d508b1c26c",
+   "club_id": "pampas",
+   "full_name": "Marcos Camerlinckx"
+  },
+  "otras": [
+   {
+    "id": "d7f8d7c6-f4eb-4336-afc6-b2735fb5dcea",
+    "club_id": "regatas-de-bella-vista",
+    "full_name": "Marcos Camerlinckx"
+   }
+  ],
+  "partidos_sra": 15
+ },
+ {
+  "sra": {
+   "id": "89e2d0bf-b5f7-438d-af97-ce71ba9ba596",
+   "club_id": "capibaras-xv",
+   "full_name": "Francisco Lluch"
+  },
+  "otras": [
+   {
+    "id": "b7c6930d-e8d4-4d9d-9156-afe74bb79d45",
+    "club_id": "jockey-club-de-rosario",
+    "full_name": "Francisco Lluch"
+   }
+  ],
+  "partidos_sra": 7
+ },
+ {
+  "sra": {
+   "id": "8e5130ca-d47c-4bd0-a467-57a67f2b8adc",
+   "club_id": "tarucas",
+   "full_name": "Pedro Coll"
+  },
+  "otras": [
+   {
+    "id": "0c93cc8b-bf3d-4716-a73d-b461caa433af",
+    "club_id": "argentina-xv",
+    "full_name": "Pedro Coll"
+   },
+   {
+    "id": "b3649f38-1328-410c-8bb9-76c24767b19c",
+    "club_id": "argentina-m20",
+    "full_name": "Pedro Coll"
+   }
+  ],
+  "partidos_sra": 9
+ },
+ {
+  "sra": {
+   "id": "8e819bd0-fadd-497b-bc1e-068d99766596",
+   "club_id": "tarucas",
+   "full_name": "José Calderoni"
+  },
+  "otras": [
+   {
+    "id": "89afe179-158a-40cc-a8cc-2b94f1da3708",
+    "club_id": "tigres-r-c",
+    "full_name": "Jose Calderoni"
+   }
+  ],
+  "partidos_sra": 13
+ },
+ {
+  "sra": {
+   "id": "8ee3c319-4c25-4e1b-a90b-c1411e240e9c",
+   "club_id": "yacare-xv",
+   "full_name": "Manuel Todaro"
+  },
+  "otras": [
+   {
+    "id": "6d65d3e9-f7e3-4c2c-b0f5-98c48256078f",
+    "club_id": "universitario-de-rosario",
+    "full_name": "Manuel Todaro"
+   }
+  ],
+  "partidos_sra": 11
+ },
+ {
+  "sra": {
+   "id": "8f44a4a9-1b3f-4172-aeff-0e8310b8eb5d",
+   "club_id": "dogos-xv",
+   "full_name": "Benjamín Vázquez Calcaterra"
+  },
+  "otras": [
+   {
+    "id": "12561908-a9d0-44c0-bb72-8fdc80298e76",
+    "club_id": "san-martin-de-villa-maria",
+    "full_name": "Benjamín Vázquez Calcaterra"
+   },
+   {
+    "id": "556fc14a-3836-42cf-9717-d995a5a8c247",
+    "club_id": "san-martin-de-villa-maria-m19-a",
+    "full_name": "Benjamin Vazquez Calcaterra"
+   }
+  ],
+  "partidos_sra": 1
+ },
+ {
+  "sra": {
+   "id": "90d4900c-900b-429a-91b9-69fe206734d5",
+   "club_id": "selknam",
+   "full_name": "Marco Alvano"
+  },
+  "otras": [
+   {
+    "id": "76ad3ffc-0491-4589-af44-9e0d833f1e54",
+    "club_id": "chile-xv",
+    "full_name": "Marco Alvano"
+   },
+   {
+    "id": "8ddf74a3-6db3-4d38-a9ab-3eea781c6d23",
+    "club_id": "chile-u20",
+    "full_name": "Marco Alvano"
+   }
+  ],
+  "partidos_sra": 2
+ },
+ {
+  "sra": {
+   "id": "9383d621-3408-4dbe-af3d-a931641825e8",
+   "club_id": "capibaras-xv",
+   "full_name": "Bautista Santiago Benavides"
+  },
+  "otras": [
+   {
+    "id": "daa2f19b-b28a-461b-9dfd-dd2f1bf71d6b",
+    "club_id": "santa-fe-r-c",
+    "full_name": "Bautista Santiago Benavides"
+   }
+  ],
+  "partidos_sra": 2
+ },
+ {
+  "sra": {
+   "id": "939de4ff-a1ab-4e37-9332-ab6b45cfceb4",
+   "club_id": "yacare-xv",
+   "full_name": "Nahuel Kacerosky"
+  },
+  "otras": [
+   {
+    "id": "d10ddfde-a9fe-425b-ad95-32d6a4a7a5f7",
+    "club_id": "paraguay",
+    "full_name": "Nahuel Kacerosky"
+   }
+  ],
+  "partidos_sra": 5
+ },
+ {
+  "sra": {
+   "id": "95576eaf-0430-4ab9-bbe2-0f8421e8363e",
+   "club_id": "capibaras-xv",
+   "full_name": "Ignacio Orsetti"
+  },
+  "otras": [
+   {
+    "id": "0e0966a7-c4af-432b-a8f1-e01a57add268",
+    "club_id": "argentina-xv",
+    "full_name": "Ignacio Orsetti"
+   },
+   {
+    "id": "7e91506e-cd7d-48d9-8f86-e2b4eb9e43a5",
+    "club_id": "jockey-club-de-rosario",
+    "full_name": "Ignacio Orsetti"
+   }
+  ],
+  "partidos_sra": 14
+ },
+ {
+  "sra": {
+   "id": "95a4dd92-4c2a-4ecb-8950-a6b61a6d9762",
+   "club_id": "dogos-xv",
+   "full_name": "Nicolás Viola"
+  },
+  "otras": [
+   {
+    "id": "3ca604f1-3eb5-4798-a1d2-7c2129efc2d6",
+    "club_id": "argentina-xv",
+    "full_name": "Nicolás Viola"
+   },
+   {
+    "id": "a0296d84-3c16-41be-81a9-ec81f2d61a1d",
+    "club_id": "jockey-club-cordoba",
+    "full_name": "Nicolás Viola"
+   }
+  ],
+  "partidos_sra": 15
+ },
+ {
+  "sra": {
+   "id": "96196795-07ca-4a79-bbae-a55a60805fd4",
+   "club_id": "penarol",
+   "full_name": "Juan Francisco Bessio"
+  },
+  "otras": [
+   {
+    "id": "bbc1d3a0-9cab-47a6-8639-9410ad96b71e",
+    "club_id": "uruguay-u20",
+    "full_name": "Juan Francisco Bessio"
+   }
+  ],
+  "partidos_sra": 6
+ },
+ {
+  "sra": {
+   "id": "96af1ab6-4c95-4c02-aac9-f75b646a74d9",
+   "club_id": "capibaras-xv",
+   "full_name": "Diego Correa"
+  },
+  "otras": [
+   {
+    "id": "8809dbbe-80d9-4c9c-8d96-db4dc681260f",
+    "club_id": "estudiantes-de-parana",
+    "full_name": "Diego Correa"
+   },
+   {
+    "id": "96e4b177-ece9-49e0-a7d2-15b02fb39857",
+    "club_id": "argentina-xv",
+    "full_name": "Diego Correa"
+   }
+  ],
+  "partidos_sra": 15
+ },
+ {
+  "sra": {
+   "id": "98ed4464-8fad-4269-b5ae-b0682af15119",
+   "club_id": "penarol",
+   "full_name": "Joaquín Suárez"
+  },
+  "otras": [
+   {
+    "id": "91021b17-e5de-45e7-8611-25ad19713c18",
+    "club_id": "club-universitario-de-cordoba-m19-b",
+    "full_name": "Joaquin Suarez"
+   },
+   {
+    "id": "fa97780d-0bb0-4e6c-ba55-9272c0bf034f",
+    "club_id": "uruguay-xv",
+    "full_name": "Joaquín Suarez"
+   },
+   {
+    "id": "feb4b3a2-8f8f-4f1d-b028-15d62f19fa12",
+    "club_id": "club-universitario-de-cordoba-m19-a",
+    "full_name": "Joaquin Suarez"
+   }
+  ],
+  "partidos_sra": 11
+ },
+ {
+  "sra": {
+   "id": "99499907-04a0-46f4-9612-140c98428a02",
+   "club_id": "yacare-xv",
+   "full_name": "Ariel Núñez"
+  },
+  "otras": [
+   {
+    "id": "7fe6322e-4331-402f-a49c-3c096f79fcf8",
+    "club_id": "san-jose",
+    "full_name": "Ariel Nuñez"
+   },
+   {
+    "id": "a621c1cf-655a-4d42-9933-68815125b324",
+    "club_id": "paraguay",
+    "full_name": "Ariel Núñez"
+   }
+  ],
+  "partidos_sra": 13
+ },
+ {
+  "sra": {
+   "id": "9a3d762b-7546-4252-9c07-a5df4ae999b8",
+   "club_id": "pampas",
+   "full_name": "Jerónimo Ulloa"
+  },
+  "otras": [
+   {
+    "id": "bb2410c1-7aac-4c3e-b60f-cdbd3bfe5cbe",
+    "club_id": "club-newman",
+    "full_name": "Jerónimo Ulloa"
+   }
+  ],
+  "partidos_sra": 12
+ },
+ {
+  "sra": {
+   "id": "9b961fd5-76e6-465b-ab9e-b6a417b10463",
+   "club_id": "pampas",
+   "full_name": "Fabrizio Cebron"
+  },
+  "otras": [
+   {
+    "id": "575e8acc-a723-44d4-ab53-2a92ab024114",
+    "club_id": "regatas-de-bella-vista",
+    "full_name": "Fabrizio Cebron"
+   },
+   {
+    "id": "7665c9bb-84bb-44b6-b310-cc5978fe1e13",
+    "club_id": "argentina-m20",
+    "full_name": "FABRIZIO CEBRON"
+   }
+  ],
+  "partidos_sra": 1
+ },
+ {
+  "sra": {
+   "id": "9cd7d442-d7d8-4a89-afde-db3c6ea16739",
+   "club_id": "yacare-xv",
+   "full_name": "Diego Miño"
+  },
+  "otras": [
+   {
+    "id": "2ccdcf06-5ad6-41bb-b8f4-993c08ce56fa",
+    "club_id": "paraguay",
+    "full_name": "Diego Miño"
+   }
+  ],
+  "partidos_sra": 3
+ },
+ {
+  "sra": {
+   "id": "9ec38c25-24c5-4af8-9bb7-1e78c6188412",
+   "club_id": "dogos-xv",
+   "full_name": "Ernesto Giúdice"
+  },
+  "otras": [
+   {
+    "id": "6fbe96d9-10ef-4a40-9006-c0ff4b808408",
+    "club_id": "mendoza-rugby-club",
+    "full_name": "Ernesto Giudice"
+   }
+  ],
+  "partidos_sra": 11
+ },
+ {
+  "sra": {
+   "id": "9f22486c-7f84-439b-a7bc-643a23a3eff6",
+   "club_id": "pampas",
+   "full_name": "Juan Penoucos"
+  },
+  "otras": [
+   {
+    "id": "7939091d-3a2e-4929-ba32-d44d6fe94e12",
+    "club_id": "belgrano-athletic",
+    "full_name": "Juan Penoucos"
+   },
+   {
+    "id": "7e95538a-49c6-4fe6-9e2f-cb0b04064ce1",
+    "club_id": "argentina",
+    "full_name": "Juan Penoucos"
+   }
+  ],
+  "partidos_sra": 14
+ },
+ {
+  "sra": {
+   "id": "a1c39dcb-9080-40bd-a875-44768ae72733",
+   "club_id": "selknam",
+   "full_name": "Benjamín Diaz"
+  },
+  "otras": [
+   {
+    "id": "61819cd8-6cfe-4668-a043-e2ea60c804f4",
+    "club_id": "chile-u20",
+    "full_name": "Benjamin Diaz"
+   }
+  ],
+  "partidos_sra": 1
+ },
+ {
+  "sra": {
+   "id": "a261b684-5f16-4b6d-ba4b-b027960ee800",
+   "club_id": "dogos-xv",
+   "full_name": "Nicolás Revol Pitt"
+  },
+  "otras": [
+   {
+    "id": "08b4f8ec-c721-4849-8d36-a3c6cebc4289",
+    "club_id": "club-la-tablada",
+    "full_name": "Nicolás Revol Pitt"
+   },
+   {
+    "id": "63b7a628-4fa5-4a73-b946-dee8a8b2cfcf",
+    "club_id": "argentina-xv",
+    "full_name": "Nicolás Revol Pitt"
+   }
+  ],
+  "partidos_sra": 11
+ },
+ {
+  "sra": {
+   "id": "a3e8c0c6-7842-43e5-b5cd-71a9a2e10de1",
+   "club_id": "dogos-xv",
+   "full_name": "Genaro Podestá"
+  },
+  "otras": [
+   {
+    "id": "5bbbca20-8722-4d3c-a275-c32516045334",
+    "club_id": "marista-rugby-club",
+    "full_name": "Genaro Podestá"
+   }
+  ],
+  "partidos_sra": 16
+ },
+ {
+  "sra": {
+   "id": "a5ddae1b-7e3b-4239-b585-c79e310d609f",
+   "club_id": "dogos-xv",
+   "full_name": "Fabricio Griffo Zaradnik"
+  },
+  "otras": [
+   {
+    "id": "7254de14-14b7-4675-9e3c-e0cd7bfbb746",
+    "club_id": "club-palermo-bajo",
+    "full_name": "Fabricio Griffo Zaradnik"
+   }
+  ],
+  "partidos_sra": 1
+ },
+ {
+  "sra": {
+   "id": "a6ee4614-9a33-4980-a5cc-b9409b26c5a6",
+   "club_id": "dogos-xv",
+   "full_name": "Alejandro Pronce"
+  },
+  "otras": [
+   {
+    "id": "f26518af-9f16-4c7f-bc63-b577db0703ad",
+    "club_id": "marista-rugby-club",
+    "full_name": "Alejandro Pronce"
+   }
+  ],
+  "partidos_sra": 6
+ },
+ {
+  "sra": {
+   "id": "a8471181-d0e3-481f-b5d7-43444aae0427",
+   "club_id": "selknam",
+   "full_name": "Iñaki Gurruchaga"
+  },
+  "otras": [
+   {
+    "id": "a0a63002-7af6-4495-a23c-af69857a4306",
+    "club_id": "chile-xv",
+    "full_name": "Iñaki Gurruchaga"
+   }
+  ],
+  "partidos_sra": 13
+ },
+ {
+  "sra": {
+   "id": "a864b67b-b091-4686-bf83-2c2d5ba4ca83",
+   "club_id": "selknam",
+   "full_name": "José Pablo Fernandez"
+  },
+  "otras": [
+   {
+    "id": "fa091a52-e157-4dc8-bc84-ec5a01800e2b",
+    "club_id": "chile-u20",
+    "full_name": "Jose Pablo Fernandez"
+   }
+  ],
+  "partidos_sra": 1
+ },
+ {
+  "sra": {
+   "id": "a89e3e11-688b-4d51-8576-171602ab7478",
+   "club_id": "tarucas",
+   "full_name": "Benjamín Farías"
+  },
+  "otras": [
+   {
+    "id": "16b423bc-6dff-4041-8339-c47a54dfa9ef",
+    "club_id": "jockey-club-de-villa-maria-intermedia",
+    "full_name": "Benjamin Farias"
+   },
+   {
+    "id": "e07e4216-b003-420c-a574-8b2627f502d3",
+    "club_id": "jockey-club-de-villa-maria-preintermedia-a",
+    "full_name": "Benjamin Farias"
+   },
+   {
+    "id": "f7fe55de-7142-4f01-8c8e-74f28a5343a7",
+    "club_id": "jockey-club-de-villa-maria",
+    "full_name": "Benjamín Farías"
+   }
+  ],
+  "partidos_sra": 4
+ },
+ {
+  "sra": {
+   "id": "aa12ceef-a54c-4392-97a5-a47a7e8e47bf",
+   "club_id": "pampas",
+   "full_name": "Marcelo Toledo"
+  },
+  "otras": [
+   {
+    "id": "31911110-2f6b-462e-b76e-936d28c5cc03",
+    "club_id": "regatas-de-bella-vista",
+    "full_name": "Marcelo Toledo"
+   }
+  ],
+  "partidos_sra": 11
+ },
+ {
+  "sra": {
+   "id": "ac1053a3-ffdf-4698-bd5b-c6008c65c88e",
+   "club_id": "dogos-xv",
+   "full_name": "Valentín Cabral"
+  },
+  "otras": [
+   {
+    "id": "8e9caa34-973c-4c5c-8f0e-b00d4779a63b",
+    "club_id": "cordoba-athletic-club",
+    "full_name": "Valentín Cabral"
+   }
+  ],
+  "partidos_sra": 12
+ },
+ {
+  "sra": {
+   "id": "afdb35da-5fbf-4695-b2eb-dccfbe8598c9",
+   "club_id": "yacare-xv",
+   "full_name": "Enrique Quinteros"
+  },
+  "otras": [
+   {
+    "id": "6f19d7f8-b30d-4214-bec4-97baada8ca20",
+    "club_id": "paraguay",
+    "full_name": "Enrique Quinteros"
+   }
+  ],
+  "partidos_sra": 11
+ },
+ {
+  "sra": {
+   "id": "b002240a-b2d1-4aaa-93c7-96f4adc7663f",
+   "club_id": "pampas",
+   "full_name": "Lucas Marguery"
+  },
+  "otras": [
+   {
+    "id": "b7a23015-6cf1-4e37-b131-629248f9355f",
+    "club_id": "club-newman",
+    "full_name": "Lucas Marguery"
+   }
+  ],
+  "partidos_sra": 11
+ },
+ {
+  "sra": {
+   "id": "b04e372b-7b0e-492c-889c-6b357a8b4fc2",
+   "club_id": "capibaras-xv",
+   "full_name": "Bruno Heit"
+  },
+  "otras": [
+   {
+    "id": "6ce46fbe-b705-4a06-8fee-b7e928580315",
+    "club_id": "estudiantes-de-parana",
+    "full_name": "Bruno Heit"
+   }
+  ],
+  "partidos_sra": 15
+ },
+ {
+  "sra": {
+   "id": "b75d7481-c4b4-485c-a7a3-f306b874c822",
+   "club_id": "selknam",
+   "full_name": "Gonzalo Lara"
+  },
+  "otras": [
+   {
+    "id": "b7329202-8c2a-4b50-a024-3df3949840b0",
+    "club_id": "academia-selknam",
+    "full_name": "Gonzalo Lara"
+   }
+  ],
+  "partidos_sra": 1
+ },
+ {
+  "sra": {
+   "id": "b87e7761-854f-4216-83db-e29d21988719",
+   "club_id": "capibaras-xv",
+   "full_name": "Lucas Bur"
+  },
+  "otras": [
+   {
+    "id": "ab4b8469-aff4-4b93-9119-2dc1340d8b10",
+    "club_id": "jockey-club-de-rosario",
+    "full_name": "Lucas Bur"
+   },
+   {
+    "id": "c07810d0-0a65-4b9e-ac63-851bf89e1964",
+    "club_id": "carlos-paz-rugby-club",
+    "full_name": "Lucas Bur"
+   }
+  ],
+  "partidos_sra": 14
+ },
+ {
+  "sra": {
+   "id": "bbf674ea-599f-48b9-8032-4374c890e722",
+   "club_id": "pampas",
+   "full_name": "Felipe Ledesma"
+  },
+  "otras": [
+   {
+    "id": "89a6610c-e444-440d-9b8a-83eb8b748244",
+    "club_id": "cordoba-athletic-club-m17-a",
+    "full_name": "Felipe Ledesma"
+   }
+  ],
+  "partidos_sra": 10
+ },
+ {
+  "sra": {
+   "id": "bccded3d-1e51-4986-abcd-8fc4ed497e36",
+   "club_id": "tarucas",
+   "full_name": "Rodrigo Navarro"
+  },
+  "otras": [
+   {
+    "id": "acbae20f-089f-4d3d-8735-d1b0f05c04c3",
+    "club_id": "tucuman-lawn-tennis",
+    "full_name": "Rodrigo Navarro"
+   }
+  ],
+  "partidos_sra": 13
+ },
+ {
+  "sra": {
+   "id": "bfe53e7d-2d69-4fbe-b379-6983ad2296e5",
+   "club_id": "yacare-xv",
+   "full_name": "Joaquín Lamas"
+  },
+  "otras": [
+   {
+    "id": "e1e884d2-2d53-4e6e-91bc-41d148979cce",
+    "club_id": "san-jose",
+    "full_name": "Joaquin Lamas"
+   }
+  ],
+  "partidos_sra": 11
+ },
+ {
+  "sra": {
+   "id": "c04eb1e1-1760-4a35-b541-2dc5bd7a1718",
+   "club_id": "dogos-xv",
+   "full_name": "Abraham Elias"
+  },
+  "otras": [
+   {
+    "id": "656bcd67-b44f-49b8-a28e-5880a2e41099",
+    "club_id": "jockey-club-cordoba-intermedia",
+    "full_name": "Abraham Elias"
+   },
+   {
+    "id": "8c3c13ed-b933-4a39-8f60-e526af4a896e",
+    "club_id": "jockey-club-cordoba",
+    "full_name": "Abraham Elías"
+   }
+  ],
+  "partidos_sra": 2
+ },
+ {
+  "sra": {
+   "id": "c16450ea-19d4-4990-92bb-c01f34b680c3",
+   "club_id": "tarucas",
+   "full_name": "Mateo Pasquini"
+  },
+  "otras": [
+   {
+    "id": "4fea119b-cafa-4490-8461-7e63cea8e077",
+    "club_id": "argentina-xv",
+    "full_name": "Mateo Pasquini"
+   },
+   {
+    "id": "cd7150fa-b35c-448b-92f7-07919d8f8300",
+    "club_id": "tucuman-rugby-club",
+    "full_name": "Mateo Pasquini"
+   }
+  ],
+  "partidos_sra": 13
+ },
+ {
+  "sra": {
+   "id": "c25524a0-3484-4eef-9213-b793cc9a05a2",
+   "club_id": "capibaras-xv",
+   "full_name": "Manuel Bernstein"
+  },
+  "otras": [
+   {
+    "id": "8ab86f7f-17dd-496c-a1c7-ad755c109c12",
+    "club_id": "crai",
+    "full_name": "Manuel Bernstein"
+   }
+  ],
+  "partidos_sra": 11
+ },
+ {
+  "sra": {
+   "id": "c3194ea5-3ff0-4c7a-bec0-6dde47082700",
+   "club_id": "capibaras-xv",
+   "full_name": "Bernardo Lis"
+  },
+  "otras": [
+   {
+    "id": "e6702888-ae18-4924-ace3-fa478358a197",
+    "club_id": "duendes-r-c",
+    "full_name": "Bernardo Lis"
+   }
+  ],
+  "partidos_sra": 12
+ },
+ {
+  "sra": {
+   "id": "c4625463-adb5-4b4a-8203-df9cf4fdbaec",
+   "club_id": "yacare-xv",
+   "full_name": "Facundo Paiva"
+  },
+  "otras": [
+   {
+    "id": "3923514d-c9e4-4dbc-a0ac-14fd43ecdfcb",
+    "club_id": "paraguay",
+    "full_name": "Facundo Paiva"
+   }
+  ],
+  "partidos_sra": 4
+ },
+ {
+  "sra": {
+   "id": "c59be8e1-4bc0-4df8-9f51-b550916245f9",
+   "club_id": "yacare-xv",
+   "full_name": "Joaquín Mussi"
+  },
+  "otras": [
+   {
+    "id": "3aec989d-510a-480b-9c79-b4604994139e",
+    "club_id": "paraguay",
+    "full_name": "Joaquín Mussi"
+   }
+  ],
+  "partidos_sra": 7
+ },
+ {
+  "sra": {
+   "id": "c5a2b62b-dea8-41e1-9851-f682a78595e0",
+   "club_id": "dogos-xv",
+   "full_name": "Juan Ignacio Greising Revol"
+  },
+  "otras": [
+   {
+    "id": "5ca5c8de-6727-49b4-a547-6c74a02c895a",
+    "club_id": "argentina-xv",
+    "full_name": "Juan Ignacio Greising Revol"
+   },
+   {
+    "id": "85dbbbee-d915-4abd-b9e8-37b159212608",
+    "club_id": "club-la-tablada",
+    "full_name": "Juan Ignacio Greising Revol"
+   },
+   {
+    "id": "b40b80d3-9373-44ad-9e40-8a7f56c5e732",
+    "club_id": "la-tablada-intermedia",
+    "full_name": "Juan Ignacio Greising Revol"
+   }
+  ],
+  "partidos_sra": 13
+ },
+ {
+  "sra": {
+   "id": "c61e71d5-13d8-40c1-832c-8b769b58a013",
+   "club_id": "dogos-xv",
+   "full_name": "Tomás Montilla"
+  },
+  "otras": [
+   {
+    "id": "7de5c196-6ffb-4d4c-86d1-96a749c30299",
+    "club_id": "universitario-de-san-juan",
+    "full_name": "Tomas Montilla"
+   },
+   {
+    "id": "e745943e-4853-493c-b986-1080551a3beb",
+    "club_id": "marista-rugby-club",
+    "full_name": "Tomás Montilla"
+   }
+  ],
+  "partidos_sra": 9
+ },
+ {
+  "sra": {
+   "id": "c6c236d3-476e-4f91-8744-21fec13982f6",
+   "club_id": "dogos-xv",
+   "full_name": "Lautaro Simes"
+  },
+  "otras": [
+   {
+    "id": "1f0acfb3-d043-4b3b-872a-c080cd5ce1a7",
+    "club_id": "tala-rugby-club",
+    "full_name": "Lautaro Simes"
+   }
+  ],
+  "partidos_sra": 12
+ },
+ {
+  "sra": {
+   "id": "c9a24765-74b6-47f5-8342-bc3df62a1daa",
+   "club_id": "pampas",
+   "full_name": "Rodrigo Fernández Criado"
+  },
+  "otras": [
+   {
+    "id": "2363c000-6114-4eee-bb8e-d41169883369",
+    "club_id": "argentina-xv",
+    "full_name": "Rodrigo Fernández Criado"
+   },
+   {
+    "id": "5c6e5802-9ee2-4cdb-82e7-a1ea117b34d6",
+    "club_id": "belgrano-athletic",
+    "full_name": "Rodrigo Fernández Criado"
+   }
+  ],
+  "partidos_sra": 15
+ },
+ {
+  "sra": {
+   "id": "caab4a0c-4aad-45e0-98e6-5f1ac98f1823",
+   "club_id": "selknam",
+   "full_name": "Federico Kennedy"
+  },
+  "otras": [
+   {
+    "id": "bb9d9b81-16f8-491e-b1ab-930c9772de13",
+    "club_id": "academia-selknam",
+    "full_name": "Federico Kennedy"
+   }
+  ],
+  "partidos_sra": 2
+ },
+ {
+  "sra": {
+   "id": "cca50b99-02d2-4102-be81-2c98b5d96937",
+   "club_id": "tarucas",
+   "full_name": "Santiago Saleme"
+  },
+  "otras": [
+   {
+    "id": "a6cd0548-6f24-4fa3-abe4-99e71bb432b9",
+    "club_id": "tucuman-lawn-tennis",
+    "full_name": "Santiago Saleme"
+   }
+  ],
+  "partidos_sra": 5
+ },
+ {
+  "sra": {
+   "id": "d04bf3c4-5e55-4d51-9357-040bee77eed8",
+   "club_id": "selknam",
+   "full_name": "Clemente Armstrong"
+  },
+  "otras": [
+   {
+    "id": "48ad83a9-6e51-4207-8c7d-c7e78ee74445",
+    "club_id": "chile-xv",
+    "full_name": "Clemente Armstrong"
+   }
+  ],
+  "partidos_sra": 11
+ },
+ {
+  "sra": {
+   "id": "d474323e-731f-4748-af21-a00a06cf8cbe",
+   "club_id": "capibaras-xv",
+   "full_name": "Lorenzo Colidio"
+  },
+  "otras": [
+   {
+    "id": "6a64d177-78eb-42d3-baab-8973d5add7e6",
+    "club_id": "duendes-r-c",
+    "full_name": "Lorenzo Colidio"
+   }
+  ],
+  "partidos_sra": 14
+ },
+ {
+  "sra": {
+   "id": "d53b2f02-1f9a-476d-9e9d-51873b8f35db",
+   "club_id": "yacare-xv",
+   "full_name": "Gianfranco Parodi"
+  },
+  "otras": [
+   {
+    "id": "89251235-2e91-4262-96e6-5d5968889d65",
+    "club_id": "curda",
+    "full_name": "Gianfranco Parodi"
+   },
+   {
+    "id": "af96e091-6995-40f7-9a1c-2bdda27ae3b0",
+    "club_id": "paraguay",
+    "full_name": "Gianfranco Parodi"
+   }
+  ],
+  "partidos_sra": 3
+ },
+ {
+  "sra": {
+   "id": "d5a6253a-6f13-45d6-a64c-f4653bc74466",
+   "club_id": "dogos-xv",
+   "full_name": "Facundo Rodríguez"
+  },
+  "otras": [
+   {
+    "id": "25b7a790-4841-4719-a010-4c105859b495",
+    "club_id": "oliva-rugby-club",
+    "full_name": "Facundo Rodriguez"
+   },
+   {
+    "id": "4a7a7105-3222-4640-b9e4-738613b6a943",
+    "club_id": "baguales-r-c-m17-b",
+    "full_name": "Facundo Rodríguez"
+   },
+   {
+    "id": "50297d90-3da8-41d5-8dd7-990db8dccd5a",
+    "club_id": "los-tarcos",
+    "full_name": "Facundo Rodriguez"
+   },
+   {
+    "id": "cbfaa6fe-5991-4029-987a-08ff7d8cf664",
+    "club_id": "jockey-club-cordoba",
+    "full_name": "Facundo Rodríguez"
+   }
+  ],
+  "partidos_sra": 13
+ },
+ {
+  "sra": {
+   "id": "da1bb8e8-674c-42ee-8b75-bcdd2dec8502",
+   "club_id": "penarol",
+   "full_name": "Juan Manuel Alonso"
+  },
+  "otras": [
+   {
+    "id": "8805af02-56c9-4c85-ad4b-7f691a49f858",
+    "club_id": "uruguay-xv",
+    "full_name": "Juan Manuel Alonso"
+   }
+  ],
+  "partidos_sra": 13
+ },
+ {
+  "sra": {
+   "id": "dad0177b-0412-462c-9f93-0bf204861a53",
+   "club_id": "selknam",
+   "full_name": "Clemente Saavedra"
+  },
+  "otras": [
+   {
+    "id": "357051f0-4aa3-4242-990e-0552fdcb9257",
+    "club_id": "chile-xv",
+    "full_name": "Clemente Saavedra"
+   }
+  ],
+  "partidos_sra": 10
+ },
+ {
+  "sra": {
+   "id": "dde75d47-9ed7-4fb7-ac96-4ecc627700d9",
+   "club_id": "selknam",
+   "full_name": "Santiago Wood"
+  },
+  "otras": [
+   {
+    "id": "867558c1-132c-4c42-92b5-e85d63fb5a8a",
+    "club_id": "chile-u20",
+    "full_name": "Santiago Wood"
+   }
+  ],
+  "partidos_sra": 1
+ },
+ {
+  "sra": {
+   "id": "ddfab376-e34a-445c-a060-b02d21363c80",
+   "club_id": "tarucas",
+   "full_name": "Mariano Muntaner"
+  },
+  "otras": [
+   {
+    "id": "3b2707d0-9588-4bbe-a869-246852aceb02",
+    "club_id": "tucuman-rugby-club",
+    "full_name": "Mariano Muntaner"
+   }
+  ],
+  "partidos_sra": 12
+ },
+ {
+  "sra": {
+   "id": "e0bfc6a2-9caa-415f-8c06-5a1b15d041fb",
+   "club_id": "tarucas",
+   "full_name": "Francisco Moreno"
+  },
+  "otras": [
+   {
+    "id": "360ff9d0-48be-406d-901b-9b6f20668a12",
+    "club_id": "argentina",
+    "full_name": "Francisco Moreno"
+   },
+   {
+    "id": "4abe102c-fe7a-43d1-87ed-f24edba610ce",
+    "club_id": "universitario-de-tucuman",
+    "full_name": "Francisco Moreno"
+   }
+  ],
+  "partidos_sra": 15
+ },
+ {
+  "sra": {
+   "id": "e0d0283d-55fc-4dc2-867c-6abd18feb72b",
+   "club_id": "yacare-xv",
+   "full_name": "Juan Mernes"
+  },
+  "otras": [
+   {
+    "id": "758e500d-cb74-43f1-b70c-e1684530e7ac",
+    "club_id": "estudiantes-de-parana",
+    "full_name": "Juan Mernes"
+   }
+  ],
+  "partidos_sra": 13
+ },
+ {
+  "sra": {
+   "id": "e0f4a833-f289-4156-afec-360959c4150f",
+   "club_id": "dogos-xv",
+   "full_name": "Augusto Cugnini"
+  },
+  "otras": [
+   {
+    "id": "26002f40-0522-4b30-af18-8e9cde4e6767",
+    "club_id": "jockey-club-cordoba",
+    "full_name": "Augusto Cugnini"
+   }
+  ],
+  "partidos_sra": 10
+ },
+ {
+  "sra": {
+   "id": "e1fe71d7-0330-4d1d-b9fc-93bcc9b36522",
+   "club_id": "pampas",
+   "full_name": "Francisco Lusarreta"
+  },
+  "otras": [
+   {
+    "id": "e2ce7c1d-1abe-4273-98db-ee0ae9c97333",
+    "club_id": "belgrano-athletic",
+    "full_name": "Francisco Lusarreta"
+   }
+  ],
+  "partidos_sra": 14
+ },
+ {
+  "sra": {
+   "id": "e203d10a-d9c8-44b9-b0fd-83707f1e6178",
+   "club_id": "yacare-xv",
+   "full_name": "Sebastian Urbieta"
+  },
+  "otras": [
+   {
+    "id": "126847ee-c60f-4e1e-9a0f-af4e866596b1",
+    "club_id": "paraguay",
+    "full_name": "Sebastián Urbieta"
+   },
+   {
+    "id": "ade49af0-6d03-4f7a-a521-bf38d1e637b6",
+    "club_id": "curda",
+    "full_name": "Sebastian Urbieta"
+   }
+  ],
+  "partidos_sra": 13
+ },
+ {
+  "sra": {
+   "id": "e3402c2b-29ac-4643-a0d0-e42b94441624",
+   "club_id": "selknam",
+   "full_name": "Cristobal Soto"
+  },
+  "otras": [
+   {
+    "id": "8754b037-f70e-4eac-b93b-d3c0cbd8c490",
+    "club_id": "chile-u20",
+    "full_name": "Cristóbal Soto"
+   }
+  ],
+  "partidos_sra": 1
+ },
+ {
+  "sra": {
+   "id": "e40868c3-1dca-4e57-870c-1106f9bc9ec7",
+   "club_id": "tarucas",
+   "full_name": "Juan Manuel Vivas"
+  },
+  "otras": [
+   {
+    "id": "43146d6b-2662-436f-a335-5010e58c89c3",
+    "club_id": "los-tordos-rugby-club",
+    "full_name": "Juan Manuel Vivas"
+   }
+  ],
+  "partidos_sra": 10
+ },
+ {
+  "sra": {
+   "id": "e57f9c54-d4f8-48fa-927f-e51a986e57a3",
+   "club_id": "dogos-xv",
+   "full_name": "Agustín De Vertiz"
+  },
+  "otras": [
+   {
+    "id": "5e6e2ff5-db1f-4934-bf92-1477be89f25a",
+    "club_id": "tala-rugby-club",
+    "full_name": "Agustín De Vértiz"
+   }
+  ],
+  "partidos_sra": 11
+ },
+ {
+  "sra": {
+   "id": "e5c0453d-3bf5-42eb-966f-2503a348669d",
+   "club_id": "selknam",
+   "full_name": "Benjamín Moreno"
+  },
+  "otras": [
+   {
+    "id": "177d26d4-1541-4c4c-9067-46a8f6e2c92f",
+    "club_id": "academia-selknam",
+    "full_name": "Benjamín Moreno"
+   }
+  ],
+  "partidos_sra": 3
+ },
+ {
+  "sra": {
+   "id": "e5c16c51-bc08-4916-9f9e-cc9ec9560919",
+   "club_id": "penarol",
+   "full_name": "Felipe Aliaga"
+  },
+  "otras": [
+   {
+    "id": "33e5c688-d4ac-43fe-b276-c328931e34d7",
+    "club_id": "uruguay-xv",
+    "full_name": "Felipe Aliaga"
+   }
+  ],
+  "partidos_sra": 10
+ },
+ {
+  "sra": {
+   "id": "e5db726f-45e0-4abc-ad7d-39b7796a37f8",
+   "club_id": "dogos-xv",
+   "full_name": "Federico Rolotti"
+  },
+  "otras": [
+   {
+    "id": "649fe0e8-2ebf-46e6-aa77-e1e70f3303f6",
+    "club_id": "club-la-tablada",
+    "full_name": "Federico Rolotti"
+   }
+  ],
+  "partidos_sra": 6
+ },
+ {
+  "sra": {
+   "id": "e5f33756-8e90-4111-933f-d023389ee5a5",
+   "club_id": "selknam",
+   "full_name": "Tomás Salas"
+  },
+  "otras": [
+   {
+    "id": "9f2e4fb9-c70b-4f89-8dc2-de02300b54bf",
+    "club_id": "chile-xv",
+    "full_name": "Tomás Salas"
+   }
+  ],
+  "partidos_sra": 2
+ },
+ {
+  "sra": {
+   "id": "e61d3fb8-5227-4d14-a2be-04f18250acdc",
+   "club_id": "dogos-xv",
+   "full_name": "Manuel Carrara"
+  },
+  "otras": [
+   {
+    "id": "717cdc32-9e0f-475b-b170-7f192272dde5",
+    "club_id": "jockey-club-cordoba",
+    "full_name": "Manuel Carrara"
+   }
+  ],
+  "partidos_sra": 3
+ },
+ {
+  "sra": {
+   "id": "e65fd67c-0221-4760-9066-429f3d6b7d83",
+   "club_id": "capibaras-xv",
+   "full_name": "Lautaro Cipriani"
+  },
+  "otras": [
+   {
+    "id": "25afb149-6aca-418c-a788-54d7b29432ea",
+    "club_id": "club-tilcara",
+    "full_name": "Lautaro Cipriani"
+   }
+  ],
+  "partidos_sra": 13
+ },
+ {
+  "sra": {
+   "id": "e6a41915-513f-4c7c-ac7c-4a7133fb87b8",
+   "club_id": "penarol",
+   "full_name": "Alejandro Molinas"
+  },
+  "otras": [
+   {
+    "id": "a5725cc2-067d-46f3-8201-5a3b3a347ac8",
+    "club_id": "crai",
+    "full_name": "Alejandro Molinas"
+   }
+  ],
+  "partidos_sra": 8
+ },
+ {
+  "sra": {
+   "id": "ec13e71c-ac1b-49be-99cd-fe2d7b69b72c",
+   "club_id": "tarucas",
+   "full_name": "Matías Sauze"
+  },
+  "otras": [
+   {
+    "id": "3e9b3bb0-31c7-4cca-9488-2bfc38519602",
+    "club_id": "tucuman-rugby-club",
+    "full_name": "Matias Sauze"
+   }
+  ],
+  "partidos_sra": 11
+ },
+ {
+  "sra": {
+   "id": "ecc4c335-2fa5-461f-b54a-9fbb7ce73334",
+   "club_id": "selknam",
+   "full_name": "Martin Escobar"
+  },
+  "otras": [
+   {
+    "id": "7ab5aec9-399e-48c5-88c5-3f456c01cc3a",
+    "club_id": "academia-selknam",
+    "full_name": "Martín Escobar"
+   }
+  ],
+  "partidos_sra": 1
+ },
+ {
+  "sra": {
+   "id": "eeb313df-b17c-4cd0-a47d-7082c35db1cc",
+   "club_id": "capibaras-xv",
+   "full_name": "Federico Cescut"
+  },
+  "otras": [
+   {
+    "id": "7bedec10-7dee-4409-8323-649b2313789f",
+    "club_id": "santa-fe-r-c",
+    "full_name": "Federico Cescut"
+   }
+  ],
+  "partidos_sra": 2
+ },
+ {
+  "sra": {
+   "id": "eed3a8f2-60f2-4d55-9284-6455d1cd9d55",
+   "club_id": "tarucas",
+   "full_name": "Stefano Ferro"
+  },
+  "otras": [
+   {
+    "id": "7e4e58b0-35c4-40c4-8b86-ccdf7b1d3116",
+    "club_id": "tucuman-lawn-tennis",
+    "full_name": "Stefano Ferro"
+   }
+  ],
+  "partidos_sra": 11
+ },
+ {
+  "sra": {
+   "id": "ef3e2298-118e-4881-a542-d09e50e2894e",
+   "club_id": "selknam",
+   "full_name": "Fabian Lagos"
+  },
+  "otras": [
+   {
+    "id": "9cedb6af-278f-4e2a-a77b-9fb0723d149d",
+    "club_id": "academia-selknam",
+    "full_name": "Fabián Lagos"
+   }
+  ],
+  "partidos_sra": 1
+ },
+ {
+  "sra": {
+   "id": "f1c2af1a-1032-4bf5-aade-bb83feb0a5e0",
+   "club_id": "capibaras-xv",
+   "full_name": "Santiago Vitola"
+  },
+  "otras": [
+   {
+    "id": "0cacfda6-0948-4b36-98b2-4bdb3be54e8c",
+    "club_id": "atletico-del-rosario",
+    "full_name": "Santiago Vitola"
+   },
+   {
+    "id": "d08e8c0c-d932-4cca-a96f-125a70aa7b1f",
+    "club_id": "atletico-del-rosario",
+    "full_name": "Santiago Vítola"
+   }
+  ],
+  "partidos_sra": 2
+ },
+ {
+  "sra": {
+   "id": "f2973726-297a-4744-a0e4-078b119c4b1a",
+   "club_id": "selknam",
+   "full_name": "Salvador Lues"
+  },
+  "otras": [
+   {
+    "id": "78eb88ed-b654-4642-ad22-7f87bf9cc617",
+    "club_id": "chile-xv",
+    "full_name": "Salvador Lues"
+   }
+  ],
+  "partidos_sra": 9
+ },
+ {
+  "sra": {
+   "id": "f4b5b00b-2b81-4269-ada9-e8aab4f19e95",
+   "club_id": "capibaras-xv",
+   "full_name": "Ignacio Gallo"
+  },
+  "otras": [
+   {
+    "id": "b8cdec67-0721-4669-8cab-bf47de82e48a",
+    "club_id": "jockey-club-de-rosario",
+    "full_name": "Ignacio Gallo"
+   }
+  ],
+  "partidos_sra": 6
+ },
+ {
+  "sra": {
+   "id": "f5371ca8-2942-4acb-9ba9-fbfc86726500",
+   "club_id": "selknam",
+   "full_name": "Felipe Méndez"
+  },
+  "otras": [
+   {
+    "id": "15654073-09c5-4768-b6ca-1568a6c6228d",
+    "club_id": "chile-xv",
+    "full_name": "Felipe Mendez"
+   },
+   {
+    "id": "9fa5d431-42e3-4319-a2b8-7bf32bf2cb03",
+    "club_id": "academia-selknam",
+    "full_name": "Felipe Méndez"
+   }
+  ],
+  "partidos_sra": 5
+ },
+ {
+  "sra": {
+   "id": "f823b19b-9880-4851-8dcb-22dd1f4428a8",
+   "club_id": "selknam",
+   "full_name": "Nicolás Triviño"
+  },
+  "otras": [
+   {
+    "id": "29421aaa-24d1-442b-b256-f043ddd467c0",
+    "club_id": "academia-selknam",
+    "full_name": "Nicolás Triviño"
+   }
+  ],
+  "partidos_sra": 1
+ },
+ {
+  "sra": {
+   "id": "fad9f9f6-3517-4785-9e47-63559ba8efb7",
+   "club_id": "selknam",
+   "full_name": "Rodrigo Araya"
+  },
+  "otras": [
+   {
+    "id": "4c55b150-df39-4836-883b-689f98bae4a6",
+    "club_id": "academia-selknam",
+    "full_name": "Rodrigo Araya"
+   }
+  ],
+  "partidos_sra": 2
+ },
+ {
+  "sra": {
+   "id": "fb23ef88-41a7-4296-9a25-f9e1ccbc8a90",
+   "club_id": "tarucas",
+   "full_name": "Tomás Dande"
+  },
+  "otras": [
+   {
+    "id": "2f5e879d-fa60-4f63-bcb1-822fc4260276",
+    "club_id": "argentina-m20",
+    "full_name": "TOMÁS DANDE"
+   },
+   {
+    "id": "4bfb5525-b156-4a4a-9bc6-aad0cd06879b",
+    "club_id": "argentina-xv",
+    "full_name": "Tomás Dande"
+   },
+   {
+    "id": "e6075639-63e3-4ff0-8ac5-396340b5253d",
+    "club_id": "huirapuca",
+    "full_name": "Tomas Dande"
+   }
+  ],
+  "partidos_sra": 8
+ },
+ {
+  "sra": {
+   "id": "fb690c01-211a-46cf-bcf2-9c712581a8e1",
+   "club_id": "dogos-xv",
+   "full_name": "Enzo Ocampo"
+  },
+  "otras": [
+   {
+    "id": "7b736bb1-f965-4af4-a965-9a01c3e275cf",
+    "club_id": "club-universitario-de-cordoba",
+    "full_name": "Enzo Ocampo"
+   }
+  ],
+  "partidos_sra": 15
+ },
+ {
+  "sra": {
+   "id": "fddf8949-ec8c-4485-8a3b-6fd9cc4da2e2",
+   "club_id": "capibaras-xv",
+   "full_name": "Lisandro Dipierri"
+  },
+  "otras": [
+   {
+    "id": "61009bd1-0820-465d-aac2-68d75af0baf1",
+    "club_id": "atletico-del-rosario",
+    "full_name": "Lisandro Dipierri"
+   }
+  ],
+  "partidos_sra": 5
+ },
+ {
+  "sra": {
+   "id": "feca432c-eb7b-4e58-aa28-29b4398365dc",
+   "club_id": "penarol",
+   "full_name": "Jesús Porro"
+  },
+  "otras": [
+   {
+    "id": "d5b9d8ff-d192-4b36-8bb4-da074970b03a",
+    "club_id": "marista-rugby-club",
+    "full_name": "Jesús Porro"
+   }
+  ],
+  "partidos_sra": 9
+ }
+]

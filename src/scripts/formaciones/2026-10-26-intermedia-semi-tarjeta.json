@@ -1,0 +1,426 @@
+{
+ "descripcion": "Intermedia semifinal 23/10 (tarjeta 327319 completa, con cambios)",
+ "partidos": [
+  {
+   "id": "22c0b937-19da-4eda-b75c-a31c16859c90",
+   "rotulo": "Jockey Club Córdoba vs Córdoba Athletic · Intermedia semifinal · tarjeta 327319",
+   "local": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Genaro Merola Moreschi"
+     },
+     {
+      "numero": 2,
+      "nombre": "Juan Manuel Freytes Echenique"
+     },
+     {
+      "numero": 3,
+      "nombre": "Renzo Rebori"
+     },
+     {
+      "numero": 4,
+      "nombre": "Juan Franco"
+     },
+     {
+      "numero": 5,
+      "nombre": "Mateo Dominguez Peralta"
+     },
+     {
+      "numero": 6,
+      "nombre": "Lucas Mateo Moyano Aguirre"
+     },
+     {
+      "numero": 7,
+      "nombre": "Isidoro Carrara"
+     },
+     {
+      "numero": 8,
+      "nombre": "Joaquin Lopez"
+     },
+     {
+      "numero": 9,
+      "nombre": "Jeronimo Cortes"
+     },
+     {
+      "numero": 10,
+      "nombre": "Tomas Trejo"
+     },
+     {
+      "numero": 11,
+      "nombre": "Conrado Alonso"
+     },
+     {
+      "numero": 12,
+      "nombre": "Simón Trejo"
+     },
+     {
+      "numero": 13,
+      "nombre": "Felipe Mallia"
+     },
+     {
+      "numero": 14,
+      "nombre": "Matias Fischer"
+     },
+     {
+      "numero": 15,
+      "nombre": "Vicente Carretero"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Julián Nereo Pelcer"
+     },
+     {
+      "numero": 17,
+      "nombre": "Francisco Nicolás Burgos"
+     },
+     {
+      "numero": 18,
+      "nombre": "Agustin Rey"
+     },
+     {
+      "numero": 19,
+      "nombre": "Nicolas Corso"
+     },
+     {
+      "numero": 20,
+      "nombre": "Jeronimo Deheza"
+     },
+     {
+      "numero": 21,
+      "nombre": "Alvaro Areco Penalba"
+     },
+     {
+      "numero": 22,
+      "nombre": "Fausto Salvador Gangemi"
+     },
+     {
+      "numero": 23,
+      "nombre": "Benjamin Urani"
+     }
+    ]
+   },
+   "visitante": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Gonzalo Thomas Gargallo Bazan"
+     },
+     {
+      "numero": 2,
+      "nombre": "Lucas Adamo"
+     },
+     {
+      "numero": 3,
+      "nombre": "Tomas Agustin Fitte"
+     },
+     {
+      "numero": 4,
+      "nombre": "Juan Bocco"
+     },
+     {
+      "numero": 5,
+      "nombre": "Maximo Leon"
+     },
+     {
+      "numero": 6,
+      "nombre": "Felipe Bocco"
+     },
+     {
+      "numero": 7,
+      "nombre": "Matias Soria"
+     },
+     {
+      "numero": 8,
+      "nombre": "Ignacio Romero"
+     },
+     {
+      "numero": 9,
+      "nombre": "Santiago Villalba Kohn"
+     },
+     {
+      "numero": 10,
+      "nombre": "Augusto Guillamondegui"
+     },
+     {
+      "numero": 11,
+      "nombre": "Martín Vaccarello"
+     },
+     {
+      "numero": 12,
+      "nombre": "Felipe Cañas"
+     },
+     {
+      "numero": 13,
+      "nombre": "Bautista Rotondo Lopez"
+     },
+     {
+      "numero": 14,
+      "nombre": "Ignacio Barrea"
+     },
+     {
+      "numero": 15,
+      "nombre": "Felipe Acuña"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Facundo Almeida"
+     },
+     {
+      "numero": 17,
+      "nombre": "German Ezequiel Koth"
+     },
+     {
+      "numero": 18,
+      "nombre": "Thiago Armando"
+     },
+     {
+      "numero": 19,
+      "nombre": "Juan Segundo Villa"
+     },
+     {
+      "numero": 20,
+      "nombre": "Martín López Mirabella"
+     },
+     {
+      "numero": 21,
+      "nombre": "Facundo Coraglio"
+     },
+     {
+      "numero": 22,
+      "nombre": "Bautista Acuña"
+     },
+     {
+      "numero": 23,
+      "nombre": "Jose Ignacio Arias"
+     }
+    ]
+   },
+   "eventos": [
+    {
+     "minuto": 7,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "jugador": "Augusto Guillamondegui",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 12,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "jugador": "Tomas Trejo",
+     "equipo": "local"
+    },
+    {
+     "minuto": 20,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Matias Fischer",
+     "equipo": "local"
+    },
+    {
+     "minuto": 21,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Tomas Trejo",
+     "equipo": "local"
+    },
+    {
+     "minuto": 25,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Juan Manuel Freytes Echenique",
+     "equipo": "local"
+    },
+    {
+     "minuto": 26,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Tomas Trejo",
+     "equipo": "local"
+    },
+    {
+     "minuto": 32,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Mateo Dominguez Peralta",
+     "equipo": "local"
+    },
+    {
+     "minuto": 32,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Tomas Trejo",
+     "equipo": "local"
+    },
+    {
+     "minuto": 38,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Maximo Leon",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 0,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Matias Soria",
+     "detalle": "Entra: Martín López Mirabella",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 1,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Joaquin Lopez",
+     "detalle": "Entra: Nicolas Corso",
+     "equipo": "local"
+    },
+    {
+     "minuto": 11,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Lucas Mateo Moyano Aguirre",
+     "detalle": "Entra: Jeronimo Deheza",
+     "equipo": "local"
+    },
+    {
+     "minuto": 13,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Facundo Almeida",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 13,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Augusto Guillamondegui",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 18,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Conrado Alonso",
+     "detalle": "Entra: Benjamin Urani",
+     "equipo": "local"
+    },
+    {
+     "minuto": 18,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Genaro Merola Moreschi",
+     "detalle": "Entra: Francisco Nicolás Burgos",
+     "equipo": "local"
+    },
+    {
+     "minuto": 18,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Juan Manuel Freytes Echenique",
+     "detalle": "Entra: Julián Nereo Pelcer",
+     "equipo": "local"
+    },
+    {
+     "minuto": 19,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Tomas Agustin Fitte",
+     "detalle": "Entra: Thiago Armando",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 25,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Matias Fischer",
+     "detalle": "Entra: Fausto Salvador Gangemi",
+     "equipo": "local"
+    },
+    {
+     "minuto": 25,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Felipe Cañas",
+     "detalle": "Entra: Jose Ignacio Arias",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 25,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Gonzalo Thomas Gargallo Bazan",
+     "detalle": "Entra: German Ezequiel Koth",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 25,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Felipe Acuña",
+     "detalle": "Entra: Facundo Coraglio",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 25,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Lucas Adamo",
+     "detalle": "Entra: Facundo Almeida",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 25,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Maximo Leon",
+     "detalle": "Entra: Juan Segundo Villa",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 26,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Ignacio Romero",
+     "detalle": "Entra: Bautista Acuña",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 28,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Fausto Salvador Gangemi",
+     "equipo": "local"
+    },
+    {
+     "minuto": 30,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Renzo Rebori",
+     "detalle": "Entra: Agustin Rey",
+     "equipo": "local"
+    },
+    {
+     "minuto": 38,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Tomas Trejo",
+     "detalle": "Entra: Alvaro Areco Penalba",
+     "equipo": "local"
+    },
+    {
+     "minuto": 40,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Ignacio Barrea",
+     "equipo": "visitante"
+    }
+   ]
+  }
+ ]
+}

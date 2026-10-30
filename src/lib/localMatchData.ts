@@ -7,7 +7,6 @@ import {
   type MatchEventDefinition,
 } from './matchEventCatalog.ts';
 import {
-  goalKickOutcomeSuffixSpanish,
   isGoalKickAttemptEvent,
   isGoalKickMade,
   parseSubstitutionIncomingPlayer,
@@ -202,12 +201,6 @@ export function normalizeLocalEvents(raw: unknown, sportId?: string | null): Loc
   });
 }
 
-/** Texto del tipo de evento en vistas públicas; añade acertada/fallada en tiros a palos cuando el detalle lo permite. */
-export function publicEventTypeDisplay(evt: Pick<LocalPublicEvent, 'type' | 'description'>): string {
-  const rawType = text(evt.type) || 'note';
-  const label = rawType.toLowerCase();
-  return `${label}${goalKickOutcomeSuffixSpanish(rawType, evt.description)}`;
-}
 
 /**
  * Puntos de un evento para la fila del jugador. Tabla fija por tipo, mas dos

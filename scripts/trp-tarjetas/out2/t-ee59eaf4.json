@@ -1,0 +1,1004 @@
+{
+ "descripcion": "tarjetas oficiales ee59eaf4",
+ "partidos": [
+  {
+   "id": "dcdfc6e2-9874-4f3f-bca6-99f647d637ad",
+   "rotulo": "san-ignacio-r-c vs bigua-rugby-club · ee59eaf4 · tarjeta 326244",
+   "arbitro": "GASTON ROGE",
+   "local": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Leon Omar Pelaez",
+      "id": "8682f893-b091-4c71-9759-6120513cf061"
+     },
+     {
+      "numero": 2,
+      "nombre": "Joaquin Gauna",
+      "id": "d4009483-9f11-4e80-b1f0-40a6b8d0789f"
+     },
+     {
+      "numero": 3,
+      "nombre": "Joel Ledesma",
+      "id": "825d2bd5-a66a-4d08-b7a5-6158ef57dd23"
+     },
+     {
+      "numero": 4,
+      "nombre": "Bruno Costales",
+      "id": "560429f4-229f-41ae-9660-64fefde040ae"
+     },
+     {
+      "numero": 5,
+      "nombre": "Thomas Helguera",
+      "id": "f25d3792-c3c3-4c0b-ad00-6393adf57284"
+     },
+     {
+      "numero": 6,
+      "nombre": "Juan Caveda Amiel",
+      "id": "de9a0098-e051-4638-b1c6-b0a7fd9217d8"
+     },
+     {
+      "numero": 7,
+      "nombre": "Ignacio Gandara",
+      "id": "e2a827b7-9e5d-436b-84f1-abf458ab71d0"
+     },
+     {
+      "numero": 8,
+      "nombre": "Francisco Paklayan",
+      "id": "db033770-7b8b-4be1-b411-f0df7ca0cc87"
+     },
+     {
+      "numero": 9,
+      "nombre": "Felipe Fortte",
+      "id": "dc5bd359-2b7e-43d6-a46e-2d2b6e54711e"
+     },
+     {
+      "numero": 10,
+      "nombre": "Manuel Fortte",
+      "id": "e8fb05ec-1fdd-41c0-9266-a95d921307b0"
+     },
+     {
+      "numero": 11,
+      "nombre": "Kevin Ibarra",
+      "id": "f7a3541a-97b9-4c94-89cc-5820d1d55d32"
+     },
+     {
+      "numero": 12,
+      "nombre": "Bautista Barbero",
+      "id": "b64b2091-a3e9-4938-b52d-e25607d076b7"
+     },
+     {
+      "numero": 13,
+      "nombre": "Valentin Delgado",
+      "id": "b619c204-9bc3-4739-b579-f2c69cd32372"
+     },
+     {
+      "numero": 14,
+      "nombre": "Lautaro Garcia",
+      "id": "057a988b-88ba-4ae6-924b-0ee3765e668a"
+     },
+     {
+      "numero": 15,
+      "nombre": "Joaquin De Rosa",
+      "id": "5f5e8e93-cd80-49df-a191-90eade0f2b47"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Ramiro Allamanda",
+      "id": "8975a63c-7964-43f1-9cdd-60ab2abcaf34"
+     },
+     {
+      "numero": 17,
+      "nombre": "Joaquin Ramirez",
+      "id": "0ebd78f8-c7a8-41ff-9527-da206a3bbbba"
+     },
+     {
+      "numero": 18,
+      "nombre": "Francisco Jeremias Cosentino",
+      "id": "b1e67d70-058c-44b6-98f0-d79c45beef6b"
+     },
+     {
+      "numero": 19,
+      "nombre": "Valentino Parodi",
+      "id": "2f783ffd-56c9-4a0f-86b6-5ecdb4356753"
+     },
+     {
+      "numero": 20,
+      "nombre": "Tomás Alonso",
+      "id": "ae6cded5-5a82-431d-8790-f89dcefaf3d9"
+     },
+     {
+      "numero": 21,
+      "nombre": "Franco Cavalli",
+      "id": "1980e99c-6e17-4399-9df5-412a178b0ed5"
+     },
+     {
+      "numero": 22,
+      "nombre": "Rafael Giardelli",
+      "id": "19895bd9-bf08-47a4-b806-e98b58bda313"
+     },
+     {
+      "numero": 23,
+      "nombre": "Daniel Havrylenko",
+      "id": "f4cb7897-f706-49cf-a6f0-98b2a6325561"
+     }
+    ],
+    "nombre": "san-ignacio-r-c"
+   },
+   "visitante": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Nahuel Correa",
+      "id": "235eb3b3-947f-478f-99bb-77a2613fb096"
+     },
+     {
+      "numero": 2,
+      "nombre": "Santino Astete",
+      "id": "cddfa520-4254-4cf0-92e5-7c923636aa1d"
+     },
+     {
+      "numero": 3,
+      "nombre": "Santiago Emanuel Sanchez",
+      "id": "eb8159de-59d5-4785-b8ca-ff2aa1e5a22b"
+     },
+     {
+      "numero": 4,
+      "nombre": "Franco Spaltro",
+      "id": "afafe8f3-6e47-4bd0-b28b-63a150bcd84f"
+     },
+     {
+      "numero": 5,
+      "nombre": "Santiago Merlo",
+      "id": "b31c4553-3651-4d50-be78-03ecd97523dd"
+     },
+     {
+      "numero": 6,
+      "nombre": "Julian Bonavita",
+      "id": "633879f5-3e6c-47d4-bcbc-4462637a0c90"
+     },
+     {
+      "numero": 7,
+      "nombre": "Juan Manuel Vincenzetti",
+      "id": "aecf3b07-f205-41f9-91f3-c3419712fe95"
+     },
+     {
+      "numero": 8,
+      "nombre": "Valentino Carballo",
+      "id": "2294449c-7f63-4c58-bf47-a06dd736fd71"
+     },
+     {
+      "numero": 9,
+      "nombre": "Alan Gonzalez",
+      "id": "5c708277-529d-449d-8e68-02ac355d856a"
+     },
+     {
+      "numero": 10,
+      "nombre": "Hernan Ebrett Prior",
+      "id": "9055dcad-e94b-45d8-a11e-6319c472ddbe"
+     },
+     {
+      "numero": 11,
+      "nombre": "Joaquin Elgueta",
+      "id": "0723a4b7-2f7c-4783-9d86-2d67c9b911d6"
+     },
+     {
+      "numero": 12,
+      "nombre": "Felipe Poli",
+      "id": "1ada2962-6a1a-4995-a363-27ccc4eba1bc"
+     },
+     {
+      "numero": 13,
+      "nombre": "Raul Horacio Brischetto",
+      "id": "06e8b185-6b11-4093-86a8-f189ef904d9d"
+     },
+     {
+      "numero": 14,
+      "nombre": "Gregorio Hatchondo",
+      "id": "f76f4aa6-d3a7-4dd4-a80b-3e22f1451833"
+     },
+     {
+      "numero": 15,
+      "nombre": "Octavio Di Luca",
+      "id": "33fc9854-f6e5-4e0d-9bef-1c09a4ee2d0c"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Benjamin Medina Urrutia",
+      "id": "228b0ae7-0ccc-4963-a24d-39ae5348d1cb"
+     },
+     {
+      "numero": 17,
+      "nombre": "Mauro Julian Ponce",
+      "id": "54ebc616-43c0-4e45-9990-19cbb1d032f9"
+     },
+     {
+      "numero": 18,
+      "nombre": "Matías Montes",
+      "id": "d45823a3-39cf-459b-a123-38d5e085728e"
+     },
+     {
+      "numero": 19,
+      "nombre": "Tomas De Simone",
+      "id": "b7d6a18c-ae8b-4389-9744-fac26ce2fab1"
+     },
+     {
+      "numero": 20,
+      "nombre": "Kevin Melchor",
+      "id": "ef59a7a3-382d-4f7d-89c8-a64fc4f7ef51"
+     },
+     {
+      "numero": 21,
+      "nombre": "Felipe Bruno",
+      "id": "36dbe093-bb17-44b5-8749-848d266a3c12"
+     },
+     {
+      "numero": 22,
+      "nombre": "Valentino Poli",
+      "id": "d674dc2b-c402-4c3f-8ffb-3c0cbab9bba6"
+     },
+     {
+      "numero": 23,
+      "nombre": "Marcos Alejandro Quiroga",
+      "id": "27b959fb-0b02-497b-af3a-9b50a7a4c83b"
+     }
+    ],
+    "nombre": "bigua-rugby-club"
+   },
+   "eventos": [
+    {
+     "minuto": 8,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Franco Spaltro",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 12,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Francisco Paklayan",
+     "equipo": "local"
+    },
+    {
+     "minuto": 13,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Lautaro Garcia",
+     "equipo": "local"
+    },
+    {
+     "minuto": 23,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "jugador": "Alan Gonzalez",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 29,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Joaquin De Rosa",
+     "equipo": "local"
+    },
+    {
+     "minuto": 36,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Valentino Carballo",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 38,
+     "periodo": "1T",
+     "tipo": "injury",
+     "jugador": "Kevin Ibarra",
+     "detalle": "Lesionado",
+     "equipo": "local"
+    },
+    {
+     "minuto": 38,
+     "periodo": "1T",
+     "tipo": "substitution",
+     "jugador": "Kevin Ibarra",
+     "detalle": "Entra: Daniel Havrylenko",
+     "equipo": "local"
+    },
+    {
+     "minuto": 40,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Joaquin De Rosa",
+     "equipo": "local"
+    },
+    {
+     "minuto": 0,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Bautista Barbero",
+     "detalle": "Entra: Joaquin Ramirez",
+     "equipo": "local"
+    },
+    {
+     "minuto": 0,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Ignacio Gandara",
+     "detalle": "Entra: Franco Cavalli",
+     "equipo": "local"
+    },
+    {
+     "minuto": 2,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "jugador": "Joaquin Ramirez",
+     "equipo": "local"
+    },
+    {
+     "minuto": 4,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Lautaro Garcia",
+     "equipo": "local"
+    },
+    {
+     "minuto": 9,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Francisco Paklayan",
+     "equipo": "local"
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Santiago Emanuel Sanchez",
+     "detalle": "Entra: Mauro Julian Ponce",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Octavio Di Luca",
+     "detalle": "Entra: Benjamin Medina Urrutia",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 12,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Joaquin Gauna",
+     "detalle": "Entra: Tomás Alonso",
+     "equipo": "local"
+    },
+    {
+     "minuto": 18,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Francisco Paklayan",
+     "equipo": "local"
+    },
+    {
+     "minuto": 19,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Joel Ledesma",
+     "detalle": "Entra: Francisco Jeremias Cosentino",
+     "equipo": "local"
+    },
+    {
+     "minuto": 19,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Leon Omar Pelaez",
+     "detalle": "Entra: Valentino Parodi",
+     "equipo": "local"
+    },
+    {
+     "minuto": 22,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Julian Bonavita",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 26,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Lautaro Garcia",
+     "equipo": "local"
+    },
+    {
+     "minuto": 27,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Manuel Fortte",
+     "equipo": "local"
+    },
+    {
+     "minuto": 30,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Valentino Poli",
+     "detalle": "Entra: Valentino Poli",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 30,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Juan Manuel Vincenzetti",
+     "detalle": "Entra: Marcos Alejandro Quiroga",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 33,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "jugador": "Franco Cavalli",
+     "equipo": "local"
+    },
+    {
+     "minuto": 33,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Mauro Julian Ponce",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 33,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Felipe Bruno",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 33,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Nahuel Correa",
+     "detalle": "Entra: Kevin Melchor",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 38,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Kevin Ibarra",
+     "detalle": "Entra: Rafael Giardelli",
+     "equipo": "local"
+    },
+    {
+     "minuto": 40,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "jugador": "Thomas Helguera",
+     "equipo": "local"
+    },
+    {
+     "minuto": 40,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Lautaro Garcia",
+     "equipo": "local"
+    },
+    {
+     "minuto": 40,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Manuel Fortte",
+     "equipo": "local"
+    },
+    {
+     "minuto": 40,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Raul Horacio Brischetto",
+     "equipo": "visitante"
+    }
+   ]
+  },
+  {
+   "id": "482b4a0e-47f4-437b-8a22-4ebf00c5c4f6",
+   "rotulo": "argentino-de-bahia-blanca vs union-del-sur · ee59eaf4 · tarjeta 326245",
+   "arbitro": "SANTIAGO BEVACQUA",
+   "local": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Facundo Esteban Aristimuño Maidana",
+      "id": "115c720b-e536-4e31-94c5-9d4106c676cf"
+     },
+     {
+      "numero": 2,
+      "nombre": "Francisco Ramirez Vita",
+      "id": "f3067141-6ba6-424c-8192-16e754e10376"
+     },
+     {
+      "numero": 3,
+      "nombre": "Pablo Cerljenko",
+      "id": "2cab11ab-6ca2-4bac-b781-35ec8fc0326e"
+     },
+     {
+      "numero": 4,
+      "nombre": "Santiago Ramos Apphatie",
+      "id": "dc4c17fc-ee63-42ab-a46d-b271b2bb6c18"
+     },
+     {
+      "numero": 5,
+      "nombre": "Martiniano Barsellini",
+      "id": "611745ab-c75d-40b0-9085-b21365b58178"
+     },
+     {
+      "numero": 6,
+      "nombre": "Nicolas Hernandez",
+      "id": "89553b4a-23a1-46ed-99e1-4b44f1f4266a"
+     },
+     {
+      "numero": 7,
+      "nombre": "Francisco Maenza",
+      "id": "ffc31fd2-d84d-4b8f-a973-aed57fec2dbc"
+     },
+     {
+      "numero": 8,
+      "nombre": "Nicolás Alejandro Marengo",
+      "id": "c903faeb-3556-4f78-89e5-98b589b4b1e0"
+     },
+     {
+      "numero": 9,
+      "nombre": "Pedro Selvarolo",
+      "id": "0dbb1f88-9694-4727-82bb-f086b83ab328"
+     },
+     {
+      "numero": 10,
+      "nombre": "Ramiro Valentin Correa",
+      "id": "2083ff1c-b803-44db-b8b5-ade225bc7f7a"
+     },
+     {
+      "numero": 11,
+      "nombre": "Tomas Moro",
+      "id": "e8a47b56-c288-4f8c-a1f5-d828dad7f0c2"
+     },
+     {
+      "numero": 12,
+      "nombre": "Guido Marconi",
+      "id": "befdd660-769b-4034-8735-a8e7dd6e6240"
+     },
+     {
+      "numero": 13,
+      "nombre": "Martín Olivero",
+      "id": "33d16755-8c77-4909-9ebf-ef48e0bb8934"
+     },
+     {
+      "numero": 14,
+      "nombre": "Agustin Grunewald",
+      "id": "3cb75ea4-286e-49b8-9334-eb0702f3da35"
+     },
+     {
+      "numero": 15,
+      "nombre": "Marcelo Tomas Exposito",
+      "id": "51f615ad-dfd6-45e7-b3cf-ad2c87d24034"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Valentin Francisco Infante",
+      "id": "342bc2c3-aee1-4b16-9e56-d54222f9736c"
+     },
+     {
+      "numero": 17,
+      "nombre": "Guido Ermiaga",
+      "id": "6633ae0f-a39e-4bab-9894-57ce6b6fbff7"
+     },
+     {
+      "numero": 18,
+      "nombre": "Manuel Otero Bertacco",
+      "id": "123cf178-e064-4ae6-a232-5f8ddb887164"
+     },
+     {
+      "numero": 19,
+      "nombre": "Julian Angel Gargiulo",
+      "id": "fdc1608a-2c40-4aa9-98e4-25fdc13036d5"
+     },
+     {
+      "numero": 20,
+      "nombre": "Emiliano Bruno Barrera",
+      "id": "8e64a104-fefa-4969-99b4-80dd5657a979"
+     },
+     {
+      "numero": 21,
+      "nombre": "Matias Dempaire",
+      "id": "5c67647b-1e80-48d9-8d4c-91d58fef4689"
+     },
+     {
+      "numero": 22,
+      "nombre": "Manuel Molina",
+      "id": "f6e7df67-5fb6-40b0-a885-395d45833781"
+     },
+     {
+      "numero": 23,
+      "nombre": "Alejo Marconi",
+      "id": "ed78080e-d40e-41c9-9a7b-46664d5871e5"
+     }
+    ],
+    "nombre": "argentino-de-bahia-blanca"
+   },
+   "visitante": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Agustín Emanuel López",
+      "id": "cb9c20ec-8583-42b8-b35a-8f7332ec74d2"
+     },
+     {
+      "numero": 2,
+      "nombre": "Matias Monopoli",
+      "id": "5f0a3b67-df73-462f-b4da-cc4d02d2c6d3"
+     },
+     {
+      "numero": 3,
+      "nombre": "Lautaro Gavilán",
+      "id": "1520e1b6-d89a-4e43-90b4-a6f54ed9d083"
+     },
+     {
+      "numero": 4,
+      "nombre": "Mauricio Cucchi Colleoni",
+      "id": "95c0c594-6a1e-42ff-b0f6-41a5c5772084"
+     },
+     {
+      "numero": 5,
+      "nombre": "Santiago Ponce",
+      "id": "740df197-a2bf-4084-bf0b-9c3c1ded215d"
+     },
+     {
+      "numero": 6,
+      "nombre": "Francisco Casarini",
+      "id": "a6fd551f-9827-4ce4-b3bc-28a6bcea1e42"
+     },
+     {
+      "numero": 7,
+      "nombre": "Ramiro Wagner",
+      "id": "3a28766c-1352-40be-a038-0685ec25d7f1"
+     },
+     {
+      "numero": 8,
+      "nombre": "Juan Ignacio Molina",
+      "id": "fdeeb13c-4933-4b30-8e49-088b7e289bae"
+     },
+     {
+      "numero": 9,
+      "nombre": "Vicente Maraude",
+      "id": "ff1e4fc5-6c06-41ac-90a4-a9106b4ace45"
+     },
+     {
+      "numero": 10,
+      "nombre": "Juan Aquilia",
+      "id": "25d0d33a-46bd-46a2-869f-a3ad912d406e"
+     },
+     {
+      "numero": 11,
+      "nombre": "Alan Haegeli",
+      "id": "5707e74d-81e1-4a13-b44c-ea891880268d"
+     },
+     {
+      "numero": 12,
+      "nombre": "Francisco Rodriguez",
+      "id": "7d41b5a0-5a76-4884-b28d-4ac8afb13288"
+     },
+     {
+      "numero": 13,
+      "nombre": "Facundo Ezequiel Lopez Sayavedra",
+      "id": "f09be8b2-8db6-4965-a31f-8f454f4eefb7"
+     },
+     {
+      "numero": 14,
+      "nombre": "Leandro Perovich",
+      "id": "6a0a6beb-fe01-4aeb-b58d-6e8bec5c49ab"
+     },
+     {
+      "numero": 15,
+      "nombre": "Franco Marino",
+      "id": "11d2f4b2-c74b-45f9-9614-6606ff3f2ddf"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Brian Molina",
+      "id": "a696ca34-9f45-4aeb-a707-f608923e4d66"
+     },
+     {
+      "numero": 17,
+      "nombre": "Facundo Valentin Echezarreta",
+      "id": "a1e0adba-5e40-4ab4-bb24-7f00d43f4837"
+     },
+     {
+      "numero": 18,
+      "nombre": "Cristian Guillermo Mathiasen",
+      "id": "09ea9a3c-2e7d-45ce-bb35-c3dada4d35fb"
+     },
+     {
+      "numero": 19,
+      "nombre": "Santiago Burcaizea",
+      "id": "f9fc026d-3c42-4905-8f7f-6e5837582151"
+     },
+     {
+      "numero": 20,
+      "nombre": "Alejandro Martín Manuel Pelaez",
+      "id": "e784683b-ce49-4cb2-8b72-2c0a2854d3b2"
+     },
+     {
+      "numero": 21,
+      "nombre": "Thiago Fujii",
+      "id": "dbc3abe5-71b1-47ca-abe1-e31aff8f72e2"
+     },
+     {
+      "numero": 22,
+      "nombre": "Bruno Mignone",
+      "id": "dc1dbe8f-bf19-4d31-8d49-374d52bb7213"
+     },
+     {
+      "numero": 23,
+      "nombre": "Franco Barranco",
+      "id": "80fe2b2d-9247-4a23-9d59-e3e2a6897e54"
+     }
+    ],
+    "nombre": "union-del-sur"
+   },
+   "eventos": [
+    {
+     "minuto": 6,
+     "periodo": "1T",
+     "tipo": "injury",
+     "jugador": "Francisco Casarini",
+     "detalle": "Lesionado",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 6,
+     "periodo": "1T",
+     "tipo": "substitution",
+     "jugador": "Francisco Casarini",
+     "detalle": "Entra: Santiago Burcaizea",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 12,
+     "periodo": "1T",
+     "tipo": "injury",
+     "jugador": "Nicolas Hernandez",
+     "detalle": "Lesionado",
+     "equipo": "local"
+    },
+    {
+     "minuto": 12,
+     "periodo": "1T",
+     "tipo": "substitution",
+     "jugador": "Nicolas Hernandez",
+     "detalle": "Entra: Emiliano Bruno Barrera",
+     "equipo": "local"
+    },
+    {
+     "minuto": 19,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Tomas Moro",
+     "equipo": "local"
+    },
+    {
+     "minuto": 26,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Tomas Moro",
+     "equipo": "local"
+    },
+    {
+     "minuto": 27,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Ramiro Valentin Correa",
+     "equipo": "local"
+    },
+    {
+     "minuto": 29,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Vicente Maraude",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 29,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Franco Marino",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 37,
+     "periodo": "1T",
+     "tipo": "injury",
+     "jugador": "Marcelo Tomas Exposito",
+     "detalle": "Lesionado",
+     "equipo": "local"
+    },
+    {
+     "minuto": 37,
+     "periodo": "1T",
+     "tipo": "substitution",
+     "jugador": "Tomas Moro",
+     "detalle": "Entra: Manuel Molina",
+     "equipo": "local"
+    },
+    {
+     "minuto": 40,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Leandro Perovich",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 6,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Tomas Moro",
+     "equipo": "local"
+    },
+    {
+     "minuto": 9,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Leandro Perovich",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 15,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Leandro Perovich",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 15,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Franco Marino",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 16,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Santiago Ramos Apphatie",
+     "detalle": "Entra: Julian Angel Gargiulo",
+     "equipo": "local"
+    },
+    {
+     "minuto": 16,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Francisco Maenza",
+     "detalle": "Entra: Valentin Francisco Infante",
+     "equipo": "local"
+    },
+    {
+     "minuto": 18,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Pedro Selvarolo",
+     "equipo": "local"
+    },
+    {
+     "minuto": 22,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Ramiro Valentin Correa",
+     "detalle": "Entra: Matias Dempaire",
+     "equipo": "local"
+    },
+    {
+     "minuto": 22,
+     "periodo": "2T",
+     "tipo": "penalty_goal",
+     "jugador": "Franco Marino",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 26,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Santiago Ponce",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 27,
+     "periodo": "2T",
+     "tipo": "injury",
+     "jugador": "Emiliano Bruno Barrera",
+     "detalle": "Lesionado",
+     "equipo": "local"
+    },
+    {
+     "minuto": 27,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Emiliano Bruno Barrera",
+     "detalle": "Entra: Guido Ermiaga",
+     "equipo": "local"
+    },
+    {
+     "minuto": 28,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Leandro Perovich",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 29,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Franco Marino",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 30,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Santiago Ponce",
+     "detalle": "Entra: Alejandro Martín Manuel Pelaez",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 32,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "jugador": "Alan Haegeli",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 37,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Marcelo Tomas Exposito",
+     "detalle": "Entra: Alejo Marconi",
+     "equipo": "local"
+    },
+    {
+     "minuto": 37,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Marcelo Tomas Exposito",
+     "detalle": "Entra: Manuel Otero Bertacco",
+     "equipo": "local"
+    },
+    {
+     "minuto": 37,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "jugador": "Brian Molina",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 40,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Lautaro Gavilán",
+     "detalle": "Entra: Brian Molina",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 41,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Alejo Marconi",
+     "equipo": "local"
+    }
+   ]
+  }
+ ]
+}

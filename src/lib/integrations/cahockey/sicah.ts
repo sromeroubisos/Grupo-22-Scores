@@ -62,6 +62,7 @@ export async function fetchSicahUrl(torneoId: string): Promise<ResultadoHttp<str
       },
       body: `id=${encodeURIComponent(torneoId)}`,
       cache: 'no-store',
+      signal: AbortSignal.timeout(8000),
     });
   } catch {
     return { ok: false, data: null, status: 0 };
@@ -78,7 +79,9 @@ export async function fetchSicahUrl(torneoId: string): Promise<ResultadoHttp<str
 export async function fetchSicahHtml(url: string): Promise<ResultadoHttp<string>> {
   let res: Response;
   try {
-    res = await fetch(url, { headers: { 'user-agent': USER_AGENT }, cache: 'no-store' });
+    // Con timeout: sin él, un SICAH colgado dejaba el cron esperando hasta el
+    // corte de Vercel. Un abort cae en el catch y vuelve como status 0.
+    res = await fetch(url, { headers: { 'user-agent': USER_AGENT }, cache: 'no-store', signal: AbortSignal.timeout(8000) });
   } catch {
     return { ok: false, data: null, status: 0 };
   }

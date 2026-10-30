@@ -1,0 +1,206 @@
+{
+  "descripcion": "Torneo del Interior A 2026 · semifinal · Jockey Club de Rosario vs Duendes R.C. (Las Cuatro Hectáreas, 26/09/2026 16:00). Formaciones de @despuesdeltry. La fuente numera a Boffelli como 21 y no nombra un 15: va de 15. Casiello y Larrazabal reusan su ficha (la fuente escribe Cassiello / Larrazábal). Actualizado con los posteos de los clubes: carrusel de @rugbyjcr (Ddu4c_4lpa_) confirma los 15 de Jockey (la 7 es Felipe Baraldi; no publicó banco de Primera) y la placa de Duendes trae los 23 (la 13 es Martín Pellegrino, no Guido).",
+  "torneo": "Torneo del Interior \"A\"",
+  "partidos": [
+    {
+      "id": "07ba8b7a-173d-47ec-b4b3-dd65b0ffc5d3",
+      "rotulo": "Jockey Club de Rosario vs Duendes R.C.",
+      "local": {
+        "nombre": "Jockey Club de Rosario",
+        "titulares": [
+          {
+            "numero": 1,
+            "nombre": "Guido Cella",
+            "id": "aeaa54a5-a7b1-4b83-aab5-ffc0d1b925cb"
+          },
+          {
+            "numero": 2,
+            "nombre": "Alejo Pereyra Tauzy",
+            "id": "cbfe5971-bef9-49ea-9774-0ca7aa78a545",
+            "capitan": true
+          },
+          {
+            "numero": 3,
+            "nombre": "Ignacio Orsetti",
+            "id": "7e91506e-cd7d-48d9-8f86-e2b4eb9e43a5"
+          },
+          {
+            "numero": 4,
+            "nombre": "Marcos Lorenzini",
+            "id": "7aee768d-2dab-4355-8fbd-4b2b4257c9e4"
+          },
+          {
+            "numero": 5,
+            "nombre": "Lucas Bur",
+            "id": "ab4b8469-aff4-4b93-9119-2dc1340d8b10"
+          },
+          {
+            "numero": 6,
+            "nombre": "Manuel Santi",
+            "id": "c2d1ec58-bf1b-448f-b7ac-55ffe74e25ad"
+          },
+          {
+            "numero": 7,
+            "nombre": "Felipe Baraldi",
+            "id": "09c0a936-966a-410c-9dd9-c130e0874beb"
+          },
+          {
+            "numero": 8,
+            "nombre": "Emiliano Ferrari",
+            "id": "003b77b3-dea1-4f58-a222-9bfbd83c826d"
+          },
+          {
+            "numero": 9,
+            "nombre": "Alejo Sugasti",
+            "id": "3f6c68d9-873b-46b5-a90d-db93c66f1a06"
+          },
+          {
+            "numero": 10,
+            "nombre": "Juan Bautista Baronio",
+            "id": "48a0465c-aac3-4d5c-8155-4c0ced46a61f"
+          },
+          {
+            "numero": 11,
+            "nombre": "Santiago Casiello",
+            "id": "5817f3c6-8248-4c2c-93cc-ef0dd43682b4"
+          },
+          {
+            "numero": 12,
+            "nombre": "Fermín Vergara Oroño",
+            "id": "ef31bd8f-d481-47a0-8050-2ca6ce985578"
+          },
+          {
+            "numero": 13,
+            "nombre": "Ignacio Dogliani",
+            "id": "b46268ae-7032-4ccb-ba2b-12d90390e0e0"
+          },
+          {
+            "numero": 14,
+            "nombre": "Manuel Lluch",
+            "id": "08251c3d-2ff2-4291-bac7-a5910acd7b9e"
+          },
+          {
+            "numero": 15,
+            "nombre": "Francisco Lluch",
+            "id": "b7c6930d-e8d4-4d9d-9156-afe74bb79d45"
+          }
+        ]
+      },
+      "visitante": {
+        "nombre": "Duendes R.C.",
+        "titulares": [
+          {
+            "numero": 1,
+            "nombre": "Mateo Negroni",
+            "id": "889ed799-a804-429d-aa36-6fea2e338033"
+          },
+          {
+            "numero": 2,
+            "nombre": "Bernardo Lis",
+            "id": "e6702888-ae18-4924-ace3-fa478358a197"
+          },
+          {
+            "numero": 3,
+            "nombre": "Federico Bautista",
+            "id": "c1e87040-2ca7-4837-b2a1-2dd58f1b4494"
+          },
+          {
+            "numero": 4,
+            "nombre": "Federico Ciancio",
+            "id": "9f78a875-379d-4887-a403-45d8cabda708"
+          },
+          {
+            "numero": 5,
+            "nombre": "Rafael Gietz",
+            "id": "e46c6743-3c54-42c8-a21c-6d49715ee628"
+          },
+          {
+            "numero": 6,
+            "nombre": "Nicolás Sánchez Gómez",
+            "id": "4619608f-a386-4644-925a-d00af17a44d6"
+          },
+          {
+            "numero": 7,
+            "nombre": "Giuliano Bufarini",
+            "id": "2d5948ae-b2f5-43c9-b4a8-0fff0ca8e546"
+          },
+          {
+            "numero": 8,
+            "nombre": "Ignacio Gandini",
+            "id": "db393ebf-4306-4c6a-9986-105fc78020d6"
+          },
+          {
+            "numero": 9,
+            "nombre": "Valentin Larrazabal",
+            "id": "3eb5ebd1-0feb-4bf9-b367-a53a742efa05"
+          },
+          {
+            "numero": 10,
+            "nombre": "Giuliano Francescangeli",
+            "id": "ab835ce4-08fb-444b-9427-e979668fa8b0"
+          },
+          {
+            "numero": 11,
+            "nombre": "Juan Cruz Faura",
+            "id": "db86dc74-052c-4bff-954d-9bc87412b422"
+          },
+          {
+            "numero": 12,
+            "nombre": "Guido Chesini",
+            "id": "cf43a12a-8cb5-4fa2-96ec-e90a9b8fc560"
+          },
+          {
+            "numero": 13,
+            "nombre": "Martín Pellegrino",
+            "id": "55cdb72d-72db-4943-9320-53e63f306602"
+          },
+          {
+            "numero": 14,
+            "nombre": "Gino Dicapua",
+            "id": "302f40cf-18ff-451d-89b3-a1575859aeb7"
+          },
+          {
+            "numero": 15,
+            "nombre": "Emiliano Boffelli",
+            "id": "5c10ff9f-f55f-450e-a113-75eff35c45d1"
+          }
+        ],
+        "suplentes": [
+          {
+            "numero": 16,
+            "nombre": "Juan Martín Guli"
+          },
+          {
+            "numero": 17,
+            "nombre": "Francisco Angaroni"
+          },
+          {
+            "numero": 18,
+            "nombre": "Federico Rodríguez",
+            "id": "45b91811-e6a6-4f1b-b738-707976d1e25d"
+          },
+          {
+            "numero": 19,
+            "nombre": "Faustino Boeris"
+          },
+          {
+            "numero": 20,
+            "nombre": "Jeremías Del Mastro"
+          },
+          {
+            "numero": 21,
+            "nombre": "Francisco Diez"
+          },
+          {
+            "numero": 22,
+            "nombre": "Felipe Roldán"
+          },
+          {
+            "numero": 23,
+            "nombre": "Juan Ignacio Araujo"
+          }
+        ]
+      }
+    }
+  ]
+}

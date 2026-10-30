@@ -1,0 +1,6 @@
+m16 intento 1 fallo: Error: Error: server:SUPABASE:select timed out after 8000ms
+m16 intento 2 fallo: Error: Error: server:SUPABASE:select timed out after 8000ms
+m16 intento 3 fallo: Error: Error: server:SUPABASE:select timed out after 8000ms
+m17 intento 1 fallo: Error: Error: server:SUPABASE:update timed out after 8000ms
+m17 intento 2 fallo: Error: columnas de Club Universitario de Córdoba M17 "A" vs Córdoba Athletic Club M17 "A" · torneo-cordobes-m17-a · tarjeta 311553: Error: server:SUPABASE:update timed out after 8000ms
+m17 intento 3 fallo: Error: columnas de Tala Rugby Club M17 "A" vs Córdoba Athletic Club M17 "A" · torneo-cordobes-m17-a · tarjeta 313064: Error: server:SUPABASE:update timed out after 8000ms

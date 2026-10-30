@@ -1,0 +1,3576 @@
+[
+ {
+  "carpeta": "interior-a-historia",
+  "nombre": "interior-a-01-jockey-de-rosario-vs-duendes-r-c",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#0f172a",
+   "accentColor": "#38bdf8"
+  },
+  "plateOptions": {},
+  "matchId": "07ba8b7a-173d-47ec-b4b3-dd65b0ffc5d3",
+  "corto": {
+   "local": "Jockey de Rosario",
+   "visita": "Duendes R.C."
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Jockey Club de Rosario",
+   "awayTeam": "Duendes R.C.",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=jockey-club-de-rosario&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=duendes-r-c&entity=club&noFallback=1",
+   "tournament": "Semifinal - Torneo del Interior \"A\"",
+   "tournamentId": "ed986d61-7389-48e5-b478-c1703b0e8379",
+   "tournamentLogo": "https://vxsolicapdcpemfsahbk.supabase.co/storage/v1/object/public/tournaments/logos/ed986d61-7389-48e5-b478-c1703b0e8379-1787176362021.svg",
+   "date": "sábado 26 de septiembre",
+   "time": "16:00",
+   "kickoffAt": "2026-09-26T19:00:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "interior-a-historia",
+  "nombre": "interior-a-02-univ-de-cordoba-vs-parana-rowing",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#0f172a",
+   "accentColor": "#38bdf8"
+  },
+  "plateOptions": {},
+  "matchId": "301364c7-4c50-4a4b-9458-a4b4bffe6047",
+  "corto": {
+   "local": "Univ. de Córdoba",
+   "visita": "Paraná Rowing"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Club Universitario de Córdoba",
+   "awayTeam": "Paraná Rowing",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=club-universitario-de-cordoba&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=parana-rowing&entity=club&noFallback=1",
+   "tournament": "Repechaje - Torneo del Interior \"A\"",
+   "tournamentId": "ed986d61-7389-48e5-b478-c1703b0e8379",
+   "tournamentLogo": "https://vxsolicapdcpemfsahbk.supabase.co/storage/v1/object/public/tournaments/logos/ed986d61-7389-48e5-b478-c1703b0e8379-1787176362021.svg",
+   "date": "sábado 26 de septiembre",
+   "time": "16:00",
+   "kickoffAt": "2026-09-26T19:00:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "interior-a-historia",
+  "nombre": "interior-a-03-natacion-y-gimnasia-vs-curne",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#0f172a",
+   "accentColor": "#38bdf8"
+  },
+  "plateOptions": {},
+  "matchId": "352621b7-7c46-4535-807a-aa350f2c621f",
+  "corto": {
+   "local": "Natación y Gimnasia",
+   "visita": "CURNE"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Natación y Gimnasia",
+   "awayTeam": "CURNE",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=natacion-y-gimnasia&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=curne&entity=club&noFallback=1",
+   "tournament": "Repechaje - Torneo del Interior \"A\"",
+   "tournamentId": "ed986d61-7389-48e5-b478-c1703b0e8379",
+   "tournamentLogo": "https://vxsolicapdcpemfsahbk.supabase.co/storage/v1/object/public/tournaments/logos/ed986d61-7389-48e5-b478-c1703b0e8379-1787176362021.svg",
+   "date": "sábado 26 de septiembre",
+   "time": "16:00",
+   "kickoffAt": "2026-09-26T19:00:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "interior-a-historia",
+  "nombre": "interior-a-04-tala-r-c-vs-jockey-cc",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#0f172a",
+   "accentColor": "#38bdf8"
+  },
+  "plateOptions": {},
+  "matchId": "86bae874-ad7f-42a5-a8d3-37dc5a8348e1",
+  "corto": {
+   "local": "Tala R.C.",
+   "visita": "Jockey CC"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Tala Rugby Club",
+   "awayTeam": "Jockey Club Córdoba",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=tala-rugby-club&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=jockey-club-cordoba&entity=club&noFallback=1",
+   "tournament": "Semifinal - Torneo del Interior \"A\"",
+   "tournamentId": "ed986d61-7389-48e5-b478-c1703b0e8379",
+   "tournamentLogo": "https://vxsolicapdcpemfsahbk.supabase.co/storage/v1/object/public/tournaments/logos/ed986d61-7389-48e5-b478-c1703b0e8379-1787176362021.svg",
+   "date": "sábado 26 de septiembre",
+   "time": "16:00",
+   "kickoffAt": "2026-09-26T19:00:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "interior-a-historia",
+  "nombre": "interior-a-05-tucuman-lawn-tennis-vs-mendoza-r-c",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#0f172a",
+   "accentColor": "#38bdf8"
+  },
+  "plateOptions": {},
+  "matchId": "ad9a5c4d-db76-4d20-ae9f-e4f2791d72de",
+  "corto": {
+   "local": "Tucumán Lawn Tennis",
+   "visita": "Mendoza R.C."
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Tucumán Lawn Tennis",
+   "awayTeam": "Mendoza Rugby Club",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=tucuman-lawn-tennis&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=mendoza-rugby-club&entity=club&noFallback=1",
+   "tournament": "Repechaje - Torneo del Interior \"A\"",
+   "tournamentId": "ed986d61-7389-48e5-b478-c1703b0e8379",
+   "tournamentLogo": "https://vxsolicapdcpemfsahbk.supabase.co/storage/v1/object/public/tournaments/logos/ed986d61-7389-48e5-b478-c1703b0e8379-1787176362021.svg",
+   "date": "sábado 26 de septiembre",
+   "time": "16:00",
+   "kickoffAt": "2026-09-26T19:00:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "interior-a-historia",
+  "nombre": "interior-a-06-la-tablada-vs-sociedad-sportiva-bb",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#0f172a",
+   "accentColor": "#38bdf8"
+  },
+  "plateOptions": {},
+  "matchId": "d959d0a7-4009-40f7-a52f-3d705173901a",
+  "corto": {
+   "local": "La Tablada",
+   "visita": "Sociedad Sportiva BB"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Club La Tablada",
+   "awayTeam": "Sociedad Sportiva de Bahía Blanca",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=club-la-tablada&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=sociedad-sportiva-de-bahia-blanca&entity=club&noFallback=1",
+   "tournament": "Repechaje - Torneo del Interior \"A\"",
+   "tournamentId": "ed986d61-7389-48e5-b478-c1703b0e8379",
+   "tournamentLogo": "https://vxsolicapdcpemfsahbk.supabase.co/storage/v1/object/public/tournaments/logos/ed986d61-7389-48e5-b478-c1703b0e8379-1787176362021.svg",
+   "date": "sábado 26 de septiembre",
+   "time": "16:00",
+   "kickoffAt": "2026-09-26T19:00:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "grupales-historia",
+  "nombre": "interior-a-semifinales-fixture",
+  "template": "dailyMatches",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#0f172a",
+   "accentColor": "#38bdf8"
+  },
+  "plateOptions": {},
+  "data": {
+   "date": "Semifinales · sábado 26 de septiembre",
+   "tournament": "Torneo del Interior \"A\"",
+   "tournamentId": "ed986d61-7389-48e5-b478-c1703b0e8379",
+   "tournamentLogo": "https://vxsolicapdcpemfsahbk.supabase.co/storage/v1/object/public/tournaments/logos/ed986d61-7389-48e5-b478-c1703b0e8379-1787176362021.svg",
+   "matches": [
+    {
+     "homeTeam": "Jockey de Rosario",
+     "awayTeam": "Duendes R.C.",
+     "homeTeamFull": "Jockey Club de Rosario",
+     "awayTeamFull": "Duendes R.C.",
+     "homeLogo": "/api/assets/team-logo?key=jockey-club-de-rosario&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=duendes-r-c&entity=club&noFallback=1",
+     "time": "16:00",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T19:00:00+00:00"
+    },
+    {
+     "homeTeam": "Tala R.C.",
+     "awayTeam": "Jockey CC",
+     "homeTeamFull": "Tala Rugby Club",
+     "awayTeamFull": "Jockey Club Córdoba",
+     "homeLogo": "/api/assets/team-logo?key=tala-rugby-club&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=jockey-club-cordoba&entity=club&noFallback=1",
+     "time": "16:00",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T19:00:00+00:00"
+    }
+   ]
+  }
+ },
+ {
+  "carpeta": "grupales-historia",
+  "nombre": "interior-a-revalida-fixture",
+  "template": "dailyMatches",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#0f172a",
+   "accentColor": "#38bdf8"
+  },
+  "plateOptions": {},
+  "data": {
+   "date": "Reválida · sábado 26 de septiembre",
+   "tournament": "Torneo del Interior \"A\"",
+   "tournamentId": "ed986d61-7389-48e5-b478-c1703b0e8379",
+   "tournamentLogo": "https://vxsolicapdcpemfsahbk.supabase.co/storage/v1/object/public/tournaments/logos/ed986d61-7389-48e5-b478-c1703b0e8379-1787176362021.svg",
+   "matches": [
+    {
+     "homeTeam": "Univ. de Córdoba",
+     "awayTeam": "Paraná Rowing",
+     "homeTeamFull": "Club Universitario de Córdoba",
+     "awayTeamFull": "Paraná Rowing",
+     "homeLogo": "/api/assets/team-logo?key=club-universitario-de-cordoba&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=parana-rowing&entity=club&noFallback=1",
+     "time": "16:00",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T19:00:00+00:00"
+    },
+    {
+     "homeTeam": "Natación y Gimnasia",
+     "awayTeam": "CURNE",
+     "homeTeamFull": "Natación y Gimnasia",
+     "awayTeamFull": "CURNE",
+     "homeLogo": "/api/assets/team-logo?key=natacion-y-gimnasia&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=curne&entity=club&noFallback=1",
+     "time": "16:00",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T19:00:00+00:00"
+    },
+    {
+     "homeTeam": "Tucumán Lawn Tennis",
+     "awayTeam": "Mendoza R.C.",
+     "homeTeamFull": "Tucumán Lawn Tennis",
+     "awayTeamFull": "Mendoza Rugby Club",
+     "homeLogo": "/api/assets/team-logo?key=tucuman-lawn-tennis&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=mendoza-rugby-club&entity=club&noFallback=1",
+     "time": "16:00",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T19:00:00+00:00"
+    },
+    {
+     "homeTeam": "La Tablada",
+     "awayTeam": "Sociedad Sportiva BB",
+     "homeTeamFull": "Club La Tablada",
+     "awayTeamFull": "Sociedad Sportiva de Bahía Blanca",
+     "homeLogo": "/api/assets/team-logo?key=club-la-tablada&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=sociedad-sportiva-de-bahia-blanca&entity=club&noFallback=1",
+     "time": "16:00",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T19:00:00+00:00"
+    }
+   ]
+  }
+ },
+ {
+  "carpeta": "urba-top-14-historia",
+  "nombre": "top-14-01-cuba-vs-biei",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#4a0710",
+   "accentColor": "#ffffff"
+  },
+  "plateOptions": {
+   "field": "#b3121d",
+   "fieldEnd": "#4a0710",
+   "ink": "#ffffff"
+  },
+  "matchId": "1b106c78-937a-4b29-ba63-0a07f2856275",
+  "corto": {
+   "local": "CUBA",
+   "visita": "BIEI"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "CUBA",
+   "awayTeam": "Buenos Aires CRC",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=cuba&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=buenos-aires-crc&entity=club&noFallback=1",
+   "tournament": "Fecha 23 - Top 14 de la URBA",
+   "tournamentId": "d29703d0-125c-44a1-ab38-137450935a6e",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:30",
+   "kickoffAt": "2026-09-26T18:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "urba-top-14-historia",
+  "nombre": "top-14-02-regatas-bv-vs-alumni",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#4a0710",
+   "accentColor": "#ffffff"
+  },
+  "plateOptions": {
+   "field": "#b3121d",
+   "fieldEnd": "#4a0710",
+   "ink": "#ffffff"
+  },
+  "matchId": "1b7bca1e-1cea-44f0-9a63-f3f1a40351db",
+  "corto": {
+   "local": "Regatas BV",
+   "visita": "Alumni"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Regatas de Bella Vista",
+   "awayTeam": "Asoc. Alumni",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=regatas-de-bella-vista&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=asoc-alumni&entity=club&noFallback=1",
+   "tournament": "Fecha 23 - Top 14 de la URBA",
+   "tournamentId": "d29703d0-125c-44a1-ab38-137450935a6e",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:30",
+   "kickoffAt": "2026-09-26T18:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "urba-top-14-historia",
+  "nombre": "top-14-03-la-plata-vs-champagnat",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#4a0710",
+   "accentColor": "#ffffff"
+  },
+  "plateOptions": {
+   "field": "#b3121d",
+   "fieldEnd": "#4a0710",
+   "ink": "#ffffff"
+  },
+  "matchId": "202c0500-cca2-4817-ae18-58a3e0fe6bf6",
+  "corto": {
+   "local": "La Plata",
+   "visita": "Champagnat"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "La Plata",
+   "awayTeam": "Club Champagnat",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=la-plata&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=club-champagnat&entity=club&noFallback=1",
+   "tournament": "Fecha 23 - Top 14 de la URBA",
+   "tournamentId": "d29703d0-125c-44a1-ab38-137450935a6e",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:30",
+   "kickoffAt": "2026-09-26T18:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "urba-top-14-historia",
+  "nombre": "top-14-04-los-matreros-vs-hindu",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#4a0710",
+   "accentColor": "#ffffff"
+  },
+  "plateOptions": {
+   "field": "#b3121d",
+   "fieldEnd": "#4a0710",
+   "ink": "#ffffff"
+  },
+  "matchId": "51ab8aac-03cc-4345-aaeb-d10cddeee467",
+  "corto": {
+   "local": "Los Matreros",
+   "visita": "Hindú"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Los Matreros",
+   "awayTeam": "Hindú Club",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=los-matreros&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=hindu-club&entity=club&noFallback=1",
+   "tournament": "Fecha 23 - Top 14 de la URBA",
+   "tournamentId": "d29703d0-125c-44a1-ab38-137450935a6e",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:30",
+   "kickoffAt": "2026-09-26T18:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "urba-top-14-historia",
+  "nombre": "top-14-05-atl-del-rosario-vs-newman",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#4a0710",
+   "accentColor": "#ffffff"
+  },
+  "plateOptions": {
+   "field": "#b3121d",
+   "fieldEnd": "#4a0710",
+   "ink": "#ffffff"
+  },
+  "matchId": "5c8ed15b-406e-49e4-9135-3ad820b4612f",
+  "corto": {
+   "local": "Atl. del Rosario",
+   "visita": "Newman"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Atlético del Rosario",
+   "awayTeam": "Club Newman",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=atletico-del-rosario&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=club-newman&entity=club&noFallback=1",
+   "tournament": "Fecha 23 - Top 14 de la URBA",
+   "tournamentId": "d29703d0-125c-44a1-ab38-137450935a6e",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:30",
+   "kickoffAt": "2026-09-26T18:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "urba-top-14-historia",
+  "nombre": "top-14-06-los-tilos-vs-sic",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#4a0710",
+   "accentColor": "#ffffff"
+  },
+  "plateOptions": {
+   "field": "#b3121d",
+   "fieldEnd": "#4a0710",
+   "ink": "#ffffff"
+  },
+  "matchId": "75b087dc-fba8-4a6e-b200-337aa03b3d54",
+  "corto": {
+   "local": "Los Tilos",
+   "visita": "SIC"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Los Tilos",
+   "awayTeam": "San Isidro Club",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=los-tilos&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=san-isidro-club&entity=club&noFallback=1",
+   "tournament": "Fecha 23 - Top 14 de la URBA",
+   "tournamentId": "d29703d0-125c-44a1-ab38-137450935a6e",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:30",
+   "kickoffAt": "2026-09-26T18:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "urba-top-14-historia",
+  "nombre": "top-14-07-casi-vs-belgrano-ath",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#4a0710",
+   "accentColor": "#ffffff"
+  },
+  "plateOptions": {
+   "field": "#b3121d",
+   "fieldEnd": "#4a0710",
+   "ink": "#ffffff"
+  },
+  "matchId": "8dfb6a4d-a6ff-4999-b6b2-614211cacf97",
+  "corto": {
+   "local": "CASI",
+   "visita": "Belgrano Ath."
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "CASI",
+   "awayTeam": "Belgrano Athletic",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=casi&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=belgrano-athletic&entity=club&noFallback=1",
+   "tournament": "Fecha 23 - Top 14 de la URBA",
+   "tournamentId": "d29703d0-125c-44a1-ab38-137450935a6e",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:30",
+   "kickoffAt": "2026-09-26T18:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "grupales-historia",
+  "nombre": "top-14-fixture",
+  "template": "dailyMatches",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#4a0710",
+   "accentColor": "#ffffff"
+  },
+  "plateOptions": {
+   "field": "#b3121d",
+   "fieldEnd": "#4a0710",
+   "ink": "#ffffff"
+  },
+  "data": {
+   "date": "Fecha 23 · sábado 26 de septiembre",
+   "tournament": "Top 14 de la URBA",
+   "tournamentId": "d29703d0-125c-44a1-ab38-137450935a6e",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "matches": [
+    {
+     "homeTeam": "CUBA",
+     "awayTeam": "BIEI",
+     "homeTeamFull": "CUBA",
+     "awayTeamFull": "Buenos Aires CRC",
+     "homeLogo": "/api/assets/team-logo?key=cuba&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=buenos-aires-crc&entity=club&noFallback=1",
+     "time": "15:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:30:00+00:00"
+    },
+    {
+     "homeTeam": "Regatas BV",
+     "awayTeam": "Alumni",
+     "homeTeamFull": "Regatas de Bella Vista",
+     "awayTeamFull": "Asoc. Alumni",
+     "homeLogo": "/api/assets/team-logo?key=regatas-de-bella-vista&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=asoc-alumni&entity=club&noFallback=1",
+     "time": "15:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:30:00+00:00"
+    },
+    {
+     "homeTeam": "La Plata",
+     "awayTeam": "Champagnat",
+     "homeTeamFull": "La Plata",
+     "awayTeamFull": "Club Champagnat",
+     "homeLogo": "/api/assets/team-logo?key=la-plata&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=club-champagnat&entity=club&noFallback=1",
+     "time": "15:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:30:00+00:00"
+    },
+    {
+     "homeTeam": "Los Matreros",
+     "awayTeam": "Hindú",
+     "homeTeamFull": "Los Matreros",
+     "awayTeamFull": "Hindú Club",
+     "homeLogo": "/api/assets/team-logo?key=los-matreros&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=hindu-club&entity=club&noFallback=1",
+     "time": "15:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:30:00+00:00"
+    },
+    {
+     "homeTeam": "Atl. del Rosario",
+     "awayTeam": "Newman",
+     "homeTeamFull": "Atlético del Rosario",
+     "awayTeamFull": "Club Newman",
+     "homeLogo": "/api/assets/team-logo?key=atletico-del-rosario&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=club-newman&entity=club&noFallback=1",
+     "time": "15:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:30:00+00:00"
+    },
+    {
+     "homeTeam": "Los Tilos",
+     "awayTeam": "SIC",
+     "homeTeamFull": "Los Tilos",
+     "awayTeamFull": "San Isidro Club",
+     "homeLogo": "/api/assets/team-logo?key=los-tilos&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=san-isidro-club&entity=club&noFallback=1",
+     "time": "15:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:30:00+00:00"
+    },
+    {
+     "homeTeam": "CASI",
+     "awayTeam": "Belgrano Ath.",
+     "homeTeamFull": "CASI",
+     "awayTeamFull": "Belgrano Athletic",
+     "homeLogo": "/api/assets/team-logo?key=casi&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=belgrano-athletic&entity=club&noFallback=1",
+     "time": "15:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:30:00+00:00"
+    }
+   ]
+  }
+ },
+ {
+  "carpeta": "noa-historia",
+  "nombre": "noa-a-01-huirapuca-vs-cardenales-r-c",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#4a0710",
+   "accentColor": "#ffffff"
+  },
+  "plateOptions": {
+   "field": "#b3121d",
+   "fieldEnd": "#4a0710",
+   "ink": "#ffffff"
+  },
+  "matchId": "0c434e81-0887-4223-b088-53c7cff69250",
+  "corto": {
+   "local": "Huirapuca",
+   "visita": "Cardenales R.C."
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Huirapuca",
+   "awayTeam": "Cardenales R.C.",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=huirapuca&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=cardenales-r-c&entity=club&noFallback=1",
+   "tournament": "Torneo Regional del NOA \"A\"",
+   "tournamentId": "a4a4d389-5eaa-4e16-9024-81c54abe64cc",
+   "tournamentLogo": "https://vxsolicapdcpemfsahbk.supabase.co/storage/v1/object/public/tournaments/logos/a4a4d389-5eaa-4e16-9024-81c54abe64cc-1787176349121.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:30",
+   "venue": "Huirapuca, cancha 1",
+   "kickoffAt": "2026-09-26T18:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "noa-historia",
+  "nombre": "noa-a-02-univ-de-salta-vs-los-tarcos",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#4a0710",
+   "accentColor": "#ffffff"
+  },
+  "plateOptions": {
+   "field": "#b3121d",
+   "fieldEnd": "#4a0710",
+   "ink": "#ffffff"
+  },
+  "matchId": "f47e8611-9ce0-4bef-a7d8-b854967be1db",
+  "corto": {
+   "local": "Univ. de Salta",
+   "visita": "Los Tarcos"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Universitario de Salta",
+   "awayTeam": "Los Tarcos",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=universitario-de-salta&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=los-tarcos&entity=club&noFallback=1",
+   "tournament": "Torneo Regional del NOA \"A\"",
+   "tournamentId": "a4a4d389-5eaa-4e16-9024-81c54abe64cc",
+   "tournamentLogo": "https://vxsolicapdcpemfsahbk.supabase.co/storage/v1/object/public/tournaments/logos/a4a4d389-5eaa-4e16-9024-81c54abe64cc-1787176349121.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:30",
+   "venue": "Universitario de Salta, cancha 1",
+   "kickoffAt": "2026-09-26T18:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "noa-historia",
+  "nombre": "noa-a-03-lince-r-c-vs-univ-tucuman",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#4a0710",
+   "accentColor": "#ffffff"
+  },
+  "plateOptions": {
+   "field": "#b3121d",
+   "fieldEnd": "#4a0710",
+   "ink": "#ffffff"
+  },
+  "matchId": "500a3c75-dbc5-4d14-9ada-2aa3ad8b4a07",
+  "corto": {
+   "local": "Lince R.C.",
+   "visita": "Univ. Tucumán"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Lince Rugby Club",
+   "awayTeam": "Universitario de Tucumán",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=lince-rugby-club&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=universitario-de-tucuman&entity=club&noFallback=1",
+   "tournament": "Torneo Regional del NOA \"A\"",
+   "tournamentId": "a4a4d389-5eaa-4e16-9024-81c54abe64cc",
+   "tournamentLogo": "https://vxsolicapdcpemfsahbk.supabase.co/storage/v1/object/public/tournaments/logos/a4a4d389-5eaa-4e16-9024-81c54abe64cc-1787176349121.png",
+   "date": "domingo 27 de septiembre",
+   "time": "16:00",
+   "venue": "Lince, cancha 1",
+   "kickoffAt": "2026-09-27T19:00:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "grupales-historia",
+  "nombre": "noa-a-fixture",
+  "template": "dailyMatches",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#4a0710",
+   "accentColor": "#ffffff"
+  },
+  "plateOptions": {
+   "field": "#b3121d",
+   "fieldEnd": "#4a0710",
+   "ink": "#ffffff"
+  },
+  "data": {
+   "date": "sábado 26 al domingo 27 de septiembre",
+   "tournament": "Torneo Regional del NOA \"A\"",
+   "tournamentId": "a4a4d389-5eaa-4e16-9024-81c54abe64cc",
+   "tournamentLogo": "https://vxsolicapdcpemfsahbk.supabase.co/storage/v1/object/public/tournaments/logos/a4a4d389-5eaa-4e16-9024-81c54abe64cc-1787176349121.png",
+   "matches": [
+    {
+     "homeTeam": "Huirapuca",
+     "awayTeam": "Cardenales R.C.",
+     "homeTeamFull": "Huirapuca",
+     "awayTeamFull": "Cardenales R.C.",
+     "homeLogo": "/api/assets/team-logo?key=huirapuca&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=cardenales-r-c&entity=club&noFallback=1",
+     "time": "15:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:30:00+00:00"
+    },
+    {
+     "homeTeam": "Univ. de Salta",
+     "awayTeam": "Los Tarcos",
+     "homeTeamFull": "Universitario de Salta",
+     "awayTeamFull": "Los Tarcos",
+     "homeLogo": "/api/assets/team-logo?key=universitario-de-salta&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=los-tarcos&entity=club&noFallback=1",
+     "time": "15:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:30:00+00:00"
+    },
+    {
+     "homeTeam": "Lince R.C.",
+     "awayTeam": "Univ. Tucumán",
+     "homeTeamFull": "Lince Rugby Club",
+     "awayTeamFull": "Universitario de Tucumán",
+     "homeLogo": "/api/assets/team-logo?key=lince-rugby-club&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=universitario-de-tucuman&entity=club&noFallback=1",
+     "time": "16:00",
+     "status": "scheduled",
+     "dateLabel": "domingo 27",
+     "kickoffAt": "2026-09-27T19:00:00+00:00"
+    }
+   ]
+  }
+ },
+ {
+  "carpeta": "uruguayo-historia",
+  "nombre": "uruguayo-01-old-christians-vs-circulo-de-tenis",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#0f172a",
+   "accentColor": "#38bdf8"
+  },
+  "plateOptions": {},
+  "matchId": "39ccaad4-64e7-4d0d-848e-12e97c31a226",
+  "corto": {
+   "local": "Old Christians",
+   "visita": "Círculo de Tenis"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Old Christians Club",
+   "awayTeam": "Círculo de Tenis",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=old-christians-club&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=circulo-de-tenis&entity=club&noFallback=1",
+   "tournament": "Fecha 8 - Uruguayo de Clubes",
+   "tournamentId": "271638cc-3351-42ce-81bd-ef091e82515d",
+   "tournamentLogo": "https://vxsolicapdcpemfsahbk.supabase.co/storage/v1/object/public/tournaments/logos/271638cc-3351-42ce-81bd-ef091e82515d-1787176331647.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:00",
+   "kickoffAt": "2026-09-26T18:00:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "uruguayo-historia",
+  "nombre": "uruguayo-02-carrasco-polo-vs-montevideo-cc",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#0f172a",
+   "accentColor": "#38bdf8"
+  },
+  "plateOptions": {},
+  "matchId": "53b80fca-375d-4e2a-a25d-5b5cb62826f1",
+  "corto": {
+   "local": "Carrasco Polo",
+   "visita": "Montevideo CC"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Carrasco Polo",
+   "awayTeam": "Montevideo C.C.",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=carrasco-polo&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=montevideo-c-c&entity=club&noFallback=1",
+   "tournament": "Fecha 8 - Uruguayo de Clubes",
+   "tournamentId": "271638cc-3351-42ce-81bd-ef091e82515d",
+   "tournamentLogo": "https://vxsolicapdcpemfsahbk.supabase.co/storage/v1/object/public/tournaments/logos/271638cc-3351-42ce-81bd-ef091e82515d-1787176331647.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:00",
+   "kickoffAt": "2026-09-26T18:00:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "uruguayo-historia",
+  "nombre": "uruguayo-03-ceibos-vs-old-boys",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#0f172a",
+   "accentColor": "#38bdf8"
+  },
+  "plateOptions": {},
+  "matchId": "67289cb9-6d0b-4f9e-aa48-4ef1d34c4550",
+  "corto": {
+   "local": "Ceibos",
+   "visita": "Old Boys"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Ceibos Club",
+   "awayTeam": "Old Boys & Girls Club",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=ceibos-club&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=old-boys-girls-club&entity=club&noFallback=1",
+   "tournament": "Fecha 8 - Uruguayo de Clubes",
+   "tournamentId": "271638cc-3351-42ce-81bd-ef091e82515d",
+   "tournamentLogo": "https://vxsolicapdcpemfsahbk.supabase.co/storage/v1/object/public/tournaments/logos/271638cc-3351-42ce-81bd-ef091e82515d-1787176331647.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:00",
+   "kickoffAt": "2026-09-26T18:00:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "uruguayo-historia",
+  "nombre": "uruguayo-04-lobos-pde-vs-seminario",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#0f172a",
+   "accentColor": "#38bdf8"
+  },
+  "plateOptions": {},
+  "matchId": "e2a1ce61-66c9-4151-b02c-7a3c29f2530e",
+  "corto": {
+   "local": "Lobos PdE",
+   "visita": "Seminario"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Lobos PdE",
+   "awayTeam": "Club Seminario",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=lobos-pde&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=club-seminario&entity=club&noFallback=1",
+   "tournament": "Fecha 8 - Uruguayo de Clubes",
+   "tournamentId": "271638cc-3351-42ce-81bd-ef091e82515d",
+   "tournamentLogo": "https://vxsolicapdcpemfsahbk.supabase.co/storage/v1/object/public/tournaments/logos/271638cc-3351-42ce-81bd-ef091e82515d-1787176331647.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:00",
+   "kickoffAt": "2026-09-26T18:00:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "uruguayo-historia",
+  "nombre": "uruguayo-05-trebol-vs-los-cuervos",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#0f172a",
+   "accentColor": "#38bdf8"
+  },
+  "plateOptions": {},
+  "matchId": "ee5416fe-5b7d-407f-bb21-79d7cb7efd7e",
+  "corto": {
+   "local": "Trébol",
+   "visita": "Los Cuervos"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Trébol de Paysandú",
+   "awayTeam": "Los Cuervos",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=trebol-de-paysandu&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=los-cuervos&entity=club&noFallback=1",
+   "tournament": "Fecha 8 - Uruguayo de Clubes",
+   "tournamentId": "271638cc-3351-42ce-81bd-ef091e82515d",
+   "tournamentLogo": "https://vxsolicapdcpemfsahbk.supabase.co/storage/v1/object/public/tournaments/logos/271638cc-3351-42ce-81bd-ef091e82515d-1787176331647.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:00",
+   "kickoffAt": "2026-09-26T18:00:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "uruguayo-historia",
+  "nombre": "uruguayo-06-psg-vs-champagnat",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#0f172a",
+   "accentColor": "#38bdf8"
+  },
+  "plateOptions": {},
+  "matchId": "f51d6c18-6cff-4263-969e-b34b500bfb83",
+  "corto": {
+   "local": "PSG",
+   "visita": "Champagnat"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "PSG",
+   "awayTeam": "Champagnat",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=psg&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=champagnat&entity=club&noFallback=1",
+   "tournament": "Fecha 8 - Uruguayo de Clubes",
+   "tournamentId": "271638cc-3351-42ce-81bd-ef091e82515d",
+   "tournamentLogo": "https://vxsolicapdcpemfsahbk.supabase.co/storage/v1/object/public/tournaments/logos/271638cc-3351-42ce-81bd-ef091e82515d-1787176331647.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:00",
+   "kickoffAt": "2026-09-26T18:00:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "grupales-historia",
+  "nombre": "uruguayo-fixture",
+  "template": "dailyMatches",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#0f172a",
+   "accentColor": "#38bdf8"
+  },
+  "plateOptions": {},
+  "data": {
+   "date": "Fecha 8 · sábado 26 de septiembre",
+   "tournament": "Uruguayo de Clubes",
+   "tournamentId": "271638cc-3351-42ce-81bd-ef091e82515d",
+   "tournamentLogo": "https://vxsolicapdcpemfsahbk.supabase.co/storage/v1/object/public/tournaments/logos/271638cc-3351-42ce-81bd-ef091e82515d-1787176331647.png",
+   "matches": [
+    {
+     "homeTeam": "Old Christians",
+     "awayTeam": "Círculo de Tenis",
+     "homeTeamFull": "Old Christians Club",
+     "awayTeamFull": "Círculo de Tenis",
+     "homeLogo": "/api/assets/team-logo?key=old-christians-club&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=circulo-de-tenis&entity=club&noFallback=1",
+     "time": "15:00",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:00:00+00:00"
+    },
+    {
+     "homeTeam": "Carrasco Polo",
+     "awayTeam": "Montevideo CC",
+     "homeTeamFull": "Carrasco Polo",
+     "awayTeamFull": "Montevideo C.C.",
+     "homeLogo": "/api/assets/team-logo?key=carrasco-polo&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=montevideo-c-c&entity=club&noFallback=1",
+     "time": "15:00",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:00:00+00:00"
+    },
+    {
+     "homeTeam": "Ceibos",
+     "awayTeam": "Old Boys",
+     "homeTeamFull": "Ceibos Club",
+     "awayTeamFull": "Old Boys & Girls Club",
+     "homeLogo": "/api/assets/team-logo?key=ceibos-club&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=old-boys-girls-club&entity=club&noFallback=1",
+     "time": "15:00",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:00:00+00:00"
+    },
+    {
+     "homeTeam": "Lobos PdE",
+     "awayTeam": "Seminario",
+     "homeTeamFull": "Lobos PdE",
+     "awayTeamFull": "Club Seminario",
+     "homeLogo": "/api/assets/team-logo?key=lobos-pde&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=club-seminario&entity=club&noFallback=1",
+     "time": "15:00",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:00:00+00:00"
+    },
+    {
+     "homeTeam": "Trébol",
+     "awayTeam": "Los Cuervos",
+     "homeTeamFull": "Trébol de Paysandú",
+     "awayTeamFull": "Los Cuervos",
+     "homeLogo": "/api/assets/team-logo?key=trebol-de-paysandu&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=los-cuervos&entity=club&noFallback=1",
+     "time": "15:00",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:00:00+00:00"
+    },
+    {
+     "homeTeam": "PSG",
+     "awayTeam": "Champagnat",
+     "homeTeamFull": "PSG",
+     "awayTeamFull": "Champagnat",
+     "homeLogo": "/api/assets/team-logo?key=psg&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=champagnat&entity=club&noFallback=1",
+     "time": "15:00",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:00:00+00:00"
+    }
+   ]
+  }
+ },
+ {
+  "carpeta": "urba-historia",
+  "nombre": "urba-primera-a-01-olivos-r-c-vs-san-andres",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "54267224-f9b5-48ce-a52b-62c60254d6c9",
+  "corto": {
+   "local": "Olivos R.C.",
+   "visita": "San Andrés"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Olivos R.C.",
+   "awayTeam": "San Andrés",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=olivos-r-c&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=san-andres&entity=club&noFallback=1",
+   "tournament": "Fecha 22 - Primera \"A\" de la URBA",
+   "tournamentId": "e5c74c61-ff94-4091-9773-ec7303088fdc",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:30",
+   "kickoffAt": "2026-09-26T18:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "urba-historia",
+  "nombre": "urba-primera-a-02-curupayti-vs-lomas-ath",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "655a15b5-077a-4cfc-b227-5851d8bac441",
+  "corto": {
+   "local": "Curupaytí",
+   "visita": "Lomas Ath."
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Curupaytí",
+   "awayTeam": "Lomas Athletic",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=curupayti&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=lomas-athletic&entity=club&noFallback=1",
+   "tournament": "Fecha 22 - Primera \"A\" de la URBA",
+   "tournamentId": "e5c74c61-ff94-4091-9773-ec7303088fdc",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:30",
+   "kickoffAt": "2026-09-26T18:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "urba-historia",
+  "nombre": "urba-primera-a-03-san-luis-vs-hurling",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "67c405e5-58f7-4e67-945d-92b7c467d26f",
+  "corto": {
+   "local": "San Luis",
+   "visita": "Hurling"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "San Luis",
+   "awayTeam": "Hurling",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=san-luis&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=hurling&entity=club&noFallback=1",
+   "tournament": "Fecha 22 - Primera \"A\" de la URBA",
+   "tournamentId": "e5c74c61-ff94-4091-9773-ec7303088fdc",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:30",
+   "kickoffAt": "2026-09-26T18:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "urba-historia",
+  "nombre": "urba-primera-a-04-san-albano-vs-pueyrredon",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "804097d4-71aa-48a5-abf3-7dec697fe39d",
+  "corto": {
+   "local": "San Albano",
+   "visita": "Pueyrredón"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "San Albano",
+   "awayTeam": "Pueyrredón",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=san-albano&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=pueyrredon&entity=club&noFallback=1",
+   "tournament": "Fecha 22 - Primera \"A\" de la URBA",
+   "tournamentId": "e5c74c61-ff94-4091-9773-ec7303088fdc",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:30",
+   "kickoffAt": "2026-09-26T18:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "urba-historia",
+  "nombre": "urba-primera-a-05-san-cirano-vs-san-fernando",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "876297bd-95c0-4d97-be8b-0e7690daad48",
+  "corto": {
+   "local": "San Cirano",
+   "visita": "San Fernando"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "San Cirano",
+   "awayTeam": "San Fernando",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=san-cirano&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=san-fernando&entity=club&noFallback=1",
+   "tournament": "Fecha 22 - Primera \"A\" de la URBA",
+   "tournamentId": "e5c74c61-ff94-4091-9773-ec7303088fdc",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:30",
+   "kickoffAt": "2026-09-26T18:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "urba-historia",
+  "nombre": "urba-primera-a-06-dep-francesa-vs-club-pucara",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "b5c3b8dc-3ebf-4486-a8a1-cc7beefbed5e",
+  "corto": {
+   "local": "Dep. Francesa",
+   "visita": "Club Pucará"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Deportiva Francesa",
+   "awayTeam": "Club Pucará",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=deportiva-francesa&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=club-pucara&entity=club&noFallback=1",
+   "tournament": "Fecha 22 - Primera \"A\" de la URBA",
+   "tournamentId": "e5c74c61-ff94-4091-9773-ec7303088fdc",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:30",
+   "kickoffAt": "2026-09-26T18:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "urba-historia",
+  "nombre": "urba-primera-a-07-geba-vs-univ-la-plata",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "e4c0337e-06db-4b7f-8ab8-4f3758f4ff7f",
+  "corto": {
+   "local": "GEBA",
+   "visita": "Univ. La Plata"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "GEBA",
+   "awayTeam": "Universitario de La Plata",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=geba&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=universitario-de-la-plata&entity=club&noFallback=1",
+   "tournament": "Fecha 22 - Primera \"A\" de la URBA",
+   "tournamentId": "e5c74c61-ff94-4091-9773-ec7303088fdc",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:30",
+   "kickoffAt": "2026-09-26T18:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "grupales-historia",
+  "nombre": "urba-primera-a-fixture",
+  "template": "dailyMatches",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "data": {
+   "date": "Fecha 22 · sábado 26 de septiembre",
+   "tournament": "Primera \"A\" de la URBA",
+   "tournamentId": "e5c74c61-ff94-4091-9773-ec7303088fdc",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "matches": [
+    {
+     "homeTeam": "Olivos R.C.",
+     "awayTeam": "San Andrés",
+     "homeTeamFull": "Olivos R.C.",
+     "awayTeamFull": "San Andrés",
+     "homeLogo": "/api/assets/team-logo?key=olivos-r-c&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=san-andres&entity=club&noFallback=1",
+     "time": "15:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:30:00+00:00"
+    },
+    {
+     "homeTeam": "Curupaytí",
+     "awayTeam": "Lomas Ath.",
+     "homeTeamFull": "Curupaytí",
+     "awayTeamFull": "Lomas Athletic",
+     "homeLogo": "/api/assets/team-logo?key=curupayti&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=lomas-athletic&entity=club&noFallback=1",
+     "time": "15:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:30:00+00:00"
+    },
+    {
+     "homeTeam": "San Luis",
+     "awayTeam": "Hurling",
+     "homeTeamFull": "San Luis",
+     "awayTeamFull": "Hurling",
+     "homeLogo": "/api/assets/team-logo?key=san-luis&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=hurling&entity=club&noFallback=1",
+     "time": "15:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:30:00+00:00"
+    },
+    {
+     "homeTeam": "San Albano",
+     "awayTeam": "Pueyrredón",
+     "homeTeamFull": "San Albano",
+     "awayTeamFull": "Pueyrredón",
+     "homeLogo": "/api/assets/team-logo?key=san-albano&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=pueyrredon&entity=club&noFallback=1",
+     "time": "15:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:30:00+00:00"
+    },
+    {
+     "homeTeam": "San Cirano",
+     "awayTeam": "San Fernando",
+     "homeTeamFull": "San Cirano",
+     "awayTeamFull": "San Fernando",
+     "homeLogo": "/api/assets/team-logo?key=san-cirano&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=san-fernando&entity=club&noFallback=1",
+     "time": "15:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:30:00+00:00"
+    },
+    {
+     "homeTeam": "Dep. Francesa",
+     "awayTeam": "Club Pucará",
+     "homeTeamFull": "Deportiva Francesa",
+     "awayTeamFull": "Club Pucará",
+     "homeLogo": "/api/assets/team-logo?key=deportiva-francesa&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=club-pucara&entity=club&noFallback=1",
+     "time": "15:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:30:00+00:00"
+    },
+    {
+     "homeTeam": "GEBA",
+     "awayTeam": "Univ. La Plata",
+     "homeTeamFull": "GEBA",
+     "awayTeamFull": "Universitario de La Plata",
+     "homeLogo": "/api/assets/team-logo?key=geba&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=universitario-de-la-plata&entity=club&noFallback=1",
+     "time": "15:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:30:00+00:00"
+    }
+   ]
+  }
+ },
+ {
+  "carpeta": "urba-historia",
+  "nombre": "urba-primera-b-01-manuel-belgrano-vs-vicentinos",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "68627cab-2a98-4fd9-8dac-77978236dead",
+  "corto": {
+   "local": "Manuel Belgrano",
+   "visita": "Vicentinos"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Manuel Belgrano",
+   "awayTeam": "Vicentinos",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=manuel-belgrano&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=vicentinos&entity=club&noFallback=1",
+   "tournament": "Fecha 22 - Primera \"B\" de la URBA",
+   "tournamentId": "797e1b94-6397-4d73-a676-c166e40be5a9",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:30",
+   "kickoffAt": "2026-09-26T18:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "urba-historia",
+  "nombre": "urba-primera-b-02-monte-grande-vs-san-patricio",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "6a708102-5645-44cf-a515-f75d259acafa",
+  "corto": {
+   "local": "Monte Grande",
+   "visita": "San Patricio"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Monte Grande",
+   "awayTeam": "Club San Patricio",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=monte-grande&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=club-san-patricio&entity=club&noFallback=1",
+   "tournament": "Fecha 22 - Primera \"B\" de la URBA",
+   "tournamentId": "797e1b94-6397-4d73-a676-c166e40be5a9",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:30",
+   "kickoffAt": "2026-09-26T18:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "urba-historia",
+  "nombre": "urba-primera-b-03-don-bosco-vs-liceo-naval",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "7b209a11-6d72-4f5e-b731-141bc2838cd2",
+  "corto": {
+   "local": "Don Bosco",
+   "visita": "Liceo Naval"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Don Bosco",
+   "awayTeam": "Liceo Naval",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=don-bosco&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=liceo-naval&entity=club&noFallback=1",
+   "tournament": "Fecha 22 - Primera \"B\" de la URBA",
+   "tournamentId": "797e1b94-6397-4d73-a676-c166e40be5a9",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:30",
+   "kickoffAt": "2026-09-26T18:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "urba-historia",
+  "nombre": "urba-primera-b-04-argentino-r-c-vs-cuq",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "8071a339-2de0-48eb-afeb-3e5f49ad9af6",
+  "corto": {
+   "local": "Argentino R.C.",
+   "visita": "CUQ"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Argentino R.C.",
+   "awayTeam": "CUQ",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=argentino-r-c&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=cuq&entity=club&noFallback=1",
+   "tournament": "Fecha 22 - Primera \"B\" de la URBA",
+   "tournamentId": "797e1b94-6397-4d73-a676-c166e40be5a9",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:30",
+   "kickoffAt": "2026-09-26T18:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "urba-historia",
+  "nombre": "urba-primera-b-05-delta-r-c-vs-banco-nacion",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "bcfb0ba7-7e69-4cb3-a132-69db98aefe2c",
+  "corto": {
+   "local": "Delta R.C.",
+   "visita": "Banco Nación"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Delta R.C.",
+   "awayTeam": "Banco Nación",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=delta-r-c&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=banco-nacion&entity=club&noFallback=1",
+   "tournament": "Fecha 22 - Primera \"B\" de la URBA",
+   "tournamentId": "797e1b94-6397-4d73-a676-c166e40be5a9",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:30",
+   "kickoffAt": "2026-09-26T18:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "urba-historia",
+  "nombre": "urba-primera-b-06-mariano-moreno-vs-liceo-militar",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "ce824ecd-e77c-4db2-b4e8-64d42110c6e0",
+  "corto": {
+   "local": "Mariano Moreno",
+   "visita": "Liceo Militar"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Mariano Moreno",
+   "awayTeam": "Liceo Militar",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=mariano-moreno&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=liceo-militar&entity=club&noFallback=1",
+   "tournament": "Fecha 22 - Primera \"B\" de la URBA",
+   "tournamentId": "797e1b94-6397-4d73-a676-c166e40be5a9",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:30",
+   "kickoffAt": "2026-09-26T18:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "urba-historia",
+  "nombre": "urba-primera-b-07-san-martin-vs-club-italiano",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "edbe7d0b-96d9-4a67-b792-421869b45314",
+  "corto": {
+   "local": "San Martín",
+   "visita": "Club Italiano"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "San Martín",
+   "awayTeam": "Club Italiano",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=san-martin&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=club-italiano&entity=club&noFallback=1",
+   "tournament": "Fecha 22 - Primera \"B\" de la URBA",
+   "tournamentId": "797e1b94-6397-4d73-a676-c166e40be5a9",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:30",
+   "kickoffAt": "2026-09-26T18:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "grupales-historia",
+  "nombre": "urba-primera-b-fixture",
+  "template": "dailyMatches",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "data": {
+   "date": "Fecha 22 · sábado 26 de septiembre",
+   "tournament": "Primera \"B\" de la URBA",
+   "tournamentId": "797e1b94-6397-4d73-a676-c166e40be5a9",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "matches": [
+    {
+     "homeTeam": "Manuel Belgrano",
+     "awayTeam": "Vicentinos",
+     "homeTeamFull": "Manuel Belgrano",
+     "awayTeamFull": "Vicentinos",
+     "homeLogo": "/api/assets/team-logo?key=manuel-belgrano&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=vicentinos&entity=club&noFallback=1",
+     "time": "15:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:30:00+00:00"
+    },
+    {
+     "homeTeam": "Monte Grande",
+     "awayTeam": "San Patricio",
+     "homeTeamFull": "Monte Grande",
+     "awayTeamFull": "Club San Patricio",
+     "homeLogo": "/api/assets/team-logo?key=monte-grande&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=club-san-patricio&entity=club&noFallback=1",
+     "time": "15:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:30:00+00:00"
+    },
+    {
+     "homeTeam": "Don Bosco",
+     "awayTeam": "Liceo Naval",
+     "homeTeamFull": "Don Bosco",
+     "awayTeamFull": "Liceo Naval",
+     "homeLogo": "/api/assets/team-logo?key=don-bosco&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=liceo-naval&entity=club&noFallback=1",
+     "time": "15:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:30:00+00:00"
+    },
+    {
+     "homeTeam": "Argentino R.C.",
+     "awayTeam": "CUQ",
+     "homeTeamFull": "Argentino R.C.",
+     "awayTeamFull": "CUQ",
+     "homeLogo": "/api/assets/team-logo?key=argentino-r-c&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=cuq&entity=club&noFallback=1",
+     "time": "15:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:30:00+00:00"
+    },
+    {
+     "homeTeam": "Delta R.C.",
+     "awayTeam": "Banco Nación",
+     "homeTeamFull": "Delta R.C.",
+     "awayTeamFull": "Banco Nación",
+     "homeLogo": "/api/assets/team-logo?key=delta-r-c&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=banco-nacion&entity=club&noFallback=1",
+     "time": "15:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:30:00+00:00"
+    },
+    {
+     "homeTeam": "Mariano Moreno",
+     "awayTeam": "Liceo Militar",
+     "homeTeamFull": "Mariano Moreno",
+     "awayTeamFull": "Liceo Militar",
+     "homeLogo": "/api/assets/team-logo?key=mariano-moreno&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=liceo-militar&entity=club&noFallback=1",
+     "time": "15:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:30:00+00:00"
+    },
+    {
+     "homeTeam": "San Martín",
+     "awayTeam": "Club Italiano",
+     "homeTeamFull": "San Martín",
+     "awayTeamFull": "Club Italiano",
+     "homeLogo": "/api/assets/team-logo?key=san-martin&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=club-italiano&entity=club&noFallback=1",
+     "time": "15:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:30:00+00:00"
+    }
+   ]
+  }
+ },
+ {
+  "carpeta": "urba-historia",
+  "nombre": "urba-primera-c-01-daom-vs-casa-de-padua",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "1f6fa4eb-de0b-4f3e-a1df-73a93c714d75",
+  "corto": {
+   "local": "Daom",
+   "visita": "CASA de Padua"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Club Daom",
+   "awayTeam": "CASA de Padua",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=club-daom&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=casa-de-padua&entity=club&noFallback=1",
+   "tournament": "Fecha 22 - Primera \"C\" de la URBA",
+   "tournamentId": "d1c0af07-36ee-4234-8678-53fef1931e4f",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:30",
+   "kickoffAt": "2026-09-26T18:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "urba-historia",
+  "nombre": "urba-primera-c-02-del-sur-vs-ciudad",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "7bbbdca9-b880-4225-917a-b5a6b30697fe",
+  "corto": {
+   "local": "Del Sur",
+   "visita": "Ciudad"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Asoc. Del Sur",
+   "awayTeam": "Ciudad de Buenos Aires",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=asoc-del-sur&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=ciudad-de-buenos-aires&entity=club&noFallback=1",
+   "tournament": "Fecha 22 - Primera \"C\" de la URBA",
+   "tournamentId": "d1c0af07-36ee-4234-8678-53fef1931e4f",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:30",
+   "kickoffAt": "2026-09-26T18:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "urba-historia",
+  "nombre": "urba-primera-c-03-st-brendan-s-vs-club-areco",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "bb578b17-5bc1-4a24-a7ee-76ba0a9114b9",
+  "corto": {
+   "local": "St. Brendan's",
+   "visita": "Club Areco"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "St. Brendan's",
+   "awayTeam": "Club Areco",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=st-brendan-s&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=club-areco&entity=club&noFallback=1",
+   "tournament": "Fecha 22 - Primera \"C\" de la URBA",
+   "tournamentId": "d1c0af07-36ee-4234-8678-53fef1931e4f",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:30",
+   "kickoffAt": "2026-09-26T18:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "urba-historia",
+  "nombre": "urba-primera-c-04-lanus-r-c-vs-lujan-r-c",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "bef34fe1-4005-4e55-9d12-26a431291aae",
+  "corto": {
+   "local": "Lanús R.C.",
+   "visita": "Lujan R.C."
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Lanús R.C.",
+   "awayTeam": "Lujan R.C.",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=lanus-r-c&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=lujan-r-c&entity=club&noFallback=1",
+   "tournament": "Fecha 22 - Primera \"C\" de la URBA",
+   "tournamentId": "d1c0af07-36ee-4234-8678-53fef1931e4f",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:30",
+   "kickoffAt": "2026-09-26T18:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "urba-historia",
+  "nombre": "urba-primera-c-05-san-miguel-vs-sitas",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "d38adc62-6dca-41b7-9529-a3d2a740d3df",
+  "corto": {
+   "local": "San Miguel",
+   "visita": "SITAS"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "San Miguel R.C.",
+   "awayTeam": "SITAS",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=san-miguel-r-c&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=sitas&entity=club&noFallback=1",
+   "tournament": "Fecha 22 - Primera \"C\" de la URBA",
+   "tournamentId": "d1c0af07-36ee-4234-8678-53fef1931e4f",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:30",
+   "kickoffAt": "2026-09-26T18:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "urba-historia",
+  "nombre": "urba-primera-c-06-san-carlos-vs-centro-naval",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "e34a3470-cd46-4544-9c36-cc6d9b351dc8",
+  "corto": {
+   "local": "San Carlos",
+   "visita": "Centro Naval"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "San Carlos",
+   "awayTeam": "Centro Naval",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=san-carlos&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=centro-naval&entity=club&noFallback=1",
+   "tournament": "Fecha 22 - Primera \"C\" de la URBA",
+   "tournamentId": "d1c0af07-36ee-4234-8678-53fef1931e4f",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:30",
+   "kickoffAt": "2026-09-26T18:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "urba-historia",
+  "nombre": "urba-primera-c-07-virreyes-r-c-vs-los-molinos",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "ede98f69-e494-4e69-b02a-f16123660517",
+  "corto": {
+   "local": "Virreyes R.C.",
+   "visita": "Los Molinos"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "VIrreyes R.C.",
+   "awayTeam": "Los Molinos",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=virreyes-r-c&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=los-molinos&entity=club&noFallback=1",
+   "tournament": "Fecha 22 - Primera \"C\" de la URBA",
+   "tournamentId": "d1c0af07-36ee-4234-8678-53fef1931e4f",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:30",
+   "kickoffAt": "2026-09-26T18:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "grupales-historia",
+  "nombre": "urba-primera-c-fixture",
+  "template": "dailyMatches",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "data": {
+   "date": "Fecha 22 · sábado 26 de septiembre",
+   "tournament": "Primera \"C\" de la URBA",
+   "tournamentId": "d1c0af07-36ee-4234-8678-53fef1931e4f",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "matches": [
+    {
+     "homeTeam": "Daom",
+     "awayTeam": "CASA de Padua",
+     "homeTeamFull": "Club Daom",
+     "awayTeamFull": "CASA de Padua",
+     "homeLogo": "/api/assets/team-logo?key=club-daom&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=casa-de-padua&entity=club&noFallback=1",
+     "time": "15:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:30:00+00:00"
+    },
+    {
+     "homeTeam": "Del Sur",
+     "awayTeam": "Ciudad",
+     "homeTeamFull": "Asoc. Del Sur",
+     "awayTeamFull": "Ciudad de Buenos Aires",
+     "homeLogo": "/api/assets/team-logo?key=asoc-del-sur&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=ciudad-de-buenos-aires&entity=club&noFallback=1",
+     "time": "15:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:30:00+00:00"
+    },
+    {
+     "homeTeam": "St. Brendan's",
+     "awayTeam": "Club Areco",
+     "homeTeamFull": "St. Brendan's",
+     "awayTeamFull": "Club Areco",
+     "homeLogo": "/api/assets/team-logo?key=st-brendan-s&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=club-areco&entity=club&noFallback=1",
+     "time": "15:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:30:00+00:00"
+    },
+    {
+     "homeTeam": "Lanús R.C.",
+     "awayTeam": "Lujan R.C.",
+     "homeTeamFull": "Lanús R.C.",
+     "awayTeamFull": "Lujan R.C.",
+     "homeLogo": "/api/assets/team-logo?key=lanus-r-c&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=lujan-r-c&entity=club&noFallback=1",
+     "time": "15:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:30:00+00:00"
+    },
+    {
+     "homeTeam": "San Miguel",
+     "awayTeam": "SITAS",
+     "homeTeamFull": "San Miguel R.C.",
+     "awayTeamFull": "SITAS",
+     "homeLogo": "/api/assets/team-logo?key=san-miguel-r-c&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=sitas&entity=club&noFallback=1",
+     "time": "15:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:30:00+00:00"
+    },
+    {
+     "homeTeam": "San Carlos",
+     "awayTeam": "Centro Naval",
+     "homeTeamFull": "San Carlos",
+     "awayTeamFull": "Centro Naval",
+     "homeLogo": "/api/assets/team-logo?key=san-carlos&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=centro-naval&entity=club&noFallback=1",
+     "time": "15:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:30:00+00:00"
+    },
+    {
+     "homeTeam": "Virreyes R.C.",
+     "awayTeam": "Los Molinos",
+     "homeTeamFull": "VIrreyes R.C.",
+     "awayTeamFull": "Los Molinos",
+     "homeLogo": "/api/assets/team-logo?key=virreyes-r-c&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=los-molinos&entity=club&noFallback=1",
+     "time": "15:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:30:00+00:00"
+    }
+   ]
+  }
+ },
+ {
+  "carpeta": "urba-historia",
+  "nombre": "urba-tercera-01-ciudad-de-campana-vs-arsenal-zarate",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "02104151-d665-4283-ac4b-8041af2cc722",
+  "corto": {
+   "local": "Ciudad de Campana",
+   "visita": "Arsenal Zarate"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Ciudad de Campana",
+   "awayTeam": "Arsenal Zarate",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=ciudad-de-campana&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=arsenal-zarate&entity=club&noFallback=1",
+   "tournament": "Fecha 19 - Tercera de la URBA",
+   "tournamentId": "1c4af912-d157-4c93-afd3-8dac0a4539b4",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:30",
+   "kickoffAt": "2026-09-26T18:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "urba-historia",
+  "nombre": "urba-tercera-02-berisso-vs-banco-hipotecario",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "0b603279-b61d-480e-88a8-30e25db3d638",
+  "corto": {
+   "local": "Berisso",
+   "visita": "Banco Hipotecario"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Berisso",
+   "awayTeam": "Banco Hipotecario",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=berisso&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=banco-hipotecario&entity=club&noFallback=1",
+   "tournament": "Fecha 19 - Tercera de la URBA",
+   "tournamentId": "1c4af912-d157-4c93-afd3-8dac0a4539b4",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:30",
+   "kickoffAt": "2026-09-26T18:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "urba-historia",
+  "nombre": "urba-tercera-03-porteno-vs-pac-general-rodriguez",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "4f9d49b7-e6f1-4f3b-96eb-426664dea368",
+  "corto": {
+   "local": "Porteño",
+   "visita": "Pac General Rodriguez"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Porteño",
+   "awayTeam": "Pac General Rodriguez",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=porteno&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=pac-general-rodriguez&entity=club&noFallback=1",
+   "tournament": "Fecha 19 - Tercera de la URBA",
+   "tournamentId": "1c4af912-d157-4c93-afd3-8dac0a4539b4",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:30",
+   "kickoffAt": "2026-09-26T18:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "urba-historia",
+  "nombre": "urba-tercera-04-almafuerte-vs-los-cedros",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "6823425a-978b-4053-8e42-8570a7974b31",
+  "corto": {
+   "local": "Almafuerte",
+   "visita": "Los Cedros"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Almafuerte",
+   "awayTeam": "Los Cedros",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=almafuerte&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=los-cedros&entity=club&noFallback=1",
+   "tournament": "Fecha 19 - Tercera de la URBA",
+   "tournamentId": "1c4af912-d157-4c93-afd3-8dac0a4539b4",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:30",
+   "kickoffAt": "2026-09-26T18:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "urba-historia",
+  "nombre": "urba-tercera-05-beromama-vs-g-y-e-de-ituzaingo",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "bcfc667a-635a-494f-b61f-c706411fc58a",
+  "corto": {
+   "local": "Beromama",
+   "visita": "G y E de Ituzaingo"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Beromama",
+   "awayTeam": "G y E de Ituzaingo",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=beromama&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=g-y-e-de-ituzaingo&entity=club&noFallback=1",
+   "tournament": "Fecha 19 - Tercera de la URBA",
+   "tournamentId": "1c4af912-d157-4c93-afd3-8dac0a4539b4",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:30",
+   "kickoffAt": "2026-09-26T18:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "grupales-historia",
+  "nombre": "urba-tercera-fixture",
+  "template": "dailyMatches",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "data": {
+   "date": "Fecha 19 · sábado 26 de septiembre",
+   "tournament": "Tercera de la URBA",
+   "tournamentId": "1c4af912-d157-4c93-afd3-8dac0a4539b4",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "matches": [
+    {
+     "homeTeam": "Ciudad de Campana",
+     "awayTeam": "Arsenal Zarate",
+     "homeTeamFull": "Ciudad de Campana",
+     "awayTeamFull": "Arsenal Zarate",
+     "homeLogo": "/api/assets/team-logo?key=ciudad-de-campana&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=arsenal-zarate&entity=club&noFallback=1",
+     "time": "15:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:30:00+00:00"
+    },
+    {
+     "homeTeam": "Berisso",
+     "awayTeam": "Banco Hipotecario",
+     "homeTeamFull": "Berisso",
+     "awayTeamFull": "Banco Hipotecario",
+     "homeLogo": "/api/assets/team-logo?key=berisso&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=banco-hipotecario&entity=club&noFallback=1",
+     "time": "15:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:30:00+00:00"
+    },
+    {
+     "homeTeam": "Porteño",
+     "awayTeam": "Pac General Rodriguez",
+     "homeTeamFull": "Porteño",
+     "awayTeamFull": "Pac General Rodriguez",
+     "homeLogo": "/api/assets/team-logo?key=porteno&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=pac-general-rodriguez&entity=club&noFallback=1",
+     "time": "15:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:30:00+00:00"
+    },
+    {
+     "homeTeam": "Almafuerte",
+     "awayTeam": "Los Cedros",
+     "homeTeamFull": "Almafuerte",
+     "awayTeamFull": "Los Cedros",
+     "homeLogo": "/api/assets/team-logo?key=almafuerte&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=los-cedros&entity=club&noFallback=1",
+     "time": "15:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:30:00+00:00"
+    },
+    {
+     "homeTeam": "Beromama",
+     "awayTeam": "G y E de Ituzaingo",
+     "homeTeamFull": "Beromama",
+     "awayTeamFull": "G y E de Ituzaingo",
+     "homeLogo": "/api/assets/team-logo?key=beromama&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=g-y-e-de-ituzaingo&entity=club&noFallback=1",
+     "time": "15:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:30:00+00:00"
+    }
+   ]
+  }
+ },
+ {
+  "carpeta": "andina-historia",
+  "nombre": "andina-apertura-01-catamarca-r-c-vs-hurones",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "0afc39d8-5ed4-4fa3-806a-4bb98b698a20",
+  "corto": {
+   "local": "Catamarca R.C.",
+   "visita": "Hurones"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Catamarca R.C.",
+   "awayTeam": "Los Hurones",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=catamarca-r-c&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=los-hurones&entity=club&noFallback=1",
+   "tournament": "Semifinales - Apertura de la Unión Andina",
+   "tournamentId": "0b54dbb4-a823-4946-9783-2601f2d9c700",
+   "tournamentLogo": "https://vxsolicapdcpemfsahbk.supabase.co/storage/v1/object/public/tournaments/logos/0b54dbb4-a823-4946-9783-2601f2d9c700-1787176325644.png",
+   "date": "sábado 26 de septiembre",
+   "time": "16:00",
+   "venue": "Catamarca",
+   "kickoffAt": "2026-09-26T19:00:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "andina-historia",
+  "nombre": "andina-apertura-02-los-teros-vs-crar-la-rioja",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "44c9fa38-435c-44ac-8b47-416641bba862",
+  "corto": {
+   "local": "Los Teros",
+   "visita": "CRAR La Rioja"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Los Teros R.C.",
+   "awayTeam": "CRAR La Rioja",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=los-teros-r-c&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=crar-la-rioja&entity=club&noFallback=1",
+   "tournament": "Semifinales - Apertura de la Unión Andina",
+   "tournamentId": "0b54dbb4-a823-4946-9783-2601f2d9c700",
+   "tournamentLogo": "https://vxsolicapdcpemfsahbk.supabase.co/storage/v1/object/public/tournaments/logos/0b54dbb4-a823-4946-9783-2601f2d9c700-1787176325644.png",
+   "date": "sábado 26 de septiembre",
+   "time": "16:00",
+   "venue": "Catamarca",
+   "kickoffAt": "2026-09-26T19:00:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "grupales-historia",
+  "nombre": "andina-apertura-fixture",
+  "template": "dailyMatches",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "data": {
+   "date": "Semifinales · sábado 26 de septiembre",
+   "tournament": "Apertura de la Unión Andina",
+   "tournamentId": "0b54dbb4-a823-4946-9783-2601f2d9c700",
+   "tournamentLogo": "https://vxsolicapdcpemfsahbk.supabase.co/storage/v1/object/public/tournaments/logos/0b54dbb4-a823-4946-9783-2601f2d9c700-1787176325644.png",
+   "matches": [
+    {
+     "homeTeam": "Catamarca R.C.",
+     "awayTeam": "Hurones",
+     "homeTeamFull": "Catamarca R.C.",
+     "awayTeamFull": "Los Hurones",
+     "homeLogo": "/api/assets/team-logo?key=catamarca-r-c&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=los-hurones&entity=club&noFallback=1",
+     "time": "16:00",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T19:00:00+00:00"
+    },
+    {
+     "homeTeam": "Los Teros",
+     "awayTeam": "CRAR La Rioja",
+     "homeTeamFull": "Los Teros R.C.",
+     "awayTeamFull": "CRAR La Rioja",
+     "homeLogo": "/api/assets/team-logo?key=los-teros-r-c&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=crar-la-rioja&entity=club&noFallback=1",
+     "time": "16:00",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T19:00:00+00:00"
+    }
+   ]
+  }
+ },
+ {
+  "carpeta": "ascenso-historia",
+  "nombre": "urba-segunda-01-la-salle-vs-atletico-y-progreso",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "00f832dc-3790-4e6a-80b0-5b222e5dfeb6",
+  "corto": {
+   "local": "La Salle",
+   "visita": "Atletico y Progreso"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "La Salle",
+   "awayTeam": "Atletico y Progreso",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=la-salle&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=atletico-y-progreso&entity=club&noFallback=1",
+   "tournament": "Fecha 22 - Segunda de la URBA",
+   "tournamentId": "6c91c204-f5d7-4d10-9f10-0b3171c5501b",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:30",
+   "kickoffAt": "2026-09-26T18:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "ascenso-historia",
+  "nombre": "urba-segunda-02-el-retiro-vs-tiro-federal-de-san-pedro",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "08f4e759-25aa-4286-9013-29f088172164",
+  "corto": {
+   "local": "El Retiro",
+   "visita": "Tiro Federal de San Pedro"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "El Retiro",
+   "awayTeam": "Tiro Federal de San Pedro",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=el-retiro&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=tiro-federal-de-san-pedro&entity=club&noFallback=1",
+   "tournament": "Fecha 22 - Segunda de la URBA",
+   "tournamentId": "6c91c204-f5d7-4d10-9f10-0b3171c5501b",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:30",
+   "kickoffAt": "2026-09-26T18:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "ascenso-historia",
+  "nombre": "urba-segunda-03-san-marcos-vs-las-canas",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "3f2594e1-3605-4831-bbb9-5d75b83b07c6",
+  "corto": {
+   "local": "San Marcos",
+   "visita": "Las Cañas"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "San Marcos",
+   "awayTeam": "Las Cañas",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=san-marcos&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=las-canas&entity=club&noFallback=1",
+   "tournament": "Fecha 22 - Segunda de la URBA",
+   "tournamentId": "6c91c204-f5d7-4d10-9f10-0b3171c5501b",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:30",
+   "kickoffAt": "2026-09-26T18:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "ascenso-historia",
+  "nombre": "urba-segunda-04-los-pinos-vs-vicente-lopez",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "89021007-0ede-430d-b2da-2cafb35aba79",
+  "corto": {
+   "local": "Los Pinos",
+   "visita": "Vicente Lopez"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Los Pinos",
+   "awayTeam": "Vicente Lopez",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=los-pinos&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=vicente-lopez&entity=club&noFallback=1",
+   "tournament": "Fecha 22 - Segunda de la URBA",
+   "tournamentId": "6c91c204-f5d7-4d10-9f10-0b3171c5501b",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:30",
+   "kickoffAt": "2026-09-26T18:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "ascenso-historia",
+  "nombre": "urba-segunda-05-tigre-vs-mercedes",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "8a60c689-5e79-4d17-999b-7ca02ea87222",
+  "corto": {
+   "local": "Tigre",
+   "visita": "Mercedes"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Tigre",
+   "awayTeam": "Mercedes",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=tigre&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=mercedes&entity=club&noFallback=1",
+   "tournament": "Fecha 22 - Segunda de la URBA",
+   "tournamentId": "6c91c204-f5d7-4d10-9f10-0b3171c5501b",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:30",
+   "kickoffAt": "2026-09-26T18:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "ascenso-historia",
+  "nombre": "urba-segunda-06-albatros-vs-varela-jr",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "bba29849-ce6e-4704-9495-cb78d7cde06c",
+  "corto": {
+   "local": "Albatros",
+   "visita": "Varela Jr."
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Albatros",
+   "awayTeam": "Varela Jr.",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=albatros&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=varela-jr&entity=club&noFallback=1",
+   "tournament": "Fecha 22 - Segunda de la URBA",
+   "tournamentId": "6c91c204-f5d7-4d10-9f10-0b3171c5501b",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:30",
+   "kickoffAt": "2026-09-26T18:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "ascenso-historia",
+  "nombre": "urba-segunda-07-atletico-chascomus-vs-old-georgian",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "c2ca5b4b-5645-4f65-8233-73c9b77ac4d7",
+  "corto": {
+   "local": "Atletico Chascomus",
+   "visita": "Old Georgian"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Atletico Chascomus",
+   "awayTeam": "Old Georgian",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=atletico-chascomus&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=old-georgian&entity=club&noFallback=1",
+   "tournament": "Fecha 22 - Segunda de la URBA",
+   "tournamentId": "6c91c204-f5d7-4d10-9f10-0b3171c5501b",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:30",
+   "kickoffAt": "2026-09-26T18:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "grupales-historia",
+  "nombre": "urba-segunda-fixture",
+  "template": "dailyMatches",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "data": {
+   "date": "Fecha 22 · sábado 26 de septiembre",
+   "tournament": "Segunda de la URBA",
+   "tournamentId": "6c91c204-f5d7-4d10-9f10-0b3171c5501b",
+   "tournamentLogo": "/competiciones/ar-urba.png",
+   "matches": [
+    {
+     "homeTeam": "La Salle",
+     "awayTeam": "Atletico y Progreso",
+     "homeTeamFull": "La Salle",
+     "awayTeamFull": "Atletico y Progreso",
+     "homeLogo": "/api/assets/team-logo?key=la-salle&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=atletico-y-progreso&entity=club&noFallback=1",
+     "time": "15:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:30:00+00:00"
+    },
+    {
+     "homeTeam": "El Retiro",
+     "awayTeam": "Tiro Federal de San Pedro",
+     "homeTeamFull": "El Retiro",
+     "awayTeamFull": "Tiro Federal de San Pedro",
+     "homeLogo": "/api/assets/team-logo?key=el-retiro&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=tiro-federal-de-san-pedro&entity=club&noFallback=1",
+     "time": "15:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:30:00+00:00"
+    },
+    {
+     "homeTeam": "San Marcos",
+     "awayTeam": "Las Cañas",
+     "homeTeamFull": "San Marcos",
+     "awayTeamFull": "Las Cañas",
+     "homeLogo": "/api/assets/team-logo?key=san-marcos&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=las-canas&entity=club&noFallback=1",
+     "time": "15:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:30:00+00:00"
+    },
+    {
+     "homeTeam": "Los Pinos",
+     "awayTeam": "Vicente Lopez",
+     "homeTeamFull": "Los Pinos",
+     "awayTeamFull": "Vicente Lopez",
+     "homeLogo": "/api/assets/team-logo?key=los-pinos&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=vicente-lopez&entity=club&noFallback=1",
+     "time": "15:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:30:00+00:00"
+    },
+    {
+     "homeTeam": "Tigre",
+     "awayTeam": "Mercedes",
+     "homeTeamFull": "Tigre",
+     "awayTeamFull": "Mercedes",
+     "homeLogo": "/api/assets/team-logo?key=tigre&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=mercedes&entity=club&noFallback=1",
+     "time": "15:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:30:00+00:00"
+    },
+    {
+     "homeTeam": "Albatros",
+     "awayTeam": "Varela Jr.",
+     "homeTeamFull": "Albatros",
+     "awayTeamFull": "Varela Jr.",
+     "homeLogo": "/api/assets/team-logo?key=albatros&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=varela-jr&entity=club&noFallback=1",
+     "time": "15:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:30:00+00:00"
+    },
+    {
+     "homeTeam": "Atletico Chascomus",
+     "awayTeam": "Old Georgian",
+     "homeTeamFull": "Atletico Chascomus",
+     "awayTeamFull": "Old Georgian",
+     "homeLogo": "/api/assets/team-logo?key=atletico-chascomus&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=old-georgian&entity=club&noFallback=1",
+     "time": "15:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:30:00+00:00"
+    }
+   ]
+  }
+ },
+ {
+  "carpeta": "ascenso-historia",
+  "nombre": "noa-b-01-gimnasia-y-tiro-vs-tiro-federal",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "a15a2c97-6f16-4378-96e3-ab148ddef5d9",
+  "corto": {
+   "local": "Gimnasia y Tiro",
+   "visita": "Tiro Federal"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Gimnasia y Tiro",
+   "awayTeam": "Tiro Federal Salta",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=gimnasia-y-tiro&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=tiro-federal-salta&entity=club&noFallback=1",
+   "tournament": "Play off - Torneo Regional del NOA \"B\"",
+   "tournamentId": "3a335922-dc88-42a8-84d3-c38b57b46bca",
+   "tournamentLogo": "https://vxsolicapdcpemfsahbk.supabase.co/storage/v1/object/public/tournaments/logos/3a335922-dc88-42a8-84d3-c38b57b46bca-1787176333453.png",
+   "date": "sábado 26 de septiembre",
+   "time": "15:30",
+   "venue": "Gimnasia y Tiro, cancha 1",
+   "kickoffAt": "2026-09-26T18:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "ascenso-historia",
+  "nombre": "noa-b-02-old-lions-r-c-vs-santiago-l-t-c",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "62603d77-333c-4bda-b1b4-421195542bce",
+  "corto": {
+   "local": "Old Lions R.C.",
+   "visita": "Santiago L.T.C."
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Old Lions R.C.",
+   "awayTeam": "Santiago Lawn Tennis Club",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=old-lions-r-c&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=santiago-lawn-tennis-club&entity=club&noFallback=1",
+   "tournament": "Play off - Torneo Regional del NOA \"B\"",
+   "tournamentId": "3a335922-dc88-42a8-84d3-c38b57b46bca",
+   "tournamentLogo": "https://vxsolicapdcpemfsahbk.supabase.co/storage/v1/object/public/tournaments/logos/3a335922-dc88-42a8-84d3-c38b57b46bca-1787176333453.png",
+   "date": "domingo 27 de septiembre",
+   "time": "16:00",
+   "venue": "Old Lions, cancha 1",
+   "kickoffAt": "2026-09-27T19:00:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "grupales-historia",
+  "nombre": "noa-b-fixture",
+  "template": "dailyMatches",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "data": {
+   "date": "Play off · sábado 26 al domingo 27 de septiembre",
+   "tournament": "Torneo Regional del NOA \"B\"",
+   "tournamentId": "3a335922-dc88-42a8-84d3-c38b57b46bca",
+   "tournamentLogo": "https://vxsolicapdcpemfsahbk.supabase.co/storage/v1/object/public/tournaments/logos/3a335922-dc88-42a8-84d3-c38b57b46bca-1787176333453.png",
+   "matches": [
+    {
+     "homeTeam": "Gimnasia y Tiro",
+     "awayTeam": "Tiro Federal",
+     "homeTeamFull": "Gimnasia y Tiro",
+     "awayTeamFull": "Tiro Federal Salta",
+     "homeLogo": "/api/assets/team-logo?key=gimnasia-y-tiro&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=tiro-federal-salta&entity=club&noFallback=1",
+     "time": "15:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T18:30:00+00:00"
+    },
+    {
+     "homeTeam": "Old Lions R.C.",
+     "awayTeam": "Santiago L.T.C.",
+     "homeTeamFull": "Old Lions R.C.",
+     "awayTeamFull": "Santiago Lawn Tennis Club",
+     "homeLogo": "/api/assets/team-logo?key=old-lions-r-c&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=santiago-lawn-tennis-club&entity=club&noFallback=1",
+     "time": "16:00",
+     "status": "scheduled",
+     "dateLabel": "domingo 27",
+     "kickoffAt": "2026-09-27T19:00:00+00:00"
+    }
+   ]
+  }
+ },
+ {
+  "carpeta": "ascenso-historia",
+  "nombre": "super-9-b-01-baguales-r-c-vs-c-s-la-carlota",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "65a4612a-7884-478e-9e0d-0a06757cdef2",
+  "corto": {
+   "local": "Baguales R.C.",
+   "visita": "C.S. La Carlota"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Baguales R.C.",
+   "awayTeam": "C.S. La Carlota",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=baguales-r-c&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=c-s-la-carlota&entity=club&noFallback=1",
+   "tournament": "Súper 9 \"B\"",
+   "tournamentId": "b6ed4086-2e75-4e68-962b-2d2363c9694c",
+   "date": "sábado 26 de septiembre",
+   "time": "16:30",
+   "kickoffAt": "2026-09-26T19:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "ascenso-historia",
+  "nombre": "super-9-b-02-alta-gracia-r-c-vs-los-cuervos-r-c",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "a92bcd54-9bce-472c-8654-cf2354e052f2",
+  "corto": {
+   "local": "Alta Gracia R.C.",
+   "visita": "Los Cuervos R.C."
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Alta Gracia R.C.",
+   "awayTeam": "Los Cuervos R.C.",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=alta-gracia-r-c&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=los-cuervos-r-c&entity=club&noFallback=1",
+   "tournament": "Súper 9 \"B\"",
+   "tournamentId": "b6ed4086-2e75-4e68-962b-2d2363c9694c",
+   "date": "sábado 26 de septiembre",
+   "time": "16:30",
+   "kickoffAt": "2026-09-26T19:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "ascenso-historia",
+  "nombre": "super-9-b-03-cordoba-rugby-vs-santa-rosa-r-c-c",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "e13adff3-d755-4cfa-a261-bf9267a59e72",
+  "corto": {
+   "local": "Córdoba Rugby",
+   "visita": "Santa Rosa R.C. (C)"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Córdoba Rugby Club",
+   "awayTeam": "Santa Rosa R.C. (C)",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=cordoba-rugby-club&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=santa-rosa-r-c-c&entity=club&noFallback=1",
+   "tournament": "Súper 9 \"B\"",
+   "tournamentId": "b6ed4086-2e75-4e68-962b-2d2363c9694c",
+   "date": "sábado 26 de septiembre",
+   "time": "16:30",
+   "kickoffAt": "2026-09-26T19:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "ascenso-historia",
+  "nombre": "super-9-b-04-aero-club-rio-iv-vs-rio-tercero-r-c",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "fcd821c8-a950-421d-ad39-07a1978e9d2a",
+  "corto": {
+   "local": "Aero club Río IV",
+   "visita": "Río Tercero R.C."
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Aero Club Río IV",
+   "awayTeam": "Río Tercero R.C.",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=aero-club-rio-iv&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=rio-tercero-r-c&entity=club&noFallback=1",
+   "tournament": "Súper 9 \"B\"",
+   "tournamentId": "b6ed4086-2e75-4e68-962b-2d2363c9694c",
+   "date": "sábado 26 de septiembre",
+   "time": "16:30",
+   "kickoffAt": "2026-09-26T19:30:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "grupales-historia",
+  "nombre": "super-9-b-fixture",
+  "template": "dailyMatches",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "data": {
+   "date": "sábado 26 de septiembre",
+   "tournament": "Súper 9 \"B\"",
+   "tournamentId": "b6ed4086-2e75-4e68-962b-2d2363c9694c",
+   "matches": [
+    {
+     "homeTeam": "Baguales R.C.",
+     "awayTeam": "C.S. La Carlota",
+     "homeTeamFull": "Baguales R.C.",
+     "awayTeamFull": "C.S. La Carlota",
+     "homeLogo": "/api/assets/team-logo?key=baguales-r-c&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=c-s-la-carlota&entity=club&noFallback=1",
+     "time": "16:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T19:30:00+00:00"
+    },
+    {
+     "homeTeam": "Alta Gracia R.C.",
+     "awayTeam": "Los Cuervos R.C.",
+     "homeTeamFull": "Alta Gracia R.C.",
+     "awayTeamFull": "Los Cuervos R.C.",
+     "homeLogo": "/api/assets/team-logo?key=alta-gracia-r-c&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=los-cuervos-r-c&entity=club&noFallback=1",
+     "time": "16:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T19:30:00+00:00"
+    },
+    {
+     "homeTeam": "Córdoba Rugby",
+     "awayTeam": "Santa Rosa R.C. (C)",
+     "homeTeamFull": "Córdoba Rugby Club",
+     "awayTeamFull": "Santa Rosa R.C. (C)",
+     "homeLogo": "/api/assets/team-logo?key=cordoba-rugby-club&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=santa-rosa-r-c-c&entity=club&noFallback=1",
+     "time": "16:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T19:30:00+00:00"
+    },
+    {
+     "homeTeam": "Aero club Río IV",
+     "awayTeam": "Río Tercero R.C.",
+     "homeTeamFull": "Aero Club Río IV",
+     "awayTeamFull": "Río Tercero R.C.",
+     "homeLogo": "/api/assets/team-logo?key=aero-club-rio-iv&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=rio-tercero-r-c&entity=club&noFallback=1",
+     "time": "16:30",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T19:30:00+00:00"
+    }
+   ]
+  }
+ },
+ {
+  "carpeta": "ascenso-historia",
+  "nombre": "copa-plata-oeste-01-banco-r-c-vs-jockey-c-san-juan",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "27f58298-b8f1-484a-b5ed-820f5f9d7ee3",
+  "corto": {
+   "local": "Banco R.C.",
+   "visita": "Jockey C. San Juan"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Banco Rugby Club",
+   "awayTeam": "Jockey Club San Juan",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=banco-rugby-club&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=jockey-club-san-juan&entity=club&noFallback=1",
+   "tournament": "Copa Plata del Oeste",
+   "tournamentId": "8e21ce2b-459c-40f5-8012-d0968d6a4d95",
+   "tournamentLogo": "https://vxsolicapdcpemfsahbk.supabase.co/storage/v1/object/public/tournaments/logos/8e21ce2b-459c-40f5-8012-d0968d6a4d95-1787176344532.png",
+   "date": "sábado 26 de septiembre",
+   "time": "16:00",
+   "kickoffAt": "2026-09-26T19:00:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "ascenso-historia",
+  "nombre": "copa-plata-oeste-02-univ-mendoza-vs-peumayen-r-c",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "45a66b49-b771-48a4-a702-9582da56900a",
+  "corto": {
+   "local": "Univ. Mendoza",
+   "visita": "Peumayen R.C."
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Universitario de Mendoza",
+   "awayTeam": "Peumayen Rugby Club",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=universitario-de-mendoza&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=peumayen-rugby-club&entity=club&noFallback=1",
+   "tournament": "Copa Plata del Oeste",
+   "tournamentId": "8e21ce2b-459c-40f5-8012-d0968d6a4d95",
+   "tournamentLogo": "https://vxsolicapdcpemfsahbk.supabase.co/storage/v1/object/public/tournaments/logos/8e21ce2b-459c-40f5-8012-d0968d6a4d95-1787176344532.png",
+   "date": "sábado 26 de septiembre",
+   "time": "16:00",
+   "kickoffAt": "2026-09-26T19:00:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "ascenso-historia",
+  "nombre": "copa-plata-oeste-03-alfiles-s-c-vs-rivadavia-rugby-club",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "ad6f2401-d825-432f-9e6f-d73d984be994",
+  "corto": {
+   "local": "Alfiles S.C.",
+   "visita": "Rivadavia Rugby Club"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Alfiles S.C.",
+   "awayTeam": "Rivadavia Rugby Club",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=alfiles-s-c&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=rivadavia-rugby-club&entity=club&noFallback=1",
+   "tournament": "Copa Plata del Oeste",
+   "tournamentId": "8e21ce2b-459c-40f5-8012-d0968d6a4d95",
+   "tournamentLogo": "https://vxsolicapdcpemfsahbk.supabase.co/storage/v1/object/public/tournaments/logos/8e21ce2b-459c-40f5-8012-d0968d6a4d95-1787176344532.png",
+   "date": "sábado 26 de septiembre",
+   "time": "16:00",
+   "kickoffAt": "2026-09-26T19:00:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "ascenso-historia",
+  "nombre": "copa-plata-oeste-04-tacuru-r-h-c-vs-huazihul",
+  "template": "matchStats",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "matchId": "af5b243b-aae4-4dcc-b4cf-0d08fc5ef88f",
+  "corto": {
+   "local": "Tacurú R.H.C.",
+   "visita": "Huazihul"
+  },
+  "data": {
+   "status": "scheduled",
+   "homeTeam": "Tacurú Rugby Hockey Club",
+   "awayTeam": "Huazihul",
+   "homeScore": null,
+   "awayScore": null,
+   "homeLogo": "/api/assets/team-logo?key=tacuru-rugby-hockey-club&entity=club&noFallback=1",
+   "awayLogo": "/api/assets/team-logo?key=huazihul&entity=club&noFallback=1",
+   "tournament": "Copa Plata del Oeste",
+   "tournamentId": "8e21ce2b-459c-40f5-8012-d0968d6a4d95",
+   "tournamentLogo": "https://vxsolicapdcpemfsahbk.supabase.co/storage/v1/object/public/tournaments/logos/8e21ce2b-459c-40f5-8012-d0968d6a4d95-1787176344532.png",
+   "date": "sábado 26 de septiembre",
+   "time": "16:00",
+   "kickoffAt": "2026-09-26T19:00:00+00:00",
+   "sport": "rugby",
+   "stats": []
+  }
+ },
+ {
+  "carpeta": "grupales-historia",
+  "nombre": "copa-plata-oeste-fixture",
+  "template": "dailyMatches",
+  "format": "1080x1920",
+  "matchExportMode": "schedule",
+  "previewColors": {
+   "bgColor": "#161616",
+   "accentColor": "#eab308"
+  },
+  "plateOptions": {
+   "field": "#161616",
+   "ink": "#eab308"
+  },
+  "data": {
+   "date": "sábado 26 de septiembre",
+   "tournament": "Copa Plata del Oeste",
+   "tournamentId": "8e21ce2b-459c-40f5-8012-d0968d6a4d95",
+   "tournamentLogo": "https://vxsolicapdcpemfsahbk.supabase.co/storage/v1/object/public/tournaments/logos/8e21ce2b-459c-40f5-8012-d0968d6a4d95-1787176344532.png",
+   "matches": [
+    {
+     "homeTeam": "Banco R.C.",
+     "awayTeam": "Jockey C. San Juan",
+     "homeTeamFull": "Banco Rugby Club",
+     "awayTeamFull": "Jockey Club San Juan",
+     "homeLogo": "/api/assets/team-logo?key=banco-rugby-club&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=jockey-club-san-juan&entity=club&noFallback=1",
+     "time": "16:00",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T19:00:00+00:00"
+    },
+    {
+     "homeTeam": "Univ. Mendoza",
+     "awayTeam": "Peumayen R.C.",
+     "homeTeamFull": "Universitario de Mendoza",
+     "awayTeamFull": "Peumayen Rugby Club",
+     "homeLogo": "/api/assets/team-logo?key=universitario-de-mendoza&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=peumayen-rugby-club&entity=club&noFallback=1",
+     "time": "16:00",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T19:00:00+00:00"
+    },
+    {
+     "homeTeam": "Alfiles S.C.",
+     "awayTeam": "Rivadavia Rugby Club",
+     "homeTeamFull": "Alfiles S.C.",
+     "awayTeamFull": "Rivadavia Rugby Club",
+     "homeLogo": "/api/assets/team-logo?key=alfiles-s-c&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=rivadavia-rugby-club&entity=club&noFallback=1",
+     "time": "16:00",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T19:00:00+00:00"
+    },
+    {
+     "homeTeam": "Tacurú R.H.C.",
+     "awayTeam": "Huazihul",
+     "homeTeamFull": "Tacurú Rugby Hockey Club",
+     "awayTeamFull": "Huazihul",
+     "homeLogo": "/api/assets/team-logo?key=tacuru-rugby-hockey-club&entity=club&noFallback=1",
+     "awayLogo": "/api/assets/team-logo?key=huazihul&entity=club&noFallback=1",
+     "time": "16:00",
+     "status": "scheduled",
+     "dateLabel": "sábado 26",
+     "kickoffAt": "2026-09-26T19:00:00+00:00"
+    }
+   ]
+  }
+ }
+]

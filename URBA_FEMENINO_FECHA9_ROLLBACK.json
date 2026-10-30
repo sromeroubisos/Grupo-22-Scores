@@ -1,0 +1,98 @@
+[
+  {
+    "id": "ed07f51a-ca50-4184-90dd-26f3622d8ba7",
+    "antes": {
+      "status": "suspended",
+      "score": null,
+      "home_base_points": 0,
+      "away_base_points": 0,
+      "home_bonus_points": 0,
+      "away_bonus_points": 0,
+      "points_autocalculated": true
+    }
+  },
+  {
+    "id": "53f66b95-48cc-42ce-8e25-70057adf0e95",
+    "antes": {
+      "status": "scheduled",
+      "score": null,
+      "home_base_points": 0,
+      "away_base_points": 0,
+      "home_bonus_points": 0,
+      "away_bonus_points": 0,
+      "points_autocalculated": true
+    }
+  },
+  {
+    "id": "8d04be80-f8c9-4873-b70b-9a22692e0895",
+    "antes": {
+      "status": "scheduled",
+      "score": null,
+      "home_base_points": 0,
+      "away_base_points": 0,
+      "home_bonus_points": 0,
+      "away_bonus_points": 0,
+      "points_autocalculated": true
+    }
+  },
+  {
+    "id": "d4cd41a2-0939-45cd-924e-562862949c8a",
+    "antes": {
+      "status": "scheduled",
+      "score": null,
+      "home_base_points": 0,
+      "away_base_points": 0,
+      "home_bonus_points": 0,
+      "away_bonus_points": 0,
+      "points_autocalculated": true
+    }
+  },
+  {
+    "id": "5060d2fa-41e0-4a8e-a683-9d3057718d2b",
+    "antes": {
+      "status": "scheduled",
+      "score": null,
+      "home_base_points": 0,
+      "away_base_points": 0,
+      "home_bonus_points": 0,
+      "away_bonus_points": 0,
+      "points_autocalculated": true
+    }
+  },
+  {
+    "id": "13eeabea-3b53-4715-a299-84ecae54bdcd",
+    "antes": {
+      "status": "scheduled",
+      "score": null,
+      "home_base_points": 0,
+      "away_base_points": 0,
+      "home_bonus_points": 0,
+      "away_bonus_points": 0,
+      "points_autocalculated": true
+    }
+  },
+  {
+    "id": "62724420-20ca-40e1-a83f-097f0f7fe3f3",
+    "antes": {
+      "status": "scheduled",
+      "score": null,
+      "home_base_points": 0,
+      "away_base_points": 0,
+      "home_bonus_points": 0,
+      "away_bonus_points": 0,
+      "points_autocalculated": true
+    }
+  },
+  {
+    "id": "b2f27570-5c86-4bc9-8417-6b06b7b58f52",
+    "antes": {
+      "status": "scheduled",
+      "score": null,
+      "home_base_points": 0,
+      "away_base_points": 0,
+      "home_bonus_points": 0,
+      "away_bonus_points": 0,
+      "points_autocalculated": true
+    }
+  }
+]

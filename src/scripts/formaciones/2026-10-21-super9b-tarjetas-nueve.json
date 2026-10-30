@@ -1,0 +1,2937 @@
+{
+ "descripcion": "Super 9 B 2026 · 9 tarjetas leidas a ojo de los PNG (volcado .md sin minutos). Dorsal 1 impreso como relleno va sin jugador.",
+ "torneo": "Super 9 B",
+ "partidos": [
+  {
+   "id": "cac01f9c-57c2-4446-8df5-35d08e5667b1",
+   "rotulo": "LOS CUERVOS R.C. vs SANTA ROSA R.C. · Fecha 01 · tarjeta 295619",
+   "local": {
+    "nombre": "LOS CUERVOS R.C.",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Enzo Daniel Saretti"
+     },
+     {
+      "numero": 2,
+      "nombre": "Jesus Marronkle"
+     },
+     {
+      "numero": 3,
+      "nombre": "Tobias Villarroel"
+     },
+     {
+      "numero": 4,
+      "nombre": "Jano Mora Pedernera"
+     },
+     {
+      "numero": 5,
+      "nombre": "Patricio Miguel Morosan Bunzli"
+     },
+     {
+      "numero": 6,
+      "nombre": "Dario Marronkle"
+     },
+     {
+      "numero": 7,
+      "nombre": "Andres Tossolini"
+     },
+     {
+      "numero": 8,
+      "nombre": "Alvaro Demetrio Touz"
+     },
+     {
+      "numero": 9,
+      "nombre": "Ignacio Cane"
+     },
+     {
+      "numero": 10,
+      "nombre": "Juan Ignacio Accastello"
+     },
+     {
+      "numero": 11,
+      "nombre": "Dante Tossolini"
+     },
+     {
+      "numero": 12,
+      "nombre": "Tomas Ariel Ferreri"
+     },
+     {
+      "numero": 13,
+      "nombre": "Lucio Guzman"
+     },
+     {
+      "numero": 14,
+      "nombre": "Mateo Leon Perez"
+     },
+     {
+      "numero": 15,
+      "nombre": "Guido Emanuel Galetto"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Ricardo Damian Cavasin"
+     },
+     {
+      "numero": 17,
+      "nombre": "Tomas Boiero"
+     },
+     {
+      "numero": 18,
+      "nombre": "Fede Zanetta"
+     },
+     {
+      "numero": 19,
+      "nombre": "Mateo Guzman"
+     },
+     {
+      "numero": 20,
+      "nombre": "Tiziano Dettoni Ganuza"
+     },
+     {
+      "numero": 21,
+      "nombre": "Dario Nahuel Fantino"
+     },
+     {
+      "numero": 22,
+      "nombre": "Tomas Noel Perez"
+     },
+     {
+      "numero": 23,
+      "nombre": "Bruno Vasconi"
+     }
+    ]
+   },
+   "visitante": {
+    "nombre": "SANTA ROSA R.C.",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Juan Matias Morales Martinez"
+     },
+     {
+      "numero": 2,
+      "nombre": "Braian Stieben"
+     },
+     {
+      "numero": 3,
+      "nombre": "Ramiro Chaile"
+     },
+     {
+      "numero": 4,
+      "nombre": "Hernan Casadesus"
+     },
+     {
+      "numero": 5,
+      "nombre": "Cristian Federico Trifiletti"
+     },
+     {
+      "numero": 6,
+      "nombre": "Lautaro Falcon"
+     },
+     {
+      "numero": 7,
+      "nombre": "Ciro Lautaro Zamora Gomez"
+     },
+     {
+      "numero": 8,
+      "nombre": "Uriel Maldonado"
+     },
+     {
+      "numero": 9,
+      "nombre": "Joaquin Barrera"
+     },
+     {
+      "numero": 10,
+      "nombre": "Rodrigo Martinez"
+     },
+     {
+      "numero": 11,
+      "nombre": "Ezequiel Ramirez"
+     },
+     {
+      "numero": 12,
+      "nombre": "Joaquin Palacios"
+     },
+     {
+      "numero": 13,
+      "nombre": "Mario Ismael Oviedo Krampitz"
+     },
+     {
+      "numero": 14,
+      "nombre": "Raul Nicolas Vega Lujan"
+     },
+     {
+      "numero": 15,
+      "nombre": "Lautaro Fontan"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Ramiro Enzo Arreguiz"
+     },
+     {
+      "numero": 17,
+      "nombre": "Matias Benjamin Herrera"
+     },
+     {
+      "numero": 18,
+      "nombre": "Alexis Agustin Maldonado"
+     },
+     {
+      "numero": 19,
+      "nombre": "Leandro Eduardo Blanco Pighi"
+     },
+     {
+      "numero": 20,
+      "nombre": "Alejandro Manuel Andrés"
+     },
+     {
+      "numero": 21,
+      "nombre": "Daniel Sebastian Claus"
+     },
+     {
+      "numero": 22,
+      "nombre": "Lucas Albang"
+     },
+     {
+      "numero": 23,
+      "nombre": "Augusto Arias"
+     }
+    ]
+   },
+   "eventos": [
+    {
+     "minuto": 2,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": ""
+    },
+    {
+     "minuto": 2,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": ""
+    },
+    {
+     "minuto": 2,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": ""
+    },
+    {
+     "minuto": 2,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": ""
+    },
+    {
+     "minuto": 2,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": ""
+    },
+    {
+     "minuto": 2,
+     "periodo": "1T",
+     "tipo": "penalty_try",
+     "equipo": "local",
+     "jugador": ""
+    },
+    {
+     "minuto": 6,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 6,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": ""
+    }
+   ],
+   "arbitro": "Santiago Geronimo Lozada Chaves"
+  },
+  {
+   "id": "e5078782-df35-49c8-94c2-1dba744f555d",
+   "rotulo": "SANTA ROSA R.C. vs CLUB SOCIAL CARLOTA · Fecha 02 · tarjeta 295963",
+   "local": {
+    "nombre": "SANTA ROSA R.C.",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Braian Stieben"
+     },
+     {
+      "numero": 2,
+      "nombre": "Ramiro Chaile"
+     },
+     {
+      "numero": 3,
+      "nombre": "Hernan Casadesus"
+     },
+     {
+      "numero": 4,
+      "nombre": "Cristian Federico Trifiletti"
+     },
+     {
+      "numero": 5,
+      "nombre": "Lucas Albang"
+     },
+     {
+      "numero": 6,
+      "nombre": "Ciro Lautaro Zamora Gomez"
+     },
+     {
+      "numero": 7,
+      "nombre": "Uriel Maldonado"
+     },
+     {
+      "numero": 8,
+      "nombre": "Rodrigo Martinez"
+     },
+     {
+      "numero": 9,
+      "nombre": "Lautaro Fontan"
+     },
+     {
+      "numero": 10,
+      "nombre": "Julián Sanchez"
+     },
+     {
+      "numero": 11,
+      "nombre": "Joaquín Palacios"
+     },
+     {
+      "numero": 12,
+      "nombre": "Mario Ismael Oviedo Krampitz"
+     },
+     {
+      "numero": 13,
+      "nombre": "Raul Nicolas Vega Lujan"
+     },
+     {
+      "numero": 14,
+      "nombre": "Joaquin Barrera"
+     },
+     {
+      "numero": 15,
+      "nombre": "Ramiro Enzo Arreguiz"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Matías Benjamin Herrera"
+     },
+     {
+      "numero": 17,
+      "nombre": "Gaston Alexander Espindola"
+     },
+     {
+      "numero": 18,
+      "nombre": "Facundo Pérez"
+     },
+     {
+      "numero": 19,
+      "nombre": "Martin Ignacio Torres"
+     },
+     {
+      "numero": 20,
+      "nombre": "Braian Facundo Oviedo"
+     },
+     {
+      "numero": 21,
+      "nombre": "Matias Nahun Vasquez"
+     },
+     {
+      "numero": 22,
+      "nombre": "Ezequiel Ramirez"
+     }
+    ]
+   },
+   "visitante": {
+    "nombre": "CLUB SOCIAL CARLOTA",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Pedro Sebastian Marquez"
+     },
+     {
+      "numero": 2,
+      "nombre": "Tobias Castro"
+     },
+     {
+      "numero": 3,
+      "nombre": "Marcos Exequiel Saez"
+     },
+     {
+      "numero": 4,
+      "nombre": "Matias Gomez"
+     },
+     {
+      "numero": 5,
+      "nombre": "Lucas Matias Ponzo"
+     },
+     {
+      "numero": 6,
+      "nombre": "Francisco Andrada"
+     },
+     {
+      "numero": 7,
+      "nombre": "Santiago Gomez Bies"
+     },
+     {
+      "numero": 8,
+      "nombre": "Mateo Stefani"
+     },
+     {
+      "numero": 9,
+      "nombre": "Camilo Gomez Perez"
+     },
+     {
+      "numero": 10,
+      "nombre": "Wilton Artusso"
+     },
+     {
+      "numero": 11,
+      "nombre": "Nicolas Facchini"
+     },
+     {
+      "numero": 12,
+      "nombre": "Nicolas Gaston Garafulic"
+     },
+     {
+      "numero": 13,
+      "nombre": "Carlos Monina"
+     },
+     {
+      "numero": 14,
+      "nombre": "Valentino Senn Tomi"
+     },
+     {
+      "numero": 15,
+      "nombre": "Agustin Artusso"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Santino Augusto Pizarro"
+     },
+     {
+      "numero": 17,
+      "nombre": "Luis Del Canto"
+     },
+     {
+      "numero": 18,
+      "nombre": "Martin Benausse"
+     },
+     {
+      "numero": 19,
+      "nombre": "Juan Bonadeo"
+     },
+     {
+      "numero": 20,
+      "nombre": "Roque Carranza"
+     },
+     {
+      "numero": 21,
+      "nombre": "Martin Gauna"
+     },
+     {
+      "numero": 22,
+      "nombre": "Agustin Mangiarotti"
+     },
+     {
+      "numero": 23,
+      "nombre": "Alexis Ivan Olguin"
+     }
+    ]
+   },
+   "eventos": [
+    {
+     "minuto": 18,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 35,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Hernan Casadesus"
+    },
+    {
+     "minuto": 35,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Ramiro Enzo Arreguiz"
+    },
+    {
+     "minuto": 35,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "visitante",
+     "jugador": "",
+     "detalle": "Juego General"
+    },
+    {
+     "minuto": 39,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 39,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 4,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Rodrigo Martinez"
+    },
+    {
+     "minuto": 4,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Ramiro Enzo Arreguiz"
+    },
+    {
+     "minuto": 9,
+     "periodo": "2T",
+     "tipo": "penalty_try",
+     "equipo": "local",
+     "jugador": ""
+    },
+    {
+     "minuto": 9,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "equipo": "visitante",
+     "jugador": "",
+     "detalle": "Juego General"
+    },
+    {
+     "minuto": 11,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 11,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 23,
+     "periodo": "2T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 35,
+     "periodo": "2T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Ramiro Enzo Arreguiz"
+    }
+   ],
+   "arbitro": "Emmanuel Boscatto"
+  },
+  {
+   "id": "6a93b525-aa1a-4bee-b772-7f72374a784e",
+   "rotulo": "A.C. BAGUALES R.C. vs LOS CUERVOS R.C. · Fecha 06 · tarjeta 309446",
+   "local": {
+    "nombre": "A.C. BAGUALES R.C.",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Sergio Ariel Diana"
+     },
+     {
+      "numero": 2,
+      "nombre": "Alejo Salas"
+     },
+     {
+      "numero": 3,
+      "nombre": "Juan Martin Rivarola"
+     },
+     {
+      "numero": 4,
+      "nombre": "Santiago Agustin Galeano"
+     },
+     {
+      "numero": 5,
+      "nombre": "Juan Emmanuel Roldan"
+     },
+     {
+      "numero": 6,
+      "nombre": "Lucas Fantini"
+     },
+     {
+      "numero": 7,
+      "nombre": "Mariano Cadamuro"
+     },
+     {
+      "numero": 8,
+      "nombre": "Bautista Cordero Goranescu"
+     },
+     {
+      "numero": 9,
+      "nombre": "Valentin Sartori"
+     },
+     {
+      "numero": 10,
+      "nombre": "Renzo Farrando"
+     },
+     {
+      "numero": 11,
+      "nombre": "Thomas Liendo"
+     },
+     {
+      "numero": 12,
+      "nombre": "Benjamin Moyano"
+     },
+     {
+      "numero": 13,
+      "nombre": "Agustin Fantini"
+     },
+     {
+      "numero": 14,
+      "nombre": "Gonzalo Facundo Aris"
+     },
+     {
+      "numero": 15,
+      "nombre": "Gastón Ignacio San"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Tobias Paz"
+     },
+     {
+      "numero": 17,
+      "nombre": "Diego Lentini"
+     },
+     {
+      "numero": 18,
+      "nombre": "Lautaro Amaranto"
+     },
+     {
+      "numero": 19,
+      "nombre": "Juan Agustin Vicens"
+     },
+     {
+      "numero": 20,
+      "nombre": "Lucas Emiliano Roldan"
+     },
+     {
+      "numero": 21,
+      "nombre": "Javier Zacarias Mamondi"
+     },
+     {
+      "numero": 22,
+      "nombre": "Valentin Brunelli"
+     },
+     {
+      "numero": 23,
+      "nombre": "Valentin Ismael Acosta"
+     }
+    ]
+   },
+   "visitante": {
+    "nombre": "LOS CUERVOS R.C.",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Ricardo Damian Cavasin"
+     },
+     {
+      "numero": 2,
+      "nombre": "Jesus Marronkle"
+     },
+     {
+      "numero": 3,
+      "nombre": "Tobias Villarroel"
+     },
+     {
+      "numero": 4,
+      "nombre": "Jano Mora Pedernera"
+     },
+     {
+      "numero": 5,
+      "nombre": "Patricio Miguel Morosan Bunzli"
+     },
+     {
+      "numero": 6,
+      "nombre": "Mateo Guzman"
+     },
+     {
+      "numero": 7,
+      "nombre": "Lisandro Ismael Quevedo Abad"
+     },
+     {
+      "numero": 8,
+      "nombre": "Ignacio Alderete"
+     },
+     {
+      "numero": 9,
+      "nombre": "Tomas Noel Perez"
+     },
+     {
+      "numero": 10,
+      "nombre": "Ignacio Cane"
+     },
+     {
+      "numero": 11,
+      "nombre": "Yaco Pepicelli Rinaudo"
+     },
+     {
+      "numero": 12,
+      "nombre": "Amilcar Eufrasio Montesanto"
+     },
+     {
+      "numero": 13,
+      "nombre": "Guido Emanuel Galetto"
+     },
+     {
+      "numero": 14,
+      "nombre": "Dante Tossolini"
+     },
+     {
+      "numero": 15,
+      "nombre": "Mateo Leon Perez"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Brian Murillo"
+     },
+     {
+      "numero": 17,
+      "nombre": "Facundo Ibarra"
+     },
+     {
+      "numero": 18,
+      "nombre": "Nelson Lambertini"
+     },
+     {
+      "numero": 19,
+      "nombre": "Tiziano Dettoni Ganuza"
+     },
+     {
+      "numero": 20,
+      "nombre": "Alvaro Demetrio Touz"
+     },
+     {
+      "numero": 21,
+      "nombre": "David DiTommaso"
+     },
+     {
+      "numero": 22,
+      "nombre": "Lucio Martinez"
+     },
+     {
+      "numero": 23,
+      "nombre": "Maximiliano Aparicio Borda"
+     }
+    ]
+   },
+   "eventos": [
+    {
+     "minuto": 1,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 1,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 1,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 1,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "visitante",
+     "jugador": "",
+     "detalle": "Juego General"
+    },
+    {
+     "minuto": 1,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 5,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Gastón Ignacio San"
+    },
+    {
+     "minuto": 18,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Gastón Ignacio San"
+    },
+    {
+     "minuto": 20,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Thomas Liendo"
+    },
+    {
+     "minuto": 20,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Benjamin Moyano"
+    },
+    {
+     "minuto": 24,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Thomas Liendo"
+    },
+    {
+     "minuto": 24,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Benjamin Moyano"
+    },
+    {
+     "minuto": 5,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Sergio Ariel Diana",
+     "detalle": "Entra: Tobias Paz"
+    },
+    {
+     "minuto": 5,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Juan Martin Rivarola",
+     "detalle": "Entra: Diego Lentini"
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Juan Emmanuel Roldan",
+     "detalle": "Entra: Lautaro Amaranto"
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Bautista Cordero Goranescu",
+     "detalle": "Entra: Javier Zacarias Mamondi"
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Valentin Sartori",
+     "detalle": "Entra: Juan Agustin Vicens"
+    },
+    {
+     "minuto": 15,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Gastón Ignacio San"
+    },
+    {
+     "minuto": 20,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Benjamin Moyano"
+    },
+    {
+     "minuto": 24,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Juan Agustin Vicens"
+    },
+    {
+     "minuto": 24,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Valentin Brunelli"
+    },
+    {
+     "minuto": 25,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Thomas Liendo",
+     "detalle": "Entra: Valentin Brunelli"
+    },
+    {
+     "minuto": 25,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Gastón Ignacio San",
+     "detalle": "Entra: Valentin Ismael Acosta"
+    },
+    {
+     "minuto": 25,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Lucas Fantini",
+     "detalle": "Entra: Lucas Emiliano Roldan"
+    }
+   ],
+   "arbitro": "Fernando Martin Pettina"
+  },
+  {
+   "id": "859458c4-5836-49d8-b6eb-993d956e1a6d",
+   "rotulo": "SANTA ROSA R.C. vs ALTA GRACIA R.C. · Fecha 09 · tarjeta 312618",
+   "local": {
+    "nombre": "SANTA ROSA R.C.",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Ramiro Chaile"
+     },
+     {
+      "numero": 2,
+      "nombre": "Braian Stieben"
+     },
+     {
+      "numero": 3,
+      "nombre": "Gaston Alexander Espindola"
+     },
+     {
+      "numero": 4,
+      "nombre": "Cristian Federico Trifiletti"
+     },
+     {
+      "numero": 5,
+      "nombre": "Ramiro Enzo Arreguiz"
+     },
+     {
+      "numero": 6,
+      "nombre": "Martin Ignacio Torres"
+     },
+     {
+      "numero": 7,
+      "nombre": "Ciro Lautaro Zamora Gomez"
+     },
+     {
+      "numero": 8,
+      "nombre": "Bautista Mateo Kunz"
+     },
+     {
+      "numero": 9,
+      "nombre": "Berti Corrado"
+     },
+     {
+      "numero": 10,
+      "nombre": "Julian Sanchez"
+     },
+     {
+      "numero": 11,
+      "nombre": "Joaquin Palacios"
+     },
+     {
+      "numero": 12,
+      "nombre": "Juan Cruz Romero Morais"
+     },
+     {
+      "numero": 13,
+      "nombre": "Mario Ismael Oviedo Krampitz"
+     },
+     {
+      "numero": 14,
+      "nombre": "Joaquin Barrera"
+     },
+     {
+      "numero": 15,
+      "nombre": "Ezequiel Ramirez"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Juan Matias Morales Martinez"
+     },
+     {
+      "numero": 17,
+      "nombre": "Carlos Rafael Vasquez"
+     },
+     {
+      "numero": 18,
+      "nombre": "Daniel Sebastian Claus"
+     },
+     {
+      "numero": 19,
+      "nombre": "Santiago Leiva"
+     },
+     {
+      "numero": 20,
+      "nombre": "Alexi Nicolas Ramirez"
+     },
+     {
+      "numero": 21,
+      "nombre": "Rodrigo Martinez"
+     },
+     {
+      "numero": 22,
+      "nombre": "Lautaro Fontan"
+     },
+     {
+      "numero": 23,
+      "nombre": "Alejandro Nicolas Nieva Chaile"
+     }
+    ]
+   },
+   "visitante": {
+    "nombre": "ALTA GRACIA R.C.",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Jesús Emanuel Cena"
+     },
+     {
+      "numero": 2,
+      "nombre": "Alejo Prandini"
+     },
+     {
+      "numero": 3,
+      "nombre": "Elias Fabricio Cuello Villarreal"
+     },
+     {
+      "numero": 4,
+      "nombre": "Jose Suasnabar"
+     },
+     {
+      "numero": 5,
+      "nombre": "Ismael Vera"
+     },
+     {
+      "numero": 6,
+      "nombre": "Santiago Barrera"
+     },
+     {
+      "numero": 7,
+      "nombre": "Ignacio Becerra"
+     },
+     {
+      "numero": 8,
+      "nombre": "Santiago larossi"
+     },
+     {
+      "numero": 9,
+      "nombre": "Valentin Olmos"
+     },
+     {
+      "numero": 10,
+      "nombre": "Ezequiel Fontaine"
+     },
+     {
+      "numero": 11,
+      "nombre": "Juan Ignacio Martinez"
+     },
+     {
+      "numero": 12,
+      "nombre": "Santiago Tomas Cesaroni"
+     },
+     {
+      "numero": 13,
+      "nombre": "Noah Francisco Tosonieri"
+     },
+     {
+      "numero": 14,
+      "nombre": "Elias Alejandro Gigena Lebovici"
+     },
+     {
+      "numero": 15,
+      "nombre": "Joaquin Francisco Flamand"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Ezequiel Lopez"
+     },
+     {
+      "numero": 17,
+      "nombre": "Francis Errecaborde"
+     },
+     {
+      "numero": 18,
+      "nombre": "Mateo Barrera"
+     },
+     {
+      "numero": 19,
+      "nombre": "Lautaro Cardozo"
+     },
+     {
+      "numero": 20,
+      "nombre": "Martín Flores"
+     },
+     {
+      "numero": 21,
+      "nombre": "Joaquín Villegas"
+     },
+     {
+      "numero": 22,
+      "nombre": "Uriel Capdevila Leunda"
+     },
+     {
+      "numero": 23,
+      "nombre": "Agustín Homero Cañas"
+     }
+    ]
+   },
+   "eventos": [
+    {
+     "minuto": 8,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Mateo Barrera"
+    },
+    {
+     "minuto": 8,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Santiago Tomas Cesaroni"
+    },
+    {
+     "minuto": 21,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "visitante",
+     "jugador": "Ezequiel Lopez",
+     "detalle": "Juego General"
+    },
+    {
+     "minuto": 28,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Mario Ismael Oviedo Krampitz"
+    },
+    {
+     "minuto": 28,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Joaquin Barrera"
+    },
+    {
+     "minuto": 33,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "visitante",
+     "jugador": "Jesús Emanuel Cena",
+     "detalle": "Juego General"
+    },
+    {
+     "minuto": 36,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Noah Francisco Tosonieri"
+    },
+    {
+     "minuto": 6,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Elias Alejandro Gigena Lebovici",
+     "detalle": "Entra: Joaquin Francisco Flamand"
+    },
+    {
+     "minuto": 8,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Ismael Vera",
+     "detalle": "Entra: Lautaro Cardozo"
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Joaquin Francisco Flamand"
+    },
+    {
+     "minuto": 12,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Juan Ignacio Martinez",
+     "detalle": "Entra: Agustín Homero Cañas"
+    },
+    {
+     "minuto": 14,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Ignacio Becerra",
+     "detalle": "Entra: Joaquín Villegas"
+    },
+    {
+     "minuto": 20,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Jose Suasnabar"
+    },
+    {
+     "minuto": 20,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Santiago Tomas Cesaroni"
+    },
+    {
+     "minuto": 20,
+     "periodo": "2T",
+     "tipo": "card_red",
+     "equipo": "visitante",
+     "jugador": "Martín Flores",
+     "detalle": "Roja 20 minutos"
+    },
+    {
+     "minuto": 26,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Mateo Barrera",
+     "detalle": "Entra: Alejo Prandini"
+    },
+    {
+     "minuto": 30,
+     "periodo": "2T",
+     "tipo": "injury",
+     "equipo": "visitante",
+     "jugador": "Santiago Tomas Cesaroni",
+     "detalle": "Lesionado"
+    },
+    {
+     "minuto": 33,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Ismael Vera"
+    },
+    {
+     "minuto": 33,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Santiago Tomas Cesaroni"
+    },
+    {
+     "minuto": 36,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Ismael Vera"
+    },
+    {
+     "minuto": 36,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Joaquin Francisco Flamand"
+    },
+    {
+     "minuto": 40,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "equipo": "visitante",
+     "jugador": "Jose Suasnabar",
+     "detalle": "Juego General"
+    }
+   ],
+   "arbitro": "Octavio Damia Patifio"
+  },
+  {
+   "id": "917ffcd0-cd63-440b-92c0-9dc780112692",
+   "rotulo": "SANTA ROSA R.C. vs LOS CUERVOS R.C. · Fecha 10 · tarjeta 314178",
+   "local": {
+    "nombre": "SANTA ROSA R.C.",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Ramiro Chaile"
+     },
+     {
+      "numero": 2,
+      "nombre": "Gaston Alexander Espindola"
+     },
+     {
+      "numero": 3,
+      "nombre": "Ramiro Enzo Arreguiz"
+     },
+     {
+      "numero": 4,
+      "nombre": "Hernan Casadesus"
+     },
+     {
+      "numero": 5,
+      "nombre": "Alexi Nicolas Ramirez"
+     },
+     {
+      "numero": 6,
+      "nombre": "Braian Facundo Oviedo"
+     },
+     {
+      "numero": 7,
+      "nombre": "Lucas Albang"
+     },
+     {
+      "numero": 8,
+      "nombre": "Alexis Agustin Maldonado"
+     },
+     {
+      "numero": 9,
+      "nombre": "Bautista Mateo Kunz"
+     },
+     {
+      "numero": 10,
+      "nombre": "Berti Corrado"
+     },
+     {
+      "numero": 11,
+      "nombre": "Lautaro Fontan"
+     },
+     {
+      "numero": 12,
+      "nombre": "Mario Ismael Oviedo Krampitz"
+     },
+     {
+      "numero": 13,
+      "nombre": "Joaquin Palacios"
+     },
+     {
+      "numero": 14,
+      "nombre": "Julian Sanchez"
+     },
+     {
+      "numero": 15,
+      "nombre": "Joaquin Barrera"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Juan Matias Morales Martinez"
+     },
+     {
+      "numero": 17,
+      "nombre": "Guillermo Chort Jure"
+     },
+     {
+      "numero": 18,
+      "nombre": "Matias Benjamin Herrera"
+     },
+     {
+      "numero": 19,
+      "nombre": "Ciro Lautaro Zamora Gomez"
+     },
+     {
+      "numero": 20,
+      "nombre": "Martin Ignacio Torres"
+     },
+     {
+      "numero": 21,
+      "nombre": "Mateo Casamayor Porto"
+     },
+     {
+      "numero": 22,
+      "nombre": "Ezequiel Ramirez"
+     },
+     {
+      "numero": 23,
+      "nombre": "Santiago Leiva"
+     }
+    ]
+   },
+   "visitante": {
+    "nombre": "LOS CUERVOS R.C.",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Ricardo Damian Cavasin"
+     },
+     {
+      "numero": 2,
+      "nombre": "Jesus Marronkle"
+     },
+     {
+      "numero": 3,
+      "nombre": "Juan Manuel Aragon"
+     },
+     {
+      "numero": 4,
+      "nombre": "Jano Mora Pedernera"
+     },
+     {
+      "numero": 5,
+      "nombre": "Nelson Lambertini"
+     },
+     {
+      "numero": 6,
+      "nombre": "Alvaro Demetrio Touz"
+     },
+     {
+      "numero": 7,
+      "nombre": "Ignacio Alderete"
+     },
+     {
+      "numero": 8,
+      "nombre": "Dante Tossolini"
+     },
+     {
+      "numero": 9,
+      "nombre": "Tomas Noel Perez"
+     },
+     {
+      "numero": 10,
+      "nombre": "Dario Nahuel Fantino"
+     },
+     {
+      "numero": 11,
+      "nombre": "Yaco Pepicelli Rinaudo"
+     },
+     {
+      "numero": 12,
+      "nombre": "Hernan David Martinez"
+     },
+     {
+      "numero": 13,
+      "nombre": "Guido Emanuel Galetto"
+     },
+     {
+      "numero": 14,
+      "nombre": "Amilcar Eufrasio Montesanto"
+     },
+     {
+      "numero": 15,
+      "nombre": "Ignacio Cane"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Diogo Touz"
+     },
+     {
+      "numero": 17,
+      "nombre": "Lisandro Ismael Quevedo Abad"
+     },
+     {
+      "numero": 18,
+      "nombre": "Tobias Villarroel"
+     },
+     {
+      "numero": 19,
+      "nombre": "Patricio Miguel Morosan Bunzli"
+     },
+     {
+      "numero": 20,
+      "nombre": "Joaquin Ismael Morosan Bunzli"
+     },
+     {
+      "numero": 21,
+      "nombre": "Lucio Martinez"
+     },
+     {
+      "numero": 22,
+      "nombre": "Tomas Ariel Ferreri"
+     },
+     {
+      "numero": 23,
+      "nombre": "Juan Bautista Calzolari"
+     }
+    ]
+   },
+   "eventos": [
+    {
+     "minuto": 9,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 9,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 10,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "visitante",
+     "jugador": "",
+     "detalle": "Juego Sucio"
+    },
+    {
+     "minuto": 21,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 21,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 2,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "equipo": "local",
+     "jugador": "Alexis Agustin Maldonado",
+     "detalle": "Juego General"
+    },
+    {
+     "minuto": 3,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Alexi Nicolas Ramirez",
+     "detalle": "Entra: Juan Matias Morales Martinez"
+    },
+    {
+     "minuto": 4,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 9,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Ramiro Chaile"
+    },
+    {
+     "minuto": 9,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Joaquin Barrera"
+    },
+    {
+     "minuto": 14,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 14,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 15,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Lautaro Fontan",
+     "detalle": "Entra: Santiago Leiva"
+    },
+    {
+     "minuto": 16,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 24,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Hernan Casadesus",
+     "detalle": "Entra: Ciro Lautaro Zamora Gomez"
+    },
+    {
+     "minuto": 25,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "equipo": "visitante",
+     "jugador": "",
+     "detalle": "Juego General"
+    },
+    {
+     "minuto": 31,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Ramiro Chaile",
+     "detalle": "Entra: Matias Benjamin Herrera"
+    },
+    {
+     "minuto": 31,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Gaston Alexander Espindola",
+     "detalle": "Entra: Martin Ignacio Torres"
+    },
+    {
+     "minuto": 31,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Bautista Mateo Kunz",
+     "detalle": "Entra: Mateo Casamayor Porto"
+    },
+    {
+     "minuto": 31,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Berti Corrado",
+     "detalle": "Entra: Ezequiel Ramirez"
+    },
+    {
+     "minuto": 35,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 39,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 41,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 41,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": ""
+    }
+   ],
+   "arbitro": "Nahuel Sabena"
+  },
+  {
+   "id": "8241da71-6ae0-4a6b-95fb-c96d8184acde",
+   "rotulo": "CORDOBA RUGBY CLUB vs LOS CUERVOS R.C. · Fecha 14 · tarjeta 322743",
+   "local": {
+    "nombre": "CORDOBA RUGBY CLUB",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Lautaro Lucero Ruiz"
+     },
+     {
+      "numero": 2,
+      "nombre": "Ramiro Rasmussen"
+     },
+     {
+      "numero": 3,
+      "nombre": "Tomas Blansztein"
+     },
+     {
+      "numero": 4,
+      "nombre": "Ignacio Castillo"
+     },
+     {
+      "numero": 5,
+      "nombre": "Jonathan Luciano Gomez"
+     },
+     {
+      "numero": 6,
+      "nombre": "Martin Acosta"
+     },
+     {
+      "numero": 7,
+      "nombre": "Valentin Sosa"
+     },
+     {
+      "numero": 8,
+      "nombre": "Lucas Serafin Gomez"
+     },
+     {
+      "numero": 9,
+      "nombre": "Francisco Gabriel Cavaglia"
+     },
+     {
+      "numero": 10,
+      "nombre": "Juan Ignacio Molina Razzuk"
+     },
+     {
+      "numero": 11,
+      "nombre": "Santos Lautaro Seminara"
+     },
+     {
+      "numero": 12,
+      "nombre": "Valentino Segatti"
+     },
+     {
+      "numero": 13,
+      "nombre": "Santiago Benjamin Paez Evans"
+     },
+     {
+      "numero": 14,
+      "nombre": "Valentin Rodriguez"
+     },
+     {
+      "numero": 15,
+      "nombre": "Lucas Carballo"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Jonatan Castellina"
+     },
+     {
+      "numero": 17,
+      "nombre": "Camilo Augusto Matschke Dimol"
+     },
+     {
+      "numero": 18,
+      "nombre": "Matias Forte"
+     },
+     {
+      "numero": 19,
+      "nombre": "Gonzalo Zalazar"
+     },
+     {
+      "numero": 20,
+      "nombre": "Emiliano Agustin Abatte"
+     },
+     {
+      "numero": 21,
+      "nombre": "Aldo Comba"
+     },
+     {
+      "numero": 22,
+      "nombre": "Lukas Vilmes"
+     },
+     {
+      "numero": 23,
+      "nombre": "Fabricio Monjes"
+     }
+    ]
+   },
+   "visitante": {
+    "nombre": "LOS CUERVOS R.C.",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Ricardo Damian Cavasin"
+     },
+     {
+      "numero": 2,
+      "nombre": "Jesus Marronkle"
+     },
+     {
+      "numero": 3,
+      "nombre": "Facundo Ibarra"
+     },
+     {
+      "numero": 4,
+      "nombre": "Jano Mora Pedernera"
+     },
+     {
+      "numero": 5,
+      "nombre": "Nelson Lambertini"
+     },
+     {
+      "numero": 6,
+      "nombre": "Joaquín Ismael Morosan Bunzli"
+     },
+     {
+      "numero": 7,
+      "nombre": "Patricio Miguel Morosan Bunzli"
+     },
+     {
+      "numero": 8,
+      "nombre": "Ignacio Alderete"
+     },
+     {
+      "numero": 9,
+      "nombre": "Tomas Noel Perez"
+     },
+     {
+      "numero": 10,
+      "nombre": "Dario Nahuel Fantino"
+     },
+     {
+      "numero": 11,
+      "nombre": "Yaco Pepicelli Rinaudo"
+     },
+     {
+      "numero": 12,
+      "nombre": "Guido Emanuel Galetto"
+     },
+     {
+      "numero": 13,
+      "nombre": "Juan Bautista Calzolari"
+     },
+     {
+      "numero": 14,
+      "nombre": "Amilcar Eufrasio Montesanto"
+     },
+     {
+      "numero": 15,
+      "nombre": "Ignacio Cane"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Enzo Daniel Saretti"
+     },
+     {
+      "numero": 17,
+      "nombre": "Juan Manuel Aragón"
+     },
+     {
+      "numero": 18,
+      "nombre": "Franco David Nieto"
+     },
+     {
+      "numero": 19,
+      "nombre": "Mateo Guzman"
+     },
+     {
+      "numero": 20,
+      "nombre": "Dante Tossolini"
+     },
+     {
+      "numero": 21,
+      "nombre": "Alvaro Demetrio Touz"
+     },
+     {
+      "numero": 22,
+      "nombre": "Lucio Guzman"
+     },
+     {
+      "numero": 23,
+      "nombre": "Tomas Ariel Ferreri"
+     }
+    ]
+   },
+   "eventos": [
+    {
+     "minuto": 1,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": ""
+    },
+    {
+     "minuto": 1,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": ""
+    },
+    {
+     "minuto": 1,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": ""
+    },
+    {
+     "minuto": 1,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": ""
+    },
+    {
+     "minuto": 1,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": ""
+    },
+    {
+     "minuto": 1,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 1,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 1,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 1,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 2,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 2,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 2,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 2,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 2,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 2,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "visitante",
+     "jugador": "",
+     "detalle": "Juego General"
+    },
+    {
+     "minuto": 17,
+     "periodo": "1T",
+     "tipo": "injury",
+     "equipo": "local",
+     "jugador": "Valentin Sosa",
+     "detalle": "Conmoción cerebral · Tackleador"
+    },
+    {
+     "minuto": 17,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "local",
+     "jugador": "Lucas Serafin Gomez",
+     "detalle": "Juego Sucio"
+    },
+    {
+     "minuto": 17,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "local",
+     "jugador": "Santos Lautaro Seminara",
+     "detalle": "Juego General"
+    }
+   ],
+   "arbitro": "Fernando Martin Pettina"
+  },
+  {
+   "id": "65a4612a-7884-478e-9e0d-0a06757cdef2",
+   "rotulo": "A.C. BAGUALES R.C. vs CLUB SOCIAL CARLOTA · Fecha 16 · tarjeta 325075",
+   "local": {
+    "nombre": "A.C. BAGUALES R.C.",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Sergio Ariel Diana"
+     },
+     {
+      "numero": 2,
+      "nombre": "Alejo Salas"
+     },
+     {
+      "numero": 3,
+      "nombre": "Diego Lentini"
+     },
+     {
+      "numero": 4,
+      "nombre": "Rolando Jose Della Casa"
+     },
+     {
+      "numero": 5,
+      "nombre": "Juan Agustin Vicens"
+     },
+     {
+      "numero": 6,
+      "nombre": "Jonathan Silva"
+     },
+     {
+      "numero": 7,
+      "nombre": "Lucas Fantini"
+     },
+     {
+      "numero": 8,
+      "nombre": "Lucas Emiliano Roldan"
+     },
+     {
+      "numero": 9,
+      "nombre": "Valentin Sartori"
+     },
+     {
+      "numero": 10,
+      "nombre": "Gastón Ignacio San"
+     },
+     {
+      "numero": 11,
+      "nombre": "Guillermo Ariel Salgan"
+     },
+     {
+      "numero": 12,
+      "nombre": "Pablo Vozzi"
+     },
+     {
+      "numero": 13,
+      "nombre": "Benjamin Moyano"
+     },
+     {
+      "numero": 14,
+      "nombre": "Alan Ezequiel Farias"
+     },
+     {
+      "numero": 15,
+      "nombre": "Agustin Fantini"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Tobias Paz"
+     },
+     {
+      "numero": 17,
+      "nombre": "Luciano Michel Vega"
+     },
+     {
+      "numero": 18,
+      "nombre": "Juan Emmanuel Roldan"
+     },
+     {
+      "numero": 19,
+      "nombre": "Mariano Cadamuro"
+     },
+     {
+      "numero": 20,
+      "nombre": "Juan Cruz Rizzi De La Fuente"
+     },
+     {
+      "numero": 21,
+      "nombre": "Gonzalo Facundo Aris"
+     },
+     {
+      "numero": 22,
+      "nombre": "Julian Octavio Bortoli"
+     },
+     {
+      "numero": 23,
+      "nombre": "Nicanor San"
+     }
+    ]
+   },
+   "visitante": {
+    "nombre": "CLUB SOCIAL CARLOTA",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Marcos Exequiel Saez"
+     },
+     {
+      "numero": 2,
+      "nombre": "Tobias Castro"
+     },
+     {
+      "numero": 3,
+      "nombre": "Pedro Sebastian Marquez"
+     },
+     {
+      "numero": 4,
+      "nombre": "Miguel Blanco"
+     },
+     {
+      "numero": 5,
+      "nombre": "Matias Mariano Gomez"
+     },
+     {
+      "numero": 6,
+      "nombre": "Juan Pablo Lucero"
+     },
+     {
+      "numero": 7,
+      "nombre": "Santiago Gomez Bies"
+     },
+     {
+      "numero": 8,
+      "nombre": "Francisco Andrada"
+     },
+     {
+      "numero": 9,
+      "nombre": "Juan Manuel Bonadeo"
+     },
+     {
+      "numero": 10,
+      "nombre": "Federico Carbonari"
+     },
+     {
+      "numero": 11,
+      "nombre": "Valentino Senn Tomi"
+     },
+     {
+      "numero": 12,
+      "nombre": "Wilton Artusso"
+     },
+     {
+      "numero": 13,
+      "nombre": "Nicolas Gaston Garafulic"
+     },
+     {
+      "numero": 14,
+      "nombre": "Carlos Monina"
+     },
+     {
+      "numero": 15,
+      "nombre": "Maximiliano Jose Romero"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Roque Carranza"
+     },
+     {
+      "numero": 17,
+      "nombre": "Alexis Ivan Olguin"
+     },
+     {
+      "numero": 18,
+      "nombre": "Enzo Gabriel Zalazar"
+     },
+     {
+      "numero": 19,
+      "nombre": "Claudio Ezequiel Mansilla"
+     },
+     {
+      "numero": 20,
+      "nombre": "Leonardo Carrizo"
+     },
+     {
+      "numero": 21,
+      "nombre": "Pedro Nicolas Bonadeo"
+     },
+     {
+      "numero": 22,
+      "nombre": "Camilo Gomez Perez"
+     },
+     {
+      "numero": 23,
+      "nombre": "Facundo Guzman"
+     }
+    ]
+   },
+   "eventos": [
+    {
+     "minuto": 2,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": ""
+    },
+    {
+     "minuto": 2,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": ""
+    },
+    {
+     "minuto": 2,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": ""
+    },
+    {
+     "minuto": 2,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": ""
+    },
+    {
+     "minuto": 2,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": ""
+    },
+    {
+     "minuto": 2,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": ""
+    },
+    {
+     "minuto": 2,
+     "periodo": "2T",
+     "tipo": "injury",
+     "equipo": "local",
+     "jugador": "Alan Ezequiel Farias",
+     "detalle": "Conmoción cerebral · Tackleador"
+    },
+    {
+     "minuto": 6,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 23,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 23,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 23,
+     "periodo": "2T",
+     "tipo": "drop_goal",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 23,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": ""
+    }
+   ],
+   "arbitro": "Gustavo Reartes"
+  },
+  {
+   "id": "a92bcd54-9bce-472c-8654-cf2354e052f2",
+   "rotulo": "ALTA GRACIA R.C. vs LOS CUERVOS R.C. · Fecha 16 · tarjeta 325077",
+   "local": {
+    "nombre": "ALTA GRACIA R.C.",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Jesús Emanuel Cena"
+     },
+     {
+      "numero": 2,
+      "nombre": "Mateo Barrera"
+     },
+     {
+      "numero": 3,
+      "nombre": "Elías Fabricio Cuello Villarreal"
+     },
+     {
+      "numero": 4,
+      "nombre": "Gustavo Roussy"
+     },
+     {
+      "numero": 5,
+      "nombre": "Lautaro Cardozo"
+     },
+     {
+      "numero": 6,
+      "nombre": "Joaquín Villegas"
+     },
+     {
+      "numero": 7,
+      "nombre": "Ignacio Becerra"
+     },
+     {
+      "numero": 8,
+      "nombre": "Santiago Barrera"
+     },
+     {
+      "numero": 9,
+      "nombre": "Ezequiel Fontaine"
+     },
+     {
+      "numero": 10,
+      "nombre": "Uriel Capdevila Leunda"
+     },
+     {
+      "numero": 11,
+      "nombre": "Santiago Tomas Cesaroni"
+     },
+     {
+      "numero": 12,
+      "nombre": "Juan Ignacio Martinez"
+     },
+     {
+      "numero": 13,
+      "nombre": "Joaquin Francisco Flamand"
+     },
+     {
+      "numero": 14,
+      "nombre": "Noah Francisco Tosonieri"
+     },
+     {
+      "numero": 15,
+      "nombre": "Martin Flores"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Tomas Videla"
+     },
+     {
+      "numero": 17,
+      "nombre": "Nicanor Stivala Guzman"
+     },
+     {
+      "numero": 18,
+      "nombre": "Gino Luca Genari"
+     },
+     {
+      "numero": 19,
+      "nombre": "Nicolas Homero Alisio"
+     },
+     {
+      "numero": 20,
+      "nombre": "Santiago larossi"
+     },
+     {
+      "numero": 21,
+      "nombre": "Elias Alejandro Gigena Lebovici"
+     },
+     {
+      "numero": 22,
+      "nombre": "Agustín Homero Cañas"
+     },
+     {
+      "numero": 23,
+      "nombre": "Fabrizio Ernesto D Angelo"
+     }
+    ]
+   },
+   "visitante": {
+    "nombre": "LOS CUERVOS R.C.",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Juan Manuel Aragón"
+     },
+     {
+      "numero": 2,
+      "nombre": "Jesus Marronkle"
+     },
+     {
+      "numero": 3,
+      "nombre": "Ricardo Damian Cavasin"
+     },
+     {
+      "numero": 4,
+      "nombre": "Jano Mora Pedernera"
+     },
+     {
+      "numero": 5,
+      "nombre": "Patricio Miguel Morosan Bunzli"
+     },
+     {
+      "numero": 6,
+      "nombre": "Dante Tossolini"
+     },
+     {
+      "numero": 7,
+      "nombre": "Mauricio Ezequiel Chicco"
+     },
+     {
+      "numero": 8,
+      "nombre": "Joaquín Ismael Morosan Bunzli"
+     },
+     {
+      "numero": 9,
+      "nombre": "Tomas Noel Perez"
+     },
+     {
+      "numero": 10,
+      "nombre": "Tomas Ariel Ferreri"
+     },
+     {
+      "numero": 11,
+      "nombre": "Yaco Pepicelli Rinaudo"
+     },
+     {
+      "numero": 12,
+      "nombre": "Guido Emanuel Galetto"
+     },
+     {
+      "numero": 13,
+      "nombre": "Lucio Guzman"
+     },
+     {
+      "numero": 14,
+      "nombre": "Amilcar Eufrasio Montesanto"
+     },
+     {
+      "numero": 15,
+      "nombre": "Franco David Nieto"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Maximiliano Oscar Cejas"
+     },
+     {
+      "numero": 17,
+      "nombre": "Facundo Ibarra"
+     },
+     {
+      "numero": 18,
+      "nombre": "Diogo Touz"
+     },
+     {
+      "numero": 19,
+      "nombre": "Nelson Lambertini"
+     },
+     {
+      "numero": 20,
+      "nombre": "Lucio Martinez"
+     },
+     {
+      "numero": 21,
+      "nombre": "Alvaro Demetrio Touz"
+     },
+     {
+      "numero": 22,
+      "nombre": "Juan Lavaroni"
+     },
+     {
+      "numero": 23,
+      "nombre": "Juan Ignacio Laffatigue"
+     }
+    ]
+   },
+   "eventos": [
+    {
+     "minuto": 1,
+     "periodo": "1T",
+     "tipo": "penalty_try",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 1,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 1,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 6,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Martin Flores"
+    },
+    {
+     "minuto": 26,
+     "periodo": "1T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Gustavo Roussy",
+     "detalle": "Entra: Agustín Homero Cañas · Tarjeta azul · Tackleador"
+    },
+    {
+     "minuto": 31,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "local",
+     "jugador": "Joaquín Villegas",
+     "detalle": "Juego General"
+    },
+    {
+     "minuto": 3,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Jesús Emanuel Cena",
+     "detalle": "Entra: Nicanor Stivala Guzman"
+    },
+    {
+     "minuto": 5,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Ezequiel Fontaine"
+    },
+    {
+     "minuto": 17,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Joaquin Francisco Flamand"
+    },
+    {
+     "minuto": 17,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Uriel Capdevila Leunda"
+    }
+   ],
+   "arbitro": "Fernando Martin Pettina"
+  },
+  {
+   "id": "fcd821c8-a950-421d-ad39-07a1978e9d2a",
+   "rotulo": "AERO CLUB RIO CUARTO vs RIO TERCERO R.C. · Fecha 16 · tarjeta 325071",
+   "local": {
+    "nombre": "AERO CLUB RIO CUARTO",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Francisco Lujan"
+     },
+     {
+      "numero": 2,
+      "nombre": "Nahuel Elisondo"
+     },
+     {
+      "numero": 3,
+      "nombre": "Ignacio Daniel Ceballos"
+     },
+     {
+      "numero": 4,
+      "nombre": "Emiliano Garino"
+     },
+     {
+      "numero": 5,
+      "nombre": "Isaias Bravo"
+     },
+     {
+      "numero": 6,
+      "nombre": "Martin Otero"
+     },
+     {
+      "numero": 7,
+      "nombre": "Gerardo Daniel Almirón"
+     },
+     {
+      "numero": 8,
+      "nombre": "Ramiro Martini"
+     },
+     {
+      "numero": 9,
+      "nombre": "Mateo Yamil Gonzalez"
+     },
+     {
+      "numero": 10,
+      "nombre": "Santino Martinez"
+     },
+     {
+      "numero": 11,
+      "nombre": "Santiago Villarreal"
+     },
+     {
+      "numero": 12,
+      "nombre": "Juan Ignacio Liendo"
+     },
+     {
+      "numero": 13,
+      "nombre": "Facundo Martini"
+     },
+     {
+      "numero": 14,
+      "nombre": "Tomas Depiro"
+     },
+     {
+      "numero": 15,
+      "nombre": "Agustin Tabasso"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Federico Cabello"
+     },
+     {
+      "numero": 17,
+      "nombre": "Diego Massa"
+     },
+     {
+      "numero": 18,
+      "nombre": "Isaias Pereyra"
+     },
+     {
+      "numero": 19,
+      "nombre": "Kevin Alejandro Rossaroli"
+     },
+     {
+      "numero": 20,
+      "nombre": "Bruno Barroso"
+     },
+     {
+      "numero": 21,
+      "nombre": "Francisco Castro"
+     },
+     {
+      "numero": 22,
+      "nombre": "Mirko Urrutia Zaninovich"
+     },
+     {
+      "numero": 23,
+      "nombre": "Daniel Oscar Garrido"
+     }
+    ]
+   },
+   "visitante": {
+    "nombre": "RIO TERCERO R.C.",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Lautaro Medina"
+     },
+     {
+      "numero": 2,
+      "nombre": "Nicolas Ezequiel Castelari"
+     },
+     {
+      "numero": 3,
+      "nombre": "Alvaro Pereyra"
+     },
+     {
+      "numero": 4,
+      "nombre": "Juan Esteban Armando"
+     },
+     {
+      "numero": 5,
+      "nombre": "Joaquin Vissani"
+     },
+     {
+      "numero": 6,
+      "nombre": "Mario Oviedo"
+     },
+     {
+      "numero": 7,
+      "nombre": "Santiago Ezequiel Galvan"
+     },
+     {
+      "numero": 8,
+      "nombre": "Agustin Molina Farrell"
+     },
+     {
+      "numero": 9,
+      "nombre": "Mateo Piacentini"
+     },
+     {
+      "numero": 10,
+      "nombre": "Alejo Valentino Lopez Escobedo"
+     },
+     {
+      "numero": 11,
+      "nombre": "Francisco Velez"
+     },
+     {
+      "numero": 12,
+      "nombre": "Dylan Oviedo"
+     },
+     {
+      "numero": 13,
+      "nombre": "Emilio Pascutti"
+     },
+     {
+      "numero": 14,
+      "nombre": "Juani Fossi"
+     },
+     {
+      "numero": 15,
+      "nombre": "Facundo Cano"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Cristian Pereyra"
+     },
+     {
+      "numero": 17,
+      "nombre": "Tomas Benjamin Guerrero"
+     },
+     {
+      "numero": 18,
+      "nombre": "Bruno Ochoa"
+     },
+     {
+      "numero": 19,
+      "nombre": "Jeremías Aguilera"
+     },
+     {
+      "numero": 20,
+      "nombre": "Bautista Asieri"
+     },
+     {
+      "numero": 21,
+      "nombre": "Mateo Mengo"
+     },
+     {
+      "numero": 22,
+      "nombre": "Aaron Baez"
+     },
+     {
+      "numero": 23,
+      "nombre": "Santino Hergert"
+     }
+    ]
+   },
+   "eventos": [
+    {
+     "minuto": 2,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Santino Martinez"
+    },
+    {
+     "minuto": 6,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Nicolas Ezequiel Castelari"
+    },
+    {
+     "minuto": 6,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Alejo Valentino Lopez Escobedo"
+    },
+    {
+     "minuto": 19,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "local",
+     "jugador": "Federico Cabello",
+     "detalle": "Scrum"
+    },
+    {
+     "minuto": 20,
+     "periodo": "1T",
+     "tipo": "penalty_try",
+     "equipo": "visitante",
+     "jugador": ""
+    },
+    {
+     "minuto": 23,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Facundo Martini"
+    },
+    {
+     "minuto": 23,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Santino Martinez"
+    },
+    {
+     "minuto": 28,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Alejo Valentino Lopez Escobedo"
+    },
+    {
+     "minuto": 35,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Santino Martinez"
+    },
+    {
+     "minuto": 36,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "visitante",
+     "jugador": "Alejo Valentino Lopez Escobedo"
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Facundo Martini"
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Santino Martinez"
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Santiago Ezequiel Galvan"
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "visitante",
+     "jugador": "Alejo Valentino Lopez Escobedo"
+    },
+    {
+     "minuto": 20,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Gerardo Daniel Almirón"
+    },
+    {
+     "minuto": 33,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Agustin Tabasso"
+    },
+    {
+     "minuto": 33,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Santino Martinez"
+    },
+    {
+     "minuto": 35,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Nicolas Ezequiel Castelari"
+    },
+    {
+     "minuto": 38,
+     "periodo": "2T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Santino Martinez"
+    }
+   ],
+   "arbitro": "Daniel Edgardo Luna"
+  }
+ ]
+}

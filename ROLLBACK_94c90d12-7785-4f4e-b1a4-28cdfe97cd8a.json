@@ -1,0 +1,29 @@
+[
+  {
+    "id": "94c90d12-7785-4f4e-b1a4-28cdfe97cd8a",
+    "antes": {
+      "status": "final",
+      "venue": null,
+      "score": {
+        "away": 30,
+        "home": 23,
+        "penalties": null,
+        "manualOverride": {
+          "away": 30,
+          "home": 23,
+          "cutoffMinute": null
+        }
+      },
+      "home_base_points": 0,
+      "away_base_points": 4,
+      "home_bonus_points": 2,
+      "away_bonus_points": 1,
+      "points_autocalculated": false,
+      "points_override_reason": null,
+      "lineups": {
+        "away": [],
+        "home": []
+      }
+    }
+  }
+]

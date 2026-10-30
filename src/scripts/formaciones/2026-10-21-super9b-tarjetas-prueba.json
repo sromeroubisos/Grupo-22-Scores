@@ -1,0 +1,446 @@
+{
+ "descripcion": "Super 9 B 2026 · completado con el texto OCR de las tarjetas (solo jugadores en blanco y cambios nuevos)",
+ "torneo": "Super 9 B",
+ "partidos": [
+  {
+   "id": "7d6413da-9ba4-4bca-a54b-7239dc4d557e",
+   "rotulo": "ALTA GRACIA R.C. vs SANTA ROSA R.C. · Fecha 18 · tarjeta 326724",
+   "local": {
+    "nombre": "ALTA GRACIA R.C.",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Francis Errecaborde"
+     },
+     {
+      "numero": 2,
+      "nombre": "Nicanor Stivala Guzman"
+     },
+     {
+      "numero": 3,
+      "nombre": "Tomas Videla"
+     },
+     {
+      "numero": 4,
+      "nombre": "Nicolás Homero Alisio"
+     },
+     {
+      "numero": 5,
+      "nombre": "Lautaro Cardozo"
+     },
+     {
+      "numero": 6,
+      "nombre": "Maximiliano Passera"
+     },
+     {
+      "numero": 7,
+      "nombre": "Joaquín Villegas"
+     },
+     {
+      "numero": 8,
+      "nombre": "Santiago Barrera"
+     },
+     {
+      "numero": 9,
+      "nombre": "Valentin Olmos"
+     },
+     {
+      "numero": 10,
+      "nombre": "Uriel Capdevila Leunda"
+     },
+     {
+      "numero": 11,
+      "nombre": "Elias Alejandro Gigena Lebovici"
+     },
+     {
+      "numero": 12,
+      "nombre": "Santiago Tomas Cesaroni"
+     },
+     {
+      "numero": 13,
+      "nombre": "Juan Ignacio Martinez"
+     },
+     {
+      "numero": 14,
+      "nombre": "Noah Francisco Tosonieri"
+     },
+     {
+      "numero": 15,
+      "nombre": "Francisco Serio"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Gino Luca Genari"
+     },
+     {
+      "numero": 17,
+      "nombre": "Ciro Dall Armellina"
+     },
+     {
+      "numero": 18,
+      "nombre": "Ezequiel Lopez"
+     },
+     {
+      "numero": 19,
+      "nombre": "Santiago larossi"
+     },
+     {
+      "numero": 20,
+      "nombre": "Ignacio Becerra"
+     },
+     {
+      "numero": 21,
+      "nombre": "Ezequiel Fontaine"
+     },
+     {
+      "numero": 22,
+      "nombre": "Fabrizio Ernesto D Angelo"
+     },
+     {
+      "numero": 23,
+      "nombre": "Joaquin Francisco Flamand"
+     }
+    ]
+   },
+   "visitante": {
+    "nombre": "SANTA ROSA R.C.",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Juan Matias Morales Martinez"
+     },
+     {
+      "numero": 2,
+      "nombre": "Ramiro Chaile"
+     },
+     {
+      "numero": 3,
+      "nombre": "Ramiro Enzo Arreguiz"
+     },
+     {
+      "numero": 4,
+      "nombre": "Hernan Casadesus"
+     },
+     {
+      "numero": 5,
+      "nombre": "Uriel Maldonado"
+     },
+     {
+      "numero": 6,
+      "nombre": "Martin Ignacio Torres"
+     },
+     {
+      "numero": 7,
+      "nombre": "Ciro Lautaro Zamora Gomez"
+     },
+     {
+      "numero": 8,
+      "nombre": "Cristian Federico Trifiletti"
+     },
+     {
+      "numero": 9,
+      "nombre": "Bautista Mateo Kunz"
+     },
+     {
+      "numero": 10,
+      "nombre": "Geronimo Villegas"
+     },
+     {
+      "numero": 11,
+      "nombre": "Alejandro Manuel Andrés"
+     },
+     {
+      "numero": 12,
+      "nombre": "Juan Cruz Romero Morais"
+     },
+     {
+      "numero": 13,
+      "nombre": "Benjamin Degano"
+     },
+     {
+      "numero": 14,
+      "nombre": "Rodrigo Martinez"
+     },
+     {
+      "numero": 15,
+      "nombre": "Lautaro Fontan"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Matias Benjamin Herrera"
+     },
+     {
+      "numero": 17,
+      "nombre": "Carlos Rafael Vasquez"
+     },
+     {
+      "numero": 18,
+      "nombre": "Agustin Pini"
+     },
+     {
+      "numero": 19,
+      "nombre": "Facundo Gorosito"
+     },
+     {
+      "numero": 20,
+      "nombre": "Daniel Pereyra"
+     },
+     {
+      "numero": 21,
+      "nombre": "Dario Rivero"
+     },
+     {
+      "numero": 22,
+      "nombre": "Mario Ismael Oviedo Krampitz"
+     },
+     {
+      "numero": 23,
+      "nombre": "Mariano Cena"
+     }
+    ]
+   },
+   "eventos": [
+    {
+     "minuto": 11,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Elias Alejandro Gigena Lebovici"
+    },
+    {
+     "minuto": 14,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "local",
+     "jugador": "Juan Ignacio Martinez",
+     "detalle": "Juego Sucio"
+    },
+    {
+     "minuto": 19,
+     "periodo": "1T",
+     "tipo": "penalty_goal",
+     "equipo": "local",
+     "jugador": "Santiago Tomas Cesaroni"
+    },
+    {
+     "minuto": 24,
+     "periodo": "1T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Ciro Lautaro Zamora Gomez",
+     "detalle": "Entra: Agustin Pini"
+    },
+    {
+     "minuto": 24,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "equipo": "visitante",
+     "jugador": "Rodrigo Martinez",
+     "detalle": "Juego Sucio"
+    },
+    {
+     "minuto": 27,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Santiago Tomas Cesaroni"
+    },
+    {
+     "minuto": 28,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Santiago Tomas Cesaroni"
+    },
+    {
+     "minuto": 36,
+     "periodo": "1T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Santiago Tomas Cesaroni"
+    },
+    {
+     "minuto": 40,
+     "periodo": "1T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Alejandro Manuel Andrés",
+     "detalle": "Entra: Mario Ismael Oviedo Krampitz"
+    },
+    {
+     "minuto": 0,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Noah Francisco Tosonieri",
+     "detalle": "Entra: Fabrizio Ernesto D Angelo"
+    },
+    {
+     "minuto": 3,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Lautaro Fontan",
+     "detalle": "Entra: Mariano Cena"
+    },
+    {
+     "minuto": 3,
+     "periodo": "2T",
+     "tipo": "injury",
+     "equipo": "visitante",
+     "jugador": "Rodrigo Martinez",
+     "detalle": "Tarjeta azul"
+    },
+    {
+     "minuto": 7,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Santiago Tomas Cesaroni",
+     "detalle": "Entra: Francisco Serio"
+    },
+    {
+     "minuto": 8,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Santiago Barrera",
+     "detalle": "Entra: Ignacio Becerra"
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Tomas Videla",
+     "detalle": "Entra: Ezequiel Lopez"
+    },
+    {
+     "minuto": 11,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "equipo": "visitante",
+     "jugador": "Uriel Maldonado",
+     "detalle": "Juego Sucio"
+    },
+    {
+     "minuto": 11,
+     "periodo": "2T",
+     "tipo": "card_red",
+     "equipo": "visitante",
+     "jugador": "Uriel Maldonado",
+     "detalle": "Roja regular"
+    },
+    {
+     "minuto": 13,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Nicanor Stivala Guzman"
+    },
+    {
+     "minuto": 14,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Matias Benjamin Herrera",
+     "detalle": "Entra: Facundo Gorosito"
+    },
+    {
+     "minuto": 17,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Hernan Casadesus"
+    },
+    {
+     "minuto": 18,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Francis Errecaborde",
+     "detalle": "Entra: Ciro Dall Armellina"
+    },
+    {
+     "minuto": 18,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Lautaro Cardozo",
+     "detalle": "Entra: Joaquin Francisco Flamand"
+    },
+    {
+     "minuto": 22,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Joaquin Francisco Flamand"
+    },
+    {
+     "minuto": 23,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Martin Ignacio Torres",
+     "detalle": "Entra: Daniel Pereyra"
+    },
+    {
+     "minuto": 23,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Cristian Federico Trifiletti",
+     "detalle": "Entra: Dario Rivero"
+    },
+    {
+     "minuto": 25,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "local",
+     "jugador": "Nicolás Homero Alisio"
+    },
+    {
+     "minuto": 28,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "visitante",
+     "jugador": "Geronimo Villegas"
+    },
+    {
+     "minuto": 31,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Fabrizio Ernesto D Angelo"
+    },
+    {
+     "minuto": 33,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "equipo": "visitante",
+     "jugador": "Juan Matias Morales Martinez",
+     "detalle": "Entra: Carlos Rafael Vasquez"
+    },
+    {
+     "minuto": 37,
+     "periodo": "2T",
+     "tipo": "try",
+     "equipo": "local",
+     "jugador": "Joaquin Francisco Flamand"
+    },
+    {
+     "minuto": 38,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "equipo": "local",
+     "jugador": "Joaquin Francisco Flamand"
+    }
+   ],
+   "arbitro": "Martin Leandro Barrabino"
+  }
+ ]
+}

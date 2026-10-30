@@ -1,0 +1,238 @@
+{
+ "descripcion": "Intermedia semi Tala vs La Tablada · formaciones de historias de Instagram",
+ "partidos": [
+  {
+   "id": "04330ad5-4881-4a05-9905-ef79e5ae5cb0",
+   "rotulo": "Tala R.C. vs La Tablada · Intermedia semifinal · Top 10 A",
+   "local": {
+    "nombre": "Tala Rugby Club Intermedia",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Valentín Ucar",
+      "puesto": "Pilar"
+     },
+     {
+      "numero": 2,
+      "nombre": "Juan Cruz Carballo",
+      "puesto": "Hooker"
+     },
+     {
+      "numero": 3,
+      "nombre": "Agustín Farías Vivas",
+      "puesto": "Pilar"
+     },
+     {
+      "numero": 4,
+      "nombre": "Fausto Ferrero",
+      "puesto": "Segunda línea"
+     },
+     {
+      "numero": 5,
+      "nombre": "Pedro Cajal",
+      "puesto": "Segunda línea"
+     },
+     {
+      "numero": 6,
+      "nombre": "Valentín Cantarutti",
+      "puesto": "Tercera línea",
+      "capitan": true
+     },
+     {
+      "numero": 7,
+      "nombre": "Francisco Chiesa",
+      "puesto": "Tercera línea"
+     },
+     {
+      "numero": 8,
+      "nombre": "Rodrigo Marin",
+      "puesto": "Tercera línea"
+     },
+     {
+      "numero": 9,
+      "nombre": "Santiago Luna",
+      "puesto": "Medio scrum"
+     },
+     {
+      "numero": 10,
+      "nombre": "Juan Cruz Capdevila",
+      "puesto": "Apertura"
+     },
+     {
+      "numero": 11,
+      "nombre": "Hernán Crespo",
+      "puesto": "Wing"
+     },
+     {
+      "numero": 12,
+      "nombre": "Juan Pérez Luque",
+      "puesto": "Centro"
+     },
+     {
+      "numero": 13,
+      "nombre": "Agustín Córdoba",
+      "puesto": "Centro"
+     },
+     {
+      "numero": 14,
+      "nombre": "Álvaro David",
+      "puesto": "Wing"
+     },
+     {
+      "numero": 15,
+      "nombre": "Tobías Rojas",
+      "puesto": "Fullback"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Juan Cruz Romero"
+     },
+     {
+      "numero": 17,
+      "nombre": "Álvaro Ortega"
+     },
+     {
+      "numero": 18,
+      "nombre": "Bautista Tron"
+     },
+     {
+      "numero": 19,
+      "nombre": "Lisandro Vittar"
+     },
+     {
+      "numero": 20,
+      "nombre": "Lautaro Szkuhra"
+     },
+     {
+      "numero": 21,
+      "nombre": "Quinto Luque"
+     },
+     {
+      "numero": 22,
+      "nombre": "Benjamín Spagnuolo"
+     },
+     {
+      "numero": 23,
+      "nombre": "Felipe Spagnuolo"
+     }
+    ]
+   },
+   "visitante": {
+    "nombre": "La Tablada - Intermedia",
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Baltazar Monforte",
+      "puesto": "Pilar"
+     },
+     {
+      "numero": 2,
+      "nombre": "Juan Ruiz",
+      "puesto": "Hooker"
+     },
+     {
+      "numero": 3,
+      "nombre": "Leo Acosta",
+      "puesto": "Pilar"
+     },
+     {
+      "numero": 4,
+      "nombre": "Lucas Rolotti",
+      "puesto": "Segunda línea"
+     },
+     {
+      "numero": 5,
+      "nombre": "Pablo Lozada",
+      "puesto": "Segunda línea"
+     },
+     {
+      "numero": 6,
+      "nombre": "Juan Cruz Pilotto",
+      "puesto": "Tercera línea"
+     },
+     {
+      "numero": 7,
+      "nombre": "Pedro Allende",
+      "puesto": "Tercera línea"
+     },
+     {
+      "numero": 8,
+      "nombre": "Lorenzo Bianco",
+      "puesto": "Tercera línea"
+     },
+     {
+      "numero": 9,
+      "nombre": "Franco Feretti",
+      "puesto": "Medio scrum"
+     },
+     {
+      "numero": 10,
+      "nombre": "Bautista Demarchi",
+      "puesto": "Apertura"
+     },
+     {
+      "numero": 11,
+      "nombre": "Alvaro Solana",
+      "puesto": "Wing"
+     },
+     {
+      "numero": 12,
+      "nombre": "Agustin Altamira",
+      "puesto": "Centro"
+     },
+     {
+      "numero": 13,
+      "nombre": "Thomas Mariani",
+      "puesto": "Centro"
+     },
+     {
+      "numero": 14,
+      "nombre": "Felipe Sanchez Vila",
+      "puesto": "Wing"
+     },
+     {
+      "numero": 15,
+      "nombre": "Javier Diaz Otañez",
+      "puesto": "Fullback"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Juan Cruz Heredia"
+     },
+     {
+      "numero": 17,
+      "nombre": "Julian Issidoro"
+     },
+     {
+      "numero": 18,
+      "nombre": "Alejo Garcia"
+     },
+     {
+      "numero": 19,
+      "nombre": "Gonzalo Berrotaran"
+     },
+     {
+      "numero": 20,
+      "nombre": "Felipe Mercau"
+     },
+     {
+      "numero": 21,
+      "nombre": "Augusto Arguello"
+     },
+     {
+      "numero": 22,
+      "nombre": "Santiago Milani"
+     },
+     {
+      "numero": 23,
+      "nombre": "Agustin Bosio"
+     }
+    ]
+   }
+  }
+ ]
+}

@@ -1,0 +1,790 @@
+{
+ "fase": {
+  "id": "4e2e28f3-fbcc-4fba-b477-81d3f3d433f4",
+  "tournament_id": "8ead4164-fe7e-4837-a4de-b804d18f7038",
+  "name": "Campeonato",
+  "phase_type": "league",
+  "order_index": 1,
+  "is_active": true,
+  "settings": {
+   "legs": 1,
+   "bonus": {
+    "defensive": {
+     "margin": 7,
+     "points": 1
+    },
+    "offensive": {
+     "tries": 4,
+     "points": 1
+    }
+   },
+   "points": {
+    "win": 4,
+    "draw": 2,
+    "loss": 0
+   },
+   "source": "cordoba-torneos-2026",
+   "groupTags": [
+    "Semifinales",
+    "Posicionamiento 5to al 8vo"
+   ],
+   "standings": {
+    "mode": "fully_manual",
+    "source": "Tabla oficial de la Unión Cordobesa de Rugby",
+    "editable": true
+   },
+   "teamsCount": 9,
+   "groupLabels": [
+    {
+     "id": "a85b507a-b3c8-4bcb-a3fa-3f0dc32a99ab",
+     "name": "Semifinales",
+     "color": "#00a365",
+     "colorMode": "manual",
+     "autoColorIndex": 0
+    },
+    {
+     "id": "0c3710ec-b831-4813-bc85-462eadf16b54",
+     "name": "Posicionamiento 5to al 8vo",
+     "color": "#3b82f6",
+     "colorMode": "manual",
+     "autoColorIndex": 0
+    }
+   ],
+   "tiebreakers": [
+    {
+     "label": "Puntos obtenidos",
+     "metric": "points",
+     "enabled": true,
+     "priority": 1
+    },
+    {
+     "label": "Resultado entre sí",
+     "metric": "head_to_head",
+     "enabled": true,
+     "priority": 2
+    },
+    {
+     "label": "Diferencia de tantos",
+     "metric": "points_difference",
+     "enabled": true,
+     "priority": 3
+    },
+    {
+     "label": "Tries a favor",
+     "metric": "tries_for",
+     "enabled": true,
+     "priority": 4
+    },
+    {
+     "label": "Partidos ganados",
+     "metric": "won",
+     "enabled": true,
+     "priority": 5
+    }
+   ],
+   "pointsSystem": {
+    "win": 4,
+    "draw": 2,
+    "loss": 0,
+    "bonusTry": 1,
+    "bonusLoss": 1,
+    "allowBonusPoints": true
+   }
+  },
+  "created_at": "2026-10-16T15:08:12.521+00:00",
+  "updated_at": "2026-10-16T15:08:12.521+00:00",
+  "season_id": "bb17a997-d573-47ff-9c0e-4f7f24c93f23"
+ },
+ "rondas": [
+  {
+   "id": "d0c381ce-2c35-4d10-9e6a-2fdd06975da7",
+   "phase_id": "4e2e28f3-fbcc-4fba-b477-81d3f3d433f4",
+   "name": "REC - Fecha 1",
+   "order_index": 19,
+   "start_date": "2026-08-28T00:00:00+00:00",
+   "end_date": "2026-08-29T00:00:00+00:00",
+   "is_completed": true,
+   "notes": null,
+   "created_at": "2026-10-16T15:08:12.521+00:00",
+   "updated_at": "2026-10-16T15:08:12.521+00:00",
+   "season_id": "bb17a997-d573-47ff-9c0e-4f7f24c93f23",
+   "group_id": null
+  },
+  {
+   "id": "2f061f8c-2ca7-4093-a10c-ee58585c2a0e",
+   "phase_id": "4e2e28f3-fbcc-4fba-b477-81d3f3d433f4",
+   "name": "REC - Fecha 2",
+   "order_index": 20,
+   "start_date": "2026-09-12T00:00:00+00:00",
+   "end_date": "2026-09-12T00:00:00+00:00",
+   "is_completed": true,
+   "notes": null,
+   "created_at": "2026-10-16T15:08:12.521+00:00",
+   "updated_at": "2026-10-16T15:08:12.521+00:00",
+   "season_id": "bb17a997-d573-47ff-9c0e-4f7f24c93f23",
+   "group_id": null
+  },
+  {
+   "id": "68b8ea11-5342-488f-9a0c-451212f7ef55",
+   "phase_id": "4e2e28f3-fbcc-4fba-b477-81d3f3d433f4",
+   "name": "REC - Fecha 3",
+   "order_index": 21,
+   "start_date": "2026-09-18T00:00:00+00:00",
+   "end_date": "2026-09-19T00:00:00+00:00",
+   "is_completed": true,
+   "notes": null,
+   "created_at": "2026-10-16T15:08:12.521+00:00",
+   "updated_at": "2026-10-16T15:08:12.521+00:00",
+   "season_id": "bb17a997-d573-47ff-9c0e-4f7f24c93f23",
+   "group_id": null
+  },
+  {
+   "id": "9c121732-e6a5-4d08-bb95-dd70bc903d7f",
+   "phase_id": "4e2e28f3-fbcc-4fba-b477-81d3f3d433f4",
+   "name": "REC - Fecha 4",
+   "order_index": 22,
+   "start_date": "2026-09-26T00:00:00+00:00",
+   "end_date": "2026-09-26T00:00:00+00:00",
+   "is_completed": true,
+   "notes": null,
+   "created_at": "2026-10-16T15:08:12.521+00:00",
+   "updated_at": "2026-10-16T15:08:12.521+00:00",
+   "season_id": "bb17a997-d573-47ff-9c0e-4f7f24c93f23",
+   "group_id": null
+  },
+  {
+   "id": "995bca36-86de-4650-b733-2e44313119d5",
+   "phase_id": "4e2e28f3-fbcc-4fba-b477-81d3f3d433f4",
+   "name": "REC - Fecha 5",
+   "order_index": 23,
+   "start_date": "2026-10-09T00:00:00+00:00",
+   "end_date": "2026-10-10T00:00:00+00:00",
+   "is_completed": true,
+   "notes": null,
+   "created_at": "2026-10-16T15:08:12.521+00:00",
+   "updated_at": "2026-10-16T15:08:12.521+00:00",
+   "season_id": "bb17a997-d573-47ff-9c0e-4f7f24c93f23",
+   "group_id": null
+  }
+ ],
+ "partidos_rec": [
+  {
+   "id": "58f38c77-6ed2-4a5f-a3a5-9ec1d6905a4e",
+   "home_club_id": "la-tablada-a-pre-intermedia",
+   "away_club_id": "san-martin-de-villa-maria-preintermedia-a",
+   "score": {
+    "away": 21,
+    "home": 36
+   },
+   "round_label": "REC - Fecha 5",
+   "status": "final",
+   "round_uuid": "995bca36-86de-4650-b733-2e44313119d5"
+  },
+  {
+   "id": "3c1b6447-6517-4ccc-8368-0ce76e38b74c",
+   "home_club_id": "cordoba-athletic-club-preintermedia-a",
+   "away_club_id": "uru-cure-rugby-club-preintermedia-a",
+   "score": {
+    "away": 19,
+    "home": 46
+   },
+   "round_label": "REC - Fecha 5",
+   "status": "final",
+   "round_uuid": "995bca36-86de-4650-b733-2e44313119d5"
+  },
+  {
+   "id": "7321f91f-e6d2-49c7-b9e6-064fcd21a3c4",
+   "home_club_id": "club-universitario-de-cordoba-preintermedia-a",
+   "away_club_id": "jockey-club-de-villa-maria-preintermedia-a",
+   "score": {
+    "away": 34,
+    "home": 19
+   },
+   "round_label": "REC - Fecha 5",
+   "status": "final",
+   "round_uuid": "995bca36-86de-4650-b733-2e44313119d5"
+  },
+  {
+   "id": "292a9129-6491-4ebd-a539-d367ab6f1a40",
+   "home_club_id": "san-martin-de-villa-maria-preintermedia-a",
+   "away_club_id": "cordoba-athletic-club-preintermedia-a",
+   "score": {
+    "away": 8,
+    "home": 17
+   },
+   "round_label": "REC - Fecha 4",
+   "status": "final",
+   "round_uuid": "9c121732-e6a5-4d08-bb95-dd70bc903d7f"
+  },
+  {
+   "id": "6bf5733a-f7a3-4f1c-a637-7ddad1635825",
+   "home_club_id": "club-palermo-bajo-preintermedia-a",
+   "away_club_id": "jockey-club-cordoba-preintermedia-a",
+   "score": {
+    "away": 42,
+    "home": 26
+   },
+   "round_label": "REC - Fecha 4",
+   "status": "final",
+   "round_uuid": "9c121732-e6a5-4d08-bb95-dd70bc903d7f"
+  },
+  {
+   "id": "a2531b2c-9ce7-4180-9735-6cdc0fa49f83",
+   "home_club_id": "tala-rugby-club-preintermedia-a",
+   "away_club_id": "la-tablada-a-pre-intermedia",
+   "score": {
+    "away": 12,
+    "home": 32
+   },
+   "round_label": "REC - Fecha 4",
+   "status": "final",
+   "round_uuid": "9c121732-e6a5-4d08-bb95-dd70bc903d7f"
+  },
+  {
+   "id": "36e56d6f-469b-4fd6-bb18-1ddbf2589d72",
+   "home_club_id": "cordoba-athletic-club-preintermedia-a",
+   "away_club_id": "tala-rugby-club-preintermedia-a",
+   "score": {
+    "away": 36,
+    "home": 27
+   },
+   "round_label": "REC - Fecha 3",
+   "status": "final",
+   "round_uuid": "68b8ea11-5342-488f-9a0c-451212f7ef55"
+  },
+  {
+   "id": "015443c5-2419-45f8-94a0-4f75ead0d046",
+   "home_club_id": "uru-cure-rugby-club-preintermedia-a",
+   "away_club_id": "san-martin-de-villa-maria-preintermedia-a",
+   "score": {
+    "away": 0,
+    "home": 28
+   },
+   "round_label": "REC - Fecha 3",
+   "status": "final",
+   "round_uuid": "68b8ea11-5342-488f-9a0c-451212f7ef55"
+  },
+  {
+   "id": "91429d00-4c7c-4a3b-976e-a72e71dd6afe",
+   "home_club_id": "club-universitario-de-cordoba-preintermedia-a",
+   "away_club_id": "club-palermo-bajo-preintermedia-a",
+   "score": {
+    "away": 59,
+    "home": 15
+   },
+   "round_label": "REC - Fecha 3",
+   "status": "final",
+   "round_uuid": "68b8ea11-5342-488f-9a0c-451212f7ef55"
+  },
+  {
+   "id": "04e15161-6113-4c82-bd18-805be0a7dd7b",
+   "home_club_id": "la-tablada-a-pre-intermedia",
+   "away_club_id": "cordoba-athletic-club-preintermedia-a",
+   "score": {
+    "away": 14,
+    "home": 32
+   },
+   "round_label": "REC - Fecha 2",
+   "status": "final",
+   "round_uuid": "2f061f8c-2ca7-4093-a10c-ee58585c2a0e"
+  },
+  {
+   "id": "7e0f4c2f-5bac-4971-833e-f60d6ee13012",
+   "home_club_id": "jockey-club-cordoba-preintermedia-a",
+   "away_club_id": "club-universitario-de-cordoba-preintermedia-a",
+   "score": {
+    "away": 23,
+    "home": 45
+   },
+   "round_label": "REC - Fecha 2",
+   "status": "final",
+   "round_uuid": "2f061f8c-2ca7-4093-a10c-ee58585c2a0e"
+  },
+  {
+   "id": "7bce32be-c4f7-44c8-9e79-f34bd36c4cb5",
+   "home_club_id": "tala-rugby-club-preintermedia-a",
+   "away_club_id": "uru-cure-rugby-club-preintermedia-a",
+   "score": {
+    "away": 26,
+    "home": 54
+   },
+   "round_label": "REC - Fecha 2",
+   "status": "final",
+   "round_uuid": "2f061f8c-2ca7-4093-a10c-ee58585c2a0e"
+  },
+  {
+   "id": "7d4297f0-c4b8-407a-a03b-973ed669df1d",
+   "home_club_id": "club-palermo-bajo-preintermedia-a",
+   "away_club_id": "jockey-club-de-villa-maria-preintermedia-a",
+   "score": {
+    "away": 3,
+    "home": 36
+   },
+   "round_label": "REC - Fecha 2",
+   "status": "final",
+   "round_uuid": "2f061f8c-2ca7-4093-a10c-ee58585c2a0e"
+  },
+  {
+   "id": "4f14ac2e-5d69-45ca-a6b8-68ffd468f367",
+   "home_club_id": "tala-rugby-club-preintermedia-a",
+   "away_club_id": "san-martin-de-villa-maria-preintermedia-a",
+   "score": {
+    "away": 0,
+    "home": 28
+   },
+   "round_label": "REC - Fecha 1",
+   "status": "final",
+   "round_uuid": "d0c381ce-2c35-4d10-9e6a-2fdd06975da7"
+  },
+  {
+   "id": "bf2a195c-08d7-43d6-bddd-ab1e734a531a",
+   "home_club_id": "jockey-club-cordoba-preintermedia-a",
+   "away_club_id": "jockey-club-de-villa-maria-preintermedia-a",
+   "score": {
+    "away": 13,
+    "home": 31
+   },
+   "round_label": "REC - Fecha 1",
+   "status": "final",
+   "round_uuid": "d0c381ce-2c35-4d10-9e6a-2fdd06975da7"
+  },
+  {
+   "id": "9ad75e03-d5ac-4e14-8bb7-d148f028ce29",
+   "home_club_id": "la-tablada-a-pre-intermedia",
+   "away_club_id": "uru-cure-rugby-club-preintermedia-a",
+   "score": {
+    "away": 12,
+    "home": 31
+   },
+   "round_label": "REC - Fecha 1",
+   "status": "final",
+   "round_uuid": "d0c381ce-2c35-4d10-9e6a-2fdd06975da7"
+  }
+ ],
+ "oficial": [
+  {
+   "id": "a2748b55-20f8-438f-9bb3-b341104c3ebc",
+   "tournament_id": "8ead4164-fe7e-4837-a4de-b804d18f7038",
+   "phase_id": "4e2e28f3-fbcc-4fba-b477-81d3f3d433f4",
+   "group_id": null,
+   "club_id": "tala-rugby-club-preintermedia-a",
+   "position": 1,
+   "played": 20,
+   "won": 20,
+   "drawn": 0,
+   "lost": 0,
+   "points": 97,
+   "scored": 851,
+   "conceded": 371,
+   "bonus_points": 17,
+   "form": null,
+   "streak": null,
+   "stats": {
+    "fuente": "Tabla oficial de la Unión Cordobesa de Rugby (bonus ofensivo despejado de los puntos)",
+    "status": null,
+    "team_logo": "https://vxsolicapdcpemfsahbk.supabase.co/storage/v1/object/public/club-assets/logos/tala-rugby-club/ffadafb3bfe08e92.png",
+    "team_name": "Tala Rugby Club Preintermedia \"A\"",
+    "tries_for": 117,
+    "difference": 480,
+    "table_type": "general",
+    "adjustments": 0,
+    "calculated_at": "2026-10-16T15:08:12.521Z",
+    "tries_against": 52,
+    "bonus_defensive": 0,
+    "bonus_destrezas": 0,
+    "bonus_offensive": 17
+   },
+   "last_updated": "2026-10-16T15:08:12.521+00:00",
+   "season_id": "bb17a997-d573-47ff-9c0e-4f7f24c93f23",
+   "team_id": null,
+   "season_entry_id": "4860cd18-eed5-43df-a5a4-03c0664ba30b",
+   "table_type": "general"
+  },
+  {
+   "id": "f53297c2-af90-469d-9680-d50105ef1db7",
+   "tournament_id": "8ead4164-fe7e-4837-a4de-b804d18f7038",
+   "phase_id": "4e2e28f3-fbcc-4fba-b477-81d3f3d433f4",
+   "group_id": null,
+   "club_id": "club-palermo-bajo-preintermedia-a",
+   "position": 2,
+   "played": 19,
+   "won": 15,
+   "drawn": 0,
+   "lost": 4,
+   "points": 77,
+   "scored": 646,
+   "conceded": 429,
+   "bonus_points": 17,
+   "form": null,
+   "streak": null,
+   "stats": {
+    "fuente": "Tabla oficial de la Unión Cordobesa de Rugby (bonus ofensivo despejado de los puntos)",
+    "status": null,
+    "team_logo": "https://vxsolicapdcpemfsahbk.supabase.co/storage/v1/object/public/club-assets/logos/club-palermo-bajo/42f76e5593529315.png",
+    "team_name": "Club Palermo Bajo Preintermedia \"A\"",
+    "tries_for": 96,
+    "difference": 217,
+    "table_type": "general",
+    "adjustments": 0,
+    "calculated_at": "2026-10-16T15:08:12.521Z",
+    "tries_against": 60,
+    "bonus_defensive": 1,
+    "bonus_destrezas": 0,
+    "bonus_offensive": 16
+   },
+   "last_updated": "2026-10-16T15:08:12.521+00:00",
+   "season_id": "bb17a997-d573-47ff-9c0e-4f7f24c93f23",
+   "team_id": null,
+   "season_entry_id": "5712bc03-2357-48cf-a1ff-7e6f3bf25f36",
+   "table_type": "general"
+  },
+  {
+   "id": "415290ec-49d0-45f3-b4d2-fa6341b6ba6b",
+   "tournament_id": "8ead4164-fe7e-4837-a4de-b804d18f7038",
+   "phase_id": "4e2e28f3-fbcc-4fba-b477-81d3f3d433f4",
+   "group_id": null,
+   "club_id": "jockey-club-cordoba-preintermedia-a",
+   "position": 3,
+   "played": 19,
+   "won": 14,
+   "drawn": 0,
+   "lost": 5,
+   "points": 70,
+   "scored": 624,
+   "conceded": 395,
+   "bonus_points": 14,
+   "form": null,
+   "streak": null,
+   "stats": {
+    "fuente": "Tabla oficial de la Unión Cordobesa de Rugby (bonus ofensivo despejado de los puntos)",
+    "status": null,
+    "team_logo": "https://vxsolicapdcpemfsahbk.supabase.co/storage/v1/object/public/club-assets/logos/jockey-club-cordoba/e262aa4efef6fe97.png",
+    "team_name": "Jockey Club Córdoba Preintermedia \"A\"",
+    "tries_for": 92,
+    "difference": 229,
+    "table_type": "general",
+    "adjustments": 0,
+    "calculated_at": "2026-10-16T15:08:12.521Z",
+    "tries_against": 53,
+    "bonus_defensive": 3,
+    "bonus_destrezas": 0,
+    "bonus_offensive": 11
+   },
+   "last_updated": "2026-10-16T15:08:12.521+00:00",
+   "season_id": "bb17a997-d573-47ff-9c0e-4f7f24c93f23",
+   "team_id": null,
+   "season_entry_id": "c4b48aef-ab17-4689-bf41-91aca69bc294",
+   "table_type": "general"
+  },
+  {
+   "id": "2cbeda62-7c7b-41c8-aa9f-bfce05d17007",
+   "tournament_id": "8ead4164-fe7e-4837-a4de-b804d18f7038",
+   "phase_id": "4e2e28f3-fbcc-4fba-b477-81d3f3d433f4",
+   "group_id": null,
+   "club_id": "la-tablada-a-pre-intermedia",
+   "position": 4,
+   "played": 20,
+   "won": 13,
+   "drawn": 0,
+   "lost": 7,
+   "points": 67,
+   "scored": 600,
+   "conceded": 434,
+   "bonus_points": 15,
+   "form": null,
+   "streak": null,
+   "stats": {
+    "fuente": "Tabla oficial de la Unión Cordobesa de Rugby (bonus ofensivo despejado de los puntos)",
+    "status": null,
+    "team_logo": "https://vxsolicapdcpemfsahbk.supabase.co/storage/v1/object/public/club-assets/logos/la-tablada-a-pre-intermedia/448d8b17adc52181.png",
+    "team_name": "La Tablada \"A\" - Pre Intermedia",
+    "tries_for": 78,
+    "difference": 166,
+    "table_type": "general",
+    "adjustments": 0,
+    "calculated_at": "2026-10-16T15:08:12.521Z",
+    "tries_against": 57,
+    "bonus_defensive": 4,
+    "bonus_destrezas": 0,
+    "bonus_offensive": 11
+   },
+   "last_updated": "2026-10-16T15:08:12.521+00:00",
+   "season_id": "bb17a997-d573-47ff-9c0e-4f7f24c93f23",
+   "team_id": null,
+   "season_entry_id": "be5a4bdf-2630-44e5-969b-198e4374c662",
+   "table_type": "general"
+  },
+  {
+   "id": "66b960bf-4159-418d-81b6-d5825a302b9b",
+   "tournament_id": "8ead4164-fe7e-4837-a4de-b804d18f7038",
+   "phase_id": "4e2e28f3-fbcc-4fba-b477-81d3f3d433f4",
+   "group_id": null,
+   "club_id": "cordoba-athletic-club-preintermedia-a",
+   "position": 5,
+   "played": 20,
+   "won": 10,
+   "drawn": 0,
+   "lost": 10,
+   "points": 53,
+   "scored": 554,
+   "conceded": 512,
+   "bonus_points": 13,
+   "form": null,
+   "streak": null,
+   "stats": {
+    "fuente": "Tabla oficial de la Unión Cordobesa de Rugby (bonus ofensivo despejado de los puntos)",
+    "status": null,
+    "team_logo": "https://vxsolicapdcpemfsahbk.supabase.co/storage/v1/object/public/club-assets/logos/cordoba-athletic-club/f63837b4be3a93ee.png",
+    "team_name": "Córdoba Athletic Club Preintermedia \"A\"",
+    "tries_for": 81,
+    "difference": 42,
+    "table_type": "general",
+    "adjustments": 0,
+    "calculated_at": "2026-10-16T15:08:12.521Z",
+    "tries_against": 75,
+    "bonus_defensive": 3,
+    "bonus_destrezas": 0,
+    "bonus_offensive": 10
+   },
+   "last_updated": "2026-10-16T15:08:12.521+00:00",
+   "season_id": "bb17a997-d573-47ff-9c0e-4f7f24c93f23",
+   "team_id": null,
+   "season_entry_id": "e3ebc2eb-d8e1-493c-b0bc-5868a96be839",
+   "table_type": "general"
+  },
+  {
+   "id": "0ba79105-ef3e-4db0-9212-57d760a3887d",
+   "tournament_id": "8ead4164-fe7e-4837-a4de-b804d18f7038",
+   "phase_id": "4e2e28f3-fbcc-4fba-b477-81d3f3d433f4",
+   "group_id": null,
+   "club_id": "club-universitario-de-cordoba-preintermedia-a",
+   "position": 6,
+   "played": 19,
+   "won": 5,
+   "drawn": 0,
+   "lost": 14,
+   "points": 30,
+   "scored": 449,
+   "conceded": 561,
+   "bonus_points": 10,
+   "form": null,
+   "streak": null,
+   "stats": {
+    "fuente": "Tabla oficial de la Unión Cordobesa de Rugby (bonus ofensivo despejado de los puntos)",
+    "status": null,
+    "team_logo": "https://vxsolicapdcpemfsahbk.supabase.co/storage/v1/object/public/club-assets/logos/club-universitario-de-cordoba/034e0d891f53524d.png",
+    "team_name": "Club Universitario de Córdoba Preintermedia \"A\"",
+    "tries_for": 64,
+    "difference": -112,
+    "table_type": "general",
+    "adjustments": 0,
+    "calculated_at": "2026-10-16T15:08:12.521Z",
+    "tries_against": 84,
+    "bonus_defensive": 4,
+    "bonus_destrezas": 0,
+    "bonus_offensive": 6
+   },
+   "last_updated": "2026-10-16T15:08:12.521+00:00",
+   "season_id": "bb17a997-d573-47ff-9c0e-4f7f24c93f23",
+   "team_id": null,
+   "season_entry_id": "6f6b94c7-b923-4755-9d87-f0a995a09b0a",
+   "table_type": "general"
+  },
+  {
+   "id": "d812f9e1-271c-41fe-aad1-b995a00702af",
+   "tournament_id": "8ead4164-fe7e-4837-a4de-b804d18f7038",
+   "phase_id": "4e2e28f3-fbcc-4fba-b477-81d3f3d433f4",
+   "group_id": null,
+   "club_id": "jockey-club-de-villa-maria-preintermedia-a",
+   "position": 7,
+   "played": 19,
+   "won": 5,
+   "drawn": 0,
+   "lost": 14,
+   "points": 28,
+   "scored": 354,
+   "conceded": 553,
+   "bonus_points": 8,
+   "form": null,
+   "streak": null,
+   "stats": {
+    "fuente": "Tabla oficial de la Unión Cordobesa de Rugby (bonus ofensivo despejado de los puntos)",
+    "status": null,
+    "team_logo": "https://vxsolicapdcpemfsahbk.supabase.co/storage/v1/object/public/club-assets/logos/jockey-club-de-villa-maria/5a8df6e34f141248.png",
+    "team_name": "Jockey Club de Villa María Preintermedia \"A\"",
+    "tries_for": 52,
+    "difference": -199,
+    "table_type": "general",
+    "adjustments": 0,
+    "calculated_at": "2026-10-16T15:08:12.521Z",
+    "tries_against": 83,
+    "bonus_defensive": 3,
+    "bonus_destrezas": 0,
+    "bonus_offensive": 5
+   },
+   "last_updated": "2026-10-16T15:08:12.521+00:00",
+   "season_id": "bb17a997-d573-47ff-9c0e-4f7f24c93f23",
+   "team_id": null,
+   "season_entry_id": "05caf198-1e51-4ee4-9042-dd96e92c3c22",
+   "table_type": "general"
+  },
+  {
+   "id": "decc3b7d-c747-4268-904e-7807cbf1d511",
+   "tournament_id": "8ead4164-fe7e-4837-a4de-b804d18f7038",
+   "phase_id": "4e2e28f3-fbcc-4fba-b477-81d3f3d433f4",
+   "group_id": null,
+   "club_id": "uru-cure-rugby-club-preintermedia-a",
+   "position": 8,
+   "played": 20,
+   "won": 4,
+   "drawn": 0,
+   "lost": 16,
+   "points": 26,
+   "scored": 490,
+   "conceded": 692,
+   "bonus_points": 10,
+   "form": null,
+   "streak": null,
+   "stats": {
+    "fuente": "Tabla oficial de la Unión Cordobesa de Rugby (bonus ofensivo despejado de los puntos)",
+    "status": null,
+    "team_logo": "https://vxsolicapdcpemfsahbk.supabase.co/storage/v1/object/public/club-assets/logos/uru-cure-rugby-club/1849942b3ac9cdf1.png",
+    "team_name": "Urú Curé Rugby Club Preintermedia \"A\"",
+    "tries_for": 69,
+    "difference": -202,
+    "table_type": "general",
+    "adjustments": 0,
+    "calculated_at": "2026-10-16T15:08:12.521Z",
+    "tries_against": 102,
+    "bonus_defensive": 2,
+    "bonus_destrezas": 0,
+    "bonus_offensive": 8
+   },
+   "last_updated": "2026-10-16T15:08:12.521+00:00",
+   "season_id": "bb17a997-d573-47ff-9c0e-4f7f24c93f23",
+   "team_id": null,
+   "season_entry_id": "58bffd1d-5dae-4049-8a77-dad9b0b76ad9",
+   "table_type": "general"
+  },
+  {
+   "id": "b56dcff2-b403-47e0-903b-a86b57417338",
+   "tournament_id": "8ead4164-fe7e-4837-a4de-b804d18f7038",
+   "phase_id": "4e2e28f3-fbcc-4fba-b477-81d3f3d433f4",
+   "group_id": null,
+   "club_id": "san-martin-de-villa-maria-preintermedia-a",
+   "position": 9,
+   "played": 20,
+   "won": 2,
+   "drawn": 0,
+   "lost": 18,
+   "points": 14,
+   "scored": 287,
+   "conceded": 908,
+   "bonus_points": 6,
+   "form": null,
+   "streak": null,
+   "stats": {
+    "fuente": "Tabla oficial de la Unión Cordobesa de Rugby (bonus ofensivo despejado de los puntos)",
+    "status": null,
+    "team_logo": "https://vxsolicapdcpemfsahbk.supabase.co/storage/v1/object/public/club-assets/logos/san-martin-de-villa-maria/7e9e085f6e3ace10.png",
+    "team_name": "San Martín de Villa María Preintermedia \"A\"",
+    "tries_for": 44,
+    "difference": -621,
+    "table_type": "general",
+    "adjustments": 0,
+    "calculated_at": "2026-10-16T15:08:12.521Z",
+    "tries_against": 127,
+    "bonus_defensive": 2,
+    "bonus_destrezas": 0,
+    "bonus_offensive": 4
+   },
+   "last_updated": "2026-10-16T15:08:12.521+00:00",
+   "season_id": "bb17a997-d573-47ff-9c0e-4f7f24c93f23",
+   "team_id": null,
+   "season_entry_id": "76565f43-d24f-4b61-93db-19f043dd910e",
+   "table_type": "general"
+  }
+ ],
+ "team_labels": [
+  {
+   "id": "37cbf55f-c5ef-4ef0-92bc-a7871c7e2edf",
+   "label_id": "a85b507a-b3c8-4bcb-a3fa-3f0dc32a99ab",
+   "club_id": null,
+   "tournament_id": "8ead4164-fe7e-4837-a4de-b804d18f7038",
+   "phase_id": "4e2e28f3-fbcc-4fba-b477-81d3f3d433f4",
+   "group_id": null,
+   "created_at": "2026-10-16T15:08:50.556057+00:00",
+   "position": 1
+  },
+  {
+   "id": "9a9327b3-23f0-45f1-a469-d5005bbc84d6",
+   "label_id": "a85b507a-b3c8-4bcb-a3fa-3f0dc32a99ab",
+   "club_id": null,
+   "tournament_id": "8ead4164-fe7e-4837-a4de-b804d18f7038",
+   "phase_id": "4e2e28f3-fbcc-4fba-b477-81d3f3d433f4",
+   "group_id": null,
+   "created_at": "2026-10-16T15:08:50.556057+00:00",
+   "position": 2
+  },
+  {
+   "id": "5b1ebdc5-7594-430b-8d13-df78030b7bf3",
+   "label_id": "a85b507a-b3c8-4bcb-a3fa-3f0dc32a99ab",
+   "club_id": null,
+   "tournament_id": "8ead4164-fe7e-4837-a4de-b804d18f7038",
+   "phase_id": "4e2e28f3-fbcc-4fba-b477-81d3f3d433f4",
+   "group_id": null,
+   "created_at": "2026-10-16T15:08:50.556057+00:00",
+   "position": 3
+  },
+  {
+   "id": "b8d723f8-0cbb-4d46-90d3-74d004e3834c",
+   "label_id": "a85b507a-b3c8-4bcb-a3fa-3f0dc32a99ab",
+   "club_id": null,
+   "tournament_id": "8ead4164-fe7e-4837-a4de-b804d18f7038",
+   "phase_id": "4e2e28f3-fbcc-4fba-b477-81d3f3d433f4",
+   "group_id": null,
+   "created_at": "2026-10-16T15:08:50.556057+00:00",
+   "position": 4
+  },
+  {
+   "id": "dc53dbf2-2d9f-42d9-afc8-e4da4821dede",
+   "label_id": "0c3710ec-b831-4813-bc85-462eadf16b54",
+   "club_id": null,
+   "tournament_id": "8ead4164-fe7e-4837-a4de-b804d18f7038",
+   "phase_id": "4e2e28f3-fbcc-4fba-b477-81d3f3d433f4",
+   "group_id": null,
+   "created_at": "2026-10-16T15:08:50.556057+00:00",
+   "position": 5
+  },
+  {
+   "id": "82d2f535-d8b4-4ce2-9632-31301ec3f873",
+   "label_id": "0c3710ec-b831-4813-bc85-462eadf16b54",
+   "club_id": null,
+   "tournament_id": "8ead4164-fe7e-4837-a4de-b804d18f7038",
+   "phase_id": "4e2e28f3-fbcc-4fba-b477-81d3f3d433f4",
+   "group_id": null,
+   "created_at": "2026-10-16T15:08:50.556057+00:00",
+   "position": 6
+  },
+  {
+   "id": "f8d7e44a-69d5-4e86-9117-88dbd114b9d5",
+   "label_id": "0c3710ec-b831-4813-bc85-462eadf16b54",
+   "club_id": null,
+   "tournament_id": "8ead4164-fe7e-4837-a4de-b804d18f7038",
+   "phase_id": "4e2e28f3-fbcc-4fba-b477-81d3f3d433f4",
+   "group_id": null,
+   "created_at": "2026-10-16T15:08:50.556057+00:00",
+   "position": 7
+  },
+  {
+   "id": "ef80cd72-dff1-47bd-8e80-7f62945245a3",
+   "label_id": "0c3710ec-b831-4813-bc85-462eadf16b54",
+   "club_id": null,
+   "tournament_id": "8ead4164-fe7e-4837-a4de-b804d18f7038",
+   "phase_id": "4e2e28f3-fbcc-4fba-b477-81d3f3d433f4",
+   "group_id": null,
+   "created_at": "2026-10-16T15:08:50.556057+00:00",
+   "position": 8
+  }
+ ]
+}

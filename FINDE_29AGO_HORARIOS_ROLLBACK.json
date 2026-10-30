@@ -1,0 +1,296 @@
+[
+  {
+    "id": "31267065-da7c-4586-98f9-dc62d20487ab",
+    "rotulo": "Litoral A - Universitario Rosario vs Estudiantes Parana",
+    "antes": "2026-08-29T19:00:00.000Z",
+    "despues": "2026-08-29T17:15:00.000Z"
+  },
+  {
+    "id": "a2fc35c9-5d22-42f8-bbee-6462421ee861",
+    "rotulo": "Litoral A - Duendes vs GER",
+    "antes": "2026-08-29T19:00:00.000Z",
+    "despues": "2026-08-29T17:15:00.000Z"
+  },
+  {
+    "id": "59a29dc9-f601-4897-b40c-c9944bb28667",
+    "rotulo": "Litoral A - Jockey Rosario vs Santa Fe",
+    "antes": "2026-08-29T19:00:00.000Z",
+    "despues": "2026-08-29T17:15:00.000Z"
+  },
+  {
+    "id": "5f58cad3-b685-4104-bcdd-5510b48a38e0",
+    "rotulo": "Litoral A - Jockey Venado Tuerto vs Old Resian",
+    "antes": "2026-08-29T19:00:00.000Z",
+    "despues": "2026-08-29T17:15:00.000Z"
+  },
+  {
+    "id": "d6a8ef70-1b9e-44f0-9822-95baf1697019",
+    "rotulo": "Litoral A - CRAI vs Parana Rowing",
+    "antes": "2026-08-29T19:00:00.000Z",
+    "despues": "2026-08-29T17:15:00.000Z"
+  },
+  {
+    "id": "a9365117-fd59-4305-a68c-3a7cbb6f42b8",
+    "rotulo": "Litoral B - Universitario Santa Fe vs Provincial",
+    "antes": "2026-08-29T19:00:00.000Z",
+    "despues": "2026-08-29T17:15:00.000Z"
+  },
+  {
+    "id": "ea33dbad-9c05-4688-a2bf-3029e5eab807",
+    "rotulo": "Litoral B - CRAR vs Logaritmo",
+    "antes": "2026-08-29T19:00:00.000Z",
+    "despues": "2026-08-29T17:15:00.000Z"
+  },
+  {
+    "id": "5f55d74e-c6e1-443f-bbaa-807eac838dbf",
+    "rotulo": "Litoral B - Los Caranchos vs Alma Juniors",
+    "antes": "2026-08-29T19:00:00.000Z",
+    "despues": "2026-08-29T17:15:00.000Z"
+  },
+  {
+    "id": "81e1f2fb-52c8-4865-be07-8b6f89305bd3",
+    "rotulo": "Litoral B - Pampas de Rufino vs GEP",
+    "antes": "2026-08-29T19:00:00.000Z",
+    "despues": "2026-08-29T17:15:00.000Z"
+  },
+  {
+    "id": "ddc5cd8f-89e0-44ac-b3ca-b434fdff5136",
+    "rotulo": "Litoral B - La Salle Jobson vs Regatas San Nicolas",
+    "antes": "2026-08-29T19:00:00.000Z",
+    "despues": "2026-08-29T17:15:00.000Z"
+  },
+  {
+    "id": "fcfe062f-d844-4717-8ebd-22705285449f",
+    "rotulo": "Litoral B - Cha Roga vs Tilcara",
+    "antes": "2026-08-29T19:00:00.000Z",
+    "despues": "2026-08-29T17:15:00.000Z"
+  },
+  {
+    "id": "4c00070e-3a5d-4b95-a317-f4a9663f5ae8",
+    "rotulo": "Centro - Uru Cure vs Jockey Cba",
+    "antes": "2026-08-29T19:00:00.000Z",
+    "despues": "2026-08-29T16:45:00.000Z"
+  },
+  {
+    "id": "d7153a73-6c92-412a-8a0b-383f5a63df49",
+    "rotulo": "Centro - La Tablada vs Jockey Villa Maria",
+    "antes": "2026-08-29T19:00:00.000Z",
+    "despues": "2026-08-29T16:30:00.000Z"
+  },
+  {
+    "id": "94c90d12-7785-4f4e-b1a4-28cdfe97cd8a",
+    "rotulo": "Centro - Universitario Cba vs Tala",
+    "antes": "2026-08-29T19:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "eb5d98c2-3e96-4c6e-b60a-e80e27214839",
+    "rotulo": "Centro - Palermo Bajo vs San Martin",
+    "antes": "2026-08-29T19:00:00.000Z",
+    "despues": "2026-08-29T16:30:00.000Z"
+  },
+  {
+    "id": "7294c4c9-b705-4987-8314-38a892490845",
+    "rotulo": "Centro - Carlos Paz vs Cba Athletic (VIERNES)",
+    "antes": "2026-08-29T19:00:00.000Z",
+    "despues": "2026-08-29T01:00:00.000Z"
+  },
+  {
+    "id": "de092044-47de-4127-b096-ddd116bd4ef0",
+    "rotulo": "Super 9 B - San Francisco vs Santa Rosa",
+    "antes": "2026-08-29T19:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "81f42324-0dc0-4232-bc57-f80bf9f56189",
+    "rotulo": "Super 9 B - Aero Rio IV vs La Carlota",
+    "antes": "2026-08-29T19:30:00.000Z",
+    "despues": "2026-08-29T18:00:00.000Z"
+  },
+  {
+    "id": "8241da71-6ae0-4a6b-95fb-c96d8184acde",
+    "rotulo": "Super 9 B - Cordoba Rugby vs Los Cuervos",
+    "antes": "2026-08-29T19:30:00.000Z",
+    "despues": "2026-08-29T16:30:00.000Z"
+  },
+  {
+    "id": "4c50da65-e2d0-4691-8fae-82675eea3f2a",
+    "rotulo": "Super 9 B - Baguales vs Alta Gracia",
+    "antes": "2026-08-29T19:30:00.000Z",
+    "despues": "2026-08-29T16:30:00.000Z"
+  },
+  {
+    "id": "e19f53b2-6358-4ce1-a345-360ebcb42e2a",
+    "rotulo": "NOA A - Huirapuca vs Universitario Salta (DOMINGO)",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-30T18:45:00.000Z"
+  },
+  {
+    "id": "c89c7049-d8d1-4144-b114-aa99a074b16e",
+    "rotulo": "NOA A - Tucuman Rugby vs Natacion y Gimnasia (DOMINGO)",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-30T19:00:00.000Z"
+  },
+  {
+    "id": "0ee2a394-364d-47dc-87df-4bcadc505204",
+    "rotulo": "NOA A - Lawn Tennis vs Lince (DOMINGO)",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-30T18:30:00.000Z"
+  },
+  {
+    "id": "62287a89-176a-487b-b781-2cd67834b146",
+    "rotulo": "NOA A - Cardenales vs Los Tarcos",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:30:00.000Z"
+  },
+  {
+    "id": "617d023b-3627-473d-ace3-9e3486c24c5d",
+    "rotulo": "NOA A - Jockey Salta vs Universitario Tucuman",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "3401fee9-eca6-4f65-a640-fc719134f31f",
+    "rotulo": "NEA - Taraguy vs San Jose",
+    "antes": "2026-08-29T19:00:00.000Z",
+    "despues": "2026-08-29T17:30:00.000Z"
+  },
+  {
+    "id": "c99fba8d-3d22-4d65-86d7-532bbcf9d3c4",
+    "rotulo": "NEA - CURNE vs CURDA",
+    "antes": "2026-08-29T19:00:00.000Z",
+    "despues": "2026-08-29T17:30:00.000Z"
+  },
+  {
+    "id": "66b7eb48-7584-45da-81e7-e16a926dbfdb",
+    "rotulo": "NEA - San Patricio vs Aranduroga",
+    "antes": "2026-08-29T19:00:00.000Z",
+    "despues": "2026-08-29T17:30:00.000Z"
+  },
+  {
+    "id": "d1bc140e-8891-40f3-b1d7-3756ae9c9ce7",
+    "rotulo": "NEA - Aguara vs Regatas (DOMINGO)",
+    "antes": "2026-08-29T19:00:00.000Z",
+    "despues": "2026-08-30T19:00:00.000Z"
+  },
+  {
+    "id": "0536af7b-4218-4a81-9e9b-4671b3e9240f",
+    "rotulo": "NEA B - Caza y Pesca vs Sixty",
+    "antes": "2026-08-29T19:00:00.000Z",
+    "despues": "2026-08-29T21:00:00.000Z"
+  },
+  {
+    "id": "cff17a25-d8cb-4066-9994-b8e89aed4d7a",
+    "rotulo": "NEA B - Lomas vs CAPRI",
+    "antes": "2026-08-29T19:00:00.000Z",
+    "despues": "2026-08-29T21:00:00.000Z"
+  },
+  {
+    "id": "29205b7d-87ed-4f08-8188-770b91772f43",
+    "rotulo": "NEA B - Pay Ubre vs Abipones (DOMINGO)",
+    "antes": "2026-08-29T19:00:00.000Z",
+    "despues": "2026-08-30T18:00:00.000Z"
+  },
+  {
+    "id": "f451e56d-2ef9-4946-bf22-3c7bbc45ed87",
+    "rotulo": "NEA B - Qompi vs Tacuru",
+    "antes": "2026-08-29T19:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "72398032-350c-44ce-b865-55569b7041d4",
+    "rotulo": "Copa Oro Oeste - Mendoza RC vs CPBM",
+    "antes": "2026-08-29T19:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "90c10795-4bb4-436d-867f-8465e63f3048",
+    "rotulo": "Copa Oro Oeste - Teque vs San Juan RC",
+    "antes": "2026-08-29T19:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "7188acc9-e062-40d3-b76d-f4e88e343753",
+    "rotulo": "Copa Oro Oeste - Marista vs Los Tordos",
+    "antes": "2026-08-29T19:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "0009f63f-4dc3-407c-a401-cd2b09488698",
+    "rotulo": "Copa Oro Oeste - Universitario SJ vs Liceo",
+    "antes": "2026-08-29T19:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "04fc294e-a96d-47c9-94f7-231ff99e1ccc",
+    "rotulo": "Copa Plata Oeste - Tacuru vs Peumayen",
+    "antes": "2026-08-29T19:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "85fa0971-8b02-456f-907d-58c320a8b481",
+    "rotulo": "Copa Plata Oeste - Rivadavia vs Banco",
+    "antes": "2026-08-29T19:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "30b88ffb-a6fb-440d-b997-fc654418343b",
+    "rotulo": "Copa Plata Oeste - Universitario Mza vs Jockey SJ",
+    "antes": "2026-08-29T19:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "d4e90bab-5aee-421e-8ee7-d6eb64d3d435",
+    "rotulo": "Copa Plata Oeste - Huazihul vs Alfiles",
+    "antes": "2026-08-29T19:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "83c0f8b9-9327-41fb-a272-5c98af5abd79",
+    "rotulo": "Pampeano - Universitario MdP vs Argentino BB",
+    "antes": "2026-08-29T19:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "4925c2bc-e5ae-439f-9bd7-cd3fcf5fd7a7",
+    "rotulo": "Pampeano - IPR Sporting vs Los Cardos",
+    "antes": "2026-08-29T19:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "0e21b7aa-77c2-49d3-9864-bf4ada0e83c5",
+    "rotulo": "Pampeano - Sportiva BB vs San Ignacio",
+    "antes": "2026-08-29T19:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "276e4e97-0a6e-4d40-89b3-ec6837d55cfc",
+    "rotulo": "Pampeano - Mar del Plata Club vs Comercial",
+    "antes": "2026-08-29T19:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "fdddd375-3de9-4a69-b90b-7407f2debb2a",
+    "rotulo": "NOA B - Gimnasia y Tiro vs Aguara Guazu",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "aaf493fd-c0f3-4d6c-b071-536215082a98",
+    "rotulo": "NOA B - Old Lions vs Santiago Lawn Tennis",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "5619baf0-9743-4531-8562-0a43c7a34313",
+    "rotulo": "NOA B - Jockey Tucuman vs Tigres",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "c0dac096-413e-493e-a8b9-879e10619455",
+    "rotulo": "NOA B - Tiro Federal Salta vs Santiago Rugby",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  }
+]

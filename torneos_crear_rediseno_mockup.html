@@ -1,0 +1,4047 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Crear torneo · Rediseño navegable</title>
+<style>
+:root {
+    --surface-0: #0a0d12;
+    --surface-1: #11151c;
+    --surface-2: #181d26;
+    --surface-3: #232934;
+    --surface-4: #2c333f;
+    --text-primary: #f4f6fa;
+    --text-secondary: #b6bdcc;
+    --text-dim: #6b7280;
+    --accent: #00a365;
+    --accent-2: #00c47a;
+    --accent-soft: rgba(0, 163, 101, 0.14);
+    --success: #34d399;
+    --warning: #facc15;
+    --danger: #f87171;
+    --info: #60a5fa;
+    --border: rgba(255, 255, 255, 0.07);
+    --border-strong: rgba(255, 255, 255, 0.14);
+    --r-sm: 6px;
+    --r-md: 10px;
+    --r-lg: 14px;
+    --r-xl: 22px;
+    --shadow-md: 0 6px 18px rgba(0,0,0,0.35);
+    --shadow-lg: 0 18px 40px rgba(0,0,0,0.4);
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+    background: #06080c;
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+}
+button { font-family: inherit; cursor: pointer; }
+input, select, textarea { font-family: inherit; }
+
+.page {
+    max-width: 1380px;
+    margin: 0 auto;
+    padding: 28px 24px 80px;
+}
+
+.page-head {
+    margin-bottom: 28px;
+}
+.page-title {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+.page-sub {
+    color: var(--text-secondary);
+    font-size: 14px;
+    max-width: 700px;
+    margin-top: 6px;
+}
+
+.toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 6px;
+    margin: 18px 0 28px;
+    width: fit-content;
+}
+.toolbar button {
+    background: transparent;
+    border: 0;
+    color: var(--text-secondary);
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all .15s;
+}
+.toolbar button:hover { color: var(--text-primary); }
+.toolbar button.active {
+    background: var(--accent);
+    color: #fff;
+}
+
+.viewport-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 28px;
+    align-items: start;
+}
+@media (min-width: 1180px) {
+    .viewport-row.split { grid-template-columns: 380px 1fr; }
+}
+
+.frame-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent-2);
+    background: var(--accent-soft);
+    padding: 4px 10px;
+    border-radius: 999px;
+    margin-bottom: 12px;
+}
+.frame-label.desktop {
+    color: var(--info);
+    background: rgba(96,165,250,0.12);
+}
+
+/* Mobile frame */
+.mobile-frame {
+    width: 360px;
+    height: 760px;
+    margin: 0 auto;
+    background: var(--surface-0);
+    border-radius: 36px;
+    border: 8px solid #1a1f29;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    position: relative;
+}
+.mobile-screen {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    padding-bottom: 96px;
+    scrollbar-width: thin;
+}
+.mobile-screen::-webkit-scrollbar { width: 4px; }
+.mobile-screen::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 4px; }
+
+/* Desktop frame */
+.desktop-frame {
+    background: var(--surface-0);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+}
+.desktop-chrome {
+    background: var(--surface-1);
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-dim);
+}
+.desktop-chrome .dots { display: flex; gap: 6px; }
+.desktop-chrome .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--surface-3); }
+.desktop-chrome .url {
+    margin-left: 10px;
+    background: var(--surface-2);
+    padding: 4px 10px;
+    border-radius: 6px;
+    flex: 1;
+    max-width: 600px;
+}
+
+/* ============= COMMON ============= */
+.top-app-bar {
+    position: sticky; top: 0;
+    background: var(--surface-1);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 5;
+    backdrop-filter: blur(8px);
+}
+.top-app-bar .back {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    display: grid; place-items: center;
+    font-size: 16px;
+}
+.top-app-bar .title {
+    font-size: 15px; font-weight: 700;
+    flex: 1;
+}
+.top-app-bar .sub {
+    font-size: 11px;
+    color: var(--text-dim);
+    font-weight: 500;
+}
+
+/* ============= TEMPLATE PICKER (STEP 0) ============= */
+.tpl-hero {
+    padding: 24px 18px 12px;
+}
+.tpl-hero h1 {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    margin-bottom: 6px;
+}
+.tpl-hero p {
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+.tpl-grid {
+    padding: 8px 18px 18px;
+    display: grid;
+    gap: 12px;
+}
+.tpl-card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 16px;
+    text-align: left;
+    color: var(--text-primary);
+    display: grid;
+    grid-template-columns: 48px 1fr auto;
+    align-items: center;
+    gap: 14px;
+    transition: all .15s;
+}
+.tpl-card:hover { background: var(--surface-2); border-color: var(--border-strong); transform: translateY(-1px); }
+.tpl-card.popular { border-color: rgba(0, 163, 101, 0.4); position: relative; }
+.tpl-card.popular::after {
+    content: 'Más usado';
+    position: absolute; top: -9px; right: 14px;
+    background: var(--accent); color: #fff;
+    font-size: 10px; font-weight: 700;
+    padding: 2px 8px; border-radius: 999px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+.tpl-icon {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    display: grid; place-items: center;
+    font-size: 22px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+}
+.tpl-icon.green { background: var(--accent-soft); color: var(--accent-2); border-color: rgba(0,163,101,0.3); }
+.tpl-icon.blue  { background: rgba(96,165,250,0.12); color: var(--info); border-color: rgba(96,165,250,0.3); }
+.tpl-icon.amber { background: rgba(250,204,21,0.12); color: var(--warning); border-color: rgba(250,204,21,0.3); }
+.tpl-icon.gray  { background: var(--surface-3); color: var(--text-secondary); }
+.tpl-body h3 {
+    font-size: 14px; font-weight: 700; margin-bottom: 2px;
+}
+.tpl-body p {
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.4;
+}
+.tpl-chev { color: var(--text-dim); font-size: 18px; }
+
+/* ============= WIZARD ============= */
+.wiz-progress {
+    padding: 14px 18px 6px;
+}
+.wiz-progress .crumb {
+    display: flex; justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+.wiz-progress .crumb strong { color: var(--text-primary); letter-spacing: 0; text-transform: none; font-weight: 700; font-size: 14px; }
+.wiz-bar {
+    height: 4px;
+    background: var(--surface-3);
+    border-radius: 999px;
+    overflow: hidden;
+}
+.wiz-bar > span {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    border-radius: 999px;
+    transition: width .3s;
+}
+
+.wiz-body { padding: 18px; }
+
+.section-title {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    margin-bottom: 4px;
+}
+.section-sub {
+    color: var(--text-secondary);
+    font-size: 13px;
+    margin-bottom: 18px;
+}
+
+/* Field */
+.field {
+    margin-bottom: 16px;
+}
+.field label {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+}
+.field label .req { color: var(--danger); }
+.field input[type=text], .field input[type=number], .field select, .field textarea {
+    width: 100%;
+    background: var(--surface-1);
+    border: 1px solid var(--border-strong);
+    color: var(--text-primary);
+    padding: 12px 14px;
+    border-radius: var(--r-md);
+    font-size: 14px;
+    transition: border-color .15s, box-shadow .15s;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0,163,101,0.18);
+}
+.field input.is-error, .field select.is-error {
+    border-color: var(--danger);
+    box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.18);
+}
+.field input.is-ok { border-color: rgba(52, 211, 153, 0.5); }
+.field .help {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 6px;
+}
+.field .err {
+    font-size: 12px;
+    color: var(--danger);
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.field .ok {
+    font-size: 12px;
+    color: var(--success);
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* Sport quick picker */
+.sport-pick {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+.sport-pick button {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    color: var(--text-secondary);
+    padding: 10px 6px;
+    font-size: 11px;
+    font-weight: 600;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    transition: all .15s;
+}
+.sport-pick button:hover { background: var(--surface-2); color: var(--text-primary); }
+.sport-pick button.selected {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: var(--accent-2);
+}
+.sport-pick button .emo { font-size: 18px; }
+.sport-more {
+    background: transparent;
+    border: 1px dashed var(--border-strong);
+    color: var(--text-secondary);
+    padding: 8px;
+    border-radius: var(--r-md);
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 8px;
+    width: 100%;
+}
+
+/* Audience pill */
+.audience-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+.audience-row button {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    padding: 12px;
+    border-radius: var(--r-md);
+    font-size: 13px;
+    font-weight: 600;
+    text-align: left;
+    line-height: 1.3;
+    transition: all .15s;
+}
+.audience-row button .small {
+    display: block;
+    font-size: 10.5px;
+    color: var(--text-dim);
+    font-weight: 500;
+    margin-top: 2px;
+}
+.audience-row button.selected {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: var(--text-primary);
+}
+
+/* Disclosure (Más opciones) */
+.disclosure {
+    margin-top: 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    background: var(--surface-1);
+    overflow: hidden;
+}
+.disclosure summary {
+    list-style: none;
+    padding: 12px 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+.disclosure summary::after {
+    content: '+';
+    font-size: 18px;
+    color: var(--text-dim);
+}
+.disclosure[open] summary::after { content: '−'; }
+.disclosure[open] summary { border-bottom: 1px solid var(--border); color: var(--text-primary); }
+.disclosure .disclosure-body { padding: 14px; }
+
+/* Structure step */
+.counter {
+    display: grid;
+    grid-template-columns: 44px 1fr 44px;
+    gap: 0;
+    background: var(--surface-1);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--r-md);
+    overflow: hidden;
+}
+.counter button {
+    background: transparent;
+    border: 0;
+    color: var(--text-primary);
+    font-size: 18px;
+    font-weight: 700;
+    transition: background .15s;
+}
+.counter button:hover { background: var(--surface-3); }
+.counter input {
+    border: 0; background: transparent;
+    text-align: center;
+    color: var(--text-primary);
+    font-size: 16px;
+    font-weight: 700;
+    width: 100%;
+}
+.counter input:focus { outline: none; }
+
+.fmt-card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 14px;
+    margin-bottom: 12px;
+}
+.fmt-card h4 { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+.fmt-card p { color: var(--text-dim); font-size: 12px; }
+
+.live-preview {
+    background: linear-gradient(135deg, var(--accent-soft), transparent);
+    border: 1px solid rgba(0, 163, 101, 0.3);
+    border-radius: var(--r-md);
+    padding: 14px;
+    margin-top: 16px;
+}
+.live-preview .kicker {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent-2);
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+.live-preview strong { font-size: 14px; }
+.live-preview .meta {
+    color: var(--text-secondary);
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+/* Bonus rules — lista flexible */
+.bonus-list { display: grid; gap: 8px; }
+.bonus-rule {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 12px;
+    display: grid;
+    grid-template-columns: 1fr 84px 32px;
+    gap: 10px;
+    align-items: center;
+}
+.bonus-rule .cond {
+    min-width: 0;
+}
+.bonus-rule .cond select,
+.bonus-rule .cond input[type=text] {
+    width: 100%;
+    background: var(--surface-1);
+    border: 1px solid var(--border-strong);
+    color: var(--text-primary);
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 12.5px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+.bonus-rule .cond .desc {
+    font-size: 10.5px;
+    color: var(--text-dim);
+    line-height: 1.35;
+}
+.bonus-rule .pts {
+    display: flex; align-items: center; gap: 4px;
+}
+.bonus-rule .pts input {
+    width: 52px;
+    background: var(--surface-1);
+    border: 1px solid var(--border-strong);
+    color: var(--text-primary);
+    padding: 8px 6px;
+    border-radius: 6px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 700;
+}
+.bonus-rule .pts .label-pts {
+    font-size: 10px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 700;
+}
+.bonus-rule .rm {
+    background: transparent; border: 0;
+    color: var(--text-dim);
+    font-size: 18px;
+    cursor: pointer;
+    width: 32px; height: 32px;
+    border-radius: 6px;
+}
+.bonus-rule .rm:hover { background: rgba(248,113,113,0.12); color: var(--danger); }
+.bonus-preset-pill {
+    display: inline-block;
+    font-size: 9.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--accent-2);
+    background: var(--accent-soft);
+    padding: 2px 7px;
+    border-radius: 999px;
+    margin-bottom: 4px;
+}
+.bonus-preset-pill.custom { color: var(--info); background: rgba(96,165,250,0.12); }
+.bonus-add-row {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    margin-top: 8px;
+}
+.bonus-add-row button {
+    background: var(--surface-2);
+    border: 1px dashed var(--border-strong);
+    color: var(--text-secondary);
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.bonus-add-row button:hover { color: var(--text-primary); border-color: var(--accent); }
+
+/* Participants step — buscador del catálogo */
+.search-bar {
+    position: relative;
+    margin-bottom: 12px;
+}
+.search-bar input {
+    width: 100%;
+    background: var(--surface-1);
+    border: 1px solid var(--border-strong);
+    color: var(--text-primary);
+    padding: 12px 14px 12px 38px;
+    border-radius: var(--r-md);
+    font-size: 14px;
+}
+.search-bar input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,163,101,0.18); }
+.search-bar .ico {
+    position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+    color: var(--text-dim); font-size: 16px;
+}
+.search-meta {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 11px; color: var(--text-dim);
+    margin: 2px 2px 10px;
+}
+.search-meta button {
+    background: transparent; border: 0; color: var(--accent-2);
+    font-size: 11px; font-weight: 700; cursor: pointer;
+}
+
+/* Lista catálogo */
+.club-list { display: grid; gap: 6px; max-height: 380px; overflow-y: auto; padding-right: 2px; }
+.club-list::-webkit-scrollbar { width: 4px; }
+.club-list::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 4px; }
+
+.club-card {
+    display: grid;
+    grid-template-columns: 22px 32px 1fr auto;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 10px 12px;
+    transition: all .15s;
+}
+.club-card.added { border-color: rgba(0,163,101,0.45); background: rgba(0,163,101,0.06); }
+.club-card .chk {
+    width: 18px; height: 18px;
+    border: 1.5px solid var(--border-strong);
+    border-radius: 4px;
+    display: grid; place-items: center;
+    color: #fff;
+    font-size: 11px;
+    background: var(--surface-2);
+    cursor: pointer;
+}
+.club-card.added .chk { background: var(--accent); border-color: var(--accent); }
+.club-logo {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: var(--surface-3);
+    display: grid; place-items: center;
+    color: var(--text-secondary);
+    font-weight: 800;
+    font-size: 11px;
+    overflow: hidden;
+}
+.club-info { min-width: 0; }
+.club-name {
+    font-size: 13.5px; font-weight: 700;
+    display: flex; align-items: center; gap: 6px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.club-meta {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 2px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.entity-tag {
+    font-size: 9.5px; font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 999px;
+    border: 1px solid var(--border-strong);
+    color: var(--text-dim);
+    flex-shrink: 0;
+}
+.entity-tag.club { color: var(--accent-2); border-color: rgba(0,163,101,0.3); background: var(--accent-soft); }
+.entity-tag.selec { color: var(--info); border-color: rgba(96,165,250,0.3); background: rgba(96,165,250,0.1); }
+.entity-tag.franq { color: #c084fc; border-color: rgba(192,132,252,0.3); background: rgba(192,132,252,0.1); }
+.entity-tag.acad { color: var(--warning); border-color: rgba(250,204,21,0.3); background: rgba(250,204,21,0.1); }
+
+.club-action {
+    background: var(--surface-2);
+    border: 1px solid var(--border-strong);
+    color: var(--text-secondary);
+    font-size: 11px; font-weight: 700;
+    padding: 5px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.club-card.added .club-action { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+/* Plantel selector expandido */
+.squad-picker {
+    grid-column: 1 / -1;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--border);
+    display: grid;
+    gap: 6px;
+}
+.squad-picker label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 700;
+    color: var(--text-dim);
+}
+.squad-picker select {
+    background: var(--surface-2);
+    border: 1px solid var(--border-strong);
+    color: var(--text-primary);
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+}
+.squad-picker .squad-warning {
+    font-size: 11px;
+    color: var(--warning);
+}
+.squad-picker .squad-info {
+    font-size: 11px;
+    color: var(--accent-2);
+}
+.squad-picker .squad-legacy {
+    font-size: 11px;
+    color: var(--text-dim);
+}
+
+/* Filter chips */
+.chips {
+    display: flex; gap: 6px; flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+.chip {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 4px;
+}
+.chip.active { background: var(--accent-soft); border-color: var(--accent); color: var(--text-primary); }
+.chip .count {
+    font-size: 10px; color: var(--text-dim);
+    padding-left: 2px;
+}
+
+.parti-add {
+    display: flex; align-items: center; gap: 6px; justify-content: center;
+    background: transparent;
+    border: 1px dashed var(--border-strong);
+    color: var(--text-secondary);
+    padding: 10px;
+    border-radius: var(--r-md);
+    font-size: 12.5px;
+    font-weight: 600;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.selected-summary {
+    background: var(--accent-soft);
+    border: 1px solid rgba(0,163,101,0.3);
+    border-radius: var(--r-md);
+    padding: 10px 12px;
+    font-size: 12px;
+    color: var(--text-primary);
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 10px;
+}
+.selected-summary strong { font-size: 14px; }
+.selected-summary button {
+    background: transparent; border: 0;
+    color: var(--accent-2);
+    font-size: 11px; font-weight: 700;
+    cursor: pointer;
+}
+
+/* Summary chip */
+.summary {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 14px;
+    margin-bottom: 12px;
+}
+.summary-row {
+    display: flex; justify-content: space-between;
+    padding: 6px 0;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+}
+.summary-row:last-child { border-bottom: 0; }
+.summary-row .k { color: var(--text-dim); }
+.summary-row .v { color: var(--text-primary); font-weight: 600; }
+.summary-row .edit {
+    background: transparent; border: 0;
+    color: var(--accent-2);
+    font-size: 11px;
+    font-weight: 700;
+    margin-left: 8px;
+    cursor: pointer;
+}
+
+/* Sticky bottom nav */
+.wiz-nav-mobile {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: var(--surface-1);
+    border-top: 1px solid var(--border);
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    display: grid;
+    grid-template-columns: 88px 1fr;
+    gap: 10px;
+    backdrop-filter: blur(10px);
+}
+.btn {
+    background: var(--surface-2);
+    border: 1px solid var(--border-strong);
+    color: var(--text-primary);
+    padding: 12px 14px;
+    border-radius: var(--r-md);
+    font-size: 14px;
+    font-weight: 700;
+    min-height: 44px;
+    transition: all .15s;
+}
+.btn:hover { background: var(--surface-3); }
+.btn.primary {
+    background: linear-gradient(180deg, var(--accent), #008c56);
+    border-color: var(--accent);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(0,163,101,0.4);
+}
+.btn.primary:disabled, .btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+.btn.ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+}
+
+.disabled-hint {
+    font-size: 11px;
+    color: var(--text-dim);
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+/* ============= DESKTOP LAYOUT ============= */
+.desktop-body {
+    background: #06080c;
+    min-height: 740px;
+    padding: 24px 28px 32px;
+}
+.desktop-head {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 22px;
+}
+.desktop-head .back {
+    width: 36px; height: 36px;
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-secondary);
+    display: grid; place-items: center;
+    font-size: 18px;
+}
+.desktop-head h1 {
+    font-size: 24px; font-weight: 800; letter-spacing: -0.01em;
+}
+.desktop-head p { color: var(--text-secondary); font-size: 13px; }
+
+.dk-stepper {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 16px 20px;
+    margin-bottom: 18px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    position: relative;
+}
+.dk-step {
+    display: flex; align-items: center; gap: 10px;
+    padding: 6px 8px;
+    position: relative;
+}
+.dk-step + .dk-step::before {
+    content: '';
+    position: absolute; left: -10px; top: 50%;
+    width: 8px; height: 2px;
+    background: var(--surface-3);
+}
+.dk-step.done + .dk-step::before, .dk-step.active + .dk-step::before { background: var(--accent); }
+.dk-step .num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--surface-3);
+    color: var(--text-dim);
+    display: grid; place-items: center;
+    font-size: 12px; font-weight: 700;
+    flex-shrink: 0;
+}
+.dk-step.active .num { background: var(--accent); color: #fff; }
+.dk-step.done .num { background: var(--success); color: #052e1e; }
+.dk-step .lbl {
+    font-size: 13px; font-weight: 600;
+    color: var(--text-dim);
+}
+.dk-step.active .lbl { color: var(--text-primary); }
+.dk-step.done .lbl { color: var(--text-secondary); }
+.dk-step .lbl .small {
+    display: block; font-size: 10.5px; color: var(--text-dim); font-weight: 500; margin-top: 1px;
+}
+
+.dk-grid {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 18px;
+    align-items: start;
+}
+.dk-card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 22px;
+}
+.dk-card-title {
+    font-size: 16px; font-weight: 700;
+    margin-bottom: 4px;
+}
+.dk-card-sub {
+    color: var(--text-secondary);
+    font-size: 13px;
+    margin-bottom: 18px;
+}
+.dk-sport-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+}
+.dk-sport-grid button {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    color: var(--text-secondary);
+    padding: 10px;
+    font-size: 11.5px;
+    font-weight: 600;
+    display: flex; flex-direction: column;
+    gap: 4px; align-items: center;
+}
+.dk-sport-grid button .emo { font-size: 20px; }
+.dk-sport-grid button.selected {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: var(--text-primary);
+}
+
+.dk-side {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 18px;
+    position: sticky;
+    top: 22px;
+}
+.dk-side h3 {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+    font-weight: 700;
+}
+.dk-preview-card {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 14px;
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 12px;
+}
+.dk-preview-logo {
+    width: 48px; height: 48px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    display: grid; place-items: center;
+    color: #fff; font-weight: 800;
+    font-size: 16px;
+}
+.dk-preview-name { font-weight: 700; font-size: 14px; }
+.dk-preview-meta { color: var(--text-dim); font-size: 11px; }
+.dk-side .summary { background: var(--surface-2); }
+.dk-side .summary-row { border-color: var(--border); }
+
+.dk-bottom {
+    display: flex; justify-content: space-between;
+    margin-top: 22px;
+    align-items: center;
+}
+.dk-bottom .left { color: var(--text-dim); font-size: 12px; }
+.dk-bottom .actions { display: flex; gap: 10px; }
+
+/* misc */
+.kbd {
+    display: inline-block;
+    font-family: ui-monospace, monospace;
+    font-size: 10px;
+    background: var(--surface-3);
+    border: 1px solid var(--border-strong);
+    padding: 1px 6px;
+    border-radius: 4px;
+    color: var(--text-secondary);
+    margin: 0 2px;
+}
+
+.tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 3px 8px;
+    border-radius: 999px;
+}
+.tag.success { background: rgba(52,211,153,0.14); color: var(--success); }
+.tag.warning { background: rgba(250,204,21,0.14); color: var(--warning); }
+.tag.info { background: rgba(96,165,250,0.14); color: var(--info); }
+
+.callout {
+    background: rgba(96,165,250,0.08);
+    border: 1px solid rgba(96,165,250,0.25);
+    border-radius: var(--r-md);
+    padding: 10px 12px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    display: flex; gap: 8px;
+    margin: 10px 0 16px;
+}
+.callout strong { color: var(--info); }
+
+/* Pane visibility (used by JS) */
+.pane { display: none; }
+.pane.active { display: block; }
+
+/* ============= ADVANCED MODE — multi-fase ============= */
+.adv-wrap {
+    background: var(--surface-0);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+}
+.adv-header {
+    background: var(--surface-1);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+.adv-header h2 {
+    font-size: 18px; font-weight: 800;
+    display: flex; align-items: center; gap: 10px;
+}
+.adv-header .torneo-pill {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+.adv-header .actions { display: flex; gap: 8px; }
+
+.adv-modeswitch {
+    display: inline-flex;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 3px;
+    margin-right: 8px;
+}
+.adv-modeswitch button {
+    background: transparent;
+    border: 0;
+    color: var(--text-secondary);
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+.adv-modeswitch button.active {
+    background: var(--accent);
+    color: #fff;
+}
+
+/* Phases timeline */
+.phase-timeline {
+    background: var(--surface-1);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 24px;
+    overflow-x: auto;
+}
+.phase-timeline-inner {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 100%;
+}
+.phase-chip {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 8px 14px;
+    color: var(--text-secondary);
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    display: inline-flex; align-items: center; gap: 8px;
+}
+.phase-chip:hover { background: var(--surface-3); color: var(--text-primary); }
+.phase-chip.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+}
+.phase-chip.draft {
+    border-style: dashed;
+    color: var(--text-dim);
+}
+.phase-chip .ph-num {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.12);
+    font-size: 10px;
+    display: grid; place-items: center;
+    font-weight: 800;
+}
+.phase-chip.active .ph-num { background: rgba(255,255,255,0.25); }
+.phase-chip .ph-type {
+    font-size: 10px;
+    opacity: 0.8;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.phase-flow {
+    color: var(--text-dim);
+    padding: 0 2px;
+    font-size: 14px;
+}
+.phase-add {
+    background: transparent;
+    border: 1px dashed var(--border-strong);
+    color: var(--text-secondary);
+    padding: 8px 14px;
+    border-radius: var(--r-md);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    margin-left: 6px;
+}
+
+/* Advanced body layout */
+.adv-body {
+    display: grid;
+    grid-template-columns: 220px 1fr 300px;
+    min-height: 620px;
+}
+.adv-side {
+    background: var(--surface-1);
+    border-right: 1px solid var(--border);
+    padding: 16px 12px;
+}
+.adv-side-title {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    padding: 0 8px;
+    font-weight: 700;
+}
+.adv-side button {
+    width: 100%;
+    background: transparent;
+    border: 0;
+    text-align: left;
+    color: var(--text-secondary);
+    padding: 9px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 2px;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 10px;
+    transition: all .12s;
+}
+.adv-side button:hover { background: var(--surface-2); color: var(--text-primary); }
+.adv-side button.active {
+    background: var(--accent-soft);
+    color: var(--accent-2);
+}
+.adv-side button .ico { font-size: 15px; opacity: 0.85; }
+.adv-side button .badge {
+    margin-left: auto;
+    background: var(--surface-3);
+    color: var(--text-dim);
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+}
+.adv-side button.active .badge {
+    background: var(--accent);
+    color: #fff;
+}
+
+.adv-main {
+    padding: 22px 24px;
+    overflow-y: auto;
+    max-height: 740px;
+}
+.adv-main h3 {
+    font-size: 18px; font-weight: 800;
+    letter-spacing: -0.01em;
+}
+.adv-main .sub {
+    color: var(--text-secondary);
+    font-size: 13px;
+    margin-bottom: 18px;
+    margin-top: 2px;
+}
+
+.adv-aside {
+    background: var(--surface-1);
+    border-left: 1px solid var(--border);
+    padding: 18px 16px;
+}
+.adv-aside h4 {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    font-weight: 700;
+}
+
+/* Phase type cards */
+.adv-types {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 22px;
+}
+.adv-type-card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 14px;
+    text-align: left;
+    cursor: pointer;
+    transition: all .15s;
+    color: var(--text-primary);
+}
+.adv-type-card:hover { background: var(--surface-2); }
+.adv-type-card.selected { background: var(--accent-soft); border-color: var(--accent); }
+.adv-type-card .ico { font-size: 22px; margin-bottom: 6px; display: block; }
+.adv-type-card h4 { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+.adv-type-card p { font-size: 11.5px; color: var(--text-dim); line-height: 1.35; }
+
+/* Groups drag&drop */
+.groups-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 10px;
+}
+.group-zone {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 12px;
+    min-height: 130px;
+}
+.group-zone-head {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 8px;
+}
+.group-zone-head h5 {
+    font-size: 12.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-secondary);
+}
+.group-zone-head .count {
+    font-size: 11px;
+    color: var(--text-dim);
+    background: var(--surface-3);
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-weight: 700;
+}
+.group-zone .team-tile {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 12px;
+    margin-bottom: 4px;
+    display: flex; align-items: center; gap: 8px;
+    cursor: grab;
+}
+.group-zone .team-tile .grip { color: var(--text-dim); font-size: 12px; }
+.group-zone .team-tile .badge-mini {
+    margin-left: auto;
+    font-size: 10px;
+    color: var(--text-dim);
+    font-weight: 700;
+}
+
+.unassigned-pool {
+    margin-top: 14px;
+    background: rgba(96,165,250,0.05);
+    border: 1px dashed rgba(96,165,250,0.3);
+    border-radius: var(--r-md);
+    padding: 12px;
+}
+.unassigned-pool h5 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--info);
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+.unassigned-pool .pool {
+    display: flex; gap: 6px; flex-wrap: wrap;
+}
+.unassigned-pool .pool span {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 11.5px;
+    cursor: grab;
+}
+
+/* Criteria reorderable */
+.criteria-list {
+    display: grid;
+    gap: 6px;
+}
+.criterion {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 10px 12px;
+    display: grid;
+    grid-template-columns: 22px 22px 1fr 22px;
+    align-items: center;
+    gap: 10px;
+    cursor: grab;
+}
+.criterion.active { border-color: var(--accent); background: var(--accent-soft); }
+.criterion .grip { color: var(--text-dim); font-size: 14px; }
+.criterion .rank {
+    background: var(--surface-3);
+    color: var(--text-secondary);
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    display: grid; place-items: center;
+    font-size: 11px;
+    font-weight: 800;
+}
+.criterion.active .rank { background: var(--accent); color: #fff; }
+.criterion .name { font-size: 13px; font-weight: 600; }
+.criterion .rm { color: var(--text-dim); background: transparent; border: 0; cursor: pointer; }
+
+.criteria-available {
+    margin-top: 14px;
+    background: var(--surface-2);
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--r-md);
+    padding: 12px;
+}
+.criteria-available h5 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+.criteria-pool { display: flex; flex-wrap: wrap; gap: 6px; }
+.criteria-pool button {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.criteria-pool button:hover { color: var(--text-primary); border-color: var(--accent); }
+
+/* Tags editor */
+.tag-list { display: grid; gap: 8px; }
+.tag-row {
+    display: grid;
+    grid-template-columns: 60px 60px 1fr 36px 36px;
+    gap: 8px;
+    align-items: center;
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 8px 10px;
+}
+.tag-row input {
+    background: var(--surface-2);
+    border: 1px solid var(--border-strong);
+    color: var(--text-primary);
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 12px;
+    width: 100%;
+}
+.tag-row .pos-label { font-size: 10px; color: var(--text-dim); }
+.tag-row .swatch {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    border: 2px solid rgba(255,255,255,0.2);
+    cursor: pointer;
+}
+
+/* Fixture */
+.fixture-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+.fixture-action-card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 16px;
+    text-align: left;
+    cursor: pointer;
+    transition: all .15s;
+}
+.fixture-action-card:hover { background: var(--surface-2); border-color: var(--border-strong); }
+.fixture-action-card.primary { background: var(--accent-soft); border-color: var(--accent); }
+.fixture-action-card .ico { font-size: 22px; margin-bottom: 6px; display: block; }
+.fixture-action-card h4 { font-size: 13.5px; font-weight: 700; }
+.fixture-action-card p { font-size: 11.5px; color: var(--text-dim); margin-top: 2px; }
+
+.fx-list { display: grid; gap: 6px; }
+.fx-row {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 8px 12px;
+    display: grid;
+    grid-template-columns: 50px 1fr 90px 80px 28px;
+    align-items: center;
+    gap: 12px;
+    font-size: 12.5px;
+}
+.fx-row .round {
+    background: var(--surface-3);
+    color: var(--text-secondary);
+    border-radius: 999px;
+    padding: 2px 8px;
+    font-size: 10px;
+    font-weight: 800;
+    text-align: center;
+}
+.fx-row .matchup { font-weight: 600; }
+.fx-row .matchup .vs { color: var(--text-dim); margin: 0 6px; }
+.fx-row .date { color: var(--text-dim); font-size: 11px; }
+.fx-row .venue { color: var(--text-dim); font-size: 11px; font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fx-row .edit { background: transparent; border: 0; color: var(--text-dim); cursor: pointer; font-size: 14px; }
+.fx-row .edit:hover { color: var(--accent-2); }
+
+/* Aside summary card */
+.aside-card {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 12px;
+    margin-bottom: 12px;
+}
+.aside-card h5 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+    font-weight: 800;
+    margin-bottom: 6px;
+}
+.aside-stat {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1;
+}
+.aside-meta {
+    color: var(--text-secondary);
+    font-size: 11.5px;
+    margin-top: 3px;
+}
+.aside-issues { display: grid; gap: 6px; margin-top: 8px; }
+.aside-issue {
+    font-size: 11.5px;
+    color: var(--text-secondary);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 7px 9px;
+    display: flex; gap: 6px; align-items: flex-start;
+}
+.aside-issue.warn { border-color: rgba(250,204,21,0.3); background: rgba(250,204,21,0.05); }
+.aside-issue.ok { border-color: rgba(52,211,153,0.3); background: rgba(52,211,153,0.05); }
+
+/* ===== Bonus profesional ===== */
+.bonus-pro {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+.bonus-pro-head {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--border);
+}
+.bonus-pro-head .id-pill {
+    font-family: ui-monospace, monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    background: var(--surface-3);
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+.bonus-pro-head .title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+.bonus-pro-head .toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-dim);
+}
+.bonus-pro-head .toggle .dot {
+    width: 32px; height: 18px;
+    background: var(--surface-3);
+    border-radius: 999px;
+    position: relative;
+}
+.bonus-pro-head .toggle.on .dot { background: var(--accent); }
+.bonus-pro-head .toggle .dot::after {
+    content: '';
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform .15s;
+}
+.bonus-pro-head .toggle.on .dot::after { transform: translateX(14px); }
+.bonus-pro-head .toggle.on { color: var(--accent-2); }
+.bonus-pro-body {
+    padding: 14px;
+}
+.bonus-formula {
+    display: grid;
+    grid-template-columns: 100px 1fr 96px 1fr 80px;
+    gap: 8px;
+    align-items: end;
+}
+.bonus-formula .ff label {
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 800;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+    display: block;
+}
+.bonus-formula .ff select,
+.bonus-formula .ff input {
+    background: var(--surface-2);
+    border: 1px solid var(--border-strong);
+    color: var(--text-primary);
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    width: 100%;
+    font-family: ui-monospace, monospace;
+    font-weight: 600;
+}
+.bonus-formula .op {
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 18px;
+    font-weight: 800;
+    padding-bottom: 8px;
+}
+.bonus-formula-preview {
+    margin-top: 10px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-family: ui-monospace, monospace;
+    font-size: 11px;
+    color: var(--accent-2);
+}
+.bonus-formula-preview .arrow { color: var(--text-dim); }
+.bonus-row-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin-top: 10px;
+}
+.bonus-row-meta .ff {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 10px;
+}
+.bonus-row-meta .ff label {
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 800;
+    color: var(--text-dim);
+    display: block;
+    margin-bottom: 4px;
+}
+.bonus-row-meta .ff select {
+    background: transparent;
+    border: 0;
+    color: var(--text-primary);
+    font-size: 12px;
+    font-weight: 600;
+    width: 100%;
+    cursor: pointer;
+}
+.bonus-row-meta .ff select:focus { outline: none; }
+
+.bonus-sim {
+    margin-top: 10px;
+    background: rgba(96,165,250,0.06);
+    border: 1px solid rgba(96,165,250,0.25);
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 11.5px;
+    display: grid;
+    gap: 6px;
+}
+.bonus-sim .label {
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 800;
+    color: var(--info);
+}
+.bonus-sim .line {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    font-family: ui-monospace, monospace;
+}
+.bonus-sim .line .out {
+    color: var(--accent-2);
+    font-weight: 700;
+}
+.bonus-sim .line .out.zero { color: var(--text-dim); }
+
+.bonus-tabs {
+    display: inline-flex;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 3px;
+    margin-bottom: 14px;
+}
+.bonus-tabs button {
+    background: transparent; border: 0;
+    color: var(--text-secondary);
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 700;
+    cursor: pointer;
+}
+.bonus-tabs button.active {
+    background: var(--accent);
+    color: #fff;
+}
+
+.bonus-presets {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-top: 12px;
+}
+.bonus-preset-card {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    text-align: left;
+    cursor: pointer;
+    transition: all .12s;
+}
+.bonus-preset-card:hover {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+}
+.bonus-preset-card .pn {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex; align-items: center; gap: 6px;
+}
+.bonus-preset-card .pd {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 2px;
+    font-family: ui-monospace, monospace;
+}
+
+/* ===== Phase flow ===== */
+.phase-flow-graph {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 18px;
+    margin-bottom: 18px;
+}
+.phase-flow-grid {
+    display: grid;
+    grid-template-columns: 1fr 40px 1fr 40px 1fr;
+    align-items: stretch;
+    gap: 0;
+}
+.phase-node {
+    background: var(--surface-2);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--r-md);
+    padding: 14px;
+}
+.phase-node.active {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+}
+.phase-node.draft {
+    border-style: dashed;
+    opacity: 0.7;
+}
+.phase-node .pn-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+.phase-node .pn-num {
+    background: var(--surface-3);
+    border-radius: 999px;
+    width: 22px; height: 22px;
+    display: grid; place-items: center;
+    font-size: 10px;
+    font-weight: 800;
+}
+.phase-node.active .pn-num { background: var(--accent); color: #fff; }
+.phase-node .pn-type {
+    font-size: 10px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 700;
+}
+.phase-node h4 {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+.phase-node .io-block {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 8px;
+    margin-top: 6px;
+    font-size: 11px;
+}
+.phase-node.active .io-block { background: rgba(0,163,101,0.08); }
+.phase-node .io-block strong {
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+    font-weight: 800;
+    display: block;
+    margin-bottom: 2px;
+}
+.phase-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-dim);
+    font-size: 22px;
+    position: relative;
+}
+.phase-arrow::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent);
+    transform: translateY(-50%);
+}
+.phase-arrow .arrow-label {
+    background: var(--surface-1);
+    border: 1px solid var(--accent);
+    color: var(--accent-2);
+    padding: 2px 6px;
+    border-radius: 999px;
+    font-size: 9.5px;
+    font-weight: 800;
+    z-index: 1;
+    font-family: ui-monospace, monospace;
+    letter-spacing: 0.04em;
+}
+
+.phase-validation {
+    margin-top: 14px;
+    display: grid;
+    gap: 6px;
+}
+.phase-validation .v-row {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 11.5px;
+    padding: 7px 10px;
+    border-radius: 6px;
+}
+.phase-validation .v-row.ok {
+    background: rgba(52,211,153,0.08);
+    color: var(--success);
+}
+.phase-validation .v-row.warn {
+    background: rgba(250,204,21,0.08);
+    color: var(--warning);
+}
+.phase-validation .v-row code {
+    font-family: ui-monospace, monospace;
+    background: rgba(255,255,255,0.05);
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-size: 11px;
+}
+
+/* ===== Criterio funcional ===== */
+.crit-pro {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 12px;
+    margin-bottom: 8px;
+}
+.crit-pro-head {
+    display: grid;
+    grid-template-columns: 22px 24px 1fr auto auto;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+.crit-pro-head .grip { color: var(--text-dim); cursor: grab; font-size: 14px; }
+.crit-pro-head .rank {
+    background: var(--accent);
+    color: #fff;
+    width: 24px; height: 24px;
+    border-radius: 6px;
+    display: grid; place-items: center;
+    font-size: 11px;
+    font-weight: 800;
+}
+.crit-pro-head .name {
+    font-size: 13px;
+    font-weight: 700;
+}
+.crit-pro-head .name .scope {
+    font-size: 10px;
+    color: var(--text-dim);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-left: 8px;
+    background: var(--surface-3);
+    padding: 2px 7px;
+    border-radius: 4px;
+}
+.crit-pro-head .formula-tag {
+    font-family: ui-monospace, monospace;
+    font-size: 10.5px;
+    color: var(--accent-2);
+    background: var(--accent-soft);
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 700;
+}
+.crit-pro-head .rm {
+    background: transparent; border: 0; color: var(--text-dim); cursor: pointer; font-size: 16px;
+}
+.crit-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    padding: 8px 0 0 56px;
+}
+.crit-option-pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 11px;
+    background: var(--surface-2);
+    border: 1px solid var(--border-strong);
+    padding: 5px 10px;
+    border-radius: 999px;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+.crit-option-pill.on {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: var(--accent-2);
+}
+
+/* Simulator panel */
+.crit-sim {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 14px;
+    margin-top: 14px;
+}
+.crit-sim h5 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+    font-weight: 800;
+    margin-bottom: 10px;
+    display: flex; align-items: center; gap: 6px;
+}
+.crit-sim .scenario {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+.crit-sim .scenario .sc-team {
+    display: grid;
+    grid-template-columns: 24px 1fr auto;
+    gap: 8px;
+    align-items: center;
+    padding: 5px 0;
+    font-size: 12px;
+    border-bottom: 1px dashed var(--border);
+}
+.crit-sim .scenario .sc-team:last-child { border-bottom: 0; }
+.crit-sim .scenario .sc-team .pos {
+    background: var(--accent);
+    color: #fff;
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    display: grid; place-items: center;
+    font-size: 11px;
+    font-weight: 800;
+}
+.crit-sim .scenario .sc-team .stats {
+    font-family: ui-monospace, monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+}
+.crit-trace {
+    margin-top: 10px;
+    background: var(--surface-2);
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-family: ui-monospace, monospace;
+    font-size: 11px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+.crit-trace .step {
+    display: grid;
+    grid-template-columns: 16px 1fr auto;
+    gap: 8px;
+    align-items: center;
+}
+.crit-trace .step .ok { color: var(--success); }
+.crit-trace .step .fail { color: var(--text-dim); }
+.crit-trace .step .out {
+    color: var(--accent-2);
+    font-weight: 700;
+}
+
+/* Modal sample (Team selector) */
+.adv-modal {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 18px;
+    margin-top: 20px;
+}
+.adv-modal-head {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 12px;
+}
+.adv-modal-head h4 {
+    font-size: 14px; font-weight: 800;
+}
+
+/* Footer notes */
+.notes {
+    margin-top: 50px;
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 24px;
+}
+.notes h3 { font-size: 16px; font-weight: 700; margin-bottom: 10px; }
+.notes ul { padding-left: 18px; color: var(--text-secondary); font-size: 13px; }
+.notes li { margin-bottom: 6px; }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+<div class="page-head">
+    <h1 class="page-title">Crear torneo · nuevo flujo</h1>
+    <p class="page-sub">
+        Plantilla primero, wizard reducido a 3 pasos, validación en vivo, controles touch-friendly. Mobile-first.
+        Hacé click en los tabs para ver cada paso, ambos viewports en paralelo.
+    </p>
+</div>
+
+<div class="toolbar" role="tablist">
+    <button class="active" data-pane="p-tpl">0. Plantilla</button>
+    <button data-pane="p-s1">1. Lo básico</button>
+    <button data-pane="p-s2">2. Estructura</button>
+    <button data-pane="p-s3">3. Participantes</button>
+    <button data-pane="p-s4">✓ Revisión</button>
+    <button data-pane="p-adv" style="background: rgba(96,165,250,0.15); color: var(--info);">⚙ Modo avanzado</button>
+</div>
+
+<div style="background: rgba(96,165,250,0.06); border: 1px solid rgba(96,165,250,0.25); border-radius: 10px; padding: 12px 16px; margin: -16px 0 24px; font-size: 13px; color: var(--text-secondary);">
+    <strong style="color: var(--info);">Dos modos coexisten:</strong> el flujo rápido (pestañas 0 → ✓) cubre el 80% de los torneos. Para casos complejos (multi-fase, grupos asignados a mano, criterios de desempate personalizados, tags por posición, fixture importado), hay un <strong>modo avanzado</strong> con el editor completo del sistema actual rediseñado. Lo cargado en el modo rápido se preserva al abrir el avanzado, y viceversa.
+</div>
+
+<!-- ====================== PANEL 0: TEMPLATE PICKER ====================== -->
+<section class="pane active" id="p-tpl">
+<div class="viewport-row split">
+
+    <div>
+        <span class="frame-label">Mobile · 360px</span>
+        <div class="mobile-frame">
+            <div class="mobile-screen">
+                <div class="top-app-bar">
+                    <button class="back">←</button>
+                    <div>
+                        <div class="title">Nuevo torneo</div>
+                        <div class="sub">Elegí cómo empezar</div>
+                    </div>
+                </div>
+
+                <div class="tpl-hero">
+                    <h1>¿Qué tipo de torneo querés crear?</h1>
+                    <p>Elegí una plantilla y completá solo lo esencial. Después podés ajustar todo.</p>
+                </div>
+
+                <div class="tpl-grid">
+                    <button class="tpl-card popular" onclick="goTo('p-s1')">
+                        <div class="tpl-icon green">🏆</div>
+                        <div class="tpl-body">
+                            <h3>Liga · todos contra todos</h3>
+                            <p>Round-robin · sumás puntos por victoria, empate y derrota · ida y vuelta opcional</p>
+                        </div>
+                        <span class="tpl-chev">›</span>
+                    </button>
+
+                    <button class="tpl-card" onclick="goTo('p-s1')">
+                        <div class="tpl-icon blue">🥊</div>
+                        <div class="tpl-body">
+                            <h3>Eliminación directa</h3>
+                            <p>Llaves · cuartos, semis, final · sin segunda chance</p>
+                        </div>
+                        <span class="tpl-chev">›</span>
+                    </button>
+
+                    <button class="tpl-card" onclick="goTo('p-s1')">
+                        <div class="tpl-icon amber">🎯</div>
+                        <div class="tpl-body">
+                            <h3>Grupos + Playoff</h3>
+                            <p>Fase de grupos seguida de eliminación · ideal con muchos equipos</p>
+                        </div>
+                        <span class="tpl-chev">›</span>
+                    </button>
+
+                    <button class="tpl-card" onclick="goTo('p-s1')">
+                        <div class="tpl-icon gray">🏁</div>
+                        <div class="tpl-body">
+                            <h3>Circuito por eventos</h3>
+                            <p>Varias paradas en la temporada · tabla acumulada · con final opcional</p>
+                        </div>
+                        <span class="tpl-chev">›</span>
+                    </button>
+
+                    <button class="tpl-card" onclick="goTo('p-s1')" style="grid-template-columns: 48px 1fr auto; border-style: dashed;">
+                        <div class="tpl-icon gray">⚙️</div>
+                        <div class="tpl-body">
+                            <h3>Personalizado · multi-fase</h3>
+                            <p>Configurás cada fase desde cero con el wizard avanzado</p>
+                        </div>
+                        <span class="tpl-chev">›</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <span class="frame-label desktop">Desktop · ≥1024px</span>
+        <div class="desktop-frame">
+            <div class="desktop-chrome">
+                <div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+                <span class="url">grupo-22-scores.app / admin / torneos / crear</span>
+            </div>
+            <div class="desktop-body">
+                <div class="desktop-head">
+                    <button class="back">←</button>
+                    <div>
+                        <h1>Crear torneo</h1>
+                        <p>Elegí una plantilla para empezar. Podés cambiar todo después.</p>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;">
+                    <button class="tpl-card popular" style="grid-template-columns: 1fr; text-align: center; padding: 24px 18px;" onclick="goTo('p-s1')">
+                        <div class="tpl-icon green" style="margin: 0 auto 12px; width: 64px; height: 64px; font-size: 28px;">🏆</div>
+                        <div class="tpl-body">
+                            <h3 style="font-size: 16px;">Liga · todos contra todos</h3>
+                            <p>Round-robin. Cada equipo enfrenta a todos los demás. Lo más usado.</p>
+                        </div>
+                    </button>
+                    <button class="tpl-card" style="grid-template-columns: 1fr; text-align: center; padding: 24px 18px;" onclick="goTo('p-s1')">
+                        <div class="tpl-icon blue" style="margin: 0 auto 12px; width: 64px; height: 64px; font-size: 28px;">🥊</div>
+                        <div class="tpl-body">
+                            <h3 style="font-size: 16px;">Eliminación directa</h3>
+                            <p>Cuartos, semis, final. Sin segunda oportunidad. Perfecto para copas.</p>
+                        </div>
+                    </button>
+                    <button class="tpl-card" style="grid-template-columns: 1fr; text-align: center; padding: 24px 18px;" onclick="goTo('p-s1')">
+                        <div class="tpl-icon amber" style="margin: 0 auto 12px; width: 64px; height: 64px; font-size: 28px;">🎯</div>
+                        <div class="tpl-body">
+                            <h3 style="font-size: 16px;">Grupos + Playoff</h3>
+                            <p>Zonas + eliminación. Ideal con muchos equipos: clasifican los mejores de cada grupo.</p>
+                        </div>
+                    </button>
+                    <button class="tpl-card" style="grid-template-columns: 1fr; text-align: center; padding: 24px 18px;" onclick="goTo('p-s1')">
+                        <div class="tpl-icon gray" style="margin: 0 auto 12px; width: 64px; height: 64px; font-size: 28px;">🏁</div>
+                        <div class="tpl-body">
+                            <h3 style="font-size: 16px;">Circuito por eventos</h3>
+                            <p>Múltiples paradas en la temporada. Tabla acumulada o final decisiva.</p>
+                        </div>
+                    </button>
+                </div>
+
+                <div style="margin-top: 16px;">
+                    <button class="tpl-card" style="width: 100%; grid-template-columns: 48px 1fr auto; border-style: dashed;" onclick="goTo('p-s1')">
+                        <div class="tpl-icon gray">⚙️</div>
+                        <div class="tpl-body">
+                            <h3>Personalizado · multi-fase</h3>
+                            <p>Configurás cada fase desde cero con el wizard avanzado. Para casos especiales como ligas con repechaje, divisiones, ascensos/descensos.</p>
+                        </div>
+                        <span class="tpl-chev">›</span>
+                    </button>
+                </div>
+
+                <div class="callout" style="margin-top: 24px;">
+                    💡 <div><strong>Tip:</strong> 8 de cada 10 torneos usan "Liga · todos contra todos". Si no estás seguro, empezá ahí — podés cambiar el formato más tarde sin perder los participantes ni los partidos cargados.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</section>
+
+<!-- ====================== PANEL 1: STEP 1 LO BÁSICO ====================== -->
+<section class="pane" id="p-s1">
+<div class="viewport-row split">
+
+    <div>
+        <span class="frame-label">Mobile · 360px</span>
+        <div class="mobile-frame">
+            <div class="mobile-screen">
+                <div class="top-app-bar">
+                    <button class="back" onclick="goTo('p-tpl')">←</button>
+                    <div>
+                        <div class="title">Liga clásica</div>
+                        <div class="sub">Plantilla seleccionada</div>
+                    </div>
+                </div>
+
+                <div class="wiz-progress">
+                    <div class="crumb">
+                        <span>Paso <strong>1 de 3</strong></span>
+                        <span>Lo básico</span>
+                    </div>
+                    <div class="wiz-bar"><span style="width: 33%"></span></div>
+                </div>
+
+                <div class="wiz-body">
+                    <h2 class="section-title">Información del torneo</h2>
+                    <p class="section-sub">Solo lo imprescindible. El logo y la página pública se configuran después.</p>
+
+                    <div class="field">
+                        <label>Nombre del torneo <span class="req">*</span></label>
+                        <input type="text" value="Torneo del Interior A" class="is-ok" />
+                        <div class="ok">✓ Disponible · slug torneo-del-interior-a</div>
+                    </div>
+
+                    <div class="field">
+                        <label>Deporte <span class="req">*</span></label>
+                        <div class="sport-pick">
+                            <button class="selected"><span class="emo">🏉</span>Rugby</button>
+                            <button><span class="emo">⚽</span>Fútbol</button>
+                            <button><span class="emo">🏀</span>Básquet</button>
+                            <button><span class="emo">🏑</span>Hockey</button>
+                        </div>
+                        <button class="sport-more" type="button">+ Ver los 32 deportes</button>
+                    </div>
+
+                    <div class="row-2">
+                        <div class="field">
+                            <label>Temporada</label>
+                            <select>
+                                <option>2026</option>
+                                <option>2025</option>
+                                <option>2024</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>Categoría</label>
+                            <input type="text" placeholder="Primera" />
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label>Audiencia pública</label>
+                        <div class="audience-row">
+                            <button class="selected">
+                                Mayores
+                                <span class="small">Aparece en la portada principal</span>
+                            </button>
+                            <button>
+                                Juveniles
+                                <span class="small">Sección juvenil</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <details class="disclosure">
+                        <summary>Más opciones (país, unión, clasificación de edad)</summary>
+                        <div class="disclosure-body">
+                            <div class="field">
+                                <label>País / Región</label>
+                                <select>
+                                    <option>Argentina</option>
+                                    <option>Uruguay</option>
+                                    <option>Chile</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label>Unión vinculada</label>
+                                <select>
+                                    <option>Independiente (sin vínculo)</option>
+                                    <option>UAR</option>
+                                    <option>URBA</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label>Clasificación de edad</label>
+                                <select>
+                                    <option>Mayores (Adults)</option>
+                                    <option>U23</option>
+                                    <option>U20</option>
+                                    <option>U18</option>
+                                </select>
+                            </div>
+                        </div>
+                    </details>
+                </div>
+
+                <div class="wiz-nav-mobile">
+                    <button class="btn ghost" onclick="goTo('p-tpl')">Atrás</button>
+                    <button class="btn primary" onclick="goTo('p-s2')">Siguiente</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <span class="frame-label desktop">Desktop · ≥1024px</span>
+        <div class="desktop-frame">
+            <div class="desktop-chrome">
+                <div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+                <span class="url">grupo-22-scores.app / admin / torneos / crear · paso 1</span>
+            </div>
+            <div class="desktop-body">
+                <div class="desktop-head">
+                    <button class="back" onclick="goTo('p-tpl')">←</button>
+                    <div>
+                        <h1>Crear torneo · Liga clásica</h1>
+                        <p>Completá lo básico. Validamos en vivo, sin sorpresas al final.</p>
+                    </div>
+                </div>
+
+                <div class="dk-stepper">
+                    <div class="dk-step active">
+                        <div class="num">1</div>
+                        <div class="lbl">Lo básico<span class="small">Nombre y deporte</span></div>
+                    </div>
+                    <div class="dk-step">
+                        <div class="num">2</div>
+                        <div class="lbl">Estructura<span class="small">Cantidad y formato</span></div>
+                    </div>
+                    <div class="dk-step">
+                        <div class="num">3</div>
+                        <div class="lbl">Participantes<span class="small">Equipos (opcional)</span></div>
+                    </div>
+                </div>
+
+                <div class="dk-grid">
+                    <div class="dk-card">
+                        <h3 class="dk-card-title">Información del torneo</h3>
+                        <p class="dk-card-sub">Lo justo para crearlo. Detalles como logo, colores y publicación van después.</p>
+
+                        <div class="field">
+                            <label>Nombre del torneo <span class="req">*</span></label>
+                            <input type="text" value="Torneo del Interior A" class="is-ok" />
+                            <div class="ok">✓ Nombre disponible · URL: /torneos/torneo-del-interior-a</div>
+                        </div>
+
+                        <div class="field">
+                            <label>Deporte <span class="req">*</span></label>
+                            <div class="dk-sport-grid">
+                                <button class="selected"><span class="emo">🏉</span>Rugby</button>
+                                <button><span class="emo">⚽</span>Fútbol</button>
+                                <button><span class="emo">🏀</span>Básquet</button>
+                                <button><span class="emo">🏑</span>Hockey</button>
+                                <button><span class="emo">🎾</span>Tenis</button>
+                                <button><span class="emo">🏐</span>Voley</button>
+                            </div>
+                            <button class="sport-more" type="button" style="margin-top: 10px;">+ Ver los 32 deportes</button>
+                        </div>
+
+                        <div class="row-2" style="gap: 16px;">
+                            <div class="field">
+                                <label>Temporada</label>
+                                <select><option>2026</option><option>2025</option><option>2024</option></select>
+                            </div>
+                            <div class="field">
+                                <label>Categoría</label>
+                                <input type="text" placeholder="Primera" />
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label>Audiencia pública</label>
+                            <div class="audience-row">
+                                <button class="selected">Mayores<span class="small">Aparece en la portada principal</span></button>
+                                <button>Juveniles<span class="small">Sección juvenil</span></button>
+                            </div>
+                        </div>
+
+                        <details class="disclosure">
+                            <summary>Más opciones · país, unión y clasificación de edad</summary>
+                            <div class="disclosure-body">
+                                <div class="row-2" style="gap: 16px;">
+                                    <div class="field">
+                                        <label>País / Región</label>
+                                        <select><option>Argentina</option><option>Uruguay</option></select>
+                                    </div>
+                                    <div class="field">
+                                        <label>Unión vinculada</label>
+                                        <select><option>Independiente (sin vínculo)</option><option>UAR</option><option>URBA</option></select>
+                                    </div>
+                                </div>
+                                <div class="field">
+                                    <label>Clasificación de edad</label>
+                                    <select><option>Mayores (Adults)</option><option>U20</option><option>U18</option></select>
+                                </div>
+                            </div>
+                        </details>
+                    </div>
+
+                    <aside class="dk-side">
+                        <h3>Vista previa en vivo</h3>
+                        <div class="dk-preview-card">
+                            <div class="dk-preview-logo">TI</div>
+                            <div>
+                                <div class="dk-preview-name">Torneo del Interior A</div>
+                                <div class="dk-preview-meta">Rugby · 2026 · Mayores</div>
+                            </div>
+                        </div>
+                        <div class="summary">
+                            <div class="summary-row"><span class="k">Plantilla</span><span class="v">Liga clásica</span></div>
+                            <div class="summary-row"><span class="k">Audiencia</span><span class="v">Mayores</span></div>
+                            <div class="summary-row"><span class="k">URL</span><span class="v" style="font-size: 11px; color: var(--accent-2);">/torneos/torneo-…</span></div>
+                            <div class="summary-row"><span class="k">Validación</span><span class="v"><span class="tag success">Listo</span></span></div>
+                        </div>
+                        <p style="font-size: 11px; color: var(--text-dim); margin-top: 8px;">Esta tarjeta refleja exactamente cómo va a verse en el catálogo público.</p>
+                    </aside>
+                </div>
+
+                <div class="dk-bottom">
+                    <div class="left">Atajos: <span class="kbd">Tab</span> avanzar · <span class="kbd">↵</span> siguiente paso</div>
+                    <div class="actions">
+                        <button class="btn ghost" onclick="goTo('p-tpl')">Atrás</button>
+                        <button class="btn primary" onclick="goTo('p-s2')">Siguiente: Estructura →</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</section>
+
+<!-- ====================== PANEL 2: STEP 2 ESTRUCTURA ====================== -->
+<section class="pane" id="p-s2">
+<div class="viewport-row split">
+
+    <div>
+        <span class="frame-label">Mobile · 360px</span>
+        <div class="mobile-frame">
+            <div class="mobile-screen">
+                <div class="top-app-bar">
+                    <button class="back" onclick="goTo('p-s1')">←</button>
+                    <div>
+                        <div class="title">Estructura</div>
+                        <div class="sub">Torneo del Interior A</div>
+                    </div>
+                </div>
+
+                <div class="wiz-progress">
+                    <div class="crumb"><span>Paso <strong>2 de 3</strong></span><span>Estructura</span></div>
+                    <div class="wiz-bar"><span style="width: 66%"></span></div>
+                </div>
+
+                <div class="wiz-body">
+                    <h2 class="section-title">¿Cómo se juega?</h2>
+                    <p class="section-sub">Tu plantilla "Liga clásica" ya viene precargada. Ajustá solo lo que necesites.</p>
+
+                    <div class="fmt-card">
+                        <h4>Formato: <span class="tag success" style="margin-left: 6px;">Round-robin</span></h4>
+                        <p>Todos los equipos juegan contra todos. Podés activar ida y vuelta abajo.</p>
+                    </div>
+
+                    <div class="field">
+                        <label>Cantidad de equipos</label>
+                        <div class="counter">
+                            <button>−</button>
+                            <input type="number" value="8" />
+                            <button>+</button>
+                        </div>
+                        <div class="help">Mínimo 3, máximo 32. Podés agregar o sacar después.</div>
+                    </div>
+
+                    <div class="field">
+                        <label>Modalidad</label>
+                        <div class="audience-row">
+                            <button class="selected">Solo ida<span class="small">7 fechas</span></button>
+                            <button>Ida y vuelta<span class="small">14 fechas</span></button>
+                        </div>
+                    </div>
+
+                    <div class="live-preview">
+                        <div class="kicker">Vista previa</div>
+                        <strong>8 equipos · 7 fechas · 28 partidos</strong>
+                        <div class="meta">Empieza el sábado siguiente al guardar. Editable después.</div>
+                    </div>
+
+                    <details class="disclosure">
+                        <summary>Puntos por partido</summary>
+                        <div class="disclosure-body">
+                            <div class="row-2">
+                                <div class="field">
+                                    <label>Victoria</label>
+                                    <input type="number" value="4" />
+                                </div>
+                                <div class="field">
+                                    <label>Empate</label>
+                                    <input type="number" value="2" />
+                                </div>
+                            </div>
+                            <div class="row-2">
+                                <div class="field">
+                                    <label>Derrota</label>
+                                    <input type="number" value="0" />
+                                </div>
+                                <div class="field">
+                                    <label>Walkover (no presentación)</label>
+                                    <input type="number" value="0" />
+                                </div>
+                            </div>
+                            <p class="help">Valores por defecto para rugby. Cambialos si tu liga usa otro reglamento.</p>
+                        </div>
+                    </details>
+
+                    <details class="disclosure">
+                        <summary>Puntos bonus <span class="tag info" style="margin-left: 6px;">2 reglas</span></summary>
+                        <div class="disclosure-body">
+                            <p class="help" style="margin-bottom: 10px;">Reglas extra que suman puntos según ciertas condiciones. Podés agregar cuantas necesites.</p>
+
+                            <div class="bonus-list">
+                                <div class="bonus-rule">
+                                    <div class="cond">
+                                        <span class="bonus-preset-pill">Ofensivo</span>
+                                        <select>
+                                            <option>4 o más tries en el partido</option>
+                                            <option>5 o más tries</option>
+                                            <option>Personalizado…</option>
+                                        </select>
+                                        <div class="desc">Premia al ataque, suma sin importar el resultado</div>
+                                    </div>
+                                    <div class="pts">
+                                        <input type="number" value="1" />
+                                        <span class="label-pts">pts</span>
+                                    </div>
+                                    <button class="rm" title="Eliminar regla">×</button>
+                                </div>
+
+                                <div class="bonus-rule">
+                                    <div class="cond">
+                                        <span class="bonus-preset-pill">Defensivo</span>
+                                        <select>
+                                            <option>Perder por 7 puntos o menos</option>
+                                            <option>Perder por 5 puntos o menos</option>
+                                            <option>Personalizado…</option>
+                                        </select>
+                                        <div class="desc">Premia al perdedor que jugó cerrado</div>
+                                    </div>
+                                    <div class="pts">
+                                        <input type="number" value="1" />
+                                        <span class="label-pts">pts</span>
+                                    </div>
+                                    <button class="rm" title="Eliminar regla">×</button>
+                                </div>
+                            </div>
+
+                            <div class="bonus-add-row">
+                                <button>＋ Valla invicta</button>
+                                <button>＋ Goleada (4+ diferencia)</button>
+                                <button>＋ Ganar de visitante</button>
+                                <button>＋ Personalizado…</button>
+                            </div>
+                        </div>
+                    </details>
+                </div>
+
+                <div class="wiz-nav-mobile">
+                    <button class="btn ghost" onclick="goTo('p-s1')">Atrás</button>
+                    <button class="btn primary" onclick="goTo('p-s3')">Siguiente</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <span class="frame-label desktop">Desktop · ≥1024px</span>
+        <div class="desktop-frame">
+            <div class="desktop-chrome">
+                <div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+                <span class="url">grupo-22-scores.app / admin / torneos / crear · paso 2</span>
+            </div>
+            <div class="desktop-body">
+                <div class="desktop-head">
+                    <button class="back" onclick="goTo('p-s1')">←</button>
+                    <div>
+                        <h1>Estructura del torneo</h1>
+                        <p>La plantilla "Liga clásica" precargó casi todo. Confirmá la cantidad de equipos y modalidad.</p>
+                    </div>
+                </div>
+
+                <div class="dk-stepper">
+                    <div class="dk-step done"><div class="num">✓</div><div class="lbl">Lo básico<span class="small">Torneo del Interior A</span></div></div>
+                    <div class="dk-step active"><div class="num">2</div><div class="lbl">Estructura<span class="small">Cantidad y formato</span></div></div>
+                    <div class="dk-step"><div class="num">3</div><div class="lbl">Participantes<span class="small">Equipos (opcional)</span></div></div>
+                </div>
+
+                <div class="dk-grid">
+                    <div class="dk-card">
+                        <h3 class="dk-card-title">¿Cómo se juega?</h3>
+                        <p class="dk-card-sub">Tu plantilla "Liga clásica" precargó round-robin. Editá solo lo que necesites.</p>
+
+                        <div class="fmt-card">
+                            <h4>Formato: <span class="tag success" style="margin-left: 6px;">Round-robin</span> <button style="background: transparent; border: 0; color: var(--accent-2); font-size: 12px; font-weight: 600; margin-left: 10px;">Cambiar →</button></h4>
+                            <p>Todos los equipos se enfrentan entre sí. Sumás puntos por victoria/empate/derrota.</p>
+                        </div>
+
+                        <div class="row-2" style="gap: 16px;">
+                            <div class="field">
+                                <label>Cantidad de equipos</label>
+                                <div class="counter">
+                                    <button>−</button>
+                                    <input type="number" value="8" />
+                                    <button>+</button>
+                                </div>
+                                <div class="help">Mínimo 3, máximo 32</div>
+                            </div>
+                            <div class="field">
+                                <label>Modalidad</label>
+                                <div class="audience-row">
+                                    <button class="selected">Solo ida<span class="small">7 fechas</span></button>
+                                    <button>Ida y vuelta<span class="small">14 fechas</span></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <details class="disclosure" open>
+                            <summary>Puntos por partido <span class="tag info" style="margin-left: 8px;">Defaults de rugby</span></summary>
+                            <div class="disclosure-body">
+                                <div class="row-2" style="gap: 16px;">
+                                    <div class="field">
+                                        <label>Puntos por victoria</label>
+                                        <input type="number" value="4" />
+                                    </div>
+                                    <div class="field">
+                                        <label>Puntos por empate</label>
+                                        <input type="number" value="2" />
+                                    </div>
+                                </div>
+                                <div class="row-2" style="gap: 16px;">
+                                    <div class="field">
+                                        <label>Puntos por derrota</label>
+                                        <input type="number" value="0" />
+                                    </div>
+                                    <div class="field">
+                                        <label>Bonus try (4 tries o +)</label>
+                                        <input type="number" value="1" />
+                                    </div>
+                                </div>
+                            </div>
+                        </details>
+
+                        <details class="disclosure">
+                            <summary>Desempates · criterios de tabla</summary>
+                            <div class="disclosure-body">
+                                <p class="help">Definí el orden cuando dos equipos tienen los mismos puntos. Drag-and-drop para reordenar.</p>
+                                <ol style="padding-left: 22px; margin-top: 8px; color: var(--text-secondary);">
+                                    <li style="margin: 6px 0;">1. Puntos obtenidos</li>
+                                    <li style="margin: 6px 0;">2. Diferencia de tantos</li>
+                                    <li style="margin: 6px 0;">3. Tantos a favor</li>
+                                    <li style="margin: 6px 0;">4. Enfrentamiento directo</li>
+                                </ol>
+                            </div>
+                        </details>
+
+                        <details class="disclosure">
+                            <summary>Configurador avanzado de fases <span class="tag info" style="margin-left: 8px;">Multi-fase</span></summary>
+                            <div class="disclosure-body">
+                                <p class="help">Si tu torneo tiene más de una fase (ej: clasificación + playoff, o grupos + final), abrí el configurador completo de fases.</p>
+                                <button class="btn ghost" style="margin-top: 8px;">Abrir configurador de fases →</button>
+                            </div>
+                        </details>
+                    </div>
+
+                    <aside class="dk-side">
+                        <h3>Vista previa en vivo</h3>
+                        <div class="live-preview" style="margin: 0 0 12px;">
+                            <div class="kicker">Tu liga generará</div>
+                            <strong style="font-size: 18px;">28 partidos</strong>
+                            <div class="meta">8 equipos · 7 fechas · solo ida</div>
+                        </div>
+                        <div class="summary">
+                            <div class="summary-row"><span class="k">Formato</span><span class="v">Round-robin</span></div>
+                            <div class="summary-row"><span class="k">Equipos</span><span class="v">8</span></div>
+                            <div class="summary-row"><span class="k">Fechas</span><span class="v">7</span></div>
+                            <div class="summary-row"><span class="k">Partidos</span><span class="v">28</span></div>
+                            <div class="summary-row"><span class="k">Puntos victoria</span><span class="v">4</span></div>
+                        </div>
+                    </aside>
+                </div>
+
+                <div class="dk-bottom">
+                    <div class="left"><span class="tag info">Auto-guardado</span> Borrador guardado hace 12s</div>
+                    <div class="actions">
+                        <button class="btn ghost" onclick="goTo('p-s1')">← Atrás</button>
+                        <button class="btn primary" onclick="goTo('p-s3')">Siguiente: Participantes →</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</section>
+
+<!-- ====================== PANEL 3: STEP 3 PARTICIPANTES ====================== -->
+<section class="pane" id="p-s3">
+<div class="viewport-row split">
+
+    <div>
+        <span class="frame-label">Mobile · 360px</span>
+        <div class="mobile-frame">
+            <div class="mobile-screen">
+                <div class="top-app-bar">
+                    <button class="back" onclick="goTo('p-s2')">←</button>
+                    <div>
+                        <div class="title">Participantes</div>
+                        <div class="sub">Opcional · podés saltar</div>
+                    </div>
+                </div>
+
+                <div class="wiz-progress">
+                    <div class="crumb"><span>Paso <strong>3 de 3</strong></span><span>Participantes</span></div>
+                    <div class="wiz-bar"><span style="width: 100%"></span></div>
+                </div>
+
+                <div class="wiz-body">
+                    <h2 class="section-title">Equipos del torneo</h2>
+                    <p class="section-sub">Buscá en el catálogo y agregá los participantes. Podés saltar este paso y cargarlos después.</p>
+
+                    <div class="selected-summary">
+                        <div><strong>3</strong> equipos seleccionados · faltan <strong>5</strong></div>
+                        <button>Ver lista →</button>
+                    </div>
+
+                    <div class="search-bar">
+                        <span class="ico">🔍</span>
+                        <input type="text" placeholder="Buscar club, selección, franquicia o academia…" value="bel" />
+                    </div>
+
+                    <div class="chips">
+                        <span class="chip active">Todos <span class="count">2.341</span></span>
+                        <span class="chip">Clubes <span class="count">1.890</span></span>
+                        <span class="chip">Selecciones <span class="count">112</span></span>
+                        <span class="chip">Franquicias <span class="count">38</span></span>
+                        <span class="chip">Academias <span class="count">301</span></span>
+                    </div>
+
+                    <div class="search-meta">
+                        <span>14 resultados para "bel"</span>
+                        <button>Crear club nuevo</button>
+                    </div>
+
+                    <div class="club-list">
+                        <div class="club-card added">
+                            <div class="chk">✓</div>
+                            <div class="club-logo" style="background: #1e3a8a; color: #fff;">BEL</div>
+                            <div class="club-info">
+                                <div class="club-name">Belgrano Athletic <span class="entity-tag club">Club</span></div>
+                                <div class="club-meta">Buenos Aires · Argentina</div>
+                                <div class="squad-picker">
+                                    <label>Plantel a inscribir</label>
+                                    <select>
+                                        <option>Primera M (Rugby / Masculino) · 2026</option>
+                                        <option>Intermedia M (Rugby / Masculino) · 2026</option>
+                                    </select>
+                                    <span class="squad-info">2 planteles disponibles · elegí cuál inscribir</span>
+                                </div>
+                            </div>
+                            <button class="club-action">Quitar</button>
+                        </div>
+
+                        <div class="club-card">
+                            <div class="chk"></div>
+                            <div class="club-logo" style="background: #16a34a; color: #fff;">BG</div>
+                            <div class="club-info">
+                                <div class="club-name">Belgrano (Córdoba) <span class="entity-tag club">Club</span></div>
+                                <div class="club-meta">Córdoba · Argentina</div>
+                            </div>
+                            <button class="club-action">Añadir</button>
+                        </div>
+
+                        <div class="club-card">
+                            <div class="chk"></div>
+                            <div class="club-logo" style="background: #4338ca; color: #fff;">BS</div>
+                            <div class="club-info">
+                                <div class="club-name">Belgrano Sur Academy <span class="entity-tag acad">Academia</span></div>
+                                <div class="club-meta">Avellaneda · Sin planteles vinculados</div>
+                            </div>
+                            <button class="club-action">Añadir</button>
+                        </div>
+
+                        <div class="club-card added">
+                            <div class="chk">✓</div>
+                            <div class="club-logo" style="background: #b91c1c; color: #fff;">BR</div>
+                            <div class="club-info">
+                                <div class="club-name">Belarmino RC <span class="entity-tag franq">Franquicia</span></div>
+                                <div class="club-meta">San Isidro · Argentina</div>
+                                <div class="squad-picker">
+                                    <span class="squad-info">✓ Plantel detectado automáticamente — Primera M 2026</span>
+                                </div>
+                            </div>
+                            <button class="club-action">Quitar</button>
+                        </div>
+
+                        <div class="club-card added">
+                            <div class="chk">✓</div>
+                            <div class="club-logo" style="background: #4b5563; color: #fff;">BE</div>
+                            <div class="club-info">
+                                <div class="club-name">Belén Selección Provincial <span class="entity-tag selec">Selección</span></div>
+                                <div class="club-meta">Catamarca · Argentina</div>
+                                <div class="squad-picker">
+                                    <span class="squad-legacy">Compite en modo legacy hasta que tenga planteles vinculados</span>
+                                </div>
+                            </div>
+                            <button class="club-action">Quitar</button>
+                        </div>
+                    </div>
+
+                    <button class="parti-add">＋ Crear club rápido sin salir del wizard</button>
+
+                    <div class="callout" style="margin-top: 14px;">
+                        💡 <div>Si el equipo no está en el catálogo, podés crearlo desde acá con solo nombre y ubicación. Después lo completás.</div>
+                    </div>
+                </div>
+
+                <div class="wiz-nav-mobile">
+                    <button class="btn ghost" onclick="goTo('p-s2')">Atrás</button>
+                    <button class="btn primary" onclick="goTo('p-s4')">Crear torneo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <span class="frame-label desktop">Desktop · ≥1024px</span>
+        <div class="desktop-frame">
+            <div class="desktop-chrome">
+                <div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+                <span class="url">grupo-22-scores.app / admin / torneos / crear · paso 3</span>
+            </div>
+            <div class="desktop-body">
+                <div class="desktop-head">
+                    <button class="back" onclick="goTo('p-s2')">←</button>
+                    <div>
+                        <h1>Participantes <span style="color: var(--text-dim); font-weight: 500; font-size: 16px;">· opcional</span></h1>
+                        <p>Cargá los equipos ahora, importá un CSV, o saltá este paso. Podés terminar después.</p>
+                    </div>
+                </div>
+
+                <div class="dk-stepper">
+                    <div class="dk-step done"><div class="num">✓</div><div class="lbl">Lo básico</div></div>
+                    <div class="dk-step done"><div class="num">✓</div><div class="lbl">Estructura</div></div>
+                    <div class="dk-step active"><div class="num">3</div><div class="lbl">Participantes<span class="small">Cargar, importar o saltar</span></div></div>
+                </div>
+
+                <div class="dk-grid">
+                    <div class="dk-card">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+                            <h3 class="dk-card-title" style="margin: 0;">Catálogo de equipos</h3>
+                            <div style="display: flex; gap: 8px;">
+                                <button class="btn ghost" style="padding: 6px 12px; font-size: 12px;">📥 Importar CSV</button>
+                                <button class="btn ghost" style="padding: 6px 12px; font-size: 12px;">＋ Crear club</button>
+                            </div>
+                        </div>
+
+                        <div class="selected-summary">
+                            <div><strong>3</strong> equipos seleccionados · objetivo del formato: <strong>8</strong></div>
+                            <button>Ver solo seleccionados</button>
+                        </div>
+
+                        <div class="search-bar">
+                            <span class="ico">🔍</span>
+                            <input type="text" placeholder="Buscar por nombre, tipo o ubicación…" value="bel" />
+                        </div>
+
+                        <div class="chips">
+                            <span class="chip active">Todos <span class="count">2.341</span></span>
+                            <span class="chip">Clubes <span class="count">1.890</span></span>
+                            <span class="chip">Selecciones <span class="count">112</span></span>
+                            <span class="chip">Franquicias <span class="count">38</span></span>
+                            <span class="chip">Academias <span class="count">301</span></span>
+                            <span class="chip">📍 Argentina <span class="count">2.012</span></span>
+                            <span class="chip">Con planteles 2026 <span class="count">1.502</span></span>
+                        </div>
+
+                        <div class="search-meta">
+                            <span>14 resultados para "bel" · ordenados por relevancia</span>
+                            <button>Seleccionar los 14</button>
+                        </div>
+
+                        <div class="club-list" style="max-height: 440px;">
+                            <div class="club-card added">
+                                <div class="chk">✓</div>
+                                <div class="club-logo" style="background: #1e3a8a; color: #fff;">BEL</div>
+                                <div class="club-info">
+                                    <div class="club-name">Belgrano Athletic Club <span class="entity-tag club">Club</span></div>
+                                    <div class="club-meta">Buenos Aires · Argentina · 2 planteles 2026</div>
+                                    <div class="squad-picker">
+                                        <label>Plantel a inscribir</label>
+                                        <select style="max-width: 360px;">
+                                            <option>Primera M (Rugby / Masculino / Mayores) · 2026</option>
+                                            <option>Intermedia M (Rugby / Masculino) · 2026</option>
+                                        </select>
+                                        <span class="squad-info">2 planteles disponibles — confirmá cuál entra al torneo</span>
+                                    </div>
+                                </div>
+                                <button class="club-action">Quitar</button>
+                            </div>
+
+                            <div class="club-card">
+                                <div class="chk"></div>
+                                <div class="club-logo" style="background: #16a34a; color: #fff;">BG</div>
+                                <div class="club-info">
+                                    <div class="club-name">Belgrano Atlético (Córdoba) <span class="entity-tag club">Club</span></div>
+                                    <div class="club-meta">Córdoba · Argentina · 1 plantel 2026</div>
+                                </div>
+                                <button class="club-action">Añadir</button>
+                            </div>
+
+                            <div class="club-card">
+                                <div class="chk"></div>
+                                <div class="club-logo" style="background: #4338ca; color: #fff;">BS</div>
+                                <div class="club-info">
+                                    <div class="club-name">Belgrano Sur Academy <span class="entity-tag acad">Academia</span></div>
+                                    <div class="club-meta">Avellaneda · Sin planteles vinculados</div>
+                                </div>
+                                <button class="club-action">Añadir</button>
+                            </div>
+
+                            <div class="club-card added">
+                                <div class="chk">✓</div>
+                                <div class="club-logo" style="background: #b91c1c; color: #fff;">BR</div>
+                                <div class="club-info">
+                                    <div class="club-name">Belarmino RC <span class="entity-tag franq">Franquicia</span></div>
+                                    <div class="club-meta">San Isidro · Argentina · 1 plantel 2026</div>
+                                    <div class="squad-picker">
+                                        <span class="squad-info">✓ Plantel detectado automáticamente — Primera M 2026</span>
+                                    </div>
+                                </div>
+                                <button class="club-action">Quitar</button>
+                            </div>
+
+                            <div class="club-card added">
+                                <div class="chk">✓</div>
+                                <div class="club-logo" style="background: #4b5563; color: #fff;">BE</div>
+                                <div class="club-info">
+                                    <div class="club-name">Belén Selección Provincial <span class="entity-tag selec">Selección</span></div>
+                                    <div class="club-meta">Catamarca · Argentina · Sin planteles vinculados</div>
+                                    <div class="squad-picker">
+                                        <span class="squad-legacy">⚠ Compite en modo legacy hasta que tenga planteles vinculados</span>
+                                    </div>
+                                </div>
+                                <button class="club-action">Quitar</button>
+                            </div>
+
+                            <div class="club-card">
+                                <div class="chk"></div>
+                                <div class="club-logo" style="background: #ea580c; color: #fff;">BL</div>
+                                <div class="club-info">
+                                    <div class="club-name">Bella Vista Rugby <span class="entity-tag club">Club</span></div>
+                                    <div class="club-meta">Bella Vista · Argentina · 3 planteles 2026</div>
+                                </div>
+                                <button class="club-action">Añadir</button>
+                            </div>
+                        </div>
+
+                        <div class="callout" style="margin-top: 14px;">
+                            💡 <div><strong>Tip:</strong> Si el equipo no está en el catálogo, usá "＋ Crear club" arriba a la derecha. Pedimos solo nombre, tipo y ubicación — el resto se completa después.</div>
+                        </div>
+                    </div>
+
+                    <aside class="dk-side">
+                        <h3>Equipos seleccionados (3)</h3>
+                        <div class="summary">
+                            <div class="summary-row"><span class="k">1. Belgrano Athletic</span><span class="v" style="font-size: 11px;">Primera M</span></div>
+                            <div class="summary-row"><span class="k">2. Belarmino RC</span><span class="v" style="font-size: 11px;">Primera M</span></div>
+                            <div class="summary-row"><span class="k">3. Belén Selección</span><span class="v" style="font-size: 11px;">Legacy</span></div>
+                        </div>
+
+                        <div class="callout" style="background: rgba(250,204,21,0.08); border-color: rgba(250,204,21,0.25); margin: 10px 0;">
+                            ⚠ <div style="color: var(--text-secondary);">Faltan <strong style="color: var(--warning);">5 equipos</strong> para llegar a 8 (mínimo de la plantilla Liga).</div>
+                        </div>
+
+                        <h3 style="margin-top: 18px;">Resumen del torneo</h3>
+                        <div class="summary">
+                            <div class="summary-row"><span class="k">Nombre</span><span class="v">Torneo del Interior A</span></div>
+                            <div class="summary-row"><span class="k">Deporte</span><span class="v">Rugby</span></div>
+                            <div class="summary-row"><span class="k">Formato</span><span class="v">Liga · ida</span></div>
+                            <div class="summary-row"><span class="k">Equipos</span><span class="v">3 / 8</span></div>
+                        </div>
+
+                        <div style="background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-md); padding: 12px; margin-top: 10px;">
+                            <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-dim); font-weight: 700; margin-bottom: 8px;">Al crear</div>
+                            <div class="audience-row" style="grid-template-columns: 1fr 1fr; gap: 6px;">
+                                <button class="selected" style="font-size: 12px; padding: 10px;">🔒 Borrador<span class="small">Solo visible para admins</span></button>
+                                <button style="font-size: 12px; padding: 10px;">🌍 Público<span class="small">Vivo en la app</span></button>
+                            </div>
+                            <p style="font-size: 11px; color: var(--text-dim); margin-top: 6px;">Recomendado: empezar como borrador y publicar cuando esté listo.</p>
+                        </div>
+
+                        <button class="btn primary" style="width: 100%; margin-top: 12px;" onclick="goTo('p-s4')">Crear torneo →</button>
+                        <p style="font-size: 11px; color: var(--text-dim); margin-top: 8px; text-align: center;">
+                            <button style="background: transparent; border: 0; color: var(--accent-2); font-size: 11px; font-weight: 700; cursor: pointer;" onclick="goTo('p-s4')">o crear sin equipos y completar después →</button>
+                        </p>
+                    </aside>
+                </div>
+
+                <div class="dk-bottom">
+                    <div class="left"><span class="tag info">Auto-guardado</span> Borrador guardado hace 4s · 3 equipos</div>
+                    <div class="actions">
+                        <button class="btn ghost" onclick="goTo('p-s2')">← Atrás</button>
+                        <button class="btn ghost" onclick="goTo('p-s4')">Crear sin participantes</button>
+                        <button class="btn primary" onclick="goTo('p-s4')">Crear con 3 equipos →</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</section>
+
+<!-- ====================== PANEL 4: REVIEW / SUCCESS ====================== -->
+<section class="pane" id="p-s4">
+<div class="viewport-row split">
+
+    <div>
+        <span class="frame-label">Mobile · 360px</span>
+        <div class="mobile-frame">
+            <div class="mobile-screen">
+                <div class="top-app-bar">
+                    <button class="back" onclick="goTo('p-s3')">←</button>
+                    <div>
+                        <div class="title">Listo</div>
+                        <div class="sub">Torneo creado</div>
+                    </div>
+                </div>
+
+                <div style="padding: 32px 18px; text-align: center;">
+                    <div style="width: 84px; height: 84px; border-radius: 50%; background: var(--accent-soft); margin: 0 auto 16px; display: grid; place-items: center; font-size: 40px;">🎉</div>
+                    <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 6px;">Torneo creado</h2>
+                    <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 20px;">
+                        Tu torneo está como <strong>borrador</strong>. Revisalo y publicalo cuando quieras.
+                    </p>
+
+                    <div class="summary" style="text-align: left;">
+                        <div class="summary-row"><span class="k">Nombre</span><span class="v">Torneo del Interior A</span></div>
+                        <div class="summary-row"><span class="k">Formato</span><span class="v">Liga · 8 equipos</span></div>
+                        <div class="summary-row"><span class="k">Estado</span><span class="v"><span class="tag warning">Borrador</span></span></div>
+                    </div>
+
+                    <button class="btn primary" style="width: 100%; margin-top: 16px;">Ir a la gestión del torneo →</button>
+                    <button class="btn ghost" style="width: 100%; margin-top: 8px;" onclick="goTo('p-tpl')">Crear otro torneo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <span class="frame-label desktop">Desktop · ≥1024px</span>
+        <div class="desktop-frame">
+            <div class="desktop-chrome">
+                <div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+                <span class="url">grupo-22-scores.app / admin / torneos / 12fa-a31b / resumen</span>
+            </div>
+            <div class="desktop-body">
+                <div style="text-align: center; padding: 28px 20px;">
+                    <div style="width: 96px; height: 96px; border-radius: 50%; background: var(--accent-soft); margin: 0 auto 18px; display: grid; place-items: center; font-size: 44px;">🎉</div>
+                    <h1 style="font-size: 28px; font-weight: 800; margin-bottom: 6px;">¡Listo, Torneo del Interior A está creado!</h1>
+                    <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 22px; max-width: 520px; margin-left: auto; margin-right: auto;">
+                        El torneo se guardó como <strong style="color: var(--warning);">borrador</strong>. Hacé los últimos ajustes y publicalo cuando esté listo.
+                    </p>
+
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-width: 720px; margin: 0 auto 22px;">
+                        <div class="dk-card" style="padding: 16px; text-align: left;">
+                            <div style="font-size: 24px; margin-bottom: 6px;">⚙️</div>
+                            <div style="font-weight: 700; font-size: 14px;">Subir logo y colores</div>
+                            <div style="color: var(--text-dim); font-size: 12px;">Identidad visual del torneo</div>
+                        </div>
+                        <div class="dk-card" style="padding: 16px; text-align: left;">
+                            <div style="font-size: 24px; margin-bottom: 6px;">📅</div>
+                            <div style="font-weight: 700; font-size: 14px;">Generar fixture</div>
+                            <div style="color: var(--text-dim); font-size: 12px;">Crear el calendario automáticamente</div>
+                        </div>
+                        <div class="dk-card" style="padding: 16px; text-align: left;">
+                            <div style="font-size: 24px; margin-bottom: 6px;">🌐</div>
+                            <div style="font-weight: 700; font-size: 14px;">Publicar</div>
+                            <div style="color: var(--text-dim); font-size: 12px;">Hacerlo visible al público</div>
+                        </div>
+                    </div>
+
+                    <button class="btn primary" style="padding: 14px 28px; font-size: 15px;">Ir al gestor de torneos →</button>
+                    <br />
+                    <button class="btn ghost" style="margin-top: 10px;" onclick="goTo('p-tpl')">Crear otro torneo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</section>
+
+<!-- ====================== PANEL ADV: MODO AVANZADO ====================== -->
+<section class="pane" id="p-adv">
+
+<div style="margin-bottom: 18px;">
+    <span class="frame-label desktop">⚙ Modo avanzado · multi-fase · desktop</span>
+    <p style="color: var(--text-secondary); font-size: 13px; margin-top: 4px;">
+        Reemplaza el "Configurador de fases" actual con una vista de timeline horizontal de fases + 6 secciones por fase (Tipo, Equipos, Grupos/Llaves, Reglas y bonus, Criterios de desempate, Tags por posición, Fixture). Toda la potencia del PhaseCreator pero más legible.
+    </p>
+</div>
+
+<div class="desktop-frame">
+    <div class="desktop-chrome">
+        <div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+        <span class="url">grupo-22-scores.app / admin / torneos / crear / avanzado</span>
+    </div>
+
+    <div class="adv-wrap">
+        <!-- HEADER -->
+        <div class="adv-header">
+            <h2>
+                ⚙ Crear torneo · modo avanzado
+                <span class="torneo-pill">Torneo del Interior A · Rugby · 2026</span>
+            </h2>
+            <div class="actions">
+                <div class="adv-modeswitch">
+                    <button onclick="goTo('p-s2')">Rápido</button>
+                    <button class="active">Avanzado</button>
+                </div>
+                <button class="btn ghost">Guardar borrador</button>
+                <button class="btn primary">Publicar torneo</button>
+            </div>
+        </div>
+
+        <!-- PHASE FLOW GRAPH -->
+        <div class="phase-timeline">
+            <div class="phase-timeline-inner">
+                <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-dim); font-weight: 700; margin-right: 8px;">Flujo del torneo:</span>
+                <button class="phase-chip">
+                    <span class="ph-num">1</span>
+                    <span>Clasificación</span>
+                    <span class="ph-type">· grupos · 16 equipos</span>
+                </button>
+                <span class="phase-flow">→</span>
+                <button class="phase-chip active">
+                    <span class="ph-num">2</span>
+                    <span>Playoff</span>
+                    <span class="ph-type">· eliminación · 8 clasificados</span>
+                </button>
+                <span class="phase-flow">→</span>
+                <button class="phase-chip draft">
+                    <span class="ph-num">3</span>
+                    <span>Final por el 3°</span>
+                    <span class="ph-type">· borrador</span>
+                </button>
+                <button class="phase-add">＋ Agregar fase</button>
+                <div style="margin-left: auto; display: flex; gap: 6px; align-items: center;">
+                    <button class="btn ghost" style="padding: 5px 10px; font-size: 11px;">🔗 Editar flujo</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- BODY: side nav + main + aside -->
+        <div class="adv-body">
+
+            <!-- SIDE NAV (per phase) -->
+            <nav class="adv-side">
+                <div class="adv-side-title">Fase 2 · Playoff</div>
+                <button><span class="ico">⚙</span>Tipo y formato</button>
+                <button class="active"><span class="ico">👥</span>Equipos<span class="badge">8</span></button>
+                <button><span class="ico">📊</span>Grupos / Llaves</button>
+                <button><span class="ico">⭐</span>Reglas y bonus<span class="badge">3</span></button>
+                <button><span class="ico">⚖️</span>Criterios desempate<span class="badge">4</span></button>
+                <button><span class="ico">🏷</span>Tags por posición<span class="badge">2</span></button>
+                <button><span class="ico">📅</span>Fixture<span class="badge">7</span></button>
+
+                <div class="adv-side-title" style="margin-top: 20px;">Torneo</div>
+                <button><span class="ico">📝</span>Detalles generales</button>
+                <button><span class="ico">🌍</span>Publicación</button>
+                <button><span class="ico">📜</span>Historial de cambios</button>
+            </nav>
+
+            <!-- MAIN -->
+            <main class="adv-main">
+
+                <!-- ===== GRAFO DE FLUJO ENTRE FASES ===== -->
+                <h3>Flujo de equipos entre fases</h3>
+                <p class="sub">Cada fase declara <strong>de dónde entran</strong> sus equipos y <strong>a dónde van</strong> los clasificados. El motor encadena las fases automáticamente.</p>
+
+                <div class="phase-flow-graph">
+                    <div class="phase-flow-grid">
+                        <!-- FASE 1 -->
+                        <div class="phase-node">
+                            <div class="pn-head">
+                                <span class="pn-num">1</span>
+                                <span class="pn-type">Grupos</span>
+                            </div>
+                            <h4>Clasificación</h4>
+                            <div class="io-block">
+                                <strong>↓ Entrada</strong>
+                                <select style="background: transparent; border: 0; color: var(--text-primary); font-size: 11.5px; padding: 0; width: 100%;">
+                                    <option>Catálogo: 16 equipos elegidos manualmente</option>
+                                    <option>Top N de fase anterior</option>
+                                    <option>Importar de torneo anterior</option>
+                                </select>
+                            </div>
+                            <div class="io-block">
+                                <strong>↑ Salida</strong>
+                                <select style="background: transparent; border: 0; color: var(--text-primary); font-size: 11.5px; padding: 0; width: 100%;">
+                                    <option>Top 2 de cada grupo → Fase 2</option>
+                                    <option>Top 1 de cada grupo</option>
+                                    <option>Top N de la tabla general</option>
+                                </select>
+                                <div style="font-size: 10.5px; color: var(--text-dim); margin-top: 3px;">8 equipos avanzan · 8 quedan eliminados</div>
+                            </div>
+                        </div>
+
+                        <div class="phase-arrow"><span class="arrow-label">2 × 4 grupos</span></div>
+
+                        <!-- FASE 2 -->
+                        <div class="phase-node active">
+                            <div class="pn-head">
+                                <span class="pn-num">2</span>
+                                <span class="pn-type">Eliminación</span>
+                            </div>
+                            <h4>Playoff</h4>
+                            <div class="io-block">
+                                <strong>↓ Entrada</strong>
+                                <select style="background: transparent; border: 0; color: var(--text-primary); font-size: 11.5px; padding: 0; width: 100%;">
+                                    <option>Top 2 de cada grupo de Fase 1 (8 equipos)</option>
+                                    <option>Top N de Fase 1</option>
+                                    <option>Manual + Fase 1</option>
+                                </select>
+                                <div style="font-size: 10.5px; color: var(--accent-2); margin-top: 3px;">✓ 8 / 8 cupos cubiertos</div>
+                            </div>
+                            <div class="io-block">
+                                <strong>↑ Salida</strong>
+                                <select style="background: transparent; border: 0; color: var(--text-primary); font-size: 11.5px; padding: 0; width: 100%;">
+                                    <option>Campeón + finalista + perdedores semis → Fase 3</option>
+                                    <option>Solo perdedores semis → Fase 3</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="phase-arrow"><span class="arrow-label">Perdedores SF</span></div>
+
+                        <!-- FASE 3 -->
+                        <div class="phase-node draft">
+                            <div class="pn-head">
+                                <span class="pn-num">3</span>
+                                <span class="pn-type">Partido único</span>
+                            </div>
+                            <h4>Final por el 3°</h4>
+                            <div class="io-block">
+                                <strong>↓ Entrada</strong>
+                                <select style="background: transparent; border: 0; color: var(--text-primary); font-size: 11.5px; padding: 0; width: 100%;">
+                                    <option>Perdedores de semifinales de Fase 2</option>
+                                </select>
+                                <div style="font-size: 10.5px; color: var(--warning); margin-top: 3px;">⏳ 0 / 2 cupos · se llenan al jugarse Fase 2</div>
+                            </div>
+                            <div class="io-block">
+                                <strong>↑ Salida</strong>
+                                <span style="font-size: 11.5px; color: var(--text-primary);">Define 3° y 4° puesto del torneo</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Validation -->
+                    <div class="phase-validation">
+                        <div class="v-row ok">✓ <div>Fase 1 → Fase 2: <code>top 2 × 4 grupos = 8 equipos</code> cuadra con cupo de Fase 2 (cuadro de 8)</div></div>
+                        <div class="v-row ok">✓ <div>Fase 2 → Fase 3: <code>losers(semifinals)</code> resuelve a 2 equipos exactos requeridos por la final por el 3°</div></div>
+                        <div class="v-row warn">⚠ <div>Fase 3 sin fixture cargado · auto-genera al cerrar Fase 2 (1 partido a definir)</div></div>
+                    </div>
+                </div>
+
+                <h3>Equipos · Fase 2 (Playoff)</h3>
+                <p class="sub">8 equipos clasificados desde la Fase 1. Podés editar el ingreso manualmente si el flujo automático no es el correcto.</p>
+
+                <div class="callout">
+                    💡 <div><strong>Flujo automático:</strong> los 2 mejores de cada grupo de la Fase 1 entran a esta fase. Si querés cambiar quién pasa, modificá las posiciones abajo.</div>
+                </div>
+
+                <div class="adv-modal" style="margin-top: 0; padding: 14px;">
+                    <div class="adv-modal-head">
+                        <h4>Equipos clasificados (8 de 16)</h4>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="btn ghost" style="padding: 5px 10px; font-size: 11px;">↺ Recalcular automáticamente</button>
+                            <button class="btn ghost" style="padding: 5px 10px; font-size: 11px;">＋ Agregar manualmente</button>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                        <div class="club-card added">
+                            <div class="chk">✓</div>
+                            <div class="club-logo" style="background: #1e3a8a;">BEL</div>
+                            <div class="club-info">
+                                <div class="club-name">Belgrano Athletic <span class="entity-tag club">1°G-A</span></div>
+                                <div class="club-meta">14 pts · diff +47</div>
+                            </div>
+                            <button class="club-action">⋯</button>
+                        </div>
+                        <div class="club-card added">
+                            <div class="chk">✓</div>
+                            <div class="club-logo" style="background: #b91c1c;">BR</div>
+                            <div class="club-info">
+                                <div class="club-name">Belarmino RC <span class="entity-tag club">2°G-A</span></div>
+                                <div class="club-meta">11 pts · diff +18</div>
+                            </div>
+                            <button class="club-action">⋯</button>
+                        </div>
+                        <div class="club-card added">
+                            <div class="chk">✓</div>
+                            <div class="club-logo" style="background: #16a34a;">PUC</div>
+                            <div class="club-info">
+                                <div class="club-name">Pucará <span class="entity-tag club">1°G-B</span></div>
+                                <div class="club-meta">15 pts · diff +52</div>
+                            </div>
+                            <button class="club-action">⋯</button>
+                        </div>
+                        <div class="club-card added">
+                            <div class="chk">✓</div>
+                            <div class="club-logo" style="background: #4338ca;">HND</div>
+                            <div class="club-info">
+                                <div class="club-name">Hindú <span class="entity-tag club">2°G-B</span></div>
+                                <div class="club-meta">12 pts · diff +22</div>
+                            </div>
+                            <button class="club-action">⋯</button>
+                        </div>
+                        <div class="club-card added">
+                            <div class="chk">✓</div>
+                            <div class="club-logo" style="background: #ea580c;">SIB</div>
+                            <div class="club-info">
+                                <div class="club-name">SIC <span class="entity-tag club">1°G-C</span></div>
+                                <div class="club-meta">13 pts · diff +31</div>
+                            </div>
+                            <button class="club-action">⋯</button>
+                        </div>
+                        <div class="club-card added">
+                            <div class="chk">✓</div>
+                            <div class="club-logo" style="background: #4b5563;">CAS</div>
+                            <div class="club-info">
+                                <div class="club-name">CASI <span class="entity-tag club">2°G-C</span></div>
+                                <div class="club-meta">10 pts · diff +9</div>
+                            </div>
+                            <button class="club-action">⋯</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LLAVES (brackets) inline -->
+                <h3 style="margin-top: 28px;">Llaves · cuadro de eliminación</h3>
+                <p class="sub">Configuración del cuadro. Sembrar manualmente o usar siembra automática por posición.</p>
+
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; padding: 14px; background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--r-md);">
+                    <div>
+                        <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-dim); font-weight: 800; margin-bottom: 8px;">Cuartos</div>
+                        <div class="fx-row" style="grid-template-columns: 1fr; padding: 8px 10px;">
+                            <div class="matchup" style="font-size: 12px;">Belgrano <span class="vs">vs</span> CASI</div>
+                        </div>
+                        <div class="fx-row" style="grid-template-columns: 1fr; padding: 8px 10px; margin-top: 6px;">
+                            <div class="matchup" style="font-size: 12px;">Pucará <span class="vs">vs</span> Hindú</div>
+                        </div>
+                        <div class="fx-row" style="grid-template-columns: 1fr; padding: 8px 10px; margin-top: 6px;">
+                            <div class="matchup" style="font-size: 12px;">SIC <span class="vs">vs</span> Belarmino</div>
+                        </div>
+                        <div class="fx-row" style="grid-template-columns: 1fr; padding: 8px 10px; margin-top: 6px;">
+                            <div class="matchup" style="font-size: 12px; color: var(--text-dim);">TBD <span class="vs">vs</span> TBD</div>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-dim); font-weight: 800; margin-bottom: 8px;">Semis</div>
+                        <div class="fx-row" style="grid-template-columns: 1fr; padding: 8px 10px; opacity: .55;">
+                            <div class="matchup" style="font-size: 12px;">Ganador 1 <span class="vs">vs</span> Ganador 2</div>
+                        </div>
+                        <div class="fx-row" style="grid-template-columns: 1fr; padding: 8px 10px; margin-top: 6px; opacity: .55;">
+                            <div class="matchup" style="font-size: 12px;">Ganador 3 <span class="vs">vs</span> Ganador 4</div>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-dim); font-weight: 800; margin-bottom: 8px;">Final</div>
+                        <div class="fx-row" style="grid-template-columns: 1fr; padding: 8px 10px; opacity: .55;">
+                            <div class="matchup" style="font-size: 12px;">Ganador SF1 <span class="vs">vs</span> Ganador SF2</div>
+                        </div>
+                        <div style="margin-top: 12px; font-size: 11px; color: var(--text-dim);">
+                            <label style="display: flex; align-items: center; gap: 6px;"><input type="checkbox" checked /> Incluir 3° y 4° puesto</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- OTRAS SECCIONES "asomadas" para mostrar todo el sistema -->
+                <details class="disclosure" style="margin-top: 24px;" open>
+                    <summary>⚙️ Tipo y formato de la fase <span class="tag info" style="margin-left: 8px;">Playoff</span></summary>
+                    <div class="disclosure-body">
+                        <div class="adv-types">
+                            <div class="adv-type-card">
+                                <span class="ico">📊</span>
+                                <h4>Grupos</h4>
+                                <p>Zonas round-robin entre grupos</p>
+                            </div>
+                            <div class="adv-type-card">
+                                <span class="ico">📋</span>
+                                <h4>Liga</h4>
+                                <p>Todos contra todos en una tabla</p>
+                            </div>
+                            <div class="adv-type-card selected">
+                                <span class="ico">🥊</span>
+                                <h4>Playoff</h4>
+                                <p>Eliminación directa con llaves</p>
+                            </div>
+                        </div>
+                        <div class="row-2">
+                            <div class="field">
+                                <label>Tamaño del cuadro</label>
+                                <select><option>8 equipos (cuartos)</option><option>16 equipos (octavos)</option><option>4 equipos (semis)</option></select>
+                            </div>
+                            <div class="field">
+                                <label>Siembra</label>
+                                <select><option>Automática por posición</option><option>Manual (drag&drop)</option></select>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+
+                <details class="disclosure">
+                    <summary>📊 Grupos / asignación de equipos <span class="tag info" style="margin-left: 8px;">Solo en fases tipo Grupos</span></summary>
+                    <div class="disclosure-body">
+                        <p class="help">Aplica para fases de tipo "Grupos". Drag&drop para mover equipos entre zonas. Asignación equilibrada por defecto.</p>
+                        <div class="groups-grid">
+                            <div class="group-zone">
+                                <div class="group-zone-head"><h5>Zona A</h5><span class="count">4</span></div>
+                                <div class="team-tile"><span class="grip">⋮⋮</span>Belgrano Athletic<span class="badge-mini">SEED 1</span></div>
+                                <div class="team-tile"><span class="grip">⋮⋮</span>CASI<span class="badge-mini">SEED 4</span></div>
+                                <div class="team-tile"><span class="grip">⋮⋮</span>Hindú<span class="badge-mini">SEED 5</span></div>
+                                <div class="team-tile"><span class="grip">⋮⋮</span>Newman<span class="badge-mini">SEED 8</span></div>
+                            </div>
+                            <div class="group-zone">
+                                <div class="group-zone-head"><h5>Zona B</h5><span class="count">4</span></div>
+                                <div class="team-tile"><span class="grip">⋮⋮</span>Pucará<span class="badge-mini">SEED 2</span></div>
+                                <div class="team-tile"><span class="grip">⋮⋮</span>SIC<span class="badge-mini">SEED 3</span></div>
+                                <div class="team-tile"><span class="grip">⋮⋮</span>Belarmino<span class="badge-mini">SEED 6</span></div>
+                                <div class="team-tile"><span class="grip">⋮⋮</span>Olivos<span class="badge-mini">SEED 7</span></div>
+                            </div>
+                        </div>
+                        <div class="unassigned-pool">
+                            <h5>Sin asignar</h5>
+                            <div class="pool"><span>Buenos Aires CR</span><span>Pueyrredón</span></div>
+                        </div>
+                    </div>
+                </details>
+
+                <details class="disclosure">
+                    <summary>⭐ Reglas y bonus <span class="tag info" style="margin-left: 8px;">3 activas · evaluables por motor</span></summary>
+                    <div class="disclosure-body">
+                        <p class="help" style="margin-bottom: 12px;">Cada regla se compila a una condición evaluable: el motor recorre cada partido cargado y suma los puntos cuando se cumple. Auditables y replicables temporada a temporada.</p>
+
+                        <div class="row-2">
+                            <div class="field"><label>Puntos por victoria</label><input type="number" value="4" /></div>
+                            <div class="field"><label>Puntos por empate</label><input type="number" value="2" /></div>
+                        </div>
+                        <div class="row-2">
+                            <div class="field"><label>Puntos por derrota</label><input type="number" value="0" /></div>
+                            <div class="field"><label>Walkover (no presentación)</label><input type="number" value="0" /></div>
+                        </div>
+
+                        <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-dim); font-weight: 700; margin: 18px 0 6px;">Reglas de bonus</div>
+
+                        <div class="bonus-tabs">
+                            <button class="active">Por partido</button>
+                            <button>Por equipo</button>
+                            <button>Por jugador</button>
+                            <button>Por evento</button>
+                        </div>
+
+                        <!-- ===== Regla 1: bonus ofensivo (4 tries) ===== -->
+                        <div class="bonus-pro">
+                            <div class="bonus-pro-head">
+                                <span class="id-pill">BNS-001</span>
+                                <span class="title">Bonus ofensivo · 4 tries o más</span>
+                                <span class="tag success">Validada</span>
+                                <span class="toggle on">ACTIVA <span class="dot"></span></span>
+                            </div>
+                            <div class="bonus-pro-body">
+                                <div class="bonus-formula">
+                                    <div class="ff">
+                                        <label>Campo</label>
+                                        <select>
+                                            <option>tries_for</option>
+                                            <option>tries_against</option>
+                                            <option>points_for</option>
+                                            <option>points_against</option>
+                                            <option>points_diff</option>
+                                            <option>red_cards</option>
+                                            <option>yellow_cards</option>
+                                            <option>conversion_pct</option>
+                                        </select>
+                                    </div>
+                                    <div class="ff">
+                                        <label>Descripción humana</label>
+                                        <input type="text" value="Tries anotados por el equipo" />
+                                    </div>
+                                    <div class="ff op">≥</div>
+                                    <div class="ff">
+                                        <label>Valor / referencia</label>
+                                        <select>
+                                            <option>4 (constante)</option>
+                                            <option>tries del rival + 3</option>
+                                            <option>parámetro de torneo</option>
+                                        </select>
+                                    </div>
+                                    <div class="ff">
+                                        <label>Otorga</label>
+                                        <div style="display: flex; align-items: center; gap: 4px;">
+                                            <input type="number" value="1" style="text-align: center;" />
+                                            <span style="font-size: 10px; color: var(--text-dim); font-weight: 700;">PTS</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="bonus-formula-preview">
+                                    <span>IF</span> tries_for ≥ 4 <span class="arrow">→</span> +1 pt al equipo evaluado · <span style="color: var(--text-dim);">aplicable a ambos en cada partido</span>
+                                </div>
+
+                                <div class="bonus-row-meta">
+                                    <div class="ff">
+                                        <label>Aplica a</label>
+                                        <select>
+                                            <option>Ambos equipos (independiente del resultado)</option>
+                                            <option>Solo al ganador</option>
+                                            <option>Solo al perdedor</option>
+                                            <option>Solo si gana de visitante</option>
+                                            <option>Solo si gana de local</option>
+                                            <option>Solo si empata</option>
+                                        </select>
+                                    </div>
+                                    <div class="ff">
+                                        <label>Tipo de cómputo</label>
+                                        <select>
+                                            <option>Fijo (suma {pts} si se cumple)</option>
+                                            <option>Multiplicado por (cantidad − umbral)</option>
+                                            <option>Escalonado (1pt @4, 2pt @6, 3pt @8)</option>
+                                        </select>
+                                    </div>
+                                    <div class="ff">
+                                        <label>Limite por partido</label>
+                                        <select>
+                                            <option>Sin límite</option>
+                                            <option>Máximo 1 vez por partido</option>
+                                            <option>Máximo 2 veces</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="bonus-sim">
+                                    <span class="label">▶ Simulación con 3 partidos cargados</span>
+                                    <div class="line"><span>Belgrano 35–17 CASI · BEL hizo 5 tries · CAS hizo 2</span><span class="out">BEL +1</span></div>
+                                    <div class="line"><span>Pucará 28–24 Hindú · PUC hizo 4 · HND hizo 3</span><span class="out">PUC +1</span></div>
+                                    <div class="line"><span>SIC 17–12 Newman · SIC hizo 1 · NEW hizo 1</span><span class="out zero">sin bonus</span></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ===== Regla 2: bonus defensivo ===== -->
+                        <div class="bonus-pro">
+                            <div class="bonus-pro-head">
+                                <span class="id-pill">BNS-002</span>
+                                <span class="title">Bonus defensivo · derrota por ≤ 7</span>
+                                <span class="tag success">Validada</span>
+                                <span class="toggle on">ACTIVA <span class="dot"></span></span>
+                            </div>
+                            <div class="bonus-pro-body">
+                                <div class="bonus-formula">
+                                    <div class="ff"><label>Campo</label><select><option>points_diff</option></select></div>
+                                    <div class="ff"><label>Descripción humana</label><input value="Diferencia (a favor − en contra)" /></div>
+                                    <div class="ff op">∈ [−7, −1]</div>
+                                    <div class="ff"><label>Valor / referencia</label><select><option>Rango fijo −7 .. −1</option></select></div>
+                                    <div class="ff"><label>Otorga</label><div style="display: flex; align-items: center; gap: 4px;"><input type="number" value="1" style="text-align: center;" /><span style="font-size: 10px; color: var(--text-dim); font-weight: 700;">PTS</span></div></div>
+                                </div>
+
+                                <div class="bonus-formula-preview">
+                                    <span>IF</span> result = LOSS <span class="arrow">AND</span> abs(points_diff) ≤ 7 <span class="arrow">→</span> +1 pt al perdedor
+                                </div>
+
+                                <div class="bonus-row-meta">
+                                    <div class="ff"><label>Aplica a</label><select><option>Solo al perdedor</option></select></div>
+                                    <div class="ff"><label>Tipo de cómputo</label><select><option>Fijo</option></select></div>
+                                    <div class="ff"><label>Limite por partido</label><select><option>Máximo 1 vez por partido</option></select></div>
+                                </div>
+
+                                <div class="bonus-sim">
+                                    <span class="label">▶ Simulación con 3 partidos cargados</span>
+                                    <div class="line"><span>Belgrano 35–17 CASI · diff −18</span><span class="out zero">CAS sin bonus (diff fuera de rango)</span></div>
+                                    <div class="line"><span>Pucará 28–24 Hindú · diff −4</span><span class="out">HND +1</span></div>
+                                    <div class="line"><span>SIC 17–12 Newman · diff −5</span><span class="out">NEW +1</span></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ===== Regla 3: bonus custom ===== -->
+                        <div class="bonus-pro">
+                            <div class="bonus-pro-head">
+                                <span class="id-pill">BNS-003</span>
+                                <span class="title">Visitante con +14 de margen</span>
+                                <span class="tag warning">Revisar</span>
+                                <span class="toggle on">ACTIVA <span class="dot"></span></span>
+                            </div>
+                            <div class="bonus-pro-body">
+                                <div class="bonus-formula">
+                                    <div class="ff"><label>Campo</label><select><option>points_diff (visitante)</option></select></div>
+                                    <div class="ff"><label>Descripción humana</label><input value="Margen del visitante" /></div>
+                                    <div class="ff op">≥</div>
+                                    <div class="ff"><label>Valor / referencia</label><select><option>14 (constante)</option></select></div>
+                                    <div class="ff"><label>Otorga</label><div style="display: flex; align-items: center; gap: 4px;"><input type="number" value="2" style="text-align: center;" /><span style="font-size: 10px; color: var(--text-dim); font-weight: 700;">PTS</span></div></div>
+                                </div>
+
+                                <div class="bonus-formula-preview">
+                                    <span>IF</span> role = AWAY <span class="arrow">AND</span> result = WIN <span class="arrow">AND</span> points_diff ≥ 14 <span class="arrow">→</span> +2 pts al visitante
+                                </div>
+
+                                <div class="bonus-row-meta">
+                                    <div class="ff"><label>Aplica a</label><select><option>Solo al ganador visitante</option></select></div>
+                                    <div class="ff"><label>Tipo de cómputo</label><select><option>Fijo</option></select></div>
+                                    <div class="ff"><label>Limite por partido</label><select><option>Máximo 1 vez</option></select></div>
+                                </div>
+
+                                <div class="aside-issue warn" style="margin-top: 10px;">
+                                    ⚠ <div>Esta regla nunca se ha cumplido en los últimos 3 partidos. ¿Querés revisarla?</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-dim); font-weight: 700; margin: 18px 0 6px;">Plantillas (1 click para agregar)</div>
+                        <div class="bonus-presets">
+                            <button class="bonus-preset-card">
+                                <div class="pn">🏉 Bonus rugby clásico <span class="tag info">URBA / World Rugby</span></div>
+                                <div class="pd">tries_for ≥ 4 → +1pt · loss_diff ≤ 7 → +1pt</div>
+                            </button>
+                            <button class="bonus-preset-card">
+                                <div class="pn">🥅 Valla invicta</div>
+                                <div class="pd">points_against = 0 → +1pt al equipo</div>
+                            </button>
+                            <button class="bonus-preset-card">
+                                <div class="pn">⚽ Goleada</div>
+                                <div class="pd">points_diff ≥ 4 → +1pt al ganador</div>
+                            </button>
+                            <button class="bonus-preset-card">
+                                <div class="pn">🃏 Sin tarjetas rojas</div>
+                                <div class="pd">red_cards = 0 → +1pt</div>
+                            </button>
+                            <button class="bonus-preset-card">
+                                <div class="pn">🎾 Sin perder set <span class="tag info">Voley / Tenis</span></div>
+                                <div class="pd">sets_lost = 0 → +1pt al ganador</div>
+                            </button>
+                            <button class="bonus-preset-card">
+                                <div class="pn">＋ Crear regla desde cero</div>
+                                <div class="pd">campo + operador + valor + acción</div>
+                            </button>
+                        </div>
+                    </div>
+                </details>
+
+                <details class="disclosure">
+                    <summary>⚖️ Criterios de desempate <span class="tag info" style="margin-left: 8px;">4 activos · evaluables · con simulador</span></summary>
+                    <div class="disclosure-body">
+                        <p class="help" style="margin-bottom: 12px;">Cada criterio es una función comparadora pura: devuelve <code style="font-family: ui-monospace, monospace; background: rgba(255,255,255,0.06); padding: 1px 4px; border-radius: 3px;">(equipoA, equipoB) → −1 | 0 | +1</code>. El motor los aplica en cascada en el orden definido hasta romper el empate. Cada criterio tiene opciones funcionales propias.</p>
+
+                        <!-- Criterio 1 -->
+                        <div class="crit-pro">
+                            <div class="crit-pro-head">
+                                <span class="grip">⋮⋮</span>
+                                <span class="rank">1</span>
+                                <span class="name">Puntos obtenidos <span class="scope">Global</span></span>
+                                <span class="formula-tag">sum(points) DESC</span>
+                                <button class="rm">×</button>
+                            </div>
+                            <div class="crit-options">
+                                <span class="crit-option-pill on">Incluye bonus</span>
+                                <span class="crit-option-pill">Solo puntos base</span>
+                            </div>
+                        </div>
+
+                        <!-- Criterio 2: head-to-head con opciones funcionales -->
+                        <div class="crit-pro">
+                            <div class="crit-pro-head">
+                                <span class="grip">⋮⋮</span>
+                                <span class="rank">2</span>
+                                <span class="name">Resultados entre sí (head-to-head) <span class="scope">Solo entre los empatados</span></span>
+                                <span class="formula-tag">h2h_points DESC</span>
+                                <button class="rm">×</button>
+                            </div>
+                            <div class="crit-options">
+                                <span class="crit-option-pill on">Solo partidos directos entre los empatados</span>
+                                <span class="crit-option-pill">Considerar todos los partidos vs el grupo empatado</span>
+                                <span class="crit-option-pill on">Aplicable solo si N = 2</span>
+                                <span class="crit-option-pill">Aplicar también con N ≥ 3 (mini-tabla)</span>
+                            </div>
+                        </div>
+
+                        <!-- Criterio 3 -->
+                        <div class="crit-pro">
+                            <div class="crit-pro-head">
+                                <span class="grip">⋮⋮</span>
+                                <span class="rank">3</span>
+                                <span class="name">Diferencia de tantos <span class="scope">Global</span></span>
+                                <span class="formula-tag">points_for − points_against</span>
+                                <button class="rm">×</button>
+                            </div>
+                            <div class="crit-options">
+                                <span class="crit-option-pill on">Toda la fase</span>
+                                <span class="crit-option-pill">Solo partidos entre los empatados</span>
+                            </div>
+                        </div>
+
+                        <!-- Criterio 4 -->
+                        <div class="crit-pro">
+                            <div class="crit-pro-head">
+                                <span class="grip">⋮⋮</span>
+                                <span class="rank">4</span>
+                                <span class="name">Diferencia de tries <span class="scope">Global</span></span>
+                                <span class="formula-tag">tries_for − tries_against</span>
+                                <button class="rm">×</button>
+                            </div>
+                            <div class="crit-options">
+                                <span class="crit-option-pill on">Toda la fase</span>
+                                <span class="crit-option-pill">Solo partidos entre los empatados</span>
+                            </div>
+                        </div>
+
+                        <div class="criteria-available">
+                            <h5>Disponibles · agregar al final del orden</h5>
+                            <div class="criteria-pool">
+                                <button>＋ Tantos a favor</button>
+                                <button>＋ Tries a favor</button>
+                                <button>＋ Menos tarjetas rojas</button>
+                                <button>＋ Walkover (W.O.) contados como factor</button>
+                                <button>＋ Sorteo (coin toss)</button>
+                                <button>＋ Personalizado · fórmula libre</button>
+                            </div>
+                        </div>
+
+                        <!-- SIMULADOR FUNCIONAL -->
+                        <div class="crit-sim">
+                            <h5>▶ Simulador · qué pasa si hay empate</h5>
+                            <p style="font-size: 11.5px; color: var(--text-secondary); margin-bottom: 10px;">Cargamos un escenario hipotético para validar que el orden de criterios desempata como esperás. <button style="background: transparent; border: 0; color: var(--accent-2); font-size: 11px; font-weight: 700; cursor: pointer; padding-left: 4px;">Editar escenario →</button></p>
+
+                            <div class="scenario">
+                                <div style="font-size: 10.5px; color: var(--text-dim); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700;">Escenario: 3 equipos empatados a 10 puntos</div>
+                                <div class="sc-team">
+                                    <span class="pos">?</span>
+                                    <strong>Belgrano</strong>
+                                    <span class="stats">10 pts · diff +12 · tries diff +5 · h2h vs PUC: G · h2h vs CAS: P</span>
+                                </div>
+                                <div class="sc-team">
+                                    <span class="pos">?</span>
+                                    <strong>Pucará</strong>
+                                    <span class="stats">10 pts · diff +18 · tries diff +6 · h2h vs BEL: P · h2h vs CAS: G</span>
+                                </div>
+                                <div class="sc-team">
+                                    <span class="pos">?</span>
+                                    <strong>CASI</strong>
+                                    <span class="stats">10 pts · diff +14 · tries diff +5 · h2h vs BEL: G · h2h vs PUC: P</span>
+                                </div>
+                            </div>
+
+                            <div class="crit-trace">
+                                <div class="step"><span class="ok">✓</span><span>Criterio 1 · Puntos: 10 = 10 = 10</span><span class="fail">empate persiste</span></div>
+                                <div class="step"><span class="ok">✓</span><span>Criterio 2 · Head-to-head: N=3, opción "solo si N=2" → <span style="color: var(--text-dim);">no aplica, salta</span></span><span class="fail">salta</span></div>
+                                <div class="step"><span class="ok">✓</span><span>Criterio 3 · Diff tantos: PUC +18 &gt; CAS +14 &gt; BEL +12</span><span class="out">RESUELVE</span></div>
+                            </div>
+
+                            <div class="scenario" style="margin-top: 12px;">
+                                <div style="font-size: 10.5px; color: var(--accent-2); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700;">Resultado final del simulador</div>
+                                <div class="sc-team">
+                                    <span class="pos">1</span>
+                                    <strong>Pucará</strong>
+                                    <span class="stats" style="color: var(--accent-2);">Gana por diff +18</span>
+                                </div>
+                                <div class="sc-team">
+                                    <span class="pos" style="background: var(--surface-3); color: var(--text-secondary);">2</span>
+                                    <strong>CASI</strong>
+                                    <span class="stats">Diff +14</span>
+                                </div>
+                                <div class="sc-team">
+                                    <span class="pos" style="background: var(--surface-3); color: var(--text-secondary);">3</span>
+                                    <strong>Belgrano</strong>
+                                    <span class="stats">Diff +12</span>
+                                </div>
+                            </div>
+
+                            <div class="callout" style="margin: 12px 0 0; background: rgba(52,211,153,0.06); border-color: rgba(52,211,153,0.25);">
+                                <span style="color: var(--success);">✓</span> <div>Este orden de criterios resuelve el escenario sin llegar al sorteo. Si el resultado no es el esperado, reordená o cambiá las opciones de cada criterio.</div>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+
+                <details class="disclosure">
+                    <summary>🏷 Tags por posición <span class="tag info" style="margin-left: 8px;">2 tags</span></summary>
+                    <div class="disclosure-body">
+                        <p class="help" style="margin-bottom: 10px;">Etiquetas que se muestran en la tabla final según la posición. Definí rangos con label y color.</p>
+                        <div class="tag-list">
+                            <div class="tag-row">
+                                <div><div class="pos-label">Del</div><input value="1" /></div>
+                                <div><div class="pos-label">Al</div><input value="4" /></div>
+                                <input value="Clasifica a semis" placeholder="Etiqueta visible en tabla" />
+                                <div class="swatch" style="background: #00a365;"></div>
+                                <button class="rm">×</button>
+                            </div>
+                            <div class="tag-row">
+                                <div><div class="pos-label">Del</div><input value="7" /></div>
+                                <div><div class="pos-label">Al</div><input value="8" /></div>
+                                <input value="Repechaje" placeholder="Etiqueta" />
+                                <div class="swatch" style="background: #facc15;"></div>
+                                <button class="rm">×</button>
+                            </div>
+                        </div>
+                        <button class="parti-add" style="margin-top: 10px;">＋ Agregar tag</button>
+                    </div>
+                </details>
+
+                <details class="disclosure">
+                    <summary>📅 Fixture <span class="tag info" style="margin-left: 8px;">7 partidos generados</span></summary>
+                    <div class="disclosure-body">
+                        <div class="fixture-actions">
+                            <button class="fixture-action-card primary">
+                                <span class="ico">✨</span>
+                                <h4>Generar automáticamente</h4>
+                                <p>Crea el calendario según el formato. Editable después.</p>
+                            </button>
+                            <button class="fixture-action-card">
+                                <span class="ico">📥</span>
+                                <h4>Importar archivo</h4>
+                                <p>CSV, XLSX o PDF con la grilla del torneo.</p>
+                            </button>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <strong style="font-size: 13px;">Partidos de esta fase (7)</strong>
+                            <div style="display: flex; gap: 6px;">
+                                <button class="chip">Por fecha</button>
+                                <button class="chip active">Por ronda</button>
+                                <button class="chip">Por sede</button>
+                            </div>
+                        </div>
+
+                        <div class="fx-list">
+                            <div class="fx-row">
+                                <span class="round">CF 1</span>
+                                <span class="matchup">Belgrano <span class="vs">vs</span> CASI</span>
+                                <span class="date">Sáb 14/03 · 16:00</span>
+                                <span class="venue">Estadio J. J. Lavalle</span>
+                                <button class="edit">✎</button>
+                            </div>
+                            <div class="fx-row">
+                                <span class="round">CF 2</span>
+                                <span class="matchup">Pucará <span class="vs">vs</span> Hindú</span>
+                                <span class="date">Sáb 14/03 · 18:30</span>
+                                <span class="venue">Cancha 1 · La Caldera</span>
+                                <button class="edit">✎</button>
+                            </div>
+                            <div class="fx-row">
+                                <span class="round">CF 3</span>
+                                <span class="matchup">SIC <span class="vs">vs</span> Belarmino</span>
+                                <span class="date">Dom 15/03 · 16:00</span>
+                                <span class="venue">San Isidro</span>
+                                <button class="edit">✎</button>
+                            </div>
+                            <div class="fx-row">
+                                <span class="round">SF</span>
+                                <span class="matchup">Ganador 1 <span class="vs">vs</span> Ganador 2</span>
+                                <span class="date">Sáb 21/03 · 16:00</span>
+                                <span class="venue">A definir</span>
+                                <button class="edit">✎</button>
+                            </div>
+                            <div class="fx-row">
+                                <span class="round">FIN</span>
+                                <span class="matchup">Ganador SF1 <span class="vs">vs</span> Ganador SF2</span>
+                                <span class="date">Sáb 28/03 · 16:00</span>
+                                <span class="venue">Estadio Vélez (Final)</span>
+                                <button class="edit">✎</button>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+            </main>
+
+            <!-- ASIDE -->
+            <aside class="adv-aside">
+                <h4>Salud del torneo</h4>
+                <div class="aside-card">
+                    <div style="display: flex; align-items: baseline; justify-content: space-between;">
+                        <span class="aside-stat" style="color: var(--success);">87%</span>
+                        <span class="tag success">Listo</span>
+                    </div>
+                    <div class="aside-meta">Listo para publicar</div>
+                </div>
+
+                <div class="aside-issues">
+                    <div class="aside-issue ok">✓ <div><strong>Fase 1 completa</strong> · 16 equipos en 4 grupos</div></div>
+                    <div class="aside-issue ok">✓ <div><strong>Fase 2 lista</strong> · cuadro armado, 7 partidos</div></div>
+                    <div class="aside-issue warn">⚠ <div><strong>Fase 3 borrador</strong> · sin equipos asignados todavía</div></div>
+                    <div class="aside-issue warn">⚠ <div><strong>Sede final pendiente</strong> · partido FIN sin venue confirmado</div></div>
+                </div>
+
+                <h4 style="margin-top: 16px;">Resumen del torneo</h4>
+                <div class="summary" style="background: var(--surface-2);">
+                    <div class="summary-row"><span class="k">Plantilla origen</span><span class="v">Grupos + Playoff</span></div>
+                    <div class="summary-row"><span class="k">Fases</span><span class="v">3 (1 borrador)</span></div>
+                    <div class="summary-row"><span class="k">Equipos totales</span><span class="v">16</span></div>
+                    <div class="summary-row"><span class="k">Partidos totales</span><span class="v">31</span></div>
+                    <div class="summary-row"><span class="k">Visibilidad</span><span class="v"><span class="tag warning">Borrador</span></span></div>
+                </div>
+
+                <h4 style="margin-top: 16px;">Acciones</h4>
+                <button class="btn primary" style="width: 100%; margin-bottom: 6px;">Publicar torneo</button>
+                <button class="btn ghost" style="width: 100%; margin-bottom: 6px;">Vista previa pública</button>
+                <button class="btn ghost" style="width: 100%;">Duplicar torneo</button>
+
+                <p style="font-size: 10.5px; color: var(--text-dim); margin-top: 12px; line-height: 1.4;">
+                    Auto-guardado activo · borrador guardado hace 8s · todo lo que carguen acá vive sincronizado con el modo rápido.
+                </p>
+            </aside>
+
+        </div>
+    </div>
+</div>
+
+<div class="notes" style="margin-top: 28px;">
+<h3>Cómo se conecta con el modo rápido</h3>
+<ul>
+    <li>Desde la <strong>pantalla 0 (plantilla)</strong>: las 4 plantillas pre-cargan la Fase 1 con valores razonables y abren el modo rápido. La opción "Personalizado · multi-fase" salta directo al modo avanzado con una Fase 1 vacía.</li>
+    <li>Desde <strong>cualquier paso del rápido</strong>: el toggle "Rápido / Avanzado" arriba a la derecha conmuta entre modos sin perder datos. Pasar a Avanzado expande la Fase 1 con los valores ya cargados; volver a Rápido es seguro solo si el torneo tiene una sola fase y configuración simple — si no, el toggle se desactiva con tooltip "Este torneo usa multi-fase, el modo rápido no aplica".</li>
+    <li><strong>Auto-guardado compartido</strong>: el draft del torneo es uno solo, no importa el modo. Si abrís en otra computadora, el borrador continúa donde lo dejaste.</li>
+</ul>
+</div>
+
+</section>
+
+<div class="notes">
+<h3>Qué cambia respecto al wizard actual</h3>
+<ul>
+    <li><strong>5 pasos → 3 pasos</strong>: "Lo básico", "Estructura", "Participantes". Reglas avanzadas y resumen final quedan inline en cada paso, visibilidad como toggle en el panel lateral.</li>
+    <li><strong>Pantalla 0 con plantillas</strong> alineadas a los 4 formatos reales del sistema: <code>league</code>, <code>knockout</code>, <code>groups</code>, <code>circuit</code>, más una opción "Personalizado" para multi-fase.</li>
+    <li><strong>Participantes = buscador del catálogo real</strong>: search sobre <code>/api/admin/clubs</code>, filtros por tipo (Club / Selección / Franquicia / Academia), badge de entity_type, logo, ubicación y contador "X de Y resultados".</li>
+    <li><strong>Selector de plantel por club</strong>: si tiene 1 squad lo detecta automáticamente; si tiene varios fuerza la elección; si no tiene ninguno avisa "modo legacy" — replica la lógica actual de <code>clubSquadsByClub</code>.</li>
+    <li><strong>"Crear club rápido"</strong> sin salir del wizard: para los equipos que todavía no están en el catálogo.</li>
+    <li><strong>Validación en vivo</strong>: el nombre muestra ✓ disponible / × ocupado mientras tipea con el slug calculado, no recién al hacer "Siguiente".</li>
+    <li><strong>Vista previa en vivo</strong> (desktop): tarjeta del torneo + resumen estructura + lista de equipos elegidos se actualizan a medida que tipeás.</li>
+    <li><strong>Microcopy humano</strong>: "Crear torneo" en lugar de "Inaugurar Torneo", "Audiencia pública" en lugar de "Sección Pública", labels en sentence case.</li>
+    <li><strong>Mobile-first</strong>: barra inferior fija (44pt), inputs grandes, contador con + / − a 44×44px, top-bar con paso y plantilla siempre a la vista, chips de filtro en scroll horizontal.</li>
+    <li><strong>"Más opciones" plegable</strong>: país, unión, edad, puntos por partido, bonus rugby, criterios de desempate y configurador multi-fase quedan en disclosures — no saturan al usuario casual.</li>
+    <li><strong>Borrador con auto-guardado</strong>: el usuario nunca pierde lo cargado si cierra el browser.</li>
+    <li><strong>Visibilidad como toggle al crear</strong>: "Borrador" (default) o "Público al instante", reemplaza el paso 5 actual.</li>
+    <li><strong>Participantes opcional</strong>: incluye "Saltar" + "Importar CSV" + "Crear con N equipos" como caminos de primera clase.</li>
+    <li><strong>Pantalla de éxito accionable</strong>: 3 next-steps claros (logo, fixture, publicar) en vez de saltar al gestor sin contexto.</li>
+</ul>
+</div>
+
+</div>
+
+<script>
+function goTo(id) {
+    document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.toolbar button').forEach(b => b.classList.remove('active'));
+    const pane = document.getElementById(id);
+    if (pane) pane.classList.add('active');
+    const btn = document.querySelector('.toolbar button[data-pane="' + id + '"]');
+    if (btn) btn.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+document.querySelectorAll('.toolbar button').forEach(btn => {
+    btn.addEventListener('click', () => goTo(btn.dataset.pane));
+});
+</script>
+
+</body>
+</html>

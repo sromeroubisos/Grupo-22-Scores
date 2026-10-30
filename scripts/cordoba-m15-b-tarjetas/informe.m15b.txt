@@ -1,0 +1,116 @@
+  aviso TALA R.C. "C" 21-34 CORDOBA R.C. (290971): ingreso sin salida, dorsal 24 (1T 8)
+  aviso TALA R.C. "C" 21-34 CORDOBA R.C. (290971): ingreso sin salida, dorsal 8 (1T 35)
+  aviso LA TABLADA "C" 0-31 UNIVERSITARIO "B" (290981): salida sin reemplazo, dorsal 8 (1T 35)
+  aviso LA TABLADA "C" 0-31 UNIVERSITARIO "B" (290981): ingreso sin salida, dorsal 16 (2T 35)
+  aviso LA TABLADA "C" 10-45 LA TABLADA "B" (290984): salida sin reemplazo, dorsal 8 (2T 2)
+  aviso LA TABLADA "C" 10-45 LA TABLADA "B" (290984): salida sin reemplazo, dorsal 9 (2T 10)
+  aviso LA TABLADA "C" 10-45 LA TABLADA "B" (290984): salida sin reemplazo, dorsal 3 (2T 21)
+290988: sin plantel utilizable (290988)
+  aviso ALTA GRACIA R.C. 44-7 Baguales Rugby Club (290989): salida sin reemplazo, dorsal 16 (2T 0)
+  aviso ALTA GRACIA R.C. 44-7 Baguales Rugby Club (290989): salida sin reemplazo, dorsal 19 (2T 0)
+  aviso ALTA GRACIA R.C. 44-7 Baguales Rugby Club (290989): salida sin reemplazo, dorsal 18 (2T 0)
+  aviso ALTA GRACIA R.C. 44-7 Baguales Rugby Club (290989): salida sin reemplazo, dorsal 17 (2T 0)
+  aviso ALTA GRACIA R.C. 44-7 Baguales Rugby Club (290989): salida sin reemplazo, dorsal 21 (2T 0)
+  aviso ALTA GRACIA R.C. 44-7 Baguales Rugby Club (290989): salida sin reemplazo, dorsal 2 (2T 0)
+  aviso LA TABLADA "B" 27-10 JOCKEY CLUB CORDOBA "B" (290990): salida sin reemplazo, dorsal 15 (2T 34)
+  aviso LA TABLADA "B" 27-10 JOCKEY CLUB CORDOBA "B" (290990): salida sin reemplazo, dorsal 22 (2T 34)
+  aviso TALA R.C. "C" 0-92 LA TABLADA "B" (291017): ingreso sin salida, dorsal 11 (1T 28)
+291018: sin plantel utilizable (291018)
+  aviso JOCKEY CLUB CORDOBA "C" 34-19 Baguales Rugby Club (291024): ingreso sin salida, dorsal 14 (2T 0)
+  aviso TALA R.C. "C" 21-19 LA TABLADA "C" (291026): ingreso sin salida, dorsal 20 (2T 35)
+  aviso TALA R.C. "C" 21-19 LA TABLADA "C" (291026): ingreso sin salida, dorsal 26 (2T 11)
+  aviso TALA R.C. "C" 21-19 LA TABLADA "C" (291026): ingreso sin salida, dorsal 12 (2T 12)
+296312: sin plantel utilizable (296312)
+  aviso UNIVERSITARIO "B" 47-10 PALERMO BAJO "B" (297230): salida sin reemplazo, dorsal 19 (2T 7)
+  aviso CORDOBA R.C. 74-10 TALA R.C. "C" (313105): ingreso sin salida, dorsal 22 (2T 8)
+  aviso TALA R.C. "C" 17-55 URU-CURE "B" (314691): salida sin reemplazo, dorsal 2 (2T 11)
+  aviso Baguales Rugby Club 5-77 TALA R.C. "B" (315173): salida sin reemplazo, dorsal 2 (2T 1)
+315176: sin plantel utilizable (315176)
+  aviso URU-CURE "B" 5-24 TALA R.C. "B" (320310): salida sin reemplazo, dorsal 8 (2T 1)
+  aviso PALERMO BAJO "B" 0-86 URU-CURE "B" (322691): salida sin reemplazo, dorsal 22 (1T 28)
+  aviso PALERMO BAJO "B" 0-86 URU-CURE "B" (322691): salida sin reemplazo, dorsal 13 (1T 36)
+  aviso Baguales Rugby Club 59-12 ALTA GRACIA R.C. (322694): salida sin reemplazo, dorsal 15 (1T 25)
+324529: sin plantel utilizable (324529)
+324530: sin plantel utilizable (324530)
+325603: sin plantel utilizable (325603)
+  aviso JOCKEY CLUB CORDOBA "C" 15-43 TALA R.C. "B" (325604): ingreso sin salida, dorsal 23 (2T 13)
+326768: sin plantel utilizable (326768)
+326771: EVENTOS NO CIERRAN ALTA GRACIA R.C. 0-28 JOCKEY CLUB CORDOBA "B" (326771): eventos 0-0 (326771)
+326785: EVENTOS NO CIERRAN TALA R.C. "B" 0-28 CORDOBA R.C. (326785): eventos 0-0 (326785)
+327344: SIN CRUCE PALERMO BAJO "A" 33-24 CBA. ATHLETIC CLUB "A" (327344) 2026-10-24 claves pb/cac (327344)
+
+Partidos de la base SIN tarjeta: 74
+  2026-03-13 B Jockey Club Córdoba M15 "B" 8-0 Tala Rugby Club M15 "B"
+  2026-03-14 B Córdoba Athletic Club M15 "B" 62-7 Club Universitario de Córdoba M15 "B"
+  2026-03-21 B Urú Curé Rugby Club M15 "B" 27-31 Córdoba Athletic Club M15 "B"
+  2026-03-21 B Club La Tablada M15 "C" 28-0 Alta Gracia R.C. M15 "B"
+  2026-04-11 B Alta Gracia R.C. M15 "B" 10-31 Tala Rugby Club M15 "C"
+  2026-04-11 B San Francisco R.C. M15 "B" 26-24 Córdoba Rugby Club M15 "B"
+  2026-04-18 B Club Universitario de Córdoba M15 "B" 0-28 Tala Rugby Club M15 "C"
+  2026-04-23 B Tala Rugby Club M15 "C" 12-31 Córdoba Athletic Club M15 "B"
+  2026-04-24 B Club La Tablada M15 "C" 5-24 Club Palermo Bajo M15 "B"
+  2026-04-25 B Jockey Club Córdoba M15 "C" 17-22 Alta Gracia R.C. M15 "B"
+  2026-04-25 B Córdoba Rugby Club M15 "B" 24-26 Tala Rugby Club M15 "B"
+  2026-04-25 B Baguales R.C. M15 "B" 19-40 San Francisco R.C. M15 "B"
+  2026-05-09 B Tala Rugby Club M15 "B" 78-0 Urú Curé Rugby Club M15 "B"
+  2026-05-09 B San Francisco R.C. M15 "B" 26-14 Club La Tablada M15 "C"
+  2026-05-16 B Baguales R.C. M15 "B" 0-40 Córdoba Rugby Club M15 "B"
+  2026-05-16 B Club La Tablada M15 "B" 12-7 Tala Rugby Club M15 "B"
+  2026-05-16 B San Francisco R.C. M15 "B" 97-0 Tala Rugby Club M15 "C"
+  2026-05-16 B Jockey Club Córdoba M15 "B" 22-12 Córdoba Athletic Club M15 "B"
+  2026-05-30 B Tala Rugby Club M15 "B" 69-19 Tala Rugby Club M15 "C"
+  2026-06-06 B Alta Gracia R.C. M15 "B" 5-24 Club La Tablada M15 "C"
+  2026-06-06 B Córdoba Rugby Club M15 "B" 28-0 Urú Curé Rugby Club M15 "B"
+  2026-06-06 B Club Universitario de Córdoba M15 "B" 14-54 Córdoba Athletic Club M15 "B"
+  2026-06-20 B Jockey Club Córdoba M15 "B" 75-10 Club Palermo Bajo M15 "B"
+  2026-06-20 B Córdoba Rugby Club M15 "B" 31-0 Club La Tablada M15 "C"
+  2026-06-20 B Tala Rugby Club M15 "C" 29-26 Alta Gracia R.C. M15 "B"
+  2026-06-20 B Club Universitario de Córdoba M15 "B" 19-27 Tala Rugby Club M15 "B"
+  2026-06-20 B Córdoba Athletic Club M15 "B" 33-24 Urú Curé Rugby Club M15 "B"
+  2026-06-27 B Tala Rugby Club M15 "B" 34-31 Córdoba Athletic Club M15 "B"
+  2026-06-27 B Club La Tablada M15 "C" 47-17 Baguales R.C. M15 "B"
+  2026-06-27 B Urú Curé Rugby Club M15 "B" 22-57 Club La Tablada M15 "B"
+  2026-06-27 B Alta Gracia R.C. M15 "B" 31-33 Jockey Club Córdoba M15 "C"
+  2026-07-25 B Jockey Club Córdoba M15 "B" 53-0 Club La Tablada M15 "C"
+  2026-07-25 B Tala Rugby Club M15 "B" 77-5 Club Palermo Bajo M15 "B"
+  2026-07-25 B Córdoba Athletic Club M15 "B" 10-29 Club La Tablada M15 "B"
+  2026-07-25 B Córdoba Rugby Club M15 "B" 61-34 Jockey Club Córdoba M15 "C"
+  2026-08-01 B Club Palermo Bajo M15 "B" 5-95 Córdoba Athletic Club M15 "B"
+  2026-08-01 B Club La Tablada M15 "B" 76-0 Alta Gracia R.C. M15 "B"
+  2026-08-01 B Jockey Club Córdoba M15 "C" 28-0 Club Universitario de Córdoba M15 "B"
+  2026-08-01 B Córdoba Rugby Club M15 "B" 28-26 San Francisco R.C. M15 "B"
+  2026-08-08 B Córdoba Rugby Club M15 "B" 45-17 Baguales R.C. M15 "B"
+  2026-08-08 B Club Palermo Bajo M15 "B" 35-37 Alta Gracia R.C. M15 "B"
+  2026-08-08 B Tala Rugby Club M15 "C" 10-50 San Francisco R.C. M15 "B"
+  2026-08-08 B Jockey Club Córdoba M15 "B" 31-26 Club La Tablada M15 "B"
+  2026-08-08 B Córdoba Athletic Club M15 "B" 29-26 Club La Tablada M15 "C"
+  2026-08-22 B Club La Tablada M15 "B" 28-0 Club Universitario de Córdoba M15 "B"
+  2026-08-22 B San Francisco R.C. M15 "B" 48-7 Baguales R.C. M15 "B"
+  2026-08-29 B Club Universitario de Córdoba M15 "B" 12-59 Córdoba Rugby Club M15 "B"
+  2026-09-12 B Córdoba Rugby Club M15 "B" 15-15 Córdoba Athletic Club M15 "B"
+  2026-09-12 B Tala Rugby Club M15 "C" 10-28 Baguales R.C. M15 "B"
+  2026-09-12 B Jockey Club Córdoba M15 "B" 64-7 Club Universitario de Córdoba M15 "B"
+  2026-09-12 B San Francisco R.C. M15 "B" 43-15 Jockey Club Córdoba M15 "C"
+  2026-09-12 B Urú Curé Rugby Club M15 "B" 40-14 Club La Tablada M15 "C"
+  2026-09-19 B Jockey Club Córdoba M15 "B" 87-0 Tala Rugby Club M15 "C"
+  2026-09-19 B Córdoba Athletic Club M15 "B" 28-0 Baguales R.C. M15 "B"
+  2026-09-19 B San Francisco R.C. M15 "B" 28-0 Club Universitario de Córdoba M15 "B"
+  2026-09-19 B Alta Gracia R.C. M15 "B" 10-90 Urú Curé Rugby Club M15 "B"
+  2026-09-19 B Jockey Club Córdoba M15 "C" 22-5 Club Palermo Bajo M15 "B"
+  2026-09-19 B Córdoba Rugby Club M15 "B" 7-36 Club La Tablada M15 "B"
+  2026-09-19 B Tala Rugby Club M15 "B" 22-17 Club La Tablada M15 "C"
+  2026-09-26 B Baguales R.C. M15 "B" 12-68 Jockey Club Córdoba M15 "B"
+  2026-09-26 B San Francisco R.C. M15 "B" 33-46 Tala Rugby Club M15 "B"
+  2026-09-26 B Urú Curé Rugby Club M15 "B" 28-0 Córdoba Rugby Club M15 "B"
+  2026-09-26 B Jockey Club Córdoba M15 "C" 34-38 Córdoba Athletic Club M15 "B"
+  2026-09-26 B Alta Gracia R.C. M15 "B" 7-71 Club La Tablada M15 "B"
+  2026-10-03 B Baguales R.C. M15 "B" 31-46 Club Universitario de Córdoba M15 "B"
+  2026-10-03 B Córdoba Rugby Club M15 "B" 0-28 Club Palermo Bajo M15 "B"
+  2026-10-03 B Córdoba Athletic Club M15 "B" 78-7 Alta Gracia R.C. M15 "B"
+  2026-10-03 B Club La Tablada M15 "C" 28-0 Urú Curé Rugby Club M15 "B"
+  2026-10-09 B Club Palermo Bajo M15 "B" 31-28 Baguales R.C. M15 "B"
+  2026-10-09 B Club La Tablada M15 "B" 69-7 Club La Tablada M15 "C"
+  2026-10-10 B Club Universitario de Córdoba M15 "B" 0-28 Alta Gracia R.C. M15 "B"
+  2026-10-16 B Club Palermo Bajo M15 "B" 0-28 Tala Rugby Club M15 "C"
+  2026-10-17 B Club Universitario de Córdoba M15 "B" 0-28 San Francisco R.C. M15 "B"
+  2026-10-17 B Baguales R.C. M15 "B" 14-62 Urú Curé Rugby Club M15 "B"

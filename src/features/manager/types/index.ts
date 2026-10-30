@@ -1,0 +1,23 @@
+// Punto de entrada de tipos del dominio.
+// Importar desde '@/types' para evitar paths largos.
+
+export * from './common.ts'
+export * from './attributes.ts'
+export * from './gender.ts'
+export * from './ageCategory.ts'
+export * from './confederation.ts'
+export * from './pyramid.ts'
+export * from './player.ts'
+export * from './staff.ts'
+export * from './contract.ts'
+export * from './country.ts'
+export * from './club.ts'
+export * from './competition.ts'
+export * from './match.ts'
+export * from './calendar.ts'
+export * from './ranking.ts'
+export * from './qualification.ts'
+export * from './world.ts'
+export * from './tactics.ts'
+export * from './board.ts'
+export * from './manager.ts'

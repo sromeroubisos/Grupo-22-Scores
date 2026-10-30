@@ -1,0 +1,43 @@
+[
+  {
+    "id": "b7fab4e0-b37a-4f73-9b2c-2ad892c4405d",
+    "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a",
+    "season_id": null,
+    "score": {
+      "away": 55,
+      "home": 31,
+      "awayTries": 0,
+      "homeTries": 0
+    },
+    "home_bonus_points": 0,
+    "away_bonus_points": 1,
+    "points_autocalculated": false,
+    "points_override_reason": "a"
+  },
+  {
+    "id": "aa4f3f9f-abdc-4147-916f-266c05ad2bcd",
+    "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a",
+    "season_id": null,
+    "score": {
+      "away": 19,
+      "home": 37
+    },
+    "home_bonus_points": 1,
+    "away_bonus_points": 0,
+    "points_autocalculated": false,
+    "points_override_reason": null
+  },
+  {
+    "id": "b1fc3947-3e94-48b8-b605-978accc36696",
+    "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a",
+    "season_id": null,
+    "score": {
+      "away": 12,
+      "home": 25
+    },
+    "home_bonus_points": 0,
+    "away_bonus_points": 0,
+    "points_autocalculated": false,
+    "points_override_reason": null
+  }
+]

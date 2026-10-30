@@ -1,0 +1,2118 @@
+tarjetas oficiales 683363b8
+
+universitario-villa-maria-rugby vs villa-general-belgrano-r-c · 683363b8 · tarjeta 322766  ·  6ee2112a-0f31-455a-921a-7380fa2f3c75
+  local     · universitario-villa-maria-rugby · 21 jugadores · 0 con ficha fijada
+  visitante · villa-general-belgrano-r-c · 28 jugadores · 21 con ficha fijada
+  eventos   · 22
+    min  0 (1T 0) visitante substitution Emilio Franck
+    min  2 (1T 2) visitante penalty_goal Cristian Federico Ramírez
+    min  5 (1T 5) local     try          Benjamin Vilella
+    min  5 (1T 5) local     conversion   Lautaro Canova
+    min 20 (1T 20) local     try          Carlos Maciel
+    min 45 (2T 5) visitante try          Rodrigo Gabriel Ramirez
+    min 45 (2T 5) visitante conversion   Cristian Federico Ramírez
+    min 49 (2T 9) visitante penalty_goal Cristian Federico Ramírez
+    min 55 (2T 15) visitante try          Luciano Llada
+    min 55 (2T 15) visitante conversion   Cristian Federico Ramírez
+    min 60 (2T 20) local     try          Oscar Cejas
+    min 60 (2T 20) visitante substitution Damián Funes
+    min 60 (2T 20) visitante substitution Bruno Ceballos Larrea
+    min 61 (2T 21) visitante try          Leandro Molina
+    min 70 (2T 30) visitante substitution Luca Gelso
+    min 70 (2T 30) visitante substitution Antonio German Barboza
+    min 70 (2T 30) visitante substitution Giuliano Lehmann
+    min 70 (2T 30) visitante substitution Ariel Nicolás Ramirez
+    min 75 (2T 35) visitante substitution Sven Martin Seyfarth
+    min 75 (2T 35) visitante card_yellow  Rodrigo Gabriel Ramirez
+    min 75 (2T 35) visitante try          Sven Martin Seyfarth
+    min 75 (2T 35) visitante conversion   Cristian Federico Ramírez
+  marcador  · eventos 17-32 · guardado 17-32
+  tries     · 3-4 (guardado —-—)
+  arbitro   · LEANDRO LUCHETTI (guardado: —)
+  guardado  · 21 local · 28 visitante · 22 eventos
+
+union-oncativo-rugby vs los-tordos-hernando · 683363b8 · tarjeta 322765  ·  3105ac28-945f-4134-b29f-c067f83c5fe8
+  local     · union-oncativo-rugby · 23 jugadores · 19 con ficha fijada
+  visitante · los-tordos-hernando · 23 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min 16 (1T 16) visitante card_yellow  Rafael Benso
+    min 22 (1T 22) local     penalty_try  
+    min 24 (1T 24) local     try          Alex Cervelli
+    min 24 (1T 24) local     conversion   Franco Re
+    min 39 (1T 39) local     try          Iván Darío Luciani
+    min 40 (1T 40) local     conversion   Franco Re
+    min 44 (2T 4) local     card_yellow  Gino Daniel Viano
+    min 45 (2T 5) visitante try          Maico Ferreyra
+    min 51 (2T 11) visitante substitution Guillermo Javier Labat
+    min 59 (2T 19) visitante try          Marcelo Ferreyra
+    min 69 (2T 29) local     try          Gino Daniel Viano
+    min 70 (2T 30) local     conversion   Franco Re
+    min 75 (2T 35) local     try          Gino Daniel Viano
+    min 78 (2T 38) visitante try          Rodrigo Oyarzabal
+    min 79 (2T 39) visitante conversion   Elias Humberto Gallardo
+    min 80 (2T 40) local     card_yellow  Luciano Javier Ciriacci
+    min 80 (2T 40) visitante try          Elias Humberto Gallardo
+    min 80 (2T 40) visitante conversion   Elias Humberto Gallardo
+  marcador  · eventos 33-24 · guardado 33-24
+  tries     · 5-4 (guardado —-—)
+  arbitro   · CLAUDIO MARCELO TEJERO (guardado: —)
+  guardado  · 23 local · 23 visitante · 18 eventos
+
+nautico-fitz-simon vs oliva-rugby-club · 683363b8 · tarjeta 322764  ·  272f928e-c343-4710-a977-e787a2342575
+  local     · nautico-fitz-simon · 23 jugadores · 0 con ficha fijada
+  visitante · oliva-rugby-club · 24 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min 24 (1T 24) local     penalty_try  
+    min 29 (1T 29) local     try          Agustín Héctor Villa
+    min 31 (1T 31) visitante try          Patricio Pignatelli
+    min 32 (1T 32) local     penalty_goal Agustín Héctor Villa
+    min 33 (1T 33) visitante card_yellow  Angel Oscar Achaval
+    min 43 (2T 3) local     penalty_goal Agustín Héctor Villa
+    min 50 (2T 10) local     try          Alejo Ortiz
+    min 50 (2T 10) local     substitution Ramiro Gonzalez
+    min 50 (2T 10) local     substitution Tomas Diaz
+    min 50 (2T 10) local     substitution Martin Luna Jara
+    min 50 (2T 10) local     substitution Emanuel Rodriguez
+    min 50 (2T 10) local     substitution Leonardo Bustos
+    min 50 (2T 10) local     substitution Agustín Vidomini
+    min 50 (2T 10) local     substitution Maximiliano Banchero
+    min 50 (2T 10) local     substitution Oscar Francisco Vélez
+    min 51 (2T 11) local     conversion   Agustín Héctor Villa
+    min 55 (2T 15) visitante penalty_goal Gaston Diaz
+    min 57 (2T 17) local     card_yellow  Lazaro Joel Ramirez
+    min 60 (2T 20) local     card_yellow  Renato Severini
+    min 70 (2T 30) local     try          Cristian Carabajal
+    min 72 (2T 32) visitante card_yellow  Francisco Peralta
+    min 75 (2T 35) local     try          Nicolás Andrés Luna Jara
+  marcador  · eventos 35-8 · guardado 35-8
+  tries     · 5-1 (guardado —-—)
+  arbitro   · DANIEL ALEJANDRO FUNES (guardado: —)
+  guardado  · 23 local · 24 visitante · 22 eventos
+
+los-tordos-hernando vs nautico-fitz-simon · 683363b8 · tarjeta 320900  ·  32d9fa7c-40e7-44a0-8ca9-9839faeb1864
+  local     · los-tordos-hernando · 23 jugadores · 0 con ficha fijada
+  visitante · nautico-fitz-simon · 27 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min 11 (1T 11) local     try          Maico Ferreyra
+    min 12 (1T 12) local     conversion   Rodrigo Oyarzabal
+    min 15 (1T 15) visitante try          Alejo Ortiz
+    min 18 (1T 18) visitante try          Tomas Diaz
+    min 24 (1T 24) visitante try          Federico Marin
+    min 25 (1T 25) local     card_yellow  Lucio Pereyra
+    min 29 (1T 29) visitante try          Martin Luna Jara
+    min 31 (1T 31) visitante try          Federico Marin
+    min 31 (1T 31) visitante conversion   Federico Marin
+    min 34 (1T 34) visitante try          Alejo Ortiz
+    min 43 (1T 43) visitante try          Nicolás Andrés Luna Jara
+    min 42 (2T 2) visitante try          Cristian Carabajal
+    min 45 (2T 5) local     try          Elias Humberto Gallardo
+    min 45 (2T 5) visitante card_yellow  Nicolás Dallatorre
+    min 50 (2T 10) local     card_yellow  Rafael Benso
+    min 52 (2T 12) visitante try          Federico Marin
+    min 52 (2T 12) visitante conversion   Federico Marin
+  marcador  · eventos 12-49 · guardado 12-49
+  tries     · 2-9 (guardado —-—)
+  arbitro   · NAHUEL SABENA (guardado: —)
+  guardado  · 23 local · 27 visitante · 17 eventos
+
+villa-general-belgrano-r-c vs union-oncativo-rugby · 683363b8 · tarjeta 320899  ·  fd163867-438a-4cbd-8579-e30ec03d0eb3
+  local     · villa-general-belgrano-r-c · 30 jugadores · 22 con ficha fijada
+  visitante · union-oncativo-rugby · 25 jugadores · 19 con ficha fijada
+  eventos   · 16
+    min  3 (1T 3) local     penalty_goal Cristian Federico Ramírez
+    min  6 (1T 6) local     penalty_goal Cristian Federico Ramírez
+    min 10 (1T 10) local     try          Juan Ramirez
+    min 11 (1T 11) local     conversion   Cristian Federico Ramírez
+    min 17 (1T 17) visitante try          Santiago Fraresso
+    min 18 (1T 18) visitante conversion   Carlos Rodrigo Gutierrez
+    min 29 (1T 29) local     card_yellow  Damián Funes
+    min 30 (1T 30) visitante try          Marcos David Ciriacci
+    min 31 (1T 31) visitante conversion   Carlos Rodrigo Gutierrez
+    min 45 (2T 5) visitante try          Gino Daniel Viano
+    min 60 (2T 20) visitante penalty_goal Carlos Rodrigo Gutierrez
+    min 64 (2T 24) visitante card_yellow  Valentino Girotti
+    min 66 (2T 26) local     try          Cristian Federico Ramírez
+    min 66 (2T 26) local     conversion   Ignacio Berreaute
+    min 71 (2T 31) visitante penalty_goal Carlos Rodrigo Gutierrez
+    min 73 (2T 33) local     penalty_goal Cristian Federico Ramírez
+  marcador  · eventos 23-25 · guardado 23-25
+  tries     · 2-3 (guardado —-—)
+  arbitro   · CRISTIAN SCHWARTZ (guardado: —)
+  guardado  · 30 local · 25 visitante · 16 eventos
+
+nautico-fitz-simon vs villa-general-belgrano-r-c · 683363b8 · tarjeta 319797  ·  f0a5cc40-8a98-476e-9db2-363b6445764f
+  local     · nautico-fitz-simon · 23 jugadores · 0 con ficha fijada
+  visitante · villa-general-belgrano-r-c · 30 jugadores · 21 con ficha fijada
+  eventos   · 26
+    min 10 (1T 10) visitante card_yellow  Diego Pereyra
+    min 16 (1T 16) visitante substitution Leandro Molina
+    min 18 (1T 18) local     penalty_goal Agustín Héctor Villa
+    min 19 (1T 19) visitante substitution Diego Pereyra
+    min 24 (1T 24) visitante substitution Thiago Gelso
+    min 24 (1T 24) visitante substitution Rodrigo Céspedes
+    min 26 (1T 26) local     try          Cristian Viviani
+    min 26 (1T 26) local     conversion   Agustín Héctor Villa
+    min 31 (1T 31) local     try          Cristian Carabajal
+    min 41 (2T 1) local     try          Cristian Carabajal
+    min 50 (2T 10) local     substitution Maximiliano Banchero
+    min 50 (2T 10) local     substitution Nicolás Andrés Luna Jara
+    min 50 (2T 10) local     substitution Leonardo Bustos
+    min 50 (2T 10) local     substitution Oscar Francisco Vélez
+    min 50 (2T 10) local     substitution Tomas Diaz
+    min 50 (2T 10) local     substitution Cristian Viviani
+    min 50 (2T 10) local     substitution Lucas Aguirre
+    min 62 (2T 22) local     try          Lazaro Joel Ramirez
+    min 62 (2T 22) local     conversion   Agustín Héctor Villa
+    min 70 (2T 30) local     card_yellow  Cristian Carabajal
+    min 70 (2T 30) visitante try          Sven Martin Seyfarth
+    min 72 (2T 32) local     card_yellow  Martin Luna Jara
+    min 73 (2T 33) visitante try          Lautaro Ramirez
+    min 73 (2T 33) visitante conversion   Cristian Federico Ramírez
+    min 76 (2T 36) visitante try          Rodrigo Gabriel Ramirez
+    min 76 (2T 36) visitante conversion   Cristian Federico Ramírez
+  marcador  · eventos 27-19 · guardado 27-19
+  tries     · 4-3 (guardado —-—)
+  arbitro   · DANIEL ALEJANDRO FUNES (guardado: —)
+  guardado  · 23 local · 30 visitante · 26 eventos
+
+los-tordos-hernando vs oliva-rugby-club · 683363b8 · tarjeta 319796  ·  2ee54313-3e55-4938-9f93-3b35e88cafad
+  local     · los-tordos-hernando · 23 jugadores · 0 con ficha fijada
+  visitante · oliva-rugby-club · 24 jugadores · 0 con ficha fijada
+  eventos   · 5
+    min 19 (1T 19) local     card_yellow  Wilson Ferreyra
+    min 26 (1T 26) visitante card_yellow  Carlos George
+    min 35 (1T 35) local     card_yellow  Rafael Benso
+    min 64 (2T 24) visitante try          Pablo Benavidez
+    min 76 (2T 36) visitante try          Angel Oscar Achaval
+  marcador  · eventos 0-10 · guardado 0-10
+  tries     · 0-2 (guardado —-—)
+  arbitro   · CLAUDIO MARCELO TEJERO (guardado: —)
+  guardado  · 23 local · 24 visitante · 5 eventos
+
+union-oncativo-rugby vs universitario-villa-maria-rugby · 683363b8 · tarjeta 319798  ·  d244fd1a-996a-4c95-bba8-6376d7d5c4ac
+  local     · union-oncativo-rugby · 23 jugadores · 19 con ficha fijada
+  visitante · universitario-villa-maria-rugby · 19 jugadores · 0 con ficha fijada
+  eventos   · 36
+    min  1 (1T 1) local     try          Alex Cervelli
+    min  4 (1T 4) local     try          Adrian Santiago Diaz
+    min  5 (1T 5) local     conversion   Carlos Rodrigo Gutierrez
+    min  8 (1T 8) local     try          Javier Ruiz
+    min 18 (1T 18) local     try          Leandro Ivan Ciriacci
+    min 19 (1T 19) local     conversion   Carlos Rodrigo Gutierrez
+    min 30 (1T 30) visitante card_yellow  Agustin Ayala
+    min 31 (1T 31) local     try          Luciano Javier Ciriacci
+    min 31 (1T 31) local     conversion   Carlos Rodrigo Gutierrez
+    min 34 (1T 34) local     try          Alex Cervelli
+    min 35 (1T 35) local     conversion   Carlos Rodrigo Gutierrez
+    min 36 (1T 36) local     try          Luciano Javier Ciriacci
+    min 36 (1T 36) local     conversion   Carlos Rodrigo Gutierrez
+    min 40 (1T 40) local     substitution Adrian Santiago Diaz
+    min 40 (1T 40) local     try          Samuel Razuk
+    min 40 (1T 40) local     conversion   Carlos Rodrigo Gutierrez
+    min 40 (1T 40) local     substitution Daniel Fantone
+    min 40 (1T 40) local     substitution Marcos David Ciriacci
+    min 42 (2T 2) local     try          Iván Darío Luciani
+    min 44 (2T 4) local     try          Brian Sala
+    min 49 (2T 9) local     try          Marcos David Ciriacci
+    min 52 (2T 12) local     try          Valentino Girotti
+    min 60 (2T 20) local     try          Gino Daniel Viano
+    min 60 (2T 20) local     substitution Leandro Ivan Ciriacci
+    min 61 (2T 21) local     conversion   Carlos Rodrigo Gutierrez
+    min 62 (2T 22) local     substitution Fabricio Carolini
+    min 62 (2T 22) local     substitution Carlos Rodrigo Gutierrez
+    min 63 (2T 23) local     substitution Javier Ruiz
+    min 67 (2T 27) local     try          Iván Darío Luciani
+    min 68 (2T 28) local     conversion   Franco Re
+    min 72 (2T 32) local     try          Franco Re
+    min 73 (2T 33) local     try          Franco Re
+    min 73 (2T 33) local     substitution Alex Cervelli
+    min 79 (2T 39) local     try          Gino Daniel Viano
+    min 80 (2T 40) local     substitution Federico Savio
+    min 80 (2T 40) local     conversion   Franco Re
+  marcador  · eventos 103-0 · guardado 103-0
+  tries     · 17-0 (guardado —-—)
+  arbitro   · EMANUEL ORDOÑEZ (guardado: —)
+  guardado  · 23 local · 19 visitante · 36 eventos
+
+villa-general-belgrano-r-c vs los-tordos-hernando · 683363b8 · tarjeta 315222  ·  dad9505f-805b-489d-acea-502a3d93de17
+  local     · villa-general-belgrano-r-c · 30 jugadores · 20 con ficha fijada
+  visitante · los-tordos-hernando · 23 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min  5 (1T 5) visitante penalty_goal Rodrigo Oyarzabal
+    min  7 (1T 7) local     penalty_goal Cristian Federico Ramírez
+    min  9 (1T 9) visitante penalty_goal Rodrigo Oyarzabal
+    min 10 (1T 10) visitante try          Rodrigo Oyarzabal
+    min 14 (1T 14) visitante try          Mauro Vieyra
+    min 20 (1T 20) local     substitution Orencio Vellon
+    min 23 (1T 23) local     substitution Thiago Gelso
+    min 29 (1T 29) visitante try          Rodrigo Oyarzabal
+    min 31 (1T 31) local     try          Rodrigo Gabriel Ramirez
+    min 31 (1T 31) local     conversion   Cristian Federico Ramírez
+    min 43 (2T 3) local     try          Lautaro Ramirez
+    min 47 (2T 7) local     substitution Rodrigo Céspedes
+    min 49 (2T 9) local     try          Juan Ramirez
+    min 49 (2T 9) local     conversion   Cristian Federico Ramírez
+    min 57 (2T 17) local     try          Lautaro Ramirez
+    min 57 (2T 17) local     conversion   Cristian Federico Ramírez
+    min 67 (2T 27) local     substitution Antonio German Barboza
+    min 67 (2T 27) local     substitution Diego Pereyra
+    min 67 (2T 27) local     substitution Bruno Ceballos Larrea
+    min 67 (2T 27) visitante try          Wilson Ferreyra
+    min 70 (2T 30) local     try          Rodrigo Gabriel Ramirez
+    min 70 (2T 30) local     conversion   Cristian Federico Ramírez
+    min 70 (2T 30) local     substitution Luciano Llada
+    min 75 (2T 35) local     try          Cristian Federico Ramírez
+    min 75 (2T 35) local     conversion   Cristian Federico Ramírez
+    min 80 (2T 40) local     try          Rodrigo Gabriel Ramirez
+    min 80 (2T 40) local     conversion   Cristian Federico Ramírez
+  marcador  · eventos 50-26 · guardado 50-26
+  tries     · 7-4 (guardado —-—)
+  arbitro   · JOSÉ OCTAVIANO BORQUEZ (guardado: —)
+  guardado  · 30 local · 23 visitante · 27 eventos
+
+universitario-villa-maria-rugby vs nautico-fitz-simon · 683363b8 · tarjeta 315221  ·  d8f4df0d-9e84-42d2-88c6-86255ff2236e
+  local     · universitario-villa-maria-rugby · 21 jugadores · 0 con ficha fijada
+  visitante · nautico-fitz-simon · 26 jugadores · 0 con ficha fijada
+  eventos   · 28
+    min 10 (1T 10) local     card_yellow  Nicolas Ibazeta
+    min 15 (1T 15) visitante try          Martin Luna Jara
+    min 15 (1T 15) visitante try          Cristian Carabajal
+    min 15 (1T 15) visitante conversion   Agustín Héctor Villa
+    min 25 (1T 25) local     card_yellow  Benjamin Vilella
+    min 25 (1T 25) visitante try          Agustín Héctor Villa
+    min 25 (1T 25) visitante conversion   Agustín Héctor Villa
+    min 30 (1T 30) visitante injury       Lucas Vivas
+    min 30 (1T 30) visitante substitution Lucas Vivas
+    min 34 (1T 34) visitante try          Agustín Héctor Villa
+    min 41 (2T 1) local     substitution Lucas Bergara
+    min 41 (2T 1) local     substitution Agustin Perez Batistic
+    min 45 (2T 5) visitante try          Gastón Francisco Arce
+    min 45 (2T 5) visitante conversion   Agustín Héctor Villa
+    min 55 (2T 15) visitante injury       Gastón Francisco Arce
+    min 55 (2T 15) visitante try          Milton Cortez
+    min 55 (2T 15) visitante substitution Gastón Francisco Arce
+    min 55 (2T 15) visitante substitution Cristian Viviani
+    min 55 (2T 15) visitante substitution Tomas Diaz
+    min 55 (2T 15) visitante substitution Martin Luna Jara
+    min 55 (2T 15) visitante conversion   Ramiro Gonzalez
+    min 55 (2T 15) visitante substitution Oscar Francisco Vélez
+    min 55 (2T 15) visitante substitution Lucas Aguirre
+    min 75 (2T 35) local     card_red     Joaquin Carballo
+    min 75 (2T 35) visitante try          Ubaldo Nicolás Azategui Fernández
+    min 75 (2T 35) visitante conversion   Agustín Héctor Villa
+    min 77 (2T 37) visitante try          Cristian Carabajal
+    min 77 (2T 37) visitante conversion   Agustín Héctor Villa
+  marcador  · eventos 0-52 · guardado 0-52
+  tries     · 0-8 (guardado —-—)
+  arbitro   · CARLOS PRIETO (guardado: —)
+  guardado  · 21 local · 26 visitante · 28 eventos
+
+oliva-rugby-club vs union-oncativo-rugby · 683363b8 · tarjeta 315220  ·  83839b0e-f333-4551-8a54-604150650e8f
+  local     · oliva-rugby-club · 23 jugadores · 0 con ficha fijada
+  visitante · union-oncativo-rugby · 23 jugadores · 19 con ficha fijada
+  eventos   · 16
+    min  3 (1T 3) visitante penalty_goal Franco Re
+    min 15 (1T 15) local     try          Gaston Diaz
+    min 16 (1T 16) local     conversion   Gaston Diaz
+    min 28 (1T 28) local     card_yellow  Francisco Peralta
+    min 40 (1T 40) visitante try          Iván Darío Luciani
+    min 40 (1T 40) visitante conversion   Franco Re
+    min 41 (2T 1) local     substitution Alejandro Gabriel Sanchez
+    min 47 (2T 7) local     substitution David Canova
+    min 50 (2T 10) local     substitution Leonardo Nigro
+    min 55 (2T 15) local     penalty_goal Gaston Diaz
+    min 56 (2T 16) visitante substitution Daniel Fantone
+    min 57 (2T 17) visitante penalty_goal Franco Re
+    min 57 (2T 17) visitante substitution Alex Cervelli
+    min 60 (2T 20) local     penalty_goal Gaston Diaz
+    min 64 (2T 24) visitante substitution Brian Sala
+    min 64 (2T 24) visitante substitution Javier Ruiz
+  marcador  · eventos 13-13 · guardado 13-13
+  tries     · 1-1 (guardado —-—)
+  arbitro   · PABLO GERARDO RONCO (guardado: —)
+  guardado  · 23 local · 23 visitante · 16 eventos
+
+nautico-fitz-simon vs union-oncativo-rugby · 683363b8 · tarjeta 314192  ·  abad2d01-1978-479d-98de-b9eb16c3d30a
+  local     · nautico-fitz-simon · 24 jugadores · 0 con ficha fijada
+  visitante · union-oncativo-rugby · 23 jugadores · 18 con ficha fijada
+  eventos   · 18
+    min  7 (1T 7) local     penalty_goal Agustín Héctor Villa
+    min 14 (1T 14) visitante try          Emiliano Acevedo
+    min 15 (1T 15) visitante conversion   Carlos Rodrigo Gutierrez
+    min 19 (1T 19) visitante penalty_goal Carlos Rodrigo Gutierrez
+    min 26 (1T 26) local     try          Lazaro Joel Ramirez
+    min 27 (1T 27) local     conversion   Agustín Héctor Villa
+    min 36 (1T 36) visitante try          Santiago Fraresso
+    min 42 (2T 2) local     try          Milton Cortez
+    min 43 (2T 3) local     conversion   Agustín Héctor Villa
+    min 50 (2T 10) local     try          Cristian Carabajal
+    min 56 (2T 16) local     penalty_goal Agustín Héctor Villa
+    min 60 (2T 20) local     substitution Martin Luna Jara
+    min 61 (2T 21) local     card_yellow  Alejo Ortiz
+    min 62 (2T 22) visitante try          Valentino Girotti
+    min 73 (2T 33) local     penalty_goal Agustín Héctor Villa
+    min 76 (2T 36) local     card_yellow  Milton Cortez
+    min 80 (2T 40) visitante try          Valentino Girotti
+    min 81 (2T 41) visitante conversion   Carlos Rodrigo Gutierrez
+  marcador  · eventos 28-27 · guardado 28-27
+  tries     · 3-4 (guardado —-—)
+  arbitro   · CRISTIAN SCHWARTZ (guardado: —)
+  guardado  · 24 local · 23 visitante · 18 eventos
+
+los-tordos-hernando vs universitario-villa-maria-rugby · 683363b8 · tarjeta 314191  ·  548b0dd1-8c40-4964-b53c-39e97dd94591
+  local     · los-tordos-hernando · 19 jugadores · 0 con ficha fijada
+  visitante · universitario-villa-maria-rugby · 19 jugadores · 0 con ficha fijada
+  eventos   · 15
+    min  7 (1T 7) local     try          Maico Ferreyra
+    min  8 (1T 8) local     conversion   Rodrigo Oyarzabal
+    min 10 (1T 10) local     substitution Mauro Vieyra
+    min 21 (1T 21) local     try          Pablo Daniel Oyarzabal
+    min 22 (1T 22) local     conversion   Rodrigo Oyarzabal
+    min 24 (1T 24) local     try          Maico Ferreyra
+    min 25 (1T 25) local     conversion   Rodrigo Oyarzabal
+    min 36 (1T 36) local     try          Maico Ferreyra
+    min 37 (1T 37) local     conversion   Rodrigo Oyarzabal
+    min 39 (1T 39) local     try          Maico Ferreyra
+    min 45 (2T 5) visitante try          Lautaro Canova
+    min 45 (2T 5) visitante conversion   Cristian Vazquez
+    min 65 (2T 25) visitante try          Valentin Ortiz
+    min 65 (2T 25) visitante conversion   Cristian Vazquez
+    min 70 (2T 30) visitante substitution Lucas Bergara
+  marcador  · eventos 33-14 · guardado 33-14
+  tries     · 5-2 (guardado —-—)
+  arbitro   · JOSÉ OCTAVIANO BORQUEZ (guardado: —)
+  guardado  · 19 local · 19 visitante · 15 eventos
+
+villa-general-belgrano-r-c vs oliva-rugby-club · 683363b8 · tarjeta 314190  ·  8cc5aaac-cf40-4b13-8b27-19143583661c
+  local     · villa-general-belgrano-r-c · 28 jugadores · 21 con ficha fijada
+  visitante · oliva-rugby-club · 23 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min 10 (1T 10) visitante penalty_goal Gaston Diaz
+    min 15 (1T 15) local     penalty_goal Cristian Federico Ramírez
+    min 25 (1T 25) local     substitution Ezequiel Ceballos Larrea
+    min 36 (1T 36) local     try          Ariel Nicolás Ramirez
+    min 45 (2T 5) local     substitution Dalmiro Vilches
+    min 55 (2T 15) visitante try          Javier Scarafiocca
+    min 60 (2T 20) local     substitution Ariel Nicolás Ramirez
+    min 62 (2T 22) local     try          Cristian Federico Ramírez
+    min 62 (2T 22) local     conversion   Cristian Federico Ramírez
+    min 65 (2T 25) local     substitution Orencio Vellon
+    min 65 (2T 25) local     substitution Bruno Ceballos Larrea
+    min 65 (2T 25) local     substitution Thiago Gelso
+    min 65 (2T 25) local     substitution Sven Martin Seyfarth
+    min 68 (2T 28) local     try          Gonzalo Vilanova
+    min 68 (2T 28) local     conversion   Cristian Federico Ramírez
+    min 75 (2T 35) local     try          Cristian Federico Ramírez
+    min 80 (2T 40) local     try          Nicolas Facchin
+  marcador  · eventos 32-8 · guardado 32-8
+  tries     · 5-1 (guardado —-—)
+  arbitro   · LUCAS HUMERES (guardado: —)
+  guardado  · 28 local · 23 visitante · 17 eventos
+
+los-tordos-hernando vs union-oncativo-rugby · 683363b8 · tarjeta 312189  ·  31488c79-085d-4437-a225-fcda35555baa
+  local     · los-tordos-hernando · 22 jugadores · 0 con ficha fijada
+  visitante · union-oncativo-rugby · 24 jugadores · 19 con ficha fijada
+  eventos   · 26
+    min  6 (1T 6) local     try          Maico Ferreyra
+    min  7 (1T 7) local     conversion   Sebastian Piedra
+    min 11 (1T 11) local     card_yellow  Axel Agustín Albornoz
+    min 17 (1T 17) local     penalty_goal Sebastian Piedra
+    min 17 (1T 17) visitante card_yellow  Federico Savio
+    min 24 (1T 24) local     card_yellow  Rafael Benso
+    min 26 (1T 26) visitante penalty_try  
+    min 30 (1T 30) visitante try          Gino Daniel Viano
+    min 30 (1T 30) visitante conversion   Franco Re
+    min 40 (1T 40) visitante substitution Samuel Razuk
+    min 52 (2T 12) visitante penalty_try  
+    min 55 (2T 15) local     card_yellow  Rodrigo Oyarzabal
+    min 56 (2T 16) visitante substitution Daniel Fantone
+    min 57 (2T 17) local     penalty_goal Sebastian Piedra
+    min 60 (2T 20) local     substitution Lucas Cañete
+    min 73 (2T 33) visitante try          Gino Daniel Viano
+    min 74 (2T 34) visitante substitution Gino Daniel Viano
+    min 74 (2T 34) visitante conversion   Franco Re
+    min 75 (2T 35) visitante substitution Leandro Ivan Ciriacci
+    min 78 (2T 38) visitante substitution Marcos David Ciriacci
+    min 78 (2T 38) visitante try          Iván Darío Luciani
+    min 80 (2T 40) local     try          Alexis Javier Ramírez
+    min 80 (2T 40) local     conversion   Sebastian Piedra
+    min 80 (2T 40) visitante substitution Federico Savio
+    min 80 (2T 40) visitante card_yellow  Javier Ruiz
+    min 85 (2T 45) visitante substitution Brian Sala
+  marcador  · eventos 20-33 · guardado 20-33
+  tries     · 2-5 (guardado —-—)
+  arbitro   · FRANCO ZARATE (guardado: —)
+  guardado  · 22 local · 24 visitante · 26 eventos
+
+oliva-rugby-club vs nautico-fitz-simon · 683363b8 · tarjeta 312188  ·  ffbab2fe-53b4-417d-8296-efaaa9be4963
+  local     · oliva-rugby-club · 25 jugadores · 0 con ficha fijada
+  visitante · nautico-fitz-simon · 27 jugadores · 0 con ficha fijada
+  eventos   · 26
+    min  8 (1T 8) visitante try          Agustín Héctor Villa
+    min  8 (1T 8) visitante conversion   Agustín Héctor Villa
+    min 21 (1T 21) visitante try          Cristian Carabajal
+    min 21 (1T 21) visitante conversion   Cristian Carabajal
+    min 35 (1T 35) local     conversion   Gaston Diaz
+    min 35 (1T 35) local     try          Gaston Diaz
+    min 38 (1T 38) visitante try          Renato Severini
+    min 38 (1T 38) visitante conversion   Renato Severini
+    min 44 (2T 4) visitante card_yellow  Nicolás Andrés Luna Jara
+    min 45 (2T 5) local     conversion   Gaston Diaz
+    min 45 (2T 5) local     try          Patricio Pignatelli
+    min 47 (2T 7) local     card_yellow  Marcelo Ezequiel Gatti
+    min 50 (2T 10) visitante try          Federico Marin
+    min 50 (2T 10) visitante conversion   Federico Marin
+    min 59 (2T 19) visitante card_yellow  Maximiliano Arce
+    min 70 (2T 30) local     card_red     Marcelo Ezequiel Gatti
+    min 70 (2T 30) local     substitution Cristian David Corrado
+    min 70 (2T 30) local     substitution Gaston Diaz
+    min 70 (2T 30) local     substitution Germán Gomez
+    min 70 (2T 30) visitante card_red     Nicolás Dallatorre
+    min 70 (2T 30) visitante card_red     Marcio Castro
+    min 70 (2T 30) visitante substitution Alexis Gonzalez
+    min 70 (2T 30) visitante substitution Tomas Diaz
+    min 70 (2T 30) visitante substitution Nicolás Andrés Luna Jara
+    min 75 (2T 35) visitante substitution Ubaldo Nicolás Azategui Fernández
+    min 75 (2T 35) visitante injury       Ubaldo Nicolás Azategui Fernández
+  marcador  · eventos 14-28 · guardado 14-28
+  tries     · 2-4 (guardado —-—)
+  arbitro   · PABLO DANIEL DIONICIO BENITEZ (guardado: —)
+  guardado  · 25 local · 27 visitante · 26 eventos
+
+nautico-fitz-simon vs los-tordos-hernando · 683363b8 · tarjeta 311725  ·  f535273a-d63f-478e-8460-de0213521627
+  local     · nautico-fitz-simon · 24 jugadores · 0 con ficha fijada
+  visitante · los-tordos-hernando · 21 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min  7 (1T 7) local     try          Cristian Viviani
+    min 20 (1T 20) local     try          Federico Marin
+    min 21 (1T 21) local     conversion   Agustín Héctor Villa
+    min 25 (1T 25) local     try          Juan Alfredo Silva
+    min 26 (1T 26) local     conversion   Agustín Héctor Villa
+    min 27 (1T 27) local     try          Cristian Carabajal
+    min 45 (2T 5) local     try          Marcio Castro
+    min 45 (2T 5) local     substitution Oscar Francisco Vélez
+    min 46 (2T 6) local     conversion   Agustín Héctor Villa
+    min 48 (2T 8) local     substitution Martin Luna Jara
+    min 52 (2T 12) visitante substitution Lautaro Baudino
+    min 54 (2T 14) local     substitution Juan Alfredo Silva
+    min 66 (2T 26) local     substitution Cristian Viviani
+    min 67 (2T 27) local     card_yellow  Lucas Vivas
+    min 67 (2T 27) visitante card_yellow  Rafael Benso
+    min 72 (2T 32) local     substitution Maximiliano Arce
+    min 72 (2T 32) local     substitution Alejo Ortiz
+  marcador  · eventos 31-0 · guardado 31-0
+  tries     · 5-0 (guardado —-—)
+  arbitro   · JOSÉ OCTAVIANO BORQUEZ (guardado: —)
+  guardado  · 24 local · 21 visitante · 17 eventos
+
+union-oncativo-rugby vs villa-general-belgrano-r-c · 683363b8 · tarjeta 311724  ·  62ed54e0-6e7e-4f1f-afa2-0b5614c9ad09
+  local     · union-oncativo-rugby · 24 jugadores · 20 con ficha fijada
+  visitante · villa-general-belgrano-r-c · 26 jugadores · 17 con ficha fijada
+  eventos   · 18
+    min  3 (1T 3) visitante penalty_goal Cristian Federico Ramírez
+    min  8 (1T 8) local     try          Leandro Ivan Ciriacci
+    min  9 (1T 9) local     conversion   Franco Re
+    min 18 (1T 18) visitante substitution Giuliano Cupaiolo
+    min 21 (1T 21) visitante penalty_goal Cristian Federico Ramírez
+    min 23 (1T 23) visitante try          Gonzalo Vilanova
+    min 23 (1T 23) visitante conversion   Cristian Federico Ramírez
+    min 40 (2T 0) visitante substitution Antonio German Barboza
+    min 46 (2T 6) local     try          Santiago Fraresso
+    min 47 (2T 7) local     conversion   Franco Re
+    min 48 (2T 8) visitante substitution Diego Pereyra
+    min 50 (2T 10) visitante try          Juan Ramirez
+    min 62 (2T 22) visitante substitution Gino Guida
+    min 62 (2T 22) visitante substitution Thiago Gelso
+    min 68 (2T 28) local     try          Santiago Fraresso
+    min 68 (2T 28) visitante substitution Ezequiel Ceballos Larrea
+    min 76 (2T 36) visitante penalty_goal Cristian Federico Ramírez
+    min 80 (2T 40) local     penalty_goal Franco Re
+  marcador  · eventos 22-21 · guardado 22-21
+  tries     · 3-2 (guardado —-—)
+  arbitro   · CRISTIAN SCHWARTZ (guardado: —)
+  guardado  · 24 local · 26 visitante · 18 eventos
+
+universitario-villa-maria-rugby vs oliva-rugby-club · 683363b8 · tarjeta 311723  ·  efc7399c-64c8-4091-bbda-c26ba8112dbf
+  local     · universitario-villa-maria-rugby · 24 jugadores · 0 con ficha fijada
+  visitante · oliva-rugby-club · 25 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min  7 (1T 7) visitante try          Ruben Javier Aguiar
+    min  8 (1T 8) visitante injury       Ruben Javier Aguiar
+    min 10 (1T 10) local     try          Cristian Vazquez
+    min 10 (1T 10) local     conversion   Pedro Alvarez
+    min 10 (1T 10) visitante card_yellow  Angel Oscar Achaval
+    min 20 (1T 20) local     try          Lautaro Canova
+    min 20 (1T 20) visitante try          Carlos George
+    min 21 (1T 21) visitante conversion   Gaston Diaz
+    min 49 (2T 9) visitante try          Pablo Benavidez
+    min 60 (2T 20) local     try          Sebastian Viera
+    min 60 (2T 20) local     conversion   Pedro Alvarez
+    min 65 (2T 25) visitante try          Emiliano Matellica
+    min 66 (2T 26) visitante conversion   Germán Gomez
+    min 70 (2T 30) local     card_yellow  Pedro Alvarez
+    min 70 (2T 30) local     substitution Facundo Castro
+    min 70 (2T 30) local     substitution Nicolas Diaz
+    min 70 (2T 30) visitante penalty_goal Germán Gomez
+    min 74 (2T 34) visitante try          Emiliano Matellica
+  marcador  · eventos 19-32 · guardado 19-32
+  tries     · 3-5 (guardado —-—)
+  arbitro   · CARLOS PRIETO (guardado: —)
+  guardado  · 24 local · 25 visitante · 18 eventos
+
+universitario-villa-maria-rugby vs union-oncativo-rugby · 683363b8 · tarjeta 309467  ·  67e60cab-23d8-4e8d-a74b-e03210e0755d
+  local     · universitario-villa-maria-rugby · 26 jugadores · 0 con ficha fijada
+  visitante · union-oncativo-rugby · 23 jugadores · 19 con ficha fijada
+  eventos   · 21
+    min 20 (1T 20) local     try          Cristian Vazquez
+    min 20 (1T 20) local     conversion   Pedro Alvarez
+    min 29 (1T 29) visitante substitution Miguel Angel Caseres
+    min 40 (1T 40) visitante try          Santiago Fraresso
+    min 40 (1T 40) visitante substitution Brian Sala
+    min 44 (2T 4) visitante try          Adrian Santiago Diaz
+    min 44 (2T 4) visitante conversion   Franco Re
+    min 45 (2T 5) local     substitution Gustavo Quilodran
+    min 55 (2T 15) local     card_yellow  Santiago Gaetan
+    min 55 (2T 15) visitante substitution Joaquin Moreno
+    min 60 (2T 20) local     try          Lautaro Canova
+    min 60 (2T 20) local     conversion   Pedro Alvarez
+    min 60 (2T 20) visitante substitution Fabricio Carolini
+    min 61 (2T 21) visitante try          Leandro Ivan Ciriacci
+    min 62 (2T 22) local     card_yellow  Sebastian Viera
+    min 65 (2T 25) visitante try          Franco Re
+    min 66 (2T 26) visitante conversion   Nicolás Luciani
+    min 66 (2T 26) visitante card_yellow  Samuel Razuk
+    min 72 (2T 32) local     card_yellow  Nicolas Andrada
+    min 80 (2T 40) visitante substitution Claudio Benjamin Tisssera
+    min 80 (2T 40) visitante substitution Daniel Fantone
+  marcador  · eventos 14-24 · guardado 14-24
+  tries     · 2-4 (guardado —-—)
+  arbitro   · NAHUEL SABENA (guardado: —)
+  guardado  · 26 local · 23 visitante · 21 eventos
+
+villa-general-belgrano-r-c vs nautico-fitz-simon · 683363b8 · tarjeta 309466  ·  bee64573-5236-41ec-845f-ff1d25b39ce8
+  local     · villa-general-belgrano-r-c · 25 jugadores · 17 con ficha fijada
+  visitante · nautico-fitz-simon · 22 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min  5 (1T 5) visitante try          Tomas Diaz
+    min 15 (1T 15) visitante try          Cristian Carabajal
+    min 16 (1T 16) visitante conversion   Cristian Carabajal
+    min 26 (1T 26) local     substitution Orencio Vellon
+    min 26 (1T 26) visitante try          Federico Marin
+    min 33 (1T 33) visitante try          Alejo Ortiz
+    min 45 (2T 5) visitante try          Federico Marin
+    min 46 (2T 6) visitante conversion   Agustín Vidomini
+    min 47 (2T 7) local     substitution Gino Guida
+    min 58 (2T 18) visitante try          Agustín Héctor Villa
+    min 59 (2T 19) visitante conversion   Cristian Carabajal
+    min 62 (2T 22) local     substitution Marcelo Murias
+    min 65 (2T 25) local     substitution Santiago Ezequiel Martinez
+    min 75 (2T 35) visitante try          Marcio Castro
+    min 80 (2T 40) visitante substitution Oscar Francisco Vélez
+    min 80 (2T 40) visitante substitution Lucas Vivas
+    min 80 (2T 40) visitante substitution Alejo Ortiz
+    min 80 (2T 40) visitante substitution Martin Luna Jara
+  marcador  · eventos 0-41 · guardado 0-41
+  tries     · 0-7 (guardado —-—)
+  arbitro   · PABLO GERARDO RONCO (guardado: —)
+  guardado  · 25 local · 22 visitante · 18 eventos
+
+oliva-rugby-club vs los-tordos-hernando · 683363b8 · tarjeta 309464  ·  b5b3cd2d-863b-4380-b279-a772bd6f9532
+  local     · oliva-rugby-club · 26 jugadores · 0 con ficha fijada
+  visitante · los-tordos-hernando · 20 jugadores · 0 con ficha fijada
+  eventos   · 14
+    min 10 (1T 10) local     card_yellow  Leonardo Nigro
+    min 10 (1T 10) visitante try          Marcelo Ferreyra
+    min 11 (1T 11) visitante conversion   Ignacio Piedra
+    min 28 (1T 28) visitante card_yellow  Axel Agustín Albornoz
+    min 34 (1T 34) local     try          Leonardo Nigro
+    min 35 (1T 35) local     conversion   Jose Cañete
+    min 50 (2T 10) local     card_red     Leonardo Nigro
+    min 50 (2T 10) visitante card_yellow  Marcelo Ferreyra
+    min 63 (2T 23) visitante try          Marcelo Ferreyra
+    min 64 (2T 24) visitante conversion   Ignacio Piedra
+    min 66 (2T 26) visitante try          Wilson Ferreyra
+    min 67 (2T 27) visitante conversion   Ignacio Piedra
+    min 78 (2T 38) local     try          Jose Cañete
+    min 80 (2T 40) local     try          Gaston Diaz
+  marcador  · eventos 17-21 · guardado 17-21
+  tries     · 3-3 (guardado —-—)
+  arbitro   · CARLOS PRIETO (guardado: —)
+  guardado  · 26 local · 20 visitante · 14 eventos
+
+los-tordos-hernando vs villa-general-belgrano-r-c · 683363b8 · tarjeta 308656  ·  8104799a-5c09-4ef0-a4e4-ebed5284b10f
+  local     · los-tordos-hernando · 19 jugadores · 0 con ficha fijada
+  visitante · villa-general-belgrano-r-c · 26 jugadores · 16 con ficha fijada
+  eventos   · 27
+    min  1 (1T 1) visitante try          Juan Ramirez
+    min  2 (1T 2) visitante conversion   Cristian Federico Ramírez
+    min  5 (1T 5) local     penalty_try  
+    min  6 (1T 6) visitante card_yellow  Luca Gelso
+    min  7 (1T 7) local     try          Wilson Ferreyra
+    min 13 (1T 13) visitante penalty_goal Cristian Federico Ramírez
+    min 21 (1T 21) visitante substitution Pablo Pereyra
+    min 23 (1T 23) visitante try          Juan Ramirez
+    min 24 (1T 24) visitante conversion   Cristian Federico Ramírez
+    min 28 (1T 28) visitante card_yellow  Luciano Llada
+    min 30 (1T 30) visitante substitution Orencio Vellon
+    min 33 (1T 33) visitante try          Juan Ramirez
+    min 39 (1T 39) visitante try          Facundo Vilanova
+    min 48 (2T 8) local     try          Rafael Benso
+    min 50 (2T 10) local     substitution Alejo Zuber
+    min 52 (2T 12) visitante try          Juan Ramirez
+    min 53 (2T 13) local     card_yellow  Ignacio Piedra
+    min 55 (2T 15) local     try          Maico Ferreyra
+    min 56 (2T 16) visitante substitution Mateo Chialvetto
+    min 64 (2T 24) visitante try          Cristian Federico Ramírez
+    min 69 (2T 29) visitante substitution Santiago Ezequiel Martinez
+    min 69 (2T 29) visitante substitution Gino Guida
+    min 69 (2T 29) visitante substitution Juan Ramirez
+    min 69 (2T 29) visitante try          Cristian Federico Ramírez
+    min 71 (2T 31) visitante try          Manuel Oliva Skansi
+    min 76 (2T 36) visitante substitution Matías Nicolás Berg
+    min 77 (2T 37) visitante try          Giuliano Lehmann
+  marcador  · eventos 22-52 · guardado 22-52
+  tries     · 4-9 (guardado —-—)
+  arbitro   · MOLINA P 25268268 (NO OFICIAL) (guardado: —)
+  guardado  · 19 local · 26 visitante · 27 eventos
+
+nautico-fitz-simon vs universitario-villa-maria-rugby · 683363b8 · tarjeta 308655  ·  8bf5e988-4c7a-4a09-b8a7-ed9523085251
+  local     · nautico-fitz-simon · 24 jugadores · 0 con ficha fijada
+  visitante · universitario-villa-maria-rugby · 21 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min  2 (1T 2) local     try          Alexis Gonzalez
+    min  6 (1T 6) local     try          Alexis Gonzalez
+    min  8 (1T 8) local     card_yellow  Lucas Aguirre
+    min  9 (1T 9) local     conversion   Cristian Viviani
+    min 10 (1T 10) local     card_yellow  Nicolás Dallatorre
+    min 12 (1T 12) local     try          Cristian Viviani
+    min 15 (1T 15) local     card_yellow  Martin Luna Jara
+    min 16 (1T 16) local     try          Alexis Gonzalez
+    min 23 (1T 23) local     try          Nicolás Dallatorre
+    min 31 (1T 31) local     conversion   Cristian Viviani
+    min 31 (1T 31) local     try          Martin Luna Jara
+    min 33 (1T 33) local     conversion   Cristian Viviani
+    min 47 (2T 7) local     try          Lazaro Joel Ramirez
+    min 51 (2T 11) local     conversion   Cristian Viviani
+    min 51 (2T 11) local     injury       Lucas Aguirre
+    min 60 (2T 20) visitante try          Lautaro Canova
+    min 60 (2T 20) visitante conversion   Pedro Alvarez
+    min 62 (2T 22) visitante substitution Nicolas Ibazeta
+    min 62 (2T 22) visitante substitution Aron Jurado
+    min 62 (2T 22) visitante substitution Gustavo Quilodran
+    min 70 (2T 30) local     try          Agustín Héctor Villa
+    min 70 (2T 30) local     conversion   Cristian Viviani
+    min 70 (2T 30) visitante injury       Thiago Cristaldo
+    min 70 (2T 30) visitante card_yellow  Aron Jurado
+  marcador  · eventos 50-7 · guardado 50-7
+  tries     · 8-1 (guardado —-—)
+  arbitro   · RODRIGO TIRANTI (guardado: —)
+  guardado  · 24 local · 21 visitante · 24 eventos
+
+union-oncativo-rugby vs oliva-rugby-club · 683363b8 · tarjeta 308654  ·  0bb9ff8f-50b7-4928-b1a2-607b70b71741
+  local     · union-oncativo-rugby · 23 jugadores · 20 con ficha fijada
+  visitante · oliva-rugby-club · 24 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min 13 (1T 13) visitante try          Leonardo Nigro
+    min 14 (1T 14) visitante conversion   Gaston Diaz
+    min 23 (1T 23) local     try          Iván Darío Luciani
+    min 23 (1T 23) local     conversion   Carlos Rodrigo Gutierrez
+    min 28 (1T 28) visitante try          Leonardo Nigro
+    min 33 (1T 33) local     try          Joaquin Moreno
+    min 34 (1T 34) visitante card_yellow  Leonardo Nigro
+    min 40 (1T 40) local     substitution Luciano Javier Ciriacci
+    min 40 (1T 40) visitante penalty_try  
+    min 41 (2T 1) local     try          Leandro Ivan Ciriacci
+    min 44 (2T 4) local     try          Valentino Girotti
+    min 57 (2T 17) local     substitution Santiago Fraresso
+    min 59 (2T 19) visitante try          Jose Cañete
+    min 63 (2T 23) local     try          Lautaro Colazo
+    min 69 (2T 29) local     try          Javier Ruiz
+    min 77 (2T 37) local     try          Valentino Girotti
+    min 80 (2T 40) local     substitution Joaquin Moreno
+    min 80 (2T 40) local     substitution Daniel Fantone
+    min 80 (2T 40) local     substitution Brian Sala
+    min 80 (2T 40) local     substitution Federico Savio
+    min 80 (2T 40) local     substitution Nicolás Luciani
+    min 80 (2T 40) visitante card_yellow  Francisco Peralta
+  marcador  · eventos 37-24 · guardado 37-24
+  tries     · 7-4 (guardado —-—)
+  arbitro   · SANTIAGO GERONIMO LOZADA CHAVES (guardado: —)
+  guardado  · 23 local · 24 visitante · 22 eventos
+
+union-oncativo-rugby vs nautico-fitz-simon · 683363b8 · tarjeta 296903  ·  6d7e56fa-85f4-4173-948c-f4b6929900d4
+  local     · union-oncativo-rugby · 23 jugadores · 15 con ficha fijada
+  visitante · nautico-fitz-simon · 17 jugadores · 0 con ficha fijada
+  eventos   · 14
+    min  5 (1T 5) visitante try          Alexis Gonzalez
+    min  5 (1T 5) visitante conversion   Agustín Héctor Villa
+    min  5 (1T 5) visitante try          Martin Luna Jara
+    min  6 (1T 6) visitante try          Agustín Héctor Villa
+    min  6 (1T 6) visitante conversion   Agustín Héctor Villa
+    min 15 (1T 15) local     card_yellow  Gino Daniel Viano
+    min 34 (1T 34) local     try          Luciano Javier Ciriacci
+    min 34 (1T 34) local     conversion   Valentino Girotti
+    min 85 (2T 45) local     substitution Miguel Angel Caseres
+    min 86 (2T 46) local     substitution Daniel Fantone
+    min 96 (2T 56) local     substitution Santiago Fraresso
+    min 98 (2T 58) local     substitution Leandro Ivan Ciriacci
+    min 100 (2T 60) local     try          Aguilar Elias
+    min 109 (2T 69) local     card_yellow  Valentino Girotti
+  marcador  · eventos 12-19 · guardado 12-19
+  tries     · 2-3 (guardado —-—)
+  arbitro   · MOLINA P 25268268 (NO OFICIAL) (guardado: —)
+  guardado  · 23 local · 17 visitante · 14 eventos
+
+universitario-villa-maria-rugby vs los-tordos-hernando · 683363b8 · tarjeta 296902  ·  39d28486-a9f4-4e01-b935-cc2b10e474b2
+  local     · universitario-villa-maria-rugby · 22 jugadores · 0 con ficha fijada
+  visitante · los-tordos-hernando · 16 jugadores · 0 con ficha fijada
+  eventos   · 16
+    min  1 (1T 1) local     card_yellow  Nicolas Ibazeta
+    min 10 (1T 10) local     try          Kevin Bastos
+    min 10 (1T 10) visitante try          Rafael Benso
+    min 12 (1T 12) visitante conversion   Ignacio Piedra
+    min 18 (1T 18) visitante card_yellow  Axel Agustín Albornoz
+    min 20 (1T 20) local     try          Lautaro Canova
+    min 21 (1T 21) visitante try          Wilson Ferreyra
+    min 35 (1T 35) visitante try          Ignacio Pereyra
+    min 37 (1T 37) visitante conversion   Ignacio Piedra
+    min 45 (2T 5) local     card_yellow  Santiago Fornes
+    min 49 (2T 9) visitante card_yellow  Ignacio Piedra
+    min 54 (2T 14) visitante try          Rafael Benso
+    min 55 (2T 15) local     try          Matias Gutierrez
+    min 55 (2T 15) local     card_yellow  Kevin Bastos
+    min 65 (2T 25) local     try          Santiago Gaetan
+    min 67 (2T 27) visitante try          Maico Ferreyra
+  marcador  · eventos 20-29 · guardado 20-29
+  tries     · 4-5 (guardado —-—)
+  arbitro   · CARLOS PRIETO (guardado: —)
+  guardado  · 22 local · 16 visitante · 16 eventos
+
+oliva-rugby-club vs villa-general-belgrano-r-c · 683363b8 · tarjeta 296901  ·  19c9d1aa-b09e-4a5c-9700-1b9b0c202865
+  local     · oliva-rugby-club · 24 jugadores · 0 con ficha fijada
+  visitante · villa-general-belgrano-r-c · 23 jugadores · 14 con ficha fijada
+  eventos   · 27
+    min  5 (1T 5) visitante penalty_goal Cristian Federico Ramírez
+    min 18 (1T 18) visitante try          Juan Ramirez
+    min 19 (1T 19) visitante conversion   Cristian Federico Ramírez
+    min 20 (1T 20) local     try          Matias Ezequiel Benavidez
+    min 25 (1T 25) visitante penalty_goal Cristian Federico Ramírez
+    min 27 (1T 27) local     conversion   Jose Cañete
+    min 28 (1T 28) local     try          Pablo Benavidez
+    min 32 (1T 32) visitante substitution Orencio Vellon
+    min 35 (1T 35) local     penalty_goal Jose Cañete
+    min 40 (2T 0) visitante substitution Dalmiro Vilches
+    min 47 (2T 7) visitante substitution Mateo Chialvetto
+    min 50 (2T 10) visitante penalty_goal Cristian Federico Ramírez
+    min 53 (2T 13) visitante substitution Gonzalo Vilanova
+    min 57 (2T 17) visitante try          Juan Ramirez
+    min 58 (2T 18) visitante conversion   Cristian Federico Ramírez
+    min 65 (2T 25) visitante try          Cristian Federico Ramírez
+    min 65 (2T 25) visitante conversion   Cristian Federico Ramírez
+    min 78 (2T 38) visitante card_yellow  Juan Ramirez
+    min 80 (2T 40) visitante substitution Matías Nicolás Berg
+    min 80 (2T 40) visitante substitution Nicolas Facchin
+    min 95 (2T 55) local     substitution Jonathan Marcelo Racca
+    min 110 (2T 70) local     substitution David Canova
+    min 110 (2T 70) local     substitution Pablo Benavidez
+    min 110 (2T 70) local     substitution Ruben Javier Aguiar
+    min 114 (2T 74) local     try          Ignacio Pedro Ferreyra
+    min 115 (2T 75) local     conversion   Emiliano Matellica
+    min 122 (2T 82) local     try          Jeremias Visconti
+  marcador  · eventos 27-30 · guardado 27-30
+  tries     · 4-3 (guardado —-—)
+  arbitro   · CRISTIAN SCHWARTZ (guardado: —)
+  guardado  · 24 local · 23 visitante · 27 eventos
+
+ranqueles-rugby vs aguilas-general-deheza · 683363b8 · tarjeta 320902  ·  bf2ce133-cfff-4246-9679-b22e7cf4b105
+  local     · ranqueles-rugby · 24 jugadores · 0 con ficha fijada
+  visitante · aguilas-general-deheza · 27 jugadores · 0 con ficha fijada
+  eventos   · 15
+    min 13 (1T 13) local     try          Alejandro Magra
+    min 13 (1T 13) local     conversion   Matias Fenoglio
+    min 21 (1T 21) local     card_yellow  Uriel Aristule
+    min 22 (1T 22) visitante penalty_goal Mario Peralta
+    min 28 (1T 28) local     try          Santino Cerioli
+    min 28 (1T 28) local     conversion   Matias Fenoglio
+    min 35 (1T 35) visitante penalty_goal Mario Peralta
+    min 42 (2T 2) visitante try          Diego Balladares
+    min 47 (2T 7) local     try          Jonathan Hansen
+    min 48 (2T 8) local     conversion   Matias Fenoglio
+    min 60 (2T 20) local     substitution Manuel Villalonga
+    min 60 (2T 20) local     substitution Jesus Lunari
+    min 62 (2T 22) local     card_yellow  Jhonatan Tevez
+    min 62 (2T 22) visitante try          Alexis Brandana
+    min 70 (2T 30) visitante try          Luciano Alberto Ramírez
+  marcador  · eventos 21-21 · guardado 21-21
+  tries     · 3-3 (guardado —-—)
+  arbitro   · DANIEL BORSARELLI (guardado: —)
+  guardado  · 24 local · 27 visitante · 15 eventos
+
+mackenna-r-c vs mirage-rugby-club · 683363b8 · tarjeta 320901  ·  99f1e0eb-eb63-4aa4-b051-8e6a00dc7876
+  local     · mackenna-r-c · 18 jugadores · 0 con ficha fijada
+  visitante · mirage-rugby-club · 17 jugadores · 0 con ficha fijada
+  eventos   · 26
+    min  6 (1T 6) local     try          Olañeta Dario
+    min 10 (1T 10) visitante substitution Leandro Altina
+    min 17 (1T 17) local     try          Olañeta Dario
+    min 18 (1T 18) visitante try          Lorenzo Peralta
+    min 19 (1T 19) visitante conversion   Benjamín Uriel Maldonado
+    min 22 (1T 22) visitante substitution Gaspar Ocampo
+    min 29 (1T 29) local     try          Hugo Daniel Monaco
+    min 35 (1T 35) local     card_yellow  Olañeta Dario
+    min 36 (1T 36) visitante penalty_try  
+    min 45 (2T 5) local     try          Marcos Borsani
+    min 45 (2T 5) local     conversion   Iago Bruggiafredo
+    min 45 (2T 5) local     substitution Nicolas Ariel Mobilia
+    min 46 (2T 6) local     substitution Heraldo Daniel Sosa
+    min 47 (2T 7) local     try          Jose Nazareno
+    min 47 (2T 7) local     conversion   Iago Bruggiafredo
+    min 48 (2T 8) local     substitution Ezequiel Mañarey
+    min 58 (2T 18) local     try          Jose Nazareno
+    min 58 (2T 18) local     conversion   Iago Bruggiafredo
+    min 61 (2T 21) local     try          Ezequiel Mañarey
+    min 63 (2T 23) local     conversion   Iago Bruggiafredo
+    min 63 (2T 23) local     try          Lucas Quevedo
+    min 70 (2T 30) local     try          Lucas Quevedo
+    min 70 (2T 30) local     conversion   Iago Bruggiafredo
+    min 73 (2T 33) local     try          Lucas Quevedo
+    min 75 (2T 35) local     try          Lucas Quevedo
+    min 75 (2T 35) local     conversion   Iago Bruggiafredo
+  marcador  · eventos 67-14 · guardado 67-14
+  tries     · 11-2 (guardado —-—)
+  arbitro   · JOSÉ OCTAVIANO BORQUEZ (guardado: —)
+  guardado  · 18 local · 17 visitante · 26 eventos
+
+las-iguanas-independiente-dolores vs mackenna-r-c · 683363b8 · tarjeta 319794  ·  ff0814d9-0288-4efb-b56f-12abd7320bb0
+  local     · las-iguanas-independiente-dolores · 29 jugadores · 22 con ficha fijada
+  visitante · mackenna-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 26
+    min  5 (1T 5) visitante substitution Javier Oscar Escudero
+    min 16 (1T 16) visitante try          Santiago Nicolás López
+    min 16 (1T 16) visitante conversion   Santiago Nicolás López
+    min 36 (1T 36) local     try          Augusto Geisbuhler
+    min 36 (1T 36) visitante try          Paulo Coronel
+    min 45 (2T 5) local     try          Nicolas Ravotti
+    min 54 (2T 14) local     try          Anibal Osmar Clavijo
+    min 55 (2T 15) local     conversion   Exequiel Roberto Sosa
+    min 56 (2T 16) local     try          Exequiel Roberto Sosa
+    min 56 (2T 16) local     conversion   Exequiel Roberto Sosa
+    min 58 (2T 18) local     try          Horacio Nicanor Domínguez
+    min 58 (2T 18) local     conversion   Exequiel Roberto Sosa
+    min 61 (2T 21) local     try          Darío Ruben Oggero
+    min 61 (2T 21) local     conversion   Héctor Gustavo Gómez
+    min 69 (2T 29) local     try          Maico Esteban Juarez
+    min 69 (2T 29) local     conversion   Exequiel Roberto Sosa
+    min 81 (2T 41) local     substitution Matias Ramon Villafañe
+    min 81 (2T 41) local     substitution Jorge Luis Pereno
+    min 81 (2T 41) local     substitution Tomás Andrés Ciallella
+    min 101 (2T 61) local     substitution Pablo Andrés Gallardine
+    min 102 (2T 62) local     substitution Pablo Andrés Gallardine
+    min 102 (2T 62) local     substitution Darío Ruben Oggero
+    min 106 (2T 66) local     substitution Esteban Leonel Sánchez Sosa
+    min 106 (2T 66) local     substitution Agustin Jose Abrigo
+    min 115 (2T 75) local     card_yellow  Fernando Raul Juarez
+    min 115 (2T 75) local     card_yellow  Gustavo Germán Oggero
+  marcador  · eventos 45-12 · guardado 45-12
+  tries     · 7-2 (guardado —-—)
+  arbitro   · NAHUEL SABENA (guardado: —)
+  guardado  · 29 local · 23 visitante · 26 eventos
+
+mirage-rugby-club vs jockey-club-rio-cuarto · 683363b8 · tarjeta 319793  ·  84e43d24-92e2-49a7-9f39-09d357e1fd39
+  local     · mirage-rugby-club · 24 jugadores · 0 con ficha fijada
+  visitante · jockey-club-rio-cuarto · 23 jugadores · 0 con ficha fijada
+  eventos   · 21
+    min  3 (1T 3) visitante try          Santiago Zabala
+    min  4 (1T 4) visitante conversion   Santiago Benitez
+    min 15 (1T 15) local     card_yellow  Luchessoli Fabrizio
+    min 16 (1T 16) visitante try          Santiago Zabala
+    min 21 (1T 21) visitante try          Ezequiel Allendez
+    min 23 (1T 23) visitante conversion   Santiago Benitez
+    min 40 (1T 40) visitante try          Juan Pablo Benitez
+    min 41 (1T 41) visitante conversion   Santiago Benitez
+    min 42 (2T 2) visitante try          Valentin Ficco
+    min 43 (2T 3) visitante conversion   Santiago Benitez
+    min 46 (2T 6) visitante try          Santiago Fenocchio
+    min 47 (2T 7) visitante conversion   Santiago Benitez
+    min 52 (2T 12) local     try          Esteban Brol
+    min 53 (2T 13) local     conversion   Luis Schlossberg
+    min 59 (2T 19) local     injury       Luchessoli Fabrizio
+    min 59 (2T 19) local     card_yellow  Lucas Giuliano Caffaratto
+    min 65 (2T 25) visitante try          Santiago Fenocchio
+    min 66 (2T 26) visitante conversion   Santiago Benitez
+    min 71 (2T 31) visitante try          Santiago Fenocchio
+    min 72 (2T 32) visitante conversion   Santiago Benitez
+    min 89 (2T 49) local     injury       Milton Guillermo
+  marcador  · eventos 7-54 · guardado 7-54
+  tries     · 1-8 (guardado —-—)
+  arbitro   · DANIEL BORSARELLI (guardado: —)
+  guardado  · 24 local · 23 visitante · 21 eventos
+
+mackenna-r-c vs aguilas-general-deheza · 683363b8 · tarjeta 315224  ·  06e4914a-3ec9-4601-8ddc-01f7a3360b52
+  local     · mackenna-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · aguilas-general-deheza · 25 jugadores · 0 con ficha fijada
+  eventos   · 16
+    min  7 (1T 7) local     try          Leandro Flores
+    min 16 (1T 16) visitante try          Jonathan Nanuel Zarate
+    min 17 (1T 17) local     card_yellow  Santiago Nicolás López
+    min 17 (1T 17) visitante conversion   Jeremías Luciano Moreno
+    min 35 (1T 35) visitante penalty_try  
+    min 45 (2T 5) visitante penalty_goal Jeremías Luciano Moreno
+    min 48 (2T 8) local     try          Jose Nazareno
+    min 49 (2T 9) local     conversion   Rafael Gorostarzu
+    min 50 (2T 10) visitante card_yellow  Victor Manuel Villaverde Oviedo
+    min 56 (2T 16) visitante try          Nicolás Lautaro Moreno
+    min 66 (2T 26) local     card_yellow  Jose Nazareno
+    min 66 (2T 26) local     card_yellow  Jano Gabriel Perez
+    min 67 (2T 27) visitante card_yellow  Daniel Pautasso
+    min 70 (2T 30) visitante card_yellow  Diego Aníbal Funes
+    min 72 (2T 32) local     penalty_try  
+    min 77 (2T 37) local     try          Jano Gabriel Perez
+  marcador  · eventos 24-22 · guardado 24-22
+  tries     · 4-3 (guardado —-—)
+  arbitro   · DANIEL BORSARELLI (guardado: —)
+  guardado  · 23 local · 25 visitante · 16 eventos
+
+jockey-club-rio-cuarto vs las-iguanas-independiente-dolores · 683363b8 · tarjeta 315223  ·  02e66070-850d-4c40-97ce-cdbce628b590
+  local     · jockey-club-rio-cuarto · 23 jugadores · 0 con ficha fijada
+  visitante · las-iguanas-independiente-dolores · 30 jugadores · 20 con ficha fijada
+  eventos   · 23
+    min  1 (1T 1) local     try          Lucas Sosa
+    min  9 (1T 9) visitante penalty_goal Exequiel Roberto Sosa
+    min 21 (1T 21) visitante penalty_try  
+    min 22 (1T 22) local     conversion   Juan Pablo Benitez
+    min 22 (1T 22) local     try          Santiago Benitez
+    min 22 (1T 22) local     card_yellow  Ignacio Aguirre Ceballos
+    min 23 (1T 23) visitante card_yellow  Anibal Osmar Clavijo
+    min 39 (1T 39) local     card_yellow  Ignacio Aguirre Ceballos
+    min 39 (1T 39) local     card_red     Ignacio Aguirre Ceballos
+    min 55 (2T 15) local     conversion   Santiago Benitez
+    min 55 (2T 15) local     try          Nicolas Torello
+    min 62 (2T 22) local     penalty_goal Santiago Benitez
+    min 67 (2T 27) local     penalty_goal Santiago Benitez
+    min 73 (2T 33) local     conversion   Nicolas Torello
+    min 73 (2T 33) local     try          German Gonzalez
+    min 88 (2T 48) visitante substitution Maico Esteban Juarez
+    min 89 (2T 49) visitante substitution Matias Ramon Villafañe
+    min 94 (2T 54) visitante penalty_try  
+    min 97 (2T 57) visitante substitution Héctor Gustavo Gómez
+    min 107 (2T 67) visitante substitution Iván Monti
+    min 107 (2T 67) visitante substitution Fernando Raul Juarez
+    min 107 (2T 67) visitante substitution Anibal Osmar Clavijo
+    min 119 (2T 79) visitante try          Emanuel Ordoñez
+  marcador  · eventos 32-22 · guardado 32-22
+  tries     · 4-3 (guardado —-—)
+  arbitro   · CLAUDIO MARCELO TEJERO (guardado: —)
+  guardado  · 23 local · 30 visitante · 23 eventos
+
+las-iguanas-independiente-dolores vs mirage-rugby-club · 683363b8 · tarjeta 314478  ·  51f96c92-9917-45ae-a32b-a70a1e99c33c
+  local     · las-iguanas-independiente-dolores · 30 jugadores · 20 con ficha fijada
+  visitante · mirage-rugby-club · 20 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min 13 (1T 13) local     penalty_try  
+    min 21 (1T 21) visitante try          Lorenzo Peralta
+    min 22 (1T 22) visitante conversion   Thiago Benjamin Pellegrino Valdivia
+    min 24 (1T 24) local     try          Nicolas Ravotti
+    min 28 (1T 28) local     try          Tomás Ezequiel Orozco
+    min 33 (1T 33) visitante try          Ignacio Chivalero
+    min 64 (2T 24) visitante card_yellow  Gustavo Castro
+    min 72 (2T 32) visitante try          Matias Navarro
+    min 80 (2T 40) local     substitution Mauricio Dadone
+    min 90 (2T 50) local     card_yellow  Pablo Dario Pisani
+    min 95 (2T 55) local     substitution Maximiliano Agustín Cieslak
+    min 99 (2T 59) local     try          Valentín Luna
+    min 100 (2T 60) local     substitution Anibal Osmar Clavijo
+    min 100 (2T 60) local     card_yellow  Augusto Geisbuhler
+    min 105 (2T 65) local     card_yellow  Héctor Gustavo Gómez
+    min 110 (2T 70) local     substitution Maico Esteban Juarez
+    min 110 (2T 70) local     substitution Tomás Ezequiel Orozco
+    min 110 (2T 70) local     substitution Gustavo Germán Oggero
+    min 115 (2T 75) local     substitution Exequiel Roberto Sosa
+    min 117 (2T 77) local     try          Nicolas Ravotti
+  marcador  · eventos 27-17 · guardado 27-17
+  tries     · 5-3 (guardado —-—)
+  arbitro   · DANIEL BORSARELLI (guardado: —)
+  guardado  · 30 local · 20 visitante · 20 eventos
+
+aguilas-general-deheza vs jockey-club-rio-cuarto · 683363b8 · tarjeta 314477  ·  d3b20ecd-8cf0-4ac9-9e0a-ac46b8e06506
+  local     · aguilas-general-deheza · 27 jugadores · 0 con ficha fijada
+  visitante · jockey-club-rio-cuarto · 24 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min 10 (1T 10) visitante try          Santiago Zabala
+    min 10 (1T 10) visitante conversion   Santiago Fenocchio
+    min 12 (1T 12) local     injury       Fabricio Emmanuel Miño
+    min 18 (1T 18) visitante try          German Gonzalez
+    min 20 (1T 20) local     card_red     Fabricio Javier Aguero
+    min 30 (1T 30) local     card_red     Diego Balladares
+    min 31 (1T 31) visitante conversion   Santiago Fenocchio
+    min 31 (1T 31) visitante try          Nicolas Torello
+    min 40 (1T 40) visitante conversion   Nicolas Torello
+    min 40 (1T 40) visitante try          Santiago Benitez
+    min 46 (2T 6) local     try          Luciano Alberto Ramírez
+    min 46 (2T 6) local     conversion   Mario Peralta
+    min 52 (2T 12) local     try          Luciano Alberto Ramírez
+    min 52 (2T 12) local     conversion   Mario Peralta
+    min 60 (2T 20) visitante conversion   Santiago Fenocchio
+    min 60 (2T 20) visitante try          Facundo Bindi
+    min 71 (2T 31) local     card_yellow  Gabriel Palacio
+    min 75 (2T 35) local     card_yellow  Alexis Brandana
+    min 75 (2T 35) visitante conversion   Santiago Fenocchio
+    min 75 (2T 35) visitante try          Jaime Maria Romero Victorica
+  marcador  · eventos 14-40 · guardado 14-40
+  tries     · 2-6 (guardado —-—)
+  arbitro   · RICARDO EZEQUIEL OYOLA (guardado: —)
+  guardado  · 27 local · 24 visitante · 20 eventos
+
+mirage-rugby-club vs aguilas-general-deheza · 683363b8 · tarjeta 314187  ·  e4858614-51b6-4c66-a7c3-79189a9ed24f
+  local     · mirage-rugby-club · 21 jugadores · 0 con ficha fijada
+  visitante · aguilas-general-deheza · 26 jugadores · 0 con ficha fijada
+  eventos   · 16
+    min  6 (1T 6) local     try          Luis Schlossberg
+    min  6 (1T 6) local     conversion   Luis Schlossberg
+    min 25 (1T 25) local     card_red     Lucas Giuliano Caffaratto
+    min 25 (1T 25) visitante card_yellow  Adrian Zarate
+    min 28 (1T 28) visitante penalty_goal Fabricio Javier Aguero
+    min 33 (1T 33) local     penalty_goal Luis Schlossberg
+    min 41 (2T 1) visitante try          Leandro Nicolas Bravo Altamirano
+    min 41 (2T 1) visitante conversion   Fabricio Javier Aguero
+    min 46 (2T 6) visitante penalty_goal Fabricio Javier Aguero
+    min 53 (2T 13) local     try          Ignacio Chivalero
+    min 55 (2T 15) local     card_yellow  Thiago Benjamin Pellegrino Valdivia
+    min 60 (2T 20) visitante injury       Axel Leonel López
+    min 60 (2T 20) visitante try          Alexis Brandana
+    min 60 (2T 20) visitante conversion   Fabricio Javier Aguero
+    min 80 (2T 40) visitante try          Enrique Nuñez
+    min 80 (2T 40) visitante conversion   Fabricio Javier Aguero
+  marcador  · eventos 15-27 · guardado 15-27
+  tries     · 2-3 (guardado —-—)
+  arbitro   · SERGIO ZBURA (guardado: —)
+  guardado  · 21 local · 26 visitante · 16 eventos
+
+jockey-club-rio-cuarto vs ranqueles-rugby · 683363b8 · tarjeta 314188  ·  e29f0d67-5027-44bc-b89e-33b1ac87bddd
+  local     · jockey-club-rio-cuarto · 24 jugadores · 0 con ficha fijada
+  visitante · ranqueles-rugby · 24 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min  1 (1T 1) visitante try          Alvaro Abatedaga
+    min  1 (1T 1) visitante conversion   Matias Fenoglio
+    min 16 (1T 16) visitante try          Santino Cerioli
+    min 24 (1T 24) visitante try          Matias Fenoglio
+    min 24 (1T 24) visitante conversion   Matias Fenoglio
+    min 39 (1T 39) local     try          Santiago Fenocchio
+    min 39 (1T 39) local     conversion   Santiago Fenocchio
+    min 46 (2T 6) local     try          Manuel Alvarez
+    min 50 (2T 10) visitante substitution Angelo Javier Rodriguez
+    min 60 (2T 20) visitante substitution Alvaro Abatedaga
+    min 64 (2T 24) local     try          Franco Figueroa
+    min 65 (2T 25) visitante substitution Franco Moriondo
+    min 65 (2T 25) visitante substitution Matias Fenoglio
+    min 66 (2T 26) local     conversion   Santiago Fenocchio
+    min 71 (2T 31) visitante card_yellow  Leandro Batalles
+    min 78 (2T 38) local     penalty_goal Santiago Fenocchio
+    min 80 (2T 40) visitante penalty_goal Mateo Luis Viglianco
+  marcador  · eventos 22-22 · guardado 22-22
+  tries     · 3-3 (guardado —-—)
+  arbitro   · GABRIEL HERNÁN TIRANTE (guardado: —)
+  guardado  · 24 local · 24 visitante · 17 eventos
+
+ranqueles-rugby vs mirage-rugby-club · 683363b8 · tarjeta 312748  ·  cd774f00-39cd-49a7-9a22-247b578a7ca1
+  local     · ranqueles-rugby · 24 jugadores · 0 con ficha fijada
+  visitante · mirage-rugby-club · 17 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min  6 (1T 6) local     try          Santino Cerioli
+    min 23 (1T 23) local     substitution Mateo Pascual
+    min 28 (1T 28) local     try          Jonathan Hansen
+    min 31 (1T 31) local     try          Matias Fenoglio
+    min 39 (1T 39) local     try          Jonathan Hansen
+    min 40 (1T 40) local     conversion   Mateo Luis Viglianco
+    min 43 (2T 3) visitante card_yellow  Franco Hernández
+    min 46 (2T 6) local     try          Lautaro Scaccia
+    min 50 (2T 10) local     substitution Lautaro Scaccia
+    min 53 (2T 13) local     substitution Maximiliano Sosa
+    min 60 (2T 20) local     substitution Uriel Aristule
+    min 60 (2T 20) local     substitution Enzo Cuello
+    min 61 (2T 21) visitante substitution Lucas Giuliano Caffaratto
+    min 61 (2T 21) visitante substitution Franco Hernández
+    min 62 (2T 22) visitante try          Luchessoli Fabrizio
+    min 63 (2T 23) visitante conversion   Lautaro Figueroa
+    min 65 (2T 25) local     try          Jhonatan Tevez
+    min 67 (2T 27) local     conversion   Matias Fenoglio
+    min 69 (2T 29) local     substitution Jonathan Hansen
+    min 70 (2T 30) visitante try          Jonathan Gabriel Flores
+    min 72 (2T 32) local     substitution Jesus Lunari
+    min 77 (2T 37) local     card_yellow  Alejandro Barnard
+  marcador  · eventos 34-12 · guardado 34-12
+  tries     · 6-2 (guardado —-—)
+  arbitro   · JOSÉ OCTAVIANO BORQUEZ (guardado: —)
+  guardado  · 24 local · 17 visitante · 22 eventos
+
+aguilas-general-deheza vs las-iguanas-independiente-dolores · 683363b8 · tarjeta 312572  ·  54f7e7f2-f7d0-4ee7-a6ad-0ddf75b2b456
+  local     · aguilas-general-deheza · 25 jugadores · 0 con ficha fijada
+  visitante · las-iguanas-independiente-dolores · 30 jugadores · 21 con ficha fijada
+  eventos   · 16
+    min 14 (1T 14) local     try          Fabricio Javier Aguero
+    min 14 (1T 14) local     conversion   Fabricio Javier Aguero
+    min 17 (1T 17) visitante try          Augusto Geisbuhler
+    min 17 (1T 17) visitante conversion   Emanuel Ordoñez
+    min 17 (1T 17) visitante penalty_goal Emanuel Ordoñez
+    min 17 (1T 17) visitante try          Augusto Geisbuhler
+    min 33 (1T 33) visitante card_yellow  Fernando Raul Juarez
+    min 46 (2T 6) local     penalty_goal Fabricio Javier Aguero
+    min 54 (2T 14) local     penalty_goal Fabricio Javier Aguero
+    min 62 (2T 22) local     penalty_goal Fabricio Javier Aguero
+    min 68 (2T 28) local     try          Fabricio Javier Aguero
+    min 68 (2T 28) local     conversion   Fabricio Javier Aguero
+    min 68 (2T 28) visitante card_yellow  Exequiel Roberto Sosa
+    min 70 (2T 30) local     card_yellow  Alexis Brandana
+    min 80 (2T 40) local     card_yellow  Jonathan Nanuel Zarate
+    min 82 (2T 42) visitante try          Pablo Dario Pisani
+  marcador  · eventos 23-20 · guardado 23-20
+  tries     · 2-3 (guardado —-—)
+  arbitro   · SERGIO ZBURA (guardado: —)
+  guardado  · 25 local · 30 visitante · 16 eventos
+
+mackenna-r-c vs jockey-club-rio-cuarto · 683363b8 · tarjeta 312193  ·  bcf000bf-ccb2-4ad2-8a80-6d9a5800920d
+  local     · mackenna-r-c · 22 jugadores · 0 con ficha fijada
+  visitante · jockey-club-rio-cuarto · 23 jugadores · 0 con ficha fijada
+  eventos   · 16
+    min  6 (1T 6) local     try          Leandro Flores
+    min 11 (1T 11) local     card_yellow  Farid Emmanuel Ghio Gonzalez
+    min 11 (1T 11) visitante penalty_try  
+    min 15 (1T 15) visitante try          Franco Maldonado
+    min 33 (1T 33) local     card_yellow  Heraldo Daniel Sosa
+    min 33 (1T 33) visitante try          Facundo Bindi
+    min 33 (1T 33) visitante conversion   Facundo Bindi
+    min 44 (2T 4) visitante try          Martin Mortigliengo
+    min 44 (2T 4) visitante conversion   Facundo Bindi
+    min 57 (2T 17) visitante try          German Gonzalez
+    min 60 (2T 20) visitante card_yellow  Franco Maldonado
+    min 64 (2T 24) visitante try          Nicolas Torello
+    min 64 (2T 24) visitante conversion   Facundo Bindi
+    min 65 (2T 25) visitante substitution Ignacio Aguirre Ceballos
+    min 74 (2T 34) visitante try          Santiago Benitez
+    min 79 (2T 39) visitante card_yellow  Lautaro Rodrigo Conci
+  marcador  · eventos 5-43 · guardado 5-43
+  tries     · 1-7 (guardado —-—)
+  arbitro   · JOSÉ OCTAVIANO BORQUEZ (guardado: —)
+  guardado  · 22 local · 23 visitante · 16 eventos
+
+ranqueles-rugby vs las-iguanas-independiente-dolores · 683363b8 · tarjeta 312191  ·  0610eddd-0fde-4e17-b688-d7b09238ff8e
+  local     · ranqueles-rugby · 23 jugadores · 0 con ficha fijada
+  visitante · las-iguanas-independiente-dolores · 27 jugadores · 18 con ficha fijada
+  eventos   · 17
+    min 16 (1T 16) local     try          Jonathan Hansen
+    min 24 (1T 24) local     try          Jonathan Hansen
+    min 24 (1T 24) local     conversion   Jesus Lunari
+    min 32 (1T 32) local     card_yellow  Lisandro Milanesio
+    min 33 (1T 33) local     substitution Uriel Aristule
+    min 37 (1T 37) local     try          Santino Cerioli
+    min 37 (1T 37) visitante try          Matías González
+    min 39 (1T 39) visitante card_yellow  Matías González
+    min 48 (2T 8) visitante try          Nicolas Ravotti
+    min 56 (2T 16) local     substitution Patricio Bigo
+    min 57 (2T 17) local     card_yellow  Adrian Ochoa
+    min 60 (2T 20) local     substitution Mateo Pascual
+    min 60 (2T 20) local     substitution Lautaro Scaccia
+    min 65 (2T 25) local     try          Enzo Cuello
+    min 72 (2T 32) local     try          Tobias Agustín Ranieri Perez
+    min 79 (2T 39) visitante try          Gustavo Germán Oggero
+    min 79 (2T 39) visitante conversion   Mauricio Dadone
+  marcador  · eventos 27-17 · guardado 27-17
+  tries     · 5-3 (guardado —-—)
+  arbitro   · SERGIO ZBURA (guardado: —)
+  guardado  · 23 local · 27 visitante · 17 eventos
+
+aguilas-general-deheza vs ranqueles-rugby · 683363b8 · tarjeta 311730  ·  aabec627-071c-4eaa-906b-14dd04d2a8e4
+  local     · aguilas-general-deheza · 23 jugadores · 0 con ficha fijada
+  visitante · ranqueles-rugby · 25 jugadores · 0 con ficha fijada
+  eventos   · 19
+    min  1 (1T 1) local     try          Diego Balladares
+    min  1 (1T 1) local     conversion   Diego Balladares
+    min  1 (1T 1) local     try          Diego Balladares
+    min  1 (1T 1) local     penalty_try  
+    min  1 (1T 1) local     penalty_goal Diego Balladares
+    min 40 (1T 40) local     substitution Nicolás Lautaro Moreno
+    min 40 (1T 40) local     substitution Diego Aníbal Funes
+    min 40 (1T 40) local     substitution Maximilano Navarro
+    min 40 (1T 40) local     substitution Cristian Arevalo
+    min 42 (2T 2) visitante card_yellow  Adrian Ochoa
+    min 44 (2T 4) visitante try          Adrian Ochoa
+    min 45 (2T 5) visitante card_yellow  Enzo Cuello
+    min 57 (2T 17) visitante substitution Mateo Pascual
+    min 59 (2T 19) visitante substitution Benjamin Alegre
+    min 67 (2T 27) visitante substitution Jonathan Hansen
+    min 75 (2T 35) visitante substitution Santino Cerioli
+    min 80 (2T 40) visitante try          Tobias Agustín Ranieri Perez
+    min 80 (2T 40) visitante substitution Franco Moriondo
+    min 80 (2T 40) visitante substitution Rodrigo Sibona
+  marcador  · eventos 22-10 · guardado 22-10
+  tries     · 3-2 (guardado —-—)
+  arbitro   · ABEL ESTEBAN TUREK (guardado: —)
+  guardado  · 23 local · 25 visitante · 19 eventos
+
+mirage-rugby-club vs mackenna-r-c · 683363b8 · tarjeta 311728  ·  fb9595c0-5133-49e6-b6cc-1d139133dfa2
+  local     · mirage-rugby-club · 25 jugadores · 0 con ficha fijada
+  visitante · mackenna-r-c · 22 jugadores · 0 con ficha fijada
+  eventos   · 16
+    min  5 (1T 5) local     injury       Lautaro Vallejos
+    min  9 (1T 9) local     try          Gonzalo Pizzi
+    min  9 (1T 9) local     conversion   Tomas De La Cruz
+    min 12 (1T 12) local     try          Gonzalo Pizzi
+    min 12 (1T 12) local     conversion   Tomas De La Cruz
+    min 20 (1T 20) visitante try          Leonardo Vilchez
+    min 43 (2T 3) local     try          Luchessoli Fabrizio
+    min 43 (2T 3) local     conversion   Gonzalo Pizzi
+    min 54 (2T 14) visitante try          Javier Oscar Escudero
+    min 60 (2T 20) local     injury       Franco Bianchi
+    min 65 (2T 25) visitante try          Javier Oscar Escudero
+    min 65 (2T 25) visitante conversion   Javier Oscar Escudero
+    min 65 (2T 25) visitante injury       Nicolas Ariel Mobilia
+    min 70 (2T 30) local     card_yellow  Alexis Ysaia
+    min 75 (2T 35) local     penalty_goal Tomas De La Cruz
+    min 80 (2T 40) local     try          Thiago Benjamin Pellegrino Valdivia
+  marcador  · eventos 29-17 · guardado 29-17
+  tries     · 4-3 (guardado —-—)
+  arbitro   · SERGIO ZBURA (guardado: —)
+  guardado  · 25 local · 22 visitante · 16 eventos
+
+jockey-club-rio-cuarto vs mirage-rugby-club · 683363b8 · tarjeta 309472  ·  1ae7f766-2cb0-4be1-a003-cf9bb61c909c
+  local     · jockey-club-rio-cuarto · 24 jugadores · 0 con ficha fijada
+  visitante · mirage-rugby-club · 21 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min  7 (1T 7) local     conversion   Facundo Bindi
+    min  7 (1T 7) local     try          Santiago Fenocchio
+    min 19 (1T 19) local     conversion   Facundo Bindi
+    min 19 (1T 19) local     try          Santiago Zabala
+    min 38 (1T 38) local     penalty_goal Facundo Bindi
+    min 39 (1T 39) local     substitution Ignacio Aguirre Ceballos
+    min 40 (1T 40) local     conversion   Facundo Bindi
+    min 40 (1T 40) local     try          German Gonzalez
+    min 46 (2T 6) local     try          Ezequiel Allendez
+    min 46 (2T 6) local     conversion   Facundo Bindi
+    min 50 (2T 10) visitante try          Martín Gabriel Arrieta
+    min 51 (2T 11) visitante conversion   Martín Gabriel Arrieta
+    min 52 (2T 12) local     conversion   Santiago Fenocchio
+    min 52 (2T 12) local     try          Juan Pablo Benitez
+    min 56 (2T 16) visitante substitution Pablo Nicolas Aguirre
+    min 56 (2T 16) visitante substitution Lucas Giuliano Caffaratto
+    min 57 (2T 17) visitante try          Gonzalo Pizzi
+    min 58 (2T 18) visitante conversion   Martín Gabriel Arrieta
+    min 60 (2T 20) visitante substitution Benjamín Uriel Maldonado
+    min 60 (2T 20) visitante substitution Leandro Altina
+    min 68 (2T 28) visitante try          Martín Gabriel Arrieta
+    min 69 (2T 29) visitante conversion   Martín Gabriel Arrieta
+    min 77 (2T 37) visitante try          Gaspar Ocampo
+    min 78 (2T 38) visitante conversion   Martín Gabriel Arrieta
+    min 80 (2T 40) local     penalty_goal Facundo Bindi
+  marcador  · eventos 41-28 · guardado 41-28
+  tries     · 5-4 (guardado —-—)
+  arbitro   · JOSÉ OCTAVIANO BORQUEZ (guardado: —)
+  guardado  · 24 local · 21 visitante · 25 eventos
+
+mackenna-r-c vs las-iguanas-independiente-dolores · 683363b8 · tarjeta 309470  ·  bfa09f59-7d54-4915-b357-733ec686b7bc
+  local     · mackenna-r-c · 22 jugadores · 0 con ficha fijada
+  visitante · las-iguanas-independiente-dolores · 30 jugadores · 19 con ficha fijada
+  eventos   · 29
+    min  9 (1T 9) local     try          Javier Oscar Escudero
+    min 15 (1T 15) local     try          Paulo Coronel
+    min 15 (1T 15) local     conversion   Leandro Flores
+    min 22 (1T 22) visitante try          Pablo Andrés Gallardine
+    min 23 (1T 23) visitante conversion   Exequiel Roberto Sosa
+    min 27 (1T 27) local     try          Farid Emmanuel Ghio Gonzalez
+    min 31 (1T 31) local     try          Leonardo Vilchez
+    min 31 (1T 31) local     conversion   Leandro Flores
+    min 34 (1T 34) local     try          Paulo Coronel
+    min 36 (1T 36) local     try          Paulo Coronel
+    min 38 (1T 38) visitante card_yellow  Augusto Geisbuhler
+    min 48 (2T 8) local     try          Leonardo Vilchez
+    min 48 (2T 8) local     conversion   Marcos Borsani
+    min 63 (2T 23) local     card_yellow  Javier Oscar Escudero
+    min 72 (2T 32) local     card_yellow  Jose Nazareno
+    min 80 (2T 40) local     card_yellow  Santiago Nicolás López
+    min 80 (2T 40) local     try          Adrian Zabala
+    min 80 (2T 40) visitante substitution Braian David Pippino
+    min 83 (2T 43) visitante try          Pablo Andrés Gallardine
+    min 83 (2T 43) visitante conversion   Exequiel Roberto Sosa
+    min 90 (2T 50) visitante substitution Matías Ezequiel Munizaga
+    min 90 (2T 50) visitante try          Nicolas Ravotti
+    min 97 (2T 57) visitante try          Fernando Raul Juarez
+    min 100 (2T 60) visitante substitution Exequiel Roberto Sosa
+    min 105 (2T 65) visitante substitution Tomás Ezequiel Orozco
+    min 109 (2T 69) visitante conversion   Elías Coria
+    min 109 (2T 69) visitante try          Augusto Geisbuhler
+    min 110 (2T 70) visitante substitution Maximiliano Agustín Cieslak
+    min 116 (2T 76) visitante try          Gustavo Germán Oggero
+  marcador  · eventos 46-36 · guardado 46-36
+  tries     · 8-6 (guardado —-—)
+  arbitro   · SERGIO ZBURA (guardado: —)
+  guardado  · 22 local · 30 visitante · 29 eventos
+
+las-iguanas-independiente-dolores vs aguilas-general-deheza · 683363b8 · tarjeta 296907  ·  859c245c-4fcc-40bb-b78d-578cc502f92f
+  local     · las-iguanas-independiente-dolores · 29 jugadores · 17 con ficha fijada
+  visitante · aguilas-general-deheza · 30 jugadores · 0 con ficha fijada
+  eventos   · 12
+    min  4 (1T 4) local     penalty_goal Mauricio Dadone
+    min 13 (1T 13) local     card_yellow  Maximiliano Agustín Cieslak
+    min 22 (1T 22) local     card_yellow  Valentín Luna
+    min 59 (2T 19) local     penalty_goal Mauricio Dadone
+    min 59 (2T 19) visitante try          Juan Cruz Genesio Altamirano
+    min 60 (2T 20) visitante conversion   Jonathan Nanuel Zarate
+    min 65 (2T 25) visitante card_yellow  Leandro Nicolas Bravo Altamirano
+    min 67 (2T 27) visitante try          Diego Balladares
+    min 68 (2T 28) visitante conversion   Juan Cruz Genesio Altamirano
+    min 76 (2T 36) visitante card_yellow  Juan Cruz Genesio Altamirano
+    min 78 (2T 38) local     try          Fernando Raul Juarez
+    min 79 (2T 39) local     conversion   Mauricio Dadone
+  marcador  · eventos 13-14 · guardado 13-14
+  tries     · 1-2 (guardado —-—)
+  arbitro   · DANIEL BORSARELLI (guardado: —)
+  guardado  · 29 local · 30 visitante · 12 eventos
+
+mirage-rugby-club vs ranqueles-rugby · 683363b8 · tarjeta 296906  ·  1b8bb8e5-e736-4191-be41-164e0550b27b
+  local     · mirage-rugby-club · 20 jugadores · 0 con ficha fijada
+  visitante · ranqueles-rugby · 23 jugadores · 0 con ficha fijada
+  eventos   · 26
+    min  5 (1T 5) local     penalty_goal Martín Gabriel Arrieta
+    min  7 (1T 7) visitante penalty_goal Mateo Luis Viglianco
+    min 15 (1T 15) local     try          Lautaro Vallejos
+    min 16 (1T 16) local     conversion   Martín Gabriel Arrieta
+    min 20 (1T 20) visitante penalty_goal Mateo Luis Viglianco
+    min 21 (1T 21) local     try          Ignacio Chivalero
+    min 22 (1T 22) local     conversion   Martín Gabriel Arrieta
+    min 31 (1T 31) visitante card_yellow  Alejandro Barnard
+    min 45 (2T 5) local     card_yellow  Luchessoli Fabrizio
+    min 49 (2T 9) visitante substitution Lautaro Scaccia
+    min 51 (2T 11) visitante substitution Alejandro Barnard
+    min 54 (2T 14) visitante substitution Mateo Luis Viglianco
+    min 54 (2T 14) visitante substitution Emanuel Ochoa
+    min 60 (2T 20) local     card_yellow  Ignacio Chivalero
+    min 62 (2T 22) visitante try          Matias Fenoglio
+    min 65 (2T 25) local     card_yellow  Lautaro Figueroa
+    min 67 (2T 27) visitante card_yellow  Angelo Javier Rodriguez
+    min 74 (2T 34) local     try          Martín Gabriel Arrieta
+    min 78 (2T 38) local     try          Lautaro Vallejos
+    min 79 (2T 39) local     conversion   Martín Gabriel Arrieta
+    min 80 (2T 40) local     try          Ignacio Chivalero
+    min 80 (2T 40) local     conversion   Martín Gabriel Arrieta
+    min 80 (2T 40) visitante substitution Enzo Cuello
+    min 80 (2T 40) visitante substitution Alejandro Magra
+    min 80 (2T 40) visitante substitution Maximiliano Sosa
+    min 80 (2T 40) visitante substitution Mateo Navecilla
+  marcador  · eventos 36-11 · guardado 36-11
+  tries     · 5-1 (guardado —-—)
+  arbitro   · SERGIO ZBURA (guardado: —)
+  guardado  · 20 local · 23 visitante · 26 eventos
+
+jockey-club-rio-cuarto vs los-patriotas-ucacha · 683363b8 · tarjeta 296905  ·  2eb08ffe-1be4-44e5-8fdd-92c33c14ffae
+  local     · jockey-club-rio-cuarto · 23 jugadores · 0 con ficha fijada
+  visitante · los-patriotas-ucacha · 23 jugadores · 0 con ficha fijada
+  eventos   · 31
+    min  2 (1T 2) local     try          Franco Maldonado
+    min  2 (1T 2) local     conversion   Facundo Bindi
+    min  8 (1T 8) local     conversion   Facundo Bindi
+    min  8 (1T 8) local     try          Facundo Bindi
+    min 13 (1T 13) local     card_yellow  Lucas Sosa
+    min 15 (1T 15) local     conversion   Facundo Bindi
+    min 15 (1T 15) local     try          Santiago Zabala
+    min 22 (1T 22) local     try          Martin Mortigliengo
+    min 29 (1T 29) local     try          Lucas Sosa
+    min 29 (1T 29) local     conversion   Lucas Sosa
+    min 37 (1T 37) local     conversion   Lucas Sosa
+    min 37 (1T 37) local     try          Juan Pablo Benitez
+    min 40 (1T 40) local     try          Victor Orlando Gonzalez
+    min 45 (2T 5) local     conversion   Facundo Bindi
+    min 45 (2T 5) local     try          Facundo Bindi
+    min 45 (2T 5) visitante substitution Juan Vazquez
+    min 50 (2T 10) visitante card_yellow  Nicolas Baigorria
+    min 55 (2T 15) local     conversion   Facundo Bindi
+    min 55 (2T 15) local     try          Santiago Fenocchio
+    min 57 (2T 17) visitante substitution Maximiliano José Grispo
+    min 60 (2T 20) visitante substitution Matias Juarez
+    min 60 (2T 20) visitante substitution Hernan Baigorria
+    min 60 (2T 20) visitante injury       Matias Juarez
+    min 67 (2T 27) local     conversion   Santiago Fenocchio
+    min 67 (2T 27) local     try          Santiago Fenocchio
+    min 72 (2T 32) visitante try          Nicolas Baigorria
+    min 73 (2T 33) local     try          Nicolas Torello
+    min 73 (2T 33) local     conversion   Facundo Bindi
+    min 75 (2T 35) local     try          Facundo Bindi
+    min 78 (2T 38) local     try          German Gonzalez
+    min 81 (2T 41) local     try          Santiago Benitez
+  marcador  · eventos 88-5 · guardado 88-5
+  tries     · 14-1 (guardado —-—)
+  arbitro   · JOSÉ OCTAVIANO BORQUEZ (guardado: —)
+  guardado  · 23 local · 23 visitante · 31 eventos
+
+los-patriotas-ucacha vs mackenna-r-c · 683363b8 · tarjeta 302126  ·  a657ddce-c105-4a5c-ac88-1028f14f0efa
+  local     · los-patriotas-ucacha · 21 jugadores · 0 con ficha fijada
+  visitante · mackenna-r-c · 21 jugadores · 0 con ficha fijada
+  eventos   · 21
+    min  9 (1T 9) visitante try          Rafael Gorostarzu
+    min  9 (1T 9) visitante conversion   Marcos Borsani
+    min 15 (1T 15) local     card_yellow  Diego Aníbal Funes
+    min 19 (1T 19) visitante try          Marcos Borsani
+    min 19 (1T 19) visitante conversion   Marcos Borsani
+    min 33 (1T 33) visitante try          Javier Oscar Escudero
+    min 33 (1T 33) visitante conversion   Leandro Flores
+    min 38 (1T 38) visitante penalty_goal Marcos Borsani
+    min 42 (2T 2) visitante try          Marcos Borsani
+    min 42 (2T 2) visitante conversion   Marcos Borsani
+    min 50 (2T 10) local     substitution Gabriel López
+    min 50 (2T 10) local     try          Federico Gonzalez
+    min 51 (2T 11) local     conversion   Maximiliano José Grispo
+    min 52 (2T 12) visitante try          Leonardo Vilchez
+    min 57 (2T 17) local     try          German Guzman
+    min 57 (2T 17) local     conversion   Maximiliano José Grispo
+    min 59 (2T 19) local     substitution Juan Vazquez
+    min 67 (2T 27) local     try          Ariel Ricardo Ferreyra
+    min 68 (2T 28) local     conversion   Maximiliano José Grispo
+    min 74 (2T 34) local     try          Angel Ferreyra
+    min 79 (2T 39) visitante card_yellow  Javier Oscar Escudero
+  marcador  · eventos 26-36 · guardado 26-36
+  tries     · 4-5 (guardado —-—)
+  arbitro   · JOSÉ OCTAVIANO BORQUEZ (guardado: —)
+  guardado  · 21 local · 21 visitante · 21 eventos
+
+ranqueles-rugby vs jockey-club-rio-cuarto · 683363b8 · tarjeta 302125  ·  88baf25e-03b8-4dd3-96dd-1a74b309a93f
+  local     · ranqueles-rugby · 28 jugadores · 0 con ficha fijada
+  visitante · jockey-club-rio-cuarto · 18 jugadores · 0 con ficha fijada
+  eventos   · 16
+    min 10 (1T 10) local     penalty_goal Mateo Luis Viglianco
+    min 20 (1T 20) visitante card_yellow  Franco Maldonado
+    min 20 (1T 20) visitante try          Facundo Bindi
+    min 20 (1T 20) visitante conversion   Facundo Bindi
+    min 29 (1T 29) local     card_yellow  Alvaro Abatedaga
+    min 30 (1T 30) visitante card_yellow  Victor Orlando Gonzalez
+    min 31 (1T 31) local     try          Jonathan Hansen
+    min 32 (1T 32) local     conversion   Mateo Luis Viglianco
+    min 43 (1T 43) local     try          Jonathan Hansen
+    min 44 (1T 44) local     conversion   Mateo Luis Viglianco
+    min 51 (2T 11) local     try          Enzo Cuello
+    min 60 (2T 20) visitante try          Nicolas Torello
+    min 70 (2T 30) local     card_yellow  Matias Fenoglio
+    min 75 (2T 35) visitante conversion   Facundo Bindi
+    min 75 (2T 35) visitante try          Facundo Bindi
+    min 78 (2T 38) local     try          Lautaro Scaccia
+  marcador  · eventos 27-19 · guardado 27-19
+  tries     · 4-3 (guardado —-—)
+  arbitro   · DANIEL BORSARELLI (guardado: —)
+  guardado  · 28 local · 18 visitante · 16 eventos
+
+aguilas-general-deheza vs mirage-rugby-club · 683363b8 · tarjeta 302124  ·  c166f6ee-124f-4c2f-8f9b-b7a45afea206
+  local     · aguilas-general-deheza · 21 jugadores · 0 con ficha fijada
+  visitante · mirage-rugby-club · 18 jugadores · 0 con ficha fijada
+  eventos   · 23
+    min  2 (1T 2) visitante try          Gaspar Ocampo
+    min  2 (1T 2) visitante conversion   Martín Gabriel Arrieta
+    min  5 (1T 5) local     try          Fabricio Javier Aguero
+    min  5 (1T 5) local     conversion   Fabricio Javier Aguero
+    min  8 (1T 8) visitante penalty_goal Martín Gabriel Arrieta
+    min 13 (1T 13) local     try          Diego Balladares
+    min 18 (1T 18) local     try          Alexis Brandana
+    min 18 (1T 18) local     conversion   Alan Gabriel Pistone
+    min 22 (1T 22) visitante penalty_goal Martín Gabriel Arrieta
+    min 23 (1T 23) local     card_yellow  Jeremías Luciano Moreno
+    min 24 (1T 24) local     try          Luciano Alberto Ramírez
+    min 24 (1T 24) local     conversion   Alan Gabriel Pistone
+    min 24 (1T 24) local     penalty_goal Alan Gabriel Pistone
+    min 31 (1T 31) visitante try          Lorenzo Peralta
+    min 32 (1T 32) visitante conversion   Martín Gabriel Arrieta
+    min 37 (1T 37) visitante penalty_goal Martín Gabriel Arrieta
+    min 39 (1T 39) local     try          Alexis Brandana
+    min 49 (2T 9) local     try          Alexis Brandana
+    min 49 (2T 9) local     conversion   Fabricio Javier Aguero
+    min 60 (2T 20) local     try          Alan Gabriel Pistone
+    min 60 (2T 20) local     conversion   Fabricio Javier Aguero
+    min 72 (2T 32) local     card_yellow  Alexis Brandana
+    min 76 (2T 36) local     try          Luciano Alberto Ramírez
+  marcador  · eventos 53-23 · guardado 53-23
+  tries     · 8-2 (guardado —-—)
+  arbitro   · EUGENIO MORRA (guardado: —)
+  guardado  · 21 local · 18 visitante · 23 eventos
+
+jockey-club-rio-cuarto vs mackenna-r-c · 683363b8 · tarjeta 322768  ·  ff93a635-cc1a-4245-964e-91941c41a613
+  local     · jockey-club-rio-cuarto · 23 jugadores · 0 con ficha fijada
+  visitante · mackenna-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 21
+    min  8 (1T 8) local     try          Santiago Zabala
+    min 11 (1T 11) local     try          Santiago Fenocchio
+    min 12 (1T 12) local     conversion   Santiago Fenocchio
+    min 27 (1T 27) local     substitution Martin Mortigliengo
+    min 27 (1T 27) visitante substitution Facundo Bollini
+    min 28 (1T 28) local     injury       Jaime Maria Romero Victorica
+    min 34 (1T 34) local     card_yellow  Nicolas Torello
+    min 37 (1T 37) visitante try          Jose Nazareno
+    min 40 (1T 40) local     substitution Benjamín Bertola
+    min 40 (1T 40) local     substitution Jaime Maria Romero Victorica
+    min 46 (2T 6) visitante try          Santiago Nicolás López
+    min 47 (2T 7) visitante conversion   Federico Rodriguez
+    min 50 (2T 10) local     try          Santiago Benitez
+    min 51 (2T 11) local     conversion   Santiago Fenocchio
+    min 67 (2T 27) local     substitution Franco Maldonado
+    min 71 (2T 31) visitante try          Jose Nazareno
+    min 72 (2T 32) visitante conversion   Jose Nazareno
+    min 73 (2T 33) visitante injury       Heraldo Daniel Sosa
+    min 77 (2T 37) visitante try          José Alberto Martin Sanchez
+    min 78 (2T 38) visitante conversion   Jose Nazareno
+    min 80 (2T 40) local     substitution Victor Orlando Gonzalez
+  marcador  · eventos 19-26 · guardado 19-26
+  tries     · 3-4 (guardado —-—)
+  arbitro   · JOSÉ OCTAVIANO BORQUEZ (guardado: —)
+  guardado  · 23 local · 23 visitante · 21 eventos
+
+las-iguanas-independiente-dolores vs ranqueles-rugby · 683363b8 · tarjeta 322767  ·  3c66ee45-65f2-457a-9338-b2b91d03fbdd
+  local     · las-iguanas-independiente-dolores · 30 jugadores · 20 con ficha fijada
+  visitante · ranqueles-rugby · 23 jugadores · 0 con ficha fijada
+  eventos   · 30
+    min  5 (1T 5) visitante penalty_try  
+    min  8 (1T 8) visitante penalty_goal Matias Fenoglio
+    min 12 (1T 12) local     try          Horacio Nicanor Domínguez
+    min 13 (1T 13) local     conversion   Exequiel Roberto Sosa
+    min 14 (1T 14) local     card_yellow  Pablo Dario Pisani
+    min 24 (1T 24) local     card_yellow  Anibal Osmar Clavijo
+    min 27 (1T 27) visitante try          Enzo Cuello
+    min 30 (1T 30) visitante card_yellow  Alvaro Abatedaga
+    min 39 (1T 39) local     try          Pablo Dario Pisani
+    min 40 (2T 0) local     substitution Maico Esteban Juarez
+    min 40 (2T 0) local     substitution Jorge Luis Pereno
+    min 50 (2T 10) local     substitution Anibal Osmar Clavijo
+    min 50 (2T 10) local     substitution Valentín Luna
+    min 50 (2T 10) visitante card_yellow  Enzo Cuello
+    min 50 (2T 10) visitante try          Jonathan Hansen
+    min 51 (2T 11) visitante conversion   Matias Fenoglio
+    min 60 (2T 20) visitante substitution Lucio Martinelli
+    min 60 (2T 20) visitante substitution Uriel Aristule
+    min 63 (2T 23) local     card_yellow  Augusto Geisbuhler
+    min 64 (2T 24) visitante substitution Mateo Navecilla
+    min 66 (2T 26) visitante substitution Lautaro Scaccia
+    min 70 (2T 30) visitante substitution Jonathan Hansen
+    min 77 (2T 37) visitante try          Jonathan Hansen
+    min 78 (2T 38) visitante conversion   Matias Fenoglio
+    min 100 (2T 60) local     penalty_try  
+    min 110 (2T 70) local     substitution Pablo Andrés Gallardine
+    min 110 (2T 70) local     substitution Lisandro Pereyra Gutiérrez
+    min 110 (2T 70) local     substitution Pablo Dario Pisani
+    min 112 (2T 72) local     try          Matias David Abrigo
+    min 113 (2T 73) local     conversion   Exequiel Roberto Sosa
+  marcador  · eventos 26-29 · guardado 26-29
+  tries     · 4-4 (guardado —-—)
+  arbitro   · DANIEL BORSARELLI (guardado: —)
+  guardado  · 30 local · 23 visitante · 30 eventos
+
+jockey-club-rio-cuarto vs aguilas-general-deheza · 683363b8 · tarjeta 307463  ·  325f4a86-8dfe-4703-977e-4778dabfb6b8
+  local     · jockey-club-rio-cuarto · 22 jugadores · 0 con ficha fijada
+  visitante · aguilas-general-deheza · 23 jugadores · 0 con ficha fijada
+  eventos   · 9
+    min  6 (1T 6) local     card_yellow  Ignacio Aguirre Ceballos
+    min 46 (2T 6) local     card_yellow  Ignacio Aguirre Ceballos
+    min 46 (2T 6) local     card_red     Ignacio Aguirre Ceballos
+    min 46 (2T 6) visitante card_yellow  Nestor Gabriel Miño
+    min 46 (2T 6) visitante card_red     Nestor Gabriel Miño
+    min 48 (2T 8) local     try          Facundo Adrian Boschero
+    min 62 (2T 22) local     try          Nicolás Lascos
+    min 65 (2T 25) visitante try          Leandro Nicolas Bravo Altamirano
+    min 65 (2T 25) visitante conversion   Fabricio Javier Aguero
+  marcador  · eventos 10-7 · guardado 10-7
+  tries     · 2-1 (guardado —-—)
+  arbitro   · DANIEL BORSARELLI (guardado: —)
+  guardado  · 22 local · 23 visitante · 9 eventos
+
+mackenna-r-c vs ranqueles-rugby · 683363b8 · tarjeta 307462  ·  2b2bc804-b9a2-4433-a5b4-c9650a5c3229
+  local     · mackenna-r-c · 21 jugadores · 0 con ficha fijada
+  visitante · ranqueles-rugby · 24 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min  5 (1T 5) local     try          Javier Oscar Escudero
+    min 13 (1T 13) local     try          Javier Oscar Escudero
+    min 13 (1T 13) local     conversion   Leandro Flores
+    min 20 (1T 20) local     try          Leandro Flores
+    min 20 (1T 20) local     conversion   Leandro Flores
+    min 25 (1T 25) visitante try          Matias Fenoglio
+    min 29 (1T 29) local     try          Leandro Flores
+    min 29 (1T 29) local     conversion   Leandro Flores
+    min 60 (2T 20) visitante substitution Alejandro Magra
+    min 62 (2T 22) visitante substitution Tobias Agustín Ranieri Perez
+    min 65 (2T 25) local     injury       Iago Bruggiafredo
+    min 68 (2T 28) visitante substitution Maximiliano Sosa
+    min 68 (2T 28) visitante substitution Matias Fenoglio
+    min 71 (2T 31) local     try          Facundo Bollini
+    min 71 (2T 31) visitante try          Alvaro Abatedaga
+    min 80 (2T 40) visitante substitution Mateo Luis Viglianco
+    min 80 (2T 40) visitante substitution Jonathan Hansen
+    min 80 (2T 40) visitante substitution Ezequiel Liendo
+  marcador  · eventos 31-10 · guardado 31-10
+  tries     · 5-2 (guardado —-—)
+  arbitro   · JOSÉ OCTAVIANO BORQUEZ (guardado: —)
+  guardado  · 21 local · 24 visitante · 18 eventos
+
+ranqueles-rugby vs los-patriotas-ucacha · 683363b8 · tarjeta 308653  ·  6d83ccbf-1cc5-4e92-9b1b-093abdcd92e7
+  local     · ranqueles-rugby · 24 jugadores · 0 con ficha fijada
+  visitante · los-patriotas-ucacha · 22 jugadores · 0 con ficha fijada
+  eventos   · 23
+    min  3 (1T 3) local     try          Lisandro Milanesio
+    min  3 (1T 3) local     conversion   Mateo Luis Viglianco
+    min  6 (1T 6) local     try          Alvaro Abatedaga
+    min 11 (1T 11) local     try          Jonathan Hansen
+    min 11 (1T 11) local     conversion   Mateo Luis Viglianco
+    min 18 (1T 18) local     conversion   Mateo Luis Viglianco
+    min 18 (1T 18) local     try          Alvaro Abatedaga
+    min 22 (1T 22) local     try          Mateo Pascual
+    min 22 (1T 22) local     conversion   Mateo Luis Viglianco
+    min 30 (1T 30) visitante injury       German Guzman
+    min 32 (1T 32) visitante card_yellow  Hernan Baigorria
+    min 33 (1T 33) local     try          Alvaro Abatedaga
+    min 33 (1T 33) local     conversion   Mateo Luis Viglianco
+    min 35 (1T 35) local     substitution Enzo Cuello
+    min 36 (1T 36) local     substitution Mateo Navecilla
+    min 36 (1T 36) visitante card_yellow  Santiago Antonieta
+    min 37 (1T 37) local     card_yellow  Jonathan Hansen
+    min 38 (1T 38) visitante injury       Matias Juarez
+    min 40 (1T 40) local     try          Lisandro Milanesio
+    min 40 (1T 40) local     conversion   Mateo Luis Viglianco
+    min 45 (2T 5) visitante injury       Maximiliano José Grispo
+    min 49 (2T 9) local     card_yellow  Ezequiel Liendo
+    min 80 (2T 40) local     substitution Mateo Pascual
+  marcador  · eventos 47-0 · guardado 47-0
+  tries     · 7-0 (guardado —-—)
+  arbitro   · SERGIO ZBURA (guardado: —)
+  guardado  · 24 local · 22 visitante · 23 eventos
+
+aguilas-general-deheza vs mackenna-r-c · 683363b8 · tarjeta 308652  ·  c8137601-0267-4ac4-846b-4d03813eaafc
+  local     · aguilas-general-deheza · 22 jugadores · 0 con ficha fijada
+  visitante · mackenna-r-c · 21 jugadores · 0 con ficha fijada
+  eventos   · 13
+    min 10 (1T 10) visitante card_yellow  Javier Oscar Escudero
+    min 15 (1T 15) local     try          Marcos Gaston Leal
+    min 16 (1T 16) local     conversion   Fabricio Javier Aguero
+    min 25 (1T 25) visitante card_yellow  Paulo Coronel
+    min 30 (1T 30) local     try          Jonathan Nanuel Zarate
+    min 38 (1T 38) local     try          Jonathan Nanuel Zarate
+    min 39 (1T 39) local     conversion   Fabricio Javier Aguero
+    min 11 (2T -29) local     card_yellow  Jeremías Luciano Moreno
+    min 46 (2T 6) visitante card_yellow  Ezequiel Mañarey
+    min 50 (2T 10) local     try          Daniel Pautasso
+    min 51 (2T 11) local     conversion   Fabricio Javier Aguero
+    min 70 (2T 30) visitante try          Marcos Borsani
+    min 70 (2T 30) visitante conversion   Rafael Gorostarzu
+  marcador  · eventos 26-7 · guardado 26-7
+  tries     · 4-1 (guardado —-—)
+  arbitro   · DANIEL BORSARELLI (guardado: —)
+  guardado  · 22 local · 21 visitante · 13 eventos
+
+las-iguanas-independiente-dolores vs jockey-club-rio-cuarto · 683363b8 · tarjeta 308651  ·  91469a8b-9183-4396-9709-b66b7f568846
+  local     · las-iguanas-independiente-dolores · 30 jugadores · 20 con ficha fijada
+  visitante · jockey-club-rio-cuarto · 23 jugadores · 0 con ficha fijada
+  eventos   · 29
+    min 15 (1T 15) local     penalty_goal Exequiel Roberto Sosa
+    min 15 (1T 15) visitante penalty_try  
+    min 20 (1T 20) visitante try          Santiago Benitez
+    min 25 (1T 25) local     substitution Silvestre Borra
+    min 25 (1T 25) local     card_yellow  Anibal Osmar Clavijo
+    min 25 (1T 25) visitante card_yellow  Ignacio Aguirre Ceballos
+    min 25 (1T 25) visitante try          Ezequiel Allendez
+    min 25 (1T 25) visitante conversion   Facundo Bindi
+    min 45 (1T 45) local     substitution Mauricio Dadone
+    min 50 (2T 10) visitante try          Facundo Bindi
+    min 50 (2T 10) visitante try          Santiago Fenocchio
+    min 50 (2T 10) visitante card_yellow  Lautaro Rodrigo Conci
+    min 50 (2T 10) visitante conversion   Martin Mortigliengo
+    min 70 (2T 30) visitante conversion   Facundo Bindi
+    min 80 (2T 40) local     substitution Maico Esteban Juarez
+    min 80 (2T 40) local     substitution Matías Ezequiel Munizaga
+    min 85 (2T 45) local     try          Augusto Geisbuhler
+    min 95 (2T 55) local     try          Fernando Raul Juarez
+    min 95 (2T 55) local     conversion   Emanuel Ordoñez
+    min 95 (2T 55) local     substitution Agustin Jose Abrigo
+    min 95 (2T 55) local     substitution Lisandro Pereyra Gutiérrez
+    min 100 (2T 60) local     try          Pablo Dario Pisani
+    min 100 (2T 60) local     conversion   Emanuel Ordoñez
+    min 105 (2T 65) local     substitution Augusto Geisbuhler
+    min 105 (2T 65) local     substitution Anibal Osmar Clavijo
+    min 105 (2T 65) local     substitution Pablo Andrés Gallardine
+    min 112 (2T 72) local     try          Nicolas Ravotti
+    min 116 (2T 76) local     try          Fernando Raul Juarez
+    min 116 (2T 76) local     conversion   Emanuel Ordoñez
+  marcador  · eventos 34-33 · guardado 34-33
+  tries     · 5-5 (guardado —-—)
+  arbitro   · JOSÉ OCTAVIANO BORQUEZ (guardado: —)
+  guardado  · 30 local · 23 visitante · 29 eventos
+
+mackenna-r-c vs oliva-rugby-club · 683363b8 · tarjeta 326848  ·  d034c591-0498-4820-9605-679d53014cff
+  local     · mackenna-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · oliva-rugby-club · 24 jugadores · 0 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 24-16
+  tries     · 0-0 (guardado —-—)
+  arbitro   · DANIEL BORSARELLI (guardado: —)
+  guardado  · 23 local · 24 visitante · 0 eventos
+
+las-iguanas-independiente-dolores vs oliva-rugby-club · 683363b8 · tarjeta 326219  ·  9a74d204-56db-465e-be79-f8e461728cd5
+  local     · las-iguanas-independiente-dolores · 29 jugadores · 19 con ficha fijada
+  visitante · oliva-rugby-club · 24 jugadores · 0 con ficha fijada
+  eventos   · 15
+    min  8 (1T 8) visitante try          Emiliano Matellica
+    min  8 (1T 8) visitante conversion   Emiliano Matellica
+    min 27 (1T 27) local     try          Fernando Raul Juarez
+    min 41 (1T 41) visitante try          Alejandro Gabriel Sanchez
+    min 42 (2T 2) visitante try          Ignacio Pedro Ferreyra
+    min 42 (2T 2) visitante conversion   Ignacio Pedro Ferreyra
+    min 52 (2T 12) visitante conversion   Alexis Andrada Andrada Rodriguez
+    min 52 (2T 12) visitante try          Alexis Andrada Andrada Rodriguez
+    min 57 (2T 17) visitante card_yellow  Leonardo Nigro
+    min 58 (2T 18) local     try          Fernando Raul Juarez
+    min 62 (2T 22) visitante penalty_goal Gaston Diaz
+    min 68 (2T 28) local     try          Iván Monti
+    min 68 (2T 28) local     conversion   Exequiel Roberto Sosa
+    min 72 (2T 32) visitante try          Germán Gomez
+    min 72 (2T 32) visitante conversion   Germán Gomez
+  marcador  · eventos 17-36 · guardado 17-36
+  tries     · 3-5 (guardado —-—)
+  arbitro   · JAVIER ANTONIO GUTIERREZ (guardado: —)
+  guardado  · 29 local · 24 visitante · 15 eventos
+
+mackenna-r-c vs las-iguanas-independiente-dolores · 683363b8 · tarjeta 325283  ·  662a46f8-0ee4-4815-bd81-cc1bd0cc6c41
+  local     · mackenna-r-c · 23 jugadores · 0 con ficha fijada
+  visitante · las-iguanas-independiente-dolores · 28 jugadores · 19 con ficha fijada
+  eventos   · 27
+    min  4 (1T 4) local     try          Jano Gabriel Perez
+    min  5 (1T 5) local     conversion   Federico Rodriguez
+    min  8 (1T 8) local     try          Federico Rodriguez
+    min  9 (1T 9) local     conversion   Federico Rodriguez
+    min 11 (1T 11) local     try          Javier Oscar Escudero
+    min 12 (1T 12) local     conversion   Federico Rodriguez
+    min 13 (1T 13) local     try          Farid Emmanuel Ghio Gonzalez
+    min 14 (1T 14) local     conversion   Federico Rodriguez
+    min 23 (1T 23) local     try          Hugo Daniel Monaco
+    min 24 (1T 24) local     conversion   Federico Rodriguez
+    min 31 (1T 31) visitante try          Exequiel Roberto Sosa
+    min 32 (1T 32) visitante conversion   Iván Monti
+    min 35 (1T 35) visitante try          Mauricio Dadone
+    min 37 (1T 37) visitante card_yellow  Milton Josue Mariani
+    min 39 (1T 39) local     try          Ezequiel Mañarey
+    min 39 (1T 39) local     conversion   Federico Rodriguez
+    min 41 (2T 1) local     try          Marcos Borsani
+    min 47 (2T 7) local     try          Ezequiel Mañarey
+    min 48 (2T 8) local     conversion   Federico Rodriguez
+    min 52 (2T 12) local     try          Ezequiel Mañarey
+    min 53 (2T 13) local     conversion   Federico Rodriguez
+    min 72 (2T 32) local     try          Federico Rodriguez
+    min 73 (2T 33) local     conversion   Federico Rodriguez
+    min 75 (2T 35) local     card_yellow  Tomas Agustín Centeno
+    min 76 (2T 36) local     card_yellow  Iago Bruggiafredo
+    min 79 (2T 39) visitante conversion   Iván Monti
+    min 79 (2T 39) visitante try          Pablo Dario Pisani
+  marcador  · eventos 68-19 · guardado 68-19
+  tries     · 10-3 (guardado —-—)
+  arbitro   · JOSÉ OCTAVIANO BORQUEZ (guardado: —)
+  guardado  · 23 local · 28 visitante · 27 eventos
+
+oliva-rugby-club vs mackenna-r-c · 683363b8 · tarjeta 324546  ·  84c080f2-8545-4df7-8c7e-1bb514a93435
+  local     · oliva-rugby-club · 24 jugadores · 0 con ficha fijada
+  visitante · mackenna-r-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 10
+    min 20 (1T 20) local     penalty_goal Gaston Diaz
+    min 28 (1T 28) visitante penalty_goal Pablo Cejas
+    min 30 (1T 30) local     card_yellow  Alejandro Gabriel Sanchez
+    min 39 (1T 39) local     try          Emiliano Matellica
+    min 40 (1T 40) local     conversion   Gaston Diaz
+    min 43 (2T 3) visitante try          Federico Rodriguez
+    min 55 (2T 15) local     card_yellow  Carlos George
+    min 59 (2T 19) visitante penalty_goal Federico Rodriguez
+    min 60 (2T 20) local     card_yellow  Francisco Peralta
+    min 79 (2T 39) visitante penalty_goal Federico Rodriguez
+  marcador  · eventos 10-14 · guardado 10-14
+  tries     · 1-1 (guardado —-—)
+  arbitro   · SANTIAGO GERONIMO LOZADA CHAVES (guardado: —)
+  guardado  · 24 local · 23 visitante · 10 eventos
+
+nautico-fitz-simon vs ranqueles-rugby · 683363b8 · tarjeta 326851  ·  286a31c5-37aa-4b3a-8ce3-d1b49bb14092
+  local     · nautico-fitz-simon · 28 jugadores · 0 con ficha fijada
+  visitante · ranqueles-rugby · 25 jugadores · 0 con ficha fijada
+  eventos   · 13
+    min  2 (1T 2) local     penalty_goal Agustín Héctor Villa
+    min  4 (1T 4) local     try          Agustín Héctor Villa
+    min  5 (1T 5) visitante try          Santino Cerioli
+    min 33 (1T 33) visitante substitution Santiago Francisco Olguin
+    min 40 (1T 40) local     substitution Martin Luna Jara
+    min 63 (1T 63) local     substitution Alejo Ortiz
+    min 70 (2T 30) local     try          Federico Marin
+    min 70 (2T 30) visitante try          Patricio Bigo
+    min 70 (2T 30) visitante substitution Federico Bruno
+    min 73 (2T 33) visitante substitution Alvaro Abatedaga
+    min 103 (2T 63) local     try          Cristian Carabajal
+    min 103 (2T 63) local     substitution Alexis Gonzalez
+    min 103 (2T 63) local     substitution Lazaro Joel Ramirez
+  marcador  · eventos 18-10 · guardado 18-10
+  tries     · 3-2 (guardado —-—)
+  arbitro   · PABLO GERARDO RONCO (guardado: —)
+  guardado  · 28 local · 25 visitante · 13 eventos
+
+aguilas-general-deheza vs union-oncativo-rugby · 683363b8 · tarjeta 326852  ·  2dba0c73-e2a2-437b-a1e4-89e2089162fa
+  local     · aguilas-general-deheza · 30 jugadores · 0 con ficha fijada
+  visitante · union-oncativo-rugby · 30 jugadores · 23 con ficha fijada
+  eventos   · 21
+    min  2 (1T 2) local     try          Mario Peralta
+    min  2 (1T 2) local     conversion   Mario Peralta
+    min 10 (1T 10) visitante injury       Valentino Girotti
+    min 12 (1T 12) local     card_yellow  Luciano Gonzalez
+    min 12 (1T 12) visitante penalty_try  
+    min 15 (1T 15) local     penalty_goal Mario Peralta
+    min 35 (1T 35) visitante try          Franco Re
+    min 35 (1T 35) visitante conversion   Carlos Rodrigo Gutierrez
+    min 41 (2T 1) local     conversion   Victor Manuel Villaverde Oviedo
+    min 41 (2T 1) local     try          Victor Manuel Villaverde Oviedo
+    min 51 (2T 11) visitante try          Brian Sala
+    min 52 (2T 12) local     try          Diego Balladares
+    min 52 (2T 12) local     conversion   Victor Manuel Villaverde Oviedo
+    min 55 (2T 15) local     card_yellow  Nestor Gabriel Miño
+    min 56 (2T 16) local     try          Alexis Brandana
+    min 56 (2T 16) local     conversion   Victor Manuel Villaverde Oviedo
+    min 60 (2T 20) local     card_yellow  Adrian Zarate
+    min 66 (2T 26) visitante card_yellow  Alex Cervelli
+    min 67 (2T 27) visitante penalty_try  
+    min 70 (2T 30) visitante try          Santiago Fraresso
+    min 70 (2T 30) visitante conversion   Franco Re
+  marcador  · eventos 31-33 · guardado 31-33
+  tries     · 4-5 (guardado —-—)
+  arbitro   · SERGIO ZBURA (guardado: —)
+  guardado  · 30 local · 30 visitante · 21 eventos
+
+villa-general-belgrano-r-c vs union-oncativo-rugby · 683363b8 · tarjeta 326218  ·  40733327-224b-4746-9333-5f1c117fce78
+  local     · villa-general-belgrano-r-c · 25 jugadores · 25 con ficha fijada
+  visitante · union-oncativo-rugby · 23 jugadores · 23 con ficha fijada
+  eventos   · 17
+    min  9 (1T 9) visitante try          Aguilar Elias
+    min 10 (1T 10) visitante conversion   Adrian Santiago Diaz
+    min 28 (1T 28) local     try          Juan Ramirez
+    min 28 (1T 28) local     conversion   Damián Funes
+    min 40 (1T 40) local     try          Lautaro Ramirez
+    min 40 (1T 40) local     conversion   Cristian Federico Ramírez
+    min 85 (2T 45) visitante penalty_try  
+    min 88 (2T 48) visitante try          Fabricio Carolini
+    min 88 (2T 48) visitante conversion   Adrian Santiago Diaz
+    min 90 (2T 50) visitante substitution Brian Sala
+    min 94 (2T 54) local     substitution Ezequiel Ceballos Larrea
+    min 94 (2T 54) local     substitution Guillermo Corti
+    min 103 (2T 63) visitante substitution Fabricio Carolini
+    min 103 (2T 63) visitante substitution Federico Savio
+    min 111 (2T 71) local     penalty_goal Cristian Federico Ramírez
+    min 116 (2T 76) local     substitution Nicolas Facchin
+    min 118 (2T 78) visitante try          Santiago Fraresso
+  marcador  · eventos 17-26 · guardado 17-26
+  tries     · 2-4 (guardado 2-4)
+  arbitro   · PABLO GERARDO RONCO (guardado: Ronco P.)
+  guardado  · 25 local · 23 visitante · 17 eventos
+
+ranqueles-rugby vs aguilas-general-deheza · 683363b8 · tarjeta 326217  ·  13196e83-88ba-429c-b696-eb38af0cd99b
+  local     · ranqueles-rugby · 26 jugadores · 0 con ficha fijada
+  visitante · aguilas-general-deheza · 30 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min  7 (1T 7) local     try          Manuel Villalonga
+    min  7 (1T 7) local     conversion   Manuel Villalonga
+    min 10 (1T 10) visitante card_yellow  Adrian Zarate
+    min 18 (1T 18) local     penalty_try  
+    min 22 (1T 22) local     try          Lucio Martinelli
+    min 22 (1T 22) local     conversion   Manuel Villalonga
+    min 25 (1T 25) visitante card_yellow  Alan Gabriel Pistone
+    min 28 (1T 28) local     try          Manuel Villalonga
+    min 39 (1T 39) local     try          Matias Fenoglio
+    min 46 (2T 6) visitante try          Richard Eliezer Alvarez
+    min 46 (2T 6) visitante conversion   Mario Peralta
+    min 47 (2T 7) local     substitution Santiago Francisco Olguin
+    min 47 (2T 7) local     substitution Patricio Bigo
+    min 49 (2T 9) local     card_yellow  Ezequiel Liendo
+    min 50 (2T 10) visitante substitution Marcos Gaston Leal
+    min 50 (2T 10) visitante substitution Diego Balladares
+    min 51 (2T 11) visitante try          Nicolás Lautaro Moreno
+    min 51 (2T 11) visitante conversion   Mario Peralta
+    min 52 (2T 12) local     substitution Federico Andino
+    min 57 (2T 17) visitante penalty_try  
+    min 61 (2T 21) local     substitution Uriel Aristule
+    min 63 (2T 23) visitante try          Cristian Arevalo
+    min 64 (2T 24) visitante substitution Francisco Brandana
+    min 66 (2T 26) local     card_yellow  Juan Alejandro Silveira
+    min 67 (2T 27) visitante card_red     Franco Zarate
+    min 73 (2T 33) local     substitution Santino Cerioli
+    min 73 (2T 33) local     substitution Matias Fenoglio
+  marcador  · eventos 31-26 · guardado 31-26
+  tries     · 5-4 (guardado —-—)
+  arbitro   · NAHUEL SABENA (guardado: —)
+  guardado  · 26 local · 30 visitante · 27 eventos
+
+jockey-club-rio-cuarto vs nautico-fitz-simon · 683363b8 · tarjeta 326216  ·  e2737022-a838-455e-8ab4-9a1ad6817867
+  local     · jockey-club-rio-cuarto · 23 jugadores · 0 con ficha fijada
+  visitante · nautico-fitz-simon · 27 jugadores · 0 con ficha fijada
+  eventos   · 21
+    min  4 (1T 4) local     try          Ezequiel Allendez
+    min  8 (1T 8) local     try          Benjamín Bertola
+    min 10 (1T 10) local     try          Ignacio Aguirre Ceballos
+    min 28 (1T 28) visitante card_yellow  Agustín Héctor Villa
+    min 32 (1T 32) local     card_yellow  Victor Orlando Gonzalez
+    min 34 (1T 34) local     try          Lucas Barros Molina
+    min 40 (1T 40) local     conversion   Santiago Fenocchio
+    min 40 (1T 40) local     try          Santiago Fenocchio
+    min 43 (2T 3) visitante try          Ubaldo Nicolás Azategui Fernández
+    min 45 (2T 5) visitante try          Gastón Francisco Arce
+    min 55 (2T 15) local     card_yellow  Martin Patroni
+    min 60 (2T 20) local     conversion   Santiago Fenocchio
+    min 60 (2T 20) local     try          Nicolas Torello
+    min 61 (2T 21) visitante card_yellow  Renato Severini
+    min 70 (2T 30) local     try          Santiago Benitez
+    min 74 (2T 34) visitante try          Gastón Francisco Arce
+    min 74 (2T 34) visitante try          Gastón Francisco Arce
+    min 76 (2T 36) visitante conversion   Agustín Héctor Villa
+    min 76 (2T 36) visitante conversion   Lazaro Joel Ramirez
+    min 80 (2T 40) local     conversion   Santiago Fenocchio
+    min 80 (2T 40) local     try          Juan Bautista Diaz
+  marcador  · eventos 46-24 · guardado 46-24
+  tries     · 8-4 (guardado —-—)
+  arbitro   · EMANUEL ORDOÑEZ (guardado: —)
+  guardado  · 23 local · 27 visitante · 21 eventos
+
+union-oncativo-rugby vs ranqueles-rugby · 683363b8 · tarjeta 325281  ·  35e3d485-ca31-493a-b676-a78b56a74837
+  local     · union-oncativo-rugby · 30 jugadores · 21 con ficha fijada
+  visitante · ranqueles-rugby · 30 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min 15 (1T 15) local     try          Brian Sala
+    min 22 (1T 22) local     try          Santiago Fraresso
+    min 25 (1T 25) visitante try          Manuel Villalonga
+    min 28 (1T 28) local     substitution Federico Savio
+    min 28 (1T 28) visitante try          Victorio Bongiovanni
+    min 28 (1T 28) visitante conversion   Manuel Villalonga
+    min 31 (1T 31) visitante try          Santino Cerioli
+    min 31 (1T 31) visitante conversion   Manuel Villalonga
+    min 40 (1T 40) local     substitution Brian Sala
+    min 45 (2T 5) local     substitution Fabricio Carolini
+    min 45 (2T 5) visitante substitution Santiago Francisco Olguin
+    min 46 (2T 6) local     try          Santiago Fraresso
+    min 46 (2T 6) local     conversion   Franco Re
+    min 46 (2T 6) visitante card_yellow  Enzo Cuello
+    min 55 (2T 15) visitante substitution Uriel Aristule
+    min 55 (2T 15) visitante substitution Patricio Bigo
+    min 60 (2T 20) visitante card_yellow  Jhonatan Tevez
+    min 60 (2T 20) visitante substitution Federico Andino
+    min 65 (2T 25) visitante try          Lisandro Milanesio
+    min 65 (2T 25) visitante conversion   Manuel Villalonga
+    min 70 (2T 30) local     substitution Valentino Girotti
+    min 72 (2T 32) local     substitution Leandro Ivan Ciriacci
+    min 72 (2T 32) local     substitution Gino Daniel Viano
+    min 74 (2T 34) visitante try          Santino Cerioli
+    min 76 (2T 36) visitante substitution Lucio Martinelli
+    min 78 (2T 38) visitante try          Alvaro Abatedaga
+    min 78 (2T 38) visitante conversion   Manuel Villalonga
+  marcador  · eventos 17-38 · guardado 17-38
+  tries     · 3-6 (guardado —-—)
+  arbitro   · LEANDRO LUCHETTI (guardado: —)
+  guardado  · 30 local · 30 visitante · 27 eventos
+
+aguilas-general-deheza vs jockey-club-rio-cuarto · 683363b8 · tarjeta 325280  ·  5cc2ccf0-9694-4694-be3e-3074e725d6ac
+  local     · aguilas-general-deheza · 28 jugadores · 0 con ficha fijada
+  visitante · jockey-club-rio-cuarto · 23 jugadores · 0 con ficha fijada
+  eventos   · 19
+    min  3 (1T 3) local     try          Luciano Alberto Ramírez
+    min  7 (1T 7) local     try          Adrian Zarate
+    min  8 (1T 8) local     conversion   Mario Peralta
+    min 14 (1T 14) visitante penalty_try  
+    min 19 (1T 19) visitante try          Santiago Zabala
+    min 19 (1T 19) visitante conversion   Santiago Benitez
+    min 24 (1T 24) local     try          Richard Eliezer Alvarez
+    min 24 (1T 24) local     conversion   Mario Peralta
+    min 34 (1T 34) visitante try          Juan Pablo Benitez
+    min 35 (1T 35) visitante conversion   Ezequiel Allendez
+    min 45 (2T 5) local     try          Mario Peralta
+    min 45 (2T 5) local     conversion   Mario Peralta
+    min 49 (2T 9) local     card_yellow  Richard Eliezer Alvarez
+    min 51 (2T 11) visitante try          Martin Patroni
+    min 57 (2T 17) local     try          Nestor Gabriel Miño
+    min 57 (2T 17) visitante try          Benjamín Bertola
+    min 57 (2T 17) visitante card_yellow  Lucas Barros Molina
+    min 58 (2T 18) local     card_yellow  Luciano Gonzalez
+    min 64 (2T 24) visitante try          Lucas Barros Molina
+  marcador  · eventos 31-36 · guardado 31-36
+  tries     · 5-6 (guardado —-—)
+  arbitro   · EUGENIO MORRA (guardado: —)
+  guardado  · 28 local · 23 visitante · 19 eventos
+
+nautico-fitz-simon vs villa-general-belgrano-r-c · 683363b8 · tarjeta 325279  ·  acb62203-e430-4dd7-bad1-b6cf5a78f83d
+  local     · nautico-fitz-simon · 24 jugadores · 0 con ficha fijada
+  visitante · villa-general-belgrano-r-c · 22 jugadores · 18 con ficha fijada
+  eventos   · 17
+    min 15 (1T 15) visitante try          Giuliano Lehmann
+    min 16 (1T 16) visitante conversion   Orencio Vellon
+    min 24 (1T 24) local     try          Alejo Ortiz
+    min 30 (1T 30) local     penalty_try  
+    min 72 (1T 72) visitante substitution Manuel Martinez
+    min 42 (2T 2) local     try          Leonardo Bustos
+    min 67 (2T 27) local     penalty_try  
+    min 92 (2T 52) visitante try          Marcelo Murias
+    min 102 (2T 62) visitante substitution Emilio Franck
+    min 112 (2T 72) visitante try          Lautaro Ramirez
+    min 112 (2T 72) visitante conversion   Cristian Federico Ramírez
+    min 112 (2T 72) visitante substitution Thiago Gelso
+    min 114 (2T 74) local     substitution Agustín Vidomini
+    min 114 (2T 74) local     substitution Gastón Francisco Arce
+    min 115 (2T 75) visitante card_yellow  Bruno Ceballos Larrea
+    min 117 (2T 77) local     substitution Lazaro Joel Ramirez
+    min 117 (2T 77) local     substitution Alexis Gonzalez
+  marcador  · eventos 24-19 · guardado 24-19
+  tries     · 4-3 (guardado —-—)
+  arbitro   · PABLO GERARDO RONCO (guardado: —)
+  guardado  · 24 local · 22 visitante · 17 eventos
+
+villa-general-belgrano-r-c vs ranqueles-rugby · 683363b8 · tarjeta 324548  ·  3dd30567-764e-4319-ac4f-d2904a7c26e2
+  local     · villa-general-belgrano-r-c · 28 jugadores · 23 con ficha fijada
+  visitante · ranqueles-rugby · 24 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min  5 (1T 5) visitante penalty_goal Mateo Luis Viglianco
+    min  8 (1T 8) local     try          Manuel Martinez
+    min  9 (1T 9) local     conversion   Cristian Federico Ramírez
+    min 28 (1T 28) visitante try          Alejandro Magra
+    min 29 (1T 29) visitante conversion   Mateo Luis Viglianco
+    min 33 (1T 33) visitante injury       Alvaro Abatedaga
+    min 33 (1T 33) visitante substitution Patricio Bigo
+    min 36 (1T 36) local     try          Antonio German Barboza
+    min 37 (1T 37) local     conversion   Cristian Federico Ramírez
+    min 40 (1T 40) visitante penalty_goal Mateo Luis Viglianco
+    min 55 (2T 15) visitante substitution Santiago Francisco Olguin
+    min 56 (2T 16) local     penalty_goal Cristian Federico Ramírez
+    min 67 (2T 27) visitante try          Mateo Pascual
+    min 70 (2T 30) local     substitution Dalmiro Vilches
+    min 70 (2T 30) visitante substitution Alejandro Magra
+    min 70 (2T 30) visitante substitution Lautaro Scaccia
+    min 73 (2T 33) visitante substitution Alvaro Abatedaga
+    min 77 (2T 37) visitante try          Manuel Villalonga
+    min 78 (2T 38) visitante conversion   Mateo Luis Viglianco
+    min 90 (2T 50) local     substitution Pablo Pereyra
+    min 90 (2T 50) local     substitution Mateo Chialvetto
+    min 92 (2T 52) local     substitution Bruno Ceballos Larrea
+    min 100 (2T 60) local     substitution Ezequiel Ceballos Larrea
+    min 110 (2T 70) local     substitution Lautaro Ramirez
+  marcador  · eventos 17-25 · guardado 17-25
+  tries     · 2-3 (guardado —-—)
+  arbitro   · SANTIAGO CORVALÁN RT (guardado: —)
+  guardado  · 28 local · 24 visitante · 24 eventos
+
+jockey-club-rio-cuarto vs union-oncativo-rugby · 683363b8 · tarjeta 324547  ·  268af9be-f961-4fd2-81d5-437949a1831c
+  local     · jockey-club-rio-cuarto · 25 jugadores · 0 con ficha fijada
+  visitante · union-oncativo-rugby · 23 jugadores · 19 con ficha fijada
+  eventos   · 17
+    min 10 (1T 10) local     conversion   Santiago Fenocchio
+    min 10 (1T 10) local     try          Santiago Fenocchio
+    min 20 (1T 20) local     try          Ignacio Aguirre Ceballos
+    min 30 (1T 30) visitante card_red     Carlos Rodrigo Gutierrez
+    min 31 (1T 31) local     card_yellow  Juan Pablo Benitez
+    min 35 (1T 35) local     try          Nicolas Torello
+    min 39 (1T 39) local     card_yellow  Benjamín Bertola
+    min 40 (1T 40) visitante try          Leandro Ivan Ciriacci
+    min 42 (2T 2) visitante penalty_try  
+    min 53 (2T 13) local     try          Santiago Fenocchio
+    min 53 (2T 13) local     conversion   Santiago Fenocchio
+    min 55 (2T 15) local     card_yellow  Valentin Ficco
+    min 65 (2T 25) local     injury       Nicolás Lascos
+    min 72 (2T 32) visitante try          Aguilar Elias
+    min 73 (2T 33) visitante conversion   Franco Re
+    min 79 (2T 39) local     conversion   Santiago Fenocchio
+    min 79 (2T 39) local     try          Lucas Barros Molina
+  marcador  · eventos 31-19 · guardado 31-19
+  tries     · 5-3 (guardado —-—)
+  arbitro   · DANIEL BORSARELLI (guardado: —)
+  guardado  · 25 local · 23 visitante · 17 eventos
+
+listo · 73 partidos

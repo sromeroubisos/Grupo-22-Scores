@@ -1,0 +1,1229 @@
+tarjetas oficiales adcb3e20
+
+club-palermo-bajo-m17-b vs tala-rugby-club-m17-c · adcb3e20 · tarjeta 326779  ·  74297e1a-66b8-4067-a4e5-9ba61ec81f2c
+  local     · club-palermo-bajo-m17-b · 23 jugadores · 0 con ficha fijada
+  visitante · tala-rugby-club-m17-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 0-28
+  tries     · 0-0 (guardado —-—)
+  arbitro   · (NO OFICIAL) (guardado: —)
+  guardado  · 23 local · 23 visitante · 0 eventos
+
+club-universitario-de-cordoba-m17-b vs san-francisco-r-c-m17-b · adcb3e20 · tarjeta 326770  ·  9442cf32-d129-43de-a7bf-1da27381db26
+  local     · club-universitario-de-cordoba-m17-b · 25 jugadores · 0 con ficha fijada
+  visitante · san-francisco-r-c-m17-b · 23 jugadores · 0 con ficha fijada
+  eventos   · 15
+    min  4 (1T 4) visitante try          Merlo Agustín
+    min  4 (1T 4) visitante conversion   Gino Bernardi
+    min  6 (1T 6) local     try          Bruno Gomez Cesar
+    min 32 (1T 32) visitante try          Merlo Agustín
+    min 32 (1T 32) visitante conversion   Gino Bernardi
+    min 41 (2T 1) visitante substitution Efraín Bischoff Kappes
+    min 44 (2T 4) visitante substitution Alejo Gigena
+    min 50 (2T 10) visitante substitution Leonel Gabriel Navarro
+    min 56 (2T 16) visitante substitution Santino Vanzetti
+    min 57 (2T 17) local     card_yellow  Francisco Boggio
+    min 57 (2T 17) visitante card_yellow  Merlo Agustín
+    min 59 (2T 19) local     conversion   Tiziano Keller
+    min 59 (2T 19) local     try          Tiziano Keller
+    min 66 (2T 26) visitante try          Santino Astegiano
+    min 72 (2T 32) local     card_yellow  Santino Nicolas Golubko Pairone
+  marcador  · eventos 12-19 · guardado 12-19
+  tries     · 2-3 (guardado —-—)
+  arbitro   · JAVIER ALBERTO FLORES (guardado: —)
+  guardado  · 25 local · 23 visitante · 15 eventos
+
+alta-gracia-r-c-m17-b vs jockey-club-cordoba-m17-b · adcb3e20 · tarjeta 326773  ·  2bfe7027-da44-4a22-80d5-12ed9be9feb3
+  local     · alta-gracia-r-c-m17-b · 24 jugadores · 0 con ficha fijada
+  visitante · jockey-club-cordoba-m17-b · 24 jugadores · 0 con ficha fijada
+  eventos   · 0
+  marcador  · eventos 0-0 · guardado 0-28
+  tries     · 0-0 (guardado —-—)
+  arbitro   · (NO OFICIAL) (guardado: —)
+  guardado  · 24 local · 24 visitante · 0 eventos
+
+baguales-r-c-m17-b vs uru-cure-rugby-club-m17-b · adcb3e20 · tarjeta 326782  ·  b2ccbfc4-1b3a-485c-99ff-456a189bb3dd
+  local     · baguales-r-c-m17-b · 23 jugadores · 0 con ficha fijada
+  visitante · uru-cure-rugby-club-m17-b · 23 jugadores · 0 con ficha fijada
+  eventos   · 29
+    min  1 (1T 1) visitante try          Ciro Bonet
+    min  5 (1T 5) visitante try          Ignacio Rossi Jaume
+    min  6 (1T 6) visitante conversion   Facundo Vicente Rojo
+    min  8 (1T 8) visitante try          Facundo Vicente Rojo
+    min  9 (1T 9) visitante conversion   Facundo Vicente Rojo
+    min 12 (1T 12) visitante try          Vicente Cayetano Pedernera
+    min 13 (1T 13) visitante conversion   Facundo Vicente Rojo
+    min 16 (1T 16) visitante try          Agustin Adan
+    min 18 (1T 18) visitante try          Juan Ignacio Tozzelli
+    min 19 (1T 19) visitante conversion   Facundo Vicente Rojo
+    min 32 (1T 32) visitante try          Jose Benjamin Rosci
+    min 40 (2T 0) local     substitution Santiago Cabrera
+    min 40 (2T 0) local     substitution Nicolás Bustos
+    min 40 (2T 0) local     substitution Leonel Bustamante
+    min 40 (2T 0) local     substitution Salvador Castro
+    min 46 (2T 6) visitante try          Facundo Vicente Rojo
+    min 47 (2T 7) visitante substitution Luca Radaelli
+    min 47 (2T 7) visitante conversion   Facundo Vicente Rojo
+    min 50 (2T 10) visitante try          José Sobrero
+    min 51 (2T 11) visitante conversion   Facundo Vicente Rojo
+    min 53 (2T 13) visitante substitution Máximo Hernán Méndez
+    min 54 (2T 14) visitante try          Valentin Pauletti
+    min 55 (2T 15) visitante conversion   Facundo Vicente Rojo
+    min 55 (2T 15) visitante substitution Agustin Adan
+    min 55 (2T 15) visitante substitution Juan Ignacio Tozzelli
+    min 60 (2T 20) visitante substitution José Sobrero
+    min 60 (2T 20) visitante substitution Lorenzo Jesus Crespo
+    min 60 (2T 20) visitante substitution Efren Santiago Fernandez Aballay
+    min 65 (2T 25) visitante try          Gonzalo Lami Echenique
+  marcador  · eventos 0-69 · guardado 0-69
+  tries     · 0-11 (guardado —-—)
+  arbitro   · LEONEL SORBERA (guardado: —)
+  guardado  · 23 local · 23 visitante · 29 eventos
+
+tala-rugby-club-m17-c vs tala-rugby-club-m17-b · adcb3e20 · tarjeta 326112  ·  3ee4b5f2-6f42-43cd-b563-bfde536d6de0
+  local     · tala-rugby-club-m17-c · 23 jugadores · 0 con ficha fijada
+  visitante · tala-rugby-club-m17-b · 23 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min  5 (1T 5) visitante try          Federico Francisco Vega
+    min  5 (1T 5) visitante conversion   Tomas Yankilevich
+    min 12 (1T 12) visitante try          Tomas Cremonini
+    min 12 (1T 12) visitante conversion   Tomas Yankilevich
+    min 25 (1T 25) visitante try          Pedro Malbrán Brocca
+    min 25 (1T 25) visitante conversion   Tomas Yankilevich
+    min 27 (1T 27) local     try          Ramon Vilosio
+    min 31 (1T 31) visitante try          Salvador Aguilar Benitez Ruiz
+    min 31 (1T 31) visitante conversion   Tomas Yankilevich
+    min 41 (2T 1) local     substitution Bautista Arotcarena
+    min 41 (2T 1) local     substitution Máximo Bustos
+    min 41 (2T 1) local     substitution Jorge Federico Gregorat
+    min 41 (2T 1) local     substitution Mauro Greco
+    min 41 (2T 1) local     substitution Juan Felipe De Vertiz
+    min 41 (2T 1) visitante substitution Gael Ignacio Tabares Gasse
+    min 41 (2T 1) visitante substitution Federico Francisco Vega
+    min 41 (2T 1) visitante substitution Diogenes Franzini
+    min 41 (2T 1) visitante substitution Salvador Soirefman Miro
+    min 47 (2T 7) visitante try          Felipe Marchetti
+    min 47 (2T 7) visitante conversion   Tomas Yankilevich
+    min 50 (2T 10) local     try          Ramiro Parlamento Arriazu
+    min 50 (2T 10) local     conversion   Ramiro Parlamento Arriazu
+    min 59 (2T 19) visitante try          Tomas Yankilevich
+    min 59 (2T 19) visitante conversion   Tomas Yankilevich
+    min 69 (2T 29) visitante try          Gael Ignacio Tabares Gasse
+  marcador  · eventos 12-47 · guardado 12-47
+  tries     · 2-7 (guardado —-—)
+  arbitro   · SANTIAGO GERONIMO LOZADA CHAVES (guardado: —)
+  guardado  · 23 local · 23 visitante · 25 eventos
+
+cordoba-athletic-club-m17-b vs cordoba-rugby-club-m17-b · adcb3e20 · tarjeta 326181  ·  3aa54c69-c597-42b3-96b9-7d483fc40c63
+  local     · cordoba-athletic-club-m17-b · 24 jugadores · 0 con ficha fijada
+  visitante · cordoba-rugby-club-m17-b · 28 jugadores · 0 con ficha fijada
+  eventos   · 26
+    min 10 (1T 10) local     try          Valentin Sutter Fuentes
+    min 10 (1T 10) visitante try          Juan Ignacio Schuster
+    min 11 (1T 11) local     conversion   Valentin Sutter Fuentes
+    min 20 (1T 20) local     card_yellow  Valentín Nicolás Gomez
+    min 20 (1T 20) visitante try          Juan Ignacio Schuster
+    min 20 (1T 20) visitante conversion   Ian Arias
+    min 28 (1T 28) visitante penalty_goal Ian Arias
+    min 30 (1T 30) visitante try          Ian Arias
+    min 30 (1T 30) visitante conversion   Ian Arias
+    min 35 (1T 35) local     try          Tomas Campos
+    min 42 (2T 2) local     substitution Francisco Pizarro Alvarado
+    min 50 (2T 10) visitante try          Juan Ignacio Schuster
+    min 54 (2T 14) local     try          Valentin Sutter Fuentes
+    min 55 (2T 15) local     conversion   Valentin Sutter Fuentes
+    min 60 (2T 20) visitante try          Mateo León Reartes
+    min 60 (2T 20) visitante conversion   Mateo León Reartes
+    min 63 (2T 23) local     substitution Camilo Lozada Chaves
+    min 67 (2T 27) local     substitution Tomas Oulton Priori
+    min 68 (2T 28) local     card_yellow  Santiago Miranda
+    min 68 (2T 28) local     substitution Valentín Nicolás Gomez
+    min 68 (2T 28) local     substitution Tomas Campos
+    min 68 (2T 28) local     substitution Fabrizzio Druetta Herther
+    min 68 (2T 28) local     substitution Santiago Tomas Aciar Gonzalez
+    min 70 (2T 30) visitante try          Mateo León Reartes
+    min 80 (2T 40) local     substitution Juan Merlo
+    min 80 (2T 40) local     substitution Felipe Garay Villegas
+  marcador  · eventos 19-39 · guardado 19-39
+  tries     · 3-6 (guardado —-—)
+  arbitro   · FEDERICO PREGOT (guardado: —)
+  guardado  · 24 local · 28 visitante · 26 eventos
+
+club-la-tablada-m17-b vs club-la-tablada-m17-c · adcb3e20 · tarjeta 326184  ·  a5182815-cba7-41ad-83a6-ff23c4cf0082
+  local     · club-la-tablada-m17-b · 23 jugadores · 0 con ficha fijada
+  visitante · club-la-tablada-m17-c · 13 jugadores · 0 con ficha fijada
+  eventos   · 8
+    min 10 (1T 10) local     try          Salvador Ballaratti
+    min 10 (1T 10) local     conversion   Francisco Gennaro Rollan
+    min 32 (1T 32) local     try          Gianni Luciano Porrati Polzella
+    min 32 (1T 32) local     conversion   Francisco Gennaro Rollan
+    min 45 (2T 5) local     try          Lucio Novillo Corvalan
+    min 45 (2T 5) local     conversion   Lucio Novillo Corvalan
+    min 68 (2T 28) local     conversion   Lucio Novillo Corvalan
+    min 68 (2T 28) local     try          Lucio Novillo Corvalan
+  marcador  · eventos 28-0 · guardado 28-0
+  tries     · 4-0 (guardado —-—)
+  arbitro   · CARLOS ALTOBELLI (guardado: —)
+  guardado  · 23 local · 13 visitante · 8 eventos
+
+club-palermo-bajo-m17-b vs baguales-r-c-m17-b · adcb3e20 · tarjeta 326186  ·  85f77eca-457d-4aa5-965d-4859c7f7be20
+  local     · club-palermo-bajo-m17-b · 23 jugadores · 0 con ficha fijada
+  visitante · baguales-r-c-m17-b · 22 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min  4 (1T 4) local     try          Alvaro Soriano
+    min  9 (1T 9) local     try          Tomás Bautista Torres
+    min 16 (1T 16) local     card_yellow  Felipe Bersano
+    min 19 (1T 19) local     try          Felipe Bersano
+    min 20 (1T 20) local     conversion   Facundo Tapia
+    min 26 (1T 26) local     try          Felipe Bersano
+    min 26 (1T 26) local     conversion   Facundo Tapia
+    min 32 (1T 32) local     substitution Stanko Nicolas Juratovic
+    min 35 (1T 35) local     try          Juan Ignacio Mangione
+    min 35 (1T 35) local     conversion   Tomás Bautista Torres
+    min 40 (2T 0) local     substitution Manuel Lisandro Roldan Funes
+    min 40 (2T 0) local     substitution Felipe Bersano
+    min 40 (2T 0) local     substitution Conrado Arias
+    min 41 (2T 1) visitante substitution Salvador Brandalisi
+    min 41 (2T 1) visitante try          Santiago Cabrera
+    min 41 (2T 1) visitante conversion   Santiago Cabrera
+    min 41 (2T 1) visitante substitution Faustino Rizzi Aramayo
+    min 41 (2T 1) visitante substitution Leonel Bustamante
+    min 49 (2T 9) local     try          Lorenzo Soriano
+    min 57 (2T 17) visitante try          Fernando Gabriel Campana
+    min 57 (2T 17) visitante conversion   Santiago Cabrera
+    min 57 (2T 17) visitante try          Geronimo Caeiro
+    min 57 (2T 17) visitante conversion   Santiago Cabrera
+    min 58 (2T 18) visitante card_yellow  Salvador Castro
+    min 70 (2T 30) local     card_yellow  Ramiro Guazzaroni
+  marcador  · eventos 36-21 · guardado 36-21
+  tries     · 6-3 (guardado —-—)
+  arbitro   · ÁNGELES MURUA (guardado: —)
+  guardado  · 23 local · 22 visitante · 25 eventos
+
+san-francisco-r-c-m17-b vs club-la-tablada-m17-b · adcb3e20 · tarjeta 325618  ·  4059c4f4-f431-4f54-bfd0-864cc4e2471e
+  local     · san-francisco-r-c-m17-b · 23 jugadores · 0 con ficha fijada
+  visitante · club-la-tablada-m17-b · 24 jugadores · 0 con ficha fijada
+  eventos   · 31
+    min  6 (1T 6) visitante try          Lucas Amado Belart
+    min  6 (1T 6) visitante conversion   Lucio Novillo Corvalan
+    min 12 (1T 12) visitante try          Felipe José Villalba Mañá
+    min 12 (1T 12) visitante conversion   Lucio Novillo Corvalan
+    min 19 (1T 19) visitante try          Lucio Novillo Corvalan
+    min 19 (1T 19) visitante conversion   Lucio Novillo Corvalan
+    min 25 (1T 25) visitante penalty_goal Lucio Novillo Corvalan
+    min 30 (1T 30) local     card_yellow  Alejo Gigena
+    min 30 (1T 30) local     substitution Alejo Gigena
+    min 31 (1T 31) visitante try          Santino Morganti
+    min 31 (1T 31) visitante conversion   Lucio Novillo Corvalan
+    min 41 (2T 1) visitante try          Noé José Velasco
+    min 41 (2T 1) visitante conversion   Lucio Novillo Corvalan
+    min 44 (2T 4) visitante try          Francisco Citati
+    min 44 (2T 4) visitante conversion   Lucio Novillo Corvalan
+    min 48 (2T 8) visitante try          Gianni Luciano Porrati Polzella
+    min 48 (2T 8) visitante conversion   Lucio Novillo Corvalan
+    min 51 (2T 11) visitante try          Patricio Pastor
+    min 51 (2T 11) visitante conversion   Lucio Novillo Corvalan
+    min 53 (2T 13) local     try          Santino Astegiano
+    min 59 (2T 19) local     try          Santino Astegiano
+    min 59 (2T 19) local     conversion   Gino Bernardi
+    min 64 (2T 24) visitante try          Juan Cruz Castro Moretti
+    min 65 (2T 25) visitante try          Ignacio Ramos
+    min 65 (2T 25) visitante conversion   Lucio Novillo Corvalan
+    min 69 (2T 29) local     card_yellow  Tomas Tognon Clerici
+    min 70 (2T 30) local     substitution Merlo Agustín
+    min 70 (2T 30) local     substitution Martín Zalazar
+    min 72 (2T 32) local     try          Fausto Norryh González
+    min 72 (2T 32) local     conversion   Gino Bernardi
+    min 73 (2T 33) visitante card_yellow  Ignacio Varetto Oiene
+  marcador  · eventos 19-71 · guardado 19-71
+  tries     · 3-10 (guardado —-—)
+  arbitro   · FRANCISCO ROMERO BRONDINO (guardado: —)
+  guardado  · 23 local · 24 visitante · 31 eventos
+
+alta-gracia-r-c-m17-b vs club-la-tablada-m17-b · adcb3e20 · tarjeta 325147  ·  c7a61aa9-25b2-4602-b001-7d2fec7b3181
+  local     · alta-gracia-r-c-m17-b · 24 jugadores · 0 con ficha fijada
+  visitante · club-la-tablada-m17-b · 24 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min  9 (1T 9) local     penalty_goal Juan Ignacio Cerezo
+    min 12 (1T 12) visitante try          Bautista Ovando
+    min 12 (1T 12) visitante conversion   Lucio Novillo Corvalan
+    min 16 (1T 16) visitante try          Tomas Perez
+    min 18 (1T 18) visitante try          Felipe José Villalba Mañá
+    min 18 (1T 18) visitante conversion   Lucio Novillo Corvalan
+    min 29 (1T 29) local     card_yellow  Leon Moreno
+    min 34 (1T 34) visitante try          Santino Morganti
+    min 34 (1T 34) visitante conversion   Lucio Novillo Corvalan
+    min 35 (1T 35) visitante try          Juan Cruz Zorrilla
+    min 35 (1T 35) visitante conversion   Lucio Novillo Corvalan
+    min 44 (2T 4) local     penalty_try  
+    min 45 (2T 5) local     substitution Valentino Pacioni
+    min 45 (2T 5) visitante try          Lucio Novillo Corvalan
+    min 48 (2T 8) visitante substitution Noé José Velasco
+    min 48 (2T 8) visitante card_yellow  Felipe José Villalba Mañá
+    min 50 (2T 10) local     substitution Pablo Joaquín Peralta Florez
+    min 55 (2T 15) local     substitution Ian Elbaum Barreto
+    min 55 (2T 15) local     substitution Ignacio Olariaga
+    min 55 (2T 15) visitante substitution Gianni Luciano Porrati Polzella
+    min 55 (2T 15) visitante substitution Nicolas Agustin Taborda
+    min 58 (2T 18) visitante substitution Simón Castaldo
+    min 60 (2T 20) visitante substitution Juan Cruz Castro Moretti
+    min 60 (2T 20) visitante substitution Juan Cruz Zorrilla
+  marcador  · eventos 10-38 · guardado 10-38
+  tries     · 1-6 (guardado —-—)
+  arbitro   · RICARDO EZEQUIEL OYOLA (guardado: —)
+  guardado  · 24 local · 24 visitante · 24 eventos
+
+tala-rugby-club-m17-c vs club-universitario-de-cordoba-m17-b · adcb3e20 · tarjeta 325125  ·  c388ea4c-debd-40d1-8674-9a26c1c8493b
+  local     · tala-rugby-club-m17-c · 23 jugadores · 0 con ficha fijada
+  visitante · club-universitario-de-cordoba-m17-b · 20 jugadores · 0 con ficha fijada
+  eventos   · 12
+    min 14 (1T 14) local     try          Mateo Tirante
+    min 14 (1T 14) local     conversion   Ramiro Parlamento Arriazu
+    min 20 (1T 20) visitante penalty_try  
+    min 23 (1T 23) local     try          Mateo Espindola
+    min 40 (2T 0) visitante substitution Bruno Gomez Cesar
+    min 44 (2T 4) local     substitution Emiliano Nieto De Tullio
+    min 45 (2T 5) local     substitution Santiago Gonzalez Garcia
+    min 53 (2T 13) local     try          Valentino Kinleiner
+    min 53 (2T 13) local     conversion   Ramiro Parlamento Arriazu
+    min 68 (2T 28) local     try          Santiago Gonzalez Garcia
+    min 68 (2T 28) local     substitution Mauro Greco
+    min 68 (2T 28) local     substitution Ramon Vilosio
+  marcador  · eventos 24-7 · guardado 24-7
+  tries     · 4-1 (guardado —-—)
+  arbitro   · RODRIGO TIRANTI (guardado: —)
+  guardado  · 23 local · 20 visitante · 12 eventos
+
+los-cuervos-r-c-m17-b vs cordoba-athletic-club-m17-b · adcb3e20 · tarjeta 325121  ·  4e4aeb4f-fdb3-4176-b2e3-1c5d1ddcd964
+  local     · los-cuervos-r-c-m17-b · 23 jugadores · 0 con ficha fijada
+  visitante · cordoba-athletic-club-m17-b · 24 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min  9 (1T 9) local     card_yellow  Ramiro Barrera
+    min 35 (1T 35) local     try          Federico Andreucci
+    min 35 (1T 35) local     conversion   Juan Felipe Bustamante
+    min 41 (2T 1) local     substitution Federico Andreucci
+    min 44 (2T 4) visitante substitution Tomas Oulton Priori
+    min 44 (2T 4) visitante substitution Santiago Segamarchi
+    min 44 (2T 4) visitante try          Valentin Sutter Fuentes
+    min 45 (2T 5) visitante conversion   Valentin Sutter Fuentes
+    min 51 (2T 11) visitante try          Francisco Pizarro Alvarado
+    min 52 (2T 12) visitante substitution Tomas Campos
+    min 54 (2T 14) local     conversion   Juan Segundo Serpilli Moyano
+    min 54 (2T 14) local     substitution Juan Segundo Serpilli Moyano
+    min 60 (2T 20) visitante substitution Felipe Garay Villegas
+    min 60 (2T 20) visitante substitution Joaquín Manuele Tortone
+    min 65 (2T 25) local     try          Dante Giuliano Costa Bergomettu
+    min 80 (2T 40) visitante substitution Valentín Nicolás Gomez
+    min 80 (2T 40) visitante substitution Fabrizzio Druetta Herther
+  marcador  · eventos 14-12 · guardado 14-12
+  tries     · 2-2 (guardado —-—)
+  arbitro   · JAVIER ANTONIO GUTIERREZ (guardado: —)
+  guardado  · 23 local · 24 visitante · 17 eventos
+
+los-cuervos-r-c-m17-b vs club-palermo-bajo-m17-b · adcb3e20 · tarjeta 324519  ·  1b458c74-3ea7-40fe-8327-82dab064a658
+  local     · los-cuervos-r-c-m17-b · 23 jugadores · 0 con ficha fijada
+  visitante · club-palermo-bajo-m17-b · 20 jugadores · 0 con ficha fijada
+  eventos   · 19
+    min  4 (1T 4) visitante try          Fausto Lasa
+    min 15 (1T 15) local     card_yellow  Benjamin Gallardo
+    min 19 (1T 19) visitante try          Alvaro Soriano
+    min 26 (1T 26) visitante card_yellow  Alvaro Soriano
+    min 28 (1T 28) local     substitution Marco Minetto
+    min 40 (2T 0) visitante substitution Benjamin Magnaterra
+    min 40 (2T 0) visitante substitution Imanol Saez
+    min 41 (2T 1) local     substitution Federico Andreucci
+    min 50 (2T 10) local     try          Lorenzo Cachin
+    min 50 (2T 10) local     conversion   Benjamin Visconti
+    min 51 (2T 11) visitante substitution Francisco Vallejos
+    min 54 (2T 14) visitante substitution Fabricio Benjamin Gomez Bresina
+    min 54 (2T 14) visitante substitution Fausto Lasa
+    min 60 (2T 20) visitante try          Camilo Benjamín Parera
+    min 66 (2T 26) local     substitution Jeremias Cabrera
+    min 66 (2T 26) local     substitution Santiago Granda
+    min 68 (2T 28) local     substitution Thiago Lopez
+    min 70 (2T 30) local     try          Lucio Lazo
+    min 70 (2T 30) local     conversion   Benjamin Visconti
+  marcador  · eventos 14-15 · guardado 14-15
+  tries     · 2-3 (guardado —-—)
+  arbitro   · PABLO DANIEL DIONICIO BENITEZ (guardado: —)
+  guardado  · 23 local · 20 visitante · 19 eventos
+
+jockey-club-cordoba-m17-b vs tala-rugby-club-m17-c · adcb3e20 · tarjeta 324517  ·  b789eaa4-4d1d-43be-9685-a4695686e80a
+  local     · jockey-club-cordoba-m17-b · 30 jugadores · 0 con ficha fijada
+  visitante · tala-rugby-club-m17-c · 23 jugadores · 0 con ficha fijada
+  eventos   · 27
+    min  9 (1T 9) visitante try          Santiago Gonzalez Garcia
+    min  9 (1T 9) visitante conversion   Ramiro Parlamento Arriazu
+    min 15 (1T 15) local     try          Jeremías Carot
+    min 16 (1T 16) local     conversion   Facundo Benjamin Brondo Furlanetto
+    min 27 (1T 27) local     try          Baltazar Servent
+    min 33 (1T 33) local     try          Juan Cruz Cerino
+    min 34 (1T 34) local     conversion   Facundo Benjamin Brondo Furlanetto
+    min 35 (1T 35) local     try          Jeremías Carot
+    min 36 (1T 36) local     conversion   Facundo Benjamin Brondo Furlanetto
+    min 40 (2T 0) local     substitution Lautaro Ezequiel Jaime
+    min 43 (2T 3) local     card_yellow  Facundo Benjamin Brondo Furlanetto
+    min 48 (2T 8) local     substitution Santiago Amaya Reyna
+    min 49 (2T 9) visitante injury       Facundo Ignacio Allende Urioste
+    min 54 (2T 14) local     substitution Francisco José Gonzalez Leahy
+    min 54 (2T 14) local     substitution Baltazar Servent
+    min 55 (2T 15) visitante try          Francisco Jaimez Lucchetta
+    min 55 (2T 15) visitante conversion   Ramiro Parlamento Arriazu
+    min 56 (2T 16) local     substitution Francisco Arceguet
+    min 56 (2T 16) visitante substitution Juan Felipe De Vertiz
+    min 56 (2T 16) visitante substitution Jeremias Zaidenberg
+    min 58 (2T 18) local     card_yellow  Valentin Jantzon Zalazar
+    min 62 (2T 22) visitante substitution Federico Agustin Druetta
+    min 66 (2T 26) visitante try          Emiliano Nieto De Tullio
+    min 68 (2T 28) local     substitution Facundo Benjamin Brondo Furlanetto
+    min 68 (2T 28) local     substitution Valentin Jantzon Zalazar
+    min 72 (2T 32) local     card_yellow  Nicolás Vaca Narvaja
+    min 74 (2T 34) visitante substitution Máximo Bustos
+  marcador  · eventos 26-19 · guardado 26-19
+  tries     · 4-3 (guardado —-—)
+  arbitro   · SANTIAGO HERRERA ALBANO (guardado: —)
+  guardado  · 30 local · 23 visitante · 27 eventos
+
+alta-gracia-r-c-m17-b vs uru-cure-rugby-club-m17-b · adcb3e20 · tarjeta 324518  ·  0713eb5b-6290-4220-8b41-3fa63fee3c69
+  local     · alta-gracia-r-c-m17-b · 23 jugadores · 0 con ficha fijada
+  visitante · uru-cure-rugby-club-m17-b · 24 jugadores · 0 con ficha fijada
+  eventos   · 16
+    min  9 (1T 9) visitante try          Ciro Bonet
+    min 10 (1T 10) visitante conversion   Facundo Vicente Rojo
+    min 20 (1T 20) local     penalty_goal Juan Ignacio Cerezo
+    min 45 (2T 5) visitante try          Bautista Sebastián Rodríguez Monte
+    min 45 (2T 5) visitante substitution Lorenzo Jesus Crespo
+    min 45 (2T 5) visitante substitution Bautista Javier Moliner Mellano
+    min 46 (2T 6) visitante conversion   Facundo Vicente Rojo
+    min 50 (2T 10) local     penalty_goal Juan Ignacio Cerezo
+    min 50 (2T 10) visitante card_yellow  José Sobrero
+    min 53 (2T 13) visitante substitution Gonzalo Lautaro Cabello
+    min 53 (2T 13) visitante substitution Luca Radaelli
+    min 55 (2T 15) local     injury       Matias Morcos Kletzl
+    min 55 (2T 15) local     substitution Matias Morcos Kletzl
+    min 60 (2T 20) visitante substitution Bruno Cejas
+    min 61 (2T 21) visitante try          Bruno Cejas
+    min 62 (2T 22) visitante conversion   Facundo Vicente Rojo
+  marcador  · eventos 6-21 · guardado 6-21
+  tries     · 0-3 (guardado —-—)
+  arbitro   · SERGIO MALDONADO (guardado: —)
+  guardado  · 23 local · 24 visitante · 16 eventos
+
+san-francisco-r-c-m17-b vs los-cuervos-r-c-m17-b · adcb3e20 · tarjeta 324091  ·  58117b53-4b1c-4c5b-9c2c-3aff645918e8
+  local     · san-francisco-r-c-m17-b · 23 jugadores · 0 con ficha fijada
+  visitante · los-cuervos-r-c-m17-b · 23 jugadores · 0 con ficha fijada
+  eventos   · 9
+    min 10 (1T 10) visitante try          Ignacio Sotelo
+    min 10 (1T 10) visitante conversion   Juan Felipe Bustamante
+    min 15 (1T 15) local     try          Merlo Agustín
+    min 45 (2T 5) local     substitution Javier Perez
+    min 45 (2T 5) local     substitution Martín Zalazar
+    min 48 (2T 8) local     try          Merlo Agustín
+    min 58 (2T 18) local     conversion   Gino Bernardi
+    min 61 (2T 21) local     penalty_goal Gino Bernardi
+    min 65 (2T 25) visitante try          Federico Andreucci
+  marcador  · eventos 15-12 · guardado 15-12
+  tries     · 2-2 (guardado —-—)
+  arbitro   · LEANDRO LUCHETTI (guardado: —)
+  guardado  · 23 local · 23 visitante · 9 eventos
+
+tala-rugby-club-m17-c vs baguales-r-c-m17-b · adcb3e20 · tarjeta 324090  ·  6d0aea6a-1e89-405a-8766-fd0d122f5b7b
+  local     · tala-rugby-club-m17-c · 23 jugadores · 0 con ficha fijada
+  visitante · baguales-r-c-m17-b · 23 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min  7 (1T 7) visitante penalty_goal Santiago Cabrera
+    min 19 (1T 19) visitante try          Fernando Gabriel Campana
+    min 19 (1T 19) visitante conversion   Santiago Cabrera
+    min 24 (1T 24) visitante try          Fernando Gabriel Campana
+    min 24 (1T 24) visitante conversion   Santiago Cabrera
+    min 41 (2T 1) local     try          Francisco Jaimez Lucchetta
+    min 42 (2T 2) local     substitution Mateo Espindola
+    min 42 (2T 2) local     substitution Octavio Rios Carranza
+    min 43 (2T 3) local     substitution Francisco Jaimez Lucchetta
+    min 45 (2T 5) local     substitution Aquiles Nicoletti
+    min 45 (2T 5) local     substitution Juan Felipe De Vertiz
+    min 50 (2T 10) visitante substitution Geronimo Caeiro
+    min 50 (2T 10) visitante substitution Luca Tagliaferri
+    min 50 (2T 10) visitante substitution Matias Bonini
+    min 51 (2T 11) local     try          Pedro Igarzabal Ferreyra
+    min 51 (2T 11) local     conversion   Piero Moretto Velez
+    min 59 (2T 19) visitante card_yellow  Franco Del Fabro
+    min 74 (2T 34) local     try          Piero Moretto Velez
+  marcador  · eventos 17-17 · guardado 17-17
+  tries     · 3-2 (guardado —-—)
+  arbitro   · FRANCO COPPETTI (guardado: —)
+  guardado  · 23 local · 23 visitante · 18 eventos
+
+jockey-club-cordoba-m17-b vs club-universitario-de-cordoba-m17-b · adcb3e20 · tarjeta 324085  ·  b8d9960c-0887-4620-ae9c-ac0eba84c445
+  local     · jockey-club-cordoba-m17-b · 26 jugadores · 0 con ficha fijada
+  visitante · club-universitario-de-cordoba-m17-b · 25 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min 12 (1T 12) local     try          Francisco José Gonzalez Leahy
+    min 13 (1T 13) local     conversion   Tiziano Piccinini
+    min 14 (1T 14) local     substitution Mateo Ciro Aime
+    min 20 (1T 20) local     try          Francisco José Gonzalez Leahy
+    min 21 (1T 21) local     conversion   Tiziano Piccinini
+    min 25 (1T 25) local     try          Mateo Sánchez
+    min 25 (1T 25) visitante substitution Bruno Graña
+    min 26 (1T 26) local     conversion   Tiziano Piccinini
+    min 30 (1T 30) visitante card_yellow  Francisco Boggio
+    min 40 (2T 0) local     substitution Tomas Javier Sarmiento Gonzalez
+    min 40 (2T 0) local     substitution Francisco José Gonzalez Leahy
+    min 40 (2T 0) local     substitution Mateo Sánchez
+    min 40 (2T 0) local     substitution Joaquín Ouro
+    min 40 (2T 0) local     substitution Ignacio Aoki
+    min 40 (2T 0) local     substitution Juan Cruz Panero
+    min 50 (2T 10) visitante substitution Tiago Agustin Quevedo Palacio
+    min 50 (2T 10) visitante substitution Francisco Boggio
+    min 50 (2T 10) visitante substitution Bautista Muñoz
+    min 51 (2T 11) local     try          Valentin Jantzon Zalazar
+    min 52 (2T 12) local     conversion   Tiziano Piccinini
+    min 54 (2T 14) local     try          Facundo Benjamin Brondo Furlanetto
+    min 58 (2T 18) local     substitution Facundo Mayda Delgado
+    min 63 (2T 23) local     try          Facundo Benjamin Brondo Furlanetto
+    min 65 (2T 25) visitante substitution Mateo Tissot
+    min 69 (2T 29) local     try          Facundo Benjamin Brondo Furlanetto
+  marcador  · eventos 43-0 · guardado 43-0
+  tries     · 7-0 (guardado —-—)
+  arbitro   · TOMAS ELIAS GIGENA RAMALLO (guardado: —)
+  guardado  · 26 local · 25 visitante · 25 eventos
+
+club-la-tablada-m17-b vs club-palermo-bajo-m17-b · adcb3e20 · tarjeta 324084  ·  67e85246-34b6-4dcc-92e2-c537adb84687
+  local     · club-la-tablada-m17-b · 24 jugadores · 0 con ficha fijada
+  visitante · club-palermo-bajo-m17-b · 23 jugadores · 0 con ficha fijada
+  eventos   · 16
+    min  3 (1T 3) local     penalty_goal Lucio Novillo Corvalan
+    min  6 (1T 6) local     try          Lucio Novillo Corvalan
+    min  6 (1T 6) local     conversion   Lucio Novillo Corvalan
+    min 11 (1T 11) local     try          Cruz Romero
+    min 11 (1T 11) local     conversion   Lucio Novillo Corvalan
+    min 31 (1T 31) visitante card_yellow  Lorenzo Brizuela
+    min 43 (2T 3) local     try          Tomas Perez
+    min 43 (2T 3) local     conversion   Lucio Novillo Corvalan
+    min 43 (2T 3) visitante substitution Fabricio Benjamin Gomez Bresina
+    min 49 (2T 9) visitante try          Maximo Sosa Vera
+    min 51 (2T 11) visitante substitution Joaquin Mediot Cenci
+    min 59 (2T 19) visitante substitution Joaquin Uriel Cingolani
+    min 59 (2T 19) visitante substitution Lorenzo Brizuela
+    min 80 (2T 40) visitante substitution Juan Félix Roggero
+    min 80 (2T 40) visitante substitution Alvaro Soriano
+    min 80 (2T 40) visitante substitution Lorenzo Soriano
+  marcador  · eventos 24-5 · guardado 24-5
+  tries     · 3-1 (guardado —-—)
+  arbitro   · FRANCISCO ROMERO BRONDINO (guardado: —)
+  guardado  · 24 local · 23 visitante · 16 eventos
+
+baguales-r-c-m17-b vs alta-gracia-r-c-m17-b · adcb3e20 · tarjeta 322653  ·  3af201c4-3d77-4e74-8e46-acfd931a6864
+  local     · baguales-r-c-m17-b · 26 jugadores · 0 con ficha fijada
+  visitante · alta-gracia-r-c-m17-b · 26 jugadores · 0 con ficha fijada
+  eventos   · 21
+    min  1 (1T 1) visitante substitution Facundo Alejandro Salgado
+    min  7 (1T 7) visitante try          Matias Morcos Kletzl
+    min 17 (1T 17) visitante try          Francisco Ferreyra
+    min 22 (1T 22) visitante try          Pablo Joaquín Peralta Florez
+    min 26 (1T 26) visitante try          Pablo Joaquín Peralta Florez
+    min 27 (1T 27) visitante conversion   Juan Ignacio Cerezo
+    min 34 (1T 34) visitante try          Ignacio Olariaga
+    min 40 (2T 0) local     substitution Faustino Rizzi Aramayo
+    min 40 (2T 0) local     substitution Baldomero Busch Frers
+    min 40 (2T 0) local     substitution Luca Tagliaferri
+    min 41 (2T 1) visitante try          Leon Moreno
+    min 42 (2T 2) visitante conversion   Juan Ignacio Cerezo
+    min 48 (2T 8) visitante try          Pablo Joaquín Peralta Florez
+    min 49 (2T 9) visitante conversion   Juan Ignacio Cerezo
+    min 50 (2T 10) local     card_yellow  Tiago Nahuel Gastaldi Cadamuro
+    min 55 (2T 15) visitante try          Francisco Ferreyra
+    min 56 (2T 16) visitante conversion   Juan Ignacio Cerezo
+    min 57 (2T 17) local     try          Nicolás Bustos
+    min 64 (2T 24) visitante try          Ignacio Olariaga
+    min 65 (2T 25) visitante conversion   Juan Ignacio Cerezo
+    min 73 (2T 33) visitante try          Francisco Ferreyra
+  marcador  · eventos 5-60 · guardado 5-60
+  tries     · 1-10 (guardado —-—)
+  arbitro   · SANTIAGO HERRERA ALBANO (guardado: —)
+  guardado  · 26 local · 26 visitante · 21 eventos
+
+club-palermo-bajo-m17-b vs uru-cure-rugby-club-m17-b · adcb3e20 · tarjeta 322651  ·  a3f57302-9c59-44d9-a024-a8c77e3e2bcb
+  local     · club-palermo-bajo-m17-b · 28 jugadores · 0 con ficha fijada
+  visitante · uru-cure-rugby-club-m17-b · 23 jugadores · 0 con ficha fijada
+  eventos   · 16
+    min  7 (1T 7) visitante try          Lorenzo Jesus Crespo
+    min  7 (1T 7) visitante conversion   Lorenzo Jesus Crespo
+    min  7 (1T 7) visitante try          Lorenzo Jesus Crespo
+    min  7 (1T 7) visitante try          Lorenzo Jesus Crespo
+    min  7 (1T 7) visitante conversion   Lorenzo Jesus Crespo
+    min  7 (1T 7) visitante try          Lorenzo Jesus Crespo
+    min  7 (1T 7) visitante card_yellow  Máximo Hernán Méndez
+    min  7 (1T 7) visitante card_yellow  Bruno Cejas
+    min  7 (1T 7) visitante card_yellow  Bruno Cejas
+    min  7 (1T 7) visitante card_red     Bruno Cejas
+    min 11 (1T 11) local     card_yellow  Lorenzo Soriano
+    min 11 (1T 11) local     try          Lorenzo Soriano
+    min 11 (1T 11) local     conversion   Lorenzo Soriano
+    min 11 (1T 11) local     penalty_goal Lorenzo Soriano
+    min 11 (1T 11) local     try          Lorenzo Soriano
+    min 11 (1T 11) local     conversion   Lorenzo Soriano
+  marcador  · eventos 17-24 · guardado 17-24
+  tries     · 2-4 (guardado —-—)
+  arbitro   · LUCAS GASTON DOPASO (guardado: —)
+  guardado  · 28 local · 23 visitante · 16 eventos
+
+cordoba-athletic-club-m17-b vs jockey-club-cordoba-m17-b · adcb3e20 · tarjeta 322648  ·  c38e41c2-a013-4c55-a9b0-cd6bb9bf3bac
+  local     · cordoba-athletic-club-m17-b · 27 jugadores · 0 con ficha fijada
+  visitante · jockey-club-cordoba-m17-b · 26 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min  6 (1T 6) visitante try          Pedro Castro
+    min  7 (1T 7) visitante conversion   Tiziano Piccinini
+    min 12 (1T 12) local     try          Facundo Audisio
+    min 13 (1T 13) local     conversion   Lorenzo Busso Garlot
+    min 25 (1T 25) visitante card_yellow  Tiziano Piccinini
+    min 26 (1T 26) local     card_yellow  Thiago Bautista Lacamoira
+    min 49 (2T 9) local     substitution Facundo Audisio
+    min 52 (2T 12) local     substitution Lorenzo Busso Garlot
+    min 52 (2T 12) local     substitution Baltasar Mansilla
+    min 56 (2T 16) visitante try          Vicenzo Tappa
+    min 57 (2T 17) visitante conversion   Tiziano Piccinini
+    min 63 (2T 23) local     substitution Tomas Campos
+    min 68 (2T 28) local     substitution Santiago Tomas Aciar Gonzalez
+    min 70 (2T 30) visitante penalty_goal Tiziano Piccinini
+    min 73 (2T 33) local     substitution Camilo Lozada Chaves
+    min 74 (2T 34) local     substitution Felipe Garay Villegas
+    min 74 (2T 34) local     substitution Juan Emiliano Lana
+    min 74 (2T 34) visitante penalty_goal Tiziano Piccinini
+    min 80 (2T 40) local     substitution Tomas Oulton Priori
+    min 80 (2T 40) local     substitution Franco Agustin Frias Lopez
+  marcador  · eventos 7-20 · guardado 7-20
+  tries     · 1-2 (guardado —-—)
+  arbitro   · GUSTAVO REARTES (guardado: —)
+  guardado  · 27 local · 26 visitante · 20 eventos
+
+san-francisco-r-c-m17-b vs baguales-r-c-m17-b · adcb3e20 · tarjeta 320729  ·  a0059c37-96f5-472f-b6fd-8843ca73abb4
+  local     · san-francisco-r-c-m17-b · 18 jugadores · 0 con ficha fijada
+  visitante · baguales-r-c-m17-b · 23 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min  1 (1T 1) local     conversion   Gino Bernardi
+    min  1 (1T 1) local     try          Santino Amaya
+    min 13 (1T 13) visitante try          Fernando Gabriel Campana
+    min 19 (1T 19) visitante penalty_goal Santiago Cabrera
+    min 32 (1T 32) local     try          Tiziano Vanzetti
+    min 32 (1T 32) local     conversion   Gino Bernardi
+    min 40 (2T 0) visitante substitution Pedro Morad Cafferata
+    min 40 (2T 0) visitante substitution Gabriel Mansilla
+    min 40 (2T 0) visitante substitution Luca Tagliaferri
+    min 40 (2T 0) visitante substitution Nicolás Bustos
+    min 41 (2T 1) local     try          Fausto Di Pietro
+    min 45 (2T 5) local     try          Santiago Gabriel Capello
+    min 50 (2T 10) local     try          Santiago Gabriel Capello
+    min 50 (2T 10) local     conversion   Gino Bernardi
+    min 59 (2T 19) local     card_yellow  Bautista González Barbaresco
+    min 62 (2T 22) visitante try          Salvador Castro
+    min 63 (2T 23) visitante card_yellow  Matias Bonini
+    min 66 (2T 26) visitante card_yellow  Baldomero Busch Frers
+    min 70 (2T 30) local     try          Tiziano Vanzetti
+    min 70 (2T 30) local     conversion   Gino Bernardi
+    min 74 (2T 34) local     try          Tiziano Vanzetti
+    min 74 (2T 34) local     conversion   Gino Bernardi
+    min 75 (2T 35) local     try          Efraín Bischoff Kappes
+    min 75 (2T 35) local     conversion   Gino Bernardi
+  marcador  · eventos 52-13 · guardado 52-13
+  tries     · 8-2 (guardado —-—)
+  arbitro   · EMANUEL MALDONADO (guardado: —)
+  guardado  · 18 local · 23 visitante · 24 eventos
+
+cordoba-rugby-club-m17-b vs jockey-club-cordoba-m17-b · adcb3e20 · tarjeta 320728  ·  e6d3f259-8c09-42ec-a6cf-a91b482b2324
+  local     · cordoba-rugby-club-m17-b · 24 jugadores · 0 con ficha fijada
+  visitante · jockey-club-cordoba-m17-b · 23 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min 12 (1T 12) local     try          Fabrizzio Rizzi
+    min 14 (1T 14) visitante try          Enzo Martinez
+    min 19 (1T 19) local     substitution Miguel Angel De Alzáa
+    min 23 (1T 23) visitante try          Ignacio Aoki
+    min 24 (1T 24) visitante conversion   Tiziano Piccinini
+    min 28 (1T 28) visitante try          Vicenzo Tappa
+    min 29 (1T 29) visitante conversion   Tiziano Piccinini
+    min 30 (1T 30) local     injury       Joaquin Vargas Ghelli
+    min 30 (1T 30) local     substitution Benjamin Martin Valerio
+    min 33 (1T 33) visitante try          Thiago Ariel Diaz Giglio
+    min 47 (2T 7) visitante substitution Facundo Mayda Delgado
+    min 47 (2T 7) visitante try          Valentin Romero Flynn
+    min 51 (2T 11) visitante substitution Lucio Piccioni
+    min 53 (2T 13) visitante substitution Ignacio Aoki
+    min 53 (2T 13) visitante substitution Felipe Piro Easdale
+    min 53 (2T 13) visitante substitution Valentin Romero Flynn
+    min 55 (2T 15) visitante try          Vicenzo Tappa
+    min 56 (2T 16) visitante substitution Salvador Zurlo Robert
+    min 56 (2T 16) visitante substitution Ignacio Risso Patron
+    min 59 (2T 19) local     substitution Brandon Emmanuel Coronel
+    min 61 (2T 21) visitante try          Gregorio Díaz Senn
+    min 62 (2T 22) visitante conversion   Tiziano Piccinini
+    min 64 (2T 24) local     substitution Facundo Aldo Torres
+    min 68 (2T 28) local     card_yellow  Fabrizzio Rizzi
+    min 68 (2T 28) visitante try          Valentin Jantzon Zalazar
+  marcador  · eventos 5-46 · guardado 5-46
+  tries     · 1-8 (guardado —-—)
+  arbitro   · LEANDRO MARCOS LUBARY (guardado: —)
+  guardado  · 24 local · 23 visitante · 25 eventos
+
+club-la-tablada-m17-b vs club-universitario-de-cordoba-m17-b · adcb3e20 · tarjeta 320724  ·  ee1cd324-e91f-489a-961a-b49bac982f91
+  local     · club-la-tablada-m17-b · 23 jugadores · 0 con ficha fijada
+  visitante · club-universitario-de-cordoba-m17-b · 24 jugadores · 0 con ficha fijada
+  eventos   · 29
+    min  1 (1T 1) local     try          Juan Ignacio Alsina
+    min  1 (1T 1) local     conversion   Lucio Novillo Corvalan
+    min  6 (1T 6) local     try          Tomas Perez
+    min  6 (1T 6) local     conversion   Lucio Novillo Corvalan
+    min  9 (1T 9) local     try          Lucio Novillo Corvalan
+    min  9 (1T 9) local     conversion   Lucio Novillo Corvalan
+    min 15 (1T 15) local     try          Lucio Novillo Corvalan
+    min 15 (1T 15) local     conversion   Lucio Novillo Corvalan
+    min 20 (1T 20) local     try          Santiago Sánchez Pulgar
+    min 20 (1T 20) local     conversion   Lucio Novillo Corvalan
+    min 24 (1T 24) local     try          Felipe José Villalba Mañá
+    min 26 (1T 26) local     try          Juan Ignacio Alsina
+    min 26 (1T 26) local     conversion   Lucio Novillo Corvalan
+    min 35 (1T 35) local     card_yellow  Santiago Sánchez Pulgar
+    min 42 (2T 2) local     substitution Juan Cruz Castro Moretti
+    min 52 (2T 12) local     substitution Salvador Filisetti
+    min 52 (2T 12) local     substitution Santiago Sánchez Pulgar
+    min 52 (2T 12) local     substitution Bautista Ovando
+    min 52 (2T 12) local     substitution Jeronimo Bertilotti Costa
+    min 52 (2T 12) local     substitution Ignacio Tarantino
+    min 52 (2T 12) local     substitution Felipe José Villalba Mañá
+    min 53 (2T 13) visitante try          Francisco Boggio
+    min 54 (2T 14) local     try          Juan Ignacio Alsina
+    min 54 (2T 14) local     conversion   Lucio Novillo Corvalan
+    min 54 (2T 14) visitante conversion   Lisandro Luna
+    min 60 (2T 20) local     substitution Francisco Gennaro Rollan
+    min 63 (2T 23) local     try          Juan Ignacio Alsina
+    min 72 (2T 32) local     try          Lucas Amado Belart
+    min 72 (2T 32) local     conversion   Francisco Citati
+  marcador  · eventos 66-7 · guardado 66-7
+  tries     · 10-1 (guardado —-—)
+  arbitro   · JUAN MANUEL LOPEZ (guardado: —)
+  guardado  · 23 local · 24 visitante · 29 eventos
+
+tala-rugby-club-m17-c vs san-francisco-r-c-m17-b · adcb3e20 · tarjeta 319631  ·  2c310d91-54a5-429c-a918-4bdfb48ec4d2
+  local     · tala-rugby-club-m17-c · 22 jugadores · 0 con ficha fijada
+  visitante · san-francisco-r-c-m17-b · 22 jugadores · 0 con ficha fijada
+  eventos   · 22
+    min  3 (1T 3) visitante try          Merlo Agustín
+    min  3 (1T 3) visitante conversion   Gino Bernardi
+    min  5 (1T 5) local     try          Valentino Navarro
+    min  6 (1T 6) local     conversion   Ramiro Parlamento Arriazu
+    min 15 (1T 15) visitante substitution Alejo Gigena
+    min 17 (1T 17) local     try          Benjamin Coronado
+    min 32 (1T 32) local     try          Jeremias Zaidenberg
+    min 33 (1T 33) local     conversion   Ramiro Parlamento Arriazu
+    min 34 (1T 34) visitante try          Merlo Agustín
+    min 41 (2T 1) visitante substitution Lautaro Benjamin Torales
+    min 48 (2T 8) visitante try          Santiago Gabriel Capello
+    min 53 (2T 13) visitante try          Tiziano Vanzetti
+    min 53 (2T 13) visitante conversion   Gino Bernardi
+    min 55 (2T 15) visitante substitution Juan Martin Fischer
+    min 57 (2T 17) visitante substitution Merlo Agustín
+    min 60 (2T 20) visitante try          Santino Amaya
+    min 60 (2T 20) visitante conversion   Gino Bernardi
+    min 61 (2T 21) visitante substitution Santiago Gabriel Capello
+    min 65 (2T 25) local     try          Ramon Vilosio
+    min 66 (2T 26) local     conversion   Ramiro Parlamento Arriazu
+    min 75 (2T 35) local     try          Ramiro Parlamento Arriazu
+    min 75 (2T 35) local     conversion   Ramiro Parlamento Arriazu
+  marcador  · eventos 33-31 · guardado 33-31
+  tries     · 5-5 (guardado —-—)
+  arbitro   · LEONEL SORBERA (guardado: —)
+  guardado  · 22 local · 22 visitante · 22 eventos
+
+cordoba-rugby-club-m17-b vs baguales-r-c-m17-b · adcb3e20 · tarjeta 319630  ·  fe2f1028-e286-44ee-baaa-b01430df5a99
+  local     · cordoba-rugby-club-m17-b · 26 jugadores · 0 con ficha fijada
+  visitante · baguales-r-c-m17-b · 28 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min 14 (1T 14) visitante try          Santiago Cabrera
+    min 16 (1T 16) visitante try          Valentin Ludueña
+    min 16 (1T 16) visitante conversion   Fernando Gabriel Campana
+    min 23 (1T 23) local     try          Juan Ignacio Schuster
+    min 32 (1T 32) visitante try          Fernando Gabriel Campana
+    min 32 (1T 32) visitante conversion   Fernando Gabriel Campana
+    min 40 (2T 0) visitante substitution Juani Colombres
+    min 40 (2T 0) visitante substitution Felipe Manuel De Blas
+    min 40 (2T 0) visitante substitution Pedro Gallo
+    min 40 (2T 0) visitante substitution Salvador Castro
+    min 45 (2T 5) local     try          Juan Ignacio Schuster
+    min 45 (2T 5) local     conversion   Ian Arias
+    min 49 (2T 9) visitante try          Luciano Morassutti Cruz
+    min 49 (2T 9) visitante conversion   Geronimo Caeiro
+    min 52 (2T 12) local     try          Facundo Aldo Torres
+    min 52 (2T 12) local     conversion   Ian Arias
+    min 55 (2T 15) local     substitution Fabrizzio Rizzi
+    min 55 (2T 15) local     substitution Facundo Aldo Torres
+    min 61 (2T 21) local     substitution Juan Ignacio Schuster
+    min 61 (2T 21) local     substitution Joel Valentino Gimenez Carrizo
+    min 61 (2T 21) local     substitution Mateo León Reartes
+    min 65 (2T 25) local     try          Benjamin Matias Odisio
+    min 68 (2T 28) visitante penalty_goal Santiago Cabrera
+    min 75 (2T 35) local     try          Luis Mondino
+    min 75 (2T 35) local     conversion   Ian Arias
+  marcador  · eventos 31-29 · guardado 31-29
+  tries     · 5-4 (guardado —-—)
+  arbitro   · ARTURO MARTINEZ (guardado: —)
+  guardado  · 26 local · 28 visitante · 25 eventos
+
+tala-rugby-club-m17-b vs los-cuervos-r-c-m17-b · adcb3e20 · tarjeta 319628  ·  6b6e406d-7c5f-484b-99ca-9f48fa4c0167
+  local     · tala-rugby-club-m17-b · 22 jugadores · 0 con ficha fijada
+  visitante · los-cuervos-r-c-m17-b · 22 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min  2 (1T 2) visitante try          Jeremias Cabrera
+    min  9 (1T 9) local     try          Pedro Malbrán Brocca
+    min  9 (1T 9) local     conversion   Tomas Yankilevich
+    min 16 (1T 16) local     try          Mateo Benjamin Carmona Demoli
+    min 16 (1T 16) local     conversion   Tomas Yankilevich
+    min 26 (1T 26) local     try          Felipe Ambrosio
+    min 30 (1T 30) local     try          Felipe Ambrosio
+    min 31 (1T 31) local     conversion   Tomas Yankilevich
+    min 35 (1T 35) local     try          Mateo Benjamin Carmona Demoli
+    min 35 (1T 35) local     conversion   Tomas Yankilevich
+    min 42 (2T 2) local     try          Sebastian Schmitt
+    min 49 (2T 9) local     try          Tomas Siegenthaler
+    min 50 (2T 10) local     conversion   Tomas Yankilevich
+    min 56 (2T 16) local     try          Santino Avaca
+    min 57 (2T 17) local     conversion   Tomas Yankilevich
+    min 66 (2T 26) visitante try          Joaquin Fernández
+    min 69 (2T 29) local     try          Mateo Tirante
+  marcador  · eventos 57-10 · guardado 57-10
+  tries     · 9-2 (guardado —-—)
+  arbitro   · LEONEL SORBERA (guardado: —)
+  guardado  · 22 local · 22 visitante · 17 eventos
+
+club-universitario-de-cordoba-m17-b vs uru-cure-rugby-club-m17-b · adcb3e20 · tarjeta 319626  ·  e78ca925-5fd3-4036-8048-36efed8f02d1
+  local     · club-universitario-de-cordoba-m17-b · 26 jugadores · 0 con ficha fijada
+  visitante · uru-cure-rugby-club-m17-b · 29 jugadores · 0 con ficha fijada
+  eventos   · 37
+    min  2 (1T 2) visitante try          Augusto Bertorello
+    min  3 (1T 3) visitante try          Juan Ignacio Tozzelli
+    min  4 (1T 4) visitante conversion   Facundo Vicente Rojo
+    min  7 (1T 7) visitante try          Bruno Cejas
+    min  9 (1T 9) visitante try          Benjamin Dalmasso
+    min 10 (1T 10) local     try          Lisandro Luna
+    min 10 (1T 10) visitante conversion   Facundo Vicente Rojo
+    min 17 (1T 17) visitante try          Augusto Bertorello
+    min 20 (1T 20) visitante try          Juan Ignacio Tozzelli
+    min 21 (1T 21) visitante conversion   Ignacio Rossi Jaume
+    min 25 (1T 25) visitante try          Bautista Rodriguez
+    min 26 (1T 26) visitante conversion   Facundo Vicente Rojo
+    min 29 (1T 29) visitante try          Vicente Cayetano Pedernera
+    min 30 (1T 30) visitante conversion   Facundo Vicente Rojo
+    min 60 (1T 60) local     substitution Valentino Marco De Paoli
+    min 60 (1T 60) local     substitution Felipe Benjamin Robledo Lacovara
+    min 60 (1T 60) local     substitution Santiago Galvan
+    min 65 (1T 65) local     substitution Bruno Graña
+    min 70 (1T 70) local     substitution Tiago Agustin Quevedo Palacio
+    min 75 (1T 75) local     substitution Bruno Gomez Cesar
+    min 41 (2T 1) visitante try          Mirko Bellina Caymes
+    min 41 (2T 1) visitante substitution Bruno Cejas
+    min 41 (2T 1) visitante substitution Joaquín González Fontana
+    min 42 (2T 2) visitante conversion   Facundo Vicente Rojo
+    min 45 (2T 5) visitante try          Ciro Bonet
+    min 48 (2T 8) visitante substitution Mirko Bellina Caymes
+    min 48 (2T 8) visitante substitution Benjamin Martinez Sosa
+    min 51 (2T 11) visitante try          Juan Ignacio Tozzelli
+    min 52 (2T 12) visitante substitution Benjamin Dalmasso
+    min 52 (2T 12) visitante substitution Ignacio Rossi Jaume
+    min 52 (2T 12) visitante substitution Juan Ignacio Tozzelli
+    min 52 (2T 12) visitante substitution Bautista Sebastián Rodríguez Monte
+    min 52 (2T 12) visitante substitution Agustin Adan
+    min 52 (2T 12) visitante substitution Augusto Bertorello
+    min 60 (2T 20) local     try          Maximo Francisco Genovese
+    min 60 (2T 20) local     conversion   Facundo Rey Nores
+    min 64 (2T 24) visitante try          Ciro Bonet
+  marcador  · eventos 12-72 · guardado 12-72
+  tries     · 2-12 (guardado —-—)
+  arbitro   · SANTIAGO HERRERA ALBANO (guardado: —)
+  guardado  · 26 local · 29 visitante · 37 eventos
+
+jockey-club-cordoba-m17-b vs club-la-tablada-m17-b · adcb3e20 · tarjeta 319625  ·  c67056d5-7c60-4e3f-b4cb-bebaa0029da9
+  local     · jockey-club-cordoba-m17-b · 28 jugadores · 0 con ficha fijada
+  visitante · club-la-tablada-m17-b · 24 jugadores · 0 con ficha fijada
+  eventos   · 25
+    min 15 (1T 15) visitante try          Bruno Salomon Piazze
+    min 15 (1T 15) visitante conversion   Lucio Novillo Corvalan
+    min 18 (1T 18) visitante try          Patricio Pastor
+    min 18 (1T 18) visitante conversion   Lucio Novillo Corvalan
+    min 22 (1T 22) visitante try          Tomas Perez
+    min 22 (1T 22) visitante conversion   Lucio Novillo Corvalan
+    min 32 (1T 32) visitante try          Lucio Novillo Corvalan
+    min 32 (1T 32) visitante conversion   Lucio Novillo Corvalan
+    min 50 (2T 10) local     try          Felipe Piro Easdale
+    min 55 (2T 15) local     substitution Samuel Palacios
+    min 55 (2T 15) local     substitution Vicenzo Tappa
+    min 56 (2T 16) visitante try          Noé José Velasco
+    min 56 (2T 16) visitante conversion   Lucio Novillo Corvalan
+    min 63 (2T 23) visitante try          Santiago Sánchez Pulgar
+    min 63 (2T 23) visitante conversion   Lucio Novillo Corvalan
+    min 67 (2T 27) visitante try          Ignacio Ramos
+    min 74 (2T 34) visitante try          Lucio Novillo Corvalan
+    min 80 (2T 40) local     substitution Ignacio Aoki
+    min 80 (2T 40) local     substitution Tiziano Piccinini
+    min 80 (2T 40) local     substitution Valentin Romero Flynn
+    min 80 (2T 40) local     substitution Cruz Arrambide
+    min 80 (2T 40) local     substitution Valentin Jantzon Zalazar
+    min 80 (2T 40) local     substitution Santiago Amaya Reyna
+    min 80 (2T 40) local     substitution Francisco Arceguet
+    min 80 (2T 40) local     substitution Mateo Sánchez
+  marcador  · eventos 5-52 · guardado 5-52
+  tries     · 1-8 (guardado —-—)
+  arbitro   · FRANCISCO ROMERO BRONDINO (guardado: —)
+  guardado  · 28 local · 24 visitante · 25 eventos
+
+club-palermo-bajo-m17-b vs alta-gracia-r-c-m17-b · adcb3e20 · tarjeta 319629  ·  12a56bc3-c154-4e5b-9a60-61513b6578f5
+  local     · club-palermo-bajo-m17-b · 24 jugadores · 0 con ficha fijada
+  visitante · alta-gracia-r-c-m17-b · 24 jugadores · 0 con ficha fijada
+  eventos   · 14
+    min  7 (1T 7) local     try          Thiago Ezequiel Galvez
+    min 14 (1T 14) visitante try          Matias Morcos Kletzl
+    min 19 (1T 19) visitante try          Valentino Pacioni
+    min 20 (1T 20) visitante conversion   Juan Ignacio Cerezo
+    min 21 (1T 21) local     try          Ignacio Rinaldi
+    min 22 (1T 22) local     conversion   Facundo Tapia
+    min 33 (1T 33) local     try          Ignacio Rinaldi
+    min 34 (1T 34) local     conversion   Facundo Tapia
+    min 45 (2T 5) visitante substitution Bruno Urquiza Segovia
+    min 50 (2T 10) visitante try          Santino Martinez
+    min 55 (2T 15) visitante substitution Santino Martinez
+    min 57 (2T 17) visitante substitution Cristobal José Hernandez Catarineu
+    min 62 (2T 22) visitante penalty_goal Juan Ignacio Cerezo
+    min 68 (2T 28) visitante try          Facundo Alejandro Salgado
+  marcador  · eventos 19-25 · guardado 19-25
+  tries     · 3-4 (guardado —-—)
+  arbitro   · TOMAS ELIAS GIGENA RAMALLO (guardado: —)
+  guardado  · 24 local · 24 visitante · 14 eventos
+
+club-palermo-bajo-m17-b vs cordoba-athletic-club-m17-b · adcb3e20 · tarjeta 323377  ·  89524698-5668-45fa-9031-a6fcd1d0589e
+  local     · club-palermo-bajo-m17-b · 27 jugadores · 0 con ficha fijada
+  visitante · cordoba-athletic-club-m17-b · 26 jugadores · 0 con ficha fijada
+  eventos   · 33
+    min  3 (1T 3) visitante try          Valentín Nicolás Gomez
+    min  9 (1T 9) local     try          Maximiliano Marquez
+    min 14 (1T 14) visitante penalty_goal Camilo Lozada Chaves
+    min 17 (1T 17) local     try          Lucio Sanchez Rubio
+    min 18 (1T 18) local     conversion   Imanol Saez
+    min 21 (1T 21) local     try          Manuel Lisandro Roldan Funes
+    min 30 (1T 30) local     try          Maximo Sosa Vera
+    min 43 (2T 3) visitante substitution Felipe Garay Villegas
+    min 44 (2T 4) local     substitution Joaquin Arguello
+    min 48 (2T 8) local     try          Manuel Lisandro Roldan Funes
+    min 48 (2T 8) local     substitution Lautaro Quiroga Vaudagna
+    min 49 (2T 9) visitante substitution Tomas Campos
+    min 51 (2T 11) visitante substitution Juan Emiliano Lana
+    min 53 (2T 13) visitante try          Martín Bernardo Espíndola
+    min 55 (2T 15) visitante substitution Juan Cruz Lopez Klein
+    min 56 (2T 16) local     substitution Federico Iribarren
+    min 60 (2T 20) local     substitution Imanol Saez
+    min 62 (2T 22) visitante try          Francesco Butto Prieto
+    min 63 (2T 23) local     substitution Lorenzo Soriano
+    min 63 (2T 23) local     substitution Benjamin Magnaterra
+    min 63 (2T 23) visitante conversion   Valentin Sutter Fuentes
+    min 66 (2T 26) local     substitution Lucio Sanchez Rubio
+    min 66 (2T 26) visitante try          Thiago Bautista Lacamoira
+    min 67 (2T 27) local     substitution Maximo Sosa Vera
+    min 67 (2T 27) local     substitution Joaquin Mediot Cenci
+    min 69 (2T 29) visitante conversion   Valentin Sutter Fuentes
+    min 71 (2T 31) local     substitution Maximiliano Marquez
+    min 71 (2T 31) local     substitution Juan Pedro Lema
+    min 73 (2T 33) visitante try          Martín Bernardo Espíndola
+    min 74 (2T 34) visitante conversion   Valentin Sutter Fuentes
+    min 80 (2T 40) visitante substitution Tomas Oulton Priori
+    min 80 (2T 40) visitante substitution Fabrizzio Druetta Herther
+    min 80 (2T 40) visitante substitution Nicanor Siciliano
+  marcador  · eventos 27-34 · guardado 27-34
+  tries     · 5-5 (guardado —-—)
+  arbitro   · LEONEL SORBERA (guardado: —)
+  guardado  · 27 local · 26 visitante · 33 eventos
+
+cordoba-rugby-club-m17-b vs san-francisco-r-c-m17-b · adcb3e20 · tarjeta 315232  ·  72cc0918-1b49-47c5-85e0-1476fc76925a
+  local     · cordoba-rugby-club-m17-b · 23 jugadores · 0 con ficha fijada
+  visitante · san-francisco-r-c-m17-b · 21 jugadores · 0 con ficha fijada
+  eventos   · 13
+    min  1 (1T 1) visitante try          Santiago Gabriel Capello
+    min 12 (1T 12) local     substitution Juan Ignacio Schuster
+    min 25 (1T 25) local     substitution Facundo Aldo Torres
+    min 26 (1T 26) visitante substitution Efraín Bischoff Kappes
+    min 40 (2T 0) local     substitution Faustino Oyola
+    min 41 (2T 1) visitante substitution Lautaro Benjamin Torales
+    min 47 (2T 7) visitante try          Merlo Agustín
+    min 51 (2T 11) visitante penalty_goal Gino Bernardi
+    min 62 (2T 22) visitante card_yellow  Santino Astegiano
+    min 63 (2T 23) local     substitution Mateo León Reartes
+    min 65 (2T 25) local     substitution Pedro Enrique Guerrero Jenefes
+    min 66 (2T 26) visitante substitution Santiago Gabriel Capello
+    min 68 (2T 28) visitante try          Santino Amaya
+  marcador  · eventos 0-18 · guardado 0-18
+  tries     · 0-3 (guardado —-—)
+  arbitro   · TOMAS ELIAS GIGENA RAMALLO (guardado: —)
+  guardado  · 23 local · 21 visitante · 13 eventos
+
+cordoba-rugby-club-m17-b vs los-cuervos-r-c-m17-b · adcb3e20 · tarjeta 314681  ·  d7b0f807-82ac-4fce-8d98-9c4e44fce241
+  local     · cordoba-rugby-club-m17-b · 22 jugadores · 0 con ficha fijada
+  visitante · los-cuervos-r-c-m17-b · 23 jugadores · 0 con ficha fijada
+  eventos   · 26
+    min  8 (1T 8) visitante try          Ignacio Sotelo
+    min 10 (1T 10) local     try          Lisandro Flores Tifner
+    min 15 (1T 15) local     try          Ian Arias
+    min 23 (1T 23) local     try          Joel Valentino Gimenez Carrizo
+    min 33 (1T 33) local     card_yellow  Julián Emilio Minnig Serniotti
+    min 33 (1T 33) visitante try          Ignacio Sotelo
+    min 33 (1T 33) visitante conversion   Juan Segundo Serpilli Moyano
+    min 40 (2T 0) local     substitution Gabriel Lopez Martinez
+    min 48 (2T 8) local     try          Valentino Ponticoba
+    min 49 (2T 9) local     conversion   Ian Arias
+    min 50 (2T 10) local     substitution Faustino Oyola
+    min 50 (2T 10) local     substitution Thiago Ceballos
+    min 55 (2T 15) visitante penalty_goal Juan Segundo Serpilli Moyano
+    min 56 (2T 16) local     try          Lautaro Martin Barboza Bilbao
+    min 56 (2T 16) local     substitution Facundo Aldo Torres
+    min 56 (2T 16) local     substitution Juan Román González
+    min 57 (2T 17) local     conversion   Ian Arias
+    min 60 (2T 20) visitante card_red     Juan Segundo Serpilli Moyano
+    min 62 (2T 22) visitante try          Juan Felipe Bustamante
+    min 63 (2T 23) local     try          Ian Arias
+    min 64 (2T 24) local     conversion   Ian Arias
+    min 65 (2T 25) local     card_red     Lisandro Flores Tifner
+    min 67 (2T 27) local     substitution Valentino Ponticoba
+    min 69 (2T 29) visitante try          Thiago Lopez
+    min 70 (2T 30) visitante conversion   Marco Minetto
+    min 73 (2T 33) local     card_yellow  Juan Ignacio Schuster
+  marcador  · eventos 36-27 · guardado 36-27
+  tries     · 6-4 (guardado —-—)
+  arbitro   · CARLOS RAFAEL HERNANDEZ (guardado: —)
+  guardado  · 22 local · 23 visitante · 26 eventos
+
+club-palermo-bajo-m17-b vs club-universitario-de-cordoba-m17-b · adcb3e20 · tarjeta 313073  ·  0185a08c-81ad-4182-97ef-b8d027c4d0ab
+  local     · club-palermo-bajo-m17-b · 26 jugadores · 0 con ficha fijada
+  visitante · club-universitario-de-cordoba-m17-b · 24 jugadores · 0 con ficha fijada
+  eventos   · 23
+    min  4 (1T 4) local     try          Stanko Nicolas Juratovic
+    min  5 (1T 5) local     conversion   Imanol Saez
+    min  8 (1T 8) local     try          Jean Luc Moix
+    min  9 (1T 9) local     conversion   Imanol Saez
+    min 35 (1T 35) local     try          Manuel Lisandro Roldan Funes
+    min 36 (1T 36) local     conversion   Imanol Saez
+    min 41 (2T 1) visitante substitution Bruno Graña
+    min 45 (2T 5) local     try          Joaquin Arguello
+    min 45 (2T 5) local     substitution Fausto Lasa
+    min 45 (2T 5) local     substitution Alvaro Soriano
+    min 46 (2T 6) local     conversion   Imanol Saez
+    min 50 (2T 10) local     substitution Conrado Arias
+    min 55 (2T 15) local     substitution Maximiliano Marquez
+    min 55 (2T 15) local     substitution Jean Luc Moix
+    min 55 (2T 15) visitante substitution Tiziano Ressia
+    min 55 (2T 15) visitante substitution Juan Tomás Paez
+    min 62 (2T 22) local     drop_goal    Facundo Tapia
+    min 66 (2T 26) local     substitution Federico Iribarren
+    min 66 (2T 26) local     substitution Joaquin Uriel Cingolani
+    min 70 (2T 30) visitante try          Santino Nicolas Golubko Pairone
+    min 80 (2T 40) local     substitution Maximo Sosa Vera
+    min 80 (2T 40) local     substitution Justiniano Quiroga
+    min 80 (2T 40) local     substitution Lucas Amuchastegui
+  marcador  · eventos 31-5 · guardado 31-5
+  tries     · 4-1 (guardado —-—)
+  arbitro   · FLORENCIA LEDESMA (guardado: —)
+  guardado  · 26 local · 24 visitante · 23 eventos
+
+san-francisco-r-c-m17-b vs jockey-club-cordoba-m17-b · adcb3e20 · tarjeta 313071  ·  2da14978-5b88-4840-9dc9-8ca1c3374db5
+  local     · san-francisco-r-c-m17-b · 19 jugadores · 0 con ficha fijada
+  visitante · jockey-club-cordoba-m17-b · 22 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min  9 (1T 9) visitante try          Lorenzo Roy Albert Mindel
+    min 13 (1T 13) local     try          Merlo Agustín
+    min 13 (1T 13) local     conversion   Gino Bernardi
+    min 25 (1T 25) local     substitution Matías Nicolás Sánchez
+    min 26 (1T 26) local     try          Javier Perez
+    min 26 (1T 26) local     conversion   Gino Bernardi
+    min 41 (2T 1) visitante substitution Francisco José Gonzalez Leahy
+    min 50 (2T 10) local     substitution Javier Perez
+    min 50 (2T 10) local     substitution Javier Perez
+    min 51 (2T 11) visitante substitution Facundo Thomas Quiroga
+    min 51 (2T 11) visitante substitution Ignacio Aoki
+    min 51 (2T 11) visitante substitution Baltazar Servent
+    min 59 (2T 19) visitante substitution Lorenzo Roy Albert Mindel
+    min 63 (2T 23) local     try          Bautista González Barbaresco
+    min 63 (2T 23) visitante try          Tomas Javier Sarmiento Gonzalez
+    min 63 (2T 23) visitante conversion   Tiziano Piccinini
+    min 70 (2T 30) visitante substitution Facundo Mayda Delgado
+  marcador  · eventos 19-12 · guardado 19-12
+  tries     · 3-2 (guardado —-—)
+  arbitro   · CARLOS RAFAEL HERNANDEZ (guardado: —)
+  guardado  · 19 local · 22 visitante · 17 eventos
+
+cordoba-rugby-club-m17-b vs club-la-tablada-m17-c · adcb3e20 · tarjeta 312613  ·  79972951-ab0d-4c29-9370-9e25154c0207
+  local     · cordoba-rugby-club-m17-b · 24 jugadores · 0 con ficha fijada
+  visitante · club-la-tablada-m17-c · 24 jugadores · 0 con ficha fijada
+  eventos   · 10
+    min  5 (1T 5) visitante try          Bautista Ovando
+    min  5 (1T 5) visitante conversion   Maximo Dieli Crimi Virasoro
+    min 24 (1T 24) local     try          Facundo Aldo Torres
+    min 35 (1T 35) visitante try          Juan Ignacio Alsina
+    min 35 (1T 35) visitante conversion   Maximo Dieli Crimi Virasoro
+    min 45 (2T 5) local     try          Francisco Agustin Molina
+    min 57 (2T 17) visitante try          Valentin Pedeo Ali
+    min 57 (2T 17) visitante conversion   Maximo Dieli Crimi Virasoro
+    min 66 (2T 26) visitante penalty_goal Maximo Dieli Crimi Virasoro
+    min 70 (2T 30) visitante penalty_goal Maximo Dieli Crimi Virasoro
+  marcador  · eventos 10-27 · guardado 10-27
+  tries     · 2-3 (guardado —-—)
+  arbitro   · MARTIN LEIVA (guardado: —)
+  guardado  · 24 local · 24 visitante · 10 eventos
+
+cordoba-rugby-club-m17-b vs alta-gracia-r-c-m17-b · adcb3e20 · tarjeta 295437  ·  ccacb94c-5074-4c8c-94f8-79ceb6cc62ce
+  local     · cordoba-rugby-club-m17-b · 23 jugadores · 0 con ficha fijada
+  visitante · alta-gracia-r-c-m17-b · 22 jugadores · 0 con ficha fijada
+  eventos   · 16
+    min  4 (1T 4) visitante try          Facundo Alejandro Salgado
+    min  4 (1T 4) visitante conversion   Juan Ignacio Cerezo
+    min 16 (1T 16) local     try          Ian Arias
+    min 17 (1T 17) local     conversion   Ian Arias
+    min 27 (1T 27) visitante try          Matias Morcos Kletzl
+    min 27 (1T 27) visitante conversion   Juan Ignacio Cerezo
+    min 34 (1T 34) local     card_yellow  Mateo León Reartes
+    min 34 (1T 34) visitante card_yellow  Alejo Facundo Arce Puy
+    min 35 (1T 35) local     substitution Fabricio Farid Ariza
+    min 42 (2T 2) local     card_yellow  Lisandro Flores Tifner
+    min 46 (2T 6) visitante substitution Ignacio Olariaga
+    min 46 (2T 6) visitante substitution Juan Cruz Heredia
+    min 52 (2T 12) visitante substitution Ian Elbaum Barreto
+    min 55 (2T 15) visitante substitution Pablo Joaquín Peralta Florez
+    min 61 (2T 21) local     substitution Mateo León Reartes
+    min 75 (2T 35) local     try          Joel Valentino Gimenez Carrizo
+  marcador  · eventos 12-14 · guardado 12-14
+  tries     · 2-2 (guardado —-—)
+  arbitro   · ARTURO MARTINEZ (guardado: —)
+  guardado  · 23 local · 22 visitante · 16 eventos
+
+jockey-club-cordoba-m17-b vs cordoba-athletic-club-m17-b · adcb3e20 · tarjeta 295474  ·  6d32fc5e-2109-4065-a13a-22ba99e8af39
+  local     · jockey-club-cordoba-m17-b · 27 jugadores · 0 con ficha fijada
+  visitante · cordoba-athletic-club-m17-b · 27 jugadores · 0 con ficha fijada
+  eventos   · 36
+    min  2 (1T 2) local     try          Juan Cruz Cerino
+    min  2 (1T 2) local     conversion   Tiziano Piccinini
+    min 20 (1T 20) local     penalty_goal Tiziano Piccinini
+    min 27 (1T 27) local     try          Joaquín Ouro
+    min 27 (1T 27) local     conversion   Tiziano Piccinini
+    min 35 (1T 35) visitante substitution Juan Emiliano Lana
+    min 35 (1T 35) visitante substitution Tomas Oulton Priori
+    min 35 (1T 35) visitante substitution Juan Cruz Cudini Martinez
+    min 40 (2T 0) local     substitution Maximo Sibilla
+    min 40 (2T 0) local     substitution Ignacio Risso Patron
+    min 43 (2T 3) local     card_yellow  Valentin Jantzon Zalazar
+    min 43 (2T 3) visitante try          Octavio Vallejos
+    min 48 (2T 8) local     substitution Valentin Romero Flynn
+    min 48 (2T 8) local     substitution Tiziano Piccinini
+    min 51 (2T 11) visitante try          Tomas Campos
+    min 53 (2T 13) local     substitution Francisco Echenique
+    min 53 (2T 13) visitante substitution Tomas Campos
+    min 54 (2T 14) local     substitution Valentin Jantzon Zalazar
+    min 54 (2T 14) local     substitution Mateo Sánchez
+    min 57 (2T 17) visitante substitution Octavio Vallejos
+    min 57 (2T 17) visitante substitution Valentín Nicolás Gomez
+    min 64 (2T 24) local     try          Ignacio Aoki
+    min 64 (2T 24) local     conversion   Tiziano Piccinini
+    min 64 (2T 24) visitante substitution Santiago Segamarchi
+    min 65 (2T 25) local     substitution Federico Avila Ferreyra
+    min 65 (2T 25) local     substitution Facundo Mayda Delgado
+    min 66 (2T 26) visitante substitution Lautaro Romero Brondino
+    min 67 (2T 27) visitante try          Juan Merlo
+    min 68 (2T 28) local     substitution Juan Cruz Cerino
+    min 68 (2T 28) visitante substitution Baltasar Mansilla
+    min 68 (2T 28) visitante substitution Lorenzo Busso Garlot
+    min 68 (2T 28) visitante substitution Camilo Lozada Chaves
+    min 73 (2T 33) local     substitution Juan Cruz Panero
+    min 74 (2T 34) local     card_yellow  Enzo Martinez
+    min 75 (2T 35) local     substitution Enzo Martinez
+    min 75 (2T 35) visitante substitution Nicanor Siciliano
+  marcador  · eventos 24-15 · guardado 24-15
+  tries     · 3-3 (guardado —-—)
+  arbitro   · DANIEL ALEJANDRO FUNES (guardado: —)
+  guardado  · 27 local · 27 visitante · 36 eventos
+
+alta-gracia-r-c-m17-b vs baguales-r-c-m17-b · adcb3e20 · tarjeta 295461  ·  b9164f06-fa4a-497f-a37e-1a84d4580f72
+  local     · alta-gracia-r-c-m17-b · 21 jugadores · 0 con ficha fijada
+  visitante · baguales-r-c-m17-b · 27 jugadores · 0 con ficha fijada
+  eventos   · 15
+    min  3 (1T 3) local     conversion   Juan Ignacio Cerezo
+    min  4 (1T 4) local     try          Ceferino Koua
+    min 14 (1T 14) visitante try          Santiago Cabrera
+    min 14 (1T 14) visitante conversion   Santiago Cabrera
+    min 21 (1T 21) local     card_yellow  Valentino Pacioni
+    min 28 (1T 28) visitante penalty_goal Santiago Cabrera
+    min 31 (1T 31) local     try          Facundo Alejandro Salgado
+    min 32 (1T 32) local     conversion   Juan Ignacio Cerezo
+    min 38 (1T 38) visitante try          Mariano Ciprian
+    min 38 (1T 38) visitante conversion   Santiago Cabrera
+    min 65 (2T 25) visitante try          Juani Colombres
+    min 74 (2T 34) visitante try          Geronimo Caeiro
+    min 74 (2T 34) visitante conversion   Santiago Cabrera
+    min 74 (2T 34) visitante card_yellow  Luciano Morassutti Cruz
+    min 75 (2T 35) local     card_yellow  Bruno Urquiza Segovia
+  marcador  · eventos 14-29 · guardado 14-29
+  tries     · 2-4 (guardado —-—)
+  arbitro   · NAZARENA YAEL GIGENA RAMALLO (guardado: —)
+  guardado  · 21 local · 27 visitante · 15 eventos
+
+tala-rugby-club-m17-b vs san-francisco-r-c-m17-b · adcb3e20 · tarjeta 295458  ·  e159c33e-1323-40da-ae94-3b3d143028de
+  local     · tala-rugby-club-m17-b · 22 jugadores · 0 con ficha fijada
+  visitante · san-francisco-r-c-m17-b · 19 jugadores · 0 con ficha fijada
+  eventos   · 24
+    min  1 (1T 1) local     try          Mateo Tirante
+    min 14 (1T 14) local     try          Sebastian Schmitt
+    min 14 (1T 14) local     conversion   Tomas Yankilevich
+    min 23 (1T 23) local     try          Felipe Marchetti
+    min 23 (1T 23) local     conversion   Tomas Yankilevich
+    min 26 (1T 26) visitante try          Santino Román Martini
+    min 26 (1T 26) visitante conversion   Gino Bernardi
+    min 41 (2T 1) visitante substitution Efraín Bischoff Kappes
+    min 41 (2T 1) visitante try          Felipe Martino
+    min 41 (2T 1) visitante conversion   Gino Bernardi
+    min 43 (2T 3) visitante substitution Santino Román Martini
+    min 43 (2T 3) visitante substitution Martín Zalazar
+    min 43 (2T 3) visitante substitution Valentin Galeotti
+    min 44 (2T 4) local     try          Mateo Tirante
+    min 50 (2T 10) local     try          Ramon Vilosio
+    min 50 (2T 10) local     conversion   Tomas Yankilevich
+    min 50 (2T 10) visitante card_yellow  Santino Amaya
+    min 55 (2T 15) local     try          Tomas Yankilevich
+    min 55 (2T 15) local     conversion   Tomas Yankilevich
+    min 61 (2T 21) local     try          Salvador Soirefman Miro
+    min 61 (2T 21) local     conversion   Tomas Yankilevich
+    min 66 (2T 26) local     card_yellow  Sebastian Schmitt
+    min 71 (2T 31) local     try          Salvador Soirefman Miro
+    min 71 (2T 31) local     conversion   Tomas Yankilevich
+  marcador  · eventos 52-14 · guardado 52-14
+  tries     · 8-2 (guardado —-—)
+  arbitro   · MARTIN LEIVA (guardado: —)
+  guardado  · 22 local · 19 visitante · 24 eventos
+
+los-cuervos-r-c-m17-b vs jockey-club-cordoba-m17-b · adcb3e20 · tarjeta 295453  ·  40fce980-7ccb-4627-bf3e-a2abea185b31
+  local     · los-cuervos-r-c-m17-b · 21 jugadores · 0 con ficha fijada
+  visitante · jockey-club-cordoba-m17-b · 20 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min  7 (1T 7) visitante try          Enzo Martinez
+    min 10 (1T 10) local     try          Lorenzo Cachin
+    min 15 (1T 15) visitante try          Ignacio Gonzalo Tellez
+    min 15 (1T 15) visitante conversion   Martin Hliba
+    min 17 (1T 17) local     card_yellow  Ramiro Barrera
+    min 26 (1T 26) local     try          Juan Felipe Bustamante
+    min 26 (1T 26) local     conversion   Lorenzo Cachin
+    min 43 (2T 3) visitante try          Maximo Sibilla
+    min 45 (2T 5) local     substitution Jeremias Cabrera
+    min 45 (2T 5) local     substitution Enzo Nahuel Ruiz
+    min 45 (2T 5) local     substitution Lucio Lazo
+    min 45 (2T 5) local     substitution Santiago Andres Quevedo Abad
+    min 54 (2T 14) visitante substitution Jeremías Carot
+    min 59 (2T 19) visitante substitution Ignacio Gonzalo Tellez
+    min 59 (2T 19) visitante substitution Enzo Martinez
+    min 68 (2T 28) local     card_yellow  Juan Segundo Serpilli Moyano
+    min 70 (2T 30) visitante substitution Jeronimo Hairabedian
+    min 70 (2T 30) visitante substitution Santiago Amaya Reyna
+  marcador  · eventos 12-17 · guardado 12-17
+  tries     · 2-3 (guardado —-—)
+  arbitro   · EMANUEL MALDONADO (guardado: —)
+  guardado  · 21 local · 20 visitante · 18 eventos
+
+listo · 42 partidos

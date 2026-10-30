@@ -145,6 +145,7 @@ interface EspnFlag {
 }
 
 interface EspnAthlete {
+    id?: string;
     displayName?: string;
     shortName?: string;
     fullName?: string;
@@ -190,6 +191,9 @@ interface EspnCompetition {
     venue?: { fullName?: string; court?: string };
     type?: { slug?: string; text?: string };
     competitors?: EspnCompetitor[];
+    /** `regulation.periods` es al mejor de cuántos sets. */
+    format?: { regulation?: { periods?: number } };
+    broadcast?: Array<{ market?: string; names?: string[] }>;
 }
 
 interface EspnGrouping {
@@ -206,6 +210,12 @@ interface EspnEvent {
     major?: boolean;
     venue?: { displayName?: string };
     groupings?: EspnGrouping[];
+    /** El campeón de la edición anterior, uno por modalidad. */
+    previousWinners?: Array<{
+        displayName?: string;
+        headshot?: string;
+        type?: { slug?: string; text?: string };
+    }>;
 }
 
 interface EspnScoreboard {
@@ -545,6 +555,7 @@ function toMatch(
         statusLabel: label,
         isLive,
         startsAt: startsAt && !Number.isNaN(startsAt.getTime()) ? startsAt : null,
+        timeValid: competition.timeValid !== false,
         home: toSide(home, isLive, withPhoto),
         away: toSide(away, isLive, withPhoto),
         sets: toSets(home, away),
@@ -553,6 +564,7 @@ function toMatch(
         round: competition.round?.displayName ?? null,
         surface: null,
         court: competition.venue?.court ?? null,
+        bestOf: numberOrNull(competition.format?.regulation?.periods),
         tournament: {
             id: tournamentId,
             name: ctx.event.name ?? ctx.event.shortName ?? '',
@@ -648,11 +660,31 @@ export async function getTennisLiveMatches(): Promise<TennisDay | null> {
     return buildDay(events, (match) => match.isLive, { timeZone: 'UTC', categories: null });
 }
 
+/**
+ * Si `tz` es una zona IANA que el runtime entiende. `Intl.DateTimeFormat` es la
+ * prueba de verdad: `Intl.supportedValuesOf('timeZone')` deja afuera alias
+ * válidos como `UTC` en V8, y la ruta los recibe.
+ */
+export function isSupportedTimeZone(tz: string): boolean {
+    if (!tz || tz.length > 64) return false;
+    try {
+        new Intl.DateTimeFormat('en-US', { timeZone: tz });
+        return true;
+    } catch {
+        return false;
+    }
+}
+
 export async function getTennisMatchesByDate(
     dateKey: string,
     options?: { timeZone?: string; categories?: string },
 ): Promise<TennisDay | null> {
-    const timeZone = options?.timeZone || APP_TIMEZONE;
+    // Una zona inválida hacía tirar `RangeError` dentro de formatDateKey y la
+    // ruta lo contestaba como 502 ("se cayó ESPN"). La ruta ya la rechaza con
+    // 400; acá, por si otro llamador la pasa, se cae a la zona de la app.
+    const timeZone = options?.timeZone && isSupportedTimeZone(options.timeZone)
+        ? options.timeZone
+        : APP_TIMEZONE;
     const events = await loadEvents([shiftDateKey(dateKey, -1), shiftDateKey(dateKey, 0)]);
     return buildDay(
         events,
@@ -688,9 +720,208 @@ export interface TennisStatGroup {
     groups: Array<{ groupName: string; statisticsItems: TennisStatRow[] }>;
 }
 
+/**
+ * La ficha del jugador, en lo que ESPN publica: edad, altura, mano, debut y el
+ * puesto en el ranking de su circuito. No hay títulos ni balance del año.
+ */
+export interface TennisPlayerProfile {
+    id: string;
+    name: string;
+    ranking: number | null;
+    age: number | null;
+    heightCm: number | null;
+    /** "Diestro" / "Zurdo", en la forma en que lo dice la crónica. */
+    hand: string | null;
+    birthPlace: string | null;
+    /** El año en que empezó en el circuito. */
+    debutYear: number | null;
+    /** Temporadas en el circuito, contadas por ESPN. */
+    seasons: number | null;
+}
+
+/** Un cruce del camino de un jugador en este torneo. */
+export interface TennisPathStep {
+    matchId: string;
+    round: string | null;
+    /** Con quién se cruzó, visto desde el jugador. */
+    opponent: { name: string; seed: number | null; country: TennisCountry | null } | null;
+    /** `true` si ganó, `false` si perdió, `null` si no terminó. */
+    won: boolean | null;
+    status: TennisMatchStatus;
+    statusLabel: string;
+    /** Los games set por set desde el jugador: "7-6(5) 6-1". */
+    score: string;
+    startsAt: Date | null;
+    /** El cruce que se está mirando. */
+    isCurrent: boolean;
+}
+
 export interface TennisMatchDetails {
     match: TennisMatch;
     statistics: TennisStatGroup[];
+    /** El resultado contado en una línea, para leer sin mirar la planilla. */
+    resumen: string | null;
+    /** Los canales que lo transmiten, tal cual los publica la fuente (mercado de EE.UU.). */
+    broadcast: string[];
+    tournament: {
+        startsAt: Date | null;
+        endsAt: Date | null;
+        venue: string | null;
+        /** El campeón de la edición anterior en ESTA modalidad. */
+        previousWinner: { name: string; headshot: string | null } | null;
+    };
+    profiles: { home: TennisPlayerProfile | null; away: TennisPlayerProfile | null };
+    /** El camino de cada uno en el cuadro: los cruces anteriores, este y el que sigue. */
+    paths: { home: TennisPathStep[]; away: TennisPathStep[] };
+}
+
+interface EspnCoreAthlete {
+    id?: string;
+    displayName?: string;
+    fullName?: string;
+    age?: number;
+    height?: number;
+    debutYear?: number;
+    birthPlace?: { summary?: string };
+    hand?: { type?: string; displayValue?: string };
+    experience?: { years?: number };
+}
+
+// La ficha de un jugador no cambia de un día para el otro.
+const ATHLETE_TTL = 24 * 60 * 60;
+
+/** El circuito de una modalidad: la masculina es ATP, la femenina WTA. El mixto no tiene uno. */
+function tourOfDraw(slug: string, ctx: TourEvent): Tour | null {
+    if (/^mens-/.test(slug)) return 'atp';
+    if (/^womens-/.test(slug)) return 'wta';
+    return ctx.tours.length === 1 ? ctx.tours[0] : null;
+}
+
+async function cargarPerfil(
+    side: TennisSide,
+    tour: Tour | null,
+    rankings: Map<string, number>,
+): Promise<TennisPlayerProfile | null> {
+    if (!side.id || !/^\d+$/.test(side.id) || !tour) return null;
+    let athlete: EspnCoreAthlete | null = null;
+    try {
+        athlete = await fetchEspn<EspnCoreAthlete>(
+            `https://sports.core.api.espn.com/v2/sports/tennis/leagues/${tour}/athletes/${side.id}?lang=en&region=us`,
+            ATHLETE_TTL,
+        );
+    } catch {
+        // Sin ficha no se cae el partido: la tarjeta del jugador queda con lo
+        // que ya se sabe (nombre, país, sembrado).
+        athlete = null;
+    }
+
+    const ranking = rankings.get(side.id) ?? null;
+    if (!athlete) {
+        return ranking == null
+            ? null
+            : { id: side.id, name: side.name, ranking, age: null, heightCm: null, hand: null, birthPlace: null, debutYear: null, seasons: null };
+    }
+
+    const handType = (athlete.hand?.type ?? '').toUpperCase();
+    return {
+        id: side.id,
+        name: athlete.displayName ?? athlete.fullName ?? side.name,
+        ranking,
+        age: numberOrNull(athlete.age),
+        // ESPN mide en pulgadas.
+        heightCm: typeof athlete.height === 'number' && athlete.height > 0 ? Math.round(athlete.height * 2.54) : null,
+        hand: handType === 'RIGHT' ? 'Diestro' : handType === 'LEFT' ? 'Zurdo' : null,
+        birthPlace: athlete.birthPlace?.summary?.trim() || null,
+        debutYear: numberOrNull(athlete.debutYear),
+        seasons: numberOrNull(athlete.experience?.years),
+    };
+}
+
+/**
+ * Los games de un partido, contados desde un lado: "7-6(5) 6-1". El número
+ * entre paréntesis es el tie-break del que lo perdió, que es como se escribe.
+ */
+function marcadorDesde(sets: TennisSet[], lado: 'home' | 'away'): string {
+    return sets
+        .filter((set) => set.home != null || set.away != null)
+        .map((set) => {
+            const propios = lado === 'home' ? set.home : set.away;
+            const ajenos = lado === 'home' ? set.away : set.home;
+            const tbPropio = lado === 'home' ? set.homeTiebreak : set.awayTiebreak;
+            const tbAjeno = lado === 'home' ? set.awayTiebreak : set.homeTiebreak;
+            const perdedorTb = tbPropio != null && tbAjeno != null ? Math.min(tbPropio, tbAjeno) : (tbPropio ?? tbAjeno);
+            const tb = perdedorTb != null ? `(${perdedorTb})` : '';
+            return `${propios ?? '-'}-${ajenos ?? '-'}${tb}`;
+        })
+        .join(' ');
+}
+
+function ganadorDe(match: TennisMatch): 'home' | 'away' | null {
+    if (match.status !== 'final') return null;
+    const h = match.home.setsWon;
+    const a = match.away.setsWon;
+    if (h == null || a == null || h === a) return null;
+    return h > a ? 'home' : 'away';
+}
+
+/** El resultado en una frase, como lo diría la crónica. */
+function resumenDe(match: TennisMatch): string | null {
+    const gana = ganadorDe(match);
+    if (match.status === 'live') {
+        const h = match.home.setsWon ?? 0;
+        const a = match.away.setsWon ?? 0;
+        if (h === a) return `${match.home.name} y ${match.away.name} van ${h}-${a} en sets.`;
+        const [delante, atras] = h > a ? [match.home, match.away] : [match.away, match.home];
+        return `${delante.name} le gana ${Math.max(h, a)}-${Math.min(h, a)} a ${atras.name}.`;
+    }
+    if (!gana) return null;
+    const ganador = match[gana];
+    const perdedor = match[gana === 'home' ? 'away' : 'home'];
+    const games = marcadorDesde(match.sets, gana);
+    if (match.statusLabel === 'Walkover') return `${ganador.name} avanzó por walkover de ${perdedor.name}.`;
+    if (match.statusLabel === 'Retired') {
+        return games
+            ? `${ganador.name} avanzó por el abandono de ${perdedor.name}, con el partido ${games}.`
+            : `${ganador.name} avanzó por el abandono de ${perdedor.name}.`;
+    }
+    return games ? `${ganador.name} venció a ${perdedor.name} por ${games}.` : null;
+}
+
+/**
+ * El camino de un jugador en el cuadro: todos sus cruces en esta modalidad,
+ * por fecha, con el partido que se está mirando marcado. El que sigue entra
+ * aunque el rival todavía no exista, porque el lugar en la llave ya es suyo.
+ */
+function caminoDe(
+    side: TennisSide,
+    grouping: EspnGrouping,
+    currentId: string,
+    ctx: TourEvent,
+    tournamentId: string,
+): TennisPathStep[] {
+    if (!side.id) return [];
+    const propios = (grouping.competitions ?? []).filter((competition) =>
+        (competition.competitors ?? []).some((c) => c.id === side.id),
+    );
+    propios.sort(byDate);
+
+    return propios.map((competition) => {
+        const match = toMatch(competition, grouping, ctx, tournamentId);
+        const lado: 'home' | 'away' = match.home.id === side.id ? 'home' : 'away';
+        const rival = match[lado === 'home' ? 'away' : 'home'];
+        const gana = ganadorDe(match);
+        return {
+            matchId: match.id,
+            round: match.round,
+            opponent: rival.name ? { name: rival.name, seed: rival.seed, country: rival.country } : null,
+            won: gana === null ? null : gana === lado,
+            status: match.status,
+            statusLabel: match.statusLabel,
+            score: marcadorDesde(match.sets, lado),
+            startsAt: match.startsAt,
+            isCurrent: match.id === currentId,
+        };
+    });
 }
 
 export async function getTennisMatch(matchId: string): Promise<TennisMatchDetails | null> {
@@ -702,11 +933,48 @@ export async function getTennisMatch(matchId: string): Promise<TennisMatchDetail
 
     const tournamentId = tournamentIdFor(ctx);
     for (const [competition, grouping] of competitionsOf(ctx.event)) {
-        if (competition.id === ref.competitionId) {
-            const match = toMatch(competition, grouping, ctx, tournamentId, true);
-            const [home, away] = await Promise.all([verificarRetrato(match.home), verificarRetrato(match.away)]);
-            return { match: { ...match, home, away }, statistics: [] };
-        }
+        if (competition.id !== ref.competitionId) continue;
+
+        const match = toMatch(competition, grouping, ctx, tournamentId, true);
+        const slug = grouping.grouping?.slug ?? '';
+        const tour = tourOfDraw(slug, ctx);
+        const rankings = tour && !match.isDoubles ? await loadRankings(tour) : new Map<string, number>();
+
+        const [home, away, perfilHome, perfilAway] = await Promise.all([
+            verificarRetrato(match.home),
+            verificarRetrato(match.away),
+            match.isDoubles ? Promise.resolve(null) : cargarPerfil(match.home, tour, rankings),
+            match.isDoubles ? Promise.resolve(null) : cargarPerfil(match.away, tour, rankings),
+        ]);
+
+        const previo = (ctx.event.previousWinners ?? []).find((w) => w.type?.slug === slug);
+        // `broadcast` no siempre es una lista: en algunos cruces ESPN manda un
+        // objeto suelto o una cadena. Lo que no sea lista se ignora.
+        const broadcast = Array.isArray(competition.broadcast)
+            ? [...new Set(competition.broadcast.flatMap((b) => (Array.isArray(b?.names) ? b.names : [])))]
+            : [];
+        const inicio = ctx.event.date ? new Date(ctx.event.date) : null;
+        const fin = ctx.event.endDate ? new Date(ctx.event.endDate) : null;
+
+        return {
+            match: { ...match, home, away },
+            statistics: [],
+            resumen: resumenDe(match),
+            broadcast,
+            tournament: {
+                startsAt: inicio && !Number.isNaN(inicio.getTime()) ? inicio : null,
+                endsAt: fin && !Number.isNaN(fin.getTime()) ? fin : null,
+                venue: ctx.event.venue?.displayName ?? null,
+                previousWinner: previo?.displayName
+                    ? { name: previo.displayName, headshot: previo.headshot ?? null }
+                    : null,
+            },
+            profiles: { home: perfilHome, away: perfilAway },
+            paths: {
+                home: caminoDe(match.home, grouping, match.id, ctx, tournamentId),
+                away: caminoDe(match.away, grouping, match.id, ctx, tournamentId),
+            },
+        };
     }
     return null;
 }

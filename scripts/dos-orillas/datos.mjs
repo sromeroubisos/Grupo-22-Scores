@@ -66,6 +66,7 @@ export const MADRES = {
   'Los Caranchos':      { id: 'los-caranchos',              nombre: 'Los Caranchos' },
   'Jockey VT':          { id: 'jockey-club-de-venado-tuerto', nombre: 'Jockey de Venado Tuerto' },
   'Universitario R':    { id: 'universitario-de-rosario',   nombre: 'Universitario de Rosario' },
+  'Provincial':         { id: 'c-a-provincial',             nombre: 'Provincial' },
 };
 
 /**
@@ -262,16 +263,23 @@ export const RULESET = {
  * Dos bloques, A y B, como los torneos de mayores del Litoral: van como dos
  * torneos porque se juegan en paralelo y cada uno tiene su campeón.
  *
- * 2026: sólo está publicada la 1ª fecha (nota de Tercer Tiempo del 30/9). Las
- * zonas y el resto del fixture no salieron: la fase va como liga única de 8 y
- * se reparte en zonas cuando se publiquen. En 2025 fueron dos zonas de 4, tres
- * fechas, semis y final.
+ * 2026 (notas de Tercer Tiempo del 30/9, 3/10 y 8/10): 16 clubes, 8 por bloque.
+ * Cada bloque tiene dos zonas de 4 y las TRES fechas de la fase de grupos son
+ * INTERZONALES —cada equipo de la zona A juega con los cuatro de la B—, así que
+ * las zonas no son grupos que se jueguen entre sí: la fase va como liga única de
+ * 8 y la zona queda anotada en la entrada de cada equipo. Las posiciones que
+ * publica la fuente son por zona y las semifinales (31/10) cruzan 1°-2° de cada
+ * zona; la final es el 7/11 y la localía se sortea el 2/11.
+ * En 2025 fueron dos zonas de 4, tres fechas, semis y final.
  *
  * Palmarés: 2022 Jockey (37-15 a Estudiantes), 2024 Jockey (32-22 a CRAI, "bicampeón"),
  * 2025 Atlético del Rosario (29-27 a Jockey) y GER en el B (39-26 a Rowing).
  * 2023: la final fue CRAI–Jockey (28/10) y el resultado no está en la fuente —
  * queda sin temporada: una temporada sin campeón se lee como "se jugó y no
  * sabemos", que es justamente el caso, pero sin fixture no aporta nada.
+ *
+ * Partido: { local, visitante, hora, arbitro } y, si ya se jugó, { hs, as, hp, ap }
+ * (hp/ap = los puntos de tabla que publicó la nota entre paréntesis).
  */
 export const TRL = [
   {
@@ -283,11 +291,37 @@ export const TRL = [
       { anio: '2024', campeon: 'Jockey CR' },
       { anio: '2025', campeon: 'Atlético del Rosario' },
     ],
-    fecha1: [
-      { local: 'Jockey CR',   visitante: 'CRAR',                 hora: null,    arbitro: 'URR' },
-      { local: 'CRAI',        visitante: 'Duendes RC',           hora: '13:00', arbitro: 'Javier Villalba (USR)' },
-      { local: 'Santa Fe RC', visitante: 'Atlético del Rosario', hora: '13:30', arbitro: 'Alfredo Fun (USR)' },
-      { local: 'GER',         visitante: 'Estudiantes',          hora: null,    arbitro: 'URR' },
+    zonas: {
+      'Zona A': ['Jockey CR', 'CRAI', 'GER', 'Santa Fe RC'],
+      'Zona B': ['Atlético del Rosario', 'Estudiantes', 'Duendes RC', 'CRAR'],
+    },
+    fechas: [
+      { n: 1, fecha: '2026-10-03', partidos: [
+        { local: 'CRAI', visitante: 'Duendes RC', hora: '13:00', hs: 31, as: 28, hp: 5, ap: 2 },
+        { local: 'Santa Fe RC', visitante: 'Atlético del Rosario', hora: '13:30', hs: 21, as: 40, hp: 0, ap: 5 },
+        { local: 'GER', visitante: 'Estudiantes', hora: '13:00', hs: 33, as: 31, hp: 5, ap: 2 },
+        // Se jugó el domingo 4/10.
+        { local: 'Jockey CR', visitante: 'CRAR', hora: '13:00', fecha: '2026-10-04', hs: 76, as: 7, hp: 5, ap: 0 },
+      ] },
+      { n: 2, fecha: '2026-10-10', partidos: [
+        { local: 'Duendes RC', visitante: 'Jockey CR', hora: '11:30' },
+        { local: 'Atlético del Rosario', visitante: 'CRAI', hora: '11:30' },
+        // Adelantado al viernes 9/10 en el Anexo Deportivo El Plumazo del CAE.
+        { local: 'Estudiantes', visitante: 'Santa Fe RC', hora: '20:00', fecha: '2026-10-09' },
+        { local: 'CRAR', visitante: 'GER', hora: '13:00' },
+      ] },
+      { n: 3, fecha: '2026-10-17', partidos: [
+        { local: 'Jockey CR', visitante: 'Atlético del Rosario' },
+        { local: 'CRAI', visitante: 'Estudiantes' },
+        { local: 'Santa Fe RC', visitante: 'CRAR' },
+        { local: 'GER', visitante: 'Duendes RC' },
+      ] },
+      { n: 4, fecha: '2026-10-24', partidos: [
+        { local: 'Estudiantes', visitante: 'Jockey CR' },
+        { local: 'CRAR', visitante: 'CRAI' },
+        { local: 'Duendes RC', visitante: 'Santa Fe RC' },
+        { local: 'Atlético del Rosario', visitante: 'GER' },
+      ] },
     ],
   },
   {
@@ -297,20 +331,44 @@ export const TRL = [
     palmares: [
       { anio: '2025', campeon: 'GER' },
     ],
-    fecha1: [
-      { local: 'Old Resian',      visitante: 'La Salle',      hora: null,    arbitro: 'URR' },
-      { local: 'Tilcara',         visitante: 'Los Caranchos', hora: null,    arbitro: 'Julián Caviglia (E. Ríos)' },
-      { local: 'Rowing',          visitante: 'Jockey VT',     hora: '13:30', arbitro: 'Diego Sueldo (E. Ríos)' },
-      { local: 'Universitario R', visitante: 'Universitario', hora: null,    arbitro: 'URR' },
+    zonas: {
+      'Zona A': ['Old Resian', 'Tilcara', 'Rowing', 'Provincial'],
+      'Zona B': ['Universitario', 'Universitario R', 'Los Caranchos', 'La Salle'],
+    },
+    fechas: [
+      { n: 1, fecha: '2026-10-03', partidos: [
+        { local: 'Old Resian', visitante: 'La Salle', hora: '11:30', hs: 43, as: 12, hp: 5, ap: 0 },
+        // La nota publica (5-1) en el partido y 2 para Universitario R en la tabla:
+        // perdió por 6 con 22 tantos, o sea defensivo + ofensivo. Se toma la tabla.
+        { local: 'Tilcara', visitante: 'Universitario R', hora: '15:00', hs: 28, as: 22, hp: 5, ap: 2,
+          nota: 'La nota publicó (5-1) en el partido y 2 puntos para Universitario R en la tabla; se tomó la tabla.' },
+        { local: 'Rowing', visitante: 'Los Caranchos', hora: '13:30', hs: 31, as: 20, hp: 5, ap: 0 },
+        { local: 'Provincial', visitante: 'Universitario', hora: '13:00', hs: 10, as: 27, hp: 0, ap: 5 },
+      ] },
+      { n: 2, fecha: '2026-10-10', partidos: [
+        { local: 'Universitario R', visitante: 'Old Resian', hora: '11:30' },
+        { local: 'Los Caranchos', visitante: 'Tilcara', hora: '11:30' },
+        { local: 'Universitario', visitante: 'Rowing', hora: '11:15' },
+        { local: 'La Salle', visitante: 'Provincial', hora: '12:00' },
+      ] },
+      { n: 3, fecha: '2026-10-17', partidos: [
+        { local: 'Old Resian', visitante: 'Los Caranchos' },
+        { local: 'Tilcara', visitante: 'Universitario' },
+        { local: 'Rowing', visitante: 'La Salle' },
+        { local: 'Provincial', visitante: 'Universitario R' },
+      ] },
+      { n: 4, fecha: '2026-10-24', partidos: [
+        { local: 'Universitario', visitante: 'Old Resian' },
+        { local: 'La Salle', visitante: 'Tilcara' },
+        { local: 'Universitario R', visitante: 'Rowing' },
+        { local: 'Los Caranchos', visitante: 'Provincial' },
+      ] },
     ],
   },
 ];
 
 /** Brown ya existía en la base SIN escudo: el seed lo completa sólo si sigue vacío. */
 export const ESCUDO_BROWN = { id: 'atletico-brown-san-vicente', escudo: 'brown san vicente.png' };
-
-/** Sábado de la 1ª fecha del Regional M19 2026. */
-export const TRL_FECHA1 = '2026-10-03';
 
 // Archivo en public/ y no Storage: sale del deploy y no gasta requests.
 export const LOGO_TRL = '/competiciones/ar-trl-m19.png';

@@ -1,0 +1,525 @@
+tarjetas oficiales 4baab70e
+
+cardenales-r-c-femenino vs universitario-de-mendoza-femenino · 4baab70e · tarjeta 325781  ·  1fd2ff45-b562-4c1a-bfee-728c9933772c
+  local     · cardenales-r-c-femenino · 18 jugadores · 0 con ficha fijada
+  visitante · universitario-de-mendoza-femenino · 16 jugadores · 0 con ficha fijada
+  eventos   · 12
+    min  3 (1T 3) local     try          Azul Medina
+    min  6 (1T 6) local     try          Azul Medina
+    min  6 (1T 6) local     conversion   Victoria Giardelli
+    min 15 (1T 15) local     try          Virginia Lucrecia Leiva Rojas
+    min 20 (1T 20) local     try          Virginia Lucrecia Leiva Rojas
+    min 42 (2T 2) local     try          Geovana Andrea Bortolozzo
+    min 42 (2T 2) local     try          Azul Medina
+    min 42 (2T 2) local     conversion   Virginia Lucrecia Leiva Rojas
+    min 51 (2T 11) visitante card_yellow  Julieta Rios
+    min 54 (2T 14) local     try          Victoria Giardelli
+    min 58 (2T 18) local     try          Azul Medina
+    min 60 (2T 20) local     try          Antonella Slame
+  marcador  · eventos 49-0 · guardado 49-0
+  tries     · 9-0 (guardado —-—)
+  arbitro   · VIVIANA GARAT (guardado: —)
+  guardado  · 18 local · 16 visitante · 12 eventos
+
+cha-roga-r-c-femenino vs universitario-de-mendoza-femenino · 4baab70e · tarjeta 325731  ·  ac08d93b-3c8f-4b0b-82a8-df3b7c9e9647
+  local     · cha-roga-r-c-femenino · 18 jugadores · 0 con ficha fijada
+  visitante · universitario-de-mendoza-femenino · 16 jugadores · 0 con ficha fijada
+  eventos   · 15
+    min  1 (1T 1) visitante try          Guada Palero
+    min  2 (1T 2) visitante try          Lourdes Marianela Castillo
+    min  3 (1T 3) visitante conversion   Emilce Desirée Gomez Lopresti
+    min  4 (1T 4) visitante try          Maria Laura Verdejo
+    min  5 (1T 5) local     injury       Cintia Peralta
+    min  5 (1T 5) visitante try          Esmeralda Beatriz Olivera Aldalla
+    min 17 (1T 17) local     substitution Tamara Rojas
+    min 42 (2T 2) local     try          Joana Carolina Casal
+    min 42 (2T 2) local     substitution Oriana Bernardi
+    min 42 (2T 2) local     substitution Micaela Aylen Gutiérrez
+    min 47 (2T 7) local     try          Joana Carolina Casal
+    min 52 (2T 12) visitante card_yellow  Emilce Desirée Gomez Lopresti
+    min 54 (2T 14) local     try          Valentina Duarte
+    min 57 (2T 17) local     substitution Cintia Peralta
+    min 59 (2T 19) local     try          Fiama Mattei
+  marcador  · eventos 20-22 · guardado 20-22
+  tries     · 4-4 (guardado —-—)
+  arbitro   · SOFIA MIRTHA VILDOZO FUENTES (guardado: —)
+  guardado  · 18 local · 16 visitante · 15 eventos
+
+cardenales-r-c-femenino vs cha-roga-r-c-femenino · 4baab70e · tarjeta 325732  ·  4dd3d283-6009-4b11-b3a5-4b8024e008eb
+  local     · cardenales-r-c-femenino · 18 jugadores · 0 con ficha fijada
+  visitante · cha-roga-r-c-femenino · 17 jugadores · 0 con ficha fijada
+  eventos   · 15
+    min  1 (1T 1) local     try          Norién Candela Casola
+    min  1 (1T 1) local     conversion   Victoria Giardelli
+    min  5 (1T 5) local     try          Azul Medina
+    min  6 (1T 6) local     card_yellow  Victoria Giardelli
+    min 15 (1T 15) local     try          Ursula Iovane
+    min 21 (1T 21) local     try          Ursula Iovane
+    min 41 (2T 1) visitante substitution Nahir Ianela Macaine
+    min 46 (2T 6) visitante substitution Lara Tatiana Yuskowich
+    min 48 (2T 8) local     try          Rita Beatriz Cazorla
+    min 48 (2T 8) local     conversion   Fátima Gisela Juarez
+    min 52 (2T 12) local     try          Norién Candela Casola
+    min 55 (2T 15) visitante substitution Triana Villordo
+    min 56 (2T 16) visitante substitution Oriana Bernardi
+    min 60 (2T 20) local     try          Victoria Giardelli
+    min 60 (2T 20) local     conversion   Fátima Gisela Juarez
+  marcador  · eventos 41-0 · guardado 41-0
+  tries     · 7-0 (guardado —-—)
+  arbitro   · NEREA LIVONI (guardado: —)
+  guardado  · 18 local · 17 visitante · 15 eventos
+
+aguilas-rc-saenz-pena-femenino vs aguara-guazu-femenino · 4baab70e · tarjeta 325736  ·  ac8a4eb4-e458-4a71-9ca1-8d1bfc6558ce
+  local     · aguilas-rc-saenz-pena-femenino · 17 jugadores · 0 con ficha fijada
+  visitante · aguara-guazu-femenino · 18 jugadores · 0 con ficha fijada
+  eventos   · 11
+    min  1 (1T 1) local     try          Zaira Florencia Gonzalez
+    min  1 (1T 1) local     conversion   Lucia Gicel Ramirez
+    min  1 (1T 1) visitante try          Graciela Yanina Serrano
+    min  8 (1T 8) visitante try          Silvina Ramirez
+    min 18 (1T 18) visitante try          Camila Villagra
+    min 41 (2T 1) local     card_yellow  Estefania Alvares
+    min 49 (2T 9) visitante try          Silvina Ramirez
+    min 59 (2T 19) visitante try          Agostina Del Valle Carreño
+    min 59 (2T 19) visitante conversion   María Florencia Moreno
+    min 60 (2T 20) visitante try          Ana Balceda
+    min 60 (2T 20) visitante conversion   Silvina Ramirez
+  marcador  · eventos 7-34 · guardado 7-34
+  tries     · 1-6 (guardado —-—)
+  arbitro   · DAIANA DEL MILAGRO CESARETTI (guardado: —)
+  guardado  · 17 local · 18 visitante · 11 eventos
+
+aguara-guazu-femenino vs palihue-rc-femenino · 4baab70e · tarjeta 325735  ·  385f4d16-3905-46bb-a6da-6342071beaaf
+  local     · aguara-guazu-femenino · 18 jugadores · 0 con ficha fijada
+  visitante · palihue-rc-femenino · 18 jugadores · 0 con ficha fijada
+  eventos   · 20
+    min  2 (1T 2) local     try          Mayra Anahí Albornoz
+    min  2 (1T 2) local     conversion   Silvina Ramirez
+    min  4 (1T 4) local     try          Mayra Anahí Albornoz
+    min  7 (1T 7) local     try          María Florencia Moreno
+    min  7 (1T 7) local     conversion   María Florencia Moreno
+    min 10 (1T 10) local     try          María Florencia Moreno
+    min 11 (1T 11) local     conversion   Silvina Ramirez
+    min 14 (1T 14) local     card_yellow  Sofía Abril Diaz
+    min 16 (1T 16) local     try          Mayra Anahí Albornoz
+    min 17 (1T 17) local     conversion   Silvina Ramirez
+    min 20 (1T 20) visitante injury       Brisa Abigail Cools
+    min 41 (2T 1) visitante substitution Antonella Abigail Azcarate
+    min 47 (2T 7) local     try          Ana Balceda
+    min 47 (2T 7) visitante substitution Brisa Abigail Cools
+    min 47 (2T 7) visitante substitution Sofia Almiron
+    min 49 (2T 9) visitante substitution Betina Ailen Roriguez Manzi
+    min 50 (2T 10) local     try          María Florencia Moreno
+    min 51 (2T 11) local     try          María Florencia Moreno
+    min 59 (2T 19) local     card_yellow  María Florencia Moreno
+    min 60 (2T 20) visitante substitution Brisa Abigail Cools
+  marcador  · eventos 48-0 · guardado 48-0
+  tries     · 8-0 (guardado —-—)
+  arbitro   · NEREA LIVONI (guardado: —)
+  guardado  · 18 local · 18 visitante · 20 eventos
+
+aguilas-rc-saenz-pena-femenino vs palihue-rc-femenino · 4baab70e · tarjeta 325734  ·  54fb19f8-9f2c-45f3-9605-b32bf4f6fef2
+  local     · aguilas-rc-saenz-pena-femenino · 17 jugadores · 0 con ficha fijada
+  visitante · palihue-rc-femenino · 18 jugadores · 0 con ficha fijada
+  eventos   · 15
+    min  5 (1T 5) local     card_yellow  Ayelen Araceli Goy
+    min  7 (1T 7) local     try          Milagros Jaqueline Cabrera
+    min 10 (1T 10) visitante penalty_try  Antonella Abigail Azcarate
+    min 16 (1T 16) visitante try          Gianela Nicole Gimenez Valenzuela
+    min 16 (1T 16) visitante conversion   Naara Jurado
+    min 17 (1T 17) local     try          Milagros Jaqueline Cabrera
+    min 20 (1T 20) visitante try          María Victoria Canepa
+    min 41 (2T 1) visitante substitution Emilia Cos
+    min 42 (2T 2) local     card_yellow  Milagros Jaqueline Cabrera
+    min 42 (2T 2) visitante substitution Sasha Noemí Prost Alan
+    min 50 (2T 10) local     try          Alexandra Monzon
+    min 50 (2T 10) local     conversion   Lucia Gicel Ramirez
+    min 51 (2T 11) local     try          Zaira Florencia Gonzalez
+    min 54 (2T 14) local     try          Melisa Soledad Rodich
+    min 59 (2T 19) local     try          Daniela Lucia Saravia
+  marcador  · eventos 32-19 · guardado 32-19
+  tries     · 6-3 (guardado —-—)
+  arbitro   · FLORENCIA LEDESMA (guardado: —)
+  guardado  · 17 local · 18 visitante · 15 eventos
+
+club-universitario-de-cordoba-femenino vs marabunta-r-c-femenino · 4baab70e · tarjeta 325737  ·  1270342f-1741-40a4-ad7a-b759b8a68b1c
+  local     · club-universitario-de-cordoba-femenino · 18 jugadores · 0 con ficha fijada
+  visitante · marabunta-r-c-femenino · 18 jugadores · 0 con ficha fijada
+  eventos   · 15
+    min  2 (1T 2) visitante try          Agustina Belén Sandoval
+    min  5 (1T 5) local     try          Renata Giraudo
+    min  8 (1T 8) visitante try          Agustina Belén Sandoval
+    min 11 (1T 11) local     try          Celmira Quiroga
+    min 12 (1T 12) local     conversion   Dolores Berti Baila
+    min 18 (1T 18) visitante substitution Lurdes Montenegro
+    min 42 (2T 2) local     try          Camila Sofia Paredes Masin
+    min 46 (2T 6) local     substitution Ayelen Vega
+    min 46 (2T 6) local     substitution Renata Giraudo
+    min 54 (2T 14) local     card_yellow  Sol Destefanis
+    min 58 (2T 18) visitante substitution Leila Daniela Sandoval
+    min 58 (2T 18) visitante substitution Tiziana Silva
+    min 59 (2T 19) local     try          Camila Sofia Paredes Masin
+    min 59 (2T 19) local     conversion   Dolores Berti Baila
+    min 59 (2T 19) local     substitution Maira Barrionuevo
+  marcador  · eventos 24-10 · guardado 24-10
+  tries     · 4-2 (guardado —-—)
+  arbitro   · ARIADNA FLORENCIA AVALOS (guardado: —)
+  guardado  · 18 local · 18 visitante · 15 eventos
+
+taborin-rc-femenino vs marabunta-r-c-femenino · 4baab70e · tarjeta 325739  ·  00456ad5-63c4-42d8-9f6d-0a7254fa506e
+  local     · taborin-rc-femenino · 18 jugadores · 0 con ficha fijada
+  visitante · marabunta-r-c-femenino · 18 jugadores · 0 con ficha fijada
+  eventos   · 26
+    min  3 (1T 3) local     try          Araceli Soledad Oviedo
+    min  9 (1T 9) visitante card_yellow  Tania Jimena Capdevila
+    min 10 (1T 10) local     try          Araceli Soledad Oviedo
+    min 13 (1T 13) local     try          Ana Rieger
+    min 13 (1T 13) local     conversion   Ana Rieger
+    min 17 (1T 17) local     card_yellow  Macarena Fernanda Burgos
+    min 17 (1T 17) visitante try          Daniza Gutierrez
+    min 17 (1T 17) visitante substitution Lucía Macarena Velázquez Loncomán
+    min 17 (1T 17) visitante substitution Yesica Banegas
+    min 23 (1T 23) local     try          Araceli Soledad Oviedo
+    min 23 (1T 23) local     conversion   Ana Rieger
+    min 41 (2T 1) local     substitution Brisa Agustina Turra
+    min 41 (2T 1) local     substitution Yamila Liliana Barrera
+    min 41 (2T 1) local     substitution Macarena Fernanda Burgos
+    min 42 (2T 2) local     try          Yesica Agustina Saucedo
+    min 42 (2T 2) local     conversion   Ana Rieger
+    min 45 (2T 5) visitante substitution María Luz Camacho
+    min 46 (2T 6) local     conversion   Ana Rieger
+    min 46 (2T 6) local     try          Gimena Sala
+    min 49 (2T 9) visitante card_red     Lurdes Montenegro
+    min 57 (2T 17) visitante substitution Tania Jimena Capdevila
+    min 57 (2T 17) visitante substitution Leila Daniela Sandoval
+    min 58 (2T 18) local     try          Ana Rieger
+    min 58 (2T 18) local     conversion   Ana Rieger
+    min 60 (2T 20) local     try          Maiara Abril Lopez Cejas
+    min 60 (2T 20) local     conversion   Ana Rieger
+  marcador  · eventos 52-5 · guardado 52-5
+  tries     · 8-1 (guardado —-—)
+  arbitro   · MARTINA GERALDINE GARABATOS BONARD (guardado: —)
+  guardado  · 18 local · 18 visitante · 26 eventos
+
+club-universitario-de-cordoba-femenino vs taborin-rc-femenino · 4baab70e · tarjeta 325740  ·  9fab8a15-d4b0-40a1-9242-2acdaaa11fc2
+  local     · club-universitario-de-cordoba-femenino · 18 jugadores · 0 con ficha fijada
+  visitante · taborin-rc-femenino · 18 jugadores · 0 con ficha fijada
+  eventos   · 9
+    min  4 (1T 4) visitante card_yellow  Maiara Abril Lopez Cejas
+    min 15 (1T 15) local     try          Maite Perez
+    min 20 (1T 20) local     try          Sol Destefanis
+    min 44 (2T 4) local     try          Camila Sofia Paredes Masin
+    min 44 (2T 4) visitante card_yellow  Ana Rieger
+    min 52 (2T 12) visitante card_yellow  Brisa Agustina Turra
+    min 53 (2T 13) local     card_yellow  Romina Blandamuro
+    min 53 (2T 13) local     card_yellow  Romina Blandamuro
+    min 57 (2T 17) local     substitution Dolores Berti Baila
+  marcador  · eventos 15-0 · guardado 15-0
+  tries     · 3-0 (guardado —-—)
+  arbitro   · VIVIANA GARAT (guardado: —)
+  guardado  · 18 local · 18 visitante · 9 eventos
+
+la-plata-femenino vs ciudad-femenino · 4baab70e · tarjeta 325747  ·  ba0c5da3-1c84-412c-8107-5b33fb3fb1a4
+  local     · la-plata-femenino · 16 jugadores · 0 con ficha fijada
+  visitante · ciudad-femenino · 16 jugadores · 0 con ficha fijada
+  eventos   · 13
+    min  2 (1T 2) local     try          Magali Gervasio
+    min  2 (1T 2) local     conversion   Avril Rahmer Morgantini
+    min 10 (1T 10) local     card_yellow  Rocio Ale
+    min 16 (1T 16) local     try          Magali Gervasio
+    min 16 (1T 16) local     conversion   Avril Rahmer Morgantini
+    min 18 (1T 18) local     try          Magali Gervasio
+    min 51 (2T 11) local     try          Magali Gervasio
+    min 51 (2T 11) local     conversion   Avril Rahmer Morgantini
+    min 55 (2T 15) local     try          Magali Gervasio
+    min 58 (2T 18) local     try          Carolina Charamone
+    min 58 (2T 18) local     conversion   Avril Rahmer Morgantini
+    min 60 (2T 20) local     try          Avril Rahmer Morgantini
+    min 60 (2T 20) local     conversion   Avril Rahmer Morgantini
+  marcador  · eventos 45-0 · guardado 45-0
+  tries     · 7-0 (guardado —-—)
+  arbitro   · ARIADNA FLORENCIA AVALOS (guardado: —)
+  guardado  · 16 local · 16 visitante · 13 eventos
+
+ciudad-femenino vs regatas-de-resistencia-femenino · 4baab70e · tarjeta 325745  ·  cd18c31e-fcea-4019-9bba-eacc1f581444
+  local     · ciudad-femenino · 16 jugadores · 0 con ficha fijada
+  visitante · regatas-de-resistencia-femenino · 18 jugadores · 0 con ficha fijada
+  eventos   · 13
+    min  1 (1T 1) local     try          Julieta Monjes
+    min  2 (1T 2) local     conversion   Carolina Ariana Carrera Venegoni
+    min  5 (1T 5) visitante try          Marianela Rita Soledad Maidana
+    min  5 (1T 5) visitante conversion   Melisa Silvana Ojeda
+    min  7 (1T 7) local     try          Alejandra Salas
+    min 21 (1T 21) local     try          Ludmila Elena Toledo Pacher
+    min 21 (1T 21) local     conversion   Carolina Ariana Carrera Venegoni
+    min 41 (2T 1) local     try          Lara Rioboo
+    min 48 (2T 8) local     try          Carolina Ariana Carrera Venegoni
+    min 48 (2T 8) local     substitution Ludmila Elena Toledo Pacher
+    min 48 (2T 8) local     substitution Camila De Los Ángeles Vargaz
+    min 48 (2T 8) local     substitution Paola Candia
+    min 48 (2T 8) local     substitution Julieta Monjes
+  marcador  · eventos 29-7 · guardado 29-7
+  tries     · 5-1 (guardado —-—)
+  arbitro   · DAIANA DEL MILAGRO CESARETTI (guardado: —)
+  guardado  · 16 local · 18 visitante · 13 eventos
+
+la-plata-femenino vs regatas-de-resistencia-femenino · 4baab70e · tarjeta 325744  ·  35bfc6b5-b43a-4163-a5b0-158c84316082
+  local     · la-plata-femenino · 16 jugadores · 0 con ficha fijada
+  visitante · regatas-de-resistencia-femenino · 18 jugadores · 0 con ficha fijada
+  eventos   · 19
+    min  9 (1T 9) visitante card_yellow  Marianela Rita Soledad Maidana
+    min 10 (1T 10) local     try          Carolina Charamone
+    min 10 (1T 10) local     conversion   Carolina Charamone
+    min 10 (1T 10) local     try          Carolina Charamone
+    min 10 (1T 10) local     conversion   Carolina Charamone
+    min 10 (1T 10) local     try          Carolina Charamone
+    min 10 (1T 10) local     conversion   Carolina Charamone
+    min 10 (1T 10) local     try          Magali Gervasio
+    min 10 (1T 10) local     conversion   Magali Gervasio
+    min 10 (1T 10) local     try          Magali Gervasio
+    min 10 (1T 10) local     conversion   Magali Gervasio
+    min 10 (1T 10) local     try          Avril Rahmer Morgantini
+    min 10 (1T 10) local     conversion   Avril Rahmer Morgantini
+    min 10 (1T 10) visitante try          Eira Lelies Mikaela Mesa
+    min 14 (1T 14) visitante card_yellow  Sabrina Nair Osuna
+    min 18 (1T 18) visitante try          Sabrina Nair Osuna
+    min 18 (1T 18) visitante conversion   Melisa Silvana Ojeda
+    min 48 (2T 8) visitante try          Sabrina Nair Osuna
+    min 50 (2T 10) local     try          Avril Rahmer Morgantini
+  marcador  · eventos 47-17 · guardado 47-17
+  tries     · 7-3 (guardado —-—)
+  arbitro   · SOFIA MIRTHA VILDOZO FUENTES (guardado: —)
+  guardado  · 16 local · 18 visitante · 19 eventos
+
+aguara-guazu-femenino vs club-universitario-de-cordoba-femenino · 4baab70e · tarjeta 325897  ·  5eb7a2d0-2290-4399-8ecb-fc363a0da01a
+  local     · aguara-guazu-femenino · 18 jugadores · 0 con ficha fijada
+  visitante · club-universitario-de-cordoba-femenino · 18 jugadores · 0 con ficha fijada
+  eventos   · 9
+    min  4 (1T 4) local     try          Graciela Yanina Serrano
+    min 12 (1T 12) visitante penalty_goal Dolores Berti Baila
+    min 42 (2T 2) visitante card_yellow  Camila Sofia Paredes Masin
+    min 42 (2T 2) visitante substitution Sol Destefanis
+    min 44 (2T 4) local     card_yellow  Camila Villagra
+    min 46 (2T 6) local     substitution Sofía Abril Diaz
+    min 50 (2T 10) local     card_yellow  Nahir Argañaraz
+    min 53 (2T 13) visitante conversion   Dolores Berti Baila
+    min 53 (2T 13) visitante try          Ema Lucia Morro Fergola
+  marcador  · eventos 5-10 · guardado 5-10
+  tries     · 1-1 (guardado —-—)
+  arbitro   · ARIADNA FLORENCIA AVALOS (guardado: —)
+  guardado  · 18 local · 18 visitante · 9 eventos
+
+cardenales-r-c-femenino vs la-plata-femenino · 4baab70e · tarjeta 325898  ·  1e1e68fe-53c7-472d-9553-bb37d6b73f38
+  local     · cardenales-r-c-femenino · 18 jugadores · 0 con ficha fijada
+  visitante · la-plata-femenino · 16 jugadores · 0 con ficha fijada
+  eventos   · 16
+    min  2 (1T 2) local     try          Geovana Andrea Bortolozzo
+    min  2 (1T 2) local     conversion   Fátima Gisela Juarez
+    min  9 (1T 9) visitante try          Magali Gervasio
+    min 11 (1T 11) visitante try          Magali Gervasio
+    min 11 (1T 11) visitante conversion   Avril Rahmer Morgantini
+    min 17 (1T 17) visitante try          Magali Gervasio
+    min 17 (1T 17) visitante conversion   Avril Rahmer Morgantini
+    min 45 (2T 5) local     try          Victoria Giardelli
+    min 45 (2T 5) local     conversion   Virginia Lucrecia Leiva Rojas
+    min 48 (2T 8) visitante try          Isabella Cappellani
+    min 55 (2T 15) local     injury       Geovana Andrea Bortolozzo
+    min 58 (2T 18) local     try          Antonella Slame
+    min 80 (2T 40) local     substitution Camila Alvarez Costas
+    min 80 (2T 40) local     substitution Morena Antonella Costilla
+    min 80 (2T 40) local     substitution Fátima Gisela Juarez
+    min 80 (2T 40) local     substitution Geovana Andrea Bortolozzo
+  marcador  · eventos 19-24 · guardado 19-24
+  tries     · 3-4 (guardado —-—)
+  arbitro   · DAIANA DEL MILAGRO CESARETTI (guardado: —)
+  guardado  · 18 local · 16 visitante · 16 eventos
+
+universitario-de-mendoza-femenino vs ciudad-femenino · 4baab70e · tarjeta 325899  ·  0c1308da-8e96-4eaf-a985-2c608d3e0ddc
+  local     · universitario-de-mendoza-femenino · 16 jugadores · 0 con ficha fijada
+  visitante · ciudad-femenino · 16 jugadores · 0 con ficha fijada
+  eventos   · 8
+    min  5 (1T 5) local     card_yellow  Luciana Aguilar
+    min  6 (1T 6) visitante try          Renata Sosa Quintana
+    min  8 (1T 8) local     try          Magdalena Vera Muñoz
+    min 18 (1T 18) local     try          Emilce Desirée Gomez Lopresti
+    min 41 (2T 1) visitante substitution Julieta Monjes
+    min 48 (2T 8) visitante substitution Ludmila Elena Toledo Pacher
+    min 55 (2T 15) visitante substitution Lara Rioboo
+    min 59 (2T 19) visitante try          Carolina Ariana Carrera Venegoni
+  marcador  · eventos 10-10 · guardado 10-10
+  tries     · 2-2 (guardado —-—)
+  arbitro   · VIVIANA GARAT (guardado: —)
+  guardado  · 16 local · 16 visitante · 8 eventos
+
+aguilas-rc-saenz-pena-femenino vs taborin-rc-femenino · 4baab70e · tarjeta 325900  ·  07e86b72-9b7c-4001-a0b7-4a76c3644641
+  local     · aguilas-rc-saenz-pena-femenino · 17 jugadores · 0 con ficha fijada
+  visitante · taborin-rc-femenino · 18 jugadores · 0 con ficha fijada
+  eventos   · 14
+    min  3 (1T 3) visitante try          Ludmila Boca
+    min 16 (1T 16) visitante try          Araceli Soledad Oviedo
+    min 16 (1T 16) visitante conversion   Ana Rieger
+    min 16 (1T 16) visitante substitution Nazarena Yael Gigena Ramallo
+    min 19 (1T 19) visitante try          Ludmila Boca
+    min 45 (2T 5) visitante substitution Tatiana Rocio Falcón
+    min 45 (2T 5) visitante substitution Araceli Soledad Oviedo
+    min 52 (2T 12) local     try          Alexandra Antonella Cabral
+    min 53 (2T 13) local     substitution Alexandra Antonella Cabral
+    min 80 (2T 40) local     substitution Alexandra Monzon
+    min 80 (2T 40) local     substitution Daniela Lucia Saravia
+    min 80 (2T 40) local     substitution Ayelen Araceli Goy
+    min 80 (2T 40) visitante substitution Yamila Liliana Barrera
+    min 80 (2T 40) visitante substitution Macarena Fernanda Burgos
+  marcador  · eventos 5-17 · guardado 5-17
+  tries     · 1-3 (guardado —-—)
+  arbitro   · NEREA LIVONI (guardado: —)
+  guardado  · 17 local · 18 visitante · 14 eventos
+
+palihue-rc-femenino vs marabunta-r-c-femenino · 4baab70e · tarjeta 325902  ·  b9c9aa18-04f5-4370-9f3c-f070417048f6
+  local     · palihue-rc-femenino · 18 jugadores · 0 con ficha fijada
+  visitante · marabunta-r-c-femenino · 17 jugadores · 0 con ficha fijada
+  eventos   · 2
+    min 22 (1T 22) visitante try          Florencia Farroni Reina
+    min 62 (2T 22) visitante substitution Tiziana Silva
+  marcador  · eventos 0-5 · guardado 0-5
+  tries     · 0-1 (guardado —-—)
+  arbitro   · SOFIA MIRTHA VILDOZO FUENTES (guardado: —)
+  guardado  · 18 local · 17 visitante · 2 eventos
+
+cha-roga-r-c-femenino vs regatas-de-resistencia-femenino · 4baab70e · tarjeta 325901  ·  c1a2cf68-08fd-4251-b845-3b3c983310bb
+  local     · cha-roga-r-c-femenino · 17 jugadores · 0 con ficha fijada
+  visitante · regatas-de-resistencia-femenino · 18 jugadores · 0 con ficha fijada
+  eventos   · 8
+    min  8 (1T 8) visitante try          Sabrina Nair Osuna
+    min  9 (1T 9) visitante conversion   Melisa Silvana Ojeda
+    min 11 (1T 11) local     try          Joana Carolina Casal
+    min 11 (1T 11) local     conversion   Joana Arce
+    min 14 (1T 14) visitante try          Juana Celeste Siacia
+    min 15 (1T 15) local     card_yellow  Joana Arce
+    min 48 (2T 8) local     substitution Oriana Bernardi
+    min 55 (2T 15) local     try          Joana Carolina Casal
+  marcador  · eventos 12-12 · guardado 12-12
+  tries     · 2-2 (guardado —-—)
+  arbitro   · CAMILA ABRIL DÍAZ (guardado: —)
+  guardado  · 17 local · 18 visitante · 8 eventos
+
+cha-roga-r-c-femenino vs palihue-rc-femenino · 4baab70e · tarjeta 325915  ·  2ea7facc-a9bb-4046-b3f2-3a084bcf158f
+  local     · cha-roga-r-c-femenino · 17 jugadores · 0 con ficha fijada
+  visitante · palihue-rc-femenino · 18 jugadores · 0 con ficha fijada
+  eventos   · 18
+    min 12 (1T 12) local     try          Joana Carolina Casal
+    min 17 (1T 17) local     substitution Victoria Rojas
+    min 17 (1T 17) local     substitution Triana Villordo
+    min 17 (1T 17) visitante try          Gianela Nicole Gimenez Valenzuela
+    min 21 (1T 21) local     try          Macarena Bello
+    min 42 (2T 2) local     try          Triana Villordo
+    min 42 (2T 2) local     conversion   Joana Arce
+    min 48 (2T 8) local     substitution Micaela Aylen Gutiérrez
+    min 48 (2T 8) local     substitution Macarena Bello
+    min 55 (2T 15) visitante conversion   Adriana Gaspar
+    min 57 (2T 17) local     substitution Nahir Ianela Macaine
+    min 58 (2T 18) visitante substitution Amparo Lucotti
+    min 58 (2T 18) visitante injury       Amparo Lucotti
+    min 59 (2T 19) visitante injury       Emilia Cos
+    min 80 (2T 40) visitante substitution Antonella Abigail Azcarate
+    min 80 (2T 40) visitante substitution Juana Cabello
+    min 80 (2T 40) visitante substitution Amy Jensen
+    min 80 (2T 40) visitante substitution Sasha Noemí Prost Alan
+  marcador  · eventos 17-7 · guardado 17-7
+  tries     · 3-1 (guardado —-—)
+  arbitro   · SOFIA MIRTHA VILDOZO FUENTES (guardado: —)
+  guardado  · 17 local · 18 visitante · 18 eventos
+
+regatas-de-resistencia-femenino vs marabunta-r-c-femenino · 4baab70e · tarjeta 325916  ·  935e20b7-2027-4bea-92bb-dfcff0b0388f
+  local     · regatas-de-resistencia-femenino · 18 jugadores · 0 con ficha fijada
+  visitante · marabunta-r-c-femenino · 16 jugadores · 0 con ficha fijada
+  eventos   · 14
+    min  1 (1T 1) visitante try          Maria Pia Perea
+    min  3 (1T 3) local     try          Nair Soledad Alvarez
+    min  7 (1T 7) local     try          Marianela Rita Soledad Maidana
+    min  9 (1T 9) local     try          Marianela Rita Soledad Maidana
+    min 10 (1T 10) local     conversion   Melisa Silvana Ojeda
+    min 14 (1T 14) local     try          Nair Soledad Alvarez
+    min 15 (1T 15) local     conversion   Melisa Silvana Ojeda
+    min 20 (1T 20) visitante substitution María Luz Camacho
+    min 41 (2T 1) local     try          Nair Soledad Alvarez
+    min 47 (2T 7) local     try          Marianela Rita Soledad Maidana
+    min 48 (2T 8) local     conversion   Melisa Silvana Ojeda
+    min 48 (2T 8) visitante substitution Agustina Belén Sandoval
+    min 50 (2T 10) local     try          Marianela Rita Soledad Maidana
+    min 60 (2T 20) visitante substitution Muriel Balboa
+  marcador  · eventos 41-5 · guardado 41-5
+  tries     · 7-1 (guardado —-—)
+  arbitro   · CAMILA ABRIL DÍAZ (guardado: —)
+  guardado  · 18 local · 16 visitante · 14 eventos
+
+universitario-de-mendoza-femenino vs aguilas-rc-saenz-pena-femenino · 4baab70e · tarjeta 325917  ·  81073f30-3a22-4bb4-b620-4b4b2ca40ec6
+  local     · universitario-de-mendoza-femenino · 16 jugadores · 0 con ficha fijada
+  visitante · aguilas-rc-saenz-pena-femenino · 17 jugadores · 0 con ficha fijada
+  eventos   · 12
+    min 15 (1T 15) visitante try          Alexandra Monzon
+    min 44 (2T 4) local     try          Emilce Desirée Gomez Lopresti
+    min 49 (2T 9) local     try          Emilce Desirée Gomez Lopresti
+    min 49 (2T 9) local     conversion   Emilce Desirée Gomez Lopresti
+    min 50 (2T 10) visitante substitution Vanesa Soledad Fernandez
+    min 55 (2T 15) visitante substitution Alexandra Antonella Cabral
+    min 55 (2T 15) visitante substitution Zaira Florencia Gonzalez
+    min 56 (2T 16) visitante injury       Alexandra Monzon
+    min 56 (2T 16) visitante substitution Alexandra Monzon
+    min 56 (2T 16) visitante substitution Daniela Lucia Saravia
+    min 80 (2T 40) local     substitution Natasha Garnica
+    min 80 (2T 40) local     substitution Priscila Bertinatto
+  marcador  · eventos 12-5 · guardado 12-5
+  tries     · 2-1 (guardado —-—)
+  arbitro   · DAIANA DEL MILAGRO CESARETTI (guardado: —)
+  guardado  · 16 local · 17 visitante · 12 eventos
+
+ciudad-femenino vs taborin-rc-femenino · 4baab70e · tarjeta 325918  ·  a71193cf-094d-413b-8d10-895893c65ee4
+  local     · ciudad-femenino · 16 jugadores · 0 con ficha fijada
+  visitante · taborin-rc-femenino · 18 jugadores · 0 con ficha fijada
+  eventos   · 10
+    min 14 (1T 14) visitante card_yellow  Gimena Sala
+    min 20 (1T 20) visitante try          Antonella Crosetto
+    min 47 (2T 7) local     substitution Maria Belen Garcia Remiro
+    min 48 (2T 8) local     try          Renata Sosa Quintana
+    min 49 (2T 9) local     substitution Alejandra Salas
+    min 49 (2T 9) local     substitution Viktoria Koleva
+    min 50 (2T 10) visitante injury       Valentina Ponce
+    min 54 (2T 14) visitante injury       Macarena Fernanda Burgos
+    min 56 (2T 16) visitante card_yellow  Gimena Sala
+    min 56 (2T 16) visitante card_red     Gimena Sala
+  marcador  · eventos 5-5 · guardado 5-5
+  tries     · 1-1 (guardado —-—)
+  arbitro   · ARIADNA FLORENCIA AVALOS (guardado: —)
+  guardado  · 16 local · 18 visitante · 10 eventos
+
+aguara-guazu-femenino vs cardenales-r-c-femenino · 4baab70e · tarjeta 325919  ·  db5b99cc-3e63-467c-8ca9-9d4daaa62237
+  local     · aguara-guazu-femenino · 18 jugadores · 0 con ficha fijada
+  visitante · cardenales-r-c-femenino · 18 jugadores · 0 con ficha fijada
+  eventos   · 5
+    min  5 (1T 5) visitante try          Brisa Malena Medina
+    min 20 (1T 20) visitante injury       Brisa Malena Medina
+    min 20 (1T 20) visitante substitution Brisa Malena Medina
+    min 53 (2T 13) local     card_yellow  Silvina Ramirez
+    min 60 (2T 20) local     card_yellow  Nahir Argañaraz
+  marcador  · eventos 0-5 · guardado 0-5
+  tries     · 0-1 (guardado —-—)
+  arbitro   · VIVIANA GARAT (guardado: —)
+  guardado  · 18 local · 18 visitante · 5 eventos
+
+club-universitario-de-cordoba-femenino vs la-plata-femenino · 4baab70e · tarjeta 325920  ·  3420556a-7b96-48cb-a028-d9182c04fae7
+  local     · club-universitario-de-cordoba-femenino · 18 jugadores · 0 con ficha fijada
+  visitante · la-plata-femenino · 16 jugadores · 0 con ficha fijada
+  eventos   · 7
+    min 10 (1T 10) local     try          Dolores Berti Baila
+    min 20 (1T 20) local     try          Brisa Nazarena Trigo Alday
+    min 45 (2T 5) visitante try          Carolina Charamone
+    min 49 (2T 9) visitante try          Magali Gervasio
+    min 49 (2T 9) visitante conversion   Avril Rahmer Morgantini
+    min 51 (2T 11) visitante card_yellow  Sol Josefina Rodriguez
+    min 60 (2T 20) local     try          Romina Blandamuro
+  marcador  · eventos 15-12 · guardado 15-12
+  tries     · 3-2 (guardado 3-2)
+  arbitro   · NEREA LIVONI (guardado: —)
+  guardado  · 18 local · 16 visitante · 7 eventos
+
+listo · 24 partidos

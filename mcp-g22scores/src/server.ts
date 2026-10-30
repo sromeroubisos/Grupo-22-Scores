@@ -1,4 +1,5 @@
-import express, { type Request, type Response } from "express";
+import { createHash, timingSafeEqual } from "node:crypto";
+import express, { type NextFunction, type Request, type Response } from "express";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
@@ -17,6 +18,12 @@ const sseMessagePath = joinPath(config.mcpPath, "messages");
 const app = express();
 
 app.disable("x-powered-by");
+
+// La auth va ANTES del parser de JSON: un pedido sin token no llega a que se
+// lea su body. /health queda abierto (no expone nada) para el hosting.
+const expectedTokenHash = config.inboundToken ? sha256(config.inboundToken) : null;
+app.use([config.mcpPath, sseMessagePath, "/sse", "/messages"], requireInboundAuth);
+
 app.use(express.json({ limit: "1mb", type: ["application/json", "application/*+json"] }));
 
 app.get("/health", (_req, res) => {
@@ -31,6 +38,7 @@ app.get("/health", (_req, res) => {
 });
 
 app.options(config.mcpPath, (_req, res) => {
+  // (Ya paso por requireInboundAuth, que deja pasar el preflight sin token.)
   res.setHeader("Allow", "GET, POST, DELETE, OPTIONS");
   res.status(204).end();
 });
@@ -66,9 +74,40 @@ app.use((_req, res) => {
   });
 });
 
-const httpServer = app.listen(config.port, () => {
-  console.log(`G22 Scores MCP server listening on http://localhost:${config.port}${config.mcpPath}`);
+const httpServer = app.listen(config.port, config.host, () => {
+  console.log(
+    `G22 Scores MCP server listening on http://${config.host}:${config.port}${config.mcpPath}` +
+      (config.inboundToken ? " (inbound auth: bearer token)" : " (inbound auth: DISABLED)")
+  );
 });
+
+function sha256(value: string): Buffer {
+  return createHash("sha256").update(value, "utf8").digest();
+}
+
+/**
+ * Authorization: Bearer <MCP_INBOUND_TOKEN>. Se comparan los SHA-256 con
+ * timingSafeEqual: los dos buffers miden siempre 32 bytes (timingSafeEqual
+ * exige igual largo) y el tiempo no filtra cuantos caracteres coinciden.
+ */
+function requireInboundAuth(req: Request, res: Response, next: NextFunction): void {
+  if (!expectedTokenHash || req.method === "OPTIONS") {
+    next();
+    return;
+  }
+
+  const header = singleHeader(req, "authorization") ?? "";
+  const match = /^Bearer\s+(.+)$/i.exec(header.trim());
+  const provided = match?.[1]?.trim() ?? "";
+
+  if (provided && timingSafeEqual(sha256(provided), expectedTokenHash)) {
+    next();
+    return;
+  }
+
+  res.setHeader("WWW-Authenticate", 'Bearer realm="g22scores-mcp"');
+  sendJsonRpcError(res, 401, -32001, "Unauthorized.");
+}
 
 process.on("SIGINT", () => shutdown("SIGINT"));
 process.on("SIGTERM", () => shutdown("SIGTERM"));
@@ -119,16 +158,44 @@ function createMcpServer(): McpServer {
 }
 
 async function createSseSession(res: Response, messagePath: string): Promise<void> {
+  // Cada sesion SSE es una conexion abierta con su propio McpServer: sin tope,
+  // un cliente que abre y no cierra se come la memoria del proceso.
+  if (sseSessions.size >= config.maxSseSessions) {
+    res.setHeader("Retry-After", "30");
+    sendJsonRpcError(res, 503, -32000, "Too many open SSE sessions. Try again later.");
+    return;
+  }
+
   const server = createMcpServer();
   const transport = new SSEServerTransport(messagePath, res);
 
-  transport.onclose = () => {
+  let cleaned = false;
+  const cleanup = () => {
+    if (cleaned) {
+      return;
+    }
+
+    cleaned = true;
     sseSessions.delete(transport.sessionId);
     void server.close();
   };
 
+  transport.onclose = cleanup;
+  // onclose no siempre se dispara si el cliente corta la conexion de golpe:
+  // el "close" de la respuesta HTTP es la red de seguridad.
+  res.on("close", () => {
+    cleanup();
+    void transport.close();
+  });
+
   sseSessions.set(transport.sessionId, { server, transport });
-  await server.connect(transport);
+
+  try {
+    await server.connect(transport);
+  } catch (error) {
+    cleanup();
+    handleServerError(res, error);
+  }
 }
 
 async function handleSseMessageRequest(req: Request, res: Response): Promise<void> {

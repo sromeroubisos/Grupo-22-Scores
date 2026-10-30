@@ -1,0 +1,153 @@
+{
+  "_about": "El Entrenador, tema oscuro. Roles mapeados a los tokens globales de G22 (--color-*). No hay color de la referencia.",
+  "color": {
+    "bg": "#0a0a0b",
+    "surface": "#121214",
+    "surface-2": "#1c1c1f",
+    "border": "#2a2a2e",
+    "border-input": "#71717a",
+    "text": "#f2f2f2",
+    "text-muted": "#a1a1aa",
+    "accent": "#00a365",
+    "on-accent": "#ffffff",
+    "success": "#22c55e",
+    "danger": "#f87171",
+    "warning": "#f59e0b",
+    "accent-ink": "#007549",
+    "accent-text": "#00a365"
+  },
+  "pairs": [
+    [
+      "text",
+      "bg"
+    ],
+    [
+      "text",
+      "surface"
+    ],
+    [
+      "text",
+      "surface-2"
+    ],
+    [
+      "text-muted",
+      "bg"
+    ],
+    [
+      "text-muted",
+      "surface"
+    ],
+    [
+      "text-muted",
+      "surface-2"
+    ],
+    [
+      "success",
+      "surface"
+    ],
+    [
+      "danger",
+      "surface"
+    ],
+    [
+      "warning",
+      "surface"
+    ],
+    [
+      "border-input",
+      "surface",
+      "ui"
+    ],
+    [
+      "on-accent",
+      "accent-ink"
+    ],
+    [
+      "accent-text",
+      "surface"
+    ],
+    [
+      "accent-text",
+      "bg"
+    ]
+  ],
+  "font": {
+    "sans": "var(--font-primary): Outfit, Inter, sans-serif (la del sitio; nada de la referencia)"
+  },
+  "type": {
+    "micro": {
+      "size": 9.5,
+      "line": 12,
+      "weight": 700,
+      "note": "rótulos en mayúscula, tracking .12em"
+    },
+    "xs": {
+      "size": 12,
+      "line": 16,
+      "weight": 500
+    },
+    "sm": {
+      "size": 13.5,
+      "line": 19,
+      "weight": 400
+    },
+    "base": {
+      "size": 15,
+      "line": 22,
+      "weight": 400
+    },
+    "lg": {
+      "size": 18,
+      "line": 24,
+      "weight": 800
+    },
+    "stat": {
+      "size": 17,
+      "line": 20,
+      "weight": 800,
+      "note": "números tabulares"
+    },
+    "display": {
+      "size": 38,
+      "line": 40,
+      "weight": 900
+    }
+  },
+  "space": [
+    0,
+    4,
+    6,
+    8,
+    10,
+    12,
+    14,
+    18,
+    24
+  ],
+  "radius": {
+    "sm": 10,
+    "md": 12,
+    "lg": 16,
+    "bar": 18,
+    "pill": 999
+  },
+  "shadow": {
+    "card": "0 12px 32px rgba(0,0,0,.12)",
+    "bar": "0 -10px 30px rgba(0,0,0,.18)",
+    "cta": "0 8px 20px color-mix(accent 30%)"
+  },
+  "motion": {
+    "fast": "150ms",
+    "card": "280ms",
+    "ease": "cubic-bezier(.2,.8,.2,1)",
+    "press": "scale(.985)"
+  },
+  "layout": {
+    "maxWidth": 960,
+    "gutterMobile": 12,
+    "gutterDesktop": 20,
+    "actionBarBottomMobile": "var(--mobile-nav-height) + env(safe-area-inset-bottom) + 8px",
+    "mobileNavBreakpoint": 900
+  },
+  "_contrastNote": "accent (#00a365, el verde de G22) NO se usa como fondo de texto blanco ni como texto en claro: da 3,27:1 y 3,13:1. Se usan accent-ink y accent-text."
+}

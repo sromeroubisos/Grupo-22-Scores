@@ -1,0 +1,219 @@
+296087 Cerrado Santa Fe Rugby Club 45-20 Universitario De Rosario eventos 45 20 nL 23 nV 23 local: fichas 22 nuevas 1 visitante: fichas 11 nuevas 12
+296088 Cerrado Old Resian Club 25-28 Gim. Y Esg. De Rosario eventos 25 28 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 22 nuevas 1
+296090 Cerrado Parana Rowing Club 20-30 Club A. Estudiantes eventos 20 30 nL 23 nV 23 local: fichas 21 nuevas 2 visitante: fichas 22 nuevas 1
+   DUDOSO ('Joaquin Valentin Guzman Beron', ['Joaquin Valentin Beron', 'Joaquín Berón'])
+   DUDOSO ('Santiago Jose Carreras Iturraspe', ['Santiago Carreras Iturraspe', 'Santiago Carreras'])
+296092 Cerrado C.R.A.I. 17-18 Duendes R.C. eventos 17 18 nL 23 nV 23 local: fichas 21 nuevas 2 visitante: fichas 22 nuevas 1
+296110 Cerrado Jockey Club Vdo Tuerto 27-26 Jockey Club De Rosario eventos 27 26 nL 23 nV 23 local: fichas 20 nuevas 3 visitante: fichas 19 nuevas 4
+295374 Cerrado C.Ra.R. De Rafaela 5-14 Club Logaritmo Rugby eventos 5 14 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+295375 Cerrado Club A. Provincial 32-5 Gim. Y Esg. De Pergamino eventos 32 5 nL 23 nV 23 local: fichas 10 nuevas 13 visitante: fichas 0 nuevas 23
+295376 Cerrado Universitario De Santa Fe 48-14 C.S. Los Pampas Rufino eventos 48 14 nL 23 nV 23 local: fichas 7 nuevas 16 visitante: fichas 0 nuevas 23 local: sin pareja: (15, '2T', 25, 'Mateo Schmidt')
+295377 Cerrado Club Los Caranchos 43-16 La Salle Jobson De Sta. Fe eventos 43 16 nL 23 nV 23 local: fichas 12 nuevas 11 visitante: fichas 0 nuevas 23
+281439 Cerrado Universitario De Rosario 24-16 Jockey Club Vdo Tuerto eventos 24 16 nL 23 nV 23 local: fichas 12 nuevas 11 visitante: fichas 19 nuevas 4
+   DUDOSO ('Joaquin Valentin Guzman Beron', ['Joaquin Valentin Beron', 'Joaquín Berón'])
+   DUDOSO ('Santiago Jose Carreras Iturraspe', ['Santiago Carreras Iturraspe', 'Santiago Carreras'])
+281440 Cerrado Jockey Club De Rosario 6-23 C.R.A.I. eventos 6 23 nL 23 nV 23 local: fichas 21 nuevas 2 visitante: fichas 21 nuevas 2
+281441 Cerrado Duendes R.C. 38-3 Parana Rowing Club eventos 38 3 nL 23 nV 23 local: fichas 22 nuevas 1 visitante: fichas 23 nuevas 0
+281442 Cerrado Club A. Estudiantes 13-8 Old Resian Club eventos 13 8 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 23 nuevas 0
+281443 Cerrado Gim. Y Esg. De Rosario 28-13 Santa Fe Rugby Club eventos 28 13 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 23 nuevas 0
+281445 Cerrado Cha Roga Club De Santa Fe 13-59 Club Los Caranchos eventos 13 59 nL 23 nV 22 local: fichas 0 nuevas 23 visitante: fichas 12 nuevas 10 visitante: sin pareja: (-1, '1T', 23, 'Franco González') visitante: sin pareja: (-1, '2T', 75, 'Manuel Ordiz')
+281446 Cerrado La Salle Jobson De Sta. Fe 29-32 Universitario De Santa Fe eventos 29 32 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 8 nuevas 15
+281447 Cerrado C.S. Los Pampas Rufino 23-23 Club A. Provincial eventos 23 23 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 10 nuevas 13
+281448 Cerrado Gim. Y Esg. De Pergamino 12-55 C.Ra.R. De Rafaela eventos 12 55 nL 23 nV 24 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 24
+281449 Cerrado Regatas & Belgrano S.N. 26-47 Club Logaritmo Rugby eventos 26 47 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+298203 Cerrado Gim. Y Esg. De Rosario 24-27 Universitario De Rosario eventos 24 27 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 11 nuevas 12
+298204 Cerrado Santa Fe Rugby Club 20-27 Club A. Estudiantes eventos 20 27 nL 23 nV 23 local: fichas 22 nuevas 1 visitante: fichas 22 nuevas 1
+298205 Cerrado Old Resian Club 19-29 Duendes R.C. eventos 19 29 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 22 nuevas 1
+298206 Cerrado Parana Rowing Club 31-29 Jockey Club De Rosario eventos 31 29 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 23 nuevas 0
+   DUDOSO ('Joaquin Valentin Guzman Beron', ['Joaquin Valentin Beron', 'Joaquín Berón'])
+   DUDOSO ('Santiago Jose Carreras Iturraspe', ['Santiago Carreras Iturraspe', 'Santiago Carreras'])
+298207 Cerrado C.R.A.I. 13-10 Jockey Club Vdo Tuerto eventos 13 10 nL 23 nV 23 local: fichas 21 nuevas 2 visitante: fichas 17 nuevas 6
+298208 Cerrado Club Logaritmo Rugby 45-15 Gim. Y Esg. De Pergamino eventos 45 15 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23 visitante: sin pareja: (14, '2T', 75, 'Leonardo Medina')
+298210 Cerrado Club A. Provincial 27-19 La Salle Jobson De Sta. Fe eventos 27 19 nL 23 nV 23 local: fichas 9 nuevas 14 visitante: fichas 0 nuevas 23
+298211 Cerrado Universitario De Santa Fe 65-21 Cha Roga Club De Santa Fe eventos 65 21 nL 23 nV 23 local: fichas 8 nuevas 15 visitante: fichas 0 nuevas 23
+298212 Cerrado Club Los Caranchos 23-15 Club Tilcara De Paraná eventos 23 15 nL 22 nV 23 local: fichas 12 nuevas 10 visitante: fichas 10 nuevas 13
+298213 Cerrado Alma Juniors De Esperanza 64-19 Regatas & Belgrano S.N. eventos 64 19 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23 visitante: sin pareja: (16, '2T', 37, 'Gino Salandari')
+   DUDOSO ('Joaquin Valentin Guzman Beron', ['Joaquin Valentin Beron', 'Joaquín Berón'])
+   DUDOSO ('Santiago Jose Carreras Iturraspe', ['Santiago Carreras Iturraspe', 'Santiago Carreras'])
+298246 Cerrado Universitario De Rosario 38-45 C.R.A.I. eventos 38 45 nL 23 nV 23 local: fichas 12 nuevas 11 visitante: fichas 22 nuevas 1
+298247 Cerrado Jockey Club Vdo Tuerto 35-27 Parana Rowing Club eventos 35 27 nL 23 nV 23 local: fichas 16 nuevas 7 visitante: fichas 23 nuevas 0
+298248 Cerrado Jockey Club De Rosario 34-25 Old Resian Club eventos 34 25 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 23 nuevas 0
+298249 Cerrado Duendes R.C. 17-28 Santa Fe Rugby Club eventos 17 28 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 22 nuevas 1
+298250 Cerrado Club A. Estudiantes 20-22 Gim. Y Esg. De Rosario eventos 20 22 nL 23 nV 23 local: fichas 22 nuevas 1 visitante: fichas 23 nuevas 0
+308803 Cerrado Club A. Estudiantes 26-24 Universitario De Rosario eventos 26 24 nL 23 nV 23 local: fichas 22 nuevas 1 visitante: fichas 11 nuevas 12
+308804 Cerrado Gim. Y Esg. De Rosario 6-27 Duendes R.C. eventos 6 27 nL 23 nV 23 local: fichas 22 nuevas 1 visitante: fichas 23 nuevas 0
+308805 Cerrado Santa Fe Rugby Club 16-15 Jockey Club De Rosario eventos 16 15 nL 23 nV 23 local: fichas 22 nuevas 1 visitante: fichas 23 nuevas 0
+308806 Cerrado Old Resian Club 17-14 Jockey Club Vdo Tuerto eventos 17 14 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 16 nuevas 7
+   DUDOSO ('Joaquin Valentin Guzman Beron', ['Joaquin Valentin Beron', 'Joaquín Berón'])
+   DUDOSO ('Santiago Jose Carreras Iturraspe', ['Santiago Carreras Iturraspe', 'Santiago Carreras'])
+308807 Cerrado Parana Rowing Club 19-38 C.R.A.I. eventos 19 38 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 22 nuevas 1
+308808 Cerrado Alma Juniors De Esperanza 20-14 Club Los Caranchos eventos 20 14 nL 23 nV 22 local: fichas 0 nuevas 23 visitante: fichas 11 nuevas 11 local: sin pareja: (14, '2T', 40, 'Alan Franco Blanche')
+308809 Cerrado Club Tilcara De Paraná 26-20 Universitario De Santa Fe eventos 26 20 nL 23 nV 23 local: fichas 12 nuevas 11 visitante: fichas 10 nuevas 13
+308810 Cerrado Cha Roga Club De Santa Fe 17-27 Club A. Provincial eventos 17 27 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 10 nuevas 13
+308811 Cerrado La Salle Jobson De Sta. Fe 15-26 C.Ra.R. De Rafaela eventos 15 26 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+308812 Cerrado C.S. Los Pampas Rufino 7-83 Club Logaritmo Rugby eventos 7 83 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+308813 Cerrado Regatas & Belgrano S.N. 35-28 Gim. Y Esg. De Pergamino eventos 35 28 nL 25 nV 23 local: fichas 0 nuevas 25 visitante: fichas 0 nuevas 23
+309375 Cerrado Universitario De Rosario 24-27 Parana Rowing Club eventos 24 27 nL 23 nV 23 local: fichas 12 nuevas 11 visitante: fichas 23 nuevas 0
+   DUDOSO ('Joaquin Valentin Guzman Beron', ['Joaquin Valentin Beron', 'Joaquín Berón'])
+   DUDOSO ('Santiago Jose Carreras Iturraspe', ['Santiago Carreras Iturraspe', 'Santiago Carreras'])
+309376 Cerrado C.R.A.I. 9-10 Old Resian Club eventos 9 10 nL 23 nV 23 local: fichas 22 nuevas 1 visitante: fichas 23 nuevas 0
+309377 Cerrado Jockey Club Vdo Tuerto 15-35 Santa Fe Rugby Club eventos 15 35 nL 23 nV 23 local: fichas 16 nuevas 7 visitante: fichas 22 nuevas 1
+309378 Cerrado Jockey Club De Rosario 40-22 Gim. Y Esg. De Rosario eventos 40 22 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 23 nuevas 0
+309379 Cerrado Duendes R.C. 26-29 Club A. Estudiantes eventos 26 29 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 23 nuevas 0
+309380 Cerrado Gim. Y Esg. De Pergamino 19-25 C.S. Los Pampas Rufino eventos 19 25 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+309381 Cerrado Club Logaritmo Rugby 55-10 La Salle Jobson De Sta. Fe eventos 55 10 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+309383 Cerrado Club A. Provincial 28-26 Club Tilcara De Paraná eventos 28 26 nL 23 nV 23 local: fichas 10 nuevas 13 visitante: fichas 12 nuevas 11
+309384 Cerrado Universitario De Santa Fe 25-23 Alma Juniors De Esperanza eventos 25 23 nL 23 nV 23 local: fichas 6 nuevas 17 visitante: fichas 0 nuevas 23
+309385 Cerrado Club Los Caranchos 36-7 Regatas & Belgrano S.N. eventos 36 7 nL 22 nV 23 local: fichas 9 nuevas 13 visitante: fichas 0 nuevas 23
+311298 Cerrado Duendes R.C. 38-17 Universitario De Rosario eventos 38 17 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 9 nuevas 14
+311299 Cerrado Club A. Estudiantes 22-17 Jockey Club De Rosario eventos 22 17 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 22 nuevas 1
+311300 Cerrado Gim. Y Esg. De Rosario 35-26 Jockey Club Vdo Tuerto eventos 35 26 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 16 nuevas 7
+   DUDOSO ('Joaquin Valentin Guzman Beron', ['Joaquin Valentin Beron', 'Joaquín Berón'])
+   DUDOSO ('Santiago Jose Carreras Iturraspe', ['Santiago Carreras Iturraspe', 'Santiago Carreras'])
+311301 Cerrado Santa Fe Rugby Club 31-27 C.R.A.I. eventos 65 67 nL 46 nV 46 local: fichas 23 nuevas 23 visitante: fichas 22 nuevas 24
+311303 Cerrado Club Los Caranchos 37-0 Universitario De Santa Fe eventos 37 0 nL 22 nV 23 local: fichas 12 nuevas 10 visitante: fichas 8 nuevas 15 local: sin pareja: (5, '2T', 45, 'Juan Cruz Vera')
+311304 Cerrado Alma Juniors De Esperanza 37-5 Club A. Provincial eventos 37 5 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 11 nuevas 12
+311306 Cerrado Cha Roga Club De Santa Fe 14-37 Club Logaritmo Rugby eventos 14 37 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+311307 Cerrado La Salle Jobson De Sta. Fe 33-19 Gim. Y Esg. De Pergamino eventos 33 19 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+311308 Cerrado Regatas & Belgrano S.N. 29-12 C.S. Los Pampas Rufino eventos 29 12 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+312019 Cerrado Universitario De Rosario 31-24 Old Resian Club eventos 31 24 nL 23 nV 23 local: fichas 11 nuevas 12 visitante: fichas 23 nuevas 0 local: sin pareja: (15, '2T', 42, 'Benicio Aguilar Saucedo')
+312020 Cerrado Parana Rowing Club 29-29 Santa Fe Rugby Club eventos 29 29 nL 23 nV 23 local: fichas 22 nuevas 1 visitante: fichas 23 nuevas 0
+   DUDOSO ('Joaquin Valentin Guzman Beron', ['Joaquin Valentin Beron', 'Joaquín Berón'])
+   DUDOSO ('Santiago Jose Carreras Iturraspe', ['Santiago Carreras Iturraspe', 'Santiago Carreras'])
+312021 Cerrado C.R.A.I. 28-32 Gim. Y Esg. De Rosario eventos 28 32 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 23 nuevas 0
+312022 Cerrado Jockey Club Vdo Tuerto 15-37 Club A. Estudiantes eventos 15 37 nL 23 nV 23 local: fichas 15 nuevas 8 visitante: fichas 22 nuevas 1
+312023 Cerrado Jockey Club De Rosario 18-10 Duendes R.C. eventos 18 10 nL 23 nV 23 local: fichas 22 nuevas 1 visitante: fichas 23 nuevas 0
+312024 Cerrado C.S. Los Pampas Rufino 32-27 La Salle Jobson De Sta. Fe eventos 32 27 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+312025 Cerrado Gim. Y Esg. De Pergamino 40-15 Cha Roga Club De Santa Fe eventos 40 15 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+312026 Cerrado Club Logaritmo Rugby 37-9 Club Tilcara De Paraná eventos 37 9 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 13 nuevas 10 visitante: sin pareja: (13, '1T', 66, 'Uriel Abalde')
+312027 Cerrado C.Ra.R. De Rafaela 48-34 Alma Juniors De Esperanza eventos 48 34 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+312028 Cerrado Club A. Provincial 39-29 Club Los Caranchos eventos 39 29 nL 23 nV 23 local: fichas 11 nuevas 12 visitante: fichas 12 nuevas 11
+312029 Cerrado Universitario De Santa Fe 42-13 Regatas & Belgrano S.N. eventos 42 13 nL 23 nV 23 local: fichas 7 nuevas 16 visitante: fichas 0 nuevas 23
+313410 Cerrado Jockey Club De Rosario 27-21 Universitario De Rosario eventos 27 21 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 12 nuevas 11 visitante: sin pareja: (11, '2T', 63, 'Benicio Aguilar Saucedo')
+313411 Cerrado Duendes R.C. 38-0 Jockey Club Vdo Tuerto eventos 38 0 nL 23 nV 23 local: fichas 22 nuevas 1 visitante: fichas 15 nuevas 8
+   DUDOSO ('Joaquin Valentin Guzman Beron', ['Joaquin Valentin Beron', 'Joaquín Berón'])
+   DUDOSO ('Santiago Jose Carreras Iturraspe', ['Santiago Carreras Iturraspe', 'Santiago Carreras'])
+313412 Cerrado Club A. Estudiantes 25-30 C.R.A.I. eventos 25 30 nL 23 nV 23 local: fichas 22 nuevas 1 visitante: fichas 23 nuevas 0
+313413 Cerrado Gim. Y Esg. De Rosario 34-33 Parana Rowing Club eventos 34 33 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 23 nuevas 0
+313414 Cerrado Santa Fe Rugby Club 31-35 Old Resian Club eventos 31 35 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 23 nuevas 0
+313415 Cerrado Universitario De Santa Fe 53-19 Club A. Provincial eventos 53 19 nL 23 nV 23 local: fichas 10 nuevas 13 visitante: fichas 12 nuevas 11
+313416 Cerrado Club Los Caranchos 13-41 C.Ra.R. De Rafaela eventos 13 41 nL 22 nV 23 local: fichas 12 nuevas 10 visitante: fichas 0 nuevas 23
+313417 Cerrado Alma Juniors De Esperanza 34-22 Club Logaritmo Rugby eventos 34 22 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+313418 Cerrado Club Tilcara De Paraná 58-0 Gim. Y Esg. De Pergamino eventos 58 0 nL 23 nV 23 local: fichas 11 nuevas 12 visitante: fichas 0 nuevas 23
+313419 Cerrado Regatas & Belgrano S.N. 47-33 La Salle Jobson De Sta. Fe eventos 47 33 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+313470 Cerrado Cha Roga Club De Santa Fe 34-24 C.S. Los Pampas Rufino eventos 34 24 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23 local: sin pareja: (9, '2T', 6, 'Romeo Martin Molina Cobo')
+313972 Cerrado Universitario De Rosario 17-37 Santa Fe Rugby Club eventos 17 37 nL 23 nV 23 local: fichas 13 nuevas 10 visitante: fichas 23 nuevas 0
+313974 Cerrado Gim. Y Esg. De Rosario 34-27 Old Resian Club eventos 34 27 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 22 nuevas 1
+313975 Cerrado Club A. Estudiantes 15-30 Parana Rowing Club eventos 15 30 nL 23 nV 23 local: fichas 20 nuevas 3 visitante: fichas 23 nuevas 0
+   DUDOSO ('Joaquin Valentin Guzman Beron', ['Joaquin Valentin Beron', 'Joaquín Berón'])
+   DUDOSO ('Santiago Jose Carreras Iturraspe', ['Santiago Carreras Iturraspe', 'Santiago Carreras'])
+313976 Cerrado Duendes R.C. 27-20 C.R.A.I. eventos 27 20 nL 23 nV 23 local: fichas 22 nuevas 1 visitante: fichas 23 nuevas 0
+313977 Cerrado Jockey Club De Rosario 52-17 Jockey Club Vdo Tuerto eventos 52 17 nL 23 nV 23 local: fichas 22 nuevas 1 visitante: fichas 14 nuevas 9
+313984 Cerrado Gim. Y Esg. De Pergamino 15-43 Alma Juniors De Esperanza eventos 42 72 nL 46 nV 46 local: fichas 0 nuevas 46 visitante: fichas 0 nuevas 46
+313980 Cerrado C.S. Los Pampas Rufino 0-43 Club Tilcara De Paraná eventos 0 43 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 10 nuevas 13
+313981 Cerrado Club Logaritmo Rugby 29-23 Club Los Caranchos eventos 29 23 nL 23 nV 22 local: fichas 0 nuevas 23 visitante: fichas 10 nuevas 12 visitante: sin pareja: (8, '2T', 60, 'Juan Cavallero')
+313982 Cerrado C.Ra.R. De Rafaela 23-24 Universitario De Santa Fe eventos 23 24 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 11 nuevas 12
+314365 Cerrado Jockey Club Vdo Tuerto 18-28 Universitario De Rosario eventos 18 28 nL 23 nV 23 local: fichas 16 nuevas 7 visitante: fichas 13 nuevas 10
+   DUDOSO ('Joaquin Valentin Guzman Beron', ['Joaquin Valentin Beron', 'Joaquín Berón'])
+   DUDOSO ('Santiago Jose Carreras Iturraspe', ['Santiago Carreras Iturraspe', 'Santiago Carreras'])
+314366 Cerrado C.R.A.I. 20-25 Jockey Club De Rosario eventos 20 25 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 22 nuevas 1
+314367 Cerrado Parana Rowing Club 10-20 Duendes R.C. eventos 10 20 nL 23 nV 23 local: fichas 22 nuevas 1 visitante: fichas 22 nuevas 1
+314368 Cerrado Old Resian Club 19-21 Club A. Estudiantes eventos 19 21 nL 23 nV 23 local: fichas 22 nuevas 1 visitante: fichas 21 nuevas 2
+314369 Cerrado Santa Fe Rugby Club 48-28 Gim. Y Esg. De Rosario eventos 48 28 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 23 nuevas 0
+315649 Cerrado Universitario De Rosario 27-26 Gim. Y Esg. De Rosario eventos 27 26 nL 23 nV 23 local: fichas 13 nuevas 10 visitante: fichas 23 nuevas 0 visitante: sin pareja: (2, '1T', 25, 'Ignacio Villegas Torra')
+315650 Cerrado Club A. Estudiantes 45-5 Santa Fe Rugby Club eventos 45 5 nL 23 nV 23 local: fichas 22 nuevas 1 visitante: fichas 23 nuevas 0
+315651 Cerrado Duendes R.C. 52-10 Old Resian Club eventos 52 10 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 23 nuevas 0 visitante: sin pareja: (4, '2T', 45, 'Santiago Torroba')
+315652 Cerrado Jockey Club De Rosario 26-13 Parana Rowing Club eventos 26 13 nL 23 nV 23 local: fichas 22 nuevas 1 visitante: fichas 23 nuevas 0
+   DUDOSO ('Joaquin Valentin Guzman Beron', ['Joaquin Valentin Beron', 'Joaquín Berón'])
+   DUDOSO ('Santiago Jose Carreras Iturraspe', ['Santiago Carreras Iturraspe', 'Santiago Carreras'])
+315653 Cerrado Jockey Club Vdo Tuerto 26-35 C.R.A.I. eventos 26 35 nL 24 nV 23 local: fichas 18 nuevas 6 visitante: fichas 21 nuevas 2 visitante: sin pareja: (26, '2T', 40, 'Ramiro Martín Ibañez')
+315654 Cerrado Club A. Provincial 22-27 C.Ra.R. De Rafaela eventos 22 27 nL 23 nV 23 local: fichas 14 nuevas 9 visitante: fichas 0 nuevas 23
+315655 Cerrado Universitario De Santa Fe 19-15 Club Logaritmo Rugby eventos 19 15 nL 23 nV 23 local: fichas 10 nuevas 13 visitante: fichas 0 nuevas 23
+315656 Cerrado Club Los Caranchos 46-12 Gim. Y Esg. De Pergamino eventos 46 12 nL 22 nV 23 local: fichas 14 nuevas 8 visitante: fichas 0 nuevas 23 visitante: sin pareja: (5, '2T', 7, 'Segundo Leoz')
+315657 Cerrado Alma Juniors De Esperanza 85-0 C.S. Los Pampas Rufino eventos 85 0 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+315658 Cerrado Club Tilcara De Paraná 59-13 La Salle Jobson De Sta. Fe eventos 59 13 nL 23 nV 23 local: fichas 13 nuevas 10 visitante: fichas 0 nuevas 23
+315659 Cerrado Regatas & Belgrano S.N. 19-17 Cha Roga Club De Santa Fe eventos 19 17 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+   DUDOSO ('Joaquin Valentin Guzman Beron', ['Joaquin Valentin Beron', 'Joaquín Berón'])
+   DUDOSO ('Santiago Jose Carreras Iturraspe', ['Santiago Carreras Iturraspe', 'Santiago Carreras'])
+320614 Cerrado C.R.A.I. 15-33 Universitario De Rosario eventos 15 33 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 14 nuevas 9
+320616 Cerrado Old Resian Club 32-33 Jockey Club De Rosario eventos 32 33 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 22 nuevas 1
+320615 Cerrado Parana Rowing Club 18-10 Jockey Club Vdo Tuerto eventos 18 10 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 16 nuevas 7 local: sin pareja: (12, '2T', 55, 'Emanuel Schiavo')
+320617 Cerrado Santa Fe Rugby Club 34-33 Duendes R.C. eventos 34 33 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 23 nuevas 0
+320618 Cerrado Gim. Y Esg. De Rosario 30-36 Club A. Estudiantes eventos 30 36 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 23 nuevas 0 local: sin pareja: (15, '2T', 64, 'Manuel Prieto')
+320619 Cerrado C.Ra.R. De Rafaela 66-0 Regatas & Belgrano S.N. eventos 66 0 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+320620 Cerrado La Salle Jobson De Sta. Fe 20-41 Alma Juniors De Esperanza eventos 20 41 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+320621 Cerrado C.S. Los Pampas Rufino 8-24 Club Los Caranchos eventos 8 24 nL 23 nV 22 local: fichas 0 nuevas 23 visitante: fichas 14 nuevas 8
+320623 Cerrado Club Logaritmo Rugby 39-32 Club A. Provincial eventos 39 32 nL 23 nV 23 local: fichas 1 nuevas 22 visitante: fichas 14 nuevas 9
+320624 Cerrado Cha Roga Club De Santa Fe 14-31 Club Tilcara De Paraná eventos 14 31 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 14 nuevas 9
+322491 Cerrado Universitario De Rosario 10-17 Club A. Estudiantes eventos 10 17 nL 23 nV 23 local: fichas 11 nuevas 12 visitante: fichas 22 nuevas 1
+322492 Cerrado Duendes R.C. 76-27 Gim. Y Esg. De Rosario eventos 76 27 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 23 nuevas 0
+322493 Cerrado Jockey Club De Rosario 34-31 Santa Fe Rugby Club eventos 34 31 nL 23 nV 23 local: fichas 21 nuevas 2 visitante: fichas 23 nuevas 0
+322494 Cerrado Jockey Club Vdo Tuerto 7-24 Old Resian Club eventos 7 24 nL 23 nV 23 local: fichas 16 nuevas 7 visitante: fichas 23 nuevas 0
+   DUDOSO ('Joaquin Valentin Guzman Beron', ['Joaquin Valentin Beron', 'Joaquín Berón'])
+322495 Cerrado C.R.A.I. 24-27 Parana Rowing Club eventos 24 27 nL 23 nV 23 local: fichas 22 nuevas 1 visitante: fichas 23 nuevas 0
+324403 Cerrado Parana Rowing Club 34-19 Universitario De Rosario eventos 34 19 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 12 nuevas 11
+   DUDOSO ('Joaquin Valentin Guzman Beron', ['Joaquin Valentin Beron', 'Joaquín Berón'])
+   DUDOSO ('Santiago Jose Carreras Iturraspe', ['Santiago Carreras Iturraspe', 'Santiago Carreras'])
+324404 Cerrado Old Resian Club 12-24 C.R.A.I. eventos 12 24 nL 23 nV 23 local: fichas 22 nuevas 1 visitante: fichas 19 nuevas 4
+324405 Cerrado Santa Fe Rugby Club 39-24 Jockey Club Vdo Tuerto eventos 39 24 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 14 nuevas 9
+324406 Cerrado Gim. Y Esg. De Rosario 23-23 Jockey Club De Rosario eventos 23 23 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 22 nuevas 1 visitante: sin pareja: (1, '1T', 6, 'Ignacio Orsetti')
+324407 Cerrado Club A. Estudiantes 16-30 Duendes R.C. eventos 16 30 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 23 nuevas 0
+325970 Cerrado Universitario De Rosario 30-38 Duendes R.C. eventos 30 38 nL 23 nV 23 local: fichas 12 nuevas 11 visitante: fichas 22 nuevas 1 local: sin pareja: (15, '2T', 69, 'Gonzalo Chiani')
+325971 Cerrado Jockey Club De Rosario 29-34 Club A. Estudiantes eventos 29 34 nL 23 nV 23 local: fichas 22 nuevas 1 visitante: fichas 23 nuevas 0
+325972 Cerrado Jockey Club Vdo Tuerto 27-31 Gim. Y Esg. De Rosario eventos 27 31 nL 23 nV 23 local: fichas 16 nuevas 7 visitante: fichas 22 nuevas 1
+   DUDOSO ('Joaquin Valentin Guzman Beron', ['Joaquin Valentin Beron', 'Joaquín Berón'])
+   DUDOSO ('Santiago Jose Carreras Iturraspe', ['Santiago Carreras Iturraspe', 'Santiago Carreras'])
+325973 Cerrado C.R.A.I. 31-30 Santa Fe Rugby Club eventos 75 47 nL 46 nV 46 local: fichas 18 nuevas 28 visitante: fichas 23 nuevas 23
+326376 Cerrado Santa Fe Rugby Club 58-38 Parana Rowing Club eventos 58 38 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 23 nuevas 0
+   DUDOSO ('Joaquin Valentin Guzman Beron', ['Joaquin Valentin Beron', 'Joaquín Berón'])
+   DUDOSO ('Santiago Jose Carreras Iturraspe', ['Santiago Carreras Iturraspe', 'Santiago Carreras'])
+326377 Cerrado Gim. Y Esg. De Rosario 41-29 C.R.A.I. eventos 41 29 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 17 nuevas 6
+326378 Cerrado Club A. Estudiantes 29-22 Jockey Club Vdo Tuerto eventos 29 22 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 18 nuevas 5
+326379 Cerrado Duendes R.C. 13-32 Jockey Club De Rosario eventos 13 32 nL 23 nV 23 local: fichas 21 nuevas 2 visitante: fichas 22 nuevas 1
+326375 Cerrado Old Resian Club 21-38 Universitario De Rosario eventos 21 38 nL 23 nV 23 local: fichas 19 nuevas 4 visitante: fichas 13 nuevas 10
+327241 Cerrado Universitario De Rosario 28-52 Jockey Club De Rosario eventos 28 52 nL 23 nV 23 local: fichas 13 nuevas 10 visitante: fichas 21 nuevas 2
+327243 Cerrado Jockey Club Vdo Tuerto 10-21 Duendes R.C. eventos 10 21 nL 23 nV 23 local: fichas 16 nuevas 7 visitante: fichas 22 nuevas 1
+   DUDOSO ('Joaquin Valentin Guzman Beron', ['Joaquin Valentin Beron', 'Joaquín Berón'])
+327244 Cerrado C.R.A.I. 26-23 Club A. Estudiantes eventos 75 52 nL 46 nV 46 local: fichas 17 nuevas 29 visitante: fichas 22 nuevas 24 local: sin pareja: (14, '2T', 34, 'Gonzalo Liendo')
+327246 Cerrado Old Resian Club 50-38 Santa Fe Rugby Club eventos 50 38 nL 23 nV 23 local: fichas 22 nuevas 1 visitante: fichas 22 nuevas 1
+322524 Cerrado C.S. Los Pampas Rufino 49-26 Gim. Y Esg. De Pergamino eventos 49 26 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+322526 Cerrado Cha Roga Club De Santa Fe 17-48 Club Tilcara De Paraná eventos 17 48 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 11 nuevas 12
+322525 Cerrado La Salle Jobson De Sta. Fe 51-34 Regatas & Belgrano S.N. eventos 51 34 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+324422 Cerrado Gim. Y Esg. De Pergamino 25-27 Cha Roga Club De Santa Fe eventos 25 27 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+324423 Cerrado Club Tilcara De Paraná 19-31 La Salle Jobson De Sta. Fe eventos 19 31 nL 23 nV 23 local: fichas 11 nuevas 12 visitante: fichas 0 nuevas 23
+324424 Cerrado Regatas & Belgrano S.N. 54-33 C.S. Los Pampas Rufino eventos 54 33 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+325477 Cerrado C.S. Los Pampas Rufino 27-17 Club Tilcara De Paraná eventos 27 17 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 10 nuevas 13
+325990 Cerrado Regatas & Belgrano S.N. 20-37 Gim. Y Esg. De Pergamino eventos 20 37 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+325991 Cerrado La Salle Jobson De Sta. Fe 26-10 Cha Roga Club De Santa Fe eventos 68 40 nL 69 nV 69 local: fichas 0 nuevas 69 visitante: fichas 0 nuevas 69 local: sin pareja: (9, '2T', 18, 'Santiago Sbodio') local: sin pareja: (32, '1T', 11, 'Facundo Godoy')
+327261 Cerrado Club Tilcara De Paraná 65-17 Gim. Y Esg. De Pergamino eventos 65 17 nL 23 nV 23 local: fichas 11 nuevas 12 visitante: fichas 0 nuevas 23 visitante: sin pareja: (12, '2T', 71, 'Axel Garay')
+327262 Cerrado Regatas & Belgrano S.N. 44-26 Cha Roga Club De Santa Fe eventos 44 26 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23 local: sin pareja: (8, '1T', 35, 'Maximiliano Vazquez') visitante: sin pareja: (17, '2T', 32, 'Gabriel Alexis Porfiri')
+327263 Cerrado C.S. Los Pampas Rufino 19-13 La Salle Jobson De Sta. Fe eventos 19 13 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+322534 Cerrado Universitario De Santa Fe 31-25 Club A. Provincial eventos 31 25 nL 23 nV 23 local: fichas 11 nuevas 12 visitante: fichas 12 nuevas 11
+322535 Cerrado C.Ra.R. De Rafaela 30-14 Club Logaritmo Rugby eventos 30 14 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 1 nuevas 22
+322536 Cerrado Club Los Caranchos 10-38 Alma Juniors De Esperanza eventos 10 38 nL 22 nV 23 local: fichas 13 nuevas 9 visitante: fichas 0 nuevas 23
+324431 Cerrado Club A. Provincial 15-29 Club Los Caranchos eventos 15 29 nL 23 nV 22 local: fichas 14 nuevas 9 visitante: fichas 12 nuevas 10
+324433 Cerrado Club Logaritmo Rugby 23-26 Universitario De Santa Fe eventos 23 26 nL 23 nV 23 local: fichas 1 nuevas 22 visitante: fichas 9 nuevas 14 visitante: sin pareja: (-1, '2T', 20, 'Nicolas Rivadeneira')
+324432 Cerrado Alma Juniors De Esperanza 33-39 C.Ra.R. De Rafaela eventos 33 39 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+325996 Cerrado Club Logaritmo Rugby 35-19 Club A. Provincial eventos 35 19 nL 23 nV 23 local: fichas 1 nuevas 22 visitante: fichas 11 nuevas 12
+325997 Cerrado Universitario De Santa Fe 18-37 Alma Juniors De Esperanza eventos 18 37 nL 23 nV 23 local: fichas 10 nuevas 13 visitante: fichas 0 nuevas 23
+325998 Cerrado C.Ra.R. De Rafaela 39-21 Club Los Caranchos eventos 39 21 nL 23 nV 22 local: fichas 0 nuevas 23 visitante: fichas 14 nuevas 8 visitante: sin pareja: (10, '2T', 53, 'Juan Ignacio González')
+326404 Cerrado Club A. Provincial 30-18 C.Ra.R. De Rafaela eventos 30 18 nL 23 nV 23 local: fichas 13 nuevas 10 visitante: fichas 0 nuevas 23
+326405 Cerrado Club Los Caranchos 20-27 Universitario De Santa Fe eventos 20 27 nL 22 nV 23 local: fichas 13 nuevas 9 visitante: fichas 7 nuevas 16
+326406 Cerrado Alma Juniors De Esperanza 28-25 Club Logaritmo Rugby eventos 28 25 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 1 nuevas 22
+327270 Cerrado Alma Juniors De Esperanza 32-12 Club A. Provincial eventos 32 12 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 13 nuevas 10
+327271 Cerrado Club Logaritmo Rugby 24-20 Club Los Caranchos eventos 24 20 nL 23 nV 22 local: fichas 1 nuevas 22 visitante: fichas 13 nuevas 9
+327272 Cerrado Universitario De Santa Fe 26-25 C.Ra.R. De Rafaela eventos 26 25 nL 23 nV 23 local: fichas 6 nuevas 17 visitante: fichas 0 nuevas 23 local: sin pareja: (9, '2T', 18, 'Juan Manuel Royo')
+PROBLEMA 295379: tarjeta 34-0 vs base (36, 0) (club-tilcara-regatas-belgrano-san-nicolas 21/03/2026); no se carga
+PROBLEMA 295378: tarjeta 59-7 vs base (30, 0) (alma-juniors-cha-roga-r-c 22/03/2026); no se carga
+PROBLEMA 281444: tarjeta 18-33 vs base (18, 36) (club-tilcara-alma-juniors 11/04/2026); no se carga
+PROBLEMA 298209: tarjeta 68-5 vs base (68, 15) (crar-pampas-de-rufino 18/04/2026); no se carga
+PROBLEMA 309382: tarjeta 66-14 vs base (66, 15) (crar-cha-roga-r-c 16/05/2026); no se carga
+PROBLEMA 311301 Santa Fe Rugby Club vs C.R.A.I. · TRL 7º FECHA - T.R.L. Primera - 1ra. división. · tarjeta 311301: eventos 65-67 vs tarjeta 31-27
+PROBLEMA 313984 Gim. Y Esg. De Pergamino vs Alma Juniors De Esperanza · TRL 9º FECHA - T.R.L. Primera - 2da. división. · tarjeta 313984: eventos 42-72 vs tarjeta 15-43
+PROBLEMA 313983: tarjeta 42-28 vs base (52, 28) (c-a-provincial-regatas-belgrano-san-nicolas 11/07/2026); no se carga
+PROBLEMA 320622: tarjeta 31-55 vs base (24, 55) (gimnasia-y-esgrima-de-pergamino-universitario-de-santa-fe 22/08/2026); no se carga
+PROBLEMA 325973 C.R.A.I. vs Santa Fe Rugby Club · TRL 16º FECHA - T.R.L. Primera - 1ra. división. · tarjeta 325973: eventos 75-47 vs tarjeta 31-30
+PROBLEMA 327244 C.R.A.I. vs Club A. Estudiantes · TRL 18º FECHA - T.R.L. Primera - 1ra. división. · tarjeta 327244: eventos 75-52 vs tarjeta 26-23
+PROBLEMA 325991 La Salle Jobson De Sta. Fe vs Cha Roga Club De Santa Fe · TRL Fecha 3 · tarjeta 325991: eventos 68-40 vs tarjeta 26-10
+PROBLEMA 326397: tarjeta 52-7 vs base (57, 7) (club-tilcara-regatas-belgrano-san-nicolas 17/10/2026); no se carga
+171 partidos

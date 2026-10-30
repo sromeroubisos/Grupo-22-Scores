@@ -1,0 +1,127 @@
+tarjetas oficiales cef0d1fd
+
+aguilas-rc-saenz-pena-femenino vs san-cipriano-femenino · cef0d1fd · tarjeta 324251  ·  16cfef1e-b041-4abb-89dd-8887ebf24079
+  local     · aguilas-rc-saenz-pena-femenino · 18 jugadores · 16 con ficha fijada
+  visitante · san-cipriano-femenino · 18 jugadores · 0 con ficha fijada
+  eventos   · 12
+    min  5 (1T 5) local     try          Milagros Jaqueline Cabrera
+    min  8 (1T 8) local     try          Patricia Soledad Ojeda
+    min 13 (1T 13) local     try          Alexandra Antonella Cabral
+    min 13 (1T 13) local     conversion   Lucia Gicel Ramirez
+    min 14 (1T 14) local     try          Patricia Soledad Ojeda
+    min 15 (1T 15) local     try          Ana María Fariña
+    min 42 (2T 2) visitante card_yellow  Florencia Loreley Morel
+    min 44 (2T 4) local     try          Veronica Alejandra Ojeda
+    min 48 (2T 8) local     try          Patricia Soledad Ojeda
+    min 50 (2T 10) local     try          Milagros Jaqueline Cabrera
+    min 50 (2T 10) local     conversion   Melisa Soledad Rodich
+    min 53 (2T 13) local     try          Estefania Alvares
+  marcador  · eventos 49-0 · guardado 49-0
+  tries     · 9-0 (guardado —-—)
+  arbitro   · URUMI 0000 (NO OFICIAL) (guardado: —)
+  guardado  · 18 local · 18 visitante · 12 eventos
+
+aguilas-rc-saenz-pena-femenino vs centro-cazadores-femenino · cef0d1fd · tarjeta 324249  ·  3fa83746-eec2-4a44-9b27-718197f9394a
+  local     · aguilas-rc-saenz-pena-femenino · 18 jugadores · 16 con ficha fijada
+  visitante · centro-cazadores-femenino · 18 jugadores · 0 con ficha fijada
+  eventos   · 12
+    min  6 (1T 6) local     try          Lucia Gicel Ramirez
+    min  6 (1T 6) local     conversion   Melisa Soledad Rodich
+    min  8 (1T 8) local     try          Zaira Florencia Gonzalez
+    min  8 (1T 8) local     conversion   Lucia Gicel Ramirez
+    min 11 (1T 11) local     try          Ana María Fariña
+    min 41 (2T 1) visitante substitution Micaela Enriquez
+    min 41 (2T 1) visitante substitution Camila Carabajal
+    min 43 (2T 3) local     try          Zaira Florencia Gonzalez
+    min 43 (2T 3) local     conversion   Lucia Gicel Ramirez
+    min 48 (2T 8) local     try          Maria Cristina Ramirez
+    min 49 (2T 9) visitante substitution Griselda Angelica Enríquez
+    min 51 (2T 11) visitante try          Gimena Rotzyn
+  marcador  · eventos 31-5 · guardado 31-5
+  tries     · 5-1 (guardado —-—)
+  arbitro   · URUMI 0000 (NO OFICIAL) (guardado: —)
+  guardado  · 18 local · 18 visitante · 12 eventos
+
+centro-cazadores-femenino vs san-cipriano-femenino · cef0d1fd · tarjeta 324250  ·  2261e874-bcd1-43ee-bb69-551deed63f94
+  local     · centro-cazadores-femenino · 18 jugadores · 0 con ficha fijada
+  visitante · san-cipriano-femenino · 18 jugadores · 0 con ficha fijada
+  eventos   · 7
+    min  4 (1T 4) visitante try          Maria Arias
+    min  9 (1T 9) local     try          Zoe Briñoccoli
+    min 41 (2T 1) local     try          Macarena Xander
+    min 41 (2T 1) local     conversion   Antonella Maidana
+    min 48 (2T 8) local     card_yellow  Dahiana Alvarez
+    min 52 (2T 12) local     try          Macarena Xander
+    min 52 (2T 12) local     conversion   Antonella Maidana
+  marcador  · eventos 19-5 · guardado 19-5
+  tries     · 3-1 (guardado —-—)
+  arbitro   · URUMI 0000 (NO OFICIAL) (guardado: —)
+  guardado  · 18 local · 18 visitante · 7 eventos
+
+capri-femenino vs regatas-de-resistencia-femenino · cef0d1fd · tarjeta 324252  ·  9ececbe4-8638-42d4-a8d4-48c0727a10d8
+  local     · capri-femenino · 18 jugadores · 0 con ficha fijada
+  visitante · regatas-de-resistencia-femenino · 18 jugadores · 16 con ficha fijada
+  eventos   · 4
+    min 20 (1T 20) visitante try          Guadalupe Del Carmen Villa
+    min 48 (2T 8) visitante try          Sabrina Nair Osuna
+    min 51 (2T 11) local     try          Ruth Valentina Velázquez López
+    min 51 (2T 11) local     conversion   Ruth Valentina Velázquez López
+  marcador  · eventos 7-10 · guardado 7-10
+  tries     · 1-2 (guardado —-—)
+  arbitro   · URUMI 0000 (NO OFICIAL) (guardado: —)
+  guardado  · 18 local · 18 visitante · 4 eventos
+
+capri-femenino vs caza-y-pesca-femenino · cef0d1fd · tarjeta 324254  ·  63ae44e8-cd98-4f84-9c1d-ee771de23e9f
+  local     · capri-femenino · 18 jugadores · 0 con ficha fijada
+  visitante · caza-y-pesca-femenino · 17 jugadores · 0 con ficha fijada
+  eventos   · 17
+    min  1 (1T 1) local     try          María Tania Longarini
+    min  3 (1T 3) local     try          Ruth Valentina Velázquez López
+    min  3 (1T 3) local     conversion   Marisa Salto
+    min  7 (1T 7) local     try          María Tania Longarini
+    min  7 (1T 7) local     conversion   Marisa Salto
+    min 10 (1T 10) local     try          María Tania Longarini
+    min 10 (1T 10) local     conversion   Marisa Salto
+    min 12 (1T 12) local     try          Ludmila Solis
+    min 14 (1T 14) local     try          María Eugenia Pereyra
+    min 14 (1T 14) local     conversion   Marisa Salto
+    min 41 (2T 1) local     try          María Eugenia Pereyra
+    min 41 (2T 1) local     conversion   Marisa Salto
+    min 43 (2T 3) local     try          Marisa Salto
+    min 43 (2T 3) local     conversion   Marisa Salto
+    min 46 (2T 6) local     try          María Eugenia Pereyra
+    min 46 (2T 6) local     conversion   Marisa Salto
+    min 53 (2T 13) visitante try          Antonia Elizabeth Ferreira
+  marcador  · eventos 59-5 · guardado 59-5
+  tries     · 9-1 (guardado —-—)
+  arbitro   · URUMI 0000 (NO OFICIAL) (guardado: —)
+  guardado  · 18 local · 17 visitante · 17 eventos
+
+regatas-de-resistencia-femenino vs caza-y-pesca-femenino · cef0d1fd · tarjeta 324253  ·  c561a0c2-da57-4763-a780-7935f04f17d8
+  local     · regatas-de-resistencia-femenino · 18 jugadores · 16 con ficha fijada
+  visitante · caza-y-pesca-femenino · 17 jugadores · 0 con ficha fijada
+  eventos   · 6
+    min  4 (1T 4) local     try          Bibiana Patricia Dure
+    min  6 (1T 6) local     try          Marianela Rita Soledad Maidana
+    min  6 (1T 6) local     conversion   Melisa Silvana Ojeda
+    min  8 (1T 8) local     try          Sabrina Nair Osuna
+    min 45 (2T 5) local     card_red     Guadalupe Del Carmen Villa
+    min 51 (2T 11) visitante try          Mariana Vega
+  marcador  · eventos 17-5 · guardado 17-5
+  tries     · 3-1 (guardado —-—)
+  arbitro   · URUMI 0000 (NO OFICIAL) (guardado: —)
+  guardado  · 18 local · 17 visitante · 6 eventos
+
+aguilas-rc-saenz-pena-femenino vs regatas-de-resistencia-femenino · cef0d1fd · tarjeta 324382  ·  ad61aafd-0ac8-4cb7-ad4b-684c0da9aa05
+  local     · aguilas-rc-saenz-pena-femenino · 18 jugadores · 16 con ficha fijada
+  visitante · regatas-de-resistencia-femenino · 17 jugadores · 15 con ficha fijada
+  eventos   · 3
+    min  9 (1T 9) local     try          Milagros Jaqueline Cabrera
+    min 55 (2T 15) local     injury       Maria Cristina Ramirez
+    min 55 (2T 15) local     try          Maria Cristina Ramirez
+  marcador  · eventos 10-0 · guardado 10-0
+  tries     · 2-0 (guardado —-—)
+  arbitro   · URUMI 0000 (NO OFICIAL) (guardado: —)
+  guardado  · 18 local · 17 visitante · 3 eventos
+
+listo · 7 partidos

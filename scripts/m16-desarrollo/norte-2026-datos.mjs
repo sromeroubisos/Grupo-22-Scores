@@ -194,7 +194,22 @@ export const RESULTADOS_J2 = {
   17: [22, 19],
   18: [36, 0],
   19: [7, 14],
+  20: [15, 26],
+  21: [16, 7],
+  22: [14, 15],
+  23: [33, 19],
+  24: [8, 34],
 };
+// El parte oficial de la UAR del 13/9 ("Buenos Aires tricampeón en el M16
+// Desarrollo Norte") confirmó los siete de la pizarra —el 22 de Mar del Plata
+// incluido— y dio el resto.
+
+/** Posiciones finales del parte de la UAR. `norte-2026-verificar.mjs` las recalcula de los resultados y compara. */
+export const POSICIONES_FINALES = [
+  'buenos-aires-m16', 'mar-del-plata-m16', 'rosario-m16', 'cordobesa-m16',
+  'oeste-m16', 'cuyo-m16', 'entrerriana-m16', 'andina-m16',
+  'salta-m16', 'tucuman-m16', 'misiones-m16', 'santiaguena-m16',
+];
 
 /**
  * Las definiciones como las escribió la pizarra. No son un dato que se cargue:

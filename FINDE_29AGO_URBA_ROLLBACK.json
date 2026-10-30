@@ -1,0 +1,1142 @@
+[
+  {
+    "id": "00e43af0-a95b-43e8-918f-40fe35cf7d2c",
+    "torneo": "URBA: PRIMERA C - Preintermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "0134c275-d28e-410c-ae4e-0f69417d9b2c",
+    "torneo": "URBA: PRIMERA A - Preintermedia B",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "0753ec99-bed0-463f-8e0f-95776591b712",
+    "torneo": "URBA: PRIMERA C - Preintermedia B",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "0c9c19aa-15d7-4221-9820-adafafefdc4e",
+    "torneo": "URBA: TOP 14 - Preintermedia D",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "0da2bc81-122d-4825-9104-068f01855f7d",
+    "torneo": "URBA: PRIMERA C - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "124d4002-d39c-437a-949e-db3e8a064d34",
+    "torneo": "URBA: TOP 14 - Preintermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "125fd187-8989-42f2-9a52-c48847dbce50",
+    "torneo": "URBA: TOP 14 - Preintermedia B",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "12f06911-ebf0-47b0-a41a-da4041c8b2e8",
+    "torneo": "URBA: TOP 14 - Preintermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "13e7ba5d-e56c-467a-b544-4d9439d03d18",
+    "torneo": "URBA: TOP 14 - Preintermedia D",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "16951fb0-5494-4070-aefa-f2fdd110f598",
+    "torneo": "URBA: TOP 14 - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "17864a59-9351-4326-ab16-eb2acd925666",
+    "torneo": "URBA: PRIMERA A - Preintermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "18a6eeb6-dd4a-4d11-9fff-fce2631f21ea",
+    "torneo": "URBA: DESARROLLO - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "1978fb4a-d081-4104-9f2c-9ab5db11d6ab",
+    "torneo": "URBA: TOP 14 - Menores de 22",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "1a81ca9a-149e-4678-9a90-58c651c6af64",
+    "torneo": "URBA: TOP 14 - Preintermedia D",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "1a936628-343f-4a77-b7e5-63bab8ccfa1c",
+    "torneo": "URBA: PRIMERA B - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "1aa742d2-f0ec-4106-af47-a4dccc03916d",
+    "torneo": "URBA: PRIMERA A - Preintermedia D",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "1bf48d55-0f6b-40ad-aca6-40f07a7be9be",
+    "torneo": "URBA: PRIMERA A - Preintermedia C",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "1c185ec7-57ec-417e-aa65-91eba1fe7b7e",
+    "torneo": "URBA: PRIMERA C - Preintermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "1fa35e89-3cff-40a8-9886-99990f3fbb05",
+    "torneo": "URBA: PRIMERA A - Preintermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "2015ec4f-32bc-49a0-ac20-bc48eb63437b",
+    "torneo": "URBA: TOP 14 - Preintermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "23be5c79-21ed-4a37-b214-434fec73c4b0",
+    "torneo": "URBA: PRIMERA B - Preintermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "24fba83d-a5b5-41c9-913e-a76019a090ee",
+    "torneo": "URBA: TOP 14 - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "25d06825-6caf-4a47-850d-529cebf7f1f6",
+    "torneo": "URBA: PRIMERA B - Preintermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "26428707-2139-4d24-b1d2-35a943b2d716",
+    "torneo": "URBA: PRIMERA A - Preintermedia B",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "266590dd-e767-4f79-9a39-10860d9bb191",
+    "torneo": "URBA: TOP 14 - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "2b5e79cd-265e-4ad0-bd88-54e7ec155572",
+    "torneo": "URBA: PRIMERA B - Preintermedia B",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "2bada8f5-770f-4dc0-b926-c8dac2dc9e0e",
+    "torneo": "URBA: PRIMERA A - Preintermedia B",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "2cebfee9-11f3-4f20-99c7-ba875e3b0b6c",
+    "torneo": "URBA: TOP 14 - Preintermedia F",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "2ced0115-66b0-4ae2-a0d1-5f9c0ffada44",
+    "torneo": "URBA: PRIMERA B - Preintermedia B",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "2e4c85f3-4029-4d0c-bafa-b1af41956918",
+    "torneo": "URBA: PRIMERA C - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "2eeed233-ef2d-4814-8fa5-1f5fc6a2388a",
+    "torneo": "URBA: PRIMERA B - Preintermedia C",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "30bd07c5-2039-4728-81be-430293434954",
+    "torneo": "URBA: TOP 14 - Preintermedia C",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "32148bbb-ae83-4046-a974-d7acf0a1e754",
+    "torneo": "URBA: DESARROLLO - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "32970494-de57-4917-9d3b-4fcc733f48e9",
+    "torneo": "URBA: PRIMERA B - Preintermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "36e6b761-a5f6-4ace-9d27-41e97cb527c0",
+    "torneo": "URBA: TOP 14 - Preintermedia E",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "388a2bac-e248-48b4-9b4e-559a2d784004",
+    "torneo": "URBA: PRIMERA B - Preintermedia B",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "3a25575d-cb0e-4c2a-b259-760369adc7ea",
+    "torneo": "URBA: DESARROLLO - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "3a49f245-60f4-4299-8c40-dee5c7052b22",
+    "torneo": "URBA: TOP 14 - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "3d70abd1-405a-48d7-91cf-6c1360e4d904",
+    "torneo": "URBA: TOP 14 - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "40c0623c-e276-4dd1-a0de-a6ae4282c869",
+    "torneo": "URBA: PRIMERA C - Preintermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "41b01c6e-b9ac-41bd-99b8-b4f971d64127",
+    "torneo": "URBA: PRIMERA C - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "424a0f90-8ef1-426c-86d0-d9a0be21daae",
+    "torneo": "URBA: PRIMERA B - Preintermedia B",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "485feb95-a543-4e15-b015-14e834c0beeb",
+    "torneo": "URBA: PRIMERA A - Preintermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "4def02e9-0847-4c82-bc99-5c2bfab265f5",
+    "torneo": "URBA: SEGUNDA - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "4f4efe8f-978c-4f09-8727-d0e74fdbe4f3",
+    "torneo": "URBA: PRIMERA A - Preintermedia C",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "532ba9fb-7660-40cc-88ef-2976727cc9fd",
+    "torneo": "URBA: PRIMERA A - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "53961388-55b9-4b69-8685-c6b9f470eb62",
+    "torneo": "URBA: PRIMERA B - Preintermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "54546ca7-fea9-4ea8-ae1a-4a130181aff5",
+    "torneo": "URBA: TERCERA - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "548b0953-e1fe-4549-b106-7694b0ab6fef",
+    "torneo": "URBA: PRIMERA C - Preintermedia B",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "5d5b1f2b-5e39-401e-99e8-917aaf959342",
+    "torneo": "URBA: PRIMERA A - Preintermedia B",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "60d3f8ff-6b32-42c1-b5b2-b274f6160e9f",
+    "torneo": "URBA: PRIMERA A - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "615aa004-fdb0-4fb3-b2a7-cffcec503273",
+    "torneo": "URBA: TOP 14 - Preintermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "61bad064-43c4-4847-8270-488c9f32f909",
+    "torneo": "URBA: PRIMERA A - Preintermedia D",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "62a3d318-4527-441f-98e3-a21bb0a14b07",
+    "torneo": "URBA: SEGUNDA - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "62bb29c3-5d0e-494f-a41c-0937be0bf423",
+    "torneo": "URBA: PRIMERA C - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "63993dfc-8163-4c93-87ee-01588bb48d35",
+    "torneo": "URBA: PRIMERA C - Preintermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "66342a0f-fd25-4bdd-b77e-f705a9a23df0",
+    "torneo": "URBA: TOP 14 - Preintermedia C",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "681466b1-34cc-4ea9-b28d-18f6abd0357d",
+    "torneo": "URBA: TERCERA - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "69255217-b640-4650-b72e-910207f0040e",
+    "torneo": "URBA: PRIMERA A - Preintermedia D",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "6b444d9a-5dae-401d-a73a-40caa72e170a",
+    "torneo": "URBA: PRIMERA A - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "6bea1783-ded7-4347-86df-dfda053f619a",
+    "torneo": "URBA: PRIMERA A - Preintermedia B",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "6c83cf34-e97a-4cfc-9406-3271adfffacb",
+    "torneo": "URBA: TOP 14 - Preintermedia D",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "6d0f1c7e-f619-4490-b084-ea33738cb5f0",
+    "torneo": "URBA: PRIMERA A - Preintermedia C",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "6f2f3d98-82a1-4d59-867b-386e62721f9b",
+    "torneo": "URBA: TOP 14 - Menores de 22",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "72f23288-adb7-481f-9f65-97253b4c264c",
+    "torneo": "URBA: PRIMERA A - Preintermedia C",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "7314fd6d-95d7-47a0-b3d8-f5087d367691",
+    "torneo": "URBA: PRIMERA A - Preintermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "73b1b104-5ad3-4e16-88a5-9c32f1e78f53",
+    "torneo": "URBA: PRIMERA A - Preintermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "75c3a547-83a7-4aef-93e6-116e1c7c23ae",
+    "torneo": "URBA: TERCERA - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "75ec5335-2a05-4953-8005-74e15da56c65",
+    "torneo": "URBA: TOP 14 - Menores de 22",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "761f8c38-9918-434b-aa2a-cbcda1ad93e0",
+    "torneo": "URBA: TOP 14 - Preintermedia B",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "7632265b-f3c7-4499-bc0d-e164d2d65736",
+    "torneo": "URBA: TOP 14 - Preintermedia E",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "76f7bad6-f1c2-43a5-a7d8-57dfbd0141ad",
+    "torneo": "URBA: SEGUNDA - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "77d511cc-d769-4df8-8f5f-e425acb4da4e",
+    "torneo": "URBA: TOP 14 - Preintermedia C",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "78fb38d9-8e06-4790-ae57-71a9523d79a2",
+    "torneo": "URBA: PRIMERA A - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "79855c99-8f43-4012-996c-f5a14d77218e",
+    "torneo": "URBA: PRIMERA A - Preintermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "7a9a4640-e2c6-4dcf-87d7-be0141e48616",
+    "torneo": "URBA: TOP 14 - Preintermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "7b0f99e5-b2f3-4b6c-ae58-9eb3f7b4eb40",
+    "torneo": "URBA: TOP 14 - Preintermedia B",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "7d275683-deff-4df3-abbc-0370d0726607",
+    "torneo": "URBA: TOP 14 - Preintermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "7d961690-224d-4fa9-8eb5-6e7d110526c8",
+    "torneo": "URBA: TOP 14 - Preintermedia E",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "7e7334fb-6ad2-46b2-8d80-e1972d6a651d",
+    "torneo": "URBA: TOP 14 - Preintermedia F",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "81250ea7-9fe9-4c68-a509-a1459681e3a1",
+    "torneo": "URBA: DESARROLLO - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "8166018e-c32a-44b6-983b-3518842c3360",
+    "torneo": "URBA: PRIMERA C - Preintermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "8452fd02-28fa-45d3-b80f-6f808b17c123",
+    "torneo": "URBA: PRIMERA B - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "87855a0f-b9f2-4848-af16-ac3a86ee71e3",
+    "torneo": "URBA: PRIMERA B - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "8ac4c0f5-7b50-46aa-94c3-3a1081c71186",
+    "torneo": "URBA: PRIMERA B - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "8bf92795-420e-4d1a-999c-866d68e0304f",
+    "torneo": "URBA: DESARROLLO - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "8c00549a-f183-4308-8c81-61b362dc1bd3",
+    "torneo": "URBA: PRIMERA A - Preintermedia D",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "948a1a13-d369-43ab-afe3-fe5961b6d98f",
+    "torneo": "URBA: TOP 14 - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "94905a7e-1b4b-499c-97f5-6cacac831372",
+    "torneo": "URBA: TOP 14 - Preintermedia C",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "95775c04-b70e-4c0a-8d25-2827fbb0342a",
+    "torneo": "URBA: PRIMERA A - Preintermedia C",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "99cb4b7a-85b8-4194-a2cd-28f180b4d653",
+    "torneo": "URBA: PRIMERA B - Preintermedia C",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "9bd999ec-6d48-4941-9624-36d117c46f9e",
+    "torneo": "URBA: TOP 14 - Preintermedia E",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "a1ff42b1-b3e2-450b-9705-74b3d5c26403",
+    "torneo": "URBA: PRIMERA A - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "a2ddf89c-d162-44af-977b-a60988177f04",
+    "torneo": "URBA: TOP 14 - Menores de 22",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "a63703da-4e66-417a-aeba-9bc99a4a4c07",
+    "torneo": "URBA: PRIMERA B - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "a9368fef-1629-489f-9530-0486a3cd537f",
+    "torneo": "URBA: SEGUNDA - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "aa37c916-5889-40c5-8cf0-6ae4f6925b72",
+    "torneo": "URBA: PRIMERA C - Preintermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "aa63f9b3-71ca-4f45-aeb6-20dd8424c19d",
+    "torneo": "URBA: PRIMERA A - Preintermedia B",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "aff2ee54-6617-435a-99e9-7a837e1e70fd",
+    "torneo": "URBA: PRIMERA C - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "b292d5ac-9135-4654-a5d9-89f1af3c8bb9",
+    "torneo": "URBA: PRIMERA A - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "b89df511-6a8e-4126-a0d9-0da5b228ac7b",
+    "torneo": "URBA: TOP 14 - Menores de 22",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "ba6e846f-03af-4e20-8c9d-fe41809b957f",
+    "torneo": "URBA: SEGUNDA - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "bcb74370-7625-45c9-ac2c-0c26331c22dc",
+    "torneo": "URBA: TOP 14 - Preintermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "bda83793-32f4-4aae-ad4a-10ad4211b963",
+    "torneo": "URBA: PRIMERA A - Preintermedia D",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "c01790e3-3f0e-4f53-8aec-dbd307563a86",
+    "torneo": "URBA: PRIMERA A - Preintermedia B",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "c0823485-1068-4efd-bec2-3500348be395",
+    "torneo": "URBA: PRIMERA C - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "c0948221-961c-41bb-9c72-d8e999d2dc22",
+    "torneo": "URBA: TOP 14 - Preintermedia F",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "c10f87cb-3d91-4bfd-9696-05794aa5c8b7",
+    "torneo": "URBA: TERCERA - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "c2fdc0fa-2f8b-45af-9b87-420814ddea10",
+    "torneo": "URBA: TOP 14 - Preintermedia B",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "c64074ac-9edd-47da-98f7-ed28c8ddb250",
+    "torneo": "URBA: PRIMERA B - Preintermedia B",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "c6572972-c9d3-4909-82fe-7c1a8e5690f9",
+    "torneo": "URBA: PRIMERA B - Preintermedia B",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "c788f483-eca8-4087-bcef-e4a0384cf620",
+    "torneo": "URBA: TOP 14 - Preintermedia B",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "cb42cbe1-6e34-4e87-b345-9d66fce45f3c",
+    "torneo": "URBA: TOP 14 - Preintermedia C",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "cf0ac4d4-63f5-4508-8fac-b4ff2539e6ce",
+    "torneo": "URBA: TOP 14 - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "cf8b9c05-78f5-488a-964d-f3d30a3b7aef",
+    "torneo": "URBA: TOP 14 - Menores de 22",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "d17aff6c-4eac-4f2a-b67a-c7942e8292c5",
+    "torneo": "URBA: PRIMERA B - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "d1e316e2-7682-4dc8-8bb5-ff3971934b27",
+    "torneo": "URBA: TOP 14 - Preintermedia E",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "d221612a-0b9a-4804-9d2b-2bf2d8cb2cbd",
+    "torneo": "URBA: PRIMERA A - Preintermedia C",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "d5c761e4-4e28-43f8-92f5-56fb79184f06",
+    "torneo": "URBA: PRIMERA A - Preintermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "d60151fe-88e8-4e4b-bd79-73e25b1af6a3",
+    "torneo": "URBA: TOP 14 - Menores de 22",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "d8da3b98-0f05-44c3-a94f-cabec1a4641a",
+    "torneo": "URBA: TOP 14 - Preintermedia B",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "d9bbd6d9-63d4-405a-b1ee-f555b6fc7d47",
+    "torneo": "URBA: SEGUNDA - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "dba28f01-9d0d-4aab-a0e5-374114bc2dca",
+    "torneo": "URBA: TOP 14 - Preintermedia D",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "dc77f583-0e98-45b2-bcf9-6cf155930485",
+    "torneo": "URBA: SEGUNDA - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "e0929456-463e-490c-b8c0-50a409df8a9f",
+    "torneo": "URBA: PRIMERA B - Preintermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "e097ae0e-8d2d-4aa1-ae2a-eaea6bf417e4",
+    "torneo": "URBA: PRIMERA C - Preintermedia B",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "e1bd5ec9-309d-4e26-b335-6cef0233ae82",
+    "torneo": "URBA: PRIMERA C - Preintermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "e3322bdd-8393-4fdb-83ae-16f698fe499b",
+    "torneo": "URBA: PRIMERA B - Preintermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "e36620ed-9e1d-4171-be4f-f951a61a74dc",
+    "torneo": "URBA: TOP 14 - Preintermedia D",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "e6dffe22-bfc5-46e2-bd3c-c447d73b9055",
+    "torneo": "URBA: PRIMERA B - Preintermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "e821ebf7-76a6-4294-bc87-efc126368f79",
+    "torneo": "URBA: TOP 14 - Preintermedia F",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "eadf3178-0407-49b5-a796-f0537cf01348",
+    "torneo": "URBA: PRIMERA C - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "eb2ac04a-1a8d-4be6-ba52-41e210bf3c0d",
+    "torneo": "URBA: PRIMERA A - Preintermedia D",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "ebe70d6f-023b-466f-9515-1b7e3abf19f4",
+    "torneo": "URBA: PRIMERA B - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "ebfc1b84-84ac-48ed-9769-e2c66c58400b",
+    "torneo": "URBA: TERCERA - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "ed009690-e303-48ba-b9f9-21c8b9ce35f6",
+    "torneo": "URBA: TOP 14 - Preintermedia C",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "ee336008-2583-4716-b22f-a73f40edee6b",
+    "torneo": "URBA: TOP 14 - Preintermedia F",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "f013ad6f-8c02-4c22-9eec-7b3f587c79cb",
+    "torneo": "URBA: PRIMERA A - Preintermedia C",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "f0ef3a9d-2346-4659-9875-caa3f027779a",
+    "torneo": "URBA: TOP 14 - Preintermedia D",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "f2160421-fe5c-4cbc-bac1-d507985a7a8e",
+    "torneo": "URBA: PRIMERA B - Preintermedia B",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "f4c9e54b-3184-4904-a0a6-4b3ddafff129",
+    "torneo": "URBA: TOP 14 - Preintermedia F",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "f6290488-2542-4b0d-b980-febeca1f343a",
+    "torneo": "URBA: TOP 14 - Preintermedia B",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "f78342e5-fa0e-42dd-a764-4ec7999e6d1c",
+    "torneo": "URBA: TOP 14 - Preintermedia C",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "fbfdf88f-f3c4-4128-a953-62803ea07820",
+    "torneo": "URBA: PRIMERA A - Preintermedia D",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "fe640017-9837-40e4-b5a3-2ba2cf5505aa",
+    "torneo": "URBA: PRIMERA A - Intermedia",
+    "antes": "2026-08-29T03:00:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "00d7c8d9-b565-46df-b7cc-8aab6fb9a61c",
+    "torneo": "Primera \"B\" de la URBA",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "23338894-9045-4ec9-b6c0-5daeeaf269b5",
+    "torneo": "Top 14 de la URBA",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "25939bbf-2093-4de8-8295-ff57493ee432",
+    "torneo": "Primera \"B\" de la URBA",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "2dc0f451-8db3-4d82-a6cd-b80c969fc72b",
+    "torneo": "Primera \"C\" de la URBA",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "30d67160-6aac-4c6e-9e8a-26a4587f67cc",
+    "torneo": "URBA: TERCERA - Superior",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "37e7dfbf-1ac7-4fde-9d3f-114c57dc19c6",
+    "torneo": "URBA: SEGUNDA - Superior",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "398bacf0-2484-437e-aaff-33cec3671d2e",
+    "torneo": "URBA: SEGUNDA - Superior",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "3cae5e94-93af-4496-ac72-b4d52a933320",
+    "torneo": "Primera \"A\" de la URBA",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "3d8d4f73-d083-4f75-ad54-b07c6edd3c69",
+    "torneo": "Top 14 de la URBA",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "3dbd98b8-bc53-4537-8622-5907eab6ec38",
+    "torneo": "Top 14 de la URBA",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "44b732a7-8865-4e95-badf-041cf9f49144",
+    "torneo": "Primera \"C\" de la URBA",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "50215bdf-983a-4f73-b44b-0c4b56e9deef",
+    "torneo": "Primera \"C\" de la URBA",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "519db47d-00df-4dc9-8ffc-9cd30adf3759",
+    "torneo": "URBA: SEGUNDA - Superior",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "59897c49-0cde-45be-8c0b-d84fb5845bcf",
+    "torneo": "Top 14 de la URBA",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "5a8bc0c8-e23a-4af6-8c0e-f8a985f83cb4",
+    "torneo": "Primera \"B\" de la URBA",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "5b78d809-7bf7-414d-8933-f924ffb2e795",
+    "torneo": "URBA: SEGUNDA - Superior",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "5d5bae6c-8110-4535-836d-6036b8650224",
+    "torneo": "Primera \"B\" de la URBA",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "60606298-b24f-4897-9a3f-d9e4e7a186e2",
+    "torneo": "Top 14 de la URBA",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "64783a28-9a01-4472-b666-b1096560594b",
+    "torneo": "Primera \"A\" de la URBA",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "6a7e868a-2a19-451a-9e60-397024fc56d6",
+    "torneo": "Primera \"C\" de la URBA",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "74991e63-5ec8-4e26-87a9-633cf0885157",
+    "torneo": "URBA: DESARROLLO - Superior",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "79b44f99-cf30-4d33-bb35-71f20257e6e2",
+    "torneo": "URBA: SEGUNDA - Superior",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "79d68420-232c-4152-8371-7377d27809c0",
+    "torneo": "URBA: DESARROLLO - Superior",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "7d3abd8f-d178-4aca-9972-24f30400aa2f",
+    "torneo": "Primera \"C\" de la URBA",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "7f24dca7-8f5a-415a-bff9-ef6a3982456e",
+    "torneo": "URBA: DESARROLLO - Superior",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "8e35a387-42df-438e-9012-cae098663337",
+    "torneo": "Primera \"B\" de la URBA",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "9743f9e4-4af8-4ce4-a284-daf3a4fcfd9e",
+    "torneo": "URBA: TERCERA - Superior",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "99362d6e-1ea9-42df-9cb0-544f7104a4c8",
+    "torneo": "URBA: TERCERA - Superior",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "a2e7de05-8ab1-4dac-ba3b-473757c5f253",
+    "torneo": "URBA: TERCERA - Superior",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "a3fa5368-0660-43ed-b47b-c39f4b1ebef6",
+    "torneo": "URBA: SEGUNDA - Superior",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "ab52c4dd-7dc7-42c3-b348-573cabb4b455",
+    "torneo": "Primera \"B\" de la URBA",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "c1c4e3f1-c03d-4cc8-a6d0-b34fa516b9af",
+    "torneo": "Top 14 de la URBA",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "cd2ce8c7-6a31-481d-a7d3-69f022a8e66a",
+    "torneo": "Primera \"C\" de la URBA",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "d2f1ea9e-8ee5-4030-a1d3-cfa53056c6e7",
+    "torneo": "Primera \"B\" de la URBA",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "d405cda6-22fe-48e0-ba63-9385e49c42a0",
+    "torneo": "URBA: TERCERA - Superior",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "d81c85a0-121e-4103-91ef-47d4cd56cc0b",
+    "torneo": "Primera \"A\" de la URBA",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "d9938e31-ae16-4c48-a282-78e8323c3cef",
+    "torneo": "Primera \"A\" de la URBA",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "df1bcea9-9ad9-4e8d-adc7-bf517211c596",
+    "torneo": "URBA: DESARROLLO - Superior",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "e3fa4c6c-00ff-4211-80fb-fc5e89c2420a",
+    "torneo": "Primera \"A\" de la URBA",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "e6f5cf17-67d1-4f77-8585-480220377e22",
+    "torneo": "Top 14 de la URBA",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "e7d80225-3cac-405a-8811-11d6318a36f1",
+    "torneo": "Primera \"C\" de la URBA",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "e8e2ab03-8f33-47f3-92d9-a67970c19dfc",
+    "torneo": "URBA: SEGUNDA - Superior",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "eee9723a-65fc-42de-952a-7111db394118",
+    "torneo": "Primera \"A\" de la URBA",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "fa80a5dc-aa98-461c-b87e-593c17e2e12a",
+    "torneo": "Primera \"A\" de la URBA",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  },
+  {
+    "id": "fec3a3e3-1f1c-45be-b460-8ee1bb5c4a10",
+    "torneo": "URBA: DESARROLLO - Superior",
+    "antes": "2026-08-29T18:30:00.000Z",
+    "despues": "2026-08-29T17:00:00.000Z"
+  }
+]

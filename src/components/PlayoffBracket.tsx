@@ -113,6 +113,18 @@ function noteOf(source: BracketSource | null | undefined, placeholder: boolean):
     return !placeholder && source?.outcome === 'loser' ? 'Mejor perdedor' : null;
 }
 
+// El estado llega en inglés según la fuente ("scheduled", "NS"); acá se lee en castellano.
+function statusLabelEs(status: string): string {
+    const s = String(status).trim();
+    const key = s.toLowerCase();
+    if (key === 'finished' || key === 'final' || key === 'ft') return 'Final';
+    if (key === 'scheduled' || key === 'ns' || key === 'not started') return 'Programado';
+    if (key === 'live' || key === 'inprogress' || key === 'in progress') return 'En vivo';
+    if (key === 'postponed') return 'Postergado';
+    if (key === 'cancelled' || key === 'canceled') return 'Cancelado';
+    return s;
+}
+
 function toMatchView(match: PlayoffMatch, matchIdx: number): MatchView {
     // Robust data extraction: cada proveedor manda los mismos datos con otra forma.
     const m = match as any;
@@ -162,7 +174,7 @@ function toMatchView(match: PlayoffMatch, matchIdx: number): MatchView {
             : matchDate
                 ? new Date(matchDate).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' })
                 : 'TBD',
-        statusLabel: placeholder ? '' : status ? (status === 'finished' ? 'Final' : String(status)) : '',
+        statusLabel: placeholder ? '' : status ? statusLabelEs(status) : '',
         hasPenalties,
         finished: Boolean(isFinished),
         placeholder,

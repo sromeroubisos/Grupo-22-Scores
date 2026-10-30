@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/server';
 import { isGlobalAdminRole } from '@/lib/auth/roles';
+import { assertMfaSatisfied, isMfaError } from '@/lib/auth/mfa';
+import { getApiErrorMessageForClient } from '@/lib/auth/apiAdmin';
 import { canonicalizeSportId } from '@/lib/clubDerivatives';
 import { getReadClient } from '@/lib/supabase/read';
 
@@ -33,10 +35,15 @@ async function requireExactSuperAdmin() {
         throw new Error('Forbidden: Super admin access required');
     }
 
+    // El segundo factor, como en requireSuperAdmin: solo exige algo si el
+    // usuario tiene un factor verificado. Se contesta con 403, no 401.
+    await assertMfaSatisfied(user.role);
+
     return user;
 }
 
 function getStatusCode(error: unknown) {
+    if (isMfaError(error)) return 403;
     const message = error instanceof Error ? error.message : 'Internal Server Error';
     if (message === 'Unauthorized') return 401;
     if (message.includes('Forbidden')) return 403;
@@ -67,7 +74,7 @@ export async function GET(request: NextRequest) {
     try {
         await requireExactSuperAdmin();
     } catch (error) {
-        return jsonError(error instanceof Error ? error.message : 'Unauthorized', getStatusCode(error));
+        return jsonError(getApiErrorMessageForClient(error, 'Unauthorized'), getStatusCode(error));
     }
 
     try {

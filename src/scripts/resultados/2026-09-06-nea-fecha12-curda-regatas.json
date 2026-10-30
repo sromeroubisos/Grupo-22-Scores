@@ -1,0 +1,17 @@
+{
+  "fecha": "2026-09-06",
+  "descripcion": "Torneo Regional del NEA 2026 · fecha 12 · CURDA 28-18 Regatas de Resistencia",
+  "fuente": "Resultado pasado por Santiago (06/09/2026).",
+  "motivo": "Carga manual del resultado de la fecha 12.",
+  "partidos": [
+    {
+      "partido": "f0c9aa5f-ff4f-45b8-9bd9-8828609bfbcb",
+      "local": "CURDA",
+      "visitante": "Regatas de Resistencia",
+      "marcador": {
+        "local": 28,
+        "visitante": 18
+      }
+    }
+  ]
+}

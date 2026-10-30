@@ -2,6 +2,9 @@ import { apiFetch } from '@/lib/apiFetch';
 import { memoryCache } from '@/lib/cache';
 import type { ExternalStandingsRow } from '@/lib/types/flashscore-integration';
 import type { Match, MatchStatus } from '@/types/match';
+import { formatDateKey } from '@/lib/timezone';
+
+import { buildMotorsportFeedCard } from './espnMotorsportEvent';
 
 export type EspnMotorsportLeagueSlug =
     | 'f1'
@@ -113,7 +116,7 @@ function formatEspnDate(date: Date) {
     return `${year}${month}${day}`;
 }
 
-function parseDate(value: unknown): Date | null {
+export function parseDate(value: unknown): Date | null {
     const normalized = normalizeString(value);
     if (!normalized) return null;
     const parsed = new Date(normalized);
@@ -251,7 +254,7 @@ function toEspnCoreUrl(urlOrRef: unknown) {
     return `${publicUrl}?lang=en&region=us`;
 }
 
-function getRefUrl(value: unknown) {
+export function getRefUrl(value: unknown) {
     return toEspnCoreUrl(isRecord(value) ? value.$ref : value);
 }
 
@@ -320,7 +323,7 @@ function getMotorsportSessionLabel(sessionType: MotorsportSessionType) {
     }
 }
 
-function mapEspnStatus(statusType: any): MatchStatus {
+export function mapEspnStatus(statusType: any): MatchStatus {
     const state = normalizeKey(statusType?.state);
     const description = normalizeKey(statusType?.description);
     const detail = normalizeKey(statusType?.detail);
@@ -547,13 +550,13 @@ async function fetchEspnJson<T>(url: string, debugTag: string, cacheTtl: number)
     return promise;
 }
 
-async function fetchEspnCoreJson<T>(urlOrRef: unknown, debugTag: string, cacheTtl: number) {
+export async function fetchEspnCoreJson<T>(urlOrRef: unknown, debugTag: string, cacheTtl: number) {
     const url = toEspnCoreUrl(urlOrRef);
     if (!url) return null;
     return fetchEspnJson<T>(url, debugTag, cacheTtl);
 }
 
-async function fetchLeagueCoreInfo(leagueSlug: EspnMotorsportLeagueSlug) {
+export async function fetchLeagueCoreInfo(leagueSlug: EspnMotorsportLeagueSlug) {
     return fetchEspnCoreJson<EspnCoreLeaguePayload>(
         `https://sports.core.api.espn.com/v2/sports/racing/leagues/${leagueSlug}?lang=en&region=us`,
         'EspnMotorsportCoreLeague',
@@ -692,7 +695,7 @@ async function buildRacePointsFromEventLog(
         );
 }
 
-async function fetchScoreboardRangeEvents(
+export async function fetchScoreboardRangeEvents(
     leagueSlug: EspnMotorsportLeagueSlug,
     startDate: Date,
     endDate: Date,
@@ -1252,42 +1255,74 @@ async function getEspnMotorsportSeasonRaceEventsForTournamentView(
 
 export async function getEspnMotorsportMatches(
     date: Date,
-    _options?: { timeZone?: string; targetDateKey?: string },
+    options?: { timeZone?: string; targetDateKey?: string },
 ): Promise<Match[]> {
+    // Un fin de semana de carreras dura tres días: el viernes hay prácticas,
+    // el sábado clasificación (o sprint) y el domingo la carrera. El evento
+    // entra en la portada CADA día que tiene una sesión, con las sesiones de
+    // ese día. Antes solo aparecía el domingo, y el viernes de un Gran Premio
+    // la portada decía "no hay partidos programados".
+    const timeZone = options?.timeZone || 'UTC';
     const targetDate = toDateOnly(date);
+    const dayKey = options?.targetDateKey || formatDateKey(targetDate, timeZone);
+    // El scoreboard corta por día UTC; con un día a cada lado entra cualquier
+    // huso del visitante.
     const eventsByLeague = await Promise.all(
         SUPPORTED_ESPN_MOTORSPORT_LEAGUES.map((league) =>
-            fetchScoreboardRangeEvents(league.slug, targetDate, targetDate),
+            fetchScoreboardRangeEvents(league.slug, addDays(targetDate, -1), addDays(targetDate, 1)).catch(() => []),
         ),
     );
 
     return eventsByLeague.flatMap((events, index) => {
         const league = SUPPORTED_ESPN_MOTORSPORT_LEAGUES[index];
-        return events
-            .map((event) => normalizeEspnEventCore(event, league))
-            .filter((event): event is NonNullable<ReturnType<typeof normalizeEspnEventCore>> => Boolean(event))
-              .filter((event) => event.sessionType === 'race')
-              .map((event) => ({
-                  id: event.id,
-                  tournamentId: event.tournament.id,
-                  leagueName: event.tournament.fullName,
-                  leagueShortName: event.tournament.name,
-                  countryName: event.tournament.countryName,
-                  eventName: event.eventName,
-                  phaseId: 'group',
-                  round: event.round,
-                  homeTeamId: event.home.id || `espn-race-home-${league.slug}`,
-                homeTeamName: event.home.name,
-                awayTeamId: event.away.id || `espn-race-away-${league.slug}`,
-                awayTeamName: event.away.name,
-                homeTeamLogo: event.home.logo,
-                awayTeamLogo: event.away.logo,
-                scheduledAt: event.kickoff,
-                venueName: event.venue || undefined,
-                status: event.status,
+        return events.flatMap((event) => {
+            const eventId = normalizeString(event?.id);
+            if (!eventId) return [];
+            const competitions: Record<string, any>[] = Array.isArray(event?.competitions) ? event.competitions : [];
+            const ofDay = competitions
+                .filter((competition) => {
+                    const when = parseDate(competition?.date);
+                    return when ? formatDateKey(when, timeZone) === dayKey : false;
+                })
+                .sort((a, b) => (parseDate(a?.date)?.getTime() || 0) - (parseDate(b?.date)?.getTime() || 0));
+            if (ofDay.length === 0) return [];
+
+            const statuses = ofDay.map((competition) => mapEspnStatus(competition?.status?.type));
+            const status: MatchStatus = statuses.includes('live')
+                ? 'live'
+                : statuses.every((s) => s === 'final')
+                    ? 'final'
+                    : statuses.every((s) => s === 'postponed') ? 'postponed'
+                        : statuses.every((s) => s === 'cancelled') ? 'cancelled'
+                            : 'scheduled';
+            const kickoff = parseDate(ofDay[0]?.date) || parseDate(event?.date);
+            if (!kickoff) return [];
+
+            const card = buildMotorsportFeedCard(league.slug, event, ofDay);
+            const venue = normalizeString(event?.circuit?.fullName) || undefined;
+
+            return [{
+                id: toEspnMotorsportMatchId(league.slug, eventId),
+                tournamentId: toEspnMotorsportTournamentId(league.slug),
+                leagueName: league.name,
+                leagueShortName: league.shortName,
+                countryName: league.countryName,
+                eventName: card.eventName,
+                motorsport: card,
+                phaseId: 'group',
+                round: typeof event?.week?.number === 'number' ? event.week.number : 0,
+                homeTeamId: `espn-race-event-${league.slug}-${eventId}`,
+                homeTeamName: card.eventName,
+                awayTeamId: `espn-race-series-${league.slug}`,
+                awayTeamName: league.shortName,
+                homeTeamLogo: getLeagueLogo(event),
+                awayTeamLogo: getLeagueLogo(event),
+                scheduledAt: kickoff,
+                venueName: venue,
+                status,
                 score: { home: null, away: null },
                 result: {
-                    isComplete: event.status === 'final',
+                    isComplete: status === 'final',
                     updatedAt: new Date(),
                     updatedBy: 'espn',
                     version: 1,
@@ -1295,7 +1330,8 @@ export async function getEspnMotorsportMatches(
                 createdFrom: 'generator' as const,
                 createdAt: new Date(),
                 updatedAt: new Date(),
-            }));
+            } as Match];
+        });
     });
 }
 

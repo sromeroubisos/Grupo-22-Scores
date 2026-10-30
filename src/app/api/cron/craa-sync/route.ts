@@ -40,6 +40,7 @@ import { authorizeCronRequest } from '@/lib/server/cronAuth';
 import { NextResponse } from 'next/server';
 
 import { createAdminClient } from '@/lib/supabase/admin';
+import { reemplazarTablaDeFase } from '@/lib/server/replacePhaseStandings';
 import { fetchPestana, fetchTabla, HTTP_FORMA_INESPERADA } from '@/lib/integrations/craa/client.ts';
 import {
   claveDeEquipo, CRAA_ID_PREFIX, CRAA_PROVIDER, DIVISIONES, parseTournamentExternalId, tocaCorrer, type RamaCraa,
@@ -391,9 +392,7 @@ async function escribirTablaOficial(
     };
   });
 
-  const { error: errBorrar } = await supabase.from('tournament_standings').delete().eq('phase_id', o.faseId);
-  if (errBorrar) return { filas: 0, error: `no se pudo vaciar la tabla (${errBorrar.message})` };
-  const { error: errAlta } = await supabase.from('tournament_standings').insert(filas);
-  if (errAlta) return { filas: 0, error: `no se pudo escribir la tabla (${errAlta.message})` };
-  return { filas: filas.length };
+  // Valida todo antes de borrar y, si el alta falla, restaura la tabla previa:
+  // un delete + insert sueltos dejaban la fase vacía con el primer error.
+  return reemplazarTablaDeFase(supabase, o.faseId, filas);
 }

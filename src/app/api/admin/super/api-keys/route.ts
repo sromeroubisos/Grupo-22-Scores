@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { guardRejection } from '@/lib/auth/apiAdmin';
 import { requireSuperAdmin } from '@/lib/auth/server';
 import {
   API_KEY_SCOPES,
@@ -39,8 +40,8 @@ async function writeAudit(actorUserId: string, entityId: string, changes: Record
 export async function GET() {
   try {
     await requireSuperAdmin();
-  } catch {
-    return jsonError('Unauthorized', 401);
+  } catch (authError) {
+    return jsonError(...guardRejection(authError));
   }
 
   try {
@@ -84,8 +85,8 @@ export async function POST(request: Request) {
   try {
     const user = await requireSuperAdmin();
     userId = user.id;
-  } catch {
-    return jsonError('Unauthorized', 401);
+  } catch (authError) {
+    return jsonError(...guardRejection(authError));
   }
 
   let body: unknown;

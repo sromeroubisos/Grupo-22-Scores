@@ -235,7 +235,7 @@ async function escribirTorneo(t, tournamentId, seasonId) {
     },
     {
       id: faseFinal, tournament_id: tournamentId, season_id: seasonId,
-      name: 'Copas de Oro, Plata y Bronce', phase_type: 'playoff', order_index: 2, is_active: false,
+      name: t.faseFinalNombre, phase_type: 'playoff', order_index: 2, is_active: false,
       settings: {
         ...settingsDeFase({ zonas: [], playoff: true, equipos }),
         playoffStages: [{ id: 'playoff_stage_1', name: 'Definiciones', matchCount: t.final.length, orderIndex: 1 }],
@@ -388,10 +388,112 @@ async function sincronizarHorarios() {
   console.log(`\n${cambios} horarios ${modo === 'execute' ? 'actualizados' : 'a actualizar'}.`);
 }
 
+/**
+ * Baja el fixture ENTERO del canon sobre los torneos que ya existen: horarios,
+ * cruces de zona, etiquetas y orígenes del domingo, días de las fechas y reglas
+ * de avance. Crea los partidos del canon que falten. No recrea nada, así que
+ * los torneos conservan su id. Saltea los partidos que ya no están 'scheduled'.
+ */
+async function sincronizarFixture() {
+  const ahoraIso = new Date().toISOString();
+  for (const t of TORNEOS) {
+    const [torneo] = await leer(`tournaments?select=id,current_season_id&slug=eq.${t.slug}`);
+    if (!torneo) { console.log(`${t.nombre}: no está en la base`); continue; }
+    const fases = await leer(`tournament_phases?select=id,phase_type,settings&tournament_id=eq.${torneo.id}`);
+    const faseGrupos = fases.find((f) => f.phase_type === 'group_stage');
+    const faseFinal = fases.find((f) => f.phase_type === 'playoff');
+    const grupos = await leer(`tournament_groups?select=id,name&phase_id=eq.${faseGrupos.id}`);
+    const groupIdDe = new Map(grupos.map((g) => [g.name, g.id]));
+    const rondasDb = await leer(`tournament_rounds?select=id,name,start_date,phase_id&phase_id=in.(${faseGrupos.id},${faseFinal.id})`);
+    const rondaDe = new Map(t.fechas.map((f) => [f.n, rondasDb.find((r) => r.name === f.nombre)]));
+    const filas = await leer(`matches?select=id,external_id,status,date_time,home_club_id,away_club_id,round_label&tournament_id=eq.${torneo.id}`);
+    const porExternal = new Map(filas.map((m) => [m.external_id, m]));
+    const cambios = [];
+    const nuevos = [];
+
+    for (const f of t.fechas) {
+      const r = rondaDe.get(f.n);
+      if (!r) throw new Error(`${t.slug}: falta la fecha "${f.nombre}"`);
+      if (r.start_date !== DIAS[f.dia]) cambios.push([`tournament_rounds?id=eq.${r.id}`, { start_date: DIAS[f.dia], end_date: DIAS[f.dia], updated_at: ahoraIso }, `fecha "${f.nombre}" → ${f.dia}`]);
+    }
+
+    for (const g of t.grupos) {
+      const m = porExternal.get(externalIdDe(t, g.n));
+      if (!m) throw new Error(`${t.slug}: falta P${g.n} en la base`);
+      if (m.status !== 'scheduled') { console.log(`  P${g.n}: ${m.status}, no se toca`); continue; }
+      cambios.push([`matches?id=eq.${m.id}`, {
+        home_club_id: g.local, away_club_id: g.visitante,
+        date_time: instanteDe(diaDeFecha(t, g.fecha), g.hora),
+        group_id: groupIdDe.get(g.zona), round_uuid: rondaDe.get(g.fecha).id,
+        round_label: t.fechas.find((f) => f.n === g.fecha).nombre,
+        notes: g.zona, updated_at: ahoraIso,
+      }, `P${g.n} ${g.hora} ${NOMBRES[g.local]} vs ${NOMBRES[g.visitante]}`]);
+    }
+
+    const idPorNumero = new Map();
+    for (const f of t.final) {
+      const cuerpo = {
+        date_time: instanteDe(diaDeFecha(t, t.fechaFinal), f.hora),
+        round_uuid: rondaDe.get(t.fechaFinal).id, round_label: f.definicion,
+        notes: f.definicion, bracket_match_code: `P${f.n}`,
+        home_source_label: etiquetaDeOrigen(f.local), away_source_label: etiquetaDeOrigen(f.visitante),
+        participant_source: { home: fuenteDeOrigen(f.local), away: fuenteDeOrigen(f.visitante) },
+        updated_at: ahoraIso,
+      };
+      const m = porExternal.get(externalIdDe(t, f.n));
+      const texto = `P${f.n} ${f.hora} ${f.definicion}: ${etiquetaDeOrigen(f.local)} vs ${etiquetaDeOrigen(f.visitante)}`;
+      if (!m) {
+        const id = crypto.randomUUID();
+        idPorNumero.set(f.n, id);
+        nuevos.push({
+          ...cuerpo, id, tournament_id: torneo.id, season_id: torneo.current_season_id,
+          sport_id: 'rugby', sport: 'rugby', venue: SEDE, status: 'scheduled', score: null,
+          category: 'Femenino', home_base_points: 0, away_base_points: 0, home_bonus_points: 0,
+          away_bonus_points: 0, points_autocalculated: true, live_enabled: false,
+          lineups: { home: [], away: [] }, events: [], review_status: 'approved',
+          phase_id: faseFinal.id, group_id: null, home_club_id: null, away_club_id: null,
+          is_visible: false, external_id: externalIdDe(t, f.n), created_at: ahoraIso,
+        });
+        console.log(`  + ${texto}`);
+        continue;
+      }
+      idPorNumero.set(f.n, m.id);
+      if (m.status !== 'scheduled') { console.log(`  P${f.n}: ${m.status}, no se toca`); continue; }
+      cambios.push([`matches?id=eq.${m.id}`, cuerpo, texto]);
+    }
+
+    const reglas = t.final.flatMap((f) => ['local', 'visitante'].filter((s) => f[s].de).map((s) => ({
+      id: crypto.randomUUID(), phase_id: faseFinal.id,
+      source_match_id: idPorNumero.get(f[s].de), outcome: f[s].resultado,
+      target_match_id: idPorNumero.get(f.n), target_slot: s === 'local' ? 'home' : 'away',
+      target_group_id: null, created_at: ahoraIso, updated_at: ahoraIso,
+    })));
+
+    const settingsFinal = {
+      ...faseFinal.settings,
+      playoffStages: [{ id: 'playoff_stage_1', name: 'Definiciones', matchCount: t.final.length, orderIndex: 1 }],
+    };
+
+    console.log(`${t.nombre}`);
+    for (const [, , texto] of cambios) console.log(`  ~ ${texto}`);
+    console.log(`  ${cambios.length} cambios · ${nuevos.length} partidos nuevos · ${reglas.length} reglas de avance (se rehacen)`);
+    if (modo !== 'execute') continue;
+
+    if (nuevos.length) await insertar('matches', nuevos);
+    for (const [recurso, cuerpo] of cambios) await actualizar(recurso, cuerpo);
+    await borrar(`tournament_match_advancement_rules?phase_id=eq.${faseFinal.id}`);
+    await insertar('tournament_match_advancement_rules', reglas);
+    await actualizar(`tournament_phases?id=eq.${faseFinal.id}`, { name: t.faseFinalNombre, settings: settingsFinal, updated_at: ahoraIso });
+    await actualizar(`tournament_seasons?id=eq.${torneo.current_season_id}`, { start_date: t.desde, end_date: t.hasta, updated_at: ahoraIso });
+    console.log('  ✓ escrito');
+  }
+}
+
 async function main() {
   console.log(`modo: ${modo}\n`);
 
   if (process.argv.includes('--horarios')) { await sincronizarHorarios(); return; }
+  if (process.argv.includes('--fixture')) { await sincronizarFixture(); return; }
 
   if (process.argv.includes('--limpiar')) {
     const filas = await leer(`tournaments?select=id,name&slug=in.(${TORNEOS.map((t) => t.slug).join(',')})`);

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { limitAnonymousRequest } from '@/lib/server/publicRouteGuards';
 
 import { getTennisTournament, TennisServiceError } from '@/lib/services/tennis';
 
@@ -15,6 +16,10 @@ export async function GET(
     context: { params: Promise<{ id: string }> },
 ) {
     const { id } = await context.params;
+
+    // Anónima y contra ESPN: tope por IP (falla abierto si no hay contador).
+    const limited = await limitAnonymousRequest(request, 'tennis-tournament');
+    if (limited) return limited;
 
     const seasonRaw = request.nextUrl.searchParams.get('season');
     const season = seasonRaw && /^\d+$/.test(seasonRaw) ? Number(seasonRaw) : undefined;

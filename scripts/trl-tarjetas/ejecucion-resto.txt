@@ -1,0 +1,762 @@
+Torneo Regional del Litoral 2026 · tarjetas oficiales
+
+Club Tilcara De Paraná vs Regatas & Belgrano S.N. · TRL 1º FECHA - T.R.L. Primera - 2da. división. · tarjeta 295379  ·  f0c2ce59-ddab-48c6-bf60-064b37584dd5
+  local     · Club Tilcara De Paraná · 23 jugadores · 22 con ficha fijada
+  visitante · Regatas & Belgrano S.N. · 23 jugadores · 21 con ficha fijada
+  eventos   · 26
+    min  7 (1T 7) local     try          Manuel Massoni
+    min 13 (1T 13) local     try          Juan Ignacio Casalongue
+    min 13 (1T 13) local     conversion   Justo Ibaquez
+    min 17 (1T 17) local     card_yellow  Tomas Ivan Sanchez
+    min 20 (1T 20) local     try          Mateo Elian Arce
+    min 31 (1T 31) visitante card_yellow  Jonatan Franceschini
+    min 33 (1T 33) local     try          Justo Ibaquez
+    min 49 (1T 49) local     substitution Juan Ignacio Casalongue
+    min 60 (1T 60) local     try          Andres Eduardo Schroeder
+    min 60 (1T 60) local     conversion   Justo Ibaquez
+    min 60 (1T 60) local     substitution Brian Perrone
+    min 60 (1T 60) local     substitution Bruno Stoppello Roth
+    min 60 (1T 60) local     substitution Valentino Sigura
+    min 60 (1T 60) local     substitution German Savio
+    min 60 (1T 60) local     substitution Manuel Massoni
+    min 60 (1T 60) local     substitution Justo Ibaquez
+    min 65 (1T 65) local     substitution Manuel Vasquez
+    min 68 (1T 68) local     try          Luca Erbetta
+    min 41 (2T 1) visitante substitution Mariano Augusto Menin Dorsch
+    min 50 (2T 10) visitante substitution Fausto Maidana
+    min 50 (2T 10) visitante substitution Calviello Ignacio
+    min 60 (2T 20) visitante substitution Nicolas Aquiles Parigini Ancarani
+    min 60 (2T 20) visitante substitution Santiago Calviello
+    min 66 (2T 26) visitante substitution Matías Nahuel Bonarrigo
+    min 66 (2T 26) visitante substitution Camilo Taboada
+    min 66 (2T 26) visitante substitution Lautaro Malaplat
+  marcador  · eventos 34-0 · guardado 34-0
+  tries     · 6-0 (guardado —-—)
+  arbitro   · GASTÓN BRITOS (guardado: —)
+  guardado  · 23 local · 23 visitante · 26 eventos
+
+Alma Juniors De Esperanza vs Cha Roga Club De Santa Fe · TRL 1º FECHA - T.R.L. Primera - 2da. división. · tarjeta 295378  ·  35f6e26a-4868-45eb-9c36-a56aca24ec87
+  local     · Alma Juniors De Esperanza · 23 jugadores · 21 con ficha fijada
+  visitante · Cha Roga Club De Santa Fe · 23 jugadores · 21 con ficha fijada
+  eventos   · 33
+    min  2 (1T 2) local     try          Nicolás Sandobal
+    min  2 (1T 2) local     conversion   Tomas Burna
+    min  9 (1T 9) visitante try          Thomas Fernandez
+    min 10 (1T 10) visitante conversion   Bladimir Villamayor
+    min 23 (1T 23) local     try          Rodrigo Perroud
+    min 23 (1T 23) local     conversion   Tomas Burna
+    min 32 (1T 32) local     try          Enzo Agustin Vera
+    min 33 (1T 33) local     conversion   Tomas Burna
+    min 35 (1T 35) local     substitution Rodrigo Perroud
+    min 44 (2T 4) visitante substitution Dario Alberto Medina
+    min 47 (2T 7) local     try          Mario Mosqueda
+    min 48 (2T 8) local     conversion   Tomas Burna
+    min 50 (2T 10) local     try          Lautaro Rivas
+    min 50 (2T 10) visitante substitution Gabriel Alexis Porfiri
+    min 51 (2T 11) local     conversion   Tomas Burna
+    min 54 (2T 14) local     try          Agustin Piris
+    min 55 (2T 15) local     conversion   Tomas Burna
+    min 59 (2T 19) visitante substitution Valentin Andreu
+    min 60 (2T 20) local     try          Nicolás Sandobal
+    min 60 (2T 20) local     conversion   Tomas Burna
+    min 60 (2T 20) local     substitution Joaquin Fernandez
+    min 60 (2T 20) visitante substitution Ulises Acevedo
+    min 60 (2T 20) visitante substitution Nazareno Loyola
+    min 60 (2T 20) visitante substitution Lautaro Fleita
+    min 64 (2T 24) visitante substitution Bladimir Villamayor
+    min 70 (2T 30) local     substitution Tomas Burna
+    min 71 (2T 31) local     try          Juan Ignacio Sandaza
+    min 72 (2T 32) local     substitution Mario Mosqueda
+    min 72 (2T 32) local     substitution Franco Juarez
+    min 72 (2T 32) local     substitution Enzo Agustin Vera
+    min 72 (2T 32) local     substitution Nicolás Sandobal
+    min 72 (2T 32) local     substitution Gaston Juarez
+    min 79 (2T 39) local     try          Bruno Perroud
+  marcador  · eventos 59-7 · guardado 59-7
+  tries     · 9-1 (guardado —-—)
+  arbitro   · EXEQUIEL ADROVER (guardado: —)
+  guardado  · 23 local · 23 visitante · 33 eventos
+
+Club Tilcara De Paraná vs Alma Juniors De Esperanza · TRL 2º FECHA - T.R.L. Primera - 2da. división. · tarjeta 281444  ·  fadacce9-72ac-4d77-806e-fc628853c08f
+  local     · Club Tilcara De Paraná · 23 jugadores · 23 con ficha fijada
+  visitante · Alma Juniors De Esperanza · 23 jugadores · 22 con ficha fijada
+  eventos   · 31
+    min  2 (1T 2) local     penalty_goal Justo Ibaquez
+    min  8 (1T 8) visitante try          Rodrigo Perroud
+    min  8 (1T 8) visitante conversion   Tomas Burna
+    min 16 (1T 16) local     penalty_goal Justo Ibaquez
+    min 20 (1T 20) visitante try          Lucas Widmer
+    min 20 (1T 20) visitante conversion   Tomas Burna
+    min 23 (1T 23) visitante try          Juan Ignacio Sandaza
+    min 24 (1T 24) visitante conversion   Tomas Burna
+    min 40 (1T 40) local     substitution Justo Ibaquez
+    min 40 (1T 40) local     substitution Fidel Seghezzo
+    min 40 (1T 40) visitante card_yellow  Mario Mosqueda
+    min 54 (1T 54) local     card_yellow  Franco Benitez
+    min 54 (1T 54) local     substitution Augusto Castiglioni
+    min 60 (1T 60) local     substitution Brian Perrone
+    min 60 (1T 60) local     substitution Valentino Sigura
+    min 60 (1T 60) local     substitution Bruno Stoppello Roth
+    min 66 (1T 66) local     try          Matias Verdun
+    min 66 (1T 66) local     conversion   Estanislao Acharta
+    min 66 (1T 66) local     substitution Franco Benitez
+    min 77 (1T 77) local     try          Estanislao Acharta
+    min 55 (2T 15) visitante try          Rodrigo Perroud
+    min 55 (2T 15) visitante conversion   Tomas Burna
+    min 59 (2T 19) visitante try          Rodrigo Perroud
+    min 60 (2T 20) visitante substitution Lucas Widmer
+    min 61 (2T 21) visitante substitution Enzo Agustin Vera
+    min 61 (2T 21) visitante substitution Joaquin Fernandez
+    min 74 (2T 34) visitante substitution Gaston Juarez
+    min 74 (2T 34) visitante substitution Nicolás Sandobal
+    min 74 (2T 34) visitante substitution Mario Mosqueda
+    min 76 (2T 36) visitante substitution Luciano Waisprot
+    min 79 (2T 39) visitante card_yellow  Agustín Ascona
+  marcador  · eventos 18-33 · guardado 18-33
+  tries     · 2-5 (guardado —-—)
+  arbitro   · FERNANDO SÁNCHEZ MEADE (guardado: —)
+  guardado  · 23 local · 23 visitante · 31 eventos
+
+C.Ra.R. De Rafaela vs C.S. Los Pampas Rufino · TRL 3º FECHA - T.R.L. Primera - 2da. división. · tarjeta 298209  ·  747f7e69-0c1a-469d-a7cf-85f243d1185b
+  local     · C.Ra.R. De Rafaela · 23 jugadores · 22 con ficha fijada
+  visitante · C.S. Los Pampas Rufino · 23 jugadores · 23 con ficha fijada
+  eventos   · 32
+    min  1 (1T 1) local     try          Leonardo Sabellotti
+    min  1 (1T 1) local     conversion   Valentino Appo
+    min  7 (1T 7) local     try          Esteban Appo
+    min  7 (1T 7) local     conversion   Valentino Appo
+    min 11 (1T 11) local     try          Franco Appo
+    min 11 (1T 11) local     conversion   Valentino Appo
+    min 18 (1T 18) visitante try          Facundo José Costa
+    min 25 (1T 25) local     try          Manuel Alejandro Mandrille
+    min 25 (1T 25) local     conversion   Valentino Appo
+    min 27 (1T 27) local     try          Leonardo Sabellotti
+    min 27 (1T 27) local     conversion   Valentino Appo
+    min 31 (1T 31) local     try          Mateo Ferrero
+    min 31 (1T 31) local     conversion   Valentino Appo
+    min 50 (1T 50) visitante substitution Facundo José Costa
+    min 43 (2T 3) local     substitution Francisco Ambort
+    min 48 (2T 8) local     try          Martin Barberis
+    min 51 (2T 11) local     substitution Valentino Appo
+    min 51 (2T 11) local     substitution Facundo Ledesma
+    min 51 (2T 11) local     substitution Tomás Ferrero
+    min 51 (2T 11) local     substitution Santiago Kerstens
+    min 55 (2T 15) local     substitution Martin Barberis
+    min 55 (2T 15) local     substitution Santiago Clemenz
+    min 61 (2T 21) local     card_yellow  Esteban Appo
+    min 67 (2T 27) local     try          Manuel Alejandro Mandrille
+    min 67 (2T 27) local     conversion   Mateo Ferrero
+    min 72 (2T 32) local     try          Franco Appo
+    min 72 (2T 32) local     conversion   Mateo Ferrero
+    min 77 (2T 37) local     try          Esteban Appo
+    min 77 (2T 37) local     conversion   Mateo Ferrero
+    min 102 (2T 62) visitante substitution Alejo Chiesa
+    min 102 (2T 62) visitante substitution Nicolas Coronel
+    min 109 (2T 69) visitante card_yellow  Santiago Acuña
+  marcador  · eventos 68-5 · guardado 68-5
+  tries     · 10-1 (guardado —-—)
+  arbitro   · MATEO CIACCIO (guardado: —)
+  guardado  · 23 local · 23 visitante · 32 eventos
+
+C.Ra.R. De Rafaela vs Cha Roga Club De Santa Fe · TRL 5º FECHA - T.R.L. Primera - 2da. división. · tarjeta 309382  ·  be8dcee6-5d6f-4700-bcda-16437f71197b
+  local     · C.Ra.R. De Rafaela · 23 jugadores · 22 con ficha fijada
+  visitante · Cha Roga Club De Santa Fe · 23 jugadores · 23 con ficha fijada
+  eventos   · 36
+    min  2 (1T 2) visitante penalty_goal Bladimir Villamayor
+    min  8 (1T 8) visitante penalty_goal Bladimir Villamayor
+    min 12 (1T 12) local     penalty_try  
+    min 15 (1T 15) visitante penalty_goal Bladimir Villamayor
+    min 16 (1T 16) local     try          Juan Cruz Karlen
+    min 16 (1T 16) local     conversion   Valentino Appo
+    min 35 (1T 35) local     try          Martin Barberis
+    min 35 (1T 35) local     conversion   Valentino Appo
+    min 38 (1T 38) local     try          Esteban Appo
+    min 38 (1T 38) local     conversion   Valentino Appo
+    min 42 (2T 2) local     try          Valentino Appo
+    min 42 (2T 2) local     conversion   Valentino Appo
+    min 45 (2T 5) local     try          Valentino Appo
+    min 45 (2T 5) local     conversion   Valentino Appo
+    min 47 (2T 7) local     substitution Santiago Kerstens
+    min 49 (2T 9) visitante substitution Nazareno Loyola
+    min 51 (2T 11) local     substitution Martin Barberis
+    min 54 (2T 14) visitante substitution Gabriel Alexis Porfiri
+    min 55 (2T 15) local     substitution Gonzalo Clemenz
+    min 55 (2T 15) local     substitution Facundo Ledesma
+    min 55 (2T 15) local     substitution Francisco Ambort
+    min 55 (2T 15) local     substitution Valentino Appo
+    min 61 (2T 21) local     try          Esteban Appo
+    min 63 (2T 23) visitante substitution Emiliano Lizasoain
+    min 63 (2T 23) visitante substitution Julián Marcelo Cabral
+    min 66 (2T 26) local     try          Bernardo Mateo Villar
+    min 72 (2T 32) visitante substitution Bladimir Villamayor
+    min 75 (2T 35) local     try          Jerónimo Ribero
+    min 75 (2T 35) local     conversion   Bernardo Mateo Villar
+    min 77 (2T 37) local     try          Bernardo Mateo Villar
+    min 77 (2T 37) local     conversion   Bernardo Mateo Villar
+    min 80 (2T 40) local     substitution Santiago Clemenz
+    min 80 (2T 40) local     substitution Fabricio Machado
+    min 80 (2T 40) visitante try          Martín Maignien
+    min 80 (2T 40) visitante substitution Luigi Croce
+    min 80 (2T 40) visitante substitution Gabriel Troncoso
+  marcador  · eventos 66-14 · guardado 66-14
+  tries     · 10-1 (guardado —-—)
+  arbitro   · XXXXX XXXXXX (NO OFICIAL) (guardado: —)
+  guardado  · 23 local · 23 visitante · 36 eventos
+
+Santa Fe Rugby Club vs C.R.A.I. · TRL 7º FECHA - T.R.L. Primera - 1ra. división. · tarjeta 311301  ·  650d68e3-3936-4f96-9ec3-c4e3d1697de0
+  local     · Santa Fe Rugby Club · 23 jugadores · 23 con ficha fijada
+  visitante · C.R.A.I. · 23 jugadores · 23 con ficha fijada
+  eventos   · 33
+    min 16 (1T 16) visitante card_yellow  Joaquin Valentin Guzman Beron
+    min 27 (1T 27) visitante try          Mateo Fauda
+    min 30 (1T 30) visitante card_yellow  Pablo Ferreyra
+    min 33 (1T 33) visitante try          Carreras Iturraspe Ignacio Maria
+    min 33 (1T 33) visitante conversion   Facundo Beltramino
+    min 39 (1T 39) local     try          Santiago Gorla
+    min 40 (1T 40) local     conversion   Bautista Javier Bejarano
+    min 44 (2T 4) visitante substitution Justo Barcojo
+    min 47 (2T 7) visitante try          Carreras Iturraspe Ignacio Maria
+    min 49 (2T 9) visitante substitution Facundo Beltramino
+    min 50 (2T 10) visitante conversion   Genaro Giombi
+    min 50 (2T 10) visitante try          Carreras Iturraspe Ignacio Maria
+    min 54 (2T 14) visitante card_yellow  Mariano Torres Jozami
+    min 57 (2T 17) visitante substitution Pablo Ferreyra
+    min 57 (2T 17) visitante substitution Joaquin Valentin Guzman Beron
+    min 63 (2T 23) visitante substitution Luciano Simino
+    min 64 (2T 24) visitante substitution Justo Gonzalez Viescas
+    min 66 (2T 26) visitante penalty_goal Genaro Giombi
+    min 70 (2T 30) visitante substitution José Manuel Canuto
+    min 78 (2T 38) visitante card_yellow  Enzo Abraham
+    min 80 (2T 40) local     substitution Joaquin Correa Garnier
+    min 82 (2T 42) local     try          Agustín Omar Foradini
+    min 83 (2T 43) local     conversion   Bautista Javier Bejarano
+    min 90 (2T 50) local     substitution Jose Carlos Milesi
+    min 90 (2T 50) local     substitution Santiago Gorla
+    min 96 (2T 56) local     try          Agustin Trossero
+    min 97 (2T 57) local     substitution Manuel Cataudela
+    min 98 (2T 58) local     substitution Ignacio Airle Gomez
+    min 105 (2T 65) local     card_yellow  Guillermo Botta
+    min 109 (2T 69) local     try          Santiago Gorla
+    min 116 (2T 76) local     substitution Tomas Garcia
+    min 117 (2T 77) local     try          Francisco Duranda
+    min 118 (2T 78) local     conversion   Bautista Javier Bejarano
+  marcador  · eventos 31-27 · guardado 31-27
+  tries     · 5-4 (guardado —-—)
+  arbitro   · XXXXX XXXXXX (NO OFICIAL) (guardado: —)
+  guardado  · 23 local · 23 visitante · 33 eventos
+
+Old Resian Club vs Parana Rowing Club · TRL 7º FECHA - T.R.L. Primera - 1ra. división. · tarjeta 311302  ·  54c5ce32-3ffc-46ff-9793-7c73ed6b9525
+  local     · Old Resian Club · 23 jugadores · 23 con ficha fijada
+  visitante · Parana Rowing Club · 23 jugadores · 23 con ficha fijada
+  eventos   · 39
+    min  2 (1T 2) local     try          Guido Candini
+    min  2 (1T 2) local     conversion   Guido Candini
+    min 12 (1T 12) visitante try          Julian Pistrilli
+    min 12 (1T 12) visitante conversion   Aquiles Bourdin
+    min 24 (1T 24) local     card_yellow  Mateo Nuñez Miserez
+    min 26 (1T 26) visitante try          Franco Marizza
+    min 26 (1T 26) visitante conversion   Aquiles Bourdin
+    min 30 (1T 30) visitante try          Tomas Osuna
+    min 30 (1T 30) visitante conversion   Aquiles Bourdin
+    min 81 (2T 41) local     substitution Bruno Marsili
+    min 81 (2T 41) local     substitution Yaco Palacios
+    min 82 (2T 42) visitante card_yellow  Andres Agasse
+    min 82 (2T 42) visitante substitution Esteban Acosta Jazmin
+    min 84 (2T 44) local     card_yellow  Mateo Nuñez Miserez
+    min 84 (2T 44) local     card_red     Mateo Nuñez Miserez
+    min 86 (2T 46) local     substitution Marco Gomez Paris
+    min 86 (2T 46) local     try          Gianfranco Speciale
+    min 86 (2T 46) visitante try          Iván Agusto Quindt Pertus
+    min 86 (2T 46) visitante substitution Juan Oldani
+    min 89 (2T 49) local     substitution Walter David Mascaro
+    min 89 (2T 49) local     try          Mateo Farias
+    min 89 (2T 49) local     conversion   Guido Candini
+    min 89 (2T 49) visitante card_yellow  Franco Dall Ava
+    min 89 (2T 49) visitante penalty_try  
+    min 96 (2T 56) local     try          Mateo Farias
+    min 99 (2T 59) visitante card_yellow  Franco Osuna
+    min 99 (2T 59) visitante substitution Tomas Osuna
+    min 101 (2T 61) local     try          Faustino Grynblat
+    min 106 (2T 66) local     try          Mateo Farias
+    min 106 (2T 66) visitante substitution Franco Dall Ava
+    min 106 (2T 66) visitante substitution Andres Agasse
+    min 106 (2T 66) visitante substitution Juan Lucas Lerena
+    min 109 (2T 69) visitante substitution Emanuel Schiavo
+    min 109 (2T 69) visitante substitution Franco Osuna
+    min 113 (2T 73) local     card_yellow  Ramiro Carcamo
+    min 113 (2T 73) visitante try          Joaquin Moine
+    min 113 (2T 73) visitante conversion   Aquiles Bourdin
+    min 116 (2T 76) visitante card_yellow  Mateo Baroli
+    min 118 (2T 78) visitante card_yellow  Facundo Taboada
+  marcador  · eventos 34-40 · guardado 34-40
+  tries     · 6-6 (guardado —-—)
+  arbitro   · JUAN MANUEL MOYANO (guardado: —)
+  guardado  · 23 local · 23 visitante · 39 eventos
+
+Gim. Y Esg. De Pergamino vs Alma Juniors De Esperanza · TRL 9º FECHA - T.R.L. Primera - 2da. división. · tarjeta 313984  ·  d6284031-7be5-4481-b224-74fbd1a8fd6b
+  local     · Gim. Y Esg. De Pergamino · 23 jugadores · 23 con ficha fijada
+  visitante · Alma Juniors De Esperanza · 23 jugadores · 23 con ficha fijada
+  eventos   · 28
+    min 21 (1T 21) visitante try          Rodrigo Perroud
+    min 21 (1T 21) visitante conversion   Tomas Burna
+    min 25 (1T 25) local     penalty_goal Santiago Francisco Raimundo
+    min 31 (1T 31) local     try          Tobias Torres
+    min 32 (1T 32) visitante try          Brian Rosillo
+    min 32 (1T 32) visitante conversion   Tomas Burna
+    min 40 (1T 40) visitante try          Chelini Genaro
+    min 43 (2T 3) visitante try          Chelini Genaro
+    min 43 (2T 3) visitante conversion   Tomas Burna
+    min 48 (2T 8) visitante substitution Martin Roldan
+    min 50 (2T 10) visitante substitution Brian Rosillo
+    min 54 (2T 14) visitante substitution Agustin Piris
+    min 55 (2T 15) local     substitution Tomas Olari
+    min 56 (2T 16) visitante substitution Alan Franco Blanche
+    min 58 (2T 18) visitante penalty_goal Tomas Burna
+    min 58 (2T 18) visitante substitution Chelini Genaro
+    min 60 (2T 20) local     substitution Alfonso Nicolas Silocchi
+    min 60 (2T 20) visitante substitution Gaston Juarez
+    min 60 (2T 20) visitante substitution Tomas Tadeo Widmer
+    min 60 (2T 20) visitante try          Tomas Burna
+    min 60 (2T 20) visitante conversion   Tomas Burna
+    min 60 (2T 20) visitante substitution Juan Milano
+    min 62 (2T 22) local     substitution Tomas Olari
+    min 62 (2T 22) local     substitution Tobias Torres
+    min 68 (2T 28) local     try          Juan Pablo Masoli
+    min 69 (2T 29) local     conversion   Segundo Leoz
+    min 80 (2T 40) visitante try          Rodrigo Perroud
+    min 80 (2T 40) visitante conversion   Tomas Burna
+  marcador  · eventos 15-43 · guardado 15-43
+  tries     · 2-6 (guardado —-—)
+  arbitro   · PABLO ANDRÉS SOLARI (guardado: —)
+  guardado  · 23 local · 23 visitante · 28 eventos
+
+La Salle Jobson De Sta. Fe vs Cha Roga Club De Santa Fe · TRL 9º FECHA - T.R.L. Primera - 2da. división. · tarjeta 313979  ·  59e717aa-30e2-4031-9b54-6a78f8364876
+  local     · La Salle Jobson De Sta. Fe · 23 jugadores · 23 con ficha fijada
+  visitante · Cha Roga Club De Santa Fe · 23 jugadores · 22 con ficha fijada
+  eventos   · 25
+    min 17 (1T 17) local     try          Emanuel Piris
+    min 17 (1T 17) local     conversion   Guido Micocci
+    min 26 (1T 26) visitante penalty_goal Bladimir Villamayor
+    min 29 (1T 29) visitante try          Pietro Croce
+    min 33 (1T 33) local     penalty_try  
+    min 33 (1T 33) visitante card_yellow  Gabriel Alexis Porfiri
+    min 40 (1T 40) local     try          Juan Cruz Hadad
+    min 40 (1T 40) local     conversion   Guido Micocci
+    min 43 (2T 3) local     substitution Santiago Miretti
+    min 45 (2T 5) local     penalty_goal Guido Micocci
+    min 47 (2T 7) visitante penalty_goal Bladimir Villamayor
+    min 52 (2T 12) local     substitution Enzo Baccega
+    min 52 (2T 12) local     substitution Tomás Rudi
+    min 52 (2T 12) local     substitution Franco Riera
+    min 52 (2T 12) visitante substitution Luigi Croce
+    min 53 (2T 13) visitante try          Pietro Croce
+    min 54 (2T 14) visitante conversion   Bladimir Villamayor
+    min 57 (2T 17) visitante penalty_goal Bladimir Villamayor
+    min 58 (2T 18) visitante substitution Federico Exequiel Andreu
+    min 60 (2T 20) local     card_yellow  Walter Chiarinoti
+    min 63 (2T 23) local     substitution Francisco De Marco
+    min 63 (2T 23) local     substitution Santiago Novelli
+    min 67 (2T 27) visitante try          Bladimir Villamayor
+    min 75 (2T 35) local     penalty_goal Guido Micocci
+    min 78 (2T 38) visitante penalty_goal Bladimir Villamayor
+  marcador  · eventos 27-29 · guardado 27-29
+  tries     · 3-3 (guardado —-—)
+  arbitro   · ALFREDO FUN (guardado: —)
+  guardado  · 23 local · 23 visitante · 25 eventos
+
+Club A. Provincial vs Regatas & Belgrano S.N. · TRL 9º FECHA - T.R.L. Primera - 2da. división. · tarjeta 313983  ·  65645be7-b518-4df9-b9e1-bcd139d749ed
+  local     · Club A. Provincial · 23 jugadores · 23 con ficha fijada
+  visitante · Regatas & Belgrano S.N. · 23 jugadores · 23 con ficha fijada
+  eventos   · 31
+    min  2 (1T 2) visitante penalty_goal Iñaki Maiztegui
+    min  5 (1T 5) local     try          Martin Besmalinovich
+    min  7 (1T 7) visitante try          Fausto Aranda
+    min 16 (1T 16) local     try          Juan Matias Ezequiel Salcedo
+    min 19 (1T 19) visitante try          Nicolas Aquiles Parigini Ancarani
+    min 30 (1T 30) local     try          Máximo Grazzelli
+    min 36 (1T 36) local     try          Ramiro Bustos
+    min 36 (1T 36) local     conversion   Matteo Menendez
+    min 41 (2T 1) visitante try          Iñaki Maiztegui
+    min 45 (2T 5) local     try          Juan Matias Ezequiel Salcedo
+    min 50 (2T 10) visitante substitution Lautaro Malaplat
+    min 50 (2T 10) visitante substitution Benjamin Urteaga
+    min 50 (2T 10) visitante substitution Emiliano Arroyo
+    min 53 (2T 13) local     try          Ramiro Bustos
+    min 53 (2T 13) local     conversion   Matteo Menendez
+    min 53 (2T 13) visitante try          Martin Gulias
+    min 65 (2T 25) visitante try          Camilo Taboada
+    min 66 (2T 26) visitante substitution Rodrigo Mansilla
+    min 66 (2T 26) visitante substitution Nicolas Aquiles Parigini Ancarani
+    min 66 (2T 26) visitante substitution Faustino Bracalentti
+    min 66 (2T 26) visitante substitution Enzo Lima
+    min 71 (2T 31) local     penalty_goal Matteo Menendez
+    min 75 (2T 35) visitante substitution Iván Gabriel Vecoli
+    min 76 (2T 36) visitante card_red     Javier Willams
+    min 81 (2T 41) local     try          Ramiro Sanchez
+    min 94 (2T 54) local     substitution Brian Zava
+    min 94 (2T 54) local     substitution Juan Matias Ezequiel Salcedo
+    min 104 (2T 64) local     card_yellow  Giuliano Aldo Farina
+    min 106 (2T 66) local     card_yellow  Marcos Cumini Londero
+    min 114 (2T 74) local     substitution Giuliano Aldo Farina
+    min 114 (2T 74) local     substitution Santiago Besmalinovich
+  marcador  · eventos 42-28 · guardado 42-28
+  tries     · 7-5 (guardado —-—)
+  arbitro   · EMILIANO COLL (guardado: —)
+  guardado  · 23 local · 23 visitante · 31 eventos
+
+Gim. Y Esg. De Pergamino vs Universitario De Santa Fe · TRL 11º FECHA - T.R.L. Primera - 2da. división. · tarjeta 320622  ·  67e6cc7e-637d-4d46-b5a3-8d7a573342eb
+  local     · Gim. Y Esg. De Pergamino · 23 jugadores · 23 con ficha fijada
+  visitante · Universitario De Santa Fe · 23 jugadores · 23 con ficha fijada
+  eventos   · 41
+    min  3 (1T 3) visitante try          Gonzalo Meza
+    min  3 (1T 3) visitante conversion   Mateo Carughi
+    min 10 (1T 10) visitante try          Laureano Olmos
+    min 10 (1T 10) visitante conversion   Mateo Carughi
+    min 13 (1T 13) visitante injury       Tomas Alejandro Galiano
+    min 13 (1T 13) visitante substitution Mateo Schmidt
+    min 17 (1T 17) visitante try          Mateo Carughi
+    min 17 (1T 17) visitante conversion   Mateo Carughi
+    min 19 (1T 19) local     injury       Nazareno Nazar
+    min 19 (1T 19) local     substitution Exequiel Bernarda
+    min 21 (1T 21) local     card_yellow  Nicolas Greco
+    min 22 (1T 22) visitante try          Mateo Schmidt
+    min 29 (1T 29) local     penalty_goal Segundo Leoz
+    min 31 (1T 31) local     substitution Santiago Francisco Raimundo
+    min 31 (1T 31) visitante card_yellow  Tomas Nuñez
+    min 32 (1T 32) local     penalty_try  Segundo Leoz
+    min 37 (1T 37) visitante try          Matias Gonzalez
+    min 40 (1T 40) local     card_red     Aquiles Rico
+    min 40 (1T 40) visitante try          Ignacio Mazzaro
+    min 40 (1T 40) visitante conversion   Mateo Carughi
+    min 40 (1T 40) visitante card_yellow  Federico Bruzzone
+    min 45 (2T 5) visitante try          Gonzalo Meza
+    min 45 (2T 5) visitante conversion   Mateo Carughi
+    min 46 (2T 6) visitante substitution Laureano Olmos
+    min 53 (2T 13) visitante substitution Tomas Alejandro Galiano
+    min 54 (2T 14) visitante penalty_goal Mateo Carughi
+    min 57 (2T 17) visitante substitution Matias Gonzalez
+    min 57 (2T 17) visitante substitution Gonzalo Meza
+    min 57 (2T 17) visitante substitution Jorge Onorato
+    min 60 (2T 20) local     try          Mauro Federico Cucu
+    min 60 (2T 20) visitante try          Ivan Dal Molin
+    min 60 (2T 20) visitante conversion   Mateo Carughi
+    min 61 (2T 21) local     conversion   Segundo Leoz
+    min 66 (2T 26) visitante substitution Tomas Nuñez
+    min 66 (2T 26) visitante substitution Ian Nahuel Dallaverde
+    min 70 (2T 30) local     try          Stefano Bosque
+    min 71 (2T 31) local     conversion   Segundo Leoz
+    min 77 (2T 37) local     substitution Nazareno Nazar
+    min 77 (2T 37) local     substitution Gregorio Constante
+    min 78 (2T 38) local     try          Facundo Oranive
+    min 79 (2T 39) local     conversion   Segundo Leoz
+  marcador  · eventos 31-55 · guardado 31-55
+  tries     · 4-8 (guardado —-—)
+  arbitro   · JOAQUIN DÍAZ (guardado: —)
+  guardado  · 23 local · 23 visitante · 41 eventos
+
+C.R.A.I. vs Santa Fe Rugby Club · TRL 16º FECHA - T.R.L. Primera - 1ra. división. · tarjeta 325973  ·  281025fe-96be-4f12-9fa3-d1f16db93c85
+  local     · C.R.A.I. · 23 jugadores · 23 con ficha fijada
+  visitante · Santa Fe Rugby Club · 23 jugadores · 23 con ficha fijada
+  eventos   · 32
+    min  5 (1T 5) visitante penalty_goal Santiago Mendicino
+    min 11 (1T 11) visitante penalty_goal Santiago Mendicino
+    min 12 (1T 12) local     try          Agustin Raul Gimenez
+    min 12 (1T 12) local     conversion   Agustin Raul Gimenez
+    min 18 (1T 18) local     try          Juan Cruz Moretti
+    min 23 (1T 23) visitante try          Agustin Trossero
+    min 36 (1T 36) visitante card_yellow  Agustín Omar Foradini
+    min 38 (1T 38) local     try          Enzo Abraham
+    min 61 (1T 61) visitante substitution Ignacio Airle Gomez
+    min 46 (2T 6) local     card_yellow  Ignacio Parodi
+    min 57 (2T 17) local     substitution Mariano Torres Jozami
+    min 58 (2T 18) local     try          Enzo Abraham
+    min 58 (2T 18) local     conversion   Agustin Raul Gimenez
+    min 60 (2T 20) local     substitution Tomás Funes Iturraspe
+    min 66 (2T 26) local     card_yellow  Ramiro Martín Ibañez
+    min 69 (2T 29) local     substitution Juan Ignacio Sánchez
+    min 69 (2T 29) local     substitution Alejandro Molinas
+    min 69 (2T 29) local     substitution Genaro Giombi
+    min 78 (2T 38) local     try          Luciano Simino
+    min 78 (2T 38) local     conversion   Facundo Beltramino
+    min 78 (2T 38) local     substitution Joaquin Valentin Guzman Beron
+    min 78 (2T 38) local     substitution Enzo Abraham
+    min 80 (2T 40) visitante substitution Marcos Erbetta
+    min 90 (2T 50) visitante substitution Jose Carlos Milesi
+    min 93 (2T 53) visitante try          Juan Cruz Strada
+    min 97 (2T 57) visitante substitution Tomas Garcia
+    min 100 (2T 60) visitante substitution Francisco Duranda
+    min 101 (2T 61) visitante substitution Bautista Santiago Benavides
+    min 102 (2T 62) visitante try          Juan Cruz Strada
+    min 103 (2T 63) visitante conversion   Santiago Mendicino
+    min 107 (2T 67) visitante try          Santiago Mendicino
+    min 108 (2T 68) visitante conversion   Santiago Mendicino
+  marcador  · eventos 31-30 · guardado 31-30
+  tries     · 5-4 (guardado —-—)
+  arbitro   · XX XX (NO OFICIAL) (guardado: —)
+  guardado  · 23 local · 23 visitante · 32 eventos
+
+Parana Rowing Club vs Old Resian Club · TRL 16º FECHA - T.R.L. Primera - 1ra. división. · tarjeta 325974  ·  b6f5cd74-5f3f-4c3e-89b3-7b7693c05343
+  local     · Parana Rowing Club · 23 jugadores · 23 con ficha fijada
+  visitante · Old Resian Club · 23 jugadores · 23 con ficha fijada
+  eventos   · 35
+    min  3 (1T 3) visitante penalty_goal Guido Candini
+    min 12 (1T 12) local     try          Franco Osuna
+    min 12 (1T 12) local     conversion   Aquiles Bourdin
+    min 27 (1T 27) visitante try          Nahuel Romero
+    min 28 (1T 28) visitante conversion   Guido Candini
+    min 33 (1T 33) visitante try          Nahuel Romero
+    min 34 (1T 34) visitante conversion   Guido Candini
+    min 40 (1T 40) local     try          Franco Marizza
+    min 40 (1T 40) local     conversion   Aquiles Bourdin
+    min 80 (2T 40) local     substitution Mateo Baroli
+    min 88 (2T 48) local     try          Esteban Acosta Jazmin
+    min 88 (2T 48) local     conversion   Aquiles Bourdin
+    min 88 (2T 48) visitante substitution Guido Richiardone
+    min 88 (2T 48) visitante substitution Walter David Mascaro
+    min 94 (2T 54) local     substitution Jorge Jonathan Gabriel Gutiérrez
+    min 95 (2T 55) local     try          Joaquin Moine
+    min 95 (2T 55) local     conversion   Aquiles Bourdin
+    min 96 (2T 56) visitante card_yellow  Santiago Cali
+    min 100 (2T 60) local     penalty_goal Aquiles Bourdin
+    min 101 (2T 61) local     substitution Joaquin Moine
+    min 102 (2T 62) local     substitution Esteban Acosta Jazmin
+    min 103 (2T 63) local     substitution Franco Marizza
+    min 103 (2T 63) local     substitution Andres Agasse
+    min 104 (2T 64) local     substitution Juan Lucas Lerena
+    min 105 (2T 65) local     substitution Franco Osuna
+    min 108 (2T 68) visitante substitution Luca Candini
+    min 108 (2T 68) visitante substitution Nahuel Elias Pacheco
+    min 109 (2T 69) local     penalty_goal Aquiles Bourdin
+    min 112 (2T 72) local     try          Aquiles Bourdin
+    min 112 (2T 72) local     conversion   Aquiles Bourdin
+    min 112 (2T 72) visitante substitution Joaquin Demetrio
+    min 112 (2T 72) visitante substitution Luciano Cuminetti
+    min 118 (2T 78) local     penalty_goal Aquiles Bourdin
+    min 119 (2T 79) visitante substitution Adrian Bachela
+    min 119 (2T 79) visitante substitution Santiago Cali
+  marcador  · eventos 44-17 · guardado 44-17
+  tries     · 5-2 (guardado 5-2)
+  guardado  · 23 local · 23 visitante · 35 eventos
+
+C.R.A.I. vs Club A. Estudiantes · TRL 18º FECHA - T.R.L. Primera - 1ra. división. · tarjeta 327244  ·  dc6d23cf-b142-4218-a176-a74302f7cc54
+  local     · C.R.A.I. · 23 jugadores · 23 con ficha fijada
+  visitante · Club A. Estudiantes · 23 jugadores · 23 con ficha fijada
+  eventos   · 29
+    min 20 (1T 20) visitante penalty_goal Máximo Cañas
+    min 29 (1T 29) visitante penalty_goal Máximo Cañas
+    min 33 (1T 33) visitante try          Augusto Perren
+    min 33 (1T 33) visitante conversion   Máximo Cañas
+    min 39 (1T 39) visitante card_yellow  Alvaro Ferreyra
+    min 41 (2T 1) local     substitution Ignacio Parodi
+    min 44 (2T 4) local     card_yellow  Manuel Bernstein
+    min 46 (2T 6) local     try          Joaquin Valentin Guzman Beron
+    min 55 (2T 15) local     substitution Tomás Funes Iturraspe
+    min 55 (2T 15) local     substitution Enzo Abraham
+    min 55 (2T 15) local     substitution José Ignacio Galvez
+    min 60 (2T 20) local     substitution Alejandro Molinas
+    min 65 (2T 25) local     try          Manuel Bernstein
+    min 65 (2T 25) local     conversion   Facundo Beltramino
+    min 75 (2T 35) local     penalty_try  Manuel Bernstein
+    min 79 (2T 39) local     try          Luciano Simino
+    min 79 (2T 39) local     conversion   Genaro Giombi
+    min 84 (2T 44) visitante try          Marcelo Mateo Santana
+    min 84 (2T 44) visitante conversion   Máximo Cañas
+    min 85 (2T 45) visitante substitution Juan Manuel Lescano
+    min 87 (2T 47) visitante substitution Alvaro Ferreyra
+    min 90 (2T 50) visitante substitution Augusto Perren
+    min 95 (2T 55) visitante substitution Lisandro Uranga
+    min 99 (2T 59) visitante penalty_goal Máximo Cañas
+    min 99 (2T 59) visitante substitution Juan Francisco Florean
+    min 103 (2T 63) visitante substitution Ramiro Gurovich
+    min 105 (2T 65) visitante substitution Valentín Haiek
+    min 110 (2T 70) visitante substitution Bautista Lescano
+    min 116 (2T 76) visitante card_yellow  Tomas Bertot
+  marcador  · eventos 26-23 · guardado 26-23
+  tries     · 4-2 (guardado —-—)
+  arbitro   · JOAQUIN ZAPATA (guardado: —)
+  guardado  · 23 local · 23 visitante · 29 eventos
+
+Parana Rowing Club vs Gim. Y Esg. De Rosario · TRL 18º FECHA - T.R.L. Primera - 1ra. división. · tarjeta 327245  ·  fbe58411-67e0-400f-8d77-de89c46335bb
+  local     · Parana Rowing Club · 23 jugadores · 23 con ficha fijada
+  visitante · Gim. Y Esg. De Rosario · 23 jugadores · 23 con ficha fijada
+  eventos   · 39
+    min  1 (1T 1) local     try          Iván Agusto Quindt Pertus
+    min  1 (1T 1) local     conversion   Aquiles Bourdin
+    min 17 (1T 17) visitante penalty_goal Ramiro Picotto
+    min 18 (1T 18) local     try          Joaquin Moine
+    min 18 (1T 18) local     conversion   Aquiles Bourdin
+    min 22 (1T 22) visitante try          Manuel Prieto
+    min 34 (1T 34) local     try          Franco Osuna
+    min 34 (1T 34) local     conversion   Aquiles Bourdin
+    min 40 (1T 40) visitante try          Tomas Kuschner
+    min 40 (1T 40) visitante conversion   Ramiro Picotto
+    min 87 (2T 47) local     try          Aquiles Bourdin
+    min 87 (2T 47) local     conversion   Aquiles Bourdin
+    min 88 (2T 48) visitante substitution Pedro Annunziata
+    min 89 (2T 49) local     substitution Jorge Jonathan Gabriel Gutiérrez
+    min 90 (2T 50) local     try          Aquiles Bourdin
+    min 90 (2T 50) local     conversion   Aquiles Bourdin
+    min 92 (2T 52) local     substitution Joaquin Moine
+    min 93 (2T 53) local     substitution Juan Lucas Lerena
+    min 94 (2T 54) local     card_yellow  Franco Marizza
+    min 96 (2T 56) visitante try          Tomas Kuschner
+    min 96 (2T 56) visitante conversion   Ramiro Picotto
+    min 96 (2T 56) visitante substitution Felipe Costa
+    min 105 (2T 65) local     substitution Esteban Acosta Jazmin
+    min 105 (2T 65) visitante try          Joaquin Horcada
+    min 105 (2T 65) visitante conversion   Ramiro Picotto
+    min 105 (2T 65) visitante substitution Tomas Morales Raffe
+    min 105 (2T 65) visitante substitution Bautista Galleano
+    min 106 (2T 66) local     substitution Andres Agasse
+    min 108 (2T 68) visitante substitution Joaquin Horcada
+    min 109 (2T 69) local     substitution Franco Osuna
+    min 113 (2T 73) local     try          Franco Marizza
+    min 113 (2T 73) local     conversion   Aquiles Bourdin
+    min 115 (2T 75) visitante substitution Juan Esteban Sopo
+    min 115 (2T 75) visitante substitution Manuel Prieto
+    min 115 (2T 75) visitante substitution Maxi Gomez
+    min 118 (2T 78) local     substitution Iván Agusto Quindt Pertus
+    min 118 (2T 78) local     substitution Emanuel Schiavo
+    min 120 (2T 80) local     try          Aquiles Bourdin
+    min 120 (2T 80) local     conversion   Aquiles Bourdin
+  marcador  · eventos 49-29 · guardado 49-29
+  tries     · 7-4 (guardado —-—)
+  arbitro   · FACUNDO GORLA (guardado: —)
+  guardado  · 23 local · 23 visitante · 39 eventos
+
+La Salle Jobson De Sta. Fe vs Cha Roga Club De Santa Fe · TRL Fecha 3 · tarjeta 325991  ·  b8d523ce-a90b-4d31-a038-44660291ba36
+  local     · La Salle Jobson De Sta. Fe · 23 jugadores · 23 con ficha fijada
+  visitante · Cha Roga Club De Santa Fe · 23 jugadores · 23 con ficha fijada
+  eventos   · 24
+    min 17 (1T 17) visitante penalty_goal Bladimir Villamayor
+    min 20 (1T 20) local     try          Enzo Baccega
+    min 20 (1T 20) local     conversion   Guido Micocci
+    min 28 (1T 28) local     conversion   Guido Micocci
+    min 28 (1T 28) local     try          Santiago Miretti
+    min 32 (1T 32) visitante injury       Ulises Acevedo
+    min 32 (1T 32) visitante substitution Ulises Acevedo
+    min 35 (1T 35) local     try          Santiago Miretti
+    min 35 (1T 35) local     conversion   Guido Micocci
+    min 41 (2T 1) visitante card_yellow  Facundo Godoy
+    min 55 (2T 15) visitante substitution Gabriel Troncoso
+    min 56 (2T 16) local     card_yellow  Santiago Novelli
+    min 58 (2T 18) local     substitution Tomás Rudi
+    min 58 (2T 18) local     substitution Santiago Sbodio
+    min 59 (2T 19) visitante try          Emiliano Lizasoain
+    min 60 (2T 20) visitante conversion   Bladimir Villamayor
+    min 66 (2T 26) local     substitution Andrés Uriel Rios
+    min 66 (2T 26) visitante substitution Leandro Lara
+    min 66 (2T 26) visitante substitution Diego Bardus
+    min 69 (2T 29) visitante substitution Emiliano Lizasoain
+    min 70 (2T 30) local     substitution Francisco De Marco
+    min 80 (2T 40) local     try          Lautaro Gabriel Alesso
+    min 80 (2T 40) visitante substitution Federico Exequiel Andreu
+    min 81 (2T 41) visitante card_yellow  Thomas Fernandez
+  marcador  · eventos 26-10 · guardado 26-10
+  tries     · 4-1 (guardado —-—)
+  arbitro   · NICOLÁS BARRAZA (guardado: —)
+  guardado  · 23 local · 23 visitante · 24 eventos
+
+Gim. Y Esg. De Pergamino vs La Salle Jobson De Sta. Fe · TRL Fecha 4 · tarjeta 326395  ·  594cf75d-4b9d-427e-93fe-7406e41c76a0
+  local     · Gim. Y Esg. De Pergamino · 23 jugadores · 22 con ficha fijada
+  visitante · La Salle Jobson De Sta. Fe · 23 jugadores · 23 con ficha fijada
+  eventos   · 18
+    min  7 (1T 7) local     penalty_goal Segundo Leoz
+    min 18 (1T 18) local     try          Dante Peralta Mason
+    min 25 (1T 25) local     substitution Nicolas Rodriguez Castillo
+    min 27 (1T 27) visitante card_yellow  Agustín Kohlbrener
+    min 31 (1T 31) local     conversion   Segundo Leoz
+    min 39 (1T 39) local     try          Gonzalo Roberto Damian Gonzalez
+    min 46 (2T 6) visitante substitution Lautaro Salcedo
+    min 46 (2T 6) visitante substitution Santiago Sbodio
+    min 52 (2T 12) visitante substitution Enzo Baccega
+    min 52 (2T 12) visitante substitution Tomás Rudi
+    min 53 (2T 13) visitante substitution Alfredo Santiago Gonzalez Dorbesi
+    min 67 (2T 27) local     card_yellow  Stefano Bosque
+    min 67 (2T 27) visitante try          Santiago Miretti
+    min 67 (2T 27) visitante conversion   Guido Micocci
+    min 71 (2T 31) local     penalty_goal Segundo Leoz
+    min 73 (2T 33) visitante try          Leandro Tacca
+    min 105 (2T 65) local     substitution Tobias Torres
+    min 114 (2T 74) local     substitution Lucas Banfi
+  marcador  · eventos 18-12 · guardado 18-12
+  tries     · 2-2 (guardado —-—)
+  arbitro   · JOSE LUIS PARRA (guardado: —)
+  guardado  · 23 local · 23 visitante · 18 eventos
+
+Cha Roga Club De Santa Fe vs C.S. Los Pampas Rufino · TRL Fecha 4 · tarjeta 326396  ·  1366eefb-d766-4f62-8af4-fe15a9ff02a2
+  local     · Cha Roga Club De Santa Fe · 23 jugadores · 23 con ficha fijada
+  visitante · C.S. Los Pampas Rufino · 23 jugadores · 23 con ficha fijada
+  eventos   · 24
+    min  1 (1T 1) local     penalty_goal Bladimir Villamayor
+    min  3 (1T 3) visitante try          Mariano Andres Pedraza
+    min  5 (1T 5) local     card_yellow  Martín Maignien
+    min  5 (1T 5) visitante penalty_try  
+    min 19 (1T 19) local     substitution Gabriel Troncoso
+    min 33 (1T 33) visitante card_yellow  Franco Pedraza
+    min 40 (1T 40) visitante penalty_goal Juan Manuel Martin
+    min 42 (2T 2) local     try          Gaspar Maurer
+    min 43 (2T 3) local     conversion   Bladimir Villamayor
+    min 48 (2T 8) local     substitution Leandro Lara
+    min 48 (2T 8) local     substitution Nazareno Loyola
+    min 49 (2T 9) local     substitution Federico Exequiel Andreu
+    min 58 (2T 18) local     try          Dario Alberto Medina
+    min 59 (2T 19) local     conversion   Bladimir Villamayor
+    min 59 (2T 19) local     substitution Facundo Godoy
+    min 61 (2T 21) local     substitution Bladimir Villamayor
+    min 82 (2T 42) local     penalty_try  
+    min 100 (2T 60) visitante card_red     Nicolas Dimo
+    min 108 (2T 68) visitante penalty_goal Juan Manuel Martin
+    min 110 (2T 70) visitante substitution Renzo Bonino
+    min 110 (2T 70) visitante substitution Jhonatan Chocobares
+    min 111 (2T 71) visitante substitution Guillermo Agustin Ojeda
+    min 111 (2T 71) visitante substitution Santiago Acuña
+    min 119 (2T 79) visitante card_yellow  Gonzalo Molina
+  marcador  · eventos 24-18 · guardado 24-18
+  tries     · 3-2 (guardado —-—)
+  arbitro   · JAVIER IGNACIO VILLALBA (guardado: —)
+  guardado  · 23 local · 23 visitante · 24 eventos
+
+Club Tilcara De Paraná vs Regatas & Belgrano S.N. · TRL Fecha 4 · tarjeta 326397  ·  ed82282c-7467-4bc7-8c5b-c31009b03ab0
+  local     · Club Tilcara De Paraná · 23 jugadores · 22 con ficha fijada
+  visitante · Regatas & Belgrano S.N. · 23 jugadores · 23 con ficha fijada
+  eventos   · 33
+    min  8 (1T 8) local     try          Lautaro Cipriani
+    min 14 (1T 14) local     try          Luca Erbetta
+    min 14 (1T 14) local     conversion   Lautaro Cipriani
+    min 27 (1T 27) visitante try          Rodrigo Mansilla
+    min 27 (1T 27) visitante conversion   Iñaki Maiztegui
+    min 32 (1T 32) local     try          Luca Erbetta
+    min 32 (1T 32) local     conversion   Lautaro Cipriani
+    min 39 (1T 39) local     try          Franco Benitez
+    min 39 (1T 39) local     conversion   Lautaro Cipriani
+    min 41 (1T 41) local     card_yellow  Tomas Ignacio Sigura
+    min 48 (1T 48) local     substitution Giuliano Piaggio
+    min 48 (1T 48) local     try          Lautaro Cipriani
+    min 48 (1T 48) local     conversion   Lautaro Cipriani
+    min 50 (1T 50) local     try          Ivo Candido
+    min 58 (1T 58) local     substitution Tomas Ignacio Sigura
+    min 65 (1T 65) local     try          Lautaro Cipriani
+    min 65 (1T 65) local     conversion   Lautaro Cipriani
+    min 67 (1T 67) local     substitution Manuel Massoni
+    min 68 (1T 68) local     substitution Mateo Elian Arce
+    min 68 (1T 68) local     substitution Andres Eduardo Schroeder
+    min 72 (1T 72) local     substitution Uriel Abalde
+    min 72 (1T 72) local     substitution Brian Perrone
+    min 72 (1T 72) local     substitution Valentino Sigura
+    min 75 (1T 75) local     conversion   Lautaro Cipriani
+    min 75 (1T 75) local     try          Brian Perrone
+    min 78 (1T 78) local     card_yellow  Agustin Lacunza
+    min 57 (2T 17) visitante substitution Rodrigo Mansilla
+    min 57 (2T 17) visitante substitution Martin Gulias
+    min 57 (2T 17) visitante substitution Lautaro Malaplat
+    min 64 (2T 24) visitante substitution Alvaro Cerella
+    min 70 (2T 30) visitante substitution Iñaki Maiztegui
+    min 70 (2T 30) visitante substitution Iván Gabriel Vecoli
+    min 70 (2T 30) visitante substitution Tomas Seganfreddo
+  marcador  · eventos 52-7 · guardado 52-7
+  tries     · 8-1 (guardado —-—)
+  arbitro   · GASTÓN BRITOS (guardado: —)
+  guardado  · 23 local · 23 visitante · 33 eventos
+
+listo · 19 partidos

@@ -1,0 +1,29 @@
+{
+  "fecha": "2026-09-06",
+  "descripcion": "Torneo Austral 2026 · fecha 3 · Bigornia 9-29 Deportivo Portugues · Comodoro 83-5 Puerto Madryn",
+  "fuente": "Posteo de @superdeporchubut con los resultados de la fecha 3 (URVCH y URA).",
+  "motivo": "Carga manual de los dos partidos que faltaban de la fecha 3. El bonus ofensivo de Portugues se declara porque el posteo lo pone en 10 puntos y sin el daba 9: sus otros dos partidos de la fase ya estaban cargados, asi que el punto que falta sale de este. Comodoro no lleva ofensivo en el 83-5 porque con el se iria a 15 y el posteo lo pone en 14.",
+  "partidos": [
+    {
+      "partido": "e3957aa1-c63e-46e7-8cb7-c0b7acd8b3b2",
+      "local": "Bigornia R.C.",
+      "visitante": "Deportivo Portugués",
+      "marcador": {
+        "local": 9,
+        "visitante": 29
+      },
+      "bonusOfensivo": [
+        "visitante"
+      ]
+    },
+    {
+      "partido": "c1bbda24-1f71-491b-bcb9-b4a3a840b206",
+      "local": "Comodoro R.C.",
+      "visitante": "Puerto Madryn R.C.",
+      "marcador": {
+        "local": 83,
+        "visitante": 5
+      }
+    }
+  ]
+}

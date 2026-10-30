@@ -1,0 +1,120 @@
+nea 309939 Cerrado taraguy-r-c 69-26 aguara eventos 69 26 base 69 24 nL 23 nV 23 local: fichas 16 nuevas 7 visitante: fichas 0 nuevas 23
+nea 309941 Cerrado curne 34-16 sixty-r-c eventos 34 16 base 34 16 nL 23 nV 23 local: fichas 22 nuevas 1 visitante: fichas 0 nuevas 23
+nea 309942 Cerrado san-jose 32-29 regatas-de-resistencia eventos 32 29 base 32 29 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+nea 309943 Cerrado curda 24-29 aranduroga-r-c eventos 24 29 base 24 29 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+nea 309940 Cerrado san-patricio 106-10 capri eventos 106 10 base 106 10 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23 visitante: sin pareja: (12, '2T', 31, 'Genaro Martin Kruka')
+nea 311466 Cerrado san-jose 17-47 taraguy-r-c eventos 17 47 base 17 47 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 16 nuevas 7
+nea 311467 Cerrado curda 19-13 curne eventos 19 13 base 19 14 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 23 nuevas 0 visitante: sin pareja: (16, '2T', 33, 'Santiago Aguirre')
+nea 311468 Cerrado aranduroga-r-c 31-35 san-patricio eventos 31 35 base 32 35 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+nea 311469 Cerrado regatas-de-resistencia 28-30 aguara eventos 28 30 base 28 30 nL 22 nV 23 local: fichas 0 nuevas 22 visitante: fichas 0 nuevas 23 local: sin pareja: (15, '2T', 22, 'Carlos Alberto Dansey Minhot')
+nea 311470 Cerrado sixty-r-c 56-17 capri eventos 56 17 base 56 17 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23 visitante: sin pareja: (3, '2T', 19, 'Alexi Nahuel Peres')
+nea 312123 Cerrado taraguy-r-c 38-0 regatas-de-resistencia eventos 38 0 base 38 0 nL 23 nV 20 local: fichas 17 nuevas 6 visitante: fichas 0 nuevas 20
+nea 312124 Cerrado sixty-r-c 16-30 aranduroga-r-c eventos 16 30 base 16 30 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23 visitante: sin pareja: (3, '2T', 8, 'Francisco Cadenas')
+nea 312125 Cerrado capri 28-64 curda eventos 28 64 base 28 64 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+nea 312126 Cerrado aguara 23-29 san-jose eventos 23 29 base 23 29 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23 local: sin pareja: (9, '2T', 20, 'Mauro Fabian Bogarin')
+nea 312127 Cerrado san-patricio 9-39 curne eventos 9 39 base 9 39 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 23 nuevas 0
+nea 312715 Cerrado taraguy-r-c 71-22 capri eventos 71 22 base 71 22 nL 23 nV 23 local: fichas 14 nuevas 9 visitante: fichas 0 nuevas 23
+nea 312716 Cerrado aguara 14-33 sixty-r-c eventos 14 33 base 14 33 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+nea 312717 Cerrado san-patricio 35-17 regatas-de-resistencia eventos 35 17 base 35 17 nL 23 nV 20 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 20 visitante: sin pareja: (5, '2T', 5, 'Bruno Cantero') visitante: sin pareja: (8, '2T', 8, 'Hernando Ezequiel Castillo') visitante: sin pareja: (9, '2T', 8, 'Rodrigo Ojeda') visitante: sin pareja: (13, '2T', 14, 'Lucas Alejandro González Matteucci') visitante: sin pareja: (15, '2T', 30, 'Augusto Tomás Aguirre')
+nea 312718 Cerrado curne 24-48 aranduroga-r-c eventos 24 48 base 24 48 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 0 nuevas 23
+nea 312719 Cerrado san-jose 13-15 curda eventos 13 15 base 13 15 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+nea 313671 Cerrado curda 24-35 taraguy-r-c eventos 24 35 base 26 35 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 16 nuevas 7
+nea 313674 Cerrado sixty-r-c 22-34 san-patricio eventos 22 34 base 22 34 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+nea 313672 Cerrado aranduroga-r-c 44-21 san-jose eventos 44 21 base 44 21 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+nea 313673 Cerrado regatas-de-resistencia 23-17 curne eventos 23 17 base 23 17 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 23 nuevas 0 visitante: sin pareja: (17, '2T', 30, 'Marcos Espinoza')
+nea 313675 Cerrado capri 12-32 aguara eventos 12 32 base 12 32 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+nea 314218 Cerrado curne 48-7 aguara eventos 48 7 base 48 7 nL 23 nV 23 local: fichas 21 nuevas 2 visitante: fichas 0 nuevas 23
+nea 314219 Cerrado san-jose 70-17 capri eventos 70 17 base 70 17 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+nea 314221 Cerrado aranduroga-r-c 31-27 regatas-de-resistencia eventos 31 27 base 31 27 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23 visitante: sin pareja: (12, '2T', 30, 'Agustín Andres Sandoval')
+nea 314220 Cerrado curda 36-13 sixty-r-c eventos 36 13 base 36 13 nL 23 nV 22 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 22
+nea 314423 Cerrado sixty-r-c 31-43 taraguy-r-c eventos 31 43 base 31 43 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 19 nuevas 4
+nea 314424 Cerrado capri 24-46 regatas-de-resistencia eventos 24 46 base 24 46 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+nea 314425 Cerrado aguara 7-26 aranduroga-r-c eventos 26 7 base 26 7 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23 LOCAL/VISITANTE INVERTIDOS respecto de la base
+nea 314426 Cerrado san-patricio 31-26 curda eventos 31 26 base 31 26 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+nea 314427 Cerrado curne 30-24 san-jose eventos 30 24 base 30 24 nL 23 nV 23 local: fichas 21 nuevas 2 visitante: fichas 0 nuevas 23
+nea 319676 Cerrado taraguy-r-c 26-25 aranduroga-r-c eventos 26 25 base 26 25 nL 23 nV 23 local: fichas 18 nuevas 5 visitante: fichas 0 nuevas 23
+nea 319677 Cerrado regatas-de-resistencia 22-26 curda eventos 22 26 base 22 26 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+nea 319679 Cerrado capri 19-64 curne eventos 19 64 base 19 64 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 23 nuevas 0 visitante: sin pareja: (10, '2T', 10, 'Rodrigo Ezequiel Macrillotakis') visitante: sin pareja: (14, '2T', 10, 'Ignacio Baiter') visitante: sin pareja: (16, '2T', 50, 'Eduardo Torres') visitante: sin pareja: (23, '2T', 56, 'Danko Raycevich')
+nea 319680 Cerrado aguara 41-21 san-patricio eventos 41 21 base 41 21 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+nea 319678 Cerrado san-jose 59-19 sixty-r-c eventos 59 19 base 59 19 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+nea 320200 Cerrado curne 32-16 taraguy-r-c eventos 32 16 base 32 16 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 16 nuevas 7
+nea 320201 Cerrado san-patricio 27-32 san-jose eventos 27 32 base 27 32 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+nea 320202 Cerrado curda 75-28 aguara eventos 75 28 base 75 28 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+nea 320203 Cerrado aranduroga-r-c 66-17 capri eventos 66 17 base 66 17 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+nea 320204 Cerrado regatas-de-resistencia 20-17 sixty-r-c eventos 20 17 base 20 17 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+nea 320810 Cerrado regatas-de-resistencia 15-29 taraguy-r-c eventos 15 29 base 15 29 nL 22 nV 23 local: fichas 0 nuevas 22 visitante: fichas 15 nuevas 8 local: sin pareja: (7, '2T', 10, 'Carlos Alberto Dansey Minhot')
+nea 320811 Cerrado san-jose 75-14 san-patricio eventos 75 14 base 75 14 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+nea 320812 Cerrado aguara 19-39 curne eventos 19 39 base 19 39 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 23 nuevas 0
+nea 320813 Cerrado aranduroga-r-c 36-27 curda eventos 36 27 base 36 27 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+nea 322645 Cerrado taraguy-r-c 35-13 san-jose eventos 35 13 base 35 13 nL 23 nV 23 local: fichas 18 nuevas 5 visitante: fichas 0 nuevas 23
+nea 322646 Cerrado curne 53-33 curda eventos 53 33 base 53 33 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 0 nuevas 23
+nea 322647 Cerrado san-patricio 32-35 aranduroga-r-c eventos 32 35 base 32 35 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+nea 322649 Cerrado aguara 33-16 regatas-de-resistencia eventos 33 16 base 33 16 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+nea 323384 Cerrado aranduroga-r-c 24-24 taraguy-r-c eventos 24 24 base 24 24 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 17 nuevas 6
+nea 323386 Cerrado san-jose 34-27 aguara eventos 34 27 base 34 27 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+nea 323387 Cerrado curne 36-21 san-patricio eventos 36 21 base 36 21 nL 23 nV 23 local: fichas 22 nuevas 1 visitante: fichas 0 nuevas 23
+nea 323385 Cerrado curda 28-18 regatas-de-resistencia eventos 28 18 base 28 18 nL 23 nV 22 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 22
+nea 324564 Cerrado aguara 13-30 taraguy-r-c eventos 13 30 base 13 30 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 17 nuevas 6
+nea 324565 Cerrado regatas-de-resistencia 33-17 san-patricio eventos 33 17 base 33 17 nL 22 nV 22 local: fichas 0 nuevas 22 visitante: fichas 0 nuevas 22
+nea 324566 Cerrado aranduroga-r-c 34-32 curne eventos 34 32 base 34 32 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 23 nuevas 0
+nea 324725 Cerrado curda 20-20 san-jose eventos 20 20 base 20 20 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+nea 325542 Cerrado taraguy-r-c 28-25 curda eventos 28 25 base 28 25 nL 23 nV 23 local: fichas 17 nuevas 6 visitante: fichas 0 nuevas 23
+nea 325543 Cerrado san-jose 48-28 aranduroga-r-c eventos 48 28 base 40 28 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+nea 325544 Cerrado curne 35-22 regatas-de-resistencia eventos 35 22 base 35 22 nL 23 nV 21 local: fichas 23 nuevas 0 visitante: fichas 0 nuevas 21 visitante: sin pareja: (-1, '2T', 5, 'Martin Peiovich')
+nea 325545 Cerrado san-patricio 32-0 aguara eventos 32 0 base 32 0 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+nea 326077 Cerrado san-patricio 39-36 taraguy-r-c eventos 39 36 base 39 36 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 9 nuevas 14
+nea 326078 Cerrado san-jose 33-24 curne eventos 33 24 base 33 24 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 22 nuevas 1
+nea 326079 Cerrado aguara 22-60 curda eventos 22 60 base 22 60 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+nea 326080 Cerrado regatas-de-resistencia 33-59 aranduroga-r-c eventos 33 59 base 33 59 nL 19 nV 23 local: fichas 0 nuevas 19 visitante: fichas 0 nuevas 23
+nea 326788 Cerrado regatas-de-resistencia 15-33 san-jose eventos 15 33 base 15 33 nL 22 nV 23 local: fichas 0 nuevas 22 visitante: fichas 0 nuevas 23
+nea 326789 Cerrado aranduroga-r-c 38-43 aguara eventos 38 43 base 38 43 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+nea 326791 Cerrado curda 50-27 san-patricio eventos 50 27 base 45 27 nL 23 nV 22 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 22
+nea 326794 Cerrado taraguy-r-c 31-21 curne eventos 31 21 base 31 21 nL 23 nV 23 local: fichas 11 nuevas 12 visitante: fichas 22 nuevas 1
+noa 319845 Cerrado tucuman-rugby-club 24-26 los-tarcos eventos 24 26 base 24 26 nL 23 nV 23 local: fichas 21 nuevas 2 visitante: fichas 0 nuevas 23
+noa 319846 Cerrado tucuman-lawn-tennis 44-29 universitario-de-tucuman eventos 44 29 base 44 29 nL 23 nV 23 local: fichas 20 nuevas 3 visitante: fichas 20 nuevas 3
+noa 319848 Cerrado cardenales-r-c 31-28 jockey-club-salta eventos 31 28 base 31 28 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 0 nuevas 23
+noa 319844 Cerrado huirapuca 45-21 lince-rugby-club eventos 45 21 base 45 21 nL 23 nV 23 local: fichas 20 nuevas 3 visitante: fichas 0 nuevas 23 visitante: sin pareja: (8, '2T', 7, 'Mirko Castro')
+noa 319842 Cerrado natacion-y-gimnasia 32-24 universitario-de-salta eventos 32 24 base 32 24 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 0 nuevas 23
+noa 320331 Cerrado lince-rugby-club 31-35 tucuman-rugby-club eventos 31 35 base 31 35 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 20 nuevas 3
+noa 322139 Cerrado universitario-de-salta 35-27 jockey-club-salta eventos 35 27 base 35 27 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+noa 322143 Cerrado universitario-de-tucuman 22-23 cardenales-r-c eventos 22 23 base 22 23 nL 23 nV 23 local: fichas 21 nuevas 2 visitante: fichas 22 nuevas 1
+noa 322144 Cerrado los-tarcos 27-23 tucuman-lawn-tennis eventos 27 23 base 27 23 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 22 nuevas 1
+noa 322145 Cerrado natacion-y-gimnasia 23-20 huirapuca eventos 23 20 base 23 20 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 20 nuevas 3
+noa 322821 Cerrado cardenales-r-c 21-17 los-tarcos eventos 21 17 base 21 17 nL 23 nV 23 local: fichas 22 nuevas 1 visitante: fichas 0 nuevas 23
+noa 322822 Cerrado jockey-club-salta 42-44 universitario-de-tucuman eventos 42 44 base 42 44 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 20 nuevas 3
+noa 322818 Cerrado huirapuca 48-24 universitario-de-salta eventos 48 24 base 48 24 nL 23 nV 23 local: fichas 19 nuevas 4 visitante: fichas 0 nuevas 23
+noa 322819 Cerrado tucuman-rugby-club 29-27 natacion-y-gimnasia eventos 29 27 base 29 27 nL 23 nV 23 local: fichas 21 nuevas 2 visitante: fichas 22 nuevas 1
+noa 322820 Cerrado tucuman-lawn-tennis 59-31 lince-rugby-club eventos 59 31 base 59 31 nL 23 nV 23 local: fichas 22 nuevas 1 visitante: fichas 0 nuevas 23 local: sin pareja: (-1, '2T', 75, 'Maximiliano De La Jara') visitante: sin pareja: (3, '1T', 36, 'Victor Emiliano Coria Marchetti')
+noa 323548 Cerrado los-tarcos 36-31 jockey-club-salta eventos 36 31 base 36 31 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+noa 323550 Cerrado natacion-y-gimnasia 31-27 tucuman-lawn-tennis eventos 31 27 base 31 27 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 22 nuevas 1 local: sin pareja: (18, '2T', 25, 'Ignacio Sandez')
+noa 323551 Cerrado huirapuca 37-33 tucuman-rugby-club eventos 37 33 base 37 33 nL 23 nV 23 local: fichas 20 nuevas 3 visitante: fichas 21 nuevas 2
+noa 323549 Cerrado lince-rugby-club 40-43 cardenales-r-c eventos 40 43 base 40 43 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 21 nuevas 2
+noa 324175 Cerrado universitario-de-salta 23-30 universitario-de-tucuman eventos 23 30 base 23 30 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 17 nuevas 6
+noa 324684 Cerrado tucuman-rugby-club 35-40 universitario-de-salta eventos 35 40 base 35 40 nL 23 nV 23 local: fichas 20 nuevas 3 visitante: fichas 0 nuevas 23 visitante: sin pareja: (-1, '2T', 12, 'Alex Leandro Benjamin Flores Vega')
+noa 324686 Cerrado cardenales-r-c 40-33 natacion-y-gimnasia eventos 40 33 base 40 33 nL 23 nV 23 local: fichas 21 nuevas 2 visitante: fichas 23 nuevas 0
+noa 324687 Cerrado jockey-club-salta 45-45 lince-rugby-club eventos 45 45 base 45 45 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+noa 324688 Cerrado universitario-de-tucuman 36-31 los-tarcos eventos 36 31 base 36 31 nL 23 nV 23 local: fichas 18 nuevas 5 visitante: fichas 0 nuevas 23
+noa 324685 Cerrado tucuman-lawn-tennis 60-37 huirapuca eventos 60 37 base 60 37 nL 23 nV 23 local: fichas 21 nuevas 2 visitante: fichas 18 nuevas 5
+noa 325165 Cerrado universitario-de-salta 45-38 los-tarcos eventos 45 38 base 45 38 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+noa 325170 Cerrado huirapuca 74-21 cardenales-r-c eventos 74 21 base 74 21 nL 23 nV 23 local: fichas 20 nuevas 3 visitante: fichas 21 nuevas 2 visitante: sin pareja: (3, '2T', 2, 'German Alejandro Rodriguez')
+noa 325166 Cerrado lince-rugby-club 40-42 universitario-de-tucuman eventos 40 42 base 40 42 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 17 nuevas 6
+noa 325690 Cerrado natacion-y-gimnasia 37-38 jockey-club-salta eventos 37 38 base 37 38 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 0 nuevas 23
+noa 325691 Cerrado tucuman-rugby-club 34-38 tucuman-lawn-tennis eventos 34 38 base 34 38 nL 23 nV 23 local: fichas 22 nuevas 1 visitante: fichas 21 nuevas 2 local: sin pareja: (19, '2T', 62, "Juan Maria D'antuene")
+noa 327064 Cerrado tucuman-lawn-tennis 56-28 universitario-de-salta eventos 56 28 base 56 28 nL 23 nV 23 local: fichas 21 nuevas 2 visitante: fichas 0 nuevas 23
+noa 327066 Cerrado jockey-club-salta 35-51 huirapuca eventos 35 51 base 35 51 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 19 nuevas 4
+noa 327067 Cerrado universitario-de-tucuman 25-28 natacion-y-gimnasia eventos 25 28 base 25 28 nL 23 nV 23 local: fichas 18 nuevas 5 visitante: fichas 23 nuevas 0
+noa 327068 Cerrado los-tarcos 49-21 lince-rugby-club eventos 49 21 base 49 21 nL 23 nV 23 local: fichas 0 nuevas 23 visitante: fichas 0 nuevas 23
+noa 327065 Cerrado cardenales-r-c 23-28 tucuman-rugby-club eventos 23 28 base 23 28 nL 23 nV 23 local: fichas 20 nuevas 3 visitante: fichas 22 nuevas 1
+noa 327383 Iniciado natacion-y-gimnasia 21-14 los-tarcos eventos 21 14 base 21 14 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 0 nuevas 23 local: sin pareja: (10, '2T', 1, 'Mariano Aguero Daneri')
+noa 327384 Iniciado huirapuca 27-23 universitario-de-tucuman eventos 27 23 base 27 23 nL 23 nV 23 local: fichas 19 nuevas 4 visitante: fichas 18 nuevas 5 local: sin pareja: (7, '2T', 4, 'Matias Rene Gimenez Bueso')
+noa 327386 Iniciado tucuman-lawn-tennis 54-10 cardenales-r-c eventos 54 10 base 54 10 nL 23 nV 23 local: fichas 20 nuevas 3 visitante: fichas 21 nuevas 2
+noa 327385 Iniciado tucuman-rugby-club 61-17 jockey-club-salta eventos 61 17 base 61 17 nL 23 nV 23 local: fichas 23 nuevas 0 visitante: fichas 0 nuevas 23
+PROBLEMA nea 309939 taraguy-r-c vs aguara · NEA 2026 · tarjeta 309939: eventos 69-26 / tarjeta 69-26 / base 69-24
+PROBLEMA nea 311467 curda vs curne · NEA 2026 · tarjeta 311467: eventos 19-13 / tarjeta 19-13 / base 19-14
+PROBLEMA nea 311468 aranduroga-r-c vs san-patricio · NEA 2026 · tarjeta 311468: eventos 31-35 / tarjeta 31-35 / base 32-35
+PROBLEMA nea 313671 curda vs taraguy-r-c · NEA 2026 · tarjeta 313671: eventos 24-35 / tarjeta 24-35 / base 26-35
+PROBLEMA nea 325543 san-jose vs aranduroga-r-c · NEA 2026 · tarjeta 325543: eventos 48-28 / tarjeta 48-28 / base 40-28
+PROBLEMA nea 326791 curda vs san-patricio · NEA 2026 · tarjeta 326791: eventos 50-27 / tarjeta 50-27 / base 45-27
+PROBLEMA noa 327382: tarjeta sin marcador (partido en juego o sin cerrar), se omite
+nea 72 partidos
+noa 39 partidos

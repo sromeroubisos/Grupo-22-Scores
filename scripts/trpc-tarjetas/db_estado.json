@@ -1,0 +1,3418 @@
+{
+ "trpc": [
+  {
+   "id": "4ff2aedc-33c2-48f7-a8c2-2f3dffed5d77",
+   "date_time": "2026-03-14T17:00:00+00:00",
+   "home_club_id": "club-las-aguilas",
+   "away_club_id": "trelew-r-c",
+   "score": {
+    "away": 24,
+    "home": 7,
+    "awayTries": 4,
+    "homeTries": 1
+   },
+   "status": "final",
+   "referee": "JUAN MANUEL RENZONE",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 23,
+   "season_id": "81790ed9-0347-4572-982e-3503a60655df",
+   "phase_id": "d8edaa8e-f887-4cb9-a84e-ea895d3d2814"
+  },
+  {
+   "id": "80584fe0-294b-4740-8a60-8ac23777a745",
+   "date_time": "2026-03-14T19:00:00+00:00",
+   "home_club_id": "roca-r-c",
+   "away_club_id": "deportivo-portugues",
+   "score": {
+    "away": 12,
+    "home": 51,
+    "awayTries": 2,
+    "homeTries": 6
+   },
+   "status": "final",
+   "referee": "RODRIGO OSCAR LOFVALL",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 26,
+   "season_id": "81790ed9-0347-4572-982e-3503a60655df",
+   "phase_id": "d8edaa8e-f887-4cb9-a84e-ea895d3d2814"
+  },
+  {
+   "id": "bdf5673b-b8a9-4f81-a5c6-9a1d3af27f8b",
+   "date_time": "2026-03-15T17:00:00+00:00",
+   "home_club_id": "bigornia-r-c",
+   "away_club_id": "marabunta-r-c",
+   "score": {
+    "away": 32,
+    "home": 38,
+    "awayTries": 5,
+    "homeTries": 6
+   },
+   "status": "final",
+   "referee": "SEBASTIAN MOLINA",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 39,
+   "season_id": "81790ed9-0347-4572-982e-3503a60655df",
+   "phase_id": "d8edaa8e-f887-4cb9-a84e-ea895d3d2814"
+  },
+  {
+   "id": "38e2f8f0-67a1-408d-8fa0-288b9fb7a3af",
+   "date_time": "2026-03-15T19:00:00+00:00",
+   "home_club_id": "neuquen-r-c",
+   "away_club_id": "chenque-r-c",
+   "score": {
+    "away": 18,
+    "home": 38,
+    "awayTries": 2,
+    "homeTries": 5
+   },
+   "status": "final",
+   "referee": "MAXIMILIANO CAMPOT",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 33,
+   "season_id": "81790ed9-0347-4572-982e-3503a60655df",
+   "phase_id": "d8edaa8e-f887-4cb9-a84e-ea895d3d2814"
+  },
+  {
+   "id": "afa23446-efbb-490f-8cf0-35dd7a612136",
+   "date_time": "2026-04-11T19:00:00+00:00",
+   "home_club_id": "marabunta-r-c",
+   "away_club_id": "roca-r-c",
+   "score": {
+    "away": 24,
+    "home": 28,
+    "awayTries": 3,
+    "homeTries": 4,
+    "manualOverride": {
+     "away": 24,
+     "home": 28,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "VICTOR ALBERTO RIERA",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 30,
+   "season_id": "81790ed9-0347-4572-982e-3503a60655df",
+   "phase_id": "d8edaa8e-f887-4cb9-a84e-ea895d3d2814"
+  },
+  {
+   "id": "9fe425a0-9fe5-4182-ac15-619405519846",
+   "date_time": "2026-04-12T15:30:00+00:00",
+   "home_club_id": "chenque-r-c",
+   "away_club_id": "club-las-aguilas",
+   "score": {
+    "away": 3,
+    "home": 71,
+    "awayTries": 0,
+    "homeTries": 11,
+    "manualOverride": {
+     "away": 3,
+     "home": 71,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "NICOLAS GODOY",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 29,
+   "season_id": "81790ed9-0347-4572-982e-3503a60655df",
+   "phase_id": "d8edaa8e-f887-4cb9-a84e-ea895d3d2814"
+  },
+  {
+   "id": "ec4e3338-d7dd-4159-a8df-0a711e79f532",
+   "date_time": "2026-04-12T17:00:00+00:00",
+   "home_club_id": "trelew-r-c",
+   "away_club_id": "neuquen-r-c",
+   "score": {
+    "away": 40,
+    "home": 22,
+    "awayTries": 5,
+    "homeTries": 4,
+    "manualOverride": {
+     "away": 40,
+     "home": 22,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "MATIAS ERICK ALVAREZ",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 34,
+   "season_id": "81790ed9-0347-4572-982e-3503a60655df",
+   "phase_id": "d8edaa8e-f887-4cb9-a84e-ea895d3d2814"
+  },
+  {
+   "id": "2532ca36-20ec-4a0e-8654-adb7ec2a940d",
+   "date_time": "2026-04-12T18:30:00+00:00",
+   "home_club_id": "deportivo-portugues",
+   "away_club_id": "bigornia-r-c",
+   "score": {
+    "away": 27,
+    "home": 29,
+    "awayTries": 4,
+    "homeTries": 2,
+    "manualOverride": {
+     "away": 27,
+     "home": 29,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "ALVARO LUIS BELINZAN",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 31,
+   "season_id": "81790ed9-0347-4572-982e-3503a60655df",
+   "phase_id": "d8edaa8e-f887-4cb9-a84e-ea895d3d2814"
+  },
+  {
+   "id": "4487a8e3-39c2-40b5-89d2-574e155dbfce",
+   "date_time": "2026-05-01T19:00:00+00:00",
+   "home_club_id": "neuquen-r-c",
+   "away_club_id": "club-las-aguilas",
+   "score": {
+    "away": 0,
+    "home": 96,
+    "awayTries": 0,
+    "homeTries": 16
+   },
+   "status": "final",
+   "referee": "PERCEVAL BISCAY",
+   "lineup_home_count": 23,
+   "lineup_away_count": 22,
+   "events_count": 44,
+   "season_id": "81790ed9-0347-4572-982e-3503a60655df",
+   "phase_id": "d8edaa8e-f887-4cb9-a84e-ea895d3d2814"
+  },
+  {
+   "id": "9a7fd22c-4314-4ce5-bd5d-7d4c7ccf7c86",
+   "date_time": "2026-05-02T18:00:00+00:00",
+   "home_club_id": "chenque-r-c",
+   "away_club_id": "trelew-r-c",
+   "score": {
+    "away": 11,
+    "home": 29,
+    "awayTries": 1,
+    "homeTries": 4,
+    "penalties": null,
+    "manualOverride": {
+     "away": 11,
+     "home": 29,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "RAFAEL ANTONIO RASO LUQUE",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 27,
+   "season_id": "81790ed9-0347-4572-982e-3503a60655df",
+   "phase_id": "d8edaa8e-f887-4cb9-a84e-ea895d3d2814"
+  },
+  {
+   "id": "d321ea2c-d4e4-4a8d-96d6-480bffb1cd99",
+   "date_time": "2026-05-02T19:00:00+00:00",
+   "home_club_id": "marabunta-r-c",
+   "away_club_id": "deportivo-portugues",
+   "score": {
+    "away": 7,
+    "home": 53
+   },
+   "status": "final",
+   "referee": "ALBERTO DELLORO ARBENOIZ",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 0,
+   "season_id": "81790ed9-0347-4572-982e-3503a60655df",
+   "phase_id": "d8edaa8e-f887-4cb9-a84e-ea895d3d2814"
+  },
+  {
+   "id": "c8f99528-6002-445d-a0eb-6d8981d1df66",
+   "date_time": "2026-05-03T16:00:00+00:00",
+   "home_club_id": "bigornia-r-c",
+   "away_club_id": "roca-r-c",
+   "score": {
+    "away": 29,
+    "home": 46,
+    "awayTries": 4,
+    "homeTries": 7,
+    "penalties": null,
+    "manualOverride": {
+     "away": 29,
+     "home": 46,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "CATRIEL HEIS",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 36,
+   "season_id": "81790ed9-0347-4572-982e-3503a60655df",
+   "phase_id": "d8edaa8e-f887-4cb9-a84e-ea895d3d2814"
+  },
+  {
+   "id": "5cc4070e-d16f-48f6-a642-d98018c2f3ef",
+   "date_time": "2026-05-23T19:00:00+00:00",
+   "home_club_id": "neuquen-r-c",
+   "away_club_id": "marabunta-r-c",
+   "score": {
+    "away": 17,
+    "home": 55,
+    "awayTries": 2,
+    "homeTries": 9,
+    "penalties": null,
+    "manualOverride": {
+     "away": 17,
+     "home": 55,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "RODRIGO OSCAR LOFVALL",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 40,
+   "season_id": "81790ed9-0347-4572-982e-3503a60655df",
+   "phase_id": "9f1b4575-ac91-4208-add5-7969e66934e6"
+  },
+  {
+   "id": "ca62c8da-f4f4-4c23-831c-54ecc59e55ec",
+   "date_time": "2026-05-24T18:00:00+00:00",
+   "home_club_id": "bigornia-r-c",
+   "away_club_id": "chenque-r-c",
+   "score": {
+    "away": 17,
+    "home": 24,
+    "awayTries": 1,
+    "homeTries": 4,
+    "manualOverride": {
+     "away": 17,
+     "home": 24,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "VICTOR ALBERTO RIERA",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 27,
+   "season_id": "81790ed9-0347-4572-982e-3503a60655df",
+   "phase_id": "9f1b4575-ac91-4208-add5-7969e66934e6"
+  },
+  {
+   "id": "a7f610f5-89b5-4a80-a6d0-bea936bc4e7e",
+   "date_time": "2026-06-20T18:30:00+00:00",
+   "home_club_id": "neuquen-r-c",
+   "away_club_id": "bigornia-r-c",
+   "score": {
+    "away": 26,
+    "home": 35,
+    "awayTries": 4,
+    "homeTries": 4
+   },
+   "status": "final",
+   "referee": "RAFAEL ANTONIO RASO LUQUE",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 31,
+   "season_id": "81790ed9-0347-4572-982e-3503a60655df",
+   "phase_id": "9f1b4575-ac91-4208-add5-7969e66934e6"
+  }
+ ],
+ "clausura": [
+  {
+   "id": "3e12a6d3-e542-4977-92b6-99af7f9b096d",
+   "date_time": "2026-09-26T19:00:00+00:00",
+   "home_club_id": "universitario-de-rio-grande",
+   "away_club_id": "club-las-aguilas",
+   "score": {
+    "away": 8,
+    "home": 31,
+    "awayTries": 1,
+    "homeTries": 4,
+    "manualOverride": {
+     "away": 8,
+     "home": 31,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "JUAN MANUEL RENZONE",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 31,
+   "season_id": "55242f08-989b-4bb0-b241-15deeebe50de",
+   "phase_id": "e05245c8-5bd0-45f9-a2f7-4c5a0f3cdda1"
+  },
+  {
+   "id": "a5f0a059-435b-4b01-a13e-9ad79fd6b6ac",
+   "date_time": "2026-09-26T19:00:00+00:00",
+   "home_club_id": "tolhuin-rugby-club",
+   "away_club_id": "club-colegio-del-sur",
+   "score": {
+    "away": 60,
+    "home": 3,
+    "awayTries": 10,
+    "homeTries": 0,
+    "manualOverride": {
+     "away": 60,
+     "home": 3,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "MARIO BENJAMÍN CASTRO",
+   "lineup_home_count": 21,
+   "lineup_away_count": 22,
+   "events_count": 25,
+   "season_id": "55242f08-989b-4bb0-b241-15deeebe50de",
+   "phase_id": "e05245c8-5bd0-45f9-a2f7-4c5a0f3cdda1"
+  },
+  {
+   "id": "c53f203d-cb96-4a9e-b693-f1ce6fd79fdc",
+   "date_time": "2026-10-03T19:00:00+00:00",
+   "home_club_id": "club-las-aguilas",
+   "away_club_id": "tolhuin-rugby-club",
+   "score": {
+    "away": 0,
+    "home": 77,
+    "awayTries": 0,
+    "homeTries": 13,
+    "manualOverride": {
+     "away": 0,
+     "home": 77,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "IGNACIO MARTÍN CASTRO",
+   "lineup_home_count": 23,
+   "lineup_away_count": 21,
+   "events_count": 29,
+   "season_id": "55242f08-989b-4bb0-b241-15deeebe50de",
+   "phase_id": "e05245c8-5bd0-45f9-a2f7-4c5a0f3cdda1"
+  },
+  {
+   "id": "c573d3b9-1491-4204-bd8b-cda3edf753d6",
+   "date_time": "2026-10-03T19:00:00+00:00",
+   "home_club_id": "club-colegio-del-sur",
+   "away_club_id": "ushuaia-rugby-club",
+   "score": {
+    "away": 18,
+    "home": 14,
+    "awayTries": 2,
+    "homeTries": 1,
+    "manualOverride": {
+     "away": 18,
+     "home": 14,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "MAURICIO GIULIANO",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 17,
+   "season_id": "55242f08-989b-4bb0-b241-15deeebe50de",
+   "phase_id": "e05245c8-5bd0-45f9-a2f7-4c5a0f3cdda1"
+  },
+  {
+   "id": "03b6a2d6-2947-4954-86c0-c4a646b7cb28",
+   "date_time": "2026-10-10T19:00:00+00:00",
+   "home_club_id": "universitario-de-rio-grande",
+   "away_club_id": "club-colegio-del-sur",
+   "score": {
+    "away": 0,
+    "home": 57,
+    "awayTries": 0,
+    "homeTries": 9
+   },
+   "status": "final",
+   "referee": "JUAN MANUEL RENZONE",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 32,
+   "season_id": "55242f08-989b-4bb0-b241-15deeebe50de",
+   "phase_id": "e05245c8-5bd0-45f9-a2f7-4c5a0f3cdda1"
+  },
+  {
+   "id": "337f331b-0b46-4d76-b7c3-8c570ddb4387",
+   "date_time": "2026-10-10T19:00:00+00:00",
+   "home_club_id": "tolhuin-rugby-club",
+   "away_club_id": "ushuaia-rugby-club",
+   "score": {
+    "away": 56,
+    "home": 0,
+    "awayTries": 8,
+    "homeTries": 0,
+    "manualOverride": {
+     "away": 56,
+     "home": 0,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "MARIO BENJAMÍN CASTRO",
+   "lineup_home_count": 22,
+   "lineup_away_count": 23,
+   "events_count": 26,
+   "season_id": "55242f08-989b-4bb0-b241-15deeebe50de",
+   "phase_id": "e05245c8-5bd0-45f9-a2f7-4c5a0f3cdda1"
+  },
+  {
+   "id": "16da6eb9-1153-44e9-91b3-395bfeeb7da4",
+   "date_time": "2026-10-17T19:00:00+00:00",
+   "home_club_id": "ushuaia-rugby-club",
+   "away_club_id": "club-las-aguilas",
+   "score": {
+    "away": 15,
+    "home": 8,
+    "awayTries": 2,
+    "homeTries": 1
+   },
+   "status": "final",
+   "referee": "MARIO BENJAMÍN CASTRO",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 17,
+   "season_id": "55242f08-989b-4bb0-b241-15deeebe50de",
+   "phase_id": "e05245c8-5bd0-45f9-a2f7-4c5a0f3cdda1"
+  },
+  {
+   "id": "b8a9747d-d8c2-4538-a5c8-64bde9f4050a",
+   "date_time": "2026-10-17T19:00:00+00:00",
+   "home_club_id": "universitario-de-rio-grande",
+   "away_club_id": "tolhuin-rugby-club",
+   "score": {
+    "away": 0,
+    "home": 20,
+    "manualOverride": {
+     "away": 0,
+     "home": 20,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "55242f08-989b-4bb0-b241-15deeebe50de",
+   "phase_id": "e05245c8-5bd0-45f9-a2f7-4c5a0f3cdda1"
+  },
+  {
+   "id": "250ad781-3287-48d5-9a29-e95cfce6daf6",
+   "date_time": "2026-10-24T19:00:00+00:00",
+   "home_club_id": "club-colegio-del-sur",
+   "away_club_id": "club-las-aguilas",
+   "score": {
+    "away": 50,
+    "home": 13,
+    "manualOverride": {
+     "away": 50,
+     "home": 13,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "IGNACIO MARTÍN CASTRO",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 0,
+   "season_id": "55242f08-989b-4bb0-b241-15deeebe50de",
+   "phase_id": "e05245c8-5bd0-45f9-a2f7-4c5a0f3cdda1"
+  },
+  {
+   "id": "be80e545-a71b-4b45-8f53-009b3fcd74ac",
+   "date_time": "2026-10-24T19:00:00+00:00",
+   "home_club_id": "universitario-de-rio-grande",
+   "away_club_id": "ushuaia-rugby-club",
+   "score": null,
+   "status": "scheduled",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "55242f08-989b-4bb0-b241-15deeebe50de",
+   "phase_id": "e05245c8-5bd0-45f9-a2f7-4c5a0f3cdda1"
+  },
+  {
+   "id": "7553d1af-3d66-4566-b40f-692204e8302d",
+   "date_time": "2026-10-31T19:00:00+00:00",
+   "home_club_id": "ushuaia-rugby-club",
+   "away_club_id": "tolhuin-rugby-club",
+   "score": null,
+   "status": "scheduled",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "55242f08-989b-4bb0-b241-15deeebe50de",
+   "phase_id": "e05245c8-5bd0-45f9-a2f7-4c5a0f3cdda1"
+  },
+  {
+   "id": "8d88b95f-a1ea-4f51-9f45-54febf557517",
+   "date_time": "2026-10-31T19:00:00+00:00",
+   "home_club_id": "club-colegio-del-sur",
+   "away_club_id": "universitario-de-rio-grande",
+   "score": null,
+   "status": "scheduled",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "55242f08-989b-4bb0-b241-15deeebe50de",
+   "phase_id": "e05245c8-5bd0-45f9-a2f7-4c5a0f3cdda1"
+  },
+  {
+   "id": "9bce9af7-1d62-4b5b-9cdd-7c749f9745d7",
+   "date_time": "2026-11-07T19:00:00+00:00",
+   "home_club_id": "club-las-aguilas",
+   "away_club_id": "universitario-de-rio-grande",
+   "score": null,
+   "status": "scheduled",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "55242f08-989b-4bb0-b241-15deeebe50de",
+   "phase_id": "e05245c8-5bd0-45f9-a2f7-4c5a0f3cdda1"
+  },
+  {
+   "id": "9e1d2f33-2518-498f-abeb-fe736a80d130",
+   "date_time": "2026-11-07T19:00:00+00:00",
+   "home_club_id": "club-colegio-del-sur",
+   "away_club_id": "tolhuin-rugby-club",
+   "score": null,
+   "status": "scheduled",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "55242f08-989b-4bb0-b241-15deeebe50de",
+   "phase_id": "e05245c8-5bd0-45f9-a2f7-4c5a0f3cdda1"
+  },
+  {
+   "id": "b3eb271f-1322-447a-8ecd-aa772cc773b4",
+   "date_time": "2026-11-14T19:00:00+00:00",
+   "home_club_id": "ushuaia-rugby-club",
+   "away_club_id": "club-colegio-del-sur",
+   "score": null,
+   "status": "scheduled",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "55242f08-989b-4bb0-b241-15deeebe50de",
+   "phase_id": "e05245c8-5bd0-45f9-a2f7-4c5a0f3cdda1"
+  },
+  {
+   "id": "fb6d8623-c570-489b-93a6-dbb64606c12b",
+   "date_time": "2026-11-14T19:00:00+00:00",
+   "home_club_id": "tolhuin-rugby-club",
+   "away_club_id": "club-las-aguilas",
+   "score": null,
+   "status": "scheduled",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "55242f08-989b-4bb0-b241-15deeebe50de",
+   "phase_id": "e05245c8-5bd0-45f9-a2f7-4c5a0f3cdda1"
+  },
+  {
+   "id": "a8317bc3-0154-4efc-8a6f-5f40b415db9e",
+   "date_time": "2026-11-21T19:00:00+00:00",
+   "home_club_id": "club-las-aguilas",
+   "away_club_id": "club-colegio-del-sur",
+   "score": null,
+   "status": "scheduled",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "55242f08-989b-4bb0-b241-15deeebe50de",
+   "phase_id": "e05245c8-5bd0-45f9-a2f7-4c5a0f3cdda1"
+  },
+  {
+   "id": "ebce3efa-deb4-45ee-99d7-3a22ee29cc48",
+   "date_time": "2026-11-21T19:00:00+00:00",
+   "home_club_id": "ushuaia-rugby-club",
+   "away_club_id": "universitario-de-rio-grande",
+   "score": null,
+   "status": "scheduled",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "55242f08-989b-4bb0-b241-15deeebe50de",
+   "phase_id": "e05245c8-5bd0-45f9-a2f7-4c5a0f3cdda1"
+  },
+  {
+   "id": "aee2c981-62a7-4901-8e02-64d40136b98a",
+   "date_time": "2026-11-28T19:00:00+00:00",
+   "home_club_id": "tolhuin-rugby-club",
+   "away_club_id": "universitario-de-rio-grande",
+   "score": null,
+   "status": "scheduled",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "55242f08-989b-4bb0-b241-15deeebe50de",
+   "phase_id": "e05245c8-5bd0-45f9-a2f7-4c5a0f3cdda1"
+  },
+  {
+   "id": "e942b939-665e-4790-a181-0b4c53ef485f",
+   "date_time": "2026-11-28T19:00:00+00:00",
+   "home_club_id": "club-las-aguilas",
+   "away_club_id": "ushuaia-rugby-club",
+   "score": null,
+   "status": "scheduled",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "55242f08-989b-4bb0-b241-15deeebe50de",
+   "phase_id": "e05245c8-5bd0-45f9-a2f7-4c5a0f3cdda1"
+  },
+  {
+   "id": "bc1ed180-069d-4365-90a3-37c9f5b0e16a",
+   "date_time": "2026-12-05T19:00:00+00:00",
+   "home_club_id": null,
+   "away_club_id": null,
+   "score": null,
+   "status": "scheduled",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "55242f08-989b-4bb0-b241-15deeebe50de",
+   "phase_id": "d24cd4ea-80a8-4d92-a810-e34707965653"
+  }
+ ],
+ "austral": [
+  {
+   "id": "4bf441c9-33db-44c2-bbfe-4b4998c9b166",
+   "date_time": "2026-08-16T19:00:00+00:00",
+   "home_club_id": "deportivo-portugues",
+   "away_club_id": "trelew-r-c",
+   "score": {
+    "away": 19,
+    "home": 28,
+    "awayTries": 3,
+    "homeTries": 4
+   },
+   "status": "final",
+   "referee": "PEDRO SEBASTIAN RIVERA",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 25,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  },
+  {
+   "id": "80e92b78-5043-46b9-8148-2b6220859401",
+   "date_time": "2026-08-16T19:00:00+00:00",
+   "home_club_id": "chenque-r-c",
+   "away_club_id": "san-jorge-r-c-ua",
+   "score": {
+    "away": 15,
+    "home": 32,
+    "awayTries": 2,
+    "homeTries": 6
+   },
+   "status": "final",
+   "referee": "FERNANDO NAHUEL",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 23,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  },
+  {
+   "id": "b7fab4e0-b37a-4f73-9b2c-2ad892c4405d",
+   "date_time": "2026-08-16T19:00:00+00:00",
+   "home_club_id": "bigornia-r-c",
+   "away_club_id": "comodoro-r-c",
+   "score": {
+    "away": 53,
+    "home": 31,
+    "awayTries": 0,
+    "homeTries": 0
+   },
+   "status": "final",
+   "referee": "DANIEL BARCHETTA",
+   "lineup_home_count": 22,
+   "lineup_away_count": 23,
+   "events_count": 0,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  },
+  {
+   "id": "b9d3b880-39d9-498e-8dca-61973be612be",
+   "date_time": "2026-08-16T19:00:00+00:00",
+   "home_club_id": "draig-goch-r-c",
+   "away_club_id": "patoruzu-r-c",
+   "score": {
+    "away": 46,
+    "home": 24,
+    "awayTries": 6,
+    "homeTries": 4
+   },
+   "status": "final",
+   "referee": "MAURICIO SANTIAGO GONZALEZ",
+   "lineup_home_count": 21,
+   "lineup_away_count": 23,
+   "events_count": 35,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  },
+  {
+   "id": "d23fd41b-929e-4cb8-9be6-28448c80f20a",
+   "date_time": "2026-08-16T19:00:00+00:00",
+   "home_club_id": "calafate-r-c",
+   "away_club_id": "puerto-madryn-r-c",
+   "score": {
+    "away": 23,
+    "home": 52,
+    "awayTries": 2,
+    "homeTries": 8
+   },
+   "status": "final",
+   "referee": "SEBASTIAN MOLINA",
+   "lineup_home_count": 23,
+   "lineup_away_count": 18,
+   "events_count": 36,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  },
+  {
+   "id": "0946487b-152e-493d-a52a-c7c8aa0f01a8",
+   "date_time": "2026-08-22T19:00:00+00:00",
+   "home_club_id": "deportivo-portugues",
+   "away_club_id": "chenque-r-c",
+   "score": {
+    "away": 41,
+    "home": 39,
+    "awayTries": 6,
+    "homeTries": 5
+   },
+   "status": "final",
+   "referee": "SEBASTIAN MOLINA",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 37,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  },
+  {
+   "id": "55d53bb2-1903-486a-b4fe-66fb562a8986",
+   "date_time": "2026-08-22T19:00:00+00:00",
+   "home_club_id": "san-jorge-r-c-ua",
+   "away_club_id": "comodoro-r-c",
+   "score": {
+    "away": 45,
+    "home": 26,
+    "awayTries": 6,
+    "homeTries": 4
+   },
+   "status": "final",
+   "referee": "MIGUEL ANGEL BRAVO",
+   "lineup_home_count": 22,
+   "lineup_away_count": 23,
+   "events_count": 33,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  },
+  {
+   "id": "aa4f3f9f-abdc-4147-916f-266c05ad2bcd",
+   "date_time": "2026-08-22T19:00:00+00:00",
+   "home_club_id": "calafate-r-c",
+   "away_club_id": "draig-goch-r-c",
+   "score": {
+    "away": 19,
+    "home": 36,
+    "awayTries": 3,
+    "homeTries": 5
+   },
+   "status": "final",
+   "referee": "ALVARO LUIS BELINZAN",
+   "lineup_home_count": 23,
+   "lineup_away_count": 21,
+   "events_count": 28,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  },
+  {
+   "id": "b1fc3947-3e94-48b8-b605-978accc36696",
+   "date_time": "2026-08-22T19:00:00+00:00",
+   "home_club_id": "trelew-r-c",
+   "away_club_id": "bigornia-r-c",
+   "score": {
+    "away": 12,
+    "home": 24,
+    "awayTries": 2,
+    "homeTries": 4
+   },
+   "status": "final",
+   "referee": "RAFAEL ANTONIO RASO LUQUE",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 26,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  },
+  {
+   "id": "ec495ce1-890b-4ad5-a528-3debbf637b13",
+   "date_time": "2026-08-22T19:00:00+00:00",
+   "home_club_id": "puerto-madryn-r-c",
+   "away_club_id": "patoruzu-r-c",
+   "score": {
+    "away": 48,
+    "home": 14,
+    "awayTries": 6,
+    "homeTries": 2
+   },
+   "status": "final",
+   "referee": "DANIEL BARCHETTA",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 38,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  },
+  {
+   "id": "e103a1e6-b8a6-43a3-b5b6-e4d1771ca41f",
+   "date_time": "2026-08-29T19:00:00+00:00",
+   "home_club_id": "patoruzu-r-c",
+   "away_club_id": "trelew-r-c",
+   "score": {
+    "away": 17,
+    "home": 20,
+    "awayTries": 3,
+    "homeTries": 1,
+    "penalties": null,
+    "manualOverride": {
+     "away": 17,
+     "home": 20,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "EDGAR GABRIEL KONONCZUK",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 26,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  },
+  {
+   "id": "09e62782-88db-40f4-9c3e-bc9e91a86b45",
+   "date_time": "2026-09-05T19:00:00+00:00",
+   "home_club_id": "draig-goch-r-c",
+   "away_club_id": "san-jorge-r-c-ua",
+   "score": {
+    "away": 24,
+    "home": 46,
+    "awayTries": 4,
+    "homeTries": 6
+   },
+   "status": "final",
+   "referee": "DANIEL BARCHETTA",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 32,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  },
+  {
+   "id": "684132ac-e0f0-4a5f-9e8c-417399e588d1",
+   "date_time": "2026-09-05T19:00:00+00:00",
+   "home_club_id": "chenque-r-c",
+   "away_club_id": "calafate-r-c",
+   "score": {
+    "away": 46,
+    "home": 40,
+    "awayTries": 5,
+    "homeTries": 6
+   },
+   "status": "final",
+   "referee": "EDGAR GABRIEL KONONCZUK",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 38,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  },
+  {
+   "id": "e3957aa1-c63e-46e7-8cb7-c0b7acd8b3b2",
+   "date_time": "2026-09-06T18:30:00+00:00",
+   "home_club_id": "bigornia-r-c",
+   "away_club_id": "deportivo-portugues",
+   "score": {
+    "away": 29,
+    "home": 9,
+    "awayTries": 5,
+    "homeTries": 0
+   },
+   "status": "final",
+   "referee": "AXEL LAFONT",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 24,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  },
+  {
+   "id": "c1bbda24-1f71-491b-bcb9-b4a3a840b206",
+   "date_time": "2026-09-06T19:00:00+00:00",
+   "home_club_id": "comodoro-r-c",
+   "away_club_id": "puerto-madryn-r-c",
+   "score": {
+    "away": 5,
+    "home": 83,
+    "awayTries": 1,
+    "homeTries": 12
+   },
+   "status": "final",
+   "referee": "PEDRO SEBASTIAN RIVERA",
+   "lineup_home_count": 23,
+   "lineup_away_count": 18,
+   "events_count": 36,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  },
+  {
+   "id": "3b2a26b1-b257-424a-82d5-2ccd9fcdf3f1",
+   "date_time": "2026-09-12T19:00:00+00:00",
+   "home_club_id": "puerto-madryn-r-c",
+   "away_club_id": "san-jorge-r-c-ua",
+   "score": {
+    "away": 5,
+    "home": 69
+   },
+   "status": "final",
+   "referee": "DANIEL BARCHETTA",
+   "lineup_home_count": 20,
+   "lineup_away_count": 22,
+   "events_count": 0,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  },
+  {
+   "id": "43cf7a5c-29b5-4585-9f74-63d01e015e2f",
+   "date_time": "2026-09-12T19:00:00+00:00",
+   "home_club_id": "deportivo-portugues",
+   "away_club_id": "patoruzu-r-c",
+   "score": {
+    "away": 38,
+    "home": 20
+   },
+   "status": "final",
+   "referee": "PEDRO SEBASTIAN RIVERA",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 0,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  },
+  {
+   "id": "712baa10-9a63-4684-9cc4-c165f77ffabf",
+   "date_time": "2026-09-12T19:00:00+00:00",
+   "home_club_id": "calafate-r-c",
+   "away_club_id": "bigornia-r-c",
+   "score": {
+    "away": 3,
+    "home": 67,
+    "awayTries": 0,
+    "homeTries": 9
+   },
+   "status": "final",
+   "referee": "MIGUEL ANGEL BRAVO",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 39,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  },
+  {
+   "id": "862fffc6-5ca1-4bda-88b9-9cb63620c1bc",
+   "date_time": "2026-09-13T18:30:00+00:00",
+   "home_club_id": "trelew-r-c",
+   "away_club_id": "comodoro-r-c",
+   "score": {
+    "away": 37,
+    "home": 53
+   },
+   "status": "final",
+   "referee": "AXEL LAFONT",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 0,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  },
+  {
+   "id": "1c5be190-66d3-429b-a543-03c94ca61ba2",
+   "date_time": "2026-09-13T19:00:00+00:00",
+   "home_club_id": "chenque-r-c",
+   "away_club_id": "draig-goch-r-c",
+   "score": {
+    "away": 15,
+    "home": 109,
+    "awayTries": 2,
+    "homeTries": 17
+   },
+   "status": "final",
+   "referee": "IVÁN ANDRES DORIA",
+   "lineup_home_count": 23,
+   "lineup_away_count": 22,
+   "events_count": 48,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  },
+  {
+   "id": "64d501f8-1d96-4ac1-81c7-d4aee578f6a1",
+   "date_time": "2026-09-26T19:00:00+00:00",
+   "home_club_id": "comodoro-r-c",
+   "away_club_id": "chenque-r-c",
+   "score": {
+    "away": 10,
+    "home": 29
+   },
+   "status": "final",
+   "referee": "SEBASTIAN MOLINA",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 0,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  },
+  {
+   "id": "fad0c4eb-649f-4d46-9b87-003782c026cd",
+   "date_time": "2026-09-26T19:00:00+00:00",
+   "home_club_id": "san-jorge-r-c-ua",
+   "away_club_id": "calafate-r-c",
+   "score": {
+    "away": 71,
+    "home": 21,
+    "awayTries": 11,
+    "homeTries": 3
+   },
+   "status": "final",
+   "referee": "AXEL CARDENAS",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 42,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  },
+  {
+   "id": "4c905449-4f36-40e3-a8f9-012b14a2790d",
+   "date_time": "2026-09-27T19:00:00+00:00",
+   "home_club_id": "patoruzu-r-c",
+   "away_club_id": "bigornia-r-c",
+   "score": {
+    "away": 25,
+    "home": 48
+   },
+   "status": "final",
+   "referee": "RAFAEL ANTONIO RASO LUQUE",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 0,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  },
+  {
+   "id": "d37d4170-9131-4e0f-8c03-1b6461f10c13",
+   "date_time": "2026-09-27T19:00:00+00:00",
+   "home_club_id": "puerto-madryn-r-c",
+   "away_club_id": "deportivo-portugues",
+   "score": {
+    "away": 39,
+    "home": 17,
+    "awayTries": 6,
+    "homeTries": 3
+   },
+   "status": "final",
+   "referee": "AXEL LAFONT",
+   "lineup_home_count": 18,
+   "lineup_away_count": 23,
+   "events_count": 24,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  },
+  {
+   "id": "df066b20-612e-464a-b7ea-b855f41ff8de",
+   "date_time": "2026-09-27T19:00:00+00:00",
+   "home_club_id": "trelew-r-c",
+   "away_club_id": "draig-goch-r-c",
+   "score": {
+    "away": 21,
+    "home": 89
+   },
+   "status": "final",
+   "referee": "DANIEL BARCHETTA",
+   "lineup_home_count": 23,
+   "lineup_away_count": 22,
+   "events_count": 0,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  },
+  {
+   "id": "268d958b-c0f4-4d71-aba8-ca33989f1e61",
+   "date_time": "2026-10-03T19:00:00+00:00",
+   "home_club_id": "calafate-r-c",
+   "away_club_id": "deportivo-portugues",
+   "score": {
+    "away": 34,
+    "home": 36
+   },
+   "status": "final",
+   "referee": "SEBASTIAN MOLINA",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 0,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  },
+  {
+   "id": "349698d2-ffe7-4e48-8387-efc19504c830",
+   "date_time": "2026-10-03T19:00:00+00:00",
+   "home_club_id": "bigornia-r-c",
+   "away_club_id": "puerto-madryn-r-c",
+   "score": {
+    "away": 19,
+    "home": 36,
+    "awayTries": 3,
+    "homeTries": 5,
+    "manualOverride": {
+     "away": 19,
+     "home": 36,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "PEDRO SEBASTIAN RIVERA",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 35,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  },
+  {
+   "id": "b0c46515-9c2b-49b1-a242-7f62e4b6a063",
+   "date_time": "2026-10-03T19:00:00+00:00",
+   "home_club_id": "patoruzu-r-c",
+   "away_club_id": "san-jorge-r-c-ua",
+   "score": {
+    "away": 21,
+    "home": 57,
+    "awayTries": 3,
+    "homeTries": 9,
+    "manualOverride": {
+     "away": 21,
+     "home": 57,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "ALVARO LUIS BELINZAN",
+   "lineup_home_count": 23,
+   "lineup_away_count": 21,
+   "events_count": 35,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  },
+  {
+   "id": "c88a37fb-e530-4bee-9c04-0343131bb6fa",
+   "date_time": "2026-10-03T19:00:00+00:00",
+   "home_club_id": "chenque-r-c",
+   "away_club_id": "trelew-r-c",
+   "score": {
+    "away": 24,
+    "home": 43
+   },
+   "status": "final",
+   "referee": "AXEL CARDENAS",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 0,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  },
+  {
+   "id": "f7cb0f35-a207-48d6-b328-8cc6ae31e0ba",
+   "date_time": "2026-10-03T19:00:00+00:00",
+   "home_club_id": "draig-goch-r-c",
+   "away_club_id": "comodoro-r-c",
+   "score": {
+    "away": 75,
+    "home": 14
+   },
+   "status": "final",
+   "referee": "RAFAEL ANTONIO RASO LUQUE",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 0,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  },
+  {
+   "id": "36e1611a-1c3f-4a01-80c8-7fa06e878d1f",
+   "date_time": "2026-10-10T19:00:00+00:00",
+   "home_club_id": "deportivo-portugues",
+   "away_club_id": "draig-goch-r-c",
+   "score": {
+    "away": 0,
+    "home": 21
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  },
+  {
+   "id": "c7c3f86e-c185-4511-a76c-d1f0cd1553a3",
+   "date_time": "2026-10-10T19:00:00+00:00",
+   "home_club_id": "trelew-r-c",
+   "away_club_id": "calafate-r-c",
+   "score": {
+    "away": 31,
+    "home": 36,
+    "awayTries": 4,
+    "homeTries": 5
+   },
+   "status": "final",
+   "referee": "RAFAEL ANTONIO RASO LUQUE",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 32,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  },
+  {
+   "id": "e0dcc3cc-4ec9-4f38-84e8-ac859d78c7cb",
+   "date_time": "2026-10-10T19:00:00+00:00",
+   "home_club_id": "puerto-madryn-r-c",
+   "away_club_id": "chenque-r-c",
+   "score": {
+    "away": 37,
+    "home": 22,
+    "awayTries": 5,
+    "homeTries": 3
+   },
+   "status": "final",
+   "referee": "FRANCISCO JAVIER CELAN",
+   "lineup_home_count": 22,
+   "lineup_away_count": 23,
+   "events_count": 33,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  },
+  {
+   "id": "f865d505-5369-43d8-8c6e-2d4c2d641739",
+   "date_time": "2026-10-10T19:00:00+00:00",
+   "home_club_id": "san-jorge-r-c-ua",
+   "away_club_id": "bigornia-r-c",
+   "score": {
+    "away": 32,
+    "home": 20,
+    "awayTries": 5,
+    "homeTries": 3
+   },
+   "status": "final",
+   "referee": "PEDRO SEBASTIAN RIVERA",
+   "lineup_home_count": 23,
+   "lineup_away_count": 20,
+   "events_count": 32,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  },
+  {
+   "id": "f5d294e2-1227-4c56-80d1-9a0ed4567f91",
+   "date_time": "2026-10-11T19:00:00+00:00",
+   "home_club_id": "comodoro-r-c",
+   "away_club_id": "patoruzu-r-c",
+   "score": {
+    "away": 21,
+    "home": 29,
+    "awayTries": 3,
+    "homeTries": 4
+   },
+   "status": "final",
+   "referee": "AXEL CARDENAS",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 28,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  },
+  {
+   "id": "37dc3562-6e9e-4c6d-bd3f-911098862e43",
+   "date_time": "2026-10-17T19:00:00+00:00",
+   "home_club_id": "chenque-r-c",
+   "away_club_id": "patoruzu-r-c",
+   "score": {
+    "away": 34,
+    "home": 35
+   },
+   "status": "final",
+   "referee": "SEBASTIAN MOLINA",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 0,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  },
+  {
+   "id": "5a96694b-cb84-4c5e-9e01-3ce0e88fb969",
+   "date_time": "2026-10-17T19:00:00+00:00",
+   "home_club_id": "puerto-madryn-r-c",
+   "away_club_id": "trelew-r-c",
+   "score": {
+    "away": 48,
+    "home": 17,
+    "awayTries": 8,
+    "homeTries": 3,
+    "manualOverride": {
+     "away": 48,
+     "home": 17,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "MAURICIO SANTIAGO GONZALEZ",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 36,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  },
+  {
+   "id": "b7efc51a-d7da-49bc-8c99-fd0b851d931c",
+   "date_time": "2026-10-17T19:00:00+00:00",
+   "home_club_id": "deportivo-portugues",
+   "away_club_id": "san-jorge-r-c-ua",
+   "score": {
+    "away": 31,
+    "home": 67,
+    "awayTries": 5,
+    "homeTries": 11
+   },
+   "status": "final",
+   "referee": "NEHUEN ALEJANDRO MILLAMAN",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 34,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  },
+  {
+   "id": "ed518195-97cc-450d-abe3-d5189df6ff33",
+   "date_time": "2026-10-17T19:00:00+00:00",
+   "home_club_id": "calafate-r-c",
+   "away_club_id": "comodoro-r-c",
+   "score": {
+    "away": 27,
+    "home": 22
+   },
+   "status": "final",
+   "referee": "EDGAR GABRIEL KONONCZUK",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 0,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  },
+  {
+   "id": "fa818af9-17d3-4851-b533-57d30bab0261",
+   "date_time": "2026-10-17T19:00:00+00:00",
+   "home_club_id": "bigornia-r-c",
+   "away_club_id": "draig-goch-r-c",
+   "score": {
+    "away": 0,
+    "home": 21
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  },
+  {
+   "id": "a2d011e2-50ec-4180-ab21-4d10bf43999f",
+   "date_time": "2026-10-31T19:00:00+00:00",
+   "home_club_id": "patoruzu-r-c",
+   "away_club_id": "calafate-r-c",
+   "score": {
+    "away": 0,
+    "home": 0
+   },
+   "status": "scheduled",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  },
+  {
+   "id": "a774ab4b-ac5d-4e80-8ae9-b3a69b43f0e6",
+   "date_time": "2026-10-31T19:00:00+00:00",
+   "home_club_id": "san-jorge-r-c-ua",
+   "away_club_id": "trelew-r-c",
+   "score": {
+    "away": 0,
+    "home": 0
+   },
+   "status": "scheduled",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  },
+  {
+   "id": "bf6a64d1-7759-4dab-bd21-f7eb4fea3fc5",
+   "date_time": "2026-10-31T19:00:00+00:00",
+   "home_club_id": "bigornia-r-c",
+   "away_club_id": "chenque-r-c",
+   "score": {
+    "away": 0,
+    "home": 0
+   },
+   "status": "scheduled",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  },
+  {
+   "id": "c60e701f-19d8-40ba-bf4b-134300920113",
+   "date_time": "2026-10-31T19:00:00+00:00",
+   "home_club_id": "draig-goch-r-c",
+   "away_club_id": "puerto-madryn-r-c",
+   "score": {
+    "away": 0,
+    "home": 0
+   },
+   "status": "scheduled",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  },
+  {
+   "id": "d711cca3-7d4c-462e-8c9c-085d11348003",
+   "date_time": "2026-10-31T19:00:00+00:00",
+   "home_club_id": "comodoro-r-c",
+   "away_club_id": "deportivo-portugues",
+   "score": {
+    "away": 0,
+    "home": 0
+   },
+   "status": "scheduled",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": null,
+   "phase_id": "f433f9f4-6ff0-4914-a0c7-4d1459912e6a"
+  }
+ ],
+ "norpat": [
+  {
+   "id": "7fbf462b-6ca3-4609-869b-cc9755253815",
+   "date_time": "2026-04-18T19:00:00+00:00",
+   "home_club_id": "marabunta-r-c",
+   "away_club_id": "roca-r-c",
+   "score": {
+    "away": 5,
+    "home": 75,
+    "awayTries": 1,
+    "homeTries": 12
+   },
+   "status": "final",
+   "referee": "ALBERTO DELLORO ARBENOIZ",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 39,
+   "season_id": "39ad1c93-c6ad-4b49-a971-74c221867499",
+   "phase_id": "a72bd920-b95b-4c1d-8908-a4310e01e814"
+  },
+  {
+   "id": "c494311b-30f6-4ab6-8872-fba65a200449",
+   "date_time": "2026-04-18T19:00:00+00:00",
+   "home_club_id": "neuquen-r-c",
+   "away_club_id": "patagonia-r-c",
+   "score": {
+    "away": 0,
+    "home": 70,
+    "awayTries": 0,
+    "homeTries": 12
+   },
+   "status": "final",
+   "referee": "PERCEVAL BISCAY",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 29,
+   "season_id": "39ad1c93-c6ad-4b49-a971-74c221867499",
+   "phase_id": "a72bd920-b95b-4c1d-8908-a4310e01e814"
+  },
+  {
+   "id": "1a12e15f-54c8-457e-88b4-cc34a957ccee",
+   "date_time": "2026-04-25T18:30:00+00:00",
+   "home_club_id": "santa-rosa-r-c",
+   "away_club_id": "universitario-de-bahia-blanca",
+   "score": {
+    "away": 23,
+    "home": 24,
+    "awayTries": 2,
+    "homeTries": 3
+   },
+   "status": "final",
+   "referee": "OMAR ALEJANDRO VILLAFAÑE",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 17,
+   "season_id": "39ad1c93-c6ad-4b49-a971-74c221867499",
+   "phase_id": "a72bd920-b95b-4c1d-8908-a4310e01e814"
+  },
+  {
+   "id": "bf682603-d877-476a-99b4-b32766b7b57f",
+   "date_time": "2026-05-02T19:00:00+00:00",
+   "home_club_id": "sociedad-sportiva-de-bahia-blanca",
+   "away_club_id": "club-el-nacional",
+   "score": {
+    "away": 0,
+    "home": 85,
+    "awayTries": 0,
+    "homeTries": 13
+   },
+   "status": "final",
+   "referee": "JUAN IGNACIO ROSSELLO",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 32,
+   "season_id": "39ad1c93-c6ad-4b49-a971-74c221867499",
+   "phase_id": "a72bd920-b95b-4c1d-8908-a4310e01e814"
+  },
+  {
+   "id": "647a6527-28aa-4c42-974a-2c08304daf7d",
+   "date_time": "2026-05-09T19:00:00+00:00",
+   "home_club_id": "neuquen-r-c",
+   "away_club_id": "santa-rosa-r-c",
+   "score": {
+    "away": 0,
+    "home": 75,
+    "awayTries": 0,
+    "homeTries": 11
+   },
+   "status": "final",
+   "referee": "ROCÍO ANTONELLA SEVERINI",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 34,
+   "season_id": "39ad1c93-c6ad-4b49-a971-74c221867499",
+   "phase_id": "a72bd920-b95b-4c1d-8908-a4310e01e814"
+  },
+  {
+   "id": "b6edcdc4-a235-4d71-8f71-b6938ce8610a",
+   "date_time": "2026-05-09T19:00:00+00:00",
+   "home_club_id": "marabunta-r-c",
+   "away_club_id": "club-el-nacional",
+   "score": {
+    "away": 22,
+    "home": 68
+   },
+   "status": "final",
+   "referee": "PERCEVAL BISCAY",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 0,
+   "season_id": "39ad1c93-c6ad-4b49-a971-74c221867499",
+   "phase_id": "a72bd920-b95b-4c1d-8908-a4310e01e814"
+  },
+  {
+   "id": "0842037b-1048-4c18-801c-d60f34cd1922",
+   "date_time": "2026-05-10T18:00:00+00:00",
+   "home_club_id": "universitario-de-bahia-blanca",
+   "away_club_id": "patagonia-r-c",
+   "score": {
+    "away": 5,
+    "home": 52,
+    "awayTries": 1,
+    "homeTries": 7
+   },
+   "status": "final",
+   "referee": "RAFAEL JORNET",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 26,
+   "season_id": "39ad1c93-c6ad-4b49-a971-74c221867499",
+   "phase_id": "a72bd920-b95b-4c1d-8908-a4310e01e814"
+  },
+  {
+   "id": "168ddbd3-2c01-4faa-bb36-ae95141dd9e4",
+   "date_time": "2026-05-10T18:00:00+00:00",
+   "home_club_id": "sociedad-sportiva-de-bahia-blanca",
+   "away_club_id": "roca-r-c",
+   "score": {
+    "away": 7,
+    "home": 111,
+    "awayTries": 1,
+    "homeTries": 17
+   },
+   "status": "final",
+   "referee": "OMAR ALEJANDRO VILLAFAÑE",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 50,
+   "season_id": "39ad1c93-c6ad-4b49-a971-74c221867499",
+   "phase_id": "a72bd920-b95b-4c1d-8908-a4310e01e814"
+  },
+  {
+   "id": "ea2dba6a-c701-46dd-920b-e9581175105c",
+   "date_time": "2026-05-16T18:00:00+00:00",
+   "home_club_id": "club-el-nacional",
+   "away_club_id": "roca-r-c",
+   "score": {
+    "away": 47,
+    "home": 17
+   },
+   "status": "final",
+   "referee": "IAN FUENTES",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 0,
+   "season_id": "39ad1c93-c6ad-4b49-a971-74c221867499",
+   "phase_id": "a72bd920-b95b-4c1d-8908-a4310e01e814"
+  },
+  {
+   "id": "a2bbf8a6-1f2b-4089-9384-f10dd34e4c01",
+   "date_time": "2026-05-16T18:30:00+00:00",
+   "home_club_id": "sociedad-sportiva-de-bahia-blanca",
+   "away_club_id": "marabunta-r-c",
+   "score": {
+    "away": 0,
+    "home": 64,
+    "awayTries": 0,
+    "homeTries": 10
+   },
+   "status": "final",
+   "referee": "SANTIAGO BEVACQUA",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 30,
+   "season_id": "39ad1c93-c6ad-4b49-a971-74c221867499",
+   "phase_id": "a72bd920-b95b-4c1d-8908-a4310e01e814"
+  },
+  {
+   "id": "31515edc-030e-47e9-8e77-6835064ef003",
+   "date_time": "2026-05-17T16:30:00+00:00",
+   "home_club_id": "santa-rosa-r-c",
+   "away_club_id": "patagonia-r-c",
+   "score": {
+    "away": 17,
+    "home": 46
+   },
+   "status": "final",
+   "referee": "ESTEBAN SZELAGOWSKI",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 0,
+   "season_id": "39ad1c93-c6ad-4b49-a971-74c221867499",
+   "phase_id": "a72bd920-b95b-4c1d-8908-a4310e01e814"
+  },
+  {
+   "id": "837d8d73-5da2-4432-ab77-93158b489a6e",
+   "date_time": "2026-05-17T18:00:00+00:00",
+   "home_club_id": "universitario-de-bahia-blanca",
+   "away_club_id": "neuquen-r-c",
+   "score": {
+    "away": 85,
+    "home": 14,
+    "awayTries": 13,
+    "homeTries": 2
+   },
+   "status": "final",
+   "referee": "MAXIMILIANO CAMPOT",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 45,
+   "season_id": "39ad1c93-c6ad-4b49-a971-74c221867499",
+   "phase_id": "a72bd920-b95b-4c1d-8908-a4310e01e814"
+  },
+  {
+   "id": "f92b54ed-1d4b-41ca-833e-dedc799b1638",
+   "date_time": "2026-05-30T19:00:00+00:00",
+   "home_club_id": "sociedad-sportiva-de-bahia-blanca",
+   "away_club_id": "neuquen-r-c",
+   "score": null,
+   "status": "postponed",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "39ad1c93-c6ad-4b49-a971-74c221867499",
+   "phase_id": "b1c5df84-b69a-438f-b7d9-9c7fbea7df4c"
+  },
+  {
+   "id": "2a3ac38f-caa7-4d87-8508-3105e4ee6642",
+   "date_time": "2026-06-06T19:00:00+00:00",
+   "home_club_id": "neuquen-r-c",
+   "away_club_id": "marabunta-r-c",
+   "score": {
+    "away": 7,
+    "home": 48,
+    "awayTries": 1,
+    "homeTries": 5,
+    "manualOverride": {
+     "away": 7,
+     "home": 48,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "VICTOR ALBERTO RIERA",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 32,
+   "season_id": "39ad1c93-c6ad-4b49-a971-74c221867499",
+   "phase_id": "b1c5df84-b69a-438f-b7d9-9c7fbea7df4c"
+  },
+  {
+   "id": "9b0e0ea0-27ed-4954-8fe7-b50d262e2322",
+   "date_time": "2026-06-13T19:00:00+00:00",
+   "home_club_id": "roca-r-c",
+   "away_club_id": "patagonia-r-c",
+   "score": {
+    "away": 20,
+    "home": 19,
+    "awayTries": 2,
+    "homeTries": 3,
+    "manualOverride": {
+     "away": 20,
+     "home": 19,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "ALVARO LUIS BELINZAN",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 24,
+   "season_id": "39ad1c93-c6ad-4b49-a971-74c221867499",
+   "phase_id": "b1c5df84-b69a-438f-b7d9-9c7fbea7df4c"
+  },
+  {
+   "id": "a7cf6c3a-08dd-4d95-a77a-f3bd7143e597",
+   "date_time": "2026-06-20T18:30:00+00:00",
+   "home_club_id": "universitario-de-bahia-blanca",
+   "away_club_id": "club-el-nacional",
+   "score": {
+    "away": 47,
+    "home": 67,
+    "manualOverride": {
+     "away": 47,
+     "home": 67,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "39ad1c93-c6ad-4b49-a971-74c221867499",
+   "phase_id": "b1c5df84-b69a-438f-b7d9-9c7fbea7df4c"
+  },
+  {
+   "id": "d8cc3304-a524-4595-aeca-3d8b8c85b5ce",
+   "date_time": "2026-06-20T18:30:00+00:00",
+   "home_club_id": "sociedad-sportiva-de-bahia-blanca",
+   "away_club_id": "santa-rosa-r-c",
+   "score": {
+    "away": 5,
+    "home": 191,
+    "manualOverride": {
+     "away": 5,
+     "home": 191,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "39ad1c93-c6ad-4b49-a971-74c221867499",
+   "phase_id": "b1c5df84-b69a-438f-b7d9-9c7fbea7df4c"
+  }
+ ],
+ "apertura": [
+  {
+   "id": "fa438805-8915-4f89-bc08-2d0677aab6df",
+   "date_time": "2026-02-14T19:00:00+00:00",
+   "home_club_id": "universitario-de-rio-grande",
+   "away_club_id": "club-colegio-del-sur",
+   "score": {
+    "away": 29,
+    "home": 0,
+    "awayTries": 4,
+    "homeTries": 0,
+    "manualOverride": {
+     "away": 29,
+     "home": 0,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "MATIAS CENA",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 22,
+   "season_id": "4bbc3190-7498-4c36-8ba1-ed3bb7e3a3e9",
+   "phase_id": "524f89e9-d827-4ff6-83f6-2556cf5db186"
+  },
+  {
+   "id": "fe95bf35-5359-41fe-8ec9-f04e6d792987",
+   "date_time": "2026-02-14T19:00:00+00:00",
+   "home_club_id": "ushuaia-rugby-club",
+   "away_club_id": "club-las-aguilas",
+   "score": {
+    "away": 26,
+    "home": 5,
+    "awayTries": 2,
+    "homeTries": 1,
+    "manualOverride": {
+     "away": 26,
+     "home": 5,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "JUAN MANUEL RENZONE",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 20,
+   "season_id": "4bbc3190-7498-4c36-8ba1-ed3bb7e3a3e9",
+   "phase_id": "524f89e9-d827-4ff6-83f6-2556cf5db186"
+  },
+  {
+   "id": "37b8d366-d3f6-44fd-9a6b-0a274e2f627d",
+   "date_time": "2026-02-21T19:00:00+00:00",
+   "home_club_id": "club-colegio-del-sur",
+   "away_club_id": "ushuaia-rugby-club",
+   "score": {
+    "away": 12,
+    "home": 15,
+    "awayTries": 2,
+    "homeTries": 2,
+    "manualOverride": {
+     "away": 12,
+     "home": 15,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "MAURICIO GIULIANO",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 17,
+   "season_id": "4bbc3190-7498-4c36-8ba1-ed3bb7e3a3e9",
+   "phase_id": "524f89e9-d827-4ff6-83f6-2556cf5db186"
+  },
+  {
+   "id": "4171ccb7-b2cf-4e38-bcad-923b8be344f7",
+   "date_time": "2026-02-28T19:00:00+00:00",
+   "home_club_id": "rio-grande-rugby-hockey-club",
+   "away_club_id": "ushuaia-rugby-club",
+   "score": {
+    "away": 20,
+    "home": 0,
+    "manualOverride": {
+     "away": 20,
+     "home": 0,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "4bbc3190-7498-4c36-8ba1-ed3bb7e3a3e9",
+   "phase_id": "524f89e9-d827-4ff6-83f6-2556cf5db186"
+  },
+  {
+   "id": "f451edcc-ff4c-4c74-a442-8f26935a46e3",
+   "date_time": "2026-02-28T19:00:00+00:00",
+   "home_club_id": "universitario-de-rio-grande",
+   "away_club_id": "club-las-aguilas",
+   "score": {
+    "away": 51,
+    "home": 16,
+    "awayTries": 8,
+    "homeTries": 1,
+    "manualOverride": {
+     "away": 51,
+     "home": 16,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "IGNACIO MARTÍN CASTRO",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 32,
+   "season_id": "4bbc3190-7498-4c36-8ba1-ed3bb7e3a3e9",
+   "phase_id": "524f89e9-d827-4ff6-83f6-2556cf5db186"
+  },
+  {
+   "id": "629f0351-32a9-41fa-84f4-694c870db773",
+   "date_time": "2026-03-07T19:00:00+00:00",
+   "home_club_id": "club-colegio-del-sur",
+   "away_club_id": "club-las-aguilas",
+   "score": {
+    "away": 36,
+    "home": 16,
+    "awayTries": 5,
+    "homeTries": 1,
+    "manualOverride": {
+     "away": 36,
+     "home": 16,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "JUAN MANUEL RENZONE",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 33,
+   "season_id": "4bbc3190-7498-4c36-8ba1-ed3bb7e3a3e9",
+   "phase_id": "524f89e9-d827-4ff6-83f6-2556cf5db186"
+  },
+  {
+   "id": "d84deb1c-f7cf-49f7-9ec4-2f63b182b228",
+   "date_time": "2026-03-07T19:00:00+00:00",
+   "home_club_id": "universitario-de-rio-grande",
+   "away_club_id": "rio-grande-rugby-hockey-club",
+   "score": {
+    "away": 0,
+    "home": 20,
+    "manualOverride": {
+     "away": 0,
+     "home": 20,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "4bbc3190-7498-4c36-8ba1-ed3bb7e3a3e9",
+   "phase_id": "524f89e9-d827-4ff6-83f6-2556cf5db186"
+  },
+  {
+   "id": "676389cd-5036-4a4b-be2a-949a078b607d",
+   "date_time": "2026-03-14T19:00:00+00:00",
+   "home_club_id": "ushuaia-rugby-club",
+   "away_club_id": "universitario-de-rio-grande",
+   "score": {
+    "away": 22,
+    "home": 15,
+    "manualOverride": {
+     "away": 22,
+     "home": 15,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "IGNACIO MARTÍN CASTRO",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 0,
+   "season_id": "4bbc3190-7498-4c36-8ba1-ed3bb7e3a3e9",
+   "phase_id": "524f89e9-d827-4ff6-83f6-2556cf5db186"
+  },
+  {
+   "id": "99a241cb-3fb5-4463-ae1a-5dd8740120e2",
+   "date_time": "2026-03-14T19:00:00+00:00",
+   "home_club_id": "rio-grande-rugby-hockey-club",
+   "away_club_id": "club-colegio-del-sur",
+   "score": {
+    "away": 24,
+    "home": 3,
+    "awayTries": 4,
+    "homeTries": 0,
+    "manualOverride": {
+     "away": 24,
+     "home": 3,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "ALEJANDRO DANIEL VILLALBA",
+   "lineup_home_count": 20,
+   "lineup_away_count": 23,
+   "events_count": 14,
+   "season_id": "4bbc3190-7498-4c36-8ba1-ed3bb7e3a3e9",
+   "phase_id": "524f89e9-d827-4ff6-83f6-2556cf5db186"
+  },
+  {
+   "id": "e812227b-d566-475c-b5e7-4cf0bb0cc8ae",
+   "date_time": "2026-03-28T19:00:00+00:00",
+   "home_club_id": "rio-grande-rugby-hockey-club",
+   "away_club_id": "club-las-aguilas",
+   "score": {
+    "away": 51,
+    "home": 6,
+    "awayTries": 9,
+    "homeTries": 0,
+    "manualOverride": {
+     "away": 51,
+     "home": 6,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "MARIO BENJAMÍN CASTRO",
+   "lineup_home_count": 19,
+   "lineup_away_count": 22,
+   "events_count": 28,
+   "season_id": "4bbc3190-7498-4c36-8ba1-ed3bb7e3a3e9",
+   "phase_id": "524f89e9-d827-4ff6-83f6-2556cf5db186"
+  },
+  {
+   "id": "fd4663ff-f80e-4e76-a57c-e7b71e24ceca",
+   "date_time": "2026-03-28T19:00:00+00:00",
+   "home_club_id": "ushuaia-rugby-club",
+   "away_club_id": "club-colegio-del-sur",
+   "score": {
+    "away": 37,
+    "home": 35,
+    "awayTries": 4,
+    "homeTries": 5,
+    "manualOverride": {
+     "away": 37,
+     "home": 35,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "ALEJANDRO DANIEL VILLALBA",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 34,
+   "season_id": "4bbc3190-7498-4c36-8ba1-ed3bb7e3a3e9",
+   "phase_id": "524f89e9-d827-4ff6-83f6-2556cf5db186"
+  },
+  {
+   "id": "064f910e-da38-4b01-afaa-7d03098595f6",
+   "date_time": "2026-04-04T19:00:00+00:00",
+   "home_club_id": "ushuaia-rugby-club",
+   "away_club_id": "rio-grande-rugby-hockey-club",
+   "score": {
+    "away": 0,
+    "home": 20,
+    "manualOverride": {
+     "away": 0,
+     "home": 20,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "4bbc3190-7498-4c36-8ba1-ed3bb7e3a3e9",
+   "phase_id": "524f89e9-d827-4ff6-83f6-2556cf5db186"
+  },
+  {
+   "id": "8a856260-5806-4a02-b668-13da32cc1147",
+   "date_time": "2026-04-04T19:00:00+00:00",
+   "home_club_id": "club-las-aguilas",
+   "away_club_id": "universitario-de-rio-grande",
+   "score": {
+    "away": 19,
+    "home": 46,
+    "awayTries": 3,
+    "homeTries": 8,
+    "manualOverride": {
+     "away": 19,
+     "home": 46,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "ALEJANDRO VINAZZA",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 29,
+   "season_id": "4bbc3190-7498-4c36-8ba1-ed3bb7e3a3e9",
+   "phase_id": "524f89e9-d827-4ff6-83f6-2556cf5db186"
+  },
+  {
+   "id": "0eb9ff87-6ff9-4ac7-9f78-1810be862c34",
+   "date_time": "2026-04-18T19:00:00+00:00",
+   "home_club_id": "rio-grande-rugby-hockey-club",
+   "away_club_id": "universitario-de-rio-grande",
+   "score": {
+    "away": 27,
+    "home": 3,
+    "awayTries": 5,
+    "homeTries": 0,
+    "manualOverride": {
+     "away": 27,
+     "home": 3,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "MARIO BENJAMÍN CASTRO",
+   "lineup_home_count": 17,
+   "lineup_away_count": 23,
+   "events_count": 17,
+   "season_id": "4bbc3190-7498-4c36-8ba1-ed3bb7e3a3e9",
+   "phase_id": "524f89e9-d827-4ff6-83f6-2556cf5db186"
+  },
+  {
+   "id": "c6f738e8-0abe-426d-9a9d-7e08bc4886e6",
+   "date_time": "2026-04-18T19:00:00+00:00",
+   "home_club_id": "club-las-aguilas",
+   "away_club_id": "club-colegio-del-sur",
+   "score": {
+    "away": 31,
+    "home": 39,
+    "manualOverride": {
+     "away": 31,
+     "home": 39,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "IGNACIO MARTÍN CASTRO",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 0,
+   "season_id": "4bbc3190-7498-4c36-8ba1-ed3bb7e3a3e9",
+   "phase_id": "524f89e9-d827-4ff6-83f6-2556cf5db186"
+  },
+  {
+   "id": "59c17ace-c649-4782-b9da-ad6a9785c2c7",
+   "date_time": "2026-04-25T19:00:00+00:00",
+   "home_club_id": "club-las-aguilas",
+   "away_club_id": "club-colegio-del-sur",
+   "score": {
+    "away": 8,
+    "home": 7,
+    "awayTries": 1,
+    "homeTries": 1,
+    "manualOverride": {
+     "away": 8,
+     "home": 7,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "JUAN MANUEL RENZONE",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 21,
+   "season_id": "4bbc3190-7498-4c36-8ba1-ed3bb7e3a3e9",
+   "phase_id": "ad0b452f-c015-44d9-aebb-67eaa63977fb"
+  }
+ ],
+ "cordillerano": [
+  {
+   "id": "817d09c8-3a75-414e-8e36-9382776edda2",
+   "date_time": "2026-08-22T19:00:00+00:00",
+   "home_club_id": "san-martin-de-los-andes-rugby-hockey-club",
+   "away_club_id": "coihues-r-c",
+   "score": {
+    "away": 15,
+    "home": 23,
+    "awayTries": 3,
+    "homeTries": 3,
+    "manualOverride": {
+     "away": 15,
+     "home": 23,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "SERGIO HERRADA",
+   "lineup_home_count": 22,
+   "lineup_away_count": 23,
+   "events_count": 24,
+   "season_id": "110c7072-a2e6-41a7-95e9-dc1ac3ef0cea",
+   "phase_id": "47324f1c-9bbd-4a5c-9b2d-3ebe4f9fc29f"
+  },
+  {
+   "id": "c3a69a90-4373-477b-ab62-64a328c4a4ac",
+   "date_time": "2026-08-22T19:00:00+00:00",
+   "home_club_id": "neuquen-r-c",
+   "away_club_id": "patagonia-r-c",
+   "score": {
+    "away": 7,
+    "home": 65,
+    "awayTries": 1,
+    "homeTries": 11,
+    "manualOverride": {
+     "away": 7,
+     "home": 65,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "ROCÍO ANTONELLA SEVERINI",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 34,
+   "season_id": "110c7072-a2e6-41a7-95e9-dc1ac3ef0cea",
+   "phase_id": "47324f1c-9bbd-4a5c-9b2d-3ebe4f9fc29f"
+  },
+  {
+   "id": "fdd27e6d-aceb-4f3f-b653-dbe2dd6c16d4",
+   "date_time": "2026-08-22T19:00:00+00:00",
+   "home_club_id": "marabunta-r-c",
+   "away_club_id": "roca-r-c",
+   "score": {
+    "away": 7,
+    "home": 64,
+    "awayTries": 1,
+    "homeTries": 10,
+    "manualOverride": {
+     "away": 7,
+     "home": 64,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "MAXIMILIANO CAMPOT",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 38,
+   "season_id": "110c7072-a2e6-41a7-95e9-dc1ac3ef0cea",
+   "phase_id": "47324f1c-9bbd-4a5c-9b2d-3ebe4f9fc29f"
+  },
+  {
+   "id": "6aa9d2af-232d-44f6-95bb-55b43c6befb3",
+   "date_time": "2026-08-29T19:00:00+00:00",
+   "home_club_id": "roca-r-c",
+   "away_club_id": "neuquen-r-c",
+   "score": {
+    "away": 26,
+    "home": 12,
+    "awayTries": 4,
+    "homeTries": 2,
+    "manualOverride": {
+     "away": 26,
+     "home": 12,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "RODRIGO OSCAR LOFVALL",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 23,
+   "season_id": "110c7072-a2e6-41a7-95e9-dc1ac3ef0cea",
+   "phase_id": "47324f1c-9bbd-4a5c-9b2d-3ebe4f9fc29f"
+  },
+  {
+   "id": "b5c54cef-e518-49f1-8d2b-1c86d484a4d5",
+   "date_time": "2026-08-29T19:00:00+00:00",
+   "home_club_id": "patagonia-r-c",
+   "away_club_id": "marabunta-r-c",
+   "score": {
+    "away": 36,
+    "home": 0,
+    "manualOverride": {
+     "away": 36,
+     "home": 0,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "MAXIMILIANO CAMPOT",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 0,
+   "season_id": "110c7072-a2e6-41a7-95e9-dc1ac3ef0cea",
+   "phase_id": "47324f1c-9bbd-4a5c-9b2d-3ebe4f9fc29f"
+  },
+  {
+   "id": "1f09462e-4f1d-4a80-9491-54ffcb5ddd6f",
+   "date_time": "2026-09-12T19:00:00+00:00",
+   "home_club_id": "coihues-r-c",
+   "away_club_id": "pehuenes-r-c",
+   "score": {
+    "away": 17,
+    "home": 27,
+    "awayTries": 3,
+    "homeTries": 5,
+    "manualOverride": {
+     "away": 17,
+     "home": 27,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "CATRIEL HEIS",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 18,
+   "season_id": "110c7072-a2e6-41a7-95e9-dc1ac3ef0cea",
+   "phase_id": "47324f1c-9bbd-4a5c-9b2d-3ebe4f9fc29f"
+  },
+  {
+   "id": "4a5f3a94-ad99-4ed9-aa0c-73e64235a4b4",
+   "date_time": "2026-09-12T19:00:00+00:00",
+   "home_club_id": "roca-r-c",
+   "away_club_id": "patagonia-r-c",
+   "score": {
+    "away": 15,
+    "home": 45,
+    "awayTries": 3,
+    "homeTries": 7,
+    "manualOverride": {
+     "away": 15,
+     "home": 45,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "ALVARO LUIS BELINZAN",
+   "lineup_home_count": 21,
+   "lineup_away_count": 23,
+   "events_count": 30,
+   "season_id": "110c7072-a2e6-41a7-95e9-dc1ac3ef0cea",
+   "phase_id": "47324f1c-9bbd-4a5c-9b2d-3ebe4f9fc29f"
+  },
+  {
+   "id": "c29a94bf-7354-439f-bd63-806cbda78458",
+   "date_time": "2026-09-19T18:00:00+00:00",
+   "home_club_id": "patagonia-r-c",
+   "away_club_id": "coihues-r-c",
+   "score": {
+    "away": 38,
+    "home": 38,
+    "awayTries": 6,
+    "homeTries": 5,
+    "manualOverride": {
+     "away": 38,
+     "home": 38,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "ALBERTO DELLORO ARBENOIZ",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 38,
+   "season_id": "110c7072-a2e6-41a7-95e9-dc1ac3ef0cea",
+   "phase_id": "47324f1c-9bbd-4a5c-9b2d-3ebe4f9fc29f"
+  },
+  {
+   "id": "ecdf2c04-1154-4429-9708-e06bf15b2ae8",
+   "date_time": "2026-09-19T19:15:00+00:00",
+   "home_club_id": "roca-r-c",
+   "away_club_id": "pehuenes-r-c",
+   "score": {
+    "away": 0,
+    "home": 40,
+    "awayTries": 0,
+    "homeTries": 6,
+    "manualOverride": {
+     "away": 0,
+     "home": 40,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "MATIAS ERICK ALVAREZ",
+   "lineup_home_count": 22,
+   "lineup_away_count": 20,
+   "events_count": 23,
+   "season_id": "110c7072-a2e6-41a7-95e9-dc1ac3ef0cea",
+   "phase_id": "47324f1c-9bbd-4a5c-9b2d-3ebe4f9fc29f"
+  },
+  {
+   "id": "ae84380a-613c-4a2f-95ba-79eabb96e4bf",
+   "date_time": "2026-09-20T16:30:00+00:00",
+   "home_club_id": "neuquen-r-c",
+   "away_club_id": "san-martin-de-los-andes-rugby-hockey-club",
+   "score": {
+    "away": 12,
+    "home": 51,
+    "awayTries": 2,
+    "homeTries": 9,
+    "manualOverride": {
+     "away": 12,
+     "home": 51,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "MAXIMILIANO CAMPOT",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 28,
+   "season_id": "110c7072-a2e6-41a7-95e9-dc1ac3ef0cea",
+   "phase_id": "47324f1c-9bbd-4a5c-9b2d-3ebe4f9fc29f"
+  },
+  {
+   "id": "3f31b7bc-1337-4919-803b-e19e927829ea",
+   "date_time": "2026-10-03T16:00:00+00:00",
+   "home_club_id": "neuquen-r-c",
+   "away_club_id": "coihues-r-c",
+   "score": {
+    "away": 0,
+    "home": 71,
+    "awayTries": 0,
+    "homeTries": 11,
+    "manualOverride": {
+     "away": 0,
+     "home": 71,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "ALDANA MICAELA GUERCI",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 36,
+   "season_id": "110c7072-a2e6-41a7-95e9-dc1ac3ef0cea",
+   "phase_id": "47324f1c-9bbd-4a5c-9b2d-3ebe4f9fc29f"
+  },
+  {
+   "id": "ddb7069a-0cc0-4fce-9742-e03e3caafab9",
+   "date_time": "2026-10-03T19:00:00+00:00",
+   "home_club_id": "patagonia-r-c",
+   "away_club_id": "pehuenes-r-c",
+   "score": {
+    "away": 10,
+    "home": 33,
+    "awayTries": 2,
+    "homeTries": 5,
+    "manualOverride": {
+     "away": 10,
+     "home": 33,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "IAN FUENTES",
+   "lineup_home_count": 23,
+   "lineup_away_count": 21,
+   "events_count": 29,
+   "season_id": "110c7072-a2e6-41a7-95e9-dc1ac3ef0cea",
+   "phase_id": "47324f1c-9bbd-4a5c-9b2d-3ebe4f9fc29f"
+  },
+  {
+   "id": "bbdaac2e-ab8c-4b74-ad29-b99cf6198206",
+   "date_time": "2026-10-04T15:00:00+00:00",
+   "home_club_id": "marabunta-r-c",
+   "away_club_id": "san-martin-de-los-andes-rugby-hockey-club",
+   "score": {
+    "away": 20,
+    "home": 67,
+    "awayTries": 3,
+    "homeTries": 11,
+    "manualOverride": {
+     "away": 20,
+     "home": 67,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "ALBERTO DELLORO ARBENOIZ",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 33,
+   "season_id": "110c7072-a2e6-41a7-95e9-dc1ac3ef0cea",
+   "phase_id": "47324f1c-9bbd-4a5c-9b2d-3ebe4f9fc29f"
+  },
+  {
+   "id": "87fc5546-62cb-4bf2-9555-4193e63e18a9",
+   "date_time": "2026-10-10T18:30:00+00:00",
+   "home_club_id": "pehuenes-r-c",
+   "away_club_id": "san-martin-de-los-andes-rugby-hockey-club",
+   "score": {
+    "away": 46,
+    "home": 22,
+    "awayTries": 7,
+    "homeTries": 4,
+    "manualOverride": {
+     "away": 46,
+     "home": 22,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "CATRIEL HEIS",
+   "lineup_home_count": 21,
+   "lineup_away_count": 23,
+   "events_count": 33,
+   "season_id": "110c7072-a2e6-41a7-95e9-dc1ac3ef0cea",
+   "phase_id": "47324f1c-9bbd-4a5c-9b2d-3ebe4f9fc29f"
+  },
+  {
+   "id": "0864afe1-af7b-4f54-b0f8-b7552e414519",
+   "date_time": "2026-10-17T18:00:00+00:00",
+   "home_club_id": "coihues-r-c",
+   "away_club_id": "marabunta-r-c",
+   "score": {
+    "away": 62,
+    "home": 0,
+    "awayTries": 10,
+    "homeTries": 0,
+    "manualOverride": {
+     "away": 62,
+     "home": 0,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "NICOLAS GODOY",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 28,
+   "season_id": "110c7072-a2e6-41a7-95e9-dc1ac3ef0cea",
+   "phase_id": "47324f1c-9bbd-4a5c-9b2d-3ebe4f9fc29f"
+  },
+  {
+   "id": "2b319013-b028-48aa-ad2e-0362380c4e2c",
+   "date_time": "2026-10-17T19:00:00+00:00",
+   "home_club_id": "pehuenes-r-c",
+   "away_club_id": "neuquen-r-c",
+   "score": {
+    "away": 66,
+    "home": 12,
+    "awayTries": 10,
+    "homeTries": 2,
+    "manualOverride": {
+     "away": 66,
+     "home": 12,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "CATRIEL HEIS",
+   "lineup_home_count": 22,
+   "lineup_away_count": 23,
+   "events_count": 38,
+   "season_id": "110c7072-a2e6-41a7-95e9-dc1ac3ef0cea",
+   "phase_id": "47324f1c-9bbd-4a5c-9b2d-3ebe4f9fc29f"
+  },
+  {
+   "id": "090ad553-97e5-4763-bd07-c45c6022e708",
+   "date_time": "2026-10-18T16:00:00+00:00",
+   "home_club_id": "san-martin-de-los-andes-rugby-hockey-club",
+   "away_club_id": "roca-r-c",
+   "score": {
+    "away": 19,
+    "home": 22,
+    "awayTries": 3,
+    "homeTries": 4,
+    "manualOverride": {
+     "away": 19,
+     "home": 22,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "JAVIER DIZ",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 25,
+   "season_id": "110c7072-a2e6-41a7-95e9-dc1ac3ef0cea",
+   "phase_id": "47324f1c-9bbd-4a5c-9b2d-3ebe4f9fc29f"
+  },
+  {
+   "id": "644c1aac-7d50-4d85-9e94-06ba3847c77e",
+   "date_time": "2026-10-25T16:00:00+00:00",
+   "home_club_id": "coihues-r-c",
+   "away_club_id": "roca-r-c",
+   "score": {
+    "away": 25,
+    "home": 25,
+    "awayTries": 4,
+    "homeTries": 4,
+    "manualOverride": {
+     "away": 25,
+     "home": 25,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "CATRIEL HEIS",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 25,
+   "season_id": "110c7072-a2e6-41a7-95e9-dc1ac3ef0cea",
+   "phase_id": "47324f1c-9bbd-4a5c-9b2d-3ebe4f9fc29f"
+  },
+  {
+   "id": "cf3e2285-0f38-4460-8dea-e081a8f130c0",
+   "date_time": "2026-10-25T17:00:00+00:00",
+   "home_club_id": "san-martin-de-los-andes-rugby-hockey-club",
+   "away_club_id": "patagonia-r-c",
+   "score": null,
+   "status": "scheduled",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "110c7072-a2e6-41a7-95e9-dc1ac3ef0cea",
+   "phase_id": "47324f1c-9bbd-4a5c-9b2d-3ebe4f9fc29f"
+  }
+ ],
+ "mayores": [
+  {
+   "id": "b24b5ddb-28ac-4d03-af4b-df7371a39fab",
+   "date_time": "2026-06-27T18:00:00+00:00",
+   "home_club_id": "marabunta-r-c",
+   "away_club_id": "patagonia-r-c",
+   "score": {
+    "away": 0,
+    "home": 76,
+    "awayTries": 0,
+    "homeTries": 12,
+    "manualOverride": {
+     "away": 0,
+     "home": 76,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "ALVARO LUIS BELINZAN",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 39,
+   "season_id": "eccd8980-3a75-482f-aeac-edff634d155f",
+   "phase_id": "45e8e04c-8239-40b9-bf09-6308eb3b4d6c"
+  },
+  {
+   "id": "11cdaf34-6814-4248-86d0-092c85039185",
+   "date_time": "2026-07-04T19:00:00+00:00",
+   "home_club_id": "neuquen-r-c",
+   "away_club_id": "roca-r-c",
+   "score": null,
+   "status": "scheduled",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "eccd8980-3a75-482f-aeac-edff634d155f",
+   "phase_id": "45e8e04c-8239-40b9-bf09-6308eb3b4d6c"
+  },
+  {
+   "id": "4d8c0587-cfec-441a-ae78-19efa9f17889",
+   "date_time": "2026-08-01T18:00:00+00:00",
+   "home_club_id": "neuquen-r-c",
+   "away_club_id": "marabunta-r-c",
+   "score": null,
+   "status": "scheduled",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "eccd8980-3a75-482f-aeac-edff634d155f",
+   "phase_id": "45e8e04c-8239-40b9-bf09-6308eb3b4d6c"
+  },
+  {
+   "id": "3a8f2535-81ca-4132-9b8d-5958cd710f18",
+   "date_time": "2026-08-01T19:00:00+00:00",
+   "home_club_id": "marabunta-r-c",
+   "away_club_id": "neuquen-r-c",
+   "score": {
+    "away": 28,
+    "home": 33,
+    "manualOverride": {
+     "away": 28,
+     "home": 33,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "RODRIGO OSCAR LOFVALL",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 0,
+   "season_id": "eccd8980-3a75-482f-aeac-edff634d155f",
+   "phase_id": "45e8e04c-8239-40b9-bf09-6308eb3b4d6c"
+  },
+  {
+   "id": "9eb199ad-82a2-4cf2-b9ea-f05ca2809f7b",
+   "date_time": "2026-08-01T19:00:00+00:00",
+   "home_club_id": "patagonia-r-c",
+   "away_club_id": "roca-r-c",
+   "score": {
+    "away": 87,
+    "home": 5,
+    "awayTries": 13,
+    "homeTries": 1,
+    "manualOverride": {
+     "away": 87,
+     "home": 5,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "VICTOR ALBERTO RIERA",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 39,
+   "season_id": "eccd8980-3a75-482f-aeac-edff634d155f",
+   "phase_id": "45e8e04c-8239-40b9-bf09-6308eb3b4d6c"
+  },
+  {
+   "id": "e1a6e2b3-6a03-493d-80b9-8bd66681b806",
+   "date_time": "2026-08-08T19:00:00+00:00",
+   "home_club_id": "roca-r-c",
+   "away_club_id": "neuquen-r-c",
+   "score": {
+    "away": 26,
+    "home": 12,
+    "awayTries": 4,
+    "homeTries": 2,
+    "manualOverride": {
+     "away": 26,
+     "home": 12,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "IAN FUENTES",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 25,
+   "season_id": "eccd8980-3a75-482f-aeac-edff634d155f",
+   "phase_id": "45e8e04c-8239-40b9-bf09-6308eb3b4d6c"
+  },
+  {
+   "id": "75c983ac-1b5d-41c9-a0ab-30e1516f61f5",
+   "date_time": "2026-08-22T19:00:00+00:00",
+   "home_club_id": "marabunta-r-c",
+   "away_club_id": "roca-r-c",
+   "score": {
+    "away": 7,
+    "home": 64,
+    "manualOverride": {
+     "away": 7,
+     "home": 64,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "MAXIMILIANO CAMPOT",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 0,
+   "season_id": "eccd8980-3a75-482f-aeac-edff634d155f",
+   "phase_id": "45e8e04c-8239-40b9-bf09-6308eb3b4d6c"
+  },
+  {
+   "id": "9ef51c94-7458-44b1-8c63-1b4634cd25b1",
+   "date_time": "2026-08-22T19:00:00+00:00",
+   "home_club_id": "neuquen-r-c",
+   "away_club_id": "patagonia-r-c",
+   "score": {
+    "away": 7,
+    "home": 65,
+    "awayTries": 1,
+    "homeTries": 11,
+    "manualOverride": {
+     "away": 7,
+     "home": 65,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "ROCÍO ANTONELLA SEVERINI",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 27,
+   "season_id": "eccd8980-3a75-482f-aeac-edff634d155f",
+   "phase_id": "45e8e04c-8239-40b9-bf09-6308eb3b4d6c"
+  },
+  {
+   "id": "23bbe2a5-aea8-47ca-a17c-765f11d86595",
+   "date_time": "2026-08-29T19:00:00+00:00",
+   "home_club_id": "patagonia-r-c",
+   "away_club_id": "marabunta-r-c",
+   "score": {
+    "away": 36,
+    "home": 0,
+    "manualOverride": {
+     "away": 36,
+     "home": 0,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "MAXIMILIANO CAMPOT",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 0,
+   "season_id": "eccd8980-3a75-482f-aeac-edff634d155f",
+   "phase_id": "45e8e04c-8239-40b9-bf09-6308eb3b4d6c"
+  },
+  {
+   "id": "9e3990b1-de64-46ab-980e-66503c5acaa6",
+   "date_time": "2026-09-05T19:00:00+00:00",
+   "home_club_id": "roca-r-c",
+   "away_club_id": "marabunta-r-c",
+   "score": {
+    "away": 29,
+    "home": 27,
+    "awayTries": 4,
+    "homeTries": 4,
+    "manualOverride": {
+     "away": 29,
+     "home": 27,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "ALVARO LUIS BELINZAN",
+   "lineup_home_count": 22,
+   "lineup_away_count": 23,
+   "events_count": 26,
+   "season_id": "eccd8980-3a75-482f-aeac-edff634d155f",
+   "phase_id": "45e8e04c-8239-40b9-bf09-6308eb3b4d6c"
+  },
+  {
+   "id": "5a74afed-0555-44ca-a5dc-d7eec3f383bc",
+   "date_time": "2026-09-12T19:00:00+00:00",
+   "home_club_id": "roca-r-c",
+   "away_club_id": "patagonia-r-c",
+   "score": {
+    "away": 15,
+    "home": 45,
+    "awayTries": 3,
+    "homeTries": 7,
+    "manualOverride": {
+     "away": 15,
+     "home": 45,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "ALVARO LUIS BELINZAN",
+   "lineup_home_count": 21,
+   "lineup_away_count": 23,
+   "events_count": 28,
+   "season_id": "eccd8980-3a75-482f-aeac-edff634d155f",
+   "phase_id": "45e8e04c-8239-40b9-bf09-6308eb3b4d6c"
+  },
+  {
+   "id": "1e6f8dea-7f7f-47bd-b04c-eaaebb405025",
+   "date_time": "2026-09-26T19:00:00+00:00",
+   "home_club_id": "patagonia-r-c",
+   "away_club_id": "neuquen-r-c",
+   "score": {
+    "away": 91,
+    "home": 0,
+    "awayTries": 15,
+    "homeTries": 0,
+    "manualOverride": {
+     "away": 91,
+     "home": 0,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "IAN FUENTES",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 40,
+   "season_id": "eccd8980-3a75-482f-aeac-edff634d155f",
+   "phase_id": "45e8e04c-8239-40b9-bf09-6308eb3b4d6c"
+  }
+ ],
+ "primerab": [
+  {
+   "id": "61ce76f6-b317-4cd2-add0-37ac526a9054",
+   "date_time": "2026-05-23T17:00:00+00:00",
+   "home_club_id": "neuquen-r-c",
+   "away_club_id": "marabunta-r-c",
+   "score": {
+    "away": 19,
+    "home": 36,
+    "awayTries": 3,
+    "homeTries": 6,
+    "manualOverride": {
+     "away": 19,
+     "home": 36,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "MAXIMILIANO CAMPOT",
+   "lineup_home_count": 23,
+   "lineup_away_count": 22,
+   "events_count": 33,
+   "season_id": "e6318da1-be38-4d5e-8ef6-78bb320335c6",
+   "phase_id": "3be8b5bc-e40b-42d9-a0f6-54b1fda4b621"
+  },
+  {
+   "id": "abf46c00-1d0d-442a-a5eb-2d65f3912167",
+   "date_time": "2026-05-23T19:00:00+00:00",
+   "home_club_id": "los-patos-r-c",
+   "away_club_id": "catriel-r-c",
+   "score": {
+    "away": 12,
+    "home": 17,
+    "awayTries": 2,
+    "homeTries": 3,
+    "manualOverride": {
+     "away": 12,
+     "home": 17,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "ALVARO LUIS BELINZAN",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 21,
+   "season_id": "e6318da1-be38-4d5e-8ef6-78bb320335c6",
+   "phase_id": "3be8b5bc-e40b-42d9-a0f6-54b1fda4b621"
+  },
+  {
+   "id": "c2f17c66-1278-4252-911b-8ba0660d8346",
+   "date_time": "2026-05-30T17:30:00+00:00",
+   "home_club_id": "roca-r-c",
+   "away_club_id": "neuquen-r-c",
+   "score": {
+    "away": 31,
+    "home": 15,
+    "awayTries": 5,
+    "homeTries": 3,
+    "manualOverride": {
+     "away": 31,
+     "home": 15,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "ALDANA MICAELA GUERCI",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 28,
+   "season_id": "e6318da1-be38-4d5e-8ef6-78bb320335c6",
+   "phase_id": "3be8b5bc-e40b-42d9-a0f6-54b1fda4b621"
+  },
+  {
+   "id": "b1cb1b5d-686c-4c85-86d8-16403715c936",
+   "date_time": "2026-05-30T18:30:00+00:00",
+   "home_club_id": "catriel-r-c",
+   "away_club_id": "marabunta-r-c",
+   "score": {
+    "away": 36,
+    "home": 29,
+    "awayTries": 6,
+    "homeTries": 5,
+    "manualOverride": {
+     "away": 36,
+     "home": 29,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "MATIAS ERICK ALVAREZ",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 31,
+   "season_id": "e6318da1-be38-4d5e-8ef6-78bb320335c6",
+   "phase_id": "3be8b5bc-e40b-42d9-a0f6-54b1fda4b621"
+  },
+  {
+   "id": "98bb0178-14dc-4036-b435-c9dec10ae8be",
+   "date_time": "2026-06-06T19:00:00+00:00",
+   "home_club_id": "catriel-r-c",
+   "away_club_id": "roca-r-c",
+   "score": {
+    "away": 19,
+    "home": 29,
+    "manualOverride": {
+     "away": 19,
+     "home": 29,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "RODRIGO OSCAR LOFVALL",
+   "lineup_home_count": 23,
+   "lineup_away_count": 22,
+   "events_count": 0,
+   "season_id": "e6318da1-be38-4d5e-8ef6-78bb320335c6",
+   "phase_id": "3be8b5bc-e40b-42d9-a0f6-54b1fda4b621"
+  },
+  {
+   "id": "6b654a8a-c538-4d88-b658-8414d7469b9c",
+   "date_time": "2026-06-13T19:00:00+00:00",
+   "home_club_id": "neuquen-r-c",
+   "away_club_id": "catriel-r-c",
+   "score": {
+    "away": 12,
+    "home": 64,
+    "awayTries": 2,
+    "homeTries": 10,
+    "manualOverride": {
+     "away": 12,
+     "home": 64,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "ROCÍO ANTONELLA SEVERINI",
+   "lineup_home_count": 23,
+   "lineup_away_count": 22,
+   "events_count": 33,
+   "season_id": "e6318da1-be38-4d5e-8ef6-78bb320335c6",
+   "phase_id": "3be8b5bc-e40b-42d9-a0f6-54b1fda4b621"
+  },
+  {
+   "id": "bf379f6b-732c-4dbc-ae57-8ba35eade319",
+   "date_time": "2026-06-20T19:00:00+00:00",
+   "home_club_id": "roca-r-c",
+   "away_club_id": "los-patos-r-c",
+   "score": {
+    "away": 24,
+    "home": 59,
+    "awayTries": 4,
+    "homeTries": 9,
+    "manualOverride": {
+     "away": 24,
+     "home": 59,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "MATIAS ERICK ALVAREZ",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 37,
+   "season_id": "e6318da1-be38-4d5e-8ef6-78bb320335c6",
+   "phase_id": "3be8b5bc-e40b-42d9-a0f6-54b1fda4b621"
+  },
+  {
+   "id": "fef5641e-48ae-4f9d-a39f-6f7e9ef41960",
+   "date_time": "2026-06-27T16:30:00+00:00",
+   "home_club_id": "marabunta-r-c",
+   "away_club_id": "roca-r-c",
+   "score": null,
+   "status": "postponed",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "e6318da1-be38-4d5e-8ef6-78bb320335c6",
+   "phase_id": "3be8b5bc-e40b-42d9-a0f6-54b1fda4b621"
+  },
+  {
+   "id": "a991e282-ada7-4a5c-a7bb-d0a890f545fc",
+   "date_time": "2026-06-27T18:00:00+00:00",
+   "home_club_id": "los-patos-r-c",
+   "away_club_id": "neuquen-r-c",
+   "score": {
+    "away": 31,
+    "home": 19,
+    "awayTries": 5,
+    "homeTries": 3,
+    "manualOverride": {
+     "away": 31,
+     "home": 19,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "ROCÍO ANTONELLA SEVERINI",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 28,
+   "season_id": "e6318da1-be38-4d5e-8ef6-78bb320335c6",
+   "phase_id": "3be8b5bc-e40b-42d9-a0f6-54b1fda4b621"
+  },
+  {
+   "id": "bc710525-2333-4a1f-b61e-1fc6ac40735e",
+   "date_time": "2026-07-04T18:00:00+00:00",
+   "home_club_id": "marabunta-r-c",
+   "away_club_id": "los-patos-r-c",
+   "score": {
+    "away": 7,
+    "home": 80,
+    "awayTries": 1,
+    "homeTries": 14,
+    "manualOverride": {
+     "away": 7,
+     "home": 80,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "PERCEVAL BISCAY",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 40,
+   "season_id": "e6318da1-be38-4d5e-8ef6-78bb320335c6",
+   "phase_id": "3be8b5bc-e40b-42d9-a0f6-54b1fda4b621"
+  },
+  {
+   "id": "9f3ab195-a019-4bfb-a014-efb5fcc2573c",
+   "date_time": "2026-07-11T19:00:00+00:00",
+   "home_club_id": "catriel-r-c",
+   "away_club_id": "los-patos-r-c",
+   "score": {
+    "away": 0,
+    "home": 43,
+    "awayTries": 0,
+    "homeTries": 7,
+    "manualOverride": {
+     "away": 0,
+     "home": 43,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "MAXIMILIANO CAMPOT",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 23,
+   "season_id": "e6318da1-be38-4d5e-8ef6-78bb320335c6",
+   "phase_id": "3be8b5bc-e40b-42d9-a0f6-54b1fda4b621"
+  },
+  {
+   "id": "27a09dc3-4bff-4b13-bdf3-f6b80a7ed9fd",
+   "date_time": "2026-08-01T17:00:00+00:00",
+   "home_club_id": "marabunta-r-c",
+   "away_club_id": "neuquen-r-c",
+   "score": {
+    "away": 21,
+    "home": 39,
+    "awayTries": 3,
+    "homeTries": 7,
+    "manualOverride": {
+     "away": 21,
+     "home": 39,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "PERCEVAL BISCAY",
+   "lineup_home_count": 21,
+   "lineup_away_count": 23,
+   "events_count": 33,
+   "season_id": "e6318da1-be38-4d5e-8ef6-78bb320335c6",
+   "phase_id": "3be8b5bc-e40b-42d9-a0f6-54b1fda4b621"
+  },
+  {
+   "id": "d49f48b9-6499-4e9d-b1f8-a4ddc73bc0f3",
+   "date_time": "2026-08-08T19:00:00+00:00",
+   "home_club_id": "los-patos-r-c",
+   "away_club_id": "marabunta-r-c",
+   "score": {
+    "away": 50,
+    "home": 14,
+    "manualOverride": {
+     "away": 50,
+     "home": 14,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "PERCEVAL BISCAY",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 0,
+   "season_id": "e6318da1-be38-4d5e-8ef6-78bb320335c6",
+   "phase_id": "3be8b5bc-e40b-42d9-a0f6-54b1fda4b621"
+  },
+  {
+   "id": "f4576287-d4b3-40dc-b994-24fe0ad43863",
+   "date_time": "2026-08-15T19:00:00+00:00",
+   "home_club_id": "neuquen-r-c",
+   "away_club_id": "los-patos-r-c",
+   "score": {
+    "away": 10,
+    "home": 77,
+    "awayTries": 2,
+    "homeTries": 13,
+    "manualOverride": {
+     "away": 10,
+     "home": 77,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "ROCÍO ANTONELLA SEVERINI",
+   "lineup_home_count": 21,
+   "lineup_away_count": 23,
+   "events_count": 33,
+   "season_id": "e6318da1-be38-4d5e-8ef6-78bb320335c6",
+   "phase_id": "3be8b5bc-e40b-42d9-a0f6-54b1fda4b621"
+  },
+  {
+   "id": "e1b0f4db-a1b6-4610-aaeb-857329e6c4fa",
+   "date_time": "2026-08-22T17:30:00+00:00",
+   "home_club_id": "marabunta-r-c",
+   "away_club_id": "catriel-r-c",
+   "score": {
+    "away": 14,
+    "home": 48,
+    "awayTries": 2,
+    "homeTries": 8,
+    "manualOverride": {
+     "away": 14,
+     "home": 48,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "VICTOR ALBERTO RIERA",
+   "lineup_home_count": 21,
+   "lineup_away_count": 23,
+   "events_count": 28,
+   "season_id": "e6318da1-be38-4d5e-8ef6-78bb320335c6",
+   "phase_id": "3be8b5bc-e40b-42d9-a0f6-54b1fda4b621"
+  },
+  {
+   "id": "3c0aab0b-9fe1-4034-bb9c-11afcde05a2f",
+   "date_time": "2026-08-29T17:30:00+00:00",
+   "home_club_id": "marabunta-r-c",
+   "away_club_id": "los-patos-r-c",
+   "score": {
+    "away": 19,
+    "home": 27,
+    "awayTries": 3,
+    "homeTries": 5,
+    "manualOverride": {
+     "away": 19,
+     "home": 27,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "MATIAS ERICK ALVAREZ",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 25,
+   "season_id": "e6318da1-be38-4d5e-8ef6-78bb320335c6",
+   "phase_id": "3be8b5bc-e40b-42d9-a0f6-54b1fda4b621"
+  },
+  {
+   "id": "39f05408-a82a-49a4-82f1-de48bd89bfdb",
+   "date_time": "2026-08-29T19:00:00+00:00",
+   "home_club_id": "catriel-r-c",
+   "away_club_id": "neuquen-r-c",
+   "score": {
+    "away": 82,
+    "home": 5,
+    "awayTries": 12,
+    "homeTries": 1,
+    "manualOverride": {
+     "away": 82,
+     "home": 5,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "ALVARO LUIS BELINZAN",
+   "lineup_home_count": 21,
+   "lineup_away_count": 23,
+   "events_count": 37,
+   "season_id": "e6318da1-be38-4d5e-8ef6-78bb320335c6",
+   "phase_id": "3be8b5bc-e40b-42d9-a0f6-54b1fda4b621"
+  },
+  {
+   "id": "e99c5b07-4522-4f1c-abac-6434cd587ff2",
+   "date_time": "2026-09-12T17:00:00+00:00",
+   "home_club_id": "marabunta-r-c",
+   "away_club_id": "neuquen-r-c",
+   "score": {
+    "away": 22,
+    "home": 30,
+    "awayTries": 4,
+    "homeTries": 5,
+    "manualOverride": {
+     "away": 22,
+     "home": 30,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "PERCEVAL BISCAY",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 30,
+   "season_id": "e6318da1-be38-4d5e-8ef6-78bb320335c6",
+   "phase_id": "3be8b5bc-e40b-42d9-a0f6-54b1fda4b621"
+  },
+  {
+   "id": "659c589e-7736-4fa8-808a-b23452899fa4",
+   "date_time": "2026-09-26T19:00:00+00:00",
+   "home_club_id": "los-patos-r-c",
+   "away_club_id": "catriel-r-c",
+   "score": {
+    "away": 7,
+    "home": 31,
+    "awayTries": 1,
+    "homeTries": 5,
+    "manualOverride": {
+     "away": 7,
+     "home": 31,
+     "cutoffMinute": null
+    }
+   },
+   "status": "final",
+   "referee": "RODRIGO OSCAR LOFVALL",
+   "lineup_home_count": 23,
+   "lineup_away_count": 23,
+   "events_count": 28,
+   "season_id": "e6318da1-be38-4d5e-8ef6-78bb320335c6",
+   "phase_id": "3be8b5bc-e40b-42d9-a0f6-54b1fda4b621"
+  },
+  {
+   "id": "05e2801a-01d2-4568-9ad7-fa085c4584e1",
+   "date_time": "2026-10-24T19:00:00+00:00",
+   "home_club_id": "neuquen-r-c",
+   "away_club_id": "catriel-r-c",
+   "score": null,
+   "status": "scheduled",
+   "referee": null,
+   "lineup_home_count": 0,
+   "lineup_away_count": 0,
+   "events_count": 0,
+   "season_id": "e6318da1-be38-4d5e-8ef6-78bb320335c6",
+   "phase_id": "3be8b5bc-e40b-42d9-a0f6-54b1fda4b621"
+  }
+ ]
+}

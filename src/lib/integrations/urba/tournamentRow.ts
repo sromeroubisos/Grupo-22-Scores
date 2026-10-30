@@ -220,7 +220,7 @@ export function planPhaseRow(input: {
       legs,
       bonus: {
         defensive: { label: 'Loss < 7 pts', margin: 7, points: 1 },
-        offensive: { label: '4+ Tries', tries: 4, points: 1 },
+        offensive: { label: '3+ Tries de diferencia', mode: 'difference', tries: 3, points: 1 },
       },
       points: { ...PUNTOS },
       circuit: null,

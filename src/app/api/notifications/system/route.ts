@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import type { PostgrestError } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/server';
+import { isAllowedPushEndpoint } from '@/lib/notifications/pushEndpoint';
 import { getPublicVapidKey, isSystemPushConfigured } from '@/lib/notifications/systemPush';
 
 export const dynamic = 'force-dynamic';
@@ -19,8 +20,14 @@ type LooseSupabaseQuery<T> = PromiseLike<{ data: T | null; error: PostgrestError
     maybeSingle: () => LooseSupabaseQuery<T>;
     limit: (count: number) => LooseSupabaseQuery<T>;
     upsert: (values: Record<string, unknown>, options?: { onConflict?: string }) => LooseSupabaseQuery<T>;
+    insert: (values: Record<string, unknown>) => LooseSupabaseQuery<T>;
+    update: (values: Record<string, unknown>) => LooseSupabaseQuery<T>;
+    in: (column: string, values: unknown[]) => LooseSupabaseQuery<T>;
+    order: (column: string, options?: { ascending?: boolean }) => LooseSupabaseQuery<T>;
     delete: () => LooseSupabaseQuery<T>;
 };
+
+const MAX_ACTIVE_SUBSCRIPTIONS_PER_USER = 10;
 
 type LooseSupabaseClient = {
     from: <T = unknown>(table: string) => LooseSupabaseQuery<T>;
@@ -140,26 +147,84 @@ export async function POST(request: NextRequest) {
         return jsonNoStore({ error: 'Suscripcion Web Push invalida.' }, { status: 400 });
     }
 
+    // El servidor le va a hacer un POST a este endpoint desde adentro de Vercel:
+    // solo pasan los push services de los navegadores (ver pushEndpoint.ts).
+    if (!isAllowedPushEndpoint(subscription.endpoint)) {
+        return jsonNoStore({ error: 'Suscripcion Web Push invalida.' }, { status: 400 });
+    }
+
     const db = supabase as unknown as LooseSupabaseClient;
-    const result = await db
-        .from('user_push_subscriptions')
-        .upsert({
-            user_id: user.id,
-            endpoint: subscription.endpoint,
-            p256dh: subscription.p256dh,
-            auth: subscription.auth,
-            user_agent: typeof body.userAgent === 'string' ? body.userAgent.slice(0, 500) : null,
-            platform: typeof body.platform === 'string' ? body.platform.slice(0, 120) : null,
-            enabled: true,
-            failed_at: null,
-            failure_reason: null,
-            last_seen_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-        }, { onConflict: 'endpoint' })
-        .select('id');
+    const now = new Date().toISOString();
+    const fields = {
+        p256dh: subscription.p256dh,
+        auth: subscription.auth,
+        user_agent: typeof body.userAgent === 'string' ? body.userAgent.slice(0, 500) : null,
+        platform: typeof body.platform === 'string' ? body.platform.slice(0, 120) : null,
+        enabled: true,
+        failed_at: null,
+        failure_reason: null,
+        last_seen_at: now,
+        updated_at: now,
+    };
+
+    // Antes era un upsert `onConflict: 'endpoint'`: si el endpoint ya era de OTRO
+    // usuario, el upsert intentaba reasignarle la fila (lo frenaba solo la RLS, si la
+    // migracion esta corrida). Ahora se separa: la fila propia se actualiza filtrando
+    // por user_id, y una nueva se inserta; el endpoint ajeno choca con el UNIQUE.
+    const existing = await db
+        .from<{ id: string }>('user_push_subscriptions')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('endpoint', subscription.endpoint)
+        .maybeSingle();
+
+    if (isPushSchemaMissing(existing.error)) {
+        return jsonNoStore({ ok: false, schemaReady: false }, { status: 409 });
+    }
+    if (existing.error) {
+        return jsonNoStore({ error: existing.error.message || 'No se pudo guardar la suscripcion.' }, { status: 500 });
+    }
+
+    let result: { error: PostgrestError | null };
+    if (existing.data?.id) {
+        result = await db
+            .from('user_push_subscriptions')
+            .update(fields)
+            .eq('id', existing.data.id)
+            .eq('user_id', user.id);
+    } else {
+        // Tope de dispositivos activos: cada aviso sale a todas las suscripciones del
+        // usuario, y sin tope una cuenta podria multiplicar los envios del cron. Al
+        // llegar al tope se apagan las menos usadas en vez de rechazar el celular nuevo.
+        const active = await db
+            .from<{ id: string }[]>('user_push_subscriptions')
+            .select('id')
+            .eq('user_id', user.id)
+            .eq('enabled', true)
+            .order('last_seen_at', { ascending: false })
+            .limit(100);
+
+        const staleIds = (active.data || []).slice(MAX_ACTIVE_SUBSCRIPTIONS_PER_USER - 1).map((row) => row.id);
+        if (staleIds.length > 0) {
+            await db
+                .from('user_push_subscriptions')
+                .update({ enabled: false, failure_reason: 'replaced_by_newer_device', updated_at: now })
+                .eq('user_id', user.id)
+                .in('id', staleIds);
+        }
+
+        result = await db
+            .from('user_push_subscriptions')
+            .insert({ ...fields, user_id: user.id, endpoint: subscription.endpoint });
+    }
 
     if (isPushSchemaMissing(result.error)) {
         return jsonNoStore({ ok: false, schemaReady: false }, { status: 409 });
+    }
+
+    if (result.error?.code === '23505') {
+        // El endpoint ya esta registrado con otra cuenta en este navegador.
+        return jsonNoStore({ error: 'Este dispositivo ya recibe avisos de otra cuenta. Desactivalos desde esa cuenta y volve a probar.' }, { status: 409 });
     }
 
     if (result.error) {

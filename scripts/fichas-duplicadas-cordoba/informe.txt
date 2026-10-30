@@ -1,0 +1,16 @@
+tarjetas con DNI: 676 · con partido: 673
+fichas con DNI: 3807 · renglones sin cruce: 13
+clubes: 102 · grupos a fusionar: 3 · fichas que sobran: 3
+grupos con DNI distinto (no se tocan): 0
+
+jockey-club-de-rosario                   -> Lgnacio Jano Fanjul  [dni]
+   *   2 Lgnacio Jano Fanjul                      42609119
+       1 Ilgnacio Jano Fanjul                     42609119
+tala-rugby-club                          -> Facundo Nicolás Ortiz  [inicial]
+       0 Ortiz F                                  
+   *  23 Facundo Nicolás Ortiz                    44720569,44770569,447720569
+tala-rugby-club                          -> Valentín Soler Filloy  [inicial]
+   *  21 Valentín Soler Filloy                    45833550
+       0 Soler V                                  
+
+── CONFLICTOS (DNI distinto) ──

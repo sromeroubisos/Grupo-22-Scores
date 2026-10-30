@@ -1,0 +1,112 @@
+Torneo : T. REGION CENTRO (INTERMEDIA) - TOP 10 A - 2026
+Ronda : SEMIFINALES
+Fecha : Semifinales
+Partido número : 327319
+
+Fecha de juego : 23/10/2026 20:30 hs
+
+Referee : Corvalán Rt, Santiago
+
+Incidencias LOCAL
+Tie.	Min.	Símbolo	Incidencia	Pun.	Jugador	Detalle	Sanción
+1T	12		Penal	3	10 - Trejo, Tomas
+1T	20		Try	5	14 - Fischer, Matias
+1T	21		Conversión	2	10 - Trejo, Tomas
+1T	25		Try	5	2 - Freytes Echenique, Juan Manuel
+1T	26		Conversión	2	10 - Trejo, Tomas
+1T	32		Try	5	5 - Dominguez Peralta, Mateo
+1T	32		Conversión	2	10 - Trejo, Tomas
+2T	1	sale.ico	Se retiró		8 - Lopez, Joaquin
+2T	1	entra.ico	Ingresó		19 - Corso, Nicolas
+2T	11	sale.ico	Se retiró		6 - Moyano Aguirre, Lucas Mateo
+2T	11	entra.ico	Ingresó		20 - Deheza, Jeronimo
+2T	18	sale.ico	Se retiró		11 - Alonso, Conrado
+2T	18	entra.ico	Ingresó		23 - Urani, Benjamin
+2T	18	sale.ico	Se retiró		2 - Freytes Echenique, Juan Manuel
+2T	18	sale.ico	Se retiró		1 - Merola Moreschi, Genaro
+2T	18	entra.ico	Ingresó		17 - Burgos, Francisco Nicolás
+2T	18	entra.ico	Ingresó		16 - Pelcer, Julián Nereo
+2T	25	sale.ico	Se retiró		14 - Fischer, Matias
+2T	25	entra.ico	Ingresó		22 - Gangemi, Fausto Salvador
+2T	28		Try	5	22 - Gangemi, Fausto Salvador
+2T	30	sale.ico	Se retiró		3 - Rebori, Renzo
+2T	30	entra.ico	Ingresó		18 - Rey, Agustin
+2T	38	sale.ico	Se retiró		10 - Trejo, Tomas
+2T	38	entra.ico	Ingresó		21 - Areco Penalba, Alvaro
+Incidencias VISITANTE
+Tie.	Min.	Símbolo	Incidencia	Pun.	Jugador	Detalle	Sanción
+1T	7		Penal	3	10 - Guillamondegui, Augusto
+1T	38		Try	5	5 - Leon, Maximo
+2T	0	sale.ico	Se retiró		6 - Bocco, Felipe
+2T	0	sale.ico	Se retiró		7 - Soria, Matias
+2T	0	entra.ico	Ingresó		19 - Villa, Juan Segundo
+2T	0	entra.ico	Ingresó		20 - López Mirabella, Martín
+2T	4	entra.ico	Ingresó		2 - Almeida, Facundo
+2T	4	sale.ico	Se retiró		1 - Gargallo Bazan, Gonzalo Thomas
+2T	13		Try	5	2 - Almeida, Facundo
+2T	13		Conversión	2	10 - Guillamondegui, Augusto
+2T	17	sale.ico	Se retiró		15 - Acuña, Felipe
+2T	17	entra.ico	Ingresó		23 - Arias, Jose Ignacio
+2T	19	entra.ico	Ingresó		18 - Armando, Thiago
+2T	19	sale.ico	Se retiró		3 - Fitte, Tomas Agustin
+2T	25	sale.ico	Se retiró		12 - Cañas, Felipe
+2T	25	entra.ico	Ingresó		17 - Koth, German Ezequiel
+2T	25	entra.ico	Ingresó		21 - Coraglio, Facundo
+2T	25	sale.ico	Se retiró		25 - Adamo, Lucas
+2T	25	sale.ico	Se retiró		5 - Leon, Maximo
+2T	26	sale.ico	Se retiró		8 - Romero, Ignacio
+2T	26	entra.ico	Ingresó		22 - Acuña, Bautista
+2T	40		Try	5	14 - Barrea, Ignacio
+Entrenador LOCAL: GASTON PAEZ MOLINA 40404997
+Miembros del equipo LOCAL
+Pos	Doc.	Nombre	APL	Cert.	Pos.	Pos.Alt	Pos.Alt.2	Ult.Fich.
+1	44719439	Merola Moreschi, Genaro			01	03	02	2026
+2	46450227	Freytes Echenique, Juan Manuel			02	01	03	2026
+3	45246578	Rebori, Renzo			03	01	02	2026
+4	46033866	Franco, Juan			04	06	08	2026
+5	44762651	Dominguez Peralta, Mateo			04	05	06	2026
+6	41050961	Moyano Aguirre, Lucas Mateo			08	07	06	2026
+7	47263954	Carrara, Isidoro			06	07	08	2026
+8	39689957	Lopez, Joaquin			08	06	07	2026
+9	46034583	Cortes, Jeronimo			09	09	10	2026
+10	46710097	Trejo, Tomas			10	15	12	2026
+11	44577681	Alonso, Conrado			15	14	13	2026
+12	45695350	Trejo, Simón			12	13	07	2026
+13	45153518	Mallia, Felipe			13	12	15	2026
+14	42285508	Fischer, Matias			11	13	14	2026
+15	46657740	Carretero, Vicente			15	10	14	2026
+16	43926298	Pelcer, Julián Nereo			02	01	06	2026
+17	46143441	Burgos, Francisco Nicolás			01	02	08	2026
+18	43390593	Rey, Agustin			01	03	08	2026
+19	46883557	Corso, Nicolas			07	08	14	2026
+20	43144274	Deheza, Jeronimo			06	07	08	2026
+21	43233332	Areco Penalba, Alvaro			10	09	15	2026
+22	44604934	Gangemi, Fausto Salvador			10	13	15	2026
+23	46223989	Urani, Benjamin			14	11	13	2026
+Entrenador VISITANTE: JUan Escobar 35212003
+Miembros del equipo VISITANTE
+Pos	Doc.	Nombre	APL	Cert.	Pos.	Pos.Alt	Pos.Alt.2	Ult.Fich.
+1	46035919	Gargallo Bazan, Gonzalo Thomas			01	02	03	2026
+2	44900670	Adamo, Lucas			02	01	(no esp.)	2026
+3	45486394	Fitte, Tomas Agustin			03	01	03	2026
+4	45596460	Bocco, Juan			07	06	05	2026
+5	47351564	Leon, Maximo			07	08	01	2026
+6	45596459	Bocco, Felipe			06	04	08	2026
+7	46850131	Soria, Matias			06	07	08	2026
+8	45408555	Romero, Ignacio			08	07	06	2026
+9	45834943	Villalba Kohn, Santiago			09	10	10	2026
+10	33201192	Guillamondegui, Augusto			10	12	15	2026
+11	45694944	Vaccarello, Martín			11	12	14	2026
+12	44369966	Cañas, Felipe			13	11	12	2026
+13	46310538	Rotondo Lopez, Bautista			13	12	15	2026
+14	45153512	Barrea, Ignacio			14	15	(no esp.)	2026
+15	44653298	Acuña, Felipe			15	11	10	2026
+16	45487844	Almeida, Facundo			02	01	(no esp.)	2026
+17	38645936	Koth, German Ezequiel			01	02	03	2026
+18	46554619	Armando, Thiago			03	01	03	2026
+19	43138195	Villa, Juan Segundo			07	06	02	2026
+20	45559676	López Mirabella, Martín			08	07	06	2026
+21	45695147	Coraglio, Facundo			09	11	15	2026
+22	46451295	Acuña, Bautista			08	05	07	2026
+23	41626431	Arias, Jose Ignacio			12	10	13	2026
+Incidencias PARTIDO

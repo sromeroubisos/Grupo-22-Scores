@@ -1,0 +1,1855 @@
+{
+ "descripcion": "tarjetas oficiales bc6e8821",
+ "partidos": [
+  {
+   "id": "53ff7903-73e0-449c-979a-2744fee51956",
+   "rotulo": "regatas-de-resistencia-femenino vs italiana-de-charata-femenino · bc6e8821 · tarjeta 315531",
+   "arbitro": "RODRIGO SAUCO",
+   "local": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Nevena Maria Franca Zacoff"
+     },
+     {
+      "numero": 2,
+      "nombre": "Gabriela Alejandra Nuñez"
+     },
+     {
+      "numero": 3,
+      "nombre": "Melina Andrea Pisarello"
+     },
+     {
+      "numero": 4,
+      "nombre": "Darka Bondar",
+      "id": "54dde6dc-49cd-4ef0-9d5f-287bbc2eb5ec"
+     },
+     {
+      "numero": 5,
+      "nombre": "Oriana Micaela Fernandez",
+      "id": "82596f71-8856-4e16-831d-6d7977392890"
+     },
+     {
+      "numero": 6,
+      "nombre": "Ayalen Paula Suarez"
+     },
+     {
+      "numero": 7,
+      "nombre": "Bibiana Patricia Dure",
+      "id": "32445bc1-0f45-4333-be10-64ca272830f2"
+     },
+     {
+      "numero": 8,
+      "nombre": "Claudia Noemi Gimenez",
+      "id": "7ab338f9-3225-4117-9dcd-ef6f6258ecf5"
+     },
+     {
+      "numero": 9,
+      "nombre": "Flavia Noelia Rolheiser",
+      "id": "c9907dd2-da84-4b84-a6bd-c2ffe5ab2420"
+     },
+     {
+      "numero": 10,
+      "nombre": "Danai Maiten Malen Romero Carrazan",
+      "id": "4a1c3f16-6345-4a51-b61c-0585aeca4fce"
+     },
+     {
+      "numero": 11,
+      "nombre": "Milagros Ramirez"
+     },
+     {
+      "numero": 12,
+      "nombre": "Guadalupe Del Carmen Villa",
+      "id": "78800c17-a310-4704-b2d5-f3d671871951"
+     },
+     {
+      "numero": 13,
+      "nombre": "Agostina Estefania Fernandez Chamorro"
+     },
+     {
+      "numero": 14,
+      "nombre": "Nilda Gomez",
+      "id": "556195d3-9873-4364-9749-9cecd992b563"
+     },
+     {
+      "numero": 15,
+      "nombre": "Florencia Fernandez",
+      "id": "493ec7fa-9714-4c23-a337-e8d134ee6c64"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Maria Agustina Ayala"
+     },
+     {
+      "numero": 17,
+      "nombre": "Karen Sabrina Caja"
+     },
+     {
+      "numero": 18,
+      "nombre": "Eira Lelies Mikaela Mesa",
+      "id": "5e1a3d76-93bb-46fd-a6d9-da3f2ce8a982"
+     },
+     {
+      "numero": 19,
+      "nombre": "Marina Ortiz",
+      "id": "818f9cdf-1ec5-4a64-8644-dda69f50f0e3"
+     },
+     {
+      "numero": 20,
+      "nombre": "Cristina Florencia Gomez",
+      "id": "4ac5eb9c-4cda-4c96-87ad-798ee059c44f"
+     },
+     {
+      "numero": 21,
+      "nombre": "Luciana Maira Montangie"
+     },
+     {
+      "numero": 22,
+      "nombre": "Sabrina Nair Osuna",
+      "id": "85527d00-9bd5-450b-a422-d0e59eaf1806"
+     },
+     {
+      "numero": 23,
+      "nombre": "Veronica Soledad Zacarias",
+      "id": "10fc8b82-c9eb-4c75-b1d7-3559b2a69249"
+     }
+    ],
+    "nombre": "regatas-de-resistencia-femenino"
+   },
+   "visitante": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Jessica Alejandra Caceres"
+     },
+     {
+      "numero": 2,
+      "nombre": "Silvina Magali Moreira"
+     },
+     {
+      "numero": 3,
+      "nombre": "Candelaria Magali Jaremko Bondar"
+     },
+     {
+      "numero": 4,
+      "nombre": "Belen Anabela Mendoza"
+     },
+     {
+      "numero": 5,
+      "nombre": "Tatiana Cecilia Diaz"
+     },
+     {
+      "numero": 6,
+      "nombre": "Del Cielo Bravo"
+     },
+     {
+      "numero": 7,
+      "nombre": "Agustina Rodriguez"
+     },
+     {
+      "numero": 8,
+      "nombre": "Cindi Antonela Salomon"
+     },
+     {
+      "numero": 9,
+      "nombre": "Ludmila Gervazoni"
+     },
+     {
+      "numero": 10,
+      "nombre": "Alejandra Anabel Correa"
+     },
+     {
+      "numero": 11,
+      "nombre": "Aldana Leguizamon"
+     },
+     {
+      "numero": 12,
+      "nombre": "Maria Bazan"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Luciana Inés Dapslaff Solis"
+     },
+     {
+      "numero": 17,
+      "nombre": "Luana Carla Jaremko Bondar"
+     },
+     {
+      "numero": 18,
+      "nombre": "Gabriela Tatiana First"
+     },
+     {
+      "numero": 19,
+      "nombre": "Pamela Loaiso"
+     },
+     {
+      "numero": 20,
+      "nombre": "Giuliana Barrera"
+     }
+    ],
+    "nombre": "italiana-de-charata-femenino"
+   },
+   "eventos": [
+    {
+     "minuto": 1,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Luciana Maira Montangie",
+     "equipo": "local"
+    },
+    {
+     "minuto": 1,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Flavia Noelia Rolheiser",
+     "equipo": "local"
+    },
+    {
+     "minuto": 3,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Ayalen Paula Suarez",
+     "equipo": "local"
+    },
+    {
+     "minuto": 3,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Flavia Noelia Rolheiser",
+     "equipo": "local"
+    },
+    {
+     "minuto": 11,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Guadalupe Del Carmen Villa",
+     "equipo": "local"
+    },
+    {
+     "minuto": 11,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Flavia Noelia Rolheiser",
+     "equipo": "local"
+    },
+    {
+     "minuto": 16,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Florencia Fernandez",
+     "equipo": "local"
+    },
+    {
+     "minuto": 19,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Flavia Noelia Rolheiser",
+     "equipo": "local"
+    },
+    {
+     "minuto": 19,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Danai Maiten Malen Romero Carrazan",
+     "equipo": "local"
+    },
+    {
+     "minuto": 1,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Danai Maiten Malen Romero Carrazan",
+     "equipo": "local"
+    },
+    {
+     "minuto": 1,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Belen Anabela Mendoza",
+     "detalle": "Entra: Giuliana Barrera",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 2,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Flavia Noelia Rolheiser",
+     "equipo": "local"
+    },
+    {
+     "minuto": 3,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Guadalupe Del Carmen Villa",
+     "equipo": "local"
+    },
+    {
+     "minuto": 3,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Flavia Noelia Rolheiser",
+     "equipo": "local"
+    },
+    {
+     "minuto": 6,
+     "periodo": "2T",
+     "tipo": "penalty_try",
+     "jugador": "",
+     "equipo": "local"
+    },
+    {
+     "minuto": 7,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Oriana Micaela Fernandez",
+     "equipo": "local"
+    },
+    {
+     "minuto": 8,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "jugador": "Maria Bazan",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 13,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Milagros Ramirez",
+     "equipo": "local"
+    },
+    {
+     "minuto": 14,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Flavia Noelia Rolheiser",
+     "equipo": "local"
+    },
+    {
+     "minuto": 19,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Milagros Ramirez",
+     "equipo": "local"
+    }
+   ]
+  },
+  {
+   "id": "61536d52-9adc-41cf-9624-c65c8637e6ab",
+   "rotulo": "italiana-de-charata-femenino vs aguilas-rc-saenz-pena-femenino · bc6e8821 · tarjeta 315534",
+   "arbitro": "MARIA DE LOS ANGELES VALLEJOS",
+   "local": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Jessica Alejandra Caceres"
+     },
+     {
+      "numero": 2,
+      "nombre": "Silvina Magali Moreira"
+     },
+     {
+      "numero": 3,
+      "nombre": "Candelaria Magali Jaremko Bondar"
+     },
+     {
+      "numero": 4,
+      "nombre": "Belen Anabela Mendoza"
+     },
+     {
+      "numero": 5,
+      "nombre": "Tatiana Cecilia Diaz"
+     },
+     {
+      "numero": 6,
+      "nombre": "Del Cielo Bravo"
+     },
+     {
+      "numero": 7,
+      "nombre": "Agustina Rodriguez"
+     },
+     {
+      "numero": 8,
+      "nombre": "Cindi Antonela Salomon"
+     },
+     {
+      "numero": 9,
+      "nombre": "Ludmila Gervazoni"
+     },
+     {
+      "numero": 10,
+      "nombre": "Alejandra Anabel Correa"
+     },
+     {
+      "numero": 11,
+      "nombre": "Aldana Leguizamon"
+     },
+     {
+      "numero": 12,
+      "nombre": "Maria Bazan"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Luciana Inés Dapslaff Solis"
+     },
+     {
+      "numero": 17,
+      "nombre": "Luana Carla Jaremko Bondar"
+     },
+     {
+      "numero": 18,
+      "nombre": "Gabriela Tatiana First"
+     },
+     {
+      "numero": 19,
+      "nombre": "Pamela Loaiso"
+     },
+     {
+      "numero": 20,
+      "nombre": "Giuliana Barrera"
+     }
+    ],
+    "nombre": "italiana-de-charata-femenino"
+   },
+   "visitante": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Alexandra Antonella Cabral",
+      "id": "a751b761-a06e-453a-9601-95d740ac2185"
+     },
+     {
+      "numero": 2,
+      "nombre": "Erica Yamila Espindola",
+      "id": "7d229483-b67f-43c0-9d65-f3e47ce1af2b"
+     },
+     {
+      "numero": 3,
+      "nombre": "Daniela Lucia Saravia",
+      "id": "88f75217-1202-42f8-9d66-a083867f9db3"
+     },
+     {
+      "numero": 4,
+      "nombre": "Vanesa Soledad Fernandez",
+      "id": "f7208937-87c9-40b9-bbfb-86cdfa867805"
+     },
+     {
+      "numero": 5,
+      "nombre": "Milagros Jaqueline Cabrera",
+      "id": "a4839ba8-5814-4357-b8ca-fd2a41ac9876"
+     },
+     {
+      "numero": 6,
+      "nombre": "Patricia Soledad Ojeda",
+      "id": "aafaea4a-49e1-447e-91a5-8d4796aa4997"
+     },
+     {
+      "numero": 7,
+      "nombre": "Ayelen Araceli Goy",
+      "id": "1b7066ff-a5f3-43fa-be8c-cd97e21e770e"
+     },
+     {
+      "numero": 8,
+      "nombre": "Zaira Florencia Gonzalez",
+      "id": "00975b27-c405-4355-b920-653fa2c96eae"
+     },
+     {
+      "numero": 9,
+      "nombre": "Lucia Gicel Ramirez",
+      "id": "5d753dbd-6a21-4c30-afce-9a6e34c9371a"
+     },
+     {
+      "numero": 10,
+      "nombre": "Talia Jorgelina Rodich"
+     },
+     {
+      "numero": 11,
+      "nombre": "Melisa Soledad Rodich",
+      "id": "e7473d52-2fd5-4582-bc1e-5d4f8167a056"
+     },
+     {
+      "numero": 12,
+      "nombre": "Cristal Marianela Escalante"
+     },
+     {
+      "numero": 13,
+      "nombre": "Estefania Alvares",
+      "id": "29e623f8-cac3-4c50-94a4-7ce3dfe4613f"
+     },
+     {
+      "numero": 14,
+      "nombre": "Catherine Francia",
+      "id": "29794c66-bfeb-4d70-ab2c-42e9aed43bd2"
+     },
+     {
+      "numero": 15,
+      "nombre": "Maria Cristina Ramirez"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Cintia Pamela Aguirre"
+     },
+     {
+      "numero": 17,
+      "nombre": "Ana María Fariña"
+     },
+     {
+      "numero": 18,
+      "nombre": "Veronica Alejandra Ojeda",
+      "id": "ddf51254-91fd-48cb-a170-df6167c52966"
+     },
+     {
+      "numero": 19,
+      "nombre": "Ludmila Araceli Britez"
+     },
+     {
+      "numero": 20,
+      "nombre": "Nancy Carolina Aceval"
+     },
+     {
+      "numero": 21,
+      "nombre": "Carla Daniela Sosa"
+     },
+     {
+      "numero": 22,
+      "nombre": "Carla Erica Marcela Leyes"
+     },
+     {
+      "numero": 23,
+      "nombre": "Cinthia Elisabeth Benitez"
+     }
+    ],
+    "nombre": "aguilas-rc-saenz-pena-femenino"
+   },
+   "eventos": [
+    {
+     "minuto": 1,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Talia Jorgelina Rodich",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 1,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Cristal Marianela Escalante",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 3,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Cristal Marianela Escalante",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 3,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Maria Cristina Ramirez",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 5,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Melisa Soledad Rodich",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 8,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Ana María Fariña",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 9,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Daniela Lucia Saravia",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 9,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Cristal Marianela Escalante",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 10,
+     "periodo": "1T",
+     "tipo": "substitution",
+     "jugador": "Candelaria Magali Jaremko Bondar",
+     "detalle": "Entra: Giuliana Barrera",
+     "equipo": "local"
+    },
+    {
+     "minuto": 11,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Melisa Soledad Rodich",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 11,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Melisa Soledad Rodich",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 2,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Talia Jorgelina Rodich",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 2,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Talia Jorgelina Rodich",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 5,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Cristal Marianela Escalante",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 6,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Catherine Francia",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 6,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Lucia Gicel Ramirez",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 8,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Talia Jorgelina Rodich",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Patricia Soledad Ojeda",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Cristal Marianela Escalante",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 12,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Talia Jorgelina Rodich",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 12,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Talia Jorgelina Rodich",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 16,
+     "periodo": "2T",
+     "tipo": "card_yellow",
+     "jugador": "Alejandra Anabel Correa",
+     "equipo": "local"
+    }
+   ]
+  },
+  {
+   "id": "babf6418-aa93-43af-9eef-3c7585a3d6c6",
+   "rotulo": "regatas-de-resistencia-femenino vs aguilas-rc-saenz-pena-femenino · bc6e8821 · tarjeta 315536",
+   "arbitro": "RODRIGO SAUCO",
+   "local": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Nair Soledad Alvarez",
+      "id": "2bf46c2b-e43a-4a44-9138-4a42f2c228a7"
+     },
+     {
+      "numero": 2,
+      "nombre": "Cristina Florencia Gomez",
+      "id": "4ac5eb9c-4cda-4c96-87ad-798ee059c44f"
+     },
+     {
+      "numero": 3,
+      "nombre": "Eira Lelies Mikaela Mesa",
+      "id": "5e1a3d76-93bb-46fd-a6d9-da3f2ce8a982"
+     },
+     {
+      "numero": 4,
+      "nombre": "Juana Celeste Siacia",
+      "id": "7864a21c-d024-48a4-9a55-08cf1ccbc619"
+     },
+     {
+      "numero": 5,
+      "nombre": "Marina Ortiz",
+      "id": "818f9cdf-1ec5-4a64-8644-dda69f50f0e3"
+     },
+     {
+      "numero": 6,
+      "nombre": "Veronica Soledad Zacarias",
+      "id": "10fc8b82-c9eb-4c75-b1d7-3559b2a69249"
+     },
+     {
+      "numero": 7,
+      "nombre": "Flavia Noelia Rolheiser",
+      "id": "c9907dd2-da84-4b84-a6bd-c2ffe5ab2420"
+     },
+     {
+      "numero": 8,
+      "nombre": "Melisa Silvana Ojeda",
+      "id": "828e0590-8e46-4ae7-8582-842508ca36d7"
+     },
+     {
+      "numero": 9,
+      "nombre": "Marianela Rita Soledad Maidana",
+      "id": "3443add3-b639-41e5-9c9a-36f3e1e6e50b"
+     },
+     {
+      "numero": 10,
+      "nombre": "Claudia Noemi Gimenez",
+      "id": "7ab338f9-3225-4117-9dcd-ef6f6258ecf5"
+     },
+     {
+      "numero": 11,
+      "nombre": "Guadalupe Del Carmen Villa",
+      "id": "78800c17-a310-4704-b2d5-f3d671871951"
+     },
+     {
+      "numero": 12,
+      "nombre": "Sabrina Nair Osuna",
+      "id": "85527d00-9bd5-450b-a422-d0e59eaf1806"
+     },
+     {
+      "numero": 13,
+      "nombre": "Luciana Maira Montangie"
+     },
+     {
+      "numero": 14,
+      "nombre": "Danai Maiten Malen Romero Carrazan",
+      "id": "4a1c3f16-6345-4a51-b61c-0585aeca4fce"
+     },
+     {
+      "numero": 15,
+      "nombre": "Nilda Gomez",
+      "id": "556195d3-9873-4364-9749-9cecd992b563"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Ayalen Paula Suarez"
+     },
+     {
+      "numero": 17,
+      "nombre": "Maria Agustina Ayala"
+     },
+     {
+      "numero": 18,
+      "nombre": "Bibiana Patricia Dure",
+      "id": "32445bc1-0f45-4333-be10-64ca272830f2"
+     },
+     {
+      "numero": 19,
+      "nombre": "Florencia Fernandez",
+      "id": "493ec7fa-9714-4c23-a337-e8d134ee6c64"
+     },
+     {
+      "numero": 20,
+      "nombre": "Darka Bondar",
+      "id": "54dde6dc-49cd-4ef0-9d5f-287bbc2eb5ec"
+     },
+     {
+      "numero": 21,
+      "nombre": "Nevena Maria Franca Zacoff"
+     },
+     {
+      "numero": 22,
+      "nombre": "Melina Andrea Pisarello"
+     },
+     {
+      "numero": 23,
+      "nombre": "Gabriela Alejandra Nuñez"
+     }
+    ],
+    "nombre": "regatas-de-resistencia-femenino"
+   },
+   "visitante": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Alexandra Antonella Cabral",
+      "id": "a751b761-a06e-453a-9601-95d740ac2185"
+     },
+     {
+      "numero": 2,
+      "nombre": "Erica Yamila Espindola",
+      "id": "7d229483-b67f-43c0-9d65-f3e47ce1af2b"
+     },
+     {
+      "numero": 3,
+      "nombre": "Daniela Lucia Saravia",
+      "id": "88f75217-1202-42f8-9d66-a083867f9db3"
+     },
+     {
+      "numero": 4,
+      "nombre": "Vanesa Soledad Fernandez",
+      "id": "f7208937-87c9-40b9-bbfb-86cdfa867805"
+     },
+     {
+      "numero": 5,
+      "nombre": "Milagros Jaqueline Cabrera",
+      "id": "a4839ba8-5814-4357-b8ca-fd2a41ac9876"
+     },
+     {
+      "numero": 6,
+      "nombre": "Patricia Soledad Ojeda",
+      "id": "aafaea4a-49e1-447e-91a5-8d4796aa4997"
+     },
+     {
+      "numero": 7,
+      "nombre": "Ayelen Araceli Goy",
+      "id": "1b7066ff-a5f3-43fa-be8c-cd97e21e770e"
+     },
+     {
+      "numero": 8,
+      "nombre": "Zaira Florencia Gonzalez",
+      "id": "00975b27-c405-4355-b920-653fa2c96eae"
+     },
+     {
+      "numero": 9,
+      "nombre": "Lucia Gicel Ramirez",
+      "id": "5d753dbd-6a21-4c30-afce-9a6e34c9371a"
+     },
+     {
+      "numero": 10,
+      "nombre": "Talia Jorgelina Rodich"
+     },
+     {
+      "numero": 11,
+      "nombre": "Melisa Soledad Rodich",
+      "id": "e7473d52-2fd5-4582-bc1e-5d4f8167a056"
+     },
+     {
+      "numero": 12,
+      "nombre": "Cristal Marianela Escalante"
+     },
+     {
+      "numero": 13,
+      "nombre": "Estefania Alvares",
+      "id": "29e623f8-cac3-4c50-94a4-7ce3dfe4613f"
+     },
+     {
+      "numero": 14,
+      "nombre": "Catherine Francia",
+      "id": "29794c66-bfeb-4d70-ab2c-42e9aed43bd2"
+     },
+     {
+      "numero": 15,
+      "nombre": "Maria Cristina Ramirez"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Cintia Pamela Aguirre"
+     },
+     {
+      "numero": 17,
+      "nombre": "Ana María Fariña"
+     },
+     {
+      "numero": 18,
+      "nombre": "Veronica Alejandra Ojeda",
+      "id": "ddf51254-91fd-48cb-a170-df6167c52966"
+     },
+     {
+      "numero": 19,
+      "nombre": "Ludmila Araceli Britez"
+     },
+     {
+      "numero": 20,
+      "nombre": "Nancy Carolina Aceval"
+     },
+     {
+      "numero": 21,
+      "nombre": "Carla Daniela Sosa"
+     },
+     {
+      "numero": 22,
+      "nombre": "Carla Erica Marcela Leyes"
+     },
+     {
+      "numero": 23,
+      "nombre": "Cinthia Elisabeth Benitez"
+     }
+    ],
+    "nombre": "aguilas-rc-saenz-pena-femenino"
+   },
+   "eventos": [
+    {
+     "minuto": 7,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Marianela Rita Soledad Maidana",
+     "equipo": "local"
+    },
+    {
+     "minuto": 7,
+     "periodo": "1T",
+     "tipo": "card_yellow",
+     "jugador": "Melisa Silvana Ojeda",
+     "equipo": "local"
+    },
+    {
+     "minuto": 12,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Talia Jorgelina Rodich",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 12,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Cristal Marianela Escalante",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 4,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Talia Jorgelina Rodich",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Melisa Soledad Rodich",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Cristal Marianela Escalante",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 13,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Cristal Marianela Escalante",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 13,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Cristal Marianela Escalante",
+     "equipo": "visitante"
+    }
+   ]
+  },
+  {
+   "id": "e5bf6c29-d019-4475-bfc8-2bb535981d5a",
+   "rotulo": "aguilas-rc-saenz-pena-femenino vs italiana-de-charata-femenino · bc6e8821 · tarjeta 322225",
+   "arbitro": "VIVIANA GARAT",
+   "local": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Marina Gonzalez"
+     },
+     {
+      "numero": 2,
+      "nombre": "Cinthia Elisabeth Benitez"
+     },
+     {
+      "numero": 3,
+      "nombre": "Veronica Pamela Acevedo",
+      "id": "d7454a72-19fd-43b3-b8d9-2e4689cf1533"
+     },
+     {
+      "numero": 4,
+      "nombre": "Nancy Carolina Aceval"
+     },
+     {
+      "numero": 5,
+      "nombre": "Veronica Alejandra Ojeda",
+      "id": "ddf51254-91fd-48cb-a170-df6167c52966"
+     },
+     {
+      "numero": 6,
+      "nombre": "Ana María Fariña"
+     },
+     {
+      "numero": 7,
+      "nombre": "Ayelen Araceli Goy",
+      "id": "1b7066ff-a5f3-43fa-be8c-cd97e21e770e"
+     },
+     {
+      "numero": 8,
+      "nombre": "Erica Yamila Espindola",
+      "id": "7d229483-b67f-43c0-9d65-f3e47ce1af2b"
+     },
+     {
+      "numero": 9,
+      "nombre": "Maria Ayelen Monte",
+      "id": "633c768f-759f-490f-a2a8-2c7c0cfcd2b1"
+     },
+     {
+      "numero": 10,
+      "nombre": "Sabrina Jaqueline Verón",
+      "id": "cd785f2f-bc90-463e-9048-81eafc2ec0b7"
+     },
+     {
+      "numero": 11,
+      "nombre": "Ludmila Araceli Britez"
+     },
+     {
+      "numero": 12,
+      "nombre": "Daniela Lucia Saravia",
+      "id": "88f75217-1202-42f8-9d66-a083867f9db3"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Maria Cristina Ramirez"
+     },
+     {
+      "numero": 17,
+      "nombre": "Patricia Soledad Ojeda",
+      "id": "aafaea4a-49e1-447e-91a5-8d4796aa4997"
+     },
+     {
+      "numero": 18,
+      "nombre": "Milagros Jaqueline Cabrera",
+      "id": "a4839ba8-5814-4357-b8ca-fd2a41ac9876"
+     },
+     {
+      "numero": 19,
+      "nombre": "Cristal Marianela Escalante"
+     },
+     {
+      "numero": 20,
+      "nombre": "Lucia Gicel Ramirez",
+      "id": "5d753dbd-6a21-4c30-afce-9a6e34c9371a"
+     },
+     {
+      "numero": 21,
+      "nombre": "Zaira Florencia Gonzalez",
+      "id": "00975b27-c405-4355-b920-653fa2c96eae"
+     }
+    ],
+    "nombre": "aguilas-rc-saenz-pena-femenino"
+   },
+   "visitante": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Candelaria Magali Jaremko Bondar"
+     },
+     {
+      "numero": 2,
+      "nombre": "Silvina Magali Moreira"
+     },
+     {
+      "numero": 3,
+      "nombre": "Jessica Alejandra Caceres"
+     },
+     {
+      "numero": 4,
+      "nombre": "Luciana Inés Dapslaff Solis"
+     },
+     {
+      "numero": 5,
+      "nombre": "Belen Anabela Mendoza"
+     },
+     {
+      "numero": 6,
+      "nombre": "Alejandra Anabel Correa"
+     },
+     {
+      "numero": 7,
+      "nombre": "Agustina Rodriguez"
+     },
+     {
+      "numero": 8,
+      "nombre": "Aldana Leguizamon"
+     },
+     {
+      "numero": 9,
+      "nombre": "Del Cielo Bravo"
+     },
+     {
+      "numero": 10,
+      "nombre": "Cindi Antonela Salomon"
+     },
+     {
+      "numero": 11,
+      "nombre": "Maria Bazan"
+     },
+     {
+      "numero": 12,
+      "nombre": "Magali Quiroga"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Giuliana Barrera"
+     },
+     {
+      "numero": 17,
+      "nombre": "Gabriela Tatiana First"
+     },
+     {
+      "numero": 18,
+      "nombre": "Ludmila Gervazoni"
+     },
+     {
+      "numero": 19,
+      "nombre": "Tatiana Cecilia Diaz"
+     },
+     {
+      "numero": 20,
+      "nombre": "Pamela Loaiso"
+     }
+    ],
+    "nombre": "italiana-de-charata-femenino"
+   },
+   "eventos": [
+    {
+     "minuto": 2,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Daniela Lucia Saravia",
+     "equipo": "local"
+    },
+    {
+     "minuto": 2,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Sabrina Jaqueline Verón",
+     "equipo": "local"
+    },
+    {
+     "minuto": 3,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Ana María Fariña",
+     "equipo": "local"
+    },
+    {
+     "minuto": 6,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Sabrina Jaqueline Verón",
+     "equipo": "local"
+    },
+    {
+     "minuto": 7,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Milagros Jaqueline Cabrera",
+     "equipo": "local"
+    },
+    {
+     "minuto": 7,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Milagros Jaqueline Cabrera",
+     "equipo": "local"
+    },
+    {
+     "minuto": 9,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Lucia Gicel Ramirez",
+     "equipo": "local"
+    },
+    {
+     "minuto": 11,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Lucia Gicel Ramirez",
+     "equipo": "local"
+    },
+    {
+     "minuto": 11,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Ayelen Araceli Goy",
+     "equipo": "local"
+    },
+    {
+     "minuto": 13,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Daniela Lucia Saravia",
+     "equipo": "local"
+    },
+    {
+     "minuto": 14,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Patricia Soledad Ojeda",
+     "equipo": "local"
+    },
+    {
+     "minuto": 1,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Candelaria Magali Jaremko Bondar",
+     "detalle": "Entra: Luciana Inés Dapslaff Solis",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 1,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Belen Anabela Mendoza",
+     "detalle": "Entra: Gabriela Tatiana First",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 1,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Tatiana Cecilia Diaz",
+     "detalle": "Entra: Giuliana Barrera",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 4,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Patricia Soledad Ojeda",
+     "equipo": "local"
+    },
+    {
+     "minuto": 6,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Patricia Soledad Ojeda",
+     "equipo": "local"
+    },
+    {
+     "minuto": 7,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Patricia Soledad Ojeda",
+     "equipo": "local"
+    },
+    {
+     "minuto": 8,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Lucia Gicel Ramirez",
+     "equipo": "local"
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Milagros Jaqueline Cabrera",
+     "equipo": "local"
+    },
+    {
+     "minuto": 10,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Milagros Jaqueline Cabrera",
+     "equipo": "local"
+    },
+    {
+     "minuto": 18,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Patricia Soledad Ojeda",
+     "equipo": "local"
+    },
+    {
+     "minuto": 18,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Erica Yamila Espindola",
+     "equipo": "local"
+    }
+   ]
+  },
+  {
+   "id": "ec4d5808-1d81-406d-93bc-d493cf738ca2",
+   "rotulo": "aguilas-rc-saenz-pena-femenino vs regatas-de-resistencia-femenino · bc6e8821 · tarjeta 322227",
+   "arbitro": "VIVIANA GARAT",
+   "local": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Alexandra Antonella Cabral",
+      "id": "a751b761-a06e-453a-9601-95d740ac2185"
+     },
+     {
+      "numero": 2,
+      "nombre": "Erica Yamila Espindola",
+      "id": "7d229483-b67f-43c0-9d65-f3e47ce1af2b"
+     },
+     {
+      "numero": 3,
+      "nombre": "Vanesa Soledad Fernandez",
+      "id": "f7208937-87c9-40b9-bbfb-86cdfa867805"
+     },
+     {
+      "numero": 4,
+      "nombre": "Daniela Lucia Saravia",
+      "id": "88f75217-1202-42f8-9d66-a083867f9db3"
+     },
+     {
+      "numero": 5,
+      "nombre": "Patricia Soledad Ojeda",
+      "id": "aafaea4a-49e1-447e-91a5-8d4796aa4997"
+     },
+     {
+      "numero": 6,
+      "nombre": "Milagros Jaqueline Cabrera",
+      "id": "a4839ba8-5814-4357-b8ca-fd2a41ac9876"
+     },
+     {
+      "numero": 7,
+      "nombre": "Zaira Florencia Gonzalez",
+      "id": "00975b27-c405-4355-b920-653fa2c96eae"
+     },
+     {
+      "numero": 8,
+      "nombre": "Maria Cristina Ramirez"
+     },
+     {
+      "numero": 9,
+      "nombre": "Cristal Marianela Escalante"
+     },
+     {
+      "numero": 10,
+      "nombre": "Melisa Soledad Rodich",
+      "id": "e7473d52-2fd5-4582-bc1e-5d4f8167a056"
+     },
+     {
+      "numero": 11,
+      "nombre": "Lucia Gicel Ramirez",
+      "id": "5d753dbd-6a21-4c30-afce-9a6e34c9371a"
+     },
+     {
+      "numero": 12,
+      "nombre": "Ana María Fariña"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Ayelen Araceli Goy",
+      "id": "1b7066ff-a5f3-43fa-be8c-cd97e21e770e"
+     },
+     {
+      "numero": 17,
+      "nombre": "Veronica Alejandra Ojeda",
+      "id": "ddf51254-91fd-48cb-a170-df6167c52966"
+     },
+     {
+      "numero": 18,
+      "nombre": "Sabrina Jaqueline Verón",
+      "id": "cd785f2f-bc90-463e-9048-81eafc2ec0b7"
+     },
+     {
+      "numero": 19,
+      "nombre": "Veronica Pamela Acevedo",
+      "id": "d7454a72-19fd-43b3-b8d9-2e4689cf1533"
+     },
+     {
+      "numero": 20,
+      "nombre": "Maria Ayelen Monte",
+      "id": "633c768f-759f-490f-a2a8-2c7c0cfcd2b1"
+     }
+    ],
+    "nombre": "aguilas-rc-saenz-pena-femenino"
+   },
+   "visitante": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Marina Ortiz",
+      "id": "818f9cdf-1ec5-4a64-8644-dda69f50f0e3"
+     },
+     {
+      "numero": 2,
+      "nombre": "Cristina Florencia Gomez",
+      "id": "4ac5eb9c-4cda-4c96-87ad-798ee059c44f"
+     },
+     {
+      "numero": 3,
+      "nombre": "Nair Soledad Alvarez",
+      "id": "2bf46c2b-e43a-4a44-9138-4a42f2c228a7"
+     },
+     {
+      "numero": 4,
+      "nombre": "Oriana Micaela Fernandez",
+      "id": "82596f71-8856-4e16-831d-6d7977392890"
+     },
+     {
+      "numero": 5,
+      "nombre": "Bibiana Patricia Dure",
+      "id": "32445bc1-0f45-4333-be10-64ca272830f2"
+     },
+     {
+      "numero": 6,
+      "nombre": "Eira Lelies Mikaela Mesa",
+      "id": "5e1a3d76-93bb-46fd-a6d9-da3f2ce8a982"
+     },
+     {
+      "numero": 7,
+      "nombre": "Flavia Noelia Rolheiser",
+      "id": "c9907dd2-da84-4b84-a6bd-c2ffe5ab2420"
+     },
+     {
+      "numero": 8,
+      "nombre": "Claudia Noemi Gimenez",
+      "id": "7ab338f9-3225-4117-9dcd-ef6f6258ecf5"
+     },
+     {
+      "numero": 9,
+      "nombre": "Marianela Rita Soledad Maidana",
+      "id": "3443add3-b639-41e5-9c9a-36f3e1e6e50b"
+     },
+     {
+      "numero": 10,
+      "nombre": "Guadalupe Del Carmen Villa",
+      "id": "78800c17-a310-4704-b2d5-f3d671871951"
+     },
+     {
+      "numero": 11,
+      "nombre": "Nilda Gomez",
+      "id": "556195d3-9873-4364-9749-9cecd992b563"
+     },
+     {
+      "numero": 12,
+      "nombre": "Sabrina Nair Osuna",
+      "id": "85527d00-9bd5-450b-a422-d0e59eaf1806"
+     },
+     {
+      "numero": 13,
+      "nombre": "Danai Maiten Malen Romero Carrazan",
+      "id": "4a1c3f16-6345-4a51-b61c-0585aeca4fce"
+     },
+     {
+      "numero": 14,
+      "nombre": "Florencia Fernandez",
+      "id": "493ec7fa-9714-4c23-a337-e8d134ee6c64"
+     },
+     {
+      "numero": 15,
+      "nombre": "Maria Agustina Ayala"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Melina Andrea Pisarello"
+     },
+     {
+      "numero": 17,
+      "nombre": "Gabriela Alejandra Nuñez"
+     },
+     {
+      "numero": 18,
+      "nombre": "Karen Sabrina Caja"
+     },
+     {
+      "numero": 19,
+      "nombre": "Darka Bondar",
+      "id": "54dde6dc-49cd-4ef0-9d5f-287bbc2eb5ec"
+     }
+    ],
+    "nombre": "regatas-de-resistencia-femenino"
+   },
+   "eventos": [
+    {
+     "minuto": 9,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Cristal Marianela Escalante",
+     "equipo": "local"
+    },
+    {
+     "minuto": 15,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Milagros Jaqueline Cabrera",
+     "equipo": "local"
+    },
+    {
+     "minuto": 5,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Zaira Florencia Gonzalez",
+     "equipo": "local"
+    }
+   ]
+  },
+  {
+   "id": "87b57ae2-4f37-48f6-ae28-2bfdff330ec8",
+   "rotulo": "italiana-de-charata-femenino vs regatas-de-resistencia-femenino · bc6e8821 · tarjeta 322226",
+   "arbitro": "MARIA DE LOS ANGELES VALLEJOS",
+   "local": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Jessica Alejandra Caceres"
+     },
+     {
+      "numero": 2,
+      "nombre": "Silvina Magali Moreira"
+     },
+     {
+      "numero": 3,
+      "nombre": "Candelaria Magali Jaremko Bondar"
+     },
+     {
+      "numero": 4,
+      "nombre": "Belen Anabela Mendoza"
+     },
+     {
+      "numero": 5,
+      "nombre": "Tatiana Cecilia Diaz"
+     },
+     {
+      "numero": 6,
+      "nombre": "Giuliana Barrera"
+     },
+     {
+      "numero": 7,
+      "nombre": "Agustina Rodriguez"
+     },
+     {
+      "numero": 8,
+      "nombre": "Cindi Antonela Salomon"
+     },
+     {
+      "numero": 9,
+      "nombre": "Ludmila Gervazoni"
+     },
+     {
+      "numero": 10,
+      "nombre": "Alejandra Anabel Correa"
+     },
+     {
+      "numero": 11,
+      "nombre": "Aldana Leguizamon"
+     },
+     {
+      "numero": 12,
+      "nombre": "Maria Bazan"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Luciana Inés Dapslaff Solis"
+     },
+     {
+      "numero": 17,
+      "nombre": "Luana Carla Jaremko Bondar"
+     },
+     {
+      "numero": 18,
+      "nombre": "Gabriela Tatiana First"
+     },
+     {
+      "numero": 19,
+      "nombre": "Del Cielo Bravo"
+     },
+     {
+      "numero": 20,
+      "nombre": "Magali Quiroga"
+     }
+    ],
+    "nombre": "italiana-de-charata-femenino"
+   },
+   "visitante": {
+    "titulares": [
+     {
+      "numero": 1,
+      "nombre": "Maria Agustina Ayala"
+     },
+     {
+      "numero": 2,
+      "nombre": "Danai Maiten Malen Romero Carrazan",
+      "id": "4a1c3f16-6345-4a51-b61c-0585aeca4fce"
+     },
+     {
+      "numero": 3,
+      "nombre": "Karen Sabrina Caja"
+     },
+     {
+      "numero": 4,
+      "nombre": "Gabriela Alejandra Nuñez"
+     },
+     {
+      "numero": 5,
+      "nombre": "Melina Andrea Pisarello"
+     },
+     {
+      "numero": 6,
+      "nombre": "Darka Bondar",
+      "id": "54dde6dc-49cd-4ef0-9d5f-287bbc2eb5ec"
+     },
+     {
+      "numero": 7,
+      "nombre": "Florencia Fernandez",
+      "id": "493ec7fa-9714-4c23-a337-e8d134ee6c64"
+     },
+     {
+      "numero": 8,
+      "nombre": "Flavia Noelia Rolheiser",
+      "id": "c9907dd2-da84-4b84-a6bd-c2ffe5ab2420"
+     },
+     {
+      "numero": 9,
+      "nombre": "Eira Lelies Mikaela Mesa",
+      "id": "5e1a3d76-93bb-46fd-a6d9-da3f2ce8a982"
+     },
+     {
+      "numero": 10,
+      "nombre": "Claudia Noemi Gimenez",
+      "id": "7ab338f9-3225-4117-9dcd-ef6f6258ecf5"
+     },
+     {
+      "numero": 11,
+      "nombre": "Guadalupe Del Carmen Villa",
+      "id": "78800c17-a310-4704-b2d5-f3d671871951"
+     },
+     {
+      "numero": 12,
+      "nombre": "Nilda Gomez",
+      "id": "556195d3-9873-4364-9749-9cecd992b563"
+     },
+     {
+      "numero": 13,
+      "nombre": "Sabrina Nair Osuna",
+      "id": "85527d00-9bd5-450b-a422-d0e59eaf1806"
+     },
+     {
+      "numero": 14,
+      "nombre": "Marianela Rita Soledad Maidana",
+      "id": "3443add3-b639-41e5-9c9a-36f3e1e6e50b"
+     },
+     {
+      "numero": 15,
+      "nombre": "Cristina Florencia Gomez",
+      "id": "4ac5eb9c-4cda-4c96-87ad-798ee059c44f"
+     }
+    ],
+    "suplentes": [
+     {
+      "numero": 16,
+      "nombre": "Marina Ortiz",
+      "id": "818f9cdf-1ec5-4a64-8644-dda69f50f0e3"
+     },
+     {
+      "numero": 17,
+      "nombre": "Nair Soledad Alvarez",
+      "id": "2bf46c2b-e43a-4a44-9138-4a42f2c228a7"
+     },
+     {
+      "numero": 18,
+      "nombre": "Bibiana Patricia Dure",
+      "id": "32445bc1-0f45-4333-be10-64ca272830f2"
+     },
+     {
+      "numero": 19,
+      "nombre": "Oriana Micaela Fernandez",
+      "id": "82596f71-8856-4e16-831d-6d7977392890"
+     }
+    ],
+    "nombre": "regatas-de-resistencia-femenino"
+   },
+   "eventos": [
+    {
+     "minuto": 1,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Eira Lelies Mikaela Mesa",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 1,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Flavia Noelia Rolheiser",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 3,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Danai Maiten Malen Romero Carrazan",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 3,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Flavia Noelia Rolheiser",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 5,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Guadalupe Del Carmen Villa",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 5,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Flavia Noelia Rolheiser",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 8,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Karen Sabrina Caja",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 10,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Eira Lelies Mikaela Mesa",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 10,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Flavia Noelia Rolheiser",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 11,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Danai Maiten Malen Romero Carrazan",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 12,
+     "periodo": "1T",
+     "tipo": "try",
+     "jugador": "Danai Maiten Malen Romero Carrazan",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 12,
+     "periodo": "1T",
+     "tipo": "conversion",
+     "jugador": "Flavia Noelia Rolheiser",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 1,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Giuliana Barrera",
+     "detalle": "Entra: Luana Carla Jaremko Bondar",
+     "equipo": "local"
+    },
+    {
+     "minuto": 1,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Jessica Alejandra Caceres",
+     "detalle": "Entra: Gabriela Tatiana First",
+     "equipo": "local"
+    },
+    {
+     "minuto": 5,
+     "periodo": "2T",
+     "tipo": "substitution",
+     "jugador": "Aldana Leguizamon",
+     "detalle": "Entra: Magali Quiroga",
+     "equipo": "local"
+    },
+    {
+     "minuto": 5,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Sabrina Nair Osuna",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 5,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Sabrina Nair Osuna",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 11,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Eira Lelies Mikaela Mesa",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 12,
+     "periodo": "2T",
+     "tipo": "try",
+     "jugador": "Sabrina Nair Osuna",
+     "equipo": "visitante"
+    },
+    {
+     "minuto": 12,
+     "periodo": "2T",
+     "tipo": "conversion",
+     "jugador": "Marianela Rita Soledad Maidana",
+     "equipo": "visitante"
+    }
+   ]
+  }
+ ]
+}

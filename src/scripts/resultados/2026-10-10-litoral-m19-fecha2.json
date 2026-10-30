@@ -1,0 +1,16 @@
+{
+  "fecha": "2026-10-10",
+  "descripcion": "Torneo Regional del Litoral M19 · 2ª fecha (sábado) · zonas A y B",
+  "fuente": "Tercer Tiempo Rugby (10/10/2026)",
+  "motivo": "Resultado de la fecha 2 del Regional del Litoral M19 (Tercer Tiempo Rugby, 10/10/2026); el ofensivo va declarado desde el récord publicado, la fuente da el marcador y no los tries.",
+  "puntosBonusOfensivo": 1,
+  "partidos": [
+    { "partido": "43ac2e42-b260-493f-ad47-cc84dc6f550f", "local": "Duendes M19", "visitante": "Jockey Club de Rosario M19", "marcador": { "local": 10, "visitante": 36 }, "bonusOfensivo": ["visitante"] },
+    { "partido": "78b2c652-297d-4d1a-90b1-32ca8ad4eccb", "local": "Atlético del Rosario M19", "visitante": "CRAI M19", "marcador": { "local": 50, "visitante": 17 }, "bonusOfensivo": ["local"] },
+    { "partido": "11be926d-cfdf-4882-aa2d-06636c3b3a02", "local": "CRAR M19", "visitante": "GER M19", "marcador": { "local": 37, "visitante": 34 }, "bonusOfensivo": ["local", "visitante"] },
+    { "partido": "a79789d5-9931-44dc-a420-b29e4205a125", "local": "Universitario de Santa Fe M19", "visitante": "Paraná Rowing M19", "marcador": { "local": 22, "visitante": 14 }, "bonusOfensivo": [] },
+    { "partido": "7e708b76-0027-43d9-9070-4d54ea8c4f32", "local": "Los Caranchos M19", "visitante": "Tilcara M19", "marcador": { "local": 14, "visitante": 28 }, "bonusOfensivo": ["visitante"] },
+    { "partido": "7ad24b85-f69f-4aa8-bf51-308a0858e1f9", "local": "Universitario de Rosario M19", "visitante": "Old Resian M19", "marcador": { "local": 33, "visitante": 50 }, "bonusOfensivo": ["local", "visitante"] },
+    { "partido": "9439b177-f468-41f9-9cb0-a631ef351ada", "local": "La Salle Jobson M19", "visitante": "Provincial M19", "marcador": { "local": 40, "visitante": 19 }, "bonusOfensivo": ["local"] }
+  ]
+}

@@ -5,6 +5,7 @@
  *   node scripts/dos-orillas/seed.mjs --plan
  *   node scripts/dos-orillas/seed.mjs --execute
  *   node scripts/dos-orillas/seed.mjs --execute --limpiar   (borra los torneos, deja clubes)
+ *   node scripts/dos-orillas/seed.mjs --execute --limpiar --solo-trl   (sólo el Regional M19)
  *
  * OJO con `--limpiar`: por PostgREST el DELETE de `team_season_entries` de un
  * torneo con 14 temporadas se corta por `statement_timeout` (57014) y deja el
@@ -46,7 +47,7 @@ import path from 'node:path';
 
 import {
   DIVISIONES, ESCUDO_BROWN, fichaDe, instanteDe, LOGO_TRL, MADRES, ORDEN_FASES,
-  reglamentoDe, RULESET_TORNEO, sistemaDe, TIEBREAKERS, PUNTOS, torneoDe, TRL, TRL_FECHA1, UNION_TORNEO,
+  reglamentoDe, RULESET_TORNEO, sistemaDe, TIEBREAKERS, PUNTOS, torneoDe, TRL, UNION_TORNEO,
 } from './datos.mjs';
 
 const REPO = process.cwd();
@@ -467,7 +468,10 @@ async function crearTorneoDivision(t) {
   }
 }
 
-/** El Regional M19: palmarés + la 1ª fecha de 2026 como fase de liga única. */
+/**
+ * El Regional M19: palmarés + la fase de grupos de 2026 como liga única de 8
+ * (los cruces son interzonales; la zona va en la entrada de cada equipo).
+ */
 async function crearTorneoTrl(b) {
   const tournamentId = crypto.randomUUID();
   try {
@@ -480,23 +484,36 @@ async function crearTorneoTrl(b) {
         slug: `${b.slug}-${p.anio}`, activa: false, campeon: fichaDe(p.campeon, 'M19').id,
       })]);
     }
+    const id = (alias) => fichaDe(alias, 'M19').id;
+    const partidos = b.fechas.flatMap((f) => f.partidos.map((m) => {
+      const jugado = Number.isInteger(m.hs);
+      return {
+        local: id(m.local), visitante: id(m.visitante), jornada: f.n,
+        date: m.fecha || f.fecha, time: m.hora || null,
+        status: jugado ? 'final' : 'scheduled',
+        hs: m.hs, as: m.as, hp: m.hp, ap: m.ap, note: m.nota || null,
+      };
+    }));
     const fase = {
       nombre: 'Fase de grupos',
-      equipos: new Set(b.fecha1.flatMap((m) => [fichaDe(m.local, 'M19').id, fichaDe(m.visitante, 'M19').id])),
-      jornadas: new Map([[1, { n: 1, desde: TRL_FECHA1, hasta: TRL_FECHA1 }]]),
-      partidos: b.fecha1.map((m) => ({
-        local: fichaDe(m.local, 'M19').id, visitante: fichaDe(m.visitante, 'M19').id, jornada: 1,
-        date: TRL_FECHA1, time: m.hora, status: 'scheduled',
-        note: `Árbitro: ${m.arbitro}${m.hora ? '' : ' · horario sin confirmar'}`,
-      })),
+      equipos: new Set(Object.values(b.zonas).flat().map(id)),
+      jornadas: new Map(b.fechas.map((f) => [f.n, { n: f.n, desde: f.fecha, hasta: f.fecha }])),
+      partidos,
     };
+    const fechas = partidos.map((m) => m.date).sort();
     const s = {
-      anio: ANIO_ACTUAL, formato: 'Sólo publicada la 1ª fecha; zonas y resto del fixture sin publicar.',
-      titulos: [], campeon: null, desde: TRL_FECHA1, hasta: TRL_FECHA1,
+      anio: ANIO_ACTUAL,
+      formato: 'Fase de grupos: 8 equipos en dos zonas de 4 y cuatro fechas interzonales (cada equipo juega con los cuatro de la otra zona). Semifinales el 31/10 (1° y 2° de cada zona), final el 7/11 con localía por sorteo el 2/11. Las posiciones oficiales son por zona.',
+      titulos: [], campeon: null, desde: fechas[0], hasta: fechas[fechas.length - 1],
       fases: [fase], equipos: fase.equipos,
     };
     const r = await escribirTemporada(tournamentId, { nombre: b.nombre, slug: b.slug }, s, true);
     await actualizar(`tournaments?id=eq.${tournamentId}`, { current_season_id: r.seasonId });
+    for (const [zona, equipos] of Object.entries(b.zonas)) {
+      for (const e of equipos) {
+        await actualizar(`team_season_entries?season_id=eq.${r.seasonId}&club_id=eq.${id(e)}`, { zone: zona });
+      }
+    }
     return { tournamentId, partidos: r.partidos };
   } catch (e) {
     await limpiarTorneo(tournamentId).catch((e2) => console.error(`  la limpieza de ${b.slug} falló también: ${e2.message}`));
@@ -511,7 +528,9 @@ async function main() {
   const slugsTodos = [...DIVISIONES.map((d) => torneoDe(d).slug), ...TRL.map((b) => b.slug)];
 
   if (process.argv.includes('--limpiar')) {
-    const filas = await leer(`tournaments?select=id,name,slug&slug=in.(${slugsTodos.join(',')})`);
+    // --solo-trl: rehacer el Regional M19 sin tocar los cuatro torneos de Dos Orillas.
+    const slugsLimpiar = process.argv.includes('--solo-trl') ? TRL.map((b) => b.slug) : slugsTodos;
+    const filas = await leer(`tournaments?select=id,name,slug&slug=in.(${slugsLimpiar.join(',')})`);
     console.log(`torneos a borrar (${filas.length}):`);
     for (const f of filas) console.log(`  - ${f.name}`);
     if (modo === 'plan') { console.log('\nmodo --plan: no se borró nada.'); return; }
@@ -523,7 +542,7 @@ async function main() {
   const plan = armarPlan(extraccion);
   // Las fichas del Regional M19 también.
   for (const b of TRL) {
-    const alias = [...b.fecha1.flatMap((m) => [m.local, m.visitante]), ...b.palmares.map((p) => p.campeon)];
+    const alias = [...Object.values(b.zonas).flat(), ...b.palmares.map((p) => p.campeon)];
     for (const a of alias) {
       const f = fichaDe(a, 'M19');
       if (!plan.fichas.has(f.id)) plan.fichas.set(f.id, { ...f, division: 'M19' });
@@ -588,7 +607,7 @@ async function main() {
   }
   for (const b of TRL) {
     const skip = torneosDb.has(b.slug);
-    console.log(`  ${skip ? '=' : '+'} ${b.nombre.padEnd(36)} ${b.palmares.length} temporadas de palmarés + 2026 (${b.fecha1.length} partidos de la 1ª fecha)${skip ? '  (ya existe)' : ''}`);
+    console.log(`  ${skip ? '=' : '+'} ${b.nombre.padEnd(36)} ${b.palmares.length} temporadas de palmarés + 2026 (${b.fechas.reduce((n, f) => n + f.partidos.length, 0)} partidos)${skip ? '  (ya existe)' : ''}`);
   }
 
   if (modo === 'plan') { console.log('\nmodo --plan: no se escribió una sola fila.'); return; }

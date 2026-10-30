@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { guardRejection } from '@/lib/auth/apiAdmin';
 import { requireSuperAdmin } from '@/lib/auth/server';
 import { isMissingApiKeysTableError, revokeApiKey } from '@/lib/server/apiKeys';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -19,8 +20,8 @@ export async function DELETE(_request: Request, context: { params: Promise<{ id:
   try {
     const user = await requireSuperAdmin();
     userId = user.id;
-  } catch {
-    return jsonError('Unauthorized', 401);
+  } catch (authError) {
+    return jsonError(...guardRejection(authError));
   }
 
   const { id } = await context.params;

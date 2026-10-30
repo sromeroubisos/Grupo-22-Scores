@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { guardRejection } from '@/lib/auth/apiAdmin';
 import { createClient } from '@/lib/supabase/server';
 import { getServiceWriter } from '@/lib/supabase/serviceWriter';
 import { requireTournamentAdminContext } from '@/lib/auth/permissions';
@@ -44,8 +45,8 @@ export async function PATCH(
     let context;
     try {
         context = await requireTournamentAdminContext(supabase);
-    } catch {
-        return err('Unauthorized', 401);
+    } catch (authError) {
+        return err(...guardRejection(authError));
     }
 
     const { id } = await params;
@@ -112,8 +113,8 @@ export async function DELETE(
     let context;
     try {
         context = await requireTournamentAdminContext(supabase);
-    } catch {
-        return err('Unauthorized', 401);
+    } catch (authError) {
+        return err(...guardRejection(authError));
     }
 
     const { id } = await params;
