@@ -45,6 +45,13 @@ test('Argentino Juvenil y Select 12: azul', () => {
     );
 });
 
+test('nacionales de la UAR (selecciones y clubes): azul', () => {
+    assert.deepEqual(
+        ids(['Encuentro Femenino de Selecciones de XV 2026', 'Nacional de Clubes Femenino Mayores 2026']),
+        Array(2).fill(T.argentinoJuvenil.id),
+    );
+});
+
 test('juveniles: negro con verde', () => {
     assert.deepEqual(
         ids(['Torneo Juvenil de Tucumán M16', 'Torneo Cordobés M19 "A"', 'URBA: Juveniles - Primera rueda - M 15 - Grupo I - Zona A']),

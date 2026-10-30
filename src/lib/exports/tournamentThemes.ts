@@ -120,6 +120,8 @@ export function resolveTournamentExportTheme(tournamentName: string | null | und
     // El Argentino Juvenil (M17, M18) y el Select 12 son de la UAR: azul, no el negro de los juveniles.
     if (has(name, /argentino juvenil|select 12/)) return T.argentinoJuvenil;
     if (has(name, JUVENIL)) return T.juvenil;
+    // Los nacionales de la UAR (selecciones y clubes) comparten el azul del Argentino Juvenil.
+    if (has(name, /encuentro femenino de selecciones|nacional de clubes/)) return T.argentinoJuvenil;
     if (has(name, /ascenso/)) return T.ascenso;
     if (has(name, /top 14 de la urba|urba top 14|urba: top 14/)) return T.regional;
     if (has(name, /top 10 del centro|copa oro del oeste|torneo regional del nea\b|norpatagonico|patagonico|regional pampeano\b|regional del litoral a|regional del noa a\b/)) {
