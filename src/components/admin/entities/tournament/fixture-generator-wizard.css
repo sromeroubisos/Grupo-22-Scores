@@ -69,3 +69,46 @@
     .fgw-body { animation: none; }
     .fgw * { transition: none !important; }
 }
+
+/* Equipos elegidos dentro del asistente de fase. */
+.fgw-teams { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.fgw-team { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 12px; background: var(--fgw-soft); }
+.fgw-team img, .fgw-team .tpm-crest { flex: none; width: 26px; height: 26px; object-fit: contain; }
+.fgw-team-name { flex: 1; min-width: 0; font-size: 0.88rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fgw-team select { flex: none; max-width: 38%; }
+.fgw-team-x { flex: none; display: grid; place-items: center; width: 30px; height: 30px; border: 0; border-radius: 8px; background: transparent; color: inherit; cursor: pointer; opacity: 0.7; }
+.fgw-team-x:hover { opacity: 1; background: var(--fgw-line); }
+.fgw-add { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; }
+
+/* Buscador flotante de equipos. Va en un portal, así que no hereda las variables de .fgw. */
+.tpm-backdrop { --tpm-line: color-mix(in srgb, currentColor 14%, transparent); --tpm-soft: color-mix(in srgb, currentColor 7%, transparent); --tpm-accent: var(--accent-primary, #00a365); position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; padding: 16px; background: rgba(8, 12, 18, 0.55); backdrop-filter: blur(6px); animation: tpm-fade 0.18s ease-out; color: var(--text-primary, CanvasText); }
+.tpm { width: min(520px, 100%); max-height: min(640px, calc(100dvh - 32px)); display: flex; flex-direction: column; gap: 12px; padding: 18px; border-radius: 18px; background: var(--surface-elevated, Canvas); border: 1px solid var(--tpm-line); box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35); animation: tpm-pop 0.26s cubic-bezier(0.2, 0.9, 0.3, 1); }
+.tpm-head { display: flex; align-items: center; justify-content: space-between; }
+.tpm-head h5 { margin: 0; font-size: 1.05rem; letter-spacing: -0.01em; }
+.tpm-x { display: grid; place-items: center; width: 34px; height: 34px; border: 0; border-radius: 10px; background: transparent; color: inherit; cursor: pointer; }
+.tpm-x:hover { background: var(--tpm-soft); }
+.tpm-search { display: flex; align-items: center; gap: 10px; padding: 0 12px; border-radius: 12px; background: var(--tpm-soft); border: 1px solid transparent; }
+.tpm-search:focus-within { border-color: var(--tpm-accent); }
+.tpm-search input { flex: 1; min-width: 0; height: 42px; border: 0; background: transparent; color: inherit; font-size: 16px; outline: none; }
+.tpm .operation-toggle { font-size: 0.82rem; }
+.tpm-list { flex: 1; min-height: 120px; overflow-y: auto; list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; overscroll-behavior: contain; }
+.tpm-row { width: 100%; display: flex; align-items: center; gap: 12px; padding: 8px 10px; border: 1px solid transparent; border-radius: 12px; background: transparent; color: inherit; text-align: left; cursor: pointer; transition: background 0.15s, transform 0.12s; }
+.tpm-row:hover { background: var(--tpm-soft); }
+.tpm-row:active { transform: scale(0.985); }
+.tpm-row.is-on { border-color: var(--tpm-accent); background: color-mix(in srgb, var(--tpm-accent) 12%, transparent); }
+.tpm-row img, .tpm-crest { flex: none; width: 28px; height: 28px; object-fit: contain; }
+.tpm-crest { display: grid; place-items: center; border-radius: 50%; background: var(--tpm-soft); font-size: 0.8rem; font-weight: 600; }
+.tpm-name { flex: 1; min-width: 0; display: flex; flex-direction: column; font-size: 0.92rem; }
+.tpm-name small { opacity: 0.6; font-size: 0.75rem; }
+.tpm-check { flex: none; width: 20px; color: var(--tpm-accent); }
+.tpm-empty { padding: 28px 8px; text-align: center; font-size: 0.86rem; opacity: 0.65; }
+.tpm-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 0.84rem; }
+@keyframes tpm-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes tpm-pop { from { opacity: 0; transform: translateY(10px) scale(0.98); } to { opacity: 1; transform: none; } }
+@media (max-width: 640px) {
+    .tpm-backdrop { align-items: end; padding: 0; }
+    .tpm { width: 100%; max-height: 88dvh; border-radius: 18px 18px 0 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .tpm-backdrop, .tpm { animation: none; }
+}

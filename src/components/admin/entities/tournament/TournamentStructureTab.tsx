@@ -1553,16 +1553,23 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                     <NewPhaseWizard
                         tournamentId={id as string}
                         sportId={(data?.sport_id ?? '').toString().toLowerCase()}
+                        seasonId={(data as { current_season_id?: string | null } | undefined)?.current_season_id ?? null}
                         phases={phases}
                         onCancel={() => setShowWizard(false)}
                         onCreated={async (created) => {
                             setShowWizard(false);
                             triggerSectionSavedFlash('structure');
+                            const withTeams = created.teamsAdded > 0
+                                ? ` con ${created.teamsAdded} equipo${created.teamsAdded === 1 ? '' : 's'}`
+                                : '';
+                            const next = created.type === 'playoff'
+                                ? 'Armá el cuadro desde la fase.'
+                                : created.teamsAdded > 0
+                                    ? 'Ahora generá el fixture desde Operación.'
+                                    : 'Ahora cargá los equipos y generá el fixture desde Operación.';
                             setFeedback({
-                                tone: 'ok',
-                                message: created.type === 'playoff'
-                                    ? `Fase «${created.name}» creada. Armá el cuadro desde la fase.`
-                                    : `Fase «${created.name}» creada. Ahora cargá los equipos y generá el fixture desde Operación.`,
+                                tone: created.warning ? 'error' : 'ok',
+                                message: `Fase «${created.name}» creada${withTeams}. ${created.warning ?? next}`,
                             });
                             await loadPhases();
                         }}
