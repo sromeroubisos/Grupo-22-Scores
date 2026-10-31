@@ -111,6 +111,7 @@ import { planTournamentMatches, type ExistenteEnBase } from '@/lib/integrations/
 import { construirPatch, parteDelBarrido, PARTES_DEL_BARRIDO, rotarPorReloj } from '@/lib/integrations/urba/syncPlan';
 import { parsearAnioPedido, PRIMER_ANIO_URBA, temporadaEnCurso } from '@/lib/integrations/urba/temporada';
 import { invalidateMatchesFeedCaches } from '@/lib/server/matchesFeedInvalidation';
+import { syncBracketAdvancement } from '@/lib/server/playoffBracket';
 import { recalculatePhaseStandingsScopes } from '@/lib/server/recalculateStandings';
 import { createAdminClient } from '@/lib/supabase/admin';
 
@@ -321,6 +322,7 @@ export async function GET(request: NextRequest) {
     let tablasRecalculadas = 0;   // fases de posiciones rehechas
     let filasDePosiciones = 0;    // filas escritas en tournament_standings
     let huerfanosBorrados = 0;
+    let llavesAvanzadas = 0;      // casilleros del cuadro de playoff que se llenaron o corrigieron
     let cortadoPorPresupuesto = false;
     /**
      * Partidos que están en la base y URBA ya no lista para ese torneo.
@@ -653,6 +655,11 @@ export async function GET(request: NextRequest) {
             // el torneo entero: recalcular una fase que no se tocó es leer toda
             // su tabla para reescribirla igual.
             const fasesTocadas = new Set<string>();
+            // Las fases donde un partido terminado cambió: el cuadro de playoff las
+            // necesita para empujar al ganador a la llave siguiente. El avance
+            // automático sólo corre cuando el resultado entra por el gestor; este
+            // cron escribe directo contra `matches` y lo salteaba.
+            const fasesConResultado = new Set<string>();
 
             // ── participantes que faltan ────────────────────────────────────
             // Un club que se suma al torneo entra en `tournament_participants` o
@@ -679,15 +686,23 @@ export async function GET(request: NextRequest) {
                 // sin rival ni external_id): se completa, no se duplica.
                 const instancia = fasePlayoff ? instanciaDePlayoff(fila.round_label) : null;
                 if (instancia === 'final' && fasePlayoff) {
+                    // La del cuadro del constructor lleva `M-F`; las que armó una persona
+                    // (Primera A/B/C, Tercera, Segunda) sólo se llaman "Final". En las dos
+                    // el lugar ya existe: sin esto el alta la duplicaba.
                     const { data: previstas } = await supabase.from('matches').select('id')
                         .eq('tournament_id', t.id).eq('phase_id', fasePlayoff)
-                        .eq('bracket_match_code', 'M-F').is('external_id', null).limit(1);
+                        .is('external_id', null)
+                        .or('bracket_match_code.eq.M-F,round_label.ilike.final')
+                        .order('bracket_match_code', { ascending: true, nullsFirst: false })
+                        .limit(1);
                     const prevista = (previstas ?? [])[0] as { id: string } | undefined;
                     if (prevista) {
                         const { error } = await supabase.from('matches')
                             .update({ ...fila, sport_id: 'rugby', is_visible: visibleEnEsteTorneo }).eq('id', prevista.id);
                         if (error) { errors.push(`${fila.external_id}: no se pudo completar la final (${error.message})`); continue; }
                         written++;
+                        fasesConResultado.add(fasePlayoff);
+                        if (fila.status === 'final') fasesTocadas.add(fasePlayoff);
                         continue;
                     }
                 }
@@ -725,7 +740,10 @@ export async function GET(request: NextRequest) {
                 if (patch.seFinaliza) finalizados++;
                 // La fase del partido que se tocó, que puede no ser la del torneo:
                 // un torneo con fase regular y playoff tiene dos tablas.
-                if (actual?.phase_id) fasesTocadas.add(actual.phase_id);
+                if (actual?.phase_id) {
+                    fasesTocadas.add(actual.phase_id);
+                    if (patch.seFinaliza || actual.status === 'final') fasesConResultado.add(actual.phase_id);
+                }
 
                 // El ranking ya no se sincroniza partido por partido: lo levanta
                 // entero el cron del martes a las 00:00. Un barrido de URBA que
@@ -813,6 +831,22 @@ export async function GET(request: NextRequest) {
                     errors.push(`${t.external_id}: el recálculo de posiciones falló (${e instanceof Error ? e.message : String(e)})`);
                 }
             }
+
+            // ── y el cuadro de playoff: el ganador pasa a la llave siguiente ──
+            // Después de la tabla y con los partidos ya escritos. Es un no-op en
+            // las fases sin reglas de avance, así que va para todas.
+            if (!enSeco) {
+                for (const phaseId of fasesConResultado) {
+                    try {
+                        const res = await syncBracketAdvancement(supabase, { phaseId });
+                        if (!res.ok) { errors.push(`${t.external_id}: no se pudo avanzar el cuadro (${res.error ?? res.code})`); continue; }
+                        llavesAvanzadas += res.synced ?? 0;
+                        for (const w of res.warnings ?? []) console.warn(`[urba-sync] ${t.external_id}: ${w}`);
+                    } catch (e) {
+                        errors.push(`${t.external_id}: el avance del cuadro falló (${e instanceof Error ? e.message : String(e)})`);
+                    }
+                }
+            }
         }
 
         if (!enSeco && (written > 0 || updated > 0)) {
@@ -861,6 +895,7 @@ export async function GET(request: NextRequest) {
             // del bug que este contador existe para hacer visible.
             tablasRecalculadas,
             filasDePosiciones,
+            llavesAvanzadas,
             // `true` cuando quedaron torneos sin mirar. No es un error: la próxima
             // corrida los toma. Sí es la señal de que el presupuesto quedó corto
             // si aparece en todas.
