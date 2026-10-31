@@ -28,6 +28,7 @@ import {
 } from '@/lib/utils/playoffStages';
 import { useTournamentDirty } from './TournamentContext';
 import PlayoffBuilderPanel from './PlayoffBuilderPanel';
+import { NewPhaseWizard } from './NewPhaseWizard';
 
 interface Phase {
     id: string;
@@ -184,6 +185,8 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
 
     // Form state
     const [showPhaseForm, setShowPhaseForm] = useState(false);
+    // El asistente por pasos es la puerta de entrada; el formulario largo queda como "avanzado".
+    const [showWizard, setShowWizard] = useState(false);
     const [phaseName, setPhaseName] = useState('');
     const [phaseType, setPhaseType] = useState<'league' | 'knockout' | 'group_stage' | 'playoff'>('league');
     const [teamsCount, setTeamsCount] = useState<number | ''>('');
@@ -1304,8 +1307,33 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                 Ya venia oculta en mobile. Ahora la seccion arranca por el
                 listado, que es donde estan los datos y las acciones. */}
 
+            {showWizard && !showPhaseForm && (
+                <>
+                    <NewPhaseWizard
+                        tournamentId={id as string}
+                        sportId={sportId}
+                        phases={phases}
+                        onCancel={() => setShowWizard(false)}
+                        onCreated={async (created) => {
+                            setShowWizard(false);
+                            triggerSectionSavedFlash('structure');
+                            setFeedback({
+                                tone: 'ok',
+                                message: created.type === 'playoff'
+                                    ? `Fase «${created.name}» creada. Armá el cuadro desde la fase.`
+                                    : `Fase «${created.name}» creada. Ahora cargá los equipos y generá el fixture desde Operación.`,
+                            });
+                            await loadPhases();
+                        }}
+                    />
+                    <button type="button" className="tms-band-action" style={{ marginTop: 8 }} onClick={() => { setShowWizard(false); setShowPhaseForm(true); }}>
+                        Usar el formulario completo
+                    </button>
+                </>
+            )}
+
             {/* ── Phase list ── */}
-            {phases.length > 0 && !showPhaseForm && (
+            {phases.length > 0 && !showPhaseForm && !showWizard && (
                 <section className="tms-section" aria-labelledby="tms-phases-title">
                     {/* Franja de sección + una sola acción principal arriba de la
                         lista (la maqueta aprobada). El botón de alta estaba al pie,
@@ -1320,7 +1348,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                         <button
                             type="button"
                             className="tms-band-action"
-                            onClick={() => { resetForm(); setShowPhaseForm(true); }}
+                            onClick={() => { resetForm(); setShowWizard(true); }}
                             disabled={isApiManaged}
                         >
                             <Plus size={14} aria-hidden="true" />
@@ -1898,7 +1926,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                     </div>
                     <button
                         className="basalt-btn basalt-btn-primary"
-                        onClick={() => { resetForm(); setShowPhaseForm(true); }}
+                        onClick={() => { resetForm(); setShowWizard(true); }}
                     >
                         <Plus size={16} />
                         Configurar primera fase

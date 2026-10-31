@@ -221,9 +221,11 @@ export async function POST(
     if (body.seeding !== undefined) {
       const sourcePhaseId = String(body.seeding?.sourcePhaseId ?? '').trim();
       const format = body.seeding?.format === 'zone_rank' ? 'zone_rank' : 'overall';
+      const perGroupRaw = Math.floor(Number(body.seeding?.perGroup));
+      const perGroup = Number.isFinite(perGroupRaw) && perGroupRaw >= 1 ? perGroupRaw : null;
       const current = readPlayoffSeedingConfig(baseSettings);
       const nextSettings = sourcePhaseId
-        ? { ...baseSettings, playoffSeeding: { sourcePhaseId, format, locked: current?.sourcePhaseId === sourcePhaseId ? current.locked : false } }
+        ? { ...baseSettings, playoffSeeding: { sourcePhaseId, format, perGroup, locked: current?.sourcePhaseId === sourcePhaseId ? current.locked : false } }
         : (() => {
             const s = { ...baseSettings } as Record<string, unknown>;
             delete s.playoffSeeding;
