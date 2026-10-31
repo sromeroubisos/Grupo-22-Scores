@@ -30,6 +30,12 @@ test('sanitizeNext: evita el bucle hacia login aunque venga disfrazado', () => {
     assert.equal(sanitizeNext('/auth/callback'), '/');
 });
 
+test('sanitizeNext: deja volver a la pantalla de nueva contraseña (link de recuperación)', () => {
+    assert.equal(sanitizeNext('/auth/update-password'), '/auth/update-password');
+    assert.equal(sanitizeNext('/auth/update-password/'), '/auth/update-password/');
+    assert.equal(sanitizeNext('/auth/mfa'), '/');
+});
+
 test('toSafeRelativePath: normaliza lo que entiende el parser', () => {
     assert.equal(toSafeRelativePath('/a/../b'), '/b');
     assert.equal(toSafeRelativePath(null), null);

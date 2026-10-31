@@ -35,9 +35,15 @@ export function toSafeRelativePath(raw: string | null | undefined): string | nul
     return path;
 }
 
+// Destinos de /auth/ a los que el callback SÍ tiene que poder volver: el link de
+// recuperación de contraseña termina el intercambio de código en esta pantalla.
+// No hacen bucle: no redirigen a login ni al callback.
+const AUTH_DESTINATIONS = new Set(['/auth/update-password']);
+
 /** true si el path vuelve a una pantalla de auth (bucle de login). */
 function isAuthLoop(path: string): boolean {
     const pathname = path.split(/[?#]/)[0].toLowerCase().replace(/\/+$/, '') || '/';
+    if (AUTH_DESTINATIONS.has(pathname)) return false;
     return pathname === '/login' || pathname === '/register' || pathname.startsWith('/auth/') || pathname === '/auth';
 }
 
