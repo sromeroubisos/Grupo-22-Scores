@@ -2372,6 +2372,17 @@ export function TournamentParticipantsTab({ id: tournamentId, data }: Props) {
                 groups={groups}
                 existingParticipants={participants}
                 loadingClubs={clubsLoading}
+                onClubCreated={(club) => setClubCatalog((prev) => [
+                    {
+                        id: club.id,
+                        name: club.name,
+                        short_name: club.short_name ?? club.slug ?? null,
+                        logo_url: club.logo_url ?? null,
+                        sport: 'rugby',
+                        sport_id: 'rugby',
+                    },
+                    ...prev,
+                ])}
             />
 
             <UpsertParticipantDrawer

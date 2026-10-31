@@ -16,6 +16,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, UserPlus, IdCard, Search, AlertCircle } from 'lucide-react';
+import LogoUploader from '@/components/LogoUploader';
 import { useDialog } from './useDialog';
 import './participants-premium.css';
 import './drawer-premium.css';
@@ -67,7 +68,20 @@ interface AddParticipantDrawerProps {
     groups: TournamentGroup[];
     existingParticipants?: Participant[];
     loadingClubs?: boolean;
+    /** Deporte con el que se da de alta un club rápido. */
+    sport?: string;
+    /** El padre suma el club recién creado al catálogo que alimenta la lista. */
+    onClubCreated?: (club: Club) => void;
 }
+
+const QUICK_CATEGORIES = ['Superior', 'Intermedia', 'Preintermedia', 'M19', 'M17', 'M16', 'M15'];
+
+const QUICK_TYPES = [
+    { value: 'club', label: 'Club' },
+    { value: 'seleccion', label: 'Selección' },
+    { value: 'academia', label: 'Academia' },
+    { value: 'franquicia', label: 'Franquicia' },
+];
 
 export function AddParticipantDrawer({
     isOpen,
@@ -78,6 +92,8 @@ export function AddParticipantDrawer({
     groups,
     existingParticipants = [],
     loadingClubs = false,
+    sport = 'rugby',
+    onClubCreated,
 }: AddParticipantDrawerProps) {
     // Form state
     const [selectedClubIds, setSelectedClubIds] = useState<string[]>([]);
@@ -88,9 +104,94 @@ export function AddParticipantDrawer({
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string>('');
 
+    // Alta rápida de club
+    const [quickOpen, setQuickOpen] = useState(false);
+    const [quickName, setQuickName] = useState('');
+    const [quickShort, setQuickShort] = useState('');
+    const [quickCity, setQuickCity] = useState('');
+    const [quickType, setQuickType] = useState('club');
+    const [quickCategories, setQuickCategories] = useState<string[]>([]);
+    const [quickCustom, setQuickCustom] = useState('');
+    const [quickLogo, setQuickLogo] = useState<string | null>(null);
+    const [quickSaving, setQuickSaving] = useState(false);
+    const [quickError, setQuickError] = useState('');
+
+    const resetQuick = () => {
+        setQuickName('');
+        setQuickShort('');
+        setQuickCity('');
+        setQuickType('club');
+        setQuickCategories([]);
+        setQuickCustom('');
+        setQuickLogo(null);
+        setQuickError('');
+    };
+
+    const toggleQuickCategory = (name: string) => {
+        setQuickCategories((prev) =>
+            prev.includes(name) ? prev.filter((item) => item !== name) : [...prev, name]
+        );
+    };
+
+    const addCustomCategory = () => {
+        const value = quickCustom.trim();
+        if (value.length < 2) return;
+        setQuickCategories((prev) => (prev.includes(value) ? prev : [...prev, value]));
+        setQuickCustom('');
+    };
+
+    const handleQuickCreate = async () => {
+        const name = quickName.trim();
+        if (name.length < 2) {
+            setQuickError('Poné el nombre del club (mínimo 2 letras).');
+            return;
+        }
+        setQuickSaving(true);
+        setQuickError('');
+        try {
+            const response = await fetch('/api/admin/torneo/clubs', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    name,
+                    short_name: quickShort.trim() || null,
+                    city: quickCity.trim() || null,
+                    entity_type: quickType,
+                    sport,
+                    is_visible: true,
+                    logo_url: quickLogo,
+                    divisions: quickCategories.map((category) => ({ name: category, category })),
+                }),
+            });
+            const payload = await response.json().catch(() => null);
+            if (!response.ok || !payload?.data?.id) {
+                throw new Error(payload?.error || 'No se pudo crear el club');
+            }
+            const created = payload.data as Club;
+            onClubCreated?.({
+                id: created.id,
+                name: created.name,
+                short_name: created.short_name ?? null,
+                slug: created.slug ?? null,
+                logo_url: quickLogo ?? created.logo_url ?? null,
+            });
+            setSelectedClubIds((prev) => (prev.includes(created.id) ? prev : [...prev, created.id]));
+            setSearchQuery('');
+            resetQuick();
+            setQuickOpen(false);
+        } catch (err: unknown) {
+            setQuickError(err instanceof Error ? err.message : 'No se pudo crear el club');
+        } finally {
+            setQuickSaving(false);
+        }
+    };
+
     // Reset form when drawer closes
     useEffect(() => {
         if (!isOpen) {
+            setQuickOpen(false);
+            resetQuick();
             setSelectedClubIds([]);
             setSearchQuery('');
             setStatus('active');
@@ -250,6 +351,163 @@ export function AddParticipantDrawer({
                         <div className="pp-drawer-section">
                             <label className="pp-drawer-section-title">Seleccionar Club</label>
 
+                            {/* Alta rápida: el club no está en la lista */}
+                            {!quickOpen ? (
+                                <button
+                                    type="button"
+                                    className="pp-drawer-btn"
+                                    onClick={() => setQuickOpen(true)}
+                                >
+                                    <UserPlus aria-hidden="true" /> ¿No está el club? Crearlo rápido
+                                </button>
+                            ) : (
+                                <div
+                                    className="pp-info-card"
+                                    style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'stretch' }}
+                                    onKeyDown={(event) => {
+                                        if (event.key === 'Enter' && (event.target as HTMLElement).tagName === 'INPUT') {
+                                            event.preventDefault();
+                                            void handleQuickCreate();
+                                        }
+                                    }}
+                                >
+                                    <strong>Crear club rápido</strong>
+
+                                    {quickError && (
+                                        <div className="pp-error-message">
+                                            <AlertCircle />
+                                            {quickError}
+                                        </div>
+                                    )}
+
+                                    <div className="pp-form-field">
+                                        <label className="pp-form-label" htmlFor="quick-club-name">Nombre</label>
+                                        <input
+                                            id="quick-club-name"
+                                            className="pp-form-input"
+                                            value={quickName}
+                                            onChange={(e) => setQuickName(e.target.value)}
+                                            placeholder="Banco Nación"
+                                            autoFocus
+                                        />
+                                    </div>
+
+                                    <div className="pp-form-grid-2">
+                                        <div className="pp-form-field">
+                                            <label className="pp-form-label" htmlFor="quick-club-short">Nombre corto</label>
+                                            <input
+                                                id="quick-club-short"
+                                                className="pp-form-input"
+                                                value={quickShort}
+                                                onChange={(e) => setQuickShort(e.target.value)}
+                                                placeholder="BNA"
+                                                maxLength={12}
+                                            />
+                                        </div>
+                                        <div className="pp-form-field">
+                                            <label className="pp-form-label" htmlFor="quick-club-city">Ciudad</label>
+                                            <input
+                                                id="quick-club-city"
+                                                className="pp-form-input"
+                                                value={quickCity}
+                                                onChange={(e) => setQuickCity(e.target.value)}
+                                                placeholder="Buenos Aires"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="pp-form-field">
+                                        <label className="pp-form-label">Tipo</label>
+                                        <div className="pp-segmented-control" role="radiogroup" aria-label="Tipo de club">
+                                            {QUICK_TYPES.map((type) => (
+                                                <button
+                                                    key={type.value}
+                                                    type="button"
+                                                    role="radio"
+                                                    aria-checked={quickType === type.value}
+                                                    className={`pp-segment-option ${quickType === type.value ? 'selected' : ''}`}
+                                                    onClick={() => setQuickType(type.value)}
+                                                >
+                                                    {type.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="pp-form-field">
+                                        <label className="pp-form-label">Categorías</label>
+                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                                            {Array.from(new Set([...QUICK_CATEGORIES, ...quickCategories])).map((category) => {
+                                                const on = quickCategories.includes(category);
+                                                return (
+                                                    <button
+                                                        key={category}
+                                                        type="button"
+                                                        aria-pressed={on}
+                                                        className={`pp-segment-option ${on ? 'selected' : ''}`}
+                                                        onClick={() => toggleQuickCategory(category)}
+                                                    >
+                                                        {category}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                        <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
+                                            <input
+                                                className="pp-form-input"
+                                                value={quickCustom}
+                                                onChange={(e) => setQuickCustom(e.target.value)}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter') {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        addCustomCategory();
+                                                    }
+                                                }}
+                                                placeholder="Otra categoría (ej. Femenino)"
+                                                aria-label="Otra categoría"
+                                            />
+                                            <button type="button" className="pp-drawer-btn" onClick={addCustomCategory}>
+                                                Agregar
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div className="pp-form-field">
+                                        <label className="pp-form-label">Logotipo</label>
+                                        {quickLogo ? (
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                                <img src={quickLogo} alt="Logotipo del club" style={{ width: 48, height: 48, objectFit: 'contain' }} />
+                                                <button type="button" className="pp-drawer-btn" onClick={() => setQuickLogo(null)}>
+                                                    Quitar
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <LogoUploader onUpload={(url) => setQuickLogo(url)} />
+                                        )}
+                                    </div>
+
+                                    <div className="pp-drawer-actions">
+                                        <button
+                                            type="button"
+                                            className="pp-drawer-btn"
+                                            onClick={() => { resetQuick(); setQuickOpen(false); }}
+                                            disabled={quickSaving}
+                                        >
+                                            Cancelar
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="pp-drawer-btn primary"
+                                            onClick={() => void handleQuickCreate()}
+                                            disabled={quickSaving || quickName.trim().length < 2}
+                                        >
+                                            {quickSaving ? 'Creando...' : 'Crear y seleccionar'}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
                             {/* Search Input */}
                             <div className="pp-club-search">
                                 <Search />
@@ -282,7 +540,7 @@ export function AddParticipantDrawer({
                                         </div>
                                         <p className="pp-club-empty-text">
                                             {clubs.length === 0
-                                                ? 'Crea un club primero antes de agregarlo como participante'
+                                                ? 'Creá un club con "Crearlo rápido" y se agrega como participante'
                                                 : 'Prueba con otro término de búsqueda'}
                                         </p>
                                     </div>
