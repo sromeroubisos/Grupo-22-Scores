@@ -15,6 +15,7 @@ import {
   type ClubDerivativeType,
 } from '@/lib/clubDerivatives';
 import { resolveTournamentAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
+import { isSevensTournament } from '@/lib/utils/rugbyModality';
 import { normalizeSlug } from '@/lib/utils/normalize';
 import { resolveSerializableLogoUrl } from '@/lib/utils/logoUrl';
 import { isMissingColumnError, isMissingTableError } from '@/lib/utils/supabaseSchema';
@@ -603,6 +604,18 @@ async function loadClubFamily(
   };
 }
 
+async function isSevensTournamentId(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  tournamentId: string,
+): Promise<boolean> {
+  const { data } = await supabase
+    .from('tournaments')
+    .select('ruleset')
+    .eq('id', tournamentId)
+    .maybeSingle();
+  return isSevensTournament(data as { ruleset?: Record<string, unknown> | null } | null);
+}
+
 // Legacy local resolver kept for reference while the shared service handles runtime resolution.
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function resolveParticipantClubForTournament(
@@ -1039,7 +1052,9 @@ export async function POST(
     const requestedClubId = String(body.club_id ?? resolvedDivision?.club_id ?? '').trim();
 
     if (requestedClubId) {
-      if (shouldResolveClubVariant) {
+      // En un seven la version 7 del club se resuelve siempre, venga o no el
+      // flag del cliente: agregar "Olivos R.C." inscribe "Olivos R.C. 7s".
+      if (shouldResolveClubVariant || await isSevensTournamentId(supabase, tournamentId)) {
         const { data: tournamentRow, error: tournamentError } = await supabase
           .from('tournaments')
           .select('*')

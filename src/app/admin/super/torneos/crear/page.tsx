@@ -44,6 +44,7 @@ import {
     normalizeTournamentFormat,
     type CircuitChampionMode,
 } from '@/lib/utils/tournamentFormat';
+import { readRugbyModality, type RugbyModality } from '@/lib/utils/rugbyModality';
 import { AUDIENCE_LABELS, resolveTournamentAudience, syncAgeGradeWithAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
 import '../../creation-forms.css';
 
@@ -1255,6 +1256,8 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
         // Solo se guarda cuando el deporte es futbol americano. Arranca en NFL
         // para que el bloque nunca aparezca vacio.
         americanFootball: createAmericanFootballRuleset(DEFAULT_AMERICAN_FOOTBALL_PRESET_ID),
+        // Solo rugby: 15 o 7. En un seven cada club se inscribe con su version 7.
+        rugbyModality: 'fifteens' as RugbyModality,
     });
 
     /* ============== Carga catálogo de clubes ============== */
@@ -1365,6 +1368,7 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                     logoUrl: data.logo_url || '',
                     bannerColor: /^#[0-9a-fA-F]{6}$/.test(data.primary_color || '') ? data.primary_color : '',
                     americanFootball: normalizeAmericanFootballRuleset(data.ruleset?.americanFootball) ?? prev.americanFootball,
+                    rugbyModality: readRugbyModality(data.ruleset) ?? prev.rugbyModality,
                     rules: {
                         ...prev.rules,
                         pointsWin: data.ruleset?.pointsWin ?? defaults.win ?? prev.rules.pointsWin,
@@ -2132,6 +2136,7 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                 ...(formData.sport === 'rugby' ? {
                     pointsBonusTry: formData.rules.pointsBonusTry,
                     pointsBonusLoss: formData.rules.pointsBonusLoss,
+                    rugbyModality: formData.rugbyModality,
                 } : {}),
                 // El reglamento (tackle/flag, cuartos, patadas, plantel) viaja
                 // con el torneo y lo lee el match center. En otro deporte no
@@ -2750,6 +2755,35 @@ Listo para continuar
                                             </p>
                                         )}
                                     </div>
+
+                                    {formData.sport === 'rugby' && (
+                                        <div className="field-group">
+                                            <label id="tg-rugby-modality-label">Modalidad *</label>
+                                            <RadioGroup className="sport-pick-grid" labelledBy="tg-rugby-modality-label">
+                                                {([
+                                                    { id: 'fifteens', label: 'Rugby 15' },
+                                                    { id: 'sevens', label: 'Rugby 7 (Seven)' },
+                                                ] as Array<{ id: RugbyModality; label: string }>).map((option) => (
+                                                    <button
+                                                        key={option.id}
+                                                        type="button"
+                                                        role="radio"
+                                                        aria-checked={formData.rugbyModality === option.id}
+                                                        className={formData.rugbyModality === option.id ? 'selected' : ''}
+                                                        onClick={() => setFormData({ ...formData, rugbyModality: option.id })}
+                                                    >
+                                                        <span className="emo">🏉</span>
+                                                        <span>{option.label}</span>
+                                                    </button>
+                                                ))}
+                                            </RadioGroup>
+                                            {formData.rugbyModality === 'sevens' && (
+                                                <p className="field-help">
+                                                    Cada club entra con su versión 7. Si todavía no existe, se crea y queda vinculada a la familia del club.
+                                                </p>
+                                            )}
+                                        </div>
+                                    )}
 
                                     <div className="grid-2">
                                         <div className="field-group">

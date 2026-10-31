@@ -8,6 +8,12 @@ import { resolveTournamentAdminScope } from '@/lib/auth/tournamentAdminScope';
 import { isMissingColumnError, isMissingTableError } from '@/lib/utils/supabaseSchema';
 import { invalidatePublicTournamentListCaches } from '@/lib/server/externalTournamentCacheInvalidation';
 import { normalizeTournamentFormat } from '@/lib/utils/tournamentFormat';
+import { resolveParticipantClubForTournament } from '@/lib/services/tournamentClubDerivationService';
+import {
+    RUGBY_MODALITY_RULESET_KEY,
+    isSevensTournament,
+    normalizeRugbyModality,
+} from '@/lib/utils/rugbyModality';
 import {
     buildPlayoffStages,
     ensurePlayoffBracketMatches,
@@ -151,8 +157,13 @@ function buildRuleset(body: JsonObject, sport: string) {
     const americanFootball = sport === 'american-football'
         ? normalizeAmericanFootballRuleset(rules.americanFootball)
         : null;
+    // 15 o 7: solo existe para rugby, y es lo que decide la version del club.
+    const rugbyModality = sport === 'rugby'
+        ? normalizeRugbyModality(body.rugby_modality ?? rules[RUGBY_MODALITY_RULESET_KEY])
+        : null;
 
     return {
+        ...(rugbyModality ? { [RUGBY_MODALITY_RULESET_KEY]: rugbyModality } : {}),
         pointsWin,
         pointsDraw,
         pointsLoss,
@@ -945,12 +956,49 @@ export async function POST(request: NextRequest) {
         if (seasonResult.warning) warnings.push(seasonResult.warning);
     }
 
+    // En un seven cada club entra con su version 7: si no existe se crea y se
+    // vincula a la familia, asi la proxima vez ya esta.
+    let resolvedClubIds = participantClubIds;
+    let resolvedDivisions = participantDivisions;
+    if (isSevensTournament({ ruleset })) {
+        const tournamentContext = {
+            id: data.id as string,
+            name,
+            display_name: displayName,
+            category,
+            age_grade: ageGrade,
+            sport_id: sport,
+            union_id: unionId,
+            country,
+            ruleset,
+        };
+        const mappedIds: string[] = [];
+        const mappedDivisions: Record<string, string> = {};
+        for (const clubId of participantClubIds) {
+            let targetId = clubId;
+            try {
+                const resolved = await resolveParticipantClubForTournament(writer, tournamentContext, clubId);
+                targetId = resolved.club.id;
+            } catch (resolveError) {
+                warnings.push(`No se pudo resolver la version 7 de ${clubId}; entro con el club original.`);
+                console.warn('[admin/torneo/tournaments] sevens variant failed:', resolveError);
+            }
+            if (!mappedIds.includes(targetId)) mappedIds.push(targetId);
+            // El plantel elegido es del club original: solo sigue valiendo si no cambio.
+            if (targetId === clubId && participantDivisions[clubId]) {
+                mappedDivisions[targetId] = participantDivisions[clubId];
+            }
+        }
+        resolvedClubIds = mappedIds;
+        resolvedDivisions = mappedDivisions;
+    }
+
     const participantResult = await createParticipants(writer, {
         tournamentId: data.id,
         seasonId,
-        clubIds: participantClubIds,
+        clubIds: resolvedClubIds,
         category,
-        divisionByClub: participantDivisions,
+        divisionByClub: resolvedDivisions,
     });
     warnings.push(...participantResult.warnings);
 
