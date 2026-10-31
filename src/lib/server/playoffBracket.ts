@@ -281,6 +281,7 @@ export async function generatePlayoffBracket(
       sourcePhaseId: seedingCfg.sourcePhaseId,
       seasonId,
       format: seedingCfg.format,
+      perGroup: seedingCfg.perGroup,
     });
   }
   if (seededClubIds.length === 0) {
@@ -531,6 +532,7 @@ export async function reseedPlayoffBracket(
     sourcePhaseId: seedingCfg.sourcePhaseId,
     seasonId: phaseRow.season_id ?? null,
     format: seedingCfg.format,
+    perGroup: seedingCfg.perGroup,
   });
   if (orderedClubIds.length === 0) return { ok: true, reseeded: 0 };
 

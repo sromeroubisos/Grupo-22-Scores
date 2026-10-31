@@ -1,0 +1,71 @@
+/* Asistente de fixture. Colores heredados del gestor; acento propio como respaldo. */
+.fgw { --fgw-accent: var(--accent-primary, #00a365); --fgw-line: color-mix(in srgb, currentColor 14%, transparent); --fgw-soft: color-mix(in srgb, currentColor 6%, transparent); display: flex; flex-direction: column; gap: 16px; padding: 20px; }
+.fgw h4 { margin: 2px 0 0; font-size: 1.25rem; letter-spacing: -0.02em; line-height: 1.1; }
+.fgw h5 { margin: 6px 0 0; font-size: 0.95rem; letter-spacing: -0.005em; }
+.fgw-head { display: flex; flex-wrap: wrap; gap: 12px 24px; justify-content: space-between; align-items: flex-end; }
+
+.fgw-steps { display: flex; gap: 6px; list-style: none; margin: 0; padding: 0; }
+.fgw-steps li { display: flex; align-items: center; gap: 8px; padding: 6px 12px 6px 6px; border-radius: 999px; font-size: 0.82rem; opacity: 0.55; transition: opacity 0.25s, background 0.25s; }
+.fgw-steps li span { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--fgw-soft); font-size: 0.72rem; font-weight: 600; }
+.fgw-steps li.is-current { opacity: 1; background: var(--fgw-soft); }
+.fgw-steps li.is-current span, .fgw-steps li.is-done span { background: var(--fgw-accent); color: #fff; }
+.fgw-steps li.is-done { opacity: 0.85; }
+
+.fgw-summary { padding: 10px 14px; border-radius: 12px; background: var(--fgw-soft); font-size: 0.86rem; backdrop-filter: blur(12px) saturate(160%); }
+.fgw-summary strong { font-variant-numeric: tabular-nums; }
+
+.fgw-body { display: flex; flex-direction: column; gap: 12px; animation: fgw-in 0.38s cubic-bezier(0.2, 0.9, 0.3, 1); }
+@keyframes fgw-in { from { opacity: 0; transform: translateX(14px); } to { opacity: 1; transform: none; } }
+
+.fgw-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; }
+.fgw-card { text-align: left; display: flex; flex-direction: column; gap: 4px; padding: 14px; border-radius: 14px; border: 1px solid var(--fgw-line); background: transparent; color: inherit; cursor: pointer; transition: transform 0.16s cubic-bezier(0.2, 0.9, 0.3, 1), border-color 0.2s, background 0.2s; }
+.fgw-card span { font-size: 0.8rem; opacity: 0.7; line-height: 1.35; }
+.fgw-card:active:not(:disabled) { transform: scale(0.975); }
+.fgw-card.is-on { border-color: var(--fgw-accent); background: color-mix(in srgb, var(--fgw-accent) 12%, transparent); }
+.fgw-card:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.fgw-seg { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 4px; border-radius: 12px; background: var(--fgw-soft); align-self: flex-start; }
+.fgw-seg button, .fgw-days button { border: 0; background: transparent; color: inherit; padding: 8px 14px; border-radius: 9px; font-size: 0.85rem; cursor: pointer; transition: transform 0.14s, background 0.2s; }
+.fgw-seg button:active, .fgw-days button:active { transform: scale(0.96); }
+.fgw-seg button.is-on { background: var(--fgw-accent); color: #fff; font-weight: 600; }
+
+.fgw-days { display: flex; flex-wrap: wrap; gap: 6px; }
+.fgw-days button { min-width: 52px; border: 1px solid var(--fgw-line); }
+.fgw-days button.is-on { background: color-mix(in srgb, var(--fgw-accent) 18%, transparent); border-color: var(--fgw-accent); font-weight: 600; }
+
+.fgw-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.fgw-grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.fgw label { display: flex; flex-direction: column; gap: 6px; font-size: 0.78rem; }
+.fgw label > span { opacity: 0.7; }
+.fgw-hint { margin: 0; font-size: 0.82rem; opacity: 0.7; }
+.fgw-warn { margin: 0; padding: 10px 12px; border-radius: 10px; font-size: 0.84rem; background: color-mix(in srgb, #eab308 16%, transparent); }
+.fgw-zones { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; font-size: 0.82rem; }
+.fgw-zones b { margin-right: 6px; }
+
+.fgw-review-head { display: flex; justify-content: space-between; align-items: center; }
+.fgw-dice { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--fgw-line); background: transparent; color: inherit; padding: 7px 12px; border-radius: 999px; font-size: 0.82rem; cursor: pointer; transition: transform 0.16s; }
+.fgw-dice:active { transform: scale(0.95) rotate(-8deg); }
+.fgw-rounds { display: flex; flex-direction: column; gap: 6px; max-height: 340px; overflow: auto; }
+.fgw-rounds details { border: 1px solid var(--fgw-line); border-radius: 12px; padding: 0 12px; }
+.fgw-rounds summary { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; cursor: pointer; font-size: 0.86rem; }
+.fgw-rounds summary span { opacity: 0.65; }
+.fgw-rounds ul { list-style: none; margin: 0 0 10px; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.fgw-rounds li { display: grid; grid-template-columns: 48px 1fr auto; gap: 10px; font-size: 0.83rem; align-items: baseline; }
+.fgw-rounds li time { font-variant-numeric: tabular-nums; opacity: 0.65; }
+.fgw-rounds li i { opacity: 0.45; font-style: normal; margin: 0 4px; }
+.fgw-rounds li em { font-style: normal; opacity: 0.55; }
+.fgw-bye { grid-template-columns: 1fr !important; opacity: 0.6; }
+
+.fgw-foot { display: flex; justify-content: space-between; gap: 12px; }
+.fgw-foot .basalt-btn { display: inline-flex; align-items: center; gap: 8px; }
+
+@media (max-width: 640px) {
+    .fgw { padding: 16px; }
+    .fgw-grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .fgw-steps li { padding-right: 8px; font-size: 0; gap: 0; }
+    .fgw-steps li.is-current { font-size: 0.82rem; gap: 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .fgw-body { animation: none; }
+    .fgw * { transition: none !important; }
+}

@@ -48,6 +48,7 @@ import { FixtureImportWizard } from './FixtureImportWizard';
 import { useFixture } from './FixtureContext';
 import { useAnimatedDisclosure } from './useAnimatedDisclosure';
 import { Crest } from './Crest';
+import { FixtureGeneratorWizard } from './FixtureGeneratorWizard';
 import './fixture-management.css';
 import './operation-console.css';
 import { readPlayoffBracketMode } from '@/lib/utils/playoffStages';
@@ -156,8 +157,8 @@ const METHOD_OPTIONS: Array<{
 }> = [
   { id: 'manual_match', icon: PlusCircle, title: 'Crear partido manual', description: 'Agregar un partido individual con fecha, hora, jornada, sede y equipos.', tone: 'accent-primary' },
   { id: 'import_fixture', icon: Upload, title: 'Importar fixture', description: 'Cargar partidos desde Excel, CSV, PDF o texto pegado.', tone: 'accent-accent' },
-  { id: 'structure_only', icon: LayoutGrid, title: 'Generar estructura', description: 'Crear jornadas vacias para completar despues.', tone: 'accent-neutral' },
-  { id: 'berger_algorithm', icon: Zap, title: 'Generacion Berger', description: 'Crear automaticamente cruces Round Robin.', tone: 'accent-neutral' },
+  { id: 'structure_only', icon: LayoutGrid, title: 'Fechas vacías', description: 'Crear las fechas y completar los partidos después.', tone: 'accent-neutral' },
+  { id: 'berger_algorithm', icon: Zap, title: 'Generar fixture', description: 'Cruces, fechas y horarios automáticos, por zonas si hay.', tone: 'accent-neutral' },
 ];
 
 // El `label` es el botón del segmento y la `description` la línea que lo
@@ -1859,58 +1860,20 @@ export function TournamentOperationFixtureWorkspace({
               </section>
             ) : null}
 
-            {selectedMethod === 'berger_algorithm' ? (
-              <section className="operation-fixture-panel basalt-card">
-                <div className="operation-fixture-panel-head">
-                  <div>
-                    <span className="operation-fixture-kicker">Generacion automatica</span>
-                    <h4>Cruces Berger</h4>
-                    <p>Selecciona clubes, fecha base y sede por defecto antes de crear el calendario.</p>
-                  </div>
-                </div>
-                <div className="operation-team-picker">
-                  {clubOptions.map((club) => {
-                    const selected = bergerForm.clubIds.includes(club.value);
-                    return (
-                      <label key={club.value} className={`operation-team-chip ${selected ? 'is-selected' : ''}`}>
-                        <input
-                          type="checkbox"
-                          checked={selected}
-                          onChange={() => setBergerForm((current) => ({
-                            ...current,
-                            clubIds: selected ? current.clubIds.filter((id) => id !== club.value) : [...current.clubIds, club.value],
-                          }))}
-                        />
-                        <span>{club.label}</span>
-                      </label>
-                    );
-                  })}
-                </div>
-                <div className="operation-form-grid">
-                  <label className="operation-form-field">
-                    <span>Fecha de inicio</span>
-                    <input className="basalt-input" type="date" value={bergerForm.startDate} onChange={(event) => setBergerForm((current) => ({ ...current, startDate: event.target.value }))} />
-                  </label>
-                  <label className="operation-form-field">
-                    <span>Hora base</span>
-                    <input className="basalt-input" type="time" value={bergerForm.matchTime} onChange={(event) => setBergerForm((current) => ({ ...current, matchTime: event.target.value }))} />
-                  </label>
-                  <label className="operation-form-field operation-form-field-span-2">
-                    <span>Sede por defecto</span>
-                    <input className="basalt-input" type="text" value={bergerForm.venue} onChange={(event) => setBergerForm((current) => ({ ...current, venue: event.target.value }))} placeholder="Sede principal" />
-                  </label>
-                </div>
-                <label className="operation-toggle">
-                  <input type="checkbox" checked={bergerForm.homeAndAway} onChange={(event) => setBergerForm((current) => ({ ...current, homeAndAway: event.target.checked }))} />
-                  <span>Crear ida y vuelta</span>
-                </label>
-                <div className="operation-inline-actions">
-                  <button type="button" className="basalt-btn basalt-btn-primary" disabled={busyAction === 'berger'} onClick={() => void handleGenerateBerger()}>
-                    {busyAction === 'berger' ? <RefreshCw size={15} className="spin" /> : <WandSparkles size={15} />}
-                    Generar cruces
-                  </button>
-                </div>
-              </section>
+            {selectedMethod === 'berger_algorithm' && selectedPhaseId ? (
+              <FixtureGeneratorWizard
+                key={selectedPhaseId}
+                tournamentId={tournament.id}
+                phaseId={selectedPhaseId}
+                phaseName={selectedPhase?.name ?? 'la fase'}
+                participants={fixture?.participants ?? []}
+                groups={availableGroups}
+                onDone={async (message) => {
+                  await refreshFixture();
+                  await afterMutation(message);
+                  setActiveSubtab('manage_fixture');
+                }}
+              />
             ) : null}
 
             {selectedMethod === 'import_fixture' ? (

@@ -239,7 +239,7 @@ export default function PlayoffBuilderPanel({
       }
     | undefined;
   const savedSeeding = settings?.playoffSeeding as
-    | { sourcePhaseId?: string; format?: 'overall' | 'zone_rank'; locked?: boolean }
+    | { sourcePhaseId?: string; format?: 'overall' | 'zone_rank'; locked?: boolean; perGroup?: number | null }
     | undefined;
 
   const [open, setOpenState] = useState(defaultOpen || OPEN_PANELS.has(phaseId));
@@ -284,6 +284,8 @@ export default function PlayoffBuilderPanel({
   const [seedFormat, setSeedFormat] = useState<'overall' | 'zone_rank'>(
     savedSeeding?.format === 'zone_rank' ? 'zone_rank' : 'overall',
   );
+  // Cuántos pasan de cada zona. Vacío = el cuadro toma los N de arriba sin recortar por zona.
+  const [seedPerGroup, setSeedPerGroup] = useState<number | ''>(savedSeeding?.perGroup ?? '');
 
   // ── Custom builder state ──────────────────────────────────────────────
   const [customCups, setCustomCups] = useState<CCup[]>(
@@ -507,7 +509,7 @@ export default function PlayoffBuilderPanel({
           seedMode,
           seeding:
             participants === 'zones'
-              ? { sourcePhaseId: seedSourceId, format: seedFormat }
+              ? { sourcePhaseId: seedSourceId, format: seedFormat, perGroup: seedPerGroup === '' ? null : seedPerGroup }
               : null,
           customSpec: templateId === 'custom' ? buildCustomSpec() : undefined,
           schedule: buildSchedule(),
@@ -885,6 +887,30 @@ export default function PlayoffBuilderPanel({
                       <span className={styles.summaryItem} style={{ color: 'var(--status-active)' }}>
                         Zonas cerradas · cuadro congelado
                       </span>
+                    )}
+                    {seedSourceId && (
+                      <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.85rem' }}>
+                        Clasifican por zona
+                        <input
+                          type="number"
+                          min={1}
+                          className={styles.miniSelect}
+                          style={{ width: 72 }}
+                          value={seedPerGroup}
+                          disabled={busy || seeding?.locked}
+                          placeholder="Todos"
+                          aria-label="Cuántos clasifican de cada zona"
+                          onChange={(e) => setSeedPerGroup(e.target.value === '' ? '' : Math.max(1, Math.floor(Number(e.target.value)) || 1))}
+                        />
+                      </label>
+                    )}
+                    {seedSourceId && (
+                      <p style={{ flexBasis: '100%', margin: 0, fontSize: '0.85rem', opacity: 0.75 }}>
+                        {seedFormat === 'zone_rank'
+                          ? `Clasifican ${teamCount} equipos: primero los 1.º de cada zona, después los 2.º, y así hasta completar. Los cruces enfrentan al mejor 1.º con el peor clasificado.`
+                          : `Clasifican los ${teamCount} mejores de la tabla general de la fase, sin importar de qué zona sean.`}
+                        {' '}Para cambiar cuántos pasan, ajustá la cantidad de equipos del cuadro.
+                      </p>
                     )}
                   </div>
                 )}

@@ -25,6 +25,8 @@ export interface PlayoffSeedingConfig {
   format: PlayoffSeedingFormat;
   /** Zone phase officially closed: stop auto-reseeding, freeze the bracket. */
   locked: boolean;
+  /** Cuántos clasifican de CADA zona. `null` = no se recorta por zona. */
+  perGroup: number | null;
 }
 
 export function readPlayoffSeedingConfig(settings: unknown): PlayoffSeedingConfig | null {
@@ -35,7 +37,9 @@ export function readPlayoffSeedingConfig(settings: unknown): PlayoffSeedingConfi
   const sourcePhaseId = typeof r.sourcePhaseId === 'string' ? r.sourcePhaseId.trim() : '';
   if (!sourcePhaseId) return null;
   const format: PlayoffSeedingFormat = r.format === 'zone_rank' ? 'zone_rank' : 'overall';
-  return { sourcePhaseId, format, locked: Boolean(r.locked) };
+  const perGroupRaw = Math.floor(Number(r.perGroup));
+  const perGroup = Number.isFinite(perGroupRaw) && perGroupRaw >= 1 ? perGroupRaw : null;
+  return { sourcePhaseId, format, locked: Boolean(r.locked), perGroup };
 }
 
 type StandingRow = {
@@ -47,6 +51,27 @@ type StandingRow = {
   conceded: number | null;
   stats: { difference?: number | null } | null;
 };
+
+/** Deja sólo a los primeros N de cada zona, según su posición en la tabla. */
+export function keepTopPerGroup<T extends { group_id: string | null; position: number | null; club_id: string | null }>(
+  rows: T[],
+  perGroup: number | null | undefined,
+): T[] {
+  if (!perGroup || perGroup < 1) return rows;
+  const byGroup = new Map<string, T[]>();
+  for (const r of rows) {
+    const key = r.group_id ?? '__nogroup__';
+    byGroup.set(key, [...(byGroup.get(key) ?? []), r]);
+  }
+  const kept = new Set<T>();
+  for (const list of byGroup.values()) {
+    [...list]
+      .sort((a, b) => Number(a.position ?? 999) - Number(b.position ?? 999) || String(a.club_id).localeCompare(String(b.club_id)))
+      .slice(0, perGroup)
+      .forEach((r) => kept.add(r));
+  }
+  return rows.filter((r) => kept.has(r));
+}
 
 /**
  * Ordered club ids (index 0 = seed #1) from a source phase's standings.
@@ -60,9 +85,11 @@ export async function computeSeedOrderFromStandings(
     sourcePhaseId: string;
     seasonId?: string | null;
     format: PlayoffSeedingFormat;
+    /** Sólo pasan los N mejores de cada zona. */
+    perGroup?: number | null;
   },
 ): Promise<string[]> {
-  const { tournamentId, sourcePhaseId, seasonId, format } = params;
+  const { tournamentId, sourcePhaseId, seasonId, format, perGroup } = params;
 
   let query = supabase
     .from('tournament_standings')
@@ -74,7 +101,8 @@ export async function computeSeedOrderFromStandings(
   const { data: standings, error } = await query;
   if (error || !Array.isArray(standings) || standings.length === 0) return [];
 
-  const rows = (standings as StandingRow[]).filter((r) => r.club_id);
+  let rows = (standings as StandingRow[]).filter((r) => r.club_id);
+  rows = keepTopPerGroup(rows, perGroup);
 
   const diffOf = (r: StandingRow): number =>
     typeof r.stats?.difference === 'number'
