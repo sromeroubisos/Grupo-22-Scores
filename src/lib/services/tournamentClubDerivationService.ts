@@ -7,6 +7,12 @@ import {
 } from '@/lib/clubDerivatives';
 import { resolveTournamentAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
 import { normalizeSlug } from '@/lib/utils/normalize';
+import {
+  SEVENS_CLUB_CATEGORY,
+  SEVENS_CLUB_NAME_SUFFIX,
+  isSevensClub,
+  isSevensTournament,
+} from '@/lib/utils/rugbyModality';
 
 export type TournamentContextRow = {
   id: string;
@@ -17,6 +23,7 @@ export type TournamentContextRow = {
   sport_id?: string | null;
   union_id?: string | null;
   country?: string | null;
+  ruleset?: Record<string, unknown> | null;
 };
 
 export type ClubContextRow = {
@@ -55,6 +62,8 @@ type TournamentClubRequirements = {
   gender: VariantGender | null;
   ageGrade: string | null;
   audience: TournamentAudience;
+  /** Torneo de rugby 7: el participante tiene que ser la version 7 del club. */
+  sevens: boolean;
 };
 
 type ResolveResult = {
@@ -85,7 +94,7 @@ const MALE_PATTERNS = [
   /\bcaballeros?\b/i,
 ];
 
-const VARIANT_CATEGORY_PREFIXES = ['gender:', 'age_grade:', 'audience:', 'variant:', 'sport:'];
+const VARIANT_CATEGORY_PREFIXES = ['gender:', 'age_grade:', 'audience:', 'variant:', 'sport:', 'modality:'];
 
 function normalizeGenderValue(value: string | null | undefined): VariantGender | null {
   const text = String(value ?? '').trim();
@@ -213,6 +222,7 @@ function normalizeClubFamilyStem(name: string | null | undefined): string {
   while (stem && stem !== previous) {
     previous = stem;
     stem = stem
+      .replace(/-(7s|7-s|sevens?)$/i, '')
       .replace(/-(rugby|hockey|field-hockey|basquet|basket|basketball|handball|voley|volley|futbol|football|soccer|futsal|tenis|tennis)$/i, '')
       .replace(/-(femenino|femenina|masculino|masculina|mixto|mixta)$/i, '')
       .replace(/-(juvenil|juveniles|cadete|cadetes|infantil|infantiles|formativas|menores|m\d{1,2}|u\d{1,2}|sub-\d{1,2}|sub\d{1,2})$/i, '')
@@ -316,6 +326,7 @@ function buildTournamentRequirements(tournament: TournamentContextRow): Tourname
     gender,
     ageGrade,
     audience,
+    sevens: isSevensTournament(tournament),
   };
 }
 
@@ -328,6 +339,10 @@ function getCandidateScore(
   const sport = canonicalizeSportId(getClubSportValue(club));
 
   if (requirements.sport && sport !== requirements.sport) return -1;
+  // Un seven se juega con la version 7 del club. (El caso inverso, un torneo
+  // de 15, se filtra en `resolveParticipantClubForTournament`, que sabe cual
+  // fue el club pedido.)
+  if (requirements.sevens && !isSevensClub(club)) return -1;
   if (requirements.gender === 'Femenino' && metadata.gender !== 'Femenino') return -1;
   if (requirements.gender === 'Mixto' && metadata.gender !== 'Mixto') return -1;
   if (requirements.gender === 'Masculino' && metadata.gender && metadata.gender !== 'Masculino') return -1;
@@ -390,6 +405,7 @@ function buildVariantCategories(
   if (requirements.audience) tokens.add(`audience:${requirements.audience}`);
   if (requirements.ageGrade) tokens.add(`age_grade:${normalizeSlug(requirements.ageGrade)}`);
   if (targetSport) tokens.add(`sport:${targetSport}`);
+  if (requirements.sevens) tokens.add(SEVENS_CLUB_CATEGORY);
   if (baseClubId) tokens.add(`base_club:${baseClubId}`);
 
   return tokens.size > 0 ? Array.from(tokens) : null;
@@ -536,6 +552,9 @@ export async function resolveParticipantClubForTournament(
   const { baseClub, candidates } = await loadClubFamily(supabase, clubId);
 
   const bestCandidate = candidates
+    // En un torneo de 15 la version 7 de la familia no es candidata, salvo
+    // que el club pedido sea justamente uno de 7 (p. ej. "Uruguay 7s").
+    .filter((candidate) => requirements.sevens || candidate.club.id === clubId || !isSevensClub(candidate.club))
     .map((candidate) => ({
       ...candidate,
       score: getCandidateScore(candidate.club, candidate.relationType, requirements),
@@ -557,10 +576,13 @@ export async function resolveParticipantClubForTournament(
     ? 'other_sport'
     : requirements.gender === 'Femenino'
       ? 'women'
-      : 'youth';
+      : requirements.sevens && requirements.audience !== 'juveniles'
+        ? 'divisions'
+        : 'youth';
 
   const suffixes = [
     targetSport !== baseSport ? getSportDisplayName(targetSport) : null,
+    requirements.sevens ? SEVENS_CLUB_NAME_SUFFIX : null,
     requirements.gender && requirements.gender !== 'Masculino' ? requirements.gender : null,
     requirements.audience === 'juveniles' ? (requirements.ageGrade || 'Juvenil') : null,
   ].filter((value): value is string => typeof value === 'string' && value.trim().length > 0);
