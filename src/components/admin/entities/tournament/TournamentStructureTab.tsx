@@ -25,6 +25,7 @@ import {
 } from '@/lib/utils/playoffStages';
 import { useTournamentDirty } from './TournamentContext';
 import PlayoffBuilderPanel from './PlayoffBuilderPanel';
+import { NewPhaseWizard } from './NewPhaseWizard';
 
 interface Phase {
     id: string;
@@ -153,6 +154,8 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
 
     // Form state
     const [showPhaseForm, setShowPhaseForm] = useState(false);
+    // El asistente por pasos es la puerta de entrada; el formulario largo queda como "avanzado".
+    const [showWizard, setShowWizard] = useState(false);
     const [phaseName, setPhaseName] = useState('');
     const [phaseType, setPhaseType] = useState<'league' | 'knockout' | 'group_stage' | 'playoff'>('league');
     const [teamsCount, setTeamsCount] = useState<number | ''>('');
@@ -1545,8 +1548,33 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                 Ya venia oculta en mobile. Ahora la seccion arranca por el
                 listado, que es donde estan los datos y las acciones. */}
 
+            {showWizard && !showPhaseForm && (
+                <>
+                    <NewPhaseWizard
+                        tournamentId={id as string}
+                        sportId={(data?.sport_id ?? '').toString().toLowerCase()}
+                        phases={phases}
+                        onCancel={() => setShowWizard(false)}
+                        onCreated={async (created) => {
+                            setShowWizard(false);
+                            triggerSectionSavedFlash('structure');
+                            setFeedback({
+                                tone: 'ok',
+                                message: created.type === 'playoff'
+                                    ? `Fase «${created.name}» creada. Armá el cuadro desde la fase.`
+                                    : `Fase «${created.name}» creada. Ahora cargá los equipos y generá el fixture desde Operación.`,
+                            });
+                            await loadPhases();
+                        }}
+                    />
+                    <button type="button" className="basalt-btn" style={{ marginTop: 8 }} onClick={() => { setShowWizard(false); setShowPhaseForm(true); }}>
+                        Usar el formulario completo
+                    </button>
+                </>
+            )}
+
             {/* ── Phase list ── */}
-            {phases.length > 0 && !showPhaseForm && (
+            {phases.length > 0 && !showPhaseForm && !showWizard && (
                 <div className="basalt-card structure-module structure-phase-list-module p-6">
                     {/* El badge "N FASES" y su gemelo de mobile contaban en la
                         cabecera las fases que estan listadas justo abajo, con
@@ -1845,7 +1873,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                     <div className="structure-module-footer mt-6 pt-6 border-t border-[var(--border-basalt)] flex justify-center">
                         <button
                             className="basalt-btn basalt-btn-primary"
-                            onClick={() => { resetForm(); setShowPhaseForm(true); }}
+                            onClick={() => { resetForm(); setShowWizard(true); }}
                             disabled={isApiManaged}
                         >
                             <Plus size={16} />
@@ -1904,7 +1932,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
             )}
 
             {/* ── Empty state ── */}
-            {phases.length === 0 && !showPhaseForm && (
+            {phases.length === 0 && !showPhaseForm && !showWizard && (
                 <div className="basalt-card basalt-hero structure-empty-panel flex flex-col items-center justify-center text-center py-20 px-8 gap-6">
                     <div className="structure-empty-icon w-16 h-16 rounded-xl bg-[var(--surface-elevated)] border border-[var(--border-basalt)] flex items-center justify-center">
                         <Layers size={28} className="text-dim" />
@@ -1917,7 +1945,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                     </div>
                     <button
                         className="basalt-btn basalt-btn-primary"
-                        onClick={() => { resetForm(); setShowPhaseForm(true); }}
+                        onClick={() => { resetForm(); setShowWizard(true); }}
                     >
                         <Plus size={16} />
                         Configurar primera fase
