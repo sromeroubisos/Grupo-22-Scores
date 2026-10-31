@@ -177,11 +177,17 @@ export async function GET(request: NextRequest) {
 
     const scope = await resolveTournamentAdminScope(supabase, context);
 
-    if (!scope.isUnlimited && scope.clubIds.size === 0) {
+    const { searchParams } = new URL(request.url);
+
+    // El selector de participantes tiene que poder ofrecer cualquier club
+    // público: vincular un rival a un torneo no da acceso para editarlo. Sin
+    // esto un gestor con un solo club solo se veía a sí mismo.
+    const includePublic = searchParams.get('include_public') === '1';
+
+    if (!scope.isUnlimited && scope.clubIds.size === 0 && !includePublic) {
         return NextResponse.json({ data: [] });
     }
 
-    const { searchParams } = new URL(request.url);
     const search = (searchParams.get('search') || '').trim();
     const parsedLimit = Number.parseInt(searchParams.get('limit') || '', 10);
     const limit = Math.min(
@@ -209,7 +215,17 @@ export async function GET(request: NextRequest) {
             .order('id', { ascending: true });
 
         if (!scope.isUnlimited) {
-            query = query.in('id', Array.from(scope.clubIds));
+            const ownedIds = Array.from(scope.clubIds);
+            if (includePublic) {
+                const quoted = ownedIds
+                    .map((id) => `"${String(id).replace(/["\\]/g, '')}"`)
+                    .join(',');
+                query = ownedIds.length > 0
+                    ? query.or(`is_visible.eq.true,id.in.(${quoted})`)
+                    : query.eq('is_visible', true);
+            } else {
+                query = query.in('id', ownedIds);
+            }
         }
 
         if (search) {

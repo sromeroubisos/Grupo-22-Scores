@@ -432,7 +432,7 @@ export function TournamentParticipantsTab({ id: tournamentId, data }: Props) {
             // (unlimited scope). Other admin roles can't use that panel and get
             // 401/403 — fall back to the global catalog so nothing regresses.
             let result = await fetchWholeClubCatalog((offset) => (
-                `/api/admin/torneo/clubs?limit=${CLUB_CATALOG_PAGE_SIZE}&offset=${offset}&divisions=0`
+                `/api/admin/torneo/clubs?limit=${CLUB_CATALOG_PAGE_SIZE}&offset=${offset}&divisions=0&include_public=1`
             ));
             if (result.status === 401 || result.status === 403) {
                 result = await fetchWholeClubCatalog((offset) => (
