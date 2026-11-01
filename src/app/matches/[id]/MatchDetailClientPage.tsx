@@ -502,7 +502,13 @@ function splitDisplayLineupPlayers(
         role: string | null;
         rating: number | null;
         isCaptain: boolean;
-    }>
+    }>,
+    /**
+     * Tope de titulares. En un seven arrancan siete y los otros cinco son
+     * suplentes: con más titulares que el tope, los que sobran pasan a suplentes
+     * (en el orden en que vienen, que es el del dorsal).
+     */
+    maxStarters?: number,
 ) {
     const isStarter = (player: typeof players[number], index: number) => {
         const role = String(player.role || '').trim().toLowerCase();
@@ -511,10 +517,29 @@ function splitDisplayLineupPlayers(
         return Number(player.number) <= 15 || index < 15;
     };
 
+    const starterFlags = players.map((player, index) => isStarter(player, index));
+    if (maxStarters !== undefined) {
+        let seen = 0;
+        starterFlags.forEach((flag, index) => {
+            if (!flag) return;
+            seen += 1;
+            if (seen > maxStarters) starterFlags[index] = false;
+        });
+    }
+
     return {
-        starters: players.filter((player, index) => isStarter(player, index)),
-        finishers: players.filter((player, index) => !isStarter(player, index)),
+        starters: players.filter((_, index) => starterFlags[index]),
+        finishers: players.filter((_, index) => !starterFlags[index]),
     };
+}
+
+/** Un partido de seven: la fuente lo dice (`modality`) o el torneo lo dice en el nombre. */
+const SEVENS_TOURNAMENT_NAME = /(?:^|[\s·\-–])(?:rugby\s*)?7['’]?s?(?=$|[\s·\-–])|\bseven(?:s)?\b/i;
+
+function isSevensMatchData(matchData: { modality?: unknown; tournament?: unknown } | null | undefined): boolean {
+    if (!matchData) return false;
+    if (String(matchData.modality ?? '').toLowerCase() === 'sevens') return true;
+    return SEVENS_TOURNAMENT_NAME.test(String(matchData.tournament ?? ''));
 }
 
 function isGenericLineupRoleLabel(value: string | null | undefined) {
@@ -2162,8 +2187,12 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
             ? localAwayLineup
             : (matchData.lineups?.AWAY_STARTING_LINEUPS || matchData.lineups?.away_team?.starting_lineups || [])
     );
-    const homeLineupGroups = splitDisplayLineupPlayers(displayHomeLineup);
-    const awayLineupGroups = splitDisplayLineupPlayers(displayAwayLineup);
+    // En un seven arrancan siete y los otros cinco son suplentes. Con un plantel
+    // sin titulares marcados no se puede saber cuáles son: no se recorta.
+    const isSevensLineup = isSevensMatchData(matchData) && !isSquadLineup;
+    const sevensStartersCap = isSevensLineup ? 7 : undefined;
+    const homeLineupGroups = splitDisplayLineupPlayers(displayHomeLineup, sevensStartersCap);
+    const awayLineupGroups = splitDisplayLineupPlayers(displayAwayLineup, sevensStartersCap);
     const topMatchLineupRating = getTopLineupRating([...displayHomeLineup, ...displayAwayLineup]);
     const hasAnyLineups = displayHomeLineup.length > 0 || displayAwayLineup.length > 0;
 
@@ -3265,6 +3294,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
 
                                         <LineupPitch
                                             label={lineupSectionLabel}
+                                            sevens={isSevensLineup}
                                             onPlayerClick={(p, team) => openPlayerSheet({
                                                 playerId: p.id,
                                                 name: String(p.name),

@@ -45,6 +45,7 @@ import {
     parseDakarPlayByPlay,
     parseDakarResultList,
     parseDakarSchedule,
+    parseDakarStartList,
     parseDakarTeamStatistics,
     type DakarAthlete,
     type DakarCompetition,
@@ -52,6 +53,7 @@ import {
     type DakarPlayerLine,
     type DakarPool,
     type DakarStandingRow,
+    type DakarStartEntry,
     type DakarUnit,
 } from '@/lib/services/dakarRugbySevensParser';
 
@@ -194,7 +196,7 @@ async function getRosters(key: DakarCompetitionKey): Promise<Map<string, DakarAt
     return byCode;
 }
 
-type MatchPartialKind = 'PlayByPlay' | 'TeamStatistics' | 'ResultList';
+type MatchPartialKind = 'PlayByPlay' | 'TeamStatistics' | 'ResultList' | 'StartList';
 
 /**
  * Un fragmento de la planilla de un partido (cronología, estadísticas por
@@ -567,20 +569,26 @@ export async function getDakarRugbySevensTournamentBundle(key: DakarCompetitionK
 // --------------------------------------------------------------------------
 
 /**
- * El visor publica los doce atletas de cada selección, sin dorsal ni puesto y
- * sin distinguir titulares de suplentes: van todos como plantel, que es lo que
- * son. La edad es la que tenían el día del partido.
+ * Un jugador de la formación. La edad es la que tenía el día del partido. En un
+ * seven arrancan siete (`starter`) y los otros cinco son `substitute`; sin la
+ * lista de salida no se sabe quién arranca y van todos como plantel.
  */
-function toLineupPlayer(athlete: DakarAthlete, line: DakarPlayerLine | undefined, at: Date) {
+function toLineupPlayer(
+    athlete: DakarAthlete,
+    at: Date,
+    extra?: { line?: DakarPlayerLine; entry?: DakarStartEntry },
+) {
+    const { line, entry } = extra ?? {};
     return {
         id: athlete.id,
         name: athlete.name,
-        // El dorsal y lo que hizo salen de la planilla del partido, cuando existe.
-        number: line?.number ?? null,
-        position: '',
-        role: 'starter',
+        // El dorsal, el puesto y el capitán salen de la lista de salida; lo que
+        // hizo, de la planilla del partido.
+        number: entry?.number ?? line?.number ?? null,
+        position: entry?.position ?? '',
+        role: entry && !entry.starter ? 'substitute' : 'starter',
         rating: null,
-        isCaptain: false,
+        isCaptain: entry?.captain ?? false,
         caps: null,
         age: dakarAgeAt(athlete.birthDate, at),
         birthDate: athlete.birthDate,
@@ -590,26 +598,30 @@ function toLineupPlayer(athlete: DakarAthlete, line: DakarPlayerLine | undefined
 }
 
 /**
- * Los jugadores de una selección en este partido: la planilla del partido
- * (con dorsal) manda sobre la lista de atletas del torneo, y los que no
- * figuran en la planilla quedan afuera cuando ya hay planilla. Sin planilla
- * —antes del partido— van los doce atletas inscriptos.
+ * Los jugadores de una selección en este partido, de más a menos confiable:
+ *   1. la lista de salida (titulares, suplentes, dorsal, puesto, capitán);
+ *   2. la planilla del partido (dorsal y lo que hizo, sin titulares);
+ *   3. los doce atletas inscriptos, antes de que haya lista.
+ * Con lista, titulares primero y después suplentes, cada grupo por dorsal.
  */
-function lineupFor(roster: DakarAthlete[], lines: DakarPlayerLine[], at: Date) {
-    if (lines.length === 0) return roster.map((athlete) => toLineupPlayer(athlete, undefined, at));
-
+function lineupFor(roster: DakarAthlete[], entries: DakarStartEntry[], lines: DakarPlayerLine[], at: Date) {
     const byId = new Map(roster.map((athlete) => [athlete.id, athlete] as const));
+    const lineById = new Map(lines.map((line) => [line.id ?? '', line] as const));
+    const athleteOf = (id: string | null, name: string, code: string): DakarAthlete =>
+        byId.get(id ?? '') ?? { id: id ?? '', code, name, gender: '' as const, birthDate: null };
+
+    if (entries.length > 0) {
+        return entries
+            .map((entry) => toLineupPlayer(athleteOf(entry.id, entry.name, entry.code), at, { entry, line: lineById.get(entry.id ?? '') }))
+            .sort((a, b) =>
+                (a.role === b.role ? 0 : a.role === 'starter' ? -1 : 1)
+                || (a.number ?? 99) - (b.number ?? 99));
+    }
+
+    if (lines.length === 0) return roster.map((athlete) => toLineupPlayer(athlete, at));
+
     return lines
-        .map((line) => {
-            const athlete = byId.get(line.id ?? '') ?? {
-                id: line.id ?? '',
-                code: line.code,
-                name: line.name,
-                gender: '' as const,
-                birthDate: null,
-            };
-            return toLineupPlayer(athlete, line, at);
-        })
+        .map((line) => toLineupPlayer(athleteOf(line.id, line.name, line.code), at, { line }))
         .sort((a, b) => (a.number ?? 99) - (b.number ?? 99));
 }
 
@@ -649,19 +661,26 @@ export async function getDakarRugbySevensMatchBundle(matchId: string) {
     // La cronología, las estadísticas y la planilla solo existen con el partido
     // en juego o terminado: antes del pitazo no se le pide nada al visor.
     const played = unit.state === 'live' || unit.state === 'final';
-    const [rostersResult, poolsResult, timelineResult, statsResult, sheetResult] = await Promise.allSettled([
+    const [rostersResult, poolsResult, timelineResult, statsResult, sheetResult, startResult] = await Promise.allSettled([
         getRosters(parsed.key),
         getPools(parsed.key, units),
         played ? getMatchPartial('PlayByPlay', unit, parseDakarPlayByPlay) : Promise.resolve([]),
         played ? getMatchPartial('TeamStatistics', unit, parseDakarTeamStatistics) : Promise.resolve([]),
         played ? getMatchPartial('ResultList', unit, parseDakarResultList) : Promise.resolve([] as DakarPlayerLine[]),
+        // La lista de salida (7 titulares y 5 suplentes) se publica antes del
+        // partido, así que se pide también con el partido por jugar. Un cruce
+        // sin equipos no tiene lista.
+        unit.placeholder ? Promise.resolve([] as DakarStartEntry[]) : getMatchPartial('StartList', unit, parseDakarStartList),
     ]);
     const rosters = rostersResult.status === 'fulfilled' ? rostersResult.value : new Map<string, DakarAthlete[]>();
     const pools = poolsResult.status === 'fulfilled' ? poolsResult.value : [];
     const events = timelineResult.status === 'fulfilled' ? timelineResult.value : [];
     const stats = statsResult.status === 'fulfilled' ? statsResult.value : [];
     const sheet = sheetResult.status === 'fulfilled' ? sheetResult.value : [];
+    const startList = startResult.status === 'fulfilled' ? startResult.value : [];
     const periods = events.length > 0 ? dakarPeriodScores(events) : [];
+    // Con titulares marcados es una formación; sin ellos, un plantel.
+    const hasStarters = startList.some((entry) => entry.starter);
 
     const standings = pools
         // La tabla que importa es la del grupo del partido; si es cruce, van todas.
@@ -671,9 +690,10 @@ export async function getDakarRugbySevensMatchBundle(matchId: string) {
     const kickoff = unit.startsAtIso ? new Date(unit.startsAtIso) : null;
     const at = kickoff ?? new Date();
     const linesOf = (code: string | null) => (code ? sheet.filter((line) => line.code === code) : []);
+    const entriesOf = (code: string | null) => (code ? startList.filter((entry) => entry.code === code) : []);
     const lineups = buildLineups(
-        unit.homeCode ? lineupFor(rosters.get(unit.homeCode) ?? [], linesOf(unit.homeCode), at) : [],
-        unit.awayCode ? lineupFor(rosters.get(unit.awayCode) ?? [], linesOf(unit.awayCode), at) : [],
+        unit.homeCode ? lineupFor(rosters.get(unit.homeCode) ?? [], entriesOf(unit.homeCode), linesOf(unit.homeCode), at) : [],
+        unit.awayCode ? lineupFor(rosters.get(unit.awayCode) ?? [], entriesOf(unit.awayCode), linesOf(unit.awayCode), at) : [],
         unit.homeName,
         unit.awayName,
     );
@@ -729,9 +749,11 @@ export async function getDakarRugbySevensMatchBundle(matchId: string) {
             },
             url: matchUrl(unit),
             lineups,
-            // El visor publica los doce de cada selección con su dorsal, pero no
-            // dice quién arranca: la pantalla los rotula "Plantel", no "Titulares".
-            lineupsKind: 'squad',
+            // Con la lista de salida hay siete titulares y cinco suplentes
+            // ("Titulares"); sin ella son los doce inscriptos ("Plantel").
+            lineupsKind: hasStarters ? undefined : 'squad',
+            // Un seven: la ficha limita los titulares a siete y dibuja la cancha de 7.
+            modality: 'sevens',
             standings,
             h2h: empty,
             events,

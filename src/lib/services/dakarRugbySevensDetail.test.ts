@@ -6,6 +6,8 @@ import {
     parseDakarGroupSummary,
     parseDakarPlayByPlay,
     parseDakarResultList,
+    parseDakarSchedule,
+    parseDakarStartList,
     parseDakarTeamStatistics,
 } from './dakarRugbySevensParser.ts';
 
@@ -161,4 +163,91 @@ test('parseDakarGroupSummary: encabezado de dos filas, el orden oficial manda', 
         [table[1].played, table[1].won, table[1].drawn, table[1].lost, table[1].pointsFor, table[1].pointsAgainst, table[1].diff],
         [2, 1, 0, 1, 41, 29, 12],
     );
+});
+
+// La lista de salida marca con `*` a los siete que arrancan, con `(C)` al capitán
+// y con F / B el puesto. Los dorsales NO dicen quién arranca.
+function startRow(cls: string, bib: string, id: string, name: string, extras: { captain?: boolean; starter?: boolean; position: 'Forward' | 'Back' }): string {
+    const captain = extras.captain ? '&nbsp;<abbr title="Captain"> (C) </abbr>' : '';
+    const starting = extras.starter ? '<span class="starting">*</span>' : '';
+    return `<tr class="${cls}" rowKey="k"> <td class="bibColored"><span><div class="bibColoredJersey"><div class="jersey X"><svg><polygon></polygon></svg><div class="number X"> ${bib} </div></div></div></span></td><td class="noc-column"></td><td class="athleteName athl"><span class="starting-wrapper"><span class="athleteLink-wrapper"><span class="athleteLink"><a class="athleteLink" href="/hide/en/Participant/ParticipantInfo/${id}"><span class="sortValue">${name}</span></a></span></span>${captain}${starting}</span></td><td class="c-hide-compact"><span class="sport-code"><abbr title="${extras.position}"> ${extras.position[0]} </abbr></span></td> </tr>`;
+}
+
+const teamStartRow = (code: string) => `<tr class="False isTeam c-bold" rowKey="RU7MTEAM7---${code}01"> <td class="bibColored"><div class="number"> <span></span> </div></td><td class="noc-column"><a class="noc-element"><span>${code}</span></a></td><td class="athleteName athl"><span class="sortValue">${code}</span></td><td></td> </tr>`;
+
+const START_LIST_HTML = `<table><thead><tr><th>No.</th></tr></thead><tbody>
+${teamStartRow('ARG')}
+${startRow('False detail', '1', ID_A, 'MARTOS RODRIGUEZ Santiago', { captain: true, starter: true, position: 'Forward' })}
+${startRow('False detail', '9', ID_B, 'BENEDIT Ramon', { starter: true, position: 'Back' })}
+${startRow('False detail', '2', ID_C, 'ABBONDATI Santiago', { position: 'Forward' })}
+${teamStartRow('UGA')}
+${startRow('True detail', '1', ID_D, 'MULIIRA Deogracious', { starter: true, position: 'Back' })}
+</tbody></table>`;
+
+test('parseDakarStartList: titulares por la marca, no por el dorsal; capitán y puesto', () => {
+    const entries = parseDakarStartList(START_LIST_HTML);
+    assert.equal(entries.length, 4);
+
+    const [captain, back, substitute, other] = entries;
+    assert.deepEqual(captain, {
+        code: 'ARG', number: 1, id: ID_A, name: 'Santiago Martos Rodriguez',
+        captain: true, starter: true, position: 'Forward',
+    });
+    // El 9 arranca y el 2 no: el dorsal no decide.
+    assert.equal(back.number, 9);
+    assert.equal(back.starter, true);
+    assert.equal(back.position, 'Back');
+    assert.equal(substitute.number, 2);
+    assert.equal(substitute.starter, false);
+    assert.equal(substitute.captain, false);
+    assert.equal(other.code, 'UGA');
+});
+
+test('parseDakarStartList: antes de la lista solo vienen las filas de selección', () => {
+    assert.deepEqual(parseDakarStartList(`<table><tbody>${teamStartRow('ARG')}${teamStartRow('UGA')}</tbody></table>`), []);
+    assert.deepEqual(parseDakarStartList(''), []);
+});
+
+// El contenedor de cada partido no es siempre `scheduleItem`: el que se está
+// jugando lleva `c-live` y los de medalla `medal-match gold|bronze`. Un lector
+// que solo reconoce la clase exacta pierde justo esos partidos.
+function teamBlock(kind: 'Left' | 'Right', code: string, english: string, score: string): string {
+    return `<div class="scoredev${kind}"> <div class="team"> <div class="team-flag"><img src="/skins/flags/svg_flags/${code}.svg" alt="" /></div><div class="team-name"> <span class="sortValue lastName">${english}</span> </div><div class="result-information"><div class="result-value"><div class="score"> <div> ${score} </div> </div></div></div></div></div>`;
+}
+
+function scheduleItem(cls: string, rsc: string, ticks: number, status: string, name: string, left: string, right: string): string {
+    return `<div class="${cls}"> <div class="link-wrapper"> <div class="header-content"> <div class="date-time"> <div class="time"> <span class="time-value" data-time-ticks="${ticks}">x</span> </div> <div class="status-remarks"><div class="status"> <span class="textStatus">${status}</span> </div></div> </div><div class="unit-content"> <div class="unit-name"> <div class="competition-name"> ${name} </div> </div><div class="scoredevInner"> ${left} ${right} </div> </div> </div> </div><div class="additional-information"><div class="venue-location"><div class="venue"> Complexe Iba Mar Diop </div></div><div class="reportInfo" rscCode="${rsc}"> </div></div></div>`;
+}
+
+const emptyTeam = (kind: 'Left' | 'Right', ...labels: string[]) =>
+    `<div class="scoredev${kind}"> <div class="team-name emptyTeam"> ${labels.map((label) => `<span class="sport-code">${label}</span>`).join('')} </div></div>`;
+
+const MIXED_SCHEDULE = `<div class="event-name"> Men </div><div class="SubTitle phase"> Pool A </div>
+${scheduleItem('scheduleItem', 'RU7MTEAM7-------------GPA-000500--', 1793545000000, 'Finished', 'Pool A Match #9', teamBlock('Left', 'CAN', 'Canada', '17'), teamBlock('Right', 'SEN', 'Senegal', '12'))}
+${scheduleItem('scheduleItem c-live', 'RU7MTEAM7-------------GPA-000600--', 1793550000000, 'Running', 'Pool A Match #10', teamBlock('Left', 'RSA', 'South Africa', '34'), teamBlock('Right', 'GER', 'Germany', '7'))}
+<div class="SubTitle phase"> Finals </div>
+${scheduleItem('scheduleItem medal-match bronze', 'RU7MTEAM7-------------FNL-000200--', 1793723760000, 'Scheduled', 'Finals Bronze Medal Match #19', emptyTeam('Left', '', 'Loser #15'), emptyTeam('Right', '', 'Loser #16'))}
+${scheduleItem('scheduleItem medal-match gold', 'RU7MTEAM7-------------FNL-000100--', 1793725380000, 'Scheduled', 'Finals Gold Medal Match #20', emptyTeam('Left', '', 'Winner #15'), emptyTeam('Right', '', 'Winner #16'))}`;
+
+test('parseDakarSchedule: lee el partido en juego y los de medalla, no solo el contenedor exacto', () => {
+    const units = parseDakarSchedule(MIXED_SCHEDULE);
+    assert.equal(units.length, 4);
+
+    const live = units.find((unit) => unit.homeCode === 'RSA');
+    assert.ok(live);
+    assert.equal(live.state, 'live');
+    assert.equal(live.homeScore, 34);
+    assert.equal(live.awayScore, 7);
+    assert.equal(live.homeName, 'Sudáfrica');
+
+    const bronze = units.find((unit) => unit.stageName === 'Tercer puesto');
+    const gold = units.find((unit) => unit.stageName === 'Final');
+    assert.ok(bronze && gold);
+    // La primera etiqueta viene vacía: el rótulo es la segunda.
+    assert.equal(bronze.homeName, 'Perdedor partido 15');
+    assert.equal(bronze.awayName, 'Perdedor partido 16');
+    assert.equal(gold.homeName, 'Ganador partido 15');
+    assert.equal(gold.awayName, 'Ganador partido 16');
+    assert.equal(gold.placeholder, true);
+    assert.equal(gold.pool, null);
 });
