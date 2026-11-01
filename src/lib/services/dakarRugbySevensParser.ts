@@ -346,9 +346,11 @@ type Side = { code: string | null; name: string; score: number | null; placehold
 
 function parseSide(block: string): Side {
     if (/emptyTeam/.test(block)) {
+        // Los cruces de medalla traen dos `sport-code` y el primero va vacío.
+        const labels = Array.from(block.matchAll(/class="sport-code">([\s\S]*?)<\/span>/g)).map((found) => stripTags(found[1])).filter(Boolean);
         return {
             code: null,
-            name: dakarPlaceholderLabel(firstMatch(block, /class="sport-code">([\s\S]*?)<\/span>/)),
+            name: dakarPlaceholderLabel(labels[labels.length - 1] ?? ''),
             score: null,
             placeholder: true,
         };
@@ -365,7 +367,9 @@ function parseSide(block: string): Side {
  * `scheduleItem` que le siguen.
  */
 export function parseDakarSchedule(html: string): DakarUnit[] {
-    const marker = /<div class="event-name">([\s\S]*?)<\/div>|SubTitle phase">([\s\S]*?)<\/div>|<div class="scheduleItem">/g;
+    // El partido en juego lleva `scheduleItem c-live` y los de medalla
+    // `scheduleItem medal-match gold|bronze`: el contenedor no es siempre el mismo.
+    const marker = /<div class="event-name">([\s\S]*?)<\/div>|SubTitle phase">([\s\S]*?)<\/div>|<div class="scheduleItem(?: [^"]*)?">/g;
     const hits: Array<{ index: number; kind: 'gender' | 'phase' | 'item'; text: string }> = [];
     let found: RegExpExecArray | null;
     while ((found = marker.exec(html)) !== null) {
@@ -960,6 +964,61 @@ export function parseDakarResultList(html: string): DakarPlayerLine[] {
     }
 
     return players;
+}
+
+// --------------------------------------------------------------------------
+// Formación (`StartList`)
+// --------------------------------------------------------------------------
+
+export type DakarStartEntry = {
+    code: string;
+    number: number | null;
+    id: string | null;
+    name: string;
+    captain: boolean;
+    /** Marcado con `*` en la lista: uno de los siete que arrancan. */
+    starter: boolean;
+    /** `Forward` o `Back`, como lo rotula el visor (F / B). */
+    position: 'Forward' | 'Back' | '';
+};
+
+/**
+ * La formación de un partido: dorsal, capitán (`(C)`), titular (`*`) y puesto
+ * (F / B). En un seven arrancan siete y los otros cinco son suplentes; los
+ * dorsales NO dicen cuáles (Argentina arrancó con 1, 3, 4, 6, 8, 9 y 10), por
+ * eso se lee la marca y no se infiere. Antes de que los equipos presenten la
+ * lista solo vienen las filas de selección: devuelve vacío.
+ */
+export function parseDakarStartList(html: string): DakarStartEntry[] {
+    const flat = html.replace(/<svg[\s\S]*?<\/svg>/g, '').replace(/\s+/g, ' ');
+    const entries: DakarStartEntry[] = [];
+    let current = '';
+
+    for (const row of flat.match(/<tr[^>]*rowKey[\s\S]*?<\/tr>/g) || []) {
+        if (/class="[^"]*\bisTeam\b/.test(row)) {
+            current = /<span>([A-Z]{3})<\/span>/.exec(row)?.[1] ?? '';
+            continue;
+        }
+        if (!current) continue;
+
+        const link = /ParticipantInfo\/([0-9a-f-]{36})[^>]*>\s*<span class="sortValue">([\s\S]*?)<\/span>/i.exec(row);
+        if (!link) continue;
+
+        const number = toInt(firstMatch(row, /class="number[^"]*">([\s\S]*?)<\/div>/));
+        const position = /title="Forward"/.test(row) ? 'Forward' : /title="Back"/.test(row) ? 'Back' : '';
+
+        entries.push({
+            code: current,
+            number,
+            id: link[1].toLowerCase(),
+            name: dakarAthleteName(decodeHtml(link[2])),
+            captain: /title="Captain"/.test(row),
+            starter: /class="starting">\s*\*/.test(row),
+            position,
+        });
+    }
+
+    return entries;
 }
 
 // --------------------------------------------------------------------------

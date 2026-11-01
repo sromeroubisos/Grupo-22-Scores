@@ -14,6 +14,8 @@ export type PitchPlayer = {
     name?: string | null;
     number?: number | string | null;
     isCaptain?: boolean | null;
+    /** `Forward` / `Back` (o F / B): con eso se arma la cancha de seven. */
+    position?: string | null;
 };
 
 type Side = { name: string; color: string; players: PitchPlayer[] };
@@ -31,6 +33,38 @@ const SLOT: Record<number, [number, number]> = {
     10: [0.42, 0.45], 12: [0.34, 0.31], 13: [0.26, 0.19],
     11: [0.15, 0.07], 14: [0.15, 0.93], 15: [0.07, 0.5],
 };
+
+// El seven: tres forwards en línea al frente (la melé) y cuatro backs en
+// diagonal hacia la punta, del medio scrum al wing. Mismas coordenadas que SLOT
+// (x=1 es el medio de la cancha), más abiertas que un XV porque son la mitad.
+const SEVENS_FORWARDS: Array<[number, number]> = [[0.84, 0.32], [0.84, 0.5], [0.84, 0.68]];
+const SEVENS_BACKS: Array<[number, number]> = [[0.64, 0.5], [0.5, 0.38], [0.37, 0.27], [0.24, 0.16]];
+
+const isForwardPosition = (position: unknown) => /^(f|fw|fwd|forward|delantero)/i.test(String(position ?? '').trim());
+const isBackPosition = (position: unknown) => /^(b|bk|back|tres cuartos)/i.test(String(position ?? '').trim());
+
+/**
+ * Dónde va cada uno de los siete. Los forwards (por puesto F; sin puesto, los
+ * tres primeros dorsales) van a la melé y los backs, por dorsal, a la línea.
+ * Un forward de más pasa a la línea de backs; nunca se pisan dos jugadores.
+ */
+export function sevensSlots<T extends PitchPlayer & { n: number }>(players: T[]): Map<T, [number, number]> {
+    const sorted = [...players].sort((a, b) => a.n - b.n).slice(0, 7);
+    const hasPositions = sorted.some((p) => isForwardPosition(p.position) || isBackPosition(p.position));
+
+    const forwards = hasPositions
+        ? sorted.filter((p) => isForwardPosition(p.position))
+        : sorted.slice(0, 3);
+    const rest = sorted.filter((p) => !forwards.includes(p));
+
+    const front = forwards.slice(0, SEVENS_FORWARDS.length);
+    const behind = [...forwards.slice(SEVENS_FORWARDS.length), ...rest].sort((a, b) => a.n - b.n).slice(0, SEVENS_BACKS.length);
+
+    const slots = new Map<T, [number, number]>();
+    front.forEach((p, i) => slots.set(p, SEVENS_FORWARDS[i]));
+    behind.forEach((p, i) => slots.set(p, SEVENS_BACKS[i]));
+    return slots;
+}
 
 function shortName(full: string) {
     const parts = full.trim().split(/\s+/);
@@ -54,12 +88,16 @@ export function placeablePlayers(players: PitchPlayer[]) {
     return out;
 }
 
-function Team({ side, mirror, onPick }: { side: Side; mirror: boolean; onPick?: PlayerPick }) {
+function Team({ side, mirror, sevens, onPick }: { side: Side; mirror: boolean; sevens: boolean; onPick?: PlayerPick }) {
     const placed = placeablePlayers(side.players);
+    const sevensLayout = sevens ? sevensSlots(placed) : null;
     return (
         <>
             {placed.map((p) => {
-                const [sx, sy] = SLOT[p.n];
+                // En un seven solo se dibujan los siete del reparto: el resto es suplente.
+                const slot = sevensLayout ? sevensLayout.get(p) : SLOT[p.n];
+                if (!slot) return null;
+                const [sx, sy] = slot;
                 const x = (mirror ? 1 - sx / 2 : sx / 2) * 100;
                 const y = (mirror ? 1 - sy : sy) * 100;
                 return (
@@ -84,7 +122,7 @@ function Team({ side, mirror, onPick }: { side: Side; mirror: boolean; onPick?: 
     );
 }
 
-export default function LineupPitch({ home, away, label, subtitle, mobile = false, onPlayerClick }: { home: Side; away: Side; label: string; subtitle?: string; mobile?: boolean; onPlayerClick?: PlayerPick }) {
+export default function LineupPitch({ home, away, label, subtitle, mobile = false, sevens = false, onPlayerClick }: { home: Side; away: Side; label: string; subtitle?: string; mobile?: boolean; /** Un seven: siete por lado, armados por puesto (F / B). */ sevens?: boolean; onPlayerClick?: PlayerPick }) {
     const total = placeablePlayers(home.players).length + placeablePlayers(away.players).length;
     if (total < 8) return null;
     return (
@@ -104,8 +142,8 @@ export default function LineupPitch({ home, away, label, subtitle, mobile = fals
                 <div className={styles.lines} aria-hidden="true">
                     <span style={{ left: '10%' }} /><span style={{ left: '38%' }} /><span style={{ left: '50%' }} className={styles.half} /><span style={{ left: '62%' }} /><span style={{ left: '90%' }} />
                 </div>
-                <Team side={home} mirror={false} onPick={onPlayerClick} />
-                <Team side={away} mirror onPick={onPlayerClick} />
+                <Team side={home} mirror={false} sevens={sevens} onPick={onPlayerClick} />
+                <Team side={away} mirror sevens={sevens} onPick={onPlayerClick} />
             </div>
             <div className={styles.mobileList}>
                 {[home, away].map((side, i) => (
