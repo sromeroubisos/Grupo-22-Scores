@@ -429,7 +429,47 @@ export function parseDakarSchedule(html: string): DakarUnit[] {
         });
     });
 
+    relabelWinnersAndLosers(units);
+
     return units.sort((a, b) => (a.startsAtIso || '').localeCompare(b.startsAtIso || '') || a.rsc.localeCompare(b.rsc));
+}
+
+/**
+ * El visor llama a los cruces por su número de partido del torneo ("Ganador
+ * partido 15"), un número que la gente no ve en ningún lado. Se traduce a lo que
+ * sí se ve en la llave: "Ganador semifinal 1", "Perdedor cruce 2". Un número que
+ * no corresponde a una semifinal ni a un cruce por puestos queda como vino.
+ */
+function relabelWinnersAndLosers(units: DakarUnit[]): void {
+    const labelOf = new Map<string, string>();
+    const stages: Array<{ stageName: string; noun: string }> = [
+        { stageName: 'Semifinal', noun: 'semifinal' },
+        { stageName: 'Puestos 5-8', noun: 'cruce' },
+    ];
+
+    for (const key of DAKAR_COMPETITION_KEYS) {
+        for (const { stageName, noun } of stages) {
+            units
+                .filter((unit) => unit.key === key && unit.stageName === stageName)
+                .sort((a, b) => a.unitCode.localeCompare(b.unitCode))
+                .forEach((unit, index) => {
+                    const number = /#(\d+)/.exec(unit.unitName)?.[1];
+                    if (number) labelOf.set(`${key}:${number}`, `${noun} ${index + 1}`);
+                });
+        }
+    }
+
+    const rewrite = (name: string, key: DakarCompetitionKey): string => {
+        const found = /^(Ganador|Perdedor) partido (\d+)$/.exec(name);
+        const label = found ? labelOf.get(`${key}:${found[2]}`) : undefined;
+        return found && label ? `${found[1]} ${label}` : name;
+    };
+
+    for (const unit of units) {
+        if (!unit.placeholder) continue;
+        unit.homeName = rewrite(unit.homeName, unit.key);
+        unit.awayName = rewrite(unit.awayName, unit.key);
+    }
 }
 
 // --------------------------------------------------------------------------
@@ -1019,6 +1059,103 @@ export function parseDakarStartList(html: string): DakarStartEntry[] {
     }
 
     return entries;
+}
+
+// --------------------------------------------------------------------------
+// Llaves de playoff
+// --------------------------------------------------------------------------
+
+type BracketTeam = { id: string; name: string; logo: string };
+
+export type DakarBracketMatch = {
+    match_id: string;
+    home_team: BracketTeam;
+    away_team: BracketTeam;
+    score_home: number | null;
+    score_away: number | null;
+    winner_id: string | null;
+    match_start_iso: string | null;
+    status: 'finished' | 'live' | 'scheduled';
+    bracket_slot: number;
+    round_index: number;
+};
+
+export type DakarBracketRound = { round_id: string; name: string; matches: DakarBracketMatch[] };
+
+export type DakarBracket = { stageId: string; name: string; active: boolean; rounds: DakarBracketRound[] };
+
+/**
+ * Las llaves de una rama, armadas del propio fixture del visor. Hay dos cuadros:
+ *
+ *   Medallas          Semifinales -> Final, y el Tercer puesto aparte.
+ *   Puestos 5.º a 8.º Cruces -> Final por el 5.º puesto y por el 7.º.
+ *
+ * Los cruces todavía sin equipo se leen "1.º Grupo A" / "Ganador partido 15" y
+ * se completan solos cuando el visor publica a los clasificados: el nombre sale
+ * siempre del fixture, no se inventa acá. Los nombres de las rondas son los que
+ * reconoce `PlayoffBracket` (la final, el tercer puesto y las finales de
+ * ubicación van aparte y sin campeón).
+ */
+export function buildDakarBrackets(
+    units: readonly DakarUnit[],
+    key: DakarCompetitionKey,
+    logoOf: (code: string | null, name: string) => string,
+): DakarBracket[] {
+    const knockout = units.filter((unit) => unit.key === key && !unit.pool);
+    const stage = (stageName: string) => knockout
+        .filter((unit) => unit.stageName === stageName)
+        .sort((a, b) => a.unitCode.localeCompare(b.unitCode));
+
+    const team = (code: string | null, name: string): BracketTeam => ({
+        id: dakarTeamId(code, name),
+        name,
+        logo: logoOf(code, name),
+    });
+
+    const toMatch = (unit: DakarUnit, roundIndex: number, slot: number): DakarBracketMatch => {
+        const decided = unit.state === 'final' && unit.homeScore !== null && unit.awayScore !== null && unit.homeScore !== unit.awayScore;
+        const home = team(unit.homeCode, unit.homeName);
+        const away = team(unit.awayCode, unit.awayName);
+        return {
+            match_id: dakarMatchIdOf(unit),
+            home_team: home,
+            away_team: away,
+            score_home: unit.state === 'scheduled' ? null : unit.homeScore,
+            score_away: unit.state === 'scheduled' ? null : unit.awayScore,
+            winner_id: decided ? ((unit.homeScore as number) > (unit.awayScore as number) ? home.id : away.id) : null,
+            match_start_iso: unit.startsAtIso,
+            status: unit.state === 'final' ? 'finished' : unit.state === 'live' ? 'live' : 'scheduled',
+            bracket_slot: slot,
+            round_index: roundIndex,
+        };
+    };
+
+    const tournamentId = DAKAR_COMPETITIONS[key].tournamentId;
+    const makeRounds = (definitions: Array<{ id: string; name: string; units: DakarUnit[] }>): DakarBracketRound[] =>
+        definitions
+            .filter((definition) => definition.units.length > 0)
+            .map((definition, roundIndex) => ({
+                round_id: `${tournamentId}-${definition.id}`,
+                name: definition.name,
+                matches: definition.units.map((unit, slot) => toMatch(unit, roundIndex + 1, slot + 1)),
+            }));
+
+    const medals = makeRounds([
+        { id: 'semis', name: 'Semifinales', units: stage('Semifinal') },
+        { id: 'final', name: 'Final', units: stage('Final') },
+        { id: 'tercer', name: 'Tercer puesto', units: stage('Tercer puesto') },
+    ]);
+    const placing = makeRounds([
+        { id: 'cruces-5-8', name: 'Cruces 5.º a 8.º', units: stage('Puestos 5-8') },
+        { id: 'quinto', name: 'Final por el 5.º puesto', units: stage('5° puesto') },
+        { id: 'septimo', name: 'Final por el 7.º puesto', units: stage('7° puesto') },
+    ]);
+
+    const brackets: DakarBracket[] = [
+        { stageId: `${tournamentId}-medallas`, name: 'Medallas', active: true, rounds: medals },
+        { stageId: `${tournamentId}-puestos`, name: 'Puestos 5.º a 8.º', active: false, rounds: placing },
+    ];
+    return brackets.filter((bracket) => bracket.rounds.length > 0);
 }
 
 // --------------------------------------------------------------------------

@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import {
+    buildDakarBrackets,
     dakarPeriodScores,
     parseDakarGroupSummary,
     parseDakarPlayByPlay,
@@ -250,4 +251,77 @@ test('parseDakarSchedule: lee el partido en juego y los de medalla, no solo el c
     assert.equal(gold.awayName, 'Ganador partido 16');
     assert.equal(gold.placeholder, true);
     assert.equal(gold.pool, null);
+});
+
+// Un torneo en fase final: una semifinal ya con un equipo, otra sin definir, el
+// cruce por el 5.º y las dos finales, que el visor nombra por número de partido.
+const KNOCKOUT_SCHEDULE = `<div class="event-name"> Men </div><div class="SubTitle phase"> Pool A </div>
+${scheduleItem('scheduleItem', 'RU7MTEAM7-------------GPA-000100--', 1793525000000, 'Finished', 'Pool A Match #1', teamBlock('Left', 'RSA', 'South Africa', '40'), teamBlock('Right', 'SEN', 'Senegal', '5'))}
+<div class="SubTitle phase"> Placing 5-8 </div>
+${scheduleItem('scheduleItem', 'RU7MTEAM7-------------SF5-000100--', 1793711280000, 'Scheduled', 'Placing 5-8 Match #13', teamBlock('Left', 'GER', 'Germany', ''), emptyTeam('Right', '4th in Pool B'))}
+<div class="SubTitle phase"> Semi-finals </div>
+${scheduleItem('scheduleItem', 'RU7MTEAM7-------------SFNL000100--', 1793713320000, 'Scheduled', 'Semi-finals Match #15', teamBlock('Left', 'RSA', 'South Africa', ''), emptyTeam('Right', '2nd in Pool B'))}
+${scheduleItem('scheduleItem', 'RU7MTEAM7-------------SFNL000200--', 1793714040000, 'Finished', 'Semi-finals Match #16', teamBlock('Left', 'FRA', 'France', '21'), teamBlock('Right', 'CAN', 'Canada', '12'))}
+<div class="SubTitle phase"> Finals </div>
+${scheduleItem('scheduleItem medal-match bronze', 'RU7MTEAM7-------------FNL-000200--', 1793723760000, 'Scheduled', 'Finals Bronze Medal Match #19', emptyTeam('Left', '', 'Loser #15'), emptyTeam('Right', '', 'Loser #16'))}
+${scheduleItem('scheduleItem medal-match gold', 'RU7MTEAM7-------------FNL-000100--', 1793725380000, 'Scheduled', 'Finals Gold Medal Match #20', emptyTeam('Left', '', 'Winner #15'), emptyTeam('Right', '', 'Winner #16'))}
+${scheduleItem('scheduleItem', 'RU7MTEAM7-------------FNL-000300--', 1793722000000, 'Scheduled', 'Finals Placing 5-6', emptyTeam('Left', '', 'Winner #13'), emptyTeam('Right', '', 'Winner #14'))}`;
+
+test('parseDakarSchedule: "Ganador partido 15" se lee como la semifinal que es', () => {
+    const units = parseDakarSchedule(KNOCKOUT_SCHEDULE);
+    const gold = units.find((unit) => unit.stageName === 'Final');
+    const bronze = units.find((unit) => unit.stageName === 'Tercer puesto');
+    const fifth = units.find((unit) => unit.stageName === '5° puesto');
+    assert.ok(gold && bronze && fifth);
+    // El 15 es la primera semifinal y el 16 la segunda; el 13 es el único cruce por puestos.
+    assert.deepEqual([gold.homeName, gold.awayName], ['Ganador semifinal 1', 'Ganador semifinal 2']);
+    assert.deepEqual([bronze.homeName, bronze.awayName], ['Perdedor semifinal 1', 'Perdedor semifinal 2']);
+    // El 14 no existe en este fixture: un número sin cruce queda como vino.
+    assert.deepEqual([fifth.homeName, fifth.awayName], ['Ganador cruce 1', 'Ganador partido 14']);
+});
+
+test('buildDakarBrackets: Medallas y Puestos 5.º a 8.º, desde el fixture', () => {
+    const units = parseDakarSchedule(KNOCKOUT_SCHEDULE);
+    const brackets = buildDakarBrackets(units, 'm', (code) => (code ? `logo-${code}` : ''));
+
+    assert.deepEqual(brackets.map((bracket) => [bracket.name, bracket.active]), [
+        ['Medallas', true],
+        ['Puestos 5.º a 8.º', false],
+    ]);
+    assert.deepEqual(brackets[0].rounds.map((round) => [round.name, round.matches.length]), [
+        ['Semifinales', 2],
+        ['Final', 1],
+        ['Tercer puesto', 1],
+    ]);
+    assert.deepEqual(brackets[1].rounds.map((round) => round.name), [
+        'Cruces 5.º a 8.º',
+        'Final por el 5.º puesto',
+    ]);
+
+    const [semiOne, semiTwo] = brackets[0].rounds[0].matches;
+    // Un lado ya está definido (con bandera) y el otro todavía es "2.º Grupo B".
+    assert.equal(semiOne.home_team.name, 'Sudáfrica');
+    assert.equal(semiOne.home_team.logo, 'logo-RSA');
+    assert.equal(semiOne.away_team.name, '2.º Grupo B');
+    assert.equal(semiOne.away_team.logo, '');
+    assert.equal(semiOne.status, 'scheduled');
+    assert.equal(semiOne.score_home, null);
+    assert.equal(semiOne.winner_id, null);
+
+    // Una semifinal jugada trae marcador y ganador.
+    assert.equal(semiTwo.status, 'finished');
+    assert.deepEqual([semiTwo.score_home, semiTwo.score_away], [21, 12]);
+    assert.equal(semiTwo.winner_id, semiTwo.home_team.id);
+
+    // Cada partido conserva el id con el que se abre su ficha.
+    assert.deepEqual(brackets[0].rounds[1].matches.map((match) => match.match_id), ['dakar-match-m-FNL_-000100']);
+});
+
+test('buildDakarBrackets: sin fase final no hay cuadros, y no mezcla las ramas', () => {
+    const poolsOnly = parseDakarSchedule(`<div class="event-name"> Men </div><div class="SubTitle phase"> Pool A </div>
+${scheduleItem('scheduleItem', 'RU7MTEAM7-------------GPA-000100--', 1793525000000, 'Scheduled', 'Pool A Match #1', teamBlock('Left', 'RSA', 'South Africa', ''), teamBlock('Right', 'SEN', 'Senegal', ''))}`);
+    assert.deepEqual(buildDakarBrackets(poolsOnly, 'm', () => ''), []);
+
+    // El fixture masculino no arma cuadros de la rama femenina.
+    assert.deepEqual(buildDakarBrackets(parseDakarSchedule(KNOCKOUT_SCHEDULE), 'w', () => ''), []);
 });
