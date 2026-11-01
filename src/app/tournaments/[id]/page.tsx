@@ -10,7 +10,7 @@ import TournamentDetailPage from './TournamentDetailClient';
 
 const EXTERNAL_PREFIXES = [
     'fs-', 'ras-league-', 'espn-league-', 'espn-soccer-league-', 'espn-racing-league-',
-    'fih-wc-', 'fisu-', 'odesur-', 'wr-',
+    'fih-wc-', 'fisu-', 'odesur-', 'wr-', 'dakar-',
 ];
 
 function isExternalTournamentId(id: string): boolean {

@@ -51,6 +51,10 @@ import {
   parseFisuMatchId,
 } from '@/lib/services/fisuRugbySevens';
 import {
+  getDakarRugbySevensMatchBundle,
+  parseDakarMatchId,
+} from '@/lib/services/dakarRugbySevens';
+import {
   getUltimateSevensMatchBundle,
   parseUs7MatchId,
 } from '@/lib/services/ultimateSevens';
@@ -391,6 +395,19 @@ export async function GET(
     // (Bornan). El id dice disciplina, rama, fase y partido.
     if (parseOdesurMatchId(matchId)) {
       const bundle = await getOdesurMatchBundle(matchId);
+      if (!bundle) {
+        return jsonNoStore(
+          { error: 'Match not found' },
+          { status: 404 }
+        );
+      }
+
+      return jsonNoStore({ ...bundle, videos: await videosPromise });
+    }
+
+    // Juegos Olímpicos de la Juventud Dakar 2026: seven masculino y femenino.
+    if (parseDakarMatchId(matchId)) {
+      const bundle = await getDakarRugbySevensMatchBundle(matchId);
       if (!bundle) {
         return jsonNoStore(
           { error: 'Match not found' },

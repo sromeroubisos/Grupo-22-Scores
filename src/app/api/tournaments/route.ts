@@ -54,6 +54,10 @@ import {
     parseFisuTournamentId,
 } from '@/lib/services/fisuRugbySevens';
 import {
+    getDakarRugbySevensTournamentBundle,
+    parseDakarTournamentId,
+} from '@/lib/services/dakarRugbySevens';
+import {
     getUltimateSevensTournamentBundle,
     parseUs7TournamentId,
 } from '@/lib/services/ultimateSevens';
@@ -862,6 +866,7 @@ async function findDbTournamentMeta(id: string) {
         isEspnMotorsportTournamentId(id) ||
         parseFihTournamentId(id) !== null ||
         parseFisuTournamentId(id) !== null ||
+        parseDakarTournamentId(id) !== null ||
         parseUs7TournamentId(id) !== null ||
         wrEventByTournamentId(id) !== null
     ) {
@@ -1231,6 +1236,7 @@ export async function GET(request: Request) {
 
     const fihCompetition = parseFihTournamentId(id) || parseFihTournamentId(dbTournamentMeta?.external_id);
     const fisuCompetition = parseFisuTournamentId(id) || parseFisuTournamentId(dbTournamentMeta?.external_id);
+    const dakarCompetition = parseDakarTournamentId(id) || parseDakarTournamentId(dbTournamentMeta?.external_id);
     const us7Competition = parseUs7TournamentId(id) || parseUs7TournamentId(dbTournamentMeta?.external_id);
     const worldRugbyEvent = wrEventByTournamentId(id) || wrEventByTournamentId(dbTournamentMeta?.external_id);
     const odesurCompetition = parseOdesurTournamentId(id) || parseOdesurTournamentId(dbTournamentMeta?.external_id);
@@ -1303,6 +1309,48 @@ export async function GET(request: Request) {
                     query: { id, url, sport, requestedSeason },
                     resolvedIds: bundle.ids,
                     provider: 'odesur',
+                    counts: {
+                        results: bundle.results.length,
+                        fixtures: bundle.fixtures.length,
+                        standings: bundle.standings.length,
+                    },
+                },
+                _cache: {
+                    entityId: bundle.ids.tournamentId,
+                    tabSources: {
+                        details: 'api',
+                        results: 'api',
+                        fixtures: 'api',
+                        standings: 'api',
+                    },
+                },
+                ids: bundle.ids,
+                details: bundle.details,
+                results: bundle.results,
+                fixtures: bundle.fixtures,
+                standings: bundle.standings,
+                standingsForm: bundle.standingsForm,
+                standingsHtFt: bundle.standingsHtFt,
+                standingsOverUnder: bundle.standingsOverUnder,
+                teamLabels: bundle.teamLabels,
+                topScorers: bundle.topScorers,
+                draw: bundle.draw,
+                archives: bundle.archives,
+            });
+        }
+
+        // Juegos Olímpicos de la Juventud Dakar 2026 (Rugby Seven): la fuente es
+        // el visor de resultados de Dakar. El id dice la rama (`dakar-ru7-2026-m`)
+        // y el torneo no vive en FlashScore ni en la base.
+        if (dakarCompetition) {
+            const bundle = await getDakarRugbySevensTournamentBundle(dakarCompetition);
+
+            return perf.json({
+                ok: true,
+                _debug: {
+                    query: { id, url, sport, requestedSeason },
+                    resolvedIds: bundle.ids,
+                    provider: 'dakar',
                     counts: {
                         results: bundle.results.length,
                         fixtures: bundle.fixtures.length,

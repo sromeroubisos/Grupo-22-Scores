@@ -38,7 +38,8 @@ export type MatchProvider =
     | 'fisu'
     | 'ultimate-sevens'
     | 'odesur'
-    | 'worldrugby';
+    | 'worldrugby'
+    | 'dakar';
 
 export type MatchStatusKind = 'scheduled' | 'live' | 'final';
 
@@ -125,12 +126,17 @@ const SUPPORTED: Record<MatchProvider, readonly MatchTabId[]> = {
     // con dorsal y suplentes 48 h antes, estadísticas por equipo y la tabla
     // del grupo. Sin H2H: la API no lo publica para juveniles.
     worldrugby: ['previa', 'summary', 'videos', 'timeline', 'lineups', 'stats', 'standings'],
+    // Juegos Olímpicos de la Juventud Dakar 2026 (seven): el visor publica el
+    // fixture, el marcador, los doce atletas de cada selección y la tabla del
+    // grupo. La cronología no estaba publicada al integrarlo (el torneo
+    // arranca el 1/11): sin ella la pestaña sería una promesa vacía.
+    dakar: ['previa', 'summary', 'videos', 'lineups', 'standings'],
 };
 
 // Las fuentes que publican el plantel poco antes del inicio. Para el resto,
 // una alineación que no llegó antes del partido no llega nunca.
 const PUBLISHES_LINEUPS_BEFORE_KICKOFF: readonly MatchProvider[] = [
-    'local', 'flashscore', 'espn-soccer', 'rugby-api-sports', 'espn-american-football', 'fih', 'fisu', 'ultimate-sevens', 'odesur', 'worldrugby',
+    'local', 'flashscore', 'espn-soccer', 'rugby-api-sports', 'espn-american-football', 'fih', 'fisu', 'ultimate-sevens', 'odesur', 'worldrugby', 'dakar',
 ];
 
 // Lo que un administrador carga a mano. El resto se deriva de los eventos, asi

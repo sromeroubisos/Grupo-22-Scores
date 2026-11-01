@@ -15,6 +15,11 @@ import {
     hasFisuRugbySevensMatchesOnDate,
 } from '@/lib/services/fisuRugbySevens';
 import {
+    getDakarRugbySevensLiveMatches,
+    getDakarRugbySevensMatches,
+    hasDakarRugbySevensMatchesOnDate,
+} from '@/lib/services/dakarRugbySevens';
+import {
     getUltimateSevensLiveMatches,
     getUltimateSevensMatches,
     hasUltimateSevensMatchesOnDate,
@@ -246,12 +251,13 @@ export async function isExternalMatchesListDateSupported(
     if (await hasOdesurMatchesOnDate(isRugbySport(sportId) ? 'rugby' : sportId, targetDateKey)) return true;
     if (isFieldHockeySport(sportId)) return hasFihWorldCupMatchesOnDate(targetDateKey, timeZone);
     if (isRugbySport(sportId)) {
-        const [universitario, ultimate, worldRugby] = await Promise.all([
+        const [universitario, ultimate, worldRugby, dakar] = await Promise.all([
             hasFisuRugbySevensMatchesOnDate(targetDateKey, timeZone),
             hasUltimateSevensMatchesOnDate(targetDateKey, timeZone),
             hasWorldRugbyMatchesOnDate(targetDateKey, timeZone),
+            hasDakarRugbySevensMatchesOnDate(targetDateKey, timeZone),
         ]);
-        return universitario || ultimate || worldRugby;
+        return universitario || ultimate || worldRugby || dakar;
     }
     return false;
 }
@@ -279,7 +285,7 @@ export async function getVirtualRugbySevensMatches(
     date: Date,
     options?: { timeZone?: string; targetDateKey?: string },
 ): Promise<Match[]> {
-    const [universitario, ultimate, suramericanos, worldRugby] = await Promise.all([
+    const [universitario, ultimate, suramericanos, worldRugby, dakar] = await Promise.all([
         getFisuRugbySevensMatches(date, options).catch((error) => {
             console.warn('[FISU] fixture del Mundial Universitario no disponible:', error?.message);
             return [] as Match[];
@@ -302,8 +308,13 @@ export async function getVirtualRugbySevensMatches(
             console.warn('[World Rugby] fixture no disponible:', error?.message);
             return [] as Match[];
         }),
+        // Seven de los Juegos Olímpicos de la Juventud (Dakar 2026).
+        getDakarRugbySevensMatches(date, options).catch((error) => {
+            console.warn('[Dakar] seven de los Juegos Olímpicos de la Juventud no disponible:', error?.message);
+            return [] as Match[];
+        }),
     ]);
-    return [...universitario, ...ultimate, ...suramericanos, ...worldRugby];
+    return [...universitario, ...ultimate, ...suramericanos, ...worldRugby, ...dakar];
 }
 
 /**
@@ -314,7 +325,7 @@ export async function getVirtualRugbySevensMatches(
  * fila que nadie iba a poner.
  */
 export async function getVirtualRugbySevensLiveMatches(): Promise<Match[]> {
-    const [universitario, ultimate, suramericanos, worldRugby] = await Promise.all([
+    const [universitario, ultimate, suramericanos, worldRugby, dakar] = await Promise.all([
         getFisuRugbySevensLiveMatches().catch((error) => {
             console.warn('[FISU] en vivo del Mundial Universitario no disponible:', error?.message);
             return [] as Match[];
@@ -331,8 +342,12 @@ export async function getVirtualRugbySevensLiveMatches(): Promise<Match[]> {
             console.warn('[World Rugby] en vivo no disponible:', error?.message);
             return [] as Match[];
         }),
+        getDakarRugbySevensLiveMatches().catch((error) => {
+            console.warn('[Dakar] en vivo del seven de los Juegos Olímpicos de la Juventud no disponible:', error?.message);
+            return [] as Match[];
+        }),
     ]);
-    return [...universitario, ...ultimate, ...suramericanos, ...worldRugby];
+    return [...universitario, ...ultimate, ...suramericanos, ...worldRugby, ...dakar];
 }
 
 /**
