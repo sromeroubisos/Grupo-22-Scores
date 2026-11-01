@@ -29,6 +29,27 @@ interface OpcionMenu {
 interface Navegacion {
     grados: OpcionMenu[];
     temporadas: OpcionMenu[];
+    /** Cómo se llama el selector de `grados`; por defecto "grado o zona". */
+    tituloGrados?: string;
+}
+
+/**
+ * Los Juegos Olímpicos de la Juventud (Dakar 2026) son dos torneos con id
+ * propio, uno por rama, y no viven en la base: el menú no sale de la ruta sino
+ * del id, que ya dice cuál es el otro.
+ */
+function ramasDeDakar(tournamentId: string): Navegacion | null {
+    const found = /^dakar-ru7-2026-([mw])$/i.exec(tournamentId);
+    if (!found) return null;
+    const actual = found[1].toLowerCase();
+    return {
+        grados: [
+            { id: 'dakar-ru7-2026-m', label: 'Masculino', detalle: null, esActual: actual === 'm' },
+            { id: 'dakar-ru7-2026-w', label: 'Femenino', detalle: null, esActual: actual === 'w' },
+        ],
+        temporadas: [],
+        tituloGrados: 'Cambiar de rama',
+    };
 }
 
 function Desplegable({
@@ -130,6 +151,11 @@ export default function TournamentNavigation({
 
     useEffect(() => {
         let vivo = true;
+        const ramas = ramasDeDakar(tournamentId);
+        if (ramas) {
+            setNav(ramas);
+            return;
+        }
         // Un id externo (fs-, espn-, ras-, fih-wc-, fisu-, odesur-, rp-comp-, wr-)
         // no tiene hermanos en la base: no se pregunta. Preguntar era un 404 en
         // la consola por cada visita.
@@ -160,7 +186,7 @@ export default function TournamentNavigation({
             {grados.length > 0 && (
                 <Desplegable
                     etiqueta={gradoActual?.label ?? 'Grado'}
-                    titulo="Cambiar de grado o zona"
+                    titulo={nav?.tituloGrados ?? 'Cambiar de grado o zona'}
                     opciones={grados}
                     tabActiva={tabActiva}
                 />

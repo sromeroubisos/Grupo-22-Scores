@@ -28,8 +28,11 @@ import {
     DAKAR_PUBLIC_URL,
     DAKAR_RESULTS_URL,
     DAKAR_SPORT_CODE,
+    DAKAR_TTL_HOT_SECONDS,
+    DAKAR_TTL_IDLE_SECONDS,
     computeDakarPools,
     dakarAgeAt,
+    dakarPeriodScores,
     dakarFlagUrl,
     dakarLiveLabel,
     dakarMatchIdOf,
@@ -39,10 +42,14 @@ import {
     parseDakarAthletes,
     parseDakarGroupSummary,
     parseDakarMatchId,
+    parseDakarPlayByPlay,
+    parseDakarResultList,
     parseDakarSchedule,
+    parseDakarTeamStatistics,
     type DakarAthlete,
     type DakarCompetition,
     type DakarCompetitionKey,
+    type DakarPlayerLine,
     type DakarPool,
     type DakarStandingRow,
     type DakarUnit,
@@ -63,6 +70,8 @@ const FETCH_TIMEOUT_MS = 15000;
 const TTL_ATHLETES_SECONDS = 3600;
 /** La tabla solo se mueve cuando termina un partido. */
 const TTL_GROUPS_SECONDS = 60;
+/** Una planilla cerrada es historia; una abierta corre con el reloj. */
+const TTL_DETAIL_SETTLED_SECONDS = 1800;
 
 // --------------------------------------------------------------------------
 // Cliente HTTP + caché
@@ -183,6 +192,23 @@ async function getRosters(key: DakarCompetitionKey): Promise<Map<string, DakarAt
     }
     byCode.forEach((list) => list.sort((a, b) => a.name.localeCompare(b.name)));
     return byCode;
+}
+
+type MatchPartialKind = 'PlayByPlay' | 'TeamStatistics' | 'ResultList';
+
+/**
+ * Un fragmento de la planilla de un partido (cronología, estadísticas por
+ * equipo o jugadores). Un partido en juego se relee cada 20 s; uno cerrado, cada
+ * media hora; uno por jugar casi no cambia.
+ */
+async function getMatchPartial<T>(kind: MatchPartialKind, unit: DakarUnit, parse: (html: string) => T): Promise<T> {
+    const path = `/hide/en/Comp/ListPartial?pagetype=${kind}&rsc=${unit.rsc}`;
+    return readResource(
+        `${CACHE_PREFIX}:${kind}:${unit.rsc}`,
+        path,
+        async () => parse(await fetchHtml(path)),
+        () => (unit.state === 'live' ? DAKAR_TTL_HOT_SECONDS : unit.state === 'final' ? TTL_DETAIL_SETTLED_SECONDS : DAKAR_TTL_IDLE_SECONDS),
+    );
 }
 
 /**
@@ -545,11 +571,12 @@ export async function getDakarRugbySevensTournamentBundle(key: DakarCompetitionK
  * sin distinguir titulares de suplentes: van todos como plantel, que es lo que
  * son. La edad es la que tenían el día del partido.
  */
-function toLineupPlayer(athlete: DakarAthlete, at: Date) {
+function toLineupPlayer(athlete: DakarAthlete, line: DakarPlayerLine | undefined, at: Date) {
     return {
         id: athlete.id,
         name: athlete.name,
-        number: null,
+        // El dorsal y lo que hizo salen de la planilla del partido, cuando existe.
+        number: line?.number ?? null,
         position: '',
         role: 'starter',
         rating: null,
@@ -557,15 +584,46 @@ function toLineupPlayer(athlete: DakarAthlete, at: Date) {
         caps: null,
         age: dakarAgeAt(athlete.birthDate, at),
         birthDate: athlete.birthDate,
+        points: line?.points ?? 0,
+        tries: line?.tries ?? 0,
     };
 }
 
-function buildLineups(home: DakarAthlete[], away: DakarAthlete[], homeName: string, awayName: string, at: Date) {
+/**
+ * Los jugadores de una selección en este partido: la planilla del partido
+ * (con dorsal) manda sobre la lista de atletas del torneo, y los que no
+ * figuran en la planilla quedan afuera cuando ya hay planilla. Sin planilla
+ * —antes del partido— van los doce atletas inscriptos.
+ */
+function lineupFor(roster: DakarAthlete[], lines: DakarPlayerLine[], at: Date) {
+    if (lines.length === 0) return roster.map((athlete) => toLineupPlayer(athlete, undefined, at));
+
+    const byId = new Map(roster.map((athlete) => [athlete.id, athlete] as const));
+    return lines
+        .map((line) => {
+            const athlete = byId.get(line.id ?? '') ?? {
+                id: line.id ?? '',
+                code: line.code,
+                name: line.name,
+                gender: '' as const,
+                birthDate: null,
+            };
+            return toLineupPlayer(athlete, line, at);
+        })
+        .sort((a, b) => (a.number ?? 99) - (b.number ?? 99));
+}
+
+function buildLineups(
+    home: ReturnType<typeof lineupFor>,
+    away: ReturnType<typeof lineupFor>,
+    homeName: string,
+    awayName: string,
+) {
     if (home.length === 0 && away.length === 0) return null;
 
-    const homePlayers = home.map((athlete) => toLineupPlayer(athlete, at));
-    const awayPlayers = away.map((athlete) => toLineupPlayer(athlete, at));
-    const none: ReturnType<typeof toLineupPlayer>[] = [];
+    const homePlayers = home;
+    const awayPlayers = away;
+    const none: ReturnType<typeof lineupFor> = [];
 
     return {
         HOME_STARTING_LINEUPS: homePlayers,
@@ -588,12 +646,22 @@ export async function getDakarRugbySevensMatchBundle(matchId: string) {
 
     // Planteles y tablas van por su cuenta: la pantalla tiene que abrir igual
     // con el cronograma solo si alguna de las dos no contesta.
-    const [rostersResult, poolsResult] = await Promise.allSettled([
+    // La cronología, las estadísticas y la planilla solo existen con el partido
+    // en juego o terminado: antes del pitazo no se le pide nada al visor.
+    const played = unit.state === 'live' || unit.state === 'final';
+    const [rostersResult, poolsResult, timelineResult, statsResult, sheetResult] = await Promise.allSettled([
         getRosters(parsed.key),
         getPools(parsed.key, units),
+        played ? getMatchPartial('PlayByPlay', unit, parseDakarPlayByPlay) : Promise.resolve([]),
+        played ? getMatchPartial('TeamStatistics', unit, parseDakarTeamStatistics) : Promise.resolve([]),
+        played ? getMatchPartial('ResultList', unit, parseDakarResultList) : Promise.resolve([] as DakarPlayerLine[]),
     ]);
     const rosters = rostersResult.status === 'fulfilled' ? rostersResult.value : new Map<string, DakarAthlete[]>();
     const pools = poolsResult.status === 'fulfilled' ? poolsResult.value : [];
+    const events = timelineResult.status === 'fulfilled' ? timelineResult.value : [];
+    const stats = statsResult.status === 'fulfilled' ? statsResult.value : [];
+    const sheet = sheetResult.status === 'fulfilled' ? sheetResult.value : [];
+    const periods = events.length > 0 ? dakarPeriodScores(events) : [];
 
     const standings = pools
         // La tabla que importa es la del grupo del partido; si es cruce, van todas.
@@ -601,12 +669,13 @@ export async function getDakarRugbySevensMatchBundle(matchId: string) {
         .flatMap((pool) => pool.rows.map((row, index) => toStandingsRow(row, index + 1, pool.name)));
 
     const kickoff = unit.startsAtIso ? new Date(unit.startsAtIso) : null;
+    const at = kickoff ?? new Date();
+    const linesOf = (code: string | null) => (code ? sheet.filter((line) => line.code === code) : []);
     const lineups = buildLineups(
-        unit.homeCode ? rosters.get(unit.homeCode) ?? [] : [],
-        unit.awayCode ? rosters.get(unit.awayCode) ?? [] : [],
+        unit.homeCode ? lineupFor(rosters.get(unit.homeCode) ?? [], linesOf(unit.homeCode), at) : [],
+        unit.awayCode ? lineupFor(rosters.get(unit.awayCode) ?? [], linesOf(unit.awayCode), at) : [],
         unit.homeName,
         unit.awayName,
-        kickoff ?? new Date(),
     );
     const empty: unknown[] = [];
 
@@ -660,14 +729,14 @@ export async function getDakarRugbySevensMatchBundle(matchId: string) {
             },
             url: matchUrl(unit),
             lineups,
-            // El visor publica los doce inscriptos, sin titulares ni dorsales:
-            // la pantalla los rotula "Plantel", no "Titulares".
+            // El visor publica los doce de cada selección con su dorsal, pero no
+            // dice quién arranca: la pantalla los rotula "Plantel", no "Titulares".
             lineupsKind: 'squad',
             standings,
             h2h: empty,
-            events: empty,
-            stats: empty,
-            periods: empty,
+            events,
+            stats,
+            periods,
             officials: empty,
             draw: empty,
             form: empty,
@@ -675,9 +744,9 @@ export async function getDakarRugbySevensMatchBundle(matchId: string) {
         },
         h2h: empty,
         standings,
-        events: empty,
-        stats: empty,
-        periods: empty,
+        events,
+        stats,
+        periods,
         lineups,
         playerStats: null,
     };
