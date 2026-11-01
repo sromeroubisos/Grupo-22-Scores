@@ -30,6 +30,7 @@ import {
     DAKAR_SPORT_CODE,
     DAKAR_TTL_HOT_SECONDS,
     DAKAR_TTL_IDLE_SECONDS,
+    buildDakarBrackets,
     computeDakarPools,
     dakarAgeAt,
     dakarPeriodScores,
@@ -543,6 +544,10 @@ export async function getDakarRugbySevensTournamentBundle(key: DakarCompetitionK
         rows: pool.rows.map((row, index) => toStandingsRow(row, index + 1, pool.name)),
     }));
 
+    // Las llaves salen del mismo fixture: se completan solas cuando el visor
+    // publica a los clasificados. El primer cuadro (Medallas) es el principal.
+    const brackets = buildDakarBrackets(units, key, (code, name) => flagOf(name, code));
+
     return {
         ids: {
             tournamentId: competition.tournamentId,
@@ -559,7 +564,8 @@ export async function getDakarRugbySevensTournamentBundle(key: DakarCompetitionK
         standingsOverUnder: [] as unknown[],
         teamLabels: dakarStandingsTeamLabels(key) as unknown[],
         topScorers: [] as unknown[],
-        draw: [] as unknown[],
+        draw: (brackets[0]?.rounds ?? []) as unknown[],
+        brackets,
         archives: [] as unknown[],
     };
 }

@@ -1355,6 +1355,7 @@ export async function GET(request: Request) {
                         results: bundle.results.length,
                         fixtures: bundle.fixtures.length,
                         standings: bundle.standings.length,
+                        brackets: bundle.brackets.length,
                     },
                 },
                 _cache: {
@@ -1377,6 +1378,8 @@ export async function GET(request: Request) {
                 teamLabels: bundle.teamLabels,
                 topScorers: bundle.topScorers,
                 draw: bundle.draw,
+                // Medallas y Puestos 5.º a 8.º: el selector de cuadros de la pestaña Playoff.
+                brackets: bundle.brackets,
                 archives: bundle.archives,
             });
         }
