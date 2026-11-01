@@ -661,3 +661,56 @@ test('las copas europeas marcan los tres primeros de CADA grupo y nada mas', asy
         assert.deepEqual(rugbyPassZonesFor(oid, 24), []);
     }
 });
+
+// ── Renumeracion de RugbyPass (2026-11-01) ──────────────────────────────────
+// El sitio cambio TODOS los ids de competicion y de partido (Top 14: 203 ->
+// 1002) y paso `sts` de "Result" a "result". El parser seguia comparando contra
+// lo viejo: el sync devolvia cero partidos y la ficha mostraba un 0-0 ajeno.
+
+const juegoNuevo = (extra: Record<string, unknown> = {}) => ({
+    id: 293550,
+    gmt: '2026-10-31T20:00:00.000Z',
+    c: 1002,
+    s: 2,
+    sts: 'result',
+    h: { n: 'Perpignan', s: 24, u: 'perpignan', l: 'a.png' },
+    a: { n: 'Toulon', s: 25, u: 'toulon', l: 'b.png' },
+    l: 'https://www.rugbypass.com/live/perpignan-vs-toulon/?g=293550',
+    ...extra,
+});
+
+test('el id nuevo de RugbyPass se resuelve y la competicion conserva el NUESTRO', () => {
+    const partido = parseRugbyPassGame(juegoNuevo());
+    assert.ok(partido, 'un partido con c=1002 tiene que reconocerse');
+    assert.equal(partido.competitionId, 203);
+    assert.equal(partido.tournamentId, 'rp-comp-203');
+    assert.equal(partido.id, 'rp-293550');
+});
+
+test('el id viejo de la competicion sigue resolviendo', () => {
+    assert.equal(parseRugbyPassGame(juegoNuevo({ c: 203 }))?.competitionId, 203);
+});
+
+test('los dos juegos de ids de competicion no se pisan entre si', () => {
+    const vistos = new Set<number>();
+    for (const c of RUGBYPASS_COMPETITIONS) {
+        for (const id of [c.id, c.upstreamId]) {
+            assert.ok(!vistos.has(id), `id repetido: ${id}`);
+            vistos.add(id);
+        }
+    }
+});
+
+test('"result" en minuscula es un partido terminado', () => {
+    assert.equal(classifyRugbyPassStatus({ s: 2, sts: 'result' }), 'final');
+    assert.equal(classifyRugbyPassStatus({ s: 2, sts: 'Result' }), 'final');
+    assert.equal(parseRugbyPassGame(juegoNuevo())?.status, 'final');
+});
+
+test('el detalle de la ficha dice de que partido es', () => {
+    const detalle = parseRugbyPassUpdate({
+        game: { id: '293674', homeTeam: { score: 0 }, awayTeam: { score: 0 }, finished: false },
+        stats: {},
+    });
+    assert.equal(detalle.gameId, 293674);
+});
