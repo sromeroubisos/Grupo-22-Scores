@@ -186,6 +186,13 @@ function isFisuMatchId(value: string) {
     return /^fisu-match-[mw]-[A-Z0-9_]{4}-\d{6}$/i.test(value);
 }
 
+// Juegos Olímpicos de la Juventud Dakar 2026 (Rugby Seven): `dakar-match-m-GPB_-000200`.
+// La `m`/`w` es la rama, después la fase (4 caracteres, `-` escrito `_`) y la
+// unidad. Mismo formato que `toDakarMatchId`.
+function isDakarMatchId(value: string) {
+    return /^dakar-match-[mw]-[A-Z0-9_]{4}-\d{6}$/i.test(value);
+}
+
 // Juegos Suramericanos: `odesur-match-hoc-w-GP01-000100` (confirmado: disciplina,
 // rama, fase y unidad) o `odesur-match-vvo-w-p202609151800-ARG-PAR` (todavía sin
 // llave: hora de pared y los dos países). Mismo formato que `odesurMatchIdOf`.
@@ -808,7 +815,8 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
     const isWorldRugbyExternal = isWorldRugbyMatchId(id);
     const isRugbyPassExternal = isRugbyPassMatchId(id);
     const isOdesurExternal = isOdesurMatchId(id);
-    const isExternalMatch = isFlashScore || isRugbyExternal || isEspnExternal || isEspnSoccerExternal || isEspnMotorsportExternal || isFihExternal || isFisuExternal || isUltimateSevensExternal || isWorldRugbyExternal || isRugbyPassExternal || isOdesurExternal;
+    const isDakarExternal = isDakarMatchId(id);
+    const isExternalMatch = isFlashScore || isRugbyExternal || isEspnExternal || isEspnSoccerExternal || isEspnMotorsportExternal || isFihExternal || isFisuExternal || isUltimateSevensExternal || isWorldRugbyExternal || isRugbyPassExternal || isOdesurExternal || isDakarExternal;
 
     const resolvedMatchId =
         typeof state.matchData?.id === 'string' && state.matchData.id.trim()
@@ -878,6 +886,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
     const isUltimateSevensSource = state.matchData?.externalProvider === 'ultimate-sevens';
     const isWorldRugbySource = state.matchData?.externalProvider === 'worldrugby';
     const isOdesurSource = state.matchData?.externalProvider === 'odesur';
+    const isDakarSource = state.matchData?.externalProvider === 'dakar';
     // La fuente puede publicar el plantel de la temporada en vez de la
     // formación del partido. Rotularlo "Titulares" sería afirmar algo que no dijo.
     const isSquadLineup = state.matchData?.lineupsKind === 'squad';
@@ -904,6 +913,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
         : isUltimateSevensSource ? 'ultimate-sevens'
         : isWorldRugbySource ? 'worldrugby'
         : isOdesurSource ? 'odesur'
+        : isDakarSource ? 'dakar'
         : isEspnSoccerSource ? 'espn-soccer'
         : isRugbyApiSportsSource ? 'rugby-api-sports'
         : isEspnSource ? 'espn-american-football'
@@ -967,7 +977,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                     // la pantalla (eventos canonicos, planilla, alineaciones),
                     // asi que no hay nada que normalizar aca.
                     // Los Juegos Suramericanos arman el bundle igual.
-                    if ((payload?.source === 'fih' || payload?.source === 'fisu' || payload?.source === 'ultimate-sevens' || payload?.source === 'worldrugby' || payload?.source === 'odesur') && payload?.match) {
+                    if ((payload?.source === 'fih' || payload?.source === 'fisu' || payload?.source === 'ultimate-sevens' || payload?.source === 'worldrugby' || payload?.source === 'odesur' || payload?.source === 'dakar') && payload?.match) {
                         statusRef.current = payload.match.status || 'scheduled';
                         setState({
                             kind: 'ok',
@@ -2118,7 +2128,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
     const exportSportId = ((): string | number | undefined => {
         const raw = matchData?.sportId;
         if (raw != null && raw !== '') return raw as string | number;
-        if (isRugbyExternal || isRugbyApiSportsSource || isFisuExternal || isFisuSource || isUltimateSevensExternal || isUltimateSevensSource || isWorldRugbyExternal || isWorldRugbySource) return 'rugby';
+        if (isRugbyExternal || isRugbyApiSportsSource || isFisuExternal || isFisuSource || isUltimateSevensExternal || isUltimateSevensSource || isWorldRugbyExternal || isWorldRugbySource || isDakarExternal || isDakarSource) return 'rugby';
         if (isFihExternal || isFihSource) return 'field-hockey';
         return undefined;
     })();

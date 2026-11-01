@@ -109,7 +109,7 @@ function isFihWorldCupTournamentId(id: string): boolean {
  */
 function isFisuTournamentId(id: string): boolean {
     const normalized = id.toLowerCase();
-    return normalized.startsWith('fisu-') || normalized.startsWith('odesur-');
+    return normalized.startsWith('fisu-') || normalized.startsWith('odesur-') || normalized.startsWith('dakar-');
 }
 
 /**
