@@ -523,10 +523,11 @@ type HeaderEntry = { text: string; title: string; top: boolean };
  */
 function readHeaderColumns(thead: string): Array<{ group: string; text: string; title: string }> {
     const grid: HeaderEntry[][] = [];
-    (thead.match(/<tr[^>]*>[\s\S]*?<\/tr>/g) || []).forEach((row, r) => {
+    const headRows: string[] = thead.match(/<tr[^>]*>[\s\S]*?<\/tr>/g) ?? [];
+    headRows.forEach((row, r) => {
         grid[r] = grid[r] ?? [];
         let c = 0;
-        for (const cell of row.match(/<th[\s\S]*?<\/th>/g) || []) {
+        for (const cell of row.match(/<th[\s\S]*?<\/th>/g) ?? []) {
             while (grid[r][c]) c += 1;
             const colspan = Number(/colspan="(\d+)"/.exec(cell)?.[1] ?? 1);
             const rowspan = Number(/rowspan="(\d+)"/.exec(cell)?.[1] ?? 1);
