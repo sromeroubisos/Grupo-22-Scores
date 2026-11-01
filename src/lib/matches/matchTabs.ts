@@ -128,9 +128,9 @@ const SUPPORTED: Record<MatchProvider, readonly MatchTabId[]> = {
     worldrugby: ['previa', 'summary', 'videos', 'timeline', 'lineups', 'stats', 'standings'],
     // Juegos Olímpicos de la Juventud Dakar 2026 (seven): el visor publica el
     // fixture, el marcador, los doce atletas de cada selección y la tabla del
-    // grupo. La cronología no estaba publicada al integrarlo (el torneo
-    // arranca el 1/11): sin ella la pestaña sería una promesa vacía.
-    dakar: ['previa', 'summary', 'videos', 'lineups', 'standings'],
+    // grupo, y con el partido en juego o jugado la cronología (tries, tarjetas,
+    // cambios) y las estadísticas por equipo.
+    dakar: ['previa', 'summary', 'videos', 'timeline', 'lineups', 'stats', 'standings'],
 };
 
 // Las fuentes que publican el plantel poco antes del inicio. Para el resto,

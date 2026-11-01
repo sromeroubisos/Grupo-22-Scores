@@ -514,6 +514,69 @@ function columnOf(header: string): ColumnKey | null {
     return null;
 }
 
+type HeaderEntry = { text: string; title: string; top: boolean };
+
+/**
+ * El encabezado del visor tiene dos filas con `colspan` y `rowspan`
+ * ("Matches" abarca MP/W/D/L; "Points" abarca F/A/D/B). Se arma la grilla y se
+ * devuelve, por columna, el grupo y la hoja (la celda de más abajo).
+ */
+function readHeaderColumns(thead: string): Array<{ group: string; text: string; title: string }> {
+    const grid: HeaderEntry[][] = [];
+    (thead.match(/<tr[^>]*>[\s\S]*?<\/tr>/g) || []).forEach((row, r) => {
+        grid[r] = grid[r] ?? [];
+        let c = 0;
+        for (const cell of row.match(/<th[\s\S]*?<\/th>/g) || []) {
+            while (grid[r][c]) c += 1;
+            const colspan = Number(/colspan="(\d+)"/.exec(cell)?.[1] ?? 1);
+            const rowspan = Number(/rowspan="(\d+)"/.exec(cell)?.[1] ?? 1);
+            const entry: HeaderEntry = {
+                text: stripTags(cell),
+                title: decodeHtml(/<abbr title="([^"]*)"/.exec(cell)?.[1] ?? ''),
+                top: /topHeader/.test(cell),
+            };
+            for (let dr = 0; dr < rowspan; dr += 1) {
+                grid[r + dr] = grid[r + dr] ?? [];
+                for (let dc = 0; dc < colspan; dc += 1) grid[r + dr][c + dc] = entry;
+            }
+            c += colspan;
+        }
+    });
+
+    const width = Math.max(0, ...grid.map((row) => row.length));
+    return Array.from({ length: width }, (_, c) => {
+        const leaf = [...grid].reverse().map((row) => row[c]).find(Boolean);
+        const head = grid[0]?.[c];
+        return {
+            group: head && head.top && head !== leaf ? head.text : '',
+            text: leaf?.text ?? '',
+            title: leaf?.title ?? '',
+        };
+    });
+}
+
+/** Qué columna es, mirando el grupo ("Matches", "Points", "Tries") y la hoja. */
+function classifyColumn(group: string, text: string, title: string): ColumnKey | 'skip' | null {
+    const g = group.toLowerCase();
+    const t = text.trim().toLowerCase();
+    if (g.startsWith('matches')) {
+        if (/played/.test(t)) return 'played';
+        if (/won/.test(t)) return 'won';
+        if (/draw/.test(t)) return 'drawn';
+        if (/lost/.test(t)) return 'lost';
+        return 'skip';
+    }
+    if (g.startsWith('points')) {
+        if (/^f$|\bfor\b/.test(t) || /^for$/i.test(title)) return 'pointsFor';
+        if (/^a$|against/.test(t) || /^against$/i.test(title)) return 'pointsAgainst';
+        return 'skip';
+    }
+    if (g.startsWith('tries')) return 'skip';
+    if (/points difference|\bpd$/.test(t)) return 'diff';
+    if (/\bpts$/.test(t)) return 'points';
+    return columnOf(text) ?? columnOf(title);
+}
+
 /**
  * Lee la(s) tabla(s) de `GroupSummary`. El visor la arma como tabla de
  * posiciones + cruce de resultados; las columnas se reconocen por su
@@ -524,12 +587,8 @@ export function parseDakarGroupSummary(html: string): DakarStandingRow[][] {
     const tables = html.match(/<table[\s\S]*?<\/table>/g) || [];
 
     return tables.map((table) => {
-        const headRow = /<thead>[\s\S]*?<tr>([\s\S]*?)<\/tr>/.exec(table)?.[1] ?? '';
-        const headers = (headRow.match(/<th[\s\S]*?<\/th>/g) || []).map((cell) => {
-            const abbr = /<abbr title="([^"]*)"/.exec(cell)?.[1] ?? '';
-            return { text: stripTags(cell), title: decodeHtml(abbr) };
-        });
-        const columns = headers.map((header) => columnOf(header.text) ?? columnOf(header.title));
+        const thead = /<thead>([\s\S]*?)<\/thead>/.exec(table)?.[1] ?? '';
+        const columns = readHeaderColumns(thead).map((column) => classifyColumn(column.group, column.text, column.title));
 
         const body = /<tbody>([\s\S]*?)<\/tbody>/.exec(table)?.[1] ?? '';
         const rows = body.match(/<tr[^>]*rowKey[\s\S]*?<\/tr>/g) || [];
@@ -614,6 +673,292 @@ export function computeDakarPools(units: DakarUnit[]): DakarPool[] {
             return { ...pool, rows };
         })
         .sort((a, b) => a.key.localeCompare(b.key) || a.phaseCode.localeCompare(b.phaseCode));
+}
+
+// --------------------------------------------------------------------------
+// Estadísticas por equipo (`TeamStatistics`)
+// --------------------------------------------------------------------------
+
+export type DakarStatRow = { label: string; home: string; away: string };
+
+const STAT_LABELS: Array<{ match: RegExp; label: string; alwaysShow: boolean }> = [
+    { match: /^points$/i, label: 'Puntos', alwaysShow: true },
+    { match: /^tries$/i, label: 'Tries', alwaysShow: true },
+    { match: /^penalty tries$/i, label: 'Tries penales', alwaysShow: false },
+    { match: /^conversions/i, label: 'Conversiones (hechas / intentos)', alwaysShow: false },
+    { match: /^penalty goals/i, label: 'Penales (hechos / intentos)', alwaysShow: false },
+    { match: /^drop goals/i, label: 'Drops (hechos / intentos)', alwaysShow: false },
+    { match: /^yellow cards$/i, label: 'Tarjetas amarillas', alwaysShow: true },
+    { match: /^red cards$/i, label: 'Tarjetas rojas', alwaysShow: true },
+];
+
+/** "-" y vacío son cero; "2 / 9" se lee "2/9". */
+function statValue(raw: string): string {
+    const value = raw.replace(/\s*\/\s*/g, '/').trim();
+    return value === '' || value === '-' ? '0' : value;
+}
+
+/**
+ * Las estadísticas de un partido, en castellano. Una fila donde los dos lados
+ * están en cero (penales, drops) no se muestra: es ruido. Puntos, tries y
+ * tarjetas sí, aunque sean cero. Un partido que no se jugó no trae números: se
+ * devuelve vacío y la pestaña no se ofrece.
+ */
+export function parseDakarTeamStatistics(html: string): DakarStatRow[] {
+    const rows: DakarStatRow[] = [];
+    const items = html.matchAll(/<div class="item">\s*<div class="competitor first">([\s\S]*?)<\/div>\s*<div class="description">([\s\S]*?)<\/div>\s*<div class="competitor second">([\s\S]*?)<\/div>/g);
+
+    for (const item of items) {
+        const description = stripTags(item[2]);
+        const known = STAT_LABELS.find((entry) => entry.match.test(description));
+        if (!known) continue;
+        const home = statValue(stripTags(item[1]));
+        const away = statValue(stripTags(item[3]));
+        const bothZero = /^0(\/0)?$/.test(home) && /^0(\/0)?$/.test(away);
+        if (bothZero && !known.alwaysShow) continue;
+        rows.push({ label: known.label, home, away });
+    }
+
+    // Sin un solo punto en juego el partido no empezó: nada que mostrar.
+    const points = rows.find((row) => row.label === 'Puntos');
+    if (points && points.home === '0' && points.away === '0' && !rows.some((row) => row.label === 'Tries' && (row.home !== '0' || row.away !== '0'))) {
+        return [];
+    }
+    return rows;
+}
+
+// --------------------------------------------------------------------------
+// Cronología (`PlayByPlay`)
+// --------------------------------------------------------------------------
+
+export type DakarEventType =
+    | 'try'
+    | 'penalty_try'
+    | 'conversion'
+    | 'penalty_goal'
+    | 'drop_goal'
+    | 'card_yellow'
+    | 'card_red'
+    | 'substitution';
+
+export type DakarTimelineEvent = {
+    type: DakarEventType;
+    team: 'home' | 'away';
+    player: string;
+    playerId: string | null;
+    /** Dorsal de `player`. */
+    number: number | null;
+    /** En un cambio, `player` es el que SALE y `subPlayer` el que entra. */
+    subPlayer?: string;
+    subPlayerId?: string | null;
+    subNumber?: number | null;
+    description: string;
+    minute: number;
+    time: number;
+    minuteNumber: number;
+    period: '1T' | '2T';
+    order: number;
+    points: number;
+};
+
+/** El tiempo de un seven dura siete minutos: el reloj de la API reinicia en el segundo. */
+const SEVENS_HALF_MINUTES = 7;
+
+function classifyAction(action: string): { type: DakarEventType; points: number; miss: boolean } | null {
+    const text = action.trim().toLowerCase();
+    if (/^penalty try/.test(text)) return { type: 'penalty_try', points: 7, miss: false };
+    if (/^try/.test(text)) return { type: 'try', points: 5, miss: false };
+    if (/^conversion/.test(text)) {
+        const miss = /miss/.test(text);
+        return { type: 'conversion', points: miss ? 0 : 2, miss };
+    }
+    if (/^penalty goal/.test(text)) {
+        const miss = /miss/.test(text);
+        return { type: 'penalty_goal', points: miss ? 0 : 3, miss };
+    }
+    if (/^drop goal/.test(text)) {
+        const miss = /miss/.test(text);
+        return { type: 'drop_goal', points: miss ? 0 : 3, miss };
+    }
+    if (/^yellow card/.test(text)) return { type: 'card_yellow', points: 0, miss: false };
+    if (/^red card/.test(text)) return { type: 'card_red', points: 0, miss: false };
+    if (/^replacement/.test(text)) return { type: 'substitution', points: 0, miss: false };
+    return null;
+}
+
+function describeEvent(type: DakarEventType, player: string, miss: boolean, incoming: string): string {
+    const of = player ? ` de ${player}` : '';
+    switch (type) {
+        case 'try': return `Try${of}`;
+        case 'penalty_try': return 'Try penal';
+        case 'conversion': return miss ? `[palos:miss] Conversión${of}` : `Conversión${of}`;
+        case 'penalty_goal': return miss ? `[palos:miss] Penal${of}` : `Penal${of}`;
+        case 'drop_goal': return miss ? `[palos:miss] Drop${of}` : `Drop${of}`;
+        case 'card_yellow': return `Tarjeta amarilla${of}`;
+        case 'card_red': return `Tarjeta roja${of}`;
+        case 'substitution': return incoming ? `Cambio · Entra: ${incoming}` : 'Cambio';
+    }
+}
+
+type SideCell = { numbers: number[]; players: Array<{ id: string | null; name: string; role: 'IN' | 'OUT' | null }> };
+
+function readSide(jerseyCell: string, nameCell: string): SideCell {
+    const numbers = Array.from(jerseyCell.matchAll(/<div class="number">\s*<span>(\d+)<\/span>/g)).map((found) => Number(found[1]));
+    const players = Array.from(nameCell.matchAll(/<span class="athleteLink(?: (IN|OUT))?">\s*<a[^>]*ParticipantInfo\/([0-9a-f-]{36})[^>]*>\s*<span class="sortValue">([\s\S]*?)<\/span>/gi))
+        .map((found) => ({
+            id: found[2].toLowerCase(),
+            name: dakarAthleteName(decodeHtml(found[3])),
+            role: (found[1] as 'IN' | 'OUT' | undefined) ?? null,
+        }));
+    return { numbers, players };
+}
+
+/**
+ * La cronología de un partido, de la más vieja a la más nueva. La API la sirve
+ * al revés (lo último arriba) y en dos grupos, `H1` y `H2`, con el reloj
+ * reiniciado en cada tiempo. El minuto que se muestra es el corrido: el 2T
+ * arranca en el 8. Un cambio trae `IN` y `OUT` marcados con su dorsal.
+ */
+export function parseDakarPlayByPlay(html: string): DakarTimelineEvent[] {
+    const flat = html.replace(/<svg[\s\S]*?<\/svg>/g, '').replace(/\s+/g, ' ');
+    const groups = Array.from(flat.matchAll(/key="H([12])" class="group"/g));
+    const collected: Array<Omit<DakarTimelineEvent, 'order'> & { secs: number; seq: number }> = [];
+    let seq = 0;
+
+    groups.forEach((group, position) => {
+        const period = group[1] === '2' ? '2T' as const : '1T' as const;
+        const start = group.index ?? 0;
+        const end = position + 1 < groups.length ? (groups[position + 1].index ?? flat.length) : flat.length;
+        const chunk = flat.slice(start, end);
+
+        for (const row of chunk.matchAll(/<tr> <td class="pbpJersey">([\s\S]*?)<\/td><td class="pbpName">([\s\S]*?)<\/td><td class="time-result-action">([\s\S]*?)<\/td><td class="pbpJersey">([\s\S]*?)<\/td><td class="pbpName">([\s\S]*?)<\/td> <\/tr>/g)) {
+            const action = firstMatch(row[3], /class="action">([\s\S]*?)<\/div>/);
+            const kind = classifyAction(action);
+            if (!kind) continue;
+
+            const clock = /class="time">\s*(\d+):(\d+)/.exec(row[3]);
+            if (!clock) continue;
+            const secs = Number(clock[1]) * 60 + Number(clock[2]);
+
+            const home = readSide(row[1], row[2]);
+            const away = readSide(row[4], row[5]);
+            const team: 'home' | 'away' = home.players.length > 0 ? 'home' : 'away';
+            const side = team === 'home' ? home : away;
+            if (side.players.length === 0 && kind.type !== 'penalty_try') continue;
+
+            const minute = (period === '2T' ? SEVENS_HALF_MINUTES : 0) + Math.floor(secs / 60) + 1;
+            seq += 1;
+            const base = { team, minute, time: minute, minuteNumber: minute, period, secs, seq };
+
+            if (kind.type === 'substitution') {
+                const entering = side.players.find((player) => player.role === 'IN') ?? side.players[0];
+                const leaving = side.players.find((player) => player.role === 'OUT') ?? side.players[1];
+                const enteringIndex = side.players.indexOf(entering);
+                const leavingIndex = leaving ? side.players.indexOf(leaving) : -1;
+                collected.push({
+                    ...base,
+                    type: 'substitution',
+                    player: leaving?.name ?? '',
+                    playerId: leaving?.id ?? null,
+                    number: leavingIndex >= 0 ? side.numbers[leavingIndex] ?? null : null,
+                    subPlayer: entering?.name ?? '',
+                    subPlayerId: entering?.id ?? null,
+                    subNumber: enteringIndex >= 0 ? side.numbers[enteringIndex] ?? null : null,
+                    description: describeEvent('substitution', '', false, entering?.name ?? ''),
+                    points: 0,
+                });
+                continue;
+            }
+
+            const player = kind.type === 'penalty_try' ? undefined : side.players[0];
+            collected.push({
+                ...base,
+                type: kind.type,
+                player: player?.name ?? '',
+                playerId: player?.id ?? null,
+                number: player ? side.numbers[0] ?? null : null,
+                description: describeEvent(kind.type, player?.name ?? '', kind.miss, ''),
+                points: kind.points,
+            });
+        }
+    });
+
+    // La tabla viene con lo último arriba: a igual segundo, el que está más
+    // abajo pasó antes, o sea el de mayor `seq` dentro de su tiempo.
+    return collected
+        .sort((a, b) =>
+            (a.period === b.period ? 0 : a.period === '1T' ? -1 : 1)
+            || a.secs - b.secs
+            || b.seq - a.seq)
+        .map(({ secs: _secs, seq: _seq, ...event }, order) => ({ ...event, order }));
+}
+
+/** El marcador de cada tiempo, sacado de la cronología. */
+export function dakarPeriodScores(events: readonly DakarTimelineEvent[]): Array<{ period: string; label: string; home: number; away: number }> {
+    const first = { home: 0, away: 0 };
+    const second = { home: 0, away: 0 };
+    for (const event of events) {
+        if (event.points <= 0) continue;
+        (event.period === '1T' ? first : second)[event.team] += event.points;
+    }
+    const periods = [{ period: '1', label: 'Primer tiempo', ...first }];
+    if (events.some((event) => event.period === '2T')) periods.push({ period: '2', label: 'Segundo tiempo', ...second });
+    return periods;
+}
+
+// --------------------------------------------------------------------------
+// Planilla por jugador (`ResultList`)
+// --------------------------------------------------------------------------
+
+export type DakarPlayerLine = {
+    code: string;
+    number: number | null;
+    id: string | null;
+    name: string;
+    points: number;
+    tries: number;
+    conversions: string;
+    yellowCards: number;
+    redCards: number;
+};
+
+/**
+ * Los jugadores de un partido con su dorsal y lo que hicieron. Las filas de
+ * equipo (`isTeam`) fijan a qué selección pertenecen las que siguen. Antes del
+ * partido no hay planilla: devuelve vacío.
+ */
+export function parseDakarResultList(html: string): DakarPlayerLine[] {
+    const flat = html.replace(/<svg[\s\S]*?<\/svg>/g, '').replace(/\s+/g, ' ');
+    const players: DakarPlayerLine[] = [];
+    let current = '';
+
+    for (const row of flat.match(/<tr[^>]*rowKey[\s\S]*?<\/tr>/g) || []) {
+        const isTeam = /class="[^"]*\bisTeam\b/.test(row);
+        const cells = (row.match(/<td[\s\S]*?<\/td>/g) || []);
+        if (isTeam) {
+            current = /<span>([A-Z]{3})<\/span>/.exec(row)?.[1] ?? '';
+            continue;
+        }
+        if (!current || cells.length < 10) continue;
+
+        const link = /ParticipantInfo\/([0-9a-f-]{36})[^>]*>\s*<span class="sortValue">([\s\S]*?)<\/span>/i.exec(row);
+        if (!link) continue;
+        const [bib, , , points, tries, conversions, , , yellow, red] = cells.map(stripTags);
+
+        players.push({
+            code: current,
+            number: toInt(bib),
+            id: link[1].toLowerCase(),
+            name: dakarAthleteName(decodeHtml(link[2])),
+            points: toInt(points) ?? 0,
+            tries: toInt(tries) ?? 0,
+            conversions: statValue(conversions),
+            yellowCards: toInt(yellow ?? '') ?? 0,
+            redCards: toInt(red ?? '') ?? 0,
+        });
+    }
+
+    return players;
 }
 
 // --------------------------------------------------------------------------
