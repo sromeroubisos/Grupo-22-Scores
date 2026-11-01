@@ -245,6 +245,16 @@ const COUNTRY_TOP_FLIGHT: Record<string, RegExp[]> = {
   US: [],
 };
 
+/**
+ * El torneo que todo el mundo sigue estos días: va PRIMERO del feed, antes que
+ * los favoritos y que lo de tu país. No lleva fecha de vencimiento porque el
+ * feed se arma por día: solo aparece los días en que tiene partidos, o sea
+ * mientras se juega (Juegos Olímpicos de la Juventud, Dakar 2026: rugby 7, 1 al
+ * 3/11). Pasada la edición se puede borrar la línea; no queda nada colgando.
+ * Se compara contra el nombre normalizado (sin tildes ni mayúsculas).
+ */
+const SEASONAL_FEATURED = /\bjoj dakar 2026\b/;
+
 /** Con menos competiciones que esto debajo de la tanda, no se arma el bloque plegado. */
 const MIN_GROUPED_LEAGUES = 3;
 
@@ -1554,7 +1564,9 @@ export default function HomePage() {
     );
 
     for (const league of list) {
-      if (MULTIPROVINCIAL_TOURNAMENT.test(normalizeForMatch(league.league))) {
+      if (SEASONAL_FEATURED.test(normalizeForMatch(league.league))) {
+        tiers.set(league.leagueId, { tier: -2, rank: 0 });
+      } else if (MULTIPROVINCIAL_TOURNAMENT.test(normalizeForMatch(league.league))) {
         tiers.set(league.leagueId, { tier: -1, rank: 0 });
       } else if (isLeagueGroupFavorite(league)) {
         tiers.set(league.leagueId, { tier: 0, rank: 0 });
@@ -1585,6 +1597,7 @@ export default function HomePage() {
     const indexed = list.map((league, index) => ({ league, index }));
     const byTier = (tier: number) => indexed.filter((entry) => info(entry.league).tier === tier);
 
+    const seasonal = byTier(-2);
     const favorites = byTier(0);
     const multiprovincial = byTier(-1);
     const countryBest = byTier(1).sort((a, b) => (
@@ -1594,9 +1607,9 @@ export default function HomePage() {
     ));
     const featured = byTier(2).sort((a, b) => (info(a.league).rank - info(b.league).rank) || (a.index - b.index));
 
-    const fillCount = Math.max(0, TOP_FEED_COUNT - favorites.length - multiprovincial.length);
+    const fillCount = Math.max(0, TOP_FEED_COUNT - seasonal.length - favorites.length - multiprovincial.length);
     const fill = [...countryBest, ...featured].slice(0, fillCount);
-    const taken = new Set([...favorites, ...fill, ...multiprovincial].map((entry) => entry.index));
+    const taken = new Set([...seasonal, ...favorites, ...fill, ...multiprovincial].map((entry) => entry.index));
     const rest = indexed
       .filter((entry) => !taken.has(entry.index))
       .sort((a, b) => (
@@ -1605,8 +1618,8 @@ export default function HomePage() {
         || (a.index - b.index)
       ));
 
-    const ordered = [...favorites, ...fill, ...multiprovincial, ...rest].map((entry) => entry.league);
-    const topCount = favorites.length + fill.length + multiprovincial.length;
+    const ordered = [...seasonal, ...favorites, ...fill, ...multiprovincial, ...rest].map((entry) => entry.league);
+    const topCount = seasonal.length + favorites.length + fill.length + multiprovincial.length;
     const top = topCount > 0 ? topCount : Math.min(3, ordered.length);
     // Un día con pocas competiciones no se agrupa: plegar dos tarjetas es fricción pura.
     return { ordered, topCount: ordered.length - top < MIN_GROUPED_LEAGUES ? ordered.length : top };
