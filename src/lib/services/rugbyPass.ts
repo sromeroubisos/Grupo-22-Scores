@@ -355,7 +355,11 @@ export async function getRugbyPassMatchDetail(
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded', Referer: u },
             });
             if (nuevo && typeof nuevo === 'object' && 'game' in nuevo) {
-                return parseRugbyPassUpdate(nuevo);
+                const detalle = parseRugbyPassUpdate(nuevo);
+                // La pagina se resuelve por el par de equipos: si el id pedido ya
+                // no existe contesta OTRO partido (el proximo cruce, 0-0). Ese
+                // detalle no sirve: se descarta en vez de pisar el marcador real.
+                if (detalle.gameId == null || detalle.gameId === Number(gameId)) return detalle;
             }
         } catch {
             // Slug invertido (301 que pierde el POST) o formato viejo: sigue.

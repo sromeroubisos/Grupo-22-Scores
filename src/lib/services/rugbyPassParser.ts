@@ -51,8 +51,21 @@ export const RUGBYPASS_UNKNOWN_KICKOFF_SUFFIX = 'T00:00:00+0000';
 // ── Catalogo de competiciones ───────────────────────────────────────────────
 
 export interface RugbyPassCompetition {
-    /** `c` del partido y `id` del bloque de competicion. Es la clave estable. */
+    /**
+     * NUESTRO id de la competicion: el que viaja en `rp-comp-<id>` y en todo lo
+     * ya guardado. Desde la renumeracion de 2026-11 ya no es el de RugbyPass
+     * (ver `upstreamId`), asi que no se compara contra `c` a mano: se resuelve
+     * con `rugbyPassCompetition`.
+     */
     id: number;
+    /**
+     * El id que RugbyPass usa HOY (`c` del partido, `id` del bloque,
+     * `optaCompId`). El 2026-11-01 el sitio renumero todas las competiciones y
+     * todos los partidos (Top 14: 203 -> 1002); el parser comparaba contra el id
+     * viejo, dejo de reconocer el feed entero y el sync devolvia cero partidos
+     * sin avisar.
+     */
+    upstreamId: number;
     /** El slug de la URL. Sobrevive a los rebrandeos: "Hilux NPC" sigue en `bunnings-npc`. */
     slug: string;
     name: string;
@@ -104,27 +117,27 @@ export interface RugbyPassCompetition {
  * paginas de las que ya tiene todo, o daria por vacias a las que nunca pide.
  */
 export const RUGBYPASS_COMPETITIONS: readonly RugbyPassCompetition[] = [
-    { id: 208, slug: 'bunnings-npc', name: 'Hilux NPC', country: 'Nueva Zelanda', seasonStartMonth: 1, viaCalendario: true },
-    { id: 203, slug: 'top-14', name: 'Top 14', country: 'Francia', seasonStartMonth: 7, viaCalendario: true },
-    { id: 211, slug: 'pro-d2', name: 'Pro D2', country: 'Francia', seasonStartMonth: 7, viaCalendario: true },
-    { id: 201, slug: 'premiership', name: 'Gallagher Premiership', country: 'Inglaterra', seasonStartMonth: 7, viaCalendario: true },
-    { id: 204, slug: 'united-rugby-championship', name: 'United Rugby Championship', country: 'Internacional', seasonStartMonth: 7, viaCalendario: true },
-    { id: 3, slug: 'internationals', name: 'Internationals', country: 'Internacional', seasonStartMonth: null, viaCalendario: true },
+    { id: 208, upstreamId: 1001, slug: 'bunnings-npc', name: 'Hilux NPC', country: 'Nueva Zelanda', seasonStartMonth: 1, viaCalendario: true },
+    { id: 203, upstreamId: 1002, slug: 'top-14', name: 'Top 14', country: 'Francia', seasonStartMonth: 7, viaCalendario: true },
+    { id: 211, upstreamId: 1013, slug: 'pro-d2', name: 'Pro D2', country: 'Francia', seasonStartMonth: 7, viaCalendario: true },
+    { id: 201, upstreamId: 1011, slug: 'premiership', name: 'Gallagher Premiership', country: 'Inglaterra', seasonStartMonth: 7, viaCalendario: true },
+    { id: 204, upstreamId: 1068, slug: 'united-rugby-championship', name: 'United Rugby Championship', country: 'Internacional', seasonStartMonth: 7, viaCalendario: true },
+    { id: 3, upstreamId: 2062, slug: 'internationals', name: 'Internationals', country: 'Internacional', seasonStartMonth: null, viaCalendario: true },
 
     // ── Solo por la pagina de la competicion ────────────────────────────────
     //
     // Las cinco internacionales llegan TODAS en la misma respuesta, la de
     // `internationals`: esa pagina es un cajon que devuelve los partidos con su
     // `optaCompId` propio. Por eso comparten `paginaDeTemporada`.
-    { id: 209, slug: 'six-nations', name: 'Six Nations', country: 'Internacional', seasonStartMonth: 1, viaCalendario: false, paginaDeTemporada: 'internationals' },
-    { id: 214, slug: 'the-rugby-championship', name: 'The Rugby Championship', country: 'Internacional', seasonStartMonth: 1, viaCalendario: false, paginaDeTemporada: 'internationals' },
-    { id: 219, slug: 'pacific-nations-cup', name: 'Pacific Nations Cup', country: 'Internacional', seasonStartMonth: 1, viaCalendario: false, paginaDeTemporada: 'internationals' },
-    { id: 269, slug: 'rugby-europe-championship', name: 'Rugby Europe Championship', country: 'Internacional', seasonStartMonth: 1, viaCalendario: false, paginaDeTemporada: 'internationals' },
-    { id: 114, slug: 'nations-championship', name: 'Nations Championship', country: 'Internacional', seasonStartMonth: 1, viaCalendario: false, paginaDeTemporada: 'nations-championship' },
+    { id: 209, upstreamId: 1055, slug: 'six-nations', name: 'Six Nations', country: 'Internacional', seasonStartMonth: 1, viaCalendario: false, paginaDeTemporada: 'internationals' },
+    { id: 214, upstreamId: 1053, slug: 'the-rugby-championship', name: 'The Rugby Championship', country: 'Internacional', seasonStartMonth: 1, viaCalendario: false, paginaDeTemporada: 'internationals' },
+    { id: 219, upstreamId: 1260, slug: 'pacific-nations-cup', name: 'Pacific Nations Cup', country: 'Internacional', seasonStartMonth: 1, viaCalendario: false, paginaDeTemporada: 'internationals' },
+    { id: 269, upstreamId: 1119, slug: 'rugby-europe-championship', name: 'Rugby Europe Championship', country: 'Internacional', seasonStartMonth: 1, viaCalendario: false, paginaDeTemporada: 'internationals' },
+    { id: 114, upstreamId: 2146, slug: 'nations-championship', name: 'Nations Championship', country: 'Internacional', seasonStartMonth: 1, viaCalendario: false, paginaDeTemporada: 'nations-championship' },
 
     // Las dos copas europeas de clubes tienen pagina propia.
-    { id: 242, slug: 'european-champions-cup', name: 'Investec Champions Cup', country: 'Europa', seasonStartMonth: 7, viaCalendario: false, paginaDeTemporada: 'european-champions-cup' },
-    { id: 243, slug: 'challenge-cup', name: 'Challenge Cup', country: 'Europa', seasonStartMonth: 7, viaCalendario: false, paginaDeTemporada: 'challenge-cup' },
+    { id: 242, upstreamId: 1008, slug: 'european-champions-cup', name: 'Investec Champions Cup', country: 'Europa', seasonStartMonth: 7, viaCalendario: false, paginaDeTemporada: 'european-champions-cup' },
+    { id: 243, upstreamId: 1026, slug: 'challenge-cup', name: 'Challenge Cup', country: 'Europa', seasonStartMonth: 7, viaCalendario: false, paginaDeTemporada: 'challenge-cup' },
 ] as const;
 
 /** Las paginas de competicion que hay que pedir, sin repetir. */
@@ -154,8 +167,14 @@ export const RUGBYPASS_EXCLUDED: readonly { id: number; name: string; reason: st
     },
 ] as const;
 
-const COMPETITION_BY_ID = new Map(RUGBYPASS_COMPETITIONS.map((c) => [c.id, c]));
+// Se indexa por AMBOS ids: el nuestro (lo ya guardado, `rp-comp-203`) y el de
+// RugbyPass (lo que trae el feed, 1002). No se pisan: los nuestros son < 300 y
+// los del sitio >= 1000.
+const COMPETITION_BY_ID = new Map<number, RugbyPassCompetition>(
+    RUGBYPASS_COMPETITIONS.flatMap((c) => [[c.id, c], [c.upstreamId, c]] as const)
+);
 
+/** Resuelve un id nuestro O de RugbyPass; la competicion devuelta lleva el nuestro. */
 export function rugbyPassCompetition(id: number): RugbyPassCompetition | null {
     return COMPETITION_BY_ID.get(id) ?? null;
 }
@@ -330,7 +349,9 @@ export function isKickoffUnknown(gmt: string): boolean {
  */
 export function classifyRugbyPassStatus(game: { s?: unknown; sts?: unknown }): MatchStatus {
     if (Number(game.s) === 1) return 'live';
-    if (String(game.sts) === 'Result') return 'final';
+    // Desde 2026-11 llega en minuscula ('result'); antes era 'Result'. Con la
+    // comparacion exacta TODO partido terminado volvia como programado.
+    if (String(game.sts).toLowerCase() === 'result') return 'final';
     return 'scheduled';
 }
 
@@ -393,11 +414,11 @@ function parseTeam(raw: RawTeam | undefined): RugbyPassTeam | null {
 export function parseRugbyPassGame(raw: RawGame): RugbyPassMatch | null {
     const gameId = Number(raw.id);
     const gmt = String(raw.gmt ?? '');
-    const competitionId = Number(raw.c);
     if (!Number.isFinite(gameId) || !gmt) return null;
 
-    const competition = rugbyPassCompetition(competitionId);
+    const competition = rugbyPassCompetition(Number(raw.c));
     if (!competition) return null;
+    const competitionId = competition.id;
 
     const home = parseTeam(raw.h);
     const away = parseTeam(raw.a);
@@ -541,9 +562,9 @@ export function parseRugbyPassSeasonGame(raw: RawSeasonGame): RugbyPassMatch | n
     const epoch = Number(raw.epoch);
     if (!Number.isFinite(gameId) || !Number.isFinite(epoch) || epoch <= 0) return null;
 
-    const competitionId = Number(raw.optaCompId);
-    const competition = rugbyPassCompetition(competitionId);
+    const competition = rugbyPassCompetition(Number(raw.optaCompId));
     if (!competition) return null;
+    const competitionId = competition.id;
 
     const home = parseSeasonTeam(raw.homeTeam);
     const away = parseSeasonTeam(raw.awayTeam);
@@ -559,7 +580,7 @@ export function parseRugbyPassSeasonGame(raw: RawSeasonGame): RugbyPassMatch | n
     const enVivo = raw.live === true || raw.live === 1;
     const status: MatchStatus = enVivo
         ? 'live'
-        : String(raw.status) === 'Result'
+        : String(raw.status).toLowerCase() === 'result'
             ? 'final'
             : 'scheduled';
 
@@ -824,6 +845,13 @@ export interface RugbyPassPlayerStat {
 }
 
 export interface RugbyPassMatchDetail {
+    /**
+     * El partido al que pertenece la respuesta (`game.id` de `action=update`).
+     * RugbyPass resuelve la pagina por el PAR DE EQUIPOS: con un id que ya no
+     * existe contesta 200 con el proximo cruce (un 0-0 sin jugar), y sin esta
+     * marca ese marcador pisaba el real. `null` en el formato viejo.
+     */
+    gameId?: number | null;
     status: string | null;
     minutes: string | null;
     homeScore: number | null;
@@ -1352,7 +1380,9 @@ export function parseRugbyPassUpdate(payload: unknown): RugbyPassMatchDetail {
     const terminado = game.finished === true;
     const marcadorLocal = Number(local.score);
     const marcadorVisita = Number(visita.score);
+    const idDelPartido = Number(game.id);
     return {
+        gameId: Number.isFinite(idDelPartido) ? idDelPartido : null,
         status: terminado ? 'result' : textoDe(stats.keyEvents?.status) || null,
         minutes: terminado ? null : textoDe(game.dateStatus) || null,
         homeScore: Number.isFinite(marcadorLocal) ? marcadorLocal : null,
