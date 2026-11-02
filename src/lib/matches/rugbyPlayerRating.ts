@@ -68,6 +68,7 @@
  */
 
 import {
+    ESCALA_POR_PUESTO,
     REFERENCIAS_POR_PUESTO,
     NORMALIZACION,
     REFERENCIA_GLOBAL,
@@ -556,8 +557,12 @@ export function rateRugbyPlayer(input: RugbyRatingInput): RugbyRating | null {
     // Restar la mediana de la señal deja el partido tipico en 6 y la media un
     // poco arriba, que es como se lee una escala de puntajes.
     const sesgo = (puesto != null ? SESGO_POR_PUESTO[puesto] : undefined) ?? SESGO;
+    // La subida se lleva a la misma apertura en los quince: sin esto el wing se
+    // quedaba con las notas altas y el pilar casi no llegaba al 8. La caida no
+    // se toca. Ver `ESCALA_POR_PUESTO`.
+    const escala = (puesto != null ? ESCALA_POR_PUESTO[puesto] : undefined) ?? 1;
     const bruta = rendimiento - sesgo;
-    const señal = bruta * (bruta >= 0 ? aporte : confianza);
+    const señal = bruta >= 0 ? (bruta / escala) * aporte : bruta * confianza;
     const nota = RATING_BASE + (señal >= 0
         ? CURVA.arriba * Math.tanh(señal / CURVA.k)
         : CURVA.abajo * Math.tanh(señal / CURVA.kAbajo));

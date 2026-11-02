@@ -104,7 +104,12 @@ for (const partido of partidos) {
         }
 
         for (const jugador of jugadores) {
-            const puesto = PUESTO_POR_NUMERO[jugador.number];
+            // La misma regla que `puestoDelPartido` en el motor: una 21 que casi
+            // no pasa no es un medio scrum, y metida en su vara la ensuciaria. Se
+            // copia en vez de importarse porque el motor no puede cargarse antes
+            // de que exista el archivo que esta pasada escribe.
+            const sinPases = jugador.number === 21 && (jugador.stats?.passes ?? 0) / jugador.minutes < 0.25;
+            const puesto = sinPases ? undefined : PUESTO_POR_NUMERO[jugador.number];
             if (!puesto || !(jugador.minutes >= MINUTOS_PARA_MEDIR)) continue;
             planillas++;
 
@@ -256,6 +261,22 @@ ${sesgo.porPuesto}
 };
 
 /**
+ * CUANTO SE ABRE PARA ARRIBA LA SEÑAL DE CADA PUESTO. El motor divide la subida
+ * por esto, y solo la subida: la caida ya esta comprimida y no se toca.
+ *
+ * Centrar la mediana iguala el partido tipico, pero no quien llega al 8. Con la
+ * caida comprimida, la cola de arriba se vuelve promedio, y la del wing —tries,
+ * quiebres— es mucho mas larga que la de un pilar, cuyo trabajo de scrum y ruck
+ * la planilla no mide. Medido: el wing sacaba 8 o mas el 14% de las veces y el
+ * pilar el 0,6%. Es el percentil 90 menos la mediana de cada puesto, sobre el de
+ * los quince juntos, en planillas de ${MINUTOS_PARA_MEDIR}+ minutos.
+ */
+export const ESCALA_POR_PUESTO: Readonly<Record<number, number>> = {
+${sesgo.escala}
+};
+
+
+/**
  * Lo que hace un equipo PROMEDIO en cada rubro, para el llamador que puntua un
  * jugador suelto y no tiene el plantel a mano. Deja la cuenta en la escala
  * correcta, pero para ese jugador vuelve el sesgo de posesion.
@@ -277,7 +298,7 @@ ${cuerpo(refGlobal, '    ', comoRef)}
 
 // PRIMERA PASADA: las varas, con el sesgo todavia en cero. Tiene que ser cero
 // de verdad y no una tabla vacia: el motor lo lee para puntuar la segunda.
-writeFileSync(SALIDA, archivo({ global: 0, porPuesto: '' }));
+writeFileSync(SALIDA, archivo({ global: 0, porPuesto: '', escala: '' }));
 
 // SEGUNDA PASADA: con las varas puestas ya se puede medir la señal y sacarle la
 // mediana. El motor se importa recien ahora, cuando el archivo existe.
@@ -293,16 +314,39 @@ for (const partido of partidos) {
                 number: jugador.number,
                 team: totales,
             });
-            if (r && r.position != null) señales.push({ signal: r.signal, puesto: r.position });
+            if (!r || r.position == null) continue;
+            // El motor acredita la subida por minutos/80 y la bajada por la
+            // confianza de siempre. El sesgo se mide sobre la señal con la
+            // confianza en los dos lados, como se midio siempre: si no, cada
+            // suplente con buen ritmo corre la mediana para abajo.
+            const minutos = Math.max(1, jugador.minutes);
+            // En esta pasada la escala de subida todavia vale 1 (la tabla esta
+            // vacia), asi que la señal positiva es la bruta por minutos/80.
+            const señal = r.signal >= 0
+                ? (r.signal / Math.min(1, minutos / 80)) * Math.min(1, minutos / 30)
+                : r.signal;
+            señales.push({ signal: señal, puesto: r.position, minutos: jugador.minutes });
         }
     }
 }
+const puestos = [...new Set(señales.map((s) => s.puesto))].sort((a, b) => a - b);
+// La apertura de arriba, en planillas largas: un cameo no dice cuanto se abre
+// un puesto, y el motor ya lo acerca a la base por los minutos.
+const largas = señales.filter((s) => s.minutos >= MINUTOS_PARA_MEDIR);
+const percentil = (v, q) => [...v].sort((a, b) => a - b)[Math.floor(q * (v.length - 1))];
+const apertura = (v) => percentil(v, 0.9) - mediana(v);
+const aperturaGlobal = apertura(largas.map((s) => s.signal));
 const sesgo = {
     global: Math.round(mediana(señales.map((s) => s.signal)) * 100000) / 100000,
-    porPuesto: [...new Set(señales.map((s) => s.puesto))].sort((a, b) => a - b)
+    porPuesto: puestos
         .map((puesto) => {
             const suyas = señales.filter((s) => s.puesto === puesto).map((s) => s.signal);
             return `    ${puesto}: ${Math.round(mediana(suyas) * 100000) / 100000},`;
+        }).join(SALTO),
+    escala: puestos
+        .map((puesto) => {
+            const suyas = largas.filter((s) => s.puesto === puesto).map((s) => s.signal);
+            return `    ${puesto}: ${Math.round((apertura(suyas) / aperturaGlobal) * 10000) / 10000},`;
         }).join(SALTO),
 };
 writeFileSync(SALIDA, archivo(sesgo));
