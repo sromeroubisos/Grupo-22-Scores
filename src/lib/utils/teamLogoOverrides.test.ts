@@ -32,6 +32,10 @@ test('un país lleva su bandera, lo escriba quien lo escriba', () => {
     assert.equal(getNationalTeamFlag('Panamá'), '/logos/selecciones/panama.png');
     assert.equal(getNationalTeamFlag('Surinam'), '/logos/selecciones/suriname.png');
     assert.equal(getNationalTeamFlag('Curazao'), '/logos/selecciones/curacao.png');
+    // Los que el parser de los Juegos de la Juventud escribe en castellano.
+    assert.equal(getNationalTeamFlag('Kenia'), '/logos/selecciones/kenya.png');
+    assert.equal(getNationalTeamFlag('Senegal'), '/logos/selecciones/senegal.png');
+    assert.equal(getNationalTeamFlag('Madagascar'), '/logos/selecciones/madagascar.png');
     assert.equal(getNationalTeamFlag('Gales'), getNationalTeamFlag('Wales'));
     // Taiwán compite con otro nombre y es el mismo país.
     assert.equal(getNationalTeamFlag('Chinese Taipei'), '/logos/selecciones/taiwan.png');
