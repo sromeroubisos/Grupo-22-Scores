@@ -3313,8 +3313,10 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                             patadas— que la cronologia no tiene de donde sacar.
                             Ultimate Sevens trae la suya en la pagina del
                             partido, y derivarla de los eventos contaria con la
-                            tabla del rugby un marcador que no es el de la liga. */}
-                        {activeTab === 'stats' && (isEspnSoccerSource || isFihSource || isRugbyPassSource || isUltimateSevensSource || isWorldRugbySource) && (
+                            tabla del rugby un marcador que no es el de la liga.
+                            Dakar publica la suya por equipo y, como RugbyPass,
+                            debajo sigue el panel derivado de los eventos. */}
+                        {activeTab === 'stats' && (isEspnSoccerSource || isFihSource || isRugbyPassSource || isUltimateSevensSource || isWorldRugbySource || isDakarSource) && (
                             <div className={styles.publicStatsPanel}>
                                 <div className={styles.panelTitle}>Estadísticas del partido</div>
                                 {statsData.length === 0 ? (
