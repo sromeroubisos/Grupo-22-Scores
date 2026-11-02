@@ -250,10 +250,41 @@ test('no marcar cuesta segun lo que se espere del puesto', () => {
     assert.ok(costoDeNoMarcar(1) < 0.2, `al pilar casi no puede costarle: costo ${costoDeNoMarcar(1)}`);
 });
 
-/** No hacer NADA en ochenta minutos es informacion, y hunde. */
-test('la planilla vacia hunde el puntaje', () => {
+/**
+ * Sin tarjeta y con errores normales no se baja de 5,2: un mal partido es un
+ * partido del monton. Solo una cantidad excepcional de errores hunde, y sin
+ * tarjeta nunca debajo de 3.
+ */
+test('sin tarjeta, solo un exceso de errores baja de 5,2', () => {
+    const anonimo = rateRugbyPlayer({
+        stats: { tackles: 1, carries: 3, carriesMetres: 15, turnoversConceded: 1, penaltiesConceded: 2 },
+        minutes: 80,
+        number: 14,
+        team: EQUIPO,
+    })!;
+    assert.ok(anonimo.value >= 5.2, `un partido anonimo dio ${anonimo.value}`);
+
+    const conErrores = (errados: number) => rateRugbyPlayer({
+        stats: { ...promedioDe(13), missedTackles: errados, penaltiesConceded: 0, turnoversConceded: 0 },
+        minutes: 80,
+        number: 13,
+        team: EQUIPO,
+    })!.value;
+    assert.ok(conErrores(12) < conErrores(9), 'el exceso de errores tiene que hundir');
+
+    const desastre = { penaltiesConceded: 20, missedTackles: 20, turnoversConceded: 20 };
+    const piso = rateRugbyPlayer({ stats: desastre, minutes: 80, number: 7, team: EQUIPO })!;
+    assert.ok(piso.value >= 3 && piso.value < 3.5, `el desastre sin tarjeta dio ${piso.value}`);
+});
+
+/**
+ * Una planilla vacia en ochenta minutos no pasa en un partido real: es el caso
+ * limite. Sin errores anotados la disciplina le suma, asi que baja sin llegar
+ * al 4, que queda para el que ademas falla.
+ */
+test('la planilla vacia baja el puntaje', () => {
     const r = rateRugbyPlayer({ stats: {}, minutes: 80, number: 7, team: EQUIPO })!;
-    assert.ok(r.value < RATING_BASE - 1, `dio ${r.value}`);
+    assert.ok(r.value < RATING_BASE - 0.5, `dio ${r.value}`);
 });
 
 test('el puntaje no se sale de la escala ni con un partido absurdo', () => {
@@ -288,6 +319,35 @@ test('el banco hereda el puesto de su numero', () => {
     const suplente = rateRugbyPlayer({ stats, minutes: 80, number: 16, team: EQUIPO })!;
     assert.equal(suplente.position, PUESTO_POR_NUMERO[16]);
     assert.equal(suplente.value, hooker.value);
+});
+
+/**
+ * Planilla real de Joaquin Moro (rp-294928, Bristol-Leicester): cuarenta minutos
+ * muy buenos. Con la vara achicada sola salia 9,2; lo que se acredita es lo que
+ * aporto, asi que tiene que quedar abajo del mismo ritmo sostenido ochenta.
+ */
+test('cuarenta minutos muy buenos no valen como ochenta', () => {
+    const moro = { carries: 7, cleanBreaks: 2, tackles: 9, turnoversWon: 3, dominantTackles: 1, passes: 2, carriesMetres: 33, defendersBeaten: 4, missedTackles: 1, ruckTurnovers: 1, penaltiesConceded: 1 };
+    const medio = rateRugbyPlayer({ stats: moro, minutes: 40, number: 20 })!;
+    const doble = Object.fromEntries(Object.entries(moro).map(([k, v]) => [k, v * 2]));
+    const entero = rateRugbyPlayer({ stats: doble, minutes: 80, number: 6 })!;
+    assert.ok(medio.value > RATING_BASE + 1, `fue un buen ingreso y dio ${medio.value}`);
+    assert.ok(medio.value < 8.5, `cuarenta minutos dieron ${medio.value}`);
+    assert.ok(entero.value > medio.value, `el mismo ritmo en ochenta dio ${entero.value} contra ${medio.value}`);
+});
+
+/** Planilla real de Manuel Zuliani (rp-292613): tercera linea con la 21. */
+test('la 21 sin pases no se juzga como medio scrum', () => {
+    const zuliani = { tackles: 19, carries: 5, carriesMetres: 2, passes: 1, penaltiesConceded: 2 };
+    const comoForward = rateRugbyPlayer({ stats: zuliani, minutes: 77, number: 21, team: EQUIPO })!;
+    assert.equal(comoForward.position, null);
+
+    const comoMedio = rateRugbyPlayer({ stats: { ...zuliani, passes: 40 }, minutes: 77, number: 21, team: EQUIPO })!;
+    assert.equal(comoMedio.position, 9);
+
+    // Tres minutos sin pasar no alcanzan para decir que no es un 9.
+    const cameo = rateRugbyPlayer({ stats: {}, minutes: 3, number: 21, team: EQUIPO })!;
+    assert.equal(cameo.position, 9);
 });
 
 test('sumar algo bueno nunca baja el puntaje', () => {

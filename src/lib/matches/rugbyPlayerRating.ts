@@ -99,6 +99,34 @@ export const PUESTO_POR_NUMERO: Readonly<Record<number, number>> = {
 };
 
 /**
+ * LA 21 NO SIEMPRE ES UN MEDIO SCRUM.
+ *
+ * Es la unica camiseta del banco donde equivocarse sale caro: `juego` pesa 45 en
+ * un 9, asi que a un tercera linea se le exigian los pases de otro oficio.
+ * Manuel Zuliani hizo 19 tackles sin errar y salia entre los peores del partido.
+ *
+ * Medido: de 944 camisetas 21 con 15 minutos o mas, 410 dan menos de 0,25 pases
+ * por minuto; de 1.324 camisetas 9, solo 5. Debajo de ese ritmo no se adivina el
+ * puesto real: se lo juzga con la vara neutra del jugador sin numero.
+ */
+const LA_21 = { minutos: 15, pasesPorMinuto: 0.25 } as const;
+
+/** El puesto con el que se juzga el partido, o null si no se lo puede afirmar. */
+export function puestoDelPartido(
+    number: number | null,
+    stats: Readonly<Record<string, number>>,
+    minutes: number
+): number | null {
+    if (number == null) return null;
+    if (
+        number === 21 &&
+        minutes >= LA_21.minutos &&
+        (stats.passes ?? 0) / minutes < LA_21.pasesPorMinuto
+    ) return null;
+    return PUESTO_POR_NUMERO[number] ?? null;
+}
+
+/**
  * Cuanto pesa cada eje en cada puesto. Suman 100 por fila —lo verifica un test.
  *
  * Un 7 vive del tackle; un 10, del juego. La tabla es lo que hace que el
@@ -253,31 +281,52 @@ const PISO_DEL_DESVIO = 0.25;
  * que es lo que deberia costar, y los extremos son asintotas: se llega
  * acercandose, nunca por acumular una jugada mas.
  *
- * ── LA CAIDA ES MAS CORTA QUE LA SUBIDA ─────────────────────────────────────
- * Tentaba lo contrario —del 6 para abajo hay cinco puntos y para arriba cuatro,
- * asi que estirar la caida parecia aprovechar la escala—. Medido, es al reves:
- * con la señal centrada en cero, bajar por 5 y subir por 4 deja la media del
- * partido en 5,6 y manda al 39% de los jugadores a 5 o menos. El que jugo un
- * poco por debajo del promedio de su puesto no jugo mal, y una curva que lo
- * trata asi miente.
+ * ── LA CAIDA ES LARGA Y LENTA ───────────────────────────────────────────────
+ * La subida y la bajada tienen cada una su ritmo, porque no se leen igual: un
+ * buen partido se nota enseguida, pero el que jugo un poco por debajo del
+ * promedio de su puesto no jugo mal, y una curva que lo trata asi miente.
  *
- * Con 4 arriba y 2 abajo la distribucion se para donde tiene que pararse: media
- * 6,28 con la mediana en 6,00, desvio 1,03, el 8,1% de las notas en 8 o mas, el
- * 1,4% en 9 o mas y el 6,4% en 5 o menos. Y describe el
- * deporte: un mal partido esta acotado —el que no aparece es anonimo, y todos
- * los anonimos se parecen— mientras que uno grande no tiene techo, porque cada
- * try, cada quiebre y cada robo se ven y se cuentan.
+ * Con una sola `k` y una caida de 2 puntos, el piso estaba en 4 y se llegaba
+ * rapido: sobre 1.678 partidos, el 86% tenia a alguien abajo de 5. Por jugador
+ * era el 4,6%, pero en una alineacion de 45 eso se ve en casi todos los
+ * partidos, y la banda de los 4 dejaba de significar un mal partido.
  *
- * El piso del rendimiento queda entonces en 4. Al 1 se llega, pero por la otra
- * puerta: la tarjeta, que se descuenta despues y en puntos planos. Es la
- * lectura correcta —al fondo de la escala se baja por una expulsion, no por una
- * tarde de pases imprecisos.
+ * Ahora la caida por rendimiento se acaba en 5,2: un mal partido se lee como un
+ * partido del monton, no como una falla. Abajo de eso se baja por dos puertas,
+ * las dos en puntos planos y despues de la curva: la tarjeta (`SANCIONES`) y una
+ * cantidad excepcional de errores (`EXCESO_DE_ERRORES`).
  *
- * Ninguna de las dos constantes sale de una intuicion: se barrieron contra la
+ * Ninguna de las constantes sale de una intuicion: se barrieron contra la
  * distribucion completa con
  * `node scripts/rugby-ratings/validar.mjs <planillas.jsonl> --barrer-k`.
  */
-const CURVA = { k: 0.88, arriba: 4, abajo: 2 } as const;
+const CURVA = { k: 0.88, kAbajo: 0.6, arriba: 4, abajo: 0.8 } as const;
+
+/**
+ * LA UNICA FORMA DE HUNDIRSE SIN TARJETA: ACUMULAR ERRORES.
+ *
+ * Penales, pelotas perdidas y tackles errados se suman, y lo que pase de nueve
+ * descuenta un cuarto de punto por error. El partido normal tiene 2; medido
+ * sobre 354 partidos, llegar a 10 pasa una vez cada doce y llegar a 12, una cada
+ * setenta. El tope deja el rendimiento en 3: al fondo se llega con tarjeta.
+ */
+export const EXCESO_DE_ERRORES = {
+    rubros: ['penaltiesConceded', 'turnoversConceded', 'missedTackles'],
+    desde: 9,
+    puntos: 0.25,
+    tope: 2.2,
+} as const;
+
+/** Los puntos que se descuentan por errores acumulados. */
+export function castigoPorErrores(stats: Readonly<Record<string, number>>) {
+    let errores = 0;
+    for (const metricId of EXCESO_DE_ERRORES.rubros) {
+        const cantidad = stats[metricId] ?? 0;
+        if (Number.isFinite(cantidad) && cantidad > 0) errores += cantidad;
+    }
+    const exceso = Math.max(0, errores - EXCESO_DE_ERRORES.desde);
+    return Math.min(EXCESO_DE_ERRORES.tope, exceso * EXCESO_DE_ERRORES.puntos);
+}
 
 /**
  * El piso de la referencia prorrateada.
@@ -396,7 +445,7 @@ export function rateRugbyPlayer(input: RugbyRatingInput): RugbyRating | null {
     const minutes = input.minutes ?? 0;
     if (minutes <= 0) return null;
 
-    const puesto = input.number != null ? PUESTO_POR_NUMERO[input.number] ?? null : null;
+    const puesto = puestoDelPartido(input.number, input.stats, minutes);
     const pesos = puesto != null ? PESOS_POR_PUESTO[puesto] : null;
 
     // La vara se achica con los minutos en vez de estirar lo hecho hasta los
@@ -489,7 +538,16 @@ export function rateRugbyPlayer(input: RugbyRatingInput): RugbyRating | null {
     else for (const eje of RATING_COMPONENTS) rendimiento += components[eje] / RATING_COMPONENTS.length;
 
     // Seis minutos no alcanzan para decir que alguien jugo mal.
+    //
+    // Y para arriba, lo que se acredita es lo que APORTO, no el ritmo. La vara
+    // achicada dice "rindio como para", y cuarenta minutos a gran ritmo se leian
+    // como ochenta: Joaquin Moro entro en el entretiempo contra Bristol, hizo un
+    // gran partido de media hora y salia 9,2, por encima de cualquier titular.
+    // Es como lo resuelve el futbol (Sofascore suma acciones, y en el River-Boca
+    // del 2026 todos los suplentes de menos de media hora quedaron entre 6,4 y
+    // 6,8): la subida crece con los minutos, asi que el 9 pide los ochenta.
     const confianza = Math.min(1, minutes / MINUTOS_PARA_CONFIANZA);
+    const aporte = Math.min(1, minutes / 80);
     // El SESGO recentra por la MEDIANA. Las varas centran cada rubro en su
     // promedio, que es lo que iguala a los quince puestos, pero un conteo tiene
     // cola a la derecha: al centrar en el promedio, mas de la mitad del plantel
@@ -498,12 +556,15 @@ export function rateRugbyPlayer(input: RugbyRatingInput): RugbyRating | null {
     // Restar la mediana de la señal deja el partido tipico en 6 y la media un
     // poco arriba, que es como se lee una escala de puntajes.
     const sesgo = (puesto != null ? SESGO_POR_PUESTO[puesto] : undefined) ?? SESGO;
-    const señal = (rendimiento - sesgo) * confianza;
-    const amplitud = señal >= 0 ? CURVA.arriba : CURVA.abajo;
-    const nota = RATING_BASE + amplitud * Math.tanh(señal / CURVA.k);
+    const bruta = rendimiento - sesgo;
+    const señal = bruta * (bruta >= 0 ? aporte : confianza);
+    const nota = RATING_BASE + (señal >= 0
+        ? CURVA.arriba * Math.tanh(señal / CURVA.k)
+        : CURVA.abajo * Math.tanh(señal / CURVA.kAbajo));
 
-    // La tarjeta se descuenta al final, en puntos y plana. Ver `SANCIONES`.
-    let castigo = 0;
+    // La tarjeta y el exceso de errores se descuentan al final, en puntos y
+    // planos. Ver `SANCIONES` y `EXCESO_DE_ERRORES`.
+    let castigo = castigoPorErrores(input.stats);
     for (const [metricId, puntos] of Object.entries(SANCIONES)) {
         const cantidad = input.stats[metricId] ?? 0;
         if (Number.isFinite(cantidad) && cantidad > 0) castigo += cantidad * puntos;
