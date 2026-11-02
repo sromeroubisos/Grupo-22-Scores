@@ -10029,15 +10029,15 @@ function getRankingNoiseTile(): HTMLCanvasElement | null {
 }
 
 // ---------------------------------------------------------------------------
-// Placa de campeón (2026-10-25). Referencia: la placa de "Campeón M15" de
-// Salida de 22 — barra de marca arriba, nombre del club en blanco, escudo al
-// centro y CAMPEÓN gigante en acento, que pisa un poco el escudo, con el
-// renglón del torneo debajo. Sin sponsors. Ignora la familia visual: es una
-// pieza dedicada, y Fondo / Acento recolorean toda la placa.
+// Placa de campeón. Referencia: la versión "de escudo" de Salida de 22 (Buenos
+// Aires campeonas, San Fernando ascenso): tres capas encimadas — nombre del club
+// de punta a punta, escudo que lo pisa y CAMPEÓN de punta a punta que pisa al
+// escudo —, y al pie el torneo y la marca. Sin barra arriba y sin sponsors.
+// Ignora la familia visual: es una pieza dedicada, y Fondo / Acento recolorean
+// toda la placa.
 //
-// Sirve para post (4:5) y story (9:16): todo se escala por ANCHO (`u`) y el
-// story reparte el alto de más corriendo los bloques, fuera de la zona que
-// tapa la interfaz de Instagram.
+// Sirve para post (4:5) y story (9:16): los dos renglones gigantes los manda el
+// ANCHO, así que su alto depende del texto, y el escudo se mide con lo que queda.
 // ---------------------------------------------------------------------------
 async function drawChampionPlate(
     ctx: CanvasRenderingContext2D,
@@ -10059,13 +10059,14 @@ async function drawChampionPlate(
     const spacedCtx = ctx as CanvasRenderingContext2D & { letterSpacing?: string };
 
     const clubs = [data.club, ...(data.coChampions ?? [])].filter((club) => club && club.name).slice(0, 2);
-    const [brandMark, photo, ...images] = await Promise.all([
+    const [brandMark, photo, tournamentLogo, ...images] = await Promise.all([
         loadImage('/marcas/salida-de-22.png'),
         data.backgroundImage ? loadImage(data.backgroundImage) : Promise.resolve(null),
+        data.tournamentLogo ? loadImage(data.tournamentLogo) : Promise.resolve(null),
         ...clubs.map((club) => loadImage(club.logo || '')),
     ]);
 
-    // ---- Fondo: placa plena, luz suave, un arco grande y grano fino ----
+    // ---- Fondo: placa plena con luz detrás del escudo y bordes caídos ----
     ctx.fillStyle = bgColor;
     ctx.fillRect(0, 0, width, height);
     if (photo) {
@@ -10075,17 +10076,12 @@ async function drawChampionPlate(
         ctx.fillStyle = hexToRGBA(bgColor, 0.74);
         ctx.fillRect(0, 0, width, height);
     } else {
-        const glow = ctx.createRadialGradient(width * 0.3, height * 0.12, 0, width * 0.3, height * 0.12, height * 0.8);
-        glow.addColorStop(0, isDark ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.45)');
-        glow.addColorStop(1, 'rgba(0,0,0,0)');
+        const glow = ctx.createRadialGradient(width / 2, height * 0.46, 0, width / 2, height * 0.46, height * 0.62);
+        glow.addColorStop(0, isDark ? 'rgba(255,255,255,0.11)' : 'rgba(255,255,255,0.5)');
+        glow.addColorStop(0.55, isDark ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.12)');
+        glow.addColorStop(1, isDark ? 'rgba(0,0,0,0.34)' : 'rgba(0,0,0,0.08)');
         ctx.fillStyle = glow;
         ctx.fillRect(0, 0, width, height);
-        ctx.save();
-        ctx.fillStyle = isDark ? mixHexColors(bgColor, '#ffffff', 0.05) : mixHexColors(bgColor, '#000000', 0.05);
-        ctx.beginPath();
-        ctx.arc(-width * 0.12, height * 0.34, width * 0.62, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
     }
     const noiseTile = getRankingNoiseTile();
     if (noiseTile) {
@@ -10100,62 +10096,111 @@ async function drawChampionPlate(
         }
     }
 
-    // ---- Barra de marca: SALIDA DE 22 a la izquierda, flechas a la derecha ----
-    const barY = pick(96, 250);
-    ctx.save();
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = textColor;
+    // ---- Pie: marca abajo de todo, logo del torneo arriba y renglón encima ----
+    let footerTop = pick(1350 - 44, 1920 - 250);
     if (brandMark) {
         // El logo de la marca (public/marcas/salida-de-22.png), no el texto: va tal cual.
-        const markHeight = u(74);
+        const markHeight = pick(52, 60);
         const markWidth = Math.round((markHeight * (brandMark.naturalWidth || brandMark.width)) / Math.max(brandMark.naturalHeight || brandMark.height, 1));
+        footerTop -= markHeight;
+        ctx.save();
         ctx.imageSmoothingEnabled = true;
         ctx.imageSmoothingQuality = 'high';
-        ctx.drawImage(brandMark, marginX - u(6), barY - markHeight / 2, markWidth, markHeight);
-    } else {
-        ctx.font = `900 ${u(46)}px ${FONT_DHARMA_C}`;
-        ctx.fillText('SALIDA DE 22', marginX, barY);
+        ctx.drawImage(brandMark, (width - markWidth) / 2, footerTop, markWidth, markHeight);
+        ctx.restore();
     }
-    ctx.strokeStyle = textColor;
-    ctx.lineWidth = u(7);
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    const chevronH = u(24);
-    const chevronW = u(14);
-    for (let index = 0; index < 3; index += 1) {
-        const x = width - marginX - u(8) - (2 - index) * u(22) - chevronW;
-        ctx.beginPath();
-        ctx.moveTo(x, barY - chevronH / 2);
-        ctx.lineTo(x + chevronW, barY);
-        ctx.lineTo(x, barY + chevronH / 2);
-        ctx.stroke();
+    if (tournamentLogo) {
+        const logoMaxHeight = pick(84, 130);
+        const logoNaturalWidth = tournamentLogo.naturalWidth || tournamentLogo.width;
+        const logoNaturalHeight = Math.max(tournamentLogo.naturalHeight || tournamentLogo.height, 1);
+        const logoHeight = Math.min(logoMaxHeight, Math.round((innerWidth * logoNaturalHeight) / logoNaturalWidth));
+        const logoWidth = Math.round((logoHeight * logoNaturalWidth) / logoNaturalHeight);
+        footerTop -= logoHeight + pick(18, 28);
+        ctx.save();
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(tournamentLogo, (width - logoWidth) / 2, footerTop, logoWidth, logoHeight);
+        ctx.restore();
     }
-    ctx.restore();
 
-    // ---- Nombre del club: blanco, condensado, ajustado al ancho ----
+    // ---- Renglón del torneo: "— SELECT 12 NORTE · 2026 —" ----
+    const captionParts = [data.tournament, data.season].map((part) => (part || '').trim()).filter(Boolean);
+    if (captionParts.length > 0) {
+        const caption = `— ${captionParts.join(' · ').toUpperCase()} —`;
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillStyle = textColor;
+        spacedCtx.letterSpacing = `${u(1)}px`;
+        let captionSize = pick(28, 34);
+        while (captionSize > u(16)) {
+            ctx.font = `italic 800 ${captionSize}px ${FONT_BODY}`;
+            if (ctx.measureText(caption).width <= innerWidth) break;
+            captionSize -= 1;
+        }
+        footerTop -= pick(20, 30);
+        ctx.fillText(caption, width / 2, footerTop);
+        footerTop -= captionSize;
+        spacedCtx.letterSpacing = '0px';
+        ctx.restore();
+    }
+
+    // ---- Los dos renglones gigantes, medidos sobre la tinta ----
     const clubName = clubs.map((club) => club.name.trim()).join(' Y ').toUpperCase();
-    const nameBaseline = pick(352, 560);
-    ctx.save();
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'alphabetic';
-    ctx.fillStyle = textColor;
-    setFittedFont(ctx, clubName, innerWidth, '900', u(210), FONT_DHARMA_C, u(60));
-    ctx.fillText(clubName, width / 2, nameBaseline);
-    ctx.restore();
+    const headline = `${clubs.length > 1 ? 'CAMPEONES' : 'CAMPEÓN'}${data.tag ? ` ${data.tag.trim().toUpperCase()}` : ''}`;
+    const measureLine = (text: string, family: string) => {
+        const weight = resolveCanvasFontWeight(family, '900');
+        ctx.font = `${weight} 100px ${family}`;
+        const metrics = ctx.measureText(text);
+        const size = (innerWidth * 100) / (metrics.actualBoundingBoxLeft + metrics.actualBoundingBoxRight);
+        const capHeight = (ctx.measureText('H').actualBoundingBoxAscent * size) / 100;
+        return { text, font: `${weight} ${size}px ${family}`, left: (metrics.actualBoundingBoxLeft * size) / 100, capHeight };
+    };
+    const blockTop = pick(56, 230);
+    const blockBottom = footerTop - pick(30, 44);
+    const available = blockBottom - blockTop;
+    // El escudo pisa la cuarta parte de abajo del nombre y CAMPEÓN pisa al escudo.
+    const crestRoom = (nameHeight: number, wordHeight: number) => (available - nameHeight * 0.75 - wordHeight) / 0.78;
+    let nameLine = measureLine(clubName, FONT_DHARMA_C);
+    let wordLine = measureLine(headline, FONT_DHARMA_C);
+    if (crestRoom(nameLine.capHeight, wordLine.capHeight) < u(500)) {
+        // Con un nombre corto la C sale tan alta que no deja lugar para el escudo:
+        // la M llena el mismo ancho con menos alto.
+        nameLine = measureLine(clubName, FONT_DHARMA_M);
+        wordLine = measureLine(headline, FONT_DHARMA_M);
+    }
+    const crestHeight = Math.round(Math.min(crestRoom(nameLine.capHeight, wordLine.capHeight), pick(620, 760)));
+    const clusterHeight = nameLine.capHeight * 0.75 + crestHeight * 0.78 + wordLine.capHeight;
+    const nameBaseline = Math.round(blockTop + (available - clusterHeight) / 2 + nameLine.capHeight);
+    const crestTop = Math.round(nameBaseline - nameLine.capHeight * 0.25);
+    const crestCenterY = crestTop + crestHeight / 2;
+    const wordBaseline = Math.round(crestTop + crestHeight * 0.78 + wordLine.capHeight);
 
-    // ---- Escudo(s) al centro; el titular los pisa un poco ----
-    // En el post, como en las referencias, el escudo llena el hueco entre el
-    // nombre y el titular y los dos lo pisan (el texto se dibuja después, encima).
-    // El story ya tenía aire de sobra y quedó como estaba.
-    const crestCenterY = pick(650, 985);
-    const crestHeight = pick(760, 680);
+    const drawGiantLine = (line: typeof nameLine, baseline: number, color: string) => {
+        ctx.save();
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillStyle = color;
+        ctx.shadowColor = 'rgba(0,0,0,0.42)';
+        ctx.shadowBlur = u(44);
+        ctx.shadowOffsetY = u(14);
+        ctx.font = line.font;
+        ctx.fillText(line.text, marginX + line.left, baseline);
+        ctx.restore();
+    };
+
+    // Capa 1: el nombre del club.
+    drawGiantLine(nameLine, nameBaseline, textColor);
+
+    // Capa 2: el escudo (o los dos) pisa el nombre. La caja compensa el margen
+    // interno de drawOverflowCrest para que el escudo mida lo que se calculó.
+    const crestBoxHeight = Math.round(crestHeight / 0.84);
     if (clubs.length === 1) {
         drawOverflowCrest(ctx, {
             x: width / 2,
             y: crestCenterY,
-            width: pick(900, 760),
-            height: crestHeight,
+            width: u(900),
+            height: crestBoxHeight,
             img: images[0],
             label: clubs[0].name,
             rawLogo: clubs[0].logo || '',
@@ -10163,14 +10208,14 @@ async function drawChampionPlate(
             showFrame: false,
         });
     } else {
-        const boxWidth = u(440);
-        const gap = u(40);
+        const boxWidth = u(460);
+        const gap = u(20);
         clubs.forEach((club, index) => {
             drawOverflowCrest(ctx, {
                 x: width / 2 + (index === 0 ? -1 : 1) * (boxWidth / 2 + gap / 2),
                 y: crestCenterY,
                 width: boxWidth,
-                height: Math.round(crestHeight * 0.8),
+                height: crestBoxHeight,
                 img: images[index],
                 label: club.name,
                 rawLogo: club.logo || '',
@@ -10180,39 +10225,8 @@ async function drawChampionPlate(
         });
     }
 
-    // ---- CAMPEÓN gigante en acento ----
-    const headline = `${clubs.length > 1 ? 'CAMPEONES' : 'CAMPEÓN'}${data.tag ? ` ${data.tag.trim().toUpperCase()}` : ''}`;
-    const headlineBaseline = pick(1108, 1540);
-    ctx.save();
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'alphabetic';
-    ctx.fillStyle = accentColor;
-    ctx.shadowColor = 'rgba(0,0,0,0.38)';
-    ctx.shadowBlur = u(26);
-    ctx.shadowOffsetY = u(8);
-    setFittedFont(ctx, headline, width - u(140), '900', u(640), FONT_DHARMA_C, u(140));
-    ctx.fillText(headline, width / 2, headlineBaseline);
-    ctx.restore();
-
-    // ---- Renglón del torneo: "— SELECT 12 NORTE · 2026 —" ----
-    const captionParts = [data.tournament, data.season].map((part) => (part || '').trim()).filter(Boolean);
-    if (captionParts.length > 0) {
-        const caption = `— ${captionParts.join(' · ').toUpperCase()} —`;
-        ctx.save();
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillStyle = textColor;
-        spacedCtx.letterSpacing = `${u(1)}px`;
-        let captionSize = u(34);
-        while (captionSize > u(16)) {
-            ctx.font = `italic 800 ${captionSize}px ${FONT_BODY}`;
-            if (ctx.measureText(caption).width <= innerWidth) break;
-            captionSize -= 1;
-        }
-        ctx.fillText(caption, width / 2, headlineBaseline + pick(64, 76));
-        spacedCtx.letterSpacing = '0px';
-        ctx.restore();
-    }
+    // Capa 3: CAMPEÓN en acento pisa el escudo.
+    drawGiantLine(wordLine, wordBaseline, accentColor);
 }
 
 // ---------------------------------------------------------------------------

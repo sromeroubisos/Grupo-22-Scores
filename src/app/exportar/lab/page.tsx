@@ -76,6 +76,19 @@ const CHAMPION: ChampionData = {
     season: '2026',
 };
 
+// La misma placa con los otros dos extremos: nombre corto y título compartido.
+const CHAMPION_SHORT: ChampionData = {
+    club: { name: 'Huazihul', logo: '/clubs/sb-huazihul.png' },
+    tournament: 'Copa Plata del Oeste',
+    season: '2026',
+};
+const CHAMPION_SHARED: ChampionData = {
+    club: { name: 'Tucumán Rugby', logo: '/clubs/sb-tucuman-rugby-club.png' },
+    coChampions: [{ name: 'Huirapuca', logo: '/clubs/sb-huirapuca.png' }],
+    tournament: 'Torneo Anual de Tucumán',
+    season: '2026',
+};
+
 // La placa ladder: valor principal + unidad, secundario y flecha por fila.
 const LADDER: StandingsData = {
     ...STANDINGS,
@@ -393,17 +406,19 @@ export default function ExportLabPage() {
                         className="lab-preview"
                     />
                 </figure>
-                <figure style={{ margin: 0 }}>
-                    <figcaption style={{ marginBottom: 8, fontWeight: 700 }}>Placa campeón</figcaption>
-                    <ExportImagePreview
-                        template="champion"
-                        data={CHAMPION}
-                        visualFamily={family}
-                        format={format}
-                        previewColors={previewColors}
-                        className="lab-preview"
-                    />
-                </figure>
+                {[CHAMPION, CHAMPION_SHORT, CHAMPION_SHARED].map((champion) => (
+                    <figure key={champion.club.name} style={{ margin: 0 }}>
+                        <figcaption style={{ marginBottom: 8, fontWeight: 700 }}>Placa campeón: {champion.club.name}</figcaption>
+                        <ExportImagePreview
+                            template="champion"
+                            data={champion}
+                            visualFamily={family}
+                            format={format}
+                            previewColors={previewColors}
+                            className="lab-preview"
+                        />
+                    </figure>
+                ))}
                 <figure style={{ margin: 0 }}>
                     <figcaption style={{ marginBottom: 8, fontWeight: 700 }}>Placa ladder</figcaption>
                     <ExportImagePreview
