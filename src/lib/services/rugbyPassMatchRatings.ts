@@ -146,6 +146,34 @@ interface CachedMatchRow {
 }
 
 /**
+ * CUANTO TIEMPO SE LE SIGUE INSISTIENDO A UN PARTIDO SIN PLANILLA.
+ *
+ * `ok: false` no alcanza para darlo por cerrado: `getRugbyPassPlayerStats` se
+ * traga los errores, asi que una falla pasajera se ve igual que un partido sin
+ * rubros. Medido: Bath-Sale (`rp-294931`) quedo marcado a las 3,5 h del partido
+ * y dos dias despues daba 46 puntajes. Desde 2026-10-12 pasaron 67 partidos asi.
+ *
+ * Una semana y no para siempre: el que de verdad no publica rubros no puede
+ * ocupar cupo del cron toda la vida.
+ */
+export const VENTANA_DE_REINTENTO_MS = 7 * 24 * 60 * 60 * 1000;
+
+/**
+ * Si un partido hay que pedirlo. `marca` es el `ok` de su corrida anterior:
+ * `undefined` si nunca se miro.
+ */
+export function hayQuePuntuar(
+    kickoffIso: string,
+    marca: boolean | undefined,
+    nowMs: number,
+    ventanaMs: number = VENTANA_DE_REINTENTO_MS
+): boolean {
+    if (marca === undefined) return true;
+    if (marca) return false;
+    return nowMs - new Date(kickoffIso).getTime() <= ventanaMs;
+}
+
+/**
  * Los partidos terminados que todavia no se puntuaron, del mas nuevo al mas
  * viejo: el hincha mira la fecha pasada, no la de hace un ano.
  *
@@ -157,8 +185,12 @@ interface CachedMatchRow {
 export async function pendingMatches(
     supabase: SupabaseClient,
     limit: number,
-    { oldestFirst = false }: { oldestFirst?: boolean } = {}
+    {
+        oldestFirst = false,
+        ventanaDeReintentoMs = VENTANA_DE_REINTENTO_MS,
+    }: { oldestFirst?: boolean; ventanaDeReintentoMs?: number } = {}
 ): Promise<RateableMatch[]> {
+    const ahora = Date.now();
     const salida: RateableMatch[] = [];
     const TANDA = 200;
     const TOPE_RECORRIDO = 2000;
@@ -178,14 +210,14 @@ export async function pendingMatches(
 
         const { data: marcados, error: marcaError } = await supabase
             .from('external_match_rating_runs')
-            .select('match_id')
+            .select('match_id, ok')
             .in('match_id', filas.map((f) => f.id));
         if (marcaError) throw marcaError;
 
-        const yaEstan = new Set((marcados ?? []).map((m) => String(m.match_id)));
+        const marcas = new Map((marcados ?? []).map((m) => [String(m.match_id), m.ok === true]));
         for (const fila of filas) {
             if (salida.length >= limit) break;
-            if (yaEstan.has(fila.id)) continue;
+            if (!hayQuePuntuar(fila.date_time, marcas.get(fila.id), ahora, ventanaDeReintentoMs)) continue;
             const homeTeamId = String(fila.home_team?.id ?? '');
             const awayTeamId = String(fila.away_team?.id ?? '');
             // Sin los dos ids no se arma la URL del partido y el proveedor

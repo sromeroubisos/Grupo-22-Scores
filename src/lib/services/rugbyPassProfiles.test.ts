@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { puntajeMasCercano, sinRepetidos } from './rugbyPassProfiles.ts';
+import { hayQuePuntuar } from './rugbyPassMatchRatings.ts';
 import type { RugbyPassPlayerMatch } from './rugbyPassCatalog.ts';
 
 /**
@@ -18,6 +19,22 @@ import type { RugbyPassPlayerMatch } from './rugbyPassCatalog.ts';
  */
 
 const ms = (iso: string) => new Date(iso).getTime();
+
+test('a un partido sin planilla se le insiste una semana y despues no', () => {
+    const kickoff = '2026-10-31T15:05:00Z';
+    const dia = 24 * 60 * 60 * 1000;
+
+    // Nunca mirado: se pide. Ya puntuado: no se paga dos veces.
+    assert.equal(hayQuePuntuar(kickoff, undefined, ms(kickoff) + 400 * dia), true);
+    assert.equal(hayQuePuntuar(kickoff, true, ms(kickoff) + dia), false);
+
+    // Es el caso de Bath-Sale: marcado sin planilla a las horas del partido.
+    assert.equal(hayQuePuntuar(kickoff, false, ms(kickoff) + 6 * dia), true);
+    assert.equal(hayQuePuntuar(kickoff, false, ms(kickoff) + 8 * dia), false);
+
+    // La ventana ampliada del backfill alcanza a los viejos.
+    assert.equal(hayQuePuntuar(kickoff, false, ms(kickoff) + 20 * dia, 30 * dia), true);
+});
 
 test('el corrimiento por huso cruza igual, lo mire quien lo mire', () => {
     // Lo que dice la cache del calendario: la hora de verdad.
