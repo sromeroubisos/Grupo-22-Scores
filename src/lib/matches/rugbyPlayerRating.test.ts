@@ -13,7 +13,7 @@ import {
     minutesFromLineup,
     rateRugbyPlayer,
 } from './rugbyPlayerRating.ts';
-import { REFERENCIAS_POR_PUESTO, SESGO_POR_PUESTO, TOTAL_DE_EQUIPO } from './rugbyRatingReferences.generated.ts';
+import { ESCALA_POR_PUESTO, REFERENCIAS_POR_PUESTO, SESGO_POR_PUESTO, TOTAL_DE_EQUIPO } from './rugbyRatingReferences.generated.ts';
 
 /**
  * El partido exactamente promedio DE UN PUESTO, en ochenta minutos.
@@ -80,8 +80,12 @@ test('el jugador promedio de su puesto sale neutro', () => {
         // Con ochenta minutos la confianza es 1, asi que la señal es el
         // recentrado y nada mas. Si alguien lo aplica dos veces, o se olvida de
         // usar el del puesto, esto salta.
+        // Si el recentrado deja la señal arriba de cero, la subida pasa por la
+        // escala del puesto; abajo de cero, no.
+        const bruta = -SESGO_POR_PUESTO[puesto];
+        const esperada = bruta >= 0 ? bruta / ESCALA_POR_PUESTO[puesto] : bruta;
         assert.ok(
-            Math.abs(r.signal + SESGO_POR_PUESTO[puesto]) < 1e-9,
+            Math.abs(r.signal - esperada) < 1e-9,
             `el puesto ${puesto} dio señal ${r.signal} y su sesgo es ${SESGO_POR_PUESTO[puesto]}`
         );
         assert.ok(Math.abs(r.value - RATING_BASE) < 1, `el partido promedio del puesto ${puesto} dio ${r.value}`);
