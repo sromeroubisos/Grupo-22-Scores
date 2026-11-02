@@ -4075,6 +4075,34 @@ export default function TournamentDetailPage({
         };
     };
 
+    // Placa de cualquier equipo de la tabla: clasificado, semifinalista, finalista.
+    const renderTeamPlateExport = (className?: string) => {
+        if (isMotorsportTournament) return null;
+        const byName = new Map<string, { name: string; logo: string }>();
+        [...standingsExportRows, ...(standingsExportGroups || []).flatMap((group: any) => group.rows || [])].forEach((row: any) => {
+            const name = String(row.teamFull || row.team || '').trim();
+            if (name && !byName.has(name)) byName.set(name, { name, logo: row.teamLogo || '' });
+        });
+        const clubChoices = [...byName.values()].sort((a, b) => a.name.localeCompare(b.name, 'es'));
+        if (clubChoices.length === 0) return null;
+        return (
+            <ExportImage
+                className={className}
+                template="champion"
+                triggerLabel="Placa"
+                filename={`placa-${tournamentData?.name || 'torneo'}`}
+                data={{
+                    club: clubChoices[0],
+                    clubChoices,
+                    tournament: tournamentData?.name || 'Torneo',
+                    season: currentSeasonOption?.label || details?.season,
+                    headline: 'CLASIFICADO',
+                    tournamentLogo,
+                }}
+            />
+        );
+    };
+
     const renderMobileHeroExport = () => {
         if (activeTab === 'results') {
             return (
@@ -4156,21 +4184,24 @@ export default function TournamentDetailPage({
 
         if (activeTab === 'standings') {
             return (
-                <ExportImage
-                    className={styles.mobileHeroExportAction}
-                    template="standings"
-                    filename={`tabla-${tournamentData?.name}`}
-                    data={{
-                        title: tournamentData?.name || 'Tabla de Posiciones',
-                        subtitle: selectedStandingsScopeView?.subtitle || details?.season || 'Clasificacion',
-                        tournamentLogo,
-                        rows: isMotorsportTournament ? motorsportStandingsExportRows : standingsExportRows,
-                        groups: isMotorsportTournament ? [] : standingsExportGroups,
-                        columnLabels: standingsExportColumnLabels,
-                        plainDiff: standingsColumnMode === 'circuit-global',
-                        showPositionDelta: false,
-                    }}
-                />
+                <>
+                    <ExportImage
+                        className={styles.mobileHeroExportAction}
+                        template="standings"
+                        filename={`tabla-${tournamentData?.name}`}
+                        data={{
+                            title: tournamentData?.name || 'Tabla de Posiciones',
+                            subtitle: selectedStandingsScopeView?.subtitle || details?.season || 'Clasificacion',
+                            tournamentLogo,
+                            rows: isMotorsportTournament ? motorsportStandingsExportRows : standingsExportRows,
+                            groups: isMotorsportTournament ? [] : standingsExportGroups,
+                            columnLabels: standingsExportColumnLabels,
+                            plainDiff: standingsColumnMode === 'circuit-global',
+                            showPositionDelta: false,
+                        }}
+                    />
+                    {renderTeamPlateExport(styles.mobileHeroExportAction)}
+                </>
             );
         }
 
@@ -5769,6 +5800,7 @@ export default function TournamentDetailPage({
                                     showPositionDelta: false,
                                 }}
                             />
+                            {renderTeamPlateExport()}
                         </div>
 
                         {isMotorsportTournament ? (

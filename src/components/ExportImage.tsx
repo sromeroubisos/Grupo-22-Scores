@@ -267,6 +267,10 @@ export interface ChampionData {
     tournament: string;
     season?: string;
     tag?: string;
+    // La palabra gigante. Vacía = CAMPEÓN / CAMPEONES según cuántos clubes haya.
+    headline?: string;
+    // Equipos elegibles en el modal: con esto la placa sale para cualquiera del torneo.
+    clubChoices?: ChampionClubData[];
     tournamentLogo?: string;
     // Foto de fondo (la que se sube en el modal o viene de "Tus fondos").
     backgroundImage?: string;
@@ -451,6 +455,8 @@ interface ExportImageProps {
     data: ExportData;
     filename?: string;
     className?: string;
+    // Texto del boton cuando conviven dos exports en la misma barra.
+    triggerLabel?: string;
     // Placa ladder: estadisticas que se pueden sumar como columnas. Se eligen
     // dentro del modal y `buildData` rearma la placa con los ids marcados.
     statOptions?: Array<{ id: string; label: string; title?: string }>;
@@ -1057,7 +1063,7 @@ export default function ExportImage(props: ExportImageProps) {
     return <ExportImageInner key={props.template} {...props} />;
 }
 
-function ExportImageInner({ template, data: liveData, filename = 'g22-export', className = '', statOptions, buildData }: ExportImageProps) {
+function ExportImageInner({ template, data: liveData, filename = 'g22-export', className = '', triggerLabel, statOptions, buildData }: ExportImageProps) {
     const supabase = useMemo(() => createClient(), []);
     const { user } = useAuth();
     const guestInvite = useGuestExportInvite();
@@ -1099,6 +1105,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
     );
     const baseData = showModal ? (statsData ?? frozenData) : liveData;
     const [selectedBracketIndex, setSelectedBracketIndex] = useState(0);
+    const [plateClubIndex, setPlateClubIndex] = useState(0);
     const [matchBackgroundUpload, setMatchBackgroundUpload] = useState<MatchBackgroundUpload | null>(() => {
         if (template !== 'matchStats') return null;
         const backgroundImage = (baseData as MatchStatsData).backgroundImage?.trim();
@@ -1113,9 +1120,13 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
     const data = useMemo<ExportData>(() => {
         // La placa de campeón toma la foto de fondo igual que el cuadro.
         if (template === 'champion') {
-            return matchBackgroundUpload?.src
-                ? { ...(baseData as ChampionData), backgroundImage: matchBackgroundUpload.src }
-                : baseData;
+            const championBase = baseData as ChampionData;
+            const chosenClub = championBase.clubChoices?.[plateClubIndex];
+            return {
+                ...championBase,
+                ...(chosenClub ? { club: chosenClub, coChampions: [] } : {}),
+                ...(matchBackgroundUpload?.src ? { backgroundImage: matchBackgroundUpload.src } : {}),
+            };
         }
         if (template !== 'playoffBracket') return baseData;
         const bracketData = baseData as PlayoffBracketData;
@@ -1130,7 +1141,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
             rounds: choice.rounds,
             subtitle: [choice.label, bracketData.subtitle].filter(Boolean).join(' · '),
         };
-    }, [baseData, bracketChoices, matchBackgroundUpload, safeBracketIndex, template]);
+    }, [baseData, bracketChoices, matchBackgroundUpload, plateClubIndex, safeBracketIndex, template]);
     const [isPortalReady, setIsPortalReady] = useState(false);
     const [format, setFormat] = useState<ExportFormat>('1080x1350');
     const [status, setStatus] = useState('');
@@ -1140,6 +1151,8 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
     const [customTournamentName, setCustomTournamentName] = useState(defaultTournamentName);
     // Placa de campeón: lo que se suma al titular ("M15" -> CAMPEÓN M15). Vacío por defecto.
     const [championExtra, setChampionExtra] = useState('');
+    // La palabra gigante de la placa: se elige en el modal o se escribe a mano.
+    const [plateHeadline, setPlateHeadline] = useState(template === 'champion' ? (liveData as ChampionData).headline ?? '' : '');
     const [selectedTimeZoneId, setSelectedTimeZoneId] = useState(DEFAULT_TIMEZONE_PRESET_ID);
     const [isTimeZoneDropdownOpen, setIsTimeZoneDropdownOpen] = useState(false);
     const [matchExportMode, setMatchExportMode] = useState<MatchExportMode>(defaultMatchExportMode);
@@ -1679,12 +1692,12 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
         if (template === 'lineups') return `Alineaciones · ${getLineupExportModeLabel(lineupExportMode)}`;
         if (template === 'squad') return 'Plantel completo';
         if (template === 'teamOfWeek') return 'Equipo de la semana';
-        if (template === 'champion') return 'Placa de campeon';
+        if (template === 'champion') return 'Placa de equipo';
         return 'Configuracion de exportacion';
     }, [dailyMatchesTimeMode, isPalmares, lineupExportMode, matchExportLayout, matchExportMode, selectedStandingsGroupLabel, standingsExportMode, template]);
     const exportSummaryChips = useMemo(() => {
         const chips = [selectedFormatConfig.label];
-        chips.push(isRankingPoster ? 'Poster Ranking' : isLadder ? 'Placa Ladder' : isBracket ? 'Cuadro Playoff' : isChampion ? 'Placa Campeon' : (isPalmares && visualFamily !== 'fanV5') ? 'Poster Palmares' : getExportVisualFamilyLabel(visualFamily));
+        chips.push(isRankingPoster ? 'Poster Ranking' : isLadder ? 'Placa Ladder' : isBracket ? 'Cuadro Playoff' : isChampion ? 'Placa Equipo' : (isPalmares && visualFamily !== 'fanV5') ? 'Poster Palmares' : getExportVisualFamilyLabel(visualFamily));
         if (template === 'matchStats') {
             chips.push(getMatchExportLayoutLabel(matchExportLayout));
         } else if (template === 'standings') {
@@ -2384,7 +2397,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
             } else if (template === 'teamOfWeek') {
                 await drawG22BaseTeamOfWeek(ctx, canvas, exportData as TeamOfWeekData, config, accentColor, bgColor, brandLogo);
             } else if (template === 'champion') {
-                await drawChampionPlate(ctx, canvas, { ...(exportData as ChampionData), tag: championExtra.trim() }, accentColor, bgColor);
+                await drawChampionPlate(ctx, canvas, { ...(exportData as ChampionData), tag: championExtra.trim(), headline: plateHeadline }, accentColor, bgColor);
             } else if (template === 'playoffBracket') {
                 // El cuadro tiene su afiche navy, salvo en Fan V5, que lo arma con su hoja clara.
                 await drawPlayoffBracket(ctx, canvas, exportData as PlayoffBracketData, config, accentColor, bgColor, brandLogo, visualFamily);
@@ -2462,7 +2475,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
         }
 
         if (template === 'champion') {
-            return { ...(exportData as ChampionData), tag: championExtra.trim() };
+            return { ...(exportData as ChampionData), tag: championExtra.trim(), headline: plateHeadline };
         }
 
         return exportData;
@@ -2471,6 +2484,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
         championExtra,
         customTournamentName,
         data,
+        plateHeadline,
         editorialCompetitionLogoUpload?.src,
         editorialContextLabel,
         editorialGradientUpload?.src,
@@ -2573,7 +2587,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                 <span className={exportJetBrainsMonoFont.className}>0123456789 +-</span>
             </div>
             <button className={styles.exportButton} onClick={openModal} disabled={isExporting} type="button">
-                {isExporting ? 'Generando...' : 'Exportar'}
+                {isExporting ? 'Generando...' : (triggerLabel || 'Exportar')}
             </button>
             {status && <div className={styles.status}>{status}</div>}
 
@@ -2909,6 +2923,52 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                                 </div>
                             )}
 
+                            {template === 'champion' && (data as ChampionData).clubChoices?.length ? (
+                                <div className={styles.modalSection}>
+                                    <label className={styles.modalLabel} htmlFor="plate-club">Equipo</label>
+                                    <select
+                                        id="plate-club"
+                                        className={styles.modalInput}
+                                        value={plateClubIndex}
+                                        onChange={(event) => setPlateClubIndex(Number(event.target.value))}
+                                    >
+                                        {(data as ChampionData).clubChoices?.map((club, index) => (
+                                            <option key={`${club.name}-${index}`} value={index}>{club.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            ) : null}
+
+                            {template === 'champion' && (
+                                <div className={styles.modalSection}>
+                                    <label className={styles.modalLabel} htmlFor="plate-headline">Palabra de la placa</label>
+                                    <div className={styles.plateWords}>
+                                        {getPlateHeadlineOptions(Boolean((data as ChampionData).coChampions?.length)).map((word) => {
+                                            const isActive = plateHeadline.trim().toUpperCase() === word;
+                                            return (
+                                                <button
+                                                    key={word}
+                                                    type="button"
+                                                    className={`${styles.plateWord} ${isActive ? styles.plateWordActive : ''}`}
+                                                    aria-pressed={isActive}
+                                                    onClick={() => setPlateHeadline(word)}
+                                                >
+                                                    {word}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                    <input
+                                        id="plate-headline"
+                                        className={styles.modalInput}
+                                        value={plateHeadline}
+                                        onChange={(event) => setPlateHeadline(event.target.value)}
+                                        placeholder="O escribí otra. Ej: SUBCAMPEÓN"
+                                        maxLength={20}
+                                    />
+                                </div>
+                            )}
+
                             {template === 'champion' && (
                                 <div className={styles.modalSection}>
                                     <label className={styles.modalLabel}>Texto junto al titular</label>
@@ -2916,7 +2976,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                                         className={styles.modalInput}
                                         value={championExtra}
                                         onChange={(event) => setChampionExtra(event.target.value)}
-                                        placeholder="Opcional. Ej: M15 (queda CAMPEÓN M15)"
+                                        placeholder="Opcional. Ej: M15"
                                         maxLength={24}
                                     />
                                 </div>
@@ -4436,6 +4496,12 @@ function paintPreviewCanvas(target: HTMLCanvasElement | null, rendered: HTMLCanv
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(rendered, 0, 0, rendered.width, rendered.height, 0, 0, target.width, target.height);
+}
+
+function getPlateHeadlineOptions(plural: boolean): string[] {
+    return plural
+        ? ['CAMPEONES', 'FINALISTAS', 'SEMIFINALISTAS', 'CLASIFICADOS']
+        : ['CAMPEÓN', 'FINALISTA', 'SEMIFINALISTA', 'CLASIFICADO'];
 }
 
 function getDefaultTournamentName(template: ExportTemplate, data: ExportData): string {
@@ -10147,7 +10213,8 @@ async function drawChampionPlate(
 
     // ---- Los dos renglones gigantes, medidos sobre la tinta ----
     const clubName = clubs.map((club) => club.name.trim()).join(' Y ').toUpperCase();
-    const headline = `${clubs.length > 1 ? 'CAMPEONES' : 'CAMPEÓN'}${data.tag ? ` ${data.tag.trim().toUpperCase()}` : ''}`;
+    const word = (data.headline || '').trim().toUpperCase() || (clubs.length > 1 ? 'CAMPEONES' : 'CAMPEÓN');
+    const headline = `${word}${data.tag ? ` ${data.tag.trim().toUpperCase()}` : ''}`;
     const measureLine = (text: string, family: string) => {
         const weight = resolveCanvasFontWeight(family, '900');
         ctx.font = `${weight} 100px ${family}`;

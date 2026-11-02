@@ -82,6 +82,13 @@ const CHAMPION_SHORT: ChampionData = {
     tournament: 'Copa Plata del Oeste',
     season: '2026',
 };
+const PLATE_SEMIFINALIST: ChampionData = {
+    club: { name: 'Huazihul', logo: '/clubs/sb-huazihul.png' },
+    tournament: 'Copa Plata del Oeste',
+    season: '2026',
+    headline: 'SEMIFINALISTA',
+};
+
 const CHAMPION_SHARED: ChampionData = {
     club: { name: 'Tucumán Rugby', logo: '/clubs/sb-tucuman-rugby-club.png' },
     coChampions: [{ name: 'Huirapuca', logo: '/clubs/sb-huirapuca.png' }],
@@ -406,8 +413,8 @@ export default function ExportLabPage() {
                         className="lab-preview"
                     />
                 </figure>
-                {[CHAMPION, CHAMPION_SHORT, CHAMPION_SHARED].map((champion) => (
-                    <figure key={champion.club.name} style={{ margin: 0 }}>
+                {[CHAMPION, CHAMPION_SHORT, PLATE_SEMIFINALIST, CHAMPION_SHARED].map((champion) => (
+                    <figure key={`${champion.club.name}-${champion.headline || ''}`} style={{ margin: 0 }}>
                         <figcaption style={{ marginBottom: 8, fontWeight: 700 }}>Placa campeón: {champion.club.name}</figcaption>
                         <ExportImagePreview
                             template="champion"

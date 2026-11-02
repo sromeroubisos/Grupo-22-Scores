@@ -1401,6 +1401,17 @@ function TeamDetailInner({ id }: { id: string }) {
                             )}
                         </div>
                         <div className={styles.headerActions}>
+                            {/* El torneo va vacío: se escribe en el modal, un club juega varios. */}
+                            <ExportImage
+                                template="champion"
+                                triggerLabel="Placa"
+                                filename={`placa-${teamName}`}
+                                data={{
+                                    club: { name: teamName, logo: teamLogoUrl },
+                                    tournament: '',
+                                    headline: 'CLASIFICADO',
+                                }}
+                            />
                             {isSuperAdminUser && adminEditHref ? (
                                 <Link href={adminEditHref} prefetch={false} className={styles.adminActionBtn}>
                                     Editar logo
