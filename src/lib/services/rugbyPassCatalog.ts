@@ -887,8 +887,14 @@ const PUESTO_PATEADOR = 'Fly Half';
 /** `<div class="detail"> <h3>Height</h3> <div>192cm</div> </div>` */
 const RE_DETALLE = /<div class="detail">\s*<h3>([^<]+)<\/h3>\s*<div>([\s\S]*?)<\/div>\s*<\/div>/gi;
 
-/** El `<h1>` del encabezado, con el id de pagina del jugador al lado. */
-const RE_ENCABEZADO = /<div class="title-inner" id="(\d+)">\s*<h1>\s*([\s\S]*?)\s*<\/h1>/i;
+/**
+ * El `<h1>` del encabezado, con el id de pagina del jugador al lado.
+ *
+ * La etiqueta admite cualquier cosa antes del `>`: en 2026-11 el sitio paso a
+ * escribir `<h1 >`, y exigir `<h1>` pelado dejaba toda ficha sin nombre, o sea
+ * en `null`, y la pantalla sin partidos ni temporadas.
+ */
+const RE_ENCABEZADO = /<div class="title-inner" id="(\d+)">\s*<h1[^>]*>\s*([\s\S]*?)\s*<\/h1>/i;
 
 /** El link al club actual, en la barra fija de arriba. */
 const RE_CLUB_ACTUAL = new RegExp(

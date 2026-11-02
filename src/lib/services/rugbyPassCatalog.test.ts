@@ -436,6 +436,14 @@ test('un 200 vacio no es un jugador', () => {
     assert.equal(parseRugbyPassPlayerProfile('', 'lo-que-sea'), null);
 });
 
+test('el h1 con un espacio antes del cierre sigue siendo el nombre', () => {
+    // En 2026-11 el sitio paso a escribir `<h1 >`. Sin nombre la ficha es `null`,
+    // cae al catalogo y el jugador se queda sin partidos ni temporadas.
+    const conEspacio = FICHA.replace('<h1> Pablo Matera </h1>', '<h1 > Pablo Matera </h1>');
+    assert.notEqual(conEspacio, FICHA);
+    assert.equal(parseRugbyPassPlayerProfile(conEspacio, 'pablo-matera')?.name, 'Pablo Matera');
+});
+
 test('un `]` adentro de un nombre no corta el JSON embebido', () => {
     // Balanceando corchetes sin mirar las comillas, el array se cierra en el
     // primer `]` de adentro de una cadena y el JSON queda truncado: no tira

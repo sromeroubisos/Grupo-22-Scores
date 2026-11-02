@@ -6,6 +6,10 @@
  *   npx tsx src/scripts/rugbypass-backfill-ratings.ts --execute
  *   npx tsx src/scripts/rugbypass-backfill-ratings.ts --execute --limit 50
  *   npx tsx src/scripts/rugbypass-backfill-ratings.ts --execute --viejos
+ *   npx tsx src/scripts/rugbypass-backfill-ratings.ts --execute --reintentar 30
+ *
+ * `--reintentar <dias>` vuelve a pedir los partidos de esos ultimos dias que
+ * quedaron sin planilla. El cron ya insiste una semana; esto es para lo anterior.
  *
  * El cron `rugbypass-ratings` alcanza para ir al dia —una fecha de rugby son
  * unos cuarenta partidos por semana— pero no para la historia que ya esta en la
@@ -37,6 +41,8 @@ const EJECUTAR = process.argv.includes('--execute');
 const VIEJOS = process.argv.includes('--viejos');
 const iLimite = process.argv.indexOf('--limit');
 const LIMITE = iLimite >= 0 ? Number(process.argv[iLimite + 1]) || 0 : 0;
+const iReintentar = process.argv.indexOf('--reintentar');
+const DIAS_REINTENTO = iReintentar >= 0 ? Number(process.argv[iReintentar + 1]) || 0 : 0;
 
 /**
  * Tres partidos a la vez. Son veintitres requests cada uno: mas que esto es
@@ -56,7 +62,10 @@ async function main() {
     const supabase = createClient(URL_BASE!, KEY!, { auth: { persistSession: false } });
 
     const cupo = LIMITE > 0 ? LIMITE : 5000;
-    const pendientes = await pendingMatches(supabase, cupo, { oldestFirst: VIEJOS });
+    const pendientes = await pendingMatches(supabase, cupo, {
+        oldestFirst: VIEJOS,
+        ...(DIAS_REINTENTO > 0 ? { ventanaDeReintentoMs: DIAS_REINTENTO * 24 * 60 * 60 * 1000 } : {}),
+    });
 
     console.log(`Partidos sin puntuar: ${pendientes.length}${VIEJOS ? ' (del mas viejo al mas nuevo)' : ''}`);
     if (pendientes.length === 0) return;
