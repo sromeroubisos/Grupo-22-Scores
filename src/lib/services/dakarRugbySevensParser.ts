@@ -876,8 +876,15 @@ export function parseDakarPlayByPlay(html: string): DakarTimelineEvent[] {
         const end = position + 1 < groups.length ? (groups[position + 1].index ?? flat.length) : flat.length;
         const chunk = flat.slice(start, end);
 
-        for (const row of chunk.matchAll(/<tr> <td class="pbpJersey">([\s\S]*?)<\/td><td class="pbpName">([\s\S]*?)<\/td><td class="time-result-action">([\s\S]*?)<\/td><td class="pbpJersey">([\s\S]*?)<\/td><td class="pbpName">([\s\S]*?)<\/td> <\/tr>/g)) {
-            const action = firstMatch(row[3], /class="action">([\s\S]*?)<\/div>/);
+        const rows = Array.from(chunk.matchAll(/<tr> <td class="pbpJersey">([\s\S]*?)<\/td><td class="pbpName">([\s\S]*?)<\/td><td class="time-result-action">([\s\S]*?)<\/td><td class="pbpJersey">([\s\S]*?)<\/td><td class="pbpName">([\s\S]*?)<\/td> <\/tr>/g));
+        const actionOf = (row: RegExpMatchArray) => firstMatch(row[3], /class="action">([\s\S]*?)<\/div>/);
+        // Lo que está arriba del cierre del tiempo se cargó después de terminado
+        // y no pasó: el visor dejó filas en 0:00 con marcadores imposibles
+        // (29-23 en un 10-17), rojas y drops que su planilla no cuenta.
+        const closing = rows.findIndex((row) => /^end of /i.test(actionOf(row).trim()));
+
+        for (const row of rows.slice(closing + 1)) {
+            const action = actionOf(row);
             const kind = classifyAction(action);
             if (!kind) continue;
 

@@ -61,6 +61,16 @@ function pbpRow(left: string, time: string, action: string, right: string): stri
 
 const side = (numbers: number[], names: string) => `<td class="pbpJersey">${jersey(...numbers)}</td><td class="pbpName">${names}<div class="assistsPlayer c-h-6"> </div></td>`;
 
+test('parseDakarPlayByPlay: lo cargado después del cierre del tiempo no pasó', () => {
+    const html = `<div key="H1" class="group" name="group0"><table><tbody>
+${pbpRow('', '0:00', 'Red Card', side([5], person(ID_D, 'MULIIRA Deogracious')))}
+${pbpRow(side([7], person(ID_B, 'ZAPIOLA Joaquin')), '0:00', 'Drop Goal Scored', '')}
+${pbpRow('', '7:45', 'End of 1st Half', '')}
+${pbpRow(side([6], person(ID_A, 'KANTZ Federico')), '2:31', 'Try Scored', '')}
+</tbody></table></div>`;
+    assert.deepEqual(parseDakarPlayByPlay(html).map((event) => event.type), ['try']);
+});
+
 // La API sirve lo último arriba y separa los tiempos en H2 / H1.
 const PBP_HTML = `<div key="H2" class="group" name="group0"><table><tbody>
 ${pbpRow(side([7], person(ID_B, 'ZAPIOLA Joaquin')), '0:30', 'Try Scored', '')}
