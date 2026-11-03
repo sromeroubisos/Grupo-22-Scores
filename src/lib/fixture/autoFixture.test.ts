@@ -185,3 +185,47 @@ test('simultáneo en todas las fechas, y sin la opción no cambia nada', () => {
     for (const r of rounds) assert.equal(new Set(all.placed.filter((p) => p.roundNumber === r.number).map((p) => p.time)).size, 1);
     assert.deepEqual(placeInSlots(rounds, { ...baseSlots, simultaneous: 'none' }), placeInSlots(rounds, baseSlots));
 });
+
+test('canchas por sede: una sede con 3 canchas juega 3 partidos al mismo horario', () => {
+    const rounds = planRounds({ teams: teams(6), scope: 'all', legs: 1 });
+    const out = placeInSlots(rounds, { ...baseSlots, venues: ['Club X'], fieldsPerVenue: 3 });
+    const first = out.placed.filter((p) => p.roundNumber === 1);
+    assert.deepEqual(first.map((p) => [p.time, p.venue]), [
+        ['10:00', 'Club X · Cancha 1'], ['10:00', 'Club X · Cancha 2'], ['10:00', 'Club X · Cancha 3'],
+    ]);
+    // Sin sede, las canchas se llaman por número.
+    const bare = placeInSlots(rounds, { ...baseSlots, fieldsPerVenue: 2 });
+    assert.deepEqual(bare.placed.filter((p) => p.roundNumber === 1).map((p) => p.venue).slice(0, 2), ['Cancha 1', 'Cancha 2']);
+});
+
+test('horarios ocupados: una cancha sola no pisa los partidos que ya estaban', () => {
+    const rounds = planRounds({ teams: teams(4), scope: 'all', legs: 1 });
+    // Ya hay partidos a las 10:00 y a las 11:30 del primer sábado.
+    const busy = [{ date: '2026-11-07', time: '10:00', venue: '' }, { date: '2026-11-07', time: '11:30', venue: '' }];
+    const out = placeInSlots(rounds, { ...baseSlots, busy });
+    const first = out.placed.filter((p) => p.roundNumber === 1);
+    assert.deepEqual(first.map((p) => [p.date, p.time]), [['2026-11-07', '13:00'], ['2026-11-07', '14:30']]);
+});
+
+test('horarios ocupados: con varias canchas se usa la que queda libre', () => {
+    const rounds = planRounds({ teams: teams(4), scope: 'all', legs: 1 });
+    const busy = [{ date: '2026-11-07', time: '10:00', venue: 'Club X · Cancha 1' }];
+    const out = placeInSlots(rounds, { ...baseSlots, venues: ['Club X'], fieldsPerVenue: 2, busy });
+    const first = out.placed.filter((p) => p.roundNumber === 1);
+    assert.deepEqual(first.map((p) => [p.time, p.venue]), [['10:00', 'Club X · Cancha 2'], ['11:30', 'Club X · Cancha 1']]);
+});
+
+test('horarios ocupados: un partido que empieza a mitad de un horario también lo bloquea', () => {
+    const rounds = planRounds({ teams: teams(2), scope: 'all', legs: 1 });
+    // 10:45 se superpone con el de las 10:00 (dura 80) y con el de las 11:30.
+    const out = placeInSlots(rounds, { ...baseSlots, busy: [{ date: '2026-11-07', time: '10:45' }] });
+    assert.equal(out.placed[0].time, '13:00');
+});
+
+test('horarios ocupados: si el día está lleno, la fecha pasa al siguiente sin marcarse partida', () => {
+    const rounds = planRounds({ teams: teams(2), scope: 'all', legs: 1 });
+    const busy = daySlotTimes(baseSlots).map((t) => ({ date: '2026-11-07', time: `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}` }));
+    const out = placeInSlots(rounds, { ...baseSlots, busy });
+    assert.equal(out.placed[0].date, '2026-11-14');
+    assert.deepEqual(out.spilledRounds, []);
+});
