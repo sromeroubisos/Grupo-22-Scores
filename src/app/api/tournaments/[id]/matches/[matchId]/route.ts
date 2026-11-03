@@ -3,6 +3,8 @@ import { requireTournamentMutationContext, tournamentApiErrorResponse } from '@/
 import { FixtureService } from '@/lib/services/fixtureService';
 import { recalcAffectedPhases } from '@/lib/server/recalcAffectedPhasesTraced';
 import { traceEditRoute, markEditTrace } from '@/lib/perf/editTrace';
+import { assignVenueSlot } from '@/lib/server/venueSlots';
+import { APP_TIMEZONE, ensureUtcDateTimeString } from '@/lib/timezone';
 
 export const maxDuration = 30;
 
@@ -23,6 +25,22 @@ export async function PATCH(
 
                 if (!previousMatch || previousMatch.tournamentId !== tournamentId) {
                     return NextResponse.json({ error: 'Match not found in this tournament' }, { status: 404 });
+                }
+
+                // Mover la hora o la cancha en una sede compartida: sin cancha va
+                // a la primera libre, y no se puede caer encima de otro partido.
+                if (body && (body.dateTime !== undefined || body.venue !== undefined)) {
+                    const { data: current } = await supabase.from('matches').select('date_time, venue').eq('id', matchId).maybeSingle();
+                    const slot = await assignVenueSlot(supabase, {
+                        tournamentId,
+                        matchId,
+                        dateTime: body.dateTime !== undefined
+                            ? (body.dateTime ? ensureUtcDateTimeString(body.dateTime, APP_TIMEZONE) : null)
+                            : (current?.date_time ?? null),
+                        venue: body.venue !== undefined ? body.venue : (current?.venue ?? null),
+                    });
+                    if (!slot.ok) return NextResponse.json({ error: slot.error }, { status: 409 });
+                    if (slot.venue && slot.venue !== (current?.venue ?? null)) body.venue = slot.venue;
                 }
 
                 const match = await FixtureService.updateMatch(matchId, body, supabase);

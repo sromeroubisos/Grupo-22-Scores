@@ -112,7 +112,14 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     // nada. Lleva fase, zona y estado: el asistente descarta lo que va a reemplazar.
     const busy = (await loadTournamentBusy(db, tournamentId, request.nextUrl.searchParams.get('from')))
       .map((row) => ({ ...toBusySlot(row), phaseId: row.phase_id, groupId: row.group_id, status: row.status }));
-    return NextResponse.json({ ok: true, groups: Array.from(byGroup.values()), busy });
+    const { data: links } = await db.from('tournament_venues').select('venues(name, fields_count)').eq('tournament_id', tournamentId).limit(1);
+    const sede = ((links ?? []) as Array<{ venues: { name: string; fields_count: number } | null }>)[0]?.venues ?? null;
+    return NextResponse.json({
+      ok: true,
+      groups: Array.from(byGroup.values()),
+      busy,
+      venue: sede ? { name: sede.name, fieldsCount: sede.fields_count } : null,
+    });
   } catch (error: unknown) {
     console.error('Error in GET /api/tournaments/[id]/fixture/auto:', error);
     return tournamentApiErrorResponse(error);
@@ -151,6 +158,16 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     };
     const problems = validateSlotConfig(slots);
     if (problems.length > 0) return NextResponse.json({ error: problems[0], problems }, { status: 400 });
+
+    // Sin sedes cargadas y con una sede asignada al torneo: se juega ahí, con sus canchas.
+    if (slots.venues.filter((v) => v.trim()).length === 0) {
+      const { data: links } = await db.from('tournament_venues').select('venues(name, fields_count)').eq('tournament_id', tournamentId).limit(1);
+      const sede = ((links ?? []) as Array<{ venues: { name: string; fields_count: number } | null }>)[0]?.venues;
+      if (sede) {
+        slots.venues = [sede.name];
+        slots.fieldsPerVenue = sede.fields_count;
+      }
+    }
 
     const rounds = planRounds({ teams, scope, legs: Number(body.legs ?? 1), seed: slots.seed });
     if (rounds.length === 0) {

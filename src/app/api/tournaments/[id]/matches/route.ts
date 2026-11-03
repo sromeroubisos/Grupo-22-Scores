@@ -3,6 +3,8 @@ import { requireTournamentMutationContext, TournamentApiError } from '@/lib/auth
 import { FixtureService } from '@/lib/services/fixtureService';
 import { recalculatePhaseStandingsScopes } from '@/lib/server/recalculateStandings';
 import { createApiPerfTracker } from '@/lib/perf/api';
+import { assignVenueSlot } from '@/lib/server/venueSlots';
+import { APP_TIMEZONE, ensureUtcDateTimeString } from '@/lib/timezone';
 
 export async function POST(
     request: NextRequest,
@@ -13,7 +15,7 @@ export async function POST(
     const perf = createApiPerfTracker(route);
 
     try {
-        await perf.measureStep(
+        const { writer } = await perf.measureStep(
             'authorize_tournament_write',
             () => requireTournamentMutationContext(tournamentId),
             {
@@ -23,6 +25,16 @@ export async function POST(
         );
 
         const rawBody = await request.json();
+
+        // En una sede compartida: sin cancha va a la primera libre, y dos
+        // partidos no pueden estar en la misma cancha a la misma hora.
+        const slot = await assignVenueSlot(writer, {
+            tournamentId,
+            dateTime: rawBody?.dateTime ? ensureUtcDateTimeString(rawBody.dateTime, APP_TIMEZONE) : null,
+            venue: typeof rawBody?.venue === 'string' ? rawBody.venue : null,
+        });
+        if (!slot.ok) return perf.json({ error: slot.error }, { status: 409 });
+        if (slot.venue) rawBody.venue = slot.venue;
         const body = {
             ...rawBody,
             streamUrl: typeof rawBody?.streamUrl === 'string' && rawBody.streamUrl.trim()

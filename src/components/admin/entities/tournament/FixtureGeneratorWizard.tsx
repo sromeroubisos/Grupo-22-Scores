@@ -90,6 +90,11 @@ export function FixtureGeneratorWizard({ tournamentId, phaseId, phaseName, parti
                 for (const g of json?.groups ?? []) if (g?.groupId) map.set(String(g.groupId), { scheduled: Number(g.scheduled) || 0, played: Number(g.played) || 0 });
                 setExistingByGroup(map);
                 setBusyRows(Array.isArray(json?.busy) ? json.busy : []);
+                // La sede del torneo viene cargada: se juega ahí, con sus canchas.
+                if (json?.venue?.name) {
+                    setVenuesText((cur) => cur || json.venue.name);
+                    setFieldsPerVenue((cur) => (cur > 1 ? cur : Math.max(1, Number(json.venue.fieldsCount) || 1)));
+                }
             })
             .catch(() => alive && setExistingByGroup(new Map()));
         return () => { alive = false; };
