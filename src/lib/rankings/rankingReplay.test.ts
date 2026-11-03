@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import {
   computeMatchExchange,
   computeWorldRugbyExchange,
+  isYouthTournament,
   playoffStageWithBonus,
   rankByRating,
   replaySeason,
@@ -59,6 +60,21 @@ test('el repechaje del TDI se llama "Cuartos de final" y no es un cuarto de fina
   assert.equal(resolvePlayoffStage({ roundName: 'Cuartos de final', phaseName: 'Reválida', phaseType: 'playoff' }), null);
   // Las copas de consuelo tampoco: la final del torneo es una sola.
   assert.equal(resolvePlayoffStage({ roundName: 'Final · Copa Plata', phaseName: 'Playoffs', phaseType: 'playoff' }), null);
+});
+
+test('un torneo juvenil no cuenta aunque se haya cargado con el club mayor', () => {
+  // Medido el 3/11/2026: Clasificatorio M19 (M19 · Juvenil), Regional Oeste
+  // Juvenil M19 (M19 · sin categoria) y UCR Juveniles Desarrollo (M17 · Juvenil).
+  assert.equal(isYouthTournament({ ageGrade: 'M19', category: 'Juvenil' }), true);
+  assert.equal(isYouthTournament({ ageGrade: 'M19', category: null }), true);
+  assert.equal(isYouthTournament({ ageGrade: 'M17', category: 'Juvenil' }), true);
+  assert.equal(isYouthTournament({ ageGrade: 'Sub-20', category: null }), true);
+  assert.equal(isYouthTournament({ ageGrade: null, category: 'Juvenil' }), true);
+  // Los de Primera, con los rotulos que hay en la base.
+  assert.equal(isYouthTournament({ ageGrade: 'mayores', category: 'Top 14' }), false);
+  assert.equal(isYouthTournament({ ageGrade: 'Mayores (Adults)', category: 'Profesional' }), false);
+  assert.equal(isYouthTournament({ ageGrade: null, category: 'Primera División' }), false);
+  assert.equal(isYouthTournament({ ageGrade: null, category: null }), false);
 });
 
 test('el bonus lo cobra solo el ganador, aparte del intercambio, y el perdedor no pierde nada mas', () => {

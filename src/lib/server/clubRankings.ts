@@ -2,6 +2,7 @@ import { canonicalizeSportId } from '@/lib/clubDerivatives';
 import { normalizeRankingPositionLabels } from '@/lib/rankings/rankingTable';
 import {
     computeMatchExchange,
+    isYouthTournament,
     rankByRating,
     replaySeason,
     playoffStageWithBonus,
@@ -175,6 +176,8 @@ type MatchSnapshot = {
     updated_at: string | null;
     /** Instancia de playoff (cuartos, semis, final) resuelta desde la ronda y la fase. */
     playoff_stage?: PlayoffStage | null;
+    /** El torneo es juvenil (M17, M19...): no cuenta aunque los clubes esten en la tabla. */
+    youth_tournament?: boolean;
 };
 
 type ImportRankingEntryInput = {
@@ -463,6 +466,7 @@ function normalizeMatchSnapshot(row: MatchSnapshot | null | undefined): MatchSna
         round_uuid: readText(row.round_uuid),
         updated_at: readText(row.updated_at),
         playoff_stage: row.playoff_stage ?? null,
+        youth_tournament: row.youth_tournament ?? false,
     };
 }
 
@@ -581,9 +585,10 @@ async function getTournamentSportMap(
     tournamentIds: string[],
 ) {
     const uniqueTournamentIds = Array.from(new Set(tournamentIds.filter(Boolean)));
-    if (uniqueTournamentIds.length === 0) return new Map<string, string | null>();
+    if (uniqueTournamentIds.length === 0) return new Map<string, { sport: string | null; youth: boolean }>();
 
     const columnVariants = [
+        'id, sport_id, sport, age_grade, category',
         'id, sport_id, sport',
         'id, sport_id',
         'id, sport',
@@ -600,8 +605,17 @@ async function getTournamentSportMap(
 
         if (!error) {
             return new Map(
-                ((data || []) as unknown as Array<{ id: string; sport_id?: string | null; sport?: string | null }>)
-                    .map((row) => [row.id, canonicalizeSportId(row.sport_id || row.sport || null)]),
+                ((data || []) as unknown as Array<{
+                    id: string;
+                    sport_id?: string | null;
+                    sport?: string | null;
+                    age_grade?: string | null;
+                    category?: string | null;
+                }>)
+                    .map((row) => [row.id, {
+                        sport: canonicalizeSportId(row.sport_id || row.sport || null),
+                        youth: isYouthTournament({ ageGrade: row.age_grade, category: row.category }),
+                    }]),
             );
         }
 
@@ -626,11 +640,15 @@ async function enrichMatchesWithTournamentSport(
     );
 
     const withSport = matches
-        .map((match) => normalizeMatchSnapshot({
-            ...match,
-            sport_id: match.sport_id ?? tournamentSportMap.get(match.tournament_id ?? '') ?? null,
-            sport: match.sport ?? tournamentSportMap.get(match.tournament_id ?? '') ?? null,
-        } as MatchSnapshot))
+        .map((match) => {
+            const tournament = tournamentSportMap.get(match.tournament_id ?? '');
+            return normalizeMatchSnapshot({
+                ...match,
+                sport_id: match.sport_id ?? tournament?.sport ?? null,
+                sport: match.sport ?? tournament?.sport ?? null,
+                youth_tournament: tournament?.youth ?? false,
+            } as MatchSnapshot);
+        })
         .filter((match): match is MatchSnapshot => Boolean(match));
 
     return enrichMatchesWithPlayoffStage(supabase, withSport);
@@ -1863,6 +1881,7 @@ function isRankingEligibleForMatch(
     if (!match.home_club_id || !match.away_club_id) return false;
     if (!entryMap.has(match.home_club_id) || !entryMap.has(match.away_club_id)) return false;
     if (normalizedSport && matchSport && normalizedSport !== matchSport) return false;
+    if (match.youth_tournament) return false;
     if (readText(match.status)?.toLowerCase() !== 'final') return false;
     if (!score) return false;
     if (!isSeasonMatch(match, ranking.results_season)) return false;

@@ -187,6 +187,20 @@ function normalizeLabel(value: string | null | undefined) {
  * repechaje). Las copas de consuelo (Plata, Bronce, Estimulo) tampoco: "la
  * final" es la del torneo, no la de la copa que juegan los que quedaron afuera.
  */
+/**
+ * Un torneo juvenil no cuenta para el ranking de clubes aunque se haya cargado
+ * con el id del club mayor (`club-x` en vez de `club-x-m19`). La elegibilidad
+ * solo pedia que los dos clubes estuvieran en la tabla, y medido el 3/11/2026
+ * entraban 106 partidos de M17/M19 como si fueran de Primera —la semi del
+ * Clasificatorio M19 de Mar del Plata hasta pago bonus—. Lo dice el torneo:
+ * `age_grade` (M17, M19, Sub-20...) o `category` ("Juvenil").
+ */
+const YOUTH_LABEL = /^(m|u|sub)\s*-?\s*\d{1,2}\b|juvenil|menores|infantil/;
+
+export function isYouthTournament(input: { ageGrade?: string | null; category?: string | null }): boolean {
+    return YOUTH_LABEL.test(normalizeLabel(input.ageGrade)) || YOUTH_LABEL.test(normalizeLabel(input.category));
+}
+
 const PHASE_WITHOUT_BONUS = /repechaje|revalida|permanencia|descenso|promocion|reclasificacion|plata|bronce|estimulo|consuelo/;
 const ROUND_WITHOUT_BONUS = /octavos|avos de final|ronda de|tercer|3er|puesto|plata|bronce|estimulo|consuelo/;
 
