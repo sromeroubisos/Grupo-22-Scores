@@ -7,10 +7,14 @@ import {
     daySlotTimes,
     placeInSlots,
     planRounds,
+    slotLanes,
     validateSlotConfig,
+    type BusySlot,
     type PairingScope,
     type SlotConfig,
 } from '@/lib/fixture/autoFixture';
+
+type BusyEntry = BusySlot & { phaseId: string | null; groupId: string | null; status: string | null };
 import './fixture-generator-wizard.css';
 
 type GroupInfo = { id: string; name: string; phaseId: string | null };
@@ -62,6 +66,9 @@ export function FixtureGeneratorWizard({ tournamentId, phaseId, phaseName, parti
     const [durationMin, setDurationMin] = useState(80);
     const [gapMin, setGapMin] = useState(10);
     const [venuesText, setVenuesText] = useState('');
+    const [fieldsPerVenue, setFieldsPerVenue] = useState(1);
+    // Partidos que ya ocupan el calendario del torneo (de esta fase y de las otras).
+    const [busyRows, setBusyRows] = useState<BusyEntry[]>([]);
     const [simultaneous, setSimultaneous] = useState<'none' | 'last_round' | 'all_rounds'>('none');
 
     const [busy, setBusy] = useState(false);
@@ -80,6 +87,7 @@ export function FixtureGeneratorWizard({ tournamentId, phaseId, phaseName, parti
                 const map = new Map<string, { scheduled: number; played: number }>();
                 for (const g of json?.groups ?? []) if (g?.groupId) map.set(String(g.groupId), { scheduled: Number(g.scheduled) || 0, played: Number(g.played) || 0 });
                 setExistingByGroup(map);
+                setBusyRows(Array.isArray(json?.busy) ? json.busy : []);
             })
             .catch(() => alive && setExistingByGroup(new Map()));
         return () => { alive = false; };
@@ -161,15 +169,24 @@ export function FixtureGeneratorWizard({ tournamentId, phaseId, phaseName, parti
         weekdays: dayMode === 'range' ? [0, 1, 2, 3, 4, 5, 6] : weekdays,
         windowStart, windowEnd, durationMin, gapMin,
         venues: venuesText.split(/[,\n]/).map((v) => v.trim()).filter(Boolean),
+        fieldsPerVenue,
         seed,
         simultaneous,
-    }), [startDate, endDate, dayMode, weekdays, windowStart, windowEnd, durationMin, gapMin, venuesText, seed, simultaneous]);
+    }), [startDate, endDate, dayMode, weekdays, windowStart, windowEnd, durationMin, gapMin, venuesText, fieldsPerVenue, seed, simultaneous]);
 
     const problems = validateSlotConfig(slots);
     const rounds = useMemo(() => planRounds({ teams: planTeams, scope, legs, seed }), [planTeams, scope, legs, seed]);
-    const placement = useMemo(() => placeInSlots(rounds, slots), [rounds, slots]);
+    // Lo que ya está en el calendario, menos lo que este fixture va a reemplazar
+    // (la misma regla que aplica el servidor al guardar).
+    const takenSlots = useMemo(() => busyRows.filter((b) => !(replace
+        && b.phaseId === phaseId
+        && b.status === 'scheduled'
+        && (!zonesActive || (b.groupId !== null && onlyZones!.includes(b.groupId))))), [busyRows, replace, phaseId, zonesActive, onlyZones]);
+    const placement = useMemo(() => placeInSlots(rounds, { ...slots, busy: takenSlots }), [rounds, slots, takenSlots]);
     const matchCount = rounds.reduce((s, r) => s + r.matches.length, 0);
-    const perDay = daySlotTimes(slots).length * Math.max(1, slots.venues.length);
+    const lanesCount = slotLanes(slots).length;
+    const perDay = daySlotTimes(slots).length * lanesCount;
+    const busyInRange = takenSlots.filter((b) => b.date >= startDate && (!endDate || b.date <= endDate)).length;
     const groupName = (id: string | null) => groups.find((g) => g.id === id)?.name ?? null;
 
     const canNext = step === 0 ? rounds.length > 0 : step === 1 ? problems.length === 0 : false;
@@ -313,8 +330,18 @@ export function FixtureGeneratorWizard({ tournamentId, phaseId, phaseName, parti
                             <label><span>Dura (min)</span><input className="basalt-input" type="number" min={1} value={durationMin} onChange={(e) => setDurationMin(Number(e.target.value) || 0)} /></label>
                             <label><span>Entre partidos (min)</span><input className="basalt-input" type="number" min={0} value={gapMin} onChange={(e) => setGapMin(Number(e.target.value) || 0)} /></label>
                         </div>
-                        <label className="fgw-wide"><span>Canchas o sedes (separadas por coma, opcional)</span>
-                            <input className="basalt-input" type="text" value={venuesText} onChange={(e) => setVenuesText(e.target.value)} placeholder="Cancha 1, Cancha 2" /></label>
+                        <div className="fgw-grid">
+                            <label><span>Sedes (separadas por coma, opcional)</span>
+                                <input className="basalt-input" type="text" value={venuesText} onChange={(e) => setVenuesText(e.target.value)} placeholder="Club Atlético, Club Universitario" /></label>
+                            <label><span>Canchas por sede</span>
+                                <input className="basalt-input" type="number" min={1} max={50} value={fieldsPerVenue} onChange={(e) => setFieldsPerVenue(Math.max(1, Math.min(50, Math.floor(Number(e.target.value)) || 1)))} /></label>
+                        </div>
+                        <p className="fgw-hint">
+                            {lanesCount > 1
+                                ? `Se juegan hasta ${lanesCount} partidos al mismo horario${fieldsPerVenue > 1 ? `, uno por cancha` : ''}.`
+                                : 'Con una sola cancha, los partidos van uno después del otro.'}
+                            {busyInRange > 0 ? ` Hay ${busyInRange} partido${busyInRange === 1 ? '' : 's'} del torneo ya programado${busyInRange === 1 ? '' : 's'} en esas fechas: sus horarios no se pisan.` : ''}
+                        </p>
                         <h5>¿Se juegan todos al mismo tiempo?</h5>
                         <div className="fgw-seg" role="radiogroup" aria-label="Partidos simultáneos">
                             {([

@@ -257,6 +257,22 @@ export interface SlotConfig {
      * sabiendo el resultado de otro), `all_rounds` = todas.
      */
     simultaneous?: 'none' | 'last_round' | 'all_rounds';
+    /** Canchas que tiene cada sede (o la única, si no hay sedes). Por defecto 1. */
+    fieldsPerVenue?: number;
+    /**
+     * Partidos que ya están en el calendario: ocupan su horario y su cancha, y
+     * los nuevos van a los huecos. `venue` vacío o que no coincide con ninguna
+     * cancha ocupa igual un lugar en ese horario, sin saber cuál.
+     */
+    busy?: BusySlot[];
+}
+
+export interface BusySlot {
+    /** `YYYY-MM-DD`, día local. */
+    date: string;
+    /** `HH:MM`, hora local de inicio. */
+    time: string;
+    venue?: string | null;
 }
 
 export interface PlacedMatch extends PlannedMatch {
@@ -331,11 +347,25 @@ export function validateSlotConfig(config: SlotConfig): string[] {
 }
 
 /**
+ * Las canchas disponibles a un mismo horario: cada sede por la cantidad de
+ * canchas que tiene. Una sede con 3 canchas da "Sede · Cancha 1/2/3".
+ */
+export function slotLanes(config: Pick<SlotConfig, 'venues' | 'fieldsPerVenue'>): Array<string | null> {
+    const venues = config.venues.map((v) => v.trim()).filter(Boolean);
+    const fields = Math.max(1, Math.floor(Number(config.fieldsPerVenue ?? 1)) || 1);
+    const bases: Array<string | null> = venues.length > 0 ? venues : [null];
+    if (fields === 1) return bases;
+    return bases.flatMap((v) => Array.from({ length: fields }, (_, i) => (v ? `${v} · Cancha ${i + 1}` : `Cancha ${i + 1}`)));
+}
+
+/**
  * Reparte los partidos en días, horarios y canchas.
  *
  * Cada fecha arranca en el siguiente día habilitado. Si no entra en un día
- * (más partidos que horarios × canchas), sigue en el próximo día habilitado y la
- * fecha queda registrada en `spilledRounds`: el gestor tiene que enterarse.
+ * (más partidos que horarios × canchas libres), sigue en el próximo día
+ * habilitado y la fecha queda registrada en `spilledRounds`: el gestor tiene que
+ * enterarse. Los partidos de `busy` no se pisan: un horario con todas sus
+ * canchas ocupadas se saltea.
  */
 export function placeInSlots(rounds: PlannedRound[], config: SlotConfig): Placement {
     const empty: Placement = { placed: [], spilledRounds: [], pastEndDate: 0, firstDate: null, lastDate: null };
@@ -345,9 +375,39 @@ export function placeInSlots(rounds: PlannedRound[], config: SlotConfig): Placem
     const weekdays = new Set(config.weekdays);
     const skip = new Set(config.skipDates ?? []);
     const times = daySlotTimes(config);
-    const venues = config.venues.map((v) => v.trim()).filter(Boolean);
-    const lanes: Array<string | null> = venues.length > 0 ? venues : [null];
-    const perDay = times.length * lanes.length;
+    const lanes = slotLanes(config);
+    const duration = Math.max(1, Math.floor(config.durationMin));
+
+    // Ocupación por día: inicio y cancha de cada partido (los que ya estaban y los
+    // que se van poniendo). Dos partidos se pisan si sus horarios se superponen.
+    const laneSet = new Set(lanes.filter((l): l is string => l !== null));
+    const occupied = new Map<string, Array<{ start: number; lane: string | null }>>();
+    const occupy = (day: string, start: number, lane: string | null) => {
+        const list = occupied.get(day) ?? [];
+        list.push({ start, lane });
+        occupied.set(day, list);
+    };
+    for (const b of config.busy ?? []) {
+        const start = parseClock(b.time);
+        if (!toUtcDate(b.date) || start === null) continue;
+        const venue = (b.venue ?? '').trim();
+        occupy(b.date, start, laneSet.has(venue) ? venue : null);
+    }
+    const freeLanes = (day: string, t: number): Array<string | null> => {
+        const overlapping = (occupied.get(day) ?? []).filter((o) => o.start < t + duration && t < o.start + duration);
+        const taken = new Set(overlapping.filter((o) => o.lane !== null).map((o) => o.lane));
+        // Sin cancha conocida ocupa un lugar igual: se descuenta de las que quedan.
+        const unknown = overlapping.filter((o) => o.lane === null).length;
+        const free = lanes.filter((l) => l === null || !taken.has(l));
+        return free.slice(0, Math.max(0, free.length - unknown));
+    };
+    const nextFreeSlot = (day: string): { time: number; lane: string | null } | null => {
+        for (const t of times) {
+            const free = freeLanes(day, t);
+            if (free.length > 0) return { time: t, lane: free[0] };
+        }
+        return null;
+    };
 
     let cursor = startDay.getTime();
     const nextAllowedDay = (): string => {
@@ -380,20 +440,21 @@ export function placeInSlots(rounds: PlannedRound[], config: SlotConfig): Placem
             continue;
         }
         let day = nextAllowedDay();
-        let used = 0;
+        let placedInRound = 0;
         let spilled = false;
         const order = rng ? shuffled(round.matches, rng) : round.matches;
         for (const match of order) {
-            if (used === perDay) {
-                day = nextAllowedDay();
-                used = 0;
-                spilled = true;
-            }
             // Los horarios se llenan por orden y, dentro de cada uno, cancha por cancha.
-            const time = times[Math.floor(used / lanes.length)];
-            const venue = lanes[used % lanes.length];
-            placed.push({ ...match, roundNumber: round.number, date: day, time: formatClock(time), venue });
-            used += 1;
+            let slot = nextFreeSlot(day);
+            for (let guard = 0; !slot && guard < 3660; guard += 1) {
+                day = nextAllowedDay();
+                if (placedInRound > 0) spilled = true;
+                slot = nextFreeSlot(day);
+            }
+            if (!slot) break;
+            occupy(day, slot.time, slot.lane);
+            placed.push({ ...match, roundNumber: round.number, date: day, time: formatClock(slot.time), venue: slot.lane });
+            placedInRound += 1;
         }
         if (spilled) spilledRounds.push(round.number);
     }
