@@ -144,7 +144,7 @@ async function main() {
     if (!APPLY) { console.log('\nDry-run: no se escribió nada. Repetí con --apply.'); return; }
 
     // ── club nuevo ───────────────────────────────────────────────────────────
-    if (faltan.includes(CLUB_NUEVO.id)) {
+    if ((faltan as string[]).includes(CLUB_NUEVO.id)) {
         const { error } = await supabase.from('clubs').insert([{
             id: CLUB_NUEVO.id, union_id: modelo.union_id, name: CLUB_NUEVO.name, short_name: CLUB_NUEVO.short_name,
             city: CLUB_NUEVO.city, region: CLUB_NUEVO.region, country: 'ARG', slug: CLUB_NUEVO.id,
