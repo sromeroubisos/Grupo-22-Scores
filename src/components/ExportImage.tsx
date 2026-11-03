@@ -25,6 +25,7 @@ import { findCountryRecord } from '@/lib/data/countries';
 import GuestExportInvite, { useGuestExportInvite } from '@/components/GuestExportInvite';
 import { createClient } from '@/lib/supabase/client';
 import styles from './ExportButton.module.css';
+import { canUseOlivos7, drawOlivos7, isOlivos7Template, resolveOlivos7Edition, type Olivos7Edition } from '@/lib/exports/olivos7';
 
 export type ExportFormat = '1080x1350' | '1080x1920';
 export type ExportTemplate = 'standings' | 'dailyMatches' | 'matchStats' | 'playerStats' | 'playoffBracket' | 'lineups' | 'squad' | 'teamOfWeek' | 'champion';
@@ -170,6 +171,8 @@ export interface MatchStatsData {
     tournamentId?: string | number | null;
     tournamentUrl?: string | null;
     tournamentLogo?: string;
+    // Fase o fecha del partido ("Semifinal", "Fecha 3"). Hoy la lee solo el diseño Olivos 7.
+    roundLabel?: string;
     date: string;
     time?: string;
     venue?: string;
@@ -461,6 +464,9 @@ interface ExportImageProps {
     // dentro del modal y `buildData` rearma la placa con los ids marcados.
     statOptions?: Array<{ id: string; label: string; title?: string }>;
     buildData?: (statIds: string[]) => ExportData;
+    // Torneo del que sale la pieza. Hoy decide una sola cosa: los torneos del Seven
+    // de Olivos exportan con su diseño propio (`lib/exports/olivos7`).
+    tournamentId?: string | number | null;
 }
 
 type ExportPreviewColorOverrides = {
@@ -501,6 +507,7 @@ type ExportImagePreviewProps = {
     standingsExportMode?: StandingsExportMode;
     dailyMatchesTimeMode?: DailyMatchesTimeMode;
     teamNameMode?: ExportTeamNameMode;
+    olivos7Edition?: Olivos7Edition | null;
     className?: string;
 };
 
@@ -1063,9 +1070,14 @@ export default function ExportImage(props: ExportImageProps) {
     return <ExportImageInner key={props.template} {...props} />;
 }
 
-function ExportImageInner({ template, data: liveData, filename = 'g22-export', className = '', triggerLabel, statOptions, buildData }: ExportImageProps) {
+function ExportImageInner({ template, data: liveData, filename = 'g22-export', className = '', triggerLabel, statOptions, buildData, tournamentId }: ExportImageProps) {
     const supabase = useMemo(() => createClient(), []);
     const { user } = useAuth();
+    // El Seven de Olivos tiene diseño propio, y lo usa SOLO su cuenta (olivosseven):
+    // en sus torneos y en las plantillas que ese diseño cubre le gana a cualquier familia.
+    const olivos7Edition = isOlivos7Template(template) && canUseOlivos7(user?.email)
+        ? resolveOlivos7Edition(tournamentId ?? (liveData as { tournamentId?: string | number | null }).tournamentId)
+        : null;
     const guestInvite = useGuestExportInvite();
     // El diseno activo del panel es para quien gestiona algo. El resto de la gente
     // —el hincha logueado y el invitado— exporta siempre con Fan V5, la familia
@@ -2204,6 +2216,34 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
             if (!ctx) throw new Error('No se pudo inicializar el canvas');
             setActiveCrestBackdropDark(getContrastColor(bgColor) === '#ffffff');
             const exportData = buildExportData(template, data, customTournamentName, selectedTimeZonePreset, teamNameMode);
+
+            if (olivos7Edition && isOlivos7Template(template)) {
+                // Diseño Olivos 7: respeta el formato elegido tal cual (posteo o historia).
+                const olivosConfig = FORMATS.find((item) => item.value === format)!;
+                canvas.width = olivosConfig.width;
+                canvas.height = olivosConfig.height;
+                setActiveCrestBackdropDark(null);
+                let olivosData: unknown = exportData;
+                if (template === 'matchStats') {
+                    olivosData = applyManualMatchScore(applyMatchExportMode(exportData as MatchStatsData, matchExportMode), manualHomeScore, manualAwayScore);
+                } else if (template === 'standings') {
+                    olivosData = scopeStandingsDataForExport(exportData as StandingsData, standingsExportMode, selectedStandingsGroupIndex);
+                } else if (template === 'dailyMatches') {
+                    const matchesData = exportData as DailyMatchesData;
+                    olivosData = { ...matchesData, matches: matchesData.matches.filter((_, index) => selectedMatchIndices.has(index)) };
+                } else if (template === 'champion') {
+                    olivosData = { ...(exportData as ChampionData), tag: championExtra.trim(), headline: plateHeadline };
+                } else if (template === 'playoffBracket') {
+                    // El título original trae la fase ("Copa de Oro - ..."); buildExportData lo pisa con el torneo.
+                    olivosData = { ...(exportData as PlayoffBracketData), title: (data as PlayoffBracketData).title };
+                }
+                await drawOlivos7(ctx, canvas, template, olivosData, { edition: olivos7Edition, loadImage });
+                await downloadCanvas(canvas, buildExportFilename(filename, template, format));
+                setStatus('Listo');
+                window.setTimeout(() => setStatus(''), 2000);
+                markExportFinished();
+                return;
+            }
 
             if (template === 'matchStats') {
                 const matchData = applyManualMatchScore(
@@ -4216,6 +4256,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                                         standingsExportMode={standingsExportMode}
                                         dailyMatchesTimeMode={dailyMatchesTimeMode}
                                         teamNameMode={teamNameMode}
+                                        olivos7Edition={olivos7Edition}
                                         className={styles.modalPreviewImage}
                                     />
                                 </div>
@@ -4274,6 +4315,7 @@ export function ExportImagePreview({
     standingsExportMode = 'table',
     dailyMatchesTimeMode = 'time',
     teamNameMode = 'short',
+    olivos7Edition = null,
     className = '',
 }: ExportImagePreviewProps) {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -4299,6 +4341,7 @@ export function ExportImagePreview({
         standingsExportMode,
         dailyMatchesTimeMode,
         teamNameMode,
+        olivos7Edition,
     };
     const latestOptionsRef = useRef<ExportPreviewRenderOptions>(renderOptions);
     latestOptionsRef.current = renderOptions;
@@ -4366,7 +4409,7 @@ export function ExportImagePreview({
         return () => {
             window.clearTimeout(timer);
         };
-    }, [customizationState, dailyMatchesTimeMode, teamNameMode, data, format, lineupExportLayout, lineupExportMode, matchExportLayout, matchExportMode, plateOptions, previewColors, standingsExportMode, template, visualFamily]);
+    }, [customizationState, dailyMatchesTimeMode, teamNameMode, data, format, lineupExportLayout, lineupExportMode, matchExportLayout, matchExportMode, olivos7Edition, plateOptions, previewColors, standingsExportMode, template, visualFamily]);
 
     // La primera pasada pinta con el lienzo todavia oculto: si el panel toma su alto
     // del propio lienzo (el laboratorio, una tarjeta suelta) mide unos pixeles y el
@@ -5857,6 +5900,7 @@ export type ExportPreviewRenderOptions = {
     standingsExportMode: StandingsExportMode;
     dailyMatchesTimeMode?: DailyMatchesTimeMode;
     teamNameMode?: ExportTeamNameMode;
+    olivos7Edition?: Olivos7Edition | null;
 };
 
 // Devuelve el lienzo dibujado, no un PNG: codificar 1080x1350 con toDataURL bloquea el
@@ -5903,6 +5947,7 @@ export async function renderMatchExportPreviewCanvas(
         standingsExportMode,
         dailyMatchesTimeMode = 'time',
     teamNameMode = 'short',
+        olivos7Edition = null,
     } = options;
 
     applyTypographyConfig(
@@ -5968,6 +6013,22 @@ export async function renderMatchExportPreviewCanvas(
     };
 
     const exportData = buildExportData(template, data, getDefaultTournamentName(template, data), findBestPresetByOffset(DEFAULT_TIMEZONE_OFFSET_MINUTES), teamNameMode);
+
+    if (olivos7Edition && isOlivos7Template(template)) {
+        const olivosConfig = FORMATS.find((item) => item.value === format)!;
+        canvas.width = olivosConfig.width;
+        canvas.height = olivosConfig.height;
+        setActiveCrestBackdropDark(null);
+        const olivosData = template === 'matchStats'
+            ? applyMatchExportMode(exportData as MatchStatsData, matchExportMode)
+            : template === 'standings'
+            ? scopeStandingsDataForExport(exportData as StandingsData, standingsExportMode, 0)
+            : template === 'playoffBracket'
+            ? { ...(exportData as PlayoffBracketData), title: (data as PlayoffBracketData).title }
+            : exportData;
+        await drawOlivos7(ctx, canvas, template, olivosData, { edition: olivos7Edition, loadImage });
+        return canvas;
+    }
 
     if (template === 'matchStats') {
         const matchData = applyMatchExportMode(exportData as MatchStatsData, matchExportMode);

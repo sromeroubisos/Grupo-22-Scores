@@ -4087,6 +4087,7 @@ export default function TournamentDetailPage({
         if (clubChoices.length === 0) return null;
         return (
             <ExportImage
+                tournamentId={adminTournamentId ?? id}
                 className={className}
                 template="champion"
                 triggerLabel="Placa"
@@ -4107,6 +4108,7 @@ export default function TournamentDetailPage({
         if (activeTab === 'results') {
             return (
                 <ExportImage
+                    tournamentId={adminTournamentId ?? id}
                     className={styles.mobileHeroExportAction}
                     template="dailyMatches"
                     filename={`resultados-${tournamentData?.name}`}
@@ -4118,6 +4120,7 @@ export default function TournamentDetailPage({
         if (activeTab === 'fixtures') {
             return (
                 <ExportImage
+                    tournamentId={adminTournamentId ?? id}
                     className={styles.mobileHeroExportAction}
                     template="dailyMatches"
                     filename={`fixture-${tournamentData?.name}`}
@@ -4129,6 +4132,7 @@ export default function TournamentDetailPage({
         if ((activeTab === 'playoff' && hasDedicatedPlayoffTab) || (activeTab === 'standings' && shouldUseIntegratedBracketView)) {
             return (
                 <ExportImage
+                    tournamentId={adminTournamentId ?? id}
                     className={styles.mobileHeroExportAction}
                     template="playoffBracket"
                     filename={`cuadro-${tournamentData?.name}`}
@@ -4146,6 +4150,7 @@ export default function TournamentDetailPage({
             const titulo = tournamentData?.name?.trim() || 'Palmarés';
             return (
                 <ExportImage
+                    tournamentId={adminTournamentId ?? id}
                     className={styles.mobileHeroExportAction}
                     template="standings"
                     filename={`palmares-${titulo}`}
@@ -4162,6 +4167,7 @@ export default function TournamentDetailPage({
             if (!historicalExportData) return null;
             return (
                 <ExportImage
+                    tournamentId={adminTournamentId ?? id}
                     className={styles.mobileHeroExportAction}
                     template="standings"
                     filename={`tabla-historica-${tournamentData?.name}`}
@@ -4174,6 +4180,7 @@ export default function TournamentDetailPage({
             if (!squadExportData) return null;
             return (
                 <ExportImage
+                    tournamentId={adminTournamentId ?? id}
                     className={styles.mobileHeroExportAction}
                     template="standings"
                     filename={`tabla-de-planteles-${tournamentData?.name}`}
@@ -4186,6 +4193,7 @@ export default function TournamentDetailPage({
             return (
                 <>
                     <ExportImage
+                        tournamentId={adminTournamentId ?? id}
                         className={styles.mobileHeroExportAction}
                         template="standings"
                         filename={`tabla-${tournamentData?.name}`}
@@ -5416,6 +5424,7 @@ export default function TournamentDetailPage({
                                         Ver campeones
                                     </button>
                                     <ExportImage
+                                        tournamentId={adminTournamentId ?? id}
                                         template="champion"
                                         filename={`campeon-${tournamentData?.name || 'torneo'}`}
                                         data={{
@@ -5505,6 +5514,7 @@ export default function TournamentDetailPage({
                                         {draw.length > 0 && (
                                             <div style={{ marginTop: 12 }}>
                                                 <ExportImage
+                                                    tournamentId={adminTournamentId ?? id}
                                                     template="playoffBracket"
                                                     filename={`cuadro-${tournamentData?.name}`}
                                                     data={bracketExportData}
@@ -5622,6 +5632,7 @@ export default function TournamentDetailPage({
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
                             <h2 className={styles.pageTitle}>{resultsPageTitle}</h2>
                             <ExportImage
+                                tournamentId={adminTournamentId ?? id}
                                 template="dailyMatches"
                                 filename={`resultados-${tournamentData?.name}`}
                                 data={{
@@ -5671,6 +5682,7 @@ export default function TournamentDetailPage({
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
                             <h2 className={styles.pageTitle}>{fixturesPageTitle}</h2>
                             <ExportImage
+                                tournamentId={adminTournamentId ?? id}
                                 template="dailyMatches"
                                 filename={`fixture-${tournamentData?.name}`}
                                 data={{
@@ -5731,6 +5743,7 @@ export default function TournamentDetailPage({
                                             </button>
                                         )}
                                         <ExportImage
+                                            tournamentId={adminTournamentId ?? id}
                                             template="playoffBracket"
                                             filename={`cuadro-${tournamentData?.name}`}
                                             data={bracketExportData}
@@ -5784,6 +5797,7 @@ export default function TournamentDetailPage({
                             )}
                             {showTimelinePicker && renderTimelineBar('toolbar')}
                             <ExportImage
+                                tournamentId={adminTournamentId ?? id}
                                 template="standings"
                                 filename={`tabla-${tournamentData?.name}`}
                                 data={{
@@ -6021,6 +6035,7 @@ export default function TournamentDetailPage({
                                     </button>
                                 )}
                                 <ExportImage
+                                    tournamentId={adminTournamentId ?? id}
                                     template="playoffBracket"
                                     filename={`cuadro-${tournamentData?.name}`}
                                     data={bracketExportData}
