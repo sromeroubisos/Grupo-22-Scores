@@ -24,6 +24,11 @@ const LAST_STEP = STEPS.length - 1;
 const ZONE_CHOICES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 const ZONE_COLORS = ['#00a365', '#3b82f6', '#eab308', '#a855f7', '#f97316', '#14b8a6', '#ef4444', '#22c55e', '#ec4899', '#0ea5e9'];
 const letter = (i: number) => String.fromCharCode(65 + i);
+const isPowerOfTwo = (n: number) => n >= 2 && n <= 64 && (n & (n - 1)) === 0;
+const CUP_SUGGESTIONS = ['Copa Oro', 'Copa Plata', 'Copa Bronce', 'Copa Estímulo'];
+
+/** "Pasan N de cada zona a tal copa": una fase de llaves por fila, por posición. */
+type CupRule = { count: number; name: string };
 
 const TYPES: Array<{ value: PhaseType; title: string; text: string; base: string }> = [
     { value: 'league', title: 'Liga', text: 'Una tabla, todos contra todos.', base: 'Liga' },
@@ -46,6 +51,7 @@ export function NewPhaseWizard({ tournamentId, sportId, phases, seasonId, onCrea
     const [pickerOpen, setPickerOpen] = useState(false);
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [cups, setCups] = useState<CupRule[]>([]);
 
     const chooseType = (next: PhaseType) => {
         setType(next);
@@ -54,8 +60,27 @@ export function NewPhaseWizard({ tournamentId, sportId, phases, seasonId, onCrea
 
     const zoneNames = useMemo(() => Array.from({ length: zones }, (_, i) => `Zona ${letter(i)}`), [zones]);
     const previous = phases.find((p) => p.id === previousId) ?? null;
-    const canGoNext = step === 1 ? name.trim().length > 0 : step === 2 ? !connected || Boolean(previousId) : true;
-    const blocker = step === 1 && !name.trim() ? 'Ponele un nombre a la fase para continuar.' : step === 2 && connected && !previousId ? 'Elegí de qué fase viene.' : '';
+
+    // Cada copa toma los puestos que siguen a la anterior: Oro 1.º-2.º, Plata 3.º-4.º.
+    const cupPlan = useMemo(() => {
+        let from = 1;
+        return cups.map((c) => {
+            const plan = { ...c, fromPosition: from, teams: c.count * zones };
+            from += c.count;
+            return plan;
+        });
+    }, [cups, zones]);
+    const cupProblem = type !== 'group_stage' ? '' : (() => {
+        const bad = cupPlan.find((c) => !c.name.trim() || !isPowerOfTwo(c.teams));
+        if (!bad) return '';
+        if (!bad.name.trim()) return 'Ponele nombre a cada copa.';
+        return `${bad.name}: ${zones} zona${zones === 1 ? '' : 's'} × ${bad.count} son ${bad.teams} equipos, y el cuadro necesita 2, 4, 8, 16 o 32. Cambiá cuántos pasan.`;
+    })();
+
+    const canGoNext = step === 1 ? name.trim().length > 0 && !cupProblem : step === 2 ? !connected || Boolean(previousId) : true;
+    const blocker = step === 1 && !name.trim() ? 'Ponele un nombre a la fase para continuar.'
+        : step === 1 && cupProblem ? cupProblem
+            : step === 2 && connected && !previousId ? 'Elegí de qué fase viene.' : '';
 
     /* La fase, sus zonas y los equipos van a la MISMA temporada. Sin esto la
        fase caía en la temporada actual y los equipos en la de la URL: la
@@ -144,43 +169,97 @@ export function NewPhaseWizard({ tournamentId, sportId, phases, seasonId, onCrea
         return { added, warning };
     };
 
+    /** El formulario de una fase, tal como lo arma el formulario completo. */
+    const snapshotFor = (phaseType: PhaseType, playoffTeams: number, withPrevious: boolean): PhaseFormSnapshot => {
+        const defaults = getPhaseDefaults({ sportId });
+        const isPlayoff = phaseType === 'playoff';
+        const stageNames = isPlayoff ? getDefaultPlayoffStageNames(playoffTeams) : [];
+        return {
+            phaseType,
+            isCircuit: false,
+            placementPoints: [],
+            teamsCount: isPlayoff ? playoffTeams : '',
+            advanceCount: '',
+            legs,
+            tableColumns: { ...defaults.columns, ...Object.fromEntries(defaults.statColumns.map((s) => [s.key, true])) },
+            groupLabels: phaseType === 'group_stage'
+                ? zoneNames.map((n, i) => ({ name: n, colorMode: 'auto' as const, color: ZONE_COLORS[i % ZONE_COLORS.length], autoColorIndex: i }))
+                : [],
+            groupNames: phaseType === 'group_stage' ? zoneNames : [],
+            playoffStageNames: stageNames,
+            playoffStageMatchCounts: isPlayoff ? getPlayoffMatchCounts(playoffTeams, stageNames.length) : [],
+            playoffTeamsCount: playoffTeams,
+            bracketMode: 'auto',
+            statsAssignment: 'played',
+            carryOverPreviousPhase: withPrevious && carryOver && connected,
+            canCarryOverPreviousPhase: withPrevious && connected && Boolean(previous),
+            pointsWin: defaults.points.win,
+            pointsDraw: defaults.points.draw,
+            pointsLoss: defaults.points.loss,
+            allowBonusPoints: defaults.points.allowBonusPoints,
+            bonusTryMode: 'count',
+            useExtraTimePoints: false,
+            pointsWinExtra: 0,
+            pointsDrawExtra: 0,
+            pointsLossExtra: 0,
+            tiebreakers: defaults.tiebreakers,
+        };
+    };
+
+    /**
+     * Una fase de llaves por copa, con el cuadro ya armado. Cada casillero dice
+     * de dónde sale ("1.º Zona A") y se llena solo cuando terminan las zonas;
+     * los ganadores avanzan solos dentro del cuadro.
+     */
+    const createCups = async (groupPhaseId: string, season: string | null): Promise<string[]> => {
+        const failed: string[] = [];
+        for (const [i, cup] of cupPlan.entries()) {
+            const cupName = cup.name.trim();
+            try {
+                const phaseBody = buildPhaseRequestBody(snapshotFor('playoff', cup.teams, false), {
+                    phaseName: cupName, editingPhaseId: null, editingPhase: null, phaseCount: phases.length + 1 + i,
+                });
+                const phaseRes = await fetch(`/api/tournaments/${tournamentId}/phases`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ...phaseBody, seasonId: season ?? undefined }),
+                });
+                const phaseJson = await phaseRes.json().catch(() => null);
+                const cupPhaseId = (phaseJson?.data ?? phaseJson)?.id;
+                if (!phaseRes.ok || !cupPhaseId) throw new Error('phase');
+                const bracketRes = await fetch(`/api/tournaments/${tournamentId}/playoff`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'generate',
+                        phaseId: cupPhaseId,
+                        templateId: 'single_elimination',
+                        teamCount: cup.teams,
+                        cupNames: { main: cupName },
+                        thirdPlace: true,
+                        seedMode: 'seed',
+                        seeding: {
+                            sourcePhaseId: groupPhaseId,
+                            format: 'zone_rank',
+                            perGroup: cup.count,
+                            fromPosition: cup.fromPosition,
+                            untilFinished: true,
+                        },
+                    }),
+                });
+                if (!bracketRes.ok) throw new Error('bracket');
+            } catch {
+                failed.push(cupName);
+            }
+        }
+        return failed;
+    };
+
     const create = async () => {
         setBusy(true);
         setError(null);
         try {
-            const defaults = getPhaseDefaults({ sportId });
-            const isPlayoff = type === 'playoff';
-            const stageNames = isPlayoff ? getDefaultPlayoffStageNames(bracketTeams) : [];
-            const snapshot: PhaseFormSnapshot = {
-                phaseType: type,
-                isCircuit: false,
-                placementPoints: [],
-                teamsCount: isPlayoff ? bracketTeams : '',
-                advanceCount: '',
-                legs,
-                tableColumns: { ...defaults.columns, ...Object.fromEntries(defaults.statColumns.map((s) => [s.key, true])) },
-                groupLabels: type === 'group_stage'
-                    ? zoneNames.map((n, i) => ({ name: n, colorMode: 'auto' as const, color: ZONE_COLORS[i % ZONE_COLORS.length], autoColorIndex: i }))
-                    : [],
-                groupNames: type === 'group_stage' ? zoneNames : [],
-                playoffStageNames: stageNames,
-                playoffStageMatchCounts: isPlayoff ? getPlayoffMatchCounts(bracketTeams, stageNames.length) : [],
-                playoffTeamsCount: bracketTeams,
-                bracketMode: 'auto',
-                statsAssignment: 'played',
-                carryOverPreviousPhase: carryOver && connected,
-                canCarryOverPreviousPhase: connected && Boolean(previous),
-                pointsWin: defaults.points.win,
-                pointsDraw: defaults.points.draw,
-                pointsLoss: defaults.points.loss,
-                allowBonusPoints: defaults.points.allowBonusPoints,
-                bonusTryMode: 'count',
-                useExtraTimePoints: false,
-                pointsWinExtra: 0,
-                pointsDrawExtra: 0,
-                pointsLossExtra: 0,
-                tiebreakers: defaults.tiebreakers,
-            };
+            const snapshot = snapshotFor(type, bracketTeams, true);
             const body = buildPhaseRequestBody(snapshot, { phaseName: name.trim(), editingPhaseId: null, editingPhase: null, phaseCount: phases.length });
             const response = await fetch(`/api/tournaments/${tournamentId}/phases`, {
                 method: 'POST',
@@ -197,6 +276,12 @@ export function NewPhaseWizard({ tournamentId, sportId, phases, seasonId, onCrea
                     ({ added: teamsAdded, warning } = await assignTeams(String(created.id)));
                 } catch {
                     warning = 'La fase se creó, pero no se pudieron cargar los equipos: sumalos desde Participantes.';
+                }
+            }
+            if (created?.id && type === 'group_stage' && cupPlan.length > 0) {
+                const failedCups = await createCups(String(created.id), resolveSeason());
+                if (failedCups.length > 0) {
+                    warning = [warning, `No se pudieron armar ${failedCups.join(', ')}: creala${failedCups.length === 1 ? '' : 's'} desde Fases.`].filter(Boolean).join(' ');
                 }
             }
             await onCreated({ id: created?.id ?? null, type, name: name.trim(), teamsAdded, warning });
@@ -250,6 +335,32 @@ export function NewPhaseWizard({ tournamentId, sportId, phases, seasonId, onCrea
                                     ))}
                                 </div>
                                 <p className="fgw-hint">Se crean {zoneNames.join(', ')}. Los equipos los sumás en el paso Equipos, o después en Participantes.</p>
+
+                                <h5>¿Quiénes pasan de cada zona?</h5>
+                                {cupPlan.length > 0 && (
+                                    <ul className="fgw-cups" aria-label="Copas">
+                                        {cupPlan.map((c, i) => (
+                                            <li key={i} className="fgw-cup">
+                                                <span>Pasan</span>
+                                                <input className="basalt-input fgw-cup-count" type="number" min={1} max={16} aria-label={`Cuántos pasan a ${c.name || 'la copa'}`} value={c.count}
+                                                    onChange={(e) => setCups(cups.map((x, j) => (j === i ? { ...x, count: Math.max(1, Math.min(16, Math.floor(Number(e.target.value)) || 1)) } : x)))} />
+                                                <span>a</span>
+                                                <input className="basalt-input fgw-cup-name" type="text" aria-label="Nombre de la copa" value={c.name}
+                                                    onChange={(e) => setCups(cups.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))} />
+                                                <em>{c.count === 1 ? `el ${c.fromPosition}.º` : `del ${c.fromPosition}.º al ${c.fromPosition + c.count - 1}.º`} · {c.teams} equipos</em>
+                                                <button type="button" className="fgw-team-x" aria-label={`Quitar ${c.name || 'la copa'}`} onClick={() => setCups(cups.filter((_, j) => j !== i))}><X size={15} /></button>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                )}
+                                <button type="button" className="basalt-btn fgw-add" onClick={() => setCups([...cups, { count: 2, name: CUP_SUGGESTIONS[cups.length] ?? `Copa ${cups.length + 1}` }])}>
+                                    <Plus size={15} />{cups.length === 0 ? 'Agregar una copa o playoff' : 'Agregar otra copa'}
+                                </button>
+                                <p className="fgw-hint">
+                                    {cupPlan.length === 0
+                                        ? 'Opcional. Cada copa se crea como una fase de llaves con su cuadro armado.'
+                                        : 'Cada copa se crea como una fase de llaves. Mientras se juegan las zonas, el cuadro dice de dónde sale cada uno (1.º Zona A, 2.º Zona B…); cuando terminan, se llena solo, y los ganadores avanzan solos.'}
+                                </p>
                             </>
                         )}
                         {type !== 'playoff' && (
@@ -339,6 +450,9 @@ export function NewPhaseWizard({ tournamentId, sportId, phases, seasonId, onCrea
                         <ul className="fgw-zones">
                             <li><b>Fase</b> {name} · {TYPES.find((t) => t.value === type)?.title}</li>
                             {type === 'group_stage' && <li><b>Zonas</b> {zoneNames.join(' · ')}</li>}
+                            {type === 'group_stage' && cupPlan.length > 0 && (
+                                <li><b>Pasan</b> {cupPlan.map((c) => `${c.count} a ${c.name.trim()} (${c.teams} equipos)`).join(' · ')}</li>
+                            )}
                             {type === 'playoff' ? <li><b>Cuadro</b> {bracketTeams} equipos</li> : <li><b>Cruces</b> {legs === 1 ? 'una vez' : 'ida y vuelta'}</li>}
                             <li><b>Equipos</b> {teams.length === 0 ? 'ninguno por ahora' : teams.length}</li>
                             <li><b>Viene de</b> {connected && previous ? previous.name : 'ninguna, es independiente'}</li>

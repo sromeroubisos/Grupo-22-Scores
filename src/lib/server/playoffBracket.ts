@@ -28,6 +28,7 @@ import {
   type ScheduleRoundInput,
 } from '@/lib/playoff/scheduling';
 import {
+  computeSeedLabels,
   computeSeedOrderFromStandings,
   readPlayoffSeedingConfig,
 } from '@/lib/playoff/seedingFromStandings';
@@ -84,9 +85,10 @@ function slotLabel(
   source: SlotSource,
   codeLabels: Map<string, string>,
   seededClubResolved: boolean,
+  seedLabels?: Map<number, string>,
 ): string | null {
   if (source.type === 'seed') {
-    return seededClubResolved ? null : `Sembrado #${source.ref}`;
+    return seededClubResolved ? null : seedLabels?.get(Number(source.ref)) ?? `Sembrado #${source.ref}`;
   }
   const ref = String(source.ref);
   const base = codeLabels.get(ref) ?? ref;
@@ -282,11 +284,16 @@ export async function generatePlayoffBracket(
       seasonId,
       format: seedingCfg.format,
       perGroup: seedingCfg.perGroup,
+      fromPosition: seedingCfg.fromPosition,
+      untilFinished: seedingCfg.untilFinished,
     });
   }
-  if (seededClubIds.length === 0) {
+  // Esperando a que terminen las zonas, el cuadro queda vacío con sus rótulos:
+  // caer al seed manual lo llenaría con equipos que no clasificaron.
+  if (seededClubIds.length === 0 && !seedingCfg?.untilFinished) {
     seededClubIds = await loadSeededClubIds(supabase, { tournamentId, phaseId, seasonId });
   }
+  const seedLabels = await computeSeedLabels(supabase, seedingCfg);
   const orderedClubIds =
     config.seedMode === 'random' ? shuffle(seededClubIds) : seededClubIds;
   const seedToClub = new Map<number, string>();
@@ -363,8 +370,8 @@ export async function generatePlayoffBracket(
     const rows = roundMatches.map((m) => {
       const homeClub = m.home.type === 'seed' ? seedToClub.get(Number(m.home.ref)) ?? null : null;
       const awayClub = m.away.type === 'seed' ? seedToClub.get(Number(m.away.ref)) ?? null : null;
-      const homeLabel = slotLabel(m.home, codeLabels, Boolean(homeClub));
-      const awayLabel = slotLabel(m.away, codeLabels, Boolean(awayClub));
+      const homeLabel = slotLabel(m.home, codeLabels, Boolean(homeClub), seedLabels);
+      const awayLabel = slotLabel(m.away, codeLabels, Boolean(awayClub), seedLabels);
       const bothResolved = Boolean(homeClub) && Boolean(awayClub);
 
       return {
@@ -503,6 +510,29 @@ export async function generatePlayoffBracket(
 }
 
 /**
+ * Re-siembra cada cuadro que toma sus clasificados de `sourcePhaseId`. Va
+ * DESPUÉS del recálculo de la tabla de las zonas: sembrar antes usaba la tabla
+ * vieja, y con el último partido de las zonas las copas se llenaban mal.
+ */
+export async function reseedBracketsFedBy(
+  supabase: Supa,
+  params: { tournamentId: string; sourcePhaseId: string },
+): Promise<number> {
+  const { data: phaseRows } = await supabase
+    .from('tournament_phases')
+    .select('id, settings')
+    .eq('tournament_id', params.tournamentId);
+  let reseeded = 0;
+  for (const row of (phaseRows ?? []) as Array<{ id: string; settings: unknown }>) {
+    const cfg = readPlayoffSeedingConfig(row.settings);
+    if (!cfg || cfg.locked || cfg.sourcePhaseId !== params.sourcePhaseId) continue;
+    const r = await reseedPlayoffBracket(supabase, { phaseId: row.id });
+    if (r.ok) reseeded += r.reseeded ?? 0;
+  }
+  return reseeded;
+}
+
+/**
  * Re-resolve the bracket's `seed`-sourced slots from the current zone-stage
  * standings (playoffSeeding config). Only unplayed bracket matches are
  * touched, so correcting a zone result before the zone phase is "closed"
@@ -533,8 +563,11 @@ export async function reseedPlayoffBracket(
     seasonId: phaseRow.season_id ?? null,
     format: seedingCfg.format,
     perGroup: seedingCfg.perGroup,
+    fromPosition: seedingCfg.fromPosition,
+    untilFinished: seedingCfg.untilFinished,
   });
   if (orderedClubIds.length === 0) return { ok: true, reseeded: 0 };
+  const seedLabels = await computeSeedLabels(supabase, seedingCfg);
 
   const seedToClub = new Map<number, string>();
   orderedClubIds.forEach((clubId, idx) => seedToClub.set(idx + 1, clubId));
@@ -578,7 +611,7 @@ export async function reseedPlayoffBracket(
       const desired = seedToClub.get(Number(src.home.ref)) ?? null;
       if (desired !== m.home_club_id) {
         patch.home_club_id = desired;
-        patch.home_source_label = desired ? null : `Sembrado #${src.home.ref}`;
+        patch.home_source_label = desired ? null : seedLabels.get(Number(src.home.ref)) ?? `Sembrado #${src.home.ref}`;
         homeClub = desired;
       }
     }
@@ -586,7 +619,7 @@ export async function reseedPlayoffBracket(
       const desired = seedToClub.get(Number(src.away.ref)) ?? null;
       if (desired !== m.away_club_id) {
         patch.away_club_id = desired;
-        patch.away_source_label = desired ? null : `Sembrado #${src.away.ref}`;
+        patch.away_source_label = desired ? null : seedLabels.get(Number(src.away.ref)) ?? `Sembrado #${src.away.ref}`;
         awayClub = desired;
       }
     }

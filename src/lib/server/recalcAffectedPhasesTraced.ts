@@ -12,6 +12,9 @@
  * el informe de Etapa 0. Acá SOLO se instrumenta; no se cambia la arquitectura.
  */
 import { recalculatePhaseStandingsScopes } from '@/lib/server/recalculateStandings';
+import { reseedBracketsFedBy } from '@/lib/server/playoffBracket';
+import { invalidateMatchesFeedCaches } from '@/lib/server/matchesFeedInvalidation';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { runWithEditTrace, appendEditTraceFact, getEditRequestId } from '@/lib/perf/editTrace';
 import { isDerivedRecalcSkipped } from '@/lib/perf/labFlags';
 import { isFinalStandingsStatus } from '@/lib/standings/matchScope';
@@ -57,6 +60,15 @@ function recalcularConCoalescing(tournamentId: string, phaseId: string): Promise
       if (estado.sucio) {
         estado.sucio = false;
         await recalculatePhaseStandingsScopes(tournamentId, phaseId, 'general');
+      }
+
+      // Con la tabla ya al día, las copas que salen de esta fase se re-siembran:
+      // así, cuando termina la zona, sus clasificados pasan solos al cuadro.
+      try {
+        const reseeded = await reseedBracketsFedBy(createAdminClient(), { tournamentId, sourcePhaseId: phaseId });
+        if (reseeded > 0) await invalidateMatchesFeedCaches();
+      } catch (err) {
+        console.error('[recalcAffectedPhases] reseed de copas falló:', err);
       }
     } finally {
       enVuelo.delete(clave);

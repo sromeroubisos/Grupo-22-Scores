@@ -43,6 +43,11 @@
 .fgw-zones b { margin-right: 6px; }
 .fgw-zones em { font-style: normal; opacity: 0.7; }
 .fgw-zones li.is-off { opacity: 0.5; }
+.fgw-cups { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.fgw-cup { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 0.85rem; }
+.fgw-cup-count { width: 64px; }
+.fgw-cup-name { flex: 1 1 160px; min-width: 0; }
+.fgw-cup em { font-style: normal; opacity: 0.7; font-size: 0.78rem; }
 
 .fgw-review-head { display: flex; justify-content: space-between; align-items: center; }
 .fgw-dice { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--fgw-line); background: transparent; color: inherit; padding: 7px 12px; border-radius: 999px; font-size: 0.82rem; cursor: pointer; transition: transform 0.16s; }
