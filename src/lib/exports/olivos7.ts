@@ -1,5 +1,5 @@
-// Diseño propio del Seven de Olivos (cuenta Olivos 7). Lo usan SOLO sus tres
-// torneos —Nocturno, Primeras Líneas y M19—, cada uno con su color y su logo.
+// Diseño propio del Seven de Olivos (cuenta Olivos 7). Lo usan SOLO sus cuatro
+// torneos —Nocturno, Primeras Líneas, M19 y Mixed Ability—, cada uno con su color y su logo.
 // Las piezas son las que aprobó la cuenta en maqueta: resultado y horario de un
 // partido (afiche de papel), fixture/resultados de la fecha, posiciones y cuadro
 // (negro con columna de color) y campeón (la palabra repetida con papelitos).
@@ -9,7 +9,7 @@
 // No importa nada de ExportImage: las imágenes llegan por `loadImage`, así este
 // archivo no arma un ciclo con un componente de 23 mil líneas.
 
-export type Olivos7EditionId = 'nocturno' | 'primeras' | 'm19';
+export type Olivos7EditionId = 'nocturno' | 'primeras' | 'm19' | 'mixed';
 
 export type Olivos7Edition = {
     id: Olivos7EditionId;
@@ -26,6 +26,8 @@ const EDITIONS: Record<Olivos7EditionId, Olivos7Edition> = {
     nocturno: { id: 'nocturno', name: 'SEVEN NOCTURNO', edition: '48ª EDICIÓN', category: 'MAYORES', accent: '#f47b20', accentInk: '#0d0d0d', logo: '/exports/olivos7/nocturno-logo.png', mark: '/exports/olivos7/nocturno-mark.png' },
     primeras: { id: 'primeras', name: 'SEVEN PRIMERAS LÍNEAS', edition: '18ª EDICIÓN', category: 'PRIMERAS LÍNEAS', accent: '#19a354', accentInk: '#0d0d0d', logo: '/exports/olivos7/primeras-logo.png', mark: '/exports/olivos7/primeras-mark.png' },
     m19: { id: 'm19', name: 'SEVEN M19', edition: '2ª EDICIÓN', category: 'M19', accent: '#c026f0', accentInk: '#ffffff', logo: '/exports/olivos7/m19-logo.png', mark: '/exports/olivos7/m19-mark.png' },
+    // El 7 del logo es bordó oscuro; sobre el negro de las placas no se lee, así que el acento es el mismo rojo, más vivo.
+    mixed: { id: 'mixed', name: 'SEVEN MIXED ABILITY', edition: '1ª EDICIÓN', category: 'MIXED ABILITY', accent: '#d42a35', accentInk: '#ffffff', logo: '/exports/olivos7/mixed-logo.png', mark: '/exports/olivos7/mixed-mark.png' },
 };
 
 // Ids de la base (tournaments.id). El torneo "Gordos" es el Seven de Primeras Líneas.
@@ -37,6 +39,8 @@ const TOURNAMENT_EDITIONS: Record<string, Olivos7EditionId> = {
     'seven-de-olivos-2026': 'nocturno',
     'seven-de-olivos-gordos-2026': 'primeras',
     'seven-de-olivos-m19-2026': 'm19',
+    '361746e1-81ab-4fe4-aac3-a4d06b315311': 'mixed',
+    'seven-de-olivos-mixed-ability-2026': 'mixed',
 };
 
 // Solo la cuenta del Seven exporta con este diseño: es la pieza de su marca, no
