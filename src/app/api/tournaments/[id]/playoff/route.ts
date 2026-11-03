@@ -14,6 +14,7 @@ import {
 } from '@/lib/server/playoffBracket';
 import { listPlayoffTemplates, type PlayoffTemplateId } from '@/lib/playoff/templates';
 import { parsePlayoffSeedingInput, readPlayoffSeedingConfig } from '@/lib/playoff/seedingFromStandings';
+import { syncQualificationLabels } from '@/lib/server/qualificationLabels';
 import { createClient } from '@/lib/supabase/server';
 
 /** Group-stage phases of a tournament that can seed a playoff bracket. */
@@ -256,6 +257,21 @@ export async function POST(
       const status =
         result.code === 'has_results' ? 409 : result.code === 'missing_migration' ? 503 : 400;
       return NextResponse.json({ ok: false, ...result }, { status });
+    }
+
+    // La tabla de las zonas lleva la etiqueta de cada copa que sale de ella
+    // (Oro verde, Plata azul…). Best-effort: el cuadro ya está armado.
+    const seedingAfter = readPlayoffSeedingConfig((await supabase.from('tournament_phases').select('settings').eq('id', phaseId).maybeSingle()).data?.settings);
+    if (seedingAfter?.perGroup) {
+      try {
+        await syncQualificationLabels(supabase, {
+          tournamentId,
+          sourcePhaseId: seedingAfter.sourcePhaseId,
+          eliminatedUpTo: Number.isFinite(Number(body.eliminatedUpTo)) ? Number(body.eliminatedUpTo) : null,
+        });
+      } catch (labelError) {
+        console.error('[playoff] no se pudieron poner las etiquetas de clasificación:', labelError);
+      }
     }
 
     await invalidateMatchesFeedCaches();

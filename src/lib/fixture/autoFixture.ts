@@ -39,6 +39,11 @@ export interface PlannedMatch {
     awayId: string;
     /** Zona del cruce; `null` si es entre zonas o no hay zonas. */
     groupId: string | null;
+    /**
+     * De qué torneo es, cuando se arman varios juntos. El mismo club puede estar
+     * en Mayores y en M19: para el descanso son equipos distintos.
+     */
+    tag?: string;
 }
 
 export interface PlannedRound {
@@ -224,6 +229,34 @@ export function planRounds(input: PlanInput): PlannedRound[] {
     }));
 }
 
+/**
+ * Varios torneos en la misma sede: junta sus fechas y las intercala de a un
+ * partido por torneo, en el orden dado (Mayores, M19, Gordos, Mayores…). Cada
+ * partido lleva su `tag`. Un torneo con menos fechas o menos partidos
+ * simplemente deja de aparecer en la rueda.
+ */
+export function interleaveRounds(lists: Array<{ tag: string; rounds: PlannedRound[] }>): PlannedRound[] {
+    const maxRounds = Math.max(0, ...lists.map((l) => l.rounds.length));
+    const out: PlannedRound[] = [];
+    for (let r = 0; r < maxRounds; r += 1) {
+        const perTag = lists.map((l) => ({ tag: l.tag, round: l.rounds[r] }));
+        const maxMatches = Math.max(0, ...perTag.map((p) => p.round?.matches.length ?? 0));
+        const matches: PlannedMatch[] = [];
+        for (let i = 0; i < maxMatches; i += 1) {
+            for (const p of perTag) {
+                const m = p.round?.matches[i];
+                if (m) matches.push({ ...m, tag: p.tag });
+            }
+        }
+        out.push({
+            number: r + 1,
+            matches,
+            byes: perTag.flatMap((p) => (p.round?.byes ?? []).map((b) => `${p.tag}:${b}`)),
+        });
+    }
+    return out;
+}
+
 /** Cuántos partidos habrá, sin armar el fixture. Para el resumen en vivo. */
 export function countMatches(input: PlanInput): number {
     return planRounds(input).reduce((sum, round) => sum + round.matches.length, 0);
@@ -259,6 +292,13 @@ export interface SlotConfig {
     simultaneous?: 'none' | 'last_round' | 'all_rounds';
     /** Canchas que tiene cada sede (o la única, si no hay sedes). Por defecto 1. */
     fieldsPerVenue?: number;
+    /**
+     * Todas las fechas el mismo día, una detrás de otra (un seven). Si no
+     * entran, siguen en el próximo día habilitado.
+     */
+    sameDay?: boolean;
+    /** Minutos que descansa un equipo entre el final de un partido y el siguiente. */
+    restMin?: number;
     /**
      * Partidos que ya están en el calendario: ocupan su horario y su cancha, y
      * los nuevos van a los huecos. `venue` vacío o que no coincide con ninguna
@@ -401,8 +441,18 @@ export function placeInSlots(rounds: PlannedRound[], config: SlotConfig): Placem
         const free = lanes.filter((l) => l === null || !taken.has(l));
         return free.slice(0, Math.max(0, free.length - unknown));
     };
-    const nextFreeSlot = (day: string): { time: number; lane: string | null } | null => {
+    // Cuándo termina el último partido de cada equipo: nadie juega dos a la vez
+    // ni sin su descanso. La clave lleva el torneo (`tag`).
+    const rest = Math.max(0, Math.floor(Number(config.restMin ?? 0)) || 0);
+    const lastEnd = new Map<string, { day: string; end: number }>();
+    const teamKey = (match: PlannedMatch, id: string) => `${match.tag ?? ''}\u0000${id}`;
+    const rested = (day: string, t: number, match: PlannedMatch) => [match.homeId, match.awayId].every((id) => {
+        const last = lastEnd.get(teamKey(match, id));
+        return !last || last.day !== day || last.end + rest <= t;
+    });
+    const nextFreeSlot = (day: string, match: PlannedMatch): { time: number; lane: string | null } | null => {
         for (const t of times) {
+            if (!rested(day, t, match)) continue;
             const free = freeLanes(day, t);
             if (free.length > 0) return { time: t, lane: free[0] };
         }
@@ -423,6 +473,7 @@ export function placeInSlots(rounds: PlannedRound[], config: SlotConfig): Placem
     const spilledRounds: number[] = [];
     const rng = config.seed === undefined ? null : seededRandom(config.seed + 7919);
     const lastNumber = rounds.length > 0 ? rounds[rounds.length - 1].number : 0;
+    let sharedDay: string | null = null;
 
     for (const round of rounds) {
         if (round.matches.length === 0) continue;
@@ -439,23 +490,26 @@ export function placeInSlots(rounds: PlannedRound[], config: SlotConfig): Placem
             });
             continue;
         }
-        let day = nextAllowedDay();
+        // En un mismo día, la fecha sigue en el día que venía usándose.
+        let day = config.sameDay && sharedDay ? sharedDay : nextAllowedDay();
         let placedInRound = 0;
         let spilled = false;
         const order = rng ? shuffled(round.matches, rng) : round.matches;
         for (const match of order) {
             // Los horarios se llenan por orden y, dentro de cada uno, cancha por cancha.
-            let slot = nextFreeSlot(day);
+            let slot = nextFreeSlot(day, match);
             for (let guard = 0; !slot && guard < 3660; guard += 1) {
                 day = nextAllowedDay();
                 if (placedInRound > 0) spilled = true;
-                slot = nextFreeSlot(day);
+                slot = nextFreeSlot(day, match);
             }
             if (!slot) break;
             occupy(day, slot.time, slot.lane);
+            for (const id of [match.homeId, match.awayId]) lastEnd.set(teamKey(match, id), { day, end: slot.time + duration });
             placed.push({ ...match, roundNumber: round.number, date: day, time: formatClock(slot.time), venue: slot.lane });
             placedInRound += 1;
         }
+        sharedDay = day;
         if (spilled) spilledRounds.push(round.number);
     }
 

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireTournamentMutationContext, tournamentApiErrorResponse } from '@/lib/auth/tournamentApi';
 import { invalidateMatchesFeedCaches } from '@/lib/server/matchesFeedInvalidation';
 import { APP_TIMEZONE, combineLocalDateTimeToUtcIso, toInputDateInTimeZone, toInputTimeInTimeZone } from '@/lib/timezone';
+import { escapePostgrestLike } from '@/lib/utils/postgrest';
 import {
   placeInSlots,
   planRounds,
@@ -33,6 +34,23 @@ async function loadTournamentBusy(db: any, tournamentId: string, fromDate: strin
     if (error) throw error;
     rows.push(...((data ?? []) as BusyRow[]));
     if ((data ?? []).length < 1000) break;
+  }
+  // Las sedes del torneo las comparten otros torneos: sus partidos ahí también ocupan cancha.
+  const { data: links } = await db
+    .from('tournament_venues')
+    .select('venues(name)')
+    .eq('tournament_id', tournamentId);
+  for (const name of ((links ?? []) as Array<{ venues: { name: string } | null }>).map((l) => l.venues?.name).filter(Boolean) as string[]) {
+    let query = db
+      .from('matches')
+      .select('phase_id, group_id, status, date_time, venue')
+      .neq('tournament_id', tournamentId)
+      .ilike('venue', `${escapePostgrestLike(name)}%`)
+      .not('date_time', 'is', null)
+      .limit(1000);
+    if (from) query = query.gte('date_time', from);
+    const { data } = await query;
+    rows.push(...((data ?? []) as BusyRow[]));
   }
   return rows.filter((r) => r.status !== 'cancelled');
 }

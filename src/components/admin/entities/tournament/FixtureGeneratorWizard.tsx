@@ -15,6 +15,7 @@ import {
 } from '@/lib/fixture/autoFixture';
 
 type BusyEntry = BusySlot & { phaseId: string | null; groupId: string | null; status: string | null };
+import { SharedDayWizard } from './SharedDayWizard';
 import './fixture-generator-wizard.css';
 
 type GroupInfo = { id: string; name: string; phaseId: string | null };
@@ -73,6 +74,7 @@ export function FixtureGeneratorWizard({ tournamentId, phaseId, phaseName, parti
 
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [sharedDay, setSharedDay] = useState(false);
 
     // Partidos que ya tiene cada zona, y las zonas elegidas (null = todas).
     const [existingByGroup, setExistingByGroup] = useState<Map<string, { scheduled: number; played: number }> | null>(null);
@@ -219,12 +221,19 @@ export function FixtureGeneratorWizard({ tournamentId, phaseId, phaseName, parti
         }
     };
 
+    if (sharedDay) {
+        return <SharedDayWizard tournamentId={tournamentId} tournamentName="Este torneo" phaseId={phaseId} onDone={onDone} onBack={() => setSharedDay(false)} />;
+    }
+
     return (
         <section className="fgw basalt-card" aria-label={`Generar fixture de ${phaseName}`}>
             <header className="fgw-head">
                 <div>
                     <span className="operation-fixture-kicker">Generación automática</span>
                     <h4>Fixture de {phaseName}</h4>
+                    <button type="button" className="fgw-link" onClick={() => setSharedDay(true)}>
+                        ¿Se juega junto con otros torneos en la misma sede? Armá la jornada compartida
+                    </button>
                 </div>
                 <ol className="fgw-steps" aria-label="Pasos">
                     {STEPS.map((label, i) => (
