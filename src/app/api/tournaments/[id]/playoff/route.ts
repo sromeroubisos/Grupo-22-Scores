@@ -13,7 +13,7 @@ import {
   syncBracketAdvancement,
 } from '@/lib/server/playoffBracket';
 import { listPlayoffTemplates, type PlayoffTemplateId } from '@/lib/playoff/templates';
-import { readPlayoffSeedingConfig } from '@/lib/playoff/seedingFromStandings';
+import { parsePlayoffSeedingInput, readPlayoffSeedingConfig } from '@/lib/playoff/seedingFromStandings';
 import { createClient } from '@/lib/supabase/server';
 
 /** Group-stage phases of a tournament that can seed a playoff bracket. */
@@ -219,13 +219,11 @@ export async function POST(
     // generar era antes dos botones, y el segundo sin el primero sembraba
     // por seed manual sin avisar.
     if (body.seeding !== undefined) {
-      const sourcePhaseId = String(body.seeding?.sourcePhaseId ?? '').trim();
-      const format = body.seeding?.format === 'zone_rank' ? 'zone_rank' : 'overall';
-      const perGroupRaw = Math.floor(Number(body.seeding?.perGroup));
-      const perGroup = Number.isFinite(perGroupRaw) && perGroupRaw >= 1 ? perGroupRaw : null;
       const current = readPlayoffSeedingConfig(baseSettings);
+      const parsed = parsePlayoffSeedingInput(body.seeding);
+      const sourcePhaseId = parsed.sourcePhaseId;
       const nextSettings = sourcePhaseId
-        ? { ...baseSettings, playoffSeeding: { sourcePhaseId, format, perGroup, locked: current?.sourcePhaseId === sourcePhaseId ? current.locked : false } }
+        ? { ...baseSettings, playoffSeeding: { ...parsed, locked: current?.sourcePhaseId === sourcePhaseId ? current.locked : false } }
         : (() => {
             const s = { ...baseSettings } as Record<string, unknown>;
             delete s.playoffSeeding;

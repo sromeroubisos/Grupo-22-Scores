@@ -29,6 +29,67 @@ export interface PlayoffSeedingConfig {
   locked: boolean;
   /** Cuántos clasifican de CADA zona. `null` = no se recorta por zona. */
   perGroup: number | null;
+  /**
+   * Desde qué puesto de cada zona se toma (1 = el primero). Copa Plata con los
+   * 3.º y 4.º es `fromPosition: 3, perGroup: 2`.
+   */
+  fromPosition: number;
+  /**
+   * El cuadro se llena recién cuando TODOS los partidos de las zonas están
+   * terminados: hasta entonces muestra "1.º Zona A" en vez de cruces provisorios.
+   */
+  untilFinished: boolean;
+}
+
+/** Lee y sanea la clasificación que llega de un body o de `settings.playoffSeeding`. */
+export function parsePlayoffSeedingInput(raw: unknown, locked = false): PlayoffSeedingConfig {
+  const r = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {};
+  const perGroupRaw = Math.floor(Number(r.perGroup));
+  const fromRaw = Math.floor(Number(r.fromPosition));
+  return {
+    sourcePhaseId: typeof r.sourcePhaseId === 'string' ? r.sourcePhaseId.trim() : '',
+    format: r.format === 'zone_rank' ? 'zone_rank' : 'overall',
+    locked,
+    perGroup: Number.isFinite(perGroupRaw) && perGroupRaw >= 1 ? perGroupRaw : null,
+    fromPosition: Number.isFinite(fromRaw) && fromRaw >= 1 ? fromRaw : 1,
+    untilFinished: r.untilFinished === true,
+  };
+}
+
+/** Todos los partidos de la fase de zonas terminados (los cancelados no cuentan). */
+export async function zonePhaseFinished(supabase: Supa, phaseId: string): Promise<boolean> {
+  const { data, error } = await supabase
+    .from('matches')
+    .select('status')
+    .eq('phase_id', phaseId);
+  if (error || !Array.isArray(data)) return false;
+  const live = (data as Array<{ status: string | null }>).filter((m) => m.status !== 'cancelled');
+  return live.length > 0 && live.every((m) => m.status === 'final');
+}
+
+/**
+ * Qué dice cada casillero vacío del cuadro mientras no hay clasificados:
+ * "1.º Zona A" en vez de "Sembrado #1". Sigue el mismo orden que el sembrado
+ * `zone_rank` (todos los primeros por orden de zona, después los segundos…).
+ */
+export async function computeSeedLabels(supabase: Supa, cfg: PlayoffSeedingConfig | null): Promise<Map<number, string>> {
+  const labels = new Map<number, string>();
+  if (!cfg || cfg.format !== 'zone_rank' || !cfg.perGroup) return labels;
+  const { data: groups } = await supabase
+    .from('tournament_groups')
+    .select('id, name, order_index')
+    .eq('phase_id', cfg.sourcePhaseId);
+  const ordered = ((groups ?? []) as Array<{ name: string; order_index: number | null }>)
+    .slice()
+    .sort((a, b) => Number(a.order_index ?? 999) - Number(b.order_index ?? 999) || String(a.name).localeCompare(String(b.name)));
+  let seed = 1;
+  for (let tier = 0; tier < cfg.perGroup; tier += 1) {
+    for (const g of ordered) {
+      labels.set(seed, `${cfg.fromPosition + tier}.º ${g.name}`);
+      seed += 1;
+    }
+  }
+  return labels;
 }
 
 export function readPlayoffSeedingConfig(settings: unknown): PlayoffSeedingConfig | null {
@@ -36,12 +97,8 @@ export function readPlayoffSeedingConfig(settings: unknown): PlayoffSeedingConfi
   const raw = (settings as Record<string, unknown>).playoffSeeding;
   if (!raw || typeof raw !== 'object') return null;
   const r = raw as Record<string, unknown>;
-  const sourcePhaseId = typeof r.sourcePhaseId === 'string' ? r.sourcePhaseId.trim() : '';
-  if (!sourcePhaseId) return null;
-  const format: PlayoffSeedingFormat = r.format === 'zone_rank' ? 'zone_rank' : 'overall';
-  const perGroupRaw = Math.floor(Number(r.perGroup));
-  const perGroup = Number.isFinite(perGroupRaw) && perGroupRaw >= 1 ? perGroupRaw : null;
-  return { sourcePhaseId, format, locked: Boolean(r.locked), perGroup };
+  const parsed = parsePlayoffSeedingInput(r, Boolean(r.locked));
+  return parsed.sourcePhaseId ? parsed : null;
 }
 
 type StandingRow = {
@@ -54,12 +111,17 @@ type StandingRow = {
   stats: { difference?: number | null } | null;
 };
 
-/** Deja sólo a los primeros N de cada zona, según su posición en la tabla. */
+/**
+ * Deja sólo a N de cada zona, según su posición en la tabla, empezando por el
+ * puesto `fromPosition` (1 = los primeros; 3 = desde el tercero).
+ */
 export function keepTopPerGroup<T extends { group_id: string | null; position: number | null; club_id: string | null }>(
   rows: T[],
   perGroup: number | null | undefined,
+  fromPosition = 1,
 ): T[] {
-  if (!perGroup || perGroup < 1) return rows;
+  const skip = Math.max(0, Math.floor(fromPosition) - 1);
+  if ((!perGroup || perGroup < 1) && skip === 0) return rows;
   const byGroup = new Map<string, T[]>();
   for (const r of rows) {
     const key = r.group_id ?? '__nogroup__';
@@ -69,7 +131,7 @@ export function keepTopPerGroup<T extends { group_id: string | null; position: n
   for (const list of byGroup.values()) {
     [...list]
       .sort((a, b) => Number(a.position ?? 999) - Number(b.position ?? 999) || String(a.club_id).localeCompare(String(b.club_id)))
-      .slice(0, perGroup)
+      .slice(skip, perGroup && perGroup >= 1 ? skip + perGroup : undefined)
       .forEach((r) => kept.add(r));
   }
   return rows.filter((r) => kept.has(r));
@@ -89,9 +151,15 @@ export async function computeSeedOrderFromStandings(
     format: PlayoffSeedingFormat;
     /** Sólo pasan los N mejores de cada zona. */
     perGroup?: number | null;
+    /** Desde qué puesto de cada zona (1 = desde el primero). */
+    fromPosition?: number;
+    /** Sin sembrar hasta que terminen todos los partidos de las zonas. */
+    untilFinished?: boolean;
   },
 ): Promise<string[]> {
-  const { tournamentId, sourcePhaseId, seasonId, format, perGroup } = params;
+  const { tournamentId, sourcePhaseId, seasonId, format, perGroup, fromPosition, untilFinished } = params;
+
+  if (untilFinished && !(await zonePhaseFinished(supabase, sourcePhaseId))) return [];
 
   let query = supabase
     .from('tournament_standings')
@@ -110,7 +178,7 @@ export async function computeSeedOrderFromStandings(
   if (error || !Array.isArray(standings) || standings.length === 0) return [];
 
   let rows = (standings as StandingRow[]).filter((r) => r.club_id);
-  rows = keepTopPerGroup(rows, perGroup);
+  rows = keepTopPerGroup(rows, perGroup, fromPosition ?? 1);
 
   const diffOf = (r: StandingRow): number =>
     typeof r.stats?.difference === 'number'
