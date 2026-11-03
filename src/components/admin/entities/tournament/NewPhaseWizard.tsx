@@ -57,11 +57,18 @@ export function NewPhaseWizard({ tournamentId, sportId, phases, seasonId, onCrea
     const canGoNext = step === 1 ? name.trim().length > 0 : step === 2 ? !connected || Boolean(previousId) : true;
     const blocker = step === 1 && !name.trim() ? 'Ponele un nombre a la fase para continuar.' : step === 2 && connected && !previousId ? 'Elegí de qué fase viene.' : '';
 
+    /* La fase, sus zonas y los equipos van a la MISMA temporada. Sin esto la
+       fase caía en la temporada actual y los equipos en la de la URL: la
+       asignación a zonas se rechazaba y el fixture salía sin zonas. */
+    const resolveSeason = () => {
+        const urlSeason = typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get('seasonId');
+        return urlSeason || seasonId || null;
+    };
+
     /** Da de alta los clubes elegidos como participantes del torneo y los asigna a la fase (y a su zona). */
     const assignTeams = async (phaseId: string): Promise<{ added: number; warning?: string }> => {
         if (teams.length === 0) return { added: 0 };
-        const urlSeason = typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get('seasonId');
-        const season = urlSeason || seasonId || null;
+        const season = resolveSeason();
         const seasonQuery = season ? `&seasonId=${encodeURIComponent(season)}` : '';
         const base = `/api/tournaments/${tournamentId}`;
 
@@ -178,7 +185,7 @@ export function NewPhaseWizard({ tournamentId, sportId, phases, seasonId, onCrea
             const response = await fetch(`/api/tournaments/${tournamentId}/phases`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body),
+                body: JSON.stringify({ ...body, seasonId: resolveSeason() ?? undefined }),
             });
             const json = await response.json().catch(() => null);
             if (!response.ok) throw new Error(json?.message || json?.error || `Error ${response.status}`);
@@ -336,7 +343,7 @@ export function NewPhaseWizard({ tournamentId, sportId, phases, seasonId, onCrea
                             <li><b>Equipos</b> {teams.length === 0 ? 'ninguno por ahora' : teams.length}</li>
                             <li><b>Viene de</b> {connected && previous ? previous.name : 'ninguna, es independiente'}</li>
                         </ul>
-                        <p className="fgw-hint">Puntos y desempates salen del deporte del torneo y se pueden ajustar en la fase. Después cargás los equipos y generás el fixture.</p>
+                        <p className="fgw-hint">Puntos y desempates salen del deporte del torneo y se pueden ajustar en la fase. {teams.length > 0 ? 'Después generás el fixture desde Partidos.' : 'Después cargás los equipos y generás el fixture.'}</p>
                     </>
                 )}
             </div>

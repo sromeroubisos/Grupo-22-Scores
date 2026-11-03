@@ -70,7 +70,9 @@ export function FixtureGeneratorWizard({ tournamentId, phaseId, phaseName, parti
     // Quién está en esta fase y en qué zona. Sin asignaciones, entran todos.
     useEffect(() => {
         let alive = true;
-        fetch(`/api/tournaments/${tournamentId}/phase-participants`)
+        // Con la temporada de la URL: sin ella el endpoint lee la actual y las zonas de otra temporada no aparecen.
+        const season = new URLSearchParams(window.location.search).get('seasonId');
+        fetch(`/api/tournaments/${tournamentId}/phase-participants${season ? `?seasonId=${encodeURIComponent(season)}` : ''}`)
             .then((r) => r.json())
             .then((json) => {
                 if (!alive) return;
@@ -90,7 +92,12 @@ export function FixtureGeneratorWizard({ tournamentId, phaseId, phaseName, parti
     }, [assignments, participants]);
 
     const names = useMemo(() => new Map(teams.map((t) => [t.id, t.name])), [teams]);
-    const groupIdsInUse = useMemo(() => Array.from(new Set(teams.map((t) => t.groupId).filter(Boolean))), [teams]);
+    // En el orden de la fase (Zona A, B…), no en el orden en que se cargaron los equipos.
+    const groupIdsInUse = useMemo(() => {
+        const order = new Map(groups.map((g, i) => [g.id, i]));
+        return Array.from(new Set(teams.map((t) => t.groupId).filter(Boolean)))
+            .sort((a, b) => (order.get(a as string) ?? Infinity) - (order.get(b as string) ?? Infinity));
+    }, [teams, groups]);
     const hasZones = groupIdsInUse.length >= 2;
 
     useEffect(() => {
