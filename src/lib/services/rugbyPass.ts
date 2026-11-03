@@ -344,10 +344,10 @@ export async function getRugbyPassMatchDetail(
     awaySlug: string
 ): Promise<RugbyPassMatchDetail | null> {
     const url = rugbyPassMatchUrl(gameId, homeSlug, awaySlug);
-    const intentar = async (u: string) => {
-        // FORMATO NUEVO (2026-10): `action=update` contesta `{ game, stats }`.
-        // `live-poll-data` ya devuelve la pagina entera en HTML, asi que solo
-        // queda de respaldo por si el sitio vuelve atras en alguna competicion.
+    const invertida = rugbyPassMatchUrl(gameId, awaySlug, homeSlug);
+
+    // FORMATO NUEVO (2026-10): `action=update` contesta `{ game, stats }`.
+    const porUpdate = async (u: string): Promise<RugbyPassMatchDetail | null> => {
         try {
             const nuevo = await rugbyPassJson(u, {
                 method: 'POST',
@@ -364,6 +364,12 @@ export async function getRugbyPassMatchDetail(
         } catch {
             // Slug invertido (301 que pierde el POST) o formato viejo: sigue.
         }
+        return null;
+    };
+
+    // `live-poll-data` ya devuelve la pagina entera en HTML: queda de respaldo
+    // por si el sitio vuelve atras en alguna competicion.
+    const porPoll = async (u: string) => {
         const payload = await rugbyPassJson(u, {
             method: 'POST',
             body: formBody({ action: 'live-poll-data', event: String(gameId), liveStandings: '0' }),
@@ -372,16 +378,22 @@ export async function getRugbyPassMatchDetail(
         return parseRugbyPassMatchDetail(payload as never);
     };
 
+    // RugbyPass no siempre pone al local primero en el slug. Con el orden
+    // equivocado `update` viene vacio PERO `live-poll-data` contesta un stub
+    // "Fixture" (0-0, filas de estadisticas en cero) que parece valido: asi la
+    // ficha de Stade Francais–La Rochelle (43-24) salia 0-0 y sin planteles.
+    // Por eso `update` se prueba en los DOS ordenes antes de tocar el formato viejo.
+    const nuevo = (await porUpdate(url)) ?? (await porUpdate(invertida));
+    if (nuevo) return nuevo;
+
     try {
-        const detalle = await intentar(url);
-        // Con el slug invertido la pagina existe pero vuelve vacia: misma trampa
-        // que en `getRugbyPassEventsFor`.
+        const detalle = await porPoll(url);
         if (detalle.events.length > 0 || detalle.stats.length > 0) return detalle;
     } catch {
         // Sigue con el orden inverso.
     }
     try {
-        return await intentar(rugbyPassMatchUrl(gameId, awaySlug, homeSlug));
+        return await porPoll(invertida);
     } catch {
         return null;
     }
