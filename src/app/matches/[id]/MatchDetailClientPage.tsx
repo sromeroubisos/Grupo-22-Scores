@@ -2792,6 +2792,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                 tournamentId: matchData.tournamentId,
                                 tournamentUrl: matchData.tournamentUrl,
                                 tournamentLogo: matchData.tournamentLogo,
+                                roundLabel: matchData.round || matchData.roundLabel || undefined,
                                 date: new Date(matchData.date).toLocaleDateString('es-AR', { timeZone: USER_TZ }),
                                 time: matchTimerText,
                                 kickoffAt: matchData.date,
