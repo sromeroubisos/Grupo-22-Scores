@@ -273,8 +273,15 @@ export async function getRugbyPassTournamentBundle(
     // La tabla cuelga de un partido, no de la competicion: se usa el mas
     // reciente que tenga con que armar la URL. Si no hay ninguno —un torneo que
     // todavia no empezo— queda sin tabla, que es lo correcto.
+    //
+    // El mas reciente JUGADO, no el mas reciente del calendario: a un partido
+    // futuro `action=update` le contesta el cuerpo vacio y la tabla cae al
+    // respaldo `live-poll-data`, que es una sola tabla sin grupos. Medido en la
+    // Nations Cup (2026-11-02): colgada del 21/11 salia una tabla de 12; de un
+    // partido jugado, Pool A y Pool B.
     let standings: ReturnType<typeof filaTablaVista>[] = [];
-    const percha = vistas.find(({ fila }) => fila.home_team?.id && fila.away_team?.id);
+    const conEquipos = vistas.filter(({ fila }) => fila.home_team?.id && fila.away_team?.id);
+    const percha = conEquipos.find(({ fila }) => fila.status === 'final') ?? conEquipos[0];
     if (percha) {
         try {
             const tabla = await getRugbyPassStandings(
