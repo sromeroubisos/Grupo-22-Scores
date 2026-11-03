@@ -26,6 +26,9 @@ const ZONE_COLORS = ['#00a365', '#3b82f6', '#eab308', '#a855f7', '#f97316', '#14
 const letter = (i: number) => String.fromCharCode(65 + i);
 const isPowerOfTwo = (n: number) => n >= 2 && n <= 64 && (n & (n - 1)) === 0;
 const CUP_SUGGESTIONS = ['Copa Oro', 'Copa Plata', 'Copa Bronce', 'Copa Estímulo'];
+/** El color de la etiqueta que lleva en la tabla cada copa, por orden: verde, azul, amarillo, naranja. */
+const CUP_COLORS = ['#00a365', '#3b82f6', '#eab308', '#f97316'];
+const cupColor = (i: number) => CUP_COLORS[Math.min(i, CUP_COLORS.length - 1)];
 
 /** "Pasan N de cada zona a tal copa": una fase de llaves por fila, por posición. */
 type CupRule = { count: number; name: string };
@@ -52,6 +55,7 @@ export function NewPhaseWizard({ tournamentId, sportId, phases, seasonId, onCrea
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [cups, setCups] = useState<CupRule[]>([]);
+    const [markEliminated, setMarkEliminated] = useState(true);
 
     const chooseType = (next: PhaseType) => {
         setType(next);
@@ -182,7 +186,8 @@ export function NewPhaseWizard({ tournamentId, sportId, phases, seasonId, onCrea
             advanceCount: '',
             legs,
             tableColumns: { ...defaults.columns, ...Object.fromEntries(defaults.statColumns.map((s) => [s.key, true])) },
-            groupLabels: phaseType === 'group_stage'
+            // Con copas, las etiquetas de la tabla son las copas (las pone el servidor al armar cada cuadro).
+            groupLabels: phaseType === 'group_stage' && cups.length === 0
                 ? zoneNames.map((n, i) => ({ name: n, colorMode: 'auto' as const, color: ZONE_COLORS[i % ZONE_COLORS.length], autoColorIndex: i }))
                 : [],
             groupNames: phaseType === 'group_stage' ? zoneNames : [],
@@ -213,6 +218,10 @@ export function NewPhaseWizard({ tournamentId, sportId, phases, seasonId, onCrea
      */
     const createCups = async (groupPhaseId: string, season: string | null): Promise<string[]> => {
         const failed: string[] = [];
+        // Hasta dónde llega "Eliminado": el tamaño de la zona más grande, si ya hay equipos.
+        const lastQualified = cupPlan.reduce((m, c) => Math.max(m, c.fromPosition + c.count - 1), 0);
+        const zoneSize = teams.length > 0 ? Math.ceil(teams.length / zones) : 16;
+        const eliminatedUpTo = markEliminated && zoneSize > lastQualified ? zoneSize : undefined;
         for (const [i, cup] of cupPlan.entries()) {
             const cupName = cup.name.trim();
             try {
@@ -245,6 +254,8 @@ export function NewPhaseWizard({ tournamentId, sportId, phases, seasonId, onCrea
                             fromPosition: cup.fromPosition,
                             untilFinished: true,
                         },
+                        // Con la última copa, la tabla ya sabe todos los puestos que pasan.
+                        eliminatedUpTo: i === cupPlan.length - 1 ? eliminatedUpTo : undefined,
                     }),
                 });
                 if (!bracketRes.ok) throw new Error('bracket');
@@ -341,6 +352,7 @@ export function NewPhaseWizard({ tournamentId, sportId, phases, seasonId, onCrea
                                     <ul className="fgw-cups" aria-label="Copas">
                                         {cupPlan.map((c, i) => (
                                             <li key={i} className="fgw-cup">
+                                                <span className="fgw-cup-dot" style={{ background: cupColor(i) }} aria-hidden="true" />
                                                 <span>Pasan</span>
                                                 <input className="basalt-input fgw-cup-count" type="number" min={1} max={16} aria-label={`Cuántos pasan a ${c.name || 'la copa'}`} value={c.count}
                                                     onChange={(e) => setCups(cups.map((x, j) => (j === i ? { ...x, count: Math.max(1, Math.min(16, Math.floor(Number(e.target.value)) || 1)) } : x)))} />
@@ -356,10 +368,16 @@ export function NewPhaseWizard({ tournamentId, sportId, phases, seasonId, onCrea
                                 <button type="button" className="basalt-btn fgw-add" onClick={() => setCups([...cups, { count: 2, name: CUP_SUGGESTIONS[cups.length] ?? `Copa ${cups.length + 1}` }])}>
                                     <Plus size={15} />{cups.length === 0 ? 'Agregar una copa o playoff' : 'Agregar otra copa'}
                                 </button>
+                                {cupPlan.length > 0 && (
+                                    <label className="operation-toggle">
+                                        <input type="checkbox" checked={markEliminated} onChange={(e) => setMarkEliminated(e.target.checked)} />
+                                        <span><span className="fgw-cup-dot" style={{ background: '#ef4444' }} aria-hidden="true" /> Los demás quedan eliminados (etiqueta roja en la tabla)</span>
+                                    </label>
+                                )}
                                 <p className="fgw-hint">
                                     {cupPlan.length === 0
-                                        ? 'Opcional. Cada copa se crea como una fase de llaves con su cuadro armado.'
-                                        : 'Cada copa se crea como una fase de llaves. Mientras se juegan las zonas, el cuadro dice de dónde sale cada uno (1.º Zona A, 2.º Zona B…); cuando terminan, se llena solo, y los ganadores avanzan solos.'}
+                                        ? 'Opcional. Cada copa se crea como una fase de llaves con su cuadro armado, y la tabla de las zonas lleva su etiqueta.'
+                                        : 'Cada copa se crea como una fase de llaves y la tabla de las zonas lleva su etiqueta con ese color. Mientras se juegan las zonas, el cuadro dice de dónde sale cada uno (1.º Zona A, 2.º Zona B…); cuando terminan, se llena solo, y los ganadores avanzan solos.'}
                                 </p>
                             </>
                         )}

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { countMatches, daySlotTimes, placeInSlots, planRounds, validateSlotConfig, type FixtureTeam, type SlotConfig } from './autoFixture.ts';
+import { countMatches, daySlotTimes, interleaveRounds, placeInSlots, planRounds, validateSlotConfig, type FixtureTeam, type SlotConfig } from './autoFixture.ts';
 
 const teams = (n: number, groupOf?: (i: number) => string): FixtureTeam[] =>
     Array.from({ length: n }, (_, i) => ({ id: `t${String(i + 1).padStart(2, '0')}`, groupId: groupOf ? groupOf(i) : null }));
@@ -220,6 +220,42 @@ test('horarios ocupados: un partido que empieza a mitad de un horario también l
     // 10:45 se superpone con el de las 10:00 (dura 80) y con el de las 11:30.
     const out = placeInSlots(rounds, { ...baseSlots, busy: [{ date: '2026-11-07', time: '10:45' }] });
     assert.equal(out.placed[0].time, '13:00');
+});
+
+const sevenSlots: SlotConfig = { ...baseSlots, durationMin: 14, gapMin: 6, windowStart: '10:00', windowEnd: '19:00', sameDay: true };
+
+test('todo en un día: las fechas siguen una detrás de otra el mismo sábado', () => {
+    const rounds = planRounds({ teams: teams(4), scope: 'all', legs: 1 });
+    const out = placeInSlots(rounds, sevenSlots);
+    assert.deepEqual([...new Set(out.placed.map((p) => p.date))], ['2026-11-07']);
+    // 6 partidos en una cancha: 10:00, 10:20, … sin pisarse.
+    assert.deepEqual(out.placed.map((p) => p.time), ['10:00', '10:20', '10:40', '11:00', '11:20', '11:40']);
+});
+
+test('descanso: un equipo no vuelve a jugar sin su descanso mínimo', () => {
+    const rounds = planRounds({ teams: teams(4), scope: 'all', legs: 1 });
+    const out = placeInSlots(rounds, { ...sevenSlots, fieldsPerVenue: 2, restMin: 30 });
+    const byTeam = new Map<string, number[]>();
+    const minutes = (t: string) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3));
+    for (const p of out.placed) for (const id of [p.homeId, p.awayId]) byTeam.set(id, [...(byTeam.get(id) ?? []), minutes(p.time)]);
+    for (const starts of byTeam.values()) {
+        const sorted = [...starts].sort((a, b) => a - b);
+        for (let i = 1; i < sorted.length; i += 1) assert.ok(sorted[i] - (sorted[i - 1] + 14) >= 30);
+    }
+});
+
+test('intercalar: tres torneos se alternan de a un partido y comparten las canchas', () => {
+    const mayores = planRounds({ teams: teams(4), scope: 'all', legs: 1 });
+    const m19 = planRounds({ teams: teams(4), scope: 'all', legs: 1 });
+    const gordos = planRounds({ teams: teams(2), scope: 'all', legs: 1 });
+    const merged = interleaveRounds([{ tag: 'may', rounds: mayores }, { tag: 'm19', rounds: m19 }, { tag: 'gor', rounds: gordos }]);
+    assert.deepEqual(merged[0].matches.map((m) => m.tag), ['may', 'm19', 'gor', 'may', 'm19']);
+    const out = placeInSlots(merged, sevenSlots);
+    assert.equal(out.placed.length, 6 + 6 + 1);
+    // Una cancha: nunca dos partidos a la misma hora, aunque sean de torneos distintos.
+    assert.equal(new Set(out.placed.map((p) => `${p.date} ${p.time}`)).size, out.placed.length);
+    // El mismo id en dos torneos son equipos distintos: el de M19 no espera al de Mayores.
+    assert.deepEqual(out.placed.slice(0, 3).map((p) => [p.tag, p.time]), [['may', '10:00'], ['m19', '10:20'], ['gor', '10:40']]);
 });
 
 test('horarios ocupados: si el día está lleno, la fecha pasa al siguiente sin marcarse partida', () => {
