@@ -67,6 +67,24 @@ export function FixtureGeneratorWizard({ tournamentId, phaseId, phaseName, parti
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    // Partidos que ya tiene cada zona, y las zonas elegidas (null = todas).
+    const [existingByGroup, setExistingByGroup] = useState<Map<string, { scheduled: number; played: number }> | null>(null);
+    const [onlyZones, setOnlyZones] = useState<string[] | null>(null);
+
+    useEffect(() => {
+        let alive = true;
+        fetch(`/api/tournaments/${tournamentId}/fixture/auto?phaseId=${encodeURIComponent(phaseId)}`, { cache: 'no-store' })
+            .then((r) => r.json())
+            .then((json) => {
+                if (!alive) return;
+                const map = new Map<string, { scheduled: number; played: number }>();
+                for (const g of json?.groups ?? []) if (g?.groupId) map.set(String(g.groupId), { scheduled: Number(g.scheduled) || 0, played: Number(g.played) || 0 });
+                setExistingByGroup(map);
+            })
+            .catch(() => alive && setExistingByGroup(new Map()));
+        return () => { alive = false; };
+    }, [tournamentId, phaseId]);
+
     // Quién está en esta fase y en qué zona. Sin asignaciones, entran todos.
     useEffect(() => {
         let alive = true;
@@ -104,6 +122,38 @@ export function FixtureGeneratorWizard({ tournamentId, phaseId, phaseName, parti
         if (assignments !== null) setScope(hasZones ? 'within_groups' : 'all');
     }, [assignments, hasZones]);
 
+    const matchesIn = (gid: string) => {
+        const e = existingByGroup?.get(gid);
+        return e ? e.scheduled + e.played : 0;
+    };
+
+    // Si unas zonas ya tienen fixture y otras no (se sumaron después), se proponen solo las vacías.
+    useEffect(() => {
+        if (assignments === null || existingByGroup === null) return;
+        const zones = groupIdsInUse as string[];
+        const empty = zones.filter((gid) => matchesIn(gid) === 0);
+        setOnlyZones(empty.length > 0 && empty.length < zones.length ? empty : null);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [assignments, existingByGroup, groupIdsInUse]);
+
+    const zonesActive = scope === 'within_groups' && hasZones && onlyZones !== null;
+    const toggleZone = (gid: string) => {
+        // Con "Todas" marcada, tocar una zona deja solo esa; después se suman o se sacan de a una.
+        if (onlyZones === null) {
+            setOnlyZones([gid]);
+            return;
+        }
+        const next = onlyZones.includes(gid) ? onlyZones.filter((x) => x !== gid) : [...onlyZones, gid];
+        const ordered = (groupIdsInUse as string[]).filter((x) => next.includes(x));
+        setOnlyZones(ordered.length === groupIdsInUse.length ? null : ordered);
+    };
+    const planTeams = useMemo(
+        () => (zonesActive ? teams.filter((t) => t.groupId && onlyZones!.includes(t.groupId)) : teams),
+        [teams, zonesActive, onlyZones],
+    );
+    const chosenNames = zonesActive ? onlyZones!.map((gid) => groups.find((g) => g.id === gid)?.name ?? 'Zona') : [];
+    const chosenWithMatches = zonesActive ? onlyZones!.filter((gid) => matchesIn(gid) > 0) : [];
+
     const slots: SlotConfig = useMemo(() => ({
         startDate,
         endDate: endDate || null,
@@ -116,7 +166,7 @@ export function FixtureGeneratorWizard({ tournamentId, phaseId, phaseName, parti
     }), [startDate, endDate, dayMode, weekdays, windowStart, windowEnd, durationMin, gapMin, venuesText, seed, simultaneous]);
 
     const problems = validateSlotConfig(slots);
-    const rounds = useMemo(() => planRounds({ teams, scope, legs, seed }), [teams, scope, legs, seed]);
+    const rounds = useMemo(() => planRounds({ teams: planTeams, scope, legs, seed }), [planTeams, scope, legs, seed]);
     const placement = useMemo(() => placeInSlots(rounds, slots), [rounds, slots]);
     const matchCount = rounds.reduce((s, r) => s + r.matches.length, 0);
     const perDay = daySlotTimes(slots).length * Math.max(1, slots.venues.length);
@@ -124,7 +174,9 @@ export function FixtureGeneratorWizard({ tournamentId, phaseId, phaseName, parti
 
     const canNext = step === 0 ? rounds.length > 0 : step === 1 ? problems.length === 0 : false;
     const blocker = step === 0
-        ? (teams.length < 2 ? 'Cargá al menos dos equipos en la fase para generar el fixture.' : rounds.length === 0 ? 'Para cruzar zonas hacen falta al menos dos zonas con equipos.' : '')
+        ? (teams.length < 2 ? 'Cargá al menos dos equipos en la fase para generar el fixture.'
+            : zonesActive && onlyZones!.length === 0 ? 'Elegí al menos una zona para generar.'
+                : rounds.length === 0 ? (zonesActive ? 'Las zonas elegidas necesitan al menos dos equipos.' : 'Para cruzar zonas hacen falta al menos dos zonas con equipos.') : '')
         : step === 1 ? problems[0] ?? '' : '';
 
     const generate = async () => {
@@ -135,13 +187,14 @@ export function FixtureGeneratorWizard({ tournamentId, phaseId, phaseName, parti
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    phaseId, mode: 'commit', teams: teams.map((t) => ({ id: t.id, groupId: t.groupId })),
+                    phaseId, mode: 'commit', teams: planTeams.map((t) => ({ id: t.id, groupId: t.groupId })),
                     scope, legs, seed, slots, replace,
+                    groupIds: zonesActive ? onlyZones : undefined,
                 }),
             });
             const json = await response.json().catch(() => null);
             if (!response.ok) throw new Error(json?.error ?? 'No se pudo generar el fixture.');
-            await onDone(`Fixture generado: ${json.matches} partidos en ${json.rounds} fechas.`);
+            await onDone(`Fixture generado${zonesActive ? ` para ${chosenNames.join(', ')}` : ''}: ${json.matches} partidos en ${json.rounds} fechas.`);
         } catch (e) {
             setError(e instanceof Error ? e.message : 'No se pudo generar el fixture.');
         } finally {
@@ -166,8 +219,8 @@ export function FixtureGeneratorWizard({ tournamentId, phaseId, phaseName, parti
             </header>
 
             <div className="fgw-summary" role="status">
-                <strong>{teams.length}</strong> equipos
-                {hasZones ? <> · <strong>{groupIdsInUse.length}</strong> zonas</> : null}
+                <strong>{planTeams.length}</strong> equipos
+                {hasZones ? <> · <strong>{zonesActive ? onlyZones!.length : groupIdsInUse.length}</strong> {zonesActive ? `de ${groupIdsInUse.length} zonas` : 'zonas'}</> : null}
                 {' · '}<strong>{matchCount}</strong> partidos · <strong>{rounds.length}</strong> fechas
                 {placement.lastDate ? <> · hasta el <strong>{longDate(placement.lastDate)}</strong></> : null}
             </div>
@@ -196,11 +249,39 @@ export function FixtureGeneratorWizard({ tournamentId, phaseId, phaseName, parti
                                 </button>
                             ))}
                         </div>
+                        {hasZones && scope === 'within_groups' && (
+                            <>
+                                <h5>¿Para qué zonas?</h5>
+                                <div className="fgw-days" role="group" aria-label="Zonas a generar">
+                                    <button type="button" aria-pressed={onlyZones === null} className={onlyZones === null ? 'is-on' : ''} onClick={() => setOnlyZones(null)}>Todas las zonas</button>
+                                    {groupIdsInUse.map((gid) => {
+                                        const on = onlyZones === null || onlyZones.includes(gid as string);
+                                        return (
+                                            <button key={gid as string} type="button" aria-pressed={onlyZones !== null && on} className={onlyZones !== null && on ? 'is-on' : ''} onClick={() => toggleZone(gid as string)}>
+                                                {groupName(gid as string) ?? 'Zona'}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                                <p className="fgw-hint">
+                                    {onlyZones === null
+                                        ? 'Se arma el fixture de todas las zonas. Tocá una zona para generar solo esa.'
+                                        : 'Solo se generan las zonas marcadas. Los partidos de las otras no se tocan, y las fechas que ya existen se reusan: la Fecha 1 de una zona nueva cae en la Fecha 1 del torneo.'}
+                                </p>
+                            </>
+                        )}
                         {hasZones && (
                             <ul className="fgw-zones">
-                                {groupIdsInUse.map((gid) => (
-                                    <li key={gid as string}><b>{groupName(gid as string) ?? 'Zona'}</b> {teams.filter((t) => t.groupId === gid).map((t) => t.name).join(' · ')}</li>
-                                ))}
+                                {groupIdsInUse.map((gid) => {
+                                    const n = matchesIn(gid as string);
+                                    const skipped = zonesActive && !onlyZones!.includes(gid as string);
+                                    return (
+                                        <li key={gid as string} className={skipped ? 'is-off' : undefined}>
+                                            <b>{groupName(gid as string) ?? 'Zona'}</b> {teams.filter((t) => t.groupId === gid).map((t) => t.name).join(' · ')}
+                                            {existingByGroup !== null ? <em>{n === 0 ? ' · sin partidos' : ` · ya tiene ${n} partido${n === 1 ? '' : 's'}`}{skipped ? ', no se toca' : ''}</em> : null}
+                                        </li>
+                                    );
+                                })}
                             </ul>
                         )}
                     </>
@@ -273,7 +354,14 @@ export function FixtureGeneratorWizard({ tournamentId, phaseId, phaseName, parti
                                 );
                             })}
                         </div>
-                        <label className="operation-toggle"><input type="checkbox" checked={replace} onChange={(e) => setReplace(e.target.checked)} /><span>Reemplazar los partidos sin jugar de esta fase (los que ya tienen resultado no se tocan)</span></label>
+                        <label className="operation-toggle"><input type="checkbox" checked={replace} onChange={(e) => setReplace(e.target.checked)} /><span>
+                            {zonesActive
+                                ? `Reemplazar los partidos sin jugar de ${chosenNames.join(', ')} (las otras zonas y los que tienen resultado no se tocan)`
+                                : 'Reemplazar los partidos sin jugar de esta fase (los que ya tienen resultado no se tocan)'}
+                        </span></label>
+                        {!replace && chosenWithMatches.length > 0 && (
+                            <p className="fgw-warn">{chosenWithMatches.map((gid) => groupName(gid) ?? 'Zona').join(', ')} ya {chosenWithMatches.length === 1 ? 'tiene' : 'tienen'} partidos: sin reemplazar, se suman a los que hay y pueden quedar repetidos.</p>
+                        )}
                     </>
                 )}
             </div>
