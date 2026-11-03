@@ -134,6 +134,12 @@ export const RUGBYPASS_COMPETITIONS: readonly RugbyPassCompetition[] = [
     { id: 219, upstreamId: 1260, slug: 'pacific-nations-cup', name: 'Pacific Nations Cup', country: 'Internacional', seasonStartMonth: 1, viaCalendario: false, paginaDeTemporada: 'internationals' },
     { id: 269, upstreamId: 1119, slug: 'rugby-europe-championship', name: 'Rugby Europe Championship', country: 'Internacional', seasonStartMonth: 1, viaCalendario: false, paginaDeTemporada: 'internationals' },
     { id: 114, upstreamId: 2146, slug: 'nations-championship', name: 'Nations Championship', country: 'Internacional', seasonStartMonth: 1, viaCalendario: false, paginaDeTemporada: 'nations-championship' },
+    // La segunda division del Nations Championship (Georgia, Uruguay, Chile,
+    // Samoa…). Es OTRA competicion en RugbyPass, no una zona del 114: sin esta
+    // fila sus partidos llegaban en la respuesta de `internationals` y el parser
+    // los descartaba por competicion no habilitada. Medido 2026-11-02: 36
+    // partidos en la temporada 202600, todos con `optaCompId` 119.
+    { id: 119, upstreamId: 2150, slug: 'world-rugby-nations-cup', name: 'World Rugby Nations Cup', country: 'Internacional', seasonStartMonth: 1, viaCalendario: false, paginaDeTemporada: 'internationals' },
 
     // Las dos copas europeas de clubes tienen pagina propia.
     { id: 242, upstreamId: 1008, slug: 'european-champions-cup', name: 'Investec Champions Cup', country: 'Europa', seasonStartMonth: 7, viaCalendario: false, paginaDeTemporada: 'european-champions-cup' },

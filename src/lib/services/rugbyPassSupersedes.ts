@@ -129,6 +129,16 @@ export const RUGBYPASS_SUPERSEDES: readonly SupersededTournament[] = [
         countries: ['international', 'internacional', 'world', 'mundo'],
     },
     {
+        rugbyPassCompetitionId: 119,
+        // FlashScore no la trae (medido 2026-11-02: cero filas en la cache).
+        // La regla esta para que el dia que aparezca no salga dos veces. Nombre
+        // completo: 'nations cup' a secas es tambien la Pacific y la de hockey.
+        tournamentIds: ['rugby-world-nations-cup'],
+        urlFragments: ['/world/world-rugby-nations-cup/'],
+        names: ['world rugby nations cup'],
+        countries: ['international', 'internacional', 'world', 'mundo'],
+    },
+    {
         rugbyPassCompetitionId: 242,
         // No tiene ficha en `data/tournaments/rugby.ts`: va por URL y nombre.
         tournamentIds: [],
