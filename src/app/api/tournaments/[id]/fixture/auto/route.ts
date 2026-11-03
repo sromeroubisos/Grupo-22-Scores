@@ -21,11 +21,46 @@ type AutoFixtureBody = {
   legs?: number;
   seed?: number;
   slots?: Partial<SlotConfig>;
-  /** Borra antes los partidos sin jugar de la fase. */
+  /** Borra antes los partidos sin jugar de la fase (o solo los de `groupIds`). */
   replace?: boolean;
+  /**
+   * Generar solo para estas zonas (con `within_groups`). Las demás no se tocan:
+   * no se borran sus partidos y las fechas existentes se reusan por número, así
+   * una zona que se suma después juega su Fecha 1 en la Fecha 1 del torneo.
+   */
+  groupIds?: string[];
 };
 
 const SCOPES: PairingScope[] = ['within_groups', 'between_groups', 'all'];
+
+/** Cuántos partidos tiene ya cada zona de la fase: el generador lo usa para proponer las zonas vacías. */
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const tournamentId = (await params).id;
+    const { writer: db } = await requireTournamentMutationContext(tournamentId);
+    const phaseId = request.nextUrl.searchParams.get('phaseId');
+    if (!phaseId) return NextResponse.json({ error: 'Falta la fase.' }, { status: 400 });
+
+    const { data, error } = await db
+      .from('matches')
+      .select('group_id, status')
+      .eq('tournament_id', tournamentId)
+      .eq('phase_id', phaseId);
+    if (error) throw error;
+
+    const byGroup = new Map<string | null, { groupId: string | null; scheduled: number; played: number }>();
+    for (const m of (data ?? []) as Array<{ group_id: string | null; status: string | null }>) {
+      const key = m.group_id ?? null;
+      const entry = byGroup.get(key) ?? { groupId: key, scheduled: 0, played: 0 };
+      if (m.status === 'scheduled') entry.scheduled += 1; else entry.played += 1;
+      byGroup.set(key, entry);
+    }
+    return NextResponse.json({ ok: true, groups: Array.from(byGroup.values()) });
+  } catch (error: unknown) {
+    console.error('Error in GET /api/tournaments/[id]/fixture/auto:', error);
+    return tournamentApiErrorResponse(error);
+  }
+}
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -34,7 +69,12 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const body = (await request.json()) as AutoFixtureBody;
 
     const scope = SCOPES.includes(body.scope as PairingScope) ? (body.scope as PairingScope) : 'all';
-    const teams = (body.teams ?? []).filter((t) => t && typeof t.id === 'string' && t.id);
+    const onlyGroups = scope === 'within_groups' && Array.isArray(body.groupIds)
+      ? Array.from(new Set(body.groupIds.filter((g): g is string => typeof g === 'string' && g.length > 0)))
+      : [];
+    const teams = (body.teams ?? [])
+      .filter((t) => t && typeof t.id === 'string' && t.id)
+      .filter((t) => onlyGroups.length === 0 || (t.groupId != null && onlyGroups.includes(t.groupId)));
     if (!body.phaseId) return NextResponse.json({ error: 'Falta la fase.' }, { status: 400 });
     if (teams.length < 2) return NextResponse.json({ error: 'Se necesitan al menos 2 equipos.' }, { status: 400 });
 
@@ -76,7 +116,16 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     if (!phase) return NextResponse.json({ error: 'La fase no pertenece al torneo.' }, { status: 400 });
     const seasonId = phase.season_id ?? null;
 
-    if (body.replace) {
+    if (body.replace && onlyGroups.length > 0) {
+      // Solo las zonas elegidas. Las fechas quedan: se reusan abajo por número.
+      const { error: delMatches } = await db
+        .from('matches')
+        .delete()
+        .eq('phase_id', body.phaseId)
+        .eq('status', 'scheduled')
+        .in('group_id', onlyGroups);
+      if (delMatches) throw delMatches;
+    } else if (body.replace) {
       const { error: delMatches } = await db
         .from('matches')
         .delete()
@@ -90,14 +139,27 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       if (empty.length > 0) await db.from('tournament_rounds').delete().in('id', empty);
     }
 
-    const { count: existingRounds } = await db
+    const { data: phaseRounds } = await db
       .from('tournament_rounds')
-      .select('id', { count: 'exact', head: true })
+      .select('id, order_index')
       .eq('phase_id', body.phaseId);
-    const offset = existingRounds ?? 0;
+    // Generando para todas, las fechas nuevas van después de las que haya. Para
+    // algunas zonas, la Fecha N de la zona cae en la Fecha N que ya existe.
+    const offset = onlyGroups.length > 0 ? 0 : (phaseRounds ?? []).length;
+    const existingByOrder = new Map<number, string>();
+    if (onlyGroups.length > 0) {
+      for (const r of (phaseRounds ?? []) as Array<{ id: string; order_index: number | null }>) {
+        if (typeof r.order_index === 'number' && !existingByOrder.has(r.order_index)) existingByOrder.set(r.order_index, r.id);
+      }
+    }
 
     const roundIds = new Map<number, string>();
     for (const round of rounds) {
+      const reused = existingByOrder.get(round.number);
+      if (reused) {
+        roundIds.set(round.number, reused);
+        continue;
+      }
       const { data, error } = await db
         .from('tournament_rounds')
         .insert({
