@@ -4,6 +4,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { parseClubBaseRosterId } from '@/lib/clubRoster';
+import { isSevensClub } from '@/lib/utils/rugbyModality';
 
 export interface PersonWithRole {
     id: string;
@@ -175,6 +176,17 @@ async function resolveSharedRosterOwnerClubId(clubId: string, supabaseClient?: a
     }
 
     return clubId;
+}
+
+/** ¿El club es la versión 7s de otro ("Olivos R.C. 7s")? Su plantel no es el de la primera. */
+async function isSevensClubRow(db: any, clubId: string): Promise<boolean> {
+    const { data, error } = await db
+        .from('clubs')
+        .select('name, categories')
+        .eq('id', clubId)
+        .maybeSingle();
+    if (error || !data) return false;
+    return isSevensClub(data);
 }
 
 async function resolveRosterScope(
@@ -1078,19 +1090,28 @@ export async function addPersonToClub(clubId: string, personData: PersonClubInpu
             return { success: false, error: 'No se encontro la ficha seleccionada para reutilizar.' };
         }
 
-        const mergedPerson = mergePersonRecord(existingPerson, normalizedPayload);
-        const { data: updatedPerson, error: personError } = await updatePersonRecord(
-            supabase,
-            normalizedPayload.existing_person_id,
-            { ...mergedPerson, club_id: rosterClubId },
-        );
+        if (await isSevensClubRow(db, rosterClubId)) {
+            // El plantel de un seven se arma con jugadores elegidos, no con el de
+            // la primera: se VINCULA la ficha (una membresía en el club 7s) sin
+            // tocarla. No se la pisa ni se la saca de su club de origen: el
+            // jugador sigue en la primera y su historial es el mismo.
+            person = existingPerson;
+            reusedExistingPerson = true;
+        } else {
+            const mergedPerson = mergePersonRecord(existingPerson, normalizedPayload);
+            const { data: updatedPerson, error: personError } = await updatePersonRecord(
+                supabase,
+                normalizedPayload.existing_person_id,
+                { ...mergedPerson, club_id: rosterClubId },
+            );
 
-        if (personError) {
-            return { success: false, error: personError.message };
+            if (personError) {
+                return { success: false, error: personError.message };
+            }
+
+            person = updatedPerson;
+            reusedExistingPerson = true;
         }
-
-        person = updatedPerson;
-        reusedExistingPerson = true;
     } else {
         const { data: insertedPerson, error: personError } = await insertPersonRecord(supabase, {
             ...normalizedPayload,

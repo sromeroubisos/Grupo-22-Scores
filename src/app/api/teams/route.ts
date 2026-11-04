@@ -28,6 +28,7 @@ import { sortMatchesByDate } from '@/lib/utils/matchOrdering';
 import { buildTeamLogoProxyUrl, clubLogoVersion } from '@/lib/utils/logoUrl';
 import { applyExternalTeamLogoOverride } from '@/lib/utils/teamLogoOverrides';
 import { isMissingColumnError, isMissingTableError } from '@/lib/utils/supabaseSchema';
+import { isSevensClub } from '@/lib/utils/rugbyModality';
 import { getNationalTeamLinksForClub } from '@/lib/services/nationalTeamLinks';
 import { fihTeamId, toFihTeamRef } from '@/lib/services/fihHockeyParser';
 import {
@@ -1696,7 +1697,13 @@ export async function GET(request: Request) {
             // Plantel, familia y partidos no dependen entre sí: viajan juntos, porque
             // contra una base cross-region cada ida y vuelta secuencial son segundos.
             const [internalSquadState, familyClubs, homeMatchesResult, awayMatchesResult, ownCrestProbe] = await Promise.all([
-                fetchInternalClubSquad(readClient, effectiveClub.id, { includePlayers: !skipSquad }),
+                // El club 7s NO hereda el plantel de la primera de su club madre:
+                // su plantel es el que carga el gestor para el seven (jugadores
+                // elegidos, vinculados por ficha), no los 49 de la primera.
+                fetchInternalClubSquad(readClient, effectiveClub.id, {
+                    includePlayers: !skipSquad,
+                    allowFamilyFallback: !isSevensClub(effectiveClub),
+                }),
                 onlySquad ? Promise.resolve<PublicRelatedClub[]>([]) : fetchInternalClubFamily(readClient, effectiveClub.id),
                 onlySquad ? Promise.resolve(null) : internalMatchesBaseQuery()
                     .eq('home_club_id', effectiveClub.id)
