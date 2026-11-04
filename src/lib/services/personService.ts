@@ -4,6 +4,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { parseClubBaseRosterId, parseFamilyDivisionId } from '@/lib/clubRoster';
+import { isSevensClub } from '@/lib/utils/rugbyModality';
 
 export interface PersonWithRole {
     id: string;
@@ -163,6 +164,17 @@ async function resolveSharedRosterOwnerClubId(clubId: string, supabaseClient?: a
     }
 
     return clubId;
+}
+
+/** ¿El club es la versión 7s de otro ("Olivos R.C. 7s")? Su plantel no es el de la primera. */
+async function isSevensClubRow(db: any, clubId: string): Promise<boolean> {
+    const { data, error } = await db
+        .from('clubs')
+        .select('name, categories')
+        .eq('id', clubId)
+        .maybeSingle();
+    if (error || !data) return false;
+    return isSevensClub(data);
 }
 
 async function resolveRosterScope(
@@ -1105,32 +1117,41 @@ export async function addPersonToClub(clubId: string, personData: PersonClubInpu
             return { success: false, error: 'No se encontro la ficha seleccionada para reutilizar.' };
         }
 
-        // Reutilizar una ficha la PISA (nombre, DNI, nacimiento, club_id). Solo
-        // vale para una persona de este club o una sin club: si no, cualquier
-        // editor con un person_id reescribía la ficha de un jugador ajeno.
-        const reuseAllowed =
-            await isPersonInClubScope(db, rosterClubId, normalizedPayload.existing_person_id) ||
-            !(await personHasAnyClub(db, normalizedPayload.existing_person_id));
-        if (!reuseAllowed) {
-            return {
-                success: false,
-                error: 'Esa ficha pertenece a otro club. Pedí el pase al club de origen o creá una ficha nueva.',
-            };
+        if (await isSevensClubRow(db, rosterClubId)) {
+            // El plantel de un seven se arma con jugadores elegidos, no con el de
+            // la primera: se VINCULA la ficha (una membresía en el club 7s) sin
+            // tocarla. No se la pisa ni se la saca de su club de origen: el
+            // jugador sigue en la primera y su historial es el mismo.
+            person = existingPerson;
+            reusedExistingPerson = true;
+        } else {
+            // Reutilizar una ficha la PISA (nombre, DNI, nacimiento, club_id). Solo
+            // vale para una persona de este club o una sin club: si no, cualquier
+            // editor con un person_id reescribía la ficha de un jugador ajeno.
+            const reuseAllowed =
+                await isPersonInClubScope(db, rosterClubId, normalizedPayload.existing_person_id) ||
+                !(await personHasAnyClub(db, normalizedPayload.existing_person_id));
+            if (!reuseAllowed) {
+                return {
+                    success: false,
+                    error: 'Esa ficha pertenece a otro club. Pedí el pase al club de origen o creá una ficha nueva.',
+                };
+            }
+
+            const mergedPerson = mergePersonRecord(existingPerson, normalizedPayload);
+            const { data: updatedPerson, error: personError } = await updatePersonRecord(
+                supabase,
+                normalizedPayload.existing_person_id,
+                { ...mergedPerson, club_id: rosterClubId },
+            );
+
+            if (personError) {
+                return { success: false, error: personError.message };
+            }
+
+            person = updatedPerson;
+            reusedExistingPerson = true;
         }
-
-        const mergedPerson = mergePersonRecord(existingPerson, normalizedPayload);
-        const { data: updatedPerson, error: personError } = await updatePersonRecord(
-            supabase,
-            normalizedPayload.existing_person_id,
-            { ...mergedPerson, club_id: rosterClubId },
-        );
-
-        if (personError) {
-            return { success: false, error: personError.message };
-        }
-
-        person = updatedPerson;
-        reusedExistingPerson = true;
     } else {
         const { data: insertedPerson, error: personError } = await insertPersonRecord(supabase, {
             ...normalizedPayload,
