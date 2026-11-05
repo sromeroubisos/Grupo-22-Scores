@@ -7118,10 +7118,24 @@ function isOwnPublicStorageUrl(url: string): boolean {
     return Boolean(OWN_PUBLIC_STORAGE_PREFIX) && url.startsWith(OWN_PUBLIC_STORAGE_PREFIX);
 }
 
+// Los escudos de partido llegan por el proxy (`/api/assets/team-logo?key=...`), sin
+// el `/clubs/x.png` a la vista: el proxy resuelve la variante de tinta con
+// `variant=dark`. Las URLs con el escudo a la vista las cubre `darkCrestSource`.
+function withDarkCrestVariant(url: string): string {
+    try {
+        const parsed = new URL(url);
+        if (parsed.pathname !== '/api/assets/team-logo' || parsed.searchParams.get('key') === 'export-image') return url;
+        parsed.searchParams.set('variant', 'dark');
+        return parsed.toString();
+    } catch {
+        return url;
+    }
+}
+
 export async function loadImage(url: string): Promise<HTMLImageElement | null> {
     if (!isImageSource(url)) return null;
     const normalizedBase = normalizeImageSource(url);
-    const normalized = ACTIVE_CREST_BACKDROP_DARK === true ? darkCrestSource(normalizedBase) : normalizedBase;
+    const normalized = ACTIVE_CREST_BACKDROP_DARK === true ? darkCrestSource(withDarkCrestVariant(normalizedBase)) : normalizedBase;
     const sameOrigin = typeof window !== 'undefined' && normalized.startsWith(window.location.origin);
     // Storage publico de Supabase manda CORS y cache de un año (los fondos de
     // presets, los escudos subidos): directo primero. Por el proxy cada foto de

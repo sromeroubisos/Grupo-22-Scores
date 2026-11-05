@@ -13,6 +13,7 @@ import { getPlayerDetails, getTeamDetails } from '@/lib/services/flashscore';
 import { getRugbyPassTournamentBranding } from '@/lib/services/rugbyPass';
 import { parseRugbyPassTournamentId } from '@/lib/services/rugbyPassTournamentBundle';
 import { isUuid } from '@/lib/utils/postgrest';
+import { darkCrestSource } from '@/lib/exports/crestVariants';
 import { TEAM_LOGO_SOURCE_REVALIDATE_SECONDS, TEAM_LOGO_SOURCE_TAG } from '@/lib/server/teamLogoSourceCache';
 
 const LOGO_DIR = path.join(process.cwd(), 'public', 'logos', 'clubs');
@@ -741,7 +742,11 @@ async function findCachedLogo(key: string, teamUrl: string, teamName: string, en
 }
 
 async function buildImageResponse(source: string, url: URL, trustVersion = true) {
-    const normalizedSource = normalizeSourceUrl(source);
+    // `variant=dark`: el export pinta sobre fondo oscuro y pide la tinta clara de los
+    // escudos que la tienen (Tala). Se aplica ACÁ, sobre el escudo ya resuelto, porque
+    // el cliente sólo ve la URL del proxy y no sabe a qué `/clubs/x.png` termina.
+    const wantsDark = url.searchParams.get('variant') === 'dark';
+    const normalizedSource = normalizeSourceUrl(wantsDark ? darkCrestSource(source) : source);
     const cacheControl = resolveProxyCacheControl(url, trustVersion);
 
     if (normalizedSource.startsWith('data:')) {
