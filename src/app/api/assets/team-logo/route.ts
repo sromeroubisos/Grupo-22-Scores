@@ -13,6 +13,7 @@ import { getPlayerDetails, getTeamDetails } from '@/lib/services/flashscore';
 import { getRugbyPassTournamentBranding } from '@/lib/services/rugbyPass';
 import { parseRugbyPassTournamentId } from '@/lib/services/rugbyPassTournamentBundle';
 import { isUuid } from '@/lib/utils/postgrest';
+import { darkCrestSource } from '@/lib/exports/crestVariants';
 import { safeFetchBuffer, SafeFetchError } from '@/lib/server/safeFetch';
 import { TEAM_LOGO_SOURCE_REVALIDATE_SECONDS, TEAM_LOGO_SOURCE_TAG } from '@/lib/server/teamLogoSourceCache';
 
@@ -930,7 +931,11 @@ async function fetchRemoteImage(source: string): Promise<Buffer | null> {
  * para cuando la funcion no lo tiene en disco.
  */
 async function buildImageResponse(source: string, url: URL, trustVersion = true): Promise<NextResponse | null> {
-    const normalizedSource = normalizeSourceUrl(source);
+    // `variant=dark`: el export pinta sobre fondo oscuro y pide la tinta clara de los
+    // escudos que la tienen (Tala). Se aplica ACÁ, sobre el escudo ya resuelto, porque
+    // el cliente sólo ve la URL del proxy y no sabe a qué `/clubs/x.png` termina.
+    const wantsDark = url.searchParams.get('variant') === 'dark';
+    const normalizedSource = normalizeSourceUrl(wantsDark ? darkCrestSource(source) : source);
     const cacheControl = resolveProxyCacheControl(url, trustVersion);
     const requestedWidth = parseRequestedWidth(url);
 
