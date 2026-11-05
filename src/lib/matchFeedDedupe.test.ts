@@ -243,3 +243,30 @@ test('anda con el torneo anidado del enriquecido', () => {
     const salida = dedupeCrossSourceMatches([enriquecido(fsTop14Ar), propioEnr]);
     assert.deepEqual(salida.map((m) => m.id), [UUID_TOP14]);
 });
+
+test('una fila de archivo con el dia corrido no sobrevive a la fuente viva (Irlanda-Argentina)', () => {
+    const feed = [
+        partido('ra-760979', '2026-11-07T12:00:00+00:00', 'Ireland', 'Argentina'),
+        partido('EB0Dad3U', '2026-11-06T20:10:00+00:00', 'Ireland', 'Argentina'),
+        partido('rp-291598', '2026-11-06T20:10:00+00:00', 'Ireland', 'Argentina'),
+    ];
+    const plegado = dedupeCrossSourceMatches(feed);
+    assert.deepEqual(plegado.map((m) => m.id), ['rp-291598']);
+});
+
+test('sin fuente viva cerca, la fila de archivo se queda', () => {
+    const feed = [
+        partido('ra-1', '1975-03-01T12:00:00+00:00', 'Bayonne', 'Biarritz'),
+        partido('live', '2026-11-06T20:10:00+00:00', 'Bayonne', 'Biarritz'),
+    ];
+    assert.equal(dedupeCrossSourceMatches(feed).length, 2);
+});
+
+test('el filtro sobre filas crudas descarta el archivo corrido de dia', async () => {
+    const { dropShadowedArchiveCacheRows } = await import('./matchFeedDedupe.ts');
+    const fila = (id: string, date_time: string) => ({
+        id, date_time, home_team: { name: 'Ireland' }, away_team: { name: 'Argentina' },
+    });
+    const filas = [fila('ra-760979', '2026-11-07T12:00:00+00:00'), fila('rp-291598', '2026-11-06T20:10:00+00:00')];
+    assert.deepEqual(dropShadowedArchiveCacheRows(filas).map((r) => r.id), ['rp-291598']);
+});

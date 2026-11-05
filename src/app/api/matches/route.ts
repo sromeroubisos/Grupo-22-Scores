@@ -27,7 +27,7 @@ import { isGlobalAdminRole } from '@/lib/auth/roles';
 import { SPORTS } from '@/lib/data/sports';
 import { getCountryById } from '@/lib/data/countries';
 import { memoryCache } from '@/lib/cache';
-import { dedupeCrossSourceMatches, hasStaleRowsNeedingRepair } from '@/lib/matchFeedDedupe';
+import { dedupeCrossSourceMatches, dropShadowedArchiveCacheRows, hasStaleRowsNeedingRepair } from '@/lib/matchFeedDedupe';
 import { isFlashScoreEnabledForSport } from '@/lib/externalProviderPolicy';
 import { isMatchVisibleToPublic } from '@/lib/matchReview';
 import {
@@ -1885,7 +1885,7 @@ async function computeMatchesPayload(
                     // request. Sin este corte, un día futuro que fixture-sync
                     // todavía no cubrió se serviría "desde caché" con el derrame
                     // del día anterior.
-                    const rowsForDate = cachedRows.filter((row) => {
+                    const rowsForDate = dropShadowedArchiveCacheRows(cachedRows).filter((row) => {
                         const rowDate = new Date(row.date_time);
                         return !Number.isNaN(rowDate.getTime()) && formatDateKey(rowDate, timeZone) === date;
                     });

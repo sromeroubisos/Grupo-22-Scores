@@ -161,6 +161,54 @@ export function dropFlashScoreTop14DuplicadoPorElPropio<T extends FeedMatchLike>
     return matches.filter((m) => !esTop14ArgentinoDeFlashScore(m));
 }
 
+/**
+ * EL ARCHIVO PUEDE TRAER OTRO DIA, NO SOLO OTRA HORA.
+ *
+ * Medido el 2026-11-05: Irlanda-Argentina salia tres veces. Las dos buenas
+ * (FlashScore y RugbyPass) dicen viernes 6/11 20:10 UTC, o sea 17:10 en
+ * Argentina. La del archivo (`ra-760979`, "Admiral Brown Cup") dice sabado 7/11
+ * 12:00 UTC: un dia corrido y la hora de relleno, que en Argentina se lee 9:00.
+ * El pliegue por identidad compara el DIA, asi que no las juntaba.
+ *
+ * La fila de archivo sin hora real nunca le gana a una fuente viva con el mismo
+ * cruce cerca (24 h). Sin fuente viva, el archivo sigue siendo lo unico que hay.
+ */
+const VENTANA_ARCHIVO_MS = 24 * 60 * 60 * 1000;
+
+function parejaDeNombres(match: FeedMatchLike): string | null {
+    const names = [match?.homeTeam?.name, match?.awayTeam?.name]
+        .map((n) => String(n || '')
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[̀-ͯ]/g, '')
+            .replace(/[^a-z0-9]+/g, ''))
+        .filter(Boolean);
+    return names.length < 2 ? null : names.slice().sort().join('|');
+}
+
+export function dropArchiveRowsShadowedByLiveSource<T extends FeedMatchLike>(matches: T[]): T[] {
+    const vivas = new Map<string, number[]>();
+    for (const m of matches) {
+        if (isArchiveMatchId(m.id)) continue;
+        const pareja = parejaDeNombres(m);
+        const ms = new Date(String(m.dateTime ?? '')).getTime();
+        if (!pareja || Number.isNaN(ms)) continue;
+        const lista = vivas.get(pareja);
+        if (lista) lista.push(ms);
+        else vivas.set(pareja, [ms]);
+    }
+    if (vivas.size === 0) return matches;
+
+    return matches.filter((m) => {
+        if (!isArchiveMatchId(m.id)) return true;
+        const pareja = parejaDeNombres(m);
+        const ms = new Date(String(m.dateTime ?? '')).getTime();
+        if (!pareja || Number.isNaN(ms)) return true;
+        const cerca = vivas.get(pareja);
+        return !cerca?.some((v) => Math.abs(v - ms) <= VENTANA_ARCHIVO_MS);
+    });
+}
+
 export function dedupeCrossSourceMatches<T extends FeedMatchLike>(matches: T[]): T[] {
     /**
      * Por identidad se guarda el MEJOR rango visto y todas las filas que lo
@@ -181,7 +229,9 @@ export function dedupeCrossSourceMatches<T extends FeedMatchLike>(matches: T[]):
     // Primero se apaga el torneo reemplazado y despues se pliega lo que quedo:
     // al reves, una fila que igual se iba a descartar podria ganarle el lugar a
     // la buena y dejar el partido con los datos del proveedor equivocado.
-    for (const match of dropFlashScoreTop14DuplicadoPorElPropio(dropSupersededMatches(matches))) {
+    for (const match of dropArchiveRowsShadowedByLiveSource(
+        dropFlashScoreTop14DuplicadoPorElPropio(dropSupersededMatches(matches))
+    )) {
         const identidad = buildFeedMatchIdentity(match);
         if (!identidad) {
             salida.push(match);
@@ -290,3 +340,20 @@ export function hasStaleRowsNeedingRepair(
         return !(identidad && identidadesCerradas.has(identidad));
     });
 }
+
+/**
+ * LO MISMO, SOBRE LAS FILAS CRUDAS DE LA CACHE, ANTES DE CORTAR POR DIA.
+ *
+ * `/api/matches` pide la cache con +-1 dia UTC y recien despues se queda con la
+ * fecha pedida. Si el archivo corrio el partido de dia (el viernes en la fuente
+ * viva, el sabado en el archivo), cada dia se arma por separado y el pliegue
+ * nunca ve las dos filas juntas: el sabado mostraba la del archivo a las 9:00.
+ * Por eso el filtro corre sobre la ventana completa, antes del corte.
+ */
+export function dropShadowedArchiveCacheRows<T extends CachedRowLike>(rows: T[]): T[] {
+    const vivas = new Set(
+        dropArchiveRowsShadowedByLiveSource(rows.map(rowToFeedLike)).map((m) => String(m.id)),
+    );
+    return rows.filter((r) => vivas.has(String(r.id)));
+}
+
