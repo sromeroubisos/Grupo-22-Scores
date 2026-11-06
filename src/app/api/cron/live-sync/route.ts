@@ -27,8 +27,9 @@ import {
     shouldPollLiveMatches
 } from '@/lib/services/externalMatchCache';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { getRugbyPassPoll } from '@/lib/services/rugbyPass';
-import { RUGBYPASS_MATCH_ID_PREFIX } from '@/lib/services/rugbyPassParser';
+import { getRugbyPassPoll, getRugbyPassMatchDetail } from '@/lib/services/rugbyPass';
+import { RUGBYPASS_MATCH_ID_PREFIX, rugbyPassTeamSlugOf } from '@/lib/services/rugbyPassParser';
+import { decidirRugbyPass } from '@/lib/services/rugbyPassLiveDecision';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
@@ -94,8 +95,6 @@ async function notificarFutbol(
  * Un partido de rugby dura unos 80 minutos de juego mas el entretiempo: 100
  * minutos desde el kickoff es el piso para darlo por terminado.
  */
-const RUGBY_MATCH_SPAN_MS = 100 * 60 * 1000;
-
 /** Cuanto antes del kickoff empieza a sondearse un partido. */
 const PRE_KICKOFF_MS = 15 * 60 * 1000;
 
@@ -119,7 +118,7 @@ async function syncRugbyPassLive(supabase: SupabaseClient) {
         .from('external_match_cache')
         // Solo lo que hace falta para decidir. `select('*')` invitaba a
         // devolver la fila entera al escribir, y ahi estaba el bug.
-        .select('id, status, date_time, score')
+        .select('id, status, date_time, score, home_team, away_team')
         .like('id', `${RUGBYPASS_MATCH_ID_PREFIX}%`)
         .in('status', ['scheduled', 'live'])
         .gte('date_time', desde)
@@ -140,36 +139,35 @@ async function syncRugbyPassLive(supabase: SupabaseClient) {
     const resultados = await getRugbyPassPoll([...porGameId.keys()]);
     const cambiadas: any[] = [];
 
-    for (const r of resultados) {
-        const fila = porGameId.get(r.gameId);
-        if (!fila) continue;
+    const pollPorGameId = new Map(resultados.map((r) => [r.gameId, r]));
 
-        const kickoffMs = new Date(fila.date_time).getTime();
-        const yaTendriaQueHaberTerminado =
-            !Number.isNaN(kickoffMs) && ahora - kickoffMs > RUGBY_MATCH_SPAN_MS;
-
-        let status = fila.status;
-        if (r.status === 'live') {
-            status = 'live';
-        } else if (fila.status === 'live' && yaTendriaQueHaberTerminado) {
-            status = 'final';
+    // LA FICHA MANDA, EL POLL ES RESPALDO (ver rugbyPassLiveDecision.ts): el poll
+    // contesta `status 0` y 0-0 con el partido en el segundo tiempo, y con eso
+    // el cron dejaba el marcador en 0-0 y cerraba el partido a los 100 minutos.
+    // Son pocas filas por corrida, asi que se pide la ficha de cada una.
+    for (const [gameId, fila] of porGameId) {
+        let ficha = null;
+        try {
+            const detalle = await getRugbyPassMatchDetail(
+                gameId,
+                rugbyPassTeamSlugOf(String(fila.home_team?.id ?? '')),
+                rugbyPassTeamSlugOf(String(fila.away_team?.id ?? '')),
+            );
+            if (detalle) {
+                ficha = {
+                    gameId: detalle.gameId,
+                    terminado: detalle.status === 'result',
+                    home: detalle.homeScore,
+                    away: detalle.awayScore,
+                };
+            }
+        } catch (e) {
+            console.warn(`[live-sync] ficha de RugbyPass ${gameId} no disponible, se usa el poll:`, e);
         }
 
-        // UN MARCADOR QUE NO VINO NO ES UN 0-0.
-        //
-        // El poll devuelve `null` cuando no publica el tanteador. Escribir eso
-        // encima de un marcador bueno lo borra, y en la pantalla un `null` se
-        // lee igual que un cero: el partido queda 0-0 en el peor momento, con
-        // el "En vivo" al lado. Sin dato, el marcador guardado no se toca.
-        const traeMarcador = typeof r.home === 'number' && typeof r.away === 'number';
-        const score = traeMarcador
-            ? { home: r.home, away: r.away, penalties: null }
-            : fila.score;
-        const cambioMarcador =
-            traeMarcador && (fila.score?.home !== r.home || fila.score?.away !== r.away);
-
-        if (status !== fila.status || cambioMarcador) {
-            cambiadas.push({ id: fila.id, status, score });
+        const decision = decidirRugbyPass(fila, gameId, ficha, pollPorGameId.get(gameId) ?? null, ahora);
+        if (decision.cambio) {
+            cambiadas.push({ id: fila.id, status: decision.status, score: decision.score });
         }
     }
 
