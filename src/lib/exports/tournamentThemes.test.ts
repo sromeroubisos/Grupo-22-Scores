@@ -90,3 +90,9 @@ test('lo que no esta en las reglas queda sin tema', () => {
     assert.equal(resolve(''), null);
     assert.equal(resolve(undefined), null);
 });
+
+test('Clausura Andina: dorado de ascenso; Cordillerano: rojo de regional', () => {
+    assert.equal(resolve('Torneo Clausura 2026 Unión Andina')?.id, T.ascenso.id);
+    assert.equal(resolve('Torneo Apertura de la Unión Andina')?.id, T.ascenso.id);
+    assert.equal(resolve('Torneo Cordillerano')?.id, T.regional.id);
+});

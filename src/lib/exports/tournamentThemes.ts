@@ -81,7 +81,7 @@ const has = (text: string, pattern: RegExp) => pattern.test(text);
 const EUROPE = /\b(pro d2|nationale|champions cup|challenge cup|all ireland|serie a elite|coppa italia|bundesliga|ekstraliga|extraliga|ereklasse|liga nationala|didi 10|sm-sarja|cn honra|super xv|super rygbi|super series|premier league|elite 1|supersevens|championship rugby|championship cup|unions cup|tbilisi|clasificatorio europeo|rugby europe)\b/;
 
 /** Lo que va por debajo de los regionales en Argentina (fondo dorado). */
-const ASCENSO = /\b(ascenso|primera [abc]\b|desarrollo|segunda|tercera|super 9|regional centro|preintermedia|intermedia|iniciacion|bi uniones|copa plata|torneo anual|interior|werentizky|apertura|austral|tierra del fuego|empresarial|formativo|superior|cordobes|tucuman|pampeano b|litoral b|noa [bc]|top 13|top 12|top 8|ten|seven)\b/;
+const ASCENSO = /\b(ascenso|primera [abc]\b|desarrollo|segunda|tercera|super 9|regional centro|preintermedia|intermedia|iniciacion|bi uniones|copa plata|torneo anual|interior|werentizky|apertura|clausura|austral|tierra del fuego|empresarial|formativo|superior|cordobes|tucuman|pampeano b|litoral b|noa [bc]|top 13|top 12|top 8|ten|seven)\b/;
 
 /** Juveniles (fondo negro, acento verde). */
 const JUVENIL = /\b(juvenil|juveniles|m ?1[3-9]|sub ?\d{2}|u ?(18|20)|m23|m-23|ucr juveniles|argentino juvenil)\b/;
@@ -124,7 +124,7 @@ export function resolveTournamentExportTheme(tournamentName: string | null | und
     if (has(name, /encuentro femenino de selecciones|nacional de clubes/)) return T.argentinoJuvenil;
     if (has(name, /ascenso/)) return T.ascenso;
     if (has(name, /top 14 de la urba|urba top 14|urba: top 14/)) return T.regional;
-    if (has(name, /top 10 del centro|copa oro del oeste|torneo regional del nea\b|norpatagonico|patagonico|regional pampeano\b|regional del litoral a|regional del noa a\b/)) {
+    if (has(name, /top 10 del centro|copa oro del oeste|torneo regional del nea\b|norpatagonico|patagonico|cordillerano|regional pampeano\b|regional del litoral a|regional del noa a\b/)) {
         // "Pampeano B", "NOA A - Intermedia"... son escalones de abajo.
         return has(name, /pampeano b|intermedia/) ? T.ascenso : T.regional;
     }
