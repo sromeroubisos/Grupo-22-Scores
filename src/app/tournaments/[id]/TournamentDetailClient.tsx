@@ -1668,20 +1668,7 @@ function buildDbPlayoffDraw(dbData: TournamentInitialData, preferredPhaseId?: st
             return String(left?.id || '').localeCompare(String(right?.id || ''));
         });
 
-    // De dónde sale cada lado de un cruce: las reglas de avance de la llave.
-    // `structural` marca el camino fijo del cuadro (el perdedor de una semi que
-    // va al 3.º puesto), que no es un "mejor perdedor" que se coló.
-    const sourceBySlot = new Map<string, { match_id: string; outcome: 'winner' | 'loser'; structural: true }>();
-    for (const rule of Array.isArray((dbData as any).advancementRules) ? ((dbData as any).advancementRules as any[]) : []) {
-        if (!rule?.target_match_id || !rule?.source_match_id) continue;
-        sourceBySlot.set(`${rule.target_match_id}:${rule.target_slot}`, {
-            match_id: String(rule.source_match_id),
-            outcome: rule.outcome === 'loser' ? 'loser' : 'winner',
-            structural: true,
-        });
-    }
-
-    const mapMatch = (match: any): any => {
+    const mapMatch = (match: any) => {
         const scoreHome = match?.score?.home ?? null;
         const scoreAway = match?.score?.away ?? null;
         const finished = isDbFinalStatus(match?.status);
@@ -1711,8 +1698,6 @@ function buildDbPlayoffDraw(dbData: TournamentInitialData, preferredPhaseId?: st
             winner_id: winnerId,
             match_start_iso: match.date_time || null,
             status: finished ? 'finished' : (match.status || 'scheduled'),
-            home_source: sourceBySlot.get(`${match.id}:home`) ?? null,
-            away_source: sourceBySlot.get(`${match.id}:away`) ?? null,
         };
     };
 

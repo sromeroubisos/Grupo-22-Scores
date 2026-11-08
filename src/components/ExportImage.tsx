@@ -14875,6 +14875,9 @@ function drawBracketCard(ctx: CanvasRenderingContext2D, spec: BracketCardSpec, p
 function isBracketThirdPlaceName(name: string): boolean {
     const n = name.toLowerCase();
     if (/third\s*place|3rd\s*place|bronze\s*final/.test(n)) return true;
+    // Consolacion (7. y 8.): cuelga de la final de ubicacion como el 3.er puesto de la Final;
+    // "Final de consolacion" es la final, no el bloque chico.
+    if (/consolaci[o\u00f3]n/.test(n) && !/^\s*final\b/.test(n)) return true;
     return /puesto/.test(n) && (/tercer/.test(n) || /(^|\D)3(\D|$)/.test(n));
 }
 

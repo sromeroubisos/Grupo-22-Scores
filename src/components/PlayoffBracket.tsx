@@ -44,11 +44,6 @@ interface PlayoffMatch {
 interface BracketSource {
     match_id: string | number | null;
     outcome: 'winner' | 'loser';
-    /**
-     * Camino fijo del cuadro (el perdedor de una semi que juega el 3.º puesto).
-     * Sin esto, un `loser` es el mejor perdedor que se coló a la ronda siguiente.
-     */
-    structural?: boolean;
 }
 
 interface PlayoffRound {
@@ -69,7 +64,17 @@ interface PlayoffBracketProps {
 function isThirdPlaceRoundName(name: string): boolean {
     const n = name.toLowerCase();
     if (/third\s*place|3rd\s*place|bronze\s*final/.test(n)) return true;
+    // La ronda de consolación ("Consolación (7.º y 8.º)") cuelga de la final de
+    // ubicación como el 3.er puesto de la Final; "Final de consolación" es la
+    // final, no el bloque chico.
+    if (isConsolationRoundName(n) && !/^\s*final\b/.test(n)) return true;
     return /puesto/.test(n) && (/tercer/.test(n) || /(^|\D)3(\D|$)/.test(n));
+}
+
+// Las rondas de consolación definen puestos (5.º al 8.º) sin ser el cuadro del
+// título: no llevan Campeón ni trofeo.
+function isConsolationRoundName(name: string): boolean {
+    return /consolaci[oó]n/i.test(name);
 }
 
 // "Semifinal" y "Cuartos de final" también contienen "final": la columna héroe
@@ -115,7 +120,7 @@ type MatchView = {
 // Un club que entró por la ventana del mejor perdedor lo dice en su fila: sin
 // eso, el cuadro parece mostrar a un eliminado jugando la ronda siguiente.
 function noteOf(source: BracketSource | null | undefined, placeholder: boolean): string | null {
-    return !placeholder && source?.outcome === 'loser' && !source.structural ? 'Mejor perdedor' : null;
+    return !placeholder && source?.outcome === 'loser' ? 'Mejor perdedor' : null;
 }
 
 // El estado llega en inglés según la fuente ("scheduled", "NS"); acá se lee en castellano.
@@ -259,8 +264,6 @@ type TreeSpan = { start: number; end: number };
 
 type TreeNode = {
     view: MatchView;
-    /** La ronda a la que pertenece el cruce: la columna puede juntar varias (Final y 3.er puesto). */
-    roundName: string;
     span: TreeSpan;
     /** Los partidos de la ronda anterior cuyo ganador llega acá. */
     feeders: { span: TreeSpan; decided: boolean }[];
@@ -280,120 +283,52 @@ const centerOf = (span: TreeSpan) => (span.start + span.end) / 2;
 function buildTreeLayout(rounds: ResolvedRound[]): { leaves: number; rounds: TreeRound[] } | null {
     if (rounds.length < 2 || rounds[0].matches.length === 0) return null;
 
-    // La columna de un cruce es su PROFUNDIDAD: 0 si no viene de nadie del
-    // cuadro, y 1 + la de su origen más profundo si no. Así la Final y el 3.er
-    // puesto, que salen de las mismas semifinales, caen en la misma columna
-    // aunque sean dos rondas.
-    type Entry = {
-        view: MatchView;
-        roundName: string;
-        depth: number;
-        span: TreeSpan;
-        feeders: Entry[];
-        /** Lo juegan los perdedores de la ronda anterior (3.er puesto, 7.º): va debajo del de los ganadores. */
-        fedByLosers: boolean;
-        order: number;
-    };
-    const entries: Entry[] = [];
-    const byId = new Map<string, Entry>();
+    const tree: TreeRound[] = [];
+    let previous = new Map<string, { span: TreeSpan; decided: boolean }>();
 
     for (let roundIdx = 0; roundIdx < rounds.length; roundIdx++) {
         const round = rounds[roundIdx];
-        const created: Entry[] = [];
+        const nodes: TreeNode[] = [];
+
         for (let matchIdx = 0; matchIdx < round.matches.length; matchIdx++) {
             const match = round.matches[matchIdx];
             const view = toMatchView(match, matchIdx);
-            let feeders: Entry[] = [];
-            let fedByLosers = false;
-            if (roundIdx > 0) {
-                // Cuentan el ganador y el camino fijo del cuadro. Un `loser` suelto
-                // es un mejor perdedor que se coló: no es un origen del cruce.
-                const usable = [match.home_source, match.away_source]
-                    .filter((source): source is BracketSource =>
-                        Boolean(source) && source!.match_id != null && (source!.outcome === 'winner' || Boolean(source!.structural)));
-                feeders = usable
-                    .map((source) => byId.get(String(source.match_id)))
-                    .filter((feeder): feeder is Entry => feeder !== undefined);
-                if (feeders.length === 0) return null;
-                fedByLosers = usable.some((source) => source.outcome === 'loser');
+            if (roundIdx === 0) {
+                nodes.push({ view, span: { start: matchIdx, end: matchIdx + 1 }, feeders: [] });
+                continue;
             }
-            created.push({
+
+            const feeders = [match.home_source, match.away_source]
+                .filter((source): source is BracketSource => source?.outcome === 'winner' && source.match_id != null)
+                .map((source) => previous.get(String(source.match_id)))
+                .filter((feeder): feeder is { span: TreeSpan; decided: boolean } => feeder !== undefined);
+            if (feeders.length === 0) return null;
+
+            nodes.push({
                 view,
-                roundName: round.name,
-                depth: feeders.length === 0 ? 0 : 1 + Math.max(...feeders.map((feeder) => feeder.depth)),
-                span: { start: 0, end: 0 },
+                span: {
+                    start: Math.min(...feeders.map((feeder) => feeder.span.start)),
+                    end: Math.max(...feeders.map((feeder) => feeder.span.end)),
+                },
                 feeders,
-                fedByLosers,
-                order: entries.length + created.length,
             });
         }
-        // Los orígenes se buscan solo en rondas anteriores.
-        for (const entry of created) byId.set(String(entry.view.key), entry);
-        entries.push(...created);
-    }
 
-    const maxDepth = Math.max(...entries.map((entry) => entry.depth));
-    const leafEntries = entries.filter((entry) => entry.depth === 0);
-    leafEntries.forEach((entry, idx) => {
-        entry.span = { start: idx, end: idx + 1 };
-    });
-
-    const columns: Entry[][] = [leafEntries];
-    for (let depth = 1; depth <= maxDepth; depth++) {
-        const column = entries.filter((entry) => entry.depth === depth);
-        // El tramo ideal de un cruce es el que abarcan sus orígenes. Dos cruces
-        // con el mismo tramo (Final y 3.er puesto, 5.º y 7.º) se lo reparten en
-        // partes iguales, en el orden de las rondas.
-        const ideal = new Map<Entry, TreeSpan>(
-            column.map((entry) => [
-                entry,
-                {
-                    start: Math.min(...entry.feeders.map((feeder) => feeder.span.start)),
-                    end: Math.max(...entry.feeders.map((feeder) => feeder.span.end)),
-                },
-            ]),
-        );
-        const groups = new Map<string, Entry[]>();
-        for (const entry of column) {
-            const span = ideal.get(entry)!;
-            const key = `${span.start}-${span.end}`;
-            groups.set(key, [...(groups.get(key) ?? []), entry]);
-        }
-        for (const group of groups.values()) {
-            const span = ideal.get(group[0])!;
-            const length = span.end - span.start;
-            if (length % group.length !== 0) return null;
-            const slice = length / group.length;
-            group
-                .sort((left, right) => Number(left.fedByLosers) - Number(right.fedByLosers) || left.order - right.order)
-                .forEach((entry, idx) => {
-                    entry.span = { start: span.start + idx * slice, end: span.start + (idx + 1) * slice };
-                });
-        }
-        columns.push(column);
-    }
-
-    const tree: TreeRound[] = [];
-    for (let depth = 0; depth < columns.length; depth++) {
-        const nodes: TreeNode[] = columns[depth]
-            .map((entry) => ({
-                view: entry.view,
-                roundName: entry.roundName,
-                span: entry.span,
-                feeders: entry.feeders.map((feeder) => ({
-                    span: feeder.span,
-                    decided: feeder.view.finished && (feeder.view.home.won || feeder.view.away.won),
-                })),
-            }))
-            .sort((left, right) => left.span.start - right.span.start);
+        nodes.sort((left, right) => left.span.start - right.span.start);
         for (let i = 1; i < nodes.length; i++) {
             if (nodes[i].span.start < nodes[i - 1].span.end) return null;
         }
-        const names = [...new Set(nodes.map((node) => node.roundName))];
-        tree.push({ key: depth, name: names.join(' · '), nodes });
+
+        previous = new Map(
+            nodes.map((node) => [
+                String(node.view.key),
+                { span: node.span, decided: node.view.finished && (node.view.home.won || node.view.away.won) },
+            ]),
+        );
+        tree.push({ key: round.key, name: round.name, nodes });
     }
 
-    return { leaves: leafEntries.length, rounds: tree };
+    return { leaves: rounds[0].matches.length, rounds: tree };
 }
 
 type Placement = {
@@ -523,9 +458,7 @@ function BracketTree({ layout, finalIdx }: { layout: { leaves: number; rounds: T
 
     // Una columna de Campeón al final del árbol, como el remate de un cuadro
     // impreso: con la final jugada muestra al ganador; antes, el lugar vacío.
-    // El 3.er puesto que comparte columna con la Final no es el cierre del cuadro.
-    const closingNodes = rounds[lastIdx].nodes.filter((node) => !isThirdPlaceRoundName(node.roundName));
-    const finalNode = finalIdx === lastIdx && closingNodes.length === 1 ? closingNodes[0] : null;
+    const finalNode = finalIdx === lastIdx && rounds[lastIdx].nodes.length === 1 ? rounds[lastIdx].nodes[0] : null;
     const champion = finalNode && finalNode.view.finished
         ? (finalNode.view.home.won ? finalNode.view.home : finalNode.view.away.won ? finalNode.view.away : null)
         : null;
@@ -562,7 +495,7 @@ function BracketTree({ layout, finalIdx }: { layout: { leaves: number; rounds: T
                             >
                                 <MatchCard
                                     view={node.view}
-                                    variant={isFinalCol ? (isThirdPlaceRoundName(node.roundName) ? 'third' : 'final') : undefined}
+                                    variant={isFinalCol ? 'final' : undefined}
                                     delayMs={Math.min(roundIdx * 90 + matchIdx * 45, 600)}
                                 />
                             </div>
@@ -673,30 +606,16 @@ export default function PlayoffBracket({ data, title = 'Cuadro Final' }: Playoff
         : [];
     const trailingThirdRounds = hasFinalColumn ? [] : thirdPlaceRounds;
 
-    // Árbol con líneas solo si cada cruce sabe de dónde sale (Ultimate Sevens y
-    // las llaves con reglas de avance). El 3.er puesto entra al árbol cuando
-    // cuelga de las semifinales; si no sabe de dónde viene, el árbol se rinde y
-    // vuelve a columnas.
-    const tree = buildTreeLayout(resolved);
+    // Árbol con líneas solo si cada cruce sabe de dónde sale (hoy: Ultimate
+    // Sevens). Con 3.er puesto no: esa ronda no cuelga de ningún cruce del árbol.
+    const tree = thirdPlaceRounds.length === 0 ? buildTreeLayout(mainRounds) : null;
     if (tree) {
-        // La columna héroe es la última que no sea de ubicación: la que trae la
-        // Final (con o sin 3.er puesto al lado), o un único cruce que cierra.
-        let treeFinalIdx = -1;
-        for (let i = tree.rounds.length - 1; i >= 0; i--) {
-            const column = tree.rounds[i];
-            const names = column.nodes.map((node) => node.roundName).filter((n) => !isThirdPlaceRoundName(n));
-            if (names.length > 0 && names.every(isPlacementRoundName)) continue;
-            if (names.some(looksLikeFinalRoundName) || (i === tree.rounds.length - 1 && column.nodes.length === 1)) {
-                treeFinalIdx = i;
-            }
-            break;
-        }
         const placements = placementsOf(tree.rounds);
         return (
             <div className={styles.container}>
                 <h2 className={styles.title}>{title}</h2>
                 <div className={styles.bracketScroll}>
-                    <BracketTree layout={tree} finalIdx={treeFinalIdx} />
+                    <BracketTree layout={tree} finalIdx={finalIdx} />
                 </div>
                 {placements ? <PlacementsTable placements={placements} /> : null}
             </div>
@@ -728,14 +647,15 @@ export default function PlayoffBracket({ data, title = 'Cuadro Final' }: Playoff
 
                         // Campeón: solo cuando la final está terminada y con ganador.
                         const finalView = views.length === 1 ? views[0] : null;
-                        const champion = finalView && finalView.finished
+                        const isConsolationFinal = isConsolationRoundName(round.name);
+                        const champion = finalView && finalView.finished && !isConsolationFinal
                             ? (finalView.home.won ? finalView.home : finalView.away.won ? finalView.away : null)
                             : null;
 
                         return (
                             <div key={round.key} className={`${styles.roundColumn} ${styles.finalColumn}`}>
                                 <h3 className={`${styles.roundTitle} ${styles.finalRoundTitle}`}>
-                                    <Trophy size={12} aria-hidden="true" />
+                                    {isConsolationFinal ? <Medal size={12} aria-hidden="true" /> : <Trophy size={12} aria-hidden="true" />}
                                     {round.name}
                                 </h3>
                                 <div className={styles.finalStack}>
@@ -756,7 +676,7 @@ export default function PlayoffBracket({ data, title = 'Cuadro Final' }: Playoff
                                         <div className={styles.thirdBlock}>
                                             <span className={styles.thirdLabel}>
                                                 <Medal size={12} aria-hidden="true" />
-                                                3.er puesto
+                                                {thirdPlaceRounds.find((round) => isConsolationRoundName(round.name))?.name ?? '3.er puesto'}
                                             </span>
                                             {thirdPlaceViews.map((view, matchIdx) => (
                                                 <MatchCard key={view.key} view={view} variant="third" delayMs={delayOf(views.length + 1 + matchIdx)} />
