@@ -9632,7 +9632,6 @@ async function drawMatchEditorialResult(
         drawEditorialHeaderArrows(ctx, canvas);
     }
 
-    drawEditorialCrestStroke(ctx, leftColumnX, homeLogoY, teamLogoWidth, teamLogoHeight, homeLogo, crestStrokeWidth);
     drawOverflowCrest(ctx, {
         x: leftColumnX,
         y: homeLogoY,
@@ -9644,7 +9643,6 @@ async function drawMatchEditorialResult(
         isDark: true,
         showFrame: false,
     });
-    drawEditorialCrestStroke(ctx, rightColumnX, awayLogoY, teamLogoWidth, teamLogoHeight, awayLogo, crestStrokeWidth);
     drawOverflowCrest(ctx, {
         x: rightColumnX,
         y: awayLogoY,
