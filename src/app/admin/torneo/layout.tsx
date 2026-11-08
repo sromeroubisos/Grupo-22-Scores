@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
 import { requireTournamentAdminContext } from '@/lib/auth/permissions';
 import { resolveAdminGuardRedirect } from '@/lib/auth/adminGuardRedirect';
-import { jakarta, mono } from './fonts';
+import { JAKARTA_STYLESHEET, mono } from './fonts';
 import TournamentAdminSidebar from './components/TournamentAdminSidebar';
 import styles from './tournament-admin.module.css';
 
@@ -26,7 +26,8 @@ export default async function TournamentAdminLayout({
     }
 
     return (
-        <div className={`${styles.shell} ${jakarta.variable} ${mono.variable}`}>
+        <div className={`${styles.shell} ${mono.variable}`}>
+            <link rel="stylesheet" href={JAKARTA_STYLESHEET} precedence="default" />
             <div className={styles.scaffoldTop} aria-hidden />
             <div className={styles.scaffoldCorner} aria-hidden />
             <TournamentAdminSidebar />
