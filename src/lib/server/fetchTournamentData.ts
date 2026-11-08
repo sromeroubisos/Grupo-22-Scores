@@ -51,8 +51,43 @@ export type TournamentInitialData = {
     rounds: unknown[];
     groups: unknown[];
     teamLabels: unknown[];
+    /**
+     * De qué partido sale cada lado de un cruce de llave (ganador o perdedor).
+     * Es lo que deja dibujar las líneas del cuadro. Opcional: sin esto el cuadro
+     * se dibuja en columnas, como siempre.
+     */
+    advancementRules?: AdvancementRuleRow[];
     queryErrors?: TournamentQueryErrors;
 };
+
+export type AdvancementRuleRow = {
+    source_match_id: string;
+    outcome: 'winner' | 'loser';
+    target_match_id: string;
+    target_slot: 'home' | 'away';
+};
+
+/** Las reglas de avance de los partidos con código de llave. Nunca rompe la página. */
+async function loadAdvancementRules(
+    supabase: Awaited<ReturnType<typeof getReadClient>>,
+    matches: Array<{ id?: string | null; bracket_match_code?: string | null }>,
+): Promise<AdvancementRuleRow[]> {
+    const ids = matches
+        .filter((match) => match?.id && match.bracket_match_code)
+        .map((match) => String(match.id))
+        .slice(0, 150);
+    if (ids.length === 0) return [];
+    try {
+        const { data, error } = await supabase
+            .from('tournament_match_advancement_rules')
+            .select('source_match_id, outcome, target_match_id, target_slot')
+            .in('source_match_id', ids);
+        if (error || !Array.isArray(data)) return [];
+        return data as AdvancementRuleRow[];
+    } catch {
+        return [];
+    }
+}
 
 type SupabaseQueryResult<T> = {
     data: T | null;
@@ -935,6 +970,7 @@ export async function fetchTournamentData(id: string, options: FetchTournamentDa
         const matchesWithEvents = mergeRelationalMatchEvents(matchesRes.data, relationalEvents);
         const hydratedMatches = hydrateMatches(matchesWithEvents, clubsById);
         const hydratedStandings = hydrateStandingsRows(standingsRes.data, clubsById);
+        const advancementRules = await loadAdvancementRules(supabase, matchesRes.data);
 
         return {
             ok: true,
@@ -975,6 +1011,7 @@ export async function fetchTournamentData(id: string, options: FetchTournamentDa
                 };
             }),
             teamLabels: normalizedTeamLabels,
+            advancementRules,
             queryErrors,
         };
     } catch (error) {
