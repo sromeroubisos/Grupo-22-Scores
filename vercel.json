@@ -140,6 +140,10 @@
     {
       "path": "/api/cron/superxv-sync",
       "schedule": "27 9 * * *"
+    },
+    {
+      "path": "/api/cron/rugbyeurope-sync",
+      "schedule": "*/10 8-21 8-16 11 *"
     }
   ]
 }
