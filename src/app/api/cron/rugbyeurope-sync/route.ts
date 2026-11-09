@@ -69,13 +69,28 @@ interface Resumen {
 const claveDeExternal = (id: string | null) => new RegExp(`^${RE_ID_PREFIX}([^:]+):`).exec(id ?? '')?.[1] ?? null;
 const sumarDias = (iso: string, n: number) => new Date(Date.parse(`${iso}T00:00:00Z`) + n * 86_400_000).toISOString().slice(0, 10);
 
-/** Las ediciones que tienen un partido sin cerrar en curso o por empezar. */
+/**
+ * Las ediciones que tienen un partido sin cerrar en curso o por empezar y, en los cuadros de
+ * eliminación, también las que cerraron un partido hace poco: el sitio nombra a los finalistas
+ * apenas termina la semifinal, y sin esta ventana el sincronizador dejaba de mirar justo cuando
+ * aparecía el cruce siguiente y lo tomaba recién en el barrido de las 6, 12, 18 o 22 UTC.
+ */
 async function edicionesEnJuego(supabase: Admin, ahora: Date): Promise<Set<string>> {
   const desde = new Date(ahora.getTime() - 4 * 3_600_000).toISOString();
   const hasta = new Date(ahora.getTime() + 45 * 60_000).toISOString();
-  const { data } = await supabase.from('matches').select('external_id')
-    .like('external_id', `${RE_ID_PREFIX}%`).neq('status', 'final').gte('date_time', desde).lte('date_time', hasta).limit(200);
-  return new Set(((data ?? []) as { external_id: string | null }[]).map((m) => claveDeExternal(m.external_id)).filter(Boolean) as string[]);
+  const cerradosDesde = new Date(ahora.getTime() - 8 * 3_600_000).toISOString();
+  const [abiertos, cerrados] = await Promise.all([
+    supabase.from('matches').select('external_id')
+      .like('external_id', `${RE_ID_PREFIX}%`).neq('status', 'final').gte('date_time', desde).lte('date_time', hasta).limit(200),
+    supabase.from('matches').select('external_id')
+      .like('external_id', `${RE_ID_PREFIX}%`).eq('status', 'final').gte('date_time', cerradosDesde).lte('date_time', ahora.toISOString()).limit(200),
+  ]);
+  const claves = (filas: unknown) => ((filas ?? []) as { external_id: string | null }[]).map((m) => claveDeExternal(m.external_id)).filter(Boolean) as string[];
+  const out = new Set(claves(abiertos.data));
+  for (const c of claves(cerrados.data)) {
+    if (edicionPorClave(c)?.formato === 'eliminatoria') out.add(c);
+  }
+  return out;
 }
 
 async function sincronizar(
