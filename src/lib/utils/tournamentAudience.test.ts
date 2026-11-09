@@ -141,6 +141,22 @@ test('los Argentinos de Seleccionados de hockey entran en las dos pestañas sin 
     assert.equal(isDualAudienceTournament({ name: 'Campeonato Argentino de Clubes Sub 16 A Caballeros' }), false);
 });
 
+test('el U18 y el U20 Championship de Rugby Europe entran en las dos pestañas; el resto de Rugby Europe, en la suya', () => {
+    for (const nombre of ['Rugby Europe U18 Championship', 'Rugby Europe U20 Championship', 'Rugby Europe U-18 Championship']) {
+        assert.equal(resolveTournamentAudience({ name: nombre }), 'juveniles', nombre);
+        assert.equal(isDualAudienceTournament({ name: nombre }), true, nombre);
+        assert.equal(matchesTournamentAudience({ name: nombre }, 'mayores'), true, nombre);
+        assert.equal(matchesTournamentAudience({ name: nombre }, 'juveniles'), true, nombre);
+    }
+
+    // Las de mayores siguen en la suya, y un torneo juvenil de clubes tampoco pasa a las dos.
+    for (const nombre of ["Rugby Europe Men's Trophy", 'Rugby Europe Super Cup', "Rugby Europe Women's Conference"]) {
+        assert.equal(isDualAudienceTournament({ name: nombre }), false, nombre);
+        assert.equal(matchesTournamentAudience({ name: nombre }, 'juveniles'), false, nombre);
+    }
+    assert.equal(isDualAudienceTournament({ name: 'Torneo Beto Jofré M16' }), false);
+});
+
 test('el M16 Desarrollo de seleccionados entra en las dos pestañas y los Desarrollo de clubes no', () => {
     for (const nombre of [
         'M16 Desarrollo Norte',
