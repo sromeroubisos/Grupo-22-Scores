@@ -1,5 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
 
 import {
   bonosDeTabla, bonusDefensivo, claveDeRonda, estadoDe, lunesDe, necesitaFicha, normalizarNombre, parseEquipos, parseFicha, parsePagina, parsePools,
@@ -322,6 +324,24 @@ test('clubDe: el nombre del sitio se resuelve por categoría', () => {
   // el mismo nombre del sitio es otro club según la competición
   assert.equal(claveAlias('w', 'ANDORRA'), 'w:andorra');
   assert.notEqual(claveAlias('m', 'ANDORRA'), claveAlias('w', 'ANDORRA'));
+});
+
+test('cada selección del catálogo tiene su bandera propia (el molde de dos esquinas curvas) en disco', () => {
+  const sitio = ['ANDORRA', 'AUSTRIA', 'BELGIUM', 'BULGARIA', 'CROATIA', 'CYPRUS', 'CZECHIA', 'DENMARK', 'ESTONIA', 'FINLAND', 'GEORGIA', 'GERMANY',
+    'GIBRALTAR', 'GREECE', 'ISRAEL', 'KOSOVO', 'LITHUANIA', 'LUXEMBOURG', 'MALTA', 'MOLDOVA', 'MONTENEGRO', 'NETHERLANDS', 'NORWAY', 'POLAND',
+    'PORTUGAL', 'ROMANIA', 'SERBIA', 'SLOVENIA', 'SPAIN', 'SWEDEN', 'SWITZERLAND', 'TÜRKIYE', 'UKRAINE'];
+  const faltan: string[] = [];
+  for (const nombre of sitio) {
+    for (const grupo of ['m', 'w', 'u18', 'u20'] as const) {
+      const club = clubDe(grupo, nombre);
+      assert.ok(club?.bandera, `${grupo}:${nombre} sin bandera declarada`);
+      if (!fs.existsSync(path.join(process.cwd(), 'public', 'logos', 'selecciones', `${club.bandera}.png`))) faltan.push(club.bandera as string);
+    }
+  }
+  assert.deepEqual([...new Set(faltan)], []);
+  // Los clubes de la Super Cup no son selecciones: llevan su escudo
+  assert.equal(clubDe('sc', 'Lusitanos')?.bandera, undefined);
+  assert.equal(clubDe('m', 'TÜRKIYE')?.bandera, 'turkey');
 });
 
 test('el catálogo no repite claves ni slugs, y edicionesActivas respeta la ventana', () => {
