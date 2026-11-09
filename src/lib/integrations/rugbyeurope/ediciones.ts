@@ -108,6 +108,12 @@ export interface ClubDef {
   name: string;
   country: string;
   union: string | null;
+  /**
+   * El archivo de la bandera propia en `public/logos/selecciones/<bandera>.png` (el
+   * molde rectangular con dos esquinas curvas). Solo las selecciones: los clubes de
+   * la Super Cup llevan su escudo.
+   */
+  bandera?: string;
 }
 
 interface Pais { es: string; slug: string; pais: string; union: string | null }
@@ -177,8 +183,10 @@ export function clubDe(grupo: GrupoRe, nombreSitio: string): ClubDef | null {
   if (grupo === 'sc') return SUPER_CUP[clave] ?? null;
   const p = PAISES[clave];
   if (!p) return null;
-  if (grupo === 'm' && clave === 'czechia') return { id: 'republica-checa', name: 'República Checa', country: p.pais, union: p.union };
-  return { id: p.slug + SUFIJO[grupo].id, name: p.es + SUFIJO[grupo].name, country: p.pais, union: p.union };
+  // Los archivos de banderas llevan el nombre en inglés del sitio, salvo Türkiye.
+  const bandera = clave === 'turkiye' ? 'turkey' : clave;
+  if (grupo === 'm' && clave === 'czechia') return { id: 'republica-checa', name: 'República Checa', country: p.pais, union: p.union, bandera };
+  return { id: p.slug + SUFIJO[grupo].id, name: p.es + SUFIJO[grupo].name, country: p.pais, union: p.union, bandera };
 }
 
 /** La clave de alias en `club_external_ids`: `w:andorra`. */

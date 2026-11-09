@@ -136,6 +136,39 @@ async function planear(ed: EdicionRe): Promise<EdicionPlan> {
   return { ed, equipos, zonas };
 }
 
+/** La bandera propia (`public/logos/selecciones/<bandera>.png`) como escudo del club. */
+function copiarBandera(id: string, bandera: string) {
+  const origen = path.join(REPO, 'public', 'logos', 'selecciones', `${bandera}.png`);
+  if (!fs.existsSync(origen)) throw new Error(`falta la bandera public/logos/selecciones/${bandera}.png (club ${id}): hay que armarla con el molde`);
+  fs.copyFileSync(origen, path.join(REPO, 'public', 'clubs', `${id}.png`));
+}
+
+/**
+ * `--banderas`: pone la bandera propia a las selecciones que este script ya creó con el
+ * escudo de Rugby Europe. Solo toca los clubes cuyo logo es el archivo local `/clubs/<id>.png`
+ * (los que tienen un escudo cargado a mano en Storage conservan su identidad) y sube su
+ * `updated_at` para que la caché de logos los vuelva a pedir.
+ */
+async function aplicarBanderas(clubes: Map<string, { club: ClubDef; logo: string | null }>) {
+  const ids = [...clubes.keys()].filter((id) => clubes.get(id)?.club.bandera);
+  const filas: { id: string; logo_url: string | null }[] = [];
+  for (let i = 0; i < ids.length; i += 60) filas.push(...await leer<any>(`clubs?select=id,logo_url&id=in.(${ids.slice(i, i + 60).join(',')})`));
+  // `--tambien=a,b`: clubes que ya tenían un escudo propio y se quieren con bandera igual.
+  // Se reapunta su `logo_url` y se imprime el anterior, para poder devolverlo.
+  const tambien = new Set((process.argv.find((a) => a.startsWith('--tambien='))?.slice('--tambien='.length) ?? '').split(',').filter(Boolean));
+  const propio = (c: { id: string; logo_url: string | null }) => c.logo_url === `/clubs/${c.id}.png`;
+  const mios = filas.filter((c) => propio(c) || tambien.has(c.id));
+  const ajenos = filas.filter((c) => !propio(c) && !tambien.has(c.id)).map((c) => c.id);
+  console.log(`clubes con bandera propia a poner: ${mios.length} · se dejan (escudo propio en Storage): ${ajenos.join(', ') || 'ninguno'}`);
+  for (const c of mios) console.log(`   ${c.id.padEnd(24)} ← ${clubes.get(c.id)?.club.bandera}.png${propio(c) ? '' : `   (antes: ${c.logo_url})`}`);
+  if (modo === 'plan') { console.log('\nmodo --plan: no se escribió nada.'); return; }
+  for (const c of mios) {
+    copiarBandera(c.id, clubes.get(c.id)!.club.bandera as string);
+    await actualizar(`clubs?id=eq.${c.id}`, propio(c) ? { updated_at: ahora } : { logo_url: `/clubs/${c.id}.png`, updated_at: ahora });
+  }
+  console.log(`\n✓ ${mios.length} clubes con su bandera.`);
+}
+
 async function bajarEscudo(id: string, logo: string) {
   const res = await fetch(`${logo}?width=256&format=png`, { headers: { 'user-agent': 'Mozilla/5.0' } });
   if (!res.ok) throw new Error(`escudo de ${id}: HTTP ${res.status}`);
@@ -157,6 +190,7 @@ async function main() {
   for (let i = 0; i < ids.length; i += 60) {
     for (const c of await leer<any>(`clubs?select=id&id=in.(${ids.slice(i, i + 60).join(',')})`)) enBase.add(c.id);
   }
+  if (process.argv.includes('--banderas')) { await aplicarBanderas(clubes); return; }
   const clubesNuevos = ids.filter((id) => !enBase.has(id));
   const unionesPedidas = [...new Set(clubesNuevos.map((id) => clubes.get(id)?.club.union).filter(Boolean))] as string[];
   const unionesBase = new Set<string>();
@@ -188,8 +222,11 @@ async function main() {
   }
   if (modo === 'plan') { console.log('\nmodo --plan: no se escribió nada.'); return; }
 
-  // Los escudos primero: si uno falla no queda nada escrito en la base.
+  // Los escudos primero: si uno falla no queda nada escrito en la base. Las selecciones llevan
+  // la bandera propia (el molde rectangular de dos esquinas curvas); solo los clubes, su escudo.
   for (const id of clubesNuevos) {
+    const bandera = clubes.get(id)?.club.bandera;
+    if (bandera) { copiarBandera(id, bandera); continue; }
     if (fs.existsSync(path.join(REPO, 'public', 'clubs', `${id}.png`))) continue;
     const logo = clubes.get(id)?.logo;
     if (!logo) throw new Error(`el club ${id} es nuevo y el sitio no trae su escudo`);
