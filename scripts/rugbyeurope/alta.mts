@@ -34,6 +34,17 @@ const FECHAS_CUADRO: Record<string, string[]> = {
   'u18-championship-2026': ['2026-11-07', '2026-11-10', '2026-11-10', '2026-11-14', '2026-11-14'],
 };
 
+/** Entre "World Championship U20" (85) y las competiciones sin prioridad. Una edición nueva: 77. */
+const PRIORIDAD: Record<string, number> = {
+  'rugby-europe-super-cup-2026': 84,
+  'u20-championship-2026': 83,
+  'u18-championship-2026': 82,
+  'mens-trophy-2627': 81,
+  'mens-conference-202627': 80,
+  'womens-trophy-202627': 79,
+  'womens-conference-2026-27': 78,
+};
+
 const TIEBREAKERS = [
   { metric: 'points', label: 'Puntos obtenidos', priority: 1, enabled: true },
   { metric: 'head_to_head', label: 'Resultado entre sí', priority: 2, enabled: true },
@@ -280,10 +291,13 @@ async function crearTorneo(p: EdicionPlan): Promise<string[]> {
       id: tournamentId, union_id: null, season_id: ed.temporada,
       name: ed.nombre, display_name: ed.nombre, original_name: ed.original, slug: ed.slug,
       status: 'published', category: ed.categoria, gender: ed.genero, age_grade: ed.categoria,
-      region: 'Europe', country: 'Internacional', country_id: null, country_name: 'Internacional',
+      // `country_id: 'international'` como los demás internacionales de la base, y una prioridad
+      // mayor a 0: la portada trae los torneos ordenados por prioridad con un tope de 1000, y con
+      // 0 los "Rugby Europe…" quedaban al final de la lista y afuera (así desaparecieron).
+      region: 'Europe', country: 'Internacional', country_id: 'international', country_name: 'Internacional',
       format: formatoDb, is_visible: true, is_active: true, logo_url: null,
       ruleset, ruleset_version: 1, sport_id: 'rugby', sport: 'rugby', sport_name: 'Rugby',
-      priority: 0, sponsors: [], social_links: {}, display_order: 0, is_popular: false,
+      priority: PRIORIDAD[ed.clave] ?? 77, sponsors: [], social_links: {}, display_order: 0, is_popular: false,
       // `url` vacía e `is_api_managed` en false: la página lee la base, no FlashScore.
       is_api_managed: false, review_status: 'approved', data_source: null,
       external_id: buildTournamentExternalId(ed.clave), current_season_id: null, created_at: ahora, updated_at: ahora,

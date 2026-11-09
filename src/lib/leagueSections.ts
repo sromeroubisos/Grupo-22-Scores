@@ -43,8 +43,16 @@ const categoriaDe = (t: TorneoDeLista): string | null => {
   return typeof c === 'string' && c.trim() ? c : null;
 };
 
+/**
+ * Rugby Europe organiza selecciones nacionales: su U18 y su U20 son competiciones
+ * internacionales como las demás y se buscan con ellas, aunque lleven la edad en el
+ * nombre. Sin esta puerta caían en "Juveniles", escondidos al fondo del listado.
+ */
+const RUGBY_EUROPE = /\brugby\s+europe\b/i;
+
 export function tipoDeLista(t: TorneoClasificable): TipoDeLista {
   if (esGradoSubordinado(t.subcategory) || RESERVA.test(t.name)) return 'reserva';
+  if (RUGBY_EUROPE.test(t.name)) return 'competiciones';
   const audiencia = resolveTournamentAudience({
     ageGrade: t.ageGroup,
     category: categoriaDe(t),

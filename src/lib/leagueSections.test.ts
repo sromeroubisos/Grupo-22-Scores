@@ -23,6 +23,20 @@ test('la lista de una unión se parte en Competiciones, Reserva y Juveniles', ()
   assert.equal(grupos[2].tournaments[0].name, 'Juveniles M16');
 });
 
+test('las competiciones de Rugby Europe van todas con las de mayores, también su U18 y su U20', () => {
+  const lista = [
+    t('sc', 'Rugby Europe Super Cup', { categories: [], ageGroup: 'Mayores' }),
+    t('u18', 'Rugby Europe U18 Championship', { categories: ['U18'], ageGroup: 'U18' }),
+    t('u20', 'Rugby Europe U20 Championship', { categories: ['U20'], ageGroup: 'U20' }),
+    t('wc', "Rugby Europe Women's Conference", { categories: [], ageGroup: 'Mayores', gender: 'femenino' }),
+  ];
+  for (const x of lista) assert.equal(tipoDeLista(x), 'competiciones', x.name);
+  assert.deepEqual(gruposPorTipo(lista).map((g) => g.title), ['Competiciones']);
+  // lo que no es de Rugby Europe sigue su camino: un U18 de otra organización es juvenil
+  assert.equal(tipoDeLista(t('x', 'Torneo U18 de la URBA', { categories: ['U18'], ageGroup: 'U18' })), 'juveniles');
+  assert.equal(tipoDeLista(t('y', 'URBA: TOP 14 - Intermedia', { subcategory: 'Intermedia' })), 'reserva');
+});
+
 test('primero se parte y después se agrupa: el Top 14 no se traga a su reserva', () => {
   const grupos = gruposPorTipo([
     t('sup', 'Top 14', { subcategory: 'Superior' }),
