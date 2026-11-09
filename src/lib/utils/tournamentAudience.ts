@@ -182,6 +182,11 @@ const BOTH_AUDIENCES_PATTERNS = [
     // portada de mayores lo escondía. Nombre exacto, que ningún torneo de clubes
     // se llama así.
     /\bu20\s+challenger\b/i,
+    // El U18 y el U20 Championship de Rugby Europe: selecciones nacionales
+    // juveniles (Georgia, España, Portugal…). Caen en juveniles por el "U18"/"U20"
+    // del nombre y la portada, que abre en mayores, decía "no hay partidos" el día
+    // de las semifinales. Nombre exacto con la marca: ningún torneo de clubes la lleva.
+    /\brugby\s+europe\s+u\s*-?\s*(?:18|20)\b/i,
     // El Select 12 de la UAR: la Zona Desarrollo del Argentino Juvenil M17, con
     // los seleccionados de las uniones. Medido contra los 1.199 nombres de
     // `tournaments`: es el único que lo dice.
