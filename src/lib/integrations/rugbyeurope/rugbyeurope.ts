@@ -45,9 +45,11 @@ export const buildMatchExternalId = (clave: string, local: string, visitante: st
 export const RONDAS = [
   { orden: 1, clave: 'cuartos', nombre: 'Cuartos de final' },
   { orden: 2, clave: 'semis', nombre: 'Semifinales' },
-  { orden: 3, clave: 'ranking-semis', nombre: 'Semifinales de ranking' },
+  // Los dos últimos nombran el puesto a propósito: la pestaña Playoff manda a "Definición de
+  // puestos" las rondas cuyo nombre dice un puesto del 5.º en adelante (ver bracketSplit.ts).
+  { orden: 3, clave: 'ranking-semis', nombre: 'Semifinales 5.º al 8.º puesto' },
   { orden: 4, clave: 'final', nombre: 'Final y 3.º puesto' },
-  { orden: 5, clave: 'ranking-final', nombre: 'Ranking: 5.º y 7.º puesto' },
+  { orden: 5, clave: 'ranking-final', nombre: 'Finales 5.º y 7.º puesto' },
 ] as const;
 export type ClaveRonda = (typeof RONDAS)[number]['clave'];
 

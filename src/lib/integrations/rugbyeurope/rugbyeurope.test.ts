@@ -6,10 +6,11 @@ import path from 'node:path';
 import {
   bonosDeTabla, bonusDefensivo, claveDeRonda, estadoDe, lunesDe, necesitaFicha, normalizarNombre, parseEquipos, parseFicha, parsePagina, parsePools,
   parseTablaOficial,
-  planRe, PREFIJO_NOTA, puntosDeBase, rondaPorSemana, semanasNuevas,
+  planRe, PREFIJO_NOTA, puntosDeBase, RONDAS, rondaPorSemana, semanasNuevas,
   type ExistenteRe, type PartidoRe,
 } from './rugbyeurope.ts';
 import { clubDe, claveAlias, edicionesActivas, edicionPorClave, EDICIONES } from './ediciones.ts';
+import { tagBracketRound } from '../../playoff/bracketSplit.ts';
 
 const U20 = edicionPorClave('u20-championship-2026')!;
 const TROPHY = edicionPorClave('mens-trophy-2627')!;
@@ -77,6 +78,17 @@ test('parseFicha: ronda, número, estadio y estado', () => {
   assert.equal(previa.cuentaRegresiva, true);
   assert.equal(previa.estadoTexto, null);
   assert.equal(previa.puntosLocal, null);
+});
+
+test('las rondas del 5.º puesto en adelante caen en "Definición de puestos"; las del título, no', () => {
+  const tags = Object.fromEntries(RONDAS.map((r) => [r.clave, tagBracketRound(r.nombre, null)]));
+  for (const clave of ['ranking-semis', 'ranking-final'] as const) {
+    assert.ok(tags[clave].bracketKey.endsWith('#puestos'), `${clave}: ${tags[clave].bracketKey}`);
+    assert.equal(tags[clave].bracketLabel, 'Definición de puestos');
+  }
+  for (const clave of ['cuartos', 'semis', 'final'] as const) {
+    assert.equal(tags[clave].bracketKey.endsWith('#puestos'), false, clave);
+  }
 });
 
 test('claveDeRonda reconoce los cinco rótulos del cuadro', () => {
