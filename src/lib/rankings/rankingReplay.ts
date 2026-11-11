@@ -270,6 +270,40 @@ function compareChronologically(left: ReplayMatch, right: ReplayMatch) {
     return left.id.localeCompare(right.id, 'en');
 }
 
+/**
+ * El mismo partido cargado en dos torneos cuenta UNA vez.
+ *
+ * Pasa cuando una fuente publica el mismo cruce en dos torneos (el Cordillerano
+ * y el Oficial Mayores del Alto Valle comparten tres partidos de Patagonia; la
+ * Copa Oro URS y el Norpatagonico, el 85-0 de Sportiva a El Nacional). Cada
+ * torneo necesita su copia para su tabla, asi que no se borra: el ranking es
+ * el que no la cuenta dos veces. Mismos dos clubes, mismo dia y mismo marcador
+ * no pueden ser dos partidos. Se queda la primera en el orden cronologico y,
+ * si una de las dos es de playoff, esa (la que paga el bonus).
+ */
+function dedupeSameMatch(ordered: ReplayMatch[]): ReplayMatch[] {
+    const kept = new Map<string, ReplayMatch>();
+    const result: ReplayMatch[] = [];
+
+    for (const match of ordered) {
+        const key = `${match.home_club_id}|${match.away_club_id}|${String(match.date_time).slice(0, 10)}|${match.score.home}-${match.score.away}`;
+        const previous = kept.get(key);
+
+        if (!previous) {
+            kept.set(key, match);
+            result.push(match);
+            continue;
+        }
+
+        if (!previous.stage && match.stage) {
+            result[result.indexOf(previous)] = match;
+            kept.set(key, match);
+        }
+    }
+
+    return result;
+}
+
 function isBefore(instant: string, cutoff: string | null | undefined) {
     if (!cutoff) return true;
     const at = new Date(instant).getTime();
@@ -306,9 +340,11 @@ export function replaySeason(input: {
         lastMatchByClub.set(entry.club_id, null);
     }
 
-    const ordered = [...input.matches]
-        .filter((match) => isBefore(match.date_time, input.until))
-        .sort(compareChronologically);
+    const ordered = dedupeSameMatch(
+        [...input.matches]
+            .filter((match) => isBefore(match.date_time, input.until))
+            .sort(compareChronologically),
+    );
 
     let applied = 0;
 
