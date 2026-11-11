@@ -159,6 +159,34 @@ test('los partidos entran en orden cronologico aunque lleguen desordenados', () 
   assert.equal(desordenado.lastMatchByClub.get('rosario'), 'm2');
 });
 
+test('el mismo partido cargado en dos torneos cuenta una sola vez', () => {
+  const uno = { id: 'torneo-a', date_time: '2026-09-12T19:00:00Z', home_club_id: 'belgrano', away_club_id: 'tilos', score: { home: 45, away: 15 } };
+  // Otra hora del mismo dia, otro id: es el mismo cruce publicado por segunda vez.
+  const copia = { ...uno, id: 'torneo-b', date_time: '2026-09-12T19:30:00Z' };
+
+  const una = replaySeason({ entries, matches: [uno], adjustments: [], config });
+  const dos = replaySeason({ entries, matches: [uno, copia], adjustments: [], config });
+
+  assert.equal(dos.applied, 1);
+  assert.deepEqual([...dos.ratings], [...una.ratings]);
+
+  // Otro marcador o otro dia NO es un duplicado: es otro partido.
+  const revancha = { ...uno, id: 'revancha', date_time: '2026-09-19T19:00:00Z' };
+  const otroMarcador = { ...uno, id: 'otro', score: { home: 45, away: 16 } };
+  assert.equal(replaySeason({ entries, matches: [uno, revancha, otroMarcador], adjustments: [], config }).applied, 3);
+});
+
+test('si una de las dos copias es de playoff, la que se cuenta es esa: paga el bonus', () => {
+  const regular = { id: 'a', date_time: '2026-10-10T19:00:00Z', home_club_id: 'belgrano', away_club_id: 'tilos', score: { home: 30, away: 20 } };
+  const final = { ...regular, id: 'b', stage: 'final' as const };
+
+  const resultado = replaySeason({ entries, matches: [regular, final], adjustments: [], config });
+  const soloFinal = replaySeason({ entries, matches: [final], adjustments: [], config });
+
+  assert.equal(resultado.applied, 1);
+  assert.deepEqual([...resultado.ratings], [...soloFinal.ratings]);
+});
+
 test('un ajuste manual se ve una sola vez: la semana en que se cargo', () => {
   // Cargado el miercoles 9/9: entra en la tabla del martes 15 y no en la
   // referencia (martes 8); la semana siguiente ya esta en las dos.
