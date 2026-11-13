@@ -26,7 +26,6 @@ import { loadManualTournaments } from '@/lib/catalog/manualTournaments';
 import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import ClubsPromoCard from '@/components/clubs-promo/ClubsPromoCard';
 import TickerTitulares from '@/components/ticker/TickerTitulares';
-import GanaConTuClubBanner from '@/components/marcas/GanaConTuClubBanner';
 import SantaFe2026Acceso from '@/components/odesur/SantaFe2026Acceso';
 import TennisMatchList from '@/components/tennis/TennisMatchList';
 import TennisTournamentList from '@/components/tennis/TennisTournamentList';
@@ -2230,17 +2229,10 @@ export default function HomePage() {
         <main className={styles.mainContent}>
           {/* En escritorio estas piezas van arriba, como siempre (el wrapper no
               genera caja). En el teléfono bajan al final del feed: arriba quedan
-              sólo deporte, día y partidos, igual que en FotMob. La placa de Ganá
-              con tu club no baja hasta el final: en el teléfono se dibuja dentro
-              del feed (ver `bannerFeed`), después de lo que sigue el usuario. */}
+              sólo deporte, día y partidos, igual que en FotMob. */}
           <div className={styles.afterFeed}>
             {/* Titulares y los partidos de los clubes que sigue. Si no hay nada, no se dibuja. */}
             <TickerTitulares favorites={favorites} />
-
-            {/* La placa de Ganá con tu club: entre los titulares y el selector de día. */}
-            <div className={styles.bannerDesktop}>
-              <GanaConTuClubBanner />
-            </div>
 
             {/* Juegos Suramericanos Santa Fe 2026: solo en el teléfono, donde el nav
                 no tiene el link. Se apaga solo al día siguiente del cierre. */}
@@ -2538,13 +2530,6 @@ export default function HomePage() {
                 </div>
               )}
 
-              {/* Teléfono: la placa va después de los favoritos del usuario. */}
-              {!esTenis && !loading && displayedFavoriteClubMatches.length > 0 && (
-                <div className={styles.bannerFeed}>
-                  <GanaConTuClubBanner />
-                </div>
-              )}
-
               {!esTenis && !loading && (() => {
               const renderLeague = (league: LeagueMatches, leagueIndex: number): ReactNode => {
                 const isCollapsed = collapsedLeagues.has(league.leagueId);
@@ -2613,9 +2598,6 @@ export default function HomePage() {
                   return (
                     <Fragment key={`${league.leagueId}-banner`}>
                       {bloque}
-                      <div className={styles.bannerFeed}>
-                        <GanaConTuClubBanner />
-                      </div>
                     </Fragment>
                   );
                 };
