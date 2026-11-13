@@ -237,6 +237,7 @@ const COUNTRY_TOP_FLIGHT: Record<string, RegExp[]> = {
     /\btop ?1[02]\b/,
     /nacional de clubes/,
     /copa oro del oeste/,
+    /^torneo del interior ["']?[ab]["']?$/,
     /torneo regional (?:del |de la )?(?:litoral|nea|noa|patagonic\w*|pampean\w*)(?!.*[\s"'][bc]["']?$)/,
   ],
   FR: [/^top ?14$/],
@@ -244,6 +245,22 @@ const COUNTRY_TOP_FLIGHT: Record<string, RegExp[]> = {
   // torneo de ese país sube a la tanda de arriba por ser "de tu país".
   US: [],
 };
+
+/**
+ * Segunda división argentina: va justo después de la primera, antes de los
+ * grandes del rugby mundial. Tercera, cuarta y lo demás siguen por prioridad del
+ * catálogo. Se compara contra el nombre sin país ni tildes.
+ */
+const AR_SECOND_FLIGHT: RegExp[] = [
+  /^primera ["']?a["']? de la urba$/,
+  /copa plata del oeste/,
+  /torneo regional (?:del |de la )?(?:litoral|noa|pampean\w*) ["']?b["']?$/,
+  /torneo regional (?:del |de la )?nea ascenso/,
+  /^regional centro ["']?a["']?$/,
+];
+
+/** Circuitos y sevens: van al final del resto, detrás de tercera, cuarta y juveniles. */
+const AR_LOW_IMPORTANCE = /\b7[´'`’]?s\b|seven|circuito/;
 
 /**
  * El torneo que todo el mundo sigue estos días: va PRIMERO del feed, antes que
@@ -259,7 +276,7 @@ const SEASONAL_FEATURED = /\bjoj dakar 2026\b/;
 const MIN_GROUPED_LEAGUES = 3;
 
 /** Juveniles, reserva y femenino no entran como "lo principal de tu país". */
-const NOT_MAIN_COUNTRY_TOURNAMENT = /\b(m-?1\d|u-?\d{2}|sub-?\d{2}|juvenil\w*|reserva|femenin\w*|women|damas|infantil\w*|cadet\w*|seven\w*)\b/;
+const NOT_MAIN_COUNTRY_TOURNAMENT = /\b(m-?1\d|u-?\d{2}|sub-?\d{2}|juvenil\w*|reserva|intermedia|preintermedia|femenin\w*|women|damas|infantil\w*|cadet\w*|seven\w*)\b/;
 
 /**
  * País a partir de la zona horaria, para cuando el idioma no lo trae ("es-419"
@@ -390,6 +407,8 @@ interface Match {
   status: 'live' | 'scheduled' | 'finished' | 'suspended';
   /** Etiqueta del suspendido (POSTERGADO, CANCELADO, W.O.); la fila muestra la corta. */
   statusLabel?: string;
+  /** Ganado por no presentación: el 21-0 / 28-0 se rotula W.O. */
+  walkover?: boolean;
   minute?: string;
   homeClubId?: string;
   awayClubId?: string;
@@ -797,7 +816,7 @@ const MatchRow = memo(({ match, selectedSport, styles, isIndividualSport, showCl
             En vivo
           </span>
         ) : match.status === 'finished' ? (
-          <span className={styles.matchFinished}>FT</span>
+          <span className={styles.matchFinished}>{match.walkover ? 'W.O.' : 'FT'}</span>
         ) : match.status === 'suspended' ? (
           /* Sin horario: anunciar la hora de un partido que no se juega manda
              a la gente a una cancha vacía. */
@@ -1517,6 +1536,7 @@ export default function HomePage() {
           winner: status === 'suspended' ? null : getMatchWinnerByScore(match),
           status: status,
           statusLabel: status === 'suspended' ? estadoResuelto.etiqueta : undefined,
+          walkover: match.score?.walkover === true,
           // minutes will be calculated by the MatchRow component using the original dateTime
           minute: (match.clock?.period === 'HT' || match.clock?.period === 'ET' || match.clock?.period === 'Final') ? match.clock.period : undefined,
           _dateTime: match.dateTime, // Preserve for real-time calculation
@@ -1590,6 +1610,13 @@ export default function HomePage() {
       Boolean(userRegion)
       && findCountryRecord(undefined, league.country)?.code?.toUpperCase() === userRegion
     );
+    const isSecondFlight = (league: LeagueMatches) => {
+      if (userRegion !== 'AR' || !isMyCountry(league)) return false;
+      const title = normalizeForMatch(league.league);
+      if (NOT_MAIN_COUNTRY_TOURNAMENT.test(title)) return false;
+      const name = title.includes(': ') ? title.slice(title.indexOf(': ') + 2) : title;
+      return AR_SECOND_FLIGHT.some((pattern) => pattern.test(name));
+    };
     const topFlight = COUNTRY_TOP_FLIGHT[userRegion];
     const countryLeagues = list.filter((league) => {
       if (!isMyCountry(league)) return false;
@@ -1618,9 +1645,13 @@ export default function HomePage() {
         tiers.set(league.leagueId, { tier: 0, rank: 0 });
       } else if (countryAllowed.has(league.leagueId)) {
         tiers.set(league.leagueId, { tier: 1, rank: 0 });
+      } else if (isSecondFlight(league)) {
+        tiers.set(league.leagueId, { tier: 1, rank: 1 });
       } else {
         const rank = selectedSport.id === 'rugby' ? getFeaturedRank(league.league, league.country) : null;
-        tiers.set(league.leagueId, rank === null ? { tier: 3, rank: 0 } : { tier: 2, rank });
+        // Circuitos de seven (Circuito Córdoba 7´s, Seven de Olivos): de baja importancia, al fondo del resto.
+        const lowImportance = rank === null && isMyCountry(league) && AR_LOW_IMPORTANCE.test(normalizeForMatch(league.league));
+        tiers.set(league.leagueId, rank === null ? { tier: 3, rank: lowImportance ? 1 : 0 } : { tier: 2, rank });
       }
     }
     return tiers;
@@ -1646,8 +1677,10 @@ export default function HomePage() {
     const seasonal = byTier(-2);
     const favorites = byTier(0);
     const multiprovincial = byTier(-1);
+    // Primera división (rank 0) antes que segunda (rank 1); adentro, por prioridad.
     const countryBest = byTier(1).sort((a, b) => (
-      (b.league.priority - a.league.priority)
+      (info(a.league).rank - info(b.league).rank)
+      || (b.league.priority - a.league.priority)
       || (b.league.matches.length - a.league.matches.length)
       || (a.index - b.index)
     ));
@@ -1667,9 +1700,11 @@ export default function HomePage() {
     const ordered = [...seasonal, ...favorites, ...fill, ...multiprovincial, ...rest].map((entry) => entry.league);
     const topCount = seasonal.length + favorites.length + fill.length + multiprovincial.length;
     const top = topCount > 0 ? topCount : Math.min(3, ordered.length);
+    // "Ver en vivo": todo lo que se está jugando, juvenil o intermedia, a la vista y sin plegar.
+    if (showLiveOnly) return { ordered, topCount: ordered.length };
     // Un día con pocas competiciones no se agrupa: plegar dos tarjetas es fricción pura.
     return { ordered, topCount: ordered.length - top < MIN_GROUPED_LEAGUES ? ordered.length : top };
-  }, [computeLeagueTiers, selectedSport.id]);
+  }, [computeLeagueTiers, selectedSport.id, showLiveOnly]);
 
   const displayedMatchesByLeague = useMemo<LeagueMatches[]>(() => {
     const withoutFavoriteClubMatches = matchesByLeague
