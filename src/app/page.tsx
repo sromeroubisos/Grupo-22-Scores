@@ -796,6 +796,7 @@ const MatchRow = memo(({ match, selectedSport, styles, isIndividualSport, showCl
       href={`/matches/${match.id}`}
       className={`${styles.matchRow} ${match.status === 'live' ? styles.matchRowLive : ''}`}
       data-status={match.status}
+      data-wide-score={String(match.homeScore ?? '').length >= 3 || String(match.awayScore ?? '').length >= 3 ? 'true' : undefined}
     >
       <div className={styles.matchTime}>
         {match.status === 'live' ? (
