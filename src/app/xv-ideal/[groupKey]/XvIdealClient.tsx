@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useAuth } from '@/context/AuthContext';
 import {
-    byVotes,
     isCompleteBallot,
     XV_PITCH,
     type XvCandidate,
@@ -16,6 +15,8 @@ import styles from './XvIdeal.module.css';
 
 interface Props {
     groupKey: string;
+    /** Solo el super admin: muestra el acceso al panel de resultados. */
+    isSuperAdmin: boolean;
     available: boolean;
     initialPolls: XvPollSummary[];
     migration: string;
@@ -54,14 +55,13 @@ function Crest({ candidate, className }: { candidate: Pick<XvCandidate, 'logo' |
     return <span className={`${className} ${styles.crestFallback}`} aria-hidden="true">{candidate.team.slice(0, 1)}</span>;
 }
 
-export default function XvIdealClient({ groupKey, available, initialPolls, migration }: Props) {
+export default function XvIdealClient({ groupKey, isSuperAdmin, available, initialPolls, migration }: Props) {
     const { user, login } = useAuth();
     const [polls, setPolls] = useState(initialPolls);
     const [activeId, setActiveId] = useState(initialPolls[0]?.id ?? '');
     const [drafts, setDrafts] = useState<Record<string, XvPicks>>(
         () => Object.fromEntries(initialPolls.map((poll) => [poll.id, draftOf(poll)])),
     );
-    const [showResults, setShowResults] = useState<Record<string, boolean>>({});
     const [thanks, setThanks] = useState<Record<string, Thanks>>({});
     const [saving, setSaving] = useState(false);
     const [resending, setResending] = useState(false);
@@ -141,8 +141,6 @@ export default function XvIdealClient({ groupKey, available, initialPolls, migra
     );
     const dirty = !samePicks(draft, saved ?? {});
     const canVote = poll.isOpen;
-    const resultsOn = !poll.isOpen || Boolean(showResults[poll.id]);
-    const totalVoters = polls.reduce((sum, entry) => sum + entry.voters, 0);
     const openSlot = openJersey === null ? null : slotsByJersey.get(openJersey) ?? null;
     const thanksHere = thanks[poll.id] ?? null;
     const otherPoll = polls.find((entry) => entry.id !== poll.id && entry.isOpen && !entry.userPicks) ?? null;
@@ -370,11 +368,15 @@ export default function XvIdealClient({ groupKey, available, initialPolls, migra
                             <p className={styles.infoNote}>Podés votar una sola zona o las dos: cada una es una votación aparte.</p>
 
                             <a className={styles.cta} href="#xv-cancha">Armar mi XV</a>
+                            {isSuperAdmin && (
+                                <a className={styles.adminLink} href={`/xv-ideal/${groupKey}/resultados`}>
+                                    Ver cómo va la votación (solo super admin)
+                                </a>
+                            )}
 
                             <ul className={styles.stats}>
                                 <li><strong>15</strong> camisetas</li>
                                 <li><strong>{polls.length}</strong> {polls.length === 1 ? 'zona' : 'zonas'}</li>
-                                <li><strong>{totalVoters}</strong> {totalVoters === 1 ? 'voto' : 'votos'}</li>
                             </ul>
 
                             {/* Envío en escritorio (en celular va debajo de la cancha). */}
@@ -434,21 +436,6 @@ export default function XvIdealClient({ groupKey, available, initialPolls, migra
                                     )}
                                     <button
                                         type="button"
-                                        className={styles.secondary}
-                                        onClick={() => {
-                                            setShowResults((current) => ({ ...current, [poll.id]: true }));
-                                            setThanks((current) => {
-                                                const next = { ...current };
-                                                delete next[poll.id];
-                                                return next;
-                                            });
-                                            document.getElementById('xv-resultados')?.scrollIntoView({ behavior: 'smooth' });
-                                        }}
-                                    >
-                                        Ver resultados
-                                    </button>
-                                    <button
-                                        type="button"
                                         className={styles.linkBtn}
                                         onClick={() => {
                                             setThanks((current) => {
@@ -481,60 +468,8 @@ export default function XvIdealClient({ groupKey, available, initialPolls, migra
                             </>
                         )}
 
-                        <div className={styles.toolbar}>
-                            <span className={styles.count}>
-                                {plural(poll.voters, 'persona votó', 'personas votaron')} en la {poll.name}
-                                {!poll.isOpen && ' · cerrada'}
-                            </span>
-                            {poll.isOpen && (
-                                <button
-                                    type="button"
-                                    className={styles.link}
-                                    onClick={() => setShowResults((current) => ({ ...current, [poll.id]: !current[poll.id] }))}
-                                >
-                                    {resultsOn ? 'Ocultar resultados' : 'Ver resultados'}
-                                </button>
-                            )}
-                        </div>
                     </section>
                 </div>
-
-                {resultsOn && (
-                    <section id="xv-resultados" className={styles.results} aria-label={`Resultados de la ${poll.name}`}>
-                        <h2 className={styles.resultsTitle}>Resultados de la {poll.name}</h2>
-                        {poll.voters === 0 ? (
-                            <p className={styles.empty}>Todavía no votó nadie en esta zona.</p>
-                        ) : (
-                            poll.results.map((slot) => {
-                                const list = byVotes(slot.candidates);
-                                const top = list[0]?.votes ?? 0;
-                                return (
-                                    <div key={slot.jersey} className={styles.resultSlot}>
-                                        <h3 className={styles.resultSlotTitle}>
-                                            <span className={styles.jersey}>{slot.jersey}</span>
-                                            {slot.label}
-                                            <span className={styles.slotTotal}>{plural(slot.total, 'voto', 'votos')}</span>
-                                        </h3>
-                                        {list.map((candidate) => (
-                                            <div key={candidate.id} className={styles.resultRow} data-leads={top > 0 && candidate.votes === top}>
-                                                <span className={styles.bar} style={{ width: `${candidate.percent}%` }} aria-hidden="true" />
-                                                <Crest candidate={candidate} className={styles.rowLogo} />
-                                                <span className={styles.optionBody}>
-                                                    <span className={styles.name}>{candidate.name}</span>
-                                                    <span className={styles.meta}>{candidate.team}</span>
-                                                </span>
-                                                <span className={styles.percent}>
-                                                    {candidate.percent}%
-                                                    <span className={styles.votes}>{plural(candidate.votes, 'voto', 'votos')}</span>
-                                                </span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                );
-                            })
-                        )}
-                    </section>
-                )}
 
                 <p className={styles.foot} data-group={groupKey}>
                     Los puntos y los partidos jugados son los del torneo, a la fecha de la votación.

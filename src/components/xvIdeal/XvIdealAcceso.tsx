@@ -8,7 +8,6 @@ import styles from './XvIdealAcceso.module.css';
 interface OpenGroup {
     groupKey: string;
     title: string;
-    voters: number | null;
 }
 
 /**
@@ -39,10 +38,7 @@ export default function XvIdealAcceso({ variant }: { variant: 'feed' | 'sidebar'
             <span className={styles.texto}>
                 <span className={styles.kicker}>Votación abierta</span>
                 <span className={styles.titulo}>Votá a los mejores del Argentino Juvenil</span>
-                <span className={styles.accion}>
-                    Armá tu XV ideal de la Zona Campeonato y la Zona Ascenso
-                    {group.voters ? ` · ${group.voters} ${group.voters === 1 ? 'voto' : 'votos'}` : ''}
-                </span>
+                <span className={styles.accion}>Armá tu XV ideal de la Zona Campeonato y la Zona Ascenso</span>
             </span>
             <svg className={styles.flecha} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <polyline points="9 6 15 12 9 18" />

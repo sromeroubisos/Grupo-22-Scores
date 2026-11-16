@@ -6,6 +6,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
 import { getServerAuthRole } from '@/lib/auth/newsAccess';
+import { isSuperAdminRole } from '@/lib/auth/roles';
 import { listXvIdealPolls, XV_IDEAL_MIGRATION, type XvIdealListing } from '@/lib/server/xvIdeal';
 import XvIdealClient from './XvIdealClient';
 
@@ -49,7 +50,7 @@ export default async function XvIdealPage({ params }: Props) {
     const { groupKey } = await params;
     if (!KEY.test(groupKey)) notFound();
 
-    const { session } = await getServerAuthRole();
+    const { session, role } = await getServerAuthRole();
     const listing = await load(groupKey, session?.user?.id ?? null);
     // Sin tablas se avisa en pantalla; con tablas y sin votaciones, esa dirección no existe.
     if (listing.available && listing.polls.length === 0) notFound();
@@ -57,6 +58,7 @@ export default async function XvIdealPage({ params }: Props) {
     return (
         <XvIdealClient
             groupKey={groupKey}
+            isSuperAdmin={isSuperAdminRole(role)}
             available={listing.available}
             initialPolls={listing.polls}
             migration={XV_IDEAL_MIGRATION}

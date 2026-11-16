@@ -15,6 +15,7 @@ import {
     normalizeSlots,
     sanitizePicks,
     summarizeXvPoll,
+    toPublicSummary,
     type XvPicks,
     type XvPoll,
     type XvPollSummary,
@@ -103,7 +104,12 @@ export interface XvIdealListing {
 }
 
 /** Las votaciones de un grupo, en el orden de las pestañas, con el voto propio si hay sesión. */
-export async function listXvIdealPolls(groupKey: string, userId: string | null): Promise<XvIdealListing> {
+export async function listXvIdealPolls(
+    groupKey: string,
+    userId: string | null,
+    /** Solo el super admin pide los resultados. Por defecto NUNCA salen. */
+    options: { includeResults?: boolean } = {},
+): Promise<XvIdealListing> {
     const admin = createAdminClient();
     const { data, error } = await admin
         .from(POLLS_TABLE)
@@ -122,20 +128,22 @@ export async function listXvIdealPolls(groupKey: string, userId: string | null):
     const now = Date.now();
     return {
         available: true,
-        polls: polls.map((poll) => summarizeXvPoll(poll, votes.get(poll.id) ?? [], userId, now)),
+        polls: polls.map((poll) => {
+            const summary = summarizeXvPoll(poll, votes.get(poll.id) ?? [], userId, now);
+            return options.includeResults ? summary : toPublicSummary(summary);
+        }),
     };
 }
 
 export interface XvIdealOpenGroup {
     groupKey: string;
     title: string;
-    /** Personas que mandaron boleta en alguna zona del grupo (suma de las zonas). */
-    voters: number | null;
 }
 
 /**
  * Los grupos con alguna votación abierta, para anunciarlos en la home. Nunca
- * lanza: sin tablas, o con un error, no hay nada que anunciar.
+ * lanza: sin tablas, o con un error, no hay nada que anunciar. No trae cuántos
+ * votos hay: los números son solo del super admin.
  */
 export async function listOpenXvIdealGroups(): Promise<XvIdealOpenGroup[]> {
     const admin = createAdminClient();
@@ -151,25 +159,11 @@ export async function listOpenXvIdealGroups(): Promise<XvIdealOpenGroup[]> {
     }
 
     const now = Date.now();
-    const polls = ((data ?? []) as Row[])
-        .map(rowToPoll)
-        .filter((poll): poll is XvPoll => Boolean(poll) && isXvPollOpen(poll as XvPoll, now));
-    if (polls.length === 0) return [];
-
-    let votes: Map<string, XvVote[]> | null = null;
-    try {
-        votes = await readVotes(polls.map((poll) => poll.id));
-    } catch (error) {
-        console.error('[xvIdeal] open polls votes read failed:', error);
-    }
-
     const groups = new Map<string, XvIdealOpenGroup>();
-    for (const poll of polls) {
-        const group = groups.get(poll.groupKey) ?? { groupKey: poll.groupKey, title: poll.title, voters: votes ? 0 : null };
-        if (votes && group.voters !== null) {
-            group.voters += (votes.get(poll.id) ?? []).filter((vote) => Object.keys(sanitizePicks(poll.slots, vote.picks)).length > 0).length;
-        }
-        groups.set(poll.groupKey, group);
+    for (const row of (data ?? []) as Row[]) {
+        const poll = rowToPoll(row);
+        if (!poll || !isXvPollOpen(poll, now) || groups.has(poll.groupKey)) continue;
+        groups.set(poll.groupKey, { groupKey: poll.groupKey, title: poll.title });
     }
     return [...groups.values()];
 }
@@ -209,5 +203,80 @@ export async function castXvIdealVote(poll: XvPoll, userId: string, rawPicks: un
     if (error) fail('vote', error, VOTES_TABLE);
 
     const votes = await readVotes([poll.id]);
-    return summarizeXvPoll(poll, votes.get(poll.id) ?? [], userId, Date.now());
+    // Quien vota no recibe el conteo: los resultados son solo del super admin.
+    return toPublicSummary(summarizeXvPoll(poll, votes.get(poll.id) ?? [], userId, Date.now()));
+}
+
+export interface XvIdealDayCount {
+    /** "2026-11-16", en hora de Buenos Aires. */
+    day: string;
+    /** Personas que votaron ESE día por primera vez. */
+    votes: number;
+}
+
+export interface XvIdealAdminPoll {
+    summary: XvPollSummary;
+    /** Altas de votantes por día, de la más vieja a la más nueva. */
+    byDay: XvIdealDayCount[];
+    /** ISO del último voto o cambio de voto; null si todavía no votó nadie. */
+    lastActivityAt: string | null;
+}
+
+const DAY_FORMAT = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Argentina/Buenos_Aires',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+});
+
+/**
+ * El reporte COMPLETO de un grupo de votaciones: resultados por camiseta, personas
+ * que votaron y evolución por día. Solo para el super admin: quien lo llama tiene
+ * que haber verificado el rol antes. No incluye quién votó qué (ni ids ni mails).
+ */
+export async function getXvIdealAdminReport(groupKey: string): Promise<{ available: boolean; polls: XvIdealAdminPoll[] }> {
+    const listing = await listXvIdealPolls(groupKey, null, { includeResults: true });
+    if (!listing.available || listing.polls.length === 0) return { available: listing.available, polls: [] };
+
+    const admin = createAdminClient();
+    const dates = new Map<string, { created: string[]; lastActivity: string | null }>();
+    for (const poll of listing.polls) dates.set(poll.id, { created: [], lastActivity: null });
+
+    for (let from = 0; ; from += PAGE) {
+        const { data, error } = await admin
+            .from(VOTES_TABLE)
+            .select('poll_id, created_at, updated_at')
+            .in('poll_id', listing.polls.map((poll) => poll.id))
+            .order('poll_id')
+            .order('user_id')
+            .range(from, from + PAGE - 1);
+        if (error) fail('votes dates', error, VOTES_TABLE);
+        const rows = (data ?? []) as Row[];
+        for (const row of rows) {
+            const entry = dates.get(text(row.poll_id) ?? '');
+            if (!entry) continue;
+            const created = text(row.created_at);
+            const updated = text(row.updated_at) ?? created;
+            if (created) entry.created.push(created);
+            if (updated && (!entry.lastActivity || updated > entry.lastActivity)) entry.lastActivity = updated;
+        }
+        if (rows.length < PAGE) break;
+    }
+
+    return {
+        available: true,
+        polls: listing.polls.map((summary) => {
+            const entry = dates.get(summary.id) ?? { created: [], lastActivity: null };
+            const perDay = new Map<string, number>();
+            for (const iso of entry.created) {
+                const day = DAY_FORMAT.format(new Date(iso));
+                perDay.set(day, (perDay.get(day) ?? 0) + 1);
+            }
+            return {
+                summary,
+                byDay: [...perDay.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([day, votes]) => ({ day, votes })),
+                lastActivityAt: entry.lastActivity,
+            };
+        }),
+    };
 }
