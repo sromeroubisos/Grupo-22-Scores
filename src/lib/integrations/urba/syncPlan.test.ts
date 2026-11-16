@@ -8,6 +8,7 @@ import {
   construirPatch,
   parteDelBarrido,
   rotarPorReloj,
+  rotarPorVuelta,
 } from './syncPlan.ts';
 
 const fila = (over: any = {}) => ({
@@ -187,4 +188,23 @@ test('un partido en vivo sí toma el final oficial de URBA', () => {
   const p = construirPatch({ fila: fila() as any, cambios: ['status', 'score'] }, 'live');
   assert.equal(p!.seFinaliza, true);
   assert.deepEqual(p!.patch.score, { home: 20, away: 10 });
+});
+
+/**
+ * El caso del femenino: 46 torneos por parte, once leídos por corrida. El
+ * barrido horario (`5 6-23 * * *`, 18 corridas) tiene que pasar por TODOS los
+ * torneos de cada parte en un día, no dejar a uno esperando una semana.
+ */
+test('el barrido horario lee todos los torneos de cada parte en un día', () => {
+  const PASO = 11;
+  for (const dia of ['2026-11-14', '2026-11-15', '2026-11-16', '2027-01-01']) {
+    const leidos = new Set<string>();
+    for (let h = 6; h <= 23; h++) {
+      const ahora = Date.parse(`${dia}T${String(h).padStart(2, '0')}:05:00.000Z`);
+      const parte = parteDelBarrido(ahora);
+      const torneos = Array.from({ length: 46 }, (_, i) => `${parte}-${i}`);
+      for (const t of rotarPorVuelta(torneos, PASO, ahora, PARTES_DEL_BARRIDO).slice(0, PASO)) leidos.add(t);
+    }
+    assert.equal(leidos.size, 46 * PARTES_DEL_BARRIDO, `el ${dia} quedaron ${46 * PARTES_DEL_BARRIDO - leidos.size} torneos sin leer`);
+  }
 });

@@ -108,7 +108,7 @@ import {
     type RondaDeFase,
 } from '@/lib/integrations/urba/instanciaDePlayoff';
 import { planTournamentMatches, type ExistenteEnBase } from '@/lib/integrations/urba/planMatches';
-import { construirPatch, parteDelBarrido, PARTES_DEL_BARRIDO, rotarPorReloj } from '@/lib/integrations/urba/syncPlan';
+import { construirPatch, parteDelBarrido, PARTES_DEL_BARRIDO, rotarPorReloj, rotarPorVuelta } from '@/lib/integrations/urba/syncPlan';
 import { parsearAnioPedido, PRIMER_ANIO_URBA, temporadaEnCurso } from '@/lib/integrations/urba/temporada';
 import { invalidateMatchesFeedCaches } from '@/lib/server/matchesFeedInvalidation';
 import { syncBracketAdvancement } from '@/lib/server/playoffBracket';
@@ -154,7 +154,7 @@ const PASO_DE_ROTACION = 11;
  * cambian allá hay que cambiarlos acá. Es feo tener el dato en dos lados; la
  * alternativa era peor, y está explicada en `resolverScope`.
  */
-const SCHEDULES_BARRIDO = new Set(['0 9 * * *', '0 10 * * *', '0 11 * * *']);
+const SCHEDULES_BARRIDO = new Set(['5 6-23 * * *']);
 
 /**
  * De dónde sale el `scope`, y por qué no alcanza con el query string.
@@ -458,7 +458,9 @@ export async function GET(request: NextRequest) {
          * queda y la siguiente encuentra otra cosa — converge sin depender de que
          * pase el tiempo. El torneo sin una sola fila va primero de todos.
          */
-        let tanda = rotarPorReloj(candidatos, PASO_DE_ROTACION, Date.now());
+        let tanda = scope === 'barrido'
+            ? rotarPorVuelta(candidatos, PASO_DE_ROTACION, Date.now(), PARTES_DEL_BARRIDO)
+            : rotarPorReloj(candidatos, PASO_DE_ROTACION, Date.now());
         if (soloRecalcular) {
             const masVieja = new Map<string, string>();
             for (let desde = 0; ; desde += 1000) {
