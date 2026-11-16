@@ -14,24 +14,23 @@
  *     del 1,5% en 9 o mas
  *   · menos del 2% de notas debajo de 5: el 4 es un partido muy malo
  *
- * Con `--barrer-k` no puntua: barre el ritmo de la caida contra la distribucion
- * de `signal` y dice cual cumple las colas. Eso es lo que fija `CURVA.kAbajo` en
- * el motor, en vez de elegirlo a ojo.
+ * v4: la nota es 6,2 + Φ⁻¹(percentil en su grupo) + bonus − tarjetas, asi que
+ * los quince puestos coinciden por construccion y lo que se mira es que las
+ * colas y los grupos (no los puestos sueltos) queden donde se espera. Antes
+ * de correrlo hace falta `calibrar-percentiles.mjs` sobre la misma cosecha.
  */
 import { pathToFileURL } from 'node:url';
 
 import { partidosDeLaCosecha } from './lados.mjs';
 
 const ENTRADA = process.argv[2];
-const BARRER = process.argv.includes('--barrer-k');
 if (!ENTRADA) {
     console.error('uso: node scripts/rugby-ratings/validar.mjs <planillas.jsonl> [--barrer-k]');
     process.exit(1);
 }
 
 const raiz = pathToFileURL(process.cwd() + '/').href;
-const { rateRugbyPlayer, SANCIONES, castigoPorErrores } =
-    await import(raiz + 'src/lib/matches/rugbyPlayerRating.ts');
+const { rateRugbyPlayer } = await import(raiz + 'src/lib/matches/rugbyPlayerRating.ts');
 
 const NOMBRE = {
     1: '1 Pilar', 2: '2 Hooker', 3: '3 Pilar der', 4: '4 Segunda', 5: '5 Segunda',
@@ -40,9 +39,26 @@ const NOMBRE = {
 };
 
 const { partidos } = await partidosDeLaCosecha(ENTRADA);
+
+// Scrum y line por equipo (salida de `cosecha-parada.mjs`), opcional.
+const PARADA = process.argv[3];
+const paradaPorPartido = new Map();
+if (PARADA) {
+    const { createReadStream } = await import('node:fs');
+    const { createInterface } = await import('node:readline');
+    const rl = createInterface({ input: createReadStream(PARADA), crlfDelay: Infinity });
+    for await (const linea of rl) {
+        if (!linea.trim()) continue;
+        try { const o = JSON.parse(linea); paradaPorPartido.set(o.match_id, o); } catch { /* linea cortada */ }
+    }
+}
+
 const puntuados = [];
 for (const partido of partidos) {
-    for (const { jugadores, totales } of partido.planteles) {
+    const paradaDelPartido = paradaPorPartido.get(partido.matchId);
+    if (PARADA && !paradaDelPartido) continue;
+    for (const [indiceLado, { jugadores, totales }] of partido.planteles.entries()) {
+        const parada = paradaDelPartido ? (indiceLado === 0 ? paradaDelPartido.home : paradaDelPartido.away) : null;
         for (const jugador of jugadores) {
             // El plantel entero va como contexto: el puntaje mide la PARTE que
             // el jugador se llevo, no cuanto hizo.
@@ -51,15 +67,10 @@ for (const partido of partidos) {
                 minutes: jugador.minutes,
                 number: jugador.number,
                 team: totales,
+                parada,
             });
             if (!r || r.position == null) continue;
-            // El castigo de la tarjeta se guarda aparte para poder barrer la
-            // curva sin volver a leer la planilla: no pasa por la curva.
-            let castigo = castigoPorErrores(jugador.stats ?? {});
-            for (const [metricId, puntos] of Object.entries(SANCIONES)) {
-                castigo += (jugador.stats?.[metricId] ?? 0) * puntos;
-            }
-            puntuados.push({ puesto: r.position, valor: r.value, signal: r.signal, castigo, minutos: jugador.minutes });
+            puntuados.push({ puesto: r.position, valor: r.value, signal: r.signal, minutos: jugador.minutes });
         }
     }
 }
@@ -77,24 +88,6 @@ const stat = (v) => {
         pc4: 100 * s.filter((x) => x <= 4).length / n,
     };
 };
-
-if (BARRER) {
-    // La subida ya esta fijada (`k` 0,88, amplitud 4): las colas de arriba no
-    // dependen de la caida. Lo que se barre es cuan rapido se baja hacia el piso
-    // de 5,2. Tarjetas y exceso de errores se restan aparte, igual que en el motor.
-    const nota = (p, kAbajo) => {
-        const curva = p.signal >= 0 ? 4 * Math.tanh(p.signal / 0.88) : 0.8 * Math.tanh(p.signal / kAbajo);
-        return Math.round(Math.min(10, Math.max(1, 6 + curva - p.castigo)) * 10) / 10;
-    };
-    console.log('kAbajo | media | desv | %>=8 | %>=9 | %<5 | %<=4');
-    console.log('-'.repeat(50));
-    for (let kAbajo = 0.3; kAbajo <= 1.01; kAbajo += 0.1) {
-        const s = stat(puntuados.map((p) => nota(p, kAbajo)));
-        const cumple = s.pc8 >= 3 && s.pc8 <= 7 && s.pc9 < 1.5 && s.bajo5 < 2;
-        console.log(`${kAbajo.toFixed(1).padStart(6)} | ${s.m.toFixed(2).padStart(5)} | ${s.sd.toFixed(2).padStart(4)} | ${s.pc8.toFixed(1).padStart(4)} | ${s.pc9.toFixed(1).padStart(4)} | ${s.bajo5.toFixed(1).padStart(3)} | ${s.pc4.toFixed(2).padStart(4)}${cumple ? '  <-- cumple' : ''}`);
-    }
-    process.exit(0);
-}
 
 console.log('Puesto        |     n | media | desv |  p90 | max | %>=8 | %>=9 | %<=5');
 console.log('-'.repeat(74));
@@ -120,5 +113,5 @@ console.log(`Notas de 8 o mas       ${g.pc8.toFixed(1)}%   ${g.pc8 >= 3 && g.pc8
 console.log(`Notas de 9 o mas       ${g.pc9.toFixed(1)}%   ${g.pc9 < 1.5 ? 'CUMPLE' : 'NO CUMPLE'} (< 1,5%)`);
 console.log(`Notas debajo de 5      ${g.bajo5.toFixed(1)}%   ${g.bajo5 < 2 ? 'CUMPLE' : 'NO CUMPLE'} (< 2%)`);
 console.log(`Notas de 4 o menos     ${g.pc4.toFixed(2)}%`);
-console.log(`Mediana                ${g.mediana.toFixed(2)}   ${Math.abs(g.mediana - 6) <= 0.05 ? 'CUMPLE' : 'NO CUMPLE'} (6,00)`);
+console.log(`Mediana                ${g.mediana.toFixed(2)}   ${Math.abs(g.mediana - 6.2) <= 0.1 ? 'CUMPLE' : 'NO CUMPLE'} (6,20)`);
 console.log(`Forwards ${(fw.reduce((a, b) => a + b, 0) / fw.length).toFixed(2)}  vs  Backs ${(bk.reduce((a, b) => a + b, 0) / bk.length).toFixed(2)}`);

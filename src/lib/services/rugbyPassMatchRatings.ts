@@ -73,7 +73,7 @@ export async function ratePlayersOfMatch(match: RateableMatch): Promise<{
     const lineups = detalle?.lineups ?? { home: [], away: [] };
     if (lineups.home.length === 0 && lineups.away.length === 0) return { rows: [], ok: false };
 
-    const hoja = planillaDelPartido(lineups, planilla);
+    const hoja = planillaDelPartido(lineups, planilla, detalle?.stats);
     if (hoja.puntajes.size === 0) return { rows: [], ok: false };
 
     const rows: PlayerRatingRow[] = [];
