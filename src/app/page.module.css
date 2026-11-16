@@ -2904,6 +2904,12 @@
         padding: 12px 16px;
     }
 
+    /* Marcador de tres cifras (134): a 1.45rem mide ~52px y se montaba sobre el
+       escudo. Esas filas abren las dos columnas del marcador. */
+    .matchRow[data-wide-score="true"] {
+        grid-template-columns: 56px 28px minmax(0, 1fr) 40px 76px 76px 40px minmax(0, 1fr) 28px 56px;
+    }
+
     .matchTeam:first-child .clubFavoriteBtn { grid-column: 2; }
     .matchTeam:first-child .teamName { grid-column: 3; }
     .matchTeam:first-child .teamLogo { grid-column: 4; }
