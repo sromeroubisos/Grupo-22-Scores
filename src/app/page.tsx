@@ -25,6 +25,7 @@ import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { loadManualTournaments } from '@/lib/catalog/manualTournaments';
 import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import ClubsPromoCard from '@/components/clubs-promo/ClubsPromoCard';
+import XvIdealAcceso from '@/components/xvIdeal/XvIdealAcceso';
 import TickerTitulares from '@/components/ticker/TickerTitulares';
 import SantaFe2026Acceso from '@/components/odesur/SantaFe2026Acceso';
 import TennisMatchList from '@/components/tennis/TennisMatchList';
@@ -2566,6 +2567,12 @@ export default function HomePage() {
                 </div>
               )}
 
+              {/* Acceso a la votación del XV Ideal: solo existe mientras haya una votación
+                  abierta. Solo abajo de 1500 px; arriba vive en la columna derecha. */}
+              <div className={styles.bannerFeed}>
+                <XvIdealAcceso variant="feed" />
+              </div>
+
               {!esTenis && !loading && (() => {
               const renderLeague = (league: LeagueMatches, leagueIndex: number): ReactNode => {
                 const isCollapsed = collapsedLeagues.has(league.leagueId);
@@ -2799,6 +2806,7 @@ export default function HomePage() {
           único que un mobile ve.
         */}
         <aside className={styles.sidebarRight}>
+          <XvIdealAcceso variant="sidebar" />
           <ClubsPromoCard variant="sidebar" />
         </aside>
       </div >
