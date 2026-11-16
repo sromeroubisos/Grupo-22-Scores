@@ -108,6 +108,23 @@ export function rotarPorReloj<T>(items: T[], paso: number, ahoraMs: number): T[]
 }
 
 /**
+ * Arranque de una corrida de BARRIDO: avanza `paso` lugares por vuelta.
+ *
+ * Una vuelta son `PARTES_DEL_BARRIDO` horas: en ese lapso las tres partes se
+ * barren una vez cada una, así que dentro de una misma parte las corridas
+ * consecutivas están separadas por exactamente una vuelta. Con la rotación por
+ * ventanas de 20 minutos de `rotarPorReloj` el salto entre dos corridas horarias
+ * era de 33 lugares y las corridas pisaban siempre los mismos torneos: una final
+ * recién publicada esperaba días a que le tocara el turno.
+ */
+export function rotarPorVuelta<T>(items: T[], paso: number, ahoraMs: number, partes = 3): T[] {
+  if (items.length === 0 || paso <= 0) return items;
+  const vuelta = Math.floor(ahoraMs / (partes * 3_600_000));
+  const desde = (((vuelta * paso) % items.length) + items.length) % items.length;
+  return [...items.slice(desde), ...items.slice(0, desde)];
+}
+
+/**
  * En cuántas partes se corta el barrido, y cuál le toca hoy.
  *
  * El barrido completo de una temporada son ~116 s y el techo de la función son
