@@ -1,82 +1,63 @@
 /**
- * EL PUNTAJE DEL JUGADOR EN UN PARTIDO DE RUGBY.
+ * EL PUNTAJE DEL JUGADOR EN UN PARTIDO DE RUGBY (v4).
  *
- * Todos arrancan en 6 —el partido correcto, sin nada que destacar ni nada que
- * reprochar— y de ahi se mueven segun lo que hicieron en la cancha. No es un
- * promedio de estadisticas: cada rubro vale distinto segun el puesto, porque
- * ocho tackles de un pilar y ocho de un wing no cuentan la misma historia.
+ *   nota = 6,2 + 1,0 · Φ⁻¹( percentil del rendimiento en su grupo )
+ *          + bonus por eventos raros − tarjetas
+ *          → un decimal, entre 1 y 10
  *
- * La cuenta es determinista y pura: mismas estadisticas y mismos minutos dan
- * el mismo puntaje siempre. No lee reloj, ni entorno, ni azar.
+ * La v3 tenia unas cuarenta constantes a mano (sesgo por puesto, escala por
+ * puesto, dos curvas tanh, piso de 5,2, castigo por errores acumulados) para
+ * emparejar a mano la distribucion de cada puesto. La v4 lo hace por
+ * construccion: el rendimiento se convierte en PERCENTIL dentro de su grupo de
+ * puestos y el percentil en nota con una unica campana. Todos los grupos tienen
+ * la misma distribucion sin que nadie la ajuste.
  *
- * OJO con el nombre: `matchPlayerRatings.ts` es OTRA cosa —el semaforo de 1 a 3
- * que votan los usuarios—. Esto no vota nadie: sale de la planilla.
+ * Es determinista y puro: mismas estadisticas y mismos minutos, misma nota. No
+ * lee reloj, ni entorno, ni azar. OJO con el nombre: `matchPlayerRatings.ts` es
+ * OTRA cosa —el semaforo de 1 a 3 que votan los usuarios—.
  *
- * ── CONTRA QUE SE COMPARA CADA JUGADOR (v2) ─────────────────────────────────
- * Cada rubro se lee contra la vara DE SU PUESTO, no contra una vara unica.
+ * ── QUE ES EL RENDIMIENTO ───────────────────────────────────────────────────
+ * Igual que antes: cada rubro es la PARTE del total de su equipo (mezclada con
+ * un equipo promedio, `NORMALIZACION`), leida contra la vara DE SU PUESTO y
+ * pasada a z con tope en ±3. Se juntan por eje y los ejes se pesan por la tabla
+ * del puesto. Tres cambios sobre la v3:
  *
- * La v1 comparaba a los quince contra la misma referencia global, y el
- * resultado estaba medido sobre 60.339 puntajes: el pilar derecho promediaba
- * 5,32 y el apertura 7,81. Dos puntos y pico de diferencia que no describian a
- * nadie —describian el puesto—. Y la tabla de pesos no podia salvarlo, porque
- * el peso multiplica pero no cambia el signo: a un pilar con pocos pases, el 5%
- * de `juego` le achicaba una perdida garantizada sin darle ninguna ganancia.
+ *  · El tackle se premia por EFECTIVIDAD (`tackles / intentos`), no por errados
+ *    en bruto. Con menos de cinco intentos no hay dato y no cuenta.
+ *  · Tries y asistencias salen del rendimiento y pasan a ser un bonus plano.
+ *    Son eventos raros: centrados por puesto les daban un z enorme a quien los
+ *    tenia y casi nada a quien no.
+ *  · Cada rubro habla en su eje segun cuanto lo toca ese puesto
+ *    (`voz × min(1, media del puesto / media global)`) y el eje es un promedio
+ *    pesado. Antes un pilar tenia en `impacto` cuatro rubros que casi no toca
+ *    (quiebres, defensores superados, offloads, lines) con z cerca de cero, y
+ *    esos cuatro diluian al unico que si mueve el eje: el acarreo.
  *
- * Con la vara por puesto, el pilar promedio da 6 y el apertura promedio da 6.
- * Los pesos pasan a hacer lo unico que tenian que hacer: decidir QUE mueve la
- * nota de cada puesto, no si el puesto entero vive arriba o abajo.
+ * ── MINUTOS: CONTRACCION ────────────────────────────────────────────────────
+ * `rendimiento × m / (m + K_MINUTOS)`, con m topeado en 80. Con ochenta minutos
+ * se cuenta el 76% de la señal, con diez el 29%. El suplente corto queda cerca
+ * de la media porque se sabe poco de el, sin reglas especiales. Menos de cinco
+ * minutos no llevan nota.
  *
- * ── Y POR QUE TAMBIEN SE CENTRAN LOS BONUS ──────────────────────────────────
- * La v1 tenia rubros que solo sumaban: el try, el quiebre, el offload. Sonaba
- * justo —no marcar un try no es una falla— pero convertia la pelota en una
- * renta: el 8 promediaba 7,45 y la segunda linea 6,04 con pesos casi iguales, y
- * la diferencia no salia de la tabla sino de que uno junta quiebres y el otro
- * no. Una ventaja que solo suma no la corrige ningun peso.
- *
- * Centrado por puesto, el wing que no marco no queda en falta: queda donde
- * corresponde, que es en el promedio de los wings. Marcar levanta; no marcar es
- * el partido normal y vale 6. Lo que ya no pasa es que llegue a 7 por ser wing.
- *
- * ── LA PARTE DEL EQUIPO, NO EL CONTEO (v3) ──────────────────────────────────
- * Cada rubro se mide como la PARTE que el jugador se llevo del total de su
- * equipo, no como cuanto hizo.
- *
- * Con conteos crudos, el puntaje medido sobre 2.634 planteles seguia el volumen
- * del equipo: la correlacion entre los pases de un equipo y su puntaje medio
- * era r = 0,726 —la mitad de la varianza—. Los pases, los avances, los metros y
- * los quiebres son todos proporcionales a la posesion, asi que un equipo que
- * elige jugar sin la pelota mandaba a sus quince jugadores debajo de la vara
- * por ejecutar el plan que ganaba el partido. Sudafrica le gano 29-24 a Nueva
- * Zelanda con el 44% de la pelota y 150 tackles, y promediaba 0,67 menos.
- *
- * En partes, eso desaparece solo: un apertura se lleva una quinta parte de los
- * pases de su equipo tenga el equipo 105 o 182, y un pilar una cincuentava. Y
- * se lleva puesto de paso el impuesto por defender: los tackles errados dejan
- * de contarse en bruto —Sudafrica erraba mas que Nueva Zelanda solo porque
- * tackleaba 44% mas, con la misma efectividad— y pasan a pesar como lo que son,
- * una fraccion del trabajo defensivo del equipo.
- *
- * ── LO QUE ESTO SIGUE SIN SER ───────────────────────────────────────────────
- * El proveedor mide avances, tackles, metros, pases y quiebres. No mide scrum,
- * line, limpieza de ruck ni maul —ni por jugador NI POR EQUIPO: no estan en los
- * veintidos rubros de la planilla, asi que ni siquiera se puede repartir un
- * credito colectivo—. Las varas por puesto hacen que el pilar PROMEDIO de 6,
- * que es lo correcto, pero un pilar EXCELENTE no puede llegar a 8,5 con datos
- * que no cuentan su trabajo. El try penal que se lleva un pack dominante no se
- * lo lleva nadie aca. Eso no lo arregla ninguna cuenta: lo arregla una señal de
- * set piece el dia que exista.
+ * ── LO QUE SIGUE SIN VERSE ──────────────────────────────────────────────────
+ * Scrum, line, ruck y maul no estan en la planilla. Un pilar que domino el
+ * scrum no se distingue de uno que lo sufrio. Esa señal es el paso siguiente
+ * (carga editorial o datos de equipo del proveedor) y entra como un rubro mas.
  */
 
 import {
-    ESCALA_POR_PUESTO,
     REFERENCIAS_POR_PUESTO,
-    NORMALIZACION,
     REFERENCIA_GLOBAL,
-    SESGO,
-    SESGO_POR_PUESTO,
+    NORMALIZACION,
     TOTAL_DE_EQUIPO,
     type Referencia,
 } from './rugbyRatingReferences.generated.ts';
+import {
+    CUANTILES_POR_GRUPO,
+    EFECTIVIDAD_GLOBAL,
+    EFECTIVIDAD_POR_PUESTO,
+    PARADA_LIGA,
+} from './rugbyRatingPercentiles.generated.ts';
 
 /** Los cinco ejes en los que se lee un partido. */
 export type RatingComponent = 'ataque' | 'defensa' | 'impacto' | 'juego' | 'disciplina';
@@ -100,12 +81,35 @@ export const PUESTO_POR_NUMERO: Readonly<Record<number, number>> = {
 };
 
 /**
+ * LOS GRUPOS CONTRA LOS QUE SE HACE EL PERCENTIL.
+ *
+ * Un jugador compite con los de su grupo, no con los quince puestos juntos: el
+ * 90 de un pilar es un buen partido de pilar. Cada grupo tiene la misma
+ * distribucion de notas por construccion.
+ */
+export type GrupoDePuesto =
+    | 'pilares' | 'hooker' | 'segundas' | 'terceras'
+    | 'medio' | 'apertura' | 'centros' | 'back-tres';
+
+export const GRUPO_POR_PUESTO: Readonly<Record<number, GrupoDePuesto>> = {
+    1: 'pilares', 3: 'pilares',
+    2: 'hooker',
+    4: 'segundas', 5: 'segundas',
+    6: 'terceras', 7: 'terceras', 8: 'terceras',
+    9: 'medio',
+    10: 'apertura',
+    12: 'centros', 13: 'centros',
+    11: 'back-tres', 14: 'back-tres', 15: 'back-tres',
+};
+
+/** El grupo con el que se compara a quien no tiene puesto afirmable. */
+export const GRUPO_SIN_PUESTO = 'todos';
+
+/**
  * LA 21 NO SIEMPRE ES UN MEDIO SCRUM.
  *
  * Es la unica camiseta del banco donde equivocarse sale caro: `juego` pesa 45 en
  * un 9, asi que a un tercera linea se le exigian los pases de otro oficio.
- * Manuel Zuliani hizo 19 tackles sin errar y salia entre los peores del partido.
- *
  * Medido: de 944 camisetas 21 con 15 minutos o mas, 410 dan menos de 0,25 pases
  * por minuto; de 1.324 camisetas 9, solo 5. Debajo de ese ritmo no se adivina el
  * puesto real: se lo juzga con la vara neutra del jugador sin numero.
@@ -130,12 +134,8 @@ export function puestoDelPartido(
 /**
  * Cuanto pesa cada eje en cada puesto. Suman 100 por fila —lo verifica un test.
  *
- * Un 7 vive del tackle; un 10, del juego. La tabla es lo que hace que el
- * puntaje hable de rugby y no de una planilla.
- *
- * Es la tabla del Rugby Player Rating v1.0 y se mantiene intacta en la v2. Lo
- * que cambio no fue la tabla —estaba bien pensada— sino contra que se compara
- * cada jugador antes de que la tabla intervenga.
+ * Es la tabla del Rugby Player Rating v1.0, intacta. Se reemplaza por pesos
+ * aprendidos de notas de expertos cuando haya notas suficientes.
  */
 export const PESOS_POR_PUESTO: Readonly<Record<number, Readonly<Record<RatingComponent, number>>>> = {
     1: { ataque: 15, defensa: 35, impacto: 30, juego: 5, disciplina: 15 },
@@ -155,63 +155,33 @@ export const PESOS_POR_PUESTO: Readonly<Record<number, Readonly<Record<RatingCom
     15: { ataque: 30, defensa: 20, impacto: 22, juego: 20, disciplina: 8 },
 };
 
-/**
- * Hacia donde empuja un rubro.
- *
- * La v1 tenia cuatro tipos —volumen, bonus, castigo, falta— porque cada uno
- * necesitaba su propia forma de centrarse contra una vara global. Con la vara
- * por puesto los cuatro se derriten en uno: todo se lee como distancia al
- * promedio del puesto, y lo unico que queda por declarar es el signo. Un tackle
- * de mas es bueno, un tackle errado de mas es malo, y ninguno de los dos
- * necesita un tipo propio para decirlo.
- *
- * La tarjeta queda afuera de esta cañeria entera: ver `SANCIONES`.
- */
+/** Hacia donde empuja un rubro: un tackle de mas es bueno, un penal de mas es malo. */
 export type DireccionDeRubro = 'suma' | 'resta';
 
 export interface RubroRating {
     componente: RatingComponent;
     direccion: DireccionDeRubro;
-    /**
-     * Cuanto habla este rubro por su eje. Es un peso RELATIVO dentro del eje:
-     * en `defensa`, el tackle habla mas fuerte que el robo porque describe mas
-     * partido, aunque el robo sea la jugada mas vistosa.
-     */
+    /** Cuanto habla este rubro por su eje: peso RELATIVO dentro del eje. */
     voz: number;
     /**
-     * Sin este rubro no se puede puntuar el partido. Son los que TODOS hacen:
-     * si no llegaron, todo el plantel figura en cero y el puntaje sale sesgado
-     * parejo sin que nadie lo note. Ver `hayPlanillaParaPuntuar`.
+     * Sin este rubro no se puede puntuar el partido. Son los que TODOS hacen: si
+     * no llegaron, todo el plantel figura en cero y el puntaje sale sesgado parejo
+     * sin que nadie lo note. Ver `hayPlanillaParaPuntuar`.
      */
     imprescindible?: true;
 }
 
 /**
- * Los rubros del partido, su eje y cuanto pesan dentro de el.
- *
- * Aca ya NO hay referencias: las varas viven en
- * `rugbyRatingReferences.generated.ts`, una por puesto y por rubro, medidas
- * sobre la cosecha de planillas. Esta tabla dice que significa cada rubro; la
- * generada dice cuanto es normal en cada puesto. Separarlas es lo que permite
- * recalibrar sin volver a discutir el modelo.
+ * Los rubros que se miden como PARTE del equipo. Los errados, los tries y las
+ * asistencias no estan: ver `EFECTIVIDAD_DE_TACKLE` y `BONUS`.
  *
  * `lineoutsWon` cae en `impacto` y no en `juego` a proposito: el line es del
- * paquete, y `juego` pesa 11 en un segunda linea. Puesto ahi, el salto de un
- * lock contaria menos que un pase de un apertura, que es al reves de como se
- * juega. Cuando existan Lineout Takes y Stolen, el set piece se merece un eje
- * propio y este parche se cae solo.
- *
- * EL TACKLE NO SE PREMIA POR CANTIDAD. `tackles` suma y `missedTackles` resta,
- * asi que lo que queda es la eficiencia pesada por volumen: 17 tackles con 5
- * errados rinden menos que 12 sin ninguno.
+ * paquete, y `juego` pesa 11 en un segunda linea.
  */
 export const RUBROS: Readonly<Record<string, RubroRating>> = {
-    tries: { componente: 'ataque', direccion: 'suma', voz: 1.0 },
-    tryAssists: { componente: 'ataque', direccion: 'suma', voz: 0.6 },
     carriesMetres: { componente: 'ataque', direccion: 'suma', voz: 0.9, imprescindible: true },
 
     tackles: { componente: 'defensa', direccion: 'suma', voz: 1.0, imprescindible: true },
-    missedTackles: { componente: 'defensa', direccion: 'resta', voz: 0.8 },
     turnoversWon: { componente: 'defensa', direccion: 'suma', voz: 0.5 },
     ruckTurnovers: { componente: 'defensa', direccion: 'suma', voz: 0.35 },
     dominantTackles: { componente: 'defensa', direccion: 'suma', voz: 0.45 },
@@ -230,153 +200,152 @@ export const RUBROS: Readonly<Record<string, RubroRating>> = {
 };
 
 /**
- * LA TARJETA NO SE COMPARA CON NADA Y NO PASA POR LA CURVA.
+ * LA EFECTIVIDAD DEL TACKLE reemplaza a los errados en bruto.
  *
- * Se descuenta en PUNTOS, plana, despues de que el rendimiento ya se convirtio
- * en nota. Cada exencion tiene su motivo y las dos son deliberadas.
+ * `tackles / (tackles + errados)` contra la media del puesto. Los errados en
+ * bruto castigaban el volumen: quien tackleaba mas erraba mas aunque acertara lo
+ * mismo. Con menos de `minimoIntentos` no hay dato y el rubro no cuenta.
+ */
+export const EFECTIVIDAD_DE_TACKLE = {
+    componente: 'defensa' as RatingComponent,
+    voz: 0.8,
+    minimoIntentos: 5,
+};
+
+/**
+ * Los eventos raros suman DESPUES de la nota y planos.
  *
- * NO SE CENTRA POR PUESTO. Todo lo demas se lee contra el promedio del puesto
- * porque MIDE RENDIMIENTO, y el rendimiento se juzga contra lo que se le pide a
- * ese puesto. Una tarjeta no mide rendimiento: mide una infraccion, y no hay
- * puesto al que se le permita infringir mas. Centrada, la primera amarilla del
- * puesto que mas amarillas cobra saldria gratis.
+ * Un try le cambia el partido a cualquiera, y un forward que lo marca esta
+ * haciendo algo menos esperable que un back. El tope evita que una tarde de
+ * tries se coma toda la escala.
+ */
+export const BONUS = {
+    tryForward: 0.45,
+    tryBack: 0.35,
+    asistencia: 0.2,
+    tope: 1.2,
+} as const;
+
+/**
+ * LA PELOTA PARADA: lo que el proveedor no mide por jugador y si por equipo.
  *
- * NO PASA POR LA CURVA. Si entrara al agregado, el mismo rojo costaria distinto
- * segun donde venia parado el jugador —la tanh comprime en los extremos—, y una
- * expulsion no se abarata porque el tipo venia jugando mal. En puntos planos,
- * la amarilla cuesta 1,0 y la roja 2,4 en los quince puestos y en cualquier
- * partido. Un test lo fija.
+ * RugbyPass no publica scrum ni line por jugador, pero la ficha del partido trae,
+ * por equipo, cuantos scrums y lines tuvo y que porcentaje gano. Con eso se arma
+ * un indice por equipo y se reparte a quienes cargan con esa pelota:
+ *
+ *   indice = (porcentaje ganado − media de la liga) / desvio de la liga,
+ *            contraido por `n / (n + K)`: 3 scrums al 100% no dicen lo que 12.
+ *
+ * Se reparte por grupo segun cuanto participa cada uno del scrum y del line, y
+ * entra como un eje mas con `peso` puntos de cien. Sin datos del partido (la
+ * ficha de temporada, un proveedor que no los trae) el eje no existe y el resto
+ * se lee completo, sin penalizar a nadie por un hueco de la fuente.
+ *
+ * Lo que sale del proveedor es solo el porcentaje y el volumen: no hay robos de
+ * scrum ni penales de scrum, asi que el indice no los incluye.
+ */
+export interface ParadaDeEquipo {
+    scrums: number | null;
+    /** Porcentaje ganado, de 0 a 1. */
+    scrumsGanados: number | null;
+    lines: number | null;
+    linesGanados: number | null;
+}
+
+/** Cuantos eventos hacen falta para creerle la mitad al porcentaje. */
+export const PARADA_K = { scrum: 8, line: 10 } as const;
+
+/** Cuanto del scrum y del line carga cada grupo, y cuanto pesa el eje en su nota. */
+export const PARADA_POR_GRUPO: Readonly<Record<string, { peso: number; scrum: number; line: number }>> = {
+    pilares: { peso: 20, scrum: 1.0, line: 0 },
+    hooker: { peso: 20, scrum: 0.7, line: 1.0 },
+    segundas: { peso: 15, scrum: 0.4, line: 0.7 },
+    terceras: { peso: 6, scrum: 0.2, line: 0.3 },
+};
+
+export interface LigaDeParada {
+    scrum: Referencia;
+    line: Referencia;
+}
+
+/** El z de scrum y de line de un equipo en un partido. `null` si el dato no esta. */
+export function indiceDeParada(
+    parada: ParadaDeEquipo | null | undefined,
+    liga: LigaDeParada = PARADA_LIGA
+) {
+    const z = (ganados: number | null | undefined, n: number | null | undefined, ref: Referencia, k: number) => {
+        if (ganados == null || n == null || !Number.isFinite(ganados) || !Number.isFinite(n) || n <= 0 || ref.desvio <= 0) return null;
+        const bruto = Math.max(-TOPE_POR_RUBRO, Math.min(TOPE_POR_RUBRO, (ganados - ref.media) / ref.desvio));
+        return bruto * (n / (n + k));
+    };
+    return {
+        scrum: z(parada?.scrumsGanados, parada?.scrums, liga.scrum, PARADA_K.scrum),
+        line: z(parada?.linesGanados, parada?.lines, liga.line, PARADA_K.line),
+    };
+}
+
+/**
+ * LA TARJETA NO SE COMPARA CON NADA.
+ *
+ * Se descuenta en PUNTOS, plana, despues de la nota: la amarilla cuesta 1,0 y la
+ * roja 2,4 en los quince puestos y en cualquier partido. Una tarjeta mide una
+ * infraccion, no rendimiento, y no hay puesto al que se le permita infringir mas.
  */
 export const SANCIONES: Readonly<Record<string, number>> = {
     yellowCards: 1.0,
     redCards: 2.4,
 };
 
-/**
- * Cuanto puede alejarse un solo rubro del promedio de su puesto.
- *
- * Tres desvios ya es un partido excepcional en ese rubro. Sin tope, un pilar
- * que marca un try —tres desvios y medio para un pilar— se llevaria el puntaje
- * solo, y un partido no se gana con una jugada.
- */
+/** La campana de la nota: media y desvio, iguales para todos los puestos. */
+export const NOTA = { media: 6.2, desvio: 1.0 } as const;
+
+/** Hasta donde llega la escala. El 10 y el 1 existen, pero cuestan. */
+const TOPE = { min: 1, max: 10 } as const;
+
+/** Cuanto pesa la duda: `m / (m + K)`. Se ajusta con datos. */
+export const K_MINUTOS = 25;
+
+/** Menos que esto no lleva nota: no se puede decir nada de cinco minutos. */
+export const MINUTOS_MINIMOS = 5;
+
+/** Cuanto puede alejarse un solo rubro del promedio de su puesto, en desvios. */
 const TOPE_POR_RUBRO = 3;
 
-/**
- * El piso del desvio de un puesto, como fraccion del desvio global del rubro.
- *
- * Hay rubros que un puesto casi no toca: un wing gana un line cada tantos
- * partidos. Ahi el desvio medido se acerca a cero y cualquier unidad se
- * convertiria en veinte desvios. El piso lo impide sin borrar la señal.
- */
+/** El piso del desvio de un puesto, como fraccion del desvio global del rubro. */
 const PISO_DEL_DESVIO = 0.25;
 
 /**
- * La curva que convierte rendimiento en nota.
- *
- * La v1 recortaba: tope por rubro, tope por eje y un clip final entre 1 y 10.
- * Con base 6 y tope de eje 1,8, dos ejes al tope ya daban 9,6 —y de ahi los 460
- * dieces perfectos que habia en la base sobre 60.339 puntajes, con el 5,1% de
- * las notas en 9 o mas cuando deberia ser el 1,5%.
- *
- * La tanh no recorta: satura. El 9 pasa a costar un partido de tres desvios,
- * que es lo que deberia costar, y los extremos son asintotas: se llega
- * acercandose, nunca por acumular una jugada mas.
- *
- * ── LA CAIDA ES LARGA Y LENTA ───────────────────────────────────────────────
- * La subida y la bajada tienen cada una su ritmo, porque no se leen igual: un
- * buen partido se nota enseguida, pero el que jugo un poco por debajo del
- * promedio de su puesto no jugo mal, y una curva que lo trata asi miente.
- *
- * Con una sola `k` y una caida de 2 puntos, el piso estaba en 4 y se llegaba
- * rapido: sobre 1.678 partidos, el 86% tenia a alguien abajo de 5. Por jugador
- * era el 4,6%, pero en una alineacion de 45 eso se ve en casi todos los
- * partidos, y la banda de los 4 dejaba de significar un mal partido.
- *
- * Ahora la caida por rendimiento se acaba en 5,2: un mal partido se lee como un
- * partido del monton, no como una falla. Abajo de eso se baja por dos puertas,
- * las dos en puntos planos y despues de la curva: la tarjeta (`SANCIONES`) y una
- * cantidad excepcional de errores (`EXCESO_DE_ERRORES`).
- *
- * Ninguna de las constantes sale de una intuicion: se barrieron contra la
- * distribucion completa con
- * `node scripts/rugby-ratings/validar.mjs <planillas.jsonl> --barrer-k`.
- */
-const CURVA = { k: 0.88, kAbajo: 0.6, arriba: 4, abajo: 0.8 } as const;
-
-/**
- * LA UNICA FORMA DE HUNDIRSE SIN TARJETA: ACUMULAR ERRORES.
- *
- * Penales, pelotas perdidas y tackles errados se suman, y lo que pase de nueve
- * descuenta un cuarto de punto por error. El partido normal tiene 2; medido
- * sobre 354 partidos, llegar a 10 pasa una vez cada doce y llegar a 12, una cada
- * setenta. El tope deja el rendimiento en 3: al fondo se llega con tarjeta.
- */
-export const EXCESO_DE_ERRORES = {
-    rubros: ['penaltiesConceded', 'turnoversConceded', 'missedTackles'],
-    desde: 9,
-    puntos: 0.25,
-    tope: 2.2,
-} as const;
-
-/** Los puntos que se descuentan por errores acumulados. */
-export function castigoPorErrores(stats: Readonly<Record<string, number>>) {
-    let errores = 0;
-    for (const metricId of EXCESO_DE_ERRORES.rubros) {
-        const cantidad = stats[metricId] ?? 0;
-        if (Number.isFinite(cantidad) && cantidad > 0) errores += cantidad;
-    }
-    const exceso = Math.max(0, errores - EXCESO_DE_ERRORES.desde);
-    return Math.min(EXCESO_DE_ERRORES.tope, exceso * EXCESO_DE_ERRORES.puntos);
-}
-
-/**
- * El piso de la referencia prorrateada.
- *
- * A un suplente de seis minutos no se le pide el volumen de un titular, pero
- * tampoco se lo juzga con la vara de seis minutos: dos avances le darian un
- * diez. Por debajo de esto la vara deja de achicarse.
+ * El piso de la referencia prorrateada: a un suplente de seis minutos no se le
+ * pide el volumen de un titular, pero tampoco la vara de seis minutos.
  */
 const MINUTOS_MINIMOS_DE_VARA = 25;
 
 /**
- * Con cuantos minutos el partido cuenta entero.
- *
- * Achicar la vara hace que el juicio sea JUSTO; esto hace que sea HONESTO. Seis
- * minutos no alcanzan para decir que alguien jugo mal: alcanzan para decir que
- * casi no jugo. Por debajo de este umbral el puntaje se acerca a la base en la
- * proporcion que falta, que es el encogimiento hacia el promedio de toda la
- * vida —y el que evita que un cameo termine primero o ultimo de la tabla.
+ * Las probabilidades en las que se guardan los cuantiles de cada grupo: los
+ * extremos 0,25% y 99,75%, y de 0,5% a 99,5% de a 0,5. Fuera de ellas el
+ * percentil se queda en la punta, y la nota en torno a 6,2 ± 2,8.
  */
-const MINUTOS_PARA_CONFIANZA = 30;
+export const PROBABILIDADES: readonly number[] = (() => {
+    const p = [0.0025];
+    for (let i = 1; i <= 199; i++) p.push(i / 200);
+    p.push(0.9975);
+    return p;
+})();
 
-/**
- * Los rubros sin los cuales NO se puede puntuar.
- *
- * Son los que hace todo el mundo: el puntaje se construye sobre ellos y un
- * ausente no se distingue de un cero. Si `passes` no llego, todo el plantel
- * aparece como si no hubiera pasado la pelota nunca y el eje juego se desploma
- * parejo —un puntaje que se ve prolijo y no dice nada. Mejor no puntuar.
- */
+/** Los rubros sin los cuales NO se puede puntuar. */
 export const RUBROS_IMPRESCINDIBLES = Object.entries(RUBROS)
     .filter(([, rubro]) => rubro.imprescindible)
     .map(([metricId]) => metricId);
 
 /**
- * Si la planilla alcanza para puntuar.
- *
- * `rubros` son las metricas que llegaron para el partido, no las de un jugador:
- * la pregunta es si la FUENTE contesto entera, no si tal jugador hizo algo.
+ * Si la planilla alcanza para puntuar. `rubros` son las metricas que llegaron
+ * para el partido, no las de un jugador: la pregunta es si la FUENTE contesto
+ * entera.
  */
 export function hayPlanillaParaPuntuar(rubros: Iterable<string>) {
     const presentes = new Set(rubros);
     return RUBROS_IMPRESCINDIBLES.every((metricId) => presentes.has(metricId));
 }
-
-/** El puntaje de un partido correcto y sin sobresaltos. */
-export const RATING_BASE = 6;
-
-/** Hasta donde llega la escala. El 10 y el 1 existen, pero cuestan. */
-const TOPE = { min: 1, max: 10 } as const;
 
 export interface RugbyRatingInput {
     /** Los rubros del partido, en los ids de metrica de la tabla de jugadores. */
@@ -386,45 +355,43 @@ export interface RugbyRatingInput {
     /** Numero de camiseta: de aca sale el puesto. */
     number: number | null;
     /**
-     * Los totales de SU equipo en el partido, rubro por rubro. Es el
-     * denominador: sin esto no hay parte que calcular.
-     *
-     * Opcional porque hay llamadores que puntuan un jugador suelto y no tienen
-     * el plantel a mano. Cuando falta se usa el total de equipo PROMEDIO
-     * (`TOTAL_DE_EQUIPO`), que deja la cuenta en la escala correcta pero vuelve
-     * a arrastrar el sesgo de posesion para ese jugador.
+     * Los totales de SU equipo en el partido, rubro por rubro: es el denominador.
+     * Cuando falta se usa el equipo PROMEDIO (`TOTAL_DE_EQUIPO`), que deja la
+     * cuenta en la escala correcta pero arrastra la posesion para ese jugador.
      */
     team?: Readonly<Record<string, number>>;
+    /** Scrum y line de SU equipo en el partido. Opcional: sin esto no hay eje de parada. */
+    parada?: ParadaDeEquipo | null;
 }
 
 export interface RugbyRating {
     /** El puntaje, de 1 a 10 con un decimal. */
     value: number;
-    /**
-     * Cuanto se aparto cada eje del promedio DE SU PUESTO, en desvios. Cero es
-     * el partido normal de ese puesto. Sirve para explicar el numero.
-     */
+    /** Cuanto se aparto cada eje del promedio DE SU PUESTO, en desvios. */
     components: Record<RatingComponent, number>;
-    /**
-     * El rendimiento en bruto, en desvios, ANTES de la curva y de la tarjeta.
-     * Cero es el partido normal del puesto.
-     *
-     * Sale afuera para que la calibracion de `CURVA.k` sea una cuenta sobre
-     * esto y no una copia del modelo en un script: el dia que se recalibre, se
-     * barre `k` contra la distribucion de `signal` y el motor no se toca.
-     */
+    /** El rendimiento ya contraido por minutos, ANTES del percentil. */
     signal: number;
+    /** El percentil (0 a 1) del rendimiento en su grupo. */
+    percentile: number;
+    /** El bonus por tries y asistencias, ya topeado. */
+    bonus: number;
+    /** El eje de pelota parada, en desvios, o null si no entro en la cuenta. */
+    parada: number | null;
     /** El puesto que se le adjudico, o null si no habia numero. */
     position: number | null;
     minutes: number;
+}
+
+/** Opciones para calibrar: permiten medir con tablas que todavia no estan escritas. */
+export interface OpcionesDeRendimiento {
+    efectividad?: Readonly<Record<number, Referencia>>;
+    liga?: LigaDeParada;
 }
 
 /** La vara de un rubro para un puesto, con el global de respaldo. */
 function referenciaDe(metricId: string, puesto: number | null): Referencia | null {
     const global = REFERENCIA_GLOBAL[metricId];
     if (!global) return null;
-    // Sin numero de camiseta no hay puesto, y se juzga contra el promedio de
-    // los quince: mejor una vara neutra que adivinar donde jugo.
     const propia = puesto != null ? REFERENCIAS_POR_PUESTO[puesto]?.[metricId] : undefined;
     if (!propia) return global;
     return {
@@ -436,71 +403,49 @@ function referenciaDe(metricId: string, puesto: number | null): Referencia | nul
 }
 
 /**
- * El puntaje de un jugador en un partido.
- *
- * Devuelve `null` cuando no hay con que calcularlo: sin minutos en cancha no
- * hay partido que puntuar, y un suplente que no entro no lleva puntaje. Es
- * distinto de un 6, que dice "jugo y estuvo correcto".
+ * Cuanto de su voz conserva un rubro en un puesto: 1 si el puesto lo toca tanto
+ * como el promedio, y menos cuanto menos lo toca. Es lo que evita que un rubro
+ * que ese puesto casi no hace diluya al que si.
  */
-export function rateRugbyPlayer(input: RugbyRatingInput): RugbyRating | null {
-    const minutes = input.minutes ?? 0;
-    if (minutes <= 0) return null;
+function presenciaDe(metricId: string, puesto: number | null): number {
+    if (puesto == null) return 1;
+    const propia = REFERENCIAS_POR_PUESTO[puesto]?.[metricId];
+    const global = REFERENCIA_GLOBAL[metricId];
+    if (!propia || !global || global.media <= 0) return 1;
+    return Math.max(0, Math.min(1, propia.media / global.media));
+}
 
+/**
+ * El rendimiento de un jugador, en desvios, ya contraido por minutos. Es todo el
+ * partido salvo el percentil: lo usa el motor y lo usa la calibracion.
+ */
+export function rendimientoDe(
+    input: RugbyRatingInput,
+    opciones: OpcionesDeRendimiento = {}
+) {
+    const minutes = input.minutes ?? 0;
     const puesto = puestoDelPartido(input.number, input.stats, minutes);
     const pesos = puesto != null ? PESOS_POR_PUESTO[puesto] : null;
 
-    // La vara se achica con los minutos en vez de estirar lo hecho hasta los
-    // ochenta. Es la diferencia entre "rindio como para doce tackles" y "si
-    // seguia a este ritmo hacia treinta": lo segundo es una proyeccion, y una
-    // proyeccion sobre diez minutos no es una calificacion.
-    //
-    // Se achica para TODOS los rubros. La v1 dejaba afuera al try y al quiebre
-    // —la vara del cameo era la del partido entero— y con eso el suplente
-    // arrancaba en falta por no marcar en veinte minutos. La unica cosa que de
-    // verdad no se prorratea es la tarjeta, y esa ya no pasa por aca.
+    // La vara se achica con los minutos en vez de estirar lo hecho a ochenta: la
+    // media baja con el tiempo en cancha y el desvio con su raiz.
     const prorrateo = Math.max(MINUTOS_MINIMOS_DE_VARA, Math.min(80, minutes)) / 80;
 
-    // Cada eje junta los desvios de sus rubros, pesados por cuanto habla cada
-    // uno. Queda en unidades de desvio: cero es el partido normal del puesto.
-    const suma: Record<RatingComponent, number> = {
-        ataque: 0, defensa: 0, impacto: 0, juego: 0, disciplina: 0,
-    };
-    const voces: Record<RatingComponent, number> = {
-        ataque: 0, defensa: 0, impacto: 0, juego: 0, disciplina: 0,
-    };
+    const suma: Record<RatingComponent, number> = { ataque: 0, defensa: 0, impacto: 0, juego: 0, disciplina: 0 };
+    const voces: Record<RatingComponent, number> = { ataque: 0, defensa: 0, impacto: 0, juego: 0, disciplina: 0 };
 
     for (const [metricId, rubro] of Object.entries(RUBROS)) {
         const referencia = referenciaDe(metricId, puesto);
         if (!referencia) continue;
 
         // Un rubro ausente es un cero de verdad: el proveedor lista solo a quien
-        // hizo algo, asi que no figurar en la columna de tries es no haber
-        // marcado. Cero cuenta, y contra la vara del puesto resta poco o nada
-        // segun cuanto se espere de ese puesto.
+        // hizo algo.
         const bruto = input.stats[metricId] ?? 0;
         if (!Number.isFinite(bruto)) continue;
 
-        // La media de un contador baja con el tiempo en cancha; el desvio baja
-        // con su RAIZ, que es como se comporta cualquier cuenta de sucesos. Si
-        // se prorratearan los dos igual, la vara del suplente quedaria absurda
-        // de angosta y cualquier avance suyo valdria tres desvios.
-        // LA PARTE, NO EL CONTEO —pero solo en parte. Ocho tackles valen
-        // distinto en un equipo que hizo 104 que en uno que hizo 150, y el que
-        // decide cual de los dos es no es el jugador: es el plan de partido.
-        //
-        // DIVIDIR POR EL TOTAL ENTERO SE PASA DE LARGO, y esta medido. Si cada
-        // jugador se mide como fraccion de su propio equipo, las fracciones de
-        // un plantel suman uno por construccion: el promedio del equipo deja de
-        // depender de si el equipo jugo bien. Con normalizacion completa el
-        // ganador solo promediaba mas que el perdedor en el 60,7% de 1.316
-        // partidos —contra 75,3% sin normalizar— y su ventaja caia de 0,33
-        // puntos a 0,04. Se iba la posesion y se iba el rendimiento colectivo
-        // con ella.
-        //
-        // El denominador es entonces una mezcla entre el total real del equipo
-        // y el de un equipo promedio. `NORMALIZACION` dice cuanto pesa cada uno:
-        // en 1 seria la fraccion pura, en 0 el conteo crudo. Se elige barriendo
-        // los dos criterios a la vez, que tiran para lados opuestos.
+        // LA PARTE, NO EL CONTEO —pero solo en parte—. Dividir por el total
+        // entero hacia que el promedio de un plantel no dijera nada de si jugo
+        // bien: el denominador mezcla el total real con el de un equipo promedio.
         const totalDelEquipo = input.team?.[metricId];
         const totalPromedio = TOTAL_DE_EQUIPO[metricId] ?? 0;
         if (totalPromedio <= 0) continue;
@@ -517,68 +462,160 @@ export function rateRugbyPlayer(input: RugbyRatingInput): RugbyRating | null {
         const z = Math.max(-TOPE_POR_RUBRO, Math.min(TOPE_POR_RUBRO, (parte - media) / desvio));
         const orientado = rubro.direccion === 'resta' ? -z : z;
 
-        suma[rubro.componente] += orientado * rubro.voz;
-        voces[rubro.componente] += rubro.voz;
+        const voz = rubro.voz * presenciaDe(metricId, puesto);
+        suma[rubro.componente] += orientado * voz;
+        voces[rubro.componente] += voz;
     }
 
-    const components: Record<RatingComponent, number> = {
-        ataque: 0, defensa: 0, impacto: 0, juego: 0, disciplina: 0,
-    };
+    // La efectividad del tackle. Sin intentos suficientes no hay dato y no entra
+    // ni en la suma ni en el denominador del eje.
+    const tackles = input.stats.tackles ?? 0;
+    const errados = input.stats.missedTackles ?? 0;
+    const intentos = tackles + errados;
+    if (Number.isFinite(intentos) && intentos >= EFECTIVIDAD_DE_TACKLE.minimoIntentos) {
+        const tabla = opciones.efectividad ?? EFECTIVIDAD_POR_PUESTO;
+        const referencia = (puesto != null ? tabla[puesto] : undefined) ?? EFECTIVIDAD_GLOBAL;
+        if (referencia.desvio > 0) {
+            const z = Math.max(
+                -TOPE_POR_RUBRO,
+                Math.min(TOPE_POR_RUBRO, (tackles / intentos - referencia.media) / referencia.desvio)
+            );
+            suma[EFECTIVIDAD_DE_TACKLE.componente] += z * EFECTIVIDAD_DE_TACKLE.voz;
+            voces[EFECTIVIDAD_DE_TACKLE.componente] += EFECTIVIDAD_DE_TACKLE.voz;
+        }
+    }
+
+    const components: Record<RatingComponent, number> = { ataque: 0, defensa: 0, impacto: 0, juego: 0, disciplina: 0 };
     for (const eje of RATING_COMPONENTS) {
-        // Promedio pesado y no suma: un eje con cinco rubros no puede mover
-        // cinco veces mas que uno con dos solo por tener mas columnas.
         components[eje] = voces[eje] > 0 ? suma[eje] / voces[eje] : 0;
     }
 
-    // El peso del puesto entra RELATIVO —los cien puntos de la fila repartidos—,
-    // no como multiplicador. Ya no hace falta compararlo contra el promedio de
-    // los quince ni topearlo: la v1 necesitaba eso porque el peso tambien tenia
-    // que corregir el sesgo del puesto, y ahora el sesgo lo corrige la vara.
     let rendimiento = 0;
     if (pesos) for (const eje of RATING_COMPONENTS) rendimiento += (pesos[eje] / 100) * components[eje];
     else for (const eje of RATING_COMPONENTS) rendimiento += components[eje] / RATING_COMPONENTS.length;
 
-    // Seis minutos no alcanzan para decir que alguien jugo mal.
-    //
-    // Y para arriba, lo que se acredita es lo que APORTO, no el ritmo. La vara
-    // achicada dice "rindio como para", y cuarenta minutos a gran ritmo se leian
-    // como ochenta: Joaquin Moro entro en el entretiempo contra Bristol, hizo un
-    // gran partido de media hora y salia 9,2, por encima de cualquier titular.
-    // Es como lo resuelve el futbol (Sofascore suma acciones, y en el River-Boca
-    // del 2026 todos los suplentes de menos de media hora quedaron entre 6,4 y
-    // 6,8): la subida crece con los minutos, asi que el 9 pide los ochenta.
-    const confianza = Math.min(1, minutes / MINUTOS_PARA_CONFIANZA);
-    const aporte = Math.min(1, minutes / 80);
-    // El SESGO recentra por la MEDIANA. Las varas centran cada rubro en su
-    // promedio, que es lo que iguala a los quince puestos, pero un conteo tiene
-    // cola a la derecha: al centrar en el promedio, mas de la mitad del plantel
-    // queda abajo y la mediana del partido caia en 5,90. Un 5,7 en pantalla se
-    // lee "jugo mal" cuando el sistema lo definio como "partido correcto".
-    // Restar la mediana de la señal deja el partido tipico en 6 y la media un
-    // poco arriba, que es como se lee una escala de puntajes.
-    const sesgo = (puesto != null ? SESGO_POR_PUESTO[puesto] : undefined) ?? SESGO;
-    // La subida se lleva a la misma apertura en los quince: sin esto el wing se
-    // quedaba con las notas altas y el pilar casi no llegaba al 8. La caida no
-    // se toca. Ver `ESCALA_POR_PUESTO`.
-    const escala = (puesto != null ? ESCALA_POR_PUESTO[puesto] : undefined) ?? 1;
-    const bruta = rendimiento - sesgo;
-    const señal = bruta >= 0 ? (bruta / escala) * aporte : bruta * confianza;
-    const nota = RATING_BASE + (señal >= 0
-        ? CURVA.arriba * Math.tanh(señal / CURVA.k)
-        : CURVA.abajo * Math.tanh(señal / CURVA.kAbajo));
+    // La pelota parada, si el partido la trae y el puesto carga con ella. El
+    // reparto es por cuanto del scrum y del line toca el grupo, y por cuanto del
+    // partido estuvo en cancha: un suplente de veinte minutos vivio un cuarto de
+    // los scrums.
+    let parada: number | null = null;
+    const grupo = puesto != null ? GRUPO_POR_PUESTO[puesto] : undefined;
+    const reparto = grupo ? PARADA_POR_GRUPO[grupo] : undefined;
+    if (reparto && input.parada) {
+        const indice = indiceDeParada(input.parada, opciones.liga);
+        const aporte = (indice.scrum != null ? reparto.scrum : 0) + (indice.line != null ? reparto.line : 0);
+        if (aporte > 0) {
+            const z = ((indice.scrum ?? 0) * reparto.scrum + (indice.line ?? 0) * reparto.line) / aporte;
+            parada = z * Math.min(1, minutes / 80);
+            // El eje le quita `peso` puntos de cien al resto, que se achica parejo.
+            rendimiento = rendimiento * (1 - reparto.peso / 100) + (reparto.peso / 100) * parada;
+        }
+    }
 
-    // La tarjeta y el exceso de errores se descuentan al final, en puntos y
-    // planos. Ver `SANCIONES` y `EXCESO_DE_ERRORES`.
-    let castigo = castigoPorErrores(input.stats);
+    const m = Math.min(80, minutes);
+    return {
+        puesto,
+        components,
+        parada,
+        rendimiento,
+        ajustado: rendimiento * (m / (m + K_MINUTOS)),
+    };
+}
+
+/** La normal estandar acumulada (Abramowitz-Stegun 7.1.26). Solo para el respaldo. */
+function normalAcumulada(x: number) {
+    const t = 1 / (1 + 0.2316419 * Math.abs(x));
+    const d = 0.3989423 * Math.exp(-x * x / 2);
+    const p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
+    return x > 0 ? 1 - p : p;
+}
+
+/** La inversa de la normal estandar (Acklam). Convierte un percentil en desvios. */
+export function normalInversa(p: number) {
+    const a = [-3.969683028665376e+01, 2.209460984245205e+02, -2.759285104469687e+02, 1.383577518672690e+02, -3.066479806614716e+01, 2.506628277459239e+00];
+    const b = [-5.447609879822406e+01, 1.615858368580409e+02, -1.556989798598866e+02, 6.680131188771972e+01, -1.328068155288572e+01];
+    const c = [-7.784894002430293e-03, -3.223964580411365e-01, -2.400758277161838e+00, -2.549732539343734e+00, 4.374664141464968e+00, 2.938163982698783e+00];
+    const d = [7.784695709041462e-03, 3.224671290700398e-01, 2.445134137142996e+00, 3.754408661907416e+00];
+    const corte = 0.02425;
+    if (p < corte) {
+        const q = Math.sqrt(-2 * Math.log(p));
+        return (((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) /
+            ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1);
+    }
+    if (p <= 1 - corte) {
+        const q = p - 0.5, r = q * q;
+        return (((((a[0] * r + a[1]) * r + a[2]) * r + a[3]) * r + a[4]) * r + a[5]) * q /
+            (((((b[0] * r + b[1]) * r + b[2]) * r + b[3]) * r + b[4]) * r + 1);
+    }
+    const q = Math.sqrt(-2 * Math.log(1 - p));
+    return -(((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) /
+        ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1);
+}
+
+/**
+ * El percentil de un rendimiento dentro de su grupo, interpolando entre los
+ * cuantiles medidos. Sin tabla para el grupo cae a la normal estandar, que deja
+ * la nota en `6,2 + rendimiento`: sirve para arrancar y para los tests, no para
+ * mostrar.
+ */
+export function percentilDe(grupo: string, x: number) {
+    const q = CUANTILES_POR_GRUPO[grupo] ?? CUANTILES_POR_GRUPO[GRUPO_SIN_PUESTO];
+    const ultimo = PROBABILIDADES.length - 1;
+    if (!q || q.length !== PROBABILIDADES.length) {
+        return Math.min(PROBABILIDADES[ultimo], Math.max(PROBABILIDADES[0], normalAcumulada(x)));
+    }
+    if (x <= q[0]) return PROBABILIDADES[0];
+    if (x >= q[ultimo]) return PROBABILIDADES[ultimo];
+    // Busqueda binaria del tramo [lo, hi] que contiene a x.
+    let lo = 0, hi = ultimo;
+    while (hi - lo > 1) {
+        const medio = (lo + hi) >> 1;
+        if (q[medio] <= x) lo = medio; else hi = medio;
+    }
+    const ancho = q[hi] - q[lo];
+    // Un tramo plano (muchos jugadores con el mismo rendimiento) toma el medio.
+    const t = ancho > 0 ? (x - q[lo]) / ancho : 0.5;
+    return PROBABILIDADES[lo] + t * (PROBABILIDADES[hi] - PROBABILIDADES[lo]);
+}
+
+/** El bonus por tries y asistencias, plano y topeado. */
+export function bonusPorEventos(stats: Readonly<Record<string, number>>, puesto: number | null) {
+    const tries = Number.isFinite(stats.tries) ? Math.max(0, stats.tries) : 0;
+    const asistencias = Number.isFinite(stats.tryAssists) ? Math.max(0, stats.tryAssists) : 0;
+    const porTry = puesto != null && puesto <= 8 ? BONUS.tryForward : BONUS.tryBack;
+    return Math.min(BONUS.tope, tries * porTry + asistencias * BONUS.asistencia);
+}
+
+/**
+ * El puntaje de un jugador en un partido.
+ *
+ * Devuelve `null` cuando no hay con que calcularlo: con menos de cinco minutos
+ * en cancha no hay partido que puntuar, y un suplente que no entro no lleva
+ * puntaje. Es distinto de un 6, que dice "jugo y estuvo correcto".
+ */
+export function rateRugbyPlayer(input: RugbyRatingInput): RugbyRating | null {
+    const minutes = input.minutes ?? 0;
+    if (minutes < MINUTOS_MINIMOS) return null;
+
+    const { puesto, components, ajustado, parada } = rendimientoDe(input);
+    const grupo = puesto != null ? GRUPO_POR_PUESTO[puesto] : GRUPO_SIN_PUESTO;
+    const percentile = percentilDe(grupo, ajustado);
+    const bonus = bonusPorEventos(input.stats, puesto);
+
+    let castigo = 0;
     for (const [metricId, puntos] of Object.entries(SANCIONES)) {
         const cantidad = input.stats[metricId] ?? 0;
         if (Number.isFinite(cantidad) && cantidad > 0) castigo += cantidad * puntos;
     }
 
+    const nota = NOTA.media + NOTA.desvio * normalInversa(percentile) + bonus - castigo;
     return {
-        value: Math.round(Math.min(TOPE.max, Math.max(TOPE.min, nota - castigo)) * 10) / 10,
+        value: Math.round(Math.min(TOPE.max, Math.max(TOPE.min, nota)) * 10) / 10,
         components,
-        signal: señal,
+        signal: ajustado,
+        percentile,
+        bonus,
+        parada,
         position: puesto,
         minutes,
     };

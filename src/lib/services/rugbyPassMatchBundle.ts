@@ -20,7 +20,12 @@ import {
 } from '../matchPeriods.ts';
 import { getRugbyPassMatchDetail, getRugbyPassPlayerStats, getRugbyPassTournamentBranding } from './rugbyPass.ts';
 import { parseRugbyPassTournamentId } from './rugbyPassTournamentBundle.ts';
-import { hayPlanillaParaPuntuar, minutesFromLineup, rateRugbyPlayer } from '../matches/rugbyPlayerRating.ts';
+import {
+    hayPlanillaParaPuntuar,
+    minutesFromLineup,
+    rateRugbyPlayer,
+    type ParadaDeEquipo,
+} from '../matches/rugbyPlayerRating.ts';
 import { rugbyPassPlayerId } from './rugbyPassCatalog.ts';
 import { getRugbyPassPlayers } from './rugbyPass.ts';
 import {
@@ -285,9 +290,37 @@ export interface PlanillaDelPartido {
  * mostrarlo. Sin rubros tampoco hay puntaje: un 6 pelado diria "jugo correcto"
  * cuando lo cierto es que no se sabe.
  */
+/**
+ * El scrum y el line de cada equipo, leidos de las estadisticas del partido.
+ *
+ * El proveedor no los publica por jugador pero si por equipo: "Scrums" y "Lines"
+ * traen la cantidad, y los "ganados %" el porcentaje. Un rotulo que no vino es
+ * `null`, y el motor lo lee como que ese eje no existe en este partido.
+ */
+export function paradaDeLaFicha(
+    stats: readonly { label: string; home: string; away: string }[] | undefined
+): { home: ParadaDeEquipo; away: ParadaDeEquipo } {
+    const numero = (texto: string | undefined) => {
+        const n = parseFloat(String(texto ?? '').replace('%', '').replace(',', '.'));
+        return Number.isFinite(n) ? n : null;
+    };
+    const lado = (cual: 'home' | 'away'): ParadaDeEquipo => {
+        const de = (etiqueta: string) => numero(stats?.find((s) => s.label === etiqueta)?.[cual]);
+        const porcentaje = (x: number | null) => (x == null ? null : x / 100);
+        return {
+            scrums: de('Scrums'),
+            scrumsGanados: porcentaje(de('Scrums ganados %')),
+            lines: de('Lines'),
+            linesGanados: porcentaje(de('Lines ganados %')),
+        };
+    };
+    return { home: lado('home'), away: lado('away') };
+}
+
 export function planillaDelPartido(
     lineups: { home: RugbyPassLineupPlayer[]; away: RugbyPassLineupPlayer[] },
-    playerStats: RugbyPassPlayerStat[]
+    playerStats: RugbyPassPlayerStat[],
+    matchStats?: readonly { label: string; home: string; away: string }[]
 ): PlanillaDelPartido {
     const rubros = rubrosPorJugador(playerStats);
 
@@ -336,14 +369,16 @@ export function planillaDelPartido(
         }
         return totales;
     };
+    // El scrum y el line son del equipo, no del jugador: cada lado lleva los suyos.
+    const parada = matchStats ? paradaDeLaFicha(matchStats) : null;
     const totalesPorLado = [
-        { alineacion: lineups.home, totales: totalesDe(lineups.home) },
-        { alineacion: lineups.away, totales: totalesDe(lineups.away) },
+        { alineacion: lineups.home, totales: totalesDe(lineups.home), parada: parada?.home ?? null },
+        { alineacion: lineups.away, totales: totalesDe(lineups.away), parada: parada?.away ?? null },
     ];
 
     const extras = new Map<string, Extras>();
     const puntajes = new Map<string, number>();
-    for (const { alineacion, totales } of totalesPorLado) {
+    for (const { alineacion, totales, parada: paradaDelLado } of totalesPorLado) {
         for (const jugador of alineacion) {
             const clave = claveNombre(jugador.name);
             if (repetidos.has(clave)) continue;
@@ -359,6 +394,7 @@ export function planillaDelPartido(
                 minutes: minutesFromLineup(jugador),
                 number: jugador.number,
                 team: totales,
+                parada: paradaDelLado,
             });
             if (puntaje) puntajes.set(clave, puntaje.value);
         }
@@ -572,7 +608,7 @@ export async function getRugbyPassMatchBundle(matchId: string, supabase: Supabas
     // La planilla completa manda. El podio del `live-poll-data` queda de
     // respaldo para cuando `filter-players-stats` no conteste.
     const rubrosDelPartido = planilla.length > 0 ? planilla : detalle?.playerStats ?? [];
-    const hoja = planillaDelPartido(alineaciones, rubrosDelPartido);
+    const hoja = planillaDelPartido(alineaciones, rubrosDelPartido, detalle?.stats);
 
     // Solo si hay a quien ponerle el puesto: sin alineacion, la llamada al
     // catalogo no tendria a quien servir.

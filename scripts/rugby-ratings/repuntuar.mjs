@@ -33,10 +33,29 @@ const env = Object.fromEntries(readFileSync('.env.local', 'utf8').split(/\r?\n/)
 const URL_SB = env.NEXT_PUBLIC_SUPABASE_URL, KEY = env.SUPABASE_SERVICE_ROLE_KEY;
 
 const { partidos } = await partidosDeLaCosecha(ENTRADA);
+
+// Scrum y line por equipo (salida de `cosecha-parada.mjs`): `node repuntuar.mjs <planillas> <parada> [--escribir]`.
+// Un partido que no figura ahi se puntua sin el eje, igual que el motor cuando la ficha no los trae.
+const PARADA = process.argv[3] && !process.argv[3].startsWith('--') ? process.argv[3] : null;
+const paradaPorPartido = new Map();
+if (PARADA) {
+    const { createReadStream } = await import('node:fs');
+    const { createInterface } = await import('node:readline');
+    const rl = createInterface({ input: createReadStream(PARADA), crlfDelay: Infinity });
+    for await (const linea of rl) {
+        if (!linea.trim()) continue;
+        try { const o = JSON.parse(linea); paradaPorPartido.set(o.match_id, o); } catch { /* linea cortada */ }
+    }
+    console.log(`[repuntuar] parada de ${paradaPorPartido.size} partidos`);
+}
+
 const filas = [];
 const vistos = new Set();
 for (const partido of partidos) {
-    for (const { jugadores, totales } of partido.planteles) {
+    const paradaDelPartido = paradaPorPartido.get(partido.matchId);
+    for (const [indiceLado, { jugadores, totales }] of partido.planteles.entries()) {
+        // El primer plantel es el local, igual que en la cosecha de planillas.
+        const parada = paradaDelPartido ? (indiceLado === 0 ? paradaDelPartido.home : paradaDelPartido.away) : null;
         for (const jugador of jugadores) {
             if (!jugador.slug) continue;
             // Un slug repetido dentro del mismo partido volaria el upsert entero
@@ -52,6 +71,7 @@ for (const partido of partidos) {
                 minutes: jugador.minutes,
                 number: jugador.number,
                 team: totales,
+                parada,
             });
             if (!r) continue;
             filas.push({

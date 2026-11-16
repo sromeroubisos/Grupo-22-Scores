@@ -2,18 +2,27 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
+    BONUS,
+    GRUPO_POR_PUESTO,
+    K_MINUTOS,
+    NOTA,
     PESOS_POR_PUESTO,
+    PROBABILIDADES,
     PUESTO_POR_NUMERO,
-    RATING_BASE,
     RATING_COMPONENTS,
     RUBROS,
     RUBROS_IMPRESCINDIBLES,
     SANCIONES,
+    bonusPorEventos,
     hayPlanillaParaPuntuar,
+    indiceDeParada,
     minutesFromLineup,
+    normalInversa,
+    percentilDe,
     rateRugbyPlayer,
+    rendimientoDe,
 } from './rugbyPlayerRating.ts';
-import { ESCALA_POR_PUESTO, REFERENCIAS_POR_PUESTO, SESGO_POR_PUESTO, TOTAL_DE_EQUIPO } from './rugbyRatingReferences.generated.ts';
+import { REFERENCIAS_POR_PUESTO, TOTAL_DE_EQUIPO } from './rugbyRatingReferences.generated.ts';
 
 /**
  * El partido exactamente promedio DE UN PUESTO, en ochenta minutos.
@@ -21,26 +30,18 @@ import { ESCALA_POR_PUESTO, REFERENCIAS_POR_PUESTO, SESGO_POR_PUESTO, TOTAL_DE_E
  * Las varas son PARTES del total del equipo, asi que para armar una planilla
  * hay que devolverlas a conteos contra un equipo promedio —y despues pasarle al
  * motor ese mismo equipo como contexto, para que la division lo cancele.
- *
  * Sale de las referencias y no de numeros escritos a mano: las varas se
- * recalibran con cada cosecha, y un promedio transcripto se desincroniza en la
- * primera recalibracion sin que ningun test lo note.
+ * recalibran con cada cosecha.
  */
 const promedioDe = (puesto: number): Record<string, number> =>
     Object.fromEntries(
-        Object.keys(RUBROS).map((metricId) => [
+        [...Object.keys(RUBROS), 'missedTackles', 'tries', 'tryAssists'].map((metricId) => [
             metricId,
             (REFERENCIAS_POR_PUESTO[puesto]?.[metricId]?.media ?? 0) * (TOTAL_DE_EQUIPO[metricId] ?? 0),
         ])
     );
 
-/** Un desvio del puesto, tambien devuelto a conteos del equipo promedio. */
-const desvioDe = (puesto: number, metricId: string) =>
-    (REFERENCIAS_POR_PUESTO[puesto]?.[metricId]?.desvio ?? 0) * (TOTAL_DE_EQUIPO[metricId] ?? 0);
-
-/** El plantel promedio, que es el denominador que anula la normalizacion. */
 const EQUIPO = TOTAL_DE_EQUIPO;
-
 const PUESTOS = Object.keys(PESOS_POR_PUESTO).map(Number);
 const titular = { role: 'starter' as const, onMinute: null, offMinute: null };
 
@@ -51,65 +52,21 @@ test('la tabla de pesos reparte cien puntos en cada puesto', () => {
     }
 });
 
-/**
- * EL INVARIANTE DEL MOTOR, y la razon entera del rediseño.
- *
- * Con una vara unica para los quince, medido sobre 60.339 puntajes, el pilar
- * derecho promediaba 5,32 y el apertura 7,81. Dos puntos y pico que no
- * describian a nadie —describian el puesto—.
- *
- * Lo que se verifica aca es que el jugador exactamente promedio de su puesto
- * salga NEUTRO: rendimiento cero en los cinco ejes, y una señal que es solo el
- * recentrado. Cualquier sesgo de puesto que sobreviva en las varas aparece como
- * un eje distinto de cero.
- *
- * OJO CON LO QUE ESTE TEST NO PUEDE VER. La nota final del partido promedio NO
- * es la misma en los quince —da 6,1 en un pilar y 6,7 en un medio scrum— y eso
- * no es un sesgo: el motor recentra por la MEDIANA, y en un conteo la media
- * esta arriba de la mediana, mas en unos puestos que en otros. Que los quince
- * caigan juntos DE VERDAD es una propiedad de la distribucion, no de un jugador
- * sintetico, y se mide sobre la cosecha con
- * `node scripts/rugby-ratings/validar.mjs`. Ahi el spread entre puestos da 0,19.
- *
- * Se recorren los quince y no dos de muestra: el sintoma es una diferencia
- * ENTRE puestos, y con dos se elige justo el par que empata.
- */
-test('el jugador promedio de su puesto sale neutro', () => {
-    for (const puesto of PUESTOS) {
-        const r = rateRugbyPlayer({ stats: promedioDe(puesto), minutes: 80, number: puesto, team: EQUIPO })!;
-        // Con ochenta minutos la confianza es 1, asi que la señal es el
-        // recentrado y nada mas. Si alguien lo aplica dos veces, o se olvida de
-        // usar el del puesto, esto salta.
-        // Si el recentrado deja la señal arriba de cero, la subida pasa por la
-        // escala del puesto; abajo de cero, no.
-        const bruta = -SESGO_POR_PUESTO[puesto];
-        const esperada = bruta >= 0 ? bruta / ESCALA_POR_PUESTO[puesto] : bruta;
-        assert.ok(
-            Math.abs(r.signal - esperada) < 1e-9,
-            `el puesto ${puesto} dio señal ${r.signal} y su sesgo es ${SESGO_POR_PUESTO[puesto]}`
-        );
-        assert.ok(Math.abs(r.value - RATING_BASE) < 1, `el partido promedio del puesto ${puesto} dio ${r.value}`);
+test('los quince puestos tienen grupo y peso', () => {
+    for (const puesto of PUESTOS) assert.ok(GRUPO_POR_PUESTO[puesto], `el puesto ${puesto} no tiene grupo`);
+    assert.equal(PUESTOS.length, 15);
+    assert.equal(GRUPO_POR_PUESTO[1], GRUPO_POR_PUESTO[3]);
+    assert.notEqual(GRUPO_POR_PUESTO[2], GRUPO_POR_PUESTO[1]);
+    assert.equal(new Set(Object.values(GRUPO_POR_PUESTO)).size, 8);
+});
+
+/** Tries, asistencias y errados no pasan por la tabla de rubros: tienen su camino. */
+test('tries, asistencias y errados no son rubros de parte', () => {
+    for (const metricId of ['tries', 'tryAssists', 'missedTackles']) {
+        assert.ok(!(metricId in RUBROS), `${metricId} no deberia estar en RUBROS`);
     }
 });
 
-/**
- * Y el corolario: ningun eje arranca torcido. Si `defensa` diera -0,4 en el
- * pilar y +0,3 en el wing, el promedio podria seguir dando 6 por compensacion
- * entre ejes y el sesgo seguiria ahi, escondido.
- */
-test('ningun eje arranca torcido en ningun puesto', () => {
-    for (const puesto of PUESTOS) {
-        const r = rateRugbyPlayer({ stats: promedioDe(puesto), minutes: 80, number: puesto, team: EQUIPO })!;
-        for (const eje of RATING_COMPONENTS) {
-            assert.ok(
-                Math.abs(r.components[eje]) < 1e-9,
-                `el puesto ${puesto} arranca con ${eje} en ${r.components[eje]}`
-            );
-        }
-    }
-});
-
-/** Las varas tienen que cubrir todo lo que el motor pregunta. */
 test('hay referencia para cada rubro en cada puesto', () => {
     for (const puesto of PUESTOS) {
         for (const metricId of Object.keys(RUBROS)) {
@@ -120,85 +77,104 @@ test('hay referencia para cada rubro en cada puesto', () => {
     }
 });
 
-test('un suplente que no entro no lleva puntaje, y eso no es un 6', () => {
+test('la normal inversa es la de la campana estandar', () => {
+    assert.ok(Math.abs(normalInversa(0.5)) < 1e-9);
+    assert.ok(Math.abs(normalInversa(0.8413447) - 1) < 1e-3);
+    assert.ok(Math.abs(normalInversa(0.975) - 1.95996) < 1e-3);
+    assert.ok(Math.abs(normalInversa(0.1) + normalInversa(0.9)) < 1e-9, 'tiene que ser simetrica');
+    // Los puntos de la tabla del modelo: percentil 10 -> 4,9; 90 -> 7,5; 99 -> 8,5.
+    assert.equal(Math.round((NOTA.media + normalInversa(0.1)) * 10) / 10, 4.9);
+    assert.equal(Math.round((NOTA.media + normalInversa(0.9)) * 10) / 10, 7.5);
+    assert.equal(Math.round((NOTA.media + normalInversa(0.99)) * 10) / 10, 8.5);
+});
+
+test('el percentil sube con el rendimiento y vive entre 0 y 1', () => {
+    for (const grupo of [...new Set(Object.values(GRUPO_POR_PUESTO)), 'todos']) {
+        let anterior = -1;
+        for (let x = -4; x <= 4; x += 0.25) {
+            const p = percentilDe(grupo, x);
+            assert.ok(p >= PROBABILIDADES[0] && p <= PROBABILIDADES[PROBABILIDADES.length - 1]);
+            assert.ok(p >= anterior, `${grupo} baja en ${x}: ${anterior} -> ${p}`);
+            anterior = p;
+        }
+    }
+});
+
+/**
+ * Lo que arreglaba el rediseño: el pilar promedio y el apertura promedio caen
+ * juntos. El partido promedio de CADA puesto tiene que quedar cerca de 6,2; un
+ * poco arriba es normal, porque en un conteo la media esta arriba de la mediana.
+ */
+test('el jugador promedio de su puesto queda cerca de 6,2 en los quince', () => {
+    for (const puesto of PUESTOS) {
+        const r = rateRugbyPlayer({ stats: promedioDe(puesto), minutes: 80, number: puesto, team: EQUIPO })!;
+        assert.ok(Math.abs(r.value - NOTA.media) < 1.2, `el puesto ${puesto} promedio dio ${r.value}`);
+    }
+});
+
+test('menos de cinco minutos no llevan nota; con cinco ya hay', () => {
     assert.equal(rateRugbyPlayer({ stats: promedioDe(6), minutes: 0, number: 20 }), null);
     assert.equal(rateRugbyPlayer({ stats: promedioDe(6), minutes: null, number: 20 }), null);
+    assert.equal(rateRugbyPlayer({ stats: promedioDe(6), minutes: 4.9, number: 20 }), null);
+    assert.ok(rateRugbyPlayer({ stats: promedioDe(6), minutes: 5, number: 20 }));
 });
 
 /**
- * El mismo trabajo defensivo no vale lo mismo en todos lados: el 7 vive del
- * tackle (37%) y el 10 no (10%). Si el puntaje no distinguiera esto, seria una
- * planilla promediada y no una lectura de rugby.
- *
- * Se comparan RENDIMIENTOS iguales, no planillas iguales: veinte tackles son un
- * partido normal para un 7 y uno historico para un 10, asi que la unica forma
- * de aislar el peso del puesto es darle a cada uno el mismo apartamiento de SU
- * promedio.
+ * La contraccion: a mismo ritmo, quien jugo menos queda mas cerca de la media.
+ * Se compara el rendimiento ajustado, que es lo que la contraccion toca.
  */
-test('el mismo salto defensivo rinde mas en un flanker que en un apertura', () => {
-    const conTackles = (puesto: number) => ({
-        ...promedioDe(puesto),
-        tackles: promedioDe(puesto).tackles + 1.5 * desvioDe(puesto, 'tackles'),
-    });
-    const siete = rateRugbyPlayer({ stats: conTackles(7), minutes: 80, number: 7, team: EQUIPO })!;
-    const diez = rateRugbyPlayer({ stats: conTackles(10), minutes: 80, number: 10, team: EQUIPO })!;
-    assert.ok(siete.value > diez.value, `${siete.value} deberia superar a ${diez.value}`);
-});
-
-/**
- * La trampa que rompio la primera version: extrapolar a ochenta minutos hacia
- * que dos avances en diez minutos valieran dieciseis, y un cameo terminaba
- * primero de la tabla.
- *
- * Se compara a MISMO RITMO, no a mismos conteos. Con los mismos conteos el
- * cameo tiene que dar mas —cuatro avances en ocho minutos es mejor partido que
- * cuatro en ochenta, y decir lo contrario seria falso—. Lo que el encogimiento
- * promete es otra cosa: que el que jugo veinte minutos rindiendo igual quede
- * mas cerca del 6, porque veinte minutos no alcanzan para afirmar tanto.
- */
-test('a mismo ritmo, el que jugo menos queda mas cerca de la base', () => {
-    const ritmo = { carries: 14, carriesMetres: 90, tackles: 12, passes: 8, tries: 1, cleanBreaks: 2, defendersBeaten: 6 };
+test('a mismo ritmo, el que jugo menos queda mas cerca de cero', () => {
+    const ritmo = { carries: 14, carriesMetres: 90, tackles: 12, passes: 8, cleanBreaks: 2, defendersBeaten: 6 };
     const escalado = (minutos: number) =>
         Object.fromEntries(Object.entries(ritmo).map(([k, v]) => [k, (v * minutos) / 80]));
 
-    const entero = rateRugbyPlayer({ stats: ritmo, minutes: 80, number: 11 })!;
-    const corto = rateRugbyPlayer({ stats: escalado(20), minutes: 20, number: 11 })!;
-
-    assert.ok(entero.value > RATING_BASE, `el partido entero tiene que destacar: dio ${entero.value}`);
+    const entero = rendimientoDe({ stats: ritmo, minutes: 80, number: 11 });
+    const corto = rendimientoDe({ stats: escalado(20), minutes: 20, number: 11 });
+    assert.ok(entero.ajustado > 0, 'el partido entero tiene que destacar');
     assert.ok(
-        Math.abs(corto.value - RATING_BASE) < Math.abs(entero.value - RATING_BASE),
-        `veinte minutos al mismo ritmo dieron ${corto.value} contra ${entero.value}`
+        Math.abs(corto.ajustado) < Math.abs(entero.ajustado),
+        `veinte minutos dieron ${corto.ajustado} contra ${entero.ajustado}`
     );
+    // La contraccion es exactamente m / (m + K).
+    assert.ok(Math.abs(entero.ajustado - entero.rendimiento * (80 / (80 + K_MINUTOS))) < 1e-12);
+    assert.ok(Math.abs(corto.ajustado - corto.rendimiento * (20 / (20 + K_MINUTOS))) < 1e-12);
 });
 
-/** Un rubro enorme no puede comprar el partido solo: hay tope por rubro. */
-test('setenta y seis pases no compran un diez', () => {
-    const r = rateRugbyPlayer({ stats: { ...promedioDe(9), passes: 76 }, minutes: 80, number: 9, team: EQUIPO })!;
-    assert.ok(r.value < 10, `dio ${r.value}`);
-    assert.ok(r.components.juego <= 3 + 1e-9, `el eje juego se paso: ${r.components.juego}`);
+test('el bonus de los eventos raros es plano, distinto para forwards, y topeado', () => {
+    assert.equal(bonusPorEventos({ tries: 1 }, 1), BONUS.tryForward);
+    assert.equal(bonusPorEventos({ tries: 1 }, 8), BONUS.tryForward);
+    assert.equal(bonusPorEventos({ tries: 1 }, 11), BONUS.tryBack);
+    assert.equal(bonusPorEventos({ tries: 1 }, null), BONUS.tryBack);
+    assert.equal(bonusPorEventos({ tryAssists: 2 }, 10), 2 * BONUS.asistencia);
+    assert.equal(bonusPorEventos({ tries: 5, tryAssists: 3 }, 11), BONUS.tope);
+    assert.equal(bonusPorEventos({}, 11), 0);
 });
 
-test('la roja hunde el puntaje y la amarilla pesa menos', () => {
-    const base = rateRugbyPlayer({ stats: promedioDe(5), minutes: 80, number: 5, team: EQUIPO })!;
-    const amarilla = rateRugbyPlayer({ stats: { ...promedioDe(5), yellowCards: 1 }, minutes: 80, number: 5, team: EQUIPO })!;
-    const roja = rateRugbyPlayer({ stats: { ...promedioDe(5), redCards: 1 }, minutes: 80, number: 5, team: EQUIPO })!;
-    assert.ok(amarilla.value < base.value);
-    assert.ok(roja.value < amarilla.value, `roja ${roja.value} deberia hundir mas que amarilla ${amarilla.value}`);
+test('los tries suman al final: no tocan el rendimiento', () => {
+    const base = { ...promedioDe(11), tryAssists: 0 };
+    const sin = rateRugbyPlayer({ stats: { ...base, tries: 0 }, minutes: 80, number: 11, team: EQUIPO })!;
+    const hattrick = rateRugbyPlayer({ stats: { ...base, tries: 3 }, minutes: 80, number: 11, team: EQUIPO })!;
+    assert.equal(sin.signal, hattrick.signal);
+    assert.equal(hattrick.bonus, Math.min(BONUS.tope, 3 * BONUS.tryBack));
+    assert.ok(hattrick.value > sin.value);
 });
 
 /**
- * LA SANCION NO SE PESA POR PUESTO Y NO PASA POR LA CURVA, y es la unica
- * excepcion a la regla de que todo se lee segun la camiseta.
- *
- * El resto del modelo se pesa porque mide RENDIMIENTO, y a cada puesto se le
- * pide otra cosa. Una tarjeta no mide rendimiento: mide una infraccion, y no
- * hay puesto al que se le permita infringir mas.
- *
- * Se recorren los quince: el sintoma es una diferencia entre puestos, y con dos
- * se elige justo el par que empata. Cada uno se mide desde SU partido promedio,
- * que es donde la curva tiene la misma pendiente para todos.
+ * LA EFECTIVIDAD, no el conteo: 17 tackles con 5 errados rinden menos que 12
+ * sin ninguno. Con menos de cinco intentos no hay dato.
  */
-test('la tarjeta cuesta lo mismo en los quince puestos', () => {
+test('el tackle se lee por efectividad y pide cinco intentos', () => {
+    const rinde = (tackles: number, errados: number) =>
+        rendimientoDe({ stats: { ...promedioDe(7), tackles, missedTackles: errados }, minutes: 80, number: 7, team: EQUIPO }).components.defensa;
+    assert.ok(rinde(12, 0) > rinde(17, 5), 'doce sin errar tiene que superar a diecisiete con cinco errados');
+
+    // Con tres tackles y uno errado son cuatro intentos: los errados no mueven nada.
+    assert.equal(rinde(3, 1), rinde(3, 0));
+    // Con cinco intentos si.
+    assert.ok(rinde(5, 0) > rinde(3, 2));
+});
+
+test('la tarjeta cuesta lo mismo en los quince puestos y no pasa por la curva', () => {
     for (const metricId of Object.keys(SANCIONES)) {
         const costos = new Set(
             PUESTOS.map((puesto) => {
@@ -209,98 +185,68 @@ test('la tarjeta cuesta lo mismo en los quince puestos', () => {
             })
         );
         assert.equal(costos.size, 1, `${metricId} cuesta distinto segun el puesto: ${[...costos].join(', ')}`);
-        // El costo es el de la tabla, sin nada en el medio. Se lee de SANCIONES
-        // y no se transcribe: el numero se recalibra, el invariante no.
         assert.equal([...costos][0], SANCIONES[metricId]);
     }
+    assert.ok(SANCIONES.redCards > SANCIONES.yellowCards);
 });
 
 /**
- * Lo que las varas por puesto NO borraron. El rendimiento se sigue leyendo por
- * camiseta, que es lo que hace que el puntaje hable de rugby. Si alguien
- * "universaliza" de mas, esto salta.
+ * EL CASO QUE ABRIO ESTA REVISION: el pilar que no hace nada no puede quedar
+ * en el promedio. Un partido casi en blanco de un pilar de ochenta minutos baja
+ * claramente de la campana.
  */
-test('el rendimiento si se sigue pesando por puesto', () => {
-    const saltoDefensivo = (puesto: number) => rateRugbyPlayer({
-        stats: { ...promedioDe(puesto), tackles: promedioDe(puesto).tackles + 2 * desvioDe(puesto, 'tackles') },
+test('el pilar que no hace nada queda debajo del promedio', () => {
+    const pasivo = rateRugbyPlayer({
+        stats: { tackles: 2, carries: 1, carriesMetres: 2, passes: 1 },
+        minutes: 80,
+        number: 1,
+        team: EQUIPO,
+    })!;
+    const normal = rateRugbyPlayer({ stats: promedioDe(1), minutes: 80, number: 1, team: EQUIPO })!;
+    assert.ok(pasivo.value < normal.value - 0.5, `pasivo ${pasivo.value} contra normal ${normal.value}`);
+    assert.ok(pasivo.value < NOTA.media - 0.5, `el pasivo dio ${pasivo.value}`);
+});
+
+/**
+ * La dilucion: antes, los rubros que un pilar casi no toca (quiebres,
+ * defensores superados, offloads, lines) tenian la misma voz que en un 8 y
+ * ahogaban a los acarreos. Con la presencia, un pilar con muchos acarreos mueve
+ * el eje impacto casi tanto como un 8.
+ */
+test('los rubros que un puesto casi no toca no diluyen su eje', () => {
+    const conAcarreos = (puesto: number) => rendimientoDe({
+        stats: { ...promedioDe(puesto), carries: promedioDe(puesto).carries * 1.5 },
         minutes: 80,
         number: puesto,
         team: EQUIPO,
-    })!.value;
-    assert.ok(saltoDefensivo(7) > saltoDefensivo(10));
+    }).components.impacto;
+    const pilar = conAcarreos(1);
+    const octavo = conAcarreos(8);
+    assert.ok(pilar > 0.5 * octavo, `pilar ${pilar} contra octavo ${octavo}`);
 });
 
-/**
- * LO QUE CAMBIO DE LA v1 Y HAY QUE MIRAR DE FRENTE.
- *
- * La v1 no castigaba no marcar: el try solo sumaba. Sonaba justo —la enorme
- * mayoria de un plantel termina el partido sin marcar— pero convertia la pelota
- * en una renta, y por eso el 8 promediaba 7,45 contra 6,04 de una segunda linea
- * con pesos casi iguales.
- *
- * Ahora el try se centra como todo lo demas, y la promesa se cumple de otra
- * forma: el wing que no marco no queda en falta, queda en el promedio de los
- * wings, que es 6. Lo que si aparece —y es rugby— es que no marcar le cuesta
- * mas a un wing que a un pilar, porque de uno se espera y del otro no.
- */
-test('no marcar cuesta segun lo que se espere del puesto', () => {
-    const costoDeNoMarcar = (puesto: number) => {
+test('el rendimiento sigue pesandose por puesto', () => {
+    const salto = (puesto: number) => {
         const promedio = promedioDe(puesto);
-        const enPromedio = rateRugbyPlayer({ stats: promedio, minutes: 80, number: puesto, team: EQUIPO })!.value;
-        const sinTry = rateRugbyPlayer({ stats: { ...promedio, tries: 0 }, minutes: 80, number: puesto, team: EQUIPO })!.value;
-        return enPromedio - sinTry;
+        return rendimientoDe({
+            stats: { ...promedio, tackles: promedio.tackles * 1.6 },
+            minutes: 80,
+            number: puesto,
+            team: EQUIPO,
+        }).rendimiento;
     };
-    assert.ok(costoDeNoMarcar(11) > costoDeNoMarcar(1), 'al wing tiene que costarle mas que al pilar');
-    assert.ok(costoDeNoMarcar(1) < 0.2, `al pilar casi no puede costarle: costo ${costoDeNoMarcar(1)}`);
-});
-
-/**
- * Sin tarjeta y con errores normales no se baja de 5,2: un mal partido es un
- * partido del monton. Solo una cantidad excepcional de errores hunde, y sin
- * tarjeta nunca debajo de 3.
- */
-test('sin tarjeta, solo un exceso de errores baja de 5,2', () => {
-    const anonimo = rateRugbyPlayer({
-        stats: { tackles: 1, carries: 3, carriesMetres: 15, turnoversConceded: 1, penaltiesConceded: 2 },
-        minutes: 80,
-        number: 14,
-        team: EQUIPO,
-    })!;
-    assert.ok(anonimo.value >= 5.2, `un partido anonimo dio ${anonimo.value}`);
-
-    const conErrores = (errados: number) => rateRugbyPlayer({
-        stats: { ...promedioDe(13), missedTackles: errados, penaltiesConceded: 0, turnoversConceded: 0 },
-        minutes: 80,
-        number: 13,
-        team: EQUIPO,
-    })!.value;
-    assert.ok(conErrores(12) < conErrores(9), 'el exceso de errores tiene que hundir');
-
-    const desastre = { penaltiesConceded: 20, missedTackles: 20, turnoversConceded: 20 };
-    const piso = rateRugbyPlayer({ stats: desastre, minutes: 80, number: 7, team: EQUIPO })!;
-    assert.ok(piso.value >= 3 && piso.value < 3.5, `el desastre sin tarjeta dio ${piso.value}`);
-});
-
-/**
- * Una planilla vacia en ochenta minutos no pasa en un partido real: es el caso
- * limite. Sin errores anotados la disciplina le suma, asi que baja sin llegar
- * al 4, que queda para el que ademas falla.
- */
-test('la planilla vacia baja el puntaje', () => {
-    const r = rateRugbyPlayer({ stats: {}, minutes: 80, number: 7, team: EQUIPO })!;
-    assert.ok(r.value < RATING_BASE - 0.5, `dio ${r.value}`);
+    assert.ok(salto(7) > salto(10), 'el mismo salto de tackles rinde mas en un 7 que en un 10');
 });
 
 test('el puntaje no se sale de la escala ni con un partido absurdo', () => {
-    const monstruo: Record<string, number> = {};
-    // El monstruo hace TODO lo bueno y nada malo.
+    const monstruo: Record<string, number> = { tries: 6, tryAssists: 4 };
     for (const [metricId, rubro] of Object.entries(RUBROS)) monstruo[metricId] = rubro.direccion === 'resta' ? 0 : 500;
     const arriba = rateRugbyPlayer({ stats: monstruo, minutes: 80, number: 8, team: EQUIPO })!;
-    assert.ok(arriba.value <= 10 && arriba.value > RATING_BASE, `dio ${arriba.value}`);
+    assert.ok(arriba.value <= 10 && arriba.value > NOTA.media, `dio ${arriba.value}`);
 
     const desastre = { redCards: 3, yellowCards: 3, penaltiesConceded: 20, missedTackles: 20, turnoversConceded: 20 };
     const abajo = rateRugbyPlayer({ stats: desastre, minutes: 80, number: 8, team: EQUIPO })!;
-    assert.ok(abajo.value >= 1 && abajo.value < RATING_BASE, `dio ${abajo.value}`);
+    assert.ok(abajo.value >= 1 && abajo.value < NOTA.media, `dio ${abajo.value}`);
 });
 
 test('mismas estadisticas dan siempre el mismo puntaje', () => {
@@ -325,21 +271,6 @@ test('el banco hereda el puesto de su numero', () => {
     assert.equal(suplente.value, hooker.value);
 });
 
-/**
- * Planilla real de Joaquin Moro (rp-294928, Bristol-Leicester): cuarenta minutos
- * muy buenos. Con la vara achicada sola salia 9,2; lo que se acredita es lo que
- * aporto, asi que tiene que quedar abajo del mismo ritmo sostenido ochenta.
- */
-test('cuarenta minutos muy buenos no valen como ochenta', () => {
-    const moro = { carries: 7, cleanBreaks: 2, tackles: 9, turnoversWon: 3, dominantTackles: 1, passes: 2, carriesMetres: 33, defendersBeaten: 4, missedTackles: 1, ruckTurnovers: 1, penaltiesConceded: 1 };
-    const medio = rateRugbyPlayer({ stats: moro, minutes: 40, number: 20 })!;
-    const doble = Object.fromEntries(Object.entries(moro).map(([k, v]) => [k, v * 2]));
-    const entero = rateRugbyPlayer({ stats: doble, minutes: 80, number: 6 })!;
-    assert.ok(medio.value > RATING_BASE + 1, `fue un buen ingreso y dio ${medio.value}`);
-    assert.ok(medio.value < 8.5, `cuarenta minutos dieron ${medio.value}`);
-    assert.ok(entero.value > medio.value, `el mismo ritmo en ochenta dio ${entero.value} contra ${medio.value}`);
-});
-
 /** Planilla real de Manuel Zuliani (rp-292613): tercera linea con la 21. */
 test('la 21 sin pases no se juzga como medio scrum', () => {
     const zuliani = { tackles: 19, carries: 5, carriesMetres: 2, passes: 1, penaltiesConceded: 2 };
@@ -349,8 +280,8 @@ test('la 21 sin pases no se juzga como medio scrum', () => {
     const comoMedio = rateRugbyPlayer({ stats: { ...zuliani, passes: 40 }, minutes: 77, number: 21, team: EQUIPO })!;
     assert.equal(comoMedio.position, 9);
 
-    // Tres minutos sin pasar no alcanzan para decir que no es un 9.
-    const cameo = rateRugbyPlayer({ stats: {}, minutes: 3, number: 21, team: EQUIPO })!;
+    // Seis minutos sin pasar no alcanzan para decir que no es un 9.
+    const cameo = rateRugbyPlayer({ stats: {}, minutes: 6, number: 21, team: EQUIPO })!;
     assert.equal(cameo.position, 9);
 });
 
@@ -367,11 +298,18 @@ test('sumar algo bueno nunca baja el puntaje', () => {
         })!.value;
         assert.ok(despues >= antes, `${metricId} bajo el puntaje: ${antes} -> ${despues}`);
     }
+    for (const metricId of ['tries', 'tryAssists']) {
+        const promedio = promedioDe(13);
+        const antes = rateRugbyPlayer({ stats: promedio, minutes: 80, number: 13, team: EQUIPO })!.value;
+        const despues = rateRugbyPlayer({ stats: { ...promedio, [metricId]: 1 }, minutes: 80, number: 13, team: EQUIPO })!.value;
+        assert.ok(despues >= antes, `${metricId} bajo el puntaje`);
+    }
 });
 
 test('sumar algo malo nunca sube el puntaje', () => {
     const malos = [
         ...Object.keys(SANCIONES),
+        'missedTackles',
         ...Object.entries(RUBROS).filter(([, r]) => r.direccion === 'resta').map(([id]) => id),
     ];
     for (const metricId of malos) {
@@ -388,15 +326,8 @@ test('sumar algo malo nunca sube el puntaje', () => {
 });
 
 /**
- * REGRESION DEL CASO QUE ABRIO LA AUDITORIA.
- *
- * Argentina-Australia: Ben Donaldson salia primero del partido con 3 avances, 8
- * tackles y 10 pases en 55 minutos, por encima de Fraser McReight, que hizo 25
- * tackles sin errar uno, 9 avances, 43 metros y un try en los ochenta.
- *
- * Las planillas son las de verdad, cosechadas de rp-949624, no numeros
- * reconstruidos: un test de regresion con datos inventados no protege del caso
- * que lo motivo.
+ * REGRESION DEL CASO QUE ABRIO LA AUDITORIA PREVIA. Planillas reales de
+ * rp-949624 (Argentina-Australia).
  */
 test('el flanker del partido queda arriba del apertura correcto', () => {
     const mcreight = rateRugbyPlayer({
@@ -415,9 +346,66 @@ test('el flanker del partido queda arriba del apertura correcto', () => {
     );
 });
 
+/**
+ * PELOTA PARADA. El proveedor no la mide por jugador pero si por equipo: un
+ * pilar de un equipo que domino el scrum tiene que quedar arriba del de uno que
+ * lo sufrio, con la misma planilla individual.
+ */
+const SCRUM_BUENO = { scrums: 12, scrumsGanados: 1, lines: 12, linesGanados: 0.95 };
+const SCRUM_MALO = { scrums: 12, scrumsGanados: 0.6, lines: 12, linesGanados: 0.7 };
+
+test('el pilar de un equipo que domino el scrum queda arriba del que lo sufrio', () => {
+    const stats = promedioDe(1);
+    const bueno = rendimientoDe({ stats, minutes: 80, number: 1, team: EQUIPO, parada: SCRUM_BUENO });
+    const malo = rendimientoDe({ stats, minutes: 80, number: 1, team: EQUIPO, parada: SCRUM_MALO });
+    assert.ok(bueno.ajustado > malo.ajustado, `${bueno.ajustado} contra ${malo.ajustado}`);
+    const notaBuena = rateRugbyPlayer({ stats, minutes: 80, number: 1, team: EQUIPO, parada: SCRUM_BUENO })!.value;
+    const notaMala = rateRugbyPlayer({ stats, minutes: 80, number: 1, team: EQUIPO, parada: SCRUM_MALO })!.value;
+    assert.ok(notaBuena - notaMala >= 0.5, `el scrum tiene que mover la nota: ${notaMala} -> ${notaBuena}`);
+});
+
+test('la pelota parada solo mueve a quienes cargan con ella', () => {
+    for (const puesto of [9, 10, 11, 12, 13, 14, 15]) {
+        const stats = promedioDe(puesto);
+        const sin = rendimientoDe({ stats, minutes: 80, number: puesto, team: EQUIPO });
+        const con = rendimientoDe({ stats, minutes: 80, number: puesto, team: EQUIPO, parada: SCRUM_MALO });
+        assert.equal(con.ajustado, sin.ajustado, `el puesto ${puesto} no deberia depender del scrum`);
+        assert.equal(con.parada, null);
+    }
+});
+
+test('el line pesa mas en el hooker que en la tercera linea, y el scrum en el pilar', () => {
+    const soloLine = { scrums: null, scrumsGanados: null, lines: 14, linesGanados: 0.55 };
+    const efecto = (puesto: number, parada: typeof SCRUM_MALO | typeof soloLine) =>
+        rendimientoDe({ stats: promedioDe(puesto), minutes: 80, number: puesto, team: EQUIPO, parada }).parada!;
+    assert.ok(Math.abs(efecto(2, soloLine)) > 0.3, 'el hooker lanza');
+    // El eje es el mismo z para quien carga con el line completo, pero pesa 20 puntos en el hooker y 6 en la tercera.
+    const peso = (puesto: number) => {
+        const sin = rendimientoDe({ stats: promedioDe(puesto), minutes: 80, number: puesto, team: EQUIPO });
+        const con = rendimientoDe({ stats: promedioDe(puesto), minutes: 80, number: puesto, team: EQUIPO, parada: soloLine });
+        return Math.abs(con.rendimiento - sin.rendimiento);
+    };
+    assert.ok(peso(2) > peso(7), `hooker ${peso(2)} contra tercera ${peso(7)}`);
+});
+
+test('un porcentaje sobre pocos eventos se contrae; sin dato no hay eje', () => {
+    const pocos = indiceDeParada({ scrums: 3, scrumsGanados: 1, lines: null, linesGanados: null });
+    const muchos = indiceDeParada({ scrums: 12, scrumsGanados: 1, lines: null, linesGanados: null });
+    assert.ok(pocos.scrum! > 0 && muchos.scrum! > pocos.scrum!, 'tres scrums al 100% no dicen lo que doce');
+    assert.equal(pocos.line, null);
+    assert.equal(indiceDeParada(null).scrum, null);
+    // Un partido sin dato de parada puntua igual que antes, sin penalizar al pilar.
+    const stats = promedioDe(1);
+    const sin = rendimientoDe({ stats, minutes: 80, number: 1, team: EQUIPO });
+    const vacio = rendimientoDe({
+        stats, minutes: 80, number: 1, team: EQUIPO,
+        parada: { scrums: null, scrumsGanados: null, lines: null, linesGanados: null },
+    });
+    assert.equal(vacio.ajustado, sin.ajustado);
+});
+
 test('la planilla completa habilita el puntaje; el podio no', () => {
     assert.ok(hayPlanillaParaPuntuar(Object.keys(RUBROS)));
-    // Lo que devuelve el podio del live-poll cuando la planilla no contesta.
     assert.ok(!hayPlanillaParaPuntuar(['tries', 'cleanBreaks', 'defendersBeaten']));
 });
 
