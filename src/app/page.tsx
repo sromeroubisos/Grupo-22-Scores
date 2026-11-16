@@ -26,6 +26,7 @@ import { loadManualTournaments } from '@/lib/catalog/manualTournaments';
 import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import ClubsPromoCard from '@/components/clubs-promo/ClubsPromoCard';
 import AwardsAcceso from '@/components/awards/AwardsAcceso';
+import XvIdealAcceso from '@/components/xvIdeal/XvIdealAcceso';
 import TickerTitulares from '@/components/ticker/TickerTitulares';
 import SantaFe2026Acceso from '@/components/odesur/SantaFe2026Acceso';
 import TennisMatchList from '@/components/tennis/TennisMatchList';
@@ -2621,6 +2622,7 @@ export default function HomePage() {
                   Solo abajo de 1500 px; arriba vive en la columna derecha. */}
               <div className={styles.bannerFeed}>
                 <AwardsAcceso variant="feed" />
+                <XvIdealAcceso variant="feed" />
               </div>
 
               {!esTenis && !loading && (() => {
@@ -2857,6 +2859,7 @@ export default function HomePage() {
         */}
         <aside className={styles.sidebarRight}>
           <AwardsAcceso variant="sidebar" />
+          <XvIdealAcceso variant="sidebar" />
           <ClubsPromoCard variant="sidebar" />
         </aside>
       </div >
