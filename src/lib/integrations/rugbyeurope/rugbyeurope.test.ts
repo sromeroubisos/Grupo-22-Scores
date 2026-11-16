@@ -300,6 +300,31 @@ test('planRe en un cuadro: sin la ficha no se pisa la ronda guardada', () => {
   assert.equal(plan.actualizar.length + plan.crear.length, 0);
 });
 
+test('planRe en un cuadro: el 3.er puesto sin rótulo en la ficha va a "Final y 3.º puesto" por ser entre los perdedores de semis', () => {
+  const rondas = (clave: string | null) =>
+    clave === 'semis' ? { id: 'rs', nombre: 'Semifinales' }
+      : clave === 'final' ? { id: 'rf', nombre: 'Final y 3.º puesto' }
+        : { id: null, nombre: 'Cuadro' };
+  const semi = (local: string, visitante: string, marcador: [number, number], inicio: string): PartidoRe => ({
+    ...base, tabla: 'results', inicio, local, visitante, puntosLocal: marcador[0], puntosVisitante: marcador[1],
+    ficha_datos: parseFicha(ficha({ rotulo: 'Semi Finals', titulo: 'Fulltime', marcador })),
+  });
+  const sinRotulo = (local: string, visitante: string, marcador: [number, number]): PartidoRe => ({
+    ...base, tabla: 'results', inicio: '2026-11-14T10:00:00.000Z', local, visitante, puntosLocal: marcador[0], puntosVisitante: marcador[1],
+    ficha_datos: null,
+  });
+  const plan = planU20({
+    partidos: [
+      semi('PORTUGAL', 'BELGIUM', [30, 10], '2026-11-10T10:00:00.000Z'),
+      semi('POLAND', 'MOLDOVA', [5, 20], '2026-11-10T12:00:00.000Z'),
+      sinRotulo('BELGIUM', 'POLAND', [45, 24]),
+    ],
+    resolverEquipo, rondaDe: rondas, existentes: [], ahora: new Date('2026-11-15T00:00:00Z'),
+  });
+  const tercero = plan.crear.find((c) => c.home_club_id === 'belgica-u20' && c.away_club_id === 'polonia-u20');
+  assert.deepEqual([tercero?.round_uuid, tercero?.round_label], ['rf', 'Final y 3.º puesto']);
+});
+
 // ── Ficha: qué vale la pena bajar ────────────────────────────────────────────
 
 test('necesitaFicha: el cuadro siempre, la liga solo lo que puede traer algo nuevo', () => {

@@ -460,6 +460,21 @@ export function planRe(input: {
   const vistos = new Set<string>();
   const veces = new Map<string, number>();
 
+  // El 3.er puesto a veces llega sin rótulo en la ficha y quedaba sin ronda (se
+  // dibujaba como "Cuadro" suelta y el cuadro mostraba la final sola). Se lo
+  // reconoce por lo que es: lo juegan los dos perdedores de las semifinales.
+  const perdedoresSemis = new Set<string>();
+  if (eliminatoria) {
+    for (const p of partidos) {
+      if (claveDeRonda(p.ficha_datos?.rotulo) !== 'semis') continue;
+      const { status, puntos } = estadoDe(p, ahora);
+      const home = resolverEquipo(p.local);
+      const away = resolverEquipo(p.visitante);
+      if (status !== 'final' || !puntos || !home || !away || puntos.home === puntos.away) continue;
+      perdedoresSemis.add(puntos.home < puntos.away ? home : away);
+    }
+  }
+
   // Primera pasada: lo que DEBERÍA haber guardado de cada partido.
   const items: { p: PartidoRe; deseado: FilaPartidoRe }[] = [];
   for (const p of [...partidos].sort((a, b) => a.inicio.localeCompare(b.inicio) || a.local.localeCompare(b.local))) {
@@ -476,7 +491,9 @@ export function planRe(input: {
     vistos.add(externalId);
 
     const { status, puntos } = estadoDe(p, ahora);
-    const ronda = rondaDe(claveDeRonda(p.ficha_datos?.rotulo), p);
+    let clave = claveDeRonda(p.ficha_datos?.rotulo);
+    if (eliminatoria && !clave && perdedoresSemis.has(home) && perdedoresSemis.has(away)) clave = 'final';
+    const ronda = rondaDe(clave, p);
     const numero = p.ficha_datos?.numero ?? null;
     const deseado: FilaPartidoRe = {
       external_id: externalId,
