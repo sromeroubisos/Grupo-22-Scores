@@ -342,6 +342,18 @@
     outline-offset: 2px;
 }
 
+.adminLink {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 8px 12px;
+    border: 1px dashed rgba(125, 211, 252, 0.6);
+    border-radius: 10px;
+    color: #7dd3fc;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
 /* Envío en celular: una tarjeta debajo de la cancha. */
 .sendMobile {
     margin-top: 14px;

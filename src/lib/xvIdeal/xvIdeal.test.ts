@@ -10,6 +10,7 @@ import {
     sanitizePicks,
     slugify,
     summarizeXvPoll,
+    toPublicSummary,
     type XvPoll,
 } from './xvIdeal';
 
@@ -127,4 +128,23 @@ test('sin votos, todo en cero y en el orden de carga (byVotes lo respeta)', () =
     assert.deepEqual(apertura.candidates.map((c) => c.id), ['10-ticinese', '10-saravia']);
     assert.ok(apertura.candidates.every((c) => c.votes === 0 && c.percent === 0));
     assert.deepEqual(byVotes(apertura.candidates).map((c) => c.id), ['10-ticinese', '10-saravia']);
+});
+
+test('toPublicSummary no deja ningún dato de votos y conserva la boleta propia', () => {
+    const votes = [
+        { userId: 'u1', picks: { '10': '10-ticinese', '1': '1-azurmendi' } },
+        { userId: 'u2', picks: { '10': '10-saravia' } },
+    ];
+    const full = summarizeXvPoll(POLL, votes, 'u1', 0);
+    assert.equal(full.voters, 2);
+
+    const pub = toPublicSummary(full);
+    assert.equal(pub.voters, 0);
+    for (const slot of pub.results) {
+        assert.equal(slot.total, 0);
+        assert.ok(slot.candidates.every((c) => c.votes === 0 && c.percent === 0));
+    }
+    assert.deepEqual(pub.userPicks, { '10': '10-ticinese', '1': '1-azurmendi' });
+    assert.deepEqual(pub.results.map((r) => r.candidates.map((c) => c.id)), full.results.map((r) => r.candidates.map((c) => c.id)));
+    assert.ok(!JSON.stringify(pub).includes('"votes":1'), 'no se filtra ningún conteo');
 });

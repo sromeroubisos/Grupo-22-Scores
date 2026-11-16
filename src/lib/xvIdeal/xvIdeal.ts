@@ -249,3 +249,22 @@ export function summarizeXvPoll(
         userPicks: own && Object.keys(own.picks).length > 0 ? own.picks : null,
     };
 }
+
+/**
+ * La versión pública de un resumen: sin un solo dato de votos (ni cuántas
+ * personas votaron, ni cuántos votos tiene cada jugador). Los resultados son
+ * solo del super admin: lo que sale a la pantalla pública pasa siempre por acá,
+ * así que el navegador de un hincha nunca recibe un número que no debe ver.
+ * Conserva `userPicks` (la boleta propia) y la estructura de la cancha.
+ */
+export function toPublicSummary(summary: XvPollSummary): XvPollSummary {
+    return {
+        ...summary,
+        voters: 0,
+        results: summary.results.map((slot) => ({
+            ...slot,
+            total: 0,
+            candidates: slot.candidates.map((candidate) => ({ ...candidate, votes: 0, percent: 0 })),
+        })),
+    };
+}

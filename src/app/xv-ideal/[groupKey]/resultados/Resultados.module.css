@@ -1,0 +1,370 @@
+/* Panel de la votación del XV Ideal (solo super admin). Mismo azul que la votación. */
+
+.page {
+    --accent: #38bdf8;
+    --ink: #7dd3fc;
+    --surface: var(--color-bg-secondary);
+    --surface-2: var(--color-bg-tertiary);
+    --edge: var(--color-border);
+    --muted: var(--color-text-secondary);
+
+    min-height: 100vh;
+    color: var(--color-text-primary);
+    font-family: var(--font-primary, 'Outfit', 'Inter', system-ui, sans-serif);
+}
+
+.wrap {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 20px 14px calc(var(--mobile-nav-height, 78px) + 24px);
+}
+
+@media (min-width: 900px) {
+    .wrap {
+        padding: 32px 24px 64px;
+    }
+}
+
+.badge {
+    display: inline-block;
+    margin: 0 0 8px;
+    padding: 3px 10px;
+    border: 1px dashed var(--accent);
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink);
+}
+
+.title {
+    margin: 0;
+    font-size: clamp(26px, 5vw, 38px);
+    line-height: 1.1;
+    font-weight: 800;
+}
+
+.lede {
+    margin: 4px 0 0;
+    color: var(--muted);
+}
+
+.meta {
+    margin: 6px 0 0;
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.meta a {
+    color: var(--ink);
+}
+
+.empty {
+    margin-top: 20px;
+    color: var(--muted);
+}
+
+.total {
+    margin: 18px 0 14px;
+    font-size: 15px;
+}
+
+.total strong {
+    font-size: 28px;
+    margin-right: 4px;
+}
+
+.total span {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+}
+
+@media (min-width: 900px) {
+    .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 22px;
+        align-items: start;
+    }
+}
+
+.card {
+    padding: 18px;
+    border: 1px solid #2b7fa8;
+    border-radius: 18px;
+    background: linear-gradient(165deg, #0a2a4a 0%, #07172b 80%);
+    color: #e6f3fb;
+}
+
+.cardHead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.zone {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 800;
+}
+
+.state {
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.state[data-open="true"] {
+    background: #35cbef;
+    color: #06202e;
+}
+
+.kpis {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 14px 0 0;
+}
+
+.kpis div {
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.kpis dt {
+    font-size: 12px;
+    color: #a9c4d3;
+}
+
+.kpis dd {
+    margin: 2px 0 0;
+    font-size: 30px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.kpis dd.small {
+    font-size: 15px;
+    font-weight: 700;
+    padding-top: 8px;
+}
+
+.sub {
+    margin: 18px 0 8px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #7dd3fc;
+}
+
+/* Votantes nuevos por día */
+.days ul {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    height: 110px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    overflow-x: auto;
+}
+
+.days li {
+    display: flex;
+    flex: 1 0 34px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    height: 100%;
+    gap: 2px;
+    font-size: 11px;
+    color: #a9c4d3;
+}
+
+.days li strong {
+    color: #fff;
+    font-size: 12px;
+}
+
+.dayBar {
+    display: block;
+    width: 70%;
+    border-radius: 4px 4px 0 0;
+    background: #35cbef;
+}
+
+/* El XV más votado */
+.pitch {
+    display: grid;
+    gap: 8px;
+    padding: 10px;
+    border: 1px solid rgba(125, 211, 252, 0.28);
+    border-radius: 14px;
+    background: linear-gradient(170deg, #0e5e98 0%, #0a3d68 55%, #07172b 100%);
+}
+
+.line {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
+
+.tile {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    width: calc((100% - 16px) / 3);
+    max-width: 120px;
+    min-height: 84px;
+    padding: 6px 4px;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    border-radius: 10px;
+    background: rgba(5, 14, 28, 0.55);
+    text-align: center;
+}
+
+.tile[data-empty="true"] {
+    border-style: dashed;
+    opacity: 0.6;
+    justify-content: center;
+}
+
+.num {
+    font-size: 13px;
+    font-weight: 800;
+    color: #35cbef;
+}
+
+.tileLogo {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+}
+
+.tileName {
+    font-size: 10.5px;
+    font-weight: 700;
+    line-height: 1.1;
+    text-transform: uppercase;
+    overflow-wrap: anywhere;
+}
+
+.tilePct {
+    font-size: 11px;
+    font-weight: 800;
+    color: #7dd3fc;
+}
+
+/* Resultado por camiseta */
+.slots {
+    display: grid;
+    gap: 6px;
+}
+
+.slot {
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.slot summary {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 6px 12px;
+    cursor: pointer;
+    list-style: none;
+}
+
+.slot summary::-webkit-details-marker {
+    display: none;
+}
+
+.slotLabel {
+    flex: 1;
+    font-weight: 700;
+}
+
+.slotTotal {
+    font-size: 12px;
+    color: #a9c4d3;
+}
+
+.slot ol {
+    display: grid;
+    gap: 6px;
+    margin: 0;
+    padding: 0 10px 10px;
+    list-style: none;
+}
+
+.slot li {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 46px;
+    padding: 4px 10px;
+    overflow: hidden;
+    border: 1px solid rgba(125, 211, 252, 0.25);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.slot li[data-lead="true"] {
+    border-color: #35cbef;
+}
+
+.bar {
+    position: absolute;
+    inset: 0 auto 0 0;
+    background: rgba(53, 203, 239, 0.2);
+}
+
+.rowLogo {
+    position: relative;
+    flex: none;
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+}
+
+.rowName {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    font-weight: 700;
+    font-size: 14px;
+    overflow-wrap: anywhere;
+}
+
+.rowName small,
+.rowPct small {
+    font-size: 11px;
+    font-weight: 500;
+    color: #a9c4d3;
+}
+
+.rowPct {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
