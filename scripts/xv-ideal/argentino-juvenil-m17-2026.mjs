@@ -25,6 +25,8 @@ import path from 'node:path';
 
 const GROUP_KEY = 'argentino-juvenil-m17-2026';
 const TITLE = 'XV Ideal del Argentino Juvenil M17 2026';
+/** Cierre de las dos votaciones (hora de Argentina). Pasada esta hora el servidor rechaza votos. */
+const CIERRE = '2026-11-17T11:00:00-03:00';
 
 const ZONAS = [
   { header: 'ZONA CAMPEONATO', name: 'Zona Campeonato', slug: 'campeonato-argentino-juvenil-m17-campeonato', position: 0 },
@@ -250,7 +252,7 @@ for (const zona of ZONAS) {
   if (!tournamentId) console.warn(`  ${zona.name}: no encontré el torneo ${zona.slug}; queda sin vínculo.`);
 
   const existentes = await api('GET', `xv_ideal_polls?group_key=eq.${GROUP_KEY}&name=eq.${zona.name}&select=id`);   // api() ya codifica la URL entera: no codificar dos veces
-  const campos = { tournament_id: tournamentId, title: TITLE, position: zona.position, slots, ...(cerrar ? { status: 'closed' } : {}) };
+  const campos = { tournament_id: tournamentId, title: TITLE, position: zona.position, slots, closes_at: new Date(CIERRE).toISOString(), ...(cerrar ? { status: 'closed' } : {}) };
   if (existentes?.length) {
     await api('PATCH', `xv_ideal_polls?id=eq.${existentes[0].id}`, campos);
     console.log(`  ${zona.name}: actualizada (${existentes[0].id})${cerrar ? ' y cerrada' : ''}`);
