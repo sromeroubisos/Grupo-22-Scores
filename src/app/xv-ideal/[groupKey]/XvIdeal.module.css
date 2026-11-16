@@ -915,11 +915,11 @@
 .overlay {
     position: fixed;
     inset: 0;
-    z-index: 60;
+    z-index: 5000;
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     justify-content: center;
-    padding: 0;
+    padding: 16px;
     background: rgba(3, 10, 22, 0.72);
     backdrop-filter: blur(4px);
     animation: fadeIn 0.18s ease both;
@@ -934,36 +934,18 @@
     flex-direction: column;
     width: 100%;
     max-width: 520px;
-    max-height: 86vh;
-    padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+    max-height: min(78vh, 640px);
+    padding: 16px;
     border: 1px solid #2b7fa8;
-    border-bottom: 0;
-    border-radius: 22px 22px 0 0;
+    border-radius: 22px;
     background: linear-gradient(170deg, #0a2a4a 0%, #07172b 80%);
     color: #e6f3fb;
-    box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.5);
-    animation: sheetIn 0.32s var(--ease) both;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+    animation: popIn 0.32s var(--ease) both;
 }
 
 .overlay[data-closing="true"] .sheet {
-    animation: sheetOut 0.18s ease both;
-}
-
-@media (min-width: 640px) {
-    .overlay {
-        align-items: center;
-        padding: 24px;
-    }
-
-    .sheet {
-        border-bottom: 1px solid #2b7fa8;
-        border-radius: 22px;
-        animation: popIn 0.32s var(--ease) both;
-    }
-
-    .overlay[data-closing="true"] .sheet {
-        animation: popOut 0.18s ease both;
-    }
+    animation: popOut 0.18s ease both;
 }
 
 .sheetHead {
