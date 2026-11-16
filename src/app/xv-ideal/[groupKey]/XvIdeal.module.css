@@ -125,6 +125,59 @@
     transition: width 0.35s var(--ease);
 }
 
+/* ───── Contador de cierre ───── */
+.timer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+    padding: 9px 14px;
+    border: 1px solid #2b7fa8;
+    border-radius: 12px;
+    background: linear-gradient(165deg, #0a2a4a 0%, #07172b 80%);
+    color: #e6f3fb;
+    font-size: 14px;
+}
+
+.timer svg {
+    flex: none;
+    color: #7dd3fc;
+}
+
+.timerText {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.timerText strong {
+    color: #fff;
+}
+
+.timerClock {
+    flex: none;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: #35cbef;
+    color: #06202e;
+    font-size: 13px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.timer[data-urgent="true"] {
+    border-color: #f59e0b;
+}
+
+.timer[data-urgent="true"] .timerClock {
+    background: #f59e0b;
+}
+
+.timer[data-closed="true"] {
+    border-color: rgba(255, 255, 255, 0.25);
+    color: #a9c4d3;
+}
+
 /* ───── Layout ───── */
 .layout {
     display: grid;

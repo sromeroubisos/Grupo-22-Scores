@@ -28,6 +28,31 @@ interface Thanks {
 }
 
 const CLOSE_MS = 180;
+const TZ = 'America/Argentina/Buenos_Aires';
+
+const dayKey = (ms: number) => new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(ms));
+
+/** "mañana a las 11 hs", "hoy a las 18:30 hs" o "el 17/11 a las 11 hs" (todo en hora de Argentina). */
+function closingLabel(closesAt: string, now: number): string {
+    const closes = Date.parse(closesAt);
+    const key = dayKey(closes);
+    const when = key === dayKey(now) ? 'hoy' : key === dayKey(now + 86_400_000) ? 'mañana' : `el ${key.slice(8, 10)}/${key.slice(5, 7)}`;
+    const [hh, mm] = new Intl.DateTimeFormat('es-AR', { timeZone: TZ, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date(closes)).split(':');
+    return `${when} a las ${mm === '00' ? `${Number(hh)} hs` : `${Number(hh)}:${mm} hs`}`;
+}
+
+/** "1 d 03 h 20 min", "18 h 32 min 10 s", "4 min 05 s". */
+function countdown(ms: number): string {
+    const total = Math.max(0, Math.floor(ms / 1000));
+    const d = Math.floor(total / 86_400);
+    const h = Math.floor((total % 86_400) / 3600);
+    const m = Math.floor((total % 3600) / 60);
+    const sec = total % 60;
+    const two = (n: number) => String(n).padStart(2, '0');
+    if (d > 0) return `${d} d ${two(h)} h ${two(m)} min`;
+    if (h > 0) return `${h} h ${two(m)} min ${two(sec)} s`;
+    return `${m} min ${two(sec)} s`;
+}
 
 function returnTo(): string | undefined {
     return typeof window === 'undefined' ? undefined : `${window.location.pathname}${window.location.search}`;
@@ -75,6 +100,17 @@ export default function XvIdealClient({ groupKey, isSuperAdmin, available, initi
     const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const poll = polls.find((entry) => entry.id === activeId) ?? polls[0];
+
+    // El reloj corre en el navegador y arranca después de montar: así el HTML del servidor no discrepa del cliente.
+    const closesAt = poll?.closesAt ?? null;
+    const [now, setNow] = useState<number | null>(null);
+    useEffect(() => {
+        if (!closesAt) return;
+        setNow(Date.now());
+        const timer = setInterval(() => setNow(Date.now()), 1000);
+        return () => clearInterval(timer);
+    }, [closesAt]);
+
     const draft = useMemo(() => (poll ? (drafts[poll.id] ?? {}) : {}), [drafts, poll]);
 
     const slotsByJersey = useMemo(() => {
@@ -140,7 +176,8 @@ export default function XvIdealClient({ groupKey, isSuperAdmin, available, initi
         draft,
     );
     const dirty = !samePicks(draft, saved ?? {});
-    const canVote = poll.isOpen;
+    const expired = Boolean(closesAt) && now !== null && now >= Date.parse(closesAt as string);
+    const canVote = poll.isOpen && !expired;
     const openSlot = openJersey === null ? null : slotsByJersey.get(openJersey) ?? null;
     const thanksHere = thanks[poll.id] ?? null;
     const otherPoll = polls.find((entry) => entry.id !== poll.id && entry.isOpen && !entry.userPicks) ?? null;
@@ -361,6 +398,30 @@ export default function XvIdealClient({ groupKey, isSuperAdmin, available, initi
                                 </button>
                             );
                         })}
+                    </div>
+                )}
+
+                {closesAt && now !== null && (
+                    <div
+                        className={styles.timer}
+                        data-closed={expired}
+                        data-urgent={!expired && Date.parse(closesAt) - now < 3_600_000}
+                        role="timer"
+                        aria-live="off"
+                    >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <circle cx="12" cy="13" r="8" />
+                            <polyline points="12 9 12 13 15 15" />
+                            <path d="M9 2h6" />
+                        </svg>
+                        {expired ? (
+                            <span className={styles.timerText}>La votación cerró</span>
+                        ) : (
+                            <>
+                                <span className={styles.timerText}>La votación cierra <strong>{closingLabel(closesAt, now)}</strong></span>
+                                <span className={styles.timerClock}>{countdown(Date.parse(closesAt) - now)}</span>
+                            </>
+                        )}
                     </div>
                 )}
 
