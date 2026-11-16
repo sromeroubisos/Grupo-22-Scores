@@ -539,7 +539,7 @@ function CrossBracket({ layout, names }: { layout: CrossLayout; names: [string, 
                             3.er puesto del cuadro principal. */}
                         <MatchCard
                             view={target.view}
-                            variant={target.kind === 'winners' ? 'final' : 'third'}
+                            variant={target.kind === 'winners' ? 'final' : undefined}
                             delayMs={90 + idx * 45}
                         />
                     </div>
