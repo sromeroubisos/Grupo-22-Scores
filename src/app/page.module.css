@@ -2773,6 +2773,13 @@
         padding: 16px 6px;
     }
 
+    /* Marcador de tres cifras (120, 134): mide ~34px y no entra en la columna de
+       28px sin pisar el escudo. Solo en ese caso se abre un poco el espacio del
+       marcador y los nombres de los clubes ceden ese lugar. */
+    .matchRow[data-wide-score="true"] {
+        grid-template-columns: 22px minmax(0, 1fr) 28px 38px 38px 28px minmax(0, 1fr) 22px;
+    }
+
     .matchRow > *,
     .matchRow .matchTeam > *,
     .matchRow .matchTeamIdentity > * {
@@ -2877,6 +2884,7 @@
         font-weight: 700;
         font-variant-numeric: tabular-nums;
     }
+
 
     .matchTeam:last-child .teamScore {
         text-align: left;
