@@ -632,7 +632,7 @@ function BracketTree({ layout, finalIdx, thirdPlace = [] }: { layout: { leaves: 
                                                 3.er puesto
                                             </span>
                                             {thirdPlace.map((view, idx) => (
-                                                <MatchCard key={view.key} view={view} variant="third" delayMs={Math.min(rounds.length * 90 + idx * 45, 600)} />
+                                                <MatchCard key={view.key} view={view} delayMs={Math.min(rounds.length * 90 + idx * 45, 600)} />
                                             ))}
                                         </div>
                                     </div>
