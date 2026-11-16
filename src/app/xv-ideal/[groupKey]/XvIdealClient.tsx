@@ -318,6 +318,23 @@ export default function XvIdealClient({ groupKey, isSuperAdmin, available, initi
     return (
         <main className={styles.page}>
             <div className={styles.wrap}>
+                {/* Solo el super admin: el servidor ni dibuja esta barra para el resto. */}
+                {isSuperAdmin && (
+                    <a className={styles.adminBar} href={`/xv-ideal/${groupKey}/resultados`}>
+                        <span className={styles.adminBadge}>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                <rect x="4" y="11" width="16" height="10" rx="2" />
+                                <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+                            </svg>
+                            Super admin
+                        </span>
+                        <span className={styles.adminText}>Ver cómo va la votación</span>
+                        <svg className={styles.adminArrow} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <polyline points="9 6 15 12 9 18" />
+                        </svg>
+                    </a>
+                )}
+
                 {/* Selector de zona: dos bloques. */}
                 {polls.length > 1 && (
                     <div className={styles.zones} role="tablist" aria-label="Zona">
@@ -368,11 +385,7 @@ export default function XvIdealClient({ groupKey, isSuperAdmin, available, initi
                             <p className={styles.infoNote}>Podés votar una sola zona o las dos: cada una es una votación aparte.</p>
 
                             <a className={styles.cta} href="#xv-cancha">Armar mi XV</a>
-                            {isSuperAdmin && (
-                                <a className={styles.adminLink} href={`/xv-ideal/${groupKey}/resultados`}>
-                                    Ver cómo va la votación (solo super admin)
-                                </a>
-                            )}
+
 
                             <ul className={styles.stats}>
                                 <li><strong>15</strong> camisetas</li>
