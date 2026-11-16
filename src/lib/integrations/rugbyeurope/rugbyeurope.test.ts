@@ -7,7 +7,7 @@ import {
   bonosDeTabla, bonusDefensivo, claveDeRonda, estadoDe, lunesDe, necesitaFicha, normalizarNombre, parseEquipos, parseFicha, parsePagina, parsePools,
   parseTablaOficial,
   planRe, PREFIJO_NOTA, puntosDeBase, RONDAS, rondaPorSemana, semanasNuevas,
-  type ExistenteRe, type PartidoRe,
+  renumerarRondasPorFecha, type ExistenteRe, type PartidoRe,
 } from './rugbyeurope.ts';
 import { clubDe, claveAlias, edicionesActivas, edicionPorClave, EDICIONES } from './ediciones.ts';
 import { tagBracketRound } from '../../playoff/bracketSplit.ts';
@@ -439,4 +439,26 @@ test('parseFicha: las semifinales vienen sin número, y un estadio no se confund
   assert.equal(parseFicha(ficha({ rotulo: 'Final & 3rd Place' })).rotulo, 'Final & 3rd Place');
   // una línea de detalle que no es una ronda (el estadio) no cuenta
   assert.equal(parseFicha(ficha({ rotulo: 'Prague Marketa Stadium' })).rotulo, null);
+});
+
+test('parsePagina: un partido con el día pero sin hora (TBC) entra con hora provisoria y marcado', () => {
+  const filaTbc = `
+<tr data-competition-table-row="1,2" class="c-fixtures-table__row">
+<td><div><p><strong>27/02/2027</strong><abbr title="To Be Confirmed">TBC</abbr></p></div></td>
+<td>${equipoLogo('MALTA', 'MLT')}<abbr>V</abbr>${equipoLogo('CZECHIA', 'CZE')}</td></tr>`;
+  const html = `<table class="c-fixtures-table" data-competition-table="fixtures"><tbody>${filaTbc}</tbody></table>`;
+  const filas = parsePagina(html);
+  assert.equal(filas.length, 1);
+  assert.equal(filas[0].inicio, '2027-02-27T12:00:00.000Z');
+  assert.equal(filas[0].horaPendiente, true);
+  assert.equal(filas[0].local, 'MALTA');
+});
+
+test('renumerarRondasPorFecha: una fecha que cae antes de otras ya cargadas reordena nombre y orden', () => {
+  const r = (id: string, n: number, start: string) => ({ id, name: `Fecha ${n}`, order_index: n, start_date: start });
+  const cambios = renumerarRondasPorFecha([r('a', 4, '2027-03-01'), r('b', 5, '2027-03-22'), r('c', 6, '2027-02-22'), r('d', 7, '2027-03-29')]);
+  assert.deepEqual(cambios.map((c) => `${c.id}:${c.name}:${c.order_index}`).sort(), ['a:Fecha 2:2', 'b:Fecha 3:3', 'c:Fecha 1:1', 'd:Fecha 4:4']);
+  // ya en orden: nada que hacer; con una ronda puesta a mano: no se toca nada
+  assert.deepEqual(renumerarRondasPorFecha([r('a', 1, '2027-03-01'), r('b', 2, '2027-03-08')]), []);
+  assert.deepEqual(renumerarRondasPorFecha([r('a', 2, '2027-03-01'), { id: 'x', name: 'Final', order_index: 1, start_date: '2027-03-08' }]), []);
 });

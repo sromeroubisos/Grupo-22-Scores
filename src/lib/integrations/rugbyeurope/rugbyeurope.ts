@@ -7,8 +7,9 @@
  *   {ruta de la edición}
  *     tabla "Fixtures" y tabla "Results": hora en UTC (`data-raw-date-utc`),
  *     equipos (con su sigla y escudo), marcador del resultado y el vínculo a la ficha.
- *     Un partido sin fecha ni hora todavía NO trae `data-raw-date-utc`: se saltea
- *     y entra cuando el sitio lo programa.
+ *     Un partido con el día pero sin hora ("TBC") NO trae `data-raw-date-utc`: se carga con
+ *     una hora provisoria (`horaPendiente`) y se corrige cuando el sitio la fija. Uno sin
+ *     siquiera el día se saltea y entra cuando el sitio lo programa.
  *   {ruta}/{local}-v-{visitante}/
  *     la ficha: estadio y estado ("Fulltime", o la cuenta regresiva "Kick off").
  *     En los cuadros de eliminación también la ronda y el número ("Quarter Finals, M3");
@@ -31,6 +32,8 @@ export const RE_ID_PREFIX = 'rugbyeurope:';
 export const RE_WEB = 'https://www.rugbyeurope.eu';
 export const PREFIJO_NOTA = 'Rugby Europe · ';
 const HORAS_PARA_FINAL = 3;
+/** Hora (UTC) con la que se carga un partido de día confirmado y hora "TBC". */
+const HORA_PROVISORIA_UTC = '12:00';
 
 export const urlPagina = (ed: EdicionRe) => `${RE_WEB}${ed.ruta}`;
 export const buildTournamentExternalId = (clave: string) => `${RE_ID_PREFIX}${clave}`;
@@ -85,6 +88,24 @@ export function semanasNuevas(partidos: { inicio: string }[], rondas: RondaDb[])
   return [...new Set(partidos.map((p) => lunesDe(p.inicio)))].filter((s) => !tengo.has(s)).sort();
 }
 
+/**
+ * Una fecha que el sitio programa ANTES de otras ya cargadas (un partido TBC con día en
+ * febrero cuando marzo ya existía) nace con el número siguiente y queda desordenada:
+ * "Fecha 6" antes que "Fecha 4". Devuelve lo que hay que renumerar para que el nombre y el
+ * orden sigan el calendario. Solo toca ligas con todas las rondas "Fecha N" y con fecha de
+ * inicio; si hay una ronda con otro nombre (puesta a mano) no renumera nada.
+ */
+export function renumerarRondasPorFecha(rondas: RondaDb[]): { id: string; name: string; order_index: number }[] {
+  if (!rondas.length || rondas.some((r) => !r.start_date || !/^Fecha \d+$/.test(r.name))) return [];
+  const ordenadas = [...rondas].sort((a, b) => (a.start_date as string).localeCompare(b.start_date as string) || a.id.localeCompare(b.id));
+  const cambios: { id: string; name: string; order_index: number }[] = [];
+  ordenadas.forEach((r, i) => {
+    const name = `Fecha ${i + 1}`;
+    if (r.name !== name || r.order_index !== i + 1) cambios.push({ id: r.id, name, order_index: i + 1 });
+  });
+  return cambios;
+}
+
 /** Cuadro: la ronda sale del rótulo de la ficha. */
 export const rondaEliminatoria = (rondas: RondaDb[]) => (clave: ClaveRonda | null): { id: string | null; nombre: string } => {
   const def = RONDAS.find((r) => r.clave === clave);
@@ -120,6 +141,8 @@ export interface FilaRe {
   tabla: 'fixtures' | 'results';
   /** instante UTC ISO */
   inicio: string;
+  /** true: el sitio solo dio el día ("TBC"); `inicio` lleva una hora provisoria */
+  horaPendiente: boolean;
   local: string;
   visitante: string;
   puntosLocal: number | null;
@@ -152,13 +175,20 @@ export function parsePagina(html: string): FilaRe[] {
   for (const { tabla, fila } of filasDeTablas(html)) {
     const utc = /data-raw-date-utc="([^"]+)"/.exec(fila)?.[1];
     const equipos = equiposDeFila(fila);
-    if (!utc || equipos.length < 2) continue;
-    const inicio = new Date(utc.replace(/(\.\d{3})\d+Z$/, '$1Z'));
+    if (equipos.length < 2) continue;
+    // Sin hora ("TBC") el sitio igual publica el DÍA: <strong>27/02/2027</strong>. Se carga con
+    // una hora provisoria y se marca; cuando el sitio fije la hora, el cron la corrige solo.
+    const dia = utc ? null : /<strong>\s*(\d{2})\/(\d{2})\/(\d{4})\s*<\/strong>/.exec(fila);
+    if (!utc && !dia) continue;
+    const inicio = utc
+      ? new Date(utc.replace(/(\.\d{3})\d+Z$/, '$1Z'))
+      : new Date(`${dia![3]}-${dia![2]}-${dia![1]}T${HORA_PROVISORIA_UTC}:00.000Z`);
     if (Number.isNaN(inicio.getTime())) continue;
     const puntos = [...fila.matchAll(/c-fixtures-table__title__score">\s*(\d{1,3})\s*</g)].map((x) => Number(x[1]));
     out.push({
       tabla,
       inicio: inicio.toISOString(),
+      horaPendiente: !utc,
       local: equipos[0].nombre,
       visitante: equipos[1].nombre,
       puntosLocal: puntos.length >= 2 ? puntos[0] : null,
@@ -505,7 +535,7 @@ export function planRe(input: {
       round_uuid: ronda.id,
       round_label: ronda.nombre,
       venue: p.ficha_datos?.estadio ?? null,
-      notes: PREFIJO_NOTA + [ronda.nombre, numero ? `M${numero}` : null].filter(Boolean).join(' · '),
+      notes: PREFIJO_NOTA + [ronda.nombre, numero ? `M${numero}` : null, p.horaPendiente ? 'hora a confirmar' : null].filter(Boolean).join(' · '),
     };
     if (!eliminatoria) {
       const cerrado = status === 'final' && puntos;

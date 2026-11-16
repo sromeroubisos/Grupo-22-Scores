@@ -34,7 +34,7 @@ import {
 } from '@/lib/integrations/rugbyeurope/ediciones.ts';
 import {
   RE_ID_PREFIX, RE_PROVIDER, bonosDeTabla, buildTournamentExternalId, fetchFicha, fetchPagina, lunesDe, necesitaFicha, planRe, prefijoPartidos,
-  rondaEliminatoria, rondaPorSemana, semanasNuevas,
+  renumerarRondasPorFecha, rondaEliminatoria, rondaPorSemana, semanasNuevas,
   type ExistenteRe, type FichaRe, type PartidoRe, type RondaDb,
 } from '@/lib/integrations/rugbyeurope/rugbyeurope.ts';
 
@@ -171,6 +171,28 @@ async function sincronizar(
         if (error) return falla(`no se pudieron crear las rondas nuevas (${error.message})`);
       }
       rondas.push(...filas.map((f) => ({ id: f.id, name: f.name, order_index: f.order_index, start_date: f.start_date })));
+
+      // Una fecha nueva puede caer ANTES de otras ya cargadas: se renumera por calendario.
+      // (phase_id, order_index) es único: primero se las aparta a un rango alto y después
+      // se les pone el número final.
+      const cambios = renumerarRondasPorFecha(rondas);
+      if (cambios.length) {
+        if (!enSeco) {
+          const ahoraIso = ahora.toISOString();
+          for (const c of cambios) {
+            const { error } = await supabase.from('tournament_rounds').update({ order_index: 1000 + c.order_index, updated_at: ahoraIso }).eq('id', c.id);
+            if (error) return falla(`no se pudieron renumerar las rondas (${error.message})`);
+          }
+          for (const c of cambios) {
+            const { error } = await supabase.from('tournament_rounds').update({ name: c.name, order_index: c.order_index, updated_at: ahoraIso }).eq('id', c.id);
+            if (error) return falla(`no se pudieron renumerar las rondas (${error.message})`);
+          }
+        }
+        for (const c of cambios) {
+          const r = rondas.find((x) => x.id === c.id);
+          if (r) { r.name = c.name; r.order_index = c.order_index; }
+        }
+      }
     }
   }
 
