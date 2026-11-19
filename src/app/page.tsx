@@ -273,6 +273,13 @@ const AR_LOW_IMPORTANCE = /\b7[´'`’]?s\b|seven|circuito/;
  */
 const SEASONAL_FEATURED = /\bjoj dakar 2026\b/;
 
+/**
+ * Torneos fijados arriba de todo en la portada, en este orden (el índice es el
+ * `rank`): el Veco Villegas y el Nacional de Clubes. Van antes que los favoritos
+ * y que lo de tu país; como el resto, solo aparecen los días en que tienen partidos.
+ */
+const PINNED_TOP_TOURNAMENTS = [/veco\s+villegas/, /nacional\s+de\s+clubes/];
+
 /** Con menos competiciones que esto debajo de la tanda, no se arma el bloque plegado. */
 const MIN_GROUPED_LEAGUES = 3;
 
@@ -1639,12 +1646,18 @@ export default function HomePage() {
     );
 
     for (const league of list) {
-      if (SEASONAL_FEATURED.test(normalizeForMatch(league.league))) {
+      const pinnedRank = PINNED_TOP_TOURNAMENTS.findIndex((pattern) => pattern.test(normalizeForMatch(league.league)));
+      if (pinnedRank >= 0) {
+        tiers.set(league.leagueId, { tier: -3, rank: pinnedRank });
+      } else if (SEASONAL_FEATURED.test(normalizeForMatch(league.league))) {
         tiers.set(league.leagueId, { tier: -2, rank: 0 });
+      } else if (isLeagueGroupFavorite(league)) {
+        // Los favoritos se evalúan ANTES que los multiprovinciales: si no, un
+        // "Nacional de Clubes" seguido caía en el nivel -1 y quedaba debajo de
+        // los grandes del rugby en vez de subir arriba de todo.
+        tiers.set(league.leagueId, { tier: 0, rank: 0 });
       } else if (MULTIPROVINCIAL_TOURNAMENT.test(normalizeForMatch(league.league))) {
         tiers.set(league.leagueId, { tier: -1, rank: 0 });
-      } else if (isLeagueGroupFavorite(league)) {
-        tiers.set(league.leagueId, { tier: 0, rank: 0 });
       } else if (countryAllowed.has(league.leagueId)) {
         tiers.set(league.leagueId, { tier: 1, rank: 0 });
       } else if (isSecondFlight(league)) {
@@ -1676,6 +1689,7 @@ export default function HomePage() {
     const indexed = list.map((league, index) => ({ league, index }));
     const byTier = (tier: number) => indexed.filter((entry) => info(entry.league).tier === tier);
 
+    const pinned = byTier(-3).sort((a, b) => (info(a.league).rank - info(b.league).rank) || (a.index - b.index));
     const seasonal = byTier(-2);
     const favorites = byTier(0);
     const multiprovincial = byTier(-1);
@@ -1688,9 +1702,9 @@ export default function HomePage() {
     ));
     const featured = byTier(2).sort((a, b) => (info(a.league).rank - info(b.league).rank) || (a.index - b.index));
 
-    const fillCount = Math.max(0, TOP_FEED_COUNT - seasonal.length - favorites.length - multiprovincial.length);
+    const fillCount = Math.max(0, TOP_FEED_COUNT - pinned.length - seasonal.length - favorites.length - multiprovincial.length);
     const fill = [...countryBest, ...featured].slice(0, fillCount);
-    const taken = new Set([...seasonal, ...favorites, ...fill, ...multiprovincial].map((entry) => entry.index));
+    const taken = new Set([...pinned, ...seasonal, ...favorites, ...fill, ...multiprovincial].map((entry) => entry.index));
     const rest = indexed
       .filter((entry) => !taken.has(entry.index))
       .sort((a, b) => (
@@ -1699,8 +1713,8 @@ export default function HomePage() {
         || (a.index - b.index)
       ));
 
-    const ordered = [...seasonal, ...favorites, ...fill, ...multiprovincial, ...rest].map((entry) => entry.league);
-    const topCount = seasonal.length + favorites.length + fill.length + multiprovincial.length;
+    const ordered = [...pinned, ...seasonal, ...favorites, ...fill, ...multiprovincial, ...rest].map((entry) => entry.league);
+    const topCount = pinned.length + seasonal.length + favorites.length + fill.length + multiprovincial.length;
     const top = topCount > 0 ? topCount : Math.min(3, ordered.length);
     // "Ver en vivo": todo lo que se está jugando, juvenil o intermedia, a la vista y sin plegar.
     if (showLiveOnly) return { ordered, topCount: ordered.length };
