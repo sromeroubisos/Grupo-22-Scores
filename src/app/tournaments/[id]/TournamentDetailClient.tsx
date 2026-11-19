@@ -1220,6 +1220,14 @@ function getPreferredKnockoutPhase(phases: any[], rounds: any[] = [], matches: a
     );
     if (knockoutPhases.length === 0) return null;
 
+    // Una fase puede pedir ser la que se abre primero (`settings.defaultKnockoutView`):
+    // Oro/Plata/Bronce son fases separadas y, sin esto, la pestaña abría en la
+    // última con datos, o sea la de Bronce.
+    const flaggedKnockout = knockoutPhases.find(
+        (phase: any) => phase?.settings?.defaultKnockoutView === true,
+    );
+    if (flaggedKnockout) return flaggedKnockout;
+
     const explicitActiveKnockout = knockoutPhases.find((phase: any) => phase?.is_active);
     if (explicitActiveKnockout) return explicitActiveKnockout;
 
