@@ -18,6 +18,10 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 
 type Supa = SupabaseClient<any, any, any>;
 
+import { applyZoneConflictSwap, parseZoneConflictSwap, type ZoneConflictSwap } from './zoneConflictSwap';
+
+export type { ZoneConflictSwap };
+
 export type PlayoffSeedingFormat = 'overall' | 'zone_rank';
 
 export interface PlayoffSeedingConfig {
@@ -37,6 +41,17 @@ export interface PlayoffSeedingConfig {
    * terminados: hasta entonces muestra "1.º Zona A" en vez de cruces provisorios.
    */
   untilFinished: boolean;
+  /**
+   * Qué dice cada casillero mientras no hay clasificados (índice 0 = sembrado
+   * #1). Sirve cuando el cruce no es "1.º Zona A" sino "Mejor segundo".
+   */
+  seedLabels: string[];
+  /**
+   * Evita repetir rival de zona: si el sembrado `seed` salió de la misma zona
+   * que el sembrado `as`, se intercambian los sembrados `swap`. Opt-in; solo
+   * actúa con tabla general (`overall`). `null` = no hace nada.
+   */
+  swapIfSameZone: ZoneConflictSwap | null;
 }
 
 /** Lee y sanea la clasificación que llega de un body o de `settings.playoffSeeding`. */
@@ -51,6 +66,10 @@ export function parsePlayoffSeedingInput(raw: unknown, locked = false): PlayoffS
     perGroup: Number.isFinite(perGroupRaw) && perGroupRaw >= 1 ? perGroupRaw : null,
     fromPosition: Number.isFinite(fromRaw) && fromRaw >= 1 ? fromRaw : 1,
     untilFinished: r.untilFinished === true,
+    seedLabels: Array.isArray(r.seedLabels)
+      ? r.seedLabels.map((l) => (typeof l === 'string' ? l.trim() : ''))
+      : [],
+    swapIfSameZone: parseZoneConflictSwap(r.swapIfSameZone),
   };
 }
 
@@ -72,6 +91,12 @@ export async function zonePhaseFinished(supabase: Supa, phaseId: string): Promis
  */
 export async function computeSeedLabels(supabase: Supa, cfg: PlayoffSeedingConfig | null): Promise<Map<number, string>> {
   const labels = new Map<number, string>();
+  if (cfg && cfg.seedLabels.some((l) => l)) {
+    cfg.seedLabels.forEach((l, i) => {
+      if (l) labels.set(i + 1, l);
+    });
+    return labels;
+  }
   if (!cfg || cfg.format !== 'zone_rank' || !cfg.perGroup) return labels;
   const { data: groups } = await supabase
     .from('tournament_groups')
@@ -153,9 +178,11 @@ export async function computeSeedOrderFromStandings(
     fromPosition?: number;
     /** Sin sembrar hasta que terminen todos los partidos de las zonas. */
     untilFinished?: boolean;
+    /** Intercambio de sembrados si dos salen de la misma zona (solo `overall`). */
+    swapIfSameZone?: ZoneConflictSwap | null;
   },
 ): Promise<string[]> {
-  const { tournamentId, sourcePhaseId, seasonId, format, perGroup, fromPosition, untilFinished } = params;
+  const { tournamentId, sourcePhaseId, seasonId, format, perGroup, fromPosition, untilFinished, swapIfSameZone } = params;
 
   if (untilFinished && !(await zonePhaseFinished(supabase, sourcePhaseId))) return [];
 
@@ -184,13 +211,15 @@ export async function computeSeedOrderFromStandings(
     Number(b.scored ?? 0) - Number(a.scored ?? 0);
 
   if (format === 'overall') {
-    return rows
+    const sorted = rows
       .slice()
       .sort(
         (a, b) =>
           Number(a.position ?? 999) - Number(b.position ?? 999) || byStrength(a, b),
-      )
-      .map((r) => r.club_id as string);
+      );
+    const order = sorted.map((r) => r.club_id as string);
+    const groupOf = new Map<string, string | null>(sorted.map((r) => [r.club_id as string, r.group_id]));
+    return applyZoneConflictSwap(order, groupOf, swapIfSameZone);
   }
 
   // zone_rank: group order minor, position tier major.

@@ -286,6 +286,7 @@ export async function generatePlayoffBracket(
       perGroup: seedingCfg.perGroup,
       fromPosition: seedingCfg.fromPosition,
       untilFinished: seedingCfg.untilFinished,
+      swapIfSameZone: seedingCfg.swapIfSameZone,
     });
   }
   // Esperando a que terminen las zonas, el cuadro queda vacío con sus rótulos:
@@ -565,6 +566,7 @@ export async function reseedPlayoffBracket(
     perGroup: seedingCfg.perGroup,
     fromPosition: seedingCfg.fromPosition,
     untilFinished: seedingCfg.untilFinished,
+    swapIfSameZone: seedingCfg.swapIfSameZone,
   });
   if (orderedClubIds.length === 0) return { ok: true, reseeded: 0 };
   const seedLabels = await computeSeedLabels(supabase, seedingCfg);
