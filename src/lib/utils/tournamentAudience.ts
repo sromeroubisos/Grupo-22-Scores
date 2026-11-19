@@ -191,6 +191,10 @@ const BOTH_AUDIENCES_PATTERNS = [
     // los seleccionados de las uniones. Medido contra los 1.199 nombres de
     // `tournaments`: es el único que lo dice.
     /\bselect\s*12\b/i,
+    // Campeones Veco Villegas (Tucumán, M19): el torneo de los campeones M19 de
+    // cada unión del país. Es de M19, pero es de los grandes del calendario
+    // argentino y el hincha lo busca en la portada de mayores.
+    /\bveco\s+villegas\b/i,
 ];
 
 /** Si el torneo se muestra en los dos segmentos en vez de en el suyo. */
