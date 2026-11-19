@@ -14997,10 +14997,50 @@ function drawBracketBlockCard(
     });
 }
 
+type BracketBlockEntry = { round: PlayoffBracketRoundData; index: number; matchOffset?: number };
+
+// Algunas fuentes (Rugby Europe) traen "Final y 3.º puesto" como UNA ronda de dos
+// partidos. Hay que partirla: la final sigue al arbol y el 3.er puesto cuelga debajo.
+// La final es el cruce que juegan los ganadores de la ronda anterior.
+function splitCombinedFinalRound(entries: BracketBlockEntry[]): BracketBlockEntry[] {
+    const out: BracketBlockEntry[] = [];
+    entries.forEach((entry, position) => {
+        const name = getBracketRoundName(entry.round, entry.index).toLowerCase();
+        const matches = entry.round.matches;
+        const previous = entries[position - 1];
+        if (matches.length !== 2 || !previous || !/\bfinal\b/.test(name) || !/puesto/.test(name)) {
+            out.push(entry);
+            return;
+        }
+        const winners = new Set<string>();
+        previous.round.matches.forEach((match) => {
+            (['home', 'away'] as const).forEach((side) => {
+                if (!getBracketMatchWinner(match, side)) return;
+                const label = side === 'home'
+                    ? getBracketParticipantName(match.home_team || null, match.home_participant || null)
+                    : getBracketParticipantName(match.away_team || null, match.away_participant || null);
+                winners.add(label.trim().toLowerCase());
+            });
+        });
+        const finalScore = (match: PlayoffBracketMatchData) =>
+            [
+                getBracketParticipantName(match.home_team || null, match.home_participant || null),
+                getBracketParticipantName(match.away_team || null, match.away_participant || null),
+            ].filter((label) => winners.has(label.trim().toLowerCase())).length;
+        // Empate (sin ganadores cargados): la final es la ultima, como en el fixture.
+        const finalIndex = finalScore(matches[0]) > finalScore(matches[1]) ? 0 : 1;
+        const thirdIndex = 1 - finalIndex;
+        const base = entry.matchOffset ?? 0;
+        out.push({ round: { ...entry.round, name: 'Final', round_name: undefined, ROUND_NAME: undefined, matches: [matches[finalIndex]] }, index: entry.index, matchOffset: base + finalIndex });
+        out.push({ round: { ...entry.round, name: '3.er puesto', round_name: undefined, ROUND_NAME: undefined, matches: [matches[thirdIndex]] }, index: entry.index, matchOffset: base + thirdIndex });
+    });
+    return out;
+}
+
 function drawBracketBlocks(
     ctx: CanvasRenderingContext2D,
-    entries: Array<{ round: PlayoffBracketRoundData; index: number }>,
-    logosFor: (roundIndex: number, matchIndex: number) => { homeLogo: HTMLImageElement | null; awayLogo: HTMLImageElement | null },
+    rawEntries: BracketBlockEntry[],
+    rawLogosFor: (roundIndex: number, matchIndex: number) => { homeLogo: HTMLImageElement | null; awayLogo: HTMLImageElement | null },
     palette: BracketPalette,
     u: (value: number) => number,
     W: number,
@@ -15008,6 +15048,10 @@ function drawBracketBlocks(
     areaHeight: number,
     sideMargin?: number,
 ) {
+    const entries = splitCombinedFinalRound(rawEntries);
+    const offsetOf = new Map<PlayoffBracketRoundData, number>(entries.map((entry) => [entry.round, entry.matchOffset ?? 0]));
+    const logosFor = (roundIndex: number, matchIndex: number, round?: PlayoffBracketRoundData) =>
+        rawLogosFor(roundIndex, matchIndex + (round ? offsetOf.get(round) ?? 0 : 0));
     const thirdEntries = entries.filter((entry) => isBracketThirdPlaceName(getBracketRoundName(entry.round, entry.index)));
     let mainEntries = entries.filter((entry) => !thirdEntries.includes(entry));
     const hasFinal = mainEntries.length > 0 && thirdEntries.length > 0;
@@ -15110,7 +15154,7 @@ function drawBracketBlocks(
                 rowHeight,
                 title: '',
                 match,
-                ...logosFor(entry.index, matchIndex),
+                ...logosFor(entry.index, matchIndex, entry.round),
                 dense: false,
             }, palette, u);
         });
@@ -15133,7 +15177,7 @@ function drawBracketBlocks(
                     rowHeight,
                     title: '',
                     match,
-                    ...logosFor(entry.index, matchIndex),
+                    ...logosFor(entry.index, matchIndex, entry.round),
                     dense: false,
                 }, palette, u);
                 cursor += cardHeight + u(16);
