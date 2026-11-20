@@ -1,4 +1,4 @@
-const SW_VERSION = '2026-08-27-1';
+const SW_VERSION = '2026-11-20-1';
 const LOGO_CACHE = `g22-logo-cache-${SW_VERSION}`;
 const STATIC_CACHE = `g22-static-cache-${SW_VERSION}`;
 const OWNED_CACHE_PREFIXES = ['g22-logo-cache-', 'g22-static-cache-', 'g22-runtime-cache-', 'g22-app-cache-'];
@@ -121,6 +121,12 @@ async function getLatestUnreadNotification() {
 }
 
 function getNotificationTarget(notification) {
+  // El aviso en vivo trae su destino armado: se respeta, pero solo si es una
+  // ruta propia (nunca una URL externa).
+  if (notification && typeof notification.url === 'string' && notification.url.startsWith('/') && !notification.url.startsWith('//')) {
+    return notification.url;
+  }
+
   if (notification && notification.match_id) {
     return `/matches/${notification.match_id}`;
   }
@@ -171,16 +177,48 @@ self.addEventListener('push', (event) => {
     }
 
     const targetUrl = getNotificationTarget(notification);
-    await self.registration.showNotification(notification.title || 'G22 Scores', {
+
+    // Con `tag` propio (aviso en vivo de un partido) la notificacion nueva
+    // REEMPLAZA a la anterior del mismo partido en la bandeja: un solo cartel
+    // con el marcador, no una pila. Sin `tag` cada aviso es el suyo.
+    const hasOwnTag = typeof notification.tag === 'string' && notification.tag.length > 0;
+    const tag = hasOwnTag
+      ? notification.tag
+      : (notification.id ? `g22-${notification.id}` : 'g22-notification');
+
+    const options = {
       body: notification.body || 'Hay novedades de tus equipos favoritos.',
       icon: '/icon.png',
       badge: '/icon.png',
-      tag: notification.id ? `g22-${notification.id}` : 'g22-notification',
+      tag,
       data: {
         url: targetUrl,
         notificationId: notification.id || null,
       },
-    });
+    };
+
+    if (typeof notification.timestamp === 'number') options.timestamp = notification.timestamp;
+    // `renotify` exige `tag`: sin el, Chrome tira TypeError y el aviso no sale.
+    // En iPhone lo ignoran; en Android hace sonar el hito aunque reemplace.
+    if (hasOwnTag && notification.renotify === true) options.renotify = true;
+    if (notification.silent === true) options.silent = true;
+    if (notification.requireInteraction === true) options.requireInteraction = true;
+    if (notification.kind === 'live') {
+      options.actions = [{ action: 'open', title: 'Ver partido' }];
+    }
+
+    try {
+      await self.registration.showNotification(notification.title || 'G22 Scores', options);
+    } catch (error) {
+      // Una opcion que el navegador no soporta no puede dejar el push mudo:
+      // se reintenta con lo minimo, que es lo que siempre funciono.
+      await self.registration.showNotification(notification.title || 'G22 Scores', {
+        body: options.body,
+        icon: options.icon,
+        tag: options.tag,
+        data: options.data,
+      });
+    }
   })());
 });
 
@@ -244,7 +282,13 @@ self.addEventListener('notificationclick', (event) => {
 
       await client.focus();
       if ('navigate' in client) {
-        return client.navigate(targetUrl);
+        // En ventanas "no controladas" navigate() rechaza; sin este catch el toque
+        // en el aviso no hacia nada. Se cae a abrir una ventana nueva.
+        try {
+          return await client.navigate(targetUrl);
+        } catch {
+          break;
+        }
       }
       return undefined;
     }

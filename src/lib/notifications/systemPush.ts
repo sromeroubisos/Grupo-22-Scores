@@ -25,6 +25,14 @@ export type SystemPushPayload = {
     entity_type?: string | null;
     entity_id?: string | null;
     match_id?: string | null;
+    /** `live`: aviso en vivo de un partido; el SW lo reemplaza por `tag`. */
+    kind?: 'live';
+    tag?: string;
+    silent?: boolean;
+    renotify?: boolean;
+    requireInteraction?: boolean;
+    url?: string;
+    timestamp?: number;
 };
 
 export type PushSendResult = {
@@ -48,6 +56,9 @@ type VapidConfig = {
  * Seis horas cubren una noche entera; un resultado sigue valiendo a la manana.
  */
 export const PUSH_TTL_SECONDS = 6 * 60 * 60;
+
+/** Un partido dura ~2 h: pasado eso el marcador viejo ya no le sirve a nadie. */
+export const LIVE_PUSH_TTL_SECONDS = 2 * 60 * 60;
 
 const FALLBACK_VAPID_SUBJECT = 'mailto:hola@g22scores.com';
 
@@ -98,7 +109,24 @@ function serializePayload(payload: SystemPushPayload | null | undefined) {
         entity_type: payload.entity_type ?? null,
         entity_id: payload.entity_id ?? null,
         match_id: payload.match_id ?? null,
+        kind: payload.kind,
+        tag: payload.tag,
+        silent: payload.silent,
+        renotify: payload.renotify,
+        requireInteraction: payload.requireInteraction,
+        url: payload.url,
+        timestamp: payload.timestamp,
     });
+}
+
+/**
+ * `Topic` (RFC 8030): si el celular esta apagado, el push service guarda solo el
+ * ULTIMO mensaje del mismo topic en vez de entregar diez marcadores viejos al
+ * prenderlo. Maximo 32 caracteres base64url: el uuid del partido sin guiones.
+ */
+function topicFor(payload: SystemPushPayload | null | undefined) {
+    if (payload?.kind !== 'live' || !payload.match_id) return undefined;
+    return payload.match_id.replace(/-/g, '').slice(0, 32);
 }
 
 export async function sendSystemPush(
@@ -128,7 +156,9 @@ export async function sendSystemPush(
                     publicKey: config.publicKey,
                     privateKey: config.privateKey,
                 },
-                TTL: PUSH_TTL_SECONDS,
+                // Un marcador en vivo vale poco horas despues; el resto de los avisos si.
+                TTL: payload?.kind === 'live' ? LIVE_PUSH_TTL_SECONDS : PUSH_TTL_SECONDS,
+                topic: topicFor(payload),
                 urgency: 'high',
                 contentEncoding: 'aes128gcm',
             },

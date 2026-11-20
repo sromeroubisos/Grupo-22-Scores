@@ -36,6 +36,16 @@ import {
     type LeagueFollowRow,
 } from '@/lib/services/followingService';
 import type { EntityType } from '@/lib/types/user';
+import { FOLLOW_EVENT } from '@/lib/notifications/webPushClient';
+
+/**
+ * Avisa que el usuario acaba de seguir algo. `PushActivationPrompt` lo escucha y
+ * ofrece activar los avisos del celular justo cuando tienen sentido.
+ */
+function announceFollow(name?: string) {
+    if (typeof window === 'undefined') return;
+    window.dispatchEvent(new CustomEvent(FOLLOW_EVENT, { detail: { name } }));
+}
 
 export type FavoriteItem = {
     id: string;
@@ -256,6 +266,7 @@ export function useFavorites() {
                 existingRows: matchedRows,
             });
             setActionError(null);
+            if (nextIsFavorite) announceFollow(options.name);
         } catch (err) {
             rollback();
             const message = isFollowingSchemaMissingError(err)
@@ -300,6 +311,7 @@ export function useFavorites() {
                     existingRows: matchedRows,
                 });
                 setActionError(null);
+                if (nextIsFavorite) announceFollow(item.name);
             } catch (err) {
                 rollback();
                 const message = isFollowingSchemaMissingError(err)

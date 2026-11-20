@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { Analytics } from "@vercel/analytics/next";
 import ChunkLoadRecovery from "@/components/ChunkLoadRecovery";
 import ConditionalLayout from "@/components/ConditionalLayout";
+import PushActivationPrompt from "@/components/PushActivationPrompt";
 // Force rebuild for ChunkLoadError fix
 import { AuthProvider } from "@/context/AuthContext";
 import { appIconHref } from "@/lib/appBranding";
@@ -176,6 +177,7 @@ export default function RootLayout({
           <Suspense fallback={null}>
             <ConditionalLayout>{children}</ConditionalLayout>
           </Suspense>
+          <PushActivationPrompt />
         </AuthProvider>
         <Analytics />
       </body>

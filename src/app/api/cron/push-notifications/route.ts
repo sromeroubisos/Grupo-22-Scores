@@ -1,8 +1,12 @@
 /**
  * /api/cron/push-notifications
  *
- * Sends system-level Web Push notifications for unread in-app notifications.
- * Called by Vercel Cron, usually every minute.
+ * Avisos del sistema (Web Push) al celular. Cada minuto hace dos cosas:
+ *
+ *  1. Pasada EN VIVO: un solo aviso por partido que se reemplaza con el marcador
+ *     (ver lib/notifications/liveMatchPush.ts). Es lo que se parece a una app.
+ *  2. Avisos sueltos: lo que quedo sin leer y sin enviar en `user_notifications`
+ *     (fútbol externo, etc.). Los de partidos propios los cubre el aviso en vivo.
  *
  * Authentication: Bearer {CRON_SECRET} header.
  */
@@ -15,16 +19,32 @@ import {
     sendSystemPush,
     type StoredPushSubscription,
 } from '@/lib/notifications/systemPush';
+import { runLivePushPass, type LivePassStats, type LiveSub } from '@/lib/notifications/liveMatchPush';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 export const maxDuration = 30;
 
-const MAX_NOTIFICATIONS_PER_RUN = 50;
+const MAX_NOTIFICATIONS_PER_RUN = 200;
+const SEND_CONCURRENCY = 8;
+
+/** Un aviso con mas de esto ya no es una novedad: se archiva sin mandarlo. */
+const STALE_AFTER_MS = 3 * 60 * 60 * 1000;
+/** Un fallo transitorio se reintenta cada minuto hasta este limite; despues se descarta. */
+const RETRY_WINDOW_MS = 30 * 60 * 1000;
+
+/**
+ * Los avisos de partidos propios (gol, try, final) los cubre el aviso EN VIVO,
+ * que es uno solo por partido y se reemplaza. Mandarlos ademas como push suelto
+ * era la rafaga de 16 avisos iguales. Siguen en la campanita de la app.
+ */
+const COVERED_BY_LIVE_TYPES = new Set(['team_event', 'match_finished']);
 
 type PendingNotification = {
     id: string;
     user_id: string;
+    type: string | null;
+    created_at: string;
     title: string;
     body: string;
     entity_type: string | null;
@@ -81,7 +101,7 @@ async function markNotificationHandled(
 
 async function disableExpiredSubscription(
     db: LooseSupabaseClient,
-    subscription: StoredPushSubscription,
+    subscription: { id: string },
     reason: string,
 ) {
     await db
@@ -93,6 +113,18 @@ async function disableExpiredSubscription(
             updated_at: new Date().toISOString(),
         })
         .eq('id', subscription.id);
+}
+
+async function pool<T>(items: T[], size: number, worker: (item: T) => Promise<void>) {
+    let index = 0;
+    const runners = Array.from({ length: Math.min(size, items.length) }, async () => {
+        while (index < items.length) {
+            const current = items[index];
+            index += 1;
+            await worker(current);
+        }
+    });
+    await Promise.all(runners);
 }
 
 export async function GET(request: NextRequest) {
@@ -109,12 +141,30 @@ export async function GET(request: NextRequest) {
     }
 
     const db = createAdminClient() as unknown as LooseSupabaseClient;
+
+    // 1) Avisos en vivo. Si falla (esquema sin migrar, red), los sueltos siguen.
+    let live: LivePassStats | { error: string } | null = null;
+    try {
+        live = await runLivePushPass({
+            db,
+            send: async (sub: LiveSub, payload) => {
+                const result = await sendSystemPush(sub, payload);
+                return { ok: result.ok, expired: result.expired, error: result.error };
+            },
+            onExpired: (sub, reason) => disableExpiredSubscription(db, sub, reason),
+        });
+    } catch (error) {
+        live = { error: error instanceof Error ? error.message : 'live_pass_failed' };
+        console.error('[push-notifications] pasada en vivo fallo:', error);
+    }
+
+    // 2) Avisos sueltos.
     const pendingResult = await db
         .from<PendingNotification[]>('user_notifications')
         // El push viaja con titulo, cuerpo y destino adentro (cifrado): el
         // service worker lo muestra sin volver a pedirle nada al servidor, que
         // con la app cerrada horas es lo que fallaba (sesion vencida).
-        .select('id, user_id, title, body, entity_type, entity_id, match_id')
+        .select('id, user_id, type, created_at, title, body, entity_type, entity_id, match_id')
         .is('read_at', null)
         .is('system_notified_at', null)
         .order('created_at', { ascending: true })
@@ -126,11 +176,12 @@ export async function GET(request: NextRequest) {
             schemaReady: false,
             sent: 0,
             processed: 0,
+            live,
         });
     }
 
     if (pendingResult.error) {
-        return NextResponse.json({ error: pendingResult.error.message }, { status: 500 });
+        return NextResponse.json({ error: pendingResult.error.message, live }, { status: 500 });
     }
 
     const pending = pendingResult.data ?? [];
@@ -141,10 +192,43 @@ export async function GET(request: NextRequest) {
             schemaReady: true,
             sent: 0,
             processed: 0,
+            live,
         });
     }
 
-    const userIds = Array.from(new Set(pending.map((notification) => notification.user_id)));
+    const now = Date.now();
+    let processed = 0;
+    let stale = 0;
+    let covered = 0;
+
+    // Lo viejo y lo que ya cubre el aviso en vivo se archiva sin mandar nada.
+    const toSend: PendingNotification[] = [];
+    for (const notification of pending) {
+        const age = now - Date.parse(notification.created_at);
+        if (Number.isFinite(age) && age > STALE_AFTER_MS) {
+            await markNotificationHandled(db, notification.id, 'stale_not_sent');
+            stale += 1;
+            processed += 1;
+            continue;
+        }
+
+        if (COVERED_BY_LIVE_TYPES.has(notification.type ?? '') && notification.match_id) {
+            await markNotificationHandled(db, notification.id, 'covered_by_live_push');
+            covered += 1;
+            processed += 1;
+            continue;
+        }
+
+        toSend.push(notification);
+    }
+
+    if (toSend.length === 0) {
+        return NextResponse.json({
+            ok: true, configured: true, schemaReady: true, processed, sent: 0, stale, covered, live,
+        });
+    }
+
+    const userIds = Array.from(new Set(toSend.map((notification) => notification.user_id)));
     const subscriptionsResult = await db
         .from<StoredPushSubscription[]>('user_push_subscriptions')
         .select('id, user_id, endpoint, p256dh, auth')
@@ -156,12 +240,13 @@ export async function GET(request: NextRequest) {
             ok: true,
             schemaReady: false,
             sent: 0,
-            processed: 0,
+            processed,
+            live,
         });
     }
 
     if (subscriptionsResult.error) {
-        return NextResponse.json({ error: subscriptionsResult.error.message }, { status: 500 });
+        return NextResponse.json({ error: subscriptionsResult.error.message, live }, { status: 500 });
     }
 
     const subscriptionsByUser = new Map<string, StoredPushSubscription[]>();
@@ -173,16 +258,19 @@ export async function GET(request: NextRequest) {
 
     let sent = 0;
     let failed = 0;
-    let processed = 0;
+    let retrying = 0;
 
-    for (const notification of pending) {
+    await pool(toSend, SEND_CONCURRENCY, async (notification) => {
         const subscriptions = subscriptionsByUser.get(notification.user_id) ?? [];
         if (subscriptions.length === 0) {
             await markNotificationHandled(db, notification.id, 'no_active_push_subscription');
             processed += 1;
-            continue;
+            return;
         }
 
+        // Partido externo (sin fila propia): el mismo tag para todos los avisos de
+        // ese partido, asi el marcador nuevo REEMPLAZA al anterior en la bandeja.
+        const isMatch = notification.entity_type === 'match' && notification.entity_id;
         const payload = {
             id: notification.id,
             title: notification.title,
@@ -190,6 +278,13 @@ export async function GET(request: NextRequest) {
             entity_type: notification.entity_type,
             entity_id: notification.entity_id,
             match_id: notification.match_id,
+            ...(isMatch
+                ? {
+                    tag: `g22-match-${notification.entity_id}`,
+                    renotify: true,
+                    url: `/matches/${notification.entity_id}`,
+                }
+                : {}),
         };
 
         const results = await Promise.all(subscriptions.map(async (subscription) => {
@@ -205,13 +300,25 @@ export async function GET(request: NextRequest) {
         sent += successes;
         failed += errors.length;
 
-        await markNotificationHandled(
-            db,
-            notification.id,
-            successes > 0 ? null : (errors[0]?.error || 'push_send_failed'),
-        );
+        if (successes > 0) {
+            await markNotificationHandled(db, notification.id, null);
+            processed += 1;
+            return;
+        }
+
+        // Todos fallaron. Si fue una suscripcion vencida no hay nada que reintentar;
+        // si fue un 5xx, un 429 o un timeout del push service, el aviso queda
+        // pendiente y se reintenta en el proximo minuto (antes se perdia).
+        const transient = errors.some((result) => !result.expired);
+        const age = now - Date.parse(notification.created_at);
+        if (transient && age < RETRY_WINDOW_MS) {
+            retrying += 1;
+            return;
+        }
+
+        await markNotificationHandled(db, notification.id, errors[0]?.error || 'push_send_failed');
         processed += 1;
-    }
+    });
 
     return NextResponse.json({
         ok: true,
@@ -220,5 +327,9 @@ export async function GET(request: NextRequest) {
         processed,
         sent,
         failed,
+        retrying,
+        stale,
+        covered,
+        live,
     });
 }
