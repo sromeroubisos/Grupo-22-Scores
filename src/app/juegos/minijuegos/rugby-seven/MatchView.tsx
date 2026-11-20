@@ -1,0 +1,664 @@
+'use client';
+
+import { useEffect, useRef, useState } from 'react';
+import { SevenMatch, VIEW_H, VIEW_W, type Hud, type MatchConfig, type MatchEvent } from './engine';
+import styles from './seven.module.css';
+import { assignKey, CONTROL_LABELS, DEFAULT_BINDINGS, keyName, loadBindings, saveBindings, type Bindings, type ControlAction } from './controls';
+
+/** Ancho del lienzo (alto fijo 270): entre 4:3 y ~2,4:1. Más ancho o más angosto, se centra. */
+const MIN_VIEW_W = 360;
+const MAX_VIEW_W = 640;
+
+interface Props {
+    fontFamily?: string; // fuente pixel para el nombre sobre el jugador
+    cfg: MatchConfig;
+    onFinish: (score: [number, number], log: MatchEvent[]) => void;
+    onQuit: () => void;
+    musicSrc?: string | null;
+}
+
+const MUTE_KEY = 'g22-rugby-seven-mute';
+/** Cuánto hay que mantener W/S para que el pase sea un salteo. */
+const SKIP_HOLD_MS = 220;
+
+/* Gestos táctiles (ver onPointerDown). Medidas en píxeles de pantalla. */
+const KICK_ZONE = 0.22; // franja izquierda de la cancha donde mantener = patear
+const KICK_HOLD_MS = 170; // hay que dejar el dedo esto para que empiece a cargar la patada
+const SWIPE_PX = 34; // desde acá un movimiento rápido es un deslizamiento
+const SWIPE_MS = 260; // y tiene que pasar en este tiempo
+const SKIP_SWIPE_PX = 120; // un deslizamiento vertical así de largo es un salteo
+const TAP_PX = 14;
+const TAP_MS = 240;
+const DOUBLE_TAP_MS = 320;
+const TOUCH_HELP_KEY = 'g22-rugby-seven-touch-help';
+
+interface Finger {
+    kind: 'move' | 'kick' | 'swipe' | 'done';
+    x0: number;
+    y0: number;
+    t0: number;
+    dir: 'up' | 'down';
+    kicking: boolean;
+}
+
+const TOUCH_GESTURES: [string, string][] = [
+    ['Moverte', 'Mantené el dedo arriba o abajo de la mitad de la cancha.'],
+    ['Pase', 'Deslizá rápido hacia arriba o hacia abajo. Un deslizamiento largo es un salteo.'],
+    ['Chocar o tacklear', 'Deslizá rápido hacia adelante o hacia atrás.'],
+    ['Patear', 'Mantené en la franja izquierda para cargar y soltá para patear.'],
+    ['Drop', 'Dos toques seguidos.'],
+    ['Scrum, ruck, line y conversión', 'Tocá la pantalla.'],
+    ['Defendiendo', 'Un toque cambia de jugador.'],
+];
+
+/** La lista de gestos del celular (en la ayuda inicial y en la pausa). */
+function TouchLegend() {
+    return (
+        <ul className={styles.controlsList}>
+            {TOUCH_GESTURES.map(([label, hint]) => (
+                <li key={label}>
+                    <span>
+                        <strong>{label}</strong>
+                        <small>{hint}</small>
+                    </span>
+                </li>
+            ))}
+        </ul>
+    );
+}
+
+/** Las ayudas del motor hablan del teclado; en el celular, de la pantalla. */
+const touchHint = (h: string) =>
+    h
+        .replace(/^Tocá ESPACIO/, 'Tocá la pantalla')
+        .replace(/^ESPACIO o Q cuando/, 'Tocá la pantalla cuando')
+        .replace(/^ESPACIO (cuando|en)/, 'Tocá la pantalla $1');
+
+/** Celular o tablet: sin mouse y con dedo. */
+const isTouchDevice = () => typeof window !== 'undefined' && window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+
+/** Tiempo de juego transcurrido, m:ss. */
+function clockOf(t: number) {
+    const s = Math.floor(t);
+    return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+}
+
+/** Cada cuánto aparece una línea del relato simulado. */
+const SIM_STEP_MS = 650;
+
+interface SimRun {
+    events: MatchEvent[];
+    from: [number, number];
+    startT: number;
+    final: [number, number];
+}
+
+function hudKey(h: Hud) {
+    return `${h.sh}|${h.sa}|${h.clock}|${h.period}|${h.banner}|${h.bannerSub}|${h.hint}|${h.attacking}|${h.phase}|${h.carrier}`;
+}
+
+/**
+ * El partido: canvas en píxeles duros + marcador y avisos en el DOM.
+ * Teclado: ↑/↓ moverse (y amagar), W/S pase, D chocar o tacklear,
+ * Espacio pase al mejor ubicado / cambiar jugador / scrum / line / patada.
+ */
+export default function MatchView({ cfg, onFinish, onQuit, musicSrc = null, fontFamily }: Props) {
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const matchRef = useRef<SevenMatch | null>(null);
+    const keys = useRef(new Set<string>());
+    const touchMove = useRef({ up: false, down: false });
+    const pausedRef = useRef(false);
+    const passDown = useRef<{ w: number | null; s: number | null }>({ w: null, s: null });
+    const finishRef = useRef(onFinish);
+    const [hud, setHud] = useState<Hud | null>(null);
+    const [paused, setPaused] = useState(false);
+    const audioRef = useRef<HTMLAudioElement>(null);
+    const [hasMusic, setHasMusic] = useState(false);
+    const [muted, setMuted] = useState(false);
+    /** Mientras se lee el relato simulado, el final no avanza solo. */
+    const holdFinish = useRef(false);
+    const [sim, setSim] = useState<SimRun | null>(null);
+    const [simShown, setSimShown] = useState(0);
+    const bindRef = useRef<Bindings>(DEFAULT_BINDINGS);
+    const [bindings, setBindings] = useState<Bindings>(DEFAULT_BINDINGS);
+    const [showControls, setShowControls] = useState(false);
+    /** Acción esperando que aprieten la tecla nueva. */
+    const rebindRef = useRef<ControlAction | null>(null);
+    const [rebinding, setRebinding] = useState<ControlAction | null>(null);
+    const screenRef = useRef<HTMLDivElement>(null);
+    const [view, setView] = useState({ w: VIEW_W, cssW: 0, cssH: 0 });
+
+    useEffect(() => {
+        const b = loadBindings();
+        bindRef.current = b;
+        setBindings(b);
+    }, []);
+
+    const updateBindings = (b: Bindings) => {
+        bindRef.current = b;
+        setBindings(b);
+        saveBindings(b);
+    };
+
+    const startRebind = (a: ControlAction | null) => {
+        rebindRef.current = a;
+        setRebinding(a);
+    };
+
+    // La cancha ocupa toda la pantalla: el ancho del lienzo sigue la proporción del lugar disponible.
+    useEffect(() => {
+        const el = screenRef.current;
+        if (!el) return;
+        const fit = () => {
+            const W = el.clientWidth;
+            const H = el.clientHeight;
+            if (!W || !H) return;
+            const w = Math.round(Math.min(MAX_VIEW_W, Math.max(MIN_VIEW_W, (VIEW_H * W) / H)));
+            const scale = Math.min(W / w, H / VIEW_H);
+            setView({ w, cssW: Math.floor(w * scale), cssH: Math.floor(VIEW_H * scale) });
+            if (matchRef.current) matchRef.current.viewW = w;
+        };
+        fit();
+        const ro = new ResizeObserver(fit);
+        ro.observe(el);
+        return () => ro.disconnect();
+    }, []);
+
+    useEffect(() => {
+        finishRef.current = onFinish;
+    }, [onFinish]);
+
+    // El relato aparece de a una línea, como si se fuera jugando.
+    useEffect(() => {
+        if (!sim || simShown >= sim.events.length) return;
+        const id = window.setTimeout(() => setSimShown((n) => n + 1), SIM_STEP_MS);
+        return () => window.clearTimeout(id);
+    }, [sim, simShown]);
+
+    const startSim = () => {
+        const m = matchRef.current;
+        if (!m) return;
+        holdFinish.current = true;
+        const from: [number, number] = [m.score[0], m.score[1]];
+        const startT = m.elapsed();
+        const events = m.simulateRest();
+        setSim({ events, from, startT, final: [m.score[0], m.score[1]] });
+        setSimShown(0);
+        pausedRef.current = false;
+        setPaused(false);
+    };
+
+    useEffect(() => {
+        try {
+            setMuted(localStorage.getItem(MUTE_KEY) === '1');
+        } catch {
+            // Sin localStorage: la música arranca prendida.
+        }
+    }, []);
+
+    // Música de fondo: suena mientras se juega, se corta en la pausa y al salir.
+    useEffect(() => {
+        const audio = audioRef.current;
+        if (!audio || !hasMusic) return;
+        audio.volume = 0.45;
+        if (paused || muted || hud?.phase === 'end') audio.pause();
+        else audio.play().catch(() => {});
+    }, [hasMusic, paused, muted, hud?.phase]);
+
+    const toggleMute = () => {
+        setMuted((m) => {
+            try {
+                localStorage.setItem(MUTE_KEY, m ? '0' : '1');
+            } catch {
+                // Sin localStorage: vale solo para este partido.
+            }
+            return !m;
+        });
+    };
+
+    useEffect(() => {
+        const match = new SevenMatch(cfg);
+        if (fontFamily) match.fontFamily = fontFamily;
+        if (screenRef.current) {
+            const el = screenRef.current;
+            match.viewW = Math.round(Math.min(MAX_VIEW_W, Math.max(MIN_VIEW_W, (VIEW_H * el.clientWidth) / Math.max(1, el.clientHeight))));
+        }
+        matchRef.current = match;
+        let finishTimer = 0;
+        match.onEnd = (score) => {
+            // Si se simuló, el que avanza es el botón del relato.
+            if (holdFinish.current) return;
+            finishTimer = window.setTimeout(() => finishRef.current(score, match.log), 2600);
+        };
+        const ctx = canvasRef.current?.getContext('2d');
+        let raf = 0;
+        let last = performance.now();
+        let lastKey = '';
+        const loop = (now: number) => {
+            const dt = (now - last) / 1000;
+            last = now;
+            if (!pausedRef.current) {
+                const attacking = match.hud().attacking;
+                const k = keys.current;
+                const b = bindRef.current;
+                // Moverse. Defendiendo, las teclas de pase también mueven (no hay pase que dar).
+                const up = k.has(b.up) || (!attacking && k.has(b.passUp)) || touchMove.current.up;
+                const down = k.has(b.down) || (!attacking && k.has(b.passDown)) || touchMove.current.down;
+                match.setMove(up, down);
+                match.update(dt);
+            }
+            if (ctx) match.render(ctx);
+            const h = match.hud();
+            const key = hudKey(h);
+            if (key !== lastKey) {
+                lastKey = key;
+                setHud(h);
+            }
+            raf = requestAnimationFrame(loop);
+        };
+        raf = requestAnimationFrame(loop);
+        return () => {
+            cancelAnimationFrame(raf);
+            window.clearTimeout(finishTimer);
+            matchRef.current = null;
+        };
+    }, [cfg, fontFamily]);
+
+    const togglePause = (value?: boolean) => {
+        const next = value ?? !pausedRef.current;
+        pausedRef.current = next;
+        setPaused(next);
+    };
+
+    useEffect(() => {
+        const onDown = (e: KeyboardEvent) => {
+            const k = e.key.toLowerCase();
+            // Reasignando un control: la próxima tecla es la nueva (Esc cancela).
+            if (rebindRef.current) {
+                e.preventDefault();
+                const a = rebindRef.current;
+                startRebind(null);
+                if (k !== 'escape') updateBindings(assignKey(bindRef.current, a, k));
+                return;
+            }
+            const m = matchRef.current;
+            if (!m) return;
+            const b = bindRef.current;
+            const action = (Object.keys(b) as ControlAction[]).find((a) => b[a] === k);
+            if (!action && k !== 'escape') return;
+            e.preventDefault();
+            if (k === 'escape' || action === 'pause') {
+                if (!e.repeat && !holdFinish.current) togglePause();
+                return;
+            }
+            if (pausedRef.current) return;
+            const fresh = !keys.current.has(k);
+            keys.current.add(k);
+            if (!fresh) return;
+            const attacking = m.hud().attacking;
+            if (action === 'up') m.juke(-1);
+            else if (action === 'down') m.juke(1);
+            else if (action === 'hit') m.hit();
+            else if (action === 'kick' && attacking) m.startKick();
+            else if (action === 'drop') m.dropGoal();
+            else if (action === 'action') m.action();
+            // Pase: sale al soltar. Toque = pase corto; mantenido = salteo.
+            else if (action === 'passUp' && attacking) passDown.current.w = performance.now();
+            else if (action === 'passDown' && attacking) passDown.current.s = performance.now();
+        };
+        const onUp = (e: KeyboardEvent) => {
+            const k = e.key.toLowerCase();
+            keys.current.delete(k);
+            const m = matchRef.current;
+            if (!m || pausedRef.current) return;
+            const b = bindRef.current;
+            if (k === b.kick) m.releaseKick();
+            if (k === b.passUp || k === b.passDown) {
+                const slot = k === b.passUp ? 'w' : 's';
+                const t0 = passDown.current[slot];
+                passDown.current[slot] = null;
+                if (t0 !== null) m.pass(slot === 'w' ? -1 : 1, performance.now() - t0 >= SKIP_HOLD_MS);
+            }
+        };
+        const onBlur = () => keys.current.clear();
+        const onVis = () => {
+            if (document.hidden) togglePause(true);
+        };
+        window.addEventListener('keydown', onDown);
+        window.addEventListener('keyup', onUp);
+        window.addEventListener('blur', onBlur);
+        document.addEventListener('visibilitychange', onVis);
+        return () => {
+            window.removeEventListener('keydown', onDown);
+            window.removeEventListener('keyup', onUp);
+            window.removeEventListener('blur', onBlur);
+            document.removeEventListener('visibilitychange', onVis);
+        };
+    }, []);
+
+    /*
+     * ---- Táctil sobre la cancha (celular y tablet) ----
+     *   · Mantener arriba o abajo de la mitad de la pantalla: el jugador va para ese lado.
+     *   · Mantener en la franja izquierda: carga la patada; al soltar, patea.
+     *   · Dos toques: drop.
+     *   · Deslizar rápido hacia arriba o hacia abajo: pase para ese lado (largo = salteo).
+     *   · Deslizar rápido hacia adelante o atrás: chocar / tacklear.
+     *   · En scrum, ruck, line y conversiones: tocar la pantalla.
+     * Cada dedo es un gesto: se puede mover con uno y pasar con otro.
+     */
+    const fingers = useRef(new Map<number, Finger>());
+    const lastTap = useRef(0);
+    const syncTouchMove = () => {
+        let up = false;
+        let down = false;
+        for (const f of fingers.current.values()) {
+            if (f.kind !== 'move') continue;
+            if (f.dir === 'up') up = true;
+            else down = true;
+        }
+        touchMove.current = { up, down };
+    };
+    const zoneOf = (e: React.PointerEvent) => {
+        const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
+        return { rx: (e.clientX - r.left) / r.width, ry: (e.clientY - r.top) / r.height };
+    };
+    const onPointerDown = (e: React.PointerEvent) => {
+        const m = matchRef.current;
+        if (!m || pausedRef.current) return;
+        e.preventDefault();
+        try {
+            // Que el dedo siga siendo de la cancha aunque se vaya del borde.
+            (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
+        } catch {
+            // Algunos navegadores no lo permiten para ese puntero: el gesto sigue igual.
+        }
+        const h = m.hud();
+        // Scrum, ruck, line, conversión y drop: cada toque cuenta.
+        if (h.phase === 'scrum' || h.phase === 'ruck' || h.phase === 'lineout' || h.phase === 'conv' || h.phase === 'drop') {
+            m.action();
+            fingers.current.set(e.pointerId, { kind: 'done', x0: e.clientX, y0: e.clientY, t0: performance.now(), dir: 'up', kicking: false });
+            return;
+        }
+        const { rx, ry } = zoneOf(e);
+        const kind: Finger['kind'] = rx < KICK_ZONE && h.attacking ? 'kick' : 'move';
+        fingers.current.set(e.pointerId, { kind, x0: e.clientX, y0: e.clientY, t0: performance.now(), dir: ry < 0.5 ? 'up' : 'down', kicking: false });
+        if (kind === 'kick') {
+            // La patada se empieza a cargar recién si el dedo se queda: un toque rápido puede ser el primero del drop.
+            window.setTimeout(() => {
+                const f = fingers.current.get(e.pointerId);
+                if (f && f.kind === 'kick' && !pausedRef.current) {
+                    f.kicking = true;
+                    matchRef.current?.startKick();
+                }
+            }, KICK_HOLD_MS);
+        }
+        syncTouchMove();
+    };
+    const onPointerMove = (e: React.PointerEvent) => {
+        const f = fingers.current.get(e.pointerId);
+        if (!f || f.kind === 'done' || f.kind === 'swipe') return;
+        const dx = e.clientX - f.x0;
+        const dy = e.clientY - f.y0;
+        // Movimiento rápido y largo: es un deslizamiento, ese dedo deja de mover al jugador.
+        if (Math.hypot(dx, dy) > SWIPE_PX && performance.now() - f.t0 < SWIPE_MS && !f.kicking) {
+            f.kind = 'swipe';
+            syncTouchMove();
+            return;
+        }
+        if (f.kind === 'move') {
+            const { ry } = zoneOf(e);
+            const dir = ry < 0.5 ? 'up' : 'down';
+            if (dir !== f.dir) {
+                f.dir = dir;
+                syncTouchMove();
+            }
+        }
+    };
+    const onPointerEnd = (e: React.PointerEvent) => {
+        const f = fingers.current.get(e.pointerId);
+        fingers.current.delete(e.pointerId);
+        syncTouchMove();
+        const m = matchRef.current;
+        if (!f || !m || pausedRef.current || f.kind === 'done') return;
+        if (f.kicking) {
+            m.releaseKick();
+            return;
+        }
+        if (e.type === 'pointercancel') return;
+        const dx = e.clientX - f.x0;
+        const dy = e.clientY - f.y0;
+        const dt = performance.now() - f.t0;
+        const dist = Math.hypot(dx, dy);
+        if (dist > SWIPE_PX && dt < SWIPE_MS + 200) {
+            if (Math.abs(dy) > Math.abs(dx)) {
+                // Arriba o abajo: pase para ese lado; un deslizamiento largo es salteo. Defendiendo, amague.
+                if (m.hud().attacking) m.pass(dy < 0 ? -1 : 1, Math.abs(dy) > SKIP_SWIPE_PX);
+                else m.juke(dy < 0 ? -1 : 1);
+            } else m.hit();
+            return;
+        }
+        if (dist < TAP_PX && dt < TAP_MS) {
+            const now = performance.now();
+            if (now - lastTap.current < DOUBLE_TAP_MS) {
+                lastTap.current = 0;
+                if (m.hud().attacking) m.dropGoal();
+                return;
+            }
+            lastTap.current = now;
+            // Defendiendo, un toque cambia de jugador.
+            if (!m.hud().attacking) m.action();
+        }
+    };
+
+    // En celular: la ayuda de los gestos se muestra la primera vez (con el partido en pausa).
+    const [touch, setTouch] = useState(false);
+    const [touchHelp, setTouchHelp] = useState(false);
+    useEffect(() => {
+        if (!isTouchDevice()) return;
+        setTouch(true);
+        let seen = false;
+        try {
+            seen = localStorage.getItem(TOUCH_HELP_KEY) === '1';
+        } catch {
+            // Sin localStorage: se muestra igual.
+        }
+        if (!seen) {
+            setTouchHelp(true);
+            pausedRef.current = true;
+        }
+    }, []);
+    const closeTouchHelp = () => {
+        setTouchHelp(false);
+        pausedRef.current = paused;
+        try {
+            localStorage.setItem(TOUCH_HELP_KEY, '1');
+        } catch {
+            // Sin localStorage: la próxima vez se vuelve a mostrar.
+        }
+    };
+
+    // Pantalla fija mientras se juega: sin zoom con dos dedos (Safari) ni rebote al deslizar.
+    useEffect(() => {
+        const stop = (e: Event) => e.preventDefault();
+        const html = document.documentElement;
+        const prev = html.style.overscrollBehavior;
+        html.style.overscrollBehavior = 'none';
+        document.addEventListener('gesturestart', stop);
+        document.addEventListener('gesturechange', stop);
+        return () => {
+            html.style.overscrollBehavior = prev;
+            document.removeEventListener('gesturestart', stop);
+            document.removeEventListener('gesturechange', stop);
+        };
+    }, []);
+
+    return (
+        <div className={styles.matchWrap}>
+            <div className={styles.screen} ref={screenRef}>
+                <canvas
+                    ref={canvasRef}
+                    width={view.w}
+                    height={VIEW_H}
+                    className={styles.canvas}
+                    style={view.cssW ? { width: view.cssW, height: view.cssH } : undefined}
+                    onPointerDown={onPointerDown}
+                    onPointerMove={onPointerMove}
+                    onPointerUp={onPointerEnd}
+                    onPointerCancel={onPointerEnd}
+                    onContextMenu={(e) => e.preventDefault()}
+                    role="img"
+                    aria-label={`Partido ${cfg.home.name} contra ${cfg.away.name}`}
+                />
+                {/* Marcador y reloj arriba a la izquierda, sobre la tribuna. */}
+                <div className={styles.hudLeft}>
+                    <span className={styles.sbTeam}>
+                        <i style={{ background: hud?.homeColor }} aria-hidden="true" />
+                        {hud?.home}
+                    </span>
+                    <span className={styles.sbScore} aria-live="polite">
+                        {hud?.sh ?? 0} - {hud?.sa ?? 0}
+                    </span>
+                    <span className={styles.sbTeam}>
+                        {hud?.away}
+                        <i style={{ background: hud?.awayColor }} aria-hidden="true" />
+                    </span>
+                    <span className={styles.sbClock}>
+                        {hud?.clock} <small>{hud?.period}</small>
+                    </span>
+                    {hud?.carrier && <small className={styles.sbCarrier}>{hud.carrier}</small>}
+                </div>
+                {/* Pausa, música y controles arriba a la derecha. */}
+                <div className={styles.hudRight}>
+                    <span className={styles.sbHelp}>{keyName(bindings.pause)} · pausa y controles</span>
+                    {hasMusic && (
+                        <button type="button" className={styles.pauseBtn} onClick={toggleMute} aria-label={muted ? 'Prender la música' : 'Silenciar la música'} aria-pressed={!muted}>
+                            {muted ? '×♪' : '♪'}
+                        </button>
+                    )}
+                    <button type="button" className={styles.pauseBtn} onClick={() => togglePause()} aria-label={paused ? 'Seguir' : 'Pausa'}>
+                        {paused ? '▶' : 'II'}
+                    </button>
+                </div>
+                {musicSrc && <audio ref={audioRef} src={musicSrc} loop preload="auto" onCanPlay={() => setHasMusic(true)} onError={() => setHasMusic(false)} />}
+                {hud?.banner && !sim && (
+                    <div className={styles.banner} key={hud.banner + (hud.bannerSub ?? '')}>
+                        <strong>{hud.banner}</strong>
+                        {hud.bannerSub && <span>{hud.bannerSub}</span>}
+                    </div>
+                )}
+                {hud?.hint && <div className={styles.hint}>{touch ? touchHint(hud.hint) : hud.hint}</div>}
+                {/* Solo se ve en un celular parado (lo decide el CSS). */}
+                <div className={styles.rotateHint} aria-hidden="true">
+                    Girá el celular para jugar con la cancha grande
+                </div>
+                {paused && (
+                    <div className={styles.pauseLayer}>
+                        <strong>Pausa</strong>
+                        <button type="button" className={styles.btnPrimary} onClick={() => togglePause(false)}>
+                            Seguir
+                        </button>
+                        {hud?.phase !== 'end' && (
+                            <button
+                                type="button"
+                                className={styles.btnGhost}
+                                onClick={startSim}
+                            >
+                                Simular el resto
+                            </button>
+                        )}
+                        <button type="button" className={styles.btnGhost} onClick={onQuit}>
+                            Abandonar partido
+                        </button>
+                        <button type="button" className={styles.btnGhost} onClick={() => setShowControls((v) => !v)} aria-expanded={showControls}>
+                            {showControls ? 'Ocultar controles' : 'Controles'}
+                        </button>
+                        {showControls && touch && (
+                            <div className={styles.controlsPanel}>
+                                <TouchLegend />
+                            </div>
+                        )}
+                        {showControls && !touch && (
+                            <div className={styles.controlsPanel}>
+                                <ul className={styles.controlsList}>
+                                    {CONTROL_LABELS.map((c) => (
+                                        <li key={c.id}>
+                                            <span>
+                                                <strong>{c.label}</strong>
+                                                <small>{c.hint}</small>
+                                            </span>
+                                            <button
+                                                type="button"
+                                                className={rebinding === c.id ? styles.keyBtnActive : styles.keyBtn}
+                                                onClick={() => startRebind(rebinding === c.id ? null : c.id)}
+                                                aria-label={`${c.label}: ${keyName(bindings[c.id])}. Cambiar tecla`}
+                                            >
+                                                {rebinding === c.id ? 'Apretá una tecla' : keyName(bindings[c.id])}
+                                            </button>
+                                        </li>
+                                    ))}
+                                </ul>
+                                <p className={styles.controlsNote}>
+                                    Si elegís una tecla que ya usa otra acción, se intercambian. Recién tackleado, las de pase sueltan un offload.
+                                </p>
+                                <button type="button" className={styles.btnGhost} onClick={() => updateBindings({ ...DEFAULT_BINDINGS })}>
+                                    Volver a los de fábrica
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                )}
+                {touchHelp && (
+                    <div className={`${styles.pauseLayer} ${styles.touchHelp}`} role="dialog" aria-label="Cómo se juega en el celular">
+                        <strong>Cómo se juega con el dedo</strong>
+                        <div className={styles.controlsPanel}>
+                            <TouchLegend />
+                        </div>
+                        <button type="button" className={styles.btnPrimary} onClick={closeTouchHelp}>
+                            Entendido, a jugar
+                        </button>
+                    </div>
+                )}
+                {sim && (
+                    <div className={styles.simLayer} role="dialog" aria-label="Así se jugó el resto">
+                        <div className={styles.simHead}>
+                            <strong>Así se jugó el resto</strong>
+                            <span>
+                                Desde el {clockOf(sim.startT)} · {cfg.home.short} {sim.from[0]} - {sim.from[1]} {cfg.away.short}
+                            </span>
+                        </div>
+                        <ol className={styles.simList} aria-live="polite">
+                            {sim.events.length === 0 && simShown === 0 && <li>No pasó nada más: el partido se fue en tackles y rucks.</li>}
+                            {sim.events.slice(0, simShown).map((ev, i) => {
+                                const team = ev.side === 0 ? cfg.home : cfg.away;
+                                const color = ev.side === 0 ? hud?.homeColor : hud?.awayColor;
+                                return (
+                                    <li key={i} className={ev.score ? styles.simScored : undefined}>
+                                        <time>{clockOf(ev.t)}</time>
+                                        <span className={styles.simTeam}>
+                                            <i style={{ background: color }} aria-hidden="true" />
+                                            {team.short}
+                                        </span>
+                                        <span>{ev.text}</span>
+                                        <span className={styles.simScore}>{ev.score ? `${ev.score[0]} - ${ev.score[1]}` : ''}</span>
+                                    </li>
+                                );
+                            })}
+                        </ol>
+                        <div className={styles.simFoot}>
+                            {simShown < sim.events.length ? (
+                                <button type="button" className={styles.btnGhost} onClick={() => setSimShown(sim.events.length)}>
+                                    Ver todo
+                                </button>
+                            ) : (
+                                <button type="button" className={styles.btnPrimary} onClick={() => finishRef.current(sim.final, matchRef.current?.log ?? [])}>
+                                    Final: {cfg.home.short} {sim.final[0]} - {sim.final[1]} {cfg.away.short} · Seguir
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                )}
+            </div>
+
+        </div>
+    );
+}

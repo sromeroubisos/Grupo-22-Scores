@@ -7,6 +7,8 @@ import capitanIdle from '@/img/11.png';
 import capitanActive from '@/img/12.png';
 import entrenadorIdle from '@/img/13.png';
 import entrenadorActive from '@/img/14.png';
+import argentoIdle from '@/img/15.png';
+import argentoActive from '@/img/16.png';
 import soonIdle from '@/img/9.png';
 import soonActive from '@/img/10.png';
 import styles from '../juegos.module.css';
@@ -107,6 +109,28 @@ export default function MinijuegosPage() {
                         />
                         <Image
                             src={entrenadorActive}
+                            alt=""
+                            className={`${styles.coverImg} ${styles.coverActive}`}
+                            sizes="(max-width: 640px) 100vw, 520px"
+                        />
+                    </span>
+                    <span className={styles.badgeOnPoster}>Nuevo</span>
+                    <span className={styles.playBtn}>Jugar <ChevronRight /></span>
+                </Link>
+
+                {/* Rugby Argento (la ruta sigue siendo rugby-seven): afiche en blanco
+                    y negro que se pone verde al pasar el mouse, como los demás. */}
+                <Link href="/juegos/minijuegos/rugby-seven" className={`${styles.card} ${styles.cardPoster}`}>
+                    <h2 className={styles.srOnly}>Rugby Argento: llevá a tu club a lo más alto del rugby argentino, del interior a la URBA</h2>
+                    <span className={styles.cover}>
+                        <Image
+                            src={argentoIdle}
+                            alt=""
+                            className={`${styles.coverImg} ${styles.coverIdle}`}
+                            sizes="(max-width: 640px) 100vw, 520px"
+                        />
+                        <Image
+                            src={argentoActive}
                             alt=""
                             className={`${styles.coverImg} ${styles.coverActive}`}
                             sizes="(max-width: 640px) 100vw, 520px"
