@@ -55,6 +55,8 @@ import { SPORTS } from '@/lib/data/sports';
 import type { SportId } from '@/lib/types';
 import { useAuth } from '@/context/AuthContext';
 import { SponsorShowcase } from '@/components/sponsors/SponsorShowcase';
+import { SponsorBand, SponsorsTabPanel } from '@/components/sponsors/SponsorBands';
+import { useTournamentSponsors } from '@/components/sponsors/useTournamentSponsors';
 import { getTournamentFlashScoreConfig, getTournamentRugbyApiSportsConfig } from '@/lib/externalProviderPolicy';
 import { parseOdesurTournamentId } from '@/lib/services/odesur2026Parser';
 import {
@@ -75,6 +77,7 @@ const BASE_TABS = [
     { id: 'champions', label: 'Campeones' },
     { id: 'historical', label: 'Histórica' },
     { id: 'squads', label: 'Tabla de Planteles' },
+    { id: 'sponsors', label: 'Sponsors' },
 ];
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -2954,6 +2957,12 @@ export default function TournamentDetailPage({
         || sondaPuntajes.hasLocalRatings
         || (sondaPuntajes.overrideCandidateIds.length > 0 && overridesConPuntajes !== false);
 
+    // Sponsors por nivel (main / medios / relleno). Se piden una vez y se reparten.
+    const sponsorTiers = useTournamentSponsors(
+        (initialData?.tournament as { id?: string } | undefined)?.id ?? id,
+    );
+    const hasSponsorsTab = sponsorTiers.hasTiers;
+
     const navigationTabs = useMemo(() => {
         let tabs = BASE_TABS
             .filter((tab: { id: string; label: string }) => !(isLimitedExternalProvider && !hasEspnSoccerTopScorers && tab.id === 'stats'))
@@ -2964,6 +2973,7 @@ export default function TournamentDetailPage({
             .filter((tab: { id: string; label: string }) => !(tab.id === 'historical' && !hasHistoricalTable))
             .filter((tab: { id: string; label: string }) => !(tab.id === 'squads' && !hasSquadTable))
             .filter((tab: { id: string; label: string }) => !(tab.id === 'scores' && !scoresTabConDatos))
+            .filter((tab: { id: string; label: string }) => !(tab.id === 'sponsors' && !hasSponsorsTab))
             .map((tab: { id: string; label: string }) => {
                 if (tab.id === 'standings' && shouldUseIntegratedBracketView) {
                     return { ...tab, label: 'Cuadro' };
@@ -2991,7 +3001,7 @@ export default function TournamentDetailPage({
         }
 
         return tabs;
-    }, [hasChampionSeasons, hasHistoricalTable, hasSquadTable, hasDedicatedPlayoffTab, hasEspnSoccerTopScorers, hasVisibleStandingsData, isLimitedExternalProvider, isEspnSoccerSource, isMotorsportTournament, scoresTabConDatos, shouldForceStandingsTabVisible, shouldUseIntegratedBracketView, isFifaWorldCup, isPhoneViewport]);
+    }, [hasSponsorsTab, hasChampionSeasons, hasHistoricalTable, hasSquadTable, hasDedicatedPlayoffTab, hasEspnSoccerTopScorers, hasVisibleStandingsData, isLimitedExternalProvider, isEspnSoccerSource, isMotorsportTournament, scoresTabConDatos, shouldForceStandingsTabVisible, shouldUseIntegratedBracketView, isFifaWorldCup, isPhoneViewport]);
 
     useEffect(() => {
         if (navigationTabs.some((tab: { id: string; label: string }) => tab.id === activeTab)) return;
@@ -4989,11 +4999,24 @@ export default function TournamentDetailPage({
     const renderMatchListWithDayDividers = (matches: any[], isResult: boolean): React.ReactNode[] => {
         const nodes: React.ReactNode[] = [];
         let lastDayKey: string | null = null;
+        let diaIdx = -1;
+        /* Los medios van DESPUÉS de los partidos de un día (no pegados a su
+           título). En el celular la lista es larga y angosta: salen tras el primer
+           día y después cada tres, para que no tapen los partidos. */
+        const pushMedios = (dia: number, key: string) => {
+            if (sponsorTiers.medios.length === 0) return;
+            if (isPhoneViewport && dia % 3 !== 0) return;
+            nodes.push(
+                <SponsorBand key={`sp-${key}`} sponsors={sponsorTiers.medios} size="medio" compact />
+            );
+        };
         matches.forEach((m, idx) => {
             const ts = m.timestamp || m.start_time || m.time;
             const date = ts ? new Date(ts * 1000) : null;
             const dayKey = date ? formatDateKey(date, APP_TIMEZONE) : 'no-date';
             if (dayKey !== lastDayKey) {
+                if (lastDayKey !== null) pushMedios(diaIdx, lastDayKey);
+                diaIdx += 1;
                 nodes.push(
                     <div key={`day-${dayKey}-${idx}`} className={styles.matchDayDivider}>
                         {formatDayDividerLabel(date, dayKey)}
@@ -5003,7 +5026,41 @@ export default function TournamentDetailPage({
             }
             nodes.push(renderCompetitionItem(m, isResult, idx));
         });
+        if (lastDayKey !== null) pushMedios(diaIdx, `${lastDayKey}-fin`);
         return nodes;
+    };
+
+    /* Con sponsors de nivel medio, cada día va en SU tarjeta y la banda de
+       sponsors queda ENTRE tarjetas, afuera: el bloque de partidos y el de
+       sponsors no se mezclan. Sin sponsors se usa la lista de siempre. */
+    const renderMatchDaysSplit = (matches: any[], isResult: boolean): React.ReactNode => {
+        const days: { key: string; date: Date | null; items: { m: any; idx: number }[] }[] = [];
+        matches.forEach((m, idx) => {
+            const ts = m.timestamp || m.start_time || m.time;
+            const date = ts ? new Date(ts * 1000) : null;
+            const key = date ? formatDateKey(date, APP_TIMEZONE) : 'no-date';
+            const last = days[days.length - 1];
+            if (last && last.key === key) last.items.push({ m, idx });
+            else days.push({ key, date, items: [{ m, idx }] });
+        });
+        const out: React.ReactNode[] = [];
+        days.forEach((day, dia) => {
+            out.push(
+                <div key={`card-${day.key}-${dia}`} className={styles.sectionCard}>
+                    <div className={styles.matchList}>
+                        <div className={styles.matchDayDivider}>{formatDayDividerLabel(day.date, day.key)}</div>
+                        {day.items.map(({ m, idx }) => renderCompetitionItem(m, isResult, idx))}
+                    </div>
+                </div>
+            );
+            // Celular: tras el primer día y después cada tres. Web: tras cada día.
+            if (!isPhoneViewport || dia % 3 === 0) {
+                out.push(
+                    <SponsorBand key={`sp-${day.key}-${dia}`} sponsors={sponsorTiers.medios} size="medio" compact />
+                );
+            }
+        });
+        return <div style={{ display: 'grid', gap: 12 }}>{out}</div>;
     };
 
     // data-sticky-tabs: le pide a globals.css que pase body y main a
@@ -5333,6 +5390,9 @@ export default function TournamentDetailPage({
                             {/* Featured Match */}
                             {isMotorsportTournament ? renderMotorsportSeasonHero() : featured && renderCompetitionCard()}
 
+                            {/* Main sponsors: justo debajo del próximo partido */}
+                            <SponsorBand sponsors={sponsorTiers.main} size="main" label="Main sponsors" className={styles.sponsorBandGap} />
+
                             {/* Latest Results */}
                             {(isMotorsportTournament || results.length > 0) && (
                                 <div className={styles.sectionCard}>
@@ -5596,6 +5656,10 @@ export default function TournamentDetailPage({
                                 }}
                             />
                         </div>
+                        <SponsorBand compact sponsors={sponsorTiers.main} size="main" label="Main sponsors" className={styles.sponsorBandGap} />
+                        {!isMotorsportTournament && sponsorTiers.medios.length > 0 && results.length > 0 ? (
+                            renderMatchDaysSplit(results, true)
+                        ) : (
                         <div className={styles.sectionCard}>
                             {isMotorsportTournament ? (
                                 <div className={styles.motorsportSeasonCalendarList}>
@@ -5611,6 +5675,7 @@ export default function TournamentDetailPage({
                                 </div>
                             )}
                         </div>
+                        )}
                     </div>
                 )}
 
@@ -5645,6 +5710,10 @@ export default function TournamentDetailPage({
                                 }}
                             />
                         </div>
+                        <SponsorBand compact sponsors={sponsorTiers.main} size="main" label="Main sponsors" className={styles.sponsorBandGap} />
+                        {!isMotorsportTournament && sponsorTiers.medios.length > 0 && fixtures.length > 0 ? (
+                            renderMatchDaysSplit(fixtures, false)
+                        ) : (
                         <div className={styles.sectionCard}>
                             {isMotorsportTournament ? (
                                 <div className={styles.motorsportSeasonCalendarList}>
@@ -5660,6 +5729,7 @@ export default function TournamentDetailPage({
                                 </div>
                             )}
                         </div>
+                        )}
                     </div>
                 )}
 
@@ -5982,7 +6052,12 @@ export default function TournamentDetailPage({
                             </div>
                         </div>
                         {bracketPhaseSelector}
-                        {renderPlayoffBrackets(`Cuadro - ${getKnockoutPhaseDisplayTitle(bracketPhase, tournamentName)}`)}
+                        {renderPlayoffBrackets(
+                            // Una fase que ya se llama "Cuadro" no lleva el prefijo otra vez.
+                            /^cuadro\b/i.test(getKnockoutPhaseDisplayTitle(bracketPhase, tournamentName))
+                                ? getKnockoutPhaseDisplayTitle(bracketPhase, tournamentName)
+                                : `Cuadro - ${getKnockoutPhaseDisplayTitle(bracketPhase, tournamentName)}`,
+                        )}
                         </>)}
                     </div>
                 )}
@@ -6048,6 +6123,12 @@ export default function TournamentDetailPage({
                 )}
 
                 {/* ── ARCHIVE TAB ───────────────────────────────────────── */}
+                {activeTab === 'sponsors' && hasSponsorsTab && (
+                    <div className={styles.section}>
+                        <SponsorsTabPanel tiers={sponsorTiers} />
+                    </div>
+                )}
+
                 {activeTab === 'archive' && (
                     <div className={styles.section}>
                         <h2 className={styles.pageTitle}>Archivo de Temporadas</h2>
@@ -6080,10 +6161,12 @@ export default function TournamentDetailPage({
 
               {/* Sponsors del torneo: se cargan desde el gestor (pestaña Sponsors).
                   Sin sponsors activos no se dibuja nada. La API resuelve el slug. */}
-              <SponsorShowcase
-                ownerType="tournament"
-                ownerId={(initialData?.tournament as { id?: string } | undefined)?.id ?? id}
-              />
+              {!sponsorTiers.hasTiers && (
+                <SponsorShowcase
+                  ownerType="tournament"
+                  ownerId={(initialData?.tournament as { id?: string } | undefined)?.id ?? id}
+                />
+              )}
             </div>
 
             {showPredictor && draw.length > 0 && (

@@ -5344,3 +5344,6 @@
     padding-left: var(--page-bleed);
     padding-right: var(--page-bleed);
 }
+
+/* Separación de la banda de main sponsors respecto de lo que sigue. */
+.sponsorBandGap { margin-bottom: 16px; }

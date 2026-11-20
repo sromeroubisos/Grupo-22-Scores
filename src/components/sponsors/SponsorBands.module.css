@@ -1,0 +1,153 @@
+/* Bandas de sponsors por nivel. Usa los tokens del sitio: sirve en claro y oscuro. */
+
+.band {
+    display: grid;
+    gap: 8px;
+    min-width: 0;
+}
+
+.label {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-text-tertiary);
+}
+
+.row {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    min-width: 0;
+}
+
+.item {
+    min-width: 0;
+}
+
+.frame {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    background: #fff; /* los logos vienen pensados para fondo claro */
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.frame img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.link {
+    transition: border-color 0.15s ease;
+}
+
+.link:hover,
+.link:focus-visible {
+    border-color: var(--color-text-tertiary);
+}
+
+/* Los altos son los de cada formato (970×90 en escritorio, 150×100 y 320×100
+   en celular); el ANCHO es el del contenedor entero. El logo se encaja
+   (contain) dentro del cuadro sin deformarse. */
+
+/* Main: cuatro a todo el ancho. En el teléfono, grilla de 2×2 (150×100). */
+.main .row {
+    gap: 8px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.main .frame {
+    height: 100px;
+    padding: 2px;
+    border-radius: 10px;
+}
+
+@media (min-width: 640px) {
+    .main .row {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .main .frame {
+        height: 64px;
+    }
+}
+
+/* Medios: tres a todo el ancho, en una fila siempre (320×100 / 970×90). */
+.medio .row {
+    gap: 8px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.medio .frame {
+    height: 100px;
+    padding: 2px;
+    border-radius: 10px;
+}
+
+@media (min-width: 640px) {
+    .medio .frame {
+        height: 52px;
+    }
+}
+
+/* Compacto (sólo celular): en Resultados y Fixture los sponsors no pueden
+   comerse la pantalla. Main: una fila de 4 bajita. Medios: más bajos. */
+@media (max-width: 639px) {
+    .compact.main .row {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 6px;
+    }
+
+    .compact.main .frame {
+        height: 56px;
+        padding: 2px;
+        border-radius: 8px;
+    }
+
+    .compact.medio .frame {
+        height: 52px;
+        padding: 2px;
+        border-radius: 8px;
+    }
+
+    .compact .label {
+        display: none;
+    }
+}
+
+/* Relleno: grilla chica, sólo en la pestaña. */
+.relleno .row {
+    gap: 8px;
+    grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+}
+
+.relleno .frame {
+    aspect-ratio: 1 / 1;
+    padding: 2px;
+    border-radius: 10px;
+}
+
+.panel {
+    display: grid;
+    gap: 22px;
+    min-width: 0;
+}
+
+.panelTitle {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--color-text-primary);
+}
+
+/* Banda en medio de una lista (cambio de día). */
+.inList {
+    margin: 4px 0;
+}
