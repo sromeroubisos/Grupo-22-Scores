@@ -60,6 +60,19 @@ interface Player {
     mark: Player | null;
     fb: boolean; // fullback: el que defiende queda siempre uno al fondo
     rucking: boolean; // está metido en el ruck, empujando sobre la pelota
+    sk: PlayerSkill | null; // skills del modo carrera (null: el jugador promedio)
+}
+
+/**
+ * Skills de un jugador (1 a 10, con la moral ya sumada). `fat0` es el cansancio
+ * con que llega al partido (la seguidilla de la temporada): se resta de entrada.
+ */
+export interface PlayerSkill {
+    spd: number;
+    kick: number;
+    tkl: number;
+    sta: number;
+    fat0?: number;
 }
 
 interface Flight {
@@ -99,8 +112,14 @@ export interface MatchConfig {
     away: SevenTeam;
     difficulty: Difficulty;
     minutes: number;
+    /** Partido que se tiene que definir: empate → un minuto extra; si sigue igual, muerte súbita. */
     suddenDeath: boolean;
+    /** Skills de los siete de cada lado (modo carrera). Sin esto, todos promedio. */
+    skills?: [PlayerSkill[] | null, PlayerSkill[] | null];
 }
+
+/** Lo que dura el minuto extra antes de la muerte súbita (s). */
+const EXTRA_LEN = 60;
 
 export interface Hud {
     home: string;
@@ -204,7 +223,7 @@ export interface MatchEvent {
     score: [number, number] | null; // marcador después, si cambió
     sim: boolean;
     /** Si sumó puntos: quién (puesto 0-6 del equipo de `side`) y cómo. Alimenta las tablas de goleadores. */
-    stat?: { slot: number; kind: 'try' | 'conv' | 'drop' };
+    stat?: { slot: number; kind: 'try' | 'conv' | 'drop' | 'miss' };
 }
 
 /**
@@ -253,6 +272,8 @@ export class SevenMatch {
     clock: number;
     readonly halfLen: number;
     lastPlay = false;
+    /** Minuto extra en juego (o ya jugado, si después hubo muerte súbita). */
+    extra = false;
     overtime = false;
     ctrl: Player | null = null;
     input = { up: false, down: false };
@@ -300,6 +321,7 @@ export class SevenMatch {
                     side, i, look: team.players[i], x: 60, y: 35, vx: 0, vy: 0, facing: side === 0 ? 1 : -1,
                     pose: 'stand', down: 0, lunge: 0, hit: 0, hitCd: 0, juke: 0, jukeCd: 0, jukeDir: 0, cool: 0,
                     passT: 0, stun: 0, anim: rnd() * 4, oy: 0, mark: null, fb: false, rucking: false,
+                    sk: cfg.skills?.[side]?.[i] ?? null,
                 });
             }
         }
@@ -414,6 +436,34 @@ export class SevenMatch {
     private dir(side: Side): 1 | -1 {
         return side === 0 ? 1 : -1;
     }
+
+    /**
+     * Una skill del jugador en este momento: la de base menos el cansancio. El
+     * cansancio arranca en el que trae de la temporada y crece con el reloj, más
+     * rápido cuanto menos resistencia tiene (con 10 casi no se nota; con 3, un 7
+     * termina en 5). Nunca baja de 1.
+     */
+    skill(p: Player, k: 'spd' | 'kick' | 'tkl'): number {
+        const sk = p.sk;
+        if (!sk) return 6;
+        const total = this.halfLen * 2 + (this.extra ? EXTRA_LEN : 0);
+        const prog = clamp(this.elapsed() / Math.max(1, total), 0, 1.2);
+        const drop = (sk.fat0 ?? 0) + ((11 - sk.sta) / 10) * 2.4 * prog;
+        return clamp(sk[k] - drop, 1, 10);
+    }
+
+    /** Cuánto le queda al jugador (0 a 1), para mostrarlo. */
+    legs(p: Player): number {
+        const sk = p.sk;
+        if (!sk) return 1;
+        const base = (sk.spd + sk.tkl) / 2;
+        return clamp((this.skill(p, 'spd') + this.skill(p, 'tkl')) / 2 / Math.max(1, base), 0, 1);
+    }
+
+    /** Factores sobre la base del partido: con skill 6 no cambia nada. */
+    private fSpd = (p: Player) => 1 + (this.skill(p, 'spd') - 6) * 0.028;
+    private fKick = (p: Player) => clamp(1 + (this.skill(p, 'kick') - 6) * 0.07, 0.6, 1.3);
+    private fTkl = (p: Player) => clamp(1 + (this.skill(p, 'tkl') - 6) * 0.045, 0.75, 1.2);
 
     private say(text: string, sub: string | null = null, t = 1.2) {
         this.banner = { text, sub, t };
@@ -786,9 +836,20 @@ export class SevenMatch {
             this.say('ENTRETIEMPO', `${this.cfg.home.short} ${this.score[0]} - ${this.score[1]} ${this.cfg.away.short}`, 2.6);
             return;
         }
+        // Empate en un partido que se tiene que definir: primero un minuto más, que gana el que esté arriba.
+        if (this.cfg.suddenDeath && this.score[0] === this.score[1] && !this.extra) {
+            this.extra = true;
+            this.half = 3;
+            this.clock = EXTRA_LEN;
+            this.restart(rnd() < 0.5 ? 0 : 1, false);
+            this.phaseT = 2;
+            this.say('MINUTO EXTRA', 'Un minuto más: gana el que termine arriba', 2.2);
+            return;
+        }
+        // Y si en ese minuto siguen iguales, muerte súbita: el primero que marca.
         if (this.cfg.suddenDeath && this.score[0] === this.score[1] && !this.overtime) {
             this.overtime = true;
-            this.half = 3;
+            this.half = 4;
             this.restart(rnd() < 0.5 ? 0 : 1, false);
             this.phaseT = 2;
             this.say('MUERTE SÚBITA', 'El primero que marca, gana', 2);
@@ -856,7 +917,7 @@ export class SevenMatch {
                 if (rnd() < convProb(s)) {
                     this.score[s] += 2;
                     add(s, `Conversión de ${kicker}`, true, at, { slot: 4, kind: 'conv' });
-                } else add(s, `${kicker} erra la conversión`, false, at);
+                } else add(s, `${kicker} erra la conversión`, false, at, { slot: 4, kind: 'miss' });
                 pos = o; // en el seven saca el que convirtió: la pelota es del otro
                 return false;
             }
@@ -888,7 +949,17 @@ export class SevenMatch {
         this.clock = 0;
         this.half = 2;
         this.lastPlay = false;
-        // En eliminación no hay empate: muerte súbita hasta que alguien apoye.
+        // Si se tiene que definir: un minuto más (gana el que termine arriba)...
+        const inExtra = this.extra && !this.overtime; // se simuló con el minuto extra ya empezado
+        if (this.cfg.suddenDeath && !this.overtime && (inExtra || this.score[0] === this.score[1])) {
+            if (!this.extra) {
+                this.extra = true;
+                add(0, 'Minuto extra: gana el que termine arriba', false, total);
+                pos = rnd() < 0.5 ? 0 : 1;
+            }
+            for (let et = Math.max(t, total + 8 + rnd() * 10); et < total + EXTRA_LEN; et += 18 + rnd() * 20) possession(et, false);
+        }
+        // ...y si siguen iguales, muerte súbita hasta que alguien apoye.
         if (this.cfg.suddenDeath && this.score[0] === this.score[1]) {
             this.overtime = true;
             add(0, 'Muerte súbita: el primero que marca, gana', false, total);
@@ -1021,6 +1092,12 @@ export class SevenMatch {
         const scorer = this.ball.holder && this.ball.holder.side === lt.side ? this.ball.holder : null;
         const kicker = scorer ?? this.team(lt.side).sort((a, b) => Math.hypot(a.x - TRY_R, a.y - lt.y) - Math.hypot(b.x - TRY_R, b.y - lt.y))[0];
         this.convKicker = kicker?.i ?? 4;
+        // La patada del que patea: agranda o achica el verde (o la chance del rival).
+        if (kicker && this.mg?.kind === 'timing') {
+            const f = this.fKick(kicker);
+            if (userKicks) this.mg.zone = clamp(this.mg.zone * f, 0.04, 0.5);
+            else this.mg.win = rnd() < clamp(this.D.cpuKick * (1 - wide * 0.3) * f, 0.05, 0.97);
+        }
         const places = new Map<Player, { x: number; y: number; pose: Pose; facing: 1 | -1 }>();
         places.set(kicker, { x: (lt.side === 0 ? TRY_R : TRY_L) - d * 18, y: lt.y, pose: 'stand', facing: d });
         const walk = this.beginWalk(places, 12);
@@ -1065,7 +1142,7 @@ export class SevenMatch {
         c.facing = 1;
         this.mg = {
             kind: 'timing', cursor: 0, dir: 1, speed: 1.4 + dist / 40,
-            zone: clamp(this.D.kickWindow * 1.15 * (1 - dist / 75) * (1 - wide * 0.6), 0.04, 0.4),
+            zone: clamp(this.D.kickWindow * 1.15 * (1 - dist / 75) * (1 - wide * 0.6) * this.fKick(c), 0.04, 0.4),
             userActs: true, done: false, win: false,
         };
         this.say('DROP', 'Se acomoda para patear', 0.8);
@@ -1076,7 +1153,7 @@ export class SevenMatch {
         const dist = c.x - TRY_L;
         const wide = Math.abs(c.y - WIDTH / 2) / (WIDTH / 2);
         this.dropFrom = { x: c.x, y: c.y, side: 1 };
-        this.dropOk = rnd() < this.D.cpuKick * (1 - dist / 70) * (1 - wide * 0.5);
+        this.dropOk = rnd() < this.D.cpuKick * (1 - dist / 70) * (1 - wide * 0.5) * this.fKick(c);
         this.phase = 'dropResult';
         this.phaseT = 1.4;
         this.ball.holder = c;
@@ -1116,10 +1193,13 @@ export class SevenMatch {
         this.form(other, x, WIDTH / 2, carrier, false, 12);
     }
 
-    /** Segundos de juego transcurridos (sin contar la muerte súbita). */
+    /** Segundos de juego transcurridos (el minuto extra suma; la muerte súbita, no). */
     elapsed(): number {
+        const total = this.halfLen * 2;
+        if (this.overtime) return total + (this.extra ? EXTRA_LEN : 0);
+        if (this.half === 3) return total + EXTRA_LEN - Math.max(0, this.clock);
         const rem = Math.max(0, this.clock) + (this.half === 1 ? this.halfLen : 0);
-        return this.overtime ? this.halfLen * 2 : this.halfLen * 2 - rem;
+        return total - rem;
     }
 
     /**
@@ -1396,7 +1476,7 @@ export class SevenMatch {
             p.vy *= 0.5;
             return;
         }
-        const sp = Math.min(speed, dist * 4);
+        const sp = Math.min(speed * (this.phase === 'play' ? this.fSpd(p) : 1), dist * 4);
         p.vx = (dx / dist) * sp;
         p.vy = (dy / dist) * sp;
     }
@@ -1445,9 +1525,10 @@ export class SevenMatch {
         // ---- portador ----
         if (carrier && carrier.down <= 0) {
             if (carrier.side === 0) {
-                const burst = carrier.hit > 0 ? 9.2 : 7.2;
+                const f = this.fSpd(carrier);
+                const burst = (carrier.hit > 0 ? 9.2 : 7.2) * f;
                 carrier.vx = carrier.stun > 0 ? 3.5 : burst;
-                let vy = ((this.input.down ? 1 : 0) - (this.input.up ? 1 : 0)) * 6;
+                let vy = ((this.input.down ? 1 : 0) - (this.input.up ? 1 : 0)) * 6 * f;
                 if (carrier.juke > 0.14) vy = carrier.jukeDir * 10;
                 carrier.vy = vy;
             } else {
@@ -1460,7 +1541,7 @@ export class SevenMatch {
             if (p === carrier || p.down > 0) continue;
             if (fl && p === fl.to) {
                 // El receptor sigue su carrera hacia adelante.
-                p.vx = d * (attSide === 0 ? 6.8 : D.cpuRun * 0.95);
+                p.vx = d * (attSide === 0 ? 6.8 : D.cpuRun * 0.95) * this.fSpd(p);
                 p.vy *= 0.8;
                 continue;
             }
@@ -1722,15 +1803,16 @@ export class SevenMatch {
             return;
         }
         const dx = focus.x + focus.vx * 0.2 - p.x;
-        p.vx = Math.sign(dx) * Math.min(Math.abs(dx) * 3, 7.4);
-        let vy = ((this.input.down ? 1 : 0) - (this.input.up ? 1 : 0)) * 6.6;
+        const f = this.fSpd(p);
+        p.vx = Math.sign(dx) * Math.min(Math.abs(dx) * 3, 7.4 * f);
+        let vy = ((this.input.down ? 1 : 0) - (this.input.up ? 1 : 0)) * 6.6 * f;
         if (this.cfg.difficulty === 'muy-facil' && vy === 0) vy = clamp((focus.y - p.y) * 2, -4, 4);
         p.vy = vy;
     }
 
     private cpuCarrier(c: Player, dt: number) {
         const D = this.D;
-        c.vx = c.stun > 0 ? -3 : -D.cpuRun;
+        c.vx = c.stun > 0 ? -3 : -D.cpuRun * this.fSpd(c);
         let threat: Player | null = null;
         let td = Infinity;
         for (const o of this.team(0)) {
@@ -1774,20 +1856,23 @@ export class SevenMatch {
         const D = this.D;
         let tackled: boolean;
         let label = 'TACKLE';
+        // Las skills mueven las chances: el tackle del que defiende contra la potencia (choque) o la velocidad (amague) del portador.
+        const pr = (v: number) => clamp(v, 0.02, 0.98);
+        const edge = this.fTkl(df) / this.fTkl(c);
         if (c.side === 0) {
             if (c.hit > 0) {
-                tackled = rnd() >= D.breakHit;
+                tackled = rnd() >= pr(D.breakHit / edge);
                 if (!tackled) label = 'QUIEBRE';
             } else if (c.juke > 0) {
-                tackled = rnd() >= D.dodge;
+                tackled = rnd() >= pr(D.dodge * (this.fSpd(c) / this.fSpd(df)) ** 2);
                 if (!tackled) label = 'AMAGUE';
             } else {
-                tackled = rnd() < D.cpuTackle;
+                tackled = rnd() < pr(D.cpuTackle * edge);
                 if (!tackled) label = 'SE SOLTÓ';
             }
         } else {
             const p = df === this.ctrl ? (df.lunge > 0 ? D.userTackle : 0.55) : 0.45;
-            tackled = rnd() < p * (1 - D.cpuBreak * 0.6);
+            tackled = rnd() < pr(p * (1 - D.cpuBreak * 0.6) * edge);
             if (!tackled) label = 'SE SOLTÓ';
         }
 
@@ -1995,7 +2080,7 @@ export class SevenMatch {
         if (!mg || mg.kind !== 'timing' || !lt) return;
         const ok = mg.userActs ? mg.done && mg.win : mg.win;
         if (ok) this.score[lt.side] += 2;
-        this.note(lt.side, ok ? 'Conversión' : 'Conversión errada', ok, ok ? { slot: this.convKicker, kind: 'conv' } : undefined);
+        this.note(lt.side, ok ? 'Conversión' : 'Conversión errada', ok, { slot: this.convKicker, kind: ok ? 'conv' : 'miss' });
         this.mg = null;
         this.say(ok ? 'CONVERTIDO' : 'AFUERA', ok ? '+2' : null, 1.3);
         this.phase = 'convResult';
@@ -2022,13 +2107,13 @@ export class SevenMatch {
             sh: this.score[0],
             sa: this.score[1],
             clock: this.overtime ? 'ORO' : `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`,
-            period: this.overtime ? 'Muerte súbita' : this.lastPlay ? 'Última jugada' : this.half === 1 ? '1.er tiempo' : '2.º tiempo',
+            period: this.overtime ? 'Muerte súbita' : this.lastPlay ? 'Última jugada' : this.half === 1 ? '1.er tiempo' : this.half === 3 ? 'Minuto extra' : '2.º tiempo',
             banner: this.banner?.text ?? null,
             bannerSub: this.banner?.sub ?? null,
             hint,
             attacking: !!c && c.side === 0,
             phase: this.phase,
-            carrier: c ? `${c.i + 1} · ${playerNames(c.side === 0 ? this.cfg.home : this.cfg.away)[c.i].short}` : null,
+            carrier: c ? `${c.i + 1} · ${playerNames(c.side === 0 ? this.cfg.home : this.cfg.away)[c.i].short}${c.sk ? ` · ${Math.round(this.legs(c) * 100)}%` : ''}` : null,
         };
     }
 

@@ -8,6 +8,7 @@ import { Silkscreen } from 'next/font/google';
 import MatchView from './MatchView';
 import SpritePreview from './SpritePreview';
 import TeamEditor from './TeamEditor';
+import { ClubPanel, CoachPrompt, LineupBoard, NewsPopup, PreseasonPanel, readCoach, RosterTable, saveCoach } from './CareerPanels';
 import { matchupOdds, type MatchConfig, type MatchEvent } from './engine';
 import { POSITIONS, playerNames } from './names';
 import { APPROX_KIT, NATION_BY_CODE, NATION_ZONE, NATIONS, ZONES } from './nations';
@@ -25,7 +26,6 @@ import {
     type SevenTeam,
 } from './teams';
 import {
-    closeRound,
     createTour,
     defOf,
     finalRanking,
@@ -33,11 +33,14 @@ import {
     groupStandings,
     koLabel,
     myFixture,
+    nextIsHome,
     nextOpponent,
+    playerAt,
     ratingBoost,
     ratingOf,
     roundLabel,
     replaceInDef,
+    setCareerContext,
     setRatingContext,
     simulate,
     TOURS,
@@ -52,9 +55,20 @@ import { AR_CLUBS, AR_DIVISIONS_PLAYABLE } from './arClubs';
 import { CLUB_LEAGUES, CLUBS, teamOfCode } from './clubs';
 import {
     advanceCareer,
+    applyCareerContext,
     CAREER_PHASE_LABEL,
     careerBoosts,
     careerNames,
+    careerPlayerName,
+    careerRound,
+    careerSkills,
+    headToHead,
+    clubRecords,
+    HOME_ADV,
+    inPreseason,
+    preseasonFriendly,
+    unseenNews,
+    markNewsSeen,
     careerRating,
     careerVerdict,
     closesSeason,
@@ -69,7 +83,6 @@ import {
     palmaresKeys,
     palmaresLabel,
     pendingCelebration,
-    myRoster,
     NAC_FORMATS,
     otherTours,
     parallelView,
@@ -85,7 +98,7 @@ import styles from './seven.module.css';
 
 const pixel = Silkscreen({ weight: ['400', '700'], subsets: ['latin'], display: 'swap' });
 
-type Mode = 'quick' | 'cup' | 'tour';
+type Mode = 'quick' | 'cup' | 'tour' | 'friendly';
 type Screen =
     | { k: 'menu' }
     | { k: 'quick'; step: 1 | 2 }
@@ -102,6 +115,8 @@ type Screen =
     | { k: 'edit'; team: SevenTeam }
     | { k: 'match'; cfg: MatchConfig; mode: Mode; nonce: number }
     | { k: 'result'; cfg: MatchConfig; mode: Mode; score: [number, number] };
+
+type HubTab = 'tabla' | 'calendario' | 'cuadro' | 'resultados' | 'goleadores' | 'otros' | 'plantel' | 'club' | 'palmares' | 'camino' | 'carrera';
 
 interface Category {
     name: string;
@@ -532,9 +547,16 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
     const [otherKey, setOtherKey] = useState<string | null>(null);
     const [nacPick, setNacPick] = useState<NacFormat | null>(null);
     const [coachName, setCoachName] = useState('');
+    /** La primera vez que se abre el juego se pide el nombre del entrenador. */
+    const [askCoach, setAskCoach] = useState(false);
+    useEffect(() => {
+        const c = readCoach();
+        if (c) setCoachName(c);
+        else if (c === '') setAskCoach(true);
+    }, []);
     const [celebratedKey, setCelebratedKey] = useState<string | null>(null);
     const [palmaresKey, setPalmaresKey] = useState<string | null>(null);
-    const [hubTab, setHubTab] = useState<'tabla' | 'calendario' | 'cuadro' | 'resultados' | 'goleadores' | 'otros' | 'plantel' | 'palmares' | 'camino' | 'carrera'>('tabla');
+    const [hubTab, setHubTab] = useState<HubTab>('tabla');
     /** Torneo que se está armando (de fábrica, con reemplazos o personalizado). */
     const [setupDef, setSetupDef] = useState<TourDef | null>(null);
     const [customFormat, setCustomFormat] = useState(0);
@@ -637,6 +659,29 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
         if (loaded) syncRef.current?.changed({ customTeams, cup, tours });
     }, [loaded, customTeams, cup, tours]);
 
+    // Todo el juego es fijo: sin zoom de pellizco, doble toque ni Ctrl+rueda (en la cancha no se puede, y afuera confundía).
+    useEffect(() => {
+        const stop = (e: Event) => e.preventDefault();
+        const pinch = (e: TouchEvent) => {
+            if (e.touches.length > 1) e.preventDefault();
+        };
+        const wheel = (e: WheelEvent) => {
+            if (e.ctrlKey) e.preventDefault();
+        };
+        document.addEventListener('gesturestart', stop);
+        document.addEventListener('gesturechange', stop);
+        document.addEventListener('touchmove', pinch, { passive: false });
+        document.addEventListener('wheel', wheel, { passive: false });
+        document.addEventListener('dblclick', stop);
+        return () => {
+            document.removeEventListener('gesturestart', stop);
+            document.removeEventListener('gesturechange', stop);
+            document.removeEventListener('touchmove', pinch);
+            document.removeEventListener('wheel', wheel);
+            document.removeEventListener('dblclick', stop);
+        };
+    }, []);
+
     // El juego es la pantalla: mientras está abierto, la página de atrás no scrollea.
     useEffect(() => {
         const html = document.documentElement;
@@ -667,6 +712,9 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
     const allTeams = useMemo(() => [...customTeams, ...NATIONS, ...CLUBS, ...AR_CLUBS, ...PRESET_TEAMS], [customTeams]);
     // Nivel de los equipos propios y, en una carrera, lo que cada club ganó o perdió con las temporadas.
     setRatingContext(Object.fromEntries(customTeams.map((t) => [t.id, t.rating ?? 70])), tour?.career ? careerBoosts(tour.career) : undefined);
+    // En una carrera: quién juega en cada puesto y la localía; afuera, nada.
+    if (tour?.career) applyCareerContext(tour.career);
+    else setCareerContext();
     const byId = (id: string | null) => {
         const t = allTeams.find((x) => x.id === id) ?? null;
         if (!t) return t;
@@ -680,7 +728,8 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
     const playerName = (team: string, slot: number) => {
         const t = byId(team);
         if (!t) return '—';
-        const n = playerNames(t)[slot];
+        // En la carrera los goleadores se anotan por jugador (id), no por puesto.
+        const n = tour?.career ? careerPlayerName(tour.career, t, slot) : playerNames(t)[slot];
         return n ? `${n.first} ${n.last}`.trim() : '—';
     };
     const nameOf = (id: string) => byId(id)?.name ?? 'Equipo borrado';
@@ -740,13 +789,17 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
         if (!tour) return;
         const opp = nextOpponent(tour);
         if (!opp) {
-            persist({ tour: closeRound(tour, null) });
+            persist({ tour: careerRound(tour, null) });
             return;
         }
         const home = byId(tour.me);
-        const away = byId(opp);
-        if (!home || !away) return;
-        play({ home, away, difficulty: tour.difficulty, minutes: tour.duration, suddenDeath: tour.stage === 'ko' }, 'tour');
+        const away0 = byId(opp);
+        if (!home || !away0) return;
+        const r = tour.career;
+        // De visitante en la fase regular, el local suma la localía.
+        const away = r && tour.stage === 'grupos' && !nextIsHome(tour) ? { ...away0, rating: (away0.rating ?? 70) + HOME_ADV } : away0;
+        const skills: MatchConfig['skills'] = r ? [careerSkills(r, tour.me), careerSkills(r, opp)] : undefined;
+        play({ home, away, difficulty: tour.difficulty, minutes: tour.duration, suddenDeath: tour.stage === 'ko', skills }, 'tour');
     };
 
     /** Simula el partido del usuario (o todos los que le quedan en la etapa) con el nivel de cada equipo. */
@@ -755,10 +808,27 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
         let s = tour;
         for (let guard = 0; guard < 200 && !s.done && !s.eliminated; guard++) {
             const o = nextOpponent(s);
-            s = closeRound(s, o ? simulate(s.me, o, s.stage === 'ko') : null);
+            if (s.career) applyCareerContext(s.career);
+            const ko = s.stage === 'ko';
+            // La localía del simulado: suma el que juega en su cancha (en el cuadro, neutral).
+            const adv = ko || !s.career ? 0 : nextIsHome(s) ? HOME_ADV : -HOME_ADV;
+            s = careerRound(s, o ? simulate(s.me, o, ko, adv) : null);
             if (!all && o) break;
         }
         persist({ tour: s });
+    };
+
+    /** Un amistoso de pretemporada: se juega (o se simula) y deja moral, o una lesión. */
+    const friendly = (opp: string, sim: boolean) => {
+        if (!tour?.career) return;
+        const home = byId(tour.me);
+        const away = byId(opp);
+        if (!home || !away) return;
+        if (sim) {
+            persist({ tour: preseasonFriendly(tour, opp, simulate(tour.me, opp, true)) });
+            return;
+        }
+        play({ home, away, difficulty: tour.difficulty, minutes: tour.duration, suddenDeath: true, skills: [careerSkills(tour.career, tour.me), careerSkills(tour.career, opp)] }, 'friendly');
     };
 
     const startRoad = () => {
@@ -770,7 +840,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
 
     const startCareer = () => {
         if (!mine) return;
-        persist({ tour: createCareer(mine, difficulty, duration, coachName) });
+        persist({ tour: createCareer(mine, difficulty, duration, coachName || readCoach() || undefined) });
         setHubTab('tabla');
         setScreen({ k: 'tour' });
     };
@@ -807,9 +877,21 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
         }
         if (mode === 'tour' && tour) {
             // Los tantos del partido jugado, con su autor: el local (lado 0) es siempre el club del usuario.
-            const events: ScoreEvent[] = log.filter((e) => e.stat).map((e) => ({ team: e.side === 0 ? cfg.home.id : cfg.away.id, slot: e.stat!.slot, kind: e.stat!.kind }));
-            persist({ tour: closeRound(tour, score, events) });
+            // En la carrera el autor es el jugador (id) que estaba en ese puesto.
+            const teamOf = (side: 0 | 1) => (side === 0 ? cfg.home.id : cfg.away.id);
+            const events: ScoreEvent[] = [];
+            const misses: number[] = [];
+            for (const e of log) {
+                if (!e.stat) continue;
+                const team = teamOf(e.side);
+                const id = playerAt(team, e.stat.slot);
+                if (e.stat.kind === 'miss') {
+                    if (e.side === 0) misses.push(id);
+                } else events.push({ team, slot: id, kind: e.stat.kind });
+            }
+            persist({ tour: careerRound(tour, score, events, misses) });
         }
+        if (mode === 'friendly' && tour) persist({ tour: preseasonFriendly(tour, cfg.away.id, score) });
         setScreen({ k: 'result', cfg, mode, score });
     };
 
@@ -901,11 +983,26 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                 )}
                 {menuMusicSrc && <audio ref={menuAudio} src={menuMusicSrc} loop preload="auto" />}
 
+                {askCoach && screen.k === 'menu' && (
+                    <CoachPrompt
+                        initial={coachName}
+                        onDone={(n) => {
+                            saveCoach(n);
+                            setCoachName(n);
+                            setAskCoach(false);
+                        }}
+                    />
+                )}
                 {screen.k === 'menu' && (
                     <div className={styles.menuScreen}>
                         <div className={styles.logo}>
                             <p className={styles.title} aria-hidden="true">Rugby Seven</p>
                             <p className={styles.subtitle}>Siete contra siete · pelota en mano · siempre para adelante</p>
+                            {coachName && (
+                                <button type="button" className={styles.coachLine} onClick={() => setAskCoach(true)} aria-label={`Entrenador: ${coachName}. Cambiar el nombre`}>
+                                    Entrenador: <b>{coachName}</b> · cambiar
+                                </button>
+                            )}
                         </div>
                         <div className={styles.runway} aria-hidden="true">
                             <div className={styles.runners}>
@@ -1427,7 +1524,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                     const road = tour.road ?? null;
                     const career = tour.career ?? null;
                     const verdict = road ? roadVerdict(tour) : career ? careerVerdict(tour) : null;
-                    const tabs: ['tabla' | 'calendario' | 'cuadro' | 'resultados' | 'goleadores' | 'otros' | 'plantel' | 'palmares' | 'camino' | 'carrera', string][] = [
+                    const tabs: [HubTab, string][] = [
                         ...(onlyKo ? [] : [['tabla', tour.groups.length > 1 ? (tour.cross ? 'Conferencias' : 'Grupos') : 'Tabla'] as ['tabla', string]]),
                         ['calendario', 'Calendario'],
                         ...(tour.hasKo ? [['cuadro', 'Cuadro'] as ['cuadro', string]] : []),
@@ -1436,6 +1533,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                         ...(tour.stats ? [['goleadores', 'Goleadores'] as ['goleadores', string]] : []),
                         ...(career?.others ? [['otros', 'Otros torneos'] as ['otros', string]] : []),
                         ...(career?.rosters ? [['plantel', 'Plantel'] as ['plantel', string]] : []),
+                        ...(career ? [['club', 'Club'] as ['club', string]] : []),
                         ...(career ? [['palmares', 'Palmarés'] as ['palmares', string]] : []),
                         ...(career ? [['carrera', 'Carrera'] as ['carrera', string]] : []),
                     ];
@@ -1445,6 +1543,18 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                     const careerWins = career && tour.done ? pendingCelebration(career) : [];
                     const soloKey = !career && !road && tour.done && tour.champion === tour.me ? `${tour.tourId}:${tour.groupHistory.length}:${tour.koHistory.length}` : null;
                     const celebrateTeam = careerWins.length || (soloKey && soloKey !== celebratedKey) ? byId(tour.me) : null;
+                    const preseason = !!career && inPreseason(career) && !tour.done;
+                    const news = career && !celebrateTeam ? unseenNews(career)[0] ?? null : null;
+                    const h2h = career && opp ? headToHead(career, opp) : null;
+                    const best = career ? clubRecords(career).find((x) => x.label === 'Máximo anotador') ?? null : null;
+                    const homeNow = !!career && tour.stage === 'grupos' && nextIsHome(tour);
+                    const rivals = career
+                        ? Object.values(career.divisions)
+                              .flat()
+                              .filter((id) => id !== career.me)
+                              .map((id) => ({ id, name: nameOf(id) }))
+                              .sort((a, b) => a.name.localeCompare(b.name))
+                        : [];
                     return (
                         <div className={styles.body}>
                             {celebrateTeam && (
@@ -1453,6 +1563,16 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                     titles={careerWins.length ? careerWins.map((w) => `${w} ${career?.season ?? ''}`) : [tourDef.name]}
                                     coach={career?.coach}
                                     onClose={() => (careerWins.length ? persist({ tour: markCelebrated(tour) }) : setCelebratedKey(soloKey))}
+                                />
+                            )}
+                            {news && meTeam && (
+                                <NewsPopup
+                                    key={`${career?.newsSeen ?? 0}-${news.title}`}
+                                    news={news}
+                                    team={meTeam}
+                                    more={career ? unseenNews(career).length - 1 : 0}
+                                    onClose={() => career && persist({ tour: { ...tour, career: { ...career, newsSeen: (career.newsSeen ?? 0) + 1 } } })}
+                                    onSkipAll={() => persist({ tour: markNewsSeen(tour) })}
                                 />
                             )}
                             <div className={styles.hub}>
@@ -1494,9 +1614,14 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                             </strong>
                                             {tour.champion !== tour.me && <small>{tour.eliminated ? 'Vos quedaste afuera antes.' : `${meTeam?.name} terminó sin el título.`}</small>}
                                         </div>
+                                    ) : preseason ? (
+                                        <PreseasonPanel tour={tour} rivals={rivals} nameOf={nameOf} onChange={(t) => persist({ tour: t })} onFriendly={friendly} />
                                     ) : (
                                         <>
-                                            <span className={styles.nextLabel}>{roundLabel(tour)}</span>
+                                            <span className={styles.nextLabel}>
+                                                {roundLabel(tour)}
+                                                {career && opp ? (tour.stage === 'grupos' ? (homeNow ? ' · de local' : ' · de visitante: el rival suma la localía') : ' · cancha neutral') : ''}
+                                            </span>
                                             {oppTeam && meTeam ? (
                                                 <div className={styles.nextVs}>
                                                     <span className={styles.nextTeam}>
@@ -1513,6 +1638,8 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                             ) : (
                                                 <p className={styles.note}>Fecha libre: esta fecha la juegan los demás.</p>
                                             )}
+                                            {h2h && <p className={styles.h2hNote}>{h2h}</p>}
+                                            {career && best && <p className={styles.h2hNote}>{best.label} de tu carrera: {best.name} ({best.n}).</p>}
                                         </>
                                     )}
                                     {tourLive && (
@@ -1532,7 +1659,9 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                         </div>
                                     )}
                                     {(() => {
-                                        const nextStep = tourLive
+                                        const nextStep = preseason
+                                            ? null
+                                            : tourLive
                                             ? { label: opp ? 'Jugar ▶' : 'Simular la fecha ▶', run: playTourMatch }
                                             : career && verdict?.next
                                               ? { label: `${verdict.next} ▶`, run: () => nextCareerStage(closesSeason(tour) ? nacPick ?? formatOf(career, career.season + 1) : undefined) }
@@ -1541,10 +1670,12 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                                 : null;
                                         return (
                                             <div className={styles.hubActions}>
-                                                <button type="button" className={`${styles.btnPrimary} ${styles.hubMainBtn}`} onClick={nextStep?.run ?? (() => setScreen({ k: 'slots' }))}>
-                                                    {nextStep?.label ?? 'Partidas ▶'}
-                                                </button>
-                                                {tourLive && (
+                                                {!preseason && (
+                                                    <button type="button" className={`${styles.btnPrimary} ${styles.hubMainBtn}`} onClick={nextStep?.run ?? (() => setScreen({ k: 'slots' }))}>
+                                                        {nextStep?.label ?? 'Partidas ▶'}
+                                                    </button>
+                                                )}
+                                                {tourLive && !preseason && (
                                                     <div className={styles.simRow}>
                                                         <button type="button" className={styles.simBtn} onClick={() => simTourMatch(false)} disabled={!opp}>
                                                             Simular partido
@@ -1554,7 +1685,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                                         </button>
                                                     </div>
                                                 )}
-                                                {nextStep && (
+                                                {(nextStep || preseason) && (
                                                     <button type="button" className={styles.textBtn} onClick={() => setScreen({ k: 'slots' })}>
                                                         ◀ Volver a partidas
                                                     </button>
@@ -1754,33 +1885,15 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                         {tab === 'plantel' && career && (
                                             <div className={styles.rosterPanel}>
                                                 <h3 className={styles.groupTitle}>Plantel de {nameOf(career.me)} · temporada {career.season}</h3>
+                                                <LineupBoard tour={tour} onChange={(t) => persist({ tour: t })} />
+                                                <h3 className={styles.groupTitle}>Los doce</h3>
                                                 <p className={styles.note}>
-                                                    Cada año los jugadores cumplen uno: los jóvenes mejoran, los veteranos bajan y se retiran, y llega uno nuevo de la cantera. El plantel pesa en el nivel del club. Tocá un nombre para cambiarlo.
+                                                    Valoración de 1 a 10 y skills: velocidad, patada, tackle y resistencia. La moral (▲▼) sube con los triunfos y los tries y baja con las derrotas y las patadas erradas. Cada año los jóvenes mejoran, los veteranos bajan y se retiran, y sube la camada de M19. Tocá un nombre para cambiarlo.
                                                 </p>
-                                                <ul className={styles.rosterList}>
-                                                    {myRoster(career).map((p) => (
-                                                        <li key={`${p.slot}-${p.name.first}-${p.name.last}`}>
-                                                            <span className={styles.rosterPos}>{p.slot + 1} · {p.pos}</span>
-                                                            <input
-                                                                className={styles.rosterName}
-                                                                defaultValue={`${p.name.first} ${p.name.last}`.trim()}
-                                                                aria-label={`Nombre del ${p.pos.toLowerCase()} (${p.slot + 1})`}
-                                                                maxLength={40}
-                                                                onBlur={(e) => {
-                                                                    const v = e.currentTarget.value;
-                                                                    if (v.trim() !== `${p.name.first} ${p.name.last}`.trim()) persist({ tour: renamePlayer(tour, p.slot, v) });
-                                                                }}
-                                                                onKeyDown={(e) => {
-                                                                    if (e.key === 'Enter') e.currentTarget.blur();
-                                                                }}
-                                                            />
-                                                            <span className={styles.rosterAge}>{p.age} años</span>
-                                                            <span className={p.q >= 0 ? styles.fixWin : styles.fixLoss}>{p.q >= 0 ? '+' : ''}{p.q.toFixed(1)}</span>
-                                                        </li>
-                                                    ))}
-                                                </ul>
+                                                <RosterTable tour={tour} onRename={(id, v) => persist({ tour: renamePlayer(tour, id, v) })} />
                                             </div>
                                         )}
+                                        {tab === 'club' && career && <ClubPanel career={career} nameOf={nameOf} />}
                                         {tab === 'palmares' && career && (() => {
                                             const keys = palmaresKeys(career);
                                             const key = palmaresKey && keys.includes(palmaresKey) ? palmaresKey : keys[0];
@@ -2036,7 +2149,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                         musicSrc={musicSrc}
                         fontFamily={pixel.style.fontFamily}
                         onFinish={(score, log) => onFinish(screen.cfg, screen.mode, score, log)}
-                        onQuit={() => setScreen(screen.mode === 'cup' ? { k: 'cup' } : screen.mode === 'tour' ? { k: 'tour' } : { k: 'quick', step: 1 })}
+                        onQuit={() => setScreen(screen.mode === 'cup' ? { k: 'cup' } : screen.mode === 'tour' || screen.mode === 'friendly' ? { k: 'tour' } : { k: 'quick', step: 1 })}
                     />
                 )}
 
@@ -2044,8 +2157,12 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                     <div className={styles.body}>
                         <div className={styles.result}>
                             <p className={styles.resultLabel}>
+                                {screen.mode === 'friendly' ? 'Amistoso · ' : ''}
                                 {screen.score[0] > screen.score[1] ? 'Ganaste' : screen.score[0] < screen.score[1] ? 'Perdiste' : 'Empate'}
                             </p>
+                            {screen.mode === 'friendly' && (
+                                <p className={styles.note}>{screen.score[0] > screen.score[1] ? 'La moral de todo el plantel sube al máximo.' : 'La moral del plantel baja un punto.'}</p>
+                            )}
                             <div className={styles.resultScore}>
                                 <span>
                                     <SpritePreview look={screen.cfg.home.players[0]} kit={screen.cfg.home.kit} scale={5} running={screen.score[0] > screen.score[1]} />
@@ -2068,6 +2185,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                 )}
                                 {screen.mode === 'cup' && btn('Ver la Copa ▶', () => setScreen({ k: 'cup' }), true)}
                                 {screen.mode === 'tour' && btn('Ver el torneo ▶', () => setScreen({ k: 'tour' }), true)}
+                                {screen.mode === 'friendly' && btn('Volver a la pretemporada ▶', () => setScreen({ k: 'tour' }), true)}
                             </div>
                         </div>
                     </div>

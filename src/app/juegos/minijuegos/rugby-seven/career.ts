@@ -44,21 +44,27 @@
 import { AR_LABEL_OVERRIDE, arClubById } from './arClubs';
 import { AR_SEVEN_CUPOS, AR_SEVEN_DIVISIONS } from './arClubs.generated';
 import { PALMARES_KEYS, PALMARES_LABEL, realTitles, type TitleRow } from './palmares';
-import { defaultNames, nameFromSeed, nameFromText, POSITIONS, type PlayerName } from './names';
+import { defaultNames, nameFromSeed, nameFromText, type PlayerName } from './names';
 import type { Difficulty, Duration, SevenTeam } from './teams';
+import type { PlayerSkill } from './engine';
 import {
+    baseRatingOf,
     closeRound,
     createTour,
     defOf,
     finalRanking,
     groupStandings,
     myFixture,
+    nextOpponent,
     ratingOf,
     roundLabel,
+    scoreEvents,
+    setCareerContext,
     setRatingBoost,
     simulate,
     topStats,
     type FixtureItem,
+    type ScoreEvent,
     type TourDef,
     type TourState,
 } from './tours';
@@ -97,11 +103,44 @@ interface Dispute {
     semis: string[]; // semifinalistas del de abajo
 }
 
+/** Por qué un jugador no está: lesión, franquicia del Super Rugby Américas, club de Europa o Pumas. */
+export type OutKind = 'inj' | 'fra' | 'eur' | 'pum';
+
 export interface Player {
+    /** Id dentro del club (los siete de las partidas viejas son 0 a 6, su puesto de entonces). */
+    id?: number;
     age: number;
-    q: number; // nivel respecto del promedio del club (−6 a 6)
-    gen: number; // cuántas veces se renovó ese puesto (da el nombre del que llega)
+    /** Solo partidas viejas: nivel respecto del promedio del club (−6 a 6). */
+    q: number;
+    gen: number; // partidas viejas: cuántas veces se renovó ese puesto (da el nombre)
     name?: string; // el que escribió el usuario
+    /** Valoración general, de 1 a 10 (el 10 casi no existe). */
+    ovr?: number;
+    /** Skills de 1 a 10: velocidad, patada, tackle y resistencia. */
+    s?: [number, number, number, number];
+    /** Moral, de −2 a 2. */
+    m?: number;
+    /** Si no está: por qué, hasta qué altura de la temporada (0 a 1; 2 = toda) y quién se lo llevó. */
+    out?: { kind: OutKind; until: number; by?: string };
+}
+
+/** Una noticia del club que se muestra en un cartel (convocatorias, lesiones, vueltas). */
+export interface CareerNews {
+    season: number;
+    kind: OutKind | 'back' | 'youth' | 'train';
+    title: string;
+    text: string;
+    /** El jugador de la noticia (id en el plantel propio). */
+    who?: number;
+}
+
+/** Cómo le fue a una categoría del club en la temporada. */
+export interface YouthRow {
+    cat: string;
+    place: number;
+    of: number;
+    /** Nacional de la categoría (M16, M17 y M19): hasta dónde llegó. */
+    nac?: string;
 }
 
 export interface Award {
@@ -144,6 +183,29 @@ export interface CareerState {
     awards?: { season: number; comp: string; tries: Award[]; points: Award[] }[];
     /** Etapa que ya se asentó (lo que no juega el usuario ya está simulado). */
     settled?: CareerPhase | null;
+    /** El siete inicial elegido (ids del plantel propio, en el orden de los puestos). */
+    lineup?: number[];
+    /** Cansancio del plantel propio por la seguidilla de partidos (0 a 2). */
+    fat?: number;
+    /** Bajas de la temporada en curso (lesionados más convocados): nunca más de 3. */
+    bajas?: number;
+    /** La pretemporada de este año: en qué paso va y lo que se eligió. */
+    pre?: { step: 'punto' | 'entreno' | 'amistosos' | 'listo'; punto?: 'juveniles' | 'primera'; trained?: { id: number; result: 'up' | 'same' | 'inj' }[]; friendlies?: { opp: string; us: number; them: number }[] } | null;
+    /** Ya se resolvieron las convocatorias de mitad de temporada (Pumas, Europa). */
+    midDone?: boolean;
+    /** Noticias del club, y cuántas ya se vieron. */
+    news?: CareerNews[];
+    newsSeen?: number;
+    /** Camadas de juveniles de cada club: M15, M16, M17 y M19 (fuerza de 1 a 10). */
+    youth?: Record<string, [number, number, number, number]>;
+    /** Lo que invirtió el club propio en juveniles (sube su cantera). */
+    invest?: number;
+    /** Reportes de juveniles y divisiones del club, por temporada. */
+    reports?: { season: number; rows: YouthRow[] }[];
+    /** Historial contra cada rival: ganados, empatados, perdidos, a favor, en contra y el último [temporada, nosotros, ellos]. */
+    h2h?: Record<string, [number, number, number, number, number, number, number, number]>;
+    /** Lo que hizo cada jugador del club en toda la carrera: tries, puntos, partidos y el nombre (de los que ya no están). */
+    legends?: Record<string, [number, number, number, string?]>;
     /** Lo que dejó la temporada en curso; se aplica al cerrarla. */
     pending: {
         moves: { club: string; from: string; to: string }[];
@@ -213,25 +275,173 @@ export function divisionOf(r: CareerState, club: string): string | null {
 
 /* ───────────────────────── planteles ───────────────────────── */
 
-function newRoster(): Player[] {
-    return Array.from({ length: 7 }, () => ({ age: 19 + Math.floor(Math.random() * 15), q: Math.round(rand(-2, 2) * 10) / 10, gen: 0 }));
+/** Doce por club: siete titulares y cinco suplentes. */
+export const SQUAD = 12;
+/** Nunca más de tres bajas (lesionados más convocados) en una temporada. */
+export const MAX_BAJAS = 3;
+/** Lo que vale jugar de local en la fase regular (puntos de nivel, escala 30-95). */
+export const HOME_ADV = 3;
+export const SKILL_LABEL = ['Velocidad', 'Patada', 'Tackle', 'Resistencia'] as const;
+
+/** Azar con semilla (para que convertir una partida vieja dé siempre lo mismo). */
+function seededRand(seed: string): () => number {
+    let h = 2166136261;
+    for (let i = 0; i < seed.length; i++) h = Math.imul(h ^ seed.charCodeAt(i), 16777619);
+    let a = h >>> 0;
+    return () => {
+        a = (a + 0x6d2b79f5) | 0;
+        let t = Math.imul(a ^ (a >>> 15), 1 | a);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+}
+const gauss = (r: () => number) => (r() + r() + r() - 1.5) * 1.15;
+const r1 = (v: number) => Math.round(v * 10) / 10;
+const clampN = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
+
+/** El centro de nivel de un club en la escala de 1 a 10, desde su nivel de catálogo. */
+const centerOf = (club: string) => clampN(1 + (baseRatingOf(club) - 40) / 6, 1.5, 8.6);
+/** Nivel de un club (escala 30-95) que da un promedio de valoración. */
+const ratingFromOvr = (avg: number) => 40 + (avg - 1) * 6;
+
+/** La valoración nunca pasa de 10, y arriba de 9 cuesta muchísimo. */
+const capOvr = (v: number) => r1(clampN(v > 9 ? 9 + (v - 9) * 0.35 : v, 1, 10));
+
+function makeSkills(ovr: number, r: () => number): [number, number, number, number] {
+    const one = () => Math.round(clampN(ovr + gauss(r) * 1.3, 1, 10));
+    return [one(), one(), one(), one()];
 }
 
-/** Lo que el plantel le suma o le resta al nivel del club. */
-const rosterBoost = (roster: Player[] | undefined) => (roster ? (roster.reduce((a, p) => a + p.q, 0) / roster.length) * 0.9 : 0);
+function makePlayer(id: number, ovr: number, age: number, r: () => number = Math.random): Player {
+    const o = capOvr(ovr);
+    return { id, age, q: 0, gen: 0, ovr: o, s: makeSkills(o, r), m: 0 };
+}
+
+function newRoster(club: string, r: () => number = Math.random): Player[] {
+    const c = centerOf(club);
+    return Array.from({ length: SQUAD }, (_, id) => makePlayer(id, c + gauss(r) * 0.8 - (id >= 7 ? 0.5 : 0), 19 + Math.floor(r() * 15), r));
+}
+
+/** Pasa un plantel de las partidas viejas (siete, con `q`) al de doce con skills. Siempre da lo mismo. */
+function upgradeRoster(club: string, old: Player[]): Player[] {
+    const r = seededRand(`${club}:plantel`);
+    const c = centerOf(club);
+    const out = old.slice(0, 7).map((p, i): Player => ({ ...p, ...makePlayer(i, c + p.q * 0.5, p.age, r), gen: p.gen, ...(p.name ? { name: p.name } : {}) }));
+    for (let id = out.length; id < SQUAD; id++) out.push(makePlayer(id, c - 0.5 + gauss(r) * 0.8, 19 + Math.floor(r() * 15), r));
+    return out;
+}
+
+/** Lleva una partida vieja al formato actual (planteles de 12, camadas). No toca las que ya están. */
+function upgradeCareer(r: CareerState) {
+    if (!r.rosters) {
+        r.rosters = {};
+        for (const clubs of Object.values(r.divisions)) for (const c of clubs) r.rosters[c] = newRoster(c, seededRand(`${c}:nuevo`));
+    }
+    for (const [club, ro] of Object.entries(r.rosters)) if (ro.length < SQUAD || ro.some((p) => p.id === undefined || p.ovr === undefined)) r.rosters[club] = upgradeRoster(club, ro);
+    if (!r.youth) r.youth = initialYouth(r);
+}
+
+const needsUpgrade = (r: CareerState) => !r.youth || Object.values(r.rosters ?? {}).some((ro) => ro.length < SQUAD || ro.some((p) => p.id === undefined || p.ovr === undefined));
+
+export const available = (p: Player) => !p.out;
+/** Valoración con la moral encima (lo que rinde hoy). */
+const formOvr = (p: Player) => (p.ovr ?? 5) + (p.m ?? 0) * 0.3;
+
+/**
+ * El siete de un club: los mejores disponibles, cada uno en el puesto que le
+ * queda: el que mejor patea de apertura, los más rápidos afuera, los que más
+ * tacklean adelante. Con `keep`, respeta los que eligió el usuario.
+ */
+export function autoLineup(roster: Player[], keep?: number[]): number[] {
+    const ok = roster.filter(available);
+    const byId = new Map(ok.map((p) => [p.id as number, p]));
+    const slots: (number | null)[] = Array(7).fill(null);
+    const used = new Set<number>();
+    keep?.forEach((id, i) => {
+        if (i < 7 && byId.has(id) && !used.has(id)) {
+            slots[i] = id;
+            used.add(id);
+        }
+    });
+    const pool = ok.filter((p) => !used.has(p.id as number)).sort((a, b) => formOvr(b) - formOvr(a)).slice(0, 7 - used.size);
+    const take = (score: (p: Player) => number) => {
+        pool.sort((a, b) => score(b) - score(a));
+        const p = pool.shift();
+        return p ? (p.id as number) : null;
+    };
+    const order: [number, (p: Player) => number][] = [
+        [4, (p) => (p.s?.[1] ?? 5) * 2 + formOvr(p)],
+        [6, (p) => (p.s?.[0] ?? 5) * 2 + formOvr(p)],
+        [5, (p) => (p.s?.[0] ?? 5) + (p.s?.[2] ?? 5) + formOvr(p)],
+        [0, (p) => (p.s?.[2] ?? 5) * 2 + formOvr(p)],
+        [2, (p) => (p.s?.[2] ?? 5) * 2 + formOvr(p)],
+        [1, (p) => (p.s?.[2] ?? 5) + (p.s?.[3] ?? 5) + formOvr(p)],
+        [3, (p) => (p.s?.[0] ?? 5) + (p.s?.[3] ?? 5) + formOvr(p)],
+    ];
+    for (const [slot, score] of order) if (slots[slot] === null) slots[slot] = take(score);
+    // Si faltara gente (no debería: con 12 y tope de 3 bajas siempre hay 9), se repite el primero.
+    const fallback = (roster[0]?.id as number) ?? 0;
+    return slots.map((x) => x ?? fallback);
+}
+
+/** El siete del club del usuario: el que eligió, con los que no están reemplazados. */
+export function myLineup(r: CareerState): number[] {
+    return autoLineup(r.rosters?.[r.me] ?? [], r.lineup);
+}
+
+const lineupOf = (r: CareerState, club: string) => (club === r.me ? myLineup(r) : autoLineup(r.rosters?.[club] ?? []));
+
+/** Un club de la máquina que juega dos torneos a la vez llega más cansado. */
+const busy = (r: CareerState, club: string) => r.phase === 'liga' && Object.values(r.tiers ?? {}).some((t) => t?.includes(club));
+
+/** Nivel de un club (escala 30-95) por su siete de hoy, con moral y cansancio. */
+function rosterRating(r: CareerState, club: string): number | null {
+    const roster = r.rosters?.[club];
+    if (!roster?.length || roster[0].ovr === undefined) return null;
+    const ids = lineupOf(r, club);
+    const by = new Map(roster.map((p) => [p.id, p]));
+    const avg = ids.reduce((a, id) => a + formOvr(by.get(id) ?? roster[0]), 0) / ids.length;
+    const tired = club === r.me ? (r.fat ?? 0) * 1.5 : busy(r, club) ? 1.5 : 0;
+    return ratingFromOvr(avg) - tired;
+}
 
 const boostCache = new WeakMap<CareerState, Record<string, number>>();
-/** Lo que cambió el nivel de cada club: rendimiento más plantel. */
+const slotCache = new WeakMap<CareerState, Record<string, number[]>>();
+/** Lo que cambió el nivel de cada club: rendimiento (diluido) más lo que vale su plantel hoy. */
 export function careerBoosts(r: CareerState): Record<string, number> {
     const hit = boostCache.get(r);
     if (hit) return hit;
     const out: Record<string, number> = { ...(r.ratings ?? {}) };
-    for (const [club, roster] of Object.entries(r.rosters ?? {})) out[club] = (out[club] ?? 0) + rosterBoost(roster);
+    for (const club of Object.keys(r.rosters ?? {})) {
+        const rr = rosterRating(r, club);
+        if (rr !== null) out[club] = (out[club] ?? 0) + rr - baseRatingOf(club);
+    }
     boostCache.set(r, out);
     return out;
 }
 
-const applyBoosts = (r: CareerState) => setRatingBoost(careerBoosts(r));
+/** Quién juega en cada puesto de cada club: los goleadores se anotan por jugador. */
+export function careerSlots(r: CareerState): Record<string, number[]> {
+    const hit = slotCache.get(r);
+    if (hit) return hit;
+    const out: Record<string, number[]> = {};
+    for (const club of Object.keys(r.rosters ?? {})) out[club] = lineupOf(r, club);
+    slotCache.set(r, out);
+    return out;
+}
+
+const forget = (r: CareerState) => {
+    boostCache.delete(r);
+    slotCache.delete(r);
+};
+
+const applyBoosts = (r: CareerState) => {
+    setRatingBoost(careerBoosts(r));
+    setCareerContext(careerSlots(r), HOME_ADV);
+};
+
+/** Lo que la pantalla tiene que fijar antes de jugar o simular dentro de una carrera. */
+export const applyCareerContext = applyBoosts;
 
 /** Nivel actual de un club dentro de la carrera, redondeado. */
 export const careerRating = (r: CareerState, club: string) => {
@@ -239,62 +449,567 @@ export const careerRating = (r: CareerState, club: string) => {
     return Math.round(ratingOf(club));
 };
 
-/** Los nombres del plantel de un club en la carrera (con renovaciones y nombres editados). */
-export function careerNames(r: CareerState, team: SevenTeam): PlayerName[] | null {
-    const roster = r.rosters?.[team.id];
-    if (!roster) return null;
-    const base = defaultNames(team);
-    return roster.map((p, slot) => (p.name ? nameFromText(p.name) : p.gen === 0 ? base[slot] : nameFromSeed(team, `${team.id}:${slot}:${p.gen}`)));
+/** El nombre de un jugador de un club por su id (los que se fueron, por el nombre que quedó guardado). */
+export function careerPlayerName(r: CareerState, team: SevenTeam, id: number): PlayerName {
+    const p = r.rosters?.[team.id]?.find((x) => x.id === id);
+    if (!p) {
+        const gone = team.id === r.me ? r.legends?.[String(id)]?.[3] : undefined;
+        if (gone) return nameFromText(gone);
+        return defaultNames(team)[id] ?? nameFromSeed(team, `${team.id}:n${id}`);
+    }
+    if (p.name) return nameFromText(p.name);
+    if (id < 7) return p.gen === 0 ? defaultNames(team)[id] : nameFromSeed(team, `${team.id}:${id}:${p.gen}`);
+    return nameFromSeed(team, `${team.id}:n${id}`);
 }
 
-/** El plantel del club del usuario, para mostrarlo y editarlo. */
-export function myRoster(r: CareerState): { slot: number; pos: string; name: PlayerName; age: number; q: number }[] {
+/** Los nombres de los siete de un club, en el orden de los puestos (para el partido). */
+export function careerNames(r: CareerState, team: SevenTeam): PlayerName[] | null {
+    if (!r.rosters?.[team.id]) return null;
+    return lineupOf(r, team.id).map((id) => careerPlayerName(r, team, id));
+}
+
+/** Las skills de los siete de un club para el partido, con la moral y el cansancio de la temporada. */
+export function careerSkills(r: CareerState, club: string): PlayerSkill[] | null {
+    const roster = r.rosters?.[club];
+    if (!roster?.length || !roster[0].s) return null;
+    const by = new Map(roster.map((p) => [p.id, p]));
+    const fat0 = club === r.me ? (r.fat ?? 0) * 0.6 : busy(r, club) ? 0.6 : 0;
+    return lineupOf(r, club).map((id) => {
+        const p = by.get(id) ?? roster[0];
+        const m = (p.m ?? 0) * 0.3;
+        const [spd, kick, tkl, sta] = p.s ?? [6, 6, 6, 6];
+        return { spd: clampN(spd + m, 1, 10), kick: clampN(kick + m, 1, 10), tkl: clampN(tkl + m, 1, 10), sta, fat0 };
+    });
+}
+
+export interface RosterRow {
+    id: number;
+    name: PlayerName;
+    age: number;
+    ovr: number;
+    s: [number, number, number, number];
+    m: number;
+    out?: Player['out'];
+    /** Puesto en el siete inicial (0 a 6), o null si es suplente. */
+    slot: number | null;
+}
+
+/** El plantel del club del usuario, para mostrarlo y armar el siete. */
+export function myRoster(r: CareerState): RosterRow[] {
     const team = arClubById(r.me);
     const roster = r.rosters?.[r.me];
     if (!team || !roster) return [];
-    const names = careerNames(r, team) ?? defaultNames(team);
-    return roster.map((p, slot) => ({ slot, pos: POSITIONS[slot], name: names[slot], age: p.age, q: p.q }));
+    const lineup = myLineup(r);
+    return roster.map((p) => {
+        const id = p.id as number;
+        const slot = lineup.indexOf(id);
+        return { id, name: careerPlayerName(r, team, id), age: p.age, ovr: p.ovr ?? 5, s: p.s ?? [5, 5, 5, 5], m: p.m ?? 0, out: p.out, slot: slot >= 0 && available(p) ? slot : null };
+    });
 }
 
 /** Cambia el nombre de un jugador del plantel propio. */
-export function renamePlayer(s: TourState, slot: number, text: string): TourState {
+export function renamePlayer(s: TourState, id: number, text: string): TourState {
     const r = s.career;
     const roster = r?.rosters?.[r.me];
-    if (!r || !roster?.[slot]) return s;
+    if (!r || !roster?.some((p) => p.id === id)) return s;
     const clean = text.replace(/\s+/g, ' ').trim().slice(0, 40);
-    const next = roster.map((p, i) => (i === slot ? { ...p, name: clean || undefined } : p));
+    const next = roster.map((p) => (p.id === id ? { ...p, name: clean || undefined } : p));
     return { ...s, career: { ...r, rosters: { ...r.rosters, [r.me]: next } } };
 }
 
-/** Un año más para todos: los jóvenes mejoran, los veteranos caen y se retiran, y llega la cantera. */
+/** Pone a un jugador en un puesto del siete (si ya estaba en otro, intercambian). */
+export function setLineupSlot(s: TourState, slot: number, id: number): TourState {
+    const r = s.career;
+    const p = r?.rosters?.[r.me]?.find((x) => x.id === id);
+    if (!r || !p || !available(p) || slot < 0 || slot > 6) return s;
+    const cur = myLineup(r);
+    const next = [...cur];
+    const was = cur.indexOf(id);
+    if (was >= 0) next[was] = cur[slot];
+    next[slot] = id;
+    return { ...s, career: { ...r, lineup: next } };
+}
+
+/** Vuelve al siete que arma el cuerpo técnico (los mejores en su puesto). */
+export function resetLineup(s: TourState): TourState {
+    const r = s.career;
+    if (!r) return s;
+    return { ...s, career: { ...r, lineup: autoLineup(r.rosters?.[r.me] ?? []) } };
+}
+
+/** Un jugador nuevo de la cantera: sale de la camada de M19 del club. */
+function fromYouth(r: CareerState, club: string, id: number): Player {
+    const cam = r.youth?.[club]?.[3] ?? centerOf(club);
+    return makePlayer(id, cam - 1.6 + Math.random() * 1.6, 18 + Math.floor(Math.random() * 3));
+}
+
+const nextId = (roster: Player[]) => Math.max(-1, ...roster.map((p) => p.id ?? 0)) + 1;
+
+/** Guarda el nombre de un jugador que se va (para la historia del club). */
+function archiveLegend(r: CareerState, id: number, name: string) {
+    const row = r.legends?.[String(id)];
+    if (row) row[3] = name;
+}
+
+/**
+ * Un año más para todos: los jóvenes mejoran, los veteranos caen y se retiran,
+ * los que se fueron a Europa no vuelven, y los lugares los llenan los de la
+ * cantera (mejores cuanto mejor viene la camada de M19).
+ */
 function evolveRosters(r: CareerState) {
     const mine: string[] = [];
     const team = arClubById(r.me);
-    const before = team ? careerNames(r, team) : null;
     for (const [club, roster] of Object.entries(r.rosters ?? {})) {
-        roster.forEach((p, slot) => {
+        const keep: Player[] = [];
+        for (const p of roster) {
+            const name = club === r.me && team ? careerPlayerName(r, team, p.id as number) : null;
+            const full = name ? `${name.first} ${name.last}`.trim() : '';
+            if (p.out?.kind === 'eur') {
+                if (name) mine.push(`${full} se quedó en Europa.`);
+                if (club === r.me) archiveLegend(r, p.id as number, full);
+                continue;
+            }
             p.age += 1;
-            if (p.age <= 22) p.q += rand(0.3, 1.6);
-            else if (p.age <= 27) p.q += rand(-0.3, 0.8);
-            else if (p.age <= 30) p.q += rand(-0.8, 0.3);
-            else p.q += rand(-1.6, -0.2);
+            const o = p.ovr ?? 5;
+            let d: number;
+            if (p.age <= 22) d = rand(0.1, 0.8);
+            else if (p.age <= 27) d = rand(-0.25, 0.4);
+            else if (p.age <= 30) d = rand(-0.55, 0.15);
+            else d = rand(-1.0, -0.1);
+            if (d > 0 && o > 8) d *= 0.45; // arriba cuesta más
+            // Cada club tira hacia su nivel de cantera: sin esto, con los años todos suben.
+            d += (canteraOf(r, club) - 0.2 - o) * 0.14;
+            p.ovr = capOvr(o + d);
+            p.s = (p.s ?? makeSkills(p.ovr, Math.random)).map((v, k) => Math.round(clampN(v + d + (k === 0 && p.age > 29 ? -0.4 : 0) + (Math.random() - 0.5) * 0.8, 1, 10))) as Player['s'];
+            p.m = 0;
+            delete p.out;
             const retires = p.age >= 37 || (p.age >= 31 && Math.random() < (p.age - 30) * 0.22);
             if (retires) {
-                const old = club === r.me && before ? before[slot] : null;
-                const age = p.age;
-                p.age = 18 + Math.floor(Math.random() * 4);
-                p.q = rand(-3, 1.5);
-                p.gen += 1;
-                delete p.name;
-                if (old && team) {
-                    const nuevo = nameFromSeed(team, `${club}:${slot}:${p.gen}`);
-                    mine.push(`Se retiró ${old.first} ${old.last} (${age} años, ${POSITIONS[slot].toLowerCase()}); llega ${nuevo.first} ${nuevo.last} (${p.age}).`);
-                }
+                if (name) mine.push(`Se retiró ${full} (${p.age} años).`);
+                if (club === r.me) archiveLegend(r, p.id as number, full);
+                continue;
             }
-            p.q = Math.round(Math.max(-6, Math.min(6, p.q)) * 10) / 10;
-        });
+            keep.push(p);
+        }
+        while (keep.length < SQUAD) {
+            const np = fromYouth(r, club, nextId([...roster, ...keep]));
+            keep.push(np);
+            if (club === r.me && team) {
+                const n = careerPlayerName({ ...r, rosters: { ...r.rosters, [club]: keep } }, team, np.id as number);
+                mine.push(`Sube de la cantera ${n.first} ${n.last} (${np.age} años, valoración ${(np.ovr ?? 0).toFixed(1)}).`);
+            }
+        }
+        r.rosters![club] = keep;
     }
+    if (r.lineup) r.lineup = autoLineup(r.rosters?.[r.me] ?? [], r.lineup);
     return mine;
+}
+
+/* ───────────────────────── franquicias, Europa y Pumas ───────────────────────── */
+
+const CAPIBARAS_CORDOBA = new Set(['ar-jockey-club-villa-maria', 'ar-san-martin-de-villa-maria', 'ar-aero-club-rio-iv', 'ar-uru-cure-rugby-club']);
+
+/** La franquicia del Super Rugby Américas que mira a los jugadores de un club. */
+export function franchiseOf(club: string): string {
+    if (CAPIBARAS_CORDOBA.has(club)) return 'Capibaras';
+    const region = REGION_OF_CLUB[club];
+    if (region === 'noa') return 'Tarucas';
+    if (region === 'nea') return 'Yacaré XV';
+    if (region === 'centro' || region === 'oeste') return 'Dogos XXI';
+    if (region === 'litoral') return 'Capibaras';
+    return 'Pampas'; // URBA, Pampeana y Patagonia
+}
+
+const EUROPE = ['Bath', 'Toulouse', 'Clermont', 'Benetton', 'Exeter', 'Montpellier', 'Leicester', 'Zebre', 'Bayonne', 'Pau'];
+
+const fullName = (r: CareerState, id: number) => {
+    const team = arClubById(r.me);
+    if (!team) return '';
+    const n = careerPlayerName(r, team, id);
+    return `${n.first} ${n.last}`.trim();
+};
+
+function pushNews(r: CareerState, n: Omit<CareerNews, 'season'>) {
+    (r.news ??= []).push({ season: r.season, ...n });
+    if (r.news.length > 40) {
+        const drop = r.news.length - 40;
+        r.news = r.news.slice(drop);
+        r.newsSeen = Math.max(0, (r.newsSeen ?? 0) - drop);
+    }
+}
+
+/** Saca a un jugador por un tiempo, si quedan bajas en la temporada. Devuelve si lo sacó. */
+function takeOut(r: CareerState, p: Player, kind: OutKind, until: number, by?: string): boolean {
+    if ((r.bajas ?? 0) >= MAX_BAJAS || p.out) return false;
+    p.out = { kind, until, ...(by ? { by } : {}) };
+    r.bajas = (r.bajas ?? 0) + 1;
+    return true;
+}
+
+/** Arranque de temporada: la franquicia de la región puede llevarse a un joven muy bueno la primera mitad. */
+function franchiseCall(r: CareerState) {
+    const roster = r.rosters?.[r.me] ?? [];
+    const cands = roster.filter((p) => p.age >= 19 && p.age <= 25 && (p.ovr ?? 0) >= 6.8 && !p.out).sort((a, b) => (b.ovr ?? 0) - (a.ovr ?? 0));
+    const p = cands[0];
+    if (!p || Math.random() >= clampN(((p.ovr ?? 0) - 6.5) * 0.2, 0, 0.65)) return;
+    const fr = franchiseOf(r.me);
+    if (!takeOut(r, p, 'fra', 0.5, fr)) return;
+    pushNews(r, {
+        kind: 'fra', who: p.id,
+        title: `${fr} convocó a ${fullName(r, p.id as number)}`,
+        text: 'La franquicia del Super Rugby Américas se lo lleva para su temporada. Se pierde la primera mitad del año y vuelve con más rodaje.',
+    });
+}
+
+/** Mitad de temporada: vuelven los de la franquicia, y a los muy buenos los pueden llamar los Pumas o un club de Europa. */
+function midSeason(r: CareerState) {
+    const roster = r.rosters?.[r.me] ?? [];
+    for (const p of roster) {
+        if (p.out?.kind === 'fra') {
+            delete p.out;
+            p.ovr = capOvr((p.ovr ?? 5) + 0.5);
+            pushNews(r, { kind: 'back', who: p.id, title: `Volvió ${fullName(r, p.id as number)}`, text: `Terminó su temporada con ${franchiseOf(r.me)} y vuelve al club con medio punto más de valoración.` });
+        }
+    }
+    if (r.midDone) return;
+    r.midDone = true;
+    const best = roster.filter((p) => !p.out).sort((a, b) => (b.ovr ?? 0) - (a.ovr ?? 0));
+    const puma = best.find((p) => p.age >= 20 && p.age <= 32 && (p.ovr ?? 0) >= 8.5);
+    if (puma) {
+        const o = puma.ovr ?? 0;
+        const chance = o >= 9.5 ? 0.92 : clampN((o - 8.3) * 0.4, 0, 0.6);
+        if (Math.random() < chance && takeOut(r, puma, 'pum', 2, 'Los Pumas')) {
+            pushNews(r, { kind: 'pum', who: puma.id, title: `Los Pumas convocaron a ${fullName(r, puma.id as number)}`, text: 'Se va con el seleccionado lo que queda de la temporada. Vuelve el año que viene.' });
+            return;
+        }
+    }
+    const eur = best.find((p) => p.age >= 21 && p.age <= 30 && (p.ovr ?? 0) >= 7.8);
+    if (eur && Math.random() < clampN(((eur.ovr ?? 0) - 7.5) * 0.15, 0, 0.35)) {
+        const club = EUROPE[Math.floor(Math.random() * EUROPE.length)];
+        if (takeOut(r, eur, 'eur', 2, club)) {
+            pushNews(r, { kind: 'eur', who: eur.id, title: `${club} se llevó a ${fullName(r, eur.id as number)}`, text: 'Firmó en Europa: no termina la temporada con el club y no vuelve.' });
+        }
+    }
+}
+
+/** Los que ya cumplieron su lesión vuelven. */
+function heal(r: CareerState, clock: number) {
+    for (const p of r.rosters?.[r.me] ?? []) {
+        if (p.out?.kind === 'inj' && p.out.until <= clock) {
+            delete p.out;
+            pushNews(r, { kind: 'back', who: p.id, title: `${fullName(r, p.id as number)} está de alta`, text: 'Se recuperó de la lesión y vuelve a estar a disposición.' });
+        }
+    }
+}
+
+/* ───────────────────────── juveniles y divisiones ───────────────────────── */
+
+export const YOUTH_CATS = ['M15', 'M16', 'M17', 'M19'] as const;
+const NAC_CATS: Record<number, string> = { 1: 'nac-m16', 2: 'nac-m17', 3: 'nac-m19' };
+export const JUV_LABEL: Record<string, string> = { 'nac-m16': 'Nacional M16', 'nac-m17': 'Nacional M17', 'nac-m19': 'Nacional M19' };
+
+/** La cantera de un club: de su nivel, más lo que invirtió el usuario si es el propio. */
+const canteraOf = (r: CareerState, club: string) => centerOf(club) + (club === r.me ? r.invest ?? 0 : 0);
+
+function initialYouth(r: CareerState): Record<string, [number, number, number, number]> {
+    const out: Record<string, [number, number, number, number]> = {};
+    for (const club of Object.keys(r.rosters ?? {})) {
+        const rr = seededRand(`${club}:juveniles`);
+        const c = canteraOf(r, club);
+        out[club] = [0, 1, 2, 3].map(() => r1(clampN(c + gauss(rr) * 1.1, 1, 10))) as [number, number, number, number];
+    }
+    return out;
+}
+
+/** Cada año la camada sube de categoría (con un poco de cambio) y llega una nueva a M15. */
+function ageYouth(r: CareerState) {
+    const y = (r.youth ??= initialYouth(r));
+    for (const club of Object.keys(r.rosters ?? {})) {
+        const cur = y[club] ?? [5, 5, 5, 5];
+        const drift = () => (Math.random() - 0.5) * 0.9;
+        y[club] = [
+            r1(clampN(canteraOf(r, club) + gauss(Math.random) * 1.1, 1, 10)),
+            r1(clampN(cur[0] + drift(), 1, 10)),
+            r1(clampN(cur[1] + drift(), 1, 10)),
+            r1(clampN(cur[2] + drift(), 1, 10)),
+        ];
+    }
+}
+
+const REGIONS = [...new Set(AR_SEVEN_DIVISIONS.map((d) => d.region))];
+const REGION_LABEL: Record<string, string> = { urba: 'URBA', centro: 'Córdoba', litoral: 'Litoral', oeste: 'Cuyo', noa: 'NOA', nea: 'NEA', pampeana: 'Pampeana', patagonia: 'Patagonia' };
+export const regionLabel = (region: string) => REGION_LABEL[region] ?? region;
+
+/** Los clubes de una región (de su catálogo), sin repetir. */
+const clubsOfRegion = (region: string) => [...new Set(AR_SEVEN_DIVISIONS.filter((d) => d.region === region).flatMap((d) => d.clubs))];
+
+/**
+ * El año de los juveniles: en cada categoría, la tabla de cada región sale de
+ * la fuerza de las camadas más un poco de azar; en M16, M17 y M19 los campeones
+ * de cada región juegan el nacional. Devuelve lo del club propio, más sus
+ * divisiones de mayores (Intermedia, Pre A...).
+ */
+function youthSeason(r: CareerState): YouthRow[] {
+    const rows: YouthRow[] = [];
+    const myRegion = REGION_OF_CLUB[r.me];
+    const camada = (club: string, k: number) => r.youth?.[club]?.[k] ?? r1(centerOf(club) + gauss(Math.random) * 1.1);
+    YOUTH_CATS.forEach((cat, k) => {
+        const champs: { club: string; v: number }[] = [];
+        let myPlace = 0;
+        let myOf = 0;
+        for (const region of REGIONS) {
+            const table = clubsOfRegion(region)
+                .map((club) => ({ club, v: camada(club, k) + gauss(Math.random) * 0.7 }))
+                .sort((a, b) => b.v - a.v);
+            if (table[0]) champs.push(table[0]);
+            if (region === myRegion) {
+                myPlace = table.findIndex((x) => x.club === r.me) + 1;
+                myOf = table.length;
+            }
+        }
+        const row: YouthRow = { cat, place: myPlace, of: myOf };
+        const nacKey = NAC_CATS[k];
+        if (nacKey) {
+            // Cuartos, semis y final entre los campeones regionales.
+            let alive = [...champs].sort(() => Math.random() - 0.5);
+            const fell = new Map<string, string>();
+            const rounds = ['cuartos', 'semis', 'la final'];
+            for (let ri = 0; alive.length > 1 && ri < 3; ri++) {
+                const next: typeof alive = [];
+                for (let i = 0; i < alive.length; i += 2) {
+                    const a = alive[i];
+                    const b = alive[i + 1];
+                    if (!b) {
+                        next.push(a);
+                        continue;
+                    }
+                    const aw = a.v + gauss(Math.random) * 0.8 > b.v + gauss(Math.random) * 0.8;
+                    next.push(aw ? a : b);
+                    fell.set(aw ? b.club : a.club, rounds[ri]);
+                }
+                alive = next;
+            }
+            const champ = alive[0]?.club;
+            if (champ) addChampion(r, nacKey, champ);
+            if (champs.some((c) => c.club === r.me)) row.nac = champ === r.me ? 'Campeón' : `Perdió en ${fell.get(r.me) ?? 'cuartos'}`;
+            else row.nac = 'No clasificó';
+        }
+        rows.push(row);
+    });
+    // Las divisiones de mayores: tantas como tiene un club de su tamaño, contra los de su misma división.
+    const div = divisionOf(r, r.me) ?? '';
+    const level = DIV[div]?.level ?? 5;
+    const n = r.branch === 'urba' ? [0, 5, 4, 3, 3, 2, 2, 1][level] ?? 1 : level <= 2 ? 3 : level <= 5 ? 2 : 1;
+    const names = ['Intermedia', 'Pre A', 'Pre B', 'Pre C', 'Pre D'].slice(0, n);
+    const rivals = r.divisions[div] ?? [r.me];
+    names.forEach((cat, k) => {
+        const table = rivals
+            .map((club) => ({ club, v: centerOf(club) + (r.ratings?.[club] ?? 0) / 6 + ((camada(club, 3) - centerOf(club)) * 0.4 * (k + 1)) / n + gauss(Math.random) * 0.9 }))
+            .sort((a, b) => b.v - a.v);
+        rows.push({ cat, place: table.findIndex((x) => x.club === r.me) + 1, of: table.length });
+    });
+    return rows;
+}
+
+/* ───────────────────────── después de cada fecha ───────────────────────── */
+
+/** Qué parte de la temporada va (0 a 1) mirando los torneos del club; fuera de la fase regular, 1. */
+const clockOf = (s: TourState) => (s.career?.phase === 'liga' ? seasonClock(s) : 1);
+
+/**
+ * Cierra la fecha del club en la carrera: el resultado en el torneo (closeRound)
+ * y lo que deja en el plantel: moral, cansancio, alguna lesión, el historial
+ * contra el rival y los números de cada jugador. Fuera de una carrera es
+ * closeRound y nada más. `misses`: ids de los que erraron conversiones.
+ */
+export function careerRound(s: TourState, mine: [number, number] | null, events?: ScoreEvent[], misses: number[] = []): TourState {
+    const opp = nextOpponent(s);
+    if (s.career) applyBoosts(s.career);
+    const next = closeRound(s, mine, events);
+    if (!next.career) return next;
+    const r = next.career; // closeRound ya lo clonó
+    upgradeCareer(r);
+    const roster = r.rosters?.[r.me] ?? [];
+    const lineup = myLineup(r);
+    if (opp && mine) {
+        const [us, them] = mine;
+        // Historial contra el rival.
+        const h = ((r.h2h ??= {})[opp] ??= [0, 0, 0, 0, 0, 0, 0, 0]);
+        if (us > them) h[0] += 1;
+        else if (us === them) h[1] += 1;
+        else h[2] += 1;
+        h[3] += us;
+        h[4] += them;
+        h[5] = r.season;
+        h[6] = us;
+        h[7] = them;
+        // Los números de cada jugador en el club, partido a partido.
+        const myEvents = (events?.length ? events : scoreEvents(r.me, us)).filter((e) => e.team === r.me);
+        const L = (r.legends ??= {});
+        for (const id of lineup) (L[String(id)] ??= [0, 0, 0])[2] += 1;
+        for (const e of myEvents) {
+            const row = (L[String(e.slot)] ??= [0, 0, 0]);
+            if (e.kind === 'try') row[0] += 1;
+            row[1] += e.kind === 'try' ? 5 : e.kind === 'conv' ? 2 : 3;
+        }
+        // Moral: el resultado, el que apoyó y el pateador que erra.
+        const by = new Map(roster.map((p) => [p.id, p]));
+        const delta = us > them ? 0.4 : us < them ? -0.4 : 0;
+        for (const p of roster) p.m = r1(clampN((p.m ?? 0) * 0.85 + (lineup.includes(p.id as number) ? delta : delta / 2), -2, 2));
+        for (const e of myEvents) {
+            const p = by.get(e.slot);
+            if (p) p.m = r1(clampN((p.m ?? 0) + (e.kind === 'try' ? 0.4 : 0.1), -2, 2));
+        }
+        for (const id of misses) {
+            const p = by.get(id);
+            if (p) p.m = r1(clampN((p.m ?? 0) - 0.35, -2, 2));
+        }
+        // Cansancio: jugar los dos torneos a la vez pesa el doble.
+        const two = !!r.parallel && !r.parallel.done;
+        r.fat = r1(clampN((r.fat ?? 0) + (two ? 0.42 : 0.22), 0, 2));
+        // Alguna lesión de partido (cuenta para el tope de bajas).
+        if (Math.random() < 0.06) {
+            const id = lineup[Math.floor(Math.random() * lineup.length)];
+            const p = by.get(id);
+            const dates = 2 + Math.floor(Math.random() * 3);
+            if (p && takeOut(r, p, 'inj', clockOf(next) + dates * 0.07)) {
+                pushNews(r, { kind: 'inj', who: id, title: `Lesión de ${fullName(r, id)}`, text: `Se golpeó en el partido y se pierde unas ${dates} fechas.` });
+            }
+        }
+    } else if (!opp) {
+        // Fecha libre: descanso.
+        r.fat = r1(clampN((r.fat ?? 0) - 0.5, 0, 2));
+    }
+    const clock = clockOf(next);
+    heal(r, clock);
+    if (r.phase === 'liga' && clock >= 0.5) midSeason(r);
+    if (r.lineup) r.lineup = autoLineup(roster, r.lineup);
+    return next;
+}
+
+/** El cartel de antes del partido: cómo te fue contra este rival. */
+export function headToHead(r: CareerState, opp: string): string | null {
+    const h = r.h2h?.[opp];
+    if (!h) return null;
+    const n = h[0] + h[1] + h[2];
+    const pl = (k: number, w: string) => `${k} ${w}${k === 1 ? '' : 's'}`;
+    return `Jugaste ${n === 1 ? 'una vez' : `${n} veces`} contra ${nm(opp)}: ${pl(h[0], 'ganado')}, ${pl(h[1], 'empatado')}, ${pl(h[2], 'perdido')}. La última, ${h[6]}-${h[7]} en ${h[5]}.`;
+}
+
+/** Los récords del club en toda la carrera: máximo anotador, máximo tryman y el de más partidos. */
+export function clubRecords(r: CareerState): { label: string; name: string; n: string }[] {
+    const team = arClubById(r.me);
+    const L = Object.entries(r.legends ?? {});
+    if (!team || !L.length) return [];
+    const name = (id: string) => {
+        const n = careerPlayerName(r, team, Number(id));
+        return `${n.first} ${n.last}`.trim();
+    };
+    const top = (k: 0 | 1 | 2) => [...L].sort((a, b) => b[1][k] - a[1][k])[0];
+    const out: { label: string; name: string; n: string }[] = [];
+    const pts = top(1);
+    if (pts && pts[1][1] > 0) out.push({ label: 'Máximo anotador', name: name(pts[0]), n: `${pts[1][1]} puntos` });
+    const tr = top(0);
+    if (tr && tr[1][0] > 0) out.push({ label: 'Máximo tryman', name: name(tr[0]), n: `${tr[1][0]} tr${tr[1][0] === 1 ? 'y' : 'ies'}` });
+    const pj = top(2);
+    if (pj && pj[1][2] > 0) out.push({ label: 'Más partidos', name: name(pj[0]), n: `${pj[1][2]} partido${pj[1][2] === 1 ? '' : 's'}` });
+    return out;
+}
+
+/** Las noticias que todavía no se mostraron. */
+export const unseenNews = (r: CareerState) => (r.news ?? []).slice(r.newsSeen ?? 0);
+
+export function markNewsSeen(s: TourState): TourState {
+    const r = s.career;
+    if (!r) return s;
+    return { ...s, career: { ...r, newsSeen: r.news?.length ?? 0 } };
+}
+
+/* ───────────────────────── pretemporada ───────────────────────── */
+
+/** La pretemporada está pendiente: antes del primer partido del año. */
+export const inPreseason = (r: CareerState) => !!r.pre && r.pre.step !== 'listo' && r.phase === 'liga';
+
+export const TRAIN_ODDS = { up: 60, same: 25, inj: 15 };
+
+/** El punto de la pretemporada: a los juveniles (la cantera) o a la primera (descanso y moral). */
+export function preseasonPoint(s: TourState, punto: 'juveniles' | 'primera'): TourState {
+    const r0 = s.career;
+    if (!r0 || r0.pre?.step !== 'punto') return s;
+    const r: CareerState = JSON.parse(JSON.stringify(r0));
+    if (punto === 'juveniles') {
+        r.invest = r1((r.invest ?? 0) + 0.3);
+        const y = r.youth?.[r.me];
+        if (y) r.youth![r.me] = y.map((v) => r1(clampN(v + 0.5, 1, 10))) as [number, number, number, number];
+    } else {
+        r.fat = 0;
+        for (const p of r.rosters?.[r.me] ?? []) p.m = r1(clampN((p.m ?? 0) + 1, -2, 2));
+    }
+    r.pre = { ...r.pre!, step: 'entreno', punto };
+    return { ...s, career: r };
+}
+
+/** Entrenar a tres: cada uno puede subir un punto, quedar igual o lesionarse. */
+export function preseasonTrain(s: TourState, ids: number[]): TourState {
+    const r0 = s.career;
+    if (!r0 || r0.pre?.step !== 'entreno') return s;
+    const r: CareerState = JSON.parse(JSON.stringify(r0));
+    const trained: { id: number; result: 'up' | 'same' | 'inj' }[] = [];
+    for (const id of ids.slice(0, 3)) {
+        const p = r.rosters?.[r.me]?.find((x) => x.id === id);
+        if (!p || p.out) continue;
+        const x = Math.random() * 100;
+        if (x < TRAIN_ODDS.up) {
+            p.ovr = capOvr((p.ovr ?? 5) + 1);
+            const k = Math.floor(Math.random() * 4);
+            if (p.s) p.s[k] = Math.min(10, p.s[k] + 1);
+            trained.push({ id, result: 'up' });
+        } else if (x < TRAIN_ODDS.up + TRAIN_ODDS.inj && takeOut(r, p, 'inj', 0.5)) {
+            trained.push({ id, result: 'inj' });
+            pushNews(r, { kind: 'inj', who: id, title: `Lesión de ${fullName(r, id)} en la pretemporada`, text: 'Se lesionó entrenando: se pierde la primera mitad de la temporada.' });
+        } else {
+            trained.push({ id, result: 'same' });
+        }
+    }
+    r.pre = { ...r.pre!, step: 'amistosos', trained };
+    if (r.lineup) r.lineup = autoLineup(r.rosters?.[r.me] ?? [], r.lineup);
+    return { ...s, career: r };
+}
+
+/** Un amistoso de pretemporada: ganarlo sube la moral de todos; perderlo la baja y arriesga una lesión. */
+export function preseasonFriendly(s: TourState, opp: string, score: [number, number]): TourState {
+    const r0 = s.career;
+    if (!r0 || r0.pre?.step !== 'amistosos') return s;
+    const r: CareerState = JSON.parse(JSON.stringify(r0));
+    const roster = r.rosters?.[r.me] ?? [];
+    const won = score[0] > score[1];
+    for (const p of roster) p.m = r1(clampN((p.m ?? 0) + (won ? 2 : -1), -2, 2));
+    if (!won && Math.random() < 0.35) {
+        const lineup = myLineup(r);
+        const id = lineup[Math.floor(Math.random() * lineup.length)];
+        const p = roster.find((x) => x.id === id);
+        if (p && takeOut(r, p, 'inj', 0.25)) pushNews(r, { kind: 'inj', who: id, title: `Lesión de ${fullName(r, id)} en el amistoso`, text: 'Se pierde el primer cuarto de la temporada.' });
+    }
+    const friendlies = [...(r.pre?.friendlies ?? []), { opp, us: score[0], them: score[1] }];
+    r.pre = { ...r.pre!, friendlies, step: friendlies.length >= 2 ? 'listo' : 'amistosos' };
+    if (r.lineup) r.lineup = autoLineup(roster, r.lineup);
+    return { ...s, career: r };
+}
+
+/** Terminar la pretemporada (sin amistosos, o después de uno). */
+export function preseasonDone(s: TourState): TourState {
+    const r = s.career;
+    if (!r?.pre) return s;
+    return { ...s, career: { ...r, pre: { ...r.pre, step: 'listo' } } };
+}
+
+/** Arranca la pretemporada del año (y la convocatoria de la franquicia). */
+function startPreseason(r: CareerState) {
+    r.pre = { step: 'punto' };
+    r.bajas = 0;
+    r.midDone = false;
+    r.fat = 0;
+    franchiseCall(r);
 }
 
 /* ───────────────────────── definiciones ───────────────────────── */
@@ -468,6 +1183,8 @@ const myTier = (r: CareerState): TierId | null => {
 
 /** Arranca la temporada: la división en pantalla, el federal en paralelo y todo lo demás a la par. */
 function seasonStart(r: CareerState, difficulty: Difficulty, duration: Duration): TourState {
+    startPreseason(r);
+    forget(r);
     applyBoosts(r);
     const div = divisionOf(r, r.me) ?? Object.keys(r.divisions)[0];
     const tiers = tiersOf(r);
@@ -492,7 +1209,7 @@ export function createCareer(meId: string, difficulty: Difficulty, duration: Dur
     const divisions: Record<string, string[]> = {};
     for (const d of AR_SEVEN_DIVISIONS) if (d.branch === branch) divisions[d.id] = [...d.clubs].sort(byRating);
     const rosters: Record<string, Player[]> = {};
-    for (const clubs of Object.values(divisions)) for (const c of clubs) rosters[c] = newRoster();
+    for (const clubs of Object.values(divisions)) for (const c of clubs) rosters[c] = newRoster(c);
     const r: CareerState = {
         v: 1, me: meId, branch, season: 2026, phase: 'liga', divisions,
         cupos: AR_SEVEN_CUPOS.map((c) => ({ region: c.region, source: c.sourceCompetitionId, tdiA: c.tdiA, tdiB: c.tdiB })),
@@ -504,6 +1221,7 @@ export function createCareer(meId: string, difficulty: Difficulty, duration: Dur
     };
     // 2026: los federales los juegan los de más nivel de cada regional, con las plazas de fábrica.
     r.tiers = tierFields(r, 'final', r.cupos, undefined, {});
+    r.youth = initialYouth(r);
     return seasonStart(r, difficulty, duration);
 }
 
@@ -609,7 +1327,7 @@ function addChampion(r: CareerState, key: string, club: string | null | undefine
     const list = ((r.champions ??= {})[key] ??= []);
     if (list.some(([season]) => season === r.season)) return;
     list.push([r.season, club]);
-    if (club === r.me) (r.pending.wins ??= []).push(palmaresLabel(key));
+    if (club === r.me && !JUV_LABEL[key]) (r.pending.wins ??= []).push(palmaresLabel(key));
 }
 
 const addBonus = (r: CareerState, club: string | null | undefined, v: number) => {
@@ -620,10 +1338,10 @@ const addBonus = (r: CareerState, club: string | null | undefined, v: number) =>
 
 /** Goleadores y tryman de un torneo, con los nombres de este año. */
 function awardsOf(r: CareerState, t: TourState, comp: string) {
-    const name = (team: string, slot: number) => {
+    const name = (team: string, id: number) => {
         const club = arClubById(team);
         if (!club) return '—';
-        const n = (careerNames(r, club) ?? defaultNames(club))[slot];
+        const n = careerPlayerName(r, club, id);
         return `${n.first} ${n.last}`.trim();
     };
     const map = (by: 'tries' | 'points') => topStats(t.stats, by, 5).map((x) => ({ name: name(x.team, x.slot), club: x.team, n: by === 'tries' ? x.tries : x.points }));
@@ -981,8 +1699,13 @@ function closeSeason(r: CareerState, chosen?: NacFormat) {
     const before = careerRating(r, r.me);
     const { tiers, cupos, cuposAB } = nextTiers(r);
     evolveRatings(r);
+    // Juveniles y divisiones del año: el reporte, y la camada de M19 que sube a la primera.
+    const rows = youthSeason(r);
+    r.reports = [...(r.reports ?? []), { season: r.season, rows }].slice(-12);
+    const youthNote = rows.filter((x) => x.nac === 'Campeón' || (x.place === 1 && x.of > 1)).map((x) => (x.nac === 'Campeón' ? `${x.cat} campeón del Nacional.` : `${x.cat} campeón de la región.`));
     const roster = evolveRosters(r);
-    boostCache.delete(r);
+    ageYouth(r);
+    forget(r);
     const after = careerRating(r, r.me);
     const fmt = formatOf(r, r.season);
     if (fmt !== 'ab') {
@@ -1005,7 +1728,7 @@ function closeSeason(r: CareerState, chosen?: NacFormat) {
     const last = r.history.at(-1);
     if (last) {
         last.rating = after;
-        last.note = [...r.pending.note, ...roster, after !== before ? `Nivel ${before} → ${after}.` : `Nivel ${after}, sin cambios.`].join(' ');
+        last.note = [...r.pending.note, ...youthNote, ...roster, after !== before ? `Nivel ${before} → ${after}.` : `Nivel ${after}, sin cambios.`].join(' ');
     }
     r.season += 1;
     r.phase = 'liga';
@@ -1023,7 +1746,7 @@ function closeSeason(r: CareerState, chosen?: NacFormat) {
  * Con dos torneos en paralelo, espera a que terminen los dos.
  */
 export function settleCareer(s0: TourState): TourState {
-    const s = careerTick(s0);
+    const s = careerTick(upgraded(s0));
     if (!s.career || !s.done || s.career.settled === s.career.phase) return s;
     if (s.career.parallel && !s.career.parallel.done) return s;
     const r: CareerState = JSON.parse(JSON.stringify(s.career));
@@ -1035,6 +1758,14 @@ export function settleCareer(s0: TourState): TourState {
     else if (r.phase === 'tdi') settleTdiLegacy(s, r);
     else settleNacional(s, r);
     r.settled = r.phase;
+    return { ...s, career: r };
+}
+
+/** Una partida vieja, llevada al formato actual (planteles de 12 y camadas); las nuevas pasan tal cual. */
+function upgraded(s: TourState): TourState {
+    if (!s.career || !needsUpgrade(s.career)) return s;
+    const r: CareerState = JSON.parse(JSON.stringify(s.career));
+    upgradeCareer(r);
     return { ...s, career: r };
 }
 
@@ -1109,10 +1840,7 @@ export function advanceCareer(s0: TourState, chosen?: NacFormat): TourState {
         return stage({ ...r, phase: 'tdi', settled: null, parallel: null }, legacyTdiDef(which, which === 'A' ? f.tdiA ?? [] : f.tdiB ?? [], r.season), s.difficulty, s.duration);
     }
     // Partidas guardadas sin planteles: se arman al cerrar la primera temporada.
-    if (!r.rosters) {
-        r.rosters = {};
-        for (const clubs of Object.values(r.divisions)) for (const c of clubs) r.rosters[c] = newRoster();
-    }
+    upgradeCareer(r);
     closeSeason(r, chosen);
     return seasonStart(r, s.difficulty, s.duration);
 }
@@ -1299,7 +2027,7 @@ export function liveScorers(t: TourState, by: 'tries' | 'points', nameOf: (team:
 /* ───────────────────────── palmarés y títulos ───────────────────────── */
 
 /** Cómo se llama un palmarés: los nacionales por su nombre, las divisiones por la suya. */
-export const palmaresLabel = (key: string) => PALMARES_LABEL[key] ?? divisionLabel(key);
+export const palmaresLabel = (key: string) => PALMARES_LABEL[key] ?? JUV_LABEL[key] ?? divisionLabel(key);
 
 /** Historia completa de una competición: la real (hasta 2025) y la de esta carrera, del más nuevo al más viejo. */
 export function palmaresFor(r: CareerState, key: string): TitleRow[] {

@@ -194,6 +194,19 @@ export function setRatingContext(custom: Record<string, number>, boost?: Record<
 export function setRatingBoost(boost?: Record<string, number>) {
     BOOST = boost ?? {};
 }
+/*
+ * Más contexto de la carrera: quién juega en cada puesto de cada club (los
+ * goleadores se anotan por jugador, no por puesto) y cuánto vale la localía en
+ * los partidos simulados de fase regular.
+ */
+let SLOT_IDS: Record<string, number[]> = {};
+let HOME_ADV = 0;
+export function setCareerContext(slotIds?: Record<string, number[]>, homeAdv = 0) {
+    SLOT_IDS = slotIds ?? {};
+    HOME_ADV = homeAdv;
+}
+/** El jugador (id) que ocupa un puesto de un club; fuera de la carrera, el puesto mismo. */
+export const playerAt = (team: string, slot: number) => SLOT_IDS[team]?.[slot] ?? slot;
 /** Lo que una carrera le cambió al nivel de un club (0 fuera de la carrera). */
 export const ratingBoost = (id: string) => BOOST[id] ?? 0;
 export const baseRatingOf = (id: string) => RATING.get(id) ?? CUSTOM[id] ?? 60;
@@ -352,6 +365,12 @@ export function nextOpponent(s: TourState): string | null {
     return mine[0] === s.me ? mine[1] : mine[0];
 }
 
+/** ¿El usuario juega de local la fecha actual? (en el cuadro, la cancha es neutral: false) */
+export function nextIsHome(s: TourState): boolean {
+    if (s.stage !== 'grupos') return false;
+    return (s.rounds[s.round] ?? []).some(([a]) => a === s.me);
+}
+
 /** El grupo del equipo (índice), o -1. */
 export function groupOf(s: TourState, id: string): number {
     return s.groups.findIndex((g) => g.includes(id));
@@ -408,9 +427,9 @@ export function scoreEvents(team: string, score: number): ScoreEvent[] {
         return TRY_W.length - 1;
     };
     const out: ScoreEvent[] = [];
-    for (let i = 0; i < b.t; i++) out.push({ team, slot: pick(), kind: 'try' });
-    for (let i = 0; i < b.c; i++) out.push({ team, slot: 4, kind: 'conv' });
-    for (let i = 0; i < b.d; i++) out.push({ team, slot: 4, kind: 'drop' });
+    for (let i = 0; i < b.t; i++) out.push({ team, slot: playerAt(team, pick()), kind: 'try' });
+    for (let i = 0; i < b.c; i++) out.push({ team, slot: playerAt(team, 4), kind: 'conv' });
+    for (let i = 0; i < b.d; i++) out.push({ team, slot: playerAt(team, 4), kind: 'drop' });
     return out;
 }
 
@@ -438,15 +457,16 @@ export function topStats(stats: Record<string, StatLine> | undefined, by: 'tries
         .slice(0, n);
 }
 
-/** Resultado de un partido que no juega el usuario, a partir del ranking. */
-export function simulate(a: string, b: string, knockout: boolean): [number, number] {
-    const pa = 1 / (1 + 10 ** ((ratingOf(b) - ratingOf(a)) / 18));
-    let ta = poisson(1 + 4 * pa);
-    let tb = poisson(1 + 4 * (1 - pa));
-    if (knockout && ta === tb) {
-        if (Math.random() < pa) ta += 1;
-        else tb += 1;
-    }
+/**
+ * Resultado de un partido que no juega el usuario, a partir del ranking. En
+ * fase regular el local (`a`) suma la localía de la carrera. En eliminación no
+ * hay empate: un minuto extra (lo gana el que termine arriba) y, si siguen
+ * iguales, muerte súbita.
+ */
+export function simulate(a: string, b: string, knockout: boolean, homeAdv = knockout ? 0 : HOME_ADV): [number, number] {
+    const pa = 1 / (1 + 10 ** ((ratingOf(b) - ratingOf(a) - homeAdv) / 18));
+    const ta = poisson(1 + 4 * pa);
+    const tb = poisson(1 + 4 * (1 - pa));
     const pts = (t: number) => {
         let sc = t * 5;
         for (let i = 0; i < t; i++) if (Math.random() < 0.65) sc += 2;
@@ -455,8 +475,14 @@ export function simulate(a: string, b: string, knockout: boolean): [number, numb
     let sa = pts(ta);
     let sb = pts(tb);
     if (knockout && sa === sb) {
-        if (ta >= tb) sa += 2;
-        else sb += 2;
+        const first = Math.random() < pa ? 0 : 1;
+        // Minuto extra: más o menos una de cada tres veces alguien marca y se lo lleva.
+        if (Math.random() < 0.35) {
+            const add = Math.random() < 0.85 ? (Math.random() < 0.65 ? 7 : 5) : 3;
+            if (first === 0) sa += add;
+            else sb += add;
+        } else if (first === 0) sa += 5; // muerte súbita: el primero que apoya
+        else sb += 5;
     }
     return [sa, sb];
 }
