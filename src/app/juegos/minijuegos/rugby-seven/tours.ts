@@ -668,7 +668,9 @@ export function closeRound(prev: TourState, mine: [number, number] | null, mineE
         }
     }
     // Afuera: el resto del torneo se juega solo, para saber quién salió campeón.
-    return s.eliminated && !s.done ? closeRound(s, null) : s;
+    // Los torneos que nadie juega ('__nadie') NO: van fecha por fecha al ritmo de la temporada
+    // del usuario; si se resolvieran de un saque, el cuadro entero aparecería terminado a mitad de año.
+    return s.eliminated && !s.done && s.me !== '__nadie' ? closeRound(s, null) : s;
 }
 
 export function isTourState(v: unknown): v is TourState {

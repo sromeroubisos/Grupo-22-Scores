@@ -1996,6 +1996,29 @@ export class SevenMatch {
         }
     }
 
+    /**
+     * Probabilidad de que retenga el ruck el que tenía la pelota, con los toques por
+     * segundo del usuario. Es la cuenta de verdad: la barra de pelea y el desenlace
+     * salen de acá, así que la barra no puede prometer más de lo que se juega.
+     */
+    private ruckKeep(userRate: number): { keep: number; alone: boolean; jackal: boolean } {
+        const { side } = this.ruckAt;
+        const other: Side = side === 0 ? 1 : 0;
+        const inRuck = (s: Side) => this.players.filter((p) => p.side === s && p.rucking && p.pose === 'scrum');
+        const own = inRuck(side);
+        const opp = inRuck(other);
+        const contest = clamp((userRate - this.D.ruckRate) / 4, -1, 1); // + = el usuario empuja más que el rival
+        const power = (ps: Player[]) => (ps.length ? ps.reduce((a, p) => a + this.fTkl(p) * (this.kgOf(p) / 95), 0) / ps.length : 0.9);
+        let keep = side === 0 ? this.D.ruckKeep + contest * 0.1 : this.D.cpuRuckKeep - contest * 0.16;
+        keep += (own.length - opp.length) * 0.05;
+        keep += (power(own) - power(opp)) * 0.25;
+        const alone = own.length === 0;
+        const jackal = this.ruckFirst !== null && this.ruckFirst !== side;
+        if (alone) keep -= 0.2;
+        if (jackal) keep -= 0.12;
+        return { keep: clamp(keep, 0.3, 0.98), alone, jackal };
+    }
+
     private updateRuck(dt: number) {
         const mash = this.mg?.kind === 'ruck' ? this.mg.mash : 0;
         // Los que llegan al ruck corren y se agachan; el resto va a su lugar.
@@ -2042,20 +2065,7 @@ export class SevenMatch {
          * se comparan contra el ritmo del rival, que sube con la dificultad.
          */
         const other: Side = side === 0 ? 1 : 0;
-        const inRuck = (s: Side) => this.players.filter((p) => p.side === s && p.rucking && p.pose === 'scrum');
-        const own = inRuck(side);
-        const opp = inRuck(other);
-        const userRate = mash / 1.3;
-        const contest = clamp((userRate - this.D.ruckRate) / 4, -1, 1); // + = el usuario empuja más que el rival
-        const power = (ps: Player[]) => (ps.length ? ps.reduce((a, p) => a + this.fTkl(p) * (this.kgOf(p) / 95), 0) / ps.length : 0.9);
-        let keep = side === 0 ? this.D.ruckKeep + contest * 0.1 : this.D.cpuRuckKeep - contest * 0.16;
-        keep += (own.length - opp.length) * 0.05;
-        keep += (power(own) - power(opp)) * 0.25;
-        const alone = own.length === 0;
-        const jackal = this.ruckFirst !== null && this.ruckFirst !== side;
-        if (alone) keep -= 0.2;
-        if (jackal) keep -= 0.12;
-        keep = clamp(keep, 0.3, 0.98);
+        const { keep, alone, jackal } = this.ruckKeep(mash / 1.3);
         const winner: Side = rnd() < keep ? side : other;
         this.mg = null;
         if (winner !== side) {
@@ -2462,9 +2472,12 @@ export class SevenMatch {
         if (mg.kind === 'ruck') {
             // Pelea del ruck: tus toques contra el empuje que "hace" el rival en el mismo tiempo.
             // Es la misma cuenta con la que se resuelve (userRate vs ruckRate), así que no miente.
-            const cpuPush = this.D.ruckRate * clamp(1.3 - this.phaseT, 0, 1.3);
-            const bal = clamp((mg.mash - cpuPush) / (mg.mash + cpuPush + 3), -1, 1);
-            const split = Math.round(w / 2 + (bal * w) / 2);
+            // La barra es la probabilidad real de quedarte con la pelota (incluye cuántos llegaron,
+            // quién se metió primero y el peso), no solo los toques: el desenlace sale de esa misma cuenta.
+            const elapsed = clamp(1.3 - this.phaseT, 0.35, 1.3);
+            const { keep } = this.ruckKeep(mg.mash / elapsed);
+            const userWin = this.ruckAt.side === 0 ? keep : 1 - keep;
+            const split = Math.round(userWin * w);
             ctx.fillStyle = '#141218';
             ctx.fillRect(x0 - 2, y0 - 2, w + 4, 14);
             ctx.fillStyle = this.kits[0].shirt;
