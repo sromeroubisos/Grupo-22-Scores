@@ -41,7 +41,7 @@
  * que no juega el usuario, y el cartel dice exactamente lo que después pasa.
  */
 
-import { AR_LABEL_OVERRIDE, AR_SEVEN_CUPOS, AR_SEVEN_DIVISIONS, arClubById, CBA_DESARROLLO_ZONES, isArgBranch, type ArBranch } from './arClubs';
+import { AR_LABEL_OVERRIDE, AR_SEVEN_CUPOS, AR_SEVEN_DIVISIONS, arClubById, CBA_DESARROLLO_ZONES, FEM_GUEST_IDS, isArgBranch, type ArBranch } from './arClubs';
 import { randomLook, type Look } from './sprites';
 import { PALMARES_KEYS, PALMARES_LABEL, realTitles, type TitleRow } from './palmares';
 import { defaultNames, nameFromSeed, nameFromText, type PlayerName } from './names';
@@ -102,8 +102,11 @@ interface Cup {
     sub: string;
     teams: string[];
     kind: 'ko' | 'liga' | 'grupos';
-    /** Para las copas por grupos: los grupos (pasan los dos primeros de cada uno). */
+    /** Para las copas por grupos: los grupos (pasan los dos primeros de cada uno, o `advance`). */
     groups?: string[][];
+    advance?: number;
+    /** Después de los grupos hay cuadro (semifinales y final). */
+    ko?: boolean;
     champion?: string;
     /** Orden final de la copa (para las que reparten lugares, como la Repescagem). */
     ranking?: string[];
@@ -721,6 +724,7 @@ export function franchiseOf(club: string): string {
     if (region === 'chile') return 'Selknam';
     if (region === 'uruguay') return 'Peñarol';
     if (region === 'brasil') return 'Cobras';
+    if (region === 'espana' || region === 'femenino') return '';
     if (region === 'noa') return 'Tarucas';
     if (region === 'nea') return 'Yacaré XV';
     if (region === 'centro' || region === 'oeste') return 'Dogos XXI';
@@ -761,7 +765,7 @@ function franchiseCall(r: CareerState) {
     const p = cands[0];
     if (!p || Math.random() >= clampN(((p.ovr ?? 0) - 6.5) * 0.2, 0, 0.65)) return;
     const fr = franchiseOf(r.me);
-    if (!takeOut(r, p, 'fra', 0.5, fr)) return;
+    if (!fr || !takeOut(r, p, 'fra', 0.5, fr)) return;
     pushNews(r, {
         kind: 'fra', who: p.id,
         title: `${fr} convocó a ${fullName(r, p.id as number)}`,
@@ -772,6 +776,8 @@ function franchiseCall(r: CareerState) {
 /** El seleccionado del país del club. */
 export function nationalTeamOf(club: string): string {
     const region = REGION_OF_CLUB[club];
+    if (region === 'espana') return club.startsWith('ef-') ? 'Las Leonas' : 'Los Leones';
+    if (region === 'femenino') return 'Las Yaguaretés';
     return region === 'chile' ? 'Los Cóndores' : region === 'uruguay' ? 'Los Teros' : region === 'brasil' ? 'Os Tupis' : 'Los Pumas';
 }
 
@@ -1147,6 +1153,14 @@ function leagueDef(divId: string, clubs: string[], season: number): TourDef {
         const zones = cbaZones(clubs);
         if (zones.length === 2) return { ...base, formatLabel: 'Dos zonas (Capital-Este y Sur-Centro) a una rueda · final entre los ganadores', stage: { kind: 'grupos', groups: zones, advance: 1 } };
     }
+    // Uruguay: Apertura a una rueda con semifinales y final (el Clausura y la superfinal son copas).
+    if (divId === 'uy-uruguayo') {
+        return { ...base, name: `Uruguayo de Clubes · Apertura ${season}`, formatLabel: 'Apertura a una rueda · semifinales y final · después, el Clausura y la superfinal', stage: { kind: 'grupos', groups: 1, advance: 4, legs: 1 } };
+    }
+    // España: la División de Honor B en grupos, con cuadro entre los ganadores.
+    if (divId === 'es-dhb') {
+        return { ...base, formatLabel: 'Cuatro grupos a dos ruedas · los ganadores juegan semifinales y final: el campeón sube', stage: { kind: 'grupos', groups: 4, advance: 1, legs: 2 } };
+    }
     // Brasil: Super 12 en tres grupos de cuatro (a dos ruedas). Después, Hexagonal y final, o Repescagem.
     if (divId === 'br-super12' || divId === 'br-segunda') {
         const after = divId === 'br-super12' ? 'los 2 primeros de cada grupo al Hexagonal (y los 2 mejores, a la final); el resto, a la Repescagem' : 'los 2 primeros de cada grupo, a la Repescagem por un lugar en la Primeira';
@@ -1342,7 +1356,7 @@ function seasonStart(r: CareerState, difficulty: Difficulty, duration: Duration)
     for (const t of TIERS_OF[formatOf(r, r.season)]) if (t !== mineTier && (tiers[t]?.length ?? 0) >= 2) add(`tier:${t}`, tierDef(t, tiers[t]!, r.season));
     // La primera de los otros países: se juega a la par y se puede mirar (no cruza con la carrera, salvo en el Sudamericano).
     const mine = countryOf(r.branch);
-    for (const [c, div] of Object.entries(COUNTRY_TOP)) if (c !== mine && DIV[div]) add(`ext:${div}`, leagueDef(div, [...DIV[div].clubs].sort(byRating), r.season));
+    if (mine) for (const [c, div] of Object.entries(COUNTRY_TOP)) if (c !== mine && DIV[div]) add(`ext:${div}`, leagueDef(div, [...DIV[div].clubs].sort(byRating), r.season));
     return stage({ ...r, parallel, others, phase: 'liga', settled: null }, leagueDef(div, [...r.divisions[div]].sort(byRating), r.season), difficulty, duration);
 }
 
@@ -1510,7 +1524,7 @@ function settleLiga(s: TourState, r: CareerState) {
     }
     r.pending.rankings = rankings;
     for (const divId of Object.keys(rankings)) {
-        if (divId === 'br-super12') continue; // el campeón sale de la final
+        if (divId === 'br-super12' || divId === 'uy-uruguayo') continue; // el campeón sale de la final (o de la superfinal)
         addBonus(r, rankings[divId][0], 1);
         addChampion(r, divId, rankings[divId][0]);
     }
@@ -1669,7 +1683,7 @@ function settleLiga(s: TourState, r: CareerState) {
 const CUSTOM_UPS = new Set(['ar-centro-top10', 'ar-centro-super9b', 'ar-litoral-top10', 'ar-patagonia-regional']);
 
 /** Nombres de las copas para el palmarés. */
-export const CUP_LABEL: Record<string, string> = { 'cba-regA': 'Regional A de Córdoba', 'cba-regB': 'Regional B de Córdoba', sudamericano: 'Sudamericano de Clubes' };
+export const CUP_LABEL: Record<string, string> = { 'cba-regA': 'Regional A de Córdoba', 'cba-regB': 'Regional B de Córdoba', sudamericano: 'Sudamericano de Clubes', 'nacional-fem': 'Nacional de Clubes Femenino' };
 
 function addCup(r: CareerState, c: Cup) {
     if (c.teams.length >= 2) (r.pending.cups ??= []).push(c);
@@ -1684,7 +1698,7 @@ const cupDef = (c: Cup, season: number): TourDef => ({
     cat: 'Argentina',
     teams: [...c.teams],
     formatLabel: c.kind === 'ko' ? 'Eliminación directa' : c.kind === 'grupos' ? 'Grupos a una rueda · pasan los dos primeros de cada uno' : 'Todos contra todos, a una rueda',
-    stage: c.kind === 'ko' ? { kind: 'ko', fixed: true } : c.kind === 'grupos' && c.groups ? { kind: 'grupos', groups: c.groups, advance: 2, noKo: true } : { kind: 'liga', legs: 1 },
+    stage: c.kind === 'ko' ? { kind: 'ko', fixed: true } : c.kind === 'grupos' && c.groups ? { kind: 'grupos', groups: c.groups, advance: c.advance ?? 2, noKo: !c.ko } : { kind: 'liga', legs: 1 },
 });
 
 /** Juega las copas que no son del usuario y deja anotada la suya. */
@@ -1716,6 +1730,36 @@ function applyCup(r: CareerState, c: Cup, t: TourState) {
             r.pending.myCup = list.length - 1;
             r.pending.note.push('Jugás la final del Super 12.');
         } else applyCup(r, fin, finish(createTour(cupDef(fin, r.season), '__nadie', 'normal', 3)));
+        return;
+    }
+    if (c.key === 'uy-clausura') {
+        // Si el campeón del Clausura es el mismo del Apertura, es el campeón uruguayo; si no, superfinal.
+        const ap = r.pending.rankings?.['uy-uruguayo']?.[0];
+        r.log.push(`${r.season}: ${nm(w)} campeón del Clausura uruguayo.`);
+        if (!ap || ap === w) {
+            addChampion(r, 'uy-uruguayo', w);
+            r.log.push(`${r.season}: ${nm(w)} ganó el Apertura y el Clausura: campeón uruguayo.`);
+            return;
+        }
+        const fin: Cup = { key: 'uy-final', name: 'Superfinal uruguaya', sub: 'El campeón del Apertura contra el del Clausura.', teams: [ap, w], kind: 'ko' };
+        const list = (r.pending.cups ??= []);
+        list.push(fin);
+        if (fin.teams.includes(r.me)) {
+            r.pending.myCup = list.length - 1;
+            r.pending.note.push('Jugás la superfinal uruguaya.');
+        } else applyCup(r, fin, finish(createTour(cupDef(fin, r.season), '__nadie', 'normal', 3)));
+        return;
+    }
+    if (c.key === 'uy-final') {
+        addChampion(r, 'uy-uruguayo', w);
+        addBonus(r, w, 2);
+        r.log.push(`${r.season}: ${nm(w)} campeón uruguayo (superfinal).`);
+        return;
+    }
+    if (c.key === 'nac-fem') {
+        addChampion(r, 'nacional-fem', w);
+        addBonus(r, w, 2);
+        r.log.push(`${r.season}: ${nm(w)} campeón del Nacional de Clubes Femenino.`);
         return;
     }
     if (c.key === 'br-final') {
@@ -1880,7 +1924,25 @@ function tdiBOutside(r: CareerState, b: TourState, rankings: Record<string, stri
  * Repescagem con los 6 mejores de la Segunda, por los 6 lugares que quedan.
  */
 function foreignRules(r: CareerState, rankings: Record<string, string[]>) {
-    if (r.branch === 'chile') {
+    if (r.branch === 'uruguay') {
+        const ap = rankings['uy-uruguayo'] ?? [];
+        if (ap.length >= 4) {
+            r.log.push(`${r.season}: ${nm(ap[0])} campeón del Apertura uruguayo.`);
+            addCup(r, { key: 'uy-clausura', name: 'Clausura uruguayo', sub: 'La vuelta del Apertura, con semifinales y final: su campeón juega la superfinal.', teams: [...ap], kind: 'grupos', groups: [[...ap]], advance: 4, ko: true });
+        }
+    }
+    if (r.branch === 'fem') {
+        // El Nacional de Clubes Femenino: los 2 mejores del Top 9 de la URBA y del Centro, más los de las otras regiones.
+        const top = rankings['af-urba-top9'] ?? [];
+        const cen = rankings['af-centro'] ?? [];
+        const teams = [...top.slice(0, 2), ...cen.slice(0, 2), ...FEM_GUEST_IDS].sort(byRating);
+        if (teams.length >= 8) {
+            const groups: string[][] = [[], [], [], []];
+            teams.slice(0, 12).forEach((club, i) => groups[Math.floor(i / 4) % 2 ? 3 - (i % 4) : i % 4].push(club));
+            addCup(r, { key: 'nac-fem', name: 'Nacional de Clubes Femenino', sub: 'Los 2 mejores de la URBA y del Centro, y los de las otras regiones: cuatro zonas, semifinales y final.', teams: groups.flat(), kind: 'grupos', groups, advance: 1, ko: true });
+        }
+    }
+    if (r.branch === 'chile' || r.branch === 'espana' || r.branch === 'espanaFem' || r.branch === 'fem') {
         for (const divId of Object.keys(r.divisions)) {
             const up = DIV[divId]?.promotesTo;
             const rk = rankings[divId] ?? [];
@@ -1910,7 +1972,7 @@ function foreignRules(r: CareerState, rankings: Record<string, string[]>) {
 
 /** La primera de cada país (en la Argentina, el campeón sale del Nacional de Clubes). */
 const COUNTRY_TOP: Record<string, string> = { ar: 'ar-urba-top14', uy: 'uy-uruguayo', br: 'br-super12', cl: 'cl-top10' };
-const countryOf = (b: Branch) => (isArgBranch(b) ? 'ar' : b === 'uruguay' ? 'uy' : b === 'brasil' ? 'br' : 'cl');
+const countryOf = (b: Branch) => (isArgBranch(b) ? 'ar' : b === 'uruguay' ? 'uy' : b === 'brasil' ? 'br' : b === 'chile' ? 'cl' : null);
 const champOf = (r: CareerState, key: string) => r.champions?.[key]?.find(([season]) => season === r.season)?.[1] ?? null;
 
 /** El campeón del año de un país: el de la carrera, o el de su primera jugada a la par. */
@@ -1926,6 +1988,7 @@ function countryChampion(r: CareerState, c: string): string | null {
 
 /** Los cuatro del Sudamericano, cruzados: Argentina contra Chile y Brasil contra Uruguay. */
 function sudTeams(r: CareerState): string[] | null {
+    if (!countryOf(r.branch)) return null;
     const t = ['ar', 'cl', 'br', 'uy'].map((c) => countryChampion(r, c));
     return t.every(Boolean) && new Set(t).size === 4 ? (t as string[]) : null;
 }
@@ -1961,8 +2024,12 @@ export function sudamericanoFor(s: TourState): string[] | null {
 
 /** Lo que dice el calendario sobre cómo se sube y se baja en una división. */
 function ruleText(r: CareerState, div: string): string | null {
-    if (r.branch === 'chile') return [DIV[div]?.promotesTo ? 'El campeón sube.' : '', DIV[div]?.relegatesTo ? 'Baja el último.' : ''].filter(Boolean).join(' ') || null;
-    if (r.branch === 'uruguay') return 'Una sola división: fase regular y semifinales por el título.';
+    if (r.branch === 'chile' || r.branch === 'espana' || r.branch === 'espanaFem' || r.branch === 'fem') {
+        const base = [DIV[div]?.promotesTo ? 'El campeón sube.' : '', DIV[div]?.relegatesTo ? 'Baja el último.' : ''].filter(Boolean).join(' ');
+        const nac = div === 'af-urba-top9' || div === 'af-centro' ? ' Las 2 mejores juegan el Nacional de Clubes Femenino.' : '';
+        return (base + nac).trim() || null;
+    }
+    if (r.branch === 'uruguay') return 'Apertura y Clausura, cada uno con semifinales y final; si los ganan distintos, superfinal por el título.';
     if (div === 'br-super12') return 'Los 2 primeros de cada grupo, al Hexagonal (los 2 mejores juegan la final); el resto, a la Repescagem por seguir en la Primeira.';
     if (div === 'br-segunda') return 'Los 2 primeros de cada grupo, a la Repescagem por un lugar en la Primeira.';
     if (DIV[div]?.branch === 'urba') {
@@ -2524,7 +2591,7 @@ export function seasonPlan(s: TourState): SeasonItem[] {
         : { name: 'Sudamericano de Clubes', detail: `Lo juegan los campeones de Argentina (el del Nacional), Uruguay, Brasil y Chile: semifinales y final. ${isArgBranch(r.branch) ? 'Si salís campeón del Nacional' : 'Si salís campeón'}, elegís si lo jugás.`, state: r.phase === 'sudam' ? 'live' : 'maybe' };
 
     // 5. Nacional de Clubes (solo en el rugby argentino).
-    if (!isArgBranch(r.branch)) return [...items, sudItem];
+    if (!isArgBranch(r.branch)) return countryOf(r.branch) ? [...items, sudItem] : items;
     const fmtLabel = NAC_FORMATS.find((f) => f.id === fmt)?.label ?? '';
     const nac = p.nacional;
     if (fmt === 'ab') {

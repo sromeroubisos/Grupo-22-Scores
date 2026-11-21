@@ -29,6 +29,14 @@ const P: Record<string, Pool> = {
         first: ['Álvaro', 'Pablo', 'Jaime', 'Iñaki', 'Unai', 'Marc', 'Jordi', 'Gonzalo', 'Rubén', 'Adrián', 'Íker', 'Sergio'],
         last: ['Etxeberria', 'Gutiérrez', 'Ibarra', 'Lozano', 'Martí', 'Ortega', 'Prieto', 'Salinas', 'Urrutia', 'Vidal', 'Zubiri', 'Arrieta', 'Bravo', 'Calvo', 'Garrido', 'Iglesias'],
     },
+    rioF: {
+        first: ['Sofía', 'Valentina', 'Camila', 'Martina', 'Lucía', 'Agustina', 'Florencia', 'Julieta', 'Micaela', 'Rocío', 'Catalina', 'Milagros'],
+        last: ['Ferreyra', 'Aguirre', 'Bustos', 'Correa', 'Domínguez', 'Ledesma', 'Medina', 'Olivera', 'Quiroga', 'Sosa', 'Vera', 'Zárate', 'Cabral', 'Ojeda', 'Paredes', 'Villalba'],
+    },
+    iberF: {
+        first: ['Lucía', 'Paula', 'Laura', 'Marta', 'Ainhoa', 'Leire', 'Nerea', 'Carla', 'Irene', 'Alba', 'Maialen', 'Clara'],
+        last: ['Etxeberria', 'Gutiérrez', 'Ibarra', 'Lozano', 'Martí', 'Ortega', 'Prieto', 'Salinas', 'Urrutia', 'Vidal', 'Zubiri', 'Arrieta', 'Bravo', 'Calvo', 'Garrido', 'Iglesias'],
+    },
     anglo: {
         first: ['Jack', 'Harry', 'Oliver', 'George', 'Sam', 'Ben', 'Will', 'Tom', 'Josh', 'Luke', 'Matt', 'Dan'],
         last: ['Barker', 'Cole', 'Dawson', 'Fletcher', 'Granger', 'Holt', 'Kemp', 'Lambert', 'Marsh', 'Norris', 'Payne', 'Reeve', 'Shaw', 'Tate', 'Walsh', 'Whitley'],

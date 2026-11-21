@@ -58,6 +58,9 @@ const CAREER_COUNTRIES: { id: string; name: string; flag: string; sub: string; b
     { id: 'ar', name: 'Argentina', flag: 'ar', sub: 'URBA y el interior: ascensos, promociones, Torneo del Interior y Nacional de Clubes.', branches: ['urba', 'interior'] },
     { id: 'uy', name: 'Uruguay', flag: 'uy', sub: 'El Uruguayo de Clubes: fase regular y semifinales por el título.', branches: ['uruguay'] },
     { id: 'br', name: 'Brasil', flag: 'br', sub: 'Super 12: grupos, Hexagonal y final; Repescagem con la Segunda.', branches: ['brasil'] },
+    { id: 'es', name: 'España', flag: 'es', sub: 'División de Honor, Honor Élite y Honor B (en grupos). Sube el campeón, baja el último.', branches: ['espana'] },
+    { id: 'arf', name: 'Argentina · femenino', flag: 'ar', sub: 'URBA (Top 9, Primera y Segunda) y el Centro (Córdoba y Andina). Las mejores juegan el Nacional de Clubes Femenino.', branches: ['fem'] },
+    { id: 'esf', name: 'España · femenino', flag: 'es', sub: 'Liga Iberdrola y División de Honor B femenina. Sube la campeona, baja la última.', branches: ['espanaFem'] },
     { id: 'cl', name: 'Chile', flag: 'cl', sub: 'ARUSA: Top 10, Segunda, Tercera y Cuarta. Sube el campeón, baja el último.', branches: ['chile'] },
 ];
 /** El primer club de un país en orden alfabético: el que aparece elegido al entrar. */
@@ -67,11 +70,12 @@ const firstClubOf = (countryId: string) => {
     return [...new Set(ids)].map((id) => AR_CLUBS.find((t) => t.id === id)).filter((t): t is SevenTeam => !!t).sort((a, b) => a.name.localeCompare(b.name, 'es'))[0]?.id ?? null;
 };
 /** Bandera de cada categoría con país. */
-const CAT_FLAG: Record<string, string> = { Argentina: 'ar', Chile: 'cl', Uruguay: 'uy', Brasil: 'br' };
+const CAT_FLAG: Record<string, string> = { Argentina: 'ar', Chile: 'cl', Uruguay: 'uy', Brasil: 'br', España: 'es' };
 const countryOfClub = (id: string | null) => CAREER_COUNTRIES.find((c) => AR_SEVEN_DIVISIONS.some((d) => c.branches.includes(d.branch) && d.clubs.includes(id ?? '')))?.id ?? null;
 
 /** En qué grupo del selector va cada división: Argentina, o el país de afuera. */
-const branchGroup = (b: ArBranch) => (b === 'chile' ? 'Chile' : b === 'uruguay' ? 'Uruguay' : b === 'brasil' ? 'Brasil' : 'Argentina');
+const branchGroup = (b: ArBranch) =>
+    ({ chile: 'Chile', uruguay: 'Uruguay', brasil: 'Brasil', espana: 'España', espanaFem: 'España femenino', fem: 'Argentina femenino' } as Record<string, string>)[b] ?? 'Argentina';
 import { CLUB_LEAGUES, CLUBS, teamOfCode } from './clubs';
 import {
     advanceCareer,
@@ -1288,7 +1292,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                             <button type="button" className={`${styles.pickCard} ${styles.pickCardAlt}`} onClick={() => setScreen({ k: 'careerSetup', step: 0 })}>
                                 <strong>Modo carrera</strong>
                                 <span>Un club, temporada tras temporada: plantel, pretemporada, ascensos, descensos y títulos.</span>
-                                <small>Argentina, Uruguay, Brasil o Chile</small>
+                                <small>Argentina, Uruguay, Brasil, Chile o España · varones y mujeres</small>
                             </button>
                         </div>
                         <div className={styles.footerBtns}>
@@ -1369,7 +1373,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                 {CAT_FLAG[tourCat] && <FlagIcon code={CAT_FLAG[tourCat]} size={22} />} {tourCat}
                             </h2>
                             <div className={styles.cardGrid}>
-                                {['Argentina', 'Chile', 'Uruguay', 'Brasil'].includes(tourCat) && (
+                                {['Argentina', 'Chile', 'Uruguay', 'Brasil', 'España'].includes(tourCat) && (
                                     <button
                                         type="button"
                                         className={`${styles.pickCard} ${styles.pickCardAlt}`}

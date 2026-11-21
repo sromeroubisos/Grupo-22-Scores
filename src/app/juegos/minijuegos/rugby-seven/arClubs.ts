@@ -50,7 +50,7 @@ const CBA_CLUBS: ArSevenClub[] = CBA_DESARROLLO_ZONES.flat().map((id, i) => ({
 }));
 
 /** Las ramas de la carrera: las dos argentinas y, aparte (no se cruzan con las argentinas), Chile, Uruguay y Brasil. */
-export type ArBranch = 'urba' | 'interior' | 'chile' | 'uruguay' | 'brasil';
+export type ArBranch = 'urba' | 'interior' | 'chile' | 'uruguay' | 'brasil' | 'espana' | 'espanaFem' | 'fem';
 export interface GameDivision extends Omit<ArSevenDivision, 'branch'> {
     branch: ArBranch;
 }
@@ -61,6 +61,8 @@ export interface GameClub extends ArSevenClub {
 }
 export const isArgBranch = (b: ArBranch) => b === 'urba' || b === 'interior';
 
+/** El color de un club femenino: el del club de varones del mismo nombre, si está. */
+const colorLike = (name: string) => GEN_CLUBS.find((c) => c.name === name)?.color ?? null;
 const slug = (name: string) => name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
 /**
@@ -105,8 +107,61 @@ const FOREIGN: { div: Omit<GameDivision, 'clubs'>; pool: string; top: number; cl
         pool: 'luso', top: 46,
         clubs: [['Niterói', null], ['Rio Rugby', null], ['Brummers', null], ['Serra Gaúcha', null], ['Pé Vermelho', null], ['Leões de Paraisópolis', null], ['Colonos', null], ['Joinville', null], ['Carioca', null], ['Urutu', null], ['Iguanas SJC', null], ['Vitória', null]],
     },
+    // España (FER, temporada 2026/27). Sin los equipos B.
+    {
+        div: { id: 'es-dh', label: 'División de Honor', branch: 'espana', region: 'espana', level: 1, promotesTo: null, relegatesTo: 'es-elite' },
+        pool: 'iber', top: 66,
+        clubs: [['VRAC Valladolid', null], ['El Salvador', null], ['Alcobendas', null], ['AMPO Ordizia', null], ['Complutense Cisneros', null], ['UE Santboiana', null], ['Liceo Francés', null], ['CR La Vila', null], ['Burgos', null], ['Pozuelo', null]],
+    },
+    {
+        div: { id: 'es-elite', label: 'División de Honor Élite', branch: 'espana', region: 'espana', level: 2, promotesTo: 'es-dh', relegatesTo: 'es-dhb' },
+        pool: 'iber', top: 57,
+        clubs: [['Getxo Rugby', null], ['CR Sant Cugat', null], ['Valencia RC', null], ['Les Abelles', null], ['Hernani', null], ['Ingenieros Industriales', null], ['Real Ciencias Sevilla', null], ['Barça Rugbi', null], ['Bizkaia Gernika', null], ['Fénix Rugby', null]],
+    },
+    {
+        div: { id: 'es-dhb', label: 'División de Honor B', branch: 'espana', region: 'espana', level: 3, promotesTo: 'es-elite', relegatesTo: null },
+        pool: 'iber', top: 50,
+        clubs: [['Universitario Bilbao', null], ['CRAT Coruña', null], ['BUC Barcelona', null], ['Belenos', null], ['CAU Valencia', null], ['Rugby Majadahonda', null], ['Cormorán Santander', null], ['Real Oviedo Rugby', null], ['CR Alcalá', null], ['Gaztedi', null], ['Akra Bárbara', null], ['Gijón Rugby Club', null], ['Donostia Rugby', null], ['CN Poble Nou', null], ['Elorrio', null], ['CAR Sevilla', null], ['La Única', null], ['RC Sitges', null], ['Universidade de Vigo', null], ['Rugby Aranda', null], ['El Toro', null], ['CAR Cáceres', null], ['Ponent Mallorca', null], ['Jaén Rugby', null], ['Os Ingleses', null], ['Soto del Real', null], ['VPC Andorra', null]],
+    },
+    {
+        div: { id: 'ef-iberdrola', label: 'Liga Iberdrola', branch: 'espanaFem', region: 'espana', level: 1, promotesTo: null, relegatesTo: 'ef-dhb' },
+        pool: 'iberF', top: 60,
+        clubs: [['Majadahonda', null], ['CRAT Coruña', null], ['El Salvador', null], ['Getxo', null], ['Sant Cugat', null], ['Universitario Sevilla', null], ['Turia', null]],
+    },
+    {
+        div: { id: 'ef-dhb', label: 'División de Honor B femenina', branch: 'espanaFem', region: 'espana', level: 2, promotesTo: 'ef-iberdrola', relegatesTo: null },
+        pool: 'iberF', top: 51,
+        clubs: [['Olímpico de Pozuelo', null], ['Complutense Cisneros', null], ['Universitario Bilbao', null], ['UE Santboiana', null], ['BUC Barcelona', null], ['Gaztedi', null], ['Eibar', null], ['Atlético Portuense', null]],
+    },
+    // Argentina femenino: URBA (Top 9, Primera y Segunda) y el Centro (Córdoba y Andina).
+    {
+        div: { id: 'af-urba-top9', label: 'Top 9 femenino de la URBA', branch: 'fem', region: 'femenino', level: 1, promotesTo: null, relegatesTo: 'af-urba-primera' },
+        pool: 'rioF', top: 62,
+        clubs: [['Ciudad', colorLike('Ciudad')], ['La Plata', colorLike('La Plata')], ['CUQ', '#009fe0'], ['Centro Naval', colorLike('Centro Naval')], ['La Salle', colorLike('La Salle')], ['Lanús', colorLike('Lanús')], ['Beromama', null], ['CASA de Padua', colorLike('CASA de Padua')], ['Del Oeste', null]],
+    },
+    {
+        div: { id: 'af-urba-primera', label: 'Primera femenina de la URBA', branch: 'fem', region: 'femenino', level: 2, promotesTo: 'af-urba-top9', relegatesTo: 'af-urba-segunda' },
+        pool: 'rioF', top: 52,
+        clubs: [['San Marcos', null], ['Tigre', null], ['SITAS', colorLike('SITAS')], ['Don Bosco', colorLike('Don Bosco')], ['Univ. de La Matanza', null], ['Municipalidad de Avellaneda', null], ['Municipalidad de Berazategui', null], ['Marcos Paz', null], ['Ciudad de Campana', null]],
+    },
+    {
+        div: { id: 'af-urba-segunda', label: 'Segunda femenina de la URBA', branch: 'fem', region: 'femenino', level: 3, promotesTo: 'af-urba-primera', relegatesTo: null },
+        pool: 'rioF', top: 45,
+        clubs: [['Los Tilos', colorLike('Los Tilos')], ['Universitario de La Plata', colorLike('Universitario de La Plata')], ['San Miguel', null], ['Vicente López', colorLike('Vicente López')], ['Atlético y Progreso', colorLike('Atlético y Progreso')], ['Banco Hipotecario', colorLike('Banco Hipotecario')], ['Defensores de Glew', null], ['GyE de Ituzaingó', null], ['PAC General Rodríguez', null]],
+    },
+    {
+        div: { id: 'af-centro', label: 'Femenino del Centro (Córdoba y Andina)', branch: 'fem', region: 'femenino', level: 1, promotesTo: null, relegatesTo: null },
+        pool: 'rioF', top: 60,
+        clubs: [['Universitario de Córdoba', colorLike('Universitario de Córdoba')], ['Taborín', null], ['Córdoba Athletic', colorLike('Córdoba Athletic')], ['Córdoba RC / La Tablada', colorLike('La Tablada')], ['Palermo Bajo / Carlos Paz', colorLike('Palermo Bajo')], ['Aero Club Río Cuarto', colorLike('Aero Club Río Cuarto')], ['Catamarca Rugby Club', colorLike('Catamarca Rugby Club')], ['Mañke', null], ['Los Chelcos', colorLike('Los Chelcos')]],
+    },
 ];
-const prefixOf = (b: ArBranch) => (b === 'chile' ? 'cl' : b === 'uruguay' ? 'uy' : 'br');
+/**
+ * Los que juegan el Nacional de Clubes Femenino por sus regiones (no tienen
+ * liga en la carrera): entran fijos, como en la edición 2026.
+ */
+export const FEM_GUESTS: [string, string | null][] = [['Cardenales', colorLike('Cardenales')], ['Cha Roga', colorLike('Cha Roga')], ['Universitario de Mendoza', colorLike('Universitario de Mendoza')], ['Aguará Guazú', colorLike('Aguará Guazú')], ['Águilas de Resistencia', null], ['Palihue', null], ['Marabunta', colorLike('Marabunta')], ['Regatas de Resistencia', colorLike('Regatas Resistencia')]];
+export const FEM_GUEST_IDS = FEM_GUESTS.map(([name]) => `af-${slug(name)}`);
+const prefixOf = (b: ArBranch) => ({ chile: 'cl', uruguay: 'uy', brasil: 'br', espana: 'es', espanaFem: 'ef', fem: 'af' } as Record<string, string>)[b] ?? 'xx';
 const FOREIGN_CLUBS: GameClub[] = FOREIGN.flatMap((f) =>
     f.clubs.map(([name, color], i) => ({
         id: `${prefixOf(f.div.branch)}-${slug(name)}`,
@@ -120,6 +175,7 @@ const FOREIGN_CLUBS: GameClub[] = FOREIGN.flatMap((f) =>
         fixed: f.top - i,
     })),
 );
+const GUEST_CLUBS: GameClub[] = FEM_GUESTS.map(([name, color], i) => ({ id: FEM_GUEST_IDS[i], name, short: name.slice(0, 3).toUpperCase(), color, rating: 40, division: 'af-invitados', ranking: null, pool: 'rioF', fixed: 56 - i }));
 const FOREIGN_DIVISIONS: GameDivision[] = FOREIGN.map((f) => ({ ...f.div, clubs: f.clubs.map(([name]) => `${prefixOf(f.div.branch)}-${slug(name)}`) }));
 
 const DIV_OVERRIDE: Record<string, Partial<ArSevenDivision>> = {
@@ -130,7 +186,7 @@ const DIV_OVERRIDE: Record<string, Partial<ArSevenDivision>> = {
 };
 
 /** Clubes del juego: los del canon, el Desarrollo de Córdoba y las ligas de afuera. */
-export const AR_SEVEN_CLUBS: GameClub[] = [...GEN_CLUBS, ...CBA_CLUBS, ...FOREIGN_CLUBS];
+export const AR_SEVEN_CLUBS: GameClub[] = [...GEN_CLUBS, ...CBA_CLUBS, ...FOREIGN_CLUBS, ...GUEST_CLUBS];
 /** Divisiones del juego: las del canon (con los cruces de arriba), el Desarrollo de Córdoba y las ligas de afuera. */
 export const AR_SEVEN_DIVISIONS: GameDivision[] = [
     ...GEN_DIVISIONS.map((d) => ({ ...d, ...(DIV_OVERRIDE[d.id] ?? {}) })),
@@ -415,10 +471,10 @@ function divisionTour(d: GameDivision): TourDef {
     return {
         id: `ar-tour-${d.id}`,
         name: d.label,
-        sub: d.branch === 'urba' ? 'Rama URBA.' : d.branch === 'interior' ? 'Regional del interior.' : d.branch === 'chile' ? 'Chile · ARUSA.' : d.branch === 'uruguay' ? 'Uruguay.' : 'Brasil · CBRu.',
+        sub: ({ urba: 'Rama URBA.', interior: 'Regional del interior.', chile: 'Chile · ARUSA.', uruguay: 'Uruguay.', brasil: 'Brasil · CBRu.', espana: 'España · FER.', espanaFem: 'España · FER, femenino.', fem: 'Argentina, femenino.' } as Record<string, string>)[d.branch] ?? '',
         source: 'real',
         clubs: true,
-        cat: isArgBranch(d.branch) ? 'Argentina' : d.branch === 'chile' ? 'Chile' : d.branch === 'uruguay' ? 'Uruguay' : 'Brasil',
+        cat: isArgBranch(d.branch) || d.branch === 'fem' ? 'Argentina' : d.branch === 'chile' ? 'Chile' : d.branch === 'uruguay' ? 'Uruguay' : d.branch === 'brasil' ? 'Brasil' : 'España',
         teams: [...d.clubs],
         formatLabel: `${n} clubes · fase regular a una vuelta · ${top === 4 ? 'semifinales' : 'final'} con los ${top} primeros`,
         stage: { kind: 'grupos', groups: 1, advance: top },

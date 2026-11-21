@@ -113,6 +113,7 @@ export const TOUR_CATS: { id: string; sub: string }[] = [
     { id: 'Chile', sub: 'ARUSA: Top 10, Segunda, Tercera y Cuarta.' },
     { id: 'Uruguay', sub: 'Uruguayo de Clubes.' },
     { id: 'Brasil', sub: 'Super 12: Primeira y Segunda Divisão.' },
+    { id: 'España', sub: 'División de Honor, Honor Élite y Honor B; Liga Iberdrola y Honor B femenina.' },
     { id: 'Europa', sub: 'Champions Cup, Challenge Cup y URC.' },
     { id: 'Francia', sub: 'Top 14 y Pro D2.' },
     { id: 'Inglaterra', sub: 'Premiership.' },
