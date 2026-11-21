@@ -171,6 +171,8 @@ export interface YouthRow {
     of: number;
     /** Nacional de la categoría (M16, M17 y M19): hasta dónde llegó. */
     nac?: string;
+    /** Campeón del nacional de la categoría. */
+    champ?: string;
 }
 
 export interface Award {
@@ -205,6 +207,10 @@ export interface CareerState {
     parallel?: TourState | null;
     /** Los demás torneos de la temporada, que avanzan fecha a fecha junto con el del usuario. */
     others?: Record<string, TourState> | null;
+    /** Lo que se jugó después de la fase regular (playoffs, promociones, plazas, Nacional, Sudamericano), para mirarlo. */
+    archive?: Record<string, TourState> | null;
+    /** Ascensos y descensos de la última temporada cerrada. */
+    movesLog?: { season: number; lines: string[] } | null;
     /** Lo que rindió cada club en la cancha (se diluye cada año). */
     ratings?: Record<string, number>;
     /** Plantel de cada club de la rama. */
@@ -920,6 +926,7 @@ function youthSeason(r: CareerState): YouthRow[] {
             }
             const champ = alive[0]?.club;
             if (champ) addChampion(r, nacKey, champ);
+            row.champ = champ;
             if (champs.some((c) => c.club === r.me)) row.nac = champ === r.me ? 'Campeón' : `Perdió en ${fell.get(r.me) ?? 'cuartos'}`;
             else row.nac = 'No clasificó';
         }
@@ -1349,6 +1356,15 @@ function seasonStart(r: CareerState, difficulty: Difficulty, duration: Duration)
     const tiers = tiersOf(r);
     const mineTier = myTier(r);
     const parallel = mineTier && tiers[mineTier] ? { ...createTour(tierDef(mineTier, tiers[mineTier]!, r.season), r.me, difficulty, duration), def: tierDef(mineTier, tiers[mineTier]!, r.season) } : null;
+    const others = buildOthers(r);
+    return stage({ ...r, parallel, others, phase: 'liga', settled: null }, leagueDef(div, [...r.divisions[div]].sort(byRating), r.season), difficulty, duration);
+}
+
+/** Los torneos que se juegan a la par del club: las otras divisiones, los federales y las primeras de otros países. */
+function buildOthers(r: CareerState): Record<string, TourState> {
+    const div = divisionOf(r, r.me) ?? Object.keys(r.divisions)[0];
+    const tiers = tiersOf(r);
+    const mineTier = myTier(r);
     const others: Record<string, TourState> = {};
     const add = (key: string, def: TourDef) => {
         const t: TourState = { ...createTour(def, '__nadie', 'normal', 3), def };
@@ -1359,8 +1375,20 @@ function seasonStart(r: CareerState, difficulty: Difficulty, duration: Duration)
     for (const t of TIERS_OF[formatOf(r, r.season)]) if (t !== mineTier && (tiers[t]?.length ?? 0) >= 2) add(`tier:${t}`, tierDef(t, tiers[t]!, r.season));
     // La primera de los otros países: se juega a la par y se puede mirar (no cruza con la carrera, salvo en el Sudamericano).
     const mine = countryOf(r.branch);
-    if (mine) for (const [c, div] of Object.entries(COUNTRY_TOP)) if (c !== mine && DIV[div]) add(`ext:${div}`, leagueDef(div, [...DIV[div].clubs].sort(byRating), r.season));
-    return stage({ ...r, parallel, others, phase: 'liga', settled: null }, leagueDef(div, [...r.divisions[div]].sort(byRating), r.season), difficulty, duration);
+    if (mine) for (const [c, d] of Object.entries(COUNTRY_TOP)) if (c !== mine && DIV[d]) add(`ext:${d}`, leagueDef(d, [...DIV[d].clubs].sort(byRating), r.season));
+    return others;
+}
+
+/** Partidas guardadas antes de los torneos en paralelo: se arman una vez, se ponen al día y se guardan. */
+export function ensureOthers(s: TourState): TourState | null {
+    if (!s.career || s.career.phase !== 'liga' || s.career.others) return null;
+    return advanceOthers(withOthers(s));
+}
+
+function withOthers(s: TourState): TourState {
+    const r = s.career;
+    if (!r || r.phase !== 'liga' || r.others) return s;
+    return { ...s, career: { ...r, others: buildOthers(r) } };
 }
 
 /** Arranca la carrera con el club elegido, en su división de 2026. */
@@ -1407,7 +1435,7 @@ const nextDateAt = (t: TourState) => (t.groupHistory.length + t.koHistory.length
  * fecha más temprana) y hace avanzar los demás hasta la misma altura.
  */
 export function careerTick(s0: TourState): TourState {
-    const s = advanceOthers(s0);
+    const s = advanceOthers(withOthers(s0));
     const r = s.career;
     const o = r?.parallel;
     if (!r || !o || o.done) return s;
@@ -1449,7 +1477,17 @@ function finish(t: TourState): TourState {
 /** Los otros torneos de la temporada, para mirarlos: los federales y la región del club primero. */
 export function otherTours(s: TourState): { key: string; name: string; state: TourState }[] {
     const r = s.career;
-    if (!r?.others) return [];
+    if (!r) return [];
+    // Lo que ya se jugó después de la fase regular: playoffs, promociones, plazas, Nacional, Sudamericano.
+    const ARC_ORDER = ['nacional', 'sudamericano', 'plazas', 'promos'];
+    const archived = Object.entries(r.archive ?? {})
+        .map(([key, state]) => ({ key: `arc:${key}`, name: defOf(state)?.name ?? key, state }))
+        .sort((a, b) => {
+            const ia = ARC_ORDER.indexOf(a.key.slice(4));
+            const ib = ARC_ORDER.indexOf(b.key.slice(4));
+            return (ia < 0 ? 9 : ia) - (ib < 0 ? 9 : ib) || a.name.localeCompare(b.name);
+        });
+    if (!r.others) return archived;
     const myRegion = DIV[divisionOf(r, r.me) ?? '']?.region;
     const order = ['nacA', 'nacB', 'tdiA', 'tdiB'];
     const rank = (k: string): [number, string, number] => {
@@ -1463,7 +1501,8 @@ export function otherTours(s: TourState): { key: string; name: string; state: To
             const [ra, ga, la] = rank(a.key);
             const [rb, gb, lb] = rank(b.key);
             return ra - rb || ga.localeCompare(gb) || la - lb || a.name.localeCompare(b.name);
-        });
+        })
+        .concat(archived);
 }
 
 /** El otro torneo que se juega en paralelo, para mirarlo (con la carrera puesta). */
@@ -1515,6 +1554,7 @@ function awardsOf(r: CareerState, t: TourState, comp: string) {
 
 /** Cierra la fase regular y los federales: simula el resto y decide qué viene. */
 function settleLiga(s: TourState, r: CareerState) {
+    r.archive = {};
     const { regional, tier } = seasonTours(s);
     const fmt = formatOf(r, r.season);
     const myDiv = divisionOf(r, r.me) ?? '';
@@ -1668,6 +1708,7 @@ function settleLiga(s: TourState, r: CareerState) {
             if (nac.teams.includes(r.me)) r.pending.note.push(`Clasificaste al Nacional de Clubes (${NAC_FORMATS.find((f) => f.id === fmt)?.label.toLowerCase()}).`);
             else {
                 const sim = finish(nacionalTour(nac, r.season, '__nadie', 'normal', 3));
+                archiveTour(r, 'nacional', sim);
                 nac.champion = sim.champion ?? undefined;
                 addChampion(r, 'nacional', sim.champion);
                 addBonus(r, sim.champion, 2);
@@ -1722,6 +1763,7 @@ function applyCup(r: CareerState, c: Cup, t: TourState) {
     const order = finalRanking(t);
     const w = t.champion ?? order[0];
     if (!w) return;
+    archiveTour(r, `cup:${c.key}`, t);
     c.champion = w;
     c.ranking = order;
     if (c.key === 'br-hex') {
@@ -2118,6 +2160,7 @@ function resolveDisputes(r: CareerState) {
                 return;
             }
             play(m);
+            archiveMatch(r, 'plazas', 'Plazas de los federales', `Repechaje del ${TIER_NAME[d.up]}`, m.a, m.b, m.score![0], m.score![1]);
         });
         if (!d.rev && d.rep.every((m) => m.winner)) {
             // Los de la URBA no ponen en juego plazas (las suyas salen del Top 14).
@@ -2133,6 +2176,7 @@ function resolveDisputes(r: CareerState) {
                 return;
             }
             play(m);
+            archiveMatch(r, 'plazas', 'Plazas de los federales', d.outside ? 'Repechaje del TDI B (con otra región)' : `Reválida ${TIER_NAME[d.up]}`, m.a, m.b, m.score![0], m.score![1]);
             applyRevalida(r, d, m);
         });
     });
@@ -2180,9 +2224,30 @@ function applyRevalida(r: CareerState, d: Dispute, m: PlazaMatch) {
     r.log.push(`${r.season}: ${nm(m.b)} le ganó la reválida a ${nm(m.a)}${regUp !== regLow ? ` y le da a su región una plaza del ${TIER_NAME[d.up]}` : ''}.`);
 }
 
+/** Guarda un torneo terminado de la temporada para mirarlo en "Otros torneos". */
+function archiveTour(r: CareerState, key: string, t: TourState) {
+    const x: TourState = { ...t };
+    delete x.career;
+    delete x.stats;
+    (r.archive ??= {})[key] = x;
+}
+
+/** Suma un partido suelto (promoción, repechaje, reválida) a un "torneo" de resultados para mirar. */
+function archiveMatch(r: CareerState, key: string, name: string, label: string, a: string, b: string, sa: number, sb: number) {
+    const arc = (r.archive ??= {});
+    let t = arc[key];
+    if (!t) {
+        const def: TourDef = { id: `career-res-${key}-${r.season}`, name: `${name} ${r.season}`, sub: '', source: 'real', clubs: true, cat: 'Argentina', teams: [], formatLabel: 'Partidos sueltos', stage: { kind: 'ko', fixed: true } };
+        t = { ...createTour(def, '__nadie', 'normal', 3), def, done: true, hasKo: false, stage: 'ko', groups: [], table: [], alive: [], koHistory: [] };
+        delete t.stats;
+    }
+    arc[key] = { ...t, koHistory: [...t.koHistory, { label, results: [{ a, b, sa, sb }] }] };
+}
+
 /** Anota el resultado de una promoción y, si ganó el de abajo, el cambio de lugar. */
 function resolvePromo(r: CareerState, p: Promo, score: [number, number]) {
     p.score = score;
+    archiveMatch(r, 'promos', 'Promociones', `${divisionLabel(p.up)}${p.via ? ` · ${p.via}` : ''}`, p.top, p.bottom, score[1], score[0]);
     p.winner = score[1] > score[0] ? p.top : p.bottom;
     if (p.winner === p.top) {
         r.pending.moves.push({ club: p.top, from: p.down, to: p.up }, { club: p.bottom, from: p.up, to: p.bottomTo ?? p.down });
@@ -2224,6 +2289,7 @@ function settlePlayoff(s: TourState, r: CareerState) {
     if (!d || !m || !my) return;
     m.score = scoreOf(s, m.a) ?? (s.champion === m.a ? [1, 0] : [0, 1]);
     m.winner = s.champion ?? (m.score[0] > m.score[1] ? m.a : m.b);
+    archiveMatch(r, 'plazas', 'Plazas de los federales', my.kind === 'rep' ? `Repechaje del ${TIER_NAME[d.up]}` : d.outside ? 'Repechaje del TDI B (con otra región)' : `Reválida ${TIER_NAME[d.up]}`, m.a, m.b, m.score[0], m.score[1]);
     const won = m.winner === r.me;
     if (my.kind === 'rep') r.pending.note.push(won ? `Ganaste el repechaje: tu región conserva la plaza del ${TIER_NAME[d.up]}.` : 'Perdiste el repechaje: vas a la reválida.');
     else {
@@ -2236,6 +2302,7 @@ function settlePlayoff(s: TourState, r: CareerState) {
 }
 
 function settleNacional(s: TourState, r: CareerState) {
+    archiveTour(r, 'nacional', s);
     addBonus(r, s.champion, 2);
     if (r.pending.nacional) r.pending.nacional.champion = s.champion ?? undefined;
     addChampion(r, 'nacional', s.champion);
@@ -2286,6 +2353,14 @@ function closeSeason(r: CareerState, chosen?: NacFormat) {
     const rows = youthSeason(r);
     r.reports = [...(r.reports ?? []), { season: r.season, rows }].slice(-12);
     const youthNote = rows.filter((x) => x.nac === 'Campeón' || (x.place === 1 && x.of > 1)).map((x) => (x.nac === 'Campeón' ? `${x.cat} campeón del Nacional.` : `${x.cat} campeón de la región.`));
+    // El reporte llega como noticia: cómo terminó cada categoría y quién ganó los nacionales.
+    const lines = rows.map((x) => `${x.cat}: ${x.place === 1 && x.of > 1 ? 'campeón' : `${x.place}.º de ${x.of}`}${x.nac ? ` · Nacional: ${x.nac === 'Campeón' ? 'campeón' : x.nac.toLowerCase()}` : ''}.`);
+    const champs = rows.filter((x) => x.champ && x.champ !== r.me).map((x) => `${x.cat} ${nm(x.champ!)}`);
+    pushNews(r, {
+        kind: 'youth',
+        title: `Reporte de juveniles ${r.season}`,
+        text: [...lines, champs.length ? `Campeones nacionales: ${champs.join(', ')}.` : ''].filter(Boolean).join(' '),
+    });
     const roster = evolveRosters(r);
     ageYouth(r);
     forget(r);
@@ -2314,11 +2389,14 @@ function closeSeason(r: CareerState, chosen?: NacFormat) {
         last.rating = after;
         last.note = [...r.pending.note, ...youthNote, ...roster, after !== before ? `Nivel ${before} → ${after}.` : `Nivel ${after}, sin cambios.`].join(' ');
     }
+    const lvl = (d: string) => DIV[d]?.level ?? 9;
+    const movesLines = r.pending.moves.map((m) => `${nm(m.club)} ${lvl(m.to) < lvl(m.from) ? 'sube' : 'baja'}: ${divisionLabel(m.from)} → ${divisionLabel(m.to)}`);
     r.season += 1;
     r.phase = 'liga';
     r.settled = null;
     r.parallel = null;
     r.others = null;
+    r.movesLog = { season: r.season - 1, lines: movesLines };
     r.pending = emptyPending();
 }
 
@@ -2340,6 +2418,7 @@ export function settleCareer(s0: TourState): TourState {
     else if (r.phase === 'playoff') settlePlayoff(s, r);
     else if (r.phase === 'copa') settleCup(s, r);
     else if (r.phase === 'sudam') {
+        archiveTour(r, 'sudamericano', s);
         applySud(r, s.champion);
         r.pending.note.push(s.champion === r.me ? 'Campeón del Sudamericano de Clubes.' : `Sudamericano de Clubes: campeón ${nm(s.champion ?? '')}.`);
     }
@@ -2435,7 +2514,9 @@ export function advanceCareer(s0: TourState, chosen?: NacFormat, playSud = false
         if (teams) {
             r.pending.sud = { teams };
             if (playSud && teams.includes(r.me)) return stage({ ...r, phase: 'sudam', settled: null, parallel: null }, sudDef(teams, r.season), s.difficulty, s.duration);
-            applySud(r, finish(createTour(sudDef(teams, r.season), '__nadie', 'normal', 3)).champion);
+            const sudT = finish(createTour(sudDef(teams, r.season), '__nadie', 'normal', 3));
+            archiveTour(r, 'sudamericano', sudT);
+            applySud(r, sudT.champion);
             if (teams.includes(r.me)) r.pending.note.push(r.pending.sud.champion === r.me ? 'Campeón del Sudamericano de Clubes (simulado).' : 'Sudamericano de Clubes simulado: no salió.');
         }
     }

@@ -111,6 +111,7 @@ import {
     pendingCelebration,
     NAC_FORMATS,
     otherTours,
+    ensureOthers,
     parallelView,
     renamePlayer,
     seasonFixture,
@@ -654,6 +655,12 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
     /** El cartel de la última simulación (victoria, derrota o empate). */
     const [simFlash, setSimFlash] = useState<SimFlash | null>(null);
     const closeSimFlash = useCallback(() => setSimFlash(null), []);
+    // Una carrera guardada antes de los torneos en paralelo: se arman una vez y quedan en la partida.
+    useEffect(() => {
+        const fixed = tour ? ensureOthers(tour) : null;
+        if (fixed) persist({ tour: fixed });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [tour]);
     const [palmaresKey, setPalmaresKey] = useState<string | null>(null);
     const [hubTab, setHubTab] = useState<HubTab>('tabla');
     /** Torneo que se está armando (de fábrica, con reemplazos o personalizado). */
@@ -1892,7 +1899,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                               ] as [HubTab, string][])
                             : []),
                         ...(tour.stats ? [['goleadores', 'Goleadores'] as ['goleadores', string]] : []),
-                        ...(career?.others ? [['otros', 'Otros torneos'] as ['otros', string]] : []),
+                        ...(career ? [['otros', 'Otros torneos'] as ['otros', string]] : []),
                         ...(career?.rosters ? [['plantel', 'Plantel'] as ['plantel', string]] : []),
                         ...(career ? [['club', 'Club'] as ['club', string]] : []),
                         ...(career ? [['palmares', 'Palmarés'] as ['palmares', string]] : []),
@@ -2175,11 +2182,22 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                                 ...(par ? [{ key: 'mio', name: `${(defOf(par)?.name ?? '').replace(/ \d{4}$/, '')} (tu club)`, state: par }] : []),
                                                 ...otherTours(tour),
                                             ];
-                                            if (list.length === 0) return <p className={styles.empty}>No hay otros torneos en juego.</p>;
+                                            const moves = career.movesLog;
+                                            const movesBox = moves && moves.lines.length > 0 && (
+                                                <div className={styles.roadPending}>
+                                                    <strong>Ascensos y descensos {moves.season}</strong>
+                                                    {moves.lines.map((l, i) => (
+                                                        <span key={i}>{l}</span>
+                                                    ))}
+                                                </div>
+                                            );
+                                            if (list.length === 0) return movesBox || <p className={styles.empty}>No hay otros torneos en juego.</p>;
                                             const cur = list.find((x) => x.key === otherKey) ?? list[0];
                                             const t = cur.state;
                                             const d = defOf(t);
-                                            const lastRounds = [...t.koHistory].reverse().concat([...t.groupHistory].reverse()).slice(0, 2);
+                                            // Los partidos sueltos (promociones, repechajes, reválidas) van todos, sin tabla.
+                                            const loose = t.tourId.startsWith('career-res-');
+                                            const lastRounds = loose ? t.koHistory : [...t.koHistory].reverse().concat([...t.groupHistory].reverse()).slice(0, 2);
                                             return (
                                                 <div className={styles.othersPanel}>
                                                     <label className={styles.othersPick}>
@@ -2192,12 +2210,15 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                                             ))}
                                                         </select>
                                                     </label>
+                                                    {movesBox}
                                                     <p className={styles.note}>
-                                                        {t.done
-                                                            ? `Terminado · campeón: ${nameOf(t.champion ?? finalRanking(t)[0] ?? '')}.`
-                                                            : `Va por: ${roundLabel(t).toLowerCase()}. Se juega a la par de tu temporada: avanza cada vez que jugás o simulás una fecha.`}
+                                                        {loose
+                                                            ? 'Partido por partido: el que gana se queda con el lugar.'
+                                                            : t.done
+                                                              ? `Terminado · campeón: ${nameOf(t.champion ?? finalRanking(t)[0] ?? '')}.`
+                                                              : `Va por: ${roundLabel(t).toLowerCase()}. Se juega a la par de tu temporada: avanza cada vez que jugás o simulás una fecha.`}
                                                     </p>
-                                                    {(t.stage === 'grupos' || !t.hasKo) && (
+                                                    {!loose && (t.stage === 'grupos' || !t.hasKo) && (
                                                         <div className={styles.groupGrid}>
                                                             {t.groups.map((_, gi) => (
                                                                 <GroupTable
@@ -2217,7 +2238,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                                         <div className={styles.results}>
                                                             {lastRounds.map((h, hi) => (
                                                                 <div key={`${h.label}-${hi}`} className={styles.histRound}>
-                                                                    <h3 className={styles.groupTitle}>{hi === 0 ? 'Última fecha' : 'Fecha anterior'} · {h.label}</h3>
+                                                                    <h3 className={styles.groupTitle}>{loose ? h.label : `${hi === 0 ? 'Última fecha' : 'Fecha anterior'} · ${h.label}`}</h3>
                                                                     <ul className={styles.histList}>
                                                                         {h.results.map((x) => (
                                                                             <li key={`${x.a}-${x.b}`} className={x.a === tour.me || x.b === tour.me ? styles.rowMine : undefined}>
