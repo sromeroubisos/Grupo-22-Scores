@@ -1909,7 +1909,11 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                     const di = DIFFICULTIES.findIndex((d) => d.id === tour.difficulty);
                     const du = DURATIONS.indexOf(tour.duration);
                     const careerWins = career && tour.done ? pendingCelebration(career) : [];
-                    const soloKey = !career && !road && !svns && !intl && tour.done && tour.champion === tour.me ? `${tour.tourId}:${tour.groupHistory.length}:${tour.koHistory.length}` : null;
+                    // Festejo de título fuera de la carrera de clubes (suelto, Road, SVNS y selecciones): una clave por torneo jugado.
+                    const soloKey =
+                        !career && tour.done && tour.champion === tour.me
+                            ? `${tour.tourId}:${tour.groupHistory.length}:${tour.koHistory.length}:${road?.phase ?? ''}:${svns ? `${svns.season}.${svns.phase}.${svns.leg}` : ''}:${intl ? `${intl.season}.${intl.step}` : ''}`
+                            : null;
                     const celebrateTeam = careerWins.length || (soloKey && soloKey !== celebratedKey) ? byId(tour.me) : null;
                     const preseason = !!career && inPreseason(career) && !tour.done;
                     const news = career && !celebrateTeam ? unseenNews(career)[0] ?? null : null;
