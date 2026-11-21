@@ -130,6 +130,8 @@ const LINE_STEAL: Record<Difficulty, number> = { 'muy-facil': 0.2, facil: 0.15, 
 /** Lo rápido que corre la marca del line: más difícil, más rápida. */
 const LINE_SPEED: Record<Difficulty, number> = { 'muy-facil': 1.0, facil: 1.18, normal: 1.35, dificil: 1.5, leyenda: 1.68 };
 /** A qué velocidad corren los rivales a buscar una patada o una pelota suelta (m/s). */
+/** Qué tan rápido, respecto de tu carrera, cierran los defensores que te persiguen (1 = igual que vos). */
+const CPU_CATCHUP: Record<Difficulty, number> = { 'muy-facil': 0.94, facil: 1.0, normal: 1.03, dificil: 1.06, leyenda: 1.09 };
 const CPU_CHASE: Record<Difficulty, number> = { 'muy-facil': 6.6, facil: 7.5, normal: 8.3, dificil: 8.8, leyenda: 9.3 };
 /** Pelota suelta disputada: lo que le cuesta al rival quedársela si llegan juntos. */
 const CPU_GRAB: Record<Difficulty, number> = { 'muy-facil': 0.3, facil: 0.4, normal: 0.5, dificil: 0.58, leyenda: 0.66 };
@@ -1607,6 +1609,9 @@ export class SevenMatch {
             }
         }
         const defSpeed = defSide === 1 ? D.cpuDefRun : 7.0;
+        // Si el portador sos vos, los que lo persiguen nunca corren menos que vos: un poco más
+        // rápido según la dificultad. Así, cuando cortás la línea, el cierre de la defensa se siente.
+        const catchUp = defSide === 1 && carrier?.side === 0 ? Math.hypot(carrier.vx, carrier.vy) * CPU_CATCHUP[this.cfg.difficulty] : 0;
         for (const p of defs) {
             if (p.down > 0) {
                 p.vx = 0;
@@ -1623,7 +1628,7 @@ export class SevenMatch {
                 const lineBroken = !defs.some((o) => o !== p && o.down <= 0 && (o.x - focus.x) * d > -1 && Math.abs(o.y - focus.y) < 8);
                 const close = Math.hypot(p.x - focus.x, p.y - focus.y) < 9;
                 if (lineBroken || close) {
-                    const sp = defSpeed * 0.97;
+                    const sp = Math.max(defSpeed * 0.97, catchUp);
                     const aim = this.leadPoint(p, focus, sp);
                     this.step(p, aim.x, aim.y, sp);
                 } else {
@@ -1643,7 +1648,7 @@ export class SevenMatch {
             }
             const chase = p === pursuer || (p.mark === focus && pd > 3 && this.cfg.difficulty !== 'muy-facil');
             if (chase) {
-                const sp = defSide === 0 ? 6.4 : defSpeed;
+                const sp = defSide === 0 ? 6.4 : Math.max(defSpeed, catchUp);
                 const aim = this.leadPoint(p, focus, sp);
                 this.step(p, aim.x, aim.y, sp);
             } else {
@@ -2455,10 +2460,19 @@ export class SevenMatch {
             return;
         }
         if (mg.kind === 'ruck') {
+            // Pelea del ruck: tus toques contra el empuje que "hace" el rival en el mismo tiempo.
+            // Es la misma cuenta con la que se resuelve (userRate vs ruckRate), así que no miente.
+            const cpuPush = this.D.ruckRate * clamp(1.3 - this.phaseT, 0, 1.3);
+            const bal = clamp((mg.mash - cpuPush) / (mg.mash + cpuPush + 3), -1, 1);
+            const split = Math.round(w / 2 + (bal * w) / 2);
             ctx.fillStyle = '#141218';
-            ctx.fillRect(x0 + 43, y0 - 2, 64, 8);
+            ctx.fillRect(x0 - 2, y0 - 2, w + 4, 14);
+            ctx.fillStyle = this.kits[0].shirt;
+            ctx.fillRect(x0, y0, split, 8);
+            ctx.fillStyle = this.kits[1].shirt;
+            ctx.fillRect(x0 + split, y0, w - split, 8);
             ctx.fillStyle = '#f0c419';
-            ctx.fillRect(x0 + 45, y0, Math.min(60, mg.mash * 4), 4);
+            ctx.fillRect(x0 + Math.round(w / 2), y0 - 3, 1, 14);
             return;
         }
         ctx.fillStyle = '#141218';
