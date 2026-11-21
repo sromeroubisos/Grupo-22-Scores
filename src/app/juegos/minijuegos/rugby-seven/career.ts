@@ -318,7 +318,7 @@ export const SQUAD = 12;
 export const MAX_BAJAS = 3;
 /** Lo que vale jugar de local en la fase regular (puntos de nivel, escala 30-95). */
 export const HOME_ADV = 3;
-export const SKILL_LABEL = ['Velocidad', 'Patada', 'Tackle', 'Resistencia'] as const;
+export const SKILL_LABEL = ['Velocidad', 'Pase y patada', 'Tackle', 'Resistencia'] as const;
 
 /** Azar con semilla (para que convertir una partida vieja dé siempre lo mismo). */
 function seededRand(seed: string): () => number {

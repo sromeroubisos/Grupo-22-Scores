@@ -125,6 +125,14 @@ export interface MatchConfig {
 const DODGE_VY: Record<Difficulty, number> = { 'muy-facil': 3.2, facil: 4, normal: 5, dificil: 5.8, leyenda: 6.3 };
 /** Ancho del verde en tu saque de line, por dificultad (antes de la altura de los saltadores). */
 const LINE_ZONE: Record<Difficulty, number> = { 'muy-facil': 0.36, facil: 0.3, normal: 0.24, dificil: 0.2, leyenda: 0.16 };
+/** Robar el line del rival: la franja verde se achica con la dificultad. */
+const LINE_STEAL: Record<Difficulty, number> = { 'muy-facil': 0.2, facil: 0.15, normal: 0.1, dificil: 0.08, leyenda: 0.06 };
+/** Lo rápido que corre la marca del line: más difícil, más rápida. */
+const LINE_SPEED: Record<Difficulty, number> = { 'muy-facil': 1.0, facil: 1.18, normal: 1.35, dificil: 1.5, leyenda: 1.68 };
+/** A qué velocidad corren los rivales a buscar una patada o una pelota suelta (m/s). */
+const CPU_CHASE: Record<Difficulty, number> = { 'muy-facil': 6.6, facil: 7.5, normal: 8.3, dificil: 8.8, leyenda: 9.3 };
+/** Pelota suelta disputada: lo que le cuesta al rival quedársela si llegan juntos. */
+const CPU_GRAB: Record<Difficulty, number> = { 'muy-facil': 0.3, facil: 0.4, normal: 0.5, dificil: 0.58, leyenda: 0.66 };
 
 /** Lo que dura el minuto extra antes de la muerte súbita (s). */
 const EXTRA_LEN = 60;
@@ -496,6 +504,8 @@ export class SevenMatch {
     private fSpd = (p: Player) => 1 + (this.skill(p, 'spd') - 6) * 0.028;
     private fKick = (p: Player) => clamp(1 + (this.skill(p, 'kick') - 6) * 0.07, 0.6, 1.3);
     private fTkl = (p: Player) => clamp(1 + (this.skill(p, 'tkl') - 6) * 0.045, 0.75, 1.2);
+    /** Manos (sale de "pase y patada"): pases más rápidos y difíciles de cortar, menos pelotas al piso. */
+    private fHands = (p: Player) => clamp(1 + (this.skill(p, 'kick') - 6) * 0.05, 0.7, 1.25);
 
     private say(text: string, sub: string | null = null, t = 1.2) {
         this.banner = { text, sub, t };
@@ -788,7 +798,7 @@ export class SevenMatch {
         this.ball.y = from.y;
         this.ball.flight = {
             from, to, sx: from.x, sy: from.y, releaseX: from.x, toX0: to.x, t: 0,
-            dur: clamp(dist / (skip ? 24 : 21), 0.18, 1.3), tried: new Set(), skip,
+            dur: clamp(dist / ((skip ? 24 : 21) * this.fHands(from)), 0.16, 1.4), tried: new Set(), skip,
         };
         from.passT = 0.28;
     }
@@ -804,7 +814,8 @@ export class SevenMatch {
         this.ball.x = from.x;
         this.ball.y = from.y;
         const fb = this.team(from.side === 0 ? 1 : 0).find((p) => p.fb && p.down <= 0);
-        const dist = 12 + power * 33;
+        const foot = this.fKick(from);
+        const dist = 12 + power * 33 * foot;
         const tx = clamp(from.x + d * dist, 2, 118);
         const goalX = from.side === 0 ? TRY_R : TRY_L;
         const toPosts = Math.abs(goalX - from.x);
@@ -813,13 +824,13 @@ export class SevenMatch {
         let ty: number;
         let goal = false;
         if (atPosts) {
-            const err = (rnd() - 0.5) * (2 + toPosts * 0.16 + Math.abs(from.y - WIDTH / 2) * 0.3);
+            const err = ((rnd() - 0.5) * (2 + toPosts * 0.16 + Math.abs(from.y - WIDTH / 2) * 0.3)) / foot;
             ty = WIDTH / 2 + err;
             goal = Math.abs(err) < 2.8 && (tx - goalX) * d >= 0;
         } else {
             const lanes = [10, 22, 35, 48, 60].filter((y) => Math.abs(y - from.y) < 30);
             const lane = lanes.sort((a, b) => (fb ? Math.abs(b - fb.y) - Math.abs(a - fb.y) : Math.abs(a - from.y) - Math.abs(b - from.y)))[0] ?? from.y;
-            ty = lane + (rnd() - 0.5) * (3 + power * 12);
+            ty = lane + ((rnd() - 0.5) * (3 + power * 12)) / foot;
         }
         ty = clamp(ty, 4, WIDTH - 4);
         this.ball.holder = null;
@@ -1058,8 +1069,8 @@ export class SevenMatch {
         const lx = clamp(x, TRY_L + 6, TRY_R - 6);
         this.lineout = { x: lx, y: top ? 0 : WIDTH, thrower };
         this.mg = {
-            kind: 'timing', cursor: 0, dir: 1, speed: 1.35,
-            zone: clamp((thrower === 0 ? LINE_ZONE[this.cfg.difficulty] : 0.1) * (this.jumpers(0) / this.jumpers(1)) ** 6, 0.04, 0.45),
+            kind: 'timing', cursor: 0, dir: 1, speed: LINE_SPEED[this.cfg.difficulty],
+            zone: clamp((thrower === 0 ? LINE_ZONE[this.cfg.difficulty] : LINE_STEAL[this.cfg.difficulty]) * (this.jumpers(0) / this.jumpers(1)) ** 6, 0.04, 0.45),
             userActs: true, done: false, win: false,
         };
         this.phase = 'lineout';
@@ -1538,7 +1549,7 @@ export class SevenMatch {
                 if (p.side === 0) this.ctrl = null;
                 return;
             }
-            const sp = Math.min(9, dist / dt);
+            const sp = Math.min(9 * this.fSpd(p), dist / dt);
             p.vx = (dx / dist) * sp;
             p.vy = (dy / dist) * sp;
             p.x += p.vx * dt;
@@ -1660,7 +1671,7 @@ export class SevenMatch {
             this.ball.y = fl.sy + (fl.to.y - fl.sy) * k;
             // Pases largos y salteos se leen más fácil.
             const long = Math.hypot(fl.to.x - fl.sx, fl.to.y - fl.sy) > 14 ? 1.3 : 1;
-            const intercept = (fl.from.side === 0 ? D.intercept : 0.14) * (fl.skip ? 1.8 : 1) * long;
+            const intercept = ((fl.from.side === 0 ? D.intercept : 0.14) * (fl.skip ? 1.8 : 1) * long) / this.fHands(fl.from) ** 2;
             for (const o of this.team(fl.from.side === 0 ? 1 : 0)) {
                 // En la gracia de la salida, el primer pase no se corta: los rivales todavía están en el ruck.
                 if (this.safeT > 0 || o.down > 0 || fl.tried.has(o)) continue;
@@ -1681,7 +1692,7 @@ export class SevenMatch {
                 }
                 // Knock-on: raro, y más raro cuanto mejor es el equipo (Nueva Zelanda casi nunca; Malta, cada tanto).
                 const team = rec.side === 0 ? this.cfg.home : this.cfg.away;
-                const knock = clamp(0.022 - (((team.rating ?? 70) - 40) / 55) * 0.018, 0.003, 0.022) * (fl.skip ? 1.5 : 1);
+                const knock = (clamp(0.022 - (((team.rating ?? 70) - 40) / 55) * 0.018, 0.003, 0.022) * (fl.skip ? 1.5 : 1)) / (this.fHands(rec) * this.fHands(fl.from)) ** 1.5;
                 if (this.safeT <= 0 && rnd() < knock) {
                     this.puff(rec.x, rec.y, 5);
                     this.startScrum(rec.side === 0 ? 1 : 0, rec.x, rec.y, 'KNOCK-ON');
@@ -1736,14 +1747,15 @@ export class SevenMatch {
      */
     private chaseBall(dt: number, bx: number, by: number, kicker: Side) {
         const d = this.dir(kicker);
-        const defSpeed = kicker === 0 ? this.D.cpuDefRun : 7.0;
+        // Los tuyos corren a 8 m/s; los rivales, según la dificultad. Y cada uno con su velocidad.
+        const base = (side: Side) => (side === 0 ? 8 : CPU_CHASE[this.cfg.difficulty]);
         for (const side of [kicker, kicker === 0 ? 1 : 0] as Side[]) {
             const chasers = this.team(side)
                 .filter((p) => p.down <= 0)
                 .sort((a, b) => Math.hypot(a.x - bx, a.y - by) - Math.hypot(b.x - bx, b.y - by));
             chasers.forEach((p, i) => {
-                if (i < 2 || p.fb) this.step(p, bx, by, side === kicker ? 8.6 : defSpeed + 0.2);
-                else this.step(p, bx - d * (side === kicker ? 8 : -6), clamp(p.y, 4, WIDTH - 4), 6);
+                if (i < 2 || p.fb) this.step(p, bx, by, (base(side) + (side === kicker ? 0.4 : 0)) * this.fSpd(p));
+                else this.step(p, bx - d * (side === kicker ? 8 : -6), clamp(p.y, 4, WIDTH - 4), 6 * this.fSpd(p));
             });
         }
         for (const p of this.players) {
@@ -1811,6 +1823,15 @@ export class SevenMatch {
             }
         }
         if (!who) return;
+        // Si hay uno del otro lado encima también, se la disputan: manos de cada uno y la dificultad.
+        const first: Player = who;
+        const rival = this.players.find((p) => p.side !== first.side && p.down <= 0 && p.pose === 'stand' && Math.hypot(p.x - this.ball.x, p.y - this.ball.y) < 1.2);
+        if (rival) {
+            const user = first.side === 0 ? first : rival;
+            const cpu = first.side === 0 ? rival : first;
+            const cpuOdds = clamp(CPU_GRAB[this.cfg.difficulty] * (this.fHands(cpu) / this.fHands(user)) ** 2, 0.1, 0.9);
+            who = rnd() < cpuOdds ? cpu : user;
+        }
         this.ball.loose = null;
         const att = lb.kicker;
         const inGoal = att === 0 ? this.ball.x >= TRY_R : this.ball.x <= TRY_L;
@@ -2022,7 +2043,7 @@ export class SevenMatch {
         const userRate = mash / 1.3;
         const contest = clamp((userRate - this.D.ruckRate) / 4, -1, 1); // + = el usuario empuja más que el rival
         const power = (ps: Player[]) => (ps.length ? ps.reduce((a, p) => a + this.fTkl(p) * (this.kgOf(p) / 95), 0) / ps.length : 0.9);
-        let keep = side === 0 ? this.D.ruckKeep + contest * 0.07 : this.D.cpuRuckKeep - contest * 0.1;
+        let keep = side === 0 ? this.D.ruckKeep + contest * 0.1 : this.D.cpuRuckKeep - contest * 0.16;
         keep += (own.length - opp.length) * 0.05;
         keep += (power(own) - power(opp)) * 0.25;
         const alone = own.length === 0;

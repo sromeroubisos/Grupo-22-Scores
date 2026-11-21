@@ -3790,3 +3790,112 @@
     align-items: center;
     gap: 4px;
 }
+
+
+/* ---- Cartel de una simulación: victoria, derrota o empate ---- */
+.simFlash {
+    position: fixed;
+    inset: 0;
+    z-index: 2900;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 14px;
+    padding: 16px;
+    border: 0;
+    font: inherit;
+    color: #f4f4f4;
+    text-align: center;
+    cursor: pointer;
+    background: rgba(5, 6, 8, 0.9);
+    animation: simFlashIn 0.25s ease-out;
+}
+
+.simFlashWin {
+    background: radial-gradient(circle at 50% 45%, rgba(63, 191, 90, 0.35), transparent 60%), rgba(5, 6, 8, 0.92);
+}
+
+.simFlashLoss {
+    background: radial-gradient(circle at 50% 45%, rgba(224, 72, 72, 0.32), transparent 60%), rgba(5, 6, 8, 0.92);
+}
+
+.simFlashDraw {
+    background: radial-gradient(circle at 50% 45%, rgba(240, 196, 25, 0.28), transparent 60%), rgba(5, 6, 8, 0.92);
+}
+
+.simFlashTitle {
+    font-size: clamp(2rem, 9vw, 4rem);
+    letter-spacing: 0.1em;
+    text-shadow: 0 4px 0 #050608;
+    animation: simFlashStamp 0.5s cubic-bezier(0.2, 1.6, 0.4, 1) both;
+}
+
+.simFlashWin .simFlashTitle {
+    color: #4fd16a;
+}
+
+.simFlashLoss .simFlashTitle {
+    color: #ff6b6b;
+}
+
+.simFlashDraw .simFlashTitle {
+    color: var(--gold);
+}
+
+.simFlashScore {
+    display: flex;
+    align-items: center;
+    gap: clamp(10px, 4vw, 28px);
+    animation: simFlashUp 0.4s 0.25s ease-out both;
+}
+
+.simFlashTeam {
+    display: grid;
+    justify-items: center;
+    gap: 4px;
+}
+
+.simFlashNums {
+    font-size: clamp(1.8rem, 8vw, 3.2rem);
+    font-variant-numeric: tabular-nums;
+}
+
+.simFlashNums small {
+    opacity: 0.6;
+}
+
+.simFlashSub {
+    max-width: 34ch;
+    font-size: 0.8rem;
+    opacity: 0.85;
+    animation: simFlashUp 0.4s 0.4s ease-out both;
+}
+
+@keyframes simFlashIn {
+    from {
+        opacity: 0;
+    }
+}
+
+@keyframes simFlashStamp {
+    from {
+        opacity: 0;
+        transform: scale(2.2);
+    }
+}
+
+@keyframes simFlashUp {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .simFlash,
+    .simFlashTitle,
+    .simFlashScore,
+    .simFlashSub {
+        animation: none;
+    }
+}

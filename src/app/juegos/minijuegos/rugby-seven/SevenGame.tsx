@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useAuth } from '@/context/AuthContext';
 import { Silkscreen } from 'next/font/google';
@@ -579,6 +579,48 @@ function ChampionCelebration({ team, titles, coach, onClose }: { team: SevenTeam
     );
 }
 
+/** Lo que dejó una simulación: el último partido y, si fueron varios, el balance. */
+interface SimFlash {
+    home: SevenTeam;
+    away: SevenTeam;
+    score: [number, number];
+    record?: [number, number, number]; // ganados, empatados, perdidos (al simular varios)
+}
+
+/** Cartel animado al simular: victoria, derrota o empate, con el resultado. Se va solo o con un toque. */
+function SimResult({ flash, onClose }: { flash: SimFlash; onClose: () => void }) {
+    const [a, b] = flash.score;
+    const kind = a > b ? 'win' : a < b ? 'loss' : 'draw';
+    const title = kind === 'win' ? 'VICTORIA' : kind === 'loss' ? 'DERROTA' : 'EMPATE';
+    useEffect(() => {
+        const t = setTimeout(onClose, flash.record ? 3600 : 2600);
+        return () => clearTimeout(t);
+    }, [flash, onClose]);
+    const rec = flash.record;
+    return (
+        <button type="button" className={`${styles.simFlash} ${kind === 'win' ? styles.simFlashWin : kind === 'loss' ? styles.simFlashLoss : styles.simFlashDraw}`} onClick={onClose} aria-label={`${title}: ${flash.home.name} ${a}, ${flash.away.name} ${b}. Tocá para seguir.`}>
+            <strong className={styles.simFlashTitle}>{title}</strong>
+            <span className={styles.simFlashScore}>
+                <span className={styles.simFlashTeam}>
+                    <SpritePreview look={flash.home.players[0]} kit={flash.home.kit} scale={3} celebrating={kind === 'win'} />
+                    <b>{flash.home.short}</b>
+                </span>
+                <span className={styles.simFlashNums}>
+                    {a} <small>-</small> {b}
+                </span>
+                <span className={styles.simFlashTeam}>
+                    <SpritePreview look={flash.away.players[0]} kit={flash.away.kit} scale={3} celebrating={kind === 'loss'} />
+                    <b>{flash.away.short}</b>
+                </span>
+            </span>
+            <span className={styles.simFlashSub}>
+                {flash.home.name} contra {flash.away.name}
+                {rec ? ` · simulaste ${rec[0] + rec[1] + rec[2]}: ${rec[0]} ganado${rec[0] === 1 ? '' : 's'}, ${rec[2]} perdido${rec[2] === 1 ? '' : 's'}${rec[1] ? `, ${rec[1]} empate${rec[1] === 1 ? '' : 's'}` : ''}` : ''}
+            </span>
+        </button>
+    );
+}
+
 export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { musicSrc?: string | null; menuMusicSrc?: string | null }) {
     const [screen, setScreen] = useState<Screen>({ k: 'menu' });
     const [customTeams, setCustomTeams] = useState<SevenTeam[]>([]);
@@ -609,6 +651,9 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
         else if (c === '') setAskCoach(true);
     }, []);
     const [celebratedKey, setCelebratedKey] = useState<string | null>(null);
+    /** El cartel de la última simulación (victoria, derrota o empate). */
+    const [simFlash, setSimFlash] = useState<SimFlash | null>(null);
+    const closeSimFlash = useCallback(() => setSimFlash(null), []);
     const [palmaresKey, setPalmaresKey] = useState<string | null>(null);
     const [hubTab, setHubTab] = useState<HubTab>('tabla');
     /** Torneo que se está armando (de fábrica, con reemplazos o personalizado). */
@@ -863,16 +908,26 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
     const simTourMatch = (all: boolean) => {
         if (!tour) return;
         let s = tour;
+        let last: { opp: string; score: [number, number] } | null = null;
+        const rec: [number, number, number] = [0, 0, 0];
         for (let guard = 0; guard < 200 && !s.done && !s.eliminated; guard++) {
             const o = nextOpponent(s);
             if (s.career) applyCareerContext(s.career);
             const ko = s.stage === 'ko';
             // La localía del simulado: suma el que juega en su cancha (en el cuadro, neutral).
             const adv = ko || !s.career ? 0 : nextIsHome(s) ? HOME_ADV : -HOME_ADV;
-            s = careerRound(s, o ? simulate(s.me, o, ko, adv) : null);
+            const score = o ? simulate(s.me, o, ko, adv) : null;
+            if (o && score) {
+                last = { opp: o, score };
+                rec[score[0] > score[1] ? 0 : score[0] === score[1] ? 1 : 2] += 1;
+            }
+            s = careerRound(s, score);
             if (!all && o) break;
         }
         persist({ tour: s });
+        const home = byId(s.me);
+        const away = last ? byId(last.opp) : null;
+        if (last && home && away) setSimFlash({ home, away, score: last.score, record: rec[0] + rec[1] + rec[2] > 1 ? rec : undefined });
     };
 
     /** Un amistoso de pretemporada: se juega (o se simula) y deja moral, o una lesión. */
@@ -882,7 +937,9 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
         const away = byId(opp);
         if (!home || !away) return;
         if (sim) {
-            persist({ tour: preseasonFriendly(tour, opp, simulate(tour.me, opp, true)) });
+            const score = simulate(tour.me, opp, true);
+            persist({ tour: preseasonFriendly(tour, opp, score) });
+            setSimFlash({ home, away, score });
             return;
         }
         play({ home, away, difficulty: tour.difficulty, minutes: tour.duration, suddenDeath: true, skills: [careerSkills(tour.career, tour.me), careerSkills(tour.career, opp)] }, 'friendly');
@@ -1861,6 +1918,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                         : [];
                     return (
                         <div className={styles.body}>
+                            {simFlash && <SimResult flash={simFlash} onClose={closeSimFlash} />}
                             {celebrateTeam && (
                                 <ChampionCelebration
                                     team={celebrateTeam}

@@ -54,28 +54,28 @@ export interface DiffParams {
 export const DIFF: Record<Difficulty, DiffParams> = {
     'muy-facil': {
         cpuRun: 5.6, cpuDefRun: 5.6, cpuTackle: 0.35, breakHit: 0.8, dodge: 0.8, userTackle: 0.97,
-        cpuBreak: 0.12, intercept: 0.02, scrumCpu: 14, ruckKeep: 0.96, cpuRuckKeep: 0.8, ruckRate: 2.5,
+        cpuBreak: 0.12, intercept: 0.02, scrumCpu: 14, ruckKeep: 0.97, cpuRuckKeep: 0.66, ruckRate: 2.5,
         kickWindow: 0.34, cpuKick: 0.45, cpuPassIQ: 0.6,
     },
     facil: {
         cpuRun: 6.6, cpuDefRun: 6.6, cpuTackle: 0.66, breakHit: 0.54, dodge: 0.56, userTackle: 0.89,
-        cpuBreak: 0.4, intercept: 0.08, scrumCpu: 22, ruckKeep: 0.93, cpuRuckKeep: 0.86, ruckRate: 4,
+        cpuBreak: 0.4, intercept: 0.08, scrumCpu: 22, ruckKeep: 0.94, cpuRuckKeep: 0.78, ruckRate: 4,
         kickWindow: 0.22, cpuKick: 0.6, cpuPassIQ: 1.25,
     },
     // El normal de ahora es el difícil de antes: el de antes se sentía fácil.
     normal: {
         cpuRun: 7.5, cpuDefRun: 7.3, cpuTackle: 0.84, breakHit: 0.33, dodge: 0.36, userTackle: 0.76,
-        cpuBreak: 0.62, intercept: 0.17, scrumCpu: 31, ruckKeep: 0.89, cpuRuckKeep: 0.9, ruckRate: 5.5,
+        cpuBreak: 0.62, intercept: 0.17, scrumCpu: 31, ruckKeep: 0.89, cpuRuckKeep: 0.88, ruckRate: 5.5,
         kickWindow: 0.13, cpuKick: 0.78, cpuPassIQ: 2.2,
     },
     dificil: {
         cpuRun: 7.9, cpuDefRun: 7.8, cpuTackle: 0.9, breakHit: 0.24, dodge: 0.27, userTackle: 0.68,
-        cpuBreak: 0.72, intercept: 0.22, scrumCpu: 36, ruckKeep: 0.86, cpuRuckKeep: 0.93, ruckRate: 7,
+        cpuBreak: 0.72, intercept: 0.22, scrumCpu: 36, ruckKeep: 0.84, cpuRuckKeep: 0.92, ruckRate: 7,
         kickWindow: 0.1, cpuKick: 0.85, cpuPassIQ: 2.8,
     },
     leyenda: {
         cpuRun: 8.3, cpuDefRun: 8.3, cpuTackle: 0.94, breakHit: 0.16, dodge: 0.19, userTackle: 0.6,
-        cpuBreak: 0.8, intercept: 0.28, scrumCpu: 41, ruckKeep: 0.83, cpuRuckKeep: 0.95, ruckRate: 8.5,
+        cpuBreak: 0.8, intercept: 0.28, scrumCpu: 41, ruckKeep: 0.78, cpuRuckKeep: 0.95, ruckRate: 8.5,
         kickWindow: 0.08, cpuKick: 0.9, cpuPassIQ: 3.4,
     },
 };
