@@ -1225,7 +1225,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                 <input
                                     value={coachName}
                                     onChange={(e) => setCoachName(e.target.value.slice(0, 40))}
-                                    placeholder="Cómo te van a nombrar en el palmarés"
+                                    placeholder="Tu nombre (va al palmarés)"
                                     maxLength={40}
                                     autoComplete="off"
                                 />
