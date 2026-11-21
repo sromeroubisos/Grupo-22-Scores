@@ -129,9 +129,13 @@ const LINE_ZONE: Record<Difficulty, number> = { 'muy-facil': 0.36, facil: 0.3, n
 const LINE_STEAL: Record<Difficulty, number> = { 'muy-facil': 0.2, facil: 0.15, normal: 0.1, dificil: 0.08, leyenda: 0.06 };
 /** Lo rápido que corre la marca del line: más difícil, más rápida. */
 const LINE_SPEED: Record<Difficulty, number> = { 'muy-facil': 1.0, facil: 1.18, normal: 1.35, dificil: 1.5, leyenda: 1.68 };
+/**
+ * Puntos de velocidad personal (en la escala 1 a 10 de las skills) que la defensa rival suma sobre
+ * su propio nivel, según la dificultad. Es un empujón a SUS estadísticas, no una velocidad fija:
+ * contra un equipo mucho peor siguen siendo más lentos que tus jugadores.
+ */
+const CPU_DEF_SPD_PTS: Record<Difficulty, number> = { 'muy-facil': 0, facil: 0.5, normal: 1, dificil: 1.5, leyenda: 2 };
 /** A qué velocidad corren los rivales a buscar una patada o una pelota suelta (m/s). */
-/** Qué tan rápido, respecto de tu carrera, cierran los defensores que te persiguen (1 = igual que vos). */
-const CPU_CATCHUP: Record<Difficulty, number> = { 'muy-facil': 0.94, facil: 1.0, normal: 1.03, dificil: 1.06, leyenda: 1.09 };
 const CPU_CHASE: Record<Difficulty, number> = { 'muy-facil': 6.6, facil: 7.5, normal: 8.3, dificil: 8.8, leyenda: 9.3 };
 /** Pelota suelta disputada: lo que le cuesta al rival quedársela si llegan juntos. */
 const CPU_GRAB: Record<Difficulty, number> = { 'muy-facil': 0.3, facil: 0.4, normal: 0.5, dificil: 0.58, leyenda: 0.66 };
@@ -1610,10 +1614,9 @@ export class SevenMatch {
                 pursuer = p;
             }
         }
-        const defSpeed = defSide === 1 ? D.cpuDefRun : 7.0;
-        // Si el portador sos vos, los que lo persiguen nunca corren menos que vos: un poco más
-        // rápido según la dificultad. Así, cuando cortás la línea, el cierre de la defensa se siente.
-        const catchUp = defSide === 1 && carrier?.side === 0 ? Math.hypot(carrier.vx, carrier.vy) * CPU_CATCHUP[this.cfg.difficulty] : 0;
+        // La defensa rival suma puntos de velocidad PERSONAL según la dificultad (cada uno sobre su propio
+        // nivel: un equipo flojo sigue siendo más lento que el tuyo). Los 0,028 son lo que vale un punto en fSpd.
+        const defSpeed = defSide === 1 ? D.cpuDefRun * (1 + CPU_DEF_SPD_PTS[this.cfg.difficulty] * 0.028) : 7.0;
         for (const p of defs) {
             if (p.down > 0) {
                 p.vx = 0;
@@ -1630,7 +1633,7 @@ export class SevenMatch {
                 const lineBroken = !defs.some((o) => o !== p && o.down <= 0 && (o.x - focus.x) * d > -1 && Math.abs(o.y - focus.y) < 8);
                 const close = Math.hypot(p.x - focus.x, p.y - focus.y) < 9;
                 if (lineBroken || close) {
-                    const sp = Math.max(defSpeed * 0.97, catchUp);
+                    const sp = defSpeed * 0.97;
                     const aim = this.leadPoint(p, focus, sp);
                     this.step(p, aim.x, aim.y, sp);
                 } else {
@@ -1650,7 +1653,7 @@ export class SevenMatch {
             }
             const chase = p === pursuer || (p.mark === focus && pd > 3 && this.cfg.difficulty !== 'muy-facil');
             if (chase) {
-                const sp = defSide === 0 ? 6.4 : Math.max(defSpeed, catchUp);
+                const sp = defSide === 0 ? 6.4 : defSpeed;
                 const aim = this.leadPoint(p, focus, sp);
                 this.step(p, aim.x, aim.y, sp);
             } else {
@@ -2087,6 +2090,7 @@ export class SevenMatch {
             this.say(winner === 0 ? 'RUCK GANADO' : jackal ? 'JACKAL' : 'PELOTA ROBADA', why, 1.2);
             if (this.deadBall()) return;
         } else if (side === 0) this.say('PELOTA ASEGURADA', null, 0.5);
+        else this.say('RUCK PERDIDO', 'El rival aseguró la pelota', 0.8);
         // La levanta el más cercano a la pelota del que la ganó, y se sigue jugando.
         this.quickRelease(winner, x, y, null);
     }
@@ -2488,8 +2492,8 @@ export class SevenMatch {
             // Es la misma cuenta con la que se resuelve (userRate vs ruckRate), así que no miente.
             // La barra es la probabilidad real de quedarte con la pelota (incluye cuántos llegaron,
             // quién se metió primero y el peso), no solo los toques: el desenlace sale de esa misma cuenta.
-            const elapsed = clamp(1.3 - this.phaseT, 0.35, 1.3);
-            const { keep } = this.ruckKeep(mg.mash / elapsed);
+            // Con la misma cuenta que el desenlace (toques / 1,3): sin proyecciones que después no se cumplan.
+            const { keep } = this.ruckKeep(mg.mash / 1.3);
             const userWin = this.ruckAt.side === 0 ? keep : 1 - keep;
             const split = Math.round(userWin * w);
             ctx.fillStyle = '#141218';
