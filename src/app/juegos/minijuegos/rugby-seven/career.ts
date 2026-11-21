@@ -72,7 +72,7 @@ import {
 type Branch = ArBranch;
 /** ¿Es una carrera del rugby argentino (con TDI y Nacional)? Las de Chile, Uruguay y Brasil van aparte. */
 export const isArgCareer = (r: CareerState) => isArgBranch(r.branch);
-export type CareerPhase = 'liga' | 'copa' | 'playoff' | 'promocion' | 'tdi' | 'nacional';
+export type CareerPhase = 'liga' | 'copa' | 'playoff' | 'promocion' | 'tdi' | 'nacional' | 'sudam';
 export type NacFormat = 'final' | 'semis' | 'grupos8' | 'ab';
 export type TierId = 'nacA' | 'nacB' | 'tdiA' | 'tdiB';
 type Cupo = { region: string; source: string; tdiA: number; tdiB: number };
@@ -255,6 +255,8 @@ export interface CareerState {
         cupoDeltaB?: Record<string, number>; // plazas de TDI B que gana o pierde cada región (repechaje con los que no tienen)
         cups?: Cup[];
         myCup?: number | null;
+        /** Sudamericano de Clubes de la temporada: los campeones de los cuatro países. */
+        sud?: { teams: string[]; champion?: string } | null;
         deltaAB?: Record<string, [number, number, number, number]>;
         note: string[];
         /** Títulos que ganó el club esta temporada (para el festejo). */
@@ -1338,6 +1340,9 @@ function seasonStart(r: CareerState, difficulty: Difficulty, duration: Duration)
     };
     for (const d of Object.keys(r.divisions)) if (d !== div && r.divisions[d].length >= 2) add(`div:${d}`, leagueDef(d, [...r.divisions[d]].sort(byRating), r.season));
     for (const t of TIERS_OF[formatOf(r, r.season)]) if (t !== mineTier && (tiers[t]?.length ?? 0) >= 2) add(`tier:${t}`, tierDef(t, tiers[t]!, r.season));
+    // La primera de los otros países: se juega a la par y se puede mirar (no cruza con la carrera, salvo en el Sudamericano).
+    const mine = countryOf(r.branch);
+    for (const [c, div] of Object.entries(COUNTRY_TOP)) if (c !== mine && DIV[div]) add(`ext:${div}`, leagueDef(div, [...DIV[div].clubs].sort(byRating), r.season));
     return stage({ ...r, parallel, others, phase: 'liga', settled: null }, leagueDef(div, [...r.divisions[div]].sort(byRating), r.season), difficulty, duration);
 }
 
@@ -1664,7 +1669,7 @@ function settleLiga(s: TourState, r: CareerState) {
 const CUSTOM_UPS = new Set(['ar-centro-top10', 'ar-centro-super9b', 'ar-litoral-top10', 'ar-patagonia-regional']);
 
 /** Nombres de las copas para el palmarés. */
-export const CUP_LABEL: Record<string, string> = { 'cba-regA': 'Regional A de Córdoba', 'cba-regB': 'Regional B de Córdoba' };
+export const CUP_LABEL: Record<string, string> = { 'cba-regA': 'Regional A de Córdoba', 'cba-regB': 'Regional B de Córdoba', sudamericano: 'Sudamericano de Clubes' };
 
 function addCup(r: CareerState, c: Cup) {
     if (c.teams.length >= 2) (r.pending.cups ??= []).push(c);
@@ -1899,6 +1904,59 @@ function foreignRules(r: CareerState, rankings: Record<string, string[]>) {
         }
     }
     resolveCups(r);
+}
+
+/* ───────────────────────── Sudamericano de Clubes ───────────────────────── */
+
+/** La primera de cada país (en la Argentina, el campeón sale del Nacional de Clubes). */
+const COUNTRY_TOP: Record<string, string> = { ar: 'ar-urba-top14', uy: 'uy-uruguayo', br: 'br-super12', cl: 'cl-top10' };
+const countryOf = (b: Branch) => (isArgBranch(b) ? 'ar' : b === 'uruguay' ? 'uy' : b === 'brasil' ? 'br' : 'cl');
+const champOf = (r: CareerState, key: string) => r.champions?.[key]?.find(([season]) => season === r.season)?.[1] ?? null;
+
+/** El campeón del año de un país: el de la carrera, o el de su primera jugada a la par. */
+function countryChampion(r: CareerState, c: string): string | null {
+    if (c === countryOf(r.branch)) {
+        if (c === 'ar') return champOf(r, 'nacional') ?? champOf(r, r.branch === 'urba' ? 'ar-urba-top14' : 'tdiA');
+        return champOf(r, COUNTRY_TOP[c]);
+    }
+    const div = COUNTRY_TOP[c];
+    const t = r.others?.[`ext:${div}`] ?? (DIV[div] ? finish(createTour(leagueDef(div, [...DIV[div].clubs].sort(byRating), r.season), '__nadie', 'normal', 3)) : null);
+    return t ? finalRanking(t.done ? t : finish(t))[0] ?? null : null;
+}
+
+/** Los cuatro del Sudamericano, cruzados: Argentina contra Chile y Brasil contra Uruguay. */
+function sudTeams(r: CareerState): string[] | null {
+    const t = ['ar', 'cl', 'br', 'uy'].map((c) => countryChampion(r, c));
+    return t.every(Boolean) && new Set(t).size === 4 ? (t as string[]) : null;
+}
+
+const sudDef = (teams: string[], season: number): TourDef => ({
+    id: `career-sudamericano-${season}`,
+    name: `Sudamericano de Clubes ${season}`,
+    sub: 'Los campeones de Argentina, Uruguay, Brasil y Chile.',
+    source: 'real',
+    clubs: true,
+    cat: 'Argentina',
+    teams,
+    formatLabel: 'Semifinales y final',
+    stage: { kind: 'ko', fixed: true },
+});
+
+function applySud(r: CareerState, w: string | null | undefined) {
+    const sud = r.pending.sud;
+    if (!sud || !w) return;
+    sud.champion = w;
+    addChampion(r, 'sudamericano', w);
+    addBonus(r, w, 2);
+    r.log.push(`${r.season}: ${nm(w)} campeón del Sudamericano de Clubes.`);
+}
+
+/** Si el club del usuario se ganó el Sudamericano de este año y todavía no se jugó: sus rivales. */
+export function sudamericanoFor(s: TourState): string[] | null {
+    const r = settleCareer(s).career;
+    if (!r || !closesSeason(s) || r.phase === 'sudam' || r.pending.sud?.champion) return null;
+    const teams = r.pending.sud?.teams ?? sudTeams(r);
+    return teams?.includes(r.me) ? teams : null;
 }
 
 /** Lo que dice el calendario sobre cómo se sube y se baja en una división. */
@@ -2211,6 +2269,10 @@ export function settleCareer(s0: TourState): TourState {
     if (r.phase === 'liga') settleLiga(s, r);
     else if (r.phase === 'playoff') settlePlayoff(s, r);
     else if (r.phase === 'copa') settleCup(s, r);
+    else if (r.phase === 'sudam') {
+        applySud(r, s.champion);
+        r.pending.note.push(s.champion === r.me ? 'Campeón del Sudamericano de Clubes.' : `Sudamericano de Clubes: campeón ${nm(s.champion ?? '')}.`);
+    }
     else if (r.phase === 'promocion') settlePromo(s, r);
     else if (r.phase === 'tdi') settleTdiLegacy(s, r);
     else settleNacional(s, r);
@@ -2229,6 +2291,7 @@ function upgraded(s: TourState): TourState {
 /** Qué se juega después de la etapa en curso (null: se cierra la temporada). */
 function nextStage(r: CareerState): { def: TourDef; phase: CareerPhase; alive?: string[] } | null {
     const p = r.pending;
+    if (r.phase === 'sudam') return null;
     const cup = p.cups?.[p.myCup ?? -1];
     if (cup && !cup.champion) return { def: cupDef(cup, r.season), phase: 'copa' };
     const my = p.my;
@@ -2249,6 +2312,7 @@ function nextStage(r: CareerState): { def: TourDef; phase: CareerPhase; alive?: 
 const NEXT_LABEL: Record<CareerPhase, string> = {
     liga: 'Fase regular',
     copa: 'Jugar la copa',
+    sudam: 'Jugar el Sudamericano',
     playoff: 'Jugar por la plaza',
     promocion: 'Jugar la promoción',
     tdi: 'Jugar el Torneo del Interior',
@@ -2277,13 +2341,14 @@ export function careerVerdict(s0: TourState): { title: string; text: string; nex
     const won = s.champion === r.me;
     if (r.phase === 'playoff') return { title: won ? 'Ganaste' : 'Perdiste', text, next };
     if (r.phase === 'copa') return { title: won ? 'Campeón' : 'Terminó la copa', text, next };
+    if (r.phase === 'sudam') return { title: won ? 'Campeón sudamericano' : 'Terminó el Sudamericano', text, next };
     if (r.phase === 'promocion') return { title: won ? 'Ganaste la promoción' : 'Perdiste la promoción', text, next };
     if (r.phase === 'tdi') return { title: won ? 'Campeón del interior' : 'Terminó el Torneo del Interior', text, next };
     return { title: won ? 'Campeón del Nacional de Clubes' : 'Terminó el Nacional', text: text || `Temporada ${r.season} cerrada.`, next };
 }
 
 /** Pasa a la etapa siguiente de la carrera. Al cerrar la temporada, `chosen` fija el Nacional de dentro de dos años. */
-export function advanceCareer(s0: TourState, chosen?: NacFormat): TourState {
+export function advanceCareer(s0: TourState, chosen?: NacFormat, playSud = false): TourState {
     const s = settleCareer(s0);
     if (!s.career || !s.done || (s.career.parallel && !s.career.parallel.done)) return s;
     const r: CareerState = JSON.parse(JSON.stringify(s.career));
@@ -2293,6 +2358,16 @@ export function advanceCareer(s0: TourState, chosen?: NacFormat): TourState {
         const t = stage({ ...r, phase: nx.phase, settled: null, parallel: null }, nx.def, s.difficulty, s.duration);
         if (nx.alive) t.alive = [...nx.alive];
         return t;
+    }
+    // Antes de cerrar la temporada, el Sudamericano de Clubes (el usuario lo juega si clasificó y quiere).
+    if (r.phase !== 'sudam' && !r.pending.sud?.champion && (r.phase !== 'liga' || !r.pending.tdi)) {
+        const teams = r.pending.sud?.teams ?? sudTeams(r);
+        if (teams) {
+            r.pending.sud = { teams };
+            if (playSud && teams.includes(r.me)) return stage({ ...r, phase: 'sudam', settled: null, parallel: null }, sudDef(teams, r.season), s.difficulty, s.duration);
+            applySud(r, finish(createTour(sudDef(teams, r.season), '__nadie', 'normal', 3)).champion);
+            if (teams.includes(r.me)) r.pending.note.push(r.pending.sud.champion === r.me ? 'Campeón del Sudamericano de Clubes (simulado).' : 'Sudamericano de Clubes simulado: no salió.');
+        }
     }
     // Partida vieja que cerró la fase regular clasificada al TDI como etapa aparte: lo juega ahora.
     if (r.phase === 'liga' && r.pending.tdi && !r.tiers && !r.tdi) {
@@ -2314,6 +2389,7 @@ export function isCareerState(v: unknown): v is CareerState {
 export const CAREER_PHASE_LABEL: Record<CareerPhase, string> = {
     liga: 'Temporada regular',
     copa: 'Copa de fin de temporada',
+    sudam: 'Sudamericano de Clubes',
     playoff: 'Disputa de plazas',
     promocion: 'Promoción',
     tdi: 'Torneo del Interior',
@@ -2441,8 +2517,14 @@ export function seasonPlan(s: TourState): SeasonItem[] {
         }
     }
 
+    // El Sudamericano de Clubes: los campeones de los cuatro países, al cerrar la temporada.
+    const sud = p.sud;
+    const sudItem: SeasonItem = sud?.champion
+        ? { name: 'Sudamericano de Clubes', detail: sud.champion === r.me ? 'Campeón' : `Campeón: ${nm(sud.champion)}`, state: sud.teams.includes(r.me) ? 'done' : 'out' }
+        : { name: 'Sudamericano de Clubes', detail: `Lo juegan los campeones de Argentina (el del Nacional), Uruguay, Brasil y Chile: semifinales y final. ${isArgBranch(r.branch) ? 'Si salís campeón del Nacional' : 'Si salís campeón'}, elegís si lo jugás.`, state: r.phase === 'sudam' ? 'live' : 'maybe' };
+
     // 5. Nacional de Clubes (solo en el rugby argentino).
-    if (!isArgBranch(r.branch)) return items;
+    if (!isArgBranch(r.branch)) return [...items, sudItem];
     const fmtLabel = NAC_FORMATS.find((f) => f.id === fmt)?.label ?? '';
     const nac = p.nacional;
     if (fmt === 'ab') {
@@ -2488,7 +2570,7 @@ export function seasonPlan(s: TourState): SeasonItem[] {
             items.push({ name: nextName, detail: parts.length ? `Se clasifica con esta tabla · ${parts.join(' · ')}` : 'Tu región no tiene plazas', state: parts.length ? 'maybe' : 'out' });
         }
     }
-    return items;
+    return [...items, sudItem];
 }
 
 /** Goleadores y tryman en vivo de un torneo, con nombres. */

@@ -64,44 +64,45 @@ export const isArgBranch = (b: ArBranch) => b === 'urba' || b === 'interior';
 const slug = (name: string) => name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
 /**
- * Ligas de afuera, de la base de G22 (temporada 2026). Sin los equipos B ni
+ * Ligas de afuera, de la base de G22 (temporada 2026). Su nivel queda debajo
+ * del argentino (el campeón argentino suele ganar el Sudamericano). Sin los equipos B ni
  * los repetidos (el segundo equipo de un club que ya juega más arriba). El
  * nivel va de mayor a menor según el orden de cada lista.
  */
 const FOREIGN: { div: Omit<GameDivision, 'clubs'>; pool: string; top: number; clubs: [string, string | null][] }[] = [
     {
         div: { id: 'cl-top10', label: 'Top 10 de ARUSA', branch: 'chile', region: 'chile', level: 1, promotesTo: null, relegatesTo: 'cl-segunda' },
-        pool: 'latam', top: 68,
+        pool: 'latam', top: 62,
         clubs: [['Old Boys', '#495270'], ['Universidad Católica', '#1f5bab'], ['COBS', '#322952'], ['Old Mackayans', '#000776'], ['Sporting', '#000000'], ['Stade Français', '#eb2a2e'], ['Old Reds', '#ed1c24'], ['PWCC', '#cfa976'], ['Old Georgians', '#f9bd18'], ['CD Alumni', '#efdd1f'], ['Old Johns', '#e10019'], ['Santo Tomás', null], ['Los Troncos', null], ['Viña Rugby Club', null]],
     },
     {
         div: { id: 'cl-segunda', label: 'Segunda de ARUSA', branch: 'chile', region: 'chile', level: 2, promotesTo: 'cl-top10', relegatesTo: 'cl-tercera' },
-        pool: 'latam', top: 52,
+        pool: 'latam', top: 47,
         clubs: [['Old Gabs', '#801740'], ['Tabancura', '#65c3f3'], ['Gauchos', '#e2332b'], ['Old Locks', '#ffac01'], ['Old Newlanders', '#0e4b12'], ['All Brads', '#215a3f'], ['Lagartos', '#20351f']],
     },
     {
         div: { id: 'cl-tercera', label: 'Tercera de ARUSA', branch: 'chile', region: 'chile', level: 3, promotesTo: 'cl-segunda', relegatesTo: 'cl-cuarta' },
-        pool: 'latam', top: 45,
+        pool: 'latam', top: 40,
         clubs: [['Costa del Sol', null], ['Halcones', null], ['IRC', null], ['Lions', null], ['Mano Rugby', null], ['Old Navy', null], ['Trapiales', null]],
     },
     {
         div: { id: 'cl-cuarta', label: 'Cuarta de ARUSA', branch: 'chile', region: 'chile', level: 4, promotesTo: 'cl-tercera', relegatesTo: null },
-        pool: 'latam', top: 39,
+        pool: 'latam', top: 34,
         clubs: [['Universidad de Chile', null], ['Escuela Militar', null], ['Old Green', null], ['RC Francés', null], ['Toros de Quillota', null], ['URMA', null]],
     },
     {
         div: { id: 'uy-uruguayo', label: 'Uruguayo de Clubes', branch: 'uruguay', region: 'uruguay', level: 1, promotesTo: null, relegatesTo: null },
-        pool: 'rio', top: 70,
+        pool: 'rio', top: 64,
         clubs: [['Old Christians', '#002c50'], ['Carrasco Polo', '#006ab4'], ['Montevideo Cricket', '#e60000'], ['Champagnat', '#052d4c'], ['Old Boys & Girls', '#d42d00'], ['Trébol de Paysandú', '#009138'], ['Círculo de Tenis', '#2e2a28'], ['Seminario', '#871828'], ['Los Cuervos', '#000000'], ['Lobos de Punta del Este', '#2d3b6a'], ['PSG', '#e33028'], ['Ceibos', '#2a462c']],
     },
     {
         div: { id: 'br-super12', label: 'Super 12 · Primeira Divisão', branch: 'brasil', region: 'brasil', level: 1, promotesTo: null, relegatesTo: 'br-segunda' },
-        pool: 'luso', top: 60,
+        pool: 'luso', top: 55,
         clubs: [['SPAC', null], ['Pasteur', null], ['São José', null], ['Poli', null], ['Jacareí', null], ['Charrua', null], ['Farrapos', null], ['Desterro', null], ['Rio Branco', null], ['Tornados Indaiatuba', null], ['Nova Lima', null], ['Joaca', null]],
     },
     {
         div: { id: 'br-segunda', label: 'Super 12 · Segunda Divisão', branch: 'brasil', region: 'brasil', level: 2, promotesTo: 'br-super12', relegatesTo: null },
-        pool: 'luso', top: 50,
+        pool: 'luso', top: 46,
         clubs: [['Niterói', null], ['Rio Rugby', null], ['Brummers', null], ['Serra Gaúcha', null], ['Pé Vermelho', null], ['Leões de Paraisópolis', null], ['Colonos', null], ['Joinville', null], ['Carioca', null], ['Urutu', null], ['Iguanas SJC', null], ['Vitória', null]],
     },
 ];

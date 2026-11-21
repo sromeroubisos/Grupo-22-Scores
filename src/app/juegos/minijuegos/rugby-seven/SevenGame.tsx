@@ -54,12 +54,20 @@ import {
 import { AR_CLUBS, AR_DIVISIONS_PLAYABLE, AR_SEVEN_DIVISIONS, type ArBranch } from './arClubs';
 
 /** Los países de la carrera: cada uno con sus ligas (las argentinas son dos ramas, URBA e interior). */
-const CAREER_COUNTRIES: { id: string; name: string; sub: string; branches: ArBranch[] }[] = [
-    { id: 'ar', name: 'Argentina', sub: 'URBA y el interior: ascensos, promociones, Torneo del Interior y Nacional de Clubes.', branches: ['urba', 'interior'] },
-    { id: 'uy', name: 'Uruguay', sub: 'El Uruguayo de Clubes: fase regular y semifinales por el título.', branches: ['uruguay'] },
-    { id: 'br', name: 'Brasil', sub: 'Super 12: grupos, Hexagonal y final; Repescagem con la Segunda.', branches: ['brasil'] },
-    { id: 'cl', name: 'Chile', sub: 'ARUSA: Top 10, Segunda, Tercera y Cuarta. Sube el campeón, baja el último.', branches: ['chile'] },
+const CAREER_COUNTRIES: { id: string; name: string; flag: string; sub: string; branches: ArBranch[] }[] = [
+    { id: 'ar', name: 'Argentina', flag: 'ar', sub: 'URBA y el interior: ascensos, promociones, Torneo del Interior y Nacional de Clubes.', branches: ['urba', 'interior'] },
+    { id: 'uy', name: 'Uruguay', flag: 'uy', sub: 'El Uruguayo de Clubes: fase regular y semifinales por el título.', branches: ['uruguay'] },
+    { id: 'br', name: 'Brasil', flag: 'br', sub: 'Super 12: grupos, Hexagonal y final; Repescagem con la Segunda.', branches: ['brasil'] },
+    { id: 'cl', name: 'Chile', flag: 'cl', sub: 'ARUSA: Top 10, Segunda, Tercera y Cuarta. Sube el campeón, baja el último.', branches: ['chile'] },
 ];
+/** El primer club de un país en orden alfabético: el que aparece elegido al entrar. */
+const firstClubOf = (countryId: string) => {
+    const c = CAREER_COUNTRIES.find((x) => x.id === countryId);
+    const ids = AR_SEVEN_DIVISIONS.filter((d) => c?.branches.includes(d.branch)).flatMap((d) => d.clubs);
+    return [...new Set(ids)].map((id) => AR_CLUBS.find((t) => t.id === id)).filter((t): t is SevenTeam => !!t).sort((a, b) => a.name.localeCompare(b.name, 'es'))[0]?.id ?? null;
+};
+/** Bandera de cada categoría con país. */
+const CAT_FLAG: Record<string, string> = { Argentina: 'ar', Chile: 'cl', Uruguay: 'uy', Brasil: 'br' };
 const countryOfClub = (id: string | null) => CAREER_COUNTRIES.find((c) => AR_SEVEN_DIVISIONS.some((d) => c.branches.includes(d.branch) && d.clubs.includes(id ?? '')))?.id ?? null;
 
 /** En qué grupo del selector va cada división: Argentina, o el país de afuera. */
@@ -84,6 +92,7 @@ import {
     careerRating,
     careerVerdict,
     isArgCareer,
+    sudamericanoFor,
     closesSeason,
     createCareer,
     divisionLabel,
@@ -251,12 +260,9 @@ function TeamChooser({ label, teamId, onChange, categories, avoid, active, onAct
     const cat = cats.find((c) => c.name === prefCat && holds(c)) ?? cats.find(holds) ?? cats[0];
     const team = cat?.teams.find((t) => t.id === teamId) ?? null;
     const names = team ? playerNames(team) : [];
-    // Primer nivel: el tipo (Internacional, Inventados...). Segundo: la categoría adentro del tipo (el continente).
+    // Las categorías van agrupadas por tipo (Internacional, Argentina, Chile...) en el desplegable.
     const groupOf = (c: Category) => c.group ?? c.name;
     const groups = [...new Set(cats.map(groupOf))];
-    const group = cat ? groupOf(cat) : groups[0];
-    const inGroup = cats.filter((c) => groupOf(c) === group);
-    const subIdx = Math.max(0, inGroup.indexOf(cat));
 
     const pickIn = (c: Category, from: number, step: 1 | -1) => {
         for (let k = 0; k < c.teams.length; k++) {
@@ -264,18 +270,6 @@ function TeamChooser({ label, teamId, onChange, categories, avoid, active, onAct
             if (t.id !== avoid) return t.id;
         }
         return c.teams[0].id;
-    };
-    const moveGroup = (step: 1 | -1) => {
-        const g = groups[wrap(groups.indexOf(group) + step, groups.length)];
-        const first = cats.find((c) => groupOf(c) === g);
-        if (!first) return;
-        setPrefCat(first.name);
-        onChange(pickIn(first, 0, 1));
-    };
-    const moveCat = (step: 1 | -1) => {
-        const next = inGroup[wrap(subIdx + step, inGroup.length)];
-        setPrefCat(next.name);
-        onChange(pickIn(next, 0, 1));
     };
     const moveTeam = (step: 1 | -1) => {
         if (!cat) return;
@@ -286,11 +280,46 @@ function TeamChooser({ label, teamId, onChange, categories, avoid, active, onAct
     return (
         <section className={`${styles.chooser} ${active ? styles.chooserActive : ''}`} aria-label={label} onFocusCapture={onActivate} onClick={onActivate}>
             <header className={styles.slotHead}>{label}</header>
-            {groups.length > 1 && (
-                <ArrowSelect label="Tipo" value={group} sub={`${new Set(inGroup.flatMap((c) => c.teams.map((t) => t.id))).size} equipos`} onPrev={() => moveGroup(-1)} onNext={() => moveGroup(1)} />
+            {cats.length > 1 && (
+                <label className={styles.othersPick}>
+                    <span>Liga o categoría</span>
+                    <select
+                        value={cat ? `${groupOf(cat)}|${cat.name}` : ''}
+                        onChange={(e) => {
+                            const next = cats.find((c) => `${groupOf(c)}|${c.name}` === e.target.value);
+                            if (!next) return;
+                            setPrefCat(next.name);
+                            onChange(pickIn(next, 0, 1));
+                        }}
+                    >
+                        {groups.map((g) => (
+                            <optgroup key={g} label={g}>
+                                {cats
+                                    .filter((c) => groupOf(c) === g)
+                                    .map((c) => (
+                                        <option key={`${g}|${c.name}`} value={`${g}|${c.name}`}>
+                                            {c.name} ({c.teams.length})
+                                        </option>
+                                    ))}
+                            </optgroup>
+                        ))}
+                    </select>
+                </label>
             )}
-            {inGroup.length > 1 && (
-                <ArrowSelect label={cat?.kind ?? 'Categoría'} value={cat?.name ?? ''} sub={`${cat?.teams.length ?? 0} equipos`} onPrev={() => moveCat(-1)} onNext={() => moveCat(1)} />
+            {cat && cat.teams.length > 1 && (
+                <label className={styles.othersPick}>
+                    <span>Equipo</span>
+                    <select value={team?.id ?? ''} onChange={(e) => e.target.value && onChange(e.target.value)}>
+                        {!team && <option value="">Elegí un equipo</option>}
+                        {[...cat.teams]
+                            .sort((a, b) => a.name.localeCompare(b.name, 'es'))
+                            .map((t) => (
+                                <option key={t.id} value={t.id} disabled={t.id === avoid}>
+                                    {t.name}
+                                </option>
+                            ))}
+                    </select>
+                </label>
             )}
             <div className={styles.slotPitch} aria-hidden="true">
                 {team && [0, 1, 2].map((i) => <SpritePreview key={`${team.id}-${i}`} look={team.players[i]} kit={team.kit} scale={4} running />)}
@@ -863,9 +892,9 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
         setScreen({ k: 'tour' });
     };
 
-    const nextCareerStage = (format?: NacFormat) => {
+    const nextCareerStage = (format?: NacFormat, playSud = false) => {
         if (!tour) return;
-        persist({ tour: advanceCareer(tour, format) });
+        persist({ tour: advanceCareer(tour, format, playSud) });
         setNacPick(null);
         setHubTab('tabla');
     };
@@ -1278,10 +1307,13 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                     className={styles.pickCard}
                                     onClick={() => {
                                         setCareerCountry(c.id);
+                                        if (countryOfClub(mine) !== c.id) setMine(firstClubOf(c.id));
                                         setScreen({ k: 'careerSetup', step: 1 });
                                     }}
                                 >
-                                    <strong>{c.name}</strong>
+                                    <strong>
+                                        <FlagIcon code={c.flag} size={20} /> {c.name}
+                                    </strong>
                                     <span>{c.sub}</span>
                                     <small>{AR_DIVISIONS_PLAYABLE.filter((d) => c.branches.includes(d.branch)).length} divisiones</small>
                                 </button>
@@ -1310,7 +1342,9 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                         const n = TOURS.filter((t) => catOf(t) === c.id).length;
                                         return (
                                             <button key={c.id} type="button" className={styles.pickCard} onClick={() => setTourCat(c.id)}>
-                                                <strong>{c.id}</strong>
+                                                <strong>
+                                                    {CAT_FLAG[c.id] && <FlagIcon code={CAT_FLAG[c.id]} size={20} />} {c.id}
+                                                </strong>
                                                 <span>{c.sub}</span>
                                                 <small>{n} {n === 1 ? 'torneo' : 'torneos'}</small>
                                             </button>
@@ -1331,14 +1365,18 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                     const list = TOURS.filter((t) => catOf(t) === tourCat);
                     return (
                         <div className={styles.body}>
-                            <h2 className={styles.pickTitle}>{tourCat}</h2>
+                            <h2 className={styles.pickTitle}>
+                                {CAT_FLAG[tourCat] && <FlagIcon code={CAT_FLAG[tourCat]} size={22} />} {tourCat}
+                            </h2>
                             <div className={styles.cardGrid}>
                                 {['Argentina', 'Chile', 'Uruguay', 'Brasil'].includes(tourCat) && (
                                     <button
                                         type="button"
                                         className={`${styles.pickCard} ${styles.pickCardAlt}`}
                                         onClick={() => {
-                                            setCareerCountry(CAREER_COUNTRIES.find((c) => c.name === tourCat)?.id ?? 'ar');
+                                            const id = CAREER_COUNTRIES.find((c) => c.name === tourCat)?.id ?? 'ar';
+                                            setCareerCountry(id);
+                                            if (countryOfClub(mine) !== id) setMine(firstClubOf(id));
                                             setScreen({ k: 'careerSetup', step: 1 });
                                         }}
                                     >
@@ -1664,6 +1702,17 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                                 <span>{verdict.title}</span>
                                                 <small>{verdict.text}</small>
                                             </div>
+                                            {career && sudamericanoFor(tour) && (
+                                                <div className={styles.nacAsk}>
+                                                    <span className={styles.nacAskQ}>Clasificaste al Sudamericano de Clubes {career.season}</span>
+                                                    <small className={styles.nacAskNote}>
+                                                        {sudamericanoFor(tour)!.map((id) => nameOf(id)).join(' · ')}. Semifinales y final. Si seguís de largo, se simula.
+                                                    </small>
+                                                    <button type="button" className={styles.btnPrimary} onClick={() => nextCareerStage(isArgCareer(career) ? nacPick ?? formatOf(career, career.season + 1) : undefined, true)}>
+                                                        Jugar el Sudamericano ▶
+                                                    </button>
+                                                </div>
+                                            )}
                                             {career && isArgCareer(career) && closesSeason(tour) && (
                                                 <div className={styles.nacAsk} role="radiogroup" aria-label={`Formato del Nacional de Clubes ${career.season + 2}`}>
                                                     <span className={styles.nacAskQ}>¿Cómo creés que se va a jugar el Nacional de Clubes {career.season + 2}?</span>
