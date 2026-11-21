@@ -274,10 +274,18 @@ const SEASONAL_FEATURED = /\bjoj dakar 2026\b/;
 
 /**
  * Torneos fijados arriba de todo en la portada, en este orden (el índice es el
- * `rank`): el Nacional de Clubes y, debajo, el Veco Villegas. Van antes que los favoritos
- * y que lo de tu país; como el resto, solo aparecen los días en que tienen partidos.
+ * `rank`): el Nacional de Clubes, debajo el Veco Villegas y debajo el Nacional de
+ * Clubes Campeones M17. Van antes que los favoritos y que lo de tu país; como el
+ * resto, solo aparecen los días en que tienen partidos.
+ *
+ * El primer patrón excluye "campeones": el M17 también dice "nacional de clubes" y,
+ * sin la exclusión, caía en el primer lugar, por delante del Veco.
  */
-const PINNED_TOP_TOURNAMENTS = [/nacional\s+de\s+clubes/, /veco\s+villegas/];
+const PINNED_TOP_TOURNAMENTS = [
+  /nacional\s+de\s+clubes(?!\s+campeones)/,
+  /veco\s+villegas/,
+  /nacional\s+de\s+clubes\s+campeones/,
+];
 
 /** Con menos competiciones que esto debajo de la tanda, no se arma el bloque plegado. */
 const MIN_GROUPED_LEAGUES = 3;
