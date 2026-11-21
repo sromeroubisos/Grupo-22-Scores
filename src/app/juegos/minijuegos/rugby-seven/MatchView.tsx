@@ -26,37 +26,71 @@ const KICK_ZONE = 0.22; // franja izquierda de la cancha donde mantener = patear
 const KICK_HOLD_MS = 170; // hay que dejar el dedo esto para que empiece a cargar la patada
 const SWIPE_PX = 34; // desde acá un movimiento rápido es un deslizamiento
 const SWIPE_MS = 260; // y tiene que pasar en este tiempo
-const SKIP_SWIPE_PX = 120; // un deslizamiento vertical así de largo es un salteo
+const SKIP_SWIPE_PX = 170; // esquema A: un deslizamiento vertical así de largo es un salteo
 const TAP_PX = 14;
 const TAP_MS = 240;
 const DOUBLE_TAP_MS = 320;
 const TOUCH_HELP_KEY = 'g22-rugby-seven-touch-help';
 const PORTRAIT_KEY = 'g22-rugby-seven-portrait';
+const SCHEME_KEY = 'g22-rugby-seven-touch-scheme';
+const DRAG_PX = 12; // esquema B: desde acá el dedo que se arrastra mueve al jugador
+const LONG_PASS_MS = 420; // esquema B: tocar y dejar quieto este tiempo es un salteo
+
+/** Cómo se juega con el dedo. "tap" (B): deslizar mueve, tocar pasa. "swipe" (A): mantener mueve, deslizar pasa. */
+export type TouchScheme = 'tap' | 'swipe';
 
 interface Finger {
-    kind: 'move' | 'kick' | 'swipe' | 'done';
+    kind: 'move' | 'kick' | 'swipe' | 'pending' | 'done';
     x0: number;
     y0: number;
     t0: number;
-    dir: 'up' | 'down';
+    dir: 'up' | 'down' | 'none';
     kicking: boolean;
+    ry: number; // dónde tocó (0 arriba, 1 abajo): el esquema B pasa para ese lado
 }
 
-const TOUCH_GESTURES: [string, string][] = [
-    ['Moverte', 'Mantené el dedo arriba o abajo de la mitad de la cancha.'],
-    ['Pase', 'Deslizá rápido hacia arriba o hacia abajo. Un deslizamiento largo es un salteo.'],
-    ['Chocar o tacklear', 'Deslizá rápido hacia adelante o hacia atrás.'],
-    ['Patear', 'Mantené en la franja izquierda para cargar y soltá para patear.'],
-    ['Drop', 'Dos toques seguidos.'],
-    ['Scrum, ruck, line y conversión', 'Tocá la pantalla.'],
-    ['Defendiendo', 'Un toque cambia de jugador.'],
-];
+const TOUCH_GESTURES: Record<TouchScheme, [string, string][]> = {
+    tap: [
+        ['Moverte', 'Deslizá el dedo hacia arriba o hacia abajo y mantenelo: el jugador va para ese lado.'],
+        ['Pase', 'Tocá del lado derecho: arriba de la mitad, pase para arriba; abajo, para abajo.'],
+        ['Salteo', 'Tocá y dejá el dedo quieto un momento.'],
+        ['Chocar o tacklear', 'Deslizá rápido hacia adelante o hacia atrás.'],
+        ['Patear', 'Mantené en la franja izquierda para cargar y soltá para patear.'],
+        ['Drop', 'Dos toques seguidos en la franja izquierda.'],
+        ['Scrum, ruck, line y conversión', 'Tocá la pantalla.'],
+        ['Defendiendo', 'Un toque cambia de jugador.'],
+    ],
+    swipe: [
+        ['Moverte', 'Mantené el dedo arriba o abajo de la mitad de la cancha.'],
+        ['Pase', 'Deslizá rápido hacia arriba o hacia abajo. Un deslizamiento muy largo es un salteo.'],
+        ['Chocar o tacklear', 'Deslizá rápido hacia adelante o hacia atrás.'],
+        ['Patear', 'Mantené en la franja izquierda para cargar y soltá para patear.'],
+        ['Drop', 'Dos toques seguidos.'],
+        ['Scrum, ruck, line y conversión', 'Tocá la pantalla.'],
+        ['Defendiendo', 'Un toque cambia de jugador.'],
+    ],
+};
+
+/** Elegir el esquema de controles táctiles. */
+function SchemePick({ scheme, onChange }: { scheme: TouchScheme; onChange: (s: TouchScheme) => void }) {
+    return (
+        <div className={styles.portraitPick} role="radiogroup" aria-label="Controles con el dedo">
+            <span>Controles:</span>
+            <button type="button" role="radio" aria-checked={scheme === 'tap'} className={scheme === 'tap' ? styles.keyBtnActive : styles.keyBtn} onClick={() => onChange('tap')}>
+                Deslizar mueve, tocar pasa
+            </button>
+            <button type="button" role="radio" aria-checked={scheme === 'swipe'} className={scheme === 'swipe' ? styles.keyBtnActive : styles.keyBtn} onClick={() => onChange('swipe')}>
+                Mantener mueve, deslizar pasa
+            </button>
+        </div>
+    );
+}
 
 /** La lista de gestos del celular (en la ayuda inicial y en la pausa). */
-function TouchLegend() {
+function TouchLegend({ scheme }: { scheme: TouchScheme }) {
     return (
         <ul className={styles.controlsList}>
-            {TOUCH_GESTURES.map(([label, hint]) => (
+            {TOUCH_GESTURES[scheme].map(([label, hint]) => (
                 <li key={label}>
                     <span>
                         <strong>{label}</strong>
@@ -348,12 +382,34 @@ export default function MatchView({ cfg, onFinish, onQuit, musicSrc = null, font
      * Cada dedo es un gesto: se puede mover con uno y pasar con otro.
      */
     const fingers = useRef(new Map<number, Finger>());
+    const [scheme, setScheme] = useState<TouchScheme>('tap');
+    const schemeRef = useRef<TouchScheme>('tap');
+    useEffect(() => {
+        try {
+            const saved = localStorage.getItem(SCHEME_KEY);
+            if (saved === 'tap' || saved === 'swipe') {
+                setScheme(saved);
+                schemeRef.current = saved;
+            }
+        } catch {
+            // Sin localStorage: arranca con el B.
+        }
+    }, []);
+    const chooseScheme = (sc: TouchScheme) => {
+        setScheme(sc);
+        schemeRef.current = sc;
+        try {
+            localStorage.setItem(SCHEME_KEY, sc);
+        } catch {
+            // Sin localStorage: vale para este partido.
+        }
+    };
     const lastTap = useRef(0);
     const syncTouchMove = () => {
         let up = false;
         let down = false;
         for (const f of fingers.current.values()) {
-            if (f.kind !== 'move') continue;
+            if (f.kind !== 'move' || f.dir === 'none') continue;
             if (f.dir === 'up') up = true;
             else down = true;
         }
@@ -382,12 +438,26 @@ export default function MatchView({ cfg, onFinish, onQuit, musicSrc = null, font
         // Scrum, ruck, line, conversión y drop: cada toque cuenta.
         if (h.phase === 'scrum' || h.phase === 'ruck' || h.phase === 'lineout' || h.phase === 'conv' || h.phase === 'drop') {
             m.action();
-            fingers.current.set(e.pointerId, { kind: 'done', x0: pt(e).x, y0: pt(e).y, t0: performance.now(), dir: 'up', kicking: false });
+            fingers.current.set(e.pointerId, { kind: 'done', x0: pt(e).x, y0: pt(e).y, t0: performance.now(), dir: 'none', kicking: false, ry: 0.5 });
             return;
         }
         const { rx, ry } = zoneOf(e);
-        const kind: Finger['kind'] = rx < KICK_ZONE && h.attacking ? 'kick' : 'move';
-        fingers.current.set(e.pointerId, { kind, x0: pt(e).x, y0: pt(e).y, t0: performance.now(), dir: ry < 0.5 ? 'up' : 'down', kicking: false });
+        const tapScheme = schemeRef.current === 'tap';
+        // En la franja izquierda se patea (y en el B ahí va el drop). Esquema A: el dedo apoyado ya mueve.
+        // Esquema B: hasta saber si es toque (pase), dedo quieto (salteo) o arrastre (moverse), queda pendiente.
+        const kind: Finger['kind'] = rx < KICK_ZONE && h.attacking ? 'kick' : tapScheme ? 'pending' : 'move';
+        fingers.current.set(e.pointerId, { kind, x0: pt(e).x, y0: pt(e).y, t0: performance.now(), dir: tapScheme ? 'none' : ry < 0.5 ? 'up' : 'down', kicking: false, ry });
+        if (kind === 'pending') {
+            window.setTimeout(() => {
+                const f = fingers.current.get(e.pointerId);
+                const mm = matchRef.current;
+                // Dedo quieto en el mismo lugar: salteo para ese lado.
+                if (f && f.kind === 'pending' && mm && !pausedRef.current && mm.hud().attacking) {
+                    f.kind = 'done';
+                    mm.pass(f.ry < 0.5 ? -1 : 1, true);
+                }
+            }, LONG_PASS_MS);
+        }
         if (kind === 'kick') {
             // La patada se empieza a cargar recién si el dedo se queda: un toque rápido puede ser el primero del drop.
             window.setTimeout(() => {
@@ -405,6 +475,23 @@ export default function MatchView({ cfg, onFinish, onQuit, musicSrc = null, font
         if (!f || f.kind === 'done' || f.kind === 'swipe') return;
         const dx = pt(e).x - f.x0;
         const dy = pt(e).y - f.y0;
+        if (schemeRef.current === 'tap' && (f.kind === 'pending' || f.kind === 'move')) {
+            // Esquema B. Un golpe rápido de costado: chocar o tacklear.
+            if (Math.abs(dx) > SWIPE_PX && Math.abs(dx) > Math.abs(dy) * 1.5 && performance.now() - f.t0 < SWIPE_MS) {
+                f.kind = 'done';
+                syncTouchMove();
+                matchRef.current?.hit();
+                return;
+            }
+            // Arrastrar arriba o abajo: moverse para ese lado mientras el dedo siga ahí.
+            const dir = dy < -DRAG_PX ? 'up' : dy > DRAG_PX ? 'down' : f.kind === 'move' ? f.dir : 'none';
+            if (dir !== 'none' && (f.kind !== 'move' || dir !== f.dir)) {
+                f.kind = 'move';
+                f.dir = dir;
+                syncTouchMove();
+            }
+            return;
+        }
         // Movimiento rápido y largo: es un deslizamiento, ese dedo deja de mover al jugador.
         if (Math.hypot(dx, dy) > SWIPE_PX && performance.now() - f.t0 < SWIPE_MS && !f.kicking) {
             f.kind = 'swipe';
@@ -435,6 +522,22 @@ export default function MatchView({ cfg, onFinish, onQuit, musicSrc = null, font
         const dy = pt(e).y - f.y0;
         const dt = performance.now() - f.t0;
         const dist = Math.hypot(dx, dy);
+        if (schemeRef.current === 'tap') {
+            // Esquema B: tocar es pase (o cambiar de jugador defendiendo); el drop, dos toques a la izquierda.
+            if (f.kind === 'kick' && dist < TAP_PX && dt < TAP_MS) {
+                const now = performance.now();
+                if (now - lastTap.current < DOUBLE_TAP_MS) {
+                    lastTap.current = 0;
+                    m.dropGoal();
+                } else lastTap.current = now;
+                return;
+            }
+            if (f.kind === 'pending') {
+                if (m.hud().attacking) m.pass(f.ry < 0.5 ? -1 : 1, false);
+                else m.action();
+            }
+            return;
+        }
         if (dist > SWIPE_PX && dt < SWIPE_MS + 200) {
             if (Math.abs(dy) > Math.abs(dx)) {
                 // Arriba o abajo: pase para ese lado; un deslizamiento largo es salteo. Defendiendo, amague.
@@ -621,7 +724,8 @@ export default function MatchView({ cfg, onFinish, onQuit, musicSrc = null, font
                         </button>
                         {showControls && touch && (
                             <div className={styles.controlsPanel}>
-                                <TouchLegend />
+                                <SchemePick scheme={scheme} onChange={chooseScheme} />
+                                <TouchLegend scheme={scheme} />
                                 <div className={styles.portraitPick} role="radiogroup" aria-label="Con el celular parado">
                                     <span>Con el celular parado:</span>
                                     <button type="button" role="radio" aria-checked={portraitMode === 'force'} className={portraitMode === 'force' ? styles.keyBtnActive : styles.keyBtn} onClick={() => choosePortraitMode('force')}>
@@ -666,8 +770,9 @@ export default function MatchView({ cfg, onFinish, onQuit, musicSrc = null, font
                 {touchHelp && (
                     <div className={`${styles.pauseLayer} ${styles.touchHelp}`} role="dialog" aria-label="Cómo se juega en el celular">
                         <strong>Cómo se juega con el dedo</strong>
+                        <SchemePick scheme={scheme} onChange={chooseScheme} />
                         <div className={styles.controlsPanel}>
-                            <TouchLegend />
+                            <TouchLegend scheme={scheme} />
                         </div>
                         <button type="button" className={styles.btnPrimary} onClick={closeTouchHelp}>
                             Entendido, a jugar
