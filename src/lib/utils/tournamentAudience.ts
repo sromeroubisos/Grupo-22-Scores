@@ -195,6 +195,11 @@ const BOTH_AUDIENCES_PATTERNS = [
     // cada unión del país. Es de M19, pero es de los grandes del calendario
     // argentino y el hincha lo busca en la portada de mayores.
     /\bveco\s+villegas\b/i,
+    // El Torneo Nacional de Clubes Campeones M17 (Salta, noviembre 2026): el
+    // gemelo del Veco para M17, un campeón de cada unión. Es de M17 y por el grado
+    // iría solo a juveniles, pero es un nacional y se busca en la portada. Nombre
+    // exacto con "nacional de clubes campeones": ningún otro torneo lo dice.
+    /\bnacional\s+de\s+clubes\s+campeones\s+m\s*-?\s*17\b/i,
 ];
 
 /** Si el torneo se muestra en los dos segmentos en vez de en el suyo. */

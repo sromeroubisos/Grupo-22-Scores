@@ -120,6 +120,19 @@ test('el Argentino Juvenil entra en las dos pestañas sin dejar de ser juvenil',
     assert.equal(isDualAudienceTournament({ originalName: 'Campeonato Argentino Juvenil M17 - Zona Ascenso' }), true);
 });
 
+test('el Nacional de Clubes Campeones M17 entra en las dos pestañas sin dejar de ser juvenil', () => {
+    const torneo = { name: 'Torneo Nacional de Clubes Campeones M17' };
+
+    assert.equal(resolveTournamentAudience({ ...torneo, ageGrade: 'M17' }), 'juveniles');
+    assert.equal(isDualAudienceTournament(torneo), true);
+    assert.equal(matchesTournamentAudience(torneo, 'mayores'), true);
+    assert.equal(matchesTournamentAudience(torneo, 'juveniles'), true);
+
+    // Un torneo de clubes M17 cualquiera sigue solo en juveniles.
+    assert.equal(isDualAudienceTournament({ name: 'Torneo Cordobés M17 "A"' }), false);
+    assert.equal(isDualAudienceTournament({ name: 'Campeones de Clubes M17 Regional' }), false);
+});
+
 test('los Argentinos de Seleccionados de hockey entran en las dos pestañas sin dejar de ser juveniles', () => {
     // Como los escribe el importador de la CAH (singular y plural) y como los
     // dice la gente ("de Selecciones"). Son Sub 14/16/19 —siguen siendo
