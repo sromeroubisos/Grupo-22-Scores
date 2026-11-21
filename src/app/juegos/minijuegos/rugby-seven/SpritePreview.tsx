@@ -5,8 +5,8 @@ import { playerSprite, SPRITE_H, SPRITE_W, type Frame, type Kit, type Look } fro
 
 const RUN: Frame[] = ['run0', 'run1', 'run2', 'run3'];
 
-/** Un jugador pixel a escala, quieto o corriendo en loop. Decorativo. */
-export default function SpritePreview({ look, kit, scale = 4, running = false }: { look: Look; kit: Kit; scale?: number; running?: boolean }) {
+/** Un jugador pixel a escala: quieto, corriendo o festejando (brazos arriba), en loop. Decorativo. */
+export default function SpritePreview({ look, kit, scale = 4, running = false, celebrating = false }: { look: Look; kit: Kit; scale?: number; running?: boolean; celebrating?: boolean }) {
     const ref = useRef<HTMLCanvasElement>(null);
 
     useEffect(() => {
@@ -19,9 +19,10 @@ export default function SpritePreview({ look, kit, scale = 4, running = false }:
         let last = 0;
         const draw = (t: number) => {
             ctx.clearRect(0, 0, cv.width, cv.height);
-            ctx.drawImage(playerSprite(look, kit, running ? RUN[frame % 4] : 'idle'), 0, 0);
-            if (running) {
-                if (t - last > 110) {
+            const pose: Frame = celebrating ? (frame % 2 ? 'celebrate' : 'idle') : running ? RUN[frame % 4] : 'idle';
+            ctx.drawImage(playerSprite(look, kit, pose), 0, 0);
+            if (running || celebrating) {
+                if (t - last > (celebrating ? 260 : 110)) {
                     frame += 1;
                     last = t;
                 }
@@ -30,7 +31,7 @@ export default function SpritePreview({ look, kit, scale = 4, running = false }:
         };
         raf = requestAnimationFrame(draw);
         return () => cancelAnimationFrame(raf);
-    }, [look, kit, running]);
+    }, [look, kit, running, celebrating]);
 
     return (
         <canvas

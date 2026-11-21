@@ -43,6 +43,7 @@
 
 import { AR_LABEL_OVERRIDE, arClubById } from './arClubs';
 import { AR_SEVEN_CUPOS, AR_SEVEN_DIVISIONS } from './arClubs.generated';
+import { PALMARES_KEYS, PALMARES_LABEL, realTitles, type TitleRow } from './palmares';
 import { defaultNames, nameFromSeed, nameFromText, POSITIONS, type PlayerName } from './names';
 import type { Difficulty, Duration, SevenTeam } from './teams';
 import {
@@ -127,6 +128,10 @@ export interface CareerState {
     tdi?: { A: string[]; B: string[] };
     /** Cómo se juega el Nacional cada temporada (se elige dos temporadas antes). */
     nacFormat?: Record<string, NacFormat>;
+    /** El nombre del entrenador (lo pone el usuario al empezar). */
+    coach?: string;
+    /** Campeón de cada competición en cada temporada de esta carrera: clave del palmarés → [temporada, club]. */
+    champions?: Record<string, [number, string][]>;
     /** El otro torneo que el club juega en paralelo (el federal o la división, el que no está en pantalla). */
     parallel?: TourState | null;
     /** Los demás torneos de la temporada, que avanzan fecha a fecha junto con el del usuario. */
@@ -158,6 +163,10 @@ export interface CareerState {
         cupoDelta: Record<string, number>; // plazas de TDI A que gana (+) o pierde (−) cada región
         deltaAB?: Record<string, [number, number, number, number]>;
         note: string[];
+        /** Títulos que ganó el club esta temporada (para el festejo). */
+        wins?: string[];
+        /** Cuántos de esos ya se festejaron. */
+        celebrated?: number;
         /** Cuántas notas había al empezar la etapa en curso (el cartel muestra las nuevas). */
         noteMark?: number;
     };
@@ -476,7 +485,7 @@ function seasonStart(r: CareerState, difficulty: Difficulty, duration: Duration)
 }
 
 /** Arranca la carrera con el club elegido, en su división de 2026. */
-export function createCareer(meId: string, difficulty: Difficulty, duration: Duration): TourState {
+export function createCareer(meId: string, difficulty: Difficulty, duration: Duration, coach?: string): TourState {
     setRatingBoost({});
     const home = AR_SEVEN_DIVISIONS.find((d) => d.clubs.includes(meId));
     const branch: Branch = home?.branch ?? 'urba';
@@ -488,6 +497,8 @@ export function createCareer(meId: string, difficulty: Difficulty, duration: Dur
         v: 1, me: meId, branch, season: 2026, phase: 'liga', divisions,
         cupos: AR_SEVEN_CUPOS.map((c) => ({ region: c.region, source: c.sourceCompetitionId, tdiA: c.tdiA, tdiB: c.tdiB })),
         nacFormat: { '2026': 'final', '2027': 'final' },
+        coach: coach?.trim().slice(0, 40) || undefined,
+        champions: {},
         ratings: {}, rosters, awards: [], settled: null, parallel: null,
         pending: emptyPending(), history: [], log: [],
     };
@@ -592,6 +603,15 @@ function seasonTours(s: TourState): { regional: TourState; tier: TourState | nul
 /** Cuántos suben de esta división a la de arriba (y cuántos bajan de allá), en la URBA. */
 const swapsFrom = (divId: string) => (divId !== 'ar-urba-tercera' && divId !== 'ar-urba-desarrollo' ? 2 : 1);
 
+/** Anota el campeón de una competición en la historia de esta carrera (y, si es el club propio, para festejar). */
+function addChampion(r: CareerState, key: string, club: string | null | undefined) {
+    if (!club) return;
+    const list = ((r.champions ??= {})[key] ??= []);
+    if (list.some(([season]) => season === r.season)) return;
+    list.push([r.season, club]);
+    if (club === r.me) (r.pending.wins ??= []).push(palmaresLabel(key));
+}
+
 const addBonus = (r: CareerState, club: string | null | undefined, v: number) => {
     if (!club) return;
     const b = (r.pending.bonus ??= {});
@@ -625,7 +645,10 @@ function settleLiga(s: TourState, r: CareerState) {
         rankings[divId] = divId === myDiv ? finalRanking(regional) : other ? finalRanking(other) : finalRanking(finish({ ...createTour(leagueDef(divId, r.divisions[divId], r.season), '__nadie', 'normal', 3) }));
     }
     r.pending.rankings = rankings;
-    for (const divId of Object.keys(rankings)) addBonus(r, rankings[divId][0], 1);
+    for (const divId of Object.keys(rankings)) {
+        addBonus(r, rankings[divId][0], 1);
+        addChampion(r, divId, rankings[divId][0]);
+    }
     r.history.push({ season: r.season, division: myDiv, place: rankings[myDiv].indexOf(r.me) + 1, note: '' });
     awardsOf(r, regional, divisionLabel(myDiv));
 
@@ -674,6 +697,7 @@ function settleLiga(s: TourState, r: CareerState) {
         for (const cupo of r.cupos) r.pending.regional[cupo.source] = rankings[cupo.source] ?? [];
         // El Top 14 de este año (para el Nacional y las plazas de la URBA en el formato A/B).
         r.pending.urbaOrder = finalRanking(finish(createTour(leagueDef('ar-urba-top14', [...(DIV['ar-urba-top14']?.clubs ?? [])].sort(byRating), r.season), '__nadie', 'normal', 3)));
+        addChampion(r, 'ar-urba-top14', r.pending.urbaOrder[0]);
     }
 
     // Los federales: el del club tal como lo jugó, los otros como corrieron.
@@ -688,6 +712,8 @@ function settleLiga(s: TourState, r: CareerState) {
         if (st.champion) {
             addBonus(r, st.champion, t === 'nacA' ? 3 : t === 'tdiA' || t === 'nacB' ? 2 : 1.5);
             r.log.push(`${r.season}: ${nm(st.champion)} campeón del ${TIER_NAME[t]}.`);
+            // En el formato A/B el Nacional A es el Nacional de Clubes y el B, el Nacional B.
+            addChampion(r, t === 'nacA' ? 'nacional' : t === 'nacB' ? 'nacionalB' : t, st.champion);
         }
     }
     if (tier) {
@@ -744,6 +770,7 @@ function settleLiga(s: TourState, r: CareerState) {
             else {
                 const sim = finish(nacionalTour(nac, r.season, '__nadie', 'normal', 3));
                 nac.champion = sim.champion ?? undefined;
+                addChampion(r, 'nacional', sim.champion);
                 addBonus(r, sim.champion, 2);
                 if (sim.champion) r.log.push(`${r.season}: ${nm(sim.champion)} campeón del Nacional de Clubes.`);
             }
@@ -910,6 +937,7 @@ function settlePlayoff(s: TourState, r: CareerState) {
 function settleNacional(s: TourState, r: CareerState) {
     addBonus(r, s.champion, 2);
     if (r.pending.nacional) r.pending.nacional.champion = s.champion ?? undefined;
+    addChampion(r, 'nacional', s.champion);
     if (s.champion) r.log.push(`${r.season}: ${nm(s.champion)} campeón del Nacional de Clubes.`);
     r.pending.note.push(s.champion === r.me ? 'Campeón del Nacional de Clubes.' : `Nacional de Clubes: terminaste ${finalRanking(s).indexOf(r.me) + 1}.º.`);
 }
@@ -1266,4 +1294,44 @@ export function seasonPlan(s: TourState): SeasonItem[] {
 /** Goleadores y tryman en vivo de un torneo, con nombres. */
 export function liveScorers(t: TourState, by: 'tries' | 'points', nameOf: (team: string, slot: number) => string, n = 10) {
     return topStats(t.stats, by, n).map((x) => ({ ...x, name: nameOf(x.team, x.slot) }));
+}
+
+/* ───────────────────────── palmarés y títulos ───────────────────────── */
+
+/** Cómo se llama un palmarés: los nacionales por su nombre, las divisiones por la suya. */
+export const palmaresLabel = (key: string) => PALMARES_LABEL[key] ?? divisionLabel(key);
+
+/** Historia completa de una competición: la real (hasta 2025) y la de esta carrera, del más nuevo al más viejo. */
+export function palmaresFor(r: CareerState, key: string): TitleRow[] {
+    const game = (r.champions?.[key] ?? []).map(([season, club]) => ({ season, name: nm(club), club, game: true }));
+    return [...realTitles(key), ...game].sort((a, b) => b.season - a.season);
+}
+
+/** Las competiciones con palmarés para mostrar: primero las de la rama y la región del club. */
+export function palmaresKeys(r: CareerState): string[] {
+    const mine = Object.keys(r.champions ?? {});
+    const all = [...new Set(['nacional', 'tdiA', 'tdiB', 'nacionalB', ...Object.keys(r.divisions).filter((d) => DIV[d]?.level !== undefined), ...PALMARES_KEYS, ...mine])];
+    const myDiv = divisionOf(r, r.me);
+    const myRegion = myDiv ? DIV[myDiv]?.region : null;
+    const rank = (k: string) => (k === myDiv ? 0 : ['nacional', 'tdiA', 'tdiB', 'nacionalB'].includes(k) ? 1 : DIV[k]?.region === myRegion ? 2 : 3);
+    return all
+        .filter((k) => realTitles(k).length > 0 || (r.champions?.[k]?.length ?? 0) > 0)
+        .sort((a, b) => rank(a) - rank(b) || (DIV[a]?.level ?? 0) - (DIV[b]?.level ?? 0) || palmaresLabel(a).localeCompare(palmaresLabel(b)));
+}
+
+/** Los títulos del club del usuario en esta carrera (los de la insignia del entrenador). */
+export function myTitles(r: CareerState): { key: string; label: string; season: number }[] {
+    const out: { key: string; label: string; season: number }[] = [];
+    for (const [key, list] of Object.entries(r.champions ?? {})) for (const [season, club] of list) if (club === r.me) out.push({ key, label: palmaresLabel(key), season });
+    return out.sort((a, b) => b.season - a.season || a.label.localeCompare(b.label));
+}
+
+/** Títulos de esta temporada que todavía no se festejaron. */
+export const pendingCelebration = (r: CareerState) => (r.pending.wins ?? []).slice(r.pending.celebrated ?? 0);
+
+/** Marca los títulos como festejados (para no repetir el festejo al volver al torneo). */
+export function markCelebrated(s: TourState): TourState {
+    const r = s.career;
+    if (!r) return s;
+    return { ...s, career: { ...r, pending: { ...r.pending, celebrated: r.pending.wins?.length ?? 0 } } };
 }

@@ -63,6 +63,12 @@ import {
     divisionOf,
     formatOf,
     liveScorers,
+    markCelebrated,
+    myTitles,
+    palmaresFor,
+    palmaresKeys,
+    palmaresLabel,
+    pendingCelebration,
     myRoster,
     NAC_FORMATS,
     otherTours,
@@ -447,6 +453,65 @@ function Bracket({ s, def, nameOf, flagOf }: { s: TourState; def: TourDef; nameO
 
 /* ===================== el juego ===================== */
 
+/** Trofeo genérico en pixel art (no es ninguna copa real). */
+function Trophy({ size = 96 }: { size?: number }) {
+    return (
+        <svg viewBox="0 0 16 18" width={size} height={(size * 18) / 16} shapeRendering="crispEdges" aria-hidden="true" className={styles.trophy}>
+            <rect x="3" y="1" width="10" height="1" fill="#fff3b0" />
+            <rect x="2" y="2" width="12" height="5" fill="#f2c230" />
+            <rect x="3" y="7" width="10" height="2" fill="#e0a91c" />
+            <rect x="4" y="9" width="8" height="1" fill="#c98e10" />
+            <rect x="0" y="2" width="2" height="1" fill="#e0a91c" />
+            <rect x="0" y="3" width="1" height="3" fill="#e0a91c" />
+            <rect x="1" y="6" width="2" height="1" fill="#e0a91c" />
+            <rect x="14" y="2" width="2" height="1" fill="#e0a91c" />
+            <rect x="15" y="3" width="1" height="3" fill="#e0a91c" />
+            <rect x="13" y="6" width="2" height="1" fill="#e0a91c" />
+            <rect x="4" y="3" width="2" height="3" fill="#fff3b0" />
+            <rect x="7" y="10" width="2" height="3" fill="#c98e10" />
+            <rect x="5" y="13" width="6" height="1" fill="#e0a91c" />
+            <rect x="4" y="14" width="8" height="3" fill="#5b3a1e" />
+            <rect x="5" y="15" width="6" height="1" fill="#f2c230" />
+        </svg>
+    );
+}
+
+/** Festejo de campeón: el plantel salta alrededor del trofeo, con papelitos. */
+function ChampionCelebration({ team, titles, coach, onClose }: { team: SevenTeam; titles: string[]; coach?: string; onClose: () => void }) {
+    const players = team.players.slice(0, 6);
+    return (
+        <div className={styles.celebrate} role="dialog" aria-label={`${team.name} campeón`}>
+            <div className={styles.confetti} aria-hidden="true">
+                {Array.from({ length: 28 }, (_, i) => (
+                    <i key={i} style={{ left: `${(i * 37) % 100}%`, animationDelay: `${(i % 7) * 0.35}s`, background: [team.kit.shirt, team.kit.shirt2, '#f2c230', '#ffffff'][i % 4] }} />
+                ))}
+            </div>
+            <strong className={styles.celebrateTitle}>CAMPEONES</strong>
+            <span className={styles.celebrateClub}>{team.name}</span>
+            <div className={styles.celebrateStage}>
+                {players.slice(0, 3).map((look, i) => (
+                    <span key={`a${i}`} className={styles.celebrateJump} style={{ animationDelay: `${i * 0.18}s` }}>
+                        <SpritePreview look={look} kit={team.kit} scale={4} celebrating />
+                    </span>
+                ))}
+                <span className={styles.celebrateCup}>
+                    <Trophy size={88} />
+                </span>
+                {players.slice(3, 6).map((look, i) => (
+                    <span key={`b${i}`} className={styles.celebrateJump} style={{ animationDelay: `${(i + 3) * 0.18}s` }}>
+                        <SpritePreview look={look} kit={team.kit} scale={4} celebrating />
+                    </span>
+                ))}
+            </div>
+            <span className={styles.celebrateTitles}>{titles.join(' · ')}</span>
+            {coach && <span className={styles.celebrateCoach}>Entrenador: {coach}</span>}
+            <button type="button" className={styles.btnPrimary} onClick={onClose}>
+                Seguir ▶
+            </button>
+        </div>
+    );
+}
+
 export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { musicSrc?: string | null; menuMusicSrc?: string | null }) {
     const [screen, setScreen] = useState<Screen>({ k: 'menu' });
     const [customTeams, setCustomTeams] = useState<SevenTeam[]>([]);
@@ -466,7 +531,10 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
     const [duration, setDuration] = useState<Duration>(3);
     const [otherKey, setOtherKey] = useState<string | null>(null);
     const [nacPick, setNacPick] = useState<NacFormat | null>(null);
-    const [hubTab, setHubTab] = useState<'tabla' | 'calendario' | 'cuadro' | 'resultados' | 'goleadores' | 'otros' | 'plantel' | 'camino' | 'carrera'>('tabla');
+    const [coachName, setCoachName] = useState('');
+    const [celebratedKey, setCelebratedKey] = useState<string | null>(null);
+    const [palmaresKey, setPalmaresKey] = useState<string | null>(null);
+    const [hubTab, setHubTab] = useState<'tabla' | 'calendario' | 'cuadro' | 'resultados' | 'goleadores' | 'otros' | 'plantel' | 'palmares' | 'camino' | 'carrera'>('tabla');
     /** Torneo que se está armando (de fábrica, con reemplazos o personalizado). */
     const [setupDef, setSetupDef] = useState<TourDef | null>(null);
     const [customFormat, setCustomFormat] = useState(0);
@@ -702,7 +770,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
 
     const startCareer = () => {
         if (!mine) return;
-        persist({ tour: createCareer(mine, difficulty, duration) });
+        persist({ tour: createCareer(mine, difficulty, duration, coachName) });
         setHubTab('tabla');
         setScreen({ k: 'tour' });
     };
@@ -1152,6 +1220,16 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                         </div>
                     ) : (
                         <div className={styles.body}>
+                            <label className={styles.coachField}>
+                                <span>Nombre del entrenador</span>
+                                <input
+                                    value={coachName}
+                                    onChange={(e) => setCoachName(e.target.value.slice(0, 40))}
+                                    placeholder="Cómo te van a nombrar en el palmarés"
+                                    maxLength={40}
+                                    autoComplete="off"
+                                />
+                            </label>
                             <SettingsStep teams={[byId(mine)]} difficulty={difficulty} setDifficulty={setDifficulty} duration={duration} setDuration={setDuration} />
                             <p className={styles.note}>Se guarda en la partida {slot + 1}{tour ? ', en lugar de la que había' : ''}.</p>
                             <div className={styles.footerBtns}>
@@ -1349,7 +1427,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                     const road = tour.road ?? null;
                     const career = tour.career ?? null;
                     const verdict = road ? roadVerdict(tour) : career ? careerVerdict(tour) : null;
-                    const tabs: ['tabla' | 'calendario' | 'cuadro' | 'resultados' | 'goleadores' | 'otros' | 'plantel' | 'camino' | 'carrera', string][] = [
+                    const tabs: ['tabla' | 'calendario' | 'cuadro' | 'resultados' | 'goleadores' | 'otros' | 'plantel' | 'palmares' | 'camino' | 'carrera', string][] = [
                         ...(onlyKo ? [] : [['tabla', tour.groups.length > 1 ? (tour.cross ? 'Conferencias' : 'Grupos') : 'Tabla'] as ['tabla', string]]),
                         ['calendario', 'Calendario'],
                         ...(tour.hasKo ? [['cuadro', 'Cuadro'] as ['cuadro', string]] : []),
@@ -1358,13 +1436,25 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                         ...(tour.stats ? [['goleadores', 'Goleadores'] as ['goleadores', string]] : []),
                         ...(career?.others ? [['otros', 'Otros torneos'] as ['otros', string]] : []),
                         ...(career?.rosters ? [['plantel', 'Plantel'] as ['plantel', string]] : []),
+                        ...(career ? [['palmares', 'Palmarés'] as ['palmares', string]] : []),
                         ...(career ? [['carrera', 'Carrera'] as ['carrera', string]] : []),
                     ];
                     const tab = tabs.some(([k]) => k === hubTab) ? hubTab : tabs[0][0];
                     const di = DIFFICULTIES.findIndex((d) => d.id === tour.difficulty);
                     const du = DURATIONS.indexOf(tour.duration);
+                    const careerWins = career && tour.done ? pendingCelebration(career) : [];
+                    const soloKey = !career && !road && tour.done && tour.champion === tour.me ? `${tour.tourId}:${tour.groupHistory.length}:${tour.koHistory.length}` : null;
+                    const celebrateTeam = careerWins.length || (soloKey && soloKey !== celebratedKey) ? byId(tour.me) : null;
                     return (
                         <div className={styles.body}>
+                            {celebrateTeam && (
+                                <ChampionCelebration
+                                    team={celebrateTeam}
+                                    titles={careerWins.length ? careerWins.map((w) => `${w} ${career?.season ?? ''}`) : [tourDef.name]}
+                                    coach={career?.coach}
+                                    onClose={() => (careerWins.length ? persist({ tour: markCelebrated(tour) }) : setCelebratedKey(soloKey))}
+                                />
+                            )}
                             <div className={styles.hub}>
                                 <div className={styles.nextCard}>
                                     {road && <span className={styles.roadChip}>⚑ {nameOf(road.me)} · {PHASE_LABEL[road.phase]}</span>}
@@ -1691,11 +1781,65 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                                 </ul>
                                             </div>
                                         )}
+                                        {tab === 'palmares' && career && (() => {
+                                            const keys = palmaresKeys(career);
+                                            const key = palmaresKey && keys.includes(palmaresKey) ? palmaresKey : keys[0];
+                                            const rows = key ? palmaresFor(career, key) : [];
+                                            const count = new Map<string, number>();
+                                            for (const r of rows) count.set(r.name, (count.get(r.name) ?? 0) + 1);
+                                            const top = [...count.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6);
+                                            return (
+                                                <div className={styles.othersPanel}>
+                                                    <label className={styles.othersPick}>
+                                                        <span>Competición</span>
+                                                        <select value={key} onChange={(e) => setPalmaresKey(e.target.value)}>
+                                                            {keys.map((k) => (
+                                                                <option key={k} value={k}>
+                                                                    {palmaresLabel(k)}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                    </label>
+                                                    <p className={styles.note}>Hasta 2025, los campeones reales del archivo de G22 Scores. Desde 2026, los de esta carrera, que se van sumando temporada a temporada.</p>
+                                                    {top.length > 0 && (
+                                                        <div className={styles.palmaresTop}>
+                                                            {top.map(([name, n]) => (
+                                                                <span key={name} className={name === nameOf(career.me) ? styles.palmaresMine : undefined}>
+                                                                    <b>{n}</b> {name}
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                    <ol className={styles.palmaresList}>
+                                                        {rows.map((r) => (
+                                                            <li key={`${r.season}-${r.name}`} className={`${r.game ? styles.palmaresGame : ''} ${r.club === career.me ? styles.palmaresMine : ''}`}>
+                                                                <span>{r.season}</span>
+                                                                <span>{r.club ? <FlagIcon code={flagOf(r.club)} size={14} /> : null} {r.name}</span>
+                                                                {r.game && <small>en esta carrera</small>}
+                                                            </li>
+                                                        ))}
+                                                    </ol>
+                                                </div>
+                                            );
+                                        })()}
                                         {tab === 'carrera' && career && (
                                             <div className={styles.roadPanel}>
                                                 <h3 className={styles.groupTitle}>
                                                     {nameOf(career.me)} · {divisionLabel(divisionOf(career, career.me) ?? '')} · nivel {careerRating(career, career.me)}
                                                 </h3>
+                                                {career.coach && (
+                                                    <div className={styles.coachCard}>
+                                                        <span>Entrenador: <b>{career.coach}</b></span>
+                                                        <div className={styles.badges}>
+                                                            {myTitles(career).length === 0 && <small>Todavía sin títulos.</small>}
+                                                            {myTitles(career).map((t) => (
+                                                                <span key={`${t.key}-${t.season}`} className={styles.badge2}>
+                                                                    <Trophy size={14} /> Campeón {t.label} {t.season}
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
                                                 <p className={styles.note}>
                                                     El nivel de cada club cambia al cerrar la temporada: sube si terminás más arriba de lo esperado y con los títulos, y baja si no.
                                                     {career.branch === 'interior' && ' Sin ascenso directo: el campeón de cada división juega la promoción contra el último de la de arriba.'}

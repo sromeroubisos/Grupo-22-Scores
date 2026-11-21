@@ -2973,3 +2973,314 @@
         grid-column: 1 / -1;
     }
 }
+
+/* ───── Celular parado ───── */
+
+/* Modo "girar la cancha": el partido entero rota 90° y usa el alto de la pantalla como ancho.
+   El lienzo se mide con el tamaño SIN rotar (clientWidth/clientHeight), así que se adapta solo. */
+.rotated {
+    position: fixed;
+    top: 0;
+    left: 100vw;
+    width: 100dvh;
+    height: 100vw;
+    transform: rotate(90deg);
+    transform-origin: top left;
+    z-index: 2500;
+    padding: 4px;
+    background: #050608;
+    display: grid;
+    grid-template-rows: 1fr;
+}
+
+.rotated .screen {
+    height: 100%;
+}
+
+/* Modo "pedir que gire": tapa el partido (en pausa) hasta que el celular quede acostado. */
+.portraitBlock {
+    position: fixed;
+    inset: 0;
+    z-index: 2600;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 12px;
+    padding: 24px;
+    text-align: center;
+    background: rgba(5, 6, 8, 0.96);
+    color: #f4f4f4;
+}
+
+.portraitBlock strong {
+    font-size: 1.2rem;
+    color: var(--gold);
+}
+
+.portraitBlock small {
+    max-width: 280px;
+    font-size: 0.66rem;
+    line-height: 1.5;
+    color: var(--color-text-secondary);
+}
+
+.portraitIcon {
+    font-size: 3rem;
+    color: var(--gold);
+    animation: portraitSpin 2.2s ease-in-out infinite;
+}
+
+@keyframes portraitSpin {
+    0%,
+    30% {
+        transform: rotate(0deg);
+    }
+    60%,
+    100% {
+        transform: rotate(90deg);
+    }
+}
+
+.portraitPick {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 0.66rem;
+    color: var(--color-text-secondary);
+}
+
+/* ───── Festejo de campeón ───── */
+.celebrate {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 10px;
+    padding: 16px;
+    overflow: hidden;
+    text-align: center;
+    background:
+        radial-gradient(circle at 50% 48%, rgba(242, 194, 48, 0.28), transparent 55%),
+        rgba(5, 6, 8, 0.97);
+    color: #f4f4f4;
+    animation: celebrateIn 0.35s ease-out;
+}
+
+@keyframes celebrateIn {
+    from {
+        opacity: 0;
+        transform: scale(1.04);
+    }
+}
+
+.celebrateTitle {
+    font-size: clamp(1.8rem, 7vw, 3.4rem);
+    color: var(--gold);
+    letter-spacing: 0.08em;
+    text-shadow: 0 4px 0 #050608;
+    animation: celebratePulse 1.2s ease-in-out infinite;
+}
+
+@keyframes celebratePulse {
+    50% {
+        transform: scale(1.06);
+    }
+}
+
+.celebrateClub {
+    font-size: clamp(1rem, 3.6vw, 1.5rem);
+}
+
+.celebrateStage {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: clamp(2px, 1.5vw, 14px);
+    margin: 6px 0;
+}
+
+.celebrateJump {
+    display: block;
+    animation: celebrateJump 0.9s ease-in-out infinite;
+}
+
+@keyframes celebrateJump {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-22px);
+    }
+}
+
+.celebrateCup {
+    display: block;
+    margin: 0 6px 6px;
+    animation: celebrateCup 1.6s ease-in-out infinite;
+}
+
+@keyframes celebrateCup {
+    50% {
+        transform: translateY(-10px) rotate(-4deg);
+        filter: drop-shadow(0 0 10px rgba(242, 194, 48, 0.8));
+    }
+}
+
+.trophy {
+    display: block;
+    image-rendering: pixelated;
+}
+
+.celebrateTitles {
+    font-size: 0.72rem;
+    color: var(--gold);
+}
+
+.celebrateCoach {
+    font-size: 0.68rem;
+    color: var(--color-text-secondary);
+}
+
+.confetti {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.confetti i {
+    position: absolute;
+    top: -12px;
+    width: 8px;
+    height: 12px;
+    animation: confettiFall 2.6s linear infinite;
+}
+
+@keyframes confettiFall {
+    to {
+        transform: translateY(110vh) rotate(540deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .celebrate,
+    .celebrateTitle,
+    .celebrateJump,
+    .celebrateCup,
+    .confetti i {
+        animation: none;
+    }
+}
+
+@media (max-width: 520px) {
+    /* En un celular parado, los seis no entran a escala 4: se achica el grupo. */
+    .celebrateStage {
+        transform: scale(0.7);
+    }
+}
+
+/* ───── Entrenador, insignias y palmarés ───── */
+.coachField {
+    display: grid;
+    gap: 6px;
+    width: min(420px, 100%);
+    font-size: 0.72rem;
+    color: var(--color-text-secondary);
+}
+
+.coachField input {
+    font: inherit;
+    font-size: 0.8rem;
+    padding: 10px 12px;
+    border-radius: 6px;
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    border: 2px solid var(--color-border);
+}
+
+.coachField input:focus {
+    border-color: var(--gold);
+    outline: none;
+}
+
+.coachCard {
+    display: grid;
+    gap: 8px;
+    padding: 10px;
+    border-radius: 8px;
+    background: var(--color-bg-secondary);
+    border: 2px solid var(--color-border);
+    font-size: 0.72rem;
+}
+
+.badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.badge2 {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: rgba(242, 194, 48, 0.12);
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    font-size: 0.62rem;
+}
+
+.palmaresTop {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.palmaresTop span {
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    font-size: 0.66rem;
+}
+
+.palmaresTop b {
+    color: var(--gold);
+}
+
+.palmaresList {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 3px;
+    font-size: 0.68rem;
+}
+
+.palmaresList li {
+    display: grid;
+    grid-template-columns: 48px 1fr auto;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 8px;
+    border-radius: 4px;
+    background: var(--color-bg-secondary);
+}
+
+.palmaresList small {
+    color: var(--color-text-secondary);
+    font-size: 0.58rem;
+}
+
+.palmaresGame {
+    border-left: 3px solid var(--gold);
+}
+
+.palmaresMine {
+    color: var(--gold);
+}

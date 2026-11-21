@@ -31,6 +31,7 @@ const TAP_PX = 14;
 const TAP_MS = 240;
 const DOUBLE_TAP_MS = 320;
 const TOUCH_HELP_KEY = 'g22-rugby-seven-touch-help';
+const PORTRAIT_KEY = 'g22-rugby-seven-portrait';
 
 interface Finger {
     kind: 'move' | 'kick' | 'swipe' | 'done';
@@ -358,8 +359,13 @@ export default function MatchView({ cfg, onFinish, onQuit, musicSrc = null, font
         }
         touchMove.current = { up, down };
     };
+    // Con la cancha girada 90° (celular parado, modo "girar la cancha"), lo que en la pantalla es
+    // abajo, en la cancha es la derecha: los gestos se rotan con ella.
+    const rotatedRef = useRef(false);
+    const pt = (e: React.PointerEvent) => (rotatedRef.current ? { x: e.clientY, y: -e.clientX } : { x: e.clientX, y: e.clientY });
     const zoneOf = (e: React.PointerEvent) => {
         const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
+        if (rotatedRef.current) return { rx: (e.clientY - r.top) / r.height, ry: 1 - (e.clientX - r.left) / r.width };
         return { rx: (e.clientX - r.left) / r.width, ry: (e.clientY - r.top) / r.height };
     };
     const onPointerDown = (e: React.PointerEvent) => {
@@ -376,12 +382,12 @@ export default function MatchView({ cfg, onFinish, onQuit, musicSrc = null, font
         // Scrum, ruck, line, conversión y drop: cada toque cuenta.
         if (h.phase === 'scrum' || h.phase === 'ruck' || h.phase === 'lineout' || h.phase === 'conv' || h.phase === 'drop') {
             m.action();
-            fingers.current.set(e.pointerId, { kind: 'done', x0: e.clientX, y0: e.clientY, t0: performance.now(), dir: 'up', kicking: false });
+            fingers.current.set(e.pointerId, { kind: 'done', x0: pt(e).x, y0: pt(e).y, t0: performance.now(), dir: 'up', kicking: false });
             return;
         }
         const { rx, ry } = zoneOf(e);
         const kind: Finger['kind'] = rx < KICK_ZONE && h.attacking ? 'kick' : 'move';
-        fingers.current.set(e.pointerId, { kind, x0: e.clientX, y0: e.clientY, t0: performance.now(), dir: ry < 0.5 ? 'up' : 'down', kicking: false });
+        fingers.current.set(e.pointerId, { kind, x0: pt(e).x, y0: pt(e).y, t0: performance.now(), dir: ry < 0.5 ? 'up' : 'down', kicking: false });
         if (kind === 'kick') {
             // La patada se empieza a cargar recién si el dedo se queda: un toque rápido puede ser el primero del drop.
             window.setTimeout(() => {
@@ -397,8 +403,8 @@ export default function MatchView({ cfg, onFinish, onQuit, musicSrc = null, font
     const onPointerMove = (e: React.PointerEvent) => {
         const f = fingers.current.get(e.pointerId);
         if (!f || f.kind === 'done' || f.kind === 'swipe') return;
-        const dx = e.clientX - f.x0;
-        const dy = e.clientY - f.y0;
+        const dx = pt(e).x - f.x0;
+        const dy = pt(e).y - f.y0;
         // Movimiento rápido y largo: es un deslizamiento, ese dedo deja de mover al jugador.
         if (Math.hypot(dx, dy) > SWIPE_PX && performance.now() - f.t0 < SWIPE_MS && !f.kicking) {
             f.kind = 'swipe';
@@ -425,8 +431,8 @@ export default function MatchView({ cfg, onFinish, onQuit, musicSrc = null, font
             return;
         }
         if (e.type === 'pointercancel') return;
-        const dx = e.clientX - f.x0;
-        const dy = e.clientY - f.y0;
+        const dx = pt(e).x - f.x0;
+        const dy = pt(e).y - f.y0;
         const dt = performance.now() - f.t0;
         const dist = Math.hypot(dx, dy);
         if (dist > SWIPE_PX && dt < SWIPE_MS + 200) {
@@ -467,6 +473,41 @@ export default function MatchView({ cfg, onFinish, onQuit, musicSrc = null, font
             pausedRef.current = true;
         }
     }, []);
+    // Celular parado: "force" pide girarlo (y pausa); "fit" gira la cancha para que ocupe el alto.
+    const [portrait, setPortrait] = useState(false);
+    const [portraitMode, setPortraitMode] = useState<'force' | 'fit'>('force');
+    useEffect(() => {
+        if (!isTouchDevice()) return;
+        try {
+            const saved = localStorage.getItem(PORTRAIT_KEY);
+            if (saved === 'fit' || saved === 'force') setPortraitMode(saved);
+        } catch {
+            // Sin localStorage: arranca pidiendo girar.
+        }
+        const mq = window.matchMedia('(orientation: portrait)');
+        const on = () => setPortrait(mq.matches);
+        on();
+        mq.addEventListener('change', on);
+        return () => mq.removeEventListener('change', on);
+    }, []);
+    const choosePortraitMode = (m: 'force' | 'fit') => {
+        setPortraitMode(m);
+        try {
+            localStorage.setItem(PORTRAIT_KEY, m);
+        } catch {
+            // Sin localStorage: vale para este partido.
+        }
+    };
+    const rotated = touch && portrait && portraitMode === 'fit';
+    const blockPortrait = touch && portrait && portraitMode === 'force';
+    useEffect(() => {
+        rotatedRef.current = rotated;
+    }, [rotated]);
+    // Pausado si lo pausó el usuario, si está la ayuda o si hay que girar el celular.
+    useEffect(() => {
+        pausedRef.current = paused || touchHelp || blockPortrait;
+    }, [paused, touchHelp, blockPortrait]);
+
     const closeTouchHelp = () => {
         setTouchHelp(false);
         pausedRef.current = paused;
@@ -493,7 +534,7 @@ export default function MatchView({ cfg, onFinish, onQuit, musicSrc = null, font
     }, []);
 
     return (
-        <div className={styles.matchWrap}>
+        <div className={rotated ? `${styles.matchWrap} ${styles.rotated}` : styles.matchWrap}>
             <div className={styles.screen} ref={screenRef}>
                 <canvas
                     ref={canvasRef}
@@ -547,10 +588,16 @@ export default function MatchView({ cfg, onFinish, onQuit, musicSrc = null, font
                     </div>
                 )}
                 {hud?.hint && <div className={styles.hint}>{touch ? touchHint(hud.hint) : hud.hint}</div>}
-                {/* Solo se ve en un celular parado (lo decide el CSS). */}
-                <div className={styles.rotateHint} aria-hidden="true">
-                    Girá el celular para jugar con la cancha grande
-                </div>
+                {blockPortrait && !touchHelp && (
+                    <div className={styles.portraitBlock} role="dialog" aria-label="Girá el celular">
+                        <span className={styles.portraitIcon} aria-hidden="true">⟳</span>
+                        <strong>Girá el celular</strong>
+                        <small>La cancha se juega acostada. El partido queda en pausa hasta que lo gires.</small>
+                        <button type="button" className={styles.btnGhost} onClick={() => choosePortraitMode('fit')}>
+                            Jugar así, con la cancha girada
+                        </button>
+                    </div>
+                )}
                 {paused && (
                     <div className={styles.pauseLayer}>
                         <strong>Pausa</strong>
@@ -575,6 +622,15 @@ export default function MatchView({ cfg, onFinish, onQuit, musicSrc = null, font
                         {showControls && touch && (
                             <div className={styles.controlsPanel}>
                                 <TouchLegend />
+                                <div className={styles.portraitPick} role="radiogroup" aria-label="Con el celular parado">
+                                    <span>Con el celular parado:</span>
+                                    <button type="button" role="radio" aria-checked={portraitMode === 'force'} className={portraitMode === 'force' ? styles.keyBtnActive : styles.keyBtn} onClick={() => choosePortraitMode('force')}>
+                                        Pedir que lo gire
+                                    </button>
+                                    <button type="button" role="radio" aria-checked={portraitMode === 'fit'} className={portraitMode === 'fit' ? styles.keyBtnActive : styles.keyBtn} onClick={() => choosePortraitMode('fit')}>
+                                        Girar la cancha
+                                    </button>
+                                </div>
                             </div>
                         )}
                         {showControls && !touch && (
