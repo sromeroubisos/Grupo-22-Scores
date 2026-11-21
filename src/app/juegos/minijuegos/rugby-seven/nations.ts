@@ -271,4 +271,4 @@ export const NATION_ZONE: Record<string, Zone> = Object.fromEntries([
 export const APPROX_KIT = new Set(FEM_DEFS.filter((d) => d.approx).flatMap((d) => [`nat-${d.code.toLowerCase()}`, `natf-${d.code.toLowerCase()}`]));
 
 /** Región geográfica por código (para saber qué clasificatorio al Mundial juega cada selección). */
-export const REGION_BY_CODE: Record<string, Region> = Object.fromEntries(DEFS.map((d) => [d.code, d.region]));
+export const REGION_BY_CODE: Record<string, Region> = Object.fromEntries(FEM_DEFS.map((d) => [d.code, d.region]));

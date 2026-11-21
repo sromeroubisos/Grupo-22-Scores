@@ -21,6 +21,7 @@ import { FEM_NATIONS, NATIONS, NATION_BY_CODE } from './nations';
 import type { Difficulty, Duration } from './teams';
 import type { CareerState } from './career';
 import type { RoadState } from './road';
+import type { SvnsState } from './svns';
 
 export type Stage =
     | { kind: 'liga'; legs: 1 | 2 }
@@ -239,6 +240,8 @@ export interface TourState {
     def?: TourDef;
     /** Si es una etapa del camino al Mundial, el estado de todo el camino. */
     road?: RoadState;
+    /** Si es una etapa del circuito SVNS, el estado de todo el circuito. */
+    svns?: SvnsState;
     /** Si es una etapa del modo carrera argentino, el estado de toda la carrera. */
     career?: CareerState;
     /** Tries y puntos de cada jugador (`equipo#puesto`), si el torneo lleva goleadores. */

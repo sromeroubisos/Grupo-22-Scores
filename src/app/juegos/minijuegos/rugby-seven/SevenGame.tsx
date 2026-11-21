@@ -119,6 +119,7 @@ import {
     type NacFormat,
 } from './career';
 import { advanceRoad, AUTO_QUALIFIED, createRoad, PHASE_LABEL, regionalDef, regionFor, regionName, roadEligible, roadVerdict } from './road';
+import { advanceSvns, createSvns, SVNS_LEGS, SVNS_PHASE_LABEL, svnsBoosts, svnsRegionName, svnsStartTier, svnsTable, svnsVerdict, TIER_LABEL } from './svns';
 import { CloudSync, type CloudStatus } from './cloudSave';
 import styles from './seven.module.css';
 
@@ -135,6 +136,7 @@ type Screen =
     | { k: 'tourSetup'; step: 1 | 2 }
     | { k: 'customSetup' }
     | { k: 'roadSetup'; step: 1 | 2 }
+    | { k: 'svnsSetup'; step: 1 | 2 }
     | { k: 'newPick' }
     | { k: 'careerSetup'; step: 0 | 1 | 2 }
     | { k: 'tour' }
@@ -143,7 +145,7 @@ type Screen =
     | { k: 'match'; cfg: MatchConfig; mode: Mode; nonce: number }
     | { k: 'result'; cfg: MatchConfig; mode: Mode; score: [number, number] };
 
-type HubTab = 'tabla' | 'calendario' | 'cuadro' | 'resultados' | 'goleadores' | 'otros' | 'plantel' | 'club' | 'palmares' | 'camino' | 'carrera';
+type HubTab = 'tabla' | 'calendario' | 'cuadro' | 'resultados' | 'goleadores' | 'otros' | 'plantel' | 'club' | 'palmares' | 'camino' | 'carrera' | 'circuito';
 
 interface Category {
     name: string;
@@ -763,7 +765,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
 
     const allTeams = useMemo(() => [...customTeams, ...NATIONS, ...FEM_NATIONS, ...CLUBS, ...AR_CLUBS, ...PRESET_TEAMS], [customTeams]);
     // Nivel de los equipos propios y, en una carrera, lo que cada club ganó o perdió con las temporadas.
-    setRatingContext(Object.fromEntries(customTeams.map((t) => [t.id, t.rating ?? 70])), tour?.career ? careerBoosts(tour.career) : undefined);
+    setRatingContext(Object.fromEntries(customTeams.map((t) => [t.id, t.rating ?? 70])), tour?.career ? careerBoosts(tour.career) : tour?.svns ? svnsBoosts(tour.svns) : undefined);
     // En una carrera: quién juega en cada puesto y la localía; afuera, nada.
     if (tour?.career) applyCareerContext(tour.career);
     else setCareerContext();
@@ -910,6 +912,19 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
         setHubTab('tabla');
     };
 
+    const startSvns = () => {
+        if (!mine) return;
+        persist({ tour: createSvns(mine, difficulty, duration) });
+        setHubTab('tabla');
+        setScreen({ k: 'tour' });
+    };
+
+    const nextSvnsStage = () => {
+        if (!tour) return;
+        persist({ tour: advanceSvns(tour) });
+        setHubTab('tabla');
+    };
+
     /** Dificultad y duración se pueden cambiar con el torneo empezado: valen desde el próximo partido. */
     const setTourOptions = (patch: { difficulty?: Difficulty; duration?: Duration }) => {
         if (tour) persist({ tour: { ...tour, ...patch } });
@@ -993,6 +1008,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
         tourSetup: setupDef?.name ?? 'Torneo',
         customSetup: 'Torneo personalizado',
         roadSetup: 'Road to Rugby World Cup',
+        svnsSetup: 'Circuito SVNS',
         careerSetup: 'Modo carrera',
         newPick: 'Nuevo torneo',
         tour: tourDef?.name ?? 'Torneo',
@@ -1132,6 +1148,24 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                 <strong>Road to Rugby World Cup</strong>
                                 <span>{tours.some((t) => !t) ? 'Llevá una selección del clasificatorio al Mundial.' : 'Las tres partidas están ocupadas: borrá una para empezar.'}</span>
                             </button>
+                            <button
+                                type="button"
+                                role="menuitem"
+                                className={styles.menuBtn}
+                                onClick={() => {
+                                    const free = tours.findIndex((t) => !t);
+                                    if (free < 0) {
+                                        setScreen({ k: 'slots' });
+                                        return;
+                                    }
+                                    setSlot(free);
+                                    setScreen({ k: 'svnsSetup', step: 1 });
+                                }}
+                            >
+                                <span className={styles.menuIcon} aria-hidden="true">✦</span>
+                                <strong>Circuito SVNS</strong>
+                                <span>{tours.some((t) => !t) ? 'Una selección de seven, del regional al SVNS 1. Varones y mujeres.' : 'Las tres partidas están ocupadas: borrá una para empezar.'}</span>
+                            </button>
                             <button type="button" role="menuitem" className={styles.menuBtn} onClick={() => setScreen(cupLive ? { k: 'cup' } : { k: 'cupSetup', step: 1 })}>
                                 <span className={styles.menuIcon} aria-hidden="true">♛</span>
                                 <strong>{cupLive ? 'Seguir la Copa Seven' : 'Copa Seven'}</strong>
@@ -1177,17 +1211,17 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                             {tours.map((t, i) => {
                                 const d = t ? defOf(t) : null;
                                 const me = t ? byId(t.me) : null;
-                                const finished = !!t && !t.career && (t.road ? t.road.out || (t.road.phase === 'wc' && t.done) : t.done || t.eliminated);
+                                const finished = !!t && !t.career && !t.svns && (t.road ? t.road.out || (t.road.phase === 'wc' && t.done) : t.done || t.eliminated);
                                 return (
                                     <section key={i} className={`${styles.saveSlot} ${i === slot && t ? styles.saveSlotOn : ''}`} aria-label={`Partida ${i + 1}`}>
                                         <header className={styles.slotHead}>Partida {i + 1}</header>
                                         {t && d ? (
                                             <>
-                                                <strong className={styles.saveTitle}>{t.road ? 'Road to Rugby World Cup' : t.career ? `Carrera · temporada ${t.career.season}` : d.name}</strong>
+                                                <strong className={styles.saveTitle}>{t.svns ? `Circuito SVNS · temporada ${t.svns.season}` : t.road ? 'Road to Rugby World Cup' : t.career ? `Carrera · temporada ${t.career.season}` : d.name}</strong>
                                                 <span className={styles.saveTeam}>
                                                     <FlagIcon code={me?.flag} size={20} /> {me?.name ?? 'Equipo borrado'}
                                                 </span>
-                                                <span className={styles.saveMeta}>{t.road ? `${PHASE_LABEL[t.road.phase]} · ${d.name}` : t.career ? `${CAREER_PHASE_LABEL[t.career.phase]} · ${d.name}` : d.formatLabel}</span>
+                                                <span className={styles.saveMeta}>{t.svns ? `${SVNS_PHASE_LABEL[t.svns.phase]} · ${d.name}` : t.road ? `${PHASE_LABEL[t.road.phase]} · ${d.name}` : t.career ? `${CAREER_PHASE_LABEL[t.career.phase]} · ${d.name}` : d.formatLabel}</span>
                                                 <span className={styles.saveMeta}>
                                                     {finished ? (t.champion === t.me ? 'Terminada · campeón' : 'Terminada') : roundLabel(t)} · {DIFFICULTIES.find((x) => x.id === t.difficulty)?.label} · {t.duration} min
                                                 </span>
@@ -1294,6 +1328,11 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                 <strong>Modo carrera</strong>
                                 <span>Un club, temporada tras temporada: plantel, pretemporada, ascensos, descensos y títulos.</span>
                                 <small>Argentina, Uruguay, Brasil, Chile o España · varones y mujeres</small>
+                            </button>
+                            <button type="button" className={styles.pickCard} onClick={() => setScreen({ k: 'svnsSetup', step: 1 })}>
+                                <strong>Circuito SVNS</strong>
+                                <span>Una selección de seven, temporada tras temporada: del regional al SVNS 3, al SVNS 2 y al SVNS 1, con ascensos y descensos.</span>
+                                <small>Selecciones · varones y mujeres</small>
                             </button>
                         </div>
                         <div className={styles.footerBtns}>
@@ -1572,6 +1611,52 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                     );
                 })()}
 
+                {screen.k === 'svnsSetup' && (() => {
+                    const byRating = (a: SevenTeam, b: SevenTeam) => (b.rating ?? 0) - (a.rating ?? 0);
+                    const cats: Category[] = [
+                        ...ZONES.map((z) => ({ name: z, group: 'Varones', kind: 'Continente', teams: NATIONS.filter((t) => NATION_ZONE[t.id] === z).sort(byRating) })),
+                        ...ZONES.map((z) => ({ name: `${z} · femenino`, group: 'Mujeres', kind: 'Continente', teams: FEM_NATIONS.filter((t) => NATION_ZONE[t.id] === z).sort(byRating) })),
+                    ];
+                    const valid = !!mine && (mine.startsWith('nat-') || mine.startsWith('natf-'));
+                    const tier = valid && mine ? svnsStartTier(mine) : null;
+                    return screen.step === 1 ? (
+                        <div className={styles.body}>
+                            <div className={styles.single}>
+                                <TeamChooser label="Tu selección" teamId={valid ? mine : null} onChange={setMine} categories={cats} />
+                                {tier && mine && (
+                                    <p className={styles.note}>
+                                        {tier === 'reg'
+                                            ? `Arrancás en el ${svnsRegionName(mine)}: el campeón va al SVNS 3.`
+                                            : `Arrancás en el ${TIER_LABEL[tier]}, como en 2026.`}
+                                    </p>
+                                )}
+                            </div>
+                            <div className={styles.footerBtns}>
+                                {btn('◀ Partidas', () => setScreen({ k: 'slots' }))}
+                                {!valid && <span className={styles.missing}>Elegí una selección (varones o mujeres) para empezar.</span>}
+                                {btn('Siguiente ▶', () => setScreen({ k: 'svnsSetup', step: 2 }), true, !valid)}
+                            </div>
+                        </div>
+                    ) : (
+                        <div className={styles.body}>
+                            <SettingsStep teams={[byId(mine)]} difficulty={difficulty} setDifficulty={setDifficulty} duration={duration} setDuration={setDuration} />
+                            <div className={styles.roadInfo}>
+                                <strong>Cómo es el circuito</strong>
+                                <span>Regional: el campeón de cada zona va al SVNS 3.</span>
+                                <span>SVNS 3: ocho selecciones, un torneo. Las dos primeras suben al SVNS 2.</span>
+                                <span>SVNS 2: seis selecciones, {SVNS_LEGS.s2} etapas que suman puntos. Las cuatro primeras juegan el World Championship; las dos últimas bajan al SVNS 3.</span>
+                                <span>SVNS 1: ocho selecciones, {SVNS_LEGS.s1} etapas. La que más suma es campeona del circuito.</span>
+                                <span>World Championship: las 8 del SVNS 1 y las 4 mejores del SVNS 2. Las 8 primeras juegan el SVNS 1 del año siguiente.</span>
+                            </div>
+                            <p className={styles.note}>Se guarda en la partida {slot + 1}{tour ? ', en lugar de la que había' : ''}.</p>
+                            <div className={styles.footerBtns}>
+                                {btn('◀ Selección', () => setScreen({ k: 'svnsSetup', step: 1 }))}
+                                {btn('Empezar el circuito ▶', startSvns, true, !valid)}
+                            </div>
+                        </div>
+                    );
+                })()}
+
                 {screen.k === 'tourSetup' && setupDef && (() => {
                     const def = setupDef;
                     const field = def.teams.map((c) => teamOfCode(c)).filter((t): t is SevenTeam => !!t).sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
@@ -1640,13 +1725,15 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                     const onlyKo = tourDef.stage.kind === 'ko';
                     const road = tour.road ?? null;
                     const career = tour.career ?? null;
-                    const verdict = road ? roadVerdict(tour) : career ? careerVerdict(tour) : null;
+                    const svns = tour.svns ?? null;
+                    const verdict = road ? roadVerdict(tour) : career ? careerVerdict(tour) : svns && tour.done ? svnsVerdict(tour) : null;
                     const tabs: [HubTab, string][] = [
                         ...(onlyKo ? [] : [['tabla', tour.groups.length > 1 ? (tour.cross ? 'Conferencias' : 'Grupos') : 'Tabla'] as ['tabla', string]]),
                         ['calendario', 'Calendario'],
                         ...(tour.hasKo ? [['cuadro', 'Cuadro'] as ['cuadro', string]] : []),
                         ['resultados', 'Resultados'],
                         ...(road ? [['camino', 'Camino al Mundial'] as ['camino', string]] : []),
+                        ...(svns ? [['circuito', 'Circuito'] as ['circuito', string]] : []),
                         ...(tour.stats ? [['goleadores', 'Goleadores'] as ['goleadores', string]] : []),
                         ...(career?.others ? [['otros', 'Otros torneos'] as ['otros', string]] : []),
                         ...(career?.rosters ? [['plantel', 'Plantel'] as ['plantel', string]] : []),
@@ -1658,7 +1745,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                     const di = DIFFICULTIES.findIndex((d) => d.id === tour.difficulty);
                     const du = DURATIONS.indexOf(tour.duration);
                     const careerWins = career && tour.done ? pendingCelebration(career) : [];
-                    const soloKey = !career && !road && tour.done && tour.champion === tour.me ? `${tour.tourId}:${tour.groupHistory.length}:${tour.koHistory.length}` : null;
+                    const soloKey = !career && !road && !svns && tour.done && tour.champion === tour.me ? `${tour.tourId}:${tour.groupHistory.length}:${tour.koHistory.length}` : null;
                     const celebrateTeam = careerWins.length || (soloKey && soloKey !== celebratedKey) ? byId(tour.me) : null;
                     const preseason = !!career && inPreseason(career) && !tour.done;
                     const news = career && !celebrateTeam ? unseenNews(career)[0] ?? null : null;
@@ -1695,13 +1782,14 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                             <div className={styles.hub}>
                                 <div className={styles.nextCard}>
                                     {road && <span className={styles.roadChip}>⚑ {nameOf(road.me)} · {PHASE_LABEL[road.phase]}</span>}
+                                    {svns && <span className={styles.roadChip}>✦ {nameOf(svns.me)} · Temporada {svns.season} · {SVNS_PHASE_LABEL[svns.phase]}</span>}
                                     {career && <span className={styles.roadChip}>⚑ {nameOf(career.me)} · Temporada {career.season} · {CAREER_PHASE_LABEL[career.phase]}</span>}
                                     {career?.parallel && !career.parallel.done && (
                                         <span className={styles.parallelNote}>
                                             En paralelo: {(defOf(career.parallel)?.name ?? '').replace(/ \d{4}$/, '')} · {roundLabel(career.parallel).toLowerCase()}
                                         </span>
                                     )}
-                                    {(road || career) && tour.done && verdict ? (
+                                    {(road || career || svns) && tour.done && verdict ? (
                                         <>
                                             <div className={styles.champBox}>
                                                 <span>{verdict.title}</span>
@@ -1795,7 +1883,9 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                               ? { label: `${verdict.next} ▶`, run: () => nextCareerStage(closesSeason(tour) ? nacPick ?? formatOf(career, career.season + 1) : undefined) }
                                               : road && verdict?.next
                                                 ? { label: `${verdict.next} ▶`, run: nextRoadStage }
-                                                : null;
+                                                : svns && verdict?.next
+                                                  ? { label: `${verdict.next} ▶`, run: nextSvnsStage }
+                                                  : null;
                                         return (
                                             <div className={styles.hubActions}>
                                                 {!preseason && (
@@ -2133,6 +2223,71 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                                 {career.log.length > 0 && (
                                                     <ul className={styles.roadLog}>
                                                         {[...career.log].reverse().slice(0, 12).map((l, i) => (
+                                                            <li key={i}>{l}</li>
+                                                        ))}
+                                                    </ul>
+                                                )}
+                                            </div>
+                                        )}
+                                        {tab === 'circuito' && svns && (
+                                            <div className={styles.roadPanel}>
+                                                {svnsTable(tour) && (
+                                                    <>
+                                                        <h3 className={styles.groupTitle}>Tabla del {SVNS_PHASE_LABEL[svns.phase]} {svns.season} · después de {svns.leg - (tour.done ? 0 : 1)} de {SVNS_LEGS[svns.phase as 's1' | 's2']} etapas</h3>
+                                                        <ul className={styles.roadSlots}>
+                                                            {svnsTable(tour)!.map((x, i) => (
+                                                                <li key={x.id} className={x.id === svns.me ? styles.rowMine : undefined}>
+                                                                    <span>{i + 1}. <FlagIcon code={flagOf(x.id)} size={14} /> {nameOf(x.id)}</span>
+                                                                    <small>{x.pts} pts</small>
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </>
+                                                )}
+                                                <h3 className={styles.groupTitle}>SVNS 1 {svns.season}</h3>
+                                                <ul className={styles.roadSlots}>
+                                                    {svns.s1.map((id) => (
+                                                        <li key={id} className={id === svns.me ? styles.rowMine : undefined}>
+                                                            <span><FlagIcon code={flagOf(id)} size={14} /> {nameOf(id)}</span>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                                <h3 className={styles.groupTitle}>SVNS 2 {svns.season}</h3>
+                                                <ul className={styles.roadSlots}>
+                                                    {svns.s2.map((id) => (
+                                                        <li key={id} className={id === svns.me ? styles.rowMine : undefined}>
+                                                            <span><FlagIcon code={flagOf(id)} size={14} /> {nameOf(id)}</span>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                                {svns.s3direct.length > 0 && (
+                                                    <div className={styles.roadPending}>
+                                                        <span>Bajaron del SVNS 2 y juegan el SVNS 3: {svns.s3direct.map(nameOf).join(' y ')}.</span>
+                                                    </div>
+                                                )}
+                                                {svns.titles.length > 0 && (
+                                                    <>
+                                                        <h3 className={styles.groupTitle}>Títulos</h3>
+                                                        <ul className={styles.roadLog}>
+                                                            {svns.titles.map((t, i) => (
+                                                                <li key={i}>{t.season} · {t.label}</li>
+                                                            ))}
+                                                        </ul>
+                                                    </>
+                                                )}
+                                                {svns.history.length > 0 && (
+                                                    <>
+                                                        <h3 className={styles.groupTitle}>Temporadas</h3>
+                                                        <ul className={styles.roadLog}>
+                                                            {[...svns.history].reverse().map((h) => (
+                                                                <li key={h.season}>{h.season} · {h.text}</li>
+                                                            ))}
+                                                        </ul>
+                                                    </>
+                                                )}
+                                                {svns.log.length > 0 && (
+                                                    <ul className={styles.roadLog}>
+                                                        {[...svns.log].reverse().map((l, i) => (
                                                             <li key={i}>{l}</li>
                                                         ))}
                                                     </ul>
