@@ -27,7 +27,7 @@ import type { IntlState } from './intl';
 export type Stage =
     | { kind: 'liga'; legs: 1 | 2 }
     // `noKo`: grupos que terminan en la tabla (clasificatorios), sin cuadro.
-    | { kind: 'grupos'; groups: number | string[][]; advance: number; bestThirds?: number; cross?: boolean; noKo?: boolean; legs?: 1 | 2 }
+    | { kind: 'grupos'; groups: number | string[][]; advance: number; bestThirds?: number; cross?: boolean; noKo?: boolean; legs?: 1 | 2; rep?: boolean }
     // Eliminación directa desde el primer partido (repechajes, copas).
     // `fixed`: el cuadro va en el orden de `teams` (1 contra 2, 3 contra 4…), sin sembrar por ranking.
     | { kind: 'ko'; fixed?: boolean };
@@ -235,6 +235,13 @@ export interface TourState {
     champion: string | null;
     eliminated: boolean;
     /**
+     * Repechaje del usuario dentro del torneo (federales con `stage.rep`): si termina 3.º o 4.º
+     * de su zona, juega 3.º contra 4.º de zonas cruzadas en la misma fecha que los cuartos.
+     * `rep` es el cruce pendiente; `repResult`, cómo salió (la carrera lo toma para las plazas).
+     */
+    rep?: [string, string] | null;
+    repResult?: Result | null;
+    /**
      * Definición congelada del torneo: los personalizados, los que tienen
      * equipos reemplazados y las etapas del Road to RWC no están en TOURS.
      */
@@ -415,7 +422,17 @@ export function koLabel(n: number): string {
     }
 }
 
+/** Los cruces del repechaje: 3.º de una zona contra 4.º de la zona cruzada (A-B, B-A, C-D, D-C). */
+export function repechajePairs(s: TourState): [string, string][] {
+    const at = (gi: number, pos: number) => groupStandings(s, gi)[pos]?.team;
+    return ([[0, 1], [1, 0], [2, 3], [3, 2]] as const)
+        .map(([g3, g4]) => [at(g3, 2), at(g4, 3)] as const)
+        .filter((p): p is readonly [string, string] => !!p[0] && !!p[1])
+        .map(([a, b]) => [a, b] as [string, string]);
+}
+
 export function roundLabel(s: TourState): string {
+    if (s.stage === 'ko' && s.rep?.includes(s.me)) return 'Repechaje por la plaza';
     if (s.stage === 'ko') return koLabel(s.alive.length);
     if (!s.hasKo) return `Fecha ${s.round + 1} de ${s.rounds.length}`;
     if (s.groups.length === 1) return `Fase regular · fecha ${s.round + 1} de ${s.rounds.length}`;
@@ -432,7 +449,8 @@ function koPairs(s: TourState): [string, string][] {
 /** Los partidos que se juegan en la fecha actual: los cruces con un libre no cuentan. */
 function currentPairs(s: TourState): [string, string][] {
     if (s.stage === 'grupos') return s.rounds[s.round] ?? [];
-    return koPairs(s).filter(([a, b]) => a !== BYE && b !== BYE);
+    const pairs = koPairs(s).filter(([a, b]) => a !== BYE && b !== BYE);
+    return s.rep ? [...pairs, s.rep] : pairs;
 }
 
 /** El rival del usuario en la fecha actual, o null si tiene fecha libre o ya no juega. */
@@ -655,11 +673,28 @@ export function closeRound(prev: TourState, mine: [number, number] | null, mineE
             const padded = [...q, ...Array<string>(size - q.length).fill(BYE)];
             s.koStart = size;
             s.alive = seedOrder(size).map((i) => padded[i]);
-            if (!s.alive.includes(s.me)) s.eliminated = true;
+            if (!s.alive.includes(s.me)) {
+                // Federales: el 3.º y el 4.º de su zona no quedan afuera, juegan el repechaje con los cuartos.
+                const repPair = def.stage.kind === 'grupos' && def.stage.rep && s.groups.length >= 4 ? repechajePairs(s).find((p) => p.includes(s.me)) : undefined;
+                if (repPair) s.rep = repPair;
+                else s.eliminated = true;
+            }
         }
     } else {
-        s.koHistory.push({ label, results });
-        const winner = new Map(results.map((r) => [`${r.a}|${r.b}`, r.sa > r.sb ? r.a : r.b]));
+        let koResults = results;
+        const repPair = s.rep;
+        if (repPair) {
+            // El repechaje del usuario se juega en la fecha de los cuartos, pero no es parte del cuadro.
+            const rr = results.find((r) => r.a === repPair[0] && r.b === repPair[1]);
+            if (rr) {
+                s.repResult = rr;
+                s.koHistory.push({ label: 'Repechaje por la plaza', results: [rr] });
+                koResults = results.filter((r) => r !== rr);
+            }
+            s.rep = null;
+        }
+        s.koHistory.push({ label: koLabel(s.alive.length), results: koResults });
+        const winner = new Map(koResults.map((r) => [`${r.a}|${r.b}`, r.sa > r.sb ? r.a : r.b]));
         s.alive = koPairs(s).map(([a, b]) => (a === BYE ? b : b === BYE ? a : winner.get(`${a}|${b}`) as string));
         if (!s.alive.includes(s.me)) s.eliminated = true;
         if (s.alive.length === 1) {

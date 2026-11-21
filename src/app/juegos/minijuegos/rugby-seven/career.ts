@@ -1230,7 +1230,8 @@ const tierDef = (t: TierId, teams: string[], season: number): TourDef => ({
     cat: 'Argentina',
     teams,
     formatLabel: '4 zonas de 4 a dos ruedas · 1.º y 2.º a cuartos · 3.º y 4.º al repechaje',
-    stage: { kind: 'grupos', groups: 4, advance: 2, legs: 2 },
+    // El repechaje (3.º y 4.º de zonas cruzadas) se juega dentro del torneo, con los cuartos; el último nivel no lo tiene.
+    stage: { kind: 'grupos', groups: 4, advance: 2, legs: 2, rep: t !== 'tdiB' },
 });
 
 const legacyTdiDef = (which: 'A' | 'B', teams: string[], season: number): TourDef => ({
@@ -1461,7 +1462,8 @@ function totalDates(t: TourState): number {
     let ko = 0;
     if (def?.stage.kind === 'ko') ko = Math.ceil(Math.log2(Math.max(2, def.teams.length)));
     else if (t.hasKo && def?.stage.kind === 'grupos') ko = Math.ceil(Math.log2(Math.max(2, def.stage.advance * t.groups.length + (def.stage.bestThirds ?? 0))));
-    return Math.max(1, t.rounds.length + ko);
+    // El repechaje del usuario suma una entrada al historial del cuadro.
+    return Math.max(1, t.rounds.length + ko + (t.rep || t.repResult ? 1 : 0));
 }
 
 /** En qué punto de la temporada cae la próxima fecha de un torneo (0 a 1). */
@@ -1732,6 +1734,16 @@ function settleLiga(s: TourState, r: CareerState) {
             .map(([g3, g4]) => ({ a: zone(g3, 2), b: zone(g4, 3) }))
             .filter((m): m is PlazaMatch => !!m.a && !!m.b);
         const semis = low.koHistory.find((h) => h.results.length === 2)?.results.flatMap((x) => [x.a, x.b]) ?? [];
+        // Si el usuario ya jugó su repechaje dentro del torneo, queda asentado (y no se vuelve a jugar).
+        const rr = up.repResult;
+        const mine = rr ? rep.find((m) => m.a === rr.a && m.b === rr.b) : undefined;
+        if (rr && mine) {
+            mine.score = [rr.sa, rr.sb];
+            mine.winner = rr.sa > rr.sb ? rr.a : rr.b;
+            archiveMatch(r, 'plazas', 'Plazas de los federales', `Repechaje del ${TIER_NAME[order[i]]}`, rr.a, rr.b, rr.sa, rr.sb);
+            const won = mine.winner === r.me;
+            r.pending.note.push(won ? `Ganaste el repechaje: tu región conserva la plaza del ${TIER_NAME[order[i]]}.` : 'Perdiste el repechaje: vas a la reválida.');
+        }
         disputes.push({ up: order[i], low: order[i + 1], rep, rev: null, semis });
     }
     if (states.tdiB) {

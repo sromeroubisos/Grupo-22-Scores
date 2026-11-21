@@ -318,6 +318,8 @@ export class SevenMatch {
     private offloadTried = false;
     /** Quién se metió primero sobre la pelota en el ruck en curso. */
     private ruckFirst: Side | null = null;
+    /** El sorteo del ruck en curso, tirado al armarse: fija la raya que la barra tiene que cruzar. */
+    private ruckRoll = 0.5;
     /** El que se agacha a levantar la pelota del ruck (un paso, sin cortar el juego). */
     private pickup: { p: Player; t: number } | null = null;
     /** Segundos de gracia del que sale jugando de un ruck, scrum o line: nadie lo tacklea. */
@@ -1968,6 +1970,7 @@ export class SevenMatch {
         this.phase = 'ruck';
         this.phaseT = 1.3;
         this.mg = { kind: 'ruck', mash: 0 };
+        this.ruckRoll = rnd();
         this.say('TACKLE', null, 0.8);
         this.buildRuck(c, df);
     }
@@ -2019,6 +2022,15 @@ export class SevenMatch {
         return { keep: clamp(keep, 0.3, 0.98), alone, jackal };
     }
 
+    /**
+     * La raya que tu lado de la barra tiene que cruzar para quedarse con la pelota (0 a 1).
+     * Sale del sorteo fijado al armarse el ruck: si tenías la pelota gana el que supera
+     * `roll`; si la tenía el rival, el que supera `1 - roll`.
+     */
+    private ruckLine(): number {
+        return this.ruckAt.side === 0 ? this.ruckRoll : 1 - this.ruckRoll;
+    }
+
     private updateRuck(dt: number) {
         const mash = this.mg?.kind === 'ruck' ? this.mg.mash : 0;
         // Los que llegan al ruck corren y se agachan; el resto va a su lugar.
@@ -2066,7 +2078,9 @@ export class SevenMatch {
          */
         const other: Side = side === 0 ? 1 : 0;
         const { keep, alone, jackal } = this.ruckKeep(mash / 1.3);
-        const winner: Side = rnd() < keep ? side : other;
+        // Gana el que cruza la raya de la barra: el mismo sorteo que se ve (ruckLine), sin tirar otro al final.
+        const userWin = side === 0 ? keep : 1 - keep;
+        const winner: Side = userWin > this.ruckLine() ? 0 : 1;
         this.mg = null;
         if (winner !== side) {
             const why = alone ? 'Quedó solo: nadie llegó a apoyar' : jackal ? 'Llegaron primero sobre la pelota' : side === 0 ? 'Empujaron más: tocá más rápido' : 'Empujaste más y la ganaste';
@@ -2484,8 +2498,9 @@ export class SevenMatch {
             ctx.fillRect(x0, y0, split, 8);
             ctx.fillStyle = this.kits[1].shirt;
             ctx.fillRect(x0 + split, y0, w - split, 8);
+            // La raya amarilla: hay que pasarla con tu color. Si la barra termina de tu lado, ganás.
             ctx.fillStyle = '#f0c419';
-            ctx.fillRect(x0 + Math.round(w / 2), y0 - 3, 1, 14);
+            ctx.fillRect(x0 + Math.round(this.ruckLine() * w), y0 - 3, 2, 14);
             return;
         }
         ctx.fillStyle = '#141218';
