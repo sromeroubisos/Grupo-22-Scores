@@ -119,6 +119,8 @@ import {
     type NacFormat,
 } from './career';
 import { advanceRoad, AUTO_QUALIFIED, createRoad, PHASE_LABEL, regionalDef, regionFor, regionName, roadEligible, roadVerdict } from './road';
+import { advanceIntl, compName, createIntl, intlBoosts, intlInvest, intlNames, intlSign, intlStartComp, intlVerdict, isWcYear } from './intl';
+import { IntlRanking, IntlSeason, IntlSquad, IntlUnion } from './IntlPanels';
 import { advanceSvns, createSvns, SVNS_LEGS, SVNS_PHASE_LABEL, svnsBoosts, svnsRegionName, svnsStartTier, svnsTable, svnsVerdict, TIER_LABEL } from './svns';
 import { CloudSync, type CloudStatus } from './cloudSave';
 import styles from './seven.module.css';
@@ -137,6 +139,7 @@ type Screen =
     | { k: 'customSetup' }
     | { k: 'roadSetup'; step: 1 | 2 }
     | { k: 'svnsSetup'; step: 1 | 2 }
+    | { k: 'intlSetup'; step: 1 | 2 }
     | { k: 'newPick' }
     | { k: 'careerSetup'; step: 0 | 1 | 2 }
     | { k: 'tour' }
@@ -145,7 +148,7 @@ type Screen =
     | { k: 'match'; cfg: MatchConfig; mode: Mode; nonce: number }
     | { k: 'result'; cfg: MatchConfig; mode: Mode; score: [number, number] };
 
-type HubTab = 'tabla' | 'calendario' | 'cuadro' | 'resultados' | 'goleadores' | 'otros' | 'plantel' | 'club' | 'palmares' | 'camino' | 'carrera' | 'circuito';
+type HubTab = 'tabla' | 'calendario' | 'cuadro' | 'resultados' | 'goleadores' | 'otros' | 'plantel' | 'club' | 'palmares' | 'camino' | 'carrera' | 'circuito' | 'ranking' | 'union' | 'temporada';
 
 interface Category {
     name: string;
@@ -765,7 +768,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
 
     const allTeams = useMemo(() => [...customTeams, ...NATIONS, ...FEM_NATIONS, ...CLUBS, ...AR_CLUBS, ...PRESET_TEAMS], [customTeams]);
     // Nivel de los equipos propios y, en una carrera, lo que cada club ganó o perdió con las temporadas.
-    setRatingContext(Object.fromEntries(customTeams.map((t) => [t.id, t.rating ?? 70])), tour?.career ? careerBoosts(tour.career) : tour?.svns ? svnsBoosts(tour.svns) : undefined);
+    setRatingContext(Object.fromEntries(customTeams.map((t) => [t.id, t.rating ?? 70])), tour?.career ? careerBoosts(tour.career) : tour?.svns ? svnsBoosts(tour.svns) : tour?.intl ? intlBoosts(tour.intl) : undefined);
     // En una carrera: quién juega en cada puesto y la localía; afuera, nada.
     if (tour?.career) applyCareerContext(tour.career);
     else setCareerContext();
@@ -773,7 +776,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
         const t = allTeams.find((x) => x.id === id) ?? null;
         if (!t) return t;
         // En una carrera: el plantel de este año (retiros, cantera, nombres editados) y el nivel que ganó o perdió.
-        const names = tour?.career ? careerNames(tour.career, t) : null;
+        const names = tour?.career ? careerNames(tour.career, t) : tour?.intl && t.id === tour.intl.me ? intlNames(tour.intl) : null;
         const boosted = ratingBoost(t.id) ? Math.round(ratingOf(t.id)) : null;
         if (!names && boosted === null) return t;
         return { ...t, ...(boosted !== null ? { rating: boosted } : {}), ...(names ? { names } : {}) };
@@ -912,6 +915,21 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
         setHubTab('tabla');
     };
 
+    const startIntl = () => {
+        if (!mine) return;
+        persist({ tour: createIntl(mine, difficulty, duration) });
+        setHubTab('tabla');
+        setScreen({ k: 'tour' });
+    };
+
+    const nextIntlStage = () => {
+        if (!tour) return;
+        const t = advanceIntl(tour);
+        persist({ tour: t });
+        // Al cerrar el año, a la temporada nueva (ahí está el resumen del cierre).
+        setHubTab(t.intl && tour.intl && t.intl.season !== tour.intl.season ? 'temporada' : 'tabla');
+    };
+
     const startSvns = () => {
         if (!mine) return;
         persist({ tour: createSvns(mine, difficulty, duration) });
@@ -1009,6 +1027,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
         customSetup: 'Torneo personalizado',
         roadSetup: 'Road to Rugby World Cup',
         svnsSetup: 'Circuito SVNS',
+        intlSetup: 'Carrera internacional',
         careerSetup: 'Modo carrera',
         newPick: 'Nuevo torneo',
         tour: tourDef?.name ?? 'Torneo',
@@ -1166,6 +1185,24 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                 <strong>Circuito SVNS</strong>
                                 <span>{tours.some((t) => !t) ? 'Una selección de seven, del regional al SVNS 1. Varones y mujeres.' : 'Las tres partidas están ocupadas: borrá una para empezar.'}</span>
                             </button>
+                            <button
+                                type="button"
+                                role="menuitem"
+                                className={styles.menuBtn}
+                                onClick={() => {
+                                    const free = tours.findIndex((t) => !t);
+                                    if (free < 0) {
+                                        setScreen({ k: 'slots' });
+                                        return;
+                                    }
+                                    setSlot(free);
+                                    setScreen({ k: 'intlSetup', step: 1 });
+                                }}
+                            >
+                                <span className={styles.menuIcon} aria-hidden="true">◎</span>
+                                <strong>Carrera internacional</strong>
+                                <span>{tours.some((t) => !t) ? 'Una selección de XV, año tras año: divisiones, Mundial, ranking en vivo y el desarrollo de tu país.' : 'Las tres partidas están ocupadas: borrá una para empezar.'}</span>
+                            </button>
                             <button type="button" role="menuitem" className={styles.menuBtn} onClick={() => setScreen(cupLive ? { k: 'cup' } : { k: 'cupSetup', step: 1 })}>
                                 <span className={styles.menuIcon} aria-hidden="true">♛</span>
                                 <strong>{cupLive ? 'Seguir la Copa Seven' : 'Copa Seven'}</strong>
@@ -1211,17 +1248,17 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                             {tours.map((t, i) => {
                                 const d = t ? defOf(t) : null;
                                 const me = t ? byId(t.me) : null;
-                                const finished = !!t && !t.career && !t.svns && (t.road ? t.road.out || (t.road.phase === 'wc' && t.done) : t.done || t.eliminated);
+                                const finished = !!t && !t.career && !t.svns && !t.intl && (t.road ? t.road.out || (t.road.phase === 'wc' && t.done) : t.done || t.eliminated);
                                 return (
                                     <section key={i} className={`${styles.saveSlot} ${i === slot && t ? styles.saveSlotOn : ''}`} aria-label={`Partida ${i + 1}`}>
                                         <header className={styles.slotHead}>Partida {i + 1}</header>
                                         {t && d ? (
                                             <>
-                                                <strong className={styles.saveTitle}>{t.svns ? `Circuito SVNS · temporada ${t.svns.season}` : t.road ? 'Road to Rugby World Cup' : t.career ? `Carrera · temporada ${t.career.season}` : d.name}</strong>
+                                                <strong className={styles.saveTitle}>{t.intl ? `Carrera internacional · ${t.intl.season}` : t.svns ? `Circuito SVNS · temporada ${t.svns.season}` : t.road ? 'Road to Rugby World Cup' : t.career ? `Carrera · temporada ${t.career.season}` : d.name}</strong>
                                                 <span className={styles.saveTeam}>
                                                     <FlagIcon code={me?.flag} size={20} /> {me?.name ?? 'Equipo borrado'}
                                                 </span>
-                                                <span className={styles.saveMeta}>{t.svns ? `${SVNS_PHASE_LABEL[t.svns.phase]} · ${d.name}` : t.road ? `${PHASE_LABEL[t.road.phase]} · ${d.name}` : t.career ? `${CAREER_PHASE_LABEL[t.career.phase]} · ${d.name}` : d.formatLabel}</span>
+                                                <span className={styles.saveMeta}>{t.intl ? d.name : t.svns ? `${SVNS_PHASE_LABEL[t.svns.phase]} · ${d.name}` : t.road ? `${PHASE_LABEL[t.road.phase]} · ${d.name}` : t.career ? `${CAREER_PHASE_LABEL[t.career.phase]} · ${d.name}` : d.formatLabel}</span>
                                                 <span className={styles.saveMeta}>
                                                     {finished ? (t.champion === t.me ? 'Terminada · campeón' : 'Terminada') : roundLabel(t)} · {DIFFICULTIES.find((x) => x.id === t.difficulty)?.label} · {t.duration} min
                                                 </span>
@@ -1332,6 +1369,11 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                             <button type="button" className={styles.pickCard} onClick={() => setScreen({ k: 'svnsSetup', step: 1 })}>
                                 <strong>Circuito SVNS</strong>
                                 <span>Una selección de seven, temporada tras temporada: del regional al SVNS 3, al SVNS 2 y al SVNS 1, con ascensos y descensos.</span>
+                                <small>Selecciones · varones y mujeres</small>
+                            </button>
+                            <button type="button" className={`${styles.pickCard} ${styles.pickCardAlt}`} onClick={() => setScreen({ k: 'intlSetup', step: 1 })}>
+                                <strong>Carrera internacional</strong>
+                                <span>Una selección de XV, año tras año: subís de división, buscás el Mundial y desarrollás el rugby de tu país. Ranking de World Rugby en vivo.</span>
                                 <small>Selecciones · varones y mujeres</small>
                             </button>
                         </div>
@@ -1611,6 +1653,54 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                     );
                 })()}
 
+                {screen.k === 'intlSetup' && (() => {
+                    const byRating = (a: SevenTeam, b: SevenTeam) => (b.rating ?? 0) - (a.rating ?? 0);
+                    const cats: Category[] = [
+                        ...ZONES.map((z) => ({ name: z, group: 'Varones', kind: 'Continente', teams: NATIONS.filter((t) => NATION_ZONE[t.id] === z).sort(byRating) })),
+                        ...ZONES.map((z) => ({ name: `${z} · femenino`, group: 'Mujeres', kind: 'Continente', teams: FEM_NATIONS.filter((t) => NATION_ZONE[t.id] === z).sort(byRating) })),
+                    ];
+                    const valid = !!mine && (mine.startsWith('nat-') || mine.startsWith('natf-'));
+                    const fem = !!mine && mine.startsWith('natf-');
+                    return screen.step === 1 ? (
+                        <div className={styles.body}>
+                            <div className={styles.single}>
+                                <TeamChooser label="Tu selección" teamId={valid ? mine : null} onChange={setMine} categories={cats} />
+                                {valid && mine && <p className={styles.note}>Arrancás en 2026, en el {intlStartComp(mine)}.</p>}
+                            </div>
+                            <div className={styles.footerBtns}>
+                                {btn('◀ Partidas', () => setScreen({ k: 'slots' }))}
+                                {!valid && <span className={styles.missing}>Elegí una selección (varones o mujeres) para empezar.</span>}
+                                {btn('Siguiente ▶', () => setScreen({ k: 'intlSetup', step: 2 }), true, !valid)}
+                            </div>
+                        </div>
+                    ) : (
+                        <div className={styles.body}>
+                            <SettingsStep teams={[byId(mine)]} difficulty={difficulty} setDifficulty={setDifficulty} duration={duration} setDuration={setDuration} />
+                            <div className={styles.roadInfo}>
+                                <strong>Cómo es la carrera</strong>
+                                {fem ? (
+                                    <>
+                                        <span>Cada año: tu regional (Women’s Six Nations, Pacific Four, Rugby Europe, Asia, África, Oceanía o Américas) y, si estás adentro, el WXV en septiembre-octubre. El Mundial es en 2029 y 2033: lo juegan las 16 mejores del ranking.</span>
+                                        <span>En el WXV y en Europa sube la campeona del escalón de abajo y baja la última.</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <span>Cada año: tu regional (Six Nations, Rugby Europe Championship, Trophy o Conference, Rugby Championship, Pacific Nations Cup, Sudamérica, Asia o África), y en julio y noviembre el Nations Championship, la Nations Cup o los test.</span>
+                                        <span>En Europa y Sudamérica sube el campeón de abajo y baja el último. Desde 2030, el campeón de la Nations Cup sube al Nations Championship.</span>
+                                        <span>Mundial en 2027, 2031, 2035… Al siguiente van directo las 12 mejores; el resto se gana en los regionales del año anterior y en los repechajes.</span>
+                                    </>
+                                )}
+                                <span>Entre torneo y torneo dirigís la unión: liga local, academia, staff y red de elegibles. Los plazos son los del rugby: un juvenil tarda 3 años en llegar y uno por residencia, 5.</span>
+                            </div>
+                            <p className={styles.note}>Se guarda en la partida {slot + 1}{tour ? ', en lugar de la que había' : ''}.</p>
+                            <div className={styles.footerBtns}>
+                                {btn('◀ Selección', () => setScreen({ k: 'intlSetup', step: 1 }))}
+                                {btn('Empezar la carrera ▶', startIntl, true, !valid)}
+                            </div>
+                        </div>
+                    );
+                })()}
+
                 {screen.k === 'svnsSetup' && (() => {
                     const byRating = (a: SevenTeam, b: SevenTeam) => (b.rating ?? 0) - (a.rating ?? 0);
                     const cats: Category[] = [
@@ -1726,7 +1816,8 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                     const road = tour.road ?? null;
                     const career = tour.career ?? null;
                     const svns = tour.svns ?? null;
-                    const verdict = road ? roadVerdict(tour) : career ? careerVerdict(tour) : svns && tour.done ? svnsVerdict(tour) : null;
+                    const intl = tour.intl ?? null;
+                    const verdict = road ? roadVerdict(tour) : career ? careerVerdict(tour) : svns && tour.done ? svnsVerdict(tour) : intl && tour.done ? intlVerdict(tour) : null;
                     const tabs: [HubTab, string][] = [
                         ...(onlyKo ? [] : [['tabla', tour.groups.length > 1 ? (tour.cross ? 'Conferencias' : 'Grupos') : 'Tabla'] as ['tabla', string]]),
                         ['calendario', 'Calendario'],
@@ -1734,6 +1825,14 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                         ['resultados', 'Resultados'],
                         ...(road ? [['camino', 'Camino al Mundial'] as ['camino', string]] : []),
                         ...(svns ? [['circuito', 'Circuito'] as ['circuito', string]] : []),
+                        ...(intl
+                            ? ([
+                                  ['ranking', 'Ranking'],
+                                  ['temporada', 'Temporada'],
+                                  ['union', 'Unión'],
+                                  ['plantel', 'Plantel'],
+                              ] as [HubTab, string][])
+                            : []),
                         ...(tour.stats ? [['goleadores', 'Goleadores'] as ['goleadores', string]] : []),
                         ...(career?.others ? [['otros', 'Otros torneos'] as ['otros', string]] : []),
                         ...(career?.rosters ? [['plantel', 'Plantel'] as ['plantel', string]] : []),
@@ -1745,7 +1844,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                     const di = DIFFICULTIES.findIndex((d) => d.id === tour.difficulty);
                     const du = DURATIONS.indexOf(tour.duration);
                     const careerWins = career && tour.done ? pendingCelebration(career) : [];
-                    const soloKey = !career && !road && !svns && tour.done && tour.champion === tour.me ? `${tour.tourId}:${tour.groupHistory.length}:${tour.koHistory.length}` : null;
+                    const soloKey = !career && !road && !svns && !intl && tour.done && tour.champion === tour.me ? `${tour.tourId}:${tour.groupHistory.length}:${tour.koHistory.length}` : null;
                     const celebrateTeam = careerWins.length || (soloKey && soloKey !== celebratedKey) ? byId(tour.me) : null;
                     const preseason = !!career && inPreseason(career) && !tour.done;
                     const news = career && !celebrateTeam ? unseenNews(career)[0] ?? null : null;
@@ -1782,6 +1881,12 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                             <div className={styles.hub}>
                                 <div className={styles.nextCard}>
                                     {road && <span className={styles.roadChip}>⚑ {nameOf(road.me)} · {PHASE_LABEL[road.phase]}</span>}
+                                    {intl && (
+                                        <span className={styles.roadChip}>
+                                            ◎ {nameOf(intl.me)} · {intl.season} · {compName(intl.plan[intl.step])}
+                                            {isWcYear(intl.gender, intl.season) ? ' · año de Mundial' : ''}
+                                        </span>
+                                    )}
                                     {svns && <span className={styles.roadChip}>✦ {nameOf(svns.me)} · Temporada {svns.season} · {SVNS_PHASE_LABEL[svns.phase]}</span>}
                                     {career && <span className={styles.roadChip}>⚑ {nameOf(career.me)} · Temporada {career.season} · {CAREER_PHASE_LABEL[career.phase]}</span>}
                                     {career?.parallel && !career.parallel.done && (
@@ -1789,7 +1894,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                             En paralelo: {(defOf(career.parallel)?.name ?? '').replace(/ \d{4}$/, '')} · {roundLabel(career.parallel).toLowerCase()}
                                         </span>
                                     )}
-                                    {(road || career || svns) && tour.done && verdict ? (
+                                    {(road || career || svns || intl) && tour.done && verdict ? (
                                         <>
                                             <div className={styles.champBox}>
                                                 <span>{verdict.title}</span>
@@ -1885,7 +1990,9 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                                 ? { label: `${verdict.next} ▶`, run: nextRoadStage }
                                                 : svns && verdict?.next
                                                   ? { label: `${verdict.next} ▶`, run: nextSvnsStage }
-                                                  : null;
+                                                  : intl && verdict?.next
+                                                    ? { label: `${verdict.next} ▶`, run: nextIntlStage }
+                                                    : null;
                                         return (
                                             <div className={styles.hubActions}>
                                                 {!preseason && (
@@ -2229,6 +2336,10 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                                 )}
                                             </div>
                                         )}
+                                        {tab === 'ranking' && intl && <IntlRanking r={intl} nameOf={nameOf} flag={(id) => <FlagIcon code={flagOf(id)} size={14} />} />}
+                                        {tab === 'temporada' && intl && <IntlSeason r={intl} done={tour.done} nameOf={nameOf} flag={(id) => <FlagIcon code={flagOf(id)} size={14} />} />}
+                                        {tab === 'union' && intl && <IntlUnion r={intl} onInvest={(a) => persist({ tour: intlInvest(tour, a) })} />}
+                                        {tab === 'plantel' && intl && <IntlSquad r={intl} onSign={(id) => persist({ tour: intlSign(tour, id) })} />}
                                         {tab === 'circuito' && svns && (
                                             <div className={styles.roadPanel}>
                                                 {svnsTable(tour) && (
