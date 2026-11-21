@@ -32,7 +32,13 @@ export interface Look {
     hair: number;
     style: number;
     beard?: boolean;
+    /** Jugadora: el peinado sale de FEM_STYLES (pelo largo, colita, trenzas) y nunca lleva barba. */
+    fem?: boolean;
 }
+
+/** Peinados de las jugadoras. El largo cae por la espalda y la colita se mueve al correr. */
+export const FEM_STYLES = ['colita', 'colitaVincha', 'melena', 'trenzasLargas', 'rodeteAlto', 'rulosLargos'] as const;
+export type FemStyle = (typeof FEM_STYLES)[number];
 
 export type Pattern = 'liso' | 'aros' | 'banda';
 
@@ -124,6 +130,105 @@ const HAIR_TOP: Record<HairStyle, string[]> = {
         'OsSSSSSSSSSSSO',
     ],
 };
+
+const FEM_TOP: Record<FemStyle, string[]> = {
+    colita: [
+        '..............',
+        '....OOOOOO....',
+        '..OOHLLHHHOO..',
+        '.OHHLHHHHLHHO.',
+        'OHHHHHHHHHHHHO',
+        'OHhHHHHHSHHSHO',
+        'OHhSSSSSSSSSSO',
+    ],
+    colitaVincha: [
+        '..............',
+        '....OOOOOO....',
+        '..OOHLLHHHOO..',
+        '.OHHLHHHHLHHO.',
+        'OWWWWWWWWWWWWO',
+        'OwwwwwwwwwwwwO',
+        'OHhSSSSSSSSSSO',
+    ],
+    melena: [
+        '..............',
+        '...OOOOOOO....',
+        '..OHLLHHLHOO..',
+        '.OHHLHHHHHLHO.',
+        'OHHHHHHHHHHHHO',
+        'OHhHHHHHHSHHHO',
+        'OHhHSSSSSSSSSO',
+    ],
+    trenzasLargas: [
+        '..............',
+        '....OOOOOO....',
+        '..OOHLHLHLOO..',
+        '.OHHLHHLHHHHO.',
+        'OHHHHHHHHHHHHO',
+        'OHhHHHHSSSSSHO',
+        'OHhSSSSSSSSSSO',
+    ],
+    rodeteAlto: [
+        '..OOOO........',
+        '.OHLLHO.......',
+        '.OHHHOOOOOO...',
+        '.OhOHLLHHHHOO.',
+        'OHHHHHHHHHHHHO',
+        'OHhHHHHHSHHSHO',
+        'OHhSSSSSSSSSSO',
+    ],
+    rulosLargos: [
+        '..OO.OO.OO....',
+        '.OLHOLHOLHOO..',
+        'OHHHHHHHHHHHO.',
+        'OHLHHLHHLHHHHO',
+        'OHhHHHHHHHHHHO',
+        'OHhHHSHSSHSHHO',
+        'OHhHSSSSSSSSSO',
+    ],
+};
+
+/*
+ * Lo que cae por la espalda, mirando a la derecha (la nuca queda a la
+ * izquierda). Se pinta antes que la cabeza, así el contorno de la cabeza tapa
+ * el nacimiento. `quieta` de pie; `vuelo` corriendo, con la colita hacia atrás.
+ */
+const FEM_BACK: Record<FemStyle, { quieta: string[]; vuelo: string[]; y: number; vy: number } | null> = {
+    colita: {
+        y: 1,
+        quieta: ['...OO', '..OHH', '.OHLH', '.OHhH', 'OHHhO', 'OHhO.', 'OHhO.', 'OhhO.', '.OhO.', '..O..'],
+        vy: 2,
+        vuelo: ['.OOOO', 'OHLHH', 'OhHhH', '.OhhO', '..OO.'],
+    },
+    colitaVincha: {
+        y: 1,
+        quieta: ['...OO', '..OHH', '.OHLH', '.OHhH', 'OHHhO', 'OHhO.', 'OHhO.', 'OhhO.', '.OhO.', '..O..'],
+        vy: 2,
+        vuelo: ['.OOOO', 'OHLHH', 'OhHhH', '.OhhO', '..OO.'],
+    },
+    melena: {
+        y: 3,
+        quieta: ['..OHH', '.OHHH', 'OHHLH', 'OHhHH', 'OHhHH', 'OHhHH', 'OHhhH', 'OhhhO', '.OhO.', '..O..'],
+        vy: 3,
+        vuelo: ['..OHH', '.OHHH', 'OHLHH', 'OHhHH', 'OhHhH', 'OhhhO', '.OhO.', '..O..'],
+    },
+    trenzasLargas: {
+        y: 5,
+        quieta: ['..OHH', '.OhO.', '.OHO.', '.OhO.', '.OHO.', '.OhO.', '.OWO.', '..O..'],
+        vy: 5,
+        vuelo: ['..OHH', '.OhO.', 'OHO..', 'OhO..', 'OHO..', 'OWO..', '.O...'],
+    },
+    rodeteAlto: null,
+    rulosLargos: {
+        y: 3,
+        quieta: ['..OHH', '.OLHH', 'OHHhH', 'OHLHH', 'OhHHH', 'OHhLH', 'OhHhO', '.OhO.', '..O..'],
+        vy: 3,
+        vuelo: ['..OHH', '.OLHH', 'OHHhH', 'OhLHH', 'OHhhO', '.OhO.', '..O..'],
+    },
+};
+
+/* La cara de una jugadora: pestañas en el borde de cada ojo y la boca marcada. */
+const FEM_MOUTH = '#b9566a';
 
 const FACE = [
     'OsSSSSSESSSESO',
@@ -225,7 +330,12 @@ const LEGS = {
  */
 const dropCols = (rows: string[], cols: number[]) => rows.map((r) => [...r].filter((_, i) => !cols.includes(i)).join(''));
 for (const k of Object.keys(HAIR_TOP) as HairStyle[]) HAIR_TOP[k] = dropCols(HAIR_TOP[k], [4, 9]);
+for (const k of Object.keys(FEM_TOP) as FemStyle[]) FEM_TOP[k] = dropCols(FEM_TOP[k], [4, 9]);
 const FACE_N = dropCols(FACE, [4, 9]);
+/* Con el pelo largo, la nuca sigue con pelo hasta la mandíbula. */
+/* Las columnas de los ojos en la cara ya angostada. */
+const FEM_EYES = [...FACE_N[0]].flatMap((ch, i) => (ch === 'E' ? [i] : []));
+const FACE_LONG = FACE_N.map((r, i) => (i < 3 ? r.slice(0, 1) + 'h' + r.slice(2) : r));
 const BEARD_N = BEARD.map((r) => (r ? dropCols([r], [4, 9])[0] : null));
 for (const k of Object.keys(TORSO) as (keyof typeof TORSO)[]) TORSO[k] = dropCols(TORSO[k], [5, 10]);
 
@@ -339,7 +449,7 @@ function paintRows(
 const cache = new Map<string, HTMLCanvasElement>();
 
 function lookKey(look: Look, kit: Kit): string {
-    return `${look.skin}.${look.hair}.${look.style}.${look.beard ? 1 : 0}|${kit.shirt}${kit.shirt2}${kit.shorts}${kit.socks}${kit.pattern}${kit.collar ?? ''}`;
+    return `${look.skin}.${look.hair}.${look.style}.${look.beard ? 1 : 0}${look.fem ? 'f' : ''}|${kit.shirt}${kit.shirt2}${kit.shorts}${kit.socks}${kit.pattern}${kit.collar ?? ''}`;
 }
 
 /** Cuadro cacheado de un jugador, mirando a la derecha. */
@@ -361,6 +471,8 @@ export function playerSprite(look: Look, kit: Kit, frame: Frame): HTMLCanvasElem
     const hairDark = shade(hair, -30);
     const hairLight = shade(hair, 40);
     const style = HAIR_STYLES[look.style % HAIR_STYLES.length];
+    const femStyle = look.fem ? FEM_STYLES[look.style % FEM_STYLES.length] : null;
+    const back = femStyle ? FEM_BACK[femStyle] : null;
     const shirtDark = shadeFor(kit.shirt);
     const collar = kit.collar ?? (kit.pattern === 'liso' ? kit.shirt2 : OUTLINE);
 
@@ -380,7 +492,21 @@ export function playerSprite(look: Look, kit: Kit, frame: Frame): HTMLCanvasElem
         }
     };
 
-    const paintHead = (hx: number, hy: number) => {
+    const paintHead = (hx: number, hy: number, moving = false) => {
+        // El pelo largo va detrás de la cabeza: primero, así el contorno de la cabeza lo tapa.
+        if (femStyle) {
+            // Un píxel más adelante que la de los varones: así la colita asoma por la nuca.
+            const fx = hx + 1;
+            if (back) paintRows(ctx, moving ? back.vuelo : back.quieta, fx - 3, hy + (moving ? back.vy : back.y), headColor);
+            paintRows(ctx, FEM_TOP[femStyle], fx, hy, headColor);
+            paintRows(ctx, back && femStyle !== 'colita' && femStyle !== 'colitaVincha' ? FACE_LONG : FACE_N, fx, hy + 7, headColor);
+            // Pestañas (arriba y al costado de cada ojo) y la boca.
+            ctx.fillStyle = OUTLINE;
+            for (const ex of FEM_EYES) ctx.fillRect(fx + ex + 1, hy + 6, 1, 1);
+            ctx.fillStyle = FEM_MOUTH;
+            ctx.fillRect(fx + FEM_EYES[1] - 1, hy + 9, 2, 1);
+            return;
+        }
         paintRows(ctx, HAIR_TOP[style], hx, hy, headColor);
         paintRows(ctx, look.beard ? FACE_N.map((f, i) => BEARD_N[i] ?? f) : FACE_N, hx, hy + 7, headColor);
     };
@@ -409,7 +535,7 @@ export function playerSprite(look: Look, kit: Kit, frame: Frame): HTMLCanvasElem
             }
         };
         paintRows(ctx, body.back, 0, 0, diveColor);
-        paintHead(body.head.x, body.head.y);
+        paintHead(body.head.x, body.head.y, true);
         paintRows(ctx, body.front, 0, 0, diveColor);
         cache.set(key, cv);
         return cv;
@@ -447,9 +573,9 @@ export function playerSprite(look: Look, kit: Kit, frame: Frame): HTMLCanvasElem
         }
     });
 
-    paintHead(2, top);
+    paintHead(2, top, frame === 'run1' || frame === 'run3' || frame === 'pass');
 
-    if (style === 'trenzas') {
+    if (!femStyle && style === 'trenzas') {
         // Las trenzas caen por la espalda, sobre el hombro de atrás.
         paintRows(ctx, ['Oh', 'hO', 'Oh', 'hO', 'OO'], 1, top + 8, headColor);
     }
@@ -480,6 +606,14 @@ export function drawBall(ctx: CanvasRenderingContext2D, x: number, y: number) {
     ctx.fillStyle = '#8a8478';
     ctx.fillRect(px - 1, py - 1, 3, 1);
 }
+
+/** La misma cara, de jugadora: peinado de pelo largo y sin barba. */
+export function femLook(l: Look): Look {
+    return { skin: l.skin, hair: l.hair === 7 ? 1 : l.hair, style: l.style % FEM_STYLES.length, fem: true };
+}
+
+/** ¿Es un club femenino? (Argentina y España: los ids empiezan con af- y ef-). */
+export const isFemClub = (id: string) => id.startsWith('af-') || id.startsWith('ef-');
 
 export function randomLook(rand: () => number = Math.random): Look {
     return {

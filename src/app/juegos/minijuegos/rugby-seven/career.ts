@@ -42,7 +42,7 @@
  */
 
 import { AR_LABEL_OVERRIDE, AR_SEVEN_CUPOS, AR_SEVEN_DIVISIONS, arClubById, CBA_DESARROLLO_ZONES, FEM_GUEST_IDS, isArgBranch, type ArBranch } from './arClubs';
-import { randomLook, type Look } from './sprites';
+import { femLook, isFemClub, randomLook, type Look } from './sprites';
 import { PALMARES_KEYS, PALMARES_LABEL, realTitles, type TitleRow } from './palmares';
 import { defaultNames, nameFromSeed, nameFromText, type PlayerName } from './names';
 import type { Difficulty, Duration, SevenTeam } from './teams';
@@ -566,7 +566,10 @@ export function careerPlayerName(r: CareerState, team: SevenTeam, id: number): P
 }
 
 /** La cara de un jugador: siempre la misma para el mismo jugador del mismo club. */
-export const playerLook = (club: string, id: number): Look => randomLook(seededRand(`${club}:cara:${id}`));
+export const playerLook = (club: string, id: number): Look => {
+    const look = randomLook(seededRand(`${club}:cara:${id}`));
+    return isFemClub(club) ? femLook(look) : look;
+};
 
 /** Los nombres de los siete de un club, en el orden de los puestos (para el partido). */
 export function careerNames(r: CareerState, team: SevenTeam): PlayerName[] | null {

@@ -14,7 +14,7 @@
 
 import { AR_SEVEN_CLUBS as GEN_CLUBS, AR_SEVEN_CUPOS, AR_SEVEN_DIVISIONS as GEN_DIVISIONS, type ArSevenClub, type ArSevenDivision } from './arClubs.generated';
 import { squadFor } from './nations';
-import type { Kit } from './sprites';
+import { femLook, isFemClub, type Kit } from './sprites';
 import type { SevenTeam } from './teams';
 import type { TourDef } from './tours';
 
@@ -423,7 +423,7 @@ export const AR_CLUBS: SevenTeam[] = AR_SEVEN_CLUBS.map((c) => ({
     name: c.name,
     short: SHORTS.get(c.name) ?? c.short,
     kit: kitOf(c),
-    players: squadFor(c.id, 'sudamerica'),
+    players: isFemClub(c.id) ? squadFor(c.id, 'sudamerica').map(femLook) : squadFor(c.id, 'sudamerica'),
     rating: gameRating(c),
     flag: (() => {
         const k = kitOf(c);
