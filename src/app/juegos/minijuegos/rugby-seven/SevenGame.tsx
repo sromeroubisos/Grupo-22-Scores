@@ -51,7 +51,16 @@ import {
     type ScoreEvent,
     type TourState,
 } from './tours';
-import { AR_CLUBS, AR_DIVISIONS_PLAYABLE, type ArBranch } from './arClubs';
+import { AR_CLUBS, AR_DIVISIONS_PLAYABLE, AR_SEVEN_DIVISIONS, type ArBranch } from './arClubs';
+
+/** Los países de la carrera: cada uno con sus ligas (las argentinas son dos ramas, URBA e interior). */
+const CAREER_COUNTRIES: { id: string; name: string; sub: string; branches: ArBranch[] }[] = [
+    { id: 'ar', name: 'Argentina', sub: 'URBA y el interior: ascensos, promociones, Torneo del Interior y Nacional de Clubes.', branches: ['urba', 'interior'] },
+    { id: 'uy', name: 'Uruguay', sub: 'El Uruguayo de Clubes: fase regular y semifinales por el título.', branches: ['uruguay'] },
+    { id: 'br', name: 'Brasil', sub: 'Super 12: grupos, Hexagonal y final; Repescagem con la Segunda.', branches: ['brasil'] },
+    { id: 'cl', name: 'Chile', sub: 'ARUSA: Top 10, Segunda, Tercera y Cuarta. Sube el campeón, baja el último.', branches: ['chile'] },
+];
+const countryOfClub = (id: string | null) => CAREER_COUNTRIES.find((c) => AR_SEVEN_DIVISIONS.some((d) => c.branches.includes(d.branch) && d.clubs.includes(id ?? '')))?.id ?? null;
 
 /** En qué grupo del selector va cada división: Argentina, o el país de afuera. */
 const branchGroup = (b: ArBranch) => (b === 'chile' ? 'Chile' : b === 'uruguay' ? 'Uruguay' : b === 'brasil' ? 'Brasil' : 'Argentina');
@@ -113,7 +122,8 @@ type Screen =
     | { k: 'tourSetup'; step: 1 | 2 }
     | { k: 'customSetup' }
     | { k: 'roadSetup'; step: 1 | 2 }
-    | { k: 'careerSetup'; step: 1 | 2 }
+    | { k: 'newPick' }
+    | { k: 'careerSetup'; step: 0 | 1 | 2 }
     | { k: 'tour' }
     | { k: 'teams' }
     | { k: 'edit'; team: SevenTeam }
@@ -551,6 +561,8 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
     const [otherKey, setOtherKey] = useState<string | null>(null);
     const [nacPick, setNacPick] = useState<NacFormat | null>(null);
     const [coachName, setCoachName] = useState('');
+    /** País elegido para la carrera nueva. */
+    const [careerCountry, setCareerCountry] = useState<string>('ar');
     /** La primera vez que se abre el juego se pide el nombre del entrenador. */
     const [askCoach, setAskCoach] = useState(false);
     useEffect(() => {
@@ -948,6 +960,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
         customSetup: 'Torneo personalizado',
         roadSetup: 'Road to Rugby World Cup',
         careerSetup: 'Modo carrera',
+        newPick: 'Nuevo torneo',
         tour: tourDef?.name ?? 'Torneo',
         cupSetup: 'Copa Seven',
         cup: 'Copa Seven',
@@ -968,7 +981,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                     {screen.k !== 'menu' && !inMatch && (
                         <span className={styles.barTitle}>
                             {titles[screen.k]}
-                            {stepOf && <small> · paso {stepOf} de 2</small>}
+                            {stepOf ? <small> · paso {stepOf} de 2</small> : null}
                         </span>
                     )}
                     {menuMusicSrc && (
@@ -1051,7 +1064,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                                 return;
                                             }
                                             setSlot(free);
-                                            setScreen({ k: 'careerSetup', step: 1 });
+                                            setScreen({ k: 'careerSetup', step: 0 });
                                         }}
                                     >
                                         <span className={styles.menuIcon} aria-hidden="true">◆</span>
@@ -1060,7 +1073,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                             {live
                                                 ? `${nameOf(live.me)} · temporada ${live.season} · ${divisionLabel(divisionOf(live, live.me) ?? '')}.`
                                                 : tours.some((t) => !t)
-                                                  ? 'Un club argentino, varias temporadas: ascensos, promociones, TDI y Nacional.'
+                                                  ? 'Un club de Argentina, Uruguay, Brasil o Chile, varias temporadas: ascensos, descensos y títulos.'
                                                   : 'Las tres partidas están ocupadas: borrá una para empezar.'}
                                         </span>
                                     </button>
@@ -1205,7 +1218,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                                         onClick={() => {
                                                             setSlot(i);
                                                             setTourCat(null);
-                                                            setScreen({ k: 'tourPick' });
+                                                            setScreen({ k: 'newPick' });
                                                         }}
                                                     >
                                                         Nuevo torneo ▶
@@ -1231,6 +1244,51 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                           ? 'Guardadas también en tu cuenta.'
                                           : ''}
                             </span>
+                        </div>
+                    </div>
+                )}
+
+                {screen.k === 'newPick' && (
+                    <div className={styles.body}>
+                        <div className={styles.cardGrid} role="group" aria-label="Qué querés jugar">
+                            <button type="button" className={styles.pickCard} onClick={() => setScreen({ k: 'tourPick' })}>
+                                <strong>Jugar un torneo</strong>
+                                <span>Selecciones, clubes de Europa y del sur, y las ligas de Argentina, Uruguay, Brasil y Chile. Un torneo y listo.</span>
+                                <small>Elegí el país o la categoría</small>
+                            </button>
+                            <button type="button" className={`${styles.pickCard} ${styles.pickCardAlt}`} onClick={() => setScreen({ k: 'careerSetup', step: 0 })}>
+                                <strong>Modo carrera</strong>
+                                <span>Un club, temporada tras temporada: plantel, pretemporada, ascensos, descensos y títulos.</span>
+                                <small>Argentina, Uruguay, Brasil o Chile</small>
+                            </button>
+                        </div>
+                        <div className={styles.footerBtns}>
+                            {btn('◀ Partidas', () => setScreen({ k: 'slots' }))}
+                        </div>
+                    </div>
+                )}
+
+                {screen.k === 'careerSetup' && screen.step === 0 && (
+                    <div className={styles.body}>
+                        <div className={styles.cardGrid} role="group" aria-label="País de la carrera">
+                            {CAREER_COUNTRIES.map((c) => (
+                                <button
+                                    key={c.id}
+                                    type="button"
+                                    className={styles.pickCard}
+                                    onClick={() => {
+                                        setCareerCountry(c.id);
+                                        setScreen({ k: 'careerSetup', step: 1 });
+                                    }}
+                                >
+                                    <strong>{c.name}</strong>
+                                    <span>{c.sub}</span>
+                                    <small>{AR_DIVISIONS_PLAYABLE.filter((d) => c.branches.includes(d.branch)).length} divisiones</small>
+                                </button>
+                            ))}
+                        </div>
+                        <div className={styles.footerBtns}>
+                            {btn('◀ Volver', () => setScreen({ k: 'newPick' }))}
                         </div>
                     </div>
                 )}
@@ -1275,10 +1333,17 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                         <div className={styles.body}>
                             <h2 className={styles.pickTitle}>{tourCat}</h2>
                             <div className={styles.cardGrid}>
-                                {tourCat === 'Argentina' && (
-                                    <button type="button" className={`${styles.pickCard} ${styles.pickCardAlt}`} onClick={() => setScreen({ k: 'careerSetup', step: 1 })}>
+                                {['Argentina', 'Chile', 'Uruguay', 'Brasil'].includes(tourCat) && (
+                                    <button
+                                        type="button"
+                                        className={`${styles.pickCard} ${styles.pickCardAlt}`}
+                                        onClick={() => {
+                                            setCareerCountry(CAREER_COUNTRIES.find((c) => c.name === tourCat)?.id ?? 'ar');
+                                            setScreen({ k: 'careerSetup', step: 1 });
+                                        }}
+                                    >
                                         <strong>Modo carrera</strong>
-                                        <span>Un club, varias temporadas: ascensos, descensos, plazas del Torneo del Interior y el Nacional.</span>
+                                        <span>Un club, varias temporadas: ascensos, descensos y títulos.</span>
                                         <small>Elegí tu club</small>
                                     </button>
                                 )}
@@ -1303,21 +1368,24 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                     );
                 })()}
 
-                {screen.k === 'careerSetup' && (() => {
-                    // Cualquier club argentino, de cualquier división: la carrera arranca donde juega en 2026.
-                    const arCats: Category[] = AR_DIVISIONS_PLAYABLE.map((d) => ({ name: d.label, group: branchGroup(d.branch), kind: 'División', teams: d.clubs.map((id) => teamOfCode(id)).filter((t): t is SevenTeam => !!t) }));
-                    const valid = !!mine && mine.startsWith('ar-');
+                {screen.k === 'careerSetup' && screen.step !== 0 && (() => {
+                    // Cualquier club del país elegido, de cualquier división: la carrera arranca donde juega en 2026.
+                    const country = CAREER_COUNTRIES.find((c) => c.id === careerCountry) ?? CAREER_COUNTRIES[0];
+                    const arCats: Category[] = AR_DIVISIONS_PLAYABLE.filter((d) => country.branches.includes(d.branch)).map((d) => ({ name: d.label, group: branchGroup(d.branch), kind: 'División', teams: d.clubs.map((id) => teamOfCode(id)).filter((t): t is SevenTeam => !!t) }));
+                    const valid = countryOfClub(mine) === country.id;
                     return screen.step === 1 ? (
                         <div className={styles.body}>
                             <div className={styles.single}>
                                 <TeamChooser label="Tu club" teamId={valid ? mine : null} onChange={setMine} categories={arCats} />
                                 <p className={styles.note}>
-                                    Jugás la división de tu club temporada tras temporada: ascensos y descensos, el Torneo del Interior con las plazas de tu región, y el Nacional de Clubes si salís campeón del Top 14 o del TDI A.
+                                    {country.id === 'ar'
+                                        ? 'Jugás la división de tu club temporada tras temporada: ascensos y descensos, el Torneo del Interior con las plazas de tu región, y el Nacional de Clubes si salís campeón del Top 14 o del TDI A.'
+                                        : `Jugás la división de tu club temporada tras temporada. ${country.sub}`}
                                 </p>
                             </div>
                             <div className={styles.footerBtns}>
-                                {btn('◀ Argentina', () => setScreen({ k: 'tourPick' }))}
-                                {!valid && <span className={styles.missing}>Elegí un club argentino.</span>}
+                                {btn('◀ Países', () => setScreen({ k: 'careerSetup', step: 0 }))}
+                                {!valid && <span className={styles.missing}>Elegí un club de {country.name}.</span>}
                                 {btn('Siguiente ▶', () => setScreen({ k: 'careerSetup', step: 2 }), true, !valid)}
                             </div>
                         </div>

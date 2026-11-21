@@ -110,6 +110,9 @@ export const TOURS: TourDef[] = [...INTERNATIONAL, ...CLUB_TOURS, ...AR_TOURS];
 export const TOUR_CATS: { id: string; sub: string }[] = [
     { id: 'Internacional', sub: 'Mundial, Six Nations, Rugby Championship y más.' },
     { id: 'Argentina', sub: 'Nacional de Clubes, Torneo del Interior, URBA y regionales.' },
+    { id: 'Chile', sub: 'ARUSA: Top 10, Segunda, Tercera y Cuarta.' },
+    { id: 'Uruguay', sub: 'Uruguayo de Clubes.' },
+    { id: 'Brasil', sub: 'Super 12: Primeira y Segunda Divisão.' },
     { id: 'Europa', sub: 'Champions Cup, Challenge Cup y URC.' },
     { id: 'Francia', sub: 'Top 14 y Pro D2.' },
     { id: 'Inglaterra', sub: 'Premiership.' },

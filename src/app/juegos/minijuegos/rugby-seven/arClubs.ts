@@ -417,7 +417,7 @@ function divisionTour(d: GameDivision): TourDef {
         sub: d.branch === 'urba' ? 'Rama URBA.' : d.branch === 'interior' ? 'Regional del interior.' : d.branch === 'chile' ? 'Chile · ARUSA.' : d.branch === 'uruguay' ? 'Uruguay.' : 'Brasil · CBRu.',
         source: 'real',
         clubs: true,
-        cat: isArgBranch(d.branch) ? 'Argentina' : 'América',
+        cat: isArgBranch(d.branch) ? 'Argentina' : d.branch === 'chile' ? 'Chile' : d.branch === 'uruguay' ? 'Uruguay' : 'Brasil',
         teams: [...d.clubs],
         formatLabel: `${n} clubes · fase regular a una vuelta · ${top === 4 ? 'semifinales' : 'final'} con los ${top} primeros`,
         stage: { kind: 'grupos', groups: 1, advance: top },
