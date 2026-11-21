@@ -11,7 +11,7 @@
  * para que un pack de Tonga no se vea igual que uno de Escocia.
  */
 
-import { HAIR_STYLES, type Kit, type Look } from './sprites';
+import { femLook, HAIR_STYLES, type Kit, type Look } from './sprites';
 import type { SevenTeam } from './teams';
 
 export type Region = 'europa-norte' | 'europa-sur' | 'europa-este' | 'sudamerica' | 'pacifico' | 'africa-sur' | 'africa' | 'asia' | 'norteamerica' | 'oceania' | 'medio-oriente';
@@ -119,6 +119,35 @@ const DEFS: NationDef[] = [
     { code: 'SUI', name: 'Suiza', flag: 'ch', rating: 44, region: 'europa-norte', kit: kit(RED, W, W, RED, 'liso', W), approx: true },
 ];
 
+/*
+ * Selecciones que solo están en la rama femenina (no tienen seleccionado de
+ * varones en el juego): China, México, Polonia y Kazajistán juegan el circuito
+ * de seven y los torneos continentales.
+ */
+const FEM_ONLY: NationDef[] = [
+    { code: 'CHN', name: 'China', flag: 'cn', rating: 50, region: 'asia', kit: kit(RED, YELLOW, RED, RED, 'liso', YELLOW), approx: true },
+    { code: 'MEX', name: 'México', flag: 'mx', rating: 45, region: 'norteamerica', kit: kit(GREEN, W, W, RED, 'banda', RED), approx: true },
+    { code: 'POL', name: 'Polonia', flag: 'pl', rating: 44, region: 'europa-este', kit: kit(W, RED, RED, W, 'banda', RED), approx: true },
+    { code: 'KAZ', name: 'Kazajistán', flag: 'kz', rating: 42, region: 'asia', kit: kit('#2aa7d8', YELLOW, '#2aa7d8', '#2aa7d8', 'liso', YELLOW), approx: true },
+];
+
+/*
+ * Nivel de cada seleccionado femenino, por el escalón que juega: las del WXV 1
+ * y la élite del circuito de seven arriba (Inglaterra, Nueva Zelanda, Canadá,
+ * Francia), después el WXV 2 y las que pelean cuartos en el seven, el WXV 3 y
+ * las campeonas continentales, y abajo las que recién arman su programa. Las
+ * que no están acá salen del nivel de los varones, bajado: un país sin
+ * seleccionado femenino fuerte no hereda la fuerza de su pack.
+ */
+const FEM_RATING: Record<string, number> = {
+    ENG: 93, NZL: 92, CAN: 89, FRA: 88, AUS: 86, USA: 84, IRL: 80, FIJ: 78, ITA: 77, SCO: 75, CHN: 74,
+    WAL: 72, JPN: 72, ESP: 72, RSA: 70, BRA: 68, ARG: 66, SAM: 64, NED: 62, KEN: 60, KAZ: 60, POL: 60,
+    MEX: 58, COL: 58, HKG: 58, BEL: 58, GER: 56, POR: 56, PAR: 56, SWE: 54, CHI: 54, UGA: 54, URU: 52, TGA: 52,
+    CZE: 48, VEN: 48, ROU: 46, ZIM: 46, PER: 46, SUI: 46, GUA: 44, DEN: 44, NOR: 44, ECU: 42, DOM: 42, NAM: 42,
+    FIN: 42, KOR: 42, MAS: 40, GEO: 40, HON: 40, LTU: 40,
+};
+const femRating = (d: NationDef) => FEM_RATING[d.code] ?? Math.round(30 + (d.rating - 30) * 0.45);
+
 /* ---- planteles por región ---- */
 
 interface Pool {
@@ -197,7 +226,24 @@ export const NATIONS: SevenTeam[] = DEFS.map((d) => ({
     flag: d.flag,
 }));
 
-export const NATION_BY_CODE: Record<string, SevenTeam> = Object.fromEntries(DEFS.map((d, i) => [d.code, NATIONS[i]]));
+/** Todas las selecciones, también en femenino. El código de la jugadora es el del país con "-F" (ARG-F). */
+const FEM_DEFS = [...DEFS, ...FEM_ONLY];
+export const femCode = (code: string) => `${code}-F`;
+export const FEM_NATIONS: SevenTeam[] = FEM_DEFS.map((d) => ({
+    id: `natf-${d.code.toLowerCase()}`,
+    name: d.name,
+    short: d.code,
+    kit: d.kit,
+    players: squadFor(femCode(d.code), d.region).map(femLook),
+    rating: femRating(d),
+    flag: d.flag,
+    fem: true,
+}));
+
+export const NATION_BY_CODE: Record<string, SevenTeam> = Object.fromEntries([
+    ...DEFS.map((d, i) => [d.code, NATIONS[i]] as const),
+    ...FEM_DEFS.map((d, i) => [femCode(d.code), FEM_NATIONS[i]] as const),
+]);
 
 /** Continentes para elegir selección: se pasan uno por uno con las flechas. */
 export type Zone = 'América' | 'Europa' | 'África' | 'Asia' | 'Oceanía';
@@ -216,10 +262,13 @@ const ZONE_OF_REGION: Record<Region, Zone> = {
     africa: 'África',
 };
 /** Zona de cada selección, para filtrar la lista. */
-export const NATION_ZONE: Record<string, Zone> = Object.fromEntries(DEFS.map((d) => [`nat-${d.code.toLowerCase()}`, ZONE_OF_REGION[d.region]]));
+export const NATION_ZONE: Record<string, Zone> = Object.fromEntries([
+    ...DEFS.map((d) => [`nat-${d.code.toLowerCase()}`, ZONE_OF_REGION[d.region]] as const),
+    ...FEM_DEFS.map((d) => [`natf-${d.code.toLowerCase()}`, ZONE_OF_REGION[d.region]] as const),
+]);
 
 /** Selecciones cuya camiseta sale de la bandera, para avisarlo en pantalla. */
-export const APPROX_KIT = new Set(DEFS.filter((d) => d.approx).map((d) => `nat-${d.code.toLowerCase()}`));
+export const APPROX_KIT = new Set(FEM_DEFS.filter((d) => d.approx).flatMap((d) => [`nat-${d.code.toLowerCase()}`, `natf-${d.code.toLowerCase()}`]));
 
 /** Región geográfica por código (para saber qué clasificatorio al Mundial juega cada selección). */
 export const REGION_BY_CODE: Record<string, Region> = Object.fromEntries(DEFS.map((d) => [d.code, d.region]));

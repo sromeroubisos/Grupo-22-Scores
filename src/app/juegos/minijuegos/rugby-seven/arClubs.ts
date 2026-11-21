@@ -424,6 +424,7 @@ export const AR_CLUBS: SevenTeam[] = AR_SEVEN_CLUBS.map((c) => ({
     short: SHORTS.get(c.name) ?? c.short,
     kit: kitOf(c),
     players: isFemClub(c.id) ? squadFor(c.id, 'sudamerica').map(femLook) : squadFor(c.id, 'sudamerica'),
+    fem: isFemClub(c.id) || undefined,
     rating: gameRating(c),
     flag: (() => {
         const k = kitOf(c);

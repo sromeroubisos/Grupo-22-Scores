@@ -17,7 +17,7 @@
 
 import { AR_CLUBS, AR_TOURS } from './arClubs';
 import { CLUB_TOURS, CLUBS } from './clubs';
-import { NATIONS, NATION_BY_CODE } from './nations';
+import { FEM_NATIONS, NATIONS, NATION_BY_CODE } from './nations';
 import type { Difficulty, Duration } from './teams';
 import type { CareerState } from './career';
 import type { RoadState } from './road';
@@ -103,12 +103,80 @@ const INTERNATIONAL: TourDef[] = [
     },
 ];
 
+/** Los códigos de las selecciones femeninas: el del país con "-F". */
+const fem = (...codes: string[]) => codes.map((c) => `${c}-F`);
+const FEM_CAT = 'Internacional femenino';
+
+/*
+ * Torneos de selecciones femeninas, con su formato real. Los niveles de cada
+ * seleccionado salen de FEM_RATING (nations.ts), por el escalón que juega.
+ */
+const INTERNATIONAL_FEM: TourDef[] = [
+    {
+        id: 'fem-world-cup-2025', name: 'Women’s Rugby World Cup', sub: 'Las 16 de Inglaterra 2025.', cat: FEM_CAT,
+        formatLabel: '4 grupos de 4 · pasan las dos primeras · cuartos', source: 'real',
+        teams: fem('ENG', 'USA', 'SAM', 'AUS', 'CAN', 'SCO', 'WAL', 'FIJ', 'NZL', 'IRL', 'JPN', 'ESP', 'FRA', 'ITA', 'RSA', 'BRA'),
+        stage: { kind: 'grupos', groups: [fem('ENG', 'USA', 'SAM', 'AUS'), fem('CAN', 'SCO', 'WAL', 'FIJ'), fem('NZL', 'IRL', 'JPN', 'ESP'), fem('FRA', 'ITA', 'RSA', 'BRA')], advance: 2 },
+    },
+    {
+        id: 'fem-six-nations', name: 'Women’s Six Nations', sub: 'Las seis del hemisferio norte.', cat: FEM_CAT,
+        formatLabel: 'Liga a una vuelta', source: 'real', teams: fem('ENG', 'FRA', 'IRL', 'ITA', 'SCO', 'WAL'), stage: { kind: 'liga', legs: 1 },
+    },
+    {
+        id: 'fem-svns', name: 'SVNS femenino', sub: 'El circuito mundial de seven: las doce de la élite.', cat: FEM_CAT,
+        formatLabel: '3 grupos de 4 · pasan dos y las 2 mejores terceras · cuartos', source: 'real',
+        teams: fem('NZL', 'AUS', 'CAN', 'FRA', 'USA', 'FIJ', 'ENG', 'IRL', 'JPN', 'BRA', 'ESP', 'CHN'),
+        stage: { kind: 'grupos', groups: 3, advance: 2, bestThirds: 2 },
+    },
+    {
+        id: 'fem-olimpicos', name: 'Juegos Olímpicos · seven femenino', sub: 'Las doce de París 2024.', cat: FEM_CAT,
+        formatLabel: '3 grupos de 4 · pasan dos y las 2 mejores terceras · cuartos', source: 'real',
+        teams: fem('FRA', 'NZL', 'AUS', 'CAN', 'USA', 'FIJ', 'ENG', 'IRL', 'BRA', 'CHN', 'JPN', 'RSA'),
+        stage: { kind: 'grupos', groups: 3, advance: 2, bestThirds: 2 },
+    },
+    {
+        id: 'fem-wxv1', name: 'WXV 1', sub: 'El primer escalón mundial: las seis mejores.', cat: FEM_CAT,
+        formatLabel: 'Liga a una vuelta', source: 'real', teams: fem('ENG', 'NZL', 'CAN', 'FRA', 'USA', 'IRL'), stage: { kind: 'liga', legs: 1 },
+    },
+    {
+        id: 'fem-wxv2', name: 'WXV 2', sub: 'El segundo escalón mundial.', cat: FEM_CAT,
+        formatLabel: 'Liga a una vuelta', source: 'real', teams: fem('AUS', 'ITA', 'SCO', 'WAL', 'JPN', 'RSA'), stage: { kind: 'liga', legs: 1 },
+    },
+    {
+        id: 'fem-wxv3', name: 'WXV 3', sub: 'El tercer escalón: las campeonas continentales.', cat: FEM_CAT,
+        formatLabel: 'Liga a una vuelta', source: 'real', teams: fem('FIJ', 'ESP', 'SAM', 'NED', 'KAZ', 'HKG'), stage: { kind: 'liga', legs: 1 },
+    },
+    {
+        id: 'fem-pacific-four', name: 'Pacific Four Series', sub: 'Nueva Zelanda, Australia, Canadá y Estados Unidos.', cat: FEM_CAT,
+        formatLabel: 'Liga a una vuelta', source: 'real', teams: fem('NZL', 'AUS', 'CAN', 'USA'), stage: { kind: 'liga', legs: 1 },
+    },
+    {
+        id: 'fem-sudamericano-seven', name: 'Sudamericano de Seven femenino', sub: 'Las ocho de la región.', cat: FEM_CAT,
+        formatLabel: '2 grupos de 4 · semifinales y final', source: 'real',
+        teams: fem('BRA', 'ARG', 'COL', 'PAR', 'CHI', 'URU', 'VEN', 'PER'),
+        stage: { kind: 'grupos', groups: 2, advance: 2 },
+    },
+    {
+        id: 'fem-rugby-europe', name: 'Rugby Europe Women’s Championship', sub: 'España y las que la persiguen.', cat: FEM_CAT,
+        formatLabel: 'Liga a una vuelta', source: 'real', teams: fem('ESP', 'NED', 'POR', 'BEL', 'SWE'), stage: { kind: 'liga', legs: 1 },
+    },
+    {
+        id: 'fem-asia', name: 'Asia Rugby Women’s Championship', sub: 'Japón, China, Kazajistán y Hong Kong.', cat: FEM_CAT,
+        formatLabel: 'Liga a una vuelta', source: 'real', teams: fem('JPN', 'CHN', 'KAZ', 'HKG'), stage: { kind: 'liga', legs: 1 },
+    },
+    {
+        id: 'fem-africa', name: 'Rugby Africa Women’s Cup', sub: 'Sudáfrica, Kenia, Uganda y Zimbabue.', cat: FEM_CAT,
+        formatLabel: 'Liga a una vuelta', source: 'real', teams: fem('RSA', 'KEN', 'UGA', 'ZIM'), stage: { kind: 'liga', legs: 1 },
+    },
+];
+
 /** Todos los torneos de fábrica: primero los de selecciones, después los de clubes. */
-export const TOURS: TourDef[] = [...INTERNATIONAL, ...CLUB_TOURS, ...AR_TOURS];
+export const TOURS: TourDef[] = [...INTERNATIONAL, ...INTERNATIONAL_FEM, ...CLUB_TOURS, ...AR_TOURS];
 
 /** Las tarjetas de categoría, en el orden en que se muestran. */
 export const TOUR_CATS: { id: string; sub: string }[] = [
     { id: 'Internacional', sub: 'Mundial, Six Nations, Rugby Championship y más.' },
+    { id: 'Internacional femenino', sub: 'Mundial, Six Nations, WXV, SVNS, Juegos Olímpicos y los continentales.' },
     { id: 'Argentina', sub: 'Nacional de Clubes, Torneo del Interior, URBA y regionales.' },
     { id: 'Chile', sub: 'ARUSA: Top 10, Segunda, Tercera y Cuarta.' },
     { id: 'Uruguay', sub: 'Uruguayo de Clubes.' },
@@ -183,7 +251,7 @@ export function defOf(s: TourState): TourDef | null {
 }
 
 export const teamIdOf = (code: string) => NATION_BY_CODE[code]?.id ?? code;
-const RATING = new Map([...NATIONS, ...CLUBS, ...AR_CLUBS].map((t) => [t.id, t.rating ?? 60]));
+const RATING = new Map([...NATIONS, ...FEM_NATIONS, ...CLUBS, ...AR_CLUBS].map((t) => [t.id, t.rating ?? 60]));
 /*
  * Contexto de nivel: los equipos propios del usuario (no están en el
  * catálogo) y lo que el modo carrera le sumó o le restó a cada club con las

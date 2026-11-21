@@ -12,6 +12,8 @@ export interface SevenTeam {
     rating?: number; // 40-95; si falta, 70
     flag?: string; // código ISO para la bandera (selecciones; en los clubes, la de su país)
     namePool?: string; // de qué lista salen los nombres ficticios (clubes: la de su país)
+    /** Equipo femenino: jugadoras (peinados largos) y nombres de mujer. */
+    fem?: boolean;
     league?: string; // clubes: la liga donde juega
     /** Plantel con nombres propios (el modo carrera: renovaciones y nombres editados). Sin esto, los de fábrica. */
     names?: PlayerName[];

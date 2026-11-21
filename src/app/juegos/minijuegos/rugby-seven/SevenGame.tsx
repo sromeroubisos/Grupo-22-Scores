@@ -11,7 +11,7 @@ import TeamEditor from './TeamEditor';
 import { ClubPanel, CoachPrompt, LineupBoard, NewsPopup, PreseasonPanel, readCoach, RosterTable, saveCoach } from './CareerPanels';
 import { matchupOdds, type MatchConfig, type MatchEvent } from './engine';
 import { POSITIONS, playerNames } from './names';
-import { APPROX_KIT, NATION_BY_CODE, NATION_ZONE, NATIONS, ZONES } from './nations';
+import { APPROX_KIT, FEM_NATIONS, NATION_BY_CODE, NATION_ZONE, NATIONS, ZONES } from './nations';
 import { randomLook } from './sprites';
 import {
     DIFFICULTIES,
@@ -250,7 +250,7 @@ function ArrowSelect({ label, value, sub, onPrev, onNext, big }: { label: string
 const wrap = (i: number, n: number) => ((i % n) + n) % n;
 
 /** Código de participante de torneo: ARG para selecciones, el id (club-…) para clubes. */
-const codeOfTeam = (t: SevenTeam) => (t.id.startsWith('nat-') ? t.id.slice(4).toUpperCase() : t.id);
+const codeOfTeam = (t: SevenTeam) => (t.id.startsWith('nat-') ? t.id.slice(4).toUpperCase() : t.id.startsWith('natf-') ? `${t.id.slice(5).toUpperCase()}-F` : t.id);
 
 /**
  * Elección de equipo en dos niveles: primero la categoría (Mundial, zona,
@@ -753,6 +753,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
         return [
             ...ZONES.map((z) => ({ name: z, group: 'Internacional', kind: 'Continente', teams: NATIONS.filter((t) => NATION_ZONE[t.id] === z).sort(byRating) })),
             { name: 'Mundial 2027', group: 'Internacional', kind: 'Continente', teams: wc },
+            ...ZONES.map((z) => ({ name: `${z} · femenino`, group: 'Internacional femenino', kind: 'Continente', teams: FEM_NATIONS.filter((t) => NATION_ZONE[t.id] === z).sort(byRating) })),
             ...CLUB_LEAGUES.map((l) => ({ name: l.name, group: 'Clubes', kind: 'Liga', teams: l.teams })),
             ...AR_DIVISIONS_PLAYABLE.map((d) => ({ name: d.label, group: branchGroup(d.branch), kind: 'División', teams: d.clubs.map((id) => teamOfCode(id)).filter((t): t is SevenTeam => !!t) })),
             { name: 'Inventados', teams: PRESET_TEAMS },
@@ -760,7 +761,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
         ];
     }, [customTeams]);
 
-    const allTeams = useMemo(() => [...customTeams, ...NATIONS, ...CLUBS, ...AR_CLUBS, ...PRESET_TEAMS], [customTeams]);
+    const allTeams = useMemo(() => [...customTeams, ...NATIONS, ...FEM_NATIONS, ...CLUBS, ...AR_CLUBS, ...PRESET_TEAMS], [customTeams]);
     // Nivel de los equipos propios y, en una carrera, lo que cada club ganó o perdió con las temporadas.
     setRatingContext(Object.fromEntries(customTeams.map((t) => [t.id, t.rating ?? 70])), tour?.career ? careerBoosts(tour.career) : undefined);
     // En una carrera: quién juega en cada puesto y la localía; afuera, nada.
@@ -1455,7 +1456,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
 
                 {screen.k === 'customSetup' && (() => {
                     const fmt = CUSTOM_FORMATS[customFormat];
-                    const pools = [...ZONES.map((z) => ({ name: z as string, teams: NATIONS.filter((t) => NATION_ZONE[t.id] === z).sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0)) })), ...CLUB_LEAGUES.map((l) => ({ name: l.name, teams: l.teams })), ...AR_DIVISIONS_PLAYABLE.map((d) => ({ name: d.label, teams: d.clubs.map((id) => teamOfCode(id)).filter((t): t is SevenTeam => !!t) }))];
+                    const pools = [...ZONES.map((z) => ({ name: z as string, teams: NATIONS.filter((t) => NATION_ZONE[t.id] === z).sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0)) })), ...ZONES.map((z) => ({ name: `${z} · femenino`, teams: FEM_NATIONS.filter((t) => NATION_ZONE[t.id] === z).sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0)) })), ...CLUB_LEAGUES.map((l) => ({ name: l.name, teams: l.teams })), ...AR_DIVISIONS_PLAYABLE.map((d) => ({ name: d.label, teams: d.clubs.map((id) => teamOfCode(id)).filter((t): t is SevenTeam => !!t) }))];
                     const pool = pools[wrap(customZone, pools.length)];
                     const zone = pool.name;
                     const zoneTeams = pool.teams;
@@ -1575,7 +1576,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                     const def = setupDef;
                     const field = def.teams.map((c) => teamOfCode(c)).filter((t): t is SevenTeam => !!t).sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
                     const valid = !!mine && field.some((t) => t.id === mine);
-                    const outside = (def.teams.some((c) => c.startsWith('ar-')) ? AR_CLUBS : def.teams.some((c) => c.startsWith('club-')) ? CLUBS : NATIONS).filter((t) => !def.teams.includes(codeOfTeam(t))).sort((a, b) => a.name.localeCompare(b.name));
+                    const outside = (def.teams.some((c) => c.startsWith('ar-')) ? AR_CLUBS : def.teams.some((c) => c.startsWith('club-')) ? CLUBS : def.teams.some((c) => c.endsWith('-F')) ? FEM_NATIONS : NATIONS).filter((t) => !def.teams.includes(codeOfTeam(t))).sort((a, b) => a.name.localeCompare(b.name));
                     return screen.step === 1 ? (
                         <div className={styles.body}>
                             <div className={styles.single}>

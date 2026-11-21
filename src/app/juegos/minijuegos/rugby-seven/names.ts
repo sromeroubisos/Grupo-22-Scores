@@ -135,6 +135,41 @@ const P: Record<string, Pool> = {
     },
 };
 
+/*
+ * Nombres de mujer por lista: los apellidos son los mismos de cada país. Así
+ * cualquier equipo femenino (selección o club) se llama como corresponde.
+ */
+const FEM_FIRST: Record<string, string[]> = {
+    rio: P.rioF.first,
+    iber: P.iberF.first,
+    latam: ['Valentina', 'Daniela', 'Camila', 'Mariana', 'Natalia', 'Gabriela', 'Paola', 'Andrea', 'Carolina', 'Fernanda', 'Ximena', 'Lorena'],
+    luso: ['Ana', 'Beatriz', 'Mariana', 'Inês', 'Raquel', 'Joana', 'Larissa', 'Bianca', 'Thalia', 'Leila', 'Isadora', 'Rafaela'],
+    anglo: ['Emily', 'Sarah', 'Jess', 'Abby', 'Ellie', 'Hannah', 'Zoe', 'Megan', 'Holly', 'Lucy', 'Amy', 'Katie'],
+    celta: ['Aoife', 'Siobhán', 'Ciara', 'Niamh', 'Rhona', 'Cerys', 'Eilidh', 'Gwen', 'Saoirse', 'Ffion', 'Morag', 'Orla'],
+    franco: ['Pauline', 'Gabrielle', 'Marine', 'Laure', 'Camille', 'Romane', 'Charlotte', 'Émilie', 'Agathe', 'Léa', 'Manon', 'Clara'],
+    italo: ['Giulia', 'Sara', 'Beatrice', 'Elisa', 'Francesca', 'Chiara', 'Martina', 'Alessia', 'Valeria', 'Silvia', 'Aura', 'Michela'],
+    germ: ['Lena', 'Anna', 'Sophie', 'Marie', 'Laura', 'Lea', 'Hannah', 'Jana', 'Nina', 'Sarah', 'Katharina', 'Julia'],
+    nordic: ['Emma', 'Ida', 'Freja', 'Sofie', 'Linnea', 'Maja', 'Ingrid', 'Sara', 'Elin', 'Aino', 'Signe', 'Hanna'],
+    eslavo: ['Anna', 'Maria', 'Katarzyna', 'Petra', 'Ivana', 'Natalia', 'Daria', 'Tereza', 'Olena', 'Marta', 'Jana', 'Milena'],
+    georgia: ['Nino', 'Mariam', 'Ana', 'Tamar', 'Salome', 'Eka', 'Natia', 'Keti', 'Lika', 'Elene', 'Sopo', 'Tako'],
+    rumano: ['Ioana', 'Andreea', 'Elena', 'Maria', 'Alexandra', 'Bianca', 'Diana', 'Cristina', 'Raluca', 'Irina', 'Larisa', 'Oana'],
+    griego: ['Maria', 'Eleni', 'Katerina', 'Sofia', 'Georgia', 'Dimitra', 'Christina', 'Anna', 'Despina', 'Ioanna', 'Vasiliki', 'Nefeli'],
+    turco: ['Elif', 'Zeynep', 'Ayşe', 'Defne', 'Ece', 'Selin', 'Merve', 'Deniz', 'Buse', 'Ceren', 'Esra', 'Nil'],
+    hebreo: ['Noa', 'Maya', 'Tamar', 'Yael', 'Shira', 'Ella', 'Roni', 'Michal', 'Lior', 'Dana', 'Inbar', 'Hila'],
+    pacifico: ['Ana', 'Sela', 'Vika', 'Mele', 'Lavinia', 'Ilisapeci', 'Reapi', 'Raijieli', 'Losana', 'Seini', 'Talei', 'Alowesi'],
+    japon: ['Yuka', 'Mei', 'Hana', 'Riho', 'Saki', 'Aoi', 'Mio', 'Yume', 'Haruka', 'Nana', 'Rin', 'Akari'],
+    hk: ['Ka-yan', 'Wing-sze', 'Hoi-lam', 'Chloe', 'Natasha', 'Mei', 'Yan-yi', 'Sze-wing', 'Ching', 'Lok-yi', 'Hiu-tung', 'Wai-man'],
+    sudafrica: ['Zintle', 'Nadine', 'Babalwa', 'Anathi', 'Lindelwa', 'Simamkele', 'Aphiwe', 'Libbie', 'Sinazo', 'Eloise', 'Nolusindiso', 'Marlie'],
+    africa: ['Grace', 'Janet', 'Sheila', 'Philadelphia', 'Rachel', 'Chiamaka', 'Ruth', 'Tsitsi', 'Faith', 'Mercy', 'Agnes', 'Esther'],
+    africaFr: ['Aïcha', 'Fatou', 'Awa', 'Mariama', 'Adjoua', 'Sandrine', 'Clarisse', 'Aminata', 'Nadège', 'Khady', 'Ramata', 'Grâce'],
+    magreb: ['Yasmine', 'Amira', 'Sarah', 'Lina', 'Nour', 'Inès', 'Imane', 'Rania', 'Meriem', 'Salma', 'Kenza', 'Leila'],
+    namibia: ['Anel', 'Elize', 'Ndapewa', 'Mia', 'Lize', 'Twapewa', 'Annika', 'Hilma', 'Carla', 'Nadia', 'Selma', 'Jana'],
+    corea: ['Ji-woo', 'Seo-yeon', 'Min-seo', 'Ha-eun', 'Su-bin', 'Ye-jin', 'Da-eun', 'Yu-na', 'Ji-min', 'Hye-won', 'Seo-a', 'Eun-ji'],
+    malasia: ['Nur', 'Aisyah', 'Siti', 'Farah', 'Puteri', 'Hana', 'Mei Ling', 'Priya', 'Aina', 'Syazwani', 'Liyana', 'Zara'],
+    golfo: ['Fatima', 'Mariam', 'Sophie', 'Noor', 'Hessa', 'Emma', 'Aisha', 'Chloe', 'Layla', 'Grace', 'Shamma', 'Amna'],
+    neer: ['Anouk', 'Femke', 'Lotte', 'Sanne', 'Fleur', 'Lieke', 'Iris', 'Eva', 'Roos', 'Floor', 'Noor', 'Marit'],
+};
+
 const POOL_BY_CODE: Record<string, keyof typeof P> = {
     ARG: 'rio', URU: 'rio', PAR: 'rio',
     CHI: 'latam', COL: 'latam', PER: 'latam', ECU: 'latam', VEN: 'latam', GUA: 'latam', HON: 'latam', DOM: 'latam',
@@ -160,6 +195,7 @@ const POOL_BY_CODE: Record<string, keyof typeof P> = {
     NAM: 'namibia', ALG: 'magreb', CIV: 'africaFr', SEN: 'africaFr',
     KOR: 'corea', MAS: 'malasia', UAE: 'golfo',
     NED: 'neer', SUI: 'germ',
+    CHN: 'hk', MEX: 'latam', POL: 'eslavo', KAZ: 'eslavo',
 };
 
 /** Puestos del seven, del 1 al 7. El 7 es el que defiende de fullback. */
@@ -191,8 +227,13 @@ export interface PlayerName {
 const cache = new Map<string, PlayerName[]>();
 
 const poolOf = (team: SevenTeam): Pool => {
-    const code = team.id.startsWith('nat-') ? team.id.slice(4).toUpperCase() : '';
-    return P[(team.namePool && P[team.namePool] ? team.namePool : null) ?? POOL_BY_CODE[code] ?? 'rio'];
+    const m = /^natf?-(.+)$/.exec(team.id);
+    const code = m ? m[1].toUpperCase() : '';
+    const key = (team.namePool && P[team.namePool] ? team.namePool : null) ?? POOL_BY_CODE[code] ?? 'rio';
+    if (!team.fem) return P[key];
+    // Jugadoras: el nombre de mujer de su país (las listas rioF e iberF ya lo son).
+    const base = key.endsWith('F') ? key.slice(0, -1) : key;
+    return { first: FEM_FIRST[base] ?? FEM_FIRST.rio, last: P[key].last };
 };
 
 /** Un nombre del país del equipo a partir de una semilla (los que llegan a reemplazar a un retirado). */
