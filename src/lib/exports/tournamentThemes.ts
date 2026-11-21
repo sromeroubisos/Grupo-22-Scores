@@ -24,6 +24,8 @@ export type TournamentExportTheme = {
     accent: string;
     /** Color con el que se resalta la estadistica elegida en las estadisticas. */
     highlight: string;
+    /** Formato de salida propio del torneo (Story). Sin esto queda el post de siempre. */
+    format?: '1080x1920';
 };
 
 const IMG = '/export-backgrounds/';
@@ -45,6 +47,8 @@ export const TOURNAMENT_THEMES = {
     chileTop: { id: 'chile-top', light: true, image: `${IMG}blanco.jpg`, bg: '#f1f5f9', accent: '#dc2626', highlight: '#dc2626' },
     chileAscenso: { id: 'chile-ascenso', light: true, image: `${IMG}blanco.jpg`, bg: '#f1f5f9', accent: '#1d4ed8', highlight: '#1d4ed8' },
     nationsChampionship: { id: 'nations-championship', image: `${IMG}verde.jpg`, bg: '#1c2b2a', accent: '#facc15', highlight: '#ffffff' },
+    // Campeones Veco Villegas: fondo Negro, acento verde de marca (G22 Dark) y Story.
+    veco: { id: 'veco', image: `${IMG}negro.jpg`, bg: '#181818', accent: '#00a365', highlight: '#ffffff', format: '1080x1920' },
     celeste: { id: 'celeste', image: `${IMG}cian.jpg`, bg: '#167c95', accent: '#ffffff', highlight: '#ffffff' },
 } as const satisfies Record<string, TournamentExportTheme>;
 
@@ -94,6 +98,9 @@ export function resolveTournamentExportTheme(tournamentName: string | null | und
     const name = normalize(tournamentName || '');
     if (!name) return null;
     const T = TOURNAMENT_THEMES;
+
+    // ── Torneos con identidad propia ───────────────────────────────────
+    if (has(name, /veco villegas/)) return T.veco;
 
     // ── Internacionales ────────────────────────────────────────────────
     if (has(name, /nations championship/)) return T.nationsChampionship;

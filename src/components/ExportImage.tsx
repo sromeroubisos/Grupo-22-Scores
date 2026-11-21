@@ -1548,6 +1548,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
             ));
         }
         statsOptions?.color.onChange(tournamentTheme.highlight);
+        if (tournamentTheme.format) setFormat(tournamentTheme.format);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [showModal, tournamentTheme?.id, template, isBracket, isLadder, isRankingPoster, visualFamily]);
 
