@@ -261,7 +261,7 @@ export function RosterTable({ tour, kit, onRename }: { tour: TourState; kit?: Ki
                         }}
                     />
                     <span className={styles.rosterAge}>
-                        {p.age} años · {p.b[0]} kg · {(p.b[1] / 100).toFixed(2).replace('.', ',')} m · <Skills s={p.s} /> <Moral m={p.m} />
+                        {p.age} años · {p.b[0]} kg · {(p.b[1] / 100).toFixed(2).replace('.', ',')} m · <Skills s={p.s} /> <Moral m={p.m} /> · XP {p.xp.toFixed(1)}
                         {outText(p) && <small className={styles.lineOut}> · {outText(p)}</small>}
                     </span>
                     <span className={p.ovr >= 7 ? styles.fixWin : p.ovr < 4 ? styles.fixLoss : undefined}>{p.ovr.toFixed(1)}</span>
@@ -281,7 +281,7 @@ export function PreseasonPanel({
     onFriendly,
 }: {
     tour: TourState;
-    rivals: { id: string; name: string }[];
+    rivals: { id: string; name: string; group?: string }[];
     nameOf: (id: string) => string;
     onChange: (s: TourState) => void;
     onFriendly: (opp: string, sim: boolean) => void;
@@ -367,11 +367,20 @@ export function PreseasonPanel({
                     <label className={styles.othersPick}>
                         <span>Rival</span>
                         <select value={rival} onChange={(e) => setRival(e.target.value)}>
-                            {rivals.map((c) => (
-                                <option key={c.id} value={c.id}>
-                                    {c.name}
-                                </option>
-                            ))}
+                            {[...new Set(rivals.map((c) => c.group ?? ''))].map((g) => {
+                                const opts = rivals.filter((c) => (c.group ?? '') === g).map((c) => (
+                                    <option key={c.id} value={c.id}>
+                                        {c.name}
+                                    </option>
+                                ));
+                                return g ? (
+                                    <optgroup key={g} label={g}>
+                                        {opts}
+                                    </optgroup>
+                                ) : (
+                                    opts
+                                );
+                            })}
                         </select>
                     </label>
                     <div className={styles.simRow}>

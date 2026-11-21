@@ -60,6 +60,9 @@ export interface GameClub extends ArSevenClub {
     fixed?: number;
 }
 export const isArgBranch = (b: ArBranch) => b === 'urba' || b === 'interior';
+/** Cómo se llama cada rama en un listado. */
+export const branchLabel = (b: ArBranch) =>
+    ({ urba: 'Argentina · URBA', interior: 'Argentina · interior', chile: 'Chile', uruguay: 'Uruguay', brasil: 'Brasil', espana: 'España', espanaFem: 'España · femenino', fem: 'Argentina · femenino' } as Record<string, string>)[b] ?? b;
 
 /** El color de un club femenino: el del club de varones del mismo nombre, si está. */
 const colorLike = (name: string) => GEN_CLUBS.find((c) => c.name === name)?.color ?? null;

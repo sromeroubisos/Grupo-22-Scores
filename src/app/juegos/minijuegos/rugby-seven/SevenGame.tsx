@@ -1916,13 +1916,28 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                     const h2h = career && opp ? headToHead(career, opp) : null;
                     const best = career ? clubRecords(career).find((x) => x.label === 'Máximo anotador') ?? null : null;
                     const homeNow = !!career && tour.stage === 'grupos' && nextIsHome(tour);
-                    const rivals = career
-                        ? Object.values(career.divisions)
-                              .flat()
-                              .filter((id) => id !== career.me)
-                              .map((id) => ({ id, name: nameOf(id) }))
-                              .sort((a, b) => a.name.localeCompare(b.name))
-                        : [];
+                    // Amistosos contra cualquier club: los de tu división primero, después cada división del país y de afuera, y las ligas del mundo.
+                    const rivals = (() => {
+                        if (!career) return [];
+                        const fem = career.branch === 'fem' || career.branch === 'espanaFem';
+                        const seen = new Set<string>([career.me]);
+                        const out: { id: string; name: string; group: string }[] = [];
+                        const push = (group: string, ids: string[]) => {
+                            for (const id of [...ids].sort((a, b) => nameOf(a).localeCompare(nameOf(b), 'es'))) {
+                                if (seen.has(id)) continue;
+                                seen.add(id);
+                                out.push({ id, name: nameOf(id), group });
+                            }
+                        };
+                        const myDiv = divisionOf(career, career.me);
+                        if (myDiv) push(`Tu división · ${divisionLabel(myDiv)}`, career.divisions[myDiv] ?? []);
+                        for (const d of AR_DIVISIONS_PLAYABLE) {
+                            if ((d.branch === 'fem' || d.branch === 'espanaFem') !== fem) continue;
+                            push(`${branchGroup(d.branch)} · ${d.label}`, career.divisions[d.id] ?? d.clubs);
+                        }
+                        if (!fem) for (const l of CLUB_LEAGUES) push(l.name, l.teams.map((t) => t.id));
+                        return out;
+                    })();
                     return (
                         <div className={styles.body}>
                             {simFlash && <SimResult flash={simFlash} onClose={closeSimFlash} />}
@@ -2203,10 +2218,16 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                                     <label className={styles.othersPick}>
                                                         <span>Torneo</span>
                                                         <select value={cur.key} onChange={(e) => setOtherKey(e.target.value)}>
-                                                            {list.map((x) => (
-                                                                <option key={x.key} value={x.key}>
-                                                                    {x.name} · {x.state.done ? 'terminado' : roundLabel(x.state).toLowerCase()}
-                                                                </option>
+                                                            {[...new Set(list.map((x) => ('group' in x ? x.group : 'Tu club')))].map((g) => (
+                                                                <optgroup key={g} label={g}>
+                                                                    {list
+                                                                        .filter((x) => ('group' in x ? x.group : 'Tu club') === g)
+                                                                        .map((x) => (
+                                                                            <option key={x.key} value={x.key}>
+                                                                                {x.name} · {x.state.done ? 'terminado' : roundLabel(x.state).toLowerCase()}
+                                                                            </option>
+                                                                        ))}
+                                                                </optgroup>
                                                             ))}
                                                         </select>
                                                     </label>

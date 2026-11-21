@@ -41,7 +41,7 @@
  * que no juega el usuario, y el cartel dice exactamente lo que después pasa.
  */
 
-import { AR_LABEL_OVERRIDE, AR_SEVEN_CUPOS, AR_SEVEN_DIVISIONS, arClubById, CBA_DESARROLLO_ZONES, FEM_GUEST_IDS, isArgBranch, type ArBranch } from './arClubs';
+import { AR_LABEL_OVERRIDE, AR_SEVEN_CUPOS, AR_SEVEN_DIVISIONS, arClubById, branchLabel, CBA_DESARROLLO_ZONES, FEM_GUEST_IDS, isArgBranch, type ArBranch } from './arClubs';
 import { femLook, isFemClub, randomLook, type Look } from './sprites';
 import { PALMARES_KEYS, PALMARES_LABEL, realTitles, type TitleRow } from './palmares';
 import { defaultNames, nameFromSeed, nameFromText, type PlayerName } from './names';
@@ -54,6 +54,7 @@ import {
     defOf,
     finalRanking,
     groupStandings,
+    groupOf,
     myFixture,
     nextOpponent,
     ratingOf,
@@ -63,6 +64,8 @@ import {
     setRatingBoost,
     simulate,
     topStats,
+    TOURS,
+    catOf,
     type FixtureItem,
     type ScoreEvent,
     type TourDef,
@@ -152,6 +155,8 @@ export interface Player {
     b?: [number, number];
     /** Si no está: por qué, hasta qué altura de la temporada (0 a 1; 2 = toda) y quién se lo llevó. */
     out?: { kind: OutKind; until: number; by?: string };
+    /** Experiencia de la temporada (solo el plantel propio): se vuelca en el desarrollo al cerrar el año. */
+    xp?: number;
 }
 
 /** Una noticia del club que se muestra en un cartel (convocatorias, lesiones, vueltas). */
@@ -609,6 +614,8 @@ export interface RosterRow {
     b: [number, number];
     /** Puesto en el siete inicial (0 a 6), o null si es suplente. */
     slot: number | null;
+    /** Experiencia sumada esta temporada. */
+    xp: number;
 }
 
 /** El plantel del club del usuario, para mostrarlo y armar el siete. */
@@ -620,7 +627,7 @@ export function myRoster(r: CareerState): RosterRow[] {
     return roster.map((p) => {
         const id = p.id as number;
         const slot = lineup.indexOf(id);
-        return { id, name: careerPlayerName(r, team, id), age: p.age, ovr: p.ovr ?? 5, s: p.s ?? [5, 5, 5, 5], m: p.m ?? 0, out: p.out, b: p.b ?? [95, 185], slot: slot >= 0 && available(p) ? slot : null };
+        return { id, name: careerPlayerName(r, team, id), age: p.age, ovr: p.ovr ?? 5, s: p.s ?? [5, 5, 5, 5], m: p.m ?? 0, out: p.out, b: p.b ?? [95, 185], slot: slot >= 0 && available(p) ? slot : null, xp: p.xp ?? 0 };
     });
 }
 
@@ -673,6 +680,9 @@ function archiveLegend(r: CareerState, id: number, name: string) {
  * los que se fueron a Europa no vuelven, y los lugares los llenan los de la
  * cantera (mejores cuanto mejor viene la camada de M19).
  */
+/** La experiencia de una temporada jugada entera, sin títulos: la que suman los clubes que no son del usuario. */
+const XP_BASE = 18;
+
 function evolveRosters(r: CareerState) {
     const mine: string[] = [];
     const team = arClubById(r.me);
@@ -696,6 +706,9 @@ function evolveRosters(r: CareerState) {
             if (d > 0 && o > 8) d *= 0.45; // arriba cuesta más
             // Cada club tira hacia su nivel de cantera: sin esto, con los años todos suben.
             d += (canteraOf(r, club) - 0.2 - o) * 0.14;
+            // Experiencia: los otros clubes juegan siempre (XP_BASE); el propio, lo que sumó. Pesa más en los jóvenes.
+            if (club === r.me) d += (clampN(p.xp ?? 0, 0, 30) - XP_BASE) * 0.02 * (p.age <= 23 ? 1 : p.age <= 28 ? 0.6 : 0.3);
+            p.xp = 0;
             p.ovr = capOvr(o + d);
             p.s = (p.s ?? makeSkills(p.ovr, Math.random)).map((v, k) => Math.round(clampN(v + d + (k === 0 && p.age > 29 ? -0.4 : 0) + (Math.random() - 0.5) * 0.8, 1, 10))) as Player['s'];
             p.m = 0;
@@ -999,6 +1012,17 @@ export function careerRound(s: TourState, mine: [number, number] | null, events?
         for (const id of misses) {
             const p = by.get(id);
             if (p) p.m = r1(clampN((p.m ?? 0) - 0.35, -2, 2));
+        }
+        // Experiencia: jugarlo vale 4 veces lo que simularlo. Ganar suma más, y más contra uno más fuerte o el puntero.
+        const live = events !== undefined;
+        const lead = s.stage === 'grupos' ? groupStandings(s, groupOf(s, r.me))[0]?.team : null;
+        let xp = us > them ? 1.2 : us === them ? 1 : 0.8;
+        if (us > them) xp += clampN((ratingOf(opp) - ratingOf(r.me)) / 20, 0, 0.6) + (lead === opp ? 0.5 : 0);
+        if (!live) xp *= 0.25;
+        for (const p of roster) p.xp = Math.round(((p.xp ?? 0) + (lineup.includes(p.id as number) ? xp : xp * 0.3)) * 100) / 100;
+        for (const e of myEvents) {
+            const p = by.get(e.slot);
+            if (p && e.kind === 'try') p.xp = Math.round(((p.xp ?? 0) + (live ? 0.2 : 0.05)) * 100) / 100;
         }
         // Cansancio: jugar los dos torneos a la vez pesa el doble.
         const two = !!r.parallel && !r.parallel.done;
@@ -1373,22 +1397,35 @@ function buildOthers(r: CareerState): Record<string, TourState> {
     };
     for (const d of Object.keys(r.divisions)) if (d !== div && r.divisions[d].length >= 2) add(`div:${d}`, leagueDef(d, [...r.divisions[d]].sort(byRating), r.season));
     for (const t of TIERS_OF[formatOf(r, r.season)]) if (t !== mineTier && (tiers[t]?.length ?? 0) >= 2) add(`tier:${t}`, tierDef(t, tiers[t]!, r.season));
-    // La primera de los otros países: se juega a la par y se puede mirar (no cruza con la carrera, salvo en el Sudamericano).
-    const mine = countryOf(r.branch);
-    if (mine) for (const [c, d] of Object.entries(COUNTRY_TOP)) if (c !== mine && DIV[d]) add(`ext:${d}`, leagueDef(d, [...DIV[d].clubs].sort(byRating), r.season));
+    // Las divisiones de las otras ramas y países (de varones o de mujeres, como el club), a la par.
+    const fem = r.branch === 'fem' || r.branch === 'espanaFem';
+    for (const d of AR_SEVEN_DIVISIONS) {
+        if (r.divisions[d.id] || d.clubs.length < 2) continue;
+        if ((d.branch === 'fem' || d.branch === 'espanaFem') !== fem) continue;
+        add(`ext:${d.id}`, leagueDef(d.id, [...d.clubs].sort(byRating), r.season));
+    }
+    // Los internacionales: selecciones y las ligas de clubes del mundo.
+    for (const t of TOURS) {
+        if (['Argentina', 'Chile', 'Uruguay', 'Brasil', 'España'].includes(catOf(t))) continue;
+        add(`int:${t.id}`, t);
+    }
     return others;
 }
 
 /** Partidas guardadas antes de los torneos en paralelo: se arman una vez, se ponen al día y se guardan. */
 export function ensureOthers(s: TourState): TourState | null {
-    if (!s.career || s.career.phase !== 'liga' || s.career.others) return null;
+    const o = s.career?.others;
+    if (!s.career || s.career.phase !== 'liga' || (o && Object.keys(o).some((k) => k.startsWith('int:')))) return null;
     return advanceOthers(withOthers(s));
 }
 
 function withOthers(s: TourState): TourState {
     const r = s.career;
-    if (!r || r.phase !== 'liga' || r.others) return s;
-    return { ...s, career: { ...r, others: buildOthers(r) } };
+    if (!r || r.phase !== 'liga') return s;
+    if (!r.others) return { ...s, career: { ...r, others: buildOthers(r) } };
+    // Partidas de antes de que se sumaran las otras ligas y los internacionales: se agregan los que faltan.
+    if (Object.keys(r.others).some((k) => k.startsWith('int:'))) return s;
+    return { ...s, career: { ...r, others: { ...buildOthers(r), ...r.others } } };
 }
 
 /** Arranca la carrera con el club elegido, en su división de 2026. */
@@ -1475,13 +1512,13 @@ function finish(t: TourState): TourState {
 }
 
 /** Los otros torneos de la temporada, para mirarlos: los federales y la región del club primero. */
-export function otherTours(s: TourState): { key: string; name: string; state: TourState }[] {
+export function otherTours(s: TourState): { key: string; name: string; state: TourState; group: string }[] {
     const r = s.career;
     if (!r) return [];
     // Lo que ya se jugó después de la fase regular: playoffs, promociones, plazas, Nacional, Sudamericano.
     const ARC_ORDER = ['nacional', 'sudamericano', 'plazas', 'promos'];
     const archived = Object.entries(r.archive ?? {})
-        .map(([key, state]) => ({ key: `arc:${key}`, name: defOf(state)?.name ?? key, state }))
+        .map(([key, state]) => ({ key: `arc:${key}`, name: defOf(state)?.name ?? key, state, group: 'Fin de temporada' }))
         .sort((a, b) => {
             const ia = ARC_ORDER.indexOf(a.key.slice(4));
             const ib = ARC_ORDER.indexOf(b.key.slice(4));
@@ -1490,13 +1527,28 @@ export function otherTours(s: TourState): { key: string; name: string; state: To
     if (!r.others) return archived;
     const myRegion = DIV[divisionOf(r, r.me) ?? '']?.region;
     const order = ['nacA', 'nacB', 'tdiA', 'tdiB'];
+    const groupOf2 = (k: string, state: TourState): string => {
+        if (k.startsWith('tier:')) return 'Federales';
+        if (k.startsWith('int:')) {
+            const cat = catOf(defOf(state) ?? ({} as TourDef));
+            return cat.startsWith('Internacional') ? `Selecciones · ${cat === 'Internacional' ? 'varones' : 'mujeres'}` : `Clubes del mundo · ${cat}`;
+        }
+        const d = DIV[k.slice(4)];
+        if (k.startsWith('div:')) return 'Tu rama';
+        return d ? branchLabel(d.branch) : 'Otros';
+    };
     const rank = (k: string): [number, string, number] => {
         if (k.startsWith('tier:')) return [0, '', order.indexOf(k.slice(5))];
+        if (k.startsWith('int:')) return [4, '', 0];
+        if (k.startsWith('ext:')) {
+            const e = DIV[k.slice(4)];
+            return [3, branchLabel(e?.branch ?? 'urba'), e?.level ?? 9];
+        }
         const d = DIV[k.slice(4)];
         return [d?.region === myRegion ? 1 : 2, d?.region ?? '', d?.level ?? 9];
     };
     return Object.entries(r.others)
-        .map(([key, state]) => ({ key, name: (defOf(state)?.name ?? key).replace(/ \d{4}$/, ''), state }))
+        .map(([key, state]) => ({ key, name: (defOf(state)?.name ?? key).replace(/ \d{4}$/, ''), state, group: groupOf2(key, state) }))
         .sort((a, b) => {
             const [ra, ga, la] = rank(a.key);
             const [rb, gb, lb] = rank(b.key);
@@ -1529,7 +1581,10 @@ function addChampion(r: CareerState, key: string, club: string | null | undefine
     const list = ((r.champions ??= {})[key] ??= []);
     if (list.some(([season]) => season === r.season)) return;
     list.push([r.season, club]);
-    if (club === r.me && !JUV_LABEL[key]) (r.pending.wins ??= []).push(palmaresLabel(key));
+    if (club === r.me && !JUV_LABEL[key]) {
+        (r.pending.wins ??= []).push(palmaresLabel(key));
+        for (const p of r.rosters?.[r.me] ?? []) p.xp = Math.round(((p.xp ?? 0) + 3) * 100) / 100;
+    }
 }
 
 const addBonus = (r: CareerState, club: string | null | undefined, v: number) => {
