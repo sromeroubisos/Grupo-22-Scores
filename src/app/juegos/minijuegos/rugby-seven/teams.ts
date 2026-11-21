@@ -17,13 +17,14 @@ export interface SevenTeam {
     names?: PlayerName[];
 }
 
-export type Difficulty = 'muy-facil' | 'facil' | 'normal' | 'dificil';
+export type Difficulty = 'muy-facil' | 'facil' | 'normal' | 'dificil' | 'leyenda';
 
 export const DIFFICULTIES: { id: Difficulty; label: string; hint: string }[] = [
-    { id: 'muy-facil', label: 'Muy fácil', hint: 'Para aprender los controles.' },
-    { id: 'facil', label: 'Fácil', hint: 'La defensa llega tarde.' },
-    { id: 'normal', label: 'Normal', hint: 'Partido parejo.' },
-    { id: 'dificil', label: 'Difícil', hint: 'Tacklean bien y leen el pase.' },
+    { id: 'muy-facil', label: 'Muy fácil', hint: 'Solo para empezar: aprender los controles.' },
+    { id: 'facil', label: 'Fácil', hint: 'Para amigarse con los controles.' },
+    { id: 'normal', label: 'Normal', hint: 'Para jugar en serio: tacklean y leen el pase.' },
+    { id: 'dificil', label: 'Difícil', hint: 'Muy exigente: cada metro cuesta.' },
+    { id: 'leyenda', label: 'Leyenda', hint: 'Para cracks: no perdona nada.' },
 ];
 
 export const DURATIONS = [3, 5, 7] as const;
@@ -40,8 +41,9 @@ export interface DiffParams {
     cpuBreak: number; // prob. de que el portador rival rompa tu tackle
     intercept: number; // prob. de intercepción por defensor cerca de la línea del pase
     scrumCpu: number; // empuje rival por segundo (tus toques suman 7 cada uno)
-    ruckKeep: number; // prob. de retener la pelota en tu ruck
-    cpuRuckKeep: number; // prob. de que el rival retenga la suya
+    ruckKeep: number; // base de retener la pelota en tu ruck (con apoyo parejo y toques parejos)
+    cpuRuckKeep: number; // base de que el rival retenga la suya
+    ruckRate: number; // toques por segundo que "hace" el rival en el ruck: para ganarle hay que tocar más rápido
     kickWindow: number; // ancho del centro en la conversión (0..1)
     cpuKick: number; // prob. de que el rival convierta
     cpuPassIQ: number; // ganas del rival de pasar cuando lo apuran (por segundo)
@@ -50,23 +52,29 @@ export interface DiffParams {
 export const DIFF: Record<Difficulty, DiffParams> = {
     'muy-facil': {
         cpuRun: 5.6, cpuDefRun: 5.6, cpuTackle: 0.35, breakHit: 0.8, dodge: 0.8, userTackle: 0.97,
-        cpuBreak: 0.12, intercept: 0.02, scrumCpu: 14, ruckKeep: 0.95, cpuRuckKeep: 0.6,
+        cpuBreak: 0.12, intercept: 0.02, scrumCpu: 14, ruckKeep: 0.96, cpuRuckKeep: 0.8, ruckRate: 2.5,
         kickWindow: 0.34, cpuKick: 0.45, cpuPassIQ: 0.6,
     },
     facil: {
-        cpuRun: 6.3, cpuDefRun: 6.3, cpuTackle: 0.58, breakHit: 0.62, dodge: 0.64, userTackle: 0.92,
-        cpuBreak: 0.32, intercept: 0.06, scrumCpu: 19, ruckKeep: 0.9, cpuRuckKeep: 0.78,
-        kickWindow: 0.26, cpuKick: 0.55, cpuPassIQ: 1.0,
+        cpuRun: 6.6, cpuDefRun: 6.6, cpuTackle: 0.66, breakHit: 0.54, dodge: 0.56, userTackle: 0.89,
+        cpuBreak: 0.4, intercept: 0.08, scrumCpu: 22, ruckKeep: 0.93, cpuRuckKeep: 0.86, ruckRate: 4,
+        kickWindow: 0.22, cpuKick: 0.6, cpuPassIQ: 1.25,
     },
+    // El normal de ahora es el difícil de antes: el de antes se sentía fácil.
     normal: {
-        cpuRun: 7.0, cpuDefRun: 6.9, cpuTackle: 0.74, breakHit: 0.44, dodge: 0.48, userTackle: 0.85,
-        cpuBreak: 0.48, intercept: 0.11, scrumCpu: 25, ruckKeep: 0.82, cpuRuckKeep: 0.88,
-        kickWindow: 0.19, cpuKick: 0.65, cpuPassIQ: 1.5,
+        cpuRun: 7.5, cpuDefRun: 7.3, cpuTackle: 0.84, breakHit: 0.33, dodge: 0.36, userTackle: 0.76,
+        cpuBreak: 0.62, intercept: 0.17, scrumCpu: 31, ruckKeep: 0.89, cpuRuckKeep: 0.9, ruckRate: 5.5,
+        kickWindow: 0.13, cpuKick: 0.78, cpuPassIQ: 2.2,
     },
     dificil: {
-        cpuRun: 7.5, cpuDefRun: 7.3, cpuTackle: 0.84, breakHit: 0.33, dodge: 0.36, userTackle: 0.76,
-        cpuBreak: 0.62, intercept: 0.17, scrumCpu: 31, ruckKeep: 0.76, cpuRuckKeep: 0.93,
-        kickWindow: 0.13, cpuKick: 0.78, cpuPassIQ: 2.2,
+        cpuRun: 7.9, cpuDefRun: 7.8, cpuTackle: 0.9, breakHit: 0.24, dodge: 0.27, userTackle: 0.68,
+        cpuBreak: 0.72, intercept: 0.22, scrumCpu: 36, ruckKeep: 0.86, cpuRuckKeep: 0.93, ruckRate: 7,
+        kickWindow: 0.1, cpuKick: 0.85, cpuPassIQ: 2.8,
+    },
+    leyenda: {
+        cpuRun: 8.3, cpuDefRun: 8.3, cpuTackle: 0.94, breakHit: 0.16, dodge: 0.19, userTackle: 0.6,
+        cpuBreak: 0.8, intercept: 0.28, scrumCpu: 41, ruckKeep: 0.83, cpuRuckKeep: 0.95, ruckRate: 8.5,
+        kickWindow: 0.08, cpuKick: 0.9, cpuPassIQ: 3.4,
     },
 };
 

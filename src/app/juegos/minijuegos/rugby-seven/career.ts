@@ -120,6 +120,8 @@ export interface Player {
     s?: [number, number, number, number];
     /** Moral, de −2 a 2. */
     m?: number;
+    /** Peso (kg) y altura (cm): el scrum y el line. */
+    b?: [number, number];
     /** Si no está: por qué, hasta qué altura de la temporada (0 a 1; 2 = toda) y quién se lo llevó. */
     out?: { kind: OutKind; until: number; by?: string };
 }
@@ -127,7 +129,7 @@ export interface Player {
 /** Una noticia del club que se muestra en un cartel (convocatorias, lesiones, vueltas). */
 export interface CareerNews {
     season: number;
-    kind: OutKind | 'back' | 'youth' | 'train';
+    kind: OutKind | 'back' | 'youth' | 'train' | 'club';
     title: string;
     text: string;
     /** El jugador de la noticia (id en el plantel propio). */
@@ -204,6 +206,8 @@ export interface CareerState {
     reports?: { season: number; rows: YouthRow[] }[];
     /** Historial contra cada rival: ganados, empatados, perdidos, a favor, en contra y el último [temporada, nosotros, ellos]. */
     h2h?: Record<string, [number, number, number, number, number, number, number, number]>;
+    /** Versión de la carrera: las partidas viejas se llevan a la actual al abrirse (ver migrateCareer). */
+    cv?: number;
     /** Lo que hizo cada jugador del club en toda la carrera: tries, puntos, partidos y el nombre (de los que ya no están). */
     legends?: Record<string, [number, number, number, string?]>;
     /** Lo que dejó la temporada en curso; se aplica al cerrarla. */
@@ -312,9 +316,15 @@ function makeSkills(ovr: number, r: () => number): [number, number, number, numb
     return [one(), one(), one(), one()];
 }
 
+/** Peso y altura: los pesados tienden a ser altos; de 76 a 118 kg y de 1,70 a 2,02 m. */
+function makeBody(r: () => number): [number, number] {
+    const kg = Math.round(76 + r() * 42);
+    return [kg, Math.round(clampN(168 + (kg - 76) * 0.45 + r() * 16, 170, 202))];
+}
+
 function makePlayer(id: number, ovr: number, age: number, r: () => number = Math.random): Player {
     const o = capOvr(ovr);
-    return { id, age, q: 0, gen: 0, ovr: o, s: makeSkills(o, r), m: 0 };
+    return { id, age, q: 0, gen: 0, ovr: o, s: makeSkills(o, r), m: 0, b: makeBody(r) };
 }
 
 function newRoster(club: string, r: () => number = Math.random): Player[] {
@@ -338,10 +348,54 @@ function upgradeCareer(r: CareerState) {
         for (const clubs of Object.values(r.divisions)) for (const c of clubs) r.rosters[c] = newRoster(c, seededRand(`${c}:nuevo`));
     }
     for (const [club, ro] of Object.entries(r.rosters)) if (ro.length < SQUAD || ro.some((p) => p.id === undefined || p.ovr === undefined)) r.rosters[club] = upgradeRoster(club, ro);
+    for (const [club, ro] of Object.entries(r.rosters)) {
+        const rb = seededRand(`${club}:cuerpos`);
+        for (const p of ro) if (!p.b) p.b = makeBody(rb);
+    }
     if (!r.youth) r.youth = initialYouth(r);
 }
 
-const needsUpgrade = (r: CareerState) => !r.youth || Object.values(r.rosters ?? {}).some((ro) => ro.length < SQUAD || ro.some((p) => p.id === undefined || p.ovr === undefined));
+/** Versión actual de la carrera (2: plantel de 12, niveles desde el ranking, peso y altura). */
+const CAREER_VERSION = 2;
+
+const needsUpgrade = (r: CareerState) =>
+    (r.cv ?? 0) < CAREER_VERSION || !r.youth || Object.values(r.rosters ?? {}).some((ro) => ro.length < SQUAD || ro.some((p) => p.id === undefined || p.ovr === undefined || !p.b));
+
+/**
+ * Lleva una carrera guardada a la versión actual, para que las partidas que ya
+ * estaban vean todo lo nuevo: planteles de 12 con skills, peso y altura; el
+ * nivel de cada club re-centrado en el ranking de clubes (lo jugado se
+ * conserva en parte); y, si la temporada no empezó, la pretemporada. Si ya
+ * está en juego, avisa las novedades y la franquicia puede llamar a alguien.
+ */
+function migrateCareer(s: TourState, r: CareerState) {
+    upgradeCareer(r);
+    if ((r.cv ?? 0) >= CAREER_VERSION) return;
+    for (const [club, roster] of Object.entries(r.rosters ?? {})) {
+        const mean = roster.reduce((a, p) => a + (p.ovr ?? 5), 0) / Math.max(1, roster.length);
+        const delta = (centerOf(club) - 0.2 - mean) * 0.7;
+        if (Math.abs(delta) < 0.05) continue;
+        for (const p of roster) {
+            p.ovr = capOvr((p.ovr ?? 5) + delta);
+            if (p.s) p.s = p.s.map((v) => Math.round(clampN(v + delta, 1, 10))) as Player['s'];
+        }
+    }
+    r.cv = CAREER_VERSION;
+    const played = s.groupHistory.length + s.koHistory.length + (r.parallel ? r.parallel.groupHistory.length + r.parallel.koHistory.length : 0);
+    if (r.phase === 'liga' && played === 0 && !r.pre) {
+        startPreseason(r);
+    } else if (!r.pre) {
+        r.pre = { step: 'listo' };
+        r.bajas ??= 0;
+        pushNews(r, {
+            kind: 'club',
+            title: 'Novedades en el club',
+            text: 'Ahora el plantel es de doce, con valoración, skills, peso y altura: armá tu siete en Plantel. Hay moral, cansancio, convocatorias y juveniles. La pretemporada llega al empezar el año que viene.',
+        });
+        if (r.phase === 'liga' && seasonClock(s) < 0.4) franchiseCall(r);
+    }
+    forget(r);
+}
 
 export const available = (p: Player) => !p.out;
 /** Valoración con la moral encima (lo que rinde hoy). */
@@ -373,9 +427,9 @@ export function autoLineup(roster: Player[], keep?: number[]): number[] {
         [4, (p) => (p.s?.[1] ?? 5) * 2 + formOvr(p)],
         [6, (p) => (p.s?.[0] ?? 5) * 2 + formOvr(p)],
         [5, (p) => (p.s?.[0] ?? 5) + (p.s?.[2] ?? 5) + formOvr(p)],
-        [0, (p) => (p.s?.[2] ?? 5) * 2 + formOvr(p)],
-        [2, (p) => (p.s?.[2] ?? 5) * 2 + formOvr(p)],
-        [1, (p) => (p.s?.[2] ?? 5) + (p.s?.[3] ?? 5) + formOvr(p)],
+        [0, (p) => (p.s?.[2] ?? 5) * 2 + formOvr(p) + ((p.b?.[0] ?? 95) - 95) / 8],
+        [2, (p) => (p.s?.[2] ?? 5) * 2 + formOvr(p) + ((p.b?.[0] ?? 95) - 95) / 8],
+        [1, (p) => (p.s?.[2] ?? 5) + (p.s?.[3] ?? 5) + formOvr(p) + ((p.b?.[1] ?? 185) - 185) / 8],
         [3, (p) => (p.s?.[0] ?? 5) + (p.s?.[3] ?? 5) + formOvr(p)],
     ];
     for (const [slot, score] of order) if (slots[slot] === null) slots[slot] = take(score);
@@ -478,7 +532,7 @@ export function careerSkills(r: CareerState, club: string): PlayerSkill[] | null
         const p = by.get(id) ?? roster[0];
         const m = (p.m ?? 0) * 0.3;
         const [spd, kick, tkl, sta] = p.s ?? [6, 6, 6, 6];
-        return { spd: clampN(spd + m, 1, 10), kick: clampN(kick + m, 1, 10), tkl: clampN(tkl + m, 1, 10), sta, fat0 };
+        return { spd: clampN(spd + m, 1, 10), kick: clampN(kick + m, 1, 10), tkl: clampN(tkl + m, 1, 10), sta, fat0, kg: p.b?.[0], cm: p.b?.[1] };
     });
 }
 
@@ -490,6 +544,8 @@ export interface RosterRow {
     s: [number, number, number, number];
     m: number;
     out?: Player['out'];
+    /** Peso (kg) y altura (cm). */
+    b: [number, number];
     /** Puesto en el siete inicial (0 a 6), o null si es suplente. */
     slot: number | null;
 }
@@ -503,7 +559,7 @@ export function myRoster(r: CareerState): RosterRow[] {
     return roster.map((p) => {
         const id = p.id as number;
         const slot = lineup.indexOf(id);
-        return { id, name: careerPlayerName(r, team, id), age: p.age, ovr: p.ovr ?? 5, s: p.s ?? [5, 5, 5, 5], m: p.m ?? 0, out: p.out, slot: slot >= 0 && available(p) ? slot : null };
+        return { id, name: careerPlayerName(r, team, id), age: p.age, ovr: p.ovr ?? 5, s: p.s ?? [5, 5, 5, 5], m: p.m ?? 0, out: p.out, b: p.b ?? [95, 185], slot: slot >= 0 && available(p) ? slot : null };
     });
 }
 
@@ -1222,6 +1278,7 @@ export function createCareer(meId: string, difficulty: Difficulty, duration: Dur
     // 2026: los federales los juegan los de más nivel de cada regional, con las plazas de fábrica.
     r.tiers = tierFields(r, 'final', r.cupos, undefined, {});
     r.youth = initialYouth(r);
+    r.cv = CAREER_VERSION;
     return seasonStart(r, difficulty, duration);
 }
 
@@ -1765,7 +1822,7 @@ export function settleCareer(s0: TourState): TourState {
 function upgraded(s: TourState): TourState {
     if (!s.career || !needsUpgrade(s.career)) return s;
     const r: CareerState = JSON.parse(JSON.stringify(s.career));
-    upgradeCareer(r);
+    migrateCareer(s, r);
     return { ...s, career: r };
 }
 

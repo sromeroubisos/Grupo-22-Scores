@@ -73,6 +73,9 @@ export interface PlayerSkill {
     tkl: number;
     sta: number;
     fat0?: number;
+    /** Peso (kg) y altura (cm): mandan en el scrum y en el line. */
+    kg?: number;
+    cm?: number;
 }
 
 interface Flight {
@@ -118,6 +121,11 @@ export interface MatchConfig {
     skills?: [PlayerSkill[] | null, PlayerSkill[] | null];
 }
 
+/** Cuánto se abre de costado el portador rival cuando lo apuran (m/s). */
+const DODGE_VY: Record<Difficulty, number> = { 'muy-facil': 3.2, facil: 4, normal: 5, dificil: 5.8, leyenda: 6.3 };
+/** Ancho del verde en tu saque de line, por dificultad (antes de la altura de los saltadores). */
+const LINE_ZONE: Record<Difficulty, number> = { 'muy-facil': 0.36, facil: 0.3, normal: 0.24, dificil: 0.2, leyenda: 0.16 };
+
 /** Lo que dura el minuto extra antes de la muerte súbita (s). */
 const EXTRA_LEN = 60;
 
@@ -159,7 +167,7 @@ function colorDistance(a: string, b: string): number {
 function withRating(base: DiffParams, cpuRating: number, userRating: number): DiffParams {
     // Manda la DIFERENCIA entre los dos: Perú contra Brasil es cuesta arriba aunque los dos estén lejos
     // de la elite. El nivel absoluto del rival suma un poco (un clásico entre potencias pide más).
-    const f = clamp((cpuRating - userRating) / 18 + (cpuRating - 68) / 60, -1, 1);
+    const f = clamp((cpuRating - userRating) / 14 + (cpuRating - 62) / 45, -1, 1);
     return {
         ...base,
         cpuRun: base.cpuRun + f * 0.9,
@@ -171,8 +179,9 @@ function withRating(base: DiffParams, cpuRating: number, userRating: number): Di
         // Tu tackle: contra un rival de abajo casi no fallás; contra Nueva Zelanda se te escapan.
         userTackle: clamp(base.userTackle * (1 - f * 0.3), 0.45, 0.99),
         intercept: clamp(base.intercept * (1 + f * 0.8), 0, 0.3),
-        cpuRuckKeep: clamp(base.cpuRuckKeep + f * 0.08, 0.45, 0.98),
-        ruckKeep: clamp(base.ruckKeep - f * 0.06, 0.6, 0.98),
+        cpuRuckKeep: clamp(base.cpuRuckKeep + f * 0.04, 0.6, 0.98),
+        ruckKeep: clamp(base.ruckKeep - f * 0.04, 0.7, 0.98),
+        ruckRate: base.ruckRate * (1 + f * 0.2),
         scrumCpu: base.scrumCpu * (1 + f * 0.4),
         cpuKick: clamp(base.cpuKick + f * 0.15, 0.2, 0.92),
         cpuPassIQ: base.cpuPassIQ * (1 + f * 0.5),
@@ -184,7 +193,7 @@ function withRating(base: DiffParams, cpuRating: number, userRating: number): Di
  * que lo que metés en 3 minutos no se duplica en 7. Muy fácil: 54 a los 3', 90 a
  * los 7'. Normal: 33 y 55.
  */
-const PACE_K: Record<Difficulty, number> = { 'muy-facil': 28, facil: 22, normal: 17, dificil: 13 };
+const PACE_K: Record<Difficulty, number> = { 'muy-facil': 28, facil: 20, normal: 14, dificil: 11, leyenda: 9 };
 export function paceCap(difficulty: Difficulty, minutes: number): number {
     return PACE_K[difficulty] * Math.max(0, minutes) ** 0.6;
 }
@@ -203,8 +212,8 @@ function pressured(b: DiffParams, def: number, atk: number): DiffParams {
         breakHit: clamp(b.breakHit * (1 - def * 0.55), 0.06, 0.92),
         dodge: clamp(b.dodge * (1 - def * 0.55), 0.06, 0.92),
         intercept: clamp(b.intercept * (1 + def * 1.4) + def * 0.03, 0, 0.36),
-        cpuRuckKeep: clamp(b.cpuRuckKeep + def * 0.08, 0.45, 0.98),
-        ruckKeep: clamp(b.ruckKeep - def * 0.16, 0.5, 0.98),
+        cpuRuckKeep: clamp(b.cpuRuckKeep + def * 0.02, 0.6, 0.98),
+        ruckKeep: clamp(b.ruckKeep - def * 0.04, 0.7, 0.98),
         scrumCpu: b.scrumCpu * (1 + def * 0.35),
         kickWindow: b.kickWindow * (1 - def * 0.4),
         cpuRun: b.cpuRun + atk * 0.7,
@@ -403,7 +412,7 @@ export class SevenMatch {
         const mg = this.mg;
         if (this.walkT > 0 && (this.phase === 'scrum' || this.phase === 'lineout')) return; // todavía se están acomodando
         if (this.phase === 'scrum' && mg?.kind === 'scrum') {
-            mg.user += 7;
+            mg.user += 7 * this.packRatio() ** 2;
             this.shake = Math.max(this.shake, 0.5);
             return;
         }
@@ -458,6 +467,29 @@ export class SevenMatch {
         if (!sk) return 1;
         const base = (sk.spd + sk.tkl) / 2;
         return clamp((this.skill(p, 'spd') + this.skill(p, 'tkl')) / 2 / Math.max(1, base), 0, 1);
+    }
+
+    /** Peso de un jugador (kg): el del plantel, o uno típico según el nivel del equipo. */
+    private kgOf(p: Player): number {
+        const team = p.side === 0 ? this.cfg.home : this.cfg.away;
+        return p.sk?.kg ?? 92 + ((team.rating ?? 70) - 60) * 0.25;
+    }
+
+    private cmOf(p: Player): number {
+        const team = p.side === 0 ? this.cfg.home : this.cfg.away;
+        return p.sk?.cm ?? 185 + ((team.rating ?? 70) - 60) * 0.12;
+    }
+
+    /** Peso del pack propio contra el rival (los tres más pesados de cada lado): >1, empujás más. */
+    private packRatio(): number {
+        const pack = (side: Side) => this.team(side).map((p) => this.kgOf(p)).sort((a, b) => b - a).slice(0, 3).reduce((a, b) => a + b, 0);
+        return clamp(pack(0) / Math.max(1, pack(1)), 0.8, 1.25);
+    }
+
+    /** Altura de los saltadores de un lado (promedio de los dos más altos). */
+    private jumpers(side: Side): number {
+        const h = this.team(side).map((p) => this.cmOf(p)).sort((a, b) => b - a);
+        return (h[0] + (h[1] ?? h[0])) / 2;
     }
 
     /** Factores sobre la base del partido: con skill 6 no cambia nada. */
@@ -871,7 +903,7 @@ export class SevenMatch {
         let t = this.elapsed();
         const ru = this.cfg.home.rating ?? 70;
         const rc = this.cfg.away.rating ?? 70;
-        const bias: Record<Difficulty, number> = { 'muy-facil': 0.25, facil: 0.12, normal: 0, dificil: -0.1 };
+        const bias: Record<Difficulty, number> = { 'muy-facil': 0.25, facil: 0.1, normal: -0.05, dificil: -0.12, leyenda: -0.18 };
         const model = clamp(1 / (1 + 10 ** ((rc - ru) / 18)) + bias[this.cfg.difficulty], 0.08, 0.92);
         // Cómo venía el partido: pesa, sin mandar.
         const played = (this.score[0] + 3) / (this.score[0] + this.score[1] + 6);
@@ -1027,7 +1059,7 @@ export class SevenMatch {
         this.lineout = { x: lx, y: top ? 0 : WIDTH, thrower };
         this.mg = {
             kind: 'timing', cursor: 0, dir: 1, speed: 1.35,
-            zone: thrower === 0 ? (this.cfg.difficulty === 'muy-facil' ? 0.36 : 0.24) : 0.1,
+            zone: clamp((thrower === 0 ? LINE_ZONE[this.cfg.difficulty] : 0.1) * (this.jumpers(0) / this.jumpers(1)) ** 6, 0.04, 0.45),
             userActs: true, done: false, win: false,
         };
         this.phase = 'lineout';
@@ -1828,7 +1860,7 @@ export class SevenMatch {
         let vy = 0;
         if (threat) {
             const away: 1 | -1 = c.y >= threat.y ? 1 : -1;
-            vy = away * (this.cfg.difficulty === 'dificil' ? 5.5 : this.cfg.difficulty === 'normal' ? 4.5 : 3.2);
+            vy = away * DODGE_VY[this.cfg.difficulty];
             if (td < 4.5 && rnd() < D.cpuPassIQ * dt) {
                 const opt = this.passTarget(c, away) ?? this.bestOption(c);
                 if (opt && Math.abs(opt.y - threat.y) > 3) {
@@ -1976,22 +2008,35 @@ export class SevenMatch {
         if (this.phaseT > 0) return;
 
         const { x, y, side } = this.ruckAt;
-        // El ruck lo gana el que llega: cuenta quién está metido (agachado) de cada lado.
-        // Portador aislado o rival con más gente encima = la pelota cambia de manos.
-        const arrived = (s: Side) => this.players.filter((p) => p.side === s && p.rucking && p.pose === 'scrum').length;
-        const support = arrived(side) - arrived(side === 0 ? 1 : 0);
-        let keep = (side === 0 ? this.D.ruckKeep + mash * 0.012 : this.D.cpuRuckKeep - mash * 0.02) - 0.08 + support * 0.11;
-        if (arrived(side) === 0) keep -= 0.15; // nadie lo fue a apoyar
-        // El primero que se mete sobre la pelota manda: si es el rival, está en posición de jackal.
-        if (this.ruckFirst !== null) keep += this.ruckFirst === side ? 0.06 : -0.2;
-        keep = clamp(keep, 0.25, 0.97);
-        const winner: Side = rnd() < keep ? side : side === 0 ? 1 : 0;
+        /*
+         * El ruck casi siempre lo retiene el que tenía la pelota. Se pierde
+         * cuando: el portador quedó solo (nadie llegó a apoyar), el rival se
+         * metió primero sobre la pelota (jackal), el rival tiene más gente
+         * encima o empuja más fuerte. Los toques del usuario son su empuje y
+         * se comparan contra el ritmo del rival, que sube con la dificultad.
+         */
+        const other: Side = side === 0 ? 1 : 0;
+        const inRuck = (s: Side) => this.players.filter((p) => p.side === s && p.rucking && p.pose === 'scrum');
+        const own = inRuck(side);
+        const opp = inRuck(other);
+        const userRate = mash / 1.3;
+        const contest = clamp((userRate - this.D.ruckRate) / 4, -1, 1); // + = el usuario empuja más que el rival
+        const power = (ps: Player[]) => (ps.length ? ps.reduce((a, p) => a + this.fTkl(p) * (this.kgOf(p) / 95), 0) / ps.length : 0.9);
+        let keep = side === 0 ? this.D.ruckKeep + contest * 0.07 : this.D.cpuRuckKeep - contest * 0.1;
+        keep += (own.length - opp.length) * 0.05;
+        keep += (power(own) - power(opp)) * 0.25;
+        const alone = own.length === 0;
+        const jackal = this.ruckFirst !== null && this.ruckFirst !== side;
+        if (alone) keep -= 0.2;
+        if (jackal) keep -= 0.12;
+        keep = clamp(keep, 0.3, 0.98);
+        const winner: Side = rnd() < keep ? side : other;
         this.mg = null;
         if (winner !== side) {
-            const jackal = support < 0 || this.ruckFirst !== side;
-            this.say(jackal ? 'JACKAL' : 'PELOTA ROBADA', jackal ? 'Llegaron primero y la robaron' : null, 1);
+            const why = alone ? 'Quedó solo: nadie llegó a apoyar' : jackal ? 'Llegaron primero sobre la pelota' : side === 0 ? 'Empujaron más: tocá más rápido' : 'Empujaste más y la ganaste';
+            this.say(winner === 0 ? 'RUCK GANADO' : jackal ? 'JACKAL' : 'PELOTA ROBADA', why, 1.2);
             if (this.deadBall()) return;
-        }
+        } else if (side === 0) this.say('PELOTA ASEGURADA', null, 0.5);
         // La levanta el más cercano a la pelota del que la ganó, y se sigue jugando.
         this.quickRelease(winner, x, y, null);
     }
@@ -2029,7 +2074,7 @@ export class SevenMatch {
     private updateScrum(dt: number) {
         const mg = this.mg;
         if (!mg || mg.kind !== 'scrum') return;
-        mg.cpu += this.D.scrumCpu * dt * (0.7 + rnd() * 0.6);
+        mg.cpu += (this.D.scrumCpu * dt * (0.7 + rnd() * 0.6)) / this.packRatio() ** 2;
         const bal = clamp((mg.user - mg.cpu) / 40, -1, 1);
         for (const p of this.players) {
             if (p.pose === 'scrum') p.x += bal * dt * 0.8;

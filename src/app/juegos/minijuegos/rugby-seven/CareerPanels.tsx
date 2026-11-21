@@ -191,7 +191,7 @@ export function LineupBoard({ tour, onChange }: { tour: TourState; onChange: (s:
     return (
         <div className={styles.lineBoard}>
             <p className={styles.note}>
-                Arrastrá un jugador sobre otro para cambiarlos (en el celular, desde el número), o tocá uno y después el otro. El apertura patea, los de afuera corren y los de adelante tacklean. Bajas de la temporada: {bajas} de {MAX_BAJAS}.
+                Arrastrá un jugador sobre otro para cambiarlos (en el celular, desde el número), o tocá uno y después el otro. El apertura patea, los de afuera corren, los de adelante tacklean y empujan el scrum con su peso, y los altos ganan el line. Bajas de la temporada: {bajas} de {MAX_BAJAS}.
             </p>
             <div className={styles.lineField} aria-label="Siete inicial">
                 {starters.map((p, slot) => (
@@ -245,7 +245,7 @@ export function RosterTable({ tour, onRename }: { tour: TourState; onRename: (id
                         }}
                     />
                     <span className={styles.rosterAge}>
-                        {p.age} años · <Skills s={p.s} /> <Moral m={p.m} />
+                        {p.age} años · {p.b[0]} kg · {(p.b[1] / 100).toFixed(2).replace('.', ',')} m · <Skills s={p.s} /> <Moral m={p.m} />
                         {outText(p) && <small className={styles.lineOut}> · {outText(p)}</small>}
                     </span>
                     <span className={p.ovr >= 7 ? styles.fixWin : p.ovr < 4 ? styles.fixLoss : undefined}>{p.ovr.toFixed(1)}</span>
@@ -377,7 +377,7 @@ export function PreseasonPanel({
 
 /* ───────────────────────── noticias ───────────────────────── */
 
-const NEWS_TAG: Record<string, string> = { fra: 'Super Rugby Américas', eur: 'Mercado', pum: 'Los Pumas', inj: 'Parte médico', back: 'Vuelta', youth: 'Juveniles', train: 'Pretemporada' };
+const NEWS_TAG: Record<string, string> = { club: 'Novedades', fra: 'Super Rugby Américas', eur: 'Mercado', pum: 'Los Pumas', inj: 'Parte médico', back: 'Vuelta', youth: 'Juveniles', train: 'Pretemporada' };
 
 /** El cartel animado de una noticia del club, con el jugador. */
 export function NewsPopup({ news, team, more = 0, onClose, onSkipAll }: { news: CareerNews; team: SevenTeam; more?: number; onClose: () => void; onSkipAll?: () => void }) {

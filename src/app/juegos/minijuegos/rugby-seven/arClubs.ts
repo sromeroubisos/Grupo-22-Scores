@@ -229,13 +229,14 @@ const SHORTS = makeShorts([...AR_SEVEN_CLUBS].sort((a, b) => (b.ranking ?? 0) - 
 /**
  * Fuerza en la escala del juego. Manda el ranking de clubes de Salida de 22,
  * que es de escala ARGENTINA (Newman ~99 por ser el mejor del país, no del
- * mundo): se comprime a 45-82, así el mejor argentino queda debajo de la élite
- * profesional (Toulouse 95, Leinster 93) y arriba de una franquicia de Super
- * Rugby Americas. Los clubes sin ranking toman la fuerza del canon (banda
- * 24-52), llevada a 38-58: siempre debajo de un club de primera rankeado.
+ * mundo): va casi derecho, 30 + ranking × 0,55 (Newman 84, Jockey de Rosario
+ * 76, un ranking 50 da 57). Así el mejor argentino queda debajo de la élite
+ * profesional (Toulouse 95, Leinster 93) y la distancia entre un club de
+ * arriba y uno del montón se siente en la cancha. Los clubes sin ranking toman
+ * la fuerza del canon (banda 24-52), llevada a 38-58.
  */
 function gameRating(c: ArSevenClub): number {
-    if (c.ranking !== null) return Math.round(45 + (c.ranking / 99) * 37);
+    if (c.ranking !== null) return Math.round(30 + c.ranking * 0.55);
     return Math.round(38 + Math.max(0, c.rating - 24) * 0.72);
 }
 

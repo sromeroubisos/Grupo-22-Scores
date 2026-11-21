@@ -573,6 +573,8 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
     useEffect(() => {
         const saved = loadSaved();
         const list = saved.tours.map((t) => (t ? settleCareer(t) : null));
+        // Una carrera vieja se lleva a la versión actual al abrirse: se guarda enseguida, así no se rehace.
+        if (list.some((t, i) => t !== saved.tours[i])) saveSaved({ customTeams: saved.customTeams, cup: saved.cup, tours: list });
         setCustomTeams(saved.customTeams);
         setCup(saved.cup);
         setTours(list);

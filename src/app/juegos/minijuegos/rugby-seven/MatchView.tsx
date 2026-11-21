@@ -26,6 +26,7 @@ const KICK_ZONE = 0.22; // franja izquierda de la cancha donde mantener = patear
 const KICK_HOLD_MS = 170; // hay que dejar el dedo esto para que empiece a cargar la patada
 const SWIPE_PX = 34; // desde acá un movimiento rápido es un deslizamiento
 const SWIPE_MS = 260; // y tiene que pasar en este tiempo
+const HIT_PX = 40; // con la pelota: deslizar así hacia adelante es chocar (a cualquier velocidad)
 const SKIP_SWIPE_PX = 170; // esquema A: un deslizamiento vertical así de largo es un salteo
 const TAP_PX = 14;
 const TAP_MS = 240;
@@ -54,7 +55,8 @@ const TOUCH_GESTURES: Record<TouchScheme, [string, string][]> = {
         ['Moverte', 'Deslizá el dedo hacia arriba o hacia abajo y mantenelo: el jugador va para ese lado.'],
         ['Pase', 'Tocá del lado derecho: arriba de la mitad, pase para arriba; abajo, para abajo.'],
         ['Salteo', 'Tocá y dejá el dedo quieto un momento.'],
-        ['Chocar o tacklear', 'Deslizá rápido hacia adelante o hacia atrás.'],
+        ['Chocar', 'Con la pelota, deslizá el dedo hacia adelante (a la derecha).'],
+        ['Tacklear', 'Sin la pelota, deslizá rápido hacia adelante o hacia atrás.'],
         ['Patear', 'Mantené en la franja izquierda para cargar y soltá para patear.'],
         ['Drop', 'Dos toques seguidos en la franja izquierda.'],
         ['Scrum, ruck, line y conversión', 'Tocá la pantalla.'],
@@ -63,7 +65,8 @@ const TOUCH_GESTURES: Record<TouchScheme, [string, string][]> = {
     swipe: [
         ['Moverte', 'Mantené el dedo arriba o abajo de la mitad de la cancha.'],
         ['Pase', 'Deslizá rápido hacia arriba o hacia abajo. Un deslizamiento muy largo es un salteo.'],
-        ['Chocar o tacklear', 'Deslizá rápido hacia adelante o hacia atrás.'],
+        ['Chocar', 'Con la pelota, deslizá el dedo hacia adelante (a la derecha).'],
+        ['Tacklear', 'Sin la pelota, deslizá rápido hacia adelante o hacia atrás.'],
         ['Patear', 'Mantené en la franja izquierda para cargar y soltá para patear.'],
         ['Drop', 'Dos toques seguidos.'],
         ['Scrum, ruck, line y conversión', 'Tocá la pantalla.'],
@@ -475,6 +478,14 @@ export default function MatchView({ cfg, onFinish, onQuit, musicSrc = null, font
         if (!f || f.kind === 'done' || f.kind === 'swipe') return;
         const dx = pt(e).x - f.x0;
         const dy = pt(e).y - f.y0;
+        // Con la pelota, deslizar hacia adelante (aunque sea despacio, y también desde la franja de patear) es chocar.
+        const mm = matchRef.current;
+        if (mm && !f.kicking && dx > HIT_PX && Math.abs(dx) > Math.abs(dy) * 1.3 && mm.hud().attacking) {
+            f.kind = 'done';
+            syncTouchMove();
+            mm.hit();
+            return;
+        }
         if (schemeRef.current === 'tap' && (f.kind === 'pending' || f.kind === 'move')) {
             // Esquema B. Un golpe rápido de costado: chocar o tacklear.
             if (Math.abs(dx) > SWIPE_PX && Math.abs(dx) > Math.abs(dy) * 1.5 && performance.now() - f.t0 < SWIPE_MS) {
