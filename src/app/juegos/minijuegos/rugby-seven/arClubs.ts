@@ -12,11 +12,131 @@
  * orden de fuerza.
  */
 
-import { AR_SEVEN_CLUBS, AR_SEVEN_CUPOS, AR_SEVEN_DIVISIONS, type ArSevenClub, type ArSevenDivision } from './arClubs.generated';
+import { AR_SEVEN_CLUBS as GEN_CLUBS, AR_SEVEN_CUPOS, AR_SEVEN_DIVISIONS as GEN_DIVISIONS, type ArSevenClub, type ArSevenDivision } from './arClubs.generated';
 import { squadFor } from './nations';
 import type { Kit } from './sprites';
 import type { SevenTeam } from './teams';
 import type { TourDef } from './tours';
+
+/*
+ * Lo que el juego le agrega al canon (sin tocar el archivo generado):
+ *
+ *   · El Desarrollo de Córdoba: las dos ligas de la UCR (Capital-Este y
+ *     Sur-Centro, de la base de G22). Su campeón juega el repechaje contra el
+ *     último del Súper 9 por un lugar en el Súper 9.
+ *   · El Torneo Andino ya no asciende al NOA B: sus cuatro mejores juegan el
+ *     Regional A de Córdoba con los cuatro mejores del Súper 9, y los cuatro
+ *     que siguen, el Regional B.
+ *   · Tierra del Fuego y Santa Cruz alimentan el Regional Patagónico, no el
+ *     Austral.
+ */
+const CBA_ZONE_NAMES: string[][] = [
+    ['Ajedrez Cosquín', 'Asociación Cordobesa Volantes', 'Chelcos de Villa del Rosario', 'Conas', 'Cuises Porteña', 'Los Toros de Brinkmann', 'Mañke', 'Rosedal', 'Salsipuedes', 'Universidad Siglo 21', 'Villa Libertador'],
+    ['Águilas de General Deheza', 'Universitario de Villa María', 'Jockey Club Río Cuarto', 'Las Iguanas', 'Los Patriotas de Ucacha', 'Los Tordos de Hernando', 'Mackenna', 'Mirage', 'Náutico Fitz Simon', 'Oliva', 'Ranqueles', 'Unión Oncativo', 'Villa General Belgrano'],
+];
+export const CBA_DESARROLLO_ZONES: string[][] = CBA_ZONE_NAMES.map((zone) => zone.map((name) => `ar-cba-${name.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`));
+
+const CBA_NAMES = CBA_ZONE_NAMES.flat();
+// Los que tienen más estructura (ciudades grandes) un poco arriba; el resto, de desarrollo.
+const CBA_STRONGER = new Set(['Jockey Club Río Cuarto', 'Universitario de Villa María', 'Universidad Siglo 21', 'Villa General Belgrano', 'Oliva']);
+const CBA_CLUBS: ArSevenClub[] = CBA_DESARROLLO_ZONES.flat().map((id, i) => ({
+    id,
+    name: CBA_NAMES[i],
+    short: CBA_NAMES[i].replace(/^(Los|Las|Club|Asociación)\s+/, '').slice(0, 3).toUpperCase(),
+    color: null,
+    rating: CBA_STRONGER.has(CBA_NAMES[i]) ? 31 : 26 + (i % 4),
+    division: 'ar-centro-desarrollo',
+    ranking: null,
+}));
+
+/** Las ramas de la carrera: las dos argentinas y, aparte (no se cruzan con las argentinas), Chile, Uruguay y Brasil. */
+export type ArBranch = 'urba' | 'interior' | 'chile' | 'uruguay' | 'brasil';
+export interface GameDivision extends Omit<ArSevenDivision, 'branch'> {
+    branch: ArBranch;
+}
+/** Un club del juego: los extranjeros traen su lista de nombres y su nivel fijo (no están en el ranking argentino). */
+export interface GameClub extends ArSevenClub {
+    pool?: string;
+    fixed?: number;
+}
+export const isArgBranch = (b: ArBranch) => b === 'urba' || b === 'interior';
+
+const slug = (name: string) => name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+/**
+ * Ligas de afuera, de la base de G22 (temporada 2026). Sin los equipos B ni
+ * los repetidos (el segundo equipo de un club que ya juega más arriba). El
+ * nivel va de mayor a menor según el orden de cada lista.
+ */
+const FOREIGN: { div: Omit<GameDivision, 'clubs'>; pool: string; top: number; clubs: [string, string | null][] }[] = [
+    {
+        div: { id: 'cl-top10', label: 'Top 10 de ARUSA', branch: 'chile', region: 'chile', level: 1, promotesTo: null, relegatesTo: 'cl-segunda' },
+        pool: 'latam', top: 68,
+        clubs: [['Old Boys', '#495270'], ['Universidad Católica', '#1f5bab'], ['COBS', '#322952'], ['Old Mackayans', '#000776'], ['Sporting', '#000000'], ['Stade Français', '#eb2a2e'], ['Old Reds', '#ed1c24'], ['PWCC', '#cfa976'], ['Old Georgians', '#f9bd18'], ['CD Alumni', '#efdd1f'], ['Old Johns', '#e10019'], ['Santo Tomás', null], ['Los Troncos', null], ['Viña Rugby Club', null]],
+    },
+    {
+        div: { id: 'cl-segunda', label: 'Segunda de ARUSA', branch: 'chile', region: 'chile', level: 2, promotesTo: 'cl-top10', relegatesTo: 'cl-tercera' },
+        pool: 'latam', top: 52,
+        clubs: [['Old Gabs', '#801740'], ['Tabancura', '#65c3f3'], ['Gauchos', '#e2332b'], ['Old Locks', '#ffac01'], ['Old Newlanders', '#0e4b12'], ['All Brads', '#215a3f'], ['Lagartos', '#20351f']],
+    },
+    {
+        div: { id: 'cl-tercera', label: 'Tercera de ARUSA', branch: 'chile', region: 'chile', level: 3, promotesTo: 'cl-segunda', relegatesTo: 'cl-cuarta' },
+        pool: 'latam', top: 45,
+        clubs: [['Costa del Sol', null], ['Halcones', null], ['IRC', null], ['Lions', null], ['Mano Rugby', null], ['Old Navy', null], ['Trapiales', null]],
+    },
+    {
+        div: { id: 'cl-cuarta', label: 'Cuarta de ARUSA', branch: 'chile', region: 'chile', level: 4, promotesTo: 'cl-tercera', relegatesTo: null },
+        pool: 'latam', top: 39,
+        clubs: [['Universidad de Chile', null], ['Escuela Militar', null], ['Old Green', null], ['RC Francés', null], ['Toros de Quillota', null], ['URMA', null]],
+    },
+    {
+        div: { id: 'uy-uruguayo', label: 'Uruguayo de Clubes', branch: 'uruguay', region: 'uruguay', level: 1, promotesTo: null, relegatesTo: null },
+        pool: 'rio', top: 70,
+        clubs: [['Old Christians', '#002c50'], ['Carrasco Polo', '#006ab4'], ['Montevideo Cricket', '#e60000'], ['Champagnat', '#052d4c'], ['Old Boys & Girls', '#d42d00'], ['Trébol de Paysandú', '#009138'], ['Círculo de Tenis', '#2e2a28'], ['Seminario', '#871828'], ['Los Cuervos', '#000000'], ['Lobos de Punta del Este', '#2d3b6a'], ['PSG', '#e33028'], ['Ceibos', '#2a462c']],
+    },
+    {
+        div: { id: 'br-super12', label: 'Super 12 · Primeira Divisão', branch: 'brasil', region: 'brasil', level: 1, promotesTo: null, relegatesTo: 'br-segunda' },
+        pool: 'luso', top: 60,
+        clubs: [['SPAC', null], ['Pasteur', null], ['São José', null], ['Poli', null], ['Jacareí', null], ['Charrua', null], ['Farrapos', null], ['Desterro', null], ['Rio Branco', null], ['Tornados Indaiatuba', null], ['Nova Lima', null], ['Joaca', null]],
+    },
+    {
+        div: { id: 'br-segunda', label: 'Super 12 · Segunda Divisão', branch: 'brasil', region: 'brasil', level: 2, promotesTo: 'br-super12', relegatesTo: null },
+        pool: 'luso', top: 50,
+        clubs: [['Niterói', null], ['Rio Rugby', null], ['Brummers', null], ['Serra Gaúcha', null], ['Pé Vermelho', null], ['Leões de Paraisópolis', null], ['Colonos', null], ['Joinville', null], ['Carioca', null], ['Urutu', null], ['Iguanas SJC', null], ['Vitória', null]],
+    },
+];
+const prefixOf = (b: ArBranch) => (b === 'chile' ? 'cl' : b === 'uruguay' ? 'uy' : 'br');
+const FOREIGN_CLUBS: GameClub[] = FOREIGN.flatMap((f) =>
+    f.clubs.map(([name, color], i) => ({
+        id: `${prefixOf(f.div.branch)}-${slug(name)}`,
+        name,
+        short: name.replace(/^(Old|Los|Las|Club|CD|RC)\s+/, '').slice(0, 3).toUpperCase(),
+        color,
+        rating: 40,
+        division: f.div.id,
+        ranking: null,
+        pool: f.pool,
+        fixed: f.top - i,
+    })),
+);
+const FOREIGN_DIVISIONS: GameDivision[] = FOREIGN.map((f) => ({ ...f.div, clubs: f.clubs.map(([name]) => `${prefixOf(f.div.branch)}-${slug(name)}`) }));
+
+const DIV_OVERRIDE: Record<string, Partial<ArSevenDivision>> = {
+    'ar-centro-super9b': { relegatesTo: 'ar-centro-desarrollo' },
+    'ar-noa-andina': { promotesTo: null },
+    'ar-patagonia-tdf': { promotesTo: 'ar-patagonia-regional' },
+    'ar-patagonia-santacruz': { promotesTo: 'ar-patagonia-regional' },
+};
+
+/** Clubes del juego: los del canon, el Desarrollo de Córdoba y las ligas de afuera. */
+export const AR_SEVEN_CLUBS: GameClub[] = [...GEN_CLUBS, ...CBA_CLUBS, ...FOREIGN_CLUBS];
+/** Divisiones del juego: las del canon (con los cruces de arriba), el Desarrollo de Córdoba y las ligas de afuera. */
+export const AR_SEVEN_DIVISIONS: GameDivision[] = [
+    ...GEN_DIVISIONS.map((d) => ({ ...d, ...(DIV_OVERRIDE[d.id] ?? {}) })),
+    { id: 'ar-centro-desarrollo', label: 'Desarrollo de Córdoba', branch: 'interior', region: 'centro', level: 6, promotesTo: 'ar-centro-super9b', relegatesTo: null, clubs: CBA_DESARROLLO_ZONES.flat() },
+    ...FOREIGN_DIVISIONS,
+];
+export { AR_SEVEN_CUPOS };
 
 const NAVY = '#14234a';
 const W = '#f4f4f4';
@@ -235,7 +355,8 @@ const SHORTS = makeShorts([...AR_SEVEN_CLUBS].sort((a, b) => (b.ranking ?? 0) - 
  * arriba y uno del montón se siente en la cancha. Los clubes sin ranking toman
  * la fuerza del canon (banda 24-52), llevada a 38-58.
  */
-function gameRating(c: ArSevenClub): number {
+function gameRating(c: GameClub): number {
+    if (c.fixed !== undefined) return c.fixed;
     if (c.ranking !== null) return Math.round(30 + c.ranking * 0.55);
     return Math.round(38 + Math.max(0, c.rating - 24) * 0.72);
 }
@@ -252,7 +373,7 @@ export const AR_CLUBS: SevenTeam[] = AR_SEVEN_CLUBS.map((c) => ({
         // Banderita con los colores del club (no el escudo): la dibuja FlagIcon a partir de este código.
         return `kit:${k.shirt}:${k.shirt2}:${k.pattern}`;
     })(),
-    namePool: 'rio',
+    namePool: c.pool ?? 'rio',
     league: AR_SEVEN_DIVISIONS.find((d) => d.id === c.division)?.label,
 }));
 
@@ -261,11 +382,11 @@ export const arClubById = (id: string): SevenTeam | undefined => AR_BY_ID[id];
 
 /** Divisiones jugables (con al menos cuatro clubes), en el orden del canon: URBA arriba, después el interior. */
 /*
- * Nombres como los dice la gente: en Córdoba la segunda categoría es el
- * Regional A (su campeón juega la promoción con el último del Top 10 A).
+ * Nombres como los dice la gente: en Córdoba la segunda categoría es el Súper 9
+ * (sus 4 mejores y los del Andino juegan el Regional A, que da el ascenso).
  */
 export const AR_LABEL_OVERRIDE: Record<string, string> = {
-    'ar-centro-super9b': 'Regional A de Córdoba',
+    'ar-centro-super9b': 'Súper 9 de Córdoba',
 };
 
 export const AR_DIVISIONS_PLAYABLE = AR_SEVEN_DIVISIONS.filter((d) => d.clubs.length >= 4).map((d) => ({ ...d, label: AR_LABEL_OVERRIDE[d.id] ?? d.label }));
@@ -287,16 +408,16 @@ function tdiField(which: 'A' | 'B'): string[] {
     return out;
 }
 
-function divisionTour(d: ArSevenDivision): TourDef {
+function divisionTour(d: GameDivision): TourDef {
     const n = d.clubs.length;
     const top: 4 | 2 = n >= 6 ? 4 : 2;
     return {
         id: `ar-tour-${d.id}`,
         name: d.label,
-        sub: d.branch === 'urba' ? 'Rama URBA.' : 'Regional del interior.',
+        sub: d.branch === 'urba' ? 'Rama URBA.' : d.branch === 'interior' ? 'Regional del interior.' : d.branch === 'chile' ? 'Chile · ARUSA.' : d.branch === 'uruguay' ? 'Uruguay.' : 'Brasil · CBRu.',
         source: 'real',
         clubs: true,
-        cat: 'Argentina',
+        cat: isArgBranch(d.branch) ? 'Argentina' : 'América',
         teams: [...d.clubs],
         formatLabel: `${n} clubes · fase regular a una vuelta · ${top === 4 ? 'semifinales' : 'final'} con los ${top} primeros`,
         stage: { kind: 'grupos', groups: 1, advance: top },

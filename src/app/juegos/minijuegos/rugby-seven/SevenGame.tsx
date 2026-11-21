@@ -51,7 +51,10 @@ import {
     type ScoreEvent,
     type TourState,
 } from './tours';
-import { AR_CLUBS, AR_DIVISIONS_PLAYABLE } from './arClubs';
+import { AR_CLUBS, AR_DIVISIONS_PLAYABLE, type ArBranch } from './arClubs';
+
+/** En qué grupo del selector va cada división: Argentina, o el país de afuera. */
+const branchGroup = (b: ArBranch) => (b === 'chile' ? 'Chile' : b === 'uruguay' ? 'Uruguay' : b === 'brasil' ? 'Brasil' : 'Argentina');
 import { CLUB_LEAGUES, CLUBS, teamOfCode } from './clubs';
 import {
     advanceCareer,
@@ -71,6 +74,7 @@ import {
     markNewsSeen,
     careerRating,
     careerVerdict,
+    isArgCareer,
     closesSeason,
     createCareer,
     divisionLabel,
@@ -705,7 +709,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
             ...ZONES.map((z) => ({ name: z, group: 'Internacional', kind: 'Continente', teams: NATIONS.filter((t) => NATION_ZONE[t.id] === z).sort(byRating) })),
             { name: 'Mundial 2027', group: 'Internacional', kind: 'Continente', teams: wc },
             ...CLUB_LEAGUES.map((l) => ({ name: l.name, group: 'Clubes', kind: 'Liga', teams: l.teams })),
-            ...AR_DIVISIONS_PLAYABLE.map((d) => ({ name: d.label, group: 'Argentina', kind: 'División', teams: d.clubs.map((id) => teamOfCode(id)).filter((t): t is SevenTeam => !!t) })),
+            ...AR_DIVISIONS_PLAYABLE.map((d) => ({ name: d.label, group: branchGroup(d.branch), kind: 'División', teams: d.clubs.map((id) => teamOfCode(id)).filter((t): t is SevenTeam => !!t) })),
             { name: 'Inventados', teams: PRESET_TEAMS },
             { name: 'Mis equipos', teams: customTeams },
         ];
@@ -1301,7 +1305,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
 
                 {screen.k === 'careerSetup' && (() => {
                     // Cualquier club argentino, de cualquier división: la carrera arranca donde juega en 2026.
-                    const arCats: Category[] = AR_DIVISIONS_PLAYABLE.map((d) => ({ name: d.label, group: 'Argentina', kind: 'División', teams: d.clubs.map((id) => teamOfCode(id)).filter((t): t is SevenTeam => !!t) }));
+                    const arCats: Category[] = AR_DIVISIONS_PLAYABLE.map((d) => ({ name: d.label, group: branchGroup(d.branch), kind: 'División', teams: d.clubs.map((id) => teamOfCode(id)).filter((t): t is SevenTeam => !!t) }));
                     const valid = !!mine && mine.startsWith('ar-');
                     return screen.step === 1 ? (
                         <div className={styles.body}>
@@ -1592,7 +1596,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                                 <span>{verdict.title}</span>
                                                 <small>{verdict.text}</small>
                                             </div>
-                                            {career && closesSeason(tour) && (
+                                            {career && isArgCareer(career) && closesSeason(tour) && (
                                                 <div className={styles.nacAsk} role="radiogroup" aria-label={`Formato del Nacional de Clubes ${career.season + 2}`}>
                                                     <span className={styles.nacAskQ}>¿Cómo creés que se va a jugar el Nacional de Clubes {career.season + 2}?</span>
                                                     {NAC_FORMATS.map((f) => {
@@ -1887,12 +1891,12 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                         {tab === 'plantel' && career && (
                                             <div className={styles.rosterPanel}>
                                                 <h3 className={styles.groupTitle}>Plantel de {nameOf(career.me)} · temporada {career.season}</h3>
-                                                <LineupBoard tour={tour} onChange={(t) => persist({ tour: t })} />
+                                                <LineupBoard tour={tour} kit={byId(career.me)?.kit} onChange={(t) => persist({ tour: t })} />
                                                 <h3 className={styles.groupTitle}>Los doce</h3>
                                                 <p className={styles.note}>
                                                     Valoración de 1 a 10 y skills: velocidad, patada, tackle y resistencia. La moral (▲▼) sube con los triunfos y los tries y baja con las derrotas y las patadas erradas. Cada año los jóvenes mejoran, los veteranos bajan y se retiran, y sube la camada de M19. Tocá un nombre para cambiarlo.
                                                 </p>
-                                                <RosterTable tour={tour} onRename={(id, v) => persist({ tour: renamePlayer(tour, id, v) })} />
+                                                <RosterTable tour={tour} kit={byId(career.me)?.kit} onRename={(id, v) => persist({ tour: renamePlayer(tour, id, v) })} />
                                             </div>
                                         )}
                                         {tab === 'club' && career && <ClubPanel career={career} nameOf={nameOf} />}
@@ -1968,6 +1972,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                                         </li>
                                                     ))}
                                                 </ul>
+                                                {isArgCareer(career) && (
                                                 <div className={styles.roadPending}>
                                                     <span>Formato del Nacional de Clubes:</span>
                                                     {[0, 1, 2].map((k) => (
@@ -1977,7 +1982,8 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                                         </span>
                                                     ))}
                                                 </div>
-                                                {formatOf(career, career.season) === 'ab' && career.cuposAB ? (
+                                                )}
+                                                {!isArgCareer(career) ? null : formatOf(career, career.season) === 'ab' && career.cuposAB ? (
                                                     <div className={styles.roadPending}>
                                                         <span>Plazas por región (Nacional A / Nacional B / TDI A / TDI B):</span>
                                                         {career.cuposAB.map((c) => (

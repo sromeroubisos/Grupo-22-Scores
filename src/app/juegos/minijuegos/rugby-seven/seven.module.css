@@ -584,7 +584,7 @@
 
 .tiles {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
     gap: 6px;
     max-height: 340px;
     overflow-y: auto;
@@ -3395,7 +3395,7 @@
 
 .lineField {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
     gap: 8px;
     padding: 10px;
     border-radius: 8px;
@@ -3500,7 +3500,7 @@
 
 .lineBenchList {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
     gap: 8px;
 }
 
@@ -3759,4 +3759,34 @@
 /* Todo el juego fijo: sin doble toque para hacer zoom. */
 .page {
     touch-action: manipulation;
+}
+
+/* ───────── la carita de cada jugador ───────── */
+
+.face {
+    display: inline-block;
+    flex: none;
+    width: 32px;
+    height: 24px;
+    overflow: hidden;
+    vertical-align: middle;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.06);
+    margin-right: 4px;
+}
+
+.face canvas {
+    display: block;
+    margin-top: 1px;
+}
+
+.faceBig {
+    width: 48px;
+    height: 34px;
+}
+
+.rosterPos {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
 }

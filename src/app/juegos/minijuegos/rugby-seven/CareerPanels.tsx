@@ -10,6 +10,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import SpritePreview from './SpritePreview';
 import { POSITIONS } from './names';
+import type { Kit } from './sprites';
 import type { SevenTeam } from './teams';
 import type { TourState } from './tours';
 import {
@@ -17,6 +18,7 @@ import {
     franchiseOf,
     MAX_BAJAS,
     myRoster,
+    playerLook,
     preseasonDone,
     preseasonPoint,
     preseasonTrain,
@@ -33,6 +35,16 @@ import styles from './seven.module.css';
 const OUT_LABEL: Record<string, string> = { inj: 'Lesionado', fra: 'En la franquicia', eur: 'En Europa', pum: 'Con los Pumas' };
 
 const fullOf = (p: RosterRow) => `${p.name.first} ${p.name.last}`.trim();
+
+/** La carita del jugador: la cabeza del muñeco pixel, con la camiseta del club. */
+function Face({ club, id, kit, big }: { club: string; id: number; kit?: Kit; big?: boolean }) {
+    if (!kit) return null;
+    return (
+        <span className={big ? `${styles.face} ${styles.faceBig}` : styles.face} aria-hidden="true">
+            <SpritePreview look={playerLook(club, id)} kit={kit} scale={big ? 3 : 2} />
+        </span>
+    );
+}
 
 /** Estado de un jugador que no está, para mostrarlo. */
 function outText(p: RosterRow): string | null {
@@ -71,7 +83,7 @@ function Skills({ s }: { s: [number, number, number, number] }) {
  * Los siete de la cancha y el banco. Se arma arrastrando un jugador sobre otro
  * (o sobre un puesto), o tocando uno y después el otro: los dos se cambian.
  */
-export function LineupBoard({ tour, onChange }: { tour: TourState; onChange: (s: TourState) => void }) {
+export function LineupBoard({ tour, kit, onChange }: { tour: TourState; kit?: Kit; onChange: (s: TourState) => void }) {
     const career = tour.career as CareerState;
     const roster = myRoster(career);
     const starters = Array.from({ length: 7 }, (_, slot) => roster.find((p) => p.slot === slot) ?? null);
@@ -180,6 +192,7 @@ export function LineupBoard({ tour, onChange }: { tour: TourState; onChange: (s:
         >
             <b className={styles.lineOvr} data-handle="" title="Arrastrá desde acá">{p.ovr.toFixed(1)}</b>
             <span className={styles.lineName}>
+                <Face club={career.me} id={p.id} kit={kit} />
                 {p.name.short} <Moral m={p.m} />
             </span>
             {p.out ? <small className={styles.lineOut}>{OUT_LABEL[p.out.kind]}</small> : <Skills s={p.s} />}
@@ -223,14 +236,17 @@ export function LineupBoard({ tour, onChange }: { tour: TourState; onChange: (s:
 }
 
 /** El plantel entero, con nombres editables y las skills de cada uno. */
-export function RosterTable({ tour, onRename }: { tour: TourState; onRename: (id: number, text: string) => void }) {
+export function RosterTable({ tour, kit, onRename }: { tour: TourState; kit?: Kit; onRename: (id: number, text: string) => void }) {
     const career = tour.career as CareerState;
     const roster = [...myRoster(career)].sort((a, b) => (a.slot ?? 9) - (b.slot ?? 9) || b.ovr - a.ovr);
     return (
         <ul className={styles.rosterList}>
             {roster.map((p) => (
                 <li key={`${p.id}-${p.name.first}-${p.name.last}`} className={p.out ? styles.rosterOut : undefined}>
-                    <span className={styles.rosterPos}>{p.slot !== null ? `${p.slot + 1} · ${POSITIONS[p.slot]}` : 'Suplente'}</span>
+                    <span className={styles.rosterPos}>
+                        <Face club={career.me} id={p.id} kit={kit} big />
+                        {p.slot !== null ? `${p.slot + 1} · ${POSITIONS[p.slot]}` : 'Suplente'}
+                    </span>
                     <input
                         className={styles.rosterName}
                         defaultValue={fullOf(p)}
@@ -377,11 +393,11 @@ export function PreseasonPanel({
 
 /* ───────────────────────── noticias ───────────────────────── */
 
-const NEWS_TAG: Record<string, string> = { club: 'Novedades', fra: 'Super Rugby Américas', eur: 'Mercado', pum: 'Los Pumas', inj: 'Parte médico', back: 'Vuelta', youth: 'Juveniles', train: 'Pretemporada' };
+const NEWS_TAG: Record<string, string> = { club: 'Novedades', fra: 'Super Rugby Américas', eur: 'Mercado', pum: 'Seleccionado', inj: 'Parte médico', back: 'Vuelta', youth: 'Juveniles', train: 'Pretemporada' };
 
 /** El cartel animado de una noticia del club, con el jugador. */
 export function NewsPopup({ news, team, more = 0, onClose, onSkipAll }: { news: CareerNews; team: SevenTeam; more?: number; onClose: () => void; onSkipAll?: () => void }) {
-    const look = team.players[(news.who ?? 0) % team.players.length];
+    const look = news.who !== undefined ? playerLook(team.id, news.who) : team.players[0];
     return (
         <div className={styles.newsPop} role="dialog" aria-modal="true" aria-labelledby="news-title">
             <div className={styles.newsCard}>
