@@ -730,7 +730,7 @@ export function franchiseOf(club: string): string {
     if (region === 'espana' || region === 'femenino') return '';
     if (region === 'noa') return 'Tarucas';
     if (region === 'nea') return 'Yacaré XV';
-    if (region === 'centro' || region === 'oeste') return 'Dogos XXI';
+    if (region === 'centro' || region === 'oeste') return 'Dogos XV';
     if (region === 'litoral') return 'Capibaras';
     return 'Pampas'; // URBA, Pampeana y Patagonia
 }

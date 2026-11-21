@@ -15,6 +15,8 @@ import {
     intlCalendar,
     intlLadder,
     intlOthers,
+    intlYouth,
+    YOUTH_CATS,
     levelName,
     liveRanking,
     maxLevel,
@@ -295,6 +297,87 @@ export function IntlSeason({ r, done, nameOf, flag }: { r: IntlState; done: bool
                                 <li key={i}>{l}</li>
                             ))}
                     </ul>
+                </>
+            )}
+        </div>
+    );
+}
+
+const CAT_HINT: Record<string, string> = {
+    M20: 'Regional en el primer semestre y, en junio-julio, el Junior World Championship (16) o la U20 Challenger Cup (8): sube el campeón de la Challenger y baja el último del Junior.',
+    M18: 'Sin Mundial: Six Nations U18 Festival, Rugby Europe U18 y los regionales de cada zona.',
+    M16: 'Festivales de desarrollo por región. Mide lo que viene de la academia en 4 o 5 años.',
+};
+
+/** Los seleccionados juveniles: nivel de cada categoría, reportes por año y el Junior World Championship. */
+export function IntlYouth({ r, nameOf, flag }: { r: IntlState; nameOf: (id: string) => string; flag: Flag }) {
+    const y = intlYouth(r);
+    return (
+        <div className={styles.rosterPanel}>
+            <h3 className={styles.groupTitle}>Seleccionados juveniles</h3>
+            <p className={styles.note}>Juegan sus torneos en paralelo y el reporte llega al cerrar cada año. Su nivel sale de la academia y de la liga: un buen año de la M20 o la M18 hace crecer un poco más a esos chicos.</p>
+            <ul className={styles.clubRecords}>
+                {YOUTH_CATS.filter((c) => r.gender === 'm' || c !== 'M16').map((c) => (
+                    <li key={c}>
+                        <small>{c}</small>
+                        <strong>{y.level[c]}</strong>
+                        <span>{y.rank[c]}.º del mundo en su categoría</span>
+                    </li>
+                ))}
+            </ul>
+            {YOUTH_CATS.filter((c) => r.gender === 'm' || c !== 'M16').map((c) => (
+                <p key={c} className={styles.note}>
+                    <strong>{c}:</strong> {r.gender === 'f' && c === 'M20' ? 'Six Nations U20 Summer Series (las seis del Six Nations). En el resto del mundo la M20 femenina todavía no tiene torneo de XV.' : CAT_HINT[c]}
+                </p>
+            ))}
+            <h3 className={styles.groupTitle}>Reportes</h3>
+            {y.reports.length === 0 ? (
+                <p className={styles.empty}>El primer reporte llega al cerrar el {r.season}.</p>
+            ) : (
+                y.reports.map((rep) => (
+                    <div key={rep.season} className={styles.nacAsk}>
+                        <span className={styles.nacAskQ}>{rep.season}</span>
+                        {rep.rows.length === 0 ? (
+                            <small className={styles.nacAskNote}>Sin seleccionados juveniles en competencia.</small>
+                        ) : (
+                            rep.rows.map((row, i) => (
+                                <small key={i} className={styles.nacAskNote}>
+                                    {row.cat} · {row.comp}: {row.place === 1 ? 'campeón' : `${row.place}.º de ${row.of}`}
+                                    {row.place !== 1 && (
+                                        <>
+                                            {' '}
+                                            · campeón {flag(row.champion)} {nameOf(row.champion)}
+                                        </>
+                                    )}
+                                </small>
+                            ))
+                        )}
+                    </div>
+                ))
+            )}
+            {y.jwc.length > 0 && (
+                <>
+                    <h3 className={styles.groupTitle}>Junior World Championship {r.season}</h3>
+                    <ul className={styles.roadSlots}>
+                        {y.jwc.map((id) => (
+                            <li key={id} className={id === r.me ? styles.rowMine : undefined}>
+                                <span>
+                                    {flag(id)} {nameOf(id)}
+                                </span>
+                            </li>
+                        ))}
+                    </ul>
+                    <h3 className={styles.groupTitle}>U20 Challenger Cup</h3>
+                    <ul className={styles.roadSlots}>
+                        {y.chal.map((id) => (
+                            <li key={id} className={id === r.me ? styles.rowMine : undefined}>
+                                <span>
+                                    {flag(id)} {nameOf(id)}
+                                </span>
+                            </li>
+                        ))}
+                    </ul>
+                    <p className={styles.note}>La Challenger se arma cada año con los que llegan de los regionales M20.</p>
                 </>
             )}
         </div>

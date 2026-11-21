@@ -120,7 +120,7 @@ import {
 } from './career';
 import { advanceRoad, AUTO_QUALIFIED, createRoad, PHASE_LABEL, regionalDef, regionFor, regionName, roadEligible, roadVerdict } from './road';
 import { advanceIntl, compName, createIntl, intlBoosts, intlInvest, intlNames, intlSign, intlStartComp, intlVerdict, isWcYear } from './intl';
-import { IntlRanking, IntlSeason, IntlSquad, IntlUnion } from './IntlPanels';
+import { IntlRanking, IntlSeason, IntlSquad, IntlUnion, IntlYouth } from './IntlPanels';
 import { advanceSvns, createSvns, SVNS_LEGS, SVNS_PHASE_LABEL, svnsBoosts, svnsRegionName, svnsStartTier, svnsTable, svnsVerdict, TIER_LABEL } from './svns';
 import { CloudSync, type CloudStatus } from './cloudSave';
 import styles from './seven.module.css';
@@ -148,7 +148,7 @@ type Screen =
     | { k: 'match'; cfg: MatchConfig; mode: Mode; nonce: number }
     | { k: 'result'; cfg: MatchConfig; mode: Mode; score: [number, number] };
 
-type HubTab = 'tabla' | 'calendario' | 'cuadro' | 'resultados' | 'goleadores' | 'otros' | 'plantel' | 'club' | 'palmares' | 'camino' | 'carrera' | 'circuito' | 'ranking' | 'union' | 'temporada';
+type HubTab = 'tabla' | 'calendario' | 'cuadro' | 'resultados' | 'goleadores' | 'otros' | 'plantel' | 'club' | 'palmares' | 'camino' | 'carrera' | 'circuito' | 'ranking' | 'union' | 'temporada' | 'juveniles';
 
 interface Category {
     name: string;
@@ -1831,6 +1831,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                   ['temporada', 'Temporada'],
                                   ['union', 'Unión'],
                                   ['plantel', 'Plantel'],
+                                  ['juveniles', 'Juveniles'],
                               ] as [HubTab, string][])
                             : []),
                         ...(tour.stats ? [['goleadores', 'Goleadores'] as ['goleadores', string]] : []),
@@ -2339,6 +2340,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                         {tab === 'ranking' && intl && <IntlRanking r={intl} nameOf={nameOf} flag={(id) => <FlagIcon code={flagOf(id)} size={14} />} />}
                                         {tab === 'temporada' && intl && <IntlSeason r={intl} done={tour.done} nameOf={nameOf} flag={(id) => <FlagIcon code={flagOf(id)} size={14} />} />}
                                         {tab === 'union' && intl && <IntlUnion r={intl} onInvest={(a) => persist({ tour: intlInvest(tour, a) })} />}
+                                        {tab === 'juveniles' && intl && <IntlYouth r={intl} nameOf={nameOf} flag={(id) => <FlagIcon code={flagOf(id)} size={14} />} />}
                                         {tab === 'plantel' && intl && <IntlSquad r={intl} onSign={(id) => persist({ tour: intlSign(tour, id) })} />}
                                         {tab === 'circuito' && svns && (
                                             <div className={styles.roadPanel}>

@@ -44,7 +44,7 @@
  */
 
 import { nameFromSeed } from './names';
-import { FEM_NATIONS, NATIONS, NATION_BY_CODE } from './nations';
+import { FEM_NATIONS, NATIONS, NATION_BY_CODE, REGION_BY_CODE } from './nations';
 import type { Difficulty, Duration } from './teams';
 import { createTour, finalRanking, playOut, setRatingBoost, teamIdOf, TOURS, type Stage, type TourDef, type TourState } from './tours';
 
@@ -130,6 +130,8 @@ export interface IntlState {
     log: string[];
     /** Lo que dejó el cierre del último año (para el cartel). */
     lastNotes?: string[];
+    /** Juveniles (las partidas anteriores no los traen: se arman solos). */
+    youthTeams?: YouthTeams;
 }
 
 /* ───────────────────────── catálogo ───────────────────────── */
@@ -830,6 +832,8 @@ function closeSeason(r: IntlState): string[] {
         u.fondos = 0;
     }
     u.talento = r1(clamp(u.talento + 0.08 * u.liga + 0.05 * u.academia, 1, 8.5));
+    // Los seleccionados juveniles: sus torneos del año y el reporte.
+    notes.push(...youthSeason(r));
     notes.push(...developSquad(r));
 
     // El año, en una línea.
@@ -939,4 +943,251 @@ export function intlLadder(r: IntlState): { key: string; name: string; teams: st
     const out = keys.filter((k) => r.comps[k]?.length).map((k) => ({ key: k, name: compName(k), teams: r.comps[k] }));
     if (r.gender === 'm') out.unshift({ key: 'nc', name: 'Nations Championship', teams: [...r.nc[0], ...r.nc[1]] });
     return out;
+}
+
+/* ───────────────────────── seleccionados juveniles ───────────────────────── */
+
+/*
+ * Cómo funcionan en el mundo (y así se simulan):
+ *
+ *   M20  Varones: los regionales del primer semestre (Six Nations U20,
+ *        Rugby Championship U20, Rugby Europe U20 Championship y Trophy,
+ *        Sudamérica M20, Oceania, Asia, África y Norteamérica) y en
+ *        junio-julio el Junior World Championship: 16 selecciones en cuatro
+ *        grupos, todas siguen a un cuadro por puestos. Abajo, en octubre, la
+ *        U20 Challenger Cup: 8 que llegan de los regionales. El campeón de la
+ *        Challenger sube al Junior World Championship y baja el 16.º (World
+ *        Rugby todavía no confirmó el sistema: el juego usa ese).
+ *        Mujeres: la Six Nations U20 Summer Series.
+ *   M18  No hay Mundial: Six Nations U18 Festival, Rugby Europe U18
+ *        Championship y Trophy, Sudamérica M18 y los regionales de cada zona.
+ *   M16  Festivales de desarrollo por región, sin título mundial.
+ *
+ * El nivel de cada juvenil sale del de su selección mayor más lo que viene
+ * empujando de abajo: para el usuario, el techo de su academia contra el
+ * nivel del plantel mayor; para las demás, una corriente propia que cambia
+ * con los años. Los torneos se simulan al cerrar el año y llegan como
+ * reporte, igual que las divisiones de un club.
+ */
+
+export type YouthCat = 'M20' | 'M18' | 'M16';
+export const YOUTH_CATS: YouthCat[] = ['M20', 'M18', 'M16'];
+
+export interface YouthRow {
+    cat: YouthCat;
+    comp: string;
+    place: number;
+    of: number;
+    champion: string;
+}
+
+export interface YouthTeams {
+    /** Las 16 del Junior World Championship y las 8 de la Challenger (varones). */
+    jwc: string[];
+    chal: string[];
+    /** Corriente de cada juvenil respecto de su selección mayor (en puntos de nivel). */
+    off: Record<YouthCat, Record<string, number>>;
+    reports: { season: number; rows: YouthRow[] }[];
+}
+
+const JWC_2026 = [
+    ['RSA', 'GEO', 'WAL', 'URU'],
+    ['NZL', 'ITA', 'SCO', 'JPN'],
+    ['ENG', 'IRL', 'ARG', 'USA'],
+    ['FRA', 'AUS', 'ESP', 'FIJ'],
+];
+const CHAL_2026 = ['CHI', 'BRA', 'ROU', 'HKG', 'POR', 'CAN', 'NAM', 'BEL'];
+const SIX = ['ENG', 'FRA', 'IRL', 'ITA', 'SCO', 'WAL'];
+const RC = ['RSA', 'NZL', 'AUS', 'ARG'];
+
+type YRegion = 'europa' | 'sudamerica' | 'norte' | 'africa' | 'asia' | 'oceania';
+const YREGION_OF: Record<string, YRegion> = {
+    'europa-norte': 'europa', 'europa-sur': 'europa', 'europa-este': 'europa', 'medio-oriente': 'europa',
+    sudamerica: 'sudamerica', norteamerica: 'norte', africa: 'africa', 'africa-sur': 'africa', asia: 'asia', pacifico: 'oceania', oceania: 'oceania',
+};
+const yRegionOf = (id: string): YRegion => YREGION_OF[REGION_BY_CODE[baseCode(id)] ?? 'europa-norte'] ?? 'europa';
+
+interface YComp {
+    key: string;
+    cat: YouthCat;
+    name: string;
+    teams: string[];
+}
+
+/** El nivel de un juvenil para la simulación. */
+function youthRating(r: IntlState, cat: YouthCat, id: string): number {
+    return clamp((r.rating[id] ?? baseRating(id)) + (r.youthTeams?.off[cat][id] ?? 0), 30, 95);
+}
+
+/** La corriente de los juveniles del usuario: lo que trae la academia contra el nivel del plantel mayor. */
+function myYouthOff(r: IntlState, cat: YouthCat): number {
+    const senior = xv(r);
+    const sAvg = senior.length ? senior.reduce((s, p) => s + p.ovr, 0) / senior.length : ovrFor(myLevel(r));
+    let pots: number[];
+    if (cat === 'M20') pots = [...r.youth.filter((p) => p.age >= 19), ...r.squad.filter((p) => p.age <= 20)].map((p) => p.pot);
+    else if (cat === 'M18') pots = r.youth.filter((p) => p.age <= 18).map((p) => p.pot);
+    else {
+        const u = r.union;
+        pots = [u.talento + 0.42 * u.academia + 0.38 * u.liga];
+    }
+    if (!pots.length) return -8;
+    const best = pots.sort((a, b) => b - a).slice(0, 15);
+    const avg = best.reduce((s, x) => s + x, 0) / best.length;
+    return clamp((avg - sAvg) * 5, -12, 12) - 4;
+}
+
+function ensureYouth(r: IntlState): YouthTeams {
+    if (r.youthTeams) return r.youthTeams;
+    const g = r.gender;
+    const off = { M20: {}, M18: {}, M16: {} } as YouthTeams['off'];
+    for (const id of Object.keys(r.rating)) for (const c of YOUTH_CATS) off[c][id] = r1(-4 + gauss() * 3);
+    r.youthTeams = {
+        jwc: g === 'm' ? JWC_2026.flat().map((c) => idOf(c, 'm')) : [],
+        chal: g === 'm' ? CHAL_2026.map((c) => idOf(c, 'm')) : [],
+        off,
+        reports: [],
+    };
+    return r.youthTeams;
+}
+
+/** Los torneos juveniles regionales del año, armados por zona. */
+function youthComps(r: IntlState): YComp[] {
+    const g = r.gender;
+    const ids = Object.keys(r.rating);
+    const six = SIX.map((c) => idOf(c, g)).filter((id) => ids.includes(id));
+    const rc = RC.map((c) => idOf(c, g)).filter((id) => ids.includes(id));
+    const zone = (z: YRegion, cat: YouthCat, minus: string[] = []) =>
+        ids.filter((id) => yRegionOf(id) === z && !minus.includes(id)).sort((a, b) => youthRating(r, cat, b) - youthRating(r, cat, a) || a.localeCompare(b));
+    const out: YComp[] = [];
+    const fem = g === 'f' ? ' femenino' : '';
+    const add = (key: string, cat: YouthCat, name: string, teams: string[]) => {
+        if (teams.length >= 2) out.push({ key, cat, name, teams: teams.slice(0, 16) });
+    };
+    // M20.
+    if (g === 'm') {
+        add('u20six', 'M20', 'Six Nations U20', six);
+        add('u20rc', 'M20', 'Rugby Championship U20', rc);
+        const eu = zone('europa', 'M20', six);
+        add('u20rec', 'M20', 'Rugby Europe U20 Championship', eu.slice(0, 8));
+        add('u20ret', 'M20', 'Rugby Europe U20 Trophy', eu.slice(8, 20));
+        add('u20sam', 'M20', 'Sudamérica Rugby M20', zone('sudamerica', 'M20', rc));
+        add('u20oce', 'M20', 'Oceania Rugby U20', zone('oceania', 'M20', rc));
+        add('u20asia', 'M20', 'Asia Rugby U20', zone('asia', 'M20'));
+        add('u20afr', 'M20', 'Rugby Africa U20 (Trofeo Barthés)', zone('africa', 'M20', rc));
+        add('u20nam', 'M20', 'Rugby Americas North U20', zone('norte', 'M20'));
+    } else {
+        add('wu20six', 'M20', 'Six Nations U20 Summer Series', six);
+    }
+    // M18.
+    add('u18six', 'M18', `Six Nations U18 Festival${fem}`, six);
+    const eu18 = zone('europa', 'M18', six);
+    add('u18rec', 'M18', `Rugby Europe U18 Championship${fem}`, eu18.slice(0, 8));
+    add('u18ret', 'M18', `Rugby Europe U18 Trophy${fem}`, eu18.slice(8, 20));
+    add('u18sam', 'M18', `Sudamérica Rugby M18${fem}`, zone('sudamerica', 'M18'));
+    add('u18oce', 'M18', `Oceania Rugby U18${fem}`, zone('oceania', 'M18'));
+    add('u18asia', 'M18', `Asia Rugby U18${fem}`, zone('asia', 'M18'));
+    add('u18afr', 'M18', `Rugby Africa U18${fem}`, zone('africa', 'M18'));
+    add('u18nam', 'M18', `Rugby Americas North U18${fem}`, zone('norte', 'M18'));
+    // M16: festivales de desarrollo, solo varones (en mujeres el M16 se juega en seven).
+    if (g === 'm') {
+        add('u16eu', 'M16', 'Festival europeo M16', zone('europa', 'M16').slice(0, 12));
+        add('u16sam', 'M16', 'Festival sudamericano M16', zone('sudamerica', 'M16'));
+        add('u16oce', 'M16', 'Festival del Pacífico M16', zone('oceania', 'M16'));
+        add('u16afr', 'M16', 'Festival africano M16', zone('africa', 'M16'));
+        add('u16asia', 'M16', 'Festival asiático M16', zone('asia', 'M16'));
+        add('u16nam', 'M16', 'Festival norteamericano M16', zone('norte', 'M16'));
+    }
+    return out;
+}
+
+/** Un torneo juvenil simulado con los niveles de esa categoría. */
+function playYouth(r: IntlState, cat: YouthCat, key: string, name: string, teams: string[], groups?: string[][]): string[] {
+    const boost: Record<string, number> = {};
+    for (const id of teams) boost[id] = youthRating(r, cat, id) - baseRating(id);
+    setRatingBoost(boost);
+    const stage: Stage = groups ? { kind: 'grupos', groups: groups.map((x) => x.map(codeOf)), advance: 1 } : stageFor(teams.length);
+    const t = playOut({ id: `intl-y-${key}-${r.season}`, name, sub: '', formatLabel: '', source: 'real', teams: teams.map(codeOf), stage });
+    return finalRanking(t);
+}
+
+/** El año de los juveniles: regionales, Junior World Championship y Challenger; el reporte y lo que deja. */
+function youthSeason(r: IntlState): string[] {
+    const y = ensureYouth(r);
+    const me = r.me;
+    // La corriente: la del usuario sale de su academia; las demás cambian un poco cada año.
+    for (const c of YOUTH_CATS) {
+        for (const id of Object.keys(y.off[c])) if (id !== me) y.off[c][id] = r1(clamp(y.off[c][id] * 0.85 + gauss() * 1.4 - 0.6, -12, 10));
+        y.off[c][me] = r1(myYouthOff(r, c));
+    }
+    const rows: YouthRow[] = [];
+    const results: Record<string, string[]> = {};
+    for (const c of youthComps(r)) {
+        const ranking = playYouth(r, c.cat, c.key, c.name, c.teams);
+        results[c.key] = ranking;
+        if (ranking.includes(me)) rows.push({ cat: c.cat, comp: c.name, place: ranking.indexOf(me) + 1, of: ranking.length, champion: ranking[0] });
+    }
+    const notes: string[] = [];
+    if (r.gender === 'm') {
+        // Junior World Championship (junio-julio): el de 2026 con sus grupos reales.
+        const groups = r.season === 2026 ? JWC_2026.map((g) => g.map((c) => idOf(c, 'm'))) : undefined;
+        const jwc = playYouth(r, 'M20', 'jwc', `Junior World Championship ${r.season}`, y.jwc, groups);
+        if (jwc.includes(me)) rows.push({ cat: 'M20', comp: 'Junior World Championship', place: jwc.indexOf(me) + 1, of: jwc.length, champion: jwc[0] });
+        r.log.push(`${r.season}: ${nameOf(jwc[0])} campeón del Junior World Championship.`);
+        // La Challenger: las que llegan de los regionales (desde 2027; la de 2026 es la real).
+        if (r.season > 2026) {
+            const inJwc = new Set(y.jwc);
+            const champs = ['u20rec', 'u20sam', 'u20oce', 'u20asia', 'u20afr', 'u20nam', 'u20ret'].map((k) => results[k]?.find((id) => !inJwc.has(id))).filter((x): x is string => !!x);
+            const rest = ['u20rec', 'u20sam', 'u20afr', 'u20asia', 'u20nam', 'u20oce'].flatMap((k) => (results[k] ?? []).filter((id) => !inJwc.has(id)));
+            const field: string[] = [];
+            for (const id of [...champs, ...rest]) if (!field.includes(id) && field.length < 8) field.push(id);
+            y.chal = field;
+        }
+        const chal = y.chal.length >= 2 ? playYouth(r, 'M20', 'chal', `U20 Challenger Cup ${r.season}`, y.chal) : [];
+        if (chal.includes(me)) rows.push({ cat: 'M20', comp: 'U20 Challenger Cup', place: chal.indexOf(me) + 1, of: chal.length, champion: chal[0] });
+        // Sube el campeón de la Challenger, baja el último del Junior World Championship.
+        const up = chal[0];
+        const down = jwc[jwc.length - 1];
+        if (up && down && !y.jwc.includes(up)) {
+            y.jwc = y.jwc.map((x) => (x === down ? up : x));
+            y.chal = y.chal.map((x) => (x === up ? down : x));
+            r.log.push(`${r.season}: ${nameOf(up)} M20 sube al Junior World Championship; ${nameOf(down)} baja a la Challenger.`);
+            if (up === me) notes.push('M20: ascenso al Junior World Championship.');
+            if (down === me) notes.push('M20: baja a la U20 Challenger Cup.');
+        }
+    }
+    // Lo que deja: un buen año de los juveniles los hace crecer un poco más.
+    for (const row of rows) {
+        const top = row.place === 1;
+        const good = row.place <= Math.ceil(row.of / 2);
+        const group = row.cat === 'M20' ? r.youth.filter((p) => p.age >= 19).concat(r.squad.filter((p) => p.age <= 20)) : row.cat === 'M18' ? r.youth.filter((p) => p.age <= 18) : [];
+        for (const p of group) p.ovr = r1(clamp(Math.min(p.pot, p.ovr + (top ? 0.15 : good ? 0.05 : 0)), 1, 10));
+        if (top && row.comp === 'Junior World Championship') r.union.talento = r1(clamp(r.union.talento + 0.1, 1, 8.5));
+        notes.push(`${row.cat}: ${row.place === 1 ? 'campeón' : `${row.place}.º`} del ${row.comp}${row.place === 1 ? '' : ` (de ${row.of})`}.`);
+    }
+    if (!rows.length) notes.push('Juveniles: tu unión todavía no tiene seleccionados juveniles en competencia. Crecen con la academia y la liga.');
+    y.reports = [...y.reports, { season: r.season, rows }].slice(-12);
+    setRatingBoost(intlBoosts(r));
+    return notes;
+}
+
+/** Para la pantalla: los reportes, el nivel de cada juvenil y quién está en el Junior World Championship. */
+export function intlYouth(r: IntlState): { reports: YouthTeams['reports']; jwc: string[]; chal: string[]; level: Record<YouthCat, number>; rank: Record<YouthCat, number> } {
+    const y = r.youthTeams;
+    const level = {} as Record<YouthCat, number>;
+    const rank = {} as Record<YouthCat, number>;
+    for (const c of YOUTH_CATS) {
+        const off = y?.off[c][r.me] ?? myYouthOff(r, c);
+        level[c] = Math.round(clamp((r.rating[r.me] ?? 40) + off, 30, 95));
+        const all = Object.keys(r.rating)
+            .filter((id) => id !== r.me)
+            .map((id) => clamp((r.rating[id] ?? 40) + (y?.off[c][id] ?? -4), 30, 95));
+        rank[c] = all.filter((v) => v > level[c]).length + 1;
+    }
+    return {
+        reports: [...(y?.reports ?? [])].reverse(),
+        jwc: y?.jwc ?? (r.gender === 'm' ? JWC_2026.flat().map((c) => idOf(c, 'm')) : []),
+        chal: y?.chal ?? (r.gender === 'm' ? CHAL_2026.map((c) => idOf(c, 'm')) : []),
+        level,
+        rank,
+    };
 }
