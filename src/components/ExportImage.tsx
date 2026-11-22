@@ -11906,26 +11906,24 @@ async function drawDailyMatches(
         ctx.fillStyle = textColor;
         ctx.textAlign = 'left';
         ctx.font = `800 ${sharedMatchNameFontSize}px ${FONT_DISPLAY}`;
-        ctx.fillText(match.homeTeam.toUpperCase(), homeTextX, y + rowHeight / 2 + 10);
+        ctx.fillText(match.homeTeam.toUpperCase(), homeTextX, y + rowHeight / 2 + 1);
 
         ctx.textAlign = 'right';
         ctx.font = `800 ${sharedMatchNameFontSize}px ${FONT_DISPLAY}`;
-        ctx.fillText(match.awayTeam.toUpperCase(), awayTextX, y + rowHeight / 2 + 10);
+        ctx.fillText(match.awayTeam.toUpperCase(), awayTextX, y + rowHeight / 2 + 1);
 
+        // Solo "EN JUEGO" lleva rotulo debajo; sin rotulo, el marcador/horario queda centrado en la fila.
+        const hasSubLabel = match.status === 'live';
         ctx.textAlign = 'center';
         ctx.fillStyle = accentColor;
         ctx.font = `800 ${scaleElementSize('score', isStory ? 44 : 38, isStory ? 44 : 38)}px ${match.status === 'scheduled' ? FONT_DISPLAY : FONT_MONO}`;
-        ctx.fillText(centerText, safe.centerX, y + rowHeight / 2 + 4);
+        ctx.fillText(centerText, safe.centerX, y + rowHeight / 2 + (hasSubLabel ? -8 : 1));
 
-        ctx.fillStyle = mutedColor;
-        ctx.font = `700 ${isStory ? 16 : 14}px ${FONT_BODY}`;
-        ctx.fillText(
-            match.status === 'scheduled'
-                ? (timeMode === 'vs' ? 'PROGRAMADO' : 'HORARIO')
-                : match.status === 'live' ? 'EN JUEGO' : 'MARCADOR FINAL',
-            safe.centerX,
-            y + rowHeight / 2 + (isStory ? 38 : 32)
-        );
+        if (hasSubLabel) {
+            ctx.fillStyle = mutedColor;
+            ctx.font = `700 ${isStory ? 16 : 14}px ${FONT_BODY}`;
+            ctx.fillText('EN JUEGO', safe.centerX, y + rowHeight / 2 + (isStory ? 30 : 26));
+        }
         ctx.restore();
     });
 
