@@ -154,7 +154,7 @@ async function main() {
 
     // ── clubes: los viejos tienen que existir; los nuevos no pueden pisar a otro ──
     const { data: clubesDb } = await supabase.from('clubs').select('id, union_id').in('id', CLUBES.map((c) => c.id));
-    const porId = new Map((clubesDb ?? []).map((c) => [c.id as string, c]));
+    const porId = new Map(((clubesDb ?? []) as Array<{ id: string; union_id: string | null }>).map((c) => [c.id, c]));
     for (const c of CLUBES) {
         const ya = porId.get(c.id);
         if (!c.nuevo && !ya) throw new Error(`Debería existir y no está: ${c.id}`);
