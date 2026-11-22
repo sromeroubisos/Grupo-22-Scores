@@ -528,7 +528,8 @@ export function careerBoosts(r: CareerState): Record<string, number> {
     const hit = boostCache.get(r);
     if (hit) return hit;
     const out: Record<string, number> = { ...(r.ratings ?? {}) };
-    for (const [club, d] of Object.entries(r.drift ?? {})) out[club] = (out[club] ?? 0) + d;
+    // La forma de fondo de un club con plantel entra por sus jugadores (rosterTarget); la de los demás, directo.
+    for (const [club, d] of Object.entries(r.drift ?? {})) if (!r.rosters?.[club]) out[club] = (out[club] ?? 0) + d;
     for (const club of Object.keys(r.rosters ?? {})) {
         const rr = rosterRating(r, club);
         if (rr !== null) out[club] = (out[club] ?? 0) + rr - baseRatingOf(club);
@@ -666,7 +667,8 @@ export function resetLineup(s: TourState): TourState {
 
 /** Un jugador nuevo de la cantera: sale de la camada de M19 del club. */
 function fromYouth(r: CareerState, club: string, id: number): Player {
-    const cam = r.youth?.[club]?.[3] ?? centerOf(club);
+    // Una camada excepcional da un par de buenos, no un plantel de cracks: el techo lo pone el nivel del club.
+    const cam = Math.min(r.youth?.[club]?.[3] ?? centerOf(club), rosterTarget(r, club) + 0.4);
     return makePlayer(id, cam - 1.6 + Math.random() * 1.6, 18 + Math.floor(Math.random() * 3));
 }
 
@@ -708,7 +710,7 @@ function evolveRosters(r: CareerState) {
             else d = rand(-1.0, -0.1);
             if (d > 0 && o > 8) d *= 0.45; // arriba cuesta más
             // Cada club tira hacia su nivel de cantera: sin esto, con los años todos suben.
-            d += (canteraOf(r, club) - 0.2 - o) * 0.14;
+            d += (rosterTarget(r, club) - 0.2 - o) * 0.2;
             // Experiencia: los otros clubes juegan siempre (XP_BASE); el propio, lo que sumó. Pesa más en los jóvenes.
             if (club === r.me) d += (clampN(p.xp ?? 0, 0, 30) - XP_BASE) * 0.02 * (p.age <= 23 ? 1 : p.age <= 28 ? 0.6 : 0.3);
             p.xp = 0;
@@ -716,6 +718,14 @@ function evolveRosters(r: CareerState) {
             p.s = (p.s ?? makeSkills(p.ovr, Math.random)).map((v, k) => Math.round(clampN(v + d + (k === 0 && p.age > 29 ? -0.4 : 0) + (Math.random() - 0.5) * 0.8, 1, 10))) as Player['s'];
             p.m = 0;
             delete p.out;
+            // Los cracks no se quedan: a los muy buenos se los lleva Europa o la franquicia del Super Rugby Américas.
+            if (p.age >= 20 && p.age <= 31 && p.ovr >= Math.max(8, centerOf(club) + 0.3) && Math.random() < clampN((p.ovr - Math.max(7.8, centerOf(club) + 0.1)) * 0.55, 0, 0.9)) {
+                const fr = franchiseOf(club);
+                const dest = fr && Math.random() < 0.5 ? `${fr}, en el Super Rugby Américas` : EUROPE[Math.floor(Math.random() * EUROPE.length)];
+                if (name) mine.push(`${full} firmó con ${dest}: no sigue en el club.`);
+                if (club === r.me) archiveLegend(r, p.id as number, full);
+                continue;
+            }
             const retires = p.age >= 37 || (p.age >= 31 && Math.random() < (p.age - 30) * 0.22);
             if (retires) {
                 if (name) mine.push(`Se retiró ${full} (${p.age} años).`);
@@ -859,6 +869,15 @@ export const JUV_LABEL: Record<string, string> = { 'nac-m16': 'Nacional M16', 'n
 /** La cantera de un club: de su nivel, más lo que invirtió el usuario si es el propio. */
 const canteraOf = (r: CareerState, club: string) => centerOf(club) + (club === r.me ? r.invest ?? 0 : 0);
 
+/**
+ * A qué nivel tira el plantel de primera: el del club, su forma de fondo y, si es el propio, lo que
+ * invirtió en la cantera. La inversión rinde cada vez menos y nunca alcanza para un plantel de cracks:
+ * lo que formás de más se lo llevan afuera.
+ */
+const INVEST_MAX = 0.6;
+const investEff = (r: CareerState) => INVEST_MAX * (1 - Math.exp(-(r.invest ?? 0) / 2.5));
+const rosterTarget = (r: CareerState, club: string) => clampN(centerOf(club) + (r.drift?.[club] ?? 0) / 6 + (club === r.me ? investEff(r) : 0), 1, 8.8);
+
 function initialYouth(r: CareerState): Record<string, [number, number, number, number]> {
     const out: Record<string, [number, number, number, number]> = {};
     for (const club of Object.keys(r.rosters ?? {})) {
@@ -955,8 +974,14 @@ function youthSeason(r: CareerState): YouthRow[] {
     const names = ['Intermedia', 'Pre A', 'Pre B', 'Pre C', 'Pre D'].slice(0, n);
     const rivals = r.divisions[div] ?? [r.me];
     names.forEach((cat, k) => {
+        // La reserva sale de la cantera: cuanto más abajo, más pesan las camadas (y lo que invirtió el club) y menos la primera.
+        const w = clampN(0.7 + 0.05 * k, 0, 0.8);
         const table = rivals
-            .map((club) => ({ club, v: centerOf(club) + (r.ratings?.[club] ?? 0) / 6 + ((camada(club, 3) - centerOf(club)) * 0.4 * (k + 1)) / n + gauss(Math.random) * 0.9 }))
+            .map((club) => {
+                const first = centerOf(club) + (r.ratings?.[club] ?? 0) / 6 + (r.drift?.[club] ?? 0) / 6;
+                const pool = (camada(club, 2) + camada(club, 3)) / 2;
+                return { club, v: first * (1 - w) + pool * w + gauss(Math.random) * 0.7 };
+            })
             .sort((a, b) => b.v - a.v);
         rows.push({ cat, place: table.findIndex((x) => x.club === r.me) + 1, of: table.length });
     });
