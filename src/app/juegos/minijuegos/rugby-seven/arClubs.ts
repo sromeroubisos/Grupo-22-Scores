@@ -417,9 +417,12 @@ const SHORTS = makeShorts([...AR_SEVEN_CLUBS].sort((a, b) => (b.ranking ?? 0) - 
  */
 function gameRating(c: GameClub): number {
     if (c.fixed !== undefined) return c.fixed;
-    if (c.ranking !== null) return Math.round(30 + c.ranking * 0.55);
-    return Math.round(38 + Math.max(0, c.rating - 24) * 0.72);
+    // La URBA tiene más nivel de punta a punta que el interior: sin esto el Nacional lo ganaba casi siempre el interior.
+    const urba = AR_SEVEN_DIVISIONS.find((d) => d.id === c.division)?.branch === 'urba' ? URBA_LIFT : 0;
+    if (c.ranking !== null) return Math.round(30 + c.ranking * 0.55 + urba);
+    return Math.round(38 + Math.max(0, c.rating - 24) * 0.72 + urba);
 }
+const URBA_LIFT = 3;
 
 export const AR_CLUBS: SevenTeam[] = AR_SEVEN_CLUBS.map((c) => ({
     id: c.id,

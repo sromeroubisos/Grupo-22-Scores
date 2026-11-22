@@ -218,6 +218,8 @@ export interface CareerState {
     movesLog?: { season: number; lines: string[] } | null;
     /** Lo que rindió cada club en la cancha (se diluye cada año). */
     ratings?: Record<string, number>;
+    /** La forma de fondo de cada club del catálogo (sube y baja de a poco, año a año), en puntos de nivel. */
+    drift?: Record<string, number>;
     /** Plantel de cada club de la rama. */
     rosters?: Record<string, Player[]>;
     /** Goleadores y tryman de cada torneo jugado por el club. */
@@ -526,6 +528,7 @@ export function careerBoosts(r: CareerState): Record<string, number> {
     const hit = boostCache.get(r);
     if (hit) return hit;
     const out: Record<string, number> = { ...(r.ratings ?? {}) };
+    for (const [club, d] of Object.entries(r.drift ?? {})) out[club] = (out[club] ?? 0) + d;
     for (const club of Object.keys(r.rosters ?? {})) {
         const rr = rosterRating(r, club);
         if (rr !== null) out[club] = (out[club] ?? 0) + rr - baseRatingOf(club);
@@ -2403,12 +2406,47 @@ function evolveRatings(r: CareerState) {
         const n = Math.max(1, order.length - 1);
         order.forEach((club, place) => {
             const perf = (expected.indexOf(club) - place) / n; // de −1 a 1
-            const v = (prev[club] ?? 0) * 0.7 + perf * 4 + (r.pending.bonus?.[club] ?? 0) + (Math.random() - 0.5) * 2;
-            const rounded = Math.round(Math.max(-10, Math.min(10, v)) * 2) / 2;
+            const was = prev[club] ?? 0;
+            // Los títulos pesan menos cuanto más arriba ya está el club: el que gana siempre se gasta.
+            const titles = (r.pending.bonus?.[club] ?? 0) * (was > 0 ? clampN(1 - was / 9, 0.2, 1) : 1);
+            const v = was * RATING_KEEP + perf * 4 + titles + (Math.random() - 0.5) * 2;
+            const rounded = Math.round(clampN(v, -RATING_CAP, RATING_CAP) * 2) / 2;
             if (rounded) next[club] = rounded;
         });
     }
     r.ratings = next;
+    evolveDrift(r);
+}
+
+/** Cuánto del rendimiento de un año sigue al siguiente, y el techo (y piso) de ese rendimiento. */
+const RATING_KEEP = 0.55;
+const RATING_CAP = 8;
+/** La forma de fondo: un paseo al azar que vuelve de a poco a cero (el nivel de catálogo) y no pasa de ±DRIFT_CAP. */
+const DRIFT_KEEP = 0.86;
+const DRIFT_STEP = 4;
+const DRIFT_CAP = 10;
+
+/**
+ * Los clubes no son los mismos para siempre: unos arman una camada y suben, otros pierden a sus
+ * figuras y bajan. Les pasa a todos los del catálogo, también a los de las ramas que el usuario no juega.
+ * El que ya está muy arriba de su nivel recibe un tirón extra hacia abajo.
+ */
+function evolveDrift(r: CareerState) {
+    const prev = r.drift ?? {};
+    const next: Record<string, number> = {};
+    const ids = new Set<string>();
+    for (const d of AR_SEVEN_DIVISIONS) for (const c of d.clubs) ids.add(c);
+    for (const clubs of Object.values(r.divisions)) for (const c of clubs) ids.add(c);
+    for (const club of [...ids].sort()) {
+        const d = prev[club] ?? 0;
+        const drag = d > 3 ? (d - 3) * 0.12 : 0;
+        // Los de catálogo altísimo (Newman, Tala) tienden a quedar un poco más cerca del lote: la cima no es de nadie.
+        const crown = Math.max(0, baseRatingOf(club) - 78) * 0.5 * (1 - DRIFT_KEEP);
+        const v = d * DRIFT_KEEP - drag - crown + gauss(Math.random) * DRIFT_STEP;
+        const rounded = Math.round(clampN(v, -DRIFT_CAP, DRIFT_CAP) * 2) / 2;
+        if (rounded) next[club] = rounded;
+    }
+    r.drift = next;
 }
 
 /** Cierra la temporada: niveles, planteles, ascensos, plazas y clasificados, y pasa a la siguiente. */
@@ -2801,10 +2839,12 @@ export function liveScorers(t: TourState, by: 'tries' | 'points', nameOf: (team:
 /** Cómo se llama un palmarés: los nacionales por su nombre, las divisiones por la suya. */
 export const palmaresLabel = (key: string) => PALMARES_LABEL[key] ?? JUV_LABEL[key] ?? CUP_LABEL[key] ?? divisionLabel(key);
 
-/** Historia completa de una competición: la real (hasta 2025) y la de esta carrera, del más nuevo al más viejo. */
+/** Historia completa de una competición: la real (hasta 2026) y la de esta carrera, del más nuevo al más viejo. */
 export function palmaresFor(r: CareerState, key: string): TitleRow[] {
     const game = (r.champions?.[key] ?? []).map(([season, club]) => ({ season, name: nm(club), club, game: true }));
-    return [...realTitles(key), ...game].sort((a, b) => b.season - a.season);
+    // Si la carrera ya jugó una temporada que también tiene campeón real (2026), manda la de la partida.
+    const played = new Set(game.map((g) => g.season));
+    return [...realTitles(key).filter((t) => !played.has(t.season)), ...game].sort((a, b) => b.season - a.season);
 }
 
 /** Las competiciones con palmarés para mostrar: primero las de la rama y la región del club. */
