@@ -184,9 +184,20 @@ export const TOUR_CATS: { id: string; sub: string }[] = [
     { id: 'Uruguay', sub: 'Uruguayo de Clubes.' },
     { id: 'Brasil', sub: 'Super 12: Primeira y Segunda Divisão.' },
     { id: 'España', sub: 'División de Honor, Honor Élite y Honor B; Liga Iberdrola y Honor B femenina.' },
-    { id: 'Europa', sub: 'Champions Cup, Challenge Cup y URC.' },
-    { id: 'Francia', sub: 'Top 14 y Pro D2.' },
-    { id: 'Inglaterra', sub: 'Premiership.' },
+    { id: 'Europa', sub: 'Champions Cup, Challenge Cup, URC y la Supercopa Europea.' },
+    { id: 'Francia', sub: 'Top 14 y Pro D2; en el modo carrera, de la Élite 14 al Federal Uno, y la Élite 14 femenina.' },
+    { id: 'Inglaterra', sub: 'Premiership; en el modo carrera, Premier Union y Challenger Union.' },
+    { id: 'Sudáfrica', sub: 'Copa Curry: la Élite y el Ascenso.' },
+    { id: 'Portugal', sub: 'Campeonato Lusitano: Divisão de Honra y Primeira Divisão.' },
+    { id: 'Alemania', sub: 'Liga Federal Alemana: Primera y Segunda.' },
+    { id: 'Polonia', sub: 'Liga Extra y Liga Uno de Polonia.' },
+    { id: 'Georgia', sub: 'Liga Gran 10 y Liga Primera de Georgia.' },
+    { id: 'Rusia', sub: 'Liga Pro y Liga Mayor de Rusia.' },
+    { id: 'Australia', sub: 'Liga Escudo de Sídney y Liga Premier de Queensland.' },
+    { id: 'Chequia', sub: 'Liga Extra y Primera Liga Checa.' },
+    { id: 'Bolivia', sub: 'Liga Altiplano de Bolivia.' },
+    { id: 'Perú', sub: 'Liga Andina del Perú.' },
+    { id: 'México', sub: 'Liga Azteca de México.' },
     { id: 'Hemisferio sur', sub: 'Super Rugby Pacific y Currie Cup.' },
     { id: 'América', sub: 'Super Rugby Americas y Major League Rugby.' },
     { id: 'Japón', sub: 'Japan League One D1 y D2.' },
@@ -487,11 +498,11 @@ function poisson(lambda: number): number {
 export interface ScoreEvent {
     team: string;
     slot: number;
-    kind: 'try' | 'conv' | 'drop';
+    kind: 'try' | 'conv' | 'drop' | 'tackle';
 }
 
-/** Tries y puntos de cada jugador en un torneo: clave `equipo#puesto`. */
-export type StatLine = [number, number];
+/** Tries, puntos y tackles de cada jugador en un torneo: clave `equipo#puesto`. Los tackles faltan en las partidas viejas. */
+export type StatLine = [number, number, number?];
 
 // En el seven los tries los apoyan más los de afuera; patea el apertura (puesto 5).
 const TRY_W = [1, 1, 1, 2, 3, 4, 5];
@@ -531,25 +542,58 @@ export function scoreEvents(team: string, score: number): ScoreEvent[] {
 
 const POINTS = { try: 5, conv: 2, drop: 3 } as const;
 
+/**
+ * Los tackles de un equipo en un partido simulado: dependen de cuánto atacó el
+ * rival (más puntos en contra, más defensa) y los de adelante tacklean más.
+ */
+export function tackleEvents(team: string, oppScore: number): ScoreEvent[] {
+    const w = [4, 4, 4, 3, 2, 3, 2];
+    const total = w.reduce((x, y) => x + y, 0);
+    const n = 14 + Math.round(oppScore * 0.8);
+    const out: ScoreEvent[] = [];
+    for (let i = 0; i < n; i++) {
+        let r = Math.random() * total;
+        let slot = w.length - 1;
+        for (let j = 0; j < w.length; j++) if ((r -= w[j]) < 0) { slot = j; break; }
+        out.push({ team, slot: playerAt(team, slot), kind: 'tackle' });
+    }
+    return out;
+}
+
 export function addStats(stats: Record<string, StatLine>, events: ScoreEvent[]) {
     for (const e of events) {
         const k = `${e.team}#${e.slot}`;
-        const line = (stats[k] ??= [0, 0]);
+        const line = (stats[k] ??= [0, 0, 0]);
+        if (e.kind === 'tackle') {
+            line[2] = (line[2] ?? 0) + 1;
+            continue;
+        }
         if (e.kind === 'try') line[0] += 1;
         line[1] += POINTS[e.kind];
     }
 }
 
-/** Los mejores de un torneo: por tries (tryman) o por puntos (goleador). */
-export function topStats(stats: Record<string, StatLine> | undefined, by: 'tries' | 'points', n = 10): { team: string; slot: number; tries: number; points: number }[] {
+/**
+ * La nota del jugador del torneo: lo que anota más lo que defiende. Un punto por
+ * punto y uno por tackle, así el que hace de todo le gana al que hace una sola cosa.
+ */
+export const playerRating = (points: number, tackles: number) => points + tackles;
+
+export type StatBy = 'tries' | 'points' | 'tackles' | 'rating';
+
+/** Los mejores de un torneo: tryman, goleador (puntos), defensor (tackles) o el mejor jugador (nota general). */
+export function topStats(stats: Record<string, StatLine> | undefined, by: StatBy, n = 10): { team: string; slot: number; tries: number; points: number; tackles: number; rating: number }[] {
     if (!stats) return [];
+    const value = (x: { tries: number; points: number; tackles: number; rating: number }) => (by === 'tries' ? x.tries : by === 'points' ? x.points : by === 'tackles' ? x.tackles : x.rating);
     return Object.entries(stats)
-        .map(([k, [tries, points]]) => {
+        .map(([k, [tries, points, tk]]) => {
             const [team, slot] = k.split('#');
-            return { team, slot: Number(slot), tries, points };
+            const tackles = tk ?? 0;
+            return { team, slot: Number(slot), tries, points, tackles, rating: playerRating(points, tackles) };
         })
-        .filter((x) => (by === 'tries' ? x.tries : x.points) > 0)
-        .sort((a, b) => (by === 'tries' ? b.tries - a.tries || b.points - a.points : b.points - a.points || b.tries - a.tries))
+        .filter((x) => value(x) > 0)
+        // Desempates estables: el valor, después puntos, tackles y el nombre de la clave.
+        .sort((a, b) => value(b) - value(a) || b.points - a.points || b.tackles - a.tackles || a.team.localeCompare(b.team) || a.slot - b.slot)
         .slice(0, n);
 }
 
@@ -650,8 +694,11 @@ export function closeRound(prev: TourState, mine: [number, number] | null, mineE
     if (s.stats) {
         for (const r of results) {
             const isMine = !!mine && (r.a === s.me || r.b === s.me);
-            if (isMine && mineEvents?.length) addStats(s.stats, mineEvents);
-            else addStats(s.stats, [...scoreEvents(r.a, r.sa), ...scoreEvents(r.b, r.sb)]);
+            if (isMine && mineEvents?.length) {
+                addStats(s.stats, mineEvents);
+                // Un partido que se miró (sin tackles registrados) los reparte como uno simulado.
+                if (!mineEvents.some((e) => e.kind === 'tackle')) addStats(s.stats, [...tackleEvents(r.a, r.sb), ...tackleEvents(r.b, r.sa)]);
+            } else addStats(s.stats, [...scoreEvents(r.a, r.sa), ...scoreEvents(r.b, r.sb), ...tackleEvents(r.a, r.sb), ...tackleEvents(r.b, r.sa)]);
         }
     }
 

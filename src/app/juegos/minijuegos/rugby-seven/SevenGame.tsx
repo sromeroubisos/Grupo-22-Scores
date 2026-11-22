@@ -52,7 +52,7 @@ import {
     type ScoreEvent,
     type TourState,
 } from './tours';
-import { AR_CLUBS, AR_DIVISIONS_PLAYABLE, AR_SEVEN_DIVISIONS, type ArBranch } from './arClubs';
+import { AR_CLUBS, AR_DIVISIONS_PLAYABLE, AR_SEVEN_DIVISIONS, isFemBranch, type ArBranch } from './arClubs';
 
 /** Los países de la carrera: cada uno con sus ligas (las argentinas son dos ramas, URBA e interior). */
 const CAREER_COUNTRIES: { id: string; name: string; flag: string; sub: string; branches: ArBranch[] }[] = [
@@ -60,6 +60,21 @@ const CAREER_COUNTRIES: { id: string; name: string; flag: string; sub: string; b
     { id: 'uy', name: 'Uruguay', flag: 'uy', sub: 'El Uruguayo de Clubes: fase regular y semifinales por el título.', branches: ['uruguay'] },
     { id: 'br', name: 'Brasil', flag: 'br', sub: 'Super 12: grupos, Hexagonal y final; Repescagem con la Segunda.', branches: ['brasil'] },
     { id: 'es', name: 'España', flag: 'es', sub: 'División de Honor, Honor Élite y Honor B (en grupos). Sube el campeón, baja el último.', branches: ['espana'] },
+    { id: 'fr', name: 'Francia', flag: 'fr', sub: 'Élite 14, Pro Segunda, Liga Nacional, Liga Nacional 2 y Federal Uno. Sube el campeón, baja el último.', branches: ['francia'] },
+    { id: 'en', name: 'Inglaterra', flag: 'gb-eng', sub: 'Premier Union y Challenger Union. Sube el campeón, baja el último.', branches: ['inglaterra'] },
+    { id: 'frf', name: 'Francia · femenino', flag: 'fr', sub: 'Élite 14 Femenina y Federal Uno Femenina. Sube la campeona, baja la última.', branches: ['franciaFem'] },
+    { id: 'enf', name: 'Inglaterra · femenino', flag: 'gb-eng', sub: 'Premier Union Femenina y Challenger Union Femenina. Sube la campeona, baja la última.', branches: ['inglaterraFem'] },
+    { id: 'za', name: 'Sudáfrica', flag: 'za', sub: 'Copa Curry: la Élite y el Ascenso. Sube el campeón, baja el último.', branches: ['sudafrica'] },
+    { id: 'pt', name: 'Portugal', flag: 'pt', sub: 'Campeonato Lusitano: Divisão de Honra y Primeira Divisão. Sube el campeón, baja el último.', branches: ['portugal'] },
+    { id: 'de', name: 'Alemania', flag: 'de', sub: 'Liga Federal Alemana: Primera y Segunda. Sube el campeón, baja el último.', branches: ['alemania'] },
+    { id: 'pl', name: 'Polonia', flag: 'pl', sub: 'Liga Extra y Liga Uno de Polonia. Sube el campeón, baja el último.', branches: ['polonia'] },
+    { id: 'ge', name: 'Georgia', flag: 'ge', sub: 'Liga Gran 10 y Liga Primera de Georgia. Sube el campeón, baja el último.', branches: ['georgia'] },
+    { id: 'ru', name: 'Rusia', flag: 'ru', sub: 'Liga Pro y Liga Mayor de Rusia. Sube el campeón, baja el último.', branches: ['rusia'] },
+    { id: 'au', name: 'Australia', flag: 'au', sub: 'Liga Escudo de Sídney y Liga Premier de Queensland. Sube el campeón, baja el último.', branches: ['australia'] },
+    { id: 'cz', name: 'Chequia', flag: 'cz', sub: 'Liga Extra y Primera Liga Checa. Sube el campeón, baja el último.', branches: ['chequia'] },
+    { id: 'bo', name: 'Bolivia', flag: 'bo', sub: 'Liga Altiplano de Bolivia: una sola división, fase regular y semifinales.', branches: ['bolivia'] },
+    { id: 'pe', name: 'Perú', flag: 'pe', sub: 'Liga Andina del Perú: una sola división, fase regular y semifinales.', branches: ['peru'] },
+    { id: 'mx', name: 'México', flag: 'mx', sub: 'Liga Azteca de México: una sola división, fase regular y semifinales.', branches: ['mexico'] },
     { id: 'arf', name: 'Argentina · femenino', flag: 'ar', sub: 'URBA (Top 9, Primera y Segunda) y el Centro (Córdoba y Andina). Las mejores juegan el Nacional de Clubes Femenino.', branches: ['fem'] },
     { id: 'esf', name: 'España · femenino', flag: 'es', sub: 'Liga Iberdrola y División de Honor B femenina. Sube la campeona, baja la última.', branches: ['espanaFem'] },
     { id: 'cl', name: 'Chile', flag: 'cl', sub: 'ARUSA: Top 10, Segunda, Tercera y Cuarta. Sube el campeón, baja el último.', branches: ['chile'] },
@@ -71,13 +86,15 @@ const firstClubOf = (countryId: string) => {
     return [...new Set(ids)].map((id) => AR_CLUBS.find((t) => t.id === id)).filter((t): t is SevenTeam => !!t).sort((a, b) => a.name.localeCompare(b.name, 'es'))[0]?.id ?? null;
 };
 /** Bandera de cada categoría con país. */
-const CAT_FLAG: Record<string, string> = { Argentina: 'ar', Chile: 'cl', Uruguay: 'uy', Brasil: 'br', España: 'es' };
+const CAT_FLAG: Record<string, string> = { Argentina: 'ar', Chile: 'cl', Uruguay: 'uy', Brasil: 'br', España: 'es', Francia: 'fr', Inglaterra: 'gb-eng', Sudáfrica: 'za', Portugal: 'pt', Alemania: 'de', Polonia: 'pl', Georgia: 'ge', Rusia: 'ru', Australia: 'au', Chequia: 'cz', Bolivia: 'bo', Perú: 'pe', México: 'mx' };
+/** Las categorías de torneo que tienen modo carrera. */
+const CAREER_CATS = ['Argentina', 'Chile', 'Uruguay', 'Brasil', 'España', 'Francia', 'Inglaterra', 'Sudáfrica', 'Portugal', 'Alemania', 'Polonia', 'Georgia', 'Rusia', 'Australia', 'Chequia', 'Bolivia', 'Perú', 'México'];
 const countryOfClub = (id: string | null) => CAREER_COUNTRIES.find((c) => AR_SEVEN_DIVISIONS.some((d) => c.branches.includes(d.branch) && d.clubs.includes(id ?? '')))?.id ?? null;
 
 /** En qué grupo del selector va cada división: Argentina, o el país de afuera. */
 const branchGroup = (b: ArBranch) =>
-    ({ chile: 'Chile', uruguay: 'Uruguay', brasil: 'Brasil', espana: 'España', espanaFem: 'España femenino', fem: 'Argentina femenino' } as Record<string, string>)[b] ?? 'Argentina';
-import { CLUB_LEAGUES, CLUBS, teamOfCode } from './clubs';
+    ({ chile: 'Chile', uruguay: 'Uruguay', brasil: 'Brasil', espana: 'España', espanaFem: 'España femenino', fem: 'Argentina femenino', francia: 'Francia', inglaterra: 'Inglaterra', sudafrica: 'Sudáfrica', portugal: 'Portugal', franciaFem: 'Francia femenino', inglaterraFem: 'Inglaterra femenino', alemania: 'Alemania', polonia: 'Polonia', georgia: 'Georgia', rusia: 'Rusia', australia: 'Australia', chequia: 'Chequia', bolivia: 'Bolivia', peru: 'Perú', mexico: 'México' } as Record<string, string>)[b] ?? 'Argentina';
+import { CLUB_LEAGUES, CLUBS, registerCustomTeams, teamOfCode } from './clubs';
 import {
     advanceCareer,
     applyCareerContext,
@@ -125,6 +142,8 @@ import { advanceIntl, compName, createIntl, intlBoosts, intlInvest, intlNames, i
 import { IntlRanking, IntlSeason, IntlSquad, IntlUnion, IntlYouth } from './IntlPanels';
 import { advanceSvns, createSvns, SVNS_LEGS, SVNS_PHASE_LABEL, svnsBoosts, svnsRegionName, svnsStartTier, svnsTable, svnsVerdict, TIER_LABEL } from './svns';
 import { CloudSync, type CloudStatus } from './cloudSave';
+import { readLang, startTranslating, writeLang, type Lang } from './i18n';
+import { applyStoredClubEdits, EDITABLE_CLUBS, isClubEdited, resetClubEdit, saveClubEdit } from './clubEdits';
 import styles from './seven.module.css';
 
 const pixel = Silkscreen({ weight: ['400', '700'], subsets: ['latin'], display: 'swap' });
@@ -147,6 +166,8 @@ type Screen =
     | { k: 'tour' }
     | { k: 'teams' }
     | { k: 'edit'; team: SevenTeam }
+    | { k: 'clubs' }
+    | { k: 'clubEdit'; team: SevenTeam }
     | { k: 'match'; cfg: MatchConfig; mode: Mode; nonce: number }
     | { k: 'result'; cfg: MatchConfig; mode: Mode; score: [number, number] };
 
@@ -762,7 +783,27 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
     const [cloud, setCloud] = useState<CloudStatus>('off');
     const [loaded, setLoaded] = useState(false);
 
+    /** Idioma de la interfaz: español, o inglés (una capa que traduce lo que se ve; ver i18n.ts). */
+    const [lang, setLang] = useState<Lang>('es');
+    const pageRef = useRef<HTMLDivElement | null>(null);
+    useEffect(() => setLang(readLang()), []);
     useEffect(() => {
+        const root = pageRef.current;
+        if (lang !== 'en' || !root) return;
+        return startTranslating(root);
+    }, [lang]);
+    /** Editar clubes: lo que se busca, la liga elegida y un contador para repintar cuando cambia el catálogo. */
+    const [clubQuery, setClubQuery] = useState('');
+    /** Liga propia: el nombre que se le pone. */
+    const [customName, setCustomName] = useState('');
+    /** Modo carrera: un equipo propio (id) que ocupa el lugar del club elegido. */
+    const [careerReplace, setCareerReplace] = useState('');
+    const [clubLeague, setClubLeague] = useState('');
+    const [, setClubTick] = useState(0);
+
+    useEffect(() => {
+        // Los clubes editados antes se aplican al catálogo antes de armar nada con ellos.
+        applyStoredClubEdits();
         const saved = loadSaved();
         const list = saved.tours.map((t) => (t ? settleCareer(t) : null));
         // Una carrera vieja se lleva a la versión actual al abrirse: se guarda enseguida, así no se rehace.
@@ -905,6 +946,8 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
     }, [customTeams]);
 
     const allTeams = useMemo(() => [...customTeams, ...NATIONS, ...FEM_NATIONS, ...CLUBS, ...AR_CLUBS, ...PRESET_TEAMS], [customTeams]);
+    // Los equipos propios también se resuelven por código (ligas y torneos con ellos adentro).
+    registerCustomTeams(customTeams);
     // Nivel de los equipos propios y, en una carrera, lo que cada club ganó o perdió con las temporadas.
     setRatingContext(Object.fromEntries(customTeams.map((t) => [t.id, t.rating ?? 70])), tour?.career ? careerBoosts(tour.career) : tour?.svns ? svnsBoosts(tour.svns) : tour?.intl ? intlBoosts(tour.intl) : undefined);
     // En una carrera: quién juega en cada puesto y la localía; afuera, nada.
@@ -955,6 +998,38 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
         const away = byId(rival);
         if (!home || !away) return;
         play({ home, away, difficulty, minutes: duration, suddenDeath: false }, 'quick');
+    };
+
+    /**
+     * Amistoso entre dos equipos cualquiera, sin jugarlo: la computadora lo resuelve.
+     * Con `watchIt` se muestra como relato; si no, solo el cartel con el resultado. No toca ninguna partida guardada.
+     */
+    const simQuick = (watchIt: boolean) => {
+        const home = byId(mine);
+        const away = byId(rival);
+        if (!home || !away) return;
+        const score = simulate(home.id, away.id, false, 0);
+        if (!watchIt) {
+            setSimFlash({ home, away, score });
+            return;
+        }
+        const events = [...scoreEvents(home.id, score[0]), ...scoreEvents(away.id, score[1])];
+        const minutes = duration;
+        const items: WatchItem[] = [];
+        for (const team of [home.id, away.id]) {
+            const side: 0 | 1 = team === home.id ? 0 : 1;
+            const own = events.filter((e) => e.team === team);
+            const convs = own.filter((e) => e.kind === 'conv');
+            own.filter((e) => e.kind === 'try').forEach((e, i) => {
+                const at = 0.4 + Math.random() * (minutes - 0.8);
+                items.push({ at, side, pts: 5, text: `Try de ${playerName(team, e.slot)}` });
+                const c = convs[i];
+                if (c) items.push({ at: Math.min(minutes, at + 0.15), side, pts: 2, text: `Conversión de ${playerName(team, c.slot)}` });
+            });
+            own.filter((e) => e.kind === 'drop').forEach((e) => items.push({ at: 0.4 + Math.random() * (minutes - 0.8), side, pts: 3, text: `Drop de ${playerName(team, e.slot)}` }));
+        }
+        items.sort((x, y) => x.at - y.at);
+        setWatch({ home, away, score, minutes, items });
     };
 
     const startCup = () => {
@@ -1083,6 +1158,10 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
 
     const startCareer = () => {
         if (!mine) return;
+        // Un equipo propio en lugar del club: toma su nombre, su camiseta y su plantel (se deshace en Editar clubes).
+        const own = careerReplace ? customTeams.find((c) => c.id === careerReplace) : null;
+        if (own) saveClubEdit(mine, { name: own.name, short: own.short, kit: own.kit, players: own.players });
+        setCareerReplace('');
         persist({ tour: createCareer(mine, difficulty, duration, coachName || readCoach() || undefined) });
         setHubTab('tabla');
         setScreen({ k: 'tour' });
@@ -1226,7 +1305,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
     const stepOf = 'step' in screen ? screen.step : null;
 
     return (
-        <div className={`${styles.page} ${pixel.className}`}>
+        <div ref={pageRef} lang={lang} className={`${styles.page} ${pixel.className}`}>
             <div className={inMatch ? `${styles.shell} ${styles.shellMatch}` : styles.shell}>
                 {/* En el partido la cancha se queda con toda la pantalla: el título queda para lectores de pantalla y salir está en la pausa. */}
                 {inMatch && <h1 className={styles.srOnly}>Rugby Seven</h1>}
@@ -1239,6 +1318,19 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                             {stepOf ? <small> · paso {stepOf} de 2</small> : null}
                         </span>
                     )}
+                    <button
+                        type="button"
+                        className={`${styles.exitBtn} ${styles.musicBtn}`}
+                        onClick={() => {
+                            const next: Lang = lang === 'en' ? 'es' : 'en';
+                            writeLang(next);
+                            setLang(next);
+                        }}
+                        aria-label={lang === 'en' ? 'Cambiar a español' : 'Switch to English'}
+                        lang={lang === 'en' ? 'es' : 'en'}
+                    >
+                        {lang === 'en' ? 'ES' : 'EN'}
+                    </button>
                     {menuMusicSrc && (
                         <button
                             type="button"
@@ -1328,7 +1420,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                             {live
                                                 ? `${nameOf(live.me)} · temporada ${live.season} · ${divisionLabel(divisionOf(live, live.me) ?? '')}.`
                                                 : tours.some((t) => !t)
-                                                  ? 'Un club de Argentina, Uruguay, Brasil o Chile, varias temporadas: ascensos, descensos y títulos.'
+                                                  ? 'Un club de Argentina, Sudáfrica, Inglaterra, Francia, Portugal y más, varias temporadas: ascensos, descensos y títulos.'
                                                   : 'Las tres partidas están ocupadas: borrá una para empezar.'}
                                         </span>
                                     </button>
@@ -1399,6 +1491,11 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                 <strong>Mis equipos</strong>
                                 <span>Armá tu camiseta y tu plantel de siete.</span>
                             </button>
+                            <button type="button" role="menuitem" className={styles.menuBtn} onClick={() => setScreen({ k: 'clubs' })}>
+                                <span className={styles.menuIcon} aria-hidden="true">⚙</span>
+                                <strong>Editar clubes</strong>
+                                <span>Cambiá el nombre, la camiseta y los jugadores de cualquier club.</span>
+                            </button>
                         </div>
                     </div>
                 )}
@@ -1423,6 +1520,8 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                         <SettingsStep teams={[byId(mine), byId(rival)]} difficulty={difficulty} setDifficulty={setDifficulty} duration={duration} setDuration={setDuration} />
                         <div className={styles.footerBtns}>
                             {btn('◀ Equipos', () => setScreen({ k: 'quick', step: 1 }))}
+                            {btn('Resultado rápido', () => simQuick(false))}
+                            {btn('Ver simulación', () => simQuick(true))}
                             {btn('Jugar ▶', startQuick, true)}
                         </div>
                     </div>
@@ -1550,7 +1649,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                             <button type="button" className={`${styles.pickCard} ${styles.pickCardAlt}`} onClick={() => setScreen({ k: 'careerSetup', step: 0 })}>
                                 <strong>Modo carrera</strong>
                                 <span>Un club, temporada tras temporada: plantel, pretemporada, ascensos, descensos y títulos.</span>
-                                <small>Argentina, Uruguay, Brasil, Chile o España · varones y mujeres</small>
+                                <small>Argentina, Europa, Sudáfrica, Oceanía y más: decenas de ligas · varones y mujeres</small>
                             </button>
                             <button type="button" className={styles.pickCard} onClick={() => setScreen({ k: 'svnsSetup', step: 1 })}>
                                 <strong>Circuito SVNS</strong>
@@ -1641,7 +1740,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                 {CAT_FLAG[tourCat] && <FlagIcon code={CAT_FLAG[tourCat]} size={22} />} {tourCat}
                             </h2>
                             <div className={styles.cardGrid}>
-                                {['Argentina', 'Chile', 'Uruguay', 'Brasil', 'España'].includes(tourCat) && (
+                                {CAREER_CATS.includes(tourCat) && (
                                     <button
                                         type="button"
                                         className={`${styles.pickCard} ${styles.pickCardAlt}`}
@@ -1692,6 +1791,20 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                         ? 'Jugás la división de tu club temporada tras temporada: ascensos y descensos, el Torneo del Interior con las plazas de tu región, y el Nacional de Clubes si salís campeón del Top 14 o del TDI A.'
                                         : `Jugás la división de tu club temporada tras temporada. ${country.sub}`}
                                 </p>
+                                {customTeams.length > 0 && (
+                                    <div className={styles.field}>
+                                        <label className={styles.fieldLabel} htmlFor="seven-career-replace">Jugar con un equipo tuyo</label>
+                                        <select id="seven-career-replace" className={styles.input} value={careerReplace} onChange={(e) => setCareerReplace(e.target.value)} disabled={!valid}>
+                                            <option value="">No: jugar con el club tal cual</option>
+                                            {customTeams.map((c) => (
+                                                <option key={c.id} value={c.id}>
+                                                    {c.name} reemplaza a {byId(mine)?.name ?? 'este club'}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        {careerReplace && <p className={styles.note}>El club toma el nombre, la camiseta y los siete jugadores de tu equipo. Lo deshacés en Editar clubes.</p>}
+                                    </div>
+                                )}
                             </div>
                             <div className={styles.footerBtns}>
                                 {btn('◀ Países', () => setScreen({ k: 'careerSetup', step: 0 }))}
@@ -1723,7 +1836,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
 
                 {screen.k === 'customSetup' && (() => {
                     const fmt = CUSTOM_FORMATS[customFormat];
-                    const pools = [...ZONES.map((z) => ({ name: z as string, teams: NATIONS.filter((t) => NATION_ZONE[t.id] === z).sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0)) })), ...ZONES.map((z) => ({ name: `${z} · femenino`, teams: FEM_NATIONS.filter((t) => NATION_ZONE[t.id] === z).sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0)) })), ...CLUB_LEAGUES.map((l) => ({ name: l.name, teams: l.teams })), ...AR_DIVISIONS_PLAYABLE.map((d) => ({ name: d.label, teams: d.clubs.map((id) => teamOfCode(id)).filter((t): t is SevenTeam => !!t) }))];
+                    const pools = [...(customTeams.length ? [{ name: 'Mis equipos', teams: customTeams }] : []), ...ZONES.map((z) => ({ name: z as string, teams: NATIONS.filter((t) => NATION_ZONE[t.id] === z).sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0)) })), ...ZONES.map((z) => ({ name: `${z} · femenino`, teams: FEM_NATIONS.filter((t) => NATION_ZONE[t.id] === z).sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0)) })), ...CLUB_LEAGUES.map((l) => ({ name: l.name, teams: l.teams })), ...AR_DIVISIONS_PLAYABLE.map((d) => ({ name: d.label, teams: d.clubs.map((id) => teamOfCode(id)).filter((t): t is SevenTeam => !!t) }))];
                     const pool = pools[wrap(customZone, pools.length)];
                     const zone = pool.name;
                     const zoneTeams = pool.teams;
@@ -1741,6 +1854,10 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                         onPrev={() => setCustomFormat(wrap(customFormat - 1, CUSTOM_FORMATS.length))}
                                         onNext={() => setCustomFormat(wrap(customFormat + 1, CUSTOM_FORMATS.length))}
                                     />
+                                    <div className={styles.field}>
+                                        <label className={styles.fieldLabel} htmlFor="seven-league-name">Nombre de tu liga</label>
+                                        <input id="seven-league-name" className={styles.input} value={customName} maxLength={32} onChange={(e) => setCustomName(e.target.value)} placeholder="Torneo personalizado" />
+                                    </div>
                                     <div className={styles.customPicked}>
                                         <strong>{customField.length} elegidas</strong>
                                         <span className={styles.tourFlags}>
@@ -1777,8 +1894,10 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                 {btn('Elegir selección ▶', () => {
                                     const def: TourDef = {
                                         id: `custom-${customField.join('-')}`,
-                                        name: 'Torneo personalizado',
-                                        sub: `${customField.length} selecciones.`,
+                                        name: customName.trim() || 'Torneo personalizado',
+                                        sub: `${customField.length} equipos.`,
+                                        // Con equipos propios o clubes entre los participantes se elige "tu club", no "tu selección".
+                                        clubs: customField.some((c) => !/^[A-Z]{3}(-F)?$/.test(c)) || undefined,
                                         formatLabel: fmt.label,
                                         teams: [...customField],
                                         source: 'custom',
@@ -1937,7 +2056,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                     const def = setupDef;
                     const field = def.teams.map((c) => teamOfCode(c)).filter((t): t is SevenTeam => !!t).sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
                     const valid = !!mine && field.some((t) => t.id === mine);
-                    const outside = (def.teams.some((c) => c.startsWith('ar-')) ? AR_CLUBS : def.teams.some((c) => c.startsWith('club-')) ? CLUBS : def.teams.some((c) => c.endsWith('-F')) ? FEM_NATIONS : NATIONS).filter((t) => !def.teams.includes(codeOfTeam(t))).sort((a, b) => a.name.localeCompare(b.name));
+                    const outside = [...(def.teams.some((c) => c.startsWith('ar-')) ? AR_CLUBS : def.teams.some((c) => c.startsWith('club-')) ? CLUBS : def.teams.some((c) => c.endsWith('-F')) ? FEM_NATIONS : NATIONS), ...customTeams].filter((t) => !def.teams.includes(codeOfTeam(t))).sort((a, b) => a.name.localeCompare(b.name));
                     return screen.step === 1 ? (
                         <div className={styles.body}>
                             <div className={styles.single}>
@@ -2045,7 +2164,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                     // Amistosos contra cualquier club: los de tu división primero, después cada división del país y de afuera, y las ligas del mundo.
                     const rivals = (() => {
                         if (!career) return [];
-                        const fem = career.branch === 'fem' || career.branch === 'espanaFem';
+                        const fem = isFemBranch(career.branch);
                         const seen = new Set<string>([career.me]);
                         const out: { id: string; name: string; group: string }[] = [];
                         const push = (group: string, ids: string[]) => {
@@ -2058,7 +2177,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                         const myDiv = divisionOf(career, career.me);
                         if (myDiv) push(`Tu división · ${divisionLabel(myDiv)}`, career.divisions[myDiv] ?? []);
                         for (const d of AR_DIVISIONS_PLAYABLE) {
-                            if ((d.branch === 'fem' || d.branch === 'espanaFem') !== fem) continue;
+                            if (isFemBranch(d.branch) !== fem) continue;
                             push(`${branchGroup(d.branch)} · ${d.label}`, career.divisions[d.id] ?? d.clubs);
                         }
                         if (!fem) for (const l of CLUB_LEAGUES) push(l.name, l.teams.map((t) => t.id));
@@ -2066,8 +2185,6 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                     })();
                     return (
                         <div className={styles.body}>
-                            {simFlash && <SimResult flash={simFlash} onClose={closeSimFlash} />}
-                            {watch && <SimWatch data={watch} onClose={closeWatch} />}
                             {celebrateTeam && (
                                 <ChampionCelebration
                                     team={celebrateTeam}
@@ -2412,11 +2529,11 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                                     <section key={t.tourId}>
                                                         <h3 className={styles.groupTitle}>{(defOf(t)?.name ?? '').replace(/ \d{4}$/, '')}</h3>
                                                         <div className={styles.scorerCols}>
-                                                            {(['tries', 'points'] as const).map((by) => {
+                                                            {(['rating', 'points', 'tackles', 'tries'] as const).map((by) => {
                                                                 const rows = liveScorers(t, by, playerName, 10);
                                                                 return (
                                                                     <div key={by} className={styles.groupCard}>
-                                                                        <h4 className={styles.scorerTitle}>{by === 'tries' ? 'Tryman' : 'Goleadores'}</h4>
+                                                                        <h4 className={styles.scorerTitle}>{by === 'tries' ? 'Tryman' : by === 'points' ? 'Goleador' : by === 'tackles' ? 'Mejor defensor' : 'Mejor jugador'}</h4>
                                                                         {rows.length === 0 ? (
                                                                             <p className={styles.empty}>Todavía no hay tantos.</p>
                                                                         ) : (
@@ -2425,7 +2542,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                                                                     <li key={`${x.team}-${x.slot}`} className={x.team === tour.me ? styles.rowMine : undefined}>
                                                                                         <span>{x.name}</span>
                                                                                         <small><FlagIcon code={flagOf(x.team)} size={12} /> {nameOf(x.team)}</small>
-                                                                                        <b>{by === 'tries' ? `${x.tries} tries` : `${x.points} pts`}</b>
+                                                                                        <b>{by === 'tries' ? `${x.tries} tries` : by === 'points' ? `${x.points} pts` : by === 'tackles' ? `${x.tackles} tackles` : `${x.rating} pts · ${x.points} + ${x.tackles} tk`}</b>
                                                                                     </li>
                                                                                 ))}
                                                                             </ol>
@@ -2550,12 +2667,15 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                                 )}
                                                 {(career.awards ?? []).length > 0 && (
                                                     <div className={styles.roadPending}>
-                                                        <span>Goleadores y tryman de cada temporada:</span>
-                                                        {[...(career.awards ?? [])].reverse().slice(0, 12).map((a, i) => (
-                                                            <span key={i}>
-                                                                {a.season} · {a.comp}: tryman {a.tries[0] ? `${a.tries[0].name} (${nameOf(a.tries[0].club)}, ${a.tries[0].n})` : '—'} · goleador {a.points[0] ? `${a.points[0].name} (${nameOf(a.points[0].club)}, ${a.points[0].n} pts)` : '—'}
-                                                            </span>
-                                                        ))}
+                                                        <span>Premios de cada temporada (mejor jugador, goleador, mejor defensor y tryman):</span>
+                                                        {[...(career.awards ?? [])].reverse().slice(0, 12).map((a, i) => {
+                                                            const fmt = (x: { name: string; club: string; n: number } | undefined, unit: string) => (x ? `${x.name} (${nameOf(x.club)}, ${x.n}${unit})` : '—');
+                                                            return (
+                                                                <span key={i}>
+                                                                    {a.season} · {a.comp}: mejor jugador {fmt(a.best?.[0], ' pts')} · goleador {fmt(a.points[0], ' pts')} · mejor defensor {fmt(a.tackles?.[0], ' tackles')} · tryman {fmt(a.tries[0], '')}
+                                                                </span>
+                                                            );
+                                                        })}
                                                     </div>
                                                 )}
                                                 {career.log.length > 0 && (
@@ -2757,6 +2877,22 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                         </div>
                         <div className={styles.footerBtns}>
                             {btn('◀ Menú', () => setScreen({ k: 'menu' }))}
+                            {customTeams.length >= 3 && (
+                                btn('Crear una liga con mis equipos', () => {
+                                    // Va a la primera partida libre (si están las tres ocupadas, a elegir cuál borrar).
+                                    const free = tours.findIndex((t) => !t);
+                                    if (free < 0) {
+                                        setScreen({ k: 'slots' });
+                                        return;
+                                    }
+                                    setSlot(free);
+                                    // Arranca con todos tus equipos adentro: después sumás clubes o sacás los que no.
+                                    setCustomField(customTeams.slice(0, 64).map((c) => c.id));
+                                    setCustomName('');
+                                    setCustomZone(0);
+                                    setScreen({ k: 'customSetup' });
+                                })
+                            )}
                             {btn('Crear equipo ▶', () => setScreen({ k: 'edit', team: newTeam() }), true)}
                         </div>
                     </div>
@@ -2766,6 +2902,88 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                     <div className={styles.body}>
                         <div className={styles.scrollPanel}>
                             <TeamEditor initial={screen.team} onSave={saveTeam} onCancel={() => setScreen({ k: 'teams' })} />
+                        </div>
+                    </div>
+                )}
+
+                {screen.k === 'clubs' && (() => {
+                    const q = clubQuery.trim().toLowerCase();
+                    const leagues = [...new Set(EDITABLE_CLUBS.map((c) => c.league).filter((l): l is string => !!l))].sort((a, b) => a.localeCompare(b, 'es'));
+                    const found = EDITABLE_CLUBS.filter((c) => (!clubLeague || c.league === clubLeague) && (!q || c.name.toLowerCase().includes(q) || c.short.toLowerCase() === q));
+                    const shown = found.slice(0, 60);
+                    return (
+                        <div className={styles.body}>
+                            <div className={styles.editorTop}>
+                                <div className={styles.field}>
+                                    <label className={styles.fieldLabel} htmlFor="seven-club-q">Buscar club</label>
+                                    <input id="seven-club-q" className={styles.input} value={clubQuery} onChange={(e) => setClubQuery(e.target.value)} placeholder="Nombre del club" />
+                                </div>
+                                <div className={styles.field}>
+                                    <label className={styles.fieldLabel} htmlFor="seven-club-league">Liga o división</label>
+                                    <select id="seven-club-league" className={styles.input} value={clubLeague} onChange={(e) => setClubLeague(e.target.value)}>
+                                        <option value="">Todas</option>
+                                        {leagues.map((l) => (
+                                            <option key={l} value={l}>
+                                                {l}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+                            <div className={styles.scrollPanel}>
+                                {shown.length === 0 ? (
+                                    <p className={styles.note}>No hay clubes con esa búsqueda.</p>
+                                ) : (
+                                    <ul className={styles.teamList}>
+                                        {shown.map((t) => (
+                                            <li key={t.id} className={styles.teamRow}>
+                                                <span className={styles.teamSprites} aria-hidden="true">
+                                                    {t.players.slice(0, 3).map((p, i) => (
+                                                        <SpritePreview key={i} look={p} kit={t.kit} scale={2} />
+                                                    ))}
+                                                </span>
+                                                <span className={styles.teamName}>
+                                                    {t.name} <small>{t.league ?? t.short}{isClubEdited(t.id) ? ' · editado' : ''}</small>
+                                                </span>
+                                                <button type="button" className={styles.btnGhost} onClick={() => setScreen({ k: 'clubEdit', team: t })} aria-label={`Editar ${t.name}`}>
+                                                    Editar
+                                                </button>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                )}
+                                {found.length > shown.length && <p className={styles.note}>Hay {found.length - shown.length} más: afiná la búsqueda o elegí una liga.</p>}
+                            </div>
+                            <div className={styles.footerBtns}>
+                                {btn('◀ Menú', () => setScreen({ k: 'menu' }))}
+                                <span className={styles.missing}>Los cambios se guardan en este navegador y valen en todos los modos.</span>
+                            </div>
+                        </div>
+                    );
+                })()}
+
+                {screen.k === 'clubEdit' && (
+                    <div className={styles.body}>
+                        <div className={styles.scrollPanel}>
+                            <TeamEditor
+                                initial={screen.team}
+                                saveLabel="Guardar club"
+                                onSave={(t) => {
+                                    saveClubEdit(screen.team.id, { name: t.name, short: t.short, kit: t.kit, players: t.players });
+                                    setClubTick((n) => n + 1);
+                                    setScreen({ k: 'clubs' });
+                                }}
+                                onReset={
+                                    isClubEdited(screen.team.id)
+                                        ? () => {
+                                              resetClubEdit(screen.team.id);
+                                              setClubTick((n) => n + 1);
+                                              setScreen({ k: 'clubs' });
+                                          }
+                                        : undefined
+                                }
+                                onCancel={() => setScreen({ k: 'clubs' })}
+                            />
                         </div>
                     </div>
                 )}
@@ -2818,6 +3036,10 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                         </div>
                     </div>
                 )}
+
+                {/* Los carteles de simulación son de pantalla completa: valen en el menú (amistoso) y en los torneos. */}
+                {simFlash && <SimResult flash={simFlash} onClose={closeSimFlash} />}
+                {watch && <SimWatch data={watch} onClose={closeWatch} />}
             </div>
         </div>
     );

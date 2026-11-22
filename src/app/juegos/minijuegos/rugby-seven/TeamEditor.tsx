@@ -34,7 +34,21 @@ function Swatches({ id, label, colors, value, onChange }: { id: string; label: s
     );
 }
 
-export default function TeamEditor({ initial, onSave, onCancel }: { initial: SevenTeam; onSave: (t: SevenTeam) => void; onCancel: () => void }) {
+export default function TeamEditor({
+    initial,
+    onSave,
+    onCancel,
+    saveLabel = 'Guardar equipo',
+    onReset,
+}: {
+    initial: SevenTeam;
+    onSave: (t: SevenTeam) => void;
+    onCancel: () => void;
+    /** Texto del botón de guardar (al editar un club del catálogo, "Guardar club"). */
+    saveLabel?: string;
+    /** Si está, aparece "Restaurar de fábrica" (clubes del catálogo ya editados). */
+    onReset?: () => void;
+}) {
     const [team, setTeam] = useState<SevenTeam>(initial);
     const [sel, setSel] = useState(0);
     const kit = team.kit;
@@ -157,8 +171,13 @@ export default function TeamEditor({ initial, onSave, onCancel }: { initial: Sev
                 <button type="button" className={styles.btnGhost} onClick={onCancel}>
                     Volver sin guardar
                 </button>
+                {onReset && (
+                    <button type="button" className={styles.btnGhost} onClick={onReset}>
+                        Restaurar de fábrica
+                    </button>
+                )}
                 <button type="button" className={styles.btnPrimary} disabled={!!missing} onClick={() => onSave({ ...team, name, short, custom: true })}>
-                    Guardar equipo
+                    {saveLabel}
                 </button>
             </div>
             {missing && <p className={styles.missing}>{missing}</p>}

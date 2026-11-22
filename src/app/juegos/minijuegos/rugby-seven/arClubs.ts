@@ -51,7 +51,11 @@ const CBA_CLUBS: ArSevenClub[] = CBA_DESARROLLO_ZONES.flat().map((id, i) => ({
 }));
 
 /** Las ramas de la carrera: las dos argentinas y, aparte (no se cruzan con las argentinas), Chile, Uruguay y Brasil. */
-export type ArBranch = 'urba' | 'interior' | 'chile' | 'uruguay' | 'brasil' | 'espana' | 'espanaFem' | 'fem';
+export type ArBranch = 'urba' | 'interior' | 'chile' | 'uruguay' | 'brasil' | 'espana' | 'espanaFem' | 'fem' | 'francia' | 'inglaterra' | 'sudafrica' | 'portugal' | 'franciaFem' | 'inglaterraFem' | 'alemania' | 'polonia' | 'georgia' | 'rusia' | 'australia' | 'chequia' | 'bolivia' | 'peru' | 'mexico';
+/** Ramas con liga simple (el campeón sube, baja el último) y sin Sudamericano: se arman todas igual. */
+export const isLeagueBranch = (b: ArBranch) => ['chile', 'espana', 'espanaFem', 'fem', 'francia', 'inglaterra', 'sudafrica', 'portugal', 'franciaFem', 'inglaterraFem', 'alemania', 'polonia', 'georgia', 'rusia', 'australia', 'chequia', 'bolivia', 'peru', 'mexico'].includes(b);
+/** Las ramas de mujeres: no se mezclan con las de varones en los torneos en paralelo. */
+export const isFemBranch = (b: ArBranch) => b === 'fem' || b === 'espanaFem' || b === 'franciaFem' || b === 'inglaterraFem';
 export interface GameDivision extends Omit<ArSevenDivision, 'branch'> {
     branch: ArBranch;
 }
@@ -63,7 +67,7 @@ export interface GameClub extends ArSevenClub {
 export const isArgBranch = (b: ArBranch) => b === 'urba' || b === 'interior';
 /** Cómo se llama cada rama en un listado. */
 export const branchLabel = (b: ArBranch) =>
-    ({ urba: 'Argentina · URBA', interior: 'Argentina · interior', chile: 'Chile', uruguay: 'Uruguay', brasil: 'Brasil', espana: 'España', espanaFem: 'España · femenino', fem: 'Argentina · femenino' } as Record<string, string>)[b] ?? b;
+    ({ urba: 'Argentina · URBA', interior: 'Argentina · interior', chile: 'Chile', uruguay: 'Uruguay', brasil: 'Brasil', espana: 'España', espanaFem: 'España · femenino', fem: 'Argentina · femenino', francia: 'Francia', inglaterra: 'Inglaterra', sudafrica: 'Sudáfrica', portugal: 'Portugal', franciaFem: 'Francia · femenino', inglaterraFem: 'Inglaterra · femenino', alemania: 'Alemania', polonia: 'Polonia', georgia: 'Georgia', rusia: 'Rusia', australia: 'Australia', chequia: 'Chequia', bolivia: 'Bolivia', peru: 'Perú', mexico: 'México' } as Record<string, string>)[b] ?? b;
 
 /** El color de un club femenino: el del club de varones del mismo nombre, si está. */
 const colorLike = (name: string) => GEN_CLUBS.find((c) => c.name === name)?.color ?? null;
@@ -137,6 +141,161 @@ const FOREIGN: { div: Omit<GameDivision, 'clubs'>; pool: string; top: number; cl
         pool: 'iberF', top: 51,
         clubs: [['Olímpico de Pozuelo', null], ['Complutense Cisneros', null], ['Universitario Bilbao', null], ['UE Santboiana', null], ['BUC Barcelona', null], ['Gaztedi', null], ['Eibar', null], ['Atlético Portuense', null]],
     },
+    // Francia, Inglaterra, Sudáfrica y Portugal. Los torneos llevan un nombre propio (parecido al real, no igual): los clubes son los de siempre.
+    {
+        div: { id: 'fr-elite14', label: 'Élite 14', branch: 'francia', region: 'francia', level: 1, promotesTo: null, relegatesTo: 'fr-pro-segunda' },
+        pool: 'franco', top: 70,
+        clubs: [['Stade Toulousain', '#c8102e'], ['Union Bordeaux-Bègles', '#5a0f2a'], ['Stade Rochelais', '#111111'], ['Racing 92', '#8ec5e8'], ['Stade Français', '#f472b6'], ['ASM Clermont', '#ffd700'], ['Section Paloise', '#004231'], ['Montpellier', '#0b1838'], ['RC Toulon', '#d7262f'], ['Castres Olympique', '#1f5fbf'], ['LOU Rugby', '#c00418'], ['Aviron Bayonnais', '#81bbe9'], ['USA Perpignan', '#94d4ef'], ['RC Vannes', '#1f3fbf']],
+    },
+    {
+        div: { id: 'fr-pro-segunda', label: 'Pro Segunda', branch: 'francia', region: 'francia', level: 2, promotesTo: 'fr-elite14', relegatesTo: 'fr-nacional' },
+        pool: 'franco', top: 58,
+        clubs: [['Colomiers Rugby', '#00137f'], ['Provence Rugby', '#1e1e1e'], ['Oyonnax', '#111111'], ['Valence Romans', '#ffffff'], ['CA Brive', '#111111'], ['SU Agen', '#1e2952'], ['FC Grenoble', '#0033a0'], ['Soyaux-Angoulême XV', '#59084e'], ['Biarritz Olympique', '#e30613'], ['US Dax', '#e2001a'], ['AS Béziers', '#000080'], ['USON Nevers', '#ffdb00'], ['Stade Aurillacois', '#be082e'], ['Nissa Rugby', '#e30613'], ['RC Narbonnais', '#ff6900'], ['US Montauban', '#1f5c3a']],
+    },
+    // Alemania, Polonia, Georgia y Rusia: dos divisiones cada una, con nombres propios. Las listas son aproximadas: se retocan con Editar clubes.
+    {
+        div: { id: 'de-liga-federal', label: 'Liga Federal Alemana · Primera', branch: 'alemania', region: 'alemania', level: 1, promotesTo: null, relegatesTo: 'de-liga-federal-2' },
+        pool: 'germ', top: 54,
+        clubs: [['Heidelberger RK', '#c8102e'], ['RK 03 Berlin', '#111111'], ['SC Neuenheim', '#0b6b3a'], ['SC 1880 Frankfurt', '#c8102e'], ['TSV Handschuhsheim', '#1f4fa0'], ['DRC Hannover', '#0b6b3a'], ['Hamburger RC', '#1f3fbf'], ['TV Pforzheim', '#ffd100'], ['RG Heidelberg', '#c8102e'], ['Berliner RC', '#111111']],
+    },
+    {
+        div: { id: 'de-liga-federal-2', label: 'Liga Federal Alemana · Segunda', branch: 'alemania', region: 'alemania', level: 2, promotesTo: 'de-liga-federal', relegatesTo: null },
+        pool: 'germ', top: 44,
+        clubs: [['Heusenstamm', '#c8102e'], ['Stuttgarter RC', '#111111'], ['RC Aachen', '#1f4fa0'], ['Düsseldorfer RK', '#c8102e'], ['Münchner RC', '#1f3fbf'], ['Offenbach', '#0b6b3a'], ['Rostock', '#1f4fa0'], ['Hohen Neuendorf', '#ffd100'], ['Rheinbrüder Karlsruhe', '#c8102e'], ['Köln', '#c8102e']],
+    },
+    {
+        div: { id: 'pl-liga-extra', label: 'Liga Extra de Polonia', branch: 'polonia', region: 'polonia', level: 1, promotesTo: null, relegatesTo: 'pl-liga-uno' },
+        pool: 'eslavo', top: 50,
+        clubs: [['Arka Gdynia', '#1f4fa0'], ['Lechia Gdańsk', '#0b6b3a'], ['Budowlani Łódź', '#1f3fbf'], ['Ogniwo Sopot', '#c8102e'], ['Juvenia Kraków', '#c8102e'], ['Pogoń Siedlce', '#0b6b3a'], ['Orkan Sochaczew', '#ffd100'], ['Master Pharm Łódź', '#1f4fa0']],
+    },
+    {
+        div: { id: 'pl-liga-uno', label: 'Liga Uno de Polonia', branch: 'polonia', region: 'polonia', level: 2, promotesTo: 'pl-liga-extra', relegatesTo: null },
+        pool: 'eslavo', top: 40,
+        clubs: [['Posnania Poznań', '#1f4fa0'], ['Skra Warszawa', '#c8102e'], ['Legia Warszawa', '#0b6b3a'], ['Rugby Białystok', '#c8102e'], ['Rzeszów', '#1f3fbf'], ['Kaszubia', '#111111'], ['Tatra Zakopane', '#0b6b3a'], ['Lublin', '#ffd100']],
+    },
+    {
+        div: { id: 'ge-liga-gran10', label: 'Liga Gran 10 de Georgia', branch: 'georgia', region: 'georgia', level: 1, promotesTo: null, relegatesTo: 'ge-liga-primera' },
+        pool: 'georgia', top: 58,
+        clubs: [['Lelo Tbilisi', '#c8102e'], ['Armazi', '#1f4fa0'], ['Locomotive Tbilisi', '#c8102e'], ['Batumi', '#1f3fbf'], ['Aia Kutaisi', '#ffd100'], ['Khvamli', '#0b6b3a'], ['Kochebi Bolnisi', '#111111'], ['Rustavi', '#1f4fa0'], ['Telavi', '#c8102e'], ['Tbilisi Academy', '#ffffff']],
+    },
+    {
+        div: { id: 'ge-liga-primera', label: 'Liga Primera de Georgia', branch: 'georgia', region: 'georgia', level: 2, promotesTo: 'ge-liga-gran10', relegatesTo: null },
+        pool: 'georgia', top: 46,
+        clubs: [['Gori', '#c8102e'], ['Akhaltsikhe', '#1f4fa0'], ['Marneuli', '#0b6b3a'], ['Zugdidi', '#ffd100'], ['Poti', '#1f3fbf'], ['Samtredia', '#c8102e'], ['Kobuleti', '#111111'], ['Mtskheta', '#0b6b3a']],
+    },
+    {
+        div: { id: 'ru-liga-pro', label: 'Liga Pro de Rusia', branch: 'rusia', region: 'rusia', level: 1, promotesTo: null, relegatesTo: 'ru-liga-mayor' },
+        pool: 'eslavo', top: 52,
+        clubs: [['Enisey-STM', '#c8102e'], ['Krasny Yar', '#c8102e'], ['VVA Podmoskovye', '#1f4fa0'], ['Slava Moscú', '#1f3fbf'], ['Lokomotiv Penza', '#0b6b3a'], ['Dinamo Moscú', '#1f4fa0'], ['CSKA Moscú', '#c8102e'], ['Spartak Moscú', '#c8102e']],
+    },
+    {
+        div: { id: 'ru-liga-mayor', label: 'Liga Mayor de Rusia', branch: 'rusia', region: 'rusia', level: 2, promotesTo: 'ru-liga-pro', relegatesTo: null },
+        pool: 'eslavo', top: 42,
+        clubs: [['Imperia Kazán', '#111111'], ['Fili Moscú', '#0b6b3a'], ['Novokuznetsk', '#1f4fa0'], ['Dinamo Sverdlovsk', '#1f3fbf'], ['Strela Kazán', '#c8102e'], ['Ladoga San Petersburgo', '#1f4fa0'], ['Olimp Krasnodar', '#ffd100'], ['Sibir Novosibirsk', '#c8102e']],
+    },
+    // Australia, Chequia, Bolivia, Perú y México. Listas aproximadas (se retocan con Editar clubes); las ligas chicas de América son de una sola división.
+    {
+        div: { id: 'au-liga-escudo', label: 'Liga Escudo de Sídney', branch: 'australia', region: 'australia', level: 1, promotesTo: null, relegatesTo: 'au-liga-queensland' },
+        pool: 'anglo', top: 56,
+        clubs: [['Sydney University', '#c8102e'], ['Randwick', '#1f4fa0'], ['Eastwood', '#0b6b3a'], ['Warringah', '#c8102e'], ['Northern Suburbs', '#111111'], ['Manly', '#1f3fbf'], ['Southern Districts', '#c8102e'], ['Penrith Emus', '#0b6b3a'], ['Gordon', '#1f4fa0'], ['Western Sydney Two Blues', '#ffd100']],
+    },
+    {
+        div: { id: 'au-liga-queensland', label: 'Liga Premier de Queensland', branch: 'australia', region: 'australia', level: 2, promotesTo: 'au-liga-escudo', relegatesTo: null },
+        pool: 'anglo', top: 48,
+        clubs: [['Brothers Brisbane', '#c8102e'], ['GPS Brisbane', '#1f4fa0'], ['Souths Brisbane', '#0b6b3a'], ['Easts Brisbane', '#c8102e'], ['University of Queensland', '#6e1a2c'], ['Bond University', '#1f3fbf'], ['Sunnybank', '#ffd100'], ['Wests Brisbane', '#111111']],
+    },
+    {
+        div: { id: 'cz-liga-extra', label: 'Liga Extra Checa', branch: 'chequia', region: 'chequia', level: 1, promotesTo: null, relegatesTo: 'cz-liga-primera' },
+        pool: 'eslavo', top: 48,
+        clubs: [['Slavia Praga', '#c8102e'], ['Sparta Praga', '#c8102e'], ['Dragon Brno', '#0b6b3a'], ['Tatra Smíchov', '#1f4fa0'], ['Říčany', '#ffd100'], ['Petrovice', '#1f3fbf'], ['Havířov', '#c8102e'], ['Pilsen', '#111111']],
+    },
+    {
+        div: { id: 'cz-liga-primera', label: 'Primera Liga Checa', branch: 'chequia', region: 'chequia', level: 2, promotesTo: 'cz-liga-extra', relegatesTo: null },
+        pool: 'eslavo', top: 38,
+        clubs: [['Olomouc', '#1f4fa0'], ['Ostrava', '#c8102e'], ['Hradec Králové', '#0b6b3a'], ['Liberec', '#1f3fbf'], ['Bohemians Praga', '#0b6b3a'], ['Kralupy', '#c8102e'], ['Jihlava', '#ffd100'], ['České Budějovice', '#1f4fa0']],
+    },
+    {
+        div: { id: 'bo-liga-altiplano', label: 'Liga Altiplano de Bolivia', branch: 'bolivia', region: 'bolivia', level: 1, promotesTo: null, relegatesTo: null },
+        pool: 'latam', top: 44,
+        clubs: [['Tigres Santa Cruz', '#f47920'], ['Cóndores de La Paz', '#c8102e'], ['Cochabamba Rugby Club', '#0b6b3a'], ['Warriors Santa Cruz', '#1f3fbf'], ['Mastodontes Cochabamba', '#111111'], ['Pumas de Tarija', '#ffd100'], ['Sucre Rugby', '#c8102e'], ['Bull Sharks Santa Cruz', '#1f4fa0']],
+    },
+    {
+        div: { id: 'pe-liga-andina', label: 'Liga Andina del Perú', branch: 'peru', region: 'peru', level: 1, promotesTo: null, relegatesTo: null },
+        pool: 'latam', top: 44,
+        clubs: [['Lince Rugby', '#c8102e'], ['Cóndores de Lima', '#111111'], ['San Isidro Rugby', '#1f4fa0'], ['Lima Rugby Club', '#0b6b3a'], ['Cusco Rugby', '#c8102e'], ['Arequipa Rugby', '#ffd100'], ['Miraflores Rugby', '#1f3fbf'], ['Trujillo Rugby', '#6e1a2c']],
+    },
+    {
+        div: { id: 'mx-liga-azteca', label: 'Liga Azteca de México', branch: 'mexico', region: 'mexico', level: 1, promotesTo: null, relegatesTo: null },
+        pool: 'latam', top: 46,
+        clubs: [['Diablos Rojos', '#c8102e'], ['Mayas Rugby', '#0b6b3a'], ['Pumas CU', '#1f3fbf'], ['Búhos de Monterrey', '#111111'], ['Cuervos de Guadalajara', '#1f4fa0'], ['Toluca Rugby', '#c8102e'], ['Tigres de Puebla', '#f47920'], ['Querétaro Rugby', '#ffd100']],
+    },
+    // Las divisiones de abajo de Francia (nombres propios, clubes de verdad; las listas son aproximadas y se pueden retocar con Editar clubes).
+    {
+        div: { id: 'fr-nacional', label: 'Liga Nacional', branch: 'francia', region: 'francia', level: 3, promotesTo: 'fr-pro-segunda', relegatesTo: 'fr-nacional-2' },
+        pool: 'franco', top: 46,
+        clubs: [['Albi', '#c8102e'], ['Rouen Normandie', '#ffffff'], ['Suresnes', '#1f3fbf'], ['Tarbes', '#0b6b3a'], ['Blagnac', '#c8102e'], ['Massy', '#0b1f5c'], ['Dijon', '#8a1c2b'], ['Mont-de-Marsan', '#ffd100'], ['Bourg-en-Bresse', '#1f4fa0'], ['Rennes', '#c8102e'], ['Vienne', '#111111'], ['Chambéry', '#1f4fa0']],
+    },
+    {
+        div: { id: 'fr-nacional-2', label: 'Liga Nacional 2', branch: 'francia', region: 'francia', level: 4, promotesTo: 'fr-nacional', relegatesTo: 'fr-federal-uno' },
+        pool: 'franco', top: 40,
+        clubs: [['Auch', '#c8102e'], ['Cognac', '#ffd100'], ['Bobigny', '#1f3fbf'], ['Strasbourg', '#c8102e'], ['Limoges', '#0b6b3a'], ['Villeurbanne', '#1f4fa0'], ['Saint-Étienne', '#0b6b3a'], ['Lourdes', '#1f4fa0'], ['Tulle', '#c8102e'], ['Bagnères', '#ffffff'], ['Lyon Villeurbanne', '#111111'], ['Nantes', '#ffd100']],
+    },
+    {
+        div: { id: 'fr-federal-uno', label: 'Federal Uno', branch: 'francia', region: 'francia', level: 5, promotesTo: 'fr-nacional-2', relegatesTo: null },
+        pool: 'franco', top: 34,
+        clubs: [['Saint-Médard', '#c8102e'], ['Hyères-Carqueiranne', '#1f3fbf'], ['Périgueux', '#111111'], ['Marmande', '#c8102e'], ['Saint-Girons', '#0b6b3a'], ['Cahors', '#1f4fa0'], ['Lannemezan', '#ffd100'], ['Tournon', '#c8102e'], ['Mâcon', '#0b1f5c'], ['Orsay', '#1f3fbf'], ['Pamiers', '#c8102e'], ['Rodez', '#ffd100']],
+    },
+    // Femenino: la Élite 14 y la Premier Union femeninas, cada una con su escalón de abajo para ascensos y descensos.
+    {
+        div: { id: 'ffr-elite14', label: 'Élite 14 Femenina', branch: 'franciaFem', region: 'francia', level: 1, promotesTo: null, relegatesTo: 'ffr-federal' },
+        pool: 'franco', top: 66,
+        clubs: [['Stade Toulousain', '#c8102e'], ['Blagnac', '#c8102e'], ['Stade Bordelais', '#5a0f2a'], ['Montpellier', '#0b1838'], ['Stade Rennais', '#c8102e'], ['Romagnat', '#1f4fa0'], ['Villeneuve-d’Ascq', '#c8102e'], ['Lons', '#0b6b3a'], ['Lyon', '#c00418'], ['Chambéry', '#1f4fa0']],
+    },
+    {
+        div: { id: 'ffr-federal', label: 'Federal Uno Femenina', branch: 'franciaFem', region: 'francia', level: 2, promotesTo: 'ffr-elite14', relegatesTo: null },
+        pool: 'franco', top: 52,
+        clubs: [['Bayonne', '#81bbe9'], ['Tarbes', '#0b6b3a'], ['Nice', '#e30613'], ['Brive', '#111111'], ['Grenoble', '#0033a0'], ['Clermont', '#ffd700'], ['Saint-Orens', '#c8102e'], ['Toulon', '#d7262f']],
+    },
+    {
+        div: { id: 'fen-premier-union', label: 'Premier Union Femenina', branch: 'inglaterraFem', region: 'inglaterra', level: 1, promotesTo: null, relegatesTo: 'fen-challenger' },
+        pool: 'anglo', top: 66,
+        clubs: [['Gloucester-Hartpury', '#a6192e'], ['Saracens', '#111111'], ['Exeter Chiefs', '#111111'], ['Bristol Bears', '#0b1f5c'], ['Harlequins', '#cd273d'], ['Leicester Tigers', '#044231'], ['Ealing Trailfinders', '#c8102e'], ['Loughborough Lightning', '#1f4fa0'], ['Sale Sharks', '#000099'], ['Bath', '#0033cc']],
+    },
+    {
+        div: { id: 'fen-challenger', label: 'Challenger Union Femenina', branch: 'inglaterraFem', region: 'inglaterra', level: 2, promotesTo: 'fen-premier-union', relegatesTo: null },
+        pool: 'anglo', top: 52,
+        clubs: [['Worcester Warriors', '#0b3a8c'], ['Darlington Mowden Park', '#1f4fa0'], ['Firwood Waterloo', '#c8102e'], ['Cheltenham Tigers', '#ffd100'], ['Barnes', '#1f3fbf'], ['Richmond', '#111111'], ['Wasps FC', '#111111'], ['Lichfield', '#c8102e']],
+    },
+    {
+        div: { id: 'en-premier-union', label: 'Premier Union', branch: 'inglaterra', region: 'inglaterra', level: 1, promotesTo: null, relegatesTo: 'en-challenger-union' },
+        pool: 'anglo', top: 68,
+        clubs: [['Bath', '#0033cc'], ['Bristol Bears', '#0b1f5c'], ['Exeter Chiefs', '#111111'], ['Gloucester', '#a6192e'], ['Harlequins', '#cd273d'], ['Leicester Tigers', '#044231'], ['Newcastle Red Bulls', '#111111'], ['Northampton Saints', '#008469'], ['Sale Sharks', '#000099'], ['Saracens', '#111111']],
+    },
+    {
+        div: { id: 'en-challenger-union', label: 'Challenger Union', branch: 'inglaterra', region: 'inglaterra', level: 2, promotesTo: 'en-premier-union', relegatesTo: null },
+        pool: 'anglo', top: 56,
+        clubs: [['Ealing Trailfinders', '#c8102e'], ['Cornish Pirates', '#111111'], ['Doncaster Knights', '#1f3fbf'], ['Jersey Reds', '#c8102e'], ['Caldy', '#ffd100'], ['Chinnor', '#1f5fbf'], ['Coventry', '#111111'], ['Hartpury', '#0b1f5c'], ['Nottingham', '#111111'], ['Ampthill', '#c8102e']],
+    },
+    {
+        div: { id: 'za-copa-curry', label: 'Copa Curry · Élite', branch: 'sudafrica', region: 'sudafrica', level: 1, promotesTo: null, relegatesTo: 'za-curry-ascenso' },
+        pool: 'sudafrica', top: 64,
+        clubs: [['Blue Bulls', '#75c2ee'], ['Free State Cheetahs', '#f47920'], ['Griquas', '#007a87'], ['Golden Lions', '#e30613'], ['Pumas', '#d0d3d4'], ['Natal Sharks', '#1a1a1a'], ['Western Province', '#0033a0'], ['Boland Kavaliers', '#d4af37']],
+    },
+    {
+        div: { id: 'za-curry-ascenso', label: 'Copa Curry · Ascenso', branch: 'sudafrica', region: 'sudafrica', level: 2, promotesTo: 'za-copa-curry', relegatesTo: null },
+        pool: 'sudafrica', top: 52,
+        clubs: [['Eastern Province Elephants', '#8a1c2b'], ['Border Bulldogs', '#0b3a8c'], ['Falcons', '#f2a900'], ['Leopards', '#111111'], ['Griffons', '#c8102e'], ['SWD Eagles', '#00492c'], ['Valke', '#1f4fa0'], ['Kings de Port Elizabeth', '#7a1f4a']],
+    },
+    {
+        div: { id: 'pt-honra', label: 'Campeonato Lusitano · Divisão de Honra', branch: 'portugal', region: 'portugal', level: 1, promotesTo: null, relegatesTo: 'pt-primeira' },
+        pool: 'luso', top: 54,
+        clubs: [['Direito', '#1f4fa0'], ['Belenenses', '#0b3a8c'], ['Agronomia', '#0b6b3a'], ['Benfica', '#c8102e'], ['Técnico', '#1f3fbf'], ['Cascais', '#ffd100'], ['CDUP', '#14234a'], ['Lousã', '#f47920'], ['Académica de Coimbra', '#111111'], ['Évora', '#6e1a2c']],
+    },
+    {
+        div: { id: 'pt-primeira', label: 'Campeonato Lusitano · Primeira Divisão', branch: 'portugal', region: 'portugal', level: 2, promotesTo: 'pt-honra', relegatesTo: null },
+        pool: 'luso', top: 44,
+        clubs: [['Montemor', '#c8102e'], ['Santarém', '#0b6b3a'], ['Vila Real', '#1f4fa0'], ['Algarve', '#ffd100'], ['Caldas', '#6e1a2c'], ['Dragon Force', '#111111'], ['Sporting', '#0b6b3a'], ['Marítimo', '#c8102e']],
+    },
     // Argentina femenino: URBA (Top 9, Primera y Segunda) y el Centro (Córdoba y Andina).
     {
         div: { id: 'af-urba-top9', label: 'Top 9 femenino de la URBA', branch: 'fem', region: 'femenino', level: 1, promotesTo: null, relegatesTo: 'af-urba-primera' },
@@ -165,7 +324,7 @@ const FOREIGN: { div: Omit<GameDivision, 'clubs'>; pool: string; top: number; cl
  */
 export const FEM_GUESTS: [string, string | null][] = [['Cardenales', colorLike('Cardenales')], ['Cha Roga', colorLike('Cha Roga')], ['Universitario de Mendoza', colorLike('Universitario de Mendoza')], ['Aguará Guazú', colorLike('Aguará Guazú')], ['Águilas de Resistencia', null], ['Palihue', null], ['Marabunta', colorLike('Marabunta')], ['Regatas de Resistencia', colorLike('Regatas Resistencia')]];
 export const FEM_GUEST_IDS = FEM_GUESTS.map(([name]) => `af-${slug(name)}`);
-const prefixOf = (b: ArBranch) => ({ chile: 'cl', uruguay: 'uy', brasil: 'br', espana: 'es', espanaFem: 'ef', fem: 'af' } as Record<string, string>)[b] ?? 'xx';
+const prefixOf = (b: ArBranch) => ({ chile: 'cl', uruguay: 'uy', brasil: 'br', espana: 'es', espanaFem: 'ef', fem: 'af', francia: 'fr', inglaterra: 'en', sudafrica: 'za', portugal: 'pt', franciaFem: 'ffr', inglaterraFem: 'fen', alemania: 'de', polonia: 'pl', georgia: 'ge', rusia: 'ru', australia: 'au', chequia: 'cz', bolivia: 'bo', peru: 'pe', mexico: 'mx' } as Record<string, string>)[b] ?? 'xx';
 const FOREIGN_CLUBS: GameClub[] = FOREIGN.flatMap((f) =>
     f.clubs.map(([name, color], i) => ({
         id: `${prefixOf(f.div.branch)}-${slug(name)}`,
@@ -484,10 +643,10 @@ function divisionTour(d: GameDivision): TourDef {
     return {
         id: `ar-tour-${d.id}`,
         name: d.label,
-        sub: ({ urba: 'Rama URBA.', interior: 'Regional del interior.', chile: 'Chile · ARUSA.', uruguay: 'Uruguay.', brasil: 'Brasil · CBRu.', espana: 'España · FER.', espanaFem: 'España · FER, femenino.', fem: 'Argentina, femenino.' } as Record<string, string>)[d.branch] ?? '',
+        sub: ({ urba: 'Rama URBA.', interior: 'Regional del interior.', chile: 'Chile · ARUSA.', uruguay: 'Uruguay.', brasil: 'Brasil · CBRu.', espana: 'España · FER.', espanaFem: 'España · FER, femenino.', fem: 'Argentina, femenino.', francia: 'Francia · liga de clubes.', inglaterra: 'Inglaterra · liga de clubes.', sudafrica: 'Sudáfrica · copa de uniones.', portugal: 'Portugal · campeonato de clubes.', franciaFem: 'Francia · liga de clubes, femenino.', inglaterraFem: 'Inglaterra · liga de clubes, femenino.', alemania: 'Alemania · liga de clubes.', polonia: 'Polonia · liga de clubes.', georgia: 'Georgia · liga de clubes.', rusia: 'Rusia · liga de clubes.', australia: 'Australia · liga de clubes.', chequia: 'Chequia · liga de clubes.', bolivia: 'Bolivia · liga de clubes.', peru: 'Perú · liga de clubes.', mexico: 'México · liga de clubes.' } as Record<string, string>)[d.branch] ?? '',
         source: 'real',
         clubs: true,
-        cat: isArgBranch(d.branch) || d.branch === 'fem' ? 'Argentina' : d.branch === 'chile' ? 'Chile' : d.branch === 'uruguay' ? 'Uruguay' : d.branch === 'brasil' ? 'Brasil' : 'España',
+        cat: isArgBranch(d.branch) || d.branch === 'fem' ? 'Argentina' : d.branch === 'chile' ? 'Chile' : d.branch === 'uruguay' ? 'Uruguay' : d.branch === 'brasil' ? 'Brasil' : d.branch === 'francia' || d.branch === 'franciaFem' ? 'Francia' : d.branch === 'inglaterra' || d.branch === 'inglaterraFem' ? 'Inglaterra' : d.branch === 'sudafrica' ? 'Sudáfrica' : d.branch === 'portugal' ? 'Portugal' : d.branch === 'alemania' ? 'Alemania' : d.branch === 'polonia' ? 'Polonia' : d.branch === 'georgia' ? 'Georgia' : d.branch === 'rusia' ? 'Rusia' : d.branch === 'australia' ? 'Australia' : d.branch === 'chequia' ? 'Chequia' : d.branch === 'bolivia' ? 'Bolivia' : d.branch === 'peru' ? 'Perú' : d.branch === 'mexico' ? 'México' : 'España',
         teams: [...d.clubs],
         formatLabel: `${n} clubes · fase regular a una vuelta · ${top === 4 ? 'semifinales' : 'final'} con los ${top} primeros`,
         stage: { kind: 'grupos', groups: 1, advance: top },

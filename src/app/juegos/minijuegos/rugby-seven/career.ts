@@ -41,8 +41,9 @@
  * que no juega el usuario, y el cartel dice exactamente lo que después pasa.
  */
 
-import { AR_LABEL_OVERRIDE, AR_SEVEN_CUPOS, AR_SEVEN_DIVISIONS, arClubById, branchLabel, CBA_DESARROLLO_ZONES, FEM_GUEST_IDS, isArgBranch, type ArBranch } from './arClubs';
+import { AR_LABEL_OVERRIDE, AR_SEVEN_CUPOS, AR_SEVEN_DIVISIONS, arClubById, branchLabel, CBA_DESARROLLO_ZONES, FEM_GUEST_IDS, isArgBranch, isFemBranch, isLeagueBranch, type ArBranch } from './arClubs';
 import { femLook, isFemClub, randomLook, type Look } from './sprites';
+import { CLUB_LEAGUES } from './clubs';
 import { PALMARES_KEYS, PALMARES_LABEL, realTitles, type TitleRow } from './palmares';
 import { nameFromSeed, nameFromText, playerNames, type PlayerName } from './names';
 import type { Difficulty, Duration, SevenTeam } from './teams';
@@ -64,6 +65,7 @@ import {
     setRatingBoost,
     simulate,
     topStats,
+    type StatBy,
     TOURS,
     catOf,
     type FixtureItem,
@@ -113,6 +115,10 @@ interface Cup {
     champion?: string;
     /** Orden final de la copa (para las que reparten lugares, como la Repescagem). */
     ranking?: string[];
+    /** Cómo se describe el formato (si no, el genérico de la copa). */
+    label?: string;
+    /** Mejores terceros que pasan además de los primeros de cada grupo. */
+    bestThirds?: number;
 }
 
 /** Un partido por una plaza: `a` es el del nivel de arriba. */
@@ -225,7 +231,11 @@ export interface CareerState {
     /** Plantel de cada club de la rama. */
     rosters?: Record<string, Player[]>;
     /** Goleadores y tryman de cada torneo jugado por el club. */
-    awards?: { season: number; comp: string; tries: Award[]; points: Award[] }[];
+    /**
+     * Premios de cada torneo: tryman y goleador (puntos) y, desde que se cuentan los tackles, el mejor
+     * defensor (más tackles) y el mejor jugador del torneo (nota general). Los dos últimos faltan en las partidas viejas.
+     */
+    awards?: { season: number; comp: string; tries: Award[]; points: Award[]; tackles?: Award[]; best?: Award[] }[];
     /** Etapa que ya se asentó (lo que no juega el usuario ya está simulado). */
     settled?: CareerPhase | null;
     /** El siete inicial elegido (ids del plantel propio, en el orden de los puestos). */
@@ -238,6 +248,13 @@ export interface CareerState {
     pre?: { step: 'punto' | 'entreno' | 'amistosos' | 'listo'; punto?: 'juveniles' | 'primera'; trained?: { id: number; result: 'up' | 'same' | 'inj' }[]; friendlies?: { opp: string; us: number; them: number }[] } | null;
     /** Ya se resolvieron las convocatorias de mitad de temporada (Pumas, Europa). */
     midDone?: boolean;
+    /** Europa: ya se resolvió la ventana de noviembre de los seleccionados (se rearma cada pretemporada). */
+    autumnDone?: boolean;
+    /**
+     * Europa: la tabla final de la temporada anterior de la primera de Francia y de Inglaterra, que es
+     * lo que da las plazas de la Copa de Campeones y la Copa Desafío de este año (como en la vida real).
+     */
+    euro?: { fr: string[]; en: string[] };
     /** Noticias del club, y cuántas ya se vieron. */
     news?: CareerNews[];
     newsSeen?: number;
@@ -762,7 +779,10 @@ export function franchiseOf(club: string): string {
     if (region === 'chile') return 'Selknam';
     if (region === 'uruguay') return 'Peñarol';
     if (region === 'brasil') return 'Cobras';
-    if (region === 'espana' || region === 'femenino') return '';
+    // La Supercopa Europea (octubre a diciembre) junta a los mejores de las ligas de España y Portugal.
+    if (region === 'espana') return club.startsWith('ef-') ? '' : 'Iberos';
+    if (region === 'portugal') return 'Lusitanos';
+    if (region === 'femenino' || region === 'francia' || region === 'inglaterra' || region === 'sudafrica' || region === 'alemania' || region === 'polonia' || region === 'georgia' || region === 'rusia' || region === 'australia' || region === 'chequia' || region === 'bolivia' || region === 'peru' || region === 'mexico') return '';
     if (region === 'noa') return 'Tarucas';
     if (region === 'nea') return 'Yacaré XV';
     if (region === 'centro' || region === 'oeste') return 'Dogos XV';
@@ -807,7 +827,7 @@ function franchiseCall(r: CareerState) {
     pushNews(r, {
         kind: 'fra', who: p.id,
         title: `${fr} convocó a ${fullName(r, p.id as number)}`,
-        text: 'La franquicia del Super Rugby Américas se lo lleva para su temporada. Se pierde la primera mitad del año y vuelve con más rodaje.',
+        text: `${fr === 'Iberos' || fr === 'Lusitanos' ? 'La Supercopa Europea (de octubre a diciembre)' : 'La franquicia del Super Rugby Américas'} se lo lleva para su temporada. Se pierde la primera mitad del año y vuelve con más rodaje.`,
     });
 }
 
@@ -816,10 +836,50 @@ export function nationalTeamOf(club: string): string {
     const region = REGION_OF_CLUB[club];
     if (region === 'espana') return club.startsWith('ef-') ? 'Las Leonas' : 'Los Leones';
     if (region === 'femenino') return 'Las Yaguaretés';
+    if (region === 'francia') return club.startsWith('ffr-') ? 'Las Galas' : 'Los Galos';
+    if (region === 'inglaterra') return club.startsWith('fen-') ? 'Las Rosas' : 'Los Rosas';
+    if (region === 'sudafrica') return 'Los Antílopes';
+    if (region === 'portugal') return 'Os Lusos';
+    if (region === 'alemania') return 'Los Águilas';
+    if (region === 'polonia') return 'Las Águilas Blancas';
+    if (region === 'georgia') return 'Los Lelos';
+    if (region === 'rusia') return 'Los Osos';
+    if (region === 'australia') return 'Los Canguros';
+    if (region === 'chequia') return 'Los Leones Bohemios';
+    if (region === 'bolivia') return 'Los Andinos';
+    if (region === 'peru') return 'Los Incas';
+    if (region === 'mexico') return 'Los Aztecas';
     return region === 'chile' ? 'Los Cóndores' : region === 'uruguay' ? 'Los Teros' : region === 'brasil' ? 'Os Tupis' : 'Los Pumas';
 }
 
 /** Mitad de temporada: vuelven los de la franquicia, y a los muy buenos los pueden llamar los Pumas o un club de Europa. */
+/** Las ligas de Europa: ahí el seleccionado no se lleva a nadie toda la temporada, sino por ventanas. */
+// Rusia no figura: World Rugby la tiene suspendida y sus jugadores no son convocados a ningún seleccionado.
+const EURO_WINDOWS = new Set<Branch>(['francia', 'inglaterra', 'espana', 'portugal', 'franciaFem', 'inglaterraFem', 'espanaFem', 'alemania', 'polonia', 'georgia', 'chequia']);
+
+/**
+ * Una ventana internacional: los mejores del plantel se van con el seleccionado y vuelven cuando termina.
+ * En Europa son dos por año: los tests de noviembre (tres fines de semana, al arrancar la temporada) y el
+ * Seis Naciones (febrero y marzo). Los clubes pierden sobre todo a sus estrellas, no a todo el plantel.
+ * `until` es el punto de la temporada (0 a 1) en que vuelven.
+ */
+function nationalWindow(r: CareerState, label: string, until: number, minOvr: number, max: number) {
+    const roster = r.rosters?.[r.me] ?? [];
+    const nt = nationalTeamOf(r.me);
+    const cands = roster.filter((p) => !p.out && p.age >= 19 && p.age <= 35 && (p.ovr ?? 0) >= minOvr).sort((a, b) => (b.ovr ?? 0) - (a.ovr ?? 0));
+    let n = 0;
+    for (const p of cands) {
+        if (n >= max) break;
+        const o = p.ovr ?? 0;
+        // Cuanto más alto el nivel, más seguro: las estrellas casi siempre; en el piso del corte, una de cada dos.
+        if (Math.random() >= clampN(0.45 + (o - minOvr) * 0.6, 0.45, 0.95)) continue;
+        if (takeOut(r, p, 'pum', until, nt)) {
+            n += 1;
+            pushNews(r, { kind: 'pum', who: p.id, title: `${nt} convocaron a ${fullName(r, p.id as number)}`, text: `${label}: se pierde esas fechas con el club y vuelve cuando termina la ventana.` });
+        }
+    }
+}
+
 function midSeason(r: CareerState) {
     const roster = r.rosters?.[r.me] ?? [];
     for (const p of roster) {
@@ -831,6 +891,11 @@ function midSeason(r: CareerState) {
     }
     if (r.midDone) return;
     r.midDone = true;
+    // Europa: el Seis Naciones (febrero y marzo, siete semanas) se lleva a las estrellas y las devuelve.
+    if (EURO_WINDOWS.has(r.branch)) {
+        nationalWindow(r, 'Seis Naciones', 0.5 + 0.22, 5.6, 3);
+        return;
+    }
     const best = roster.filter((p) => !p.out).sort((a, b) => (b.ovr ?? 0) - (a.ovr ?? 0));
     const puma = best.find((p) => p.age >= 20 && p.age <= 32 && (p.ovr ?? 0) >= 8.5);
     if (puma) {
@@ -856,6 +921,12 @@ function midSeason(r: CareerState) {
 /** Los que ya cumplieron su lesión vuelven. */
 function heal(r: CareerState, clock: number) {
     for (const p of r.rosters?.[r.me] ?? []) {
+        // Los de una ventana del seleccionado vuelven cuando termina (las convocatorias de toda la temporada, no).
+        if (p.out?.kind === 'pum' && p.out.until < 1 && p.out.until <= clock) {
+            delete p.out;
+            pushNews(r, { kind: 'back', who: p.id, title: `Volvió ${fullName(r, p.id as number)}`, text: 'Terminó la ventana con el seleccionado y vuelve a estar a disposición del club.' });
+            continue;
+        }
         if (p.out?.kind === 'inj' && p.out.until <= clock) {
             delete p.out;
             pushNews(r, { kind: 'back', who: p.id, title: `${fullName(r, p.id as number)} está de alta`, text: 'Se recuperó de la lesión y vuelve a estar a disposición.' });
@@ -1024,7 +1095,8 @@ export function careerRound(s: TourState, mine: [number, number] | null, events?
         h[6] = us;
         h[7] = them;
         // Los números de cada jugador en el club, partido a partido.
-        const myEvents = (events?.length ? events : scoreEvents(r.me, us)).filter((e) => e.team === r.me);
+        // Solo los tantos: los tackles van a las estadísticas del torneo (closeRound), no a puntos, moral ni experiencia.
+        const myEvents = (events?.length ? events : scoreEvents(r.me, us)).filter((e) => e.team === r.me && e.kind !== 'tackle');
         const L = (r.legends ??= {});
         for (const id of lineup) (L[String(id)] ??= [0, 0, 0])[2] += 1;
         for (const e of myEvents) {
@@ -1073,6 +1145,11 @@ export function careerRound(s: TourState, mine: [number, number] | null, events?
     }
     const clock = clockOf(next);
     heal(r, clock);
+    // Europa: la ventana de noviembre (tres fines de semana de tests) cae al arrancar la temporada.
+    if (r.phase === 'liga' && clock >= 0.2 && !r.autumnDone && EURO_WINDOWS.has(r.branch)) {
+        r.autumnDone = true;
+        nationalWindow(r, 'Tests de noviembre', 0.2 + 0.12, 5.8, 2);
+    }
     if (r.phase === 'liga' && clock >= 0.5) midSeason(r);
     if (r.lineup) r.lineup = autoLineup(roster, r.lineup);
     return next;
@@ -1199,6 +1276,7 @@ function startPreseason(r: CareerState) {
     r.pre = { step: 'punto' };
     r.bajas = 0;
     r.midDone = false;
+    r.autumnDone = false;
     r.fat = 0;
     franchiseCall(r);
 }
@@ -1430,15 +1508,16 @@ function buildOthers(r: CareerState): Record<string, TourState> {
     for (const d of Object.keys(r.divisions)) if (d !== div && r.divisions[d].length >= 2) add(`div:${d}`, leagueDef(d, [...r.divisions[d]].sort(byRating), r.season));
     for (const t of TIERS_OF[formatOf(r, r.season)]) if (t !== mineTier && (tiers[t]?.length ?? 0) >= 2) add(`tier:${t}`, tierDef(t, tiers[t]!, r.season));
     // Las divisiones de las otras ramas y países (de varones o de mujeres, como el club), a la par.
-    const fem = r.branch === 'fem' || r.branch === 'espanaFem';
+    const fem = isFemBranch(r.branch);
     for (const d of AR_SEVEN_DIVISIONS) {
         if (r.divisions[d.id] || d.clubs.length < 2) continue;
-        if ((d.branch === 'fem' || d.branch === 'espanaFem') !== fem) continue;
+        if (isFemBranch(d.branch) !== fem) continue;
         add(`ext:${d.id}`, leagueDef(d.id, [...d.clubs].sort(byRating), r.season));
     }
     // Los internacionales: selecciones y las ligas de clubes del mundo.
     for (const t of TOURS) {
-        if (['Argentina', 'Chile', 'Uruguay', 'Brasil', 'España'].includes(catOf(t))) continue;
+        // Las divisiones de carrera (ar-tour-…) ya entran arriba; los países con liga propia salen de acá.
+        if (t.id.startsWith('ar-tour-') || ['Argentina', 'Chile', 'Uruguay', 'Brasil', 'España'].includes(catOf(t))) continue;
         add(`int:${t.id}`, t);
     }
     return others;
@@ -1634,10 +1713,12 @@ function awardsOf(r: CareerState, t: TourState, comp: string) {
         const n = careerPlayerName(r, club, id);
         return `${n.first} ${n.last}`.trim();
     };
-    const map = (by: 'tries' | 'points') => topStats(t.stats, by, 5).map((x) => ({ name: name(x.team, x.slot), club: x.team, n: by === 'tries' ? x.tries : x.points }));
+    const map = (by: StatBy) => topStats(t.stats, by, 5).map((x) => ({ name: name(x.team, x.slot), club: x.team, n: by === 'tries' ? x.tries : by === 'points' ? x.points : by === 'tackles' ? x.tackles : x.rating }));
     const tries = map('tries');
     const points = map('points');
-    if (tries.length || points.length) (r.awards ??= []).push({ season: r.season, comp, tries, points });
+    const tackles = map('tackles');
+    const best = map('rating');
+    if (tries.length || points.length) (r.awards ??= []).push({ season: r.season, comp, tries, points, tackles, best });
 }
 
 /** Cierra la fase regular y los federales: simula el resto y decide qué viene. */
@@ -1825,7 +1906,7 @@ function settleLiga(s: TourState, r: CareerState) {
 const CUSTOM_UPS = new Set(['ar-centro-top10', 'ar-centro-super9b', 'ar-litoral-top10', 'ar-patagonia-regional']);
 
 /** Nombres de las copas para el palmarés. */
-export const CUP_LABEL: Record<string, string> = { 'cba-regA': 'Regional A de Córdoba', 'cba-regB': 'Regional B de Córdoba', sudamericano: 'Sudamericano de Clubes', 'nacional-fem': 'Nacional de Clubes Femenino' };
+export const CUP_LABEL: Record<string, string> = { 'cba-regA': 'Regional A de Córdoba', 'cba-regB': 'Regional B de Córdoba', sudamericano: 'Sudamericano de Clubes', 'nacional-fem': 'Nacional de Clubes Femenino', 'eu-champions': 'Campeonato Europeo de Campeones', 'eu-challenge': 'Desafío Europeo' };
 
 function addCup(r: CareerState, c: Cup) {
     if (c.teams.length >= 2) (r.pending.cups ??= []).push(c);
@@ -1839,8 +1920,8 @@ const cupDef = (c: Cup, season: number): TourDef => ({
     clubs: true,
     cat: 'Argentina',
     teams: [...c.teams],
-    formatLabel: c.kind === 'ko' ? 'Eliminación directa' : c.kind === 'grupos' ? 'Grupos a una rueda · pasan los dos primeros de cada uno' : 'Todos contra todos, a una rueda',
-    stage: c.kind === 'ko' ? { kind: 'ko', fixed: true } : c.kind === 'grupos' && c.groups ? { kind: 'grupos', groups: c.groups, advance: c.advance ?? 2, noKo: !c.ko } : { kind: 'liga', legs: 1 },
+    formatLabel: c.label ?? (c.kind === 'ko' ? 'Eliminación directa' : c.kind === 'grupos' ? 'Grupos a una rueda · pasan los dos primeros de cada uno' : 'Todos contra todos, a una rueda'),
+    stage: c.kind === 'ko' ? { kind: 'ko', fixed: true } : c.kind === 'grupos' && c.groups ? { kind: 'grupos', groups: c.groups, advance: c.advance ?? 2, noKo: !c.ko, ...(c.bestThirds ? { bestThirds: c.bestThirds } : {}) } : { kind: 'liga', legs: 1 },
 });
 
 /** Juega las copas que no son del usuario y deja anotada la suya. */
@@ -1903,6 +1984,12 @@ function applyCup(r: CareerState, c: Cup, t: TourState) {
         addChampion(r, 'nacional-fem', w);
         addBonus(r, w, 2);
         r.log.push(`${r.season}: ${nm(w)} campeón del Nacional de Clubes Femenino.`);
+        return;
+    }
+    if (c.key === 'eu-champions' || c.key === 'eu-challenge') {
+        addChampion(r, c.key, w);
+        addBonus(r, w, c.key === 'eu-champions' ? 2 : 1);
+        r.log.push(`${r.season}: ${nm(w)} campeón del ${CUP_LABEL[c.key]}.`);
         return;
     }
     if (c.key === 'br-final') {
@@ -2085,7 +2172,7 @@ function foreignRules(r: CareerState, rankings: Record<string, string[]>) {
             addCup(r, { key: 'nac-fem', name: 'Nacional de Clubes Femenino', sub: 'Los 2 mejores de la URBA y del Centro, y los de las otras regiones: cuatro zonas, semifinales y final.', teams: groups.flat(), kind: 'grupos', groups, advance: 1, ko: true });
         }
     }
-    if (r.branch === 'chile' || r.branch === 'espana' || r.branch === 'espanaFem' || r.branch === 'fem') {
+    if (isLeagueBranch(r.branch)) {
         for (const divId of Object.keys(r.divisions)) {
             const up = DIV[divId]?.promotesTo;
             const rk = rankings[divId] ?? [];
@@ -2108,7 +2195,62 @@ function foreignRules(r: CareerState, rankings: Record<string, string[]>) {
             addCup(r, { key: 'br-rep', name: 'Repescagem', sub: 'Los 6 de abajo de la Primeira y los 6 mejores de la Segunda: los 2 primeros de cada grupo juegan la Primeira.', teams: rep, kind: 'grupos', groups });
         }
     }
+    if (r.branch === 'francia' || r.branch === 'inglaterra' || r.branch === 'sudafrica') euroCups(r, rankings);
     resolveCups(r);
+}
+
+/* ───────────────────────── Copas europeas ───────────────────────── */
+
+/**
+ * El Campeonato Europeo de Campeones y el Desafío Europeo (los torneos de clubes de Europa).
+ *
+ * LAS PLAZAS salen de la tabla final de la temporada ANTERIOR de cada liga, como en la realidad:
+ * al de Campeones van 8 de Francia, 8 de Inglaterra y 8 de la liga celta e italiana (con Sudáfrica);
+ * al Desafío van los 6 siguientes de Francia, los 2 siguientes de Inglaterra, los 8 siguientes de la
+ * liga celta e italiana y dos invitados (los Cheetahs y el Black Lion). Los equipos de afuera de la liga
+ * del usuario se ordenan por nivel (esas ligas no llevan tabla propia en esta carrera).
+ *
+ * Se juegan después de la fase regular (el juego corre las etapas una atrás de la otra) y, al cerrar la
+ * temporada, la tabla de este año queda guardada para repartir las plazas del que viene.
+ */
+function euroCups(r: CareerState, rankings: Record<string, string[]>) {
+    const divClubs = (div: string) => [...(AR_SEVEN_DIVISIONS.find((d) => d.id === div)?.clubs ?? [])].sort(byRating);
+    const tableOf = (div: string): string[] | null => rankings[div] ?? (r.others?.[`ext:${div}`] ? finalRanking(r.others[`ext:${div}`]) : null);
+    const fr = r.euro?.fr?.length ? r.euro.fr : divClubs('fr-elite14');
+    const en = r.euro?.en?.length ? r.euro.en : divClubs('en-premier-union');
+    // La liga celta e italiana (el URC de afuera): del más fuerte al más flojo, del catálogo de clubes.
+    const urc = (CLUB_LEAGUES.find((l) => l.id === 'urc')?.teams ?? []).map((t) => t.id);
+    const cheetahs = r.branch === 'sudafrica' ? 'za-free-state-cheetahs' : 'club-free-state-cheetahs';
+    const uniq = (ids: string[]) => [...new Set(ids)];
+    const champions = uniq([...fr.slice(0, 8), ...en.slice(0, 8), ...urc.slice(0, 8)]);
+    const challenge = uniq([...fr.slice(8, 14), ...en.slice(8, 10), ...urc.slice(8, 16), cheetahs, 'club-black-lion']).filter((id) => !champions.includes(id));
+    // Zonas parejas: en serpentina por nivel.
+    const zones = (ids: string[], n: number) => {
+        const sorted = [...ids].sort(byRating);
+        const groups: string[][] = Array.from({ length: n }, () => []);
+        sorted.forEach((club, i) => groups[Math.floor(i / n) % 2 ? n - 1 - (i % n) : i % n].push(club));
+        return groups;
+    };
+    if (champions.length >= 12) {
+        const groups = zones(champions, 4);
+        addCup(r, {
+            key: 'eu-champions', name: 'Campeonato Europeo de Campeones', teams: groups.flat(), kind: 'grupos', groups, advance: 4, ko: true,
+            sub: 'Los 8 primeros de Francia, de Inglaterra y de la liga celta e italiana, según la tabla del año pasado.',
+            label: '4 zonas de 6 · pasan los 4 primeros de cada una · octavos, cuartos, semifinales y final',
+        });
+    }
+    if (challenge.length >= 9) {
+        const groups = zones(challenge, 3);
+        addCup(r, {
+            key: 'eu-challenge', name: 'Desafío Europeo', teams: groups.flat(), kind: 'grupos', groups, advance: 2, bestThirds: 2, ko: true,
+            sub: 'Los que no entraron a la Copa de Campeones, más dos invitados: los Cheetahs y el Black Lion.',
+            label: '3 zonas de 6 · pasan los 2 primeros y los 2 mejores terceros · cuartos, semifinales y final',
+        });
+    }
+    const mine = champions.includes(r.me) ? 'el Campeonato Europeo de Campeones' : challenge.includes(r.me) ? 'el Desafío Europeo' : null;
+    if (mine) r.pending.note.push(`Por la tabla del año pasado, jugás ${mine}.`);
+    // Las plazas del año que viene salen de la tabla de este año.
+    r.euro = { fr: tableOf('fr-elite14') ?? fr, en: tableOf('en-premier-union') ?? en };
 }
 
 /* ───────────────────────── Sudamericano de Clubes ───────────────────────── */
@@ -2167,7 +2309,7 @@ export function sudamericanoFor(s: TourState): string[] | null {
 
 /** Lo que dice el calendario sobre cómo se sube y se baja en una división. */
 function ruleText(r: CareerState, div: string): string | null {
-    if (r.branch === 'chile' || r.branch === 'espana' || r.branch === 'espanaFem' || r.branch === 'fem') {
+    if (isLeagueBranch(r.branch)) {
         const base = [DIV[div]?.promotesTo ? 'El campeón sube.' : '', DIV[div]?.relegatesTo ? 'Baja el último.' : ''].filter(Boolean).join(' ');
         const nac = div === 'af-urba-top9' || div === 'af-centro' ? ' Las 2 mejores juegan el Nacional de Clubes Femenino.' : '';
         return (base + nac).trim() || null;
@@ -2885,7 +3027,7 @@ export function seasonPlan(s: TourState): SeasonItem[] {
 }
 
 /** Goleadores y tryman en vivo de un torneo, con nombres. */
-export function liveScorers(t: TourState, by: 'tries' | 'points', nameOf: (team: string, slot: number) => string, n = 10) {
+export function liveScorers(t: TourState, by: StatBy, nameOf: (team: string, slot: number) => string, n = 10) {
     return topStats(t.stats, by, n).map((x) => ({ ...x, name: nameOf(x.team, x.slot) }));
 }
 

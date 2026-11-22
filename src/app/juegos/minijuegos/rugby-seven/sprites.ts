@@ -612,8 +612,8 @@ export function femLook(l: Look): Look {
     return { skin: l.skin, hair: l.hair === 7 ? 1 : l.hair, style: l.style % FEM_STYLES.length, fem: true };
 }
 
-/** ¿Es un club femenino? (Argentina y España: los ids empiezan con af- y ef-). */
-export const isFemClub = (id: string) => id.startsWith('af-') || id.startsWith('ef-');
+/** ¿Es un club femenino? (Argentina, España, Francia e Inglaterra: los ids empiezan con af-, ef-, ffr- y fen-). */
+export const isFemClub = (id: string) => id.startsWith('af-') || id.startsWith('ef-') || id.startsWith('ffr-') || id.startsWith('fen-');
 
 export function randomLook(rand: () => number = Math.random): Look {
     return {

@@ -146,6 +146,13 @@ const LOOKS: Record<string, Look> = {
     'California Legion': ['CAL', '#e4002b', '#ffffff', '#e4002b', '#e4002b', 'liso'],
     // ── Invitado a la Challenge Cup ──
     'Black Lion': ['BLI', '#1c191c', '#c8102e', '#1c191c', '#1c191c', 'liso'],
+    // ── Supercopa Europea (selecciones de clubes de los países chicos de Europa) ──
+    Iberos: ['IBE', '#c60b1e', '#ffc400', '#1b2a4a', '#c60b1e', 'banda'],
+    Lusitanos: ['LUS', '#006600', '#c8102e', '#c8102e', '#006600', 'liso'],
+    'Lobos de Rumania': ['LRU', '#ffd100', '#002b7f', '#002b7f', '#ffd100', 'liso'],
+    'Guerreros de Bohemia': ['GBO', '#c8102e', '#ffffff', '#11457e', '#c8102e', 'aros'],
+    'Diablos de Bruselas': ['DBR', '#e30613', '#111111', '#111111', '#e30613', 'liso'],
+    'Delta XV': ['DEL', '#f47920', '#ffffff', '#1f3fbf', '#f47920', 'liso'],
 };
 
 /** País de cada franquicia de las ligas que cruzan fronteras. */
@@ -184,6 +191,12 @@ const BY_COUNTRY: Record<string, { region: Region; pool: string }> = {
     us: { region: 'norteamerica', pool: 'anglo' },
     jp: { region: 'asia', pool: 'japon' },
     ge: { region: 'europa-este', pool: 'georgia' },
+    es: { region: 'europa-sur', pool: 'iber' },
+    pt: { region: 'europa-sur', pool: 'luso' },
+    ro: { region: 'europa-este', pool: 'rumano' },
+    cz: { region: 'europa-este', pool: 'eslavo' },
+    be: { region: 'europa-norte', pool: 'franco' },
+    nl: { region: 'europa-norte', pool: 'neer' },
 };
 
 /** Las ligas del modo clubes, en el orden en que se recorren con las flechas. */
@@ -238,12 +251,25 @@ export const CLUB_LEAGUES: { id: string; name: string; teams: SevenTeam[] }[] = 
 
 const BLACK_LION = makeClub('Black Lion', 'ge', 'Rugby Europe Super Cup');
 
-export const CLUBS: SevenTeam[] = [...CLUB_LEAGUES.flatMap((l) => l.teams), BLACK_LION];
+/**
+ * La Supercopa Europea: seis selecciones de clubes de los países chicos (España, Portugal, Rumania,
+ * Chequia, Bélgica y Países Bajos). No son clubes: juntan a los mejores de sus ligas, de octubre a diciembre.
+ */
+const SUPER_CUP_DEFS: [string, string, number][] = [['Iberos', 'es', 60], ['Lusitanos', 'pt', 57], ['Lobos de Rumania', 'ro', 59], ['Guerreros de Bohemia', 'cz', 52], ['Diablos de Bruselas', 'be', 50], ['Delta XV', 'nl', 51]];
+export const SUPER_CUP_TEAMS: SevenTeam[] = SUPER_CUP_DEFS.map(([name, country, rating]) => ({ ...makeClub(name, country, 'Supercopa Europea'), rating }));
+
+export const CLUBS: SevenTeam[] = [...CLUB_LEAGUES.flatMap((l) => l.teams), BLACK_LION, ...SUPER_CUP_TEAMS];
 const CLUB_BY_ID: Record<string, SevenTeam> = Object.fromEntries(CLUBS.map((c) => [c.id, c]));
 
-/** Un participante de torneo: código de selección (ARG) o id de club (club-…). */
+/** Los equipos que armó el usuario (Mis equipos): así pueden ser participantes de una liga o de un torneo. */
+let CUSTOM_REG: Record<string, SevenTeam> = {};
+export function registerCustomTeams(list: SevenTeam[]) {
+    CUSTOM_REG = Object.fromEntries(list.map((t) => [t.id, t]));
+}
+
+/** Un participante de torneo: código de selección (ARG), id de club (club-…) o un equipo propio (custom-…). */
 export function teamOfCode(code: string): SevenTeam | undefined {
-    return NATION_BY_CODE[code] ?? CLUB_BY_ID[code] ?? arClubById(code);
+    return NATION_BY_CODE[code] ?? CLUB_BY_ID[code] ?? arClubById(code) ?? CUSTOM_REG[code];
 }
 
 const leagueIds = (id: string) => CLUB_LEAGUES.find((l) => l.id === id)?.teams.map((t) => t.id) ?? [];
@@ -267,7 +293,7 @@ function league(id: string, leagueId: string, name: string, sub: string, top: 4 
  * (Cheetahs y Black Lion), a la Challenge.
  */
 const CAT_OF: Record<string, string> = {
-    'Champions Cup': 'Europa', 'Challenge Cup': 'Europa', 'United Rugby Championship': 'Europa',
+    'Champions Cup': 'Europa', 'Challenge Cup': 'Europa', 'United Rugby Championship': 'Europa', 'Supercopa Europea': 'Europa',
     'Top 14': 'Francia', 'Pro D2': 'Francia', Premiership: 'Inglaterra',
     'Super Rugby Pacific': 'Hemisferio sur', 'Currie Cup': 'Hemisferio sur',
     'Super Rugby Americas': 'América', 'Major League Rugby': 'América',
@@ -297,6 +323,12 @@ const CLUB_TOURS_RAW: TourDef[] = [
     league('219d6f1e-a6d9-4197-9f9a-9913bf548696', 'us-mlr', 'Major League Rugby', 'El profesionalismo de Estados Unidos.', 4, 2),
     league('f5312256-5c9d-434b-8006-11f8c7b5bd27', 'jpn-d1', 'Japan League One D1', 'La primera de Japón.', 4),
     league('jpn-league-one-d2', 'jpn-d2', 'Japan League One D2', 'La segunda de Japón.', 4),
+    {
+        id: 'supercopa-europea', name: 'Supercopa Europea', sub: 'Seis selecciones de clubes: Iberos, Lusitanos, Rumania, Bohemia, Bruselas y Delta.', source: 'real',
+        formatLabel: 'Todos contra todos a una vuelta · semifinales y final con los 4 primeros', clubs: true,
+        teams: SUPER_CUP_TEAMS.map((t) => t.id),
+        stage: { kind: 'grupos', groups: 1, advance: 4, legs: 1 },
+    },
 ];
 
 export const CLUB_TOURS: TourDef[] = CLUB_TOURS_RAW.map((d) => ({ ...d, cat: CAT_OF[d.name] }));

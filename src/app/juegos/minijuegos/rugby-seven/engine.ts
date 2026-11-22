@@ -246,7 +246,7 @@ export interface MatchEvent {
     score: [number, number] | null; // marcador después, si cambió
     sim: boolean;
     /** Si sumó puntos: quién (puesto 0-6 del equipo de `side`) y cómo. Alimenta las tablas de goleadores. */
-    stat?: { slot: number; kind: 'try' | 'conv' | 'drop' | 'miss' };
+    stat?: { slot: number; kind: 'try' | 'conv' | 'drop' | 'miss' | 'tackle' };
 }
 
 /**
@@ -951,12 +951,19 @@ export class SevenMatch {
         };
         const convProb = (s: Side) => (s === 0 ? clamp(0.45 + this.D.kickWindow, 0.4, 0.85) : this.D.cpuKick);
         const TRY_W = [1, 1, 1, 2, 3, 4, 5];
+        /** Quién tacklea más: los de adelante cargan con el trabajo. */
+        const TACKLER_W = [4, 4, 4, 3, 2, 3, 2];
         const TRY_HOW = ['por la punta', 'tras un quiebre por el medio', 'después de un salteo', 'en un contraataque', 'tras un ruck rápido', 'con un amague que deja parado al fullback'];
 
         /** Una posesión. Devuelve true si terminó en try (para la muerte súbita). */
         const possession = (at: number, sudden: boolean): boolean => {
             const s = pos;
             const o: Side = s === 0 ? 1 : 0;
+            // Cada posesión del que ataca deja unos tackles del que defiende (se anotan en el log, no en el relato).
+            const nTackles = 2 + Math.floor(rnd() * 3);
+            for (let k = 0; k < nTackles; k++) {
+                this.log.push({ t: Math.min(at, total), side: o, text: '', score: null, sim: true, stat: { slot: pick(TACKLER_W), kind: 'tackle' } });
+            }
             const r = rnd();
             const pt = tryProb(s, at);
             if (r < pt) {
@@ -1975,6 +1982,8 @@ export class SevenMatch {
         this.mg = { kind: 'ruck', mash: 0 };
         this.ruckRoll = rnd();
         this.say('TACKLE', null, 0.8);
+        // Se anota el tackle del defensor (puesto = df.i): alimenta las estadísticas del torneo.
+        this.log.push({ t: this.elapsed(), side: df.side, text: '', score: null, sim: false, stat: { slot: df.i, kind: 'tackle' } });
         this.buildRuck(c, df);
     }
 
