@@ -2679,7 +2679,7 @@
 
 .simRow {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(104px, 1fr));
     gap: 8px;
 }
 
@@ -3898,4 +3898,98 @@
     .simFlashSub {
         animation: none;
     }
+}
+
+/* Partido simulado: el relato minuto a minuto */
+.simWatch {
+    position: fixed;
+    inset: 0;
+    z-index: 2900;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    overflow-y: auto;
+    color: #f4f4f4;
+    background: rgba(5, 6, 8, 0.94);
+}
+
+.simWatchBoard {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 8px;
+}
+
+.simWatchTeam {
+    display: grid;
+    justify-items: center;
+    gap: 4px;
+    min-width: 72px;
+    font-size: 0.7rem;
+}
+
+.simWatchNums {
+    font-size: 2.2rem;
+    letter-spacing: 2px;
+}
+
+.simWatchNums small {
+    opacity: 0.6;
+}
+
+.simWatchClock {
+    font-size: 0.8rem;
+    opacity: 0.85;
+}
+
+.simWatchList {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    width: min(420px, 100%);
+    display: grid;
+    gap: 6px;
+}
+
+.simWatchList li {
+    padding: 8px 10px;
+    font-size: 0.72rem;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.06);
+    border-left: 3px solid transparent;
+}
+
+.simWatchMine {
+    border-left-color: var(--gold) !important;
+}
+
+.simWatchTheirs {
+    border-left-color: #8a93a6 !important;
+}
+
+.simWatchEmpty {
+    opacity: 0.6;
+}
+
+.simWatchEnd {
+    font-size: 1.1rem;
+    letter-spacing: 2px;
+}
+
+.simWatchWin {
+    color: #3fbf5a;
+}
+
+.simWatchLoss {
+    color: #e0524f;
+}
+
+.simWatchActions {
+    display: flex;
+    gap: 10px;
+    margin-top: auto;
+    padding-top: 8px;
 }

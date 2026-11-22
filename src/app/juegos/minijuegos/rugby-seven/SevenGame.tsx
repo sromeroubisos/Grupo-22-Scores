@@ -42,6 +42,7 @@ import {
     replaceInDef,
     setCareerContext,
     setRatingContext,
+    scoreEvents,
     simulate,
     TOURS,
     TOUR_CATS,
@@ -622,6 +623,89 @@ function SimResult({ flash, onClose }: { flash: SimFlash; onClose: () => void })
     );
 }
 
+/** Una jugada del partido simulado: cuándo pasó (en minutos), de quién fue y qué fue. */
+interface WatchItem {
+    at: number;
+    side: 0 | 1;
+    pts: number;
+    text: string;
+}
+
+/** Un partido que la computadora jugó sola: el resultado ya está guardado, esto es para mirarlo. */
+interface SimWatchData {
+    home: SevenTeam;
+    away: SevenTeam;
+    score: [number, number];
+    minutes: number;
+    items: WatchItem[];
+}
+
+/** Cuánto dura el relato (segundos de verdad) para todo el partido. */
+const WATCH_SECONDS = 14;
+
+/** Pasa el partido simulado como relato: reloj, marcador que sube y cada jugada, con salto al final. */
+function SimWatch({ data, onClose }: { data: SimWatchData; onClose: () => void }) {
+    const [t, setT] = useState(0);
+    const done = t >= data.minutes;
+    useEffect(() => {
+        if (done) return;
+        const step = data.minutes / (WATCH_SECONDS * 10);
+        const id = setInterval(() => setT((x) => Math.min(data.minutes, x + step)), 100);
+        return () => clearInterval(id);
+    }, [done, data.minutes]);
+    const seen = data.items.filter((i) => i.at <= t);
+    const now: [number, number] = [0, 0];
+    for (const i of seen) now[i.side] += i.pts;
+    const [a, b] = done ? data.score : now;
+    const kind = data.score[0] > data.score[1] ? 'victoria' : data.score[0] < data.score[1] ? 'derrota' : 'empate';
+    const mm = Math.floor(t);
+    const ss = Math.floor((t - mm) * 60);
+    return (
+        <div className={styles.simWatch} role="dialog" aria-modal="true" aria-label={`Partido simulado: ${data.home.name} contra ${data.away.name}`}>
+            <div className={styles.simWatchBoard}>
+                <span className={styles.simWatchTeam}>
+                    <SpritePreview look={data.home.players[0]} kit={data.home.kit} scale={2} />
+                    <b>{data.home.short}</b>
+                </span>
+                <span className={styles.simWatchNums} aria-live="polite">
+                    {a} <small>-</small> {b}
+                </span>
+                <span className={styles.simWatchTeam}>
+                    <SpritePreview look={data.away.players[0]} kit={data.away.kit} scale={2} />
+                    <b>{data.away.short}</b>
+                </span>
+            </div>
+            <span className={styles.simWatchClock}>
+                {done ? 'Final' : `${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`}
+                {!done && t >= data.minutes / 2 ? ' · segundo tiempo' : ''}
+            </span>
+            <ol className={styles.simWatchList} aria-label="Jugadas">
+                {seen.length === 0 && <li className={styles.simWatchEmpty}>Arranca el partido.</li>}
+                {[...seen].reverse().map((i, k) => (
+                    <li key={`${i.at}-${k}`} className={i.side === 0 ? styles.simWatchMine : styles.simWatchTheirs}>
+                        <b>{Math.max(1, Math.ceil(i.at))}'</b> {i.text}
+                    </li>
+                ))}
+            </ol>
+            {done && (
+                <strong className={`${styles.simWatchEnd} ${kind === 'victoria' ? styles.simWatchWin : kind === 'derrota' ? styles.simWatchLoss : ''}`}>
+                    {kind === 'victoria' ? 'VICTORIA' : kind === 'derrota' ? 'DERROTA' : 'EMPATE'}
+                </strong>
+            )}
+            <div className={styles.simWatchActions}>
+                {!done && (
+                    <button type="button" className={styles.simBtn} onClick={() => setT(data.minutes)}>
+                        Saltar al final
+                    </button>
+                )}
+                <button type="button" className={styles.btnPrimary} onClick={onClose}>
+                    {done ? 'Seguir ▶' : 'Cerrar'}
+                </button>
+            </div>
+        </div>
+    );
+}
+
 export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { musicSrc?: string | null; menuMusicSrc?: string | null }) {
     const [screen, setScreen] = useState<Screen>({ k: 'menu' });
     const [customTeams, setCustomTeams] = useState<SevenTeam[]>([]);
@@ -655,6 +739,8 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
     /** El cartel de la última simulación (victoria, derrota o empate). */
     const [simFlash, setSimFlash] = useState<SimFlash | null>(null);
     const closeSimFlash = useCallback(() => setSimFlash(null), []);
+    const [watch, setWatch] = useState<SimWatchData | null>(null);
+    const closeWatch = useCallback(() => setWatch(null), []);
     // Una carrera guardada antes de los torneos en paralelo: se arman una vez y quedan en la partida.
     useEffect(() => {
         const fixed = tour ? ensureOthers(tour) : null;
@@ -935,6 +1021,42 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
         const home = byId(s.me);
         const away = last ? byId(last.opp) : null;
         if (last && home && away) setSimFlash({ home, away, score: last.score, record: rec[0] + rec[1] + rec[2] > 1 ? rec : undefined });
+    };
+
+    /**
+     * La computadora juega el partido del usuario sola y se lo muestra como relato. El resultado se
+     * guarda ya (igual que al jugarlo), el relato es solo para mirarlo.
+     */
+    const watchTourMatch = () => {
+        if (!tour) return;
+        const o = nextOpponent(tour);
+        if (!o) return;
+        if (tour.career) applyCareerContext(tour.career);
+        const ko = tour.stage === 'ko';
+        const adv = ko || !tour.career ? 0 : nextIsHome(tour) ? HOME_ADV : -HOME_ADV;
+        const score = simulate(tour.me, o, ko, adv);
+        const events = [...scoreEvents(tour.me, score[0]), ...scoreEvents(o, score[1])];
+        const home = byId(tour.me);
+        const away = byId(o);
+        if (!home || !away) return;
+        const minutes = tour.duration;
+        const items: WatchItem[] = [];
+        for (const team of [tour.me, o]) {
+            const side: 0 | 1 = team === tour.me ? 0 : 1;
+            const mine = events.filter((e) => e.team === team);
+            const tries = mine.filter((e) => e.kind === 'try');
+            const convs = mine.filter((e) => e.kind === 'conv');
+            tries.forEach((e, i) => {
+                const at = 0.4 + Math.random() * (minutes - 0.8);
+                items.push({ at, side, pts: 5, text: `Try de ${playerName(team, e.slot)}` });
+                const c = convs[i];
+                if (c) items.push({ at: Math.min(minutes, at + 0.15), side, pts: 2, text: `Conversión de ${playerName(team, c.slot)}` });
+            });
+            mine.filter((e) => e.kind === 'drop').forEach((e) => items.push({ at: 0.4 + Math.random() * (minutes - 0.8), side, pts: 3, text: `Drop de ${playerName(team, e.slot)}` }));
+        }
+        items.sort((x, y) => x.at - y.at);
+        persist({ tour: careerRound(tour, score, events) });
+        setWatch({ home, away, score, minutes, items });
     };
 
     /** Un amistoso de pretemporada: se juega (o se simula) y deja moral, o una lesión. */
@@ -1945,6 +2067,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                     return (
                         <div className={styles.body}>
                             {simFlash && <SimResult flash={simFlash} onClose={closeSimFlash} />}
+                            {watch && <SimWatch data={watch} onClose={closeWatch} />}
                             {celebrateTeam && (
                                 <ChampionCelebration
                                     team={celebrateTeam}
@@ -2087,8 +2210,11 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                                 )}
                                                 {tourLive && !preseason && (
                                                     <div className={styles.simRow}>
+                                                        <button type="button" className={styles.simBtn} onClick={watchTourMatch} disabled={!opp}>
+                                                            Ver simulación
+                                                        </button>
                                                         <button type="button" className={styles.simBtn} onClick={() => simTourMatch(false)} disabled={!opp}>
-                                                            Simular partido
+                                                            Resultado rápido
                                                         </button>
                                                         <button type="button" className={styles.simBtn} onClick={() => simTourMatch(true)}>
                                                             Simular todo

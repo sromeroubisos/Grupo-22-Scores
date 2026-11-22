@@ -2457,9 +2457,21 @@ const BIG_CLUB = 79;
 const DRIFT_STEP = 3.2;
 const DRIFT_CAP = 10;
 /** El año de un club: qué tan seguido es extraordinario y de cuántos puntos de nivel. */
-const HOT_ODDS = 0.1;
+const HOT_ODDS = 0.16;
 const HOT_MIN = 5;
 const HOT_SPAN = 6;
+
+/**
+ * Lo que deja un título nacional: parte del año extraordinario que lo trajo se vuelve forma de fondo,
+ * y la cantera decide el resto. Un inédito con buenas camadas puede sostenerse; sin ellas, se desinfla
+ * al año siguiente. En los clubes sin plantel (otras ramas) la cantera es un tiro al azar.
+ */
+function titleMomentum(r: CareerState, club: string): number {
+    const hot = Math.max(0, r.hot?.[club] ?? 0);
+    const y = r.youth?.[club];
+    const pool = y ? (y[2] + y[3]) / 2 - centerOf(club) : (Math.random() - 0.35) * 2;
+    return hot * 0.25 + clampN(0.5 + pool * 1.5, 0, 3);
+}
 
 /**
  * Los clubes no son los mismos para siempre: unos arman una camada y suben, otros pierden a sus
@@ -2471,11 +2483,13 @@ function evolveDrift(r: CareerState) {
     const ids = new Set<string>();
     for (const d of AR_SEVEN_DIVISIONS) for (const c of d.clubs) ids.add(c);
     for (const clubs of Object.values(r.divisions)) for (const c of clubs) ids.add(c);
+    const champs = new Set((r.champions?.nacional ?? []).filter(([season]) => season === r.season).map(([, club]) => club));
     for (const club of [...ids].sort()) {
         const d = prev[club] ?? 0;
         // Los grandes sostienen su época (una hegemonía dura años); los del medio suben y bajan más rápido.
         const keep = baseRatingOf(club) >= BIG_CLUB ? DRIFT_KEEP_BIG : DRIFT_KEEP;
-        const v = d * keep + gauss(Math.random) * DRIFT_STEP;
+        let v = d * keep + gauss(Math.random) * DRIFT_STEP;
+        if (champs.has(club)) v += titleMomentum(r, club);
         const rounded = Math.round(clampN(v, -DRIFT_CAP, DRIFT_CAP) * 2) / 2;
         if (rounded) next[club] = rounded;
     }
