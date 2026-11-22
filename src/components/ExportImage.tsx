@@ -1147,9 +1147,11 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
     const olivos7Edition = isOlivos7Template(template) && canUseOlivos7(user?.email)
         ? resolveOlivos7Edition(tournamentId ?? (liveData as { tournamentId?: string | number | null }).tournamentId)
         : null;
-    // Córdoba Seven también tiene diseño propio (rojo y blanco), pero lo usa cualquiera que
-    // exporte ESTE torneo, no una cuenta puntual.
+    // Córdoba Seven también tiene diseño propio (rojo y blanco): lo usa cualquiera que exporte
+    // ESTE torneo —el invitado incluido—, salvo el administrador general, que exporta con su
+    // propio diseño activo como en cualquier otro torneo.
     const cordoba7 = isCordoba7Template(template)
+        && user?.role !== 'super_admin'
         && isCordoba7Tournament(tournamentId ?? (liveData as { tournamentId?: string | number | null }).tournamentId);
     const guestInvite = useGuestExportInvite();
     // El diseno activo del panel es para quien gestiona algo. El resto de la gente

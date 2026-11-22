@@ -1808,3 +1808,8 @@ html[data-theme="dark"] img[src*="team-logo?key=chubut-m17"],
 html[data-theme="dark"] img[src*="team-logo?key=chubut-m16"] {
     content: url("/clubs/chubut-m17-dark.png");
 }
+
+/* El escudo de Locos por el Seven es blanco sobre transparente: en tema claro no se veria. */
+[data-theme="light"] img[src*="locos-por-el-seven"] {
+  filter: brightness(0);
+}
