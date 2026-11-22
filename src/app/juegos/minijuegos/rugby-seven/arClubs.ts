@@ -422,7 +422,7 @@ function gameRating(c: GameClub): number {
     if (c.ranking !== null) return Math.round(30 + c.ranking * 0.55 + urba);
     return Math.round(38 + Math.max(0, c.rating - 24) * 0.72 + urba);
 }
-const URBA_LIFT = 3;
+const URBA_LIFT = 5;
 
 export const AR_CLUBS: SevenTeam[] = AR_SEVEN_CLUBS.map((c) => ({
     id: c.id,

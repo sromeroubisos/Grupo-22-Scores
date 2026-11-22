@@ -220,6 +220,8 @@ export interface CareerState {
     ratings?: Record<string, number>;
     /** La forma de fondo de cada club del catálogo (sube y baja de a poco, año a año), en puntos de nivel. */
     drift?: Record<string, number>;
+    /** El año de cada club: de vez en cuando uno arma "su temporada" (o la tiene mala). Dura una sola. */
+    hot?: Record<string, number>;
     /** Plantel de cada club de la rama. */
     rosters?: Record<string, Player[]>;
     /** Goleadores y tryman de cada torneo jugado por el club. */
@@ -530,6 +532,7 @@ export function careerBoosts(r: CareerState): Record<string, number> {
     const out: Record<string, number> = { ...(r.ratings ?? {}) };
     // La forma de fondo de un club con plantel entra por sus jugadores (rosterTarget); la de los demás, directo.
     for (const [club, d] of Object.entries(r.drift ?? {})) if (!r.rosters?.[club]) out[club] = (out[club] ?? 0) + d;
+    for (const [club, h] of Object.entries(r.hot ?? {})) out[club] = (out[club] ?? 0) + h;
     for (const club of Object.keys(r.rosters ?? {})) {
         const rr = rosterRating(r, club);
         if (rr !== null) out[club] = (out[club] ?? 0) + rr - baseRatingOf(club);
@@ -2447,14 +2450,20 @@ function evolveRatings(r: CareerState) {
 const RATING_KEEP = 0.55;
 const RATING_CAP = 8;
 /** La forma de fondo: un paseo al azar que vuelve de a poco a cero (el nivel de catálogo) y no pasa de ±DRIFT_CAP. */
-const DRIFT_KEEP = 0.86;
-const DRIFT_STEP = 4;
+const DRIFT_KEEP = 0.9;
+const DRIFT_KEEP_BIG = 0.97;
+/** Desde qué nivel de catálogo un club es "grande". */
+const BIG_CLUB = 79;
+const DRIFT_STEP = 3.2;
 const DRIFT_CAP = 10;
+/** El año de un club: qué tan seguido es extraordinario y de cuántos puntos de nivel. */
+const HOT_ODDS = 0.1;
+const HOT_MIN = 5;
+const HOT_SPAN = 6;
 
 /**
  * Los clubes no son los mismos para siempre: unos arman una camada y suben, otros pierden a sus
  * figuras y bajan. Les pasa a todos los del catálogo, también a los de las ramas que el usuario no juega.
- * El que ya está muy arriba de su nivel recibe un tirón extra hacia abajo.
  */
 function evolveDrift(r: CareerState) {
     const prev = r.drift ?? {};
@@ -2464,14 +2473,21 @@ function evolveDrift(r: CareerState) {
     for (const clubs of Object.values(r.divisions)) for (const c of clubs) ids.add(c);
     for (const club of [...ids].sort()) {
         const d = prev[club] ?? 0;
-        const drag = d > 3 ? (d - 3) * 0.12 : 0;
-        // Los de catálogo altísimo (Newman, Tala) tienden a quedar un poco más cerca del lote: la cima no es de nadie.
-        const crown = Math.max(0, baseRatingOf(club) - 78) * 0.5 * (1 - DRIFT_KEEP);
-        const v = d * DRIFT_KEEP - drag - crown + gauss(Math.random) * DRIFT_STEP;
+        // Los grandes sostienen su época (una hegemonía dura años); los del medio suben y bajan más rápido.
+        const keep = baseRatingOf(club) >= BIG_CLUB ? DRIFT_KEEP_BIG : DRIFT_KEEP;
+        const v = d * keep + gauss(Math.random) * DRIFT_STEP;
         const rounded = Math.round(clampN(v, -DRIFT_CAP, DRIFT_CAP) * 2) / 2;
         if (rounded) next[club] = rounded;
     }
     r.drift = next;
+    // El año que viene: casi todos igual que siempre, pero uno de cada ocho tiene un año redondo (o un desastre).
+    const hot: Record<string, number> = {};
+    for (const club of [...ids].sort()) {
+        const v = Math.random() < HOT_ODDS ? (Math.random() < 0.65 ? 1 : -1) * (HOT_MIN + Math.random() * HOT_SPAN) : gauss(Math.random) * 1.5;
+        const rounded = Math.round(v * 2) / 2;
+        if (rounded) hot[club] = rounded;
+    }
+    r.hot = hot;
 }
 
 /** Cierra la temporada: niveles, planteles, ascensos, plazas y clasificados, y pasa a la siguiente. */
