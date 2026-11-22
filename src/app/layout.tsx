@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 import { Analytics } from "@vercel/analytics/next";
 import ChunkLoadRecovery from "@/components/ChunkLoadRecovery";
+import ZoomLock from "@/components/ZoomLock";
 import ConditionalLayout from "@/components/ConditionalLayout";
 import PushActivationPrompt from "@/components/PushActivationPrompt";
 // Force rebuild for ChunkLoadError fix
@@ -13,7 +14,9 @@ import "./globals.css";
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 5,
+  minimumScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -155,6 +158,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(siteJsonLd) }}
         />
         <ChunkLoadRecovery />
+        <ZoomLock />
         {/*
           Render the boot fallback OUTSIDE the Suspense boundary so it only
           appears on the very first paint (and gets covered immediately by

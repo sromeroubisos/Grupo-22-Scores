@@ -1771,6 +1771,15 @@ main:has([data-sticky-tabs]) {
     }
 }
 
+/* Sin zoom con los dedos: `manipulation` deja el scroll y el toque, y quita
+   el pellizco y el doble toque. Complementa a ZoomLock y al meta viewport. */
+html,
+body {
+    touch-action: manipulation;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
 /*
  * Escudo del Tala con dos tintas: en modo noche cualquier <img> que lo pida usa la
  * version de letras blancas (public/clubs/tala-rugby-club-dark.png). El sitio pide los

@@ -131,7 +131,9 @@ function useAnchorToVisualViewport(enabled: boolean) {
             const nav = ref.current;
             if (!nav) return;
             const gap = vv.offsetTop + vv.height - window.innerHeight;
-            const shift = Math.abs(vv.scale - 1) < 0.01 && gap > 1 ? Math.round(gap) : 0;
+            // El zoom está bloqueado (ZoomLock), así que la escala siempre es 1:
+            // cualquier diferencia positiva es un layout viewport corto.
+            const shift = gap > 1 ? Math.round(gap) : 0;
             nav.style.setProperty('--nav-shift', `${shift}px`);
         };
         const schedule = () => {
