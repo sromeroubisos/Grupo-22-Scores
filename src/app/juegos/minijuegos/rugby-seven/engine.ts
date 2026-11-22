@@ -850,6 +850,16 @@ export class SevenMatch {
         this.say(KICK_AIM_LABEL[this.kickAim], 'Zona de tu patada', 0.9);
     }
 
+    /**
+     * Celular: el dedo que carga la patada también mueve la zona. `fracY` es la altura del dedo sobre la
+     * cancha (0 arriba, 1 abajo); la zona va a esa altura, a mano, hasta que se suelta.
+     */
+    setAimFromScreen(fracY: number) {
+        if (this.kickCharge === null) return;
+        this.kickAim = 'manual';
+        this.aimY = clamp((fracY * VIEW_H - FIELD_TOP) / PYM, 1.2, WIDTH - 1.2);
+    }
+
     /** Dónde apunta cada preset (costado, en m). `null`: automática. */
     private presetY(aim: KickAim, manualY: number): number | null {
         switch (aim) {

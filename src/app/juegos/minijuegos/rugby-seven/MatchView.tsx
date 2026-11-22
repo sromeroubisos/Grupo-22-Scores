@@ -57,7 +57,7 @@ const TOUCH_GESTURES: Record<TouchScheme, [string, string][]> = {
         ['Salteo', 'Tocá y dejá el dedo quieto un momento.'],
         ['Chocar', 'Con la pelota, deslizá el dedo hacia adelante (a la derecha).'],
         ['Tacklear', 'Sin la pelota, deslizá rápido hacia adelante o hacia atrás.'],
-        ['Patear', 'Mantené en la franja izquierda para cargar y soltá para patear.'],
+        ['Patear', 'Mantené en la franja izquierda: aparece la mira. Sin soltar, deslizá el dedo hacia arriba o abajo para moverla; soltá para patear.'],
         ['Zona de patada', 'Tocá el botón "Patada" de arriba para elegir touch, arriba, centro o abajo.'],
         ['Drop', 'Dos toques seguidos en la franja izquierda.'],
         ['Scrum, ruck, line y conversión', 'Tocá la pantalla.'],
@@ -68,7 +68,7 @@ const TOUCH_GESTURES: Record<TouchScheme, [string, string][]> = {
         ['Pase', 'Deslizá rápido hacia arriba o hacia abajo. Un deslizamiento muy largo es un salteo.'],
         ['Chocar', 'Con la pelota, deslizá el dedo hacia adelante (a la derecha).'],
         ['Tacklear', 'Sin la pelota, deslizá rápido hacia adelante o hacia atrás.'],
-        ['Patear', 'Mantené en la franja izquierda para cargar y soltá para patear.'],
+        ['Patear', 'Mantené en la franja izquierda: aparece la mira. Sin soltar, deslizá el dedo hacia arriba o abajo para moverla; soltá para patear.'],
         ['Zona de patada', 'Tocá el botón "Patada" de arriba para elegir touch, arriba, centro o abajo.'],
         ['Drop', 'Dos toques seguidos.'],
         ['Scrum, ruck, line y conversión', 'Tocá la pantalla.'],
@@ -479,6 +479,11 @@ export default function MatchView({ cfg, onFinish, onQuit, musicSrc = null, font
     const onPointerMove = (e: React.PointerEvent) => {
         const f = fingers.current.get(e.pointerId);
         if (!f || f.kind === 'done' || f.kind === 'swipe') return;
+        // Cargando la patada: el dedo mueve la zona (la altura del dedo es el costado adonde va).
+        if (f.kicking) {
+            matchRef.current?.setAimFromScreen(zoneOf(e).ry);
+            return;
+        }
         const dx = pt(e).x - f.x0;
         const dy = pt(e).y - f.y0;
         // Con la pelota, deslizar hacia adelante (aunque sea despacio, y también desde la franja de patear) es chocar.
