@@ -106,7 +106,7 @@ const PARTIDOS: P[] = [
     p('SEMI', 'Semifinal', '2026-11-01', '15:00', IND, REM, 17, 18),
     p('SEMI', 'Semifinal', '2026-11-08', '15:30', PICO, KAM, 26, 24),
     p('SEMI', 'Semifinal', '2026-11-15', '15:30', MIU, REM, 23, 8),
-    p('FINAL', 'Final UROBA', '2026-11-22', '15:30', MIU, PICO, null, null),
+    p('FINAL', 'Final UROBA', '2026-11-22', '15:30', MIU, PICO, 34, 22),
     p('OMBU', 'Final Copa Ombú', '2026-11-22', '14:30', KAM, REM, null, null),
 ];
 
@@ -332,6 +332,20 @@ async function main() {
         }
     }
     console.log(`partidos: ${nuevos} nuevos · ${actualizados} actualizados`);
+
+    // ── campeón: sale de la Final UROBA. El trigger g22_auto_campeon no lo ve porque
+    //    los partidos van por fase y no cuelgan de tournament_rounds. ──────────────
+    const finalUroba = PARTIDOS.find((m) => m.etapa === 'FINAL');
+    if (finalUroba && finalUroba.hs !== null && finalUroba.as !== null && finalUroba.hs !== finalUroba.as) {
+        const campeon = finalUroba.hs > finalUroba.as ? finalUroba.home : finalUroba.away;
+        const { data: temp } = await supabase.from('tournament_seasons').select('settings').eq('id', seasonId as string).limit(1);
+        const { error: eCamp } = await supabase.from('tournament_seasons').update({
+            champion_club_id: campeon,
+            settings: { ...((temp?.[0]?.settings as Record<string, unknown> | null) ?? {}), champion_source: ORIGEN },
+        }).eq('id', seasonId as string);
+        if (eCamp) throw new Error(`Campeón: ${eCamp.message}`);
+        console.log('campeón', campeon);
+    }
 
     // ── tablas (solo las dos de liga) ────────────────────────────────────────
     const { recalculatePhaseStandingsScopes } = await import('@/lib/server/recalculateStandings');
