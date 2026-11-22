@@ -11,6 +11,7 @@
  * para que un pack de Tonga no se vea igual que uno de Escocia.
  */
 
+import { AR_SEVEN_ROSTERS } from './arRosters.generated';
 import { femLook, HAIR_STYLES, type Kit, type Look } from './sprites';
 import type { SevenTeam } from './teams';
 
@@ -224,6 +225,11 @@ export const NATIONS: SevenTeam[] = DEFS.map((d) => ({
     players: squadFor(d.code, d.region),
     rating: d.rating,
     flag: d.flag,
+    // Los 7 con más puntos de la selección en la base (apellido recortado); sin datos, los de fábrica.
+    names: AR_SEVEN_ROSTERS[`nat-${d.code.toLowerCase()}`]?.map((short) => {
+        const [first, ...rest] = short.split(' ');
+        return { first, last: rest.join(' '), short };
+    }),
 }));
 
 /** Todas las selecciones, también en femenino. El código de la jugadora es el del país con "-F" (ARG-F). */

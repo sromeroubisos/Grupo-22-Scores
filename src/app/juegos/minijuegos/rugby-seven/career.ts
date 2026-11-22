@@ -44,7 +44,7 @@
 import { AR_LABEL_OVERRIDE, AR_SEVEN_CUPOS, AR_SEVEN_DIVISIONS, arClubById, branchLabel, CBA_DESARROLLO_ZONES, FEM_GUEST_IDS, isArgBranch, type ArBranch } from './arClubs';
 import { femLook, isFemClub, randomLook, type Look } from './sprites';
 import { PALMARES_KEYS, PALMARES_LABEL, realTitles, type TitleRow } from './palmares';
-import { defaultNames, nameFromSeed, nameFromText, type PlayerName } from './names';
+import { nameFromSeed, nameFromText, playerNames, type PlayerName } from './names';
 import type { Difficulty, Duration, SevenTeam } from './teams';
 import type { PlayerSkill } from './engine';
 import {
@@ -576,10 +576,10 @@ export function careerPlayerName(r: CareerState, team: SevenTeam, id: number): P
     if (!p) {
         const gone = team.id === r.me ? r.legends?.[String(id)]?.[3] : undefined;
         if (gone) return nameFromText(gone);
-        return defaultNames(team)[id] ?? nameFromSeed(team, `${team.id}:n${id}`);
+        return playerNames(team)[id] ?? nameFromSeed(team, `${team.id}:n${id}`);
     }
     if (p.name) return nameFromText(p.name);
-    if (id < 7) return p.gen === 0 ? defaultNames(team)[id] : nameFromSeed(team, `${team.id}:${id}:${p.gen}`);
+    if (id < 7) return p.gen === 0 ? playerNames(team)[id] : nameFromSeed(team, `${team.id}:${id}:${p.gen}`);
     return nameFromSeed(team, `${team.id}:n${id}`);
 }
 

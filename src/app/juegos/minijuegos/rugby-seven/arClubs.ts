@@ -13,6 +13,7 @@
  */
 
 import { AR_SEVEN_CLUBS as GEN_CLUBS, AR_SEVEN_CUPOS, AR_SEVEN_DIVISIONS as GEN_DIVISIONS, type ArSevenClub, type ArSevenDivision } from './arClubs.generated';
+import { AR_SEVEN_ROSTERS } from './arRosters.generated';
 import { squadFor } from './nations';
 import { femLook, isFemClub, type Kit } from './sprites';
 import type { SevenTeam } from './teams';
@@ -438,6 +439,11 @@ export const AR_CLUBS: SevenTeam[] = AR_SEVEN_CLUBS.map((c) => ({
         return `kit:${k.shirt}:${k.shirt2}:${k.pattern}`;
     })(),
     namePool: c.pool ?? 'rio',
+    // Los 7 con más puntos del club (apellido recortado); sin datos, los de fábrica.
+    names: AR_SEVEN_ROSTERS[c.id]?.map((short) => {
+        const [first, ...rest] = short.split(' ');
+        return { first, last: rest.join(' '), short };
+    }),
     league: AR_SEVEN_DIVISIONS.find((d) => d.id === c.division)?.label,
 }));
 
