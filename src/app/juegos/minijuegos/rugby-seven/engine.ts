@@ -93,6 +93,8 @@ interface Flight {
     /** Patada: la pelota va a un punto, no a un compañero. */
     kick?: { tx: number; ty: number };
     goal?: boolean; // patada a los palos que entra: drop
+    /** Patada pensada para salir por la touch (la zona estaba pegada a la raya): rige el 50-22 y la atajada. */
+    touchAim?: boolean;
 }
 
 interface Particle {
@@ -135,6 +137,23 @@ const LINE_SPEED: Record<Difficulty, number> = { 'muy-facil': 1.0, facil: 1.18, 
  * contra un equipo mucho peor siguen siendo más lentos que tus jugadores.
  */
 const CPU_DEF_SPD_PTS: Record<Difficulty, number> = { 'muy-facil': 0, facil: 0.5, normal: 1, dificil: 1.5, leyenda: 2 };
+/** Chance de que el rival ataje una patada a touch si llegó a la zona (se multiplica por sus manos). */
+const CPU_CATCH: Record<Difficulty, number> = { 'muy-facil': 0.35, facil: 0.5, normal: 0.65, dificil: 0.78, leyenda: 0.88 };
+/** Empujón extra a la velocidad de la defensa rival: la cierra más rápido y complica el juego. */
+const CPU_DEF_BOOST: Record<Difficulty, number> = { 'muy-facil': 1.03, facil: 1.09, normal: 1.15, dificil: 1.2, leyenda: 1.25 };
+
+/** A dónde apunta tu patada: lo elige el jugador (tecla Zona) y se ve en la cancha. */
+export type KickAim = 'auto' | 'touchUp' | 'touchDown' | 'up' | 'mid' | 'down' | 'manual';
+export const KICK_AIMS: KickAim[] = ['auto', 'touchUp', 'touchDown', 'up', 'mid', 'down'];
+export const KICK_AIM_LABEL: Record<KickAim, string> = {
+    auto: 'AUTOMÁTICA',
+    touchUp: 'A TOUCH ARRIBA',
+    touchDown: 'A TOUCH ABAJO',
+    up: 'ZONA ARRIBA',
+    mid: 'AL CENTRO',
+    down: 'ZONA ABAJO',
+    manual: 'A MANO',
+};
 /** A qué velocidad corren los rivales a buscar una patada o una pelota suelta (m/s). */
 const CPU_CHASE: Record<Difficulty, number> = { 'muy-facil': 6.6, facil: 7.5, normal: 8.3, dificil: 8.8, leyenda: 9.3 };
 /** Pelota suelta disputada: lo que le cuesta al rival quedársela si llegan juntos. */
@@ -156,6 +175,8 @@ export interface Hud {
     bannerSub: string | null;
     hint: string | null;
     attacking: boolean;
+    /** Zona elegida para la patada (texto para el botón). */
+    kickAim: string;
     phase: Phase;
     carrier: string | null; // "7 · F. Ferreyra"
 }
@@ -367,7 +388,7 @@ export class SevenMatch {
     /** Toque nuevo de ↑/↓: amague si llevás la pelota. */
     juke(dir: -1 | 1) {
         const c = this.ball.holder;
-        if (this.phase !== 'play' || !c || c.side !== 0 || c.jukeCd > 0) return;
+        if (this.phase !== 'play' || !c || c.side !== 0 || c.jukeCd > 0 || this.kickCharge !== null) return;
         c.juke = 0.32;
         c.jukeCd = 0.45;
         c.jukeDir = dir;
@@ -420,7 +441,8 @@ export class SevenMatch {
         this.kickCharge = null;
         const c = this.ball.holder;
         if (power === null || this.phase !== 'play' || !c || c.side !== 0 || c.down > 0) return;
-        this.throwKick(c, power);
+        this.throwKick(c, power, this.kickAim, this.aimY);
+        if (this.kickAim === 'manual') this.kickAim = 'auto'; // la zona a mano vale para una patada
     }
 
     /** Espacio: pase al mejor ubicado, cambiar de jugador, empujar o patear según el momento. */
@@ -817,34 +839,81 @@ export class SevenMatch {
      * rival tiene descubierto. Después pica, queda suelta y la gana el primero
      * que llega corriendo.
      */
-    private throwKick(from: Player, power = 0.5) {
+    /** Zona elegida para tu próxima patada. */
+    kickAim: KickAim = 'auto';
+    /** Costado elegido a mano (m) mientras se carga la patada: ↑/↓ mueven la zona. */
+    private aimY = WIDTH / 2;
+
+    /** Tecla Zona: pasa a la siguiente zona de patada. */
+    cycleKickAim() {
+        this.kickAim = KICK_AIMS[(KICK_AIMS.indexOf(this.kickAim) + 1) % KICK_AIMS.length];
+        this.say(KICK_AIM_LABEL[this.kickAim], 'Zona de tu patada', 0.9);
+    }
+
+    /** Dónde apunta cada preset (costado, en m). `null`: automática. */
+    private presetY(aim: KickAim, manualY: number): number | null {
+        switch (aim) {
+            case 'touchUp': return 2.2;
+            case 'touchDown': return WIDTH - 2.2;
+            case 'up': return WIDTH * 0.2;
+            case 'mid': return WIDTH / 2;
+            case 'down': return WIDTH * 0.8;
+            case 'manual': return manualY;
+            default: return null;
+        }
+    }
+
+    /**
+     * La zona donde puede caer la patada: centro y radios (m). El largo lo manda la potencia, el costado la
+     * zona elegida, y el error del pie agranda el óvalo (menos puntería, más lejos y menos pie). La pelota
+     * cae SIEMPRE adentro de ese óvalo: lo que se dibuja es lo que puede pasar.
+     */
+    private kickZone(from: Player, power: number, aim: KickAim, manualY: number) {
         const d = this.dir(from.side);
-        this.ball.x = from.x;
-        this.ball.y = from.y;
-        const fb = this.team(from.side === 0 ? 1 : 0).find((p) => p.fb && p.down <= 0);
         const foot = this.fKick(from);
-        const dist = 12 + power * 33 * foot;
-        const tx = clamp(from.x + d * dist, 2, 118);
+        const cx = clamp(from.x + d * (12 + power * 33 * foot), 2, 118);
+        let cy = this.presetY(aim, manualY);
+        if (cy === null) {
+            const fb = this.team(from.side === 0 ? 1 : 0).find((p) => p.fb && p.down <= 0);
+            const lanes = [10, 22, 35, 48, 60].filter((y) => Math.abs(y - from.y) < 30);
+            cy = lanes.sort((a, b) => (fb ? Math.abs(b - fb.y) - Math.abs(a - fb.y) : Math.abs(a - from.y) - Math.abs(b - from.y)))[0] ?? from.y;
+        }
+        const ry = (1.5 + power * 4) / foot;
+        return { cx, cy, rx: ry * 1.5, ry };
+    }
+
+    /** A dónde va la patada. `noise` = false da el centro de la zona (para dibujar la mira). */
+    private kickTarget(from: Player, power: number, aim: KickAim, manualY: number, noise: boolean): { tx: number; ty: number; goal: boolean; atPosts: boolean } {
+        const d = this.dir(from.side);
+        const foot = this.fKick(from);
+        const z = this.kickZone(from, power, aim, manualY);
         const goalX = from.side === 0 ? TRY_R : TRY_L;
         const toPosts = Math.abs(goalX - from.x);
-        // De frente a los palos, fuerte y a tiro: va a los palos. Si entra, es drop.
-        const atPosts = power >= 0.7 && toPosts <= 45 && Math.abs(from.y - WIDTH / 2) < 9;
-        let ty: number;
-        let goal = false;
+        // De frente a los palos, fuerte y a tiro: va a los palos. Si entra, es drop. Solo en automática o al centro.
+        const atPosts = (aim === 'auto' || aim === 'mid') && power >= 0.7 && toPosts <= 45 && Math.abs(from.y - WIDTH / 2) < 9;
         if (atPosts) {
-            const err = ((rnd() - 0.5) * (2 + toPosts * 0.16 + Math.abs(from.y - WIDTH / 2) * 0.3)) / foot;
-            ty = WIDTH / 2 + err;
-            goal = Math.abs(err) < 2.8 && (tx - goalX) * d >= 0;
-        } else {
-            const lanes = [10, 22, 35, 48, 60].filter((y) => Math.abs(y - from.y) < 30);
-            const lane = lanes.sort((a, b) => (fb ? Math.abs(b - fb.y) - Math.abs(a - fb.y) : Math.abs(a - from.y) - Math.abs(b - from.y)))[0] ?? from.y;
-            ty = lane + ((rnd() - 0.5) * (3 + power * 12)) / foot;
+            const err = noise ? ((rnd() - 0.5) * (2 + toPosts * 0.16 + Math.abs(from.y - WIDTH / 2) * 0.3)) / foot : 0;
+            return { tx: z.cx, ty: clamp(WIDTH / 2 + err, 4, WIDTH - 4), goal: Math.abs(err) < 2.8 && (z.cx - goalX) * d >= 0, atPosts };
         }
-        ty = clamp(ty, 4, WIDTH - 4);
+        if (!noise) return { tx: z.cx, ty: z.cy, goal: false, atPosts };
+        const r = Math.sqrt(rnd());
+        const a = rnd() * Math.PI * 2;
+        const ty = z.cy + z.ry * r * Math.sin(a);
+        // Las zonas comunes no se salen de la cancha; las de touch sí (pica afuera o adentro).
+        const touchy = aim === 'touchUp' || aim === 'touchDown' || z.cy < 4 || z.cy > WIDTH - 4;
+        return { tx: clamp(z.cx + z.rx * r * Math.cos(a), 2, 118), ty: touchy ? ty : clamp(ty, 4, WIDTH - 4), goal: false, atPosts };
+    }
+
+    private throwKick(from: Player, power = 0.5, aim: KickAim = 'auto', manualY = WIDTH / 2) {
+        this.ball.x = from.x;
+        this.ball.y = from.y;
+        const { tx, ty, goal, atPosts } = this.kickTarget(from, power, aim, manualY, true);
+        const cy = this.presetY(aim, manualY);
+        const touchAim = cy !== null && (cy <= 4 || cy >= WIDTH - 4);
         this.ball.holder = null;
-        this.ball.flight = { from, to: from, sx: from.x, sy: from.y, releaseX: from.x, t: 0, dur: 0.7 + power * 0.8, tried: new Set(), kick: { tx, ty }, goal };
+        this.ball.flight = { from, to: from, sx: from.x, sy: from.y, releaseX: from.x, t: 0, dur: 0.55 + power * 0.6, tried: new Set(), kick: { tx, ty }, goal, touchAim };
         from.passT = 0.3;
-        this.say(atPosts ? 'A LOS PALOS' : power > 0.75 ? 'PATADA LARGA' : power < 0.3 ? 'PATADITA' : 'PATADA', null, 0.7);
+        this.say(atPosts ? 'A LOS PALOS' : touchAim ? 'A TOUCH' : power > 0.75 ? 'PATADA LARGA' : power < 0.3 ? 'PATADITA' : 'PATADA', null, 0.7);
     }
 
     /** Patada directa sin cargar (botón táctil de un toque). */
@@ -852,7 +921,7 @@ export class SevenMatch {
         if (this.phase !== 'play') return;
         const c = this.ball.holder;
         if (!c || c.side !== 0 || c.passT > 0 || c.down > 0) return;
-        this.throwKick(c, 0.55);
+        this.throwKick(c, 0.55, this.kickAim, this.aimY);
     }
 
     private catchBall(p: Player) {
@@ -1290,8 +1359,21 @@ export class SevenMatch {
 
     /* ---------------- simulación ---------------- */
 
+    /**
+     * Avanza el partido en pasos chicos. Antes un cuadro lento (más de 50 ms) se recortaba y el juego iba
+     * en cámara lenta, justo cuando la patada dibuja la mira; ahora el tiempo real se reparte en pasos de
+     * hasta 1/30 s y la velocidad del juego no depende de los cuadros por segundo.
+     */
     update(rawDt: number) {
-        const dt = Math.min(rawDt, 1 / 20);
+        let left = Math.min(rawDt, 0.25);
+        while (left > 1e-6) {
+            const step = Math.min(left, 1 / 30);
+            this.tick(step);
+            left -= step;
+        }
+    }
+
+    private tick(dt: number) {
         this.time += dt;
         if (this.banner) {
             this.banner.t -= dt;
@@ -1353,7 +1435,18 @@ export class SevenMatch {
         if (this.kickCharge !== null) {
             const h = this.ball.holder;
             if (this.phase !== "play" || !h || h.side !== 0 || h.down > 0) this.kickCharge = null;
-            else this.kickCharge = Math.min(1, this.kickCharge + dt / 0.9);
+            else {
+                this.kickCharge = Math.min(1, this.kickCharge + dt / 0.9);
+                // Cargando: ↑/↓ mueven la zona a donde va a caer (arranca de donde estaba apuntando).
+                const dy = (this.input.down ? 1 : 0) - (this.input.up ? 1 : 0);
+                if (dy !== 0) {
+                    if (this.kickAim !== 'manual') {
+                        this.aimY = this.kickZone(h, this.kickCharge, this.kickAim, this.aimY).cy;
+                        this.kickAim = 'manual';
+                    }
+                    this.aimY = clamp(this.aimY + dy * 30 * dt, 1.2, WIDTH - 1.2);
+                }
+            }
         }
         this.phaseT -= dt;
         switch (this.phase) {
@@ -1587,6 +1680,7 @@ export class SevenMatch {
                 const burst = (carrier.hit > 0 ? 9.2 : 7.2) * f;
                 carrier.vx = carrier.stun > 0 ? 3.5 : burst;
                 let vy = ((this.input.down ? 1 : 0) - (this.input.up ? 1 : 0)) * 6 * f;
+                if (this.kickCharge !== null) vy = 0; // cargando la patada, ↑/↓ mueven la mira, no al jugador
                 if (carrier.juke > 0.14) vy = carrier.jukeDir * 10;
                 carrier.vy = vy;
             } else {
@@ -1623,7 +1717,7 @@ export class SevenMatch {
         }
         // La defensa rival suma puntos de velocidad PERSONAL según la dificultad (cada uno sobre su propio
         // nivel: un equipo flojo sigue siendo más lento que el tuyo). Los 0,028 son lo que vale un punto en fSpd.
-        const defSpeed = defSide === 1 ? D.cpuDefRun * (1 + CPU_DEF_SPD_PTS[this.cfg.difficulty] * 0.028) : 7.0;
+        const defSpeed = defSide === 1 ? D.cpuDefRun * (1 + CPU_DEF_SPD_PTS[this.cfg.difficulty] * 0.028) * CPU_DEF_BOOST[this.cfg.difficulty] : 7.0;
         for (const p of defs) {
             if (p.down > 0) {
                 p.vx = 0;
@@ -1772,7 +1866,8 @@ export class SevenMatch {
                 .sort((a, b) => Math.hypot(a.x - bx, a.y - by) - Math.hypot(b.x - bx, b.y - by));
             chasers.forEach((p, i) => {
                 if (i < 2 || p.fb) this.step(p, bx, by, (base(side) + (side === kicker ? 0.4 : 0)) * this.fSpd(p));
-                else this.step(p, bx - d * (side === kicker ? 8 : -6), clamp(p.y, 4, WIDTH - 4), 6 * this.fSpd(p));
+                // La defensa rival no afloja: el resto también sale a cubrir a buena velocidad, no al trote.
+                else this.step(p, bx - d * (side === kicker ? 8 : -6), clamp(p.y, 4, WIDTH - 4), (side === 1 ? Math.max(6, base(1) * 0.92) : 6) * this.fSpd(p));
             });
         }
         for (const p of this.players) {
@@ -1794,6 +1889,46 @@ export class SevenMatch {
         const att = fl.from.side;
         this.chaseBall(dt, kick.tx, kick.ty, att);
         if (k < 1) return;
+        // A touch. Antes de que pique o salga, el rival puede atajarla: el que llegó a la zona la baja,
+        // y eso es lo que impide que el 50-22 sea gratis.
+        const rival: Side = att === 0 ? 1 : 0;
+        const outDirect = kick.ty <= 0.2 || kick.ty >= WIDTH - 0.2;
+        const bounceOut = !!fl.touchAim && !outDirect && (kick.ty <= 4 || kick.ty >= WIDTH - 4);
+        if (outDirect || bounceOut) {
+            const spot = { x: kick.tx, y: clamp(kick.ty, 0.5, WIDTH - 0.5) };
+            const fielder = this.team(rival)
+                .filter((p) => p.down <= 0 && p.pose === 'stand' && Math.hypot(p.x - spot.x, p.y - spot.y) < 2.4)
+                .sort((a, b) => Math.hypot(a.x - spot.x, a.y - spot.y) - Math.hypot(b.x - spot.x, b.y - spot.y))[0];
+            if (fielder && !outDirect && rnd() < CPU_CATCH[this.cfg.difficulty] * this.fHands(fielder) ** 2) {
+                this.ball.flight = null;
+                this.say('LA ATAJA', fielder.fb ? 'El fullback llegó a tiempo' : 'Llegaron a la pelota', 1);
+                this.turnoverInPlay(fielder);
+                return;
+            }
+            const edge = kick.ty < WIDTH / 2 ? 0 : WIDTH;
+            this.ball.flight = null;
+            this.ball.y = edge;
+            if (outDirect) {
+                // Directa: si pateó desde adentro de su 22 gana el terreno; de afuera, el line es donde pateó.
+                const own22 = (att === 0 ? fl.sx - TRY_L : TRY_R - fl.sx) <= 22;
+                this.say('DIRECTO A TOUCH', own22 ? 'Line para el rival' : 'Sin pique: pierde el terreno', 1.3);
+                this.startLineout(rival, own22 ? kick.tx : fl.sx, edge);
+                return;
+            }
+            // Pica adentro y sale: 50-22 si pateó desde su mitad y salió adentro del 22 rival.
+            const cx = clamp(kick.tx + this.dir(att) * (2 + rnd() * 3), TRY_L, TRY_R);
+            const ownHalf = att === 0 ? fl.sx < 60 : fl.sx > 60;
+            const in22 = att === 0 ? cx >= TRY_R - 22 : cx <= TRY_L + 22;
+            if (ownHalf && in22) {
+                this.say('50-22', att === 0 ? 'El line es tuyo' : 'El line es del rival', 1.6);
+                this.shake = Math.max(this.shake, 0.4);
+                this.startLineout(att, cx, edge);
+            } else {
+                this.say('A TOUCH', 'Line para el rival', 1);
+                this.startLineout(rival, cx, edge);
+            }
+            return;
+        }
         // Patada fuerte que pasó entre los palos: es drop.
         if (fl.goal) {
             this.ball.flight = null;
@@ -1896,6 +2031,37 @@ export class SevenMatch {
             }
         }
         let vy = 0;
+        const smart = this.cfg.difficulty !== 'muy-facil';
+        if (smart) {
+            const rivals = this.team(0).filter((o) => o.down <= 0);
+            const room = (q: Player) => rivals.reduce((m, o) => Math.min(m, Math.hypot(o.x - q.x, o.y - q.y)), Infinity);
+            // Espacio libre adelante: acelera y se abre hacia donde la defensa tiene el hueco más grande.
+            const ahead = rivals.filter((o) => c.x - o.x > -1);
+            if (!ahead.some((o) => c.x - o.x < 14 && Math.abs(o.y - c.y) < 8)) c.vx *= 1.1;
+            if (!threat || td > 6) {
+                const ys = [6, 14, 22, 30, 38, 46, 54, 62].filter((y) => y > 3 && y < WIDTH - 3);
+                let bestY = c.y;
+                let bestS = -Infinity;
+                for (const y of ys) {
+                    const s = ahead.reduce((m, o) => Math.min(m, Math.hypot((o.x - c.x) * 0.5, o.y - y)), 40) - Math.abs(y - c.y) * 0.25;
+                    if (s > bestS) {
+                        bestS = s;
+                        bestY = y;
+                    }
+                }
+                if (Math.abs(bestY - c.y) > 2) vy = Math.sign(bestY - c.y) * DODGE_VY[this.cfg.difficulty] * 0.7;
+            }
+            // Un compañero con campo libre y el rival cerrando: se la juega a él antes de que lo agarren.
+            // También lejos del rival: si hay un compañero con mucho más campo que él, se la da y que corra.
+            const near = threat && td < 8;
+            if ((!threat || td < 16) && rnd() < D.cpuPassIQ * (near ? 2.6 : 1.4) * dt) {
+                const free = this.bestOption(c);
+                if (free && room(free) > 10 && room(free) > room(c) + (near ? 3 : 6) && Math.abs(free.y - c.y) > 3) {
+                    this.throwPass(c, free);
+                    return;
+                }
+            }
+        }
         if (threat) {
             const away: 1 | -1 = c.y >= threat.y ? 1 : -1;
             vy = away * DODGE_VY[this.cfg.difficulty];
@@ -1914,7 +2080,10 @@ export class SevenMatch {
             return;
         }
         if (threat && td < 6 && c.x > 45 && rnd() < 0.3 * dt) {
-            this.throwKick(c, 0.35 + rnd() * 0.45);
+            // En su propio 22 apurado, a veces la manda a touch para sacársela de encima.
+            const own22 = c.x > TRY_R - 22 - 10;
+            const aim: KickAim = smart && own22 && rnd() < 0.5 ? (c.y < WIDTH / 2 ? 'touchUp' : 'touchDown') : 'auto';
+            this.throwKick(c, 0.35 + rnd() * 0.45, aim);
             return;
         }
         if (c.y < 7) vy = Math.max(vy, 3);
@@ -2220,6 +2389,7 @@ export class SevenMatch {
             bannerSub: this.banner?.sub ?? null,
             hint,
             attacking: !!c && c.side === 0,
+            kickAim: KICK_AIM_LABEL[this.kickAim],
             phase: this.phase,
             carrier: c ? `${c.i + 1} · ${playerNames(c.side === 0 ? this.cfg.home : this.cfg.away)[c.i].short}${c.sk ? ` · ${Math.round(this.legs(c) * 100)}%` : ''}` : null,
         };
@@ -2399,6 +2569,55 @@ export class SevenMatch {
             const w = Math.round(18 * this.kickCharge);
             ctx.fillStyle = this.kickCharge > 0.8 ? "#e04848" : this.kickCharge > 0.45 ? "#f0c419" : "#3fbf5a";
             ctx.fillRect(bx, by, w, 3);
+        }
+
+        // Mira de la patada: con la pelota y atacando se ve la zona elegida; cargando, el punto de caída.
+        if (this.ball.holder === p && p.side === 0 && this.phase === 'play' && p.down <= 0) {
+            const charging = this.kickCharge !== null;
+            if (charging || this.kickAim !== 'auto') {
+                const pw = charging ? this.kickCharge ?? 0 : 0.55;
+                const z = this.kickZone(p, pw, this.kickAim, this.aimY);
+                const mx = this.sx(z.cx);
+                const my = this.sy(clamp(z.cy, 0, WIDTH));
+                const touchy = z.cy < 4 || z.cy > WIDTH - 4;
+                const tone = touchy ? '124,196,239' : '255,255,255';
+                // Trayectoria: una línea en semicírculo desde el pie hasta el centro de la zona.
+                const fx = sx;
+                const fy = sy - 8;
+                const lift = 26 + Math.abs(mx - fx) * 0.28;
+                ctx.save();
+                ctx.strokeStyle = `rgba(${tone},0.85)`;
+                ctx.lineWidth = 1;
+                ctx.setLineDash([3, 3]);
+                ctx.beginPath();
+                ctx.moveTo(fx, fy);
+                ctx.quadraticCurveTo((fx + mx) / 2, Math.min(fy, my) - lift, mx, my);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                // Zona donde puede caer: óvalo medio blanco con su aro; la pelota cae siempre adentro.
+                ctx.beginPath();
+                ctx.ellipse(mx, my, Math.max(5, z.rx * PXM), Math.max(3, z.ry * PYM), 0, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(${tone},0.24)`;
+                ctx.fill();
+                ctx.strokeStyle = `rgba(${tone},0.95)`;
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.ellipse(mx, my, Math.max(2.5, z.rx * PXM * 0.45), Math.max(1.5, z.ry * PYM * 0.45), 0, 0, Math.PI * 2);
+                ctx.strokeStyle = `rgba(${tone},0.55)`;
+                ctx.stroke();
+                ctx.fillStyle = `rgba(${tone},1)`;
+                ctx.fillRect(mx - 1, my - 1, 3, 3);
+                ctx.restore();
+            }
+            if (this.kickAim !== 'auto') {
+                ctx.font = `7px ${this.fontFamily}`;
+                ctx.textAlign = 'center';
+                ctx.fillStyle = '#141218';
+                ctx.fillText(KICK_AIM_LABEL[this.kickAim], sx + 1, sy + 17);
+                ctx.fillStyle = '#7cc4ef';
+                ctx.fillText(KICK_AIM_LABEL[this.kickAim], sx, sy + 16);
+                ctx.textAlign = 'left';
+            }
         }
 
         // Marca del jugador que manejás.

@@ -12,6 +12,7 @@
  */
 
 import { AR_SEVEN_ROSTERS } from './arRosters.generated';
+import { SQUADS_15S } from './squads15';
 import { femLook, HAIR_STYLES, type Kit, type Look } from './sprites';
 import type { SevenTeam } from './teams';
 
@@ -226,9 +227,10 @@ export const NATIONS: SevenTeam[] = DEFS.map((d) => ({
     rating: d.rating,
     flag: d.flag,
     // Los 7 con más puntos de la selección en la base (apellido recortado); sin datos, los de fábrica.
-    names: AR_SEVEN_ROSTERS[`nat-${d.code.toLowerCase()}`]?.map((short) => {
+    // Nations Championship y Nations Cup: los planteles de 15 de 2026 (squads15.ts). Sin ahí, los de la base.
+    names: (SQUADS_15S[d.code] ?? AR_SEVEN_ROSTERS[`nat-${d.code.toLowerCase()}`])?.map((short) => {
         const [first, ...rest] = short.split(' ');
-        return { first, last: rest.join(' '), short };
+        return rest.length ? { first, last: rest.join(' '), short } : { first: '', last: first, short };
     }),
 }));
 
