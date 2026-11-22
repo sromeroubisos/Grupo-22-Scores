@@ -47,11 +47,11 @@ html,body{width:${f.w}px;height:${f.h}px;background:var(--rojo);overflow:hidden;
 .tile{background:#fff;display:flex;align-items:center;justify-content:center;flex:none;padding:calc(var(--pad,10px));overflow:hidden}
 .tile img{max-width:100%;max-height:100%;object-fit:contain}
 .mono{font-family:'Anton',sans-serif;color:var(--rojo);font-size:calc(80px*var(--k));letter-spacing:.04em}
-.pie{margin-top:auto;padding-top:calc(18px*var(--k));font-weight:800;letter-spacing:.3em;font-size:calc(32px*var(--k));opacity:.9}
+.pie{margin-top:auto;padding-top:calc(18px*var(--k));display:flex;justify-content:center}.pie img{height:calc(64px*var(--k));width:auto}
 .ejemplo{position:absolute;top:24px;right:24px;border:3px solid #fff;padding:4px 14px;font-weight:800;font-size:28px;letter-spacing:.2em}
 `;
 
-const pagina = (f, cuerpo) => `<!doctype html><html><head><meta charset="utf-8"><style>${CSS(f)}</style></head><body><div class="pag">${EJEMPLO ? '<div class="ejemplo">EJEMPLO</div>' : ''}${cuerpo}<div class="pie">G22 SCORES</div></div></body></html>`;
+const pagina = (f, cuerpo) => `<!doctype html><html><head><meta charset="utf-8"><style>${CSS(f)}</style></head><body><div class="pag">${EJEMPLO ? '<div class="ejemplo">EJEMPLO</div>' : ''}${cuerpo}<div class="pie"><img src="${img('logo-g22.png')}" alt="G22 Scores"></div></div></body></html>`;
 const cabecera = (extra = '') => `<img class="logo" src="${img('logo-torneo.png')}" alt="Córdoba Seven">${extra}`;
 
 /** Un partido: dos escudos, los dos puntajes y la etapa. Sin nombres: los escudos hablan. */
