@@ -58,7 +58,6 @@ const TOUCH_GESTURES: Record<TouchScheme, [string, string][]> = {
         ['Chocar', 'Con la pelota, deslizá el dedo hacia adelante (a la derecha).'],
         ['Tacklear', 'Sin la pelota, deslizá rápido hacia adelante o hacia atrás.'],
         ['Patear', 'Mantené en la franja izquierda: aparece la mira. Sin soltar, deslizá el dedo hacia arriba o abajo para moverla; soltá para patear.'],
-        ['Zona de patada', 'Tocá el botón "Patada" de arriba para elegir touch, arriba, centro o abajo.'],
         ['Drop', 'Dos toques seguidos en la franja izquierda.'],
         ['Scrum, ruck, line y conversión', 'Tocá la pantalla.'],
         ['Defendiendo', 'Un toque cambia de jugador.'],
@@ -69,7 +68,6 @@ const TOUCH_GESTURES: Record<TouchScheme, [string, string][]> = {
         ['Chocar', 'Con la pelota, deslizá el dedo hacia adelante (a la derecha).'],
         ['Tacklear', 'Sin la pelota, deslizá rápido hacia adelante o hacia atrás.'],
         ['Patear', 'Mantené en la franja izquierda: aparece la mira. Sin soltar, deslizá el dedo hacia arriba o abajo para moverla; soltá para patear.'],
-        ['Zona de patada', 'Tocá el botón "Patada" de arriba para elegir touch, arriba, centro o abajo.'],
         ['Drop', 'Dos toques seguidos.'],
         ['Scrum, ruck, line y conversión', 'Tocá la pantalla.'],
         ['Defendiendo', 'Un toque cambia de jugador.'],
@@ -340,7 +338,6 @@ export default function MatchView({ cfg, onFinish, onQuit, musicSrc = null, font
             else if (action === 'down') m.juke(1);
             else if (action === 'hit') m.hit();
             else if (action === 'kick' && attacking) m.startKick();
-            else if (action === 'zone' && attacking) m.cycleKickAim();
             else if (action === 'drop') m.dropGoal();
             else if (action === 'action') m.action();
             // Pase: sale al soltar. Toque = pase corto; mantenido = salteo.
@@ -692,11 +689,6 @@ export default function MatchView({ cfg, onFinish, onQuit, musicSrc = null, font
                 </div>
                 {/* Pausa, música y controles arriba a la derecha. */}
                 <div className={styles.hudRight}>
-                    {hud?.attacking && hud.phase === 'play' && (
-                        <button type="button" className={styles.pauseBtn} style={{ width: 'auto', padding: '0 8px' }} onClick={() => matchRef.current?.cycleKickAim()} aria-label="Cambiar la zona de la patada">
-                            {`Patada: ${hud.kickAim.toLowerCase()} (${keyName(bindings.zone)})`}
-                        </button>
-                    )}
                     <span className={styles.sbHelp}>{keyName(bindings.pause)} · pausa y controles</span>
                     {hasMusic && (
                         <button type="button" className={styles.pauseBtn} onClick={toggleMute} aria-label={muted ? 'Prender la música' : 'Silenciar la música'} aria-pressed={!muted}>

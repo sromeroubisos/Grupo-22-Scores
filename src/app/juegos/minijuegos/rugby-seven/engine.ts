@@ -175,8 +175,6 @@ export interface Hud {
     bannerSub: string | null;
     hint: string | null;
     attacking: boolean;
-    /** Zona elegida para la patada (texto para el botón). */
-    kickAim: string;
     phase: Phase;
     carrier: string | null; // "7 · F. Ferreyra"
 }
@@ -433,6 +431,9 @@ export class SevenMatch {
         const c = this.ball.holder;
         if (this.phase !== 'play' || !c || c.side !== 0 || c.passT > 0 || c.down > 0) return;
         this.kickCharge = 0;
+        // La mira arranca derecho adelante; el jugador la mueve (↑/↓ o el dedo) y suelta para patear.
+        this.kickAim = 'manual';
+        this.aimY = clamp(c.y, 4, WIDTH - 4);
     }
 
     /** A soltada: patea con la potencia cargada. */
@@ -441,8 +442,7 @@ export class SevenMatch {
         this.kickCharge = null;
         const c = this.ball.holder;
         if (power === null || this.phase !== 'play' || !c || c.side !== 0 || c.down > 0) return;
-        this.throwKick(c, power, this.kickAim, this.aimY);
-        if (this.kickAim === 'manual') this.kickAim = 'auto'; // la zona a mano vale para una patada
+        this.throwKick(c, power, 'manual', this.aimY);
     }
 
     /** Espacio: pase al mejor ubicado, cambiar de jugador, empujar o patear según el momento. */
@@ -844,12 +844,6 @@ export class SevenMatch {
     /** Costado elegido a mano (m) mientras se carga la patada: ↑/↓ mueven la zona. */
     private aimY = WIDTH / 2;
 
-    /** Tecla Zona: pasa a la siguiente zona de patada. */
-    cycleKickAim() {
-        this.kickAim = KICK_AIMS[(KICK_AIMS.indexOf(this.kickAim) + 1) % KICK_AIMS.length];
-        this.say(KICK_AIM_LABEL[this.kickAim], 'Zona de tu patada', 0.9);
-    }
-
     /**
      * Celular: el dedo que carga la patada también mueve la zona. `fracY` es la altura del dedo sobre la
      * cancha (0 arriba, 1 abajo); la zona va a esa altura, a mano, hasta que se suelta.
@@ -931,7 +925,7 @@ export class SevenMatch {
         if (this.phase !== 'play') return;
         const c = this.ball.holder;
         if (!c || c.side !== 0 || c.passT > 0 || c.down > 0) return;
-        this.throwKick(c, 0.55, this.kickAim, this.aimY);
+        this.throwKick(c, 0.55, 'manual', clamp(c.y, 4, WIDTH - 4));
     }
 
     private catchBall(p: Player) {
@@ -1450,10 +1444,6 @@ export class SevenMatch {
                 // Cargando: ↑/↓ mueven la zona a donde va a caer (arranca de donde estaba apuntando).
                 const dy = (this.input.down ? 1 : 0) - (this.input.up ? 1 : 0);
                 if (dy !== 0) {
-                    if (this.kickAim !== 'manual') {
-                        this.aimY = this.kickZone(h, this.kickCharge, this.kickAim, this.aimY).cy;
-                        this.kickAim = 'manual';
-                    }
                     this.aimY = clamp(this.aimY + dy * 30 * dt, 1.2, WIDTH - 1.2);
                 }
             }
@@ -2399,7 +2389,6 @@ export class SevenMatch {
             bannerSub: this.banner?.sub ?? null,
             hint,
             attacking: !!c && c.side === 0,
-            kickAim: KICK_AIM_LABEL[this.kickAim],
             phase: this.phase,
             carrier: c ? `${c.i + 1} · ${playerNames(c.side === 0 ? this.cfg.home : this.cfg.away)[c.i].short}${c.sk ? ` · ${Math.round(this.legs(c) * 100)}%` : ''}` : null,
         };
@@ -2584,8 +2573,9 @@ export class SevenMatch {
         // Mira de la patada: con la pelota y atacando se ve la zona elegida; cargando, el punto de caída.
         if (this.ball.holder === p && p.side === 0 && this.phase === 'play' && p.down <= 0) {
             const charging = this.kickCharge !== null;
-            if (charging || this.kickAim !== 'auto') {
-                const pw = charging ? this.kickCharge ?? 0 : 0.55;
+            // Solo mientras se mantiene apretado para patear.
+            if (charging) {
+                const pw = this.kickCharge ?? 0;
                 const z = this.kickZone(p, pw, this.kickAim, this.aimY);
                 const mx = this.sx(z.cx);
                 const my = this.sy(clamp(z.cy, 0, WIDTH));
@@ -2618,15 +2608,6 @@ export class SevenMatch {
                 ctx.fillStyle = `rgba(${tone},1)`;
                 ctx.fillRect(mx - 1, my - 1, 3, 3);
                 ctx.restore();
-            }
-            if (this.kickAim !== 'auto') {
-                ctx.font = `7px ${this.fontFamily}`;
-                ctx.textAlign = 'center';
-                ctx.fillStyle = '#141218';
-                ctx.fillText(KICK_AIM_LABEL[this.kickAim], sx + 1, sy + 17);
-                ctx.fillStyle = '#7cc4ef';
-                ctx.fillText(KICK_AIM_LABEL[this.kickAim], sx, sy + 16);
-                ctx.textAlign = 'left';
             }
         }
 

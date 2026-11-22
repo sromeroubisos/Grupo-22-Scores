@@ -3,7 +3,7 @@
  * dispositivo en localStorage; Esc siempre pausa, aunque se reasigne todo.
  */
 
-export type ControlAction = 'up' | 'down' | 'passUp' | 'passDown' | 'hit' | 'kick' | 'zone' | 'drop' | 'action' | 'pause';
+export type ControlAction = 'up' | 'down' | 'passUp' | 'passDown' | 'hit' | 'kick' | 'drop' | 'action' | 'pause';
 
 export type Bindings = Record<ControlAction, string>;
 
@@ -14,7 +14,6 @@ export const DEFAULT_BINDINGS: Bindings = {
     passDown: 's',
     hit: 'd',
     kick: 'a',
-    zone: 'e',
     drop: 'q',
     action: ' ',
     pause: 'p',
@@ -26,8 +25,7 @@ export const CONTROL_LABELS: { id: ControlAction; label: string; hint: string }[
     { id: 'passUp', label: 'Pase arriba', hint: 'Mantené para el salteo · defendiendo, sube' },
     { id: 'passDown', label: 'Pase abajo', hint: 'Mantené para el salteo · defendiendo, baja' },
     { id: 'hit', label: 'Chocar', hint: 'Sin pelota, tacklear' },
-    { id: 'kick', label: 'Patear', hint: 'Mantené para cargar, soltá para patear' },
-    { id: 'zone', label: 'Zona de patada', hint: 'Cambia adónde patear: touch, arriba, centro, abajo' },
+    { id: 'kick', label: 'Patear', hint: 'Mantené: aparece la mira y ↑/↓ la mueven · soltá para patear' },
     { id: 'drop', label: 'Drop', hint: 'A 45 m o menos de los palos' },
     { id: 'action', label: 'Acción', hint: 'Mejor pase · cambiar jugador · scrum · line' },
     { id: 'pause', label: 'Pausa', hint: 'Esc también pausa' },
