@@ -1,0 +1,362 @@
+{
+ "dia": "DOMINGO 22 DE NOVIEMBRE",
+ "fase": "FASE DE GRUPOS",
+ "equipos": {
+  "santiago-lawn-tennis-club-7s": {
+   "corto": "Santiago L.T.C.",
+   "escudo": "escudos/santiago-lawn-tennis-club-7s.png",
+   "jugadores": [
+    "Adriano Di Salvo",
+    "Agustin Guijarro Paradelo",
+    "Augusto Mirolo",
+    "Carlos Docampo",
+    "Gonzalo Mansilla",
+    "Ignacio Mansilla",
+    "Juan Cruz Mirolo",
+    "Manuel Lima",
+    "Mateo Estofan",
+    "Maximo Pernigotti",
+    "Nicolas Caputo"
+   ]
+  },
+  "club-la-tablada-7s": {
+   "corto": "La Tablada",
+   "escudo": "escudos/club-la-tablada-7s.png",
+   "jugadores": [
+    "Alvaro Solana",
+    "Bautista Otero",
+    "Fausto Fratessi",
+    "Francesco Bianco",
+    "Lorenzo Dutto",
+    "Lucas Sudria",
+    "Martín Tobal",
+    "Salvador Solana",
+    "Santiago Otero",
+    "Tobias Tosetti",
+    "Valentin Rojas"
+   ]
+  },
+  "universidad-nacional-de-cordoba-7s": {
+   "corto": "U.N.C.",
+   "escudo": "escudos/universidad-nacional-de-cordoba-7s.png",
+   "jugadores": [
+    "Agustin Kurincic",
+    "Benja Meroi",
+    "David Molina",
+    "Elías Molina",
+    "Francisco Torres",
+    "Gino Tinelli",
+    "Juan Ferreiro",
+    "Leandro Agustin Muñoz Carratu",
+    "Mariano García Larrañaga",
+    "Nahuel Millacan",
+    "Roger Ontivero",
+    "Yago Torres"
+   ]
+  },
+  "leones-7": {
+   "corto": "Old Lion",
+   "escudo": "escudos/leones-7.png",
+   "jugadores": [
+    "Felipe Martínez",
+    "Guillermo García",
+    "Ignacio Amaranto",
+    "Joaquín Ledesma",
+    "Juan Cruz Bertilotti",
+    "Juan Cruz Campos",
+    "Lautaro Amaranto",
+    "Omar Saad",
+    "Renzo Farrando",
+    "Thomas Liendo",
+    "Valentin Brunelli"
+   ]
+  },
+  "cordoba-athletic-club-7s": {
+   "corto": "Córdoba Athletic",
+   "escudo": "escudos/cordoba-athletic-club-7s.png",
+   "jugadores": [
+    "Benjamin Campi",
+    "Eros Parada",
+    "Facundo López",
+    "Facundo Mishima",
+    "Juan Francisco Lanzani",
+    "Lautaro Bazan Velez",
+    "Lautaro Castex",
+    "Olivier Courtis",
+    "Salvador Acuña",
+    "Santiago Manzur",
+    "Tomas Amusategui",
+    "Valentin Reinoso"
+   ]
+  },
+  "invitacion-cagnoli": {
+   "corto": "Inv. Cagnoli",
+   "escudo": "escudos/invitacion-cagnoli.png",
+   "jugadores": [
+    "Agustin Lucena",
+    "Fabricio Montenegro",
+    "Gaston Pacheco",
+    "Javier Bandeira",
+    "Joaquin Martinez",
+    "Lucas Coronel",
+    "Luciano Gimenez",
+    "Matias Colussi",
+    "Renzo Peon",
+    "Thiago Bejarano"
+   ]
+  },
+  "locos-por-el-seven": {
+   "corto": "Locos x7",
+   "escudo": null,
+   "jugadores": [
+    "Bautista Ponia",
+    "Benjamin Moyano",
+    "Fernando Mendieta",
+    "Guillermo Fontana",
+    "Ignacio Rosso",
+    "Joaquin Jazbec",
+    "Juan Pablo Cerreto",
+    "Luciano Zalasar",
+    "Santiago Gamarra",
+    "Santiago Suarez",
+    "Valentin Sartori"
+   ]
+  },
+  "la-banda-de-hugo": {
+   "corto": "Universitario",
+   "escudo": "escudos/la-banda-de-hugo.png",
+   "jugadores": [
+    "Agustin Bernie",
+    "Augusto Tula",
+    "Facundo Garay",
+    "Farid Hamud",
+    "Felix Aballay",
+    "Fernando Nieto",
+    "Franco Kogan",
+    "Jose Castro",
+    "Josue Simón",
+    "Juan Cruz Menendez",
+    "Juan Manuel Dorrego",
+    "Maximiliano Brizuela"
+   ]
+  },
+  "baguales": {
+   "corto": "Baguales",
+   "escudo": "escudos/baguales.png",
+   "jugadores": [
+    "Agusto Ramírez",
+    "Francisco Sosa",
+    "Guillermo García",
+    "Imanol Yañes",
+    "Juan Cruz Bertilotti",
+    "Juan Cruz Campos",
+    "Lautaro Amaranto",
+    "Rodrigo Taborda",
+    "Thomas Liendo",
+    "Tomás Suárez"
+   ]
+  }
+ },
+ "partidos": [
+  {
+   "n": 1,
+   "hora": "15:00",
+   "local": "santiago-lawn-tennis-club-7s",
+   "visita": "club-la-tablada-7s",
+   "zona": "ZONA A",
+   "etapa": "FASE DE GRUPOS · ZONA A",
+   "puntos": {
+    "local": 19,
+    "visita": 12
+   }
+  },
+  {
+   "n": 2,
+   "hora": "15:20",
+   "local": "leones-7",
+   "visita": "cordoba-athletic-club-7s",
+   "zona": "ZONA B",
+   "etapa": "FASE DE GRUPOS · ZONA B",
+   "puntos": {
+    "local": 7,
+    "visita": 21
+   }
+  },
+  {
+   "n": 3,
+   "hora": "15:40",
+   "local": "locos-por-el-seven",
+   "visita": "la-banda-de-hugo",
+   "zona": "ZONA C",
+   "etapa": "FASE DE GRUPOS · ZONA C",
+   "puntos": {
+    "local": 12,
+    "visita": 14
+   }
+  },
+  {
+   "n": 4,
+   "hora": "16:00",
+   "local": "santiago-lawn-tennis-club-7s",
+   "visita": "universidad-nacional-de-cordoba-7s",
+   "zona": "ZONA A",
+   "etapa": "FASE DE GRUPOS · ZONA A"
+  },
+  {
+   "n": 5,
+   "hora": "16:20",
+   "local": "leones-7",
+   "visita": "invitacion-cagnoli",
+   "zona": "ZONA B",
+   "etapa": "FASE DE GRUPOS · ZONA B"
+  },
+  {
+   "n": 6,
+   "hora": "16:40",
+   "local": "locos-por-el-seven",
+   "visita": "baguales",
+   "zona": "ZONA C",
+   "etapa": "FASE DE GRUPOS · ZONA C"
+  },
+  {
+   "n": 7,
+   "hora": "17:00",
+   "local": "club-la-tablada-7s",
+   "visita": "universidad-nacional-de-cordoba-7s",
+   "zona": "ZONA A",
+   "etapa": "FASE DE GRUPOS · ZONA A"
+  },
+  {
+   "n": 8,
+   "hora": "17:20",
+   "local": "cordoba-athletic-club-7s",
+   "visita": "invitacion-cagnoli",
+   "zona": "ZONA B",
+   "etapa": "FASE DE GRUPOS · ZONA B"
+  },
+  {
+   "n": 9,
+   "hora": "17:40",
+   "local": "la-banda-de-hugo",
+   "visita": "baguales",
+   "zona": "ZONA C",
+   "etapa": "FASE DE GRUPOS · ZONA C"
+  }
+ ],
+ "zonas": [
+  {
+   "nombre": "ZONA A",
+   "filas": [
+    {
+     "id": "universidad-nacional-de-cordoba-7s",
+     "j": 2,
+     "g": 2,
+     "e": 0,
+     "p": 0,
+     "pf": 41,
+     "pc": 15,
+     "dif": 26,
+     "pts": 8
+    },
+    {
+     "id": "santiago-lawn-tennis-club-7s",
+     "j": 2,
+     "g": 1,
+     "e": 0,
+     "p": 1,
+     "pf": 29,
+     "pc": 29,
+     "dif": 0,
+     "pts": 4
+    },
+    {
+     "id": "club-la-tablada-7s",
+     "j": 2,
+     "g": 0,
+     "e": 0,
+     "p": 2,
+     "pf": 17,
+     "pc": 43,
+     "dif": -26,
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "nombre": "ZONA B",
+   "filas": [
+    {
+     "id": "cordoba-athletic-club-7s",
+     "j": 2,
+     "g": 2,
+     "e": 0,
+     "p": 0,
+     "pf": 54,
+     "pc": 7,
+     "dif": 47,
+     "pts": 8
+    },
+    {
+     "id": "leones-7",
+     "j": 2,
+     "g": 1,
+     "e": 0,
+     "p": 1,
+     "pf": 33,
+     "pc": 26,
+     "dif": 7,
+     "pts": 4
+    },
+    {
+     "id": "invitacion-cagnoli",
+     "j": 2,
+     "g": 0,
+     "e": 0,
+     "p": 2,
+     "pf": 5,
+     "pc": 59,
+     "dif": -54,
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "nombre": "ZONA C",
+   "filas": [
+    {
+     "id": "la-banda-de-hugo",
+     "j": 2,
+     "g": 2,
+     "e": 0,
+     "p": 0,
+     "pf": 35,
+     "pc": 19,
+     "dif": 16,
+     "pts": 8
+    },
+    {
+     "id": "locos-por-el-seven",
+     "j": 2,
+     "g": 0,
+     "e": 1,
+     "p": 1,
+     "pf": 31,
+     "pc": 33,
+     "dif": -2,
+     "pts": 2
+    },
+    {
+     "id": "baguales",
+     "j": 2,
+     "g": 0,
+     "e": 1,
+     "p": 1,
+     "pf": 26,
+     "pc": 40,
+     "dif": -14,
+     "pts": 2
+    }
+   ]
+  }
+ ]
+}
