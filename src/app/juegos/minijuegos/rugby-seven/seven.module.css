@@ -487,17 +487,19 @@
     display: inline-block;
 }
 
+/* Nivel del rival en estrellas (de 1 a 5): la misma marca, recortada en forma de estrella. */
 .level {
     display: inline-flex;
-    gap: 2px;
+    gap: 1px;
+    align-items: center;
 }
 
 .level i {
-    width: 8px;
-    height: 10px;
-    background: #2b3040;
-    border: 1px solid #050608;
+    width: 12px;
+    height: 12px;
+    background: #3a4054;
     display: inline-block;
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
 }
 
 .level .levelOn {
@@ -3992,4 +3994,48 @@
     gap: 10px;
     margin-top: auto;
     padding-top: 8px;
+}
+
+/* Carrera internacional: plantel con convocados y titulares elegibles a mano. */
+.rosterList li.rosterPick {
+    grid-template-columns: minmax(0, 90px) minmax(0, 150px) 1fr auto auto;
+}
+
+.rosterActions {
+    display: flex;
+    gap: 6px;
+}
+
+.rosterActions .chip {
+    min-height: 32px;
+    padding: 4px 8px;
+}
+
+.chip[aria-pressed='true'] {
+    border-color: #050608;
+    background: var(--gold);
+    color: #141218;
+}
+
+.chip:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.rosterWhy {
+    display: block;
+    margin-top: 2px;
+    color: var(--color-text-secondary);
+    font-style: italic;
+}
+
+@media (max-width: 640px) {
+    .rosterList li.rosterPick {
+        grid-template-columns: 1fr auto;
+    }
+
+    .rosterList li.rosterPick .rosterAge,
+    .rosterList li.rosterPick .rosterActions {
+        grid-column: 1 / -1;
+    }
 }

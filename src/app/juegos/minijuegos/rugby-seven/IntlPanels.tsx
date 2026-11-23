@@ -24,7 +24,10 @@ import {
     upgradeCost,
     upgradeYears,
     upkeepOf,
-    xv,
+    calledIds,
+    starterIds,
+    CALL_SIZE,
+    STARTERS,
     type Area,
     type IntlState,
 } from './intl';
@@ -135,29 +138,75 @@ export function IntlUnion({ r, onInvest }: { r: IntlState; onInvest: (a: Area) =
 
 const ORIGIN: Record<string, string> = { local: 'Local', herencia: 'Herencia', residencia: 'Residencia' };
 
-/** El plantel: los 15 que juegan, el resto, los juveniles de la academia y los elegibles que se pueden convocar. */
-export function IntlSquad({ r, onSign }: { r: IntlState; onSign: (id: number) => void }) {
-    const titulares = new Set(xv(r).map((p) => p.id));
-    const squad = [...r.squad].sort((a, b) => Number(titulares.has(b.id)) - Number(titulares.has(a.id)) || b.ovr - a.ovr);
+/**
+ * El plantel: todos los elegibles; de ellos, los 12 convocados y los 7 titulares los elige el usuario.
+ * Después, los juveniles de la academia y los elegibles que se pueden convocar.
+ */
+export function IntlSquad({ r, onSign, onCall, onStart }: { r: IntlState; onSign: (id: number) => void; onCall: (id: number) => void; onStart: (id: number) => void }) {
+    const called = new Set(calledIds(r));
+    const starters = new Set(starterIds(r));
+    const rank = (id: number) => (starters.has(id) ? 2 : called.has(id) ? 1 : 0);
+    const squad = [...r.squad].sort((a, b) => rank(b.id) - rank(a.id) || b.ovr - a.ovr);
     const youth = [...r.youth].sort((a, b) => b.pot - a.pot);
+    const callFull = called.size >= CALL_SIZE;
+    const startFull = starters.size >= STARTERS;
     return (
         <div className={styles.rosterPanel}>
-            <h3 className={styles.groupTitle}>Plantel · {r.squad.length} jugadores</h3>
-            <p className={styles.note}>Juegan los 15 mejores disponibles. Crecen hasta los 27-28, se sostienen hasta los 30 y después bajan; se retiran entre los 33 y los 36.</p>
+            <h3 className={styles.groupTitle}>Plantel · {r.squad.length} elegibles</h3>
+            <p className={styles.note}>
+                Convocados {called.size}/{CALL_SIZE} · Titulares {starters.size}/{STARTERS}. Los 7 titulares salen a la cancha; el nivel del equipo es el de los 12, con los titulares pesando
+                el doble. Si dejás lugares libres, al jugar los completan los mejores disponibles.
+            </p>
             <ul className={styles.rosterList}>
                 {squad.map((p) => {
                     const waiting = !!p.from && p.from > r.season;
+                    const isCalled = called.has(p.id);
+                    const isStarter = starters.has(p.id);
+                    const callBlocked = !isCalled && (waiting || callFull);
+                    const startBlocked = !isStarter && (!isCalled || startFull);
+                    const why = waiting
+                        ? `Elegible en ${p.from}`
+                        : callBlocked
+                          ? 'Convocatoria completa: sacá a uno para sumarlo'
+                          : startBlocked
+                            ? !isCalled
+                                ? 'Convocalo para que pueda ser titular'
+                                : 'Ya hay 7 titulares: mandá uno al banco'
+                            : null;
                     return (
-                        <li key={p.id} className={waiting ? styles.rosterOut : undefined}>
-                            <span className={styles.rosterPos}>{titulares.has(p.id) ? 'XV' : waiting ? 'Espera' : 'Plantel'}</span>
+                        <li key={p.id} className={`${styles.rosterPick} ${waiting ? styles.rosterOut : ''}`}>
+                            <span className={styles.rosterPos}>{isStarter ? 'Titular' : isCalled ? 'Suplente' : waiting ? 'Espera' : 'Plantel'}</span>
                             <span className={styles.rosterName}>
                                 {p.first} {p.last}
                             </span>
                             <span className={styles.rosterAge}>
                                 {p.pos === 'fw' ? 'Forward' : 'Back'} · {p.age} años · {p.caps} caps · {ORIGIN[p.origin]}
                                 {waiting ? ` · elegible en ${p.from}` : ''} · techo {p.pot.toFixed(1)}
+                                {why && <small className={styles.rosterWhy}>{why}</small>}
                             </span>
                             <span className={p.ovr >= 7 ? styles.fixWin : p.ovr < 4 ? styles.fixLoss : undefined}>{p.ovr.toFixed(1)}</span>
+                            <span className={styles.rosterActions}>
+                                <button
+                                    type="button"
+                                    className={styles.chip}
+                                    aria-pressed={isCalled}
+                                    disabled={callBlocked}
+                                    aria-label={`${isCalled ? 'Desconvocar' : 'Convocar'} a ${p.first} ${p.last}`}
+                                    onClick={() => onCall(p.id)}
+                                >
+                                    Convocado
+                                </button>
+                                <button
+                                    type="button"
+                                    className={styles.chip}
+                                    aria-pressed={isStarter}
+                                    disabled={startBlocked}
+                                    aria-label={`${isStarter ? 'Mandar al banco' : 'Poner de titular'} a ${p.first} ${p.last}`}
+                                    onClick={() => onStart(p.id)}
+                                >
+                                    Titular
+                                </button>
+                            </span>
                         </li>
                     );
                 })}

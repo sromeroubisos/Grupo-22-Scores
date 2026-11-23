@@ -12,7 +12,7 @@
  * Carrera, en features/career/engine).
  */
 
-import { DIFF, type DiffParams, type Difficulty, type SevenTeam } from './teams';
+import { DIFF, cpuRatingFor, type DiffParams, type Difficulty, type SevenTeam } from './teams';
 import { playerNames } from './names';
 import { DIVE_ANCHOR, drawBall, playerSprite, SPRITE_H, type Frame, type Kit, type Look } from './sprites';
 
@@ -124,23 +124,35 @@ export interface MatchConfig {
 }
 
 /** Cuánto se abre de costado el portador rival cuando lo apuran (m/s). */
-const DODGE_VY: Record<Difficulty, number> = { 'muy-facil': 3.2, facil: 4, normal: 5, dificil: 5.8, leyenda: 6.3 };
+const DODGE_VY: Record<Difficulty, number> = { 'muy-facil': 3.2, facil: 4, normal: 5, dificil: 5.8, leyenda: 6.3, extremo: 6.6 };
 /** Ancho del verde en tu saque de line, por dificultad (antes de la altura de los saltadores). */
-const LINE_ZONE: Record<Difficulty, number> = { 'muy-facil': 0.36, facil: 0.3, normal: 0.24, dificil: 0.2, leyenda: 0.16 };
-/** Robar el line del rival: la franja verde se achica con la dificultad. */
-const LINE_STEAL: Record<Difficulty, number> = { 'muy-facil': 0.2, facil: 0.15, normal: 0.1, dificil: 0.08, leyenda: 0.06 };
+const LINE_ZONE: Record<Difficulty, number> = { 'muy-facil': 0.36, facil: 0.3, normal: 0.24, dificil: 0.2, leyenda: 0.16, extremo: 0.14 };
+/**
+ * Robar el line del rival: la franja verde se achica con la dificultad. Es angosta a propósito: el
+ * saque es del otro, que lo tiene ensayado. Acertar no alcanza (ver LINE_STEAL_ODDS).
+ */
+const LINE_STEAL: Record<Difficulty, number> = { 'muy-facil': 0.12, facil: 0.09, normal: 0.07, dificil: 0.06, leyenda: 0.05, extremo: 0.045 };
+/** Tope de la franja de robo aunque tus saltadores sean mucho más altos. */
+const LINE_STEAL_MAX = 0.15;
+/** En el saque rival la marca corre más rápido que en el tuyo. */
+const LINE_STEAL_SPEED = 1.25;
+/**
+ * Aunque cortes en el verde, el saltador rival tiene que fallar: chance de quedártela una vez que
+ * acertaste (antes de la altura). En el rugby de verdad se roba uno de cada cinco o seis.
+ */
+const LINE_STEAL_ODDS: Record<Difficulty, number> = { 'muy-facil': 0.6, facil: 0.45, normal: 0.36, dificil: 0.3, leyenda: 0.24, extremo: 0.2 };
 /** Lo rápido que corre la marca del line: más difícil, más rápida. */
-const LINE_SPEED: Record<Difficulty, number> = { 'muy-facil': 1.0, facil: 1.18, normal: 1.35, dificil: 1.5, leyenda: 1.68 };
+const LINE_SPEED: Record<Difficulty, number> = { 'muy-facil': 1.0, facil: 1.18, normal: 1.35, dificil: 1.5, leyenda: 1.68, extremo: 1.8 };
 /**
  * Puntos de velocidad personal (en la escala 1 a 10 de las skills) que la defensa rival suma sobre
  * su propio nivel, según la dificultad. Es un empujón a SUS estadísticas, no una velocidad fija:
  * contra un equipo mucho peor siguen siendo más lentos que tus jugadores.
  */
-const CPU_DEF_SPD_PTS: Record<Difficulty, number> = { 'muy-facil': 0, facil: 0.5, normal: 1, dificil: 1.5, leyenda: 2 };
+const CPU_DEF_SPD_PTS: Record<Difficulty, number> = { 'muy-facil': 0, facil: 0.5, normal: 1, dificil: 1.5, leyenda: 2, extremo: 2.3 };
 /** Chance de que el rival ataje una patada a touch si llegó a la zona (se multiplica por sus manos). */
-const CPU_CATCH: Record<Difficulty, number> = { 'muy-facil': 0.35, facil: 0.5, normal: 0.65, dificil: 0.78, leyenda: 0.88 };
+const CPU_CATCH: Record<Difficulty, number> = { 'muy-facil': 0.35, facil: 0.5, normal: 0.65, dificil: 0.78, leyenda: 0.88, extremo: 0.92 };
 /** Empujón extra a la velocidad de la defensa rival: la cierra más rápido y complica el juego. */
-const CPU_DEF_BOOST: Record<Difficulty, number> = { 'muy-facil': 1.03, facil: 1.09, normal: 1.15, dificil: 1.2, leyenda: 1.25 };
+const CPU_DEF_BOOST: Record<Difficulty, number> = { 'muy-facil': 1.03, facil: 1.09, normal: 1.15, dificil: 1.2, leyenda: 1.25, extremo: 1.28 };
 
 /** A dónde apunta tu patada: lo elige el jugador (tecla Zona) y se ve en la cancha. */
 export type KickAim = 'auto' | 'touchUp' | 'touchDown' | 'up' | 'mid' | 'down' | 'manual';
@@ -155,9 +167,9 @@ export const KICK_AIM_LABEL: Record<KickAim, string> = {
     manual: 'A MANO',
 };
 /** A qué velocidad corren los rivales a buscar una patada o una pelota suelta (m/s). */
-const CPU_CHASE: Record<Difficulty, number> = { 'muy-facil': 6.6, facil: 7.5, normal: 8.3, dificil: 8.8, leyenda: 9.3 };
+const CPU_CHASE: Record<Difficulty, number> = { 'muy-facil': 6.6, facil: 7.5, normal: 8.3, dificil: 8.8, leyenda: 9.3, extremo: 9.6 };
 /** Pelota suelta disputada: lo que le cuesta al rival quedársela si llegan juntos. */
-const CPU_GRAB: Record<Difficulty, number> = { 'muy-facil': 0.3, facil: 0.4, normal: 0.5, dificil: 0.58, leyenda: 0.66 };
+const CPU_GRAB: Record<Difficulty, number> = { 'muy-facil': 0.3, facil: 0.4, normal: 0.5, dificil: 0.58, leyenda: 0.66, extremo: 0.7 };
 
 /** Lo que dura el minuto extra antes de la muerte súbita (s). */
 const EXTRA_LEN = 60;
@@ -226,7 +238,7 @@ function withRating(base: DiffParams, cpuRating: number, userRating: number): Di
  * que lo que metés en 3 minutos no se duplica en 7. Muy fácil: 54 a los 3', 90 a
  * los 7'. Normal: 33 y 55.
  */
-const PACE_K: Record<Difficulty, number> = { 'muy-facil': 28, facil: 20, normal: 14, dificil: 11, leyenda: 9 };
+const PACE_K: Record<Difficulty, number> = { 'muy-facil': 28, facil: 20, normal: 14, dificil: 11, leyenda: 9, extremo: 8 };
 export function paceCap(difficulty: Difficulty, minutes: number): number {
     return PACE_K[difficulty] * Math.max(0, minutes) ** 0.6;
 }
@@ -257,6 +269,81 @@ function pressured(b: DiffParams, def: number, atk: number): DiffParams {
     };
 }
 
+/**
+ * Rachas anímicas. Un partido no se juega parejo de punta a punta: el rival tiene pasajes en los que
+ * se agranda y otros en los que le cuesta. Cuánto se mueve depende de la dificultad: en muy fácil
+ * puede tener un rato muy bueno y después caerse; en leyenda casi no se mueve, rinde siempre.
+ * Es lo que evita que tantos partidos terminen con un equipo en cero.
+ */
+/**
+ * Cómo se mueve el rival en cada dificultad:
+ * - `swing`: cuántos NIVELES de dificultad se corre en su mejor (o peor) pasaje;
+ * - `bias`: hacia dónde tira de entrada (negativo = vive en bajón);
+ * - `trend`: cuánto mejora a medida que avanza el partido (0 al arranque, todo al final);
+ * - `upCap`: tope de su mejor pasaje, en niveles;
+ * - `spell`: cuánto dura un pasaje, en segundos de juego (cortos = oleadas que cambian rápido).
+ *
+ * Muy fácil: casi siempre en bajón, con oleadas cortas que lo levantan un poco y se le pasan.
+ * Fácil: arranca flojo y cada vez tiene más pasajes buenos. De normal para arriba, cada vez más
+ * parejo; en extremo no se mueve (y juega con cinco estrellas).
+ */
+const MOOD_PROFILE: Record<Difficulty, { swing: number; bias: number; trend: number; upCap: number; spell: [number, number] }> = {
+    'muy-facil': { swing: 0.6, bias: -0.55, trend: 0, upCap: 0.3, spell: [8, 20] },
+    facil: { swing: 1, bias: -0.25, trend: 0.7, upCap: 1, spell: [15, 40] },
+    normal: { swing: 0.85, bias: 0, trend: 0.2, upCap: 0.85, spell: [20, 50] },
+    dificil: { swing: 0.6, bias: 0, trend: 0, upCap: 0.6, spell: [25, 55] },
+    leyenda: { swing: 0.35, bias: 0, trend: 0, upCap: 0.35, spell: [30, 60] },
+    extremo: { swing: 0.15, bias: 0, trend: 0, upCap: 0.15, spell: [30, 60] },
+};
+/** El ánimo del rival en niveles, a partir del pasaje normalizado (-1..1). */
+const cpuLevels = (d: Difficulty, target: number) => Math.min(target * MOOD_PROFILE[d].swing, MOOD_PROFILE[d].upCap);
+/** Lo que se mueve tu equipo: poco, y igual en todas las dificultades (lo tuyo lo pone el que juega). */
+const USER_SWING = 0.22;
+/** Pasajes de tu equipo (y el mínimo que asegura el orgullo). */
+const SPELL_MIN = 20;
+const SPELL_MAX = 50;
+/** Orgullo: si está en cero y abajo por esto o más, el que recibe el tanto reacciona en el acto. */
+const PRIDE_GAP = 10;
+
+const LEVELS: Difficulty[] = ['muy-facil', 'facil', 'normal', 'dificil', 'leyenda', 'extremo'];
+/** Lo que el ánimo no toca: tu patada a los palos es tuya. */
+const MOOD_KEEP: (keyof DiffParams)[] = ['kickWindow'];
+const PROB_KEYS = new Set<keyof DiffParams>(['cpuTackle', 'breakHit', 'dodge', 'userTackle', 'cpuBreak', 'intercept', 'ruckKeep', 'cpuRuckKeep', 'cpuKick']);
+
+/** Los parámetros de una dificultad "intermedia" (índice fraccionario), estirando la recta en las puntas. */
+function levelAt(idx: number): DiffParams {
+    const i = clamp(Math.floor(idx), 0, LEVELS.length - 2);
+    const f = idx - i;
+    const a = DIFF[LEVELS[i]];
+    const b = DIFF[LEVELS[i + 1]];
+    const out = { ...a };
+    for (const k of Object.keys(a) as (keyof DiffParams)[]) out[k] = a[k] + (b[k] - a[k]) * f;
+    return out;
+}
+
+/**
+ * El ánimo encima de los parámetros. `cpu` está en niveles: +1 es el rival jugando un nivel arriba
+ * del elegido (corre, tacklea, rompe y lee el pase como el de arriba), -1 un nivel abajo. Se suma
+ * como diferencia, así respeta el ranking y la presión que ya traían. `user` es tu equipo, más suave.
+ */
+function inMood(b: DiffParams, difficulty: Difficulty, cpu: number, user: number): DiffParams {
+    const base = LEVELS.indexOf(difficulty);
+    const from = DIFF[difficulty];
+    const to = levelAt(clamp(base + cpu, -0.5, LEVELS.length - 0.5));
+    const out = { ...b };
+    for (const k of Object.keys(from) as (keyof DiffParams)[]) {
+        if (MOOD_KEEP.includes(k)) continue;
+        const v = b[k] + (to[k] - from[k]);
+        out[k] = PROB_KEYS.has(k) ? clamp(v, 0.03, 0.98) : Math.max(from[k] * 0.3, v);
+    }
+    out.breakHit = clamp(out.breakHit * (1 + user * 0.3), 0.03, 0.98);
+    out.dodge = clamp(out.dodge * (1 + user * 0.3), 0.03, 0.98);
+    out.userTackle = clamp(out.userTackle * (1 + user * 0.15), 0.3, 0.99);
+    out.ruckKeep = clamp(out.ruckKeep + user * 0.03, 0.6, 0.98);
+    out.kickWindow = b.kickWindow * (1 + user * 0.2);
+    return out;
+}
+
 /** Una línea del relato del partido (lo jugado y lo simulado). */
 export interface MatchEvent {
     t: number; // segundos de juego transcurridos
@@ -265,7 +352,7 @@ export interface MatchEvent {
     score: [number, number] | null; // marcador después, si cambió
     sim: boolean;
     /** Si sumó puntos: quién (puesto 0-6 del equipo de `side`) y cómo. Alimenta las tablas de goleadores. */
-    stat?: { slot: number; kind: 'try' | 'conv' | 'drop' | 'miss' | 'tackle' };
+    stat?: { slot: number; kind: 'try' | 'conv' | 'drop' | 'miss' | 'tackle' | 'missTackle' };
 }
 
 /**
@@ -273,7 +360,7 @@ export interface MatchEvent {
  * 10 tackles tuyos cuántos entran, y de cada 10 choques o amagues cuántos rompen.
  */
 export function matchupOdds(difficulty: Difficulty, cpuRating: number, userRating: number): { tackle: number; breakLine: number } {
-    const d = withRating(DIFF[difficulty], cpuRating, userRating);
+    const d = withRating(DIFF[difficulty], cpuRatingFor(difficulty, cpuRating), userRating);
     return { tackle: Math.round(d.userTackle * 10), breakLine: Math.round(((d.breakHit + d.dodge) / 2) * 10) };
 }
 
@@ -298,6 +385,13 @@ export class SevenMatch {
     pressure = { def: 0, atk: 0 };
     private pressureTick = 0;
     private warned = false;
+    /**
+     * Ánimo vivo de cada lado (0 = parejo). `target` es el pasaje en curso; `now` lo sigue de a poco,
+     * así un cambio de racha se siente en unos segundos y no de golpe.
+     */
+    mood = { cpu: 0, user: 0 };
+    private moodTarget = { cpu: 0, user: 0 };
+    private spellLeft = 0;
     /** Relato: tries, conversiones y drops, jugados o simulados. */
     log: MatchEvent[] = [];
     readonly kits: [Kit, Kit];
@@ -353,7 +447,7 @@ export class SevenMatch {
 
     constructor(cfg: MatchConfig) {
         this.cfg = cfg;
-        this.baseD = withRating(DIFF[cfg.difficulty], cfg.away.rating ?? 70, cfg.home.rating ?? 70);
+        this.baseD = withRating(DIFF[cfg.difficulty], cpuRatingFor(cfg.difficulty, cfg.away.rating), cfg.home.rating ?? 70);
         this.D = this.baseD;
         this.kits = [cfg.home.kit, awayKit(cfg.home.kit, cfg.away.kit)];
         this.halfLen = (cfg.minutes * 60) / 2;
@@ -430,6 +524,13 @@ export class SevenMatch {
     startKick() {
         const c = this.ball.holder;
         if (this.phase !== 'play' || !c || c.side !== 0 || c.passT > 0 || c.down > 0) return;
+        // Con la chicharra ya sonada, patear es tirarla a la tribuna: se termina el tiempo ahí.
+        // Si querés seguir, no pateés: movela y jugá.
+        if (this.lastPlay) {
+            this.say('A LA TRIBUNA', 'La tira afuera y se termina', 1.4);
+            this.endHalf();
+            return;
+        }
         this.kickCharge = 0;
         // La mira arranca derecho adelante; el jugador la mueve (↑/↓ o el dedo) y suelta para patear.
         this.kickAim = 'manual';
@@ -533,7 +634,8 @@ export class SevenMatch {
     /** Factores sobre la base del partido: con skill 6 no cambia nada. */
     private fSpd = (p: Player) => 1 + (this.skill(p, 'spd') - 6) * 0.028;
     private fKick = (p: Player) => clamp(1 + (this.skill(p, 'kick') - 6) * 0.07, 0.6, 1.3);
-    private fTkl = (p: Player) => clamp(1 + (this.skill(p, 'tkl') - 6) * 0.045, 0.75, 1.2);
+    /** Tackle: de 1 a 10, cada punto mueve un 6% las chances de agarrar (o de zafar si sos el portador). */
+    private fTkl = (p: Player) => clamp(1 + (this.skill(p, 'tkl') - 6) * 0.06, 0.7, 1.25);
     /** Manos (sale de "pase y patada"): pases más rápidos y difíciles de cortar, menos pelotas al piso. */
     private fHands = (p: Player) => clamp(1 + (this.skill(p, 'kick') - 6) * 0.05, 0.7, 1.25);
 
@@ -994,8 +1096,8 @@ export class SevenMatch {
         const total = this.halfLen * 2;
         let t = this.elapsed();
         const ru = this.cfg.home.rating ?? 70;
-        const rc = this.cfg.away.rating ?? 70;
-        const bias: Record<Difficulty, number> = { 'muy-facil': 0.25, facil: 0.1, normal: -0.05, dificil: -0.12, leyenda: -0.18 };
+        const rc = cpuRatingFor(this.cfg.difficulty, this.cfg.away.rating);
+        const bias: Record<Difficulty, number> = { 'muy-facil': 0.25, facil: 0.1, normal: -0.05, dificil: -0.12, leyenda: -0.18, extremo: -0.22 };
         const model = clamp(1 / (1 + 10 ** ((rc - ru) / 18)) + bias[this.cfg.difficulty], 0.08, 0.92);
         // Cómo venía el partido: pesa, sin mandar.
         const played = (this.score[0] + 3) / (this.score[0] + this.score[1] + 6);
@@ -1016,7 +1118,14 @@ export class SevenMatch {
         };
         const holder = this.ball.holder ?? this.ball.flight?.to ?? null;
         let pos: Side = holder ? holder.side : this.starter;
-        const strength = (s: Side) => (s === 0 ? share : 1 - share);
+        // Las rachas también corren en lo simulado: el pasaje en curso sigue y después cambia igual que en cancha.
+        let spellEnd = t + Math.max(0, this.spellLeft);
+        const cpuMood = () =>
+            cpuLevels(this.cfg.difficulty, this.moodTarget.cpu) - this.moodTarget.user * USER_SWING;
+        const strength = (s: Side) => {
+            const u = clamp(share - cpuMood() * 0.15, 0.05, 0.95);
+            return s === 0 ? u : 1 - u;
+        };
         const tryProb = (s: Side, at: number) => {
             let p = 0.04 + 0.6 * strength(s) ** 1.2;
             if (this.score[s] > paceCap(this.cfg.difficulty, at / 60) + 5) p *= 0.5;
@@ -1032,15 +1141,24 @@ export class SevenMatch {
         const possession = (at: number, sudden: boolean): boolean => {
             const s = pos;
             const o: Side = s === 0 ? 1 : 0;
+            if (at >= spellEnd) {
+                spellEnd = at + this.spellLen();
+                this.moodTarget = { cpu: this.nextSpell(this.moodTarget.cpu, 1, at), user: this.nextSpell(this.moodTarget.user, 0, at) };
+            }
             // Cada posesión del que ataca deja unos tackles del que defiende (se anotan en el log, no en el relato).
             const nTackles = 2 + Math.floor(rnd() * 3);
             for (let k = 0; k < nTackles; k++) {
-                this.log.push({ t: Math.min(at, total), side: o, text: '', score: null, sim: true, stat: { slot: pick(TACKLER_W), kind: 'tackle' } });
+                const slot = pick(TACKLER_W);
+                // Erra más el que tacklea peor: la habilidad de tackle del que defiende.
+                const df = this.team(o)[slot];
+                const miss = clamp(0.2 - (this.skill(df, 'tkl') - 6) * 0.03, 0.05, 0.4);
+                this.log.push({ t: Math.min(at, total), side: o, text: '', score: null, sim: true, stat: { slot, kind: rnd() < miss ? 'missTackle' : 'tackle' } });
             }
             const r = rnd();
             const pt = tryProb(s, at);
             if (r < pt) {
                 this.score[s] += 5;
+                this.moodAfterScore(s, 5);
                 const scorerSlot = pick(TRY_W);
                 add(s, `Try de ${names[s][scorerSlot].short} ${TRY_HOW[Math.floor(rnd() * TRY_HOW.length)]}`, true, at, { slot: scorerSlot, kind: 'try' });
                 if (sudden) return true;
@@ -1056,6 +1174,7 @@ export class SevenMatch {
                 const kicker = names[s][4].short;
                 if (rnd() < (s === 0 ? 0.45 : this.D.cpuKick * 0.7)) {
                     this.score[s] += 3;
+                    this.moodAfterScore(s, 3);
                     add(s, `Drop de ${kicker}`, true, at, { slot: 4, kind: 'drop' });
                 } else add(s, `${kicker} prueba el drop y se va afuera`, false, at);
                 pos = o;
@@ -1157,8 +1276,12 @@ export class SevenMatch {
         const lx = clamp(x, TRY_L + 6, TRY_R - 6);
         this.lineout = { x: lx, y: top ? 0 : WIDTH, thrower };
         this.mg = {
-            kind: 'timing', cursor: 0, dir: 1, speed: LINE_SPEED[this.cfg.difficulty],
-            zone: clamp((thrower === 0 ? LINE_ZONE[this.cfg.difficulty] : LINE_STEAL[this.cfg.difficulty]) * (this.jumpers(0) / this.jumpers(1)) ** 6, 0.04, 0.45),
+            kind: 'timing', cursor: 0, dir: 1,
+            speed: LINE_SPEED[this.cfg.difficulty] * (thrower === 0 ? 1 : LINE_STEAL_SPEED),
+            zone:
+                thrower === 0
+                    ? clamp(LINE_ZONE[this.cfg.difficulty] * (this.jumpers(0) / this.jumpers(1)) ** 6, 0.04, 0.45)
+                    : clamp(LINE_STEAL[this.cfg.difficulty] * (this.jumpers(0) / this.jumpers(1)) ** 6, 0.03, LINE_STEAL_MAX),
             userActs: true, done: false, win: false,
         };
         this.phase = 'lineout';
@@ -1185,6 +1308,7 @@ export class SevenMatch {
     private scoreTry(c: Player) {
         const side = c.side;
         this.score[side] += 5;
+        this.moodAfterScore(side, 5);
         this.lastTry = { side, y: c.y };
         c.pose = 'dive';
         c.vx = this.dir(side) * 6;
@@ -1307,6 +1431,7 @@ export class SevenMatch {
         const other: Side = scorer === 0 ? 1 : 0;
         if (this.dropOk) {
             this.score[scorer] += 3;
+            this.moodAfterScore(scorer, 3);
             this.say('DROP CONVERTIDO', '+3', 1.4);
             const kicker = this.nearestTo(scorer, from.x, from.y);
             this.note(scorer, kicker ? `Drop de ${this.nameOf(kicker)}` : "Drop", true, { slot: kicker?.i ?? 4, kind: 'drop' });
@@ -1346,10 +1471,71 @@ export class SevenMatch {
         const def = clamp(min * 0.04 + overUser * 0.07, 0, 1.6);
         const atk = clamp(min * 0.025 + overUser * 0.035 - overCpu * 0.03, -0.8, 0.9);
         this.pressure = { def, atk };
-        this.D = pressured(this.baseD, def, atk);
+        this.updateMood();
+        this.D = inMood(pressured(this.baseD, def, atk), this.cfg.difficulty, this.mood.cpu, this.mood.user);
         if (!this.warned && def >= 0.4 && this.phase === 'play') {
             this.warned = true;
             this.say('AJUSTE', 'El rival cierra la defensa', 1.4);
+        }
+    }
+
+    /**
+     * El pasaje que viene. Lo tira al azar, pero con memoria: después de un rato muy bueno tiende a
+     * venir uno flojo, y al revés. El que está en cero y abajo por más de un try reacciona por orgullo:
+     * su próximo pasaje sale para arriba. Devuelve el ánimo normalizado (-1..1); la dificultad lo escala.
+     */
+    private nextSpell(prev: number, side: Side, at = this.elapsed()): number {
+        const other: Side = side === 0 ? 1 : 0;
+        const pride = this.score[side] === 0 && this.score[other] - this.score[side] >= PRIDE_GAP ? 0.45 : 0;
+        // Solo el rival tiene perfil por dificultad: de dónde arranca y cuánto crece con el reloj.
+        let lean = 0;
+        if (side === 1) {
+            const prof = MOOD_PROFILE[this.cfg.difficulty];
+            lean = prof.bias + prof.trend * clamp(at / (this.halfLen * 2), 0, 1);
+        }
+        return clamp(-prev * 0.55 + (rnd() * 2 - 1) * 0.75 + pride + lean, -1, 1);
+    }
+
+    /** Cuánto dura el próximo pasaje del rival: oleadas cortas en muy fácil, pasajes largos arriba. */
+    private spellLen(): number {
+        const [a, b] = MOOD_PROFILE[this.cfg.difficulty].spell;
+        return a + rnd() * (b - a);
+    }
+
+    /** Cada cuarto de segundo: el ánimo sigue al pasaje en curso y, cuando el pasaje se agota, cambia. */
+    private updateMood() {
+        const step = 0.25;
+        const clockRuns = this.phase !== 'end' && this.phase !== 'try' && !(this.phase === 'ready' && this.time <= 2);
+        if (clockRuns) this.spellLeft -= step;
+        if (this.spellLeft <= 0) {
+            this.spellLeft = this.spellLen();
+            this.moodTarget = { cpu: this.nextSpell(this.moodTarget.cpu, 1), user: this.nextSpell(this.moodTarget.user, 0) };
+        }
+        // Se acomoda en unos tres segundos (dos en las oleadas de muy fácil): se nota, pero no de un tackle al otro.
+        const k = Math.min(1, step / (this.cfg.difficulty === 'muy-facil' ? 2 : 3));
+        const cpuGoal = cpuLevels(this.cfg.difficulty, this.moodTarget.cpu);
+        this.mood.cpu += (cpuGoal - this.mood.cpu) * k;
+        this.mood.user += (this.moodTarget.user * USER_SWING - this.mood.user) * k;
+        // Sin avisos: la racha no se anuncia, se nota jugando.
+    }
+
+    /**
+     * Lo que le hace un tanto al ánimo: al que marca lo empuja, al que lo recibe lo baja. Se suma al
+     * pasaje en curso, no lo reemplaza; el próximo pasaje igual puede dar vuelta la racha.
+     */
+    private moodAfterScore(scorer: Side, pts: number) {
+        const kick = pts >= 5 ? 0.3 : 0.15;
+        const sign = scorer === 1 ? 1 : -1;
+        this.moodTarget.cpu = clamp(this.moodTarget.cpu + sign * kick, -1, 1);
+        this.moodTarget.user = clamp(this.moodTarget.user - sign * kick, -1, 1);
+        // Orgullo: el que está en cero y se le escapan no se entrega. En vez del bajón, reacciona ya:
+        // arranca su mejor pasaje del partido, de entrada y con un pasaje entero por delante.
+        const other: Side = scorer === 0 ? 1 : 0;
+        if (this.score[other] === 0 && this.score[scorer] >= PRIDE_GAP) {
+            const lift = 0.75 + rnd() * 0.25;
+            if (other === 1) this.moodTarget.cpu = Math.max(this.moodTarget.cpu, lift);
+            else this.moodTarget.user = Math.max(this.moodTarget.user, lift);
+            this.spellLeft = Math.max(this.spellLeft, SPELL_MIN);
         }
     }
 
@@ -2031,6 +2217,20 @@ export class SevenMatch {
             }
         }
         let vy = 0;
+        // Chicharra sonada y el rival arriba en el marcador: no arriesga nada, la tira a la tribuna.
+        if (this.lastPlay && !this.overtime && this.score[1] > this.score[0] && c.stun <= 0) {
+            this.say('A LA TRIBUNA', `${this.cfg.away.name} la tira afuera`, 1.4);
+            this.endHalf();
+            return;
+        }
+        // Se va solo: nadie le llega antes de la línea. No pasa ni patea, corre derecho a apoyar
+        // (y si puede, se cierra un poco hacia los palos para la conversión).
+        if (c.stun <= 0 && this.cpuClearRun(c)) {
+            c.vx *= 1.1;
+            vy = clamp((WIDTH / 2 - c.y) * 0.3, -2, 2);
+            c.vy = vy;
+            return;
+        }
         const smart = this.cfg.difficulty !== 'muy-facil';
         if (smart) {
             const rivals = this.team(0).filter((o) => o.down <= 0);
@@ -2075,9 +2275,14 @@ export class SevenMatch {
         }
         // Apurado y lejos del try: a veces la patea al fondo en vez de comerse el tackle.
         // Cerca de los palos y apurado: a veces prueba el drop.
-        if (threat && td < 7 && c.x - TRY_L < 32 && Math.abs(c.y - WIDTH / 2) < 18 && this.cfg.difficulty !== "muy-facil" && rnd() < 0.12 * dt) {
-            this.cpuDrop(c);
-            return;
+        if (this.cfg.difficulty !== 'muy-facil') {
+            const urge = this.cpuDropUrge();
+            const range = urge >= 1 ? 38 : 32;
+            const pressed = threat !== null && td < 9;
+            if ((pressed || urge >= 1) && c.x - TRY_L < range && Math.abs(c.y - WIDTH / 2) < 18 && rnd() < urge * dt) {
+                this.cpuDrop(c);
+                return;
+            }
         }
         if (threat && td < 6 && c.x > 45 && rnd() < 0.3 * dt) {
             // En su propio 22 apurado, a veces la manda a touch para sacársela de encima.
@@ -2089,6 +2294,52 @@ export class SevenMatch {
         if (c.y < 7) vy = Math.max(vy, 3);
         if (c.y > WIDTH - 7) vy = Math.min(vy, -3);
         c.vy = vy;
+    }
+
+    /**
+     * Ganas del rival de probar el drop (por segundo, ya en rango y de frente a los palos). El try
+     * sigue siendo lo primero; el drop aparece cuando el partido lo pide:
+     * - muerte súbita: cualquier tanto gana, así que lo busca siempre que pueda;
+     * - el final (último minuto o minuto extra): abajo por 1 a 3 o empatado, el drop lo empata o lo
+     *   gana y lo busca mucho; abajo por más, necesita tries y casi no lo intenta; arriba por poco,
+     *   alguno para estirar;
+     * - el resto del partido: de vez en cuando, más cuanto más parejo esté el marcador.
+     * Mayor que 1 = lo busca aunque nadie lo apure.
+     */
+    private cpuDropUrge(): number {
+        if (this.overtime) return 1.6;
+        const diff = this.score[1] - this.score[0];
+        const total = this.halfLen * 2 + (this.extra ? EXTRA_LEN : 0);
+        const remain = total - this.elapsed();
+        const late = remain < 60 && (this.half >= 2 || this.extra);
+        if (late) {
+            if (diff >= -2 && diff <= -1) return 1.5;
+            if (diff === 0 || diff === -3) return 1.2;
+            if (diff < -3) return 0.02;
+            return diff <= 4 ? 0.3 : 0.05;
+        }
+        const gap = Math.abs(diff);
+        const close = gap <= 7 ? 1.4 : gap >= 15 ? 0.4 : 1;
+        return 0.12 * close * (diff < -10 ? 0.3 : 1);
+    }
+
+    /**
+     * ¿El portador rival tiene el try servido? Para cada uno de los tuyos que está de pie: si está
+     * adelante (entre él y la línea), llega a cortarlo si cubre la distancia de costado en el tiempo
+     * que el portador tarda en pasarle por al lado; si viene de atrás, solo cuenta pegado a él.
+     */
+    private cpuClearRun(c: Player): boolean {
+        const vC = Math.max(1, Math.abs(c.vx));
+        for (const o of this.team(0)) {
+            if (o.down > 0) continue;
+            const dx = c.x - o.x; // > 0: está adelante del portador, camino al try
+            const dy = Math.abs(o.y - c.y);
+            if (dx > -1) {
+                const t = Math.max(0, dx) / vC;
+                if (dy <= 7.4 * this.fSpd(o) * t + 3) return false;
+            } else if (Math.hypot(dx, dy) < 3) return false;
+        }
+        return true;
     }
 
     private contact(df: Player, c: Player) {
@@ -2126,6 +2377,8 @@ export class SevenMatch {
             this.puff(df.x, df.y, 6);
             this.shake = label === 'QUIEBRE' ? 0.8 : 0.3;
             this.say(label, null, 0.8);
+            // El tackle errado también se anota: con eso se revisa la habilidad de tackle en la carrera.
+            this.log.push({ t: this.elapsed(), side: df.side, text: '', score: null, sim: false, stat: { slot: df.i, kind: 'missTackle' } });
             return;
         }
 
@@ -2265,8 +2518,9 @@ export class SevenMatch {
         this.mg = null;
         if (winner !== side) {
             const why = alone ? 'Quedó solo: nadie llegó a apoyar' : jackal ? 'Llegaron primero sobre la pelota' : side === 0 ? 'Empujaron más: tocá más rápido' : 'Empujaste más y la ganaste';
-            this.say(winner === 0 ? 'RUCK GANADO' : jackal ? 'JACKAL' : 'PELOTA ROBADA', why, 1.2);
-            if (this.deadBall()) return;
+            // Un robo en el ruck no es pelota muerta: aunque haya sonado la chicharra, se sigue jugando.
+            // El que la ganó decide: la tira afuera para terminar o la mueve para atacar.
+            this.say(winner === 0 ? 'RUCK GANADO' : jackal ? 'JACKAL' : 'PELOTA ROBADA', this.lastPlay ? (winner === 0 ? 'Patealá afuera para terminar, o jugala' : 'Sigue la última jugada') : why, 1.2);
         } else if (side === 0) this.say('PELOTA ASEGURADA', null, 0.5);
         else this.say('RUCK PERDIDO', 'El rival aseguró la pelota', 0.8);
         // La levanta el más cercano a la pelota del que la ganó, y se sigue jugando.
@@ -2339,9 +2593,16 @@ export class SevenMatch {
         const lo = this.lineout;
         if (!lo || !mg || mg.kind !== 'timing') return;
         // Saque tuyo: lo ganás si acertaste. Saque rival: lo robás si acertaste.
-        const userHit = mg.done && mg.win;
+        let userHit = mg.done && mg.win;
+        // Saque rival: acertar te pone a pelear la pelota, no te la da. El saltador rival también salta.
+        let contested = false;
+        if (lo.thrower === 1 && userHit) {
+            const odds = clamp(LINE_STEAL_ODDS[this.cfg.difficulty] * (this.jumpers(0) / this.jumpers(1)) ** 3, 0.12, 0.8);
+            userHit = rnd() < odds;
+            contested = !userHit;
+        }
         const winner: Side = userHit ? 0 : 1;
-        this.say(winner === lo.thrower ? 'LINE LIMPIO' : 'LINE ROBADO', null, 1);
+        this.say(winner === lo.thrower ? 'LINE LIMPIO' : 'LINE ROBADO', contested ? 'Llegaste, pero la aseguró su saltador' : null, 1);
         // Atrapa el saltador que está en la hilera; después se la da al medio.
         const catchY = lo.y === 0 ? 10 : WIDTH - 10;
         const jumper =

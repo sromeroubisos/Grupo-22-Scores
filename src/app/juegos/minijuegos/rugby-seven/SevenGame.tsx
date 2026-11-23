@@ -14,6 +14,7 @@ import { POSITIONS, playerNames } from './names';
 import { APPROX_KIT, FEM_NATIONS, NATION_BY_CODE, NATION_ZONE, NATIONS, ZONES } from './nations';
 import { randomLook } from './sprites';
 import {
+    cpuRatingFor,
     DIFFICULTIES,
     DURATIONS,
     loadSaved,
@@ -138,7 +139,7 @@ import {
     type NacFormat,
 } from './career';
 import { advanceRoad, AUTO_QUALIFIED, createRoad, PHASE_LABEL, regionalDef, regionFor, regionName, roadEligible, roadVerdict } from './road';
-import { advanceIntl, compName, createIntl, intlBoosts, intlInvest, intlNames, intlSign, intlStartComp, intlVerdict, isWcYear } from './intl';
+import { advanceIntl, compName, createIntl, intlBoosts, intlInvest, intlNames, intlSign, intlStartComp, intlToggleCall, intlToggleStarter, intlVerdict, isWcYear } from './intl';
 import { IntlRanking, IntlSeason, IntlSquad, IntlUnion, IntlYouth } from './IntlPanels';
 import { advanceSvns, createSvns, SVNS_LEGS, SVNS_PHASE_LABEL, svnsBoosts, svnsRegionName, svnsStartTier, svnsTable, svnsVerdict, TIER_LABEL } from './svns';
 import { CloudSync, type CloudStatus } from './cloudSave';
@@ -250,7 +251,7 @@ function FlagIcon({ code, size = 18 }: { code?: string; size?: number }) {
 function Level({ rating }: { rating?: number }) {
     const lvl = Math.max(1, Math.min(5, Math.round(((rating ?? 70) - 25) / 14)));
     return (
-        <span className={styles.level} aria-label={`Nivel ${lvl} de 5`}>
+        <span className={styles.level} role="img" aria-label={`${lvl} de 5 estrellas`}>
             {[1, 2, 3, 4, 5].map((i) => (
                 <i key={i} className={i <= lvl ? styles.levelOn : undefined} aria-hidden="true" />
             ))}
@@ -392,7 +393,7 @@ function SettingsStep({ teams, difficulty, setDifficulty, duration, setDuration 
                             <span className={styles.nextTeam}>
                                 <SpritePreview look={t.players[0]} kit={t.kit} scale={4} running />
                                 <b><FlagIcon code={t.flag} /> {t.name}</b>
-                                {i > 0 && <Level rating={t.rating} />}
+                                {i > 0 && <Level rating={cpuRatingFor(difficulty, t.rating)} />}
                             </span>
                         </span>
                     ) : null,
@@ -2278,7 +2279,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                                     <span className={styles.nextTeam}>
                                                         <SpritePreview look={oppTeam.players[0]} kit={oppTeam.kit} scale={3} running />
                                                         <b><FlagIcon code={oppTeam.flag} /> {oppTeam.name}</b>
-                                                        <Level rating={oppTeam.rating} />
+                                                        <Level rating={cpuRatingFor(tour.difficulty, oppTeam.rating)} />
                                                     </span>
                                                 </div>
                                             ) : (
@@ -2691,7 +2692,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                         {tab === 'temporada' && intl && <IntlSeason r={intl} done={tour.done} nameOf={nameOf} flag={(id) => <FlagIcon code={flagOf(id)} size={14} />} />}
                                         {tab === 'union' && intl && <IntlUnion r={intl} onInvest={(a) => persist({ tour: intlInvest(tour, a) })} />}
                                         {tab === 'juveniles' && intl && <IntlYouth r={intl} nameOf={nameOf} flag={(id) => <FlagIcon code={flagOf(id)} size={14} />} />}
-                                        {tab === 'plantel' && intl && <IntlSquad r={intl} onSign={(id) => persist({ tour: intlSign(tour, id) })} />}
+                                        {tab === 'plantel' && intl && <IntlSquad r={intl} onSign={(id) => persist({ tour: intlSign(tour, id) })} onCall={(id) => persist({ tour: intlToggleCall(tour, id) })} onStart={(id) => persist({ tour: intlToggleStarter(tour, id) })} />}
                                         {tab === 'circuito' && svns && (
                                             <div className={styles.roadPanel}>
                                                 {svnsTable(tour) && (

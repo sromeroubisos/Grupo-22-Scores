@@ -43,8 +43,11 @@
  * también crecen o se estancan según el nivel en el que compiten.
  */
 
+import { AR_SEVEN_ROSTERS } from './arRosters.generated';
 import { nameFromSeed } from './names';
+import { PRO_PLAYERS } from './proPlayers.generated';
 import { FEM_NATIONS, NATIONS, NATION_BY_CODE, REGION_BY_CODE } from './nations';
+import { SQUADS_15S } from './squads15';
 import type { Difficulty, Duration } from './teams';
 import { createTour, finalRanking, playOut, setRatingBoost, teamIdOf, TOURS, type Stage, type TourDef, type TourState } from './tours';
 
@@ -132,6 +135,13 @@ export interface IntlState {
     lastNotes?: string[];
     /** Juveniles (las partidas anteriores no los traen: se arman solos). */
     youthTeams?: YouthTeams;
+    /**
+     * Los convocados (hasta CALL_SIZE ids) y, de ellos, los titulares (hasta STARTERS ids), elegidos
+     * por el usuario. Sin esto (partidas viejas, o si nunca tocó nada), se arman solos con los mejores;
+     * si alguno se retira o deja de estar disponible, el lugar lo llena el mejor que queda.
+     */
+    called?: number[];
+    starters?: number[];
 }
 
 /* ───────────────────────── catálogo ───────────────────────── */
@@ -522,12 +532,94 @@ function newPlayer(r: IntlState, team: string, age: number, ovr: number, pot: nu
 }
 
 const available = (r: IntlState) => r.squad.filter((p) => !p.from || p.from <= r.season);
-/** Los 15 que juegan: los mejores disponibles. */
-export const xv = (r: IntlState) => [...available(r)].sort((a, b) => b.ovr - a.ovr).slice(0, 15);
+/** El plantel de seven: 12 convocados, 7 en la cancha. */
+export const CALL_SIZE = 12;
+export const STARTERS = 7;
+
+/** Los que eligió el usuario (los que siguen disponibles) y, detrás, los mejores hasta completar `size`. */
+function pickWith(pool: IntlPlayer[], chosen: number[] | undefined, size: number): IntlPlayer[] {
+    const byId = new Map(pool.map((p) => [p.id, p]));
+    const out: IntlPlayer[] = [];
+    for (const id of chosen ?? []) {
+        const p = byId.get(id);
+        if (p && !out.includes(p) && out.length < size) out.push(p);
+    }
+    const rest = pool.filter((p) => !out.includes(p)).sort((a, b) => b.ovr - a.ovr || a.id - b.id);
+    return [...out, ...rest.slice(0, size - out.length)];
+}
+
+/** Los 12 convocados. */
+export const convocados = (r: IntlState) => pickWith(available(r), r.called, CALL_SIZE);
+/** Los 7 que salen a la cancha, de entre los convocados. */
+export const titulares = (r: IntlState) => pickWith(convocados(r), r.starters, STARTERS);
+/** Compatibilidad: lo que antes eran "los que juegan" ahora son los convocados. */
+export const xv = convocados;
+
+/** Nivel del equipo: los 12 convocados, con los 7 titulares pesando el doble (son los que más juegan). */
 export const myLevel = (r: IntlState) => {
-    const top = xv(r);
-    return top.length ? Math.round(ratingFor(top.reduce((s, p) => s + p.ovr, 0) / top.length)) : 40;
+    const called = convocados(r);
+    if (!called.length) return 40;
+    const start = new Set(titulares(r).map((p) => p.id));
+    let sum = 0;
+    let w = 0;
+    for (const p of called) {
+        const k = start.has(p.id) ? 2 : 1;
+        sum += p.ovr * k;
+        w += k;
+    }
+    return Math.round(ratingFor(sum / w));
 };
+
+/**
+ * La elección del usuario tal cual (sin completar): los convocados que siguen disponibles y, de ellos,
+ * los titulares. Si nunca tocó nada, la elección es la automática. Es lo que muestra la pantalla; al
+ * jugar, los lugares vacíos los completa el mejor disponible (`convocados` / `titulares`).
+ */
+export function calledIds(r: IntlState): number[] {
+    if (!r.called) return convocados(r).map((p) => p.id);
+    const ok = new Set(available(r).map((p) => p.id));
+    return r.called.filter((id) => ok.has(id)).slice(0, CALL_SIZE);
+}
+export function starterIds(r: IntlState): number[] {
+    const called = new Set(calledIds(r));
+    if (!r.starters) return titulares(r).map((p) => p.id).filter((id) => called.has(id));
+    return r.starters.filter((id) => called.has(id)).slice(0, STARTERS);
+}
+
+/** Convocar o desconvocar a un jugador. Sacarlo de la convocatoria lo saca también de los titulares. */
+export function intlToggleCall(s: TourState, id: number): TourState {
+    if (!s.intl) return s;
+    const r: IntlState = JSON.parse(JSON.stringify(s.intl));
+    const called = calledIds(r);
+    const starters = starterIds(r);
+    if (called.includes(id)) {
+        r.called = called.filter((x) => x !== id);
+        r.starters = starters.filter((x) => x !== id);
+    } else {
+        if (called.length >= CALL_SIZE || !available(r).some((p) => p.id === id)) return s;
+        r.called = [...called, id];
+        r.starters = starters;
+    }
+    r.rating[r.me] = myLevel(r);
+    return { ...s, intl: r };
+}
+
+/** Poner o sacar a un convocado de los siete titulares. */
+export function intlToggleStarter(s: TourState, id: number): TourState {
+    if (!s.intl) return s;
+    const r: IntlState = JSON.parse(JSON.stringify(s.intl));
+    const called = calledIds(r);
+    const starters = starterIds(r);
+    if (!called.includes(id)) return s;
+    r.called = called;
+    if (starters.includes(id)) r.starters = starters.filter((x) => x !== id);
+    else {
+        if (starters.length >= STARTERS) return s;
+        r.starters = [...starters, id];
+    }
+    r.rating[r.me] = myLevel(r);
+    return { ...s, intl: r };
+}
 
 function initialSquad(r: IntlState) {
     const target = ovrFor(baseRating(r.me));
@@ -543,7 +635,78 @@ function initialSquad(r: IntlState) {
         p.ovr = r1(clamp(p.ovr + shift, 1, 10));
         p.pot = r1(clamp(Math.max(p.pot + shift, p.ovr), 1, 10));
     }
+    // Los titulares son los del XV de la selección en su mejor torneo (Nations Championship o Nations
+    // Cup, squads15.ts): los 7 mejores del plantel llevan esos nombres y arrancan de titulares. Detrás,
+    // los del seven del país; el resto son caras nuevas con nombres del país.
+    if (r.gender === 'm') {
+        const xvNames = SQUADS_15S[baseCode(r.me)] ?? [];
+        const real = [...new Set([...xvNames, ...(AR_SEVEN_ROSTERS[`nat-${baseCode(r.me).toLowerCase()}`] ?? [])])];
+        const best = [...r.squad].sort((a, b) => b.ovr - a.ovr);
+        real.slice(0, best.length).forEach((short, i) => {
+            const [first, ...rest] = short.split(' ');
+            if (rest.length) {
+                best[i].first = first;
+                best[i].last = rest.join(' ');
+            } else {
+                best[i].first = '';
+                best[i].last = first;
+            }
+        });
+        // Los elegibles que siguen: los de la selección que juegan en las ligas profesionales (RugbyPass,
+        // proPlayers.generated.ts; primero los que jugaron en la mayor). Argentina, si todavía falta, sigue
+        // con los planteles de sus clubes (arRosters.generated.ts). Lo que quede, nombres del país.
+        // El mismo jugador puede llegar de dos fuentes con recortes distintos ("Cotarmana" y "Cotarmanac'"):
+        // se compara por inicial y las primeras seis letras del apellido.
+        const used = new Set(real.map(nameKey));
+        const code = baseCode(r.me);
+        const pros = (PRO_PLAYERS[code] ?? []).filter((x) => {
+            const k = nameKey(x.short);
+            if (used.has(k)) return false;
+            used.add(k);
+            return true;
+        });
+        const clubs =
+            code === 'ARG'
+                ? [...new Set(Object.keys(AR_SEVEN_ROSTERS).filter((k) => k.startsWith('ar-')).sort().flatMap((k) => AR_SEVEN_ROSTERS[k]))].filter(
+                      (n) => n.includes(' ') && !used.has(nameKey(n)),
+                  )
+                : [];
+        for (const p of best.slice(real.length)) {
+            let short: string | undefined;
+            const pro = pros.shift();
+            if (pro) {
+                short = pro.short;
+                p.pos = pro.pos;
+            } else if (clubs.length) short = clubs.splice(Math.floor(Math.random() * clubs.length), 1)[0];
+            if (!short) break;
+            const [first, ...rest] = short.split(' ');
+            p.first = first;
+            p.last = rest.join(' ');
+        }
+        if (xvNames.length) {
+            const starters = best.slice(0, Math.min(STARTERS, xvNames.length)).map((p) => p.id);
+            r.starters = starters;
+            r.called = [...starters, ...best.filter((p) => !starters.includes(p.id)).slice(0, CALL_SIZE - starters.length).map((p) => p.id)];
+        }
+    }
+    // Sin repetidos: si dos caras nuevas salieron con el mismo nombre, la segunda sortea otro.
+    const names = new Set<string>();
+    for (const p of r.squad) {
+        for (let k = 0; k < 12 && names.has(nameKey(`${p.first} ${p.last}`)); k++) {
+            const n = nameFromSeed(teamOf(r.me)!, `${r.me}:intl:${p.id}:${k}:${Math.random()}`);
+            p.first = n.first;
+            p.last = n.last;
+        }
+        names.add(nameKey(`${p.first} ${p.last}`));
+    }
     for (let i = 0; i < 4; i++) intake(r, 17 + (i % 3));
+}
+
+/** Clave para comparar nombres de fuentes distintas: inicial y primeras seis letras del apellido. */
+function nameKey(full: string): string {
+    const plain = full.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const [first, ...rest] = plain.split(/\s+/);
+    return `${first?.[0] ?? ''}:${rest.join('').replace(/[^a-z]/g, '').slice(0, 6)}`;
 }
 
 /** Un juvenil nuevo de la academia (entra a los 17; llega a la selección a los 20). */
@@ -857,7 +1020,7 @@ function settle(s: TourState): IntlState {
         const c: SimComp = { key, name: compName(key), window: COMPS[key]?.window ?? 6, ranking: finalRanking(s), results: resultsOf(s), mine: true };
         if (key === 'repAA' || key === 'repPS' || key === 'fqt') settleRep(r, key, c);
         else r.sims.push(c);
-        // Caps: los 15 que juegan suman los partidos del torneo.
+        // Caps: los 12 convocados suman los partidos del torneo.
         const games = c.results.filter(([a, b]) => a === r.me || b === r.me).length;
         for (const p of xv(r)) {
             const q = r.squad.find((x) => x.id === p.id);
@@ -905,9 +1068,7 @@ export function advanceIntl(s: TourState): TourState {
 
 /** Los siete que salen a la cancha (los nombres del plantel propio). */
 export function intlNames(r: IntlState): { first: string; last: string; short: string }[] {
-    return xv(r)
-        .slice(0, 7)
-        .map((p) => ({ first: p.first, last: p.last, short: `${p.first[0]}. ${p.last}` }));
+    return titulares(r).map((p) => ({ first: p.first, last: p.last, short: p.first ? `${p.first.replace(/\.$/, '')[0]}. ${p.last}` : p.last }));
 }
 
 /** El calendario del año del usuario, con lo jugado. */

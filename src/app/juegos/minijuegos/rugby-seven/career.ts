@@ -163,6 +163,11 @@ export interface Player {
     out?: { kind: OutKind; until: number; by?: string };
     /** Experiencia de la temporada (solo el plantel propio): se vuelca en el desarrollo al cerrar el año. */
     xp?: number;
+    /**
+     * Tackles de la media temporada en curso (solo el plantel propio): hechos y errados. Se revisan dos
+     * veces por año (a la mitad y al cierre) y mueven la habilidad de tackle y la valoración.
+     */
+    tk?: [number, number];
 }
 
 /** Una noticia del club que se muestra en un cartel (convocatorias, lesiones, vueltas). */
@@ -248,6 +253,8 @@ export interface CareerState {
     pre?: { step: 'punto' | 'entreno' | 'amistosos' | 'listo'; punto?: 'juveniles' | 'primera'; trained?: { id: number; result: 'up' | 'same' | 'inj' }[]; friendlies?: { opp: string; us: number; them: number }[] } | null;
     /** Ya se resolvieron las convocatorias de mitad de temporada (Pumas, Europa). */
     midDone?: boolean;
+    /** Ya se hizo la revisión de tackles de mitad de temporada. */
+    tkMid?: boolean;
     /** Europa: ya se resolvió la ventana de noviembre de los seleccionados (se rearma cada pretemporada). */
     autumnDone?: boolean;
     /**
@@ -880,6 +887,74 @@ function nationalWindow(r: CareerState, label: string, until: number, minOvr: nu
     }
 }
 
+/** Quién tacklea más en el seven: los de adelante cargan con el trabajo (por puesto, 0 a 6). */
+const TACKLE_W = [4, 4, 4, 3, 2, 3, 2];
+/** Lo que erra un jugador con esa habilidad de tackle (1 a 10). Con 6, uno de cada cinco. */
+const missRateOf = (tkl: number) => clampN(0.2 - (tkl - 6) * 0.03, 0.05, 0.4);
+
+/**
+ * Suma los tackles del partido a cada jugador propio. Si se jugó, salen del partido (hechos y errados);
+ * si se simuló, se reparten como en las tablas del torneo y cada uno erra según su habilidad.
+ */
+function countTackles(r: CareerState, roster: Player[], lineup: number[], events: ScoreEvent[] | undefined, oppScore: number) {
+    const by = new Map(roster.map((p) => [p.id, p]));
+    const mine = (events ?? []).filter((e) => e.team === r.me && (e.kind === 'tackle' || e.kind === 'missTackle'));
+    if (mine.length) {
+        for (const e of mine) {
+            const p = by.get(e.slot);
+            if (!p) continue;
+            const tk = (p.tk ??= [0, 0]);
+            tk[e.kind === 'tackle' ? 0 : 1] += 1;
+        }
+        return;
+    }
+    const total = TACKLE_W.reduce((a, b) => a + b, 0);
+    const n = 14 + Math.round(oppScore * 0.8);
+    for (let i = 0; i < n; i++) {
+        let x = Math.random() * total;
+        let slot = TACKLE_W.length - 1;
+        for (let j = 0; j < TACKLE_W.length; j++) if ((x -= TACKLE_W[j]) < 0) { slot = j; break; }
+        const p = by.get(lineup[slot]);
+        if (!p) continue;
+        const tk = (p.tk ??= [0, 0]);
+        tk[Math.random() < missRateOf(p.s?.[2] ?? 6) ? 1 : 0] += 1;
+    }
+}
+
+/**
+ * Revisión de tackles (a la mitad y al cierre de la temporada): el que tackleó mejor de lo que dice su
+ * habilidad la sube un punto, el que erró de más la baja; la valoración acompaña. Hace falta una
+ * muestra mínima: con pocos tackles no se juzga a nadie. Los contadores vuelven a cero.
+ */
+function tackleReview(r: CareerState, when: string) {
+    const roster = r.rosters?.[r.me] ?? [];
+    const up: string[] = [];
+    const down: string[] = [];
+    for (const p of roster) {
+        const [made, missed] = p.tk ?? [0, 0];
+        delete p.tk;
+        const n = made + missed;
+        if (n < 8 || !p.s) continue;
+        const tkl = p.s[2];
+        const rate = made / n;
+        const expected = 1 - missRateOf(tkl);
+        let d = 0;
+        if (rate >= expected + 0.06 && tkl < 10) d = 1;
+        else if (rate <= expected - 0.08 && tkl > 1) d = -1;
+        if (!d) continue;
+        p.s = [p.s[0], p.s[1], tkl + d, p.s[3]];
+        p.ovr = capOvr((p.ovr ?? 5) + d * 0.15);
+        const pct = Math.round(rate * 100);
+        (d > 0 ? up : down).push(`${fullName(r, p.id as number)} (${pct}% de efectividad, ${n} tackles)`);
+    }
+    if (!up.length && !down.length) return;
+    pushNews(r, {
+        kind: 'train',
+        title: `Revisión de tackles · ${when}`,
+        text: [up.length ? `Suben su tackle: ${up.join(', ')}.` : '', down.length ? `Lo bajan: ${down.join(', ')}.` : ''].filter(Boolean).join(' '),
+    });
+}
+
 function midSeason(r: CareerState) {
     const roster = r.rosters?.[r.me] ?? [];
     for (const p of roster) {
@@ -1096,7 +1171,8 @@ export function careerRound(s: TourState, mine: [number, number] | null, events?
         h[7] = them;
         // Los números de cada jugador en el club, partido a partido.
         // Solo los tantos: los tackles van a las estadísticas del torneo (closeRound), no a puntos, moral ni experiencia.
-        const myEvents = (events?.length ? events : scoreEvents(r.me, us)).filter((e) => e.team === r.me && e.kind !== 'tackle');
+        const myEvents = (events?.length ? events : scoreEvents(r.me, us)).filter((e) => e.team === r.me && e.kind !== 'tackle' && e.kind !== 'missTackle');
+        countTackles(r, roster, lineup, events, them);
         const L = (r.legends ??= {});
         for (const id of lineup) (L[String(id)] ??= [0, 0, 0])[2] += 1;
         for (const e of myEvents) {
@@ -1151,6 +1227,11 @@ export function careerRound(s: TourState, mine: [number, number] | null, events?
         nationalWindow(r, 'Tests de noviembre', 0.2 + 0.12, 5.8, 2);
     }
     if (r.phase === 'liga' && clock >= 0.5) midSeason(r);
+    // A la mitad del calendario del club (la liga con el torneo que se juega en paralelo): revisión de tackles.
+    if (r.phase === 'liga' && clock >= 0.5 && !r.tkMid) {
+        r.tkMid = true;
+        tackleReview(r, 'mitad de temporada');
+    }
     if (r.lineup) r.lineup = autoLineup(roster, r.lineup);
     return next;
 }
@@ -1276,6 +1357,7 @@ function startPreseason(r: CareerState) {
     r.pre = { step: 'punto' };
     r.bajas = 0;
     r.midDone = false;
+    r.tkMid = false;
     r.autumnDone = false;
     r.fat = 0;
     franchiseCall(r);
@@ -2663,6 +2745,7 @@ function closeSeason(r: CareerState, chosen?: NacFormat) {
         title: `Reporte de juveniles ${r.season}`,
         text: [...lines, champs.length ? `Campeones nacionales: ${champs.join(', ')}.` : ''].filter(Boolean).join(' '),
     });
+    tackleReview(r, 'cierre de temporada');
     const roster = evolveRosters(r);
     ageYouth(r);
     forget(r);

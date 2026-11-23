@@ -498,7 +498,7 @@ function poisson(lambda: number): number {
 export interface ScoreEvent {
     team: string;
     slot: number;
-    kind: 'try' | 'conv' | 'drop' | 'tackle';
+    kind: 'try' | 'conv' | 'drop' | 'tackle' | 'missTackle';
 }
 
 /** Tries, puntos y tackles de cada jugador en un torneo: clave `equipo#puesto`. Los tackles faltan en las partidas viejas. */
@@ -563,6 +563,8 @@ export function tackleEvents(team: string, oppScore: number): ScoreEvent[] {
 export function addStats(stats: Record<string, StatLine>, events: ScoreEvent[]) {
     for (const e of events) {
         const k = `${e.team}#${e.slot}`;
+        // El tackle errado no suma en las tablas del torneo: lo usa la carrera para revisar la habilidad.
+        if (e.kind === 'missTackle') continue;
         const line = (stats[k] ??= [0, 0, 0]);
         if (e.kind === 'tackle') {
             line[2] = (line[2] ?? 0) + 1;

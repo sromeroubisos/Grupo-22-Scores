@@ -19,7 +19,7 @@ export interface SevenTeam {
     names?: PlayerName[];
 }
 
-export type Difficulty = 'muy-facil' | 'facil' | 'normal' | 'dificil' | 'leyenda';
+export type Difficulty = 'muy-facil' | 'facil' | 'normal' | 'dificil' | 'leyenda' | 'extremo';
 
 export const DIFFICULTIES: { id: Difficulty; label: string; hint: string }[] = [
     { id: 'muy-facil', label: 'Muy fácil', hint: 'Solo para empezar: aprender los controles.' },
@@ -27,7 +27,16 @@ export const DIFFICULTIES: { id: Difficulty; label: string; hint: string }[] = [
     { id: 'normal', label: 'Normal', hint: 'Para jugar en serio: tacklean y leen el pase.' },
     { id: 'dificil', label: 'Difícil', hint: 'Muy exigente: cada metro cuesta.' },
     { id: 'leyenda', label: 'Leyenda', hint: 'Para cracks: no perdona nada.' },
+    { id: 'extremo', label: 'Extremo', hint: 'Todos los rivales juegan como un cinco estrellas.' },
 ];
+
+/** Valoración con la que juega el rival en Extremo: cinco estrellas, sea quien sea. */
+export const EXTREME_RATING = 95;
+
+/** La valoración con la que juega el rival: la suya, o cinco estrellas en Extremo. */
+export function cpuRatingFor(difficulty: Difficulty, rating: number | undefined): number {
+    return difficulty === 'extremo' ? EXTREME_RATING : (rating ?? 70);
+}
 
 export const DURATIONS = [3, 5, 7] as const;
 export type Duration = (typeof DURATIONS)[number];
@@ -77,6 +86,12 @@ export const DIFF: Record<Difficulty, DiffParams> = {
         cpuRun: 8.3, cpuDefRun: 8.3, cpuTackle: 0.94, breakHit: 0.16, dodge: 0.19, userTackle: 0.6,
         cpuBreak: 0.8, intercept: 0.28, scrumCpu: 41, ruckKeep: 0.78, cpuRuckKeep: 0.95, ruckRate: 8.5,
         kickWindow: 0.08, cpuKick: 0.9, cpuPassIQ: 3.4,
+    },
+    // Extremo: las perillas de leyenda un poco más arriba; lo que más pesa es el rival de cinco estrellas.
+    extremo: {
+        cpuRun: 8.5, cpuDefRun: 8.5, cpuTackle: 0.95, breakHit: 0.14, dodge: 0.16, userTackle: 0.57,
+        cpuBreak: 0.83, intercept: 0.3, scrumCpu: 44, ruckKeep: 0.76, cpuRuckKeep: 0.96, ruckRate: 9,
+        kickWindow: 0.07, cpuKick: 0.92, cpuPassIQ: 3.7,
     },
 };
 
