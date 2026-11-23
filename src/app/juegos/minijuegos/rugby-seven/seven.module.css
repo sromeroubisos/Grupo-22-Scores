@@ -4330,3 +4330,27 @@
         animation: none;
     }
 }
+
+/* "Bien hecho": el mismo cartel, en verde y en el centro de la cancha. */
+.drillDone {
+    right: auto;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    justify-items: center;
+    text-align: center;
+    border-color: #7ee08a;
+    cursor: default;
+    animation: doneIn 0.3s ease-out;
+}
+
+.drillDone strong {
+    color: #7ee08a;
+    font-size: 1.3rem;
+}
+
+@keyframes doneIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.85);
+    }
+}

@@ -1056,7 +1056,9 @@ const EXACT: Record<string, string> = {
     'Salir del tutorial': 'Leave the tutorial',
     'Salir de la práctica': 'Leave practice',
     'Bien.': 'Good.',
-    'Bien. Vamos con el siguiente.': 'Good. On to the next one.',
+    'Bien hecho': 'Well done',
+    'Completaste el último ejercicio.': 'You completed the last drill.',
+    'Completaste el tutorial. Ya sabés lo básico; cuando quieras repasar algo, está la Práctica en el menú.': 'You completed the tutorial. You know the basics; whenever you want to go over something, Practice is in the menu.',
     'Se terminó la cancha: te faltó algún cono': 'You ran out of field: you missed a cone',
     'Se te escapó: seguilo y tirate cuando lo tengas cerca': 'He got away: follow him and dive in when he is close',
     'Tocá más rápido para quedarte con la pelota': 'Tap faster to keep the ball',
@@ -1179,6 +1181,7 @@ const PATTERNS: Rule[] = [
     [/^(.+) la tira afuera$/, (m) => `${m[1]} kick it out`],
     // Tutorial y práctica (con las teclas que tenga puestas cada uno).
     [/^Tutorial · (\d+) de (\d+)$/, (m) => `Tutorial · ${m[1]} of ${m[2]}`],
+    [/^Ahora vamos con el siguiente: (.+)\.$/, (m) => `Now on to the next one: ${translate(m[1])}.`],
     [/^Corrés solo hacia adelante\. Mantené (.+) o (.+) para ir hacia arriba o hacia abajo y pasá por los conos\.$/, (m) => `You run forward on your own. Hold ${m[1]} or ${m[2]} to go up or down and go through the cones.`],
     [/^Un toque corto de (.+) o (.+) es un amague: un cambio de paso rápido\. Hacé tres\.$/, (m) => `A short tap of ${m[1]} or ${m[2]} is a sidestep: a quick change of step. Do three.`],
     [/^(.+) pasa para arriba y (.+) para abajo; mantenida, es un salteo\. Moverte sigue siendo con (.+) y (.+)\. Pasala una vez para cada lado\.$/, (m) => `${m[1]} passes up and ${m[2]} passes down; held, it is a skip pass. Moving is still ${m[3]} and ${m[4]}. Pass once to each side.`],

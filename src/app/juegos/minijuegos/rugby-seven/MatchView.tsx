@@ -796,7 +796,7 @@ export default function MatchView({ cfg, onFinish, onQuit, musicSrc = null, font
                 setTutorialDone(true);
                 pausedRef.current = true;
             }
-        }, 1400);
+        }, 2200); // lo que dura el cartel de "Bien hecho"
         return () => window.clearTimeout(id);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [hd?.done, hd?.id, drillKind]);
@@ -868,6 +868,19 @@ export default function MatchView({ cfg, onFinish, onQuit, musicSrc = null, font
                 />
                 {/* El dedo se queda mostrando el gesto, sobre la cancha, hasta que completás el ejercicio. */}
                 {drillKind && hd && touch && !hd.done && !tutorialDone && <GestureHint id={hd.id} scheme={scheme} layerRef={gestureRef} />}
+                {/* Ejercicio completo: la felicitación en el medio y qué viene, mientras se arma el siguiente. */}
+                {drillKind && hd?.done && !tutorialDone && !intro && (
+                    <div className={`${styles.drillIntro} ${styles.drillDone}`} role="status" aria-live="polite">
+                        <strong>Bien hecho</strong>
+                        <p className={styles.drillText}>
+                            {(() => {
+                                const next = drillList[drillList.indexOf(hd.id) + 1];
+                                if (drillKind === 'tutorial' && !next) return 'Completaste el último ejercicio.';
+                                return `Ahora vamos con el siguiente: ${DRILL_TITLE[next ?? drillList[0]]}.`;
+                            })()}
+                        </p>
+                    </div>
+                )}
                 {drillKind && intro && !tutorialDone && (
                     <div className={styles.drillIntro} role="dialog" aria-label={DRILL_TITLE[intro.id]} onClick={() => setIntro(null)}>
                         <span className={styles.drillStep}>{drillKind === 'tutorial' ? `Tutorial · ${drillList.indexOf(intro.id) + 1} de ${drillList.length}` : 'Práctica'}</span>
@@ -890,7 +903,7 @@ export default function MatchView({ cfg, onFinish, onQuit, musicSrc = null, font
                                 <i key={i} data-on={i < hd.count ? '1' : '0'} />
                             ))}
                         </div>
-                        {hd.done ? <p className={styles.drillOk}>{drillKind === 'tutorial' && hd.id === drillList[drillList.length - 1] ? 'Bien.' : 'Bien. Vamos con el siguiente.'}</p> : hd.note && <p className={styles.drillNote}>{hd.note}</p>}
+                        {!hd.done && hd.note && <p className={styles.drillNote}>{hd.note}</p>}
                         {drillKind === 'practice' && (
                             <div className={styles.drillPick} role="radiogroup" aria-label="Ejercicio">
                                 {drillList.map((id) => (
@@ -909,8 +922,8 @@ export default function MatchView({ cfg, onFinish, onQuit, musicSrc = null, font
                 )}
                 {tutorialDone && (
                     <div className={styles.pauseLayer} role="dialog" aria-label="Tutorial terminado">
-                        <strong>Listo</strong>
-                        <p className={styles.drillText}>Ya sabés lo básico. Cuando quieras repasar algo, está la Práctica en el menú.</p>
+                        <strong>Bien hecho</strong>
+                        <p className={styles.drillText}>Completaste el tutorial. Ya sabés lo básico; cuando quieras repasar algo, está la Práctica en el menú.</p>
                         <button type="button" className={styles.btnPrimary} onClick={onQuit}>
                             Ir a jugar
                         </button>
