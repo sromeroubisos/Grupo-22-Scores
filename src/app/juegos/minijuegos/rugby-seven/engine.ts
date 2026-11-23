@@ -33,7 +33,7 @@ const WALK_SPEED = 9;
 
 type Side = 0 | 1;
 type Pose = 'stand' | 'ground' | 'dive' | 'celebrate' | 'scrum';
-export type Phase = 'ready' | 'play' | 'ruck' | 'scrum' | 'lineout' | 'try' | 'conv' | 'convResult' | 'drop' | 'dropResult' | 'halftime' | 'end';
+export type Phase = 'ready' | 'play' | 'ruck' | 'scrum' | 'lineout' | 'try' | 'conv' | 'convResult' | 'drop' | 'dropResult' | 'whistle' | 'halftime' | 'end';
 
 interface Player {
     side: Side;
@@ -529,11 +529,10 @@ export class SevenMatch {
     startKick() {
         const c = this.ball.holder;
         if (this.phase !== 'play' || !c || c.side !== 0 || c.passT > 0 || c.down > 0) return;
-        // Con la chicharra ya sonada, patear es tirarla a la tribuna: se termina el tiempo ahí.
-        // Si querés seguir, no pateés: movela y jugá.
-        if (this.lastPlay) {
-            this.say('A LA TRIBUNA', 'La tira afuera y se termina', 1.4);
-            this.endHalf();
+        // Con la chicharra ya sonada, patear es tirarla a la tribuna: se ve la patada y, cuando sale,
+        // se termina el tiempo. Si querés seguir, no pateés: movela y jugá.
+        if (this.lastPlay && !this.overtime) {
+            this.throwOutKick(c);
             return;
         }
         this.kickCharge = 0;
@@ -1027,6 +1026,23 @@ export class SevenMatch {
         this.say(atPosts ? 'A LOS PALOS' : touchAim ? 'A TOUCH' : power > 0.75 ? 'PATADA LARGA' : power < 0.3 ? 'PATADITA' : 'PATADA', null, 0.7);
     }
 
+    /**
+     * Con la chicharra sonada: la patea a la tribuna por el costado más cercano. Sale directa (nadie
+     * la puede atajar) y, cuando cae afuera, se termina el tiempo (ver updateKick).
+     */
+    private throwOutKick(from: Player) {
+        const d = this.dir(from.side);
+        const tx = clamp(from.x + d * (8 + rnd() * 8), 2, 118);
+        const ty = from.y < WIDTH / 2 ? -3 : WIDTH + 3;
+        this.kickCharge = null;
+        this.ball.x = from.x;
+        this.ball.y = from.y;
+        this.ball.holder = null;
+        this.ball.flight = { from, to: from, sx: from.x, sy: from.y, releaseX: from.x, t: 0, dur: 0.85, tried: new Set(), kick: { tx, ty }, goal: false, touchAim: true };
+        from.passT = 0.3;
+        this.say('A LA TRIBUNA', from.side === 0 ? 'La tirás afuera' : `${this.cfg.away.name} la tira afuera`, 1.2);
+    }
+
     /** Patada directa sin cargar (botón táctil de un toque). */
     kick() {
         if (this.phase !== 'play') return;
@@ -1051,11 +1067,30 @@ export class SevenMatch {
         if (newCarrier.side === 1) this.ctrl = this.nearestTo(0, newCarrier.x, newCarrier.y);
     }
 
-    /** Pelota muerta. Si ya sonó la chicharra, termina el tiempo. */
-    private deadBall(): boolean {
+    /**
+     * Pelota muerta. Si ya sonó la chicharra, termina el tiempo, pero no de golpe: el juego frena un
+     * momento y muestra por qué (knock-on, pase adelantado, afuera). Sin ese aviso el final parecía
+     * un corte al azar.
+     */
+    private deadBall(why?: string): boolean {
         if (!this.lastPlay) return false;
-        this.endHalf();
+        this.whistle(why);
         return true;
+    }
+
+    /** Pitazo final del tiempo: frena el juego un segundo con el motivo a la vista y después cierra. */
+    private whistle(why?: string) {
+        this.lastPlay = false;
+        this.phase = 'whistle';
+        this.phaseT = 1.2;
+        this.mg = null;
+        this.kickCharge = null;
+        this.ball.flight = null;
+        for (const p of this.players) {
+            p.vx = 0;
+            p.vy = 0;
+        }
+        if (why) this.say(why, 'Pelota muerta: se termina el tiempo', 1.2);
     }
 
     private endHalf() {
@@ -1244,7 +1279,7 @@ export class SevenMatch {
     }
 
     private startScrum(feed: Side, x: number, y: number, why: string) {
-        if (this.deadBall()) return;
+        if (this.deadBall(why)) return;
         this.phase = 'scrum';
         this.scrumAt = { x: clamp(x, TRY_L + 6, TRY_R - 6), y: clamp(y, 15, WIDTH - 15) };
         this.mg = { kind: 'scrum', user: feed === 0 ? 12 : 0, cpu: feed === 1 ? 12 : 0 };
@@ -1276,7 +1311,7 @@ export class SevenMatch {
     }
 
     private startLineout(thrower: Side, x: number, y: number) {
-        if (this.deadBall()) return;
+        if (this.deadBall('AFUERA')) return;
         const top = y < WIDTH / 2;
         const lx = clamp(x, TRY_L + 6, TRY_R - 6);
         this.lineout = { x: lx, y: top ? 0 : WIDTH, thrower };
@@ -1707,6 +1742,9 @@ export class SevenMatch {
             case 'dropResult':
                 if (this.phaseT <= 0) this.afterDrop();
                 break;
+            case 'whistle':
+                if (this.phaseT <= 0) this.endHalf();
+                break;
             case 'halftime':
                 if (this.phaseT <= 0) {
                     this.half = 2;
@@ -2107,6 +2145,11 @@ export class SevenMatch {
             const edge = kick.ty < WIDTH / 2 ? 0 : WIDTH;
             this.ball.flight = null;
             this.ball.y = edge;
+            if (outDirect && this.lastPlay) {
+                // Chicharra sonada y la pelota en la tribuna: se termina el tiempo.
+                this.whistle();
+                return;
+            }
             if (outDirect) {
                 // Directa: si pateó desde adentro de su 22 gana el terreno; de afuera, el line es donde pateó.
                 const own22 = (att === 0 ? fl.sx - TRY_L : TRY_R - fl.sx) <= 22;
@@ -2230,10 +2273,11 @@ export class SevenMatch {
             }
         }
         let vy = 0;
-        // Chicharra sonada y el rival arriba en el marcador: no arriesga nada, la tira a la tribuna.
-        if (this.lastPlay && !this.overtime && this.score[1] > this.score[0] && c.stun <= 0) {
-            this.say('A LA TRIBUNA', `${this.cfg.away.name} la tira afuera`, 1.4);
-            this.endHalf();
+        // Chicharra sonada y el rival arriba por menos de un try convertido: partido parejo, no arriesga
+        // nada y la patea a la tribuna (se ve la patada). Arriba por 7 o más, sigue jugando.
+        const lead = this.score[1] - this.score[0];
+        if (this.lastPlay && !this.overtime && lead > 0 && lead < 7 && c.stun <= 0 && c.passT <= 0) {
+            this.throwOutKick(c);
             return;
         }
         // Se va solo: nadie le llega antes de la línea. No pasa ni patea, corre derecho a apoyar
@@ -2297,7 +2341,9 @@ export class SevenMatch {
                 return;
             }
         }
-        if (threat && td < 6 && c.x > 45 && rnd() < 0.3 * dt) {
+        // Con la chicharra sonada y sin ir ganando, patear es regalar el final: la sigue jugando.
+        const mustPlay = this.lastPlay && !this.overtime && this.score[1] <= this.score[0];
+        if (!mustPlay && threat && td < 6 && c.x > 45 && rnd() < 0.3 * dt) {
             // En su propio 22 apurado, a veces la manda a touch para sacársela de encima.
             const own22 = c.x > TRY_R - 22 - 10;
             const aim: KickAim = smart && own22 && rnd() < 0.5 ? (c.y < WIDTH / 2 ? 'touchUp' : 'touchDown') : 'auto';
