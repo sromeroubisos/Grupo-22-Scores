@@ -1082,8 +1082,11 @@ const EXACT: Record<string, string> = {
     'Ahora defendés. Seguilo manteniendo el dedo arriba o abajo y, cuando lo tengas cerca, deslizá rápido hacia adelante para tirarte. Tacklealo dos veces.':
         'Now you defend. Follow him by holding your finger up or down and, when he is close, swipe quickly forward to dive in. Tackle him twice.',
     'Te tacklearon y se arma el ruck. Tocá la pantalla rápido para quedarte con la pelota. Ganalo dos veces.': 'You were tackled and the ruck forms. Tap the screen fast to keep the ball. Win it twice.',
-    'Mantené el dedo en la franja izquierda: aparece la mira. Sin soltar, movela hacia arriba o abajo. Soltá para patear. Pateá dos veces.':
-        'Hold your finger on the left strip: the aim appears. Without letting go, move it up or down. Let go to kick. Kick twice.',
+    'Apoyá el dedo en la franja izquierda y dejalo apretado, sin tocar y soltar: aparece la mira. Sin levantarlo, movelo arriba o abajo para apuntar. Soltá para patear. Pateá dos veces.':
+        'Put your finger on the left strip and keep it pressed, don’t just tap: the aim appears. Without lifting it, move it up or down to aim. Let go to kick. Kick twice.',
+    '¿Cómo se hace?': 'How is it done?',
+    'Ver de nuevo cómo se hace': 'See again how it is done',
+    'Ya entendí': 'Got it',
 };
 
 /** Una sigla de división con año ("Élite 14 2029") o un nombre con punto al final ("Copa Curry · Élite."). */

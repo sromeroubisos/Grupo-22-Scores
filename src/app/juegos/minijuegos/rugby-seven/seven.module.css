@@ -4135,23 +4135,26 @@
     }
 }
 
-/* ---- Tutorial en el celular: un dedo que hace la mímica del gesto ---- */
+/* ---- Tutorial en el celular: un dedo que hace la mímica del gesto ----
+ * Apoya donde hay que tocar en la cancha (--ax/--ay, lo pone la vista cada cuadro: tu jugador, el
+ * compañero, el ruck) y arrastra o desliza hacia el objetivo (--dx/--dy).
+ */
 .gestureLayer {
     position: absolute;
     inset: 0;
-    z-index: 2;
+    z-index: 5;
     pointer-events: none;
     overflow: hidden;
 }
 
 .gestureHand {
     position: absolute;
-    left: 65%;
-    top: 50%;
+    left: var(--ax, 65%);
+    top: var(--ay, 50%);
     width: 0;
     height: 0;
     opacity: 0;
-    animation-duration: 2.6s;
+    animation-duration: 2.4s;
     animation-iteration-count: infinite;
     animation-timing-function: ease-in-out;
 }
@@ -4183,86 +4186,68 @@
     animation-name: var(--ripple, none);
 }
 
-.g-move-tap { animation-name: gMoveTap; }
-.g-move-swipe { animation-name: gMoveSwipe; }
-.g-pass-tap { animation-name: gPassTap; --ripple: rPassTap; }
-.g-pass-swipe { animation-name: gPassSwipe; }
-.g-hit { animation-name: gHit; animation-duration: 1.6s; }
-.g-tackle { animation-name: gTackle; animation-duration: 3s; }
+.g-move-tap { animation-name: gDrag; }
+.gestureHand { opacity: 1; }
+.g-move-swipe { animation-name: gHold; }
+.g-pass-tap { animation-name: gTap; --ripple: rTap; }
+.g-pass-swipe { animation-name: gFlick; animation-duration: 1.6s; }
+.g-hit { animation-name: gFlick; animation-duration: 1.6s; }
+.g-tackle { animation-name: gTackle; animation-duration: 2.8s; }
 .g-ruck { animation-name: gRuck; animation-duration: 0.36s; opacity: 1; --ripple: rRuck; }
 .g-kick { animation-name: gKick; animation-duration: 3s; }
 
-@keyframes gMoveTap {
-    0% { left: 65%; top: 50%; opacity: 0; }
-    8% { left: 65%; top: 50%; opacity: 1; }
-    30%, 45% { top: 28%; }
-    70%, 88% { top: 72%; opacity: 1; }
-    100% { top: 72%; opacity: 0; }
+/*
+ * El dedo no desaparece: se queda a la vista todo el tiempo y solo parpadea un instante cuando
+ * vuelve al punto de partida para repetir el gesto.
+ */
+/* Apoya sobre el jugador y lo arrastra hacia el objetivo; se queda ahí un rato. */
+@keyframes gDrag {
+    0%, 12% { transform: translate(0, 0); opacity: 1; }
+    45%, 90% { transform: translate(0, var(--dy)); opacity: 1; }
+    96% { transform: translate(0, var(--dy)); opacity: 0.2; }
+    100% { transform: translate(0, 0); opacity: 1; }
 }
 
-@keyframes gMoveSwipe {
-    0% { left: 65%; top: 28%; opacity: 0; }
-    6%, 42% { left: 65%; top: 28%; opacity: 1; }
-    48% { top: 28%; opacity: 0; }
-    54% { top: 72%; opacity: 0; }
-    60%, 94% { top: 72%; opacity: 1; }
-    100% { top: 72%; opacity: 0; }
+/* Mantiene el dedo del lado hacia donde tiene que ir, apretando. */
+@keyframes gHold {
+    0%, 100% { transform: translate(0, var(--dy)) scale(1); opacity: 1; }
+    50% { transform: translate(0, var(--dy)) scale(0.92); opacity: 1; }
 }
 
-@keyframes gPassTap {
-    0% { left: 72%; top: 30%; opacity: 0; transform: scale(1.15); }
-    12% { opacity: 1; transform: scale(1.15); }
-    20% { transform: scale(0.9); }
-    30% { transform: scale(1); opacity: 1; }
-    42% { left: 72%; top: 30%; opacity: 0; }
-    55% { left: 72%; top: 70%; opacity: 0; transform: scale(1.15); }
-    65% { opacity: 1; transform: scale(1.15); }
-    73% { transform: scale(0.9); }
-    83% { transform: scale(1); opacity: 1; }
-    100% { left: 72%; top: 70%; opacity: 0; }
+/* Un toque: baja, aprieta y vuelve. */
+@keyframes gTap {
+    0%, 15% { transform: scale(1.15); opacity: 1; }
+    28% { transform: scale(0.9); }
+    40%, 100% { transform: scale(1.15); opacity: 1; }
 }
 
-@keyframes rPassTap {
-    0%, 19% { opacity: 0; transform: scale(0.4); }
-    21% { opacity: 1; transform: scale(0.6); }
-    34% { opacity: 0; transform: scale(1.6); }
-    72% { opacity: 0; transform: scale(0.4); }
-    74% { opacity: 1; transform: scale(0.6); }
-    87%, 100% { opacity: 0; transform: scale(1.6); }
+@keyframes rTap {
+    0%, 26% { opacity: 0; transform: scale(0.4); }
+    29% { opacity: 1; transform: scale(0.6); }
+    48%, 100% { opacity: 0; transform: scale(1.7); }
 }
 
-@keyframes gPassSwipe {
-    0% { left: 72%; top: 55%; opacity: 0; }
-    10% { top: 55%; opacity: 1; }
-    22% { top: 28%; opacity: 1; }
-    30% { top: 24%; opacity: 0; }
-    50% { top: 45%; opacity: 0; }
-    60% { top: 45%; opacity: 1; }
-    72% { top: 72%; opacity: 1; }
-    80%, 100% { top: 76%; opacity: 0; }
+/* Deslizamiento rápido desde el jugador hacia --dx/--dy. */
+@keyframes gFlick {
+    0%, 25% { transform: translate(0, 0); opacity: 1; }
+    45%, 80% { transform: translate(var(--dx), var(--dy)); opacity: 1; }
+    90% { transform: translate(var(--dx), var(--dy)); opacity: 0.2; }
+    100% { transform: translate(0, 0); opacity: 1; }
 }
 
-@keyframes gHit {
-    0% { left: 48%; top: 55%; opacity: 0; }
-    20% { left: 48%; opacity: 1; }
-    45% { left: 76%; opacity: 1; }
-    60%, 100% { left: 80%; opacity: 0; }
-}
-
+/* Lo sigue (arriba o abajo, a la altura del rival) y se tira hacia él. */
 @keyframes gTackle {
-    0% { left: 55%; top: 50%; opacity: 0; }
-    8% { top: 50%; opacity: 1; }
-    25% { top: 34%; }
-    45% { left: 55%; top: 50%; }
-    58% { left: 55%; top: 50%; }
-    70% { left: 78%; top: 50%; opacity: 1; }
-    80%, 100% { left: 82%; top: 50%; opacity: 0; }
+    0%, 10% { transform: translate(0, 0); opacity: 1; }
+    38%, 52% { transform: translate(0, var(--dy)); }
+    66%, 86% { transform: translate(var(--dx), var(--dy)); opacity: 1; }
+    94% { transform: translate(var(--dx), var(--dy)); opacity: 0.2; }
+    100% { transform: translate(0, 0); opacity: 1; }
 }
 
 @keyframes gRuck {
-    0% { left: 60%; top: 55%; transform: translate(0, -6px); }
+    0% { transform: translate(0, -6px); }
     45% { transform: translate(0, 0); }
-    100% { left: 60%; top: 55%; transform: translate(0, -6px); }
+    100% { transform: translate(0, -6px); }
 }
 
 @keyframes rRuck {
@@ -4271,18 +4256,77 @@
     100% { opacity: 0; transform: scale(1.5); }
 }
 
+/* Mantiene en la franja izquierda, a la altura del jugador, mueve la mira y suelta. */
+/* Apretado todo el tiempo (la onda marca que no se suelta), mueve la mira y al final suelta. */
 @keyframes gKick {
-    0% { left: 10%; top: 50%; opacity: 0; }
-    8%, 22% { left: 10%; top: 50%; opacity: 1; }
-    42% { top: 30%; }
-    66% { top: 64%; }
-    80% { top: 50%; opacity: 1; }
-    90%, 100% { left: 10%; top: 50%; opacity: 0; }
+    0%, 20% { transform: translate(0, 0) scale(0.92); opacity: 1; }
+    42% { transform: translate(0, -30px) scale(0.92); }
+    64% { transform: translate(0, 30px) scale(0.92); }
+    82% { transform: translate(0, 0) scale(0.92); opacity: 1; }
+    90%, 100% { transform: translate(0, 0) scale(1.1); opacity: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {
     .gestureHand {
         animation: none;
         opacity: 1;
+    }
+}
+
+/* Cartel de cada ejercicio: en el medio, a la derecha del jugador (que arranca a la izquierda). */
+.drillIntro {
+    position: absolute;
+    top: 50%;
+    right: 4%;
+    z-index: 4;
+    transform: translateY(-50%);
+    display: grid;
+    gap: 6px;
+    justify-items: start;
+    width: min(330px, 52%);
+    padding: 12px 14px;
+    border-radius: 8px;
+    background: rgba(5, 6, 8, 0.92);
+    border: 2px solid var(--gold);
+    box-shadow: 0 6px 0 rgba(0, 0, 0, 0.45);
+    color: #f4f4f4;
+    animation: introIn 0.28s ease-out;
+    cursor: pointer;
+}
+
+.drillIntro strong {
+    font-size: 1.15rem;
+}
+
+.drillIntro .drillText {
+    font-size: clamp(0.66rem, 1.9vw, 0.8rem);
+}
+
+.drillCount {
+    justify-self: center;
+    font-size: 2rem;
+    line-height: 1;
+    color: var(--gold);
+    animation: countPop 1s ease-out;
+}
+
+@keyframes introIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50%) scale(0.9);
+    }
+}
+
+@keyframes countPop {
+    from {
+        opacity: 0;
+        transform: scale(1.8);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .drillIntro,
+    .drillCount {
+        animation: none;
     }
 }

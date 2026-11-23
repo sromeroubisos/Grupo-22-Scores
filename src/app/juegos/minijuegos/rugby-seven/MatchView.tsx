@@ -33,7 +33,7 @@ const DRILL_TITLE: Record<DrillId, string> = {
  * El dedo que hace la mímica del gesto en el celular (cada animación está en seven.module.css).
  * Mover y pasar cambian según el esquema: en uno se arrastra y se toca, en el otro se mantiene y se desliza.
  */
-function GestureHint({ id, scheme }: { id: DrillId; scheme: TouchScheme }) {
+function GestureHint({ id, scheme, layerRef }: { id: DrillId; scheme: TouchScheme; layerRef: React.RefObject<HTMLDivElement | null> }) {
     const anim: Partial<Record<DrillId, string>> = {
         move: scheme === 'tap' ? 'g-move-tap' : 'g-move-swipe',
         pass: scheme === 'tap' ? 'g-pass-tap' : 'g-pass-swipe',
@@ -45,12 +45,57 @@ function GestureHint({ id, scheme }: { id: DrillId; scheme: TouchScheme }) {
     const a = anim[id];
     if (!a) return null;
     return (
-        <div className={styles.gestureLayer} aria-hidden="true">
+        <div className={styles.gestureLayer} aria-hidden="true" ref={layerRef}>
             <div key={a} className={`${styles.gestureHand} ${styles[a]}`}>
                 <img src="/juegos/rugby-seven/dedo.png" alt="" width={64} height={67} loading="lazy" />
             </div>
         </div>
     );
+}
+
+/**
+ * Pone el dedo donde hay que tocar, en la cancha: sobre tu jugador (o el ruck) y con el gesto hacia
+ * el objetivo. Escribe variables CSS que usan las animaciones: --ax/--ay (dónde apoya) y --dx/--dy
+ * (hacia dónde arrastra o desliza). Las cuentas van en el marco del lienzo (offsetLeft/Top), así
+ * sirven también con la cancha girada.
+ */
+function placeGesture(layer: HTMLDivElement, cv: HTMLCanvasElement, m: SevenMatch, scheme: TouchScheme) {
+    const pts = m.drillPoints();
+    const id = m.drill?.id;
+    if (!pts || !id) return;
+    const s = cv.clientWidth / cv.width;
+    const ox = cv.offsetLeft;
+    const oy = cv.offsetTop;
+    const P = (p: { x: number; y: number }) => [ox + p.x * s, oy + p.y * s] as const;
+    const [mx, my] = P(pts.me);
+    const to = pts.to ? P(pts.to) : null;
+    const midY = oy + cv.clientHeight / 2;
+    const lim = (v: number, a: number) => Math.max(-a, Math.min(a, v));
+    // Que siempre se note el arrastre, aunque el objetivo esté casi a la misma altura.
+    const atLeast = (v: number, min: number) => (Math.abs(v) < min ? (v < 0 ? -min : min) : v);
+    let ax = mx;
+    let ay = my;
+    let dx = 0;
+    let dy = 0;
+    if (id === 'move') dy = atLeast(lim(to ? to[1] - my : 40, 60), 28);
+    else if (id === 'pass') {
+        const up = to ? to[1] < my : true;
+        dy = up ? -50 : 50;
+        // Esquema B: el pase sale tocando la mitad de la pantalla de ese lado: el dedo toca al compañero.
+        if (scheme === 'tap' && to) {
+            ax = to[0];
+            ay = up ? Math.min(to[1], midY - 24) : Math.max(to[1], midY + 24);
+        }
+    } else if (id === 'hit') dx = 60;
+    else if (id === 'tackle') {
+        dy = to ? lim(to[1] - my, 50) : 0;
+        dx = to && to[0] < mx ? -60 : 60;
+    } else if (id === 'kick') ax = ox + cv.clientWidth * 0.08; // la patada se carga en la franja izquierda
+    const st = layer.style;
+    st.setProperty('--ax', `${Math.round(ax)}px`);
+    st.setProperty('--ay', `${Math.round(ay)}px`);
+    st.setProperty('--dx', `${Math.round(dx)}px`);
+    st.setProperty('--dy', `${Math.round(dy)}px`);
 }
 
 /** La consigna de cada ejercicio, con las teclas que tiene puestas o con los gestos del esquema elegido. */
@@ -82,7 +127,7 @@ function drillText(id: DrillId, touch: boolean, scheme: TouchScheme, b: Bindings
             ? 'Ahora defendés. Seguilo arrastrando el dedo arriba o abajo y, cuando lo tengas cerca, deslizá rápido hacia adelante para tirarte. Tacklealo dos veces.'
             : 'Ahora defendés. Seguilo manteniendo el dedo arriba o abajo y, cuando lo tengas cerca, deslizá rápido hacia adelante para tirarte. Tacklealo dos veces.',
         ruck: 'Te tacklearon y se arma el ruck. Tocá la pantalla rápido para quedarte con la pelota. Ganalo dos veces.',
-        kick: 'Mantené el dedo en la franja izquierda: aparece la mira. Sin soltar, movela hacia arriba o abajo. Soltá para patear. Pateá dos veces.',
+        kick: 'Apoyá el dedo en la franja izquierda y dejalo apretado, sin tocar y soltar: aparece la mira. Sin levantarlo, movelo arriba o abajo para apuntar. Soltá para patear. Pateá dos veces.',
     };
     return t[id];
 }
@@ -235,6 +280,8 @@ export default function MatchView({ cfg, onFinish, onQuit, musicSrc = null, font
     const rebindRef = useRef<ControlAction | null>(null);
     const [rebinding, setRebinding] = useState<ControlAction | null>(null);
     const screenRef = useRef<HTMLDivElement>(null);
+    /** La capa del dedo del tutorial: se mueve sola cada cuadro, sin pasar por React. */
+    const gestureRef = useRef<HTMLDivElement>(null);
     const [view, setView] = useState({ w: VIEW_W, cssW: 0, cssH: 0 });
 
     useEffect(() => {
@@ -357,6 +404,7 @@ export default function MatchView({ cfg, onFinish, onQuit, musicSrc = null, font
                 match.update(dt);
             }
             if (ctx) match.render(ctx);
+            if (gestureRef.current && canvasRef.current) placeGesture(gestureRef.current, canvasRef.current, match, schemeRef.current);
             const h = match.hud();
             const key = hudKey(h);
             if (key !== lastKey) {
@@ -752,9 +800,33 @@ export default function MatchView({ cfg, onFinish, onQuit, musicSrc = null, font
         return () => window.clearTimeout(id);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [hd?.done, hd?.id, drillKind]);
+    /*
+     * Cartel de cada ejercicio: al arrancar uno (o con el "?"), el juego se frena, aparece en el medio
+     * qué hay que hacer, el dedo lo muestra sobre la cancha y una cuenta 3, 2, 1 lo saca.
+     */
+    const INTRO_FROM = 3;
+    const [intro, setIntro] = useState<{ id: DrillId; left: number } | null>(null);
+    const lastDrillId = useRef<DrillId | null>(null);
     useEffect(() => {
-        if (tutorialDone) pausedRef.current = true;
-    }, [tutorialDone, paused, touchHelp, blockPortrait]);
+        if (!drillKind || !hd || tutorialDone) return;
+        if (hd.id === lastDrillId.current) return;
+        if (touch && hd.id === 'juke') return; // en el celular salta solo al pase
+        lastDrillId.current = hd.id;
+        setIntro({ id: hd.id, left: INTRO_FROM });
+    }, [drillKind, hd?.id, tutorialDone, touch]); // eslint-disable-line react-hooks/exhaustive-deps
+    useEffect(() => {
+        // La cuenta no corre mientras el partido está en pausa o hay que girar el celular.
+        if (!intro || paused || blockPortrait) return;
+        const id = window.setTimeout(() => setIntro((v) => (v ? (v.left > 1 ? { ...v, left: v.left - 1 } : null) : null)), intro.left === INTRO_FROM ? 2200 : 1000);
+        return () => window.clearTimeout(id);
+    }, [intro, paused, blockPortrait]);
+    const showIntro = () => {
+        if (hd) setIntro({ id: hd.id, left: INTRO_FROM });
+    };
+    // Frenado mientras está el cartel del ejercicio o el de "terminaste el tutorial".
+    useEffect(() => {
+        pausedRef.current = paused || touchHelp || blockPortrait || tutorialDone || !!intro;
+    }, [tutorialDone, intro, paused, touchHelp, blockPortrait]);
     const goPractice = (id: DrillId = drillList[0]) => {
         setTutorialDone(false);
         setDrillKind('practice');
@@ -794,13 +866,25 @@ export default function MatchView({ cfg, onFinish, onQuit, musicSrc = null, font
                     role="img"
                     aria-label={`Partido ${cfg.home.name} contra ${cfg.away.name}`}
                 />
-                {/* El dedo muestra el gesto hasta que lo hacés una vez (en el ruck, mientras dure el ruck). */}
-                {drillKind && hd && touch && !hd.done && !tutorialDone && (hd.id === 'ruck' ? hud?.phase === 'ruck' : hd.count === 0) && <GestureHint id={hd.id} scheme={scheme} />}
+                {/* El dedo se queda mostrando el gesto, sobre la cancha, hasta que completás el ejercicio. */}
+                {drillKind && hd && touch && !hd.done && !tutorialDone && <GestureHint id={hd.id} scheme={scheme} layerRef={gestureRef} />}
+                {drillKind && intro && !tutorialDone && (
+                    <div className={styles.drillIntro} role="dialog" aria-label={DRILL_TITLE[intro.id]} onClick={() => setIntro(null)}>
+                        <span className={styles.drillStep}>{drillKind === 'tutorial' ? `Tutorial · ${drillList.indexOf(intro.id) + 1} de ${drillList.length}` : 'Práctica'}</span>
+                        <strong>{DRILL_TITLE[intro.id]}</strong>
+                        <p className={styles.drillText}>{drillText(intro.id, touch, scheme, bindings)}</p>
+                        <span className={styles.drillCount} key={intro.left} aria-live="polite">
+                            {intro.left}
+                        </span>
+                        <button type="button" className={styles.drillSkip} onClick={() => setIntro(null)}>
+                            Ya entendí
+                        </button>
+                    </div>
+                )}
                 {drillKind && hd && (
                     <div className={styles.drillPanel}>
                         <span className={styles.drillStep}>{drillKind === 'tutorial' ? `Tutorial · ${drillList.indexOf(hd.id) + 1} de ${drillList.length}` : 'Práctica'}</span>
                         <strong>{DRILL_TITLE[hd.id]}</strong>
-                        <p className={styles.drillText}>{drillText(hd.id, touch, scheme, bindings)}</p>
                         <div className={styles.drillDots} role="img" aria-label={`${hd.count} de ${hd.goal}`}>
                             {Array.from({ length: hd.goal }, (_, i) => (
                                 <i key={i} data-on={i < hd.count ? '1' : '0'} />
@@ -858,6 +942,11 @@ export default function MatchView({ cfg, onFinish, onQuit, musicSrc = null, font
                 {/* Pausa, música y controles arriba a la derecha. */}
                 <div className={styles.hudRight}>
                     <span className={styles.sbHelp}>{keyName(bindings.pause)} · pausa y controles</span>
+                    {drillKind && hd && !tutorialDone && (
+                        <button type="button" className={styles.pauseBtn} onClick={showIntro} aria-label="Ver de nuevo cómo se hace">
+                            ?
+                        </button>
+                    )}
                     {hasMusic && (
                         <button type="button" className={styles.pauseBtn} onClick={toggleMute} aria-label={muted ? 'Prender la música' : 'Silenciar la música'} aria-pressed={!muted}>
                             {muted ? '×♪' : '♪'}

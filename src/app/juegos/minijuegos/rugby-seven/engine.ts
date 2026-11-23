@@ -1483,6 +1483,8 @@ export class SevenMatch {
      * con timing; más lejos o más abierto, más chica la zona buena.
      */
     dropGoal() {
+        // En los ejercicios no hay drop: en el celular, tocar la franja de patear lo disparaba sin querer.
+        if (this.drill) return;
         if (this.phase === 'drop') {
             this.action();
             return;
@@ -1926,6 +1928,34 @@ export class SevenMatch {
             this.contact(tackler, me); // en el ruck el tackle siempre entra (ver drillTackled)
         }
         this.camX = me.x - 14;
+    }
+
+    /**
+     * Para el dedo que hace la mímica: dónde está tu jugador (o el ruck) y adónde apunta el gesto
+     * (el próximo cono, el compañero que falta para el pase, el rival que tenés que tacklear), en
+     * píxeles del lienzo. Un poco arriba de los pies, para que el dedo toque el cuerpo.
+     */
+    drillPoints(): { me: { x: number; y: number }; to: { x: number; y: number } | null } | null {
+        const d = this.drill;
+        if (!d) return null;
+        const px = (x: number, y: number) => ({ x: this.sx(x), y: this.sy(y) - 8 });
+        if (this.phase === 'ruck') return { me: px(this.ruckAt.x, this.ruckAt.y), to: null };
+        const h = this.ball.holder;
+        const me = d.id === 'tackle' ? this.ctrl : h && h.side === 0 ? h : null;
+        if (!me) return null;
+        let to: { x: number; y: number } | null = null;
+        if (d.id === 'move') {
+            const cone = this.drillMarks.find((m) => !m.got);
+            if (cone) to = px(cone.x, cone.y);
+        } else if (d.id === 'pass') {
+            // Falta para arriba (-1) o para abajo (1): el compañero de ese lado.
+            const want = this.drillDirs.has(-1) ? 1 : -1;
+            const mate = this.team(0)
+                .filter((p) => p !== me && Math.sign(p.y - me.y) === want)
+                .sort((a, b) => Math.abs(a.y - me.y) - Math.abs(b.y - me.y))[0];
+            if (mate) to = px(mate.x, mate.y);
+        } else if (d.id === 'tackle' && h && h.side === 1) to = px(h.x, h.y);
+        return { me: px(me.x, me.y), to };
     }
 
     /** Lo que se cuenta como acierto. */
