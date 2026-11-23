@@ -277,26 +277,29 @@ function pressured(b: DiffParams, def: number, atk: number): DiffParams {
  */
 /**
  * Cómo se mueve el rival en cada dificultad:
- * - `swing`: cuántos NIVELES de dificultad se corre en su mejor (o peor) pasaje;
+ * - `up`: cuántos NIVELES de dificultad sube en su mejor pasaje;
+ * - `down`: cuántos baja en el peor. Es asimétrico a propósito: el bajón es leve y el pasaje bueno
+ *   se nota de verdad. Con las dos puntas iguales, el rival pasaba la mitad del partido flojo y en
+ *   promedio quedaba más blando que sin rachas (medido en juego: fácil y normal se ganaban a cero);
  * - `bias`: hacia dónde tira de entrada (negativo = vive en bajón);
  * - `trend`: cuánto mejora a medida que avanza el partido (0 al arranque, todo al final);
- * - `upCap`: tope de su mejor pasaje, en niveles;
  * - `spell`: cuánto dura un pasaje, en segundos de juego (cortos = oleadas que cambian rápido).
  *
  * Muy fácil: casi siempre en bajón, con oleadas cortas que lo levantan un poco y se le pasan.
- * Fácil: arranca flojo y cada vez tiene más pasajes buenos. De normal para arriba, cada vez más
- * parejo; en extremo no se mueve (y juega con cinco estrellas).
+ * Fácil: arranca flojo y cada vez tiene más pasajes buenos; en el mejor juega como uno de difícil.
+ * Normal: en su mejor pasaje juega casi como leyenda. De ahí para arriba, cada vez más parejo; en
+ * extremo no se mueve (y juega con cinco estrellas).
  */
-const MOOD_PROFILE: Record<Difficulty, { swing: number; bias: number; trend: number; upCap: number; spell: [number, number] }> = {
-    'muy-facil': { swing: 0.6, bias: -0.55, trend: 0, upCap: 0.3, spell: [8, 20] },
-    facil: { swing: 1, bias: -0.25, trend: 0.7, upCap: 1, spell: [15, 40] },
-    normal: { swing: 0.85, bias: 0, trend: 0.2, upCap: 0.85, spell: [20, 50] },
-    dificil: { swing: 0.6, bias: 0, trend: 0, upCap: 0.6, spell: [25, 55] },
-    leyenda: { swing: 0.35, bias: 0, trend: 0, upCap: 0.35, spell: [30, 60] },
-    extremo: { swing: 0.15, bias: 0, trend: 0, upCap: 0.15, spell: [30, 60] },
+const MOOD_PROFILE: Record<Difficulty, { up: number; down: number; bias: number; trend: number; spell: [number, number] }> = {
+    'muy-facil': { up: 0.3, down: 0.6, bias: -0.55, trend: 0, spell: [8, 20] },
+    facil: { up: 2, down: 0.6, bias: -0.15, trend: 0.7, spell: [15, 35] },
+    normal: { up: 1.8, down: 0.5, bias: 0.1, trend: 0.2, spell: [15, 40] },
+    dificil: { up: 1.1, down: 0.35, bias: 0, trend: 0, spell: [20, 45] },
+    leyenda: { up: 0.6, down: 0.2, bias: 0, trend: 0, spell: [25, 55] },
+    extremo: { up: 0.2, down: 0.1, bias: 0, trend: 0, spell: [30, 60] },
 };
 /** El ánimo del rival en niveles, a partir del pasaje normalizado (-1..1). */
-const cpuLevels = (d: Difficulty, target: number) => Math.min(target * MOOD_PROFILE[d].swing, MOOD_PROFILE[d].upCap);
+const cpuLevels = (d: Difficulty, target: number) => target * (target >= 0 ? MOOD_PROFILE[d].up : MOOD_PROFILE[d].down);
 /** Lo que se mueve tu equipo: poco, y igual en todas las dificultades (lo tuyo lo pone el que juega). */
 const USER_SWING = 0.22;
 /** Pasajes de tu equipo (y el mínimo que asegura el orgullo). */
@@ -304,6 +307,8 @@ const SPELL_MIN = 20;
 const SPELL_MAX = 50;
 /** Orgullo: si está en cero y abajo por esto o más, el que recibe el tanto reacciona en el acto. */
 const PRIDE_GAP = 10;
+/** El rival reacciona antes: en cero y abajo por un try convertido ya sale a buscar. */
+const CPU_PRIDE_GAP = 7;
 
 const LEVELS: Difficulty[] = ['muy-facil', 'facil', 'normal', 'dificil', 'leyenda', 'extremo'];
 /** Lo que el ánimo no toca: tu patada a los palos es tuya. */
@@ -1486,12 +1491,15 @@ export class SevenMatch {
      */
     private nextSpell(prev: number, side: Side, at = this.elapsed()): number {
         const other: Side = side === 0 ? 1 : 0;
-        const pride = this.score[side] === 0 && this.score[other] - this.score[side] >= PRIDE_GAP ? 0.45 : 0;
+        const behind = this.score[other] - this.score[side];
+        const pride = this.score[side] === 0 && behind >= (side === 1 ? CPU_PRIDE_GAP : PRIDE_GAP) ? 0.45 : 0;
         // Solo el rival tiene perfil por dificultad: de dónde arranca y cuánto crece con el reloj.
         let lean = 0;
         if (side === 1) {
             const prof = MOOD_PROFILE[this.cfg.difficulty];
             lean = prof.bias + prof.trend * clamp(at / (this.halfLen * 2), 0, 1);
+            // Abajo en el marcador se agranda (menos en muy fácil, que tiene que seguir siendo muy fácil).
+            if (behind >= 7 && this.cfg.difficulty !== 'muy-facil') lean += 0.25;
         }
         return clamp(-prev * 0.55 + (rnd() * 2 - 1) * 0.75 + pride + lean, -1, 1);
     }
@@ -1520,18 +1528,23 @@ export class SevenMatch {
     }
 
     /**
-     * Lo que le hace un tanto al ánimo: al que marca lo empuja, al que lo recibe lo baja. Se suma al
-     * pasaje en curso, no lo reemplaza; el próximo pasaje igual puede dar vuelta la racha.
+     * Lo que le hace un tanto al ánimo: al que marca lo empuja. Tu try NO hunde al rival: si lo
+     * hundiera, cada try tuyo haría más fácil el siguiente y el partido terminaría en goleada a cero.
+     * El try del rival sí te baja un poco a vos. Se suma al pasaje en curso, no lo reemplaza.
      */
     private moodAfterScore(scorer: Side, pts: number) {
         const kick = pts >= 5 ? 0.3 : 0.15;
-        const sign = scorer === 1 ? 1 : -1;
-        this.moodTarget.cpu = clamp(this.moodTarget.cpu + sign * kick, -1, 1);
-        this.moodTarget.user = clamp(this.moodTarget.user - sign * kick, -1, 1);
+        if (scorer === 1) {
+            this.moodTarget.cpu = clamp(this.moodTarget.cpu + kick, -1, 1);
+            this.moodTarget.user = clamp(this.moodTarget.user - kick, -1, 1);
+        } else {
+            this.moodTarget.user = clamp(this.moodTarget.user + kick, -1, 1);
+        }
         // Orgullo: el que está en cero y se le escapan no se entrega. En vez del bajón, reacciona ya:
         // arranca su mejor pasaje del partido, de entrada y con un pasaje entero por delante.
         const other: Side = scorer === 0 ? 1 : 0;
-        if (this.score[other] === 0 && this.score[scorer] >= PRIDE_GAP) {
+        const gap = other === 1 ? (this.cfg.difficulty === 'muy-facil' ? PRIDE_GAP : CPU_PRIDE_GAP) : PRIDE_GAP;
+        if (this.score[other] === 0 && this.score[scorer] >= gap) {
             const lift = 0.75 + rnd() * 0.25;
             if (other === 1) this.moodTarget.cpu = Math.max(this.moodTarget.cpu, lift);
             else this.moodTarget.user = Math.max(this.moodTarget.user, lift);
