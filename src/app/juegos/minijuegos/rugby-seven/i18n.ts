@@ -1037,6 +1037,53 @@ const EXACT: Record<string, string> = {
     'Jugás la división de tu club temporada tras temporada.': 'You play your club’s division season after season.',
     'El club toma el nombre, la camiseta y los siete jugadores de tu equipo. Lo deshacés en Editar clubes.': 'The club takes your team’s name, kit and seven players. You can undo it in Edit clubs.',
     'Elegí tu selección entre las que juegan.': 'Pick your team from those taking part.',
+    // Tutorial y práctica
+    'Práctica': 'Practice',
+    'Repetí los ejercicios: moverte, pasar, chocar, tacklear, el ruck y patear.': 'Repeat the drills: moving, passing, running hard, tackling, the ruck and kicking.',
+    'Moverte': 'Moving',
+    'Amague': 'Sidestep',
+    'Pase': 'Pass',
+    'Chocar': 'Run hard',
+    'Tacklear': 'Tackle',
+    'Ruck': 'Ruck',
+    'Patear': 'Kick',
+    'Ejercicio': 'Drill',
+    'Saltar el tutorial': 'Skip the tutorial',
+    'Listo': 'Done',
+    'Ya sabés lo básico. Cuando quieras repasar algo, está la Práctica en el menú.': 'You know the basics. Whenever you want to go over something, Practice is in the menu.',
+    'Ir a jugar': 'Go play',
+    'Seguir practicando': 'Keep practising',
+    'Salir del tutorial': 'Leave the tutorial',
+    'Salir de la práctica': 'Leave practice',
+    'Bien.': 'Good.',
+    'Bien. Vamos con el siguiente.': 'Good. On to the next one.',
+    'Se terminó la cancha: te faltó algún cono': 'You ran out of field: you missed a cone',
+    'Se te escapó: seguilo y tirate cuando lo tengas cerca': 'He got away: follow him and dive in when he is close',
+    'Tocá más rápido para quedarte con la pelota': 'Tap faster to keep the ball',
+    'Te fuiste afuera: quedate adentro de la cancha': 'You went out: stay inside the field',
+    'Pase adelantado: el pase va siempre para atrás o en línea': 'Forward pass: the pass always goes backwards or flat',
+    'Te tacklearon: chocá justo antes del contacto': 'You were tackled: run hard just before contact',
+    'Te tacklearon': 'You were tackled',
+    'Otra vez': 'Again',
+    'Ahora pasala para abajo': 'Now pass it down',
+    'Ahora pasala para arriba': 'Now pass it up',
+    'Un amague es un cambio de paso rápido. Hacé tres.': 'A sidestep is a quick change of step. Do three.',
+    'Corrés solo hacia adelante. Deslizá el dedo hacia arriba o hacia abajo y mantenelo para ir para ese lado. Pasá por los conos.':
+        'You run forward on your own. Slide your finger up or down and hold it to go that way. Go through the cones.',
+    'Corrés solo hacia adelante. Mantené el dedo arriba o abajo de la mitad de la cancha para ir para ese lado. Pasá por los conos.':
+        'You run forward on your own. Hold your finger above or below the middle of the field to go that way. Go through the cones.',
+    'Tocá la cancha: arriba de la mitad, pase para arriba; abajo, para abajo. Pasala una vez para cada lado.':
+        'Tap the field: above the middle, pass up; below, pass down. Pass once to each side.',
+    'Deslizá rápido hacia arriba o hacia abajo para pasar para ese lado. Pasala una vez para cada lado.': 'Swipe quickly up or down to pass that way. Pass once to each side.',
+    'Te sale un defensor. Justo antes del choque, deslizá el dedo hacia adelante (a la derecha) para romper el tackle. Rompelo dos veces.':
+        'A defender comes at you. Just before contact, slide your finger forward (to the right) to break the tackle. Break it twice.',
+    'Ahora defendés. Seguilo arrastrando el dedo arriba o abajo y, cuando lo tengas cerca, deslizá rápido hacia adelante para tirarte. Tacklealo dos veces.':
+        'Now you defend. Follow him by dragging your finger up or down and, when he is close, swipe quickly forward to dive in. Tackle him twice.',
+    'Ahora defendés. Seguilo manteniendo el dedo arriba o abajo y, cuando lo tengas cerca, deslizá rápido hacia adelante para tirarte. Tacklealo dos veces.':
+        'Now you defend. Follow him by holding your finger up or down and, when he is close, swipe quickly forward to dive in. Tackle him twice.',
+    'Te tacklearon y se arma el ruck. Tocá la pantalla rápido para quedarte con la pelota. Ganalo dos veces.': 'You were tackled and the ruck forms. Tap the screen fast to keep the ball. Win it twice.',
+    'Mantené el dedo en la franja izquierda: aparece la mira. Sin soltar, movela hacia arriba o abajo. Soltá para patear. Pateá dos veces.':
+        'Hold your finger on the left strip: the aim appears. Without letting go, move it up or down. Let go to kick. Kick twice.',
 };
 
 /** Una sigla de división con año ("Élite 14 2029") o un nombre con punto al final ("Copa Curry · Élite."). */
@@ -1127,6 +1174,15 @@ const PATTERNS: Rule[] = [
     [/^Descenso: el año que viene jugás el (.+)\.$/, (m) => `Relegation: next year you play the ${translate(m[1])}.`],
     [/^Se retiraron (.+)\.$/, (m) => `${m[1]} retired.`],
     [/^(.+) la tira afuera$/, (m) => `${m[1]} kick it out`],
+    // Tutorial y práctica (con las teclas que tenga puestas cada uno).
+    [/^Tutorial · (\d+) de (\d+)$/, (m) => `Tutorial · ${m[1]} of ${m[2]}`],
+    [/^Corrés solo hacia adelante\. Mantené (.+) o (.+) para ir hacia arriba o hacia abajo y pasá por los conos\.$/, (m) => `You run forward on your own. Hold ${m[1]} or ${m[2]} to go up or down and go through the cones.`],
+    [/^Un toque corto de (.+) o (.+) es un amague: un cambio de paso rápido\. Hacé tres\.$/, (m) => `A short tap of ${m[1]} or ${m[2]} is a sidestep: a quick change of step. Do three.`],
+    [/^(.+) pasa para arriba y (.+) para abajo; mantenida, es un salteo\. Moverte sigue siendo con (.+) y (.+)\. Pasala una vez para cada lado\.$/, (m) => `${m[1]} passes up and ${m[2]} passes down; held, it is a skip pass. Moving is still ${m[3]} and ${m[4]}. Pass once to each side.`],
+    [/^Te sale un defensor\. Apretá (.+) justo antes del choque para romper el tackle\. Rompelo dos veces\.$/, (m) => `A defender comes at you. Press ${m[1]} just before contact to break the tackle. Break it twice.`],
+    [/^Ahora defendés\. Seguilo con (.+) y (.+) y, cuando lo tengas cerca, apretá (.+) para tirarte al tackle\. Tacklealo dos veces\.$/, (m) => `Now you defend. Follow him with ${m[1]} and ${m[2]} and, when he is close, press ${m[3]} to dive into the tackle. Tackle him twice.`],
+    [/^Te tacklearon y se arma el ruck\. Tocá (.+) rápido para quedarte con la pelota\. Ganalo dos veces\.$/, (m) => `You were tackled and the ruck forms. Tap ${m[1] === 'Espacio' ? 'Space' : m[1]} fast to keep the ball. Win it twice.`],
+    [/^Mantené (.+): aparece la mira y con (.+) y (.+) la movés\. Soltá para patear\. Pateá dos veces\.$/, (m) => `Hold ${m[1]}: the aim appears and ${m[2]} and ${m[3]} move it. Let go to kick. Kick twice.`],
     [/^Ya son elegibles por residencia: (.+)\.$/, (m) => `Now eligible by residency: ${m[1]}.`],
     [/^Fondos: \+(.+) \(World Rugby, ranking y Mundial\), −(.+) de mantenimiento\.$/, (m) => `Funds: +${m[1]} (World Rugby, ranking and World Cup), −${m[2]} upkeep.`],
     [/^Va por: (.+)\. Se juega a la par de tu temporada: avanza cada vez que jugás o simulás una fecha\.$/, (m) => `Going for: ${m[1]}. It runs alongside your season: it advances each time you play or simulate a round.`],

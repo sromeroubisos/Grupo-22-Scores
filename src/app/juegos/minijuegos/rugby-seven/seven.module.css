@@ -2266,6 +2266,101 @@
     background: rgba(5, 6, 8, 0.7);
 }
 
+/* ---- Tutorial y práctica: la consigna del ejercicio arriba a la izquierda ---- */
+.drillPanel {
+    position: absolute;
+    top: 8px;
+    left: 10px;
+    z-index: 3;
+    display: grid;
+    gap: 3px;
+    width: min(340px, calc(100% - 150px));
+    padding: 7px 10px 8px;
+    border-radius: 6px;
+    background: rgba(5, 6, 8, 0.85);
+    border: 2px solid #050608;
+    color: #f4f4f4;
+    pointer-events: none; /* el dedo sigue siendo de la cancha; solo los botones lo toman */
+}
+
+.drillPanel button {
+    pointer-events: auto;
+}
+
+.drillStep {
+    font-size: 0.58rem;
+    color: var(--gold);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.drillPanel strong {
+    font-size: 0.9rem;
+}
+
+.drillText {
+    margin: 0;
+    font-size: clamp(0.62rem, 1.7vw, 0.74rem);
+    line-height: 1.35;
+}
+
+.drillDots {
+    display: flex;
+    gap: 4px;
+    margin-top: 2px;
+}
+
+.drillDots i {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    border: 1px solid #f4f4f4;
+}
+
+.drillDots i[data-on='1'] {
+    background: var(--gold);
+    border-color: var(--gold);
+}
+
+.drillNote {
+    margin: 0;
+    font-size: 0.66rem;
+    color: #ff8a80;
+}
+
+.drillOk {
+    margin: 0;
+    font-size: 0.72rem;
+    color: #7ee08a;
+}
+
+.drillPick {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 4px;
+}
+
+.drillPick .keyBtn,
+.drillPick .keyBtnActive {
+    min-width: 0;
+    padding: 3px 7px;
+    font-size: 0.62rem;
+}
+
+.drillSkip {
+    justify-self: start;
+    margin-top: 2px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--color-text-secondary);
+    font: inherit;
+    font-size: 0.6rem;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
 /* ---- Controles configurables (en la pausa) ---- */
 .controlsPanel {
     display: grid;
@@ -4037,5 +4132,157 @@
     .rosterList li.rosterPick .rosterAge,
     .rosterList li.rosterPick .rosterActions {
         grid-column: 1 / -1;
+    }
+}
+
+/* ---- Tutorial en el celular: un dedo que hace la mímica del gesto ---- */
+.gestureLayer {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.gestureHand {
+    position: absolute;
+    left: 65%;
+    top: 50%;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    animation-duration: 2.6s;
+    animation-iteration-count: infinite;
+    animation-timing-function: ease-in-out;
+}
+
+/* La punta del dedo está arriba a la izquierda del dibujo: se corre para que ese punto sea el toque. */
+.gestureHand img {
+    position: absolute;
+    left: -12px;
+    top: -12px;
+    width: 64px;
+    max-width: none; /* el contenedor mide 0 (es solo el punto del toque): sin esto, un max-width global la achica a nada */
+    height: auto;
+    image-rendering: pixelated;
+    filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.45));
+}
+
+/* Onda del toque, en la punta del dedo. */
+.gestureHand::before {
+    content: '';
+    position: absolute;
+    left: -14px;
+    top: -14px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid #f4f4f4;
+    opacity: 0;
+    animation: inherit;
+    animation-name: var(--ripple, none);
+}
+
+.g-move-tap { animation-name: gMoveTap; }
+.g-move-swipe { animation-name: gMoveSwipe; }
+.g-pass-tap { animation-name: gPassTap; --ripple: rPassTap; }
+.g-pass-swipe { animation-name: gPassSwipe; }
+.g-hit { animation-name: gHit; animation-duration: 1.6s; }
+.g-tackle { animation-name: gTackle; animation-duration: 3s; }
+.g-ruck { animation-name: gRuck; animation-duration: 0.36s; opacity: 1; --ripple: rRuck; }
+.g-kick { animation-name: gKick; animation-duration: 3s; }
+
+@keyframes gMoveTap {
+    0% { left: 65%; top: 50%; opacity: 0; }
+    8% { left: 65%; top: 50%; opacity: 1; }
+    30%, 45% { top: 28%; }
+    70%, 88% { top: 72%; opacity: 1; }
+    100% { top: 72%; opacity: 0; }
+}
+
+@keyframes gMoveSwipe {
+    0% { left: 65%; top: 28%; opacity: 0; }
+    6%, 42% { left: 65%; top: 28%; opacity: 1; }
+    48% { top: 28%; opacity: 0; }
+    54% { top: 72%; opacity: 0; }
+    60%, 94% { top: 72%; opacity: 1; }
+    100% { top: 72%; opacity: 0; }
+}
+
+@keyframes gPassTap {
+    0% { left: 72%; top: 30%; opacity: 0; transform: scale(1.15); }
+    12% { opacity: 1; transform: scale(1.15); }
+    20% { transform: scale(0.9); }
+    30% { transform: scale(1); opacity: 1; }
+    42% { left: 72%; top: 30%; opacity: 0; }
+    55% { left: 72%; top: 70%; opacity: 0; transform: scale(1.15); }
+    65% { opacity: 1; transform: scale(1.15); }
+    73% { transform: scale(0.9); }
+    83% { transform: scale(1); opacity: 1; }
+    100% { left: 72%; top: 70%; opacity: 0; }
+}
+
+@keyframes rPassTap {
+    0%, 19% { opacity: 0; transform: scale(0.4); }
+    21% { opacity: 1; transform: scale(0.6); }
+    34% { opacity: 0; transform: scale(1.6); }
+    72% { opacity: 0; transform: scale(0.4); }
+    74% { opacity: 1; transform: scale(0.6); }
+    87%, 100% { opacity: 0; transform: scale(1.6); }
+}
+
+@keyframes gPassSwipe {
+    0% { left: 72%; top: 55%; opacity: 0; }
+    10% { top: 55%; opacity: 1; }
+    22% { top: 28%; opacity: 1; }
+    30% { top: 24%; opacity: 0; }
+    50% { top: 45%; opacity: 0; }
+    60% { top: 45%; opacity: 1; }
+    72% { top: 72%; opacity: 1; }
+    80%, 100% { top: 76%; opacity: 0; }
+}
+
+@keyframes gHit {
+    0% { left: 48%; top: 55%; opacity: 0; }
+    20% { left: 48%; opacity: 1; }
+    45% { left: 76%; opacity: 1; }
+    60%, 100% { left: 80%; opacity: 0; }
+}
+
+@keyframes gTackle {
+    0% { left: 55%; top: 50%; opacity: 0; }
+    8% { top: 50%; opacity: 1; }
+    25% { top: 34%; }
+    45% { left: 55%; top: 50%; }
+    58% { left: 55%; top: 50%; }
+    70% { left: 78%; top: 50%; opacity: 1; }
+    80%, 100% { left: 82%; top: 50%; opacity: 0; }
+}
+
+@keyframes gRuck {
+    0% { left: 60%; top: 55%; transform: translate(0, -6px); }
+    45% { transform: translate(0, 0); }
+    100% { left: 60%; top: 55%; transform: translate(0, -6px); }
+}
+
+@keyframes rRuck {
+    0%, 40% { opacity: 0; transform: scale(0.5); }
+    50% { opacity: 1; transform: scale(0.7); }
+    100% { opacity: 0; transform: scale(1.5); }
+}
+
+@keyframes gKick {
+    0% { left: 10%; top: 50%; opacity: 0; }
+    8%, 22% { left: 10%; top: 50%; opacity: 1; }
+    42% { top: 30%; }
+    66% { top: 64%; }
+    80% { top: 50%; opacity: 1; }
+    90%, 100% { left: 10%; top: 50%; opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .gestureHand {
+        animation: none;
+        opacity: 1;
     }
 }

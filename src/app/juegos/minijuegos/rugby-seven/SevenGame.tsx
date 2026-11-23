@@ -170,6 +170,7 @@ type Screen =
     | { k: 'clubs' }
     | { k: 'clubEdit'; team: SevenTeam }
     | { k: 'match'; cfg: MatchConfig; mode: Mode; nonce: number }
+    | { k: 'drill'; kind: 'tutorial' | 'practice'; nonce: number }
     | { k: 'result'; cfg: MatchConfig; mode: Mode; score: [number, number] };
 
 type HubTab = 'tabla' | 'calendario' | 'cuadro' | 'resultados' | 'goleadores' | 'otros' | 'plantel' | 'club' | 'palmares' | 'camino' | 'carrera' | 'circuito' | 'ranking' | 'union' | 'temporada' | 'juveniles';
@@ -199,6 +200,14 @@ const CUSTOM_FORMATS: { label: string; hint: string; stage: Stage; min: number; 
 
 /* Lo impuro (azar, reloj, contador) vive fuera del componente: solo se llama desde eventos. */
 let matchNonce = 0;
+/** Marca de que el tutorial ya se mostró en este dispositivo. */
+const TUTORIAL_KEY = 'g22-rugby-seven-tutorial';
+
+/** El partido de los ejercicios: sin rival de verdad, dos equipos de fábrica y el ritmo de fácil. */
+function drillCfg(): MatchConfig {
+    return { home: PRESET_TEAMS[0], away: PRESET_TEAMS[1], difficulty: 'facil', minutes: 7, suddenDeath: false, drill: 'move' };
+}
+
 function nextNonce() {
     matchNonce += 1;
     return matchNonce;
@@ -757,6 +766,19 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
         if (c) setCoachName(c);
         else if (c === '') setAskCoach(true);
     }, []);
+    // El tutorial sale una sola vez por dispositivo, la primera vez que se abre el juego. Se anota al
+    // arrancarlo, así no vuelve aunque lo salteen o cierren la pestaña a la mitad.
+    useEffect(() => {
+        try {
+            if (localStorage.getItem(TUTORIAL_KEY) === '1') return;
+            localStorage.setItem(TUTORIAL_KEY, '1');
+        } catch {
+            return; // Sin localStorage no hay cómo recordarlo: mejor no mostrarlo en cada visita.
+        }
+        setScreen({ k: 'drill', kind: 'tutorial', nonce: nextNonce() });
+    }, []);
+    // Un solo objeto: la vista del partido rearma el motor cada vez que cambia la config.
+    const drillConfig = useMemo(drillCfg, []);
     const [celebratedKey, setCelebratedKey] = useState<string | null>(null);
     /** El cartel de la última simulación (victoria, derrota o empate). */
     const [simFlash, setSimFlash] = useState<SimFlash | null>(null);
@@ -871,7 +893,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
             return !m;
         });
     };
-    const matchOn = screen.k === 'match';
+    const matchOn = screen.k === 'match' || screen.k === 'drill';
     useEffect(() => {
         const a = menuAudio.current;
         if (!a) return;
@@ -1277,7 +1299,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
         e.preventDefault();
     };
 
-    const inMatch = screen.k === 'match';
+    const inMatch = screen.k === 'match' || screen.k === 'drill';
     const quickMissing = !mine || !rival || mine === rival;
     const btn = (label: string, onClick: () => void, primary = false, disabled = false) => (
         <button type="button" className={primary ? styles.btnPrimary : styles.backBtn} onClick={onClick} disabled={disabled}>
@@ -1384,6 +1406,11 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                 <span className={styles.menuIcon} aria-hidden="true">▶</span>
                                 <strong>Partido rápido</strong>
                                 <span>Elegís los dos equipos y a la cancha.</span>
+                            </button>
+                            <button type="button" role="menuitem" className={styles.menuBtn} onClick={() => setScreen({ k: 'drill', kind: 'practice', nonce: nextNonce() })}>
+                                <span className={styles.menuIcon} aria-hidden="true">◎</span>
+                                <strong>Práctica</strong>
+                                <span>Repetí los ejercicios: moverte, pasar, chocar, tacklear, el ruck y patear.</span>
                             </button>
                             <button type="button" role="menuitem" className={styles.menuBtn} onClick={() => setScreen({ k: 'slots' })}>
                                 <span className={styles.menuIcon} aria-hidden="true">★</span>
@@ -2997,6 +3024,18 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                         fontFamily={pixel.style.fontFamily}
                         onFinish={(score, log) => onFinish(screen.cfg, screen.mode, score, log)}
                         onQuit={() => setScreen(screen.mode === 'cup' ? { k: 'cup' } : screen.mode === 'tour' || screen.mode === 'friendly' ? { k: 'tour' } : { k: 'quick', step: 1 })}
+                    />
+                )}
+
+                {screen.k === 'drill' && (
+                    <MatchView
+                        key={screen.nonce}
+                        cfg={drillConfig}
+                        drill={screen.kind}
+                        musicSrc={musicSrc}
+                        fontFamily={pixel.style.fontFamily}
+                        onFinish={() => setScreen({ k: 'menu' })}
+                        onQuit={() => setScreen({ k: 'menu' })}
                     />
                 )}
 

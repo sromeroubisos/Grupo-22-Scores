@@ -61,6 +61,23 @@ interface Player {
     fb: boolean; // fullback: el que defiende queda siempre uno al fondo
     rucking: boolean; // está metido en el ruck, empujando sobre la pelota
     sk: PlayerSkill | null; // skills del modo carrera (null: el jugador promedio)
+    out?: boolean; // fuera de la cancha (en los ejercicios solo juegan los que hacen falta)
+}
+
+/**
+ * Ejercicios del tutorial y de la práctica. Cada uno arma una jugada chica (vos solo, o con uno o dos
+ * más) y cuenta cuántas veces hiciste lo que enseña. El reloj no corre y no hay marcador.
+ */
+export type DrillId = 'move' | 'juke' | 'pass' | 'hit' | 'tackle' | 'ruck' | 'kick';
+export const DRILLS: DrillId[] = ['move', 'juke', 'pass', 'hit', 'tackle', 'ruck', 'kick'];
+const DRILL_GOAL: Record<DrillId, number> = { move: 4, juke: 3, pass: 2, hit: 2, tackle: 2, ruck: 2, kick: 2 };
+export interface DrillState {
+    id: DrillId;
+    count: number;
+    goal: number;
+    done: boolean;
+    /** Lo que salió mal en el último intento (se borra al volver a intentar). */
+    note: string | null;
 }
 
 /**
@@ -121,6 +138,8 @@ export interface MatchConfig {
     suddenDeath: boolean;
     /** Skills de los siete de cada lado (modo carrera). Sin esto, todos promedio. */
     skills?: [PlayerSkill[] | null, PlayerSkill[] | null];
+    /** Tutorial o práctica: arranca en este ejercicio en vez de un partido. */
+    drill?: DrillId;
 }
 
 /** Cuánto se abre de costado el portador rival cuando lo apuran (m/s). */
@@ -170,6 +189,40 @@ export const KICK_AIM_LABEL: Record<KickAim, string> = {
 const CPU_CHASE: Record<Difficulty, number> = { 'muy-facil': 6.6, facil: 7.5, normal: 8.3, dificil: 8.8, leyenda: 9.3, extremo: 9.6 };
 /** Pelota suelta disputada: lo que le cuesta al rival quedársela si llegan juntos. */
 const CPU_GRAB: Record<Difficulty, number> = { 'muy-facil': 0.3, facil: 0.4, normal: 0.5, dificil: 0.58, leyenda: 0.66, extremo: 0.7 };
+/**
+ * Lo que el rival le regala a una defensa que juega bien. Medido contra una defensa que tacklea seguro
+ * y toca rápido el ruck: en normal el rival perdía la pelota en 9 de cada 10 posesiones desde el saque,
+ * casi todas por lo mismo en todos los niveles (le cortaban el pase, se la robaban en el ruck tocando
+ * rápido o la pateaba al fondo apurado). Por eso un buen jugador lo ganaba a cero. De normal para arriba
+ * el rival lee el pase, protege su ruck y no la regala.
+ * - `intercept`: chance de que uno de los tuyos le corte un pase al pasar cerca de la pelota;
+ * - `ruckPush`: cuánto le saca tu toque rápido a la retención del ruck rival;
+ * - `panicKick`: ganas de patearla al fondo cuando lo apuran en su campo (por segundo).
+ */
+/**
+ * Cómo arma las fases el rival. Antes daba nueve pases por posesión, cada uno 8 m para atrás, y casi
+ * no llegaba al ruck: retrocedía, regalaba intercepciones y no había disputa de pelota.
+ * - `appetite`: ganas de pasar que le quedan después de cada pase de la misma fase (se multiplican);
+ * - `carryAfter`: pases en la fase a partir de los cuales deja de abrirse y encara para ir al contacto;
+ * - `sidestep`: cuánto se sigue corriendo de costado cuando encara (1 = igual que antes);
+ * - `depth`: profundidad de los apoyos (1 = la de antes; menos = línea más plana).
+ */
+const CPU_PHASE: Record<Difficulty, { appetite: number; carryAfter: number; sidestep: number; depth: number }> = {
+    'muy-facil': { appetite: 1, carryAfter: 99, sidestep: 1, depth: 1 },
+    facil: { appetite: 0.9, carryAfter: 4, sidestep: 0.9, depth: 1 },
+    normal: { appetite: 0.8, carryAfter: 3, sidestep: 0.8, depth: 1 },
+    dificil: { appetite: 0.75, carryAfter: 3, sidestep: 0.75, depth: 0.95 },
+    leyenda: { appetite: 0.7, carryAfter: 3, sidestep: 0.75, depth: 0.9 },
+    extremo: { appetite: 0.7, carryAfter: 3, sidestep: 0.75, depth: 0.9 },
+};
+const CPU_CARE: Record<Difficulty, { intercept: number; ruckPush: number; panicKick: number }> = {
+    'muy-facil': { intercept: 0.14, ruckPush: 0.16, panicKick: 0.3 },
+    facil: { intercept: 0.14, ruckPush: 0.16, panicKick: 0.3 },
+    normal: { intercept: 0.07, ruckPush: 0.09, panicKick: 0.12 },
+    dificil: { intercept: 0.055, ruckPush: 0.07, panicKick: 0.08 },
+    leyenda: { intercept: 0.045, ruckPush: 0.06, panicKick: 0.06 },
+    extremo: { intercept: 0.04, ruckPush: 0.05, panicKick: 0.05 },
+};
 
 /** Lo que dura el minuto extra antes de la muerte súbita (s). */
 const EXTRA_LEN = 60;
@@ -189,6 +242,7 @@ export interface Hud {
     attacking: boolean;
     phase: Phase;
     carrier: string | null; // "7 · F. Ferreyra"
+    drill: DrillState | null;
 }
 
 const clamp = (v: number, a: number, b: number) => (v < a ? a : v > b ? b : v);
@@ -446,6 +500,16 @@ export class SevenMatch {
     private pickup: { p: Player; t: number } | null = null;
     /** Segundos de gracia del que sale jugando de un ruck, scrum o line: nadie lo tacklea. */
     private safeT = 0;
+    /** Pases del rival en esta fase (se reinicia en cada ruck, formación o recuperación). */
+    private cpuPhasePasses = 0;
+    /** Ejercicio en curso (tutorial o práctica); null en un partido. */
+    drill: DrillState | null = null;
+    /** Conos del ejercicio de moverse. */
+    private drillMarks: { x: number; y: number; got: boolean }[] = [];
+    /** Para qué lados ya pasaste en el ejercicio de pase. */
+    private drillDirs = new Set<number>();
+    /** Segundos hasta rearmar la jugada del ejercicio (después de un acierto o de un error). */
+    private drillReset = 0;
     private time = 0;
     private crowd: string[] = [];
     private ended = false;
@@ -472,7 +536,8 @@ export class SevenMatch {
         for (let k = 0; k < 400; k++) this.crowd.push(palette[(k * 7919 + ((k * k) % 13)) % palette.length]);
         this.restart(0, true);
         this.phaseT = 1.8;
-        this.say('SAQUE', `${cfg.home.name} contra ${cfg.away.name}`, 1.8);
+        if (cfg.drill) this.startDrill(cfg.drill);
+        else this.say('SAQUE', `${cfg.home.name} contra ${cfg.away.name}`, 1.8);
     }
 
     /* ---------------- entradas ---------------- */
@@ -489,6 +554,7 @@ export class SevenMatch {
         c.juke = 0.32;
         c.jukeCd = 0.45;
         c.jukeDir = dir;
+        if (this.drill?.id === 'juke') this.drillHit();
     }
 
     /** D: chocar fuerte con la pelota, o tirarse al tackle sin ella. */
@@ -548,6 +614,7 @@ export class SevenMatch {
         const c = this.ball.holder;
         if (power === null || this.phase !== 'play' || !c || c.side !== 0 || c.down > 0) return;
         this.throwKick(c, power, 'manual', this.aimY);
+        if (this.drill?.id === 'kick') this.drillHit();
     }
 
     /** Espacio: pase al mejor ubicado, cambiar de jugador, empujar o patear según el momento. */
@@ -582,7 +649,7 @@ export class SevenMatch {
     /* ---------------- reglas ---------------- */
 
     private team(side: Side) {
-        return this.players.filter((p) => p.side === side);
+        return this.players.filter((p) => p.side === side && !p.out);
     }
 
     private dir(side: Side): 1 | -1 {
@@ -658,6 +725,7 @@ export class SevenMatch {
         this.moveSpeed = speed;
         this.pickup = null;
         this.safeT = 0;
+        this.cpuPhasePasses = 0;
         bx = clamp(bx, TRY_L + 4, TRY_R - 4);
         by = clamp(by, 5, WIDTH - 5);
         this.targets.clear();
@@ -927,6 +995,7 @@ export class SevenMatch {
     }
 
     private throwPass(from: Player, to: Player, skip = false) {
+        if (from.side === 1) this.cpuPhasePasses++;
         const dist = Math.hypot(to.x - from.x, to.y - from.y);
         this.ball.holder = null;
         // Sale de las manos del que pasa: sin esto, el primer cuadro la dibujaba donde había quedado.
@@ -1061,6 +1130,7 @@ export class SevenMatch {
     }
 
     private turnoverInPlay(newCarrier: Player) {
+        this.cpuPhasePasses = 0;
         this.catchBall(newCarrier);
         // Marcas y fullback nuevos para el que ahora defiende.
         this.planFormation(newCarrier.side, newCarrier.x, newCarrier.y, newCarrier);
@@ -1633,7 +1703,7 @@ export class SevenMatch {
 
         const clockRuns =
             this.phase === 'play' || this.phase === 'ruck' || this.phase === 'scrum' || this.phase === 'lineout' || (this.phase === 'ready' && this.time > 2);
-        if (clockRuns && !this.overtime && !this.lastPlay) {
+        if (clockRuns && !this.overtime && !this.lastPlay && !this.drill) {
             this.clock -= dt;
             if (this.clock <= 0) {
                 this.clock = 0;
@@ -1756,6 +1826,7 @@ export class SevenMatch {
             case 'end':
                 break;
         }
+        if (this.drill) this.drillTick(dt);
 
         // Nadie sale del recinto en ninguna fase. Si alguien quedaba detrás de la línea
         // de pelota muerta, el límite de la jugada lo traía de golpe: eso era un "teletransporte".
@@ -1778,6 +1849,154 @@ export class SevenMatch {
         const viewM = this.viewW / PXM;
         const want = clamp(focus - viewM / 2, -6, 126 - viewM);
         this.camX += (want - this.camX) * Math.min(1, dt * 4);
+    }
+
+    /* ---------------- ejercicios (tutorial y práctica) ---------------- */
+
+    /** Empieza un ejercicio desde cero. La vista lo llama para pasar al siguiente o repetirlo. */
+    startDrill(id: DrillId) {
+        this.drill = { id, count: 0, goal: DRILL_GOAL[id], done: false, note: null };
+        this.drillDirs.clear();
+        this.drillMarks =
+            id === 'move'
+                ? [
+                      // Zigzag que se llega a hacer corriendo: unos 12 m de costado cada 16 m de cancha.
+                      { x: 40, y: 27, got: false },
+                      { x: 56, y: 40, got: false },
+                      { x: 72, y: 27, got: false },
+                      { x: 88, y: 40, got: false },
+                  ]
+                : [];
+        this.banner = null;
+        this.setupDrill();
+    }
+
+    /** Arma la jugada del ejercicio: solo entran a la cancha los que hacen falta. */
+    private setupDrill() {
+        const d = this.drill;
+        if (!d) return;
+        this.phase = 'play';
+        this.phaseT = 0;
+        this.mg = null;
+        this.kickCharge = null;
+        this.pickup = null;
+        this.targets.clear();
+        this.ball.flight = null;
+        this.ball.loose = null;
+        this.safeT = 0;
+        this.score = [0, 0];
+        this.lastPlay = false;
+        this.ruckCarrier = null;
+        this.cpuPhasePasses = 0;
+        this.drillReset = 0;
+        this.walkT = 0;
+        for (const p of this.players) {
+            Object.assign(p, { out: true, x: 0.5, y: -1, vx: 0, vy: 0, down: 0, pose: 'stand', lunge: 0, hit: 0, hitCd: 0, juke: 0, jukeCd: 0, cool: 0, passT: 0, stun: 0, mark: null, fb: false, rucking: false });
+            p.facing = p.side === 0 ? 1 : -1;
+        }
+        const pick = (side: Side, i: number) => this.players.find((p) => p.side === side && p.i === i) as Player;
+        const put = (p: Player, x: number, y: number) => {
+            p.out = false;
+            p.x = x;
+            p.y = y;
+            return p;
+        };
+        const me = put(pick(0, 3), 20, 35);
+        if (d.id === 'pass') {
+            put(pick(0, 2), 16, 27);
+            put(pick(0, 4), 16, 43);
+        }
+        if (d.id === 'hit') {
+            me.x = 25;
+            put(pick(1, 3), 45, 35);
+        }
+        if (d.id === 'tackle') {
+            me.x = 55;
+            const runner = put(pick(1, 3), 82, 28 + rnd() * 14);
+            this.catchBall(runner);
+            this.ctrl = me;
+            this.camX = 40;
+            return;
+        }
+        this.catchBall(me);
+        if (d.id === 'ruck') {
+            me.x = 40;
+            put(pick(0, 4), 37, 38);
+            const tackler = put(pick(1, 3), 41.2, 35);
+            this.contact(tackler, me); // en el ruck el tackle siempre entra (ver drillTackled)
+        }
+        this.camX = me.x - 14;
+    }
+
+    /** Lo que se cuenta como acierto. */
+    private drillHit() {
+        const d = this.drill;
+        if (!d || d.done) return;
+        d.count = Math.min(d.goal, d.count + 1);
+        d.note = null;
+        if (d.count >= d.goal) d.done = true;
+        // Moverse, amagar y pasar siguen corriendo; el resto vuelve a armar la jugada después de cada acierto.
+        if (d.done || (d.id !== 'move' && d.id !== 'juke' && d.id !== 'pass')) this.drillReset = 1.2;
+    }
+
+    /** Salió mal: se muestra por qué y se vuelve a armar la jugada. */
+    private drillFail(note: string) {
+        if (!this.drill) return;
+        this.drill.note = note;
+        this.drillReset = 1.1;
+    }
+
+    /** En los ejercicios, algunos choques se resuelven para enseñar (y no por azar). */
+    private drillTackled(c: Player, df: Player, tackled: boolean): boolean {
+        const id = this.drill?.id;
+        if (id === 'ruck') return true;
+        if (id === 'hit' && c.side === 0 && c.hit > 0) return false; // chocaste a tiempo: lo rompés
+        if (id === 'tackle' && c.side === 1 && df === this.ctrl && df.lunge > 0) return true; // te tiraste a tiempo
+        return tackled;
+    }
+
+    private drillTick(dt: number) {
+        const d = this.drill;
+        if (!d) return;
+        // Los que no juegan el ejercicio se quedan afuera, quietos y sin dibujarse.
+        for (const p of this.players) {
+            if (!p.out) continue;
+            p.x = 0.5;
+            p.y = -1;
+            p.vx = 0;
+            p.vy = 0;
+            p.rucking = false;
+        }
+        if (this.drillReset > 0) {
+            this.drillReset -= dt;
+            if (this.drillReset <= 0) this.setupDrill();
+            return;
+        }
+        if (d.done) return;
+        // Cualquier cosa que corte la jugada (afuera, scrum, try, ruck que no es del ejercicio) la rearma.
+        if (this.phase !== 'play' && !(d.id === 'ruck' && this.phase === 'ruck')) {
+            const why: Partial<Record<Phase, string>> = {
+                lineout: 'Te fuiste afuera: quedate adentro de la cancha',
+                scrum: 'Pase adelantado: el pase va siempre para atrás o en línea',
+                ruck: d.id === 'hit' ? 'Te tacklearon: chocá justo antes del contacto' : 'Te tacklearon',
+            };
+            this.drillFail(why[this.phase] ?? 'Otra vez');
+            return;
+        }
+        const c = this.ball.holder;
+        if (d.id === 'move' && c && c.side === 0) {
+            for (const m of this.drillMarks) {
+                if (!m.got && Math.abs(m.x - c.x) < 2.6 && Math.abs(m.y - c.y) < 4) {
+                    m.got = true;
+                    this.drillHit();
+                }
+            }
+            if (!d.done && c.x > 100) this.drillFail('Se terminó la cancha: te faltó algún cono');
+        } else if (d.id === 'tackle' && c && c.side === 1 && c.x < 30) {
+            this.drillFail('Se te escapó: seguilo y tirate cuando lo tengas cerca');
+        } else if (c && c.side === 0 && c.x > 100) {
+            this.drillReset = 0.01; // llegó al fondo: vuelve al principio y sigue contando
+        }
     }
 
     private moveToTargets(dt: number) {
@@ -1935,7 +2154,8 @@ export class SevenMatch {
                 continue;
             }
             const ty = clamp(focus.y + p.oy, 3, WIDTH - 3);
-            const tx = focus.x - d * (3.5 + Math.abs(p.oy) * 0.22);
+            // El rival ataca más plano: con la línea tan profunda cada pase le costaba 8 m para atrás.
+            const tx = focus.x - d * (3.5 + Math.abs(p.oy) * 0.22) * (attSide === 1 ? CPU_PHASE[this.cfg.difficulty].depth : 1);
             this.step(p, tx, ty, 8.2);
         }
 
@@ -2019,7 +2239,7 @@ export class SevenMatch {
             this.ball.y = fl.sy + (fl.to.y - fl.sy) * k;
             // Pases largos y salteos se leen más fácil.
             const long = Math.hypot(fl.to.x - fl.sx, fl.to.y - fl.sy) > 14 ? 1.3 : 1;
-            const intercept = ((fl.from.side === 0 ? D.intercept : 0.14) * (fl.skip ? 1.8 : 1) * long) / this.fHands(fl.from) ** 2;
+            const intercept = ((fl.from.side === 0 ? D.intercept : CPU_CARE[this.cfg.difficulty].intercept) * (fl.skip ? 1.8 : 1) * long) / this.fHands(fl.from) ** 2;
             for (const o of this.team(fl.from.side === 0 ? 1 : 0)) {
                 // En la gracia de la salida, el primer pase no se corta: los rivales todavía están en el ruck.
                 if (this.safeT > 0 || o.down > 0 || fl.tried.has(o)) continue;
@@ -2041,12 +2261,20 @@ export class SevenMatch {
                 // Knock-on: raro, y más raro cuanto mejor es el equipo (Nueva Zelanda casi nunca; Malta, cada tanto).
                 const team = rec.side === 0 ? this.cfg.home : this.cfg.away;
                 const knock = (clamp(0.022 - (((team.rating ?? 70) - 40) / 55) * 0.018, 0.003, 0.022) * (fl.skip ? 1.5 : 1)) / (this.fHands(rec) * this.fHands(fl.from)) ** 1.5;
-                if (this.safeT <= 0 && rnd() < knock) {
+                if (this.safeT <= 0 && !this.drill && rnd() < knock) {
                     this.puff(rec.x, rec.y, 5);
                     this.startScrum(rec.side === 0 ? 1 : 0, rec.x, rec.y, 'KNOCK-ON');
                     return;
                 }
                 this.catchBall(rec);
+                if (this.drill?.id === 'pass' && rec.side === 0 && this.drill.count < this.drill.goal) {
+                    // Cuenta una vez para cada lado: arriba y abajo.
+                    const dir = Math.sign(rec.y - fl.sy);
+                    if (dir !== 0 && !this.drillDirs.has(dir)) {
+                        this.drillDirs.add(dir);
+                        this.drillHit();
+                    } else if (!this.drillDirs.has(-dir)) this.drill.note = dir < 0 ? 'Ahora pasala para abajo' : 'Ahora pasala para arriba';
+                }
             }
             return;
         }
@@ -2311,7 +2539,9 @@ export class SevenMatch {
             // Un compañero con campo libre y el rival cerrando: se la juega a él antes de que lo agarren.
             // También lejos del rival: si hay un compañero con mucho más campo que él, se la da y que corra.
             const near = threat && td < 8;
-            if ((!threat || td < 16) && rnd() < D.cpuPassIQ * (near ? 2.6 : 1.4) * dt) {
+            // Cada pase de la fase le quita ganas al próximo: dos o tres y va al contacto (ver más abajo).
+            const appetite = CPU_PHASE[this.cfg.difficulty].appetite ** this.cpuPhasePasses;
+            if ((!threat || td < 16) && rnd() < D.cpuPassIQ * (near ? 2.6 : 1.4) * appetite * dt) {
                 const free = this.bestOption(c);
                 if (free && room(free) > 10 && room(free) > room(c) + (near ? 3 : 6) && Math.abs(free.y - c.y) > 3) {
                     this.throwPass(c, free);
@@ -2321,8 +2551,12 @@ export class SevenMatch {
         }
         if (threat) {
             const away: 1 | -1 = c.y >= threat.y ? 1 : -1;
-            vy = away * DODGE_VY[this.cfg.difficulty];
-            if (td < 4.5 && rnd() < D.cpuPassIQ * dt) {
+            // Ya movió la pelota en esta fase: no se abre más hacia el costado, encara y busca el contacto
+            // para armar el ruck y ganar la línea de ventaja (así juega un seven: fases, no pases hacia atrás).
+            const style = CPU_PHASE[this.cfg.difficulty];
+            const carry = this.cpuPhasePasses >= style.carryAfter;
+            vy = away * DODGE_VY[this.cfg.difficulty] * (carry ? style.sidestep : 1);
+            if (!carry && td < 4.5 && rnd() < D.cpuPassIQ * dt) {
                 const opt = this.passTarget(c, away) ?? this.bestOption(c);
                 if (opt && Math.abs(opt.y - threat.y) > 3) {
                     this.throwPass(c, opt);
@@ -2332,7 +2566,7 @@ export class SevenMatch {
         }
         // Apurado y lejos del try: a veces la patea al fondo en vez de comerse el tackle.
         // Cerca de los palos y apurado: a veces prueba el drop.
-        if (this.cfg.difficulty !== 'muy-facil') {
+        if (this.cfg.difficulty !== 'muy-facil' && !this.drill) {
             const urge = this.cpuDropUrge();
             const range = urge >= 1 ? 38 : 32;
             const pressed = threat !== null && td < 9;
@@ -2343,7 +2577,7 @@ export class SevenMatch {
         }
         // Con la chicharra sonada y sin ir ganando, patear es regalar el final: la sigue jugando.
         const mustPlay = this.lastPlay && !this.overtime && this.score[1] <= this.score[0];
-        if (!mustPlay && threat && td < 6 && c.x > 45 && rnd() < 0.3 * dt) {
+        if (!mustPlay && !this.drill && threat && td < 6 && c.x > 45 && rnd() < CPU_CARE[this.cfg.difficulty].panicKick * dt) {
             // En su propio 22 apurado, a veces la manda a touch para sacársela de encima.
             const own22 = c.x > TRY_R - 22 - 10;
             const aim: KickAim = smart && own22 && rnd() < 0.5 ? (c.y < WIDTH / 2 ? 'touchUp' : 'touchDown') : 'auto';
@@ -2424,6 +2658,13 @@ export class SevenMatch {
             tackled = rnd() < pr(p * (1 - D.cpuBreak * 0.6) * edge);
             if (!tackled) label = 'SE SOLTÓ';
         }
+        if (this.drill) {
+            tackled = this.drillTackled(c, df, tackled);
+            if (tackled && label !== 'TACKLE') label = 'TACKLE';
+            if (!tackled && c.side === 0 && c.hit > 0) label = 'QUIEBRE';
+            if (this.drill.id === 'hit' && label === 'QUIEBRE') this.drillHit();
+            if (this.drill.id === 'tackle' && tackled && c.side === 1) this.drillHit();
+        }
 
         if (!tackled) {
             df.pose = 'ground';
@@ -2475,6 +2716,7 @@ export class SevenMatch {
      */
     private buildRuck(c: Player, df: Player) {
         this.ruckFirst = null;
+        this.cpuPhasePasses = 0;
         const d = this.dir(c.side);
         this.planFormation(c.side, c.x - d * 3, c.y, c);
         this.targets.delete(c);
@@ -2505,7 +2747,7 @@ export class SevenMatch {
         const opp = inRuck(other);
         const contest = clamp((userRate - this.D.ruckRate) / 4, -1, 1); // + = el usuario empuja más que el rival
         const power = (ps: Player[]) => (ps.length ? ps.reduce((a, p) => a + this.fTkl(p) * (this.kgOf(p) / 95), 0) / ps.length : 0.9);
-        let keep = side === 0 ? this.D.ruckKeep + contest * 0.1 : this.D.cpuRuckKeep - contest * 0.16;
+        let keep = side === 0 ? this.D.ruckKeep + contest * 0.1 : this.D.cpuRuckKeep - contest * CPU_CARE[this.cfg.difficulty].ruckPush;
         keep += (own.length - opp.length) * 0.05;
         keep += (power(own) - power(opp)) * 0.25;
         const alone = own.length === 0;
@@ -2573,7 +2815,13 @@ export class SevenMatch {
         const { keep, alone, jackal } = this.ruckKeep(mash / 1.3);
         // Gana el que cruza la raya de la barra: el mismo sorteo que se ve (ruckLine), sin tirar otro al final.
         const userWin = side === 0 ? keep : 1 - keep;
-        const winner: Side = userWin > this.ruckLine() ? 0 : 1;
+        let winner: Side = userWin > this.ruckLine() ? 0 : 1;
+        // Ejercicio de ruck: lo gana el que toca rápido (cinco toques en lo que dura), sin sorteo.
+        if (this.drill?.id === 'ruck') {
+            winner = mash >= 5 ? 0 : 1;
+            if (winner === 0) this.drillHit();
+            else this.drillFail('Tocá más rápido para quedarte con la pelota');
+        }
         this.mg = null;
         if (winner !== side) {
             const why = alone ? 'Quedó solo: nadie llegó a apoyar' : jackal ? 'Llegaron primero sobre la pelota' : side === 0 ? 'Empujaron más: tocá más rápido' : 'Empujaste más y la ganaste';
@@ -2711,6 +2959,7 @@ export class SevenMatch {
             attacking: !!c && c.side === 0,
             phase: this.phase,
             carrier: c ? `${c.i + 1} · ${playerNames(c.side === 0 ? this.cfg.home : this.cfg.away)[c.i].short}${c.sk ? ` · ${Math.round(this.legs(c) * 100)}%` : ''}` : null,
+            drill: this.drill ? { ...this.drill } : null,
         };
     }
 
@@ -2731,7 +2980,24 @@ export class SevenMatch {
         this.drawGround(ctx);
 
         const items: { y: number; draw: () => void }[] = [];
-        for (const p of this.players) items.push({ y: p.y, draw: () => this.drawPlayer(ctx, p) });
+        for (const p of this.players) if (!p.out) items.push({ y: p.y, draw: () => this.drawPlayer(ctx, p) });
+        // Conos del ejercicio de moverse: naranjas mientras falten.
+        for (const m of this.drillMarks) {
+            if (m.got) continue;
+            items.push({
+                y: m.y,
+                draw: () => {
+                    const x = this.sx(m.x);
+                    const y = this.sy(m.y);
+                    ctx.fillStyle = '#ef7d1a';
+                    ctx.fillRect(x, y - 5, 1, 1);
+                    ctx.fillRect(x - 1, y - 4, 3, 2);
+                    ctx.fillRect(x - 2, y - 2, 5, 2);
+                    ctx.fillStyle = '#f4f4f4';
+                    ctx.fillRect(x - 1, y - 3, 3, 1);
+                },
+            });
+        }
         for (const gx of [TRY_L, TRY_R]) {
             items.push({ y: WIDTH / 2 - 2.8, draw: () => this.drawPost(ctx, gx, WIDTH / 2 - 2.8, false) });
             items.push({ y: WIDTH / 2 + 2.8, draw: () => this.drawPost(ctx, gx, WIDTH / 2 + 2.8, true) });

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { SevenMatch, VIEW_H, VIEW_W, type Hud, type MatchConfig, type MatchEvent } from './engine';
+import { DRILLS, SevenMatch, VIEW_H, VIEW_W, type DrillId, type Hud, type MatchConfig, type MatchEvent } from './engine';
 import styles from './seven.module.css';
 import { assignKey, CONTROL_LABELS, DEFAULT_BINDINGS, keyName, loadBindings, saveBindings, type Bindings, type ControlAction } from './controls';
 
@@ -15,6 +15,76 @@ interface Props {
     onFinish: (score: [number, number], log: MatchEvent[]) => void;
     onQuit: () => void;
     musicSrc?: string | null;
+    /** Ejercicios en vez de partido: el tutorial (una sola vez) o la práctica. */
+    drill?: 'tutorial' | 'practice';
+}
+
+const DRILL_TITLE: Record<DrillId, string> = {
+    move: 'Moverte',
+    juke: 'Amague',
+    pass: 'Pase',
+    hit: 'Chocar',
+    tackle: 'Tacklear',
+    ruck: 'Ruck',
+    kick: 'Patear',
+};
+
+/**
+ * El dedo que hace la mímica del gesto en el celular (cada animación está en seven.module.css).
+ * Mover y pasar cambian según el esquema: en uno se arrastra y se toca, en el otro se mantiene y se desliza.
+ */
+function GestureHint({ id, scheme }: { id: DrillId; scheme: TouchScheme }) {
+    const anim: Partial<Record<DrillId, string>> = {
+        move: scheme === 'tap' ? 'g-move-tap' : 'g-move-swipe',
+        pass: scheme === 'tap' ? 'g-pass-tap' : 'g-pass-swipe',
+        hit: 'g-hit',
+        tackle: 'g-tackle',
+        ruck: 'g-ruck',
+        kick: 'g-kick',
+    };
+    const a = anim[id];
+    if (!a) return null;
+    return (
+        <div className={styles.gestureLayer} aria-hidden="true">
+            <div key={a} className={`${styles.gestureHand} ${styles[a]}`}>
+                <img src="/juegos/rugby-seven/dedo.png" alt="" width={64} height={67} loading="lazy" />
+            </div>
+        </div>
+    );
+}
+
+/** La consigna de cada ejercicio, con las teclas que tiene puestas o con los gestos del esquema elegido. */
+function drillText(id: DrillId, touch: boolean, scheme: TouchScheme, b: Bindings): string {
+    const k = (a: ControlAction) => keyName(b[a]);
+    if (!touch) {
+        const t: Record<DrillId, string> = {
+            move: `Corrés solo hacia adelante. Mantené ${k('up')} o ${k('down')} para ir hacia arriba o hacia abajo y pasá por los conos.`,
+            juke: `Un toque corto de ${k('up')} o ${k('down')} es un amague: un cambio de paso rápido. Hacé tres.`,
+            pass: `${k('passUp')} pasa para arriba y ${k('passDown')} para abajo; mantenida, es un salteo. Moverte sigue siendo con ${k('up')} y ${k('down')}. Pasala una vez para cada lado.`,
+            hit: `Te sale un defensor. Apretá ${k('hit')} justo antes del choque para romper el tackle. Rompelo dos veces.`,
+            tackle: `Ahora defendés. Seguilo con ${k('up')} y ${k('down')} y, cuando lo tengas cerca, apretá ${k('hit')} para tirarte al tackle. Tacklealo dos veces.`,
+            ruck: `Te tacklearon y se arma el ruck. Tocá ${k('action')} rápido para quedarte con la pelota. Ganalo dos veces.`,
+            kick: `Mantené ${k('kick')}: aparece la mira y con ${k('up')} y ${k('down')} la movés. Soltá para patear. Pateá dos veces.`,
+        };
+        return t[id];
+    }
+    const tap = scheme === 'tap';
+    const t: Record<DrillId, string> = {
+        move: tap
+            ? 'Corrés solo hacia adelante. Deslizá el dedo hacia arriba o hacia abajo y mantenelo para ir para ese lado. Pasá por los conos.'
+            : 'Corrés solo hacia adelante. Mantené el dedo arriba o abajo de la mitad de la cancha para ir para ese lado. Pasá por los conos.',
+        juke: 'Un amague es un cambio de paso rápido. Hacé tres.',
+        pass: tap
+            ? 'Tocá la cancha: arriba de la mitad, pase para arriba; abajo, para abajo. Pasala una vez para cada lado.'
+            : 'Deslizá rápido hacia arriba o hacia abajo para pasar para ese lado. Pasala una vez para cada lado.',
+        hit: 'Te sale un defensor. Justo antes del choque, deslizá el dedo hacia adelante (a la derecha) para romper el tackle. Rompelo dos veces.',
+        tackle: tap
+            ? 'Ahora defendés. Seguilo arrastrando el dedo arriba o abajo y, cuando lo tengas cerca, deslizá rápido hacia adelante para tirarte. Tacklealo dos veces.'
+            : 'Ahora defendés. Seguilo manteniendo el dedo arriba o abajo y, cuando lo tengas cerca, deslizá rápido hacia adelante para tirarte. Tacklealo dos veces.',
+        ruck: 'Te tacklearon y se arma el ruck. Tocá la pantalla rápido para quedarte con la pelota. Ganalo dos veces.',
+        kick: 'Mantené el dedo en la franja izquierda: aparece la mira. Sin soltar, movela hacia arriba o abajo. Soltá para patear. Pateá dos veces.',
+    };
+    return t[id];
 }
 
 const MUTE_KEY = 'g22-rugby-seven-mute';
@@ -132,7 +202,8 @@ interface SimRun {
 }
 
 function hudKey(h: Hud) {
-    return `${h.sh}|${h.sa}|${h.clock}|${h.period}|${h.banner}|${h.bannerSub}|${h.hint}|${h.attacking}|${h.phase}|${h.carrier}`;
+    const d = h.drill;
+    return `${h.sh}|${h.sa}|${h.clock}|${h.period}|${h.banner}|${h.bannerSub}|${h.hint}|${h.attacking}|${h.phase}|${h.carrier}|${d ? `${d.id}|${d.count}|${d.done}|${d.note}` : ''}`;
 }
 
 /**
@@ -140,7 +211,7 @@ function hudKey(h: Hud) {
  * Teclado: ↑/↓ moverse (y amagar), W/S pase, D chocar o tacklear,
  * Espacio pase al mejor ubicado / cambiar jugador / scrum / line / patada.
  */
-export default function MatchView({ cfg, onFinish, onQuit, musicSrc = null, fontFamily }: Props) {
+export default function MatchView({ cfg, onFinish, onQuit, musicSrc = null, fontFamily, drill }: Props) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const matchRef = useRef<SevenMatch | null>(null);
     const keys = useRef(new Set<string>());
@@ -581,6 +652,17 @@ export default function MatchView({ cfg, onFinish, onQuit, musicSrc = null, font
     useEffect(() => {
         if (!isTouchDevice()) return;
         setTouch(true);
+        // En los ejercicios cada gesto se enseña en su paso: la lista entera no hace falta.
+        if (drill) {
+            if (drill === 'tutorial') {
+                try {
+                    localStorage.setItem(TOUCH_HELP_KEY, '1');
+                } catch {
+                    // Sin localStorage: el primer partido la vuelve a mostrar.
+                }
+            }
+            return;
+        }
         let seen = false;
         try {
             seen = localStorage.getItem(TOUCH_HELP_KEY) === '1';
@@ -637,6 +719,49 @@ export default function MatchView({ cfg, onFinish, onQuit, musicSrc = null, font
         }
     };
 
+    /*
+     * ---- Tutorial y práctica ----
+     * El tutorial pasa por todos los ejercicios en orden y, al terminar, ofrece seguir practicando.
+     * La práctica deja elegir uno y lo repite. En el celular no está el amague: no tiene gesto propio.
+     */
+    const [drillKind, setDrillKind] = useState<'tutorial' | 'practice' | null>(drill ?? null);
+    const [tutorialDone, setTutorialDone] = useState(false);
+    const drillList = touch ? DRILLS.filter((d) => d !== 'juke') : DRILLS;
+    const hd = hud?.drill ?? null;
+    // El amague no va en el celular: si arrancó ahí, salta al siguiente.
+    useEffect(() => {
+        if (touch && hd?.id === 'juke') matchRef.current?.startDrill('pass');
+    }, [touch, hd?.id]);
+    useEffect(() => {
+        if (!hd?.done || !drillKind) return;
+        const id = window.setTimeout(() => {
+            const m = matchRef.current;
+            if (!m) return;
+            const next = drillList[drillList.indexOf(hd.id) + 1];
+            // Práctica: pasa solo al siguiente y, después del último, vuelve a empezar.
+            if (drillKind === 'practice') {
+                m.startDrill(next ?? drillList[0]);
+                return;
+            }
+            if (next) m.startDrill(next);
+            else {
+                setTutorialDone(true);
+                pausedRef.current = true;
+            }
+        }, 1400);
+        return () => window.clearTimeout(id);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [hd?.done, hd?.id, drillKind]);
+    useEffect(() => {
+        if (tutorialDone) pausedRef.current = true;
+    }, [tutorialDone, paused, touchHelp, blockPortrait]);
+    const goPractice = (id: DrillId = drillList[0]) => {
+        setTutorialDone(false);
+        setDrillKind('practice');
+        pausedRef.current = paused;
+        matchRef.current?.startDrill(id);
+    };
+
     // Pantalla fija mientras se juega: sin zoom con dos dedos (Safari) ni rebote al deslizar.
     useEffect(() => {
         const stop = (e: Event) => e.preventDefault();
@@ -669,7 +794,49 @@ export default function MatchView({ cfg, onFinish, onQuit, musicSrc = null, font
                     role="img"
                     aria-label={`Partido ${cfg.home.name} contra ${cfg.away.name}`}
                 />
+                {/* El dedo muestra el gesto hasta que lo hacés una vez (en el ruck, mientras dure el ruck). */}
+                {drillKind && hd && touch && !hd.done && !tutorialDone && (hd.id === 'ruck' ? hud?.phase === 'ruck' : hd.count === 0) && <GestureHint id={hd.id} scheme={scheme} />}
+                {drillKind && hd && (
+                    <div className={styles.drillPanel}>
+                        <span className={styles.drillStep}>{drillKind === 'tutorial' ? `Tutorial · ${drillList.indexOf(hd.id) + 1} de ${drillList.length}` : 'Práctica'}</span>
+                        <strong>{DRILL_TITLE[hd.id]}</strong>
+                        <p className={styles.drillText}>{drillText(hd.id, touch, scheme, bindings)}</p>
+                        <div className={styles.drillDots} role="img" aria-label={`${hd.count} de ${hd.goal}`}>
+                            {Array.from({ length: hd.goal }, (_, i) => (
+                                <i key={i} data-on={i < hd.count ? '1' : '0'} />
+                            ))}
+                        </div>
+                        {hd.done ? <p className={styles.drillOk}>{drillKind === 'tutorial' && hd.id === drillList[drillList.length - 1] ? 'Bien.' : 'Bien. Vamos con el siguiente.'}</p> : hd.note && <p className={styles.drillNote}>{hd.note}</p>}
+                        {drillKind === 'practice' && (
+                            <div className={styles.drillPick} role="radiogroup" aria-label="Ejercicio">
+                                {drillList.map((id) => (
+                                    <button key={id} type="button" role="radio" aria-checked={hd.id === id} className={hd.id === id ? styles.keyBtnActive : styles.keyBtn} onClick={() => matchRef.current?.startDrill(id)}>
+                                        {DRILL_TITLE[id]}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                        {drillKind === 'tutorial' && !tutorialDone && (
+                            <button type="button" className={styles.drillSkip} onClick={() => setTutorialDone(true)}>
+                                Saltar el tutorial
+                            </button>
+                        )}
+                    </div>
+                )}
+                {tutorialDone && (
+                    <div className={styles.pauseLayer} role="dialog" aria-label="Tutorial terminado">
+                        <strong>Listo</strong>
+                        <p className={styles.drillText}>Ya sabés lo básico. Cuando quieras repasar algo, está la Práctica en el menú.</p>
+                        <button type="button" className={styles.btnPrimary} onClick={onQuit}>
+                            Ir a jugar
+                        </button>
+                        <button type="button" className={styles.btnGhost} onClick={() => goPractice()}>
+                            Seguir practicando
+                        </button>
+                    </div>
+                )}
                 {/* Marcador y reloj arriba a la izquierda, sobre la tribuna. */}
+                {!drillKind && (
                 <div className={styles.hudLeft}>
                     <span className={styles.sbTeam}>
                         <i style={{ background: hud?.homeColor }} aria-hidden="true" />
@@ -687,6 +854,7 @@ export default function MatchView({ cfg, onFinish, onQuit, musicSrc = null, font
                     </span>
                     {hud?.carrier && <small className={styles.sbCarrier}>{hud.carrier}</small>}
                 </div>
+                )}
                 {/* Pausa, música y controles arriba a la derecha. */}
                 <div className={styles.hudRight}>
                     <span className={styles.sbHelp}>{keyName(bindings.pause)} · pausa y controles</span>
@@ -723,7 +891,7 @@ export default function MatchView({ cfg, onFinish, onQuit, musicSrc = null, font
                         <button type="button" className={styles.btnPrimary} onClick={() => togglePause(false)}>
                             Seguir
                         </button>
-                        {hud?.phase !== 'end' && (
+                        {hud?.phase !== 'end' && !drillKind && (
                             <button
                                 type="button"
                                 className={styles.btnGhost}
@@ -733,7 +901,7 @@ export default function MatchView({ cfg, onFinish, onQuit, musicSrc = null, font
                             </button>
                         )}
                         <button type="button" className={styles.btnGhost} onClick={onQuit}>
-                            Abandonar partido
+                            {drillKind === 'tutorial' ? 'Salir del tutorial' : drillKind ? 'Salir de la práctica' : 'Abandonar partido'}
                         </button>
                         <button type="button" className={styles.btnGhost} onClick={() => setShowControls((v) => !v)} aria-expanded={showControls}>
                             {showControls ? 'Ocultar controles' : 'Controles'}
