@@ -3,13 +3,13 @@
 // que genera `scripts/cordoba7-placas/render.mjs`, pero dibujado en el lienzo del
 // botón Exportar para que lo use cualquiera que exporte este torneo.
 //
-// Cubre tres plantillas: resultado/horario de un partido, horarios del día y tabla
-// de posiciones (una zona o todas). El cuadro y el campeón no tienen diseño propio
-// y salen con la familia de siempre (`CORDOBA7_TEMPLATES`).
+// Cubre cuatro plantillas: resultado/horario de un partido, horarios del día, tabla
+// de posiciones (una zona o todas) y campeón. El cuadro de playoff no tiene diseño
+// propio y sale con la familia de siempre (`CORDOBA7_TEMPLATES`).
 
-import { ensureOlivos7Fonts, type O7DailyData, type O7MatchData, type O7StandingsData } from './olivos7';
+import { ensureOlivos7Fonts, type O7ChampionData, type O7DailyData, type O7MatchData, type O7StandingsData } from './olivos7';
 
-export const CORDOBA7_TEMPLATES = ['matchStats', 'dailyMatches', 'standings'] as const;
+export const CORDOBA7_TEMPLATES = ['matchStats', 'dailyMatches', 'standings', 'champion'] as const;
 export type Cordoba7Template = (typeof CORDOBA7_TEMPLATES)[number];
 
 export function isCordoba7Template(template: string): template is Cordoba7Template {
@@ -346,6 +346,109 @@ async function drawStandings(ctx: Ctx, canvas: HTMLCanvasElement, data: O7Standi
 }
 
 // ---------------------------------------------------------------------------
+// Campeón: pared de palabras, escudo grande, papelitos y pie con club y torneo
+// (la misma idea que la placa de campeón del Seven de Olivos, en rojo y blanco).
+
+async function drawChampion(ctx: Ctx, canvas: HTMLCanvasElement, data: O7ChampionData, o: Cordoba7DrawOptions) {
+    const W = canvas.width, H = canvas.height;
+    const story = isStory(canvas);
+    const k = story ? 1 : 0.74;
+    const [crestImg, logo, g22] = await Promise.all([
+        data.club.logo ? o.loadImage(data.club.logo) : Promise.resolve(null),
+        o.loadImage(TOURNAMENT_LOGO),
+        o.loadImage(G22_LOGO),
+    ]);
+
+    ctx.fillStyle = RED;
+    ctx.fillRect(0, 0, W, H);
+
+    // Pared de palabras: contorno rojo oscuro debajo, blanco encima.
+    const word = upper(data.headline) || 'CAMPEONES';
+    const rows = story ? 7 : 5;
+    const size = 236;
+    ctx.font = `${size}px ${ANTON}`;
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'left';
+    ctx.lineJoin = 'round';
+    const lineH = size * 0.98;
+    const startY = H / 2 - (rows * lineH) / 2;
+    const wordW = spacedWidth(ctx, word, 4);
+    const fit = wordW > W - 60 ? (W - 60) / wordW : 1;
+    for (let i = 0; i < rows; i++) {
+        const y = startY + lineH * (i + 0.5);
+        ctx.save();
+        ctx.translate(W / 2, y);
+        ctx.scale(fit, 1);
+        let cx = -wordW / 2;
+        for (const ch of word) {
+            ctx.lineWidth = 10;
+            ctx.strokeStyle = DARK;
+            ctx.strokeText(ch, cx, 0);
+            ctx.fillStyle = 'rgba(255,255,255,0.85)';
+            ctx.fillText(ch, cx, 0);
+            cx += ctx.measureText(ch).width + 4;
+        }
+        ctx.restore();
+    }
+
+    // Escudo sobre tarjeta blanca, con sombra.
+    const crest = story ? 640 : 520;
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.55)';
+    ctx.shadowBlur = 40;
+    ctx.shadowOffsetY = 28;
+    tile(ctx, crestImg, data.club.name, (W - crest) / 2, H / 2 - crest / 2 + crest * 0.03, crest, crest, 0.1);
+    ctx.restore();
+
+    // Papelitos (azar sembrado: siempre caen igual).
+    let seed = 22;
+    const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    const colors = [WHITE, WHITE, DARK, '#111111'];
+    for (let i = 0; i < (story ? 46 : 34); i++) {
+        const big = rnd() < 0.18;
+        const w = big ? 90 + rnd() * 110 : 18 + rnd() * 34;
+        const h = w * (0.3 + rnd() * 0.25);
+        const x = rnd() * W - 40, y = rnd() * H - 30;
+        const color = colors[Math.floor(rnd() * 4)];
+        const rot = rnd() * Math.PI;
+        ctx.save();
+        ctx.translate(x + w / 2, y + h / 2);
+        ctx.rotate(rot);
+        if (big) { ctx.filter = 'blur(9px)'; ctx.globalAlpha = 0.85; }
+        ctx.fillStyle = color;
+        ctx.fillRect(-w / 2, -h / 2, w, h);
+        ctx.restore();
+    }
+
+    // Logo del torneo arriba, sobre una banda roja que tapa la pared.
+    const logoTop = 70 * k, logoH = 230 * k;
+    ctx.fillStyle = RED;
+    ctx.fillRect(0, 0, W, logoTop + logoH + 24 * k);
+    if (logo) containImage(ctx, logo, 70, logoTop, W - 140, logoH);
+
+    // Pie: club y torneo sobre una banda roja oscura.
+    const club = upper(data.club.name);
+    const comp = [upper(data.tag) || upper(data.tournament), upper(data.season)].filter(Boolean).join(' ');
+    const g22H = 64 * k;
+    const g22Y = H - 60 * k - g22H;
+    const fy = g22Y - (story ? 70 : 52);
+    const font = `800 ${story ? 34 : 28}px ${BARLOW}`;
+    ctx.font = font;
+    const line = comp ? `${club} · ${comp}` : club;
+    const lw = Math.min(W - 80, spacedWidth(ctx, line, 8) + 60);
+    ctx.fillStyle = DARK;
+    ctx.fillRect(W / 2 - lw / 2, fy - 36, lw, 72);
+    text(ctx, line, W / 2, fy, font, WHITE, 'center', 8, lw - 40);
+
+    ctx.fillStyle = RED;
+    ctx.fillRect(0, g22Y - 18 * k, W, H - g22Y + 18 * k);
+    if (g22) {
+        const r = g22H / g22.naturalHeight;
+        ctx.drawImage(g22, (W - g22.naturalWidth * r) / 2, g22Y, g22.naturalWidth * r, g22H);
+    }
+}
+
+// ---------------------------------------------------------------------------
 // Punto de entrada
 
 export async function drawCordoba7(ctx: Ctx, canvas: HTMLCanvasElement, template: Cordoba7Template, data: unknown, o: Cordoba7DrawOptions) {
@@ -355,6 +458,7 @@ export async function drawCordoba7(ctx: Ctx, canvas: HTMLCanvasElement, template
         ctx.filter = 'none';
         if (template === 'matchStats') await drawMatch(ctx, canvas, data as O7MatchData, o);
         else if (template === 'dailyMatches') await drawDaily(ctx, canvas, data as O7DailyData, o);
+        else if (template === 'champion') await drawChampion(ctx, canvas, data as O7ChampionData, o);
         else await drawStandings(ctx, canvas, data as O7StandingsData, o);
     } finally {
         ctx.restore();
