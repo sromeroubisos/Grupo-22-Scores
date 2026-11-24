@@ -150,8 +150,8 @@ const TOUCH_HELP_KEY = 'g22-rugby-seven-touch-help';
 const PORTRAIT_KEY = 'g22-rugby-seven-portrait';
 const SCHEME_KEY = 'g22-rugby-seven-touch-scheme';
 const STEP_PX = 18; // esquema B: desde acá un deslizamiento arriba o abajo es un paso de costado
-const STEP_MS = 300; // cuánto dura cada paso
-const STEP_SPEED = 2.4; // el paso va a 2,4 veces la velocidad de costado normal: casi 2 m por deslizamiento
+const STEP_MS = 340; // cuánto dura cada paso
+const STEP_SPEED = 1.5; // el paso va a 1,5 veces la velocidad de costado normal, parejo (sin el tirón del amague)
 const STEP_MAX_MS = 1000; // los pasos acumulados no pasan de esto
 const LONG_PASS_MS = 420; // esquema B: tocar y dejar quieto este tiempo es un salteo
 
@@ -552,8 +552,6 @@ export default function MatchView({ cfg, onFinish, onQuit, musicSrc = null, font
         const st = touchStep.current;
         const left = st.dir === dir ? Math.max(0, st.until - now) : 0;
         touchStep.current = { dir, until: now + Math.min(STEP_MAX_MS, left + STEP_MS) };
-        // Con la pelota, el paso arranca con un amague: el cambio de ritmo que deja al defensor.
-        matchRef.current?.juke(dir === 'up' ? -1 : 1);
     };
     // Con la cancha girada 90° (celular parado, modo "girar la cancha"), lo que en la pantalla es
     // abajo, en la cancha es la derecha: los gestos se rotan con ella.
