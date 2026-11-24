@@ -215,6 +215,10 @@ const CPU_PHASE: Record<Difficulty, { appetite: number; carryAfter: number; side
     leyenda: { appetite: 0.7, carryAfter: 3, sidestep: 0.75, depth: 0.9 },
     extremo: { appetite: 0.7, carryAfter: 3, sidestep: 0.75, depth: 0.9 },
 };
+/** Hasta cuántos metros del tackle un compañero se suma al ruck, y a qué velocidad llega. */
+const RUCK_REACH = 14;
+const RUCK_RUN = 8.5;
+
 const CPU_CARE: Record<Difficulty, { intercept: number; ruckPush: number; panicKick: number }> = {
     'muy-facil': { intercept: 0.14, ruckPush: 0.16, panicKick: 0.3 },
     facil: { intercept: 0.14, ruckPush: 0.16, panicKick: 0.3 },
@@ -2761,8 +2765,10 @@ export class SevenMatch {
         this.targets.delete(df);
         for (const side of [c.side, c.side === 0 ? 1 : 0] as Side[]) {
             const sd = side === c.side ? -d : d; // de qué lado de la pelota se paran
+            // Al ruck van los que están cerca (hasta RUCK_REACH m). El que está lejos no llega a tiempo:
+            // por eso un portador que se fue solo queda sin apoyo y el que corre con gente al lado, no.
             const near = this.team(side)
-                .filter((p) => p !== c && p !== df && p.down <= 0 && !p.fb)
+                .filter((p) => p !== c && p !== df && p.down <= 0 && !p.fb && Math.hypot(p.x - c.x, p.y - c.y) < RUCK_REACH)
                 .sort((a, b) => Math.hypot(a.x - c.x, a.y - c.y) - Math.hypot(b.x - c.x, b.y - c.y))
                 .slice(0, 2);
             near.forEach((p, k) => {
@@ -2785,12 +2791,13 @@ export class SevenMatch {
         const opp = inRuck(other);
         const contest = clamp((userRate - this.D.ruckRate) / 4, -1, 1); // + = el usuario empuja más que el rival
         const power = (ps: Player[]) => (ps.length ? ps.reduce((a, p) => a + this.fTkl(p) * (this.kgOf(p) / 95), 0) / ps.length : 0.9);
-        let keep = side === 0 ? this.D.ruckKeep + contest * 0.1 : this.D.cpuRuckKeep - contest * CPU_CARE[this.cfg.difficulty].ruckPush;
-        keep += (own.length - opp.length) * 0.05;
+        let keep = side === 0 ? this.D.ruckKeep + contest * 0.22 : this.D.cpuRuckKeep - contest * CPU_CARE[this.cfg.difficulty].ruckPush;
+        // Cada apoyo de más (o de menos) sobre la pelota pesa: es lo que más decide un ruck.
+        keep += (own.length - opp.length) * 0.12;
         keep += (power(own) - power(opp)) * 0.25;
         const alone = own.length === 0;
         const jackal = this.ruckFirst !== null && this.ruckFirst !== side;
-        if (alone) keep -= 0.2;
+        if (alone) keep -= 0.25;
         if (jackal) keep -= 0.12;
         return { keep: clamp(keep, 0.3, 0.98), alone, jackal };
     }
@@ -2826,7 +2833,8 @@ export class SevenMatch {
                 p.vy = 0;
                 continue;
             }
-            const sp = Math.min(dist / dt, p.rucking ? 12 : 9);
+            // Al ruck se llega corriendo de verdad: el que estaba lejos llega tarde (o cuando ya se resolvió).
+            const sp = Math.min(dist / dt, p.rucking ? RUCK_RUN * this.fSpd(p) : 9);
             if (dist > 0.05) {
                 p.vx = ((t.x - p.x) / dist) * sp;
                 p.vy = ((t.y - p.y) / dist) * sp;
