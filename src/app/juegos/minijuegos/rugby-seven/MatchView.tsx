@@ -151,7 +151,7 @@ const PORTRAIT_KEY = 'g22-rugby-seven-portrait';
 const SCHEME_KEY = 'g22-rugby-seven-touch-scheme';
 const STEP_PX = 18; // esquema B: desde acá un deslizamiento arriba o abajo es un paso de costado
 const STEP_MS = 340; // cuánto dura cada paso
-const STEP_SPEED = 1.5; // el paso va a 1,5 veces la velocidad de costado normal, parejo (sin el tirón del amague)
+const STEP_SPEED = 1.25; // el paso va a 1,25 veces la velocidad de costado; el motor resta adelante lo que suma de costado
 const STEP_MAX_MS = 1000; // los pasos acumulados no pasan de esto
 const LONG_PASS_MS = 420; // esquema B: tocar y dejar quieto este tiempo es un salteo
 

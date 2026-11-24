@@ -2171,6 +2171,12 @@ export class SevenMatch {
                 if (this.kickCharge !== null) vy = 0; // cargando la patada, ↑/↓ mueven la mira, no al jugador
                 if (carrier.juke > 0.14) vy = carrier.jukeDir * 10;
                 carrier.vy = vy;
+                // El paso de costado del dedo no suma velocidad: corrido de costado, se avanza menos.
+                // Tope: lo que va en diagonal con el teclado (7,2 adelante y 6 de costado).
+                if (this.input.fast > 1 && vy !== 0 && carrier.stun <= 0) {
+                    const cap = Math.hypot(burst, 6 * f);
+                    carrier.vx = Math.max(burst * 0.5, Math.sqrt(Math.max(0, cap * cap - vy * vy)));
+                }
             } else {
                 this.cpuCarrier(carrier, dt);
             }
