@@ -82,6 +82,8 @@ export async function GET(
         return NextResponse.json({
             grados: menuDeGrados(actual, hermanos),
             temporadas: menuDeTemporadas(actual, hermanos),
+            // En el circuito de seven de World Rugby los "grados" son los circuitos.
+            ...(actual.category === 'SVNS' && { tituloGrados: 'Cambiar de circuito' }),
         }, {
             // El menú cambia cuando se publica una temporada, no en cada visita.
             headers: { 'cache-control': 'public, s-maxage=300, stale-while-revalidate=3600' },

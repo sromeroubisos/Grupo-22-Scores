@@ -20,8 +20,10 @@ import path from 'node:path';
 import { createClient } from '@supabase/supabase-js';
 
 import {
+    CATEGORIA_SVNS,
     CIRCUITOS_SVNS,
     circuitoPorClave,
+    subcategoriaDe,
     temporadaLabel,
     type CircuitoSvns,
 } from '../lib/integrations/worldrugby/svns.ts';
@@ -29,7 +31,6 @@ import { fijarFaseActiva, sincronizarEtapa, type ResumenEtapa } from '../lib/int
 
 const REPO = process.cwd();
 const ORIGEN = 'worldrugby-alta';
-const PUNTOS_POR_PUESTO = [20, 18, 16, 14, 12, 10];
 
 const modo = process.argv.includes('--execute') ? 'execute' : process.argv.includes('--plan') ? 'plan' : null;
 if (!modo) {
@@ -75,10 +76,15 @@ async function leerMolde() {
     return { torneo: t, fase: (fases as Fila[])[0] };
 }
 
+/** Los puntos por puesto de una etapa, en la forma del ruleset y de la fase. */
+function puntosPorPuesto(c: CircuitoSvns): { points: number; position: number }[] {
+    return c.puntosPorPuesto.map((points, p) => ({ points, position: p + 1 }));
+}
+
 function rulesetDe(molde: Fila, c: CircuitoSvns): Fila {
     const etapas = c.etapas.map((e, i) => ({
-        id: `phase_${i + 1}`, name: e.nombre, order: i + 1, format: 'league',
-        circuit_points: PUNTOS_POR_PUESTO.map((points, p) => ({ points, position: p + 1 })), ranking_source: 'phase_standings',
+        id: `phase_${i + 1}`, name: e.nombre, order: i + 1, format: e.formato === 'grupos' ? 'group_stage' : 'league',
+        circuit_points: puntosPorPuesto(c), ranking_source: 'phase_standings',
     }));
     const base = molde.ruleset as Fila;
     const faseBase = (base.phases as Fila[])[0];
@@ -138,7 +144,15 @@ async function aplicarReglas(torneoId: string): Promise<number> {
     const { data: fases, error } = await sb.from('tournament_phases').select('id, settings').eq('tournament_id', torneoId);
     if (error) throw new Error(error.message);
     for (const f of (fases ?? []) as Fila[]) {
-        const { error: errF } = await sb.from('tournament_phases').update({ settings: conReglasOficiales(f.settings ?? {}), updated_at: ahoraIso }).eq('id', f.id);
+        const rol = f.settings?.worldrugby?.rol ?? 'liga';
+        let settings = conReglasOficiales(f.settings ?? {});
+        if (rol === 'grupos') {
+            settings = { ...settings, circuit: { ...(settings.circuit ?? {}), contributesToGeneralTable: false } };
+        } else if (rol === 'final') {
+            // La clasificación final la escribe el sincronizador: el motor no la recalcula.
+            settings = { ...settings, standings: { ...(settings.standings ?? {}), mode: 'fully_manual', editable: false } };
+        }
+        const { error: errF } = await sb.from('tournament_phases').update({ settings, updated_at: ahoraIso }).eq('id', f.id);
         if (errF) throw new Error(errF.message);
     }
     // Los puntos cargados a mano ya no valen: el motor los calcula con el reglamento oficial.
@@ -166,7 +180,8 @@ async function crearTorneo(molde: { torneo: Fila; fase: Fila }, c: CircuitoSvns,
     try {
         await ins('tournaments', {
             id: torneoId, union_id: molde.torneo.union_id, season_id: c.temporada, name: c.nombre, display_name: c.nombre,
-            original_name: c.nombre, slug: c.slug, status: 'published', category: null, age_grade: 'Mayores', gender: generoDb,
+            original_name: c.nombre, slug: c.slug, status: 'published', category: CATEGORIA_SVNS, subcategory: subcategoriaDe(c.nivel),
+            age_grade: 'Mayores', gender: generoDb,
             region: 'Internacional', country: 'Internacional', country_id: 'international', country_name: 'Internacional',
             format: 'circuit', is_visible: true, is_active: true, logo_url: molde.torneo.logo_url,
             ruleset, ruleset_version: 1, sport_id: 'rugby', sport: 'rugby', sport_name: 'Rugby',
@@ -182,15 +197,30 @@ async function crearTorneo(molde: { torneo: Fila; fase: Fila }, c: CircuitoSvns,
         });
         const { error } = await sb.from('tournaments').update({ current_season_id: seasonId }).eq('id', torneoId);
         if (error) throw new Error(`tournaments (temporada): ${error.message}`);
-        await ins('tournament_phases', c.etapas.map((e, i) => ({
-            id: crypto.randomUUID(), tournament_id: torneoId, season_id: seasonId, order_index: i + 1, is_active: i === 0,
-            name: e.nombre, phase_type: 'league',
-            settings: {
-                ...molde.fase.settings, teamsCount: 6, source: ORIGEN, worldrugby: { etapa: e.clave },
-                circuit: { ...(molde.fase.settings.circuit ?? {}), pointsByPlacement: PUNTOS_POR_PUESTO.map((points, p) => ({ points, position: p + 1 })) },
-            },
-            created_at: ahoraIso, updated_at: ahoraIso,
-        })));
+        // Una etapa de liga es UNA fase. Una con grupos y cuadro son DOS: la de grupos (tabla de cada
+        // grupo, no suma a la general) y la de la etapa (cuadro + clasificación final, que sí suma).
+        const fases: Fila[] = [];
+        for (const e of c.etapas) {
+            const ajustes = (rol: string, extra: Fila) => ({
+                ...molde.fase.settings, teamsCount: e.formato === 'liga' ? 6 : c.puntosPorPuesto.length, source: ORIGEN,
+                worldrugby: { etapa: e.clave, rol },
+                circuit: { ...(molde.fase.settings.circuit ?? {}), pointsByPlacement: puntosPorPuesto(c), ...extra },
+            });
+            const nueva = (nombre: string, tipo: string, rol: string, extra: Fila) => ({
+                id: crypto.randomUUID(), tournament_id: torneoId, season_id: seasonId, order_index: fases.length + 1,
+                is_active: false, name: nombre, phase_type: tipo, settings: ajustes(rol, extra),
+                created_at: ahoraIso, updated_at: ahoraIso,
+            });
+            if (e.formato === 'liga') fases.push(nueva(e.nombre, 'league', 'liga', {}));
+            else {
+                fases.push(nueva(`${e.nombre} · Grupos`, 'group_stage', 'grupos', { contributesToGeneralTable: false }));
+                fases.push(nueva(e.nombre, 'league', 'final', { contributesToGeneralTable: true }));
+            }
+        }
+        // La etapa vigente es la que queda activa (una sola por torneo); acá, la primera.
+        const primera = fases.find((f) => f.settings.worldrugby.rol !== 'grupos');
+        if (primera) primera.is_active = true;
+        await ins('tournament_phases', fases);
     } catch (e) {
         await sb.from('tournament_phases').delete().eq('tournament_id', torneoId);
         await sb.from('tournaments').update({ current_season_id: null }).eq('id', torneoId);
@@ -311,9 +341,11 @@ async function main() {
             const reseteados = await aplicarReglas(torneoId);
             const activa = await fijarFaseActiva(sb, c, torneoId, ahora);
             if (activa) console.log(`   fase activa de ${c.clave}: ${activa}`);
-            const { data: fases, error } = await sb.from('tournament_phases').select('id, season_id, name').eq('tournament_id', torneoId).order('order_index');
+            const { data: fases, error } = await sb.from('tournament_phases').select('id, season_id, name, settings').eq('tournament_id', torneoId).order('order_index');
             if (error) throw new Error(error.message);
             for (const fase of (fases ?? []) as Fila[]) {
+                // La fase de la etapa con cuadro es `fully_manual`: la escribe el sincronizador, no el motor.
+                if (fase.settings?.worldrugby?.rol === 'final') continue;
                 const r = await recalculatePhaseStandingsScopes(torneoId, fase.id, 'general', fase.season_id ?? undefined);
                 console.log(`   tabla ${c.clave} · ${fase.name}: ${r.ok ? `${r.rows_calculated} filas` : 'FALLÓ'}`);
             }

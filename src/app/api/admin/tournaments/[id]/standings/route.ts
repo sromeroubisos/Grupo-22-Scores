@@ -189,6 +189,8 @@ async function handleCircuitGlobalStandings(tournamentId: string, supabase: any,
 
     for (const phase of phases) {
         const phaseSettings = (phase.settings ?? {}) as Record<string, unknown>;
+        // Una fase de grupos de una etapa con cuadro no suma a la general (ver TournamentDetailClient).
+        if ((phaseSettings as any)?.circuit?.contributesToGeneralTable === false) continue;
         const placementMap = new Map(
             resolveCircuitPlacementPoints(phaseSettings, ruleset, phase.id, phase.order_index ?? 0)
                 .map(({ position, points }) => [position, points]),

@@ -548,7 +548,7 @@ test('etiquetas: una por puesto, sin fase ni grupo, hacia el cruce del 17/10', (
 // Circuito SVNS
 // --------------------------------------------------------------------------
 
-const DUBAI_M = wrEventByTournamentId('wr-svns-2027-dubai-m');
+const DUBAI_M = SVNS_DB_STAGES.find((event) => event.tournamentId === 'wr-svns-2027-dubai-m');
 const DUBAI_3_M = SVNS_DB_STAGES.find((event) => event.tournamentId === 'wr-svns3-2027-dubai-m');
 
 function svnsMatch(id: string, phase: string, home: string, away: string, status: string, scores: [number, number], millis: number) {
@@ -566,14 +566,15 @@ function svnsMatch(id: string, phase: string, home: string, away: string, status
 }
 
 test('SVNS: el registro trae el circuito con ids únicos y sin repetir torneo', () => {
-    const events = WR_EVENTS.filter((event) => event.scoring === 'sevens');
-    assert.equal(events.length, 38);
-    assert.equal(new Set(events.map((event) => event.tournamentId)).size, 38);
-    assert.equal(new Set(events.map((event) => event.eventId)).size, 38);
-    assert.equal(new Set(WR_EVENTS.map((event) => event.url)).size, WR_EVENTS.length);
+    const events = SVNS_DB_STAGES.filter((event) => event.scoring === 'sevens');
+    assert.equal(events.length, 52);
+    assert.equal(new Set(events.map((event) => event.tournamentId)).size, 52);
+    assert.equal(new Set(events.map((event) => event.eventId)).size, 52);
+    assert.equal(new Set([...WR_EVENTS, ...SVNS_DB_STAGES].map((event) => event.url)).size, WR_EVENTS.length + SVNS_DB_STAGES.length);
     assert.ok(events.every((event) => event.window && event.tournamentId.startsWith('wr-')));
     assert.equal(DUBAI_M?.eventId, '92263486-d635-4cd8-866d-ac0563c9250e');
-    assert.equal(wrEventByTournamentId('wr-svns-2027-dubai-w')?.gender, 'Femenino');
+    assert.equal(SVNS_DB_STAGES.find((event) => event.tournamentId === 'wr-svns-2027-dubai-w')?.gender, 'Femenino');
+    assert.equal(SVNS_DB_STAGES.find((event) => event.tournamentId === 'wr-svns-2027-dubai-w')?.city, 'Dubái');
 });
 
 test('SVNS: la copia de FlashScore se reconoce por el nombre de la liga', () => {
@@ -640,8 +641,8 @@ test('SVNS: las fases de copa salen en castellano', () => {
 });
 
 test("SVNS: las etapas de la base no se repiten en el feed sin base", () => {
-    assert.equal(SVNS_DB_STAGES.length, 14);
+    assert.equal(SVNS_DB_STAGES.length, 52);
     const enFeed = new Set(WR_EVENTS.map((event) => event.eventId));
     assert.ok(SVNS_DB_STAGES.every((event) => !enFeed.has(event.eventId)));
-    assert.ok(SVNS_DB_STAGES.every((event) => /^wr-svns[23]-/.test(event.tournamentId)));
+    assert.ok(SVNS_DB_STAGES.every((event) => /^wr-(svns|svns2|svns3|wc)-/.test(event.tournamentId)));
 });

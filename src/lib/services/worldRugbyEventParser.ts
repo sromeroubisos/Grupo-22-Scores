@@ -66,6 +66,8 @@ export interface WrEventDef {
      */
     scoring?: 'xv' | 'sevens';
     gender?: 'Masculino' | 'Femenino';
+    /** Sede de la etapa en castellano ("Dubái"), solo en el circuito SVNS. */
+    city?: string;
     /**
      * Días (AAAA-MM-DD) en que el torneo juega. Sin ventana, el torneo se pide
      * siempre; con ella, solo cerca de sus fechas, así un circuito de 26 etapas
@@ -121,16 +123,36 @@ export function svnsStage(
         siteUrl: `https://www.svns.com/en/fixtures-and-results/${slug}/matches`,
         scoring: 'sevens' as const,
         gender: g.gender,
+        city,
         window: { start, end },
     }));
 }
 
 /**
- * Etapas del circuito que viven en la BASE (torneos de circuito con una fase de liga por
- * etapa, como el SVNS 2 cargado a mano) y las mantiene `/api/cron/worldrugby-sync`. Son las
- * de seis equipos todos contra todos; salen de `WR_EVENTS` para no mostrarse dos veces.
+ * TODAS las etapas del circuito HSBC SVNS (SVNS 1, 2 y 3 y el World Championship, 2025-26 y
+ * 2026-27): viven en la BASE como torneos de circuito y las mantiene `/api/cron/worldrugby-sync`.
+ * No están en `WR_EVENTS` para no mostrarse dos veces.
  */
 export const SVNS_DB_STAGES: readonly WrEventDef[] = [
+    ...svnsStage('svns', 'dubai', 'Dubái', '2025-11-29', '2025-11-30', ['11cc06dc-3ea9-4d90-b0ae-a399af78e4eb', 'acf5df55-1883-433c-b015-ebb2abf22606'], '2026'),
+    ...svnsStage('svns', 'cape-town', 'Ciudad del Cabo', '2025-12-06', '2025-12-07', ['9e2d4625-9e44-470b-8b7a-232b800ae969', '97aba84c-bb17-44f1-ac0f-085225f13d46'], '2026'),
+    ...svnsStage('svns3', 'dubai', 'Dubái', '2026-01-17', '2026-01-18', ['835d93ac-ba9e-4d53-b704-417ca85ae129', '55671206-ca67-46f6-90f8-00866f23ce71'], '2026'),
+    ...svnsStage('svns', 'singapore', 'Singapur', '2026-01-31', '2026-02-01', ['2dcbf587-13b5-4aef-ad20-d1d533f9cb07', '23dd7def-56c1-44a1-a830-cffa99148c66'], '2026'),
+    ...svnsStage('svns', 'perth', 'Perth', '2026-02-07', '2026-02-08', ['e5065fab-87d4-4037-ae12-cd532a44ec0e', 'a36c424f-a02c-4d5d-8c43-b27c8809cf62'], '2026'),
+    ...svnsStage('svns', 'vancouver', 'Vancouver', '2026-03-07', '2026-03-08', ['845e1c8f-c661-4bb9-a507-79b377691739', '7ca63f08-fb29-413b-88f2-ab1ccea429b7'], '2026'),
+    ...svnsStage('svns', 'new-york', 'Nueva York', '2026-03-14', '2026-03-15', ['cfe84ffe-82ac-4861-9ca4-f825353ea199', '9800a9dd-f1a1-47bc-9cdb-b8a76c2f3367'], '2026'),
+    ...svnsStage('wc', 'hong-kong', 'Hong Kong', '2026-04-17', '2026-04-19', ['ab7b277c-7e3d-4c65-99b0-b2f82daa0b6c', '0ba019f2-fc92-4ff3-98bc-979b9488b4ff'], '2026'),
+    ...svnsStage('wc', 'valladolid', 'Valladolid', '2026-05-29', '2026-05-31', ['067e2c0a-71c5-4133-843f-1ab7d6354ecc', '22bc64d9-d11e-43eb-b275-31fe00c6358e'], '2026'),
+    ...svnsStage('wc', 'bordeaux', 'Burdeos', '2026-06-05', '2026-06-07', ['39fdda12-ab80-4f68-97ff-1f30744d5895', 'cf1f0f65-25f9-4d97-81c0-20d5d09ec2ff'], '2026'),
+    ...svnsStage('svns', 'dubai', 'Dubái', '2026-11-28', '2026-11-29', ['92263486-d635-4cd8-866d-ac0563c9250e', '399c1cb8-594b-4899-907a-05a390367251']),
+    ...svnsStage('svns', 'cape-town', 'Ciudad del Cabo', '2026-12-05', '2026-12-06', ['d45db457-09c9-4603-8991-5abbcb94277b', '26a10704-1b2c-4ae5-84ea-313302343337']),
+    ...svnsStage('svns', 'singapore', 'Singapur', '2027-01-30', '2027-01-31', ['e835b968-4d15-4a5e-88f6-91e34ab2568f', '463dd4fe-521c-4b34-8379-fea9d39285b5']),
+    ...svnsStage('svns', 'perth', 'Perth', '2027-02-06', '2027-02-07', ['136112d7-d729-4417-a0ee-cba8720545e8', '000329f8-5d05-49ed-b280-105767de2e85']),
+    ...svnsStage('svns', 'vancouver', 'Vancouver', '2027-03-06', '2027-03-07', ['ed0edcc4-b9b2-4ae9-bd26-1e55fbfc746c', 'ea0dd958-e26d-47f1-b8e4-bd7a89d0fcf7']),
+    ...svnsStage('svns', 'new-york', 'Nueva York', '2027-03-13', '2027-03-14', ['00efe590-3644-4252-bdb3-09c16688e183', '4be4f537-1195-4d83-b5ea-1084a7885803']),
+    ...svnsStage('wc', 'hong-kong', 'Hong Kong', '2027-04-09', '2027-04-11', ['434568aa-0c0b-4005-99a3-7f7b530f2e4b', '09b3e766-640f-4e09-ad4c-5147bb61e44f']),
+    ...svnsStage('wc', 'valladolid', 'Valladolid', '2027-05-21', '2027-05-23', ['611828a4-22c3-4b37-9d29-7c56c7906a48', '181b7bc8-b895-4306-b030-c667946a58b2']),
+    ...svnsStage('wc', 'bordeaux', 'Burdeos', '2027-05-28', '2027-05-30', ['5745adcf-13c6-456d-bf01-d0b928f36c90', '47a636ce-8e80-4610-ac0b-17d7dfbe0d7c']),
     ...svnsStage('svns2', 'nairobi', 'Nairobi', '2026-02-14', '2026-02-15', ['09584ea7-cda0-458e-a037-a2604238c2fc', 'b7178530-dfc5-4701-9157-c5648f04615c'], '2026'),
     ...svnsStage('svns2', 'montevideo', 'Montevideo', '2026-03-21', '2026-03-22', ['f6d666e7-36a3-4024-8bda-edd9c799383e', '4374bc35-495b-47a5-a0e9-09c05098b405'], '2026'),
     ...svnsStage('svns2', 'sao-paulo', 'São Paulo', '2026-03-28', '2026-03-29', ['771f9811-6dce-4d91-9ac2-1c65c577366f', '4a6b45fb-eee6-4100-86dc-8cd610f7cb33'], '2026'),
@@ -156,30 +178,6 @@ export const WR_EVENTS: readonly WrEventDef[] = [
         },
         siteUrl: 'https://www.world.rugby/tournaments/u20',
     },
-    // Circuito HSBC SVNS 2026-27. Los ids salen de `/rugby/v3/event?startDate=…`
-    // (medido el 24/11/2026). SVNS 3 y 2 juegan el mismo fin de semana que la
-    // primera etapa del SVNS en la misma sede o en otra; cada una es un evento.
-    // Temporada 2025-26 (histórico): fixture, resultados, cronología y tabla de cada etapa.
-    ...svnsStage('svns', 'dubai', 'Dubái', '2025-11-29', '2025-11-30', ['11cc06dc-3ea9-4d90-b0ae-a399af78e4eb', 'acf5df55-1883-433c-b015-ebb2abf22606'], '2026'),
-    ...svnsStage('svns', 'cape-town', 'Ciudad del Cabo', '2025-12-06', '2025-12-07', ['9e2d4625-9e44-470b-8b7a-232b800ae969', '97aba84c-bb17-44f1-ac0f-085225f13d46'], '2026'),
-    ...svnsStage('svns3', 'dubai', 'Dubái', '2026-01-17', '2026-01-18', ['835d93ac-ba9e-4d53-b704-417ca85ae129', '55671206-ca67-46f6-90f8-00866f23ce71'], '2026'),
-    ...svnsStage('svns', 'singapore', 'Singapur', '2026-01-31', '2026-02-01', ['2dcbf587-13b5-4aef-ad20-d1d533f9cb07', '23dd7def-56c1-44a1-a830-cffa99148c66'], '2026'),
-    ...svnsStage('svns', 'perth', 'Perth', '2026-02-07', '2026-02-08', ['e5065fab-87d4-4037-ae12-cd532a44ec0e', 'a36c424f-a02c-4d5d-8c43-b27c8809cf62'], '2026'),
-    ...svnsStage('svns', 'vancouver', 'Vancouver', '2026-03-07', '2026-03-08', ['845e1c8f-c661-4bb9-a507-79b377691739', '7ca63f08-fb29-413b-88f2-ab1ccea429b7'], '2026'),
-    ...svnsStage('svns', 'new-york', 'Nueva York', '2026-03-14', '2026-03-15', ['cfe84ffe-82ac-4861-9ca4-f825353ea199', '9800a9dd-f1a1-47bc-9cdb-b8a76c2f3367'], '2026'),
-    ...svnsStage('wc', 'hong-kong', 'Hong Kong', '2026-04-17', '2026-04-19', ['ab7b277c-7e3d-4c65-99b0-b2f82daa0b6c', '0ba019f2-fc92-4ff3-98bc-979b9488b4ff'], '2026'),
-    ...svnsStage('wc', 'valladolid', 'Valladolid', '2026-05-29', '2026-05-31', ['067e2c0a-71c5-4133-843f-1ab7d6354ecc', '22bc64d9-d11e-43eb-b275-31fe00c6358e'], '2026'),
-    ...svnsStage('wc', 'bordeaux', 'Burdeos', '2026-06-05', '2026-06-07', ['39fdda12-ab80-4f68-97ff-1f30744d5895', 'cf1f0f65-25f9-4d97-81c0-20d5d09ec2ff'], '2026'),
-    // Temporada 2026-27.
-    ...svnsStage('svns', 'dubai', 'Dubái', '2026-11-28', '2026-11-29', ['92263486-d635-4cd8-866d-ac0563c9250e', '399c1cb8-594b-4899-907a-05a390367251']),
-    ...svnsStage('svns', 'cape-town', 'Ciudad del Cabo', '2026-12-05', '2026-12-06', ['d45db457-09c9-4603-8991-5abbcb94277b', '26a10704-1b2c-4ae5-84ea-313302343337']),
-    ...svnsStage('svns', 'singapore', 'Singapur', '2027-01-30', '2027-01-31', ['e835b968-4d15-4a5e-88f6-91e34ab2568f', '463dd4fe-521c-4b34-8379-fea9d39285b5']),
-    ...svnsStage('svns', 'perth', 'Perth', '2027-02-06', '2027-02-07', ['136112d7-d729-4417-a0ee-cba8720545e8', '000329f8-5d05-49ed-b280-105767de2e85']),
-    ...svnsStage('svns', 'vancouver', 'Vancouver', '2027-03-06', '2027-03-07', ['ed0edcc4-b9b2-4ae9-bd26-1e55fbfc746c', 'ea0dd958-e26d-47f1-b8e4-bd7a89d0fcf7']),
-    ...svnsStage('svns', 'new-york', 'Nueva York', '2027-03-13', '2027-03-14', ['00efe590-3644-4252-bdb3-09c16688e183', '4be4f537-1195-4d83-b5ea-1084a7885803']),
-    ...svnsStage('wc', 'hong-kong', 'Hong Kong', '2027-04-09', '2027-04-11', ['434568aa-0c0b-4005-99a3-7f7b530f2e4b', '09b3e766-640f-4e09-ad4c-5147bb61e44f']),
-    ...svnsStage('wc', 'valladolid', 'Valladolid', '2027-05-21', '2027-05-23', ['611828a4-22c3-4b37-9d29-7c56c7906a48', '181b7bc8-b895-4306-b030-c667946a58b2']),
-    ...svnsStage('wc', 'bordeaux', 'Burdeos', '2027-05-28', '2027-05-30', ['5745adcf-13c6-456d-bf01-d0b928f36c90', '47a636ce-8e80-4610-ac0b-17d7dfbe0d7c']),
 ];
 
 export function wrEventByTournamentId(value: unknown): WrEventDef | null {

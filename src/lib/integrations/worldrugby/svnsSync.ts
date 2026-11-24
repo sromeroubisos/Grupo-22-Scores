@@ -25,9 +25,11 @@ import {
 } from '../../services/worldRugbyEventParser.ts';
 import {
     candidatosClub,
+    clasificacionFinal,
     nombreClub,
     planSvns,
     type CircuitoSvns,
+    type FilaClasificacion,
     type EtapaSvns,
     type ExistenteSvns,
     type GeneroSvns,
@@ -135,6 +137,8 @@ async function asegurarParticipantes(
     seasonId: string | null,
     clubes: Map<string, string>,
     ahora: string,
+    /** club → grupo (solo en la fase de grupos de una etapa con cuadro). */
+    grupoDe: ReadonlyMap<string, string> = new Map(),
 ): Promise<number> {
     const [partR, fppR] = await Promise.all([
         sb.from('tournament_participants').select('id, club_id').eq('tournament_id', torneo.id).limit(1000),
@@ -173,7 +177,7 @@ async function asegurarParticipantes(
         if (!enFase.has(pid)) {
             const r = await sb.from('tournament_phase_participants').insert({
                 id: crypto.randomUUID(), tournament_id: torneo.id, season_id: seasonId, phase_id: faseId, participant_id: pid,
-                group_id: null, status: 'active', seed: null, notes: ORIGEN, created_at: ahora, updated_at: ahora,
+                group_id: grupoDe.get(clubId) ?? null, status: 'active', seed: null, notes: ORIGEN, created_at: ahora, updated_at: ahora,
             });
             if (r.error) throw new Error(`participante de fase ${clubId}: ${r.error.message}`);
             enFase.add(pid);
@@ -250,6 +254,93 @@ async function sincronizarCronologia(sb: Sb, p: PartidoConId, seasonId: string |
     return filas.length;
 }
 
+interface FasesEtapa {
+    /** Etapa de liga: su única fase. */
+    liga: { id: string; season_id: string | null } | null;
+    /** Etapa con cuadro: la fase de grupos y la de la etapa (cuadro + clasificación final). */
+    grupos: { id: string; season_id: string | null } | null;
+    final: { id: string; season_id: string | null } | null;
+}
+
+async function leerFases(sb: Sb, torneoId: string, etapa: EtapaSvns): Promise<FasesEtapa | string> {
+    const { data, error } = await sb.from('tournament_phases').select('id, season_id, settings')
+        .eq('tournament_id', torneoId).eq('settings->worldrugby->>etapa', etapa.clave);
+    if (error) return `no se pudo leer la fase (${error.message})`;
+    const lista = (data ?? []) as { id: string; season_id: string | null; settings: { worldrugby?: { rol?: string } } | null }[];
+    const porRol = (rol: string) => lista.find((f) => (f.settings?.worldrugby?.rol ?? 'liga') === rol) ?? null;
+    if (etapa.formato === 'liga') {
+        const liga = porRol('liga');
+        return liga ? { liga, grupos: null, final: null } : `el torneo no tiene la fase de ${etapa.clave}`;
+    }
+    const grupos = porRol('grupos');
+    const final = porRol('final');
+    return grupos && final ? { liga: null, grupos, final } : `el torneo no tiene las dos fases de ${etapa.clave}`;
+}
+
+/** Los grupos de la fase ("A" → id). Crea los que falten. */
+async function asegurarGrupos(sb: Sb, faseId: string, seasonId: string | null, letras: string[], ahora: string): Promise<Map<string, string>> {
+    const { data, error } = await sb.from('tournament_groups').select('id, name, order_index').eq('phase_id', faseId);
+    if (error) throw new Error(`no se pudieron leer los grupos (${error.message})`);
+    const filas = (data ?? []) as { id: string; name: string; order_index: number }[];
+    const porLetra = new Map(filas.map((g) => [g.name.replace(/^Grupo\s+/i, '').toUpperCase(), g.id]));
+    let orden = filas.reduce((m, g) => Math.max(m, g.order_index ?? 0), 0);
+    const nuevos: { id: string; phase_id: string; season_id: string | null; name: string; order_index: number; created_at: string }[] = [];
+    for (const letra of [...new Set(letras)].sort()) {
+        if (porLetra.has(letra)) continue;
+        orden += 1;
+        const id = crypto.randomUUID();
+        nuevos.push({ id, phase_id: faseId, season_id: seasonId, name: `Grupo ${letra}`, order_index: orden, created_at: ahora });
+        porLetra.set(letra, id);
+    }
+    if (nuevos.length) {
+        const r = await sb.from('tournament_groups').insert(nuevos);
+        if (r.error) throw new Error(`no se pudieron crear los grupos (${r.error.message})`);
+    }
+    return porLetra;
+}
+
+/**
+ * La clasificación final de la etapa en `tournament_standings` de la fase de la etapa
+ * (`fully_manual`: el motor no la recalcula). Escribe solo si cambió. Devuelve las filas
+ * escritas (0 si ya estaba igual).
+ */
+async function escribirClasificacion(
+    sb: Sb,
+    torneoId: string,
+    faseId: string,
+    seasonId: string | null,
+    filas: FilaClasificacion[],
+    ahora: string,
+): Promise<number> {
+    const { data: previas, error } = await sb.from('tournament_standings').select('club_id, position, played, scored, conceded')
+        .eq('phase_id', faseId).eq('table_type', 'general');
+    if (error) throw new Error(`no se pudo leer la clasificación (${error.message})`);
+    const antes = ((previas ?? []) as { club_id: string; position: number; played: number; scored: number; conceded: number }[])
+        .map((r) => `${r.club_id}:${r.position}:${r.played}:${r.scored}:${r.conceded}`).sort().join('|');
+    const ahoraFirma = filas.map((r) => `${r.clubId}:${r.position}:${r.played}:${r.scored}:${r.conceded}`).sort().join('|');
+    if (antes === ahoraFirma) return 0;
+
+    if ((previas ?? []).length) {
+        const r = await sb.from('tournament_standings').delete().eq('phase_id', faseId).eq('table_type', 'general');
+        if (r.error) throw new Error(`no se pudo reemplazar la clasificación (${r.error.message})`);
+    }
+    if (!filas.length) return 0;
+    const { data: clubes } = await sb.from('clubs').select('id, name, logo_url').in('id', filas.map((f) => f.clubId));
+    const datos = new Map(((clubes ?? []) as { id: string; name: string; logo_url: string | null }[]).map((c) => [c.id, c]));
+    const r = await sb.from('tournament_standings').insert(filas.map((f) => ({
+        id: crypto.randomUUID(), tournament_id: torneoId, phase_id: faseId, group_id: null, club_id: f.clubId,
+        position: f.position, played: f.played, won: f.won, drawn: f.drawn, lost: f.lost, points: f.points,
+        scored: f.scored, conceded: f.conceded, bonus_points: 0, form: null, streak: null, season_id: seasonId, table_type: 'general',
+        last_updated: ahora,
+        stats: {
+            fuente: 'World Rugby', status: null, team_name: datos.get(f.clubId)?.name ?? f.clubId, team_logo: datos.get(f.clubId)?.logo_url ?? null,
+            difference: f.scored - f.conceded, table_type: 'general', adjustments: 0, calculated_at: ahora,
+        },
+    })));
+    if (r.error) throw new Error(`no se pudo escribir la clasificación (${r.error.message})`);
+    return filas.length;
+}
+
 export async function sincronizarEtapa(
     sb: Sb,
     circuito: CircuitoSvns,
@@ -270,11 +361,12 @@ export async function sincronizarEtapa(
         if (errT) return falla(`no se pudo leer el torneo (${errT.message})`);
         if (!torneo) return falla(`no hay torneo ${circuito.externalId}: se da de alta con src/scripts/worldrugby-alta.ts`);
 
-        const { data: fase, error: errF } = await sb.from('tournament_phases').select('id, season_id')
-            .eq('tournament_id', torneo.id).eq('settings->worldrugby->>etapa', etapa.clave).maybeSingle();
-        if (errF) return falla(`no se pudo leer la fase (${errF.message})`);
-        if (!fase) return falla(`el torneo no tiene la fase de ${etapa.clave}`);
-        const seasonId: string | null = fase.season_id ?? torneo.current_season_id ?? null;
+        const fases = await leerFases(sb, torneo.id, etapa);
+        if (typeof fases === 'string') return falla(fases);
+        const faseDatos = fases.liga ?? fases.grupos;
+        if (!faseDatos) return falla('sin fase');
+        const seasonId: string | null = faseDatos.season_id ?? torneo.current_season_id ?? null;
+        const idsFases = [fases.liga?.id, fases.grupos?.id, fases.final?.id].filter(Boolean) as string[];
 
         // Si World Rugby no contesta, no se escribe nada.
         const schedule = await bajar(`/event/${etapa.def.eventId}/schedule`);
@@ -291,11 +383,11 @@ export async function sincronizarEtapa(
         for (const f of faltan) clubDe.set(f.pais, f.id);
         const resolverClub = (side: WrSide) => clubDe.get(side.country) ?? null;
 
-        const { data: filas, error: errM } = await sb.from('matches').select(COLUMNAS).eq('phase_id', fase.id).limit(1000);
+        const { data: filas, error: errM } = await sb.from('matches').select(COLUMNAS).in('phase_id', idsFases).limit(1000);
         if (errM) return falla(`no se pudieron leer los partidos (${errM.message})`);
         const existentesDb = (filas ?? []) as ExistenteSvns[];
 
-        const plan = planSvns({ fixtures, existentes: existentesDb, resolverClub });
+        const plan = planSvns({ fixtures, existentes: existentesDb, resolverClub, formato: etapa.formato });
         base.crear = plan.crear.length;
         base.actualizar = plan.actualizar.length;
         base.sinCambios = plan.sinCambios;
@@ -303,27 +395,50 @@ export async function sincronizarEtapa(
         base.equiposSinClub = plan.equiposSinClub;
         base.detalle = plan.actualizar.map((a) => ({ id: a.id, cambios: a.cambios }));
 
-        // Solo los clubes que juegan en esta etapa (no todos los países de la API).
+        // Solo los clubes que juegan en esta etapa (no todos los países de la API), y su grupo.
         const juegan = new Set<string>();
+        const poolDe = new Map<string, string>();
         for (const f of fixtures) {
             const h = resolverClub(f.home);
             const a = resolverClub(f.away);
             if (h) juegan.add(h);
             if (a) juegan.add(a);
+            if (f.pool && h) poolDe.set(h, f.pool);
+            if (f.pool && a) poolDe.set(a, f.pool);
         }
         const clubesDeLaEtapa = new Map<string, string>();
         for (const [pais, id] of clubDe) if (juegan.has(id)) clubesDeLaEtapa.set(id, nombreClub(pais, circuito.genero));
 
-        if (opciones.enSeco) return { ...base, ok: true };
+        const clasificacion = etapa.formato === 'grupos'
+            ? clasificacionFinal(fixtures, resolverClub, circuito.puntosPorPuesto)
+            : [];
 
-        base.participantesNuevos = await asegurarParticipantes(sb, torneo, fase.id, seasonId, clubesDeLaEtapa, ahoraIso);
+        if (opciones.enSeco) return { ...base, ok: true, eventos: clasificacion.length };
+
+        // Fases, grupos y participantes.
+        let grupoIdDe = new Map<string, string>();
+        if (fases.liga) {
+            base.participantesNuevos = await asegurarParticipantes(sb, torneo, fases.liga.id, seasonId, clubesDeLaEtapa, ahoraIso);
+        } else if (fases.grupos && fases.final) {
+            grupoIdDe = await asegurarGrupos(sb, fases.grupos.id, seasonId, [...new Set(poolDe.values())], ahoraIso);
+            const delClub = new Map<string, string>();
+            for (const [club, pool] of poolDe) {
+                const g = grupoIdDe.get(pool);
+                if (g) delClub.set(club, g);
+            }
+            base.participantesNuevos = await asegurarParticipantes(sb, torneo, fases.grupos.id, seasonId, clubesDeLaEtapa, ahoraIso, delClub);
+            await asegurarParticipantes(sb, torneo, fases.final.id, seasonId, clubesDeLaEtapa, ahoraIso);
+        }
 
         const creadas = new Map<string, string>();
         if (plan.crear.length) {
-            const { data: insertadas, error } = await sb.from('matches').insert(plan.crear.map((f) => ({
-                ...f, tournament_id: torneo.id, season_id: seasonId, phase_id: fase.id, sport_id: 'rugby', sport: 'rugby',
+            const filasNuevas = plan.crear.map((c) => ({
+                ...c.fila, tournament_id: torneo.id, season_id: seasonId, sport_id: 'rugby', sport: 'rugby',
+                phase_id: c.fase === 'grupos' ? fases.grupos?.id : c.fase === 'final' ? fases.final?.id : fases.liga?.id,
+                group_id: c.fase === 'grupos' && c.grupo ? grupoIdDe.get(c.grupo) ?? null : null,
                 category: torneo.category, is_visible: torneo.is_visible === true, live_enabled: false, review_status: 'approved',
-            }))).select('id, external_id');
+            }));
+            const { data: insertadas, error } = await sb.from('matches').insert(filasNuevas).select('id, external_id');
             if (error) return { ...base, error: `alta de ${plan.crear.length} partidos falló (${error.message})` };
             for (const m of (insertadas ?? []) as { id: string; external_id: string }[]) creadas.set(m.external_id, m.id);
         }
@@ -360,11 +475,22 @@ export async function sincronizarEtapa(
 
         const cambioTabla = plan.crear.length > 0
             || plan.actualizar.some((a) => 'score' in a.patch || 'status' in a.patch || 'home_club_id' in a.patch);
-        if (cambioTabla && opciones.recalcular) {
+        const faseDeTabla = fases.liga ?? fases.grupos;
+        if (cambioTabla && opciones.recalcular && faseDeTabla) {
             try {
-                if (!(await opciones.recalcular(torneo.id, fase.id, seasonId))) errors.push('el recálculo de la tabla falló');
+                if (!(await opciones.recalcular(torneo.id, faseDeTabla.id, seasonId))) errors.push('el recálculo de la tabla falló');
             } catch (e) {
                 errors.push(`el recálculo de la tabla falló (${e instanceof Error ? e.message : 'error'})`);
+            }
+        }
+
+        // La clasificación final por puesto: es la que suma a la tabla general del circuito.
+        if (fases.final) {
+            try {
+                const escritas = await escribirClasificacion(sb, torneo.id, fases.final.id, seasonId, clasificacion, ahoraIso);
+                if (escritas > 0) base.escribio = true;
+            } catch (e) {
+                errors.push(`clasificación final: ${e instanceof Error ? e.message : 'error'}`);
             }
         }
         return { ...base, ok: errors.length === 0 };
@@ -378,6 +504,7 @@ const DIA_MS = 86_400_000;
 /**
  * Cada torneo admite UNA sola fase activa (`tournament_phases_one_active_idx`): la etapa en
  * curso o, si todavía no arrancó ninguna, la primera. Es la que la pantalla abre por defecto.
+ * En una etapa con cuadro es la de la etapa (la clasificación), no la de grupos.
  * Devuelve la etapa que quedó activa, o null si ya estaba bien.
  */
 export async function fijarFaseActiva(sb: Sb, circuito: CircuitoSvns, torneoId: string, ahora: Date): Promise<string | null> {
@@ -386,8 +513,8 @@ export async function fijarFaseActiva(sb: Sb, circuito: CircuitoSvns, torneoId: 
     const etapa = arrancadas.length ? arrancadas[arrancadas.length - 1] : circuito.etapas[0];
     const { data, error } = await sb.from('tournament_phases').select('id, is_active, settings').eq('tournament_id', torneoId);
     if (error) throw new Error(`no se pudieron leer las fases (${error.message})`);
-    const fases = (data ?? []) as { id: string; is_active: boolean; settings: { worldrugby?: { etapa?: string } } | null }[];
-    const objetivo = fases.find((f) => f.settings?.worldrugby?.etapa === etapa.clave);
+    const fases = (data ?? []) as { id: string; is_active: boolean; settings: { worldrugby?: { etapa?: string; rol?: string } } | null }[];
+    const objetivo = fases.find((f) => f.settings?.worldrugby?.etapa === etapa.clave && f.settings?.worldrugby?.rol !== 'grupos');
     if (!objetivo) return null;
     const activas = fases.filter((f) => f.is_active);
     if (activas.length === 1 && activas[0].id === objetivo.id) return null;

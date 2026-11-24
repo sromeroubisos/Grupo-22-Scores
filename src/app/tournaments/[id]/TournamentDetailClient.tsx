@@ -1835,7 +1835,11 @@ function buildCircuitGlobalStandings(dbData: TournamentInitialData) {
         phases,
         tournamentRuleset,
     } = getDbStandingsContext(dbData);
-    const stagePhases = getStandingsEligiblePhases(phases);
+    // Una fase de grupos de una etapa con cuadro (SVNS) tiene su tabla pero no suma a la
+    // general: lo que suma es la clasificación final de la etapa. El editor ya escribe la marca.
+    const stagePhases = getStandingsEligiblePhases(phases).filter(
+        (phase: any) => phase?.settings?.circuit?.contributesToGeneralTable !== false,
+    );
 
     const rowsByClub = new Map<string, any>();
 

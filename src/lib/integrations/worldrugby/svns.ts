@@ -1,14 +1,16 @@
 /**
- * Circuito HSBC SVNS en la BASE: SVNS 2 y SVNS 3 de seis equipos todos contra todos.
+ * Circuito HSBC SVNS en la BASE: SVNS 1, 2 y 3 y el World Championship.
  *
- * El modelo es el del SVNS 2 que ya estaba cargado a mano: un torneo `circuit` por
- * categoría y género, con UNA fase de liga por etapa (fin de semana) y puntos por puesto
- * (20, 18, 16…) que suman la tabla general. Lo nuevo es que los partidos, los marcadores
- * en vivo y la cronología salen de la API de World Rugby (la misma que usa svns.com) y los
- * mantiene `/api/cron/worldrugby-sync`.
+ * El modelo es el del SVNS 2 que ya estaba cargado a mano: un torneo `circuit` por nivel,
+ * género y temporada, con puntos por puesto (20, 18, 16…) que suman la tabla general. Los
+ * partidos, los marcadores en vivo y la cronología salen de la API de World Rugby (la misma
+ * que usa svns.com) y los mantiene `/api/cron/worldrugby-sync`.
  *
- * SVNS 1 y el World Championship (12 equipos, grupos y cuadro) NO están acá: siguen
- * saliendo en vivo desde `services/worldRugbyEvent.ts`, sin pasar por la base.
+ * Hay dos formas de etapa:
+ *  - `liga`: seis equipos todos contra todos. UNA fase de liga; su tabla es el puesto.
+ *  - `grupos`: grupos y cuadro (SVNS 1, World Championship). DOS fases: "Grupos", con la tabla
+ *    de cada grupo, y la de la etapa, con TODOS los partidos de cuadro y la clasificación final
+ *    por puesto (`clasificacionFinal`), que es la que suma a la tabla general.
  *
  * Este módulo es PURO: entra JSON, sale dato. Sin red ni base. Lo prueba `svns.test.ts`.
  */
@@ -28,14 +30,17 @@ export const SVNS_EXTERNAL_PREFIX = 'worldrugby:';
 // Catálogo de circuitos
 // --------------------------------------------------------------------------
 
-export type NivelSvns = 'svns2' | 'svns3';
+export type NivelSvns = 'svns' | 'svns2' | 'svns3' | 'wc';
 export type GeneroSvns = 'm' | 'w';
+export type FormatoEtapa = 'liga' | 'grupos';
 
 export interface EtapaSvns {
     /** `wr-svns2-2026-nairobi-m`: el id del evento en el registro. */
     clave: string;
     def: WrEventDef;
     nombre: string;
+    ciudad: string;
+    formato: FormatoEtapa;
     desde: string;
     hasta: string;
 }
@@ -52,12 +57,51 @@ export interface CircuitoSvns {
     slug: string;
     /** El torneo que ya existía cargado a mano y se revincula en vez de crearse. */
     slugExistente: string | null;
+    /** Puntos de la tabla general por puesto en cada etapa (el 1.º primero). */
+    puntosPorPuesto: number[];
     etapas: EtapaSvns[];
 }
 
-const ID_ETAPA = /^wr-(svns2|svns3)-(\d{4})-(.+)-([mw])$/;
+const ID_ETAPA = /^wr-(svns|svns2|svns3|wc)-(\d{4})-(.+)-([mw])$/;
 
-const TIER_NOMBRE: Record<NivelSvns, string> = { svns2: 'SVNS 2', svns3: 'SVNS 3' };
+const TIER_NOMBRE: Record<NivelSvns, string> = {
+    svns: 'SVNS 1',
+    svns2: 'SVNS 2',
+    svns3: 'SVNS 3',
+    wc: 'SVNS World Championship',
+};
+
+/** Cómo se juega cada nivel. El SVNS 3 de 2025-26 tuvo grupos y cuadro; el de 2026-27, liga de seis. */
+export function formatoDe(nivel: NivelSvns, temporada: string): FormatoEtapa {
+    if (nivel === 'svns' || nivel === 'wc') return 'grupos';
+    if (nivel === 'svns3' && temporada === '2026') return 'grupos';
+    return 'liga';
+}
+
+const ESCALA_6 = [20, 18, 16, 14, 12, 10];
+const ESCALA_8 = [20, 18, 16, 14, 12, 10, 8, 6];
+const ESCALA_12 = [20, 18, 16, 14, 12, 10, 8, 6, 4, 3, 2, 1];
+
+/** Puntos por puesto de la serie oficial (`/series/{id}/standings`, medidos en 2025-26). */
+export function puntosDe(nivel: NivelSvns, formato: FormatoEtapa): number[] {
+    if (formato === 'liga') return ESCALA_6;
+    return nivel === 'wc' ? ESCALA_12 : ESCALA_8;
+}
+
+/**
+ * El circuito como "grado" del torneo: todos los SVNS van con `category = 'SVNS'` y el
+ * circuito en `subcategory`. Con eso la cabecera ofrece cambiar de circuito (mismo año y
+ * género) y de temporada (mismo circuito), como en los grados de la URBA.
+ */
+export const CATEGORIA_SVNS = 'SVNS';
+
+export function subcategoriaDe(nivel: NivelSvns): string {
+    return nivel === 'wc' ? 'World Championship' : TIER_NOMBRE[nivel];
+}
+
+function slugNivel(nivel: NivelSvns): string {
+    return nivel === 'wc' ? 'svns-world-championship' : TIER_NOMBRE[nivel].toLowerCase().replace(' ', '-');
+}
 
 /** "2027" → "2026-27". */
 export function temporadaLabel(temporada: string): string {
@@ -86,14 +130,18 @@ export function armarCircuitos(stages: readonly WrEventDef[] = SVNS_DB_STAGES): 
                 temporada,
                 genero,
                 nombre: `${TIER_NOMBRE[nivel]} - ${generoNombre}${sufijo}`,
-                slug: `${TIER_NOMBRE[nivel].toLowerCase().replace(' ', '-')}-${generoNombre.toLowerCase()}${esExistente ? '' : `-${temporadaLabel(temporada)}`}`,
+                slug: `${slugNivel(nivel)}-${generoNombre.toLowerCase()}${esExistente ? '' : `-${temporadaLabel(temporada)}`}`,
                 slugExistente: esExistente ? `svns-2-${generoNombre.toLowerCase()}` : null,
+                puntosPorPuesto: puntosDe(nivel, formatoDe(nivel, temporada)),
                 etapas: [],
             };
             grupos.set(clave, c);
         }
-        const ciudad = def.name.replace(/^SVNS(?: 2| 3)?\s+/, '').replace(/\s+(Masculino|Femenino)\s+\d{4}-\d{2}$/, '');
-        c.etapas.push({ clave: def.tournamentId, def, nombre: `Etapa ${ciudad}`, desde: def.window.start, hasta: def.window.end });
+        const ciudad = def.city ?? def.name;
+        c.etapas.push({
+            clave: def.tournamentId, def, nombre: `Etapa ${ciudad}`, ciudad, formato: formatoDe(nivel, temporada),
+            desde: def.window.start, hasta: def.window.end,
+        });
     }
     const out = [...grupos.values()];
     for (const c of out) c.etapas.sort((a, b) => a.desde.localeCompare(b.desde));
@@ -178,8 +226,17 @@ export interface FilaNuevaSvns {
     away_bonus_points: number;
 }
 
+/** Una fila nueva con el lugar que le toca en una etapa de grupos (en una liga, `fase` es null). */
+export interface CrearSvns {
+    fila: FilaNuevaSvns;
+    /** `grupos` (partido de grupo) o `final` (cuadro). Null en una etapa de liga. */
+    fase: 'grupos' | 'final' | null;
+    /** Letra del grupo ("A") de un partido de grupo. */
+    grupo: string | null;
+}
+
 export interface PlanSvns {
-    crear: FilaNuevaSvns[];
+    crear: CrearSvns[];
     actualizar: { id: string; patch: Record<string, unknown>; cambios: string[]; externalId: string; matchId: string }[];
     /** Cada partido de World Rugby con su fila (null si se va a crear): sirve para la cronología. */
     vinculados: { matchId: string; externalId: string; filaId: string | null; fixture: WrFixture }[];
@@ -205,13 +262,16 @@ function marcador(f: WrFixture): { home: number; away: number } | null {
  *   toca nada salvo el id y, si World Rugby ya tiene el partido jugado, marcador y estado.
  * - Un partido que World Rugby todavía tiene "sin empezar" nunca pisa un resultado ya
  *   cargado: la fuente oficial manda solo cuando publica algo.
+ * - Un cruce con lugares sin dueño ("1.º Grupo A") no se crea hasta que tenga equipos.
  */
 export function planSvns(input: {
     fixtures: readonly WrFixture[];
     existentes: readonly ExistenteSvns[];
     resolverClub: (side: WrSide) => string | null;
+    formato?: FormatoEtapa;
 }): PlanSvns {
     const { fixtures, existentes, resolverClub } = input;
+    const formato = input.formato ?? 'liga';
     const plan: PlanSvns = { crear: [], actualizar: [], vinculados: [], sinCambios: 0, equiposSinClub: [], huerfanos: [] };
     const sinClub = new Set<string>();
     const porExternal = new Map(existentes.filter((e) => e.external_id).map((e) => [e.external_id as string, e]));
@@ -246,19 +306,23 @@ export function planSvns(input: {
 
         if (!fila) {
             plan.crear.push({
-                external_id: externalId,
-                home_club_id: home,
-                away_club_id: away,
-                date_time: f.kickoffIso,
-                status: estado,
-                score,
-                venue: f.venue || null,
-                round_label: null,
-                points_autocalculated: true,
-                home_base_points: 0,
-                away_base_points: 0,
-                home_bonus_points: 0,
-                away_bonus_points: 0,
+                fase: formato === 'grupos' ? (f.pool ? 'grupos' : 'final') : null,
+                grupo: formato === 'grupos' ? f.pool : null,
+                fila: {
+                    external_id: externalId,
+                    home_club_id: home,
+                    away_club_id: away,
+                    date_time: f.kickoffIso,
+                    status: estado,
+                    score,
+                    venue: f.venue || null,
+                    round_label: formato === 'grupos' ? f.stageLabel : null,
+                    points_autocalculated: true,
+                    home_base_points: 0,
+                    away_base_points: 0,
+                    home_bonus_points: 0,
+                    away_bonus_points: 0,
+                },
             });
             plan.vinculados.push({ matchId: f.matchId, externalId, filaId: null, fixture: f });
             continue;
@@ -306,4 +370,89 @@ export function planSvns(input: {
     for (const e of libres) if (!usados.has(e.id)) plan.huerfanos.push(e.id);
     plan.equiposSinClub = [...sinClub];
     return plan;
+}
+
+// --------------------------------------------------------------------------
+// Clasificación final de una etapa con grupos y cuadro
+// --------------------------------------------------------------------------
+
+export interface FilaClasificacion {
+    clubId: string;
+    position: number;
+    /** Puntos de la tabla general que vale ese puesto. */
+    points: number;
+    played: number;
+    won: number;
+    drawn: number;
+    lost: number;
+    scored: number;
+    conceded: number;
+}
+
+/** El puesto que define una fase del cuadro: la final da 1.º y 2.º; "5th Place Play-Off", 5.º y 6.º. */
+export function puestoDeFase(fase: string): number | null {
+    const raw = fase.trim();
+    if (/^(?:cup\s+)?final$/i.test(raw)) return 1;
+    const m = raw.match(/^(\d+)(?:st|nd|rd|th)\s+Place\s+Play[-\s]?Off$/i);
+    return m ? Number(m[1]) : null;
+}
+
+/**
+ * La clasificación final de la etapa, por lo que ya se jugó: cada final y cada partido por
+ * un puesto reparte dos lugares (el ganador toma el de arriba, el perdedor el siguiente).
+ * Los equipos con el puesto todavía sin definir no tienen fila: la etapa se completa a
+ * medida que se juega y la tabla general solo suma lo decidido.
+ *
+ * Sale de lo que pasó en la cancha, no de una tabla aparte; los números de cada fila
+ * (jugados, ganados, tantos) salen de TODOS los partidos terminados de la etapa.
+ */
+export function clasificacionFinal(
+    fixtures: readonly WrFixture[],
+    resolverClub: (side: WrSide) => string | null,
+    puntosPorPuesto: readonly number[],
+): FilaClasificacion[] {
+    const puesto = new Map<string, number>();
+    for (const f of fixtures) {
+        if (f.pool || f.state !== 'final' || f.home.placeholder || f.away.placeholder) continue;
+        if (f.home.score === null || f.away.score === null || f.home.score === f.away.score) continue;
+        const base = puestoDeFase(f.phase);
+        const home = resolverClub(f.home);
+        const away = resolverClub(f.away);
+        if (base === null || !home || !away) continue;
+        const gana = f.home.score > f.away.score ? home : away;
+        const pierde = gana === home ? away : home;
+        puesto.set(gana, base);
+        puesto.set(pierde, base + 1);
+    }
+
+    const filas = new Map<string, FilaClasificacion>();
+    const fila = (clubId: string) => {
+        let r = filas.get(clubId);
+        if (!r) {
+            r = { clubId, position: puesto.get(clubId) ?? 0, points: 0, played: 0, won: 0, drawn: 0, lost: 0, scored: 0, conceded: 0 };
+            filas.set(clubId, r);
+        }
+        return r;
+    };
+    for (const f of fixtures) {
+        if (f.state !== 'final' || f.home.placeholder || f.away.placeholder) continue;
+        if (f.home.score === null || f.away.score === null) continue;
+        const home = resolverClub(f.home);
+        const away = resolverClub(f.away);
+        if (!home || !away) continue;
+        for (const [club, own, other] of [[home, f.home.score, f.away.score], [away, f.away.score, f.home.score]] as const) {
+            const r = fila(club);
+            r.played += 1;
+            r.scored += own;
+            r.conceded += other;
+            if (own > other) r.won += 1;
+            else if (own === other) r.drawn += 1;
+            else r.lost += 1;
+        }
+    }
+
+    return [...filas.values()]
+        .filter((r) => r.position > 0)
+        .map((r) => ({ ...r, points: puntosPorPuesto[r.position - 1] ?? 0 }))
+        .sort((a, b) => a.position - b.position);
 }
