@@ -150,8 +150,9 @@ const TOUCH_HELP_KEY = 'g22-rugby-seven-touch-help';
 const PORTRAIT_KEY = 'g22-rugby-seven-portrait';
 const SCHEME_KEY = 'g22-rugby-seven-touch-scheme';
 const STEP_PX = 18; // esquema B: desde acá un deslizamiento arriba o abajo es un paso de costado
-const STEP_MS = 280; // cuánto dura cada paso (a la velocidad de costado del jugador)
-const STEP_MAX_MS = 1100; // los pasos acumulados no pasan de esto
+const STEP_MS = 300; // cuánto dura cada paso
+const STEP_SPEED = 2.4; // el paso va a 2,4 veces la velocidad de costado normal: casi 2 m por deslizamiento
+const STEP_MAX_MS = 1000; // los pasos acumulados no pasan de esto
 const LONG_PASS_MS = 420; // esquema B: tocar y dejar quieto este tiempo es un salteo
 
 /** Cómo se juega con el dedo. "tap" (B): deslizar mueve, tocar pasa. "swipe" (A): mantener mueve, deslizar pasa. */
@@ -406,7 +407,9 @@ export default function MatchView({ cfg, onFinish, onQuit, musicSrc = null, font
                 const stepping = st.dir !== null && now < st.until;
                 const up = k.has(b.up) || (!attacking && k.has(b.passUp)) || touchMove.current.up || (stepping && st.dir === 'up');
                 const down = k.has(b.down) || (!attacking && k.has(b.passDown)) || touchMove.current.down || (stepping && st.dir === 'down');
-                match.setMove(up, down);
+                // Solo el paso del dedo, sin tecla ni dedo apoyado: va al doble de rápido, como el juke de Retro Bowl.
+                const keyed = k.has(b.up) || k.has(b.down) || k.has(b.passUp) || k.has(b.passDown) || touchMove.current.up || touchMove.current.down;
+                match.setMove(up, down, stepping && !keyed ? STEP_SPEED : 1);
                 match.update(dt);
             }
             if (ctx) match.render(ctx);

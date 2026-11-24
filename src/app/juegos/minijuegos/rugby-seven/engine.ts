@@ -471,7 +471,8 @@ export class SevenMatch {
     extra = false;
     overtime = false;
     ctrl: Player | null = null;
-    input = { up: false, down: false };
+    /** fast: multiplica la velocidad de costado (los pasos del dedo son un desplazamiento rápido). */
+    input = { up: false, down: false, fast: 1 };
     onEnd: ((score: [number, number]) => void) | null = null;
     /** Fuente del nombre sobre el jugador: la pixel del juego (la pasa la vista). */
     fontFamily = 'monospace';
@@ -542,9 +543,10 @@ export class SevenMatch {
 
     /* ---------------- entradas ---------------- */
 
-    setMove(up: boolean, down: boolean) {
+    setMove(up: boolean, down: boolean, fast = 1) {
         this.input.up = up;
         this.input.down = down;
+        this.input.fast = fast;
     }
 
     /** Toque nuevo de ↑/↓: amague si llevás la pelota. */
@@ -2165,7 +2167,7 @@ export class SevenMatch {
                 const f = this.fSpd(carrier);
                 const burst = (carrier.hit > 0 ? 9.2 : 7.2) * f;
                 carrier.vx = carrier.stun > 0 ? 3.5 : burst;
-                let vy = ((this.input.down ? 1 : 0) - (this.input.up ? 1 : 0)) * 6 * f;
+                let vy = ((this.input.down ? 1 : 0) - (this.input.up ? 1 : 0)) * 6 * f * this.input.fast;
                 if (this.kickCharge !== null) vy = 0; // cargando la patada, ↑/↓ mueven la mira, no al jugador
                 if (carrier.juke > 0.14) vy = carrier.jukeDir * 10;
                 carrier.vy = vy;
@@ -2510,7 +2512,7 @@ export class SevenMatch {
         const dx = focus.x + focus.vx * 0.2 - p.x;
         const f = this.fSpd(p);
         p.vx = Math.sign(dx) * Math.min(Math.abs(dx) * 3, 7.4 * f);
-        let vy = ((this.input.down ? 1 : 0) - (this.input.up ? 1 : 0)) * 6.6 * f;
+        let vy = ((this.input.down ? 1 : 0) - (this.input.up ? 1 : 0)) * 6.6 * f * this.input.fast;
         if (this.cfg.difficulty === 'muy-facil' && vy === 0) vy = clamp((focus.y - p.y) * 2, -4, 4);
         p.vy = vy;
     }
