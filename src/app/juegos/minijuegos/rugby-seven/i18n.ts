@@ -818,7 +818,8 @@ const EXACT: Record<string, string> = {
     campeón: 'champion',
     '· campeón': '· champion',
     // Controles del celular
-    'Deslizá el dedo hacia arriba o hacia abajo y mantenelo: el jugador va para ese lado.': 'Swipe up or down and hold: the player runs that way.',
+    'Corrés solo hacia adelante. Cada deslizamiento corto hacia arriba o hacia abajo es un paso para ese lado: cuantos más, más te corrés.':
+        'You run forward on your own. Each short swipe up or down is a step that way: the more swipes, the further you move.',
     'Tocá del lado derecho: arriba de la mitad, pase para arriba; abajo, para abajo.': 'Tap on the right side: above the middle, pass up; below, pass down.',
     'Tocá y dejá el dedo quieto un momento.': 'Tap and keep your finger still for a moment.',
     'Con la pelota, deslizá el dedo hacia adelante (a la derecha).': 'With the ball, swipe forward (to the right).',
@@ -1070,8 +1071,8 @@ const EXACT: Record<string, string> = {
     'Ahora pasala para abajo': 'Now pass it down',
     'Ahora pasala para arriba': 'Now pass it up',
     'Un amague es un cambio de paso rápido. Hacé tres.': 'A sidestep is a quick change of step. Do three.',
-    'Corrés solo hacia adelante. Deslizá el dedo hacia arriba o hacia abajo y mantenelo para ir para ese lado. Pasá por los conos.':
-        'You run forward on your own. Slide your finger up or down and hold it to go that way. Go through the cones.',
+    'Corrés solo hacia adelante. Cada deslizamiento corto hacia arriba o hacia abajo es un paso para ese lado: cuantos más hagas, más te corrés. Pasá por los conos.':
+        'You run forward on your own. Each short swipe up or down is a step that way: the more you do, the further you move. Go through the cones.',
     'Corrés solo hacia adelante. Mantené el dedo arriba o abajo de la mitad de la cancha para ir para ese lado. Pasá por los conos.':
         'You run forward on your own. Hold your finger above or below the middle of the field to go that way. Go through the cones.',
     'Tocá la cancha: arriba de la mitad, pase para arriba; abajo, para abajo. Pasala una vez para cada lado.':
@@ -1079,8 +1080,8 @@ const EXACT: Record<string, string> = {
     'Deslizá rápido hacia arriba o hacia abajo para pasar para ese lado. Pasala una vez para cada lado.': 'Swipe quickly up or down to pass that way. Pass once to each side.',
     'Te sale un defensor. Justo antes del choque, deslizá el dedo hacia adelante (a la derecha) para romper el tackle. Rompelo dos veces.':
         'A defender comes at you. Just before contact, slide your finger forward (to the right) to break the tackle. Break it twice.',
-    'Ahora defendés. Seguilo arrastrando el dedo arriba o abajo y, cuando lo tengas cerca, deslizá rápido hacia adelante para tirarte. Tacklealo dos veces.':
-        'Now you defend. Follow him by dragging your finger up or down and, when he is close, swipe quickly forward to dive in. Tackle him twice.',
+    'Ahora defendés. Seguilo con deslizamientos cortos arriba o abajo y, cuando lo tengas cerca, deslizá rápido hacia adelante para tirarte. Tacklealo dos veces.':
+        'Now you defend. Follow him with short swipes up or down and, when he is close, swipe quickly forward to dive in. Tackle him twice.',
     'Ahora defendés. Seguilo manteniendo el dedo arriba o abajo y, cuando lo tengas cerca, deslizá rápido hacia adelante para tirarte. Tacklealo dos veces.':
         'Now you defend. Follow him by holding your finger up or down and, when he is close, swipe quickly forward to dive in. Tackle him twice.',
     'Te tacklearon y se arma el ruck. Tocá la pantalla rápido para quedarte con la pelota. Ganalo dos veces.': 'You were tackled and the ruck forms. Tap the screen fast to keep the ball. Win it twice.',

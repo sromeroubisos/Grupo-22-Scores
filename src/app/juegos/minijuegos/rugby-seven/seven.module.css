@@ -4186,7 +4186,7 @@
     animation-name: var(--ripple, none);
 }
 
-.g-move-tap { animation-name: gDrag; }
+.g-move-tap { animation-name: gSteps; animation-duration: 1.8s; }
 .gestureHand { opacity: 1; }
 .g-move-swipe { animation-name: gHold; }
 .g-pass-tap { animation-name: gTap; --ripple: rTap; }
@@ -4206,6 +4206,20 @@
     45%, 90% { transform: translate(0, var(--dy)); opacity: 1; }
     96% { transform: translate(0, var(--dy)); opacity: 0.2; }
     100% { transform: translate(0, 0); opacity: 1; }
+}
+
+/* Tres deslizamientos cortos hacia el objetivo: cada uno es un paso de costado. */
+@keyframes gSteps {
+    0%, 8% { transform: translate(0, 0); opacity: 1; }
+    18% { transform: translate(0, calc(var(--dy) * 0.6)); opacity: 1; }
+    22% { transform: translate(0, calc(var(--dy) * 0.6)); opacity: 0.2; }
+    26%, 34% { transform: translate(0, 0); opacity: 1; }
+    44% { transform: translate(0, calc(var(--dy) * 0.6)); opacity: 1; }
+    48% { transform: translate(0, calc(var(--dy) * 0.6)); opacity: 0.2; }
+    52%, 60% { transform: translate(0, 0); opacity: 1; }
+    70% { transform: translate(0, calc(var(--dy) * 0.6)); opacity: 1; }
+    74% { transform: translate(0, calc(var(--dy) * 0.6)); opacity: 0.2; }
+    78%, 100% { transform: translate(0, 0); opacity: 1; }
 }
 
 /* Mantiene el dedo del lado hacia donde tiene que ir, apretando. */

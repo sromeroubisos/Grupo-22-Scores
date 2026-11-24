@@ -116,7 +116,7 @@ function drillText(id: DrillId, touch: boolean, scheme: TouchScheme, b: Bindings
     const tap = scheme === 'tap';
     const t: Record<DrillId, string> = {
         move: tap
-            ? 'Corrés solo hacia adelante. Deslizá el dedo hacia arriba o hacia abajo y mantenelo para ir para ese lado. Pasá por los conos.'
+            ? 'Corrés solo hacia adelante. Cada deslizamiento corto hacia arriba o hacia abajo es un paso para ese lado: cuantos más hagas, más te corrés. Pasá por los conos.'
             : 'Corrés solo hacia adelante. Mantené el dedo arriba o abajo de la mitad de la cancha para ir para ese lado. Pasá por los conos.',
         juke: 'Un amague es un cambio de paso rápido. Hacé tres.',
         pass: tap
@@ -124,7 +124,7 @@ function drillText(id: DrillId, touch: boolean, scheme: TouchScheme, b: Bindings
             : 'Deslizá rápido hacia arriba o hacia abajo para pasar para ese lado. Pasala una vez para cada lado.',
         hit: 'Te sale un defensor. Justo antes del choque, deslizá el dedo hacia adelante (a la derecha) para romper el tackle. Rompelo dos veces.',
         tackle: tap
-            ? 'Ahora defendés. Seguilo arrastrando el dedo arriba o abajo y, cuando lo tengas cerca, deslizá rápido hacia adelante para tirarte. Tacklealo dos veces.'
+            ? 'Ahora defendés. Seguilo con deslizamientos cortos arriba o abajo y, cuando lo tengas cerca, deslizá rápido hacia adelante para tirarte. Tacklealo dos veces.'
             : 'Ahora defendés. Seguilo manteniendo el dedo arriba o abajo y, cuando lo tengas cerca, deslizá rápido hacia adelante para tirarte. Tacklealo dos veces.',
         ruck: 'Te tacklearon y se arma el ruck. Tocá la pantalla rápido para quedarte con la pelota. Ganalo dos veces.',
         kick: 'Apoyá el dedo en la franja izquierda y dejalo apretado, sin tocar y soltar: aparece la mira. Sin levantarlo, movelo arriba o abajo para apuntar. Soltá para patear. Pateá dos veces.',
@@ -149,7 +149,9 @@ const DOUBLE_TAP_MS = 320;
 const TOUCH_HELP_KEY = 'g22-rugby-seven-touch-help';
 const PORTRAIT_KEY = 'g22-rugby-seven-portrait';
 const SCHEME_KEY = 'g22-rugby-seven-touch-scheme';
-const DRAG_PX = 12; // esquema B: desde acá el dedo que se arrastra mueve al jugador
+const STEP_PX = 18; // esquema B: desde acá un deslizamiento arriba o abajo es un paso de costado
+const STEP_MS = 280; // cuánto dura cada paso (a la velocidad de costado del jugador)
+const STEP_MAX_MS = 1100; // los pasos acumulados no pasan de esto
 const LONG_PASS_MS = 420; // esquema B: tocar y dejar quieto este tiempo es un salteo
 
 /** Cómo se juega con el dedo. "tap" (B): deslizar mueve, tocar pasa. "swipe" (A): mantener mueve, deslizar pasa. */
@@ -167,7 +169,7 @@ interface Finger {
 
 const TOUCH_GESTURES: Record<TouchScheme, [string, string][]> = {
     tap: [
-        ['Moverte', 'Deslizá el dedo hacia arriba o hacia abajo y mantenelo: el jugador va para ese lado.'],
+        ['Moverte', 'Corrés solo hacia adelante. Cada deslizamiento corto hacia arriba o hacia abajo es un paso para ese lado: cuantos más, más te corrés.'],
         ['Pase', 'Tocá del lado derecho: arriba de la mitad, pase para arriba; abajo, para abajo.'],
         ['Salteo', 'Tocá y dejá el dedo quieto un momento.'],
         ['Chocar', 'Con la pelota, deslizá el dedo hacia adelante (a la derecha).'],
@@ -261,6 +263,8 @@ export default function MatchView({ cfg, onFinish, onQuit, musicSrc = null, font
     const matchRef = useRef<SevenMatch | null>(null);
     const keys = useRef(new Set<string>());
     const touchMove = useRef({ up: false, down: false });
+    /** Esquema B: los pasos de costado que quedan por dar (dirección y hasta cuándo, en performance.now). */
+    const touchStep = useRef<{ dir: 'up' | 'down' | null; until: number }>({ dir: null, until: 0 });
     const pausedRef = useRef(false);
     const passDown = useRef<{ w: number | null; s: number | null }>({ w: null, s: null });
     const finishRef = useRef(onFinish);
@@ -398,8 +402,10 @@ export default function MatchView({ cfg, onFinish, onQuit, musicSrc = null, font
                 const k = keys.current;
                 const b = bindRef.current;
                 // Moverse. Defendiendo, las teclas de pase también mueven (no hay pase que dar).
-                const up = k.has(b.up) || (!attacking && k.has(b.passUp)) || touchMove.current.up;
-                const down = k.has(b.down) || (!attacking && k.has(b.passDown)) || touchMove.current.down;
+                const st = touchStep.current;
+                const stepping = st.dir !== null && now < st.until;
+                const up = k.has(b.up) || (!attacking && k.has(b.passUp)) || touchMove.current.up || (stepping && st.dir === 'up');
+                const down = k.has(b.down) || (!attacking && k.has(b.passDown)) || touchMove.current.down || (stepping && st.dir === 'down');
                 match.setMove(up, down);
                 match.update(dt);
             }
@@ -537,6 +543,15 @@ export default function MatchView({ cfg, onFinish, onQuit, musicSrc = null, font
         }
         touchMove.current = { up, down };
     };
+    /** Un paso de costado (esquema B). Para el mismo lado se suma al que falta; para el otro, lo reemplaza. */
+    const addStep = (dir: 'up' | 'down') => {
+        const now = performance.now();
+        const st = touchStep.current;
+        const left = st.dir === dir ? Math.max(0, st.until - now) : 0;
+        touchStep.current = { dir, until: now + Math.min(STEP_MAX_MS, left + STEP_MS) };
+        // Con la pelota, el paso arranca con un amague: el cambio de ritmo que deja al defensor.
+        matchRef.current?.juke(dir === 'up' ? -1 : 1);
+    };
     // Con la cancha girada 90° (celular parado, modo "girar la cancha"), lo que en la pantalla es
     // abajo, en la cancha es la derecha: los gestos se rotan con ella.
     const rotatedRef = useRef(false);
@@ -618,12 +633,11 @@ export default function MatchView({ cfg, onFinish, onQuit, musicSrc = null, font
                 matchRef.current?.hit();
                 return;
             }
-            // Arrastrar arriba o abajo: moverse para ese lado mientras el dedo siga ahí.
-            const dir = dy < -DRAG_PX ? 'up' : dy > DRAG_PX ? 'down' : f.kind === 'move' ? f.dir : 'none';
-            if (dir !== 'none' && (f.kind !== 'move' || dir !== f.dir)) {
-                f.kind = 'move';
-                f.dir = dir;
-                syncTouchMove();
+            // Como en Retro Bowl: cada deslizamiento corto arriba o abajo es un paso de costado.
+            // Un dedo da un paso; para correrse más, más deslizamientos (se acumulan).
+            if (Math.abs(dy) > STEP_PX && Math.abs(dy) > Math.abs(dx)) {
+                f.kind = 'done';
+                addStep(dy < 0 ? 'up' : 'down');
             }
             return;
         }
