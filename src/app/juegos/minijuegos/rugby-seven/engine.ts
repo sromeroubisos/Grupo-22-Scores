@@ -274,8 +274,9 @@ function withRating(base: DiffParams, cpuRating: number, userRating: number): Di
     return {
         ...base,
         cpuRun: base.cpuRun + f * 0.9,
-        cpuDefRun: base.cpuDefRun + f * 0.8,
-        cpuTackle: clamp(base.cpuTackle * (1 + f * 0.35), 0.15, 0.96),
+        cpuDefRun: base.cpuDefRun + f * 0.45, // la velocidad personal ya sale de cada jugador; acá solo un poco
+        // Suave: tu ventaja ya entra por las skills de cada uno (edge en contact); si pesa dos veces, 4★ contra 3★ era un paseo.
+        cpuTackle: clamp(base.cpuTackle * (1 + f * 0.18), 0.15, 0.96),
         cpuBreak: clamp(base.cpuBreak * (1 + f * 0.8), 0.03, 0.9),
         breakHit: clamp(base.breakHit * (1 - f * 0.55), 0.1, 0.94),
         dodge: clamp(base.dodge * (1 - f * 0.55), 0.1, 0.94),
@@ -477,6 +478,12 @@ export class SevenMatch {
     ctrl: Player | null = null;
     /** fast: multiplica la velocidad de costado (los pasos del dedo son un desplazamiento rápido). */
     input = { up: false, down: false, fast: 1 };
+    /**
+     * Hacia dónde va tu portador de costado, promediado en ~medio segundo. Los defensores lo leen con
+     * esto y no con la velocidad del instante: si no, un paso corto del dedo los mandaba a cortar a
+     * un lugar a 20 m y se quedaban sin tacklear.
+     */
+    private userVyAvg = 0;
     onEnd: ((score: [number, number]) => void) | null = null;
     /** Fuente del nombre sobre el jugador: la pixel del juego (la pasa la vista). */
     fontFamily = 'monospace';
@@ -2068,8 +2075,9 @@ export class SevenMatch {
     private leadPoint(p: Player, q: Player, speed: number): { x: number; y: number } {
         const rx = q.x - p.x;
         const ry = q.y - p.y;
-        const a = q.vx * q.vx + q.vy * q.vy - speed * speed;
-        const b = 2 * (rx * q.vx + ry * q.vy);
+        const qvy = q.side === 0 && q === this.ball.holder ? this.userVyAvg : q.vy;
+        const a = q.vx * q.vx + qvy * qvy - speed * speed;
+        const b = 2 * (rx * q.vx + ry * qvy);
         const c = rx * rx + ry * ry;
         let t = 1.5;
         if (Math.abs(a) < 1e-6) {
@@ -2083,7 +2091,7 @@ export class SevenMatch {
             }
         }
         t = clamp(t, 0, 3);
-        return { x: clamp(q.x + q.vx * t, 0.5, 119.5), y: clamp(q.y + q.vy * t, 1, WIDTH - 1) };
+        return { x: clamp(q.x + q.vx * t, 0.5, 119.5), y: clamp(q.y + qvy * t, 1, WIDTH - 1) };
     }
 
     /**
@@ -2217,6 +2225,21 @@ export class SevenMatch {
         // La defensa rival suma puntos de velocidad PERSONAL según la dificultad (cada uno sobre su propio
         // nivel: un equipo flojo sigue siendo más lento que el tuyo). Los 0,028 son lo que vale un punto en fSpd.
         const defSpeed = defSide === 1 ? D.cpuDefRun * (1 + CPU_DEF_SPD_PTS[this.cfg.difficulty] * 0.028) * CPU_DEF_BOOST[this.cfg.difficulty] : 7.0;
+        /*
+         * Urgencia: si tu portador rompió la línea (no queda ningún rival adelante cerca de él), la marca
+         * deja de importar. Hasta dos que todavía lo pueden cortar (no los pasó de largo) la sueltan y
+         * salen a cerrarlo en diagonal, apurados. Antes de romper la línea, cada uno sigue con su marca.
+         */
+        const cover = new Set<Player>();
+        if (defSide === 1 && carrier && carrier === focus && this.cfg.difficulty !== 'muy-facil') {
+            const broken = !defs.some((o) => !o.fb && o.down <= 0 && (o.x - focus.x) * d > 0 && Math.abs(o.y - focus.y) < 6);
+            if (broken) {
+                defs.filter((o) => o !== pursuer && !o.fb && o.down <= 0 && (o.x - focus.x) * d > -3)
+                    .sort((a, b) => Math.abs(a.y - focus.y) - Math.abs(b.y - focus.y) || a.i - b.i)
+                    .slice(0, 2)
+                    .forEach((o) => cover.add(o));
+            }
+        }
         for (const p of defs) {
             if (p.down > 0) {
                 p.vx = 0;
@@ -2238,7 +2261,7 @@ export class SevenMatch {
                     this.step(p, aim.x, aim.y, sp);
                 } else {
                     // Al fondo, corriéndose hacia donde apunta el portador.
-                    const ahead = focus.y + focus.vy * 1.2;
+                    const ahead = focus.y + (focus.side === 0 && focus === carrier ? this.userVyAvg : focus.vy) * 1.2;
                     this.step(p, clamp(focus.x + d * 20, TRY_L - 5, TRY_R + 5), clamp((ahead + WIDTH / 2) / 2, 6, WIDTH - 6), defSpeed * 0.9);
                 }
                 continue;
@@ -2251,9 +2274,9 @@ export class SevenMatch {
                     continue;
                 }
             }
-            const chase = p === pursuer || (p.mark === focus && pd > 3 && this.cfg.difficulty !== 'muy-facil');
+            const chase = p === pursuer || cover.has(p) || (p.mark === focus && pd > 3 && this.cfg.difficulty !== 'muy-facil');
             if (chase) {
-                const sp = defSide === 0 ? 6.4 : defSpeed;
+                const sp = defSide === 0 ? 6.4 : cover.has(p) ? defSpeed * 1.05 : defSpeed;
                 const aim = this.leadPoint(p, focus, sp);
                 this.step(p, aim.x, aim.y, sp);
             } else {
@@ -2262,6 +2285,9 @@ export class SevenMatch {
                 this.step(p, lineX, mk.y, defSpeed * 0.85);
             }
         }
+
+        if (carrier && carrier.side === 0) this.userVyAvg += (carrier.vy - this.userVyAvg) * Math.min(1, dt / 0.5);
+        else this.userVyAvg = 0;
 
         // ---- integrar ----
         for (const p of this.players) {
@@ -2692,7 +2718,8 @@ export class SevenMatch {
                 tackled = rnd() >= pr(D.dodge * (this.fSpd(c) / this.fSpd(df)) ** 2);
                 if (!tackled) label = 'AMAGUE';
             } else {
-                tackled = rnd() < pr(D.cpuTackle * edge);
+                // La diferencia de skills cuenta, pero no tanto que a tu crack no lo baje nadie.
+                tackled = rnd() < pr(D.cpuTackle * Math.sqrt(edge));
                 if (!tackled) label = 'SE SOLTÓ';
             }
         } else {
