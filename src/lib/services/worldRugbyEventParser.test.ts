@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
+    SVNS_DB_STAGES,
     WR_EVENTS,
     WR_TTL_HOT_SECONDS,
     WR_TTL_IDLE_SECONDS,
@@ -9,6 +10,7 @@ import {
     applyWrManualResults,
     classifyWrStatus,
     computeWrPoolTables,
+    isWorldRugbyCopyLeague,
     parseWrManualResult,
     parseWrMatchId,
     parseWrSchedule,
@@ -540,4 +542,106 @@ test('etiquetas: una por puesto, sin fase ni grupo, hacia el cruce del 17/10', (
     ]);
     assert.ok(labels.every((l) => l.phase_id === null && l.group_id === null && l.club_id === null));
     assert.equal(new Set(labels.map((l) => l.id)).size, 4);
+});
+
+// --------------------------------------------------------------------------
+// Circuito SVNS
+// --------------------------------------------------------------------------
+
+const DUBAI_M = wrEventByTournamentId('wr-svns-2027-dubai-m');
+const DUBAI_3_M = SVNS_DB_STAGES.find((event) => event.tournamentId === 'wr-svns3-2027-dubai-m');
+
+function svnsMatch(id: string, phase: string, home: string, away: string, status: string, scores: [number, number], millis: number) {
+    return {
+        matchId: id,
+        description: 'Match 1',
+        eventPhase: phase,
+        venue: { name: 'The Sevens Stadium', city: 'Dubai' },
+        time: { millis, gmtOffset: 4 },
+        teams: [{ id: home, name: `${home} 7s` }, { id: away, name: `${away} 7s` }],
+        scores,
+        status,
+        clock: { secs: 0 },
+    };
+}
+
+test('SVNS: el registro trae el circuito con ids únicos y sin repetir torneo', () => {
+    const events = WR_EVENTS.filter((event) => event.scoring === 'sevens');
+    assert.equal(events.length, 38);
+    assert.equal(new Set(events.map((event) => event.tournamentId)).size, 38);
+    assert.equal(new Set(events.map((event) => event.eventId)).size, 38);
+    assert.equal(new Set(WR_EVENTS.map((event) => event.url)).size, WR_EVENTS.length);
+    assert.ok(events.every((event) => event.window && event.tournamentId.startsWith('wr-')));
+    assert.equal(DUBAI_M?.eventId, '92263486-d635-4cd8-866d-ac0563c9250e');
+    assert.equal(wrEventByTournamentId('wr-svns-2027-dubai-w')?.gender, 'Femenino');
+});
+
+test('SVNS: la copia de FlashScore se reconoce por el nombre de la liga', () => {
+    assert.equal(isWorldRugbyCopyLeague('WORLD: HSBC SVNS'), true);
+    assert.equal(isWorldRugbyCopyLeague('WORLD: SVNS Women'), true);
+    assert.equal(isWorldRugbyCopyLeague('WORLD: Sevens World Series'), true);
+    assert.equal(isWorldRugbyCopyLeague('FRANCE: Supersevens'), false);
+    assert.equal(isWorldRugbyCopyLeague('WORLD: United Rugby Championship'), false);
+    assert.equal(isWorldRugbyCopyLeague(null), false);
+});
+
+test('SVNS: los equipos pierden el "7s", el grupo sale de la fase y los lugares tienen etiqueta', () => {
+    assert.ok(DUBAI_M);
+    const json = {
+        matches: [
+            svnsMatch('b493d473-5f55-49de-b6ca-ca2d0f24c4c6', 'Pool A', 'Australia', 'USA', 'U', [0, 0], 1795851000000),
+            {
+                ...svnsMatch('c493d473-5f55-49de-b6ca-ca2d0f24c4c6', 'Cup Semi Finals', 'Argentina', 'Fiji', 'U', [0, 0], 1795937400000),
+                teams: [{ id: '1', name: '1st Pool A' }, { id: '2', name: 'Winner W13' }],
+            },
+        ],
+    };
+    const [group, cup] = parseWrSchedule(json, DUBAI_M, 0);
+    assert.equal(group.home.name, 'Australia');
+    assert.equal(group.away.country, 'USA');
+    assert.equal(group.pool, 'A');
+    assert.equal(cup.pool, null);
+    assert.equal(cup.home.name, '1.º Grupo A');
+    assert.equal(cup.away.name, 'Ganador partido 13');
+    assert.equal(cup.stageLabel, 'Semifinal · Copa');
+});
+
+test('SVNS 3: un solo grupo ("Pool Pool") es de todos contra todos', () => {
+    assert.ok(DUBAI_3_M);
+    const json = { matches: [svnsMatch('d493d473-5f55-49de-b6ca-ca2d0f24c4c6', 'Pool Pool', 'Italy', 'Chile', 'U', [0, 0], 1795764000000)] };
+    const [fixture] = parseWrSchedule(json, DUBAI_3_M, 0);
+    assert.equal(fixture.pool, 'A');
+});
+
+test('SVNS: la tabla calculada da 3 el triunfo, 2 el empate, 1 la derrota y ningún bonus', () => {
+    assert.ok(DUBAI_M);
+    const json = {
+        matches: [
+            svnsMatch('b493d473-5f55-49de-b6ca-ca2d0f24c4c6', 'Pool A', 'Australia', 'USA', 'C', [38, 7], 1795851000000),
+            svnsMatch('c493d473-5f55-49de-b6ca-ca2d0f24c4c6', 'Pool A', 'Australia', 'Fiji', 'C', [14, 14], 1795854000000),
+        ],
+    };
+    const fixtures = parseWrSchedule(json, DUBAI_M, 1795900000000);
+    // Con tries de sobra (6 y 0): en seven no cuentan para el bonus.
+    const tries = new Map(fixtures.map((fixture) => [fixture.matchId, { home: 6, away: 0 }] as const));
+    const [pool] = computeWrPoolTables(fixtures, tries, new Map(), 'sevens');
+    const points = Object.fromEntries(pool.rows.map((row) => [row.country, row.points]));
+    assert.deepEqual(points, { Australia: 5, USA: 1, Fiji: 2 });
+    assert.ok(pool.rows.every((row) => row.bonusPoints === 0));
+});
+
+test('SVNS: las fases de copa salen en castellano', () => {
+    assert.equal(wrPhaseLabel('Cup Final'), 'Final · Copa');
+    assert.equal(wrPhaseLabel('Challenge Semi Finals'), 'Semifinal · Challenge');
+    assert.equal(wrPhaseLabel('Plate Quarter Finals'), 'Cuartos de final · Plata');
+    assert.equal(wrPlaceholderLabel('Loser M14'), 'Perdedor partido 14');
+    assert.equal(wrPlaceholderLabel('Winner of Match 3'), 'Ganador partido 3');
+    assert.equal(wrPlaceholderLabel('Argentina 7s'), null);
+});
+
+test("SVNS: las etapas de la base no se repiten en el feed sin base", () => {
+    assert.equal(SVNS_DB_STAGES.length, 14);
+    const enFeed = new Set(WR_EVENTS.map((event) => event.eventId));
+    assert.ok(SVNS_DB_STAGES.every((event) => !enFeed.has(event.eventId)));
+    assert.ok(SVNS_DB_STAGES.every((event) => /^wr-svns[23]-/.test(event.tournamentId)));
 });

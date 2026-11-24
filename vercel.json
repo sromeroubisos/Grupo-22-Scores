@@ -136,6 +136,10 @@
     {
       "path": "/api/cron/rugbyeurope-sync",
       "schedule": "*/10 6-23 * * *"
+    },
+    {
+      "path": "/api/cron/worldrugby-sync",
+      "schedule": "*/5 * * * *"
     }
   ]
 }

@@ -192,9 +192,28 @@ async function getManualResults(): Promise<Map<string, WrManualResult>> {
     return manual;
 }
 
+const MS_DAY = 86_400_000;
+
+/** AAAA-MM-DD ± `days`, en UTC puro: es una clave de calendario, no un instante. */
+function shiftDayKey(dayKey: string, days: number): string {
+    return new Date(Date.parse(`${dayKey}T00:00:00Z`) + days * MS_DAY).toISOString().slice(0, 10);
+}
+
+/**
+ * ¿Hay que pedirle el fixture a este torneo para esos días? Un torneo con
+ * ventana (cada etapa del circuito SVNS) solo se consulta cerca de sus fechas,
+ * con un día de margen por el huso. Sin ventana, o sin días, se consulta siempre.
+ */
+function isEventNear(event: WrEventDef, dayKeys?: readonly string[]): boolean {
+    if (!event.window || !dayKeys || dayKeys.length === 0) return true;
+    const from = shiftDayKey(event.window.start, -1);
+    const to = shiftDayKey(event.window.end, 1);
+    return dayKeys.some((key) => key >= from && key <= to);
+}
+
 /** Todos los torneos a la vez. Uno caído no se lleva a los demás. */
-async function getAllFixtures(): Promise<{ event: WrEventDef; fixture: WrFixture }[]> {
-    const results = await Promise.all(WR_EVENTS.map(async (event) => {
+async function getAllFixtures(dayKeys?: readonly string[]): Promise<{ event: WrEventDef; fixture: WrFixture }[]> {
+    const results = await Promise.all(WR_EVENTS.filter((event) => isEventNear(event, dayKeys)).map(async (event) => {
         try {
             return (await getEventFixtures(event)).map((fixture) => ({ event, fixture }));
         } catch (error) {
@@ -237,7 +256,9 @@ async function getSquads(event: WrEventDef): Promise<Map<string, WrPerson[]>> {
  * Mundial Juvenil 2026: los cuatro grupos dan igual que la oficial).
  */
 async function getPoolTables(event: WrEventDef, fixtures: WrFixture[]): Promise<WrPoolTable[]> {
-    const finished = fixtures.filter((fixture) => fixture.pool && fixture.state === 'final');
+    const sevens = event.scoring === 'sevens';
+    // En seven no hay bonus: los tries no cambian la tabla y no se piden.
+    const finished = sevens ? [] : fixtures.filter((fixture) => fixture.pool && fixture.state === 'final');
     const [official, tries] = await Promise.all([
         readResource(`${CACHE_PREFIX}:standings:${event.eventId}`, `/event/${event.eventId}/standings`, () => TTL_STANDINGS_SECONDS)
             .then((json) => parseWrStandings(json, event))
@@ -252,7 +273,7 @@ async function getPoolTables(event: WrEventDef, fixtures: WrFixture[]): Promise<
     for (const [matchId, value] of tries) if (value) triesByMatch.set(matchId, value);
     const bonusByMatch = new Map<string, { home: boolean; away: boolean }>();
     for (const fixture of finished) if (fixture.manualTryBonus) bonusByMatch.set(fixture.matchId, fixture.manualTryBonus);
-    return pickWrStandings(official, computeWrPoolTables(fixtures, triesByMatch, bonusByMatch)).tables;
+    return pickWrStandings(official, computeWrPoolTables(fixtures, triesByMatch, bonusByMatch, event.scoring)).tables;
 }
 
 // --------------------------------------------------------------------------
@@ -337,7 +358,7 @@ export async function getWorldRugbyMatches(
     const timeZone = options?.timeZone;
     const targetDateKey = options?.targetDateKey || formatDateKey(date, timeZone);
 
-    return (await getAllFixtures())
+    return (await getAllFixtures([targetDateKey]))
         .map(({ event, fixture }) => toAppMatch(event, fixture))
         .filter((match): match is Match => match !== null)
         .filter((match) => match.scheduledAt !== null && formatDateKey(match.scheduledAt, timeZone) === targetDateKey);
@@ -348,13 +369,14 @@ export async function getWorldRugbyMatches(
  * escrito a mano. Es una compuerta: si la API no contesta, el feed sigue.
  */
 export async function hasWorldRugbyMatchesOnDate(targetDateKey: string, timeZone?: string): Promise<boolean> {
-    const fixtures = await getAllFixtures().catch(() => []);
+    const fixtures = await getAllFixtures([targetDateKey]).catch(() => []);
     return fixtures.some(({ fixture }) =>
         fixture.kickoffMs !== null && formatDateKey(new Date(fixture.kickoffMs), timeZone) === targetDateKey);
 }
 
 export async function getWorldRugbyLiveMatches(): Promise<Match[]> {
-    return (await getAllFixtures())
+    const today = new Date().toISOString().slice(0, 10);
+    return (await getAllFixtures([shiftDayKey(today, -1), today, shiftDayKey(today, 1)]))
         .filter(({ fixture }) => fixture.state === 'live')
         .map(({ event, fixture }) => toAppMatch(event, fixture))
         .filter((match): match is Match => match !== null);
@@ -484,11 +506,14 @@ function toStandingsRow(row: WrStandingRow, position: number, groupName: string)
     };
 }
 
-function toStandingsGroups(tables: WrPoolTable[]) {
+function toStandingsGroups(tables: WrPoolTable[], event: WrEventDef) {
+    const note = event.scoring === 'sevens'
+        ? 'Triunfo 3, empate 2, derrota 1.'
+        : 'Triunfo 4, empate 2. Bonus: 1 por cuatro tries o más y 1 por perder por siete o menos.';
     return tables.map((table) => ({
         group_name: table.name,
         name: table.name,
-        note: 'Triunfo 4, empate 2. Bonus: 1 por cuatro tries o más y 1 por perder por siete o menos.',
+        note,
         rows: table.rows.map((row, index) => toStandingsRow(row, index + 1, table.name)),
     }));
 }
@@ -503,7 +528,7 @@ function buildTournamentDetails(event: WrEventDef) {
         season: event.season,
         name: event.name,
         full_name: event.fullName,
-        gender: 'Masculino',
+        gender: event.gender ?? 'Masculino',
         country: { name: 'Internacional' },
         sport: { sport_id: 'rugby', name: 'Rugby' },
         logo: event.logo,
@@ -528,7 +553,7 @@ export async function getWorldRugbyTournamentBundle(event: WrEventDef) {
         .sort((left, right) => (left.view.timestamp || 0) - (right.view.timestamp || 0))
         .map(({ view }) => view);
 
-    const standings = toStandingsGroups(await getPoolTables(event, allFixtures).catch(() => [] as WrPoolTable[]));
+    const standings = toStandingsGroups(await getPoolTables(event, allFixtures).catch(() => [] as WrPoolTable[]), event);
 
     return {
         ids: {

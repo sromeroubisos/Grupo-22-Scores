@@ -24,6 +24,7 @@ import {
     getUltimateSevensMatches,
     hasUltimateSevensMatchesOnDate,
 } from '@/lib/services/ultimateSevens';
+import { isWorldRugbyCopyLeague } from '@/lib/services/worldRugbyEventParser';
 import {
     getWorldRugbyLiveMatches,
     getWorldRugbyMatches,
@@ -368,6 +369,14 @@ function mergeOdesurMatches(odesur: Match[], others: Match[]): Match[] {
     return [...odesur, ...others.filter((match) => !isOdesurCopyLeague(match.leagueName))];
 }
 
+/**
+ * El circuito SVNS sale de World Rugby (llega antes que FlashScore): de
+ * FlashScore se descarta SU copia, para que no entre ni duplicada ni tarde.
+ */
+function dropWorldRugbyCopies(matches: Match[]): Match[] {
+    return matches.filter((match) => !isWorldRugbyCopyLeague(match.leagueName));
+}
+
 /** ¿El deporte tiene algún proveedor virtual (seven o Juegos Suramericanos)? */
 export function wantsVirtualProviders(sportId: string): boolean {
     return wantsVirtualRugbySevens(sportId) || wantsOdesurMerge(sportId);
@@ -682,7 +691,7 @@ async function getProviderDailyMatches(
 
         if (flashScoreError && sevens.length === 0) throw flashScoreError;
 
-        return [...sevens, ...flashScore];
+        return [...sevens, ...dropWorldRugbyCopies(flashScore)];
     }
 
     return fetchFlashScoreDailyMatches(date, sportId, options);
@@ -843,7 +852,7 @@ async function getProviderLiveMatches(sportId: string): Promise<Match[]> {
             getFlashScoreLiveMatchesRaw(sportId).catch(() => [] as Match[]),
         ]);
 
-        return [...sevens, ...flashScore];
+        return [...sevens, ...dropWorldRugbyCopies(flashScore)];
     }
 
     return getFlashScoreLiveMatchesRaw(sportId);

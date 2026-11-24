@@ -39,6 +39,7 @@ import {
 } from '@/lib/server/externalTournamentOverrides';
 import { isMissingColumnError, isMissingTableError } from '@/lib/utils/supabaseSchema';
 import { isBlockedTournamentId } from '@/lib/utils/blockedTournaments';
+import { isWorldRugbyCopyLeague } from '@/lib/services/worldRugbyEventParser';
 import { buildClubLogoProxyUrl, resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 import { isTournamentVisibleToPublic } from '@/lib/tournamentReview';
 import {
@@ -1827,6 +1828,9 @@ async function computeMatchesPayload(
                     // todavía no cubrió se serviría "desde caché" con el derrame
                     // del día anterior.
                     const rowsForDate = dropShadowedArchiveCacheRows(cachedRows).filter((row) => {
+                        // El circuito SVNS sale de World Rugby: la copia que
+                        // FlashScore dejó en la caché no se sirve.
+                        if (String(row.tournament_id || '').startsWith('fs-') && isWorldRugbyCopyLeague(row.tournament_name)) return false;
                         const rowDate = new Date(row.date_time);
                         return !Number.isNaN(rowDate.getTime()) && formatDateKey(rowDate, timeZone) === date;
                     });

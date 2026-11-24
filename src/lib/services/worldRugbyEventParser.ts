@@ -59,7 +59,86 @@ export interface WrEventDef {
     /** Grupo de cada selección, por el nombre en inglés de World Rugby sin la categoría. */
     pools: Record<string, readonly string[]>;
     siteUrl: string;
+    /**
+     * Reglamento de la tabla calculada. `xv` (por defecto): 4/2 y bonus. `sevens`:
+     * las etapas del circuito SVNS, 3 el triunfo, 2 el empate, 1 la derrota y
+     * sin bonus.
+     */
+    scoring?: 'xv' | 'sevens';
+    gender?: 'Masculino' | 'Femenino';
+    /**
+     * Días (AAAA-MM-DD) en que el torneo juega. Sin ventana, el torneo se pide
+     * siempre; con ella, solo cerca de sus fechas, así un circuito de 26 etapas
+     * no abre 26 pedidos por cada día del feed.
+     */
+    window?: { start: string; end: string };
 }
+
+/**
+ * ¿Es la copia que publica FlashScore de un torneo que ahora sale de World
+ * Rugby? Con los dos adentro cada partido saldría dos veces, uno de ellos con
+ * horas de atraso. De FlashScore se cae SOLO su copia del circuito SVNS.
+ */
+export function isWorldRugbyCopyLeague(leagueName: string | null | undefined): boolean {
+    return /\bsvns\b|sevens\s+(?:world\s+)?series|world\s+(?:rugby\s+)?sevens/i.test(String(leagueName || ''));
+}
+
+type SvnsTier = 'svns' | 'svns2' | 'svns3' | 'wc';
+
+const SVNS_TIER_NAME: Record<SvnsTier, string> = {
+    svns: 'SVNS',
+    svns2: 'SVNS 2',
+    svns3: 'SVNS 3',
+    wc: 'SVNS World Championship',
+};
+
+/** Una etapa del circuito, masculina y femenina. `[mensId, womensId]` salen de `/rugby/v3/event`. */
+export function svnsStage(
+    tier: SvnsTier,
+    slug: string,
+    city: string,
+    start: string,
+    end: string,
+    ids: readonly [string, string],
+    season = '2027',
+): WrEventDef[] {
+    // La temporada 2026-27 se llama "SVNS 2027" en la fuente, y la 2025-26 "SVNS 2026".
+    const seasonLabel = `${Number(season) - 1}-${season.slice(2)}`;
+    const genders = [
+        { code: 'm', gender: 'Masculino', ageLabel: '', label: 'Masculino' },
+        { code: 'w', gender: 'Femenino', ageLabel: 'F', label: 'Femenino' },
+    ] as const;
+    return genders.map((g, index) => ({
+        tournamentId: `wr-${tier}-${season}-${slug}-${g.code}`,
+        eventId: ids[index],
+        name: `${SVNS_TIER_NAME[tier]} ${city} ${g.label} ${seasonLabel}`,
+        fullName: `HSBC ${SVNS_TIER_NAME[tier]} ${seasonLabel} · ${city} · ${g.label}`,
+        season,
+        url: `/rugby-union/world/${tier}-${season}-${slug}-${g.code}/`,
+        logo: '/competiciones/world-rugby.png',
+        ageLabel: g.ageLabel,
+        pools: {},
+        siteUrl: `https://www.svns.com/en/fixtures-and-results/${slug}/matches`,
+        scoring: 'sevens' as const,
+        gender: g.gender,
+        window: { start, end },
+    }));
+}
+
+/**
+ * Etapas del circuito que viven en la BASE (torneos de circuito con una fase de liga por
+ * etapa, como el SVNS 2 cargado a mano) y las mantiene `/api/cron/worldrugby-sync`. Son las
+ * de seis equipos todos contra todos; salen de `WR_EVENTS` para no mostrarse dos veces.
+ */
+export const SVNS_DB_STAGES: readonly WrEventDef[] = [
+    ...svnsStage('svns2', 'nairobi', 'Nairobi', '2026-02-14', '2026-02-15', ['09584ea7-cda0-458e-a037-a2604238c2fc', 'b7178530-dfc5-4701-9157-c5648f04615c'], '2026'),
+    ...svnsStage('svns2', 'montevideo', 'Montevideo', '2026-03-21', '2026-03-22', ['f6d666e7-36a3-4024-8bda-edd9c799383e', '4374bc35-495b-47a5-a0e9-09c05098b405'], '2026'),
+    ...svnsStage('svns2', 'sao-paulo', 'São Paulo', '2026-03-28', '2026-03-29', ['771f9811-6dce-4d91-9ac2-1c65c577366f', '4a6b45fb-eee6-4100-86dc-8cd610f7cb33'], '2026'),
+    ...svnsStage('svns3', 'dubai', 'Dubái', '2026-11-27', '2026-11-28', ['0bc77cc5-753a-4abf-b52f-4915aa5fd4d2', '8b71df83-8a99-477e-a150-2ec0991caf5b']),
+    ...svnsStage('svns2', 'nairobi', 'Nairobi', '2027-01-23', '2027-01-24', ['4e41ddb5-650f-4f33-8f0b-5ac83b3764f6', '6f643172-a9fa-4ad4-8c55-9eb5f257dcd9']),
+    ...svnsStage('svns2', 'montevideo', 'Montevideo', '2027-02-20', '2027-02-21', ['9aad5de1-7597-467f-a4dd-9dd4ed1de340', 'a0abba26-a607-4537-ba75-725bf2ee0b7c']),
+    ...svnsStage('svns2', 'sao-paulo', 'São Paulo', '2027-02-27', '2027-02-28', ['9031960e-7941-4423-b98c-12873e7fedfc', '920c3d4d-1777-44aa-86d6-4547b8f09db6']),
+];
 
 export const WR_EVENTS: readonly WrEventDef[] = [
     {
@@ -77,6 +156,30 @@ export const WR_EVENTS: readonly WrEventDef[] = [
         },
         siteUrl: 'https://www.world.rugby/tournaments/u20',
     },
+    // Circuito HSBC SVNS 2026-27. Los ids salen de `/rugby/v3/event?startDate=…`
+    // (medido el 24/11/2026). SVNS 3 y 2 juegan el mismo fin de semana que la
+    // primera etapa del SVNS en la misma sede o en otra; cada una es un evento.
+    // Temporada 2025-26 (histórico): fixture, resultados, cronología y tabla de cada etapa.
+    ...svnsStage('svns', 'dubai', 'Dubái', '2025-11-29', '2025-11-30', ['11cc06dc-3ea9-4d90-b0ae-a399af78e4eb', 'acf5df55-1883-433c-b015-ebb2abf22606'], '2026'),
+    ...svnsStage('svns', 'cape-town', 'Ciudad del Cabo', '2025-12-06', '2025-12-07', ['9e2d4625-9e44-470b-8b7a-232b800ae969', '97aba84c-bb17-44f1-ac0f-085225f13d46'], '2026'),
+    ...svnsStage('svns3', 'dubai', 'Dubái', '2026-01-17', '2026-01-18', ['835d93ac-ba9e-4d53-b704-417ca85ae129', '55671206-ca67-46f6-90f8-00866f23ce71'], '2026'),
+    ...svnsStage('svns', 'singapore', 'Singapur', '2026-01-31', '2026-02-01', ['2dcbf587-13b5-4aef-ad20-d1d533f9cb07', '23dd7def-56c1-44a1-a830-cffa99148c66'], '2026'),
+    ...svnsStage('svns', 'perth', 'Perth', '2026-02-07', '2026-02-08', ['e5065fab-87d4-4037-ae12-cd532a44ec0e', 'a36c424f-a02c-4d5d-8c43-b27c8809cf62'], '2026'),
+    ...svnsStage('svns', 'vancouver', 'Vancouver', '2026-03-07', '2026-03-08', ['845e1c8f-c661-4bb9-a507-79b377691739', '7ca63f08-fb29-413b-88f2-ab1ccea429b7'], '2026'),
+    ...svnsStage('svns', 'new-york', 'Nueva York', '2026-03-14', '2026-03-15', ['cfe84ffe-82ac-4861-9ca4-f825353ea199', '9800a9dd-f1a1-47bc-9cdb-b8a76c2f3367'], '2026'),
+    ...svnsStage('wc', 'hong-kong', 'Hong Kong', '2026-04-17', '2026-04-19', ['ab7b277c-7e3d-4c65-99b0-b2f82daa0b6c', '0ba019f2-fc92-4ff3-98bc-979b9488b4ff'], '2026'),
+    ...svnsStage('wc', 'valladolid', 'Valladolid', '2026-05-29', '2026-05-31', ['067e2c0a-71c5-4133-843f-1ab7d6354ecc', '22bc64d9-d11e-43eb-b275-31fe00c6358e'], '2026'),
+    ...svnsStage('wc', 'bordeaux', 'Burdeos', '2026-06-05', '2026-06-07', ['39fdda12-ab80-4f68-97ff-1f30744d5895', 'cf1f0f65-25f9-4d97-81c0-20d5d09ec2ff'], '2026'),
+    // Temporada 2026-27.
+    ...svnsStage('svns', 'dubai', 'Dubái', '2026-11-28', '2026-11-29', ['92263486-d635-4cd8-866d-ac0563c9250e', '399c1cb8-594b-4899-907a-05a390367251']),
+    ...svnsStage('svns', 'cape-town', 'Ciudad del Cabo', '2026-12-05', '2026-12-06', ['d45db457-09c9-4603-8991-5abbcb94277b', '26a10704-1b2c-4ae5-84ea-313302343337']),
+    ...svnsStage('svns', 'singapore', 'Singapur', '2027-01-30', '2027-01-31', ['e835b968-4d15-4a5e-88f6-91e34ab2568f', '463dd4fe-521c-4b34-8379-fea9d39285b5']),
+    ...svnsStage('svns', 'perth', 'Perth', '2027-02-06', '2027-02-07', ['136112d7-d729-4417-a0ee-cba8720545e8', '000329f8-5d05-49ed-b280-105767de2e85']),
+    ...svnsStage('svns', 'vancouver', 'Vancouver', '2027-03-06', '2027-03-07', ['ed0edcc4-b9b2-4ae9-bd26-1e55fbfc746c', 'ea0dd958-e26d-47f1-b8e4-bd7a89d0fcf7']),
+    ...svnsStage('svns', 'new-york', 'Nueva York', '2027-03-13', '2027-03-14', ['00efe590-3644-4252-bdb3-09c16688e183', '4be4f537-1195-4d83-b5ea-1084a7885803']),
+    ...svnsStage('wc', 'hong-kong', 'Hong Kong', '2027-04-09', '2027-04-11', ['434568aa-0c0b-4005-99a3-7f7b530f2e4b', '09b3e766-640f-4e09-ad4c-5147bb61e44f']),
+    ...svnsStage('wc', 'valladolid', 'Valladolid', '2027-05-21', '2027-05-23', ['611828a4-22c3-4b37-9d29-7c56c7906a48', '181b7bc8-b895-4306-b030-c667946a58b2']),
+    ...svnsStage('wc', 'bordeaux', 'Burdeos', '2027-05-28', '2027-05-30', ['5745adcf-13c6-456d-bf01-d0b928f36c90', '47a636ce-8e80-4610-ac0b-17d7dfbe0d7c']),
 ];
 
 export function wrEventByTournamentId(value: unknown): WrEventDef | null {
@@ -150,11 +253,21 @@ const COUNTRY_ES: Record<string, string> = {
     'united states': 'Estados Unidos',
     wales: 'Gales',
     zimbabwe: 'Zimbabue',
+    china: 'China',
+    colombia: 'Colombia',
+    mexico: 'México',
+    paraguay: 'Paraguay',
+    peru: 'Perú',
+    poland: 'Polonia',
+    senegal: 'Senegal',
+    uganda: 'Uganda',
+    'ivory coast': 'Costa de Marfil',
+    "cote d'ivoire": 'Costa de Marfil',
 };
 
 /** "Chile U20" → "Chile". La categoría la pone el torneo, no el nombre. */
 export function wrCountryOf(rawName: string): string {
-    return rawName.replace(/\s+U\d{2}$/i, '').trim();
+    return rawName.replace(/\s+U\d{2}$/i, '').replace(/\s+7s$/i, '').trim();
 }
 
 export function wrCountryEs(country: string): string {
@@ -170,7 +283,8 @@ const ORDINAL_ES: Record<string, string> = { '1': '1.º', '2': '2.º', '3': '3.�
 export function wrPlaceholderLabel(rawName: string): string | null {
     const pool = rawName.trim().match(/^(\d+)(?:st|nd|rd|th)\s+Pool\s+([A-Z])$/i);
     if (pool) return `${ORDINAL_ES[pool[1]] ?? `${pool[1]}.º`} Grupo ${pool[2].toUpperCase()}`;
-    const winner = rawName.trim().match(/^(Winner|Loser)\s+(?:of\s+)?Match\s+(\d+)$/i);
+    // "Winner of Match 12" (juveniles) y "Winner W13" / "Loser M7" (seven).
+    const winner = rawName.trim().match(/^(Winner|Loser)\s+(?:of\s+)?(?:Match\s+)?[A-Z]?(\d+)$/i);
     if (winner) return `${/^w/i.test(winner[1]) ? 'Ganador' : 'Perdedor'} partido ${winner[2]}`;
     return null;
 }
@@ -309,6 +423,13 @@ export function wrPhaseLabel(phase: string): string {
     if (placeSemi) return `Semifinal por el ${placeSemi[1]}.º puesto`;
     const pool = raw.match(/^Pool\s+([A-Z])$/i);
     if (pool) return `Grupo ${pool[1].toUpperCase()}`;
+    // Seven: la copa de cada nivel ("Cup Final", "Challenge Semi Finals").
+    const trophy = raw.match(/^(Cup|Plate|Challenge|Bowl|Shield)(?:\s+Trophy)?\s+(Quarter[-\s]?Finals?|Semi[-\s]?Finals?|Final)$/i);
+    if (trophy) {
+        const name = { cup: 'Copa', plate: 'Plata', challenge: 'Challenge', bowl: 'Bowl', shield: 'Escudo' }[trophy[1].toLowerCase()] ?? trophy[1];
+        const stage = /^quarter/i.test(trophy[2]) ? 'Cuartos de final' : /^semi/i.test(trophy[2]) ? 'Semifinal' : 'Final';
+        return `${stage} · ${name}`;
+    }
     return raw;
 }
 
@@ -346,7 +467,10 @@ export function parseWrSchedule(json: unknown, event: WrEventDef, nowMs: number)
         const away = toSide(teams[1], event, played ? asNumber(scores[1]) ?? 0 : null);
 
         const phase = asString(match.eventPhase).trim();
-        const phasePool = phase.match(/^Pool\s+([A-Z])$/i)?.[1]?.toUpperCase() ?? null;
+        // El SVNS 3 juega un solo grupo y la fuente lo llama "Pool Pool".
+        const phasePool = /^Pool\s+Pool$/i.test(phase)
+            ? 'A'
+            : phase.match(/^Pool\s+([A-Z])$/i)?.[1]?.toUpperCase() ?? null;
         const declaredPool = !phase && !home.placeholder && !away.placeholder
             ? poolOfCountry(event, home.country)
             : null;
@@ -886,7 +1010,9 @@ export function computeWrPoolTables(
     fixtures: readonly WrFixture[],
     triesByMatch: ReadonlyMap<string, { home: number; away: number }>,
     bonusByMatch: ReadonlyMap<string, { home: boolean; away: boolean }> = new Map(),
+    scoring: 'xv' | 'sevens' = 'xv',
 ): WrPoolTable[] {
+    const sevens = scoring === 'sevens';
     const pools = new Map<string, Map<string, WrStandingRow>>();
 
     for (const fixture of fixtures) {
@@ -916,17 +1042,19 @@ export function computeWrPoolTables(
             row.pointsAgainst += other;
             row.triesFor += ownTries;
             row.triesAgainst += otherTries;
+            // Seven (SVNS): 3 el triunfo, 2 el empate, 1 la derrota, sin bonus.
             let bonus = 0;
-            if (tries ? ownTries >= 4 : declaredBonus) bonus += 1;
+            if (!sevens && (tries ? ownTries >= 4 : declaredBonus)) bonus += 1;
             if (own > other) {
                 row.won += 1;
-                row.points += 4;
+                row.points += sevens ? 3 : 4;
             } else if (own === other) {
                 row.drawn += 1;
                 row.points += 2;
             } else {
                 row.lost += 1;
-                if (other - own <= 7) bonus += 1;
+                if (sevens) row.points += 1;
+                else if (other - own <= 7) bonus += 1;
             }
             row.bonusPoints += bonus;
             row.points += bonus;
@@ -946,7 +1074,9 @@ export function parseWrStandings(json: unknown, event: WrEventDef): WrPoolTable[
         const table = asObject(raw);
         const entries = Array.isArray(table?.entries) ? table.entries : [];
         if (!table || entries.length === 0) continue;
-        const pool = (asString(table.shortLabel) || asString(table.label).replace(/^Pool\s+/i, '')).toUpperCase();
+        const rawPool = (asString(table.shortLabel) || asString(table.label).replace(/^Pool\s+/i, '')).toUpperCase();
+        // El grupo único del SVNS 3 llega como "POOL"; el fixture lo llama "A".
+        const pool = rawPool === 'POOL' || rawPool === '' ? 'A' : rawPool;
         const rows = entries.map((rawEntry) => {
             const entry = asObject(rawEntry) ?? {};
             const side = toSide(entry.team, event, null);
