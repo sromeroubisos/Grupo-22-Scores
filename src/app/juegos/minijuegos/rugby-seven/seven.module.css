@@ -3844,6 +3844,14 @@
     cursor: pointer;
 }
 
+.offlineLine {
+    margin: 6px 0 0;
+    color: var(--color-text-secondary);
+    font-size: 0.58rem;
+    letter-spacing: 0.04em;
+    text-align: center;
+}
+
 .coachLine b {
     color: var(--gold);
 }

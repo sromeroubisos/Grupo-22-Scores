@@ -6,6 +6,9 @@ import SevenGame from './SevenGame';
 export const metadata: Metadata = {
     title: 'Rugby Seven | G22 Scores',
     description: 'Seven de rugby en pixel art con selecciones reales: World Cup, Rugby Championship, Six Nations, Sudamericano Seven y más. Partidos de 3, 5 o 7 minutos.',
+    // Manifiesto propio: "Agregar a la pantalla de inicio" desde acá instala Rugby Seven como
+    // una app aparte, que abre directo en el juego y anda sin conexión (ver public/sw.js).
+    manifest: '/juegos/rugby-seven/manifest.webmanifest',
 };
 
 /**

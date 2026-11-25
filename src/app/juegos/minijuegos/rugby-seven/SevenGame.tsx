@@ -143,6 +143,7 @@ import { advanceIntl, compName, createIntl, intlBoosts, intlInvest, intlNames, i
 import { IntlRanking, IntlSeason, IntlSquad, IntlUnion, IntlYouth } from './IntlPanels';
 import { advanceSvns, createSvns, SVNS_LEGS, SVNS_PHASE_LABEL, svnsBoosts, svnsRegionName, svnsStartTier, svnsTable, svnsVerdict, TIER_LABEL } from './svns';
 import { CloudSync, markTutorialSeenInAccount, tutorialSeenInAccount, type CloudStatus } from './cloudSave';
+import { useOfflineReady } from './offline';
 import { readLang, startTranslating, writeLang, type Lang } from './i18n';
 import { applyStoredClubEdits, EDITABLE_CLUBS, isClubEdited, resetClubEdit, saveClubEdit } from './clubEdits';
 import styles from './seven.module.css';
@@ -247,6 +248,16 @@ function Pennant({ code, size }: { code: string; size: number }) {
         </svg>
     );
 }
+
+/**
+ * Todas las banderas que el juego puede mostrar, para guardarlas y que se vean sin conexión
+ * (los `kit:` son banderines dibujados, no archivos).
+ */
+const GAME_FLAGS: string[] = [...new Set(
+    [...NATIONS, ...FEM_NATIONS, ...CLUBS, ...AR_CLUBS]
+        .map((team) => team.flag)
+        .filter((flag): flag is string => typeof flag === 'string' && flag.length > 0 && !flag.startsWith('kit:')),
+)].sort();
 
 /** Bandera desde public/flags. Decorativa: el nombre del país siempre va al lado. */
 function FlagIcon({ code, size = 18 }: { code?: string; size?: number }) {
@@ -822,6 +833,11 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
     const syncRef = useRef<CloudSync | null>(null);
     const [cloud, setCloud] = useState<CloudStatus>('off');
     const [loaded, setLoaded] = useState(false);
+    // Sin conexión: el juego queda guardado en el teléfono cada vez que abre con internet.
+    const offline = useOfflineReady(GAME_FLAGS, [
+        '/juegos/rugby-seven/dedo.png',
+        ...[musicSrc, menuMusicSrc].filter((src): src is string => Boolean(src)),
+    ]);
 
     /** Idioma de la interfaz: español, o inglés (una capa que traduce lo que se ve; ver i18n.ts). */
     const [lang, setLang] = useState<Lang>('es');
@@ -1420,6 +1436,13 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                 <button type="button" className={styles.coachLine} onClick={() => setAskCoach(true)} aria-label={`Entrenador: ${coachName}. Cambiar el nombre`}>
                                     Entrenador: <b>{coachName}</b> · cambiar
                                 </button>
+                            )}
+                            {(offline === 'ready' || offline === 'offline') && (
+                                <p className={styles.offlineLine} role="status">
+                                    {offline === 'offline'
+                                        ? 'Sin conexión: jugás igual. Tu cuenta se pone al día cuando vuelva la señal.'
+                                        : 'Listo para jugar sin conexión en este dispositivo.'}
+                                </p>
                             )}
                         </div>
                         <div className={styles.runway} aria-hidden="true">

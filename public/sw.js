@@ -1,10 +1,107 @@
-const SW_VERSION = '2026-11-20-1';
+const SW_VERSION = '2026-11-25-1';
 const LOGO_CACHE = `g22-logo-cache-${SW_VERSION}`;
 const STATIC_CACHE = `g22-static-cache-${SW_VERSION}`;
 const OWNED_CACHE_PREFIXES = ['g22-logo-cache-', 'g22-static-cache-', 'g22-runtime-cache-', 'g22-app-cache-'];
 const MAX_LOGO_CACHE_ENTRIES = 120;
 const MAX_STATIC_CACHE_ENTRIES = 40;
 const MAX_CACHEABLE_RESPONSE_BYTES = 150_000;
+
+/*
+ * Rugby Seven sin conexión.
+ *
+ * El juego no necesita internet para jugarse: los equipos van en el código y las
+ * partidas en el navegador. Lo que faltaba era tener a mano la página y sus
+ * archivos. Su caché NO lleva SW_VERSION y no la borra el `activate`: una
+ * versión nueva del service worker no puede dejar a nadie sin el juego en el
+ * colectivo. Se renueva sola: cada vez que el juego abre con conexión le manda
+ * al SW la lista exacta de lo que usó, y lo que ya no está en la lista se va.
+ */
+const GAME_CACHE = 'g22-game-cache-rugby-seven';
+const GAME_PATH = '/juegos/minijuegos/rugby-seven';
+const GAME_ASSET_PREFIXES = ['/_next/static/', '/juegos/rugby-seven/', '/flags/'];
+const GAME_NAVIGATION_TIMEOUT_MS = 4000;
+
+function isGamePath(pathname) {
+  return pathname === GAME_PATH || pathname === `${GAME_PATH}/`;
+}
+
+function isGameAsset(url) {
+  return GAME_ASSET_PREFIXES.some((prefix) => url.pathname.startsWith(prefix)) || url.pathname === '/icon.png';
+}
+
+/** La página del juego: primero la red (para tener la última versión), y sin red la guardada. */
+async function gameNavigation(request) {
+  const cache = await caches.open(GAME_CACHE);
+  try {
+    const response = await Promise.race([
+      fetch(request),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), GAME_NAVIGATION_TIMEOUT_MS)),
+    ]);
+    if (response && response.ok) await cache.put(GAME_PATH, response.clone());
+    return response;
+  } catch (error) {
+    const cached = await cache.match(GAME_PATH);
+    if (cached) return cached;
+    throw error;
+  }
+}
+
+/** Deja en la caché exactamente lo que el juego dijo que usa: suma lo nuevo y saca lo viejo. */
+async function syncGameCache(urls) {
+  const cache = await caches.open(GAME_CACHE);
+  const wanted = new Set(
+    urls
+      .map((value) => {
+        try {
+          const url = new URL(value, self.location.origin);
+          return isSameOrigin(url) && (isGamePath(url.pathname) || isGameAsset(url)) ? url.href : null;
+        } catch {
+          return null;
+        }
+      })
+      .filter(Boolean),
+  );
+  const pageUrl = new URL(GAME_PATH, self.location.origin).href;
+  wanted.add(pageUrl);
+
+  const existing = await cache.keys();
+  const have = new Set(existing.map((request) => request.url));
+  await Promise.all(existing.filter((request) => !wanted.has(request.url)).map((request) => cache.delete(request)));
+
+  let failed = 0;
+  // Lo que no existe en el servidor (una bandera que falta) no es una falla: no hay nada que
+  // guardar y el juego ya lo muestra roto con conexión. Se informa aparte para poder arreglarlo.
+  const notFound = [];
+  // De a pocos: son ~100 banderas y los chunks del juego, y el celular puede estar con mala señal.
+  const pending = [...wanted].filter((url) => !have.has(url) || url === pageUrl);
+  for (let i = 0; i < pending.length; i += 8) {
+    await Promise.all(pending.slice(i, i + 8).map(async (url) => {
+      try {
+        const response = await fetch(url, { cache: 'no-cache' });
+        if (response.status === 404) {
+          notFound.push(new URL(url).pathname);
+          return;
+        }
+        if (!response.ok) throw new Error(String(response.status));
+        await cache.put(url, response);
+      } catch {
+        failed += 1;
+      }
+    }));
+  }
+  return { total: wanted.size, failed, notFound: notFound.slice(0, 20) };
+}
+
+self.addEventListener('message', (event) => {
+  const data = event.data;
+  if (!data || data.type !== 'g22-game-cache' || !Array.isArray(data.urls)) return;
+  event.waitUntil((async () => {
+    const result = await syncGameCache(data.urls).catch(() => ({ total: 0, failed: -1 }));
+    if (event.source && typeof event.source.postMessage === 'function') {
+      event.source.postMessage({ type: 'g22-game-cache-done', ...result });
+    }
+  })());
+});
 
 function isSameOrigin(url) {
   return url.origin === self.location.origin;
@@ -94,6 +191,28 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  const request = event.request;
+  if (request.method === 'GET') {
+    const url = new URL(request.url);
+    if (isSameOrigin(url)) {
+      if (request.mode === 'navigate' && isGamePath(url.pathname)) {
+        event.respondWith(gameNavigation(request));
+        return;
+      }
+      // Solo lo que el juego guardó; el resto del sitio sigue por su camino de siempre.
+      if (isGameAsset(url) && url.pathname !== '/api/assets/team-logo') {
+        event.respondWith((async () => {
+          const cache = await caches.open(GAME_CACHE);
+          const cached = await cache.match(request);
+          if (cached) return cached;
+          const target = getCacheTarget(request);
+          return target ? staleWhileRevalidate(request, target.cacheName, target.maxEntries) : fetch(request);
+        })());
+        return;
+      }
+    }
+  }
+
   const target = getCacheTarget(event.request);
   if (!target) return;
 

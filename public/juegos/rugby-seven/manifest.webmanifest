@@ -1,0 +1,16 @@
+{
+  "name": "Rugby Seven",
+  "short_name": "Rugby Seven",
+  "description": "Seven de rugby en pixel art. Se juega con o sin conexión.",
+  "id": "/juegos/minijuegos/rugby-seven",
+  "start_url": "/juegos/minijuegos/rugby-seven",
+  "scope": "/juegos/minijuegos/rugby-seven",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#0b0d12",
+  "theme_color": "#0b0d12",
+  "icons": [
+    { "src": "/icon.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
