@@ -1,4 +1,4 @@
-const SW_VERSION = '2026-11-25-1';
+const SW_VERSION = '2026-11-25-2';
 const LOGO_CACHE = `g22-logo-cache-${SW_VERSION}`;
 const STATIC_CACHE = `g22-static-cache-${SW_VERSION}`;
 const OWNED_CACHE_PREFIXES = ['g22-logo-cache-', 'g22-static-cache-', 'g22-runtime-cache-', 'g22-app-cache-'];
@@ -46,6 +46,21 @@ async function gameNavigation(request) {
   }
 }
 
+/** El cartel de "sin conexión" para las páginas que no se guardan. */
+async function offlinePage() {
+  const cache = await caches.open(GAME_CACHE);
+  const hasGame = Boolean(await cache.match(GAME_PATH));
+  const action = hasGame
+    ? `<a href="${GAME_PATH}">Jugar Rugby Seven</a><p class="hint">El juego quedó guardado en este dispositivo: se juega sin señal.</p>`
+    : '<p class="hint">Cuando vuelva la señal, el sitio carga solo.</p>';
+  const html = `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sin conexión · G22 Scores</title><style>
+:root{color-scheme:dark}body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0b0d12;color:#f2f4f8;font:16px/1.4 system-ui,-apple-system,sans-serif;text-align:center;padding:24px;box-sizing:border-box}
+h1{font-size:1.3rem;margin:0 0 8px}p{margin:0;color:#a7adb8}.hint{margin-top:14px;font-size:.85rem}
+a{display:inline-block;margin-top:22px;padding:14px 24px;border-radius:999px;background:#8fff00;color:#0b0d12;font-weight:800;text-decoration:none}
+</style></head><body><main><h1>Sin conexión</h1><p>No hay internet para cargar esta página.</p>${action}</main></body></html>`;
+  return new Response(html, { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' } });
+}
+
 /** Deja en la caché exactamente lo que el juego dijo que usa: suma lo nuevo y saca lo viejo. */
 async function syncGameCache(urls) {
   const cache = await caches.open(GAME_CACHE);
@@ -73,7 +88,10 @@ async function syncGameCache(urls) {
   // guardar y el juego ya lo muestra roto con conexión. Se informa aparte para poder arreglarlo.
   const notFound = [];
   // De a pocos: son ~100 banderas y los chunks del juego, y el celular puede estar con mala señal.
-  const pending = [...wanted].filter((url) => !have.has(url) || url === pageUrl);
+  // Primero lo indispensable para abrir y jugar (la página y el código), después música y banderas:
+  // si el visitante cierra a la mitad, o la señal es mala, el juego ya queda jugable.
+  const rank = (url) => (url === pageUrl ? 0 : url.includes('/_next/static/') ? 1 : url.includes('/juegos/rugby-seven/') ? 3 : 2);
+  const pending = [...wanted].filter((url) => !have.has(url) || url === pageUrl).sort((a, b) => rank(a) - rank(b));
   for (let i = 0; i < pending.length; i += 8) {
     await Promise.all(pending.slice(i, i + 8).map(async (url) => {
       try {
@@ -197,6 +215,13 @@ self.addEventListener('fetch', (event) => {
     if (isSameOrigin(url)) {
       if (request.mode === 'navigate' && isGamePath(url.pathname)) {
         event.respondWith(gameNavigation(request));
+        return;
+      }
+      // Cualquier otra página sin red: en vez de la pantalla de error del navegador, un cartel que
+      // lleva al juego si está guardado. Con red no cambia nada: el pedido sale igual que siempre
+      // (y con su redirect en "manual", que es como llega una navegación).
+      if (request.mode === 'navigate') {
+        event.respondWith(fetch(request).catch(() => offlinePage()));
         return;
       }
       // Solo lo que el juego guardó; el resto del sitio sigue por su camino de siempre.
