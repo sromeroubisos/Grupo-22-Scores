@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { generateLocalDateKeys, getTodayKey } from '@/lib/timezone';
 import { logRefreshLoop } from '@/lib/debug/refreshLoop';
+import { earlyFetch } from '@/lib/home/earlyFetch';
 import { reconcileLiveOverlay, type LiveSnapshot } from '@/lib/matches/liveOverlay';
 
 export type SourceErrorScenario = 'fs_down_db_ok' | 'db_down_fs_ok' | 'both_down' | null;
@@ -199,7 +200,10 @@ export function useMatchesStore(
             sport: sportId,
             attempt,
           });
-          const res = await fetch(url, { signal: attemptController.signal });
+          // El primer intento aprovecha el pedido que la home lanzó antes de hidratar.
+          const res = attempt === 1
+            ? await earlyFetch(url, { signal: attemptController.signal })
+            : await fetch(url, { signal: attemptController.signal });
           clearTimeout(timeoutId);
           signal?.removeEventListener('abort', abortAttempt);
 

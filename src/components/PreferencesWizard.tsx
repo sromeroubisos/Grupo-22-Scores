@@ -28,6 +28,7 @@ import {
     buildClubTree,
     categoryLabel,
     detectUserCountryId,
+    espnSoccerTeamKey,
     loadClubOptions,
     loadExternalLeagueOptions,
     loadLeagueClubs,
@@ -531,10 +532,20 @@ export default function PreferencesWizard({ variant, editing = false, onClose }:
 
     // Clubes: todos los del deporte, con sus categorías y ramas agrupadas bajo el club base.
     // Se destacan los de las ligas elegidas y los del país del visitante.
+    // Un club de ESPN fútbol tiene un id por liga: el de la Libertadores es el mismo
+    // Boca que ya está con el id de la Liga. Se reconoce por el número de equipo.
     const allClubs = useMemo(() => {
         const known = new Set(clubState.options.map((club) => club.id));
-        return [...clubState.options, ...participants.extra.filter((club) => !known.has(club.id))];
+        const knownEspn = new Set(clubState.options.map((club) => espnSoccerTeamKey(club.id)).filter(Boolean));
+        return [...clubState.options, ...participants.extra.filter((club) => {
+            const espn = espnSoccerTeamKey(club.id);
+            return !known.has(club.id) && !(espn && knownEspn.has(espn));
+        })];
     }, [clubState.options, participants.extra]);
+    const participantEspnKeys = useMemo(
+        () => new Set([...participants.ids].map(espnSoccerTeamKey).filter((key): key is string => Boolean(key))),
+        [participants.ids],
+    );
     const clubTree = useMemo(() => buildClubTree(allClubs), [allClubs]);
     const nameMatches = useCallback((club: ClubOption) => fold(`${club.name} ${club.context}`).includes(q), [q]);
     // Buscando: del club base se ven solo las categorías que coinciden (salvo que coincida el propio club).
@@ -548,7 +559,12 @@ export default function PreferencesWizard({ variant, editing = false, onClose }:
         if (q) return { inLeagues: [] as ClubOption[], local: [] as ClubOption[], rest: matching, total: matching.length };
         // Del torneo elegido: está inscripto (la base) o se lo vio jugando en esa competición (el feed).
         const playsInWanted = (root: ClubOption) => [root, ...(clubTree.childrenOf.get(root.id) ?? [])]
-            .some((club) => participants.ids.has(club.id) || club.leagueIds.some((id) => wanted.has(id)));
+            .some((club) => {
+                const espn = espnSoccerTeamKey(club.id);
+                return participants.ids.has(club.id)
+                    || Boolean(espn && participantEspnKeys.has(espn))
+                    || club.leagueIds.some((id) => wanted.has(id));
+            });
         const inLeagues = wanted.size === 0 ? [] : matching.filter(playsInWanted);
         const taken = new Set(inLeagues.map((club) => club.id));
         const local = userCountryId
@@ -556,7 +572,7 @@ export default function PreferencesWizard({ variant, editing = false, onClose }:
             : [];
         local.forEach((club) => taken.add(club.id));
         return { inLeagues, local, rest: matching.filter((club) => !taken.has(club.id)), total: matching.length };
-    }, [childrenFor, clubTree, leagues, nameMatches, participants.ids, q, userCountryId]);
+    }, [childrenFor, clubTree, leagues, nameMatches, participantEspnKeys, participants.ids, q, userCountryId]);
     // El tope de filas se reparte en orden de grupo; "Ver más" suma de a CLUBS_PAGE.
     const clubLimit = q ? Infinity : clubsShown;
     const clubSlices = (() => {
@@ -582,7 +598,11 @@ export default function PreferencesWizard({ variant, editing = false, onClose }:
     // ── Pie: el botón dice qué falta, siempre ─────────────────────────────
     const primaryLabel = (() => {
         if (saving) return 'Guardando…';
-        if (step === 'sport') return sportId ? 'Continuar' : 'Elegí un deporte para continuar';
+        if (step === 'sport') {
+            if (!sportId) return 'Elegí un deporte para continuar';
+            // Al lado del "Listo": que se lea qué agrega seguir, no solo "Continuar".
+            return !editing && favorites.length === 0 ? 'Sumar competiciones y clubes' : 'Continuar';
+        }
         if (step === 'leagues') return leagues.size > 0 ? `Continuar · ${leagues.size} elegida${leagues.size === 1 ? '' : 's'}` : 'Continuar sin elegir';
         if (step === 'clubs') return clubs.size > 0 ? `Continuar · ${clubs.size} elegido${clubs.size === 1 ? '' : 's'}` : 'Continuar sin elegir';
         return 'Finalizar';
@@ -914,6 +934,15 @@ export default function PreferencesWizard({ variant, editing = false, onClose }:
                 {stepIndex > 0 && (
                     <button type="button" className={styles.btnSecondary} onClick={() => (showingReview ? setReviewing(false) : goTo(STEPS[stepIndex - 1]))} disabled={saving}>
                         Atrás
+                    </button>
+                )}
+                {/* Cuatro pasos antes de ver un partido es mucho para quien recién llega:
+                    con el deporte alcanza para armar la portada. Competiciones y clubes se
+                    siguen después con la estrella. Solo en la primera vez y sin favoritos:
+                    `finish` sincroniza la lista entera y borraría los que ya hay. */}
+                {step === 'sport' && sportId && !editing && favorites.length === 0 && (
+                    <button type="button" className={styles.btnSecondary} onClick={() => void finish()} disabled={saving}>
+                        Listo
                     </button>
                 )}
                 <button type="button" className={styles.btnPrimary} onClick={onPrimary} disabled={primaryDisabled}>

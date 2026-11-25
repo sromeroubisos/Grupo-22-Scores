@@ -1498,6 +1498,29 @@
     margin-bottom: var(--spacing-md);
 }
 
+.nextMatchDayBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: var(--spacing-lg);
+    min-height: 44px;
+    padding: 0 20px;
+    border: 1px solid var(--color-accent);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--color-accent);
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.nextMatchDayBtn:hover,
+.nextMatchDayBtn:focus-visible {
+    background: var(--color-accent);
+    color: #04140c;
+}
+
 /* News List */
 .newsList {
     display: flex;
@@ -2137,8 +2160,13 @@
         letter-spacing: 0.02em;
     }
 
+    /* Una columna, como arriba de 1101 y abajo de 850. Con dos (auto-fill de
+       380px) un iPad apaisado (1024) quedaba con tarjetas de 460px donde el
+       nombre del equipo medía 0 —solo escudos y tanteador— y cualquier pieza
+       del feed sin contenido dejaba una celda vacía a la izquierda. */
     .matchesContainer {
-        grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+        grid-template-columns: minmax(0, 1fr);
+        gap: 12px;
     }
 }
 
@@ -2588,10 +2616,16 @@
         font-size: 0.72rem;
     }
 
+    /* "Instalar" aparece tarde (cuando el navegador avisa que se puede): si
+       ocupara lugar en la columna empujaría el feed entero hacia abajo con la
+       página ya pintada. Flota arriba de la barra inferior y no corre nada. */
     .installSlot {
         display: block;
-        order: 4;
-        padding-top: 12px;
+        position: fixed;
+        left: 12px;
+        right: 12px;
+        bottom: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom) + 10px);
+        z-index: 40;
     }
 
     .installSlot:empty {

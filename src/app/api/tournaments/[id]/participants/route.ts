@@ -17,7 +17,8 @@ import {
 import { resolveTournamentAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
 import { isSevensTournament } from '@/lib/utils/rugbyModality';
 import { normalizeSlug } from '@/lib/utils/normalize';
-import { resolveSerializableLogoUrl } from '@/lib/utils/logoUrl';
+import { buildTeamLogoProxyUrl, resolveSerializableLogoUrl } from '@/lib/utils/logoUrl';
+import { getEspnFootballLeagueStandings, parseEspnFootballTournamentId } from '@/lib/services/espnFootball';
 import { isMissingColumnError, isMissingTableError } from '@/lib/utils/supabaseSchema';
 import { isUuid } from '@/lib/utils/postgrest';
 import { createApiPerfTracker } from '@/lib/perf/api';
@@ -732,6 +733,36 @@ export async function GET(
       scopedSeasonId = tournamentSeason?.current_season_id ?? null;
     }
     perf.note({ full });
+
+    // ─── ESPN FÚTBOL ──────────────────────────────────────────────────────────
+    // Los clubes de fútbol no viven en la base: son los de la tabla de ESPN, con
+    // el MISMO id que lleva el feed (`espn-soccer-team-<liga>-<n>`), así que
+    // seguirlo desde el onboarding prende la estrella en la portada. Sin esto la
+    // ruta devolvía [] y el onboarding solo ofrecía los equipos que jugaban en
+    // los cuatro días del feed.
+    const espnSoccerSlug = parseEspnFootballTournamentId(tournamentId);
+    if (espnSoccerSlug) {
+      const standings = await perf.measureStep(
+        'load_espn_soccer_standings',
+        async () => getEspnFootballLeagueStandings(espnSoccerSlug).catch(() => null),
+        { bucket: 'query', logQuery: true },
+      );
+      const seen = new Set<string>();
+      const teams = (standings?.rows ?? [])
+        .filter((row: any) => {
+          const id = typeof row?.team_id === 'string' ? row.team_id : '';
+          if (!id || seen.has(id)) return false;
+          seen.add(id);
+          return true;
+        })
+        .map((row: any) => ({
+          id: row.team_id as string,
+          name: String(row.team_name || '').trim(),
+          logo: buildTeamLogoProxyUrl({ key: row.team_id, name: row.team_name, fallback: row.team_logo }),
+        }))
+        .filter((team: { name: string }) => team.name.length > 0);
+      return perf.json(teams);
+    }
 
     // ─── FLASH SCORE SUPPORT ──────────────────────────────────────────────────
     const espnLeagueSlug = parseEspnAmericanFootballTournamentId(tournamentId);

@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
+import { sharedJson } from '@/lib/home/earlyFetch';
+
 import styles from './XvIdealAcceso.module.css';
 
 interface OpenGroup {
@@ -21,12 +23,12 @@ export default function XvIdealAcceso({ variant }: { variant: 'feed' | 'sidebar'
     const [group, setGroup] = useState<OpenGroup | null>(null);
 
     useEffect(() => {
-        const controller = new AbortController();
-        fetch('/api/xv-ideal/open', { signal: controller.signal })
-            .then((response) => (response.ok ? response.json() : null))
-            .then((body: { groups?: OpenGroup[] } | null) => setGroup(body?.groups?.[0] ?? null))
+        // Las dos variantes se montan juntas: una sola consulta para las dos.
+        let vigente = true;
+        sharedJson<{ groups?: OpenGroup[] }>('/api/xv-ideal/open')
+            .then((body) => { if (vigente) setGroup(body?.groups?.[0] ?? null); })
             .catch(() => undefined);
-        return () => controller.abort();
+        return () => { vigente = false; };
     }, []);
 
     if (!group) return null;

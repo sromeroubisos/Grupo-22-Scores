@@ -47,6 +47,13 @@ export function buildClubCandidateIds(entityId: string): string[] {
         values.push(stripped, stripped.toLowerCase());
     }
 
+    // ESPN fútbol lleva la liga en el id (`espn-soccer-team-arg.1-5`), pero el
+    // número es el del equipo en todo ESPN: Boca es el 5 en la Liga y en la
+    // Libertadores. Este alias sin liga hace que seguirlo en una competición lo
+    // marque en todas.
+    const espnSoccer = /^espn-soccer-team-.+-(\d+)$/.exec(lower);
+    if (espnSoccer) values.push(`espn-soccer-team:${espnSoccer[1]}`);
+
     const aliasSeed = stripped.trim();
     if (aliasSeed && !isUuid(aliasSeed)) {
         const aliasSeedLower = aliasSeed.toLowerCase();

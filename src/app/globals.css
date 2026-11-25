@@ -1,4 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+/* Outfit, Inter y JetBrains Mono vienen del <link> de layout.tsx. Un @import acá
+   las pedía otra vez y en cadena (primero este CSS, recién después el de Google),
+   demorando el primer pintado. */
 @import "tailwindcss" source(none);
 @config "../../tailwind.config.mjs";
 @source "./";

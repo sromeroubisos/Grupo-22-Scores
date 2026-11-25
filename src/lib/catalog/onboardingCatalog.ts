@@ -281,6 +281,37 @@ export async function loadExternalLeagueOptions(
 
 // Ayer, hoy y los dos días siguientes: cubre a los clubes de proveedor que no
 // están en la base sin pedirle al servidor el mes entero.
+/**
+ * Ligas de fútbol cuyos planteles entran enteros en "elegí tus clubes". El ORDEN
+ * importa: un club que está en varias queda con el id de la primera, así que van
+ * las ligas locales antes que las copas. Son ligas de ESPN (ver espnFootball).
+ */
+const FOOTBALL_LEAGUE_NAMES = new Map<string, { name: string; country: string }>([
+    ['espn-soccer-league-arg.1', { name: 'Liga Profesional Argentina', country: 'Argentina' }],
+    ['espn-soccer-league-arg.2', { name: 'Primera Nacional', country: 'Argentina' }],
+    ['espn-soccer-league-uru.1', { name: 'Primera División Uruguay', country: 'Uruguay' }],
+    ['espn-soccer-league-chi.1', { name: 'Primera División Chile', country: 'Chile' }],
+    ['espn-soccer-league-par.1', { name: 'Primera División Paraguay', country: 'Paraguay' }],
+    ['espn-soccer-league-bra.1', { name: 'Brasileirão Série A', country: 'Brasil' }],
+    ['espn-soccer-league-col.1', { name: 'Liga BetPlay Colombia', country: 'Colombia' }],
+    ['espn-soccer-league-per.1', { name: 'Liga 1 Perú', country: 'Perú' }],
+    ['espn-soccer-league-ecu.1', { name: 'LigaPro Ecuador', country: 'Ecuador' }],
+    ['espn-soccer-league-mex.1', { name: 'Liga MX', country: 'México' }],
+    ['espn-soccer-league-usa.1', { name: 'Major League Soccer', country: 'Estados Unidos' }],
+    ['espn-soccer-league-esp.1', { name: 'LaLiga', country: 'España' }],
+    ['espn-soccer-league-eng.1', { name: 'Premier League', country: 'Inglaterra' }],
+    ['espn-soccer-league-ita.1', { name: 'Serie A Italia', country: 'Italia' }],
+    ['espn-soccer-league-ger.1', { name: 'Bundesliga', country: 'Alemania' }],
+    ['espn-soccer-league-fra.1', { name: 'Ligue 1', country: 'Francia' }],
+    ['espn-soccer-league-por.1', { name: 'Primeira Liga', country: 'Portugal' }],
+    ['espn-soccer-league-ned.1', { name: 'Eredivisie', country: 'Países Bajos' }],
+]);
+
+/** Número de equipo de ESPN fútbol, igual en todas sus ligas ("espn-soccer-team-arg.1-5" → "5"). */
+export function espnSoccerTeamKey(id: string): string | null {
+    return /^espn-soccer-team-.+-(\d+)$/i.exec(id)?.[1] ?? null;
+}
+
 const CLUB_WINDOW_FROM = -1;
 const CLUB_WINDOW_TO = 2;
 // PostgREST no devuelve más de 1000 filas por pedido: se pagina.
@@ -341,10 +372,17 @@ export async function loadClubOptions(
     signal?: AbortSignal,
 ): Promise<{ options: ClubOption[]; failed: boolean; partial: boolean }> {
     const dates = generateLocalDateKeys(timeZone, CLUB_WINDOW_FROM, CLUB_WINDOW_TO);
+    // Fútbol no tiene clubes en la base: sin los planteles de las ligas, la lista
+    // era solo lo que jugaba en los 4 días del feed y faltaban clubes enteros.
+    const squadLeagues = sportId === 'football' ? [...FOOTBALL_LEAGUE_NAMES.keys()] : [];
+    const squadsPromise = Promise.allSettled(
+        squadLeagues.map((leagueId) => loadLeagueClubs(leagueId, signal).then((clubs) => ({ leagueId, clubs }))),
+    );
     const [dbResult, ...dayResults] = await Promise.allSettled([
         loadDbClubs(sportId, signal),
         ...dates.map((entry) => matchesOf(entry.dateKey, sportId, timeZone, signal)),
     ]);
+    const squads = (await squadsPromise).flatMap((result) => (result.status === 'fulfilled' ? [result.value] : []));
     const dbClubs = dbResult.status === 'fulfilled' ? (dbResult.value as DbClub[]) : [];
     const feed = dayResults.flatMap((day) => (day.status === 'fulfilled' ? (day.value as FeedMatch[]) : []));
     const failedDays = dayResults.filter((day) => day.status === 'rejected').length;
@@ -365,6 +403,45 @@ export async function loadClubOptions(
         });
     }
 
+    // El mismo club de ESPN aparece con un id por liga (Boca en la Liga y en la
+    // Libertadores). Va UNA vez, con el id de su liga local (las ligas van en ese
+    // orden); la estrella de favoritos reconoce los demás por el número.
+    const byEspnTeam = new Map<string, ClubOption>();
+    const espnTeamOf = espnSoccerTeamKey;
+    const sameClub = (id: string) => {
+        const direct = byId.get(id);
+        if (direct) return direct;
+        const espnTeam = espnTeamOf(id);
+        return espnTeam ? byEspnTeam.get(espnTeam) : undefined;
+    };
+    const remember = (club: ClubOption) => {
+        byId.set(club.id, club);
+        const espnTeam = espnTeamOf(club.id);
+        if (espnTeam && !byEspnTeam.has(espnTeam)) byEspnTeam.set(espnTeam, club);
+    };
+
+    for (const { leagueId, clubs } of squads) {
+        const league = FOOTBALL_LEAGUE_NAMES.get(leagueId);
+        const competition = league?.name ?? '';
+        const countryId = league ? findCountryRecord(null, league.country)?.id ?? null : null;
+        for (const club of clubs) {
+            const existing = sameClub(club.id);
+            if (existing) {
+                if (!existing.leagueIds.includes(leagueId)) existing.leagueIds.push(leagueId);
+                continue;
+            }
+            remember({
+                id: club.id,
+                name: club.name,
+                logo: club.logo,
+                context: competition,
+                countryId,
+                leagueIds: [leagueId],
+                baseId: null,
+            });
+        }
+    }
+
     for (const match of feed) {
         const leagueId = String(match.tournament?.id ?? '');
         const competition = String(match.tournament?.name ?? '').trim();
@@ -377,13 +454,13 @@ export async function loadClubOptions(
             const name = String(side.team?.name ?? '').trim();
             // Sin id de club no hay a qué seguir: la portada tampoco ofrece estrella ahí.
             if (!id || !name) continue;
-            const existing = byId.get(id);
+            const existing = sameClub(id);
             if (existing) {
                 if (leagueId && !existing.leagueIds.includes(leagueId)) existing.leagueIds.push(leagueId);
                 if (!existing.context) existing.context = competition;
                 continue;
             }
-            byId.set(id, {
+            remember({
                 id,
                 name,
                 logo: resolveTeamLogo(side.team as never) || null,

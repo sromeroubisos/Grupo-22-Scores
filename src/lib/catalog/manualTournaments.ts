@@ -7,6 +7,7 @@
 // endpoint); si falla no se guarda, para que el próximo intento reintente.
 
 import { resolveCountryId } from '@/lib/data/countries';
+import { earlyFetch } from '@/lib/home/earlyFetch';
 import type { Tournament } from '@/lib/types';
 import { resolveTournamentAudience } from '@/lib/utils/tournamentAudience';
 
@@ -63,7 +64,7 @@ let cached: { at: number; promise: Promise<ManualTournamentApiItem[]> } | null =
 function loadRaw(): Promise<ManualTournamentApiItem[]> {
     if (cached && Date.now() - cached.at < TTL_MS) return cached.promise;
 
-    const promise = fetch('/api/home/manual-tournaments', { cache: 'default' })
+    const promise = earlyFetch('/api/home/manual-tournaments', { cache: 'default' })
         .then(async (response) => {
             const payload = await response.json().catch(() => ({}));
             if (!response.ok) throw new Error(payload.error || `HTTP ${response.status}`);

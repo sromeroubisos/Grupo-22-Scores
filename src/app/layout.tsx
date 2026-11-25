@@ -9,6 +9,7 @@ import PushActivationPrompt from "@/components/PushActivationPrompt";
 import { AuthProvider } from "@/context/AuthContext";
 import { appIconHref } from "@/lib/appBranding";
 import { publicSiteUrl } from "@/lib/seo/siteUrl";
+import { HOME_EARLY_FETCH_SCRIPT } from "@/lib/home/earlyFetch";
 import "./globals.css";
 
 export const viewport: Viewport = {
@@ -126,6 +127,8 @@ export default function RootLayout({
   return (
     <html lang="es" data-theme="dark" className="dark" suppressHydrationWarning>
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link rel="preconnect" href="https://use.typekit.net" />
         <link rel="preconnect" href="https://p.typekit.net" crossOrigin="" />
         <link
@@ -151,6 +154,8 @@ export default function RootLayout({
             `,
           }}
         />
+        {/* Los datos de la home salen ya, sin esperar a que hidrate React. Ver lib/home/earlyFetch. */}
+        <script dangerouslySetInnerHTML={{ __html: HOME_EARLY_FETCH_SCRIPT }} />
       </head>
       <body suppressHydrationWarning>
         <script

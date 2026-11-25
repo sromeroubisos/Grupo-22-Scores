@@ -16,13 +16,15 @@ import { getTournamentsBySport, getInternationalTournamentsBySport, getTournamen
 import { buildEspnFootballTournaments, getEspnFootballInternationalTournaments } from '@/lib/data/tournaments/espnFootballCatalog';
 import { findCountryRecord, getCountryById, resolveCountryId } from '@/lib/data/countries';
 import { newsPath } from '@/lib/news/newsUrl';
-import type { Tournament } from '@/lib/types'; // Keep this for existing tournament logic
+import type { SportId, Tournament } from '@/lib/types'; // Keep this for existing tournament logic
 import TournamentSeasonTag from '@/components/TournamentSeasonTag';
 import CountryFlag from '@/components/CountryFlag';
 import { useFavorites } from '@/hooks/useFavorites';
 import { useMatchesStore } from '@/hooks/useMatchesStore';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { loadManualTournaments } from '@/lib/catalog/manualTournaments';
+import { earlyFetch, sharedJson } from '@/lib/home/earlyFetch';
+import { getSportById } from '@/lib/data/sports';
 import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import ClubsPromoCard from '@/components/clubs-promo/ClubsPromoCard';
 import XvIdealAcceso from '@/components/xvIdeal/XvIdealAcceso';
@@ -649,6 +651,28 @@ function mapPublicTournamentToTournament(item: PublicTournamentListItem): Tourna
 // Types moved inside or imported if needed
 
 // Generate dates for the date picker (timezone-aware)
+/**
+ * "Hoy", "Ayer", "Hace 3 días", "Hace 2 semanas" y, de un mes para atrás, la
+ * fecha ("28 de octubre"). Antes iba `toLocaleDateString()` sin idioma: cada
+ * navegador la escribía a su manera y no se leía cuán vieja era la nota.
+ */
+function cuandoSePublico(iso: string): string {
+  const fecha = new Date(iso);
+  if (Number.isNaN(fecha.getTime())) return '';
+  const dias = Math.floor((Date.now() - fecha.getTime()) / 86_400_000);
+  if (dias <= 0) return 'Hoy';
+  if (dias === 1) return 'Ayer';
+  if (dias < 7) return `Hace ${dias} días`;
+  if (dias < 30) {
+    const semanas = Math.floor(dias / 7);
+    return semanas === 1 ? 'Hace una semana' : `Hace ${semanas} semanas`;
+  }
+  return fecha.toLocaleDateString('es-AR', { day: 'numeric', month: 'long' });
+}
+
+/** Huecos de la tira de fechas antes de saber la zona (mismo largo: -7..+7). */
+const DATE_PLACEHOLDERS = Array.from({ length: 15 }, (_, index) => `placeholder-${index}`);
+
 function generateDates(timeZone: string) {
   const entries = generateLocalDateKeys(timeZone, -7, 7);
   const today = new Date();
@@ -1016,7 +1040,7 @@ export default function HomePage() {
   const [leagueUnions, setLeagueUnions] = useState<UnionConRegion[]>([]);
   useEffect(() => {
     const controller = new AbortController();
-    fetch('/api/public/unions', { signal: controller.signal })
+    earlyFetch('/api/public/unions', { signal: controller.signal })
       .then((response) => response.json())
       .then((payload) => {
         if (Array.isArray(payload?.data)) setLeagueUnions(payload.data as UnionConRegion[]);
@@ -1969,7 +1993,7 @@ export default function HomePage() {
           scope: 'summary',
         });
 
-        const response = await fetch(`/api/public/tournaments?${searchParams.toString()}`, {
+        const response = await earlyFetch(`/api/public/tournaments?${searchParams.toString()}`, {
           signal: controller.signal,
         });
         const payload = await response.json().catch(() => ({}));
@@ -2098,10 +2122,10 @@ export default function HomePage() {
     setSelectedDate(today);
 
     // Fetch real news
-    fetch('/api/news')
-      .then(res => res.json())
+    // Compartido con el ticker de titulares, que pide lo mismo.
+    sharedJson<{ data?: any[] }>('/api/news')
       .then(json => {
-        if (json.data) setNews(json.data);
+        if (json?.data) setNews(json.data);
       })
       .catch(err => console.error('Error fetching news:', err));
 
@@ -2147,6 +2171,51 @@ export default function HomePage() {
   }, [selectedDate, dates]);
 
   const selectedDateInfo = dates.find(d => d.date === selectedDate);
+
+  // Las del deporte que se está mirando primero; si no hay ninguna, las últimas
+  // de cualquiera (con su rótulo, que antes decía "Rugby" para todas).
+  const feedNews = useMemo(() => {
+    const ofSport = news.filter((item) => item?.sport === selectedSport.id);
+    return (ofSport.length > 0 ? ofSport : news).slice(0, 5);
+  }, [news, selectedSport.id]);
+
+  // El próximo día con partidos, para no dejar al visitante frente a un "no hay
+  // nada" (un martes de rugby es lo normal). Se buscan los siguientes días de la
+  // tira de a uno y se corta en el primero con algo, con el MISMO filtro de
+  // segmento que el feed: un día con solo juveniles no le sirve a Mayores.
+  // Las respuestas salen de la caché del servidor; son pedidos baratos.
+  const [nextMatchDay, setNextMatchDay] = useState<{ date: string; label: string; count: number } | null>(null);
+  const dayIsEmpty = !esTenis && !loading && !sourceError
+    && displayedMatchesByLeague.length === 0 && displayedFavoriteClubMatches.length === 0;
+  useEffect(() => {
+    setNextMatchDay(null);
+    if (!dayIsEmpty || !selectedDate) return;
+    const startIndex = dates.findIndex((d) => d.date === selectedDate);
+    if (startIndex < 0) return;
+    const candidates = dates.slice(startIndex + 1, startIndex + 8);
+    if (candidates.length === 0) return;
+
+    const controller = new AbortController();
+    (async () => {
+      for (const day of candidates) {
+        try {
+          const url = `/api/matches?date=${day.date}&sport=${selectedSport.id}&external=true&tz=${encodeURIComponent(userTimeZone)}`;
+          const response = await fetch(url, { signal: controller.signal });
+          if (!response.ok) continue;
+          const payload = await response.json();
+          const list: any[] = Array.isArray(payload) ? payload : (Array.isArray(payload?.data) ? payload.data : []);
+          const count = list.filter((match) => match?.tournament && shouldIncludeMatchForAudience(match.tournament)).length;
+          if (count > 0) {
+            if (!controller.signal.aborted) setNextMatchDay({ date: day.date, label: day.label, count });
+            return;
+          }
+        } catch {
+          if (controller.signal.aborted) return;
+        }
+      }
+    })();
+    return () => controller.abort();
+  }, [dayIsEmpty, dates, selectedDate, selectedSport.id, shouldIncludeMatchForAudience, userTimeZone]);
 
   const isIndividualSport = INDIVIDUAL_SPORTS.has(selectedSport.id);
   const isMotorsportSport = selectedSport.id === 'motorsport';
@@ -2331,6 +2400,8 @@ export default function HomePage() {
                   key={sport.id}
                   type="button"
                   aria-label={sport.nameEs}
+                  title={sport.nameEs}
+                  aria-pressed={selectedSport.id === sport.id}
                   className={`${styles.sportChip} ${selectedSport.id === sport.id ? styles.active : ''}`}
                   onClick={() => setSelectedSport(sport)}
                 >
@@ -2362,6 +2433,14 @@ export default function HomePage() {
               <div className={styles.dateSelectorInner}>
                 {/* Desktop/Tablet Scrolling List */}
                 <div className={styles.dateList} ref={dateListRef}>
+                  {/* Las fechas dependen de la zona del navegador y se arman en un
+                      efecto. Hasta entonces van huecos del mismo tamaño: sin ellos
+                      la tira nacía con alto cero y empujaba el feed al aparecer. */}
+                  {dates.length === 0 && DATE_PLACEHOLDERS.map((key) => (
+                    <span key={key} className={styles.dateItem} aria-hidden="true" style={{ visibility: 'hidden' }}>
+                      <span className={styles.dateLabel}>Hoy</span>
+                    </span>
+                  ))}
                   {dates.map((date) => (
                     <button
                       key={date.date}
@@ -2531,6 +2610,17 @@ export default function HomePage() {
                         ? 'No se encontraron encuentros de juveniles ni de reserva para esta fecha.'
                         : 'No se encontraron encuentros para esta fecha.'}
                   </p>
+                  {/* Un día vacío no es un callejón: se ofrece el próximo con partidos. */}
+                  {!showLiveOnly && nextMatchDay && (
+                    <button
+                      type="button"
+                      className={styles.nextMatchDayBtn}
+                      onClick={() => setSelectedDate(nextMatchDay.date)}
+                    >
+                      Ver {nextMatchDay.label.toLowerCase()} · {nextMatchDay.count} {nextMatchDay.count === 1 ? 'partido' : 'partidos'}
+                      <ChevronRight size={16} aria-hidden="true" />
+                    </button>
+                  )}
                 </div>
               )}
 
@@ -2793,14 +2883,15 @@ export default function HomePage() {
               {!loading && news.length > 0 && (
                 <section className={styles.feedNews} aria-labelledby="feed-news-titulo">
                   <div className={styles.feedNewsHeader}>
-                    <h2 id="feed-news-titulo" className={styles.feedNewsTitle}>Noticias Recientes</h2>
+                    {/* "Últimas" y no "Recientes": la última nota puede tener semanas, y la fecha de cada una ya lo dice. */}
+                    <h2 id="feed-news-titulo" className={styles.feedNewsTitle}>Últimas noticias</h2>
                     <Link href="/noticias" className={styles.feedNewsLink}>
                       Ver noticias →
                     </Link>
                   </div>
 
                   <div className={styles.newsList}>
-                    {news.slice(0, 5).map((item) => (
+                    {feedNews.map((item) => (
                       <Link key={item.id} href={newsPath(item)} className={styles.newsCard}>
                         <div
                           className={styles.newsImage}
@@ -2809,11 +2900,13 @@ export default function HomePage() {
                           {!item.image_url && <Trophy size={16} style={{ opacity: 0.2 }} />}
                         </div>
                         <div className={styles.newsContent}>
-                          <span className={styles.newsCategory}>Rugby</span>
+                          <span className={styles.newsCategory}>{(item.sport && getSportById(item.sport as SportId)?.nameEs) || 'Rugby'}</span>
                           <h3 className={styles.newsTitle}>{item.title}</h3>
-                          <span className={styles.newsTime}>
-                            {item.published_at ? new Date(item.published_at).toLocaleDateString() : 'Reciente'}
-                          </span>
+                          {item.published_at && (
+                            <time className={styles.newsTime} dateTime={item.published_at}>
+                              {cuandoSePublico(item.published_at)}
+                            </time>
+                          )}
                         </div>
                       </Link>
                     ))}

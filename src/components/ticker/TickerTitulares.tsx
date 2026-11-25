@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { FavoriteItem } from '@/hooks/useFavorites';
 import { newsPath } from '@/lib/news/newsUrl';
+import { sharedJson } from '@/lib/home/earlyFetch';
 
 import styles from './TickerTitulares.module.css';
 
@@ -123,11 +124,12 @@ function cuandoJuega(timestamp: number, timeZone: string): string {
     return `${diaSemana} ${diaMes} ${hora}`;
 }
 
-async function traerTitulares(signal: AbortSignal): Promise<Pieza[]> {
-    const res = await fetch('/api/news', { cache: 'no-store', signal });
-    if (!res.ok) return [];
-
-    const payload = (await res.json()) as { data?: NewsLike[] | null };
+// Sin signal: la respuesta es la misma que pide la home para su lista de
+// noticias (`sharedJson`), así que no se corta; quien llama ignora el resultado
+// si ya se desmontó.
+async function traerTitulares(): Promise<Pieza[]> {
+    const payload = await sharedJson<{ data?: NewsLike[] | null }>('/api/news').catch(() => null);
+    if (!payload) return [];
     const filas = Array.isArray(payload?.data) ? payload.data : [];
 
     return filas
@@ -269,7 +271,7 @@ export default function TickerTitulares({ favorites }: { favorites: FavoriteItem
     useEffect(() => {
         const controller = new AbortController();
 
-        traerTitulares(controller.signal)
+        traerTitulares()
             .then((piezas) => {
                 if (!controller.signal.aborted) setTitulares(piezas);
             })

@@ -7,6 +7,8 @@ import styles from './WorldCupTicker.module.css';
 
 const FIFA_WC_TOURNAMENT_ID = 'espn-soccer-league-fifa.world';
 const FIFA_WC_URL = '/soccer/fifa/world-cup/';
+/** Día siguiente a la final del Mundial 2026 (19/7/2026). Para el próximo, otra fecha. */
+const WORLD_CUP_ENDS_AT = Date.UTC(2026, 6, 20);
 
 type MatchLike = {
     event_key?: string;
@@ -39,6 +41,9 @@ export default function WorldCupTicker() {
 
     // Fetch the FIFA World Cup fixtures once on mount.
     useEffect(() => {
+        // Terminado el Mundial no hay próximo partido que contar: era un pedido
+        // de 0,5-1,3 s en cada página del sitio para no dibujar nada.
+        if (Date.now() > WORLD_CUP_ENDS_AT) return;
         const controller = new AbortController();
         (async () => {
             try {
