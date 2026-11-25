@@ -2673,15 +2673,23 @@ function evolveRatings(r: CareerState) {
 /** Cuánto del rendimiento de un año sigue al siguiente, y el techo (y piso) de ese rendimiento. */
 const RATING_KEEP = 0.55;
 const RATING_CAP = 8;
-/** La forma de fondo: un paseo al azar que vuelve de a poco a cero (el nivel de catálogo) y no pasa de ±DRIFT_CAP. */
+/**
+ * La forma de fondo: un paseo al azar que vuelve de a poco hacia su lugar (`pedigreeOf`: la tradición
+ * del club y la media de su regional; cero en los torneos sin historia) y no pasa de ±DRIFT_CAP.
+ * Con 0,9-0,92 de memoria una época dura unos diez años y después rota, como en la historia real. Con
+ * 0,97 (lo que había) duraba unos 30: el mismo club ganaba toda la carrera.
+ */
 const DRIFT_KEEP = 0.9;
-const DRIFT_KEEP_BIG = 0.97;
+const DRIFT_KEEP_BIG = 0.92;
 /** Desde qué nivel de catálogo un club es "grande". */
 const BIG_CLUB = 79;
-const DRIFT_STEP = 3.2;
-const DRIFT_CAP = 10;
-/** El año de un club: qué tan seguido es extraordinario y de cuántos puntos de nivel. */
-const HOT_ODDS = 0.16;
+const DRIFT_STEP = 4.5;
+const DRIFT_CAP = 14;
+/**
+ * El año de un club: qué tan seguido es extraordinario y de cuántos puntos de nivel. Uno de cada veinte:
+ * más seguido (era uno de cada seis) cortaba las épocas al azar y el campeón repetía menos que en la realidad.
+ */
+const HOT_ODDS = 0.05;
 const HOT_MIN = 5;
 const HOT_SPAN = 6;
 
@@ -2695,6 +2703,45 @@ function titleMomentum(r: CareerState, club: string): number {
     const y = r.youth?.[club];
     const pool = y ? (y[2] + y[3]) / 2 - centerOf(club) : (Math.random() - 0.35) * 2;
     return hot * 0.25 + clampN(0.5 + pool * 1.5, 0, 3);
+}
+
+/** Cuántos años de historia real mira la tradición, y cuántos puntos de nivel vale. */
+const PEDIGREE_YEARS = 40;
+const PEDIGREE_SCALE = 8;
+/** Cuánto de su distancia a la media de su regional devuelve, a la larga, un club (el catálogo es una foto de hoy). */
+const CATALOG_PULL = 0.5;
+let pedigree: Map<string, number> | null = null;
+
+/**
+ * Hacia dónde vuelve, con los años, la forma de fondo de un club de un regional con historia. Dos cosas:
+ *
+ * - Su tradición: cuánto más (o menos) de su parte justa de títulos ganó en los últimos 40 años
+ *   reales (palmares.ts). La historia dice quiénes son los grandes de cada región: en la URBA las
+ *   épocas rotan entre San Isidro, Hindú y Alumni; en Córdoba, entre Tala y La Tablada; en Pampeana
+ *   casi todo queda entre Mar del Plata e IPR, como pasó de verdad.
+ * - El catálogo es el ranking de hoy: un club en su pico (Newman, bicampeón con 89) arranca como
+ *   favorito, pero con los años devuelve parte de su ventaja sobre la media del regional. Sin esto
+ *   ganaba la mitad de los títulos de 40 temporadas; en los 40 años reales, ningún club pasó del 35 %.
+ *
+ * Calibrado contra la historia con scripts/sim-seven-vs-real.ts. Un regional con poca historia cargada
+ * (menos de 10 años) no entra: ahí manda el catálogo, como antes.
+ */
+function pedigreeOf(club: string): number {
+    if (!pedigree) {
+        pedigree = new Map();
+        for (const d of AR_SEVEN_DIVISIONS) {
+            const rows = [...realTitles(d.id)].sort((a, b) => a.season - b.season).slice(-PEDIGREE_YEARS);
+            if (rows.length < 10 || !d.clubs.length) continue;
+            const won = new Map<string, number>();
+            for (const t of rows) if (t.club) won.set(t.club, (won.get(t.club) ?? 0) + 1);
+            const mean = d.clubs.reduce((a, c) => a + baseRatingOf(c), 0) / d.clubs.length;
+            for (const c of d.clubs) {
+                const tradition = PEDIGREE_SCALE * ((won.get(c) ?? 0) / rows.length - 1 / d.clubs.length);
+                pedigree.set(c, tradition + CATALOG_PULL * (mean - baseRatingOf(c)));
+            }
+        }
+    }
+    return pedigree.get(club) ?? 0;
 }
 
 /**
@@ -2712,13 +2759,15 @@ function evolveDrift(r: CareerState) {
         const d = prev[club] ?? 0;
         // Los grandes sostienen su época (una hegemonía dura años); los del medio suben y bajan más rápido.
         const keep = baseRatingOf(club) >= BIG_CLUB ? DRIFT_KEEP_BIG : DRIFT_KEEP;
-        let v = d * keep + gauss(Math.random) * DRIFT_STEP;
+        // Vuelve de a poco hacia su tradición (no hacia cero): los grandes de la historia reaparecen.
+        const home = pedigreeOf(club);
+        let v = home + (d - home) * keep + gauss(Math.random) * DRIFT_STEP;
         if (champs.has(club)) v += titleMomentum(r, club);
         const rounded = Math.round(clampN(v, -DRIFT_CAP, DRIFT_CAP) * 2) / 2;
         if (rounded) next[club] = rounded;
     }
     r.drift = next;
-    // El año que viene: casi todos igual que siempre, pero uno de cada ocho tiene un año redondo (o un desastre).
+    // El año que viene: casi todos igual que siempre, pero uno de cada veinte tiene un año redondo (o un desastre).
     const hot: Record<string, number> = {};
     for (const club of [...ids].sort()) {
         const v = Math.random() < HOT_ODDS ? (Math.random() < 0.65 ? 1 : -1) * (HOT_MIN + Math.random() * HOT_SPAN) : gauss(Math.random) * 1.5;
