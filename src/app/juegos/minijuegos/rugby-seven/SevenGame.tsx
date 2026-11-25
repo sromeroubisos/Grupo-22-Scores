@@ -142,7 +142,7 @@ import { advanceRoad, AUTO_QUALIFIED, createRoad, PHASE_LABEL, regionalDef, regi
 import { advanceIntl, compName, createIntl, intlBoosts, intlInvest, intlNames, intlSign, intlStartComp, intlToggleCall, intlToggleStarter, intlVerdict, isWcYear } from './intl';
 import { IntlRanking, IntlSeason, IntlSquad, IntlUnion, IntlYouth } from './IntlPanels';
 import { advanceSvns, createSvns, SVNS_LEGS, SVNS_PHASE_LABEL, svnsBoosts, svnsRegionName, svnsStartTier, svnsTable, svnsVerdict, TIER_LABEL } from './svns';
-import { CloudSync, type CloudStatus } from './cloudSave';
+import { CloudSync, markTutorialSeenInAccount, tutorialSeenInAccount, type CloudStatus } from './cloudSave';
 import { readLang, startTranslating, writeLang, type Lang } from './i18n';
 import { applyStoredClubEdits, EDITABLE_CLUBS, isClubEdited, resetClubEdit, saveClubEdit } from './clubEdits';
 import styles from './seven.module.css';
@@ -766,16 +766,33 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
         if (c) setCoachName(c);
         else if (c === '') setAskCoach(true);
     }, []);
-    // El tutorial sale una sola vez por dispositivo, la primera vez que se abre el juego. Se anota al
-    // arrancarlo, así no vuelve aunque lo salteen o cierren la pestaña a la mitad.
+    // El tutorial sale una sola vez, la primera vez que se abre el juego. Se anota al arrancarlo, así
+    // no vuelve aunque lo salteen o cierren la pestaña a la mitad. Lo recuerdan el navegador Y la
+    // cuenta: hay celulares que borran el navegador al cerrar (el de Instagram o WhatsApp, el modo
+    // incógnito) y ahí salía en cada visita. Sin la marca local se le pregunta a la cuenta antes de
+    // mostrarlo; sin sesión la cuenta contesta que no y todo queda como antes.
     useEffect(() => {
+        let seenHere: boolean;
         try {
-            if (localStorage.getItem(TUTORIAL_KEY) === '1') return;
-            localStorage.setItem(TUTORIAL_KEY, '1');
+            seenHere = localStorage.getItem(TUTORIAL_KEY) === '1';
         } catch {
             return; // Sin localStorage no hay cómo recordarlo: mejor no mostrarlo en cada visita.
         }
-        setScreen({ k: 'drill', kind: 'tutorial', nonce: nextNonce() });
+        if (seenHere) return; // la cuenta se pone al día en el efecto de abajo, si hay sesión
+        let cancelled = false;
+        void tutorialSeenInAccount().then((seenInAccount) => {
+            if (cancelled) return;
+            try {
+                localStorage.setItem(TUTORIAL_KEY, '1');
+            } catch {
+                // Sin localStorage: la cuenta igual lo recuerda si hay sesión.
+            }
+            void markTutorialSeenInAccount();
+            if (!seenInAccount) setScreen({ k: 'drill', kind: 'tutorial', nonce: nextNonce() });
+        });
+        return () => {
+            cancelled = true;
+        };
     }, []);
     // Un solo objeto: la vista del partido rearma el motor cada vez que cambia la config.
     const drillConfig = useMemo(drillCfg, []);
@@ -871,6 +888,18 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
             alive = false;
         };
     }, [loaded, userId]);
+
+    // Con sesión, el tutorial visto en este navegador se anota también en la cuenta (una vez): así,
+    // si el celular borra el navegador, la próxima visita no lo vuelve a mostrar.
+    useEffect(() => {
+        if (!userId) return;
+        try {
+            if (localStorage.getItem(TUTORIAL_KEY) !== '1') return;
+        } catch {
+            return;
+        }
+        void markTutorialSeenInAccount();
+    }, [userId]);
 
     // Música de los menús: suena en todo lo que no es el partido (el partido tiene la suya).
     // Los navegadores no dejan arrancar audio solo: empieza con el primer toque o tecla.

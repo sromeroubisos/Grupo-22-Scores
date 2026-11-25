@@ -210,6 +210,73 @@ export class CloudSync {
     }
 }
 
+/* ───────── tutorial visto ───────── */
+
+// "Ya viste el tutorial" en la cuenta, aparte de las partidas. El navegador lo
+// recuerda en localStorage, pero hay celulares que lo borran al cerrar (el
+// navegador de Instagram o WhatsApp, el modo incógnito): ahí el tutorial salía
+// en cada visita. Con sesión, la cuenta es la que se acuerda.
+const TUTORIAL_GAME = 'rugby-seven-tutorial';
+const TUTORIAL_SYNCED_KEY = 'g22-rugby-seven-tutorial-cloud';
+const TUTORIAL_TIMEOUT_MS = 3000;
+
+async function hasRows(game: string, signal: AbortSignal): Promise<boolean> {
+    const res = await fetch(`${API}?game=${game}`, { credentials: 'same-origin', cache: 'no-store', signal });
+    if (!res.ok) return false; // 401 sin sesión: la cuenta no sabe nada
+    const body = (await res.json()) as { slots?: unknown[] };
+    return Array.isArray(body.slots) && body.slots.length > 0;
+}
+
+/**
+ * ¿La cuenta dice que este jugador ya pasó por el juego? Sí si tiene la marca del
+ * tutorial o cualquier partida guardada (quien jugó antes de que existiera la
+ * marca tampoco tiene que volver a verlo). Sin sesión, sin red o tarde: false.
+ */
+export async function tutorialSeenInAccount(): Promise<boolean> {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), TUTORIAL_TIMEOUT_MS);
+    try {
+        const [flag, saves] = await Promise.all([
+            hasRows(TUTORIAL_GAME, controller.signal).catch(() => false),
+            hasRows(GAME, controller.signal).catch(() => false),
+        ]);
+        return flag || saves;
+    } finally {
+        clearTimeout(timer);
+    }
+}
+
+/**
+ * Anota el tutorial como visto en la cuenta. Una sola vez por navegador: si la
+ * cuenta contestó bien, queda la marca local y no se vuelve a mandar. Sin
+ * sesión (401) no se marca nada y se reintenta en la próxima visita, por si
+ * después inicia sesión.
+ */
+export async function markTutorialSeenInAccount(): Promise<void> {
+    try {
+        if (localStorage.getItem(TUTORIAL_SYNCED_KEY) === '1') return;
+    } catch {
+        // Sin localStorage: se manda igual, es un pedido chico.
+    }
+    try {
+        const res = await fetch(API, {
+            method: 'PUT',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' },
+            // `data` tiene que ser base64: "MQ==" es "1".
+            body: JSON.stringify({ game: TUTORIAL_GAME, slot: 0, data: 'MQ==', savedAt: Date.now() }),
+        });
+        if (!res.ok) return;
+        try {
+            localStorage.setItem(TUTORIAL_SYNCED_KEY, '1');
+        } catch {
+            // Sin localStorage: la próxima visita lo vuelve a mandar.
+        }
+    } catch {
+        // Sin red: se reintenta en la próxima visita.
+    }
+}
+
 /** Abre y valida un casillero que vino de la cuenta (undefined si no sirve). */
 async function parseSlot(slot: number, data: string): Promise<unknown> {
     try {
