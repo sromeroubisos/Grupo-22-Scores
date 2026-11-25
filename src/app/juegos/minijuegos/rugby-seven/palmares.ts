@@ -12,7 +12,7 @@
  * juego los cruza con sus clubes por nombre (ver `matchClub`).
  */
 
-import { AR_CLUBS } from './arClubs';
+import { AR_CLUBS, AR_SEVEN_DIVISIONS } from './arClubs';
 
 /** Hasta qué año va la historia real (incluido). */
 export const REAL_UNTIL = 2026;
@@ -37,6 +37,19 @@ const RAW: Record<string, string> = {
         '2008:IPR Sporting|2009:IPR Sporting|2010:IPR Sporting|2011:IPR Sporting|2012:IPR Sporting|2013:Mar del Plata Club|2014:Mar del Plata Club|2015:Mar del Plata Club|2016:Mar del Plata Club|2017:IPR Sporting|2018:Mar del Plata Club|2019:Sociedad Sportiva de Bahía Blanca|2021:Mar del Plata Club|2022:Mar del Plata Club|2023:Mar del Plata Club|2024:Mar del Plata Club|2025:Mar del Plata Club|2026:Sociedad Sportiva de Bahía Blanca',
     'ar-patagonia-regional':
         '2008:Neuquén R.C.|2009:Marabunta R.C.|2010:Neuquén R.C.|2011:Neuquén R.C.|2012:Neuquén R.C.|2013:Neuquén R.C.|2014:Neuquén R.C.|2015:Neuquén R.C.|2016:Bigornia R.C.|2017:Roca R.C.|2018:Roca R.C.|2019:Roca R.C.|2022:Deportivo Portugués|2023:Bigornia R.C.|2024:Neuquén R.C.|2025:Neuquén R.C.|2026:Neuquén R.C.',
+    // Sumados el 2026-11-25 desde tournament_seasons (mismo origen que los de arriba).
+    'ar-nea-a':
+        '1963:Sixty R.C.|1964:Sixty R.C.|1965:Sixty R.C.|1966:Sixty R.C.|1967:Sixty R.C.|1968:Sixty R.C.|1969:Sixty R.C.|1970:Sixty R.C.|1971:Taraguy R.C.|1972:Regatas de Resistencia|1973:Aranduroga R.C.|1974:Cotton R.C.|1975:Taraguy R.C.|1976:CURNE|1977:Taraguy R.C.|1978:Aranduroga R.C.|1979:CURNE|1980:CURNE|1981:CURNE|1982:Aranduroga R.C.|1983:CURNE|1984:Aguará|1985:Sixty R.C.|1986:CURNE|1987:CURNE|1988:CURNE|1989:CURNE|1990:CURNE|1991:Aranduroga R.C.|1992:Aranduroga R.C.|1993:Aranduroga R.C.|1994:Aranduroga R.C.|1995:Aranduroga R.C.|1996:Taraguy R.C.|1997:Taraguy R.C.|1998:Taraguy R.C.|1999:Aranduroga R.C.|2000:Taraguy R.C.|2001:Aranduroga R.C.|2002:Taraguy R.C.|2003:Taraguy R.C.|2004:Taraguy R.C.|2005:Taraguy R.C.|2006:Taraguy R.C.|2007:Taraguy R.C.|2008:CURNE|2009:CURNE|2010:Regatas de Resistencia|2011:Aranduroga R.C.|2012:CURNE|2013:CURNE|2014:CURNE|2015:San Patricio|2016:Taraguy R.C.|2017:CURNE|2018:Taraguy R.C.|2019:CURNE|2021:CURNE|2022:CURNE|2023:CURNE|2024:CURNE|2025:CURNE|2026:CURNE',
+    'ar-oeste-oro':
+        '2000:Marista Rugby Club|2001:Los Tordos Rugby Club|2002:Los Tordos Rugby Club|2003:Los Tordos Rugby Club|2004:Los Tordos Rugby Club|2005:Mendoza Rugby Club|2006:Marista Rugby Club|2007:Mendoza Rugby Club|2008:Los Tordos Rugby Club|2009:Liceo Rugby Club|2010:Liceo Rugby Club|2011:Marista Rugby Club|2012:Liceo Rugby Club|2013:Los Tordos Rugby Club|2014:Los Tordos Rugby Club|2015:Marista Rugby Club|2016:Liceo Rugby Club|2017:Los Tordos Rugby Club|2018:Los Tordos Rugby Club|2019:Marista Rugby Club|2021:Marista Rugby Club|2022:Teqüe R.C.|2023:Marista Rugby Club|2024:Marista Rugby Club|2025:Marista Rugby Club|2026:Los Tordos Rugby Club',
+    'ar-urba-primera-a':
+        '2004:San Martín|2005:Club San Patricio|2006:Universitario de La Plata|2007:San Carlos|2008:St. Brendan\'s|2009:Liceo Naval|2010:Curupaytí|2011:Banco Nación|2012:Mariano Moreno|2013:Deportiva Francesa|2014:Curupaytí|2015:Delta R.C.|2016:Club Italiano|2026:San Cirano',
+    'cl-top10':
+        '1948:PWCC|1949:Universidad Católica|1950:Universidad Federico Santa María|1951:PWCC|1952:PWCC|1953:PWCC|1954:Old Boys R.C.|1955:PWCC|1956:Stade Francais|1957:Stade Francais|1958:PWCC|1959:Stade Francais|1960:PWCC|1961:PWCC|1962:PWCC|1963:Stade Francais|1964:PWCC|1965:Universidad Católica|1966:Old Boys R.C.|1967:PWCC|1968:PWCC|1969:Old Boys R.C.|1970:Old Boys R.C.|1971:PWCC|1972:PWCC|1973:Stade Francais|1974:Stade Francais|1975:Universidad Católica|1976:Old Boys R.C.|1977:Old Boys R.C.|1978:Old Mackayans|1979:Old Boys R.C.|1980:COBS|1981:Old Mackayans|1982:Old Mackayans|1983:Old Boys R.C.|1984:Old Boys R.C.|1985:Old Boys R.C.|1986:Old Boys R.C.|1987:Old Boys R.C.|1988:Universidad Católica|1989:Universidad Católica|1990:Old Boys R.C.|1991:COBS|1992:Universidad Católica|1993:Stade Francais|1994:Old Boys R.C.|1995:Universidad Católica|1996:Universidad Católica|1997:Universidad Católica|1998:Universidad Católica|1999:Universidad Católica|2000:Old Mackayans|2001:CD Alumni|2002:Universidad Católica|2003:Universidad Católica|2004:Universidad Católica|2005:Old Boys R.C.|2006:Universidad Católica|2007:Los Troncos|2008:Old Mackayans|2009:Universidad Católica|2010:Stade Francais|2011:Stade Francais|2012:Old Boys R.C.|2013:COBS|2014:Old Mackayans|2015:PWCC|2016:COBS|2017:Old Boys R.C.|2018:COBS|2019:Universidad Católica|2021:COBS|2022:COBS|2023:COBS|2024:Old Boys R.C.|2025:Old Mackayans',
+    'uy-uruguayo':
+        '1951:Montevideo C.C.|1952:Old Boys & Girls Club|1953:Montevideo C.C.|1954:Trouville Rugby|1955:Colonia Rowing Club|1956:Montevideo C.C.|1957:Old Boys & Girls Club|1958:Colonia Rowing Club|1959:Old Boys & Girls Club|1960:Los Cuervos|1961:Carrasco Polo|1962:Old Boys & Girls Club|1963:Old Boys & Girls Club|1964:Old Boys & Girls Club|1965:Old Boys & Girls Club|1966:Carrasco Polo|1967:Old Boys & Girls Club|1968:Old Boys & Girls Club|1969:Old Boys & Girls Club|1970:Old Christians Club|1971:La Cachila|1972:La Cachila|1973:La Cachila|1974:La Cachila|1975:La Cachila|1976:Old Christians Club|1977:Old Christians Club|1978:Old Christians Club|1979:Old Christians Club|1980:Old Christians Club|1981:Carrasco Polo|1982:Old Christians Club|1983:Carrasco Polo|1984:Old Christians Club|1985:Old Christians Club|1986:Old Christians Club|1987:Old Christians Club|1988:Old Christians Club|1989:Old Christians Club|1990:Carrasco Polo|1991:Carrasco Polo|1992:Carrasco Polo|1993:Carrasco Polo|1994:Carrasco Polo|1995:Carrasco Polo|1996:Carrasco Polo|1997:Carrasco Polo|1998:Carrasco Polo|1999:Carrasco Polo|2000:Carrasco Polo|2001:Carrasco Polo|2002:Carrasco Polo|2003:Carrasco Polo|2004:Carrasco Polo|2005:Carrasco Polo|2006:Carrasco Polo|2007:Old Christians Club|2008:Carrasco Polo|2009:Carrasco Polo|2010:Old Boys & Girls Club|2011:Carrasco Polo|2012:Carrasco Polo|2013:Old Boys & Girls Club|2014:Carrasco Polo|2015:Old Christians Club|2016:Old Christians Club|2017:Old Christians Club|2018:Trébol de Paysandú|2019:Old Christians Club|2020:Carrasco Polo|2021:Old Boys & Girls Club|2022:Trébol de Paysandú|2023:Old Christians Club|2024:Old Christians Club|2025:Old Boys & Girls Club|2026:Old Boys & Girls Club',
+    'nacional-fem':
+        '2011:Sixty R.C. Femenino|2012:Cardenales R.C. Femenino|2013:Cardenales R.C. Femenino|2014:Cardenales R.C. Femenino|2015:Cardenales R.C. Femenino|2016:CAPRI Femenino|2017:La Plata Femenino|2018:Universidad Nacional de Córdoba Femenino|2019:Centro Naval Femenino|2021:Aguará Guazú Femenino|2022:Club Universitario de Córdoba Femenino|2023:Cardenales R.C. Femenino|2024:Taborín RC Femenino|2025:Cardenales R.C. Femenino|2026:Club Universitario de Córdoba Femenino',
 };
 
 /** Nombre de cada palmarés (las divisiones usan el de la división). */
@@ -62,18 +75,30 @@ const norm = (s: string) =>
         .toLowerCase()
         .replace(/[^a-z0-9 ]/g, ' ')
         // "Club", "R.C.", "de"… no distinguen; "Athletic" sí (Córdoba Athletic ≠ Córdoba Rugby Club).
-        .replace(/\b(club|rugby|r c|rc|asoc|f c|fc|crc|de)\b/g, ' ')
+        // "Femenino" tampoco: el palmarés del Nacional Femenino nombra "Cardenales R.C. Femenino".
+        .replace(/\b(club|rugby|r c|rc|asoc|f c|fc|crc|de|femenino)\b/g, ' ')
         .replace(/\s+/g, ' ')
         .trim();
 const ALIAS: Record<string, string> = { 'san isidro': 'SIC', 'buenos aires': 'Buenos Aires' };
+/** Nombres del archivo que no se parecen al del juego, directo al id. */
+const ALIAS_ID: Record<string, string> = { 'montevideo c c': 'uy-montevideo-cricket' };
 const BY_NAME = new Map<string, string>();
 for (const c of AR_CLUBS) BY_NAME.set(norm(c.name), c.id);
 
-/** El club del juego que corresponde a un nombre del archivo (o null si no está en el juego). */
-export function matchClub(name: string): string | null {
+/**
+ * El club del juego que corresponde a un nombre del archivo (o null si no está en el juego). Con
+ * `scope` (los clubes del torneo) busca primero ahí: "Stade Francais" del Top 10 de ARUSA es el
+ * chileno, no el de París, y "Regatas de Resistencia" del NEA es el de varones, no su equipo femenino.
+ */
+export function matchClub(name: string, scope?: readonly string[]): string | null {
     const n = norm(name);
     const alias = ALIAS[n];
     if (alias) return AR_CLUBS.find((c) => c.name === alias)?.id ?? null;
+    if (ALIAS_ID[n]) return ALIAS_ID[n];
+    if (scope?.length) {
+        const local = AR_CLUBS.find((c) => scope.includes(c.id) && norm(c.name) === n);
+        if (local) return local.id;
+    }
     return BY_NAME.get(n) ?? null;
 }
 
@@ -82,6 +107,11 @@ const parsed = new Map<string, TitleRow[]>();
 export function realTitles(key: string): TitleRow[] {
     const hit = parsed.get(key);
     if (hit) return hit;
+    // Los clubes del torneo; en las copas sin división (Nacional, TDI), los de su rama: "La Plata"
+    // campeón del Nacional es el de varones, no su equipo femenino. Si no está ahí, sigue en el resto
+    // (Carrasco Polo, uruguayo, ganó el TDI B).
+    const branch = key === 'nacional-fem' ? 'af-' : 'ar-';
+    const scope = AR_SEVEN_DIVISIONS.find((d) => d.id === key)?.clubs ?? AR_CLUBS.filter((c) => c.id.startsWith(branch)).map((c) => c.id);
     const rows = (RAW[key] ?? '')
         .split('|')
         .filter(Boolean)
@@ -89,7 +119,7 @@ export function realTitles(key: string): TitleRow[] {
             const i = pair.indexOf(':');
             const season = Number(pair.slice(0, i));
             const name = pair.slice(i + 1);
-            const club = matchClub(name);
+            const club = matchClub(name, scope);
             return { season, name: club ? AR_CLUBS.find((c) => c.id === club)?.name ?? name : name, club, game: false };
         })
         .filter((r) => r.season <= REAL_UNTIL);

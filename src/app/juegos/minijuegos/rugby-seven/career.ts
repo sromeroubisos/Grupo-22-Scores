@@ -2710,6 +2710,16 @@ const PEDIGREE_YEARS = 40;
 const PEDIGREE_SCALE = 8;
 /** Cuánto de su distancia a la media de su regional devuelve, a la larga, un club (el catálogo es una foto de hoy). */
 const CATALOG_PULL = 0.5;
+/**
+ * El dominio de cada liga: cuánto repite campeón en su historia contra una liga "normal" (URBA, Chile,
+ * NOA: un tercio de los años), al cuadrado y acotado. Multiplica la tradición: en el Uruguayo o el NEA
+ * (62 %) da ~3,5, en la URBA 1,2, en Chile 0,9. Medido con 16 carreras por rama contra los 14 torneos con
+ * historia: sin él el error era 3,83; con él, 2,89.
+ */
+const DOMINANCE_BASE = 0.33;
+const DOMINANCE_MIN = 0.6;
+const DOMINANCE_MAX = 4;
+const DOMINANCE_EXP = 2;
 let pedigree: Map<string, number> | null = null;
 
 /**
@@ -2735,8 +2745,13 @@ function pedigreeOf(club: string): number {
             const won = new Map<string, number>();
             for (const t of rows) if (t.club) won.set(t.club, (won.get(t.club) ?? 0) + 1);
             const mean = d.clubs.reduce((a, c) => a + baseRatingOf(c), 0) / d.clubs.length;
+            // Cada liga, su grado de dominio: cuánto repite campeón en su historia. En el Uruguayo o el
+            // NEA (62 %) el grande le saca mucha más distancia al resto que en la URBA o Chile (31-36 %).
+            const key = (t: (typeof rows)[number]) => t.club ?? t.name;
+            const repeat = rows.filter((t, i) => i > 0 && key(t) === key(rows[i - 1])).length / (rows.length - 1);
+            const dominance = clampN((repeat / DOMINANCE_BASE) ** DOMINANCE_EXP, DOMINANCE_MIN, DOMINANCE_MAX);
             for (const c of d.clubs) {
-                const tradition = PEDIGREE_SCALE * ((won.get(c) ?? 0) / rows.length - 1 / d.clubs.length);
+                const tradition = PEDIGREE_SCALE * dominance * ((won.get(c) ?? 0) / rows.length - 1 / d.clubs.length);
                 pedigree.set(c, tradition + CATALOG_PULL * (mean - baseRatingOf(c)));
             }
         }

@@ -2,12 +2,15 @@
 // Uso: npx tsx scripts/sim-seven-vs-real.ts [carreras] [temporadas]
 import { advanceCareer, applyCareerContext, careerRound, createCareer, preseasonDone } from '../src/app/juegos/minijuegos/rugby-seven/career';
 import { HOME_ADV, nextIsHome, nextOpponent, simulate } from '../src/app/juegos/minijuegos/rugby-seven/tours';
-import { AR_CLUBS } from '../src/app/juegos/minijuegos/rugby-seven/arClubs';
-import { realTitles } from '../src/app/juegos/minijuegos/rugby-seven/palmares';
+import { AR_SEVEN_DIVISIONS } from '../src/app/juegos/minijuegos/rugby-seven/arClubs';
+import { PALMARES_KEYS, realTitles } from '../src/app/juegos/minijuegos/rugby-seven/palmares';
 
 const RUNS = Number(process.argv[2] ?? 6);
 const SEASONS = Number(process.argv[3] ?? 40);
-const KEYS = ['ar-urba-top14', 'ar-centro-top10', 'ar-noa-a', 'ar-litoral-top10', 'ar-pampeana-a', 'ar-patagonia-regional', 'nacional', 'tdiA', 'tdiB'];
+// Todos los torneos con historia real de al menos 10 años.
+const KEYS = PALMARES_KEYS.filter((k) => realTitles(k).length >= 10);
+// Cada rama juega sus torneos: una carrera por rama con un club chico de esa rama.
+const BRANCHES = ['ar-', 'cl-', 'uy-', 'af-'];
 
 type M = { distinct: number; repeat: number; top1: number; top2: number; avgReign: number; dyn: number };
 function measure(seq: string[]): M {
@@ -22,9 +25,11 @@ function measure(seq: string[]): M {
 }
 const mean = (ms: M[]): M => { const o: any = {}; for (const k of Object.keys(ms[0]) as (keyof M)[]) o[k] = ms.reduce((a, m) => a + m[k], 0) / ms.length; return o; };
 
-const small = (AR_CLUBS as { id: string }[]).map((c) => c.id).filter((id) => id.startsWith('ar-')).slice(-1)[0];
 const runs: Record<string, [number, string][]>[] = [];
-for (let run = 0; run < RUNS; run++) {
+for (const prefix of BRANCHES) for (let run = 0; run < RUNS; run++) {
+  // Un club que juegue en alguna división de la rama (el último de la última: chico).
+  const divs = (AR_SEVEN_DIVISIONS as { clubs: string[] }[]).filter((d) => d.clubs[0]?.startsWith(prefix));
+  const small = divs[divs.length - 1].clubs.slice(-1)[0];
   let s = createCareer(small, 'normal', 3);
   const start = s.career!.season;
   for (let g = 0; g < SEASONS * 40 && s.career!.season < start + SEASONS; g++) {
