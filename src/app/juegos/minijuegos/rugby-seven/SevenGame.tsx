@@ -1371,10 +1371,11 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
 
     /* ---- teclado en los menús: flechas para mover, Enter para entrar ---- */
     const onMenuKey = (e: React.KeyboardEvent<HTMLDivElement>) => {
-        if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+        // Con las tarjetas en grilla, las cuatro flechas recorren el menú en orden.
+        if (!['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'].includes(e.key)) return;
         const btns = [...e.currentTarget.querySelectorAll<HTMLButtonElement>('button')];
         const i = btns.indexOf(document.activeElement as HTMLButtonElement);
-        btns[wrap(i + (e.key === 'ArrowDown' ? 1 : -1), btns.length)]?.focus();
+        btns[wrap(i + (e.key === 'ArrowDown' || e.key === 'ArrowRight' ? 1 : -1), btns.length)]?.focus();
         e.preventDefault();
     };
 
@@ -1489,167 +1490,182 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                             </div>
                         </div>
                         <div className={styles.menu} onKeyDown={onMenuKey} role="menu" aria-label="Menú principal">
-                            <button type="button" role="menuitem" className={styles.menuBtn} onClick={() => setScreen({ k: 'quick', step: 1 })}>
-                                <span className={styles.menuIcon} aria-hidden="true">▶</span>
-                                <strong>Partido rápido</strong>
-                                <span>Elegís los dos equipos y a la cancha.</span>
-                            </button>
-                            <button type="button" role="menuitem" className={styles.menuBtn} onClick={() => setScreen({ k: 'drill', kind: 'practice', nonce: nextNonce() })}>
-                                <span className={styles.menuIcon} aria-hidden="true">◎</span>
-                                <strong>Práctica</strong>
-                                <span>Repetí los ejercicios: moverte, pasar, chocar, tacklear, el ruck y patear.</span>
-                            </button>
-                            <button type="button" role="menuitem" className={styles.menuBtn} onClick={() => setScreen({ k: 'slots' })}>
-                                <span className={styles.menuIcon} aria-hidden="true">★</span>
-                                <strong>Torneos</strong>
-                                <span>{savedCount ? `${savedCount} de ${TOUR_SLOTS} partidas guardadas.` : 'Selecciones, clubes de Europa y del sur, y el rugby argentino.'}</span>
-                            </button>
-                            {(() => {
-                                // Si ya hay una carrera guardada, este botón la retoma; si no, arranca una en la primera partida libre.
-                                const careerSlot = tours.findIndex((t) => !!t?.career);
-                                const live = careerSlot >= 0 ? tours[careerSlot]?.career : null;
-                                return (
+                            <div className={styles.menuGroup} role="group" aria-labelledby="menu-jugar">
+                                <h2 className={styles.menuGroupTitle} id="menu-jugar">Jugar ahora<small>Un partido y listo</small></h2>
+                                <div className={styles.menuGrid}>
+                                    <button type="button" role="menuitem" className={styles.menuBtn} onClick={() => setScreen({ k: 'quick', step: 1 })}>
+                                        <span className={styles.menuIcon} aria-hidden="true">▶</span>
+                                        <strong>Partido rápido</strong>
+                                        <span>Elegís los dos equipos y a la cancha.</span>
+                                    </button>
+                                    <button type="button" role="menuitem" className={styles.menuBtn} onClick={() => setScreen({ k: 'drill', kind: 'practice', nonce: nextNonce() })}>
+                                        <span className={styles.menuIcon} aria-hidden="true">◎</span>
+                                        <strong>Práctica</strong>
+                                        <span>Repetí los ejercicios: moverte, pasar, chocar, tacklear, el ruck y patear.</span>
+                                    </button>
+                                    <button type="button" role="menuitem" className={styles.menuBtn} onClick={() => setScreen(cupLive ? { k: 'cup' } : { k: 'cupSetup', step: 1 })}>
+                                        <span className={styles.menuIcon} aria-hidden="true">♛</span>
+                                        <strong>{cupLive ? 'Seguir la Copa Seven' : 'Copa Seven'}</strong>
+                                        <span>{cupLive && cup ? `Te toca: ${CUP_ROUNDS[cup.round].toLowerCase()}.` : 'Cuartos, semi y final contra rivales al azar.'}</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div className={styles.menuGroup} role="group" aria-labelledby="menu-carreras">
+                                <h2 className={styles.menuGroupTitle} id="menu-carreras">Carreras<small>Temporada tras temporada, con guardado</small></h2>
+                                <div className={styles.menuGrid}>
+                                    {(() => {
+                                        // Mi Club: si ya hay uno fundado, lo retoma; si no, lo funda en la primera partida libre.
+                                        const mcSlot = tours.findIndex((t) => !!t?.miclub);
+                                        const live = mcSlot >= 0 ? tours[mcSlot]?.miclub : null;
+                                        return (
+                                            <button
+                                                type="button"
+                                                role="menuitem"
+                                                className={styles.menuBtn}
+                                                onClick={() => {
+                                                    if (live) {
+                                                        setSlot(mcSlot);
+                                                        setHubTab('tabla');
+                                                        setScreen({ k: 'tour' });
+                                                        return;
+                                                    }
+                                                    const free = tours.findIndex((t) => !t);
+                                                    if (free < 0) {
+                                                        setScreen({ k: 'slots' });
+                                                        return;
+                                                    }
+                                                    setSlot(free);
+                                                    setMcDraft(null);
+                                                    setMcRegion(null);
+                                                    setScreen({ k: 'mcSetup', step: 1 });
+                                                }}
+                                            >
+                                                <span className={styles.menuIcon} aria-hidden="true">⚑</span>
+                                                <strong>{live ? 'Seguir con Mi Club' : 'Mi Club'}</strong>
+                                                <span>
+                                                    {live
+                                                        ? `${live.team.name} · temporada ${live.season} · ${levelDef(levelOf(live, live.me) ?? 'base').label}.`
+                                                        : tours.some((t) => !t)
+                                                          ? 'Fundás tu club y lo llevás de la Regional a Primera, en Argentina o en Sudamérica.'
+                                                          : 'Las tres partidas están ocupadas: borrá una para empezar.'}
+                                                </span>
+                                            </button>
+                                        );
+                                    })()}
+                                    {(() => {
+                                        // Si ya hay una carrera guardada, este botón la retoma; si no, arranca una en la primera partida libre.
+                                        const careerSlot = tours.findIndex((t) => !!t?.career);
+                                        const live = careerSlot >= 0 ? tours[careerSlot]?.career : null;
+                                        return (
+                                            <button
+                                                type="button"
+                                                role="menuitem"
+                                                className={styles.menuBtn}
+                                                onClick={() => {
+                                                    if (live) {
+                                                        setSlot(careerSlot);
+                                                        setHubTab('tabla');
+                                                        setScreen({ k: 'tour' });
+                                                        return;
+                                                    }
+                                                    const free = tours.findIndex((t) => !t);
+                                                    if (free < 0) {
+                                                        setScreen({ k: 'slots' });
+                                                        return;
+                                                    }
+                                                    setSlot(free);
+                                                    setScreen({ k: 'careerSetup', step: 0 });
+                                                }}
+                                            >
+                                                <span className={styles.menuIcon} aria-hidden="true">◆</span>
+                                                <strong>{live ? 'Seguir la carrera' : 'Modo carrera'}</strong>
+                                                <span>
+                                                    {live
+                                                        ? `${nameOf(live.me)} · temporada ${live.season} · ${divisionLabel(divisionOf(live, live.me) ?? '')}.`
+                                                        : tours.some((t) => !t)
+                                                          ? 'Un club de Argentina, Sudáfrica, Inglaterra, Francia, Portugal y más, varias temporadas: ascensos, descensos y títulos.'
+                                                          : 'Las tres partidas están ocupadas: borrá una para empezar.'}
+                                                </span>
+                                            </button>
+                                        );
+                                    })()}
                                     <button
                                         type="button"
                                         role="menuitem"
                                         className={styles.menuBtn}
                                         onClick={() => {
-                                            if (live) {
-                                                setSlot(careerSlot);
-                                                setHubTab('tabla');
-                                                setScreen({ k: 'tour' });
-                                                return;
-                                            }
                                             const free = tours.findIndex((t) => !t);
                                             if (free < 0) {
                                                 setScreen({ k: 'slots' });
                                                 return;
                                             }
                                             setSlot(free);
-                                            setScreen({ k: 'careerSetup', step: 0 });
+                                            setScreen({ k: 'intlSetup', step: 1 });
                                         }}
                                     >
-                                        <span className={styles.menuIcon} aria-hidden="true">◆</span>
-                                        <strong>{live ? 'Seguir la carrera' : 'Modo carrera'}</strong>
-                                        <span>
-                                            {live
-                                                ? `${nameOf(live.me)} · temporada ${live.season} · ${divisionLabel(divisionOf(live, live.me) ?? '')}.`
-                                                : tours.some((t) => !t)
-                                                  ? 'Un club de Argentina, Sudáfrica, Inglaterra, Francia, Portugal y más, varias temporadas: ascensos, descensos y títulos.'
-                                                  : 'Las tres partidas están ocupadas: borrá una para empezar.'}
-                                        </span>
+                                        <span className={styles.menuIcon} aria-hidden="true">◎</span>
+                                        <strong>Carrera internacional</strong>
+                                        <span>{tours.some((t) => !t) ? 'Una selección de XV, año tras año: divisiones, Mundial, ranking en vivo y el desarrollo de tu país.' : 'Las tres partidas están ocupadas: borrá una para empezar.'}</span>
                                     </button>
-                                );
-                            })()}
-                            {(() => {
-                                // Mi Club: si ya hay uno fundado, lo retoma; si no, lo funda en la primera partida libre.
-                                const mcSlot = tours.findIndex((t) => !!t?.miclub);
-                                const live = mcSlot >= 0 ? tours[mcSlot]?.miclub : null;
-                                return (
                                     <button
                                         type="button"
                                         role="menuitem"
                                         className={styles.menuBtn}
                                         onClick={() => {
-                                            if (live) {
-                                                setSlot(mcSlot);
-                                                setHubTab('tabla');
-                                                setScreen({ k: 'tour' });
-                                                return;
-                                            }
                                             const free = tours.findIndex((t) => !t);
                                             if (free < 0) {
                                                 setScreen({ k: 'slots' });
                                                 return;
                                             }
                                             setSlot(free);
-                                            setMcDraft(null);
-                                            setMcRegion(null);
-                                            setScreen({ k: 'mcSetup', step: 1 });
+                                            setScreen({ k: 'svnsSetup', step: 1 });
+                                        }}
+                                    >
+                                        <span className={styles.menuIcon} aria-hidden="true">✦</span>
+                                        <strong>Circuito SVNS</strong>
+                                        <span>{tours.some((t) => !t) ? 'Una selección de seven, del regional al SVNS 1. Varones y mujeres.' : 'Las tres partidas están ocupadas: borrá una para empezar.'}</span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        role="menuitem"
+                                        className={styles.menuBtn}
+                                        onClick={() => {
+                                            // Arranca en la primera partida libre; si están las tres ocupadas, a elegir cuál borrar.
+                                            const free = tours.findIndex((t) => !t);
+                                            if (free < 0) {
+                                                setScreen({ k: 'slots' });
+                                                return;
+                                            }
+                                            setSlot(free);
+                                            setScreen({ k: 'roadSetup', step: 1 });
                                         }}
                                     >
                                         <span className={styles.menuIcon} aria-hidden="true">⚑</span>
-                                        <strong>{live ? 'Seguir con Mi Club' : 'Mi Club'}</strong>
-                                        <span>
-                                            {live
-                                                ? `${live.team.name} · temporada ${live.season} · ${levelDef(levelOf(live, live.me) ?? 'base').label}.`
-                                                : tours.some((t) => !t)
-                                                  ? 'Fundás tu club y lo llevás de la Regional a Primera, en Argentina o en Sudamérica.'
-                                                  : 'Las tres partidas están ocupadas: borrá una para empezar.'}
-                                        </span>
+                                        <strong>Road to Rugby World Cup</strong>
+                                        <span>{tours.some((t) => !t) ? 'Llevá una selección del clasificatorio al Mundial.' : 'Las tres partidas están ocupadas: borrá una para empezar.'}</span>
                                     </button>
-                                );
-                            })()}
-                            <button
-                                type="button"
-                                role="menuitem"
-                                className={styles.menuBtn}
-                                onClick={() => {
-                                    // Arranca en la primera partida libre; si están las tres ocupadas, a elegir cuál borrar.
-                                    const free = tours.findIndex((t) => !t);
-                                    if (free < 0) {
-                                        setScreen({ k: 'slots' });
-                                        return;
-                                    }
-                                    setSlot(free);
-                                    setScreen({ k: 'roadSetup', step: 1 });
-                                }}
-                            >
-                                <span className={styles.menuIcon} aria-hidden="true">⚑</span>
-                                <strong>Road to Rugby World Cup</strong>
-                                <span>{tours.some((t) => !t) ? 'Llevá una selección del clasificatorio al Mundial.' : 'Las tres partidas están ocupadas: borrá una para empezar.'}</span>
-                            </button>
-                            <button
-                                type="button"
-                                role="menuitem"
-                                className={styles.menuBtn}
-                                onClick={() => {
-                                    const free = tours.findIndex((t) => !t);
-                                    if (free < 0) {
-                                        setScreen({ k: 'slots' });
-                                        return;
-                                    }
-                                    setSlot(free);
-                                    setScreen({ k: 'svnsSetup', step: 1 });
-                                }}
-                            >
-                                <span className={styles.menuIcon} aria-hidden="true">✦</span>
-                                <strong>Circuito SVNS</strong>
-                                <span>{tours.some((t) => !t) ? 'Una selección de seven, del regional al SVNS 1. Varones y mujeres.' : 'Las tres partidas están ocupadas: borrá una para empezar.'}</span>
-                            </button>
-                            <button
-                                type="button"
-                                role="menuitem"
-                                className={styles.menuBtn}
-                                onClick={() => {
-                                    const free = tours.findIndex((t) => !t);
-                                    if (free < 0) {
-                                        setScreen({ k: 'slots' });
-                                        return;
-                                    }
-                                    setSlot(free);
-                                    setScreen({ k: 'intlSetup', step: 1 });
-                                }}
-                            >
-                                <span className={styles.menuIcon} aria-hidden="true">◎</span>
-                                <strong>Carrera internacional</strong>
-                                <span>{tours.some((t) => !t) ? 'Una selección de XV, año tras año: divisiones, Mundial, ranking en vivo y el desarrollo de tu país.' : 'Las tres partidas están ocupadas: borrá una para empezar.'}</span>
-                            </button>
-                            <button type="button" role="menuitem" className={styles.menuBtn} onClick={() => setScreen(cupLive ? { k: 'cup' } : { k: 'cupSetup', step: 1 })}>
-                                <span className={styles.menuIcon} aria-hidden="true">♛</span>
-                                <strong>{cupLive ? 'Seguir la Copa Seven' : 'Copa Seven'}</strong>
-                                <span>{cupLive && cup ? `Te toca: ${CUP_ROUNDS[cup.round].toLowerCase()}.` : 'Cuartos, semi y final contra rivales al azar.'}</span>
-                            </button>
-                            <button type="button" role="menuitem" className={styles.menuBtn} onClick={() => setScreen({ k: 'teams' })}>
-                                <span className={styles.menuIcon} aria-hidden="true">✎</span>
-                                <strong>Mis equipos</strong>
-                                <span>Armá tu camiseta y tu plantel de siete.</span>
-                            </button>
-                            <button type="button" role="menuitem" className={styles.menuBtn} onClick={() => setScreen({ k: 'clubs' })}>
-                                <span className={styles.menuIcon} aria-hidden="true">⚙</span>
-                                <strong>Editar clubes</strong>
-                                <span>Cambiá el nombre, la camiseta y los jugadores de cualquier club.</span>
-                            </button>
+                                </div>
+                            </div>
+                            <div className={styles.menuGroup} role="group" aria-labelledby="menu-equipos">
+                                <h2 className={styles.menuGroupTitle} id="menu-equipos">Torneos y equipos<small>Tus partidas, tus camisetas</small></h2>
+                                <div className={styles.menuGrid}>
+                                    <button type="button" role="menuitem" className={styles.menuBtn} onClick={() => setScreen({ k: 'slots' })}>
+                                        <span className={styles.menuIcon} aria-hidden="true">★</span>
+                                        <strong>Torneos</strong>
+                                        <span>{savedCount ? `${savedCount} de ${TOUR_SLOTS} partidas guardadas.` : 'Selecciones, clubes de Europa y del sur, y el rugby argentino.'}</span>
+                                    </button>
+                                    <button type="button" role="menuitem" className={styles.menuBtn} onClick={() => setScreen({ k: 'teams' })}>
+                                        <span className={styles.menuIcon} aria-hidden="true">✎</span>
+                                        <strong>Mis equipos</strong>
+                                        <span>Armá tu camiseta y tu plantel de siete.</span>
+                                    </button>
+                                    <button type="button" role="menuitem" className={styles.menuBtn} onClick={() => setScreen({ k: 'clubs' })}>
+                                        <span className={styles.menuIcon} aria-hidden="true">⚙</span>
+                                        <strong>Editar clubes</strong>
+                                        <span>Cambiá el nombre, la camiseta y los jugadores de cualquier club.</span>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 )}

@@ -288,46 +288,119 @@
 
 /* ---- menú principal ---- */
 
+/* Tres grupos (Jugar ahora, Carreras, Torneos y equipos), cada uno una grilla de tarjetas:
+   dos por fila en el celular, tres en pantallas anchas. Antes eran once botones en una columna. */
 .menu {
     display: grid;
+    gap: 16px;
+    width: 100%;
+    max-width: 760px;
+    margin: 14px auto 4px;
+}
+
+.menuGroup {
+    display: grid;
+    gap: 8px;
+}
+
+.menuGroupTitle {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 10px;
+    margin: 0;
+    font-size: 0.72rem;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.menuGroupTitle small {
+    font-size: 0.6rem;
+    color: var(--color-text-secondary);
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.menuGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr));
     gap: 10px;
-    max-width: 560px;
-    margin: 18px auto 4px;
+}
+
+@media (min-width: 720px) {
+    .menuGrid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+/* Celular acostado (así abre la app instalada): la pista con los corredores es decoración y se comía
+   toda la pantalla; sin ella, el menú aparece de entrada. */
+@media (max-height: 480px) {
+    .menuScreen .runway {
+        display: none;
+    }
+}
+
+/* En dos columnas, un grupo impar deja una tarjeta sola: la primera (la acción principal del grupo)
+   ocupa toda la fila. */
+@media (max-width: 719px) {
+    .menuGrid > :first-child:nth-last-child(2n + 1) {
+        grid-column: 1 / -1;
+    }
 }
 
 .menuBtn {
     font: inherit;
     text-align: left;
+    position: relative;
     display: grid;
-    grid-template-columns: 40px 1fr;
-    grid-template-rows: auto auto;
-    column-gap: 12px;
-    row-gap: 4px;
-    align-items: center;
-    padding: 14px 16px;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    row-gap: 6px;
+    min-width: 0;
+    padding: 12px;
+    /* Lugar para el ícono, arriba a la derecha: el título usa todo el ancho de la tarjeta. */
+    padding-right: 44px;
     border-radius: 8px;
     background: var(--color-bg-secondary);
     color: var(--color-text-primary);
     border: 3px solid #050608;
     box-shadow: 0 4px 0 #050608;
     cursor: pointer;
-    transition: transform 80ms steps(2), background 80ms;
+    transition: transform 80ms steps(2), background 80ms, box-shadow 80ms steps(2);
 }
 
 .menuBtn strong {
-    font-size: 1rem;
+    /* La letra pixelada es ancha: se achica un poco en pantallas angostas para que "Internacional" entre. */
+    font-size: clamp(0.68rem, 2.4vw, 0.8rem);
+    line-height: 1.3;
+    overflow-wrap: break-word;
+    hyphens: auto;
 }
 
+/* La descripción, en dos renglones como mucho: la tarjeta no crece. Usa también el ancho del ícono. */
 .menuBtn > span:last-child {
-    grid-column: 2;
+    margin-right: -32px;
     color: var(--color-text-secondary);
-    font-size: 0.7rem;
+    font-size: 0.62rem;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .menuBtn:hover,
 .menuBtn:focus-visible {
     background: #232838;
-    transform: translateX(4px);
+    transform: translateY(-2px);
+}
+
+/* Responde al apretar, no al soltar: la tarjeta se hunde sobre su sombra. */
+.menuBtn:active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 #050608;
 }
 
 .menuBtn:hover .menuIcon,
@@ -337,15 +410,17 @@
 }
 
 .menuIcon {
-    grid-row: 1 / span 2;
+    position: absolute;
+    top: 10px;
+    right: 10px;
     display: grid;
     place-items: center;
-    width: 40px;
-    height: 40px;
+    width: 28px;
+    height: 28px;
     border-radius: 6px;
     background: var(--color-bg-tertiary);
     color: var(--gold);
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     border: 2px solid #050608;
 }
 
@@ -1545,18 +1620,31 @@
     color: var(--color-text-secondary);
 }
 
+/* Cada pantalla se desplaza dentro del marco del juego (la página es fija). Antes cortaba lo que
+   no entraba: en "Fundar el club" no se llegaba ni a la región ni al botón. */
 .body {
     flex: 1;
     min-height: 0;
     display: flex;
     flex-direction: column;
     gap: 10px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
 }
 
-.body > .footerBtns {
+/* Los botones de abajo (volver, seguir) quedan siempre a mano, pegados al pie mientras se desplaza.
+   También los del editor de equipo (fundar el club, Mis equipos), que viven dentro del editor. */
+.body > .footerBtns,
+.body > .editor > .footerBtns {
     margin-top: auto;
     flex: none;
     align-items: center;
+    position: sticky;
+    bottom: 0;
+    z-index: 3;
+    padding-top: 8px;
+    background: linear-gradient(to bottom, rgba(18, 20, 28, 0), #12141c 10px);
 }
 
 .body > .footerBtns .missing {
