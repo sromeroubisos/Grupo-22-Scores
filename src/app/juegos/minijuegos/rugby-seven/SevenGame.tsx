@@ -143,7 +143,7 @@ import { advanceIntl, compName, createIntl, intlBoosts, intlInvest, intlNames, i
 import { IntlRanking, IntlSeason, IntlSquad, IntlUnion, IntlYouth } from './IntlPanels';
 import { advanceSvns, createSvns, SVNS_LEGS, SVNS_PHASE_LABEL, svnsBoosts, svnsRegionName, svnsStartTier, svnsTable, svnsVerdict, TIER_LABEL } from './svns';
 import { CloudSync, markTutorialSeenInAccount, tutorialSeenInAccount, type CloudStatus } from './cloudSave';
-import { advanceMiClub, createMiClub, levelDef, levelOf, MC_LEVELS, MC_POOL, MC_REGIONS, mcAfterRound, mcRegionLabel, mcVerdict, myTeam, type McRegion } from './miClub';
+import { advanceMiClub, createMiClub, levelDef, levelOf, liveMine, MC_LEVELS, MC_POOL, MC_REGIONS, mcAfterRound, mcRegionLabel, mcVerdict, myTeam, NAC_HOW, NAC_NAME, phaseName, type McRegion } from './miClub';
 import { McPyramid, McSquad, McTables } from './MiClubPanels';
 import { useOfflineReady } from './offline';
 import { readLang, startTranslating, writeLang, type Lang } from './i18n';
@@ -508,7 +508,9 @@ function Bracket({ s, def, nameOf, flagOf }: { s: TourState; def: TourDef; nameO
     size = full;
     const firstRoundMatches = entrants ? Math.min(size / 2, entrants - size / 2) : size / 2;
     const cols: { label: string; matches: { a?: string; b?: string; sa?: number; sb?: number }[] }[] = [];
-    for (let n = size; n >= 2; n /= 2) {
+    // Las copas grandes (Mi Club: hasta 256) se dibujan desde octavos; las rondas de antes van en Resultados.
+    const top = Math.min(size, 16);
+    for (let n = top; n >= 2; n /= 2) {
         const label = koLabel(n);
         const played = s.koHistory.find((h) => h.label === label);
         if (played) cols.push({ label, matches: played.results });
@@ -516,8 +518,7 @@ function Bracket({ s, def, nameOf, flagOf }: { s: TourState; def: TourDef; nameO
             const m = [];
             for (let i = 0; i + 1 < s.alive.length; i += 2) if (s.alive[i] !== '__bye__' && s.alive[i + 1] !== '__bye__') m.push({ a: s.alive[i], b: s.alive[i + 1] });
             cols.push({ label, matches: m });
-        } else cols.push({ label, matches: Array.from({ length: n === size ? firstRoundMatches : n / 2 }, () => ({})) });
-    }
+        } else cols.push({ label, matches: Array.from({ length: n === size ? firstRoundMatches : n / 2 }, () => ({})) });    }
     return (
         <div className={styles.bracket}>
             {!s.koStart && <p className={styles.note}>El cuadro se arma cuando termina la fase de grupos.</p>}
@@ -2157,6 +2158,10 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                     Seis divisiones con los {MC_POOL.length} clubes de varones de Argentina: {MC_LEVELS.map((l) => l.label).join(', ')}. Arrancás en la Regional, con un plantel de pibes del barrio.
                                 </span>
                                 <span>{levelDef('base').upHow} En Quinta y Cuarta también hay zonas y cuadro; de Tercera para arriba, liga de 12.</span>
+                                <span>A la par de la liga, cada tantas fechas, la copa de tu división: todos sus clubes, mata-mata.</span>
+                                <span>
+                                    Desde mitad de año, la {NAC_NAME} de 64, con los que van arriba en ese momento. {NAC_HOW}.
+                                </span>
                                 <span>Los clubes de la pirámide suben y bajan como vos: la tabla de cada división se ve fecha a fecha.</span>
                             </div>
                             <p className={styles.note}>Se guarda en la partida {slot + 1}{tour ? ', en lugar de la que había' : ''}.</p>
@@ -2430,7 +2435,16 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                         </span>
                                     )}
                                     {svns && <span className={styles.roadChip}>✦ {nameOf(svns.me)} · Temporada {svns.season} · {SVNS_PHASE_LABEL[svns.phase]}</span>}
-                                    {miclub && <span className={styles.roadChip}>⚑ {miclub.team.name} · Temporada {miclub.season} · {levelDef(levelOf(miclub, miclub.me) ?? 'base').label}</span>}
+                                    {miclub && <span className={styles.roadChip}>⚑ {miclub.team.name} · Temporada {miclub.season} · {phaseName(tour)}</span>}
+                                    {miclub && liveMine(tour).length > 1 && (
+                                        <span className={styles.parallelNote}>
+                                            También en juego:{' '}
+                                            {liveMine(tour)
+                                                .slice(1)
+                                                .map((t) => `${(t.def?.name ?? '').replace(/ \d{4}$/, '')} · ${roundLabel(t).toLowerCase()}`)
+                                                .join(' · ')}
+                                        </span>
+                                    )}
                                     {career && <span className={styles.roadChip}>⚑ {nameOf(career.me)} · Temporada {career.season} · {CAREER_PHASE_LABEL[career.phase]}</span>}
                                     {career?.parallel && !career.parallel.done && (
                                         <span className={styles.parallelNote}>

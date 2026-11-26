@@ -4,6 +4,11 @@
  * abajo, zonas regionales y cuadro; arriba, liga. El estado viaja en `TourState.miclub`, igual que
  * la carrera (career.ts) y la carrera internacional (intl.ts), así que se guarda en los casilleros
  * de siempre y en la cuenta.
+ *
+ * La temporada tiene tres torneos propios que se juegan intercalados, cada uno en su tramo del año:
+ * la liga de la división (todo el año), la copa de la división (todo el año, Primera no tiene) y la
+ * Copa Nacional de 64 (la segunda mitad; se arma a mitad de año con la tabla de ese momento). Cada
+ * fecha se juega la del torneo que va primero en el calendario; los otros esperan en `parked`.
  */
 import { AR_CLUBS, AR_SEVEN_DIVISIONS } from './arClubs';
 import { makePlayer, regionLabel, type Player } from './career';
@@ -29,16 +34,18 @@ export interface McLevelDef {
     down: number;
     /** Cómo se sube, en palabras (para la pantalla). */
     upHow: string;
+    /** Cuántos entran a la Copa Nacional y cómo (por zona o por la tabla), a mitad de temporada. */
+    nac: { perZone?: number; top?: number; all?: boolean; how: string };
 }
 
 /** De arriba hacia abajo. Lo que sube de una división es lo que baja de la de arriba. */
 export const MC_LEVELS: McLevelDef[] = [
-    { id: 'primera', label: 'Primera', size: 12, zones: 0, advance: 4, up: 0, down: 2, upHow: 'Campeón por semis y final entre los 4 primeros. Bajan los 2 últimos.' },
-    { id: 'segunda', label: 'Segunda', size: 12, zones: 0, advance: 0, up: 2, down: 2, upHow: 'Suben los 2 primeros de la tabla. Bajan los 2 últimos.' },
-    { id: 'tercera', label: 'Tercera', size: 12, zones: 0, advance: 0, up: 2, down: 2, upHow: 'Suben los 2 primeros de la tabla. Bajan los 2 últimos.' },
-    { id: 'cuarta', label: 'Cuarta', size: 40, zones: 4, advance: 2, up: 2, down: 4, upHow: 'Pasan los 2 primeros de cada zona a cuartos: suben los 2 finalistas. Baja el último de cada zona.' },
-    { id: 'quinta', label: 'Quinta', size: 80, zones: 8, advance: 2, up: 4, down: 8, upHow: 'Pasan los 2 primeros de cada zona a octavos: suben los 4 semifinalistas. Baja el último de cada zona.' },
-    { id: 'base', label: 'Regional', size: 0, zones: 16, advance: 1, up: 8, down: 0, upHow: 'Pasa el primero de cada zona a octavos: suben los 8 que ganan su octavo.' },
+    { id: 'primera', label: 'Primera', size: 12, zones: 0, advance: 4, up: 0, down: 2, upHow: 'Campeón por semis y final entre los 4 primeros. Bajan los 2 últimos.', nac: { all: true, how: 'los 12' } },
+    { id: 'segunda', label: 'Segunda', size: 12, zones: 0, advance: 0, up: 2, down: 2, upHow: 'Suben los 2 primeros de la tabla. Bajan los 2 últimos.', nac: { all: true, how: 'los 12' } },
+    { id: 'tercera', label: 'Tercera', size: 12, zones: 0, advance: 0, up: 2, down: 2, upHow: 'Suben los 2 primeros de la tabla. Bajan los 2 últimos.', nac: { top: 8, how: 'los 8 primeros' } },
+    { id: 'cuarta', label: 'Cuarta', size: 40, zones: 4, advance: 2, up: 2, down: 4, upHow: 'Pasan los 2 primeros de cada zona a cuartos: suben los 2 finalistas. Baja el último de cada zona.', nac: { perZone: 2, how: 'los 2 primeros de cada zona' } },
+    { id: 'quinta', label: 'Quinta', size: 80, zones: 8, advance: 2, up: 4, down: 8, upHow: 'Pasan los 2 primeros de cada zona a octavos: suben los 4 semifinalistas. Baja el último de cada zona.', nac: { perZone: 1, how: 'el puntero de cada zona' } },
+    { id: 'base', label: 'Regional', size: 0, zones: 16, advance: 1, up: 8, down: 0, upHow: 'Pasa el primero de cada zona a octavos: suben los 8 que ganan su octavo.', nac: { perZone: 1, how: 'el puntero de cada zona' } },
 ];
 
 export const levelDef = (id: McLevel) => MC_LEVELS.find((l) => l.id === id)!;
@@ -64,6 +71,12 @@ export const MC_POOL: string[] = AR_CLUBS.filter((c) => !c.fem && c.id.startsWit
 
 export const MC_ME = 'mc-propio';
 
+/** Los torneos de una temporada: la liga de la división, su copa y la Copa Nacional. */
+export type McKind = 'liga' | 'cup' | 'nac';
+export const NAC_NAME = 'Copa Nacional';
+export const NAC_SIZE = 64;
+export const cupName = (level: McLevel) => `Copa de ${levelDef(level).label}`;
+
 export interface MiClubState {
     v: 1;
     me: typeof MC_ME;
@@ -83,11 +96,17 @@ export interface MiClubState {
     /** Créditos: se ganan jugando, nunca se compran. */
     credits: number;
     facilities: { cancha: number; entreno: number; inferiores: number };
-    /** Las otras divisiones, que avanzan a la par: `lvl:<división>`. */
+    /** Los torneos propios que no están en pantalla (esperan su fecha): `liga`, `cup`, `nac`. */
+    parked: Partial<Record<McKind, TourState>>;
+    /** Ya se armó la Copa Nacional de esta temporada (se arma a mitad de año). */
+    nacMade?: boolean;
+    /** Lo que se juega sin el club, a la par: `lvl:<división>`, `cup:<división>` y, si no entró, `nac`. */
     others: Record<string, TourState>;
     history: { season: number; level: McLevel; place: string }[];
     titles: { season: number; label: string }[];
     log: string[];
+    /** Lo que pasó en la temporada con los torneos propios (eliminaciones, clasificaciones). */
+    news?: string[];
     /** Ascensos y descensos de la última temporada cerrada: `up|club|de|a` o `down|club|de|a`. */
     moves?: { season: number; lines: string[] };
     /** Lo que dejó el cierre del último año en el plantel (retiros, juveniles). */
@@ -146,7 +165,7 @@ function initialSquad(r: MiClubState, rand: () => number) {
     }
 }
 
-/* ───────────────────────── armado de divisiones ───────────────────────── */
+/* ───────────────────────── armado de divisiones y copas ───────────────────────── */
 
 const byStrength = (a: string, b: string) => ratingOf(b) - ratingOf(a) || a.localeCompare(b);
 
@@ -194,13 +213,13 @@ export function levelOf(r: MiClubState, club: string): McLevel | null {
     return MC_LEVELS.find((l) => r.divisions[l.id].includes(club))?.id ?? null;
 }
 
-/** El torneo de una división esta temporada. */
+/** El torneo de liga de una división esta temporada. */
 export function levelTourDef(r: MiClubState, level: McLevel): TourDef {
     const l = levelDef(level);
     const zones = zonesOf(r, level);
     const teams = zones.flat();
     return {
-        id: `mc-${level}-${r.season}`,
+        id: `mc-liga-${level}-${r.season}`,
         name: `${l.label} ${r.season}`,
         sub: l.upHow,
         formatLabel: l.zones ? `${l.zones} zonas regionales y cuadro` : l.advance ? `Liga de ${teams.length} y playoff de ${l.advance}` : `Liga de ${teams.length}`,
@@ -212,24 +231,176 @@ export function levelTourDef(r: MiClubState, level: McLevel): TourDef {
     };
 }
 
-/** Las otras divisiones de la temporada, armadas para que avancen a la par. */
-function buildOthers(r: MiClubState): Record<string, TourState> {
-    const mine = levelOf(r, MC_ME);
-    const out: Record<string, TourState> = {};
-    for (const l of MC_LEVELS) {
-        if (l.id === mine) continue;
-        const def = levelTourDef(r, l.id);
-        const t: TourState = { ...createTour(def, '__nadie', 'normal', 3), def };
-        delete t.stats;
-        out[`lvl:${l.id}`] = t;
-    }
-    return out;
+/** La copa de una división: todos sus clubes, mata-mata. Los más fuertes quedan libres en la primera ronda. */
+function cupDef(r: MiClubState, level: McLevel): TourDef {
+    const teams = [...r.divisions[level]].sort(byStrength);
+    return {
+        id: `mc-copa-${level}-${r.season}`, name: `${cupName(level)} ${r.season}`, sub: 'Todos los clubes de la división, a eliminación directa.',
+        formatLabel: `Eliminación directa · ${teams.length} clubes`, teams, source: 'custom', clubs: true, cat: 'Mi Club', stage: { kind: 'ko' },
+    };
 }
 
-function stageTour(r: MiClubState, difficulty: Difficulty, duration: Duration): TourState {
-    const level = levelOf(r, MC_ME) ?? 'base';
-    const def = levelTourDef(r, level);
-    return { ...createTour(def, MC_ME, difficulty, duration), def, miclub: r };
+/** De qué torneo de la temporada es un estado: la liga, la copa de la división o la Nacional. */
+export const kindOf = (t: TourState): McKind => (t.tourId.startsWith('mc-nac') ? 'nac' : t.tourId.startsWith('mc-copa') ? 'cup' : 'liga');
+
+/** Una división, sin el club adentro (avanza fecha a fecha a la par). */
+function background(def: TourDef): TourState {
+    const t: TourState = { ...createTour(def, '__nadie', 'normal', 3), def };
+    delete t.stats;
+    return t;
+}
+
+function mineTour(def: TourDef, difficulty: Difficulty, duration: Duration): TourState {
+    return { ...createTour(def, MC_ME, difficulty, duration), def };
+}
+
+/* ───────────────────────── el calendario ───────────────────────── */
+
+/** El tramo del año de cada torneo (0 a 1): la Nacional, la segunda mitad. */
+const WINDOW: Record<McKind, [number, number]> = { liga: [0, 1], cup: [0.03, 0.97], nac: [0.5, 1] };
+
+/** Cuántas fechas tiene un torneo en total: la fase de grupos más las rondas del cuadro. */
+function totalDates(t: TourState): number {
+    const def = t.def;
+    if (def?.stage.kind === 'ko') return Math.max(1, Math.ceil(Math.log2(Math.max(2, def.teams.length))));
+    let ko = 0;
+    if (t.hasKo && def?.stage.kind === 'grupos') ko = Math.ceil(Math.log2(Math.max(2, def.stage.advance * t.groups.length)));
+    return Math.max(1, t.rounds.length + ko);
+}
+
+const played = (t: TourState) => t.groupHistory.length + t.koHistory.length;
+
+/** En qué punto del año cae la próxima fecha de un torneo. */
+function nextDate(t: TourState): number {
+    const [a, b] = WINDOW[kindOf(t)];
+    return a + ((b - a) * (played(t) + 0.5)) / totalDates(t);
+}
+
+/** Hasta dónde del año llegó un torneo con lo jugado. */
+function progress(t: TourState): number {
+    const [a, b] = WINDOW[kindOf(t)];
+    return t.done ? b : a + ((b - a) * played(t)) / totalDates(t);
+}
+
+const KIND_ORDER: McKind[] = ['liga', 'cup', 'nac'];
+
+/** Los torneos propios de la temporada, el de pantalla primero. */
+function myTours(s: TourState): TourState[] {
+    const r = s.miclub!;
+    return [s, ...KIND_ORDER.map((k) => r.parked?.[k]).filter((t): t is TourState => !!t)];
+}
+
+/** Los torneos propios que siguen en juego (sin terminar). */
+export function liveMine(s: TourState): TourState[] {
+    return s.miclub ? myTours(s).filter((t) => !t.done) : [];
+}
+
+/** La tabla de una división ahora mismo (para armar la Nacional a mitad de año). */
+function ligaNow(s: TourState, level: McLevel): TourState | null {
+    const r = s.miclub!;
+    if (levelOf(r, MC_ME) === level) return myTours(s).find((t) => kindOf(t) === 'liga') ?? null;
+    return r.others[`lvl:${level}`] ?? null;
+}
+
+/** Los 64 de la Copa Nacional, con las tablas de mitad de año. */
+function nacTeams(s: TourState): string[] {
+    const r = s.miclub!;
+    const out: string[] = [];
+    for (const l of MC_LEVELS) {
+        const t = ligaNow(s, l.id);
+        if (l.nac.all || !t) {
+            out.push(...r.divisions[l.id]);
+            continue;
+        }
+        const tables = t.groups.map((_, gi) => groupStandings(t, gi).map((row) => row.team));
+        if (l.nac.top) out.push(...tables[0].slice(0, l.nac.top));
+        else out.push(...tables.flatMap((rows) => rows.slice(0, l.nac.perZone ?? 1)));
+    }
+    return out.slice(0, NAC_SIZE);
+}
+
+function nacDef(s: TourState): TourDef {
+    const r = s.miclub!;
+    const teams = nacTeams(s).sort(byStrength);
+    return {
+        id: `mc-nac-${r.season}`, name: `${NAC_NAME} ${r.season}`, sub: 'Primera y Segunda completas, y los mejores de las demás divisiones a mitad de año.',
+        formatLabel: `Eliminación directa · ${teams.length} clubes`, teams, source: 'custom', clubs: true, cat: 'Mi Club', stage: { kind: 'ko' },
+    };
+}
+
+/** Qué se juega primero: el torneo propio con la fecha más temprana (a igual fecha, la liga). */
+function onScreen(s: TourState): TourState {
+    const r = s.miclub!;
+    const live = myTours(s).filter((t) => !t.done);
+    if (!live.length) return s;
+    const pick = [...live].sort((x, y) => nextDate(x) - nextDate(y) || KIND_ORDER.indexOf(kindOf(x)) - KIND_ORDER.indexOf(kindOf(y)))[0];
+    if (pick === s) return s;
+    const parked: Partial<Record<McKind, TourState>> = {};
+    for (const t of myTours(s)) {
+        if (t === pick) continue;
+        const x: TourState = { ...t };
+        delete x.miclub;
+        parked[kindOf(t)] = x;
+    }
+    return { ...pick, difficulty: s.difficulty, duration: s.duration, miclub: { ...r, parked } };
+}
+
+/**
+ * Después de cada fecha propia: si ya es mitad de año se arma la Copa Nacional, las divisiones y
+ * copas sin el club avanzan hasta la misma altura y pasa a pantalla el torneo que juega primero.
+ */
+export function mcAfterRound(s0: TourState): TourState {
+    if (!s0.miclub) return s0;
+    let s: TourState = { ...s0, miclub: { ...s0.miclub, parked: { ...(s0.miclub.parked ?? {}) }, others: { ...s0.miclub.others }, news: [...(s0.miclub.news ?? [])] } };
+    const r = s.miclub!;
+    // La altura del año: lo más avanzado de los torneos propios que siguen (si no queda ninguno, el final).
+    const live = myTours(s).filter((t) => !t.done);
+    const clock = live.length ? Math.max(...live.map(progress)) : 1;
+
+    // Un torneo propio que se terminó en esta fecha: la noticia.
+    if (s0.done && !s0.miclub.news?.includes(s0.tourId)) {
+        const name = (defName(s0) ?? '').replace(/ \d{4}$/, '');
+        r.news!.push(s0.tourId);
+        r.news!.push(s0.champion === MC_ME ? `Campeón de ${name}.` : kindOf(s0) === 'liga' ? `Terminó ${name}.` : `${name}: afuera en ${placeOf(s0, levelOf(r, MC_ME) ?? 'base').toLowerCase()}.`);
+    }
+
+    // A mitad de año se arma la Nacional, con las tablas de ese momento.
+    if (!r.nacMade && clock >= WINDOW.nac[0]) {
+        r.nacMade = true;
+        const def = nacDef(s);
+        if (def.teams.includes(MC_ME)) {
+            r.parked.nac = mineTour(def, s.difficulty, s.duration);
+            r.news!.push(`Clasificaste a la ${NAC_NAME}: ${def.teams.length} clubes, con Primera y Segunda.`);
+        } else r.others.nac = background(def);
+    }
+
+    for (const [k, t0] of Object.entries(r.others)) {
+        let t = t0;
+        for (let guard = 0; guard < 80 && !t.done && nextDate(t) <= clock; guard++) t = closeRound(t, null);
+        r.others[k] = t;
+    }
+    s = onScreen(s);
+    return s;
+}
+
+const defName = (t: TourState) => t.def?.name;
+
+/* ───────────────────────── la temporada nueva ───────────────────────── */
+
+/** Arma la temporada: la liga y la copa propias, y todo lo demás sin el club. */
+function startSeason(r: MiClubState, difficulty: Difficulty, duration: Duration): TourState {
+    const mine = levelOf(r, MC_ME) ?? 'base';
+    r.others = {};
+    r.parked = {};
+    r.nacMade = false;
+    r.news = [];
+    for (const l of MC_LEVELS) {
+        if (l.id !== mine) r.others[`lvl:${l.id}`] = background(levelTourDef(r, l.id));
+        if (l.id !== 'primera' && l.id !== mine) r.others[`cup:${l.id}`] = background(cupDef(r, l.id));
+    }
+    if (mine !== 'primera') r.parked.cup = mineTour(cupDef(r, mine), difficulty, duration);
+    const liga: TourState = { ...mineTour(levelTourDef(r, mine), difficulty, duration), miclub: r };
+    return onScreen(liga);
 }
 
 /** Lo que eligió el usuario al fundar el club. */
@@ -254,46 +425,14 @@ export function createMiClub(f: McFounding, difficulty: Difficulty, duration: Du
         nextId: 1,
         credits: 0,
         facilities: { cancha: 1, entreno: 1, inferiores: 1 },
+        parked: {},
         others: {},
         history: [],
         titles: [],
         log: [`2026: se funda ${name}, en la Regional de ${mcRegionLabel(f.region)}.`],
     };
     initialSquad(r, rand);
-    r.others = buildOthers(r);
-    return stageTour(r, difficulty, duration);
-}
-
-/* ───────────────────────── la temporada a la par ───────────────────────── */
-
-/** Cuántas fechas tiene un torneo en total: la fase de grupos más las rondas del cuadro. */
-function totalDates(t: TourState): number {
-    const def = t.def;
-    let ko = 0;
-    if (t.hasKo && def?.stage.kind === 'grupos') ko = Math.ceil(Math.log2(Math.max(2, def.stage.advance * t.groups.length)));
-    return Math.max(1, t.rounds.length + ko);
-}
-
-const played = (t: TourState) => t.groupHistory.length + t.koHistory.length;
-
-/**
- * Después de cada fecha propia, las otras divisiones avanzan hasta la misma altura de la temporada:
- * la Regional va por la fecha 4 de 11 y Primera, por la 4 de 13. Si el club ya terminó (o quedó
- * afuera), las demás se terminan.
- */
-export function mcAfterRound(s: TourState): TourState {
-    const r = s.miclub;
-    if (!r) return s;
-    const clock = s.done || s.eliminated ? 1 : played(s) / totalDates(s);
-    let changed = false;
-    const others: Record<string, TourState> = {};
-    for (const [k, t0] of Object.entries(r.others)) {
-        let t = t0;
-        for (let guard = 0; guard < 80 && !t.done && (played(t) + 0.5) / totalDates(t) <= clock; guard++) t = closeRound(t, null);
-        if (t !== t0) changed = true;
-        others[k] = t;
-    }
-    return changed ? { ...s, miclub: { ...r, others } } : s;
+    return startSeason(r, difficulty, duration);
 }
 
 /* ───────────────────────── cierre de la temporada ───────────────────────── */
@@ -323,7 +462,7 @@ function movesOf(t: TourState, level: McLevel): { up: string[]; down: string[] }
     return { up: up.slice(0, l.up), down: down.slice(0, l.down) };
 }
 
-/** Hasta dónde llegó el club en su división (para la historia y el cartel). */
+/** Hasta dónde llegó el club en un torneo (para la historia y el cartel). */
 function placeOf(t: TourState, level: McLevel): string {
     if (t.champion === MC_ME) return 'Campeón';
     const ko = [...t.koHistory].reverse().find((h) => h.results.some((r) => r.a === MC_ME || r.b === MC_ME));
@@ -365,47 +504,65 @@ function developSquad(r: MiClubState, rand: () => number): string[] {
     return notes;
 }
 
-/** El cartel del final de la temporada: qué pasó y qué viene. */
-export function mcVerdict(s: TourState): { title: string; text: string; next: string } | null {
-    const r = s.miclub;
-    if (!r || !(s.done || s.eliminated)) return null;
-    const level = levelOf(r, MC_ME) ?? 'base';
-    const l = levelDef(level);
-    const t = finishTour(s);
-    const { up, down } = movesOf(t, level);
-    const place = placeOf(t, level);
-    const above = MC_LEVELS[MC_LEVELS.indexOf(l) - 1];
-    const below = MC_LEVELS[MC_LEVELS.indexOf(l) + 1];
-    const title = t.champion === MC_ME ? `Campeón de ${l.label}` : up.includes(MC_ME) ? `Ascenso a ${above?.label}` : down.includes(MC_ME) ? `Descenso a ${below?.label}` : `${l.label} ${r.season}: ${place.toLowerCase()}`;
-    const text = up.includes(MC_ME)
-        ? `${r.team.name} juega en ${above?.label} la temporada que viene.${t.champion === MC_ME ? ' Y con la vuelta olímpica.' : ''}`
-        : down.includes(MC_ME)
-          ? `${r.team.name} vuelve a ${below?.label}. Hay que rearmarse.`
-          : `${r.team.name} sigue en ${l.label}. ${l.upHow}`;
-    return { title, text, next: `Temporada ${r.season + 1}` };
+/** Los torneos propios de la temporada por tipo (los de pantalla y los que esperan). */
+function mineByKind(s: TourState): Partial<Record<McKind, TourState>> {
+    const out: Partial<Record<McKind, TourState>> = {};
+    for (const t of myTours(s)) out[kindOf(t)] = t;
+    return out;
 }
 
-/** Cierra la temporada: asienta toda la pirámide, mueve los clubes, desarrolla el plantel y arranca la siguiente. */
-export function advanceMiClub(s0: TourState): TourState {
-    if (!s0.miclub || !(s0.done || s0.eliminated)) return s0;
-    const s = finishTour(s0);
-    const r: MiClubState = JSON.parse(JSON.stringify(s0.miclub));
-    const mine = levelOf(r, MC_ME) ?? 'base';
-    const tours: Record<string, TourState> = {};
-    for (const l of MC_LEVELS) tours[l.id] = l.id === mine ? s : finishTour(r.others[`lvl:${l.id}`]);
-    const moves: Record<string, { up: string[]; down: string[] }> = {};
-    for (const l of MC_LEVELS) moves[l.id] = tours[l.id] ? movesOf(tours[l.id], l.id) : { up: [], down: [] };
+/** El cartel del final de la temporada: qué pasó en la liga, en las copas y qué viene. */
+export function mcVerdict(s: TourState): { title: string; text: string; next: string } | null {
+    const r = s.miclub;
+    if (!r || liveMine(s).length) return null;
+    const level = levelOf(r, MC_ME) ?? 'base';
+    const l = levelDef(level);
+    const mine = mineByKind(s);
+    const liga = mine.liga ? finishTour(mine.liga) : null;
+    if (!liga) return null;
+    const { up, down } = movesOf(liga, level);
+    const above = MC_LEVELS[MC_LEVELS.indexOf(l) - 1];
+    const below = MC_LEVELS[MC_LEVELS.indexOf(l) + 1];
+    const title = liga.champion === MC_ME ? `Campeón de ${l.label}` : up.includes(MC_ME) ? `Ascenso a ${above?.label}` : down.includes(MC_ME) ? `Descenso a ${below?.label}` : `${l.label} ${r.season}: ${placeOf(liga, level).toLowerCase()}`;
+    const parts = [up.includes(MC_ME) ? `${r.team.name} juega en ${above?.label} la temporada que viene.` : down.includes(MC_ME) ? `${r.team.name} vuelve a ${below?.label}.` : `${r.team.name} sigue en ${l.label}.`];
+    if (mine.cup) parts.push(`${cupName(level)}: ${placeOf(mine.cup, level).toLowerCase()}.`);
+    if (mine.nac) parts.push(`${NAC_NAME}: ${placeOf(mine.nac, level).toLowerCase()}.`);
+    return { title, text: parts.join(' '), next: `Temporada ${r.season + 1}` };
+}
 
-    // Historia y títulos del club propio.
-    const place = placeOf(s, mine);
-    r.history.push({ season: r.season, level: mine, place });
-    if (s.champion === MC_ME) r.titles.push({ season: r.season, label: levelDef(mine).label });
+/** Cierra el año: asienta la pirámide con las ligas, anota los títulos, desarrolla el plantel y arranca el siguiente. */
+export function advanceMiClub(s0: TourState): TourState {
+    if (!s0.miclub || liveMine(s0).length) return s0;
+    const r: MiClubState = JSON.parse(JSON.stringify(s0.miclub));
+    const mineLevel = levelOf(r, MC_ME) ?? 'base';
+    const mine = mineByKind(s0);
+    const ligaOf = (level: McLevel) => (level === mineLevel ? mine.liga : r.others[`lvl:${level}`]);
+    const ligas: Partial<Record<McLevel, TourState>> = {};
     for (const l of MC_LEVELS) {
-        const champ = tours[l.id]?.champion;
-        if (champ && champ !== MC_ME) r.log.push(`${r.season}: ${l.label}, campeón ${CLUB_NAME.get(champ) ?? champ}.`);
+        const t = ligaOf(l.id);
+        if (t) ligas[l.id] = finishTour(t);
     }
+    const nac = mine.nac ?? (r.others.nac ? finishTour(r.others.nac) : null);
+
+    // Historia y títulos del club propio: la liga, la copa y la Nacional.
+    const liga = ligas[mineLevel];
+    const parts = [liga ? placeOf(liga, mineLevel) : '—'];
+    if (mine.cup) parts.push(`copa: ${placeOf(mine.cup, mineLevel).toLowerCase()}`);
+    if (mine.nac) parts.push(`Nacional: ${placeOf(mine.nac, mineLevel).toLowerCase()}`);
+    r.history.push({ season: r.season, level: mineLevel, place: parts.join(' · ') });
+    if (liga?.champion === MC_ME) r.titles.push({ season: r.season, label: levelDef(mineLevel).label });
+    if (mine.cup?.champion === MC_ME) r.titles.push({ season: r.season, label: cupName(mineLevel) });
+    if (mine.nac?.champion === MC_ME) r.titles.push({ season: r.season, label: NAC_NAME });
+    const champ = (t: TourState | null | undefined) => (t?.champion ? (t.champion === MC_ME ? r.team.name : CLUB_NAME.get(t.champion) ?? t.champion) : null);
+    for (const l of MC_LEVELS) {
+        const c = champ(ligas[l.id]);
+        if (c) r.log.push(`${r.season}: ${l.label}, campeón ${c}.`);
+    }
+    if (champ(nac)) r.log.push(`${r.season}: ${NAC_NAME}, campeón ${champ(nac)}.`);
 
     // Los movimientos, de una vez (así nadie sube dos escalones).
+    const moves: Record<string, { up: string[]; down: string[] }> = {};
+    for (const l of MC_LEVELS) moves[l.id] = ligas[l.id] ? movesOf(ligas[l.id]!, l.id) : { up: [], down: [] };
     const next = {} as Record<McLevel, string[]>;
     const lines: string[] = [];
     MC_LEVELS.forEach((l, i) => {
@@ -422,8 +579,7 @@ export function advanceMiClub(s0: TourState): TourState {
     const rand = seeded(`${r.team.name}:${r.season}:cierre`);
     r.lastNotes = developSquad(r, rand);
     r.season += 1;
-    r.others = buildOthers(r);
-    return stageTour(r, s0.difficulty, s0.duration);
+    return startSeason(r, s0.difficulty, s0.duration);
 }
 
 /** Ascensos y descensos de la última temporada cerrada, por división de origen. */
@@ -436,7 +592,7 @@ export function movesByLevel(r: MiClubState): { level: McLevelDef; up: string[];
     })).filter((x) => x.up.length || x.down.length);
 }
 
-/** Qué le pasó al club propio en el último cierre: 'up', 'down' o null. */
+/** Qué le pasó al club propio en el último cierre. */
 export function myMove(r: MiClubState): { up: boolean; to: McLevel } | null {
     const line = (r.moves?.lines ?? []).map((l) => l.split('|')).find(([, id]) => id === MC_ME);
     return line ? { up: line[0] === 'up', to: line[3] as McLevel } : null;
@@ -444,13 +600,53 @@ export function myMove(r: MiClubState): { up: boolean; to: McLevel } | null {
 
 /* ───────────────────────── para mirar ───────────────────────── */
 
-/** Todas las divisiones de la pirámide, de arriba hacia abajo: la propia (la que se juega) y las demás. */
-export function pyramidTours(s: TourState): { level: McLevelDef; state: TourState; mine: boolean }[] {
+export interface McView {
+    level: McLevelDef;
+    /** La liga de la división, en vivo. */
+    liga: TourState | null;
+    /** Su copa (Primera no tiene), en vivo. */
+    cup: TourState | null;
+    mine: boolean;
+}
+
+/** Todas las divisiones de la pirámide, de arriba hacia abajo, con su liga y su copa. */
+export function pyramidTours(s: TourState): McView[] {
     const r = s.miclub;
     if (!r) return [];
-    const mine = levelOf(r, MC_ME);
-    return MC_LEVELS.map((l) => ({ level: l, state: l.id === mine ? s : r.others[`lvl:${l.id}`], mine: l.id === mine })).filter((x) => !!x.state);
+    const mineLevel = levelOf(r, MC_ME);
+    const mine = mineByKind(s);
+    return MC_LEVELS.map((l) => {
+        const isMine = l.id === mineLevel;
+        return {
+            level: l,
+            liga: (isMine ? mine.liga : r.others[`lvl:${l.id}`]) ?? null,
+            cup: (isMine ? mine.cup : r.others[`cup:${l.id}`]) ?? null,
+            mine: isMine,
+        };
+    });
 }
+
+/** La Copa Nacional de la temporada (la del club o la que se juega sin él); null antes de mitad de año. */
+export function nacionalView(s: TourState): TourState | null {
+    const r = s.miclub;
+    if (!r) return null;
+    return mineByKind(s).nac ?? r.others.nac ?? null;
+}
+
+/** Cómo se entra a la Copa Nacional, en palabras. */
+export const NAC_HOW = MC_LEVELS.map((l) => `${l.label}: ${l.nac.how}`).join(' · ');
+
+/** El nombre del torneo en pantalla (para el chip del hub). */
+export function phaseName(s: TourState): string {
+    const r = s.miclub;
+    if (!r) return '';
+    const level = levelOf(r, MC_ME) ?? 'base';
+    const k = kindOf(s);
+    return k === 'cup' ? cupName(level) : k === 'nac' ? NAC_NAME : levelDef(level).label;
+}
+
+/** Las noticias de la temporada (sin las marcas internas). */
+export const seasonNews = (r: MiClubState) => (r.news ?? []).filter((n) => !n.startsWith('mc-'));
 
 /** Qué significa cada puesto de una tabla de la pirámide. */
 export type McTag = 'playoff' | 'ascenso' | 'descenso' | null;

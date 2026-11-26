@@ -7,7 +7,7 @@
 
 import { useState, type ReactNode } from 'react';
 import { SKILL_LABEL } from './career';
-import { levelDef, levelOf, MC_ME, movesByLevel, myMove, myRating, pyramidTours, starters, tagFor, TAG_LABEL, zoneName, type McLevel, type McTag, type MiClubState } from './miClub';
+import { cupName, levelDef, levelOf, MC_ME, movesByLevel, myMove, myRating, NAC_HOW, NAC_NAME, NAC_SIZE, nacionalView, pyramidTours, seasonNews, starters, tagFor, TAG_LABEL, zoneName, type McLevel, type McTag, type MiClubState } from './miClub';
 import { groupStandings, roundLabel, finalRanking, type TourState } from './tours';
 import styles from './seven.module.css';
 
@@ -116,10 +116,10 @@ export function McPyramid({ s, nameOf, flag, bracket }: { s: TourState; nameOf: 
     const r = s.miclub!;
     const list = pyramidTours(s);
     const mine = levelOf(r, MC_ME) ?? 'base';
-    const [pick, setPick] = useState<McLevel>(mine);
-    const cur = list.find((x) => x.level.id === pick) ?? list[0];
-    const t = cur.state;
-    const showTables = t.stage === 'grupos' || t.done;
+    const nac = nacionalView(s);
+    const [pick, setPick] = useState<McLevel | 'nac'>(mine);
+    const cur = pick === 'nac' ? null : list.find((x) => x.level.id === pick) ?? list[0];
+    const news = seasonNews(r);
     const moves = movesByLevel(r);
     const mineMove = myMove(r);
     const names = (ids: string[]) => ids.map((id) => (id === MC_ME ? `${nameOf(id)} (vos)` : nameOf(id))).join(', ');
@@ -140,21 +140,94 @@ export function McPyramid({ s, nameOf, flag, bracket }: { s: TourState; nameOf: 
                     ))}
                 </details>
             )}
-            <div className={styles.pyramidPick} role="radiogroup" aria-label="División">
+            {news.length > 0 && (
+                <div className={styles.roadPending}>
+                    <strong>Tu temporada {r.season}</strong>
+                    {news.map((n, i) => (
+                        <span key={i}>{n}</span>
+                    ))}
+                </div>
+            )}
+            <div className={styles.pyramidPick} role="radiogroup" aria-label="División o copa">
                 {list.map((x) => (
-                    <button key={x.level.id} type="button" role="radio" aria-checked={x.level.id === cur.level.id} className={`${styles.pyramidStep} ${x.level.id === cur.level.id ? styles.pyramidStepOn : ''}`} onClick={() => setPick(x.level.id)}>
+                    <button key={x.level.id} type="button" role="radio" aria-checked={pick === x.level.id} className={`${styles.pyramidStep} ${pick === x.level.id ? styles.pyramidStepOn : ''}`} onClick={() => setPick(x.level.id)}>
                         <strong>{x.level.label}</strong>
                         <small>{x.mine ? 'tu división' : `${r.divisions[x.level.id].length} clubes`}</small>
                     </button>
                 ))}
+                <button type="button" role="radio" aria-checked={pick === 'nac'} className={`${styles.pyramidStep} ${pick === 'nac' ? styles.pyramidStepOn : ''}`} onClick={() => setPick('nac')}>
+                    <strong>{NAC_NAME}</strong>
+                    <small>{nac ? `${nac.def?.teams.length ?? NAC_SIZE} clubes` : 'desde mitad de año'}</small>
+                </button>
             </div>
-            <p className={styles.note}>
-                {cur.level.upHow}{' '}
-                {t.done ? `Terminado · campeón: ${nameOf(t.champion ?? finalRanking(t)[0] ?? '')}.` : `Va por: ${roundLabel(t).toLowerCase()}.`}
-            </p>
-            {showTables && <McTables s={t} r={r} level={cur.level.id} nameOf={nameOf} flag={flag} mineFirst={cur.mine} />}
-            {t.hasKo && t.stage === 'ko' && bracket(t)}
+            {cur ? (
+                <>
+                    {cur.liga && (
+                        <section className={styles.mcSection} aria-label={`Liga de ${cur.level.label}`}>
+                            <h3 className={styles.groupTitle}>Liga · {cur.level.label}</h3>
+                            <p className={styles.note}>
+                                {cur.level.upHow} {status(cur.liga, nameOf)}
+                            </p>
+                            {(cur.liga.stage === 'grupos' || cur.liga.done) && <McTables s={cur.liga} r={r} level={cur.level.id} nameOf={nameOf} flag={flag} mineFirst={cur.mine} />}
+                            {cur.liga.hasKo && cur.liga.stage === 'ko' && bracket(cur.liga)}
+                        </section>
+                    )}
+                    {cur.cup ? (
+                        <CupBlock title={cupName(cur.level.id)} t={cur.cup} how="Todos los clubes de la división, a eliminación directa. Los más fuertes arrancan una ronda más adelante." nameOf={nameOf} flag={flag} bracket={bracket} />
+                    ) : (
+                        cur.level.id === 'primera' && <p className={styles.note}>Primera no juega copa de división: juega la {NAC_NAME}.</p>
+                    )}
+                </>
+            ) : nac ? (
+                <CupBlock title={NAC_NAME} t={nac} how={`${NAC_SIZE} clubes, armada a mitad de año. ${NAC_HOW}.`} nameOf={nameOf} flag={flag} bracket={bracket} />
+            ) : (
+                <p className={styles.note}>
+                    La {NAC_NAME} se arma a mitad de año con la tabla de ese momento: {NAC_HOW}.
+                </p>
+            )}
         </div>
+    );
+}
+
+/** Lo que va de un torneo, en una línea. */
+function status(t: TourState, nameOf: (id: string) => string): string {
+    return t.done ? `Terminado · campeón: ${nameOf(t.champion ?? finalRanking(t)[0] ?? '')}.` : `Va por: ${roundLabel(t).toLowerCase()}.`;
+}
+
+/** Una copa (mata-mata): cómo va, la última ronda jugada y el cuadro desde octavos. */
+function CupBlock({ title, t, how, nameOf, flag, bracket }: { title: string; t: TourState; how: string; nameOf: (id: string) => string; flag: Flag; bracket: (t: TourState) => ReactNode }) {
+    const last = t.koHistory.at(-1);
+    const alive = t.done ? 0 : t.alive.filter((id) => id !== '__bye__').length;
+    return (
+        <section className={styles.mcSection} aria-label={title}>
+            <h3 className={styles.groupTitle}>{title}</h3>
+            <p className={styles.note}>
+                {how} {status(t, nameOf)} {alive > 16 ? `Quedan ${alive}.` : ''}
+            </p>
+            {last && alive > 16 && (
+                <div className={styles.results}>
+                    <div className={styles.histRound}>
+                        <h4 className={styles.groupTitle}>Última ronda · {last.label}</h4>
+                        <ul className={styles.histList}>
+                            {last.results.map((x) => (
+                                <li key={`${x.a}-${x.b}`} className={x.a === MC_ME || x.b === MC_ME ? styles.rowMine : undefined}>
+                                    <span>
+                                        {flag(x.a)} {nameOf(x.a)}
+                                    </span>
+                                    <strong>
+                                        {x.sa} - {x.sb}
+                                    </strong>
+                                    <span>
+                                        {nameOf(x.b)} {flag(x.b)}
+                                    </span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </div>
+            )}
+            {bracket(t)}
+        </section>
     );
 }
 
