@@ -7,7 +7,7 @@
 
 import { useState, type ReactNode } from 'react';
 import { SKILL_LABEL } from './career';
-import { levelDef, levelOf, MC_ME, myRating, pyramidTours, starters, tagFor, TAG_LABEL, zoneName, type McLevel, type McTag, type MiClubState } from './miClub';
+import { levelDef, levelOf, MC_ME, movesByLevel, myMove, myRating, pyramidTours, starters, tagFor, TAG_LABEL, zoneName, type McLevel, type McTag, type MiClubState } from './miClub';
 import { groupStandings, roundLabel, finalRanking, type TourState } from './tours';
 import styles from './seven.module.css';
 
@@ -120,8 +120,26 @@ export function McPyramid({ s, nameOf, flag, bracket }: { s: TourState; nameOf: 
     const cur = list.find((x) => x.level.id === pick) ?? list[0];
     const t = cur.state;
     const showTables = t.stage === 'grupos' || t.done;
+    const moves = movesByLevel(r);
+    const mineMove = myMove(r);
+    const names = (ids: string[]) => ids.map((id) => (id === MC_ME ? `${nameOf(id)} (vos)` : nameOf(id))).join(', ');
     return (
         <div className={styles.othersPanel}>
+            {r.moves && moves.length > 0 && (
+                <details className={styles.movesBox}>
+                    <summary>
+                        <strong>Ascensos y descensos {r.moves.season}</strong>
+                        {mineMove ? ` · ${mineMove.up ? 'subiste' : 'bajaste'} a ${levelDef(mineMove.to).label}` : ` · ${moves.reduce((a, m) => a + m.up.length, 0)} clubes suben y otros tantos bajan`}
+                    </summary>
+                    {moves.map((m) => (
+                        <p key={m.level.id} className={styles.movesLevel}>
+                            <strong>{m.level.label}</strong>
+                            {m.up.length > 0 && <span>▲ Suben: {names(m.up)}.</span>}
+                            {m.down.length > 0 && <span>▼ Bajan: {names(m.down)}.</span>}
+                        </p>
+                    ))}
+                </details>
+            )}
             <div className={styles.pyramidPick} role="radiogroup" aria-label="División">
                 {list.map((x) => (
                     <button key={x.level.id} type="button" role="radio" aria-checked={x.level.id === cur.level.id} className={`${styles.pyramidStep} ${x.level.id === cur.level.id ? styles.pyramidStepOn : ''}`} onClick={() => setPick(x.level.id)}>
@@ -149,6 +167,24 @@ export function McSquad({ r }: { r: MiClubState }) {
             <p className={styles.note}>
                 Nivel del club: {myRating(r)}. Salen a la cancha los siete mejores. Créditos: {r.credits}.
             </p>
+            {!!r.lastNotes?.length && (
+                <div className={styles.roadPending}>
+                    <strong>Cambios de la pretemporada {r.season}</strong>
+                    {r.lastNotes.map((n, i) => (
+                        <span key={i}>{n}</span>
+                    ))}
+                </div>
+            )}
+            {r.history.length > 0 && (
+                <div className={styles.roadPending}>
+                    <strong>Historia del club</strong>
+                    {[...r.history].reverse().map((h) => (
+                        <span key={h.season}>
+                            {h.season} · {levelDef(h.level).label} · {h.place}
+                        </span>
+                    ))}
+                </div>
+            )}
             <div className={styles.groupCard}>
                 <table className={styles.table}>
                     <thead>

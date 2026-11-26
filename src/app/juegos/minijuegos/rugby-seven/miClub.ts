@@ -8,7 +8,7 @@
 import { AR_CLUBS, AR_SEVEN_DIVISIONS } from './arClubs';
 import { makePlayer, regionLabel, type Player } from './career';
 import { nameFromSeed, type PlayerName } from './names';
-import { closeRound, createTour, ratingOf, type TourDef, type TourState } from './tours';
+import { closeRound, createTour, finalRanking, groupStandings, ratingOf, type TourDef, type TourState } from './tours';
 import type { Difficulty, Duration, SevenTeam } from './teams';
 
 /* ───────────────────────── la pirámide ───────────────────────── */
@@ -55,6 +55,8 @@ const REGION_OF: Record<string, string> = (() => {
     return out;
 })();
 
+const CLUB_NAME = new Map(AR_CLUBS.map((c) => [c.id, c.name]));
+
 /** Los clubes de varones de Argentina que entran en la pirámide. */
 export const MC_POOL: string[] = AR_CLUBS.filter((c) => !c.fem && c.id.startsWith('ar-') && REGION_OF[c.id]).map((c) => c.id);
 
@@ -86,6 +88,10 @@ export interface MiClubState {
     history: { season: number; level: McLevel; place: string }[];
     titles: { season: number; label: string }[];
     log: string[];
+    /** Ascensos y descensos de la última temporada cerrada: `up|club|de|a` o `down|club|de|a`. */
+    moves?: { season: number; lines: string[] };
+    /** Lo que dejó el cierre del último año en el plantel (retiros, juveniles). */
+    lastNotes?: string[];
 }
 
 /* ───────────────────────── azar con semilla ───────────────────────── */
@@ -288,6 +294,152 @@ export function mcAfterRound(s: TourState): TourState {
         others[k] = t;
     }
     return changed ? { ...s, miclub: { ...r, others } } : s;
+}
+
+/* ───────────────────────── cierre de la temporada ───────────────────────── */
+
+function finishTour(t: TourState): TourState {
+    let x = t;
+    for (let guard = 0; guard < 200 && !x.done; guard++) x = closeRound(x, null);
+    return x;
+}
+
+/** Los clubes que llegaron a la ronda del cuadro que juegan `n` (16: octavos, 8: cuartos, 4: semis, 2: final). */
+function reachedRound(t: TourState, n: number): string[] {
+    const h = t.koHistory.find((x) => x.results.length * 2 === n);
+    return h ? h.results.flatMap((r) => [r.a, r.b]) : [];
+}
+
+/** Quiénes suben y quiénes bajan de una división terminada. */
+function movesOf(t: TourState, level: McLevel): { up: string[]; down: string[] } {
+    const l = levelDef(level);
+    const tables = t.groups.map((_, gi) => groupStandings(t, gi).map((row) => row.team));
+    let up: string[] = [];
+    if (l.up) up = l.zones ? reachedRound(t, l.up) : tables[0].slice(0, l.up);
+    // Si un cuadro quedó incompleto (no debería), se completa con el orden final.
+    if (up.length < l.up) for (const id of finalRanking(t)) if (up.length < l.up && !up.includes(id)) up.push(id);
+    const perZone = l.zones ? Math.ceil(l.down / l.zones) : l.down;
+    const down = l.down ? tables.flatMap((rows) => rows.slice(rows.length - perZone)).filter((id) => !up.includes(id)) : [];
+    return { up: up.slice(0, l.up), down: down.slice(0, l.down) };
+}
+
+/** Hasta dónde llegó el club en su división (para la historia y el cartel). */
+function placeOf(t: TourState, level: McLevel): string {
+    if (t.champion === MC_ME) return 'Campeón';
+    const ko = [...t.koHistory].reverse().find((h) => h.results.some((r) => r.a === MC_ME || r.b === MC_ME));
+    if (ko) return ko.label;
+    const gi = t.groups.findIndex((g) => g.includes(MC_ME));
+    const pos = gi >= 0 ? groupStandings(t, gi).findIndex((row) => row.team === MC_ME) + 1 : 0;
+    return levelDef(level).zones ? `${pos}.º de su zona` : `${pos}.º`;
+}
+
+/** Un año más: los pibes crecen, los grandes bajan, los de 34 se retiran y suben juveniles. */
+function developSquad(r: MiClubState, rand: () => number): string[] {
+    const notes: string[] = [];
+    const team = { ...r.team, namePool: r.team.namePool ?? 'rio' };
+    const avg = r.squad.reduce((a, p) => a + (p.ovr ?? 1), 0) / Math.max(1, r.squad.length);
+    const out: Player[] = [];
+    for (const p of r.squad) {
+        const age = p.age + 1;
+        if (age >= 34) {
+            const n = r.names[p.id!];
+            notes.push(`Se retira ${n ? `${n.first} ${n.last}`.trim() : 'un jugador'} (${p.age} años).`);
+            continue;
+        }
+        const base = age <= 21 ? 0.35 : age <= 24 ? 0.2 : age <= 28 ? 0.05 : age <= 31 ? -0.1 : -0.3;
+        const ovr = Math.round(Math.max(1, Math.min(10, (p.ovr ?? 1) + base + gauss(rand) * 0.15)) * 10) / 10;
+        const step = Math.round(ovr - (p.ovr ?? 1));
+        const s = (p.s ?? [1, 1, 1, 1]).map((v) => Math.max(1, Math.min(10, v + step))) as [number, number, number, number];
+        out.push({ ...p, age, ovr, s });
+    }
+    // Las vacantes, de las inferiores: pibes de 18, un poco por debajo del plantel.
+    while (out.length < 12) {
+        const id = r.nextId++;
+        const p = makePlayer(id, avg - 0.4 + gauss(rand) * 0.5, 18, rand);
+        r.names[id] = nameFromSeed(team, `${r.team.name}:${id}`);
+        notes.push(`Sube de las inferiores ${r.names[id].first} ${r.names[id].last}.`);
+        out.push(p);
+    }
+    r.squad = out;
+    r.lineup = r.lineup?.filter((id) => out.some((p) => p.id === id));
+    return notes;
+}
+
+/** El cartel del final de la temporada: qué pasó y qué viene. */
+export function mcVerdict(s: TourState): { title: string; text: string; next: string } | null {
+    const r = s.miclub;
+    if (!r || !(s.done || s.eliminated)) return null;
+    const level = levelOf(r, MC_ME) ?? 'base';
+    const l = levelDef(level);
+    const t = finishTour(s);
+    const { up, down } = movesOf(t, level);
+    const place = placeOf(t, level);
+    const above = MC_LEVELS[MC_LEVELS.indexOf(l) - 1];
+    const below = MC_LEVELS[MC_LEVELS.indexOf(l) + 1];
+    const title = t.champion === MC_ME ? `Campeón de ${l.label}` : up.includes(MC_ME) ? `Ascenso a ${above?.label}` : down.includes(MC_ME) ? `Descenso a ${below?.label}` : `${l.label} ${r.season}: ${place.toLowerCase()}`;
+    const text = up.includes(MC_ME)
+        ? `${r.team.name} juega en ${above?.label} la temporada que viene.${t.champion === MC_ME ? ' Y con la vuelta olímpica.' : ''}`
+        : down.includes(MC_ME)
+          ? `${r.team.name} vuelve a ${below?.label}. Hay que rearmarse.`
+          : `${r.team.name} sigue en ${l.label}. ${l.upHow}`;
+    return { title, text, next: `Temporada ${r.season + 1}` };
+}
+
+/** Cierra la temporada: asienta toda la pirámide, mueve los clubes, desarrolla el plantel y arranca la siguiente. */
+export function advanceMiClub(s0: TourState): TourState {
+    if (!s0.miclub || !(s0.done || s0.eliminated)) return s0;
+    const s = finishTour(s0);
+    const r: MiClubState = JSON.parse(JSON.stringify(s0.miclub));
+    const mine = levelOf(r, MC_ME) ?? 'base';
+    const tours: Record<string, TourState> = {};
+    for (const l of MC_LEVELS) tours[l.id] = l.id === mine ? s : finishTour(r.others[`lvl:${l.id}`]);
+    const moves: Record<string, { up: string[]; down: string[] }> = {};
+    for (const l of MC_LEVELS) moves[l.id] = tours[l.id] ? movesOf(tours[l.id], l.id) : { up: [], down: [] };
+
+    // Historia y títulos del club propio.
+    const place = placeOf(s, mine);
+    r.history.push({ season: r.season, level: mine, place });
+    if (s.champion === MC_ME) r.titles.push({ season: r.season, label: levelDef(mine).label });
+    for (const l of MC_LEVELS) {
+        const champ = tours[l.id]?.champion;
+        if (champ && champ !== MC_ME) r.log.push(`${r.season}: ${l.label}, campeón ${CLUB_NAME.get(champ) ?? champ}.`);
+    }
+
+    // Los movimientos, de una vez (así nadie sube dos escalones).
+    const next = {} as Record<McLevel, string[]>;
+    const lines: string[] = [];
+    MC_LEVELS.forEach((l, i) => {
+        const stay = r.divisions[l.id].filter((id) => !moves[l.id].up.includes(id) && !moves[l.id].down.includes(id));
+        const fromBelow = MC_LEVELS[i + 1] ? moves[MC_LEVELS[i + 1].id].up : [];
+        const fromAbove = MC_LEVELS[i - 1] ? moves[MC_LEVELS[i - 1].id].down : [];
+        next[l.id] = [...stay, ...fromBelow, ...fromAbove];
+        for (const id of fromBelow) lines.push(`up|${id}|${MC_LEVELS[i + 1].id}|${l.id}`);
+        for (const id of fromAbove) lines.push(`down|${id}|${MC_LEVELS[i - 1].id}|${l.id}`);
+    });
+    r.divisions = next;
+    r.moves = { season: r.season, lines };
+
+    const rand = seeded(`${r.team.name}:${r.season}:cierre`);
+    r.lastNotes = developSquad(r, rand);
+    r.season += 1;
+    r.others = buildOthers(r);
+    return stageTour(r, s0.difficulty, s0.duration);
+}
+
+/** Ascensos y descensos de la última temporada cerrada, por división de origen. */
+export function movesByLevel(r: MiClubState): { level: McLevelDef; up: string[]; down: string[] }[] {
+    const lines = (r.moves?.lines ?? []).map((line) => line.split('|'));
+    return MC_LEVELS.map((level) => ({
+        level,
+        up: lines.filter(([k, , from]) => k === 'up' && from === level.id).map(([, id]) => id),
+        down: lines.filter(([k, , from]) => k === 'down' && from === level.id).map(([, id]) => id),
+    })).filter((x) => x.up.length || x.down.length);
+}
+
+/** Qué le pasó al club propio en el último cierre: 'up', 'down' o null. */
+export function myMove(r: MiClubState): { up: boolean; to: McLevel } | null {
+    const line = (r.moves?.lines ?? []).map((l) => l.split('|')).find(([, id]) => id === MC_ME);
+    return line ? { up: line[0] === 'up', to: line[3] as McLevel } : null;
 }
 
 /* ───────────────────────── para mirar ───────────────────────── */

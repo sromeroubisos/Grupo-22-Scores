@@ -4468,3 +4468,33 @@
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 6px;
 }
+
+/* Ascensos y descensos del último cierre: una línea por división, plegado. */
+.movesBox {
+    padding: 10px;
+    border-radius: 8px;
+    background: var(--color-bg-secondary);
+    border: 2px solid var(--color-border);
+    font-size: 0.66rem;
+    line-height: 1.5;
+}
+
+.movesBox summary {
+    cursor: pointer;
+    color: var(--color-text-primary);
+}
+
+.movesBox summary strong {
+    color: var(--gold);
+}
+
+.movesLevel {
+    display: grid;
+    gap: 2px;
+    margin: 8px 0 0;
+    color: var(--color-text-secondary);
+}
+
+.movesLevel strong {
+    color: var(--color-text-primary);
+}

@@ -143,7 +143,7 @@ import { advanceIntl, compName, createIntl, intlBoosts, intlInvest, intlNames, i
 import { IntlRanking, IntlSeason, IntlSquad, IntlUnion, IntlYouth } from './IntlPanels';
 import { advanceSvns, createSvns, SVNS_LEGS, SVNS_PHASE_LABEL, svnsBoosts, svnsRegionName, svnsStartTier, svnsTable, svnsVerdict, TIER_LABEL } from './svns';
 import { CloudSync, markTutorialSeenInAccount, tutorialSeenInAccount, type CloudStatus } from './cloudSave';
-import { createMiClub, levelDef, levelOf, MC_LEVELS, MC_POOL, MC_REGIONS, mcAfterRound, mcRegionLabel, myTeam, type McRegion } from './miClub';
+import { advanceMiClub, createMiClub, levelDef, levelOf, MC_LEVELS, MC_POOL, MC_REGIONS, mcAfterRound, mcRegionLabel, mcVerdict, myTeam, type McRegion } from './miClub';
 import { McPyramid, McSquad, McTables } from './MiClubPanels';
 import { useOfflineReady } from './offline';
 import { readLang, startTranslating, writeLang, type Lang } from './i18n';
@@ -1279,6 +1279,13 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
         setScreen({ k: 'tour' });
     };
 
+    /** Mi Club: cierra la temporada (ascensos, descensos, plantel) y arranca la siguiente; se ve en la Pirámide. */
+    const nextMcSeason = () => {
+        if (!tour) return;
+        persist({ tour: advanceMiClub(tour) });
+        setHubTab('piramide');
+    };
+
     const nextIntlStage = () => {
         if (!tour) return;
         const t = advanceIntl(tour);
@@ -2326,7 +2333,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                     const svns = tour.svns ?? null;
                     const intl = tour.intl ?? null;
                     const miclub = tour.miclub ?? null;
-                    const verdict = road ? roadVerdict(tour) : career ? careerVerdict(tour) : svns && tour.done ? svnsVerdict(tour) : intl && tour.done ? intlVerdict(tour) : null;
+                    const verdict = road ? roadVerdict(tour) : career ? careerVerdict(tour) : svns && tour.done ? svnsVerdict(tour) : intl && tour.done ? intlVerdict(tour) : miclub ? mcVerdict(tour) : null;
                     const tabs: [HubTab, string][] = [
                         ...(onlyKo ? [] : [['tabla', tour.groups.length > 1 ? (tour.cross ? 'Conferencias' : 'Grupos') : 'Tabla'] as ['tabla', string]]),
                         ['calendario', 'Calendario'],
@@ -2430,7 +2437,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                             En paralelo: {(defOf(career.parallel)?.name ?? '').replace(/ \d{4}$/, '')} · {roundLabel(career.parallel).toLowerCase()}
                                         </span>
                                     )}
-                                    {(road || career || svns || intl) && tour.done && verdict ? (
+                                    {(road || career || svns || intl || miclub) && tour.done && verdict ? (
                                         <>
                                             <div className={styles.champBox}>
                                                 <span>{verdict.title}</span>
@@ -2528,7 +2535,9 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                                   ? { label: `${verdict.next} ▶`, run: nextSvnsStage }
                                                   : intl && verdict?.next
                                                     ? { label: `${verdict.next} ▶`, run: nextIntlStage }
-                                                    : null;
+                                                    : miclub && verdict?.next
+                                                      ? { label: `${verdict.next} ▶`, run: nextMcSeason }
+                                                      : null;
                                         return (
                                             <div className={styles.hubActions}>
                                                 {!preseason && (
