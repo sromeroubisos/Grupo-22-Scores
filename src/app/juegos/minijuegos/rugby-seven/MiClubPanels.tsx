@@ -7,7 +7,7 @@
 
 import { useState, type ReactNode } from 'react';
 import { SKILL_LABEL, type Player } from './career';
-import { cupName, facCost, FAC_MAX, FACILITIES, levelDef, levelOf, MC_ME, nextLicense, trainStepAt, upgradeBlock, type McFacility, PAY, PAY_BY_LEVEL, PRIZE, releaseBlock, signBlock, SQUAD_MAX, trainBlock, trainCost, movesByLevel, myMove, myRating, americaView, LIB_NAME, LIB_PER_WORLD, nacHowOf, nacNameOf, nacionalView, otherWorld, topOf, WORLDS, pyramidTours, seasonNews, starters, tagFor as levelTag, TAG_LABEL, kindOf, mundialView, WCC_NAME, WCC_FROM_PRIMERA, zoneName, type McLevel, type McTag, type MiClubState } from './miClub';
+import { cupName, facCost, FAC_MAX, FACILITIES, levelDef, levelOf, MC_ME, nextLicense, trainStepAt, upgradeBlock, type McFacility, PAY, PAY_BY_LEVEL, PRIZE, releaseBlock, signBlock, SQUAD_MAX, trainBlock, trainCostFor, trainStepFor, divisionCap, seasonGain, SEASON_GROWTH_MAX, movesByLevel, myMove, myRating, americaView, LIB_NAME, LIB_PER_WORLD, nacHowOf, nacNameOf, nacionalView, otherWorld, topOf, WORLDS, pyramidTours, seasonNews, starters, tagFor as levelTag, TAG_LABEL, kindOf, mundialView, WCC_NAME, WCC_FROM_PRIMERA, zoneName, type McLevel, type McTag, type MiClubState } from './miClub';
 import { groupStandings, roundLabel, finalRanking, type TourState } from './tours';
 import styles from './seven.module.css';
 
@@ -344,10 +344,14 @@ export function McSquad({ r, onTrain, onRelease }: { r: MiClubState; onTrain: (i
     const xi = new Set(starters(r).map((p) => p.id));
     const list = [...r.squad].sort((a, b) => Number(xi.has(b.id)) - Number(xi.has(a.id)) || (b.ovr ?? 0) - (a.ovr ?? 0));
     const relBlock = releaseBlock(r);
+    const cap = divisionCap(r);
+    const f2 = (v: number) => v.toFixed(2).replace('.', ',');
+    // Tu jugador, primero.
+    list.sort((a, b) => Number(b.id === r.marquee?.id) - Number(a.id === r.marquee?.id));
     return (
         <div className={styles.othersPanel}>
             <p className={styles.note}>
-                Nivel del club: {myRating(r)}. Salen a la cancha los siete mejores. Tenés {r.credits} créditos. Mejorar a un jugador sube {trainStepAt(r.facilities?.entreno ?? 1).toFixed(2).replace('.', ',')} su valoración, una vez por temporada (más con mejor entrenamiento).
+                Nivel del club: {myRating(r)}. Tenés {r.credits} créditos. Entrenar sube {f2(trainStepFor(r))} (más con mejor entrenamiento y cuanto mejor va el equipo) y cada vez cuesta más. En el año, cada jugador mejora como mucho {SEASON_GROWTH_MAX.toFixed(1).replace('.', ',')} entre entrenamiento y rendimiento, y no pasa el techo de la división: {cap.toFixed(1).replace('.', ',')}.
             </p>
             {!!r.lastNotes?.length && (
                 <div className={styles.roadPending}>
@@ -362,15 +366,22 @@ export function McSquad({ r, onTrain, onRelease }: { r: MiClubState; onTrain: (i
                     const n = r.names[p.id!];
                     const name = n ? `${n.first} ${n.last}`.trim() : '—';
                     const tb = trainBlock(r, p);
+                    const cost = trainCostFor(r, p);
+                    const isMarquee = r.marquee?.id === p.id;
+                    const rb = releaseBlock(r, p.id);
+                    const gain = seasonGain(r, p.id!);
+                    const note = [isMarquee ? '⭐ tu jugador' : null, xi.has(p.id) ? 'titular' : 'suplente', gain > 0 ? `+${gain.toFixed(1).replace('.', ',')} este año` : null].filter(Boolean).join(' · ');
                     return (
-                        <PlayerCard key={p.id} name={name} p={p} note={xi.has(p.id) ? 'titular' : 'suplente'} mine={xi.has(p.id)}>
-                            <button type="button" className={styles.btnGhost} disabled={!!tb} aria-label={tb ? `Mejorar a ${name}: ${tb}` : `Mejorar a ${name} por ${trainCost(p)} créditos`} onClick={() => onTrain(p.id!)}>
-                                Mejorar · {trainCost(p)}
+                        <PlayerCard key={p.id} name={name} p={p} note={note} mine={xi.has(p.id)}>
+                            <button type="button" className={styles.btnGhost} disabled={!!tb} aria-label={tb ? `Entrenar a ${name}: ${tb}` : `Entrenar a ${name} por ${cost} créditos`} onClick={() => onTrain(p.id!)}>
+                                Entrenar · {cost}
                             </button>
-                            <button type="button" className={styles.btnGhost} disabled={!!relBlock} aria-label={relBlock ? `Liberar a ${name}: ${relBlock}` : `Liberar a ${name}`} onClick={() => onRelease(p.id!)}>
-                                Liberar
-                            </button>
-                            {tb && tb !== 'Ya está en su techo.' && <small className={styles.mcWhy}>{tb}</small>}
+                            {!isMarquee && (
+                                <button type="button" className={styles.btnGhost} disabled={!!rb} aria-label={rb ? `Liberar a ${name}: ${rb}` : `Liberar a ${name}`} onClick={() => onRelease(p.id!)}>
+                                    Liberar
+                                </button>
+                            )}
+                            {tb && <small className={styles.mcWhy}>{tb}</small>}
                         </PlayerCard>
                     );
                 })}

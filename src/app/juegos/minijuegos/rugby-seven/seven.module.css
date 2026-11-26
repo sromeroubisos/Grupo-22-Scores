@@ -4925,3 +4925,27 @@
     background: var(--gold);
     color: #141218;
 }
+
+/* Mi Club: elegir cuál de las siete caras del club es tu jugador. */
+.lookPick {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 6px;
+}
+
+.lookOpt {
+    font: inherit;
+    display: grid;
+    place-items: center;
+    padding: 6px 0;
+    border-radius: 8px;
+    cursor: pointer;
+    background: var(--color-bg-tertiary);
+    border: 2px solid var(--color-border);
+}
+
+@media (max-width: 420px) {
+    .lookPick {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}

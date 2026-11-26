@@ -217,6 +217,8 @@ export interface CareerState {
     nacFormat?: Record<string, NacFormat>;
     /** El nombre del entrenador (lo pone el usuario al empezar). */
     coach?: string;
+    /** Tu jugador: el que creaste al empezar la carrera (id en el plantel del club). */
+    marquee?: number;
     /** Campeón de cada competición en cada temporada de esta carrera: clave del palmarés → [temporada, club]. */
     champions?: Record<string, [number, string][]>;
     /** El otro torneo que el club juega en paralelo (el federal o la división, el que no está en pantalla). */
@@ -753,7 +755,9 @@ function evolveRosters(r: CareerState) {
                 if (club === r.me) archiveLegend(r, p.id as number, full);
                 continue;
             }
-            const retires = p.age >= 37 || (p.age >= 31 && Math.random() < (p.age - 30) * 0.22);
+            // Tu jugador (el que creaste al empezar) no se retira antes de los 37.
+            const isMarquee = club === r.me && r.marquee === p.id;
+            const retires = p.age >= 37 || (!isMarquee && p.age >= 31 && Math.random() < (p.age - 30) * 0.22);
             if (retires) {
                 if (name) mine.push(`Se retiró ${full} (${p.age} años).`);
                 if (club === r.me) archiveLegend(r, p.id as number, full);
@@ -1623,7 +1627,7 @@ function withOthers(s: TourState): TourState {
 }
 
 /** Arranca la carrera con el club elegido, en su división de 2026. */
-export function createCareer(meId: string, difficulty: Difficulty, duration: Duration, coach?: string): TourState {
+export function createCareer(meId: string, difficulty: Difficulty, duration: Duration, coach?: string, player?: { name: string }): TourState {
     setRatingBoost({});
     const home = AR_SEVEN_DIVISIONS.find((d) => d.clubs.includes(meId));
     const branch: Branch = home?.branch ?? 'urba';
@@ -1644,6 +1648,16 @@ export function createCareer(meId: string, difficulty: Difficulty, duration: Dur
     r.tiers = isArgBranch(branch) ? tierFields(r, 'final', r.cupos, undefined, {}) : {};
     r.youth = initialYouth(r);
     r.cv = CAREER_VERSION;
+    // Tu jugador: arranca un poco arriba del nivel de tu club (19 años) y no se retira antes de los 37.
+    const pname = player?.name.trim().slice(0, 28);
+    if (pname) {
+        const roster = r.rosters![meId];
+        const id = Math.max(0, ...roster.map((p) => p.id ?? 0)) + 1;
+        const p = makePlayer(id, Math.min(8.6, centerOf(meId) + 1.2), 19);
+        p.name = pname;
+        roster.push(p);
+        r.marquee = id;
+    }
     return seasonStart(r, difficulty, duration);
 }
 

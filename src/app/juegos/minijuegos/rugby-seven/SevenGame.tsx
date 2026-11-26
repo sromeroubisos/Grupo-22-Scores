@@ -782,6 +782,10 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
     const [mcDraft, setMcDraft] = useState<SevenTeam | null>(null);
     const [mcRegion, setMcRegion] = useState<McRegion | null>(null);
     const [mcWorld, setMcWorld] = useState<McWorld>('ar');
+    // Modo carrera: el nombre de tu jugador (opcional); arranca un poco arriba del nivel de tu club.
+    const [careerPlayer, setCareerPlayer] = useState('');
+    // Tu jugador (el marquee): nombre, puesto (0 a 6) y cuál de las siete caras del club es la suya.
+    const [mcPlayer, setMcPlayer] = useState<{ name: string; pos: number; look: number }>({ name: '', pos: 4, look: 0 });
     const [coachName, setCoachName] = useState('');
     /** País elegido para la carrera nueva. */
     const [careerCountry, setCareerCountry] = useState<string>('ar');
@@ -1248,7 +1252,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
         const own = careerReplace ? customTeams.find((c) => c.id === careerReplace) : null;
         if (own) saveClubEdit(mine, { name: own.name, short: own.short, kit: own.kit, players: own.players });
         setCareerReplace('');
-        persist({ tour: createCareer(mine, difficulty, duration, coachName || readCoach() || undefined) });
+        persist({ tour: createCareer(mine, difficulty, duration, coachName || readCoach() || undefined, careerPlayer.trim() ? { name: careerPlayer } : undefined) });
         setHubTab('tabla');
         setScreen({ k: 'tour' });
     };
@@ -1275,7 +1279,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
 
     const startMiClub = () => {
         if (!mcDraft || !mcRegion) return;
-        persist({ tour: createMiClub({ team: mcDraft, region: mcRegion, world: mcWorld }, difficulty, duration) });
+        persist({ tour: createMiClub({ team: mcDraft, region: mcRegion, world: mcWorld, player: mcPlayer }, difficulty, duration) });
         setMcDraft(null);
         setMcRegion(null);
         setHubTab('tabla');
@@ -2087,6 +2091,11 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                     autoComplete="off"
                                 />
                             </label>
+                            <label className={styles.coachField}>
+                                <span>Tu jugador (opcional): el crack del club</span>
+                                <input value={careerPlayer} onChange={(e) => setCareerPlayer(e.target.value.slice(0, 28))} placeholder="Nombre y apellido" maxLength={28} autoComplete="off" />
+                            </label>
+                            <p className={styles.note}>Si lo creás, se suma al plantel un poco por encima del nivel de tu club, con 19 años, y crece entrenándolo en cada pretemporada. No se retira antes de los 37.</p>
                             <SettingsStep teams={[byId(mine)]} difficulty={difficulty} setDifficulty={setDifficulty} duration={duration} setDuration={setDuration} />
                             <p className={styles.note}>Se guarda en la partida {slot + 1}{tour ? ', en lugar de la que había' : ''}.</p>
                             <div className={styles.footerBtns}>
@@ -2275,6 +2284,32 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                     Define tu zona en la Regional y en las divisiones con zonas: tus rivales son los de tu {WORLDS[mcWorld].regionWord}.
                                 </small>
                             </div>
+                            <div className={styles.nacAsk}>
+                                <span className={styles.nacAskQ}>Tu jugador · el crack del club</span>
+                                <label className={styles.field}>
+                                    <span className={styles.fieldLabel}>Nombre y apellido</span>
+                                    <input className={styles.input} value={mcPlayer.name} maxLength={28} placeholder="Por ejemplo: Tomás Albornoz" onChange={(e) => setMcPlayer((p) => ({ ...p, name: e.target.value }))} />
+                                </label>
+                                <div role="radiogroup" aria-label="Puesto de tu jugador" className={styles.regionGrid}>
+                                    {POSITIONS.map((label, i) => (
+                                        <button key={i} type="button" role="radio" aria-checked={mcPlayer.pos === i} className={`${styles.nacOpt} ${mcPlayer.pos === i ? styles.nacOptOn : ''}`} onClick={() => setMcPlayer((p) => ({ ...p, pos: i }))}>
+                                            <strong>{i === 0 ? 'Pilar izquierdo' : i === 2 ? 'Pilar derecho' : label}</strong>
+                                        </button>
+                                    ))}
+                                </div>
+                                {mcDraft && (
+                                    <div role="radiogroup" aria-label="La cara de tu jugador" className={styles.lookPick}>
+                                        {mcDraft.players.map((look, i) => (
+                                            <button key={i} type="button" role="radio" aria-checked={mcPlayer.look === i} aria-label={`Cara ${i + 1}`} className={`${styles.lookOpt} ${mcPlayer.look === i ? styles.nacOptOn : ''}`} onClick={() => setMcPlayer((p) => ({ ...p, look: i }))}>
+                                                <SpritePreview look={look} kit={mcDraft.kit} scale={2} />
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                                <small className={styles.nacAskNote}>
+                                    Arranca un poco por encima del nivel de su división y crece con el club: entrenándolo con créditos y jugando. Es tuyo: no se libera.
+                                </small>
+                            </div>
                             <SettingsStep teams={[mcDraft]} difficulty={difficulty} setDifficulty={setDifficulty} duration={duration} setDuration={setDuration} />
                             <div className={styles.roadInfo}>
                                 <strong>Cómo es Mi Club · {WORLDS[mcWorld].label}</strong>
@@ -2295,8 +2330,10 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                             <p className={styles.note}>Se guarda en la partida {slot + 1}{tour ? ', en lugar de la que había' : ''}.</p>
                             <div className={styles.footerBtns}>
                                 {btn('◀ Camiseta', () => setScreen({ k: 'mcSetup', step: 1 }))}
-                                {!mcRegion && <span className={styles.missing}>Elegí la región de tu club para empezar.</span>}
-                                {btn('Fundar el club ▶', startMiClub, true, !mcDraft || !mcRegion)}
+                                {(!mcRegion || !mcPlayer.name.trim()) && (
+                                    <span className={styles.missing}>{!mcRegion ? 'Elegí la región de tu club para empezar.' : 'Poné el nombre de tu jugador para empezar.'}</span>
+                                )}
+                                {btn('Fundar el club ▶', startMiClub, true, !mcDraft || !mcRegion || !mcPlayer.name.trim())}
                             </div>
                         </div>
                     ))}

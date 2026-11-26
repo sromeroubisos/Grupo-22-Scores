@@ -13,7 +13,7 @@
 import { AR_CLUBS, AR_SEVEN_DIVISIONS } from './arClubs';
 import { CLUB_LEAGUES } from './clubs';
 import { makePlayer, regionLabel, type Player } from './career';
-import { defaultNames, nameFromSeed, type PlayerName } from './names';
+import { defaultNames, nameFromSeed, nameFromText, type PlayerName } from './names';
 import { closeRound, createTour, finalRanking, groupStandings, ratingOf, triesOfScore, type TourDef, type TourState } from './tours';
 import type { Difficulty, Duration, SevenTeam } from './teams';
 
@@ -169,6 +169,14 @@ export interface MiClubState {
     paid?: string[];
     /** Jugadores que ya se mejoraron esta temporada (una vez por año cada uno). */
     trained?: number[];
+    /** Tu jugador: el que creaste al fundar el club (no se libera) y el puesto que ocupa en la cancha (0 a 6). */
+    marquee?: { id: number; pos: number };
+    /** Lo que mejoró cada jugador en esta temporada (entrenamiento y rendimiento): nunca más de 1,5. */
+    gains?: Record<number, number>;
+    /** Cuántas veces se entrenó a cada jugador esta temporada (cada vez cuesta más). */
+    trainings?: Record<number, number>;
+    /** Los partidos propios de la temporada: ganados, empatados y perdidos (el rendimiento del equipo). */
+    record?: [number, number, number];
     /** Lo que dejó el último partido, en palabras ("+18: 12 por jugar, 6 por ganar"). */
     lastGain?: string;
     /** Ascensos y descensos de la última temporada cerrada: `up|club|de|a` o `down|club|de|a`. */
@@ -218,7 +226,18 @@ export function starters(r: MiClubState): Player[] {
     const byId = new Map(r.squad.map((p) => [p.id!, p]));
     const chosen = (r.lineup ?? []).map((id) => byId.get(id)).filter((p): p is Player => !!p);
     const rest = r.squad.filter((p) => !chosen.includes(p)).sort((a, b) => (b.ovr ?? 0) - (a.ovr ?? 0));
-    return [...chosen, ...rest].slice(0, 7);
+    const xi = [...chosen, ...rest].slice(0, 7);
+    // Tu jugador siempre es titular: si quedó afuera, entra en lugar del peor de los siete.
+    const mq = r.marquee ? byId.get(r.marquee.id) : undefined;
+    if (mq && !xi.includes(mq)) xi[xi.length - 1] = mq;
+    // Tu jugador juega en su puesto (y con su cara: la del mismo lugar en la camiseta del club).
+    const m = r.marquee;
+    const at = m ? xi.findIndex((p) => p.id === m.id) : -1;
+    if (m && at >= 0 && at !== m.pos) {
+        const [mp] = xi.splice(at, 1);
+        xi.splice(Math.min(m.pos, xi.length), 0, mp);
+    }
+    return xi;
 }
 
 export function myRating(r: MiClubState): number {
@@ -377,7 +396,7 @@ export const FACILITIES: { id: McFacility; label: string; effect: (lvl: number) 
 ];
 
 /** Lo que sube "Mejorar" según el nivel de entrenamiento. */
-export const trainStepAt = (entreno: number) => 0.3 + 0.05 * (entreno - 1);
+export const trainStepAt = (entreno: number) => 0.2 + 0.05 * (entreno - 1);
 
 /** El costo de pasar una instalación al nivel siguiente (null: ya está al máximo). */
 export function facCost(r: MiClubState, f: McFacility): number | null {
@@ -439,6 +458,52 @@ export function worldCeiling(r: { world?: McWorld }): number {
     return 1 + (strongest - 40) / 6 + 0.8;
 }
 
+/* ───────── progresión: topes por división y por temporada ───────── */
+
+/** Lo más que puede mejorar un jugador en una temporada, entre entrenamiento y rendimiento. */
+export const SEASON_GROWTH_MAX = 1.5;
+
+/** El nivel medio (escala 1-10) de los clubes de una división. */
+export function levelCenter(r: MiClubState, level: McLevel): number {
+    const clubs = (r.divisions[level] ?? []).filter((c) => c !== MC_ME);
+    const avg = clubs.reduce((a, c) => a + ratingOf(c), 0) / Math.max(1, clubs.length);
+    return 1 + (avg - 40) / 6;
+}
+
+/**
+ * El techo de crecimiento en la división del club: 1,6 arriba de su nivel medio (Regional ≈ 3,4,
+ * Primera ≈ 9,6). Un jugador por encima no baja, pero no crece hasta que el club suba. Uno mejor solo
+ * llega fichándolo.
+ */
+export function divisionCap(r: MiClubState): number {
+    const levels = levelsOf(r);
+    const level = levelOf(r, MC_ME) ?? levels.at(-1)!.id;
+    // Abajo se puede sacar más ventaja (1,6 sobre el nivel medio); arriba menos (1,0 en Primera):
+    // así en Primera hay cracks de 8 y pico, pero no un equipo entero de 9.
+    const i = levels.findIndex((l) => l.id === level);
+    const room = 1.0 + 0.6 * (i / Math.max(1, levels.length - 1));
+    return Math.min(worldCeiling(r), Math.round((levelCenter(r, level) + room) * 10) / 10);
+}
+
+/** Cómo le va al equipo en la temporada (0 a 1): pesa en lo que rinde el entrenamiento. */
+export function winRate(r: MiClubState): number {
+    const [w, d, l] = r.record ?? [0, 0, 0];
+    const n = w + d + l;
+    return n ? (w + 0.5 * d) / n : 0.5;
+}
+
+export const seasonGain = (r: MiClubState, id: number) => r.gains?.[id] ?? 0;
+
+/** Lo que sube un entrenamiento: más con mejor entrenamiento y cuanto mejor va el equipo. */
+export function trainStepFor(r: MiClubState): number {
+    return Math.round(trainStepAt(r.facilities?.entreno ?? 1) * (0.7 + 0.6 * winRate(r)) * 100) / 100;
+}
+
+/** Lo que cuesta entrenar a un jugador: según lo que vale, y cada vez más en la misma temporada. */
+export const trainCostFor = (r: MiClubState, p: Player) => Math.max(6, Math.round(priceOf(p) * 0.12)) * (1 + (r.trainings?.[p.id!] ?? 0));
+
+const fmt1 = (v: number) => v.toFixed(1).replace('.', ',');
+
 /** Lo que cuesta mejorar a un jugador (+0,3 de valoración), una vez por temporada. */
 export const trainCost = (p: Player) => Math.max(6, Math.round(priceOf(p) * 0.2));
 
@@ -474,6 +539,10 @@ function payMatches(r: MiClubState, t: TourState) {
         paid.add(key);
         if (!m) continue;
         const [us, them] = m.a === MC_ME ? [m.sa, m.sb] : [m.sb, m.sa];
+        // El rendimiento de la temporada (lo que pesa en el entrenamiento y en el crecimiento).
+        const rec = [...(r.record ?? [0, 0, 0])] as [number, number, number];
+        rec[us > them ? 0 : us === them ? 1 : 2] += 1;
+        r.record = rec;
         const tries = (m.a === MC_ME ? m.ta : m.tb) ?? triesOfScore(us);
         const parts: [number, string][] = [[PAY_BY_LEVEL[level], 'por jugar']];
         if (us > them) parts.push([PAY.win, 'por ganar']);
@@ -506,7 +575,10 @@ function makeOffers(r: MiClubState, rand: () => number): McOffer[] {
     const aboveLevel = levelsOf(r)[Math.max(0, levelsOf(r).findIndex((l) => l.id === level) - 1)].id;
     const aboveClubs = r.divisions[aboveLevel].filter((c) => c !== MC_ME);
     const aboveCenter = 1 + (aboveClubs.reduce((a, c) => a + ratingOf(c), 0) / Math.max(1, aboveClubs.length) - 40) / 6;
-    const ceiling = worldCeiling(r) - 0.4;
+    // El techo del mercado: como mucho 0,6 arriba del techo de la división (y del mundo). Un jugador
+    // mejor que la división se consigue fichándolo, pero no es lo normal; sin este tope, cada ventana
+    // traía jugadores arriba del propio plantel y el equipo subía sin freno.
+    const ceiling = Math.min(worldCeiling(r) - 0.4, divisionCap(r) + 0.6);
     for (let i = 0; i < 6; i++) {
         const id = r.nextId++;
         const age = 19 + Math.floor(rand() * 13);
@@ -562,11 +634,12 @@ export function mcSign(s: TourState, offerId: number): TourState {
 }
 
 /** Por qué no se puede liberar a un jugador (null: se puede). */
-export const releaseBlock = (r: MiClubState) => (r.squad.length <= SQUAD_MIN ? `Hacen falta al menos ${SQUAD_MIN} jugadores en el plantel.` : null);
+export const releaseBlock = (r: MiClubState, playerId?: number) =>
+    playerId !== undefined && r.marquee?.id === playerId ? 'Es tu jugador: no se libera.' : r.squad.length <= SQUAD_MIN ? `Hacen falta al menos ${SQUAD_MIN} jugadores en el plantel.` : null;
 
 export function mcRelease(s: TourState, playerId: number): TourState {
     return withClub(s, (r) => {
-        if (releaseBlock(r)) return;
+        if (releaseBlock(r, playerId)) return;
         const n = r.names[playerId];
         r.squad = r.squad.filter((p) => p.id !== playerId);
         r.lineup = r.lineup?.filter((id) => id !== playerId);
@@ -576,21 +649,27 @@ export function mcRelease(s: TourState, playerId: number): TourState {
 
 /** Por qué no se puede mejorar a un jugador (null: se puede). */
 export function trainBlock(r: MiClubState, p: Player): string | null {
-    if (r.trained?.includes(p.id!)) return 'Ya se mejoró esta temporada.';
-    if ((p.ovr ?? 1) >= Math.min(9.5, worldCeiling(r))) return 'Ya está en su techo.';
-    if (r.credits < trainCost(p)) return `Te faltan ${trainCost(p) - r.credits} créditos.`;
+    const cap = divisionCap(r);
+    if ((p.ovr ?? 1) >= cap) return `Llegó al techo de la división (${fmt1(cap)}): crece cuando el club sube.`;
+    if (seasonGain(r, p.id!) >= SEASON_GROWTH_MAX - 0.05) return `Ya mejoró lo máximo de esta temporada (+${fmt1(SEASON_GROWTH_MAX)}).`;
+    const cost = trainCostFor(r, p);
+    if (r.credits < cost) return `Te faltan ${cost - r.credits} créditos.`;
     return null;
 }
 
+/** Entrenar con créditos: se puede varias veces por temporada, cada vez más caro, sin pasar los topes. */
 export function mcTrain(s: TourState, playerId: number): TourState {
     return withClub(s, (r) => {
         const p = r.squad.find((x) => x.id === playerId);
         if (!p || trainBlock(r, p)) return;
-        r.credits -= trainCost(p);
+        r.credits -= trainCostFor(r, p);
         const before = p.ovr ?? 1;
-        p.ovr = Math.round(Math.min(10, before + trainStepAt(r.facilities?.entreno ?? 1)) * 10) / 10;
+        const step = Math.max(0, Math.min(trainStepFor(r), divisionCap(r) - before, SEASON_GROWTH_MAX - seasonGain(r, playerId)));
+        p.ovr = Math.round(Math.min(10, before + step) * 10) / 10;
         // Al cruzar un número entero, las habilidades acompañan.
         if (Math.floor(p.ovr) > Math.floor(before)) p.s = (p.s ?? [1, 1, 1, 1]).map((v) => Math.min(10, v + 1)) as [number, number, number, number];
+        r.gains = { ...(r.gains ?? {}), [playerId]: Math.round((seasonGain(r, playerId) + (p.ovr - before)) * 100) / 100 };
+        r.trainings = { ...(r.trainings ?? {}), [playerId]: (r.trainings?.[playerId] ?? 0) + 1 };
         r.trained = [...(r.trained ?? []), playerId];
     });
 }
@@ -806,6 +885,9 @@ function startSeason(r: MiClubState, difficulty: Difficulty, duration: Duration)
     r.news = [];
     r.paid = [];
     r.trained = [];
+    r.gains = {};
+    r.trainings = {};
+    r.record = [0, 0, 0];
     r.lastGain = undefined;
     const rand = seeded(`${r.team.name}:${r.season}:mercado`);
     r.sponsors = sponsorsFor(r, rand);
@@ -825,7 +907,15 @@ export interface McFounding {
     team: SevenTeam;
     region: McRegion;
     world?: McWorld;
+    /** Tu jugador: su nombre, su puesto (0 a 6) y cuál de las siete caras del club es la suya. */
+    player?: { name: string; pos: number; look: number };
 }
+
+/** El nivel con el que arranca tu jugador: un poco arriba del de su división (y debajo del techo). */
+export const marqueeStartOvr = (r: MiClubState) => {
+    const level = levelOf(r, MC_ME) ?? levelsOf(r).at(-1)!.id;
+    return Math.round(Math.min(divisionCap(r) - 0.1, levelCenter(r, level) + 1.5) * 10) / 10;
+};
 
 export function createMiClub(f: McFounding, difficulty: Difficulty, duration: Duration, seed = `${Date.now()}`): TourState {
     const rand = seeded(`${seed}:${f.team.name}`);
@@ -853,6 +943,23 @@ export function createMiClub(f: McFounding, difficulty: Difficulty, duration: Du
         log: [`2026: se funda ${name}, en la Regional de ${mcRegionLabel(f.region)}${f.world === 'sa' ? ' (Sudamérica)' : ''}.`],
     };
     initialSquad(r, rand);
+    if (f.player?.name.trim()) {
+        // Tu jugador: arriba del nivel de la Regional, en su puesto y con la cara que elegiste.
+        const id = r.nextId++;
+        const p = makePlayer(id, marqueeStartOvr(r), 19, rand);
+        p.ovr = marqueeStartOvr(r);
+        r.squad.push(p);
+        r.names[id] = nameFromText(f.player.name.trim());
+        const pos = Math.max(0, Math.min(6, f.player.pos));
+        const look = Math.max(0, Math.min(6, f.player.look));
+        if (look !== pos) {
+            const players = [...r.team.players];
+            [players[pos], players[look]] = [players[look], players[pos]];
+            r.team = { ...r.team, players };
+        }
+        r.marquee = { id, pos };
+        r.log.push(`2026: ${r.names[id].first} ${r.names[id].last} arranca su carrera en ${name}.`.replace('  ', ' '));
+    }
     return startSeason(r, difficulty, duration);
 }
 
@@ -899,19 +1006,30 @@ function developSquad(r: MiClubState, rand: () => number): string[] {
     const team = { ...r.team, namePool: r.team.namePool ?? 'rio' };
     const avg = r.squad.reduce((a, p) => a + (p.ovr ?? 1), 0) / Math.max(1, r.squad.length);
     const out: Player[] = [];
+    // Lo que rindió el año: los titulares crecen más, y más cuanto mejor le fue al equipo.
+    const xi = new Set(starters(r).map((p) => p.id));
+    const form = winRate(r);
+    const cap = divisionCap(r);
     for (const p of r.squad) {
         const age = p.age + 1;
-        if (age >= 34) {
+        const isMarquee = r.marquee?.id === p.id;
+        // Tu jugador se retira más tarde (a los 37); el resto, a los 34.
+        if (age >= (isMarquee ? 37 : 34)) {
             const n = r.names[p.id!];
-            notes.push(`Se retira ${n ? `${n.first} ${n.last}`.trim() : 'un jugador'} (${p.age} años).`);
+            notes.push(`Se retira ${isMarquee ? 'tu jugador, ' : ''}${n ? `${n.first} ${n.last}`.trim() : 'un jugador'} (${p.age} años).`);
+            if (isMarquee) r.marquee = undefined;
             continue;
         }
-        const base = age <= 21 ? 0.35 : age <= 24 ? 0.2 : age <= 28 ? 0.05 : age <= 31 ? -0.1 : -0.3;
-        // El entrenamiento suma a todos un poco por año.
+        // Por la edad, poco: los pibes suben de a poco y los grandes bajan.
+        const base = age <= 21 ? 0.25 : age <= 24 ? 0.15 : age <= 28 ? 0.05 : age <= 31 ? -0.1 : -0.3;
+        const play = xi.has(p.id) ? 0.1 + 0.35 * form : 0.03;
+        // El entrenamiento (la instalación) suma a todos un poco por año.
         const gym = 0.04 * ((r.facilities?.entreno ?? 1) - 1);
-        // Arriba del techo del mundo ya no se crece: solo se sostiene o se baja con la edad.
-        const grow = (p.ovr ?? 1) >= worldCeiling(r) ? Math.min(0, base) : base + gym;
-        const ovr = Math.round(Math.max(1, Math.min(10, (p.ovr ?? 1) + grow + gauss(rand) * 0.15)) * 10) / 10;
+        const now = p.ovr ?? 1;
+        let grow = base + play + gym + gauss(rand) * 0.08;
+        // Los topes: nunca más de 1,5 en el año (contando lo entrenado) ni arriba del techo de la división.
+        if (grow > 0) grow = Math.max(0, Math.min(grow, SEASON_GROWTH_MAX - seasonGain(r, p.id!), cap - now));
+        const ovr = Math.round(Math.max(1, Math.min(10, now + grow)) * 10) / 10;
         const step = Math.round(ovr - (p.ovr ?? 1));
         const s = (p.s ?? [1, 1, 1, 1]).map((v) => Math.max(1, Math.min(10, v + step))) as [number, number, number, number];
         out.push({ ...p, age, ovr, s });
