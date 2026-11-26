@@ -2566,7 +2566,8 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                                               ? `Terminado · campeón: ${nameOf(t.champion ?? finalRanking(t)[0] ?? '')}.`
                                                               : `Va por: ${roundLabel(t).toLowerCase()}. Se juega a la par de tu temporada: avanza cada vez que jugás o simulás una fecha.`}
                                                     </p>
-                                                    {!loose && (t.stage === 'grupos' || !t.hasKo) && (
+                                                    {/* Terminado con playoff: la tabla de la fase regular también, no solo el cuadro. */}
+                                                    {!loose && (t.stage === 'grupos' || !t.hasKo || (t.done && t.groupHistory.length > 0)) && (
                                                         <div className={styles.groupGrid}>
                                                             {t.groups.map((_, gi) => (
                                                                 <GroupTable
