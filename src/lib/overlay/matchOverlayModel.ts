@@ -6,7 +6,7 @@
  * un navegador embebido y lo que decide qué se anuncia al aire tiene que poder
  * probarse aparte.
  */
-import { readAmericanFootballRuleset, toPeriodRules } from '../americanFootballRules.ts';
+import { readAmericanFootballRuleset, toPeriodRules, type MatchPeriodRules } from '../americanFootballRules.ts';
 import { normalizeLocalEvents } from '../localMatchData.ts';
 import {
   computeElapsedSeconds,
@@ -19,7 +19,21 @@ import {
 import { isGoalKickAttemptEvent, isGoalKickMade } from '../matchEventStats.ts';
 import { normalizeMatchPeriod, type PeriodSportRef } from '../matchPeriods.ts';
 import { APP_TIMEZONE } from '../timezone.ts';
-import { getRugbyModalityRules, readRugbyModality, rugbyModalityPeriodRules, type RugbyModality } from '../utils/rugbyModality.ts';
+import { readRugbyModality, type RugbyModality } from '../utils/rugbyModality.ts';
+
+/*
+ * Seven: dos tiempos de 7', suplementario de 5' y amarilla de 2'. Van acá y no
+ * se leen de rugbyModality.ts para que el overlay no dependa de una tabla de
+ * reglas que no todas las versiones del sitio tienen. El 15 no lleva reglas de
+ * período: el reloj usa la tabla de rugby de siempre.
+ */
+const SEVENS_SIN_BIN_MINUTES = 2;
+const FIFTEENS_SIN_BIN_MINUTES = 10;
+
+function rugbyModalityPeriodRules(modality: RugbyModality | null | undefined): MatchPeriodRules | null {
+  if (modality !== 'sevens') return null;
+  return { periods: 2, periodDurationMinutes: 7, overtimeDurationMinutes: 5, countdown: false };
+}
 
 export type OverlayPhase = 'scheduled' | 'live' | 'final' | 'other';
 export type OverlaySide = 'home' | 'away';
@@ -403,7 +417,9 @@ const RED_TYPES = new Set(['red_card', 'card_red']);
 /** Cuánto dura el sin-bin según el deporte: 10' en rugby, 2' en seven, nada en el resto. */
 export function sinBinSeconds(match: OverlayMatch): number {
   if (match.manual) return match.manual.sinBin ?? 0;
-  if (match.rugbyModality) return getRugbyModalityRules(match.rugbyModality).sinBinMinutes * 60;
+  if (match.rugbyModality) {
+    return (match.rugbyModality === 'sevens' ? SEVENS_SIN_BIN_MINUTES : FIFTEENS_SIN_BIN_MINUTES) * 60;
+  }
   const ref = match.sportRef;
   const sportId = String((typeof ref === 'string' ? ref : ref?.sportId) ?? '').toLowerCase();
   if (sportId.includes('seven') || /rugby[-_ ]?7/.test(sportId)) return 120;
