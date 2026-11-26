@@ -4765,29 +4765,72 @@
     color: var(--gold);
 }
 
-/* ───────── Menú: color propio de cada tarjeta y "Seguir jugando" ───────── */
+/* ───────── Menú: baldosas planas (como los menús de los juegos de fútbol de celular) ───────── */
 
-/* Cada tarjeta trae su color (--acc): una franja arriba, el ícono teñido y, al pasar, el ícono lleno. */
+/* Planas: un bloque de color del tono de cada sección (--acc), sin borde grueso, sin sombra de botón
+   3D y sin franjas. El ícono grande en su color, el título en mayúsculas y un renglón de detalle. */
 .menuBtn {
-    box-shadow: inset 0 4px 0 var(--acc, var(--gold)), 0 4px 0 #050608;
+    border: 0;
+    border-radius: 10px;
+    padding: 14px;
+    padding-right: 52px;
+    min-height: 92px;
+    align-content: space-between;
+    background: color-mix(in srgb, var(--acc, var(--gold)) 13%, #191c26);
+    box-shadow: none;
+    transition: transform 120ms ease-out, background 120ms ease-out;
 }
 
+.menuBtn strong {
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.menuBtn:hover,
+.menuBtn:focus-visible {
+    transform: none;
+    background: color-mix(in srgb, var(--acc, var(--gold)) 22%, #191c26);
+}
+
+.menuBtn:focus-visible {
+    outline: 2px solid var(--acc, var(--gold));
+    outline-offset: 2px;
+}
+
+/* Al apretar se achica apenas: responde en el toque, no al soltar. */
 .menuBtn:active {
-    box-shadow: inset 0 4px 0 var(--acc, var(--gold)), 0 1px 0 #050608;
+    transform: scale(0.97);
+    box-shadow: none;
 }
 
-.menuBtn .menuIcon {
-    color: var(--acc, var(--gold));
-    background: color-mix(in srgb, var(--acc, var(--gold)) 18%, var(--color-bg-tertiary));
-}
-
+.menuBtn .menuIcon,
 .menuBtn:hover .menuIcon,
 .menuBtn:focus-visible .menuIcon {
-    background: var(--acc, var(--gold));
-    color: #141218;
+    top: 12px;
+    right: 12px;
+    width: 30px;
+    height: 30px;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    color: var(--acc, var(--gold));
+    font-size: 1.35rem;
 }
 
-/* Las partidas en curso, arriba y más grandes: el jugador del club corriendo, el próximo partido y "Seguir". */
+@media (prefers-reduced-motion: reduce) {
+    .menuBtn,
+    .continueCard {
+        transition: background 120ms ease-out;
+    }
+
+    .menuBtn:active,
+    .continueCard:active {
+        transform: none;
+    }
+}
+
+/* Las partidas en curso: la baldosa grande, arriba. El jugador del club corriendo sobre el pasto,
+   el próximo partido y "Seguir". También plana. */
 .continueBox {
     display: grid;
     gap: 8px;
@@ -4811,27 +4854,29 @@
         'sprite text'
         'sprite cta';
     align-items: center;
-    gap: 6px 12px;
-    padding: 12px 14px;
-    border-radius: 8px;
+    gap: 8px 14px;
+    padding: 14px 16px;
+    min-height: 112px;
+    border: 0;
+    border-radius: 12px;
     cursor: pointer;
     color: var(--color-text-primary);
-    background:
-        repeating-linear-gradient(90deg, rgba(70, 154, 64, 0.16) 0 24px, rgba(63, 143, 58, 0.1) 24px 48px),
-        var(--color-bg-secondary);
-    border: 3px solid #050608;
-    box-shadow: inset 0 4px 0 var(--gold), 0 4px 0 #050608;
-    transition: transform 80ms steps(2), box-shadow 80ms steps(2);
+    background: repeating-linear-gradient(90deg, #2f6e2b 0 28px, #2a6427 28px 56px);
+    transition: transform 120ms ease-out, filter 120ms ease-out;
 }
 
 .continueCard:hover,
 .continueCard:focus-visible {
-    transform: translateY(-2px);
+    filter: brightness(1.08);
+}
+
+.continueCard:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
 }
 
 .continueCard:active {
-    transform: translateY(3px);
-    box-shadow: inset 0 4px 0 var(--gold), 0 1px 0 #050608;
+    transform: scale(0.98);
 }
 
 .continueSprite {
@@ -4853,30 +4898,30 @@
 
 .continueText small {
     font-size: 0.6rem;
-    color: var(--gold);
+    color: #d9f2c9;
     text-transform: uppercase;
     letter-spacing: 0.08em;
 }
 
 .continueText strong {
-    font-size: 0.9rem;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
     overflow-wrap: anywhere;
 }
 
 .continueText > span {
     font-size: 0.62rem;
-    color: var(--color-text-secondary);
+    color: #e7f5dd;
     line-height: 1.4;
 }
 
 .continueCta {
     grid-area: cta;
     justify-self: start;
-    padding: 6px 12px;
-    border-radius: 6px;
+    padding: 7px 14px;
+    border-radius: 999px;
     font-size: 0.72rem;
     background: var(--gold);
     color: #141218;
-    border: 2px solid #050608;
-    box-shadow: 0 3px 0 #050608;
 }
