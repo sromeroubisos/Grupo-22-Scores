@@ -1710,9 +1710,10 @@ export function otherTours(s: TourState): { key: string; name: string; state: To
     const r = s.career;
     if (!r) return [];
     // Lo que ya se jugó después de la fase regular: playoffs, promociones, plazas, Nacional, Sudamericano.
-    const ARC_ORDER = ['nacional', 'sudamericano', 'plazas', 'promos'];
+    const ARC_ORDER = ['liga', 'federal', 'nacional', 'sudamericano', 'plazas', 'promos'];
+    const OWN = new Set(['liga', 'federal']);
     const archived = Object.entries(r.archive ?? {})
-        .map(([key, state]) => ({ key: `arc:${key}`, name: defOf(state)?.name ?? key, state, group: 'Fin de temporada' }))
+        .map(([key, state]) => ({ key: `arc:${key}`, name: defOf(state)?.name ?? key, state, group: OWN.has(key) ? 'Tu fase regular' : 'Fin de temporada' }))
         .sort((a, b) => {
             const ia = ARC_ORDER.indexOf(a.key.slice(4));
             const ib = ARC_ORDER.indexOf(b.key.slice(4));
@@ -1807,6 +1808,10 @@ function awardsOf(r: CareerState, t: TourState, comp: string) {
 function settleLiga(s: TourState, r: CareerState) {
     r.archive = {};
     const { regional, tier } = seasonTours(s);
+    // La fase regular propia (y el federal en paralelo) quedan para mirar: la tabla final, con
+    // quién subió y quién bajó, se sigue consultando después de que arrancan los playoffs.
+    archiveTour(r, 'liga', regional);
+    if (tier) archiveTour(r, 'federal', tier);
     const fmt = formatOf(r, r.season);
     const myDiv = divisionOf(r, r.me) ?? '';
     if (r.others) for (const k of Object.keys(r.others)) r.others[k] = finish(r.others[k]);
