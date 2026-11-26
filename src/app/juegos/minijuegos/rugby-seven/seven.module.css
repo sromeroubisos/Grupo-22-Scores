@@ -4950,6 +4950,57 @@
     }
 }
 
+/* ===== Partido: marcador más grande y la pausa pegada a él (en la esquina no se veía) ===== */
+.hudLeft {
+    gap: 10px;
+    padding: 6px 8px 6px 12px;
+    font-size: 1.05rem;
+    max-width: calc(100% - 90px);
+}
+
+.hudLeft .sbTeam i {
+    width: 14px;
+    height: 14px;
+}
+
+.hudLeft .sbScore {
+    font-size: 1.4rem;
+    padding: 2px 12px;
+}
+
+.hudLeft .sbClock {
+    font-size: 1.1rem;
+}
+
+.hudLeft .sbClock small {
+    font-size: 0.78rem;
+}
+
+.pauseMain {
+    width: auto;
+    height: 40px;
+    padding: 0 14px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    border-color: var(--gold);
+    color: var(--gold);
+    background: rgba(240, 196, 25, 0.12);
+    white-space: nowrap;
+}
+
+.pauseMain:active {
+    transform: scale(0.96);
+}
+
+@media (hover: none) and (pointer: coarse) {
+    /* En el celular, la pausa todavía más grande: es lo único que se toca fuera de la cancha. */
+    .pauseMain {
+        height: 46px;
+        padding: 0 18px;
+        font-size: 0.95rem;
+    }
+}
+
 /* ===== Salir: al menú del juego; aparte, a los minijuegos ===== */
 .exitBtn + .exitGames {
     margin-left: 8px;

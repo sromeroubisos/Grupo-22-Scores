@@ -965,6 +965,10 @@ export default function MatchView({ cfg, onFinish, onQuit, musicSrc = null, font
                         {hud?.clock} <small>{hud?.period}</small>
                     </span>
                     {hud?.carrier && <small className={styles.sbCarrier}>{hud.carrier}</small>}
+                    {/* La pausa va pegada al marcador, grande y con su nombre: en la esquina no se encontraba. */}
+                    <button type="button" className={`${styles.pauseBtn} ${styles.pauseMain}`} onClick={() => togglePause()} aria-label={paused ? 'Seguir' : 'Pausa'}>
+                        {paused ? '▶ Seguir' : 'II Pausa'}
+                    </button>
                 </div>
                 )}
                 {/* Pausa, música y controles arriba a la derecha. */}
@@ -980,9 +984,12 @@ export default function MatchView({ cfg, onFinish, onQuit, musicSrc = null, font
                             {muted ? '×♪' : '♪'}
                         </button>
                     )}
-                    <button type="button" className={styles.pauseBtn} onClick={() => togglePause()} aria-label={paused ? 'Seguir' : 'Pausa'}>
-                        {paused ? '▶' : 'II'}
-                    </button>
+                    {/* En la práctica no hay marcador: la pausa queda acá. */}
+                    {drillKind && (
+                        <button type="button" className={styles.pauseBtn} onClick={() => togglePause()} aria-label={paused ? 'Seguir' : 'Pausa'}>
+                            {paused ? '▶' : 'II'}
+                        </button>
+                    )}
                 </div>
                 {musicSrc && <audio ref={audioRef} src={musicSrc} loop preload="auto" onCanPlay={() => setHasMusic(true)} onError={() => setHasMusic(false)} />}
                 {hud?.banner && !sim && (
