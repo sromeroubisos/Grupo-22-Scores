@@ -1730,6 +1730,9 @@ export async function fetchMatchCenterMatch(
               awayTeamId: normalizeText((data as any).away_team_id) || null,
             },
             fixedCfg,
+            // Planilla vacia: se muestra el plantel actual del club. Si ya hay
+            // jugadores cargados no se pisa nada que no sea el plantel de la edicion.
+            { clubSquadFallback: !storedHasPlayers, matchDate: (data as any).date_time ?? null },
           );
           if (derived) {
             resolvedLineups = normalizeLineups(derived);

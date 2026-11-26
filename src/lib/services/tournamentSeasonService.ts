@@ -1,3 +1,6 @@
+import { getFixedRosterConfig } from '@/lib/tournament/fixedRoster';
+import { loadCurrentClubSquad } from '@/lib/services/fixedRosterLineups';
+
 type DbClient = any;
 
 export type TournamentSeasonStatus = 'draft' | 'active' | 'completed' | 'archived';
@@ -638,7 +641,74 @@ export async function ensureRostersForSeasonEntries(db: DbClient, seasonId: stri
         throw new Error(insertError.message || 'No se pudieron crear los planteles.');
     }
 
+    await seedNewRostersFromClubSquads(db, season, data ?? []);
+
     return data ?? [];
+}
+
+/**
+ * Un plantel de la edicion recien creado arranca con el plantel ACTUAL del club,
+ * si el torneo usa plantel fijo (el seven lo usa siempre) y el plantel del club
+ * entra en el del torneo. Asi, cuando alguien
+ * inscribe un equipo, sus jugadores ya estan para todos los partidos de la
+ * edicion; despues se edita en el gestor.
+ *
+ * Solo toca planteles que acaban de nacer: uno existente nunca se rellena, aunque
+ * este vacio, para no deshacer una baja que alguien hizo a proposito.
+ * Best-effort: si algo falla, el plantel queda vacio como antes.
+ */
+async function seedNewRostersFromClubSquads(db: DbClient, season: any, rosters: any[]) {
+    if (rosters.length === 0) return;
+    try {
+        const { data: tournament } = await db
+            .from('tournaments')
+            .select('ruleset')
+            .eq('id', season.tournament_id)
+            .maybeSingle();
+        const cfg = getFixedRosterConfig({ settings: season.settings }, tournament ? { ruleset: tournament.ruleset } : null);
+        if (!cfg.enabled) return;
+
+        // Un jugador juega para un solo club por edicion: los que ya estan en otro plantel no se duplican.
+        const { data: taken } = await db
+            .from('roster_memberships')
+            .select('player_id')
+            .eq('season_id', season.id);
+        const takenIds = new Set<string>((taken ?? []).map((row: any) => String(row.player_id)));
+        const asOf = typeof season.start_date === 'string' ? season.start_date : null;
+
+        for (const roster of rosters) {
+            if (!roster?.club_id) continue;
+            const squad = await loadCurrentClubSquad(db, String(roster.club_id), asOf);
+            // Un club con mas fichas que el plantel del torneo no tiene "su" doce:
+            // no se inventa la convocatoria, se arma en el gestor.
+            if (squad.length === 0 || squad.length > cfg.rosterSize) continue;
+            const rows = squad
+                .filter((player) => !takenIds.has(player.id))
+                .map((player, index) => {
+                    takenIds.add(player.id);
+                    return {
+                        roster_id: roster.id,
+                        season_id: season.id,
+                        tournament_id: season.tournament_id,
+                        club_id: roster.club_id,
+                        team_id: roster.team_id ?? null,
+                        player_id: player.id,
+                        jersey_number: player.number,
+                        position: player.position || null,
+                        role: cfg.startersCount ? (index < cfg.startersCount ? 'titular' : 'suplente') : null,
+                        status: 'active',
+                        ...(asOf ? { joined_at: asOf } : {}),
+                    };
+                });
+            if (rows.length === 0) continue;
+            const { error } = await db.from('roster_memberships').insert(rows);
+            if (error && !isDuplicateError(error)) {
+                console.warn('[tournamentSeasonService] no se pudo precargar el plantel del club:', error.message);
+            }
+        }
+    } catch (error) {
+        console.warn('[tournamentSeasonService] precarga de planteles salteada:', error);
+    }
 }
 
 export async function listSeasonRosters(db: DbClient, seasonId: string, includeMemberships = false) {

@@ -24,6 +24,8 @@ import {
     type PlayoffBracketMode,
 } from '@/lib/utils/playoffStages';
 import { useTournamentDirty } from './TournamentContext';
+import { getFixedRosterConfig } from '@/lib/tournament/fixedRoster';
+import { describeRugbyModalityRules, readRugbyModality } from '@/lib/utils/rugbyModality';
 import PlayoffBuilderPanel from './PlayoffBuilderPanel';
 import { NewPhaseWizard } from './NewPhaseWizard';
 
@@ -193,11 +195,11 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
 
     // Plantel fijo por equipo (fixed roster per tournament). Stored in
     // tournaments.ruleset.fixedRoster; getFixedRosterConfig() reads it.
-    const initialFixedRoster = (data as any)?.ruleset?.fixedRoster ?? {};
-    const [fixedRosterEnabled, setFixedRosterEnabled] = useState<boolean>(Boolean(initialFixedRoster.enabled));
-    const [fixedRosterSize, setFixedRosterSize] = useState<number>(
-        typeof initialFixedRoster.rosterSize === 'number' ? initialFixedRoster.rosterSize : 23,
-    );
+    // Sin configuracion guardada se muestra la del torneo: el seven viene prendido con 12.
+    const initialFixedRoster = getFixedRosterConfig(null, { ruleset: (data as any)?.ruleset ?? null });
+    const isSevens = readRugbyModality((data as any)?.ruleset ?? null) === 'sevens';
+    const [fixedRosterEnabled, setFixedRosterEnabled] = useState<boolean>(initialFixedRoster.enabled);
+    const [fixedRosterSize, setFixedRosterSize] = useState<number>(initialFixedRoster.rosterSize);
     const [fixedRosterLockPhaseId, setFixedRosterLockPhaseId] = useState<string>(
         typeof initialFixedRoster.lockPhaseId === 'string' ? initialFixedRoster.lockPhaseId : '',
     );
@@ -206,8 +208,8 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
     const [fixedRosterError, setFixedRosterError] = useState<string | null>(null);
     // Last persisted roster config, so we can flag unsaved edits to the shell.
     const [savedFixedRoster, setSavedFixedRoster] = useState(() => ({
-        enabled: Boolean(initialFixedRoster.enabled),
-        rosterSize: typeof initialFixedRoster.rosterSize === 'number' ? initialFixedRoster.rosterSize : 23,
+        enabled: initialFixedRoster.enabled,
+        rosterSize: initialFixedRoster.rosterSize,
         lockPhaseId: typeof initialFixedRoster.lockPhaseId === 'string' ? initialFixedRoster.lockPhaseId : '',
     }));
 
@@ -1460,6 +1462,12 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                             se cargan automáticamente en todos sus partidos. Otros torneos siguen con la carga
                             manual de titulares/suplentes por partido.
                         </p>
+                        {isSevens && (
+                            <p className="structure-module-copy text-dim text-sm mt-1">
+                                Seven: viene prendido con {describeRugbyModalityRules('sevens')}. Al inscribir un equipo
+                                se precarga con el plantel actual del club, y se edita en Equipos.
+                            </p>
+                        )}
                     </div>
 
                     <label className="flex items-center gap-2 mb-4" style={{ cursor: isApiManaged ? 'default' : 'pointer' }}>

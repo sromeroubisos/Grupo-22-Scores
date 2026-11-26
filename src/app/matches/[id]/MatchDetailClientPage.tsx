@@ -31,6 +31,7 @@ import {
 } from '@/lib/matchEventCatalog';
 import type { PeriodSportRef } from '@/lib/matchPeriods';
 import { readAmericanFootballRuleset, toPeriodRules } from '@/lib/americanFootballRules';
+import { readRugbyModality, rugbyModalityPeriodRules } from '@/lib/utils/rugbyModality';
 import {
     buildCompleteMatchStats,
     buildCompleteStatTabs,
@@ -85,7 +86,12 @@ const USER_TZ = APP_TIMEZONE;
  */
 function buildPublicSportRef(sportId: string | null | undefined, tournamentRuleset: unknown): PeriodSportRef {
     const rules = readAmericanFootballRuleset(tournamentRuleset);
-    return rules ? { sportId: sportId ?? null, periodRules: toPeriodRules(rules) } : (sportId ?? null);
+    if (rules) return { sportId: sportId ?? null, periodRules: toPeriodRules(rules) };
+    // Seven: dos tiempos de 7'. El rugby de 15 no tiene reglas de periodo y sigue igual.
+    const sevens = rugbyModalityPeriodRules(readRugbyModality(
+        tournamentRuleset && typeof tournamentRuleset === 'object' ? tournamentRuleset as Record<string, unknown> : null,
+    ));
+    return sevens ? { sportId: sportId ?? null, periodRules: sevens } : (sportId ?? null);
 }
 
 function formatClockLabel(

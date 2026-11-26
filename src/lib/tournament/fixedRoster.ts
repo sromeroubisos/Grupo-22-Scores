@@ -14,6 +14,7 @@
  */
 
 import { isFinalStandingsStatus } from '@/lib/standings/matchScope';
+import { getRugbyModalityRules, readRugbyModality } from '@/lib/utils/rugbyModality';
 
 export type FixedRosterConfig = {
   /** "Plantel fijo por equipo" master switch for this tournament. */
@@ -26,6 +27,12 @@ export type FixedRosterConfig = {
   lockPhaseId: string | null;
   /** Denormalized order_index of `lockPhaseId` for cheap match-vs-lock comparison. */
   lockOrderIndex: number | null;
+  /**
+   * Cuantos de la lista arrancan cuando el plantel no dice quien es titular.
+   * null = no se asigna nada (la planilla decide, como siempre). En el seven
+   * son 7: los primeros siete de la lista, el resto al banco.
+   */
+  startersCount: number | null;
 };
 
 export const DEFAULT_FIXED_ROSTER_CONFIG: FixedRosterConfig = {
@@ -34,7 +41,29 @@ export const DEFAULT_FIXED_ROSTER_CONFIG: FixedRosterConfig = {
   enforceExactSize: false,
   lockPhaseId: null,
   lockOrderIndex: null,
+  startersCount: null,
 };
+
+/**
+ * Lo que un torneo usa cuando nadie configuro el plantel fijo. En el seven viene
+ * PRENDIDO con 12 (7 + 5): un club arma su plantel una vez para el torneo y ese
+ * plantel juega todos los partidos de la edicion. El 15 sigue apagado.
+ */
+export function getDefaultFixedRosterConfig(tournament?: { ruleset?: unknown } | null): FixedRosterConfig {
+  const ruleset = tournament?.ruleset && typeof tournament.ruleset === 'object'
+    ? tournament.ruleset as Record<string, unknown>
+    : null;
+  if (readRugbyModality(ruleset) === 'sevens') {
+    const sevens = getRugbyModalityRules('sevens');
+    return {
+      ...DEFAULT_FIXED_ROSTER_CONFIG,
+      enabled: true,
+      rosterSize: sevens.lineupSize,
+      startersCount: sevens.starters,
+    };
+  }
+  return { ...DEFAULT_FIXED_ROSTER_CONFIG };
+}
 
 const MIN_ROSTER_SIZE = 1;
 const MAX_ROSTER_SIZE = 40;
@@ -60,9 +89,10 @@ export function isMatchRosterSnapshotStatus(status: unknown): boolean {
   return LIVE_STATUS_TOKENS.has(normalized);
 }
 
-function clampRosterSize(value: unknown): number {
+function clampRosterSize(value: unknown, fallback: number = DEFAULT_FIXED_ROSTER_CONFIG.rosterSize): number {
+  if (value === null || value === undefined || value === '') return fallback;
   const n = typeof value === 'number' ? value : Number(value);
-  if (!Number.isFinite(n)) return DEFAULT_FIXED_ROSTER_CONFIG.rosterSize;
+  if (!Number.isFinite(n)) return fallback;
   return Math.min(MAX_ROSTER_SIZE, Math.max(MIN_ROSTER_SIZE, Math.trunc(n)));
 }
 
@@ -80,8 +110,11 @@ function toOptionalInt(value: unknown): number | null {
   return Number.isFinite(n) ? Math.trunc(n) : null;
 }
 
-export function normalizeFixedRosterConfig(raw: unknown): FixedRosterConfig {
-  if (!raw || typeof raw !== 'object') return { ...DEFAULT_FIXED_ROSTER_CONFIG };
+export function normalizeFixedRosterConfig(
+  raw: unknown,
+  defaults: FixedRosterConfig = DEFAULT_FIXED_ROSTER_CONFIG,
+): FixedRosterConfig {
+  if (!raw || typeof raw !== 'object') return { ...defaults };
   const source = raw as Record<string, unknown>;
   const lockPhaseId =
     typeof source.lockPhaseId === 'string' && source.lockPhaseId.trim()
@@ -92,10 +125,11 @@ export function normalizeFixedRosterConfig(raw: unknown): FixedRosterConfig {
 
   return {
     enabled: Boolean(source.enabled),
-    rosterSize: clampRosterSize(source.rosterSize ?? source.roster_size),
+    rosterSize: clampRosterSize(source.rosterSize ?? source.roster_size, defaults.rosterSize),
     enforceExactSize: Boolean(source.enforceExactSize ?? source.enforce_exact_size),
     lockPhaseId,
     lockOrderIndex: toOptionalInt(source.lockOrderIndex ?? source.lock_order_index),
+    startersCount: toOptionalInt(source.startersCount ?? source.starters_count) ?? defaults.startersCount,
   };
 }
 
@@ -107,11 +141,12 @@ export function getFixedRosterConfig(
   season?: { settings?: unknown } | null,
   tournament?: { ruleset?: unknown } | null,
 ): FixedRosterConfig {
+  const defaults = getDefaultFixedRosterConfig(tournament);
   const fromSeason = readRawConfig(season?.settings);
-  if (fromSeason) return normalizeFixedRosterConfig(fromSeason);
+  if (fromSeason) return normalizeFixedRosterConfig(fromSeason, defaults);
   const fromTournament = readRawConfig(tournament?.ruleset);
-  if (fromTournament) return normalizeFixedRosterConfig(fromTournament);
-  return { ...DEFAULT_FIXED_ROSTER_CONFIG };
+  if (fromTournament) return normalizeFixedRosterConfig(fromTournament, defaults);
+  return defaults;
 }
 
 /**

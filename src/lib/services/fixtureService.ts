@@ -1071,12 +1071,12 @@ export class FixtureService {
     // Fixed roster: pre-seed the lineup from the team's registered roster so the
     // new match opens with the 23 already loaded. Best-effort — on any failure
     // we skip it and the match-center read path derives it lazily instead.
-    if (phaseContext.season_id) {
+    if (phaseContext.season_id || data.tournamentId) {
       try {
         const fixedCfg = await loadFixedRosterConfigForMatch(
           supabase,
           data.tournamentId,
-          phaseContext.season_id,
+          phaseContext.season_id || null,
         );
         if (fixedCfg.enabled) {
           const statusLocked = isMatchRosterLocked({ status: data.status });
@@ -1097,13 +1097,15 @@ export class FixtureService {
             const derived = await deriveFixedRosterLineups(
               supabase,
               {
-                seasonId: phaseContext.season_id,
+                seasonId: phaseContext.season_id || null,
                 homeClubId: data.homeClubId || null,
                 homeTeamId: null,
                 awayClubId: data.awayClubId || null,
                 awayTeamId: null,
               },
               fixedCfg,
+              // Partido nuevo: sin plantel de la edicion, arranca con el del club.
+              { clubSquadFallback: true, matchDate: (insertData as any).date_time ?? null },
             );
             if (derived) {
               insertData.lineups = {

@@ -56,6 +56,7 @@ import {
 import { deriveDriveSituation, formatDownAndDistance, suggestedDriveEventType } from '@/lib/americanFootballDrive';
 import { formatClockSeconds, getClockDisplaySeconds, getPeriodOffsetSeconds, type MatchClockTransition } from '@/lib/matchClock';
 import { getSportLineupSize, getSportMatchProfile, isGoalCountingSport } from '@/lib/sportMatchProfile';
+import { getRugbyModalityRules, readRugbyModality, rugbyModalityPeriodRules, type RugbyModality } from '@/lib/utils/rugbyModality';
 import { useMatchClock } from '@/hooks/useMatchClock';
 import {
     getConfiguredEventPoints,
@@ -1748,6 +1749,8 @@ async function fetchMatchConfiguration(
     sportId: string | null;
     /** Reglamento de futbol americano del torneo (tackle/flag, periodos, plantel). null en los demas deportes. */
     americanFootball: AmericanFootballRuleset | null;
+    /** Rugby 15 o 7 (seven: planilla de 12, tiempos de 7'). null fuera del rugby o sin dato. */
+    rugbyModality: RugbyModality | null;
 }> {
     try {
         const { createClient } = await import('@/lib/supabase/client');
@@ -1800,6 +1803,9 @@ async function fetchMatchConfiguration(
             americanFootball: normalizeSportBucket(resolvedSportId) === 'american-football'
                 ? readAmericanFootballRuleset(tournamentRuleset)
                 : null,
+            rugbyModality: normalizeSportBucket(resolvedSportId) === 'rugby'
+                ? readRugbyModality(tournamentRuleset)
+                : null,
         };
     } catch {
         return {
@@ -1807,6 +1813,7 @@ async function fetchMatchConfiguration(
             eventDefinitions: getDefaultMatchEventDefinitions(fallbackSportId),
             sportId: fallbackSportId,
             americanFootball: null,
+            rugbyModality: null,
         };
     }
 }
@@ -1940,9 +1947,11 @@ export default function MatchCenterClient({
     useEffect(() => {
         matchRulesRef.current = matchRules;
     }, [matchRules]);
+    /** Seven: dos tiempos de 7', planilla de 7 + 5. Se deriva de `ruleset.rugbyModality`. */
+    const [rugbyModality, setRugbyModality] = useState<RugbyModality | null>(null);
     const sportRef = useMemo<PeriodSportRef>(
-        () => ({ sportId: matchSportId, periodRules: toPeriodRules(matchRules) }),
-        [matchSportId, matchRules],
+        () => ({ sportId: matchSportId, periodRules: toPeriodRules(matchRules) ?? rugbyModalityPeriodRules(rugbyModality) }),
+        [matchSportId, matchRules, rugbyModality],
     );
     const sportRefRef = useRef<PeriodSportRef>(sportRef);
     useEffect(() => {
@@ -1950,10 +1959,15 @@ export default function MatchCenterClient({
     }, [sportRef]);
     const matchProfile = useMemo(() => {
         const base = getSportMatchProfile(matchSportId);
-        return matchRules
-            ? { ...base, lineupSize: matchRules.roster.size, startersCount: matchRules.roster.starters }
-            : base;
-    }, [matchSportId, matchRules]);
+        if (matchRules) {
+            return { ...base, lineupSize: matchRules.roster.size, startersCount: matchRules.roster.starters };
+        }
+        if (rugbyModality === 'sevens') {
+            const sevens = getRugbyModalityRules('sevens');
+            return { ...base, lineupSize: sevens.lineupSize, startersCount: sevens.starters };
+        }
+        return base;
+    }, [matchSportId, matchRules, rugbyModality]);
     const matchProfileRef = useRef(matchProfile);
     useEffect(() => {
         matchProfileRef.current = matchProfile;
@@ -2011,6 +2025,14 @@ export default function MatchCenterClient({
         initialMatch.lineups,
         getSportLineupSize(initialMatch.tournament?.sport_id ?? initialMatch.tournament?.sportId ?? null),
     )));
+    // El reglamento del torneo (seven: 12, futbol americano: su plantel) llega
+    // despues del primer render. Con la planilla todavia vacia, el campo lo sigue;
+    // si ya hay jugadores cargados, manda lo cargado.
+    useEffect(() => {
+        const loaded = localLineupsRef.current;
+        if ((loaded?.home?.length ?? 0) > 0 || (loaded?.away?.length ?? 0) > 0) return;
+        setLineupSizeInput(String(matchProfile.lineupSize));
+    }, [matchProfile.lineupSize]);
     const [quickLineupDrafts, setQuickLineupDrafts] = useState<{ home: string; away: string }>(() => ({
         home: formatQuickLineupDraft(initialLineups.home),
         away: formatQuickLineupDraft(initialLineups.away),
@@ -2554,6 +2576,7 @@ export default function MatchCenterClient({
         setPointsRules(configuration.pointsRules);
         setMatchSportId(configuration.sportId);
         setMatchRules(configuration.americanFootball);
+        setRugbyModality(configuration.rugbyModality);
         setEventDefinitions(configuration.eventDefinitions);
     }, [match.phase_id, match.round_id, match.tournament_id]);
 

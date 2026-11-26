@@ -44,7 +44,7 @@ import {
     normalizeTournamentFormat,
     type CircuitChampionMode,
 } from '@/lib/utils/tournamentFormat';
-import { readRugbyModality, type RugbyModality } from '@/lib/utils/rugbyModality';
+import { describeRugbyModalityRules, readRugbyModality, type RugbyModality } from '@/lib/utils/rugbyModality';
 import { AUDIENCE_LABELS, resolveTournamentAudience, syncAgeGradeWithAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
 import '../../creation-forms.css';
 
@@ -2777,6 +2777,9 @@ Listo para continuar
                                                     </button>
                                                 ))}
                                             </RadioGroup>
+                                            <p className="field-help">
+                                                Reglamento: {describeRugbyModalityRules(formData.rugbyModality)}. La planilla, el reloj y el sin-bin de cada partido se arman con esto.
+                                            </p>
                                             {formData.rugbyModality === 'sevens' && (
                                                 <p className="field-help">
                                                     Cada club entra con su versión 7. Si todavía no existe, se crea y queda vinculada a la familia del club.

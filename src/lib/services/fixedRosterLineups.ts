@@ -169,46 +169,140 @@ async function loadRosterPlayers(
     .filter((p): p is DerivedLineupPlayer => p !== null);
 }
 
+/** Fecha (YYYY-MM-DD) contra la que se mide si un jugador sigue en el club. */
+function toDateOnly(value: unknown): string | null {
+  const raw = text(value);
+  if (!raw) return null;
+  const parsed = Date.parse(raw);
+  return Number.isFinite(parsed) ? new Date(parsed).toISOString().slice(0, 10) : null;
+}
+
+/**
+ * EL PLANTEL ACTUAL DEL CLUB (`team_memberships`), a la fecha del partido: los
+ * que ya habian llegado (`joined_at`) y todavia no se fueron (`left_at`). Es lo
+ * que se muestra cuando el equipo no armo un plantel para esta edicion.
+ *
+ * Orden: por numero si lo tienen, si no por nombre — el mismo de la ficha del
+ * club, asi la planilla y la ficha se leen igual.
+ */
+export async function loadCurrentClubSquad(
+  client: DbClient,
+  clubId: string,
+  asOfDate: string | null,
+): Promise<DerivedLineupPlayer[]> {
+  if (!clubId) return [];
+  const asOf = asOfDate ?? new Date().toISOString().slice(0, 10);
+  const { data, error } = await client
+    .from('team_memberships')
+    .select(
+      'person_id, position, jersey_number, status, joined_at, left_at, ' +
+        'person:people(id, first_name, last_name, full_name, name, position)',
+    )
+    .eq('club_id', clubId)
+    .neq('status', 'inactive')
+    .or(`left_at.is.null,left_at.gte.${asOf}`)
+    .limit(200);
+
+  if (error) {
+    if (isMissingTableError(error, 'team_memberships')) return [];
+    console.error('[fixedRosterLineups] team_memberships lookup failed:', error);
+    return [];
+  }
+
+  const seen = new Set<string>();
+  const players: DerivedLineupPlayer[] = [];
+  for (const row of (Array.isArray(data) ? data : []) as any[]) {
+    const joined = toDateOnly(row.joined_at);
+    if (joined && joined > asOf) continue;
+    const person = Array.isArray(row.person) ? row.person[0] : row.person;
+    const name = resolvePlayerName(person);
+    const playerId = text(person?.id) || text(row.person_id);
+    if (!playerId || !name || seen.has(playerId)) continue;
+    seen.add(playerId);
+    const jersey =
+      typeof row.jersey_number === 'number' && Number.isFinite(row.jersey_number)
+        ? Math.trunc(row.jersey_number)
+        : null;
+    players.push({
+      id: playerId,
+      number: jersey,
+      name,
+      position: text(row.position) || text(person?.position) || '',
+      role: undefined,
+    });
+  }
+
+  players.sort((a, b) => {
+    if (a.number !== null && b.number !== null) return a.number - b.number;
+    if (a.number !== null) return -1;
+    if (b.number !== null) return 1;
+    return a.name.localeCompare(b.name, 'es');
+  });
+  return players;
+}
+
+/**
+ * Los primeros `startersCount` arrancan y el resto va al banco, salvo que el
+ * plantel ya diga quien es titular. Sin `startersCount` no se toca nada.
+ */
+function assignDefaultRoles(players: DerivedLineupPlayer[], startersCount: number | null): DerivedLineupPlayer[] {
+  if (!startersCount || players.some((player) => player.role)) return players;
+  return players.map((player, index) => ({
+    ...player,
+    role: index < startersCount ? 'starter' : 'substitute',
+  }));
+}
+
+export type DeriveFixedRosterOptions = {
+  /**
+   * Si un equipo no tiene plantel de la edicion, usar el plantel actual del
+   * club. Solo para mostrar una planilla VACIA: nunca pisa lo que el operador
+   * ya cargo a mano en el partido.
+   */
+  clubSquadFallback?: boolean;
+  /** Fecha del partido, para leer el plantel del club a ese dia. */
+  matchDate?: string | null;
+};
+
 /**
  * Builds `{ home, away }` lineups from each team's fixed roster, or `null` when
- * the feature can't apply for this match (no season, no roster either side,
- * tables missing). Partial result is allowed: a side with no roster is `[]`.
+ * the feature can't apply for this match (no roster either side, tables
+ * missing). Partial result is allowed: a side with no roster is `[]`.
+ *
+ * Sin temporada (o sin plantel de la edicion) y con `clubSquadFallback`, cada
+ * lado cae al plantel actual de su club.
  */
 export async function deriveFixedRosterLineups(
   client: DbClient,
   match: MatchTeamContext,
   cfg: FixedRosterConfig,
+  options: DeriveFixedRosterOptions = {},
 ): Promise<DerivedFixedRosterLineups | null> {
   const seasonId = text(match.seasonId);
-  if (!seasonId) return null;
+  if (!seasonId && !options.clubSquadFallback) return null;
 
   const cap =
     typeof cfg.rosterSize === 'number' && cfg.rosterSize > 0 ? cfg.rosterSize : null;
+  const matchDate = toDateOnly(options.matchDate);
 
-  const [homeRoster, awayRoster] = await Promise.all([
-    resolveSeasonRosterForTeam(
-      client,
-      seasonId,
-      text(match.homeClubId),
-      text(match.homeTeamId),
-    ),
-    resolveSeasonRosterForTeam(
-      client,
-      seasonId,
-      text(match.awayClubId),
-      text(match.awayTeamId),
-    ),
-  ]);
-
-  if (!homeRoster && !awayRoster) return null;
+  const loadSide = async (clubId: string | null, teamId: string | null): Promise<DerivedLineupPlayer[]> => {
+    const roster = seasonId ? await resolveSeasonRosterForTeam(client, seasonId, clubId, teamId) : null;
+    const fromRoster = roster ? await loadRosterPlayers(client, roster.id) : [];
+    if (fromRoster.length > 0 || !options.clubSquadFallback || !clubId) return fromRoster;
+    const squad = await loadCurrentClubSquad(client, clubId, matchDate);
+    // Solo si el plantel del club ENTRA en el del torneo. Un club con 61 fichas
+    // no tiene "su" doce: cortar por orden seria inventar la convocatoria, y la
+    // planilla queda vacia para que la arme el gestor.
+    return cap && squad.length > cap ? [] : squad;
+  };
 
   const [homeAll, awayAll] = await Promise.all([
-    homeRoster ? loadRosterPlayers(client, homeRoster.id) : Promise.resolve([]),
-    awayRoster ? loadRosterPlayers(client, awayRoster.id) : Promise.resolve([]),
+    loadSide(text(match.homeClubId), text(match.homeTeamId)),
+    loadSide(text(match.awayClubId), text(match.awayTeamId)),
   ]);
 
-  const home = cap ? homeAll.slice(0, cap) : homeAll;
-  const away = cap ? awayAll.slice(0, cap) : awayAll;
+  const home = assignDefaultRoles(cap ? homeAll.slice(0, cap) : homeAll, cfg.startersCount);
+  const away = assignDefaultRoles(cap ? awayAll.slice(0, cap) : awayAll, cfg.startersCount);
 
   if (home.length === 0 && away.length === 0) return null;
 
