@@ -2282,14 +2282,20 @@ function foreignRules(r: CareerState, rankings: Record<string, string[]>) {
         }
     }
     if (isLeagueBranch(r.branch)) {
-        for (const divId of Object.keys(r.divisions)) {
+        // Dos divisiones que suben a la misma (Países Bajos: Segunda Norte y Sur): cada una cambia con un
+        // club distinto de arriba (el último con la primera, el anteúltimo con la segunda), no los dos con el último.
+        const nth: Record<string, number> = {};
+        for (const divId of Object.keys(r.divisions).sort((a, b) => a.localeCompare(b))) {
             const up = DIV[divId]?.promotesTo;
             const rk = rankings[divId] ?? [];
             const upper = up ? rankings[up] ?? [] : [];
             if (!up || !rk.length || !upper.length) continue;
-            r.pending.moves.push({ club: rk[0], from: divId, to: up }, { club: upper[upper.length - 1], from: up, to: divId });
+            const i = (nth[up] = (nth[up] ?? -1) + 1);
+            const bottom = upper[upper.length - 1 - i];
+            if (!bottom) continue;
+            r.pending.moves.push({ club: rk[0], from: divId, to: up }, { club: bottom, from: up, to: divId });
             if (rk[0] === r.me) r.pending.note.push(`Campeón y ascenso: el año que viene, ${divisionLabel(up)}.`);
-            if (upper[upper.length - 1] === r.me) r.pending.note.push(`Último: el año que viene, ${divisionLabel(divId)}.`);
+            if (bottom === r.me) r.pending.note.push(`${i ? 'Anteúltimo' : 'Último'}: el año que viene, ${divisionLabel(divId)}.`);
         }
     }
     if (r.branch === 'brasil') {

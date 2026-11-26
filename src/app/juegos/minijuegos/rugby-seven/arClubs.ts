@@ -204,15 +204,28 @@ const FOREIGN: { div: Omit<GameDivision, 'clubs'>; pool: string; top: number; cl
         pool: 'anglo', top: 48,
         clubs: [['Brothers Brisbane', '#c8102e'], ['GPS Brisbane', '#1f4fa0'], ['Souths Brisbane', '#0b6b3a'], ['Easts Brisbane', '#c8102e'], ['University of Queensland', '#6e1a2c'], ['Bond University', '#1f3fbf'], ['Sunnybank', '#ffd100'], ['Wests Brisbane', '#111111']],
     },
+    // Chequia: las cuatro ligas de la Unión Checa (rugbyunion.cz, temporada 2026), en el orden de su tabla.
+    // Sin los equipos B ni los U23. La 3.ª y la 4.ª liga van juntas (sueltas eran de a cinco). Donau Viena es
+    // austríaco y juega la Extraliga checa.
     {
-        div: { id: 'cz-liga-extra', label: 'Liga Extra Checa', branch: 'chequia', region: 'chequia', level: 1, promotesTo: null, relegatesTo: 'cz-liga-primera' },
-        pool: 'eslavo', top: 48,
-        clubs: [['Slavia Praga', '#c8102e'], ['Sparta Praga', '#c8102e'], ['Dragon Brno', '#0b6b3a'], ['Tatra Smíchov', '#1f4fa0'], ['Říčany', '#ffd100'], ['Petrovice', '#1f3fbf'], ['Havířov', '#c8102e'], ['Pilsen', '#111111']],
+        div: { id: 'cz-liga-extra', label: 'Extraliga Checa', branch: 'chequia', region: 'chequia', level: 1, promotesTo: null, relegatesTo: 'cz-liga-primera' },
+        pool: 'eslavo', top: 50,
+        clubs: [['Říčany', '#ffd100'], ['Tatra Smíchov', '#1f4fa0'], ['Slavia Praga', '#c8102e'], ['Donau Viena', '#c8102e'], ['Dragon Brno', '#0b6b3a'], ['Vyškov', '#111111']],
     },
     {
-        div: { id: 'cz-liga-primera', label: 'Primera Liga Checa', branch: 'chequia', region: 'chequia', level: 2, promotesTo: 'cz-liga-extra', relegatesTo: null },
-        pool: 'eslavo', top: 38,
-        clubs: [['Olomouc', '#1f4fa0'], ['Ostrava', '#c8102e'], ['Hradec Králové', '#0b6b3a'], ['Liberec', '#1f3fbf'], ['Bohemians Praga', '#0b6b3a'], ['Kralupy', '#c8102e'], ['Jihlava', '#ffd100'], ['České Budějovice', '#1f4fa0']],
+        div: { id: 'cz-liga-primera', label: 'Primera Liga Checa', branch: 'chequia', region: 'chequia', level: 2, promotesTo: 'cz-liga-extra', relegatesTo: 'cz-liga-segunda' },
+        pool: 'eslavo', top: 43,
+        clubs: [['Praga', '#1f3fbf'], ['Zlín', '#ffd100'], ['Petrovice', '#1f3fbf'], ['Sparta Praga', '#c8102e'], ['Bystrc', '#0b6b3a']],
+    },
+    {
+        div: { id: 'cz-liga-segunda', label: 'Segunda Liga Checa', branch: 'chequia', region: 'chequia', level: 3, promotesTo: 'cz-liga-primera', relegatesTo: 'cz-liga-tercera' },
+        pool: 'eslavo', top: 37,
+        clubs: [['Přelouč', '#1f4fa0'], ['Olomouc', '#1f4fa0'], ['Mariánské Hory', '#0b6b3a'], ['Havířov', '#c8102e']],
+    },
+    {
+        div: { id: 'cz-liga-tercera', label: 'Tercera Liga Checa', branch: 'chequia', region: 'chequia', level: 4, promotesTo: 'cz-liga-segunda', relegatesTo: null },
+        pool: 'eslavo', top: 32,
+        clubs: [['Vrchlabí', '#0b6b3a'], ['Pilsen', '#111111'], ['České Budějovice', '#1f4fa0'], ['Kralupy', '#c8102e'], ['Olymp', '#1f3fbf'], ['Babice', '#ffd100']],
     },
     {
         div: { id: 'bo-liga-altiplano', label: 'Liga Altiplano de Bolivia', branch: 'bolivia', region: 'bolivia', level: 1, promotesTo: null, relegatesTo: null },
@@ -356,10 +369,28 @@ const FOREIGN: { div: Omit<GameDivision, 'clubs'>; pool: string; top: number; cl
         pool: 'franco', top: 40,
         clubs: [['RC Luxembourg', '#c8102e'], ['RC Walferdange', '#1f4fa0'], ['Antwerp RC', '#c8102e'], ['Brussels Celtic', '#0b6b3a'], ['Gent', '#1f4fa0'], ['Leuven', '#111111'], ['Visé', '#ffd100'], ['Mons', '#c8102e']],
     },
+    // Países Bajos: las ligas de la Rugby Nederland (temporada 2026), en el orden de su tabla. Sin los segundos
+    // equipos (la Future klasse es casi toda de reservas). RC Aachen, alemán, juega la 2e klasse Zuid: queda en
+    // la liga alemana para que no haya dos.
     {
-        div: { id: 'nl-ereklasse', label: 'Ereklasse de Países Bajos', branch: 'holanda', region: 'holanda', level: 1, promotesTo: null, relegatesTo: null },
-        pool: 'germ', top: 46,
-        clubs: [['Castricum', '#ffd100'], ['The Dukes', '#c8102e'], ['Hilversum', '#1f4fa0'], ['Haagsche RC', '#111111'], ['AAC Amsterdam', '#c8102e'], ['Diok', '#0b6b3a'], ['Delft', '#1f3fbf'], ['’t Gooi', '#f47920']],
+        div: { id: 'nl-ereklasse', label: 'Ereklasse de Países Bajos', branch: 'holanda', region: 'holanda', level: 1, promotesTo: null, relegatesTo: 'nl-primera' },
+        pool: 'germ', top: 47,
+        clubs: [['The Dukes', '#c8102e'], ['Haagsche RC', '#111111'], ['’t Gooi', '#f47920'], ['Haarlem', '#c8102e'], ['Hoek van Holland', '#1f4fa0'], ['Eemland', '#0b6b3a'], ['Castricum', '#ffd100'], ['Rotterdamse RC', '#1f3fbf'], ['Diok', '#0b6b3a'], ['AAC Amsterdam', '#c8102e'], ['Oisterwijk Oysters', '#111111'], ['Ascrum', '#1f4fa0']],
+    },
+    {
+        div: { id: 'nl-primera', label: 'Primera Clase de Países Bajos', branch: 'holanda', region: 'holanda', level: 2, promotesTo: 'nl-ereklasse', relegatesTo: 'nl-segunda-norte' },
+        pool: 'germ', top: 38,
+        clubs: [['BRC', '#1f3fbf'], ['Spakenburg', '#c8102e'], ['Amstelveen', '#0b6b3a'], ['Groningen', '#111111'], ['Hilversum', '#1f4fa0'], ['The Wasps', '#ffd100'], ['URC Utrecht', '#c8102e'], ['The Bassets', '#1f4fa0'], ['USRS', '#111111'], ['Gouda', '#ffd100'], ['Waterland', '#1f3fbf'], ['The Rams', '#0b6b3a']],
+    },
+    {
+        div: { id: 'nl-segunda-norte', label: 'Segunda Clase Norte de Países Bajos', branch: 'holanda', region: 'holanda', level: 3, promotesTo: 'nl-primera', relegatesTo: null },
+        pool: 'germ', top: 30,
+        clubs: [['Bulldogs', '#c8102e'], ['Feanster', '#1f4fa0'], ['The Wild Rovers', '#0b6b3a'], ['Pickwick Players', '#111111'], ['Zwolle', '#1f3fbf'], ['Zaanse RC', '#ffd100'], ['The Pigs', '#f47920'], ['Alkmaar', '#c8102e'], ['GSRC', '#1f4fa0']],
+    },
+    {
+        div: { id: 'nl-segunda-sur', label: 'Segunda Clase Sur de Países Bajos', branch: 'holanda', region: 'holanda', level: 3, promotesTo: 'nl-primera', relegatesTo: null },
+        pool: 'germ', top: 30,
+        clubs: [['The Elephants', '#111111'], ['RCT', '#c8102e'], ['Oemoemenoe', '#ffd100'], ['Maastricht', '#c8102e'], ['RCC', '#1f4fa0'], ['Eindhoven', '#1f3fbf'], ['LSRG', '#0b6b3a'], ['Octopus', '#1f4fa0'], ['The Pink Panthers', '#f472b6']],
     },
     // Argentina femenino: URBA (Top 9, Primera y Segunda) y el Centro (Córdoba y Andina).
     {
