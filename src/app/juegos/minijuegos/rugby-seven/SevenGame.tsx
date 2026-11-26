@@ -94,6 +94,28 @@ const firstClubOf = (countryId: string) => {
     const ids = AR_SEVEN_DIVISIONS.filter((d) => c?.branches.includes(d.branch)).flatMap((d) => d.clubs);
     return [...new Set(ids)].map((id) => AR_CLUBS.find((t) => t.id === id)).filter((t): t is SevenTeam => !!t).sort((a, b) => a.name.localeCompare(b.name, 'es'))[0]?.id ?? null;
 };
+/** Las cards del inicio del hub: un ícono, un color y para qué sirve cada sección. */
+const HUB_TILE: Partial<Record<HubTab, { i: string; c: string; d: string }>> = {
+    tabla: { i: '▤', c: '#3fbf5a', d: 'Las tablas, todas las zonas' },
+    calendario: { i: '◷', c: '#4aa3ff', d: 'Tus próximas fechas' },
+    cuadro: { i: '⚔', c: '#f0c419', d: 'El mata-mata' },
+    resultados: { i: '✓', c: '#5ad1e6', d: 'Lo que ya se jugó' },
+    goleadores: { i: '★', c: '#ff8a3d', d: 'Tries, puntos y tackles' },
+    piramide: { i: '▲', c: '#b072ff', d: 'Todas las ligas y copas' },
+    plantel: { i: '☻', c: '#2fd3a0', d: 'Tus jugadores y el entrenamiento' },
+    fichajes: { i: '✚', c: '#ff6fb0', d: 'El mercado de pases' },
+    club: { i: '⌂', c: '#ffd36b', d: 'Instalaciones y créditos' },
+    otros: { i: '◎', c: '#5ad1e6', d: 'Lo que se juega a la par' },
+    palmares: { i: '♛', c: '#f0c419', d: 'Los títulos del club' },
+    carrera: { i: '⚑', c: '#e04848', d: 'Tu historia, año por año' },
+    camino: { i: '⚑', c: '#2fd3a0', d: 'El camino al Mundial' },
+    circuito: { i: '✦', c: '#b072ff', d: 'Las etapas del circuito' },
+    ranking: { i: '▲', c: '#b072ff', d: 'El ranking mundial' },
+    temporada: { i: '◷', c: '#4aa3ff', d: 'El año de tu seleccionado' },
+    union: { i: '⌂', c: '#ffd36b', d: 'La unión y sus inversiones' },
+    juveniles: { i: '✚', c: '#ff6fb0', d: 'Los que vienen de abajo' },
+};
+
 /** Bandera de cada categoría con país. */
 const CAT_FLAG: Record<string, string> = { Argentina: 'ar', Chile: 'cl', Uruguay: 'uy', Brasil: 'br', España: 'es', Francia: 'fr', Inglaterra: 'gb-eng', Sudáfrica: 'za', Portugal: 'pt', Alemania: 'de', Polonia: 'pl', Georgia: 'ge', Rusia: 'ru', Australia: 'au', Chequia: 'cz', Bolivia: 'bo', Perú: 'pe', México: 'mx', 'Gales': 'gb-wls', 'Escocia': 'gb-sct', 'Irlanda': 'ie', 'Rumania': 'ro', 'Italia': 'it', 'Bélgica': 'be', 'Países Bajos': 'nl' };
 /** Las categorías de torneo que tienen modo carrera. */
@@ -151,7 +173,7 @@ import { advanceIntl, compName, createIntl, intlBoosts, intlInvest, intlNames, i
 import { IntlRanking, IntlSeason, IntlSquad, IntlUnion, IntlYouth } from './IntlPanels';
 import { advanceSvns, createSvns, SVNS_LEGS, SVNS_PHASE_LABEL, svnsBoosts, svnsRegionName, svnsStartTier, svnsTable, svnsVerdict, TIER_LABEL } from './svns';
 import { CloudSync, markTutorialSeenInAccount, tutorialSeenInAccount, type CloudStatus } from './cloudSave';
-import { advanceMiClub, createMiClub, LIB_NAME, levelDef, levelOf, liveMine, mcAfterRound, mcRegionLabel, mcRelease, mcSign, mcTrain, mcUpgrade, mcVerdict, myTeam, nacHowOf, phaseName, WORLDS, type McRegion, type McWorld } from './miClub';
+import { advanceMiClub, createMiClub, LIB_NAME, levelDef, levelOf, liveMine, mcAfterRound, mcRegionLabel, mcRelease, mcSign, mcTrain, mcUpgrade, mcVerdict, myTeam, nacHowOf, phaseName, WORLDS, zoneName, type McRegion, type McWorld } from './miClub';
 import { McClubPanel, McCredits, McMarket, McPyramid, McSquad, McTourTables } from './MiClubPanels';
 import { useOfflineReady } from './offline';
 import { readLang, startTranslating, writeLang, type Lang } from './i18n';
@@ -849,6 +871,14 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
     const [hubTab, setHubTab] = useState<HubTab>('tabla');
     // El panel del próximo partido (dificultad, duración y cómo jugarlo): se abre tocando el versus de arriba.
     const [matchOpen, setMatchOpen] = useState(false);
+    // El hub arranca en su inicio (el partido grande, tu grupo y los menús en cards); tocar una card abre esa sección.
+    const [hubHome, setHubHome] = useState(true);
+    // Cada vez que se vuelve al torneo (después de un partido, al entrar), se vuelve al inicio del hub.
+    const [hubFor, setHubFor] = useState(screen.k);
+    if (hubFor !== screen.k) {
+        setHubFor(screen.k);
+        if (screen.k === 'tour') setHubHome(true);
+    }
     /** Torneo que se está armando (de fábrica, con reemplazos o personalizado). */
     const [setupDef, setSetupDef] = useState<TourDef | null>(null);
     const [customFormat, setCustomFormat] = useState(0);
@@ -2626,7 +2656,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                 />
                             )}
                             <div className={styles.hub}>
-                                <div className={styles.hubBar}>
+                                <div className={`${styles.hubBar} ${hubHome ? styles.hubBarHero : ''}`}>
                                     <button
                                         type="button"
                                         className={styles.vsMini}
@@ -2637,12 +2667,12 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                         {oppTeam && meTeam && tourLive && !preseason ? (
                                             <>
                                                 <span className={styles.vsMiniTeam}>
-                                                    <SpritePreview look={meTeam.players[0]} kit={meTeam.kit} scale={2} running />
+                                                    <SpritePreview look={meTeam.players[0]} kit={meTeam.kit} scale={hubHome ? 4 : 2} running />
                                                     <b>{meTeam.name}</b>
                                                 </span>
                                                 <span className={styles.vsMiniBadge}>VS</span>
                                                 <span className={styles.vsMiniTeam}>
-                                                    <SpritePreview look={oppTeam.players[0]} kit={oppTeam.kit} scale={2} running />
+                                                    <SpritePreview look={oppTeam.players[0]} kit={oppTeam.kit} scale={hubHome ? 4 : 2} running />
                                                     <b>{oppTeam.name}</b>
                                                 </span>
                                             </>
@@ -2818,13 +2848,98 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                 )}
 
                                 <div className={styles.hubMain}>
-                                    <div className={styles.tabs} role="tablist" aria-label="Vista del torneo">
-                                        {tabs.map(([k, l]) => (
-                                            <button key={k} type="button" role="tab" aria-selected={tab === k} className={styles.tab} onClick={() => setHubTab(k)}>
-                                                {l}
-                                            </button>
-                                        ))}
-                                    </div>
+                                    {hubHome ? (
+                                        <div className={styles.hubHome}>
+                                            {(() => {
+                                                // Lo único en primera plana: tu grupo (los primeros 6 y tu lugar, si estás más abajo).
+                                                const gi = tour.groups.findIndex((g) => g.includes(tour.me));
+                                                const openTab = (k: HubTab) => {
+                                                    setHubTab(k);
+                                                    setHubHome(false);
+                                                };
+                                                if (onlyKo || gi < 0 || tour.stage === 'ko') {
+                                                    if (!tabs.some(([k]) => k === 'cuadro')) return null;
+                                                    return (
+                                                        <section className={styles.previewCard} aria-label="El cuadro">
+                                                            <h2 className={styles.previewTitle}>{tour.done ? 'Terminado' : roundLabel(tour)}</h2>
+                                                            <p className={styles.note}>El torneo está en el mata-mata.</p>
+                                                            <button type="button" className={styles.previewMore} onClick={() => openTab('cuadro')}>
+                                                                Ver el cuadro ▶
+                                                            </button>
+                                                        </section>
+                                                    );
+                                                }
+                                                const rows = groupStandings(tour, gi);
+                                                const at = rows.findIndex((row) => row.team === tour.me);
+                                                const shown = at >= 6 ? [...rows.slice(0, 5), rows[at]] : rows.slice(0, 6);
+                                                const title = tour.groups.length === 1 ? 'Tu tabla' : miclub ? zoneName(miclub, tour.groups[gi], gi) : tour.cross ? (gi === 0 ? 'Conferencia Norte' : 'Conferencia Sur') : `Tu grupo · ${GROUP_LETTERS[gi]}`;
+                                                return (
+                                                    <section className={styles.previewCard} aria-label={title}>
+                                                        <h2 className={styles.previewTitle}>{title}</h2>
+                                                        <table className={`${styles.table} ${styles.previewTable}`}>
+                                                            <thead>
+                                                                <tr>
+                                                                    <th scope="col">#</th>
+                                                                    <th scope="col">Club</th>
+                                                                    <th scope="col">PJ</th>
+                                                                    <th scope="col">Pts</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {shown.map((row) => {
+                                                                    const pos = rows.indexOf(row) + 1;
+                                                                    return (
+                                                                        <tr key={row.team} className={row.team === tour.me ? styles.rowMine : undefined}>
+                                                                            <td>{pos}</td>
+                                                                            <td className={styles.tableTeam}>
+                                                                                <FlagIcon code={flagOf(row.team)} size={14} /> <span className={styles.previewName}>{nameOf(row.team)}</span>
+                                                                            </td>
+                                                                            <td>{row.pj}</td>
+                                                                            <td>
+                                                                                <strong>{row.pts}</strong>
+                                                                            </td>
+                                                                        </tr>
+                                                                    );
+                                                                })}
+                                                            </tbody>
+                                                        </table>
+                                                        {tabs.some(([k]) => k === 'tabla') && (
+                                                            <button type="button" className={styles.previewMore} onClick={() => openTab('tabla')}>
+                                                                Ver {tour.groups.length > 1 ? 'todas las tablas' : 'la tabla entera'} ▶
+                                                            </button>
+                                                        )}
+                                                    </section>
+                                                );
+                                            })()}
+                                            <nav className={styles.hubTiles} aria-label="Secciones del torneo">
+                                                {tabs.map(([k, l]) => (
+                                                    <button
+                                                        key={k}
+                                                        type="button"
+                                                        className={styles.hubTile}
+                                                        style={{ '--acc': HUB_TILE[k]?.c ?? '#9ea5b6' } as React.CSSProperties}
+                                                        onClick={() => {
+                                                            setHubTab(k);
+                                                            setHubHome(false);
+                                                        }}
+                                                    >
+                                                        <span className={styles.hubTileIcon} aria-hidden="true">
+                                                            {HUB_TILE[k]?.i ?? '•'}
+                                                        </span>
+                                                        <strong>{l}</strong>
+                                                        {HUB_TILE[k]?.d && <small>{HUB_TILE[k]!.d}</small>}
+                                                    </button>
+                                                ))}
+                                            </nav>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <div className={styles.sectionHead}>
+                                                <button type="button" className={styles.backBtn} onClick={() => setHubHome(true)}>
+                                                    ◀ Volver
+                                                </button>
+                                                <h2 className={styles.sectionTitle}>{tabs.find(([k]) => k === tab)?.[1]}</h2>
+                                            </div>
                                     <div className={styles.hubPanel}>
                                         {tab === 'tabla' && miclub && <McTourTables s={tour} r={miclub} nameOf={nameOf} flag={(id) => <FlagIcon code={flagOf(id)} size={14} />} />}
                                         {tab === 'piramide' && miclub && <McPyramid s={tour} nameOf={nameOf} flag={(id) => <FlagIcon code={flagOf(id)} size={14} />} bracket={(t) => (defOf(t) ? <Bracket s={t} def={defOf(t)!} nameOf={nameOf} flagOf={flagOf} /> : null)} />}
@@ -3260,6 +3375,8 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                             </div>
                                         )}
                                     </div>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         </div>

@@ -4950,6 +4950,222 @@
     }
 }
 
+/* ===== El inicio del hub: el partido en grande, tu grupo y los menús en cards ===== */
+.hubBarHero {
+    padding: 14px 16px;
+    gap: 16px;
+}
+
+.hubBarHero .vsMini {
+    min-width: 300px;
+    max-width: 460px;
+    padding: 12px 16px 8px;
+    gap: 4px 16px;
+}
+
+.hubBarHero .vsMiniTeam b {
+    font-size: 0.78rem;
+}
+
+.hubBarHero .vsMiniBadge {
+    font-size: 1.3rem;
+}
+
+.hubBarHero .hubBarInfo strong {
+    font-size: 1rem;
+}
+
+.hubBarHero .hubBarInfo > span {
+    font-size: 0.78rem;
+}
+
+.hubBarHero .hubBarGo {
+    min-height: 56px;
+    padding: 0 28px;
+    font-size: 1rem;
+}
+
+.hubHome {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    align-content: start;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+@media (min-width: 900px) {
+    .hubHome {
+        grid-template-columns: minmax(300px, 400px) minmax(0, 1fr);
+    }
+}
+
+.previewCard {
+    display: grid;
+    gap: 8px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: #151821;
+    border: 2px solid var(--color-border);
+    min-width: 0;
+}
+
+.previewTitle {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.previewTable {
+    font-size: 0.78rem;
+}
+
+.previewTable th,
+.previewTable td {
+    padding: 6px 5px;
+}
+
+.previewName {
+    display: inline-block;
+    max-width: 18ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: bottom;
+}
+
+.previewMore {
+    font: inherit;
+    justify-self: start;
+    min-height: 40px;
+    padding: 0 14px;
+    font-size: 0.74rem;
+    border-radius: 6px;
+    border: 2px solid var(--color-border);
+    background: var(--color-bg-tertiary);
+    color: var(--gold);
+    cursor: pointer;
+}
+
+.hubTiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 140px), 1fr));
+    gap: 10px;
+    align-content: start;
+}
+
+.hubTile {
+    font: inherit;
+    position: relative;
+    display: grid;
+    gap: 4px;
+    align-content: start;
+    min-height: 92px;
+    padding: 14px 44px 12px 14px;
+    text-align: left;
+    border: 0;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--acc) 13%, #191c26);
+    color: var(--color-text-primary);
+    cursor: pointer;
+    transition: transform 100ms ease-out, background 120ms ease-out;
+}
+
+.hubTile:hover {
+    background: color-mix(in srgb, var(--acc) 22%, #191c26);
+}
+
+.hubTile:active {
+    transform: scale(0.97);
+}
+
+.hubTile:focus-visible {
+    outline: 2px solid var(--acc);
+    outline-offset: 2px;
+}
+
+.hubTile strong {
+    font-size: 0.85rem;
+}
+
+.hubTile small {
+    font-size: 0.62rem;
+    color: var(--color-text-secondary);
+    line-height: 1.4;
+}
+
+.hubTileIcon {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-size: 1.35rem;
+    color: var(--acc);
+}
+
+.sectionHead {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.backBtn {
+    font: inherit;
+    min-height: 42px;
+    padding: 0 14px;
+    font-size: 0.8rem;
+    border-radius: 6px;
+    border: 2px solid var(--color-border);
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+    cursor: pointer;
+}
+
+.sectionTitle {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hubTile {
+        transition: none;
+    }
+}
+
+@media (max-width: 760px) {
+    .hubBarHero .vsMini {
+        min-width: 0;
+    }
+
+    .hubBarHero .hubBarGo {
+        width: 100%;
+    }
+
+    .hubHome {
+        overflow: visible;
+    }
+}
+
+/* Celular acostado: la card del partido no se come la pantalla. */
+@media (max-height: 500px) and (orientation: landscape) {
+    .hubBarHero {
+        padding: 8px 10px;
+    }
+
+    .hubBarHero .vsMini {
+        padding: 6px 10px 4px;
+    }
+
+    .hubHome {
+        overflow: visible;
+        grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
+    }
+}
+
 /* ===== Partido: marcador más grande y la pausa pegada a él (en la esquina no se veía) ===== */
 .hudLeft {
     gap: 10px;
