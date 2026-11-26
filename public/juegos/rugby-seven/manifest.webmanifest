@@ -1,6 +1,6 @@
 {
-  "name": "Rugby Seven",
-  "short_name": "Rugby Seven",
+  "name": "Rugby Argento",
+  "short_name": "Rugby Argento",
   "description": "Seven de rugby en pixel art. Se juega con o sin conexión.",
   "id": "/juegos/minijuegos/rugby-seven",
   "start_url": "/juegos/minijuegos/rugby-seven",
@@ -10,7 +10,17 @@
   "background_color": "#0b0d12",
   "theme_color": "#0b0d12",
   "icons": [
-    { "src": "/icon.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/icon.png", "sizes": "512x512", "type": "image/png" }
+    {
+      "src": "/juegos/rugby-seven/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/juegos/rugby-seven/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
   ]
 }

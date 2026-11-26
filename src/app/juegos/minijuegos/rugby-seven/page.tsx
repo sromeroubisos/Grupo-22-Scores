@@ -9,6 +9,10 @@ export const metadata: Metadata = {
     // Manifiesto propio: "Agregar a la pantalla de inicio" desde acá instala Rugby Seven como
     // una app aparte, que abre directo en el juego y anda sin conexión (ver public/sw.js).
     manifest: '/juegos/rugby-seven/manifest.webmanifest',
+    // El iPhone no lee los íconos del manifiesto: el acceso directo sale del apple-touch-icon.
+    // Reemplaza entero el `icons` del layout, por eso va también el de la pestaña.
+    icons: { icon: '/juegos/rugby-seven/icon-192.png', apple: '/juegos/rugby-seven/apple-touch-icon.png' },
+    appleWebApp: { capable: true, title: 'Rugby Argento', statusBarStyle: 'black-translucent' },
 };
 
 /**
