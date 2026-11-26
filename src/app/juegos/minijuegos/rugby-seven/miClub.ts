@@ -12,8 +12,8 @@
  */
 import { AR_CLUBS, AR_SEVEN_DIVISIONS } from './arClubs';
 import { makePlayer, regionLabel, type Player } from './career';
-import { nameFromSeed, type PlayerName } from './names';
-import { closeRound, createTour, finalRanking, groupStandings, ratingOf, type TourDef, type TourState } from './tours';
+import { defaultNames, nameFromSeed, type PlayerName } from './names';
+import { closeRound, createTour, finalRanking, groupStandings, ratingOf, triesOfScore, type TourDef, type TourState } from './tours';
 import type { Difficulty, Duration, SevenTeam } from './teams';
 
 /* ───────────────────────── la pirámide ───────────────────────── */
@@ -107,10 +107,36 @@ export interface MiClubState {
     log: string[];
     /** Lo que pasó en la temporada con los torneos propios (eliminaciones, clasificaciones). */
     news?: string[];
+    /** Los jugadores que se pueden fichar ahora (se renuevan al empezar y a mitad de año). */
+    offers?: McOffer[];
+    /** Los sponsors de la temporada: cada uno paga un poco por partido. */
+    sponsors?: McSponsor[];
+    /** Partidos propios ya cobrados (`torneo:fecha`), para no cobrar dos veces. */
+    paid?: string[];
+    /** Jugadores que ya se mejoraron esta temporada (una vez por año cada uno). */
+    trained?: number[];
+    /** Lo que dejó el último partido, en palabras ("+18: 12 por jugar, 6 por ganar"). */
+    lastGain?: string;
     /** Ascensos y descensos de la última temporada cerrada: `up|club|de|a` o `down|club|de|a`. */
     moves?: { season: number; lines: string[] };
     /** Lo que dejó el cierre del último año en el plantel (retiros, juveniles). */
     lastNotes?: string[];
+}
+
+/** Un jugador en el mercado: su ficha, su nombre, de dónde viene y cuánto cuesta. */
+export interface McOffer {
+    id: number;
+    player: Player;
+    name: PlayerName;
+    /** Club real de donde viene (los inventados no traen). */
+    from?: string;
+    price: number;
+}
+
+export interface McSponsor {
+    name: string;
+    /** Créditos por partido. */
+    pay: number;
 }
 
 /* ───────────────────────── azar con semilla ───────────────────────── */
@@ -254,6 +280,175 @@ function mineTour(def: TourDef, difficulty: Difficulty, duration: Duration): Tou
     return { ...createTour(def, MC_ME, difficulty, duration), def };
 }
 
+/* ───────────────────────── créditos ───────────────────────── */
+
+/**
+ * La economía: se gana jugando, nunca se compra. Perder también suma (la base por partido), ganar
+ * suma más, y los títulos y el ascenso dejan un premio al cierre. Los precios están pensados para
+ * que una temporada alcance para 2 o 3 refuerzos del nivel de la división, no para comprarse Primera.
+ */
+export const PAY_BY_LEVEL: Record<McLevel, number> = { base: 10, quinta: 12, cuarta: 15, tercera: 18, segunda: 22, primera: 26 };
+export const PAY = { win: 10, draw: 4, try: 1, cupRound: 5, nacRound: 10 };
+export const PRIZE = { ascenso: 80, liga: 100, copa: 60, nac: 150 };
+export const SQUAD_MAX = 14;
+const SQUAD_MIN = 9;
+
+/** Lo que vale un jugador: crece con el nivel (al cuadrado) y baja con la edad. */
+export function priceOf(p: Player, real = false): number {
+    const o = p.ovr ?? 1;
+    const age = p.age <= 23 ? 1.15 : p.age <= 28 ? 1 : p.age <= 31 ? 0.8 : 0.6;
+    return Math.max(5, Math.round(o * o * 6 * age * (real ? 1.3 : 1)));
+}
+
+/** Lo que cuesta mejorar a un jugador (+0,3 de valoración), una vez por temporada. */
+export const trainCost = (p: Player) => Math.max(6, Math.round(priceOf(p) * 0.2));
+
+const BIZ = ['Corralón', 'Panadería', 'Ferretería', 'Carnicería', 'Autoservicio', 'Farmacia', 'Inmobiliaria', 'Estudio contable', 'Gomería', 'Heladería', 'Distribuidora', 'Óptica', 'Vivero', 'Transporte'];
+const BIZ_NAME = ['El Tero', 'La Espiga', 'Don Pepe', 'San Jorge', 'Los Andes', 'La Esquina', 'El Molino', 'Del Centro', 'La Paz', 'El Ombú', 'Las Acacias', 'Norte', 'El Faro', 'Los Pinos'];
+
+/** Los sponsors de la temporada: más y mejores cuanto más arriba juega el club y mejor le fue. */
+function sponsorsFor(r: MiClubState, rand: () => number): McSponsor[] {
+    const level = levelOf(r, MC_ME) ?? 'base';
+    const base = PAY_BY_LEVEL[level];
+    const last = r.history.at(-1);
+    const good = !!last && /Campeón|Final|Semifinal|1\.º|2\.º/.test(last.place);
+    const n = 1 + (MC_LEVELS.length - 1 - MC_LEVELS.findIndex((l) => l.id === level) >= 3 ? 1 : 0) + (good ? 1 : 0);
+    const out: McSponsor[] = [];
+    for (let i = 0; i < n; i++) {
+        const name = `${BIZ[Math.floor(rand() * BIZ.length)]} ${BIZ_NAME[Math.floor(rand() * BIZ_NAME.length)]}`;
+        if (out.some((x) => x.name === name)) continue;
+        out.push({ name, pay: Math.max(1, Math.round(base * (0.04 + rand() * 0.04))) });
+    }
+    return out;
+}
+
+/** Cobra los partidos propios todavía no cobrados de un torneo. */
+function payMatches(r: MiClubState, t: TourState) {
+    const level = levelOf(r, MC_ME) ?? 'base';
+    const kind = kindOf(t);
+    const paid = new Set(r.paid ?? []);
+    const sponsor = (r.sponsors ?? []).reduce((a, x) => a + x.pay, 0);
+    const rounds = [...t.groupHistory.map((h, i) => ({ h, key: `${t.tourId}:g${i}`, ko: false })), ...t.koHistory.map((h, i) => ({ h, key: `${t.tourId}:k${i}`, ko: true }))];
+    for (const { h, key, ko } of rounds) {
+        if (paid.has(key)) continue;
+        const m = h.results.find((x) => x.a === MC_ME || x.b === MC_ME);
+        paid.add(key);
+        if (!m) continue;
+        const [us, them] = m.a === MC_ME ? [m.sa, m.sb] : [m.sb, m.sa];
+        const tries = (m.a === MC_ME ? m.ta : m.tb) ?? triesOfScore(us);
+        const parts: [number, string][] = [[PAY_BY_LEVEL[level], 'por jugar']];
+        if (us > them) parts.push([PAY.win, 'por ganar']);
+        else if (us === them) parts.push([PAY.draw, 'por el empate']);
+        if (tries) parts.push([tries * PAY.try, `por ${tries} ${tries === 1 ? 'try' : 'tries'}`]);
+        if (ko && us > them && kind !== 'liga') parts.push([kind === 'nac' ? PAY.nacRound : PAY.cupRound, 'por pasar de ronda']);
+        if (sponsor) parts.push([sponsor, 'de los sponsors']);
+        const total = parts.reduce((a, [v]) => a + v, 0);
+        r.credits += total;
+        r.lastGain = `+${total} créditos: ${parts.map(([v, why]) => `${v} ${why}`).join(', ')}.`;
+    }
+    r.paid = [...paid];
+}
+
+/* ───────────────────────── el mercado ───────────────────────── */
+
+/** Seis jugadores para fichar: inventados alrededor del nivel del club y, desde Tercera, de clubes reales de arriba. */
+function makeOffers(r: MiClubState, rand: () => number): McOffer[] {
+    const level = levelOf(r, MC_ME) ?? 'base';
+    const xi = starters(r);
+    const avg = xi.reduce((a, p) => a + (p.ovr ?? 1), 0) / Math.max(1, xi.length);
+    const team = { ...r.team, namePool: r.team.namePool ?? 'rio' };
+    const out: McOffer[] = [];
+    const reals = ['primera', 'segunda', 'tercera'].includes(level) ? 2 : 0;
+    // El nivel medio (escala 1-10) de la división de arriba: la vara para subir.
+    const aboveLevel = MC_LEVELS[Math.max(0, MC_LEVELS.findIndex((l) => l.id === level) - 1)].id;
+    const aboveClubs = r.divisions[aboveLevel].filter((c) => c !== MC_ME);
+    const aboveCenter = 1 + (aboveClubs.reduce((a, c) => a + ratingOf(c), 0) / Math.max(1, aboveClubs.length) - 40) / 6;
+    for (let i = 0; i < 6; i++) {
+        const id = r.nextId++;
+        const age = 19 + Math.floor(rand() * 13);
+        if (i < reals) {
+            // De un club real de la división de arriba (en Primera, de la misma).
+            const above = MC_LEVELS[Math.max(0, MC_LEVELS.findIndex((l) => l.id === level) - 1)].id;
+            const clubs = [...r.divisions[above]].filter((c) => c !== MC_ME).sort();
+            const club = clubs[Math.floor(rand() * clubs.length)];
+            const center = 1 + (ratingOf(club) - 40) / 6;
+            const player = makePlayer(id, center + 0.2 + gauss(rand) * 0.5, age, rand);
+            const src = AR_CLUBS.find((c) => c.id === club);
+            const name = src ? defaultNames(src)[Math.floor(rand() * 7)] : nameFromSeed(team, `${club}:${id}`);
+            out.push({ id, player, name, from: club, price: priceOf(player, true) });
+        } else {
+            // Alrededor del nivel del equipo y, siempre, un par al nivel de la división de arriba (más caros):
+            // con esos se sube. Si el club ya está por encima de esa vara, la vara es el propio nivel.
+            const target = Math.max(avg, aboveCenter);
+            const center = i === reals ? target + 0.4 : i === reals + 1 ? avg + 0.6 : avg + 0.1;
+            const player = makePlayer(id, center + gauss(rand) * 0.5, age, rand);
+            out.push({ id, player, name: nameFromSeed(team, `${r.team.name}:mercado:${id}`), price: priceOf(player) });
+        }
+    }
+    return out.sort((a, b) => (b.player.ovr ?? 0) - (a.player.ovr ?? 0));
+}
+
+/** Por qué no se puede fichar a un jugador (null: se puede). */
+export function signBlock(r: MiClubState, o: McOffer): string | null {
+    if (r.squad.length >= SQUAD_MAX) return `El plantel está lleno (${SQUAD_MAX}): liberá a un jugador para hacer lugar.`;
+    if (r.credits < o.price) return `Te faltan ${o.price - r.credits} créditos.`;
+    return null;
+}
+
+/** El club propio de un estado, clonado para cambiarlo sin tocar el original. */
+function withClub(s: TourState, fn: (r: MiClubState) => void): TourState {
+    if (!s.miclub) return s;
+    const r: MiClubState = JSON.parse(JSON.stringify(s.miclub));
+    fn(r);
+    return { ...s, miclub: r };
+}
+
+export function mcSign(s: TourState, offerId: number): TourState {
+    return withClub(s, (r) => {
+        const o = r.offers?.find((x) => x.id === offerId);
+        if (!o || signBlock(r, o)) return;
+        r.credits -= o.price;
+        r.squad.push({ ...o.player, id: o.id });
+        r.names[o.id] = o.name;
+        r.offers = r.offers!.filter((x) => x.id !== offerId);
+        r.news = [...(r.news ?? []), `Fichaste a ${o.name.first} ${o.name.last}${o.from ? ` (de ${CLUB_NAME.get(o.from) ?? o.from})` : ''} por ${o.price} créditos.`];
+    });
+}
+
+/** Por qué no se puede liberar a un jugador (null: se puede). */
+export const releaseBlock = (r: MiClubState) => (r.squad.length <= SQUAD_MIN ? `Hacen falta al menos ${SQUAD_MIN} jugadores en el plantel.` : null);
+
+export function mcRelease(s: TourState, playerId: number): TourState {
+    return withClub(s, (r) => {
+        if (releaseBlock(r)) return;
+        const n = r.names[playerId];
+        r.squad = r.squad.filter((p) => p.id !== playerId);
+        r.lineup = r.lineup?.filter((id) => id !== playerId);
+        r.news = [...(r.news ?? []), `Liberaste a ${n ? `${n.first} ${n.last}`.trim() : 'un jugador'}.`];
+    });
+}
+
+/** Por qué no se puede mejorar a un jugador (null: se puede). */
+export function trainBlock(r: MiClubState, p: Player): string | null {
+    if (r.trained?.includes(p.id!)) return 'Ya se mejoró esta temporada.';
+    if ((p.ovr ?? 1) >= 9.5) return 'Ya está en su techo.';
+    if (r.credits < trainCost(p)) return `Te faltan ${trainCost(p) - r.credits} créditos.`;
+    return null;
+}
+
+export function mcTrain(s: TourState, playerId: number): TourState {
+    return withClub(s, (r) => {
+        const p = r.squad.find((x) => x.id === playerId);
+        if (!p || trainBlock(r, p)) return;
+        r.credits -= trainCost(p);
+        const before = p.ovr ?? 1;
+        p.ovr = Math.round(Math.min(10, before + 0.3) * 10) / 10;
+        // Al cruzar un número entero, las habilidades acompañan.
+        if (Math.floor(p.ovr) > Math.floor(before)) p.s = (p.s ?? [1, 1, 1, 1]).map((v) => Math.min(10, v + 1)) as [number, number, number, number];
+        r.trained = [...(r.trained ?? []), playerId];
+    });
+}
+
 /* ───────────────────────── el calendario ───────────────────────── */
 
 /** El tramo del año de cada torneo (0 a 1): la Nacional, la segunda mitad. */
@@ -357,6 +552,9 @@ export function mcAfterRound(s0: TourState): TourState {
     const live = myTours(s).filter((t) => !t.done);
     const clock = live.length ? Math.max(...live.map(progress)) : 1;
 
+    // Los partidos propios de esta fecha se cobran (una sola vez cada uno).
+    payMatches(r, s);
+
     // Un torneo propio que se terminó en esta fecha: la noticia.
     if (s0.done && !s0.miclub.news?.includes(s0.tourId)) {
         const name = (defName(s0) ?? '').replace(/ \d{4}$/, '');
@@ -367,6 +565,9 @@ export function mcAfterRound(s0: TourState): TourState {
     // A mitad de año se arma la Nacional, con las tablas de ese momento.
     if (!r.nacMade && clock >= WINDOW.nac[0]) {
         r.nacMade = true;
+        // El mercado de mitad de año: jugadores nuevos.
+        r.offers = makeOffers(r, seeded(`${r.team.name}:${r.season}:mercado-2`));
+        r.news!.push('Se abrió el mercado de mitad de año: hay jugadores nuevos para fichar.');
         const def = nacDef(s);
         if (def.teams.includes(MC_ME)) {
             r.parked.nac = mineTour(def, s.difficulty, s.duration);
@@ -394,6 +595,12 @@ function startSeason(r: MiClubState, difficulty: Difficulty, duration: Duration)
     r.parked = {};
     r.nacMade = false;
     r.news = [];
+    r.paid = [];
+    r.trained = [];
+    r.lastGain = undefined;
+    const rand = seeded(`${r.team.name}:${r.season}:mercado`);
+    r.sponsors = sponsorsFor(r, rand);
+    r.offers = makeOffers(r, rand);
     for (const l of MC_LEVELS) {
         if (l.id !== mine) r.others[`lvl:${l.id}`] = background(levelTourDef(r, l.id));
         if (l.id !== 'primera' && l.id !== mine) r.others[`cup:${l.id}`] = background(cupDef(r, l.id));
@@ -576,8 +783,16 @@ export function advanceMiClub(s0: TourState): TourState {
     r.divisions = next;
     r.moves = { season: r.season, lines };
 
+    // Los premios del año.
+    const prizes: [number, string][] = [];
+    if (moves[mineLevel].up.includes(MC_ME)) prizes.push([PRIZE.ascenso, 'el ascenso']);
+    if (liga?.champion === MC_ME) prizes.push([PRIZE.liga, `el título de ${levelDef(mineLevel).label}`]);
+    if (mine.cup?.champion === MC_ME) prizes.push([PRIZE.copa, `la ${cupName(mineLevel)}`]);
+    if (mine.nac?.champion === MC_ME) prizes.push([PRIZE.nac, `la ${NAC_NAME}`]);
+    for (const [v] of prizes) r.credits += v;
+
     const rand = seeded(`${r.team.name}:${r.season}:cierre`);
-    r.lastNotes = developSquad(r, rand);
+    r.lastNotes = [...prizes.map(([v, why]) => `Premio por ${why}: ${v} créditos.`), ...developSquad(r, rand)];
     r.season += 1;
     return startSeason(r, s0.difficulty, s0.duration);
 }

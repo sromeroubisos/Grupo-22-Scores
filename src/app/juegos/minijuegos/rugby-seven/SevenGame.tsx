@@ -143,8 +143,8 @@ import { advanceIntl, compName, createIntl, intlBoosts, intlInvest, intlNames, i
 import { IntlRanking, IntlSeason, IntlSquad, IntlUnion, IntlYouth } from './IntlPanels';
 import { advanceSvns, createSvns, SVNS_LEGS, SVNS_PHASE_LABEL, svnsBoosts, svnsRegionName, svnsStartTier, svnsTable, svnsVerdict, TIER_LABEL } from './svns';
 import { CloudSync, markTutorialSeenInAccount, tutorialSeenInAccount, type CloudStatus } from './cloudSave';
-import { advanceMiClub, createMiClub, levelDef, levelOf, liveMine, MC_LEVELS, MC_POOL, MC_REGIONS, mcAfterRound, mcRegionLabel, mcVerdict, myTeam, NAC_HOW, NAC_NAME, phaseName, type McRegion } from './miClub';
-import { McPyramid, McSquad, McTables } from './MiClubPanels';
+import { advanceMiClub, createMiClub, levelDef, levelOf, liveMine, MC_LEVELS, MC_POOL, MC_REGIONS, mcAfterRound, mcRegionLabel, mcRelease, mcSign, mcTrain, mcVerdict, myTeam, NAC_HOW, NAC_NAME, phaseName, type McRegion } from './miClub';
+import { McClubPanel, McMarket, McPyramid, McSquad, McTables } from './MiClubPanels';
 import { useOfflineReady } from './offline';
 import { readLang, startTranslating, writeLang, type Lang } from './i18n';
 import { applyStoredClubEdits, EDITABLE_CLUBS, isClubEdited, resetClubEdit, saveClubEdit } from './clubEdits';
@@ -177,7 +177,7 @@ type Screen =
     | { k: 'drill'; kind: 'tutorial' | 'practice'; nonce: number }
     | { k: 'result'; cfg: MatchConfig; mode: Mode; score: [number, number] };
 
-type HubTab = 'tabla' | 'calendario' | 'cuadro' | 'resultados' | 'goleadores' | 'otros' | 'plantel' | 'club' | 'palmares' | 'camino' | 'carrera' | 'circuito' | 'ranking' | 'union' | 'temporada' | 'juveniles' | 'piramide';
+type HubTab = 'tabla' | 'calendario' | 'cuadro' | 'resultados' | 'goleadores' | 'otros' | 'plantel' | 'club' | 'palmares' | 'camino' | 'carrera' | 'circuito' | 'ranking' | 'union' | 'temporada' | 'juveniles' | 'piramide' | 'fichajes';
 
 interface Category {
     name: string;
@@ -2359,6 +2359,8 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                             ? ([
                                   ['piramide', 'Pirámide'],
                                   ['plantel', 'Plantel'],
+                                  ['fichajes', 'Fichajes'],
+                                  ['club', 'Club'],
                               ] as [HubTab, string][])
                             : []),
                         ...(tour.stats ? [['goleadores', 'Goleadores'] as ['goleadores', string]] : []),
@@ -2436,6 +2438,11 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                     )}
                                     {svns && <span className={styles.roadChip}>✦ {nameOf(svns.me)} · Temporada {svns.season} · {SVNS_PHASE_LABEL[svns.phase]}</span>}
                                     {miclub && <span className={styles.roadChip}>⚑ {miclub.team.name} · Temporada {miclub.season} · {phaseName(tour)}</span>}
+                                    {miclub && (
+                                        <span className={styles.parallelNote}>
+                                            ◈ {miclub.credits} créditos{miclub.lastGain ? ` · último partido ${miclub.lastGain.split(':')[0]}` : ''}
+                                        </span>
+                                    )}
                                     {miclub && liveMine(tour).length > 1 && (
                                         <span className={styles.parallelNote}>
                                             También en juego:{' '}
@@ -2593,7 +2600,9 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                     <div className={styles.hubPanel}>
                                         {tab === 'tabla' && miclub && <McTables s={tour} r={miclub} level={levelOf(miclub, miclub.me) ?? 'base'} nameOf={nameOf} flag={(id) => <FlagIcon code={flagOf(id)} size={14} />} mineFirst />}
                                         {tab === 'piramide' && miclub && <McPyramid s={tour} nameOf={nameOf} flag={(id) => <FlagIcon code={flagOf(id)} size={14} />} bracket={(t) => (defOf(t) ? <Bracket s={t} def={defOf(t)!} nameOf={nameOf} flagOf={flagOf} /> : null)} />}
-                                        {tab === 'plantel' && miclub && <McSquad r={miclub} />}
+                                        {tab === 'plantel' && miclub && <McSquad r={miclub} onTrain={(id) => persist({ tour: mcTrain(tour, id) })} onRelease={(id) => persist({ tour: mcRelease(tour, id) })} />}
+                                        {tab === 'fichajes' && miclub && <McMarket r={miclub} nameOf={nameOf} onSign={(id) => persist({ tour: mcSign(tour, id) })} />}
+                                        {tab === 'club' && miclub && <McClubPanel r={miclub} />}
                                         {tab === 'tabla' && !miclub && (
                                             <div className={styles.groupGrid}>
                                                 {tour.groups.map((_, gi) => (

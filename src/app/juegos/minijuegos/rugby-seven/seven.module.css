@@ -4465,7 +4465,7 @@
 /* Región del club al fundarlo. */
 .regionGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 130px), 1fr));
     gap: 6px;
 }
 
@@ -4506,4 +4506,135 @@
     min-width: 0;
     padding-top: 6px;
     border-top: 1px solid var(--color-border);
+}
+
+/* Mi Club: botones de cada fila (fichar, mejorar, liberar) y de dónde viene un jugador. */
+.mcActions {
+    white-space: nowrap;
+}
+
+.mcActions button + button {
+    margin-left: 6px;
+}
+
+.mcFrom {
+    color: var(--color-text-secondary);
+    font-size: 0.6rem;
+}
+
+/* Mi Club: jugadores como tarjetas (plantel y mercado). Una columna en el celular, varias en pantallas anchas. */
+.mcCards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr));
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.mcCard {
+    display: grid;
+    gap: 6px;
+    align-content: start;
+    min-width: 0;
+    padding: 10px;
+    border-radius: 8px;
+    background: var(--color-bg-secondary);
+    border: 2px solid var(--color-border);
+}
+
+.mcCardMine {
+    border-color: rgba(240, 196, 25, 0.55);
+}
+
+.mcCardHead {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    min-width: 0;
+}
+
+.mcCardHead strong {
+    font-size: 0.74rem;
+    overflow-wrap: anywhere;
+}
+
+.mcOvr {
+    flex: none;
+    font-size: 0.9rem;
+    color: var(--gold);
+}
+
+.mcSkills {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2px 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.6rem;
+    color: var(--color-text-secondary);
+}
+
+.mcSkills li {
+    display: flex;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.mcSkills b {
+    color: var(--color-text-primary);
+}
+
+.mcCardActions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.mcCardActions button {
+    flex: 1 1 auto;
+    min-height: 40px;
+}
+
+.mcWhy {
+    flex-basis: 100%;
+    font-size: 0.58rem;
+    color: var(--color-text-secondary);
+}
+
+/* Tablas de la pirámide en pantallas angostas: sin G y P, y el nombre se corta con puntos suspensivos. */
+.mcTeamName {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: bottom;
+}
+
+@media (max-width: 560px) {
+    .mcHideNarrow {
+        display: none;
+    }
+
+    .mcTeamName {
+        max-width: 42vw;
+    }
+}
+
+/* La regla va por el ancho de la tabla, no de la pantalla: en la tablet las zonas van de a dos y cada una es angosta. */
+.mcTableCard {
+    container-type: inline-size;
+}
+
+@container (max-width: 400px) {
+    .mcHideNarrow {
+        display: none;
+    }
+
+    .mcTeamName {
+        max-width: 48cqi;
+    }
 }
