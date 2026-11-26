@@ -143,6 +143,8 @@ import { advanceIntl, compName, createIntl, intlBoosts, intlInvest, intlNames, i
 import { IntlRanking, IntlSeason, IntlSquad, IntlUnion, IntlYouth } from './IntlPanels';
 import { advanceSvns, createSvns, SVNS_LEGS, SVNS_PHASE_LABEL, svnsBoosts, svnsRegionName, svnsStartTier, svnsTable, svnsVerdict, TIER_LABEL } from './svns';
 import { CloudSync, markTutorialSeenInAccount, tutorialSeenInAccount, type CloudStatus } from './cloudSave';
+import { createMiClub, levelDef, levelOf, MC_LEVELS, MC_POOL, MC_REGIONS, mcAfterRound, mcRegionLabel, myTeam, type McRegion } from './miClub';
+import { McPyramid, McSquad, McTables } from './MiClubPanels';
 import { useOfflineReady } from './offline';
 import { readLang, startTranslating, writeLang, type Lang } from './i18n';
 import { applyStoredClubEdits, EDITABLE_CLUBS, isClubEdited, resetClubEdit, saveClubEdit } from './clubEdits';
@@ -163,6 +165,7 @@ type Screen =
     | { k: 'roadSetup'; step: 1 | 2 }
     | { k: 'svnsSetup'; step: 1 | 2 }
     | { k: 'intlSetup'; step: 1 | 2 }
+    | { k: 'mcSetup'; step: 1 | 2 }
     | { k: 'newPick' }
     | { k: 'careerSetup'; step: 0 | 1 | 2 }
     | { k: 'tour' }
@@ -174,7 +177,7 @@ type Screen =
     | { k: 'drill'; kind: 'tutorial' | 'practice'; nonce: number }
     | { k: 'result'; cfg: MatchConfig; mode: Mode; score: [number, number] };
 
-type HubTab = 'tabla' | 'calendario' | 'cuadro' | 'resultados' | 'goleadores' | 'otros' | 'plantel' | 'club' | 'palmares' | 'camino' | 'carrera' | 'circuito' | 'ranking' | 'union' | 'temporada' | 'juveniles';
+type HubTab = 'tabla' | 'calendario' | 'cuadro' | 'resultados' | 'goleadores' | 'otros' | 'plantel' | 'club' | 'palmares' | 'camino' | 'carrera' | 'circuito' | 'ranking' | 'union' | 'temporada' | 'juveniles' | 'piramide';
 
 interface Category {
     name: string;
@@ -221,6 +224,12 @@ function shuffled<T>(arr: T[]): T[] {
         [a[i], a[j]] = [a[j], a[i]];
     }
     return a;
+}
+
+/** Cierra una fecha: la carrera anota lo suyo y, en Mi Club, el resto de la pirámide avanza a la par. */
+function tourRound(...args: Parameters<typeof careerRound>): TourState {
+    const next = careerRound(...args);
+    return next.miclub ? mcAfterRound(next) : next;
 }
 
 function makeNewTeam(): SevenTeam {
@@ -767,6 +776,9 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
     const [duration, setDuration] = useState<Duration>(3);
     const [otherKey, setOtherKey] = useState<string | null>(null);
     const [nacPick, setNacPick] = useState<NacFormat | null>(null);
+    // Mi Club: el club que se está fundando (camiseta y nombre) y su región.
+    const [mcDraft, setMcDraft] = useState<SevenTeam | null>(null);
+    const [mcRegion, setMcRegion] = useState<McRegion | null>(null);
     const [coachName, setCoachName] = useState('');
     /** País elegido para la carrera nueva. */
     const [careerCountry, setCareerCountry] = useState<string>('ar');
@@ -1013,11 +1025,14 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
         ];
     }, [customTeams]);
 
-    const allTeams = useMemo(() => [...customTeams, ...NATIONS, ...FEM_NATIONS, ...CLUBS, ...AR_CLUBS, ...PRESET_TEAMS], [customTeams]);
+    // Mi Club: el club propio, con el nivel que da su plantel de hoy y sus siete titulares.
+    const mcTeam = useMemo(() => (tour?.miclub ? myTeam(tour.miclub) : null), [tour?.miclub]);
+    const ownTeams = useMemo(() => (mcTeam ? [...customTeams, mcTeam] : customTeams), [customTeams, mcTeam]);
+    const allTeams = useMemo(() => [...ownTeams, ...NATIONS, ...FEM_NATIONS, ...CLUBS, ...AR_CLUBS, ...PRESET_TEAMS], [ownTeams]);
     // Los equipos propios también se resuelven por código (ligas y torneos con ellos adentro).
-    registerCustomTeams(customTeams);
+    registerCustomTeams(ownTeams);
     // Nivel de los equipos propios y, en una carrera, lo que cada club ganó o perdió con las temporadas.
-    setRatingContext(Object.fromEntries(customTeams.map((t) => [t.id, t.rating ?? 70])), tour?.career ? careerBoosts(tour.career) : tour?.svns ? svnsBoosts(tour.svns) : tour?.intl ? intlBoosts(tour.intl) : undefined);
+    setRatingContext(Object.fromEntries(ownTeams.map((t) => [t.id, t.rating ?? 70])),tour?.career ? careerBoosts(tour.career) : tour?.svns ? svnsBoosts(tour.svns) : tour?.intl ? intlBoosts(tour.intl) : undefined);
     // En una carrera: quién juega en cada puesto y la localía; afuera, nada.
     if (tour?.career) applyCareerContext(tour.career);
     else setCareerContext();
@@ -1127,7 +1142,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
         if (!tour) return;
         const opp = nextOpponent(tour);
         if (!opp) {
-            persist({ tour: careerRound(tour, null) });
+            persist({ tour: tourRound(tour, null) });
             return;
         }
         const home = byId(tour.me);
@@ -1157,7 +1172,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                 last = { opp: o, score };
                 rec[score[0] > score[1] ? 0 : score[0] === score[1] ? 1 : 2] += 1;
             }
-            s = careerRound(s, score);
+            s = tourRound(s, score);
             if (!all && o) break;
         }
         persist({ tour: s });
@@ -1198,7 +1213,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
             mine.filter((e) => e.kind === 'drop').forEach((e) => items.push({ at: 0.4 + Math.random() * (minutes - 0.8), side, pts: 3, text: `Drop de ${playerName(team, e.slot)}` }));
         }
         items.sort((x, y) => x.at - y.at);
-        persist({ tour: careerRound(tour, score, events) });
+        persist({ tour: tourRound(tour, score, events) });
         setWatch({ home, away, score, minutes, items });
     };
 
@@ -1255,6 +1270,15 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
         setScreen({ k: 'tour' });
     };
 
+    const startMiClub = () => {
+        if (!mcDraft || !mcRegion) return;
+        persist({ tour: createMiClub({ team: mcDraft, region: mcRegion }, difficulty, duration) });
+        setMcDraft(null);
+        setMcRegion(null);
+        setHubTab('tabla');
+        setScreen({ k: 'tour' });
+    };
+
     const nextIntlStage = () => {
         if (!tour) return;
         const t = advanceIntl(tour);
@@ -1307,7 +1331,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                     if (e.side === 0) misses.push(id);
                 } else events.push({ team, slot: id, kind: e.stat.kind });
             }
-            persist({ tour: careerRound(tour, score, events, misses) });
+            persist({ tour: tourRound(tour, score, events, misses) });
         }
         if (mode === 'friendly' && tour) persist({ tour: preseasonFriendly(tour, cfg.away.id, score) });
         setScreen({ k: 'result', cfg, mode, score });
@@ -1361,6 +1385,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
         roadSetup: 'Road to Rugby World Cup',
         svnsSetup: 'Circuito SVNS',
         intlSetup: 'Carrera internacional',
+        mcSetup: 'Mi Club',
         careerSetup: 'Modo carrera',
         newPick: 'Nuevo torneo',
         tour: tourDef?.name ?? 'Torneo',
@@ -1506,6 +1531,45 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                     </button>
                                 );
                             })()}
+                            {(() => {
+                                // Mi Club: si ya hay uno fundado, lo retoma; si no, lo funda en la primera partida libre.
+                                const mcSlot = tours.findIndex((t) => !!t?.miclub);
+                                const live = mcSlot >= 0 ? tours[mcSlot]?.miclub : null;
+                                return (
+                                    <button
+                                        type="button"
+                                        role="menuitem"
+                                        className={styles.menuBtn}
+                                        onClick={() => {
+                                            if (live) {
+                                                setSlot(mcSlot);
+                                                setHubTab('tabla');
+                                                setScreen({ k: 'tour' });
+                                                return;
+                                            }
+                                            const free = tours.findIndex((t) => !t);
+                                            if (free < 0) {
+                                                setScreen({ k: 'slots' });
+                                                return;
+                                            }
+                                            setSlot(free);
+                                            setMcDraft(null);
+                                            setMcRegion(null);
+                                            setScreen({ k: 'mcSetup', step: 1 });
+                                        }}
+                                    >
+                                        <span className={styles.menuIcon} aria-hidden="true">⚑</span>
+                                        <strong>{live ? 'Seguir con Mi Club' : 'Mi Club'}</strong>
+                                        <span>
+                                            {live
+                                                ? `${live.team.name} · temporada ${live.season} · ${levelDef(levelOf(live, live.me) ?? 'base').label}.`
+                                                : tours.some((t) => !t)
+                                                  ? 'Fundás tu club y lo llevás de la Regional a Primera, contra todos los clubes de Argentina.'
+                                                  : 'Las tres partidas están ocupadas: borrá una para empezar.'}
+                                        </span>
+                                    </button>
+                                );
+                            })()}
                             <button
                                 type="button"
                                 role="menuitem"
@@ -1612,14 +1676,15 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                         <div className={styles.slotList}>
                             {tours.map((t, i) => {
                                 const d = t ? defOf(t) : null;
-                                const me = t ? byId(t.me) : null;
-                                const finished = !!t && !t.career && !t.svns && !t.intl && (t.road ? t.road.out || (t.road.phase === 'wc' && t.done) : t.done || t.eliminated);
+                                // El club de Mi Club vive dentro de su partida: se arma de ahí, no del catálogo.
+                                const me = t ? (t.miclub ? myTeam(t.miclub) : byId(t.me)) : null;
+                                const finished = !!t && !t.career && !t.svns && !t.intl && !t.miclub &&(t.road ? t.road.out || (t.road.phase === 'wc' && t.done) : t.done || t.eliminated);
                                 return (
                                     <section key={i} className={`${styles.saveSlot} ${i === slot && t ? styles.saveSlotOn : ''}`} aria-label={`Partida ${i + 1}`}>
                                         <header className={styles.slotHead}>Partida {i + 1}</header>
                                         {t && d ? (
                                             <>
-                                                <strong className={styles.saveTitle}>{t.intl ? `Carrera internacional · ${t.intl.season}` : t.svns ? `Circuito SVNS · temporada ${t.svns.season}` : t.road ? 'Road to Rugby World Cup' : t.career ? `Carrera · temporada ${t.career.season}` : d.name}</strong>
+                                                <strong className={styles.saveTitle}>{t.miclub ? `Mi Club · temporada ${t.miclub.season}` : t.intl ? `Carrera internacional · ${t.intl.season}` : t.svns ? `Circuito SVNS · temporada ${t.svns.season}` : t.road ? 'Road to Rugby World Cup' : t.career ? `Carrera · temporada ${t.career.season}` : d.name}</strong>
                                                 <span className={styles.saveTeam}>
                                                     <FlagIcon code={me?.flag} size={20} /> {me?.name ?? 'Equipo borrado'}
                                                 </span>
@@ -1725,6 +1790,19 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                 <strong>Jugar un torneo</strong>
                                 <span>Selecciones, clubes de Europa y del sur, y las ligas de Argentina, Uruguay, Brasil y Chile. Un torneo y listo.</span>
                                 <small>Elegí el país o la categoría</small>
+                            </button>
+                            <button
+                                type="button"
+                                className={styles.pickCard}
+                                onClick={() => {
+                                    setMcDraft(null);
+                                    setMcRegion(null);
+                                    setScreen({ k: 'mcSetup', step: 1 });
+                                }}
+                            >
+                                <strong>Mi Club</strong>
+                                <span>Fundás tu club y arrancás en la Regional. Seis divisiones con todos los clubes de Argentina: subís hasta Primera.</span>
+                                <small>Tu camiseta, tu plantel · varones</small>
                             </button>
                             <button type="button" className={`${styles.pickCard} ${styles.pickCardAlt}`} onClick={() => setScreen({ k: 'careerSetup', step: 0 })}>
                                 <strong>Modo carrera</strong>
@@ -2038,6 +2116,51 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                     );
                 })()}
 
+                {screen.k === 'mcSetup' &&
+                    (screen.step === 1 ? (
+                        <div className={styles.body}>
+                            <p className={styles.note}>Diseñá tu club: nombre, sigla del marcador, camiseta y caras.</p>
+                            <TeamEditor
+                                initial={mcDraft ?? makeNewTeam()}
+                                saveLabel="Siguiente ▶"
+                                onSave={(t) => {
+                                    setMcDraft(t);
+                                    setScreen({ k: 'mcSetup', step: 2 });
+                                }}
+                                onCancel={() => setScreen({ k: 'newPick' })}
+                            />
+                        </div>
+                    ) : (
+                        <div className={styles.body}>
+                            <div className={styles.nacAsk} role="radiogroup" aria-label="Región de tu club">
+                                <span className={styles.nacAskQ}>¿De dónde es {mcDraft?.name.trim() || 'tu club'}?</span>
+                                <div className={styles.regionGrid}>
+                                    {MC_REGIONS.map((reg) => (
+                                        <button key={reg} type="button" role="radio" aria-checked={mcRegion === reg} className={`${styles.nacOpt} ${mcRegion === reg ? styles.nacOptOn : ''}`} onClick={() => setMcRegion(reg)}>
+                                            <strong>{mcRegionLabel(reg)}</strong>
+                                        </button>
+                                    ))}
+                                </div>
+                                <small className={styles.nacAskNote}>Define tu zona en la Regional y en las divisiones con zonas: tus rivales son los de tu región.</small>
+                            </div>
+                            <SettingsStep teams={[mcDraft]} difficulty={difficulty} setDifficulty={setDifficulty} duration={duration} setDuration={setDuration} />
+                            <div className={styles.roadInfo}>
+                                <strong>Cómo es Mi Club</strong>
+                                <span>
+                                    Seis divisiones con los {MC_POOL.length} clubes de varones de Argentina: {MC_LEVELS.map((l) => l.label).join(', ')}. Arrancás en la Regional, con un plantel de pibes del barrio.
+                                </span>
+                                <span>{levelDef('base').upHow} En Quinta y Cuarta también hay zonas y cuadro; de Tercera para arriba, liga de 12.</span>
+                                <span>Los clubes de la pirámide suben y bajan como vos: la tabla de cada división se ve fecha a fecha.</span>
+                            </div>
+                            <p className={styles.note}>Se guarda en la partida {slot + 1}{tour ? ', en lugar de la que había' : ''}.</p>
+                            <div className={styles.footerBtns}>
+                                {btn('◀ Camiseta', () => setScreen({ k: 'mcSetup', step: 1 }))}
+                                {!mcRegion && <span className={styles.missing}>Elegí la región de tu club para empezar.</span>}
+                                {btn('Fundar el club ▶', startMiClub, true, !mcDraft || !mcRegion)}
+                            </div>
+                        </div>
+                    ))}
+
                 {screen.k === 'intlSetup' && (() => {
                     const byRating = (a: SevenTeam, b: SevenTeam) => (b.rating ?? 0) - (a.rating ?? 0);
                     const cats: Category[] = [
@@ -2202,6 +2325,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                     const career = tour.career ?? null;
                     const svns = tour.svns ?? null;
                     const intl = tour.intl ?? null;
+                    const miclub = tour.miclub ?? null;
                     const verdict = road ? roadVerdict(tour) : career ? careerVerdict(tour) : svns && tour.done ? svnsVerdict(tour) : intl && tour.done ? intlVerdict(tour) : null;
                     const tabs: [HubTab, string][] = [
                         ...(onlyKo ? [] : [['tabla', tour.groups.length > 1 ? (tour.cross ? 'Conferencias' : 'Grupos') : 'Tabla'] as ['tabla', string]]),
@@ -2217,6 +2341,12 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                   ['union', 'Unión'],
                                   ['plantel', 'Plantel'],
                                   ['juveniles', 'Juveniles'],
+                              ] as [HubTab, string][])
+                            : []),
+                        ...(miclub
+                            ? ([
+                                  ['piramide', 'Pirámide'],
+                                  ['plantel', 'Plantel'],
                               ] as [HubTab, string][])
                             : []),
                         ...(tour.stats ? [['goleadores', 'Goleadores'] as ['goleadores', string]] : []),
@@ -2293,6 +2423,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                         </span>
                                     )}
                                     {svns && <span className={styles.roadChip}>✦ {nameOf(svns.me)} · Temporada {svns.season} · {SVNS_PHASE_LABEL[svns.phase]}</span>}
+                                    {miclub && <span className={styles.roadChip}>⚑ {miclub.team.name} · Temporada {miclub.season} · {levelDef(levelOf(miclub, miclub.me) ?? 'base').label}</span>}
                                     {career && <span className={styles.roadChip}>⚑ {nameOf(career.me)} · Temporada {career.season} · {CAREER_PHASE_LABEL[career.phase]}</span>}
                                     {career?.parallel && !career.parallel.done && (
                                         <span className={styles.parallelNote}>
@@ -2437,7 +2568,10 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                         ))}
                                     </div>
                                     <div className={styles.hubPanel}>
-                                        {tab === 'tabla' && (
+                                        {tab === 'tabla' && miclub && <McTables s={tour} r={miclub} level={levelOf(miclub, miclub.me) ?? 'base'} nameOf={nameOf} flag={(id) => <FlagIcon code={flagOf(id)} size={14} />} mineFirst />}
+                                        {tab === 'piramide' && miclub && <McPyramid s={tour} nameOf={nameOf} flag={(id) => <FlagIcon code={flagOf(id)} size={14} />} bracket={(t) => (defOf(t) ? <Bracket s={t} def={defOf(t)!} nameOf={nameOf} flagOf={flagOf} /> : null)} />}
+                                        {tab === 'plantel' && miclub && <McSquad r={miclub} />}
+                                        {tab === 'tabla' && !miclub && (
                                             <div className={styles.groupGrid}>
                                                 {tour.groups.map((_, gi) => (
                                                     <GroupTable

@@ -20,6 +20,7 @@ import { CLUB_TOURS, CLUBS } from './clubs';
 import { FEM_NATIONS, NATIONS, NATION_BY_CODE } from './nations';
 import type { Difficulty, Duration } from './teams';
 import type { CareerState } from './career';
+import type { MiClubState } from './miClub';
 import type { RoadState } from './road';
 import type { SvnsState } from './svns';
 import type { IntlState } from './intl';
@@ -265,6 +266,8 @@ export interface TourState {
     intl?: IntlState;
     /** Si es una etapa del modo carrera argentino, el estado de toda la carrera. */
     career?: CareerState;
+    /** Si es una temporada de Mi Club, el estado de todo el club (la pirámide, el plantel, los créditos). */
+    miclub?: MiClubState;
     /** Tries y puntos de cada jugador (`equipo#puesto`), si el torneo lleva goleadores. */
     stats?: Record<string, StatLine>;
 }

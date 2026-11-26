@@ -394,7 +394,7 @@ function makeBody(r: () => number): [number, number] {
     return [kg, Math.round(clampN(168 + (kg - 76) * 0.45 + r() * 16, 170, 202))];
 }
 
-function makePlayer(id: number, ovr: number, age: number, r: () => number = Math.random): Player {
+export function makePlayer(id: number, ovr: number, age: number, r: () => number = Math.random): Player {
     const o = capOvr(ovr);
     return { id, age, q: 0, gen: 0, ovr: o, s: makeSkills(o, r), m: 0, b: makeBody(r) };
 }
