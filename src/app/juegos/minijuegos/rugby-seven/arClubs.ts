@@ -127,7 +127,7 @@ const FOREIGN: { div: Omit<GameDivision, 'clubs'>; pool: string; top: number; cl
         clubs: [['Getxo Rugby', null], ['CR Sant Cugat', null], ['Valencia RC', null], ['Les Abelles', null], ['Hernani', null], ['Ingenieros Industriales', null], ['Real Ciencias Sevilla', null], ['Barça Rugbi', null], ['Bizkaia Gernika', null], ['Fénix Rugby', null]],
     },
     {
-        div: { id: 'es-dhb', label: 'División de Honor B', branch: 'espana', region: 'espana', level: 3, promotesTo: 'es-elite', relegatesTo: null },
+        div: { id: 'es-dhb', label: 'División de Honor B', branch: 'espana', region: 'espana', level: 3, promotesTo: 'es-elite', relegatesTo: 'es-pn-norte' },
         pool: 'iber', top: 50,
         clubs: [['Universitario Bilbao', null], ['CRAT Coruña', null], ['BUC Barcelona', null], ['Belenos', null], ['CAU Valencia', null], ['Rugby Majadahonda', null], ['Cormorán Santander', null], ['Real Oviedo Rugby', null], ['CR Alcalá', null], ['Gaztedi', null], ['Akra Bárbara', null], ['Gijón Rugby Club', null], ['Donostia Rugby', null], ['CN Poble Nou', null], ['Elorrio', null], ['CAR Sevilla', null], ['La Única', null], ['RC Sitges', null], ['Universidade de Vigo', null], ['Rugby Aranda', null], ['El Toro', null], ['CAR Cáceres', null], ['Ponent Mallorca', null], ['Jaén Rugby', null], ['Os Ingleses', null], ['Soto del Real', null], ['VPC Andorra', null]],
     },
@@ -159,7 +159,7 @@ const FOREIGN: { div: Omit<GameDivision, 'clubs'>; pool: string; top: number; cl
         clubs: [['Heidelberger RK', '#c8102e'], ['RK 03 Berlin', '#111111'], ['SC Neuenheim', '#0b6b3a'], ['SC 1880 Frankfurt', '#c8102e'], ['TSV Handschuhsheim', '#1f4fa0'], ['DRC Hannover', '#0b6b3a'], ['Hamburger RC', '#1f3fbf'], ['TV Pforzheim', '#ffd100'], ['RG Heidelberg', '#c8102e'], ['Berliner RC', '#111111']],
     },
     {
-        div: { id: 'de-liga-federal-2', label: 'Liga Federal Alemana · Segunda', branch: 'alemania', region: 'alemania', level: 2, promotesTo: 'de-liga-federal', relegatesTo: null },
+        div: { id: 'de-liga-federal-2', label: 'Liga Federal Alemana · Segunda', branch: 'alemania', region: 'alemania', level: 2, promotesTo: 'de-liga-federal', relegatesTo: 'de-regionalliga' },
         pool: 'germ', top: 44,
         clubs: [['Heusenstamm', '#c8102e'], ['Stuttgarter RC', '#111111'], ['RC Aachen', '#1f4fa0'], ['Düsseldorfer RK', '#c8102e'], ['Münchner RC', '#1f3fbf'], ['Offenbach', '#0b6b3a'], ['Rostock', '#1f4fa0'], ['Hohen Neuendorf', '#ffd100'], ['Rheinbrüder Karlsruhe', '#c8102e'], ['Köln', '#c8102e']],
     },
@@ -171,7 +171,7 @@ const FOREIGN: { div: Omit<GameDivision, 'clubs'>; pool: string; top: number; cl
     {
         div: { id: 'pl-liga-uno', label: 'Liga Uno de Polonia', branch: 'polonia', region: 'polonia', level: 2, promotesTo: 'pl-liga-extra', relegatesTo: null },
         pool: 'eslavo', top: 40,
-        clubs: [['Posnania Poznań', '#1f4fa0'], ['Skra Warszawa', '#c8102e'], ['Legia Warszawa', '#0b6b3a'], ['Rugby Białystok', '#c8102e'], ['Rzeszów', '#1f3fbf'], ['Kaszubia', '#111111'], ['Tatra Zakopane', '#0b6b3a'], ['Lublin', '#ffd100']],
+        clubs: [['Posnania Poznań', '#1f4fa0'], ['Skra Warszawa', '#c8102e'], ['Legia Warszawa', '#0b6b3a'], ['Rugby Białystok', '#c8102e'], ['Rzeszów', '#1f3fbf'], ['Kaszubia', '#111111'], ['Tatra Zakopane', '#0b6b3a'], ['Lublin', '#ffd100'], ['AZS AWF Warszawa', '#1f4fa0'], ['Śląsk Wrocław', '#0b6b3a']],
     },
     {
         div: { id: 'ge-liga-gran10', label: 'Liga Gran 10 de Georgia', branch: 'georgia', region: 'georgia', level: 1, promotesTo: null, relegatesTo: 'ge-liga-primera' },
@@ -312,7 +312,7 @@ const FOREIGN: { div: Omit<GameDivision, 'clubs'>; pool: string; top: number; cl
         clubs: [['Direito', '#1f4fa0'], ['Belenenses', '#0b3a8c'], ['Agronomia', '#0b6b3a'], ['Benfica', '#c8102e'], ['Técnico', '#1f3fbf'], ['Cascais', '#ffd100'], ['CDUP', '#14234a'], ['Lousã', '#f47920'], ['Académica de Coimbra', '#111111'], ['Évora', '#6e1a2c']],
     },
     {
-        div: { id: 'pt-primeira', label: 'Campeonato Lusitano · Primeira Divisão', branch: 'portugal', region: 'portugal', level: 2, promotesTo: 'pt-honra', relegatesTo: null },
+        div: { id: 'pt-primeira', label: 'Campeonato Lusitano · Primeira Divisão', branch: 'portugal', region: 'portugal', level: 2, promotesTo: 'pt-honra', relegatesTo: 'pt-segunda' },
         pool: 'luso', top: 44,
         clubs: [['Montemor', '#c8102e'], ['Santarém', '#0b6b3a'], ['Vila Real', '#1f4fa0'], ['Algarve', '#ffd100'], ['Caldas', '#6e1a2c'], ['Dragon Force', '#111111'], ['Sporting', '#0b6b3a'], ['Marítimo', '#c8102e']],
     },
@@ -325,7 +325,7 @@ const FOREIGN: { div: Omit<GameDivision, 'clubs'>; pool: string; top: number; cl
         clubs: [['Llandovery', '#ffd100'], ['Ebbw Vale', '#c8102e'], ['Aberavon', '#c8102e'], ['Cardiff RFC', '#0b3a8c'], ['Pontypridd', '#111111'], ['Newport RFC', '#111111'], ['Swansea', '#ffffff'], ['Bridgend Ravens', '#1f4fa0'], ['Carmarthen Quins', '#1f3fbf'], ['Cross Keys', '#111111'], ['Neath', '#111111'], ['Llanelli RFC', '#c8102e']],
     },
     {
-        div: { id: 'wa-campeonato', label: 'Campeonato de Gales', branch: 'gales', region: 'gales', level: 2, promotesTo: 'wa-premier', relegatesTo: null },
+        div: { id: 'wa-campeonato', label: 'Campeonato de Gales', branch: 'gales', region: 'gales', level: 2, promotesTo: 'wa-premier', relegatesTo: 'wa-division1' },
         pool: 'celta', top: 50,
         clubs: [['Merthyr', '#111111'], ['Pontypool', '#c8102e'], ['Bargoed', '#1f4fa0'], ['Newbridge', '#c8102e'], ['Narberth', '#1f3fbf'], ['Beddau', '#ffd100'], ['Trebanos', '#0b6b3a'], ['Ystrad Rhondda', '#c8102e'], ['Bedwas', '#111111'], ['Glynneath', '#1f4fa0']],
     },
@@ -335,7 +335,7 @@ const FOREIGN: { div: Omit<GameDivision, 'clubs'>; pool: string; top: number; cl
         clubs: [['Heriot’s', '#1f3fbf'], ['Currie Chieftains', '#ffd100'], ['Edinburgh Academicals', '#1f4fa0'], ['Watsonians', '#c8102e'], ['Marr', '#0b3a8c'], ['Hawick', '#0b6b3a'], ['Selkirk', '#1f4fa0'], ['Jed-Forest', '#1f3fbf'], ['Musselburgh', '#111111'], ['Kelso', '#111111']],
     },
     {
-        div: { id: 'sc-nacional', label: 'Nacional Uno de Escocia', branch: 'escocia', region: 'escocia', level: 2, promotesTo: 'sc-premier', relegatesTo: null },
+        div: { id: 'sc-nacional', label: 'Nacional Uno de Escocia', branch: 'escocia', region: 'escocia', level: 2, promotesTo: 'sc-premier', relegatesTo: 'sc-nacional-2' },
         pool: 'celta', top: 47,
         clubs: [['Gala', '#1f3fbf'], ['Melrose', '#ffd100'], ['Glasgow Hawks', '#111111'], ['Ayr', '#c8102e'], ['Biggar', '#111111'], ['Stirling County', '#c8102e'], ['Dundee', '#1f4fa0'], ['Boroughmuir', '#0b6b3a'], ['Glasgow High Kelvinside', '#1f3fbf'], ['Aberdeen Grammar', '#111111']],
     },
@@ -345,17 +345,17 @@ const FOREIGN: { div: Omit<GameDivision, 'clubs'>; pool: string; top: number; cl
         clubs: [['Clontarf', '#c8102e'], ['Terenure College', '#1f3fbf'], ['Lansdowne', '#c8102e'], ['Cork Constitution', '#ffffff'], ['Young Munster', '#111111'], ['St Mary’s College', '#1f4fa0'], ['UCD', '#1f4fa0'], ['Garryowen', '#1f3fbf'], ['Shannon', '#111111'], ['Ballynahinch', '#c8102e']],
     },
     {
-        div: { id: 'ie-1b', label: 'Liga de Irlanda · Primera B', branch: 'irlanda', region: 'irlanda', level: 2, promotesTo: 'ie-1a', relegatesTo: null },
+        div: { id: 'ie-1b', label: 'Liga de Irlanda · Primera B', branch: 'irlanda', region: 'irlanda', level: 2, promotesTo: 'ie-1a', relegatesTo: 'ie-2a' },
         pool: 'celta', top: 52,
         clubs: [['Dublin University', '#1f4fa0'], ['Old Wesley', '#0b3a8c'], ['Naas', '#111111'], ['Malone', '#ffd100'], ['Buccaneers', '#c8102e'], ['Banbridge', '#c8102e'], ['City of Armagh', '#0b6b3a'], ['Old Belvedere', '#111111'], ['Queen’s University', '#0b6b3a'], ['Highfield', '#1f3fbf']],
     },
     {
-        div: { id: 'ro-superliga', label: 'Superliga de Rumania', branch: 'rumania', region: 'rumania', level: 1, promotesTo: null, relegatesTo: null },
+        div: { id: 'ro-superliga', label: 'Superliga de Rumania', branch: 'rumania', region: 'rumania', level: 1, promotesTo: null, relegatesTo: 'ro-divizia-1' },
         pool: 'rumano', top: 56,
         clubs: [['Steaua București', '#c8102e'], ['Dinamo București', '#c8102e'], ['CSM Știința Baia Mare', '#ffd100'], ['SCM Timișoara', '#111111'], ['Universitatea Cluj', '#111111'], ['Rapid București', '#7a1f2c'], ['CSM București', '#1f4fa0'], ['Gloria Buzău', '#0b6b3a']],
     },
     {
-        div: { id: 'it-serie-a-elite', label: 'Serie A Élite de Italia', branch: 'italia', region: 'italia', level: 1, promotesTo: null, relegatesTo: null },
+        div: { id: 'it-serie-a-elite', label: 'Serie A Élite de Italia', branch: 'italia', region: 'italia', level: 1, promotesTo: null, relegatesTo: 'it-serie-a' },
         pool: 'italo', top: 62,
         clubs: [['Petrarca Padova', '#111111'], ['Rovigo', '#1f4fa0'], ['Viadana', '#ffd100'], ['Valorugby Emilia', '#c8102e'], ['Fiamme Oro', '#1f3fbf'], ['Colorno', '#c8102e'], ['Mogliano', '#1f4fa0'], ['Lyons Piacenza', '#0b6b3a'], ['Vicenza', '#c8102e'], ['Lazio', '#8ec5e8']],
     },
@@ -365,7 +365,7 @@ const FOREIGN: { div: Omit<GameDivision, 'clubs'>; pool: string; top: number; cl
         clubs: [['Boitsfort', '#c8102e'], ['Kituro', '#1f4fa0'], ['ASUB Waterloo', '#0b6b3a'], ['Dendermonde', '#111111'], ['La Hulpe', '#1f3fbf'], ['Soignies', '#c8102e'], ['Frameries', '#ffd100'], ['Coq Mosan', '#c8102e']],
     },
     {
-        div: { id: 'be-nacional', label: 'Nacional de Bélgica y Luxemburgo', branch: 'belgica', region: 'belgica', level: 2, promotesTo: 'be-elite', relegatesTo: null },
+        div: { id: 'be-nacional', label: 'Nacional de Bélgica y Luxemburgo', branch: 'belgica', region: 'belgica', level: 2, promotesTo: 'be-elite', relegatesTo: 'be-division-2' },
         pool: 'franco', top: 40,
         clubs: [['RC Luxembourg', '#c8102e'], ['RC Walferdange', '#1f4fa0'], ['Antwerp RC', '#c8102e'], ['Brussels Celtic', '#0b6b3a'], ['Gent', '#1f4fa0'], ['Leuven', '#111111'], ['Visé', '#ffd100'], ['Mons', '#c8102e']],
     },
@@ -391,6 +391,68 @@ const FOREIGN: { div: Omit<GameDivision, 'clubs'>; pool: string; top: number; cl
         div: { id: 'nl-segunda-sur', label: 'Segunda Clase Sur de Países Bajos', branch: 'holanda', region: 'holanda', level: 3, promotesTo: 'nl-primera', relegatesTo: null },
         pool: 'germ', top: 30,
         clubs: [['The Elephants', '#111111'], ['RCT', '#c8102e'], ['Oemoemenoe', '#ffd100'], ['Maastricht', '#c8102e'], ['RCC', '#1f4fa0'], ['Eindhoven', '#1f3fbf'], ['LSRG', '#0b6b3a'], ['Octopus', '#1f4fa0'], ['The Pink Panthers', '#f472b6']],
+    },
+    // Más clubes de Europa (divisiones de abajo, con clubes de verdad; listas aproximadas que se retocan con
+    // Editar clubes): así Mi Club en Europa tiene seis divisiones, como la Argentina.
+    {
+        div: { id: 'es-pn-norte', label: 'Primera Nacional · Norte', branch: 'espana', region: 'espana', level: 4, promotesTo: 'es-dhb', relegatesTo: null },
+        pool: 'iber', top: 46,
+        clubs: [['Zarautz', '#c8102e'], ['Bera Bera', '#1f4fa0'], ['Durango', '#0b6b3a'], ['Uribealdea', '#111111'], ['Ourense', '#ffd100'], ['Lugo', '#1f3fbf'], ['Canoe', '#6e1a2c'], ['Arquitectura', '#f47920'], ['Tres Cantos', '#c8102e'], ['GEiEG Girona', '#1f4fa0'], ['Sant Andreu', '#0b6b3a']],
+    },
+    {
+        div: { id: 'es-pn-sur', label: 'Primera Nacional · Sur', branch: 'espana', region: 'espana', level: 4, promotesTo: 'es-dhb', relegatesTo: null },
+        pool: 'iber', top: 46,
+        clubs: [['Tatami', '#c8102e'], ['Atlético Portuense', '#1f4fa0'], ['Marbella', '#0b6b3a'], ['Málaga', '#111111'], ['Granada', '#ffd100'], ['Murcia', '#1f3fbf'], ['Tenerife', '#6e1a2c'], ['Tarragona', '#f47920'], ['L’Hospitalet', '#c8102e'], ['Gòtics', '#1f4fa0'], ['Badalona', '#0b6b3a']],
+    },
+    {
+        div: { id: 'pt-segunda', label: 'Campeonato Lusitano · Segunda Divisão', branch: 'portugal', region: 'portugal', level: 3, promotesTo: 'pt-primeira', relegatesTo: null },
+        pool: 'luso', top: 40,
+        clubs: [['CDUL', '#c8102e'], ['São Miguel', '#1f4fa0'], ['Loulé', '#0b6b3a'], ['Arcos de Valdevez', '#111111'], ['Bairrada', '#ffd100'], ['Moita', '#1f3fbf'], ['Setúbal', '#6e1a2c'], ['Guimarães', '#f47920']],
+    },
+    {
+        div: { id: 'it-serie-a', label: 'Serie A de Italia', branch: 'italia', region: 'italia', level: 2, promotesTo: 'it-serie-a-elite', relegatesTo: 'it-serie-b' },
+        pool: 'italo', top: 54,
+        clubs: [['Calvisano', '#c8102e'], ['Rugby Parma', '#1f4fa0'], ['L’Aquila', '#0b6b3a'], ['Noceto', '#111111'], ['Valsugana', '#ffd100'], ['San Donà', '#1f3fbf'], ['Verona', '#6e1a2c'], ['Capitolina', '#f47920'], ['Rugby Paese', '#c8102e'], ['Reggio', '#1f4fa0'], ['CUS Torino', '#0b6b3a'], ['Amatori Milano', '#111111']],
+    },
+    {
+        div: { id: 'it-serie-b', label: 'Serie B de Italia', branch: 'italia', region: 'italia', level: 3, promotesTo: 'it-serie-a', relegatesTo: null },
+        pool: 'italo', top: 45,
+        clubs: [['Firenze', '#c8102e'], ['Livorno', '#1f4fa0'], ['Brescia', '#0b6b3a'], ['Alghero', '#111111'], ['Amatori Napoli', '#ffd100'], ['Amatori Catania', '#1f3fbf'], ['Pesaro', '#6e1a2c'], ['Benevento', '#f47920']],
+    },
+    {
+        div: { id: 'de-regionalliga', label: 'Liga Regional Alemana', branch: 'alemania', region: 'alemania', level: 3, promotesTo: 'de-liga-federal-2', relegatesTo: null },
+        pool: 'germ', top: 36,
+        clubs: [['Germania List', '#c8102e'], ['Victoria Linden', '#1f4fa0'], ['Ricklingen', '#0b6b3a'], ['Hannover 78', '#111111'], ['Berliner SV 92', '#ffd100'], ['St. Pauli', '#1f3fbf'], ['Eintracht Frankfurt', '#6e1a2c'], ['Heidelberger TV', '#f47920'], ['RC Leipzig', '#c8102e'], ['Dresdner RC', '#1f4fa0']],
+    },
+    {
+        div: { id: 'ie-2a', label: 'Liga de Irlanda · Segunda A', branch: 'irlanda', region: 'irlanda', level: 3, promotesTo: 'ie-1b', relegatesTo: 'ie-2b' },
+        pool: 'celta', top: 48,
+        clubs: [['Blackrock College', '#c8102e'], ['Greystones', '#1f4fa0'], ['Ballymena', '#0b6b3a'], ['Dungannon', '#111111'], ['Instonians', '#ffd100'], ['Galwegians', '#1f3fbf'], ['Corinthians', '#6e1a2c'], ['Cashel', '#f47920'], ['Sligo', '#c8102e'], ['Nenagh Ormond', '#1f4fa0'], ['Bruff', '#0b6b3a'], ['Navan', '#111111']],
+    },
+    {
+        div: { id: 'ie-2b', label: 'Liga de Irlanda · Segunda B', branch: 'irlanda', region: 'irlanda', level: 4, promotesTo: 'ie-2a', relegatesTo: null },
+        pool: 'celta', top: 41,
+        clubs: [['Skerries', '#c8102e'], ['Dolphin', '#1f4fa0'], ['MU Barnhall', '#0b6b3a'], ['Wanderers', '#111111'], ['Seapoint', '#ffd100'], ['Monkstown', '#1f3fbf'], ['Belfast Harlequins', '#6e1a2c'], ['Rainey Old Boys', '#f47920'], ['Clonmel', '#c8102e'], ['Tullamore', '#1f4fa0'], ['Enniscorthy', '#0b6b3a'], ['Midleton', '#111111'], ['Bective Rangers', '#ffd100'], ['Old Crescent', '#1f3fbf'], ['UL Bohemian', '#6e1a2c'], ['Thomond', '#f47920']],
+    },
+    {
+        div: { id: 'wa-division1', label: 'Primera División de Gales', branch: 'gales', region: 'gales', level: 3, promotesTo: 'wa-campeonato', relegatesTo: null },
+        pool: 'celta', top: 42,
+        clubs: [['Cardiff Met', '#c8102e'], ['Cwmbran', '#1f4fa0'], ['Tata Steel', '#0b6b3a'], ['Bridgend Athletic', '#111111'], ['Maesteg Quins', '#ffd100'], ['Aberavon Quins', '#1f3fbf'], ['Penallta', '#6e1a2c'], ['Ystradgynlais', '#f47920'], ['Llanharan', '#c8102e'], ['Rumney', '#1f4fa0'], ['Brynmawr', '#0b6b3a'], ['Abercarn', '#111111'], ['Treorchy', '#ffd100'], ['Tondu', '#1f3fbf'], ['Kenfig Hill', '#6e1a2c'], ['Whitland', '#f47920'], ['Newcastle Emlyn', '#c8102e'], ['Tenby United', '#1f4fa0']],
+    },
+    {
+        div: { id: 'sc-nacional-2', label: 'Nacional Dos de Escocia', branch: 'escocia', region: 'escocia', level: 3, promotesTo: 'sc-nacional', relegatesTo: null },
+        pool: 'celta', top: 40,
+        clubs: [['Hamilton', '#c8102e'], ['Edinburgh Northern', '#1f4fa0'], ['Peebles', '#0b6b3a'], ['Kirkcaldy', '#111111'], ['Howe of Fife', '#ffd100'], ['Dumfries Saints', '#1f3fbf'], ['Preston Lodge', '#6e1a2c'], ['Lasswade', '#f47920'], ['Cambuslang', '#c8102e'], ['Livingston', '#1f4fa0'], ['Highland', '#0b6b3a'], ['Stewart’s Melville', '#111111'], ['Gordonians', '#ffd100'], ['Haddington', '#1f3fbf'], ['Berwick', '#6e1a2c'], ['Linlithgow', '#f47920']],
+    },
+    {
+        div: { id: 'ro-divizia-1', label: 'Divizia Națională de Rumania', branch: 'rumania', region: 'rumania', level: 2, promotesTo: 'ro-superliga', relegatesTo: null },
+        pool: 'rumano', top: 44,
+        clubs: [['Știința Petroșani', '#c8102e'], ['Politehnica Iași', '#1f4fa0'], ['Sportul Studențesc', '#0b6b3a'], ['Farul Constanța', '#111111'], ['Olimpia București', '#ffd100']],
+    },
+    {
+        div: { id: 'be-division-2', label: 'Segunda División de Bélgica', branch: 'belgica', region: 'belgica', level: 3, promotesTo: 'be-nacional', relegatesTo: null },
+        pool: 'franco', top: 32,
+        clubs: [['Brussels Barbarians', '#c8102e'], ['Ottignies', '#1f4fa0'], ['Tournai', '#0b6b3a'], ['Namur', '#111111'], ['Charleroi', '#ffd100'], ['Brugge', '#1f3fbf'], ['Kortrijk', '#6e1a2c'], ['Mechelen', '#f47920']],
     },
     // Argentina femenino: URBA (Top 9, Primera y Segunda) y el Centro (Córdoba y Andina).
     {

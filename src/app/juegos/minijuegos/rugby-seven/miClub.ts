@@ -19,7 +19,7 @@ import type { Difficulty, Duration, SevenTeam } from './teams';
 
 /* ───────────────────────── la pirámide ───────────────────────── */
 
-export type McLevel = 'primera' | 'segunda' | 'tercera' | 'cuarta' | 'quinta' | 'base' | 'sa1' | 'sa2' | 'sa3' | 'sa4' | 'eu1' | 'eu2' | 'eu3' | 'eu4';
+export type McLevel = 'primera' | 'segunda' | 'tercera' | 'cuarta' | 'quinta' | 'base' | 'sa1' | 'sa2' | 'sa3' | 'sa4' | 'eu1' | 'eu2' | 'eu3' | 'eu4' | 'eu5' | 'eu6';
 
 export interface McLevelDef {
     id: McLevel;
@@ -70,14 +70,15 @@ export const SA_LEVELS: McLevelDef[] = [
 /**
  * Europa no profesional: España, Portugal, Italia, Rumania, Georgia, Irlanda, Gales, Escocia, Bélgica y
  * Luxemburgo, Países Bajos, Alemania, Polonia y Chequia (sin Inglaterra, Francia ni las franquicias del URC).
- * El sistema de Sudamérica: Primera y Segunda de 12, Tercera en dos zonas y la Regional por país.
+ * Seis divisiones, como la Argentina: Primera, Segunda y Tercera de 12, Cuarta y Quinta en zonas y la Regional por país.
  */
 export const EU_LEVELS: McLevelDef[] = [
     { id: 'eu1', label: 'Primera', size: 12, zones: 0, advance: 4, up: 0, down: 2, upHow: 'Campeón por semis y final entre los 4 primeros. Bajan los 2 últimos.', nac: { all: true, how: 'los 12' } },
     { id: 'eu2', label: 'Segunda', size: 12, zones: 0, advance: 0, up: 2, down: 2, red: 4, upHow: 'Sube el primero. Del 2.º al 5.º juegan un reducido: el ganador también sube. Bajan los 2 últimos.', nac: { all: true, how: 'los 12' } },
-    { id: 'eu3', label: 'Tercera', size: 24, zones: 2, advance: 2, up: 2, down: 4, upHow: 'Pasan los 2 primeros de cada zona a semifinales: suben los 2 finalistas. Bajan los 2 últimos de cada zona.', nac: { perZone: 2, how: 'los 2 primeros de cada zona' } },
-    // Son muchas zonas (una o dos por país): suben los 4 semifinalistas, si no salir de la Regional era casi imposible.
-    { id: 'eu4', label: 'Regional', size: 0, zones: 12, advance: 1, up: 4, down: 0, byRegion: true, upHow: 'Una zona por país: pasa el primero de cada una al cuadro y suben los 4 semifinalistas.', nac: { perZone: 1, how: 'el puntero de cada zona' } },
+    { id: 'eu3', label: 'Tercera', size: 12, zones: 0, advance: 0, up: 2, down: 2, red: 4, upHow: 'Sube el primero. Del 2.º al 5.º juegan un reducido: el ganador también sube. Bajan los 2 últimos.', nac: { top: 8, how: 'los 8 primeros' } },
+    { id: 'eu4', label: 'Cuarta', size: 40, zones: 4, advance: 2, up: 2, down: 4, upHow: 'Pasan los 2 primeros de cada zona a cuartos: suben los 2 finalistas. Baja el último de cada zona.', nac: { perZone: 2, how: 'los 2 primeros de cada zona' } },
+    { id: 'eu5', label: 'Quinta', size: 80, zones: 8, advance: 2, up: 4, down: 8, upHow: 'Pasan los 2 primeros de cada zona a octavos: suben los 4 semifinalistas. Baja el último de cada zona.', nac: { perZone: 1, how: 'el puntero de cada zona' } },
+    { id: 'eu6', label: 'Regional', size: 0, zones: 16, advance: 1, up: 8, down: 0, byRegion: true, upHow: 'Una zona por país (los grandes en dos o tres): pasa el primero de cada una al cuadro y suben los 8 que llegan a cuartos.', nac: { perZone: 1, how: 'el puntero de cada zona' } },
 ];
 
 const ALL_LEVELS = [...MC_LEVELS, ...SA_LEVELS, ...EU_LEVELS];
@@ -435,7 +436,7 @@ function mineTour(def: TourDef, difficulty: Difficulty, duration: Duration): Tou
  * suma más, y los títulos y el ascenso dejan un premio al cierre. Los precios están pensados para
  * que una temporada alcance para 2 o 3 refuerzos del nivel de la división, no para comprarse Primera.
  */
-export const PAY_BY_LEVEL: Record<McLevel, number> = { base: 10, quinta: 12, cuarta: 15, tercera: 18, segunda: 22, primera: 26, sa4: 11, sa3: 16, sa2: 22, sa1: 26, eu4: 11, eu3: 16, eu2: 22, eu1: 26 };
+export const PAY_BY_LEVEL: Record<McLevel, number> = { base: 10, quinta: 12, cuarta: 15, tercera: 18, segunda: 22, primera: 26, sa4: 11, sa3: 16, sa2: 22, sa1: 26, eu6: 10, eu5: 12, eu4: 15, eu3: 18, eu2: 22, eu1: 26 };
 export const PAY = { win: 10, draw: 4, try: 1, cupRound: 5, nacRound: 10, libRound: 15, wccRound: 25 };
 export const PRIZE = { ascenso: 80, liga: 100, copa: 60, nac: 150, lib: 220, wcc: 400 };
 export const SQUAD_MAX = 14;
