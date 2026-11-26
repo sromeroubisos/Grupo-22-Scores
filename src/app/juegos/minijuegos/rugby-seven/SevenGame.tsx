@@ -1489,21 +1489,100 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                 })}
                             </div>
                         </div>
+                        {(() => {
+                            // Lo que está en juego: cada partida guardada que sigue (con su próximo partido) y la Copa Seven.
+                            const live = tours
+                                .map((t, i) => ({ t, i }))
+                                .filter((x): x is { t: TourState; i: number } => {
+                                    const t = x.t;
+                                    if (!t) return false;
+                                    const finished = !t.career && !t.svns && !t.intl && !t.miclub && (t.road ? t.road.out || (t.road.phase === 'wc' && t.done) : t.done || t.eliminated);
+                                    return !finished;
+                                });
+                            if (!live.length && !cupLive) return null;
+                            return (
+                                <section className={styles.continueBox} aria-labelledby="menu-seguir">
+                                    <h2 className={styles.menuGroupTitle} id="menu-seguir">
+                                        Seguir jugando<small>Tus partidas en curso</small>
+                                    </h2>
+                                    <div className={styles.continueGrid}>
+                                        {live.map(({ t, i }) => {
+                                            const me = t.miclub ? myTeam(t.miclub) : byId(t.me);
+                                            const playing = !t.done && !t.eliminated;
+                                            const opp = playing ? nextOpponent(t) : null;
+                                            const mode = t.miclub ? 'Mi Club' : t.career ? 'Modo carrera' : t.intl ? 'Carrera internacional' : t.svns ? 'Circuito SVNS' : t.road ? 'Road to Rugby World Cup' : 'Torneo';
+                                            const season = t.miclub ? ` · temporada ${t.miclub.season}` : t.career ? ` · temporada ${t.career.season}` : t.intl ? ` · ${t.intl.season}` : t.svns ? ` · temporada ${t.svns.season}` : '';
+                                            const comp = t.miclub ? phaseName(t) : (defOf(t)?.name ?? '').replace(/ \d{4}$/, '');
+                                            const next = !playing ? 'Terminó la etapa: pasá a la siguiente.' : opp ? `${roundLabel(t)} · vs ${nameOf(opp)}` : `${roundLabel(t)} · fecha libre`;
+                                            return (
+                                                <button
+                                                    key={i}
+                                                    type="button"
+                                                    className={styles.continueCard}
+                                                    onClick={() => {
+                                                        setSlot(i);
+                                                        setHubTab('tabla');
+                                                        setScreen({ k: 'tour' });
+                                                    }}
+                                                    aria-label={`Seguir: ${mode}, ${me?.name ?? ''}. ${next}`}
+                                                >
+                                                    {me && (
+                                                        <span className={styles.continueSprite} aria-hidden="true">
+                                                            <SpritePreview look={me.players[0]} kit={me.kit} scale={3} running />
+                                                        </span>
+                                                    )}
+                                                    <span className={styles.continueText}>
+                                                        <small>
+                                                            {mode}
+                                                            {season}
+                                                        </small>
+                                                        <strong>
+                                                            <FlagIcon code={me?.flag} size={16} /> {me?.name ?? 'Equipo borrado'}
+                                                        </strong>
+                                                        <span>
+                                                            {comp} · {next}
+                                                        </span>
+                                                    </span>
+                                                    <span className={styles.continueCta} aria-hidden="true">
+                                                        Seguir ▶
+                                                    </span>
+                                                </button>
+                                            );
+                                        })}
+                                        {cupLive && cup && (
+                                            <button type="button" className={styles.continueCard} onClick={() => setScreen({ k: 'cup' })} aria-label={`Seguir la Copa Seven: te toca ${CUP_ROUNDS[cup.round].toLowerCase()}`}>
+                                                <span className={styles.continueSprite} aria-hidden="true">
+                                                    ♛
+                                                </span>
+                                                <span className={styles.continueText}>
+                                                    <small>Copa Seven</small>
+                                                    <strong>Te toca: {CUP_ROUNDS[cup.round].toLowerCase()}</strong>
+                                                    <span>Cuartos, semi y final contra rivales al azar.</span>
+                                                </span>
+                                                <span className={styles.continueCta} aria-hidden="true">
+                                                    Seguir ▶
+                                                </span>
+                                            </button>
+                                        )}
+                                    </div>
+                                </section>
+                            );
+                        })()}
                         <div className={styles.menu} onKeyDown={onMenuKey} role="menu" aria-label="Menú principal">
                             <div className={styles.menuGroup} role="group" aria-labelledby="menu-jugar">
                                 <h2 className={styles.menuGroupTitle} id="menu-jugar">Jugar ahora<small>Un partido y listo</small></h2>
                                 <div className={styles.menuGrid}>
-                                    <button type="button" role="menuitem" className={styles.menuBtn} onClick={() => setScreen({ k: 'quick', step: 1 })}>
+                                    <button type="button" role="menuitem" className={styles.menuBtn} style={{ '--acc': '#3fbf5a' } as React.CSSProperties} onClick={() => setScreen({ k: 'quick', step: 1 })}>
                                         <span className={styles.menuIcon} aria-hidden="true">▶</span>
                                         <strong>Partido rápido</strong>
                                         <span>Elegís los dos equipos y a la cancha.</span>
                                     </button>
-                                    <button type="button" role="menuitem" className={styles.menuBtn} onClick={() => setScreen({ k: 'drill', kind: 'practice', nonce: nextNonce() })}>
+                                    <button type="button" role="menuitem" className={styles.menuBtn} style={{ '--acc': '#4aa3ff' } as React.CSSProperties} onClick={() => setScreen({ k: 'drill', kind: 'practice', nonce: nextNonce() })}>
                                         <span className={styles.menuIcon} aria-hidden="true">◎</span>
                                         <strong>Práctica</strong>
                                         <span>Repetí los ejercicios: moverte, pasar, chocar, tacklear, el ruck y patear.</span>
                                     </button>
-                                    <button type="button" role="menuitem" className={styles.menuBtn} onClick={() => setScreen(cupLive ? { k: 'cup' } : { k: 'cupSetup', step: 1 })}>
+                                    <button type="button" role="menuitem" className={styles.menuBtn} style={{ '--acc': '#f0c419' } as React.CSSProperties} onClick={() => setScreen(cupLive ? { k: 'cup' } : { k: 'cupSetup', step: 1 })}>
                                         <span className={styles.menuIcon} aria-hidden="true">♛</span>
                                         <strong>{cupLive ? 'Seguir la Copa Seven' : 'Copa Seven'}</strong>
                                         <span>{cupLive && cup ? `Te toca: ${CUP_ROUNDS[cup.round].toLowerCase()}.` : 'Cuartos, semi y final contra rivales al azar.'}</span>
@@ -1521,7 +1600,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                             <button
                                                 type="button"
                                                 role="menuitem"
-                                                className={styles.menuBtn}
+                                                className={styles.menuBtn} style={{ '--acc': '#ff8a3d' } as React.CSSProperties}
                                                 onClick={() => {
                                                     if (live) {
                                                         setSlot(mcSlot);
@@ -1560,7 +1639,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                             <button
                                                 type="button"
                                                 role="menuitem"
-                                                className={styles.menuBtn}
+                                                className={styles.menuBtn} style={{ '--acc': '#e04848' } as React.CSSProperties}
                                                 onClick={() => {
                                                     if (live) {
                                                         setSlot(careerSlot);
@@ -1592,7 +1671,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                     <button
                                         type="button"
                                         role="menuitem"
-                                        className={styles.menuBtn}
+                                        className={styles.menuBtn} style={{ '--acc': '#5ad1e6' } as React.CSSProperties}
                                         onClick={() => {
                                             const free = tours.findIndex((t) => !t);
                                             if (free < 0) {
@@ -1604,13 +1683,13 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                         }}
                                     >
                                         <span className={styles.menuIcon} aria-hidden="true">◎</span>
-                                        <strong>Carrera internacional</strong>
+                                        <strong>Carrera interna&shy;cional</strong>
                                         <span>{tours.some((t) => !t) ? 'Una selección de XV, año tras año: divisiones, Mundial, ranking en vivo y el desarrollo de tu país.' : 'Las tres partidas están ocupadas: borrá una para empezar.'}</span>
                                     </button>
                                     <button
                                         type="button"
                                         role="menuitem"
-                                        className={styles.menuBtn}
+                                        className={styles.menuBtn} style={{ '--acc': '#b072ff' } as React.CSSProperties}
                                         onClick={() => {
                                             const free = tours.findIndex((t) => !t);
                                             if (free < 0) {
@@ -1628,7 +1707,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                     <button
                                         type="button"
                                         role="menuitem"
-                                        className={styles.menuBtn}
+                                        className={styles.menuBtn} style={{ '--acc': '#2fd3a0' } as React.CSSProperties}
                                         onClick={() => {
                                             // Arranca en la primera partida libre; si están las tres ocupadas, a elegir cuál borrar.
                                             const free = tours.findIndex((t) => !t);
@@ -1649,17 +1728,17 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                             <div className={styles.menuGroup} role="group" aria-labelledby="menu-equipos">
                                 <h2 className={styles.menuGroupTitle} id="menu-equipos">Torneos y equipos<small>Tus partidas, tus camisetas</small></h2>
                                 <div className={styles.menuGrid}>
-                                    <button type="button" role="menuitem" className={styles.menuBtn} onClick={() => setScreen({ k: 'slots' })}>
+                                    <button type="button" role="menuitem" className={styles.menuBtn} style={{ '--acc': '#ffd36b' } as React.CSSProperties} onClick={() => setScreen({ k: 'slots' })}>
                                         <span className={styles.menuIcon} aria-hidden="true">★</span>
                                         <strong>Torneos</strong>
                                         <span>{savedCount ? `${savedCount} de ${TOUR_SLOTS} partidas guardadas.` : 'Selecciones, clubes de Europa y del sur, y el rugby argentino.'}</span>
                                     </button>
-                                    <button type="button" role="menuitem" className={styles.menuBtn} onClick={() => setScreen({ k: 'teams' })}>
+                                    <button type="button" role="menuitem" className={styles.menuBtn} style={{ '--acc': '#ff6fb0' } as React.CSSProperties} onClick={() => setScreen({ k: 'teams' })}>
                                         <span className={styles.menuIcon} aria-hidden="true">✎</span>
                                         <strong>Mis equipos</strong>
                                         <span>Armá tu camiseta y tu plantel de siete.</span>
                                     </button>
-                                    <button type="button" role="menuitem" className={styles.menuBtn} onClick={() => setScreen({ k: 'clubs' })}>
+                                    <button type="button" role="menuitem" className={styles.menuBtn} style={{ '--acc': '#9ea5b6' } as React.CSSProperties} onClick={() => setScreen({ k: 'clubs' })}>
                                         <span className={styles.menuIcon} aria-hidden="true">⚙</span>
                                         <strong>Editar clubes</strong>
                                         <span>Cambiá el nombre, la camiseta y los jugadores de cualquier club.</span>
@@ -1841,7 +1920,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                 <small>Selecciones · varones y mujeres</small>
                             </button>
                             <button type="button" className={`${styles.pickCard} ${styles.pickCardAlt}`} onClick={() => setScreen({ k: 'intlSetup', step: 1 })}>
-                                <strong>Carrera internacional</strong>
+                                <strong>Carrera interna&shy;cional</strong>
                                 <span>Una selección de XV, año tras año: subís de división, buscás el Mundial y desarrollás el rugby de tu país. Ranking de World Rugby en vivo.</span>
                                 <small>Selecciones · varones y mujeres</small>
                             </button>

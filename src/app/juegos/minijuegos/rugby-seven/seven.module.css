@@ -334,11 +334,26 @@
     }
 }
 
-/* Celular acostado (así abre la app instalada): la pista con los corredores es decoración y se comía
-   toda la pantalla; sin ella, el menú aparece de entrada. */
+/* Celular acostado (así abre la app instalada): la pista con los corredores queda, más baja, para
+   que el menú asome en la primera pantalla. */
 @media (max-height: 480px) {
     .menuScreen .runway {
-        display: none;
+        height: 72px;
+        margin-top: 8px;
+    }
+
+    .menuScreen .runners {
+        transform: scale(0.62);
+        transform-origin: left bottom;
+    }
+
+    /* El título, más chico: con el celular acostado "Seguir jugando" tiene que asomar de entrada. */
+    .menuScreen .title {
+        font-size: clamp(1.6rem, 5vw, 2.4rem);
+    }
+
+    .menuScreen .subtitle {
+        margin-top: 6px;
     }
 }
 
@@ -4748,4 +4763,120 @@
 
 .mcWarn {
     color: var(--gold);
+}
+
+/* ───────── Menú: color propio de cada tarjeta y "Seguir jugando" ───────── */
+
+/* Cada tarjeta trae su color (--acc): una franja arriba, el ícono teñido y, al pasar, el ícono lleno. */
+.menuBtn {
+    box-shadow: inset 0 4px 0 var(--acc, var(--gold)), 0 4px 0 #050608;
+}
+
+.menuBtn:active {
+    box-shadow: inset 0 4px 0 var(--acc, var(--gold)), 0 1px 0 #050608;
+}
+
+.menuBtn .menuIcon {
+    color: var(--acc, var(--gold));
+    background: color-mix(in srgb, var(--acc, var(--gold)) 18%, var(--color-bg-tertiary));
+}
+
+.menuBtn:hover .menuIcon,
+.menuBtn:focus-visible .menuIcon {
+    background: var(--acc, var(--gold));
+    color: #141218;
+}
+
+/* Las partidas en curso, arriba y más grandes: el jugador del club corriendo, el próximo partido y "Seguir". */
+.continueBox {
+    display: grid;
+    gap: 8px;
+    width: 100%;
+    max-width: 760px;
+    margin: 14px auto 0;
+}
+
+.continueGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+    gap: 10px;
+}
+
+.continueCard {
+    font: inherit;
+    text-align: left;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+        'sprite text'
+        'sprite cta';
+    align-items: center;
+    gap: 6px 12px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--color-text-primary);
+    background:
+        repeating-linear-gradient(90deg, rgba(70, 154, 64, 0.16) 0 24px, rgba(63, 143, 58, 0.1) 24px 48px),
+        var(--color-bg-secondary);
+    border: 3px solid #050608;
+    box-shadow: inset 0 4px 0 var(--gold), 0 4px 0 #050608;
+    transition: transform 80ms steps(2), box-shadow 80ms steps(2);
+}
+
+.continueCard:hover,
+.continueCard:focus-visible {
+    transform: translateY(-2px);
+}
+
+.continueCard:active {
+    transform: translateY(3px);
+    box-shadow: inset 0 4px 0 var(--gold), 0 1px 0 #050608;
+}
+
+.continueSprite {
+    grid-area: sprite;
+    display: grid;
+    place-items: center;
+    min-width: 56px;
+    min-height: 64px;
+    font-size: 2rem;
+    color: var(--gold);
+}
+
+.continueText {
+    grid-area: text;
+    display: grid;
+    gap: 4px;
+    min-width: 0;
+}
+
+.continueText small {
+    font-size: 0.6rem;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.continueText strong {
+    font-size: 0.9rem;
+    overflow-wrap: anywhere;
+}
+
+.continueText > span {
+    font-size: 0.62rem;
+    color: var(--color-text-secondary);
+    line-height: 1.4;
+}
+
+.continueCta {
+    grid-area: cta;
+    justify-self: start;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    background: var(--gold);
+    color: #141218;
+    border: 2px solid #050608;
+    box-shadow: 0 3px 0 #050608;
 }
