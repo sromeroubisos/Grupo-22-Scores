@@ -12,8 +12,11 @@
  * coincidan.
  */
 import { normalizeHex, type ManualCard, type OverlayEvent, type OverlayMatch } from './matchOverlayModel.ts';
+import { defaultSponsorsState, mergeSponsorsState, type ManualSponsorsState } from './sponsorsOverlay.ts';
 
-export type ManualKind = 'marcador' | 'titular';
+export type { ManualSponsorsState } from './sponsorsOverlay.ts';
+
+export type ManualKind = 'marcador' | 'titular' | 'sponsors';
 export type ManualSport = 'rugby' | 'futbol' | 'hockey' | 'basquet' | 'otro';
 
 export interface ManualTeam {
@@ -87,7 +90,7 @@ export interface ManualHeadlineState {
   ticker: string;
 }
 
-export type ManualState = ManualScoreState | ManualHeadlineState;
+export type ManualState = ManualScoreState | ManualHeadlineState | ManualSponsorsState;
 
 /* ─── tantos por deporte ─── */
 
@@ -122,9 +125,11 @@ const DEFAULT_HOME: ManualTeam = { name: 'Local', short: 'LOC', color: '#00a365'
 const DEFAULT_AWAY: ManualTeam = { name: 'Visitante', short: 'VIS', color: '#f2f2f2', logo: null, score: 0, players: [] };
 
 export function defaultManualState(kind: 'titular'): ManualHeadlineState;
+export function defaultManualState(kind: 'sponsors'): ManualSponsorsState;
 export function defaultManualState(kind: 'marcador'): ManualScoreState;
 export function defaultManualState(kind: ManualKind): ManualState;
 export function defaultManualState(kind: ManualKind): ManualState {
+  if (kind === 'sponsors') return defaultSponsorsState();
   if (kind === 'titular') {
     return {
       visible: false,
@@ -243,6 +248,7 @@ const SPORTS: ManualSport[] = ['rugby', 'futbol', 'hockey', 'basquet', 'otro'];
 
 /** El estado guardado, leído con tolerancia (una fila vieja o rota no tumba el overlay). */
 export function readManualState(kind: 'titular', raw: unknown): ManualHeadlineState;
+export function readManualState(kind: 'sponsors', raw: unknown): ManualSponsorsState;
 export function readManualState(kind: 'marcador', raw: unknown): ManualScoreState;
 export function readManualState(kind: ManualKind, raw: unknown): ManualState;
 export function readManualState(kind: ManualKind, raw: unknown): ManualState {
@@ -259,6 +265,8 @@ export function readManualState(kind: ManualKind, raw: unknown): ManualState {
 export function mergeManualState(kind: ManualKind, current: unknown, patch: unknown): ManualState {
   const saved = rec(current);
   const incoming = rec(patch);
+
+  if (kind === 'sponsors') return mergeSponsorsState(current, patch);
 
   if (kind === 'titular') {
     const defaults = defaultManualState('titular');

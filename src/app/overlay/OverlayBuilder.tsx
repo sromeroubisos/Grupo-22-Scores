@@ -304,13 +304,17 @@ function Editor({ kind, origin, onBack, onStyle }: { kind: Kind; origin: string;
   const [manualClock, setManualClock] = useState<ReturnType<typeof sevensClockPatch>>(null);
   const [headline, setHeadline] = useState({ kicker: '', title: '', subtitle: '' });
   const [headlineStyle, setHeadlineStyle] = useState<(typeof HEADLINE_STYLES)[number][0]>('noticiero');
+  const [sponsorLayout, setSponsorLayout] = useState<'grilla' | 'banda' | 'esquina'>('grilla');
+  const [sponsorSurface, setSponsorSurface] = useState<'oscuro' | 'claro'>('oscuro');
+  const [sponsorHeading, setSponsorHeading] = useState('');
   const [manual, setManual] = useState<ManualCreated | null>(null);
   const [manualError, setManualError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [loadingMatch, setLoadingMatch] = useState(false);
 
   // Ubicación y tipografía
-  const [position, setPosition] = useState(kind === 'manual-titular' ? 'abajo' : 'centro');
+  const defaultPosition = kind === 'manual-titular' ? 'abajo' : kind === 'manual-sponsors' ? 'auto' : 'centro';
+  const [position, setPosition] = useState(defaultPosition);
   const [scale, setScale] = useState(1);
   const [cycle, setCycle] = useState(false);
   const [showFor, setShowFor] = useState(15);
@@ -391,7 +395,7 @@ function Editor({ kind, origin, onBack, onStyle }: { kind: Kind; origin: string;
     if (needsTournament(kind) && !tournament) return 'Elegí el torneo para tener la URL.';
     if (kind === 'jugador' && !idFrom(playerLink)) return 'Pegá el link de la ficha del jugador para tener la URL.';
     if (kind === 'noticia' && !idFrom(newsLink)) return 'Pegá el link de la noticia para tener la URL.';
-    if (isManual(kind) && !manual) return kind === 'manual-marcador' ? 'Creá el marcador para tener la URL.' : 'Creá el titular para tener la URL.';
+    if (isManual(kind) && !manual) return kind === 'manual-marcador' ? 'Creá el marcador para tener la URL.' : kind === 'manual-sponsors' ? 'Creá el overlay de sponsors para tener la URL.' : 'Creá el titular para tener la URL.';
     return null;
   }, [kind, match, matches, tournament, playerLink, newsLink, manual]);
 
@@ -443,7 +447,7 @@ function Editor({ kind, origin, onBack, onStyle }: { kind: Kind; origin: string;
       path = '/overlay/noticia';
       if (idFrom(newsLink)) params.set('id', idFrom(newsLink));
     } else {
-      path = `/overlay/manual/${manual?.id ?? 'demo'}`;
+      path = `/overlay/manual/${manual?.id ?? (kind === 'manual-sponsors' ? 'demo-sponsors' : 'demo')}`;
       if (kind === 'manual-marcador') {
         const style = manualStyle === 'partido' ? 'tarjeta' : manualStyle;
         if (style !== 'marcador') params.set('estilo', style);
@@ -460,8 +464,7 @@ function Editor({ kind, origin, onBack, onStyle }: { kind: Kind; origin: string;
       if (!showCards) params.set('tarjetas', '0');
     }
     if (!header && (kind === 'partido' || kind === 'escudos' || kind === 'franja' || kind === 'bloques')) params.set('encabezado', '0');
-    const defaultPos = kind === 'manual-titular' ? 'abajo' : 'centro';
-    if (position !== defaultPos) params.set('pos', position);
+    if (position !== defaultPosition && position !== 'auto') params.set('pos', position);
     if (scale !== 1) params.set('escala', String(scale));
     if (cycle && !isManual(kind)) {
       params.set('mostrar', String(showFor));
@@ -486,7 +489,7 @@ function Editor({ kind, origin, onBack, onStyle }: { kind: Kind; origin: string;
     return `${path}${query ? `?${query}` : ''}`;
   }, [kind, match, matches, tournamentId, round, phase, group, stat, limit, day, dayTournaments, sport, liveOnly,
     playerLink, newsLink, bracketView, side, formView, manual, manualStyle, plates, subs, homeColor, awayColor,
-    homeName, awayName, clockMode, showCards, header, position, scale, cycle, showFor, hideFor, rows, rotate,
+    homeName, awayName, clockMode, showCards, header, position, defaultPosition, scale, cycle, showFor, hideFor, rows, rotate,
     background, title, fonts, customKind, customValue, customScale, options]);
 
   const url = `${origin}${relative}`;
@@ -504,8 +507,13 @@ function Editor({ kind, origin, onBack, onStyle }: { kind: Kind; origin: string;
       params.set('visita_nombre', awayTeam.short || awayTeam.name);
       return demo(`/overlay/partido/demo?${params}`);
     }
+    if (kind === 'manual-sponsors') {
+      const params = new URLSearchParams(relative.split('?')[1] ?? '');
+      params.set('forma', sponsorLayout);
+      return demo(`/overlay/manual/demo-sponsors?${params}`);
+    }
     return demo(relative);
-  }, [missing, relative, kind, manualStyle, homeTeam, awayTeam]);
+  }, [missing, relative, kind, manualStyle, homeTeam, awayTeam, sponsorLayout]);
 
   const panelUrl = manual ? `${origin}/overlay/control/${manual.id}#clave=${manual.key}` : '';
 
@@ -525,12 +533,14 @@ function Editor({ kind, origin, onBack, onStyle }: { kind: Kind; origin: string;
     const team = (info: TeamInfo, players: string[]) => ({ name: info.name, short: info.short, color: info.color, logo: info.logo, players });
     const state = kind === 'manual-titular'
       ? { style: headlineStyle, items: [{ id: 'h1', ...headline }], current: 0 }
-      : { sport: manualSport, title: manualTitle, home: team(homeTeam, homePlayers), away: team(awayTeam, awayPlayers), ...(manualClock ?? {}) };
+      : kind === 'manual-sponsors'
+        ? { layout: sponsorLayout, surface: sponsorSurface, heading: sponsorHeading }
+        : { sport: manualSport, title: manualTitle, home: team(homeTeam, homePlayers), away: team(awayTeam, awayPlayers), ...(manualClock ?? {}) };
     try {
       const response = await fetch('/api/overlay/control', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ kind: kind === 'manual-titular' ? 'titular' : 'marcador', state }),
+        body: JSON.stringify({ kind: kind === 'manual-titular' ? 'titular' : kind === 'manual-sponsors' ? 'sponsors' : 'marcador', state }),
       });
       const body = await response.json().catch(() => null);
       if (!response.ok || !body?.id) throw new Error(body?.error ?? 'No se pudo crear.');
@@ -556,7 +566,7 @@ function Editor({ kind, origin, onBack, onStyle }: { kind: Kind; origin: string;
   const usesCustom = Object.values(fonts).some((font) => font.family === 'propia');
   const filteredGroups = options?.groups.filter((item) => !phase || item.phaseId === phase) ?? [];
   const showsHeaderToggle = kind === 'partido' || kind === 'escudos' || kind === 'franja' || kind === 'bloques';
-  const showsVisibility = kind !== 'manual-titular';
+  const showsVisibility = kind !== 'manual-titular' && kind !== 'manual-sponsors';
   // Los pasos se numeran en el orden en que aparecen.
   const numbers = new Map<string, number>();
   const stepOrder = [
@@ -569,6 +579,7 @@ function Editor({ kind, origin, onBack, onStyle }: { kind: Kind; origin: string;
     kind === 'manual-marcador' && 'equipos',
     kind === 'manual-marcador' && 'diseno',
     kind === 'manual-titular' && 'titular',
+    kind === 'manual-sponsors' && 'sponsors',
     showsVisibility && 'visible',
     isScoreboardStyle(kind) && 'colores',
   ].filter((item): item is string => Boolean(item));
@@ -833,11 +844,45 @@ function Editor({ kind, origin, onBack, onStyle }: { kind: Kind; origin: string;
             </Step>
           ) : null}
 
+          {kind === 'manual-sponsors' ? (
+            <Step n={n('sponsors')} title="Cómo se ve" hint="Los logos se suben después, desde el panel: cuatro niveles (Title, Main, Sponsor y Acompañante) y los tamaños se acomodan solos.">
+              {manual ? <p className={styles.hint}>Ya está creado. La forma, el fondo y los logos se cambian desde el panel de control.</p> : (
+                <>
+                  <Segment
+                    label="Forma"
+                    value={sponsorLayout}
+                    options={[['grilla', 'Grilla'], ['banda', 'Banda abajo'], ['esquina', 'Esquina']]}
+                    onChange={setSponsorLayout}
+                  />
+                  <p className={styles.hint}>
+                    {sponsorLayout === 'grilla' && 'Todos los niveles juntos en una placa: para la previa o el entretiempo.'}
+                    {sponsorLayout === 'banda' && 'Una franja abajo que pasa de a un nivel por vez.'}
+                    {sponsorLayout === 'esquina' && 'Un logo por vez en una esquina; el Title se queda más tiempo.'}
+                  </p>
+                  <Segment
+                    label="Fondo de la placa"
+                    value={sponsorSurface}
+                    options={[['oscuro', 'Oscuro G22'], ['claro', 'Claro']]}
+                    onChange={setSponsorSurface}
+                  />
+                  <Field label="Título de la grilla (opcional)">
+                    <input value={sponsorHeading} onChange={(e) => setSponsorHeading(e.target.value)} maxLength={60} placeholder="Gracias a nuestros sponsors" />
+                  </Field>
+                </>
+              )}
+            </Step>
+          ) : null}
+
           {isManual(kind) ? (
             <div className={styles.createBox}>
               {manual ? (
                 <>
-                  <p><b>Listo.</b> Desde el panel de control lo manejás: puntos, reloj, tarjetas y anotadores (o los textos del titular). Anda en el celular.</p>
+                  <p>
+                    <b>Listo.</b>{' '}
+                    {kind === 'manual-sponsors'
+                      ? 'Ahora abrí el panel y subí los PNG en cada nivel (Title, Main, Sponsor, Acompañante). La vista previa se actualiza sola.'
+                      : 'Desde el panel de control lo manejás: puntos, reloj, tarjetas y anotadores (o los textos del titular). Anda en el celular.'}
+                  </p>
                   <div className={styles.createActions}>
                     <a className={styles.primary} href={panelUrl} target="_blank" rel="noreferrer">Abrir el panel de control</a>
                     <button type="button" className={styles.secondary} onClick={() => void copy(panelUrl, 'panel')}>{copied === 'panel' ? 'Link copiado' : 'Copiar link del panel'}</button>
@@ -847,7 +892,7 @@ function Editor({ kind, origin, onBack, onStyle }: { kind: Kind; origin: string;
               ) : (
                 <>
                   <button type="button" className={styles.primary} onClick={() => void createManual()} disabled={creating || (kind === 'manual-titular' && !headline.title.trim())}>
-                    {creating ? 'Creando…' : kind === 'manual-marcador' ? 'Crear el marcador' : 'Crear el titular'}
+                    {creating ? 'Creando…' : kind === 'manual-marcador' ? 'Crear el marcador' : kind === 'manual-sponsors' ? 'Crear y subir los logos' : 'Crear el titular'}
                   </button>
                   {kind === 'manual-titular' && !headline.title.trim() ? <p className={styles.hint}>Escribí el título para crearlo.</p> : null}
                   {manualError ? <p className={styles.error}>{manualError}</p> : null}
@@ -946,6 +991,7 @@ function Editor({ kind, origin, onBack, onStyle }: { kind: Kind; origin: string;
             <div className={styles.advancedBody}>
               <Field label="Posición en pantalla">
                 <select value={position} onChange={(e) => setPosition(e.target.value)}>
+                  {kind === 'manual-sponsors' ? <option value="auto">Automática (según la forma)</option> : null}
                   {POSITIONS.map(([id, label]) => <option key={id} value={id}>{label}</option>)}
                 </select>
               </Field>

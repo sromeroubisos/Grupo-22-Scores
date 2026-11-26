@@ -8,7 +8,7 @@ export type Kind =
   | 'partido' | 'marcador' | 'barra' | 'franja' | 'compacto' | 'bloques' | 'escudos' | 'tira' | 'formacion'
   | 'partidos' | 'fecha' | 'dia' | 'home'
   | 'tabla' | 'goleadores' | 'playoff' | 'jugador' | 'noticia'
-  | 'manual-marcador' | 'manual-titular';
+  | 'manual-marcador' | 'manual-titular' | 'manual-sponsors';
 
 export interface KindDef {
   id: Kind;
@@ -73,6 +73,7 @@ export const KIND_GROUPS: KindGroup[] = [
     description: 'Los manejás vos desde el celular, sin cargar nada en G22.',
     kinds: [
       { id: 'manual-marcador', label: 'Marcador manual', hint: 'Elegís los equipos y sumás puntos desde un panel.', thumb: scoreboard('marcador', 2.9) },
+      { id: 'manual-sponsors', label: 'Sponsors', hint: 'Subís los PNG en cuatro niveles; los tamaños se acomodan solos.', thumb: '/overlay/manual/demo-sponsors?escala=1.15' },
       { id: 'manual-titular', label: 'Titular de noticiero', hint: 'Zócalo abajo con varios títulos que rotan.', thumb: '/overlay/manual/demo' },
       { id: 'noticia', label: 'Noticia de G22', hint: 'Una nota publicada, con su foto.', thumb: '/overlay/noticia?escala=1.5' },
     ],
@@ -99,7 +100,7 @@ const SCOREBOARD_KINDS = new Set<Kind>(['marcador', 'barra', 'franja', 'compacto
 
 export const isScoreboardStyle = (kind: Kind) => SCOREBOARD_KINDS.has(kind) || kind === 'partido';
 export const isMatchKind = (kind: Kind) => isScoreboardStyle(kind) || kind === 'formacion';
-export const isManual = (kind: Kind) => kind === 'manual-marcador' || kind === 'manual-titular';
+export const isManual = (kind: Kind) => kind === 'manual-marcador' || kind === 'manual-titular' || kind === 'manual-sponsors';
 /** Las versiones que dibujan un marcador (con reloj, tarjetas, colores de club). */
 export const hasScoreboard = (kind: Kind) => isScoreboardStyle(kind) || kind === 'manual-marcador';
 export const needsTournament = (kind: Kind) => kind === 'fecha' || kind === 'playoff' || kind === 'tabla' || kind === 'goleadores';

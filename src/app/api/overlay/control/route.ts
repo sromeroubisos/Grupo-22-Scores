@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
   const user = { id: access.userId };
 
   const body = (await request.json().catch(() => ({}))) as { kind?: string; state?: unknown };
-  const kind: ManualKind = body.kind === 'titular' ? 'titular' : 'marcador';
+  const kind: ManualKind = body.kind === 'titular' || body.kind === 'sponsors' ? body.kind : 'marcador';
   // Lo que se eligió en el generador (equipos, colores, deporte) entra saneado,
   // igual que lo que manda el panel: el reloj y los eventos no se pueden fijar.
   const initialState = mergeManualState(kind, defaultManualState(kind), body.state ?? {});

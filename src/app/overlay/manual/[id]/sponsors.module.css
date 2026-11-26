@@ -1,0 +1,269 @@
+/*
+ * Overlay de sponsors. Los tamaños de los logos NO salen de acá: los calcula
+ * `tierBoxes` (sponsorsOverlay.ts) y llegan en línea. Acá va el marco: la
+ * tarjeta de la grilla, la banda y la esquina, en oscuro (G22) o en claro.
+ */
+
+.grid,
+.band,
+.corner,
+.empty {
+  --sp-bg:
+    radial-gradient(120% 90% at 0% 0%, rgba(0, 163, 101, 0.2) 0%, transparent 55%),
+    linear-gradient(165deg, #101a14 0%, #0b0e0c 52%, #070807 100%);
+  --sp-ink: #f3f6f4;
+  --sp-dim: rgba(243, 246, 244, 0.6);
+  --sp-line: rgba(255, 255, 255, 0.1);
+  --sp-accent: var(--ov-brand, #00a365);
+  --sp-label: #2bd683;
+
+  position: relative;
+  background: var(--sp-bg);
+  color: var(--sp-ink);
+  border: 1px solid rgba(0, 194, 123, 0.22);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+/* Claro: para logos oscuros o a todo color que se pierden sobre negro. */
+.grid[data-surface='claro'],
+.band[data-surface='claro'],
+.corner[data-surface='claro'],
+.empty[data-surface='claro'] {
+  --sp-bg: linear-gradient(165deg, #ffffff 0%, #f3f6f4 100%);
+  --sp-ink: #0b120e;
+  --sp-dim: rgba(11, 18, 14, 0.55);
+  --sp-line: rgba(11, 18, 14, 0.1);
+  --sp-label: #00804f;
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+/* Filete de marca arriba. */
+.grid::before,
+.band::before,
+.corner::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 5px;
+  background: var(--sp-accent);
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+
+.logo img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ─── grilla ─── */
+
+.grid {
+  width: 1600px;
+  padding: 44px 60px 48px;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+  animation: sp-rise 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.gridHead {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 4px;
+}
+
+.gridHead img {
+  height: 38px;
+  width: auto;
+}
+
+.grid[data-surface='claro'] .gridHead img {
+  filter: brightness(0.15);
+}
+
+.gridHead span {
+  font-family: var(--ov-head, 'dharma-gothic-c', 'Bebas Neue', sans-serif);
+  font-weight: var(--ov-head-weight, 800);
+  font-size: 44px;
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+
+.tier {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  animation: sp-rise 560ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.tier:nth-of-type(2) { animation-delay: 90ms; }
+.tier:nth-of-type(3) { animation-delay: 180ms; }
+.tier:nth-of-type(4) { animation-delay: 270ms; }
+.tier:nth-of-type(5) { animation-delay: 360ms; }
+
+/* El rótulo del nivel, entre dos filetes. */
+.tierLabel {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  font-family: var(--ov-text, 'articulat-cf', 'Outfit', sans-serif);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--sp-label);
+}
+
+.tierLabel::before,
+.tierLabel::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--sp-line);
+}
+
+/* ─── banda ─── */
+
+.band {
+  width: 1680px;
+  height: 152px;
+  border-radius: 16px;
+  display: flex;
+  align-items: stretch;
+  animation: sp-wipe 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.bandLabel {
+  flex: none;
+  width: 230px;
+  display: flex;
+  align-items: center;
+  padding: 0 26px;
+  background: var(--sp-accent);
+  color: #04110b;
+  font-family: var(--ov-head, 'dharma-gothic-c', 'Bebas Neue', sans-serif);
+  font-weight: var(--ov-head-weight, 800);
+  font-size: 50px;
+  line-height: 0.88;
+  text-transform: uppercase;
+  animation: sp-fade 360ms ease both;
+}
+
+.bandLogos {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 32px;
+  animation: sp-slide 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.bandDots {
+  position: absolute;
+  right: 18px;
+  bottom: 12px;
+  display: flex;
+  gap: 6px;
+}
+
+.bandDots i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--sp-line);
+}
+
+.bandDots i[data-on] { background: var(--sp-accent); }
+
+/* ─── esquina ─── */
+
+.corner {
+  width: 420px;
+  height: 230px;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px 28px 22px;
+  animation: sp-rise 480ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.cornerLabel {
+  font-family: var(--ov-text, 'articulat-cf', 'Outfit', sans-serif);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--sp-label);
+}
+
+.cornerLogo {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: sp-swap 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.empty {
+  padding: 22px 30px;
+  border-radius: 14px;
+  font-family: var(--ov-text, 'articulat-cf', 'Outfit', sans-serif);
+  font-size: 22px;
+  font-weight: 700;
+}
+
+@keyframes sp-rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes sp-wipe {
+  from { opacity: 0; clip-path: inset(0 100% 0 0); }
+  to { opacity: 1; clip-path: inset(0 0 0 0); }
+}
+
+@keyframes sp-slide {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes sp-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes sp-swap {
+  from { opacity: 0; transform: scale(0.94); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grid, .tier, .band, .bandLabel, .bandLogos, .corner, .cornerLogo {
+    animation: sp-fade 200ms ease both;
+  }
+}

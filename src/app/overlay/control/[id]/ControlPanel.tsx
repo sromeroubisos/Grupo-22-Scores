@@ -10,11 +10,13 @@ import {
   type ManualHeadlineState,
   type ManualKind,
   type ManualScoreState,
+  type ManualSponsorsState,
   type ManualSport,
   type ManualState,
 } from '@/lib/overlay/manualOverlay';
 import { ClubPicker, MatchPicker } from '../../_builder/Pickers';
 import { sevensClockPatch, teamsFromMatch } from '../../_builder/matchTeams';
+import SponsorsPanel, { type UploadedLogo } from './SponsorsPanel';
 import styles from './control.module.css';
 
 /**
@@ -166,6 +168,21 @@ export default function ControlPanel({ id }: { id: string }) {
     pendingText.current = window.setTimeout(() => void send({ state: patch }), 450);
   }, [send]);
 
+  /** Sube un logo del overlay de sponsors; devuelve su URL y su proporción ya recortada. */
+  const uploadLogo = useCallback(async (file: Blob, name: string): Promise<UploadedLogo> => {
+    if (!key) throw new Error('Falta la clave del panel: abrí el link completo que te dio el generador.');
+    const form = new FormData();
+    form.append('file', file, name);
+    const response = await fetch(`/api/overlay/control/${encodeURIComponent(id)}/logo`, {
+      method: 'POST',
+      headers: { 'x-overlay-key': key },
+      body: form,
+    });
+    const body = await response.json().catch(() => null);
+    if (!response.ok || !body?.url) throw new Error(body?.error ?? 'No se pudo subir.');
+    return { url: String(body.url), ratio: Number(body.ratio) || 2 };
+  }, [id, key]);
+
   const overlayUrl = `${origin}/overlay/manual/${id}`;
 
   return (
@@ -173,7 +190,7 @@ export default function ControlPanel({ id }: { id: string }) {
       <header className={styles.header}>
         <div>
           <p className={styles.eyebrow}>Panel de control · G22</p>
-          <h1 className={styles.h1}>{kind === 'titular' ? 'Titulares' : 'Marcador manual'}</h1>
+          <h1 className={styles.h1}>{kind === 'titular' ? 'Titulares' : kind === 'sponsors' ? 'Sponsors' : 'Marcador manual'}</h1>
         </div>
         <span className={styles.saving}>{saving ? 'Guardando…' : error ? '' : 'Al día'}</span>
       </header>
@@ -191,7 +208,9 @@ export default function ControlPanel({ id }: { id: string }) {
 
       {!state ? <p className={styles.muted}>Cargando…</p> : kind === 'titular'
         ? <HeadlinePanel state={state as ManualHeadlineState} offset={offset} patchNow={patchNow} patchText={patchText} />
-        : <ScorePanel state={state as ManualScoreState} offset={offset} patchNow={patchNow} patchText={patchText} send={send} />}
+        : kind === 'sponsors'
+          ? <SponsorsPanel state={state as ManualSponsorsState} patchNow={patchNow} patchText={patchText} uploadLogo={uploadLogo} />
+          : <ScorePanel state={state as ManualScoreState} offset={offset} patchNow={patchNow} patchText={patchText} send={send} />}
     </main>
   );
 }

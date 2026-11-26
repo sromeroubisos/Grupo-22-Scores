@@ -44,6 +44,8 @@ export interface OverlayConfig {
   bracketView: 'llave' | 'columnas';
   /** Tipografía por rol (resultado, números, títulos, texto) y fuente propia. Ver `fonts.ts`. */
   fonts: OverlayFonts;
+  /** Sponsors: `forma=` pisa la forma elegida en el panel (grilla, banda o esquina). */
+  sponsorLayout: 'grilla' | 'banda' | 'esquina' | null;
 }
 
 
@@ -130,6 +132,7 @@ export function parseOverlayConfig(
     cup: cup !== null && cup >= 1 ? Math.trunc(cup) : null,
     title: first(params.titulo).slice(0, 80) || null,
     bracketView: first(params.vista) === 'columnas' ? 'columnas' : 'llave',
+    sponsorLayout: (['grilla', 'banda', 'esquina'] as const).find((value) => value === first(params.forma)) ?? null,
     fonts: {
       score: parseRoleFont(first(params.resultado), ROLE_DEFAULTS.score),
       // `numeros=articulat` (sin peso) sigue valiendo: toma el peso por defecto.

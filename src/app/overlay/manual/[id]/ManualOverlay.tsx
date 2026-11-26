@@ -8,6 +8,7 @@ import type { OverlayConfig } from '../../_lib/config';
 import OverlayStage from '../../_components/OverlayStage';
 import { G22Card, SetupHint } from '../../_components/G22Card';
 import MatchOverlay from '../../partido/[id]/MatchOverlay';
+import SponsorsOverlay from './SponsorsOverlay';
 import styles from '../../_components/g22.module.css';
 
 /**
@@ -22,9 +23,11 @@ export default function ManualOverlay({ id, config }: { id: string; config: Over
   const [failure, setFailure] = useState<string | null>(null);
   // `/overlay/manual/demo?prueba=1`: el titular de muestra del generador.
   const demo = config.demo && id === 'demo';
+  // `/overlay/manual/demo-sponsors?prueba=1`: los sponsors de muestra.
+  const demoSponsors = config.demo && id === 'demo-sponsors';
 
   useEffect(() => {
-    if (demo) return undefined;
+    if (demo || demoSponsors) return undefined;
     let cancelled = false;
     fetch(`/api/overlay/control/${encodeURIComponent(id)}`, { cache: 'no-store' })
       .then(async (response) => {
@@ -35,12 +38,14 @@ export default function ManualOverlay({ id, config }: { id: string; config: Over
       })
       .catch(() => { if (!cancelled) setFailure('Sin conexión con g22scores. Recargá la fuente.'); });
     return () => { cancelled = true; };
-  }, [id, demo]);
+  }, [id, demo, demoSponsors]);
 
+  if (demoSponsors) return <SponsorsOverlay id={id} config={config} demo />;
   if (demo) return <HeadlineOverlay id={id} config={config} demo />;
   if (failure) return <SetupHint>G22 · {failure}</SetupHint>;
   if (kind === 'marcador') return <MatchOverlay matchId={id} config={config} manual />;
   if (kind === 'titular') return <HeadlineOverlay id={id} config={config} />;
+  if (kind === 'sponsors') return <SponsorsOverlay id={id} config={config} />;
   return null;
 }
 

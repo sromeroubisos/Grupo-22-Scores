@@ -71,21 +71,38 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   if (!key || !keyMatches(key, row.edit_key_hash)) return noStore({ error: 'La clave del panel no es válida.' }, 403);
 
   const body = (await request.json().catch(() => ({}))) as { state?: unknown; clock?: unknown; score?: unknown };
-  const now = Date.now();
-  let state = mergeManualState(row.kind, row.state, body.state ?? {});
-  if (row.kind === 'marcador') {
-    const clockAction = parseClockAction(body.clock);
-    if (clockAction) state = applyClockAction(state as ManualScoreState, clockAction, now);
-    // El tanto se registra DESPUÉS de mover el reloj: queda en el segundo correcto.
-    const scoreAction = parseScoreAction(body.score);
-    if (scoreAction) state = applyScoreAction(state as ManualScoreState, scoreAction, now);
+
+  // Cada guardado lee la fila, aplica el cambio y escribe el estado ENTERO. Dos
+  // pedidos a la vez (dos toques rápidos, o dos personas con el panel) se
+  // pisaban: el segundo escribía sobre lo que leyó antes del primero. Ahora la
+  // escritura solo pasa si `updated_at` sigue siendo el que se leyó; si otro
+  // guardó en el medio, se relee y se vuelve a aplicar sobre lo nuevo.
+  let current = row;
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    const now = Date.now();
+    let state = mergeManualState(current.kind, current.state, body.state ?? {});
+    if (current.kind === 'marcador') {
+      const clockAction = parseClockAction(body.clock);
+      if (clockAction) state = applyClockAction(state as ManualScoreState, clockAction, now);
+      // El tanto se registra DESPUÉS de mover el reloj: queda en el segundo correcto.
+      const scoreAction = parseScoreAction(body.score);
+      if (scoreAction) state = applyScoreAction(state as ManualScoreState, scoreAction, now);
+    }
+    // La marca nueva siempre posterior a la leída, aunque caigan en el mismo milisegundo.
+    const stamp = new Date(Math.max(now, Date.parse(current.updated_at) + 1)).toISOString();
+    const { data: written, error: updateError } = await admin
+      .from('overlay_controls')
+      .update({ state, updated_at: stamp })
+      .eq('id', id)
+      .eq('updated_at', current.updated_at)
+      .select('id');
+    if (updateError) return noStore({ error: 'No se pudo guardar.' }, 502);
+    if (written && written.length) {
+      return noStore({ id, kind: current.kind, state, serverNow: new Date(now).toISOString() });
+    }
+    const reread = await load(id);
+    if (reread.error || !reread.row) return noStore({ error: 'No se pudo guardar.' }, 502);
+    current = reread.row;
   }
-
-  const { error: updateError } = await admin
-    .from('overlay_controls')
-    .update({ state, updated_at: new Date(now).toISOString() })
-    .eq('id', id);
-  if (updateError) return noStore({ error: 'No se pudo guardar.' }, 502);
-
-  return noStore({ id, kind: row.kind, state, serverNow: new Date(now).toISOString() });
+  return noStore({ error: 'Hubo demasiados cambios a la vez. Probá de nuevo.' }, 409);
 }

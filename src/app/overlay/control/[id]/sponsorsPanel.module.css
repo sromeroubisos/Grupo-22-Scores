@@ -1,0 +1,93 @@
+/* Lista de logos de cada nivel en el panel de sponsors. */
+
+.label {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(243, 246, 244, 0.62);
+}
+
+.logos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.logos li {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  gap: 6px 10px;
+  align-items: center;
+}
+
+/* Damero: se ve qué parte del PNG es transparente. */
+.thumb {
+  grid-row: span 2;
+  width: 96px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  padding: 6px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: #1d221f;
+  background-image:
+    linear-gradient(45deg, #262c28 25%, transparent 25%),
+    linear-gradient(-45deg, #262c28 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #262c28 75%),
+    linear-gradient(-45deg, transparent 75%, #262c28 75%);
+  background-size: 12px 12px;
+  background-position: 0 0, 0 6px, 6px -6px, -6px 0;
+}
+
+.thumb[data-surface='claro'] {
+  background: #fff;
+}
+
+.thumb img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.name {
+  min-height: 36px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #0b0e0c;
+  color: #f3f6f4;
+  font: inherit;
+  font-size: 14px;
+  min-width: 0;
+}
+
+.actions {
+  display: flex;
+  gap: 4px;
+  min-width: 0;
+}
+
+.actions button {
+  min-height: 34px !important;
+  min-width: 34px;
+  padding: 0 !important;
+}
+
+.actions button:disabled { opacity: 0.35; }
+
+.actions select {
+  flex: 1;
+  min-width: 0;
+  min-height: 34px;
+  padding: 0 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #0b0e0c;
+  color: #f3f6f4;
+  font: inherit;
+  font-size: 13px;
+}
