@@ -7,7 +7,7 @@
 
 import { useState, type ReactNode } from 'react';
 import { SKILL_LABEL, type Player } from './career';
-import { cupName, levelDef, levelOf, MC_ME, PAY, PAY_BY_LEVEL, PRIZE, releaseBlock, signBlock, SQUAD_MAX, trainBlock, trainCost, movesByLevel, myMove, myRating, americaView, LIB_NAME, LIB_PER_WORLD, nacHowOf, nacNameOf, nacionalView, otherWorld, topOf, WORLDS, pyramidTours, seasonNews, starters, tagFor, TAG_LABEL, zoneName, type McLevel, type McTag, type MiClubState } from './miClub';
+import { cupName, facCost, FAC_MAX, FACILITIES, levelDef, levelOf, MC_ME, nextLicense, trainStepAt, upgradeBlock, type McFacility, PAY, PAY_BY_LEVEL, PRIZE, releaseBlock, signBlock, SQUAD_MAX, trainBlock, trainCost, movesByLevel, myMove, myRating, americaView, LIB_NAME, LIB_PER_WORLD, nacHowOf, nacNameOf, nacionalView, otherWorld, topOf, WORLDS, pyramidTours, seasonNews, starters, tagFor, TAG_LABEL, zoneName, type McLevel, type McTag, type MiClubState } from './miClub';
 import { groupStandings, roundLabel, finalRanking, type TourState } from './tours';
 import styles from './seven.module.css';
 
@@ -300,7 +300,7 @@ export function McSquad({ r, onTrain, onRelease }: { r: MiClubState; onTrain: (i
     return (
         <div className={styles.othersPanel}>
             <p className={styles.note}>
-                Nivel del club: {myRating(r)}. Salen a la cancha los siete mejores. Tenés {r.credits} créditos. Mejorar a un jugador sube 0,3 su valoración, una vez por temporada.
+                Nivel del club: {myRating(r)}. Salen a la cancha los siete mejores. Tenés {r.credits} créditos. Mejorar a un jugador sube {trainStepAt(r.facilities?.entreno ?? 1).toFixed(2).replace('.', ',')} su valoración, una vez por temporada (más con mejor entrenamiento).
             </p>
             {!!r.lastNotes?.length && (
                 <div className={styles.roadPending}>
@@ -365,13 +365,61 @@ export function McMarket({ r, nameOf, onSign }: { r: MiClubState; nameOf: (id: s
     );
 }
 
-/** El club: créditos, sponsors de la temporada, cómo se gana, títulos e historia. */
-export function McClubPanel({ r }: { r: MiClubState }) {
+/** Las instalaciones: una barrita de 5 por cada una, lo que da y lo que cuesta subirla. */
+function Facilities({ r, onUpgrade }: { r: MiClubState; onUpgrade: (f: McFacility) => void }) {
+    const lic = nextLicense(r);
+    return (
+        <section className={styles.mcSection} aria-label="Instalaciones">
+            <h3 className={styles.groupTitle}>Instalaciones</h3>
+            {lic && lic.need > 1 && (
+                <p className={`${styles.note} ${lic.ok ? '' : styles.mcWarn}`}>
+                    {lic.ok
+                        ? `Licencia al día: ${levelDef(lic.level).label} pide la cancha en nivel ${lic.need} y la tuya está en ${r.facilities.cancha}.`
+                        : `Para jugar ${levelDef(lic.level).label} hace falta la cancha en nivel ${lic.need} (la tuya está en ${r.facilities.cancha}). Si ganás el ascenso sin ella, sube otro en tu lugar.`}
+                </p>
+            )}
+            <ul className={styles.mcCards} aria-label="Instalaciones del club">
+                {FACILITIES.map((f) => {
+                    const lvl = r.facilities?.[f.id] ?? 1;
+                    const cost = facCost(r, f.id);
+                    const block = upgradeBlock(r, f.id);
+                    return (
+                        <li key={f.id} className={styles.mcCard}>
+                            <div className={styles.mcCardHead}>
+                                <strong>{f.label}</strong>
+                                <span className={styles.mcOvr}>
+                                    {lvl}/{FAC_MAX}
+                                </span>
+                            </div>
+                            <div className={styles.facBar} role="meter" aria-valuemin={1} aria-valuemax={FAC_MAX} aria-valuenow={lvl} aria-label={`${f.label}: nivel ${lvl} de ${FAC_MAX}`}>
+                                {Array.from({ length: FAC_MAX }, (_, i) => (
+                                    <span key={i} className={i < lvl ? styles.facOn : undefined} />
+                                ))}
+                            </div>
+                            <small className={styles.mcFrom}>{f.effect(lvl)}</small>
+                            {cost !== null && <small className={styles.mcFrom}>Nivel {lvl + 1}: {f.effect(lvl + 1).charAt(0).toLowerCase() + f.effect(lvl + 1).slice(1)}</small>}
+                            <div className={styles.mcCardActions}>
+                                <button type="button" className={styles.btnPrimary} disabled={!!block} aria-label={block ? `Mejorar ${f.label}: ${block}` : `Mejorar ${f.label} a nivel ${lvl + 1} por ${cost} créditos`} onClick={() => onUpgrade(f.id)}>
+                                    {cost === null ? 'Al máximo' : `Mejorar · ${cost}`}
+                                </button>
+                                {block && cost !== null && <small className={styles.mcWhy}>{block}</small>}
+                            </div>
+                        </li>
+                    );
+                })}
+            </ul>
+        </section>
+    );
+}
+
+/** El club: créditos, instalaciones, sponsors de la temporada, cómo se gana, títulos e historia. */
+export function McClubPanel({ r, onUpgrade }: { r: MiClubState; onUpgrade: (f: McFacility) => void }) {
     const sponsors = r.sponsors ?? [];
     const sponsorPay = sponsors.reduce((a, x) => a + x.pay, 0);
     const level = levelOf(r, MC_ME) ?? 'base';
     return (
         <div className={styles.othersPanel}>
+            <Facilities r={r} onUpgrade={onUpgrade} />
             <div className={styles.roadPending}>
                 <strong>{r.credits} créditos</strong>
                 {r.lastGain && <span>Último partido: {r.lastGain}</span>}

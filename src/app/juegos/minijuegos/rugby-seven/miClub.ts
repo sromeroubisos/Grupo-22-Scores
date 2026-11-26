@@ -335,6 +335,81 @@ export const PAY_BY_LEVEL: Record<McLevel, number> = { base: 10, quinta: 12, cua
 export const PAY = { win: 10, draw: 4, try: 1, cupRound: 5, nacRound: 10, libRound: 15 };
 export const PRIZE = { ascenso: 80, liga: 100, copa: 60, nac: 150, lib: 220 };
 export const SQUAD_MAX = 14;
+
+/* ───────────────────────── instalaciones ───────────────────────── */
+
+export type McFacility = 'cancha' | 'entreno' | 'inferiores';
+export const FAC_MAX = 5;
+/** Créditos extra por partido de local, por cada nivel de cancha arriba del 1. */
+export const CANCHA_PER_LEVEL = 3;
+
+export const FACILITIES: { id: McFacility; label: string; effect: (lvl: number) => string; costs: number[] }[] = [
+    {
+        id: 'cancha', label: 'Cancha',
+        effect: (lvl) => (lvl <= 1 ? 'Una cancha de barrio: no suma nada de local.' : `De local en la liga, ${(lvl - 1) * CANCHA_PER_LEVEL} créditos más por partido.`),
+        // Lo que cuesta pasar al nivel 2, 3, 4 y 5.
+        costs: [40, 90, 180, 300],
+    },
+    {
+        id: 'entreno', label: 'Entrenamiento',
+        effect: (lvl) =>
+            lvl <= 1
+                ? `Entrenamiento básico: "Mejorar" sube ${trainStepAt(lvl).toFixed(2).replace('.', ',')}.`
+                : `Los jugadores crecen ${(0.04 * (lvl - 1)).toFixed(2).replace('.', ',')} más por año, y "Mejorar" sube ${trainStepAt(lvl).toFixed(2).replace('.', ',')}.`,
+        costs: [50, 120, 220, 360],
+    },
+    {
+        id: 'inferiores', label: 'Inferiores',
+        effect: (lvl) => `Cada temporada sube un juvenil de 18 años, de valoración ${(-0.7 + 0.25 * (lvl - 1)).toFixed(2).replace('.', ',')} respecto del plantel.`,
+        costs: [40, 100, 190, 320],
+    },
+];
+
+/** Lo que sube "Mejorar" según el nivel de entrenamiento. */
+export const trainStepAt = (entreno: number) => 0.3 + 0.05 * (entreno - 1);
+
+/** El costo de pasar una instalación al nivel siguiente (null: ya está al máximo). */
+export function facCost(r: MiClubState, f: McFacility): number | null {
+    const lvl = r.facilities?.[f] ?? 1;
+    return lvl >= FAC_MAX ? null : FACILITIES.find((x) => x.id === f)!.costs[lvl - 1];
+}
+
+/** Por qué no se puede mejorar una instalación (null: se puede). */
+export function upgradeBlock(r: MiClubState, f: McFacility): string | null {
+    const cost = facCost(r, f);
+    if (cost === null) return 'Ya está al máximo.';
+    if (r.credits < cost) return `Te faltan ${cost - r.credits} créditos.`;
+    return null;
+}
+
+export function mcUpgrade(s: TourState, f: McFacility): TourState {
+    return withClub(s, (r) => {
+        const cost = facCost(r, f);
+        if (cost === null || upgradeBlock(r, f)) return;
+        r.credits -= cost;
+        r.facilities = { ...(r.facilities ?? { cancha: 1, entreno: 1, inferiores: 1 }), [f]: (r.facilities?.[f] ?? 1) + 1 };
+        r.news = [...(r.news ?? []), `${FACILITIES.find((x) => x.id === f)!.label} a nivel ${r.facilities[f]} por ${cost} créditos.`];
+    });
+}
+
+/**
+ * La licencia: el nivel de cancha que pide cada división para jugarla. Las tres de arriba de cada
+ * mundo piden 4, 3 y 2 (Primera, Segunda, Tercera); el resto, ninguno.
+ */
+export function licenseFor(r: { world?: McWorld }, level: McLevel): number {
+    const i = levelsOf(r).findIndex((l) => l.id === level);
+    return i === 0 ? 4 : i === 1 ? 3 : i === 2 ? 2 : 1;
+}
+
+/** La división de arriba de la del club y la cancha que pide (null en Primera). */
+export function nextLicense(r: MiClubState): { level: McLevel; need: number; ok: boolean } | null {
+    const levels = levelsOf(r);
+    const i = levels.findIndex((l) => l.id === (levelOf(r, MC_ME) ?? levels.at(-1)!.id));
+    if (i <= 0) return null;
+    const level = levels[i - 1].id;
+    const need = licenseFor(r, level);
+    return { level, need, ok: (r.facilities?.cancha ?? 1) >= need };
+}
 const SQUAD_MIN = 9;
 
 /** Lo que vale un jugador: crece con el nivel (al cuadrado) y baja con la edad. */
@@ -342,6 +417,15 @@ export function priceOf(p: Player, real = false): number {
     const o = p.ovr ?? 1;
     const age = p.age <= 23 ? 1.15 : p.age <= 28 ? 1 : p.age <= 31 ? 0.8 : 0.6;
     return Math.max(5, Math.round(o * o * 6 * age * (real ? 1.3 : 1)));
+}
+
+/**
+ * El techo de un jugador en este mundo (escala 1-10): un poco arriba del club más fuerte. Sin techo, en
+ * Sudamérica (clubes más flojos que los argentinos) el plantel crecía sin freno y ganaba todo.
+ */
+export function worldCeiling(r: { world?: McWorld }): number {
+    const strongest = Math.max(...worldOf(r).pool.map((c) => ratingOf(c)));
+    return 1 + (strongest - 40) / 6 + 0.8;
 }
 
 /** Lo que cuesta mejorar a un jugador (+0,3 de valoración), una vez por temporada. */
@@ -386,6 +470,9 @@ function payMatches(r: MiClubState, t: TourState) {
         if (tries) parts.push([tries * PAY.try, `por ${tries} ${tries === 1 ? 'try' : 'tries'}`]);
         if (ko && us > them && kind !== 'liga') parts.push([kind === 'lib' ? PAY.libRound : kind === 'nac' ? PAY.nacRound : PAY.cupRound, 'por pasar de ronda']);
         if (sponsor) parts.push([sponsor, 'de los sponsors']);
+        // De local en la liga (el primero del cruce es el dueño de casa), la cancha deja lo suyo.
+        const cancha = r.facilities?.cancha ?? 1;
+        if (!ko && kind === 'liga' && m.a === MC_ME && cancha > 1) parts.push([(cancha - 1) * CANCHA_PER_LEVEL, 'de la cancha']);
         const total = parts.reduce((a, [v]) => a + v, 0);
         r.credits += total;
         r.lastGain = `+${total} créditos: ${parts.map(([v, why]) => `${v} ${why}`).join(', ')}.`;
@@ -408,6 +495,7 @@ function makeOffers(r: MiClubState, rand: () => number): McOffer[] {
     const aboveLevel = levelsOf(r)[Math.max(0, levelsOf(r).findIndex((l) => l.id === level) - 1)].id;
     const aboveClubs = r.divisions[aboveLevel].filter((c) => c !== MC_ME);
     const aboveCenter = 1 + (aboveClubs.reduce((a, c) => a + ratingOf(c), 0) / Math.max(1, aboveClubs.length) - 40) / 6;
+    const ceiling = worldCeiling(r) - 0.4;
     for (let i = 0; i < 6; i++) {
         const id = r.nextId++;
         const age = 19 + Math.floor(rand() * 13);
@@ -417,7 +505,7 @@ function makeOffers(r: MiClubState, rand: () => number): McOffer[] {
             const clubs = [...r.divisions[above]].filter((c) => c !== MC_ME).sort();
             const club = clubs[Math.floor(rand() * clubs.length)];
             const center = 1 + (ratingOf(club) - 40) / 6;
-            const player = makePlayer(id, center + 0.2 + gauss(rand) * 0.5, age, rand);
+            const player = makePlayer(id, Math.min(ceiling, center + 0.2) + gauss(rand) * 0.5, age, rand);
             const src = AR_CLUBS.find((c) => c.id === club);
             const name = src ? defaultNames(src)[Math.floor(rand() * 7)] : nameFromSeed(team, `${club}:${id}`);
             out.push({ id, player, name, from: club, price: priceOf(player, true) });
@@ -425,7 +513,9 @@ function makeOffers(r: MiClubState, rand: () => number): McOffer[] {
             // Alrededor del nivel del equipo y, siempre, un par al nivel de la división de arriba (más caros):
             // con esos se sube. Si el club ya está por encima de esa vara, la vara es el propio nivel.
             const target = Math.max(avg, aboveCenter);
-            const center = i === reals ? target + 0.4 : i === reals + 1 ? avg + 0.6 : avg + 0.1;
+            // El techo: nadie en el mercado es mucho mejor que el club más fuerte del mundo. Sin esto, en
+            // Sudamérica (clubes más flojos) el plantel crecía sin freno y se llevaba todo.
+            const center = Math.min(ceiling, i === reals ? target + 0.4 : i === reals + 1 ? avg + 0.6 : avg + 0.1);
             const player = makePlayer(id, center + gauss(rand) * 0.5, age, rand);
             out.push({ id, player, name: nameFromSeed(team, `${r.team.name}:mercado:${id}`), price: priceOf(player) });
         }
@@ -476,7 +566,7 @@ export function mcRelease(s: TourState, playerId: number): TourState {
 /** Por qué no se puede mejorar a un jugador (null: se puede). */
 export function trainBlock(r: MiClubState, p: Player): string | null {
     if (r.trained?.includes(p.id!)) return 'Ya se mejoró esta temporada.';
-    if ((p.ovr ?? 1) >= 9.5) return 'Ya está en su techo.';
+    if ((p.ovr ?? 1) >= Math.min(9.5, worldCeiling(r))) return 'Ya está en su techo.';
     if (r.credits < trainCost(p)) return `Te faltan ${trainCost(p) - r.credits} créditos.`;
     return null;
 }
@@ -487,7 +577,7 @@ export function mcTrain(s: TourState, playerId: number): TourState {
         if (!p || trainBlock(r, p)) return;
         r.credits -= trainCost(p);
         const before = p.ovr ?? 1;
-        p.ovr = Math.round(Math.min(10, before + 0.3) * 10) / 10;
+        p.ovr = Math.round(Math.min(10, before + trainStepAt(r.facilities?.entreno ?? 1)) * 10) / 10;
         // Al cruzar un número entero, las habilidades acompañan.
         if (Math.floor(p.ovr) > Math.floor(before)) p.s = (p.s ?? [1, 1, 1, 1]).map((v) => Math.min(10, v + 1)) as [number, number, number, number];
         r.trained = [...(r.trained ?? []), playerId];
@@ -778,7 +868,11 @@ function developSquad(r: MiClubState, rand: () => number): string[] {
             continue;
         }
         const base = age <= 21 ? 0.35 : age <= 24 ? 0.2 : age <= 28 ? 0.05 : age <= 31 ? -0.1 : -0.3;
-        const ovr = Math.round(Math.max(1, Math.min(10, (p.ovr ?? 1) + base + gauss(rand) * 0.15)) * 10) / 10;
+        // El entrenamiento suma a todos un poco por año.
+        const gym = 0.04 * ((r.facilities?.entreno ?? 1) - 1);
+        // Arriba del techo del mundo ya no se crece: solo se sostiene o se baja con la edad.
+        const grow = (p.ovr ?? 1) >= worldCeiling(r) ? Math.min(0, base) : base + gym;
+        const ovr = Math.round(Math.max(1, Math.min(10, (p.ovr ?? 1) + grow + gauss(rand) * 0.15)) * 10) / 10;
         const step = Math.round(ovr - (p.ovr ?? 1));
         const s = (p.s ?? [1, 1, 1, 1]).map((v) => Math.max(1, Math.min(10, v + step))) as [number, number, number, number];
         out.push({ ...p, age, ovr, s });
@@ -791,6 +885,14 @@ function developSquad(r: MiClubState, rand: () => number): string[] {
         notes.push(`Sube de las inferiores ${r.names[id].first} ${r.names[id].last}.`);
         out.push(p);
     }
+    // El juvenil del año, de regalo: mejor cuanto más alto el nivel de las inferiores (si hay lugar).
+    if (out.length < SQUAD_MAX) {
+        const id = r.nextId++;
+        const p = makePlayer(id, avg - 0.7 + 0.25 * ((r.facilities?.inferiores ?? 1) - 1) + gauss(rand) * 0.4, 18, rand);
+        r.names[id] = nameFromSeed(team, `${r.team.name}:${id}`);
+        notes.push(`Llega de las inferiores ${r.names[id].first} ${r.names[id].last} (valoración ${(p.ovr ?? 1).toFixed(1).replace('.', ',')}).`);
+        out.push(p);
+    } else notes.push('El juvenil del año no tuvo lugar: el plantel está lleno.');
     r.squad = out;
     r.lineup = r.lineup?.filter((id) => out.some((p) => p.id === id));
     return notes;
@@ -816,11 +918,21 @@ export function mcVerdict(s: TourState): { title: string; text: string; next: st
     const above = levelsOf(r)[levelsOf(r).indexOf(l) - 1];
     const below = levelsOf(r)[levelsOf(r).indexOf(l) + 1];
     const title = liga.champion === MC_ME ? `Campeón de ${l.label}` : up.includes(MC_ME) ? `Ascenso a ${above?.label}` : down.includes(MC_ME) ? `Descenso a ${below?.label}` : `${l.label} ${r.season}: ${placeOf(liga, level).toLowerCase()}`;
-    const parts = [up.includes(MC_ME) ? `${r.team.name} juega en ${above?.label} la temporada que viene.` : down.includes(MC_ME) ? `${r.team.name} vuelve a ${below?.label}.` : `${r.team.name} sigue en ${l.label}.`];
+    const lic = nextLicense(r);
+    const blocked = up.includes(MC_ME) && !!lic && !lic.ok;
+    const parts = [
+        blocked
+            ? `Ganaste el ascenso, pero ${above?.label} pide la cancha en nivel ${lic!.need} y la tuya está en ${r.facilities?.cancha ?? 1}. Mejorala en Club antes de pasar de temporada o sube otro en tu lugar.`
+            : up.includes(MC_ME)
+              ? `${r.team.name} juega en ${above?.label} la temporada que viene.`
+              : down.includes(MC_ME)
+                ? `${r.team.name} vuelve a ${below?.label}.`
+                : `${r.team.name} sigue en ${l.label}.`,
+    ];
     if (mine.cup) parts.push(`${cupName(level)}: ${placeOf(mine.cup, level).toLowerCase()}.`);
     if (mine.nac) parts.push(`${nacNameOf(r)}: ${placeOf(mine.nac, level).toLowerCase()}.`);
     if (mine.lib) parts.push(`${LIB_NAME}: ${placeOf(mine.lib, level).toLowerCase()}.`);
-    return { title, text: parts.join(' '), next: `Temporada ${r.season + 1}` };
+    return { title: blocked ? `${title} · falta la cancha` : title, text: parts.join(' '), next: `Temporada ${r.season + 1}` };
 }
 
 /** Cierra el año: asienta la pirámide con las ligas, anota los títulos, desarrolla el plantel y arranca el siguiente. */
@@ -860,6 +972,16 @@ export function advanceMiClub(s0: TourState): TourState {
     // Los movimientos, de una vez (así nadie sube dos escalones).
     const moves: Record<string, { up: string[]; down: string[] }> = {};
     for (const l of levelsOf(r)) moves[l.id] = ligas[l.id] ? movesOf(ligas[l.id]!, l.id) : { up: [], down: [] };
+    // La licencia: sin la cancha que pide la división de arriba, el club no sube y sube el siguiente.
+    const licNotes: string[] = [];
+    const lic = nextLicense(r);
+    const myMoves = moves[mineLevel];
+    if (lic && !lic.ok && myMoves.up.includes(MC_ME) && liga) {
+        const instead = finalRanking(liga).find((id) => id !== MC_ME && !myMoves.up.includes(id) && !myMoves.down.includes(id));
+        myMoves.up = myMoves.up.filter((id) => id !== MC_ME);
+        if (instead) myMoves.up.push(instead);
+        licNotes.push(`Ganaste el ascenso, pero ${levelDef(lic.level).label} pide la cancha en nivel ${lic.need} y la tuya está en ${r.facilities?.cancha ?? 1}: ${instead ? `sube ${CLUB_NAME.get(instead) ?? instead} en tu lugar` : 'no subís'}.`);
+    }
     const next = {} as Record<McLevel, string[]>;
     const lines: string[] = [];
     levelsOf(r).forEach((l, i) => {
@@ -883,7 +1005,7 @@ export function advanceMiClub(s0: TourState): TourState {
     for (const [v] of prizes) r.credits += v;
 
     const rand = seeded(`${r.team.name}:${r.season}:cierre`);
-    r.lastNotes = [...prizes.map(([v, why]) => `Premio por ${why}: ${v} créditos.`), ...developSquad(r, rand)];
+    r.lastNotes = [...licNotes, ...prizes.map(([v, why]) => `Premio por ${why}: ${v} créditos.`), ...developSquad(r, rand)];
     r.season += 1;
     return startSeason(r, s0.difficulty, s0.duration);
 }

@@ -4638,3 +4638,26 @@
         max-width: 48cqi;
     }
 }
+
+/* Mi Club: barrita de una instalación (5 niveles) y el aviso de la licencia. */
+.facBar {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 3px;
+}
+
+.facBar span {
+    height: 10px;
+    border-radius: 2px;
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+}
+
+.facBar .facOn {
+    background: var(--gold);
+    border-color: var(--gold);
+}
+
+.mcWarn {
+    color: var(--gold);
+}
