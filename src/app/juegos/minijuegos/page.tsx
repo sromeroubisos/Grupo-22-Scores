@@ -119,8 +119,12 @@ export default function MinijuegosPage() {
                 </Link>
 
                 {/* Rugby Argento (la ruta sigue siendo rugby-seven): afiche en blanco
-                    y negro que se pone verde al pasar el mouse, como los demás. */}
-                <Link href="/juegos/minijuegos/rugby-seven" className={`${styles.card} ${styles.cardPoster}`}>
+                    y negro que se pone verde al pasar el mouse, como los demás.
+                    <a> y no <Link>: el juego se instala como app con SU manifiesto. Con navegación
+                    del cliente Safari se queda con el del sitio (start_url "/") y el acceso directo
+                    abría G22 Scores en vez del juego. Una carga completa trae el <head> del juego. */}
+                {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+                <a href="/juegos/minijuegos/rugby-seven" className={`${styles.card} ${styles.cardPoster}`}>
                     <h2 className={styles.srOnly}>Rugby Argento: llevá a tu club a lo más alto del rugby argentino, del interior a la URBA</h2>
                     <span className={styles.cover}>
                         <Image
@@ -138,7 +142,7 @@ export default function MinijuegosPage() {
                     </span>
                     <span className={styles.badgeOnPoster}>Nuevo</span>
                     <span className={styles.playBtn}>Jugar <ChevronRight /></span>
-                </Link>
+                </a>
 
                 {/* El afiche de lo que viene. No es un enlace ni un botón: no hay
                     adónde ir todavía, así que va como div y sin la pastilla de
