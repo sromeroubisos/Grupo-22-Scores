@@ -145,7 +145,7 @@ import { IntlRanking, IntlSeason, IntlSquad, IntlUnion, IntlYouth } from './Intl
 import { advanceSvns, createSvns, SVNS_LEGS, SVNS_PHASE_LABEL, svnsBoosts, svnsRegionName, svnsStartTier, svnsTable, svnsVerdict, TIER_LABEL } from './svns';
 import { CloudSync, markTutorialSeenInAccount, tutorialSeenInAccount, type CloudStatus } from './cloudSave';
 import { advanceMiClub, createMiClub, LIB_NAME, levelDef, levelOf, liveMine, mcAfterRound, mcRegionLabel, mcRelease, mcSign, mcTrain, mcUpgrade, mcVerdict, myTeam, nacHowOf, phaseName, WORLDS, type McRegion, type McWorld } from './miClub';
-import { McClubPanel, McMarket, McPyramid, McSquad, McTourTables } from './MiClubPanels';
+import { McClubPanel, McCredits, McMarket, McPyramid, McSquad, McTourTables } from './MiClubPanels';
 import { useOfflineReady } from './offline';
 import { readLang, startTranslating, writeLang, type Lang } from './i18n';
 import { applyStoredClubEdits, EDITABLE_CLUBS, isClubEdited, resetClubEdit, saveClubEdit } from './clubEdits';
@@ -840,6 +840,8 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
     }, [tour]);
     const [palmaresKey, setPalmaresKey] = useState<string | null>(null);
     const [hubTab, setHubTab] = useState<HubTab>('tabla');
+    // El panel del próximo partido (dificultad, duración y cómo jugarlo): se abre tocando el versus de arriba.
+    const [matchOpen, setMatchOpen] = useState(false);
     /** Torneo que se está armando (de fábrica, con reemplazos o personalizado). */
     const [setupDef, setSetupDef] = useState<TourDef | null>(null);
     const [customFormat, setCustomFormat] = useState(0);
@@ -1450,8 +1452,13 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                             {menuMuted ? '×♪' : '♪'}
                         </button>
                     )}
-                    <Link href="/juegos/minijuegos" className={styles.exitBtn}>
-                        ✕ Salir
+                    {screen.k !== 'menu' && (
+                        <button type="button" className={styles.exitBtn} onClick={() => setScreen({ k: 'menu' })} aria-label="Salir al menú de Rugby Argento">
+                            ◀ Salir
+                        </button>
+                    )}
+                    <Link href="/juegos/minijuegos" className={`${styles.exitBtn} ${styles.exitGames}`} aria-label="Volver a los minijuegos">
+                        {screen.k === 'menu' ? '✕ Salir' : '✕ Minijuegos'}
                     </Link>
                 </header>
                 )}
@@ -2572,6 +2579,25 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                         if (!fem) for (const l of CLUB_LEAGUES) push(l.name, l.teams.map((t) => t.id));
                         return out;
                     })();
+                    const nextStep = preseason
+                        ? null
+                        : tourLive
+                        ? { label: opp ? 'Jugar ▶' : 'Simular la fecha ▶', run: playTourMatch }
+                        : career && verdict?.next
+                          ? { label: `${verdict.next} ▶`, run: () => nextCareerStage(closesSeason(tour) ? nacPick ?? formatOf(career, career.season + 1) : undefined) }
+                          : road && verdict?.next
+                            ? { label: `${verdict.next} ▶`, run: nextRoadStage }
+                            : svns && verdict?.next
+                              ? { label: `${verdict.next} ▶`, run: nextSvnsStage }
+                              : intl && verdict?.next
+                                ? { label: `${verdict.next} ▶`, run: nextIntlStage }
+                                : miclub && verdict?.next
+                                  ? { label: `${verdict.next} ▶`, run: nextMcSeason }
+                                  : null;
+                    const closeAnd = (f: () => void) => () => {
+                        setMatchOpen(false);
+                        f();
+                    };
                     return (
                         <div className={styles.body}>
                             {celebrateTeam && (
@@ -2593,7 +2619,50 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                 />
                             )}
                             <div className={styles.hub}>
-                                <div className={styles.nextCard}>
+                                <div className={styles.hubBar}>
+                                    <button
+                                        type="button"
+                                        className={styles.vsMini}
+                                        onClick={() => setMatchOpen(true)}
+                                        aria-haspopup="dialog"
+                                        aria-label={oppTeam && meTeam && tourLive ? `${meTeam.name} contra ${oppTeam.name}: abrir dificultad, duración y cómo jugar` : 'Abrir el detalle de la fecha'}
+                                    >
+                                        {oppTeam && meTeam && tourLive && !preseason ? (
+                                            <>
+                                                <span className={styles.vsMiniTeam}>
+                                                    <SpritePreview look={meTeam.players[0]} kit={meTeam.kit} scale={2} running />
+                                                    <b>{meTeam.name}</b>
+                                                </span>
+                                                <span className={styles.vsMiniBadge}>VS</span>
+                                                <span className={styles.vsMiniTeam}>
+                                                    <SpritePreview look={oppTeam.players[0]} kit={oppTeam.kit} scale={2} running />
+                                                    <b>{oppTeam.name}</b>
+                                                </span>
+                                            </>
+                                        ) : (
+                                            <span className={styles.vsMiniText}>{tour.done && verdict ? verdict.title : preseason ? 'Pretemporada' : tour.done ? (tour.champion === tour.me ? 'Campeón' : 'Terminó el torneo') : 'Fecha libre'}</span>
+                                        )}
+                                        <small className={styles.vsMiniHint}>Tocá para ver opciones</small>
+                                    </button>
+                                    <div className={styles.hubBarInfo}>
+                                        <strong>{miclub ? `${phaseName(tour)} · Temporada ${miclub.season}` : career ? `Temporada ${career.season}` : tourDef.name.replace(/ \d{4}$/, '')}</strong>
+                                        <span>{tourLive ? roundLabel(tour) : tour.done ? 'Terminado' : ''}</span>
+                                        {miclub && <McCredits n={miclub.credits} gain={miclub.lastGain ? `último partido ${miclub.lastGain.split(':')[0]}` : undefined} />}
+                                    </div>
+                                    {!preseason && (
+                                        <button type="button" className={`${styles.btnPrimary} ${styles.hubBarGo}`} onClick={closeAnd(nextStep?.run ?? (() => setScreen({ k: 'slots' })))}>
+                                            {nextStep?.label ?? 'Partidas ▶'}
+                                        </button>
+                                    )}
+                                </div>
+                                {(matchOpen || preseason) && (
+                                <div className={styles.sheetLayer} onClick={() => setMatchOpen(false)}>
+                                <div className={`${styles.nextCard} ${styles.hubSheet}`} role="dialog" aria-modal="true" aria-label="Próximo partido" onClick={(e) => e.stopPropagation()}>
+                                    {!preseason && (
+                                        <button type="button" className={styles.sheetClose} onClick={() => setMatchOpen(false)} aria-label="Cerrar">
+                                            ✕
+                                        </button>
+                                    )}
                                     {road && <span className={styles.roadChip}>⚑ {nameOf(road.me)} · {PHASE_LABEL[road.phase]}</span>}
                                     {intl && (
                                         <span className={styles.roadChip}>
@@ -2605,7 +2674,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                     {miclub && <span className={styles.roadChip}>⚑ {miclub.team.name} · Temporada {miclub.season} · {phaseName(tour)}</span>}
                                     {miclub && (
                                         <span className={styles.parallelNote}>
-                                            ◈ {miclub.credits} créditos{miclub.lastGain ? ` · último partido ${miclub.lastGain.split(':')[0]}` : ''}
+                                            <McCredits n={miclub.credits} gain={miclub.lastGain ? `último partido ${miclub.lastGain.split(':')[0]}` : undefined} />
                                         </span>
                                     )}
                                     {miclub && liveMine(tour).length > 1 && (
@@ -2709,37 +2778,22 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                         </div>
                                     )}
                                     {(() => {
-                                        const nextStep = preseason
-                                            ? null
-                                            : tourLive
-                                            ? { label: opp ? 'Jugar ▶' : 'Simular la fecha ▶', run: playTourMatch }
-                                            : career && verdict?.next
-                                              ? { label: `${verdict.next} ▶`, run: () => nextCareerStage(closesSeason(tour) ? nacPick ?? formatOf(career, career.season + 1) : undefined) }
-                                              : road && verdict?.next
-                                                ? { label: `${verdict.next} ▶`, run: nextRoadStage }
-                                                : svns && verdict?.next
-                                                  ? { label: `${verdict.next} ▶`, run: nextSvnsStage }
-                                                  : intl && verdict?.next
-                                                    ? { label: `${verdict.next} ▶`, run: nextIntlStage }
-                                                    : miclub && verdict?.next
-                                                      ? { label: `${verdict.next} ▶`, run: nextMcSeason }
-                                                      : null;
                                         return (
                                             <div className={styles.hubActions}>
                                                 {!preseason && (
-                                                    <button type="button" className={`${styles.btnPrimary} ${styles.hubMainBtn}`} onClick={nextStep?.run ?? (() => setScreen({ k: 'slots' }))}>
+                                                    <button type="button" className={`${styles.btnPrimary} ${styles.hubMainBtn}`} onClick={closeAnd(nextStep?.run ?? (() => setScreen({ k: 'slots' })))}>
                                                         {nextStep?.label ?? 'Partidas ▶'}
                                                     </button>
                                                 )}
                                                 {tourLive && !preseason && (
                                                     <div className={styles.simRow}>
-                                                        <button type="button" className={styles.simBtn} onClick={watchTourMatch} disabled={!opp}>
+                                                        <button type="button" className={styles.simBtn} onClick={closeAnd(watchTourMatch)} disabled={!opp}>
                                                             Ver simulación
                                                         </button>
-                                                        <button type="button" className={styles.simBtn} onClick={() => simTourMatch(false)} disabled={!opp}>
+                                                        <button type="button" className={styles.simBtn} onClick={closeAnd(() => simTourMatch(false))} disabled={!opp}>
                                                             Resultado rápido
                                                         </button>
-                                                        <button type="button" className={styles.simBtn} onClick={() => simTourMatch(true)}>
+                                                        <button type="button" className={styles.simBtn} onClick={closeAnd(() => simTourMatch(true))}>
                                                             Simular todo
                                                         </button>
                                                     </div>
@@ -2753,6 +2807,8 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                         );
                                     })()}
                                 </div>
+                                </div>
+                                )}
 
                                 <div className={styles.hubMain}>
                                     <div className={styles.tabs} role="tablist" aria-label="Vista del torneo">

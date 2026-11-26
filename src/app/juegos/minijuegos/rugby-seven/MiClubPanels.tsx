@@ -7,7 +7,7 @@
 
 import { useState, type ReactNode } from 'react';
 import { SKILL_LABEL, type Player } from './career';
-import { cupName, facCost, FAC_MAX, FACILITIES, levelDef, levelOf, MC_ME, nextLicense, trainStepAt, upgradeBlock, type McFacility, PAY, PAY_BY_LEVEL, PRIZE, releaseBlock, signBlock, SQUAD_MAX, trainBlock, trainCostFor, trainStepFor, divisionCap, seasonGain, SEASON_GROWTH_MAX, movesByLevel, myMove, myRating, americaView, LIB_NAME, LIB_PER_WORLD, nacHowOf, nacNameOf, nacionalView, otherWorld, topOf, WORLDS, pyramidTours, seasonNews, starters, tagFor as levelTag, TAG_LABEL, kindOf, mundialView, WCC_NAME, WCC_FROM_PRIMERA, zoneName, type McLevel, type McTag, type MiClubState } from './miClub';
+import { browseScopes, cupSpot, type McBrowseItem, type McBrowseScope, facCost, FAC_MAX, FACILITIES, levelDef, levelOf, MC_ME, nextLicense, upgradeBlock, type McFacility, PAY, PAY_BY_LEVEL, PRIZE, releaseBlock, signBlock, SQUAD_MAX, trainBlock, trainCostFor, trainStepFor, divisionCap, seasonGain, SEASON_GROWTH_MAX, movesByLevel, myMove, myRating, LIB_NAME, nacNameOf, seasonNews, starters, tagFor as levelTag, TAG_LABEL, kindOf, WCC_NAME, zoneName, type McLevel, type McTag, type MiClubState } from './miClub';
 import { groupStandings, roundLabel, finalRanking, type TourState } from './tours';
 import styles from './seven.module.css';
 
@@ -16,6 +16,7 @@ type Flag = (id: string) => ReactNode;
 const TAG_CLASS: Record<Exclude<McTag, null>, string> = {
     playoff: styles.tagPlayoff,
     ascenso: styles.tagUp,
+    reducido: styles.tagRed,
     descenso: styles.tagDown,
 };
 
@@ -23,13 +24,25 @@ const TAG_CLASS: Record<Exclude<McTag, null>, string> = {
 function tagsOf(level: McLevel): Exclude<McTag, null>[] {
     const l = levelDef(level);
     const out: Exclude<McTag, null>[] = [];
-    if (l.advance) out.push('playoff');
+    if (l.red) out.push('ascenso', 'reducido');
+    else if (l.advance) out.push('playoff');
     else if (l.up) out.push('ascenso');
     if (l.down) out.push('descenso');
     return out;
 }
 
-export function McLegend({ level }: { level: McLevel }) {
+/** Los créditos del club, con su moneda: siempre a la vista donde se gastan. */
+export function McCredits({ n, gain }: { n: number; gain?: string }) {
+    return (
+        <span className={styles.coinPill} aria-label={`${n} créditos`}>
+            <span className={styles.coin} aria-hidden="true" />
+            <strong>{n}</strong>
+            <small>créditos{gain ? ` · ${gain}` : ''}</small>
+        </span>
+    );
+}
+
+export function McLegend({ level, cups }: { level: McLevel; cups?: boolean }) {
     return (
         <ul className={styles.tagLegend} aria-label="Qué significa cada color">
             {tagsOf(level).map((t) => (
@@ -37,12 +50,20 @@ export function McLegend({ level }: { level: McLevel }) {
                     <span className={`${styles.tagDot} ${TAG_CLASS[t]}`} aria-hidden="true" /> {TAG_LABEL[t]}
                 </li>
             ))}
+            {cups && (
+                <li>
+                    <span className={styles.cupNum} aria-hidden="true">
+                        1
+                    </span>{' '}
+                    Clasifica a copa
+                </li>
+            )}
         </ul>
     );
 }
 
-/** Una tabla de la pirámide: cada puesto con su etiqueta (color al costado y texto para lectores). */
-export function McTable({ title, s, gi, level, nameOf, flag, advanceOnly }: { title: string; s: TourState; gi: number; level: McLevel; nameOf: (id: string) => string; flag: Flag; advanceOnly?: number }) {
+/** Una tabla de la pirámide: cada puesto con su etiqueta (color al costado y texto para lectores) y la copa a la que da (en amarillo). */
+export function McTable({ title, s, gi, level, nameOf, flag, advanceOnly, cupOf }: { title: string; s: TourState; gi: number; level: McLevel; nameOf: (id: string) => string; flag: Flag; advanceOnly?: number; cupOf?: (place: number) => string | null }) {
     const rows = groupStandings(s, gi);
     // En una copa de grupos (la del Mundo) solo importa quién pasa: los primeros `advanceOnly`.
     const tagFor = (lvl: McLevel, i: number, n: number): McTag => (advanceOnly !== undefined ? (i < advanceOnly ? 'playoff' : null) : levelTag(lvl, i, n));
@@ -64,11 +85,19 @@ export function McTable({ title, s, gi, level, nameOf, flag, advanceOnly }: { ti
                 <tbody>
                     {rows.map((r, i) => {
                         const tag = tagFor(level, i, rows.length);
+                        const cup = cupOf?.(i) ?? null;
                         return (
                             <tr key={r.team} className={`${r.team === MC_ME ? styles.rowMine : ''} ${tag ? TAG_CLASS[tag] : ''}`}>
                                 <td>
-                                    {i + 1}
+                                    {cup ? (
+                                        <span className={styles.cupNum} title={`Clasifica a: ${cup}`}>
+                                            {i + 1}
+                                        </span>
+                                    ) : (
+                                        i + 1
+                                    )}
                                     {tag && <span className={styles.srOnly}> · {TAG_LABEL[tag]}</span>}
+                                    {cup && <span className={styles.srOnly}> · clasifica a {cup}</span>}
                                 </td>
                                 <td className={styles.tableTeam}>
                                     {flag(r.team)} <span className={styles.mcTeamName}>{nameOf(r.team)}</span>
@@ -115,12 +144,14 @@ export function McTourTables({ s, r, nameOf, flag }: { s: TourState; r: MiClubSt
 }
 
 /** Las zonas (o la tabla única) de una división, con su leyenda. La propia va primero. */
-export function McTables({ s, r, level, nameOf, flag, mineFirst }: { s: TourState; r: MiClubState; level: McLevel; nameOf: (id: string) => string; flag: Flag; mineFirst?: boolean }) {
+export function McTables({ s, r, level, nameOf, flag, mineFirst, ext }: { s: TourState; r: MiClubState; level: McLevel; nameOf: (id: string) => string; flag: Flag; mineFirst?: boolean; ext?: boolean }) {
     const order = s.groups.map((_, gi) => gi);
     if (mineFirst) order.sort((a, b) => Number(s.groups[b].includes(MC_ME)) - Number(s.groups[a].includes(MC_ME)));
+    const cupOf = (place: number) => cupSpot(r, level, place, ext);
+    const anyCup = [0, 1, 2, 3].some((i) => cupOf(i));
     return (
         <>
-            <McLegend level={level} />
+            <McLegend level={level} cups={anyCup} />
             <div className={styles.groupGrid}>
                 {order.map((gi) => (
                     <McTable
@@ -131,6 +162,7 @@ export function McTables({ s, r, level, nameOf, flag, mineFirst }: { s: TourStat
                         level={level}
                         nameOf={nameOf}
                         flag={flag}
+                        cupOf={cupOf}
                     />
                 ))}
             </div>
@@ -141,20 +173,19 @@ export function McTables({ s, r, level, nameOf, flag, mineFirst }: { s: TourStat
 /** La pirámide: cualquier división, en vivo, con lo que pasa en cada puesto. */
 export function McPyramid({ s, nameOf, flag, bracket }: { s: TourState; nameOf: (id: string) => string; flag: Flag; bracket: (t: TourState) => ReactNode }) {
     const r = s.miclub!;
-    const list = pyramidTours(s);
-    const mine = levelOf(r, MC_ME) ?? 'base';
-    const nac = nacionalView(s);
-    const america = americaView(s);
-    const nacName = nacNameOf(r);
-    const nacHow = nacHowOf(r);
-    const world = r.world ?? 'ar';
-    const wcc = mundialView(s);
-    const [pick, setPick] = useState<McLevel | 'nac' | 'lib' | 'wcc'>(mine);
-    const cur = pick === 'nac' || pick === 'lib' || pick === 'wcc' ? null : list.find((x) => x.level.id === pick) ?? list[0];
+    const scopes = browseScopes(s);
+    const [scopeId, setScopeId] = useState<McBrowseScope['id']>('mine');
+    const [kind, setKind] = useState<'ligas' | 'copas'>('ligas');
+    const [key, setKey] = useState<string | null>(null);
+    const scope = scopes.find((x) => x.id === scopeId) ?? scopes[0];
+    const items = scope[kind];
+    const item = items.find((i) => i.key === key) ?? items.find((i) => i.mine) ?? items[0];
+    const at = items.indexOf(item);
     const news = seasonNews(r);
     const moves = movesByLevel(r);
     const mineMove = myMove(r);
     const names = (ids: string[]) => ids.map((id) => (id === MC_ME ? `${nameOf(id)} (vos)` : nameOf(id))).join(', ');
+    const go = (d: number) => setKey(items[(at + d + items.length) % items.length].key);
     return (
         <div className={styles.othersPanel}>
             {r.moves && moves.length > 0 && (
@@ -180,93 +211,115 @@ export function McPyramid({ s, nameOf, flag, bracket }: { s: TourState; nameOf: 
                     ))}
                 </div>
             )}
-            <div className={styles.pyramidPick} role="radiogroup" aria-label="División o copa">
-                {list.map((x) => (
-                    <button key={x.level.id} type="button" role="radio" aria-checked={pick === x.level.id} className={`${styles.pyramidStep} ${pick === x.level.id ? styles.pyramidStepOn : ''}`} onClick={() => setPick(x.level.id)}>
-                        <strong>{x.level.label}</strong>
-                        <small>{x.mine ? 'tu división' : `${r.divisions[x.level.id].length} clubes`}</small>
-                    </button>
-                ))}
-                <button type="button" role="radio" aria-checked={pick === 'nac'} className={`${styles.pyramidStep} ${pick === 'nac' ? styles.pyramidStepOn : ''}`} onClick={() => setPick('nac')}>
-                    <strong>{nacName}</strong>
-                    <small>{nac ? `${nac.def?.teams.length ?? 0} clubes` : 'desde mitad de año'}</small>
-                </button>
-                <button type="button" role="radio" aria-checked={pick === 'lib'} className={`${styles.pyramidStep} ${pick === 'lib' ? styles.pyramidStepOn : ''}`} onClick={() => setPick('lib')}>
-                    <strong>Copa de América</strong>
-                    <small>{america.lib ? `${america.lib.def?.teams.length ?? 0} clubes` : 'desde mitad de año'}</small>
-                </button>
-                <button type="button" role="radio" aria-checked={pick === 'wcc'} className={`${styles.pyramidStep} ${pick === 'wcc' ? styles.pyramidStepOn : ''}`} onClick={() => setPick('wcc')}>
-                    <strong>Mundial de Clubes</strong>
-                    <small>{wcc ? `${wcc.def?.teams.length ?? 0} clubes` : 'último tercio del año'}</small>
-                </button>
+            <div className={styles.browsePick}>
+                <label className={styles.browseField}>
+                    <span>Dónde</span>
+                    <select
+                        value={scope.id}
+                        onChange={(e) => {
+                            setScopeId(e.target.value as McBrowseScope['id']);
+                            setKey(null);
+                        }}
+                    >
+                        {scopes.map((x) => (
+                            <option key={x.id} value={x.id}>
+                                {x.label}
+                            </option>
+                        ))}
+                    </select>
+                </label>
+                <label className={styles.browseField}>
+                    <span>Qué</span>
+                    <select
+                        value={kind}
+                        onChange={(e) => {
+                            setKind(e.target.value as 'ligas' | 'copas');
+                            setKey(null);
+                        }}
+                    >
+                        <option value="ligas">Ligas ({scope.ligas.length})</option>
+                        <option value="copas">Copas ({scope.copas.length})</option>
+                    </select>
+                </label>
+                <div className={`${styles.browseField} ${styles.browseWhich}`}>
+                    <label htmlFor="mc-browse-which">Cuál</label>
+                    <div className={styles.browseRow}>
+                        <button type="button" className={styles.browseArrow} onClick={() => go(-1)} aria-label="Torneo anterior" disabled={items.length < 2}>
+                            ◀
+                        </button>
+                        <select id="mc-browse-which" value={item?.key ?? ''} onChange={(e) => setKey(e.target.value)}>
+                            {items.map((i) => (
+                                <option key={i.key} value={i.key}>
+                                    {i.label}
+                                    {i.t ? '' : ' · todavía no'}
+                                    {i.mine && !i.label.includes('tu división') ? ' · jugás vos' : ''}
+                                </option>
+                            ))}
+                        </select>
+                        <button type="button" className={styles.browseArrow} onClick={() => go(1)} aria-label="Torneo siguiente" disabled={items.length < 2}>
+                            ▶
+                        </button>
+                    </div>
+                </div>
             </div>
-            {pick === 'wcc' ? (
-                wcc ? (
-                    <section className={styles.mcSection} aria-label={WCC_NAME}>
-                        <h3 className={styles.groupTitle}>{WCC_NAME}</h3>
-                        <p className={styles.note}>
-                            Los {WCC_FROM_PRIMERA} mejores de la Primera de {WORLDS[world].label} contra 28 profesionales del mundo: 8 grupos de 4 y octavos. {status(wcc, nameOf)}
-                        </p>
-                        {(wcc.stage === 'grupos' || wcc.done) && <WccTables s={wcc} nameOf={nameOf} flag={flag} />}
-                        {wcc.stage === 'ko' && bracket(wcc)}
-                    </section>
-                ) : (
-                    <p className={styles.note}>
-                        La {WCC_NAME} se arma en el último tercio del año: los {WCC_FROM_PRIMERA} mejores de la Primera de {WORLDS[world].label} contra los profesionales del Top 14, la Premiership, el URC, el Super Rugby, Japón y más.
-                    </p>
-                )
-            ) : cur ? (
-                <>
-                    {cur.liga && (
-                        <section className={styles.mcSection} aria-label={`Liga de ${cur.level.label}`}>
-                            <h3 className={styles.groupTitle}>Liga · {cur.level.label}</h3>
-                            <p className={styles.note}>
-                                {cur.level.upHow} {status(cur.liga, nameOf)}
-                            </p>
-                            {(cur.liga.stage === 'grupos' || cur.liga.done) && <McTables s={cur.liga} r={r} level={cur.level.id} nameOf={nameOf} flag={flag} mineFirst={cur.mine} />}
-                            {cur.liga.hasKo && cur.liga.stage === 'ko' && bracket(cur.liga)}
-                        </section>
-                    )}
-                    {cur.cup ? (
-                        <CupBlock title={cupName(cur.level.id)} t={cur.cup} how="Todos los clubes de la división, a eliminación directa. Los más fuertes arrancan una ronda más adelante." nameOf={nameOf} flag={flag} bracket={bracket} />
-                    ) : (
-                        cur.level.id === topOf(world) && (
-                            <p className={styles.note}>
-                                Primera no juega copa de división: juega la {nacName} y la {LIB_NAME}.
-                            </p>
-                        )
-                    )}
-                </>
-            ) : pick === 'lib' ? (
-                <>
-                    {america.lib ? (
-                        <CupBlock title={LIB_NAME} t={america.lib} how={`Los ${LIB_PER_WORLD} mejores de la Primera de Argentina contra los ${LIB_PER_WORLD} mejores de la de Sudamérica, a eliminación directa.`} nameOf={nameOf} flag={flag} bracket={bracket} />
-                    ) : (
-                        <p className={styles.note}>
-                            La {LIB_NAME} se arma pasada la mitad de año con los {LIB_PER_WORLD} mejores de cada Primera: la de {WORLDS[world].label} y la de {WORLDS[otherWorld(world)].label}.
-                        </p>
-                    )}
-                    {america.ext && (
-                        <section className={styles.mcSection} aria-label={`Primera de ${WORLDS[otherWorld(world)].label}`}>
-                            <h3 className={styles.groupTitle}>Primera de {WORLDS[otherWorld(world)].label}</h3>
-                            <p className={styles.note}>
-                                Del otro lado. Sus {LIB_PER_WORLD} mejores van a la {LIB_NAME}. {status(america.ext, nameOf)}
-                            </p>
-                            {(america.ext.stage === 'grupos' || america.ext.done) && <McTables s={america.ext} r={r} level={topOf(otherWorld(world))} nameOf={nameOf} flag={flag} />}
-                            {america.ext.hasKo && america.ext.stage === 'ko' && bracket(america.ext)}
-                        </section>
-                    )}
-                </>
-            ) : nac ? (
-                <CupBlock title={nacName} t={nac} how={`${nac.def?.teams.length ?? 0} clubes, armada a mitad de año. ${nacHow}.`} nameOf={nameOf} flag={flag} bracket={bracket} />
-            ) : (
-                <p className={styles.note}>
-                    La {nacName} se arma a mitad de año con la tabla de ese momento: {nacHow}.
-                </p>
-            )}
+            {item && <BrowseView item={item} r={r} nameOf={nameOf} flag={flag} bracket={bracket} />}
         </div>
     );
 }
+
+/** Un torneo del explorador: la tabla (todas las zonas o grupos) y, si tiene, el cuadro. */
+function BrowseView({ item, r, nameOf, flag, bracket }: { item: McBrowseItem; r: MiClubState; nameOf: (id: string) => string; flag: Flag; bracket: (t: TourState) => ReactNode }) {
+    const t = item.t;
+    const title = item.label.replace(' · tu división', '');
+    if (!t) {
+        return (
+            <section className={styles.mcSection} aria-label={title}>
+                <h3 className={styles.groupTitle}>{title}</h3>
+                <p className={styles.note}>
+                    Se arma {item.when ?? 'más adelante'}. {item.how}
+                </p>
+            </section>
+        );
+    }
+    const onlyKo = t.def?.stage.kind === 'ko';
+    if (onlyKo) return <CupBlock title={title} t={t} how={item.how} nameOf={nameOf} flag={flag} bracket={bracket} />;
+    const showKo = t.hasKo && (t.stage === 'ko' || t.koHistory.length > 0);
+    return (
+        <section className={styles.mcSection} aria-label={title}>
+            <h3 className={styles.groupTitle}>{title}</h3>
+            <p className={styles.note}>
+                {item.how} {status(t, nameOf)}
+            </p>
+            {item.key === 'wcc' ? (
+                <WccTables s={t} nameOf={nameOf} flag={flag} />
+            ) : item.level ? (
+                <McTables s={t} r={r} level={item.level} nameOf={nameOf} flag={flag} mineFirst={item.mine} ext={item.ext} />
+            ) : (
+                <>
+                    {t.hasKo && (
+                        <ul className={styles.tagLegend} aria-label="Qué significa cada color">
+                            <li>
+                                <span className={`${styles.tagDot} ${TAG_CLASS.playoff}`} aria-hidden="true" /> Pasa a semifinales
+                            </li>
+                        </ul>
+                    )}
+                    <div className={styles.groupGrid}>
+                        {t.groups.map((_, gi) => (
+                            <McTable key={gi} title={t.groups.length === 1 ? 'Tabla de posiciones' : `Grupo ${gi + 1}`} s={t} gi={gi} level="primera" nameOf={nameOf} flag={flag} advanceOnly={t.hasKo ? 4 : 0} />
+                        ))}
+                    </div>
+                </>
+            )}
+            {showKo && (
+                <>
+                    <h4 className={styles.groupTitle}>Cuadro</h4>
+                    {bracket(t)}
+                </>
+            )}
+        </section>
+    );
+}
+
 
 /** Lo que va de un torneo, en una línea. */
 function status(t: TourState, nameOf: (id: string) => string): string {
@@ -350,8 +403,9 @@ export function McSquad({ r, onTrain, onRelease }: { r: MiClubState; onTrain: (i
     list.sort((a, b) => Number(b.id === r.marquee?.id) - Number(a.id === r.marquee?.id));
     return (
         <div className={styles.othersPanel}>
+            <McCredits n={r.credits} />
             <p className={styles.note}>
-                Nivel del club: {myRating(r)}. Tenés {r.credits} créditos. Entrenar sube {f2(trainStepFor(r))} (más con mejor entrenamiento y cuanto mejor va el equipo) y cada vez cuesta más. En el año, cada jugador mejora como mucho {SEASON_GROWTH_MAX.toFixed(1).replace('.', ',')} entre entrenamiento y rendimiento, y no pasa el techo de la división: {cap.toFixed(1).replace('.', ',')}.
+                Nivel del club: {myRating(r)}. Entrenar sube {f2(trainStepFor(r))} (más con mejor entrenamiento y cuanto mejor va el equipo) y cada vez cuesta más. En el año, cada jugador mejora como mucho {SEASON_GROWTH_MAX.toFixed(1).replace('.', ',')} entre entrenamiento y rendimiento, y no pasa el techo de la división: {cap.toFixed(1).replace('.', ',')}.
             </p>
             {!!r.lastNotes?.length && (
                 <div className={styles.roadPending}>
@@ -397,8 +451,9 @@ export function McMarket({ r, nameOf, onSign }: { r: MiClubState; nameOf: (id: s
     const worstXi = Math.min(...starters(r).map((p) => p.ovr ?? 1));
     return (
         <div className={styles.othersPanel}>
+            <McCredits n={r.credits} />
             <p className={styles.note}>
-                Tenés {r.credits} créditos y {r.squad.length} de {SQUAD_MAX} lugares en el plantel. El mercado se renueva al empezar la temporada y a mitad de año. Los créditos se ganan jugando: no se compran.
+                {r.squad.length} de {SQUAD_MAX} lugares en el plantel. El mercado se renueva al empezar la temporada y a mitad de año. Los créditos se ganan jugando: no se compran.
             </p>
             {offers.length === 0 ? (
                 <p className={styles.empty}>No quedan jugadores en el mercado. Vuelve a abrirse a mitad de año.</p>
@@ -477,6 +532,7 @@ export function McClubPanel({ r, onUpgrade }: { r: MiClubState; onUpgrade: (f: M
     const level = levelOf(r, MC_ME) ?? 'base';
     return (
         <div className={styles.othersPanel}>
+            <McCredits n={r.credits} />
             <Facilities r={r} onUpgrade={onUpgrade} />
             <div className={styles.roadPending}>
                 <strong>{r.credits} créditos</strong>

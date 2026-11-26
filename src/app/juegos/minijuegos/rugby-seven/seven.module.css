@@ -4949,3 +4949,422 @@
         grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 }
+
+/* ===== Salir: al menú del juego; aparte, a los minijuegos ===== */
+.exitBtn + .exitGames {
+    margin-left: 8px;
+}
+
+button.exitBtn {
+    font: inherit;
+    font-size: 0.72rem;
+    background: none;
+    cursor: pointer;
+}
+
+/* ===== El hub: una barra arriba con el próximo partido y todo el ancho para las tablas ===== */
+.hub {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+}
+
+.hubBar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: #151821;
+    border: 2px solid var(--color-border);
+}
+
+/* El versus chico: los dos muñequitos con su nombre abajo y el VS en el medio. Tocarlo abre las opciones. */
+.vsMini {
+    font: inherit;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: end;
+    gap: 2px 8px;
+    min-width: 220px;
+    max-width: 340px;
+    padding: 6px 10px 4px;
+    border-radius: 8px;
+    border: 2px solid var(--color-border);
+    background: color-mix(in srgb, var(--gold) 8%, #1b1f2b);
+    color: var(--color-text-primary);
+    cursor: pointer;
+    transition: transform 100ms ease-out, background 120ms ease-out;
+}
+
+.vsMini:hover {
+    background: color-mix(in srgb, var(--gold) 16%, #1b1f2b);
+}
+
+.vsMini:active {
+    transform: scale(0.97);
+}
+
+.vsMini:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+}
+
+.vsMiniTeam {
+    display: grid;
+    justify-items: center;
+    gap: 3px;
+    min-width: 0;
+}
+
+.vsMiniTeam b {
+    max-width: 100%;
+    font-size: 0.66rem;
+    font-weight: 400;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vsMiniBadge {
+    align-self: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--gold);
+}
+
+.vsMiniText {
+    grid-column: 1 / -1;
+    justify-self: center;
+    padding: 8px 0 4px;
+    font-size: 0.8rem;
+    color: var(--gold);
+}
+
+.vsMiniHint {
+    grid-column: 1 / -1;
+    justify-self: center;
+    font-size: 0.55rem;
+    color: var(--color-text-secondary);
+}
+
+.hubBarInfo {
+    flex: 1 1 180px;
+    min-width: 0;
+    display: grid;
+    gap: 4px;
+    justify-items: start;
+}
+
+.hubBarInfo strong {
+    font-size: 0.8rem;
+    color: var(--color-text-primary);
+}
+
+.hubBarInfo > span {
+    font-size: 0.7rem;
+    color: var(--color-text-secondary);
+}
+
+.hubBarGo {
+    font: inherit;
+    font-size: 0.85rem;
+    min-height: 48px;
+    padding: 0 20px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* El panel del partido: encima de todo, centrado; se cierra tocando afuera o con la cruz. */
+.sheetLayer {
+    position: fixed;
+    inset: 0;
+    z-index: 2100;
+    display: grid;
+    place-items: center;
+    padding: 16px;
+    overflow-y: auto;
+    background: rgba(4, 5, 8, 0.72);
+}
+
+.hubSheet {
+    position: relative;
+    width: min(520px, 100%);
+    max-height: calc(100dvh - 32px);
+    overflow-y: auto;
+    padding-top: 22px;
+    animation: sheetIn 180ms ease-out;
+}
+
+@keyframes sheetIn {
+    from {
+        opacity: 0;
+        transform: scale(0.96);
+    }
+}
+
+.sheetClose {
+    font: inherit;
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    border: 2px solid var(--color-border);
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+    cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hubSheet {
+        animation: none;
+    }
+
+    .vsMini {
+        transition: none;
+    }
+}
+
+@media (max-width: 760px) {
+    .hubBar {
+        gap: 8px;
+    }
+
+    .vsMini {
+        flex: 1 1 100%;
+        max-width: none;
+    }
+
+    .hubBarGo {
+        flex: 1 1 auto;
+    }
+}
+
+/* ===== Créditos con su moneda ===== */
+.othersPanel > .coinPill {
+    justify-self: start;
+}
+
+.coinPill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px 3px 4px;
+    border-radius: 999px;
+    background: rgba(240, 196, 25, 0.12);
+    border: 1px solid rgba(240, 196, 25, 0.45);
+}
+
+.coinPill strong {
+    font-size: 0.85rem;
+    color: var(--gold);
+}
+
+.coinPill small {
+    font-size: 0.6rem;
+    color: var(--color-text-secondary);
+}
+
+.coin {
+    position: relative;
+    flex: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #fff4b0, #f0c419 45%, #b47e08);
+    box-shadow: inset 0 0 0 2px #9c6c05;
+}
+
+.coin::after {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border-radius: 50%;
+    border: 1px solid rgba(120, 80, 0, 0.6);
+}
+
+/* ===== Tablas: reducido en violeta, cupo a copa en amarillo ===== */
+.tagRed td:first-child {
+    box-shadow: inset 3px 0 0 #b072ff;
+}
+
+.tagDot.tagRed {
+    background: #b072ff;
+}
+
+.cupNum {
+    display: inline-grid;
+    place-items: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 4px;
+    border-radius: 4px;
+    background: var(--gold);
+    color: #141218;
+    font-weight: 700;
+}
+
+/* ===== Explorador de torneos: dónde, qué y cuál ===== */
+.browsePick {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 8px;
+}
+
+.browseWhich {
+    grid-column: span 2;
+}
+
+@media (max-width: 420px) {
+    .browseWhich {
+        grid-column: 1 / -1;
+    }
+}
+
+.browseField {
+    display: grid;
+    gap: 4px;
+    min-width: 0;
+}
+
+.browseField > span,
+.browseField > label {
+    font-size: 0.62rem;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.browseField select {
+    font: inherit;
+    font-size: 0.8rem;
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 2px solid var(--color-border);
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+}
+
+.browseField select:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 1px;
+}
+
+.browseRow {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
+    gap: 6px;
+}
+
+.browseArrow {
+    font: inherit;
+    min-height: 44px;
+    border-radius: 6px;
+    border: 2px solid var(--color-border);
+    background: var(--color-bg-tertiary);
+    color: var(--gold);
+    cursor: pointer;
+}
+
+.browseArrow:active {
+    transform: scale(0.95);
+}
+
+.browseArrow:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+/* El hub ya no tiene la columna del partido: los paneles usan todo el ancho. */
+.hubPanel .othersPanel {
+    max-width: none;
+}
+
+/* ===== Letra más grande en el hub: las tablas y los textos se leían chicos (sobre todo con el celular acostado) ===== */
+.hubPanel .table {
+    font-size: 0.78rem;
+}
+
+.hubPanel .table th,
+.hubPanel .table td {
+    padding: 7px 6px;
+}
+
+.hubPanel .note,
+.hubPanel .tagLegend {
+    font-size: 0.74rem;
+    line-height: 1.5;
+}
+
+.hubPanel .groupTitle {
+    font-size: 0.8rem;
+}
+
+.hubMain .tab {
+    font-size: 0.8rem;
+    min-height: 42px;
+}
+
+@media (max-width: 760px) {
+    .hubPanel .table {
+        font-size: 0.7rem;
+    }
+
+    .hubPanel .table th,
+    .hubPanel .table td {
+        padding: 6px 4px;
+    }
+}
+
+/* Celular acostado: la barra de arriba en una sola línea y sin la ayuda, para que las tablas tengan alto. */
+@media (max-height: 500px) and (orientation: landscape) {
+    /* Se desplaza la pantalla entera: la barra y las pestañas suben y las tablas quedan con todo el alto. */
+    .hub {
+        grid-template-rows: none;
+        align-content: start;
+        overflow-y: auto;
+    }
+
+    .hub .hubMain {
+        min-height: auto;
+    }
+
+    .hub .hubPanel {
+        overflow: visible;
+    }
+
+    /* Las pestañas en una sola fila que se corre de costado. */
+    .hubMain .tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .hubMain .tab {
+        flex: none;
+        min-height: 38px;
+    }
+
+    .hubBar {
+        flex-wrap: nowrap;
+        padding: 4px 8px;
+    }
+
+    .vsMini {
+        min-width: 200px;
+        padding: 4px 8px 2px;
+    }
+
+    .vsMiniHint {
+        display: none;
+    }
+
+    .hubBarGo {
+        min-height: 42px;
+    }
+}
