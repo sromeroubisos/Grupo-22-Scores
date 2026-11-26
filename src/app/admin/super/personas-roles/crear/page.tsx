@@ -15,6 +15,7 @@ const CREATABLE_ROLES: AppUserRole[] = [
     'redactor',
     'operador',
     'admin_general',
+    'usuario_overlay',
     'fan',
 ];
 

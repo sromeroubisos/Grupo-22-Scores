@@ -1,0 +1,1049 @@
+/*
+ * Overlay de transmisión. Reglas que importan para OBS / vMix:
+ * - Fondo transparente (lo pone page.tsx sobre html/body).
+ * - Paneles SÓLIDOS, sin backdrop-filter: el navegador embebido lo dibuja
+ *   caro y encima del video no se ve el desenfoque.
+ * - Animaciones solo de transform/opacity/clip-path: no hacen relayout y no
+ *   tironean un encoder que ya está al 80 %.
+ * - Tamaños en px pensados para un lienzo de 1920×1080; `--ov-scale` ajusta.
+ * - El resultado va en Dharma Gothic E Heavy (900), igual que la tarjeta y la
+ *   placa de G22 Base.
+ */
+
+.stage {
+  --ov-panel: #0d0f12;
+  --ov-panel-2: #171a1f;
+  --ov-ink: #ffffff;
+  --ov-ink-dim: rgba(255, 255, 255, 0.62);
+  --ov-brand: #00c27b;
+  --ov-live: #ff3b3b;
+  --ov-yellow: #ffd21f;
+  --ov-red: #e5202e;
+  --ov-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  font-family: var(--ov-text, 'Outfit', 'Inter', system-ui, sans-serif);
+  color: var(--ov-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Sobre chroma verde, el verde de marca se keyea: va blanco. */
+.stage[data-chroma='verde'] {
+  --ov-brand: #ffffff;
+}
+
+.anchor {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transform: scale(var(--ov-scale));
+}
+
+.anchor[data-v='top'] { top: var(--ov-margin); }
+.anchor[data-v='bottom'] { bottom: var(--ov-margin); }
+.anchor[data-v='middle'] { top: 50%; }
+.anchor[data-h='left'] { left: var(--ov-margin); align-items: flex-start; }
+.anchor[data-h='right'] { right: var(--ov-margin); align-items: flex-end; }
+.anchor[data-h='center'] { left: 50%; align-items: center; }
+
+/* Escala desde la esquina en la que está anclado; al medio, desde el centro. */
+.anchor[data-v='top'][data-h='left'] { transform-origin: top left; }
+.anchor[data-v='top'][data-h='right'] { transform-origin: top right; }
+.anchor[data-v='bottom'][data-h='left'] { transform-origin: bottom left; }
+.anchor[data-v='bottom'][data-h='right'] { transform-origin: bottom right; }
+.anchor[data-v='top'][data-h='center'] { transform-origin: top center; transform: translateX(-50%) scale(var(--ov-scale)); }
+.anchor[data-v='bottom'][data-h='center'] { transform-origin: bottom center; transform: translateX(-50%) scale(var(--ov-scale)); }
+.anchor[data-v='middle'][data-h='left'] { transform-origin: center left; transform: translateY(-50%) scale(var(--ov-scale)); }
+.anchor[data-v='middle'][data-h='right'] { transform-origin: center right; transform: translateY(-50%) scale(var(--ov-scale)); }
+.anchor[data-v='middle'][data-h='center'] { transform-origin: center; transform: translate(-50%, -50%) scale(var(--ov-scale)); }
+
+.anchor[data-v='bottom'] .plateSlot { order: -1; }
+
+/* ─── torneo ─── */
+
+.tournament {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px 5px 10px;
+  background: var(--ov-brand);
+  color: #04110b;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1;
+  max-width: 560px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  animation: ov-drop 520ms var(--ov-ease) both;
+}
+
+.tournamentLogo {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+/* ─── marcador (bug) ─── */
+
+.bug {
+  display: flex;
+  align-items: stretch;
+  background: var(--ov-panel);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  animation: ov-wipe 640ms var(--ov-ease) both;
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  height: 48px;
+}
+
+.row + .row {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.team {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 100%;
+  min-width: 0;
+  padding-right: 14px;
+}
+
+.teamStrip {
+  align-self: stretch;
+  width: 7px;
+  flex: none;
+}
+
+.team[data-side='home'] .teamStrip { background: var(--ov-home); }
+.team[data-side='away'] .teamStrip { background: var(--ov-away); }
+
+.teamLogo,
+.teamLogoFallback {
+  width: 32px;
+  height: 32px;
+  flex: none;
+}
+
+.teamLogo { object-fit: contain; }
+
+.teamLogoFallback {
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--ov-panel-2);
+  font-weight: 800;
+  font-size: 16px;
+}
+
+.teamName {
+  width: 240px;
+  font-size: 21px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1;
+}
+
+.score {
+  display: grid;
+  place-items: center;
+  align-self: stretch;
+  min-width: 64px;
+  padding: 0 10px;
+  background: var(--ov-panel-2);
+  font-family: var(--ov-score, 'dharma-gothic-e', 'Bebas Neue', sans-serif);
+  font-weight: var(--ov-score-weight, 900);
+  font-size: 40px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+}
+
+.scoreBump {
+  display: inline-block;
+  animation: ov-bump 900ms var(--ov-ease);
+}
+
+/* ─── reloj ─── */
+
+.clock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 112px;
+  padding: 0 14px;
+  background: #000;
+  border-left: 3px solid var(--ov-brand);
+}
+
+.clockTime {
+  font-family: var(--ov-score, 'dharma-gothic-e', 'Bebas Neue', sans-serif);
+  font-weight: var(--ov-score-weight, 900);
+  font-size: 38px;
+  line-height: 0.9;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+.clockLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--ov-ink-dim);
+  white-space: nowrap;
+}
+
+.clock:not([data-has-time]) .clockLabel {
+  font-size: 17px;
+  color: var(--ov-ink);
+}
+
+.clock[data-phase='final'] {
+  background: var(--ov-brand);
+  border-left-color: var(--ov-brand);
+}
+
+.clock[data-phase='final'] .clockLabel {
+  color: #04110b;
+}
+
+.liveDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ov-live);
+  animation: ov-pulse 1.4s ease-in-out infinite;
+}
+
+/* ─── barra (zócalo) ─── */
+
+.bar {
+  display: flex;
+  align-items: stretch;
+  height: 72px;
+  background: var(--ov-panel);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5);
+  animation: ov-rise 640ms var(--ov-ease) both;
+}
+
+.bar .team { padding: 0 20px 0 0; gap: 14px; }
+.bar .team[data-side='away'] { flex-direction: row-reverse; padding: 0 0 0 20px; }
+.bar .teamLogo, .bar .teamLogoFallback { width: 46px; height: 46px; }
+.bar .teamName { width: 360px; font-size: 26px; }
+.bar .team[data-side='away'] .teamName { text-align: right; }
+
+.barScore {
+  display: flex;
+  align-items: center;
+  background: var(--ov-panel-2);
+  padding: 0 8px;
+}
+
+.barScore .score {
+  background: transparent;
+  font-size: 56px;
+  min-width: 76px;
+}
+
+.barDash {
+  font-family: var(--ov-score, 'dharma-gothic-e', 'Bebas Neue', sans-serif);
+  font-weight: var(--ov-score-weight, 900);
+  font-size: 40px;
+  color: var(--ov-ink-dim);
+}
+
+.bar .clock { min-width: 132px; }
+
+/* ─── placa de evento ─── */
+
+.plateSlot {
+  display: flex;
+}
+
+.plate {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  height: 60px;
+  padding: 0 20px 0 0;
+  background: var(--ov-panel);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+  white-space: nowrap;
+  animation: ov-plate-in 520ms var(--ov-ease) both;
+}
+
+.plate[data-leaving] {
+  animation: ov-plate-out 450ms var(--ov-ease) both;
+}
+
+.plateAccent {
+  align-self: stretch;
+  width: 10px;
+  background: var(--ov-team);
+}
+
+.plate[data-tone='yellow'] .plateAccent { background: var(--ov-yellow); }
+.plate[data-tone='red'] .plateAccent { background: var(--ov-red); }
+
+.plateLogo {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
+.plateTitle {
+  font-family: var(--ov-score, 'dharma-gothic-e', 'Bebas Neue', sans-serif);
+  font-weight: var(--ov-score-weight, 900);
+  font-size: 38px;
+  line-height: 1;
+  letter-spacing: 0.03em;
+  padding-top: 3px;
+}
+
+.plate[data-tone='score'] .plateTitle { color: var(--ov-brand); }
+.plate[data-tone='yellow'] .plateTitle { color: var(--ov-yellow); }
+.plate[data-tone='red'] .plateTitle { color: #ff5a64; }
+
+.platePlayer {
+  font-size: 22px;
+  font-weight: 700;
+  max-width: 380px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.plateTeam {
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--ov-ink-dim);
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.plateMinute {
+  font-family: var(--ov-score, 'dharma-gothic-e', 'Bebas Neue', sans-serif);
+  font-weight: var(--ov-score-weight, 900);
+  font-size: 28px;
+  color: var(--ov-ink-dim);
+  padding-top: 2px;
+}
+
+/* ─── ayuda de armado (ID mal, sin conexión) ─── */
+
+.setupHint {
+  position: fixed;
+  top: 24px;
+  left: 24px;
+  padding: 10px 14px;
+  background: #b00020;
+  color: #fff;
+  font: 600 16px/1.3 'Inter', system-ui, sans-serif;
+}
+
+/* ─── animaciones ─── */
+
+@keyframes ov-wipe {
+  from { clip-path: inset(0 100% 0 0); opacity: 0.4; }
+  to { clip-path: inset(0 0 0 0); opacity: 1; }
+}
+
+@keyframes ov-rise {
+  from { transform: translateY(24px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes ov-drop {
+  from { transform: translateY(-10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes ov-bump {
+  0% { transform: translateY(100%); opacity: 0; color: var(--ov-brand); }
+  45% { transform: translateY(-6%) scale(1.18); opacity: 1; color: var(--ov-brand); }
+  100% { transform: translateY(0) scale(1); color: var(--ov-ink); }
+}
+
+@keyframes ov-plate-in {
+  from { clip-path: inset(0 100% 0 0); transform: translateX(-16px); }
+  to { clip-path: inset(0 0 0 0); transform: translateX(0); }
+}
+
+@keyframes ov-plate-out {
+  from { clip-path: inset(0 0 0 0); opacity: 1; }
+  to { clip-path: inset(0 0 0 100%); opacity: 0; }
+}
+
+@keyframes ov-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
+
+/* ─── reloj vencido: se cumplió el tiempo del período ─── */
+
+.clock[data-expired],
+.fCenter[data-expired],
+.blockClock[data-expired] {
+  background: #d7192a;
+  border-left-color: #ff5a64;
+  animation: ov-expired 1.2s ease-in-out infinite;
+}
+
+.clock[data-expired] .clockLabel,
+.fCenter[data-expired] .fLabel { color: #ffe1e3; }
+
+.cClock[data-expired] {
+  background: #d7192a;
+  color: #fff;
+  animation: ov-expired 1.2s ease-in-out infinite;
+}
+
+@keyframes ov-expired {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.25); }
+}
+
+/* ─── tarjetas: rectangulitos como en la planilla ─── */
+
+.pips {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: 2px;
+}
+
+.pip {
+  display: inline-grid;
+  place-items: center;
+  width: 11px;
+  height: 16px;
+  border-radius: 2px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
+}
+
+.pip[data-tone='yellow'] { background: #ffd21f; }
+.pip[data-tone='red'] { background: #e5202e; }
+
+.pip[data-count] {
+  width: 18px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #04110b;
+}
+
+.pip[data-tone='red'][data-count] { color: #fff; }
+
+/* Los sin-bin corriendo: un módulo que se despliega debajo del marcador. */
+.sinbins {
+  display: flex;
+  gap: 6px;
+  animation: ov-drop 420ms var(--ov-ease) both;
+}
+
+.sinbin {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 10px 5px 0;
+  background: var(--ov-panel);
+  border-left: 5px solid var(--ov-team);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+}
+
+.sinbinTeam {
+  padding-left: 8px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.sinbinTime {
+  font-family: var(--ov-num, var(--ov-score, 'dharma-gothic-e', sans-serif));
+  font-weight: var(--ov-num-weight, 900);
+  font-size: calc(22px * var(--ov-num-size, 1));
+  font-variant-numeric: tabular-nums;
+  color: #ffd21f;
+}
+
+/* ─── franja: bloques del color de cada club ─── */
+
+.franja {
+  display: flex;
+  align-items: stretch;
+  height: 64px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+  animation: ov-wipe 640ms var(--ov-ease) both;
+}
+
+.fTeam {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 18px;
+  min-width: 200px;
+}
+
+.fTeam[data-side='home'] { background: var(--ov-home); color: var(--ov-home-ink); justify-content: flex-start; }
+.fTeam[data-side='away'] { background: var(--ov-away); color: var(--ov-away-ink); justify-content: flex-end; }
+
+.fTeam .teamLogo,
+.fTeam .teamLogoFallback { width: 40px; height: 40px; }
+
+.fName {
+  font-size: 26px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+}
+
+.fScore {
+  display: grid;
+  place-items: center;
+  min-width: 82px;
+  background: var(--ov-panel);
+  font-family: var(--ov-score, 'dharma-gothic-e', sans-serif);
+  font-weight: var(--ov-score-weight, 900);
+  font-size: calc(50px * var(--ov-score-size, 1));
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+}
+
+.fCenter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-width: 124px;
+  padding: 0 14px;
+  background: #000;
+  border-left: 3px solid var(--ov-brand);
+  border-right: 3px solid var(--ov-brand);
+}
+
+.fTime {
+  font-family: var(--ov-num, var(--ov-score, 'dharma-gothic-e', sans-serif));
+  font-weight: var(--ov-num-weight, 900);
+  font-size: calc(32px * var(--ov-num-size, 1));
+  line-height: 0.9;
+  font-variant-numeric: tabular-nums;
+}
+
+.fLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: var(--ov-ink-dim);
+}
+
+.fDivider {
+  width: 4px;
+  background: var(--ov-brand);
+}
+
+/* ─── compacto: la píldora chica ─── */
+
+.compact {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 46px;
+  padding: 0 6px 0 16px;
+  border-radius: 999px;
+  background: var(--ov-panel);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.45);
+  animation: ov-wipe 560ms var(--ov-ease) both;
+}
+
+.cDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15);
+}
+
+.cName {
+  font-size: 19px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+}
+
+.cScore {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 12px;
+  border-radius: 8px;
+  background: var(--ov-panel-2);
+  font-family: var(--ov-score, 'dharma-gothic-e', sans-serif);
+  font-weight: var(--ov-score-weight, 900);
+  font-size: calc(34px * var(--ov-score-size, 1));
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+}
+
+.cDash { color: var(--ov-ink-dim); }
+
+.cClock {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: var(--ov-brand);
+  color: #04110b;
+  font-family: var(--ov-num, var(--ov-score, 'dharma-gothic-e', sans-serif));
+  font-weight: var(--ov-num-weight, 900);
+  font-size: calc(22px * var(--ov-num-size, 1));
+  font-variant-numeric: tabular-nums;
+}
+
+.cClock small {
+  font-family: var(--ov-text, 'Outfit', sans-serif);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  opacity: 0.75;
+}
+
+/* ─── bloques: dos cuadrados grandes con el reloj abajo ─── */
+
+.blocks {
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.5);
+  animation: ov-rise 600ms var(--ov-ease) both;
+}
+
+.blockRow { display: flex; }
+
+.block {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 170px;
+  padding: 18px 10px 12px;
+  background: var(--ov-panel);
+  overflow: hidden;
+}
+
+.block + .block { border-left: 1px solid rgba(255, 255, 255, 0.08); }
+
+.blockBand {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 6px;
+}
+
+.block[data-side='home'] .blockBand { background: var(--ov-home); }
+.block[data-side='away'] .blockBand { background: var(--ov-away); }
+
+.block .teamLogo,
+.block .teamLogoFallback { width: 44px; height: 44px; }
+
+.blockScore {
+  font-family: var(--ov-score, 'dharma-gothic-e', sans-serif);
+  font-weight: var(--ov-score-weight, 900);
+  font-size: calc(92px * var(--ov-score-size, 1));
+  line-height: 0.85;
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+}
+
+.blockName {
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.blockClock {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 44px;
+  background: #000;
+  border-top: 3px solid var(--ov-brand);
+}
+
+.blockClock b {
+  font-family: var(--ov-num, var(--ov-score, 'dharma-gothic-e', sans-serif));
+  font-weight: var(--ov-num-weight, 900);
+  font-size: calc(28px * var(--ov-num-size, 1));
+  font-variant-numeric: tabular-nums;
+}
+
+.blockClock span:last-child {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: var(--ov-ink-dim);
+}
+
+/* ─── el tanto sobre el marcador ─── */
+
+/* El marcador va envuelto: el efecto lo tapa entero mientras dura. */
+.board {
+  position: relative;
+  display: flex;
+}
+
+.fx {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  background: var(--fx-color);
+  color: var(--fx-ink);
+  overflow: visible;
+  pointer-events: none;
+  animation: fx-sweep var(--fx-ms) cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.fx[data-side='away'] { animation-name: fx-sweep-away; }
+
+.fxText {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  white-space: nowrap;
+  animation: fx-text var(--fx-ms) ease both;
+}
+
+.fxTitle {
+  font-family: var(--ov-score, 'dharma-gothic-e', sans-serif);
+  font-weight: var(--ov-score-weight, 900);
+  font-size: calc(46px * var(--ov-score-size, 1));
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+.fxPlayer {
+  font-size: 22px;
+  font-weight: 800;
+}
+
+/* El +N: aparece al lado del texto, titila como un flash y después se
+   desliza hacia el resultado de su lado (adentro de la franja: lo de afuera
+   lo recorta la animación). */
+.fxPoints {
+  padding: 2px 14px;
+  border-radius: 10px;
+  background: #fff;
+  color: #04110b;
+  font-family: var(--ov-score, 'dharma-gothic-e', sans-serif);
+  font-weight: var(--ov-score-weight, 900);
+  font-size: calc(46px * var(--ov-score-size, 1));
+  line-height: 1;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  animation: fx-points-home var(--fx-ms) cubic-bezier(0.5, 0, 0.75, 0) both;
+}
+
+.fx[data-side='away'] .fxPoints { animation-name: fx-points-away; }
+
+@keyframes fx-sweep {
+  0% { clip-path: inset(0 100% 0 0); }
+  12% { clip-path: inset(0 0 0 0); }
+  80% { clip-path: inset(0 0 0 0); opacity: 1; }
+  100% { clip-path: inset(0 0 0 100%); opacity: 0.9; }
+}
+
+@keyframes fx-sweep-away {
+  0% { clip-path: inset(0 0 0 100%); }
+  12% { clip-path: inset(0 0 0 0); }
+  80% { clip-path: inset(0 0 0 0); opacity: 1; }
+  100% { clip-path: inset(0 100% 0 0); opacity: 0.9; }
+}
+
+@keyframes fx-text {
+  0%, 8% { opacity: 0; transform: scale(1.3); }
+  18% { opacity: 1; transform: scale(1); }
+  58% { opacity: 1; }
+  66%, 100% { opacity: 0; }
+}
+
+@keyframes fx-points-home {
+  0%, 14% { opacity: 0; transform: scale(0.4); }
+  20% { opacity: 1; transform: scale(1.3); }
+  26% { opacity: 0.2; }
+  32% { opacity: 1; }
+  38% { opacity: 0.2; }
+  44% { opacity: 1; transform: scale(1); }
+  60% { opacity: 1; transform: translateX(0) scale(1); }
+  /* Se va hacia el resultado del local (a la izquierda). */
+  86% { opacity: 1; transform: translateX(-240px) scale(0.7); }
+  100% { opacity: 0; transform: translateX(-260px) scale(0.5); }
+}
+
+@keyframes fx-points-away {
+  0%, 14% { opacity: 0; transform: scale(0.4); }
+  20% { opacity: 1; transform: scale(1.3); }
+  26% { opacity: 0.2; }
+  32% { opacity: 1; }
+  38% { opacity: 0.2; }
+  44% { opacity: 1; transform: scale(1); }
+  60% { opacity: 1; transform: translateX(0) scale(1); }
+  86% { opacity: 1; transform: translateX(240px) scale(0.7); }
+  100% { opacity: 0; transform: translateX(260px) scale(0.5); }
+}
+
+/* ─── escudos grandes ─── */
+
+.crests {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 18px 28px 34px;
+  border-radius: 16px;
+  background: linear-gradient(165deg, #121c16, #070807);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+  animation: ov-rise 600ms var(--ov-ease) both;
+}
+
+.crestTeam {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 120px;
+}
+
+.crestBig .teamLogo,
+.crestBig .teamLogoFallback { width: 84px; height: 84px; font-size: 34px; }
+
+.crestName {
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.crestScore {
+  font-family: var(--ov-score, 'dharma-gothic-e', sans-serif);
+  font-weight: var(--ov-score-weight, 900);
+  font-size: calc(96px * var(--ov-score-size, 1));
+  line-height: 0.85;
+  font-variant-numeric: tabular-nums;
+  min-width: 90px;
+  text-align: center;
+  overflow: hidden;
+}
+
+.crestClock {
+  position: absolute;
+  left: 50%;
+  bottom: -14px;
+  transform: translateX(-50%);
+  padding: 4px 16px;
+  border-radius: 999px;
+  background: var(--ov-brand);
+  color: #04110b;
+  font-family: var(--ov-num, var(--ov-score, 'dharma-gothic-e', sans-serif));
+  font-weight: var(--ov-num-weight, 900);
+  font-size: calc(24px * var(--ov-num-size, 1));
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.crestClock[data-expired] { background: #d7192a; color: #fff; animation: ov-expired 1.2s ease-in-out infinite; }
+
+/* ─── tira fina ─── */
+
+.strip {
+  display: flex;
+  align-items: stretch;
+  height: 40px;
+  background: rgba(7, 8, 7, 0.92);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.4);
+  animation: ov-wipe 520ms var(--ov-ease) both;
+}
+
+.stripTeam {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 14px;
+  font-size: 17px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+}
+
+.stripTeam[data-side='home'] { box-shadow: inset 0 -4px 0 var(--ov-home); }
+.stripTeam[data-side='away'] { box-shadow: inset 0 -4px 0 var(--ov-away); }
+
+.stripScore {
+  display: grid;
+  place-items: center;
+  min-width: 44px;
+  font-family: var(--ov-score, 'dharma-gothic-e', sans-serif);
+  font-weight: var(--ov-score-weight, 900);
+  font-size: calc(30px * var(--ov-score-size, 1));
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+}
+
+.stripClock {
+  display: grid;
+  place-items: center;
+  padding: 0 12px;
+  background: var(--ov-brand);
+  color: #04110b;
+  font-family: var(--ov-num, var(--ov-score, 'dharma-gothic-e', sans-serif));
+  font-weight: var(--ov-num-weight, 900);
+  font-size: calc(19px * var(--ov-num-size, 1));
+  font-variant-numeric: tabular-nums;
+}
+
+.stripClock[data-expired] { background: #d7192a; color: #fff; animation: ov-expired 1.2s ease-in-out infinite; }
+
+.stripSep { width: 3px; background: var(--ov-brand); }
+
+/* ─── simetría: los dos lados miden lo mismo en todas las formas ─── */
+
+/* Nombres en un renglón; si no entran, con puntos suspensivos. */
+.teamName,
+.fName,
+.cName,
+.blockName,
+.crestName,
+.stripTeam {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Esquina y zócalo: el lugar de las tarjetas es fijo, el resultado no se corre. */
+.bug .pips,
+.bar .pips {
+  width: 44px;
+  flex: none;
+  justify-content: flex-start;
+}
+
+/* Franja: los dos bloques de color, del mismo ancho. */
+.fTeam {
+  width: 290px;
+  min-width: 0;
+  flex: none;
+}
+
+.fName { min-width: 0; }
+.fTeam .pips { width: 40px; flex: none; }
+.fTeam[data-side='home'] .pips { justify-content: flex-start; }
+.fTeam[data-side='away'] .pips { justify-content: flex-end; }
+
+/* Compacto: siglas y tarjetas con ancho fijo a cada lado del resultado. */
+.cName {
+  width: 96px;
+  text-align: center;
+}
+
+.compact .pips { width: 30px; flex: none; justify-content: center; }
+
+/* Bloques: mismo ancho, todo centrado, el nombre en un renglón. */
+.block {
+  width: 210px;
+  flex: none;
+  justify-content: flex-start;
+}
+
+.blockName {
+  width: 100%;
+  text-align: center;
+  font-size: 17px;
+}
+
+.block .pips {
+  min-height: 16px;
+  justify-content: center;
+}
+
+/* Escudos grandes: los dos lados iguales. */
+.crestTeam {
+  width: 160px;
+  min-width: 0;
+}
+
+.crestName {
+  width: 100%;
+  text-align: center;
+}
+
+.crestTeam .pips { min-height: 16px; justify-content: center; }
+
+.crestScore { width: 110px; }
+
+/* Tira: siglas del mismo ancho a los dos lados. */
+.stripTeam {
+  width: 120px;
+  justify-content: center;
+}
+
+.stripTeam .pips { flex: none; }
+
+/* Escudos: lugar para "CLUB VISITANTE" y aire para la píldora del reloj. */
+.crestTeam { width: 200px; }
+.crestName { font-size: 17px; }
+.crests { margin-bottom: 18px; }
+
+/* Escudos: el reloj va ADENTRO, centrado debajo del resultado (no colgando). */
+.crests { margin-bottom: 0; padding: 20px 28px; }
+
+.crestCenter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.crestScores {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.crestDash {
+  font-family: var(--ov-score, 'dharma-gothic-e', sans-serif);
+  font-weight: var(--ov-score-weight, 900);
+  font-size: calc(56px * var(--ov-score-size, 1));
+  color: var(--ov-ink-dim);
+}
+
+.crests .crestClock {
+  position: static;
+  transform: none;
+}

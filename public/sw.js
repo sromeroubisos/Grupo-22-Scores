@@ -1,4 +1,4 @@
-const SW_VERSION = '2026-11-25-2';
+const SW_VERSION = '2026-11-26-1';
 const LOGO_CACHE = `g22-logo-cache-${SW_VERSION}`;
 const STATIC_CACHE = `g22-static-cache-${SW_VERSION}`;
 const OWNED_CACHE_PREFIXES = ['g22-logo-cache-', 'g22-static-cache-', 'g22-runtime-cache-', 'g22-app-cache-'];
@@ -58,6 +58,18 @@ async function offlinePage() {
 h1{font-size:1.3rem;margin:0 0 8px}p{margin:0;color:#a7adb8}.hint{margin-top:14px;font-size:.85rem}
 a{display:inline-block;margin-top:22px;padding:14px 24px;border-radius:999px;background:#8fff00;color:#0b0d12;font-weight:800;text-decoration:none}
 </style></head><body><main><h1>Sin conexión</h1><p>No hay internet para cargar esta página.</p>${action}</main></body></html>`;
+  return new Response(html, { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' } });
+}
+
+/** Lo que se carga en OBS/vMix (no el generador ni el panel de control, que mira una persona). */
+function isBroadcastOverlay(pathname) {
+  return pathname.startsWith('/overlay/') && !pathname.startsWith('/overlay/control/');
+}
+
+function overlayRetryPage() {
+  const html = '<!doctype html><html><head><meta charset="utf-8"><title>G22 overlay</title>'
+    + '<style>html,body{margin:0;background:transparent}</style>'
+    + '<script>setTimeout(function(){location.reload()},5000)</script></head><body></body></html>';
   return new Response(html, { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' } });
 }
 
@@ -220,6 +232,12 @@ self.addEventListener('fetch', (event) => {
       // Cualquier otra página sin red: en vez de la pantalla de error del navegador, un cartel que
       // lleva al juego si está guardado. Con red no cambia nada: el pedido sale igual que siempre
       // (y con su redirect en "manual", que es como llega una navegación).
+      // Un overlay de transmisión (OBS/vMix) sin red no puede mostrar un cartel: sale al aire.
+      // Página transparente que reintenta sola hasta que vuelva la conexión.
+      if (request.mode === 'navigate' && isBroadcastOverlay(url.pathname)) {
+        event.respondWith(fetch(request).catch(() => overlayRetryPage()));
+        return;
+      }
       if (request.mode === 'navigate') {
         event.respondWith(fetch(request).catch(() => offlinePage()));
         return;

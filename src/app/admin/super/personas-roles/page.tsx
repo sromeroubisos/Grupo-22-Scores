@@ -355,7 +355,7 @@ export default function PersonasRolesPage() {
         };
     }, [editingUser]);
 
-    const roleOptions: AppUserRole[] = ['fan', 'familia_club', 'admin_club', 'admin_torneo', 'admin_general', 'super_admin'];
+    const roleOptions: AppUserRole[] = ['fan', 'usuario_overlay', 'familia_club', 'admin_club', 'admin_torneo', 'admin_general', 'super_admin'];
 
     const clubScopeOptions = useMemo<ClubAssignmentOption[]>(() => {
         return clubsForAssignment

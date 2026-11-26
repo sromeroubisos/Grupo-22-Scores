@@ -12,7 +12,7 @@ import ThemeToggle from '@/components/ThemeToggle';
 // Loading it client-only keeps both renders identical until hydration finishes.
 const NotificationsBell = dynamic(() => import('@/components/NotificationsBell'), { ssr: false });
 const GlobalSearch = dynamic(() => import('@/components/GlobalSearch'), { ssr: false });
-import { getRoleLabel, resolveAdminPanel } from '@/lib/auth/roles';
+import { getRoleLabel, hasOverlayAccess, resolveAdminPanel } from '@/lib/auth/roles';
 import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import { logRefreshLoop } from '@/lib/debug/refreshLoop';
 import { trackEvent } from '@/lib/analytics';
@@ -137,6 +137,7 @@ export default function Header() {
 
     const displayUser = hasHydrated ? user : null;
     const adminPanel = resolveAdminPanel(displayUser?.role, displayUser?.memberships);
+    const canUseOverlays = hasOverlayAccess(displayUser?.role);
     const isNewsRoute = pathname?.startsWith('/noticias') ?? false;
     const isRankingsRoute = pathname?.startsWith('/rankings') ?? false;
     // El Prode dejó de ser una pestaña de primera plana: vive dentro de Juegos.
@@ -392,6 +393,17 @@ export default function Header() {
                                             </svg>
                                             Prode
                                         </Link>
+
+                                        {canUseOverlays && (
+                                            <Link href="/overlay" prefetch={false} onClick={() => setIsUserMenuOpen(false)}>
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                                    <rect x="2" y="4" width="20" height="14" rx="2" />
+                                                    <rect x="5" y="12" width="9" height="3" rx="1" />
+                                                    <path d="M8 21h8" />
+                                                </svg>
+                                                Overlays
+                                            </Link>
+                                        )}
 
                                         {adminPanel && (
                                             <Link href={adminPanel.href} prefetch={false} onClick={() => setIsUserMenuOpen(false)}>

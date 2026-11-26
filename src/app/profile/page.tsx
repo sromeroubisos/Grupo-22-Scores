@@ -23,7 +23,7 @@ import {
 import { useFavorites } from '@/hooks/useFavorites';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { getActiveSports } from '@/lib/data/sports';
-import { getRoleLabel } from '@/lib/auth/roles';
+import { getRoleLabel, hasOverlayAccess } from '@/lib/auth/roles';
 import { useAuth } from '@/context/AuthContext';
 import ProdeLobby from '@/components/prode/ProdeLobby';
 import type { ProdePrivateLeagueSummary, PublicProdeCompetition, PublicProdeUserTotal } from '@/lib/prode/types';
@@ -152,6 +152,19 @@ export default function ProfilePage() {
                 {activeTab === 'perfil' && (
                     <div className={styles.profileStack}>
                         <ProfileHeader user={user} stats={stats} />
+                        {hasOverlayAccess(user?.role) && (
+                            <section className={styles.settingsCard} aria-label="Overlays">
+                                <div className={styles.settingsGrid}>
+                                    <Link href="/overlay" prefetch={false} className={`${styles.settingTile} ${styles.settingTileLink}`} style={{ gridColumn: '1 / -1' }}>
+                                        <div className={styles.settingInfo}>
+                                            <h4>Overlays</h4>
+                                            <p>Gráficos en vivo para OBS y vMix: marcadores, tablas, titulares</p>
+                                        </div>
+                                        <ChevronRight size={16} color="var(--color-text-tertiary)" />
+                                    </Link>
+                                </div>
+                            </section>
+                        )}
                         <ProfileActionHub
                             user={user}
                             activeRequestForm={activeRequestForm}

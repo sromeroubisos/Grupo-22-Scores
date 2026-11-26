@@ -28,6 +28,8 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
     const isManagementPage = pathname?.startsWith('/admin');
     const isOnboardingPage = pathname?.startsWith('/onboarding');
     const isClubAdminPage = pathname?.startsWith('/club-admin');
+    // Overlay de transmisión: lo abre OBS/vMix, nunca se lo manda al onboarding.
+    const isOverlayPage = pathname?.startsWith('/overlay') ?? false;
     // Pantalla full-screen del Prode Mundial: trae su propio fondo y bottom nav,
     // así que va sin el chrome global (header/ticker/nav/footer).
     const isProdeFullScreen = pathname === '/prode/mundial';
@@ -67,7 +69,8 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
             isAuthenticated &&
             user &&
             user.onboardingCompleted === false &&
-            !isOnboardingPage
+            !isOnboardingPage &&
+            !isOverlayPage
         ) {
             // Se pregunta UNA vez: quien ya pasó por el asistente en este dispositivo (o lo salteó)
             // y después se registra no lo repite. Se marca completo en su cuenta; los favoritos que
@@ -96,7 +99,14 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
             }
             router.push(`/onboarding/preferences?returnTo=${encodeURIComponent(returnTo)}`);
         }
-    }, [isLoading, isManagementPage, isAuthenticated, user, isOnboardingPage, returnTo, router, refreshOnboardingStatus]);
+    }, [isLoading, isManagementPage, isAuthenticated, user, isOnboardingPage, isOverlayPage, returnTo, router, refreshOnboardingStatus]);
+
+    // Overlay de transmisión (OBS, vMix): lo dibuja un programa de streaming
+    // encima del video, así que va sin NADA del sitio — ni header, ni barra,
+    // ni asistentes que aparezcan solos en plena transmisión.
+    if (isOverlayPage) {
+        return <>{children}</>;
+    }
 
     // Onboarding pages get a blank layout (no header/footer/nav)
     if (isOnboardingPage || isProdeFullScreen) {

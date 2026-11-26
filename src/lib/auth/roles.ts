@@ -13,7 +13,8 @@ export type AppUserRole =
     | 'gestor_deportes'
     | 'gestor_torneos'
     | 'gestor_partidos'
-    | 'gestor_clubes';
+    | 'gestor_clubes'
+    | 'usuario_overlay';
 
 export type MembershipScope = 'union' | 'sport' | 'tournament' | 'match' | 'club' | 'club_family';
 export type MembershipRole = 'admin' | 'editor' | 'operator' | 'viewer';
@@ -45,6 +46,7 @@ export const APP_ROLES: AppUserRole[] = [
     'gestor_torneos',
     'gestor_partidos',
     'gestor_clubes',
+    'usuario_overlay',
 ];
 
 const ROLE_ALIASES: Record<string, AppUserRole> = {
@@ -80,6 +82,9 @@ const ROLE_ALIASES: Record<string, AppUserRole> = {
     user: 'fan',
     jugador: 'jugador',
     entrenador: 'entrenador',
+    usuario_overlay: 'usuario_overlay',
+    overlay: 'usuario_overlay',
+    overlay_user: 'usuario_overlay',
 };
 
 export const VIEW_MEMBERSHIP_ROLES = new Set<MembershipRole>(['admin', 'editor', 'operator', 'viewer']);
@@ -103,6 +108,7 @@ export const ROLE_LABELS: Record<AppUserRole, string> = {
     gestor_torneos: 'Gestor de Torneos',
     gestor_partidos: 'Gestor de Partidos',
     gestor_clubes: 'Gestor de Clubes',
+    usuario_overlay: 'Usuario con overlays',
 };
 
 export const DEFAULT_SCOPE_FOR_ROLE: Partial<Record<AppUserRole, MembershipScope>> = {
@@ -267,6 +273,16 @@ export function isGlobalAdminRole(role?: string | null): boolean {
 
 export function canUseRestrictedContentActions(role?: string | null): boolean {
     return isGlobalAdminRole(role);
+}
+
+/**
+ * Quién arma overlays de transmisión (/overlay) y crea marcadores o titulares
+ * manuales: el rol `usuario_overlay` y la administración global. Ver los
+ * overlays al aire no pide nada: OBS y vMix no tienen sesión.
+ */
+export function hasOverlayAccess(role?: string | null): boolean {
+    const normalized = normalizeRole(role);
+    return normalized === 'usuario_overlay' || isGlobalAdminRole(normalized);
 }
 
 export function isSuperAdminRole(role?: string | null): boolean {
