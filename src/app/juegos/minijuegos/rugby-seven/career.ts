@@ -793,7 +793,7 @@ export function franchiseOf(club: string): string {
     // La Supercopa Europea (octubre a diciembre) junta a los mejores de las ligas de España y Portugal.
     if (region === 'espana') return club.startsWith('ef-') ? '' : 'Iberos';
     if (region === 'portugal') return 'Lusitanos';
-    if (region === 'femenino' || region === 'francia' || region === 'inglaterra' || region === 'sudafrica' || region === 'alemania' || region === 'polonia' || region === 'georgia' || region === 'rusia' || region === 'australia' || region === 'chequia' || region === 'bolivia' || region === 'peru' || region === 'mexico' || region === 'colombia') return '';
+    if (region === 'femenino' || region === 'francia' || region === 'inglaterra' || region === 'sudafrica' || region === 'alemania' || region === 'polonia' || region === 'georgia' || region === 'rusia' || region === 'australia' || region === 'chequia' || region === 'bolivia' || region === 'peru' || region === 'mexico' || region === 'colombia' || region === 'gales' || region === 'escocia' || region === 'irlanda' || region === 'rumania' || region === 'italia' || region === 'belgica' || region === 'holanda') return '';
     if (region === 'noa') return 'Tarucas';
     if (region === 'nea') return 'Yacaré XV';
     if (region === 'centro' || region === 'oeste') return 'Dogos XV';
@@ -861,13 +861,20 @@ export function nationalTeamOf(club: string): string {
     if (region === 'peru') return 'Los Incas';
     if (region === 'mexico') return 'Los Aztecas';
     if (region === 'colombia') return 'Los Tucanes';
+    if (region === 'gales') return 'Los Dragones';
+    if (region === 'escocia') return 'Los Cardos';
+    if (region === 'irlanda') return 'Los Tréboles';
+    if (region === 'rumania') return 'Los Robles';
+    if (region === 'italia') return 'Los Azules';
+    if (region === 'belgica') return 'Los Diablos Negros';
+    if (region === 'holanda') return 'Los Tulipanes';
     return region === 'chile' ? 'Los Cóndores' : region === 'uruguay' ? 'Los Teros' : region === 'brasil' ? 'Os Tupis' : 'Los Pumas';
 }
 
 /** Mitad de temporada: vuelven los de la franquicia, y a los muy buenos los pueden llamar los Pumas o un club de Europa. */
 /** Las ligas de Europa: ahí el seleccionado no se lleva a nadie toda la temporada, sino por ventanas. */
 // Rusia no figura: World Rugby la tiene suspendida y sus jugadores no son convocados a ningún seleccionado.
-const EURO_WINDOWS = new Set<Branch>(['francia', 'inglaterra', 'espana', 'portugal', 'franciaFem', 'inglaterraFem', 'espanaFem', 'alemania', 'polonia', 'georgia', 'chequia']);
+const EURO_WINDOWS = new Set<Branch>(['francia', 'inglaterra', 'espana', 'portugal', 'franciaFem', 'inglaterraFem', 'espanaFem', 'alemania', 'polonia', 'georgia', 'chequia', 'gales', 'escocia', 'irlanda', 'rumania', 'italia', 'belgica', 'holanda']);
 
 /**
  * Una ventana internacional: los mejores del plantel se van con el seleccionado y vuelven cuando termina.

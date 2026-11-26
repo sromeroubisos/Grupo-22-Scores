@@ -77,6 +77,13 @@ const CAREER_COUNTRIES: { id: string; name: string; flag: string; sub: string; b
     { id: 'pe', name: 'Perú', flag: 'pe', sub: 'Liga Andina del Perú: una sola división, fase regular y semifinales.', branches: ['peru'] },
     { id: 'mx', name: 'México', flag: 'mx', sub: 'Liga Azteca de México: una sola división, fase regular y semifinales.', branches: ['mexico'] },
     { id: 'co', name: 'Colombia', flag: 'co', sub: 'Liga de Rugby de Bogotá: una sola división, fase regular y semifinales.', branches: ['colombia'] },
+    { id: 'wa', name: 'Gales', flag: 'gb-wls', sub: 'Liga Premier y Campeonato de Gales: los clubes, no las franquicias. Sube el campeón, baja el último.', branches: ['gales'] },
+    { id: 'sc', name: 'Escocia', flag: 'gb-sct', sub: 'Liga Premier y Nacional Uno de Escocia. Sube el campeón, baja el último.', branches: ['escocia'] },
+    { id: 'ie', name: 'Irlanda', flag: 'ie', sub: 'Liga de Irlanda: Primera A y Primera B. Sube el campeón, baja el último.', branches: ['irlanda'] },
+    { id: 'ro', name: 'Rumania', flag: 'ro', sub: 'Superliga de Rumania: una sola división, fase regular y semifinales.', branches: ['rumania'] },
+    { id: 'it', name: 'Italia', flag: 'it', sub: 'Serie A Élite de Italia: una sola división, fase regular y semifinales.', branches: ['italia'] },
+    { id: 'be', name: 'Bélgica y Luxemburgo', flag: 'be', sub: 'Liga Élite y Nacional de Bélgica y Luxemburgo. Sube el campeón, baja el último.', branches: ['belgica'] },
+    { id: 'nl', name: 'Países Bajos', flag: 'nl', sub: 'Ereklasse de Países Bajos: una sola división, fase regular y semifinales.', branches: ['holanda'] },
     { id: 'arf', name: 'Argentina · femenino', flag: 'ar', sub: 'URBA (Top 9, Primera y Segunda) y el Centro (Córdoba y Andina). Las mejores juegan el Nacional de Clubes Femenino.', branches: ['fem'] },
     { id: 'esf', name: 'España · femenino', flag: 'es', sub: 'Liga Iberdrola y División de Honor B femenina. Sube la campeona, baja la última.', branches: ['espanaFem'] },
     { id: 'cl', name: 'Chile', flag: 'cl', sub: 'ARUSA: Top 10, Segunda, Tercera y Cuarta. Sube el campeón, baja el último.', branches: ['chile'] },
@@ -88,14 +95,14 @@ const firstClubOf = (countryId: string) => {
     return [...new Set(ids)].map((id) => AR_CLUBS.find((t) => t.id === id)).filter((t): t is SevenTeam => !!t).sort((a, b) => a.name.localeCompare(b.name, 'es'))[0]?.id ?? null;
 };
 /** Bandera de cada categoría con país. */
-const CAT_FLAG: Record<string, string> = { Argentina: 'ar', Chile: 'cl', Uruguay: 'uy', Brasil: 'br', España: 'es', Francia: 'fr', Inglaterra: 'gb-eng', Sudáfrica: 'za', Portugal: 'pt', Alemania: 'de', Polonia: 'pl', Georgia: 'ge', Rusia: 'ru', Australia: 'au', Chequia: 'cz', Bolivia: 'bo', Perú: 'pe', México: 'mx' };
+const CAT_FLAG: Record<string, string> = { Argentina: 'ar', Chile: 'cl', Uruguay: 'uy', Brasil: 'br', España: 'es', Francia: 'fr', Inglaterra: 'gb-eng', Sudáfrica: 'za', Portugal: 'pt', Alemania: 'de', Polonia: 'pl', Georgia: 'ge', Rusia: 'ru', Australia: 'au', Chequia: 'cz', Bolivia: 'bo', Perú: 'pe', México: 'mx', 'Gales': 'gb-wls', 'Escocia': 'gb-sct', 'Irlanda': 'ie', 'Rumania': 'ro', 'Italia': 'it', 'Bélgica': 'be', 'Países Bajos': 'nl' };
 /** Las categorías de torneo que tienen modo carrera. */
-const CAREER_CATS = ['Argentina', 'Chile', 'Uruguay', 'Brasil', 'España', 'Francia', 'Inglaterra', 'Sudáfrica', 'Portugal', 'Alemania', 'Polonia', 'Georgia', 'Rusia', 'Australia', 'Chequia', 'Bolivia', 'Perú', 'México'];
+const CAREER_CATS = ['Argentina', 'Chile', 'Uruguay', 'Brasil', 'España', 'Francia', 'Inglaterra', 'Sudáfrica', 'Portugal', 'Alemania', 'Polonia', 'Georgia', 'Rusia', 'Australia', 'Chequia', 'Bolivia', 'Perú', 'México', 'Gales', 'Escocia', 'Irlanda', 'Rumania', 'Italia', 'Bélgica', 'Países Bajos'];
 const countryOfClub = (id: string | null) => CAREER_COUNTRIES.find((c) => AR_SEVEN_DIVISIONS.some((d) => c.branches.includes(d.branch) && d.clubs.includes(id ?? '')))?.id ?? null;
 
 /** En qué grupo del selector va cada división: Argentina, o el país de afuera. */
 const branchGroup = (b: ArBranch) =>
-    ({ chile: 'Chile', uruguay: 'Uruguay', brasil: 'Brasil', espana: 'España', espanaFem: 'España femenino', fem: 'Argentina femenino', francia: 'Francia', inglaterra: 'Inglaterra', sudafrica: 'Sudáfrica', portugal: 'Portugal', franciaFem: 'Francia femenino', inglaterraFem: 'Inglaterra femenino', alemania: 'Alemania', polonia: 'Polonia', georgia: 'Georgia', rusia: 'Rusia', australia: 'Australia', chequia: 'Chequia', bolivia: 'Bolivia', peru: 'Perú', mexico: 'México' } as Record<string, string>)[b] ?? 'Argentina';
+    ({ chile: 'Chile', uruguay: 'Uruguay', brasil: 'Brasil', espana: 'España', espanaFem: 'España femenino', fem: 'Argentina femenino', francia: 'Francia', inglaterra: 'Inglaterra', sudafrica: 'Sudáfrica', portugal: 'Portugal', franciaFem: 'Francia femenino', inglaterraFem: 'Inglaterra femenino', alemania: 'Alemania', polonia: 'Polonia', georgia: 'Georgia', rusia: 'Rusia', australia: 'Australia', chequia: 'Chequia', bolivia: 'Bolivia', peru: 'Perú', mexico: 'México', gales: 'Gales', escocia: 'Escocia', irlanda: 'Irlanda', rumania: 'Rumania', italia: 'Italia', belgica: 'Bélgica', holanda: 'Países Bajos' } as Record<string, string>)[b] ?? 'Argentina';
 import { CLUB_LEAGUES, CLUBS, registerCustomTeams, teamOfCode } from './clubs';
 import {
     advanceCareer,
@@ -2256,7 +2263,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                             <div className={styles.nacAsk} role="radiogroup" aria-label="Dónde juega tu club">
                                 <span className={styles.nacAskQ}>¿En qué pirámide juega {mcDraft?.name.trim() || 'tu club'}?</span>
                                 <div className={styles.regionGrid}>
-                                    {(['ar', 'sa'] as McWorld[]).map((w) => (
+                                    {(['ar', 'sa', 'eu'] as McWorld[]).map((w) => (
                                         <button
                                             key={w}
                                             type="button"
@@ -2276,9 +2283,9 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                     ))}
                                 </div>
                             </div>
-                            <div className={styles.nacAsk} role="radiogroup" aria-label={mcWorld === 'sa' ? 'País de tu club' : 'Región de tu club'}>
+                            <div className={styles.nacAsk} role="radiogroup" aria-label={mcWorld !== 'ar' ? 'País de tu club' : 'Región de tu club'}>
                                 <span className={styles.nacAskQ}>
-                                    ¿De {mcWorld === 'sa' ? 'qué país' : 'dónde'} es {mcDraft?.name.trim() || 'tu club'}?
+                                    ¿De {mcWorld !== 'ar' ? 'qué país' : 'dónde'} es {mcDraft?.name.trim() || 'tu club'}?
                                 </span>
                                 <div className={styles.regionGrid}>
                                     {WORLDS[mcWorld].regions.map((reg) => (
@@ -2322,7 +2329,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                 <strong>Cómo es Mi Club · {WORLDS[mcWorld].label}</strong>
                                 <span>
                                     {WORLDS[mcWorld].levels.length} divisiones con los {WORLDS[mcWorld].pool.length} clubes de varones{' '}
-                                    {mcWorld === 'sa' ? 'de Chile, Brasil, Uruguay, Perú, México y Colombia' : 'de Argentina'}: {WORLDS[mcWorld].levels.map((l) => l.label).join(', ')}. Arrancás en la Regional, con un plantel de pibes del barrio.
+                                    {mcWorld === 'sa' ? 'de Chile, Brasil, Uruguay, Perú, México y Colombia' : mcWorld === 'eu' ? 'de la Europa no profesional (de Irlanda a Georgia, sin Inglaterra ni Francia)' : 'de Argentina'}: {WORLDS[mcWorld].levels.map((l) => l.label).join(', ')}. Arrancás en la Regional, con un plantel de pibes del barrio.
                                 </span>
                                 <span>{WORLDS[mcWorld].levels.at(-1)!.upHow}</span>
                                 <span>A la par de la liga, cada tantas fechas, la copa de tu división: todos sus clubes, mata-mata.</span>

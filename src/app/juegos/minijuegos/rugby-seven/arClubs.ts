@@ -51,9 +51,9 @@ const CBA_CLUBS: ArSevenClub[] = CBA_DESARROLLO_ZONES.flat().map((id, i) => ({
 }));
 
 /** Las ramas de la carrera: las dos argentinas y, aparte (no se cruzan con las argentinas), Chile, Uruguay y Brasil. */
-export type ArBranch = 'urba' | 'interior' | 'chile' | 'uruguay' | 'brasil' | 'espana' | 'espanaFem' | 'fem' | 'francia' | 'inglaterra' | 'sudafrica' | 'portugal' | 'franciaFem' | 'inglaterraFem' | 'alemania' | 'polonia' | 'georgia' | 'rusia' | 'australia' | 'chequia' | 'bolivia' | 'peru' | 'mexico' | 'colombia';
+export type ArBranch = 'urba' | 'interior' | 'chile' | 'uruguay' | 'brasil' | 'espana' | 'espanaFem' | 'fem' | 'francia' | 'inglaterra' | 'sudafrica' | 'portugal' | 'franciaFem' | 'inglaterraFem' | 'alemania' | 'polonia' | 'georgia' | 'rusia' | 'australia' | 'chequia' | 'bolivia' | 'peru' | 'mexico' | 'colombia' | 'gales' | 'escocia' | 'irlanda' | 'rumania' | 'italia' | 'belgica' | 'holanda';
 /** Ramas con liga simple (el campeón sube, baja el último) y sin Sudamericano: se arman todas igual. */
-export const isLeagueBranch = (b: ArBranch) => ['chile', 'espana', 'espanaFem', 'fem', 'francia', 'inglaterra', 'sudafrica', 'portugal', 'franciaFem', 'inglaterraFem', 'alemania', 'polonia', 'georgia', 'rusia', 'australia', 'chequia', 'bolivia', 'peru', 'mexico', 'colombia'].includes(b);
+export const isLeagueBranch = (b: ArBranch) => ['chile', 'espana', 'espanaFem', 'fem', 'francia', 'inglaterra', 'sudafrica', 'portugal', 'franciaFem', 'inglaterraFem', 'alemania', 'polonia', 'georgia', 'rusia', 'australia', 'chequia', 'bolivia', 'peru', 'mexico', 'colombia', 'gales', 'escocia', 'irlanda', 'rumania', 'italia', 'belgica', 'holanda'].includes(b);
 /** Las ramas de mujeres: no se mezclan con las de varones en los torneos en paralelo. */
 export const isFemBranch = (b: ArBranch) => b === 'fem' || b === 'espanaFem' || b === 'franciaFem' || b === 'inglaterraFem';
 export interface GameDivision extends Omit<ArSevenDivision, 'branch'> {
@@ -67,7 +67,7 @@ export interface GameClub extends ArSevenClub {
 export const isArgBranch = (b: ArBranch) => b === 'urba' || b === 'interior';
 /** Cómo se llama cada rama en un listado. */
 export const branchLabel = (b: ArBranch) =>
-    ({ urba: 'Argentina · URBA', interior: 'Argentina · interior', chile: 'Chile', uruguay: 'Uruguay', brasil: 'Brasil', espana: 'España', espanaFem: 'España · femenino', fem: 'Argentina · femenino', francia: 'Francia', inglaterra: 'Inglaterra', sudafrica: 'Sudáfrica', portugal: 'Portugal', franciaFem: 'Francia · femenino', inglaterraFem: 'Inglaterra · femenino', alemania: 'Alemania', polonia: 'Polonia', georgia: 'Georgia', rusia: 'Rusia', australia: 'Australia', chequia: 'Chequia', bolivia: 'Bolivia', peru: 'Perú', mexico: 'México' } as Record<string, string>)[b] ?? b;
+    ({ urba: 'Argentina · URBA', interior: 'Argentina · interior', chile: 'Chile', uruguay: 'Uruguay', brasil: 'Brasil', espana: 'España', espanaFem: 'España · femenino', fem: 'Argentina · femenino', francia: 'Francia', inglaterra: 'Inglaterra', sudafrica: 'Sudáfrica', portugal: 'Portugal', franciaFem: 'Francia · femenino', inglaterraFem: 'Inglaterra · femenino', alemania: 'Alemania', polonia: 'Polonia', georgia: 'Georgia', rusia: 'Rusia', australia: 'Australia', chequia: 'Chequia', bolivia: 'Bolivia', peru: 'Perú', mexico: 'México', gales: 'Gales', escocia: 'Escocia', irlanda: 'Irlanda', rumania: 'Rumania', italia: 'Italia', belgica: 'Bélgica', holanda: 'Países Bajos' } as Record<string, string>)[b] ?? b;
 
 /** El color de un club femenino: el del club de varones del mismo nombre, si está. */
 const colorLike = (name: string) => GEN_CLUBS.find((c) => c.name === name)?.color ?? null;
@@ -303,6 +303,64 @@ const FOREIGN: { div: Omit<GameDivision, 'clubs'>; pool: string; top: number; cl
         pool: 'luso', top: 44,
         clubs: [['Montemor', '#c8102e'], ['Santarém', '#0b6b3a'], ['Vila Real', '#1f4fa0'], ['Algarve', '#ffd100'], ['Caldas', '#6e1a2c'], ['Dragon Force', '#111111'], ['Sporting', '#0b6b3a'], ['Marítimo', '#c8102e']],
     },
+    // Europa de clubes no profesional: Gales, Escocia e Irlanda (las ligas de clubes, no las franquicias del URC),
+    // Rumania, Italia, Bélgica (con los dos clubes de Luxemburgo, que juegan las ligas de los vecinos) y
+    // Países Bajos. Listas aproximadas, con los clubes de verdad: se retocan con Editar clubes.
+    {
+        div: { id: 'wa-premier', label: 'Liga Premier de Gales', branch: 'gales', region: 'gales', level: 1, promotesTo: null, relegatesTo: 'wa-campeonato' },
+        pool: 'celta', top: 60,
+        clubs: [['Llandovery', '#ffd100'], ['Ebbw Vale', '#c8102e'], ['Aberavon', '#c8102e'], ['Cardiff RFC', '#0b3a8c'], ['Pontypridd', '#111111'], ['Newport RFC', '#111111'], ['Swansea', '#ffffff'], ['Bridgend Ravens', '#1f4fa0'], ['Carmarthen Quins', '#1f3fbf'], ['Cross Keys', '#111111'], ['Neath', '#111111'], ['Llanelli RFC', '#c8102e']],
+    },
+    {
+        div: { id: 'wa-campeonato', label: 'Campeonato de Gales', branch: 'gales', region: 'gales', level: 2, promotesTo: 'wa-premier', relegatesTo: null },
+        pool: 'celta', top: 50,
+        clubs: [['Merthyr', '#111111'], ['Pontypool', '#c8102e'], ['Bargoed', '#1f4fa0'], ['Newbridge', '#c8102e'], ['Narberth', '#1f3fbf'], ['Beddau', '#ffd100'], ['Trebanos', '#0b6b3a'], ['Ystrad Rhondda', '#c8102e'], ['Bedwas', '#111111'], ['Glynneath', '#1f4fa0']],
+    },
+    {
+        div: { id: 'sc-premier', label: 'Liga Premier de Escocia', branch: 'escocia', region: 'escocia', level: 1, promotesTo: null, relegatesTo: 'sc-nacional' },
+        pool: 'celta', top: 56,
+        clubs: [['Heriot’s', '#1f3fbf'], ['Currie Chieftains', '#ffd100'], ['Edinburgh Academicals', '#1f4fa0'], ['Watsonians', '#c8102e'], ['Marr', '#0b3a8c'], ['Hawick', '#0b6b3a'], ['Selkirk', '#1f4fa0'], ['Jed-Forest', '#1f3fbf'], ['Musselburgh', '#111111'], ['Kelso', '#111111']],
+    },
+    {
+        div: { id: 'sc-nacional', label: 'Nacional Uno de Escocia', branch: 'escocia', region: 'escocia', level: 2, promotesTo: 'sc-premier', relegatesTo: null },
+        pool: 'celta', top: 47,
+        clubs: [['Gala', '#1f3fbf'], ['Melrose', '#ffd100'], ['Glasgow Hawks', '#111111'], ['Ayr', '#c8102e'], ['Biggar', '#111111'], ['Stirling County', '#c8102e'], ['Dundee', '#1f4fa0'], ['Boroughmuir', '#0b6b3a'], ['Glasgow High Kelvinside', '#1f3fbf'], ['Aberdeen Grammar', '#111111']],
+    },
+    {
+        div: { id: 'ie-1a', label: 'Liga de Irlanda · Primera A', branch: 'irlanda', region: 'irlanda', level: 1, promotesTo: null, relegatesTo: 'ie-1b' },
+        pool: 'celta', top: 62,
+        clubs: [['Clontarf', '#c8102e'], ['Terenure College', '#1f3fbf'], ['Lansdowne', '#c8102e'], ['Cork Constitution', '#ffffff'], ['Young Munster', '#111111'], ['St Mary’s College', '#1f4fa0'], ['UCD', '#1f4fa0'], ['Garryowen', '#1f3fbf'], ['Shannon', '#111111'], ['Ballynahinch', '#c8102e']],
+    },
+    {
+        div: { id: 'ie-1b', label: 'Liga de Irlanda · Primera B', branch: 'irlanda', region: 'irlanda', level: 2, promotesTo: 'ie-1a', relegatesTo: null },
+        pool: 'celta', top: 52,
+        clubs: [['Dublin University', '#1f4fa0'], ['Old Wesley', '#0b3a8c'], ['Naas', '#111111'], ['Malone', '#ffd100'], ['Buccaneers', '#c8102e'], ['Banbridge', '#c8102e'], ['City of Armagh', '#0b6b3a'], ['Old Belvedere', '#111111'], ['Queen’s University', '#0b6b3a'], ['Highfield', '#1f3fbf']],
+    },
+    {
+        div: { id: 'ro-superliga', label: 'Superliga de Rumania', branch: 'rumania', region: 'rumania', level: 1, promotesTo: null, relegatesTo: null },
+        pool: 'rumano', top: 56,
+        clubs: [['Steaua București', '#c8102e'], ['Dinamo București', '#c8102e'], ['CSM Știința Baia Mare', '#ffd100'], ['SCM Timișoara', '#111111'], ['Universitatea Cluj', '#111111'], ['Rapid București', '#7a1f2c'], ['CSM București', '#1f4fa0'], ['Gloria Buzău', '#0b6b3a']],
+    },
+    {
+        div: { id: 'it-serie-a-elite', label: 'Serie A Élite de Italia', branch: 'italia', region: 'italia', level: 1, promotesTo: null, relegatesTo: null },
+        pool: 'italo', top: 62,
+        clubs: [['Petrarca Padova', '#111111'], ['Rovigo', '#1f4fa0'], ['Viadana', '#ffd100'], ['Valorugby Emilia', '#c8102e'], ['Fiamme Oro', '#1f3fbf'], ['Colorno', '#c8102e'], ['Mogliano', '#1f4fa0'], ['Lyons Piacenza', '#0b6b3a'], ['Vicenza', '#c8102e'], ['Lazio', '#8ec5e8']],
+    },
+    {
+        div: { id: 'be-elite', label: 'Liga Élite de Bélgica', branch: 'belgica', region: 'belgica', level: 1, promotesTo: null, relegatesTo: 'be-nacional' },
+        pool: 'franco', top: 48,
+        clubs: [['Boitsfort', '#c8102e'], ['Kituro', '#1f4fa0'], ['ASUB Waterloo', '#0b6b3a'], ['Dendermonde', '#111111'], ['La Hulpe', '#1f3fbf'], ['Soignies', '#c8102e'], ['Frameries', '#ffd100'], ['Coq Mosan', '#c8102e']],
+    },
+    {
+        div: { id: 'be-nacional', label: 'Nacional de Bélgica y Luxemburgo', branch: 'belgica', region: 'belgica', level: 2, promotesTo: 'be-elite', relegatesTo: null },
+        pool: 'franco', top: 40,
+        clubs: [['RC Luxembourg', '#c8102e'], ['RC Walferdange', '#1f4fa0'], ['Antwerp RC', '#c8102e'], ['Brussels Celtic', '#0b6b3a'], ['Gent', '#1f4fa0'], ['Leuven', '#111111'], ['Visé', '#ffd100'], ['Mons', '#c8102e']],
+    },
+    {
+        div: { id: 'nl-ereklasse', label: 'Ereklasse de Países Bajos', branch: 'holanda', region: 'holanda', level: 1, promotesTo: null, relegatesTo: null },
+        pool: 'germ', top: 46,
+        clubs: [['Castricum', '#ffd100'], ['The Dukes', '#c8102e'], ['Hilversum', '#1f4fa0'], ['Haagsche RC', '#111111'], ['AAC Amsterdam', '#c8102e'], ['Diok', '#0b6b3a'], ['Delft', '#1f3fbf'], ['’t Gooi', '#f47920']],
+    },
     // Argentina femenino: URBA (Top 9, Primera y Segunda) y el Centro (Córdoba y Andina).
     {
         div: { id: 'af-urba-top9', label: 'Top 9 femenino de la URBA', branch: 'fem', region: 'femenino', level: 1, promotesTo: null, relegatesTo: 'af-urba-primera' },
@@ -331,7 +389,7 @@ const FOREIGN: { div: Omit<GameDivision, 'clubs'>; pool: string; top: number; cl
  */
 export const FEM_GUESTS: [string, string | null][] = [['Cardenales', colorLike('Cardenales')], ['Cha Roga', colorLike('Cha Roga')], ['Universitario de Mendoza', colorLike('Universitario de Mendoza')], ['Aguará Guazú', colorLike('Aguará Guazú')], ['Águilas de Resistencia', null], ['Palihue', null], ['Marabunta', colorLike('Marabunta')], ['Regatas de Resistencia', colorLike('Regatas Resistencia')]];
 export const FEM_GUEST_IDS = FEM_GUESTS.map(([name]) => `af-${slug(name)}`);
-const prefixOf = (b: ArBranch) => ({ chile: 'cl', uruguay: 'uy', brasil: 'br', espana: 'es', espanaFem: 'ef', fem: 'af', francia: 'fr', inglaterra: 'en', sudafrica: 'za', portugal: 'pt', franciaFem: 'ffr', inglaterraFem: 'fen', alemania: 'de', polonia: 'pl', georgia: 'ge', rusia: 'ru', australia: 'au', chequia: 'cz', bolivia: 'bo', peru: 'pe', mexico: 'mx', colombia: 'co' } as Record<string, string>)[b] ?? 'xx';
+const prefixOf = (b: ArBranch) => ({ chile: 'cl', uruguay: 'uy', brasil: 'br', espana: 'es', espanaFem: 'ef', fem: 'af', francia: 'fr', inglaterra: 'en', sudafrica: 'za', portugal: 'pt', franciaFem: 'ffr', inglaterraFem: 'fen', alemania: 'de', polonia: 'pl', georgia: 'ge', rusia: 'ru', australia: 'au', chequia: 'cz', bolivia: 'bo', peru: 'pe', mexico: 'mx', colombia: 'co', gales: 'wa', escocia: 'sc', irlanda: 'ie', rumania: 'ro', italia: 'it', belgica: 'be', holanda: 'nl' } as Record<string, string>)[b] ?? 'xx';
 const FOREIGN_CLUBS: GameClub[] = FOREIGN.flatMap((f) =>
     f.clubs.map(([name, color], i) => ({
         id: `${prefixOf(f.div.branch)}-${slug(name)}`,
@@ -650,10 +708,10 @@ function divisionTour(d: GameDivision): TourDef {
     return {
         id: `ar-tour-${d.id}`,
         name: d.label,
-        sub: ({ urba: 'Rama URBA.', interior: 'Regional del interior.', chile: 'Chile · ARUSA.', uruguay: 'Uruguay.', brasil: 'Brasil · CBRu.', espana: 'España · FER.', espanaFem: 'España · FER, femenino.', fem: 'Argentina, femenino.', francia: 'Francia · liga de clubes.', inglaterra: 'Inglaterra · liga de clubes.', sudafrica: 'Sudáfrica · copa de uniones.', portugal: 'Portugal · campeonato de clubes.', franciaFem: 'Francia · liga de clubes, femenino.', inglaterraFem: 'Inglaterra · liga de clubes, femenino.', alemania: 'Alemania · liga de clubes.', polonia: 'Polonia · liga de clubes.', georgia: 'Georgia · liga de clubes.', rusia: 'Rusia · liga de clubes.', australia: 'Australia · liga de clubes.', chequia: 'Chequia · liga de clubes.', bolivia: 'Bolivia · liga de clubes.', peru: 'Perú · liga de clubes.', mexico: 'México · liga de clubes.' } as Record<string, string>)[d.branch] ?? '',
+        sub: ({ urba: 'Rama URBA.', interior: 'Regional del interior.', chile: 'Chile · ARUSA.', uruguay: 'Uruguay.', brasil: 'Brasil · CBRu.', espana: 'España · FER.', espanaFem: 'España · FER, femenino.', fem: 'Argentina, femenino.', francia: 'Francia · liga de clubes.', inglaterra: 'Inglaterra · liga de clubes.', sudafrica: 'Sudáfrica · copa de uniones.', portugal: 'Portugal · campeonato de clubes.', franciaFem: 'Francia · liga de clubes, femenino.', inglaterraFem: 'Inglaterra · liga de clubes, femenino.', alemania: 'Alemania · liga de clubes.', polonia: 'Polonia · liga de clubes.', georgia: 'Georgia · liga de clubes.', rusia: 'Rusia · liga de clubes.', australia: 'Australia · liga de clubes.', chequia: 'Chequia · liga de clubes.', bolivia: 'Bolivia · liga de clubes.', peru: 'Perú · liga de clubes.', mexico: 'México · liga de clubes.', gales: 'Gales · liga de clubes.', escocia: 'Escocia · liga de clubes.', irlanda: 'Irlanda · liga de clubes.', rumania: 'Rumania · liga de clubes.', italia: 'Italia · liga de clubes.', belgica: 'Bélgica · liga de clubes.', holanda: 'Países Bajos · liga de clubes.' } as Record<string, string>)[d.branch] ?? '',
         source: 'real',
         clubs: true,
-        cat: isArgBranch(d.branch) || d.branch === 'fem' ? 'Argentina' : d.branch === 'chile' ? 'Chile' : d.branch === 'uruguay' ? 'Uruguay' : d.branch === 'brasil' ? 'Brasil' : d.branch === 'francia' || d.branch === 'franciaFem' ? 'Francia' : d.branch === 'inglaterra' || d.branch === 'inglaterraFem' ? 'Inglaterra' : d.branch === 'sudafrica' ? 'Sudáfrica' : d.branch === 'portugal' ? 'Portugal' : d.branch === 'alemania' ? 'Alemania' : d.branch === 'polonia' ? 'Polonia' : d.branch === 'georgia' ? 'Georgia' : d.branch === 'rusia' ? 'Rusia' : d.branch === 'australia' ? 'Australia' : d.branch === 'chequia' ? 'Chequia' : d.branch === 'bolivia' ? 'Bolivia' : d.branch === 'peru' ? 'Perú' : d.branch === 'mexico' ? 'México' : d.branch === 'colombia' ? 'Colombia' : 'España',
+        cat: isArgBranch(d.branch) || d.branch === 'fem' ? 'Argentina' : d.branch === 'chile' ? 'Chile' : d.branch === 'uruguay' ? 'Uruguay' : d.branch === 'brasil' ? 'Brasil' : d.branch === 'francia' || d.branch === 'franciaFem' ? 'Francia' : d.branch === 'inglaterra' || d.branch === 'inglaterraFem' ? 'Inglaterra' : d.branch === 'sudafrica' ? 'Sudáfrica' : d.branch === 'portugal' ? 'Portugal' : d.branch === 'alemania' ? 'Alemania' : d.branch === 'polonia' ? 'Polonia' : d.branch === 'georgia' ? 'Georgia' : d.branch === 'rusia' ? 'Rusia' : d.branch === 'australia' ? 'Australia' : d.branch === 'chequia' ? 'Chequia' : d.branch === 'bolivia' ? 'Bolivia' : d.branch === 'peru' ? 'Perú' : d.branch === 'mexico' ? 'México' : d.branch === 'colombia' ? 'Colombia' : d.branch === 'gales' ? 'Gales' : d.branch === 'escocia' ? 'Escocia' : d.branch === 'irlanda' ? 'Irlanda' : d.branch === 'rumania' ? 'Rumania' : d.branch === 'italia' ? 'Italia' : d.branch === 'belgica' ? 'Bélgica' : d.branch === 'holanda' ? 'Países Bajos' : 'España',
         teams: [...d.clubs],
         formatLabel: `${n} clubes · fase regular a una vuelta · ${top === 4 ? 'semifinales' : 'final'} con los ${top} primeros`,
         stage: { kind: 'grupos', groups: 1, advance: top },
