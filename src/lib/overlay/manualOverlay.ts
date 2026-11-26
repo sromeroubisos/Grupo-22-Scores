@@ -191,7 +191,7 @@ function mergeTeam(prev: ManualTeam, patch: unknown): ManualTeam {
   const name = source.name === undefined ? prev.name : (text(source.name, 40) || prev.name);
   return {
     name,
-    short: (source.short === undefined ? prev.short : text(source.short, 12) || name.slice(0, 3)).toUpperCase(),
+    short: (source.short === undefined ? prev.short : text(source.short, 16) || name.slice(0, 3)).toUpperCase(),
     color: source.color === undefined ? prev.color : normalizeHex(text(source.color, 9)),
     logo: source.logo === undefined ? prev.logo : safeImageUrl(source.logo),
     score: source.score === undefined ? prev.score : int(source.score, 0, 999, prev.score),

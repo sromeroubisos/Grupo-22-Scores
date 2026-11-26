@@ -13,6 +13,8 @@ import {
   type ManualSport,
   type ManualState,
 } from '@/lib/overlay/manualOverlay';
+import { ClubPicker, MatchPicker } from '../../_builder/Pickers';
+import { sevensClockPatch, teamsFromMatch } from '../../_builder/matchTeams';
 import styles from './control.module.css';
 
 /**
@@ -214,6 +216,7 @@ function ScorePanel({
   const [now, setNow] = useState(() => Date.now());
   const [setTime, setSetTime] = useState('');
   const [scorer, setScorer] = useState<Record<'home' | 'away', string>>({ home: '', away: '' });
+  const [loadingTeams, setLoadingTeams] = useState(false);
   useEffect(() => {
     const interval = window.setInterval(() => setNow(Date.now()), 250);
     return () => window.clearInterval(interval);
@@ -263,6 +266,30 @@ function ScorePanel({
             <input value={state.title} maxLength={60} onChange={(e) => patchText({ title: e.target.value })} />
           </label>
         </div>
+      </section>
+
+      <section className={styles.card}>
+        <h2>Equipos</h2>
+        <p className={styles.muted}>
+          {state.home.name} vs {state.away.name}. Para cambiarlos, traé los dos de un partido de G22 (con colores, escudos y planteles) o elegí cada club en su tarjeta, abajo.
+        </p>
+        <MatchPicker
+          actionLabel="Traer equipos"
+          onPick={(id, found) => {
+            setLoadingTeams(true);
+            teamsFromMatch(id, found)
+              .then((teams) => {
+                const patch: Patch = { sport: teams.sport, ...(sevensClockPatch(teams) ?? {}) };
+                if (teams.home) patch.home = teams.home;
+                if (teams.away) patch.away = teams.away;
+                if (teams.title) patch.title = teams.title;
+                patchNow(patch);
+              })
+              .catch(() => undefined)
+              .finally(() => setLoadingTeams(false));
+          }}
+        />
+        {loadingTeams ? <p className={styles.muted}>Trayendo equipos y planteles…</p> : null}
       </section>
 
       <section className={styles.card}>
@@ -341,6 +368,13 @@ function ScorePanel({
             </div>
             <details className={styles.details}>
               <summary>Equipo: nombre, sigla, color, escudo y plantel</summary>
+              <div className={styles.field}>
+                <span>Elegir un club de G22 (nombre, sigla, color y escudo de una)</span>
+                <ClubPicker
+                  label={`Buscar club ${side === 'home' ? 'local' : 'visitante'}`}
+                  onPick={(club) => patchNow({ [side]: { name: club.name, short: club.short, color: club.color ?? team.color, logo: club.logo } })}
+                />
+              </div>
               <label className={styles.field}>
                 <span>Nombre</span>
                 <input value={team.name} maxLength={40} onChange={(e) => patchText({ [side]: { name: e.target.value } })} />
@@ -348,7 +382,7 @@ function ScorePanel({
               <div className={styles.pair}>
                 <label className={styles.field}>
                   <span>Sigla</span>
-                  <input value={team.short} maxLength={12} onChange={(e) => patchText({ [side]: { short: e.target.value } })} />
+                  <input value={team.short} maxLength={16} onChange={(e) => patchText({ [side]: { short: e.target.value } })} />
                 </label>
                 <label className={styles.field}>
                   <span>Color</span>
@@ -362,6 +396,7 @@ function ScorePanel({
               <label className={styles.field}>
                 <span>Plantel (uno por renglón, ej. «10 Juan Pérez»)</span>
                 <textarea
+                  key={team.players.join('|')}
                   rows={6}
                   defaultValue={team.players.join('\n')}
                   onBlur={(e) => patchNow({ [side]: { players: e.target.value.split('\n') } })}

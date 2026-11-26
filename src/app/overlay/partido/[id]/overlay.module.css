@@ -1007,13 +1007,26 @@
 
 .crestScore { width: 110px; }
 
-/* Tira: siglas del mismo ancho a los dos lados. */
+/* Tira: siglas del mismo ancho a los dos lados. El nombre va en su propio
+   elemento: el texto suelto dentro de un flex no toma los puntos suspensivos y,
+   centrado, se cortaba por los dos costados ("LUB LOCAL"). */
 .stripTeam {
-  width: 120px;
+  width: 190px;
+  min-width: 0;
   justify-content: center;
 }
 
-.stripTeam .pips { flex: none; }
+.stripName {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* Lugar fijo para las tarjetas: con una o con dos, el nombre mide lo mismo de los dos lados. */
+.stripTeam .pips { flex: none; width: 26px; }
+.stripTeam[data-side='home'] .pips { justify-content: flex-start; }
+.stripTeam[data-side='away'] .pips { justify-content: flex-end; }
 
 /* Escudos: lugar para "CLUB VISITANTE" y aire para la píldora del reloj. */
 .crestTeam { width: 200px; }

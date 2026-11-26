@@ -2,7 +2,7 @@ import { createHash, randomBytes } from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getOverlayAccess } from '@/lib/auth/overlayAccess';
-import { defaultManualState, type ManualKind } from '@/lib/overlay/manualOverlay';
+import { defaultManualState, mergeManualState, type ManualKind } from '@/lib/overlay/manualOverlay';
 
 /**
  * Crea un overlay manual (marcador o titular) y devuelve su ID y la CLAVE del
@@ -21,8 +21,11 @@ export async function POST(request: NextRequest) {
   }
   const user = { id: access.userId };
 
-  const body = (await request.json().catch(() => ({}))) as { kind?: string };
+  const body = (await request.json().catch(() => ({}))) as { kind?: string; state?: unknown };
   const kind: ManualKind = body.kind === 'titular' ? 'titular' : 'marcador';
+  // Lo que se eligió en el generador (equipos, colores, deporte) entra saneado,
+  // igual que lo que manda el panel: el reloj y los eventos no se pueden fijar.
+  const initialState = mergeManualState(kind, defaultManualState(kind), body.state ?? {});
   const key = randomBytes(18).toString('base64url');
 
   const admin = createAdminClient();
@@ -31,7 +34,7 @@ export async function POST(request: NextRequest) {
     .insert({
       kind,
       edit_key_hash: createHash('sha256').update(key).digest('hex'),
-      state: defaultManualState(kind),
+      state: initialState,
       created_by: user.id,
     })
     .select('id')

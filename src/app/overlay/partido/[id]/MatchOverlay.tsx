@@ -486,13 +486,13 @@ export default function MatchOverlay({
           </div>
         ) : config.style === 'tira' ? (
           <div className={styles.strip} data-phase={match.phase}>
-            <span className={styles.stripTeam} data-side="home">{home.short}<Pips cards={cards?.home} /></span>
+            <span className={styles.stripTeam} data-side="home"><span className={styles.stripName}>{home.short}</span><Pips cards={cards?.home} /></span>
             <span className={styles.stripScore}><Score value={home.score} bump={bump.home} bare /></span>
             {config.showClock ? (
               <span className={styles.stripClock} data-expired={clock.expired ? '' : undefined}>{time ?? clock.label}</span>
             ) : <span className={styles.stripSep} />}
             <span className={styles.stripScore}><Score value={away.score} bump={bump.away} bare /></span>
-            <span className={styles.stripTeam} data-side="away"><Pips cards={cards?.away} />{away.short}</span>
+            <span className={styles.stripTeam} data-side="away"><Pips cards={cards?.away} /><span className={styles.stripName}>{away.short}</span></span>
           </div>
         ) : config.style === 'bloques' ? (
           <div className={styles.blocks} data-phase={match.phase}>

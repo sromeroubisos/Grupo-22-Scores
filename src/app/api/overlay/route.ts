@@ -10,6 +10,7 @@ import {
   parseIdList,
 } from '@/lib/server/overlayFeed';
 import { feedHome, feedLeaders, feedNews, feedStandings } from '@/lib/server/overlayFeedTables';
+import { searchOverlay } from '@/lib/server/overlaySearch';
 
 /**
  * Lectura pública para los overlays de transmisión (`/overlay/*`).
@@ -24,6 +25,7 @@ import { feedHome, feedLeaders, feedNews, feedStandings } from '@/lib/server/ove
  *   ?tipo=goleadores&torneo=<id>[&stat=puntos|tries|goles|conversiones|penales|tarjetas][&cantidad=10]
  *   ?tipo=noticia&id=<id o link de la nota>
  *   ?tipo=opciones&torneo=<id>             fechas, fases, zonas y playoffs (para el generador)
+ *   ?tipo=buscar&q=<nombre>                clubes, sus partidos cercanos y torneos (generador y panel)
  *
  * Solo devuelve lo que ya es público (partidos visibles, ficha de jugador sin
  * datos personales). Caché de CDN corta: un overlay se relee cada pocos
@@ -68,9 +70,12 @@ export async function GET(request: NextRequest) {
       case 'opciones':
         body = await feedTournamentOptions(tournament);
         break;
+      case 'buscar':
+        body = await searchOverlay(params.get('q') ?? '');
+        break;
       default:
         return NextResponse.json(
-          { error: 'tipo tiene que ser partidos, fecha, dia, home, playoff, jugador, tabla, goleadores, noticia u opciones.' },
+          { error: 'tipo tiene que ser partidos, fecha, dia, home, playoff, jugador, tabla, goleadores, noticia, opciones o buscar.' },
           { status: 400, headers: { 'Cache-Control': 'no-store' } },
         );
     }

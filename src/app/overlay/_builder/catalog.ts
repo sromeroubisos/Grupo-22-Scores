@@ -1,0 +1,115 @@
+/**
+ * Los gráficos que ofrece el generador, cómo se agrupan en la galería y qué
+ * URL de muestra dibuja cada tarjeta. Es la única lista: la galería, el editor
+ * y la vista previa leen de acá.
+ */
+
+export type Kind =
+  | 'partido' | 'marcador' | 'barra' | 'franja' | 'compacto' | 'bloques' | 'escudos' | 'tira' | 'formacion'
+  | 'partidos' | 'fecha' | 'dia' | 'home'
+  | 'tabla' | 'goleadores' | 'playoff' | 'jugador' | 'noticia'
+  | 'manual-marcador' | 'manual-titular';
+
+export interface KindDef {
+  id: Kind;
+  label: string;
+  hint: string;
+  /** Muestra para la tarjeta de la galería (siempre en modo prueba). */
+  thumb: string;
+}
+
+export interface KindGroup {
+  id: string;
+  label: string;
+  description: string;
+  kinds: KindDef[];
+}
+
+/** El overlay se dibuja para 1920×1080: en la miniatura se agranda para que se lea. */
+const scoreboard = (style: string, zoom = 1.9) => `/overlay/partido/demo?estilo=${style}&escala=${zoom}`;
+
+export const KIND_GROUPS: KindGroup[] = [
+  {
+    id: 'partido',
+    label: 'Un partido',
+    description: 'Se actualizan solos con el partido de G22: resultado, reloj, tarjetas y anotadores.',
+    kinds: [
+      { id: 'marcador', label: 'Marcador de esquina', hint: 'Chico, con el reloj. Para todo el partido.', thumb: scoreboard('marcador', 2.9) },
+      { id: 'escudos', label: 'Escudos grandes', hint: 'Los escudos a los costados y el resultado al medio.', thumb: scoreboard('escudos', 2) },
+      { id: 'franja', label: 'Franja de colores', hint: 'Bloques del color de cada club, reloj al medio.', thumb: scoreboard('franja', 1.9) },
+      { id: 'bloques', label: 'Bloques grandes', hint: 'Dos cuadrados con el resultado y el reloj abajo.', thumb: scoreboard('bloques', 2.8) },
+      { id: 'barra', label: 'Zócalo', hint: 'Barra ancha con los nombres completos.', thumb: scoreboard('barra', 1.3) },
+      { id: 'compacto', label: 'Compacto', hint: 'Una píldora: siglas, resultado y minuto.', thumb: scoreboard('compacto', 3) },
+      { id: 'tira', label: 'Tira fina', hint: 'Una línea mínima: siglas, resultado y tiempo.', thumb: scoreboard('tira', 2.1) },
+      { id: 'partido', label: 'Tarjeta del partido', hint: 'Escudos, resultado, contexto y anotadores.', thumb: '/overlay/partido/demo?escala=1.5' },
+      { id: 'formacion', label: 'Formaciones', hint: 'Los dos planteles, o uno en la cancha.', thumb: '/overlay/formacion/demo?escala=0.85' },
+    ],
+  },
+  {
+    id: 'varios',
+    label: 'Varios partidos',
+    description: 'Listas que rotan solas de a páginas.',
+    kinds: [
+      { id: 'partidos', label: 'Partidos elegidos', hint: 'Los que elijas, en ese orden.', thumb: '/overlay/partidos?escala=1.2' },
+      { id: 'fecha', label: 'Fecha de un torneo', hint: 'Todos los partidos de una fecha.', thumb: '/overlay/fecha?escala=1.2' },
+      { id: 'dia', label: 'Partidos del día', hint: 'Lo cargado en G22 un día, por torneo.', thumb: '/overlay/dia?escala=1.2' },
+      { id: 'home', label: 'Todos los deportes', hint: 'La home de G22, con partidos externos.', thumb: '/overlay/home?escala=1.2' },
+    ],
+  },
+  {
+    id: 'torneo',
+    label: 'Torneo y jugadores',
+    description: 'Tablas, rankings y llaves de un torneo.',
+    kinds: [
+      { id: 'tabla', label: 'Tabla de posiciones', hint: 'Por fase y por zona.', thumb: '/overlay/tabla?escala=1.1' },
+      { id: 'goleadores', label: 'Goleadores y tryman', hint: 'Puntos, tries, goles o tarjetas.', thumb: '/overlay/goleadores?escala=1.2' },
+      { id: 'playoff', label: 'Playoff', hint: 'El cuadro como llave o en columnas.', thumb: '/overlay/playoff?escala=1.6' },
+      { id: 'jugador', label: 'Jugador', hint: 'Ficha con sus números.', thumb: '/overlay/jugador?escala=1.2' },
+    ],
+  },
+  {
+    id: 'manual',
+    label: 'Manuales y noticias',
+    description: 'Los manejás vos desde el celular, sin cargar nada en G22.',
+    kinds: [
+      { id: 'manual-marcador', label: 'Marcador manual', hint: 'Elegís los equipos y sumás puntos desde un panel.', thumb: scoreboard('marcador', 2.9) },
+      { id: 'manual-titular', label: 'Titular de noticiero', hint: 'Zócalo abajo con varios títulos que rotan.', thumb: '/overlay/manual/demo' },
+      { id: 'noticia', label: 'Noticia de G22', hint: 'Una nota publicada, con su foto.', thumb: '/overlay/noticia?escala=1.5' },
+    ],
+  },
+];
+
+export const KIND_DEFS: Map<Kind, KindDef & { group: KindGroup }> = new Map(
+  KIND_GROUPS.flatMap((group) => group.kinds.map((kind) => [kind.id, { ...kind, group }] as const)),
+);
+
+/** Los estilos de marcador de un partido, en el orden en que se ofrecen. */
+export const SCOREBOARD_STYLES: Array<{ id: Kind; label: string }> = [
+  { id: 'marcador', label: 'Esquina' },
+  { id: 'escudos', label: 'Escudos' },
+  { id: 'franja', label: 'Franja' },
+  { id: 'bloques', label: 'Bloques' },
+  { id: 'barra', label: 'Zócalo' },
+  { id: 'compacto', label: 'Compacto' },
+  { id: 'tira', label: 'Tira' },
+  { id: 'partido', label: 'Tarjeta' },
+];
+
+const SCOREBOARD_KINDS = new Set<Kind>(['marcador', 'barra', 'franja', 'compacto', 'bloques', 'escudos', 'tira']);
+
+export const isScoreboardStyle = (kind: Kind) => SCOREBOARD_KINDS.has(kind) || kind === 'partido';
+export const isMatchKind = (kind: Kind) => isScoreboardStyle(kind) || kind === 'formacion';
+export const isManual = (kind: Kind) => kind === 'manual-marcador' || kind === 'manual-titular';
+/** Las versiones que dibujan un marcador (con reloj, tarjetas, colores de club). */
+export const hasScoreboard = (kind: Kind) => isScoreboardStyle(kind) || kind === 'manual-marcador';
+export const needsTournament = (kind: Kind) => kind === 'fecha' || kind === 'playoff' || kind === 'tabla' || kind === 'goleadores';
+export const isList = (kind: Kind) => ['partidos', 'fecha', 'dia', 'home', 'tabla', 'goleadores'].includes(kind);
+
+export const DEFAULT_ROWS: Partial<Record<Kind, number>> = { partidos: 6, fecha: 7, dia: 7, home: 7, tabla: 10, goleadores: 5 };
+
+/** Del link pegado (o el ID suelto) se queda con el último tramo del camino. */
+export function idFrom(raw: string): string {
+  return raw.trim().replace(/\/+$/, '').split('/').pop()?.split(/[?#]/)[0] ?? '';
+}
+
+export const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

@@ -12,6 +12,14 @@
   --c-dim: rgba(243, 246, 244, 0.62);
   --c-green: #00a365;
   --c-green-ink: #22c55e;
+  /* Los buscadores de clubes y partidos (Pickers) comparten estilos con el generador. */
+  --s-line: rgba(255, 255, 255, 0.08);
+  --s-line-strong: rgba(255, 255, 255, 0.16);
+  --s-ink: #f3f6f4;
+  --s-dim: rgba(243, 246, 244, 0.62);
+  --s-faint: rgba(243, 246, 244, 0.42);
+  --s-green: #00a365;
+  --s-green-ink: #2bd683;
 
   min-height: 100vh;
   padding: 20px clamp(16px, 3vw, 32px) 40px;
@@ -246,7 +254,25 @@
   font-size: 14px;
 }
 
-.check input[type='checkbox'] { width: 18px; height: 18px; accent-color: var(--c-green); }
+/* El sitio saca la apariencia nativa (appearance: none): la casilla se dibuja acá. */
+.check input[type='checkbox'] {
+  flex: none;
+  appearance: none;
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  border-radius: 6px;
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  background: #0b0e0c center / 15px no-repeat;
+  cursor: pointer;
+}
+
+.check input[type='checkbox']:checked {
+  border-color: var(--c-green);
+  background-color: var(--c-green);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.5l3 3 6-7' fill='none' stroke='%2304110b' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
 .check input[type='number'] { width: 72px; }
 
 .steps {
