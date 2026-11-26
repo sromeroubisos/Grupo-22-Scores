@@ -7,7 +7,7 @@
 
 import { useState, type ReactNode } from 'react';
 import { SKILL_LABEL, type Player } from './career';
-import { cupName, facCost, FAC_MAX, FACILITIES, levelDef, levelOf, MC_ME, nextLicense, trainStepAt, upgradeBlock, type McFacility, PAY, PAY_BY_LEVEL, PRIZE, releaseBlock, signBlock, SQUAD_MAX, trainBlock, trainCost, movesByLevel, myMove, myRating, americaView, LIB_NAME, LIB_PER_WORLD, nacHowOf, nacNameOf, nacionalView, otherWorld, topOf, WORLDS, pyramidTours, seasonNews, starters, tagFor, TAG_LABEL, zoneName, type McLevel, type McTag, type MiClubState } from './miClub';
+import { cupName, facCost, FAC_MAX, FACILITIES, levelDef, levelOf, MC_ME, nextLicense, trainStepAt, upgradeBlock, type McFacility, PAY, PAY_BY_LEVEL, PRIZE, releaseBlock, signBlock, SQUAD_MAX, trainBlock, trainCost, movesByLevel, myMove, myRating, americaView, LIB_NAME, LIB_PER_WORLD, nacHowOf, nacNameOf, nacionalView, otherWorld, topOf, WORLDS, pyramidTours, seasonNews, starters, tagFor as levelTag, TAG_LABEL, kindOf, mundialView, WCC_NAME, WCC_FROM_PRIMERA, zoneName, type McLevel, type McTag, type MiClubState } from './miClub';
 import { groupStandings, roundLabel, finalRanking, type TourState } from './tours';
 import styles from './seven.module.css';
 
@@ -42,8 +42,10 @@ export function McLegend({ level }: { level: McLevel }) {
 }
 
 /** Una tabla de la pirámide: cada puesto con su etiqueta (color al costado y texto para lectores). */
-export function McTable({ title, s, gi, level, nameOf, flag }: { title: string; s: TourState; gi: number; level: McLevel; nameOf: (id: string) => string; flag: Flag }) {
+export function McTable({ title, s, gi, level, nameOf, flag, advanceOnly }: { title: string; s: TourState; gi: number; level: McLevel; nameOf: (id: string) => string; flag: Flag; advanceOnly?: number }) {
     const rows = groupStandings(s, gi);
+    // En una copa de grupos (la del Mundo) solo importa quién pasa: los primeros `advanceOnly`.
+    const tagFor = (lvl: McLevel, i: number, n: number): McTag => (advanceOnly !== undefined ? (i < advanceOnly ? 'playoff' : null) : levelTag(lvl, i, n));
     return (
         <div className={`${styles.groupCard} ${styles.mcTableCard}`}>
             <h3 className={styles.groupTitle}>{title}</h3>
@@ -87,6 +89,31 @@ export function McTable({ title, s, gi, level, nameOf, flag }: { title: string; 
     );
 }
 
+/** Los grupos de la Copa del Mundo: pasan los 2 primeros de cada uno a octavos. */
+export function WccTables({ s, nameOf, flag }: { s: TourState; nameOf: (id: string) => string; flag: Flag }) {
+    const order = s.groups.map((_, gi) => gi).sort((a, b) => Number(s.groups[b].includes(MC_ME)) - Number(s.groups[a].includes(MC_ME)));
+    return (
+        <>
+            <ul className={styles.tagLegend} aria-label="Qué significa cada color">
+                <li>
+                    <span className={`${styles.tagDot} ${TAG_CLASS.playoff}`} aria-hidden="true" /> Pasa a octavos
+                </li>
+            </ul>
+            <div className={styles.groupGrid}>
+                {order.map((gi) => (
+                    <McTable key={gi} title={`Grupo ${gi + 1}`} s={s} gi={gi} level="primera" nameOf={nameOf} flag={flag} advanceOnly={2} />
+                ))}
+            </div>
+        </>
+    );
+}
+
+/** Las tablas del torneo propio en pantalla: la Copa del Mundo por grupos, el resto como división. */
+export function McTourTables({ s, r, nameOf, flag }: { s: TourState; r: MiClubState; nameOf: (id: string) => string; flag: Flag }) {
+    if (kindOf(s) === 'wcc') return <WccTables s={s} nameOf={nameOf} flag={flag} />;
+    return <McTables s={s} r={r} level={levelOf(r, MC_ME) ?? 'base'} nameOf={nameOf} flag={flag} mineFirst />;
+}
+
 /** Las zonas (o la tabla única) de una división, con su leyenda. La propia va primero. */
 export function McTables({ s, r, level, nameOf, flag, mineFirst }: { s: TourState; r: MiClubState; level: McLevel; nameOf: (id: string) => string; flag: Flag; mineFirst?: boolean }) {
     const order = s.groups.map((_, gi) => gi);
@@ -121,8 +148,9 @@ export function McPyramid({ s, nameOf, flag, bracket }: { s: TourState; nameOf: 
     const nacName = nacNameOf(r);
     const nacHow = nacHowOf(r);
     const world = r.world ?? 'ar';
-    const [pick, setPick] = useState<McLevel | 'nac' | 'lib'>(mine);
-    const cur = pick === 'nac' || pick === 'lib' ? null : list.find((x) => x.level.id === pick) ?? list[0];
+    const wcc = mundialView(s);
+    const [pick, setPick] = useState<McLevel | 'nac' | 'lib' | 'wcc'>(mine);
+    const cur = pick === 'nac' || pick === 'lib' || pick === 'wcc' ? null : list.find((x) => x.level.id === pick) ?? list[0];
     const news = seasonNews(r);
     const moves = movesByLevel(r);
     const mineMove = myMove(r);
@@ -167,8 +195,27 @@ export function McPyramid({ s, nameOf, flag, bracket }: { s: TourState; nameOf: 
                     <strong>Copa de América</strong>
                     <small>{america.lib ? `${america.lib.def?.teams.length ?? 0} clubes` : 'desde mitad de año'}</small>
                 </button>
+                <button type="button" role="radio" aria-checked={pick === 'wcc'} className={`${styles.pyramidStep} ${pick === 'wcc' ? styles.pyramidStepOn : ''}`} onClick={() => setPick('wcc')}>
+                    <strong>Mundial de Clubes</strong>
+                    <small>{wcc ? `${wcc.def?.teams.length ?? 0} clubes` : 'último tercio del año'}</small>
+                </button>
             </div>
-            {cur ? (
+            {pick === 'wcc' ? (
+                wcc ? (
+                    <section className={styles.mcSection} aria-label={WCC_NAME}>
+                        <h3 className={styles.groupTitle}>{WCC_NAME}</h3>
+                        <p className={styles.note}>
+                            Los {WCC_FROM_PRIMERA} mejores de la Primera de {WORLDS[world].label} contra 28 profesionales del mundo: 8 grupos de 4 y octavos. {status(wcc, nameOf)}
+                        </p>
+                        {(wcc.stage === 'grupos' || wcc.done) && <WccTables s={wcc} nameOf={nameOf} flag={flag} />}
+                        {wcc.stage === 'ko' && bracket(wcc)}
+                    </section>
+                ) : (
+                    <p className={styles.note}>
+                        La {WCC_NAME} se arma en el último tercio del año: los {WCC_FROM_PRIMERA} mejores de la Primera de {WORLDS[world].label} contra los profesionales del Top 14, la Premiership, el URC, el Super Rugby, Japón y más.
+                    </p>
+                )
+            ) : cur ? (
                 <>
                     {cur.liga && (
                         <section className={styles.mcSection} aria-label={`Liga de ${cur.level.label}`}>
@@ -424,10 +471,10 @@ export function McClubPanel({ r, onUpgrade }: { r: MiClubState; onUpgrade: (f: M
                 <strong>{r.credits} créditos</strong>
                 {r.lastGain && <span>Último partido: {r.lastGain}</span>}
                 <span>
-                    Por partido en {levelDef(level).label}: {PAY_BY_LEVEL[level]} por jugar, {PAY.win} más si ganás ({PAY.draw} si empatás), {PAY.try} por try y {PAY.cupRound} por pasar de ronda en la copa ({PAY.nacRound} en la {nacNameOf(r)} y {PAY.libRound} en la {LIB_NAME}).
+                    Por partido en {levelDef(level).label}: {PAY_BY_LEVEL[level]} por jugar, {PAY.win} más si ganás ({PAY.draw} si empatás), {PAY.try} por try y {PAY.cupRound} por pasar de ronda en la copa ({PAY.nacRound} en la {nacNameOf(r)}, {PAY.libRound} en la {LIB_NAME} y {PAY.wccRound} en la {WCC_NAME}).
                 </span>
                 <span>
-                    Al cierre: {PRIZE.ascenso} por ascender, {PRIZE.liga} por salir campeón de la liga, {PRIZE.copa} por la copa de la división, {PRIZE.nac} por la {nacNameOf(r)} y {PRIZE.lib} por la {LIB_NAME}.
+                    Al cierre: {PRIZE.ascenso} por ascender, {PRIZE.liga} por salir campeón de la liga, {PRIZE.copa} por la copa de la división, {PRIZE.nac} por la {nacNameOf(r)}, {PRIZE.lib} por la {LIB_NAME} y {PRIZE.wcc} por la {WCC_NAME}.
                 </span>
             </div>
             <div className={styles.roadPending}>

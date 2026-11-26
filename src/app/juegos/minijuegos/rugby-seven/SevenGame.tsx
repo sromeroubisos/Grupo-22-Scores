@@ -145,7 +145,7 @@ import { IntlRanking, IntlSeason, IntlSquad, IntlUnion, IntlYouth } from './Intl
 import { advanceSvns, createSvns, SVNS_LEGS, SVNS_PHASE_LABEL, svnsBoosts, svnsRegionName, svnsStartTier, svnsTable, svnsVerdict, TIER_LABEL } from './svns';
 import { CloudSync, markTutorialSeenInAccount, tutorialSeenInAccount, type CloudStatus } from './cloudSave';
 import { advanceMiClub, createMiClub, LIB_NAME, levelDef, levelOf, liveMine, mcAfterRound, mcRegionLabel, mcRelease, mcSign, mcTrain, mcUpgrade, mcVerdict, myTeam, nacHowOf, phaseName, WORLDS, type McRegion, type McWorld } from './miClub';
-import { McClubPanel, McMarket, McPyramid, McSquad, McTables } from './MiClubPanels';
+import { McClubPanel, McMarket, McPyramid, McSquad, McTourTables } from './MiClubPanels';
 import { useOfflineReady } from './offline';
 import { readLang, startTranslating, writeLang, type Lang } from './i18n';
 import { applyStoredClubEdits, EDITABLE_CLUBS, isClubEdited, resetClubEdit, saveClubEdit } from './clubEdits';
@@ -2631,7 +2631,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                         ))}
                                     </div>
                                     <div className={styles.hubPanel}>
-                                        {tab === 'tabla' && miclub && <McTables s={tour} r={miclub} level={levelOf(miclub, miclub.me) ?? 'base'} nameOf={nameOf} flag={(id) => <FlagIcon code={flagOf(id)} size={14} />} mineFirst />}
+                                        {tab === 'tabla' && miclub && <McTourTables s={tour} r={miclub} nameOf={nameOf} flag={(id) => <FlagIcon code={flagOf(id)} size={14} />} />}
                                         {tab === 'piramide' && miclub && <McPyramid s={tour} nameOf={nameOf} flag={(id) => <FlagIcon code={flagOf(id)} size={14} />} bracket={(t) => (defOf(t) ? <Bracket s={t} def={defOf(t)!} nameOf={nameOf} flagOf={flagOf} /> : null)} />}
                                         {tab === 'plantel' && miclub && <McSquad r={miclub} onTrain={(id) => persist({ tour: mcTrain(tour, id) })} onRelease={(id) => persist({ tour: mcRelease(tour, id) })} />}
                                         {tab === 'fichajes' && miclub && <McMarket r={miclub} nameOf={nameOf} onSign={(id) => persist({ tour: mcSign(tour, id) })} />}
