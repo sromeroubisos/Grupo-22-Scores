@@ -76,6 +76,7 @@ const CAREER_COUNTRIES: { id: string; name: string; flag: string; sub: string; b
     { id: 'bo', name: 'Bolivia', flag: 'bo', sub: 'Liga Altiplano de Bolivia: una sola división, fase regular y semifinales.', branches: ['bolivia'] },
     { id: 'pe', name: 'Perú', flag: 'pe', sub: 'Liga Andina del Perú: una sola división, fase regular y semifinales.', branches: ['peru'] },
     { id: 'mx', name: 'México', flag: 'mx', sub: 'Liga Azteca de México: una sola división, fase regular y semifinales.', branches: ['mexico'] },
+    { id: 'co', name: 'Colombia', flag: 'co', sub: 'Liga de Rugby de Bogotá: una sola división, fase regular y semifinales.', branches: ['colombia'] },
     { id: 'arf', name: 'Argentina · femenino', flag: 'ar', sub: 'URBA (Top 9, Primera y Segunda) y el Centro (Córdoba y Andina). Las mejores juegan el Nacional de Clubes Femenino.', branches: ['fem'] },
     { id: 'esf', name: 'España · femenino', flag: 'es', sub: 'Liga Iberdrola y División de Honor B femenina. Sube la campeona, baja la última.', branches: ['espanaFem'] },
     { id: 'cl', name: 'Chile', flag: 'cl', sub: 'ARUSA: Top 10, Segunda, Tercera y Cuarta. Sube el campeón, baja el último.', branches: ['chile'] },
@@ -143,7 +144,7 @@ import { advanceIntl, compName, createIntl, intlBoosts, intlInvest, intlNames, i
 import { IntlRanking, IntlSeason, IntlSquad, IntlUnion, IntlYouth } from './IntlPanels';
 import { advanceSvns, createSvns, SVNS_LEGS, SVNS_PHASE_LABEL, svnsBoosts, svnsRegionName, svnsStartTier, svnsTable, svnsVerdict, TIER_LABEL } from './svns';
 import { CloudSync, markTutorialSeenInAccount, tutorialSeenInAccount, type CloudStatus } from './cloudSave';
-import { advanceMiClub, createMiClub, levelDef, levelOf, liveMine, MC_LEVELS, MC_POOL, MC_REGIONS, mcAfterRound, mcRegionLabel, mcRelease, mcSign, mcTrain, mcVerdict, myTeam, NAC_HOW, NAC_NAME, phaseName, type McRegion } from './miClub';
+import { advanceMiClub, createMiClub, LIB_NAME, levelDef, levelOf, liveMine, mcAfterRound, mcRegionLabel, mcRelease, mcSign, mcTrain, mcVerdict, myTeam, nacHowOf, phaseName, WORLDS, type McRegion, type McWorld } from './miClub';
 import { McClubPanel, McMarket, McPyramid, McSquad, McTables } from './MiClubPanels';
 import { useOfflineReady } from './offline';
 import { readLang, startTranslating, writeLang, type Lang } from './i18n';
@@ -780,6 +781,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
     // Mi Club: el club que se está fundando (camiseta y nombre) y su región.
     const [mcDraft, setMcDraft] = useState<SevenTeam | null>(null);
     const [mcRegion, setMcRegion] = useState<McRegion | null>(null);
+    const [mcWorld, setMcWorld] = useState<McWorld>('ar');
     const [coachName, setCoachName] = useState('');
     /** País elegido para la carrera nueva. */
     const [careerCountry, setCareerCountry] = useState<string>('ar');
@@ -1273,7 +1275,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
 
     const startMiClub = () => {
         if (!mcDraft || !mcRegion) return;
-        persist({ tour: createMiClub({ team: mcDraft, region: mcRegion }, difficulty, duration) });
+        persist({ tour: createMiClub({ team: mcDraft, region: mcRegion, world: mcWorld }, difficulty, duration) });
         setMcDraft(null);
         setMcRegion(null);
         setHubTab('tabla');
@@ -1572,7 +1574,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                             {live
                                                 ? `${live.team.name} · temporada ${live.season} · ${levelDef(levelOf(live, live.me) ?? 'base').label}.`
                                                 : tours.some((t) => !t)
-                                                  ? 'Fundás tu club y lo llevás de la Regional a Primera, contra todos los clubes de Argentina.'
+                                                  ? 'Fundás tu club y lo llevás de la Regional a Primera, en Argentina o en Sudamérica.'
                                                   : 'Las tres partidas están ocupadas: borrá una para empezar.'}
                                         </span>
                                     </button>
@@ -1809,8 +1811,8 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                 }}
                             >
                                 <strong>Mi Club</strong>
-                                <span>Fundás tu club y arrancás en la Regional. Seis divisiones con todos los clubes de Argentina: subís hasta Primera.</span>
-                                <small>Tu camiseta, tu plantel · varones</small>
+                                <span>Fundás tu club y arrancás en la Regional, en Argentina o en Sudamérica: subís hasta Primera y la Copa de América.</span>
+                                <small>Argentina o Sudamérica · varones</small>
                             </button>
                             <button type="button" className={`${styles.pickCard} ${styles.pickCardAlt}`} onClick={() => setScreen({ k: 'careerSetup', step: 0 })}>
                                 <strong>Modo carrera</strong>
@@ -2140,27 +2142,58 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                         </div>
                     ) : (
                         <div className={styles.body}>
-                            <div className={styles.nacAsk} role="radiogroup" aria-label="Región de tu club">
-                                <span className={styles.nacAskQ}>¿De dónde es {mcDraft?.name.trim() || 'tu club'}?</span>
+                            <div className={styles.nacAsk} role="radiogroup" aria-label="Dónde juega tu club">
+                                <span className={styles.nacAskQ}>¿En qué pirámide juega {mcDraft?.name.trim() || 'tu club'}?</span>
                                 <div className={styles.regionGrid}>
-                                    {MC_REGIONS.map((reg) => (
+                                    {(['ar', 'sa'] as McWorld[]).map((w) => (
+                                        <button
+                                            key={w}
+                                            type="button"
+                                            role="radio"
+                                            aria-checked={mcWorld === w}
+                                            className={`${styles.nacOpt} ${mcWorld === w ? styles.nacOptOn : ''}`}
+                                            onClick={() => {
+                                                setMcWorld(w);
+                                                setMcRegion(null);
+                                            }}
+                                        >
+                                            <strong>{WORLDS[w].label}</strong>
+                                            <small>
+                                                {WORLDS[w].levels.length} divisiones · {WORLDS[w].pool.length} clubes
+                                            </small>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className={styles.nacAsk} role="radiogroup" aria-label={mcWorld === 'sa' ? 'País de tu club' : 'Región de tu club'}>
+                                <span className={styles.nacAskQ}>
+                                    ¿De {mcWorld === 'sa' ? 'qué país' : 'dónde'} es {mcDraft?.name.trim() || 'tu club'}?
+                                </span>
+                                <div className={styles.regionGrid}>
+                                    {WORLDS[mcWorld].regions.map((reg) => (
                                         <button key={reg} type="button" role="radio" aria-checked={mcRegion === reg} className={`${styles.nacOpt} ${mcRegion === reg ? styles.nacOptOn : ''}`} onClick={() => setMcRegion(reg)}>
                                             <strong>{mcRegionLabel(reg)}</strong>
                                         </button>
                                     ))}
                                 </div>
-                                <small className={styles.nacAskNote}>Define tu zona en la Regional y en las divisiones con zonas: tus rivales son los de tu región.</small>
+                                <small className={styles.nacAskNote}>
+                                    Define tu zona en la Regional y en las divisiones con zonas: tus rivales son los de tu {WORLDS[mcWorld].regionWord}.
+                                </small>
                             </div>
                             <SettingsStep teams={[mcDraft]} difficulty={difficulty} setDifficulty={setDifficulty} duration={duration} setDuration={setDuration} />
                             <div className={styles.roadInfo}>
-                                <strong>Cómo es Mi Club</strong>
+                                <strong>Cómo es Mi Club · {WORLDS[mcWorld].label}</strong>
                                 <span>
-                                    Seis divisiones con los {MC_POOL.length} clubes de varones de Argentina: {MC_LEVELS.map((l) => l.label).join(', ')}. Arrancás en la Regional, con un plantel de pibes del barrio.
+                                    {WORLDS[mcWorld].levels.length} divisiones con los {WORLDS[mcWorld].pool.length} clubes de varones{' '}
+                                    {mcWorld === 'sa' ? 'de Chile, Brasil, Uruguay, Perú, México y Colombia' : 'de Argentina'}: {WORLDS[mcWorld].levels.map((l) => l.label).join(', ')}. Arrancás en la Regional, con un plantel de pibes del barrio.
                                 </span>
-                                <span>{levelDef('base').upHow} En Quinta y Cuarta también hay zonas y cuadro; de Tercera para arriba, liga de 12.</span>
+                                <span>{WORLDS[mcWorld].levels.at(-1)!.upHow}</span>
                                 <span>A la par de la liga, cada tantas fechas, la copa de tu división: todos sus clubes, mata-mata.</span>
                                 <span>
-                                    Desde mitad de año, la {NAC_NAME} de 64, con los que van arriba en ese momento. {NAC_HOW}.
+                                    Desde mitad de año, la {WORLDS[mcWorld].nacName}, con los que van arriba en ese momento. {nacHowOf({ world: mcWorld })}.
+                                </span>
+                                <span>
+                                    En Primera, además, la {LIB_NAME}: los 8 mejores de la Primera de Argentina contra los 8 mejores de la de Sudamérica, mata-mata.
                                 </span>
                                 <span>Los clubes de la pirámide suben y bajan como vos: la tabla de cada división se ve fecha a fecha.</span>
                             </div>

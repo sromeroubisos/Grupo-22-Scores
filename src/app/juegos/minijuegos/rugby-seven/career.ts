@@ -789,7 +789,7 @@ export function franchiseOf(club: string): string {
     // La Supercopa Europea (octubre a diciembre) junta a los mejores de las ligas de España y Portugal.
     if (region === 'espana') return club.startsWith('ef-') ? '' : 'Iberos';
     if (region === 'portugal') return 'Lusitanos';
-    if (region === 'femenino' || region === 'francia' || region === 'inglaterra' || region === 'sudafrica' || region === 'alemania' || region === 'polonia' || region === 'georgia' || region === 'rusia' || region === 'australia' || region === 'chequia' || region === 'bolivia' || region === 'peru' || region === 'mexico') return '';
+    if (region === 'femenino' || region === 'francia' || region === 'inglaterra' || region === 'sudafrica' || region === 'alemania' || region === 'polonia' || region === 'georgia' || region === 'rusia' || region === 'australia' || region === 'chequia' || region === 'bolivia' || region === 'peru' || region === 'mexico' || region === 'colombia') return '';
     if (region === 'noa') return 'Tarucas';
     if (region === 'nea') return 'Yacaré XV';
     if (region === 'centro' || region === 'oeste') return 'Dogos XV';
@@ -856,6 +856,7 @@ export function nationalTeamOf(club: string): string {
     if (region === 'bolivia') return 'Los Andinos';
     if (region === 'peru') return 'Los Incas';
     if (region === 'mexico') return 'Los Aztecas';
+    if (region === 'colombia') return 'Los Tucanes';
     return region === 'chile' ? 'Los Cóndores' : region === 'uruguay' ? 'Los Teros' : region === 'brasil' ? 'Os Tupis' : 'Los Pumas';
 }
 

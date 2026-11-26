@@ -7,7 +7,7 @@
 
 import { useState, type ReactNode } from 'react';
 import { SKILL_LABEL, type Player } from './career';
-import { cupName, levelDef, levelOf, MC_ME, PAY, PAY_BY_LEVEL, PRIZE, releaseBlock, signBlock, SQUAD_MAX, trainBlock, trainCost, movesByLevel, myMove, myRating, NAC_HOW, NAC_NAME, NAC_SIZE, nacionalView, pyramidTours, seasonNews, starters, tagFor, TAG_LABEL, zoneName, type McLevel, type McTag, type MiClubState } from './miClub';
+import { cupName, levelDef, levelOf, MC_ME, PAY, PAY_BY_LEVEL, PRIZE, releaseBlock, signBlock, SQUAD_MAX, trainBlock, trainCost, movesByLevel, myMove, myRating, americaView, LIB_NAME, LIB_PER_WORLD, nacHowOf, nacNameOf, nacionalView, otherWorld, topOf, WORLDS, pyramidTours, seasonNews, starters, tagFor, TAG_LABEL, zoneName, type McLevel, type McTag, type MiClubState } from './miClub';
 import { groupStandings, roundLabel, finalRanking, type TourState } from './tours';
 import styles from './seven.module.css';
 
@@ -117,8 +117,12 @@ export function McPyramid({ s, nameOf, flag, bracket }: { s: TourState; nameOf: 
     const list = pyramidTours(s);
     const mine = levelOf(r, MC_ME) ?? 'base';
     const nac = nacionalView(s);
-    const [pick, setPick] = useState<McLevel | 'nac'>(mine);
-    const cur = pick === 'nac' ? null : list.find((x) => x.level.id === pick) ?? list[0];
+    const america = americaView(s);
+    const nacName = nacNameOf(r);
+    const nacHow = nacHowOf(r);
+    const world = r.world ?? 'ar';
+    const [pick, setPick] = useState<McLevel | 'nac' | 'lib'>(mine);
+    const cur = pick === 'nac' || pick === 'lib' ? null : list.find((x) => x.level.id === pick) ?? list[0];
     const news = seasonNews(r);
     const moves = movesByLevel(r);
     const mineMove = myMove(r);
@@ -156,8 +160,12 @@ export function McPyramid({ s, nameOf, flag, bracket }: { s: TourState; nameOf: 
                     </button>
                 ))}
                 <button type="button" role="radio" aria-checked={pick === 'nac'} className={`${styles.pyramidStep} ${pick === 'nac' ? styles.pyramidStepOn : ''}`} onClick={() => setPick('nac')}>
-                    <strong>{NAC_NAME}</strong>
-                    <small>{nac ? `${nac.def?.teams.length ?? NAC_SIZE} clubes` : 'desde mitad de año'}</small>
+                    <strong>{nacName}</strong>
+                    <small>{nac ? `${nac.def?.teams.length ?? 0} clubes` : 'desde mitad de año'}</small>
+                </button>
+                <button type="button" role="radio" aria-checked={pick === 'lib'} className={`${styles.pyramidStep} ${pick === 'lib' ? styles.pyramidStepOn : ''}`} onClick={() => setPick('lib')}>
+                    <strong>Copa de América</strong>
+                    <small>{america.lib ? `${america.lib.def?.teams.length ?? 0} clubes` : 'desde mitad de año'}</small>
                 </button>
             </div>
             {cur ? (
@@ -175,14 +183,38 @@ export function McPyramid({ s, nameOf, flag, bracket }: { s: TourState; nameOf: 
                     {cur.cup ? (
                         <CupBlock title={cupName(cur.level.id)} t={cur.cup} how="Todos los clubes de la división, a eliminación directa. Los más fuertes arrancan una ronda más adelante." nameOf={nameOf} flag={flag} bracket={bracket} />
                     ) : (
-                        cur.level.id === 'primera' && <p className={styles.note}>Primera no juega copa de división: juega la {NAC_NAME}.</p>
+                        cur.level.id === topOf(world) && (
+                            <p className={styles.note}>
+                                Primera no juega copa de división: juega la {nacName} y la {LIB_NAME}.
+                            </p>
+                        )
+                    )}
+                </>
+            ) : pick === 'lib' ? (
+                <>
+                    {america.lib ? (
+                        <CupBlock title={LIB_NAME} t={america.lib} how={`Los ${LIB_PER_WORLD} mejores de la Primera de Argentina contra los ${LIB_PER_WORLD} mejores de la de Sudamérica, a eliminación directa.`} nameOf={nameOf} flag={flag} bracket={bracket} />
+                    ) : (
+                        <p className={styles.note}>
+                            La {LIB_NAME} se arma pasada la mitad de año con los {LIB_PER_WORLD} mejores de cada Primera: la de {WORLDS[world].label} y la de {WORLDS[otherWorld(world)].label}.
+                        </p>
+                    )}
+                    {america.ext && (
+                        <section className={styles.mcSection} aria-label={`Primera de ${WORLDS[otherWorld(world)].label}`}>
+                            <h3 className={styles.groupTitle}>Primera de {WORLDS[otherWorld(world)].label}</h3>
+                            <p className={styles.note}>
+                                Del otro lado. Sus {LIB_PER_WORLD} mejores van a la {LIB_NAME}. {status(america.ext, nameOf)}
+                            </p>
+                            {(america.ext.stage === 'grupos' || america.ext.done) && <McTables s={america.ext} r={r} level={topOf(otherWorld(world))} nameOf={nameOf} flag={flag} />}
+                            {america.ext.hasKo && america.ext.stage === 'ko' && bracket(america.ext)}
+                        </section>
                     )}
                 </>
             ) : nac ? (
-                <CupBlock title={NAC_NAME} t={nac} how={`${NAC_SIZE} clubes, armada a mitad de año. ${NAC_HOW}.`} nameOf={nameOf} flag={flag} bracket={bracket} />
+                <CupBlock title={nacName} t={nac} how={`${nac.def?.teams.length ?? 0} clubes, armada a mitad de año. ${nacHow}.`} nameOf={nameOf} flag={flag} bracket={bracket} />
             ) : (
                 <p className={styles.note}>
-                    La {NAC_NAME} se arma a mitad de año con la tabla de ese momento: {NAC_HOW}.
+                    La {nacName} se arma a mitad de año con la tabla de ese momento: {nacHow}.
                 </p>
             )}
         </div>
@@ -344,10 +376,10 @@ export function McClubPanel({ r }: { r: MiClubState }) {
                 <strong>{r.credits} créditos</strong>
                 {r.lastGain && <span>Último partido: {r.lastGain}</span>}
                 <span>
-                    Por partido en {levelDef(level).label}: {PAY_BY_LEVEL[level]} por jugar, {PAY.win} más si ganás ({PAY.draw} si empatás), {PAY.try} por try y {PAY.cupRound} por pasar de ronda en la copa ({PAY.nacRound} en la {NAC_NAME}).
+                    Por partido en {levelDef(level).label}: {PAY_BY_LEVEL[level]} por jugar, {PAY.win} más si ganás ({PAY.draw} si empatás), {PAY.try} por try y {PAY.cupRound} por pasar de ronda en la copa ({PAY.nacRound} en la {nacNameOf(r)} y {PAY.libRound} en la {LIB_NAME}).
                 </span>
                 <span>
-                    Al cierre: {PRIZE.ascenso} por ascender, {PRIZE.liga} por salir campeón de la liga, {PRIZE.copa} por la copa de la división y {PRIZE.nac} por la {NAC_NAME}.
+                    Al cierre: {PRIZE.ascenso} por ascender, {PRIZE.liga} por salir campeón de la liga, {PRIZE.copa} por la copa de la división, {PRIZE.nac} por la {nacNameOf(r)} y {PRIZE.lib} por la {LIB_NAME}.
                 </span>
             </div>
             <div className={styles.roadPending}>

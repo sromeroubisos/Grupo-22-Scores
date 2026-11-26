@@ -51,9 +51,9 @@ const CBA_CLUBS: ArSevenClub[] = CBA_DESARROLLO_ZONES.flat().map((id, i) => ({
 }));
 
 /** Las ramas de la carrera: las dos argentinas y, aparte (no se cruzan con las argentinas), Chile, Uruguay y Brasil. */
-export type ArBranch = 'urba' | 'interior' | 'chile' | 'uruguay' | 'brasil' | 'espana' | 'espanaFem' | 'fem' | 'francia' | 'inglaterra' | 'sudafrica' | 'portugal' | 'franciaFem' | 'inglaterraFem' | 'alemania' | 'polonia' | 'georgia' | 'rusia' | 'australia' | 'chequia' | 'bolivia' | 'peru' | 'mexico';
+export type ArBranch = 'urba' | 'interior' | 'chile' | 'uruguay' | 'brasil' | 'espana' | 'espanaFem' | 'fem' | 'francia' | 'inglaterra' | 'sudafrica' | 'portugal' | 'franciaFem' | 'inglaterraFem' | 'alemania' | 'polonia' | 'georgia' | 'rusia' | 'australia' | 'chequia' | 'bolivia' | 'peru' | 'mexico' | 'colombia';
 /** Ramas con liga simple (el campeón sube, baja el último) y sin Sudamericano: se arman todas igual. */
-export const isLeagueBranch = (b: ArBranch) => ['chile', 'espana', 'espanaFem', 'fem', 'francia', 'inglaterra', 'sudafrica', 'portugal', 'franciaFem', 'inglaterraFem', 'alemania', 'polonia', 'georgia', 'rusia', 'australia', 'chequia', 'bolivia', 'peru', 'mexico'].includes(b);
+export const isLeagueBranch = (b: ArBranch) => ['chile', 'espana', 'espanaFem', 'fem', 'francia', 'inglaterra', 'sudafrica', 'portugal', 'franciaFem', 'inglaterraFem', 'alemania', 'polonia', 'georgia', 'rusia', 'australia', 'chequia', 'bolivia', 'peru', 'mexico', 'colombia'].includes(b);
 /** Las ramas de mujeres: no se mezclan con las de varones en los torneos en paralelo. */
 export const isFemBranch = (b: ArBranch) => b === 'fem' || b === 'espanaFem' || b === 'franciaFem' || b === 'inglaterraFem';
 export interface GameDivision extends Omit<ArSevenDivision, 'branch'> {
@@ -229,6 +229,13 @@ const FOREIGN: { div: Omit<GameDivision, 'clubs'>; pool: string; top: number; cl
         pool: 'latam', top: 46,
         clubs: [['Diablos Rojos', '#c8102e'], ['Mayas Rugby', '#0b6b3a'], ['Pumas CU', '#1f3fbf'], ['Búhos de Monterrey', '#111111'], ['Cuervos de Guadalajara', '#1f4fa0'], ['Toluca Rugby', '#c8102e'], ['Tigres de Puebla', '#f47920'], ['Querétaro Rugby', '#ffd100']],
     },
+    // Colombia: los clubes de la Liga de Rugby de Bogotá (ligarugbybogota.com.co, 2025). Los colores no
+    // están publicados: son elegidos para el juego y se retocan con Editar clubes.
+    {
+        div: { id: 'co-liga-bogota', label: 'Liga de Rugby de Bogotá', branch: 'colombia', region: 'colombia', level: 1, promotesTo: null, relegatesTo: null },
+        pool: 'latam', top: 44,
+        clubs: [['Magníficos', '#1f3fbf'], ['Alianza', '#c8102e'], ['Barbarians', '#111111'], ['Cachacas', '#ffd100'], ['Carneros', '#6e1a2c'], ['Coyotes', '#f47920'], ['Jaguares', '#0b6b3a'], ['Manoba', '#1f4fa0'], ['Minotauros', '#5a0f2a'], ['Salamandras', '#3fbf5a'], ['Zeppelin', '#ffffff']],
+    },
     // Las divisiones de abajo de Francia (nombres propios, clubes de verdad; las listas son aproximadas y se pueden retocar con Editar clubes).
     {
         div: { id: 'fr-nacional', label: 'Liga Nacional', branch: 'francia', region: 'francia', level: 3, promotesTo: 'fr-pro-segunda', relegatesTo: 'fr-nacional-2' },
@@ -324,7 +331,7 @@ const FOREIGN: { div: Omit<GameDivision, 'clubs'>; pool: string; top: number; cl
  */
 export const FEM_GUESTS: [string, string | null][] = [['Cardenales', colorLike('Cardenales')], ['Cha Roga', colorLike('Cha Roga')], ['Universitario de Mendoza', colorLike('Universitario de Mendoza')], ['Aguará Guazú', colorLike('Aguará Guazú')], ['Águilas de Resistencia', null], ['Palihue', null], ['Marabunta', colorLike('Marabunta')], ['Regatas de Resistencia', colorLike('Regatas Resistencia')]];
 export const FEM_GUEST_IDS = FEM_GUESTS.map(([name]) => `af-${slug(name)}`);
-const prefixOf = (b: ArBranch) => ({ chile: 'cl', uruguay: 'uy', brasil: 'br', espana: 'es', espanaFem: 'ef', fem: 'af', francia: 'fr', inglaterra: 'en', sudafrica: 'za', portugal: 'pt', franciaFem: 'ffr', inglaterraFem: 'fen', alemania: 'de', polonia: 'pl', georgia: 'ge', rusia: 'ru', australia: 'au', chequia: 'cz', bolivia: 'bo', peru: 'pe', mexico: 'mx' } as Record<string, string>)[b] ?? 'xx';
+const prefixOf = (b: ArBranch) => ({ chile: 'cl', uruguay: 'uy', brasil: 'br', espana: 'es', espanaFem: 'ef', fem: 'af', francia: 'fr', inglaterra: 'en', sudafrica: 'za', portugal: 'pt', franciaFem: 'ffr', inglaterraFem: 'fen', alemania: 'de', polonia: 'pl', georgia: 'ge', rusia: 'ru', australia: 'au', chequia: 'cz', bolivia: 'bo', peru: 'pe', mexico: 'mx', colombia: 'co' } as Record<string, string>)[b] ?? 'xx';
 const FOREIGN_CLUBS: GameClub[] = FOREIGN.flatMap((f) =>
     f.clubs.map(([name, color], i) => ({
         id: `${prefixOf(f.div.branch)}-${slug(name)}`,
@@ -646,7 +653,7 @@ function divisionTour(d: GameDivision): TourDef {
         sub: ({ urba: 'Rama URBA.', interior: 'Regional del interior.', chile: 'Chile · ARUSA.', uruguay: 'Uruguay.', brasil: 'Brasil · CBRu.', espana: 'España · FER.', espanaFem: 'España · FER, femenino.', fem: 'Argentina, femenino.', francia: 'Francia · liga de clubes.', inglaterra: 'Inglaterra · liga de clubes.', sudafrica: 'Sudáfrica · copa de uniones.', portugal: 'Portugal · campeonato de clubes.', franciaFem: 'Francia · liga de clubes, femenino.', inglaterraFem: 'Inglaterra · liga de clubes, femenino.', alemania: 'Alemania · liga de clubes.', polonia: 'Polonia · liga de clubes.', georgia: 'Georgia · liga de clubes.', rusia: 'Rusia · liga de clubes.', australia: 'Australia · liga de clubes.', chequia: 'Chequia · liga de clubes.', bolivia: 'Bolivia · liga de clubes.', peru: 'Perú · liga de clubes.', mexico: 'México · liga de clubes.' } as Record<string, string>)[d.branch] ?? '',
         source: 'real',
         clubs: true,
-        cat: isArgBranch(d.branch) || d.branch === 'fem' ? 'Argentina' : d.branch === 'chile' ? 'Chile' : d.branch === 'uruguay' ? 'Uruguay' : d.branch === 'brasil' ? 'Brasil' : d.branch === 'francia' || d.branch === 'franciaFem' ? 'Francia' : d.branch === 'inglaterra' || d.branch === 'inglaterraFem' ? 'Inglaterra' : d.branch === 'sudafrica' ? 'Sudáfrica' : d.branch === 'portugal' ? 'Portugal' : d.branch === 'alemania' ? 'Alemania' : d.branch === 'polonia' ? 'Polonia' : d.branch === 'georgia' ? 'Georgia' : d.branch === 'rusia' ? 'Rusia' : d.branch === 'australia' ? 'Australia' : d.branch === 'chequia' ? 'Chequia' : d.branch === 'bolivia' ? 'Bolivia' : d.branch === 'peru' ? 'Perú' : d.branch === 'mexico' ? 'México' : 'España',
+        cat: isArgBranch(d.branch) || d.branch === 'fem' ? 'Argentina' : d.branch === 'chile' ? 'Chile' : d.branch === 'uruguay' ? 'Uruguay' : d.branch === 'brasil' ? 'Brasil' : d.branch === 'francia' || d.branch === 'franciaFem' ? 'Francia' : d.branch === 'inglaterra' || d.branch === 'inglaterraFem' ? 'Inglaterra' : d.branch === 'sudafrica' ? 'Sudáfrica' : d.branch === 'portugal' ? 'Portugal' : d.branch === 'alemania' ? 'Alemania' : d.branch === 'polonia' ? 'Polonia' : d.branch === 'georgia' ? 'Georgia' : d.branch === 'rusia' ? 'Rusia' : d.branch === 'australia' ? 'Australia' : d.branch === 'chequia' ? 'Chequia' : d.branch === 'bolivia' ? 'Bolivia' : d.branch === 'peru' ? 'Perú' : d.branch === 'mexico' ? 'México' : d.branch === 'colombia' ? 'Colombia' : 'España',
         teams: [...d.clubs],
         formatLabel: `${n} clubes · fase regular a una vuelta · ${top === 4 ? 'semifinales' : 'final'} con los ${top} primeros`,
         stage: { kind: 'grupos', groups: 1, advance: top },
