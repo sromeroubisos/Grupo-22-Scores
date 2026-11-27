@@ -66,7 +66,8 @@ async function main() {
         const { error: updateError } = await admin.auth.admin.updateUserById(existing.id, {
             password,
             email_confirm: true,
-            user_metadata: { name, role: 'admin_torneo' },
+            // must_change_password: el dueño ve el cartel para elegir una propia.
+            user_metadata: { name, role: 'admin_torneo', must_change_password: true },
         });
         if (updateError) throw updateError;
         userId = existing.id;
@@ -76,7 +77,7 @@ async function main() {
             email,
             password,
             email_confirm: true,
-            user_metadata: { name, role: 'admin_torneo' },
+            user_metadata: { name, role: 'admin_torneo', must_change_password: true },
         });
         if (error) throw error;
         if (!data.user) throw new Error('createUser no devolvió usuario');

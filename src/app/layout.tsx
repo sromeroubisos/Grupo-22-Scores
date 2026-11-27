@@ -5,6 +5,7 @@ import ChunkLoadRecovery from "@/components/ChunkLoadRecovery";
 import ZoomLock from "@/components/ZoomLock";
 import ConditionalLayout from "@/components/ConditionalLayout";
 import PushActivationPrompt from "@/components/PushActivationPrompt";
+import ForcedPasswordPrompt from "@/components/ForcedPasswordPrompt";
 // Force rebuild for ChunkLoadError fix
 import { AuthProvider } from "@/context/AuthContext";
 import { appIconHref } from "@/lib/appBranding";
@@ -187,6 +188,7 @@ export default function RootLayout({
             <ConditionalLayout>{children}</ConditionalLayout>
           </Suspense>
           <PushActivationPrompt />
+          <ForcedPasswordPrompt />
         </AuthProvider>
         <Analytics />
       </body>

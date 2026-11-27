@@ -13,6 +13,7 @@ import {
 } from '@/lib/auth/roles';
 import { getReservedAdminRole } from '@/lib/types/user';
 import { isGlobalAdminRole } from '@/lib/auth/roles';
+import { MUST_CHANGE_PASSWORD_FLAG } from '@/lib/auth/mustChangePassword';
 
 // Why this endpoint exists: there was NO way for an admin to onboard a
 // worker. A staff member had to (1) self-register at /register, (2) click
@@ -198,7 +199,12 @@ export async function POST(request: NextRequest) {
                 email,
                 password,
                 email_confirm: true,
-                user_metadata: name ? { full_name: name } : {},
+                // La contraseña la eligió el admin: en el primer ingreso el
+                // dueño ve el cartel para poner una propia.
+                user_metadata: {
+                    ...(name ? { full_name: name } : {}),
+                    [MUST_CHANGE_PASSWORD_FLAG]: true,
+                },
             });
             if (createError) {
                 return jsonError('No se pudo crear la cuenta de autenticación.', 500, createError.message);
