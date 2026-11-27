@@ -27,6 +27,7 @@ import { createClient } from '@/lib/supabase/client';
 import styles from './ExportButton.module.css';
 import { drawCordoba7, isCordoba7Template, isCordoba7Tournament } from '@/lib/exports/cordoba7';
 import { canUseOlivos7, drawOlivos7, isOlivos7Template, resolveOlivos7Edition, type Olivos7Edition } from '@/lib/exports/olivos7';
+import { resolveEditorialBaseLayers, resolveTournamentExportBase, tournamentBaseFromSrc } from '@/lib/exports/tournamentBases';
 
 export type ExportFormat = '1080x1350' | '1080x1920';
 export type ExportTemplate = 'standings' | 'dailyMatches' | 'matchStats' | 'playerStats' | 'playoffBracket' | 'lineups' | 'squad' | 'teamOfWeek' | 'champion';
@@ -1333,8 +1334,14 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
     const [editorialGradientUpload, setEditorialGradientUpload] = useState<MatchBackgroundUpload | null>(() => {
         if (template !== 'matchStats') return null;
         const gradientImage = (data as MatchStatsData).editorialGradientImage?.trim();
-        return gradientImage ? { name: 'Degradado preconfigurado', src: gradientImage } : null;
+        return gradientImage ? { name: 'Degradado preconfigurado', src: gradientImage } : tournamentBaseUpload(data as MatchStatsData);
     });
+    // La base del torneo se precarga UNA vez por base: si el usuario la saca, un nuevo
+    // render del partido (que llega como objeto nuevo) no se la vuelve a poner.
+    const autoTournamentBaseRef = useRef<string | null>(
+        template === 'matchStats' ? tournamentBaseFromSrc(tournamentBaseUpload(data as MatchStatsData)?.src)?.id ?? null : null
+    );
+    const tournamentBaseActive = template === 'matchStats' && Boolean(tournamentBaseFromSrc(editorialGradientUpload?.src));
     const [editorialCompetitionLogoUpload, setEditorialCompetitionLogoUpload] = useState<MatchBackgroundUpload | null>(null);
     const [manualHomeScore, setManualHomeScore] = useState(() => (
         template === 'matchStats'
@@ -1678,15 +1685,23 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
         setManualHomeScore(formatExportScoreInput(matchData.homeScore));
         setManualAwayScore(formatExportScoreInput(matchData.awayScore));
         const gradientImage = matchData.editorialGradientImage?.trim();
-        setEditorialGradientUpload((current) => current ?? (gradientImage ? { name: 'Degradado preconfigurado', src: gradientImage } : null));
+        setEditorialGradientUpload((current) => {
+            if (current) return current;
+            if (gradientImage) return { name: 'Degradado preconfigurado', src: gradientImage };
+            const baseUpload = tournamentBaseUpload(matchData);
+            const baseId = tournamentBaseFromSrc(baseUpload?.src)?.id ?? null;
+            if (!baseUpload || autoTournamentBaseRef.current === baseId) return null;
+            autoTournamentBaseRef.current = baseId;
+            return baseUpload;
+        });
     }, [data, template]);
 
     useEffect(() => {
-        if (!shouldLockMatchExportFormatToPost(template, visualFamily, matchExportLayout, matchExportMode)) return;
+        if (!shouldLockMatchExportFormatToPost(template, visualFamily, matchExportLayout, matchExportMode, tournamentBaseActive)) return;
         if (format !== '1080x1350') {
             setFormat('1080x1350');
         }
-    }, [format, matchExportLayout, matchExportMode, template, visualFamily]);
+    }, [format, matchExportLayout, matchExportMode, template, tournamentBaseActive, visualFamily]);
 
     useEffect(() => {
         if (template !== 'matchStats') return;
@@ -1773,7 +1788,10 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
         && matchExportMode === 'schedule'
         && (visualFamily === 'g22Base' || visualFamily === 'posterV3' || visualFamily === 'impactoV4' || visualFamily === 'fanV5');
     const hasMatchEditorialBackground = template === 'matchStats'
-        ? supportsPhotoFreeEditorialSchedule || Boolean(matchBackgroundUpload?.src || (data as MatchStatsData).backgroundImage?.trim())
+        ? supportsPhotoFreeEditorialSchedule
+            || Boolean(matchBackgroundUpload?.src || (data as MatchStatsData).backgroundImage?.trim())
+            // La base del torneo trae su versión SIN FOTO: el editorial sale igual.
+            || (tournamentBaseActive && matchExportMode === 'result')
         : false;
     const isEditorialGradientMode = template === 'matchStats' && matchExportLayout === 'editorial4x5';
     // La placa clasica del partido: la unica pieza con degradado propio.
@@ -1791,12 +1809,12 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
         };
     }, [data, template]);
     const isResultExport = template === 'matchStats' && matchExportMode === 'result';
-    const locksMatchFormatToPost = shouldLockMatchExportFormatToPost(template, visualFamily, matchExportLayout, matchExportMode);
+    const locksMatchFormatToPost = shouldLockMatchExportFormatToPost(template, visualFamily, matchExportLayout, matchExportMode, tournamentBaseActive);
     const exportActionLabel = template === 'standings' && standingsSlides.length > 1
         ? `Exportar ${standingsSlides.length} imagenes`
         : 'Exportar imagen';
     const selectedFormatConfig = useMemo(
-        () => FORMATS.find((item) => item.value === getResolvedMatchExportFormat(template, format, visualFamily, matchExportLayout, matchExportMode)) || FORMATS[0],
+        () => FORMATS.find((item) => item.value === getResolvedMatchExportFormat(template, format, visualFamily, matchExportLayout, matchExportMode, tournamentBaseActive)) || FORMATS[0],
         [format, matchExportLayout, matchExportMode, template, visualFamily]
     );
     const selectedPaletteName = useMemo(
@@ -2347,7 +2365,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                     resolveActiveElementDimensionContextId(template, matchExportLayout, matchExportMode)
                 )
             );
-            const resolvedFormat = getResolvedMatchExportFormat(template, format, visualFamily, matchExportLayout, matchExportMode);
+            const resolvedFormat = getResolvedMatchExportFormat(template, format, visualFamily, matchExportLayout, matchExportMode, tournamentBaseActive);
             const config = FORMATS.find((item) => item.value === resolvedFormat)!;
             const [, brandLogo] = await Promise.all([ensureExportFonts(), loadImage('/icon.png')]);
             const canvas = document.createElement('canvas');
@@ -2397,7 +2415,14 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                     standingsBackgroundUpload,
                 );
                 if (matchExportLayout === 'editorial4x5') {
-                    const backgroundImage = matchBackgroundUpload?.src || matchData.backgroundImage || '';
+                    const uploadedPhoto = matchBackgroundUpload?.src || matchData.backgroundImage || '';
+                    const tournamentBase = matchData.status !== 'scheduled'
+                        ? tournamentBaseFromSrc(editorialGradientUpload?.src || matchData.editorialGradientImage)
+                        : null;
+                    const baseLayers = tournamentBase
+                        ? resolveEditorialBaseLayers(tournamentBase, { story: config.height > config.width * 1.5, photoSrc: uploadedPhoto })
+                        : null;
+                    const backgroundImage = baseLayers?.backgroundImage || uploadedPhoto;
                     const scheduledEditorialWithoutPhoto = (visualFamily === 'posterV3' || visualFamily === 'g22Base' || visualFamily === 'impactoV4' || visualFamily === 'fanV5')
                         && (matchData.status === 'scheduled' || (matchData.mainTitle || '').trim().toLowerCase() === 'horario');
                     if (!backgroundImage && !scheduledEditorialWithoutPhoto) {
@@ -2411,7 +2436,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                         editorialContextLabel,
                         editorialShowTopBadge,
                         editorialShowHeaderArrows,
-                        editorialGradientImage: editorialGradientUpload?.src || matchData.editorialGradientImage,
+                        editorialGradientImage: baseLayers?.gradientImage || editorialGradientUpload?.src || matchData.editorialGradientImage,
                         sponsors: activeEditorialSponsors,
                     };
                     if (visualFamily === 'posterV3') {
@@ -4814,11 +4839,14 @@ function shouldLockMatchExportFormatToPost(
     template: ExportTemplate,
     _visualFamily: ExportVisualFamily,
     layout: MatchExportLayout,
-    _mode: MatchExportMode,
+    mode: MatchExportMode,
+    // Con la base de un torneo el resultado editorial tiene su versión de historia
+    // (`lib/exports/tournamentBases`); sin base, la pieza sigue siendo solo 4:5.
+    hasTournamentBase = false,
 ) {
     void _visualFamily;
-    void _mode;
     if (template !== 'matchStats') return false;
+    if (hasTournamentBase && mode === 'result') return false;
     return layout === 'editorial4x5';
 }
 
@@ -4828,8 +4856,15 @@ function getResolvedMatchExportFormat(
     visualFamily: ExportVisualFamily,
     layout: MatchExportLayout,
     mode: MatchExportMode,
+    hasTournamentBase = false,
 ): ExportFormat {
-    return shouldLockMatchExportFormatToPost(template, visualFamily, layout, mode) ? '1080x1350' : format;
+    return shouldLockMatchExportFormatToPost(template, visualFamily, layout, mode, hasTournamentBase) ? '1080x1350' : format;
+}
+
+/** La base del torneo del partido, lista para precargar como capa editorial. */
+function tournamentBaseUpload(data: MatchStatsData | null | undefined): MatchBackgroundUpload | null {
+    const item = data ? resolveTournamentExportBase(data.tournamentId, data.kickoffAt ?? null) : null;
+    return item ? { name: `Base del torneo · ${item.name}`, src: item.post.photo } : null;
 }
 
 function getExportFontFamilyOption(id: ExportFontFamilyOptionId): ExportFontFamilyOption {
@@ -6208,8 +6243,17 @@ export async function renderMatchExportPreviewCanvas(
         )
     );
 
+    // Sin modal no hay quien precargue la base del torneo: se resuelve acá, salvo que el
+    // partido ya traiga otra capa elegida.
+    const previewGradient = template === 'matchStats' ? (data as MatchStatsData).editorialGradientImage?.trim() || '' : '';
+    const previewTournamentBase = template === 'matchStats'
+        ? (previewGradient
+            ? tournamentBaseFromSrc(previewGradient)
+            : resolveTournamentExportBase((data as MatchStatsData).tournamentId, (data as MatchStatsData).kickoffAt ?? null))
+        : null;
+
     try {
-        const resolvedFormat = getResolvedMatchExportFormat(template, format, visualFamily, matchExportLayout, matchExportMode);
+        const resolvedFormat = getResolvedMatchExportFormat(template, format, visualFamily, matchExportLayout, matchExportMode, Boolean(previewTournamentBase));
         const config = FORMATS.find((item) => item.value === resolvedFormat);
         if (!config) {
             throw new Error('Formato de preview no soportado');
@@ -6276,9 +6320,18 @@ export async function renderMatchExportPreviewCanvas(
         const matchData = applyMatchExportMode(exportData as MatchStatsData, matchExportMode);
 
         if (matchExportLayout === 'editorial4x5') {
+        const previewBaseLayers = previewTournamentBase && matchData.status !== 'scheduled'
+            ? resolveEditorialBaseLayers(previewTournamentBase, {
+                story: config.height > config.width * 1.5,
+                photoSrc: matchData.backgroundImage,
+            })
+            : null;
         const editorialMatchData: MatchStatsData = {
             ...matchData,
             editorialContextLabel: matchData.editorialContextLabel || '',
+            ...(previewBaseLayers
+                ? { backgroundImage: previewBaseLayers.backgroundImage, editorialGradientImage: previewBaseLayers.gradientImage }
+                : {}),
         };
 
             if (visualFamily === 'posterV3') {
