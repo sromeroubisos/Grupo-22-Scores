@@ -36,6 +36,7 @@ import {
 } from '@/lib/server/playoffStages';
 import { generatePlayoffBracket, loadPlayoffBracket } from '@/lib/server/playoffBracket';
 import { resolveMatchAdvancement } from '@/lib/server/resolveMatchAdvancement';
+import { advanceFromGroupLabels } from '@/lib/server/advanceFromGroupLabels';
 import { reseedPlayoffBracket } from '@/lib/server/playoffBracket';
 import { readPlayoffSeedingConfig } from '@/lib/playoff/seedingFromStandings';
 import type { PlayoffBuilderConfig } from '@/lib/playoff/templates';
@@ -1450,6 +1451,21 @@ export class FixtureService {
         console.error('[FixtureService] Playoff reseed-from-zones threw:', reseedError);
       }
       traceStageEnd('reseed');
+      }
+
+      // Cruces con rótulo de origen ("2º Zona B", "1º Copa de Oro"): cuando el grupo
+      // termina, el partido de destino toma al club de ese puesto. Opt-in por
+      // temporada (settings.autoAdvanceFromLabels); nunca tira.
+      if (!isDerivedRecalcSkipped('advancement')) {
+        traceStageStart('label_advancement');
+        const labels = await advanceFromGroupLabels(supabase, matchId);
+        if (labels.ok && labels.changed > 0) {
+          markEditTrace({ labelAdvancementChanged: labels.changed });
+          if (sideEffects) sideEffects.derivedChanged = true;
+          await invalidateMatchesFeedCaches();
+        }
+        if (!labels.ok) console.error('[FixtureService] Avance por rótulo falló:', labels.error);
+        traceStageEnd('label_advancement');
       }
     }
 

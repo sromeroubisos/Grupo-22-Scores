@@ -1313,6 +1313,10 @@ function mapDbMatchToFrontend(match: any) {
         away_team: { id: match.away?.id ?? match.away_club_id ?? null, name: match.away?.name ?? '', short_name: match.away?.short_name ?? null, logo: match.away?.logo_url ?? '' },
         home_club_id: match.home_club_id,
         away_club_id: match.away_club_id,
+        // Cruce todavía sin club: las filas del fixture leen de dónde sale ("1º Zona A")
+        // en vez de "Local". Campo aparte, no el nombre: si no, cuenta como un equipo más.
+        home_source_label: match.home?.name ? null : match.home_source_label ?? null,
+        away_source_label: match.away?.name ? null : match.away_source_label ?? null,
         lineups: match.lineups ?? null,
         events: match.events ?? [],
         date_time: match.date_time ?? null,
@@ -4104,8 +4108,8 @@ export default function TournamentDetailPage({
         const penAway = penaltiesRaw?.away;
         const hasPenalties = typeof penHome === 'number' && typeof penAway === 'number';
 
-        const homeFull = match.home_team?.name || match.event_home_team || match.home_team_name || 'Local';
-        const awayFull = match.away_team?.name || match.event_away_team || match.away_team_name || 'Visitante';
+        const homeFull = match.home_team?.name || match.event_home_team || match.home_team_name || match.home_source_label || 'Local';
+        const awayFull = match.away_team?.name || match.event_away_team || match.away_team_name || match.away_source_label || 'Visitante';
         // En la fila compacta va el nombre corto (Newman, SIC, Regatas BV); el
         // completo queda en el title, para quien no reconozca la abreviatura.
         const homeName = nombreDeFila(match.home_team, homeFull);
@@ -4601,8 +4605,8 @@ export default function TournamentDetailPage({
 
         const scoreHome = match.scores?.home ?? match.scores?.home_score ?? match.home_score;
         const scoreAway = match.scores?.away ?? match.scores?.away_score ?? match.away_score;
-        const homeName = match.home_team?.name || match.event_home_team || match.home_team_name || 'Local';
-        const awayName = match.away_team?.name || match.event_away_team || match.away_team_name || 'Visitante';
+        const homeName = match.home_team?.name || match.event_home_team || match.home_team_name || match.home_source_label || 'Local';
+        const awayName = match.away_team?.name || match.event_away_team || match.away_team_name || match.away_source_label || 'Visitante';
         const homeLogo = getTeamLogo(match.home_team) || match.home_team_logo || '';
         const awayLogo = getTeamLogo(match.away_team) || match.away_team_logo || '';
         /* El estado sale del resolvedor: un 'postponed' que llegue hasta acá
