@@ -26,7 +26,9 @@ import GuestExportInvite, { useGuestExportInvite } from '@/components/GuestExpor
 import { createClient } from '@/lib/supabase/client';
 import styles from './ExportButton.module.css';
 import { drawCordoba7, isCordoba7Template, isCordoba7Tournament } from '@/lib/exports/cordoba7';
-import { drawPava7, isPava7Template, isPava7Tournament } from '@/lib/exports/pava7';
+import { drawPava7, isPava7Template, isPava7Tournament, pava7Covers } from '@/lib/exports/pava7';
+
+const PAVA7_SUPER_CHOICE_KEY = 'g22:pava7-super-design';
 import { canUseOlivos7, drawOlivos7, isOlivos7Template, resolveOlivos7Edition, type Olivos7Edition } from '@/lib/exports/olivos7';
 import { resolveEditorialBaseLayers, resolveTournamentExportBase, tournamentBaseFromSrc } from '@/lib/exports/tournamentBases';
 
@@ -1159,9 +1161,18 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
     // El Seven de la Pava (Córdoba Athletic) exporta con la estética de su cronograma —negro,
     // serif roja, línea de tiempo—: misma regla que Córdoba 7, lo usan sus administradores y
     // cualquiera que exporte el torneo; el administrador general sigue con su diseño activo.
-    const pava7 = isPava7Template(template)
-        && user?.role !== 'super_admin'
+    // El administrador general elige en el modal entre su diseño y el del Pava (solo en estos torneos).
+    const pava7Eligible = pava7Covers(template, liveData)
         && isPava7Tournament(tournamentId ?? (liveData as { tournamentId?: string | number | null }).tournamentId);
+    const isSuperAdmin = user?.role === 'super_admin';
+    const [superUsesPava7, setSuperUsesPava7] = useState<boolean>(() => {
+        try { return window.localStorage.getItem(PAVA7_SUPER_CHOICE_KEY) === '1'; } catch { return false; }
+    });
+    const chooseSuperPava7 = (next: boolean) => {
+        setSuperUsesPava7(next);
+        try { window.localStorage.setItem(PAVA7_SUPER_CHOICE_KEY, next ? '1' : '0'); } catch { /* sin storage: queda en memoria */ }
+    };
+    const pava7 = pava7Eligible && (!isSuperAdmin || superUsesPava7);
     const guestInvite = useGuestExportInvite();
     // El diseno activo del panel es para quien gestiona algo. El resto de la gente
     // —el hincha logueado y el invitado— exporta siempre con Fan V5, la familia
@@ -2869,13 +2880,41 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
 
                         <div className={styles.modalBody}>
                             <div className={styles.modalControls}>
+                            {isSuperAdmin && pava7Eligible && (
+                                <div className={styles.modalSection}>
+                                    <label className={styles.modalLabel}>Diseño para este torneo</label>
+                                    <div className={styles.formatOptions} role="radiogroup" aria-label="Diseño para este torneo">
+                                        <button
+                                            className={`${styles.formatBtn} ${!superUsesPava7 ? styles.active : ''}`}
+                                            onClick={() => chooseSuperPava7(false)}
+                                            type="button"
+                                            role="radio"
+                                            aria-checked={!superUsesPava7}
+                                        >
+                                            Mi diseño
+                                        </button>
+                                        <button
+                                            className={`${styles.formatBtn} ${superUsesPava7 ? styles.active : ''}`}
+                                            onClick={() => chooseSuperPava7(true)}
+                                            type="button"
+                                            role="radio"
+                                            aria-checked={superUsesPava7}
+                                        >
+                                            Seven de la Pava
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
                             <div className={styles.modalSection}>
                                 <label className={styles.modalLabel}>Diseno activo</label>
                                 <div className={styles.activeDesignCard}>
                                     <div className={styles.activeDesignCopy}>
-                                        <strong>{isRankingPoster ? 'Poster Ranking' : isLadder ? 'Placa Ladder' : isBracket ? 'Cuadro Playoff' : (isPalmares && visualFamily !== 'fanV5') ? 'Poster Palmares' : getExportVisualFamilyLabel(visualFamily)}</strong>
+                                        <strong>{pava7 ? 'Seven de la Pava' : isRankingPoster ? 'Poster Ranking' : isLadder ? 'Placa Ladder' : isBracket ? 'Cuadro Playoff' : (isPalmares && visualFamily !== 'fanV5') ? 'Poster Palmares' : getExportVisualFamilyLabel(visualFamily)}</strong>
                                         <span>
-                                            {isRankingPoster
+                                            {pava7
+                                                ? 'Estética del cronograma oficial del torneo: negro con grano, serif roja y línea de tiempo.'
+                                                : isRankingPoster
                                                 ? 'Afiche dedicado del ranking: banda vertical con el titulo, tabla P/Equipo/PTS/VAR y fila del lider destacada.'
                                                 : isLadder
                                                     ? 'Placa dedicada de la tabla: titulo grande, una fila por club con escudo, valor principal, dato secundario y flecha de tendencia.'

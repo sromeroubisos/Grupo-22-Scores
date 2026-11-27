@@ -26,6 +26,14 @@ export function isPava7Template(template: string): template is Pava7Template {
     return (PAVA7_TEMPLATES as readonly string[]).includes(template);
 }
 
+// "standings" también lo usan el palmarés, la ladder y el póster de ranking (`data.variant`):
+// esas placas no son una tabla de posiciones y siguen con su diseño dedicado.
+export function pava7Covers(template: string, data: unknown): template is Pava7Template {
+    if (!isPava7Template(template)) return false;
+    if (template !== 'standings') return true;
+    return !(data as { variant?: string | null } | null)?.variant;
+}
+
 // Ids de la base (tournaments.id) y slugs de las dos ramas.
 const PAVA7_TOURNAMENTS = new Set([
     'ed822419-a8e3-4581-94c1-e309598f0619',
