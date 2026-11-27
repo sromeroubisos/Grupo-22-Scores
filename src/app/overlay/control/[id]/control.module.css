@@ -429,3 +429,62 @@
   grid-template-columns: 2fr 1fr 1fr 1fr;
   gap: 6px;
 }
+
+/* Vencimiento del enlace guardado para OBS (vale 15 días). */
+.linkExpiry {
+  margin: 2px 0 0;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(0, 163, 101, 0.12);
+  color: #2bd683;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.linkExpiry[data-state='por-vencer'] { background: rgba(255, 196, 0, 0.12); color: #ffd166; }
+.linkExpiry[data-state='vencido'] { background: rgba(255, 123, 123, 0.12); color: #ff7b7b; }
+
+/* Color del equipo a mano, al lado del título: es lo que más se toca antes de salir. */
+.teamHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.teamColor {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--c-dim);
+}
+
+.teamColor input {
+  width: 46px;
+  height: 34px;
+  padding: 3px;
+  border-radius: 9px;
+  border: 1px solid var(--c-line);
+  background: #0b0e0c;
+}
+
+.shotNow {
+  margin: 0;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--c-dim);
+}
+
+.inline select {
+  min-height: 42px;
+  padding: 0 10px;
+  border-radius: 9px;
+  border: 1px solid var(--c-line);
+  background: #0b0e0c;
+  color: var(--c-ink);
+  font: inherit;
+}

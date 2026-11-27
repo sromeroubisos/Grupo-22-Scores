@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
+import LinkWatch from '../../_components/LinkWatch';
+import { checkOverlayLink } from '../../_lib/linkGate';
 import ManualOverlay from './ManualOverlay';
 import FontAssets from '../../_components/FontAssets';
-import { overlayPageCss, parseOverlayConfig, type SearchParams } from '../../_lib/config';
+import { applyPlan, overlayPageCss, parseOverlayConfig, type SearchParams } from '../../_lib/config';
 
 /**
  * Overlay MANUAL para OBS / vMix: un marcador o un titular que el productor
@@ -23,13 +25,19 @@ export default async function ManualOverlayPage({
   searchParams: Promise<SearchParams>;
 }) {
   const [{ id }, query] = await Promise.all([params, searchParams]);
-  const config = parseOverlayConfig(query, { style: 'marcador' });
+  const asked = parseOverlayConfig(query, { style: 'marcador' });
+
+  const gate = await checkOverlayLink(query, `/overlay/manual/${id}`);
+  // Lo que pide la URL, recortado al plan del dueño del enlace.
+  const config = applyPlan(asked, gate.status === 'ok' ? gate.plan : 'basico');
 
   return (
     <>
       <style>{overlayPageCss(config.background, config.fonts)}</style>
       <FontAssets fonts={config.fonts} />
-      <ManualOverlay id={decodeURIComponent(id)} config={config} />
+      <LinkWatch gate={gate} brand={config.brand}>
+        <ManualOverlay id={decodeURIComponent(id)} config={config} />
+      </LinkWatch>
     </>
   );
 }

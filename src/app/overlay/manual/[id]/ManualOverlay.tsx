@@ -5,6 +5,7 @@
 import { useEffect, useState } from 'react';
 import { currentHeadline, readManualState, type ManualHeadlineState, type ManualKind } from '@/lib/overlay/manualOverlay';
 import type { OverlayConfig } from '../../_lib/config';
+import { planRules } from '@/lib/overlay/overlayPlan';
 import OverlayStage from '../../_components/OverlayStage';
 import { G22Card, SetupHint } from '../../_components/G22Card';
 import MatchOverlay from '../../partido/[id]/MatchOverlay';
@@ -45,7 +46,11 @@ export default function ManualOverlay({ id, config }: { id: string; config: Over
   if (failure) return <SetupHint>G22 · {failure}</SetupHint>;
   if (kind === 'marcador') return <MatchOverlay matchId={id} config={config} manual />;
   if (kind === 'titular') return <HeadlineOverlay id={id} config={config} />;
-  if (kind === 'sponsors') return <SponsorsOverlay id={id} config={config} />;
+  if (kind === 'sponsors') {
+    // Los sponsors son del plan premium: con otro plan, solo lo ve quien arma la escena.
+    if (!planRules(config.plan).sponsors) return <SetupHint>G22 · El overlay de sponsors es del plan Premium.</SetupHint>;
+    return <SponsorsOverlay id={id} config={config} />;
+  }
   return null;
 }
 

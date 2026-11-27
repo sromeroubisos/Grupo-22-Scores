@@ -18,6 +18,18 @@ import { ClubPicker, MatchPicker } from '../../_builder/Pickers';
 import { sevensClockPatch, teamsFromMatch } from '../../_builder/matchTeams';
 import SponsorsPanel, { type UploadedLogo } from './SponsorsPanel';
 import styles from './control.module.css';
+import { linkAirPath, linkStatus } from '@/lib/overlay/overlayLinks';
+import { CONVERSION_LABEL, shotView } from '@/lib/overlay/shotClock';
+
+/** Cuentas de un toque. La de la conversión, además, arranca sola con cada try. */
+const SHOT_PRESETS: Array<{ label: string; seconds: number }> = [
+  { label: CONVERSION_LABEL, seconds: 90 },
+  { label: 'PENAL', seconds: 60 },
+  { label: 'TIEMPO MÉDICO', seconds: 120 },
+  { label: 'TMO', seconds: 90 },
+];
+
+type PanelLink = { path: string; token: string; expiresAt: string };
 
 /**
  * Panel de un overlay manual. La clave llega en el fragmento de la URL
@@ -32,7 +44,7 @@ import styles from './control.module.css';
 const KEY_STORAGE = (id: string) => `g22-overlay-key:${id}`;
 
 type Patch = Record<string, unknown>;
-type Payload = { state?: unknown; clock?: unknown; score?: unknown };
+type Payload = { state?: unknown; clock?: unknown; score?: unknown; shot?: unknown };
 
 function readKey(id: string): string {
   const fromHash = new URLSearchParams(window.location.hash.slice(1)).get('clave');
@@ -77,6 +89,8 @@ export default function ControlPanel({ id }: { id: string }) {
   const [kind, setKind] = useState<ManualKind | null>(null);
   const [state, setState] = useState<ManualState | null>(null);
   const [offset, setOffset] = useState(0);
+  const [link, setLink] = useState<PanelLink | null | undefined>(undefined);
+  const [serverClock, setServerClock] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [origin, setOrigin] = useState('');
@@ -88,11 +102,15 @@ export default function ControlPanel({ id }: { id: string }) {
     setOrigin(window.location.origin);
   }, [id]);
 
-  const applyServer = useCallback((body: { kind: ManualKind; state: unknown; serverNow?: string }, requestedAt: number) => {
+  const applyServer = useCallback((body: { kind: ManualKind; state: unknown; serverNow?: string; link?: PanelLink | null }, requestedAt: number) => {
     setKind(body.kind);
+    if (body.link !== undefined) setLink(body.link);
     setState(readManualState(body.kind, body.state));
     const serverNow = Date.parse(body.serverNow ?? '');
-    if (Number.isFinite(serverNow)) setOffset(serverNow - (requestedAt + Date.now()) / 2);
+    if (Number.isFinite(serverNow)) {
+      setOffset(serverNow - (requestedAt + Date.now()) / 2);
+      setServerClock(serverNow);
+    }
   }, []);
 
   // Lectura periódica (otra persona puede estar manejando el mismo overlay).
@@ -104,7 +122,8 @@ export default function ControlPanel({ id }: { id: string }) {
       if (Date.now() - lastLocalEdit.current > 2_500) {
         const requestedAt = Date.now();
         try {
-          const response = await fetch(`/api/overlay/control/${encodeURIComponent(id)}`, { cache: 'no-store' });
+          // Con la clave, el servidor también manda el enlace guardado para OBS y su vencimiento.
+          const response = await fetch(`/api/overlay/control/${encodeURIComponent(id)}`, { cache: 'no-store', headers: key ? { 'x-overlay-key': key } : undefined });
           const body = await response.json().catch(() => null);
           if (!cancelled) {
             if (response.ok && body) {
@@ -125,7 +144,7 @@ export default function ControlPanel({ id }: { id: string }) {
       cancelled = true;
       if (timer) window.clearTimeout(timer);
     };
-  }, [id, applyServer]);
+  }, [id, key, applyServer]);
 
   const send = useCallback(async (payload: Payload) => {
     if (!key) {
@@ -183,7 +202,8 @@ export default function ControlPanel({ id }: { id: string }) {
     return { url: String(body.url), ratio: Number(body.ratio) || 2 };
   }, [id, key]);
 
-  const overlayUrl = `${origin}/overlay/manual/${id}`;
+  const overlayUrl = link ? `${origin}${linkAirPath(link.path, link.token)}` : '';
+  const linkInfo = link && serverClock ? linkStatus(link.expiresAt, serverClock) : null;
 
   return (
     <main className={styles.page}>
@@ -200,9 +220,18 @@ export default function ControlPanel({ id }: { id: string }) {
       <section className={styles.urlBox}>
         <span>URL para OBS / vMix (1920×1080)</span>
         <div className={styles.urlRow}>
-          <input readOnly value={overlayUrl} onFocus={(e) => e.currentTarget.select()} aria-label="URL del overlay" />
-          <button type="button" onClick={() => void navigator.clipboard?.writeText(overlayUrl)}>Copiar</button>
+          <input readOnly value={overlayUrl} placeholder={link === null ? 'Guardalo en Mis overlays (g22scores.com/overlay)' : 'Cargando…'} onFocus={(e) => e.currentTarget.select()} aria-label="URL del overlay" />
+          <button type="button" disabled={!overlayUrl} onClick={() => void navigator.clipboard?.writeText(overlayUrl)}>Copiar</button>
         </div>
+        {linkInfo ? (
+          <p className={styles.linkExpiry} data-state={linkInfo.state} role={linkInfo.state === 'vigente' ? undefined : 'status'}>
+            {linkInfo.state === 'vencido'
+              ? `${linkInfo.label}: ya no sale al aire. Renovalo en g22scores.com/overlay, en Mis overlays; la URL sigue siendo la misma.`
+              : linkInfo.state === 'por-vencer'
+                ? `${linkInfo.label}. Renovalo en g22scores.com/overlay, en Mis overlays, antes de salir al aire.`
+                : `${linkInfo.label}. Se renueva en g22scores.com/overlay, en Mis overlays.`}
+          </p>
+        ) : null}
         <small>Guardá este panel en favoritos: el link ya trae la clave. Quien lo tenga puede manejar el overlay.</small>
       </section>
 
@@ -236,6 +265,9 @@ function ScorePanel({
   const [setTime, setSetTime] = useState('');
   const [scorer, setScorer] = useState<Record<'home' | 'away', string>>({ home: '', away: '' });
   const [loadingTeams, setLoadingTeams] = useState(false);
+  const [shotName, setShotName] = useState('');
+  const [shotTime, setShotTime] = useState('1:00');
+  const [shotTeam, setShotTeam] = useState<'' | 'home' | 'away'>('');
   useEffect(() => {
     const interval = window.setInterval(() => setNow(Date.now()), 250);
     return () => window.clearInterval(interval);
@@ -258,6 +290,12 @@ function ScorePanel({
   };
 
   const recent = [...state.events].reverse().slice(0, 8);
+  const shot = shotView(state.shot, now + offset);
+  const startOwnShot = () => {
+    const seconds = parseMmss(shotTime);
+    if (!seconds) return;
+    void send({ shot: { start: { label: shotName || 'TIEMPO', seconds, team: shotTeam || null } } });
+  };
 
   return (
     <div className={styles.grid}>
@@ -359,11 +397,67 @@ function ScorePanel({
         </label>
       </section>
 
+      <section className={styles.card}>
+        <h2>Shot clock</h2>
+        {shot ? (
+          <>
+            <p className={styles.shotNow}>
+              {shot.team ? `${state[shot.team].short} · ` : ''}{shot.label}{shot.paused ? ' · en pausa' : shot.done ? ' · terminó' : ''}
+            </p>
+            <div className={styles.clock} data-expired={shot.urgent ? '' : undefined}>{shot.time}</div>
+            <div className={styles.buttons}>
+              {shot.paused
+                ? <button type="button" className={styles.primary} onClick={() => void send({ shot: 'resume' })}>Seguir</button>
+                : <button type="button" className={styles.primary} onClick={() => void send({ shot: 'pause' })} disabled={shot.done}>Pausar</button>}
+              <button type="button" onClick={() => void send({ shot: 'stop' })}>Sacar</button>
+            </div>
+          </>
+        ) : (
+          <p className={styles.muted}>Una cuenta corta debajo del marcador. Se va sola cuando llega a cero.</p>
+        )}
+        <div className={styles.periods} aria-label="Cuentas de un toque">
+          {SHOT_PRESETS.map((preset) => (
+            <button key={preset.label} type="button" onClick={() => void send({ shot: { start: { label: preset.label, seconds: preset.seconds, team: shotTeam || null } } })}>
+              {preset.label} {mmss(preset.seconds)}
+            </button>
+          ))}
+        </div>
+        <div className={styles.pair}>
+          <label className={styles.field}>
+            <span>Cuenta propia: qué dice</span>
+            <input value={shotName} maxLength={24} placeholder="Ej. LINE-OUT" onChange={(e) => setShotName(e.target.value)} />
+          </label>
+          <label className={styles.field}>
+            <span>Cuánto dura (mm:ss)</span>
+            <input value={shotTime} placeholder="1:00" onChange={(e) => setShotTime(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') startOwnShot(); }} />
+          </label>
+        </div>
+        <div className={styles.inline}>
+          <select value={shotTeam} onChange={(e) => setShotTeam(e.target.value as '' | 'home' | 'away')} aria-label="De qué equipo es la cuenta">
+            <option value="">Sin equipo</option>
+            <option value="home">{state.home.short}</option>
+            <option value="away">{state.away.short}</option>
+          </select>
+          <button type="button" onClick={startOwnShot} disabled={!parseMmss(shotTime)}>Arrancar la cuenta</button>
+        </div>
+        {!parseMmss(shotTime) ? <p className={styles.muted}>Poné cuánto dura (mm:ss) para arrancarla.</p> : null}
+        <label className={styles.check}>
+          <input type="checkbox" checked={state.autoShot > 0} onChange={(e) => patchNow({ autoShot: e.target.checked ? 90 : 0 })} />
+          <span>Arranca sola después de cada try (conversión, 1:30). La conversión, hecha o errada, la saca.</span>
+        </label>
+      </section>
+
       {(['home', 'away'] as const).map((side) => {
         const team = state[side];
         return (
           <section className={styles.card} key={side} style={{ borderTopColor: team.color ?? undefined }}>
-            <h2>{side === 'home' ? 'Local' : 'Visitante'} · {team.short}</h2>
+            <div className={styles.teamHead}>
+              <h2>{side === 'home' ? 'Local' : 'Visitante'} · {team.short}</h2>
+              <label className={styles.teamColor}>
+                <span>Color</span>
+                <input type="color" value={team.color ?? '#00a365'} onChange={(e) => patchNow({ [side]: { color: e.target.value } })} aria-label={`Color del ${side === 'home' ? 'local' : 'visitante'} en el marcador`} />
+              </label>
+            </div>
             <div className={styles.score}>{team.score}</div>
             <label className={styles.field}>
               <span>Quién (opcional: sale en la placa)</span>
@@ -386,7 +480,7 @@ function ScorePanel({
               <button type="button" onClick={() => patchNow({ [side]: { score: team.score + 1 } })}>+1 punto</button>
             </div>
             <details className={styles.details}>
-              <summary>Equipo: nombre, sigla, color, escudo y plantel</summary>
+              <summary>Equipo: nombre, sigla, escudo y plantel</summary>
               <div className={styles.field}>
                 <span>Elegir un club de G22 (nombre, sigla, color y escudo de una)</span>
                 <ClubPicker
@@ -398,16 +492,10 @@ function ScorePanel({
                 <span>Nombre</span>
                 <input value={team.name} maxLength={40} onChange={(e) => patchText({ [side]: { name: e.target.value } })} />
               </label>
-              <div className={styles.pair}>
-                <label className={styles.field}>
-                  <span>Sigla</span>
-                  <input value={team.short} maxLength={16} onChange={(e) => patchText({ [side]: { short: e.target.value } })} />
-                </label>
-                <label className={styles.field}>
-                  <span>Color</span>
-                  <input type="color" value={team.color ?? '#00a365'} onChange={(e) => patchNow({ [side]: { color: e.target.value } })} />
-                </label>
-              </div>
+              <label className={styles.field}>
+                <span>Sigla</span>
+                <input value={team.short} maxLength={16} onChange={(e) => patchText({ [side]: { short: e.target.value } })} />
+              </label>
               <label className={styles.field}>
                 <span>Escudo (link https a una imagen, opcional)</span>
                 <input value={team.logo ?? ''} placeholder="https://…/escudo.png" onChange={(e) => patchText({ [side]: { logo: e.target.value } })} />

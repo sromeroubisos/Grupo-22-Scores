@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getOverlayAccess } from '@/lib/auth/overlayAccess';
+import { getOverlayPlan } from '@/lib/server/overlayPlanStore';
 import OverlayBuilder from './OverlayBuilder';
 import styles from './builder.module.css';
 
@@ -36,5 +37,7 @@ export default async function OverlayBuilderPage() {
     );
   }
 
-  return <OverlayBuilder />;
+  // El plan decide qué se puede personalizar (y al aire se vuelve a aplicar).
+  const plan = await getOverlayPlan(access.userId, access.role).catch(() => 'basico' as const);
+  return <OverlayBuilder plan={plan} />;
 }

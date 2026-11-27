@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
+import LinkWatch from '../../_components/LinkWatch';
+import { checkOverlayLink } from '../../_lib/linkGate';
 import MatchOverlay from './MatchOverlay';
 import FontAssets from '../../_components/FontAssets';
-import { overlayPageCss, parseOverlayConfig, type SearchParams } from '../../_lib/config';
+import { applyPlan, overlayPageCss, parseOverlayConfig, type SearchParams } from '../../_lib/config';
 
 /**
  * Overlay de un partido para OBS / vMix / Streamlabs / cualquier programa con
@@ -29,13 +31,19 @@ export default async function OverlayMatchPage({
   searchParams: Promise<SearchParams>;
 }) {
   const [{ id }, query] = await Promise.all([params, searchParams]);
-  const config = parseOverlayConfig(query, { style: 'tarjeta' });
+  const asked = parseOverlayConfig(query, { style: 'tarjeta' });
+
+  const gate = await checkOverlayLink(query, `/overlay/partido/${id}`);
+  // Lo que pide la URL, recortado al plan del dueño del enlace.
+  const config = applyPlan(asked, gate.status === 'ok' ? gate.plan : 'basico');
 
   return (
     <>
       <style>{overlayPageCss(config.background, config.fonts)}</style>
       <FontAssets fonts={config.fonts} />
-      <MatchOverlay matchId={decodeURIComponent(id)} config={config} />
+      <LinkWatch gate={gate} brand={config.brand}>
+        <MatchOverlay matchId={decodeURIComponent(id)} config={config} />
+      </LinkWatch>
     </>
   );
 }

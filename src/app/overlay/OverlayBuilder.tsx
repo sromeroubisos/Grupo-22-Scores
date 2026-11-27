@@ -2,15 +2,18 @@
 
 /* eslint-disable @next/next/no-img-element -- el wordmark es un PNG local chico. */
 
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { FONT_FAMILIES, ROLE_DEFAULTS, fontFamilyDef, roleFontParam, type FontRole, type RoleFont } from './_lib/fonts';
 import {
   DEFAULT_ROWS, KIND_DEFS, KIND_GROUPS, SCOREBOARD_STYLES, UUID_RE,
-  hasScoreboard, idFrom, isList, isManual, isMatchKind, isScoreboardStyle, needsTournament,
+  hasScoreboard, idFrom, isList, isManual, isMatchKind, isScoreboardStyle, needsTournament, requiredPlan,
   type Kind,
 } from './_builder/catalog';
+import { PLAN_LABELS, planAtLeast, planRules, type BrandPosition, type OverlayPlan } from '@/lib/overlay/overlayPlan';
+import { teamAcronym, type NameMode } from '@/lib/overlay/teamAcronym';
 import { Canvas } from './_builder/Canvas';
 import { ClubPicker, Crest, MatchPicker, TournamentPicker, matchWhen, type OverlaySearchMatch } from './_builder/Pickers';
+import { MyOverlays, SaveLink } from './_builder/MyOverlays';
 import { sevensClockPatch, teamFromClub, teamsFromMatch, type ManualSport, type TeamInfo } from './_builder/matchTeams';
 import styles from './_builder/studio.module.css';
 
@@ -99,7 +102,18 @@ async function describeMatch(id: string): Promise<PickedMatch> {
 
 const hexParam = (color: string) => color.replace('#', '');
 
-export default function OverlayBuilder() {
+/** El plan del usuario: qué se puede personalizar. Al aire se vuelve a aplicar. */
+const PlanContext = createContext<OverlayPlan>('basico');
+
+export default function OverlayBuilder({ plan }: { plan: OverlayPlan }) {
+  return (
+    <PlanContext.Provider value={plan}>
+      <Studio />
+    </PlanContext.Provider>
+  );
+}
+
+function Studio() {
   const [kind, setKind] = useState<Kind | null>(null);
   const [origin, setOrigin] = useState('https://www.g22scores.com');
 
@@ -137,7 +151,7 @@ export default function OverlayBuilder() {
       {kind ? (
         <Editor key={isScoreboardStyle(kind) ? 'scoreboard' : kind} kind={kind} origin={origin} onBack={back} onStyle={switchStyle} />
       ) : (
-        <Gallery onOpen={open} />
+        <Gallery onOpen={open} origin={origin} />
       )}
     </main>
   );
@@ -145,7 +159,7 @@ export default function OverlayBuilder() {
 
 /* ─────────────── Galería ─────────────── */
 
-function Gallery({ onOpen }: { onOpen: (kind: Kind) => void }) {
+function Gallery({ onOpen, origin }: { onOpen: (kind: Kind) => void; origin: string }) {
   // Las tarjetas muestran una imagen fija; la muestra en vivo se monta sólo en
   // la que está bajo el mouse, de a una. Veinte iframes a la vez trababan el navegador.
   const [live, setLive] = useState<Kind | null>(null);
@@ -160,6 +174,7 @@ function Gallery({ onOpen }: { onOpen: (kind: Kind) => void }) {
     if (hoverTimer.current) window.clearTimeout(hoverTimer.current);
     setLive(null);
   };
+  const plan = useContext(PlanContext);
 
   return (
     <>
@@ -168,14 +183,24 @@ function Gallery({ onOpen }: { onOpen: (kind: Kind) => void }) {
         <div>
           <h1 className={styles.title}>Overlays para transmisión</h1>
           <p className={styles.lead}>Gráficos en vivo para OBS, vMix o Streamlabs que se actualizan solos con lo que pasa en G22.</p>
+          <p className={styles.planLine}>
+            <span className={styles.planBadge} data-plan={plan}>Plan {PLAN_LABELS[plan]}</span>
+            {plan === 'basico'
+              ? 'Estética de G22 y los marcadores de la casa. Con el plan Colores, todos los estilos y los colores de cada club; con Premium, el logo del torneo y los sponsors.'
+              : plan === 'colores'
+                ? 'Todos los estilos, colores y tipografías. Con Premium, el logo del torneo, los sponsors y sin la marca de G22.'
+                : 'Todo: estilos, colores, tipografías, logo del torneo, sponsors y la marca de G22 opcional.'}
+          </p>
         </div>
       </header>
 
       <ol className={styles.steps} aria-label="Cómo se usa">
         <li><b>1</b><span><strong>Elegí un gráfico.</strong> Pasá el mouse por una tarjeta para verla en movimiento.</span></li>
         <li><b>2</b><span><strong>Personalizalo.</strong> El partido o torneo, qué se ve, colores y tipografías.</span></li>
-        <li><b>3</b><span><strong>Copiá la URL</strong> y pegala como fuente de navegador en OBS o vMix.</span></li>
+        <li><b>3</b><span><strong>Guardalo y copiá la URL</strong> para pegarla en OBS o vMix. Vale 15 días y se renueva desde Mis overlays.</span></li>
       </ol>
+
+      <MyOverlays origin={origin} />
 
       {KIND_GROUPS.map((group) => (
         <section key={group.id} className={styles.shelf} aria-labelledby={`grupo-${group.id}`}>
@@ -184,15 +209,22 @@ function Gallery({ onOpen }: { onOpen: (kind: Kind) => void }) {
             <p>{group.description}</p>
           </div>
           <div className={styles.cards}>
-            {group.kinds.map((item) => (
+            {group.kinds.map((item) => {
+              const needs = requiredPlan(item.id);
+              const locked = !planAtLeast(plan, needs);
+              return (
               <button
                 key={item.id}
                 type="button"
                 className={styles.card}
+                data-locked={locked ? '' : undefined}
+                disabled={locked}
+                aria-label={locked ? `${item.label}: disponible con el plan ${PLAN_LABELS[needs]}` : undefined}
                 onClick={() => onOpen(item.id)}
                 onPointerEnter={(event) => startLive(item.id, event.pointerType)}
                 onPointerLeave={stopLive}
               >
+                {locked ? <span className={styles.cardLock}>Plan {PLAN_LABELS[needs]}</span> : null}
                 <span className={styles.cardMedia}>
                   <img src={`/overlay-thumbs/${item.id}.webp`} alt="" width={960} height={540} loading="lazy" decoding="async" className={styles.cardImg} />
                   {live === item.id ? (
@@ -203,9 +235,10 @@ function Gallery({ onOpen }: { onOpen: (kind: Kind) => void }) {
                   <b>{item.label}</b>
                   <span>{item.hint}</span>
                 </span>
-                <span className={styles.cardCta} aria-hidden="true">Personalizar →</span>
+                <span className={styles.cardCta} aria-hidden="true">{locked ? `Con el plan ${PLAN_LABELS[needs]}` : 'Personalizar →'}</span>
               </button>
-            ))}
+              );
+            })}
           </div>
         </section>
       ))}
@@ -246,6 +279,7 @@ function HowTo() {
             <li>La PC necesita internet: se actualiza sola cada pocos segundos.</li>
             <li>Si se corta, queda lo último y reintenta. Nunca sale un cartel de error.</li>
             <li>Probalo antes con <b>modo prueba</b>, en la misma PC.</li>
+            <li>El enlace vale <b>15 días</b>. Si vence, en vez del gráfico sale un aviso: renovalo en <b>Mis overlays</b> y la URL sigue igual.</li>
           </ol>
         </div>
       </div>
@@ -284,6 +318,10 @@ function Editor({ kind, origin, onBack, onStyle }: { kind: Kind; origin: string;
   const [showCards, setShowCards] = useState(true);
   const [plates, setPlates] = useState(true);
   const [subs, setSubs] = useState(false);
+  const [conversion, setConversion] = useState(true);
+  const [celebration, setCelebration] = useState<'marcador' | 'cinta'>('marcador');
+  const [showTries, setShowTries] = useState(false);
+  const [showPeriod, setShowPeriod] = useState(false);
   const [header, setHeader] = useState(true);
   const [title, setTitle] = useState('');
 
@@ -292,6 +330,10 @@ function Editor({ kind, origin, onBack, onStyle }: { kind: Kind; origin: string;
   const [awayColor, setAwayColor] = useState('');
   const [homeName, setHomeName] = useState('');
   const [awayName, setAwayName] = useState('');
+  // Cómo se escribe cada club: siglas, nombre completo o automático (y el nombre, editable).
+  const [nameMode, setNameMode] = useState<NameMode>('auto');
+  const [homeFull, setHomeFull] = useState('');
+  const [awayFull, setAwayFull] = useState('');
 
   // Manual
   const [homeTeam, setHomeTeam] = useState<TeamInfo>({ name: 'Local', short: 'LOC', color: '#00a365', logo: null });
@@ -313,7 +355,7 @@ function Editor({ kind, origin, onBack, onStyle }: { kind: Kind; origin: string;
   const [loadingMatch, setLoadingMatch] = useState(false);
 
   // Ubicación y tipografía
-  const defaultPosition = kind === 'manual-titular' ? 'abajo' : kind === 'manual-sponsors' ? 'auto' : 'centro';
+  const defaultPosition = kind === 'manual-titular' || kind === 'presentacion' ? 'abajo' : kind === 'manual-sponsors' ? 'auto' : 'centro';
   const [position, setPosition] = useState(defaultPosition);
   const [scale, setScale] = useState(1);
   const [cycle, setCycle] = useState(false);
@@ -322,6 +364,11 @@ function Editor({ kind, origin, onBack, onStyle }: { kind: Kind; origin: string;
   const [rows, setRows] = useState(DEFAULT_ROWS[kind] ?? 6);
   const [rotate, setRotate] = useState(10);
   const [background, setBackground] = useState('');
+  // Plan y marca: lo que el plan no permite, el generador no lo ofrece (y al aire se ignora).
+  const plan = useContext(PlanContext);
+  const rules = planRules(plan);
+  const [brand, setBrand] = useState<BrandPosition>('arriba-der');
+  const [logo, setLogo] = useState('');
   const [fonts, setFonts] = useState<Record<FontRole, RoleFont>>({ ...ROLE_DEFAULTS });
   const [customKind, setCustomKind] = useState<'google' | 'url' | 'local'>('google');
   const [customValue, setCustomValue] = useState('');
@@ -407,6 +454,7 @@ function Editor({ kind, origin, onBack, onStyle }: { kind: Kind; origin: string;
       if (kind !== 'partido') params.set('estilo', kind);
       if (!plates) params.set('placas', '0');
       if (subs) params.set('cambios', '1');
+      if (conversion && kind !== 'partido') params.set('conversion', '90');
     } else if (kind === 'formacion') {
       path = `/overlay/formacion/${match?.id ?? 'demo'}`;
       if (side !== 'ambos') params.set('lado', side);
@@ -458,10 +506,16 @@ function Editor({ kind, origin, onBack, onStyle }: { kind: Kind; origin: string;
       if (awayColor) params.set('visita', hexParam(awayColor));
       if (homeName.trim()) params.set('local_nombre', homeName.trim());
       if (awayName.trim()) params.set('visita_nombre', awayName.trim());
+      if (homeFull.trim()) params.set('local_largo', homeFull.trim());
+      if (awayFull.trim()) params.set('visita_largo', awayFull.trim());
     }
     if (hasScoreboard(kind)) {
       if (clockMode !== 'normal') params.set('reloj', clockMode);
       if (!showCards) params.set('tarjetas', '0');
+      if (celebration === 'cinta' && kind !== 'partido') params.set('festejo', 'cinta');
+      if (showTries && kind !== 'partido') params.set('tries', '1');
+      if (showPeriod && kind !== 'partido') params.set('periodo', '1');
+      if (nameMode !== 'auto') params.set('nombres', nameMode);
     }
     if (!header && (kind === 'partido' || kind === 'escudos' || kind === 'franja' || kind === 'bloques')) params.set('encabezado', '0');
     if (position !== defaultPosition && position !== 'auto') params.set('pos', position);
@@ -475,6 +529,8 @@ function Editor({ kind, origin, onBack, onStyle }: { kind: Kind; origin: string;
       if (rotate !== 10) params.set('rotar', String(rotate));
     }
     if (background) params.set('fondo', background);
+    if (brand !== 'arriba-der') params.set('marca', brand);
+    if (logo && rules.tournamentLogo && hasScoreboard(kind)) params.set('logo', logo);
     if (title.trim() && !isManual(kind)) params.set('titulo', title.trim());
     for (const role of ROLES) {
       const font = fonts[role.id];
@@ -488,9 +544,9 @@ function Editor({ kind, origin, onBack, onStyle }: { kind: Kind; origin: string;
     const query = params.toString();
     return `${path}${query ? `?${query}` : ''}`;
   }, [kind, match, matches, tournamentId, round, phase, group, stat, limit, day, dayTournaments, sport, liveOnly,
-    playerLink, newsLink, bracketView, side, formView, manual, manualStyle, plates, subs, homeColor, awayColor,
+    playerLink, newsLink, bracketView, side, formView, manual, manualStyle, plates, subs, conversion, celebration, showTries, showPeriod, nameMode, homeFull, awayFull, homeColor, awayColor,
     homeName, awayName, clockMode, showCards, header, position, defaultPosition, scale, cycle, showFor, hideFor, rows, rotate,
-    background, title, fonts, customKind, customValue, customScale, options]);
+    background, title, fonts, customKind, customValue, customScale, options, brand, logo, rules.tournamentLogo]);
 
   const url = `${origin}${relative}`;
 
@@ -503,8 +559,8 @@ function Editor({ kind, origin, onBack, onStyle }: { kind: Kind; origin: string;
       params.set('estilo', manualStyle === 'partido' ? 'tarjeta' : manualStyle);
       params.set('local', hexParam(homeTeam.color ?? '#00a365'));
       params.set('visita', hexParam(awayTeam.color ?? '#f2f2f2'));
-      params.set('local_nombre', homeTeam.short || homeTeam.name);
-      params.set('visita_nombre', awayTeam.short || awayTeam.name);
+      params.set('local_nombre', teamAcronym(homeTeam.name, homeTeam.short));
+      params.set('visita_nombre', teamAcronym(awayTeam.name, awayTeam.short));
       return demo(`/overlay/partido/demo?${params}`);
     }
     if (kind === 'manual-sponsors') {
@@ -514,6 +570,16 @@ function Editor({ kind, origin, onBack, onStyle }: { kind: Kind; origin: string;
     }
     return demo(relative);
   }, [missing, relative, kind, manualStyle, homeTeam, awayTeam, sponsorLayout]);
+
+  /** El nombre con que se guarda en Mis overlays si no se escribe otro. */
+  const defaultTitle = useMemo(() => {
+    const short = (team: TeamInfo | null | undefined) => team?.short || team?.name || '';
+    if (isMatchKind(kind) && match?.home && match?.away) return `${def.label} · ${short(match.home)} vs ${short(match.away)}`;
+    if (kind === 'manual-marcador') return `${def.label} · ${short(homeTeam)} vs ${short(awayTeam)}`;
+    if (kind === 'manual-titular' && headline.title.trim()) return `${def.label} · ${headline.title.trim()}`.slice(0, 120);
+    if (tournament?.name && (needsTournament(kind) || kind === 'jugador')) return `${def.label} · ${tournament.name}`;
+    return def.label;
+  }, [kind, def.label, match, homeTeam, awayTeam, headline.title, tournament]);
 
   const panelUrl = manual ? `${origin}/overlay/control/${manual.id}#clave=${manual.key}` : '';
 
@@ -540,7 +606,7 @@ function Editor({ kind, origin, onBack, onStyle }: { kind: Kind; origin: string;
       const response = await fetch('/api/overlay/control', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ kind: kind === 'manual-titular' ? 'titular' : kind === 'manual-sponsors' ? 'sponsors' : 'marcador', state }),
+        body: JSON.stringify({ kind: kind === 'manual-titular' ? 'titular' : kind === 'manual-sponsors' ? 'sponsors' : 'marcador', state, title: defaultTitle }),
       });
       const body = await response.json().catch(() => null);
       if (!response.ok || !body?.id) throw new Error(body?.error ?? 'No se pudo crear.');
@@ -582,6 +648,7 @@ function Editor({ kind, origin, onBack, onStyle }: { kind: Kind; origin: string;
     kind === 'manual-sponsors' && 'sponsors',
     showsVisibility && 'visible',
     isScoreboardStyle(kind) && 'colores',
+    'marca',
   ].filter((item): item is string => Boolean(item));
   stepOrder.forEach((id, index) => numbers.set(id, index + 1));
   const n = (id: string) => numbers.get(id) ?? 0;
@@ -599,11 +666,11 @@ function Editor({ kind, origin, onBack, onStyle }: { kind: Kind; origin: string;
         <button
           type="button"
           className={styles.topCopy}
-          onClick={() => void copy(url, 'url')}
+          onClick={() => document.getElementById('guardar')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
           disabled={Boolean(missing)}
           title={missing ?? undefined}
         >
-          {copied === 'url' ? 'URL copiada' : 'Copiar URL'}
+          Guardar para OBS
         </button>
       </div>
 
@@ -611,11 +678,24 @@ function Editor({ kind, origin, onBack, onStyle }: { kind: Kind; origin: string;
         <div className={styles.controls}>
           {isScoreboardStyle(kind) ? (
             <div className={styles.styleRow} role="radiogroup" aria-label="Estilo del marcador">
-              {SCOREBOARD_STYLES.map((item) => (
-                <button key={item.id} type="button" role="radio" aria-checked={kind === item.id} className={styles.styleChip} onClick={() => onStyle(item.id)}>
-                  {item.label}
-                </button>
-              ))}
+              {SCOREBOARD_STYLES.map((item) => {
+                const needs = requiredPlan(item.id);
+                const locked = !planAtLeast(plan, needs);
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    role="radio"
+                    aria-checked={kind === item.id}
+                    className={styles.styleChip}
+                    disabled={locked}
+                    title={locked ? `Con el plan ${PLAN_LABELS[needs]}` : undefined}
+                    onClick={() => onStyle(item.id)}
+                  >
+                    {item.label}{locked ? ' · ' + PLAN_LABELS[needs] : ''}
+                  </button>
+                );
+              })}
             </div>
           ) : null}
 
@@ -817,11 +897,24 @@ function Editor({ kind, origin, onBack, onStyle }: { kind: Kind; origin: string;
                   </Field>
                 </div>
                 <div className={styles.styleRow} role="radiogroup" aria-label="Diseño del marcador">
-                  {SCOREBOARD_STYLES.map((item) => (
-                    <button key={item.id} type="button" role="radio" aria-checked={manualStyle === item.id} className={styles.styleChip} onClick={() => setManualStyle(item.id)}>
-                      {item.label}
-                    </button>
-                  ))}
+                  {SCOREBOARD_STYLES.map((item) => {
+                    const needs = requiredPlan(item.id);
+                    const locked = !planAtLeast(plan, needs);
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        role="radio"
+                        aria-checked={manualStyle === item.id}
+                        className={styles.styleChip}
+                        disabled={locked}
+                        title={locked ? `Con el plan ${PLAN_LABELS[needs]}` : undefined}
+                        onClick={() => setManualStyle(item.id)}
+                      >
+                        {item.label}{locked ? ' · ' + PLAN_LABELS[needs] : ''}
+                      </button>
+                    );
+                  })}
                 </div>
               </Step>
             </>
@@ -912,13 +1005,37 @@ function Editor({ kind, origin, onBack, onStyle }: { kind: Kind; origin: string;
                     onChange={setClockMode}
                   />
                   <Check label="Amarillas, rojas y sin-bin" checked={showCards} onChange={setShowCards} />
+                  {kind !== 'partido' ? <Check label="Contador de tries de cada equipo" checked={showTries} onChange={setShowTries} /> : null}
+                  {kind !== 'partido' ? <Check label="Período junto al reloj (1T, 2T)" checked={showPeriod} onChange={setShowPeriod} disabled={clockMode === 'oculto'} /> : null}
+                  {kind === 'manual-marcador' ? (
+                    <Segment
+                      label="Cómo se escriben los clubes"
+                      value={nameMode}
+                      options={[['auto', 'Automático'], ['siglas', 'Siglas'], ['completo', 'Nombre completo']]}
+                      onChange={setNameMode}
+                    />
+                  ) : null}
+                  {kind !== 'partido' ? (
+                    <Segment
+                      label="Festejo del tanto"
+                      value={celebration}
+                      options={[['marcador', 'Sobre el marcador'], ['cinta', 'Cinta a lo ancho']]}
+                      onChange={setCelebration}
+                    />
+                  ) : null}
                 </>
               ) : null}
               {isScoreboardStyle(kind) ? (
                 <>
                   <Check label="Placa de quien anota (try, penal, tarjeta)" checked={plates} onChange={setPlates} />
                   <Check label="Placa de los cambios" checked={subs} onChange={setSubs} disabled={!plates} />
+                  {kind !== 'partido' ? (
+                    <Check label="Cuenta de la conversión después de cada try (90 s)" checked={conversion} onChange={setConversion} />
+                  ) : null}
                 </>
+              ) : null}
+              {kind === 'manual-marcador' ? (
+                <p className={styles.hint}>La cuenta de la conversión y las cuentas propias (TMO, tiempo médico) se manejan desde el panel.</p>
               ) : null}
               {showsHeaderToggle ? <Check label="Torneo, fase y zona arriba del marcador" checked={header} onChange={setHeader} /> : null}
               {!isManual(kind) && kind !== 'marcador' && kind !== 'barra' && kind !== 'compacto' && kind !== 'tira' ? (
@@ -936,17 +1053,54 @@ function Editor({ kind, origin, onBack, onStyle }: { kind: Kind; origin: string;
           ) : null}
 
           {isScoreboardStyle(kind) ? (
-            <Step n={n('colores')} title="Colores y nombres" hint="Vacío = el color y el nombre del club en G22.">
+            <Step n={n('colores')} title={rules.colors ? 'Colores y nombres' : 'Nombres'} hint="Vacío = el color del club en G22, su nombre y la sigla que sale de él.">
+              <Segment
+                label="Cómo se escriben los clubes"
+                value={nameMode}
+                options={[['auto', 'Automático'], ['siglas', 'Siglas (MAR)'], ['completo', 'Nombre completo']]}
+                onChange={setNameMode}
+              />
+              <p className={styles.hint}>
+                {nameMode === 'auto'
+                  ? 'Siglas en los marcadores chicos y el nombre completo en los anchos (zócalo, cápsula, línea, presentación).'
+                  : nameMode === 'siglas'
+                    ? 'La sigla en todos los marcadores.'
+                    : 'El nombre completo en todos. En los marcadores chicos, un nombre largo se corta con puntos suspensivos.'}
+              </p>
               <div className={styles.teams}>
-                <ColorName label="Local" color={homeColor} fallback={match?.home?.color ?? '#00a365'} onColor={setHomeColor} name={homeName} placeholder={match?.home?.short ?? 'Nombre del club'} onName={setHomeName} />
-                <ColorName label="Visitante" color={awayColor} fallback={match?.away?.color ?? '#2563eb'} onColor={setAwayColor} name={awayName} placeholder={match?.away?.short ?? 'Nombre del club'} onName={setAwayName} />
+                <ColorName label="Local" colors={rules.colors} color={homeColor} fallback={match?.home?.color ?? '#00a365'} onColor={setHomeColor} name={homeName} placeholder={teamAcronym(homeFull || match?.home?.name, match?.home?.short) || 'LOC'} onName={setHomeName} fullName={homeFull} fullPlaceholder={match?.home?.name ?? 'Nombre del club'} onFullName={setHomeFull} />
+                <ColorName label="Visitante" colors={rules.colors} color={awayColor} fallback={match?.away?.color ?? '#2563eb'} onColor={setAwayColor} name={awayName} placeholder={teamAcronym(awayFull || match?.away?.name, match?.away?.short) || 'VIS'} onName={setAwayName} fullName={awayFull} fullPlaceholder={match?.away?.name ?? 'Nombre del club'} onFullName={setAwayFull} />
               </div>
+              {!rules.colors ? (
+                <PlanLock needs="colores">Con tu plan los marcadores salen con los colores de G22. Con el plan Colores elegís el color de cada club.</PlanLock>
+              ) : null}
             </Step>
           ) : null}
 
+          <Step n={n('marca')} title="Marca y logo" hint="G22 Scores apoya la transmisión: su marca sale arriba o abajo a la derecha.">
+            <Segment
+              label="Marca de G22"
+              value={brand}
+              options={[['arriba-der', 'Arriba a la derecha'], ['abajo-der', 'Abajo a la derecha'], ...(rules.hideBrand ? [['no', 'Sin marca'] as [BrandPosition, string]] : [])]}
+              onChange={setBrand}
+            />
+            {!rules.hideBrand ? <p className={styles.hint}>Sacar la marca de G22 es del plan Premium.</p> : null}
+            {hasScoreboard(kind) ? (
+              rules.tournamentLogo ? (
+                <TournamentLogoField logo={logo} onLogo={setLogo} tournamentLogo={tournament?.logo ?? null} />
+              ) : (
+                <PlanLock needs="premium">El logo del torneo en el marcador es del plan Premium. Con tu plan va el logo de G22.</PlanLock>
+              )
+            ) : null}
+          </Step>
+
           <details className={styles.advanced}>
-            <summary>Tipografías</summary>
+            <summary>Tipografías{rules.fonts ? '' : ' · plan Colores'}</summary>
             <div className={styles.advancedBody}>
+              {!rules.fonts ? (
+                <PlanLock needs="colores">Con tu plan los gráficos usan las tipografías de G22. Con el plan Colores elegís las tuyas.</PlanLock>
+              ) : null}
+              {rules.fonts ? <>
               {ROLES.map((role) => {
                 const font = fonts[role.id];
                 const family = fontFamilyDef(font.family);
@@ -983,6 +1137,7 @@ function Editor({ kind, origin, onBack, onStyle }: { kind: Kind; origin: string;
                 </>
               ) : <p className={styles.hint}>Elegí «Fuente propia» en cualquiera para usar una de Google Fonts, un archivo o una instalada en la PC.</p>}
               <button type="button" className={styles.linkButton} onClick={() => setFonts({ ...ROLE_DEFAULTS })}>Volver a las de G22</button>
+              </> : null}
             </div>
           </details>
 
@@ -1024,11 +1179,8 @@ function Editor({ kind, origin, onBack, onStyle }: { kind: Kind; origin: string;
         <aside className={styles.output} aria-label="Vista previa y URL">
           <Canvas src={previewUrl} title="Vista previa del overlay" className={styles.bigCanvas} />
           <p className={styles.previewNote}>{missing ? `Muestra con datos de prueba. ${missing}` : 'Así sale al aire, con los datos reales.'}</p>
-          <div className={styles.urlRow}>
-            <input className={styles.url} readOnly value={missing ? '' : url} placeholder="La URL aparece acá" onFocus={(e) => e.currentTarget.select()} aria-label="URL del overlay" />
-            <button type="button" className={styles.primary} onClick={() => void copy(url, 'url')} disabled={Boolean(missing)}>
-              {copied === 'url' ? 'Copiada' : 'Copiar'}
-            </button>
+          <div id="guardar">
+            <SaveLink relative={relative} missing={missing} origin={origin} defaultTitle={defaultTitle} />
           </div>
           {!missing ? (
             <div className={styles.outActions}>
@@ -1126,18 +1278,28 @@ function TeamEditor({ label, team, players, onChange }: { label: string; team: T
   );
 }
 
-function ColorName({ label, color, fallback, onColor, name, placeholder, onName }: {
+function ColorName({ label, color, fallback, onColor, name, placeholder, onName, fullName, fullPlaceholder, onFullName, colors = true }: {
   label: string; color: string; fallback: string; onColor: (value: string) => void; name: string; placeholder: string; onName: (value: string) => void;
+  fullName: string; fullPlaceholder: string; onFullName: (value: string) => void;
+  /** Sin el plan de colores, solo los nombres. */
+  colors?: boolean;
 }) {
   const safeFallback = /^#[0-9a-f]{6}$/i.test(fallback) ? fallback : '#00a365';
   return (
     <div className={styles.team}>
       <span className={styles.teamLabel}>{label}</span>
-      <div className={styles.colorRow}>
-        <input type="color" value={color || safeFallback} onChange={(e) => onColor(e.target.value)} aria-label={`Color ${label.toLowerCase()}`} />
-        {color ? <button type="button" className={styles.linkButton} onClick={() => onColor('')}>Usar el del club</button> : <span className={styles.hint}>El del club</span>}
-      </div>
-      <Field label="Nombre en pantalla"><input value={name} maxLength={24} placeholder={placeholder} onChange={(e) => onName(e.target.value)} /></Field>
+      {colors ? (
+        <div className={styles.colorRow}>
+          <input type="color" value={color || safeFallback} onChange={(e) => onColor(e.target.value)} aria-label={`Color ${label.toLowerCase()}`} />
+          {color ? <button type="button" className={styles.linkButton} onClick={() => onColor('')}>Usar el del club</button> : <span className={styles.hint}>El del club</span>}
+        </div>
+      ) : null}
+      <Field label="Nombre completo">
+        <input value={fullName} maxLength={40} placeholder={fullPlaceholder} onChange={(e) => onFullName(e.target.value)} />
+      </Field>
+      <Field label="Sigla (3 letras)">
+        <input value={name} maxLength={4} placeholder={placeholder} onChange={(e) => onName(e.target.value.toUpperCase())} />
+      </Field>
     </div>
   );
 }
@@ -1148,4 +1310,73 @@ function weightLabel(weight: number) {
     600: 'SemiBold', 700: 'Bold', 800: 'ExtraBold', 900: 'Heavy',
   };
   return `${weight} · ${names[weight] ?? ''}`;
+}
+
+/** Lo que el plan no incluye: qué falta y con qué plan se destraba. */
+function PlanLock({ needs, children }: { needs: OverlayPlan; children: ReactNode }) {
+  return (
+    <p className={styles.planLock}>
+      <span className={styles.planBadge} data-plan={needs}>Plan {PLAN_LABELS[needs]}</span>
+      {children}
+    </p>
+  );
+}
+
+/**
+ * El logo del torneo (premium): se sube un PNG o se pega el link. Sin logo
+ * propio, al aire va el del torneo en G22 si lo tiene; si no, el de G22.
+ */
+function TournamentLogoField({ logo, onLogo, tournamentLogo }: { logo: string; onLogo: (url: string) => void; tournamentLogo: string | null }) {
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const upload = async (file: File) => {
+    setUploading(true);
+    setError(null);
+    try {
+      const form = new FormData();
+      form.append('file', file, file.name);
+      const response = await fetch('/api/overlay/logo-torneo', { method: 'POST', body: form });
+      const body = await response.json().catch(() => null);
+      if (!response.ok || !body?.url) throw new Error(body?.error ?? 'No se pudo subir el logo.');
+      onLogo(String(body.url));
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'No se pudo subir el logo.');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const shown = logo || tournamentLogo;
+  return (
+    <div className={styles.logoField}>
+      <span className={styles.logoLabel}>Logo del torneo en el marcador</span>
+      <div className={styles.logoRow}>
+        <span className={styles.logoPreview}>
+          {shown ? <img src={shown} alt="Logo del torneo elegido" /> : <img src="/header-logo.png" alt="Logo de G22 (sin logo de torneo)" />}
+        </span>
+        <div className={styles.logoActions}>
+          <label className={styles.secondary}>
+            {uploading ? 'Subiendo…' : logo ? 'Cambiar el PNG' : 'Subir un PNG'}
+            <input
+              type="file"
+              accept="image/png,image/webp,image/jpeg"
+              hidden
+              disabled={uploading}
+              onChange={(e) => { const file = e.target.files?.[0]; if (file) void upload(file); e.target.value = ''; }}
+            />
+          </label>
+          {logo ? <button type="button" className={styles.linkButton} onClick={() => onLogo('')}>Sacar el logo</button> : null}
+        </div>
+      </div>
+      <p className={styles.hint}>
+        {logo
+          ? 'Sale en los marcadores que llevan logo (cuadro, paneles, pestaña, presentación) y chico junto al reloj en los demás.'
+          : tournamentLogo
+            ? 'Sin subir nada se usa el logo del torneo en G22.'
+            : 'Sin logo de torneo va el de G22. PNG con fondo transparente, hasta 4 MB.'}
+      </p>
+      {error ? <p className={styles.error} role="alert">{error}</p> : null}
+    </div>
+  );
 }

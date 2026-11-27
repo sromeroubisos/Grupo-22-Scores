@@ -13,6 +13,16 @@
  */
 import { normalizeHex, type ManualCard, type OverlayEvent, type OverlayMatch } from './matchOverlayModel.ts';
 import { defaultSponsorsState, mergeSponsorsState, type ManualSponsorsState } from './sponsorsOverlay.ts';
+import {
+  CONVERSION_LABEL,
+  endsConversion,
+  pauseShot,
+  readShotClock,
+  resumeShot,
+  shotLabel,
+  startShot,
+  type ShotClock,
+} from './shotClock.ts';
 
 export type { ManualSponsorsState } from './sponsorsOverlay.ts';
 
@@ -63,6 +73,10 @@ export interface ManualScoreState {
   clock: ManualClock;
   /** Duración del sin-bin de una amarilla, en segundos (0 = sin temporizador). */
   sinBin: number;
+  /** Segundos de shot clock que arranca solo después de un try (0 = no arranca). */
+  autoShot: number;
+  /** La cuenta regresiva corta que está al aire (conversión o una propia), o null. */
+  shot: ShotClock | null;
   events: ManualEvent[];
 }
 
@@ -150,6 +164,8 @@ export function defaultManualState(kind: ManualKind): ManualState {
     away: { ...DEFAULT_AWAY, players: [] },
     clock: { running: false, base: 0, startedAt: null, countdown: false, limit: 40 * 60 },
     sinBin: 10 * 60,
+    autoShot: 90,
+    shot: null,
     events: [],
   };
 }
@@ -307,6 +323,9 @@ export function mergeManualState(kind: ManualKind, current: unknown, patch: unkn
       limit: clockPatch.limit === undefined ? clock.limit : int(clockPatch.limit, 0, 24 * 3600, clock.limit),
     },
     sinBin: int(incoming.sinBin ?? saved.sinBin ?? defaults.sinBin, 0, 3600, defaults.sinBin),
+    autoShot: int(incoming.autoShot ?? saved.autoShot ?? defaults.autoShot, 0, 600, defaults.autoShot),
+    // El shot clock solo se mueve con su acción (`applyShotAction`), con la hora del servidor.
+    shot: readShotClock(saved.shot),
     events: readEvents(saved.events),
   };
 }
@@ -395,9 +414,17 @@ export function applyScoreAction(state: ManualScoreState, action: ScoreAction, n
       at: manualElapsed(state.clock, nowMs),
       points,
     };
+    // Try: arranca la cuenta de la conversión. La conversión (hecha o errada) la cierra.
+    let shot = state.shot;
+    if (type === 'try' && state.sport === 'rugby' && state.autoShot > 0) {
+      shot = startShot(nowMs, { label: CONVERSION_LABEL, seconds: state.autoShot, team, source: event.id });
+    } else if (endsConversion(type) && shot?.label === CONVERSION_LABEL) {
+      shot = null;
+    }
     return {
       ...state,
       [team]: { ...state[team], score: Math.min(999, state[team].score + points) },
+      shot,
       events: [...state.events, event].slice(-60),
     };
   }
@@ -407,8 +434,37 @@ export function applyScoreAction(state: ManualScoreState, action: ScoreAction, n
   return {
     ...state,
     [removed.team]: { ...state[removed.team], score: Math.max(0, state[removed.team].score - removed.points) },
+    // Deshacer el try que la arrancó saca también la cuenta de la conversión.
+    shot: state.shot?.source === removed.id ? null : state.shot,
     events: state.events.filter((_, i) => i !== index),
   };
+}
+
+/* ─── shot clock ─── */
+
+export type ShotAction =
+  | { start: { label: string; seconds: number; team: 'home' | 'away' | null } }
+  | 'pause' | 'resume' | 'stop';
+
+export function parseShotAction(raw: unknown): ShotAction | null {
+  if (raw === 'pause' || raw === 'resume' || raw === 'stop') return raw;
+  const start = rec(rec(raw).start);
+  const seconds = Number(start.seconds);
+  if (!Number.isFinite(seconds) || seconds < 1) return null;
+  return {
+    start: {
+      label: shotLabel(start.label),
+      seconds: Math.min(3600, Math.trunc(seconds)),
+      team: start.team === 'home' || start.team === 'away' ? start.team : null,
+    },
+  };
+}
+
+export function applyShotAction(state: ManualScoreState, action: ShotAction, nowMs: number): ManualScoreState {
+  if (action === 'stop') return { ...state, shot: null };
+  if (action === 'pause') return state.shot ? { ...state, shot: pauseShot(state.shot, nowMs) } : state;
+  if (action === 'resume') return state.shot ? { ...state, shot: resumeShot(state.shot, nowMs) } : state;
+  return { ...state, shot: startShot(nowMs, action.start) };
 }
 
 /* ─── al aire ─── */
@@ -455,6 +511,7 @@ export function manualToOverlayMatch(id: string, state: ManualScoreState, offset
       offsetMs,
       cards: { home: cards('home'), away: cards('away') },
       sinBin: state.sinBin,
+      shot: state.shot,
     },
   };
 }

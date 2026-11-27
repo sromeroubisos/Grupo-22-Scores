@@ -1068,3 +1068,86 @@
   }
   .cardCta { opacity: 1; }
 }
+
+/* ─── planes ─── */
+
+.planLine {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  margin: 10px 0 0;
+  color: var(--s-dim);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.planBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--s-raised);
+  border: 1px solid var(--s-line-strong);
+  color: var(--s-ink);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.planBadge[data-plan='colores'] { border-color: rgba(96, 165, 250, 0.55); color: #93c5fd; }
+.planBadge[data-plan='premium'] { border-color: rgba(255, 196, 0, 0.55); color: #ffd166; }
+
+.planLock {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px dashed var(--s-line-strong);
+  color: var(--s-dim);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.card[data-locked] { cursor: not-allowed; }
+.card[data-locked] .cardMedia { opacity: 0.45; filter: grayscale(0.6); }
+
+.cardLock {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.75);
+  color: #ffd166;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.styleChip:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* ─── logo del torneo ─── */
+
+.logoField { display: grid; gap: 8px; margin-top: 6px; }
+.logoLabel { font-size: 13px; color: var(--s-dim); }
+.logoRow { display: flex; align-items: center; gap: 14px; }
+
+.logoPreview {
+  display: grid;
+  place-items: center;
+  width: 92px;
+  height: 64px;
+  border-radius: 10px;
+  border: 1px solid var(--s-line);
+  background: #0b0d10;
+}
+
+.logoPreview img { max-width: 76px; max-height: 50px; object-fit: contain; }
+.logoActions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.logoActions label { cursor: pointer; }
+.card { position: relative; }

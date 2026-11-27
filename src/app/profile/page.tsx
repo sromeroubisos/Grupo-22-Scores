@@ -28,6 +28,7 @@ import { useAuth } from '@/context/AuthContext';
 import ProdeLobby from '@/components/prode/ProdeLobby';
 import type { ProdePrivateLeagueSummary, PublicProdeCompetition, PublicProdeUserTotal } from '@/lib/prode/types';
 
+import { linksSummary } from '@/lib/overlay/overlayLinks';
 import styles from './profile.module.css';
 
 type MainTab = 'prode' | 'perfil';
@@ -159,6 +160,7 @@ export default function ProfilePage() {
                                         <div className={styles.settingInfo}>
                                             <h4>Overlays</h4>
                                             <p>Gráficos en vivo para OBS y vMix: marcadores, tablas, titulares</p>
+                                            <OverlayExpiryNote />
                                         </div>
                                         <ChevronRight size={16} color="var(--color-text-tertiary)" />
                                     </Link>
@@ -1011,4 +1013,26 @@ function SettingsPanel({ logout }: { logout: () => void }) {
             </div>
         </section>
     );
+}
+
+/** En la tarjeta de Overlays: cuántos enlaces guardados vencen pronto o ya vencieron. */
+function OverlayExpiryNote() {
+    const [note, setNote] = useState<string | null>(null);
+    useEffect(() => {
+        let cancelled = false;
+        fetch('/api/overlay/enlaces', { cache: 'no-store' })
+            .then((response) => (response.ok ? response.json() : null))
+            .then((body: { links?: { expiresAt: string }[]; serverNow?: string } | null) => {
+                if (cancelled || !body?.links) return;
+                const { soon, expired } = linksSummary(body.links, Date.parse(body.serverNow ?? '') || Date.now());
+                const parts = [
+                    soon ? (soon === 1 ? '1 vence pronto' : `${soon} vencen pronto`) : '',
+                    expired ? (expired === 1 ? '1 venció' : `${expired} vencieron`) : '',
+                ].filter(Boolean);
+                setNote(parts.length ? `${parts.join(' · ')}: renovalos en Mis overlays` : null);
+            })
+            .catch(() => undefined);
+        return () => { cancelled = true; };
+    }, []);
+    return note ? <p style={{ color: 'var(--color-text-primary)', fontWeight: 600 }}>{note}</p> : null;
 }

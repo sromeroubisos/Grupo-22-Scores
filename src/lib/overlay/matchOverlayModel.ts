@@ -19,6 +19,7 @@ import {
 import { isGoalKickAttemptEvent, isGoalKickMade } from '../matchEventStats.ts';
 import { normalizeMatchPeriod, type PeriodSportRef } from '../matchPeriods.ts';
 import { APP_TIMEZONE } from '../timezone.ts';
+import type { ShotClock } from './shotClock.ts';
 import { readRugbyModality, type RugbyModality } from '../utils/rugbyModality.ts';
 
 /*
@@ -100,6 +101,8 @@ export interface ManualClockInfo {
   cards?: { home: ManualCard[]; away: ManualCard[] };
   /** Segundos de sin-bin de una amarilla (0 = sin temporizador). */
   sinBin?: number;
+  /** Shot clock del panel (conversión o una cuenta propia). */
+  shot?: ShotClock | null;
   /** Hora del servidor − hora local, para que el panel y OBS muestren el mismo segundo. */
   offsetMs: number;
 }

@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
+import LinkWatch from '../../_components/LinkWatch';
+import { checkOverlayLink } from '../../_lib/linkGate';
 import FormationOverlay from './FormationOverlay';
 import FontAssets from '../../_components/FontAssets';
-import { first, overlayPageCss, parseOverlayConfig, type SearchParams } from '../../_lib/config';
+import { applyPlan, first, overlayPageCss, parseOverlayConfig, type SearchParams } from '../../_lib/config';
 
 /**
  * Formaciones de un partido para OBS / vMix:
@@ -24,17 +26,23 @@ export default async function FormationPage({
   searchParams: Promise<SearchParams>;
 }) {
   const [{ id }, query] = await Promise.all([params, searchParams]);
-  const config = parseOverlayConfig(query);
+  const asked = parseOverlayConfig(query);
   const rawSide = first(query.lado);
   const side = rawSide === 'local' || rawSide === 'visita' ? rawSide : 'ambos';
   const rawView = first(query.vista);
   const view = rawView === 'cancha' || rawView === 'lista' ? rawView : 'auto';
 
+  const gate = await checkOverlayLink(query, `/overlay/formacion/${id}`);
+  // Lo que pide la URL, recortado al plan del dueño del enlace.
+  const config = applyPlan(asked, gate.status === 'ok' ? gate.plan : 'basico');
+
   return (
     <>
       <style>{overlayPageCss(config.background, config.fonts)}</style>
       <FontAssets fonts={config.fonts} />
-      <FormationOverlay matchId={decodeURIComponent(id)} config={config} side={side} view={view} />
+      <LinkWatch gate={gate} brand={config.brand}>
+        <FormationOverlay matchId={decodeURIComponent(id)} config={config} side={side} view={view} />
+      </LinkWatch>
     </>
   );
 }

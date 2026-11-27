@@ -2,6 +2,7 @@ import { createHash, randomBytes } from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getOverlayAccess } from '@/lib/auth/overlayAccess';
+import { insertUserLink } from '@/lib/server/overlayLinksStore';
 import { defaultManualState, mergeManualState, type ManualKind } from '@/lib/overlay/manualOverlay';
 
 /**
@@ -21,7 +22,7 @@ export async function POST(request: NextRequest) {
   }
   const user = { id: access.userId };
 
-  const body = (await request.json().catch(() => ({}))) as { kind?: string; state?: unknown };
+  const body = (await request.json().catch(() => ({}))) as { kind?: string; state?: unknown; title?: unknown };
   const kind: ManualKind = body.kind === 'titular' || body.kind === 'sponsors' ? body.kind : 'marcador';
   // Lo que se eligió en el generador (equipos, colores, deporte) entra saneado,
   // igual que lo que manda el panel: el reloj y los eventos no se pueden fijar.
@@ -48,5 +49,14 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  return NextResponse.json({ id: data.id, kind, key }, { headers: { 'Cache-Control': 'no-store' } });
+  // El enlace para OBS queda guardado en "Mis overlays" de quien lo creó (vale 15
+  // días). Si falla, el overlay igual existe: se puede guardar desde el generador.
+  const fallbackTitle = kind === 'titular' ? 'Titular manual' : kind === 'sponsors' ? 'Sponsors' : 'Marcador manual';
+  const title = typeof body.title === 'string' && body.title.trim() ? body.title.trim().slice(0, 120) : fallbackTitle;
+  const link = await insertUserLink(user.id, { title, kind: 'manual', path: `/overlay/manual/${data.id}` }).catch(() => null);
+
+  return NextResponse.json(
+    { id: data.id, kind, key, link: link ? { path: link.path, token: link.token, expiresAt: link.expiresAt } : null },
+    { headers: { 'Cache-Control': 'no-store' } },
+  );
 }

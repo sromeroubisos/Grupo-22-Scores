@@ -1,12 +1,15 @@
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { latestLinkForManual } from '@/lib/server/overlayLinksStore';
 import {
   applyClockAction,
   applyScoreAction,
+  applyShotAction,
   mergeManualState,
   parseClockAction,
   parseScoreAction,
+  parseShotAction,
   readManualState,
   type ManualKind,
   type ManualScoreState,
@@ -18,7 +21,8 @@ import {
  *   GET    estado actual + la hora del servidor (el overlay corrige su reloj con ella)
  *   PATCH  { state?: {...parcial},
  *            clock?: 'start'|'pause'|'reset'|{set:segundos}|{adjust:±segundos},
- *            score?: {event:{team,type,player}} | {undo:true|<id del evento>} }
+ *            score?: {event:{team,type,player}} | {undo:true|<id del evento>},
+ *            shot?: {start:{label,seconds,team}} | 'pause'|'resume'|'stop' }
  *          con el header `x-overlay-key: <clave del panel>`
  *
  * Leer es público (es lo que ya se ve al aire); escribir pide la clave.
@@ -46,13 +50,17 @@ async function load(id: string) {
   return { admin, row: data as { id: string; kind: ManualKind; edit_key_hash: string; state: unknown; updated_at: string } | null, error };
 }
 
-export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   if (!UUID_RE.test(id)) return noStore({ error: 'Overlay inexistente.' }, 404);
   const { row, error } = await load(id);
   if (error) return noStore({ error: 'No se pudo leer el overlay.' }, 502);
   if (!row) return noStore({ error: 'Overlay inexistente.' }, 404);
+  // Con la clave (el panel), también el enlace guardado para OBS y su vencimiento.
+  const key = request.headers.get('x-overlay-key') ?? '';
+  const link = key && keyMatches(key, row.edit_key_hash) ? await latestLinkForManual(id).catch(() => null) : undefined;
   return noStore({
+    ...(link !== undefined ? { link: link ? { path: link.path, token: link.token, expiresAt: link.expiresAt } : null } : {}),
     id: row.id,
     kind: row.kind,
     state: readManualState(row.kind, row.state),
@@ -70,7 +78,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   if (!row) return noStore({ error: 'Overlay inexistente.' }, 404);
   if (!key || !keyMatches(key, row.edit_key_hash)) return noStore({ error: 'La clave del panel no es válida.' }, 403);
 
-  const body = (await request.json().catch(() => ({}))) as { state?: unknown; clock?: unknown; score?: unknown };
+  const body = (await request.json().catch(() => ({}))) as { state?: unknown; clock?: unknown; score?: unknown; shot?: unknown };
 
   // Cada guardado lee la fila, aplica el cambio y escribe el estado ENTERO. Dos
   // pedidos a la vez (dos toques rápidos, o dos personas con el panel) se
@@ -87,6 +95,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       // El tanto se registra DESPUÉS de mover el reloj: queda en el segundo correcto.
       const scoreAction = parseScoreAction(body.score);
       if (scoreAction) state = applyScoreAction(state as ManualScoreState, scoreAction, now);
+      const shotAction = parseShotAction(body.shot);
+      if (shotAction) state = applyShotAction(state as ManualScoreState, shotAction, now);
     }
     // La marca nueva siempre posterior a la leída, aunque caigan en el mismo milisegundo.
     const stamp = new Date(Math.max(now, Date.parse(current.updated_at) + 1)).toISOString();

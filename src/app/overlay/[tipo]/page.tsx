@@ -1,9 +1,11 @@
 import type { Metadata } from 'next';
+import LinkWatch from '../_components/LinkWatch';
+import { checkOverlayLink } from '../_lib/linkGate';
 import { notFound } from 'next/navigation';
 import type { OverlayFeedKind } from '@/lib/overlay/overlayFeedTypes';
 import FeedOverlay from '../_components/FeedOverlay';
 import FontAssets from '../_components/FontAssets';
-import { first, overlayPageCss, parseOverlayConfig, type SearchParams } from '../_lib/config';
+import { applyPlan, first, overlayPageCss, parseOverlayConfig, type SearchParams } from '../_lib/config';
 
 /**
  * Overlays de transmisión alimentados por `/api/overlay`:
@@ -54,7 +56,7 @@ export default async function OverlayFeedPage({
   const kind = KINDS[tipo];
   if (!kind) notFound();
 
-  const config = parseOverlayConfig(query, {
+  const asked = parseOverlayConfig(query, {
     rows: kind === 'partidos' ? 6 : kind === 'tabla' ? 10 : kind === 'goleadores' ? 5 : 7,
   });
 
@@ -64,11 +66,17 @@ export default async function OverlayFeedPage({
     if (value) dataQuery.set(key, value);
   }
 
+  const gate = await checkOverlayLink(query, `/overlay/${tipo}`);
+  // Lo que pide la URL, recortado al plan del dueño del enlace.
+  const config = applyPlan(asked, gate.status === 'ok' ? gate.plan : 'basico');
+
   return (
     <>
       <style>{overlayPageCss(config.background, config.fonts)}</style>
       <FontAssets fonts={config.fonts} />
-      <FeedOverlay kind={kind} query={dataQuery.toString()} config={config} />
+      <LinkWatch gate={gate} brand={config.brand}>
+        <FeedOverlay kind={kind} query={dataQuery.toString()} config={config} />
+      </LinkWatch>
     </>
   );
 }

@@ -1,4 +1,14 @@
 import { normalizeHex } from '@/lib/overlay/matchOverlayModel';
+import { safeImageUrl } from '@/lib/overlay/manualOverlay';
+import type { NameMode } from '@/lib/overlay/teamAcronym';
+import {
+  canUseStyle,
+  effectiveBrand,
+  planRules,
+  readBrand,
+  type BrandPosition,
+  type OverlayPlan,
+} from '@/lib/overlay/overlayPlan';
 import { ROLE_DEFAULTS, customFontFaceCss, parseCustomFont, parseRoleFont, type OverlayFonts } from './fonts';
 
 /**
@@ -9,7 +19,9 @@ export interface OverlayConfig {
   /**
    * Solo partido: `tarjeta` (G22), `marcador` (esquina), `barra` (zócalo),
    * `franja` (bloques de color de cada club), `compacto` (píldora chica) o
-   * `bloques` (dos cuadrados grandes).
+   * `bloques` (dos cuadrados grandes), `cuadro` (reloj a la izquierda y dos
+   * filas de color), `paneles` (dos paneles de color con sigla y resultado) o
+   * `presentacion` (zócalo de presentación a lo ancho, para la previa).
    */
   style: OverlayStyle;
   /** `normal` (34:12), `minutos` (34', 40+2') u `oculto`. */
@@ -27,8 +39,14 @@ export interface OverlayConfig {
   substitutions: boolean;
   homeColor: string | null;
   awayColor: string | null;
+  /** La sigla que eligió el usuario (`local_nombre`, `visita_nombre`). */
   homeName: string | null;
   awayName: string | null;
+  /** El nombre completo que eligió el usuario (`local_largo`, `visita_largo`). */
+  homeFull: string | null;
+  awayFull: string | null;
+  /** `nombres=`: `siglas`, `completo` o automático (siglas en los chicos, nombre en los anchos). */
+  nameMode: NameMode;
   background: string | null;
   demo: boolean;
   /** Ciclo aparecer/desaparecer: segundos visible y oculto. null = siempre visible. */
@@ -46,10 +64,30 @@ export interface OverlayConfig {
   fonts: OverlayFonts;
   /** Sponsors: `forma=` pisa la forma elegida en el panel (grilla, banda o esquina). */
   sponsorLayout: 'grilla' | 'banda' | 'esquina' | null;
+  /** Segundos de la cuenta de la conversión que arranca sola con cada try (0 = apagada). */
+  conversion: number;
+  /**
+   * Cómo se festeja un tanto: `marcador` (la franja barre el marcador) o
+   * `cinta` (una banda a lo ancho de la pantalla, abajo, con TRY · TRY · TRY).
+   */
+  celebration: 'marcador' | 'cinta';
+  /** `tries=1`: un contador de tries al lado de cada equipo, en todos los estilos. */
+  showTries: boolean;
+  /** `periodo=1`: el período (1T, 2T) junto al reloj. Por defecto no: solo el tiempo. */
+  showPeriod: boolean;
+  /** `marca=`: dónde va "G22 Scores" (arriba o abajo a la derecha) o `no` (solo premium). */
+  brand: BrandPosition;
+  /** `logo=`: el logo del torneo para el marcador (solo premium). */
+  logo: string | null;
+  /** El plan con el que sale al aire (lo pone `applyPlan`; sin aplicar, premium). */
+  plan: OverlayPlan;
+  /** Sin el plan de colores, los clubes salen con los colores de G22 aunque el partido tenga los suyos. */
+  lockColors: boolean;
 }
 
 
-export const OVERLAY_STYLES = ['tarjeta', 'marcador', 'barra', 'franja', 'compacto', 'bloques', 'escudos', 'tira'] as const;
+export const OVERLAY_STYLES = ['tarjeta', 'marcador', 'barra', 'franja', 'compacto', 'bloques', 'escudos', 'tira', 'cuadro', 'paneles', 'presentacion', 'pestana', 'medallon', 'capsula', 'flotante', 'linea', 'pisos', 'caja', 'sesgado', 'degrade',
+  'central', 'rotulo', 'tablero', 'agua', 'claro', 'tablilla'] as const;
 export type OverlayStyle = (typeof OVERLAY_STYLES)[number];
 
 export type SearchParams = Record<string, string | string[] | undefined>;
@@ -122,6 +160,9 @@ export function parseOverlayConfig(
     awayColor: normalizeHex(first(params.visita)),
     homeName: first(params.local_nombre).slice(0, 24) || null,
     awayName: first(params.visita_nombre).slice(0, 24) || null,
+    homeFull: first(params.local_largo).slice(0, 40) || null,
+    awayFull: first(params.visita_largo).slice(0, 40) || null,
+    nameMode: first(params.nombres) === 'siglas' ? 'siglas' : first(params.nombres) === 'completo' ? 'completo' : 'auto',
     background: BACKGROUNDS[first(params.fondo)] ?? null,
     demo: flag(params.prueba, false),
     // El ciclo solo arranca si están los dos: "mostrar 15, ocultar 45".
@@ -132,6 +173,14 @@ export function parseOverlayConfig(
     cup: cup !== null && cup >= 1 ? Math.trunc(cup) : null,
     title: first(params.titulo).slice(0, 80) || null,
     bracketView: first(params.vista) === 'columnas' ? 'columnas' : 'llave',
+    conversion: Math.trunc(clamp(numberParam(params.conversion), 0, 600, 0)),
+    celebration: first(params.festejo) === 'cinta' ? 'cinta' : 'marcador',
+    showTries: flag(params.tries, false),
+    showPeriod: flag(params.periodo, false),
+    brand: readBrand(first(params.marca)),
+    logo: safeImageUrl(first(params.logo)),
+    plan: 'premium',
+    lockColors: false,
     sponsorLayout: (['grilla', 'banda', 'esquina'] as const).find((value) => value === first(params.forma)) ?? null,
     fonts: {
       score: parseRoleFont(first(params.resultado), ROLE_DEFAULTS.score),
@@ -142,6 +191,29 @@ export function parseOverlayConfig(
       custom: parseCustomFont(first(params.fuente)),
       customScale: clamp(numberParam(params.fuente_escala), 0.3, 2, 1),
     },
+  };
+}
+
+/**
+ * Lo que la URL pide, recortado a lo que permite el plan del dueño del enlace.
+ * Lo que no permite se ignora en silencio (sale la versión de G22), así una
+ * URL editada a mano no destraba nada.
+ */
+export function applyPlan(config: OverlayConfig, plan: OverlayPlan): OverlayConfig {
+  const rules = planRules(plan);
+  return {
+    ...config,
+    plan,
+    style: canUseStyle(plan, config.style) ? config.style : 'marcador',
+    homeColor: rules.colors ? config.homeColor : null,
+    awayColor: rules.colors ? config.awayColor : null,
+    // Las siglas se editan con cualquier plan: son datos, no personalización.
+    homeName: config.homeName,
+    awayName: config.awayName,
+    lockColors: !rules.colors,
+    fonts: rules.fonts ? config.fonts : { ...ROLE_DEFAULTS, custom: null, customScale: 1 },
+    logo: rules.tournamentLogo ? config.logo : null,
+    brand: effectiveBrand(plan, config.brand),
   };
 }
 

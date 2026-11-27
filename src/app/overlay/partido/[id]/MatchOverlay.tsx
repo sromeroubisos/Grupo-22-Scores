@@ -18,6 +18,9 @@ import {
   type TeamCards,
 } from '@/lib/overlay/matchOverlayModel';
 import { manualToOverlayMatch, readManualState } from '@/lib/overlay/manualOverlay';
+import { shotFromFreshEvents, shotView, type ShotClock, type ShotView } from '@/lib/overlay/shotClock';
+import { planRules } from '@/lib/overlay/overlayPlan';
+import { teamLabels } from '@/lib/overlay/teamAcronym';
 import styles from './overlay.module.css';
 
 import type { OverlayConfig } from '../../_lib/config';
@@ -67,6 +70,12 @@ function demoMatch(): OverlayMatch {
     home: { name: 'Club Local', short: 'Club Local', logo: null, color: null, score: 24 },
     away: { name: 'Club Visitante', short: 'Club Visitante', logo: null, color: null, score: 17 },
     events: [
+      // Tries de la muestra (3 a 2), para ver el contador de tries.
+      { id: 'demo-t1', type: 'try', team: 'home', player: 'Juan Pérez', minute: 8, detail: '', order: 0 },
+      { id: 'demo-t2', type: 'try', team: 'away', player: 'Martín Gómez', minute: 17, detail: '', order: 0 },
+      { id: 'demo-t3', type: 'try', team: 'home', player: 'Lucas Romero', minute: 39, detail: '', order: 0 },
+      { id: 'demo-t4', type: 'try', team: 'home', player: 'Juan Pérez', minute: 58, detail: '', order: 0 },
+      { id: 'demo-t5', type: 'try', team: 'away', player: 'Tomás Díaz', minute: 66, detail: '', order: 0 },
       { id: 'demo-y1', type: 'yellow_card', team: 'home', player: 'Juan Pérez', minute: 22, detail: '', order: 1 },
       { id: 'demo-r1', type: 'red_card', team: 'away', player: 'Martín Gómez', minute: 31, detail: '', order: 2 },
       { id: 'demo-y2', type: 'yellow_card', team: 'away', player: 'Tomás Díaz', minute: 72, detail: '', order: 3 },
@@ -120,6 +129,9 @@ export default function MatchOverlay({
   const [plate, setPlate] = useState<OverlayPlate | null>(null);
   const [plateLeaving, setPlateLeaving] = useState(false);
   const [bump, setBump] = useState<Record<OverlaySide, number>>({ home: 0, away: 0 });
+  // Cuenta de la conversión en un partido de G22 (con la hora local). En el
+  // manual la maneja el panel y viene con el estado.
+  const [localShot, setLocalShot] = useState<ShotClock | null>(null);
 
   const queueRef = useRef<OverlayPlate[]>([]);
   // El tanto sobre el marcador: se pinta del color del club, dice TRY y quién,
@@ -173,6 +185,11 @@ export default function MatchOverlay({
     if (!seenRef.current) {
       seenRef.current = new Set(next.events.map((event) => event.id));
     } else {
+      if (!manual && config.conversion > 0) {
+        const seen = seenRef.current;
+        const fresh = next.events.filter((event) => !seen.has(event.id)).sort((a, b) => a.order - b.order);
+        if (fresh.length) setLocalShot((current) => shotFromFreshEvents(current, fresh, Date.now(), config.conversion));
+      }
       plates = newPlates(next.events, seenRef.current, { substitutions: config.substitutions });
       for (const event of next.events) seenRef.current.add(event.id);
       // En los marcadores el tanto se anuncia SOBRE el marcador (el efecto);
@@ -213,7 +230,7 @@ export default function MatchOverlay({
     hasMatchRef.current = true;
     matchRef.current = next;
     setMatch(next);
-  }, [config.showPlates, config.substitutions, enqueue, usesFx]);
+  }, [config.showPlates, config.substitutions, config.conversion, enqueue, manual, usesFx]);
 
   useEffect(() => () => {
     for (const timer of fxTimers.current) window.clearTimeout(timer);
@@ -318,7 +335,8 @@ export default function MatchOverlay({
   }, [config.demo, config.showPlates, ingest]);
 
   /* ─── reloj local: corre entre lecturas ─── */
-  const live = match?.phase === 'live';
+  const shotSource = match?.manual ? match.manual.shot ?? null : localShot;
+  const live = match?.phase === 'live' || Boolean(shotSource?.endsAt);
   useEffect(() => {
     if (!live) return undefined;
     const interval = window.setInterval(() => setNow(Date.now()), 250);
@@ -346,17 +364,25 @@ export default function MatchOverlay({
   const chromaGreen = config.background === '#00b140';
   const home = {
     ...match.home,
+    // El nombre completo: el que escribió el usuario o el del club en G22.
+    name: config.homeFull ?? match.home.name,
     score: held ? held.home : match.home.score,
-    short: (config.homeName ?? match.home.short).toUpperCase(),
-    color: config.homeColor ?? match.home.color ?? (chromaGreen ? '#38bdf8' : DEFAULT_HOME_COLOR),
+    ...teamLabels(config.nameMode, config.homeName, config.homeFull ?? match.home.name, match.home.short),
+    // Sin el plan de colores, los de G22 aunque el partido (o el panel) traiga los del club.
+    color: config.homeColor ?? (config.lockColors ? null : match.home.color) ?? (chromaGreen ? '#38bdf8' : DEFAULT_HOME_COLOR),
   };
   const away = {
     ...match.away,
+    name: config.awayFull ?? match.away.name,
     score: held ? held.away : match.away.score,
-    short: (config.awayName ?? match.away.short).toUpperCase(),
-    color: config.awayColor ?? match.away.color ?? DEFAULT_AWAY_COLOR,
+    ...teamLabels(config.nameMode, config.awayName, config.awayFull ?? match.away.name, match.away.short),
+    color: config.awayColor ?? (config.lockColors ? null : match.away.color) ?? DEFAULT_AWAY_COLOR,
   };
-  const shown = context && !match.context ? { ...match, context } : match;
+  // El logo del torneo es premium: el subido en el generador o, si no, el del torneo en G22.
+  // Sin premium, en su lugar va el de G22.
+  const tournamentLogo = planRules(config.plan).tournamentLogo ? (config.logo ?? match.tournament?.logo ?? null) : null;
+  const withLogo = match.tournament ? { ...match, tournament: { ...match.tournament, logo: tournamentLogo } } : match;
+  const shown = context && !withLogo.context ? { ...withLogo, context } : withLogo;
   const clock = overlayClock(match, now);
   // La versión por defecto: la tarjeta G22 (escudos grandes, marcador,
   // anotadores y la placa del último evento adentro).
@@ -376,8 +402,10 @@ export default function MatchOverlay({
     );
   }
 
-  const vertical = config.position.startsWith('abajo') ? 'bottom' : config.position.startsWith('arriba') ? 'top' : 'middle';
-  const horizontal = config.position.endsWith('izq') ? 'left' : config.position.endsWith('der') ? 'right' : 'center';
+  // La presentación es un zócalo: sin `pos`, va abajo.
+  const position = !config.positionSet && config.style === 'presentacion' ? 'abajo' : config.position;
+  const vertical = position.startsWith('abajo') ? 'bottom' : position.startsWith('arriba') ? 'top' : 'middle';
+  const horizontal = position.endsWith('izq') ? 'left' : position.endsWith('der') ? 'right' : 'center';
 
   const stageStyle = {
     '--ov-scale': config.scale,
@@ -389,36 +417,58 @@ export default function MatchOverlay({
     ...fontVars(config.fonts),
   } as CSSProperties;
 
-  const tournamentLine = config.showTournament && (match.tournament || shown.context)
+  // Cuadro, paneles y presentación ya llevan el torneo adentro.
+  const ownHeader = config.style === 'cuadro' || config.style === 'paneles' || config.style === 'presentacion';
+  const tournamentLine = !ownHeader && config.showTournament && (match.tournament || shown.context)
     ? [match.tournament?.name, shown.context ?? match.round].filter(Boolean).join(' · ')
     : null;
 
   const plateTeam = plate?.team === 'home' ? home : plate?.team === 'away' ? away : null;
   const cards = config.showCards ? teamCards(match, now) : null;
   const time = clockText(clock, config.clockMode);
+  // El período (1T, 2T) solo si el usuario lo pidió (`periodo=1`): por defecto, solo el tiempo.
+  const period = config.showPeriod && time ? clock.label : null;
   const clockProps = { clock, time, phase: match.phase };
+  // El manual corre con la hora del servidor; el de G22, con la local.
+  const shot = shotView(shotSource, now + (match.manual?.offsetMs ?? 0));
+  const logo = tournamentLogo;
+  // Con logo de torneo, también va chico en el centro de cada marcador (junto al reloj).
+  const tourLogo = tournamentLogo ? <img src={tournamentLogo} alt="" className={styles.centerLogo} /> : null;
+  const tag = config.title ?? shown.context ?? match.round;
+  // Contador de tries (`tries=1`): sale al lado de las tarjetas en todos los estilos.
+  const countTries = (side: OverlaySide) => match.events
+    .filter((event) => event.team === side && (event.type === 'try' || event.type === 'penalty_try')).length;
+  const tries = config.showTries ? { home: countTries('home'), away: countTries('away') } : null;
+  const noCards: TeamCards = { yellow: 0, red: 0, sinBins: [] };
+  const marks: Record<OverlaySide, Marks> | null = cards || tries
+    ? {
+      home: { ...(cards?.home ?? noCards), tries: tries?.home ?? null },
+      away: { ...(cards?.away ?? noCards), tries: tries?.away ?? null },
+    }
+    : null;
 
   return (
     <div className={styles.stage} style={stageStyle} data-chroma={chromaGreen ? 'verde' : undefined}>
+      {fx && config.celebration === 'cinta' ? <CelebrationBand fx={fx} team={fx.side === 'home' ? home : away} /> : null}
       <div className={styles.anchor} data-v={vertical} data-h={horizontal}>
         {tournamentLine ? (
           <div className={styles.tournament}>
-            {match.tournament?.logo ? <img src={match.tournament.logo} alt="" className={styles.tournamentLogo} /> : null}
+            {tournamentLogo ? <img src={tournamentLogo} alt="" className={styles.tournamentLogo} /> : null}
             <span>{tournamentLine}</span>
           </div>
         ) : null}
 
         <div className={styles.board} data-fx={fx ? fx.side : undefined}>
-        {fx ? <ScoreFxLayer fx={fx} color={(fx.side === 'home' ? home : away).color} /> : null}
+        {fx && config.celebration === 'marcador' && config.style !== 'pestana' ? <ScoreFxLayer fx={fx} color={(fx.side === 'home' ? home : away).color} /> : null}
         {config.style === 'barra' ? (
           <div className={styles.bar} data-phase={match.phase}>
-            <TeamCell team={home} side="home" wide cards={cards?.home} />
+            <TeamCell team={home} side="home" wide cards={marks?.home} />
             <div className={styles.barScore}>
               <Score value={home.score} bump={bump.home} />
               <span className={styles.barDash}>–</span>
               <Score value={away.score} bump={bump.away} />
             </div>
-            <TeamCell team={away} side="away" wide cards={cards?.away} />
+            <TeamCell team={away} side="away" wide cards={marks?.away} />
             {config.showClock ? <ClockCell {...clockProps} /> : null}
           </div>
         ) : config.style === 'franja' ? (
@@ -426,37 +476,38 @@ export default function MatchOverlay({
             <div className={styles.fTeam} data-side="home">
               <Crest team={home} />
               <span className={styles.fName}>{home.short}</span>
-              <Pips cards={cards?.home} />
+              <Pips cards={marks?.home} />
             </div>
             <div className={styles.fScore}><Score value={home.score} bump={bump.home} bare /></div>
             {config.showClock ? (
               <div className={styles.fCenter} data-expired={clock.expired ? '' : undefined}>
+                {tourLogo}
                 {time ? <span className={styles.fTime}>{time}</span> : <span className={styles.fLabel}>{clock.label}</span>}
               </div>
             ) : <div className={styles.fDivider} />}
             <div className={styles.fScore}><Score value={away.score} bump={bump.away} bare /></div>
             <div className={styles.fTeam} data-side="away">
-              <Pips cards={cards?.away} />
+              <Pips cards={marks?.away} />
               <span className={styles.fName}>{away.short}</span>
               <Crest team={away} />
             </div>
           </div>
         ) : config.style === 'compacto' ? (
           <div className={styles.compact} data-phase={match.phase}>
-            <span className={styles.cDot} style={{ background: home.color }} aria-hidden="true" />
+            <span className={styles.cCrest} data-side="home"><Crest team={home} /></span>
             <span className={styles.cName}>{home.short}</span>
-            <Pips cards={cards?.home} />
+            <Pips cards={marks?.home} />
             <span className={styles.cScore}>
               <Score value={home.score} bump={bump.home} bare />
-              <span className={styles.cDash}>-</span>
+              {/* El reloj entre los dos resultados: así queda al medio exacto. */}
+              {config.showClock
+                ? <span className={styles.cClock} data-expired={clock.expired ? '' : undefined}>{time ?? clock.label}</span>
+                : <span className={styles.cDash}>-</span>}
               <Score value={away.score} bump={bump.away} bare />
             </span>
-            <Pips cards={cards?.away} />
+            <Pips cards={marks?.away} />
             <span className={styles.cName}>{away.short}</span>
-            <span className={styles.cDot} style={{ background: away.color }} aria-hidden="true" />
-            {config.showClock ? (
-              <span className={styles.cClock} data-expired={clock.expired ? '' : undefined}>{time ?? clock.label}</span>
-            ) : null}
+            <span className={styles.cCrest} data-side="away"><Crest team={away} /></span>
           </div>
         ) : config.style === 'escudos' ? (
           <div className={styles.crests} data-phase={match.phase}>
@@ -466,12 +517,13 @@ export default function MatchOverlay({
                 <span className={styles.crestTeam} data-side={side} key={side}>
                   <span className={styles.crestBig}><Crest team={team} /></span>
                   <span className={styles.crestName}>{team.short}</span>
-                  <Pips cards={cards?.[side]} />
+                  <Pips cards={marks?.[side]} />
                 </span>
               );
               // El centro (resultado y reloj) va entre los dos escudos.
               return side === 'home' ? [crest, (
                 <span className={styles.crestCenter} key="center">
+                {tourLogo}
                   <span className={styles.crestScores}>
                     <span className={styles.crestScore}><Score value={home.score} bump={bump.home} bare /></span>
                     <span className={styles.crestDash}>-</span>
@@ -486,13 +538,355 @@ export default function MatchOverlay({
           </div>
         ) : config.style === 'tira' ? (
           <div className={styles.strip} data-phase={match.phase}>
-            <span className={styles.stripTeam} data-side="home"><span className={styles.stripName}>{home.short}</span><Pips cards={cards?.home} /></span>
+            <span className={styles.stripTeam} data-side="home"><Crest team={home} /><span className={styles.stripName}>{home.short}</span><Pips cards={marks?.home} /></span>
             <span className={styles.stripScore}><Score value={home.score} bump={bump.home} bare /></span>
             {config.showClock ? (
               <span className={styles.stripClock} data-expired={clock.expired ? '' : undefined}>{time ?? clock.label}</span>
             ) : <span className={styles.stripSep} />}
             <span className={styles.stripScore}><Score value={away.score} bump={bump.away} bare /></span>
-            <span className={styles.stripTeam} data-side="away"><Pips cards={cards?.away} /><span className={styles.stripName}>{away.short}</span></span>
+            <span className={styles.stripTeam} data-side="away"><Pips cards={marks?.away} /><span className={styles.stripName}>{away.short}</span><Crest team={away} /></span>
+          </div>
+        ) : config.style === 'central' || config.style === 'rotulo' || config.style === 'tablero' || config.style === 'agua' || config.style === 'claro' ? (
+          // Cinco estilos con la misma estructura (club | centro | club) y distinta piel:
+          // el centro siempre cae al medio exacto (grilla 1fr auto 1fr).
+          <div className={styles.sym} data-skin={config.style} data-phase={match.phase}>
+            {config.style !== 'central' && config.style !== 'claro' && config.showClock && period ? (
+              <span className={styles.symTab}>{period}</span>
+            ) : null}
+            <div className={styles.symBar}>
+              {(['home', 'away'] as const).map((side) => {
+                const team = side === 'home' ? home : away;
+                const half = (
+                  <div className={styles.symTeam} data-side={side} key={side}>
+                    <span className={styles.symMark} aria-hidden="true"><Crest team={team} /></span>
+                    <span className={styles.symCrest}><Crest team={team} /></span>
+                    <span className={styles.symText}>
+                      <span className={styles.symName}>{team.short}</span>
+                      <span className={styles.symSub}><Pips cards={marks?.[side]} /></span>
+                    </span>
+                    <span className={styles.symScore}><Score value={team.score} bump={bump[side]} bare /></span>
+                  </div>
+                );
+                return side === 'home' ? [half, (
+                  <div className={styles.symMid} key="mid" data-expired={clock.expired ? '' : undefined}>
+                {tourLogo}
+                    <b className={styles.symTime}>{config.showClock ? time ?? clock.label : clock.label}</b>
+                    {(config.style === 'central' || config.style === 'claro') && config.showClock && period ? (
+                      <span className={styles.symPeriod}>{period}</span>
+                    ) : null}
+                  </div>
+                )] : [half];
+              })}
+            </div>
+          </div>
+        ) : config.style === 'tablilla' ? (
+          <div className={styles.tablilla} data-phase={match.phase}>
+            <div className={styles.tlRow}>
+              {(['home', 'away'] as const).map((side) => {
+                const team = side === 'home' ? home : away;
+                return (
+                  <div className={styles.tlTeam} data-side={side} key={side}>
+                    <span className={styles.tlTop}>
+                      <Crest team={team} />
+                      <span className={styles.tlScore}><Score value={team.score} bump={bump[side]} bare /></span>
+                    </span>
+                    <span className={styles.tlName}>{team.short}</span>
+                    <Pips cards={marks?.[side]} />
+                  </div>
+                );
+              })}
+            </div>
+            {config.showClock ? (
+              <div className={styles.tlFoot} data-expired={clock.expired ? '' : undefined}>
+                <span>{period ?? ''}</span>
+                <b>{time ?? clock.label}</b>
+                <span aria-hidden="true" />
+              </div>
+            ) : null}
+          </div>
+        ) : config.style === 'linea' ? (
+          <div className={styles.linea} data-phase={match.phase}>
+            {(['home', 'away'] as const).map((side) => {
+              const team = side === 'home' ? home : away;
+              return (
+                <div className={styles.nTeam} data-side={side} key={side}>
+                  <span className={styles.nBlock}>
+                    <Crest team={team} />
+                    <span className={styles.nName}>{wideName(team)}</span>
+                    <Pips cards={marks?.[side]} />
+                  </span>
+                  <span className={styles.nScore}><Score value={team.score} bump={bump[side]} bare /></span>
+                </div>
+              );
+            })}
+            {config.showClock ? (
+              <div className={styles.nInfo} data-expired={clock.expired ? '' : undefined}>
+                {tourLogo}
+                {period ? <span className={styles.nPeriod}>{period}</span> : null}
+                <b className={styles.nTime}>{time ?? clock.label}</b>
+              </div>
+            ) : null}
+          </div>
+        ) : config.style === 'pisos' ? (
+          <div className={styles.pisos} data-phase={match.phase}>
+            <div className={styles.sTop}>
+              {(['home', 'away'] as const).map((side) => {
+                const team = side === 'home' ? home : away;
+                return (
+                  <div className={styles.sTeam} data-side={side} key={side}>
+                    <span className={styles.sCrest}><Crest team={team} /></span>
+                    <span className={styles.sName}>{team.short}</span>
+                    <Pips cards={marks?.[side]} />
+                    <span className={styles.sScore}><Score value={team.score} bump={bump[side]} bare /></span>
+                  </div>
+                );
+              })}
+            </div>
+            {config.showClock || tag ? (
+              <div className={styles.sInfo} data-expired={clock.expired ? '' : undefined}>
+                {tourLogo}
+                {config.showClock && period ? <span className={styles.sPeriod}>{period}</span> : null}
+                {config.showClock ? <b className={styles.sTime}>{time ?? clock.label}</b> : null}
+                {tag ? <span className={styles.sTag}>{tag}</span> : null}
+              </div>
+            ) : null}
+          </div>
+        ) : config.style === 'caja' ? (
+          <div className={styles.caja} data-phase={match.phase}>
+            <div className={styles.cjRow}>
+              {(['home', 'away'] as const).map((side) => {
+                const team = side === 'home' ? home : away;
+                return (
+                  <div className={styles.cjTeam} data-side={side} key={side}>
+                    <span className={styles.cjMark} aria-hidden="true"><Crest team={team} /></span>
+                    <span className={styles.cjName}>{team.short}</span>
+                    <span className={styles.cjScore}><Score value={team.score} bump={bump[side]} bare /></span>
+                    <span className={styles.cjPips}><Pips cards={marks?.[side]} /></span>
+                  </div>
+                );
+              })}
+            </div>
+            {config.showClock ? (
+              <div className={styles.cjFoot} data-expired={clock.expired ? '' : undefined}>
+                {tourLogo}
+                <span>{period ?? ''}</span>
+                <b>{time ?? clock.label}</b>
+              </div>
+            ) : null}
+          </div>
+        ) : config.style === 'sesgado' ? (
+          <div className={styles.sesgado} data-phase={match.phase}>
+            {(['home', 'away'] as const).map((side) => {
+              const team = side === 'home' ? home : away;
+              const block = (
+                <div className={styles.gTeam} data-side={side} key={side}>
+                  <span className={styles.gInner}>
+                    <Crest team={team} />
+                    <span className={styles.gText}><span className={styles.gName}>{team.short}</span><Pips cards={marks?.[side]} /></span>
+                    <span className={styles.gScore}><Score value={team.score} bump={bump[side]} bare /></span>
+                  </span>
+                </div>
+              );
+              return side === 'home' ? [block, (
+                <div className={styles.gMid} key="mid" data-expired={clock.expired ? '' : undefined}>
+                {tourLogo}
+                  <span className={styles.gInner}>
+                    {config.showClock && period ? <span className={styles.gPeriod}>{period}</span> : null}
+                    <b className={styles.gTime}>{config.showClock ? time ?? clock.label : clock.label}</b>
+                  </span>
+                </div>
+              )] : [block];
+            })}
+          </div>
+        ) : config.style === 'degrade' ? (
+          <div className={styles.degrade} data-phase={match.phase}>
+            {config.showClock && period ? <span className={styles.dTab}>{period}</span> : null}
+            <div className={styles.dBar}>
+              {(['home', 'away'] as const).map((side) => {
+                const team = side === 'home' ? home : away;
+                const half = (
+                  <div className={styles.dTeam} data-side={side} key={side}>
+                    <span className={styles.dCrest}><Crest team={team} /></span>
+                    <span className={styles.dName}>{team.short}</span>
+                    <Pips cards={marks?.[side]} />
+                    <span className={styles.dScore}><Score value={team.score} bump={bump[side]} bare /></span>
+                  </div>
+                );
+                return side === 'home' ? [half, (
+                  <div className={styles.dMid} key="mid" data-expired={clock.expired ? '' : undefined}>
+                {tourLogo}
+                    <b>{config.showClock ? time ?? clock.label : clock.label}</b>
+                  </div>
+                )] : [half];
+              })}
+            </div>
+          </div>
+        ) : config.style === 'medallon' ? (
+          <div className={styles.medallon} data-phase={match.phase}>
+            {(['home', 'away'] as const).map((side) => {
+              const team = side === 'home' ? home : away;
+              const half = (
+                <div className={styles.mHalf} data-side={side} key={side}>
+                  <span className={styles.mCrest}><Crest team={team} /></span>
+                  <span className={styles.mNums}>
+                    <span className={styles.mScore}><Score value={team.score} bump={bump[side]} bare /></span>
+                    <span className={styles.mStat}>{team.short}</span>
+                  </span>
+                  <span className={styles.mPips}><Pips cards={marks?.[side]} /></span>
+                </div>
+              );
+              // El medallón (período, reloj y la estadística de abajo) va entre las dos mitades.
+              return side === 'home' ? [half, (
+                <div className={styles.mCoin} key="coin" data-expired={clock.expired ? '' : undefined}>
+                {tourLogo}
+                  {config.showClock && period ? <span className={styles.mPeriod}>{period}</span> : null}
+                  <b className={styles.mTime}>{config.showClock ? time ?? clock.label : clock.label}</b>
+                </div>
+              )] : [half];
+            })}
+          </div>
+        ) : config.style === 'capsula' ? (
+          <div className={styles.capsula} data-phase={match.phase}>
+            {(['home', 'away'] as const).map((side) => {
+              const team = side === 'home' ? home : away;
+              const half = (
+                <div className={styles.kHalf} data-side={side} key={side}>
+                  <span className={styles.kCrest}><Crest team={team} /></span>
+                  <span className={styles.kName}>{wideName(team)}</span>
+                  <Pips cards={marks?.[side]} />
+                  <span className={styles.kScore}><Score value={team.score} bump={bump[side]} bare /></span>
+                </div>
+              );
+              return side === 'home' ? [half, (
+                <div className={styles.kMid} key="mid" data-expired={clock.expired ? '' : undefined}>
+                {tourLogo}
+                  {config.showClock && period ? <span className={styles.kPeriod}>{period}</span> : null}
+                  <b className={styles.kTime}>{config.showClock ? time ?? clock.label : clock.label}</b>
+                </div>
+              )] : [half];
+            })}
+          </div>
+        ) : config.style === 'flotante' ? (
+          <div className={styles.flotante} data-phase={match.phase}>
+            {(['home', 'away'] as const).map((side) => {
+              const team = side === 'home' ? home : away;
+              const half = (
+                <div className={styles.lSide} data-side={side} key={side}>
+                  <span className={styles.lCrest}><Crest team={team} /></span>
+                  <span className={styles.lScore}><Score value={team.score} bump={bump[side]} bare /></span>
+                  <span className={styles.lPips}><b className={styles.lName}>{team.short}</b><Pips cards={marks?.[side]} /></span>
+                </div>
+              );
+              return side === 'home' ? [half, (
+                <div className={styles.lMid} key="mid" data-expired={clock.expired ? '' : undefined}>
+                {tourLogo}
+                  {config.showClock && period ? <span className={styles.lPeriod}>{period}</span> : null}
+                  <b>{config.showClock ? time ?? clock.label : clock.label}</b>
+                </div>
+              )] : [half];
+            })}
+          </div>
+        ) : config.style === 'pestana' ? (
+          <div className={styles.pestana} data-phase={match.phase}>
+            {config.showClock ? (
+              <div className={styles.tTab} data-expired={clock.expired ? '' : undefined}>
+                {period ? <span className={styles.tPeriod}>{period}</span> : null}
+                <span className={styles.tTime}>{time ?? clock.label}</span>
+              </div>
+            ) : null}
+            <div className={styles.tBar}>
+              <span className={styles.tName} data-side="home"><Crest team={home} /><Pips cards={marks?.home} />{home.short}</span>
+              <span className={styles.tScore}><Score value={home.score} bump={bump.home} bare /></span>
+              {/* El logo gira y muestra los puntos del tanto ("+5") mientras dura el festejo. */}
+              <span className={styles.tLogo} data-flip={fx ? '' : undefined} style={fx ? ({ '--fx-color': (fx.side === 'home' ? home : away).color, '--fx-ink': inkOn((fx.side === 'home' ? home : away).color) } as CSSProperties) : undefined}>
+                <span className={styles.tLogoFront}><LeadLogo logo={logo} /></span>
+                <span className={styles.tLogoBack}>{fx ? `+${fx.points}` : ''}</span>
+              </span>
+              <span className={styles.tScore}><Score value={away.score} bump={bump.away} bare /></span>
+              <span className={styles.tName} data-side="away">{away.short}<Pips cards={marks?.away} /><Crest team={away} /></span>
+            </div>
+          </div>
+        ) : config.style === 'cuadro' ? (
+          <div className={styles.cuadro} data-phase={match.phase}>
+            {match.tournament?.name || tag ? (
+              <div className={styles.qHead}>
+                <span className={styles.qTitle}>{match.tournament?.name ?? ''}</span>
+                {tag ? <span className={styles.qSub}>{tag}</span> : null}
+              </div>
+            ) : null}
+            <div className={styles.qBody}>
+              <div className={styles.qSide} data-expired={clock.expired ? '' : undefined}>
+                <span className={styles.qLogo}><LeadLogo logo={logo} /></span>
+                {config.showClock ? (
+                  <span className={styles.qClock}>
+                    {period ? <span className={styles.qPeriod}>{period}</span> : null}
+                    <span className={styles.qTime}>{time ?? clock.label}</span>
+                  </span>
+                ) : null}
+              </div>
+              <div className={styles.qRows}>
+                {(['home', 'away'] as const).map((side) => {
+                  const team = side === 'home' ? home : away;
+                  return (
+                    <div className={styles.qRow} data-side={side} key={side}>
+                      <span className={styles.qCrest}><Crest team={team} /></span>
+                      <span className={styles.qFill}>
+                        <Pips cards={marks?.[side]} />
+                        <span className={styles.qName}>{team.short}</span>
+                        <span className={styles.qScore}><Score value={team.score} bump={bump[side]} bare /></span>
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        ) : config.style === 'paneles' ? (
+          <div className={styles.paneles} data-phase={match.phase}>
+            <div className={styles.pTop}>
+              <div className={styles.pLead}><LeadLogo logo={logo} /></div>
+              {(['home', 'away'] as const).map((side) => {
+                const team = side === 'home' ? home : away;
+                return (
+                  <div className={styles.pPanel} data-side={side} key={side}>
+                    <span className={styles.pHead}><Crest team={team} /><span className={styles.pName}>{team.short}</span></span>
+                    <span className={styles.pScore}><Score value={team.score} bump={bump[side]} bare /></span>
+                    <span className={styles.pPips}><Pips cards={marks?.[side]} /></span>
+                  </div>
+                );
+              })}
+            </div>
+            {config.showClock ? (
+              <div className={styles.pFoot} data-expired={clock.expired ? '' : undefined}>
+                <span className={styles.pTime}>{time ?? clock.label}</span>
+                {period ? <span className={styles.pPeriod}>{period}</span> : null}
+              </div>
+            ) : null}
+          </div>
+        ) : config.style === 'presentacion' ? (
+          <div className={styles.presentacion} data-phase={match.phase}>
+            {tag ? <span className={styles.prTag}>{tag}</span> : null}
+            <div className={styles.prBar}>
+              <div className={styles.prTeam} data-side="home">
+                <Crest team={home} />
+                <span className={styles.prName}>{wideName(home)}</span>
+                <Pips cards={marks?.home} />
+                {match.phase !== 'scheduled' ? <span className={styles.prScore}><Score value={home.score} bump={bump.home} bare /></span> : null}
+              </div>
+              <div className={styles.prMid}>
+                <LeadLogo logo={logo} />
+                {match.tournament?.name ? <span className={styles.prTour}>{match.tournament.name}</span> : null}
+                {config.showClock && match.phase !== 'scheduled' ? (
+                  <b className={styles.prClock} data-expired={clock.expired ? '' : undefined}>{time ?? clock.label}</b>
+                ) : null}
+              </div>
+              <div className={styles.prTeam} data-side="away">
+                {match.phase !== 'scheduled' ? <span className={styles.prScore}><Score value={away.score} bump={bump.away} bare /></span> : null}
+                <Pips cards={marks?.away} />
+                <span className={styles.prName}>{wideName(away)}</span>
+                <Crest team={away} />
+              </div>
+            </div>
           </div>
         ) : config.style === 'bloques' ? (
           <div className={styles.blocks} data-phase={match.phase}>
@@ -505,13 +899,14 @@ export default function MatchOverlay({
                     <Crest team={team} />
                     <span className={styles.blockScore}><Score value={team.score} bump={bump[side]} bare /></span>
                     <span className={styles.blockName}>{team.short}</span>
-                    <Pips cards={cards?.[side]} />
+                    <Pips cards={marks?.[side]} />
                   </div>
                 );
               })}
             </div>
             {config.showClock ? (
               <div className={styles.blockClock} data-expired={clock.expired ? '' : undefined}>
+                {tourLogo}
                 {time ? <b>{time}</b> : <span>{clock.label}</span>}
               </div>
             ) : null}
@@ -520,11 +915,11 @@ export default function MatchOverlay({
           <div className={styles.bug} data-phase={match.phase}>
             <div className={styles.rows}>
               <div className={styles.row}>
-                <TeamCell team={home} side="home" cards={cards?.home} />
+                <TeamCell team={home} side="home" cards={marks?.home} />
                 <Score value={home.score} bump={bump.home} />
               </div>
               <div className={styles.row}>
-                <TeamCell team={away} side="away" cards={cards?.away} />
+                <TeamCell team={away} side="away" cards={marks?.away} />
                 <Score value={away.score} bump={bump.away} />
               </div>
             </div>
@@ -534,6 +929,7 @@ export default function MatchOverlay({
         </div>
 
         {cards ? <SinBins cards={cards} home={home} away={away} /> : null}
+        {shot ? <ShotClockChip shot={shot} home={home} away={away} /> : null}
 
         <div className={styles.plateSlot}>
           {plate ? (
@@ -567,7 +963,12 @@ function inkOn(hex: string): string {
   return luminance > 0.6 ? '#04110b' : '#ffffff';
 }
 
-type ShownTeam = { short: string; name: string; logo: string | null; color: string };
+type ShownTeam = { short: string; name: string; logo: string | null; color: string; /** Lo que muestran los estilos anchos (nombre completo o sigla, según elija el usuario). */ wide?: string };
+
+/** Los estilos anchos: el nombre completo, la sigla o lo que haya elegido el usuario (ver `teamLabels`). */
+function wideName(team: ShownTeam): string {
+  return team.wide ?? team.name.toUpperCase();
+}
 
 function Crest({ team }: { team: ShownTeam }) {
   return team.logo
@@ -576,20 +977,28 @@ function Crest({ team }: { team: ShownTeam }) {
 }
 
 /** Tarjetas como en la planilla: un rectángulo amarillo o rojo por tarjeta (hasta 3, después el número). */
-function Pips({ cards }: { cards?: TeamCards }) {
+function Pips({ cards }: { cards?: Marks }) {
   // Siempre ocupa su lugar (vacío si no hay tarjetas): así los dos lados miden
   // lo mismo y los números quedan alineados.
-  if (!cards || (!cards.yellow && !cards.red)) return <span className={styles.pips} aria-hidden="true" />;
+  const hasTries = cards?.tries !== null && cards?.tries !== undefined;
+  if (!cards || (!cards.yellow && !cards.red && !hasTries)) return <span className={styles.pips} aria-hidden="true" />;
   const pips = (count: number, tone: 'yellow' | 'red') => count <= 3
     ? Array.from({ length: count }, (_, i) => <span key={`${tone}${i}`} className={styles.pip} data-tone={tone} />)
     : [<span key={tone} className={styles.pip} data-tone={tone} data-count="">{count}</span>];
   return (
-    <span className={styles.pips} aria-label={`${cards.yellow} amarillas, ${cards.red} rojas`}>
+    <span className={styles.pips} aria-label={`${hasTries ? `${cards.tries} tries, ` : ''}${cards.yellow} amarillas, ${cards.red} rojas`}>
+      {/* El contador de tries: una T y el número. */}
+      {hasTries ? (
+        <span className={styles.tryCount}><b aria-hidden="true">T</b>{cards.tries}</span>
+      ) : null}
       {pips(cards.yellow, 'yellow')}
       {pips(cards.red, 'red')}
     </span>
   );
 }
+
+/** Lo que cuelga al lado del nombre: tarjetas y, si se pidió, los tries. */
+type Marks = TeamCards & { tries: number | null };
 
 function mmss(seconds: number) {
   return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
@@ -616,6 +1025,62 @@ function SinBins({ cards, home, away }: { cards: Record<OverlaySide, TeamCards>;
   );
 }
 
+/**
+ * Shot clock debajo del marcador: el rótulo (CONVERSIÓN, TMO…), el tiempo
+ * grande y una barra del color del club que se vacía. Los últimos 10, en rojo.
+ */
+function ShotClockChip({ shot, home, away }: { shot: ShotView; home: ShownTeam; away: ShownTeam }) {
+  const team = shot.team === 'home' ? home : shot.team === 'away' ? away : null;
+  return (
+    <div
+      className={styles.shot}
+      data-urgent={shot.urgent ? '' : undefined}
+      data-done={shot.done ? '' : undefined}
+      data-paused={shot.paused ? '' : undefined}
+      style={{ '--ov-team': team?.color ?? 'var(--ov-brand)' } as CSSProperties}
+      role="timer"
+    >
+      {team ? <span className={styles.shotTeam}>{team.short}</span> : null}
+      <span className={styles.shotLabel}>{shot.label}</span>
+      <span className={styles.shotTime}>{shot.time}</span>
+      <span className={styles.shotBar} aria-hidden="true">
+        <span style={{ transform: `scaleX(${shot.progress})` }} />
+      </span>
+    </div>
+  );
+}
+
+/**
+ * El festejo a lo ancho: una banda del color del club entra por abajo, el tipo
+ * de tanto corre repetido (TRY · TRY · TRY) y una palabra gigante la cruza.
+ * Abajo a la izquierda, quién lo hizo. Dura lo mismo que el efecto (FX_MS).
+ */
+function CelebrationBand({ fx, team }: { fx: ScoreFx; team: ShownTeam }) {
+  const words = Array.from({ length: 14 }, (_, index) => (
+    <span key={index} className={styles.cintaWord}>{fx.title}<i aria-hidden="true">✓</i></span>
+  ));
+  return (
+    <div
+      className={styles.cinta}
+      key={fx.key}
+      role="status"
+      style={{ '--fx-color': team.color, '--fx-ink': inkOn(team.color), '--fx-ms': `${FX_MS}ms` } as CSSProperties}
+    >
+      <div className={styles.cintaTrack} aria-hidden="true">{words}{words}</div>
+      <b className={styles.cintaBig} aria-hidden="true">{fx.title}</b>
+      <span className={styles.cintaWho}>
+        {team.logo ? <img src={team.logo} alt="" /> : null}
+        <span>{fx.title} · {fx.player ?? team.short} <em>+{fx.points}</em></span>
+      </span>
+    </div>
+  );
+}
+
+/** El logo del torneo, o el de G22 si no tiene. */
+function LeadLogo({ logo }: { logo: string | null }) {
+  return <img src={logo ?? '/header-logo.png'} alt="" data-g22={logo ? undefined : ''} />;
+}
+
 function TeamCell({
   team,
   side,
@@ -625,13 +1090,13 @@ function TeamCell({
   team: ShownTeam;
   side: OverlaySide;
   wide?: boolean;
-  cards?: TeamCards;
+  cards?: Marks;
 }) {
   return (
     <div className={styles.team} data-side={side} data-wide={wide ? '' : undefined}>
       <span className={styles.teamStrip} aria-hidden="true" />
       <Crest team={team} />
-      <span className={styles.teamName}>{wide ? team.name.toUpperCase() : team.short}</span>
+      <span className={styles.teamName}>{wide ? wideName(team) : team.short}</span>
       <Pips cards={cards} />
     </div>
   );
@@ -640,7 +1105,7 @@ function TeamCell({
 function Score({ value, bump, bare = false }: { value: number | null; bump: number; bare?: boolean }) {
   const inner = (
     // La key reinicia la animación cada vez que el marcador sube.
-    <span key={bump} className={bump > 0 ? styles.scoreBump : undefined}>
+    <span key={bump} className={bump > 0 ? `${styles.num} ${styles.scoreBump}` : styles.num}>
       {value === null ? '–' : value}
     </span>
   );
