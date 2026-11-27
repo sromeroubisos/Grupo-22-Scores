@@ -5601,3 +5601,87 @@ button.exitBtn {
         min-height: 42px;
     }
 }
+
+/* ===== Histórico de Mi Club: una temporada por vez ===== */
+.arcPick {
+    max-width: 420px;
+}
+
+.arcCard {
+    display: grid;
+    gap: 6px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 2px solid var(--color-border);
+    background: var(--color-bg-tertiary);
+}
+
+.arcMineCard {
+    border-color: var(--gold);
+}
+
+.arcTitle {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--color-text-primary);
+}
+
+.arcPlace {
+    margin: 0;
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+}
+
+.arcFacts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.arcTitles {
+    margin: 0;
+    font-size: 0.75rem;
+    color: var(--gold);
+    font-weight: 700;
+}
+
+.arcList {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: 4px 12px;
+    margin: 0;
+    font-size: 0.75rem;
+}
+
+.arcPair {
+    display: contents;
+}
+
+.arcList dt {
+    color: var(--color-text-secondary);
+    font-weight: 700;
+}
+
+.arcList dd {
+    margin: 0;
+    min-width: 0;
+}
+
+.arcClub {
+    white-space: nowrap;
+}
+
+.arcMine {
+    color: var(--gold);
+    font-weight: 700;
+}
+
+.arcUp {
+    color: #3fbf5a;
+}
+
+.arcDown {
+    color: #e04848;
+}

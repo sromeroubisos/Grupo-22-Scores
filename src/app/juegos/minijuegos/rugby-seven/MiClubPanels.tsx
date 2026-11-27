@@ -572,3 +572,139 @@ export function McClubPanel({ r, onUpgrade }: { r: MiClubState; onUpgrade: (f: M
         </div>
     );
 }
+
+/** El Histórico: cada temporada cerrada con sus campeones, quién subió y bajó, y cómo le fue al club. */
+export function McArchive({ r, nameOf, flag }: { r: MiClubState; nameOf: (id: string) => string; flag: Flag }) {
+    // Las temporadas que ya cerraron, de la más nueva a la más vieja (las de antes del Histórico, solo con lo propio).
+    const seasons = [...new Set([...r.history.map((h) => h.season), ...(r.archive ?? []).map((a) => a.season)])].sort((a, b) => b - a);
+    const [pick, setPick] = useState<number | null>(null);
+    if (!seasons.length) {
+        return (
+            <div className={styles.othersPanel}>
+                <p className={styles.note}>Todavía no cerró ninguna temporada. Cuando termine la primera, queda acá: campeones, ascensos, descensos y tu año.</p>
+            </div>
+        );
+    }
+    const season = pick !== null && seasons.includes(pick) ? pick : seasons[0];
+    const at = seasons.indexOf(season);
+    const arc = (r.archive ?? []).find((a) => a.season === season);
+    const hist = r.history.find((h) => h.season === season);
+    const who = (id: string) => (
+        <span className={`${styles.arcClub} ${id === MC_ME ? styles.arcMine : ''}`}>
+            {flag(id)} {nameOf(id)}
+        </span>
+    );
+    const list = (ids: string[]) =>
+        ids.length
+            ? ids.map((id, i) => (
+                  <span key={id}>
+                      {i > 0 && ', '}
+                      {who(id)}
+                  </span>
+              ))
+            : '—';
+    const mine = arc?.mine;
+    const [w, d, l] = mine?.record ?? [0, 0, 0];
+    const moveText = mine?.move === 'up' ? '▲ Ascendió' : mine?.move === 'down' ? '▼ Descendió' : mine ? '= Se mantuvo' : null;
+    return (
+        <div className={styles.othersPanel}>
+            <div className={`${styles.browseField} ${styles.arcPick}`}>
+                <label htmlFor="arc-season">Temporada</label>
+                <div className={styles.browseRow}>
+                    <button type="button" className={styles.browseArrow} onClick={() => setPick(seasons[at + 1])} aria-label="Temporada anterior" disabled={at >= seasons.length - 1}>
+                        ◀
+                    </button>
+                    <select id="arc-season" value={season} onChange={(e) => setPick(Number(e.target.value))}>
+                        {seasons.map((x) => (
+                            <option key={x} value={x}>
+                                Temporada {x}
+                            </option>
+                        ))}
+                    </select>
+                    <button type="button" className={styles.browseArrow} onClick={() => setPick(seasons[at - 1])} aria-label="Temporada siguiente" disabled={at <= 0}>
+                        ▶
+                    </button>
+                </div>
+            </div>
+
+            <section className={`${styles.arcCard} ${styles.arcMineCard}`} aria-label="Tu temporada">
+                <h3 className={styles.arcTitle}>
+                    {r.team.name} · {mine?.label ?? (hist ? levelDef(hist.level).label : '')}
+                </h3>
+                <p className={styles.arcPlace}>{mine?.place ?? hist?.place ?? '—'}</p>
+                {mine && (
+                    <div className={styles.arcFacts}>
+                        <span>
+                            {w} G · {d} E · {l} P
+                        </span>
+                        {moveText && <span className={mine.move === 'up' ? styles.arcUp : mine.move === 'down' ? styles.arcDown : undefined}>{moveText}</span>}
+                    </div>
+                )}
+                {mine && mine.titles.length > 0 && <p className={styles.arcTitles}>🏆 {mine.titles.join(' · ')}</p>}
+            </section>
+
+            {arc ? (
+                <>
+                    {arc.divisions.map((dv) => (
+                        <section key={dv.level} className={styles.arcCard} aria-label={dv.label}>
+                            <h3 className={styles.arcTitle}>{dv.label}</h3>
+                            <dl className={styles.arcList}>
+                                <dt>Campeón</dt>
+                                <dd>{dv.champion ? who(dv.champion) : '—'}</dd>
+                                {dv.red && (
+                                    <>
+                                        <dt>Reducido</dt>
+                                        <dd>{who(dv.red)}</dd>
+                                    </>
+                                )}
+                                {dv.cup && (
+                                    <>
+                                        <dt>Copa</dt>
+                                        <dd>{who(dv.cup)}</dd>
+                                    </>
+                                )}
+                                {dv.up.length > 0 && (
+                                    <>
+                                        <dt className={styles.arcUp}>▲ Suben</dt>
+                                        <dd>{list(dv.up)}</dd>
+                                    </>
+                                )}
+                                {dv.down.length > 0 && (
+                                    <>
+                                        <dt className={styles.arcDown}>▼ Bajan</dt>
+                                        <dd>{list(dv.down)}</dd>
+                                    </>
+                                )}
+                            </dl>
+                        </section>
+                    ))}
+                    {arc.cups.length > 0 && (
+                        <section className={styles.arcCard} aria-label="Copas">
+                            <h3 className={styles.arcTitle}>Copas</h3>
+                            <dl className={styles.arcList}>
+                                {arc.cups.map((c) => (
+                                    <div key={c.name} className={styles.arcPair}>
+                                        <dt>{c.name}</dt>
+                                        <dd>{who(c.champion)}</dd>
+                                    </div>
+                                ))}
+                            </dl>
+                        </section>
+                    )}
+                </>
+            ) : (
+                <section className={styles.arcCard} aria-label="Campeones">
+                    <h3 className={styles.arcTitle}>Campeones</h3>
+                    <ul className={styles.roadLog}>
+                        {r.log
+                            .filter((x) => x.startsWith(`${season}:`))
+                            .map((x, i) => (
+                                <li key={i}>{x.slice(String(season).length + 2)}</li>
+                            ))}
+                    </ul>
+                    <p className={styles.note}>Esta temporada se jugó antes del Histórico: quedaron los campeones, no los ascensos y descensos.</p>
+                </section>
+            )}
+        </div>
+    );
+}

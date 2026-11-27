@@ -101,7 +101,8 @@ const HUB_TILE: Partial<Record<HubTab, { i: string; c: string; d: string }>> = {
     cuadro: { i: '⚔', c: '#f0c419', d: 'El mata-mata' },
     resultados: { i: '✓', c: '#5ad1e6', d: 'Lo que ya se jugó' },
     goleadores: { i: '★', c: '#ff8a3d', d: 'Tries, puntos y tackles' },
-    piramide: { i: '▲', c: '#b072ff', d: 'Todas las ligas y copas' },
+    piramide: { i: '▲', c: '#b072ff', d: 'Tablas y cuadros de cada liga y copa' },
+    historico: { i: '⌛', c: '#c9a86b', d: 'Campeones, ascensos y tu año, temporada por temporada' },
     plantel: { i: '☻', c: '#2fd3a0', d: 'Tus jugadores y el entrenamiento' },
     fichajes: { i: '✚', c: '#ff6fb0', d: 'El mercado de pases' },
     club: { i: '⌂', c: '#ffd36b', d: 'Instalaciones y créditos' },
@@ -173,8 +174,8 @@ import { advanceIntl, compName, createIntl, intlBoosts, intlInvest, intlNames, i
 import { IntlRanking, IntlSeason, IntlSquad, IntlUnion, IntlYouth } from './IntlPanels';
 import { advanceSvns, createSvns, SVNS_LEGS, SVNS_PHASE_LABEL, svnsBoosts, svnsRegionName, svnsStartTier, svnsTable, svnsVerdict, TIER_LABEL } from './svns';
 import { CloudSync, markTutorialSeenInAccount, tutorialSeenInAccount, type CloudStatus } from './cloudSave';
-import { advanceMiClub, createMiClub, LIB_NAME, levelDef, levelOf, liveMine, mcAfterRound, mcRegionLabel, mcRelease, mcSign, mcTrain, mcUpgrade, mcVerdict, myTeam, nacHowOf, phaseName, WORLDS, zoneName, type McRegion, type McWorld } from './miClub';
-import { McClubPanel, McCredits, McMarket, McPyramid, McSquad, McTourTables } from './MiClubPanels';
+import { advanceMiClub, createMiClub, mcEnsureWorlds, LIB_NAME, levelDef, levelOf, liveMine, mcAfterRound, mcRegionLabel, mcRelease, mcSign, mcTrain, mcUpgrade, mcVerdict, myTeam, nacHowOf, phaseName, WORLDS, zoneName, type McRegion, type McWorld } from './miClub';
+import { McArchive, McClubPanel, McCredits, McMarket, McPyramid, McSquad, McTourTables } from './MiClubPanels';
 import { useOfflineReady } from './offline';
 import { readLang, startTranslating, writeLang, type Lang } from './i18n';
 import { applyStoredClubEdits, EDITABLE_CLUBS, isClubEdited, resetClubEdit, saveClubEdit } from './clubEdits';
@@ -207,7 +208,7 @@ type Screen =
     | { k: 'drill'; kind: 'tutorial' | 'practice'; nonce: number }
     | { k: 'result'; cfg: MatchConfig; mode: Mode; score: [number, number] };
 
-type HubTab = 'tabla' | 'calendario' | 'cuadro' | 'resultados' | 'goleadores' | 'otros' | 'plantel' | 'club' | 'palmares' | 'camino' | 'carrera' | 'circuito' | 'ranking' | 'union' | 'temporada' | 'juveniles' | 'piramide' | 'fichajes';
+type HubTab = 'tabla' | 'calendario' | 'cuadro' | 'resultados' | 'goleadores' | 'otros' | 'plantel' | 'club' | 'palmares' | 'camino' | 'carrera' | 'circuito' | 'ranking' | 'union' | 'temporada' | 'juveniles' | 'piramide' | 'fichajes' | 'historico';
 
 interface Category {
     name: string;
@@ -919,7 +920,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
         // Los clubes editados antes se aplican al catálogo antes de armar nada con ellos.
         applyStoredClubEdits();
         const saved = loadSaved();
-        const list = saved.tours.map((t) => (t ? settleCareer(t) : null));
+        const list = saved.tours.map((t) => (t ? mcEnsureWorlds(settleCareer(t)) : null));
         // Una carrera vieja se lleva a la versión actual al abrirse: se guarda enseguida, así no se rehace.
         if (list.some((t, i) => t !== saved.tours[i])) saveSaved({ customTeams: saved.customTeams, cup: saved.cup, tours: list });
         setCustomTeams(saved.customTeams);
@@ -952,7 +953,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
         const local = loadSaved();
         void sync.connect({ customTeams: local.customTeams, cup: local.cup, tours: local.tours }).then((remote) => {
             if (!alive || !remote) return;
-            const list = remote.tours.map((t) => (t ? settleCareer(t) : null));
+            const list = remote.tours.map((t) => (t ? mcEnsureWorlds(settleCareer(t)) : null));
             setCustomTeams(remote.customTeams);
             setCup(remote.cup);
             setTours(list);
@@ -1325,7 +1326,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
         setScreen({ k: 'tour' });
     };
 
-    /** Mi Club: cierra la temporada (ascensos, descensos, plantel) y arranca la siguiente; se ve en la Pirámide. */
+    /** Mi Club: cierra la temporada (ascensos, descensos, plantel) y arranca la siguiente; se ve en Todas las ligas. */
     const nextMcSeason = () => {
         if (!tour) return;
         persist({ tour: advanceMiClub(tour) });
@@ -2566,7 +2567,8 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                             : []),
                         ...(miclub
                             ? ([
-                                  ['piramide', 'Pirámide'],
+                                  ['piramide', 'Todas las ligas'],
+                                  ['historico', 'Histórico'],
                                   ['plantel', 'Plantel'],
                                   ['fichajes', 'Fichajes'],
                                   ['club', 'Club'],
@@ -2944,6 +2946,7 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
                                         {tab === 'tabla' && miclub && <McTourTables s={tour} r={miclub} nameOf={nameOf} flag={(id) => <FlagIcon code={flagOf(id)} size={14} />} />}
                                         {tab === 'piramide' && miclub && <McPyramid s={tour} nameOf={nameOf} flag={(id) => <FlagIcon code={flagOf(id)} size={14} />} bracket={(t) => (defOf(t) ? <Bracket s={t} def={defOf(t)!} nameOf={nameOf} flagOf={flagOf} /> : null)} />}
                                         {tab === 'plantel' && miclub && <McSquad r={miclub} onTrain={(id) => persist({ tour: mcTrain(tour, id) })} onRelease={(id) => persist({ tour: mcRelease(tour, id) })} />}
+                                        {tab === 'historico' && miclub && <McArchive r={miclub} nameOf={nameOf} flag={(id) => <FlagIcon code={flagOf(id)} size={14} />} />}
                                         {tab === 'fichajes' && miclub && <McMarket r={miclub} nameOf={nameOf} onSign={(id) => persist({ tour: mcSign(tour, id) })} />}
                                         {tab === 'club' && miclub && <McClubPanel r={miclub} onUpgrade={(f) => persist({ tour: mcUpgrade(tour, f) })} />}
                                         {tab === 'tabla' && !miclub && (
