@@ -194,10 +194,12 @@ const RUGBY_FEATURED: Array<{ name: RegExp; country?: RegExp; not?: RegExp }> = 
   { name: /nations (cup|series|championship)|internationals?|test match|lions/, not: /u-?20|sub-?20/ },
   // El circuito de seven de World Rugby, en primera plana y en este orden: la etapa del
   // SVNS 1 (y el World Championship), después el SVNS 2 y el SVNS 3. Detrás, el Seven de la
-  // República, que sin esta línea caía al desplegable como "seven argentino".
+  // Pava (Córdoba Athletic, masculino y femenino) y el Seven de la República, que sin su
+  // línea caían al desplegable como "seven argentino".
   { name: /^svns (1|world championship)\b/ },
   { name: /^svns 2\b/ },
   { name: /^svns 3\b/ },
+  { name: /seven de la pava/ },
   { name: /seven de la republica/ },
   { name: /champions cup|copa de campeones/ },
   { name: /super rugby pacific|^super rugby$/ },
