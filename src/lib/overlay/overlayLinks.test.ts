@@ -10,6 +10,7 @@ import {
   linkStatus,
   linksSummary,
   normalizeLinkPath,
+  sameLinkTarget,
 } from './overlayLinks.ts';
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -64,4 +65,17 @@ test('el token va pegado a la ruta, no a los ajustes', () => {
   assert.ok(!linkMatchesPath('/overlay/partido/abc', '/overlay/partido/otro'));
   assert.ok(!linkMatchesPath('/overlay/tabla?torneo=9', '/overlay/goleadores'));
   assert.equal(linkKindFromPath('/overlay/goleadores?torneo=1'), 'goleadores');
+});
+
+test('sameLinkTarget: lo mismo en otro orden y con enlace/prueba es lo mismo', () => {
+  const saved = '/overlay/partido/abc?estilo=bloques&pos=abajo';
+  assert.equal(sameLinkTarget(saved, '/overlay/partido/abc', { pos: 'abajo', estilo: 'bloques', enlace: 'tok' }), true);
+  assert.equal(sameLinkTarget('/overlay/tabla', '/overlay/tabla', { enlace: 'tok', prueba: '1' }), true);
+});
+
+test('sameLinkTarget: editado (otro ajuste u otro partido) ya no es lo mismo', () => {
+  const saved = '/overlay/partido/abc?estilo=bloques&pos=arriba';
+  assert.equal(sameLinkTarget(saved, '/overlay/partido/abc', { estilo: 'bloques', pos: 'abajo', enlace: 'tok' }), false);
+  assert.equal(sameLinkTarget(saved, '/overlay/partido/abc', { estilo: 'bloques', enlace: 'tok' }), false);
+  assert.equal(sameLinkTarget(saved, '/overlay/partido/otro', { estilo: 'bloques', pos: 'arriba', enlace: 'tok' }), false);
 });

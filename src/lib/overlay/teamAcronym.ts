@@ -41,7 +41,33 @@ export function teamLabels(
   const full = fullName.toUpperCase();
   if (mode === 'siglas') return { short: sigla, wide: sigla };
   if (mode === 'completo') return { short: full, wide: full };
-  return { short: sigla, wide: customShort ? sigla : full };
+  return { short: sigla, wide: customShort ? sigla : marqueeName(fullName, givenShort) };
+}
+
+/** Hasta cuántas letras entra un nombre en los estilos anchos sin cortarse. */
+const WIDE_MAX = 18;
+
+/**
+ * El nombre para los estilos anchos en modo automático: el del club, sin lo que
+ * en un marcador sobra (la categoría, el "7s", lo que va entre comillas). Si
+ * igual no entra y el club trae un nombre corto, ese: "BELGRANO ATHLETIC 7S"
+ * sale BELGRANO ATHLETIC y nunca "BELGRANO ATH…" cortado por el CSS.
+ */
+export function marqueeName(fullName: string, givenShort?: string | null): string {
+  const clean = withoutCategory(fullName) || fullName.trim();
+  const short = withoutCategory(givenShort ?? '');
+  if (clean.length > WIDE_MAX && short.length >= 3 && short.length < clean.length) return short.toUpperCase();
+  return clean.toUpperCase();
+}
+
+function withoutCategory(name: string): string {
+  return name
+    .replace(/["“”'‘’][^"“”'‘’]*["“”'‘’]/g, ' ')
+    .replace(/\(.*?\)/g, ' ')
+    .split(/\s+/)
+    .filter((word) => word && !CATEGORY.test(word) && !/^(7s|sevens|seven|xv)$/i.test(word))
+    .join(' ')
+    .trim();
 }
 
 export function teamAcronym(name: string | null | undefined, short?: string | null): string {

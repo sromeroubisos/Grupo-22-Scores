@@ -164,7 +164,8 @@ export function parseOverlayConfig(
     awayFull: first(params.visita_largo).slice(0, 40) || null,
     nameMode: first(params.nombres) === 'siglas' ? 'siglas' : first(params.nombres) === 'completo' ? 'completo' : 'auto',
     background: BACKGROUNDS[first(params.fondo)] ?? null,
-    demo: flag(params.prueba, false),
+    // `prueba=real` (solo en local) dibuja el partido de verdad: no es muestra.
+    demo: first(params.prueba) !== 'real' && flag(params.prueba, false),
     // El ciclo solo arranca si están los dos: "mostrar 15, ocultar 45".
     showFor: showFor !== null && hideFor !== null && showFor > 0 ? clamp(showFor, 3, 3600, 15) : null,
     hideFor: showFor !== null && hideFor !== null && showFor > 0 ? clamp(hideFor, 1, 3600, 30) : null,

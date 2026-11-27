@@ -71,6 +71,22 @@ export function linkMatchesPath(savedPath: string, pathname: string): boolean {
   return clean(savedPath) === clean(pathname);
 }
 
+/**
+ * ¿La página al aire está mostrando EXACTAMENTE lo guardado? Misma ruta y los
+ * mismos ajustes, sin importar el orden ni `enlace`/`prueba`. Si no, es que el
+ * dueño lo editó después de pegarlo en OBS: la página se pasa a la ruta guardada.
+ */
+export function sameLinkTarget(savedPath: string, pathname: string, query: Record<string, string | string[] | undefined>): boolean {
+  if (!linkMatchesPath(savedPath, pathname)) return false;
+  const saved = new URLSearchParams(savedPath.split('?')[1] ?? '');
+  const sorted = (entries: Array<[string, string]>) => entries.filter(([key]) => !STRIPPED_PARAMS.includes(key)).map(([key, value]) => `${key}=${value}`).sort().join('&');
+  const current: Array<[string, string]> = [];
+  for (const [key, value] of Object.entries(query)) {
+    for (const item of Array.isArray(value) ? value : value === undefined ? [] : [value]) current.push([key, item]);
+  }
+  return sorted([...saved.entries()]) === sorted(current);
+}
+
 export type LinkState = 'vigente' | 'por-vencer' | 'vencido';
 
 export type LinkStatus = {

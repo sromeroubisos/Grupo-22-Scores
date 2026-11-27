@@ -2755,3 +2755,195 @@ img.teamLogo { object-fit: contain; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 
 /* ═══ Bloques: escudo más grande ═══ */
 
 .block .teamLogo, .block .teamLogoFallback { width: 80px; height: 80px; }
+
+/*
+ * ═══ Tamaño base de cada estilo ═══
+ * Medido en un lienzo de 1920 a escala 1: un marcador de esquina de tele mide
+ * 450–650 px y un zócalo no pasa de ~1000. Varios estilos se habían ido a
+ * 1000–1700 px. El factor va en el marcador y no en el anchor: así los
+ * módulos que cuelgan (sin-bin, shot clock, placas) no se achican con él.
+ * `escala=` sigue mandando por encima de esto.
+ */
+.board[data-style='presentacion'] { zoom: 0.72; }
+.board[data-style='linea'] { zoom: 0.78; }
+.board[data-style='pisos'],
+.board[data-style='medallon'] { zoom: 0.8; }
+.board[data-style='cuadro'],
+.board[data-style='paneles'],
+.board[data-style='escudos'],
+.board[data-style='bloques'] { zoom: 0.78; }
+.board[data-style='degrade'],
+.board[data-style='barra'],
+.board[data-style='sesgado'],
+.board[data-style='franja'],
+.board[data-style='central'],
+.board[data-style='rotulo'],
+.board[data-style='claro'],
+.board[data-style='agua'],
+.board[data-style='tablero'] { zoom: 0.85; }
+.board[data-style='capsula'],
+.board[data-style='flotante'],
+.board[data-style='pestana'] { zoom: 0.9; }
+
+/* Zócalo: el nombre ocupa lo que mide (no 360 px fijos) y se lee más grande. */
+.bar .teamName { width: auto; min-width: 120px; max-width: 300px; font-size: 32px; }
+
+/* Lo que aparece debajo (sin-bin, shot clock) se tiene que leer de lejos. */
+.sinbins,
+.shot { zoom: 1.3; }
+
+/*
+ * Tarjetas: no se aprietan nunca. Con el contador de tries al lado, el hueco
+ * fijo de 44 px las dejaba en un palito de 3 px.
+ */
+.pip { flex: none; width: 14px; height: 20px; border-radius: 3px; }
+.pip[data-count] { width: 22px; font-size: 13px; }
+.pips { gap: 4px; }
+.bug .pips,
+.bar .pips { width: auto; min-width: 44px; }
+
+/* El logo del torneo con alto fijo: con solo un máximo, un PNG chico quedaba en 16 px. */
+.centerLogo { height: 30px; width: auto; }
+.mCoin .centerLogo { height: 26px; }
+.tournamentLogo { width: auto; height: 20px; max-width: 48px; }
+
+/* Marca de agua: el escudo es fondo, no puede competir con la sigla. */
+.sym[data-skin='agua'] .symMark { opacity: 0.3; }
+.sym[data-skin='agua'] .symTeam[data-side='home'] .symText { padding-left: 100px; }
+.sym[data-skin='agua'] .symTeam[data-side='away'] .symText { padding-right: 100px; }
+
+/* Nombres largos de verdad ("BELGRANO ATHLETIC"): el zócalo y la presentación crecen hasta que entran. */
+.bar .teamName { max-width: 380px; }
+.presentacion { width: auto; min-width: 1500px; }
+
+/*
+ * ═══ Bloques (rediseño) ═══
+ * Dos fichas: arriba el club en su color (escudo y sigla), abajo sobre oscuro el
+ * resultado grande y las marcas. Debajo de las dos, una barra con el reloj.
+ */
+.blocks {
+  border-radius: 10px;
+  overflow: hidden;
+  background: #0c0f13;
+}
+
+.blockRow { gap: 0; }
+
+.block {
+  width: 200px;
+  gap: 0;
+  padding: 0 0 12px;
+  background: #0c0f13;
+  justify-content: flex-start;
+}
+
+.block + .block { border-left: 2px solid #000; }
+
+.blockHead {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  height: 52px;
+  padding: 0 12px;
+}
+
+.block[data-side='home'] .blockHead { background: var(--ov-home); color: var(--ov-home-ink); }
+.block[data-side='away'] .blockHead { background: var(--ov-away); color: var(--ov-away-ink); }
+
+.block .blockHead .teamLogo,
+.block .blockHead .teamLogoFallback { width: 38px; height: 38px; font-size: 16px; flex: none; }
+
+.block .blockName {
+  width: auto;
+  min-width: 0;
+  font-family: var(--ov-text, 'Outfit', sans-serif);
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  line-height: 1;
+}
+
+.block .blockScore {
+  margin-top: 12px;
+  font-size: calc(100px * var(--ov-score-size, 1));
+  line-height: 0.9;
+}
+
+.block .pips {
+  min-height: 22px;
+  margin: 8px 0 0;
+  justify-content: center;
+}
+
+.blockClock {
+  height: 50px;
+  gap: 12px;
+  background: #000;
+  border-top: 0;
+  box-shadow: inset 0 3px 0 var(--ov-brand);
+}
+
+.blockClock b { font-size: calc(34px * var(--ov-num-size, 1)); }
+
+/*
+ * ═══ Pestaña (rediseño) ═══
+ * Escudo, sigla y marcas pegados al resultado: nada de color vacío en las
+ * puntas. La pestaña del reloj mide lo mismo que el bloque del medio
+ * (resultado + logo + resultado), así se lee como una sola pieza.
+ */
+.tBar { height: 66px; border-radius: 10px; }
+
+.tName {
+  min-width: 0;
+  gap: 12px;
+  padding: 0 18px;
+}
+
+.tName[data-side='home'] { justify-content: flex-end; }
+.tName[data-side='away'] { justify-content: flex-start; }
+
+.tName .teamLogo,
+.tName .teamLogoFallback,
+.tName[data-side='home'] .teamLogo,
+.tName[data-side='home'] .teamLogoFallback,
+.tName[data-side='away'] .teamLogo,
+.tName[data-side='away'] .teamLogoFallback { width: 48px; height: 48px; margin: 0; }
+
+.tSigla {
+  font-size: 30px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+.tScore {
+  width: 84px;
+  min-width: 84px;
+  padding: 0;
+  font-size: calc(54px * var(--ov-score-size, 1));
+}
+
+.tLogo { width: 92px; }
+.tLogoFront img { max-width: 70px; max-height: 44px; }
+
+.tTab {
+  justify-content: center;
+  width: calc(84px * 2 + 92px);
+  padding: 3px 0 1px;
+  border-radius: 10px 10px 0 0;
+}
+
+.tTime { font-size: calc(32px * var(--ov-num-size, 1)); }
+
+/* Sin reloj corriendo (FINAL, ENTRETIEMPO), el rótulo del pie se tiene que leer. */
+.blockClock span:last-child {
+  font-family: var(--ov-num, var(--ov-score, 'dharma-gothic-e', sans-serif));
+  font-weight: var(--ov-num-weight, 900);
+  font-size: calc(28px * var(--ov-num-size, 1));
+  letter-spacing: 0.04em;
+  color: #fff;
+}
+.blockClock { height: 56px; }
+.blockClock b { font-size: calc(42px * var(--ov-num-size, 1)); }

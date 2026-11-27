@@ -380,9 +380,11 @@ export default function MatchOverlay({
   };
   // El logo del torneo es premium: el subido en el generador o, si no, el del torneo en G22.
   // Sin premium, en su lugar va el de G22.
-  const tournamentLogo = planRules(config.plan).tournamentLogo ? (config.logo ?? match.tournament?.logo ?? null) : null;
+  const tournamentLogo = planRules(config.plan).tournamentLogo ? (config.logo ?? realLogo(match.tournament?.logo ?? null)) : null;
   const withLogo = match.tournament ? { ...match, tournament: { ...match.tournament, logo: tournamentLogo } } : match;
-  const shown = context && !withLogo.context ? { ...withLogo, context } : withLogo;
+  const shownRaw = context && !withLogo.context ? { ...withLogo, context } : withLogo;
+  // "Copa de Plata · Fecha 3 · Copa de Plata": la fase y la zona a veces llegan repetidas.
+  const shown = { ...shownRaw, context: dedupeSegments(shownRaw.context) };
   const clock = overlayClock(match, now);
   // La versión por defecto: la tarjeta G22 (escudos grandes, marcador,
   // anotadores y la placa del último evento adentro).
@@ -433,7 +435,7 @@ export default function MatchOverlay({
   const shot = shotView(shotSource, now + (match.manual?.offsetMs ?? 0));
   const logo = tournamentLogo;
   // Con logo de torneo, también va chico en el centro de cada marcador (junto al reloj).
-  const tourLogo = tournamentLogo ? <img src={tournamentLogo} alt="" className={styles.centerLogo} /> : null;
+  const tourLogo = tournamentLogo ? <TourLogo src={tournamentLogo} className={styles.centerLogo} /> : null;
   const tag = config.title ?? shown.context ?? match.round;
   // Contador de tries (`tries=1`): sale al lado de las tarjetas en todos los estilos.
   const countTries = (side: OverlaySide) => match.events
@@ -453,12 +455,12 @@ export default function MatchOverlay({
       <div className={styles.anchor} data-v={vertical} data-h={horizontal}>
         {tournamentLine ? (
           <div className={styles.tournament}>
-            {tournamentLogo ? <img src={tournamentLogo} alt="" className={styles.tournamentLogo} /> : null}
+            {tournamentLogo ? <TourLogo src={tournamentLogo} className={styles.tournamentLogo} /> : null}
             <span>{tournamentLine}</span>
           </div>
         ) : null}
 
-        <div className={styles.board} data-fx={fx ? fx.side : undefined}>
+        <div className={styles.board} data-style={config.style} data-fx={fx ? fx.side : undefined}>
         {fx && config.celebration === 'marcador' && config.style !== 'pestana' ? <ScoreFxLayer fx={fx} color={(fx.side === 'home' ? home : away).color} /> : null}
         {config.style === 'barra' ? (
           <div className={styles.bar} data-phase={match.phase}>
@@ -795,7 +797,7 @@ export default function MatchOverlay({
               </div>
             ) : null}
             <div className={styles.tBar}>
-              <span className={styles.tName} data-side="home"><Crest team={home} /><Pips cards={marks?.home} />{home.short}</span>
+              <span className={styles.tName} data-side="home"><Crest team={home} /><span className={styles.tSigla}>{home.short}</span><Pips cards={marks?.home} /></span>
               <span className={styles.tScore}><Score value={home.score} bump={bump.home} bare /></span>
               {/* El logo gira y muestra los puntos del tanto ("+5") mientras dura el festejo. */}
               <span className={styles.tLogo} data-flip={fx ? '' : undefined} style={fx ? ({ '--fx-color': (fx.side === 'home' ? home : away).color, '--fx-ink': inkOn((fx.side === 'home' ? home : away).color) } as CSSProperties) : undefined}>
@@ -803,7 +805,7 @@ export default function MatchOverlay({
                 <span className={styles.tLogoBack}>{fx ? `+${fx.points}` : ''}</span>
               </span>
               <span className={styles.tScore}><Score value={away.score} bump={bump.away} bare /></span>
-              <span className={styles.tName} data-side="away">{away.short}<Pips cards={marks?.away} /><Crest team={away} /></span>
+              <span className={styles.tName} data-side="away"><Pips cards={marks?.away} /><span className={styles.tSigla}>{away.short}</span><Crest team={away} /></span>
             </div>
           </div>
         ) : config.style === 'cuadro' ? (
@@ -895,10 +897,12 @@ export default function MatchOverlay({
                 const team = side === 'home' ? home : away;
                 return (
                   <div className={styles.block} data-side={side} key={side}>
-                    <span className={styles.blockBand} aria-hidden="true" />
-                    <Crest team={team} />
+                    {/* Arriba, el club en su color; abajo, sobre oscuro, el resultado. */}
+                    <span className={styles.blockHead}>
+                      <Crest team={team} />
+                      <span className={styles.blockName}>{team.short}</span>
+                    </span>
                     <span className={styles.blockScore}><Score value={team.score} bump={bump[side]} bare /></span>
-                    <span className={styles.blockName}>{team.short}</span>
                     <Pips cards={marks?.[side]} />
                   </div>
                 );
@@ -952,6 +956,38 @@ export default function MatchOverlay({
       </div>
     </div>
   );
+}
+
+/**
+ * El logo del torneo que viene de G22 pasa por el proxy de escudos, que sin logo
+ * cargado devuelve un monograma ("SD"): en un marcador eso es ruido. Se pide sin
+ * monograma y, si no hay logo, la imagen se saca sola.
+ */
+function realLogo(url: string | null): string | null {
+  if (!url) return null;
+  if (!url.includes('/api/assets/team-logo') || url.includes('noFallback=')) return url;
+  return `${url}${url.includes('?') ? '&' : '?'}noFallback=1`;
+}
+
+/** Los que no cargaron: el marcador se rearma con cada sondeo y no hay que volver a pedirlos. */
+const MISSING_LOGOS = new Set<string>();
+
+function TourLogo({ src, className }: { src: string; className: string }) {
+  const [broken, setBroken] = useState(() => MISSING_LOGOS.has(src));
+  if (broken) return null;
+  return <img src={src} alt="" className={className} onError={() => { MISSING_LOGOS.add(src); setBroken(true); }} />;
+}
+
+/** Saca los tramos repetidos de un "A · B · A" (sin distinguir mayúsculas). */
+function dedupeSegments(text: string | null | undefined): string | null {
+  if (!text) return text ?? null;
+  const seen = new Set<string>();
+  return text.split(' · ').filter((part) => {
+    const key = part.trim().toLowerCase();
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }).join(' · ');
 }
 
 /** Texto oscuro sobre colores claros, blanco sobre oscuros: el nombre siempre se lee. */
@@ -1078,7 +1114,9 @@ function CelebrationBand({ fx, team }: { fx: ScoreFx; team: ShownTeam }) {
 
 /** El logo del torneo, o el de G22 si no tiene. */
 function LeadLogo({ logo }: { logo: string | null }) {
-  return <img src={logo ?? '/header-logo.png'} alt="" data-g22={logo ? undefined : ''} />;
+  const [missing, setMissing] = useState(() => !logo || MISSING_LOGOS.has(logo));
+  if (missing || !logo) return <img src="/header-logo.png" alt="" data-g22="" />;
+  return <img src={logo} alt="" onError={() => { MISSING_LOGOS.add(logo); setMissing(true); }} />;
 }
 
 function TeamCell({

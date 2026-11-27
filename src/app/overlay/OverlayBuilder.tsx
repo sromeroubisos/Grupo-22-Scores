@@ -3,17 +3,19 @@
 /* eslint-disable @next/next/no-img-element -- el wordmark es un PNG local chico. */
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { FONT_FAMILIES, ROLE_DEFAULTS, fontFamilyDef, roleFontParam, type FontRole, type RoleFont } from './_lib/fonts';
+import { FONT_FAMILIES, ROLE_DEFAULTS, fontFamilyDef, parseRoleFont, roleFontParam, type FontRole, type RoleFont } from './_lib/fonts';
 import {
   DEFAULT_ROWS, KIND_DEFS, KIND_GROUPS, SCOREBOARD_STYLES, UUID_RE,
   hasScoreboard, idFrom, isList, isManual, isMatchKind, isScoreboardStyle, needsTournament, requiredPlan,
-  type Kind,
+  type Kind, type KindDef,
 } from './_builder/catalog';
 import { PLAN_LABELS, planAtLeast, planRules, type BrandPosition, type OverlayPlan } from '@/lib/overlay/overlayPlan';
 import { teamAcronym, type NameMode } from '@/lib/overlay/teamAcronym';
 import { Canvas } from './_builder/Canvas';
 import { ClubPicker, Crest, MatchPicker, TournamentPicker, matchWhen, type OverlaySearchMatch } from './_builder/Pickers';
-import { MyOverlays, SaveLink } from './_builder/MyOverlays';
+import { MyOverlays, SaveLink, useSavedLinks, type SavedLinks } from './_builder/MyOverlays';
+import { manualKind, reader, savedTarget } from './_builder/fromPath';
+import type { SavedLink } from '@/lib/overlay/overlayLinks';
 import { sevensClockPatch, teamFromClub, teamsFromMatch, type ManualSport, type TeamInfo } from './_builder/matchTeams';
 import styles from './_builder/studio.module.css';
 
@@ -113,45 +115,199 @@ export default function OverlayBuilder({ plan }: { plan: OverlayPlan }) {
   );
 }
 
+type StudioTab = 'crear' | 'mios';
+
+/** Qué gráfico es un overlay guardado. Los manuales lo preguntan al overlay. */
+async function kindOfSaved(link: SavedLink): Promise<Kind | null> {
+  const target = savedTarget(link.path);
+  if (!target) return null;
+  if (target.kind) return target.kind;
+  if (!target.routeId) return null;
+  try {
+    const response = await fetch(`/api/overlay/control/${target.routeId}`, { cache: 'no-store' });
+    const body = await response.json().catch(() => null);
+    return typeof body?.kind === 'string' ? manualKind(body.kind) : null;
+  } catch {
+    return null;
+  }
+}
+
 function Studio() {
   const [kind, setKind] = useState<Kind | null>(null);
+  const [tab, setTab] = useState<StudioTab>('crear');
   const [origin, setOrigin] = useState('https://www.g22scores.com');
+  const store = useSavedLinks();
+  // Un overlay de Mis overlays abierto en el editor (va en `?editar=<id>`).
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editing, setEditing] = useState<SavedLink | null>(null);
+  const [editProblem, setEditProblem] = useState<string | null>(null);
+  // Cada vez que se ABRE el editor (no cuando se guarda adentro) arranca de cero.
+  const [session, setSession] = useState('nuevo');
 
-  // El gráfico elegido vive en la URL: Atrás vuelve a la galería.
+  // El gráfico elegido, la pestaña y el overlay en edición viven en la URL: Atrás vuelve a donde estaba.
   useEffect(() => {
     setOrigin(window.location.origin);
     const read = () => {
-      const value = new URLSearchParams(window.location.search).get('grafico') as Kind | null;
+      const search = new URLSearchParams(window.location.search);
+      const editId = search.get('editar');
+      setEditingId(editId);
+      setSession(editId ?? 'nuevo');
+      if (editId) return;
+      setEditing(null);
+      const value = search.get('grafico') as Kind | null;
       setKind(value && KIND_DEFS.has(value) ? value : null);
+      setTab(search.get('vista') === 'mios' ? 'mios' : 'crear');
     };
     read();
     window.addEventListener('popstate', read);
     return () => window.removeEventListener('popstate', read);
   }, []);
 
+  // Con la lista leída, el overlay en edición se abre con su gráfico.
+  const links = store.links;
+  useEffect(() => {
+    if (!editingId || !links) return undefined;
+    const link = links.find((item) => item.id === editingId);
+    if (!link) {
+      setEditProblem('Ese overlay ya no está en Mis overlays.');
+      setEditingId(null);
+      setTab('mios');
+      setKind(null);
+      setEditing(null);
+      return undefined;
+    }
+    if (editing?.id === link.id) return undefined;
+    let cancelled = false;
+    setEditProblem(null);
+    void kindOfSaved(link).then((found) => {
+      if (cancelled) return;
+      if (!found) {
+        setEditProblem('No pudimos abrir ese overlay para editarlo.');
+        setEditingId(null);
+        setTab('mios');
+        setKind(null);
+        return;
+      }
+      setEditing(link);
+      setKind(found);
+    });
+    return () => { cancelled = true; };
+  }, [editingId, links, editing?.id]);
+
+  // Quien ya tiene overlays guardados entra a Mis overlays (con «Crear overlay» a la vista).
+  const landed = useRef(false);
+  useEffect(() => {
+    if (landed.current || !links) return;
+    landed.current = true;
+    if (links.length && !window.location.search) {
+      window.history.replaceState(null, '', '/overlay?vista=mios');
+      setTab('mios');
+    }
+  }, [links]);
+
   const open = useCallback((next: Kind) => {
     window.history.pushState(null, '', `/overlay?grafico=${next}`);
+    setEditingId(null);
+    setEditing(null);
+    setSession('nuevo');
     setKind(next);
     window.scrollTo({ top: 0 });
   }, []);
 
-  const back = useCallback(() => {
-    window.history.pushState(null, '', '/overlay');
+  const openSaved = useCallback((link: SavedLink) => {
+    window.history.pushState(null, '', `/overlay?editar=${link.id}`);
+    setEditing(null);
     setKind(null);
+    setEditProblem(null);
+    setSession(link.id);
+    setEditingId(link.id);
+    window.scrollTo({ top: 0 });
   }, []);
+
+  /** Desde el editor: si se abrió desde Mis overlays (o ya se guardó), vuelve a la lista. */
+  const back = useCallback(() => {
+    const toMine = Boolean(editingId);
+    window.history.pushState(null, '', toMine ? '/overlay?vista=mios' : '/overlay');
+    setEditingId(null);
+    setEditing(null);
+    setKind(null);
+    setTab(toMine ? 'mios' : 'crear');
+  }, [editingId]);
 
   /** Cambiar de estilo de marcador no agrega una entrada al historial. */
   const switchStyle = useCallback((next: Kind) => {
-    window.history.replaceState(null, '', `/overlay?grafico=${next}`);
+    window.history.replaceState(null, '', editingId ? `/overlay?editar=${editingId}` : `/overlay?grafico=${next}`);
     setKind(next);
+  }, [editingId]);
+
+  /** Las dos pestañas: crear (la galería) y los propios. Desde el editor, también vuelven. */
+  const goTab = useCallback((next: StudioTab) => {
+    window.history.pushState(null, '', next === 'mios' ? '/overlay?vista=mios' : '/overlay');
+    setEditingId(null);
+    setEditing(null);
+    setEditProblem(null);
+    setKind(null);
+    setTab(next);
+    window.scrollTo({ top: 0 });
   }, []);
+
+  const current: StudioTab = editingId ? 'mios' : kind ? 'crear' : tab;
+  const count = links?.length ?? 0;
 
   return (
     <main className={styles.studio}>
+      <nav className={styles.siteNav} aria-label="Overlays">
+        <a href="/" className={styles.homeLink}>
+          <span aria-hidden="true">←</span>
+          <img src="/header-logo.png" alt="" className={styles.homeLogo} />
+          <span>Volver a G22 Scores</span>
+        </a>
+        <div className={styles.navRight}>
+          <div className={styles.tabs} role="tablist" aria-label="Secciones de overlays">
+            <button type="button" role="tab" aria-selected={current === 'crear'} className={styles.tab} onClick={() => goTab('crear')}>
+              Crear
+            </button>
+            <button type="button" role="tab" aria-selected={current === 'mios'} className={styles.tab} onClick={() => goTab('mios')}>
+              Mis overlays{count ? <span className={styles.tabCount}>{count}</span> : null}
+            </button>
+          </div>
+          {current === 'mios' || kind ? (
+            <button type="button" className={`${styles.primary} ${styles.navCreate}`} onClick={() => goTab('crear')}>
+              <span aria-hidden="true">+</span> Crear<b>&nbsp;overlay</b>
+            </button>
+          ) : null}
+        </div>
+      </nav>
+
       {kind ? (
-        <Editor key={isScoreboardStyle(kind) ? 'scoreboard' : kind} kind={kind} origin={origin} onBack={back} onStyle={switchStyle} />
+        <Editor
+          key={`${session}:${isScoreboardStyle(kind) ? 'scoreboard' : kind}`}
+          kind={kind}
+          origin={origin}
+          onBack={back}
+          onStyle={switchStyle}
+          store={store}
+          saved={editing}
+          onCreate={() => goTab('crear')}
+          onSaved={(link) => {
+            if (editing) return;
+            // Recién guardado: desde ahora se edita ese mismo enlace (y Atrás vuelve a Mis overlays).
+            window.history.replaceState(null, '', `/overlay?editar=${link.id}`);
+            setEditing(link);
+            setEditingId(link.id);
+          }}
+        />
+      ) : editingId ? (
+        <p className={styles.loadingSaved} role="status">Abriendo tu overlay…</p>
+      ) : tab === 'mios' ? (
+        <div role="tabpanel" aria-label="Mis overlays">
+          {editProblem ? <p className={styles.error} role="alert">{editProblem}</p> : null}
+          <MyOverlays origin={origin} store={store} onCreate={() => goTab('crear')} onEdit={openSaved} />
+        </div>
       ) : (
-        <Gallery onOpen={open} origin={origin} />
+        <div role="tabpanel" aria-label="Crear overlays">
+          <Gallery onOpen={open} savedCount={count} onMine={() => goTab('mios')} />
+        </div>
       )}
     </main>
   );
@@ -159,7 +315,20 @@ function Studio() {
 
 /* ─────────────── Galería ─────────────── */
 
-function Gallery({ onOpen, origin }: { onOpen: (kind: Kind) => void; origin: string }) {
+/**
+ * Los estilos de marcador son variantes del mismo gráfico: en la galería van
+ * en una sola tarjeta y se eligen adentro, en el editor.
+ */
+function galleryKinds(kinds: KindDef[]): KindDef[] {
+  return kinds.flatMap((item) => {
+    if (item.id === 'marcador') {
+      return [{ ...item, label: 'Marcador', hint: `${SCOREBOARD_STYLES.length} estilos: esquina, zócalo, bloques, sesgado y más. El estilo lo elegís adentro.` }];
+    }
+    return isScoreboardStyle(item.id) && item.id !== 'partido' ? [] : [item];
+  });
+}
+
+function Gallery({ onOpen, savedCount, onMine }: { onOpen: (kind: Kind) => void; savedCount: number; onMine: () => void }) {
   // Las tarjetas muestran una imagen fija; la muestra en vivo se monta sólo en
   // la que está bajo el mouse, de a una. Veinte iframes a la vez trababan el navegador.
   const [live, setLive] = useState<Kind | null>(null);
@@ -175,11 +344,14 @@ function Gallery({ onOpen, origin }: { onOpen: (kind: Kind) => void; origin: str
     setLive(null);
   };
   const plan = useContext(PlanContext);
+  // Una categoría por vez: veintiocho tarjetas en fila cansaban la vista.
+  const [groupId, setGroupId] = useState(KIND_GROUPS[0].id);
+  const group = KIND_GROUPS.find((item) => item.id === groupId) ?? KIND_GROUPS[0];
 
   return (
     <>
       <header className={styles.hero}>
-        <img src="/header-logo.png" alt="G22 Scores" className={styles.logo} />
+
         <div>
           <h1 className={styles.title}>Overlays para transmisión</h1>
           <p className={styles.lead}>Gráficos en vivo para OBS, vMix o Streamlabs que se actualizan solos con lo que pasa en G22.</p>
@@ -194,22 +366,46 @@ function Gallery({ onOpen, origin }: { onOpen: (kind: Kind) => void; origin: str
         </div>
       </header>
 
+      {savedCount ? (
+        <button type="button" className={styles.mineStrip} onClick={onMine}>
+          <span>
+            <b>{savedCount === 1 ? 'Tenés 1 overlay guardado' : `Tenés ${savedCount} overlays guardados`}</b>
+            Para cambiar uno que ya está en OBS, editalo desde Mis overlays: la URL no cambia.
+          </span>
+          <span className={styles.mineStripCta}>Ver y editar →</span>
+        </button>
+      ) : null}
+
       <ol className={styles.steps} aria-label="Cómo se usa">
         <li><b>1</b><span><strong>Elegí un gráfico.</strong> Pasá el mouse por una tarjeta para verla en movimiento.</span></li>
         <li><b>2</b><span><strong>Personalizalo.</strong> El partido o torneo, qué se ve, colores y tipografías.</span></li>
-        <li><b>3</b><span><strong>Guardalo y copiá la URL</strong> para pegarla en OBS o vMix. Vale 15 días y se renueva desde Mis overlays.</span></li>
+        <li><b>3</b><span><strong>Guardalo y copiá la URL</strong> para pegarla en OBS o vMix. Vale 15 días y se renueva desde la pestaña Mis overlays.</span></li>
       </ol>
 
-      <MyOverlays origin={origin} />
 
-      {KIND_GROUPS.map((group) => (
-        <section key={group.id} className={styles.shelf} aria-labelledby={`grupo-${group.id}`}>
+      <div className={styles.segment} role="tablist" aria-label="Tipo de gráfico">
+        {KIND_GROUPS.map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            role="tab"
+            aria-selected={item.id === group.id}
+            className={styles.segmentItem}
+            onClick={() => setGroupId(item.id)}
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
+
+      {[group].map((group) => (
+        <section key={group.id} className={styles.shelf} role="tabpanel" aria-labelledby={`grupo-${group.id}`}>
           <div className={styles.shelfHead}>
             <h2 id={`grupo-${group.id}`}>{group.label}</h2>
             <p>{group.description}</p>
           </div>
           <div className={styles.cards}>
-            {group.kinds.map((item) => {
+            {galleryKinds(group.kinds).map((item) => {
               const needs = requiredPlan(item.id);
               const locked = !planAtLeast(plan, needs);
               return (
@@ -289,8 +485,23 @@ function HowTo() {
 
 /* ─────────────── Editor ─────────────── */
 
-function Editor({ kind, origin, onBack, onStyle }: { kind: Kind; origin: string; onBack: () => void; onStyle: (kind: Kind) => void }) {
+function Editor({ kind, origin, onBack, onStyle, onCreate, store, saved, onSaved }: {
+  /** Empezar otro overlay desde cero: vuelve a la galería. */
+  onCreate: () => void;
+  kind: Kind;
+  origin: string;
+  onBack: () => void;
+  onStyle: (kind: Kind) => void;
+  store: SavedLinks;
+  /** Abierto desde Mis overlays: arranca con sus ajustes y guarda encima. */
+  saved: SavedLink | null;
+  onSaved: (link: SavedLink) => void;
+}) {
   const def = KIND_DEFS.get(kind)!;
+  // Lo guardado, leído UNA vez al abrir: los useState de abajo arrancan de acá.
+  const [target] = useState(() => (saved ? savedTarget(saved.path) : null));
+  const r = reader(target?.params ?? null);
+  const isEditing = Boolean(target);
 
   // Datos
   const [match, setMatch] = useState<PickedMatch | null>(null);
@@ -298,42 +509,43 @@ function Editor({ kind, origin, onBack, onStyle }: { kind: Kind; origin: string;
   const [tournament, setTournament] = useState<PickedTournament | null>(null);
   const [options, setOptions] = useState<Options | null>(null);
   const [optionsError, setOptionsError] = useState<string | null>(null);
-  const [round, setRound] = useState('');
-  const [phase, setPhase] = useState('');
-  const [group, setGroup] = useState('');
-  const [stat, setStat] = useState('');
-  const [limit, setLimit] = useState(10);
-  const [day, setDay] = useState('');
+  const [round, setRound] = useState(r.text('ronda'));
+  const [phase, setPhase] = useState(r.text('fase'));
+  const [group, setGroup] = useState(r.text('grupo'));
+  const [stat, setStat] = useState(r.text('stat'));
+  const [limit, setLimit] = useState(r.number('cantidad', 10));
+  const [day, setDay] = useState(r.text('fecha'));
   const [dayTournaments, setDayTournaments] = useState<PickedTournament[]>([]);
-  const [sport, setSport] = useState('');
-  const [liveOnly, setLiveOnly] = useState(false);
-  const [playerLink, setPlayerLink] = useState('');
-  const [newsLink, setNewsLink] = useState('');
-  const [bracketView, setBracketView] = useState<'llave' | 'columnas'>('llave');
-  const [side, setSide] = useState<'ambos' | 'local' | 'visita'>('ambos');
-  const [formView, setFormView] = useState<'auto' | 'cancha' | 'lista'>('auto');
+  const [sport, setSport] = useState(r.text('deporte'));
+  const [liveOnly, setLiveOnly] = useState(r.flag('vivo'));
+  const [playerLink, setPlayerLink] = useState(kind === 'jugador' ? r.text('id') : '');
+  const [newsLink, setNewsLink] = useState(kind === 'noticia' ? r.text('id') : '');
+  const [bracketView, setBracketView] = useState<'llave' | 'columnas'>(kind === 'playoff' ? r.oneOf('vista', ['llave', 'columnas'] as const, 'llave') : 'llave');
+  const [side, setSide] = useState<'ambos' | 'local' | 'visita'>(r.oneOf('lado', ['ambos', 'local', 'visita'] as const, 'ambos'));
+  const [formView, setFormView] = useState<'auto' | 'cancha' | 'lista'>(kind === 'formacion' ? r.oneOf('vista', ['auto', 'cancha', 'lista'] as const, 'auto') : 'auto');
 
   // Qué se ve
-  const [clockMode, setClockMode] = useState<'normal' | 'minutos' | 'oculto'>('normal');
-  const [showCards, setShowCards] = useState(true);
-  const [plates, setPlates] = useState(true);
-  const [subs, setSubs] = useState(false);
-  const [conversion, setConversion] = useState(true);
-  const [celebration, setCelebration] = useState<'marcador' | 'cinta'>('marcador');
-  const [showTries, setShowTries] = useState(false);
-  const [showPeriod, setShowPeriod] = useState(false);
-  const [header, setHeader] = useState(true);
-  const [title, setTitle] = useState('');
+  const [clockMode, setClockMode] = useState<'normal' | 'minutos' | 'oculto'>(r.oneOf('reloj', ['normal', 'minutos', 'oculto'] as const, 'normal'));
+  const [showCards, setShowCards] = useState(!r.off('tarjetas'));
+  const [plates, setPlates] = useState(!r.off('placas'));
+  const [subs, setSubs] = useState(r.flag('cambios'));
+  // La conversión va prendida por defecto; guardada, está prendida solo si quedó en la ruta.
+  const [conversion, setConversion] = useState(isEditing && kind !== 'partido' ? Boolean(r.get('conversion')) : true);
+  const [celebration, setCelebration] = useState<'marcador' | 'cinta'>(r.oneOf('festejo', ['marcador', 'cinta'] as const, 'marcador'));
+  const [showTries, setShowTries] = useState(r.flag('tries'));
+  const [showPeriod, setShowPeriod] = useState(r.flag('periodo'));
+  const [header, setHeader] = useState(!r.off('encabezado'));
+  const [title, setTitle] = useState(r.text('titulo'));
 
   // Colores y nombres (vacío = el del club)
-  const [homeColor, setHomeColor] = useState('');
-  const [awayColor, setAwayColor] = useState('');
-  const [homeName, setHomeName] = useState('');
-  const [awayName, setAwayName] = useState('');
+  const [homeColor, setHomeColor] = useState(r.color('local'));
+  const [awayColor, setAwayColor] = useState(r.color('visita'));
+  const [homeName, setHomeName] = useState(r.text('local_nombre'));
+  const [awayName, setAwayName] = useState(r.text('visita_nombre'));
   // Cómo se escribe cada club: siglas, nombre completo o automático (y el nombre, editable).
-  const [nameMode, setNameMode] = useState<NameMode>('auto');
-  const [homeFull, setHomeFull] = useState('');
-  const [awayFull, setAwayFull] = useState('');
+  const [nameMode, setNameMode] = useState<NameMode>(r.oneOf('nombres', ['auto', 'siglas', 'completo'] as const, 'auto'));
+  const [homeFull, setHomeFull] = useState(r.text('local_largo'));
+  const [awayFull, setAwayFull] = useState(r.text('visita_largo'));
 
   // Manual
   const [homeTeam, setHomeTeam] = useState<TeamInfo>({ name: 'Local', short: 'LOC', color: '#00a365', logo: null });
@@ -341,7 +553,12 @@ function Editor({ kind, origin, onBack, onStyle }: { kind: Kind; origin: string;
   const [homePlayers, setHomePlayers] = useState<string[]>([]);
   const [awayPlayers, setAwayPlayers] = useState<string[]>([]);
   const [manualSport, setManualSport] = useState<ManualSport>('rugby');
-  const [manualStyle, setManualStyle] = useState<Kind>('marcador');
+  const [manualStyle, setManualStyle] = useState<Kind>(() => {
+    const style = kind === 'manual-marcador' ? r.get('estilo') : null;
+    if (!style) return 'marcador';
+    if (style === 'tarjeta') return 'partido';
+    return KIND_DEFS.has(style as Kind) && isScoreboardStyle(style as Kind) ? (style as Kind) : 'marcador';
+  });
   const [manualTitle, setManualTitle] = useState('');
   const [manualClock, setManualClock] = useState<ReturnType<typeof sevensClockPatch>>(null);
   const [headline, setHeadline] = useState({ kicker: '', title: '', subtitle: '' });
@@ -349,33 +566,82 @@ function Editor({ kind, origin, onBack, onStyle }: { kind: Kind; origin: string;
   const [sponsorLayout, setSponsorLayout] = useState<'grilla' | 'banda' | 'esquina'>('grilla');
   const [sponsorSurface, setSponsorSurface] = useState<'oscuro' | 'claro'>('oscuro');
   const [sponsorHeading, setSponsorHeading] = useState('');
-  const [manual, setManual] = useState<ManualCreated | null>(null);
+  // Un manual guardado ya existe; su clave no se guarda en ningún lado (el panel va con el link de cuando se creó).
+  const [manual, setManual] = useState<ManualCreated | null>(() => (isManual(kind) && target?.routeId ? { id: target.routeId, key: '', kind: kind === 'manual-titular' ? 'titular' : 'marcador' } : null));
   const [manualError, setManualError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [loadingMatch, setLoadingMatch] = useState(false);
 
   // Ubicación y tipografía
   const defaultPosition = kind === 'manual-titular' || kind === 'presentacion' ? 'abajo' : kind === 'manual-sponsors' ? 'auto' : 'centro';
-  const [position, setPosition] = useState(defaultPosition);
-  const [scale, setScale] = useState(1);
-  const [cycle, setCycle] = useState(false);
-  const [showFor, setShowFor] = useState(15);
-  const [hideFor, setHideFor] = useState(45);
-  const [rows, setRows] = useState(DEFAULT_ROWS[kind] ?? 6);
-  const [rotate, setRotate] = useState(10);
-  const [background, setBackground] = useState('');
+  const [position, setPosition] = useState(r.text('pos', defaultPosition));
+  const [scale, setScale] = useState(r.number('escala', 1));
+  const [cycle, setCycle] = useState(Boolean(r.get('mostrar')));
+  const [showFor, setShowFor] = useState(r.number('mostrar', 15));
+  const [hideFor, setHideFor] = useState(r.number('ocultar', 45));
+  const [rows, setRows] = useState(r.number('filas', DEFAULT_ROWS[kind] ?? 6));
+  const [rotate, setRotate] = useState(r.number('rotar', 10));
+  const [background, setBackground] = useState(r.text('fondo'));
   // Plan y marca: lo que el plan no permite, el generador no lo ofrece (y al aire se ignora).
   const plan = useContext(PlanContext);
   const rules = planRules(plan);
-  const [brand, setBrand] = useState<BrandPosition>('arriba-der');
-  const [logo, setLogo] = useState('');
-  const [fonts, setFonts] = useState<Record<FontRole, RoleFont>>({ ...ROLE_DEFAULTS });
-  const [customKind, setCustomKind] = useState<'google' | 'url' | 'local'>('google');
-  const [customValue, setCustomValue] = useState('');
-  const [customScale, setCustomScale] = useState(1);
+  const [brand, setBrand] = useState<BrandPosition>(r.oneOf('marca', ['arriba-der', 'abajo-der', 'no'] as const, 'arriba-der'));
+  const [logo, setLogo] = useState(r.text('logo'));
+  const [fonts, setFonts] = useState<Record<FontRole, RoleFont>>(() => {
+    const next = { ...ROLE_DEFAULTS };
+    for (const role of ROLES) {
+      const raw = r.get(role.param);
+      if (raw) next[role.id] = parseRoleFont(raw, ROLE_DEFAULTS[role.id]);
+    }
+    return next;
+  });
+  const savedFont = r.text('fuente');
+  const savedFontKind = savedFont.slice(0, Math.max(0, savedFont.indexOf(':')));
+  const [customKind, setCustomKind] = useState<'google' | 'url' | 'local'>(savedFontKind === 'url' || savedFontKind === 'local' ? savedFontKind : 'google');
+  const [customValue, setCustomValue] = useState(savedFont.includes(':') ? savedFont.slice(savedFont.indexOf(':') + 1) : '');
+  const [customScale, setCustomScale] = useState(r.number('fuente_escala', 1));
   const [copied, setCopied] = useState<string | null>(null);
 
-  useEffect(() => { setDay(todayKey()); }, []);
+  useEffect(() => { setDay((current) => current || todayKey()); }, []);
+
+  // Lo que la ruta guarda como id se muestra con nombre: partido, partidos, torneo(s).
+  useEffect(() => {
+    if (!target) return undefined;
+    let cancelled = false;
+    const params = reader(target.params);
+    const tournamentName = async (id: string): Promise<PickedTournament> => {
+      try {
+        const response = await fetch(`/api/overlay?tipo=opciones&torneo=${id}`);
+        const body = await response.json();
+        return { id, name: typeof body?.tournament?.name === 'string' ? body.tournament.name : 'Torneo', logo: null };
+      } catch {
+        return { id, name: 'Torneo', logo: null };
+      }
+    };
+    void (async () => {
+      if (isMatchKind(kind) && target.routeId) {
+        const picked = await describeMatch(target.routeId);
+        if (!cancelled) setMatch(picked);
+      }
+      if (kind === 'partidos') {
+        const picked = await Promise.all(params.list('ids').map((id) => describeMatch(id)));
+        if (!cancelled) setMatches(picked);
+      }
+      const torneo = params.get('torneo');
+      if (torneo && UUID_RE.test(torneo)) {
+        const picked = await tournamentName(torneo);
+        if (!cancelled) setTournament(picked);
+      }
+      const torneos = params.list('torneos').filter((id) => UUID_RE.test(id));
+      if (torneos.length) {
+        const picked = await Promise.all(torneos.map(tournamentName));
+        if (!cancelled) setDayTournaments(picked);
+      }
+    })();
+    return () => { cancelled = true; };
+    // Una sola vez, al abrir.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const tournamentId = tournament?.id ?? '';
   const validTournament = UUID_RE.test(tournamentId);
@@ -657,21 +923,26 @@ function Editor({ kind, origin, onBack, onStyle }: { kind: Kind; origin: string;
     <>
       <div className={styles.topbar}>
         <button type="button" className={styles.backButton} onClick={onBack}>
-          <span aria-hidden="true">←</span> Todos los gráficos
+          <span aria-hidden="true">←</span> {saved ? 'Mis overlays' : 'Todos los gráficos'}
         </button>
         <div className={styles.topTitle}>
-          <span>{def.group.label}</span>
-          <h1>{def.label}</h1>
+          <span>{saved ? `Editando · ${def.label}` : def.group.label}</span>
+          <h1>{saved ? saved.title : def.label}</h1>
         </div>
-        <button
-          type="button"
-          className={styles.topCopy}
-          onClick={() => document.getElementById('guardar')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
-          disabled={Boolean(missing)}
-          title={missing ?? undefined}
-        >
-          Guardar para OBS
-        </button>
+        <div className={styles.topActions}>
+          <button type="button" className={styles.topCreate} onClick={onCreate}>
+            <span aria-hidden="true">+</span> Crear<span className={styles.topCreateWord}>&nbsp;overlay</span>
+          </button>
+          <button
+            type="button"
+            className={styles.topCopy}
+            onClick={() => document.getElementById('guardar')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+            disabled={Boolean(missing)}
+            title={missing ?? undefined}
+          >
+            {saved ? 'Guardar cambios' : 'Guardar para OBS'}
+          </button>
+        </div>
       </div>
 
       <div className={styles.editor}>
@@ -976,11 +1247,17 @@ function Editor({ kind, origin, onBack, onStyle }: { kind: Kind; origin: string;
                       ? 'Ahora abrí el panel y subí los PNG en cada nivel (Title, Main, Sponsor, Acompañante). La vista previa se actualiza sola.'
                       : 'Desde el panel de control lo manejás: puntos, reloj, tarjetas y anotadores (o los textos del titular). Anda en el celular.'}
                   </p>
-                  <div className={styles.createActions}>
-                    <a className={styles.primary} href={panelUrl} target="_blank" rel="noreferrer">Abrir el panel de control</a>
-                    <button type="button" className={styles.secondary} onClick={() => void copy(panelUrl, 'panel')}>{copied === 'panel' ? 'Link copiado' : 'Copiar link del panel'}</button>
-                  </div>
-                  <p className={styles.hint}>El link del panel lleva la clave: quien lo tenga puede manejarlo. Guardalo.</p>
+                  {manual.key ? (
+                    <>
+                      <div className={styles.createActions}>
+                        <a className={styles.primary} href={panelUrl} target="_blank" rel="noreferrer">Abrir el panel de control</a>
+                        <button type="button" className={styles.secondary} onClick={() => void copy(panelUrl, 'panel')}>{copied === 'panel' ? 'Link copiado' : 'Copiar link del panel'}</button>
+                      </div>
+                      <p className={styles.hint}>El link del panel lleva la clave: quien lo tenga puede manejarlo. Guardalo.</p>
+                    </>
+                  ) : (
+                    <p className={styles.hint}>El panel se abre con el link que copiaste al crearlo: lleva la clave, y G22 no la guarda. Acá cambiás cómo se ve al aire.</p>
+                  )}
                 </>
               ) : (
                 <>
@@ -1180,7 +1457,7 @@ function Editor({ kind, origin, onBack, onStyle }: { kind: Kind; origin: string;
           <Canvas src={previewUrl} title="Vista previa del overlay" className={styles.bigCanvas} />
           <p className={styles.previewNote}>{missing ? `Muestra con datos de prueba. ${missing}` : 'Así sale al aire, con los datos reales.'}</p>
           <div id="guardar">
-            <SaveLink relative={relative} missing={missing} origin={origin} defaultTitle={defaultTitle} />
+            <SaveLink relative={relative} missing={missing} origin={origin} defaultTitle={defaultTitle} store={store} editing={saved} onSaved={onSaved} />
           </div>
           {!missing ? (
             <div className={styles.outActions}>

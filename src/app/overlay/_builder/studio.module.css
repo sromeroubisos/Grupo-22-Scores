@@ -1151,3 +1151,215 @@
 .logoActions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .logoActions label { cursor: pointer; }
 .card { position: relative; }
+
+/* ─── Barra propia: volver al sitio y las dos pestañas ─── */
+
+.siteNav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 calc(-1 * clamp(16px, 3vw, 40px));
+  padding: 10px clamp(16px, 3vw, 40px);
+  background: rgba(9, 11, 10, 0.72);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border-bottom: 1px solid var(--s-line);
+}
+
+.homeLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  padding: 0 12px 0 8px;
+  border-radius: 999px;
+  color: var(--s-dim);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 160ms, background 160ms;
+}
+
+.homeLink:hover { color: var(--s-ink); background: rgba(255, 255, 255, 0.05); }
+.homeLink:active { transform: scale(0.97); transition-duration: 80ms; }
+
+.homeLogo { height: 22px; width: auto; }
+
+.tabs {
+  display: inline-flex;
+  padding: 3px;
+  gap: 2px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--s-line);
+}
+
+.tab {
+  min-height: 36px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--s-dim);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 160ms, background 200ms var(--s-ease);
+}
+
+.tab:hover { color: var(--s-ink); }
+.tab:active { transform: scale(0.97); transition-duration: 80ms; }
+
+.tab[aria-selected='true'] {
+  background: var(--s-ink);
+  color: #090b0a;
+}
+
+/* ─── Una categoría por vez ─── */
+
+.segment {
+  display: flex;
+  gap: 6px;
+  margin-top: 28px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.segment::-webkit-scrollbar { display: none; }
+
+.segmentItem {
+  flex: none;
+  min-height: 38px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid var(--s-line-strong);
+  background: transparent;
+  color: var(--s-dim);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 160ms, background 160ms, border-color 160ms;
+}
+
+.segmentItem:hover { color: var(--s-ink); border-color: rgba(255, 255, 255, 0.3); }
+.segmentItem:active { transform: scale(0.97); transition-duration: 80ms; }
+
+.segmentItem[aria-selected='true'] {
+  background: rgba(0, 163, 101, 0.16);
+  border-color: rgba(43, 214, 131, 0.5);
+  color: var(--s-green-ink);
+}
+
+.segment + .shelf { margin-top: 22px; }
+
+@media (max-width: 640px) {
+  .homeLink span:last-child { display: none; }
+  .tab { padding: 0 12px; font-size: 13px; }
+}
+
+/* ─── Crear overlay, siempre a la vista en la barra ─── */
+
+.navRight {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.navCreate {
+  min-height: 40px;
+  padding: 0 16px;
+  gap: 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.navCreate span { font-size: 20px; line-height: 1; }
+
+.tabCount {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  margin-left: 6px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--s-green);
+  color: #03110a;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.loadingSaved {
+  padding: 48px 0;
+  color: var(--s-dim);
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .navCreate { padding: 0 12px; }
+  .navCreate b { display: none; }
+}
+
+/* En la galería: los ya guardados, a un toque. */
+.mineStrip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px 20px;
+  width: 100%;
+  margin: 0 0 18px;
+  padding: 14px 18px;
+  border: 1px solid rgba(43, 214, 131, 0.35);
+  border-radius: var(--s-radius);
+  background: rgba(0, 163, 101, 0.1);
+  color: var(--s-dim);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.45;
+  text-align: left;
+  cursor: pointer;
+  transition: background 120ms, transform 80ms;
+}
+
+.mineStrip:hover { background: rgba(0, 163, 101, 0.16); }
+.mineStrip:active { transform: scale(0.99); }
+.mineStrip b { display: block; color: var(--s-ink); font-size: 15px; }
+.mineStripCta { color: var(--s-green-ink); font-weight: 800; white-space: nowrap; }
+
+/* Editor: crear otro overlay, al lado de guardar (la barra queda fija arriba). */
+.topActions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.topCreate {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 42px;
+  padding: 0 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(43, 214, 131, 0.55);
+  background: rgba(0, 163, 101, 0.14);
+  color: var(--s-green-ink);
+  font-weight: 800;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 120ms, transform 80ms;
+}
+
+.topCreate:hover { background: rgba(0, 163, 101, 0.24); }
+.topCreate:active { transform: scale(0.97); }
+.topCreate > span:first-child { font-size: 20px; line-height: 1; }
+
+@media (max-width: 640px) {
+  .topCreateWord { display: none; }
+  .topCreate { padding: 0 12px; }
+}

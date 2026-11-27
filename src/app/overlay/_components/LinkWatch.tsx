@@ -3,52 +3,58 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import type { LinkGate } from '../_lib/linkGate';
 import type { BrandPosition } from '@/lib/overlay/overlayPlan';
+import { linkAirPath } from '@/lib/overlay/overlayLinks';
 import styles from './linkNotice.module.css';
 
 /**
  * Lo que envuelve a cada página al aire.
  *
- * Con un enlace guardado, vigila su vencimiento mientras OBS lo tiene abierto:
- * al llegar la hora pregunta al servidor; si el dueño lo renovó sigue con la
- * fecha nueva, si no, apaga el gráfico y muestra el aviso. Si la consulta falla
- * (sin red), sigue al aire y reintenta: un corte no apaga una transmisión.
+ * Con un enlace guardado, pregunta al servidor cada medio minuto mientras OBS
+ * lo tiene abierto:
+ *   - si el dueño lo EDITÓ, se recarga con la configuración nueva (misma URL en OBS);
+ *   - si venció, apaga el gráfico y muestra el aviso; si después lo renuevan, vuelve;
+ *   - si lo borraron, el aviso de enlace inexistente.
+ * Si la consulta falla (sin red), sigue al aire y reintenta: un corte no apaga
+ * una transmisión.
  */
 
-const MAX_TIMER_MS = 6 * 60 * 60 * 1000;
+const POLL_MS = 30_000;
 
 export default function LinkWatch({ gate, brand = 'arriba-der', children }: { gate: LinkGate; brand?: BrandPosition; children: ReactNode }) {
   const token = gate.status === 'ok' ? gate.token : null;
-  const [expiresAt, setExpiresAt] = useState(gate.status === 'ok' ? gate.expiresAt : null);
-  const [expired, setExpired] = useState(false);
+  const path = gate.status === 'ok' ? gate.path ?? null : null;
+  const [gone, setGone] = useState<'vencido' | 'inexistente' | null>(null);
 
   useEffect(() => {
-    if (!token || !expiresAt || expired) return;
+    if (!token) return;
     let cancelled = false;
     let timer = 0;
     const check = async () => {
-      const left = Date.parse(expiresAt) - Date.now();
-      if (left > 0) {
-        timer = window.setTimeout(() => void check(), Math.min(left + 1000, MAX_TIMER_MS));
-        return;
-      }
       try {
         const response = await fetch(`/api/overlay/enlaces/estado?t=${encodeURIComponent(token)}`, { cache: 'no-store' });
         if (cancelled) return;
-        if (response.status === 404) { setExpired(true); return; }
-        const body = (await response.json().catch(() => null)) as { expiresAt?: string } | null;
-        if (response.ok && body?.expiresAt && Date.parse(body.expiresAt) > Date.now()) { setExpiresAt(body.expiresAt); return; }
-        if (response.ok) { setExpired(true); return; }
+        if (response.status === 404) {
+          setGone('inexistente');
+        } else if (response.ok) {
+          const body = (await response.json().catch(() => null)) as { expiresAt?: string; path?: string } | null;
+          if (cancelled) return;
+          if (body?.path && path && body.path !== path) {
+            window.location.replace(linkAirPath(body.path, token));
+            return;
+          }
+          if (body?.expiresAt) setGone(Date.parse(body.expiresAt) > Date.now() ? null : 'vencido');
+        }
       } catch {
-        // Sin red: se reintenta.
+        // Sin red: sigue al aire y se reintenta.
       }
-      if (!cancelled) timer = window.setTimeout(() => void check(), 60_000);
+      if (!cancelled) timer = window.setTimeout(() => void check(), POLL_MS);
     };
-    void check();
+    timer = window.setTimeout(() => void check(), POLL_MS);
     return () => { cancelled = true; window.clearTimeout(timer); };
-  }, [token, expiresAt, expired]);
+  }, [token, path]);
 
   if (gate.status !== 'ok') return <LinkNotice status={gate.status} />;
-  if (expired) return <LinkNotice status="vencido" />;
+  if (gone) return <LinkNotice status={gone} />;
   return (
     <>
       {children}

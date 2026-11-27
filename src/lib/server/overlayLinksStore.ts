@@ -75,8 +75,12 @@ export async function insertUserLink(userId: string, link: { title: string; kind
   return toLink(data as Row);
 }
 
-/** Cambios del dueño: renovar (otros 15 días desde HOY, mismo token) y/o renombrar. */
-export async function updateUserLink(userId: string, id: string, patch: { renew?: boolean; title?: string }): Promise<SavedLink | null> {
+/**
+ * Cambios del dueño: renovar (otros 15 días desde HOY, mismo token), renombrar
+ * y/o EDITAR (otra ruta con el mismo token: la URL de OBS no cambia y la página
+ * al aire se pasa sola a la configuración nueva).
+ */
+export async function updateUserLink(userId: string, id: string, patch: { renew?: boolean; title?: string; path?: string; kind?: string }): Promise<SavedLink | null> {
   const now = Date.now();
   const update: Record<string, string> = {};
   if (patch.renew) {
@@ -84,6 +88,8 @@ export async function updateUserLink(userId: string, id: string, patch: { renew?
     update.expires_at = linkExpiry(now);
   }
   if (patch.title) update.title = patch.title;
+  if (patch.path) update.path = patch.path;
+  if (patch.kind) update.kind = patch.kind;
   if (!Object.keys(update).length) return null;
   const { data, error } = await createAdminClient()
     .from('overlay_links')

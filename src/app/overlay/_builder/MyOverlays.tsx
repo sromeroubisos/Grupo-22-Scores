@@ -2,15 +2,17 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { LINK_TTL_DAYS, linkAirPath, linkStatus, linksSummary, normalizeLinkPath, type SavedLink } from '@/lib/overlay/overlayLinks';
+import { KIND_DEFS } from './catalog';
+import { savedTarget } from './fromPath';
 import styles from './studio.module.css';
 import own from './mine.module.css';
 
 /**
  * "Mis overlays": los enlaces guardados para OBS / vMix, con su vencimiento.
  *
- * Cada enlace vale 15 días desde que se guarda o se renueva. Renovar mantiene la
- * MISMA URL: no hay que tocar la fuente en OBS. El aviso de arriba cuenta los
- * que vencen en 3 días o menos y los ya vencidos.
+ * Cada enlace vale 15 días desde que se guarda o se renueva. Renovar y EDITAR
+ * mantienen la MISMA URL: no hay que tocar la fuente en OBS. El aviso de arriba
+ * cuenta los que vencen en 3 días o menos y los ya vencidos.
  */
 
 const dateFmt = new Intl.DateTimeFormat('es-AR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' });
@@ -39,13 +41,15 @@ const offsetFrom = (body: Record<string, unknown>) => {
   return Number.isFinite(server) ? server - Date.now() : 0;
 };
 
-function useSavedLinks({ list }: { list: boolean }) {
+export type SavedLinks = ReturnType<typeof useSavedLinks>;
+
+/** La lista vive en el estudio: la pestaña la muestra con su cantidad y el editor guarda encima. */
+export function useSavedLinks() {
   const [links, setLinks] = useState<SavedLink[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [offset, setOffset] = useState(0);
 
   useEffect(() => {
-    if (!list) return;
     let cancelled = false;
     call('/api/overlay/enlaces')
       .then((body) => {
@@ -59,18 +63,22 @@ function useSavedLinks({ list }: { list: boolean }) {
         setLinks([]);
       });
     return () => { cancelled = true; };
-  }, [list]);
+  }, []);
 
   const save = useCallback(async (path: string, title: string) => {
     const body = await call('/api/overlay/enlaces', { method: 'POST', body: JSON.stringify({ path, title }) });
     setOffset(offsetFrom(body));
-    return body.link as SavedLink;
+    const link = body.link as SavedLink;
+    setLinks((current) => [link, ...(current ?? []).filter((item) => item.id !== link.id)]);
+    return link;
   }, []);
 
   const patch = useCallback(async (id: string, payload: Record<string, unknown>) => {
     const body = await call(`/api/overlay/enlaces/${id}`, { method: 'PATCH', body: JSON.stringify(payload) });
+    setOffset(offsetFrom(body));
     const link = body.link as SavedLink;
     setLinks((current) => (current ?? []).map((item) => (item.id === id ? link : item)));
+    return link;
   }, []);
 
   const remove = useCallback(async (id: string) => {
@@ -90,17 +98,23 @@ async function copyText(text: string) {
   }
 }
 
-/* ─────────────── la lista, en la galería ─────────────── */
+/** Qué gráfico es, para la lista: "Bloques grandes", "Tabla"… */
+export function linkKindLabel(path: string): string {
+  const kind = savedTarget(path)?.kind;
+  return kind ? KIND_DEFS.get(kind)?.label ?? 'Overlay' : 'Overlay manual';
+}
 
-export function MyOverlays({ origin }: { origin: string }) {
-  const { links, error, offset, patch, remove } = useSavedLinks({ list: true });
+/* ─────────────── la lista, en la pestaña ─────────────── */
+
+export function MyOverlays({ origin, store, onCreate, onEdit }: { origin: string; store: SavedLinks; onCreate: () => void; onEdit: (link: SavedLink) => void }) {
+  const { links, error, offset, patch, remove } = store;
   const now = useNow(offset);
   const [copied, setCopied] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
   const [confirming, setConfirming] = useState<string | null>(null);
 
-  if (links === null) return null;
+  if (links === null) return <p className={own.empty} role="status">Cargando tus overlays…</p>;
   const summary = linksSummary(links, now);
 
   const run = async (id: string, action: () => Promise<unknown>) => {
@@ -124,9 +138,14 @@ export function MyOverlays({ origin }: { origin: string }) {
 
   return (
     <section className={`${styles.shelf} ${own.mine}`} aria-labelledby="mis-overlays">
-      <div className={styles.shelfHead}>
-        <h2 id="mis-overlays">Mis overlays</h2>
-        <p>Los enlaces que guardaste para OBS y vMix. Cada uno vale {LINK_TTL_DAYS} días; renovarlo no cambia la URL.</p>
+      <div className={own.head}>
+        <div className={styles.shelfHead}>
+          <h2 id="mis-overlays">Mis overlays</h2>
+          <p>Los que creaste y guardaste para OBS y vMix. «Editar» los abre con sus ajustes; al guardar, la URL de OBS sigue siendo la misma. Cada uno vale {LINK_TTL_DAYS} días.</p>
+        </div>
+        <button type="button" className={`${styles.primary} ${own.create}`} onClick={onCreate}>
+          <span aria-hidden="true">+</span> Crear overlay
+        </button>
       </div>
 
       {summary.soon || summary.expired ? (
@@ -156,16 +175,17 @@ export function MyOverlays({ origin }: { origin: string }) {
                       if (value && value !== link.title) void run(link.id, () => patch(link.id, { title: value }));
                     }}
                   />
-                  <span className={own.path}>{link.path}</span>
+                  <span className={own.path}><b>{linkKindLabel(link.path)}</b> · {link.path}</span>
                 </div>
                 <span className={own.badge} data-state={status.state} title={`Vence el ${formatExpiry(link.expiresAt)}`}>
                   {status.label}
                 </span>
                 <div className={own.actions}>
+                  <button type="button" className={styles.primary} onClick={() => onEdit(link)}>Editar</button>
                   <button type="button" className={styles.secondary} onClick={() => void copy(link)} disabled={status.state === 'vencido'} title={status.state === 'vencido' ? 'Renovalo para volver a usarlo' : undefined}>
                     {copied === link.id ? 'Copiada' : 'Copiar URL'}
                   </button>
-                  <button type="button" className={status.state === 'vigente' ? styles.secondary : styles.primary} disabled={busy === link.id} onClick={() => void run(link.id, () => patch(link.id, { renovar: true }))}>
+                  <button type="button" className={styles.secondary} disabled={busy === link.id} onClick={() => void run(link.id, () => patch(link.id, { renovar: true }))}>
                     {busy === link.id ? 'Renovando…' : `Renovar ${LINK_TTL_DAYS} días`}
                   </button>
                   {confirming === link.id ? (
@@ -182,7 +202,10 @@ export function MyOverlays({ origin }: { origin: string }) {
           })}
         </ul>
       ) : (
-        <p className={own.empty}>Todavía no guardaste ninguno. Elegí un gráfico, personalizalo y tocá «Guardar y copiar».</p>
+        <div className={own.empty}>
+          <p>Todavía no guardaste ninguno. Elegí un gráfico, personalizalo y tocá «Guardar y copiar».</p>
+          <button type="button" className={styles.primary} onClick={onCreate}>Crear mi primer overlay</button>
+        </div>
       )}
       {problem ? <p className={styles.error} role="alert">{problem}</p> : null}
     </section>
@@ -191,28 +214,46 @@ export function MyOverlays({ origin }: { origin: string }) {
 
 /* ─────────────── guardar, en el editor ─────────────── */
 
-export function SaveLink({ relative, missing, origin, defaultTitle }: { relative: string; missing: string | null; origin: string; defaultTitle: string }) {
-  const { save, offset } = useSavedLinks({ list: false });
+/**
+ * Guardar desde el editor. Con `editing` (se abrió desde Mis overlays) guarda
+ * ENCIMA del mismo enlace: mismo token, misma URL en OBS, y la página al aire
+ * se pasa sola a la configuración nueva en menos de un minuto.
+ */
+export function SaveLink({ relative, missing, origin, defaultTitle, store, editing, onSaved }: {
+  relative: string;
+  missing: string | null;
+  origin: string;
+  defaultTitle: string;
+  store: SavedLinks;
+  editing: SavedLink | null;
+  onSaved: (link: SavedLink) => void;
+}) {
+  const { save, patch, offset } = store;
   const now = useNow(offset);
-  const [title, setTitle] = useState('');
-  const [saved, setSaved] = useState<SavedLink | null>(null);
+  const [title, setTitle] = useState(editing?.title ?? '');
+  const [saved, setSaved] = useState<SavedLink | null>(editing);
   const [saving, setSaving] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
   // Lo guardado es ESTA configuración: si cambia algo, hay que guardar de nuevo.
-  const current = saved && saved.path === normalizeLinkPath(relative) ? saved : null;
-  const airUrl = current ? `${origin}${linkAirPath(current.path, current.token)}` : '';
+  const sameTitle = !saved || !title.trim() || title.trim() === saved.title;
+  const current = saved && saved.path === normalizeLinkPath(relative) && sameTitle ? saved : null;
+  const airUrl = saved ? `${origin}${linkAirPath(saved.path, saved.token)}` : '';
+  const pending = Boolean(saved) && !current;
 
   const flash = () => { setCopied(true); window.setTimeout(() => setCopied(false), 1800); };
 
-  const saveAndCopy = async () => {
-    if (current) { if (await copyText(airUrl)) flash(); return; }
+  const persist = async (asNew: boolean) => {
+    if (current && !asNew) { if (await copyText(airUrl)) flash(); return; }
     setSaving(true);
     setProblem(null);
     try {
-      const link = await save(relative, title.trim() || defaultTitle);
+      const link = saved && !asNew
+        ? await patch(saved.id, { path: relative, title: title.trim() || saved.title })
+        : await save(relative, title.trim() || defaultTitle);
       setSaved(link);
+      onSaved(link);
       if (await copyText(`${origin}${linkAirPath(link.path, link.token)}`)) flash();
     } catch (failure: unknown) {
       setProblem(failure instanceof Error ? failure.message : 'No se pudo guardar.');
@@ -221,19 +262,27 @@ export function SaveLink({ relative, missing, origin, defaultTitle }: { relative
     }
   };
 
+  const label = saving ? 'Guardando…' : copied ? 'Copiada' : current ? 'Copiar' : saved ? 'Guardar cambios' : 'Guardar y copiar';
+
   return (
     <div className={own.save}>
+      {editing ? <p className={own.editing}>Editando <b>{editing.title}</b>. Al guardar, la URL de OBS sigue siendo la misma.</p> : null}
       <label className={own.saveField}>
         <span>Nombre en Mis overlays</span>
         <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={defaultTitle} maxLength={120} disabled={Boolean(missing)} />
       </label>
       <div className={styles.urlRow}>
-        <input className={styles.url} readOnly value={airUrl} placeholder={missing ? 'La URL aparece acá' : saved ? 'Cambiaste ajustes: guardalo de nuevo' : 'Guardalo para tener la URL de OBS'} onFocus={(e) => e.currentTarget.select()} aria-label="URL del overlay para OBS o vMix" />
-        <button type="button" className={styles.primary} onClick={() => void saveAndCopy()} disabled={Boolean(missing) || saving} title={missing ?? undefined}>
-          {saving ? 'Guardando…' : copied ? 'Copiada' : current ? 'Copiar' : 'Guardar y copiar'}
+        <input className={styles.url} readOnly value={airUrl} placeholder={missing ? 'La URL aparece acá' : 'Guardalo para tener la URL de OBS'} onFocus={(e) => e.currentTarget.select()} aria-label="URL del overlay para OBS o vMix" />
+        <button type="button" className={styles.primary} onClick={() => void persist(false)} disabled={Boolean(missing) || saving} title={missing ?? undefined}>
+          {label}
         </button>
       </div>
-      {current ? (
+      {pending ? (
+        <p className={own.pendingNote}>
+          Cambiaste ajustes. «Guardar cambios» los pasa al aire con la misma URL, en menos de un minuto.{' '}
+          <button type="button" className={own.asNew} onClick={() => void persist(true)} disabled={Boolean(missing) || saving}>O guardalo como un overlay nuevo</button>
+        </p>
+      ) : current ? (
         <p className={own.savedNote}>
           Guardado en Mis overlays. <b>{linkStatus(current.expiresAt, now).label}</b> ({formatExpiry(current.expiresAt)}). Renovalo desde la lista y la URL sigue siendo la misma.
         </p>

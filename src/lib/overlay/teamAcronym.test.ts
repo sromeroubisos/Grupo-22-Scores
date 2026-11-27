@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { teamAcronym, teamLabels } from './teamAcronym.ts';
+import { marqueeName, teamAcronym, teamLabels } from './teamAcronym.ts';
 
 test('la sigla corta que ya trae el club se respeta', () => {
   assert.equal(teamAcronym('Club Atlético San Isidro', 'CASI'), 'CASI');
@@ -31,4 +31,14 @@ test('nombres raros no rompen', () => {
   assert.equal(teamAcronym(''), '');
   assert.equal(teamAcronym(null, null), '');
   assert.equal(teamAcronym('C.A.S.I.'), 'CAS');
+});
+
+test('los estilos anchos no muestran un nombre que el CSS va a cortar', () => {
+  // La categoría y el "7s" sobran en un marcador.
+  assert.equal(marqueeName('Belgrano Athletic 7s', 'Belgrano Ath.'), 'BELGRANO ATHLETIC');
+  assert.equal(marqueeName('Club Newman M19 "A"', 'Newman M19 "A"'), 'CLUB NEWMAN');
+  // Si igual no entra, el nombre corto del club, también sin la categoría.
+  assert.equal(marqueeName('Los Tordos Rugby Club M19 "A"', 'Los Tordos M19 "A"'), 'LOS TORDOS');
+  // En modo automático los anchos usan esa versión.
+  assert.equal(teamLabels('auto', null, 'San Isidro Club 7s', 'SIC').wide, 'SAN ISIDRO CLUB');
 });
