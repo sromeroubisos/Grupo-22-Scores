@@ -609,9 +609,14 @@ export function topStats(stats: Record<string, StatLine> | undefined, by: StatBy
  * iguales, muerte súbita.
  */
 export function simulate(a: string, b: string, knockout: boolean, homeAdv = knockout ? 0 : HOME_ADV): [number, number] {
-    const pa = 1 / (1 + 10 ** ((ratingOf(b) - ratingOf(a) - homeAdv) / 18));
-    const ta = poisson(1 + 4 * pa);
-    const tb = poisson(1 + 4 * (1 - pa));
+    const gap = ratingOf(b) - ratingOf(a) - homeAdv;
+    const pa = 1 / (1 + 10 ** (gap / 18));
+    // Cada uno arranca con un try "de piso" que no depende del nivel: entre parejos (hasta 10 de
+    // diferencia) es el de siempre, pero se achica con la distancia. Si no, un club de la Regional le
+    // ganaba a uno de Segunda (29 puntos más) 1 de cada 23 veces; así, menos de 1 de cada 150.
+    const floor = Math.max(0.15, 1 - 0.85 * Math.min(1, (Math.abs(gap) / 25) ** 1.5));
+    const ta = poisson(floor + (5 - 2 * floor) * pa);
+    const tb = poisson(floor + (5 - 2 * floor) * (1 - pa));
     const pts = (t: number) => {
         let sc = t * 5;
         for (let i = 0; i < t; i++) if (Math.random() < 0.65) sc += 2;

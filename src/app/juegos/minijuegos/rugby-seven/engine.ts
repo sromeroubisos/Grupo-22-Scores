@@ -270,7 +270,10 @@ function colorDistance(a: string, b: string): number {
 function withRating(base: DiffParams, cpuRating: number, userRating: number): DiffParams {
     // Manda la DIFERENCIA entre los dos: Perú contra Brasil es cuesta arriba aunque los dos estén lejos
     // de la elite. El nivel absoluto del rival suma un poco (un clásico entre potencias pide más).
-    const f = clamp((cpuRating - userRating) / 14 + (cpuRating - 62) / 45, -1, 1);
+    // Más de 20 de diferencia (la Regional contra un club de Primera): el rival sigue creciendo un poco
+    // más allá del tope, para que la sorpresa sea rara y no un partido como cualquier otro.
+    const far = clamp((cpuRating - userRating - 20) / 20, 0, 0.6);
+    const f = clamp((cpuRating - userRating) / 14 + (cpuRating - 62) / 45, -1, 1) + far;
     return {
         ...base,
         cpuRun: base.cpuRun + f * 0.9,
@@ -1221,10 +1224,12 @@ export class SevenMatch {
         const ru = this.cfg.home.rating ?? 70;
         const rc = cpuRatingFor(this.cfg.difficulty, this.cfg.away.rating);
         const bias: Record<Difficulty, number> = { 'muy-facil': 0.25, facil: 0.1, normal: -0.05, dificil: -0.12, leyenda: -0.18, extremo: -0.22 };
-        const model = clamp(1 / (1 + 10 ** ((rc - ru) / 18)) + bias[this.cfg.difficulty], 0.08, 0.92);
+        // La dificultad ayuda entre parejos; contra un rival muy superior casi no cuenta (no hay fácil que alcance).
+        const gapK = 1 - clamp(Math.abs(rc - ru) / 30, 0, 1);
+        const model = clamp(1 / (1 + 10 ** ((rc - ru) / 18)) + bias[this.cfg.difficulty] * gapK, 0.02, 0.98);
         // Cómo venía el partido: pesa, sin mandar.
         const played = (this.score[0] + 3) / (this.score[0] + this.score[1] + 6);
-        const share = clamp(model * 0.65 + played * 0.35, 0.08, 0.92);
+        const share = clamp(model * 0.65 + played * 0.35, 0.03, 0.97);
         const teams = [this.cfg.home, this.cfg.away];
         const names = [playerNames(this.cfg.home), playerNames(this.cfg.away)];
         const pick = (w: number[]) => {
