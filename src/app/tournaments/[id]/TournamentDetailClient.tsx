@@ -1698,16 +1698,17 @@ function buildDbPlayoffDraw(dbData: TournamentInitialData, preferredPhaseId?: st
             match_id: match.id,
             home_participant: null,
             away_participant: null,
+            // Sin club todavía, el cruce dice de dónde sale ("1º Copa de Oro") en vez de "TBD".
             home_team: match.home ? {
                 id: match.home.id,
                 name: match.home.name || 'Local',
                 logo: match.home.logo_url || '',
-            } : null,
+            } : match.home_source_label ? { id: null, name: String(match.home_source_label), logo: '' } : null,
             away_team: match.away ? {
                 id: match.away.id,
                 name: match.away.name || 'Visitante',
                 logo: match.away.logo_url || '',
-            } : null,
+            } : match.away_source_label ? { id: null, name: String(match.away_source_label), logo: '' } : null,
             score_home: finished && hasNumericScore ? scoreHome : null,
             score_away: finished && hasNumericScore ? scoreAway : null,
             winner_id: winnerId,
