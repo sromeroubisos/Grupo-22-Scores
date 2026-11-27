@@ -1811,6 +1811,8 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
             || Boolean(matchBackgroundUpload?.src || (data as MatchStatsData).backgroundImage?.trim())
             // La base del torneo trae su versión SIN FOTO: el editorial sale igual.
             || (tournamentBaseActive && matchExportMode === 'result')
+            // El resultado editorial de G22 Base sale sin foto: fondo transparente, la base adelante.
+            || (matchExportLayout === 'editorial4x5' && matchExportMode === 'result' && visualFamily === 'g22Base')
         : false;
     const isEditorialGradientMode = template === 'matchStats' && matchExportLayout === 'editorial4x5';
     // La placa clasica del partido: la unica pieza con degradado propio.
@@ -2445,7 +2447,8 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                     const backgroundImage = baseLayers?.backgroundImage || uploadedPhoto;
                     const scheduledEditorialWithoutPhoto = (visualFamily === 'posterV3' || visualFamily === 'g22Base' || visualFamily === 'impactoV4' || visualFamily === 'fanV5')
                         && (matchData.status === 'scheduled' || (matchData.mainTitle || '').trim().toLowerCase() === 'horario');
-                    if (!backgroundImage && !scheduledEditorialWithoutPhoto) {
+                    const transparentEditorialResult = visualFamily === 'g22Base' && matchData.status !== 'scheduled';
+                    if (!backgroundImage && !scheduledEditorialWithoutPhoto && !transparentEditorialResult) {
                         throw new Error('Subi una foto de fondo para usar el layout editorial 4:5');
                     }
                     const editorialMatchData: MatchStatsData = {
@@ -9589,13 +9592,18 @@ async function drawMatchEditorialResult(
         ...sponsors.map((sponsor) => loadImage(sponsor.logo || '')),
     ]);
 
-    if (!backgroundImage) {
+    if (backgroundImageSrc && !backgroundImage) {
         throw new Error('No se pudo cargar la foto de fondo');
     }
 
-    ctx.fillStyle = bgColor;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    drawCoverImage(ctx, canvas, backgroundImage, { focusX: 0.56, focusY: 0.4 });
+    if (backgroundImage) {
+        ctx.fillStyle = bgColor;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        drawCoverImage(ctx, canvas, backgroundImage, { focusX: 0.56, focusY: 0.4 });
+    } else {
+        // Sin foto el fondo queda transparente (PNG con alfa): la base y el marcador van adelante.
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
     const overlayTop = canvas.height * (format.height > format.width ? 0.61 : 0.58);
 
     ctx.save();
@@ -9647,7 +9655,8 @@ async function drawMatchEditorialResult(
     const gradientStartY = Math.max(Math.round(titleY - editorialPreset.titleFontSize * 0.95), Math.round(overlayTop - 16));
     const usesUploadedGradientImage = Boolean(gradientImage);
 
-    if (!usesUploadedGradientImage) {
+    // Las sombras de arriba y la viñeta oscurecen la FOTO: sin foto el fondo queda limpio.
+    if (!usesUploadedGradientImage && backgroundImage) {
         const topShade = ctx.createLinearGradient(0, 0, 0, canvas.height * 0.24);
         topShade.addColorStop(0, 'rgba(0, 0, 0, 0.78)');
         topShade.addColorStop(0.54, 'rgba(0, 0, 0, 0.18)');
@@ -9741,7 +9750,7 @@ async function drawMatchEditorialResult(
         drawEditorialGradientTexture(ctx, canvas, textureImage, gradientStartY);
     }
 
-    if (!usesUploadedGradientImage) {
+    if (!usesUploadedGradientImage && backgroundImage) {
         const centerVignette = ctx.createRadialGradient(canvas.width / 2, canvas.height * 0.46, 110, canvas.width / 2, canvas.height * 0.66, canvas.width * 0.88);
         centerVignette.addColorStop(0, 'rgba(255,255,255,0)');
         centerVignette.addColorStop(1, 'rgba(2, 6, 10, 0.22)');
