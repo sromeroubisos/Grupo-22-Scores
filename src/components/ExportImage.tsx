@@ -26,6 +26,7 @@ import GuestExportInvite, { useGuestExportInvite } from '@/components/GuestExpor
 import { createClient } from '@/lib/supabase/client';
 import styles from './ExportButton.module.css';
 import { drawCordoba7, isCordoba7Template, isCordoba7Tournament } from '@/lib/exports/cordoba7';
+import { drawPava7, isPava7Template, isPava7Tournament } from '@/lib/exports/pava7';
 import { canUseOlivos7, drawOlivos7, isOlivos7Template, resolveOlivos7Edition, type Olivos7Edition } from '@/lib/exports/olivos7';
 import { resolveEditorialBaseLayers, resolveTournamentExportBase, tournamentBaseFromSrc } from '@/lib/exports/tournamentBases';
 
@@ -545,6 +546,7 @@ type ExportImagePreviewProps = {
     teamNameMode?: ExportTeamNameMode;
     olivos7Edition?: Olivos7Edition | null;
     cordoba7?: boolean;
+    pava7?: boolean;
     className?: string;
 };
 
@@ -1154,6 +1156,12 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
     const cordoba7 = isCordoba7Template(template)
         && user?.role !== 'super_admin'
         && isCordoba7Tournament(tournamentId ?? (liveData as { tournamentId?: string | number | null }).tournamentId);
+    // El Seven de la Pava (Córdoba Athletic) exporta con la estética de su cronograma —negro,
+    // serif roja, línea de tiempo—: misma regla que Córdoba 7, lo usan sus administradores y
+    // cualquiera que exporte el torneo; el administrador general sigue con su diseño activo.
+    const pava7 = isPava7Template(template)
+        && user?.role !== 'super_admin'
+        && isPava7Tournament(tournamentId ?? (liveData as { tournamentId?: string | number | null }).tournamentId);
     const guestInvite = useGuestExportInvite();
     // El diseno activo del panel es para quien gestiona algo. El resto de la gente
     // —el hincha logueado y el invitado— exporta siempre con Fan V5, la familia
@@ -2376,7 +2384,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
             setActiveCrestBackdropDark(getContrastColor(bgColor) === '#ffffff');
             const exportData = buildExportData(template, data, customTournamentName, selectedTimeZonePreset, teamNameMode);
 
-            if ((olivos7Edition && isOlivos7Template(template)) || (cordoba7 && isCordoba7Template(template))) {
+            if ((olivos7Edition && isOlivos7Template(template)) || (cordoba7 && isCordoba7Template(template)) || (pava7 && isPava7Template(template))) {
                 // Diseño Olivos 7 / Córdoba 7: respeta el formato elegido tal cual (posteo o historia).
                 const olivosConfig = FORMATS.find((item) => item.value === format)!;
                 canvas.width = olivosConfig.width;
@@ -2396,7 +2404,8 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                     // El título original trae la fase ("Copa de Oro - ..."); buildExportData lo pisa con el torneo.
                     olivosData = { ...(exportData as PlayoffBracketData), title: (data as PlayoffBracketData).title };
                 }
-                if (cordoba7 && isCordoba7Template(template)) await drawCordoba7(ctx, canvas, template, olivosData, { loadImage });
+                if (pava7 && isPava7Template(template)) await drawPava7(ctx, canvas, template, olivosData, { loadImage });
+                else if (cordoba7 && isCordoba7Template(template)) await drawCordoba7(ctx, canvas, template, olivosData, { loadImage });
                 else if (olivos7Edition && isOlivos7Template(template)) await drawOlivos7(ctx, canvas, template, olivosData, { edition: olivos7Edition, loadImage });
                 await downloadCanvas(canvas, buildExportFilename(filename, template, format));
                 setStatus('Listo');
@@ -4525,6 +4534,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                                         teamNameMode={teamNameMode}
                                         olivos7Edition={olivos7Edition}
                                         cordoba7={cordoba7}
+                                        pava7={pava7}
                                         className={styles.modalPreviewImage}
                                     />
                                 </div>
@@ -4585,6 +4595,7 @@ export function ExportImagePreview({
     teamNameMode = 'short',
     olivos7Edition = null,
     cordoba7 = false,
+    pava7 = false,
     className = '',
 }: ExportImagePreviewProps) {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -4612,6 +4623,7 @@ export function ExportImagePreview({
         teamNameMode,
         olivos7Edition,
         cordoba7,
+        pava7,
     };
     const latestOptionsRef = useRef<ExportPreviewRenderOptions>(renderOptions);
     latestOptionsRef.current = renderOptions;
@@ -4679,7 +4691,7 @@ export function ExportImagePreview({
         return () => {
             window.clearTimeout(timer);
         };
-    }, [customizationState, dailyMatchesTimeMode, teamNameMode, data, format, lineupExportLayout, lineupExportMode, matchExportLayout, matchExportMode, olivos7Edition, cordoba7, plateOptions, previewColors, standingsExportMode, template, visualFamily]);
+    }, [customizationState, dailyMatchesTimeMode, teamNameMode, data, format, lineupExportLayout, lineupExportMode, matchExportLayout, matchExportMode, olivos7Edition, cordoba7, pava7, plateOptions, previewColors, standingsExportMode, template, visualFamily]);
 
     // La primera pasada pinta con el lienzo todavia oculto: si el panel toma su alto
     // del propio lienzo (el laboratorio, una tarjeta suelta) mide unos pixeles y el
@@ -6176,6 +6188,7 @@ export type ExportPreviewRenderOptions = {
     teamNameMode?: ExportTeamNameMode;
     olivos7Edition?: Olivos7Edition | null;
     cordoba7?: boolean;
+    pava7?: boolean;
 };
 
 // Devuelve el lienzo dibujado, no un PNG: codificar 1080x1350 con toDataURL bloquea el
@@ -6224,6 +6237,7 @@ export async function renderMatchExportPreviewCanvas(
     teamNameMode = 'short',
         olivos7Edition = null,
         cordoba7 = false,
+        pava7 = false,
     } = options;
 
     applyTypographyConfig(
@@ -6299,7 +6313,7 @@ export async function renderMatchExportPreviewCanvas(
 
     const exportData = buildExportData(template, data, getDefaultTournamentName(template, data), findBestPresetByOffset(DEFAULT_TIMEZONE_OFFSET_MINUTES), teamNameMode);
 
-    if ((olivos7Edition && isOlivos7Template(template)) || (cordoba7 && isCordoba7Template(template))) {
+    if ((olivos7Edition && isOlivos7Template(template)) || (cordoba7 && isCordoba7Template(template)) || (pava7 && isPava7Template(template))) {
         const olivosConfig = FORMATS.find((item) => item.value === format)!;
         canvas.width = olivosConfig.width;
         canvas.height = olivosConfig.height;
@@ -6311,7 +6325,8 @@ export async function renderMatchExportPreviewCanvas(
             : template === 'playoffBracket'
             ? { ...(exportData as PlayoffBracketData), title: (data as PlayoffBracketData).title }
             : exportData;
-        if (cordoba7 && isCordoba7Template(template)) await drawCordoba7(ctx, canvas, template, olivosData, { loadImage });
+        if (pava7 && isPava7Template(template)) await drawPava7(ctx, canvas, template, olivosData, { loadImage });
+        else if (cordoba7 && isCordoba7Template(template)) await drawCordoba7(ctx, canvas, template, olivosData, { loadImage });
         else if (olivos7Edition && isOlivos7Template(template)) await drawOlivos7(ctx, canvas, template, olivosData, { edition: olivos7Edition, loadImage });
         return canvas;
     }

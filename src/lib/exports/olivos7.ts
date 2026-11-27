@@ -890,9 +890,9 @@ export async function drawOlivos7Standings(ctx: Ctx, canvas: HTMLCanvasElement, 
 // --- Cuadro ---
 
 type BracketSlot = { name: string; logo?: string; score: number | null; win: boolean; lost: boolean; id?: string | number };
-type BracketMatch = { a: BracketSlot | null; b: BracketSlot | null; when: string | null; played: boolean };
+export type BracketMatch = { a: BracketSlot | null; b: BracketSlot | null; when: string | null; played: boolean };
 
-function readBracketMatch(m: O7BracketMatchRaw | undefined): BracketMatch {
+export function readBracketMatch(m: O7BracketMatchRaw | undefined): BracketMatch {
     if (!m) return { a: null, b: null, when: null, played: false };
     const side = (team: O7BracketSide, part: O7BracketParticipant, score: unknown): BracketSlot | null => {
         const name = team?.name || part?.participant_name || '';
