@@ -16,6 +16,7 @@ import { makePlayer, regionLabel, type Player } from './career';
 import { defaultNames, nameFromSeed, nameFromText, type PlayerName } from './names';
 import { closeRound, createTour, finalRanking, groupStandings, ratingOf, triesOfScore, type TourDef, type TourState } from './tours';
 import type { Difficulty, Duration, SevenTeam } from './teams';
+import type { PlayerSkill } from './engine';
 
 /* ───────────────────────── la pirámide ───────────────────────── */
 
@@ -545,6 +546,24 @@ export function priceOf(p: Player, real = false): number {
 export function worldCeiling(r: { world?: McWorld }): number {
     const strongest = Math.max(...worldOf(r).pool.map((c) => ratingOf(c)));
     return 1 + (strongest - 40) / 6 + 0.8;
+}
+
+/**
+ * Las skills de los siete que salen a la cancha, para el partido jugado: los tuyos con las suyas (la
+ * moral suma un poco) y los rivales con un siete que sale de su nivel (siempre el mismo para cada club).
+ * Sin esto, en la cancha todos eran el jugador promedio y la Regional corría igual que la Primera.
+ */
+export function mcSkills(r: MiClubState, club: string): PlayerSkill[] {
+    const toSkill = (p: Player): PlayerSkill => {
+        const m = (p.m ?? 0) * 0.3;
+        const [spd, kick, tkl, sta] = p.s ?? [6, 6, 6, 6];
+        const c = (v: number) => Math.max(1, Math.min(10, v + m));
+        return { spd: c(spd), kick: c(kick), tkl: c(tkl), sta, kg: p.b?.[0], cm: p.b?.[1] };
+    };
+    if (club === MC_ME) return starters(r).map(toSkill);
+    const rand = seeded(`${club}:mi-club:siete`);
+    const center = 1 + (ratingOf(club) - 40) / 6;
+    return Array.from({ length: 7 }, (_, i) => toSkill(makePlayer(i, center + gauss(rand) * 0.4, 20 + Math.floor(rand() * 12), rand)));
 }
 
 /* ───────── progresión: topes por división y por temporada ───────── */

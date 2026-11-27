@@ -174,7 +174,7 @@ import { advanceIntl, compName, createIntl, intlBoosts, intlInvest, intlNames, i
 import { IntlRanking, IntlSeason, IntlSquad, IntlUnion, IntlYouth } from './IntlPanels';
 import { advanceSvns, createSvns, SVNS_LEGS, SVNS_PHASE_LABEL, svnsBoosts, svnsRegionName, svnsStartTier, svnsTable, svnsVerdict, TIER_LABEL } from './svns';
 import { CloudSync, markTutorialSeenInAccount, tutorialSeenInAccount, type CloudStatus } from './cloudSave';
-import { advanceMiClub, createMiClub, mcEnsureWorlds, LIB_NAME, levelDef, levelOf, liveMine, mcAfterRound, mcRegionLabel, mcRelease, mcSign, mcTrain, mcUpgrade, mcVerdict, myTeam, nacHowOf, phaseName, WORLDS, zoneName, type McRegion, type McWorld } from './miClub';
+import { advanceMiClub, createMiClub, mcEnsureWorlds, mcSkills, LIB_NAME, levelDef, levelOf, liveMine, mcAfterRound, mcRegionLabel, mcRelease, mcSign, mcTrain, mcUpgrade, mcVerdict, myTeam, nacHowOf, phaseName, WORLDS, zoneName, type McRegion, type McWorld } from './miClub';
 import { McArchive, McClubPanel, McCredits, McMarket, McPyramid, McSquad, McTourTables } from './MiClubPanels';
 import { useOfflineReady } from './offline';
 import { readLang, startTranslating, writeLang, type Lang } from './i18n';
@@ -1198,7 +1198,8 @@ export default function SevenGame({ musicSrc = null, menuMusicSrc = null }: { mu
         const r = tour.career;
         // De visitante en la fase regular, el local suma la localía.
         const away = r && tour.stage === 'grupos' && !nextIsHome(tour) ? { ...away0, rating: (away0.rating ?? 70) + HOME_ADV } : away0;
-        const skills: MatchConfig['skills'] = r ? [careerSkills(r, tour.me), careerSkills(r, opp)] : undefined;
+        // Cada jugador con lo suyo: en la carrera, el plantel del club; en Mi Club, tus pibes y el siete del rival según su nivel.
+        const skills: MatchConfig['skills'] = r ? [careerSkills(r, tour.me), careerSkills(r, opp)] : tour.miclub ? [mcSkills(tour.miclub, tour.me), mcSkills(tour.miclub, opp)] : undefined;
         play({ home, away, difficulty: tour.difficulty, minutes: tour.duration, suddenDeath: tour.stage === 'ko', skills }, 'tour');
     };
 
