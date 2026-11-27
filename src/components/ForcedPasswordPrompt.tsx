@@ -4,8 +4,19 @@ import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { Eye, EyeOff, KeyRound, Loader2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
-import { checkPassword } from '@/lib/auth/passwordPolicy';
 import { MUST_CHANGE_PASSWORD_FLAG } from '@/lib/auth/mustChangePassword';
+
+// Regla mínima y propia: este cartel no depende de la política de registro
+// para poder vivir en cualquier rama.
+function checkNewPassword(password: string, email: string | null): { ok: boolean; problems: string[] } {
+    const problems: string[] = [];
+    if (password.length < 8) problems.push('Tiene que tener al menos 8 caracteres.');
+    const local = email?.split('@')[0]?.toLowerCase();
+    if (local && local.length >= 3 && password.toLowerCase().includes(local)) {
+        problems.push('No puede contener tu email.');
+    }
+    return { ok: problems.length === 0, problems };
+}
 
 /**
  * Cartel de primer ingreso para cuentas que dio de alta un super admin.
@@ -54,7 +65,7 @@ export default function ForcedPasswordPrompt() {
         };
     }, [supabase]);
 
-    const check = useMemo(() => checkPassword(password, { email }), [password, email]);
+    const check = useMemo(() => checkNewPassword(password, email), [password, email]);
 
     if (!mustChange || SKIP_PREFIXES.some((p) => pathname.startsWith(p))) return null;
 
