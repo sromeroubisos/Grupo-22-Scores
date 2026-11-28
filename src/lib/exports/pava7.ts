@@ -485,7 +485,10 @@ async function drawMatch(ctx: Ctx, canvas: HTMLCanvasElement, data: O7MatchData,
 
 async function drawDaily(ctx: Ctx, canvas: HTMLCanvasElement, data: O7DailyData, o: Pava7DrawOptions) {
     const matches = data.matches || [];
-    const f = await frame(ctx, canvas, o, { title: 'Cronograma', sub: data.tournament || KICKER });
+    // Con marcador (jugado o en juego) la pieza es de RESULTADOS y el tanteador va entre los equipos.
+    const hasScore = (m: (typeof matches)[number]) => m.status !== 'scheduled' && m.homeScore != null && m.awayScore != null;
+    const results = matches.some(hasScore);
+    const f = await frame(ctx, canvas, o, { title: results ? 'Resultados' : 'Cronograma', sub: data.tournament || KICKER });
     const { L, R, story } = f;
     const logo = await loadAll(o, matches.flatMap((m) => [m.homeLogo, m.awayLogo]));
 
@@ -522,10 +525,17 @@ async function drawDaily(ctx: Ctx, canvas: HTMLCanvasElement, data: O7DailyData,
         }
         block.items.forEach((m, i) => {
             const cy = y + i * rowH + rowH / 2;
-            const played = m.status === 'finished' && m.homeScore != null && m.awayScore != null;
-            const big = played ? `${m.homeScore}-${m.awayScore}` : hourOf(m.time) || '--:--';
+            const scored = hasScore(m);
+            const played = scored && m.status === 'finished';
+            // Los resultados traen solo la fecha (que ya está en el encabezado del día): sin hora,
+            // la columna dice el estado.
+            const hour = /\d{1,2}:\d{2}/.test(String(m.time || '')) ? hourOf(m.time) : '';
+            const stateLabel = played ? 'FIN' : m.status === 'live' ? 'VIVO' : 'HS';
+            const big = hour || (stateLabel === 'HS' ? '--:--' : stateLabel);
             const bw = text(ctx, big, L, cy, `${timeSize}px ${SERIF}`, RED, 'left', 0, timeColW - timeSize * 0.5);
-            text(ctx, played ? 'FT' : m.status === 'live' ? 'VIVO' : 'HS', L + bw + 8, cy + timeSize * 0.2, `600 ${Math.round(timeSize * 0.22)}px ${COND}`, RED, 'left', 1.5);
+            if (hour || stateLabel === 'HS') {
+                text(ctx, stateLabel, L + bw + 8, cy + timeSize * 0.2, `600 ${Math.round(timeSize * 0.22)}px ${COND}`, RED, 'left', 1.5);
+            }
             ctx.fillStyle = RED;
             ctx.beginPath();
             ctx.arc(tlX, cy, Math.max(6, rowH * 0.085), 0, Math.PI * 2);
@@ -533,9 +543,12 @@ async function drawDaily(ctx: Ctx, canvas: HTMLCanvasElement, data: O7DailyData,
 
             // Escudo · NOMBRE  vs  NOMBRE · escudo
             const nameFont = `500 ${Math.round(Math.min(story ? 40 : 32, rowH * 0.36))}px ${COND}`;
-            const vsFont = `600 ${Math.round(Math.min(story ? 24 : 20, rowH * 0.22))}px ${COND}`;
+            const mid = scored ? `${m.homeScore} - ${m.awayScore}` : 'VS';
+            const vsFont = scored
+                ? `${Math.round(Math.min(story ? 50 : 40, rowH * 0.46))}px ${SERIF}`
+                : `600 ${Math.round(Math.min(story ? 24 : 20, rowH * 0.22))}px ${COND}`;
             const avail = R - textX;
-            const vsW = measure(ctx, 'VS', vsFont, 2) + 28;
+            const vsW = measure(ctx, mid, vsFont, scored ? 0 : 2) + 28;
             const nameMax = (avail - vsW - (s + 14) * 2) / 2;
             const homeWin = played && (m.homeScore as number) > (m.awayScore as number);
             const awayWin = played && (m.awayScore as number) > (m.homeScore as number);
@@ -545,7 +558,7 @@ async function drawDaily(ctx: Ctx, canvas: HTMLCanvasElement, data: O7DailyData,
             ctx.globalAlpha = awayWin ? 0.5 : 1;
             x += text(ctx, club(m.homeTeam), x, cy, nameFont, CREAM, 'left', 2, nameMax);
             ctx.globalAlpha = 1;
-            text(ctx, 'VS', x + 14, cy, vsFont, RED, 'left', 2);
+            text(ctx, mid, x + 14, cy, vsFont, RED, 'left', scored ? 0 : 2);
             x += vsW;
             ctx.globalAlpha = homeWin ? 0.5 : 1;
             x += text(ctx, club(m.awayTeam), x, cy, nameFont, CREAM, 'left', 2, nameMax);
