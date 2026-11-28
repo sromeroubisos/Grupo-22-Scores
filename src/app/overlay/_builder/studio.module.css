@@ -1363,3 +1363,45 @@
   .topCreateWord { display: none; }
   .topCreate { padding: 0 12px; }
 }
+
+/* Marcador manual: de dónde salen los puntos, al traer los equipos de un partido. */
+.pointsSource {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+  padding-top: 10px;
+  border-top: 1px solid var(--s-line);
+}
+
+.pointsSource > span {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* El panel de control del manual, adentro del editor (ya creado). */
+.embeddedPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  scroll-margin-top: 90px;
+}
+
+.embeddedHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.embeddedHead p {
+  margin: 4px 0 0;
+}
+
+.embeddedHead a {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  font-weight: 500;
+}

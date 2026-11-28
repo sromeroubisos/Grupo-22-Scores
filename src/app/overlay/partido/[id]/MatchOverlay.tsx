@@ -17,7 +17,8 @@ import {
   type OverlayClock,
   type TeamCards,
 } from '@/lib/overlay/matchOverlayModel';
-import { manualToOverlayMatch, readManualState } from '@/lib/overlay/manualOverlay';
+import { manualToOverlayMatch, readManualState, resolveLinkedScore } from '@/lib/overlay/manualOverlay';
+import { g22ScoreOf } from '../../_components/g22Score';
 import { shotFromFreshEvents, shotView, type ShotClock, type ShotView } from '@/lib/overlay/shotClock';
 import { planRules } from '@/lib/overlay/overlayPlan';
 import { teamLabels } from '@/lib/overlay/teamAcronym';
@@ -320,9 +321,16 @@ export default function MatchOverlay({
           // Marcador manual: se relee cada segundo (lo maneja una persona en
           // vivo) y el reloj se corrige con la hora del servidor.
           const body = await response.json();
-          const state = readManualState('marcador', body.state);
+          const saved = readManualState('marcador', body.state);
           const serverNow = Date.parse(body.serverNow);
           const offset = Number.isFinite(serverNow) ? serverNow - (requestedAt + Date.now()) / 2 : 0;
+          // Vinculado a un partido de G22: los puntos salen de ahí, salvo una corrección a mano vigente.
+          const g22 = saved.link ? await g22ScoreOf(saved.link.matchId) : null;
+          if (cancelled) return;
+          const shown = resolveLinkedScore(saved, g22);
+          const state = saved.link
+            ? { ...saved, home: { ...saved.home, score: shown.home }, away: { ...saved.away, score: shown.away } }
+            : saved;
           ingest(manualToOverlayMatch(matchId, state, offset));
           setHidden(!state.visible);
           setFailure(null);

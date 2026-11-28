@@ -83,6 +83,21 @@ export interface ManualScoreState {
   gameId: string;
   /** Los OTROS partidos de este marcador, esperando para salir al aire (en orden). */
   queue: ManualGame[];
+  /** Partido de G22 del que salen los puntos (null = todo a mano). */
+  link: ManualLink | null;
+}
+
+/**
+ * Puntos de un partido de G22, con corrección a mano.
+ *
+ * Sin corrección (`seen` null) el marcador muestra lo que tiene G22. Cuando el
+ * operador corrige (anota, deshace o toca ±1), se guarda el resultado de G22 de
+ * ese momento en `seen`: mientras G22 siga igual manda lo cargado a mano; en
+ * cuanto G22 cambia (la carga se puso al día), vuelve a mandar G22.
+ */
+export interface ManualLink {
+  matchId: string;
+  seen: { home: number; away: number } | null;
 }
 
 /**
@@ -100,6 +115,7 @@ export interface ManualGame {
   away: ManualTeam;
   clock: ManualClock;
   events: ManualEvent[];
+  link: ManualLink | null;
 }
 
 /** Cuántos partidos entran en un marcador (el al aire + los que esperan). */
@@ -194,6 +210,7 @@ export function defaultManualState(kind: ManualKind): ManualState {
     events: [],
     gameId: 'g1',
     queue: [],
+    link: null,
   };
 }
 
@@ -289,6 +306,63 @@ function readItems(raw: unknown): HeadlineItem[] {
 
 const SPORTS: ManualSport[] = ['rugby', 'futbol', 'hockey', 'basquet', 'otro'];
 
+const MATCH_ID_RE = /^[A-Za-z0-9_:.-]{1,80}$/;
+
+function readScorePair(raw: unknown): { home: number; away: number } | null {
+  const source = rec(raw);
+  if (source.home === undefined || source.away === undefined) return null;
+  return { home: int(source.home, 0, 999, 0), away: int(source.away, 0, 999, 0) };
+}
+
+/** `null` desvincula; un objeto mezcla sobre el vínculo anterior. */
+function readLink(prev: ManualLink | null, raw: unknown): ManualLink | null {
+  if (raw === undefined) return prev;
+  if (raw === null) return null;
+  const source = rec(raw);
+  const matchId = source.matchId === undefined ? prev?.matchId : text(source.matchId, 80);
+  if (!matchId || !MATCH_ID_RE.test(matchId)) return null;
+  // Otro partido arranca sin corrección.
+  const sameMatch = prev?.matchId === matchId;
+  const seen = source.seen === undefined ? (sameMatch ? prev?.seen ?? null : null) : readScorePair(source.seen);
+  return { matchId, seen };
+}
+
+/**
+ * Qué resultado va al aire: el de G22 o el corregido a mano (ver `ManualLink`).
+ * Sin vínculo o sin el dato de G22 todavía, el cargado a mano.
+ */
+export function resolveLinkedScore(
+  state: Pick<ManualScoreState, 'home' | 'away' | 'link'>,
+  g22: { home: number; away: number } | null,
+): { home: number; away: number; source: 'manual' | 'g22' | 'corregido' } {
+  const manual = { home: state.home.score, away: state.away.score };
+  if (!state.link) return { ...manual, source: 'manual' };
+  if (!g22) return { ...manual, source: state.link.seen ? 'corregido' : 'manual' };
+  const seen = state.link.seen;
+  if (seen && seen.home === g22.home && seen.away === g22.away) return { ...manual, source: 'corregido' };
+  return { ...g22, source: 'g22' };
+}
+
+/**
+ * Antes de corregir: el resultado que se ve pasa a ser el cargado a mano, y se
+ * anota cómo estaba G22. Desde ahí, anotar o deshacer suma sobre lo que se ve.
+ */
+export function rebaseOnG22(state: ManualScoreState, g22: { home: number; away: number } | null): ManualScoreState {
+  if (!state.link || !g22) return state;
+  const shown = resolveLinkedScore(state, g22);
+  return {
+    ...state,
+    home: { ...state.home, score: shown.home },
+    away: { ...state.away, score: shown.away },
+    link: { ...state.link, seen: { home: g22.home, away: g22.away } },
+  };
+}
+
+/** Lo que manda el panel junto a una corrección: cómo ve el resultado de G22. */
+export function parseG22Score(raw: unknown): { home: number; away: number } | null {
+  return readScorePair(raw);
+}
+
 /** El estado guardado, leído con tolerancia (una fila vieja o rota no tumba el overlay). */
 export function readManualState(kind: 'titular', raw: unknown): ManualHeadlineState;
 export function readManualState(kind: 'sponsors', raw: unknown): ManualSponsorsState;
@@ -357,6 +431,7 @@ export function mergeManualState(kind: ManualKind, current: unknown, patch: unkn
     // Los partidos en espera solo se mueven con su acción (`applyGameAction`).
     gameId: text(saved.gameId, 40) || 'g1',
     queue: readQueue(saved.queue),
+    link: readLink(readLink(null, saved.link), incoming.link),
   };
 }
 
@@ -375,6 +450,7 @@ function readGame(raw: unknown, fallbackId: string): ManualGame {
     away: mergeTeam(defaults.away, game.away),
     clock: readClock(game.clock ?? defaults.clock),
     events: readEvents(game.events),
+    link: readLink(null, game.link),
   };
 }
 
@@ -421,6 +497,7 @@ function activeGame(state: ManualScoreState, nowMs: number): ManualGame {
     away: state.away,
     clock: { ...state.clock, running: false, startedAt: null, base: elapsed },
     events: state.events,
+    link: state.link,
   };
 }
 
@@ -460,6 +537,7 @@ export function applyGameAction(state: ManualScoreState, action: GameAction, now
       away: { ...defaults.away, players: [] },
       clock: { ...defaults.clock, countdown: state.clock.countdown, limit: state.clock.limit },
       events: [],
+      link: null,
     }, action.add);
     return { ...state, queue: [...state.queue, fresh] };
   }
@@ -480,6 +558,7 @@ export function applyGameAction(state: ManualScoreState, action: GameAction, now
     away: incoming.away,
     clock: incoming.clock,
     events: incoming.events,
+    link: incoming.link,
     gameId: incoming.id,
     shot: null,
     // El que sale va al FINAL de la fila: el primero de la fila es siempre el que sigue.

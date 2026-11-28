@@ -7,6 +7,7 @@ import {
   currentHeadline,
   manualElapsed,
   readManualState,
+  resolveLinkedScore,
   type HeadlineItem,
   type ManualHeadlineState,
   type ManualKind,
@@ -18,6 +19,7 @@ import {
 import { ClubPicker, MatchPicker } from '../../_builder/Pickers';
 import { sevensClockPatch, teamsFromMatch } from '../../_builder/matchTeams';
 import SponsorsPanel, { type UploadedLogo } from './SponsorsPanel';
+import { g22ScoreOf, type G22Score } from '../../_components/g22Score';
 import styles from './control.module.css';
 import { linkAirPath, linkStatus } from '@/lib/overlay/overlayLinks';
 import { CONVERSION_SECONDS, SHOT_LABEL, SHOT_TIMES, shotView } from '@/lib/overlay/shotClock';
@@ -78,7 +80,13 @@ function parseMmss(raw: string): number | null {
   return Number(match[1]) * 60 + Number(match[2] ?? 0);
 }
 
-export default function ControlPanel({ id }: { id: string }) {
+export default function ControlPanel({ id, embedded = false, initialKey = '' }: {
+  id: string;
+  /** Adentro del editor de overlays: sin cabecera ni URL (están al lado). */
+  embedded?: boolean;
+  /** La clave recién creada (el editor la tiene; el link del panel la trae en el #). */
+  initialKey?: string;
+}) {
   const [key, setKey] = useState('');
   const [kind, setKind] = useState<ManualKind | null>(null);
   const [state, setState] = useState<ManualState | null>(null);
@@ -95,9 +103,9 @@ export default function ControlPanel({ id }: { id: string }) {
   const lastLocalEdit = useRef(0);
 
   useEffect(() => {
-    setKey(readKey(id));
+    setKey(initialKey || readKey(id));
     setOrigin(window.location.origin);
-  }, [id]);
+  }, [id, initialKey]);
 
   const applyServer = useCallback((body: { kind: ManualKind; state: unknown; serverNow?: string; link?: PanelLink | null; canEdit?: boolean }, requestedAt: number) => {
     setKind(body.kind);
@@ -210,7 +218,8 @@ export default function ControlPanel({ id }: { id: string }) {
   const linkInfo = link && serverClock ? linkStatus(link.expiresAt, serverClock) : null;
 
   return (
-    <main className={styles.page}>
+    <main className={embedded ? `${styles.page} ${styles.embedded}` : styles.page}>
+      {embedded ? null : (
       <header className={styles.header}>
         <div>
           <p className={styles.eyebrow}>Panel de control · G22</p>
@@ -218,9 +227,11 @@ export default function ControlPanel({ id }: { id: string }) {
         </div>
         <span className={styles.saving}>{saving ? 'Guardando…' : error ? '' : 'Al día'}</span>
       </header>
+      )}
 
       {error ? <p className={styles.error} role="alert">{error}</p> : null}
 
+      {embedded ? null : (
       <section className={styles.urlBox}>
         <span>URL para OBS / vMix (1920×1080)</span>
         <div className={styles.urlRow}>
@@ -246,6 +257,7 @@ export default function ControlPanel({ id }: { id: string }) {
                 : ''}
         </small>
       </section>
+      )}
 
       {!state ? <p className={styles.muted}>Cargando…</p> : kind === 'titular'
         ? <HeadlinePanel state={state as ManualHeadlineState} offset={offset} patchNow={patchNow} patchText={patchText} />
@@ -287,10 +299,34 @@ function ScorePanel({
   const shown = state.clock.countdown ? Math.max(0, state.clock.limit - elapsed) : elapsed;
   const expired = state.clock.limit > 0 && (state.clock.countdown ? shown === 0 : elapsed >= state.clock.limit);
 
+  // Puntos de un partido de G22: se lee su resultado y se muestra lo que va al aire.
+  const [followMatch, setFollowMatch] = useState(true);
+  const [g22, setG22] = useState<G22Score | null>(null);
+  const linkedMatch = state.link?.matchId ?? null;
+  useEffect(() => {
+    if (!linkedMatch) { setG22(null); return undefined; }
+    let cancelled = false;
+    const read = () => void g22ScoreOf(linkedMatch).then((value) => { if (!cancelled) setG22(value); });
+    read();
+    const interval = window.setInterval(read, 2_000);
+    return () => { cancelled = true; window.clearInterval(interval); };
+  }, [linkedMatch]);
+  const linked = resolveLinkedScore(state, g22);
+  const teamScore = (side: 'home' | 'away') => linked[side];
+  // Toda corrección sobre un marcador vinculado lleva cómo se ve G22: el servidor parte de lo que está al aire.
+  const withG22 = (payload: Payload): Payload => (state.link && g22 ? { ...payload, g22 } : payload);
+
   const score = (team: 'home' | 'away', type: string) => {
     // El jugador elegido sale en la placa ("TRY · Juan Pérez"); después se limpia.
-    void send({ score: { event: { team, type, player: scorer[team] || null } } });
+    void send(withG22({ score: { event: { team, type, player: scorer[team] || null } } }));
     setScorer((current) => ({ ...current, [team]: '' }));
+  };
+
+  /** ±1 punto: sobre lo que se ve al aire. */
+  const nudge = (side: 'home' | 'away', delta: number) => {
+    const value = Math.max(0, teamScore(side) + delta);
+    if (state.link && g22) void send({ state: { [side]: { score: value } }, g22 });
+    else patchNow({ [side]: { score: value } });
   };
 
   const fixTime = () => {
@@ -352,13 +388,52 @@ function ScorePanel({
                 if (teams.home) patch.home = teams.home;
                 if (teams.away) patch.away = teams.away;
                 if (teams.title) patch.title = teams.title;
+                patch.link = followMatch ? { matchId: id } : null;
                 patchNow(patch);
               })
               .catch(() => undefined)
               .finally(() => setLoadingTeams(false));
           }}
         />
+        <label className={styles.checkRow}>
+          <input type="checkbox" checked={followMatch} onChange={(e) => setFollowMatch(e.target.checked)} />
+          <span>Tomar también los <b>puntos</b> de ese partido de G22 (los podés corregir a mano acá)</span>
+        </label>
         {loadingTeams ? <p className={styles.muted}>Trayendo equipos y planteles…</p> : null}
+      </section>
+
+      <section className={styles.card}>
+        <h2>Puntos</h2>
+        <div className={styles.segment} role="radiogroup" aria-label="De dónde salen los puntos">
+          <button type="button" role="radio" aria-checked={!state.link} onClick={() => { if (state.link) patchNow({ link: null }); }}>
+            Los cargo yo
+          </button>
+          <button
+            type="button"
+            role="radio"
+            aria-checked={Boolean(state.link)}
+            disabled={!state.link}
+            title={state.link ? undefined : 'Traé los equipos de un partido de G22 con «Tomar también los puntos» tildado.'}
+          >
+            Del partido de G22
+          </button>
+        </div>
+        {state.link ? (
+          <>
+            <p className={styles.muted} role="status">
+              {linked.source === 'corregido'
+                ? `Corregido a mano: va ${linked.home} – ${linked.away}. Cuando G22 cargue algo nuevo vuelve a mandar G22${g22 ? ` (G22 tiene ${g22.home} – ${g22.away})` : ''}.`
+                : g22
+                  ? `Siguiendo a G22: ${g22.home} – ${g22.away}. Si la carga viene atrasada, anotá abajo y se corrige.`
+                  : 'Buscando el resultado en G22…'}
+            </p>
+            {linked.source === 'corregido' ? (
+              <button type="button" onClick={() => patchNow({ link: { seen: null } })}>Volver a G22 ya</button>
+            ) : null}
+          </>
+        ) : (
+          <p className={styles.muted}>Los cargás con los botones de cada equipo. Para que salgan solos, traé los equipos de un partido de G22 con «Tomar también los puntos».</p>
+        )}
       </section>
 
       <section className={styles.card}>
@@ -476,7 +551,7 @@ function ScorePanel({
                 <input type="color" value={team.color ?? '#00a365'} onChange={(e) => patchNow({ [side]: { color: e.target.value } })} aria-label={`Color del ${side === 'home' ? 'local' : 'visitante'} en el marcador`} />
               </label>
             </div>
-            <div className={styles.score}>{team.score}</div>
+            <div className={styles.score}>{teamScore(side)}</div>
             <label className={styles.field}>
               <span>Quién (opcional: sale en la placa)</span>
               <select value={scorer[side]} onChange={(e) => setScorer((current) => ({ ...current, [side]: e.target.value }))}>
@@ -494,8 +569,8 @@ function ScorePanel({
             <div className={styles.cardButtons}>
               <button type="button" className={styles.yellow} onClick={() => score(side, 'yellow_card')}>Amarilla</button>
               <button type="button" className={styles.red} onClick={() => score(side, 'red_card')}>Roja</button>
-              <button type="button" onClick={() => patchNow({ [side]: { score: Math.max(0, team.score - 1) } })}>−1 punto</button>
-              <button type="button" onClick={() => patchNow({ [side]: { score: team.score + 1 } })}>+1 punto</button>
+              <button type="button" onClick={() => nudge(side, -1)}>−1 punto</button>
+              <button type="button" onClick={() => nudge(side, 1)}>+1 punto</button>
             </div>
             <details className={styles.details}>
               <summary>Equipo: nombre, sigla, escudo y plantel</summary>
@@ -539,12 +614,12 @@ function ScorePanel({
             {recent.map((event) => (
               <li key={event.id}>
                 <span>{Math.floor(event.at / 60) + 1}′ · {state[event.team].short} · {labelOf(state.sport, event.type)}{event.player ? ` · ${event.player}` : ''}</span>
-                <button type="button" aria-label="Borrar este evento (resta sus puntos)" onClick={() => void send({ score: { undo: event.id } })}>×</button>
+                <button type="button" aria-label="Borrar este evento (resta sus puntos)" onClick={() => void send(withG22({ score: { undo: event.id } }))}>×</button>
               </li>
             ))}
           </ul>
         ) : <p className={styles.muted}>Lo que cargues aparece acá. Con la × lo borrás y se restan sus puntos.</p>}
-        <button type="button" onClick={() => void send({ score: { undo: true } })} disabled={!state.events.length}>Deshacer el último</button>
+        <button type="button" onClick={() => void send(withG22({ score: { undo: true } }))} disabled={!state.events.length}>Deshacer el último</button>
       </section>
     </div>
   );

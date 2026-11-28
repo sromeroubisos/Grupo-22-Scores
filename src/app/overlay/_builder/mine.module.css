@@ -30,7 +30,7 @@
 
 .item {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: 220px minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 12px 16px;
   padding: 12px 14px;
@@ -143,6 +143,7 @@
 
 @media (max-width: 760px) {
   .item { grid-template-columns: minmax(0, 1fr) auto; }
+  .thumb { grid-column: 1 / -1; }
   .actions { grid-column: 1 / -1; justify-content: flex-start; }
 }
 
@@ -265,3 +266,24 @@
 /* "Panel" y "WhatsApp" son enlaces con forma de botón. */
 .actions a,
 .shareRow a { display: inline-flex; align-items: center; color: var(--s-ink); font-weight: 400; text-decoration: none; }
+
+/* Vista previa en vivo de cada overlay guardado (tocarla lo abre para editar). */
+.thumb {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 1px solid var(--s-line);
+  border-radius: 10px;
+  overflow: hidden;
+  background: transparent;
+  cursor: pointer;
+}
+
+.thumb:hover,
+.thumb:focus-visible {
+  border-color: var(--s-green, #00a365);
+}
+
+.thumb iframe {
+  pointer-events: none;
+}

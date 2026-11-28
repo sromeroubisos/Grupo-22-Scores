@@ -185,3 +185,46 @@ test('una fila vieja (sin partidos) se lee con uno solo, y hay tope de partidos'
   assert.equal(state.queue.length, MAX_GAMES - 1);
   assert.equal(new Set(state.queue.map((game) => game.id)).size, MAX_GAMES - 1);
 });
+
+/* ─── puntos de G22 con corrección a mano ─── */
+
+test('vinculado a G22: sin corrección muestra G22; corregido, manda lo cargado hasta que G22 cambia', async () => {
+  const { rebaseOnG22, resolveLinkedScore } = await import('./manualOverlay.ts');
+  const linked = mergeManualState('marcador', defaultManualState('marcador'), { link: { matchId: 'abc-123' } }) as ManualScoreState;
+  assert.deepEqual(linked.link, { matchId: 'abc-123', seen: null });
+  assert.equal(resolveLinkedScore(linked, { home: 7, away: 3 }).home, 7);
+  assert.equal(resolveLinkedScore(linked, { home: 7, away: 3 }).source, 'g22');
+
+  // G22 viene atrasado: el operador carga un try encima de lo que se ve (7-3).
+  const corrected = applyScoreAction(rebaseOnG22(linked, { home: 7, away: 3 }), { event: { team: 'home', type: 'try' } }, 1000);
+  assert.deepEqual(corrected.link?.seen, { home: 7, away: 3 });
+  const shown = resolveLinkedScore(corrected, { home: 7, away: 3 });
+  assert.deepEqual([shown.home, shown.away, shown.source], [12, 3, 'corregido']);
+
+  // G22 se pone al día: vuelve a mandar G22.
+  const caught = resolveLinkedScore(corrected, { home: 12, away: 3 });
+  assert.deepEqual([caught.home, caught.away, caught.source], [12, 3, 'g22']);
+
+  // Corregir otra vez parte de lo que se ve, no de lo viejo cargado a mano.
+  const again = applyScoreAction(rebaseOnG22(corrected, { home: 14, away: 3 }), { event: { team: 'away', type: 'penalty_goal' } }, 2000);
+  const after = resolveLinkedScore(again, { home: 14, away: 3 });
+  assert.deepEqual([after.home, after.away], [14, 6]);
+});
+
+test('vínculo: null lo saca, otro partido arranca sin corrección y viaja con su partido en la fila', () => {
+  const base = mergeManualState('marcador', defaultManualState('marcador'), { link: { matchId: 'm1', seen: { home: 1, away: 2 } } }) as ManualScoreState;
+  assert.deepEqual(base.link, { matchId: 'm1', seen: { home: 1, away: 2 } });
+  const other = mergeManualState('marcador', base, { link: { matchId: 'm2' } }) as ManualScoreState;
+  assert.deepEqual(other.link, { matchId: 'm2', seen: null });
+  const follow = mergeManualState('marcador', base, { link: { seen: null } }) as ManualScoreState;
+  assert.deepEqual(follow.link, { matchId: 'm1', seen: null });
+  assert.equal((mergeManualState('marcador', base, { link: null }) as ManualScoreState).link, null);
+  assert.equal((mergeManualState('marcador', base, { link: { matchId: 'no válido!' } }) as ManualScoreState).link, null);
+
+  const added = applyGameAction(base, { add: { home: { name: 'Otro' } } }, 1000);
+  const switched = applyGameAction(added, { switch: added.queue[0].id }, 2000);
+  assert.equal(switched.link, null);
+  assert.equal(switched.queue.at(-1)?.link?.matchId, 'm1');
+  const back = applyGameAction(switched, { switch: switched.queue.at(-1)!.id }, 3000);
+  assert.equal(back.link?.matchId, 'm1');
+});

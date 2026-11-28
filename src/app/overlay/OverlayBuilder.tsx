@@ -13,6 +13,7 @@ import { PLAN_LABELS, planAtLeast, planRules, type BrandPosition, type OverlayPl
 import { teamAcronym, type NameMode } from '@/lib/overlay/teamAcronym';
 import { Canvas } from './_builder/Canvas';
 import { ClubPicker, Crest, MatchPicker, TournamentPicker, matchWhen, type OverlaySearchMatch } from './_builder/Pickers';
+import ControlPanel from './control/[id]/ControlPanel';
 import { MyOverlays, SaveLink, useSavedLinks, type SavedLinks } from './_builder/MyOverlays';
 import { manualKind, reader, savedTarget } from './_builder/fromPath';
 import type { SavedLink } from '@/lib/overlay/overlayLinks';
@@ -583,6 +584,9 @@ function Editor({ kind, origin, onBack, onStyle, onCreate, store, saved, onSaved
   // Un manual guardado ya existe; su clave no se guarda en ningún lado (el panel va con el link de cuando se creó).
   const [manual, setManual] = useState<ManualCreated | null>(() => (isManual(kind) && target?.routeId ? { id: target.routeId, key: '', kind: kind === 'manual-titular' ? 'titular' : 'marcador' } : null));
   const [manualError, setManualError] = useState<string | null>(null);
+  // Partido de G22 de donde se trajeron los equipos, y si también manda los puntos.
+  const [sourceMatch, setSourceMatch] = useState<{ id: string; label: string } | null>(null);
+  const [followPoints, setFollowPoints] = useState(true);
   const [creating, setCreating] = useState(false);
   const [loadingMatch, setLoadingMatch] = useState(false);
 
@@ -708,6 +712,7 @@ function Editor({ kind, origin, onBack, onStyle, onCreate, store, saved, onSaved
       setManualSport(teams.sport);
       setManualClock(sevensClockPatch(teams));
       if (teams.title) setManualTitle(teams.title);
+      setSourceMatch({ id, label: `${teams.home?.name ?? 'Local'} vs ${teams.away?.name ?? 'Visitante'}` });
     } catch {
       // Sin conexión: los equipos quedan como estaban y se pueden elegir a mano.
     } finally {
@@ -874,8 +879,6 @@ function Editor({ kind, origin, onBack, onStyle, onCreate, store, saved, onSaved
   };
 
   const createManual = async () => {
-    // La pestaña del panel se abre YA (en el clic): abrirla después del pedido la bloquea el navegador.
-    const panelTab = typeof window !== 'undefined' ? window.open('', '_blank') : null;
     setCreating(true);
     setManualError(null);
     const team = (info: TeamInfo, players: string[]) => ({ name: info.name, short: info.short, color: info.color, logo: info.logo, players });
@@ -883,7 +886,14 @@ function Editor({ kind, origin, onBack, onStyle, onCreate, store, saved, onSaved
       ? { style: headlineStyle, items: [{ id: 'h1', ...headline }], current: 0 }
       : kind === 'manual-sponsors'
         ? { layout: sponsorLayout, surface: sponsorSurface, heading: sponsorHeading }
-        : { sport: manualSport, title: manualTitle, home: team(homeTeam, homePlayers), away: team(awayTeam, awayPlayers), ...(manualClock ?? {}) };
+        : {
+          sport: manualSport,
+          title: manualTitle,
+          home: team(homeTeam, homePlayers),
+          away: team(awayTeam, awayPlayers),
+          ...(manualClock ?? {}),
+          link: sourceMatch && followPoints ? { matchId: sourceMatch.id } : null,
+        };
     try {
       const response = await fetch('/api/overlay/control', {
         method: 'POST',
@@ -905,10 +915,9 @@ function Editor({ kind, origin, onBack, onStyle, onCreate, store, saved, onSaved
         store.adopt(created.link);
         onSaved(created.link);
       }
-      const panel = `/overlay/control/${created.id}#clave=${created.key}`;
-      if (panelTab && !panelTab.closed) panelTab.location.href = panel;
+      // El panel aparece acá mismo, abajo de los ajustes: se ve el resultado al lado.
+      window.setTimeout(() => document.getElementById('panel-manual')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
     } catch (error: unknown) {
-      panelTab?.close();
       setManualError(error instanceof Error ? error.message : 'No se pudo crear.');
     } finally {
       setCreating(false);
@@ -1187,13 +1196,29 @@ function Editor({ kind, origin, onBack, onStyle, onCreate, store, saved, onSaved
             <>
               <Step n={n('equipos')} title="Los equipos" hint="Traé los dos de un partido de G22, o elegí cada club. También podés escribirlos a mano.">
                 {manual ? (
-                  <p className={styles.hint}>Los equipos ya están en el marcador. Para cambiarlos, usá el panel de control.</p>
+                  <p className={styles.hint}>Ya está creado. Los equipos, los puntos y de dónde salen se cambian en el panel de control, acá abajo.</p>
                 ) : (
                   <>
                     <div className={styles.fromMatch}>
                       <span>Desde un partido de G22</span>
                       <MatchPicker onPick={(id, found) => void loadManualFromMatch(id, found)} actionLabel="Traer equipos" />
                       {loadingMatch ? <p className={styles.searchNote}>Trayendo equipos y planteles…</p> : null}
+                      {sourceMatch ? (
+                        <div className={styles.pointsSource}>
+                          <span>Puntos de {sourceMatch.label}</span>
+                          <Segment
+                            label="Puntos"
+                            value={followPoints ? 'g22' : 'mano'}
+                            options={[['g22', 'Los toma de G22'], ['mano', 'Los cargo yo']]}
+                            onChange={(value) => setFollowPoints(value === 'g22')}
+                          />
+                          <p className={styles.hint}>
+                            {followPoints
+                              ? 'Salen solos de la carga de G22. Si viene atrasada, los corregís a mano desde el panel y vuelve a G22 cuando G22 se pone al día.'
+                              : 'Solo se traen los equipos: los puntos los cargás vos desde el panel.'}
+                          </p>
+                        </div>
+                      ) : null}
                     </div>
                     <div className={styles.teams}>
                       <TeamEditor label="Local" team={homeTeam} players={homePlayers.length} onChange={setHomeTeam} />
@@ -1286,30 +1311,28 @@ function Editor({ kind, origin, onBack, onStyle, onCreate, store, saved, onSaved
           {isManual(kind) ? (
             <div className={styles.createBox}>
               {manual ? (
-                <>
-                  <p>
-                    <b>Listo.</b>{' '}
-                    {kind === 'manual-sponsors'
-                      ? 'Ahora abrí el panel y subí los PNG en cada nivel (Title, Main, Sponsor, Acompañante). La vista previa se actualiza sola.'
-                      : 'Desde el panel de control lo manejás: puntos, reloj, tarjetas y anotadores (o los textos del titular). Anda en el celular.'}
-                  </p>
-                  {manual.key ? (
-                    <>
-                      <div className={styles.createActions}>
-                        <a className={styles.primary} href={panelUrl} target="_blank" rel="noreferrer">Abrir el panel de control</a>
-                        <button type="button" className={styles.secondary} onClick={() => void copy(panelUrl, 'panel')}>{copied === 'panel' ? 'Link copiado' : 'Copiar link del panel'}</button>
-                      </div>
-                      <p className={styles.hint}>El link del panel lleva la clave: quien lo tenga puede manejarlo. Guardalo.</p>
-                    </>
-                  ) : (
-                    <>
-                      <div className={styles.createActions}>
-                        <a className={styles.primary} href={`/overlay/control/${manual.id}`} target="_blank" rel="noreferrer">Abrir el panel de control</a>
-                      </div>
-                      <p className={styles.hint}>El panel se abre con tu cuenta de G22. Acá cambiás cómo se ve al aire; «Guardar cambios» lo pasa a OBS con la misma URL.</p>
-                    </>
-                  )}
-                </>
+                <div id="panel-manual" className={styles.embeddedPanel}>
+                  <div className={styles.embeddedHead}>
+                    <div>
+                      <b>Panel de control</b>
+                      <p className={styles.hint}>
+                        {kind === 'manual-sponsors'
+                          ? 'Subí los PNG en cada nivel. La vista previa de al lado se actualiza sola.'
+                          : kind === 'manual-titular'
+                            ? 'Los textos y cuál sale al aire. La vista previa de al lado se actualiza sola.'
+                            : 'Equipos, puntos, reloj y tarjetas. La vista previa de al lado se actualiza sola.'}
+                      </p>
+                    </div>
+                    <div className={styles.createActions}>
+                      <button type="button" className={styles.secondary} onClick={onBack}>Ver en Mis overlays</button>
+                      <a className={styles.secondary} href={manual.key ? panelUrl : `/overlay/control/${manual.id}`} target="_blank" rel="noreferrer">Abrir en otra pestaña</a>
+                      {manual.key ? (
+                        <button type="button" className={styles.secondary} onClick={() => void copy(panelUrl, 'panel')}>{copied === 'panel' ? 'Link copiado' : 'Link para el celular'}</button>
+                      ) : null}
+                    </div>
+                  </div>
+                  <ControlPanel id={manual.id} embedded initialKey={manual.key} />
+                </div>
               ) : (
                 <>
                   <button type="button" className={styles.primary} onClick={() => void createManual()} disabled={creating || (kind === 'manual-titular' && !headline.title.trim())}>

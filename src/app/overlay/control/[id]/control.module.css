@@ -539,3 +539,29 @@
 .kickPair { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 .page .kickMade { background: rgba(0, 163, 101, 0.2); border-color: var(--c-green); font-weight: 800; }
 .page .kickMissed { color: #ff9b9b; border-color: rgba(255, 123, 123, 0.4); }
+
+/* Tilde con texto largo al lado (traer los puntos de G22). */
+.checkRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 10px;
+  font-size: 0.9rem;
+  line-height: 1.35;
+  cursor: pointer;
+}
+
+.checkRow input {
+  margin-top: 3px;
+  width: 18px;
+  height: 18px;
+  accent-color: var(--c-green);
+  flex: none;
+}
+
+/* El panel adentro del editor de overlays: sin la cabecera ni la URL (ya están al lado). */
+.embedded {
+  min-height: 0;
+  padding: 12px;
+  border-radius: 14px;
+}

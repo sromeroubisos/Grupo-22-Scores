@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { LINK_TTL_DAYS, linkAirPath, linkStatus, linksSummary, normalizeLinkPath, sharePath, type SavedLink } from '@/lib/overlay/overlayLinks';
 import { KIND_DEFS } from './catalog';
 import { savedTarget } from './fromPath';
+import { Canvas } from './Canvas';
 import styles from './studio.module.css';
 import own from './mine.module.css';
 
@@ -291,6 +292,10 @@ export function MyOverlays({ origin, store, onCreate, onEdit }: { origin: string
             const memberCount = link.members?.length ?? 0;
             return (
               <li key={link.id} className={own.item} data-state={status.state}>
+                {/* Cómo sale al aire, en vivo (los manuales se mueven con su panel). */}
+                <button type="button" className={own.thumb} onClick={() => onEdit(link)} aria-label={`Editar ${link.title}`}>
+                  <Canvas src={link.path} title={`Vista previa de ${link.title}`} lazy />
+                </button>
                 <div className={own.info}>
                   <input
                     className={own.title}

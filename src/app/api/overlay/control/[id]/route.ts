@@ -9,7 +9,9 @@ import {
   applyShotAction,
   mergeManualState,
   parseClockAction,
+  parseG22Score,
   parseGameAction,
+  rebaseOnG22,
   parseScoreAction,
   parseShotAction,
   readManualState,
@@ -83,7 +85,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     return noStore({ error: key ? 'La clave del panel no es válida.' : 'Entrá con tu cuenta de G22 (la que tiene este overlay) o abrí el link del panel con su clave.' }, 403);
   }
 
-  const body = (await request.json().catch(() => ({}))) as { state?: unknown; clock?: unknown; score?: unknown; shot?: unknown; game?: unknown };
+  const body = (await request.json().catch(() => ({}))) as { state?: unknown; clock?: unknown; score?: unknown; shot?: unknown; game?: unknown; g22?: unknown };
 
   // Cada guardado lee la fila, aplica el cambio y escribe el estado ENTERO. Dos
   // pedidos a la vez (dos toques rápidos, o dos personas con el panel) se
@@ -93,7 +95,12 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   let current = row;
   for (let attempt = 0; attempt < 4; attempt += 1) {
     const now = Date.now();
-    let state = mergeManualState(current.kind, current.state, body.state ?? {});
+    let base: unknown = current.state;
+    // Corrección sobre un marcador vinculado a G22: primero, lo que se ve pasa a
+    // ser lo cargado a mano (con cómo estaba G22), y recién ahí se aplica el cambio.
+    const g22 = current.kind === 'marcador' ? parseG22Score(body.g22) : null;
+    if (g22) base = rebaseOnG22(readManualState('marcador', current.state), g22);
+    let state = mergeManualState(current.kind, base, body.state ?? {});
     if (current.kind === 'marcador') {
       // Pasar a otro partido va PRIMERO: lo demás del pedido cae sobre el que entra.
       const gameAction = parseGameAction(body.game);
