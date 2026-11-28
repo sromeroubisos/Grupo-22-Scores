@@ -2196,6 +2196,7 @@ export default function TournamentDetailPage({
     );
 
     const [activeTab, setActiveTab] = useState('summary');
+    const [playoffCup, setPlayoffCup] = useState('');
     // Lo pone TournamentNavigation cuando él trae el selector de temporada; con
     // esto la cabecera esconde el propio y el año deja de aparecer dos veces.
     const [navTieneTemporadas, setNavTieneTemporadas] = useState(false);
@@ -3743,9 +3744,40 @@ export default function TournamentDetailPage({
         if (playoffBrackets.length <= 1) {
             return <PlayoffBracket data={primaryBracketRounds} title={baseTitle} />;
         }
+        // Copas con cuadro propio (Oro, Plata, Bronce): se elige una y se ven su
+        // llave y sus puestos. La ronda común sin copa no cuenta como copa.
+        const cupOf = (key: string) => key.replace(/#puestos$/, '');
+        const cupKeys = Array.from(new Set(
+            playoffBrackets.filter((bracket) => bracket.label).map((bracket) => cupOf(bracket.key)),
+        ));
+        const selectedCup = cupKeys.includes(playoffCup) ? playoffCup : cupKeys[0];
+        const visibleBrackets = cupKeys.length > 1
+            ? playoffBrackets.filter((bracket) => !bracket.label || cupOf(bracket.key) === selectedCup)
+            : playoffBrackets;
         return (
             <div className={styles.playoffBracketStack}>
-                {playoffBrackets.map((bracket) => (
+                {cupKeys.length > 1 ? (
+                    <div className={styles.standingsScopeBar}>
+                        <span className={styles.standingsScopeLabel}>Copa</span>
+                        <div className={styles.pillsGroup} role="group" aria-label="Elegir copa">
+                            {cupKeys.map((cupKey) => {
+                                const label = playoffBrackets.find((bracket) => cupOf(bracket.key) === cupKey && bracket.label)?.label ?? cupKey;
+                                return (
+                                    <button
+                                        key={cupKey}
+                                        type="button"
+                                        className={`${styles.pillBtn} ${cupKey === selectedCup ? styles.pillBtnActive : ''}`}
+                                        aria-pressed={cupKey === selectedCup}
+                                        onClick={() => setPlayoffCup(cupKey)}
+                                    >
+                                        {label}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+                ) : null}
+                {visibleBrackets.map((bracket) => (
                     <PlayoffBracket
                         key={bracket.key || 'principal'}
                         data={bracket.rounds}
