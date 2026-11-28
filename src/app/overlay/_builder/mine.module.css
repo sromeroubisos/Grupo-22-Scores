@@ -193,3 +193,75 @@
 }
 
 .asNew:hover:not(:disabled) { color: var(--s-ink); }
+
+/* ─────────────── compartir ─────────────── */
+
+/* El panel de compartir ocupa todo el ancho de la fila, debajo de las acciones. */
+.sharePanel {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--s-line);
+  background: var(--s-raised);
+}
+.shareText { margin: 0; color: var(--s-dim); font-size: 13px; line-height: 1.45; }
+.shareText b { color: var(--s-ink); }
+.shareRow { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.shareUrl {
+  flex: 1 1 260px;
+  min-width: 0;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 10px;
+  border: 1px solid var(--s-line-strong);
+  background: var(--s-panel);
+  color: var(--s-ink);
+  font-size: 13px;
+}
+.members { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 0; padding: 0; list-style: none; font-size: 13px; color: var(--s-dim); }
+.memberChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 4px 3px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--s-line);
+  color: var(--s-ink);
+}
+.memberChip button {
+  width: 22px;
+  height: 22px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--s-dim);
+  cursor: pointer;
+}
+.memberChip button:hover { color: var(--s-red); }
+.sharedTag {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: rgba(120, 160, 255, 0.14);
+  color: #a9c1ff;
+  font-size: 11px;
+  font-weight: 600;
+}
+.cutLink {
+  border: 0;
+  background: none;
+  color: var(--s-dim);
+  font-size: 12px;
+  text-decoration: underline;
+  cursor: pointer;
+  justify-self: start;
+  padding: 0;
+}
+.cutLink:hover { color: var(--s-red); }
+
+/* "Panel" y "WhatsApp" son enlaces con forma de botón. */
+.actions a,
+.shareRow a { display: inline-flex; align-items: center; color: var(--s-ink); text-decoration: none; }

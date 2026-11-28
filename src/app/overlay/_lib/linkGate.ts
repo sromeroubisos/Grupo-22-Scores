@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { getOverlayAccess } from '@/lib/auth/overlayAccess';
 import { linkAirPath, sameLinkTarget } from '@/lib/overlay/overlayLinks';
 import type { OverlayPlan } from '@/lib/overlay/overlayPlan';
-import { findLinkByToken } from '@/lib/server/overlayLinksStore';
+import { findLinkByToken, hasSharedLinks } from '@/lib/server/overlayLinksStore';
 import { getOverlayPlan } from '@/lib/server/overlayPlanStore';
 import { first, type SearchParams } from './config';
 
@@ -63,6 +63,12 @@ export async function checkOverlayLink(query: SearchParams, pathname: string): P
       if (access.status === 'ok') {
         const plan = await getOverlayPlan(access.userId, access.role).catch(() => 'premium' as const);
         return { status: 'ok', token: null, expiresAt: null, plan };
+      }
+      // Sin el rol pero con overlays compartidos: la vista previa del editor de esos.
+      // Va sin recortes: el editor ya muestra solo lo que permite el plan del dueño,
+      // y al aire (con token) se vuelve a aplicar ese plan.
+      if (access.status === 'denied' && (await hasSharedLinks(access.userId))) {
+        return { status: 'ok', token: null, expiresAt: null, plan: 'premium' };
       }
     } catch {
       // Sin sesión legible: sigue como cualquier navegador.

@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server';
-import { json, overlayLinksGuard } from '../guard';
+import { json, signedInGuard } from '../guard';
 import { linkKindFromPath, normalizeLinkPath } from '@/lib/overlay/overlayLinks';
-import { deleteUserLink, updateUserLink } from '@/lib/server/overlayLinksStore';
+import { deleteUserLink, leaveLink, linkAccess, updateUserLink } from '@/lib/server/overlayLinksStore';
 
 /**
  * Un enlace de "Mis overlays".
@@ -9,15 +9,16 @@ import { deleteUserLink, updateUserLink } from '@/lib/server/overlayLinksStore';
  *   PATCH  { renovar?: true, title?: string, path?: string }
  *          renovar = otros 15 días desde hoy, MISMO token
  *          path    = editarlo: otra configuración con el MISMO token (OBS no se toca)
- *   DELETE                                     lo borra: la URL deja de funcionar en OBS
+ *   DELETE el dueño lo BORRA (la URL deja de funcionar en OBS); un co-gestor
+ *          solo lo saca de su lista (deja de gestionarlo)
  *
- * Solo el dueño (el filtro por user_id va en la consulta).
+ * El dueño y quienes entraron por su link para compartir (el store lo verifica).
  */
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const auth = await overlayLinksGuard();
+  const auth = await signedInGuard();
   if ('error' in auth) return auth.error;
   const { id } = await params;
   if (!UUID_RE.test(id)) return json({ error: 'Overlay inexistente.' }, 404);
@@ -41,12 +42,15 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 }
 
 export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const auth = await overlayLinksGuard();
+  const auth = await signedInGuard();
   if ('error' in auth) return auth.error;
   const { id } = await params;
   if (!UUID_RE.test(id)) return json({ error: 'Overlay inexistente.' }, 404);
   try {
-    return (await deleteUserLink(auth.userId, id)) ? json({ ok: true }) : json({ error: 'Overlay inexistente.' }, 404);
+    const access = await linkAccess(auth.userId, id);
+    if (access === 'owner') return (await deleteUserLink(auth.userId, id)) ? json({ ok: true }) : json({ error: 'Overlay inexistente.' }, 404);
+    if (access === 'member') return (await leaveLink(auth.userId, id)) ? json({ ok: true, left: true }) : json({ error: 'Overlay inexistente.' }, 404);
+    return json({ error: 'Overlay inexistente.' }, 404);
   } catch {
     return json({ error: 'No se pudo borrar.' }, 502);
   }

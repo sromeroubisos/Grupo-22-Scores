@@ -93,6 +93,9 @@ export default function ControlPanel({ id }: { id: string }) {
   const [serverClock, setServerClock] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  // Sin clave: si la sesión de G22 lo puede manejar (propio o compartido).
+  const [canEdit, setCanEdit] = useState<boolean | null>(null);
+  const askedSession = useRef(false);
   const [origin, setOrigin] = useState('');
   const pendingText = useRef<number | null>(null);
   const lastLocalEdit = useRef(0);
@@ -102,8 +105,9 @@ export default function ControlPanel({ id }: { id: string }) {
     setOrigin(window.location.origin);
   }, [id]);
 
-  const applyServer = useCallback((body: { kind: ManualKind; state: unknown; serverNow?: string; link?: PanelLink | null }, requestedAt: number) => {
+  const applyServer = useCallback((body: { kind: ManualKind; state: unknown; serverNow?: string; link?: PanelLink | null; canEdit?: boolean }, requestedAt: number) => {
     setKind(body.kind);
+    if (typeof body.canEdit === 'boolean') setCanEdit(body.canEdit);
     if (body.link !== undefined) setLink(body.link);
     setState(readManualState(body.kind, body.state));
     const serverNow = Date.parse(body.serverNow ?? '');
@@ -123,7 +127,13 @@ export default function ControlPanel({ id }: { id: string }) {
         const requestedAt = Date.now();
         try {
           // Con la clave, el servidor también manda el enlace guardado para OBS y su vencimiento.
-          const response = await fetch(`/api/overlay/control/${encodeURIComponent(id)}`, { cache: 'no-store', headers: key ? { 'x-overlay-key': key } : undefined });
+          // Sin clave, la primera lectura pregunta si la sesión lo puede manejar.
+          const headers: Record<string, string> = key ? { 'x-overlay-key': key } : {};
+          if (!key && !askedSession.current) {
+            headers['x-overlay-session'] = '1';
+            askedSession.current = true;
+          }
+          const response = await fetch(`/api/overlay/control/${encodeURIComponent(id)}`, { cache: 'no-store', headers });
           const body = await response.json().catch(() => null);
           if (!cancelled) {
             if (response.ok && body) {
@@ -147,8 +157,8 @@ export default function ControlPanel({ id }: { id: string }) {
   }, [id, key, applyServer]);
 
   const send = useCallback(async (payload: Payload) => {
-    if (!key) {
-      setError('Falta la clave del panel: abrí el link completo que te dio el generador.');
+    if (!key && canEdit === false) {
+      setError('Para manejarlo entrá con tu cuenta de G22 (la que tiene este overlay en Mis overlays) o abrí el link del panel con su clave.');
       return;
     }
     setSaving(true);
@@ -156,7 +166,7 @@ export default function ControlPanel({ id }: { id: string }) {
     try {
       const response = await fetch(`/api/overlay/control/${encodeURIComponent(id)}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', 'x-overlay-key': key },
+        headers: key ? { 'Content-Type': 'application/json', 'x-overlay-key': key } : { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
       const body = await response.json().catch(() => null);
@@ -171,7 +181,7 @@ export default function ControlPanel({ id }: { id: string }) {
     } finally {
       setSaving(false);
     }
-  }, [id, key, applyServer]);
+  }, [id, key, canEdit, applyServer]);
 
   /** Cambio inmediato y optimista (botones). */
   const patchNow = useCallback((patch: Patch) => {
@@ -189,18 +199,18 @@ export default function ControlPanel({ id }: { id: string }) {
 
   /** Sube un logo del overlay de sponsors; devuelve su URL y su proporción ya recortada. */
   const uploadLogo = useCallback(async (file: Blob, name: string): Promise<UploadedLogo> => {
-    if (!key) throw new Error('Falta la clave del panel: abrí el link completo que te dio el generador.');
+    if (!key && canEdit === false) throw new Error('Entrá con tu cuenta de G22 o abrí el link del panel con su clave.');
     const form = new FormData();
     form.append('file', file, name);
     const response = await fetch(`/api/overlay/control/${encodeURIComponent(id)}/logo`, {
       method: 'POST',
-      headers: { 'x-overlay-key': key },
+      headers: key ? { 'x-overlay-key': key } : undefined,
       body: form,
     });
     const body = await response.json().catch(() => null);
     if (!response.ok || !body?.url) throw new Error(body?.error ?? 'No se pudo subir.');
     return { url: String(body.url), ratio: Number(body.ratio) || 2 };
-  }, [id, key]);
+  }, [id, key, canEdit]);
 
   const overlayUrl = link ? `${origin}${linkAirPath(link.path, link.token)}` : '';
   const linkInfo = link && serverClock ? linkStatus(link.expiresAt, serverClock) : null;
@@ -232,7 +242,15 @@ export default function ControlPanel({ id }: { id: string }) {
                 : `${linkInfo.label}. Se renueva en g22scores.com/overlay, en Mis overlays.`}
           </p>
         ) : null}
-        <small>Guardá este panel en favoritos: el link ya trae la clave. Quien lo tenga puede manejar el overlay.</small>
+        <small>
+          {key
+            ? 'Guardá este panel en favoritos: el link ya trae la clave. Quien lo tenga puede manejar el overlay.'
+            : canEdit
+              ? 'Lo manejás con tu cuenta de G22. Para sumar a alguien, compartilo desde Mis overlays.'
+              : canEdit === false
+                ? 'Solo lectura: entrá con la cuenta que tiene este overlay en Mis overlays, o abrí el link del panel con su clave.'
+                : ''}
+        </small>
       </section>
 
       {!state ? <p className={styles.muted}>Cargando…</p> : kind === 'titular'

@@ -9,6 +9,8 @@
  * Puro (sin Supabase ni Next): lo usan la API, las páginas al aire y la UI.
  */
 
+import type { OverlayPlan } from './overlayPlan';
+
 export const LINK_TTL_DAYS = 15;
 /** Desde cuántos días restantes se avisa que vence. */
 export const LINK_WARN_DAYS = 3;
@@ -144,4 +146,20 @@ export type SavedLink = {
   createdAt: string;
   renewedAt: string;
   expiresAt: string;
+  /** Si es propio o compartido conmigo. Sin el campo: propio. */
+  access?: 'owner' | 'member';
+  /** Compartido conmigo: quién lo creó y su plan (es el que manda al aire y al editar). */
+  ownerName?: string | null;
+  ownerPlan?: OverlayPlan;
+  /** Propio: el link para compartir (null = no se compartió o se cortó) y quiénes lo gestionan. */
+  shareToken?: string | null;
+  members?: LinkMember[];
 };
+
+export type LinkMember = { userId: string; name: string };
+
+/** Cuántas personas pueden gestionar un mismo overlay además del dueño. */
+export const MAX_MEMBERS_PER_LINK = 20;
+
+/** La ruta del link para compartir (la que se manda por WhatsApp o mail). */
+export const sharePath = (shareToken: string) => `/overlay/compartir/${encodeURIComponent(shareToken)}`;

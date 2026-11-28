@@ -106,11 +106,15 @@ const hexParam = (color: string) => color.replace('#', '');
 
 /** El plan del usuario: qué se puede personalizar. Al aire se vuelve a aplicar. */
 const PlanContext = createContext<OverlayPlan>('basico');
+/** false = entró solo por overlays compartidos (sin el rol): gestiona esos, no crea nuevos. */
+const CreateContext = createContext(true);
 
-export default function OverlayBuilder({ plan }: { plan: OverlayPlan }) {
+export default function OverlayBuilder({ plan, canCreate = true }: { plan: OverlayPlan; canCreate?: boolean }) {
   return (
     <PlanContext.Provider value={plan}>
-      <Studio />
+      <CreateContext.Provider value={canCreate}>
+        <Studio />
+      </CreateContext.Provider>
     </PlanContext.Provider>
   );
 }
@@ -133,6 +137,8 @@ async function kindOfSaved(link: SavedLink): Promise<Kind | null> {
 }
 
 function Studio() {
+  const canCreate = useContext(CreateContext);
+  const plan = useContext(PlanContext);
   const [kind, setKind] = useState<Kind | null>(null);
   const [tab, setTab] = useState<StudioTab>('crear');
   const [origin, setOrigin] = useState('https://www.g22scores.com');
@@ -155,13 +161,13 @@ function Studio() {
       if (editId) return;
       setEditing(null);
       const value = search.get('grafico') as Kind | null;
-      setKind(value && KIND_DEFS.has(value) ? value : null);
-      setTab(search.get('vista') === 'mios' ? 'mios' : 'crear');
+      setKind(canCreate && value && KIND_DEFS.has(value) ? value : null);
+      setTab(!canCreate || search.get('vista') === 'mios' ? 'mios' : 'crear');
     };
     read();
     window.addEventListener('popstate', read);
     return () => window.removeEventListener('popstate', read);
-  }, []);
+  }, [canCreate]);
 
   // Con la lista leída, el overlay en edición se abre con su gráfico.
   const links = store.links;
@@ -241,7 +247,8 @@ function Studio() {
   }, [editingId]);
 
   /** Las dos pestañas: crear (la galería) y los propios. Desde el editor, también vuelven. */
-  const goTab = useCallback((next: StudioTab) => {
+  const goTab = useCallback((wanted: StudioTab) => {
+    const next: StudioTab = canCreate ? wanted : 'mios';
     window.history.pushState(null, '', next === 'mios' ? '/overlay?vista=mios' : '/overlay');
     setEditingId(null);
     setEditing(null);
@@ -249,7 +256,7 @@ function Studio() {
     setKind(null);
     setTab(next);
     window.scrollTo({ top: 0 });
-  }, []);
+  }, [canCreate]);
 
   const current: StudioTab = editingId ? 'mios' : kind ? 'crear' : tab;
   const count = links?.length ?? 0;
@@ -264,14 +271,16 @@ function Studio() {
         </a>
         <div className={styles.navRight}>
           <div className={styles.tabs} role="tablist" aria-label="Secciones de overlays">
-            <button type="button" role="tab" aria-selected={current === 'crear'} className={styles.tab} onClick={() => goTab('crear')}>
-              Crear
-            </button>
+            {canCreate ? (
+              <button type="button" role="tab" aria-selected={current === 'crear'} className={styles.tab} onClick={() => goTab('crear')}>
+                Crear
+              </button>
+            ) : null}
             <button type="button" role="tab" aria-selected={current === 'mios'} className={styles.tab} onClick={() => goTab('mios')}>
               Mis overlays{count ? <span className={styles.tabCount}>{count}</span> : null}
             </button>
           </div>
-          {current === 'mios' || kind ? (
+          {canCreate && (current === 'mios' || kind) ? (
             <button type="button" className={`${styles.primary} ${styles.navCreate}`} onClick={() => goTab('crear')}>
               <span aria-hidden="true">+</span> Crear<b>&nbsp;overlay</b>
             </button>
@@ -280,6 +289,8 @@ function Studio() {
       </nav>
 
       {kind ? (
+        // Un overlay compartido se edita con el plan de su DUEÑO: es el que manda al aire.
+        <PlanContext.Provider value={editing?.access === 'member' && editing.ownerPlan ? editing.ownerPlan : plan}>
         <Editor
           key={`${session}:${isScoreboardStyle(kind) ? 'scoreboard' : kind}`}
           kind={kind}
@@ -297,12 +308,13 @@ function Studio() {
             setEditingId(link.id);
           }}
         />
+        </PlanContext.Provider>
       ) : editingId ? (
         <p className={styles.loadingSaved} role="status">Abriendo tu overlay…</p>
       ) : tab === 'mios' ? (
         <div role="tabpanel" aria-label="Mis overlays">
           {editProblem ? <p className={styles.error} role="alert">{editProblem}</p> : null}
-          <MyOverlays origin={origin} store={store} onCreate={() => goTab('crear')} onEdit={openSaved} />
+          <MyOverlays origin={origin} store={store} onCreate={canCreate ? () => goTab('crear') : undefined} onEdit={openSaved} />
         </div>
       ) : (
         <div role="tabpanel" aria-label="Crear overlays">
@@ -498,6 +510,7 @@ function Editor({ kind, origin, onBack, onStyle, onCreate, store, saved, onSaved
   onSaved: (link: SavedLink) => void;
 }) {
   const def = KIND_DEFS.get(kind)!;
+  const canCreate = useContext(CreateContext);
   // Lo guardado, leído UNA vez al abrir: los useState de abajo arrancan de acá.
   const [target] = useState(() => (saved ? savedTarget(saved.path) : null));
   const r = reader(target?.params ?? null);
@@ -930,9 +943,11 @@ function Editor({ kind, origin, onBack, onStyle, onCreate, store, saved, onSaved
           <h1>{saved ? saved.title : def.label}</h1>
         </div>
         <div className={styles.topActions}>
-          <button type="button" className={styles.topCreate} onClick={onCreate}>
-            <span aria-hidden="true">+</span> Crear<span className={styles.topCreateWord}>&nbsp;overlay</span>
-          </button>
+          {canCreate ? (
+            <button type="button" className={styles.topCreate} onClick={onCreate}>
+              <span aria-hidden="true">+</span> Crear<span className={styles.topCreateWord}>&nbsp;overlay</span>
+            </button>
+          ) : null}
           <button
             type="button"
             className={styles.topCopy}
@@ -1457,7 +1472,7 @@ function Editor({ kind, origin, onBack, onStyle, onCreate, store, saved, onSaved
           <Canvas src={previewUrl} title="Vista previa del overlay" className={styles.bigCanvas} />
           <p className={styles.previewNote}>{missing ? `Muestra con datos de prueba. ${missing}` : 'Así sale al aire, con los datos reales.'}</p>
           <div id="guardar">
-            <SaveLink relative={relative} missing={missing} origin={origin} defaultTitle={defaultTitle} store={store} editing={saved} onSaved={onSaved} />
+            <SaveLink relative={relative} missing={missing} origin={origin} defaultTitle={defaultTitle} store={store} editing={saved} onSaved={onSaved} allowNew={canCreate} />
           </div>
           {!missing ? (
             <div className={styles.outActions}>

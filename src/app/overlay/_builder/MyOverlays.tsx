@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { LINK_TTL_DAYS, linkAirPath, linkStatus, linksSummary, normalizeLinkPath, type SavedLink } from '@/lib/overlay/overlayLinks';
+import { LINK_TTL_DAYS, linkAirPath, linkStatus, linksSummary, normalizeLinkPath, sharePath, type SavedLink } from '@/lib/overlay/overlayLinks';
 import { KIND_DEFS } from './catalog';
 import { savedTarget } from './fromPath';
 import styles from './studio.module.css';
@@ -77,8 +77,31 @@ export function useSavedLinks() {
     const body = await call(`/api/overlay/enlaces/${id}`, { method: 'PATCH', body: JSON.stringify(payload) });
     setOffset(offsetFrom(body));
     const link = body.link as SavedLink;
-    setLinks((current) => (current ?? []).map((item) => (item.id === id ? link : item)));
-    return link;
+    // El PATCH devuelve el enlace pelado: se conserva lo de compartir que ya tenía la lista.
+    let merged = link;
+    setLinks((current) => (current ?? []).map((item) => {
+      if (item.id !== id) return item;
+      merged = { ...item, ...link };
+      return merged;
+    }));
+    return merged;
+  }, []);
+
+  /** Dueño: genera (o lee) el link para compartir. */
+  const share = useCallback(async (id: string) => {
+    const body = await call(`/api/overlay/enlaces/${id}/compartir`, { method: 'POST' });
+    const shareToken = String(body.shareToken ?? '');
+    setLinks((current) => (current ?? []).map((item) => (item.id === id ? { ...item, shareToken } : item)));
+    return shareToken;
+  }, []);
+
+  /** Dueño: corta el link (sin userId) o saca a una persona (con userId). */
+  const unshare = useCallback(async (id: string, userId?: string) => {
+    await call(`/api/overlay/enlaces/${id}/compartir`, { method: 'DELETE', body: JSON.stringify(userId ? { userId } : {}) });
+    setLinks((current) => (current ?? []).map((item) => {
+      if (item.id !== id) return item;
+      return userId ? { ...item, members: (item.members ?? []).filter((member) => member.userId !== userId) } : { ...item, shareToken: null };
+    }));
   }, []);
 
   const remove = useCallback(async (id: string) => {
@@ -86,7 +109,7 @@ export function useSavedLinks() {
     setLinks((current) => (current ?? []).filter((item) => item.id !== id));
   }, []);
 
-  return { links, error, offset, save, patch, remove };
+  return { links, error, offset, save, patch, remove, share, unshare };
 }
 
 async function copyText(text: string) {
@@ -104,15 +127,109 @@ export function linkKindLabel(path: string): string {
   return kind ? KIND_DEFS.get(kind)?.label ?? 'Overlay' : 'Overlay manual';
 }
 
+/** El id de un overlay manual (para abrir su panel), o null si no es manual. */
+const manualIdOf = (path: string) => /^\/overlay\/manual\/([0-9a-f-]{36})(?:\?|$)/i.exec(path)?.[1] ?? null;
+
+const inviteText = (title: string) => `Te comparto el overlay «${title}» de G22 Scores para que lo puedas gestionar. Entrá con tu cuenta:`;
+
+/** El menú de compartir del sistema (celular); si no hay, copia el link. */
+async function shareOrCopy(url: string, title: string): Promise<'shared' | 'copied' | 'cancelled' | 'failed'> {
+  if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+    try {
+      await navigator.share({ title: `Overlay · ${title}`, text: inviteText(title), url });
+      return 'shared';
+    } catch (problem: unknown) {
+      if (problem instanceof DOMException && problem.name === 'AbortError') return 'cancelled';
+    }
+  }
+  return (await copyText(url)) ? 'copied' : 'failed';
+}
+
+/** Compartir un overlay propio: el link, enviarlo, y quiénes ya lo gestionan. */
+function SharePanel({ link, origin, store }: { link: SavedLink; origin: string; store: SavedLinks }) {
+  const [busy, setBusy] = useState(false);
+  const [note, setNote] = useState<string | null>(null);
+  const [problem, setProblem] = useState<string | null>(null);
+  const url = link.shareToken ? `${origin}${sharePath(link.shareToken)}` : '';
+  const members = link.members ?? [];
+
+  const run = async (action: () => Promise<unknown>) => {
+    setBusy(true);
+    setProblem(null);
+    try {
+      await action();
+    } catch (failure: unknown) {
+      setProblem(failure instanceof Error ? failure.message : 'No se pudo completar.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const flash = (text: string) => { setNote(text); window.setTimeout(() => setNote(null), 2200); };
+  const send = async () => {
+    const how = await shareOrCopy(url, link.title);
+    if (how === 'copied') flash('Link copiado. Pegalo donde quieras.');
+    if (how === 'shared') flash('Listo, enviado.');
+  };
+
+  return (
+    <div className={own.sharePanel}>
+      <p className={own.shareText}>
+        Mandale este link a quien quieras que lo gestione. Va a tener que <b>entrar con su cuenta de G22</b> y después lo
+        edita, lo renueva y maneja su panel igual que vos. Borrarlo sigue siendo solo tuyo.
+      </p>
+      {url ? (
+        <>
+          <div className={own.shareRow}>
+            <input className={own.shareUrl} readOnly value={url} onFocus={(e) => e.currentTarget.select()} aria-label="Link para compartir" />
+            <button type="button" className={styles.primary} onClick={() => void send()}>Enviar link</button>
+            <a
+              className={styles.secondary}
+              href={`https://wa.me/?text=${encodeURIComponent(`${inviteText(link.title)} ${url}`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              WhatsApp
+            </a>
+          </div>
+          {note ? <p className={own.shareText} role="status"><b>{note}</b></p> : null}
+          <button type="button" className={own.cutLink} disabled={busy} onClick={() => void run(() => store.unshare(link.id))}>
+            Cortar el link (quien ya entró lo sigue gestionando)
+          </button>
+        </>
+      ) : (
+        <div className={own.shareRow}>
+          <button type="button" className={styles.primary} disabled={busy} onClick={() => void run(() => store.share(link.id))}>
+            {busy ? 'Creando…' : 'Crear link para compartir'}
+          </button>
+        </div>
+      )}
+      {members.length ? (
+        <ul className={own.members} aria-label="Quiénes lo gestionan">
+          <li>Lo gestionan:</li>
+          {members.map((member) => (
+            <li key={member.userId} className={own.memberChip}>
+              {member.name}
+              <button type="button" aria-label={`Sacar a ${member.name}`} disabled={busy} onClick={() => void run(() => store.unshare(link.id, member.userId))}>×</button>
+            </li>
+          ))}
+        </ul>
+      ) : link.shareToken ? <p className={own.shareText}>Todavía no entró nadie con este link.</p> : null}
+      {problem ? <p className={styles.error} role="alert">{problem}</p> : null}
+    </div>
+  );
+}
+
 /* ─────────────── la lista, en la pestaña ─────────────── */
 
-export function MyOverlays({ origin, store, onCreate, onEdit }: { origin: string; store: SavedLinks; onCreate: () => void; onEdit: (link: SavedLink) => void }) {
+export function MyOverlays({ origin, store, onCreate, onEdit }: { origin: string; store: SavedLinks; onCreate?: () => void; onEdit: (link: SavedLink) => void }) {
   const { links, error, offset, patch, remove } = store;
   const now = useNow(offset);
   const [copied, setCopied] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
   const [confirming, setConfirming] = useState<string | null>(null);
+  const [sharing, setSharing] = useState<string | null>(null);
 
   if (links === null) return <p className={own.empty} role="status">Cargando tus overlays…</p>;
   const summary = linksSummary(links, now);
@@ -141,11 +258,13 @@ export function MyOverlays({ origin, store, onCreate, onEdit }: { origin: string
       <div className={own.head}>
         <div className={styles.shelfHead}>
           <h2 id="mis-overlays">Mis overlays</h2>
-          <p>Los que creaste y guardaste para OBS y vMix. «Editar» los abre con sus ajustes; al guardar, la URL de OBS sigue siendo la misma. Cada uno vale {LINK_TTL_DAYS} días.</p>
+          <p>Los que creaste y los que te compartieron, para OBS y vMix. «Editar» los abre con sus ajustes; al guardar, la URL de OBS sigue siendo la misma. «Compartir» le da a otra persona un link para gestionarlo. Cada uno vale {LINK_TTL_DAYS} días.</p>
         </div>
-        <button type="button" className={`${styles.primary} ${own.create}`} onClick={onCreate}>
-          <span aria-hidden="true">+</span> Crear overlay
-        </button>
+        {onCreate ? (
+          <button type="button" className={`${styles.primary} ${own.create}`} onClick={onCreate}>
+            <span aria-hidden="true">+</span> Crear overlay
+          </button>
+        ) : null}
       </div>
 
       {summary.soon || summary.expired ? (
@@ -162,6 +281,9 @@ export function MyOverlays({ origin, store, onCreate, onEdit }: { origin: string
         <ul className={own.list}>
           {links.map((link) => {
             const status = linkStatus(link.expiresAt, now);
+            const isMember = link.access === 'member';
+            const manualId = manualIdOf(link.path);
+            const memberCount = link.members?.length ?? 0;
             return (
               <li key={link.id} className={own.item} data-state={status.state}>
                 <div className={own.info}>
@@ -175,13 +297,26 @@ export function MyOverlays({ origin, store, onCreate, onEdit }: { origin: string
                       if (value && value !== link.title) void run(link.id, () => patch(link.id, { title: value }));
                     }}
                   />
-                  <span className={own.path}><b>{linkKindLabel(link.path)}</b> · {link.path}</span>
+                  <span className={own.path}>
+                    {isMember
+                      ? <span className={own.sharedTag}>Compartido por {link.ownerName ?? 'otro usuario'}</span>
+                      : memberCount ? <span className={own.sharedTag}>{memberCount === 1 ? 'Compartido con 1 persona' : `Compartido con ${memberCount} personas`}</span> : null}
+                    <b>{linkKindLabel(link.path)}</b> · {link.path}
+                  </span>
                 </div>
                 <span className={own.badge} data-state={status.state} title={`Vence el ${formatExpiry(link.expiresAt)}`}>
                   {status.label}
                 </span>
                 <div className={own.actions}>
                   <button type="button" className={styles.primary} onClick={() => onEdit(link)}>Editar</button>
+                  {manualId ? (
+                    <a className={styles.secondary} href={`/overlay/control/${manualId}`} target="_blank" rel="noopener noreferrer">Panel</a>
+                  ) : null}
+                  {!isMember ? (
+                    <button type="button" className={styles.secondary} aria-expanded={sharing === link.id} onClick={() => setSharing((open) => (open === link.id ? null : link.id))}>
+                      Compartir
+                    </button>
+                  ) : null}
                   <button type="button" className={styles.secondary} onClick={() => void copy(link)} disabled={status.state === 'vencido'} title={status.state === 'vencido' ? 'Renovalo para volver a usarlo' : undefined}>
                     {copied === link.id ? 'Copiada' : 'Copiar URL'}
                   </button>
@@ -190,21 +325,30 @@ export function MyOverlays({ origin, store, onCreate, onEdit }: { origin: string
                   </button>
                   {confirming === link.id ? (
                     <>
-                      <button type="button" className={own.danger} onClick={() => { setConfirming(null); void run(link.id, () => remove(link.id)); }}>Borrar: deja de andar en OBS</button>
+                      <button type="button" className={own.danger} onClick={() => { setConfirming(null); void run(link.id, () => remove(link.id)); }}>
+                        {isMember ? 'Dejar de gestionarlo' : 'Borrar: deja de andar en OBS'}
+                      </button>
                       <button type="button" className={own.cancel} onClick={() => setConfirming(null)}>No</button>
                     </>
                   ) : (
-                    <button type="button" className={own.remove} aria-label={`Borrar ${link.title}`} onClick={() => setConfirming(link.id)}>×</button>
+                    <button type="button" className={own.remove} aria-label={isMember ? `Dejar de gestionar ${link.title}` : `Borrar ${link.title}`} onClick={() => setConfirming(link.id)}>×</button>
                   )}
                 </div>
+                {sharing === link.id && !isMember ? <SharePanel link={link} origin={origin} store={store} /> : null}
               </li>
             );
           })}
         </ul>
       ) : (
         <div className={own.empty}>
-          <p>Todavía no guardaste ninguno. Elegí un gráfico, personalizalo y tocá «Guardar y copiar».</p>
-          <button type="button" className={styles.primary} onClick={onCreate}>Crear mi primer overlay</button>
+          {onCreate ? (
+            <>
+              <p>Todavía no guardaste ninguno. Elegí un gráfico, personalizalo y tocá «Guardar y copiar».</p>
+              <button type="button" className={styles.primary} onClick={onCreate}>Crear mi primer overlay</button>
+            </>
+          ) : (
+            <p>Ya no tenés overlays compartidos. Si alguien te manda otro link, abrilo y aparece acá.</p>
+          )}
         </div>
       )}
       {problem ? <p className={styles.error} role="alert">{problem}</p> : null}
@@ -219,7 +363,7 @@ export function MyOverlays({ origin, store, onCreate, onEdit }: { origin: string
  * ENCIMA del mismo enlace: mismo token, misma URL en OBS, y la página al aire
  * se pasa sola a la configuración nueva en menos de un minuto.
  */
-export function SaveLink({ relative, missing, origin, defaultTitle, store, editing, onSaved }: {
+export function SaveLink({ relative, missing, origin, defaultTitle, store, editing, onSaved, allowNew = true }: {
   relative: string;
   missing: string | null;
   origin: string;
@@ -227,6 +371,8 @@ export function SaveLink({ relative, missing, origin, defaultTitle, store, editi
   store: SavedLinks;
   editing: SavedLink | null;
   onSaved: (link: SavedLink) => void;
+  /** false = solo gestiona overlays compartidos: no puede guardar uno nuevo. */
+  allowNew?: boolean;
 }) {
   const { save, patch, offset } = store;
   const now = useNow(offset);
@@ -280,7 +426,7 @@ export function SaveLink({ relative, missing, origin, defaultTitle, store, editi
       {pending ? (
         <p className={own.pendingNote}>
           Cambiaste ajustes. «Guardar cambios» los pasa al aire con la misma URL, en menos de un minuto.{' '}
-          <button type="button" className={own.asNew} onClick={() => void persist(true)} disabled={Boolean(missing) || saving}>O guardalo como un overlay nuevo</button>
+          {allowNew ? <button type="button" className={own.asNew} onClick={() => void persist(true)} disabled={Boolean(missing) || saving}>O guardalo como un overlay nuevo</button> : null}
         </p>
       ) : current ? (
         <p className={own.savedNote}>

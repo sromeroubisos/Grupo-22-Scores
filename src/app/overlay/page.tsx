@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getOverlayAccess } from '@/lib/auth/overlayAccess';
 import { getOverlayPlan } from '@/lib/server/overlayPlanStore';
+import { hasSharedLinks } from '@/lib/server/overlayLinksStore';
 import OverlayBuilder from './OverlayBuilder';
 import styles from './builder.module.css';
 
@@ -21,7 +22,10 @@ export default async function OverlayBuilderPage() {
   const access = await getOverlayAccess();
   if (access.status === 'signed-out') redirect('/login?returnTo=%2Foverlay');
 
-  if (access.status === 'denied') {
+  // Sin el rol, pero con overlays que alguien le compartió: entra solo a gestionar esos.
+  const sharedOnly = access.status === 'denied' && (await hasSharedLinks(access.userId));
+
+  if (access.status === 'denied' && !sharedOnly) {
     return (
       <main className={styles.page}>
         <div className={styles.denied}>
@@ -39,5 +43,5 @@ export default async function OverlayBuilderPage() {
 
   // El plan decide qué se puede personalizar (y al aire se vuelve a aplicar).
   const plan = await getOverlayPlan(access.userId, access.role).catch(() => 'basico' as const);
-  return <OverlayBuilder plan={plan} />;
+  return <OverlayBuilder plan={plan} canCreate={!sharedOnly} />;
 }

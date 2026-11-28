@@ -1,7 +1,7 @@
-import { createHash, timingSafeEqual } from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { latestLinkForManual } from '@/lib/server/overlayLinksStore';
+import { canWriteManual } from '@/lib/server/overlayManualAuth';
 import {
   applyClockAction,
   applyScoreAction,
@@ -25,7 +25,9 @@ import {
  *            shot?: {start:{label,seconds,team}} | 'pause'|'resume'|'stop' }
  *          con el header `x-overlay-key: <clave del panel>`
  *
- * Leer es público (es lo que ya se ve al aire); escribir pide la clave.
+ * Leer es público (es lo que ya se ve al aire); escribir pide la clave, o la
+ * sesión de quien lo creó o lo gestiona por un link compartido (el panel abierto
+ * desde Mis overlays manda `x-overlay-session: 1` para preguntarlo).
  */
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -34,20 +36,14 @@ function noStore(body: unknown, status = 200) {
   return NextResponse.json(body, { status, headers: { 'Cache-Control': 'no-store' } });
 }
 
-function keyMatches(key: string, hash: string) {
-  const given = Buffer.from(createHash('sha256').update(key).digest('hex'));
-  const stored = Buffer.from(hash);
-  return given.length === stored.length && timingSafeEqual(given, stored);
-}
-
 async function load(id: string) {
   const admin = createAdminClient();
   const { data, error } = await admin
     .from('overlay_controls')
-    .select('id, kind, edit_key_hash, state, updated_at')
+    .select('id, kind, edit_key_hash, created_by, state, updated_at')
     .eq('id', id)
     .maybeSingle();
-  return { admin, row: data as { id: string; kind: ManualKind; edit_key_hash: string; state: unknown; updated_at: string } | null, error };
+  return { admin, row: data as { id: string; kind: ManualKind; edit_key_hash: string; created_by: string | null; state: unknown; updated_at: string } | null, error };
 }
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -56,10 +52,14 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   const { row, error } = await load(id);
   if (error) return noStore({ error: 'No se pudo leer el overlay.' }, 502);
   if (!row) return noStore({ error: 'Overlay inexistente.' }, 404);
-  // Con la clave (el panel), también el enlace guardado para OBS y su vencimiento.
+  // El panel (con la clave, o con sesión si lo pregunta): también el enlace
+  // guardado para OBS y su vencimiento, y si puede manejarlo.
   const key = request.headers.get('x-overlay-key') ?? '';
-  const link = key && keyMatches(key, row.edit_key_hash) ? await latestLinkForManual(id).catch(() => null) : undefined;
+  const asks = Boolean(key) || request.headers.get('x-overlay-session') === '1';
+  const canEdit = asks ? await canWriteManual(key, row) : undefined;
+  const link = canEdit ? await latestLinkForManual(id).catch(() => null) : undefined;
   return noStore({
+    ...(canEdit !== undefined ? { canEdit } : {}),
     ...(link !== undefined ? { link: link ? { path: link.path, token: link.token, expiresAt: link.expiresAt } : null } : {}),
     id: row.id,
     kind: row.kind,
@@ -76,7 +76,9 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   const { admin, row, error } = await load(id);
   if (error) return noStore({ error: 'No se pudo leer el overlay.' }, 502);
   if (!row) return noStore({ error: 'Overlay inexistente.' }, 404);
-  if (!key || !keyMatches(key, row.edit_key_hash)) return noStore({ error: 'La clave del panel no es válida.' }, 403);
+  if (!(await canWriteManual(key, row))) {
+    return noStore({ error: key ? 'La clave del panel no es válida.' : 'Entrá con tu cuenta de G22 (la que tiene este overlay) o abrí el link del panel con su clave.' }, 403);
+  }
 
   const body = (await request.json().catch(() => ({}))) as { state?: unknown; clock?: unknown; score?: unknown; shot?: unknown };
 

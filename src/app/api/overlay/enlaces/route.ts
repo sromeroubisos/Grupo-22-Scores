@@ -1,5 +1,5 @@
 import type { NextRequest } from 'next/server';
-import { json, overlayLinksGuard } from './guard';
+import { json, overlayLinksGuard, signedInGuard } from './guard';
 import { MAX_LINKS_PER_USER, linkKindFromPath, normalizeLinkPath } from '@/lib/overlay/overlayLinks';
 import { countUserLinks, insertUserLink, listUserLinks } from '@/lib/server/overlayLinksStore';
 
@@ -15,10 +15,10 @@ import { countUserLinks, insertUserLink, listUserLinks } from '@/lib/server/over
 const missingTable = (message: string) => /overlay_links|PGRST205|42P01/.test(message);
 
 export async function GET() {
-  const auth = await overlayLinksGuard();
+  const auth = await signedInGuard();
   if ('error' in auth) return auth.error;
   try {
-    return json({ links: await listUserLinks(auth.userId), serverNow: new Date().toISOString() });
+    return json({ links: await listUserLinks(auth.userId), canCreate: auth.canCreate, serverNow: new Date().toISOString() });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : '';
     return json({ error: missingTable(message) ? 'Mis overlays todavía no está habilitado en la base.' : 'No se pudo leer la lista.' }, 502);
