@@ -153,17 +153,29 @@ function normalizeNationKey(value: string): string {
 const WOMEN_SUFFIX_RE = /\s+(?:w|women s|womens|women|woman|fem|femenin[oa]s?|damas|mujeres)$/;
 
 /**
- * Solo el nombre PELADO del pais — la mayor de varones o la de mujeres.
+ * EL SEVEN DE LA MAYOR TAMBIEN ES EL PAIS.
  *
- * "Argentina" y "Argentina W" llevan la misma bandera: son la mayor de cada rama y
- * el pais es uno solo. "Argentina XV", "Argentina 7s" y "Argentina M20" no, porque
- * son equipos distintos —otra categoria, otro plantel— y cada uno se queda con la
- * identidad que ya tiene.
+ * Pedido del usuario (2026-11-28): en el circuito SVNS cada seleccion se llama
+ * "<pais> 7s" (asi la crea el sync de World Rugby) y tiene que llevar la bandera,
+ * no el escudo suelto que alguna ficha tenia cargado. La marca del seven se saca
+ * DESPUES de la del femenino, porque el nombre llega como "España 7s W".
+ * Una sola marca y del final: "Argentina 7s A" o "Argentina M18 7s" siguen afuera.
+ */
+const SEVENS_SUFFIX_RE = /\s+(?:7s|7 s|sevens|seven|7)$/;
+
+/**
+ * Solo el nombre PELADO del pais — la mayor de varones o la de mujeres, en XV o
+ * en seven.
  *
- * La simetria se sostiene sola porque la marca del femenino se saca ANTES de buscar
- * el pais, no en lugar de buscarlo: "Argentina 7s W" queda en "Argentina 7s", que
- * no lleva bandera igual que su par de varones. Lo que el masculino no tiene, el
- * femenino tampoco lo hereda.
+ * "Argentina", "Argentina W", "Argentina 7s" y "Argentina 7s W" llevan la misma
+ * bandera: son la mayor de cada rama y el pais es uno solo. "Argentina XV" y
+ * "Argentina M20" no, porque son equipos distintos —otra categoria, otro plantel—
+ * y cada uno se queda con la identidad que ya tiene.
+ *
+ * La simetria se sostiene sola porque las marcas se sacan ANTES de buscar el pais,
+ * no en lugar de buscarlo: "Argentina XV W" queda en "Argentina XV", que no lleva
+ * bandera igual que su par de varones. Lo que el masculino no tiene, el femenino
+ * tampoco lo hereda.
  *
  * Que la coincidencia sea exacta ademas resuelve solo el problema de los clubes que
  * arrancan igual: "New Zealand Warriors" es de la NRL y "Croatia Dakovo" es un club
@@ -173,7 +185,11 @@ export function getNationalTeamFlag(rawName: unknown): string | null {
     if (typeof rawName !== 'string') return null;
 
     const clave = normalizeNationKey(rawName);
-    const slug = NATIONAL_TEAM_FLAGS[clave] ?? NATIONAL_TEAM_FLAGS[clave.replace(WOMEN_SUFFIX_RE, '')];
+    const sinFemenino = clave.replace(WOMEN_SUFFIX_RE, '');
+    const slug =
+        NATIONAL_TEAM_FLAGS[clave] ??
+        NATIONAL_TEAM_FLAGS[sinFemenino] ??
+        NATIONAL_TEAM_FLAGS[sinFemenino.replace(SEVENS_SUFFIX_RE, '')];
     return slug ? `${NATIONAL_TEAM_FLAG_BASE}/${slug}.png` : null;
 }
 
