@@ -8837,16 +8837,28 @@ async function drawG22BasePlate(
     bgColor: string,
     plateOptions?: ExportPlateOptions
 ) {
+    // Un torneo con base propia (SVNS de Dubái, SVNS 3, Seven de la República)
+    // pone SU estética como campo: la variante SIN FOTO, opaca, del formato. La
+    // base es oscura, así que la placa se lee en blanco sobre ella.
+    const tournamentBase = resolveTournamentExportBase(data.tournamentId, data.kickoffAt ?? null);
+    const isStoryCanvas = canvas.height > canvas.width * 1.5;
+    const baseTone = getG22PlateTone(accentColor, bgColor, plateOptions);
+    const tone: G22PlateTone = tournamentBase
+        ? { ...baseTone, ink: '#ffffff', rule: hexToRGBA('#ffffff', 0.95), isDarkField: true }
+        : baseTone;
     // La placa pinta su propio campo: ahi se decide la variante del escudo, no
     // con el Fondo del modal.
-    setActiveCrestBackdropDark(getG22PlateTone(accentColor, bgColor, plateOptions).isDarkField);
-    const [homeLogo, awayLogo, tournamentLogo, sportMark, wordmark, themePhoto] = await Promise.all([
+    setActiveCrestBackdropDark(tone.isDarkField);
+    const [homeLogo, awayLogo, tournamentLogo, sportMark, wordmark, themePhoto, baseField] = await Promise.all([
         loadImage(data.homeLogo || ''),
         loadImage(data.awayLogo || ''),
         loadImage(getTournamentLogoImageSource(data)),
         loadImage(resolvePlateBrandSource(plateOptions?.brand, data.sport)),
         loadImage('/header-logo.png'),
         data.themeBackground ? loadImage(data.themeBackground) : Promise.resolve(null),
+        tournamentBase
+            ? loadImage((isStoryCanvas ? tournamentBase.story : tournamentBase.post).noPhoto)
+            : Promise.resolve(null),
     ]);
 
     // Escudo real o no hay placa. Sin este corte el escudo que falta se rellena
@@ -8869,10 +8881,17 @@ async function drawG22BasePlate(
     // 42% más grande.
     const u = (value: number) => Math.round((value * W) / 1080);
     const extra = Math.max(0, H - Math.round((W * 1350) / 1080));
-    const tone = getG22PlateTone(accentColor, bgColor, plateOptions);
     const showFooterMeta = plateOptions?.footerMeta !== false;
 
-    drawG22PlateField(ctx, canvas, tone, themePhoto, data.themeBackgroundVeil);
+    if (baseField && drawCoverImage(ctx, canvas, baseField)) {
+        // Las bases traen impreso arriba el rótulo "SALIDA DE 22 >>>" de las piezas
+        // con foto; la placa ya firma con su marca bajo el titular, así que esa
+        // franja se tapa con la textura de justo debajo (el fondo ahí es parejo).
+        const strip = u(150);
+        ctx.drawImage(canvas, 0, strip, W, strip, 0, 0, W, strip);
+    } else {
+        drawG22PlateField(ctx, canvas, tone, themePhoto, data.themeBackgroundVeil);
+    }
 
     const padding = u(62);
     const contentWidth = W - padding * 2;
