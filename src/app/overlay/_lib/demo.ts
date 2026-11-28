@@ -128,6 +128,38 @@ export function demoFeed(kind: OverlayFeedKind): OverlayFeed {
     };
   }
 
+  if (kind === 'grupo') {
+    // Una zona de cuatro: seis partidos en tres fechas (jugados, en juego y por jugar).
+    const fixture: Array<[string, number, number, string, [number, number] | null, number, string]> = [
+      ['g1', 0, 2, 'final', [27, 13], -20160, 'Fecha 1'],
+      ['g2', 3, 4, 'final', [17, 19], -20100, 'Fecha 1'],
+      ['g3', 2, 3, 'final', [24, 24], -10080, 'Fecha 2'],
+      ['g4', 4, 0, 'final', [10, 31], -10020, 'Fecha 2'],
+      ['g5', 0, 3, 'live', [12, 7], 0, 'Fecha 3'],
+      ['g6', 2, 4, 'scheduled', null, 120, 'Fecha 3'],
+    ];
+    const names = ['Club Local', 'Universitario Oeste', 'Atlético Norte', 'Deportivo Sur'];
+    return {
+      kind,
+      title: 'Torneo de prueba',
+      subtitle: 'Zona A',
+      logo: null,
+      matches: fixture.map(([id, home, away, status, score, minutes, round]) => ({
+        ...match(id, home, away, status, score, minutes),
+        context_label: round,
+      })),
+      table: {
+        sport: 'rugby',
+        rows: names.map((name, index) => ({
+          position: index + 1, teamId: null, name, logo: null,
+          played: 2, won: [2, 1, 0, 0][index], drawn: [0, 0, 1, 1][index], lost: [0, 1, 1, 1][index],
+          pointsFor: [58, 29, 37, 41][index], pointsAgainst: [23, 48, 51, 43][index], diff: [35, -19, -14, -2][index],
+          bonus: [2, 0, 0, 1][index], points: [10, 4, 2, 3][index] , form: null, group: null,
+        })).sort((a, b) => b.points - a.points).map((row, index) => ({ ...row, position: index + 1 })),
+      },
+    };
+  }
+
   if (kind === 'goleadores') {
     return {
       kind,

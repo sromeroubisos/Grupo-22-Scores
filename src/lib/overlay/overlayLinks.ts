@@ -19,7 +19,7 @@ export const MAX_LINKS_PER_USER = 200;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 /** Las rutas que salen al aire. El generador, el panel y la raíz no se guardan. */
-const AIR_PATH_RE = /^\/overlay\/(partido|formacion|manual)\/[^/?#]+$|^\/overlay\/(partidos|fecha|dia|home|tabla|goleadores|noticia|playoff|jugador)$/;
+const AIR_PATH_RE = /^\/overlay\/(partido|formacion|manual)\/[^/?#]+$|^\/overlay\/(partidos|fecha|dia|home|tabla|grupo|goleadores|noticia|playoff|jugador)$/;
 
 /** Parámetros que el enlace no guarda: el token lo pone el servidor y `prueba` es solo para probar. */
 const STRIPPED_PARAMS = ['enlace', 'prueba'];

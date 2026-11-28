@@ -7,7 +7,7 @@
  * marcador de un partido solo.
  */
 
-export type OverlayFeedKind = 'partidos' | 'fecha' | 'dia' | 'home' | 'playoff' | 'jugador' | 'tabla' | 'goleadores' | 'noticia';
+export type OverlayFeedKind = 'partidos' | 'fecha' | 'dia' | 'home' | 'playoff' | 'jugador' | 'tabla' | 'goleadores' | 'noticia' | 'grupo';
 
 export interface OverlayBracketRound {
   name: string;

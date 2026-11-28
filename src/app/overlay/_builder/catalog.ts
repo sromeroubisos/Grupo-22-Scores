@@ -11,7 +11,7 @@ export type Kind =
   | 'linea' | 'pisos' | 'caja' | 'sesgado' | 'degrade'
   | 'central' | 'rotulo' | 'tablero' | 'agua' | 'claro' | 'tablilla'
   | 'partidos' | 'fecha' | 'dia' | 'home'
-  | 'tabla' | 'goleadores' | 'playoff' | 'jugador' | 'noticia'
+  | 'tabla' | 'grupo' | 'goleadores' | 'playoff' | 'jugador' | 'noticia'
   | 'manual-marcador' | 'manual-titular' | 'manual-sponsors';
 
 export interface KindDef {
@@ -84,6 +84,7 @@ export const KIND_GROUPS: KindGroup[] = [
     description: 'Tablas, rankings y llaves de un torneo.',
     kinds: [
       { id: 'tabla', label: 'Tabla de posiciones', hint: 'Por fase y por zona.', thumb: '/overlay/tabla?escala=1.1' },
+      { id: 'grupo', label: 'Zona: partidos y tabla', hint: 'Los partidos de una zona en cuadritos y su tabla abajo. Todo junto, sin rotar.', thumb: '/overlay/grupo?escala=0.95' },
       { id: 'goleadores', label: 'Goleadores y tryman', hint: 'Puntos, tries, goles o tarjetas.', thumb: '/overlay/goleadores?escala=1.2' },
       { id: 'playoff', label: 'Playoff', hint: 'El cuadro como llave o en columnas.', thumb: '/overlay/playoff?escala=1.6' },
       { id: 'jugador', label: 'Jugador', hint: 'Ficha con sus números.', thumb: '/overlay/jugador?escala=1.2' },
@@ -143,7 +144,7 @@ export const isMatchKind = (kind: Kind) => isScoreboardStyle(kind) || kind === '
 export const isManual = (kind: Kind) => kind === 'manual-marcador' || kind === 'manual-titular' || kind === 'manual-sponsors';
 /** Las versiones que dibujan un marcador (con reloj, tarjetas, colores de club). */
 export const hasScoreboard = (kind: Kind) => isScoreboardStyle(kind) || kind === 'manual-marcador';
-export const needsTournament = (kind: Kind) => kind === 'fecha' || kind === 'playoff' || kind === 'tabla' || kind === 'goleadores';
+export const needsTournament = (kind: Kind) => kind === 'fecha' || kind === 'playoff' || kind === 'tabla' || kind === 'grupo' || kind === 'goleadores';
 export const isList = (kind: Kind) => ['partidos', 'fecha', 'dia', 'home', 'tabla', 'goleadores'].includes(kind);
 
 export const DEFAULT_ROWS: Partial<Record<Kind, number>> = { partidos: 6, fecha: 7, dia: 7, home: 7, tabla: 10, goleadores: 5 };

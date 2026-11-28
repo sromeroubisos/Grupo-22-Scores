@@ -9,7 +9,7 @@ import {
   feedTournamentOptions,
   parseIdList,
 } from '@/lib/server/overlayFeed';
-import { feedHome, feedLeaders, feedNews, feedStandings } from '@/lib/server/overlayFeedTables';
+import { feedGroup, feedHome, feedLeaders, feedNews, feedStandings } from '@/lib/server/overlayFeedTables';
 import { searchOverlay } from '@/lib/server/overlaySearch';
 
 /**
@@ -22,6 +22,7 @@ import { searchOverlay } from '@/lib/server/overlaySearch';
  *   ?tipo=jugador&id=<id>[&torneo=<id>]
  *   ?tipo=home[&fecha=…][&deporte=rugby][&torneos=…][&vivo=1]  la home: todos los deportes y proveedores
  *   ?tipo=tabla&torneo=<id>[&fase=<id>][&grupo=<id>]
+ *   ?tipo=grupo&torneo=<id>[&fase=<id>][&grupo=<id>]  una zona: sus partidos y su tabla
  *   ?tipo=goleadores&torneo=<id>[&stat=puntos|tries|goles|conversiones|penales|tarjetas][&cantidad=10]
  *   ?tipo=noticia&id=<id o link de la nota>
  *   ?tipo=opciones&torneo=<id>             fechas, fases, zonas y playoffs (para el generador)
@@ -61,6 +62,9 @@ export async function GET(request: NextRequest) {
       case 'tabla':
         body = await feedStandings(tournament, params.get('fase'), params.get('grupo'), title);
         break;
+      case 'grupo':
+        body = await feedGroup(tournament, params.get('fase'), params.get('grupo'), title);
+        break;
       case 'goleadores':
         body = await feedLeaders(tournament, params.get('stat'), Number(params.get('cantidad')) || 10, title);
         break;
@@ -75,7 +79,7 @@ export async function GET(request: NextRequest) {
         break;
       default:
         return NextResponse.json(
-          { error: 'tipo tiene que ser partidos, fecha, dia, home, playoff, jugador, tabla, goleadores, noticia, opciones o buscar.' },
+          { error: 'tipo tiene que ser partidos, fecha, dia, home, playoff, jugador, tabla, grupo, goleadores, noticia, opciones o buscar.' },
           { status: 400, headers: { 'Cache-Control': 'no-store' } },
         );
     }

@@ -2,7 +2,7 @@
 
 /* eslint-disable @next/next/no-img-element -- foto y escudos por proxy de la misma origen. */
 
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { kickoffParts, overlayClock, toOverlayMatch, type OverlayMatch } from '@/lib/overlay/matchOverlayModel';
 import type { OverlayFeed, OverlayFeedKind, OverlayLeaderRow, OverlayNews, OverlayPlayer, OverlayStandingRow } from '@/lib/overlay/overlayFeedTypes';
 import type { OverlayConfig } from '../_lib/config';
@@ -119,6 +119,7 @@ export default function FeedOverlay({
 function FeedCard({ feed, config }: { feed: OverlayFeed; config: OverlayConfig }) {
   if (feed.kind === 'jugador' && feed.player) return <PlayerCard feed={feed} player={feed.player} />;
   if (feed.kind === 'tabla' && feed.table) return <TableCard feed={feed} rows={feed.table.rows} config={config} />;
+  if (feed.kind === 'grupo') return <GroupCard feed={feed} config={config} />;
   if (feed.kind === 'goleadores' && feed.leaders) return <LeadersCard feed={feed} config={config} />;
   if (feed.kind === 'noticia' && feed.news) return <NewsCard feed={feed} news={feed.news} config={config} />;
   if (feed.kind === 'playoff' && feed.bracket) return <BracketCard feed={feed} config={config} />;
@@ -277,7 +278,7 @@ function tieStatus(match: OverlayMatch, now: number) {
   return <><span>{kickoff.day}</span><span>{kickoff.time}</span></>;
 }
 
-function Tie({ match, winner, now, index }: { match: OverlayMatch; winner: 'home' | 'away' | null; now: number; index: number }) {
+function Tie({ match, winner, now, index, caption }: { match: OverlayMatch; winner: 'home' | 'away' | null; now: number; index: number; caption?: string | null }) {
   const line = (side: 'home' | 'away') => {
     const team = match[side];
     return (
@@ -294,6 +295,7 @@ function Tie({ match, winner, now, index }: { match: OverlayMatch; winner: 'home
   };
   return (
     <div className={styles.tie} data-phase={match.phase} style={{ '--ov-i': index } as CSSProperties}>
+      {caption ? <div className={styles.tieCaption}>{caption}</div> : null}
       {line('home')}
       {line('away')}
       <div className={styles.tieMeta}>{tieStatus(match, now)}</div>
@@ -378,8 +380,6 @@ function TableCard({ feed, rows, config }: { feed: OverlayFeed; rows: OverlaySta
     return out;
   }, [rows, config.rows]);
   const page = useRotation(pages.length, config.rotate);
-  const showBonus = rows.some((row) => row.bonus > 0);
-  const showDraws = rows.some((row) => row.drawn > 0);
 
   return (
     <G22Card
@@ -395,7 +395,17 @@ function TableCard({ feed, rows, config }: { feed: OverlayFeed; rows: OverlaySta
         </>
       )}
     >
-      <div className={styles.table} key={page} data-bonus={showBonus ? '' : undefined} data-draws={showDraws ? '' : undefined}>
+      <StandingsTable key={page} rows={pages[page] ?? []} all={rows} />
+    </G22Card>
+  );
+}
+
+/** Las filas de una tabla. `all` decide qué columnas hacen falta (empates, bonus) para todas las páginas igual. */
+function StandingsTable({ rows, all = rows, dense = false }: { rows: OverlayStandingRow[]; all?: OverlayStandingRow[]; dense?: boolean }) {
+  const showBonus = all.some((row) => row.bonus > 0);
+  const showDraws = all.some((row) => row.drawn > 0);
+  return (
+      <div className={styles.table} data-bonus={showBonus ? '' : undefined} data-draws={showDraws ? '' : undefined} data-dense={dense ? '' : undefined}>
         <div className={styles.tableHead}>
           <span>#</span>
           <span>Equipo</span>
@@ -407,8 +417,8 @@ function TableCard({ feed, rows, config }: { feed: OverlayFeed; rows: OverlaySta
           {showBonus ? <span>BON</span> : null}
           <span>PTS</span>
         </div>
-        {(pages[page] ?? []).map((row, index) => {
-          const previous = index > 0 ? pages[page][index - 1].group : null;
+        {rows.map((row, index) => {
+          const previous = index > 0 ? rows[index - 1].group : null;
           const header = row.group && (index === 0 || row.group !== previous);
           const diff = row.diff > 0 ? `+${row.diff}` : String(row.diff);
           return (
@@ -432,8 +442,113 @@ function TableCard({ feed, rows, config }: { feed: OverlayFeed; rows: OverlaySta
           );
         })}
       </div>
-    </G22Card>
   );
+}
+
+/* ─── una zona: partidos arriba, tabla abajo ─── */
+
+/**
+ * Achica la tarjeta si no entra en el alto de la pantalla (una zona grande,
+ * una escala alta): al aire nunca hay scroll ni una tabla cortada.
+ */
+function useFitHeight(margin: number) {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [zoom, setZoom] = useState(1);
+  const zoomRef = useRef(1);
+  useLayoutEffect(() => {
+    const element = ref.current;
+    if (!element) return undefined;
+    const measure = () => {
+      const natural = element.getBoundingClientRect().height / zoomRef.current;
+      if (!natural) return;
+      const room = window.innerHeight - margin * 2;
+      const next = Math.max(0.5, Math.min(1, room / natural));
+      if (Math.abs(next - zoomRef.current) > 0.01) {
+        zoomRef.current = next;
+        setZoom(next);
+      }
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    window.addEventListener('resize', measure);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', measure);
+    };
+  }, [margin]);
+  return { ref, zoom };
+}
+
+function GroupCard({ feed, config }: { feed: OverlayFeed; config: OverlayConfig }) {
+  const matches = useMemo(
+    () => (feed.matches ?? []).map((raw) => toOverlayMatch(raw)).filter((match): match is OverlayMatch => match !== null),
+    [feed.matches],
+  );
+  const rows = feed.table?.rows ?? [];
+  const live = matches.filter((match) => match.phase === 'live').length;
+  const now = useNow(live > 0);
+  const columns = zoneColumns(matches.length);
+  const dense = matches.length > 8 || rows.length > 6;
+  const played = matches.filter((match) => match.phase === 'final').length;
+  const { ref, zoom } = useFitHeight(config.margin);
+
+  return (
+    <div ref={ref} style={zoom < 1 ? ({ zoom } as CSSProperties) : undefined}>
+      <G22Card
+        title={config.title ?? feed.title}
+        subtitle={feed.subtitle}
+        logo={feed.logo}
+        width={columns >= 5 ? 1400 : columns === 4 ? 1240 : 1060}
+        footer={(
+          <>
+            <span>{live ? `${live} en vivo · ` : ''}{played} de {matches.length} {matches.length === 1 ? 'partido jugado' : 'partidos jugados'}{feed.truncated ? ' · hay más' : ''}</span>
+            <span>g22scores.com</span>
+          </>
+        )}
+      >
+        <div className={styles.zone}>
+          {matches.length ? (
+            <div className={styles.zoneMatches} style={{ '--cols': columns } as CSSProperties} data-dense={dense ? '' : undefined}>
+              {matches.map((match, index) => (
+                <Tie key={match.id} match={match} winner={scoreWinner(match)} now={now} index={index} caption={match.context} />
+              ))}
+            </div>
+          ) : (
+            <p className={styles.empty}>La zona todavía no tiene partidos cargados.</p>
+          )}
+          <div className={styles.zoneLabel}>Posiciones</div>
+          {rows.length ? <StandingsTable rows={rows} dense={dense} /> : <p className={styles.empty}>La tabla todavía no tiene datos.</p>}
+        </div>
+      </G22Card>
+    </div>
+  );
+}
+
+/**
+ * Cuántos cuadritos por fila: los que dejen menos huecos en la última fila y,
+ * a igual hueco, menos filas. 6 → 3×2, 4 → 2×2, 8 → 4×2, 10 → 5×2, 12 → 4×3.
+ */
+function zoneColumns(count: number): number {
+  if (count <= 3) return Math.max(1, count);
+  if (count === 4) return 2;
+  let best = 3;
+  let bestWaste = Number.POSITIVE_INFINITY;
+  for (const columns of [3, 4, 5]) {
+    const waste = Math.ceil(count / columns) * columns - count;
+    if (waste < bestWaste || (waste === bestWaste && columns > best)) {
+      best = columns;
+      bestWaste = waste;
+    }
+  }
+  return best;
+}
+
+/** Quién ganó, mirando el resultado (solo un partido terminado y sin empate). */
+function scoreWinner(match: OverlayMatch): 'home' | 'away' | null {
+  if (match.phase !== 'final' || match.home.score === null || match.away.score === null) return null;
+  if (match.home.score === match.away.score) return null;
+  return match.home.score > match.away.score ? 'home' : 'away';
 }
 
 /* ─── goleadores / tryman ─── */

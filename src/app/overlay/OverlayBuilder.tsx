@@ -751,8 +751,8 @@ function Editor({ kind, origin, onBack, onStyle, onCreate, store, saved, onSaved
       if (kind === 'home' && sport) params.set('deporte', sport);
       if (dayTournaments.length) params.set('torneos', dayTournaments.map((item) => item.id).join(','));
       if (kind === 'home' && liveOnly) params.set('vivo', '1');
-    } else if (kind === 'tabla') {
-      path = '/overlay/tabla';
+    } else if (kind === 'tabla' || kind === 'grupo') {
+      path = `/overlay/${kind}`;
       if (tournamentId) params.set('torneo', tournamentId);
       if (phase && options) params.set('fase', phase);
       if (group && options) params.set('grupo', group);
@@ -1066,7 +1066,7 @@ function Editor({ kind, origin, onBack, onStyle, onCreate, store, saved, onSaved
                   </select>
                 </Field>
               ) : null}
-              {kind === 'tabla' && tournament ? (
+              {(kind === 'tabla' || kind === 'grupo') && tournament ? (
                 <div className={styles.pair}>
                   <Field label="Fase">
                     <select value={phase} onChange={(e) => { setPhase(e.target.value); setGroup(''); }} disabled={!options}>
@@ -1076,7 +1076,7 @@ function Editor({ kind, origin, onBack, onStyle, onCreate, store, saved, onSaved
                   </Field>
                   <Field label="Zona">
                     <select value={group} onChange={(e) => setGroup(e.target.value)} disabled={!options || !filteredGroups.length}>
-                      <option value="">Todas</option>
+                      <option value="">{kind === 'grupo' ? 'La primera' : 'Todas'}</option>
                       {filteredGroups.map((item) => <option key={item.id} value={item.id}>{item.phase && !phase ? `${item.phase} · ` : ''}{item.name}</option>)}
                     </select>
                   </Field>

@@ -16,7 +16,7 @@ export type SavedTarget = {
   params: URLSearchParams;
 };
 
-const LIST_ROUTES = new Set(['partidos', 'fecha', 'dia', 'home', 'tabla', 'goleadores', 'playoff', 'jugador', 'noticia']);
+const LIST_ROUTES = new Set(['partidos', 'fecha', 'dia', 'home', 'tabla', 'grupo', 'goleadores', 'playoff', 'jugador', 'noticia']);
 
 export function savedTarget(path: string): SavedTarget | null {
   const [pathname, query = ''] = path.split('?');

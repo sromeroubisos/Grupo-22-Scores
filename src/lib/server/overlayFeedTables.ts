@@ -18,7 +18,7 @@ import { getReadClient } from '@/lib/supabase/read';
 import { APP_TIMEZONE, formatDateKey } from '@/lib/timezone';
 import { buildTeamLogoProxyUrl } from '@/lib/utils/logoUrl';
 import type { OverlayFeed, OverlayLeaderRow, OverlayStandingRow } from '@/lib/overlay/overlayFeedTypes';
-import { OverlayFeedError, UUID_RE, loadTournament, rel, str, tournamentLogo } from './overlayFeed';
+import { MATCH_SELECT, OverlayFeedError, UUID_RE, loadTournament, rel, str, toPayload, tournamentLogo, visible } from './overlayFeed';
 
 type Row = Record<string, unknown>;
 
@@ -341,5 +341,83 @@ export async function feedNews(rawId: string, title: string | null): Promise<Ove
       sport: str(row.sport),
       path: newsPath({ id, title: str(row.title) }),
     },
+  };
+}
+
+/* ─── una zona: sus partidos y su tabla ─── */
+
+/** Tope de partidos de una zona: una zona de 6 equipos ida y vuelta son 30. */
+const MAX_GROUP_MATCHES = 30;
+
+/**
+ * Los partidos de UNA zona (jugados, en juego y por jugar) y la tabla de esa
+ * misma zona, para mostrarlos juntos. Sin zona elegida, la primera del torneo
+ * (o de la fase pedida). La tabla sale de `feedStandings`: la misma cuenta que
+ * la tabla pública.
+ */
+export async function feedGroup(
+  tournamentId: string,
+  phaseId: string | null,
+  groupId: string | null,
+  title: string | null,
+): Promise<OverlayFeed> {
+  const db = await getReadClient();
+  const tournament = await loadTournament(db, tournamentId);
+
+  const { data: phases, error: phasesError } = await db
+    .from('tournament_phases')
+    .select('id, name, order_index, created_at')
+    .eq('tournament_id', tournamentId)
+    .order('order_index', { ascending: true })
+    .order('created_at', { ascending: true })
+    .limit(50);
+  if (phasesError) throw new OverlayFeedError('No se pudieron leer las fases del torneo.', 502);
+  const phaseRows = (phases ?? []) as Row[];
+  const phaseIds = phaseRows.map((phase) => String(phase.id));
+  const { data: groups, error: groupsError } = phaseIds.length
+    ? await db.from('tournament_groups').select('id, name, phase_id, order_index').in('phase_id', phaseIds).limit(200)
+    : { data: [], error: null };
+  if (groupsError) throw new OverlayFeedError('No se pudieron leer las zonas del torneo.', 502);
+  const phaseOrder = new Map(phaseIds.map((id, index) => [id, index]));
+  const ordered = ((groups ?? []) as Row[]).sort((a, b) =>
+    (phaseOrder.get(String(a.phase_id)) ?? 0) - (phaseOrder.get(String(b.phase_id)) ?? 0)
+    || num(a.order_index) - num(b.order_index)
+    || String(a.name ?? '').localeCompare(String(b.name ?? '')));
+
+  const wanted = groupId && UUID_RE.test(groupId) ? groupId : null;
+  const wantedPhase = phaseId && UUID_RE.test(phaseId) ? phaseId : null;
+  const group = wanted
+    ? ordered.find((item) => String(item.id) === wanted)
+    : ordered.find((item) => !wantedPhase || String(item.phase_id) === wantedPhase);
+  if (!group) {
+    throw new OverlayFeedError(wanted ? 'Esa zona no es de este torneo.' : 'El torneo no tiene zonas armadas.', 404);
+  }
+  const groupKey = String(group.id);
+  const phaseKey = String(group.phase_id);
+
+  const [{ data: matchRows, error: matchesError }, standings] = await Promise.all([
+    db.from('matches').select(MATCH_SELECT).eq('group_id', groupKey).order('date_time', { ascending: true }).limit(MAX_GROUP_MATCHES + 1),
+    // Si la tabla falla, los partidos igual salen: la tabla queda vacía.
+    feedStandings(tournamentId, phaseKey, groupKey, null).catch(() => null),
+  ]);
+  if (matchesError) throw new OverlayFeedError('No se pudieron leer los partidos de la zona.', 502);
+  const rows = visible((matchRows ?? []) as Row[]);
+
+  const phaseName = str(phaseRows.find((phase) => String(phase.id) === phaseKey)?.name);
+  const groupName = str(group.name) ?? 'Zona';
+  const onePhase = phaseRows.length <= 1;
+
+  return {
+    kind: 'grupo',
+    title: title ?? String(tournament.name),
+    subtitle: [onePhase ? null : phaseName, groupName].filter(Boolean).join(' · '),
+    logo: tournamentLogo(tournament),
+    // Cada cuadrito dice solo su fecha: torneo, fase y zona ya están arriba.
+    matches: rows.slice(0, MAX_GROUP_MATCHES).map((row) => ({
+      ...toPayload(row),
+      context_label: str(rel(row.roundRow)?.name) ?? str(row.round_label),
+    })),
+    table: { rows: (standings?.table?.rows ?? []).map((row) => ({ ...row, group: null })), sport: str(tournament.sport_id) },
+    truncated: rows.length > MAX_GROUP_MATCHES,
   };
 }

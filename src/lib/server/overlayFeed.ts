@@ -33,7 +33,7 @@ type Db = any;
 type Row = Record<string, unknown>;
 
 const CLUB_COLUMNS = 'id, name, short_name, primary_color';
-const MATCH_SELECT = [
+export const MATCH_SELECT = [
   'id, tournament_id, phase_id, round_uuid, round_label, date_time, venue, status, score, clock, sport_id',
   'is_visible, review_status, home_source_label, away_source_label',
   `homeClub:home_club_id (${CLUB_COLUMNS})`,
@@ -114,7 +114,7 @@ function club(row: Row | null, sourceLabel: unknown): Row {
 }
 
 /** Un partido de la base → la forma que lee `toOverlayMatch` (sin eventos: las listas no los usan). */
-function toPayload(row: Row, context: { tournament?: boolean; round?: boolean } = {}): Row {
+export function toPayload(row: Row, context: { tournament?: boolean; round?: boolean } = {}): Row {
   const tournament = rel(row.tournament);
   return {
     id: row.id,

@@ -17,6 +17,7 @@ import { applyPlan, first, overlayPageCss, parseOverlayConfig, type SearchParams
  *   /overlay/jugador?id=<id>[&torneo=<id>]
  *   /overlay/home[?deporte=rugby][&torneos=…][&vivo=1]   la home: todos los deportes
  *   /overlay/tabla?torneo=<id>[&fase=<id>][&grupo=<id>]
+ *   /overlay/grupo?torneo=<id>[&fase=<id>][&grupo=<id>]   una zona: partidos arriba, tabla abajo
  *   /overlay/goleadores?torneo=<id>[&stat=puntos|tries|goles|…][&cantidad=10]
  *   /overlay/noticia?id=<link de la nota>
  *
@@ -36,6 +37,7 @@ const KINDS: Record<string, OverlayFeedKind> = {
   dia: 'dia',
   home: 'home',
   tabla: 'tabla',
+  grupo: 'grupo',
   goleadores: 'goleadores',
   noticia: 'noticia',
   playoff: 'playoff',
