@@ -1,9 +1,10 @@
 /**
- * Shot clock: una cuenta regresiva corta que sale debajo del marcador.
+ * Shot clock: una cuenta regresiva corta que sale debajo del marcador. Al aire
+ * dice siempre SHOT CLOCK (pedido del usuario: "se llama shot clock, nada más").
  *
- * - Después de un try, los segundos para patear la conversión (90 en rugby).
- * - Cualquier otra que arme el productor desde el panel: "PENAL 60",
- *   "TIEMPO MÉDICO 2:00", "TMO".
+ * - Después de un try arranca solo, con el tiempo elegido (1:00 por defecto:
+ *   el tiempo actual para patear la conversión). La conversión la cierra.
+ * - El productor también lo arranca a mano con el tiempo que quiera.
  *
  * Puro (sin React ni Supabase). Corre con la hora del SERVIDOR, como el reloj
  * del partido: `endsAt` es la hora en que llega a cero.
@@ -22,8 +23,13 @@ export interface ShotClock {
   source: string | null;
 }
 
-/** Segundos para patear la conversión después de un try (reglamento de World Rugby). */
-export const CONVERSION_SECONDS = 90;
+/** Lo que dice al aire, siempre. */
+export const SHOT_LABEL = 'SHOT CLOCK';
+/** Segundos para patear la conversión después de un try: hoy, un minuto. */
+export const CONVERSION_SECONDS = 60;
+/** Los tiempos de un toque del panel (y los que se ofrecen para el automático). */
+export const SHOT_TIMES = [30, 45, 60, 90, 120] as const;
+/** Etiqueta de las cuentas viejas (antes de SHOT CLOCK): se siguen leyendo. */
 export const CONVERSION_LABEL = 'CONVERSIÓN';
 /** Cuánto queda en pantalla el 0:00 antes de irse solo. */
 export const SHOT_LINGER_MS = 4_000;
@@ -107,7 +113,8 @@ export function shotView(shot: ShotClock | null, nowMs: number): ShotView | null
   if (shot.endsAt !== null && left === 0 && nowMs - Date.parse(shot.endsAt) > SHOT_LINGER_MS) return null;
   const secs = Math.ceil(left / 1000);
   return {
-    label: shot.label,
+    // Al aire dice SHOT CLOCK aunque la cuenta se haya guardado con otro nombre.
+    label: SHOT_LABEL,
     time: `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`,
     progress: Math.min(1, left / (shot.seconds * 1000)),
     urgent: secs <= 10,
@@ -120,6 +127,11 @@ export function shotView(shot: ShotClock | null, nowMs: number): ShotView | null
 /** Un evento que cierra la cuenta de la conversión: la conversión, hecha o errada. */
 export function endsConversion(type: string): boolean {
   return /conversion/i.test(type);
+}
+
+/** ¿La cuenta la arrancó un try? (la conversión la cierra; una puesta a mano, no). */
+export function startedByTry(shot: ShotClock | null): boolean {
+  return Boolean(shot && (shot.source || shot.label === CONVERSION_LABEL));
 }
 
 /**
@@ -136,8 +148,8 @@ export function shotFromFreshEvents(
   let shot = current;
   for (const event of fresh) {
     if (event.type === 'try' && seconds > 0) {
-      shot = startShot(nowMs, { label: CONVERSION_LABEL, seconds, team: event.team, source: event.id });
-    } else if (endsConversion(event.type) && shot?.label === CONVERSION_LABEL) {
+      shot = startShot(nowMs, { label: SHOT_LABEL, seconds, team: event.team, source: event.id });
+    } else if (endsConversion(event.type) && startedByTry(shot)) {
       shot = null;
     }
   }

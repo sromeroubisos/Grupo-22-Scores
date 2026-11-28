@@ -733,7 +733,7 @@ function Editor({ kind, origin, onBack, onStyle, onCreate, store, saved, onSaved
       if (kind !== 'partido') params.set('estilo', kind);
       if (!plates) params.set('placas', '0');
       if (subs) params.set('cambios', '1');
-      if (conversion && kind !== 'partido') params.set('conversion', '90');
+      if (conversion && kind !== 'partido') params.set('conversion', '60');
     } else if (kind === 'formacion') {
       path = `/overlay/formacion/${match?.id ?? 'demo'}`;
       if (side !== 'ambos') params.set('lado', side);
@@ -1322,7 +1322,7 @@ function Editor({ kind, origin, onBack, onStyle, onCreate, store, saved, onSaved
                   <Check label="Placa de quien anota (try, penal, tarjeta)" checked={plates} onChange={setPlates} />
                   <Check label="Placa de los cambios" checked={subs} onChange={setSubs} disabled={!plates} />
                   {kind !== 'partido' ? (
-                    <Check label="Cuenta de la conversión después de cada try (90 s)" checked={conversion} onChange={setConversion} />
+                    <Check label="Shot clock después de cada try (1:00)" checked={conversion} onChange={setConversion} />
                   ) : null}
                 </>
               ) : null}

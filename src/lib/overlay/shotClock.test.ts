@@ -17,7 +17,8 @@ const NOW = Date.parse('2026-11-26T20:00:00.000Z');
 test('la cuenta baja, se pone urgente en los últimos 10 y se va sola al rato de llegar a cero', () => {
   const shot = startShot(NOW, { label: 'conversión', seconds: 90, team: 'home' });
   assert.equal(shot.label, 'CONVERSIÓN');
-  assert.deepEqual(shotView(shot, NOW), { label: 'CONVERSIÓN', time: '1:30', progress: 1, urgent: false, done: false, paused: false, team: 'home' });
+  // Al aire dice SHOT CLOCK, se haya guardado con el nombre que sea.
+  assert.deepEqual(shotView(shot, NOW), { label: 'SHOT CLOCK', time: '1:30', progress: 1, urgent: false, done: false, paused: false, team: 'home' });
   assert.equal(shotView(shot, NOW + 18_500)?.time, '1:12');
   assert.equal(shotView(shot, NOW + 81_000)?.urgent, true);
   assert.equal(shotView(shot, NOW + 90_000)?.done, true);
@@ -40,13 +41,19 @@ test('en un partido de G22, el try arranca la conversión y la conversión la ci
   assert.equal(after?.team, 'away');
   assert.equal(shotFromFreshEvents(after, [{ id: 'e2', type: 'conversion', team: 'away' }], NOW, 90), null);
   assert.equal(shotFromFreshEvents(null, [{ id: 'e1', type: 'try', team: 'away' }], NOW, 0), null);
+  // Una puesta a mano no la cierra la conversión; una vieja de "CONVERSIÓN", sí.
+  const manual = startShot(NOW, { label: 'SHOT CLOCK', seconds: 60 });
+  assert.equal(shotFromFreshEvents(manual, [{ id: 'e3', type: 'conversion', team: 'home' }], NOW, 60), manual);
+  const legacy = startShot(NOW, { label: 'CONVERSIÓN', seconds: 90 });
+  assert.equal(shotFromFreshEvents(legacy, [{ id: 'e4', type: 'conversion', team: 'home' }], NOW, 60), null);
 });
 
 test('marcador manual: try con conversión automática, deshacer y cuenta propia', () => {
   let state = defaultManualState('marcador');
-  assert.equal(state.autoShot, 90);
+  assert.equal(state.autoShot, 60);
   state = applyScoreAction(state, { event: { team: 'home', type: 'try' } }, NOW);
-  assert.equal(state.shot?.label, 'CONVERSIÓN');
+  assert.equal(state.shot?.label, 'SHOT CLOCK');
+  assert.equal(shotView(state.shot, NOW)?.time, '1:00');
   assert.equal(state.shot?.team, 'home');
   // Deshacer el try saca la cuenta.
   assert.equal(applyScoreAction(state, { undo: true }, NOW + 1000).shot, null);

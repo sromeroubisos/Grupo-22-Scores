@@ -14,7 +14,9 @@
 import { normalizeHex, type ManualCard, type OverlayEvent, type OverlayMatch } from './matchOverlayModel.ts';
 import { defaultSponsorsState, mergeSponsorsState, type ManualSponsorsState } from './sponsorsOverlay.ts';
 import {
-  CONVERSION_LABEL,
+  CONVERSION_SECONDS,
+  SHOT_LABEL,
+  startedByTry,
   endsConversion,
   pauseShot,
   readShotClock,
@@ -188,7 +190,7 @@ export function defaultManualState(kind: ManualKind): ManualState {
     away: { ...DEFAULT_AWAY, players: [] },
     clock: { running: false, base: 0, startedAt: null, countdown: false, limit: 40 * 60 },
     sinBin: 10 * 60,
-    autoShot: 90,
+    autoShot: CONVERSION_SECONDS,
     shot: null,
     events: [],
     gameId: 'g1',
@@ -570,11 +572,11 @@ export function applyScoreAction(state: ManualScoreState, action: ScoreAction, n
       at: manualElapsed(state.clock, nowMs),
       points,
     };
-    // Try: arranca la cuenta de la conversión. La conversión (hecha o errada) la cierra.
+    // Try: arranca el shot clock con el tiempo elegido. La conversión (hecha o errada) lo cierra.
     let shot = state.shot;
     if (type === 'try' && state.sport === 'rugby' && state.autoShot > 0) {
-      shot = startShot(nowMs, { label: CONVERSION_LABEL, seconds: state.autoShot, team, source: event.id });
-    } else if (endsConversion(type) && shot?.label === CONVERSION_LABEL) {
+      shot = startShot(nowMs, { label: SHOT_LABEL, seconds: state.autoShot, team, source: event.id });
+    } else if (endsConversion(type) && startedByTry(shot)) {
       shot = null;
     }
     return {

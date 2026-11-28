@@ -20,15 +20,8 @@ import { sevensClockPatch, teamsFromMatch } from '../../_builder/matchTeams';
 import SponsorsPanel, { type UploadedLogo } from './SponsorsPanel';
 import styles from './control.module.css';
 import { linkAirPath, linkStatus } from '@/lib/overlay/overlayLinks';
-import { CONVERSION_LABEL, shotView } from '@/lib/overlay/shotClock';
+import { CONVERSION_SECONDS, SHOT_LABEL, SHOT_TIMES, shotView } from '@/lib/overlay/shotClock';
 
-/** Cuentas de un toque. La de la conversión, además, arranca sola con cada try. */
-const SHOT_PRESETS: Array<{ label: string; seconds: number }> = [
-  { label: CONVERSION_LABEL, seconds: 90 },
-  { label: 'PENAL', seconds: 60 },
-  { label: 'TIEMPO MÉDICO', seconds: 120 },
-  { label: 'TMO', seconds: 90 },
-];
 
 type PanelLink = { path: string; token: string; expiresAt: string };
 
@@ -284,7 +277,6 @@ function ScorePanel({
   const [setTime, setSetTime] = useState('');
   const [scorer, setScorer] = useState<Record<'home' | 'away', string>>({ home: '', away: '' });
   const [loadingTeams, setLoadingTeams] = useState(false);
-  const [shotName, setShotName] = useState('');
   const [shotTime, setShotTime] = useState('1:00');
   const [shotTeam, setShotTeam] = useState<'' | 'home' | 'away'>('');
   useEffect(() => {
@@ -313,7 +305,7 @@ function ScorePanel({
   const startOwnShot = () => {
     const seconds = parseMmss(shotTime);
     if (!seconds) return;
-    void send({ shot: { start: { label: shotName || 'TIEMPO', seconds, team: shotTeam || null } } });
+    void send({ shot: { start: { label: SHOT_LABEL, seconds, team: shotTeam || null } } });
   };
 
   return (
@@ -422,7 +414,7 @@ function ScorePanel({
         {shot ? (
           <>
             <p className={styles.shotNow}>
-              {shot.team ? `${state[shot.team].short} · ` : ''}{shot.label}{shot.paused ? ' · en pausa' : shot.done ? ' · terminó' : ''}
+              {shot.team ? `${state[shot.team].short} · ` : ''}Corriendo{shot.paused ? ' · en pausa' : shot.done ? ' · terminó' : ''}
             </p>
             <div className={styles.clock} data-expired={shot.urgent ? '' : undefined}>{shot.time}</div>
             <div className={styles.buttons}>
@@ -435,36 +427,41 @@ function ScorePanel({
         ) : (
           <p className={styles.muted}>Una cuenta corta debajo del marcador. Se va sola cuando llega a cero.</p>
         )}
-        <div className={styles.periods} aria-label="Cuentas de un toque">
-          {SHOT_PRESETS.map((preset) => (
-            <button key={preset.label} type="button" onClick={() => void send({ shot: { start: { label: preset.label, seconds: preset.seconds, team: shotTeam || null } } })}>
-              {preset.label} {mmss(preset.seconds)}
+        <div className={styles.periods} aria-label="Arrancar el shot clock">
+          {SHOT_TIMES.map((seconds) => (
+            <button key={seconds} type="button" onClick={() => void send({ shot: { start: { label: SHOT_LABEL, seconds, team: shotTeam || null } } })}>
+              {mmss(seconds)}
             </button>
           ))}
         </div>
-        <div className={styles.pair}>
-          <label className={styles.field}>
-            <span>Cuenta propia: qué dice</span>
-            <input value={shotName} maxLength={24} placeholder="Ej. LINE-OUT" onChange={(e) => setShotName(e.target.value)} />
-          </label>
-          <label className={styles.field}>
-            <span>Cuánto dura (mm:ss)</span>
-            <input value={shotTime} placeholder="1:00" onChange={(e) => setShotTime(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') startOwnShot(); }} />
-          </label>
-        </div>
         <div className={styles.inline}>
-          <select value={shotTeam} onChange={(e) => setShotTeam(e.target.value as '' | 'home' | 'away')} aria-label="De qué equipo es la cuenta">
+          <input value={shotTime} placeholder="1:00" aria-label="Otro tiempo (mm:ss)" onChange={(e) => setShotTime(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') startOwnShot(); }} />
+          <button type="button" onClick={startOwnShot} disabled={!parseMmss(shotTime)} title={parseMmss(shotTime) ? undefined : 'Poné el tiempo en mm:ss'}>Arrancar este tiempo</button>
+          <select value={shotTeam} onChange={(e) => setShotTeam(e.target.value as '' | 'home' | 'away')} aria-label="De qué equipo es el shot clock">
             <option value="">Sin equipo</option>
             <option value="home">{state.home.short}</option>
             <option value="away">{state.away.short}</option>
           </select>
-          <button type="button" onClick={startOwnShot} disabled={!parseMmss(shotTime)}>Arrancar la cuenta</button>
         </div>
-        {!parseMmss(shotTime) ? <p className={styles.muted}>Poné cuánto dura (mm:ss) para arrancarla.</p> : null}
+        {!parseMmss(shotTime) ? <p className={styles.muted}>Poné el tiempo en mm:ss para arrancarlo.</p> : null}
         <label className={styles.check}>
-          <input type="checkbox" checked={state.autoShot > 0} onChange={(e) => patchNow({ autoShot: e.target.checked ? 90 : 0 })} />
-          <span>Arranca sola después de cada try (conversión, 1:30). La conversión, hecha o errada, la saca.</span>
+          <input
+            type="checkbox"
+            checked={state.autoShot > 0}
+            onChange={(e) => patchNow({ autoShot: e.target.checked ? CONVERSION_SECONDS : 0 })}
+          />
+          <span>Arranca solo después de cada try. La conversión, hecha o errada, lo saca.</span>
         </label>
+        {state.autoShot > 0 ? (
+          <label className={styles.field}>
+            <span>Tiempo después del try</span>
+            <select value={state.autoShot} onChange={(e) => patchNow({ autoShot: Number(e.target.value) })}>
+              {[...new Set<number>([...SHOT_TIMES, state.autoShot])].sort((a, b) => a - b).map((seconds) => (
+                <option key={seconds} value={seconds}>{mmss(seconds)}{seconds === CONVERSION_SECONDS ? ' (conversión)' : ''}</option>
+              ))}
+            </select>
+          </label>
+        ) : null}
       </section>
 
       {(['home', 'away'] as const).map((side) => {
