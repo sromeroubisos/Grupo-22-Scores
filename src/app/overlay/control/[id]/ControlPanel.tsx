@@ -40,7 +40,7 @@ type PanelLink = { path: string; token: string; expiresAt: string };
 const KEY_STORAGE = (id: string) => `g22-overlay-key:${id}`;
 
 type Patch = Record<string, unknown>;
-type Payload = { state?: unknown; clock?: unknown; score?: unknown; shot?: unknown; game?: unknown };
+type Payload = { state?: unknown; clock?: unknown; score?: unknown; shot?: unknown; game?: unknown; g22?: { home: number; away: number } };
 
 function readKey(id: string): string {
   const fromHash = new URLSearchParams(window.location.hash.slice(1)).get('clave');
