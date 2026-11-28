@@ -22,6 +22,8 @@ export type TournamentExportBase = {
     name: string;
     post: TournamentBaseVariants;
     story: TournamentBaseVariants;
+    /** Color de las letras sobre la base (la placa clásica); sin dato, blanco. */
+    ink?: string;
 };
 
 const DIR = '/exports/bases/';
@@ -44,6 +46,14 @@ const BASES = {
     // FOTO / FONDO VERTICAL). La historia con foto se arma de la de posteo: el rótulo
     // arriba y la textura abajo, con la misma caída.
     sevenRepublica: base('seven-republica', 'Seven de la República', 'seven-republica'),
+    // Celeste argentino: la misma base recoloreada por luminancia (sombras azul marino,
+    // luces celeste), con el rótulo blanco intacto. Femenino y Ascenso.
+    sevenRepublicaCeleste: base('seven-republica-celeste', 'Seven de la República · celeste', 'seven-republica-celeste'),
+    // El Ascenso: celeste con las letras en dorado.
+    sevenRepublicaAscenso: {
+        ...base('seven-republica-ascenso', 'Seven de la República · Ascenso', 'seven-republica-celeste'),
+        ink: '#F2C230',
+    },
 } as const;
 
 const ALL_BASES: readonly TournamentExportBase[] = Object.values(BASES);
@@ -56,12 +66,13 @@ const SVNS3_TOURNAMENTS = new Set([
     '20b7a516-3ff9-4c18-9b8b-ad76576b63b1', // svns3-2027-w
 ]);
 
-// Seven de la República 2026 (Paraná): los cuatro torneos, masculino y femenino.
-const SEVEN_REPUBLICA_TOURNAMENTS = new Set([
-    'd1e5bc34-89e7-4211-866f-0cc8393bdef9', // Campeonato
-    '4284b867-6682-4874-ae73-c636a429b5f8', // Ascenso
-    '6fbcdb47-78e5-49d0-b3c2-41b49e306d5d', // Femenino - Campeonato
-    'f31caf4a-a366-4d69-b643-06a61244b803', // Femenino - Ascenso
+// Seven de la República 2026 (Paraná): el Campeonato masculino en verde, el femenino en
+// celeste y los dos Ascensos en celeste con letras doradas.
+const SEVEN_REPUBLICA_TOURNAMENTS = new Map<string, TournamentExportBase>([
+    ['d1e5bc34-89e7-4211-866f-0cc8393bdef9', BASES.sevenRepublica], // Campeonato
+    ['4284b867-6682-4874-ae73-c636a429b5f8', BASES.sevenRepublicaAscenso], // Ascenso
+    ['6fbcdb47-78e5-49d0-b3c2-41b49e306d5d', BASES.sevenRepublicaCeleste], // Femenino - Campeonato
+    ['f31caf4a-a366-4d69-b643-06a61244b803', BASES.sevenRepublicaAscenso], // Femenino - Ascenso
 ]);
 
 const SVNS1_TOURNAMENTS = new Set([
@@ -93,7 +104,8 @@ export function resolveTournamentExportBase(
     if (tournamentId == null) return null;
     const key = String(tournamentId).trim().toLowerCase();
     if (SVNS3_TOURNAMENTS.has(key)) return BASES.svns3;
-    if (SEVEN_REPUBLICA_TOURNAMENTS.has(key)) return BASES.sevenRepublica;
+    const republica = SEVEN_REPUBLICA_TOURNAMENTS.get(key);
+    if (republica) return republica;
     if (SVNS1_TOURNAMENTS.has(key)) {
         const day = isoDay(kickoffAt);
         if (day && SVNS1_DUBAI_WINDOWS.some(([from, to]) => day >= from && day <= to)) return BASES.svnsDubai;

@@ -8844,7 +8844,12 @@ async function drawG22BasePlate(
     const isStoryCanvas = canvas.height > canvas.width * 1.5;
     const baseTone = getG22PlateTone(accentColor, bgColor, plateOptions);
     const tone: G22PlateTone = tournamentBase
-        ? { ...baseTone, ink: '#ffffff', rule: hexToRGBA('#ffffff', 0.95), isDarkField: true }
+        ? {
+            ...baseTone,
+            ink: tournamentBase.ink || '#ffffff',
+            rule: hexToRGBA(tournamentBase.ink || '#ffffff', 0.95),
+            isDarkField: true,
+        }
         : baseTone;
     // La placa pinta su propio campo: ahi se decide la variante del escudo, no
     // con el Fondo del modal.
