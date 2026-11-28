@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useState, type ReactNode } from 'react';
 import type { LinkGate } from '../_lib/linkGate';
 import type { BrandPosition } from '@/lib/overlay/overlayPlan';
 import { linkAirPath } from '@/lib/overlay/overlayLinks';
@@ -20,7 +20,40 @@ import styles from './linkNotice.module.css';
 
 const POLL_MS = 30_000;
 
+/** El lienzo para el que están medidos los overlays (px de diseño). */
+const CANVAS_W = 1920;
+const CANVAS_H = 1080;
+
+/**
+ * Los overlays están dibujados en px de un lienzo de 1920×1080. Si la fuente de
+ * OBS/vMix tiene otro tamaño (OBS arranca en 800×600; un proyecto de 720p es
+ * 1280×720), salían chicos o cortados, "en tamaño tablet". Con zoom en la raíz,
+ * todo se dibuja en proporción al tamaño de la fuente: a 1280×720 es el mismo
+ * cuadro que a 1920×1080. El zoom en línea con !important le gana al `zoom: 1`
+ * de `overlayPageCss`.
+ */
+function useFitCanvas() {
+  useLayoutEffect(() => {
+    const root = document.documentElement;
+    const fit = () => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      if (!w || !h) return;
+      const scale = Math.min(w / CANVAS_W, h / CANVAS_H);
+      if (Math.abs(scale - 1) < 0.01) root.style.removeProperty('zoom');
+      else root.style.setProperty('zoom', String(Math.round(scale * 10_000) / 10_000), 'important');
+    };
+    fit();
+    window.addEventListener('resize', fit);
+    return () => {
+      window.removeEventListener('resize', fit);
+      root.style.removeProperty('zoom');
+    };
+  }, []);
+}
+
 export default function LinkWatch({ gate, brand = 'arriba-der', children }: { gate: LinkGate; brand?: BrandPosition; children: ReactNode }) {
+  useFitCanvas();
   const token = gate.status === 'ok' ? gate.token : null;
   const path = gate.status === 'ok' ? gate.path ?? null : null;
   const [gone, setGone] = useState<'vencido' | 'inexistente' | null>(null);
