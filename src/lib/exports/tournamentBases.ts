@@ -40,6 +40,10 @@ const BASES = {
     svnsDubai: base('svns-dubai', 'HSBC SVNS · Dubái', 'svns-dubai'),
     // Lila grisácea: el SVNS 3, en todas sus etapas.
     svns3: base('svns3', 'HSBC SVNS 3', 'svns3'),
+    // Verde: la base de los torneos argentinos de Salida de 22 (FONDO BASE / FONDO SIN
+    // FOTO / FONDO VERTICAL). La historia con foto se arma de la de posteo: el rótulo
+    // arriba y la textura abajo, con la misma caída.
+    sevenRepublica: base('seven-republica', 'Seven de la República', 'seven-republica'),
 } as const;
 
 const ALL_BASES: readonly TournamentExportBase[] = Object.values(BASES);
@@ -50,6 +54,14 @@ const SVNS3_TOURNAMENTS = new Set([
     '1a53a451-a47e-4f20-8869-e52fac61a6ca', // svns3-2026-w
     '9e884bc7-dd2d-4ed9-adc9-f6a54e03e13d', // svns3-2027-m
     '20b7a516-3ff9-4c18-9b8b-ad76576b63b1', // svns3-2027-w
+]);
+
+// Seven de la República 2026 (Paraná): los cuatro torneos, masculino y femenino.
+const SEVEN_REPUBLICA_TOURNAMENTS = new Set([
+    'd1e5bc34-89e7-4211-866f-0cc8393bdef9', // Campeonato
+    '4284b867-6682-4874-ae73-c636a429b5f8', // Ascenso
+    '6fbcdb47-78e5-49d0-b3c2-41b49e306d5d', // Femenino - Campeonato
+    'f31caf4a-a366-4d69-b643-06a61244b803', // Femenino - Ascenso
 ]);
 
 const SVNS1_TOURNAMENTS = new Set([
@@ -81,6 +93,7 @@ export function resolveTournamentExportBase(
     if (tournamentId == null) return null;
     const key = String(tournamentId).trim().toLowerCase();
     if (SVNS3_TOURNAMENTS.has(key)) return BASES.svns3;
+    if (SEVEN_REPUBLICA_TOURNAMENTS.has(key)) return BASES.sevenRepublica;
     if (SVNS1_TOURNAMENTS.has(key)) {
         const day = isoDay(kickoffAt);
         if (day && SVNS1_DUBAI_WINDOWS.some(([from, to]) => day >= from && day <= to)) return BASES.svnsDubai;
