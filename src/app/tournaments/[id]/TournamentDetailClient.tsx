@@ -1689,9 +1689,21 @@ function buildDbPlayoffDraw(dbData: TournamentInitialData, preferredPhaseId?: st
         const finished = isDbFinalStatus(match?.status);
         const hasNumericScore = typeof scoreHome === 'number' && typeof scoreAway === 'number';
         let winnerId = null;
+        const homeId = match?.home?.id ?? match?.home_club_id ?? null;
+        const awayId = match?.away?.id ?? match?.away_club_id ?? null;
+        // Mismo orden que `matchOutcome.ts` (el avance de llaves): un ganador
+        // declarado (empate definido por tries, W.O., fallo), después el
+        // marcador y, si quedó igualado, los penales.
+        const declared = String(match?.score?.winner ?? '').toLowerCase();
+        const penHome = match?.score?.penalties?.home;
+        const penAway = match?.score?.penalties?.away;
 
-        if (finished && hasNumericScore && scoreHome !== scoreAway) {
-            winnerId = scoreHome > scoreAway ? match?.home?.id ?? match?.home_club_id ?? null : match?.away?.id ?? match?.away_club_id ?? null;
+        if (finished && declared === 'home') winnerId = homeId;
+        else if (finished && declared === 'away') winnerId = awayId;
+        else if (finished && hasNumericScore && scoreHome !== scoreAway) {
+            winnerId = scoreHome > scoreAway ? homeId : awayId;
+        } else if (finished && typeof penHome === 'number' && typeof penAway === 'number' && penHome !== penAway) {
+            winnerId = penHome > penAway ? homeId : awayId;
         }
 
         return {
