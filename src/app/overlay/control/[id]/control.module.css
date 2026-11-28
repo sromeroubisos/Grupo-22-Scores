@@ -529,3 +529,13 @@
   .games li { grid-template-columns: auto minmax(0, 1fr); }
   .games li > :last-child { grid-column: 1 / -1; }
 }
+
+
+/* ─── resultado de la patada (con el shot clock corriendo) ─── */
+.kick { display: flex; flex-direction: column; gap: 8px; padding: 10px; border-radius: 12px; border: 1px solid var(--c-line); }
+.kickTitle { font-size: 12px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-dim); }
+.kickRow { display: flex; flex-direction: column; gap: 6px; }
+.kickTeam { font-size: 13px; }
+.kickPair { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.page .kickMade { background: rgba(0, 163, 101, 0.2); border-color: var(--c-green); font-weight: 800; }
+.page .kickMissed { color: #ff9b9b; border-color: rgba(255, 123, 123, 0.4); }

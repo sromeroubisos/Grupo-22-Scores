@@ -16,8 +16,7 @@ import { defaultSponsorsState, mergeSponsorsState, type ManualSponsorsState } fr
 import {
   CONVERSION_SECONDS,
   SHOT_LABEL,
-  startedByTry,
-  endsConversion,
+  endsShot,
   pauseShot,
   readShotClock,
   resumeShot,
@@ -572,11 +571,12 @@ export function applyScoreAction(state: ManualScoreState, action: ScoreAction, n
       at: manualElapsed(state.clock, nowMs),
       points,
     };
-    // Try: arranca el shot clock con el tiempo elegido. La conversión (hecha o errada) lo cierra.
+    // Try: arranca el shot clock con el tiempo elegido. Cargar la patada (conversión,
+    // penal o drop) lo corta; la errada se corta desde el panel con «fallida».
     let shot = state.shot;
     if (type === 'try' && state.sport === 'rugby' && state.autoShot > 0) {
       shot = startShot(nowMs, { label: SHOT_LABEL, seconds: state.autoShot, team, source: event.id });
-    } else if (endsConversion(type) && startedByTry(shot)) {
+    } else if (endsShot(type)) {
       shot = null;
     }
     return {

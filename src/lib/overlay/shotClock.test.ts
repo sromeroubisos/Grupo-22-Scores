@@ -41,9 +41,10 @@ test('en un partido de G22, el try arranca la conversión y la conversión la ci
   assert.equal(after?.team, 'away');
   assert.equal(shotFromFreshEvents(after, [{ id: 'e2', type: 'conversion', team: 'away' }], NOW, 90), null);
   assert.equal(shotFromFreshEvents(null, [{ id: 'e1', type: 'try', team: 'away' }], NOW, 0), null);
-  // Una puesta a mano no la cierra la conversión; una vieja de "CONVERSIÓN", sí.
+  // Cargar la patada corta cualquier shot clock, también uno puesto a mano (penal).
   const manual = startShot(NOW, { label: 'SHOT CLOCK', seconds: 60 });
-  assert.equal(shotFromFreshEvents(manual, [{ id: 'e3', type: 'conversion', team: 'home' }], NOW, 60), manual);
+  assert.equal(shotFromFreshEvents(manual, [{ id: 'e3', type: 'penalty_goal', team: 'home' }], NOW, 60), null);
+  assert.equal(shotFromFreshEvents(manual, [{ id: 'e5', type: 'tackle', team: 'home' }], NOW, 60), manual);
   const legacy = startShot(NOW, { label: 'CONVERSIÓN', seconds: 90 });
   assert.equal(shotFromFreshEvents(legacy, [{ id: 'e4', type: 'conversion', team: 'home' }], NOW, 60), null);
 });
@@ -59,6 +60,9 @@ test('marcador manual: try con conversión automática, deshacer y cuenta propia
   assert.equal(applyScoreAction(state, { undo: true }, NOW + 1000).shot, null);
   // La conversión la cierra.
   assert.equal(applyScoreAction(state, { event: { team: 'home', type: 'conversion' } }, NOW + 30_000).shot, null);
+  // Un penal puesto a mano: el penal convertido lo corta.
+  const penal = applyShotAction(defaultManualState('marcador'), { start: { label: 'SHOT CLOCK', seconds: 60, team: 'away' } }, NOW);
+  assert.equal(applyScoreAction(penal, { event: { team: 'away', type: 'penalty_goal' } }, NOW + 20_000).shot, null);
   // Apagada: el try no arranca nada.
   const off = mergeManualState('marcador', defaultManualState('marcador'), { autoShot: 0 });
   assert.equal(applyScoreAction(off as typeof state, { event: { team: 'home', type: 'try' } }, NOW).shot, null);

@@ -124,10 +124,17 @@ export function shotView(shot: ShotClock | null, nowMs: number): ShotView | null
   };
 }
 
-/** Un evento que cierra la cuenta de la conversión: la conversión, hecha o errada. */
-export function endsConversion(type: string): boolean {
-  return /conversion/i.test(type);
+/**
+ * Un evento que corta el shot clock: la patada ya se cargó (conversión, penal
+ * convertido o drop). Corta CUALQUIER shot clock, lo haya arrancado un try o
+ * el productor a mano: si la patada está cargada, la cuenta no sigue.
+ */
+export function endsShot(type: string): boolean {
+  return /conversion|penalty_goal|drop_goal/i.test(type);
 }
+
+/** Compatibilidad: el nombre viejo. */
+export const endsConversion = endsShot;
 
 /** ¿La cuenta la arrancó un try? (la conversión la cierra; una puesta a mano, no). */
 export function startedByTry(shot: ShotClock | null): boolean {
@@ -149,7 +156,7 @@ export function shotFromFreshEvents(
   for (const event of fresh) {
     if (event.type === 'try' && seconds > 0) {
       shot = startShot(nowMs, { label: SHOT_LABEL, seconds, team: event.team, source: event.id });
-    } else if (endsConversion(event.type) && startedByTry(shot)) {
+    } else if (endsShot(event.type)) {
       shot = null;
     }
   }

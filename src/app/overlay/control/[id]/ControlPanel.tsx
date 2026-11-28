@@ -423,6 +423,7 @@ function ScorePanel({
                 : <button type="button" className={styles.primary} onClick={() => void send({ shot: 'pause' })} disabled={shot.done}>Pausar</button>}
               <button type="button" onClick={() => void send({ shot: 'stop' })}>Sacar</button>
             </div>
+            {state.sport === 'rugby' ? <KickResult state={state} team={shot.team} send={send} /> : null}
           </>
         ) : (
           <p className={styles.muted}>Una cuenta corta debajo del marcador. Se va sola cuando llega a cero.</p>
@@ -762,5 +763,41 @@ function GamesCard({ state, send }: { state: ManualScoreState; send: (payload: P
       )}
       {full && !adding ? <p className={styles.muted}>Llegaste a {MAX_GAMES} partidos. Sacá uno que ya terminó para sumar otro.</p> : null}
     </section>
+  );
+}
+
+/* ─── resultado de la patada ─── */
+
+const KICKS: Array<{ type: string; made: string; missed: string; points: number }> = [
+  { type: 'conversion', made: 'Conversión acertada', missed: 'Conversión fallida', points: 2 },
+  { type: 'penalty_goal', made: 'Penal convertido', missed: 'Penal fallido', points: 3 },
+];
+
+/**
+ * Con el shot clock corriendo: cómo terminó la patada. La acertada suma los
+ * puntos (y el servidor corta el shot clock al cargarla); la fallida solo lo
+ * corta. Si el shot clock no tiene equipo, se elige de quién fue.
+ */
+function KickResult({ state, team, send }: { state: ManualScoreState; team: 'home' | 'away' | null; send: (payload: Payload) => Promise<void> }) {
+  const sides = team ? [team] : (['home', 'away'] as const);
+  return (
+    <div className={styles.kick}>
+      <span className={styles.kickTitle}>Resultado de la patada</span>
+      {sides.map((side) => (
+        <div key={side} className={styles.kickRow}>
+          {!team ? <b className={styles.kickTeam}>{state[side].short}</b> : null}
+          {KICKS.map((kick) => (
+            <span key={kick.type} className={styles.kickPair}>
+              <button type="button" className={styles.kickMade} onClick={() => void send({ score: { event: { team: side, type: kick.type, player: null } } })}>
+                {kick.made} <b>+{kick.points}</b>
+              </button>
+              <button type="button" className={styles.kickMissed} onClick={() => void send({ shot: 'stop' })}>
+                {kick.missed}
+              </button>
+            </span>
+          ))}
+        </div>
+      ))}
+    </div>
   );
 }
