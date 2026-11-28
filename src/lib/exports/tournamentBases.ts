@@ -66,10 +66,10 @@ const SVNS3_TOURNAMENTS = new Set([
     '20b7a516-3ff9-4c18-9b8b-ad76576b63b1', // svns3-2027-w
 ]);
 
-// Seven de la República 2026 (Paraná): el Campeonato masculino en verde, el femenino en
-// celeste y los dos Ascensos en celeste con letras doradas.
+// Seven de la República 2026 (Paraná): los cuatro en el celeste nacional; los dos
+// Ascensos, además, con letras doradas.
 const SEVEN_REPUBLICA_TOURNAMENTS = new Map<string, TournamentExportBase>([
-    ['d1e5bc34-89e7-4211-866f-0cc8393bdef9', BASES.sevenRepublica], // Campeonato
+    ['d1e5bc34-89e7-4211-866f-0cc8393bdef9', BASES.sevenRepublicaCeleste], // Campeonato
     ['4284b867-6682-4874-ae73-c636a429b5f8', BASES.sevenRepublicaAscenso], // Ascenso
     ['6fbcdb47-78e5-49d0-b3c2-41b49e306d5d', BASES.sevenRepublicaCeleste], // Femenino - Campeonato
     ['f31caf4a-a366-4d69-b643-06a61244b803', BASES.sevenRepublicaAscenso], // Femenino - Ascenso
