@@ -73,6 +73,11 @@ export function useSavedLinks() {
     return link;
   }, []);
 
+  /** Un enlace que creó otro pedido (el overlay manual crea el suyo al crearse). */
+  const adopt = useCallback((link: SavedLink) => {
+    setLinks((current) => [link, ...(current ?? []).filter((item) => item.id !== link.id)]);
+  }, []);
+
   const patch = useCallback(async (id: string, payload: Record<string, unknown>) => {
     const body = await call(`/api/overlay/enlaces/${id}`, { method: 'PATCH', body: JSON.stringify(payload) });
     setOffset(offsetFrom(body));
@@ -109,7 +114,7 @@ export function useSavedLinks() {
     setLinks((current) => (current ?? []).filter((item) => item.id !== id));
   }, []);
 
-  return { links, error, offset, save, patch, remove, share, unshare };
+  return { links, error, offset, save, adopt, patch, remove, share, unshare };
 }
 
 async function copyText(text: string) {
@@ -381,6 +386,14 @@ export function SaveLink({ relative, missing, origin, defaultTitle, store, editi
   const [saving, setSaving] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+
+  // El enlace puede llegar después de montar (el manual crea el suyo al crearse).
+  useEffect(() => {
+    if (editing && editing.id !== saved?.id) {
+      setSaved(editing);
+      setTitle((value) => value || editing.title);
+    }
+  }, [editing, saved?.id]);
 
   // Lo guardado es ESTA configuración: si cambia algo, hay que guardar de nuevo.
   const sameTitle = !saved || !title.trim() || title.trim() === saved.title;

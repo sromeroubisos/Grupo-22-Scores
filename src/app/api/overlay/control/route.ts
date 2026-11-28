@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getOverlayAccess } from '@/lib/auth/overlayAccess';
 import { insertUserLink } from '@/lib/server/overlayLinksStore';
+import { normalizeLinkPath } from '@/lib/overlay/overlayLinks';
 import { defaultManualState, mergeManualState, type ManualKind } from '@/lib/overlay/manualOverlay';
 
 /**
@@ -22,7 +23,7 @@ export async function POST(request: NextRequest) {
   }
   const user = { id: access.userId };
 
-  const body = (await request.json().catch(() => ({}))) as { kind?: string; state?: unknown; title?: unknown };
+  const body = (await request.json().catch(() => ({}))) as { kind?: string; state?: unknown; title?: unknown; query?: unknown };
   const kind: ManualKind = body.kind === 'titular' || body.kind === 'sponsors' ? body.kind : 'marcador';
   // Lo que se eligió en el generador (equipos, colores, deporte) entra saneado,
   // igual que lo que manda el panel: el reloj y los eventos no se pueden fijar.
@@ -53,10 +54,16 @@ export async function POST(request: NextRequest) {
   // días). Si falla, el overlay igual existe: se puede guardar desde el generador.
   const fallbackTitle = kind === 'titular' ? 'Titular manual' : kind === 'sponsors' ? 'Sponsors' : 'Marcador manual';
   const title = typeof body.title === 'string' && body.title.trim() ? body.title.trim().slice(0, 120) : fallbackTitle;
-  const link = await insertUserLink(user.id, { title, kind: 'manual', path: `/overlay/manual/${data.id}` }).catch(() => null);
+  // El enlace lleva los AJUSTES elegidos en el generador (estilo, colores,
+  // tipografías…): sin ellos, OBS mostraba el marcador por defecto y no el
+  // configurado, porque al aire se redirige a la ruta guardada.
+  const base = `/overlay/manual/${data.id}`;
+  const query = typeof body.query === 'string' ? body.query.replace(/^\?/, '') : '';
+  const path = (query && normalizeLinkPath(`${base}?${query}`)) || base;
+  const link = await insertUserLink(user.id, { title, kind: 'manual', path }).catch(() => null);
 
   return NextResponse.json(
-    { id: data.id, kind, key, link: link ? { path: link.path, token: link.token, expiresAt: link.expiresAt } : null },
+    { id: data.id, kind, key, link },
     { headers: { 'Cache-Control': 'no-store' } },
   );
 }

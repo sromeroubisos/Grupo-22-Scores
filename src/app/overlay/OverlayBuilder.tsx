@@ -280,7 +280,8 @@ function Studio() {
               Mis overlays{count ? <span className={styles.tabCount}>{count}</span> : null}
             </button>
           </div>
-          {canCreate && (current === 'mios' || kind) ? (
+          {/* Con el editor abierto NO: «Crear overlay» llevaba a la galería y se perdía lo configurado. */}
+          {canCreate && current === 'mios' && !kind ? (
             <button type="button" className={`${styles.primary} ${styles.navCreate}`} onClick={() => goTab('crear')}>
               <span aria-hidden="true">+</span> Crear<b>&nbsp;overlay</b>
             </button>
@@ -873,6 +874,8 @@ function Editor({ kind, origin, onBack, onStyle, onCreate, store, saved, onSaved
   };
 
   const createManual = async () => {
+    // La pestaña del panel se abre YA (en el clic): abrirla después del pedido la bloquea el navegador.
+    const panelTab = typeof window !== 'undefined' ? window.open('', '_blank') : null;
     setCreating(true);
     setManualError(null);
     const team = (info: TeamInfo, players: string[]) => ({ name: info.name, short: info.short, color: info.color, logo: info.logo, players });
@@ -885,12 +888,27 @@ function Editor({ kind, origin, onBack, onStyle, onCreate, store, saved, onSaved
       const response = await fetch('/api/overlay/control', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ kind: kind === 'manual-titular' ? 'titular' : kind === 'manual-sponsors' ? 'sponsors' : 'marcador', state, title: defaultTitle }),
+        // Los ajustes del generador (estilo, colores, tipografías…) van al enlace de OBS.
+        body: JSON.stringify({
+          kind: kind === 'manual-titular' ? 'titular' : kind === 'manual-sponsors' ? 'sponsors' : 'marcador',
+          state,
+          title: defaultTitle,
+          query: relative.split('?')[1] ?? '',
+        }),
       });
       const body = await response.json().catch(() => null);
       if (!response.ok || !body?.id) throw new Error(body?.error ?? 'No se pudo crear.');
-      setManual(body as ManualCreated);
+      const created = body as ManualCreated & { link?: SavedLink | null };
+      setManual({ id: created.id, key: created.key, kind: created.kind });
+      // El enlace ya quedó en Mis overlays: desde ahora el editor guarda ENCIMA de ese.
+      if (created.link?.id) {
+        store.adopt(created.link);
+        onSaved(created.link);
+      }
+      const panel = `/overlay/control/${created.id}#clave=${created.key}`;
+      if (panelTab && !panelTab.closed) panelTab.location.href = panel;
     } catch (error: unknown) {
+      panelTab?.close();
       setManualError(error instanceof Error ? error.message : 'No se pudo crear.');
     } finally {
       setCreating(false);
@@ -944,19 +962,32 @@ function Editor({ kind, origin, onBack, onStyle, onCreate, store, saved, onSaved
         </div>
         <div className={styles.topActions}>
           {canCreate ? (
+            // Vuelve a la galería para empezar OTRO: no crea este (antes decía «Crear overlay» y confundía).
             <button type="button" className={styles.topCreate} onClick={onCreate}>
-              <span aria-hidden="true">+</span> Crear<span className={styles.topCreateWord}>&nbsp;overlay</span>
+              <span aria-hidden="true">+</span> Otro<span className={styles.topCreateWord}>&nbsp;overlay</span>
             </button>
           ) : null}
-          <button
-            type="button"
-            className={styles.topCopy}
-            onClick={() => document.getElementById('guardar')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
-            disabled={Boolean(missing)}
-            title={missing ?? undefined}
-          >
-            {saved ? 'Guardar cambios' : 'Guardar para OBS'}
-          </button>
+          {isManual(kind) && !manual ? (
+            <button
+              type="button"
+              className={styles.topCopy}
+              onClick={() => void createManual()}
+              disabled={creating || (kind === 'manual-titular' && !headline.title.trim())}
+              title={kind === 'manual-titular' && !headline.title.trim() ? 'Escribí el título para crearlo.' : undefined}
+            >
+              {creating ? 'Creando…' : 'Crear y abrir el panel'}
+            </button>
+          ) : (
+            <button
+              type="button"
+              className={styles.topCopy}
+              onClick={() => document.getElementById('guardar')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+              disabled={Boolean(missing)}
+              title={missing ?? undefined}
+            >
+              {saved ? 'Guardar cambios' : 'Guardar para OBS'}
+            </button>
+          )}
         </div>
       </div>
 
@@ -1271,7 +1302,12 @@ function Editor({ kind, origin, onBack, onStyle, onCreate, store, saved, onSaved
                       <p className={styles.hint}>El link del panel lleva la clave: quien lo tenga puede manejarlo. Guardalo.</p>
                     </>
                   ) : (
-                    <p className={styles.hint}>El panel se abre con el link que copiaste al crearlo: lleva la clave, y G22 no la guarda. Acá cambiás cómo se ve al aire.</p>
+                    <>
+                      <div className={styles.createActions}>
+                        <a className={styles.primary} href={`/overlay/control/${manual.id}`} target="_blank" rel="noreferrer">Abrir el panel de control</a>
+                      </div>
+                      <p className={styles.hint}>El panel se abre con tu cuenta de G22. Acá cambiás cómo se ve al aire; «Guardar cambios» lo pasa a OBS con la misma URL.</p>
+                    </>
                   )}
                 </>
               ) : (
