@@ -78,7 +78,31 @@ export interface ManualScoreState {
   /** La cuenta regresiva corta que está al aire (conversión o una propia), o null. */
   shot: ShotClock | null;
   events: ManualEvent[];
+  /** Qué partido está al aire (cambia al pasar a otro: el overlay lo anima). */
+  gameId: string;
+  /** Los OTROS partidos de este marcador, esperando para salir al aire (en orden). */
+  queue: ManualGame[];
 }
+
+/**
+ * Un partido guardado en el marcador, fuera del aire. Lo que es de CADA partido
+ * (equipos, resultado, reloj, eventos); lo que es del marcador (visible,
+ * sin-bin, shot automático) queda en el estado.
+ */
+export interface ManualGame {
+  id: string;
+  title: string;
+  sport: ManualSport;
+  status: ManualScoreState['status'];
+  period: string;
+  home: ManualTeam;
+  away: ManualTeam;
+  clock: ManualClock;
+  events: ManualEvent[];
+}
+
+/** Cuántos partidos entran en un marcador (el al aire + los que esperan). */
+export const MAX_GAMES = 10;
 
 export interface HeadlineItem {
   id: string;
@@ -167,6 +191,8 @@ export function defaultManualState(kind: ManualKind): ManualState {
     autoShot: 90,
     shot: null,
     events: [],
+    gameId: 'g1',
+    queue: [],
   };
 }
 
@@ -327,6 +353,136 @@ export function mergeManualState(kind: ManualKind, current: unknown, patch: unkn
     // El shot clock solo se mueve con su acción (`applyShotAction`), con la hora del servidor.
     shot: readShotClock(saved.shot),
     events: readEvents(saved.events),
+    // Los partidos en espera solo se mueven con su acción (`applyGameAction`).
+    gameId: text(saved.gameId, 40) || 'g1',
+    queue: readQueue(saved.queue),
+  };
+}
+
+function readGame(raw: unknown, fallbackId: string): ManualGame {
+  const game = rec(raw);
+  const defaults = defaultManualState('marcador');
+  const sport = game.sport as ManualSport;
+  const status = game.status;
+  return {
+    id: text(game.id, 40) || fallbackId,
+    title: text(game.title, 60),
+    sport: SPORTS.includes(sport) ? sport : 'rugby',
+    status: status === 'vivo' || status === 'final' ? status : 'previa',
+    period: text(game.period, 12) || '1T',
+    home: mergeTeam(defaults.home, game.home),
+    away: mergeTeam(defaults.away, game.away),
+    clock: readClock(game.clock ?? defaults.clock),
+    events: readEvents(game.events),
+  };
+}
+
+function readQueue(raw: unknown): ManualGame[] {
+  if (!Array.isArray(raw)) return [];
+  const seen = new Set<string>();
+  return raw.slice(0, MAX_GAMES - 1).map((item, index) => readGame(item, `q${index}`)).filter((game) => {
+    if (seen.has(game.id)) return false;
+    seen.add(game.id);
+    return true;
+  });
+}
+
+/* ─── varios partidos en un marcador ─── */
+
+export type GameFields = { title?: unknown; sport?: unknown; home?: unknown; away?: unknown };
+
+export type GameAction =
+  | { add: GameFields }
+  | { switch: string }
+  | { remove: string }
+  | { update: GameFields & { id: string } };
+
+export function parseGameAction(raw: unknown): GameAction | null {
+  const action = rec(raw);
+  if (typeof action.switch === 'string' && action.switch) return { switch: action.switch.slice(0, 40) };
+  if (typeof action.remove === 'string' && action.remove) return { remove: action.remove.slice(0, 40) };
+  if (action.add !== undefined) return { add: rec(action.add) };
+  const update = rec(action.update);
+  if (typeof update.id === 'string' && update.id) return { update: { ...update, id: update.id.slice(0, 40) } };
+  return null;
+}
+
+/** El partido al aire, como partido guardado. El reloj queda PARADO donde estaba. */
+function activeGame(state: ManualScoreState, nowMs: number): ManualGame {
+  const elapsed = manualElapsed(state.clock, nowMs);
+  return {
+    id: state.gameId,
+    title: state.title,
+    sport: state.sport,
+    status: state.status,
+    period: state.period,
+    home: state.home,
+    away: state.away,
+    clock: { ...state.clock, running: false, startedAt: null, base: elapsed },
+    events: state.events,
+  };
+}
+
+/** Un equipo nuevo con nombre y sin sigla: la sigla sale del nombre (no queda "LOC"). */
+function withShort(raw: unknown): unknown {
+  const team = rec(raw);
+  return team.name !== undefined && team.short === undefined ? { ...team, short: '' } : raw;
+}
+
+function withFields(game: ManualGame, fields: GameFields): ManualGame {
+  const sport = fields.sport as ManualSport;
+  return {
+    ...game,
+    title: fields.title === undefined ? game.title : text(fields.title, 60),
+    sport: SPORTS.includes(sport) ? sport : game.sport,
+    home: mergeTeam(game.home, withShort(fields.home)),
+    away: mergeTeam(game.away, withShort(fields.away)),
+  };
+}
+
+/**
+ * Agregar, editar, sacar y PASAR AL AIRE otro partido del marcador. Al pasar,
+ * el que estaba al aire vuelve al final de la fila con su reloj parado, y el shot clock se apaga. Los resultados y eventos de cada
+ * partido viajan con él: volver a uno lo deja como estaba.
+ */
+export function applyGameAction(state: ManualScoreState, action: GameAction, nowMs: number): ManualScoreState {
+  if ('add' in action) {
+    if (state.queue.length >= MAX_GAMES - 1) return state;
+    const defaults = defaultManualState('marcador');
+    const fresh: ManualGame = withFields({
+      id: `g${nowMs.toString(36)}${state.queue.length}`,
+      title: state.title,
+      sport: state.sport,
+      status: 'previa',
+      period: '1T',
+      home: { ...defaults.home, players: [] },
+      away: { ...defaults.away, players: [] },
+      clock: { ...defaults.clock, countdown: state.clock.countdown, limit: state.clock.limit },
+      events: [],
+    }, action.add);
+    return { ...state, queue: [...state.queue, fresh] };
+  }
+  if ('remove' in action) return { ...state, queue: state.queue.filter((game) => game.id !== action.remove) };
+  if ('update' in action) {
+    return { ...state, queue: state.queue.map((game) => (game.id === action.update.id ? withFields(game, action.update) : game)) };
+  }
+  const incoming = state.queue.find((game) => game.id === action.switch);
+  if (!incoming) return state;
+  const outgoing = activeGame(state, nowMs);
+  return {
+    ...state,
+    title: incoming.title,
+    sport: incoming.sport,
+    status: incoming.status,
+    period: incoming.period,
+    home: incoming.home,
+    away: incoming.away,
+    clock: incoming.clock,
+    events: incoming.events,
+    gameId: incoming.id,
+    shot: null,
+    // El que sale va al FINAL de la fila: el primero de la fila es siempre el que sigue.
+    queue: [...state.queue.filter((game) => game.id !== incoming.id), outgoing],
   };
 }
 
@@ -512,6 +668,7 @@ export function manualToOverlayMatch(id: string, state: ManualScoreState, offset
       cards: { home: cards('home'), away: cards('away') },
       sinBin: state.sinBin,
       shot: state.shot,
+      gameId: state.gameId,
     },
   };
 }

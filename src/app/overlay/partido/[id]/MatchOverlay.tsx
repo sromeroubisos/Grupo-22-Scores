@@ -38,6 +38,9 @@ export type { OverlayConfig };
 const POLL_MS = { live: 3_000, scheduled: 5_000, other: 10_000, final: 30_000, error: 5_000 } as const;
 const PLATE_VISIBLE_MS = 6_500;
 const PLATE_EXIT_MS = 450;
+/** Pase entre partidos de un marcador manual: lo que sale y lo que entra (coincide con el CSS). */
+const SWAP_OUT_MS = 380;
+const SWAP_IN_MS = 760;
 const DEFAULT_HOME_COLOR = '#00a365';
 const DEFAULT_AWAY_COLOR = '#f2f2f2';
 
@@ -146,6 +149,13 @@ export default function MatchOverlay({
   const prevScoreRef = useRef<Record<OverlaySide, number | null> | null>(null);
   const hasMatchRef = useRef(false);
   const plateTimersRef = useRef<number[]>([]);
+  // Marcador manual con varios partidos: al pasar a otro, lo de adentro (escudos,
+  // nombres, números) sale y entra de a poco y los colores se van mezclando.
+  const [swap, setSwap] = useState<'out' | 'in' | null>(null);
+  const gameRef = useRef<string | null>(null);
+  const swapOutRef = useRef(false);
+  const pendingRef = useRef<OverlayMatch | null>(null);
+  const swapTimers = useRef<number[]>([]);
 
   /* ─── cola de placas: una por vez, cada una su tiempo al aire ─── */
   const pump = useCallback(() => {
@@ -179,6 +189,43 @@ export default function MatchOverlay({
   }, [pump]);
 
   const ingest = useCallback((next: OverlayMatch) => {
+    const gameId = next.manual?.gameId ?? null;
+    // Mientras sale el partido anterior, se guarda lo último que llegó del nuevo.
+    if (swapOutRef.current) {
+      pendingRef.current = next;
+      seenRef.current = new Set(next.events.map((event) => event.id));
+      prevScoreRef.current = { home: next.home.score, away: next.away.score };
+      return;
+    }
+    if (gameId && gameRef.current && gameId !== gameRef.current) {
+      gameRef.current = gameId;
+      // Otro partido: lo que ya tiene no se anuncia (ni placas ni festejo).
+      seenRef.current = new Set(next.events.map((event) => event.id));
+      prevScoreRef.current = { home: next.home.score, away: next.away.score };
+      queueRef.current = [];
+      for (const timer of fxTimers.current) window.clearTimeout(timer);
+      setFx(null);
+      setHeld(null);
+      pendingRef.current = next;
+      swapOutRef.current = true;
+      for (const timer of swapTimers.current) window.clearTimeout(timer);
+      setSwap('out');
+      swapTimers.current = [
+        window.setTimeout(() => {
+          swapOutRef.current = false;
+          const incoming = pendingRef.current;
+          if (incoming) {
+            matchRef.current = incoming;
+            setMatch(incoming);
+          }
+          setSwap('in');
+        }, SWAP_OUT_MS),
+        window.setTimeout(() => setSwap(null), SWAP_OUT_MS + SWAP_IN_MS),
+      ];
+      return;
+    }
+    if (gameId) gameRef.current = gameId;
+
     // La primera lectura no anuncia nada: el overlay puede abrirse a mitad de
     // partido y no tiene que recitar todo lo que ya pasó.
     let plates: OverlayPlate[] = [];
@@ -234,6 +281,7 @@ export default function MatchOverlay({
 
   useEffect(() => () => {
     for (const timer of fxTimers.current) window.clearTimeout(timer);
+    for (const timer of swapTimers.current) window.clearTimeout(timer);
   }, []);
 
   /* ─── lectura periódica ─── */
@@ -390,6 +438,7 @@ export default function MatchOverlay({
   // anotadores y la placa del último evento adentro).
   if (config.style === 'tarjeta') {
     return (
+      <div className={styles.swapWrap} data-swap={swap ?? undefined}>
       <MatchCard
         match={shown}
         home={home}
@@ -401,6 +450,7 @@ export default function MatchOverlay({
         config={config}
         now={now}
       />
+      </div>
     );
   }
 
@@ -450,7 +500,7 @@ export default function MatchOverlay({
     : null;
 
   return (
-    <div className={styles.stage} style={stageStyle} data-chroma={chromaGreen ? 'verde' : undefined}>
+    <div className={styles.stage} style={stageStyle} data-chroma={chromaGreen ? 'verde' : undefined} data-swap={swap ?? undefined}>
       {fx && config.celebration === 'cinta' ? <CelebrationBand fx={fx} team={fx.side === 'home' ? home : away} /> : null}
       <div className={styles.anchor} data-v={vertical} data-h={horizontal}>
         {tournamentLine ? (

@@ -96,6 +96,8 @@ export interface ManualCard {
 }
 
 export interface ManualClockInfo {
+  /** Qué partido del marcador manual está al aire: si cambia, el overlay anima el pase. */
+  gameId?: string;
   period: string;
   clock: { running: boolean; base: number; startedAt: string | null; countdown: boolean; limit: number };
   cards?: { home: ManualCard[]; away: ManualCard[] };

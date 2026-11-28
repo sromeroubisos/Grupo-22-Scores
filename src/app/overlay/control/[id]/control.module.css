@@ -488,3 +488,44 @@
   color: var(--c-ink);
   font: inherit;
 }
+
+
+/* ─── varios marcadores ─── */
+.gamesCard { grid-column: 1 / -1; }
+.gamesHead { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.games { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.games li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--c-line);
+}
+.games li[data-on] { border-color: var(--c-green); background: rgba(0, 163, 101, 0.1); }
+.gameName { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.gameName b { margin: 0 6px; font-variant-numeric: tabular-nums; }
+.gameOnAir, .gameOrder {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.gameOnAir { background: var(--c-green); color: #03110a; }
+.gameOrder { border: 1px solid var(--c-line); color: var(--c-dim); }
+.gameActions { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.gameActions button { min-height: 36px; }
+.gameForm { display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 12px; border: 1px dashed var(--c-line); }
+.gameTeams { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 12px; }
+.gameTeamRow { display: grid; grid-template-columns: 1fr 64px; gap: 6px; }
+.page .primaryBtn { background: var(--c-green); color: #03110a; border-color: transparent; font-weight: 800; }
+.page .primaryBtn:disabled { opacity: 0.45; cursor: not-allowed; }
+.page .dangerBtn { color: #ff7b7b; border-color: rgba(255, 123, 123, 0.4); }
+@media (max-width: 560px) {
+  .games li { grid-template-columns: auto minmax(0, 1fr); }
+  .games li > :last-child { grid-column: 1 / -1; }
+}

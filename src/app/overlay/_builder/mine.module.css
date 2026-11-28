@@ -264,4 +264,4 @@
 
 /* "Panel" y "WhatsApp" son enlaces con forma de botón. */
 .actions a,
-.shareRow a { display: inline-flex; align-items: center; color: var(--s-ink); text-decoration: none; }
+.shareRow a { display: inline-flex; align-items: center; color: var(--s-ink); font-weight: 400; text-decoration: none; }

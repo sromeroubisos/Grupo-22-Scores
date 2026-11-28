@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
+  MAX_GAMES,
   SCORING,
   currentHeadline,
   manualElapsed,
@@ -44,7 +45,7 @@ type PanelLink = { path: string; token: string; expiresAt: string };
 const KEY_STORAGE = (id: string) => `g22-overlay-key:${id}`;
 
 type Patch = Record<string, unknown>;
-type Payload = { state?: unknown; clock?: unknown; score?: unknown; shot?: unknown };
+type Payload = { state?: unknown; clock?: unknown; score?: unknown; shot?: unknown; game?: unknown };
 
 function readKey(id: string): string {
   const fromHash = new URLSearchParams(window.location.hash.slice(1)).get('clave');
@@ -317,6 +318,7 @@ function ScorePanel({
 
   return (
     <div className={styles.grid}>
+      <GamesCard state={state} send={send} />
       <section className={styles.card}>
         <h2>En pantalla</h2>
         <button type="button" className={styles.visible} data-on={state.visible ? '' : undefined} onClick={() => patchNow({ visible: !state.visible })}>
@@ -640,5 +642,128 @@ function HeadlinePanel({
         <button type="button" onClick={add} disabled={state.items.length >= 30}>+ Agregar título</button>
       </section>
     </div>
+  );
+}
+
+/* ─── varios marcadores ─── */
+
+type DraftTeam = { name: string; short: string; color: string | null; logo: string | null };
+const EMPTY_TEAM: DraftTeam = { name: '', short: '', color: null, logo: null };
+
+const STATUS_LABELS: Record<ManualScoreState['status'], string> = { previa: 'Previa', vivo: 'En vivo', final: 'Final' };
+
+/**
+ * Los partidos del marcador: el que está al aire y la fila de los que siguen.
+ * «Pasar al siguiente» saca al aire el primero de la fila (el overlay hace el
+ * cambio animado) y el que sale va al final, con su resultado y el reloj parado.
+ */
+function GamesCard({ state, send }: { state: ManualScoreState; send: (payload: Payload) => Promise<void> }) {
+  const [adding, setAdding] = useState(false);
+  const [home, setHome] = useState<DraftTeam>(EMPTY_TEAM);
+  const [away, setAway] = useState<DraftTeam>(EMPTY_TEAM);
+  const [title, setTitle] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [confirming, setConfirming] = useState<string | null>(null);
+  const full = state.queue.length >= MAX_GAMES - 1;
+  const next = state.queue[0] ?? null;
+
+  const reset = () => { setHome(EMPTY_TEAM); setAway(EMPTY_TEAM); setTitle(''); setAdding(false); };
+  const clean = (team: DraftTeam) => (team.name.trim() ? { ...team, name: team.name.trim(), short: team.short.trim() || undefined } : undefined);
+  const add = () => {
+    void send({ game: { add: { home: clean(home), away: clean(away), title: title.trim() || undefined } } });
+    reset();
+  };
+  const missing = !home.name.trim() || !away.name.trim() ? 'Poné los dos equipos (o elegí cada club) para agregarlo.' : null;
+
+  return (
+    <section className={`${styles.card} ${styles.gamesCard}`}>
+      <div className={styles.gamesHead}>
+        <h2>Marcadores · {state.queue.length + 1}</h2>
+        {next ? (
+          <button type="button" className={styles.primaryBtn} onClick={() => void send({ game: { switch: next.id } })}>
+            Pasar al siguiente: {next.home.short} vs {next.away.short} →
+          </button>
+        ) : null}
+      </div>
+
+      <ol className={styles.games}>
+        <li data-on="">
+          <span className={styles.gameOnAir}>Al aire</span>
+          <span className={styles.gameName}>{state.home.name} <b>{state.home.score} – {state.away.score}</b> {state.away.name}</span>
+          <span className={styles.muted}>{STATUS_LABELS[state.status]}</span>
+        </li>
+        {state.queue.map((game, index) => (
+          <li key={game.id}>
+            <span className={styles.gameOrder}>{index === 0 ? 'Sigue' : `${index + 1}°`}</span>
+            <span className={styles.gameName}>{game.home.name} <b>{game.home.score} – {game.away.score}</b> {game.away.name}</span>
+            <span className={styles.gameActions}>
+              <button type="button" onClick={() => void send({ game: { switch: game.id } })}>Pasar al aire</button>
+              {confirming === game.id ? (
+                <>
+                  <button type="button" className={styles.dangerBtn} onClick={() => { setConfirming(null); void send({ game: { remove: game.id } }); }}>Sacarlo</button>
+                  <button type="button" onClick={() => setConfirming(null)}>No</button>
+                </>
+              ) : (
+                <button type="button" aria-label={`Sacar ${game.home.name} vs ${game.away.name}`} onClick={() => setConfirming(game.id)}>×</button>
+              )}
+            </span>
+          </li>
+        ))}
+      </ol>
+
+      {!state.queue.length ? (
+        <p className={styles.muted}>Cargá acá los partidos que vienen y, cuando termine este, pasás al siguiente sin armar otro overlay. Cada uno guarda su resultado.</p>
+      ) : null}
+
+      {adding ? (
+        <div className={styles.gameForm}>
+          <div className={styles.field}>
+            <span>Traer los dos equipos de un partido de G22</span>
+            <MatchPicker
+              actionLabel="Agregar este partido"
+              onPick={(id, found) => {
+                setLoading(true);
+                teamsFromMatch(id, found)
+                  .then((teams) => {
+                    void send({ game: { add: { sport: teams.sport, home: teams.home ?? undefined, away: teams.away ?? undefined, title: teams.title ?? undefined } } });
+                    reset();
+                  })
+                  .catch(() => undefined)
+                  .finally(() => setLoading(false));
+              }}
+            />
+            {loading ? <p className={styles.muted}>Trayendo equipos…</p> : null}
+          </div>
+          <p className={styles.muted}>O cargalo a mano:</p>
+          <div className={styles.gameTeams}>
+            {([['Local', home, setHome], ['Visitante', away, setAway]] as const).map(([label, team, setTeam]) => (
+              <div key={label} className={styles.field}>
+                <span>{label}</span>
+                <ClubPicker label={`Buscar club ${label.toLowerCase()}`} onPick={(club) => setTeam({ name: club.name, short: club.short, color: club.color, logo: club.logo })} />
+                <input value={team.name} maxLength={40} placeholder="Nombre" onChange={(e) => setTeam({ ...team, name: e.target.value })} aria-label={`Nombre del ${label.toLowerCase()}`} />
+                <div className={styles.gameTeamRow}>
+                  <input value={team.short} maxLength={16} placeholder="Sigla" onChange={(e) => setTeam({ ...team, short: e.target.value })} aria-label={`Sigla del ${label.toLowerCase()}`} />
+                  <input type="color" value={team.color ?? (label === 'Local' ? '#00a365' : '#f2f2f2')} onChange={(e) => setTeam({ ...team, color: e.target.value })} aria-label={`Color del ${label.toLowerCase()}`} />
+                </div>
+              </div>
+            ))}
+          </div>
+          <label className={styles.field}>
+            <span>Título (torneo, opcional)</span>
+            <input value={title} maxLength={60} placeholder={state.title || 'Igual que el de ahora'} onChange={(e) => setTitle(e.target.value)} />
+          </label>
+          <div className={styles.gameActions}>
+            <button type="button" className={styles.primaryBtn} disabled={Boolean(missing)} title={missing ?? undefined} onClick={add}>Agregar a la fila</button>
+            <button type="button" onClick={reset}>Cancelar</button>
+          </div>
+          {missing ? <p className={styles.muted}>{missing}</p> : null}
+        </div>
+      ) : (
+        <button type="button" onClick={() => setAdding(true)} disabled={full} title={full ? `Entran hasta ${MAX_GAMES} partidos` : undefined}>
+          + Agregar otro marcador
+        </button>
+      )}
+      {full && !adding ? <p className={styles.muted}>Llegaste a {MAX_GAMES} partidos. Sacá uno que ya terminó para sumar otro.</p> : null}
+    </section>
   );
 }

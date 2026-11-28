@@ -2,7 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
+  MAX_GAMES,
   applyClockAction,
+  applyGameAction,
   applyScoreAction,
   currentHeadline,
   defaultManualState,
@@ -10,6 +12,7 @@ import {
   manualToOverlayMatch,
   mergeManualState,
   parseClockAction,
+  parseGameAction,
   parseScoreAction,
   type ManualHeadlineState,
   type ManualScoreState,
@@ -125,4 +128,60 @@ test('titulares: varios, con rotación por reloj del servidor, y las filas vieja
   const legacy = mergeManualState('titular', { kicker: 'VIEJO', title: 'Titular de antes', subtitle: '', style: 'zocalo' }, {}) as ManualHeadlineState;
   assert.equal(legacy.items[0].title, 'Titular de antes');
   assert.equal(legacy.style, 'noticiero');
+});
+
+test('varios partidos en un marcador: se cargan, se pasan al aire y cada uno guarda lo suyo', () => {
+  let state = defaultManualState('marcador');
+  state = mergeManualState('marcador', state, { home: { name: 'Pucará' }, away: { name: 'Hindú' } }) as ManualScoreState;
+  state = applyClockAction(state, 'start', T0);
+  state = applyScoreAction(state, { event: { team: 'home', type: 'try', player: null } }, T0 + 60_000);
+  assert.equal(state.home.score, 5);
+
+  state = applyGameAction(state, parseGameAction({ add: { home: { name: 'CASI' }, away: { name: 'SIC', color: '#112233' } } })!, T0 + 61_000);
+  assert.equal(state.queue.length, 1);
+  const second = state.queue[0];
+  assert.equal(second.away.color, '#112233');
+  assert.equal(second.home.short, 'CAS');
+  assert.equal(second.home.score, 0);
+
+  // Pasar al segundo: el primero queda en la fila, con su resultado y el reloj PARADO donde iba.
+  state = applyGameAction(state, { switch: second.id }, T0 + 120_000);
+  assert.equal(state.gameId, second.id);
+  assert.equal(state.home.name, 'CASI');
+  assert.equal(state.home.score, 0);
+  assert.equal(state.shot, null);
+  const first = state.queue[0];
+  assert.equal(first.home.name, 'Pucará');
+  assert.equal(first.home.score, 5);
+  assert.equal(first.clock.running, false);
+  assert.equal(first.clock.base, 120);
+
+  // Volver: queda como estaba.
+  state = applyGameAction(state, { switch: first.id }, T0 + 200_000);
+  assert.equal(state.home.score, 5);
+  assert.equal(manualElapsed(state.clock, T0 + 900_000), 120);
+  assert.equal(state.queue[0].home.name, 'CASI');
+
+  // Sobrevive al guardado (JSON) y al saneo.
+  const reread = mergeManualState('marcador', JSON.parse(JSON.stringify(state)), {}) as ManualScoreState;
+  assert.deepEqual(reread.queue, state.queue);
+  assert.equal(reread.gameId, state.gameId);
+  // El estado del panel no puede tocar la fila.
+  const tampered = mergeManualState('marcador', state, { queue: [], gameId: 'x' }) as ManualScoreState;
+  assert.equal(tampered.queue.length, 1);
+  assert.equal(tampered.gameId, state.gameId);
+
+  state = applyGameAction(state, { remove: state.queue[0].id }, T0);
+  assert.equal(state.queue.length, 0);
+  assert.equal(manualToOverlayMatch('m', state, 0).manual?.gameId, state.gameId);
+});
+
+test('una fila vieja (sin partidos) se lee con uno solo, y hay tope de partidos', () => {
+  const legacy = mergeManualState('marcador', { home: { name: 'A' } }, {}) as ManualScoreState;
+  assert.equal(legacy.gameId, 'g1');
+  assert.deepEqual(legacy.queue, []);
+  let state = legacy;
+  for (let i = 0; i < MAX_GAMES + 3; i += 1) state = applyGameAction(state, { add: {} }, T0 + i);
+  assert.equal(state.queue.length, MAX_GAMES - 1);
+  assert.equal(new Set(state.queue.map((game) => game.id)).size, MAX_GAMES - 1);
 });

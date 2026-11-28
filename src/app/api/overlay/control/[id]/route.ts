@@ -5,9 +5,11 @@ import { canWriteManual } from '@/lib/server/overlayManualAuth';
 import {
   applyClockAction,
   applyScoreAction,
+  applyGameAction,
   applyShotAction,
   mergeManualState,
   parseClockAction,
+  parseGameAction,
   parseScoreAction,
   parseShotAction,
   readManualState,
@@ -22,7 +24,8 @@ import {
  *   PATCH  { state?: {...parcial},
  *            clock?: 'start'|'pause'|'reset'|{set:segundos}|{adjust:±segundos},
  *            score?: {event:{team,type,player}} | {undo:true|<id del evento>},
- *            shot?: {start:{label,seconds,team}} | 'pause'|'resume'|'stop' }
+ *            shot?: {start:{label,seconds,team}} | 'pause'|'resume'|'stop',
+ *            game?: {add:{home,away,title,sport}} | {switch:<id>} | {remove:<id>} | {update:{id,…}} }
  *          con el header `x-overlay-key: <clave del panel>`
  *
  * Leer es público (es lo que ya se ve al aire); escribir pide la clave, o la
@@ -80,7 +83,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     return noStore({ error: key ? 'La clave del panel no es válida.' : 'Entrá con tu cuenta de G22 (la que tiene este overlay) o abrí el link del panel con su clave.' }, 403);
   }
 
-  const body = (await request.json().catch(() => ({}))) as { state?: unknown; clock?: unknown; score?: unknown; shot?: unknown };
+  const body = (await request.json().catch(() => ({}))) as { state?: unknown; clock?: unknown; score?: unknown; shot?: unknown; game?: unknown };
 
   // Cada guardado lee la fila, aplica el cambio y escribe el estado ENTERO. Dos
   // pedidos a la vez (dos toques rápidos, o dos personas con el panel) se
@@ -92,6 +95,9 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const now = Date.now();
     let state = mergeManualState(current.kind, current.state, body.state ?? {});
     if (current.kind === 'marcador') {
+      // Pasar a otro partido va PRIMERO: lo demás del pedido cae sobre el que entra.
+      const gameAction = parseGameAction(body.game);
+      if (gameAction) state = applyGameAction(state as ManualScoreState, gameAction, now);
       const clockAction = parseClockAction(body.clock);
       if (clockAction) state = applyClockAction(state as ManualScoreState, clockAction, now);
       // El tanto se registra DESPUÉS de mover el reloj: queda en el segundo correcto.
